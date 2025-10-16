@@ -109,7 +109,8 @@ class FeatureFlagManager {
 
     Object.entries(FLAG_DEFINITIONS).forEach(([flagKey, config]) => {
       const status = config.defaultEnabled ? '✅ ENABLED' : '❌ DISABLED';
-      const rollout = config.rolloutPercentage < 100 ? ` (${config.rolloutPercentage}%)` : '';
+      const rollout =
+        config.rolloutPercentage < 100 ? ` (${config.rolloutPercentage}%)` : '';
 
       console.log(`${status} ${flagKey}${rollout}`);
       console.log(`   ${config.description}`);
@@ -120,7 +121,9 @@ class FeatureFlagManager {
       }
 
       if (Object.keys(config.tenantOverrides).length > 0) {
-        console.log(`   Tenant overrides: ${JSON.stringify(config.tenantOverrides)}`);
+        console.log(
+          `   Tenant overrides: ${JSON.stringify(config.tenantOverrides)}`,
+        );
       }
 
       if (config.performanceThreshold) {
@@ -142,7 +145,8 @@ class FeatureFlagManager {
 
     const updates = {
       defaultEnabled: true,
-      rolloutPercentage: options.rollout || FLAG_DEFINITIONS[flagKey].rolloutPercentage,
+      rolloutPercentage:
+        options.rollout || FLAG_DEFINITIONS[flagKey].rolloutPercentage,
       ...options,
     };
 
@@ -191,7 +195,9 @@ class FeatureFlagManager {
       throw new Error(`Unknown flag: ${flagKey}`);
     }
 
-    console.log(`🏢 Setting tenant override for ${flagKey}: ${tenant} = ${enabled}`);
+    console.log(
+      `🏢 Setting tenant override for ${flagKey}: ${tenant} = ${enabled}`,
+    );
 
     const currentOverrides = FLAG_DEFINITIONS[flagKey].tenantOverrides || {};
     currentOverrides[tenant] = enabled;
@@ -219,7 +225,10 @@ class FeatureFlagManager {
           },
         };
 
-        if (config.tenantOverrides && Object.keys(config.tenantOverrides).length > 0) {
+        if (
+          config.tenantOverrides &&
+          Object.keys(config.tenantOverrides).length > 0
+        ) {
           envFlags[flagKey].tenantOverrides = config.tenantOverrides;
         }
       }
@@ -243,7 +252,9 @@ class FeatureFlagManager {
 
     console.log(`🔍 Validating performance for ${flagKey}:`);
     console.log(`   p95: ${metrics.p95}ms (limit: ${p95MaxMs}ms)`);
-    console.log(`   Error rate: ${metrics.errorRate}% (limit: ${errorRateMaxPercent}%)`);
+    console.log(
+      `   Error rate: ${metrics.errorRate}% (limit: ${errorRateMaxPercent}%)`,
+    );
 
     const p95Valid = metrics.p95 <= p95MaxMs;
     const errorRateValid = metrics.errorRate <= errorRateMaxPercent;
@@ -391,13 +402,16 @@ function main() {
         break;
 
       case 'rollout':
-        if (!args[0] || !args[1]) throw new Error('Flag name and percentage required');
+        if (!args[0] || !args[1])
+          throw new Error('Flag name and percentage required');
         manager.setRollout(args[0], parseInt(args[1]));
         break;
 
       case 'tenant':
         if (!args[0] || !args[1] || !args[2])
-          throw new Error('Flag name, tenant, and enabled (true/false) required');
+          throw new Error(
+            'Flag name, tenant, and enabled (true/false) required',
+          );
         manager.setTenantOverride(args[0], args[1], args[2] === 'true');
         break;
 

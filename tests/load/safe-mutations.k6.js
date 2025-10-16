@@ -23,39 +23,39 @@ const chaosRecoveryRate = new Rate('chaos_recovery_rate');
 // Test configuration with enhanced chaos and resilience thresholds
 export const options = {
   stages: [
-    { duration: '2m', target: 10 },   // Ramp up to 10 users
-    { duration: '5m', target: 50 },   // Scale to 50 users
-    { duration: '5m', target: 100 },  // Scale to 100 users
-    { duration: '3m', target: 100 },  // Stay at 100 users
-    { duration: '2m', target: 0 },    // Ramp down
+    { duration: '2m', target: 10 }, // Ramp up to 10 users
+    { duration: '5m', target: 50 }, // Scale to 50 users
+    { duration: '5m', target: 100 }, // Scale to 100 users
+    { duration: '3m', target: 100 }, // Stay at 100 users
+    { duration: '2m', target: 0 }, // Ramp down
   ],
   thresholds: {
     // Performance thresholds
     http_req_duration: ['p(95)<2000'], // 95% of requests under 2s
-    http_req_failed: ['rate<0.02'],    // Error rate under 2% (tightened)
-    
+    http_req_failed: ['rate<0.02'], // Error rate under 2% (tightened)
+
     // Business logic thresholds
     mutation_success_rate: ['rate>0.8'], // 80% mutation success
-    budget_denials: ['count<1000'],      // Less than 1000 budget denials
-    rate_limit_hits: ['count<500'],      // Less than 500 rate limit hits
-    
+    budget_denials: ['count<1000'], // Less than 1000 budget denials
+    rate_limit_hits: ['count<500'], // Less than 500 rate limit hits
+
     // Chaos engineering thresholds
-    'checks{type:budgetDenied}': ['rate>0'],     // Ensure denial path is exercised
-    'checks{type:rateLimited}': ['rate>0'],      // Ensure rate limiting is tested
+    'checks{type:budgetDenied}': ['rate>0'], // Ensure denial path is exercised
+    'checks{type:rateLimited}': ['rate>0'], // Ensure rate limiting is tested
     'checks{type:compensationWorked}': ['rate>0'], // Ensure rollbacks work
-    'checks{type:chaosRecovered}': ['rate>0.9'],   // 90% chaos recovery rate
-    
+    'checks{type:chaosRecovered}': ['rate>0.9'], // 90% chaos recovery rate
+
     // System resilience thresholds
-    compensation_events: ['count<100'],    // Less than 100 rollbacks
-    fault_injection_rate: ['rate<0.1'],   // Less than 10% injected faults
+    compensation_events: ['count<100'], // Less than 100 rollbacks
+    fault_injection_rate: ['rate<0.1'], // Less than 10% injected faults
     system_recovery_time: ['p(95)<5000'], // 95% of recovery under 5s
   },
   ext: {
     loadimpact: {
       projectID: parseInt(__ENV.K6_PROJECT_ID || '0'),
-      name: 'IntelGraph Safe Mutations Load Test'
-    }
-  }
+      name: 'IntelGraph Safe Mutations Load Test',
+    },
+  },
 };
 
 // Base URLs
@@ -72,20 +72,20 @@ const SAMPLE_PROMPTS = [
   'Summarize findings from the intelligence report',
   'Extract indicators of compromise from the log data',
   'Generate attribution analysis for the observed attack patterns',
-  'Create a risk assessment for the identified vulnerabilities'
+  'Create a risk assessment for the identified vulnerabilities',
 ];
 
 const SAMPLE_ENTITIES = [
-  { kind: 'IP', props: { address: '192.168.1.100', location: 'Internal' }},
-  { kind: 'Domain', props: { name: 'malicious-site.com', reputation: 'bad' }},
-  { kind: 'Person', props: { name: 'John Doe', role: 'analyst' }},
-  { kind: 'Indicator', props: { type: 'hash', value: 'abc123def456' }},
-  { kind: 'ThreatActor', props: { name: 'APT29', origin: 'RU' }}
+  { kind: 'IP', props: { address: '192.168.1.100', location: 'Internal' } },
+  { kind: 'Domain', props: { name: 'malicious-site.com', reputation: 'bad' } },
+  { kind: 'Person', props: { name: 'John Doe', role: 'analyst' } },
+  { kind: 'Indicator', props: { type: 'hash', value: 'abc123def456' } },
+  { kind: 'ThreatActor', props: { name: 'APT29', origin: 'RU' } },
 ];
 
 const AUTH_HEADERS = {
   'Content-Type': 'application/json',
-  'Authorization': `Bearer ${__ENV.TEST_TOKEN || 'test-token-123'}`
+  Authorization: `Bearer ${__ENV.TEST_TOKEN || 'test-token-123'}`,
 };
 
 // Utility functions
@@ -103,9 +103,9 @@ function generateTestTenant() {
 }
 
 // Test scenarios
-export default function() {
+export default function () {
   const tenant = generateTestTenant();
-  
+
   group('Token Counting Load Test', () => {
     testBasicTokenCounting(tenant);
     testBatchTokenCounting(tenant);
@@ -140,19 +140,19 @@ export default function() {
 
 function testBasicTokenCounting(tenant) {
   const prompt = randomChoice(SAMPLE_PROMPTS);
-  
+
   const payload = {
     provider: randomChoice(['openai', 'anthropic', 'gemini']),
     model: randomChoice(['gpt-4o-mini', 'claude-3-haiku', 'gemini-1.5-flash']),
-    prompt: prompt
+    prompt: prompt,
   };
 
   const startTime = new Date();
   const response = http.post(TOKEN_COUNT_URL, JSON.stringify(payload), {
     headers: AUTH_HEADERS,
-    tags: { scenario: 'basic_token_count', tenant: tenant }
+    tags: { scenario: 'basic_token_count', tenant: tenant },
   });
-  
+
   const endTime = new Date();
   tokenCountLatency.add(endTime - startTime);
 
@@ -165,7 +165,7 @@ function testBasicTokenCounting(tenant) {
       } catch {
         return false;
       }
-    }
+    },
   });
 
   mutationSuccessRate.add(success);
@@ -174,22 +174,30 @@ function testBasicTokenCounting(tenant) {
 function testBatchTokenCounting(tenant) {
   const requests = [];
   const batchSize = Math.floor(Math.random() * 10) + 1; // 1-10 requests
-  
+
   for (let i = 0; i < batchSize; i++) {
     requests.push({
       id: `req_${i}`,
       provider: randomChoice(['openai', 'anthropic', 'gemini']),
       model: randomChoice(['gpt-4o-mini', 'claude-3-haiku']),
-      prompt: randomChoice(SAMPLE_PROMPTS)
+      prompt: randomChoice(SAMPLE_PROMPTS),
     });
   }
 
-  const response = http.post(`${TOKEN_COUNT_URL}/batch`, JSON.stringify({
-    requests: requests
-  }), {
-    headers: AUTH_HEADERS,
-    tags: { scenario: 'batch_token_count', tenant: tenant, batch_size: batchSize }
-  });
+  const response = http.post(
+    `${TOKEN_COUNT_URL}/batch`,
+    JSON.stringify({
+      requests: requests,
+    }),
+    {
+      headers: AUTH_HEADERS,
+      tags: {
+        scenario: 'batch_token_count',
+        tenant: tenant,
+        batch_size: batchSize,
+      },
+    },
+  );
 
   const success = check(response, {
     'batch token count status is 200': (r) => r.status === 200,
@@ -200,7 +208,7 @@ function testBatchTokenCounting(tenant) {
       } catch {
         return false;
       }
-    }
+    },
   });
 
   mutationSuccessRate.add(success);
@@ -208,20 +216,21 @@ function testBatchTokenCounting(tenant) {
 
 function testLargePromptTokenCounting(tenant) {
   const largePrompt = generateLargePrompt(Math.floor(Math.random() * 5) + 1);
-  
+
   const payload = {
     provider: 'openai',
     model: 'gpt-4o-mini',
-    prompt: largePrompt
+    prompt: largePrompt,
   };
 
   const response = http.post(TOKEN_COUNT_URL, JSON.stringify(payload), {
     headers: AUTH_HEADERS,
-    tags: { scenario: 'large_prompt_token_count', tenant: tenant }
+    tags: { scenario: 'large_prompt_token_count', tenant: tenant },
   });
 
   const success = check(response, {
-    'large prompt status is 200 or 429': (r) => r.status === 200 || r.status === 429,
+    'large prompt status is 200 or 429': (r) =>
+      r.status === 200 || r.status === 429,
     'large prompt handled correctly': (r) => {
       if (r.status === 429) {
         budgetDenials.add(1);
@@ -233,7 +242,7 @@ function testLargePromptTokenCounting(tenant) {
       } catch {
         return false;
       }
-    }
+    },
   });
 
   mutationSuccessRate.add(success);
@@ -241,7 +250,7 @@ function testLargePromptTokenCounting(tenant) {
 
 function testEntityMutations(tenant) {
   const entity = randomChoice(SAMPLE_ENTITIES);
-  
+
   const mutation = `
     mutation CreateEntity($input: EntityInput!) {
       createEntity(input: $input) @budget(capUSD: 0.10, tokenCeiling: 5000) {
@@ -259,17 +268,25 @@ function testEntityMutations(tenant) {
       kind: entity.kind,
       labels: [entity.kind],
       props: entity.props,
-      source: 'load_test'
-    }
+      source: 'load_test',
+    },
   };
 
-  const response = http.post(GRAPHQL_URL, JSON.stringify({
-    query: mutation,
-    variables: variables
-  }), {
-    headers: AUTH_HEADERS,
-    tags: { scenario: 'entity_mutation', tenant: tenant, entity_kind: entity.kind }
-  });
+  const response = http.post(
+    GRAPHQL_URL,
+    JSON.stringify({
+      query: mutation,
+      variables: variables,
+    }),
+    {
+      headers: AUTH_HEADERS,
+      tags: {
+        scenario: 'entity_mutation',
+        tenant: tenant,
+        entity_kind: entity.kind,
+      },
+    },
+  );
 
   const success = check(response, {
     'entity mutation status is 200': (r) => r.status === 200,
@@ -277,7 +294,9 @@ function testEntityMutations(tenant) {
       try {
         const data = JSON.parse(r.body);
         if (data.errors) {
-          const isBudgetError = data.errors.some(e => e.message.includes('budget') || e.message.includes('Budget'));
+          const isBudgetError = data.errors.some(
+            (e) => e.message.includes('budget') || e.message.includes('Budget'),
+          );
           if (isBudgetError) {
             budgetDenials.add(1);
             return true; // Budget denial is valid
@@ -288,7 +307,7 @@ function testEntityMutations(tenant) {
       } catch {
         return false;
       }
-    }
+    },
   });
 
   mutationSuccessRate.add(success);
@@ -310,22 +329,32 @@ function testRelationshipMutations(tenant) {
       tenantId: tenant,
       srcId: `entity_${Math.floor(Math.random() * 1000)}`,
       dstId: `entity_${Math.floor(Math.random() * 1000)}`,
-      type: randomChoice(['CONNECTS_TO', 'BELONGS_TO', 'SIMILAR_TO', 'LINKED_TO']),
+      type: randomChoice([
+        'CONNECTS_TO',
+        'BELONGS_TO',
+        'SIMILAR_TO',
+        'LINKED_TO',
+      ]),
       props: { confidence: Math.random() },
-      source: 'load_test'
-    }
+      source: 'load_test',
+    },
   };
 
-  const response = http.post(GRAPHQL_URL, JSON.stringify({
-    query: mutation,
-    variables: variables
-  }), {
-    headers: AUTH_HEADERS,
-    tags: { scenario: 'relationship_mutation', tenant: tenant }
-  });
+  const response = http.post(
+    GRAPHQL_URL,
+    JSON.stringify({
+      query: mutation,
+      variables: variables,
+    }),
+    {
+      headers: AUTH_HEADERS,
+      tags: { scenario: 'relationship_mutation', tenant: tenant },
+    },
+  );
 
   check(response, {
-    'relationship mutation handled': (r) => r.status === 200 || r.status === 400 || r.status === 429
+    'relationship mutation handled': (r) =>
+      r.status === 200 || r.status === 400 || r.status === 429,
   });
 }
 
@@ -346,36 +375,41 @@ function testInvestigationMutations(tenant) {
       tenantId: tenant,
       name: `Load Test Investigation ${Math.floor(Math.random() * 10000)}`,
       description: 'Generated during load testing',
-      status: 'ACTIVE'
-    }
+      status: 'ACTIVE',
+    },
   };
 
-  const response = http.post(GRAPHQL_URL, JSON.stringify({
-    query: mutation,
-    variables: variables
-  }), {
-    headers: AUTH_HEADERS,
-    tags: { scenario: 'investigation_mutation', tenant: tenant }
-  });
+  const response = http.post(
+    GRAPHQL_URL,
+    JSON.stringify({
+      query: mutation,
+      variables: variables,
+    }),
+    {
+      headers: AUTH_HEADERS,
+      tags: { scenario: 'investigation_mutation', tenant: tenant },
+    },
+  );
 
   check(response, {
-    'investigation mutation handled': (r) => r.status === 200 || r.status === 429
+    'investigation mutation handled': (r) =>
+      r.status === 200 || r.status === 429,
   });
 }
 
 function testBudgetLimits(tenant) {
   // Intentionally exceed budget with large prompt
   const veryLargePrompt = generateLargePrompt(10); // 10x size multiplier
-  
+
   const payload = {
     provider: 'openai',
     model: 'gpt-4o', // Expensive model
-    prompt: veryLargePrompt
+    prompt: veryLargePrompt,
   };
 
   const response = http.post(TOKEN_COUNT_URL, JSON.stringify(payload), {
     headers: AUTH_HEADERS,
-    tags: { scenario: 'budget_limit_test', tenant: tenant }
+    tags: { scenario: 'budget_limit_test', tenant: tenant },
   });
 
   const budgetDenied = check(response, {
@@ -386,7 +420,7 @@ function testBudgetLimits(tenant) {
       }
       // Might be allowed if under limit
       return r.status === 200;
-    }
+    },
   });
 }
 
@@ -396,12 +430,16 @@ function testBudgetDenials(tenant) {
     const payload = {
       provider: 'openai',
       model: 'gpt-4-turbo', // Expensive model
-      prompt: generateLargePrompt(5)
+      prompt: generateLargePrompt(5),
     };
 
     const response = http.post(TOKEN_COUNT_URL, JSON.stringify(payload), {
       headers: AUTH_HEADERS,
-      tags: { scenario: 'budget_denial_burst', tenant: tenant, burst_request: i }
+      tags: {
+        scenario: 'budget_denial_burst',
+        tenant: tenant,
+        burst_request: i,
+      },
     });
 
     if (response.status === 429) {
@@ -420,32 +458,33 @@ function testRateLimits(tenant) {
       body: JSON.stringify({
         provider: 'openai',
         model: 'gpt-4o-mini',
-        prompt: 'Quick test prompt'
+        prompt: 'Quick test prompt',
       }),
       params: {
         headers: AUTH_HEADERS,
-        tags: { scenario: 'rate_limit_test', tenant: tenant, burst_req: i }
-      }
+        tags: { scenario: 'rate_limit_test', tenant: tenant, burst_req: i },
+      },
     });
   }
 
   const responses = http.batch(requests);
-  
+
   let rateLimited = 0;
   responses.forEach((response, index) => {
     if (response.status === 429) {
       rateLimitHits.add(1);
       rateLimited++;
     }
-    
+
     check(response, {
-      [`batch request ${index} handled`]: (r) => r.status === 200 || r.status === 429
+      [`batch request ${index} handled`]: (r) =>
+        r.status === 200 || r.status === 429,
     });
   });
 
   // Some requests should be rate limited in a burst
   check(rateLimited, {
-    'some requests were rate limited': (count) => count > 0
+    'some requests were rate limited': (count) => count > 0,
   });
 }
 
@@ -453,7 +492,7 @@ function testBurstTraffic(tenant) {
   // Simulate burst traffic patterns
   const burstSize = 20;
   const requests = [];
-  
+
   for (let i = 0; i < burstSize; i++) {
     const mutation = `
       mutation QuickEntity($input: EntityInput!) {
@@ -473,24 +512,28 @@ function testBurstTraffic(tenant) {
             tenantId: tenant,
             kind: 'TestEntity',
             labels: ['Test'],
-            props: { index: i, burst: true }
-          }
-        }
+            props: { index: i, burst: true },
+          },
+        },
       }),
       params: {
         headers: AUTH_HEADERS,
-        tags: { scenario: 'burst_traffic', tenant: tenant, burst_size: burstSize }
-      }
+        tags: {
+          scenario: 'burst_traffic',
+          tenant: tenant,
+          burst_size: burstSize,
+        },
+      },
     });
   }
 
   const responses = http.batch(requests);
-  
+
   let successful = 0;
   let rateLimited = 0;
   let budgetDenied = 0;
 
-  responses.forEach(response => {
+  responses.forEach((response) => {
     if (response.status === 200) {
       successful++;
     } else if (response.status === 429) {
@@ -506,29 +549,38 @@ function testBurstTraffic(tenant) {
     }
   });
 
-  check({ successful, rateLimited, budgetDenied }, {
-    'burst traffic handled appropriately': (stats) => {
-      // At least some should succeed, some should be limited
-      return stats.successful > 0 && (stats.rateLimited + stats.budgetDenied) > 0;
-    }
-  });
+  check(
+    { successful, rateLimited, budgetDenied },
+    {
+      'burst traffic handled appropriately': (stats) => {
+        // At least some should succeed, some should be limited
+        return (
+          stats.successful > 0 && stats.rateLimited + stats.budgetDenied > 0
+        );
+      },
+    },
+  );
 }
 
 function testChaosInjection(tenant) {
   // Enable database chaos for this test
   const chaosConfig = {
-    scenario: 'databaseChaos'
+    scenario: 'databaseChaos',
   };
 
   const startTime = new Date();
   let recovered = false;
-  
+
   try {
     // Enable chaos
-    const chaosResponse = http.post(`${BASE_URL}/chaos/scenarios`, JSON.stringify(chaosConfig), {
-      headers: AUTH_HEADERS,
-      tags: { scenario: 'chaos_injection', tenant: tenant }
-    });
+    const chaosResponse = http.post(
+      `${BASE_URL}/chaos/scenarios`,
+      JSON.stringify(chaosConfig),
+      {
+        headers: AUTH_HEADERS,
+        tags: { scenario: 'chaos_injection', tenant: tenant },
+      },
+    );
 
     faultInjectionRate.add(chaosResponse.status === 200);
 
@@ -548,44 +600,55 @@ function testChaosInjection(tenant) {
         kind: 'ChaosTestEntity',
         labels: ['Chaos'],
         props: { chaosTest: true },
-        source: 'chaos_test'
-      }
+        source: 'chaos_test',
+      },
     };
 
-    const mutationResponse = http.post(GRAPHQL_URL, JSON.stringify({
-      query: mutation,
-      variables: variables
-    }), {
-      headers: AUTH_HEADERS,
-      tags: { scenario: 'chaos_mutation', tenant: tenant }
-    });
+    const mutationResponse = http.post(
+      GRAPHQL_URL,
+      JSON.stringify({
+        query: mutation,
+        variables: variables,
+      }),
+      {
+        headers: AUTH_HEADERS,
+        tags: { scenario: 'chaos_mutation', tenant: tenant },
+      },
+    );
 
     // Check if system handles chaos gracefully
-    const chaosHandled = check(mutationResponse, {
-      'chaos mutation handled gracefully': (r) => {
-        // Either succeeds or fails gracefully (not 5xx)
-        return r.status < 500;
-      },
-      'proper error response during chaos': (r) => {
-        if (r.status >= 400 && r.status < 500) {
-          try {
-            const data = JSON.parse(r.body);
-            return data.errors && data.errors.length > 0;
-          } catch {
-            return false;
+    const chaosHandled = check(
+      mutationResponse,
+      {
+        'chaos mutation handled gracefully': (r) => {
+          // Either succeeds or fails gracefully (not 5xx)
+          return r.status < 500;
+        },
+        'proper error response during chaos': (r) => {
+          if (r.status >= 400 && r.status < 500) {
+            try {
+              const data = JSON.parse(r.body);
+              return data.errors && data.errors.length > 0;
+            } catch {
+              return false;
+            }
           }
-        }
-        return true;
-      }
-    }, { type: 'chaosRecovered' });
+          return true;
+        },
+      },
+      { type: 'chaosRecovered' },
+    );
 
     recovered = chaosHandled;
 
     // Clear chaos
-    http.post(`${BASE_URL}/chaos/scenarios`, JSON.stringify({ scenario: 'clearAll' }), {
-      headers: AUTH_HEADERS
-    });
-
+    http.post(
+      `${BASE_URL}/chaos/scenarios`,
+      JSON.stringify({ scenario: 'clearAll' }),
+      {
+        headers: AUTH_HEADERS,
+      },
+    );
   } catch (error) {
     recovered = false;
   } finally {
@@ -599,7 +662,7 @@ function testSystemRecovery(tenant) {
   // Test system recovery after various fault scenarios
   const scenarios = ['resourcePressure', 'networkPartition', 'providerChaos'];
   const scenario = randomChoice(scenarios);
-  
+
   const startTime = new Date();
   let recoverySuccessful = false;
 
@@ -607,7 +670,7 @@ function testSystemRecovery(tenant) {
     // Inject fault
     http.post(`${BASE_URL}/chaos/scenarios`, JSON.stringify({ scenario }), {
       headers: AUTH_HEADERS,
-      tags: { scenario: 'recovery_test', fault_type: scenario, tenant: tenant }
+      tags: { scenario: 'recovery_test', fault_type: scenario, tenant: tenant },
     });
 
     // Wait a bit for fault to take effect
@@ -616,34 +679,41 @@ function testSystemRecovery(tenant) {
     // Try operations under fault
     const healthCheck = http.get(`${BASE_URL}/health`, {
       headers: AUTH_HEADERS,
-      tags: { scenario: 'health_during_chaos', tenant: tenant }
+      tags: { scenario: 'health_during_chaos', tenant: tenant },
     });
 
     // Clear fault
-    http.post(`${BASE_URL}/chaos/scenarios`, JSON.stringify({ scenario: 'clearAll' }), {
-      headers: AUTH_HEADERS
-    });
+    http.post(
+      `${BASE_URL}/chaos/scenarios`,
+      JSON.stringify({ scenario: 'clearAll' }),
+      {
+        headers: AUTH_HEADERS,
+      },
+    );
 
     // Test recovery
     sleep(1);
 
     const postRecoveryHealth = http.get(`${BASE_URL}/health`, {
       headers: AUTH_HEADERS,
-      tags: { scenario: 'health_after_recovery', tenant: tenant }
+      tags: { scenario: 'health_after_recovery', tenant: tenant },
     });
 
-    recoverySuccessful = check(postRecoveryHealth, {
-      'system recovered after chaos': (r) => r.status === 200,
-      'health check passes after recovery': (r) => {
-        try {
-          const data = JSON.parse(r.body);
-          return data.status === 'ok' || data.healthy === true;
-        } catch {
-          return r.status === 200;
-        }
-      }
-    }, { type: 'chaosRecovered' });
-
+    recoverySuccessful = check(
+      postRecoveryHealth,
+      {
+        'system recovered after chaos': (r) => r.status === 200,
+        'health check passes after recovery': (r) => {
+          try {
+            const data = JSON.parse(r.body);
+            return data.status === 'ok' || data.healthy === true;
+          } catch {
+            return r.status === 200;
+          }
+        },
+      },
+      { type: 'chaosRecovered' },
+    );
   } catch (error) {
     recoverySuccessful = false;
   } finally {
@@ -657,9 +727,13 @@ function testSystemRecovery(tenant) {
 export function teardown(data) {
   // Clear any remaining chaos
   try {
-    http.post(`${BASE_URL}/chaos/scenarios`, JSON.stringify({ scenario: 'clearAll' }), {
-      headers: AUTH_HEADERS
-    });
+    http.post(
+      `${BASE_URL}/chaos/scenarios`,
+      JSON.stringify({ scenario: 'clearAll' }),
+      {
+        headers: AUTH_HEADERS,
+      },
+    );
   } catch (error) {
     console.log('Warning: Could not clear chaos scenarios during teardown');
   }

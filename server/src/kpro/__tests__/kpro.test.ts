@@ -20,7 +20,9 @@ import type {
 describe('KnowledgePurgeReindexOrchestrator', () => {
   const embed = async (text: string): Promise<number[]> => {
     const hash = crypto.createHash('sha1').update(text).digest('hex');
-    const sum = text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const sum = text
+      .split('')
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return [text.length, sum % 997, parseInt(hash.slice(0, 8), 16) % 1000];
   };
 
@@ -137,7 +139,9 @@ describe('KnowledgePurgeReindexOrchestrator', () => {
     expect(summary.purgedIds).toEqual(['docA']);
     expect(summary.proofs).toHaveLength(1);
     const proof = summary.proofs[0];
-    expect(proof.absence.map((a) => a.id).sort()).toEqual(removedVectorIds.sort());
+    expect(proof.absence.map((a) => a.id).sort()).toEqual(
+      removedVectorIds.sort(),
+    );
     expect(proof.absence.every((a) => a.present === false)).toBe(true);
     expect(proof.diff.removed.sort()).toEqual(removedVectorIds.sort());
     expect(proof.diff.added).toHaveLength(0);
@@ -161,12 +165,11 @@ describe('KnowledgePurgeReindexOrchestrator', () => {
         await replayVector.upsert(docs);
       },
       applyChunkReplace: async (documentId, chunks, document) => {
-        const doc =
-          document ?? {
-            id: documentId,
-            text: chunks.map((chunk) => chunk.text).join(' '),
-            version: chunks[0]?.version ?? 1,
-          };
+        const doc = document ?? {
+          id: documentId,
+          text: chunks.map((chunk) => chunk.text).join(' '),
+          version: chunks[0]?.version ?? 1,
+        };
         replayChunkStore.registerDocument(doc, chunks);
       },
     };

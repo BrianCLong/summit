@@ -3,4 +3,3 @@ rollout:
     - at-evidence-gql-web
   mcUrl: https://mc.prod.example.com
   service: companyos
-

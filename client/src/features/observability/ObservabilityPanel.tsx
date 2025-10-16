@@ -14,14 +14,16 @@ export default function ObservabilityPanel() {
           <section>
             <h3>Grafana</h3>
             {embed ? (
-              <iframe 
-                title="grafana" 
-                src={grafana} 
-                style={{ width: '100%', height: 480, border: 0 }} 
+              <iframe
+                title="grafana"
+                src={grafana}
+                style={{ width: '100%', height: 480, border: 0 }}
                 sandbox="allow-same-origin allow-scripts"
               />
             ) : (
-              <a href={grafana} target="_blank" rel="noreferrer">Open Grafana Dashboard</a>
+              <a href={grafana} target="_blank" rel="noreferrer">
+                Open Grafana Dashboard
+              </a>
             )}
           </section>
         )}
@@ -29,14 +31,16 @@ export default function ObservabilityPanel() {
           <section>
             <h3>Traces (Tempo/Jaeger)</h3>
             {embed ? (
-              <iframe 
-                title="traces" 
-                src={tempo} 
+              <iframe
+                title="traces"
+                src={tempo}
                 style={{ width: '100%', height: 480, border: 0 }}
                 sandbox="allow-same-origin allow-scripts"
               />
             ) : (
-              <a href={tempo} target="_blank" rel="noreferrer">Open Distributed Traces</a>
+              <a href={tempo} target="_blank" rel="noreferrer">
+                Open Distributed Traces
+              </a>
             )}
           </section>
         )}
@@ -44,20 +48,26 @@ export default function ObservabilityPanel() {
           <section>
             <h3>Prometheus</h3>
             {embed ? (
-              <iframe 
-                title="prom" 
-                src={prom} 
+              <iframe
+                title="prom"
+                src={prom}
                 style={{ width: '100%', height: 480, border: 0 }}
                 sandbox="allow-same-origin allow-scripts"
               />
             ) : (
-              <a href={prom} target="_blank" rel="noreferrer">Open Prometheus Metrics</a>
+              <a href={prom} target="_blank" rel="noreferrer">
+                Open Prometheus Metrics
+              </a>
             )}
           </section>
         )}
-        {!grafana && !tempo && !prom && <p>Set VITE_OBS_GRAFANA_URL / VITE_OBS_TEMPO_URL / VITE_OBS_PROM_URL to embed dashboards.</p>}
+        {!grafana && !tempo && !prom && (
+          <p>
+            Set VITE_OBS_GRAFANA_URL / VITE_OBS_TEMPO_URL / VITE_OBS_PROM_URL to
+            embed dashboards.
+          </p>
+        )}
       </div>
     </div>
   );
 }
-

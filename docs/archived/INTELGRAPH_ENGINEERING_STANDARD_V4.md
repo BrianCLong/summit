@@ -208,7 +208,10 @@ module.exports = {
   ],
   settings: { react: { version: '18.0' } },
   rules: {
-    'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
+    'import/order': [
+      'error',
+      { 'newlines-between': 'always', alphabetize: { order: 'asc' } },
+    ],
     'react/prop-types': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
@@ -354,8 +357,11 @@ module.exports = {
 
 ```js
 exports.up = async (knex) =>
-  knex.raw('CREATE INDEX IF NOT EXISTS idx_investigation_created_at ON investigation (created_at)');
-exports.down = async (knex) => knex.raw('DROP INDEX IF EXISTS idx_investigation_created_at');
+  knex.raw(
+    'CREATE INDEX IF NOT EXISTS idx_investigation_created_at ON investigation (created_at)',
+  );
+exports.down = async (knex) =>
+  knex.raw('DROP INDEX IF EXISTS idx_investigation_created_at');
 ```
 
 ### Neo4j
@@ -437,7 +443,10 @@ jobs:
 
       - name: Postgres (Prisma) migrate + generate
         if: ${{ hashFiles('packages/db/prisma/schema.prisma') != '' }}
-        env: { DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph }
+        env:
+          {
+            DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph,
+          }
         run: |
           npm run db:pg:generate
           npm run db:pg:migrate
@@ -445,11 +454,19 @@ jobs:
 
       - name: Postgres (Knex) migrate
         if: ${{ hashFiles('packages/db/knex/knexfile.cjs') != '' }}
-        env: { DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph }
+        env:
+          {
+            DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph,
+          }
         run: npm run db:knex:migrate
 
       - name: Neo4j migrations
-        env: { NEO4J_URI: bolt://localhost:7687, NEO4J_USER: neo4j, NEO4J_PASSWORD: test }
+        env:
+          {
+            NEO4J_URI: bolt://localhost:7687,
+            NEO4J_USER: neo4j,
+            NEO4J_PASSWORD: test,
+          }
         run: npm run db:neo4j:migrate
 
       - name: actionlint (GitHub Workflows)
@@ -1246,7 +1263,11 @@ body:
     attributes: { label: Timebox (hours) }
   - type: textarea
     id: outcomes
-    attributes: { label: Expected Outcomes, description: 'Decision options, risks, next steps' }
+    attributes:
+      {
+        label: Expected Outcomes,
+        description: 'Decision options, risks, next steps',
+      }
 ```
 
 ### 26.9.4 `incident.yml`

@@ -3,12 +3,23 @@
   "displayName": "IntelGraph Docs Helper",
   "publisher": "intelgraph",
   "version": "0.0.1",
-  "engines": { "vscode": "^1.75.0" },
-  "activationEvents": ["onCommand:intelgraph.docs.new", "onCommand:intelgraph.docs.search"],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "activationEvents": [
+    "onCommand:intelgraph.docs.new",
+    "onCommand:intelgraph.docs.search"
+  ],
   "contributes": {
     "commands": [
-      { "command": "intelgraph.docs.new", "title": "Docs: New Page" },
-      { "command": "intelgraph.docs.search", "title": "Docs: Search" }
+      {
+        "command": "intelgraph.docs.new",
+        "title": "Docs: New Page"
+      },
+      {
+        "command": "intelgraph.docs.search",
+        "title": "Docs: Search"
+      }
     ]
   },
   "main": "extension.js"

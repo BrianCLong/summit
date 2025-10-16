@@ -55,7 +55,10 @@ export class CognitiveTwinService {
   }
 
   private async persistTwin(twin: CognitiveTwin): Promise<void> {
-    await Promise.all([this.persistToPostgres(twin), this.persistToNeo4j(twin)]);
+    await Promise.all([
+      this.persistToPostgres(twin),
+      this.persistToNeo4j(twin),
+    ]);
   }
 
   private async persistToPostgres(twin: CognitiveTwin): Promise<void> {
@@ -66,14 +69,14 @@ export class CognitiveTwinService {
         name TEXT,
         behaviors JSONB,
         created_at TIMESTAMP DEFAULT NOW()
-      )`
+      )`,
     );
 
     await this.pg.query(
       `INSERT INTO cognitive_twins (id, entity_id, name, behaviors)
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (id) DO NOTHING`,
-      [twin.id, twin.entityId, twin.name, JSON.stringify(twin.behaviors)]
+      [twin.id, twin.entityId, twin.name, JSON.stringify(twin.behaviors)],
     );
   }
 
@@ -91,7 +94,7 @@ export class CognitiveTwinService {
           entityId: twin.entityId,
           name: twin.name,
           behaviors: twin.behaviors,
-        }
+        },
       );
     } finally {
       await session.close();
@@ -101,13 +104,12 @@ export class CognitiveTwinService {
 
 export async function simulateCognitiveTwins(
   entities: RealEntity[],
-  environment = 'default'
+  environment = 'default',
 ): Promise<CognitiveTwin[]> {
   const pg = getPostgresPool();
   const neo4j = getNeo4jDriver();
   const service = new CognitiveTwinService(pg, neo4j);
   const twins = await service.simulate(entities);
-  await Promise.all(twins.map(twin => service.deployTwin(twin, environment)));
+  await Promise.all(twins.map((twin) => service.deployTwin(twin, environment)));
   return twins;
 }
-

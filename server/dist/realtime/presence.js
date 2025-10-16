@@ -42,7 +42,9 @@ export function registerPresenceHandlers(socket) {
         map.delete(user.id);
         if (map.size === 0)
             presence.delete(workspaceId);
-        socket.to(`workspace:${workspaceId}`).emit('presence:update', Array.from(map.values()));
+        socket
+            .to(`workspace:${workspaceId}`)
+            .emit('presence:update', Array.from(map.values()));
         logger.info({ userId: user.id, workspaceId }, 'presence:disconnect');
     });
 }

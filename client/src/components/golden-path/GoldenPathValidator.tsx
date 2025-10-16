@@ -74,7 +74,8 @@ export const GoldenPathValidator: React.FC = () => {
       {
         id: 'authority_binding',
         name: 'Authority Binding',
-        description: 'Validate Foster/Starkey dissent compliance (authority checks)',
+        description:
+          'Validate Foster/Starkey dissent compliance (authority checks)',
         status: 'pending',
       },
       {
@@ -196,7 +197,9 @@ export const GoldenPathValidator: React.FC = () => {
     );
 
     if (missingVars.length > 0) {
-      throw new Error(`Missing environment variables: ${missingVars.join(', ')}`);
+      throw new Error(
+        `Missing environment variables: ${missingVars.join(', ')}`,
+      );
     }
 
     return {
@@ -237,11 +240,14 @@ export const GoldenPathValidator: React.FC = () => {
     );
 
     const healthyServices = serviceStatuses.filter(
-      (result) => result.status === 'fulfilled' && result.value.status === 'healthy',
+      (result) =>
+        result.status === 'fulfilled' && result.value.status === 'healthy',
     ).length;
 
     if (healthyServices < services.length * 0.8) {
-      throw new Error(`Insufficient healthy services: ${healthyServices}/${services.length}`);
+      throw new Error(
+        `Insufficient healthy services: ${healthyServices}/${services.length}`,
+      );
     }
 
     return {
@@ -429,7 +435,9 @@ export const GoldenPathValidator: React.FC = () => {
       }
 
       // Update step with result
-      setValidationSteps((prev) => prev.map((s) => (s.id === step.id ? result : s)));
+      setValidationSteps((prev) =>
+        prev.map((s) => (s.id === step.id ? result : s)),
+      );
 
       // Small delay between steps for UI feedback
       await new Promise((resolve) => setTimeout(resolve, 200));
@@ -440,7 +448,11 @@ export const GoldenPathValidator: React.FC = () => {
 
     const results: GoldenPathResults = {
       overall_status:
-        failedSteps === 0 ? 'success' : successfulSteps > failedSteps ? 'partial' : 'failed',
+        failedSteps === 0
+          ? 'success'
+          : successfulSteps > failedSteps
+            ? 'partial'
+            : 'failed',
       total_steps: steps.length,
       successful_steps: successfulSteps,
       failed_steps: failedSteps,
@@ -498,9 +510,12 @@ export const GoldenPathValidator: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Golden Path Validator</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Golden Path Validator
+              </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Committee requirement: Validate make bootstrap && make up && make smoke
+                Committee requirement: Validate make bootstrap && make up &&
+                make smoke
               </p>
             </div>
 
@@ -554,7 +569,10 @@ export const GoldenPathValidator: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">
-                  {Math.round((results.successful_steps / results.total_steps) * 100)}%
+                  {Math.round(
+                    (results.successful_steps / results.total_steps) * 100,
+                  )}
+                  %
                 </div>
                 <div className="text-sm text-gray-600">Success Rate</div>
               </div>
@@ -577,15 +595,21 @@ export const GoldenPathValidator: React.FC = () => {
                     <h3 className="text-lg font-medium text-gray-900">
                       {index + 1}. {step.name}
                     </h3>
-                    <div className={`text-sm font-medium ${getStatusColor(step.status)}`}>
+                    <div
+                      className={`text-sm font-medium ${getStatusColor(step.status)}`}
+                    >
                       {step.status.toUpperCase()}
                       {step.duration && (
-                        <span className="ml-2 text-gray-500">({step.duration}ms)</span>
+                        <span className="ml-2 text-gray-500">
+                          ({step.duration}ms)
+                        </span>
                       )}
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-600 mt-1">{step.description}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {step.description}
+                  </p>
 
                   {step.error && (
                     <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
@@ -614,7 +638,8 @@ export const GoldenPathValidator: React.FC = () => {
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-600">
-            Golden Path Validator ensures committee requirements are met before GA deployment
+            Golden Path Validator ensures committee requirements are met before
+            GA deployment
           </p>
         </div>
       </div>

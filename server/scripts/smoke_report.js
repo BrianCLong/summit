@@ -1,28 +1,28 @@
 // Smoke test for report generation
-const ReportService = require("../src/services/ReportService");
+const ReportService = require('../src/services/ReportService');
 
 async function main() {
   const svc = new ReportService(console);
   const base = {
-    investigationId: "demo-123",
-    title: "Smoke Test Report",
-    findings: ["Finding A", "Finding B"],
-    evidence: ["Evidence 1", "Evidence 2"],
-    metadata: { env: "smoke" },
+    investigationId: 'demo-123',
+    title: 'Smoke Test Report',
+    findings: ['Finding A', 'Finding B'],
+    evidence: ['Evidence 1', 'Evidence 2'],
+    metadata: { env: 'smoke' },
   };
-  const htmlZip = await svc.generate({ ...base, format: "html", zip: true });
-  console.log("HTML+ZIP generated:", htmlZip);
+  const htmlZip = await svc.generate({ ...base, format: 'html', zip: true });
+  console.log('HTML+ZIP generated:', htmlZip);
   try {
-    const pdfZip = await svc.generate({ ...base, format: "pdf", zip: true });
-    console.log("PDF+ZIP generated:", pdfZip);
+    const pdfZip = await svc.generate({ ...base, format: 'pdf', zip: true });
+    console.log('PDF+ZIP generated:', pdfZip);
   } catch (e) {
     console.warn(
-      "PDF generation failed (likely puppeteer/Chromium not available):",
+      'PDF generation failed (likely puppeteer/Chromium not available):',
       e.message,
     );
   }
-  const mdZip = await svc.generate({ ...base, format: "md", zip: true });
-  console.log("Markdown+ZIP generated:", mdZip);
+  const mdZip = await svc.generate({ ...base, format: 'md', zip: true });
+  console.log('Markdown+ZIP generated:', mdZip);
 }
 
 main().catch((e) => {

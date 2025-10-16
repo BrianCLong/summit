@@ -9,52 +9,52 @@ metadata:
     app.kubernetes.io/component: configuration
 data:
   # AWS Configuration
-  aws-region: "us-west-2"
-  dr-aws-region: "us-east-1"
-  aws-account-id: "123456789012"
-  
+  aws-region: 'us-west-2'
+  dr-aws-region: 'us-east-1'
+  aws-account-id: '123456789012'
+
   # S3 Backup Buckets
-  backup-bucket: "intelgraph-backups-prod"
-  dr-backup-bucket: "intelgraph-backups-dr"
-  artifact-bucket: "intelgraph-artifacts-prod"
-  dr-artifact-bucket: "intelgraph-artifacts-dr"
-  
+  backup-bucket: 'intelgraph-backups-prod'
+  dr-backup-bucket: 'intelgraph-backups-dr'
+  artifact-bucket: 'intelgraph-artifacts-prod'
+  dr-artifact-bucket: 'intelgraph-artifacts-dr'
+
   # Cluster Configuration
-  cluster-name: "intelgraph-prod"
-  dr-cluster-name: "intelgraph-dr"
-  
+  cluster-name: 'intelgraph-prod'
+  dr-cluster-name: 'intelgraph-dr'
+
   # Backup Schedules (cron format)
-  neo4j-backup-schedule: "0 2 * * *"      # Daily at 2 AM
-  postgres-backup-schedule: "0 1 * * *"   # Daily at 1 AM
-  redis-backup-schedule: "0 */6 * * *"    # Every 6 hours
-  k8s-config-schedule: "0 3 * * *"        # Daily at 3 AM
-  validation-schedule: "0 4 * * 0"        # Weekly on Sunday at 4 AM
-  
+  neo4j-backup-schedule: '0 2 * * *' # Daily at 2 AM
+  postgres-backup-schedule: '0 1 * * *' # Daily at 1 AM
+  redis-backup-schedule: '0 */6 * * *' # Every 6 hours
+  k8s-config-schedule: '0 3 * * *' # Daily at 3 AM
+  validation-schedule: '0 4 * * 0' # Weekly on Sunday at 4 AM
+
   # Retention Policies (days)
-  neo4j-retention: "30"
-  postgres-retention: "30"
-  redis-retention: "7"
-  k8s-config-retention: "30"
-  validation-retention: "90"
-  
+  neo4j-retention: '30'
+  postgres-retention: '30'
+  redis-retention: '7'
+  k8s-config-retention: '30'
+  validation-retention: '90'
+
   # Database Connection Settings
-  neo4j-host: "neo4j.database"
-  neo4j-port: "7687"
-  postgres-host: "postgres.database"
-  postgres-port: "5432"
-  redis-host: "redis.database"
-  redis-port: "6379"
-  
+  neo4j-host: 'neo4j.database'
+  neo4j-port: '7687'
+  postgres-host: 'postgres.database'
+  postgres-port: '5432'
+  redis-host: 'redis.database'
+  redis-port: '6379'
+
   # Security Settings
-  encryption-enabled: "true"
-  encryption-algorithm: "AES256"
-  integrity-verification: "true"
-  
+  encryption-enabled: 'true'
+  encryption-algorithm: 'AES256'
+  integrity-verification: 'true'
+
   # Compliance Settings
-  gdpr-enabled: "true"
-  sox-enabled: "true"
-  audit-logging: "true"
-  
+  gdpr-enabled: 'true'
+  sox-enabled: 'true'
+  audit-logging: 'true'
+
 ---
 # Backup System Secrets Template (Values should be populated via external-secrets)
 apiVersion: v1
@@ -68,23 +68,23 @@ metadata:
 type: Opaque
 stringData:
   # AWS Credentials (Use IAM roles in production)
-  aws-access-key-id: "PLACEHOLDER_AWS_ACCESS_KEY"
-  aws-secret-access-key: "PLACEHOLDER_AWS_SECRET_KEY"
-  
+  aws-access-key-id: 'PLACEHOLDER_AWS_ACCESS_KEY'
+  aws-secret-access-key: 'PLACEHOLDER_AWS_SECRET_KEY'
+
   # Database Credentials
-  neo4j-username: "neo4j"
-  neo4j-password: "PLACEHOLDER_NEO4J_PASSWORD"
-  postgres-username: "intelgraph"
-  postgres-password: "PLACEHOLDER_POSTGRES_PASSWORD"
-  
+  neo4j-username: 'neo4j'
+  neo4j-password: 'PLACEHOLDER_NEO4J_PASSWORD'
+  postgres-username: 'intelgraph'
+  postgres-password: 'PLACEHOLDER_POSTGRES_PASSWORD'
+
   # Notification Webhooks
-  slack-webhook-url: "https://hooks.slack.com/services/PLACEHOLDER"
-  pagerduty-integration-key: "PLACEHOLDER_PAGERDUTY_KEY"
-  
+  slack-webhook-url: 'https://hooks.slack.com/services/PLACEHOLDER'
+  pagerduty-integration-key: 'PLACEHOLDER_PAGERDUTY_KEY'
+
   # Encryption Keys
-  kms-key-id: "arn:aws:kms:us-west-2:123456789012:key/12345678-1234-1234-1234-123456789012"
-  backup-encryption-key: "PLACEHOLDER_32_BYTE_ENCRYPTION_KEY"
-  
+  kms-key-id: 'arn:aws:kms:us-west-2:123456789012:key/12345678-1234-1234-1234-123456789012'
+  backup-encryption-key: 'PLACEHOLDER_32_BYTE_ENCRYPTION_KEY'
+
 ---
 # Individual Database Backup Secrets
 apiVersion: v1
@@ -94,8 +94,8 @@ metadata:
   namespace: database
 type: Opaque
 stringData:
-  username: "neo4j"
-  password: "PLACEHOLDER_NEO4J_PASSWORD"
+  username: 'neo4j'
+  password: 'PLACEHOLDER_NEO4J_PASSWORD'
 ---
 apiVersion: v1
 kind: Secret
@@ -104,8 +104,8 @@ metadata:
   namespace: database
 type: Opaque
 stringData:
-  username: "intelgraph"
-  password: "PLACEHOLDER_POSTGRES_PASSWORD"
+  username: 'intelgraph'
+  password: 'PLACEHOLDER_POSTGRES_PASSWORD'
 ---
 apiVersion: v1
 kind: Secret
@@ -114,8 +114,8 @@ metadata:
   namespace: backup-system
 type: Opaque
 stringData:
-  kms-key-id: "arn:aws:kms:us-west-2:123456789012:key/12345678-1234-1234-1234-123456789012"
-  encryption-key: "PLACEHOLDER_ENCRYPTION_KEY"
+  kms-key-id: 'arn:aws:kms:us-west-2:123456789012:key/12345678-1234-1234-1234-123456789012'
+  encryption-key: 'PLACEHOLDER_ENCRYPTION_KEY'
 ---
 # TLS Certificate for Backup Encryption Service
 apiVersion: v1
@@ -125,8 +125,8 @@ metadata:
   namespace: backup-system
 type: kubernetes.io/tls
 data:
-  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t  # Base64 encoded certificate
-  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t  # Base64 encoded private key
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t # Base64 encoded certificate
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t # Base64 encoded private key
 ---
 # Namespace Creation
 apiVersion: v1
@@ -149,9 +149,9 @@ metadata:
 provisioner: ebs.csi.aws.com
 parameters:
   type: gp3
-  encrypted: "true"
-  throughput: "250"
-  iops: "3000"
+  encrypted: 'true'
+  throughput: '250'
+  iops: '3000'
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
@@ -165,7 +165,7 @@ metadata:
     app.kubernetes.io/name: backup-priority
 value: 1000
 globalDefault: false
-description: "Priority class for backup and recovery operations"
+description: 'Priority class for backup and recovery operations'
 ---
 # Resource Quotas for Backup System
 apiVersion: v1
@@ -175,12 +175,12 @@ metadata:
   namespace: backup-system
 spec:
   hard:
-    requests.cpu: "20"
-    requests.memory: "40Gi"
-    limits.cpu: "40"
-    limits.memory: "80Gi"
-    persistentvolumeclaims: "10"
-    requests.storage: "500Gi"
+    requests.cpu: '20'
+    requests.memory: '40Gi'
+    limits.cpu: '40'
+    limits.memory: '80Gi'
+    persistentvolumeclaims: '10'
+    requests.storage: '500Gi'
 ---
 # Limit Range for Backup Pods
 apiVersion: v1
@@ -190,13 +190,13 @@ metadata:
   namespace: backup-system
 spec:
   limits:
-  - default:
-      memory: "2Gi"
-      cpu: "1000m"
-    defaultRequest:
-      memory: "512Mi"
-      cpu: "250m"
-    type: Container
-  - max:
-      storage: "100Gi"
-    type: PersistentVolumeClaim
+    - default:
+        memory: '2Gi'
+        cpu: '1000m'
+      defaultRequest:
+        memory: '512Mi'
+        cpu: '250m'
+      type: Container
+    - max:
+        storage: '100Gi'
+      type: PersistentVolumeClaim

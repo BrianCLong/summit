@@ -144,13 +144,16 @@ export class MissionVault {
 
   constructor(
     private neo4j: Neo4jService,
-    private redis: RedisService
+    private redis: RedisService,
   ) {}
 
-  async createMissionContext(tenantId: string, missionData: Partial<MissionContext>): Promise<MissionContext> {
+  async createMissionContext(
+    tenantId: string,
+    missionData: Partial<MissionContext>,
+  ): Promise<MissionContext> {
     try {
       const missionId = missionData.missionId || uuidv4();
-      
+
       const mission: MissionContext = {
         missionId,
         tenantId,
@@ -167,28 +170,34 @@ export class MissionVault {
         successCriteria: missionData.successCriteria || [],
         metadata: missionData.metadata || {},
         created: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
 
       await this.storeMissionContext(mission);
-      
+
       logger.info('Mission context created', {
         tenantId,
         missionId,
         name: mission.name,
         priority: mission.priority,
-        classification: mission.classification
+        classification: mission.classification,
       });
 
       return mission;
-
     } catch (error) {
-      logger.error('Failed to create mission context', { error, tenantId, missionData });
+      logger.error('Failed to create mission context', {
+        error,
+        tenantId,
+        missionData,
+      });
       throw error;
     }
   }
 
-  async getMissionContext(tenantId: string, missionId?: string): Promise<MissionContext | null> {
+  async getMissionContext(
+    tenantId: string,
+    missionId?: string,
+  ): Promise<MissionContext | null> {
     try {
       // If no specific mission ID, get the most active/recent mission
       if (!missionId) {
@@ -200,7 +209,7 @@ export class MissionVault {
       // Try cache first
       const cacheKey = `mission:${tenantId}:${missionId}`;
       const cached = await this.redis.get(cacheKey);
-      
+
       if (cached) {
         return JSON.parse(cached);
       }
@@ -208,8 +217,9 @@ export class MissionVault {
       // Query from Neo4j
       const session = this.neo4j.getSession();
       try {
-        const result = await session.executeRead(async tx => {
-          return await tx.run(`
+        const result = await session.executeRead(async (tx) => {
+          return await tx.run(
+            `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_MISSION]->(m:Mission {mission_id: $missionId})
             OPTIONAL MATCH (m)-[:HAS_OBJECTIVE]->(obj:Objective)
             OPTIONAL MATCH (m)-[:HAS_STAKEHOLDER]->(sh:Stakeholder)
@@ -235,7 +245,9 @@ export class MissionVault {
               riskFactors: riskFactors,
               successCriteria: successCriteria
             } as mission
-          `, { tenantId, missionId });
+          `,
+            { tenantId, missionId },
+          );
         });
 
         if (result.records.length === 0) return null;
@@ -247,84 +259,105 @@ export class MissionVault {
         await this.redis.setex(cacheKey, 600, JSON.stringify(mission));
 
         return mission;
-
       } finally {
         await session.close();
       }
-
     } catch (error) {
-      logger.error('Failed to get mission context', { error, tenantId, missionId });
+      logger.error('Failed to get mission context', {
+        error,
+        tenantId,
+        missionId,
+      });
       return null;
     }
   }
 
-  async updateMissionProgress(tenantId: string, missionId: string, updates: {
-    objectiveUpdates?: Partial<MissionObjective>[];
-    milestoneUpdates?: Partial<Milestone>[];
-    riskUpdates?: Partial<RiskFactor>[];
-    phaseChange?: string;
-    metadata?: Record<string, any>;
-  }): Promise<void> {
+  async updateMissionProgress(
+    tenantId: string,
+    missionId: string,
+    updates: {
+      objectiveUpdates?: Partial<MissionObjective>[];
+      milestoneUpdates?: Partial<Milestone>[];
+      riskUpdates?: Partial<RiskFactor>[];
+      phaseChange?: string;
+      metadata?: Record<string, any>;
+    },
+  ): Promise<void> {
     try {
       const session = this.neo4j.getSession();
-      
-      await session.executeWrite(async tx => {
+
+      await session.executeWrite(async (tx) => {
         // Update mission phase if provided
         if (updates.phaseChange) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             SET m.current_phase = $phase, m.last_updated = datetime()
-          `, { missionId, phase: updates.phaseChange });
+          `,
+            { missionId, phase: updates.phaseChange },
+          );
         }
 
         // Update objectives
         if (updates.objectiveUpdates?.length) {
           for (const objUpdate of updates.objectiveUpdates) {
-            await tx.run(`
+            await tx.run(
+              `
               MATCH (m:Mission {mission_id: $missionId})-[:HAS_OBJECTIVE]->(obj:Objective {objective_id: $objectiveId})
               SET obj += $updates, obj.last_updated = datetime()
-            `, { 
-              missionId, 
-              objectiveId: objUpdate.objectiveId,
-              updates: this.sanitizeNeo4jObject(objUpdate)
-            });
+            `,
+              {
+                missionId,
+                objectiveId: objUpdate.objectiveId,
+                updates: this.sanitizeNeo4jObject(objUpdate),
+              },
+            );
           }
         }
 
         // Update milestones
         if (updates.milestoneUpdates?.length) {
           for (const msUpdate of updates.milestoneUpdates) {
-            await tx.run(`
+            await tx.run(
+              `
               MATCH (m:Mission {mission_id: $missionId})-[:HAS_MILESTONE]->(ms:Milestone {milestone_id: $milestoneId})
               SET ms += $updates, ms.last_updated = datetime()
-            `, { 
-              missionId, 
-              milestoneId: msUpdate.milestoneId,
-              updates: this.sanitizeNeo4jObject(msUpdate)
-            });
+            `,
+              {
+                missionId,
+                milestoneId: msUpdate.milestoneId,
+                updates: this.sanitizeNeo4jObject(msUpdate),
+              },
+            );
           }
         }
 
         // Update risks
         if (updates.riskUpdates?.length) {
           for (const riskUpdate of updates.riskUpdates) {
-            await tx.run(`
+            await tx.run(
+              `
               MATCH (m:Mission {mission_id: $missionId})-[:HAS_RISK]->(rf:RiskFactor {risk_id: $riskId})
               SET rf += $updates, rf.last_updated = datetime()
-            `, { 
-              missionId, 
-              riskId: riskUpdate.riskId,
-              updates: this.sanitizeNeo4jObject(riskUpdate)
-            });
+            `,
+              {
+                missionId,
+                riskId: riskUpdate.riskId,
+                updates: this.sanitizeNeo4jObject(riskUpdate),
+              },
+            );
           }
         }
 
         // Update metadata
         if (updates.metadata) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             SET m.metadata = $metadata, m.last_updated = datetime()
-          `, { missionId, metadata: JSON.stringify(updates.metadata) });
+          `,
+            { missionId, metadata: JSON.stringify(updates.metadata) },
+          );
         }
       });
 
@@ -334,15 +367,17 @@ export class MissionVault {
       logger.info('Mission progress updated', {
         tenantId,
         missionId,
-        updates: Object.keys(updates)
+        updates: Object.keys(updates),
       });
-
     } finally {
       await session.close();
     }
   }
 
-  async assessMissionHealth(tenantId: string, missionId: string): Promise<{
+  async assessMissionHealth(
+    tenantId: string,
+    missionId: string,
+  ): Promise<{
     overallHealth: 'excellent' | 'good' | 'fair' | 'poor' | 'critical';
     healthScore: number;
     factors: any[];
@@ -354,8 +389,10 @@ export class MissionVault {
         return {
           overallHealth: 'critical',
           healthScore: 0,
-          factors: [{ factor: 'mission_not_found', score: 0, impact: 'critical' }],
-          recommendations: ['Verify mission exists and is accessible']
+          factors: [
+            { factor: 'mission_not_found', score: 0, impact: 'critical' },
+          ],
+          recommendations: ['Verify mission exists and is accessible'],
         };
       }
 
@@ -389,32 +426,39 @@ export class MissionVault {
 
       const healthScore = factorCount > 0 ? totalScore / factorCount : 0;
       const overallHealth = this.determineOverallHealth(healthScore);
-      const recommendations = this.generateHealthRecommendations(factors, mission);
+      const recommendations = this.generateHealthRecommendations(
+        factors,
+        mission,
+      );
 
       return {
         overallHealth,
         healthScore,
         factors,
-        recommendations
+        recommendations,
       };
-
     } catch (error) {
-      logger.error('Failed to assess mission health', { error, tenantId, missionId });
+      logger.error('Failed to assess mission health', {
+        error,
+        tenantId,
+        missionId,
+      });
       return {
         overallHealth: 'critical',
         healthScore: 0,
         factors: [{ factor: 'assessment_error', score: 0, impact: 'critical' }],
-        recommendations: ['Contact system administrator']
+        recommendations: ['Contact system administrator'],
       };
     }
   }
 
   async getActiveMissions(tenantId: string): Promise<MissionContext[]> {
     const session = this.neo4j.getSession();
-    
+
     try {
-      const result = await session.executeRead(async tx => {
-        return await tx.run(`
+      const result = await session.executeRead(async (tx) => {
+        return await tx.run(
+          `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_MISSION]->(m:Mission)
           WHERE m.current_phase IN ['planning', 'active', 'monitoring']
           OPTIONAL MATCH (m)-[:HAS_OBJECTIVE]->(obj:Objective)
@@ -442,30 +486,36 @@ export class MissionVault {
             successCriteria: successCriteria
           } as mission
           ORDER BY m.priority DESC, m.last_updated DESC
-        `, { tenantId });
+        `,
+          { tenantId },
+        );
       });
 
-      return result.records.map(record => {
+      return result.records.map((record) => {
         const missionData = record.get('mission');
         return this.transformNeo4jToMissionContext(missionData);
       });
-
     } finally {
       await session.close();
     }
   }
 
-  async linkCoherenceToMission(tenantId: string, missionId: string, coherenceData: {
-    signalTypes: string[];
-    activityPatterns: string[];
-    narrativeImpacts: string[];
-    relevanceScore: number;
-  }): Promise<void> {
+  async linkCoherenceToMission(
+    tenantId: string,
+    missionId: string,
+    coherenceData: {
+      signalTypes: string[];
+      activityPatterns: string[];
+      narrativeImpacts: string[];
+      relevanceScore: number;
+    },
+  ): Promise<void> {
     try {
       const session = this.neo4j.getSession();
-      
-      await session.executeWrite(async tx => {
-        await tx.run(`
+
+      await session.executeWrite(async (tx) => {
+        await tx.run(
+          `
           MATCH (m:Mission {mission_id: $missionId})
           MERGE (m)-[:INFORMED_BY]->(ci:CoherenceIntel {
             signal_types: $signalTypes,
@@ -475,13 +525,15 @@ export class MissionVault {
             linked_at: datetime(),
             last_updated: datetime()
           })
-        `, {
-          missionId,
-          signalTypes: coherenceData.signalTypes,
-          activityPatterns: coherenceData.activityPatterns,
-          narrativeImpacts: coherenceData.narrativeImpacts,
-          relevanceScore: coherenceData.relevanceScore
-        });
+        `,
+          {
+            missionId,
+            signalTypes: coherenceData.signalTypes,
+            activityPatterns: coherenceData.activityPatterns,
+            narrativeImpacts: coherenceData.narrativeImpacts,
+            relevanceScore: coherenceData.relevanceScore,
+          },
+        );
       });
 
       // Invalidate mission cache
@@ -490,9 +542,8 @@ export class MissionVault {
       logger.info('Coherence data linked to mission', {
         tenantId,
         missionId,
-        relevanceScore: coherenceData.relevanceScore
+        relevanceScore: coherenceData.relevanceScore,
       });
-
     } finally {
       await session.close();
     }
@@ -500,11 +551,12 @@ export class MissionVault {
 
   private async storeMissionContext(mission: MissionContext): Promise<void> {
     const session = this.neo4j.getSession();
-    
+
     try {
-      await session.executeWrite(async tx => {
+      await session.executeWrite(async (tx) => {
         // Create mission node
-        await tx.run(`
+        await tx.run(
+          `
           MATCH (t:Tenant {tenant_id: $tenantId})
           MERGE (m:Mission {mission_id: $missionId})
           SET m += {
@@ -519,104 +571,123 @@ export class MissionVault {
             last_updated: datetime($lastUpdated)
           }
           MERGE (t)-[:HAS_MISSION]->(m)
-        `, {
-          tenantId: mission.tenantId,
-          missionId: mission.missionId,
-          name: mission.name,
-          description: mission.description,
-          currentPhase: mission.currentPhase,
-          priority: mission.priority,
-          classification: mission.classification,
-          metadata: JSON.stringify(mission.metadata),
-          created: mission.created,
-          lastUpdated: mission.lastUpdated
-        });
+        `,
+          {
+            tenantId: mission.tenantId,
+            missionId: mission.missionId,
+            name: mission.name,
+            description: mission.description,
+            currentPhase: mission.currentPhase,
+            priority: mission.priority,
+            classification: mission.classification,
+            metadata: JSON.stringify(mission.metadata),
+            created: mission.created,
+            lastUpdated: mission.lastUpdated,
+          },
+        );
 
         // Store objectives
         for (const objective of mission.objectives) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             MERGE (obj:Objective {objective_id: $objectiveId})
             SET obj += $objective
             MERGE (m)-[:HAS_OBJECTIVE]->(obj)
-          `, {
-            missionId: mission.missionId,
-            objectiveId: objective.objectiveId,
-            objective: this.sanitizeNeo4jObject(objective)
-          });
+          `,
+            {
+              missionId: mission.missionId,
+              objectiveId: objective.objectiveId,
+              objective: this.sanitizeNeo4jObject(objective),
+            },
+          );
         }
 
         // Store stakeholders
         for (const stakeholder of mission.stakeholders) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             MERGE (sh:Stakeholder {stakeholder_id: $stakeholderId})
             SET sh += $stakeholder
             MERGE (m)-[:HAS_STAKEHOLDER]->(sh)
-          `, {
-            missionId: mission.missionId,
-            stakeholderId: stakeholder.stakeholderId,
-            stakeholder: this.sanitizeNeo4jObject(stakeholder)
-          });
+          `,
+            {
+              missionId: mission.missionId,
+              stakeholderId: stakeholder.stakeholderId,
+              stakeholder: this.sanitizeNeo4jObject(stakeholder),
+            },
+          );
         }
 
         // Store resources
         for (const resource of mission.resources) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             MERGE (res:Resource {resource_id: $resourceId})
             SET res += $resource
             MERGE (m)-[:HAS_RESOURCE]->(res)
-          `, {
-            missionId: mission.missionId,
-            resourceId: resource.resourceId,
-            resource: this.sanitizeNeo4jObject(resource)
-          });
+          `,
+            {
+              missionId: mission.missionId,
+              resourceId: resource.resourceId,
+              resource: this.sanitizeNeo4jObject(resource),
+            },
+          );
         }
 
         // Store milestones
         for (const milestone of mission.timeline.milestones) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             MERGE (ms:Milestone {milestone_id: $milestoneId})
             SET ms += $milestone
             MERGE (m)-[:HAS_MILESTONE]->(ms)
-          `, {
-            missionId: mission.missionId,
-            milestoneId: milestone.milestoneId,
-            milestone: this.sanitizeNeo4jObject(milestone)
-          });
+          `,
+            {
+              missionId: mission.missionId,
+              milestoneId: milestone.milestoneId,
+              milestone: this.sanitizeNeo4jObject(milestone),
+            },
+          );
         }
 
         // Store risk factors
         for (const risk of mission.riskProfile.riskFactors) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             MERGE (rf:RiskFactor {risk_id: $riskId})
             SET rf += $risk
             MERGE (m)-[:HAS_RISK]->(rf)
-          `, {
-            missionId: mission.missionId,
-            riskId: risk.riskId,
-            risk: this.sanitizeNeo4jObject(risk)
-          });
+          `,
+            {
+              missionId: mission.missionId,
+              riskId: risk.riskId,
+              risk: this.sanitizeNeo4jObject(risk),
+            },
+          );
         }
 
         // Store success criteria
         for (const criteria of mission.successCriteria) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (m:Mission {mission_id: $missionId})
             MERGE (sc:SuccessCriteria {criteria_id: $criteriaId})
             SET sc += $criteria
             MERGE (m)-[:HAS_CRITERIA]->(sc)
-          `, {
-            missionId: mission.missionId,
-            criteriaId: criteria.criteriaId,
-            criteria: this.sanitizeNeo4jObject(criteria)
-          });
+          `,
+            {
+              missionId: mission.missionId,
+              criteriaId: criteria.criteriaId,
+              criteria: this.sanitizeNeo4jObject(criteria),
+            },
+          );
         }
       });
-
     } finally {
       await session.close();
     }
@@ -631,7 +702,7 @@ export class MissionVault {
       plannedEndDate: endDate.toISOString(),
       milestones: [],
       criticalPath: [],
-      bufferTime: 0.1 // 10% buffer
+      bufferTime: 0.1, // 10% buffer
     };
   }
 
@@ -641,7 +712,7 @@ export class MissionVault {
       riskFactors: [],
       mitigationStrategies: [],
       contingencyPlans: [],
-      lastAssessment: new Date().toISOString()
+      lastAssessment: new Date().toISOString(),
     };
   }
 
@@ -663,19 +734,20 @@ export class MissionVault {
         actualEndDate: data.actual_end_date,
         milestones: data.milestones?.map(this.transformNeo4jObject) || [],
         criticalPath: data.critical_path || [],
-        bufferTime: data.buffer_time || 0.1
+        bufferTime: data.buffer_time || 0.1,
       },
       riskProfile: {
         overallRiskLevel: data.risk_level || 'medium',
         riskFactors: data.riskFactors?.map(this.transformNeo4jObject) || [],
         mitigationStrategies: [],
         contingencyPlans: [],
-        lastAssessment: data.risk_assessment_date || new Date().toISOString()
+        lastAssessment: data.risk_assessment_date || new Date().toISOString(),
       },
-      successCriteria: data.successCriteria?.map(this.transformNeo4jObject) || [],
+      successCriteria:
+        data.successCriteria?.map(this.transformNeo4jObject) || [],
       metadata: JSON.parse(data.metadata || '{}'),
       created: data.created,
-      lastUpdated: data.last_updated
+      lastUpdated: data.last_updated,
     };
   }
 
@@ -688,8 +760,11 @@ export class MissionVault {
   private sanitizeNeo4jObject(obj: any): any {
     const sanitized = { ...obj };
     // Convert arrays and objects to JSON strings for Neo4j storage
-    Object.keys(sanitized).forEach(key => {
-      if (Array.isArray(sanitized[key]) || (typeof sanitized[key] === 'object' && sanitized[key] !== null)) {
+    Object.keys(sanitized).forEach((key) => {
+      if (
+        Array.isArray(sanitized[key]) ||
+        (typeof sanitized[key] === 'object' && sanitized[key] !== null)
+      ) {
         sanitized[key] = JSON.stringify(sanitized[key]);
       }
     });
@@ -699,9 +774,13 @@ export class MissionVault {
   private assessTimelineHealth(mission: MissionContext): any {
     const now = new Date();
     const plannedEnd = new Date(mission.timeline.plannedEndDate);
-    const progress = mission.timeline.milestones.filter(m => m.status === 'completed').length / Math.max(mission.timeline.milestones.length, 1);
-    const timeElapsed = (now.getTime() - new Date(mission.timeline.startDate).getTime()) / (plannedEnd.getTime() - new Date(mission.timeline.startDate).getTime());
-    
+    const progress =
+      mission.timeline.milestones.filter((m) => m.status === 'completed')
+        .length / Math.max(mission.timeline.milestones.length, 1);
+    const timeElapsed =
+      (now.getTime() - new Date(mission.timeline.startDate).getTime()) /
+      (plannedEnd.getTime() - new Date(mission.timeline.startDate).getTime());
+
     let score = 1.0;
     const issues = [];
 
@@ -722,20 +801,25 @@ export class MissionVault {
       details: {
         progress: progress * 100,
         timeElapsed: timeElapsed * 100,
-        issues
-      }
+        issues,
+      },
     };
   }
 
   private assessObjectiveHealth(mission: MissionContext): any {
     const objectives = mission.objectives;
     if (objectives.length === 0) {
-      return { factor: 'objectives', score: 0.5, impact: 'medium', details: { reason: 'no_objectives' } };
+      return {
+        factor: 'objectives',
+        score: 0.5,
+        impact: 'medium',
+        details: { reason: 'no_objectives' },
+      };
     }
 
-    const completed = objectives.filter(o => o.status === 'completed').length;
-    const blocked = objectives.filter(o => o.status === 'blocked').length;
-    const active = objectives.filter(o => o.status === 'active').length;
+    const completed = objectives.filter((o) => o.status === 'completed').length;
+    const blocked = objectives.filter((o) => o.status === 'blocked').length;
+    const active = objectives.filter((o) => o.status === 'active').length;
 
     let score = completed / objectives.length;
     if (blocked > 0) score -= (blocked / objectives.length) * 0.5;
@@ -750,20 +834,29 @@ export class MissionVault {
         completed,
         blocked,
         active,
-        completionRate: (completed / objectives.length) * 100
-      }
+        completionRate: (completed / objectives.length) * 100,
+      },
     };
   }
 
   private assessRiskHealth(mission: MissionContext): any {
     const risks = mission.riskProfile.riskFactors;
     if (risks.length === 0) {
-      return { factor: 'risk', score: 0.8, impact: 'low', details: { reason: 'no_identified_risks' } };
+      return {
+        factor: 'risk',
+        score: 0.8,
+        impact: 'low',
+        details: { reason: 'no_identified_risks' },
+      };
     }
 
-    const highRisks = risks.filter(r => r.riskScore >= 0.7).length;
-    const mediumRisks = risks.filter(r => r.riskScore >= 0.4 && r.riskScore < 0.7).length;
-    const mitigatedRisks = risks.filter(r => r.status === 'mitigating' || r.status === 'closed').length;
+    const highRisks = risks.filter((r) => r.riskScore >= 0.7).length;
+    const mediumRisks = risks.filter(
+      (r) => r.riskScore >= 0.4 && r.riskScore < 0.7,
+    ).length;
+    const mitigatedRisks = risks.filter(
+      (r) => r.status === 'mitigating' || r.status === 'closed',
+    ).length;
 
     let score = 1.0;
     score -= (highRisks / risks.length) * 0.4;
@@ -778,20 +871,31 @@ export class MissionVault {
         total: risks.length,
         high: highRisks,
         medium: mediumRisks,
-        mitigated: mitigatedRisks
-      }
+        mitigated: mitigatedRisks,
+      },
     };
   }
 
   private assessResourceHealth(mission: MissionContext): any {
     const resources = mission.resources;
     if (resources.length === 0) {
-      return { factor: 'resources', score: 0.3, impact: 'high', details: { reason: 'no_resources' } };
+      return {
+        factor: 'resources',
+        score: 0.3,
+        impact: 'high',
+        details: { reason: 'no_resources' },
+      };
     }
 
-    const available = resources.filter(r => r.availability === 'available').length;
-    const allocated = resources.filter(r => r.availability === 'allocated').length;
-    const unavailable = resources.filter(r => r.availability === 'unavailable').length;
+    const available = resources.filter(
+      (r) => r.availability === 'available',
+    ).length;
+    const allocated = resources.filter(
+      (r) => r.availability === 'allocated',
+    ).length;
+    const unavailable = resources.filter(
+      (r) => r.availability === 'unavailable',
+    ).length;
 
     let score = (available + allocated * 0.8) / resources.length;
     score -= (unavailable / resources.length) * 0.3;
@@ -804,12 +908,14 @@ export class MissionVault {
         total: resources.length,
         available,
         allocated,
-        unavailable
-      }
+        unavailable,
+      },
     };
   }
 
-  private determineOverallHealth(healthScore: number): 'excellent' | 'good' | 'fair' | 'poor' | 'critical' {
+  private determineOverallHealth(
+    healthScore: number,
+  ): 'excellent' | 'good' | 'fair' | 'poor' | 'critical' {
     if (healthScore >= 0.9) return 'excellent';
     if (healthScore >= 0.7) return 'good';
     if (healthScore >= 0.5) return 'fair';
@@ -817,30 +923,43 @@ export class MissionVault {
     return 'critical';
   }
 
-  private generateHealthRecommendations(factors: any[], mission: MissionContext): string[] {
+  private generateHealthRecommendations(
+    factors: any[],
+    mission: MissionContext,
+  ): string[] {
     const recommendations = [];
 
-    factors.forEach(factor => {
+    factors.forEach((factor) => {
       if (factor.impact === 'high') {
         switch (factor.factor) {
           case 'timeline':
-            recommendations.push('Consider timeline adjustment or resource reallocation');
+            recommendations.push(
+              'Consider timeline adjustment or resource reallocation',
+            );
             break;
           case 'objectives':
-            recommendations.push('Review blocked objectives and reassign resources');
+            recommendations.push(
+              'Review blocked objectives and reassign resources',
+            );
             break;
           case 'risk':
-            recommendations.push('Escalate high-risk factors and implement mitigation strategies');
+            recommendations.push(
+              'Escalate high-risk factors and implement mitigation strategies',
+            );
             break;
           case 'resources':
-            recommendations.push('Secure additional resources or adjust mission scope');
+            recommendations.push(
+              'Secure additional resources or adjust mission scope',
+            );
             break;
         }
       }
     });
 
     if (recommendations.length === 0) {
-      recommendations.push('Mission health is acceptable - continue monitoring');
+      recommendations.push(
+        'Mission health is acceptable - continue monitoring',
+      );
     }
 
     return recommendations;

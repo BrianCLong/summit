@@ -8,7 +8,9 @@ app.use(router);
 
 describe('nlq routes', () => {
   it('compiles natural language to cypher', async () => {
-    const res = await request(app).post('/nlq/compile').send({ nl: 'find all people' });
+    const res = await request(app)
+      .post('/nlq/compile')
+      .send({ nl: 'find all people' });
     expect(res.body.cypher).toBe('MATCH (p:Person) RETURN p LIMIT $limit');
   });
 });

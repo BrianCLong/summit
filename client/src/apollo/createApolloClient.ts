@@ -45,13 +45,16 @@ export async function createApolloClient() {
 
   // Auth context with token and tracing
   const authLink = setContext((_, { headers }) => {
-    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
+    const token =
+      typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
 
     // Generate a W3C traceparent header for end-to-end tracing
     const traceId = crypto.randomUUID().replace(/-/g, '');
     const spanIdArray = new Uint8Array(8);
     crypto.getRandomValues(spanIdArray);
-    const spanId = Array.from(spanIdArray, (b) => b.toString(16).padStart(2, '0')).join('');
+    const spanId = Array.from(spanIdArray, (b) =>
+      b.toString(16).padStart(2, '0'),
+    ).join('');
     const traceparent = `00-${traceId}-${spanId}-01`;
 
     return {
@@ -81,9 +84,13 @@ export async function createApolloClient() {
 
   // Subscriptions (if enabled on server)
   try {
-    const wsUrl = API_URL.replace('http://', 'ws://').replace('https://', 'wss://');
+    const wsUrl = API_URL.replace('http://', 'ws://').replace(
+      'https://',
+      'wss://',
+    );
 
-    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
+    const token =
+      typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
 
     const ws = new GraphQLWsLink(
       createWsClient({
@@ -99,7 +106,9 @@ export async function createApolloClient() {
     link = split(
       ({ query }) => {
         const def = getMainDefinition(query);
-        return def.kind === 'OperationDefinition' && def.operation === 'subscription';
+        return (
+          def.kind === 'OperationDefinition' && def.operation === 'subscription'
+        );
       },
       ws,
       from([errorLink, retryLink, authLink, persisted, http]),
@@ -117,7 +126,10 @@ export async function createApolloClient() {
             keyArgs: ['filter', 'sort', 'tenant'],
             merge(existing = { items: [] }, incoming) {
               if (!incoming?.items) return existing;
-              return { ...incoming, items: [...(existing.items || []), ...incoming.items] };
+              return {
+                ...incoming,
+                items: [...(existing.items || []), ...incoming.items],
+              };
             },
           },
           investigations: {

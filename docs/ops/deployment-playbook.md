@@ -1,6 +1,7 @@
 # Maestro Conductor Deployment Playbook
 
 ## Table of Contents
+
 - [Prerequisites](#prerequisites)
 - [Environment Setup](#environment-setup)
 - [Infrastructure Deployment](#infrastructure-deployment)
@@ -13,6 +14,7 @@
 ## Prerequisites
 
 ### System Requirements
+
 - **Kubernetes**: v1.24+
 - **PostgreSQL**: v13+
 - **Redis**: v6+
@@ -20,6 +22,7 @@
 - **Docker**: v20+
 
 ### Access Requirements
+
 - Kubernetes cluster admin access
 - Container registry access (Docker Hub, ECR, etc.)
 - Database admin credentials
@@ -27,6 +30,7 @@
 - Monitoring system access (Prometheus, Grafana)
 
 ### Tools Installation
+
 ```bash
 # Install required CLI tools
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -41,6 +45,7 @@ pip install maestro-python-client
 ## Environment Setup
 
 ### Development Environment
+
 ```bash
 #!/bin/bash
 # setup-dev.sh
@@ -74,6 +79,7 @@ echo "Development environment ready"
 ```
 
 ### Staging Environment
+
 ```bash
 #!/bin/bash
 # setup-staging.sh
@@ -118,6 +124,7 @@ echo "Staging environment ready"
 ```
 
 ### Production Environment
+
 ```bash
 #!/bin/bash
 # setup-production.sh
@@ -177,6 +184,7 @@ echo "Production environment ready"
 ## Infrastructure Deployment
 
 ### Database Schema Migration
+
 ```bash
 #!/bin/bash
 # migrate-database.sh
@@ -216,6 +224,7 @@ echo "Database migration completed successfully"
 ```
 
 ### SSL Certificate Setup
+
 ```yaml
 # ssl-certificates.yaml
 apiVersion: cert-manager.io/v1
@@ -229,9 +238,9 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - api.maestro.com
-  - dashboard.maestro.com
-  - webhook.maestro.com
+    - api.maestro.com
+    - dashboard.maestro.com
+    - webhook.maestro.com
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -244,12 +253,13 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    - http01:
-        ingress:
-          class: nginx
+      - http01:
+          ingress:
+            class: nginx
 ```
 
 ### Load Balancer Configuration
+
 ```yaml
 # load-balancer.yaml
 apiVersion: v1
@@ -258,17 +268,17 @@ metadata:
   name: maestro-lb
   namespace: maestro-prod
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-type: 'nlb'
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
 spec:
   type: LoadBalancer
   ports:
-  - name: http
-    port: 80
-    targetPort: 8080
-  - name: https
-    port: 443
-    targetPort: 8443
+    - name: http
+      port: 80
+      targetPort: 8080
+    - name: https
+      port: 443
+      targetPort: 8443
   selector:
     app: maestro-gateway
 ---
@@ -280,40 +290,41 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
 spec:
   tls:
-  - hosts:
-    - api.maestro.com
-    - dashboard.maestro.com
-    secretName: maestro-tls-secret
+    - hosts:
+        - api.maestro.com
+        - dashboard.maestro.com
+      secretName: maestro-tls-secret
   rules:
-  - host: api.maestro.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: maestro-api
-            port:
-              number: 3000
-  - host: dashboard.maestro.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: maestro-dashboard
-            port:
-              number: 80
+    - host: api.maestro.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-api
+                port:
+                  number: 3000
+    - host: dashboard.maestro.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: maestro-dashboard
+                port:
+                  number: 80
 ```
 
 ## Application Deployment
 
 ### Container Images
+
 ```bash
 #!/bin/bash
 # build-images.sh
@@ -354,6 +365,7 @@ echo "Images built and pushed successfully"
 ```
 
 ### Kubernetes Deployments
+
 ```yaml
 # maestro-api.yaml
 apiVersion: apps/v1
@@ -386,56 +398,56 @@ spec:
         runAsUser: 1000
         fsGroup: 2000
       containers:
-      - name: api
-        image: maestro/api:v1.0.0
-        ports:
-        - containerPort: 3000
-          name: http
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: maestro-secrets
-              key: database-url
-        - name: REDIS_URL
-          valueFrom:
-            secretKeyRef:
-              name: maestro-secrets
-              key: redis-url
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: maestro-secrets
-              key: jwt-secret
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
-          readOnly: true
+        - name: api
+          image: maestro/api:v1.0.0
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-secrets
+                  key: redis-url
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-secrets
+                  key: jwt-secret
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '250m'
+            limits:
+              memory: '1Gi'
+              cpu: '500m'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
       volumes:
-      - name: config
-        configMap:
-          name: maestro-config
+        - name: config
+          configMap:
+            name: maestro-config
 ---
 apiVersion: v1
 kind: Service
@@ -447,14 +459,15 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 3000
-    targetPort: 3000
-    name: http
+    - port: 3000
+      targetPort: 3000
+      name: http
   selector:
     app: maestro-api
 ```
 
 ### Executor Deployment
+
 ```yaml
 # maestro-executor.yaml
 apiVersion: apps/v1
@@ -485,37 +498,37 @@ spec:
         runAsUser: 1000
         fsGroup: 2000
       containers:
-      - name: executor
-        image: maestro/executor:v1.0.0
-        env:
-        - name: REDIS_URL
-          valueFrom:
-            secretKeyRef:
-              name: maestro-secrets
-              key: redis-url
-        - name: WORKER_CONCURRENCY
-          value: "10"
-        - name: MAX_MEMORY_MB
-          value: "1024"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "1Gi"
-            cpu: "800m"
-        livenessProbe:
-          exec:
-            command:
-            - /health-check
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - /ready-check
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: executor
+          image: maestro/executor:v1.0.0
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: maestro-secrets
+                  key: redis-url
+            - name: WORKER_CONCURRENCY
+              value: '10'
+            - name: MAX_MEMORY_MB
+              value: '1024'
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '200m'
+            limits:
+              memory: '1Gi'
+              cpu: '800m'
+          livenessProbe:
+            exec:
+              command:
+                - /health-check
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - /ready-check
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -530,23 +543,24 @@ spec:
   minReplicas: 3
   maxReplicas: 20
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ```
 
 ## Configuration
 
 ### Secrets Management
+
 ```bash
 #!/bin/bash
 # setup-secrets.sh
@@ -580,6 +594,7 @@ echo "Secrets created successfully"
 ```
 
 ### Configuration Maps
+
 ```yaml
 # maestro-config.yaml
 apiVersion: v1
@@ -653,6 +668,7 @@ data:
 ```
 
 ### Environment-Specific Configuration
+
 ```bash
 #!/bin/bash
 # configure-environment.sh
@@ -703,6 +719,7 @@ echo "Environment $ENVIRONMENT configured successfully"
 ## Health Checks
 
 ### Application Health Endpoints
+
 ```typescript
 // health-checks.ts
 import express from 'express';
@@ -720,12 +737,12 @@ app.get('/health', async (req, res) => {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: process.env.VERSION || 'unknown'
+      version: process.env.VERSION || 'unknown',
     });
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -735,7 +752,7 @@ app.get('/ready', async (req, res) => {
   const checks = {
     database: false,
     redis: false,
-    filesystem: false
+    filesystem: false,
   };
 
   try {
@@ -764,12 +781,12 @@ app.get('/ready', async (req, res) => {
     console.error('Filesystem check failed:', error);
   }
 
-  const allHealthy = Object.values(checks).every(check => check === true);
+  const allHealthy = Object.values(checks).every((check) => check === true);
 
   res.status(allHealthy ? 200 : 503).json({
     status: allHealthy ? 'ready' : 'not ready',
     checks,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -784,6 +801,7 @@ export default app;
 ```
 
 ### Health Check Scripts
+
 ```bash
 #!/bin/bash
 # health-check.sh
@@ -828,6 +846,7 @@ echo "Health checks completed"
 ## Rollback Procedures
 
 ### Application Rollback
+
 ```bash
 #!/bin/bash
 # rollback.sh
@@ -872,6 +891,7 @@ echo "Rollback completed successfully"
 ```
 
 ### Database Rollback
+
 ```bash
 #!/bin/bash
 # rollback-database.sh
@@ -928,6 +948,7 @@ fi
 ## Post-Deployment Tasks
 
 ### Smoke Tests
+
 ```bash
 #!/bin/bash
 # smoke-tests.sh
@@ -981,6 +1002,7 @@ echo "All smoke tests passed!"
 ```
 
 ### Performance Baseline
+
 ```bash
 #!/bin/bash
 # performance-baseline.sh
@@ -1006,6 +1028,7 @@ echo "Performance baseline established: $BASELINE_FILE"
 ```
 
 ### Monitoring Setup Verification
+
 ```bash
 #!/bin/bash
 # verify-monitoring.sh

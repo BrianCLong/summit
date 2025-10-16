@@ -4,9 +4,9 @@ describe('graph analytics GraphQL resolvers', () => {
   const baseUser = { id: 'analyst-1', role: 'ANALYST' };
 
   it('delegates to the service for PageRank', async () => {
-    const calculatePageRank = jest.fn().mockResolvedValue([
-      { nodeId: 'n1', label: 'Node 1', score: 0.42 },
-    ]);
+    const calculatePageRank = jest
+      .fn()
+      .mockResolvedValue([{ nodeId: 'n1', label: 'Node 1', score: 0.42 }]);
     const context = {
       user: baseUser,
       services: {
@@ -33,7 +33,12 @@ describe('graph analytics GraphQL resolvers', () => {
 
   it('delegates to the service for community detection', async () => {
     const detectCommunities = jest.fn().mockResolvedValue([
-      { communityId: 7, size: 12, algorithm: 'LOUVAIN', nodes: [{ nodeId: 'n1', label: 'Node 1' }] },
+      {
+        communityId: 7,
+        size: 12,
+        algorithm: 'LOUVAIN',
+        nodes: [{ nodeId: 'n1', label: 'Node 1' }],
+      },
     ]);
     const context = {
       user: baseUser,
@@ -55,13 +60,19 @@ describe('graph analytics GraphQL resolvers', () => {
       expect.objectContaining({ limit: 10, algorithm: 'LABEL_PROPAGATION' }),
     );
     expect(result).toEqual([
-      expect.objectContaining({ communityId: 7, size: 12, nodes: [expect.any(Object)] }),
+      expect.objectContaining({
+        communityId: 7,
+        size: 12,
+        nodes: [expect.any(Object)],
+      }),
     ]);
   });
 
   it('throws when the user is missing', async () => {
     await expect(
-      graphAnalyticsResolvers.Query.graphPageRank(null, { limit: 5 }, { services: {} } as any),
+      graphAnalyticsResolvers.Query.graphPageRank(null, { limit: 5 }, {
+        services: {},
+      } as any),
     ).rejects.toThrow('Not authenticated');
   });
 
@@ -77,7 +88,11 @@ describe('graph analytics GraphQL resolvers', () => {
     } as any;
 
     await expect(
-      graphAnalyticsResolvers.Query.graphCommunities(null, { limit: 1 }, context),
+      graphAnalyticsResolvers.Query.graphCommunities(
+        null,
+        { limit: 1 },
+        context,
+      ),
     ).rejects.toThrow('Forbidden');
   });
 });

@@ -21,4 +21,3 @@ export async function loadRecipe(name: string) {
     return { __error: 'YAML module not installed', raw: y } as any;
   }
 }
-

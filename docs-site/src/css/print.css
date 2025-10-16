@@ -1,5 +1,20 @@
 @media print {
-  nav, .theme-doc-toc-desktop, .navbar, .footer { display: none !important; }
-  main { font-size: 11pt; }
-  .watermark::before { content: attr(data-watermark); position: fixed; top: 40%; left: 10%; font-size: 48pt; color: rgba(0,0,0,0.06); transform: rotate(-30deg); }
+  nav,
+  .theme-doc-toc-desktop,
+  .navbar,
+  .footer {
+    display: none !important;
+  }
+  main {
+    font-size: 11pt;
+  }
+  .watermark::before {
+    content: attr(data-watermark);
+    position: fixed;
+    top: 40%;
+    left: 10%;
+    font-size: 48pt;
+    color: rgba(0, 0, 0, 0.06);
+    transform: rotate(-30deg);
+  }
 }

@@ -5,11 +5,13 @@ This pack hardens quality signals, reduces flake, formalizes data protection (DP
 ---
 
 ## PR 23 — Flake management framework (Jest + Playwright)
+
 **Purpose:** Detect, auto‑retry, quarantine flakes; surface rate.
 
 **Files:**
 
 **`jest.config.js`** (append)
+
 ```js
 /** @type {import('jest').Config} */
 module.exports = {
@@ -22,6 +24,7 @@ module.exports = {
 ```
 
 **`test/jest.setup.js`**
+
 ```js
 // Retry known flakey tests once based on tag
 const retry = parseInt(process.env.JEST_RETRY_TIMES || '0', 10);
@@ -32,6 +35,7 @@ if (retry > 0 && global.jest) {
 ```
 
 **`playwright.config.ts`**
+
 ```ts
 import { defineConfig } from '@playwright/test';
 export default defineConfig({
@@ -42,6 +46,7 @@ export default defineConfig({
 ```
 
 **`.github/workflows/tests.yml`** (append vars + artifact upload)
+
 ```yaml
 jobs:
   core:
@@ -55,27 +60,32 @@ jobs:
 ```
 
 **`scripts/flake-index.js`**
+
 ```js
 // Parse JUnit to compute flake index (failures that pass on retry)
 const fs = require('fs');
 const glob = require('glob');
 const { XMLParser } = require('fast-xml-parser');
 const parser = new XMLParser();
-let total = 0, flaky = 0;
+let total = 0,
+  flaky = 0;
 for (const f of glob.sync('reports/junit/**/*.xml')) {
   const xml = parser.parse(fs.readFileSync(f, 'utf8'));
-  const suites = Array.isArray(xml.testsuites?.testsuite) ? xml.testsuites.testsuite : [xml.testsuites?.testsuite].filter(Boolean);
+  const suites = Array.isArray(xml.testsuites?.testsuite)
+    ? xml.testsuites.testsuite
+    : [xml.testsuites?.testsuite].filter(Boolean);
   for (const s of suites) {
     total += Number(s?.tests || 0);
     flaky += Number(s?.flaky || 0); // if your runner writes <flaky>
   }
 }
-const idx = total ? (flaky/total) : 0;
+const idx = total ? flaky / total : 0;
 console.log(`flake_index=${idx}`);
 if (idx > Number(process.env.FLAKE_BUDGET || 0.02)) process.exit(1);
 ```
 
 **`.github/workflows/flake-budget.yml`**
+
 ```yaml
 name: flake-budget
 on: [pull_request]
@@ -94,11 +104,13 @@ jobs:
 ---
 
 ## PR 24 — Coverage budgets & required check
+
 **Purpose:** Prevent silent test erosion; enforce per‑package floor.
 
 **Files:**
 
 **`package.json`** (scripts excerpt)
+
 ```json
 {
   "scripts": {
@@ -109,16 +121,23 @@ jobs:
 ```
 
 **`scripts/coverage-check.js`**
+
 ```js
 const fs = require('fs');
-const summary = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+const summary = JSON.parse(
+  fs.readFileSync('coverage/coverage-summary.json', 'utf8'),
+);
 const floor = Number(process.env.COVERAGE_FLOOR || 0.8);
 const pct = summary.total.statements.pct / 100;
 console.log(`coverage=${pct}`);
-if (pct < floor) { console.error(`❌ Coverage ${pct} < ${floor}`); process.exit(1); }
+if (pct < floor) {
+  console.error(`❌ Coverage ${pct} < ${floor}`);
+  process.exit(1);
+}
 ```
 
 **`.github/workflows/coverage.yml`**
+
 ```yaml
 name: coverage
 on: [pull_request]
@@ -139,6 +158,7 @@ jobs:
 ---
 
 ## PR 25 — Contract testing & API schema linting
+
 **Purpose:** Catch breaking API changes early; keep OpenAPI healthy.
 
 **Files:**
@@ -146,8 +166,9 @@ jobs:
 **`api/openapi.yaml`** (ensure exists)
 
 **`.spectral.yaml`**
+
 ```yaml
-extends: ["spectral:oas", "spectral:asyncapi"]
+extends: ['spectral:oas', 'spectral:asyncapi']
 rules:
   oas3-api-servers: warn
   operation-operationId: error
@@ -155,6 +176,7 @@ rules:
 ```
 
 **`.github/workflows/api-contract.yml`**
+
 ```yaml
 name: api-contract
 on: [pull_request]
@@ -168,6 +190,7 @@ jobs:
 ```
 
 **`tests/contract/responds-to-schema.test.ts`**
+
 ```ts
 import Ajv from 'ajv';
 import { load } from 'js-yaml';
@@ -191,11 +214,13 @@ it('GET /health matches schema', async () => {
 ---
 
 ## PR 26 — Synthetic monitoring (stage/prod)
+
 **Purpose:** Always‑on HTTP canaries for the golden path.
 
 **Files:**
 
 **`.github/workflows/synthetics.yml`**
+
 ```yaml
 name: synthetics
 on:
@@ -217,17 +242,19 @@ jobs:
 ---
 
 ## PR 27 — Chaos drills (safe defaults)
+
 **Purpose:** Practice failure handling; verify rollback works.
 
 **Files:**
 
 **`k8s/chaos/pod-killer.yaml`**
+
 ```yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata: { name: chaos-pod-killer, namespace: stage }
 spec:
-  schedule: "0 2 * * 3" # weekly Wed 02:00
+  schedule: '0 2 * * 3' # weekly Wed 02:00
   jobTemplate:
     spec:
       template:
@@ -237,7 +264,7 @@ spec:
           containers:
             - name: killer
               image: bitnami/kubectl:latest
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   POD=$(kubectl -n stage get pods -l app.kubernetes.io/name=web -o jsonpath='{.items[0].metadata.name}');
@@ -245,6 +272,7 @@ spec:
 ```
 
 **`k8s/chaos/rbac.yaml`**
+
 ```yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -256,7 +284,7 @@ metadata: { name: chaos, namespace: stage }
 rules:
   - apiGroups: ['']
     resources: ['pods']
-    verbs: ['get','list','delete']
+    verbs: ['get', 'list', 'delete']
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -270,11 +298,13 @@ roleRef: { kind: Role, name: chaos, apiGroup: rbac.authorization.k8s.io }
 ---
 
 ## PR 28 — Runbook automation & one‑click rollback
+
 **Purpose:** Cut MTTR with a dispatchable rollback button.
 
 **Files:**
 
 **`.github/workflows/rollback.yml`**
+
 ```yaml
 name: rollback
 on:
@@ -296,6 +326,7 @@ jobs:
 ```
 
 **`.github/ISSUE_TEMPLATE/incident.yaml`**
+
 ```yaml
 name: Incident
 description: Prod incident record
@@ -317,11 +348,13 @@ body:
 ---
 
 ## PR 29 — Data retention & purge jobs
+
 **Purpose:** Enforce TTLs with auditable purges.
 
 **Files:**
 
 **`db/migrations/2025090701_add_retention.sql`**
+
 ```sql
 -- Example for PostgreSQL
 CREATE TABLE IF NOT EXISTS retention_policy (
@@ -335,6 +368,7 @@ ON CONFLICT (table_name) DO UPDATE SET ttl_days = EXCLUDED.ttl_days, updated_at 
 ```
 
 **`db/migrations/2025090702_dual_control_deletes.sql`**
+
 ```sql
 CREATE TABLE IF NOT EXISTS deletion_requests (
   id uuid primary key default gen_random_uuid(),
@@ -349,12 +383,13 @@ CREATE TABLE IF NOT EXISTS deletion_requests (
 ```
 
 **`k8s/cron/purge.yaml`**
+
 ```yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata: { name: retention-purge, namespace: prod }
 spec:
-  schedule: "0 1 * * *"
+  schedule: '0 1 * * *'
   jobTemplate:
     spec:
       template:
@@ -364,7 +399,7 @@ spec:
             - name: purge
               image: ghcr.io/<org>/<repo>/dbtools:latest
               envFrom: [{ secretRef: { name: db-credentials } }]
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   psql "$DB_DSN" -c "\
@@ -379,13 +414,16 @@ spec:
 ---
 
 ## PR 30 — DPIA template + enforcement hook
+
 **Purpose:** Ensure privacy impact is assessed for data-affecting changes.
 
 **Files:**
 
 **`SECURITY/DPIA.md`** (template)
+
 ```md
 # Data Protection Impact Assessment (DPIA)
+
 - **Feature/Change:**
 - **Data categories:** (PII, telemetry, etc.)
 - **Lawful basis:**
@@ -396,11 +434,16 @@ spec:
 ```
 
 **`scripts/dpia-guard.js`**
+
 ```js
 const fs = require('fs');
 const base = process.env.GITHUB_BASE_REF || 'main';
-const diff = require('child_process').execSync(`git diff --name-only origin/${base}`).toString();
-const touchesData = diff.split('\n').some(p => /schema|model|db\/migrations|api\/openapi\.yaml/.test(p));
+const diff = require('child_process')
+  .execSync(`git diff --name-only origin/${base}`)
+  .toString();
+const touchesData = diff
+  .split('\n')
+  .some((p) => /schema|model|db\/migrations|api\/openapi\.yaml/.test(p));
 if (touchesData && !fs.existsSync('SECURITY/DPIA.md')) {
   console.error('DPIA required: add/updated SECURITY/DPIA.md');
   process.exit(1);
@@ -408,6 +451,7 @@ if (touchesData && !fs.existsSync('SECURITY/DPIA.md')) {
 ```
 
 **`.github/workflows/dpia-guard.yml`**
+
 ```yaml
 name: dpia-guard
 on: [pull_request]
@@ -425,11 +469,13 @@ jobs:
 ---
 
 ## PR 31 — ABAC/Opa policies + step‑up auth hooks
+
 **Purpose:** Enforce attribute‑based access and step‑up for risky ops.
 
 **Files:**
 
 **`policy/rego/abac.rego`**
+
 ```rego
 package access
 
@@ -451,6 +497,7 @@ allow {
 ```
 
 **`server/middleware/stepup.ts`**
+
 ```ts
 import type { Request, Response, NextFunction } from 'express';
 export function requireStepUp(level = 2) {
@@ -467,11 +514,13 @@ export function requireStepUp(level = 2) {
 ---
 
 ## PR 32 — Kubecost integration & weekly FinOps report
+
 **Purpose:** Visibility to spend and anomalies; tie into PRs.
 
 **Files:**
 
 **`helm/kubecost/values.yaml`** (minimal)
+
 ```yaml
 prometheus:
   serviceAddress: http://prometheus.monitoring.svc.cluster.local:9090
@@ -480,6 +529,7 @@ aggregation:
 ```
 
 **`.github/workflows/finops-weekly.yml`**
+
 ```yaml
 name: finops-weekly
 on:
@@ -506,28 +556,39 @@ jobs:
 ---
 
 ## PR 33 — SLO/SLI recording rules & Grafana dashboard
+
 **Purpose:** Consistent golden signals across services.
 
 **Files:**
 
 **`observability/prometheus/recording-rules.yaml`**
+
 ```yaml
 groups:
-- name: web-sli
-  rules:
-    - record: job:http_request_error_rate:ratio5m
-      expr: sum(rate(http_requests_total{job="web",code=~"5.."}[5m])) / sum(rate(http_requests_total{job="web"}[5m]))
-    - record: job:http_request_duration_seconds:p95
-      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="web"}[5m])) by (le))
+  - name: web-sli
+    rules:
+      - record: job:http_request_error_rate:ratio5m
+        expr: sum(rate(http_requests_total{job="web",code=~"5.."}[5m])) / sum(rate(http_requests_total{job="web"}[5m]))
+      - record: job:http_request_duration_seconds:p95
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="web"}[5m])) by (le))
 ```
 
 **`observability/grafana/dashboards/web.json`** (skeleton)
+
 ```json
 {
   "title": "Web — Golden Signals",
   "panels": [
-    { "type": "timeseries", "title": "Error rate (5xx)", "targets": [{ "expr": "job:http_request_error_rate:ratio5m" }] },
-    { "type": "timeseries", "title": "p95 latency", "targets": [{ "expr": "job:http_request_duration_seconds:p95" }] }
+    {
+      "type": "timeseries",
+      "title": "Error rate (5xx)",
+      "targets": [{ "expr": "job:http_request_error_rate:ratio5m" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 latency",
+      "targets": [{ "expr": "job:http_request_duration_seconds:p95" }]
+    }
   ]
 }
 ```
@@ -537,11 +598,13 @@ groups:
 ---
 
 ## PR 34 — Repo arborist automation
+
 **Purpose:** Keep branches tidy; label hygiene.
 
 **Files:**
 
 **`.github/workflows/arborist.yml`**
+
 ```yaml
 name: arborist
 on:
@@ -566,19 +629,21 @@ jobs:
 ---
 
 # Cutover (half day)
-1) Land **PR 23–25** to stabilize signals (flake + coverage + contract).
-2) Enable **synthetics** and **chaos** in stage; observe alerts.
-3) Wire **runbook rollback** and socialize incident template.
-4) Apply **retention/DPIA** policies; run first purge in prod under supervision.
-5) Deploy **Kubecost** and publish first weekly report; add SLO dashboards.
+
+1. Land **PR 23–25** to stabilize signals (flake + coverage + contract).
+2. Enable **synthetics** and **chaos** in stage; observe alerts.
+3. Wire **runbook rollback** and socialize incident template.
+4. Apply **retention/DPIA** policies; run first purge in prod under supervision.
+5. Deploy **Kubecost** and publish first weekly report; add SLO dashboards.
 
 # Rollback
+
 - All changes are additive; each workflow/policy can be disabled independently. Database changes are forward‑compatible; purge TTL can be raised to neutralize deletes.
 
 # Ownership
+
 - **QA/DevEx:** PR 23–25
 - **SRE/Platform:** PR 26–28, 33
 - **Data Gov/Security:** PR 29–31
 - **FinOps:** PR 32
 - **Repo Maintainer:** PR 34
-

@@ -42,7 +42,7 @@ const DESTRUCTIVE_PATTERNS = [
   // Dangerous alterations
   'ALTER COLUMN.*DROP',
   'ALTER TABLE.*RENAME TO',
-  'RENAME TABLE'
+  'RENAME TABLE',
 ];
 
 // Patterns that are usually safe even if they match destructive patterns
@@ -52,7 +52,7 @@ const SAFE_EXCEPTIONS = [
   'DROP TABLE IF EXISTS.*staging',
   'CREATE OR REPLACE',
   'DELETE FROM.*WHERE.*created_at < NOW()',
-  'DELETE FROM.*WHERE.*id = temp'
+  'DELETE FROM.*WHERE.*id = temp',
 ];
 
 function analyzeFile(filePath) {
@@ -82,7 +82,7 @@ function analyzeFile(filePath) {
           findings.push({
             pattern: pattern,
             matches: matches,
-            lines: getLineNumbers(content, regex)
+            lines: getLineNumbers(content, regex),
           });
         }
       }
@@ -109,7 +109,13 @@ function getLineNumbers(content, regex) {
 }
 
 function checkWaivers(filePath, findings) {
-  const waiversPath = path.join(path.dirname(filePath), '..', '..', 'security', 'migration-waivers.json');
+  const waiversPath = path.join(
+    path.dirname(filePath),
+    '..',
+    '..',
+    'security',
+    'migration-waivers.json',
+  );
 
   try {
     if (fs.existsSync(waiversPath)) {
@@ -127,7 +133,9 @@ function checkWaivers(filePath, findings) {
           console.log(`   Expires: ${waiver.expires}`);
           return true;
         } else {
-          console.log(`⚠️  Waiver for ${fileName} has expired: ${waiver.expires}`);
+          console.log(
+            `⚠️  Waiver for ${fileName} has expired: ${waiver.expires}`,
+          );
         }
       }
     }
@@ -142,17 +150,19 @@ function generateWaiverTemplate(filePath, findings) {
   const fileName = path.basename(filePath);
   const template = {
     [fileName]: {
-      reason: "REQUIRED: Explain why this destructive operation is necessary",
+      reason: 'REQUIRED: Explain why this destructive operation is necessary',
       mitigations: [
-        "REQUIRED: List mitigation steps taken",
-        "e.g., Data backed up to table_backup_YYYYMMDD",
-        "e.g., Rollback procedure documented in runbook"
+        'REQUIRED: List mitigation steps taken',
+        'e.g., Data backed up to table_backup_YYYYMMDD',
+        'e.g., Rollback procedure documented in runbook',
       ],
-      approvedBy: "REQUIRED: Security team member or DBA",
+      approvedBy: 'REQUIRED: Security team member or DBA',
       approvedDate: new Date().toISOString().split('T')[0],
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days
-      issue: "REQUIRED: Link to approval issue or ticket"
-    }
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0], // 30 days
+      issue: 'REQUIRED: Link to approval issue or ticket',
+    },
   };
 
   console.log('\n📝 Waiver template:');
@@ -164,7 +174,9 @@ function main() {
   const migrationsDir = process.argv[2];
 
   if (!migrationsDir) {
-    console.error('Usage: node scripts/check-destructive-sql.js <migrations-directory>');
+    console.error(
+      'Usage: node scripts/check-destructive-sql.js <migrations-directory>',
+    );
     process.exit(1);
   }
 
@@ -173,10 +185,16 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`🔍 Scanning for destructive SQL operations in: ${migrationsDir}`);
+  console.log(
+    `🔍 Scanning for destructive SQL operations in: ${migrationsDir}`,
+  );
 
-  const files = fs.readdirSync(migrationsDir)
-    .filter(file => file.endsWith('.sql') || file.endsWith('.ts') || file.endsWith('.js'))
+  const files = fs
+    .readdirSync(migrationsDir)
+    .filter(
+      (file) =>
+        file.endsWith('.sql') || file.endsWith('.ts') || file.endsWith('.js'),
+    )
     .sort();
 
   if (files.length === 0) {
@@ -193,7 +211,7 @@ function main() {
     if (findings.length > 0) {
       console.log(`\n⚠️  Destructive operations detected in: ${file}`);
 
-      findings.forEach(finding => {
+      findings.forEach((finding) => {
         console.log(`   Pattern: ${finding.pattern}`);
         console.log(`   Lines: ${finding.lines.join(', ')}`);
         console.log(`   Matches: ${finding.matches.join(', ')}`);
@@ -219,7 +237,9 @@ function main() {
     console.log('\nThis is a safety gate to prevent accidental data loss.');
     process.exit(1);
   } else {
-    console.log('\n✅ No destructive operations detected or all operations have valid waivers');
+    console.log(
+      '\n✅ No destructive operations detected or all operations have valid waivers',
+    );
     console.log(`Scanned ${files.length} migration files`);
     process.exit(0);
   }

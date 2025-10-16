@@ -7,11 +7,11 @@ spec:
   background: true
   rules:
     - name: liveness-readiness
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "Containers must define livenessProbe and readinessProbe"
+        message: 'Containers must define livenessProbe and readinessProbe'
         pattern:
           spec:
             containers:
-            - livenessProbe: { exists: true }
-              readinessProbe: { exists: true }
+              - livenessProbe: { exists: true }
+                readinessProbe: { exists: true }

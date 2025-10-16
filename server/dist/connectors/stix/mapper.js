@@ -17,7 +17,9 @@ export async function upsertStixBundle(objs, source) {
                 source,
             });
         }
-        else if (o.type === 'malware' || o.type === 'campaign' || o.type === 'threat-actor') {
+        else if (o.type === 'malware' ||
+            o.type === 'campaign' ||
+            o.type === 'threat-actor') {
             await runCypher(`
         MERGE (e:Entity {stixId:$id})
         ON CREATE SET e.name=$name, e.types=[$type], e.createdAt=$created, e.source=$source

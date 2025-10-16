@@ -1,6 +1,3 @@
-from fixtures import client
-
-
 def test_provenance_graph(client):
     claim = client.post(
         "/claims/extract",

@@ -12,11 +12,15 @@ export interface TranslationResult {
 }
 
 export class NLQTranslator {
-  async translate(question: string, tenantId: string): Promise<TranslationResult> {
+  async translate(
+    question: string,
+    tenantId: string,
+  ): Promise<TranslationResult> {
     const lower = question.toLowerCase();
     let cypher: string;
     if (lower.includes('person') || lower.includes('people')) {
-      cypher = 'MATCH (n:Person) WHERE n.tenantId = $tenantId RETURN n LIMIT 25';
+      cypher =
+        'MATCH (n:Person) WHERE n.tenantId = $tenantId RETURN n LIMIT 25';
     } else {
       cypher = 'MATCH (n) WHERE n.tenantId = $tenantId RETURN n LIMIT 25';
     }

@@ -1,17 +1,54 @@
-<!doctype html><html><head><meta charset="utf-8"><title>CE Verify</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>body{font-family:system-ui;margin:16px}.box{border:1px solid #ddd;border-radius:12px;padding:10px;width:420px}</style></head>
-<body>
-<div class=box>
-  <input id=leaf placeholder="obligation hash"/>
-  <input id=path placeholder="comma-separated siblings"/>
-  <input id=root placeholder="root"/>
-  <button id=verify>Verify</button>
-  <pre id=out></pre>
-</div>
-<script>
-function sha256(s){return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));}
-async function fold(h, sibs){ let cur=h; for(const s of sibs){ cur = await sha256(cur + s);} return cur; }
-$('#verify').on('click', async function(){ const leaf=$('#leaf').val(); const sibs=$('#path').val().split(','); const root=$('#root').val(); const got=await fold(leaf,sibs); $('#out').text(got===root?'OK':'FAIL');});
-</script>
-</body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>CE Verify</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: system-ui;
+        margin: 16px;
+      }
+      .box {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+        width: 420px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <input id="leaf" placeholder="obligation hash" />
+      <input id="path" placeholder="comma-separated siblings" />
+      <input id="root" placeholder="root" />
+      <button id="verify">Verify</button>
+      <pre id="out"></pre>
+    </div>
+    <script>
+      function sha256(s) {
+        return crypto.subtle
+          .digest('SHA-256', new TextEncoder().encode(s))
+          .then((b) =>
+            Array.from(new Uint8Array(b))
+              .map((x) => x.toString(16).padStart(2, '0'))
+              .join(''),
+          );
+      }
+      async function fold(h, sibs) {
+        let cur = h;
+        for (const s of sibs) {
+          cur = await sha256(cur + s);
+        }
+        return cur;
+      }
+      $('#verify').on('click', async function () {
+        const leaf = $('#leaf').val();
+        const sibs = $('#path').val().split(',');
+        const root = $('#root').val();
+        const got = await fold(leaf, sibs);
+        $('#out').text(got === root ? 'OK' : 'FAIL');
+      });
+    </script>
+  </body>
+</html>

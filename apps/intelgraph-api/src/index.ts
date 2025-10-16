@@ -36,13 +36,14 @@ app.use(
       cache: true,
       rateLimit: true,
       jwksRequestsPerMinute: 5,
-      jwksUri: process.env.JWKS_URI || 'http://localhost:8080/.well-known/jwks.json'
+      jwksUri:
+        process.env.JWKS_URI || 'http://localhost:8080/.well-known/jwks.json',
     }),
     algorithms: ['RS256'],
-    credentialsRequired: false
+    credentialsRequired: false,
   }).unless({
-    path: ['/healthz', '/graphql']
-  })
+    path: ['/healthz', '/graphql'],
+  }),
 );
 
 // Error handling for JWT authentication
@@ -54,7 +55,6 @@ app.use((err: any, req: any, res: any, next: any) => {
   next();
 });
 
-
 async function main() {
   const server = new ApolloServer({
     typeDefs,
@@ -63,7 +63,7 @@ async function main() {
     formatError: (error) => {
       logger.error(error, 'GraphQL Error');
       return error;
-    }
+    },
   });
   await server.start();
   server.applyMiddleware({ app, path: '/graphql' });

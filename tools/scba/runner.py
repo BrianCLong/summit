@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import json
 import random
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Dict, Iterable, List
 
 from .attacks import Attack, AttackResult
-from .measurements import Measurement
 from .policies import EndpointPolicy, PolicyStore
 from .stats import effect_size, welch_p_value
 
@@ -19,7 +18,7 @@ class ChannelMeasurement:
     effect: float
     p_value: float
 
-    def to_dict(self) -> Dict[str, float]:
+    def to_dict(self) -> dict[str, float]:
         return {"effect": self.effect, "p_value": self.p_value}
 
 
@@ -27,9 +26,9 @@ class ChannelMeasurement:
 class AuditFinding:
     endpoint: str
     attack: str
-    channel_measurements: Dict[str, ChannelMeasurement]
+    channel_measurements: dict[str, ChannelMeasurement]
     passed: bool
-    budget: Dict[str, float]
+    budget: dict[str, float]
 
     def to_json(self) -> str:
         payload = {
@@ -37,7 +36,10 @@ class AuditFinding:
             "attack": self.attack,
             "passed": self.passed,
             "budget": self.budget,
-            "channels": {name: measurement.to_dict() for name, measurement in self.channel_measurements.items()},
+            "channels": {
+                name: measurement.to_dict()
+                for name, measurement in self.channel_measurements.items()
+            },
         }
         return json.dumps(payload, indent=2, sort_keys=True)
 
@@ -48,14 +50,14 @@ class SideChannelBudgetAuditor:
     def __init__(self, policies: PolicyStore | None = None, seed: int = 0) -> None:
         self.policies = policies or PolicyStore()
         self.seed = seed
-        self.attacks: Dict[str, List[Attack]] = {}
+        self.attacks: dict[str, list[Attack]] = {}
 
     def register_attack(self, endpoint: str, attack: Attack) -> None:
         self.attacks.setdefault(endpoint, []).append(attack)
 
-    def run(self) -> List[AuditFinding]:
+    def run(self) -> list[AuditFinding]:
         rng = random.Random(self.seed)
-        findings: List[AuditFinding] = []
+        findings: list[AuditFinding] = []
         for endpoint, attacks in self.attacks.items():
             policy = self.policies.get(endpoint)
             if not policy:
@@ -66,11 +68,15 @@ class SideChannelBudgetAuditor:
                 findings.append(finding)
         return findings
 
-    def _analyse_attack(self, policy: EndpointPolicy, attack: Attack, results: List[AttackResult]) -> AuditFinding:
-        measurements: Dict[str, ChannelMeasurement] = {}
+    def _analyse_attack(
+        self, policy: EndpointPolicy, attack: Attack, results: list[AttackResult]
+    ) -> AuditFinding:
+        measurements: dict[str, ChannelMeasurement] = {}
         channels = policy.budget.as_dict().keys()
         for channel in channels:
-            channel_samples = [[sample.channel(channel) for sample in result.samples] for result in results]
+            channel_samples = [
+                [sample.channel(channel) for sample in result.samples] for result in results
+            ]
             # Compare each secret to baseline and take the worst leakage observed.
             worst_effect = 0.0
             worst_p_value = 1.0
@@ -81,7 +87,9 @@ class SideChannelBudgetAuditor:
                     worst_effect = effect
                 if p_value < worst_p_value:
                     worst_p_value = p_value
-            measurements[channel] = ChannelMeasurement(channel=channel, effect=worst_effect, p_value=worst_p_value)
+            measurements[channel] = ChannelMeasurement(
+                channel=channel, effect=worst_effect, p_value=worst_p_value
+            )
         passed = all(measurements[ch].effect <= policy.budget.as_dict()[ch] for ch in channels)
         return AuditFinding(
             endpoint=policy.endpoint,

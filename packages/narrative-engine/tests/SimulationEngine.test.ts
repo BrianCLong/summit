@@ -5,10 +5,22 @@ const baseConfig: SimConfig = {
   initialTimestamp: 0,
   actors: [
     { id: 'mayor', name: 'Mayor Reed', mood: 2, resilience: 0.2, influence: 2 },
-    { id: 'chief', name: 'Chief Silva', mood: 1, resilience: 0.3, influence: 2 },
+    {
+      id: 'chief',
+      name: 'Chief Silva',
+      mood: 1,
+      resilience: 0.3,
+      influence: 2,
+    },
   ],
   relationships: [
-    { sourceId: 'mayor', targetId: 'chief', type: 'ally', intensity: 0.8, trust: 0.7 },
+    {
+      sourceId: 'mayor',
+      targetId: 'chief',
+      type: 'ally',
+      intensity: 0.8,
+      trust: 0.7,
+    },
   ],
 };
 

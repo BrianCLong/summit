@@ -2,7 +2,7 @@ import {
   runThreatCorrelation,
   runWargameOptimizer,
   runSentimentVolatility,
-  runStegoAnalyzer
+  runStegoAnalyzer,
 } from '../../services/strategicIntelligenceServices';
 
 export const strategicIntelligenceResolvers = {
@@ -13,10 +13,16 @@ export const strategicIntelligenceResolvers = {
     optimizeWargame: async (_: any, { logsInput }: { logsInput: any }) => {
       return runWargameOptimizer(logsInput);
     },
-    analyzeSentimentVolatility: async (_: any, { signalsInput }: { signalsInput: any }) => {
+    analyzeSentimentVolatility: async (
+      _: any,
+      { signalsInput }: { signalsInput: any },
+    ) => {
       return runSentimentVolatility(signalsInput);
     },
-    analyzeStego: async (_: any, { mediaDataInput }: { mediaDataInput: any }) => {
+    analyzeStego: async (
+      _: any,
+      { mediaDataInput }: { mediaDataInput: any },
+    ) => {
       return runStegoAnalyzer(mediaDataInput);
     },
   },

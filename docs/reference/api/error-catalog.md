@@ -14,7 +14,7 @@ owner: api
     "code": "RESOURCE_NOT_FOUND",
     "message": "<human readable>",
     "correlationId": "<uuid>",
-    "details": { }
+    "details": {}
   }
 }
 ```

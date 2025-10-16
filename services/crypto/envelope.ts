@@ -2,7 +2,11 @@ import { buildProvider } from './index';
 import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
 const kp = buildProvider();
 
-export async function seal(tenant: string, plaintext: Buffer, purpose = 'vault') {
+export async function seal(
+  tenant: string,
+  plaintext: Buffer,
+  purpose = 'vault',
+) {
   const ctx = { tenant, env: process.env.ENV || 'stage', purpose };
   const { plaintext: dek, ciphertext: edek } = await kp.generateDataKey(ctx);
   const iv = randomBytes(12);

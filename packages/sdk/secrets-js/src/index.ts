@@ -15,7 +15,9 @@ export interface SecretResponse<T = unknown> {
 /**
  * Request a short-lived token from the secrets broker.
  */
-export async function getSecret<T>(req: SecretRequest): Promise<SecretResponse<T>> {
+export async function getSecret<T>(
+  req: SecretRequest,
+): Promise<SecretResponse<T>> {
   const { data } = await axios.post<SecretResponse<T>>('/secrets/get', req);
   return data;
 }

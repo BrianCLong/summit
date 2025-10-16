@@ -4,8 +4,9 @@ import pino from 'pino';
 import sharp from 'sharp';
 const logger = pino({ name: 'OCREngine' });
 export class OCREngine {
+    config;
+    isInitialized = false;
     constructor(config) {
-        this.isInitialized = false;
         this.config = config;
     }
     /**
@@ -32,7 +33,7 @@ export class OCREngine {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        const { language = 'eng', enhanceImage = true, confidenceThreshold = 0.6, preserveWhitespace = false, enableStructureAnalysis = true } = options;
+        const { language = 'eng', enhanceImage = true, confidenceThreshold = 0.6, preserveWhitespace = false, enableStructureAnalysis = true, } = options;
         logger.info(`Starting OCR extraction for: ${imagePath}`);
         try {
             let processedImagePath = imagePath;
@@ -43,7 +44,7 @@ export class OCREngine {
             // Run multiple OCR engines and combine results
             const [tesseractResults, paddleResults] = await Promise.allSettled([
                 this.runTesseractOCR(processedImagePath, language, confidenceThreshold),
-                this.runPaddleOCR(processedImagePath, language, confidenceThreshold)
+                this.runPaddleOCR(processedImagePath, language, confidenceThreshold),
             ]);
             const allResults = [];
             // Process Tesseract results
@@ -82,11 +83,15 @@ export class OCREngine {
             const args = [
                 imagePath,
                 'stdout',
-                '-l', language,
-                '--psm', '6', // Uniform block of text
-                '--oem', '3', // Default OCR Engine Mode
-                '-c', 'preserve_interword_spaces=1',
-                'tsv'
+                '-l',
+                language,
+                '--psm',
+                '6', // Uniform block of text
+                '--oem',
+                '3', // Default OCR Engine Mode
+                '-c',
+                'preserve_interword_spaces=1',
+                'tsv',
             ];
             const tesseract = spawn('tesseract', args);
             let output = '';
@@ -123,9 +128,12 @@ export class OCREngine {
             const pythonScript = path.join(this.config.modelsPath, 'paddle_ocr.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--lang', this.mapLanguageForPaddle(language),
-                '--confidence', confidenceThreshold.toString()
+                '--image',
+                imagePath,
+                '--lang',
+                this.mapLanguageForPaddle(language),
+                '--confidence',
+                confidenceThreshold.toString(),
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -163,8 +171,9 @@ export class OCREngine {
         try {
             await sharp(imagePath)
                 .resize(null, 2000, {
+                // Upscale to minimum 2000px height
                 withoutEnlargement: false,
-                kernel: sharp.kernel.lanczos3
+                kernel: sharp.kernel.lanczos3,
             })
                 .sharpen()
                 .normalize()
@@ -184,7 +193,8 @@ export class OCREngine {
     parseTesseractTSV(tsvOutput, confidenceThreshold) {
         const lines = tsvOutput.trim().split('\n');
         const results = [];
-        for (let i = 1; i < lines.length; i++) { // Skip header
+        for (let i = 1; i < lines.length; i++) {
+            // Skip header
             const columns = lines[i].split('\t');
             if (columns.length >= 12) {
                 const confidence = parseFloat(columns[10]);
@@ -198,10 +208,10 @@ export class OCREngine {
                             y: parseInt(columns[7]),
                             width: parseInt(columns[8]),
                             height: parseInt(columns[9]),
-                            confidence: confidence / 100
+                            confidence: confidence / 100,
                         },
                         language: 'detected',
-                        engine: 'tesseract'
+                        engine: 'tesseract',
                     });
                 }
             }
@@ -231,10 +241,10 @@ export class OCREngine {
                         y: Math.round(y),
                         width: Math.round(width),
                         height: Math.round(height),
-                        confidence
+                        confidence,
                     },
                     language: 'detected',
-                    engine: 'paddleocr'
+                    engine: 'paddleocr',
                 });
             }
         }
@@ -253,7 +263,8 @@ export class OCREngine {
             for (const group of groups) {
                 const representative = group[0];
                 const overlap = this.calculateBoundingBoxOverlap(result.boundingBox, representative.boundingBox);
-                if (overlap > 0.5) { // 50% overlap threshold
+                if (overlap > 0.5) {
+                    // 50% overlap threshold
                     group.push(result);
                     merged = true;
                     break;
@@ -274,7 +285,7 @@ export class OCREngine {
                 const bestResult = group.reduce((best, current) => current.confidence > best.confidence ? current : best);
                 // If multiple engines agree, increase confidence
                 if (group.length > 1) {
-                    const textSimilarity = this.calculateTextSimilarity(group.map(r => r.text));
+                    const textSimilarity = this.calculateTextSimilarity(group.map((r) => r.text));
                     if (textSimilarity > 0.8) {
                         bestResult.confidence = Math.min(0.95, bestResult.confidence * 1.2);
                     }
@@ -282,7 +293,7 @@ export class OCREngine {
                 mergedResults.push(bestResult);
             }
         }
-        return mergedResults.filter(r => r.confidence >= confidenceThreshold);
+        return mergedResults.filter((r) => r.confidence >= confidenceThreshold);
     }
     /**
      * Calculate bounding box overlap (IoU)
@@ -306,7 +317,7 @@ export class OCREngine {
     calculateTextSimilarity(texts) {
         if (texts.length < 2)
             return 1.0;
-        const normalized = texts.map(t => t.toLowerCase().trim());
+        const normalized = texts.map((t) => t.toLowerCase().trim());
         let totalSimilarity = 0;
         let comparisons = 0;
         for (let i = 0; i < normalized.length; i++) {
@@ -358,7 +369,8 @@ export class OCREngine {
         // Sort by reading order (top to bottom, left to right)
         results.sort((a, b) => {
             const yDiff = a.boundingBox.y - b.boundingBox.y;
-            if (Math.abs(yDiff) < 20) { // Same line
+            if (Math.abs(yDiff) < 20) {
+                // Same line
                 return a.boundingBox.x - b.boundingBox.x;
             }
             return yDiff;
@@ -376,7 +388,11 @@ export class OCREngine {
                 readingOrder: i,
                 isHeading,
                 isTableCell,
-                structureType: isHeading ? 'heading' : (isTableCell ? 'table' : 'paragraph')
+                structureType: isHeading
+                    ? 'heading'
+                    : isTableCell
+                        ? 'table'
+                        : 'paragraph',
             };
         }
     }
@@ -385,7 +401,8 @@ export class OCREngine {
      */
     detectHeading(result, allResults) {
         const height = result.boundingBox.height;
-        const avgHeight = allResults.reduce((sum, r) => sum + r.boundingBox.height, 0) / allResults.length;
+        const avgHeight = allResults.reduce((sum, r) => sum + r.boundingBox.height, 0) /
+            allResults.length;
         // Heading heuristics
         const isLargerText = height > avgHeight * 1.3;
         const isShortText = result.text.length < 50;
@@ -398,7 +415,7 @@ export class OCREngine {
     detectTableCell(result, allResults) {
         // Look for aligned text elements (same x or y coordinates)
         const threshold = 10; // pixels
-        const alignedElements = allResults.filter(other => {
+        const alignedElements = allResults.filter((other) => {
             if (other === result)
                 return false;
             const sameRow = Math.abs(result.boundingBox.y - other.boundingBox.y) < threshold;
@@ -411,7 +428,7 @@ export class OCREngine {
      * Check if text has nearby text elements
      */
     hasNearbyText(result, allResults, threshold) {
-        return allResults.some(other => {
+        return allResults.some((other) => {
             if (other === result)
                 return false;
             const distance = Math.sqrt(Math.pow(result.boundingBox.x - other.boundingBox.x, 2) +
@@ -424,16 +441,16 @@ export class OCREngine {
      */
     mapLanguageForPaddle(tesseractLang) {
         const languageMap = {
-            'eng': 'en',
-            'chi_sim': 'ch',
-            'chi_tra': 'chinese_cht',
-            'jpn': 'japan',
-            'kor': 'korean',
-            'fra': 'french',
-            'deu': 'german',
-            'spa': 'spanish',
-            'rus': 'russian',
-            'ara': 'arabic'
+            eng: 'en',
+            chi_sim: 'ch',
+            chi_tra: 'chinese_cht',
+            jpn: 'japan',
+            kor: 'korean',
+            fra: 'french',
+            deu: 'german',
+            spa: 'spanish',
+            rus: 'russian',
+            ara: 'arabic',
         };
         return languageMap[tesseractLang] || 'en';
     }
@@ -461,7 +478,10 @@ export class OCREngine {
      */
     async verifyPaddleOCRInstallation() {
         return new Promise((resolve, reject) => {
-            const python = spawn(this.config.pythonPath, ['-c', 'import paddleocr; print("OK")']);
+            const python = spawn(this.config.pythonPath, [
+                '-c',
+                'import paddleocr; print("OK")',
+            ]);
             python.on('close', (code) => {
                 if (code === 0) {
                     resolve();

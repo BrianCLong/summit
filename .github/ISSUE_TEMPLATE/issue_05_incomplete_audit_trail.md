@@ -1,9 +1,9 @@
 ---
-name: "Issue #5: Incomplete Audit Trail on User Actions"
+name: 'Issue #5: Incomplete Audit Trail on User Actions'
 about: Ensure all user actions, especially tag deletions, are logged for compliance
-title: "Issue #5: Incomplete Audit Trail on User Actions"
-labels: "bug, security, compliance, backend"
-assignees: ""
+title: 'Issue #5: Incomplete Audit Trail on User Actions'
+labels: 'bug, security, compliance, backend'
+assignees: ''
 ---
 
 **Branch**: `feature/audit-tag-deletion`
@@ -38,7 +38,7 @@ from datetime import datetime
 from typing import Dict, Any
 
 class AuditLogEntry:
-    def __init__(self, 
+    def __init__(self,
                  user_id: str,
                  action: str,
                  target_type: str,
@@ -191,6 +191,7 @@ async def delete_tag(tag_id: str, current_user_id: str = Depends(get_current_use
 ```
 
 **Sub-tasks:**
+
 - [ ] Define a clear `AuditLogEntry` data model in `audit_models.py` to capture essential audit information (user, action, target, timestamp, details).
 - [ ] Implement a dedicated `audit_logger.py` module responsible for persisting audit events. This should be decoupled from the main application logic.
 - [ ] Integrate the `audit_logger` into the `tags.py` API endpoint for tag deletion.

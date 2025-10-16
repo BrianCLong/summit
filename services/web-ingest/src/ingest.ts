@@ -28,7 +28,9 @@ async function allowedByRobots(targetUrl: string): Promise<boolean> {
 export async function snapshot(url: string) {
   if (!(await allowedByRobots(url))) throw new Error('robots.txt disallows');
   const b = await chromium.launch();
-  const p = await b.newPage({ userAgent: 'IntelGraph-Symphony/1.0 (+contact@example.com)' });
+  const p = await b.newPage({
+    userAgent: 'IntelGraph-Symphony/1.0 (+contact@example.com)',
+  });
   await p.goto(url, { waitUntil: 'networkidle' });
   const html = await p.content();
   const dom = new JSDOM(html, { url });

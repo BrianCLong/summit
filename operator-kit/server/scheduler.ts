@@ -33,7 +33,11 @@ export function startScheduler() {
       q.push(job);
       return;
     }
-    emit({ type: 'budget.update', model: job.model, fraction: budgetFrac(job.model) });
+    emit({
+      type: 'budget.update',
+      model: job.model,
+      fraction: budgetFrac(job.model),
+    });
     // dispatch(job) -> your executor
   }, 1000);
 }

@@ -1,5 +1,12 @@
 import React from 'react';
-import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import {
+  NavLink,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import { DashboardPage } from './pages/Dashboard';
 import { PipelinesPage } from './pages/Pipelines';
 import { PipelineDetailPage } from './pages/PipelineDetail';
@@ -10,7 +17,10 @@ import { AdminPage } from './pages/Admin';
 import { CommandPalette } from './components/CommandPalette';
 import { RightRail } from './components/RightRail';
 import { ReasonForAccessProvider } from './ReasonForAccessContext';
-import { useKeyboardShortcuts, useNavigationShortcuts } from './hooks/useMaestroHooks';
+import {
+  useKeyboardShortcuts,
+  useNavigationShortcuts,
+} from './hooks/useMaestroHooks';
 
 const navItems = [
   { to: 'dashboard', label: 'Dashboard', view: 'dashboard' },
@@ -25,13 +35,28 @@ function useBasePath() {
   const location = useLocation();
   const segments = location.pathname.split('/').filter(Boolean);
   if (segments.length === 0) return '/';
-  if (['dashboard', 'pipelines', 'runs', 'releases', 'observability', 'admin'].includes(segments[0])) {
+  if (
+    [
+      'dashboard',
+      'pipelines',
+      'runs',
+      'releases',
+      'observability',
+      'admin',
+    ].includes(segments[0])
+  ) {
     return '/';
   }
   return `/${segments[0]}/`;
 }
 
-function GlobalBar({ onOpenPalette, basePath }: { onOpenPalette: () => void; basePath: string }) {
+function GlobalBar({
+  onOpenPalette,
+  basePath,
+}: {
+  onOpenPalette: () => void;
+  basePath: string;
+}) {
   const navigate = useNavigate();
   return (
     <header className="flex items-center justify-between border-b border-slate-800/80 bg-slate-950/80 px-6 py-3 text-sm text-slate-200">
@@ -65,7 +90,10 @@ function GlobalBar({ onOpenPalette, basePath }: { onOpenPalette: () => void; bas
         >
           Alerts (2)
         </button>
-        <div className="h-8 w-8 rounded-full border border-emerald-400/50 bg-emerald-500/20" aria-label="Presence" />
+        <div
+          className="h-8 w-8 rounded-full border border-emerald-400/50 bg-emerald-500/20"
+          aria-label="Presence"
+        />
       </div>
     </header>
   );
@@ -85,7 +113,9 @@ function LeftNav({ basePath }: { basePath: string }) {
               end={item.to === 'dashboard'}
             >
               <span>{item.label}</span>
-              <span className="text-xs text-slate-400">{item.view === 'runs' ? 'g r' : ''}</span>
+              <span className="text-xs text-slate-400">
+                {item.view === 'runs' ? 'g r' : ''}
+              </span>
             </NavLink>
           </li>
         ))}
@@ -116,7 +146,10 @@ export function MaestroApp() {
   return (
     <ReasonForAccessProvider>
       <div className="min-h-screen bg-slate-950 text-slate-50">
-        <GlobalBar onOpenPalette={() => setPaletteOpen(true)} basePath={basePath} />
+        <GlobalBar
+          onOpenPalette={() => setPaletteOpen(true)}
+          basePath={basePath}
+        />
         <div className="flex min-h-[calc(100vh-56px)]">
           <LeftNav basePath={basePath} />
           <main className="flex-1 overflow-y-auto px-6 py-6">
@@ -124,7 +157,10 @@ export function MaestroApp() {
               <Route index element={<DashboardPage />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="pipelines" element={<PipelinesPage />} />
-              <Route path="pipelines/:pipelineId" element={<PipelineDetailPage />} />
+              <Route
+                path="pipelines/:pipelineId"
+                element={<PipelineDetailPage />}
+              />
               <Route path="runs/:runId" element={<RunViewPage />} />
               <Route path="releases" element={<ReleasesPage />} />
               <Route path="observability" element={<ObservabilityPage />} />
@@ -134,7 +170,11 @@ export function MaestroApp() {
           </main>
           <RightRail view={view} />
         </div>
-        <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} basePath={basePath} />
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          basePath={basePath}
+        />
       </div>
     </ReasonForAccessProvider>
   );

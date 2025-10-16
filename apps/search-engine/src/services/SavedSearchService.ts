@@ -27,7 +27,9 @@ export class SavedSearchService {
       ),
       transports: [
         new require('winston').transports.Console(),
-        new require('winston').transports.File({ filename: 'logs/saved-search.log' }),
+        new require('winston').transports.File({
+          filename: 'logs/saved-search.log',
+        }),
       ],
     });
   }
@@ -85,7 +87,10 @@ export class SavedSearchService {
     }
   }
 
-  async getSavedSearch(id: string, userId: string): Promise<SavedSearch | null> {
+  async getSavedSearch(
+    id: string,
+    userId: string,
+  ): Promise<SavedSearch | null> {
     try {
       const result = await this.db.query(
         `
@@ -112,7 +117,9 @@ export class SavedSearchService {
 
   async updateSavedSearch(
     id: string,
-    updates: Partial<Pick<SavedSearch, 'name' | 'description' | 'query' | 'tags' | 'isPublic'>>,
+    updates: Partial<
+      Pick<SavedSearch, 'name' | 'description' | 'query' | 'tags' | 'isPublic'>
+    >,
     userId: string,
   ): Promise<SavedSearch | null> {
     try {
@@ -237,7 +244,8 @@ export class SavedSearchService {
         params.push(options.tags);
       }
 
-      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      const whereClause =
+        conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
       const limit = options.limit || 50;
       const offset = options.offset || 0;
 
@@ -257,7 +265,9 @@ export class SavedSearchService {
         [...params, limit, offset],
       );
 
-      const searches = searchResult.rows.map((row) => this.mapRowToSavedSearch(row));
+      const searches = searchResult.rows.map((row) =>
+        this.mapRowToSavedSearch(row),
+      );
       const total = parseInt(countResult.rows[0].total);
 
       return { searches, total };
@@ -270,7 +280,10 @@ export class SavedSearchService {
     }
   }
 
-  async executeSavedSearch(id: string, userId: string): Promise<SavedSearch | null> {
+  async executeSavedSearch(
+    id: string,
+    userId: string,
+  ): Promise<SavedSearch | null> {
     try {
       const result = await this.db.query(
         `
@@ -361,7 +374,10 @@ export class SavedSearchService {
     }
   }
 
-  async getSearchTemplate(id: string, userId: string): Promise<SearchTemplate | null> {
+  async getSearchTemplate(
+    id: string,
+    userId: string,
+  ): Promise<SearchTemplate | null> {
     try {
       const result = await this.db.query(
         `
@@ -413,7 +429,8 @@ export class SavedSearchService {
         params.push(options.category);
       }
 
-      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      const whereClause =
+        conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
       const limit = options.limit || 50;
       const offset = options.offset || 0;
 
@@ -433,7 +450,9 @@ export class SavedSearchService {
         [...params, limit, offset],
       );
 
-      const templates = templateResult.rows.map((row) => this.mapRowToSearchTemplate(row));
+      const templates = templateResult.rows.map((row) =>
+        this.mapRowToSearchTemplate(row),
+      );
       const total = parseInt(countResult.rows[0].total);
 
       return { templates, total };
@@ -461,12 +480,17 @@ export class SavedSearchService {
 
       Object.entries(params).forEach(([key, value]) => {
         const placeholder = `{{${key}}}`;
-        renderedTemplate = renderedTemplate.replace(new RegExp(placeholder, 'g'), String(value));
+        renderedTemplate = renderedTemplate.replace(
+          new RegExp(placeholder, 'g'),
+          String(value),
+        );
       });
 
       const unresolvedPlaceholders = renderedTemplate.match(/\{\{[^}]+\}\}/g);
       if (unresolvedPlaceholders) {
-        throw new Error(`Unresolved template parameters: ${unresolvedPlaceholders.join(', ')}`);
+        throw new Error(
+          `Unresolved template parameters: ${unresolvedPlaceholders.join(', ')}`,
+        );
       }
 
       return renderedTemplate;
@@ -511,7 +535,10 @@ export class SavedSearchService {
     };
   }
 
-  async getPopularSearches(userId: string, limit: number = 10): Promise<SavedSearch[]> {
+  async getPopularSearches(
+    userId: string,
+    limit: number = 10,
+  ): Promise<SavedSearch[]> {
     try {
       const result = await this.db.query(
         `
@@ -533,7 +560,10 @@ export class SavedSearchService {
     }
   }
 
-  async getRecentSearches(userId: string, limit: number = 10): Promise<SavedSearch[]> {
+  async getRecentSearches(
+    userId: string,
+    limit: number = 10,
+  ): Promise<SavedSearch[]> {
     try {
       const result = await this.db.query(
         `
@@ -555,7 +585,10 @@ export class SavedSearchService {
     }
   }
 
-  async searchSavedSearches(userId: string, searchTerm: string): Promise<SavedSearch[]> {
+  async searchSavedSearches(
+    userId: string,
+    searchTerm: string,
+  ): Promise<SavedSearch[]> {
     try {
       const result = await this.db.query(
         `

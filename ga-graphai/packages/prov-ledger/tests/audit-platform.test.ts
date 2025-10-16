@@ -17,7 +17,7 @@ function buildSimpleEvent(
   severity: string,
   system: string,
   correlationIds: string[],
-  timestamp: string
+  timestamp: string,
 ): void {
   ledger.append({
     id,
@@ -52,7 +52,7 @@ describe('AuditInvestigationPlatform', () => {
       'high',
       'maestro-core',
       ['case-1'],
-      '2024-04-01T00:00:00.000Z'
+      '2024-04-01T00:00:00.000Z',
     );
     buildSimpleEvent(
       simpleLedger,
@@ -63,7 +63,7 @@ describe('AuditInvestigationPlatform', () => {
       'high',
       'maestro-core',
       ['case-1'],
-      '2024-04-01T00:05:00.000Z'
+      '2024-04-01T00:05:00.000Z',
     );
     buildSimpleEvent(
       simpleLedger,
@@ -74,7 +74,7 @@ describe('AuditInvestigationPlatform', () => {
       'medium',
       'maestro-core',
       ['case-1'],
-      '2024-04-01T00:06:00.000Z'
+      '2024-04-01T00:06:00.000Z',
     );
     buildSimpleEvent(
       simpleLedger,
@@ -85,10 +85,12 @@ describe('AuditInvestigationPlatform', () => {
       'medium',
       'maestro-analytics',
       ['case-2'],
-      '2024-04-01T00:07:00.000Z'
+      '2024-04-01T00:07:00.000Z',
     );
 
-    cursorLedger = new ProvenanceLedger({ now: () => new Date('2024-04-01T02:00:00.000Z') });
+    cursorLedger = new ProvenanceLedger({
+      now: () => new Date('2024-04-01T02:00:00.000Z'),
+    });
     await cursorLedger.append(
       {
         tenantId: 't1',
@@ -106,7 +108,7 @@ describe('AuditInvestigationPlatform', () => {
           explanations: ['baseline routing'],
           timestamp: '2024-04-01T01:00:00.000Z',
         },
-      }
+      },
     );
     await cursorLedger.append(
       {
@@ -117,7 +119,11 @@ describe('AuditInvestigationPlatform', () => {
         actor: { id: 'svc-1', displayName: 'Service Bot' },
         ts: '2024-04-01T01:10:00.000Z',
         purpose: 'investigation',
-        provenance: { sessionId: 'case-1', requestId: 'req-2', parentRequestId: 'req-1' },
+        provenance: {
+          sessionId: 'case-1',
+          requestId: 'req-2',
+          parentRequestId: 'req-1',
+        },
       },
       {
         decision: {
@@ -125,7 +131,7 @@ describe('AuditInvestigationPlatform', () => {
           explanations: ['policy violation'],
           timestamp: '2024-04-01T01:10:00.000Z',
         },
-      }
+      },
     );
 
     platform = new AuditInvestigationPlatform(
@@ -138,7 +144,7 @@ describe('AuditInvestigationPlatform', () => {
         anomalyMultiplier: 1.2,
         anomalyMinEvents: 3,
         now: () => new Date('2024-04-02T00:00:00.000Z'),
-      }
+      },
     );
 
     analystContext = {
@@ -159,7 +165,7 @@ describe('AuditInvestigationPlatform', () => {
     const result = await platform.runNaturalLanguageQuery(
       'correlation:case-1 severity:high last 48 hours',
       analystContext,
-      { exportFormat: 'csv' }
+      { exportFormat: 'csv' },
     );
 
     expect(result.cached).toBe(false);
@@ -175,8 +181,12 @@ describe('AuditInvestigationPlatform', () => {
 
   it('caches repeated structured queries', async () => {
     const filter = { actors: ['alice'] };
-    const first = await platform.runQuery(filter, analystContext, { includeTimeline: true });
-    const second = await platform.runQuery(filter, analystContext, { includeTimeline: true });
+    const first = await platform.runQuery(filter, analystContext, {
+      includeTimeline: true,
+    });
+    const second = await platform.runQuery(filter, analystContext, {
+      includeTimeline: true,
+    });
 
     expect(first.cached).toBe(false);
     expect(second.cached).toBe(true);
@@ -185,11 +195,9 @@ describe('AuditInvestigationPlatform', () => {
 
   it('enforces role based export permissions', async () => {
     await expect(
-      platform.runQuery(
-        { systems: ['maestro-core'] },
-        viewerContext,
-        { exportFormat: 'json' }
-      )
+      platform.runQuery({ systems: ['maestro-core'] }, viewerContext, {
+        exportFormat: 'json',
+      }),
     ).rejects.toThrow('Not authorized');
   });
 
@@ -197,14 +205,14 @@ describe('AuditInvestigationPlatform', () => {
     const analystResult = await platform.runQuery(
       { actors: ['alice'] },
       analystContext,
-      { includeAnomalies: true }
+      { includeAnomalies: true },
     );
     expect(analystResult.anomalies.length).toBeGreaterThan(0);
 
     const viewerResult = await platform.runQuery(
       { actors: ['alice'] },
       viewerContext,
-      { includeAnomalies: true }
+      { includeAnomalies: true },
     );
     expect(viewerResult.anomalies).toHaveLength(0);
   });

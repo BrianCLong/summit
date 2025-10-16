@@ -5,10 +5,20 @@ import { initSocket } from '../src/realtime/socket';
 jest.mock('../src/lib/auth.js', () => ({
   verifyToken: jest.fn(async (token: string) => {
     if (token === 't1') {
-      return { id: '1', email: 'u1@example.com', username: 'u1', role: 'ADMIN' };
+      return {
+        id: '1',
+        email: 'u1@example.com',
+        username: 'u1',
+        role: 'ADMIN',
+      };
     }
     if (token === 't2') {
-      return { id: '2', email: 'u2@example.com', username: 'u2', role: 'ADMIN' };
+      return {
+        id: '2',
+        email: 'u2@example.com',
+        username: 'u2',
+        role: 'ADMIN',
+      };
     }
     throw new Error('Invalid token');
   }),

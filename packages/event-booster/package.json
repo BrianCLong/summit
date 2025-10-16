@@ -17,6 +17,8 @@
     "timeseries"
   ],
   "license": "MIT",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false
 }

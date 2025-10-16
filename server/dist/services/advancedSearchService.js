@@ -1,13 +1,14 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class AdvancedSearchService extends EventEmitter {
+    searchHistory = new Map();
+    savedSearches = new Map();
+    searchIndices = new Map();
+    cache;
+    searchSuggestions = new Map();
+    popularQueries = [];
     constructor() {
         super();
-        this.searchHistory = new Map();
-        this.savedSearches = new Map();
-        this.searchIndices = new Map();
-        this.searchSuggestions = new Map();
-        this.popularQueries = [];
         this.cache = new RedisCache();
         this.initializeSearchIndices();
         this.buildSearchSuggestions();
@@ -417,7 +418,13 @@ export class AdvancedSearchService extends EventEmitter {
         const terms = query.query.toLowerCase().split(' ');
         // Generate mock results based on query terms
         for (let i = 0; i < Math.min(200, Math.random() * 300 + 50); i++) {
-            const types = ['entity', 'investigation', 'evidence', 'threat', 'document'];
+            const types = [
+                'entity',
+                'investigation',
+                'evidence',
+                'threat',
+                'document',
+            ];
             const type = types[Math.floor(Math.random() * types.length)];
             mockResults.push({
                 id: `${type}_${i}`,
@@ -520,7 +527,8 @@ export class AdvancedSearchService extends EventEmitter {
             return mockResults;
         for (let i = 0; i < Math.min(120, Math.random() * 180 + 25); i++) {
             const timestamp = new Date(query.timeRange.start.getTime() +
-                Math.random() * (query.timeRange.end.getTime() - query.timeRange.start.getTime()));
+                Math.random() *
+                    (query.timeRange.end.getTime() - query.timeRange.start.getTime()));
             mockResults.push({
                 id: `temporal_${i}`,
                 type: 'investigation',
@@ -557,12 +565,14 @@ export class AdvancedSearchService extends EventEmitter {
                 id: `geo_${i}`,
                 type: 'entity',
                 score: Math.random() * 10 +
-                    ((query.geoLocation.radius - distance) / query.geoLocation.radius) * 5,
+                    ((query.geoLocation.radius - distance) / query.geoLocation.radius) *
+                        5,
                 source: 'geo_index',
                 data: {
                     ...this.generateMockData('entity', []),
                     location: {
-                        lat: query.geoLocation.lat + (distance * Math.cos((bearing * Math.PI) / 180)) / 111,
+                        lat: query.geoLocation.lat +
+                            (distance * Math.cos((bearing * Math.PI) / 180)) / 111,
                         lng: query.geoLocation.lng +
                             (distance * Math.sin((bearing * Math.PI) / 180)) /
                                 (111 * Math.cos((query.geoLocation.lat * Math.PI) / 180)),
@@ -631,7 +641,11 @@ export class AdvancedSearchService extends EventEmitter {
             field: 'score',
             type: 'range',
             buckets: [
-                { key: '9-10', count: results.filter((r) => r.score >= 9).length, selected: false },
+                {
+                    key: '9-10',
+                    count: results.filter((r) => r.score >= 9).length,
+                    selected: false,
+                },
                 {
                     key: '7-9',
                     count: results.filter((r) => r.score >= 7 && r.score < 9).length,
@@ -642,7 +656,11 @@ export class AdvancedSearchService extends EventEmitter {
                     count: results.filter((r) => r.score >= 5 && r.score < 7).length,
                     selected: false,
                 },
-                { key: '0-5', count: results.filter((r) => r.score < 5).length, selected: false },
+                {
+                    key: '0-5',
+                    count: results.filter((r) => r.score < 5).length,
+                    selected: false,
+                },
             ],
         });
         return facets;
@@ -651,7 +669,8 @@ export class AdvancedSearchService extends EventEmitter {
         const suggestions = [];
         // Add popular queries that are similar
         const popularMatches = this.popularQueries
-            .filter((pq) => pq.query.toLowerCase().includes(query.toLowerCase()) && pq.query !== query)
+            .filter((pq) => pq.query.toLowerCase().includes(query.toLowerCase()) &&
+            pq.query !== query)
             .slice(0, 3)
             .map((pq) => pq.query);
         suggestions.push(...popularMatches);
@@ -708,7 +727,13 @@ export class AdvancedSearchService extends EventEmitter {
         if (terms.length > 0 && Math.random() > 0.5) {
             return `Entity containing ${terms[0]}`;
         }
-        const names = ['Alpha Corp', 'John Smith', 'Beta Industries', 'Jane Doe', 'Gamma Technologies'];
+        const names = [
+            'Alpha Corp',
+            'John Smith',
+            'Beta Industries',
+            'Jane Doe',
+            'Gamma Technologies',
+        ];
         return names[Math.floor(Math.random() * names.length)];
     }
     generateDescription(terms) {
@@ -822,7 +847,9 @@ export class AdvancedSearchService extends EventEmitter {
             case '<':
                 return value < filter.value;
             case 'contains':
-                return String(value).toLowerCase().includes(String(filter.value).toLowerCase());
+                return String(value)
+                    .toLowerCase()
+                    .includes(String(filter.value).toLowerCase());
             default:
                 return true;
         }

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import List
 
-from langdetect import detect, LangDetectException  # type: ignore[import-untyped]
+from langdetect import LangDetectException, detect  # type: ignore[import-untyped]
 
 from .backends.base import BaseNLPBackend
 from .backends.huggingface_backend import HuggingFaceBackend
@@ -18,7 +17,7 @@ _BACKENDS = {
 }
 
 
-@lru_cache()
+@lru_cache
 def _get_backend() -> BaseNLPBackend:
     settings = get_settings()
     backend_cls = _BACKENDS.get(settings.backend, HuggingFaceBackend)
@@ -32,8 +31,8 @@ def detect_language(text: str) -> str:
         return "unknown"
 
 
-def _derive_bias(cues: dict[str, float]) -> List[BiasIndicator]:
-    indicators: List[BiasIndicator] = []
+def _derive_bias(cues: dict[str, float]) -> list[BiasIndicator]:
+    indicators: list[BiasIndicator] = []
     if cues.get("absolutist_terms", 0) > 0:
         indicators.append(
             BiasIndicator(type="absolutist_phrasing", confidence=cues["absolutist_terms"])
@@ -47,12 +46,12 @@ def _derive_bias(cues: dict[str, float]) -> List[BiasIndicator]:
     return indicators
 
 
-def analyze_batch(items: List[TextItem]) -> List[AnalysisResult]:
+def analyze_batch(items: list[TextItem]) -> list[AnalysisResult]:
     backend = _get_backend()
     texts = [redact(i.text) for i in items]
     raw_results = backend.predict(texts, lang=None)
-    results: List[AnalysisResult] = []
-    for item, res in zip(items, raw_results):
+    results: list[AnalysisResult] = []
+    for item, res in zip(items, raw_results, strict=False):
         language = item.lang or res.get("language") or detect_language(item.text)
         cues = res.get("cues", {})
         bias_indicators = _derive_bias(cues)

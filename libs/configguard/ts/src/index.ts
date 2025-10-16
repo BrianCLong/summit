@@ -7,7 +7,7 @@ export type {
   SchemaInput,
   InterpolationPolicy,
   Severity,
-  Position
+  Position,
 } from './types';
 export { loadConfig, parseConfigFile } from './parse';
 export { validate } from './validate';

@@ -9,8 +9,10 @@ export class PsyOpsModule {
     return `Generated narrative for ${query}`;
   }
 
-  monitorSocialMedia(// eslint-disable-next-line @typescript-eslint/no-unused-vars
-platform: string): JSON {
+  monitorSocialMedia(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    platform: string,
+  ): JSON {
     // Stub: X semantic search integration
     return { trends: 'Simulated monitoring data' };
   }

@@ -1,15 +1,21 @@
-from datetime import datetime
-from typing import Dict
 import uuid
+from datetime import datetime
 from io import BytesIO
 
 from .hashing import sha256_digest
 from .signatures import verify_signature
 
-_evidence: Dict[str, dict] = {}
+_evidence: dict[str, dict] = {}
 
 
-def register_evidence(kind: str, url: str | None = None, content: bytes | None = None, title: str | None = None, signature: bytes | None = None, public_key: str | None = None) -> dict:
+def register_evidence(
+    kind: str,
+    url: str | None = None,
+    content: bytes | None = None,
+    title: str | None = None,
+    signature: bytes | None = None,
+    public_key: str | None = None,
+) -> dict:
     evid_id = str(uuid.uuid4())
     data = content or (url or "").encode()
     h, length = sha256_digest(BytesIO(data))

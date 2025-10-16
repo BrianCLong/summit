@@ -12,6 +12,7 @@
 **Objective:** Move from “verifiable builds” → **“verified deploys & runtime”**. Enforce signed, SBOM‑backed artifacts at deploy, harden cluster runtime, expand OPA to ABAC, add DLP/secret controls, and stand up dashboards with tamper‑evident logs. Ship e2e checks (WebAuthn step‑up smoke, perf, and basic license compliance).
 
 **DoD:**
+
 - Deploys blocked unless: `cosign.verify=pass ∧ sbom.present ∧ provenance.verified ∧ images.pinnedByDigest ∧ policies.pass`.
 - Kubernetes workloads run with `NetworkPolicy`, `readOnlyRootFilesystem`, `runAsNonRoot`, `PDB/HPA present`, and signed images only.
 - OPA policies cover action/resource ABAC and emit decision logs; dashboards show CI → Gate → Deploy lineage.
@@ -22,18 +23,21 @@
 ## 2) Backlog (ranked)
 
 ### P0 — Must land
-1. **Deploy‑time Signature & Provenance Verify**: ArgoCD/Admission policy enforcing cosign‑verified, digest‑pinned images (keyless, Fulcio/Rekor).  
+
+1. **Deploy‑time Signature & Provenance Verify**: ArgoCD/Admission policy enforcing cosign‑verified, digest‑pinned images (keyless, Fulcio/Rekor).
 2. **ABAC Policy Expansion**: Extend OPA (`switchboard`) with action/resource schema + org roles; add deny‑reasons and coverage tests.
 3. **Cluster Runtime Hardening**: Baseline `NetworkPolicy`, `PodSecurity`, `PDB/HPA`, `securityContext` and `readOnlyRootFilesystem` for Switchboard services.
 4. **Tamper‑evident CI Logs & Decision Trails**: Hash and store CI/OPA decision logs with attestations; link run → artifact → deploy.
 
 ### P1 — Strongly desired
-5. **DLP/Secret Controls**: Pre‑commit + CI using `gitleaks`; redact logs on upload.  
-6. **Perf Baseline**: k6 smoke (RPS, p95); budget wired into CI.  
+
+5. **DLP/Secret Controls**: Pre‑commit + CI using `gitleaks`; redact logs on upload.
+6. **Perf Baseline**: k6 smoke (RPS, p95); budget wired into CI.
 7. **WebAuthn Step‑up e2e Smoke**: Playwright flow asserting step‑up required for sensitive actions.
 
 ### P2 — Stretch
-8. **License Compliance Gate**: CycloneDX license rules; fail on forbidden licenses.  
+
+8. **License Compliance Gate**: CycloneDX license rules; fail on forbidden licenses.
 9. **Counter‑influence Anomaly Scan**: Advisory bot for PR/ticket coordination anomalies (non‑blocking alerts).
 
 ---
@@ -45,6 +49,7 @@
 ### 3.1 ArgoCD / Admission: verify signatures & pin digests
 
 **NEW (Kyverno policy):** `deploy/policies/kyverno-verify-signature.yaml`
+
 ```yaml
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -55,9 +60,27 @@ spec:
   background: true
   rules:
     - name: verify-image-signature
-      match: { any: [ { resources: { kinds: ["Deployment","StatefulSet","DaemonSet","Job","CronJob"] } } ] }
+      match:
+        {
+          any:
+            [
+              {
+                resources:
+                  {
+                    kinds:
+                      [
+                        'Deployment',
+                        'StatefulSet',
+                        'DaemonSet',
+                        'Job',
+                        'CronJob',
+                      ],
+                  },
+              },
+            ],
+        }
       verifyImages:
-        - imageReferences: ["ghcr.io/companyos/*"]
+        - imageReferences: ['ghcr.io/companyos/*']
           attestations:
             - type: cosign.sigstore.dev/attestation
           mutateDigest: false
@@ -66,54 +89,60 @@ spec:
             - attestors:
                 - entries:
                     - keyless:
-                        issuer: "https://token.actions.githubusercontent.com"
-                        subject: "repo:companyos/*:ref:refs/heads/main"
+                        issuer: 'https://token.actions.githubusercontent.com'
+                        subject: 'repo:companyos/*:ref:refs/heads/main'
 ```
 
 **NEW (ArgoCD image policy via OPA Gatekeeper alternative):** `deploy/policies/gatekeeper-image-digest.yaml`
+
 ```yaml
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sAllowedRepos
 metadata:
   name: only-ghcr-companyos
 spec:
-  match: { kinds: [ { apiGroups: ["apps"], kinds: ["Deployment","StatefulSet"] } ] }
+  match:
+    { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment', 'StatefulSet'] }] }
   parameters:
-    repos: ["ghcr.io/companyos/"]
+    repos: ['ghcr.io/companyos/']
 ---
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredLabels
 metadata:
   name: require-image-digest
 spec:
-  match: { kinds: [ { apiGroups: ["apps"], kinds: ["Deployment","StatefulSet"] } ] }
+  match:
+    { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment', 'StatefulSet'] }] }
   parameters:
-    labels: [ { key: "imageDigest", allowedRegex: "^sha256:[a-f0-9]{64}$" } ]
+    labels: [{ key: 'imageDigest', allowedRegex: '^sha256:[a-f0-9]{64}$' }]
 ```
 
 **NEW (ArgoCD app project policy snippet):** `deploy/argocd/projects/switchboard-project.yaml`
+
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: switchboard
 spec:
-  sourceRepos: ["https://github.com/companyos/*"]
-  destinations: [{ server: "https://kubernetes.default.svc", namespace: "switchboard" }]
+  sourceRepos: ['https://github.com/companyos/*']
+  destinations:
+    [{ server: 'https://kubernetes.default.svc', namespace: 'switchboard' }]
   signatureKeys:
-    - keyID: "https://token.actions.githubusercontent.com"
-  clusterResourceWhitelist: [{ group: "*", kind: "*" }]
+    - keyID: 'https://token.actions.githubusercontent.com'
+  clusterResourceWhitelist: [{ group: '*', kind: '*' }]
 ```
 
 ### 3.2 CI: verify on deploy, hash logs, produce lineage
 
 **NEW:** `.github/workflows/deploy.verify.yml`
+
 ```yaml
 name: deploy.verify
 on:
   workflow_dispatch:
   push:
-    tags: [ 'app/switchboard-v*.*.*' ]
+    tags: ['app/switchboard-v*.*.*']
 permissions:
   contents: read
   id-token: write
@@ -129,7 +158,7 @@ jobs:
         uses: sigstore/cosign-installer@v3
       - name: Verify image and attestations (keyless)
         env:
-          COSIGN_EXPERIMENTAL: "1"
+          COSIGN_EXPERIMENTAL: '1'
         run: |
           IMAGE="ghcr.io/companyos/switchboard@${{ inputs.digest || env.DIGEST }}"
           cosign verify --certificate-identity "repo:companyos/switchboard:ref:refs/heads/main" \
@@ -154,6 +183,7 @@ jobs:
 ### 3.3 OPA ABAC expansion + tests
 
 **Edit:** `policies/switchboard.rego`
+
 ```rego
 package switchboard
 import future.keywords.in
@@ -197,6 +227,7 @@ deny[msg] {
 ```
 
 **Tests:** `policies/switchboard_abac_test.rego`
+
 ```rego
 package switchboard
 
@@ -222,6 +253,7 @@ test_admin_can_manage_policy {
 ### 3.4 K8s runtime baseline (Helm overlay examples)
 
 **NEW:** `deploy/helm/switchboard/overlays/security.yaml`
+
 ```yaml
 podSecurityContext:
   runAsNonRoot: true
@@ -231,15 +263,15 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
   capabilities:
-    drop: ["ALL"]
+    drop: ['ALL']
 resources:
-  requests: { cpu: "100m", memory: "128Mi" }
-  limits: { cpu: "500m", memory: "512Mi" }
+  requests: { cpu: '100m', memory: '128Mi' }
+  limits: { cpu: '500m', memory: '512Mi' }
 networkPolicy:
   enabled: true
   ingress:
     - from:
-        - podSelector: { matchLabels: { app: "gateway" } }
+        - podSelector: { matchLabels: { app: 'gateway' } }
       ports: [{ port: 8080 }]
 pdb:
   enabled: true
@@ -254,6 +286,7 @@ hpa:
 ### 3.5 DLP/Secret controls (pre‑commit & CI)
 
 **NEW:** `.gitleaks.toml`
+
 ```toml
 title = "CompanyOS DLP"
 [allowlist]
@@ -266,6 +299,7 @@ title = "CompanyOS DLP"
 ```
 
 **NEW:** `.github/workflows/dlp.scan.yml`
+
 ```yaml
 name: dlp.scan
 on: [pull_request, push]
@@ -283,10 +317,18 @@ jobs:
 ### 3.6 Perf baseline (k6) + budget gate
 
 **NEW:** `tests/k6/smoke.js`
+
 ```js
 import http from 'k6/http';
 import { sleep, check } from 'k6';
-export const options = { vus: 5, duration: '2m', thresholds: { http_req_failed: ['rate<0.01'], http_req_duration: ['p(95)<400'] } };
+export const options = {
+  vus: 5,
+  duration: '2m',
+  thresholds: {
+    http_req_failed: ['rate<0.01'],
+    http_req_duration: ['p(95)<400'],
+  },
+};
 export default function () {
   const res = http.get(`${__ENV.BASE_URL}/health`);
   check(res, { 'status 200': (r) => r.status === 200 });
@@ -295,6 +337,7 @@ export default function () {
 ```
 
 **NEW:** `.github/workflows/perf.k6.yml`
+
 ```yaml
 name: perf.k6
 on: [workflow_dispatch]
@@ -311,6 +354,7 @@ jobs:
 ### 3.7 WebAuthn step‑up smoke (Playwright)
 
 **NEW:** `apps/web/e2e/stepup.spec.ts`
+
 ```ts
 import { test, expect } from '@playwright/test';
 
@@ -327,6 +371,7 @@ test('step-up required for manage_policy', async ({ page }) => {
 ```
 
 **NEW:** `.github/workflows/e2e.playwright.yml`
+
 ```yaml
 name: e2e.playwright
 on: [pull_request]
@@ -346,6 +391,7 @@ jobs:
 ### 3.8 License rules (CycloneDX) — stretch
 
 **NEW:** `.github/workflows/license.check.yml`
+
 ```yaml
 name: license.check
 on: [pull_request]
@@ -369,44 +415,50 @@ jobs:
 ---
 
 ## 4) Observability & Evidence
-- **Lineage dashboard**: Run → Artifacts (SBOM/provenance) → Gate → Deploy results; surface allow/deny with reasons.  
+
+- **Lineage dashboard**: Run → Artifacts (SBOM/provenance) → Gate → Deploy results; surface allow/deny with reasons.
 - **Tamper‑evidence**: SHA256 for CI logs, OPA decision logs, and SBOM; store as artifacts and, optionally, object storage with immutability flag.
 
 ---
 
 ## 5) Tests & Verification
-- **Policy**: `opa test policies -v` (new ABAC tests).  
-- **Admission**: Attempt deploy with unsigned image → **blocked**; signed & digest‑pinned → **allowed**.  
-- **Runtime**: `kubectl auth can-i`, `kubectl get networkpolicy`, check containers run non‑root & RO FS.  
-- **Perf**: k6 thresholds met (p95 < 400ms, <1% fail).  
-- **DLP**: `dlp.scan` workflow passes; secrets none.  
+
+- **Policy**: `opa test policies -v` (new ABAC tests).
+- **Admission**: Attempt deploy with unsigned image → **blocked**; signed & digest‑pinned → **allowed**.
+- **Runtime**: `kubectl auth can-i`, `kubectl get networkpolicy`, check containers run non‑root & RO FS.
+- **Perf**: k6 thresholds met (p95 < 400ms, <1% fail).
+- **DLP**: `dlp.scan` workflow passes; secrets none.
 - **e2e**: Step‑up prompt appears before `manage_policy`.
 
-**Success Criteria**  
-- ArgoCD/Admission blocks unsigned/unpinned images.  
-- All Switchboard workloads baseline‑compliant (securityContext, NP, PDB/HPA).  
-- CI artifacts chained with hashes & attestations.  
+**Success Criteria**
+
+- ArgoCD/Admission blocks unsigned/unpinned images.
+- All Switchboard workloads baseline‑compliant (securityContext, NP, PDB/HPA).
+- CI artifacts chained with hashes & attestations.
 - Dashboards show green lineage for at least one tag deploy.
 
 ---
 
 ## 6) Ownership & Approvals
-- **Owners:** SecDevOps (Angleton IG), Platform/Infra (ArgoCD/K8s), App Eng (e2e/Perf).  
-- **Approvals:** Platform lead (policies), App Eng lead (Playwright hooks), Security lead (ABAC policy).  
+
+- **Owners:** SecDevOps (Angleton IG), Platform/Infra (ArgoCD/K8s), App Eng (e2e/Perf).
+- **Approvals:** Platform lead (policies), App Eng lead (Playwright hooks), Security lead (ABAC policy).
 
 ---
 
 ## 7) Timeline
-- **Days 1–2:** Admission/Kyverno + Gatekeeper policies; ArgoCD project updates.  
-- **Days 3–4:** OPA ABAC expansion + tests; CI deploy.verify wiring.  
-- **Days 5–6:** K8s runtime baseline overlays; DLP scan.  
-- **Day 7:** Perf baseline (k6) + thresholds; Playwright smoke.  
-- **Day 8–9:** Dashboards/lineage + tamper‑evidence; hardening polish.  
+
+- **Days 1–2:** Admission/Kyverno + Gatekeeper policies; ArgoCD project updates.
+- **Days 3–4:** OPA ABAC expansion + tests; CI deploy.verify wiring.
+- **Days 5–6:** K8s runtime baseline overlays; DLP scan.
+- **Day 7:** Perf baseline (k6) + thresholds; Playwright smoke.
+- **Day 8–9:** Dashboards/lineage + tamper‑evidence; hardening polish.
 - **Day 10:** Buffer + docs + approvals + tag a signed release.
 
 ---
 
 ## 8) PR Template Additions
+
 ```
 - [ ] Cosign verify (deploy) passed
 - [ ] Images pinned by digest
@@ -419,62 +471,64 @@ jobs:
 ---
 
 ## 9) Artifacts Index
-- Admission/Kyverno/Gatekeeper: `deploy/policies/*.yaml`  
-- ArgoCD project: `deploy/argocd/projects/switchboard-project.yaml`  
-- CI verify: `.github/workflows/deploy.verify.yml`  
-- OPA: `policies/switchboard.rego`, `policies/switchboard_abac_test.rego`  
-- K8s overlays: `deploy/helm/switchboard/overlays/security.yaml`  
-- DLP: `.gitleaks.toml`, `.github/workflows/dlp.scan.yml`  
-- Perf: `tests/k6/smoke.js`, `.github/workflows/perf.k6.yml`  
-- e2e: `apps/web/e2e/stepup.spec.ts`, `.github/workflows/e2e.playwright.yml`  
+
+- Admission/Kyverno/Gatekeeper: `deploy/policies/*.yaml`
+- ArgoCD project: `deploy/argocd/projects/switchboard-project.yaml`
+- CI verify: `.github/workflows/deploy.verify.yml`
+- OPA: `policies/switchboard.rego`, `policies/switchboard_abac_test.rego`
+- K8s overlays: `deploy/helm/switchboard/overlays/security.yaml`
+- DLP: `.gitleaks.toml`, `.github/workflows/dlp.scan.yml`
+- Perf: `tests/k6/smoke.js`, `.github/workflows/perf.k6.yml`
+- e2e: `apps/web/e2e/stepup.spec.ts`, `.github/workflows/e2e.playwright.yml`
 - License gate (stretch): `.github/workflows/license.check.yml`
 
 ---
 
 ## 10) Structured Output (for exec/PM traceability)
+
 summary: Harden deploy/runtime with signature verification, ABAC policies, and cluster baselines; add DLP, perf, and e2e step‑up checks; produce tamper‑evident lineage.  
 risk_score: 55  
 confidence: high  
 key_findings:
-  - id: deploy-verify-gap
-    evidence: [ ci logs, lack of cluster admission rules ]
-    impact: Unsigned/unpinned images could be deployed; weak provenance at runtime.
-    exploit_path: Compromised build → push unsigned tag → Argo sync → workload runs.
-  - id: runtime-baseline-missing
-    evidence: [ missing NetworkPolicies/PDB/HPA/securityContext ]
-    impact: Lateral movement, instability under failure or load.
-    exploit_path: Pod compromise → no NP isolation → pivot; outage without PDB/HPA.
-  - id: abac-policy-insufficient
-    evidence: [ minimal RBAC/ABAC in current policy ]
-    impact: Over-broad actions permitted; step‑up not provable in tests.
-    exploit_path: Authenticated agent escalates action without sufficient role.
-recommended_actions:
-  - title: Enforce signed + digest‑pinned images at admission
-    change_type: Policy
-    effort: M
-    prereqs: Kyverno or Gatekeeper installed; ArgoCD RBAC
-  - title: Expand OPA ABAC + tests
-    change_type: PR
-    effort: S
-    prereqs: None
-  - title: Add deploy.verify with cosign + lineage
-    change_type: PR
-    effort: S
-    prereqs: Artifact Attestations enabled
-  - title: Apply K8s runtime baselines
-    change_type: Infra
-    effort: M
-    prereqs: Helm overlay wiring
-  - title: Add DLP, Perf, e2e suites
-    change_type: PR
-    effort: S
-    prereqs: Staging URL and creds
-verification:
-  - checks: [ admission-blocks-unsigned, opa-abac-tests, k6-thresholds, playwright-stepup, dlp-clean ]
-  - success_criteria: Admission blocks on missing signature/digest; tests all green; lineage artifacts present.
-owners_notified: [ SecDevOps, Platform, App Eng ]
-links:
+
+- id: deploy-verify-gap
+  evidence: [ ci logs, lack of cluster admission rules ]
+  impact: Unsigned/unpinned images could be deployed; weak provenance at runtime.
+  exploit_path: Compromised build → push unsigned tag → Argo sync → workload runs.
+- id: runtime-baseline-missing
+  evidence: [ missing NetworkPolicies/PDB/HPA/securityContext ]
+  impact: Lateral movement, instability under failure or load.
+  exploit_path: Pod compromise → no NP isolation → pivot; outage without PDB/HPA.
+- id: abac-policy-insufficient
+  evidence: [ minimal RBAC/ABAC in current policy ]
+  impact: Over-broad actions permitted; step‑up not provable in tests.
+  exploit_path: Authenticated agent escalates action without sufficient role.
+  recommended_actions:
+- title: Enforce signed + digest‑pinned images at admission
+  change_type: Policy
+  effort: M
+  prereqs: Kyverno or Gatekeeper installed; ArgoCD RBAC
+- title: Expand OPA ABAC + tests
+  change_type: PR
+  effort: S
+  prereqs: None
+- title: Add deploy.verify with cosign + lineage
+  change_type: PR
+  effort: S
+  prereqs: Artifact Attestations enabled
+- title: Apply K8s runtime baselines
+  change_type: Infra
+  effort: M
+  prereqs: Helm overlay wiring
+- title: Add DLP, Perf, e2e suites
+  change_type: PR
+  effort: S
+  prereqs: Staging URL and creds
+  verification:
+- checks: [ admission-blocks-unsigned, opa-abac-tests, k6-thresholds, playwright-stepup, dlp-clean ]
+- success_criteria: Admission blocks on missing signature/digest; tests all green; lineage artifacts present.
+  owners_notified: [ SecDevOps, Platform, App Eng ]
+  links:
   pr:
   runbook: Reuse Sprint 1; add deploy.verify rollback (unsync Argo app)
   dashboards: CI→Gate→Deploy lineage board (to be updated after merge)
-

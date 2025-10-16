@@ -14,7 +14,7 @@ export async function verifyCosign(ref, opts) {
     }
     args.push(ref);
     try {
-        await new Promise((res, rej) => execFile('cosign', args, (e) => e ? rej(e) : res()));
+        await new Promise((res, rej) => execFile('cosign', args, (e) => (e ? rej(e) : res())));
         return true;
     }
     catch {

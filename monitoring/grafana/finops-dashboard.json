@@ -31,10 +31,10 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": null},
-                {"color": "yellow", "value": 70},
-                {"color": "orange", "value": 85},
-                {"color": "red", "value": 95}
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 70 },
+                { "color": "orange", "value": 85 },
+                { "color": "red", "value": 95 }
               ]
             },
             "unit": "percent",
@@ -42,7 +42,7 @@
             "max": 100
           }
         },
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
       },
       {
         "id": 2,
@@ -64,7 +64,7 @@
             "unit": "currencyUSD"
           }
         ],
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
       },
       {
         "id": 3,
@@ -91,7 +91,7 @@
             "unit": "percent"
           }
         ],
-        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
       },
       {
         "id": 4,
@@ -103,7 +103,7 @@
             "legendFormat": "{{category}}"
           }
         ],
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
       },
       {
         "id": 5,
@@ -122,15 +122,15 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 100},
-                {"color": "green", "value": 500}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 100 },
+                { "color": "green", "value": 500 }
               ]
             },
             "unit": "currencyUSD"
           }
         },
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
       },
       {
         "id": 6,
@@ -147,7 +147,7 @@
             "min": 0
           }
         ],
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 }
       },
       {
         "id": 7,
@@ -175,7 +175,7 @@
             }
           }
         ],
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 }
       },
       {
         "id": 8,
@@ -200,7 +200,7 @@
             "unit": "currencyUSD"
           }
         ],
-        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32}
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 }
       },
       {
         "id": 9,
@@ -219,15 +219,15 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 1000},
-                {"color": "green", "value": 5000}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 1000 },
+                { "color": "green", "value": 5000 }
               ]
             },
             "unit": "currencyUSD"
           }
         },
-        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 40}
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 40 }
       },
       {
         "id": 10,
@@ -246,9 +246,9 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 60},
-                {"color": "green", "value": 80}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 60 },
+                { "color": "green", "value": 80 }
               ]
             },
             "unit": "percent",
@@ -256,7 +256,7 @@
             "max": 100
           }
         },
-        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 40}
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 40 }
       },
       {
         "id": 11,
@@ -275,16 +275,16 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": null},
-                {"color": "yellow", "value": 0.7},
-                {"color": "red", "value": 0.9}
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 0.7 },
+                { "color": "red", "value": 0.9 }
               ]
             },
             "min": 0,
             "max": 1
           }
         },
-        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 40}
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 40 }
       },
       {
         "id": 12,
@@ -304,7 +304,7 @@
             "unit": "currencyUSD"
           }
         },
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 48}
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 48 }
       },
       {
         "id": 13,
@@ -326,7 +326,7 @@
             "unit": "currencyUSD"
           }
         ],
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 48}
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 }
       },
       {
         "id": 14,
@@ -357,9 +357,9 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 70},
-                {"color": "green", "value": 85}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 85 }
               ]
             },
             "unit": "percent",
@@ -367,7 +367,7 @@
             "max": 100
           }
         },
-        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 56}
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 56 }
       }
     ],
     "templating": {

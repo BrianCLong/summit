@@ -58,29 +58,30 @@ gh pr list --state open --draft --limit 500 --json number,createdAt | \
 
 ## 📊 Key Metrics
 
-| Metric | Current | Target (1mo) | Target (3mo) |
-|--------|---------|--------------|--------------|
-| Open PRs | 343 | <150 | <100 |
-| Conflict Rate | 57% | <30% | <20% |
-| Avg Time-to-Merge | ~14 days | <7 days | <3 days |
-| Merges/Week | ~95 | 150+ | 200+ |
-| Auto-Merge Rate | ~40% | 60% | 80% |
+| Metric            | Current  | Target (1mo) | Target (3mo) |
+| ----------------- | -------- | ------------ | ------------ |
+| Open PRs          | 343      | <150         | <100         |
+| Conflict Rate     | 57%      | <30%         | <20%         |
+| Avg Time-to-Merge | ~14 days | <7 days      | <3 days      |
+| Merges/Week       | ~95      | 150+         | 200+         |
+| Auto-Merge Rate   | ~40%     | 60%          | 80%          |
 
 ---
 
 ## 🚦 Lane Definitions
 
-| Lane | Criteria | Policy |
-|------|----------|--------|
-| **Express** | <100 LOC, green CI, no conflicts | Auto-merge (no review) |
-| **Standard** | <500 LOC, green CI | 1 approval required |
-| **Manual** | >500 LOC, conflicts, CI failures | 2+ approvals, manual merge |
+| Lane         | Criteria                         | Policy                     |
+| ------------ | -------------------------------- | -------------------------- |
+| **Express**  | <100 LOC, green CI, no conflicts | Auto-merge (no review)     |
+| **Standard** | <500 LOC, green CI               | 1 approval required        |
+| **Manual**   | >500 LOC, conflicts, CI failures | 2+ approvals, manual merge |
 
 ---
 
 ## ⚡ Troubleshooting
 
 ### "CI is stuck/not running"
+
 ```bash
 # Check workflow status
 gh run list --limit 10
@@ -91,6 +92,7 @@ gh workflow run ci.yml --ref pr-branch-name
 ```
 
 ### "PR has conflicts but auto-update failed"
+
 ```bash
 # Manually update PR branch
 gh pr checkout 12345
@@ -101,6 +103,7 @@ git push
 ```
 
 ### "Merge train is slow"
+
 1. Check GitHub Actions concurrency limits
 2. Prioritize express lane PRs
 3. Close stale/conflicting PRs to reduce queue depth
@@ -111,11 +114,13 @@ git push
 ## 📅 Daily/Weekly Routines
 
 ### Daily (10 min)
+
 1. Check queue health: `gh pr list --state open | wc -l`
 2. Review new conflicts: `scripts/triage-conflicting-prs.sh` (dry run)
 3. Spot-check CI failures on recent PRs
 
 ### Weekly (1 hour)
+
 1. **Generate hotspot report**: `scripts/conflict-hotspot-report.sh`
 2. **Update CODEOWNERS** if needed
 3. **Triage sprint**: Review manual lane, close stale PRs
@@ -125,20 +130,20 @@ git push
 
 ## 🛠️ Scripts Reference
 
-| Script | Purpose | Runtime |
-|--------|---------|---------|
-| `triage-conflicting-prs.sh` | Label & comment on stale conflicting PRs | ~2-5 min |
-| `conflict-hotspot-report.sh` | Identify high-contention files | ~30 sec |
-| `merge-train.sh` | Core merge train automation | Continuous |
+| Script                       | Purpose                                  | Runtime    |
+| ---------------------------- | ---------------------------------------- | ---------- |
+| `triage-conflicting-prs.sh`  | Label & comment on stale conflicting PRs | ~2-5 min   |
+| `conflict-hotspot-report.sh` | Identify high-contention files           | ~30 sec    |
+| `merge-train.sh`             | Core merge train automation              | Continuous |
 
 ---
 
 ## 🔗 Links
 
-* **Full Runbook**: `docs/merge-train-runbook.md`
-* **Session Summary**: `docs/merge-train-session-2025-10-14.md`
-* **Auto-Resolve Workflow**: `.github/workflows/auto-resolve-conflicts.yml`
-* **CODEOWNERS**: `.github/CODEOWNERS`
+- **Full Runbook**: `docs/merge-train-runbook.md`
+- **Session Summary**: `docs/merge-train-session-2025-10-14.md`
+- **Auto-Resolve Workflow**: `.github/workflows/auto-resolve-conflicts.yml`
+- **CODEOWNERS**: `.github/CODEOWNERS`
 
 ---
 

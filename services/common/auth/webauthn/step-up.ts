@@ -33,7 +33,10 @@ export class WebAuthnStepUp {
   /**
    * Generate step-up challenge
    */
-  static async generateChallenge(userId: string, purpose: string): Promise<StepUpChallenge> {
+  static async generateChallenge(
+    userId: string,
+    purpose: string,
+  ): Promise<StepUpChallenge> {
     const challengeId = crypto.randomUUID();
     const challenge = crypto.randomBytes(32).toString('base64url');
     const now = Date.now();
@@ -44,7 +47,7 @@ export class WebAuthnStepUp {
       userId,
       purpose,
       createdAt: now,
-      expiresAt: now + (60 * 1000) // 1 minute to complete
+      expiresAt: now + 60 * 1000, // 1 minute to complete
     };
 
     this.challenges.set(challengeId, challengeData);
@@ -61,7 +64,7 @@ export class WebAuthnStepUp {
   static async verifyAndIssueToken(
     challengeId: string,
     webauthnResponse: any,
-    purpose: string
+    purpose: string,
   ): Promise<StepUpToken | null> {
     const challenge = this.challenges.get(challengeId);
 
@@ -76,8 +79,9 @@ export class WebAuthnStepUp {
 
     // In production: verify WebAuthn response against challenge
     // For demo: simplified verification
-    const isValid = webauthnResponse?.response?.clientDataJSON &&
-                   webauthnResponse?.response?.authenticatorData;
+    const isValid =
+      webauthnResponse?.response?.clientDataJSON &&
+      webauthnResponse?.response?.authenticatorData;
 
     if (!isValid) {
       throw new Error('Invalid WebAuthn response');
@@ -88,11 +92,11 @@ export class WebAuthnStepUp {
     const token: StepUpToken = {
       userId: challenge.userId,
       issuedAt: now,
-      expiresAt: now + (this.TTL_SECONDS * 1000),
+      expiresAt: now + this.TTL_SECONDS * 1000,
       scope: this.getScopeForPurpose(purpose),
       audience: 'intelgraph-api',
       purpose,
-      signature: this.signToken(challenge.userId, purpose, now)
+      signature: this.signToken(challenge.userId, purpose, now),
     };
 
     const tokenId = crypto.randomUUID();
@@ -102,14 +106,16 @@ export class WebAuthnStepUp {
     this.challenges.delete(challengeId);
 
     // Audit log
-    console.log(JSON.stringify({
-      event: 'stepup_token_issued',
-      userId: token.userId,
-      purpose: token.purpose,
-      scope: token.scope,
-      expiresAt: new Date(token.expiresAt).toISOString(),
-      timestamp: new Date().toISOString()
-    }));
+    console.log(
+      JSON.stringify({
+        event: 'stepup_token_issued',
+        userId: token.userId,
+        purpose: token.purpose,
+        scope: token.scope,
+        expiresAt: new Date(token.expiresAt).toISOString(),
+        timestamp: new Date().toISOString(),
+      }),
+    );
 
     return token;
   }
@@ -117,7 +123,10 @@ export class WebAuthnStepUp {
   /**
    * Verify step-up token
    */
-  static verifyToken(tokenId: string, requiredPurpose?: string): StepUpToken | null {
+  static verifyToken(
+    tokenId: string,
+    requiredPurpose?: string,
+  ): StepUpToken | null {
     const token = this.tokens.get(tokenId);
 
     if (!token) {
@@ -134,7 +143,11 @@ export class WebAuthnStepUp {
     }
 
     // Verify signature
-    const expectedSignature = this.signToken(token.userId, token.purpose, token.issuedAt);
+    const expectedSignature = this.signToken(
+      token.userId,
+      token.purpose,
+      token.issuedAt,
+    );
     if (token.signature !== expectedSignature) {
       return null;
     }
@@ -161,14 +174,14 @@ export class WebAuthnStepUp {
         return res.status(401).json({
           error: 'Step-up authentication required',
           purpose: purpose,
-          remediation_url: '/auth/stepup/challenge'
+          remediation_url: '/auth/stepup/challenge',
         });
       }
 
       if (!purposeHeader) {
         return res.status(400).json({
           error: 'Purpose header required',
-          required_header: 'x-purpose'
+          required_header: 'x-purpose',
         });
       }
 
@@ -178,7 +191,7 @@ export class WebAuthnStepUp {
         return res.status(401).json({
           error: 'Invalid or expired step-up token',
           purpose: purpose,
-          remediation_url: '/auth/stepup/challenge'
+          remediation_url: '/auth/stepup/challenge',
         });
       }
 
@@ -187,14 +200,16 @@ export class WebAuthnStepUp {
       (req as any).purpose = purposeHeader;
 
       // Audit log
-      console.log(JSON.stringify({
-        event: 'stepup_access_granted',
-        userId: token.userId,
-        purpose: purposeHeader,
-        endpoint: req.path,
-        method: req.method,
-        timestamp: new Date().toISOString()
-      }));
+      console.log(
+        JSON.stringify({
+          event: 'stepup_access_granted',
+          userId: token.userId,
+          purpose: purposeHeader,
+          endpoint: req.path,
+          method: req.method,
+          timestamp: new Date().toISOString(),
+        }),
+      );
 
       next();
     };
@@ -202,18 +217,23 @@ export class WebAuthnStepUp {
 
   private static getScopeForPurpose(purpose: string): string[] {
     const scopeMap: Record<string, string[]> = {
-      'admin': ['read', 'write', 'delete', 'admin'],
-      'ops': ['read', 'write', 'export'],
-      'legal': ['read', 'export', 'pii'],
-      'compliance': ['read', 'export', 'audit'],
-      'investigation': ['read', 'write']
+      admin: ['read', 'write', 'delete', 'admin'],
+      ops: ['read', 'write', 'export'],
+      legal: ['read', 'export', 'pii'],
+      compliance: ['read', 'export', 'audit'],
+      investigation: ['read', 'write'],
     };
 
     return scopeMap[purpose] || ['read'];
   }
 
-  private static signToken(userId: string, purpose: string, issuedAt: number): string {
-    const secret = process.env.STEPUP_SECRET || 'demo-secret-change-in-production';
+  private static signToken(
+    userId: string,
+    purpose: string,
+    issuedAt: number,
+  ): string {
+    const secret =
+      process.env.STEPUP_SECRET || 'demo-secret-change-in-production';
     const data = `${userId}:${purpose}:${issuedAt}`;
     return crypto.createHmac('sha256', secret).update(data).digest('hex');
   }
@@ -261,9 +281,8 @@ export const stepUpRoutes = {
         challengeId: challenge.challengeId,
         challenge: challenge.challenge,
         purpose: challenge.purpose,
-        expiresAt: new Date(challenge.expiresAt).toISOString()
+        expiresAt: new Date(challenge.expiresAt).toISOString(),
       });
-
     } catch (error) {
       console.error('StepUp challenge error:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -279,14 +298,14 @@ export const stepUpRoutes = {
 
       if (!challengeId || !webauthnResponse || !purpose) {
         return res.status(400).json({
-          error: 'challengeId, webauthnResponse, and purpose required'
+          error: 'challengeId, webauthnResponse, and purpose required',
         });
       }
 
       const token = await WebAuthnStepUp.verifyAndIssueToken(
         challengeId,
         webauthnResponse,
-        purpose
+        purpose,
       );
 
       if (!token) {
@@ -297,9 +316,8 @@ export const stepUpRoutes = {
         token: crypto.randomUUID(), // Return token ID, not token itself
         expiresAt: new Date(token.expiresAt).toISOString(),
         scope: token.scope,
-        purpose: token.purpose
+        purpose: token.purpose,
       });
-
     } catch (error) {
       console.error('StepUp verification error:', error);
       res.status(401).json({ error: error.message });
@@ -320,10 +338,9 @@ export const stepUpRoutes = {
       const revoked = WebAuthnStepUp.revokeToken(tokenId);
 
       res.json({ revoked });
-
     } catch (error) {
       console.error('StepUp revocation error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
-  }
+  },
 };

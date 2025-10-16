@@ -1,1 +1,10 @@
-mutation evidenceVerify { evidenceVerify { ok audit { ts actor evidenceId } } }
+mutation evidenceVerify {
+  evidenceVerify {
+    ok
+    audit {
+      ts
+      actor
+      evidenceId
+    }
+  }
+}

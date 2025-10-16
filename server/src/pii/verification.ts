@@ -1,5 +1,9 @@
 import crypto from 'node:crypto';
-import { ClassifiedEntity, VerificationTask, VerificationWorkflowHooks } from './types.js';
+import {
+  ClassifiedEntity,
+  VerificationTask,
+  VerificationWorkflowHooks,
+} from './types.js';
 
 export interface VerificationQueueOptions {
   minimumConfidence?: number;
@@ -14,8 +18,9 @@ export class VerificationQueue {
   constructor(options: VerificationQueueOptions = {}) {
     this.options = {
       minimumConfidence: options.minimumConfidence ?? 0.7,
-      enforceForSeverities: options.enforceForSeverities ?? new Set(['critical', 'high']),
-      hooks: options.hooks
+      enforceForSeverities:
+        options.enforceForSeverities ?? new Set(['critical', 'high']),
+      hooks: options.hooks,
     };
   }
 
@@ -31,14 +36,19 @@ export class VerificationQueue {
       taskId: crypto.randomUUID(),
       entity,
       createdAt: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending',
     };
     this.tasks.set(task.taskId, task);
     await this.options.hooks?.onTaskCreated?.(task);
     return task;
   }
 
-  async resolve(taskId: string, status: 'approved' | 'rejected', reviewer: string, notes?: string): Promise<VerificationTask> {
+  async resolve(
+    taskId: string,
+    status: 'approved' | 'rejected',
+    reviewer: string,
+    notes?: string,
+  ): Promise<VerificationTask> {
     const task = this.tasks.get(taskId);
     if (!task) {
       throw new Error(`Unknown verification task ${taskId}`);
@@ -47,7 +57,7 @@ export class VerificationQueue {
       ...task,
       status,
       reviewer,
-      notes
+      notes,
     };
     this.tasks.set(taskId, updated);
     await this.options.hooks?.onTaskResolved?.(updated);
@@ -55,11 +65,12 @@ export class VerificationQueue {
   }
 
   list(status?: VerificationTask['status']): VerificationTask[] {
-    return [...this.tasks.values()].filter((task) => (status ? task.status === status : true));
+    return [...this.tasks.values()].filter((task) =>
+      status ? task.status === status : true,
+    );
   }
 
   clear(): void {
     this.tasks.clear();
   }
 }
-

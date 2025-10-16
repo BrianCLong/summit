@@ -1,6 +1,7 @@
 # GQLSnap Implementation Jira Tickets
 
 ## GQL-1: Establish GQLSnap Tooling Workspace
+
 - **Description:** Set up the isolated `tools/gqlsnap` workspace, scaffolding repository layout and shared configuration to comply with path isolation and determinism requirements.
 - **Acceptance Criteria:**
   - Directory structure exists under `tools/gqlsnap/` only; no changes to application/service code.
@@ -13,6 +14,7 @@
   - Add scripts/placeholders ensuring offline determinism.
 
 ## GQL-2: Implement `gqlsnap capture` Command
+
 - **Description:** Build the CLI command `gqlsnap capture` that stores schema snapshots from a provided GraphQL SDL file.
 - **Acceptance Criteria:**
   - Command accepts `--endpoint` pointing to a local schema file (e.g., `schema.graphql`).
@@ -25,6 +27,7 @@
   - Add unit tests verifying snapshot creation and determinism.
 
 ## GQL-3: Implement `gqlsnap diff` Command
+
 - **Description:** Deliver the diffing command comparing schema snapshots between a base branch and the current PR tag.
 - **Acceptance Criteria:**
   - Command signature `gqlsnap diff --base main --head pr-<n>` compares stored snapshots.
@@ -37,6 +40,7 @@
   - Write tests covering successful diff and error conditions.
 
 ## GQL-4: Breaking Change Detection Rules
+
 - **Description:** Encode schema comparison rules identifying breaking changes (removed types/fields, stricter nullability) and additive changes.
 - **Acceptance Criteria:**
   - Breaking vs additive rules align with GraphQL best practices in spec.
@@ -49,6 +53,7 @@
   - Create fixtures validating rule behavior.
 
 ## GQL-5: SARIF and Markdown Report Generation
+
 - **Description:** Provide reporting layer that emits SARIF and Markdown summaries listing breaking and additive changes separately.
 - **Acceptance Criteria:**
   - SARIF output conforms to schema and is consumable by CI annotation tools.
@@ -61,6 +66,7 @@
   - Add golden snapshot tests for both output formats.
 
 ## GQL-6: Fixture Suite Covering Rule Types
+
 - **Description:** Build comprehensive fixture schemas to validate all breaking and additive scenarios.
 - **Acceptance Criteria:**
   - Fixtures cover removed types, removed fields, nullability tightening, and purely additive updates.
@@ -73,6 +79,7 @@
   - Document fixture usage and contribution guidelines.
 
 ## GQL-7: Deterministic Test & Snapshot Harness
+
 - **Description:** Establish testing harness ensuring deterministic text and JSON outputs without network dependency.
 - **Acceptance Criteria:**
   - Test runner executes offline, using golden snapshots to validate CLI outputs.
@@ -85,6 +92,7 @@
   - Add CI configuration for running the deterministic suite.
 
 ## GQL-8: Progressive Enforcement Integration
+
 - **Description:** Integrate GQLSnap into CI with progressive enforcement—initially advisory, switching to blocking after sustained green runs.
 - **Acceptance Criteria:**
   - Non-blocking CI check publishes SARIF/Markdown artifacts and PR comment summary.

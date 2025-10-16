@@ -7,6 +7,7 @@ This pack wires **PagerDuty** and **Statuspage** end‑to‑end using repository
 ## 0) Secrets — Where to put what
 
 ### 0.1 GitHub repository secrets (used by Actions)
+
 - `PAGERDUTY_ROUTING_KEY` — Events v2 routing key (service integration).
 - `STATUSPAGE_API_TOKEN` — Statuspage API token with incident/component scopes.
 - `STATUSPAGE_PAGE_ID` — Target page ID.
@@ -14,14 +15,16 @@ This pack wires **PagerDuty** and **Statuspage** end‑to‑end using repository
 - `STAGE_KC_ISSUER`, `STAGE_KC_CLIENT_SECRET`, `STAGE_GATEWAY_URL`, `STAGE_WEB_BASE_URL`, `STAGE_PROM_URL` — already used by other packs.
 
 ### 0.2 Kubernetes secrets (alertmanager)
+
 ```yaml
 # ops/synthetics/pagerduty-secret.yaml
 apiVersion: v1
 kind: Secret
 metadata: { name: alertmanager-pagerduty, namespace: observability }
 stringData:
-  routing_key: "$PAGERDUTY_ROUTING_KEY"
+  routing_key: '$PAGERDUTY_ROUTING_KEY'
 ```
+
 Apply with your real key substituted by your secret manager or `envsubst`.
 
 ---
@@ -29,6 +32,7 @@ Apply with your real key substituted by your secret manager or `envsubst`.
 ## 1) Alertmanager wiring → PagerDuty
 
 If you use kube‑prometheus‑stack, add this Alertmanager config:
+
 ```yaml
 # ops/synthetics/alertmanager-pd.yaml
 apiVersion: v1
@@ -53,21 +57,26 @@ data:
 ---
 apiVersion: apps/v1
 kind: StatefulSet
-metadata: { name: alertmanager-kube-prometheus-stack-alertmanager, namespace: observability }
+metadata:
+  {
+    name: alertmanager-kube-prometheus-stack-alertmanager,
+    namespace: observability,
+  }
 # NOTE: if using Helm, patch via values instead of editing manifest
 spec:
   template:
     spec:
       volumes:
-      - name: pd-key
-        secret: { secretName: alertmanager-pagerduty }
-      containers:
-      - name: alertmanager
-        volumeMounts:
         - name: pd-key
-          mountPath: /etc/alertmanager/secrets
-          readOnly: true
+          secret: { secretName: alertmanager-pagerduty }
+      containers:
+        - name: alertmanager
+          volumeMounts:
+            - name: pd-key
+              mountPath: /etc/alertmanager/secrets
+              readOnly: true
 ```
+
 > With Helm: set `alertmanager.config` and `alertmanager.alertmanagerSpec.secrets` accordingly in values.
 
 Prometheus rules from earlier pack (`synthetics-rules.prom`) will now notify PD.
@@ -77,12 +86,13 @@ Prometheus rules from earlier pack (`synthetics-rules.prom`) will now notify PD.
 ## 2) Statuspage Automation — incidents & components
 
 ### 2.1 GitHub Action: open/resolve incidents on synthetic failures
+
 ```yaml
 # .github/workflows/statuspage-bridge.yaml
 name: statuspage-bridge
 on:
   workflow_run:
-    workflows: ["synthetics-check"]
+    workflows: ['synthetics-check']
     types: [requested, completed]
 jobs:
   incident:
@@ -118,8 +128,9 @@ jobs:
 ```
 
 ### 2.2 Component map example
+
 ```json
-{"Gateway API":"abcd1234efgh","Wallet":"ijkl5678mnop"}
+{ "Gateway API": "abcd1234efgh", "Wallet": "ijkl5678mnop" }
 ```
 
 > Create components in Statuspage UI, paste IDs into the JSON secret.
@@ -129,11 +140,13 @@ jobs:
 ## 3) Consumer Docs — Installing the Signed Helm Chart
 
 ### 3.1 Prereqs
+
 - Helm v3.8+ with OCI support: `helm version`
 - Cosign v2+: `cosign version`
 - Access to GHCR (public or `helm registry login ghcr.io` if private)
 
 ### 3.2 Pull & verify signed chart (OCI)
+
 ```bash
 # 1) Pull chart from GHCR (OCI)
 export ORG=BrianCLong/intelgraph
@@ -159,10 +172,12 @@ helm upgrade --install intelgraph ./charts/$CHART-$VERSION.tgz \
 > If you don’t want to store the .tgz locally, you can install directly from OCI after pull: `helm install intelgraph oci://ghcr.io/$ORG/charts/$CHART --version $VERSION` (note: cosign verification should still be performed separately).
 
 ### 3.3 Air‑gapped environments
+
 - Export chart + SBOM: `helm pull …; cosign verify …; crane copy ghcr.io/$ORG/charts/$CHART:$VERSION oci://registry.local/$CHART:$VERSION`
 - Mirror to internal registry and re‑sign with org’s Fulcio/rekor or offline key if required.
 
 ### 3.4 Values to set
+
 - OIDC issuer/audience
 - Vault CSI SecretProviderClass or direct Secrets
 - Ingress host/TLS
@@ -173,22 +188,26 @@ helm upgrade --install intelgraph ./charts/$CHART-$VERSION.tgz \
 ## 4) Runbooks
 
 ### 4.1 Rotate PagerDuty routing key
+
 1. Create new Events v2 integration in the PD service.
 2. Update GitHub secret `PAGERDUTY_ROUTING_KEY` & K8s secret `alertmanager-pagerduty`.
 3. `kubectl rollout restart sts alertmanager-…`.
 4. Fire a synthetic test (temporarily fail one probe) to see a new incident appear.
 
 ### 4.2 Rotate Statuspage API token
+
 1. Generate new token in Statuspage.
 2. Update `STATUSPAGE_API_TOKEN` in GitHub secrets.
 3. Re‑run `statuspage-bridge` manually once to validate.
 
 ### 4.3 Verify signatures policy
+
 - Gate deployments on `cosign verify` passing in CI (`helm-release` job outputs attestation URI).
 
 ---
 
 ## 5) Final Gap Sweep (closing loops)
+
 - **Accessibility**: add `axe` checks already in CI; add aria‑labels for all buttons with `data-testid`.
 - **Privacy**: publish `/docs/policies/privacy.md` + `/docs/policies/cookies.md`; link in webapp footer.
 - **Error budgets**: define per service SLOs and budgets; wire alerts to PagerDuty.
@@ -200,6 +219,7 @@ helm upgrade --install intelgraph ./charts/$CHART-$VERSION.tgz \
 ---
 
 ## 6) Make & CLI helpers
+
 ```make
 pd-secret:
 	kubectl -n observability create secret generic alertmanager-pagerduty \
@@ -219,9 +239,9 @@ helm-verify:
 ---
 
 ## 7) Checklist
+
 - [ ] Alertmanager reads PD key from K8s Secret; alerts route correctly
 - [ ] `synthetics-check` triggers `statuspage-bridge` to open/resolve incidents
 - [ ] Consumer doc verified by a fresh user (pull, verify, install)
 - [ ] Rotation runbooks tested (PD and Statuspage)
 - [ ] All policy/a11y/privacy docs linked in webapp
-

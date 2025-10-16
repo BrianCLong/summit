@@ -1,40 +1,35 @@
+import json
 import os
 import re
-import json
-from typing import Dict, Any
+from typing import Any
 
 import openai
-from pydantic import BaseModel, Field
-from langchain_community.chat_models import ChatOllama
-from langchain_core.messages import HumanMessage, SystemMessage
-
 from intelgraph_py.cache import (
     generate_cache_key,
     get_cached_explanation,
     set_cached_explanation,
 )
+from langchain_community.chat_models import ChatOllama
+from langchain_core.messages import HumanMessage, SystemMessage
+from pydantic import BaseModel, Field
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 class ExplanationOutput(BaseModel):
-    explanation_text: str = Field(
-        ..., description="Natural language explanation of the insight."
-    )
+    explanation_text: str = Field(..., description="Natural language explanation of the insight.")
     confidence_score: float = Field(
         ..., ge=0.0, le=1.0, description="Confidence score of the explanation (0.0 to 1.0)."
     )
-    source_metadata: Dict[str, Any] = Field(
+    source_metadata: dict[str, Any] = Field(
         ..., description="Metadata of the source data used for explanation."
     )
-    semantic_summary: str = Field(
-        ..., description="A concise semantic summary of the explanation."
-    )
+    semantic_summary: str = Field(..., description="A concise semantic summary of the explanation.")
 
 
 class PromptGenerator:
     @staticmethod
-    def generate_prompt(insight_data: Dict[str, Any]) -> str:
+    def generate_prompt(insight_data: dict[str, Any]) -> str:
         insight_type = insight_data.get("insight_type")
         prompt_parts = [
             "Generate a natural language explanation for the following AI-derived graph insight.",
@@ -48,18 +43,14 @@ class PromptGenerator:
             if insight_data.get("community_id") is not None:
                 prompt_parts.append(f"- Community ID: {insight_data['community_id']}")
             if insight_data.get("nodes"):
-                prompt_parts.append(
-                    f"- Nodes in this insight: {', '.join(insight_data['nodes'])}"
-                )
+                prompt_parts.append(f"- Nodes in this insight: {', '.join(insight_data['nodes'])}")
             prompt_parts.append(
                 "Explain why these nodes form a community and what characterizes it."
             )
         elif insight_type == "centrality":
             prompt_parts.append("Insight Type: Centrality Analysis")
             if insight_data.get("central_node_id"):
-                prompt_parts.append(
-                    f"- Central Node ID: {insight_data['central_node_id']}"
-                )
+                prompt_parts.append(f"- Central Node ID: {insight_data['central_node_id']}")
             prompt_parts.append(
                 "Explain the significance of this node's centrality within the graph."
             )
@@ -74,9 +65,7 @@ class PromptGenerator:
 
 def _obfuscate_text(text: str) -> str:
     text = re.sub(r"Node\s+[A-Za-z0-9]+", "Node [redacted]", text)
-    text = re.sub(
-        r"community\s+[A-Za-z0-9]+", "community [redacted]", text, flags=re.IGNORECASE
-    )
+    text = re.sub(r"community\s+[A-Za-z0-9]+", "community [redacted]", text, flags=re.IGNORECASE)
     return text
 
 
@@ -88,7 +77,7 @@ def _adapt_for_authority(expl: ExplanationOutput, authority: str) -> Explanation
 
 
 async def generate_explanation(
-    insight_data: Dict[str, Any],
+    insight_data: dict[str, Any],
     llm_model: str = "gpt-4o",
     authority: str = "internal",
     temperature: float = 0.2,
@@ -121,9 +110,7 @@ async def generate_explanation(
             )
             llm_output = response.choices[0].message.content
         else:
-            llm = ChatOllama(
-                model=llm_model, temperature=temperature, num_predict=max_tokens
-            )
+            llm = ChatOllama(model=llm_model, temperature=temperature, num_predict=max_tokens)
             messages = [
                 SystemMessage(content=system_message),
                 HumanMessage(content=user_message),

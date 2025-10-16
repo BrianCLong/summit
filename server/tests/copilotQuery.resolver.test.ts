@@ -5,9 +5,10 @@ describe('copilotQuery resolver', () => {
     return {
       tenant: { id: 't1' },
       neo4jSession: {
-        run: jest
-          .fn()
-          .mockResolvedValue({ summary: { plan: { operatorType: 'Projection' } }, records: [] }),
+        run: jest.fn().mockResolvedValue({
+          summary: { plan: { operatorType: 'Projection' } },
+          records: [],
+        }),
       },
       policyService: {
         evaluate: jest

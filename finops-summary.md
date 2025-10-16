@@ -35,4 +35,5 @@ No critical actions required at this time.
 5. Consider purchasing reserved instances for stable workloads
 
 ---
-*This report is generated automatically by the GREEN TRAIN FinOps guardrails system.*
+
+_This report is generated automatically by the GREEN TRAIN FinOps guardrails system._

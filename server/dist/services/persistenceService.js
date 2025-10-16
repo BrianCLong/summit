@@ -1,11 +1,11 @@
 import { cacheService } from './cacheService';
 class PersistenceService {
+    // In-memory storage for demonstration
+    // In production, this would be backed by PostgreSQL/Neo4j
+    investigations = new Map();
+    entities = new Map();
+    relationships = new Map();
     constructor() {
-        // In-memory storage for demonstration
-        // In production, this would be backed by PostgreSQL/Neo4j
-        this.investigations = new Map();
-        this.entities = new Map();
-        this.relationships = new Map();
         this.initializeMockData();
     }
     initializeMockData() {
@@ -111,7 +111,9 @@ class PersistenceService {
     }
     // Entity operations
     async getEntities(investigationId) {
-        const cacheKey = investigationId ? `entities:investigation:${investigationId}` : 'entities:all';
+        const cacheKey = investigationId
+            ? `entities:investigation:${investigationId}`
+            : 'entities:all';
         let entities = await cacheService.get(cacheKey);
         if (!entities) {
             entities = Array.from(this.entities.values());
@@ -183,10 +185,8 @@ class PersistenceService {
         const stats = {
             investigations: {
                 total: this.investigations.size,
-                active: Array.from(this.investigations.values()).filter((i) => i.status === 'ACTIVE')
-                    .length,
-                completed: Array.from(this.investigations.values()).filter((i) => i.status === 'COMPLETED')
-                    .length,
+                active: Array.from(this.investigations.values()).filter((i) => i.status === 'ACTIVE').length,
+                completed: Array.from(this.investigations.values()).filter((i) => i.status === 'COMPLETED').length,
             },
             entities: {
                 total: this.entities.size,

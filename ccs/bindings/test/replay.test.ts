@@ -1,7 +1,15 @@
 import nacl from 'tweetnacl';
 import { createHash } from 'crypto';
 import assert from 'assert';
-import { verifyCertificate, Participant, StratificationPlan, SamplingCertificate, SelectedParticipant, ParticipantRandomness, StratumBalance } from '../src/index';
+import {
+  verifyCertificate,
+  Participant,
+  StratificationPlan,
+  SamplingCertificate,
+  SelectedParticipant,
+  ParticipantRandomness,
+  StratumBalance,
+} from '../src/index';
 
 function decodeHex(input: string): Uint8Array {
   if (input.length % 2 !== 0) {
@@ -22,7 +30,12 @@ function encodeHex(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString('hex');
 }
 
-function buildCertificate(participants: Participant[], plan: StratificationPlan, seedHex: string, secretSeedHex: string): SamplingCertificate {
+function buildCertificate(
+  participants: Participant[],
+  plan: StratificationPlan,
+  seedHex: string,
+  secretSeedHex: string,
+): SamplingCertificate {
   const seed = decodeHex(seedHex);
   const secretSeed = decodeHex(secretSeedHex);
   const keyPair = nacl.sign.keyPair.fromSeed(secretSeed);
@@ -31,21 +44,30 @@ function buildCertificate(participants: Participant[], plan: StratificationPlan,
   const strata: Record<string, StratumBalance> = {};
 
   for (const participant of participants) {
-    const stratum = plan.keys.map((key) => `${key}=${participant.attributes[key]}`).join('|');
+    const stratum = plan.keys
+      .map((key) => `${key}=${participant.attributes[key]}`)
+      .join('|');
     const message = new Uint8Array(seed.length + participant.id.length);
     message.set(seed);
     message.set(Buffer.from(participant.id), seed.length);
     const proof = nacl.sign.detached(message, keyPair.secretKey);
-    const randomness = createHash('sha256').update(Buffer.from(proof)).digest('hex');
+    const randomness = createHash('sha256')
+      .update(Buffer.from(proof))
+      .digest('hex');
     const entry: ParticipantRandomness = {
       id: participant.id,
       stratum,
       randomness,
-      proof: Buffer.from(proof).toString('base64')
+      proof: Buffer.from(proof).toString('base64'),
     };
     transcript.push(entry);
     const bucket = buckets.get(stratum) ?? [];
-    bucket.push({ id: participant.id, stratum, randomness, proof: entry.proof });
+    bucket.push({
+      id: participant.id,
+      stratum,
+      randomness,
+      proof: entry.proof,
+    });
     buckets.set(stratum, bucket);
   }
 
@@ -65,7 +87,7 @@ function buildCertificate(participants: Participant[], plan: StratificationPlan,
     strata[stratum] = {
       target,
       selected: target,
-      available: bucket.length
+      available: bucket.length,
     };
   }
 
@@ -88,7 +110,7 @@ function buildCertificate(participants: Participant[], plan: StratificationPlan,
     cohort,
     transcript,
     timestamp: new Date().toISOString(),
-    hash: encodeHex(new Uint8Array(32))
+    hash: encodeHex(new Uint8Array(32)),
   };
   return certificate;
 }
@@ -99,7 +121,7 @@ const participants: Participant[] = [
   { id: 'p3', attributes: { region: 'eu', tier: 'control' } },
   { id: 'p4', attributes: { region: 'eu', tier: 'treatment' } },
   { id: 'p5', attributes: { region: 'na', tier: 'control' } },
-  { id: 'p6', attributes: { region: 'na', tier: 'treatment' } }
+  { id: 'p6', attributes: { region: 'na', tier: 'treatment' } },
 ];
 
 const plan: StratificationPlan = {
@@ -108,14 +130,21 @@ const plan: StratificationPlan = {
     'region=na|tier=control': 1,
     'region=na|tier=treatment': 1,
     'region=eu|tier=control': 1,
-    'region=eu|tier=treatment': 1
-  }
+    'region=eu|tier=treatment': 1,
+  },
 };
 
-const seedHex = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-const secretSeedHex = '1a0d6b29f9796dfd7c9230abd6f3a5b4f6274957332b26738d0fdb59bd4cb0f1';
+const seedHex =
+  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const secretSeedHex =
+  '1a0d6b29f9796dfd7c9230abd6f3a5b4f6274957332b26738d0fdb59bd4cb0f1';
 
-const certificate = buildCertificate(participants, plan, seedHex, secretSeedHex);
+const certificate = buildCertificate(
+  participants,
+  plan,
+  seedHex,
+  secretSeedHex,
+);
 
 verifyCertificate(participants, certificate);
 

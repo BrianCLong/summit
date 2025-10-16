@@ -12,7 +12,12 @@ export const evidenceResolvers = {
           await evidenceProvenanceService.storeEvidence({
             type: 'bundle',
             hash: input.artifacts?.[0]?.sha256 || id,
-            metadata: { releaseId: input.releaseId, service: input.service, slo: input.slo, cost: input.cost },
+            metadata: {
+              releaseId: input.releaseId,
+              service: input.service,
+              slo: input.slo,
+              cost: input.cost,
+            },
           } as any);
         }
         // Persist to Postgres for provenance linking

@@ -1,18 +1,19 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class PerformanceOptimizationService extends EventEmitter {
+    metrics = new Map();
+    cacheStrategies = new Map();
+    queryOptimizations = new Map();
+    connectionPools = new Map();
+    cache;
+    performanceThresholds = {
+        responseTime: 1000, // ms
+        memoryUsage: 80, // percentage
+        cacheHitRate: 85, // percentage
+        errorRate: 5, // percentage
+    };
     constructor() {
         super();
-        this.metrics = new Map();
-        this.cacheStrategies = new Map();
-        this.queryOptimizations = new Map();
-        this.connectionPools = new Map();
-        this.performanceThresholds = {
-            responseTime: 1000, // ms
-            memoryUsage: 80, // percentage
-            cacheHitRate: 85, // percentage
-            errorRate: 5, // percentage
-        };
         this.cache = new RedisCache();
         this.initializeCacheStrategies();
         this.initializeConnectionPools();
@@ -113,7 +114,8 @@ export class PerformanceOptimizationService extends EventEmitter {
             timestamp: new Date(),
             endpoint,
             responseTime,
-            memoryUsage: (process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) * 100,
+            memoryUsage: (process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) *
+                100,
             cpuUsage: process.cpuUsage().user / 1000000, // Convert to seconds
             cacheHitRate: this.calculateCacheHitRate(),
             concurrentUsers: this.getCurrentConcurrentUsers(),
@@ -157,9 +159,13 @@ export class PerformanceOptimizationService extends EventEmitter {
             .slice(-50);
         if (recentMetrics.length === 0)
             return;
-        const avgResponseTime = recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) / recentMetrics.length;
-        const errorRate = (recentMetrics.filter((m) => m.status === 'error').length / recentMetrics.length) * 100;
-        const avgMemoryUsage = recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) / recentMetrics.length;
+        const avgResponseTime = recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
+            recentMetrics.length;
+        const errorRate = (recentMetrics.filter((m) => m.status === 'error').length /
+            recentMetrics.length) *
+            100;
+        const avgMemoryUsage = recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) /
+            recentMetrics.length;
         const analysis = {
             avgResponseTime,
             errorRate,
@@ -216,7 +222,8 @@ export class PerformanceOptimizationService extends EventEmitter {
         // Basic query optimization rules
         if (queryType === 'cypher') {
             // Add LIMIT clauses where missing
-            if (!query.toLowerCase().includes('limit') && query.toLowerCase().includes('return')) {
+            if (!query.toLowerCase().includes('limit') &&
+                query.toLowerCase().includes('return')) {
                 optimizedQuery = query + ' LIMIT 1000';
                 indexRecommendations.push('Consider adding explicit LIMIT clause');
             }
@@ -272,10 +279,12 @@ export class PerformanceOptimizationService extends EventEmitter {
             metrics: {
                 totalRequests: recentMetrics.length,
                 avgResponseTime: recentMetrics.length > 0
-                    ? recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) / recentMetrics.length
+                    ? recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
+                        recentMetrics.length
                     : 0,
                 errorRate: recentMetrics.length > 0
-                    ? (recentMetrics.filter((m) => m.status === 'error').length / recentMetrics.length) *
+                    ? (recentMetrics.filter((m) => m.status === 'error').length /
+                        recentMetrics.length) *
                         100
                     : 0,
                 cacheHitRate: this.calculateCacheHitRate(),
@@ -329,7 +338,10 @@ export class PerformanceOptimizationService extends EventEmitter {
                         compressed++;
                     }
                 }
-                this.emit('data-compressed', { strategy: strategy.id, itemsCompressed: compressed });
+                this.emit('data-compressed', {
+                    strategy: strategy.id,
+                    itemsCompressed: compressed,
+                });
             }
             catch (error) {
                 console.error('[PERFORMANCE] Data compression error:', error);

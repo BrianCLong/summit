@@ -24,7 +24,10 @@ class SafetyCircuit {
         this.state = this.getDefaultState();
       }
     } catch (error) {
-      console.warn('Failed to load circuit state, using defaults:', error.message);
+      console.warn(
+        'Failed to load circuit state, using defaults:',
+        error.message,
+      );
       this.state = this.getDefaultState();
     }
   }
@@ -39,30 +42,30 @@ class SafetyCircuit {
 
   getDefaultState() {
     return {
-      circuit: 'CLOSED',  // CLOSED = normal, OPEN = blocked, HALF_OPEN = testing
+      circuit: 'CLOSED', // CLOSED = normal, OPEN = blocked, HALF_OPEN = testing
       failureCount: 0,
       lastFailure: null,
       lastSuccess: null,
       blockedUntil: null,
       deploymentWindow: {
-        start: '09:00',  // 9 AM UTC - Conservative business hours
-        end: '17:00',    // 5 PM UTC - Conservative business hours
+        start: '09:00', // 9 AM UTC - Conservative business hours
+        end: '17:00', // 5 PM UTC - Conservative business hours
         timezone: 'UTC',
-        allowedDays: [1, 2, 3, 4, 5]  // Monday-Friday only
+        allowedDays: [1, 2, 3, 4, 5], // Monday-Friday only
       },
       rateLimit: {
-        maxDeploymentsPerHour: 3,    // Conservative: max 3 deployments per hour
-        maxDeploymentsPerDay: 10,    // Conservative: max 10 deployments per day
-        recentDeployments: []
+        maxDeploymentsPerHour: 3, // Conservative: max 3 deployments per hour
+        maxDeploymentsPerDay: 10, // Conservative: max 10 deployments per day
+        recentDeployments: [],
       },
       circuitBreaker: {
-        failureThreshold: 3,         // Open circuit after 3 failures
-        recoveryCooldown: 30,        // 30 minutes cooldown before HALF_OPEN
-        testRequestLimit: 1          // Only 1 test request in HALF_OPEN
+        failureThreshold: 3, // Open circuit after 3 failures
+        recoveryCooldown: 30, // 30 minutes cooldown before HALF_OPEN
+        testRequestLimit: 1, // Only 1 test request in HALF_OPEN
       },
       emergencyMode: false,
-      auditLog: [],                  // Track all emergency overrides
-      lastCheck: new Date().toISOString()
+      auditLog: [], // Track all emergency overrides
+      lastCheck: new Date().toISOString(),
     };
   }
 
@@ -74,29 +77,29 @@ class SafetyCircuit {
       this.checkDeploymentWindow(),
       this.checkRateLimit(),
       this.checkSystemHealth(),
-      this.checkChangeFreeze()
+      this.checkChangeFreeze(),
     ];
 
-    const results = checks.map(check => check.call(this, options));
-    const blocked = results.some(result => !result.allowed);
+    const results = checks.map((check) => check.call(this, options));
+    const blocked = results.some((result) => !result.allowed);
 
     if (blocked) {
       const reasons = results
-        .filter(result => !result.allowed)
-        .map(result => result.reason);
+        .filter((result) => !result.allowed)
+        .map((result) => result.reason);
 
       console.log('🚫 Deployment blocked:', reasons.join(', '));
       return {
         allowed: false,
         reasons: reasons,
-        circuit: this.state.circuit
+        circuit: this.state.circuit,
       };
     }
 
     console.log('✅ Deployment allowed');
     return {
       allowed: true,
-      circuit: this.state.circuit
+      circuit: this.state.circuit,
     };
   }
 
@@ -106,7 +109,10 @@ class SafetyCircuit {
     switch (this.state.circuit) {
       case 'OPEN':
         // Check if circuit should move to HALF_OPEN
-        if (this.state.blockedUntil && now > new Date(this.state.blockedUntil)) {
+        if (
+          this.state.blockedUntil &&
+          now > new Date(this.state.blockedUntil)
+        ) {
           this.state.circuit = 'HALF_OPEN';
           this.saveState();
           console.log('🟡 Circuit moved to HALF_OPEN - testing mode');
@@ -114,7 +120,7 @@ class SafetyCircuit {
         }
         return {
           allowed: false,
-          reason: `Circuit OPEN until ${this.state.blockedUntil}`
+          reason: `Circuit OPEN until ${this.state.blockedUntil}`,
         };
 
       case 'HALF_OPEN':
@@ -140,7 +146,7 @@ class SafetyCircuit {
     if (!this.state.deploymentWindow.allowedDays.includes(currentDay)) {
       return {
         allowed: false,
-        reason: 'Deployment not allowed on weekends'
+        reason: 'Deployment not allowed on weekends',
       };
     }
 
@@ -149,7 +155,7 @@ class SafetyCircuit {
     if (currentTime < start || currentTime > end) {
       return {
         allowed: false,
-        reason: `Deployment outside window (${start}-${end} UTC)`
+        reason: `Deployment outside window (${start}-${end} UTC)`,
       };
     }
 
@@ -162,19 +168,22 @@ class SafetyCircuit {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     // Clean old deployments
-    this.state.rateLimit.recentDeployments = this.state.rateLimit.recentDeployments
-      .filter(deployment => new Date(deployment.timestamp) > oneDayAgo);
+    this.state.rateLimit.recentDeployments =
+      this.state.rateLimit.recentDeployments.filter(
+        (deployment) => new Date(deployment.timestamp) > oneDayAgo,
+      );
 
     const recentDeployments = this.state.rateLimit.recentDeployments;
-    const deploymentsLastHour = recentDeployments
-      .filter(deployment => new Date(deployment.timestamp) > oneHourAgo).length;
+    const deploymentsLastHour = recentDeployments.filter(
+      (deployment) => new Date(deployment.timestamp) > oneHourAgo,
+    ).length;
     const deploymentsLastDay = recentDeployments.length;
 
     // Check hourly limit
     if (deploymentsLastHour >= this.state.rateLimit.maxDeploymentsPerHour) {
       return {
         allowed: false,
-        reason: `Rate limit exceeded: ${deploymentsLastHour}/${this.state.rateLimit.maxDeploymentsPerHour} per hour`
+        reason: `Rate limit exceeded: ${deploymentsLastHour}/${this.state.rateLimit.maxDeploymentsPerHour} per hour`,
       };
     }
 
@@ -182,7 +191,7 @@ class SafetyCircuit {
     if (deploymentsLastDay >= this.state.rateLimit.maxDeploymentsPerDay) {
       return {
         allowed: false,
-        reason: `Rate limit exceeded: ${deploymentsLastDay}/${this.state.rateLimit.maxDeploymentsPerDay} per day`
+        reason: `Rate limit exceeded: ${deploymentsLastDay}/${this.state.rateLimit.maxDeploymentsPerDay} per day`,
       };
     }
 
@@ -194,7 +203,7 @@ class SafetyCircuit {
       // Quick health check of critical services
       const healthEndpoints = [
         'https://api.summit.dev/health',
-        'https://graph.summit.dev/health'
+        'https://graph.summit.dev/health',
       ];
 
       let healthyCount = 0;
@@ -211,11 +220,14 @@ class SafetyCircuit {
       if (healthPercentage < 50) {
         return {
           allowed: false,
-          reason: `System health poor: ${healthPercentage.toFixed(0)}%`
+          reason: `System health poor: ${healthPercentage.toFixed(0)}%`,
         };
       }
 
-      return { allowed: true, reason: `System health good: ${healthPercentage.toFixed(0)}%` };
+      return {
+        allowed: true,
+        reason: `System health good: ${healthPercentage.toFixed(0)}%`,
+      };
     } catch (error) {
       console.warn('Health check failed:', error.message);
       return { allowed: true, reason: 'Health check inconclusive' };
@@ -232,7 +244,7 @@ class SafetyCircuit {
         if (freezeConfig.includes('active: true')) {
           return {
             allowed: false,
-            reason: 'Change freeze active'
+            reason: 'Change freeze active',
           };
         }
       }
@@ -250,7 +262,7 @@ class SafetyCircuit {
     this.state.rateLimit.recentDeployments.push({
       timestamp: now.toISOString(),
       success: success,
-      metadata: metadata
+      metadata: metadata,
     });
 
     if (success) {
@@ -283,10 +295,12 @@ class SafetyCircuit {
     if (this.state.failureCount >= maxFailures) {
       this.state.circuit = 'OPEN';
       this.state.blockedUntil = new Date(
-        Date.now() + blockDurationMinutes * 60 * 1000
+        Date.now() + blockDurationMinutes * 60 * 1000,
       ).toISOString();
 
-      console.log(`🚨 Circuit OPEN - too many failures (${this.state.failureCount})`);
+      console.log(
+        `🚨 Circuit OPEN - too many failures (${this.state.failureCount})`,
+      );
       console.log(`⏰ Blocked until: ${this.state.blockedUntil}`);
     }
   }
@@ -306,7 +320,7 @@ class SafetyCircuit {
       user: user || process.env.GITHUB_ACTOR || 'unknown',
       reason,
       sessionId: `emergency-${Date.now()}`,
-      ipAddress: process.env.GITHUB_SERVER_URL || 'github-actions'
+      ipAddress: process.env.GITHUB_SERVER_URL || 'github-actions',
     };
 
     this.state.auditLog = this.state.auditLog || [];
@@ -334,9 +348,13 @@ class SafetyCircuit {
       user: user || process.env.GITHUB_ACTOR || 'unknown',
       reason: 'Emergency mode deactivated',
       sessionId: `emergency-${Date.now()}`,
-      duration: this.state.emergencyActivated ?
-        ((new Date() - new Date(this.state.emergencyActivated)) / 1000 / 60).toFixed(2) + ' minutes' :
-        'unknown'
+      duration: this.state.emergencyActivated
+        ? (
+            (new Date() - new Date(this.state.emergencyActivated)) /
+            1000 /
+            60
+          ).toFixed(2) + ' minutes'
+        : 'unknown',
     };
 
     this.state.auditLog = this.state.auditLog || [];
@@ -384,15 +402,20 @@ This emergency override was triggered to bypass Release Captain safety controls.
 
         fs.writeFileSync('/tmp/emergency-audit.md', issueBody);
 
-        execSync(`gh issue create \
+        execSync(
+          `gh issue create \
           --title "🚨 Emergency Mode Audit: ${auditEntry.sessionId}" \
           --body-file /tmp/emergency-audit.md \
           --label "emergency-audit,security,compliance" \
-          --assignee "${auditEntry.user}"`, {
-          env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN }
-        });
+          --assignee "${auditEntry.user}"`,
+          {
+            env: { ...process.env, GH_TOKEN: process.env.GITHUB_TOKEN },
+          },
+        );
 
-        console.log(`📝 Emergency audit issue created for session ${auditEntry.sessionId}`);
+        console.log(
+          `📝 Emergency audit issue created for session ${auditEntry.sessionId}`,
+        );
       }
     } catch (error) {
       console.warn('Failed to create emergency audit issue:', error.message);
@@ -408,7 +431,7 @@ This emergency override was triggered to bypass Release Captain safety controls.
       blockedUntil: this.state.blockedUntil,
       emergencyMode: this.state.emergencyMode,
       recentDeployments: this.state.rateLimit.recentDeployments.length,
-      deploymentWindow: this.state.deploymentWindow
+      deploymentWindow: this.state.deploymentWindow,
     };
   }
 
@@ -473,7 +496,7 @@ async function main() {
 }
 
 if (require.main === module) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error('Safety circuit error:', error.message);
     process.exit(1);
   });

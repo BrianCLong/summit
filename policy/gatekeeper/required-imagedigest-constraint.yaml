@@ -5,8 +5,8 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
-    excludedNamespaces: ["kube-system", "gatekeeper-system"]
+      - apiGroups: ['']
+        kinds: ['Pod']
+    excludedNamespaces: ['kube-system', 'gatekeeper-system']
   parameters:
-    excludedNamespaces: ["kube-system", "gatekeeper-system"]
+    excludedNamespaces: ['kube-system', 'gatekeeper-system']

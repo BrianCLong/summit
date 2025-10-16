@@ -1,6 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { ArtifactInput, DiffEntry, Signer, SparArtifact, SparManifest } from './types';
+import {
+  ArtifactInput,
+  DiffEntry,
+  Signer,
+  SparArtifact,
+  SparManifest,
+} from './types';
 import {
   computeHash,
   deepClone,
@@ -44,7 +50,10 @@ export class SparRegistry {
     }
 
     const templateEntries = this.index.templates[prepared.templateId] ?? [];
-    const nextVersion = templateEntries.length > 0 ? templateEntries[templateEntries.length - 1].version + 1 : 1;
+    const nextVersion =
+      templateEntries.length > 0
+        ? templateEntries[templateEntries.length - 1].version + 1
+        : 1;
     const artifactId = `${prepared.templateId}:v${nextVersion}`;
     const createdAt = new Date().toISOString();
     const signature = signer.sign(hash);
@@ -68,7 +77,10 @@ export class SparRegistry {
       createdAt,
     };
 
-    this.index.templates[prepared.templateId] = [...templateEntries, registryEntry];
+    this.index.templates[prepared.templateId] = [
+      ...templateEntries,
+      registryEntry,
+    ];
     this.index.hashes[hash] = artifactId;
     this.saveIndex();
 
@@ -89,7 +101,9 @@ export class SparRegistry {
     if (templateId) {
       return this.loadArtifactsForTemplate(templateId);
     }
-    return Object.keys(this.index.templates).flatMap((id) => this.loadArtifactsForTemplate(id));
+    return Object.keys(this.index.templates).flatMap((id) =>
+      this.loadArtifactsForTemplate(id),
+    );
   }
 
   exportManifest(artifactId: string): SparManifest {
@@ -138,11 +152,16 @@ export class SparRegistry {
   }
 
   private persistArtifact(artifact: SparArtifact): void {
-    const artifactPath = this.artifactPath(artifact.templateId, artifact.version);
+    const artifactPath = this.artifactPath(
+      artifact.templateId,
+      artifact.version,
+    );
     if (fs.existsSync(artifactPath)) {
       const existing = fs.readFileSync(artifactPath, 'utf-8');
       if (existing !== JSON.stringify(artifact, null, 2)) {
-        throw new Error(`Artifact at ${artifactPath} already exists with different content`);
+        throw new Error(
+          `Artifact at ${artifactPath} already exists with different content`,
+        );
       }
       return;
     }
@@ -155,7 +174,10 @@ export class SparRegistry {
     return entries.map((entry) => this.getArtifact(entry.id));
   }
 
-  private parseArtifactId(artifactId: string): { templateId: string; version: number } {
+  private parseArtifactId(artifactId: string): {
+    templateId: string;
+    version: number;
+  } {
     const [templateId, versionPart] = artifactId.split(':v');
     if (!templateId || !versionPart) {
       throw new Error(`Invalid artifact id ${artifactId}`);
@@ -171,7 +193,9 @@ export class SparRegistry {
     return path.join(this.storageDir, templateId, `v${version}.json`);
   }
 
-  private canonicalPayload(input: ArtifactInput | SparArtifact | SparManifest): Record<string, unknown> {
+  private canonicalPayload(
+    input: ArtifactInput | SparArtifact | SparManifest,
+  ): Record<string, unknown> {
     return {
       promptTemplate: input.promptTemplate,
       inputs: input.inputs,
@@ -182,7 +206,9 @@ export class SparRegistry {
     };
   }
 
-  private corePayload(input: ArtifactInput | SparArtifact | SparManifest): Record<string, unknown> {
+  private corePayload(
+    input: ArtifactInput | SparArtifact | SparManifest,
+  ): Record<string, unknown> {
     return this.canonicalPayload(input);
   }
 
@@ -205,7 +231,9 @@ export class SparRegistry {
         tools: normaliseTools(
           input.metadata.tools.map((tool) => ({
             ...tool,
-            parameters: tool.parameters ? deepClone(tool.parameters) : undefined,
+            parameters: tool.parameters
+              ? deepClone(tool.parameters)
+              : undefined,
           })),
         ),
       },
@@ -229,9 +257,15 @@ export class SparRegistry {
   }
 }
 
-function diffCore(a: Record<string, unknown>, b: Record<string, unknown>, prefix = ''): DiffEntry[] {
+function diffCore(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>,
+  prefix = '',
+): DiffEntry[] {
   const diffs: DiffEntry[] = [];
-  const keys = Array.from(new Set([...Object.keys(a), ...Object.keys(b)])).sort();
+  const keys = Array.from(
+    new Set([...Object.keys(a), ...Object.keys(b)]),
+  ).sort();
 
   for (const key of keys) {
     const path = prefix ? `${prefix}.${key}` : key;
@@ -247,26 +281,58 @@ function diffCore(a: Record<string, unknown>, b: Record<string, unknown>, prefix
       for (let index = 0; index < maxLength; index += 1) {
         const itemPath = `${path}[${index}]`;
         if (index >= aValue.length) {
-          diffs.push({ path: itemPath, before: undefined, after: bValue[index] });
+          diffs.push({
+            path: itemPath,
+            before: undefined,
+            after: bValue[index],
+          });
           continue;
         }
         if (index >= bValue.length) {
-          diffs.push({ path: itemPath, before: aValue[index], after: undefined });
+          diffs.push({
+            path: itemPath,
+            before: aValue[index],
+            after: undefined,
+          });
           continue;
         }
         if (!deepEqual(aValue[index], bValue[index])) {
-          if (typeof aValue[index] === 'object' && typeof bValue[index] === 'object') {
-            diffs.push(...diffCore(aValue[index] as Record<string, unknown>, bValue[index] as Record<string, unknown>, itemPath));
+          if (
+            typeof aValue[index] === 'object' &&
+            typeof bValue[index] === 'object'
+          ) {
+            diffs.push(
+              ...diffCore(
+                aValue[index] as Record<string, unknown>,
+                bValue[index] as Record<string, unknown>,
+                itemPath,
+              ),
+            );
           } else {
-            diffs.push({ path: itemPath, before: aValue[index], after: bValue[index] });
+            diffs.push({
+              path: itemPath,
+              before: aValue[index],
+              after: bValue[index],
+            });
           }
         }
       }
       continue;
     }
 
-    if (typeof aValue === 'object' && typeof bValue === 'object' && aValue && bValue) {
-      diffs.push(...diffCore(aValue as Record<string, unknown>, bValue as Record<string, unknown>, path));
+    if (
+      typeof aValue === 'object' &&
+      typeof bValue === 'object' &&
+      aValue &&
+      bValue
+    ) {
+      diffs.push(
+        ...diffCore(
+          aValue as Record<string, unknown>,
+          bValue as Record<string, unknown>,
+          path,
+        ),
+      );
       continue;
     }
 

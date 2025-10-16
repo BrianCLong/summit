@@ -1,21 +1,21 @@
-import { randomUUID } from "node:crypto";
-import { NarrativeSimulationEngine } from "./engine.js";
+import { randomUUID } from 'node:crypto';
+import { NarrativeSimulationEngine } from './engine.js';
 import type {
   SimulationConfig,
   SimulationSummary,
   NarrativeState,
   NarrativeEvent,
   NarrativeGeneratorMode,
-} from "./types.js";
+} from './types.js';
 
 interface CreateSimulationInput {
   name: string;
   themes: string[];
   tickIntervalMinutes?: number;
-  initialEntities: SimulationConfig["initialEntities"];
-  initialParameters?: SimulationConfig["initialParameters"];
+  initialEntities: SimulationConfig['initialEntities'];
+  initialParameters?: SimulationConfig['initialParameters'];
   generatorMode?: NarrativeGeneratorMode;
-  llmClient?: SimulationConfig["llmClient"];
+  llmClient?: SimulationConfig['llmClient'];
   metadata?: Record<string, unknown>;
 }
 
@@ -58,7 +58,9 @@ export class NarrativeSimulationManager {
   }
 
   list(): SimulationSummary[] {
-    return Array.from(this.simulations.values()).map((engine) => engine.getSummary());
+    return Array.from(this.simulations.values()).map((engine) =>
+      engine.getSummary(),
+    );
   }
 
   remove(id: string): boolean {
@@ -95,4 +97,5 @@ export class NarrativeSimulationManager {
   }
 }
 
-export const narrativeSimulationManager = NarrativeSimulationManager.getInstance();
+export const narrativeSimulationManager =
+  NarrativeSimulationManager.getInstance();

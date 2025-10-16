@@ -1,12 +1,12 @@
 area: runbooks
 intent: productionize
-objective: "R2 Phishing Cluster Discovery—E2E automated; disclosure pack attaches manifests."
+objective: 'R2 Phishing Cluster Discovery—E2E automated; disclosure pack attaches manifests.'
 work_items:
   - id: RB-1
-    story: "Pipeline: headers→SPF/DKIM→CT logs/DNS→entity consolidation→report"
+    story: 'Pipeline: headers→SPF/DKIM→CT logs/DNS→entity consolidation→report'
   - id: RB-2
-    story: "Attach provenance manifests to evidence bundle"
+    story: 'Attach provenance manifests to evidence bundle'
 acceptance:
-  - "One-click E2E run; export verified; report template filled"
-owners: { DRI: "data-pipelines", support: ["prov-ledger","docs"] }
-metrics: ["r2_runbook_e2e_pass = true"]
+  - 'One-click E2E run; export verified; report template filled'
+owners: { DRI: 'data-pipelines', support: ['prov-ledger', 'docs'] }
+metrics: ['r2_runbook_e2e_pass = true']

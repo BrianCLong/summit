@@ -30,14 +30,21 @@ interface AdversaryIntentDisplayProps {
   scenarioId: string;
 }
 
-const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({ scenarioId }) => {
+const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({
+  scenarioId,
+}) => {
   const { loading, error, data } = useQuery(GET_ADVERSARY_INTENT_ESTIMATES, {
     variables: { scenarioId },
     pollInterval: 10000, // Poll every 10 seconds
   });
 
   if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">Error loading adversary intent: {error.message}</Alert>;
+  if (error)
+    return (
+      <Alert severity="error">
+        Error loading adversary intent: {error.message}
+      </Alert>
+    );
 
   const estimates = data?.getAdversaryIntentEstimates || [];
 
@@ -47,12 +54,14 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({ scenari
         Adversary Intent Estimation
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Intent estimates are hypothetical and for decision support only.
+        WAR-GAMED SIMULATION - Intent estimates are hypothetical and for
+        decision support only.
       </Alert>
 
       {estimates.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No adversary intent estimates available for this scenario yet. Run a simulation to generate data.
+          No adversary intent estimates available for this scenario yet. Run a
+          simulation to generate data.
         </Typography>
       ) : (
         <List>
@@ -73,7 +82,13 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({ scenari
                     variant="determinate"
                     value={estimate.likelihood * 100}
                     sx={{ flexGrow: 1, height: 10, borderRadius: 5 }}
-                    color={estimate.likelihood > 0.7 ? 'error' : estimate.likelihood > 0.4 ? 'warning' : 'success'}
+                    color={
+                      estimate.likelihood > 0.7
+                        ? 'error'
+                        : estimate.likelihood > 0.4
+                          ? 'warning'
+                          : 'success'
+                    }
                   />
                 </Box>
                 <Typography variant="body2" sx={{ mt: 1 }}>

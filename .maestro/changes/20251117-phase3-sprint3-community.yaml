@@ -1,23 +1,22 @@
-
 area: multi
 intent: community
 release_tag: v2.0.2
 window: { start: 2025-11-17, end: 2025-11-28 }
-objective: "Enhance community engagement, improve public documentation, and streamline the contribution process."
+objective: 'Enhance community engagement, improve public documentation, and streamline the contribution process.'
 work_items:
   - id: CP-1
-    story: "Set up a community forum or discussion board (e.g., GitHub Discussions, Discourse)."
+    story: 'Set up a community forum or discussion board (e.g., GitHub Discussions, Discourse).'
     acceptance:
-      - "Platform is live and accessible."
-      - "Initial moderation guidelines are in place."
+      - 'Platform is live and accessible.'
+      - 'Initial moderation guidelines are in place.'
   - id: DD-1
-    story: "Create new tutorials for advanced features (e.g., custom OPA policies, LSC integration)."
+    story: 'Create new tutorials for advanced features (e.g., custom OPA policies, LSC integration).'
     acceptance:
-      - "At least 2 new tutorials are published on the docs site."
-      - "API reference documentation is initiated."
+      - 'At least 2 new tutorials are published on the docs site.'
+      - 'API reference documentation is initiated.'
   - id: CS-1
-    story: "Streamline external contribution process (CONTRIBUTING.md, PR templates)."
+    story: 'Streamline external contribution process (CONTRIBUTING.md, PR templates).'
     acceptance:
-      - "CONTRIBUTING.md is updated with clear guidelines."
-      - "A new PR template for external contributors is available."
-owners: { DRI: "community", support: ["docs", "dx"] }
+      - 'CONTRIBUTING.md is updated with clear guidelines.'
+      - 'A new PR template for external contributors is available.'
+owners: { DRI: 'community', support: ['docs', 'dx'] }

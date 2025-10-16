@@ -134,7 +134,8 @@ async function executeTask(task, store) {
   const key = hash(`${task.type}:${stableStringify(task.params)}`);
   const existing = await store.findTaskByKey(key);
   if (existing && existing.status === 'succeeded') return existing.outcome;
-  if (existing && existing.status === 'running') throw new Error('Duplicate in-flight');
+  if (existing && existing.status === 'running')
+    throw new Error('Duplicate in-flight');
   await store.claimTask(task.id, key); // row lock + set running
   try {
     const plan = await actions[task.type].plan(task.params);
@@ -154,7 +155,12 @@ async function executeTask(task, store) {
 **OPA hook (pseudo):**
 
 ```ts
-const decision = await opa.evaluate('orchestrator/allow', { subject, action, resource, context });
+const decision = await opa.evaluate('orchestrator/allow', {
+  subject,
+  action,
+  resource,
+  context,
+});
 if (!decision.allow) throw new Error('PolicyDenied');
 ```
 

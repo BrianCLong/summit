@@ -1,18 +1,33 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import { sign } from '@noble/ed25519';
-import type { ApprovalBundle, WorkflowDefinition, WorkflowInstance } from './types';
-import { ApprovalRequest, createWorkflow, fetchServerInfo, loadInstance, startInstance, submitApproval } from './api';
+import type {
+  ApprovalBundle,
+  WorkflowDefinition,
+  WorkflowInstance,
+} from './types';
+import {
+  ApprovalRequest,
+  createWorkflow,
+  fetchServerInfo,
+  loadInstance,
+  startInstance,
+  submitApproval,
+} from './api';
 
 const encoder = new TextEncoder();
 
-function collectActiveGates(inst: WorkflowInstance | null): { stageId: string; gateId: string }[] {
+function collectActiveGates(
+  inst: WorkflowInstance | null,
+): { stageId: string; gateId: string }[] {
   if (!inst) return [];
   const pairs: { stageId: string; gateId: string }[] = [];
   Object.entries(inst.activeStages).forEach(([stageId, stage]) => {
     Object.entries(stage.gates).forEach(([gateId, gate]) => {
       if (!gate.satisfied) {
-        if (stage.definition.kind !== 'sequential' || stage.activeGate === gateId) {
+        if (
+          stage.definition.kind !== 'sequential' ||
+          stage.activeGate === gateId
+        ) {
           pairs.push({ stageId, gateId });
         }
       }
@@ -106,7 +121,14 @@ function decodePrivateKey(base64Key: string): Uint8Array {
   throw new Error('Private key must decode to 32 or 64 bytes.');
 }
 
-function canonicalMessage(instanceId: string, stageId: string, gateId: string, actorId: string, delegatedFrom: string, nanos: bigint): string {
+function canonicalMessage(
+  instanceId: string,
+  stageId: string,
+  gateId: string,
+  actorId: string,
+  delegatedFrom: string,
+  nanos: bigint,
+): string {
   return `${instanceId}|${stageId}|${gateId}|${actorId}|${delegatedFrom}|${nanos}`;
 }
 
@@ -120,7 +142,7 @@ const emptyApproval = {
   gateId: '',
   actorId: '',
   delegatedFrom: '',
-  privateKey: ''
+  privateKey: '',
 };
 
 const emptyContext = `{
@@ -131,7 +153,8 @@ function App() {
   const [serverKey, setServerKey] = useState<string>('');
   const [workflowInput, setWorkflowInput] = useState<string>(sampleWorkflow);
   const [contextInput, setContextInput] = useState<string>(emptyContext);
-  const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowDefinition | null>(null);
+  const [currentWorkflow, setCurrentWorkflow] =
+    useState<WorkflowDefinition | null>(null);
   const [workflowIdInput, setWorkflowIdInput] = useState<string>('');
   const [instanceIdInput, setInstanceIdInput] = useState<string>('');
   const [instance, setInstance] = useState<WorkflowInstance | null>(null);
@@ -142,7 +165,12 @@ function App() {
   useEffect(() => {
     fetchServerInfo()
       .then((info) => setServerKey(info.serverPublicKey))
-      .catch((err) => setStatus({ tone: 'error', message: `Failed to load server info: ${err.message}` }));
+      .catch((err) =>
+        setStatus({
+          tone: 'error',
+          message: `Failed to load server info: ${err.message}`,
+        }),
+      );
   }, []);
 
   const activeGates = useMemo(() => collectActiveGates(instance), [instance]);
@@ -155,9 +183,15 @@ function App() {
       const created = await createWorkflow(parsed);
       setCurrentWorkflow(created);
       setWorkflowIdInput(created.id ?? '');
-      setStatus({ tone: 'success', message: `Workflow created with id ${created.id}` });
+      setStatus({
+        tone: 'success',
+        message: `Workflow created with id ${created.id}`,
+      });
     } catch (err) {
-      setStatus({ tone: 'error', message: `Unable to create workflow: ${(err as Error).message}` });
+      setStatus({
+        tone: 'error',
+        message: `Unable to create workflow: ${(err as Error).message}`,
+      });
     } finally {
       setLoading(false);
     }
@@ -165,23 +199,38 @@ function App() {
 
   const handleStartInstance = async () => {
     if (!workflowIdInput) {
-      setStatus({ tone: 'error', message: 'Workflow ID is required to start an instance.' });
+      setStatus({
+        tone: 'error',
+        message: 'Workflow ID is required to start an instance.',
+      });
       return;
     }
     setStatus(null);
     try {
-      const context = contextInput ? (JSON.parse(contextInput) as Record<string, string>) : {};
+      const context = contextInput
+        ? (JSON.parse(contextInput) as Record<string, string>)
+        : {};
       setLoading(true);
       const created = await startInstance(workflowIdInput, context);
       setInstance(created);
       setInstanceIdInput(created.id);
-      setStatus({ tone: 'success', message: `Instance ${created.id} started.` });
+      setStatus({
+        tone: 'success',
+        message: `Instance ${created.id} started.`,
+      });
       const gates = collectActiveGates(created);
       if (gates[0]) {
-        setApprovalForm((prev) => ({ ...prev, stageId: gates[0].stageId, gateId: gates[0].gateId }));
+        setApprovalForm((prev) => ({
+          ...prev,
+          stageId: gates[0].stageId,
+          gateId: gates[0].gateId,
+        }));
       }
     } catch (err) {
-      setStatus({ tone: 'error', message: `Unable to start instance: ${(err as Error).message}` });
+      setStatus({
+        tone: 'error',
+        message: `Unable to start instance: ${(err as Error).message}`,
+      });
     } finally {
       setLoading(false);
     }
@@ -189,7 +238,10 @@ function App() {
 
   const handleLoadInstance = async (id: string) => {
     if (!id) {
-      setStatus({ tone: 'error', message: 'Instance ID is required to load state.' });
+      setStatus({
+        tone: 'error',
+        message: 'Instance ID is required to load state.',
+      });
       return;
     }
     setStatus(null);
@@ -199,11 +251,21 @@ function App() {
       setInstance(loaded);
       const gates = collectActiveGates(loaded);
       if (gates[0]) {
-        setApprovalForm((prev) => ({ ...prev, stageId: gates[0].stageId, gateId: gates[0].gateId }));
+        setApprovalForm((prev) => ({
+          ...prev,
+          stageId: gates[0].stageId,
+          gateId: gates[0].gateId,
+        }));
       }
-      setStatus({ tone: 'success', message: `Instance ${loaded.id} state refreshed.` });
+      setStatus({
+        tone: 'success',
+        message: `Instance ${loaded.id} state refreshed.`,
+      });
     } catch (err) {
-      setStatus({ tone: 'error', message: `Unable to load instance: ${(err as Error).message}` });
+      setStatus({
+        tone: 'error',
+        message: `Unable to load instance: ${(err as Error).message}`,
+      });
     } finally {
       setLoading(false);
     }
@@ -211,12 +273,19 @@ function App() {
 
   const handleApprovalSubmit = async () => {
     if (!instance) {
-      setStatus({ tone: 'error', message: 'Load an instance before submitting approvals.' });
+      setStatus({
+        tone: 'error',
+        message: 'Load an instance before submitting approvals.',
+      });
       return;
     }
-    const { stageId, gateId, actorId, delegatedFrom, privateKey } = approvalForm;
+    const { stageId, gateId, actorId, delegatedFrom, privateKey } =
+      approvalForm;
     if (!stageId || !gateId || !actorId || !privateKey) {
-      setStatus({ tone: 'error', message: 'Stage, gate, actor, and private key are required.' });
+      setStatus({
+        tone: 'error',
+        message: 'Stage, gate, actor, and private key are required.',
+      });
       return;
     }
     setStatus(null);
@@ -224,7 +293,14 @@ function App() {
       const seed = decodePrivateKey(privateKey);
       const issuedAt = new Date();
       const nanos = BigInt(issuedAt.getTime()) * 1_000_000n;
-      const message = canonicalMessage(instance.id, stageId, gateId, actorId, delegatedFrom ?? '', nanos);
+      const message = canonicalMessage(
+        instance.id,
+        stageId,
+        gateId,
+        actorId,
+        delegatedFrom ?? '',
+        nanos,
+      );
       const signature = await sign(encoder.encode(message), seed);
       const payload: ApprovalRequest = {
         stageId,
@@ -232,7 +308,7 @@ function App() {
         actorId,
         delegatedFrom: delegatedFrom ? delegatedFrom : undefined,
         signature: toBase64(signature),
-        signedAt: issuedAt.toISOString()
+        signedAt: issuedAt.toISOString(),
       };
       setLoading(true);
       const response = await submitApproval(instance.id, payload);
@@ -244,7 +320,10 @@ function App() {
       setInstance(updated);
       setStatus({ tone: 'success', message: info });
     } catch (err) {
-      setStatus({ tone: 'error', message: `Approval failed: ${(err as Error).message}` });
+      setStatus({
+        tone: 'error',
+        message: `Approval failed: ${(err as Error).message}`,
+      });
     } finally {
       setLoading(false);
     }
@@ -257,9 +336,12 @@ function App() {
     return (
       <div className="form-grid">
         {bundles.map((bundle) => (
-          <section key={`${bundle.stageId}-${bundle.gateId}-${bundle.issuedAt}`}>
+          <section
+            key={`${bundle.stageId}-${bundle.gateId}-${bundle.issuedAt}`}
+          >
             <h3>
-              Bundle for stage <strong>{bundle.stageId}</strong> / gate <strong>{bundle.gateId}</strong>
+              Bundle for stage <strong>{bundle.stageId}</strong> / gate{' '}
+              <strong>{bundle.gateId}</strong>
             </h3>
             <p className="badge">Quorum {bundle.quorum}</p>
             <p>Issued: {new Date(bundle.issuedAt).toLocaleString()}</p>
@@ -278,14 +360,25 @@ function App() {
       </p>
 
       {status && (
-        <section style={{ border: status.tone === 'success' ? '1px solid #22c55e' : '1px solid #f87171' }}>
-          <strong>{status.tone === 'success' ? 'Success' : 'Error'}:</strong> {status.message}
+        <section
+          style={{
+            border:
+              status.tone === 'success'
+                ? '1px solid #22c55e'
+                : '1px solid #f87171',
+          }}
+        >
+          <strong>{status.tone === 'success' ? 'Success' : 'Error'}:</strong>{' '}
+          {status.message}
         </section>
       )}
 
       <section>
         <h2>1. Define Workflow</h2>
-        <p>Paste a workflow definition including policy participants. Create operations to persist and receive the workflow id.</p>
+        <p>
+          Paste a workflow definition including policy participants. Create
+          operations to persist and receive the workflow id.
+        </p>
         <textarea
           rows={16}
           value={workflowInput}
@@ -318,7 +411,11 @@ function App() {
               value={contextInput}
               onChange={(event) => setContextInput(event.target.value)}
             />
-            <button style={{ marginTop: '0.75rem' }} onClick={handleStartInstance} disabled={loading}>
+            <button
+              style={{ marginTop: '0.75rem' }}
+              onClick={handleStartInstance}
+              disabled={loading}
+            >
               Start Instance
             </button>
           </div>
@@ -330,7 +427,11 @@ function App() {
               onChange={(event) => setInstanceIdInput(event.target.value)}
               placeholder="instance identifier"
             />
-            <button style={{ marginTop: '0.75rem' }} onClick={() => handleLoadInstance(instanceIdInput)} disabled={loading}>
+            <button
+              style={{ marginTop: '0.75rem' }}
+              onClick={() => handleLoadInstance(instanceIdInput)}
+              disabled={loading}
+            >
               Load Instance
             </button>
           </div>
@@ -339,7 +440,8 @@ function App() {
           <div style={{ marginTop: '1rem' }}>
             <h3>Instance Snapshot</h3>
             <p>
-              Status: <strong>{instance.status}</strong> | Created {new Date(instance.createdAt).toLocaleString()} | Updated{' '}
+              Status: <strong>{instance.status}</strong> | Created{' '}
+              {new Date(instance.createdAt).toLocaleString()} | Updated{' '}
               {new Date(instance.updatedAt).toLocaleString()}
             </p>
             <details>
@@ -359,7 +461,12 @@ function App() {
               <input
                 id="stage-id"
                 value={approvalForm.stageId}
-                onChange={(event) => setApprovalForm((prev) => ({ ...prev, stageId: event.target.value }))}
+                onChange={(event) =>
+                  setApprovalForm((prev) => ({
+                    ...prev,
+                    stageId: event.target.value,
+                  }))
+                }
                 placeholder="stage-identifier"
                 list="active-stages"
               />
@@ -369,7 +476,12 @@ function App() {
               <input
                 id="gate-id"
                 value={approvalForm.gateId}
-                onChange={(event) => setApprovalForm((prev) => ({ ...prev, gateId: event.target.value }))}
+                onChange={(event) =>
+                  setApprovalForm((prev) => ({
+                    ...prev,
+                    gateId: event.target.value,
+                  }))
+                }
                 placeholder="gate-identifier"
                 list="active-gates"
               />
@@ -381,7 +493,12 @@ function App() {
               <input
                 id="actor-id"
                 value={approvalForm.actorId}
-                onChange={(event) => setApprovalForm((prev) => ({ ...prev, actorId: event.target.value }))}
+                onChange={(event) =>
+                  setApprovalForm((prev) => ({
+                    ...prev,
+                    actorId: event.target.value,
+                  }))
+                }
               />
             </div>
             <div>
@@ -389,7 +506,12 @@ function App() {
               <input
                 id="delegated-from"
                 value={approvalForm.delegatedFrom}
-                onChange={(event) => setApprovalForm((prev) => ({ ...prev, delegatedFrom: event.target.value }))}
+                onChange={(event) =>
+                  setApprovalForm((prev) => ({
+                    ...prev,
+                    delegatedFrom: event.target.value,
+                  }))
+                }
                 placeholder="optional principal id"
               />
             </div>
@@ -400,10 +522,18 @@ function App() {
               id="private-key"
               rows={4}
               value={approvalForm.privateKey}
-              onChange={(event) => setApprovalForm((prev) => ({ ...prev, privateKey: event.target.value }))}
+              onChange={(event) =>
+                setApprovalForm((prev) => ({
+                  ...prev,
+                  privateKey: event.target.value,
+                }))
+              }
             />
           </div>
-          <button onClick={handleApprovalSubmit} disabled={loading || !instance}>
+          <button
+            onClick={handleApprovalSubmit}
+            disabled={loading || !instance}
+          >
             Submit Approval
           </button>
         </div>
@@ -414,14 +544,21 @@ function App() {
         </datalist>
         <datalist id="active-gates">
           {activeGates.map((pair) => (
-            <option key={`gate-${pair.stageId}-${pair.gateId}`} value={pair.gateId} />
+            <option
+              key={`gate-${pair.stageId}-${pair.gateId}`}
+              value={pair.gateId}
+            />
           ))}
         </datalist>
       </section>
 
       <section>
         <h2>4. Approval Bundles</h2>
-        {instance ? renderBundles(instance.approvalBundles) : <p>Load an instance to view signed bundles.</p>}
+        {instance ? (
+          renderBundles(instance.approvalBundles)
+        ) : (
+          <p>Load an instance to view signed bundles.</p>
+        )}
       </section>
     </div>
   );

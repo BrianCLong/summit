@@ -6,7 +6,7 @@ import {
   ParseRequestBody,
   SummarizeRequestBody,
   ExtractRequestBody,
-  DoclingResponse
+  DoclingResponse,
 } from '../types.js';
 import {
   doclingLatency,
@@ -15,9 +15,12 @@ import {
   doclingSuccess,
   doclingCacheGauge,
   doclingQuality,
-  register
+  register,
 } from '../metrics/metrics.js';
-import { evaluatePurposePolicy, evaluateLicensePolicy } from '../security/policy.js';
+import {
+  evaluatePurposePolicy,
+  evaluateLicensePolicy,
+} from '../security/policy.js';
 import { provenanceEmitter } from '../provenance/ledger.js';
 import { safeLogPayload } from '../utils/redaction.js';
 
@@ -26,34 +29,54 @@ const config = loadConfig();
 const parseSchema = z.object({
   requestId: z.string().min(8),
   tenantId: z.string().min(1),
-  purpose: z.enum(['investigation', 't&s', 'benchmarking', 'release_notes', 'compliance']),
+  purpose: z.enum([
+    'investigation',
+    't&s',
+    'benchmarking',
+    'release_notes',
+    'compliance',
+  ]),
   retention: z.enum(['short', 'standard']),
   contentType: z.string().min(1),
   hints: z.array(z.string()).optional(),
   uri: z.string().url().optional(),
-  bytes: z.string().optional()
+  bytes: z.string().optional(),
 });
 
 const summarizeSchema = z.object({
   requestId: z.string().min(8),
   tenantId: z.string().min(1),
-  purpose: z.enum(['investigation', 't&s', 'benchmarking', 'release_notes', 'compliance']),
+  purpose: z.enum([
+    'investigation',
+    't&s',
+    'benchmarking',
+    'release_notes',
+    'compliance',
+  ]),
   retention: z.enum(['short', 'standard']),
   text: z.string().min(1),
   focus: z.enum(['failures', 'changelog', 'compliance']),
   maxTokens: z.number().int().positive().optional(),
-  relatedFragmentIds: z.array(z.string()).optional()
+  relatedFragmentIds: z.array(z.string()).optional(),
 });
 
 const extractSchema = z.object({
   requestId: z.string().min(8),
   tenantId: z.string().min(1),
-  purpose: z.enum(['investigation', 't&s', 'benchmarking', 'release_notes', 'compliance']),
+  purpose: z.enum([
+    'investigation',
+    't&s',
+    'benchmarking',
+    'release_notes',
+    'compliance',
+  ]),
   retention: z.enum(['short', 'standard']),
   text: z.string().optional(),
   bytes: z.string().optional(),
-  targets: z.array(z.enum(['license', 'version', 'cve', 'owner', 'policy'])).min(1),
-  fragmentIds: z.array(z.string()).optional()
+  targets: z
+    .array(z.enum(['license', 'version', 'cve', 'owner', 'policy']))
+    .min(1),
+  fragmentIds: z.array(z.string()).optional(),
 });
 
 type CacheEntry<T> = { expiresAt: number; response: DoclingResponse<T> };
@@ -67,17 +90,25 @@ export class DoclingHandler {
   }
 
   parse = async (req: Request, res: Response) => {
-    await this.dispatch(req, res, 'parse', parseSchema, async (payload) => this.client.parse(payload));
+    await this.dispatch(req, res, 'parse', parseSchema, async (payload) =>
+      this.client.parse(payload),
+    );
   };
 
   summarize = async (req: Request, res: Response) => {
-    await this.dispatch(req, res, 'summarize', summarizeSchema, async (payload) =>
-      this.client.summarize(payload)
+    await this.dispatch(
+      req,
+      res,
+      'summarize',
+      summarizeSchema,
+      async (payload) => this.client.summarize(payload),
     );
   };
 
   extract = async (req: Request, res: Response) => {
-    await this.dispatch(req, res, 'extract', extractSchema, async (payload) => this.client.extract(payload));
+    await this.dispatch(req, res, 'extract', extractSchema, async (payload) =>
+      this.client.extract(payload),
+    );
   };
 
   metrics = async (_req: Request, res: Response) => {
@@ -89,17 +120,23 @@ export class DoclingHandler {
     return this.cache.size;
   }
 
-  private async dispatch<Schema extends z.ZodTypeAny, Payload extends z.infer<Schema>, Result>(
+  private async dispatch<
+    Schema extends z.ZodTypeAny,
+    Payload extends z.infer<Schema>,
+    Result,
+  >(
     req: Request,
     res: Response,
     operation: 'parse' | 'summarize' | 'extract',
     schema: Schema,
-    executor: (payload: Payload) => Promise<DoclingResponse<Result>>
+    executor: (payload: Payload) => Promise<DoclingResponse<Result>>,
   ) {
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
       doclingSuccess.labels(operation, 'validation_error').inc();
-      return res.status(400).json({ error: 'invalid_request', details: parsed.error.issues });
+      return res
+        .status(400)
+        .json({ error: 'invalid_request', details: parsed.error.issues });
     }
 
     const payload = parsed.data;
@@ -107,7 +144,9 @@ export class DoclingHandler {
     const policyDecision = evaluatePurposePolicy(payload as any);
     if (!policyDecision.allow) {
       doclingSuccess.labels(operation, 'policy_denied').inc();
-      return res.status(403).json({ error: 'policy_denied', reason: policyDecision.reason });
+      return res
+        .status(403)
+        .json({ error: 'policy_denied', reason: policyDecision.reason });
     }
 
     const cached = this.getFromCache<Result>(payload.requestId);
@@ -119,7 +158,7 @@ export class DoclingHandler {
     const timer = doclingLatency.startTimer({
       operation,
       tenant_id: (payload as any).tenantId,
-      purpose: (payload as any).purpose
+      purpose: (payload as any).purpose,
     });
 
     try {
@@ -127,8 +166,12 @@ export class DoclingHandler {
       timer();
 
       doclingSuccess.labels(operation, 'success').inc();
-      doclingChars.labels(operation, (payload as any).tenantId).inc(response.usage.characters);
-      doclingCost.labels((payload as any).tenantId, (payload as any).purpose).inc(response.usage.costUsd);
+      doclingChars
+        .labels(operation, (payload as any).tenantId)
+        .inc(response.usage.characters);
+      doclingCost
+        .labels((payload as any).tenantId, (payload as any).purpose)
+        .inc(response.usage.costUsd);
 
       response.policySignals.forEach((signal) => {
         const decision = evaluateLicensePolicy(signal);
@@ -137,7 +180,7 @@ export class DoclingHandler {
         }
         if (signal.qualitySignals) {
           Object.entries(signal.qualitySignals).forEach(([key, value]) =>
-            doclingQuality.labels(key).observe(Number(value))
+            doclingQuality.labels(key).observe(Number(value)),
           );
         }
       });
@@ -152,14 +195,14 @@ export class DoclingHandler {
         parameters: response.provenance.parameters,
         input: payload,
         output: response.result,
-        requestId: response.requestId
+        requestId: response.requestId,
       });
 
       const sanitized = safeLogPayload({
         requestId: response.requestId,
         tenantId: response.tenantId,
         purpose: response.purpose,
-        retention: response.retention
+        retention: response.retention,
       });
       if (sanitized.wasRedacted) {
         doclingSuccess.labels(operation, 'redacted').inc();
@@ -173,7 +216,7 @@ export class DoclingHandler {
       return res.status(502).json({
         error: 'upstream_error',
         message: error?.message || 'Docling upstream failure',
-        fallback
+        fallback,
       });
     }
   }
@@ -196,7 +239,7 @@ export class DoclingHandler {
     }
     this.cache.set(requestId, {
       expiresAt: Date.now() + config.cacheTtlSeconds * 1000,
-      response
+      response,
     });
     doclingCacheGauge.set(this.cache.size);
   }

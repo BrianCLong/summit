@@ -13,7 +13,7 @@ import type {
   OptimizationSample,
   PolicyHook,
   ResponseStrategy,
-  RoutingPlan
+  RoutingPlan,
 } from './types';
 import type { AnomalyDetectorOptions } from './anomaly';
 import type { SelfHealingOrchestratorOptions } from './self-healing';
@@ -109,8 +109,13 @@ export class MaestroConductor {
     return this.jobRouter.route(job, assets, performance, this.policyHooks);
   }
 
-  private toOptimizationSample(signal: HealthSignal): OptimizationSample | undefined {
-    const sample: OptimizationSample = { assetId: signal.assetId, timestamp: signal.timestamp };
+  private toOptimizationSample(
+    signal: HealthSignal,
+  ): OptimizationSample | undefined {
+    const sample: OptimizationSample = {
+      assetId: signal.assetId,
+      timestamp: signal.timestamp,
+    };
     const metric = signal.metric.toLowerCase();
     if (metric.includes('latency')) {
       sample.latencyMs = signal.value;
@@ -148,7 +153,7 @@ export class MaestroConductor {
       ({
         id: anomaly.assetId,
         name: anomaly.assetId,
-        kind: 'microservice'
+        kind: 'microservice',
       } as const);
     const snapshot =
       this.monitor.getSnapshot(anomaly.assetId) ??
@@ -156,14 +161,14 @@ export class MaestroConductor {
         assetId: anomaly.assetId,
         lastUpdated: anomaly.timestamp,
         metrics: {},
-        annotations: []
+        annotations: [],
       } as const);
 
     const context = {
       asset,
       anomaly,
       snapshot,
-      policies: this.policyHooks
+      policies: this.policyHooks,
     };
     const { plans } = await this.selfHealing.orchestrate(context);
     const incident: IncidentReport = {
@@ -172,7 +177,7 @@ export class MaestroConductor {
       anomaly,
       snapshot,
       plans,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     this.incidents.push(incident);
   }

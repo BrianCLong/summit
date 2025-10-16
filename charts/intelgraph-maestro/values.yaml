@@ -39,7 +39,7 @@ api:
   replicaCount: 3
   image:
     repository: intelgraph-api
-    digest: ""  # Set by CI pipeline
+    digest: '' # Set by CI pipeline
 
   service:
     type: ClusterIP
@@ -77,16 +77,16 @@ api:
   # SLO targets
   slo:
     availability: 99.9
-    latencyP95: 350  # ms
-    latencyP99: 900  # ms
-    writeLatencyP95: 700  # ms
+    latencyP95: 350 # ms
+    latencyP99: 900 # ms
+    writeLatencyP95: 700 # ms
 
 client:
   enabled: true
   replicaCount: 3
   image:
     repository: intelgraph-client
-    digest: ""  # Set by CI pipeline
+    digest: '' # Set by CI pipeline
 
   service:
     type: ClusterIP
@@ -104,7 +104,7 @@ client:
   # CDN and static assets
   cdn:
     enabled: true
-    cachePolicy: "max-age=31536000, immutable"
+    cachePolicy: 'max-age=31536000, immutable'
 
   # Security headers
   security:
@@ -119,7 +119,7 @@ gateway:
   replicaCount: 2
   image:
     repository: intelgraph-gateway
-    digest: ""  # Set by CI pipeline
+    digest: '' # Set by CI pipeline
 
   service:
     type: ClusterIP
@@ -130,7 +130,7 @@ gateway:
 postgresql:
   enabled: true
   auth:
-    postgresPassword: ""  # Set via external secret
+    postgresPassword: '' # Set via external secret
     database: intelgraph
     username: intelgraph
 
@@ -192,16 +192,16 @@ neo4j:
     enabled: true
 
   config:
-    dbms.memory.heap.initial_size: "4G"
-    dbms.memory.heap.max_size: "8G"
-    dbms.memory.pagecache.size: "4G"
+    dbms.memory.heap.initial_size: '4G'
+    dbms.memory.heap.max_size: '8G'
+    dbms.memory.pagecache.size: '4G'
 
 redis:
   enabled: true
   architecture: replication
   auth:
     enabled: true
-    password: ""  # Set via external secret
+    password: '' # Set via external secret
 
   master:
     persistence:
@@ -258,11 +258,11 @@ ingress:
   enabled: true
   className: nginx
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-buffer-size: '16k'
+    nginx.ingress.kubernetes.io/proxy-body-size: '100m'
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
 
   hosts:
     - host: maestro.intelgraph.ai
@@ -287,7 +287,7 @@ ingress:
 prometheus:
   enabled: true
   server:
-    retention: "30d"
+    retention: '30d'
     persistentVolume:
       size: 100Gi
     resources:
@@ -308,14 +308,14 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: 'maestro'
-        orgId: 1
-        folder: 'IntelGraph Maestro'
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/maestro
+        - name: 'maestro'
+          orgId: 1
+          folder: 'IntelGraph Maestro'
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/maestro
 
 jaeger:
   enabled: true
@@ -339,10 +339,10 @@ opa:
     replicaCount: 2
 
   policies:
-    enforcement: "hard"
+    enforcement: 'hard'
     bundles:
       - name: intelgraph-abac
-        url: "http://opa-bundle-server:8080/bundles/intelgraph-abac.tar.gz"
+        url: 'http://opa-bundle-server:8080/bundles/intelgraph-abac.tar.gz'
 
 # Network Policies
 networkPolicies:
@@ -373,7 +373,7 @@ networkPolicies:
 # Pod Disruption Budgets
 podDisruptionBudgets:
   enabled: true
-  minAvailable: "50%"
+  minAvailable: '50%'
 
 # Security Contexts and Policies
 podSecurityPolicy:
@@ -393,7 +393,7 @@ securityContext:
 # Multi-tenancy Configuration
 multiTenant:
   enabled: true
-  isolation: namespace  # namespace | cluster
+  isolation: namespace # namespace | cluster
 
   tenants:
     - name: demo
@@ -410,14 +410,14 @@ multiTenant:
 costManagement:
   budgetAlerts:
     enabled: true
-    monthlyBudget: 18000  # USD
-    alertThresholds: [50, 80, 95]  # Percentage
+    monthlyBudget: 18000 # USD
+    alertThresholds: [50, 80, 95] # Percentage
 
   resourceQuotas:
     enabled: true
-    cpu: "50000m"  # 50 cores
-    memory: "200Gi"
-    persistentVolumeClaims: "50"
+    cpu: '50000m' # 50 cores
+    memory: '200Gi'
+    persistentVolumeClaims: '50'
 
 # Feature Flags
 featureFlags:

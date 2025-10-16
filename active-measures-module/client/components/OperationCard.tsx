@@ -63,7 +63,11 @@ interface OperationCardProps {
   onSelect: () => void;
 }
 
-const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSelect }) => {
+const OperationCard: React.FC<OperationCardProps> = ({
+  operation,
+  selected,
+  onSelect,
+}) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -158,7 +162,9 @@ const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSe
           <div className="flex-1">
             <CardTitle className="text-lg font-semibold flex items-center">
               {operation.name}
-              <Badge className={`ml-2 ${getClassificationColor(operation.classification)}`}>
+              <Badge
+                className={`ml-2 ${getClassificationColor(operation.classification)}`}
+              >
                 <Shield className="h-3 w-3 mr-1" />
                 {operation.classification}
               </Badge>
@@ -189,15 +195,21 @@ const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSe
               <Target className="h-4 w-4 mr-1 text-blue-500" />
               <span className="text-xs font-medium">Effectiveness</span>
             </div>
-            <div className="text-xl font-bold text-blue-600">{operation.effectiveness}%</div>
+            <div className="text-xl font-bold text-blue-600">
+              {operation.effectiveness}%
+            </div>
           </div>
 
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <AlertTriangle className={`h-4 w-4 mr-1 ${getRiskColor(operation.riskLevel)}`} />
+              <AlertTriangle
+                className={`h-4 w-4 mr-1 ${getRiskColor(operation.riskLevel)}`}
+              />
               <span className="text-xs font-medium">Risk</span>
             </div>
-            <div className={`text-lg font-semibold ${getRiskColor(operation.riskLevel)}`}>
+            <div
+              className={`text-lg font-semibold ${getRiskColor(operation.riskLevel)}`}
+            >
               {operation.riskLevel}
             </div>
           </div>
@@ -219,7 +231,9 @@ const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSe
                   <Activity className="h-4 w-4 mr-1 text-purple-500" />
                   <span className="text-xs font-medium">Engagement</span>
                 </div>
-                <div className="text-lg font-semibold">{operation.metrics.engagement}%</div>
+                <div className="text-lg font-semibold">
+                  {operation.metrics.engagement}%
+                </div>
               </div>
             </>
           )}
@@ -231,7 +245,8 @@ const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSe
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">Progress</span>
               <span className="text-muted-foreground">
-                {operation.progress.currentPhase} - {operation.progress.completion}%
+                {operation.progress.currentPhase} -{' '}
+                {operation.progress.completion}%
               </span>
             </div>
             <Progress value={operation.progress.completion} className="h-2" />
@@ -297,7 +312,9 @@ const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSe
           <div className="flex items-center space-x-4 pt-2">
             <div className="flex items-center">
               <Shield className="h-3 w-3 mr-1 text-blue-500" />
-              <span className="text-xs">Attribution: {operation.metrics.attribution}%</span>
+              <span className="text-xs">
+                Attribution: {operation.metrics.attribution}%
+              </span>
               <div className="ml-2 h-2 w-16 bg-gray-200 rounded-full">
                 <div
                   className={`h-2 rounded-full ${
@@ -315,7 +332,9 @@ const OperationCard: React.FC<OperationCardProps> = ({ operation, selected, onSe
             <Separator orientation="vertical" className="h-4" />
 
             <div className="flex items-center">
-              <span className="text-xs">Compliance: {operation.metrics.complianceScore}%</span>
+              <span className="text-xs">
+                Compliance: {operation.metrics.complianceScore}%
+              </span>
               <div className="ml-2 h-2 w-16 bg-gray-200 rounded-full">
                 <div
                   className={`h-2 rounded-full ${

@@ -1,6 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { parseDocument, isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Document } from 'yaml';
+import {
+  parseDocument,
+  isMap,
+  isSeq,
+  YAMLMap,
+  YAMLSeq,
+  Scalar,
+  Document,
+} from 'yaml';
 import type { Diagnostic, LoadResult, Position } from './types';
 import { interpolateConfig } from './interpolate';
 
@@ -17,7 +25,7 @@ export function parseConfigFile(filePath: string): ParsedConfig {
   const doc = parseDocument(raw, {
     prettyErrors: true,
     keepCstNodes: true,
-    uniqueKeys: false
+    uniqueKeys: false,
   });
 
   const diagnostics: Diagnostic[] = [];
@@ -30,7 +38,7 @@ export function parseConfigFile(filePath: string): ParsedConfig {
         message: err.message,
         pointer: '',
         line: err.linePos?.[0]?.line ?? err.line ?? 0,
-        column: err.linePos?.[0]?.col ?? err.col ?? 0
+        column: err.linePos?.[0]?.col ?? err.col ?? 0,
       });
     }
   }
@@ -42,7 +50,7 @@ export function parseConfigFile(filePath: string): ParsedConfig {
         message: warning.message,
         pointer: '',
         line: warning.linePos?.[0]?.line ?? warning.line ?? 0,
-        column: warning.linePos?.[0]?.col ?? warning.col ?? 0
+        column: warning.linePos?.[0]?.col ?? warning.col ?? 0,
       });
     }
   }
@@ -64,7 +72,7 @@ export function parseConfigFile(filePath: string): ParsedConfig {
 export function loadConfig(
   filePath: string,
   schema: object | string,
-  options: LoadOptions = {}
+  options: LoadOptions = {},
 ): LoadResult {
   const parsed = parseConfigFile(filePath);
   const diagnostics = [...parsed.diagnostics];
@@ -78,21 +86,23 @@ export function loadConfig(
     parsed.value,
     '',
     { policy: interpolationPolicy, pointerMap: parsed.pointerMap },
-    diagnostics
+    diagnostics,
   );
 
   const validationDiagnostics = validate(interpolated, schema, {
-    pointerMap: parsed.pointerMap
+    pointerMap: parsed.pointerMap,
   });
 
   diagnostics.push(...validationDiagnostics);
 
   return {
-    config: validationDiagnostics.some((d) => d.severity === 'error') && options.strict
-      ? null
-      : interpolated,
+    config:
+      validationDiagnostics.some((d) => d.severity === 'error') &&
+      options.strict
+        ? null
+        : interpolated,
     diagnostics,
-    pointerMap: parsed.pointerMap
+    pointerMap: parsed.pointerMap,
   };
 }
 
@@ -100,7 +110,7 @@ function collectPointers(
   node: YAMLMap.Parsed | YAMLSeq.Parsed | Scalar.Parsed | null,
   pointer: string,
   doc: Document.Parsed,
-  pointerMap: Record<string, Position>
+  pointerMap: Record<string, Position>,
 ): void {
   if (!node) {
     return;
@@ -108,7 +118,10 @@ function collectPointers(
 
   const range = node.range ? doc.rangeAsLinePos(node.range) : undefined;
   if (range) {
-    pointerMap[pointer] = { line: range.start.line + 1, column: range.start.col + 1 };
+    pointerMap[pointer] = {
+      line: range.start.line + 1,
+      column: range.start.col + 1,
+    };
   } else if (!(pointer in pointerMap)) {
     pointerMap[pointer] = { line: 0, column: 0 };
   }
@@ -116,7 +129,11 @@ function collectPointers(
   if (isMap(node)) {
     for (const item of node.items) {
       const key = item.key as Scalar.Parsed;
-      const value = item.value as YAMLMap.Parsed | YAMLSeq.Parsed | Scalar.Parsed | null;
+      const value = item.value as
+        | YAMLMap.Parsed
+        | YAMLSeq.Parsed
+        | Scalar.Parsed
+        | null;
       const keyValue = key?.value?.toString() ?? '';
       const childPointer = pointer
         ? `${pointer}/${escapeJsonPointerSegment(keyValue)}`

@@ -16,4 +16,3 @@ export default async function migrate(pool?: Pool) {
     CREATE INDEX IF NOT EXISTS idx_remote_tickets_site ON remote_tickets(site_id);
   `);
 }
-

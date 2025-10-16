@@ -10,11 +10,15 @@ class MockAdapter implements ModelAdapter {
 describe('NlToCypherService', () => {
   it('translates known prompts', async () => {
     const service = new NlToCypherService(new MockAdapter());
-    await expect(service.translate('show all nodes')).resolves.toBe('MATCH (n) RETURN n LIMIT 25');
+    await expect(service.translate('show all nodes')).resolves.toBe(
+      'MATCH (n) RETURN n LIMIT 25',
+    );
   });
 
   it('falls back to model adapter', async () => {
     const service = new NlToCypherService(new MockAdapter());
-    await expect(service.translate('unknown')).resolves.toBe('generated: unknown');
+    await expect(service.translate('unknown')).resolves.toBe(
+      'generated: unknown',
+    );
   });
 });

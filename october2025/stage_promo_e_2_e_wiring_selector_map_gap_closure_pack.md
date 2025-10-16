@@ -5,6 +5,7 @@ This pack wires **Playwright staging E2E** into the **stage-promo** workflow so 
 ---
 
 ## 1) stage-promo.yaml — add E2E gate (after smoke)
+
 ```yaml
 # .github/workflows/stage-promo.yaml (append/modify)
 name: stage-promo
@@ -81,6 +82,7 @@ jobs:
 ## 2) Selector Map — stable data‑testids & resolver
 
 ### 2.1 Add data-testid attributes (non-visual)
+
 ```tsx
 // webapp/src/app/TestIds.ts
 export const TID = {
@@ -98,16 +100,18 @@ export const TID = {
   XAI_EXPLAIN_BTN: 'xai-explain-btn',
   WALLET_ISSUE_BTN: 'wallet-issue-btn',
   POLICY_MENU_BTN: 'policy-menu-btn',
-  DSAR_BTN: 'dsar-btn'
+  DSAR_BTN: 'dsar-btn',
 } as const;
 ```
 
 Usage example:
+
 ```tsx
 <button data-testid={TID.LOGIN_BTN}>Sign in</button>
 ```
 
 ### 2.2 Selector map JSON
+
 ```json
 // webapp/tests/stage/selector-map.json
 {
@@ -130,38 +134,45 @@ Usage example:
 ```
 
 ### 2.3 Selector resolver utility
+
 ```ts
 // webapp/tests/stage/fixtures/selectors.ts
-import fs from 'fs'; import path from 'path';
-const mapPath = path.resolve(__dirname,'..','selector-map.json');
-export const SEL = JSON.parse(fs.readFileSync(mapPath,'utf8')) as Record<string,string>;
+import fs from 'fs';
+import path from 'path';
+const mapPath = path.resolve(__dirname, '..', 'selector-map.json');
+export const SEL = JSON.parse(fs.readFileSync(mapPath, 'utf8')) as Record<
+  string,
+  string
+>;
 ```
 
 Update tests to import `SEL.loginButton` etc. (minimal changes).
 
 ### 2.4 ESLint rule to enforce data-testid on actionable elements
+
 ```js
 // webapp/.eslintrc.cjs (snippet)
 module.exports = {
   rules: {
     'jsx-a11y/no-static-element-interactions': 'off',
-    'testing-library/await-async-utils': 'off'
+    'testing-library/await-async-utils': 'off',
   },
   overrides: [
     {
       files: ['src/**/*.tsx'],
       plugins: ['custom-testid'],
-      rules: { 'custom-testid/require-testid': 'warn' }
-    }
-  ]
+      rules: { 'custom-testid/require-testid': 'warn' },
+    },
+  ],
 };
 ```
 
-*(Plugin stub optional; the intent is to encourage testid coverage.)*
+_(Plugin stub optional; the intent is to encourage testid coverage.)_
 
 ---
 
 ## 3) Wire E2E into Make & Docs
+
 ```make
 stage-e2e:
 	STAGE_BASE_URL=$(STAGE_BASE_URL) pnpm --filter webapp run stage:e2e
@@ -174,20 +185,28 @@ Docs (`docs/INDEX.md`) add section: **Staging E2E after Promotion** with links t
 ## 4) Additional Gap Closures (Production polish)
 
 ### 4.1 API Rate Limits & WAF headers (gateway)
+
 ```ts
 // services/gateway-graphql/src/rateLimit.ts
 import rateLimit from 'express-rate-limit';
-export const limiter = rateLimit({ windowMs: 60_000, max: 600, standardHeaders: true, legacyHeaders: false });
+export const limiter = rateLimit({
+  windowMs: 60_000,
+  max: 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 // apply to express app underlying Apollo
 ```
 
 Add security headers (helmet):
+
 ```ts
 import helmet from 'helmet';
 app.use(helmet({ contentSecurityPolicy: false }));
 ```
 
 ### 4.2 Backup/Restore scripts
+
 ```bash
 # ops/backup/backup.sh
 set -e
@@ -203,6 +222,7 @@ psql "$POSTGRES_URL" < /backup/pg/last.sql
 ```
 
 ### 4.3 Chaos drills (termination + network)
+
 ```yaml
 # deploy/k8s/chaos/gateway-pod-kill.yaml
 apiVersion: chaos-mesh.org/v1alpha1
@@ -216,10 +236,12 @@ spec:
 ```
 
 ### 4.4 Cost exporter integration (Kubecost)
+
 - Annotate pods with `kubecost.com/service`: gateway, analytics, ledger, etc.
 - Dashboard panel **CPI by service** using Kubecost API.
 
 ### 4.5 CODEOWNERS & pre-commit
+
 ```text
 # CODEOWNERS
 /services/gateway-graphql/   @intelgraph/backend
@@ -230,9 +252,11 @@ spec:
 Pre-commit hooks: run ESLint, prettier, jest on changed packages.
 
 ### 4.6 License headers & NOTICE
+
 - Add MIT headers to all new files; update `LICENSE` and `NOTICE`.
 
 ### 4.7 i18n scaffolding
+
 ```ts
 // webapp/src/i18n.ts
 import i18next from 'i18next';
@@ -240,15 +264,18 @@ await i18next.init({ lng: 'en', resources: { en: { translation: {} } } });
 ```
 
 ### 4.8 Status page synthetic
+
 - Add external probe hitting `/graphql {__typename}` + wallet verify.
 
 ### 4.9 Docs completeness
+
 - **Operator Runbook**: backup/restore, chaos, rate limit knobs, cost export setup.
 - **Analyst Guide**: selector‑based quick finds, Policy Inspector usage, wallet disclosure best practices.
 
 ---
 
 ## 5) CI Wiring for New Gates
+
 ```yaml
 # .github/workflows/quality-gates.yaml
 name: quality-gates
@@ -276,6 +303,7 @@ jobs:
 ---
 
 ## 6) Final checklists (after wiring)
+
 - [ ] stage-promo runs: **helm → smoke → E2E → perf/compliance**
 - [ ] Selector map in place; DOM carries `data-testid` on actionable elements
 - [ ] Rate limits & security headers enabled on gateway
@@ -283,5 +311,7 @@ jobs:
 - [ ] Kubecost feeds CPI dashboard by service
 - [ ] CODEOWNERS enforced; pre-commit hooks active
 - [ ] i18n scaffold merged; docs updated
+
 ```
 
+```

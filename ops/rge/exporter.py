@@ -7,58 +7,65 @@ Machine-verifiable compliance packs for regulatory bodies and auditors.
 Generates comprehensive, cryptographically-signed audit trails with zero ambiguity.
 """
 
-import json
 import hashlib
 import hmac
-import time
-import base64
-import zipfile
 import io
-from typing import Dict, Any, List, Optional, NamedTuple
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone, timedelta
-from enum import Enum
+import json
 import logging
+import time
+import zipfile
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class RegulationFramework(Enum):
     """Supported regulatory frameworks"""
-    GDPR = "gdpr"           # General Data Protection Regulation
-    CCPA = "ccpa"           # California Consumer Privacy Act
-    SOX = "sox"             # Sarbanes-Oxley Act
-    SOC2 = "soc2"           # Service Organization Control 2
-    ISO27001 = "iso27001"   # Information Security Management
-    FedRAMP = "fedramp"     # Federal Risk Authorization Management Program
-    HIPAA = "hipaa"         # Health Insurance Portability and Accountability Act
-    PCI_DSS = "pci_dss"     # Payment Card Industry Data Security Standard
+
+    GDPR = "gdpr"  # General Data Protection Regulation
+    CCPA = "ccpa"  # California Consumer Privacy Act
+    SOX = "sox"  # Sarbanes-Oxley Act
+    SOC2 = "soc2"  # Service Organization Control 2
+    ISO27001 = "iso27001"  # Information Security Management
+    FedRAMP = "fedramp"  # Federal Risk Authorization Management Program
+    HIPAA = "hipaa"  # Health Insurance Portability and Accountability Act
+    PCI_DSS = "pci_dss"  # Payment Card Industry Data Security Standard
+
 
 class ComplianceStatus(Enum):
     """Compliance assessment status"""
+
     COMPLIANT = "compliant"
     NON_COMPLIANT = "non_compliant"
     PARTIALLY_COMPLIANT = "partially_compliant"
     UNDER_REVIEW = "under_review"
     NOT_APPLICABLE = "not_applicable"
 
+
 @dataclass
 class ComplianceControl:
     """Individual compliance control assessment"""
+
     control_id: str
     framework: RegulationFramework
     title: str
     description: str
     status: ComplianceStatus
-    evidence_refs: List[str]
+    evidence_refs: list[str]
     assessment_date: str
     assessor: str
     notes: str
     risk_level: str
-    remediation_plan: Optional[str] = None
+    remediation_plan: str | None = None
+
 
 @dataclass
 class AuditEvidence:
     """Audit evidence artifact"""
+
     evidence_id: str
     evidence_type: str
     title: str
@@ -71,24 +78,27 @@ class AuditEvidence:
     retention_date: str
     classification: str
 
+
 @dataclass
 class RGEExportPack:
     """Complete regulator-grade export package"""
+
     export_id: str
     tenant_id: str
-    frameworks: List[RegulationFramework]
+    frameworks: list[RegulationFramework]
     export_date: str
     reporting_period_start: str
     reporting_period_end: str
-    controls: List[ComplianceControl]
-    evidence_artifacts: List[AuditEvidence]
-    executive_summary: Dict[str, Any]
-    compliance_posture: Dict[str, Any]
-    risk_assessment: Dict[str, Any]
-    attestation: Dict[str, Any]
+    controls: list[ComplianceControl]
+    evidence_artifacts: list[AuditEvidence]
+    executive_summary: dict[str, Any]
+    compliance_posture: dict[str, Any]
+    risk_assessment: dict[str, Any]
+    attestation: dict[str, Any]
     package_hash: str
     digital_signature: str
-    export_metadata: Dict[str, Any]
+    export_metadata: dict[str, Any]
+
 
 class RGEExporter:
     """Regulator-Grade Export generator
@@ -112,10 +122,12 @@ class RGEExporter:
 
         logger.info(f"RGE Exporter initialized for tenant: {tenant_id}")
 
-    def generate_compliance_export(self,
-                                  frameworks: List[RegulationFramework],
-                                  reporting_period_days: int = 90,
-                                  include_evidence: bool = True) -> RGEExportPack:
+    def generate_compliance_export(
+        self,
+        frameworks: list[RegulationFramework],
+        reporting_period_days: int = 90,
+        include_evidence: bool = True,
+    ) -> RGEExportPack:
         """Generate comprehensive compliance export package
 
         Args:
@@ -129,9 +141,11 @@ class RGEExporter:
         start_time = time.time()
         export_id = self._generate_export_id(frameworks)
 
-        logger.info(f"Generating RGE export: {export_id}, "
-                   f"frameworks={[f.value for f in frameworks]}, "
-                   f"period={reporting_period_days}d")
+        logger.info(
+            f"Generating RGE export: {export_id}, "
+            f"frameworks={[f.value for f in frameworks]}, "
+            f"period={reporting_period_days}d"
+        )
 
         try:
             # Calculate reporting period
@@ -147,7 +161,9 @@ class RGEExporter:
             # Collect evidence artifacts
             evidence_artifacts = []
             if include_evidence:
-                evidence_artifacts = self._collect_evidence_artifacts(all_controls, start_date, end_date)
+                evidence_artifacts = self._collect_evidence_artifacts(
+                    all_controls, start_date, end_date
+                )
 
             # Generate executive summary
             executive_summary = self._generate_executive_summary(all_controls, frameworks)
@@ -177,7 +193,7 @@ class RGEExporter:
                 attestation=attestation,
                 package_hash="",  # Will be calculated
                 digital_signature="",  # Will be calculated
-                export_metadata=self._generate_export_metadata()
+                export_metadata=self._generate_export_metadata(),
             )
 
             # Generate cryptographic integrity
@@ -190,10 +206,12 @@ class RGEExporter:
             self.successful_exports += 1
             self.total_export_time += export_time
 
-            logger.info(f"RGE export generated: {export_id}, "
-                       f"controls={len(all_controls)}, "
-                       f"evidence={len(evidence_artifacts)}, "
-                       f"time={export_time:.2f}s")
+            logger.info(
+                f"RGE export generated: {export_id}, "
+                f"controls={len(all_controls)}, "
+                f"evidence={len(evidence_artifacts)}, "
+                f"time={export_time:.2f}s"
+            )
 
             return export_pack
 
@@ -202,8 +220,9 @@ class RGEExporter:
             logger.error(f"RGE export generation failed: {export_id}, error={e}")
             raise
 
-    def _collect_compliance_controls(self, framework: RegulationFramework,
-                                   start_date: datetime, end_date: datetime) -> List[ComplianceControl]:
+    def _collect_compliance_controls(
+        self, framework: RegulationFramework, start_date: datetime, end_date: datetime
+    ) -> list[ComplianceControl]:
         """Collect compliance controls for specific framework"""
         controls = []
 
@@ -221,7 +240,9 @@ class RGEExporter:
 
         return controls
 
-    def _collect_gdpr_controls(self, start_date: datetime, end_date: datetime) -> List[ComplianceControl]:
+    def _collect_gdpr_controls(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[ComplianceControl]:
         """Collect GDPR compliance controls"""
         return [
             ComplianceControl(
@@ -234,7 +255,7 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="All processing activities logged with legal basis",
-                risk_level="LOW"
+                risk_level="LOW",
             ),
             ComplianceControl(
                 control_id="GDPR-25.1",
@@ -246,7 +267,7 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Privacy controls integrated into system design",
-                risk_level="MEDIUM"
+                risk_level="MEDIUM",
             ),
             ComplianceControl(
                 control_id="GDPR-32.1",
@@ -258,11 +279,13 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="AES-256 encryption, access controls, audit logging",
-                risk_level="HIGH"
-            )
+                risk_level="HIGH",
+            ),
         ]
 
-    def _collect_soc2_controls(self, start_date: datetime, end_date: datetime) -> List[ComplianceControl]:
+    def _collect_soc2_controls(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[ComplianceControl]:
         """Collect SOC2 compliance controls"""
         return [
             ComplianceControl(
@@ -275,7 +298,7 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Role-based access controls with quarterly reviews",
-                risk_level="HIGH"
+                risk_level="HIGH",
             ),
             ComplianceControl(
                 control_id="CC7.1",
@@ -287,11 +310,13 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="24/7 security monitoring with automated response",
-                risk_level="HIGH"
-            )
+                risk_level="HIGH",
+            ),
         ]
 
-    def _collect_iso27001_controls(self, start_date: datetime, end_date: datetime) -> List[ComplianceControl]:
+    def _collect_iso27001_controls(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[ComplianceControl]:
         """Collect ISO27001 compliance controls"""
         return [
             ComplianceControl(
@@ -304,11 +329,13 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Comprehensive access control policy reviewed annually",
-                risk_level="MEDIUM"
+                risk_level="MEDIUM",
             )
         ]
 
-    def _collect_sox_controls(self, start_date: datetime, end_date: datetime) -> List[ComplianceControl]:
+    def _collect_sox_controls(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[ComplianceControl]:
         """Collect SOX compliance controls"""
         return [
             ComplianceControl(
@@ -321,11 +348,13 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Quarterly testing of internal controls",
-                risk_level="HIGH"
+                risk_level="HIGH",
             )
         ]
 
-    def _collect_fedramp_controls(self, start_date: datetime, end_date: datetime) -> List[ComplianceControl]:
+    def _collect_fedramp_controls(
+        self, start_date: datetime, end_date: datetime
+    ) -> list[ComplianceControl]:
         """Collect FedRAMP compliance controls"""
         return [
             ComplianceControl(
@@ -338,12 +367,13 @@ class RGEExporter:
                 assessment_date=datetime.now(timezone.utc).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Automated account provisioning and deprovisioning",
-                risk_level="HIGH"
+                risk_level="HIGH",
             )
         ]
 
-    def _collect_evidence_artifacts(self, controls: List[ComplianceControl],
-                                   start_date: datetime, end_date: datetime) -> List[AuditEvidence]:
+    def _collect_evidence_artifacts(
+        self, controls: list[ComplianceControl], start_date: datetime, end_date: datetime
+    ) -> list[AuditEvidence]:
         """Collect evidence artifacts referenced by controls"""
         evidence_refs = set()
         for control in controls:
@@ -365,27 +395,28 @@ class RGEExporter:
         # Generate digital signature for evidence
         signature_data = f"{evidence_ref}:{file_hash}:{self.tenant_id}"
         digital_signature = hmac.new(
-            self.signing_key,
-            signature_data.encode(),
-            hashlib.sha256
+            self.signing_key, signature_data.encode(), hashlib.sha256
         ).hexdigest()
 
         return AuditEvidence(
             evidence_id=f"evidence_{evidence_ref}_{int(time.time())}",
             evidence_type="document",
-            title=evidence_ref.replace('_', ' ').title(),
+            title=evidence_ref.replace("_", " ").title(),
             description=f"Supporting documentation for {evidence_ref}",
             creation_date=datetime.now(timezone.utc).isoformat(),
             file_path=f"/evidence/{evidence_ref}.pdf",
             file_hash=file_hash,
             file_size_bytes=len(file_content),
             digital_signature=digital_signature,
-            retention_date=(datetime.now(timezone.utc) + timedelta(days=2555)).isoformat(),  # 7 years
-            classification="CONFIDENTIAL"
+            retention_date=(
+                datetime.now(timezone.utc) + timedelta(days=2555)
+            ).isoformat(),  # 7 years
+            classification="CONFIDENTIAL",
         )
 
-    def _generate_executive_summary(self, controls: List[ComplianceControl],
-                                   frameworks: List[RegulationFramework]) -> Dict[str, Any]:
+    def _generate_executive_summary(
+        self, controls: list[ComplianceControl], frameworks: list[RegulationFramework]
+    ) -> dict[str, Any]:
         """Generate executive summary of compliance posture"""
         total_controls = len(controls)
         compliant_controls = sum(1 for c in controls if c.status == ComplianceStatus.COMPLIANT)
@@ -406,17 +437,18 @@ class RGEExporter:
                 "Strong security posture with 100% critical control compliance",
                 "Comprehensive audit trail with cryptographic integrity",
                 "Automated compliance monitoring reduces manual oversight",
-                "Privacy-by-design implementation meets GDPR requirements"
+                "Privacy-by-design implementation meets GDPR requirements",
             ],
             "recommendations": [
                 "Continue quarterly compliance assessments",
                 "Implement advanced threat detection capabilities",
-                "Enhance incident response automation"
-            ]
+                "Enhance incident response automation",
+            ],
         }
 
-    def _calculate_compliance_posture(self, controls: List[ComplianceControl],
-                                     frameworks: List[RegulationFramework]) -> Dict[str, Any]:
+    def _calculate_compliance_posture(
+        self, controls: list[ComplianceControl], frameworks: list[RegulationFramework]
+    ) -> dict[str, Any]:
         """Calculate detailed compliance posture"""
         posture = {}
 
@@ -430,24 +462,24 @@ class RGEExporter:
                 "compliant_controls": compliant,
                 "compliance_rate": compliant / max(total, 1),
                 "non_compliant_controls": [
-                    c.control_id for c in framework_controls
+                    c.control_id
+                    for c in framework_controls
                     if c.status != ComplianceStatus.COMPLIANT
                 ],
                 "high_risk_controls": [
-                    c.control_id for c in framework_controls
-                    if c.risk_level == "HIGH"
-                ]
+                    c.control_id for c in framework_controls if c.risk_level == "HIGH"
+                ],
             }
 
         return posture
 
-    def _generate_risk_assessment(self, controls: List[ComplianceControl],
-                                 frameworks: List[RegulationFramework]) -> Dict[str, Any]:
+    def _generate_risk_assessment(
+        self, controls: list[ComplianceControl], frameworks: list[RegulationFramework]
+    ) -> dict[str, Any]:
         """Generate comprehensive risk assessment"""
         high_risk_controls = [c for c in controls if c.risk_level == "HIGH"]
         non_compliant_high_risk = [
-            c for c in high_risk_controls
-            if c.status != ComplianceStatus.COMPLIANT
+            c for c in high_risk_controls if c.status != ComplianceStatus.COMPLIANT
         ]
 
         return {
@@ -460,14 +492,14 @@ class RGEExporter:
                     "framework": c.framework.value,
                     "title": c.title,
                     "risk_level": c.risk_level,
-                    "status": c.status.value
+                    "status": c.status.value,
                 }
                 for c in non_compliant_high_risk
             ],
-            "risk_mitigation_plan": "Continuous monitoring with automated remediation for non-critical issues"
+            "risk_mitigation_plan": "Continuous monitoring with automated remediation for non-critical issues",
         }
 
-    def _create_attestation_statement(self, compliance_posture: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_attestation_statement(self, compliance_posture: dict[str, Any]) -> dict[str, Any]:
         """Create executive attestation statement"""
         return {
             "attestation_date": datetime.now(timezone.utc).isoformat(),
@@ -484,11 +516,11 @@ class RGEExporter:
             "contact_information": {
                 "email": "compliance@mcplatform.com",
                 "phone": "+1-555-COMPLY",
-                "address": "123 Compliance St, Security City, SC 12345"
-            }
+                "address": "123 Compliance St, Security City, SC 12345",
+            },
         }
 
-    def _generate_export_metadata(self) -> Dict[str, Any]:
+    def _generate_export_metadata(self) -> dict[str, Any]:
         """Generate export package metadata"""
         return {
             "export_version": "1.0",
@@ -499,7 +531,7 @@ class RGEExporter:
             "machine_readable": True,
             "human_readable": True,
             "verification_instructions": "Verify package_hash and digital_signature using provided public key",
-            "export_standards": ["ISO 15489-1", "NIST SP 800-53", "GDPR Article 30"]
+            "export_standards": ["ISO 15489-1", "NIST SP 800-53", "GDPR Article 30"],
         }
 
     def _calculate_package_hash(self, export_pack: RGEExportPack) -> str:
@@ -510,7 +542,9 @@ class RGEExporter:
         package_data.pop("digital_signature", None)
 
         # Convert to canonical JSON
-        canonical_json = json.dumps(package_data, sort_keys=True, separators=(',', ':'), default=str)
+        canonical_json = json.dumps(
+            package_data, sort_keys=True, separators=(",", ":"), default=str
+        )
         return hashlib.sha256(canonical_json.encode()).hexdigest()
 
     def _sign_export_package(self, export_pack: RGEExportPack) -> str:
@@ -519,19 +553,17 @@ class RGEExporter:
             "package_hash": export_pack.package_hash,
             "export_id": export_pack.export_id,
             "tenant_id": export_pack.tenant_id,
-            "export_date": export_pack.export_date
+            "export_date": export_pack.export_date,
         }
 
-        signature_json = json.dumps(signature_data, sort_keys=True, separators=(',', ':'))
+        signature_json = json.dumps(signature_data, sort_keys=True, separators=(",", ":"))
         signature = hmac.new(
-            self.signing_key,
-            b"RGE_EXPORT:" + signature_json.encode(),
-            hashlib.sha256
+            self.signing_key, b"RGE_EXPORT:" + signature_json.encode(), hashlib.sha256
         ).hexdigest()
 
         return signature
 
-    def _generate_export_id(self, frameworks: List[RegulationFramework]) -> str:
+    def _generate_export_id(self, frameworks: list[RegulationFramework]) -> str:
         """Generate unique export identifier"""
         timestamp = int(time.time())
         frameworks_str = "_".join(sorted([f.value for f in frameworks]))
@@ -552,14 +584,12 @@ class RGEExporter:
                 "package_hash": export_pack.package_hash,
                 "export_id": export_pack.export_id,
                 "tenant_id": export_pack.tenant_id,
-                "export_date": export_pack.export_date
+                "export_date": export_pack.export_date,
             }
 
-            signature_json = json.dumps(signature_data, sort_keys=True, separators=(',', ':'))
+            signature_json = json.dumps(signature_data, sort_keys=True, separators=(",", ":"))
             expected_signature = hmac.new(
-                self.signing_key,
-                b"RGE_EXPORT:" + signature_json.encode(),
-                hashlib.sha256
+                self.signing_key, b"RGE_EXPORT:" + signature_json.encode(), hashlib.sha256
             ).hexdigest()
 
             return hmac.compare_digest(expected_signature, export_pack.digital_signature)
@@ -572,7 +602,7 @@ class RGEExporter:
         """Export package as ZIP file for distribution"""
         zip_buffer = io.BytesIO()
 
-        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             # Main export JSON
             export_json = json.dumps(asdict(export_pack), default=str, indent=2)
             zip_file.writestr("compliance_export.json", export_json)
@@ -583,13 +613,9 @@ class RGEExporter:
 
             # Controls by framework
             for framework in export_pack.frameworks:
-                framework_controls = [
-                    c for c in export_pack.controls
-                    if c.framework == framework
-                ]
+                framework_controls = [c for c in export_pack.controls if c.framework == framework]
                 controls_json = json.dumps(
-                    [asdict(c) for c in framework_controls],
-                    default=str, indent=2
+                    [asdict(c) for c in framework_controls], default=str, indent=2
                 )
                 zip_file.writestr(f"controls_{framework.value}.json", controls_json)
 
@@ -616,7 +642,7 @@ To verify integrity:
 
         return zip_buffer.getvalue()
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get exporter performance metrics"""
         success_rate = self.successful_exports / max(self.total_exports, 1)
         avg_export_time = self.total_export_time / max(self.successful_exports, 1)
@@ -627,7 +653,7 @@ To verify integrity:
             "success_rate_pct": success_rate * 100,
             "avg_export_time_s": avg_export_time,
             "sla_compliance_pct": 100.0 if avg_export_time < 120 else 0.0,  # <2min SLA
-            "export_count": self.export_count
+            "export_count": self.export_count,
         }
 
 
@@ -644,16 +670,10 @@ if __name__ == "__main__":
     print("=== RGE Exporter Demo ===")
 
     # Generate compliance export
-    frameworks = [
-        RegulationFramework.GDPR,
-        RegulationFramework.SOC2,
-        RegulationFramework.ISO27001
-    ]
+    frameworks = [RegulationFramework.GDPR, RegulationFramework.SOC2, RegulationFramework.ISO27001]
 
     export_pack = exporter.generate_compliance_export(
-        frameworks=frameworks,
-        reporting_period_days=90,
-        include_evidence=True
+        frameworks=frameworks, reporting_period_days=90, include_evidence=True
     )
 
     print(f"Export ID: {export_pack.export_id}")

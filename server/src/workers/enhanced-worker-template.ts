@@ -18,9 +18,9 @@ export const WorkerPayloadSchema = z.object({
     user_id: z.string().optional(),
     priority: z.number().min(1).max(10).default(5),
     retry_count: z.number().default(0),
-    max_retries: z.number().default(3)
+    max_retries: z.number().default(3),
   }),
-  timestamp: z.string().datetime()
+  timestamp: z.string().datetime(),
 });
 
 export type WorkerPayload = z.infer<typeof WorkerPayloadSchema>;
@@ -53,29 +53,27 @@ export class EnhancedWorker {
 
   constructor(
     private config: EnhancedWorkerConfig,
-    private processor: (payload: WorkerPayload) => Promise<any>
+    private processor: (payload: WorkerPayload) => Promise<any>,
   ) {
     this.queue = new Queue(config.queueName, {
       connection: config.connection,
-      defaultJobOptions: config.defaultJobOptions
+      defaultJobOptions: config.defaultJobOptions,
     });
 
-    this.worker = new Worker(
-      config.queueName,
-      this.processJob.bind(this),
-      {
-        connection: config.connection,
-        concurrency: config.concurrency,
-        removeOnComplete: config.defaultJobOptions.removeOnComplete,
-        removeOnFail: config.defaultJobOptions.removeOnFail
-      }
-    );
+    this.worker = new Worker(config.queueName, this.processJob.bind(this), {
+      connection: config.connection,
+      concurrency: config.concurrency,
+      removeOnComplete: config.defaultJobOptions.removeOnComplete,
+      removeOnFail: config.defaultJobOptions.removeOnFail,
+    });
 
     this.setupEventHandlers();
   }
 
   private async processJob(job: Job): Promise<any> {
-    const span = this.tracer.startSpan(`worker.${this.config.queueName}.process`);
+    const span = this.tracer.startSpan(
+      `worker.${this.config.queueName}.process`,
+    );
 
     try {
       // Validate payload with Zod
@@ -89,13 +87,13 @@ export class EnhancedWorker {
         'worker.payload.tenant_id': payload.metadata.tenant_id,
         'worker.payload.priority': payload.metadata.priority,
         'worker.retry.count': payload.metadata.retry_count,
-        'worker.retry.max': payload.metadata.max_retries
+        'worker.retry.max': payload.metadata.max_retries,
       });
 
       this.logger.info('Processing worker job', {
         jobId: job.id,
         operation: payload.operation,
-        tenantId: payload.metadata.tenant_id
+        tenantId: payload.metadata.tenant_id,
       });
 
       // Update progress
@@ -110,30 +108,30 @@ export class EnhancedWorker {
       span.setStatus({ code: SpanStatusCode.OK });
       span.setAttributes({
         'worker.result.success': true,
-        'worker.result.type': typeof result
+        'worker.result.type': typeof result,
       });
 
       this.logger.info('Worker job completed successfully', {
         jobId: job.id,
         operation: payload.operation,
-        result: typeof result
+        result: typeof result,
       });
 
       return result;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
 
       span.recordException(error as Error);
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: errorMessage
+        message: errorMessage,
       });
 
       this.logger.error('Worker job failed', {
         jobId: job.id,
         error: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       });
 
       throw error;
@@ -150,7 +148,7 @@ export class EnhancedWorker {
     this.worker.on('failed', (job, err) => {
       this.logger.error('Job failed', {
         jobId: job?.id,
-        error: err.message
+        error: err.message,
       });
     });
 
@@ -167,7 +165,7 @@ export class EnhancedWorker {
   async addJob(
     name: string,
     payload: WorkerPayload,
-    options?: any
+    options?: any,
   ): Promise<Job<WorkerPayload>> {
     // Validate before queueing
     const validatedPayload = WorkerPayloadSchema.parse(payload);
@@ -189,13 +187,15 @@ export class EnhancedWorker {
           waiting: waiting.length,
           active: active.length,
           completed: completed.length,
-          failed: failed.length
-        }
+          failed: failed.length,
+        },
       };
     } catch (error) {
       return {
         healthy: false,
-        stats: { error: error instanceof Error ? error.message : 'Unknown error' }
+        stats: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
       };
     }
   }
@@ -217,7 +217,7 @@ export function createEmbeddingUpsertWorker(): EnhancedWorker {
     connection: {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD
+      password: process.env.REDIS_PASSWORD,
     },
     defaultJobOptions: {
       removeOnComplete: 100,
@@ -225,22 +225,26 @@ export function createEmbeddingUpsertWorker(): EnhancedWorker {
       attempts: 3,
       backoff: {
         type: 'exponential',
-        delay: 2000
-      }
-    }
+        delay: 2000,
+      },
+    },
   };
 
   const processor = async (payload: WorkerPayload) => {
     // Embedding upsert implementation
-    logger.info('Processing embedding upsert', { operation: payload.operation });
+    logger.info('Processing embedding upsert', {
+      operation: payload.operation,
+    });
 
     // Simulate async work
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     return {
       processed: true,
       operation: payload.operation,
-      recordCount: Array.isArray(payload.data.records) ? payload.data.records.length : 1
+      recordCount: Array.isArray(payload.data.records)
+        ? payload.data.records.length
+        : 1,
     };
   };
 

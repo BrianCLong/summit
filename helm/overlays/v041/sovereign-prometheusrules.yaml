@@ -22,8 +22,8 @@ spec:
               mc_platform_reversible_autonomy_score
             ) / 4
           labels:
-            version: "v0.4.1"
-            component: "sovereign_safeguards"
+            version: 'v0.4.1'
+            component: 'sovereign_safeguards'
 
         - record: mc_platform:independent_verification_success_rate_5m
           expr: |
@@ -32,8 +32,8 @@ spec:
               rate(mc_platform_independent_verification_attempts_total[5m])
             ) * 100
           labels:
-            version: "v0.4.1"
-            component: "independent_verification"
+            version: 'v0.4.1'
+            component: 'independent_verification'
 
         - record: mc_platform:containment_test_success_rate_5m
           expr: |
@@ -42,8 +42,8 @@ spec:
               rate(mc_platform_containment_test_attempts_total[5m])
             ) * 100
           labels:
-            version: "v0.4.1"
-            component: "containment_readiness"
+            version: 'v0.4.1'
+            component: 'containment_readiness'
 
         # Critical alerts for Kubernetes deployment
         - alert: SovereignComplianceScoreLow
@@ -55,10 +55,10 @@ spec:
             component: sovereign_safeguards
             namespace: mc-platform-v041
           annotations:
-            summary: "Sovereign safeguards compliance score below critical threshold"
-            description: "Compliance score is {{ $value | humanize }}, below the required 0.95 threshold for tenant {{ $labels.tenant }}"
-            runbook_url: "https://docs.mc-platform.com/runbooks/sovereign-compliance-low"
-            action: "Check independent verification, containment readiness, lawful interoperability, and reversible autonomy systems"
+            summary: 'Sovereign safeguards compliance score below critical threshold'
+            description: 'Compliance score is {{ $value | humanize }}, below the required 0.95 threshold for tenant {{ $labels.tenant }}'
+            runbook_url: 'https://docs.mc-platform.com/runbooks/sovereign-compliance-low'
+            action: 'Check independent verification, containment readiness, lawful interoperability, and reversible autonomy systems'
 
         - alert: IndependentVerificationFailing
           expr: mc_platform:independent_verification_success_rate_5m < 80
@@ -69,9 +69,9 @@ spec:
             component: independent_verification
             namespace: mc-platform-v041
           annotations:
-            summary: "Independent verification success rate below threshold"
-            description: "Verification success rate is {{ $value | humanize }}%, below required 80% for tenant {{ $labels.tenant }}"
-            action: "Check verification service health and external verification source connectivity"
+            summary: 'Independent verification success rate below threshold'
+            description: 'Verification success rate is {{ $value | humanize }}%, below required 80% for tenant {{ $labels.tenant }}'
+            action: 'Check verification service health and external verification source connectivity'
 
         - alert: InsufficientVerificationSources
           expr: mc_platform_verification_sources_active < 2
@@ -82,9 +82,9 @@ spec:
             component: independent_verification
             namespace: mc-platform-v041
           annotations:
-            summary: "Insufficient independent verification sources active"
-            description: "Only {{ $value }} verification sources active, minimum 2 required for tenant {{ $labels.tenant }}"
-            action: "Restore connection to verification sources or add additional sources"
+            summary: 'Insufficient independent verification sources active'
+            description: 'Only {{ $value }} verification sources active, minimum 2 required for tenant {{ $labels.tenant }}'
+            action: 'Restore connection to verification sources or add additional sources'
 
         - alert: EmergencyStopNotReady
           expr: mc_platform_emergency_stop_ready == 0
@@ -95,9 +95,9 @@ spec:
             component: containment_readiness
             namespace: mc-platform-v041
           annotations:
-            summary: "Emergency stop mechanism not ready"
-            description: "Emergency stop is not operational for tenant {{ $labels.tenant }}"
-            action: "Immediately check emergency stop system and restore functionality"
+            summary: 'Emergency stop mechanism not ready'
+            description: 'Emergency stop is not operational for tenant {{ $labels.tenant }}'
+            action: 'Immediately check emergency stop system and restore functionality'
 
         - alert: RollbackCapabilityNotReady
           expr: mc_platform_rollback_ready == 0
@@ -108,9 +108,9 @@ spec:
             component: containment_readiness
             namespace: mc-platform-v041
           annotations:
-            summary: "Rollback capability not ready"
-            description: "Rollback mechanism is not operational for tenant {{ $labels.tenant }}"
-            action: "Check rollback system health and backup availability"
+            summary: 'Rollback capability not ready'
+            description: 'Rollback mechanism is not operational for tenant {{ $labels.tenant }}'
+            action: 'Check rollback system health and backup availability'
 
         - alert: AutonomyNotReversible
           expr: mc_platform_autonomy_reversible == 0
@@ -121,9 +121,9 @@ spec:
             component: reversible_autonomy
             namespace: mc-platform-v041
           annotations:
-            summary: "Autonomous operations not reversible"
-            description: "Autonomy reversibility not guaranteed for tenant {{ $labels.tenant }}"
-            action: "Halt autonomous operations until reversibility can be restored"
+            summary: 'Autonomous operations not reversible'
+            description: 'Autonomy reversibility not guaranteed for tenant {{ $labels.tenant }}'
+            action: 'Halt autonomous operations until reversibility can be restored'
 
         - alert: HumanControlNotAvailable
           expr: mc_platform_human_control_available == 0
@@ -134,9 +134,9 @@ spec:
             component: reversible_autonomy
             namespace: mc-platform-v041
           annotations:
-            summary: "Human control not available for autonomous operations"
-            description: "Human control mechanisms not available for tenant {{ $labels.tenant }}"
-            action: "Restore human control interfaces immediately"
+            summary: 'Human control not available for autonomous operations'
+            description: 'Human control mechanisms not available for tenant {{ $labels.tenant }}'
+            action: 'Restore human control interfaces immediately'
 
         - alert: JurisdictionComplianceViolation
           expr: mc_platform_jurisdiction_compliant == 0
@@ -147,9 +147,9 @@ spec:
             component: lawful_interoperability
             namespace: mc-platform-v041
           annotations:
-            summary: "Jurisdiction compliance violation detected"
-            description: "Non-compliance detected for jurisdiction {{ $labels.jurisdiction }} in tenant {{ $labels.tenant }}"
-            action: "Immediate review required for jurisdiction compliance"
+            summary: 'Jurisdiction compliance violation detected'
+            description: 'Non-compliance detected for jurisdiction {{ $labels.jurisdiction }} in tenant {{ $labels.tenant }}'
+            action: 'Immediate review required for jurisdiction compliance'
 
         - alert: VerificationServiceUnavailable
           expr: up{job="verification-service"} == 0
@@ -160,9 +160,9 @@ spec:
             component: verification_service
             namespace: mc-platform-v041
           annotations:
-            summary: "Independent verification service unavailable"
-            description: "Verification service is down for instance {{ $labels.instance }}"
-            action: "Restore verification service immediately"
+            summary: 'Independent verification service unavailable'
+            description: 'Verification service is down for instance {{ $labels.instance }}'
+            action: 'Restore verification service immediately'
 
         - alert: SovereignSafeguardsServiceUnavailable
           expr: up{job="sovereign-safeguards-service"} == 0
@@ -173,9 +173,9 @@ spec:
             component: sovereign_safeguards_service
             namespace: mc-platform-v041
           annotations:
-            summary: "Sovereign safeguards service unavailable"
-            description: "Sovereign safeguards service is down for instance {{ $labels.instance }}"
-            action: "Restore sovereign safeguards service immediately"
+            summary: 'Sovereign safeguards service unavailable'
+            description: 'Sovereign safeguards service is down for instance {{ $labels.instance }}'
+            action: 'Restore sovereign safeguards service immediately'
 
         # Warning alerts
         - alert: ContainmentResponseTimeHigh
@@ -187,9 +187,9 @@ spec:
             component: containment_readiness
             namespace: mc-platform-v041
           annotations:
-            summary: "Containment response time exceeds threshold"
-            description: "Response time is {{ $value }}ms, above maximum 100ms for tenant {{ $labels.tenant }}"
-            action: "Optimize containment system performance"
+            summary: 'Containment response time exceeds threshold'
+            description: 'Response time is {{ $value }}ms, above maximum 100ms for tenant {{ $labels.tenant }}'
+            action: 'Optimize containment system performance'
 
         - alert: CrossBorderApprovalExpiring
           expr: (mc_platform_cross_border_approval_expiry_timestamp - time()) < 86400 * 7
@@ -200,9 +200,9 @@ spec:
             component: lawful_interoperability
             namespace: mc-platform-v041
           annotations:
-            summary: "Cross-border approval expiring within 7 days"
-            description: "Approval {{ $labels.approval_id }} expires on {{ $labels.expiry_date }} for tenant {{ $labels.tenant }}"
-            action: "Renew cross-border approval before expiration"
+            summary: 'Cross-border approval expiring within 7 days'
+            description: 'Approval {{ $labels.approval_id }} expires on {{ $labels.expiry_date }} for tenant {{ $labels.tenant }}'
+            action: 'Renew cross-border approval before expiration'
 
         - alert: AutonomySnapshotFrequencyLow
           expr: mc_platform_autonomy_snapshot_frequency_seconds > 300
@@ -213,6 +213,6 @@ spec:
             component: reversible_autonomy
             namespace: mc-platform-v041
           annotations:
-            summary: "Autonomy snapshot frequency below recommended"
-            description: "Snapshot frequency is {{ $value }}s, above recommended 300s for tenant {{ $labels.tenant }}"
-            action: "Increase autonomy snapshot frequency"
+            summary: 'Autonomy snapshot frequency below recommended'
+            description: 'Snapshot frequency is {{ $value }}s, above recommended 300s for tenant {{ $labels.tenant }}'
+            action: 'Increase autonomy snapshot frequency'

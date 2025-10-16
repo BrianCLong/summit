@@ -7,15 +7,15 @@ on:
     branches: [main, release/v0.3.7]
 
 env:
-  ZK_ATTESTATION_REQUIRED: "true"
-  BFT_QUORUM_REQUIRED: "true"
-  CSE_SCORE_THRESHOLD: "0.99"
-  SOVEREIGN_DRIFT_GATE: "true"
-  GREENOPS_OPTIMIZATION_REQUIRED: "true"
+  ZK_ATTESTATION_REQUIRED: 'true'
+  BFT_QUORUM_REQUIRED: 'true'
+  CSE_SCORE_THRESHOLD: '0.99'
+  SOVEREIGN_DRIFT_GATE: 'true'
+  GREENOPS_OPTIMIZATION_REQUIRED: 'true'
 
 jobs:
   zk-attestation-gate:
-    name: "🔐 Zero-Knowledge Attestation Gate"
+    name: '🔐 Zero-Knowledge Attestation Gate'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -71,7 +71,7 @@ jobs:
           fi
 
   bft-quorum-gate:
-    name: "🏛️ Byzantine Fault Tolerance Gate"
+    name: '🏛️ Byzantine Fault Tolerance Gate'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -132,7 +132,7 @@ jobs:
           fi
 
   cse-gate:
-    name: "🔄 Continuous Safety Equivalence Gate"
+    name: '🔄 Continuous Safety Equivalence Gate'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -203,7 +203,7 @@ jobs:
           fi
 
   sovereign-compliance-gate:
-    name: "👑 Sovereign Compliance Gate"
+    name: '👑 Sovereign Compliance Gate'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -267,7 +267,7 @@ jobs:
           fi
 
   greenops-gate:
-    name: "🌱 GreenOps Co-Optimization Gate"
+    name: '🌱 GreenOps Co-Optimization Gate'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -343,7 +343,7 @@ jobs:
           fi
 
   observability-validation:
-    name: "📊 Sovereign Observability Validation"
+    name: '📊 Sovereign Observability Validation'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -393,9 +393,16 @@ jobs:
           fi
 
   sovereign-evidence-collection:
-    name: "📑 Sovereign Evidence Collection"
+    name: '📑 Sovereign Evidence Collection'
     runs-on: ubuntu-latest
-    needs: [zk-attestation-gate, bft-quorum-gate, cse-gate, sovereign-compliance-gate, greenops-gate]
+    needs:
+      [
+        zk-attestation-gate,
+        bft-quorum-gate,
+        cse-gate,
+        sovereign-compliance-gate,
+        greenops-gate,
+      ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

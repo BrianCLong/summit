@@ -10,7 +10,9 @@ export function listTemplates() {
     .readdirSync(templatesDir)
     .filter((f) => f.endsWith('.json'))
     .map((file) => {
-      const manifest = JSON.parse(fs.readFileSync(path.join(templatesDir, file), 'utf-8'));
+      const manifest = JSON.parse(
+        fs.readFileSync(path.join(templatesDir, file), 'utf-8'),
+      );
       return { id: manifest.id, version: manifest.version };
     });
 }
@@ -36,7 +38,10 @@ export function renderReport(
   }
   const fileName = `${sha256}.${format}`;
   fs.writeFileSync(path.join(outputPath, fileName), content);
-  const manifestHash = crypto.createHash('sha256').update(JSON.stringify(manifest)).digest('hex');
+  const manifestHash = crypto
+    .createHash('sha256')
+    .update(JSON.stringify(manifest))
+    .digest('hex');
   return {
     url: `/downloads/${fileName}`,
     sha256,

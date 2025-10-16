@@ -11,31 +11,35 @@ const router = express.Router();
  */
 router.post('/explain', async (req, res) => {
   const startTime = Date.now();
-  
+
   try {
     const { queryId, extended = false } = req.body;
-    
+
     if (!queryId) {
       return res.status(400).json({
         error: 'queryId is required',
-        code: 'MISSING_QUERY_ID'
+        code: 'MISSING_QUERY_ID',
       });
     }
 
     const explanation = await policyExplainer.getPolicyExplanationAPI(queryId);
-    
+
     if (!explanation) {
       return res.status(404).json({
         error: 'Decision trace not found',
         code: 'TRACE_NOT_FOUND',
-        queryId
+        queryId,
       });
     }
 
     // Track metrics
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policyExplanationLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.policyExplanationRequests?.inc({ status: 'success' });
+    prometheusConductorMetrics?.policyExplanationLatency?.observe(
+      duration / 1000,
+    );
+    prometheusConductorMetrics?.policyExplanationRequests?.inc({
+      status: 'success',
+    });
 
     const response = {
       queryId: explanation.queryId,
@@ -45,21 +49,25 @@ router.post('/explain', async (req, res) => {
         rulePath: explanation.rulePath,
         policyEvaluations: explanation.policyEvaluations,
         costBreakdown: explanation.costBreakdown,
-        performanceMetrics: explanation.performanceMetrics
-      })
+        performanceMetrics: explanation.performanceMetrics,
+      }),
     };
 
     res.json(response);
   } catch (error) {
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policyExplanationLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.policyExplanationRequests?.inc({ status: 'error' });
+    prometheusConductorMetrics?.policyExplanationLatency?.observe(
+      duration / 1000,
+    );
+    prometheusConductorMetrics?.policyExplanationRequests?.inc({
+      status: 'error',
+    });
 
     console.error('Policy explanation error:', error);
     res.status(500).json({
       error: 'Failed to explain policy decision',
       code: 'EXPLANATION_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -70,64 +78,68 @@ router.post('/explain', async (req, res) => {
  */
 router.post('/simulate', async (req, res) => {
   const startTime = Date.now();
-  
+
   try {
     const { queryId, proposedRules, simulationType = 'rule_change' } = req.body;
-    
+
     if (!queryId) {
       return res.status(400).json({
         error: 'queryId is required',
-        code: 'MISSING_QUERY_ID'
+        code: 'MISSING_QUERY_ID',
       });
     }
 
     if (!proposedRules || !Array.isArray(proposedRules)) {
       return res.status(400).json({
         error: 'proposedRules must be an array',
-        code: 'INVALID_RULES'
+        code: 'INVALID_RULES',
       });
     }
 
     const simulation = await policyExplainer.simulateWhatIfAPI(queryId, {
       rules: proposedRules,
-      type: simulationType
+      type: simulationType,
     });
-    
+
     if (!simulation) {
       return res.status(404).json({
         error: 'Original decision not found for simulation',
         code: 'ORIGINAL_DECISION_NOT_FOUND',
-        queryId
+        queryId,
       });
     }
 
     // Track metrics
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policySimulationLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.policySimulationRequests?.inc({ 
-      status: 'success', 
-      type: simulationType 
+    prometheusConductorMetrics?.policySimulationLatency?.observe(
+      duration / 1000,
+    );
+    prometheusConductorMetrics?.policySimulationRequests?.inc({
+      status: 'success',
+      type: simulationType,
     });
 
     res.json({
       queryId,
       simulationType,
       timestamp: new Date().toISOString(),
-      simulation
+      simulation,
     });
   } catch (error) {
     const duration = Date.now() - startTime;
-    prometheusConductorMetrics?.policySimulationLatency?.observe(duration / 1000);
-    prometheusConductorMetrics?.policySimulationRequests?.inc({ 
-      status: 'error', 
-      type: req.body.simulationType || 'unknown' 
+    prometheusConductorMetrics?.policySimulationLatency?.observe(
+      duration / 1000,
+    );
+    prometheusConductorMetrics?.policySimulationRequests?.inc({
+      status: 'error',
+      type: req.body.simulationType || 'unknown',
     });
 
     console.error('Policy simulation error:', error);
     res.status(500).json({
       error: 'Failed to simulate policy changes',
       code: 'SIMULATION_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -148,7 +160,7 @@ router.get('/rules', async (req, res) => {
         action: 'route_to',
         priority: 100,
         enabled: true,
-        metadata: { allowedExperts: ['local-llm', 'sovereign-ai'] }
+        metadata: { allowedExperts: ['local-llm', 'sovereign-ai'] },
       },
       {
         id: 'cost-budget',
@@ -157,7 +169,7 @@ router.get('/rules', async (req, res) => {
         condition: 'tenant.budgetRemaining > estimatedCost',
         action: 'allow',
         priority: 90,
-        enabled: true
+        enabled: true,
       },
       {
         id: 'sensitivity-classification',
@@ -167,7 +179,7 @@ router.get('/rules', async (req, res) => {
         action: 'route_to',
         priority: 95,
         enabled: true,
-        metadata: { allowedExperts: ['local-llm'] }
+        metadata: { allowedExperts: ['local-llm'] },
       },
       {
         id: 'emergency-override',
@@ -176,8 +188,8 @@ router.get('/rules', async (req, res) => {
         condition: 'context.urgency === "high" && user.hasEmergencyRole',
         action: 'allow',
         priority: 110,
-        enabled: true
-      }
+        enabled: true,
+      },
     ];
 
     prometheusConductorMetrics?.policyRulesRequests?.inc({ status: 'success' });
@@ -185,7 +197,7 @@ router.get('/rules', async (req, res) => {
     res.json({
       rules,
       count: rules.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     prometheusConductorMetrics?.policyRulesRequests?.inc({ status: 'error' });
@@ -194,7 +206,7 @@ router.get('/rules', async (req, res) => {
     res.status(500).json({
       error: 'Failed to fetch policy rules',
       code: 'RULES_FETCH_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -207,7 +219,7 @@ router.get('/runs/:runId/nodes/:nodeId/routing', async (req, res) => {
   try {
     const { runId, nodeId } = req.params;
     const { includeTrace = false } = req.query;
-    
+
     // In a real implementation, this would fetch from the runs database
     // For now, return a mock routing decision
     const routingDecision = {
@@ -219,30 +231,32 @@ router.get('/runs/:runId/nodes/:nodeId/routing', async (req, res) => {
         id: 'openai-gpt-4',
         name: 'OpenAI GPT-4',
         provider: 'openai',
-        model: 'gpt-4-0125-preview'
+        model: 'gpt-4-0125-preview',
       },
       decision: {
         confidence: 0.92,
         reason: 'High confidence task, budget available, no PII detected',
         estimatedCost: 0.045,
-        estimatedLatency: 1200
+        estimatedLatency: 1200,
       },
       alternatives: [
         {
           expert: 'anthropic-claude-3',
           score: 0.87,
-          rejectionReason: 'Higher cost per token'
+          rejectionReason: 'Higher cost per token',
         },
         {
           expert: 'local-llm',
           score: 0.75,
-          rejectionReason: 'Lower performance score'
-        }
-      ]
+          rejectionReason: 'Lower performance score',
+        },
+      ],
     };
 
     if (includeTrace === 'true') {
-      const trace = await policyExplainer.getPolicyExplanationAPI(routingDecision.queryId);
+      const trace = await policyExplainer.getPolicyExplanationAPI(
+        routingDecision.queryId,
+      );
       routingDecision.trace = trace;
     }
 
@@ -256,7 +270,7 @@ router.get('/runs/:runId/nodes/:nodeId/routing', async (req, res) => {
     res.status(500).json({
       error: 'Failed to fetch routing decision',
       code: 'ROUTING_FETCH_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });

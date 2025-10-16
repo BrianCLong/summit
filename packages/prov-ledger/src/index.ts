@@ -48,7 +48,10 @@ export interface RecordStepOptions {
   note?: string;
 }
 
-export function recordStep(manifest: ProvenanceManifest, opts: RecordStepOptions): ProvenanceStep {
+export function recordStep(
+  manifest: ProvenanceManifest,
+  opts: RecordStepOptions,
+): ProvenanceStep {
   const step: ProvenanceStep = {
     id: opts.id,
     type: opts.type,

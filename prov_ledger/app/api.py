@@ -3,6 +3,9 @@ from fastapi.responses import PlainTextResponse
 
 from . import claims, evidence, provenance, scoring
 from .ethics import check_request
+from .exporters import prov_json
+from .nlp import extractor
+from .observability import metrics
 from .schemas import (
     AttachEvidenceRequest,
     Claim,
@@ -11,10 +14,7 @@ from .schemas import (
     ProvExport,
     SubmitText,
 )
-from .nlp import extractor
 from .security import api_key_auth
-from .observability import metrics
-from .exporters import prov_json
 
 router = APIRouter()
 
@@ -63,7 +63,9 @@ async def get_corroboration(claim_id: str, _: None = Depends(api_key_auth)):
     if not claim:
         raise HTTPException(404, "not found")
     score, breakdown = scoring.corroborate(claim_id, claim["evidence"])
-    return Corroboration(claim_id=claim_id, evidence_ids=claim["evidence"], score=score, breakdown=breakdown)
+    return Corroboration(
+        claim_id=claim_id, evidence_ids=claim["evidence"], score=score, breakdown=breakdown
+    )
 
 
 @router.get("/claims/{claim_id}/ledger", response_model=ProvExport)

@@ -15,17 +15,43 @@ const investigationResolvers = {
         createdAt: new Date().toISOString(),
       };
     },
-    investigations: async (_: any, { limit, offset }: { limit: number, offset: number }) => {
-      logger.info(`Fetching investigations (placeholder) limit: ${limit}, offset: ${offset}`);
+    investigations: async (
+      _: any,
+      { limit, offset }: { limit: number; offset: number },
+    ) => {
+      logger.info(
+        `Fetching investigations (placeholder) limit: ${limit}, offset: ${offset}`,
+      );
       // Placeholder: In a real implementation, fetch investigations from PostgreSQL with pagination
       return [
-        { id: 'inv-1', name: 'Project Alpha', description: 'Initial investigation', createdAt: new Date().toISOString() },
-        { id: 'inv-2', name: 'Project Beta', description: 'Follow-up investigation', createdAt: new Date().toISOString() },
+        {
+          id: 'inv-1',
+          name: 'Project Alpha',
+          description: 'Initial investigation',
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 'inv-2',
+          name: 'Project Beta',
+          description: 'Follow-up investigation',
+          createdAt: new Date().toISOString(),
+        },
       ];
     },
     auditTrace: async (
       _: any,
-      { investigationId, filter }: { investigationId: string; filter?: { userId?: string; entityType?: string; from?: string; to?: string } },
+      {
+        investigationId,
+        filter,
+      }: {
+        investigationId: string;
+        filter?: {
+          userId?: string;
+          entityType?: string;
+          from?: string;
+          to?: string;
+        };
+      },
     ) => {
       logger.info(`Fetching audit trace for investigation ${investigationId}`);
       const pool = getPostgresPool();
@@ -59,7 +85,10 @@ const investigationResolvers = {
     },
   },
   Mutation: {
-    createInvestigation: async (_: any, { input }: { input: { name: string, description?: string } }) => {
+    createInvestigation: async (
+      _: any,
+      { input }: { input: { name: string; description?: string } },
+    ) => {
       logger.info(`Creating investigation: ${input.name} (placeholder)`);
       // Placeholder: In a real implementation, create investigation in PostgreSQL
       return {
@@ -69,8 +98,16 @@ const investigationResolvers = {
         createdAt: new Date().toISOString(),
       };
     },
-    updateInvestigation: async (_: any, { id, input }: { id: string, input: { name?: string, description?: string } }) => {
-      logger.info(`Updating investigation ${id}: ${JSON.stringify(input)} (placeholder)`);
+    updateInvestigation: async (
+      _: any,
+      {
+        id,
+        input,
+      }: { id: string; input: { name?: string; description?: string } },
+    ) => {
+      logger.info(
+        `Updating investigation ${id}: ${JSON.stringify(input)} (placeholder)`,
+      );
       // Placeholder: In a real implementation, update investigation in PostgreSQL
       return {
         id: id,

@@ -1,7 +1,7 @@
 neo4j:
   name: graph
   edition: enterprise
-  acceptLicenseAgreement: "yes"
+  acceptLicenseAgreement: 'yes'
   core:
     numberOfServers: 3
     persistentVolume:
@@ -12,7 +12,7 @@ neo4j:
       size: 200Gi
   resources:
     requests: { cpu: 500m, memory: 4Gi }
-    limits:   { cpu: 2, memory: 8Gi }
+    limits: { cpu: 2, memory: 8Gi }
   config:
     dbms.backup.listen_address: :6362
     dbms.memory.heap.initial_size: 2G

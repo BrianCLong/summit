@@ -6,4 +6,3 @@ export type RelayMsg = {
   createdAt: string;
   sig: string;
 };
-

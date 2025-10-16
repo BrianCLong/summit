@@ -1,9 +1,12 @@
 import { test, expect, request } from '@playwright/test';
 
 const gql = async (rq: any, query: string, variables?: any) => {
-  const res = await rq.post(`${process.env.GRAPHQL_URL || process.env.BASE_URL + '/graphql'}`, {
-    data: { query, variables },
-  });
+  const res = await rq.post(
+    `${process.env.GRAPHQL_URL || process.env.BASE_URL + '/graphql'}`,
+    {
+      data: { query, variables },
+    },
+  );
   expect(res.ok()).toBeTruthy();
   const json = await res.json();
   expect(json.errors).toBeFalsy();
@@ -16,8 +19,16 @@ test('home loads', async ({ page }) => {
 });
 
 test('GraphQL smoke — dashboard and create note', async ({ request }) => {
-  const data1 = await gql(request, `query($id: ID!){ user(id:$id){ id name } }`, { id: 'seed-user-1' });
+  const data1 = await gql(
+    request,
+    `query($id: ID!){ user(id:$id){ id name } }`,
+    { id: 'seed-user-1' },
+  );
   expect(data1.user.id).toBeTruthy();
-  const note = await gql(request, `mutation($t:String!){ createNote(input:{text:$t}){ id text } }`, { t: `pw-${Date.now()}` });
+  const note = await gql(
+    request,
+    `mutation($t:String!){ createNote(input:{text:$t}){ id text } }`,
+    { t: `pw-${Date.now()}` },
+  );
   expect(note.createNote.id).toBeTruthy();
 });

@@ -53,7 +53,7 @@ export class ActionSandbox {
     this.logger = logger;
     this.basePath = basePath;
     this.networkGuard = new NetworkGuard(logger);
-    
+
     // Ensure base directory exists
     fs.mkdir(basePath, { recursive: true }).catch(() => {});
   }
@@ -66,11 +66,14 @@ export class ActionSandbox {
     const sandboxId = context.id || randomUUID();
     const sandboxPath = join(this.basePath, sandboxId);
 
-    this.logger.info({ 
-      sandboxId, 
-      command: context.command,
-      config: context.config 
-    }, 'Starting sandbox execution');
+    this.logger.info(
+      {
+        sandboxId,
+        command: context.command,
+        config: context.config,
+      },
+      'Starting sandbox execution',
+    );
 
     try {
       // Create sandbox directory
@@ -85,20 +88,25 @@ export class ActionSandbox {
       // Calculate duration
       result.duration = Date.now() - startTime;
 
-      this.logger.info({ 
-        sandboxId, 
-        success: result.success, 
-        duration: result.duration,
-        exitCode: result.exitCode
-      }, 'Sandbox execution completed');
+      this.logger.info(
+        {
+          sandboxId,
+          success: result.success,
+          duration: result.duration,
+          exitCode: result.exitCode,
+        },
+        'Sandbox execution completed',
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error({ 
-        sandboxId, 
-        error: error.message 
-      }, 'Sandbox execution failed');
+      this.logger.error(
+        {
+          sandboxId,
+          error: error.message,
+        },
+        'Sandbox execution failed',
+      );
 
       return {
         success: false,
@@ -109,15 +117,17 @@ export class ActionSandbox {
         resourceUsage: {
           maxMemoryMB: 0,
           cpuTimeMs: 0,
-          networkConnections: 0
+          networkConnections: 0,
         },
-        violations: [`Sandbox setup failed: ${error.message}`]
+        violations: [`Sandbox setup failed: ${error.message}`],
       };
-
     } finally {
       // Cleanup sandbox directory
-      await this.cleanupSandbox(sandboxPath).catch(err => {
-        this.logger.warn({ sandboxId, error: err.message }, 'Failed to cleanup sandbox');
+      await this.cleanupSandbox(sandboxPath).catch((err) => {
+        this.logger.warn(
+          { sandboxId, error: err.message },
+          'Failed to cleanup sandbox',
+        );
       });
     }
   }
@@ -125,7 +135,10 @@ export class ActionSandbox {
   /**
    * Setup sandbox environment with security controls
    */
-  private async setupSandbox(sandboxPath: string, context: ExecutionContext): Promise<void> {
+  private async setupSandbox(
+    sandboxPath: string,
+    context: ExecutionContext,
+  ): Promise<void> {
     // Create working directory
     const workDir = join(sandboxPath, 'work');
     await fs.mkdir(workDir, { recursive: true });
@@ -150,8 +163,8 @@ export class ActionSandbox {
    * Execute with resource and security constraints
    */
   private async executeConstrained(
-    sandboxPath: string, 
-    context: ExecutionContext
+    sandboxPath: string,
+    context: ExecutionContext,
   ): Promise<SandboxResult> {
     return new Promise((resolve) => {
       const violations: string[] = [];
@@ -160,15 +173,15 @@ export class ActionSandbox {
       let maxMemoryMB = 0;
       let cpuTimeMs = 0;
       let networkConnections = 0;
-      
+
       // Build Docker command with security constraints
       const dockerArgs = this.buildDockerArgs(sandboxPath, context);
-      
+
       this.logger.debug({ dockerArgs }, 'Executing Docker command');
-      
+
       const process = spawn('docker', dockerArgs, {
         cwd: sandboxPath,
-        env: { ...process.env, ...context.config.environment }
+        env: { ...process.env, ...context.config.environment },
       });
 
       let timeoutHandle: NodeJS.Timeout | null = null;
@@ -180,47 +193,58 @@ export class ActionSandbox {
           if (!killed) {
             killed = true;
             process.kill('SIGKILL');
-            violations.push(`Execution timeout after ${context.config.timeoutMs}ms`);
+            violations.push(
+              `Execution timeout after ${context.config.timeoutMs}ms`,
+            );
           }
         }, context.config.timeoutMs);
       }
 
       // Monitor resource usage
       const resourceMonitor = setInterval(() => {
-        this.getContainerStats(context.id).then(stats => {
-          if (stats) {
-            maxMemoryMB = Math.max(maxMemoryMB, stats.memoryMB);
-            cpuTimeMs += stats.cpuUsageMs;
-            networkConnections = stats.networkConnections;
+        this.getContainerStats(context.id)
+          .then((stats) => {
+            if (stats) {
+              maxMemoryMB = Math.max(maxMemoryMB, stats.memoryMB);
+              cpuTimeMs += stats.cpuUsageMs;
+              networkConnections = stats.networkConnections;
 
-            // Check memory limits
-            if (context.config.maxMemoryMB > 0 && stats.memoryMB > context.config.maxMemoryMB) {
-              violations.push(`Memory limit exceeded: ${stats.memoryMB}MB > ${context.config.maxMemoryMB}MB`);
-              if (!killed) {
-                killed = true;
-                process.kill('SIGKILL');
+              // Check memory limits
+              if (
+                context.config.maxMemoryMB > 0 &&
+                stats.memoryMB > context.config.maxMemoryMB
+              ) {
+                violations.push(
+                  `Memory limit exceeded: ${stats.memoryMB}MB > ${context.config.maxMemoryMB}MB`,
+                );
+                if (!killed) {
+                  killed = true;
+                  process.kill('SIGKILL');
+                }
               }
             }
-          }
-        }).catch(() => {}); // Ignore monitoring errors
+          })
+          .catch(() => {}); // Ignore monitoring errors
       }, 1000);
 
       // Capture output
       process.stdout?.on('data', (data) => {
         stdout += data.toString();
-        
+
         // Check for suspicious output patterns
         const suspiciousPatterns = [
           /password[:\s]/i,
           /api[_\s]*key/i,
           /secret/i,
           /token/i,
-          /credential/i
+          /credential/i,
         ];
 
         for (const pattern of suspiciousPatterns) {
           if (pattern.test(data.toString())) {
-            violations.push('Suspicious output detected - potential secret leakage');
+            violations.push(
+              'Suspicious output detected - potential secret leakage',
+            );
             break;
           }
         }
@@ -231,7 +255,10 @@ export class ActionSandbox {
       });
 
       // Network monitoring
-      const networkMonitor = this.networkGuard.monitor(context.id, context.config);
+      const networkMonitor = this.networkGuard.monitor(
+        context.id,
+        context.config,
+      );
       networkMonitor.on('violation', (violation) => {
         violations.push(`Network violation: ${violation}`);
       });
@@ -250,9 +277,9 @@ export class ActionSandbox {
           resourceUsage: {
             maxMemoryMB,
             cpuTimeMs,
-            networkConnections
+            networkConnections,
           },
-          violations
+          violations,
         });
       });
 
@@ -270,9 +297,9 @@ export class ActionSandbox {
           resourceUsage: {
             maxMemoryMB,
             cpuTimeMs,
-            networkConnections
+            networkConnections,
           },
-          violations: violations.concat([`Process error: ${error.message}`])
+          violations: violations.concat([`Process error: ${error.message}`]),
         });
       });
     });
@@ -281,41 +308,57 @@ export class ActionSandbox {
   /**
    * Build Docker command with security constraints
    */
-  private buildDockerArgs(sandboxPath: string, context: ExecutionContext): string[] {
+  private buildDockerArgs(
+    sandboxPath: string,
+    context: ExecutionContext,
+  ): string[] {
     const workDir = join(sandboxPath, 'work');
     const seccompProfile = join(sandboxPath, 'seccomp.json');
-    
+
     const args = [
       'run',
       '--rm',
-      '--name', `sandbox-${context.id}`,
-      
+      '--name',
+      `sandbox-${context.id}`,
+
       // Security constraints
-      '--user', '65534:65534', // nobody user
+      '--user',
+      '65534:65534', // nobody user
       '--read-only',
       '--no-new-privileges',
-      '--security-opt', `seccomp=${seccompProfile}`,
-      '--cap-drop', 'ALL',
-      
+      '--security-opt',
+      `seccomp=${seccompProfile}`,
+      '--cap-drop',
+      'ALL',
+
       // Resource limits
-      '--memory', `${context.config.maxMemoryMB}m`,
-      '--cpus', (context.config.maxCpuPercent / 100).toString(),
-      '--ulimit', 'nofile=100:100',
-      '--ulimit', 'nproc=50:50',
-      
+      '--memory',
+      `${context.config.maxMemoryMB}m`,
+      '--cpus',
+      (context.config.maxCpuPercent / 100).toString(),
+      '--ulimit',
+      'nofile=100:100',
+      '--ulimit',
+      'nproc=50:50',
+
       // Network policy
       ...this.getNetworkArgs(context.config),
-      
+
       // Mounts
-      '--volume', `${workDir}:/work:ro`,
-      '--workdir', '/work',
-      
+      '--volume',
+      `${workDir}:/work:ro`,
+      '--workdir',
+      '/work',
+
       // Environment
-      ...Object.entries(context.config.environment).flatMap(([k, v]) => ['-e', `${k}=${v}`]),
-      
+      ...Object.entries(context.config.environment).flatMap(([k, v]) => [
+        '-e',
+        `${k}=${v}`,
+      ]),
+
       // Image and command
       'alpine:3.18', // Minimal base image
-      ...context.command
+      ...context.command,
     ];
 
     return args;
@@ -328,14 +371,19 @@ export class ActionSandbox {
     switch (config.networkPolicy) {
       case 'none':
         return ['--network', 'none'];
-        
+
       case 'internal':
-        return ['--network', 'bridge', '--add-host', 'host.docker.internal:host-gateway'];
-        
+        return [
+          '--network',
+          'bridge',
+          '--add-host',
+          'host.docker.internal:host-gateway',
+        ];
+
       case 'allowlist':
         // Custom network with firewall rules
         return ['--network', 'sandbox-allowlist'];
-        
+
       case 'internet':
       default:
         return ['--network', 'bridge'];
@@ -352,92 +400,324 @@ export class ActionSandbox {
         {
           names: [
             // Essential syscalls
-            'read', 'write', 'open', 'close', 'stat', 'fstat', 'lstat',
-            'poll', 'lseek', 'mmap', 'mprotect', 'munmap', 'brk',
-            'rt_sigaction', 'rt_sigprocmask', 'rt_sigreturn',
-            'ioctl', 'pread64', 'pwrite64', 'readv', 'writev',
-            'access', 'pipe', 'select', 'sched_yield', 'mremap',
-            'msync', 'mincore', 'madvise', 'shmget', 'shmat', 'shmctl',
-            'dup', 'dup2', 'pause', 'nanosleep', 'getitimer',
-            'alarm', 'setitimer', 'getpid', 'sendfile', 'socket',
-            'connect', 'accept', 'sendto', 'recvfrom', 'sendmsg',
-            'recvmsg', 'shutdown', 'bind', 'listen', 'getsockname',
-            'getpeername', 'socketpair', 'setsockopt', 'getsockopt',
-            'clone', 'fork', 'vfork', 'execve', 'exit', 'wait4',
-            'kill', 'uname', 'semget', 'semop', 'semctl', 'shmdt',
-            'msgget', 'msgsnd', 'msgrcv', 'msgctl', 'fcntl',
-            'flock', 'fsync', 'fdatasync', 'truncate', 'ftruncate',
-            'getdents', 'getcwd', 'chdir', 'fchdir', 'rename',
-            'mkdir', 'rmdir', 'creat', 'link', 'unlink', 'symlink',
-            'readlink', 'chmod', 'fchmod', 'chown', 'fchown',
-            'lchown', 'umask', 'gettimeofday', 'getrlimit',
-            'getrusage', 'sysinfo', 'times', 'ptrace', 'getuid',
-            'syslog', 'getgid', 'setuid', 'setgid', 'geteuid',
-            'getegid', 'setpgid', 'getppid', 'getpgrp', 'setsid',
-            'setreuid', 'setregid', 'getgroups', 'setgroups',
-            'setresuid', 'getresuid', 'setresgid', 'getresgid',
-            'getpgid', 'setfsuid', 'setfsgid', 'getsid', 'capget',
-            'capset', 'rt_sigpending', 'rt_sigtimedwait',
-            'rt_sigqueueinfo', 'rt_sigsuspend', 'sigaltstack',
-            'utime', 'mknod', 'uselib', 'personality', 'ustat',
-            'statfs', 'fstatfs', 'sysfs', 'getpriority',
-            'setpriority', 'sched_setparam', 'sched_getparam',
-            'sched_setscheduler', 'sched_getscheduler',
-            'sched_get_priority_max', 'sched_get_priority_min',
-            'sched_rr_get_interval', 'mlock', 'munlock', 'mlockall',
-            'munlockall', 'vhangup', 'modify_ldt', 'pivot_root',
-            '_sysctl', 'prctl', 'arch_prctl', 'adjtimex',
-            'setrlimit', 'chroot', 'sync', 'acct', 'settimeofday',
-            'mount', 'umount2', 'swapon', 'swapoff', 'reboot',
-            'sethostname', 'setdomainname', 'iopl', 'ioperm',
-            'create_module', 'init_module', 'delete_module',
-            'get_kernel_syms', 'query_module', 'quotactl',
-            'nfsservctl', 'getpmsg', 'putpmsg', 'afs_syscall',
-            'tuxcall', 'security', 'gettid', 'readahead',
-            'setxattr', 'lsetxattr', 'fsetxattr', 'getxattr',
-            'lgetxattr', 'fgetxattr', 'listxattr', 'llistxattr',
-            'flistxattr', 'removexattr', 'lremovexattr',
-            'fremovexattr', 'tkill', 'time', 'futex', 'sched_setaffinity',
-            'sched_getaffinity', 'set_thread_area', 'io_setup',
-            'io_destroy', 'io_getevents', 'io_submit', 'io_cancel',
-            'get_thread_area', 'lookup_dcookie', 'epoll_create',
-            'epoll_ctl_old', 'epoll_wait_old', 'remap_file_pages',
-            'getdents64', 'set_tid_address', 'restart_syscall',
-            'semtimedop', 'fadvise64', 'timer_create', 'timer_settime',
-            'timer_gettime', 'timer_getoverrun', 'timer_delete',
-            'clock_settime', 'clock_gettime', 'clock_getres',
-            'clock_nanosleep', 'exit_group', 'epoll_wait', 'epoll_ctl',
-            'tgkill', 'utimes', 'vserver', 'mbind', 'set_mempolicy',
-            'get_mempolicy', 'mq_open', 'mq_unlink', 'mq_timedsend',
-            'mq_timedreceive', 'mq_notify', 'mq_getsetattr', 'kexec_load',
-            'waitid', 'add_key', 'request_key', 'keyctl', 'ioprio_set',
-            'ioprio_get', 'inotify_init', 'inotify_add_watch',
-            'inotify_rm_watch', 'migrate_pages', 'openat', 'mkdirat',
-            'mknodat', 'fchownat', 'futimesat', 'newfstatat', 'unlinkat',
-            'renameat', 'linkat', 'symlinkat', 'readlinkat', 'fchmodat',
-            'faccessat', 'pselect6', 'ppoll', 'unshare', 'set_robust_list',
-            'get_robust_list', 'splice', 'tee', 'sync_file_range',
-            'vmsplice', 'move_pages', 'utimensat', 'epoll_pwait',
-            'signalfd', 'timerfd_create', 'eventfd', 'fallocate',
-            'timerfd_settime', 'timerfd_gettime', 'accept4', 'signalfd4',
-            'eventfd2', 'epoll_create1', 'dup3', 'pipe2', 'inotify_init1',
-            'preadv', 'pwritev', 'rt_tgsigqueueinfo', 'perf_event_open'
+            'read',
+            'write',
+            'open',
+            'close',
+            'stat',
+            'fstat',
+            'lstat',
+            'poll',
+            'lseek',
+            'mmap',
+            'mprotect',
+            'munmap',
+            'brk',
+            'rt_sigaction',
+            'rt_sigprocmask',
+            'rt_sigreturn',
+            'ioctl',
+            'pread64',
+            'pwrite64',
+            'readv',
+            'writev',
+            'access',
+            'pipe',
+            'select',
+            'sched_yield',
+            'mremap',
+            'msync',
+            'mincore',
+            'madvise',
+            'shmget',
+            'shmat',
+            'shmctl',
+            'dup',
+            'dup2',
+            'pause',
+            'nanosleep',
+            'getitimer',
+            'alarm',
+            'setitimer',
+            'getpid',
+            'sendfile',
+            'socket',
+            'connect',
+            'accept',
+            'sendto',
+            'recvfrom',
+            'sendmsg',
+            'recvmsg',
+            'shutdown',
+            'bind',
+            'listen',
+            'getsockname',
+            'getpeername',
+            'socketpair',
+            'setsockopt',
+            'getsockopt',
+            'clone',
+            'fork',
+            'vfork',
+            'execve',
+            'exit',
+            'wait4',
+            'kill',
+            'uname',
+            'semget',
+            'semop',
+            'semctl',
+            'shmdt',
+            'msgget',
+            'msgsnd',
+            'msgrcv',
+            'msgctl',
+            'fcntl',
+            'flock',
+            'fsync',
+            'fdatasync',
+            'truncate',
+            'ftruncate',
+            'getdents',
+            'getcwd',
+            'chdir',
+            'fchdir',
+            'rename',
+            'mkdir',
+            'rmdir',
+            'creat',
+            'link',
+            'unlink',
+            'symlink',
+            'readlink',
+            'chmod',
+            'fchmod',
+            'chown',
+            'fchown',
+            'lchown',
+            'umask',
+            'gettimeofday',
+            'getrlimit',
+            'getrusage',
+            'sysinfo',
+            'times',
+            'ptrace',
+            'getuid',
+            'syslog',
+            'getgid',
+            'setuid',
+            'setgid',
+            'geteuid',
+            'getegid',
+            'setpgid',
+            'getppid',
+            'getpgrp',
+            'setsid',
+            'setreuid',
+            'setregid',
+            'getgroups',
+            'setgroups',
+            'setresuid',
+            'getresuid',
+            'setresgid',
+            'getresgid',
+            'getpgid',
+            'setfsuid',
+            'setfsgid',
+            'getsid',
+            'capget',
+            'capset',
+            'rt_sigpending',
+            'rt_sigtimedwait',
+            'rt_sigqueueinfo',
+            'rt_sigsuspend',
+            'sigaltstack',
+            'utime',
+            'mknod',
+            'uselib',
+            'personality',
+            'ustat',
+            'statfs',
+            'fstatfs',
+            'sysfs',
+            'getpriority',
+            'setpriority',
+            'sched_setparam',
+            'sched_getparam',
+            'sched_setscheduler',
+            'sched_getscheduler',
+            'sched_get_priority_max',
+            'sched_get_priority_min',
+            'sched_rr_get_interval',
+            'mlock',
+            'munlock',
+            'mlockall',
+            'munlockall',
+            'vhangup',
+            'modify_ldt',
+            'pivot_root',
+            '_sysctl',
+            'prctl',
+            'arch_prctl',
+            'adjtimex',
+            'setrlimit',
+            'chroot',
+            'sync',
+            'acct',
+            'settimeofday',
+            'mount',
+            'umount2',
+            'swapon',
+            'swapoff',
+            'reboot',
+            'sethostname',
+            'setdomainname',
+            'iopl',
+            'ioperm',
+            'create_module',
+            'init_module',
+            'delete_module',
+            'get_kernel_syms',
+            'query_module',
+            'quotactl',
+            'nfsservctl',
+            'getpmsg',
+            'putpmsg',
+            'afs_syscall',
+            'tuxcall',
+            'security',
+            'gettid',
+            'readahead',
+            'setxattr',
+            'lsetxattr',
+            'fsetxattr',
+            'getxattr',
+            'lgetxattr',
+            'fgetxattr',
+            'listxattr',
+            'llistxattr',
+            'flistxattr',
+            'removexattr',
+            'lremovexattr',
+            'fremovexattr',
+            'tkill',
+            'time',
+            'futex',
+            'sched_setaffinity',
+            'sched_getaffinity',
+            'set_thread_area',
+            'io_setup',
+            'io_destroy',
+            'io_getevents',
+            'io_submit',
+            'io_cancel',
+            'get_thread_area',
+            'lookup_dcookie',
+            'epoll_create',
+            'epoll_ctl_old',
+            'epoll_wait_old',
+            'remap_file_pages',
+            'getdents64',
+            'set_tid_address',
+            'restart_syscall',
+            'semtimedop',
+            'fadvise64',
+            'timer_create',
+            'timer_settime',
+            'timer_gettime',
+            'timer_getoverrun',
+            'timer_delete',
+            'clock_settime',
+            'clock_gettime',
+            'clock_getres',
+            'clock_nanosleep',
+            'exit_group',
+            'epoll_wait',
+            'epoll_ctl',
+            'tgkill',
+            'utimes',
+            'vserver',
+            'mbind',
+            'set_mempolicy',
+            'get_mempolicy',
+            'mq_open',
+            'mq_unlink',
+            'mq_timedsend',
+            'mq_timedreceive',
+            'mq_notify',
+            'mq_getsetattr',
+            'kexec_load',
+            'waitid',
+            'add_key',
+            'request_key',
+            'keyctl',
+            'ioprio_set',
+            'ioprio_get',
+            'inotify_init',
+            'inotify_add_watch',
+            'inotify_rm_watch',
+            'migrate_pages',
+            'openat',
+            'mkdirat',
+            'mknodat',
+            'fchownat',
+            'futimesat',
+            'newfstatat',
+            'unlinkat',
+            'renameat',
+            'linkat',
+            'symlinkat',
+            'readlinkat',
+            'fchmodat',
+            'faccessat',
+            'pselect6',
+            'ppoll',
+            'unshare',
+            'set_robust_list',
+            'get_robust_list',
+            'splice',
+            'tee',
+            'sync_file_range',
+            'vmsplice',
+            'move_pages',
+            'utimensat',
+            'epoll_pwait',
+            'signalfd',
+            'timerfd_create',
+            'eventfd',
+            'fallocate',
+            'timerfd_settime',
+            'timerfd_gettime',
+            'accept4',
+            'signalfd4',
+            'eventfd2',
+            'epoll_create1',
+            'dup3',
+            'pipe2',
+            'inotify_init1',
+            'preadv',
+            'pwritev',
+            'rt_tgsigqueueinfo',
+            'perf_event_open',
           ],
-          action: 'SCMP_ACT_ALLOW'
-        }
-      ]
+          action: 'SCMP_ACT_ALLOW',
+        },
+      ],
     };
 
     await fs.writeFile(
-      join(sandboxPath, 'seccomp.json'), 
-      JSON.stringify(profile, null, 2)
+      join(sandboxPath, 'seccomp.json'),
+      JSON.stringify(profile, null, 2),
     );
   }
 
   /**
    * Create AppArmor profile for additional MAC controls
    */
-  private async createAppArmorProfile(sandboxPath: string, config: SandboxConfig): Promise<void> {
+  private async createAppArmorProfile(
+    sandboxPath: string,
+    config: SandboxConfig,
+  ): Promise<void> {
     // AppArmor profile would be created here for additional mandatory access control
     // This is a simplified example - production would need full profile development
   }
@@ -445,7 +725,10 @@ export class ActionSandbox {
   /**
    * Setup network namespace with custom rules
    */
-  private async setupNetworkNamespace(sandboxPath: string, config: SandboxConfig): Promise<void> {
+  private async setupNetworkNamespace(
+    sandboxPath: string,
+    config: SandboxConfig,
+  ): Promise<void> {
     // Network namespace setup would be implemented here
     // This involves creating custom Docker networks with iptables rules
   }
@@ -455,8 +738,14 @@ export class ActionSandbox {
    */
   private async getContainerStats(containerId: string): Promise<any> {
     return new Promise((resolve) => {
-      const process = spawn('docker', ['stats', `sandbox-${containerId}`, '--no-stream', '--format', 'json']);
-      
+      const process = spawn('docker', [
+        'stats',
+        `sandbox-${containerId}`,
+        '--no-stream',
+        '--format',
+        'json',
+      ]);
+
       let stdout = '';
       process.stdout?.on('data', (data) => {
         stdout += data.toString();
@@ -466,9 +755,11 @@ export class ActionSandbox {
         try {
           const stats = JSON.parse(stdout);
           resolve({
-            memoryMB: parseFloat(stats.MemUsage.split('/')[0].trim().replace('MiB', '')),
+            memoryMB: parseFloat(
+              stats.MemUsage.split('/')[0].trim().replace('MiB', ''),
+            ),
             cpuUsageMs: parseFloat(stats.CPUPerc.replace('%', '')),
-            networkConnections: 0 // Would parse from netstat
+            networkConnections: 0, // Would parse from netstat
           });
         } catch {
           resolve(null);
@@ -500,7 +791,7 @@ class NetworkGuard {
 
     // Start monitoring network activity
     const monitorProcess = spawn('netstat', ['-tupln']);
-    
+
     monitorProcess.stdout?.on('data', (data) => {
       const connections = data.toString().split('\n');
       for (const conn of connections) {
@@ -514,11 +805,15 @@ class NetworkGuard {
       on: eventEmitter.on.bind(eventEmitter),
       stop: () => {
         monitorProcess.kill();
-      }
+      },
     };
   }
 
-  private checkConnection(connection: string, config: SandboxConfig, emitter: any) {
+  private checkConnection(
+    connection: string,
+    config: SandboxConfig,
+    emitter: any,
+  ) {
     // Parse connection and check against policy
     try {
       const parts = connection.trim().split(/\s+/);
@@ -530,9 +825,15 @@ class NetworkGuard {
       // Check against allowlist
       if (config.networkPolicy === 'allowlist') {
         const portNum = parseInt(port, 10);
-        
-        if (!config.allowedHosts.includes(host) || !config.allowedPorts.includes(portNum)) {
-          emitter.emit('violation', `Unauthorized connection to ${host}:${port}`);
+
+        if (
+          !config.allowedHosts.includes(host) ||
+          !config.allowedPorts.includes(portNum)
+        ) {
+          emitter.emit(
+            'violation',
+            `Unauthorized connection to ${host}:${port}`,
+          );
         }
       }
 
@@ -540,7 +841,6 @@ class NetworkGuard {
       if (this.isSuspiciousConnection(host, parseInt(port, 10))) {
         emitter.emit('violation', `Suspicious connection to ${host}:${port}`);
       }
-
     } catch (error) {
       // Ignore parsing errors
     }
@@ -561,7 +861,9 @@ class NetworkGuard {
 export class URLValidator {
   private static readonly BLOCKED_SCHEMES = ['file', 'ftp', 'jar', 'data'];
   private static readonly BLOCKED_HOSTS = [
-    '127.0.0.1', 'localhost', '0.0.0.0',
+    '127.0.0.1',
+    'localhost',
+    '0.0.0.0',
     '169.254.169.254', // AWS metadata
     'metadata.google.internal', // GCP metadata
     '100.100.100.200', // Alibaba metadata
@@ -569,7 +871,7 @@ export class URLValidator {
   ];
   private static readonly BLOCKED_NETWORKS = [
     '10.0.0.0/8',
-    '172.16.0.0/12', 
+    '172.16.0.0/12',
     '192.168.0.0/16',
     '127.0.0.0/8',
     'fc00::/7', // IPv6 private
@@ -592,7 +894,10 @@ export class URLValidator {
 
       // Check for private IP ranges (simplified)
       if (this.isPrivateNetwork(parsed.hostname)) {
-        return { valid: false, reason: `Private network access not allowed: ${parsed.hostname}` };
+        return {
+          valid: false,
+          reason: `Private network access not allowed: ${parsed.hostname}`,
+        };
       }
 
       // Additional checks for suspicious patterns
@@ -601,7 +906,6 @@ export class URLValidator {
       }
 
       return { valid: true };
-
     } catch (error) {
       return { valid: false, reason: 'Invalid URL format' };
     }
@@ -609,8 +913,10 @@ export class URLValidator {
 
   private static isPrivateNetwork(hostname: string): boolean {
     // Simplified check - production would use proper IP range validation
-    return hostname.startsWith('192.168.') || 
-           hostname.startsWith('10.') || 
-           hostname.startsWith('172.');
+    return (
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      hostname.startsWith('172.')
+    );
   }
 }

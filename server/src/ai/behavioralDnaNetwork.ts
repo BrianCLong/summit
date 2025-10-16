@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 
 export interface BehaviorEvent {
   entityId: string;
@@ -39,7 +39,7 @@ export class BehavioralDnaNetwork extends EventEmitter {
     this.history.set(event.entityId, history);
     this.embeddings.set(event.entityId, this.mean(history));
 
-    this.emit("update", {
+    this.emit('update', {
       entityId: event.entityId,
       embedding: this.embeddings.get(event.entityId),
       anomaly,

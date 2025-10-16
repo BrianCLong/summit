@@ -49,7 +49,8 @@ const investigationRepo = new InvestigationRepo(pg);
 const DateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
   description: 'DateTime custom scalar type',
-  serialize: (value: any) => (value instanceof Date ? value.toISOString() : value),
+  serialize: (value: any) =>
+    value instanceof Date ? value.toISOString() : value,
   parseValue: (value: any) => new Date(value),
   parseLiteral(ast) {
     if (ast.kind === Kind.STRING) {
@@ -135,7 +136,11 @@ export const coreResolvers = {
       return await investigationRepo.findById(id, effectiveTenantId);
     },
 
-    investigations: async (_: any, { tenantId, status, limit, offset }: any, context: any) => {
+    investigations: async (
+      _: any,
+      { tenantId, status, limit, offset }: any,
+      context: any,
+    ) => {
       const effectiveTenantId = tenantId || context.tenantId;
       if (!effectiveTenantId) {
         throw new Error('Tenant ID is required');
@@ -279,7 +284,10 @@ export const coreResolvers = {
 
       // Add investigation context to props if provided
       if (parsed.investigationId) {
-        parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
+        parsed.props = {
+          ...parsed.props,
+          investigationId: parsed.investigationId,
+        };
       }
 
       return await entityRepo.create(parsed, userId);
@@ -312,7 +320,10 @@ export const coreResolvers = {
 
       // Add investigation context to props if provided
       if (parsed.investigationId) {
-        parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
+        parsed.props = {
+          ...parsed.props,
+          investigationId: parsed.investigationId,
+        };
       }
 
       return await relationshipRepo.create(parsed, userId);
@@ -325,7 +336,10 @@ export const coreResolvers = {
       }
 
       // Verify relationship belongs to tenant before deletion
-      const relationship = await relationshipRepo.findById(id, effectiveTenantId);
+      const relationship = await relationshipRepo.findById(
+        id,
+        effectiveTenantId,
+      );
       if (!relationship) {
         return false;
       }
@@ -343,14 +357,21 @@ export const coreResolvers = {
       return await investigationRepo.update(input);
     },
 
-    deleteInvestigation: async (_: any, { id, tenantId }: any, context: any) => {
+    deleteInvestigation: async (
+      _: any,
+      { id, tenantId }: any,
+      context: any,
+    ) => {
       const effectiveTenantId = tenantId || context.tenantId;
       if (!effectiveTenantId) {
         throw new Error('Tenant ID is required');
       }
 
       // Verify investigation belongs to tenant before deletion
-      const investigation = await investigationRepo.findById(id, effectiveTenantId);
+      const investigation = await investigationRepo.findById(
+        id,
+        effectiveTenantId,
+      );
       if (!investigation) {
         return false;
       }
@@ -361,7 +382,10 @@ export const coreResolvers = {
 
   // Field resolvers
   Entity: {
-    relationships: async (parent: any, { direction = 'BOTH', type, limit = 100 }: any) => {
+    relationships: async (
+      parent: any,
+      { direction = 'BOTH', type, limit = 100 }: any,
+    ) => {
       const directionMap = {
         INCOMING: 'incoming',
         OUTGOING: 'outgoing',
@@ -376,7 +400,10 @@ export const coreResolvers = {
     },
 
     relationshipCount: async (parent: any) => {
-      const counts = await relationshipRepo.getEntityRelationshipCount(parent.id, parent.tenantId);
+      const counts = await relationshipRepo.getEntityRelationshipCount(
+        parent.id,
+        parent.tenantId,
+      );
       return {
         incoming: counts.incoming,
         outgoing: counts.outgoing,
@@ -417,7 +444,10 @@ export const coreResolvers = {
       });
     },
 
-    relationships: async (parent: any, { type, limit = 100, offset = 0 }: any) => {
+    relationships: async (
+      parent: any,
+      { type, limit = 100, offset = 0 }: any,
+    ) => {
       return await relationshipRepo.search({
         tenantId: parent.tenantId,
         type,

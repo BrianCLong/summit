@@ -8,11 +8,11 @@ services:
       POSTGRES_USER: preview_user
       POSTGRES_PASSWORD: preview_pass
     ports:
-      - "5433:5432"
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U preview_user -d intelgraph_preview"]
+      test: ['CMD-SHELL', 'pg_isready -U preview_user -d intelgraph_preview']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -20,11 +20,11 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6380:6379"
+      - '6380:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 3s
       retries: 5
@@ -33,17 +33,18 @@ services:
     image: neo4j:5-enterprise
     environment:
       NEO4J_AUTH: neo4j/preview_pass
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
       NEO4J_server_memory_heap_initial__size: 512m
       NEO4J_server_memory_heap_max__size: 1g
     ports:
-      - "7688:7687"
-      - "7475:7474"
+      - '7688:7687'
+      - '7475:7474'
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "preview_pass", "RETURN 1"]
+      test:
+        ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'preview_pass', 'RETURN 1']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -53,7 +54,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "4001:4000"
+      - '4001:4000'
     environment:
       NODE_ENV: preview
       DATABASE_URL: postgresql://preview_user:preview_pass@postgres:5432/intelgraph_preview
@@ -72,7 +73,7 @@ services:
       neo4j:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -82,7 +83,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       REACT_APP_API_URL: http://localhost:4001
       REACT_APP_GRAPHQL_URL: http://localhost:4001/graphql
@@ -91,7 +92,7 @@ services:
       server:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
       interval: 30s
       timeout: 10s
       retries: 3

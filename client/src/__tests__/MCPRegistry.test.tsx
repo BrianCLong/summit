@@ -7,7 +7,10 @@ describe('MCPRegistry page', () => {
   const origFetch = global.fetch;
   beforeEach(() => {
     global.fetch = jest.fn(async (input: RequestInfo) => {
-      if (typeof input === 'string' && input.endsWith('/api/maestro/v1/mcp/servers')) {
+      if (
+        typeof input === 'string' &&
+        input.endsWith('/api/maestro/v1/mcp/servers')
+      ) {
         return new Response(JSON.stringify([]), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },

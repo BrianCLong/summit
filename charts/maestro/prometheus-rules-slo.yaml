@@ -9,7 +9,7 @@ spec:
         # GraphQL Request metrics
         - record: job:graphql_requests:rate5m
           expr: sum by (job)(rate(http_requests_total{job="maestro-conductor-v24"}[5m]))
-        - record: job:graphql_errors:rate5m  
+        - record: job:graphql_errors:rate5m
           expr: sum by (job)(rate(http_requests_total{job="maestro-conductor-v24",code=~"5..|4.."}[5m]))
         - record: job:graphql_error_ratio:5m
           expr: job:graphql_errors:rate5m / job:graphql_requests:rate5m
@@ -20,7 +20,7 @@ spec:
         - record: job:graphql_read_slo_breach:5m
           expr: job:graphql_read_latency_p95:5m > 0.35
 
-        # GraphQL Write latency SLO (p95 ≤ 700ms)  
+        # GraphQL Write latency SLO (p95 ≤ 700ms)
         - record: job:graphql_write_latency_p95:5m
           expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="maestro-conductor-v24",operation="write"}[5m]))
         - record: job:graphql_write_slo_breach:5m
@@ -29,14 +29,19 @@ spec:
         # Subscription fanout SLO (p95 ≤ 250ms)
         - record: job:subscription_fanout_p95:5m
           expr: histogram_quantile(0.95, rate(subscription_fanout_latency_ms_bucket[5m]))
-        - record: job:subscription_slo_breach:5m  
+        - record: job:subscription_slo_breach:5m
           expr: job:subscription_fanout_p95:5m > 250
 
         # Availability SLO (99.9%)
         - alert: GraphQLAvailabilitySLOBreach
           expr: job:graphql_error_ratio:5m > (1 - 0.999) * 14 # 14x budget burn
           for: 2m
-          labels: { severity: critical, slo: graphql-availability, objective: '99.9%' }
+          labels:
+            {
+              severity: critical,
+              slo: graphql-availability,
+              objective: '99.9%',
+            }
           annotations:
             summary: 'GraphQL availability SLO breach (fast burn)'
             description: 'GraphQL error rate {{ $value | humanizePercentage }} exceeds SLO budget burn rate'
@@ -46,7 +51,12 @@ spec:
         - alert: GraphQLReadLatencySLOBreach
           expr: job:graphql_read_slo_breach:5m
           for: 5m
-          labels: { severity: warning, slo: graphql-read-latency, objective: 'p95-350ms' }
+          labels:
+            {
+              severity: warning,
+              slo: graphql-read-latency,
+              objective: 'p95-350ms',
+            }
           annotations:
             summary: 'GraphQL read latency SLO breach'
             description: 'GraphQL read p95 latency {{ $value | humanizeDuration }} exceeds 350ms SLO'
@@ -55,8 +65,13 @@ spec:
         # Write Latency SLO
         - alert: GraphQLWriteLatencySLOBreach
           expr: job:graphql_write_slo_breach:5m
-          for: 5m  
-          labels: { severity: warning, slo: graphql-write-latency, objective: 'p95-700ms' }
+          for: 5m
+          labels:
+            {
+              severity: warning,
+              slo: graphql-write-latency,
+              objective: 'p95-700ms',
+            }
           annotations:
             summary: 'GraphQL write latency SLO breach'
             description: 'GraphQL write p95 latency {{ $value | humanizeDuration }} exceeds 700ms SLO'
@@ -66,9 +81,14 @@ spec:
         - alert: SubscriptionFanoutSLOBreach
           expr: job:subscription_slo_breach:5m
           for: 5m
-          labels: { severity: warning, slo: subscription-fanout, objective: 'p95-250ms' }
+          labels:
+            {
+              severity: warning,
+              slo: subscription-fanout,
+              objective: 'p95-250ms',
+            }
           annotations:
-            summary: 'Subscription fanout latency SLO breach' 
+            summary: 'Subscription fanout latency SLO breach'
             description: 'Subscription fanout p95 latency {{ $value }}ms exceeds 250ms SLO'
             runbook_url: https://runbooks.maestro.dev/slo-subscription-fanout.md
 

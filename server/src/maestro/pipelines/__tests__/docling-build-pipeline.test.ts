@@ -2,9 +2,18 @@ import { DoclingBuildPipeline } from '../docling-build-pipeline';
 
 describe('DoclingBuildPipeline', () => {
   const service = {
-    summarizeBuildFailure: jest.fn().mockResolvedValue({ summary: { id: 's1' }, fragments: [], findings: [], policySignals: [] }),
-    extractLicenses: jest.fn().mockResolvedValue({ findings: [], policySignals: [] }),
-    generateReleaseNotes: jest.fn().mockResolvedValue({ summary: { id: 'rn1' } }),
+    summarizeBuildFailure: jest.fn().mockResolvedValue({
+      summary: { id: 's1' },
+      fragments: [],
+      findings: [],
+      policySignals: [],
+    }),
+    extractLicenses: jest
+      .fn()
+      .mockResolvedValue({ findings: [], policySignals: [] }),
+    generateReleaseNotes: jest
+      .fn()
+      .mockResolvedValue({ summary: { id: 'rn1' } }),
   } as any;
 
   beforeEach(() => {

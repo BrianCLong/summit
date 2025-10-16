@@ -4,20 +4,20 @@ replicaCount: 1
 image:
   server:
     repository: ghcr.io/brianlong/intelgraph/server
-    tag: "dev"
+    tag: 'dev'
     pullPolicy: IfNotPresent
   client:
     repository: ghcr.io/brianlong/intelgraph/client
-    tag: "dev"
+    tag: 'dev'
     pullPolicy: IfNotPresent
 
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 
 serviceAccount:
   create: true
   annotations: {}
-  name: ""
+  name: ''
 
 podAnnotations: {}
 
@@ -38,7 +38,7 @@ service:
 
 ingress:
   enabled: false
-  className: ""
+  className: ''
   annotations: {}
   hosts:
     - host: chart-example.local
@@ -103,7 +103,7 @@ spire:
   agent:
     replicas: 1
   helper:
-    image: "ghcr.io/spiffe/spiffe-helper:0.6.0"
+    image: 'ghcr.io/spiffe/spiffe-helper:0.6.0'
 
 # Services configuration
 services:
@@ -162,7 +162,7 @@ rollout:
 # Monitoring configuration
 monitoring:
   prometheus:
-    server: "prometheus.monitoring.svc.cluster.local:9090"
+    server: 'prometheus.monitoring.svc.cluster.local:9090'
   prometheusRules:
     enabled: false
 
@@ -187,7 +187,7 @@ otel:
 # Preview environment specific settings
 preview:
   enabled: false
-  ttl: "24h"
+  ttl: '24h'
   cleanup: true
 # Zero Trust configuration
 zeroTrust:
@@ -196,10 +196,10 @@ zeroTrust:
 # Audit configuration
 audit:
   wormEnabled: false
-  bucket: "intelgraph-audit-logs"
-  storageSize: "10Gi"
+  bucket: 'intelgraph-audit-logs'
+  storageSize: '10Gi'
   worm:
-    image: "amazon/aws-cli:2.13.32"
+    image: 'amazon/aws-cli:2.13.32'
 
 # mTLS configuration
 mtls:
@@ -207,7 +207,7 @@ mtls:
 
 # AWS configuration
 aws:
-  region: "us-east-1"
+  region: 'us-east-1'
 
 # Security configuration
 security:
@@ -220,19 +220,19 @@ security:
 
 # Federal configuration
 federal:
-  classification: "UNCLASSIFIED"
+  classification: 'UNCLASSIFIED'
   airGap:
     enabled: false
   breakGlass:
     emergencyNetworkOverride: false
   fips:
-    enforcementAction: "warn"
+    enforcementAction: 'warn'
   enforcement:
     resourceLimits: false
   limits:
     maxCpu: 2
   hsm:
-    provider: "none"
+    provider: 'none'
   storage:
     fipsCrypto: false
 

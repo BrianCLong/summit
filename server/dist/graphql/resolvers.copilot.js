@@ -20,7 +20,7 @@ const copilotResolvers = {
         copilotStats: async (_, { timeRange = '24 hours' }, { dataSources }) => {
             const { copilotOrchestrator } = dataSources;
             return copilotOrchestrator.getStats(timeRange);
-        }
+        },
     },
     Mutation: {
         startCopilotRun: async (_, { goalId, goalText, investigationId, resume = false }, { dataSources, user }) => {
@@ -39,7 +39,7 @@ const copilotResolvers = {
             return copilotOrchestrator.startRun(goalId, goal, {
                 resume,
                 investigationId,
-                userId: user?.id
+                userId: user?.id,
             });
         },
         pauseCopilotRun: async (_, { runId }, { dataSources }) => {
@@ -52,7 +52,7 @@ const copilotResolvers = {
             if (!run)
                 throw new Error('Run not found');
             return copilotOrchestrator.resumeRun(run);
-        }
+        },
     },
     // Subscriptions for real-time updates
     Subscription: {
@@ -65,8 +65,8 @@ const copilotResolvers = {
                     throw new Error('Run not found');
                 return pubsub.asyncIterator(`COPILOT_EVENT_${runId}`);
             },
-            resolve: (event) => event.payload
-        }
+            resolve: (event) => event.payload,
+        },
     },
     // Field resolvers for nested data
     CopilotRun: {
@@ -81,8 +81,8 @@ const copilotResolvers = {
         isActive: (run, _, { dataSources }) => {
             const { copilotOrchestrator } = dataSources;
             return copilotOrchestrator.activeRuns.has(run.id);
-        }
-    }
+        },
+    },
 };
 module.exports = { copilotResolvers };
 //# sourceMappingURL=resolvers.copilot.js.map

@@ -136,15 +136,23 @@ export function MobileLayout({
 
             <div className="flex items-center space-x-1">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" />
                 </svg>
               </div>
-              <span className="text-lg font-bold text-intel-900 dark:text-white">IntelGraph</span>
+              <span className="text-lg font-bold text-intel-900 dark:text-white">
+                IntelGraph
+              </span>
             </div>
 
             <div className="flex items-center space-x-2">
-              {isOffline && <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse" />}
+              {isOffline && (
+                <div className="w-2 h-2 bg-warning-500 rounded-full animate-pulse" />
+              )}
               <button className="p-2 text-intel-600 dark:text-intel-400 hover:text-intel-900 dark:hover:text-white relative">
                 <BellIcon className="w-6 h-6" />
                 {notificationCount > 0 && (

@@ -27,7 +27,7 @@ export function formatRelativeTime(date: Date | string): string {
   if (diffMins < 60) return `${diffMins}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
-  
+
   return formatDate(date)
 }
 
@@ -42,21 +42,31 @@ export function truncateText(text: string, maxLength: number): string {
 
 export function getRiskColor(level: string): string {
   switch (level.toLowerCase()) {
-    case 'low': return 'text-threat-low'
-    case 'medium': return 'text-threat-medium'
-    case 'high': return 'text-threat-high'
-    case 'critical': return 'text-threat-critical'
-    default: return 'text-muted-foreground'
+    case 'low':
+      return 'text-threat-low'
+    case 'medium':
+      return 'text-threat-medium'
+    case 'high':
+      return 'text-threat-high'
+    case 'critical':
+      return 'text-threat-critical'
+    default:
+      return 'text-muted-foreground'
   }
 }
 
 export function getStatusColor(status: string): string {
   switch (status.toLowerCase()) {
-    case 'active': return 'text-green-600'
-    case 'pending': return 'text-yellow-600'
-    case 'completed': return 'text-blue-600'
-    case 'failed': return 'text-red-600'
-    default: return 'text-muted-foreground'
+    case 'active':
+      return 'text-green-600'
+    case 'pending':
+      return 'text-yellow-600'
+    case 'completed':
+      return 'text-blue-600'
+    case 'failed':
+      return 'text-red-600'
+    default:
+      return 'text-muted-foreground'
   }
 }
 

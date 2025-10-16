@@ -16,7 +16,8 @@ async function main() {
     [HOURS],
   );
 
-  if (!rows.length) return console.log('no overrides expiring in next %sh', HOURS);
+  if (!rows.length)
+    return console.log('no overrides expiring in next %sh', HOURS);
 
   const lines = rows
     .map(

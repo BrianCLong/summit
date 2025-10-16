@@ -15,7 +15,7 @@ class GNNService {
      * Perform node classification using GNN
      */
     async classifyNodes(params) {
-        const { investigationId, graphData, nodeFeatures = {}, nodeLabels = {}, modelName = 'default_node_classifier', modelConfig = {}, taskMode = 'predict', options = {} } = params;
+        const { investigationId, graphData, nodeFeatures = {}, nodeLabels = {}, modelName = 'default_node_classifier', modelConfig = {}, taskMode = 'predict', options = {}, } = params;
         const jobId = uuidv4();
         return trackGraphOperation('gnn_node_classification', investigationId, async () => {
             try {
@@ -30,19 +30,19 @@ class GNNService {
                         hidden_dim: 256,
                         output_dim: 128,
                         dropout: 0.2,
-                        ...modelConfig
+                        ...modelConfig,
                     },
                     task_mode: taskMode,
-                    num_epochs: options.numEpochs || (taskMode === 'train' ? 50 : undefined)
+                    num_epochs: options.numEpochs || (taskMode === 'train' ? 50 : undefined),
                 };
                 const response = await fetch(`${this.mlServiceUrl}/gnn/node_classification`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${options.token || ''}`
+                        Authorization: `Bearer ${options.token || ''}`,
                     },
                     body: JSON.stringify(payload),
-                    timeout: this.defaultTimeout
+                    timeout: this.defaultTimeout,
                 });
                 if (!response.ok) {
                     throw new Error(`GNN node classification failed: ${response.statusText}`);
@@ -53,7 +53,7 @@ class GNNService {
                     jobId,
                     taskId: result.task_id,
                     taskMode,
-                    modelName
+                    modelName,
                 });
                 return {
                     success: true,
@@ -61,7 +61,7 @@ class GNNService {
                     taskId: result.task_id,
                     taskMode,
                     modelName,
-                    message: 'Node classification task queued successfully'
+                    message: 'Node classification task queued successfully',
                 };
             }
             catch (error) {
@@ -69,12 +69,12 @@ class GNNService {
                 logger.error('GNN node classification failed', {
                     investigationId,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 });
                 return {
                     success: false,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 };
             }
         });
@@ -83,7 +83,7 @@ class GNNService {
      * Perform link prediction using GNN
      */
     async predictLinks(params) {
-        const { investigationId, graphData, nodeFeatures = {}, candidateEdges = [], modelName = 'default_link_predictor', modelConfig = {}, taskMode = 'predict', options = {} } = params;
+        const { investigationId, graphData, nodeFeatures = {}, candidateEdges = [], modelName = 'default_link_predictor', modelConfig = {}, taskMode = 'predict', options = {}, } = params;
         const jobId = uuidv4();
         return trackGraphOperation('gnn_link_prediction', investigationId, async () => {
             try {
@@ -98,21 +98,21 @@ class GNNService {
                         hidden_dim: 256,
                         output_dim: 128,
                         dropout: 0.2,
-                        ...modelConfig
+                        ...modelConfig,
                     },
                     task_mode: taskMode,
                     num_epochs: options.numEpochs || (taskMode === 'train' ? 50 : undefined),
                     // hint for callback routing on ML service
-                    focus_entity_id: options.focusEntityId || undefined
+                    focus_entity_id: options.focusEntityId || undefined,
                 };
                 const response = await fetch(`${this.mlServiceUrl}/gnn/link_prediction`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${options.token || ''}`
+                        Authorization: `Bearer ${options.token || ''}`,
                     },
                     body: JSON.stringify(payload),
-                    timeout: this.defaultTimeout
+                    timeout: this.defaultTimeout,
                 });
                 if (!response.ok) {
                     throw new Error(`GNN link prediction failed: ${response.statusText}`);
@@ -124,7 +124,7 @@ class GNNService {
                     taskId: result.task_id,
                     taskMode,
                     modelName,
-                    candidateEdgeCount: candidateEdges.length
+                    candidateEdgeCount: candidateEdges.length,
                 });
                 return {
                     success: true,
@@ -132,7 +132,7 @@ class GNNService {
                     taskId: result.task_id,
                     taskMode,
                     modelName,
-                    message: 'Link prediction task queued successfully'
+                    message: 'Link prediction task queued successfully',
                 };
             }
             catch (error) {
@@ -140,12 +140,12 @@ class GNNService {
                 logger.error('GNN link prediction failed', {
                     investigationId,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 });
                 return {
                     success: false,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 };
             }
         });
@@ -154,7 +154,7 @@ class GNNService {
      * Perform graph classification using GNN
      */
     async classifyGraphs(params) {
-        const { investigationId, graphs, graphLabels = [], modelName = 'default_graph_classifier', modelConfig = {}, taskMode = 'predict', options = {} } = params;
+        const { investigationId, graphs, graphLabels = [], modelName = 'default_graph_classifier', modelConfig = {}, taskMode = 'predict', options = {}, } = params;
         const jobId = uuidv4();
         return trackGraphOperation('gnn_graph_classification', investigationId, async () => {
             try {
@@ -168,19 +168,19 @@ class GNNService {
                         hidden_dim: 256,
                         output_dim: 128,
                         dropout: 0.2,
-                        ...modelConfig
+                        ...modelConfig,
                     },
                     task_mode: taskMode,
-                    num_epochs: options.numEpochs || (taskMode === 'train' ? 100 : undefined)
+                    num_epochs: options.numEpochs || (taskMode === 'train' ? 100 : undefined),
                 };
                 const response = await fetch(`${this.mlServiceUrl}/gnn/graph_classification`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${options.token || ''}`
+                        Authorization: `Bearer ${options.token || ''}`,
                     },
                     body: JSON.stringify(payload),
-                    timeout: this.defaultTimeout
+                    timeout: this.defaultTimeout,
                 });
                 if (!response.ok) {
                     throw new Error(`GNN graph classification failed: ${response.statusText}`);
@@ -192,7 +192,7 @@ class GNNService {
                     taskId: result.task_id,
                     taskMode,
                     modelName,
-                    graphCount: graphs.length
+                    graphCount: graphs.length,
                 });
                 return {
                     success: true,
@@ -200,7 +200,7 @@ class GNNService {
                     taskId: result.task_id,
                     taskMode,
                     modelName,
-                    message: 'Graph classification task queued successfully'
+                    message: 'Graph classification task queued successfully',
                 };
             }
             catch (error) {
@@ -208,12 +208,12 @@ class GNNService {
                 logger.error('GNN graph classification failed', {
                     investigationId,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 });
                 return {
                     success: false,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 };
             }
         });
@@ -222,7 +222,7 @@ class GNNService {
      * Perform anomaly detection using GNN
      */
     async detectAnomalies(params) {
-        const { investigationId, graphData, nodeFeatures = {}, normalNodes = [], modelName = 'default_anomaly_detector', modelConfig = {}, taskMode = 'predict', anomalyThreshold = 0.5, options = {} } = params;
+        const { investigationId, graphData, nodeFeatures = {}, normalNodes = [], modelName = 'default_anomaly_detector', modelConfig = {}, taskMode = 'predict', anomalyThreshold = 0.5, options = {}, } = params;
         const jobId = uuidv4();
         return trackGraphOperation('gnn_anomaly_detection', investigationId, async () => {
             try {
@@ -237,20 +237,20 @@ class GNNService {
                         hidden_dim: 256,
                         output_dim: 128,
                         dropout: 0.2,
-                        ...modelConfig
+                        ...modelConfig,
                     },
                     task_mode: taskMode,
                     anomaly_threshold: anomalyThreshold,
-                    num_epochs: options.numEpochs || (taskMode === 'train' ? 50 : undefined)
+                    num_epochs: options.numEpochs || (taskMode === 'train' ? 50 : undefined),
                 };
                 const response = await fetch(`${this.mlServiceUrl}/gnn/anomaly_detection`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${options.token || ''}`
+                        Authorization: `Bearer ${options.token || ''}`,
                     },
                     body: JSON.stringify(payload),
-                    timeout: this.defaultTimeout
+                    timeout: this.defaultTimeout,
                 });
                 if (!response.ok) {
                     throw new Error(`GNN anomaly detection failed: ${response.statusText}`);
@@ -262,7 +262,7 @@ class GNNService {
                     taskId: result.task_id,
                     taskMode,
                     modelName,
-                    anomalyThreshold
+                    anomalyThreshold,
                 });
                 return {
                     success: true,
@@ -270,7 +270,7 @@ class GNNService {
                     taskId: result.task_id,
                     taskMode,
                     modelName,
-                    message: 'Anomaly detection task queued successfully'
+                    message: 'Anomaly detection task queued successfully',
                 };
             }
             catch (error) {
@@ -278,12 +278,12 @@ class GNNService {
                 logger.error('GNN anomaly detection failed', {
                     investigationId,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 });
                 return {
                     success: false,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 };
             }
         });
@@ -292,7 +292,7 @@ class GNNService {
      * Generate node embeddings using GNN
      */
     async generateEmbeddings(params) {
-        const { investigationId, graphData, nodeFeatures = {}, modelName = 'default_embedder', embeddingDim = 128, options = {} } = params;
+        const { investigationId, graphData, nodeFeatures = {}, modelName = 'default_embedder', embeddingDim = 128, options = {}, } = params;
         const jobId = uuidv4();
         return trackGraphOperation('gnn_generate_embeddings', investigationId, async () => {
             try {
@@ -301,16 +301,16 @@ class GNNService {
                     graph_data: graphData,
                     node_features: nodeFeatures,
                     model_name: modelName,
-                    embedding_dim: embeddingDim
+                    embedding_dim: embeddingDim,
                 };
                 const response = await fetch(`${this.mlServiceUrl}/gnn/generate_embeddings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${options.token || ''}`
+                        Authorization: `Bearer ${options.token || ''}`,
                     },
                     body: JSON.stringify(payload),
-                    timeout: this.defaultTimeout
+                    timeout: this.defaultTimeout,
                 });
                 if (!response.ok) {
                     throw new Error(`GNN embedding generation failed: ${response.statusText}`);
@@ -321,14 +321,14 @@ class GNNService {
                     jobId,
                     taskId: result.task_id,
                     modelName,
-                    embeddingDim
+                    embeddingDim,
                 });
                 return {
                     success: true,
                     jobId,
                     taskId: result.task_id,
                     modelName,
-                    message: 'Embedding generation task queued successfully'
+                    message: 'Embedding generation task queued successfully',
                 };
             }
             catch (error) {
@@ -336,12 +336,12 @@ class GNNService {
                 logger.error('GNN embedding generation failed', {
                     investigationId,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 });
                 return {
                     success: false,
                     jobId,
-                    error: error.message
+                    error: error.message,
                 };
             }
         });
@@ -354,31 +354,31 @@ class GNNService {
             const response = await fetch(`${this.mlServiceUrl}/gnn/models`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${options.token || ''}`
+                    Authorization: `Bearer ${options.token || ''}`,
                 },
-                timeout: this.defaultTimeout
+                timeout: this.defaultTimeout,
             });
             if (!response.ok) {
                 throw new Error(`Failed to list GNN models: ${response.statusText}`);
             }
             const result = await response.json();
             logger.info('GNN models listed', {
-                modelCount: result.count
+                modelCount: result.count,
             });
             return {
                 success: true,
                 models: result.models,
-                count: result.count
+                count: result.count,
             };
         }
         catch (error) {
             trackError('gnn_service', 'ListModelsError');
             logger.error('Failed to list GNN models', {
-                error: error.message
+                error: error.message,
             });
             return {
                 success: false,
-                error: error.message
+                error: error.message,
             };
         }
     }
@@ -390,15 +390,15 @@ class GNNService {
             const response = await fetch(`${this.mlServiceUrl}/gnn/models/${modelName}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${options.token || ''}`
+                    Authorization: `Bearer ${options.token || ''}`,
                 },
-                timeout: this.defaultTimeout
+                timeout: this.defaultTimeout,
             });
             if (!response.ok) {
                 if (response.status === 404) {
                     return {
                         success: false,
-                        error: 'Model not found'
+                        error: 'Model not found',
                     };
                 }
                 throw new Error(`Failed to get model info: ${response.statusText}`);
@@ -407,22 +407,22 @@ class GNNService {
             logger.info('GNN model info retrieved', {
                 modelName,
                 modelType: result.config?.model_type,
-                taskType: result.config?.task_type
+                taskType: result.config?.task_type,
             });
             return {
                 success: true,
-                modelInfo: result
+                modelInfo: result,
             };
         }
         catch (error) {
             trackError('gnn_service', 'GetModelInfoError');
             logger.error('Failed to get GNN model info', {
                 modelName,
-                error: error.message
+                error: error.message,
             });
             return {
                 success: false,
-                error: error.message
+                error: error.message,
             };
         }
     }
@@ -434,38 +434,38 @@ class GNNService {
             const response = await fetch(`${this.mlServiceUrl}/gnn/models/${modelName}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${options.token || ''}`
+                    Authorization: `Bearer ${options.token || ''}`,
                 },
-                timeout: this.defaultTimeout
+                timeout: this.defaultTimeout,
             });
             if (!response.ok) {
                 if (response.status === 404) {
                     return {
                         success: false,
-                        error: 'Model not found'
+                        error: 'Model not found',
                     };
                 }
                 throw new Error(`Failed to delete model: ${response.statusText}`);
             }
             const result = await response.json();
             logger.info('GNN model deleted', {
-                modelName
+                modelName,
             });
             return {
                 success: true,
                 deleted: result.deleted,
-                modelName: result.model_name
+                modelName: result.model_name,
             };
         }
         catch (error) {
             trackError('gnn_service', 'DeleteModelError');
             logger.error('Failed to delete GNN model', {
                 modelName,
-                error: error.message
+                error: error.message,
             });
             return {
                 success: false,
-                error: error.message
+                error: error.message,
             };
         }
     }
@@ -483,8 +483,11 @@ class GNNService {
                 else if (graphData.nodes && graphData.edges) {
                     // Node-edge format
                     return {
-                        edges: graphData.edges.map(e => [e.source || e.from, e.target || e.to]),
-                        node_features: this._extractNodeFeatures(graphData.nodes)
+                        edges: graphData.edges.map((e) => [
+                            e.source || e.from,
+                            e.target || e.to,
+                        ]),
+                        node_features: this._extractNodeFeatures(graphData.nodes),
                     };
                 }
                 else if (graphData.edges) {
@@ -497,7 +500,7 @@ class GNNService {
         catch (error) {
             logger.error('Failed to convert graph data', {
                 error: error.message,
-                format
+                format,
             });
             throw new Error(`Graph data conversion failed: ${error.message}`);
         }
@@ -530,19 +533,21 @@ class GNNService {
         try {
             const response = await fetch(`${this.mlServiceUrl}/health`, {
                 method: 'GET',
-                timeout: 5000
+                timeout: 5000,
             });
             return {
                 available: response.ok,
                 status: response.status,
-                message: response.ok ? 'GNN service available' : 'GNN service unavailable'
+                message: response.ok
+                    ? 'GNN service available'
+                    : 'GNN service unavailable',
             };
         }
         catch (error) {
             return {
                 available: false,
                 status: 0,
-                message: `GNN service unreachable: ${error.message}`
+                message: `GNN service unreachable: ${error.message}`,
             };
         }
     }

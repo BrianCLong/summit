@@ -31,4 +31,3 @@ spec:
         has_annotation(k, v) {
           input.review.object.metadata.annotations[k] == v
         }
-

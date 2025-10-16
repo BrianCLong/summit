@@ -1,4 +1,3 @@
-
 # ADR-051: Price-Aware Orchestration
 
 **Status:** Proposed

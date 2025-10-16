@@ -16,7 +16,7 @@ const options = {
   port: url.port || (url.protocol === 'https:' ? 443 : 80),
   path: url.pathname + url.search,
   method: 'GET',
-  timeout: 5000
+  timeout: 5000,
 };
 
 const request = client.request(options, (response) => {
@@ -40,4 +40,3 @@ request.on('timeout', () => {
 });
 
 request.end();
-

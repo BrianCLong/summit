@@ -240,4 +240,3 @@ export interface VerificationWorkflowHooks {
   onTaskCreated?: (task: VerificationTask) => Promise<void> | void;
   onTaskResolved?: (task: VerificationTask) => Promise<void> | void;
 }
-

@@ -37,5 +37,8 @@ export async function persistSession(
 export async function revokeSessionPersist(sid: string) {
   const pool: Pool = getPostgresPool();
   await ensureSessionsTable();
-  await pool.query(`UPDATE mcp_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE sid = $1`, [sid]);
+  await pool.query(
+    `UPDATE mcp_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE sid = $1`,
+    [sid],
+  );
 }

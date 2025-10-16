@@ -4,13 +4,13 @@ import {
   TimelineStatusCounts,
   WorkflowDefinition,
   WorkflowRunRecord,
-  type NodeRunStatus
-} from "common-types";
+  type NodeRunStatus,
+} from 'common-types';
 import {
   computeWorkflowEstimates,
   topologicalSort,
-  validateWorkflow
-} from "policy";
+  validateWorkflow,
+} from 'policy';
 
 export interface CanvasNodePosition {
   x: number;
@@ -57,7 +57,7 @@ export interface ObserverState {
 }
 
 export interface PlaybackOptions {
-  direction?: "forward" | "backward";
+  direction?: 'forward' | 'backward';
   step?: number;
   loop?: boolean;
 }
@@ -110,7 +110,7 @@ export function createCanvasState(workflow: WorkflowDefinition): CanvasState {
   const positions = computeConstraintAwareLayout(
     validation.normalized,
     { criticalLane: 0 },
-    criticalPath
+    criticalPath,
   );
   return {
     workflow: validation.normalized,
@@ -119,30 +119,30 @@ export function createCanvasState(workflow: WorkflowDefinition): CanvasState {
     selectedNodeIds: [],
     criticalPath,
     validation,
-    runtime: {}
+    runtime: {},
   };
 }
 
 export function autoLayout(
   state: CanvasState,
-  options: LayoutOptions = {}
+  options: LayoutOptions = {},
 ): CanvasState {
   const criticalPath = state.validation.analysis.estimated.criticalPath;
   const positions = computeConstraintAwareLayout(
     state.workflow,
     options,
-    criticalPath
+    criticalPath,
   );
   return {
     ...state,
-    positions
+    positions,
   };
 }
 
 export function updateNodePosition(
   state: CanvasState,
   nodeId: string,
-  patch: Partial<CanvasNodePosition>
+  patch: Partial<CanvasNodePosition>,
 ): CanvasState {
   const current = state.positions[nodeId] ?? {
     x: 0,
@@ -150,52 +150,63 @@ export function updateNodePosition(
     column: 0,
     lane: 0,
     width: DEFAULT_NODE_WIDTH,
-    height: DEFAULT_NODE_HEIGHT
+    height: DEFAULT_NODE_HEIGHT,
   };
   return {
     ...state,
     positions: {
       ...state.positions,
-      [nodeId]: { ...current, ...patch }
-    }
+      [nodeId]: { ...current, ...patch },
+    },
   };
 }
 
-export function selectNodes(state: CanvasState, nodeIds: string[]): CanvasState {
+export function selectNodes(
+  state: CanvasState,
+  nodeIds: string[],
+): CanvasState {
   return {
     ...state,
-    selectedNodeIds: [...new Set(nodeIds)]
+    selectedNodeIds: [...new Set(nodeIds)],
   };
 }
 
 export function applyRunUpdate(
   state: CanvasState,
-  run: WorkflowRunRecord
+  run: WorkflowRunRecord,
 ): CanvasState {
   const runtime: Record<string, CanvasRuntimeState> = { ...state.runtime };
   for (const snapshot of run.nodes ?? []) {
     runtime[snapshot.nodeId] = {
       status: snapshot.status,
       startedAt: snapshot.startedAt,
-      finishedAt: snapshot.finishedAt
+      finishedAt: snapshot.finishedAt,
     };
   }
   return {
     ...state,
     runtime,
-    criticalPath: run.stats.criticalPath ?? state.criticalPath
+    criticalPath: run.stats.criticalPath ?? state.criticalPath,
   };
 }
 
 export function computeWorkflowDiff(
   current: WorkflowDefinition,
-  next: WorkflowDefinition
+  next: WorkflowDefinition,
 ): WorkflowDiff {
-  const currentNodeMap = new Map(current.nodes.map((node) => [node.id, node] as const));
-  const nextNodeMap = new Map(next.nodes.map((node) => [node.id, node] as const));
+  const currentNodeMap = new Map(
+    current.nodes.map((node) => [node.id, node] as const),
+  );
+  const nextNodeMap = new Map(
+    next.nodes.map((node) => [node.id, node] as const),
+  );
 
-  const addedNodes = [...nextNodeMap.keys()].filter((id) => !currentNodeMap.has(id));
-  const removedNodes = [...currentNodeMap.keys()].filter((id) => !nextNodeMap.has(id));
+  const addedNodes = [...nextNodeMap.keys()].filter(
+    (id) => !currentNodeMap.has(id),
+  );
+  const removedNodes = [...currentNodeMap.keys()].filter(
+    (id) => !nextNodeMap.has(id),
+  );
   const changedNodes: string[] = [];
 
   for (const [id, node] of currentNodeMap.entries()) {
@@ -206,14 +217,19 @@ export function computeWorkflowDiff(
     if (
       node.type !== candidate.type ||
       JSON.stringify(node.params) !== JSON.stringify(candidate.params) ||
-      JSON.stringify(node.evidenceOutputs ?? []) !== JSON.stringify(candidate.evidenceOutputs ?? [])
+      JSON.stringify(node.evidenceOutputs ?? []) !==
+        JSON.stringify(candidate.evidenceOutputs ?? [])
     ) {
       changedNodes.push(id);
     }
   }
 
-  const currentEdges = new Set(current.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on)));
-  const nextEdges = new Set(next.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on)));
+  const currentEdges = new Set(
+    current.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on)),
+  );
+  const nextEdges = new Set(
+    next.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on)),
+  );
   const addedEdges = [...nextEdges].filter((edge) => !currentEdges.has(edge));
   const removedEdges = [...currentEdges].filter((edge) => !nextEdges.has(edge));
 
@@ -227,11 +243,13 @@ export function createObserverState(run: WorkflowRunRecord): ObserverState {
     timeline,
     currentIndex: 0,
     playbackSpeed: 1,
-    isPlaying: false
+    isPlaying: false,
   };
 }
 
-export function buildObserverTimeline(run: WorkflowRunRecord): ObserverTimeline {
+export function buildObserverTimeline(
+  run: WorkflowRunRecord,
+): ObserverTimeline {
   const frames: ObserverTimelineFrame[] = [];
   const nodeIds = new Set(run.nodes?.map((node) => node.nodeId));
   for (const nodeId of run.stats.criticalPath ?? []) {
@@ -239,61 +257,80 @@ export function buildObserverTimeline(run: WorkflowRunRecord): ObserverTimeline 
   }
   const baselineStatuses: Record<string, NodeRunStatus> = {};
   for (const nodeId of nodeIds) {
-    baselineStatuses[nodeId] = "queued";
+    baselineStatuses[nodeId] = 'queued';
   }
 
-  frames.push(attachTimelineMetadata({
-    index: 0,
-    timestamp: run.startedAt ?? new Date().toISOString(),
-    nodeStatuses: { ...baselineStatuses },
-    costUSD: 0,
-    latencyMs: 0,
-    criticalPath: []
-  }, nodeIds.size));
+  frames.push(
+    attachTimelineMetadata(
+      {
+        index: 0,
+        timestamp: run.startedAt ?? new Date().toISOString(),
+        nodeStatuses: { ...baselineStatuses },
+        costUSD: 0,
+        latencyMs: 0,
+        criticalPath: [],
+      },
+      nodeIds.size,
+    ),
+  );
 
   const events = buildNodeEvents(run);
   let index = 1;
   for (const event of events) {
     const previous = { ...frames[frames.length - 1].nodeStatuses };
     previous[event.nodeId] = event.status;
-    frames.push(attachTimelineMetadata({
-      index,
-      timestamp: event.timestamp,
-      nodeStatuses: previous,
-      costUSD: interpolateCost(run.stats.costUSD, index, events.length),
-      latencyMs: interpolateLatency(run.stats.latencyMs, index, events.length),
-      criticalPath: run.stats.criticalPath,
-      delta: { nodeId: event.nodeId, status: event.status }
-    }, nodeIds.size));
+    frames.push(
+      attachTimelineMetadata(
+        {
+          index,
+          timestamp: event.timestamp,
+          nodeStatuses: previous,
+          costUSD: interpolateCost(run.stats.costUSD, index, events.length),
+          latencyMs: interpolateLatency(
+            run.stats.latencyMs,
+            index,
+            events.length,
+          ),
+          criticalPath: run.stats.criticalPath,
+          delta: { nodeId: event.nodeId, status: event.status },
+        },
+        nodeIds.size,
+      ),
+    );
     index += 1;
   }
 
-  frames.push(attachTimelineMetadata({
-    index,
-    timestamp: run.finishedAt ?? new Date().toISOString(),
-    nodeStatuses: { ...frames[frames.length - 1].nodeStatuses },
-    costUSD: run.stats.costUSD,
-    latencyMs: run.stats.latencyMs,
-    criticalPath: run.stats.criticalPath
-  }, nodeIds.size));
+  frames.push(
+    attachTimelineMetadata(
+      {
+        index,
+        timestamp: run.finishedAt ?? new Date().toISOString(),
+        nodeStatuses: { ...frames[frames.length - 1].nodeStatuses },
+        costUSD: run.stats.costUSD,
+        latencyMs: run.stats.latencyMs,
+        criticalPath: run.stats.criticalPath,
+      },
+      nodeIds.size,
+    ),
+  );
 
   return { frames };
 }
 
 export function buildDependencyGraphSnapshot(
   state: CanvasState,
-  frame?: ObserverTimelineFrame
+  frame?: ObserverTimelineFrame,
 ): DependencyGraphSnapshot {
   const nodeStatuses: Record<string, NodeRunStatus> = {};
   for (const node of state.workflow.nodes) {
     const runtimeStatus = state.runtime[node.id]?.status;
     nodeStatuses[node.id] =
-      frame?.nodeStatuses[node.id] ?? runtimeStatus ?? "queued";
+      frame?.nodeStatuses[node.id] ?? runtimeStatus ?? 'queued';
   }
 
   const { counts, progressPercent } = summarizeStatuses(
     nodeStatuses,
-    state.workflow.nodes.length
+    state.workflow.nodes.length,
   );
 
   const dependencies = new Map<string, string[]>();
@@ -325,7 +362,7 @@ export function buildDependencyGraphSnapshot(
     : constraintAwareAutoLayout(state.workflow);
 
   const nodes: DependencyGraphNodeState[] = state.workflow.nodes.map((node) => {
-    const status = nodeStatuses[node.id] ?? "queued";
+    const status = nodeStatuses[node.id] ?? 'queued';
     const deps = dependencies.get(node.id) ?? [];
     const nodePosition = positions[node.id] ?? {
       x: 0,
@@ -333,13 +370,15 @@ export function buildDependencyGraphSnapshot(
       column: 0,
       lane: 0,
       width: DEFAULT_NODE_WIDTH,
-      height: DEFAULT_NODE_HEIGHT
+      height: DEFAULT_NODE_HEIGHT,
     };
     const completedDeps = deps.filter((dependencyId) =>
-      isCompletedStatus(nodeStatuses[dependencyId])
+      isCompletedStatus(nodeStatuses[dependencyId]),
     );
     const isBlocked =
-      status === "queued" && completedDeps.length !== deps.length && deps.length > 0;
+      status === 'queued' &&
+      completedDeps.length !== deps.length &&
+      deps.length > 0;
     return {
       id: node.id,
       label: node.name ?? node.id,
@@ -352,20 +391,20 @@ export function buildDependencyGraphSnapshot(
       isCritical: criticalSet.has(node.id),
       isBlocked,
       startedAt: state.runtime[node.id]?.startedAt,
-      finishedAt: state.runtime[node.id]?.finishedAt
+      finishedAt: state.runtime[node.id]?.finishedAt,
     };
   });
 
   const edges: DependencyGraphEdgeState[] = state.workflow.edges.map((edge) => {
     const id = serializeEdge(edge.from, edge.to, edge.on);
-    const sourceStatus = nodeStatuses[edge.from] ?? "queued";
+    const sourceStatus = nodeStatuses[edge.from] ?? 'queued';
     return {
       id,
       from: edge.from,
       to: edge.to,
       condition: edge.on,
       isCritical: criticalPairs.has(buildEdgePairKey(edge.from, edge.to)),
-      isSatisfied: isCompletedStatus(sourceStatus)
+      isSatisfied: isCompletedStatus(sourceStatus),
     };
   });
 
@@ -373,15 +412,15 @@ export function buildDependencyGraphSnapshot(
     nodes,
     edges,
     statusCounts: counts,
-    progressPercent
+    progressPercent,
   };
 }
 
 export function advancePlayback(
   state: ObserverState,
-  options: PlaybackOptions = {}
+  options: PlaybackOptions = {},
 ): ObserverState {
-  const direction = options.direction === "backward" ? -1 : 1;
+  const direction = options.direction === 'backward' ? -1 : 1;
   const step = options.step ?? 1;
   const nextIndex = state.currentIndex + direction * step;
   if (options.loop) {
@@ -391,22 +430,29 @@ export function advancePlayback(
   }
   return {
     ...state,
-    currentIndex: Math.max(0, Math.min(nextIndex, state.timeline.frames.length - 1))
+    currentIndex: Math.max(
+      0,
+      Math.min(nextIndex, state.timeline.frames.length - 1),
+    ),
   };
 }
 
 export function constraintAwareAutoLayout(
   workflow: WorkflowDefinition,
-  options: LayoutOptions = {}
+  options: LayoutOptions = {},
 ): Record<string, CanvasNodePosition> {
   const estimates = computeWorkflowEstimates(workflow);
-  return computeConstraintAwareLayout(workflow, options, estimates.criticalPath);
+  return computeConstraintAwareLayout(
+    workflow,
+    options,
+    estimates.criticalPath,
+  );
 }
 
 function computeConstraintAwareLayout(
   workflow: WorkflowDefinition,
   options: LayoutOptions,
-  criticalPath: string[]
+  criticalPath: string[],
 ): Record<string, CanvasNodePosition> {
   const columnSpacing = options.columnSpacing ?? 280;
   const rowSpacing = options.rowSpacing ?? 180;
@@ -463,7 +509,7 @@ function computeConstraintAwareLayout(
       column,
       lane,
       width: DEFAULT_NODE_WIDTH,
-      height: DEFAULT_NODE_HEIGHT
+      height: DEFAULT_NODE_HEIGHT,
     };
   }
 
@@ -484,23 +530,41 @@ function buildNodeEvents(run: WorkflowRunRecord): NodeEvent[] {
   const events: NodeEvent[] = [];
   for (const node of run.nodes ?? []) {
     if (node.startedAt) {
-      events.push({ nodeId: node.nodeId, status: "running", timestamp: node.startedAt });
+      events.push({
+        nodeId: node.nodeId,
+        status: 'running',
+        timestamp: node.startedAt,
+      });
     }
     if (node.finishedAt) {
-      events.push({ nodeId: node.nodeId, status: node.status, timestamp: node.finishedAt });
+      events.push({
+        nodeId: node.nodeId,
+        status: node.status,
+        timestamp: node.finishedAt,
+      });
     }
   }
-  return events.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  return events.sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  );
 }
 
-function interpolateCost(total: number, index: number, totalEvents: number): number {
+function interpolateCost(
+  total: number,
+  index: number,
+  totalEvents: number,
+): number {
   if (totalEvents === 0) {
     return total;
   }
   return Number(((total * index) / totalEvents).toFixed(2));
 }
 
-function interpolateLatency(total: number, index: number, totalEvents: number): number {
+function interpolateLatency(
+  total: number,
+  index: number,
+  totalEvents: number,
+): number {
   if (totalEvents === 0) {
     return total;
   }
@@ -508,20 +572,23 @@ function interpolateLatency(total: number, index: number, totalEvents: number): 
 }
 
 function attachTimelineMetadata(
-  frame: Omit<ObserverTimelineFrame, "statusCounts" | "progressPercent">,
-  totalNodes: number
+  frame: Omit<ObserverTimelineFrame, 'statusCounts' | 'progressPercent'>,
+  totalNodes: number,
 ): ObserverTimelineFrame {
-  const { counts, progressPercent } = summarizeStatuses(frame.nodeStatuses, totalNodes);
+  const { counts, progressPercent } = summarizeStatuses(
+    frame.nodeStatuses,
+    totalNodes,
+  );
   return {
     ...frame,
     statusCounts: counts,
-    progressPercent
+    progressPercent,
   };
 }
 
 function summarizeStatuses(
   nodeStatuses: Record<string, NodeRunStatus>,
-  totalNodes: number
+  totalNodes: number,
 ): { counts: TimelineStatusCounts; progressPercent: number } {
   const counts: TimelineStatusCounts = {
     total: totalNodes,
@@ -530,27 +597,27 @@ function summarizeStatuses(
     skipped: 0,
     failed: 0,
     running: 0,
-    queued: 0
+    queued: 0,
   };
 
   for (const status of Object.values(nodeStatuses)) {
     switch (status) {
-      case "succeeded":
+      case 'succeeded':
         counts.succeeded += 1;
         counts.completed += 1;
         break;
-      case "skipped":
+      case 'skipped':
         counts.skipped += 1;
         counts.completed += 1;
         break;
-      case "failed":
+      case 'failed':
         counts.failed += 1;
         counts.completed += 1;
         break;
-      case "running":
+      case 'running':
         counts.running += 1;
         break;
-      case "queued":
+      case 'queued':
       default:
         counts.queued += 1;
         break;
@@ -566,7 +633,7 @@ function summarizeStatuses(
 }
 
 function isCompletedStatus(status: NodeRunStatus | undefined): boolean {
-  return status === "succeeded" || status === "skipped" || status === "failed";
+  return status === 'succeeded' || status === 'skipped' || status === 'failed';
 }
 
 function buildEdgePairKey(from: string, to: string): string {

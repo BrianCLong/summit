@@ -12,5 +12,4 @@ spec:
     - type: cpu
       metadata:
         type: Utilization
-        value: "70"
-
+        value: '70'

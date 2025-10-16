@@ -9,12 +9,15 @@ type PendingBatch = { events: PendingEvent[]; timer?: NodeJS.Timeout };
 
 const batches = new Map<string, PendingBatch>();
 
-export async function createRecording(sessionId: string, toolClass: string): Promise<string | undefined> {
+export async function createRecording(
+  sessionId: string,
+  toolClass: string,
+): Promise<string | undefined> {
   try {
     const res = await fetch(`${BASE_URL}/v1/recordings`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId, seed: '0', meta: { toolClass } })
+      body: JSON.stringify({ sessionId, seed: '0', meta: { toolClass } }),
     });
     if (!res.ok) throw new Error(`replay create failed: ${res.status}`);
     const json = (await res.json()) as { id: string };
@@ -25,7 +28,12 @@ export async function createRecording(sessionId: string, toolClass: string): Pro
   }
 }
 
-export function recordEvent(recordingId: string | undefined, dir: 'in' | 'out', channel: string, payload: unknown) {
+export function recordEvent(
+  recordingId: string | undefined,
+  dir: 'in' | 'out',
+  channel: string,
+  payload: unknown,
+) {
   if (!recordingId) return;
   let batch = batches.get(recordingId);
   if (!batch) {
@@ -60,9 +68,9 @@ async function flush(recordingId: string) {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-ig-signature': `sha256=${signature}`
+        'x-ig-signature': `sha256=${signature}`,
       },
-      body: payload
+      body: payload,
     });
     if (!res.ok) {
       console.warn('replay recordEvent failed', res.status);

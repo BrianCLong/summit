@@ -10,7 +10,9 @@ export function CodexPanel() {
     <aside aria-label="Codex" className="codex-panel">
       <header>
         <h2>Codex</h2>
-        <button onClick={() => dispatch(addSection('New Section'))}>+ Section</button>
+        <button onClick={() => dispatch(addSection('New Section'))}>
+          + Section
+        </button>
       </header>
       <DndContext
         collisionDetection={closestCenter}

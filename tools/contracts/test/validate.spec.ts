@@ -1,4 +1,4 @@
-test("valid contract passes", ()=>{
+test('valid contract passes', () => {
   const yaml = `
 area: server
 intent: perf

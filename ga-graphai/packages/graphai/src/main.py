@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
 from fastapi import FastAPI, HTTPException
-from features import build_degree_features
 from pydantic import BaseModel
+
+from features import build_degree_features
 
 
 class FeatureBuildRequest(BaseModel):
@@ -27,7 +27,7 @@ class ModelProfile:
     region: str
     latency_ms: int
     cost_per_1k_tokens: float
-    capabilities: List[str]
+    capabilities: list[str]
     max_context: int
     tier: str
 

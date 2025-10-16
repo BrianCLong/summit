@@ -16,7 +16,10 @@ export function overlaps(a: TemporalInterval, b: TemporalInterval): boolean {
   return a.validFrom < b.validTo && b.validFrom < a.validTo;
 }
 
-export function isConsistent(existing: TemporalInterval[], candidate: TemporalInterval): boolean {
+export function isConsistent(
+  existing: TemporalInterval[],
+  candidate: TemporalInterval,
+): boolean {
   return !existing.some((i) => overlaps(i, candidate));
 }
 

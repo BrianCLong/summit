@@ -24,6 +24,7 @@ VITE_OBS_EMBED=false  # Use external links only
 #### When to Use Embeds (`VITE_OBS_EMBED=true`)
 
 ✅ **Safe to embed when:**
+
 - You control both IntelGraph and observability tool domains
 - Observability tools are configured with proper `X-Frame-Options` or `frame-ancestors`
 - CSP allows `frame-src` for the observability domains
@@ -32,6 +33,7 @@ VITE_OBS_EMBED=false  # Use external links only
 #### When to Use Links (`VITE_OBS_EMBED=false`)
 
 🔒 **Use links when:**
+
 - Strict CSP policies prohibit iframe embedding
 - Observability tools are on third-party domains
 - Security policies require external tool access
@@ -40,16 +42,18 @@ VITE_OBS_EMBED=false  # Use external links only
 ## CSP Configuration Examples
 
 ### Permissive CSP (Allows Embeds)
+
 ```http
-Content-Security-Policy: 
+Content-Security-Policy:
   default-src 'self';
   frame-src 'self' https://grafana.company.com https://tempo.company.com https://prometheus.company.com;
   script-src 'self' 'unsafe-inline';
 ```
 
 ### Strict CSP (Links Only)
+
 ```http
-Content-Security-Policy: 
+Content-Security-Policy:
   default-src 'self';
   frame-src 'none';
   script-src 'self';
@@ -58,6 +62,7 @@ Content-Security-Policy:
 ## Tool-Specific Setup
 
 ### Grafana
+
 ```bash
 # In grafana.ini
 [security]
@@ -74,6 +79,7 @@ frame_ancestors = https://intelgraph.company.com
 ```
 
 ### Tempo/Jaeger
+
 ```bash
 # Configure frame-ancestors in reverse proxy (nginx/apache)
 # Tempo doesn't have built-in frame controls
@@ -82,6 +88,7 @@ add_header Content-Security-Policy "frame-ancestors 'self' https://intelgraph.co
 ```
 
 ### Prometheus
+
 ```bash
 # Use --web.external-url for proper embedding
 --web.external-url=https://prometheus.company.com/
@@ -94,17 +101,19 @@ add_header X-Frame-Options "SAMEORIGIN";
 ## Security Best Practices
 
 ### 1. Use Authenticated Embeds
+
 - Configure observability tools with authentication
 - Use signed URLs or session-based access
 - Avoid embedding tools with sensitive data publicly
 
 ### 2. Domain Validation
+
 ```javascript
 // Example iframe validation
 const allowedDomains = [
   'grafana.company.com',
-  'tempo.company.com', 
-  'prometheus.company.com'
+  'tempo.company.com',
+  'prometheus.company.com',
 ];
 
 const isValidUrl = (url) => {
@@ -118,7 +127,9 @@ const isValidUrl = (url) => {
 ```
 
 ### 3. Sandbox Attributes
+
 The ObservabilityPanel uses secure sandbox attributes:
+
 ```jsx
 <iframe
   sandbox="allow-same-origin allow-scripts"
@@ -128,6 +139,7 @@ The ObservabilityPanel uses secure sandbox attributes:
 ```
 
 ### 4. Content Validation
+
 - Validate all URLs before embedding
 - Use allowlists for approved observability domains
 - Implement URL sanitization
@@ -135,13 +147,15 @@ The ObservabilityPanel uses secure sandbox attributes:
 ## Deployment Strategies
 
 ### Development Environment
+
 ```bash
 # Relaxed CSP for development
 VITE_OBS_EMBED=true
 CSP_FRAME_SRC="'self' https://*.localhost:*"
 ```
 
-### Staging Environment  
+### Staging Environment
+
 ```bash
 # Test both modes
 VITE_OBS_EMBED=true  # Test embeds
@@ -150,6 +164,7 @@ VITE_OBS_EMBED=false # Test link fallbacks
 ```
 
 ### Production Environment
+
 ```bash
 # Strict CSP recommended
 VITE_OBS_EMBED=false
@@ -162,21 +177,25 @@ CSP_FRAME_SRC="'none'"
 ### Common Issues
 
 **1. "Refused to display in a frame"**
+
 - Check `X-Frame-Options` on observability tool
 - Verify `frame-ancestors` CSP directive
 - Ensure domains match exactly (including subdomains)
 
 **2. Blank iframe content**
+
 - Verify authentication/session state
 - Check browser developer tools for CSP violations
 - Test URL directly in new tab
 
 **3. Cross-origin errors**
+
 - Configure CORS properly on observability tools
 - Use same-origin or properly configured cross-origin setup
 - Consider using signed URLs
 
 ### Debug Mode
+
 ```bash
 # Enable debug logging
 VITE_DEBUG_CSP=true
@@ -194,4 +213,3 @@ The embedding logic is in `client/src/features/observability/ObservabilityPanel.
 - Provides clear UX for both modes
 
 The toggle is build-time only to ensure consistent behavior across environments and prevent runtime CSP conflicts.
-

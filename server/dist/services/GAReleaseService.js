@@ -6,6 +6,8 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 export class GAReleaseService {
+    packageJson;
+    serverPackageJson;
     constructor() {
         this.packageJson = this.loadPackageJson('package.json');
         this.serverPackageJson = this.loadPackageJson('server/package.json');
@@ -34,13 +36,17 @@ export class GAReleaseService {
         validations.push({
             component: 'package-json',
             status: this.packageJson ? 'pass' : 'fail',
-            message: this.packageJson ? 'Package.json valid' : 'Package.json missing or invalid',
+            message: this.packageJson
+                ? 'Package.json valid'
+                : 'Package.json missing or invalid',
         });
         // Check node_modules
         validations.push({
             component: 'dependencies',
             status: this.checkNodeModules() ? 'pass' : 'fail',
-            message: this.checkNodeModules() ? 'Dependencies installed' : 'Missing dependencies',
+            message: this.checkNodeModules()
+                ? 'Dependencies installed'
+                : 'Missing dependencies',
         });
         // Check environment configuration
         const envStatus = this.checkEnvironment();
@@ -173,7 +179,11 @@ export class GAReleaseService {
         return status.ready;
     }
     checkNodeModules() {
-        const paths = ['node_modules', 'server/node_modules', 'client/node_modules'];
+        const paths = [
+            'node_modules',
+            'server/node_modules',
+            'client/node_modules',
+        ];
         return paths.every((p) => fs.existsSync(path.join(process.cwd(), p)));
     }
     checkEnvironment() {
@@ -183,7 +193,10 @@ export class GAReleaseService {
             return { status: 'pass', message: 'Environment configuration found' };
         }
         else if (fs.existsSync(envExamplePath)) {
-            return { status: 'warning', message: 'Using .env.example (should copy to .env)' };
+            return {
+                status: 'warning',
+                message: 'Using .env.example (should copy to .env)',
+            };
         }
         else {
             return { status: 'fail', message: 'No environment configuration found' };

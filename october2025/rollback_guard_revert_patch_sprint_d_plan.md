@@ -2,9 +2,9 @@
 
 This Canvas adds:
 
-1) A **single-toggle guard** via `RECEIPTS_ENABLED` across API/Worker so rollbacks don’t require code removal.
-2) A **full revert patch** that removes all previously added files/lines in one `git apply` if you need a clean rollback.
-3) **Sprint D (2 weeks)**: hardening + coverage + audit UX.
+1. A **single-toggle guard** via `RECEIPTS_ENABLED` across API/Worker so rollbacks don’t require code removal.
+2. A **full revert patch** that removes all previously added files/lines in one `git apply` if you need a clean rollback.
+3. **Sprint D (2 weeks)**: hardening + coverage + audit UX.
 
 ---
 
@@ -196,11 +196,13 @@ Apply from repo root to remove all artifacts introduced by the receipts/ledger/O
 ## C) Sprint D (2 weeks) — **Hardening, Coverage, and Audit UX**
 
 **Objectives**
+
 - **Coverage**: 100% privileged API routes + top 5 worker jobs emit receipts; dual‑graph attestation on all write ops.
 - **Hardening**: policy tests for OPA bundle; key rotation + KID headers; resilience on ledger outages.
 - **Audit UX**: minimal **Audit Workbench** (CLI + one UI route) to query by `op_id` and visualize anchor/receipts/digests.
 
 **Backlog**
+
 - [ ] API: add `x-policy-version` + `x-receipt-id` headers; OTEL attrs (`authz.receipt_hash`, `ledger.anchor_hash`).
 - [ ] API: wrap write routes with `attest()`; add retries + DLQ if ledger down (queue to Redis, flush background).
 - [ ] Worker: decorate jobs `ingest`, `link`, `promote`, `redact`, `export` with `with_receipt()`; export `op_id` consistently.
@@ -213,18 +215,21 @@ Apply from repo root to remove all artifacts introduced by the receipts/ledger/O
 - [ ] CI: extend `assurance` job with end‑to‑end test: API call → receipt anchored → `audit/query` returns anchor within 1s.
 
 **KPIs/Exit**
+
 - Coverage: **100%** privileged routes emit receipts; **100%** write ops call `attest()`.
 - Stability: no 5xx from API when ledger is down; background flush recovers within **60s**.
 - Tests: OPA policy tests green; CI e2e passes; p95 anchor < **15ms** local.
 
 **Deliverables**
+
 - `/integration/audit_cli.py` + UI page `ui/pages/audit/[op_id].tsx` (simple table)
 - `/infra/keys/dev_rotate.py` (dev-only keypair rotate)
 - `/infra/opa/tests/*.rego` (rego unit tests)
 
 **Risks & Mitigations**
-- *Key handling:* wrap in KMS later; for now, sanitize logs and enforce KID only.
-- *False confidence via selective disclosure:* add a doc section for auditor rehydration workflow.
+
+- _Key handling:_ wrap in KMS later; for now, sanitize logs and enforce KID only.
+- _False confidence via selective disclosure:_ add a doc section for auditor rehydration workflow.
 
 ---
 
@@ -237,4 +242,3 @@ Apply from repo root to remove all artifacts introduced by the receipts/ledger/O
   git apply --index PR-feat-policy-receipts-ledger-opa-REVERT.patch
   git commit -m "revert: remove policy receipts, ledger, and OPA bundle"
   ```
-

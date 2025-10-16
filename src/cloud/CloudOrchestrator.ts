@@ -24,7 +24,14 @@ export interface CloudCredentials {
 
 export interface CloudCapability {
   service: string;
-  type: 'COMPUTE' | 'STORAGE' | 'NETWORK' | 'DATABASE' | 'AI_ML' | 'SECURITY' | 'MONITORING';
+  type:
+    | 'COMPUTE'
+    | 'STORAGE'
+    | 'NETWORK'
+    | 'DATABASE'
+    | 'AI_ML'
+    | 'SECURITY'
+    | 'MONITORING';
   tier: 'BASIC' | 'STANDARD' | 'PREMIUM' | 'ENTERPRISE';
   limits: ResourceLimits;
   sla: ServiceLevelAgreement;
@@ -78,7 +85,13 @@ export interface PerformanceMetrics {
 export interface WorkloadDefinition {
   id: string;
   name: string;
-  type: 'WEB_APP' | 'API_SERVICE' | 'BATCH_JOB' | 'ML_TRAINING' | 'DATA_PIPELINE' | 'DATABASE';
+  type:
+    | 'WEB_APP'
+    | 'API_SERVICE'
+    | 'BATCH_JOB'
+    | 'ML_TRAINING'
+    | 'DATA_PIPELINE'
+    | 'DATABASE';
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   requirements: WorkloadRequirements;
   constraints: WorkloadConstraints;
@@ -202,7 +215,13 @@ export interface DeploymentPlan {
   timeline: DeploymentTimeline;
   riskAssessment: RiskAssessment;
   created: Date;
-  status: 'DRAFT' | 'APPROVED' | 'EXECUTING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+  status:
+    | 'DRAFT'
+    | 'APPROVED'
+    | 'EXECUTING'
+    | 'COMPLETED'
+    | 'FAILED'
+    | 'CANCELLED';
 }
 
 export interface ResourceAllocation {
@@ -355,7 +374,12 @@ export interface FailoverThreshold {
 }
 
 export interface LoadBalancingConfig {
-  algorithm: 'ROUND_ROBIN' | 'WEIGHTED' | 'LEAST_CONNECTIONS' | 'GEOGRAPHIC' | 'LATENCY_BASED';
+  algorithm:
+    | 'ROUND_ROBIN'
+    | 'WEIGHTED'
+    | 'LEAST_CONNECTIONS'
+    | 'GEOGRAPHIC'
+    | 'LATENCY_BASED';
   healthCheckInterval: number;
   sessionAffinity: boolean;
   stickySession: boolean;
@@ -404,24 +428,27 @@ export class CloudOrchestrator extends EventEmitter {
   async initialize(): Promise<void> {
     try {
       console.log('☁️ Initializing Enterprise Cloud Orchestrator...');
-      
+
       await this.loadCloudProviders();
       await this.validateConnections();
       await this.setupGlobalDistribution();
       await this.startContinuousOptimization();
-      
+
       this.isInitialized = true;
       this.emit('initialized', { timestamp: new Date() });
-      
     } catch (error) {
       this.emit('error', { error, context: 'initialization' });
       throw error;
     }
   }
 
-  async registerCloudProvider(config: Partial<CloudProvider>): Promise<CloudProvider> {
+  async registerCloudProvider(
+    config: Partial<CloudProvider>,
+  ): Promise<CloudProvider> {
     const provider: CloudProvider = {
-      id: config.id || `provider-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id:
+        config.id ||
+        `provider-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: config.name || 'Unknown Provider',
       type: config.type || 'PRIVATE',
       region: config.region || 'us-east-1',
@@ -429,7 +456,7 @@ export class CloudOrchestrator extends EventEmitter {
       credentials: config.credentials || {
         type: 'IAM_ROLE',
         credentials: {},
-        rotationPolicy: 'monthly'
+        rotationPolicy: 'monthly',
       },
       capabilities: config.capabilities || [],
       pricing: config.pricing || this.getDefaultPricing(),
@@ -440,13 +467,13 @@ export class CloudOrchestrator extends EventEmitter {
         throughput: { requests: 1000, bandwidth: 1000 },
         availability: 0.999,
         errorRate: 0.001,
-        lastMeasured: new Date()
+        lastMeasured: new Date(),
       },
-      lastHealthCheck: new Date()
+      lastHealthCheck: new Date(),
     };
 
     this.providers.set(provider.id, provider);
-    
+
     // Test connectivity
     try {
       await this.testProviderConnection(provider);
@@ -455,14 +482,18 @@ export class CloudOrchestrator extends EventEmitter {
       provider.status = 'OFFLINE';
       console.log(`   ❌ Failed to connect to ${provider.name}`);
     }
-    
+
     this.emit('providerRegistered', provider);
     return provider;
   }
 
-  async createWorkload(definition: Partial<WorkloadDefinition>): Promise<WorkloadDefinition> {
+  async createWorkload(
+    definition: Partial<WorkloadDefinition>,
+  ): Promise<WorkloadDefinition> {
     const workload: WorkloadDefinition = {
-      id: definition.id || `workload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id:
+        definition.id ||
+        `workload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: definition.name || 'Unknown Workload',
       type: definition.type || 'WEB_APP',
       priority: definition.priority || 'MEDIUM',
@@ -474,12 +505,12 @@ export class CloudOrchestrator extends EventEmitter {
       deployment: definition.deployment || this.getDefaultDeployment(),
       monitoring: definition.monitoring || this.getDefaultMonitoring(),
       created: new Date(),
-      owner: definition.owner || 'system'
+      owner: definition.owner || 'system',
     };
 
     this.workloads.set(workload.id, workload);
     this.emit('workloadCreated', workload);
-    
+
     return workload;
   }
 
@@ -490,25 +521,31 @@ export class CloudOrchestrator extends EventEmitter {
     }
 
     console.log(`🎯 Optimizing placement for workload: ${workload.name}...`);
-    
+
     // Get available providers that meet constraints
     const eligibleProviders = this.getEligibleProviders(workload);
-    
+
     // Calculate optimal resource allocation
     const allocation = await this.optimizationEngine.calculateOptimalAllocation(
       workload,
-      eligibleProviders
+      eligibleProviders,
     );
-    
+
     // Estimate costs
-    const costEstimate = await this.costTracker.estimateCosts(allocation, workload);
-    
+    const costEstimate = await this.costTracker.estimateCosts(
+      allocation,
+      workload,
+    );
+
     // Assess risks
-    const riskAssessment = await this.assessDeploymentRisk(workload, allocation);
-    
+    const riskAssessment = await this.assessDeploymentRisk(
+      workload,
+      allocation,
+    );
+
     // Generate timeline
     const timeline = this.generateDeploymentTimeline(workload, allocation);
-    
+
     const plan: DeploymentPlan = {
       id: `plan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       workloadId,
@@ -518,12 +555,12 @@ export class CloudOrchestrator extends EventEmitter {
       timeline,
       riskAssessment,
       created: new Date(),
-      status: 'DRAFT'
+      status: 'DRAFT',
     };
 
     this.deploymentPlans.set(plan.id, plan);
     this.emit('planGenerated', plan);
-    
+
     return plan;
   }
 
@@ -545,7 +582,7 @@ export class CloudOrchestrator extends EventEmitter {
       // Execute deployment phases
       for (const phase of plan.timeline.phases) {
         console.log(`   📋 Executing phase: ${phase.name}...`);
-        
+
         for (const task of phase.tasks) {
           await this.executeDeploymentTask(task, plan);
         }
@@ -553,64 +590,67 @@ export class CloudOrchestrator extends EventEmitter {
 
       plan.status = 'COMPLETED';
       this.emit('deploymentCompleted', { plan, workload });
-      
+
       console.log(`   ✅ Deployment completed: ${workload.name}`);
       return true;
-      
     } catch (error) {
       plan.status = 'FAILED';
       this.emit('deploymentFailed', { plan, workload, error });
-      
+
       console.error(`   ❌ Deployment failed: ${workload.name}`, error.message);
-      
+
       // Attempt rollback if configured
       if (workload.deployment.rollbackPolicy.enabled) {
         await this.rollbackDeployment(plan);
       }
-      
+
       return false;
     }
   }
 
-  async setupGlobalDistribution(config: Partial<GlobalDistribution>): Promise<GlobalDistribution> {
+  async setupGlobalDistribution(
+    config: Partial<GlobalDistribution>,
+  ): Promise<GlobalDistribution> {
     const distribution: GlobalDistribution = {
-      id: config.id || `dist-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id:
+        config.id ||
+        `dist-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: config.name || 'Global Distribution',
       regions: config.regions || this.generateDefaultRegions(),
       strategy: config.strategy || {
         type: 'ACTIVE_ACTIVE',
         parameters: {},
         consistencyLevel: 'EVENTUAL',
-        conflictResolution: 'LAST_WRITE_WINS'
+        conflictResolution: 'LAST_WRITE_WINS',
       },
       replication: config.replication || {
         enabled: true,
         strategy: 'ASYNC',
         replicationFactor: 3,
         crossRegion: true,
-        encryptionInTransit: true
+        encryptionInTransit: true,
       },
       failover: config.failover || {
         enabled: true,
         threshold: [
           { metric: 'availability', threshold: 0.95, duration: 300 },
-          { metric: 'latency', threshold: 1000, duration: 60 }
+          { metric: 'latency', threshold: 1000, duration: 60 },
         ],
         timeout: 300,
         strategy: 'AUTOMATIC',
-        rollbackEnabled: true
+        rollbackEnabled: true,
       },
       loadBalancing: config.loadBalancing || {
         algorithm: 'LATENCY_BASED',
         healthCheckInterval: 30,
         sessionAffinity: false,
-        stickySession: false
+        stickySession: false,
       },
       trafficRouting: config.trafficRouting || {
         type: 'DNS',
         policies: [],
         geolocation: true,
-        latencyOptimized: true
+        latencyOptimized: true,
       },
       monitoring: config.monitoring || {
         crossRegionLatency: true,
@@ -618,44 +658,51 @@ export class CloudOrchestrator extends EventEmitter {
         replicationLag: true,
         failoverMetrics: true,
         costAnalysis: true,
-        complianceTracking: true
-      }
+        complianceTracking: true,
+      },
     };
 
     this.distributions.set(distribution.id, distribution);
-    
+
     // Setup replication between regions
     await this.configureReplication(distribution);
-    
+
     // Setup load balancing
     await this.configureLoadBalancing(distribution);
-    
+
     this.emit('distributionConfigured', distribution);
     return distribution;
   }
 
-  async scaleWorkload(workloadId: string, scaleFactor: number): Promise<boolean> {
+  async scaleWorkload(
+    workloadId: string,
+    scaleFactor: number,
+  ): Promise<boolean> {
     const workload = this.workloads.get(workloadId);
     if (!workload) {
       throw new Error(`Workload ${workloadId} not found`);
     }
 
-    console.log(`📈 Scaling workload ${workload.name} by factor ${scaleFactor}...`);
-    
+    console.log(
+      `📈 Scaling workload ${workload.name} by factor ${scaleFactor}...`,
+    );
+
     try {
       // Calculate new resource requirements
-      const newRequirements = this.calculateScaledRequirements(workload, scaleFactor);
-      
+      const newRequirements = this.calculateScaledRequirements(
+        workload,
+        scaleFactor,
+      );
+
       // Update workload definition
       workload.requirements = newRequirements;
-      
+
       // Trigger redeployment with new requirements
       const plan = await this.optimizeWorkloadPlacement(workloadId);
       await this.deployWorkload(plan.id);
-      
+
       this.emit('workloadScaled', { workload, scaleFactor });
       return true;
-      
     } catch (error) {
       this.emit('scalingFailed', { workload, scaleFactor, error });
       return false;
@@ -668,16 +715,17 @@ export class CloudOrchestrator extends EventEmitter {
       summary: {
         totalProviders: this.providers.size,
         activeWorkloads: this.workloads.size,
-        activeDeployments: Array.from(this.deploymentPlans.values())
-          .filter(p => p.status === 'EXECUTING' || p.status === 'COMPLETED').length
+        activeDeployments: Array.from(this.deploymentPlans.values()).filter(
+          (p) => p.status === 'EXECUTING' || p.status === 'COMPLETED',
+        ).length,
       },
       costs: await this.costTracker.generateReport(),
       optimization: {
         potentialSavings: await this.calculatePotentialSavings(),
-        recommendations: await this.generateCostOptimizationRecommendations()
+        recommendations: await this.generateCostOptimizationRecommendations(),
       },
       compliance: await this.complianceValidator.generateReport(),
-      performance: this.generatePerformanceReport()
+      performance: this.generatePerformanceReport(),
     };
 
     this.emit('reportGenerated', report);
@@ -687,7 +735,7 @@ export class CloudOrchestrator extends EventEmitter {
   // Private helper methods
   private async loadCloudProviders(): Promise<void> {
     console.log('🌐 Loading cloud providers...');
-    
+
     const defaultProviders = [
       {
         name: 'AWS US East',
@@ -704,14 +752,24 @@ export class CloudOrchestrator extends EventEmitter {
               memory: { max: 100000, current: 0 },
               storage: { max: 1000000, current: 0 },
               network: { max: 100000, current: 0 },
-              instances: { max: 1000, current: 0 }
+              instances: { max: 1000, current: 0 },
             },
-            sla: { availability: 0.999, latency: 50, throughput: 10000, durability: 0.999999999 }
-          }
+            sla: {
+              availability: 0.999,
+              latency: 50,
+              throughput: 10000,
+              durability: 0.999999999,
+            },
+          },
         ],
         compliance: [
-          { framework: 'SOC2', level: 'Type II', certification: 'AWS-SOC2-2024', validUntil: new Date(2024, 11, 31) }
-        ]
+          {
+            framework: 'SOC2',
+            level: 'Type II',
+            certification: 'AWS-SOC2-2024',
+            validUntil: new Date(2024, 11, 31),
+          },
+        ],
       },
       {
         name: 'Azure West Europe',
@@ -728,20 +786,34 @@ export class CloudOrchestrator extends EventEmitter {
               memory: { max: 80000, current: 0 },
               storage: { max: 800000, current: 0 },
               network: { max: 80000, current: 0 },
-              instances: { max: 800, current: 0 }
+              instances: { max: 800, current: 0 },
             },
-            sla: { availability: 0.995, latency: 60, throughput: 8000, durability: 0.999999999 }
-          }
+            sla: {
+              availability: 0.995,
+              latency: 60,
+              throughput: 8000,
+              durability: 0.999999999,
+            },
+          },
         ],
         compliance: [
-          { framework: 'GDPR', level: 'Compliant', certification: 'AZURE-GDPR-2024', validUntil: new Date(2024, 11, 31) }
-        ]
+          {
+            framework: 'GDPR',
+            level: 'Compliant',
+            certification: 'AZURE-GDPR-2024',
+            validUntil: new Date(2024, 11, 31),
+          },
+        ],
       },
       {
         name: 'GCP Asia Pacific',
         type: 'GCP' as const,
         region: 'asia-southeast1',
-        availabilityZones: ['asia-southeast1-a', 'asia-southeast1-b', 'asia-southeast1-c'],
+        availabilityZones: [
+          'asia-southeast1-a',
+          'asia-southeast1-b',
+          'asia-southeast1-c',
+        ],
         capabilities: [
           {
             service: 'Compute Engine',
@@ -752,15 +824,25 @@ export class CloudOrchestrator extends EventEmitter {
               memory: { max: 120000, current: 0 },
               storage: { max: 1200000, current: 0 },
               network: { max: 120000, current: 0 },
-              instances: { max: 1200, current: 0 }
+              instances: { max: 1200, current: 0 },
             },
-            sla: { availability: 0.999, latency: 45, throughput: 12000, durability: 0.999999999 }
-          }
+            sla: {
+              availability: 0.999,
+              latency: 45,
+              throughput: 12000,
+              durability: 0.999999999,
+            },
+          },
         ],
         compliance: [
-          { framework: 'ISO27001', level: 'Certified', certification: 'GCP-ISO27001-2024', validUntil: new Date(2024, 11, 31) }
-        ]
-      }
+          {
+            framework: 'ISO27001',
+            level: 'Certified',
+            certification: 'GCP-ISO27001-2024',
+            validUntil: new Date(2024, 11, 31),
+          },
+        ],
+      },
     ];
 
     for (const config of defaultProviders) {
@@ -770,7 +852,7 @@ export class CloudOrchestrator extends EventEmitter {
 
   private async validateConnections(): Promise<void> {
     console.log('🔍 Validating cloud provider connections...');
-    
+
     for (const [id, provider] of this.providers) {
       try {
         const latency = await this.testProviderLatency(provider);
@@ -784,81 +866,99 @@ export class CloudOrchestrator extends EventEmitter {
     }
   }
 
-  private async testProviderConnection(provider: CloudProvider): Promise<boolean> {
+  private async testProviderConnection(
+    provider: CloudProvider,
+  ): Promise<boolean> {
     // Mock connection test
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 200));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 1000 + 200),
+    );
     return Math.random() > 0.05; // 95% success rate
   }
 
   private async testProviderLatency(provider: CloudProvider): Promise<number> {
     // Mock latency test
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     return Math.floor(Math.random() * 50) + 30; // 30-80ms
   }
 
   private getEligibleProviders(workload: WorkloadDefinition): CloudProvider[] {
-    return Array.from(this.providers.values()).filter(provider => {
+    return Array.from(this.providers.values()).filter((provider) => {
       // Check region constraints
-      if (workload.constraints.regions.length > 0 && 
-          !workload.constraints.regions.includes(provider.region)) {
+      if (
+        workload.constraints.regions.length > 0 &&
+        !workload.constraints.regions.includes(provider.region)
+      ) {
         return false;
       }
-      
+
       // Check provider constraints
-      if (workload.constraints.providers.length > 0 && 
-          !workload.constraints.providers.includes(provider.id)) {
+      if (
+        workload.constraints.providers.length > 0 &&
+        !workload.constraints.providers.includes(provider.id)
+      ) {
         return false;
       }
-      
+
       // Check compliance requirements
       const requiredCompliance = workload.requirements.compliance;
-      const providerCompliance = provider.compliance.map(c => c.framework);
-      
-      if (!requiredCompliance.every(req => providerCompliance.includes(req))) {
+      const providerCompliance = provider.compliance.map((c) => c.framework);
+
+      if (
+        !requiredCompliance.every((req) => providerCompliance.includes(req))
+      ) {
         return false;
       }
-      
+
       // Check resource availability
-      const capability = provider.capabilities.find(c => c.type === 'COMPUTE');
+      const capability = provider.capabilities.find(
+        (c) => c.type === 'COMPUTE',
+      );
       if (capability) {
         const available = {
           cpu: capability.limits.cpu.max - capability.limits.cpu.current,
-          memory: capability.limits.memory.max - capability.limits.memory.current
+          memory:
+            capability.limits.memory.max - capability.limits.memory.current,
         };
-        
-        if (available.cpu < workload.requirements.cpu.min || 
-            available.memory < workload.requirements.memory.min) {
+
+        if (
+          available.cpu < workload.requirements.cpu.min ||
+          available.memory < workload.requirements.memory.min
+        ) {
           return false;
         }
       }
-      
+
       return provider.status === 'ACTIVE';
     });
   }
 
-  private async assessDeploymentRisk(workload: WorkloadDefinition, allocation: ResourceAllocation[]): Promise<RiskAssessment> {
+  private async assessDeploymentRisk(
+    workload: WorkloadDefinition,
+    allocation: ResourceAllocation[],
+  ): Promise<RiskAssessment> {
     const factors: RiskFactor[] = [
       {
         category: 'Provider Dependency',
         description: 'Reliance on single cloud provider',
         probability: allocation.length === 1 ? 0.7 : 0.3,
         impact: 0.8,
-        severity: allocation.length === 1 ? 'HIGH' : 'MEDIUM'
+        severity: allocation.length === 1 ? 'HIGH' : 'MEDIUM',
       },
       {
         category: 'Resource Availability',
         description: 'Risk of resource exhaustion',
         probability: 0.2,
         impact: 0.6,
-        severity: 'MEDIUM'
+        severity: 'MEDIUM',
       },
       {
         category: 'Compliance',
         description: 'Regulatory compliance risk',
         probability: workload.requirements.compliance.length > 0 ? 0.1 : 0.05,
         impact: 0.9,
-        severity: 'MEDIUM'
-      }
+        severity: 'MEDIUM',
+      },
     ];
 
     const overallRisk = this.calculateOverallRisk(factors);
@@ -867,13 +967,19 @@ export class CloudOrchestrator extends EventEmitter {
       overallRisk,
       factors,
       mitigation: this.generateMitigation(factors),
-      contingencyPlans: this.generateContingencyPlans(factors)
+      contingencyPlans: this.generateContingencyPlans(factors),
     };
   }
 
-  private calculateOverallRisk(factors: RiskFactor[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const avgRisk = factors.reduce((sum, factor) => sum + (factor.probability * factor.impact), 0) / factors.length;
-    
+  private calculateOverallRisk(
+    factors: RiskFactor[],
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+    const avgRisk =
+      factors.reduce(
+        (sum, factor) => sum + factor.probability * factor.impact,
+        0,
+      ) / factors.length;
+
     if (avgRisk > 0.7) return 'CRITICAL';
     if (avgRisk > 0.5) return 'HIGH';
     if (avgRisk > 0.3) return 'MEDIUM';
@@ -881,11 +987,11 @@ export class CloudOrchestrator extends EventEmitter {
   }
 
   private generateMitigation(factors: RiskFactor[]): RiskMitigation[] {
-    return factors.map(factor => ({
+    return factors.map((factor) => ({
       riskId: factor.category,
       strategy: `Mitigate ${factor.category.toLowerCase()} risk`,
       implementation: `Implement controls for ${factor.description.toLowerCase()}`,
-      effectiveness: 0.8
+      effectiveness: 0.8,
     }));
   }
 
@@ -893,20 +999,31 @@ export class CloudOrchestrator extends EventEmitter {
     return [
       {
         trigger: 'Provider outage detected',
-        actions: ['Failover to backup provider', 'Notify operations team', 'Monitor service health'],
+        actions: [
+          'Failover to backup provider',
+          'Notify operations team',
+          'Monitor service health',
+        ],
         owner: 'DevOps Team',
-        priority: 1
+        priority: 1,
       },
       {
         trigger: 'Resource utilization > 90%',
-        actions: ['Scale resources automatically', 'Alert capacity planning team', 'Prepare additional capacity'],
+        actions: [
+          'Scale resources automatically',
+          'Alert capacity planning team',
+          'Prepare additional capacity',
+        ],
         owner: 'Platform Team',
-        priority: 2
-      }
+        priority: 2,
+      },
     ];
   }
 
-  private generateDeploymentTimeline(workload: WorkloadDefinition, allocation: ResourceAllocation[]): DeploymentTimeline {
+  private generateDeploymentTimeline(
+    workload: WorkloadDefinition,
+    allocation: ResourceAllocation[],
+  ): DeploymentTimeline {
     const phases: DeploymentPhase[] = [
       {
         name: 'Infrastructure Provisioning',
@@ -920,7 +1037,7 @@ export class CloudOrchestrator extends EventEmitter {
             type: 'INFRASTRUCTURE',
             duration: 180,
             prerequisites: [],
-            rollbackable: true
+            rollbackable: true,
           },
           {
             id: 'provision-network',
@@ -928,9 +1045,9 @@ export class CloudOrchestrator extends EventEmitter {
             type: 'NETWORK',
             duration: 120,
             prerequisites: [],
-            rollbackable: true
-          }
-        ]
+            rollbackable: true,
+          },
+        ],
       },
       {
         name: 'Application Deployment',
@@ -944,7 +1061,7 @@ export class CloudOrchestrator extends EventEmitter {
             type: 'APPLICATION',
             duration: 400,
             prerequisites: ['provision-compute'],
-            rollbackable: true
+            rollbackable: true,
           },
           {
             id: 'configure-monitoring',
@@ -952,9 +1069,9 @@ export class CloudOrchestrator extends EventEmitter {
             type: 'MONITORING',
             duration: 200,
             prerequisites: ['deploy-app'],
-            rollbackable: true
-          }
-        ]
+            rollbackable: true,
+          },
+        ],
       },
       {
         name: 'Health Check & Verification',
@@ -968,29 +1085,48 @@ export class CloudOrchestrator extends EventEmitter {
             type: 'VERIFICATION',
             duration: 300,
             prerequisites: ['deploy-app', 'configure-monitoring'],
-            rollbackable: false
-          }
-        ]
-      }
+            rollbackable: false,
+          },
+        ],
+      },
     ];
 
     return {
       estimatedDuration: phases.reduce((sum, phase) => sum + phase.duration, 0),
       phases,
-      criticalPath: ['Infrastructure Provisioning', 'Application Deployment', 'Health Check & Verification'],
+      criticalPath: [
+        'Infrastructure Provisioning',
+        'Application Deployment',
+        'Health Check & Verification',
+      ],
       dependencies: [
-        { source: 'Infrastructure Provisioning', target: 'Application Deployment', type: 'HARD', weight: 1 },
-        { source: 'Application Deployment', target: 'Health Check & Verification', type: 'HARD', weight: 1 }
-      ]
+        {
+          source: 'Infrastructure Provisioning',
+          target: 'Application Deployment',
+          type: 'HARD',
+          weight: 1,
+        },
+        {
+          source: 'Application Deployment',
+          target: 'Health Check & Verification',
+          type: 'HARD',
+          weight: 1,
+        },
+      ],
     };
   }
 
-  private async executeDeploymentTask(task: DeploymentTask, plan: DeploymentPlan): Promise<void> {
+  private async executeDeploymentTask(
+    task: DeploymentTask,
+    plan: DeploymentPlan,
+  ): Promise<void> {
     console.log(`     🔧 Executing task: ${task.name}...`);
-    
+
     // Mock task execution
-    await new Promise(resolve => setTimeout(resolve, Math.min(task.duration, 2000))); // Cap at 2s for demo
-    
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(task.duration, 2000)),
+    ); // Cap at 2s for demo
+
     const success = Math.random() > 0.05; // 95% success rate
     if (!success) {
       throw new Error(`Task ${task.name} failed`);
@@ -999,66 +1135,93 @@ export class CloudOrchestrator extends EventEmitter {
 
   private async rollbackDeployment(plan: DeploymentPlan): Promise<void> {
     console.log(`🔄 Rolling back deployment: ${plan.id}...`);
-    
+
     // Mock rollback process
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     plan.status = 'CANCELLED';
     this.emit('deploymentRolledBack', plan);
   }
 
-  private calculateScaledRequirements(workload: WorkloadDefinition, scaleFactor: number): WorkloadRequirements {
+  private calculateScaledRequirements(
+    workload: WorkloadDefinition,
+    scaleFactor: number,
+  ): WorkloadRequirements {
     const original = workload.requirements;
-    
+
     return {
       ...original,
       cpu: {
         min: Math.ceil(original.cpu.min * scaleFactor),
         max: Math.ceil(original.cpu.max * scaleFactor),
-        preferred: Math.ceil(original.cpu.preferred * scaleFactor)
+        preferred: Math.ceil(original.cpu.preferred * scaleFactor),
       },
       memory: {
         min: Math.ceil(original.memory.min * scaleFactor),
         max: Math.ceil(original.memory.max * scaleFactor),
-        preferred: Math.ceil(original.memory.preferred * scaleFactor)
-      }
+        preferred: Math.ceil(original.memory.preferred * scaleFactor),
+      },
     };
   }
 
   private async setupGlobalDistribution(): Promise<void> {
     console.log('🌍 Setting up global distribution...');
-    
+
     await this.setupGlobalDistribution({
       name: 'IntelGraph Global Distribution',
       regions: [
         {
           name: 'us-east-1',
-          providers: Array.from(this.providers.values()).filter(p => p.region.includes('east')).map(p => p.id),
+          providers: Array.from(this.providers.values())
+            .filter((p) => p.region.includes('east'))
+            .map((p) => p.id),
           weight: 0.4,
           primary: true,
           latency: 50,
-          capacity: { cpu: 10000, memory: 100000, storage: 1000000, network: 100000, utilizationTarget: 0.7 },
-          compliance: ['SOC2', 'FISMA']
+          capacity: {
+            cpu: 10000,
+            memory: 100000,
+            storage: 1000000,
+            network: 100000,
+            utilizationTarget: 0.7,
+          },
+          compliance: ['SOC2', 'FISMA'],
         },
         {
           name: 'west-europe',
-          providers: Array.from(this.providers.values()).filter(p => p.region.includes('europe')).map(p => p.id),
+          providers: Array.from(this.providers.values())
+            .filter((p) => p.region.includes('europe'))
+            .map((p) => p.id),
           weight: 0.35,
           primary: false,
           latency: 60,
-          capacity: { cpu: 8000, memory: 80000, storage: 800000, network: 80000, utilizationTarget: 0.7 },
-          compliance: ['GDPR', 'ISO27001']
+          capacity: {
+            cpu: 8000,
+            memory: 80000,
+            storage: 800000,
+            network: 80000,
+            utilizationTarget: 0.7,
+          },
+          compliance: ['GDPR', 'ISO27001'],
         },
         {
           name: 'asia-southeast1',
-          providers: Array.from(this.providers.values()).filter(p => p.region.includes('asia')).map(p => p.id),
+          providers: Array.from(this.providers.values())
+            .filter((p) => p.region.includes('asia'))
+            .map((p) => p.id),
           weight: 0.25,
           primary: false,
           latency: 45,
-          capacity: { cpu: 12000, memory: 120000, storage: 1200000, network: 120000, utilizationTarget: 0.7 },
-          compliance: ['ISO27001']
-        }
-      ]
+          capacity: {
+            cpu: 12000,
+            memory: 120000,
+            storage: 1200000,
+            network: 120000,
+            utilizationTarget: 0.7,
+          },
+          compliance: ['ISO27001'],
+        },
+      ],
     });
   }
 
@@ -1070,18 +1233,28 @@ export class CloudOrchestrator extends EventEmitter {
         weight: 0.4,
         primary: true,
         latency: 50,
-        capacity: { cpu: 1000, memory: 10000, storage: 100000, network: 10000, utilizationTarget: 0.7 },
-        compliance: ['SOC2']
-      }
+        capacity: {
+          cpu: 1000,
+          memory: 10000,
+          storage: 100000,
+          network: 10000,
+          utilizationTarget: 0.7,
+        },
+        compliance: ['SOC2'],
+      },
     ];
   }
 
-  private async configureReplication(distribution: GlobalDistribution): Promise<void> {
+  private async configureReplication(
+    distribution: GlobalDistribution,
+  ): Promise<void> {
     // Mock replication setup
     console.log('   🔄 Configuring cross-region replication...');
   }
 
-  private async configureLoadBalancing(distribution: GlobalDistribution): Promise<void> {
+  private async configureLoadBalancing(
+    distribution: GlobalDistribution,
+  ): Promise<void> {
     // Mock load balancing setup
     console.log('   ⚖️ Setting up global load balancing...');
   }
@@ -1099,9 +1272,9 @@ export class CloudOrchestrator extends EventEmitter {
     // Mock continuous optimization
     const optimizations = await this.optimizationEngine.findOptimizations(
       Array.from(this.workloads.values()),
-      Array.from(this.providers.values())
+      Array.from(this.providers.values()),
     );
-    
+
     if (optimizations.length > 0) {
       this.emit('optimizationsFound', optimizations);
     }
@@ -1117,18 +1290,27 @@ export class CloudOrchestrator extends EventEmitter {
       'Consider reserved instances for predictable workloads',
       'Implement auto-scaling to reduce over-provisioning',
       'Optimize storage tiers based on access patterns',
-      'Review data transfer costs between regions'
+      'Review data transfer costs between regions',
     ];
   }
 
   private generatePerformanceReport(): any {
     const providers = Array.from(this.providers.values());
-    
+
     return {
-      averageLatency: providers.reduce((sum, p) => sum + p.performance.latency.p50, 0) / providers.length,
-      averageAvailability: providers.reduce((sum, p) => sum + p.performance.availability, 0) / providers.length,
-      averageErrorRate: providers.reduce((sum, p) => sum + p.performance.errorRate, 0) / providers.length,
-      totalThroughput: providers.reduce((sum, p) => sum + p.performance.throughput.requests, 0)
+      averageLatency:
+        providers.reduce((sum, p) => sum + p.performance.latency.p50, 0) /
+        providers.length,
+      averageAvailability:
+        providers.reduce((sum, p) => sum + p.performance.availability, 0) /
+        providers.length,
+      averageErrorRate:
+        providers.reduce((sum, p) => sum + p.performance.errorRate, 0) /
+        providers.length,
+      totalThroughput: providers.reduce(
+        (sum, p) => sum + p.performance.throughput.requests,
+        0,
+      ),
     };
   }
 
@@ -1136,10 +1318,10 @@ export class CloudOrchestrator extends EventEmitter {
     return {
       type: 'ON_DEMAND',
       currency: 'USD',
-      compute: { perHour: 0.10, perGb: 0.05 },
+      compute: { perHour: 0.1, perGb: 0.05 },
       storage: { perGbMonth: 0.023, perOperation: 0.0004 },
       network: { perGb: 0.09, perRequest: 0.0000004 },
-      discounts: []
+      discounts: [],
     };
   }
 
@@ -1151,7 +1333,7 @@ export class CloudOrchestrator extends EventEmitter {
       network: { bandwidth: 1000, latency: 100 },
       availability: 0.99,
       durability: 0.999,
-      compliance: []
+      compliance: [],
     };
   }
 
@@ -1162,7 +1344,7 @@ export class CloudOrchestrator extends EventEmitter {
       costLimit: 1000,
       timeWindow: '30d',
       dataResidency: [],
-      securityLevel: 'STANDARD'
+      securityLevel: 'STANDARD',
     };
   }
 
@@ -1170,12 +1352,24 @@ export class CloudOrchestrator extends EventEmitter {
     return {
       type: 'AUTO',
       triggers: [
-        { metric: 'cpu', threshold: 80, operator: 'GT', duration: 300, action: 'SCALE_UP' },
-        { metric: 'cpu', threshold: 20, operator: 'LT', duration: 600, action: 'SCALE_DOWN' }
+        {
+          metric: 'cpu',
+          threshold: 80,
+          operator: 'GT',
+          duration: 300,
+          action: 'SCALE_UP',
+        },
+        {
+          metric: 'cpu',
+          threshold: 20,
+          operator: 'LT',
+          duration: 600,
+          action: 'SCALE_DOWN',
+        },
       ],
       limits: { min: 1, max: 10 },
       cooldown: 300,
-      strategy: 'HORIZONTAL'
+      strategy: 'HORIZONTAL',
     };
   }
 
@@ -1187,7 +1381,7 @@ export class CloudOrchestrator extends EventEmitter {
       timeout: 5,
       retries: 3,
       successThreshold: 1,
-      failureThreshold: 3
+      failureThreshold: 3,
     };
   }
 
@@ -1199,9 +1393,9 @@ export class CloudOrchestrator extends EventEmitter {
         enabled: true,
         triggerConditions: ['health_check_failure', 'error_rate_high'],
         maxRetries: 3,
-        backoffStrategy: 'exponential'
+        backoffStrategy: 'exponential',
       },
-      progressDeadline: 1200
+      progressDeadline: 1200,
     };
   }
 
@@ -1214,25 +1408,25 @@ export class CloudOrchestrator extends EventEmitter {
           condition: 'error_rate > 0.05',
           severity: 'WARNING',
           channels: ['email', 'slack'],
-          suppressDuration: 300
-        }
+          suppressDuration: 300,
+        },
       ],
       logging: {
         level: 'INFO',
         retention: 30,
         destinations: ['stdout', 'elasticsearch'],
-        sampling: 1.0
+        sampling: 1.0,
       },
       tracing: {
         enabled: true,
         samplingRate: 0.1,
-        traceIdHeader: 'X-Trace-Id'
+        traceIdHeader: 'X-Trace-Id',
       },
       dashboard: {
         enabled: true,
         panels: [],
-        refreshInterval: 30
-      }
+        refreshInterval: 30,
+      },
     };
   }
 
@@ -1242,7 +1436,9 @@ export class CloudOrchestrator extends EventEmitter {
   }
 
   getActiveProviders(): CloudProvider[] {
-    return Array.from(this.providers.values()).filter(p => p.status === 'ACTIVE');
+    return Array.from(this.providers.values()).filter(
+      (p) => p.status === 'ACTIVE',
+    );
   }
 
   getWorkloadCount(): number {
@@ -1260,23 +1456,30 @@ export class CloudOrchestrator extends EventEmitter {
 
 // Helper classes
 class CloudOptimizer {
-  async calculateOptimalAllocation(workload: WorkloadDefinition, providers: CloudProvider[]): Promise<ResourceAllocation[]> {
+  async calculateOptimalAllocation(
+    workload: WorkloadDefinition,
+    providers: CloudProvider[],
+  ): Promise<ResourceAllocation[]> {
     // Mock optimization algorithm
     const allocations: ResourceAllocation[] = [];
-    
+
     // Select top providers based on performance and cost
-    const sortedProviders = providers.sort((a, b) => 
-      (b.performance.availability * 1000 - b.pricing.compute.perHour) - 
-      (a.performance.availability * 1000 - a.pricing.compute.perHour)
+    const sortedProviders = providers.sort(
+      (a, b) =>
+        b.performance.availability * 1000 -
+        b.pricing.compute.perHour -
+        (a.performance.availability * 1000 - a.pricing.compute.perHour),
     );
-    
+
     // Distribute workload across providers
     let remainingPercentage = 100;
     for (let i = 0; i < Math.min(3, sortedProviders.length); i++) {
       const provider = sortedProviders[i];
-      const percentage = i === sortedProviders.length - 1 ? remainingPercentage : 
-                        Math.floor(remainingPercentage * (0.6 - i * 0.2));
-      
+      const percentage =
+        i === sortedProviders.length - 1
+          ? remainingPercentage
+          : Math.floor(remainingPercentage * (0.6 - i * 0.2));
+
       if (percentage > 0) {
         allocations.push({
           providerId: provider.id,
@@ -1284,35 +1487,44 @@ class CloudOptimizer {
           resources: [
             {
               type: 'COMPUTE',
-              quantity: Math.ceil(workload.requirements.cpu.preferred * percentage / 100),
+              quantity: Math.ceil(
+                (workload.requirements.cpu.preferred * percentage) / 100,
+              ),
               specification: 'standard',
-              estimatedCost: provider.pricing.compute.perHour * 24 * 30 * percentage / 100
-            }
+              estimatedCost:
+                (provider.pricing.compute.perHour * 24 * 30 * percentage) / 100,
+            },
           ],
           percentage: percentage,
-          priority: i + 1
+          priority: i + 1,
         });
-        
+
         remainingPercentage -= percentage;
       }
     }
-    
+
     return allocations;
   }
 
-  async findOptimizations(workloads: WorkloadDefinition[], providers: CloudProvider[]): Promise<any[]> {
+  async findOptimizations(
+    workloads: WorkloadDefinition[],
+    providers: CloudProvider[],
+  ): Promise<any[]> {
     // Mock optimization finding
     return [];
   }
 }
 
 class CostTracker {
-  async estimateCosts(allocation: ResourceAllocation[], workload: WorkloadDefinition): Promise<CostEstimate> {
-    const breakdown: CostBreakdown[] = allocation.map(alloc => ({
+  async estimateCosts(
+    allocation: ResourceAllocation[],
+    workload: WorkloadDefinition,
+  ): Promise<CostEstimate> {
+    const breakdown: CostBreakdown[] = allocation.map((alloc) => ({
       category: 'COMPUTE',
       providerId: alloc.providerId,
       amount: alloc.resources.reduce((sum, res) => sum + res.estimatedCost, 0),
-      details: `${alloc.percentage}% allocation`
+      details: `${alloc.percentage}% allocation`,
     }));
 
     const total = breakdown.reduce((sum, item) => sum + item.amount, 0);
@@ -1322,7 +1534,7 @@ class CostTracker {
       period: 'monthly',
       breakdown,
       total,
-      confidence: 0.85
+      confidence: 0.85,
     };
   }
 
@@ -1334,8 +1546,8 @@ class CostTracker {
         compute: 0.6,
         storage: 0.2,
         network: 0.15,
-        other: 0.05
-      }
+        other: 0.05,
+      },
     };
   }
 }
@@ -1345,13 +1557,13 @@ class ComplianceValidator {
     return {
       overallScore: Math.floor(Math.random() * 10) + 90, // 90-100%
       frameworks: {
-        'SOC2': 'COMPLIANT',
-        'GDPR': 'COMPLIANT',
-        'ISO27001': 'COMPLIANT',
-        'FISMA': 'PARTIAL'
+        SOC2: 'COMPLIANT',
+        GDPR: 'COMPLIANT',
+        ISO27001: 'COMPLIANT',
+        FISMA: 'PARTIAL',
       },
       violations: Math.floor(Math.random() * 3),
-      lastAssessment: new Date()
+      lastAssessment: new Date(),
     };
   }
 }

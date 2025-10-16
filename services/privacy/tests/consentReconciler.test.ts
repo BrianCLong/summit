@@ -20,7 +20,10 @@ describe('ConsentReconciler', () => {
     lawfulBasis: 'consent',
     purposes: ['analytics', 'marketing'],
     proof: 'doc-123',
-    retention: { expiresAt: '2026-01-01T00:00:00.000Z', policyReference: 'ret-1' },
+    retention: {
+      expiresAt: '2026-01-01T00:00:00.000Z',
+      policyReference: 'ret-1',
+    },
     metadata: { ccpaNoticeProvided: true },
     preferences: { email: true, sms: false },
   };
@@ -45,7 +48,9 @@ describe('ConsentReconciler', () => {
       purposes: ['analytics'],
     };
 
-    const api = createApiMock({ fetchConsent: jest.fn().mockResolvedValue(existingRecord) });
+    const api = createApiMock({
+      fetchConsent: jest.fn().mockResolvedValue(existingRecord),
+    });
 
     const snapshots: ConsentStateSnapshot[] = [
       baseSnapshot,
@@ -79,17 +84,31 @@ describe('ConsentReconciler', () => {
         consentId: 'consent-1',
         version: 4,
         canonicalSource: 'identity-core',
-        sources: expect.arrayContaining(['identity-core', 'legacy-crm', 'edge-cache']),
+        sources: expect.arrayContaining([
+          'identity-core',
+          'legacy-crm',
+          'edge-cache',
+        ]),
         purposes: ['analytics', 'marketing'],
       }),
     );
 
-    const auditEntries = (api.recordAuditTrail as jest.Mock).mock.calls.map((call) => call[0]);
+    const auditEntries = (api.recordAuditTrail as jest.Mock).mock.calls.map(
+      (call) => call[0],
+    );
     expect(auditEntries.length).toBe(result.auditTrail.length);
-    expect(auditEntries[0]).toMatchObject({ action: 'RECONCILE', actor: 'unit-test' });
+    expect(auditEntries[0]).toMatchObject({
+      action: 'RECONCILE',
+      actor: 'unit-test',
+    });
     expect(result.driftFindings.length).toBeGreaterThanOrEqual(1);
-    expect(result.updatesRequired).toEqual(expect.arrayContaining(['legacy-crm', 'edge-cache']));
-    expect(api.publishDrift).toHaveBeenCalledWith('consent-1', result.driftFindings as ConsentDriftFinding[]);
+    expect(result.updatesRequired).toEqual(
+      expect.arrayContaining(['legacy-crm', 'edge-cache']),
+    );
+    expect(api.publishDrift).toHaveBeenCalledWith(
+      'consent-1',
+      result.driftFindings as ConsentDriftFinding[],
+    );
     expect(result.compliance.isCompliant).toBe(true);
   });
 
@@ -127,7 +146,9 @@ describe('ConsentReconciler', () => {
       .map((call) => call[0])
       .find((entry) => entry.action === 'COMPLIANCE_ALERT');
     expect(complianceEntry).toBeDefined();
-    expect(complianceEntry?.details?.issues).toHaveLength(result.compliance.issues.length);
+    expect(complianceEntry?.details?.issues).toHaveLength(
+      result.compliance.issues.length,
+    );
   });
 });
 
@@ -159,13 +180,21 @@ describe('HttpConsentApiClient', () => {
   it('performs CRUD operations against the consent API', async () => {
     const axiosStub = makeAxiosStub();
     (axiosStub.get as jest.Mock).mockResolvedValue({ data: sampleRecord });
-    const client = new HttpConsentApiClient({ baseUrl: 'https://privacy.example.com' }, axiosStub);
+    const client = new HttpConsentApiClient(
+      { baseUrl: 'https://privacy.example.com' },
+      axiosStub,
+    );
 
-    await expect(client.fetchConsent('consent-3')).resolves.toEqual(sampleRecord);
+    await expect(client.fetchConsent('consent-3')).resolves.toEqual(
+      sampleRecord,
+    );
     expect(axiosStub.get).toHaveBeenCalledWith('/consents/consent-3');
 
     await client.upsertConsent(sampleRecord);
-    expect(axiosStub.put).toHaveBeenCalledWith('/consents/consent-3', sampleRecord);
+    expect(axiosStub.put).toHaveBeenCalledWith(
+      '/consents/consent-3',
+      sampleRecord,
+    );
 
     const auditEntry = {
       consentId: 'consent-3',
@@ -175,7 +204,10 @@ describe('HttpConsentApiClient', () => {
       summary: 'Reconciled',
     };
     await client.recordAuditTrail(auditEntry);
-    expect(axiosStub.post).toHaveBeenCalledWith('/consents/consent-3/audit', auditEntry);
+    expect(axiosStub.post).toHaveBeenCalledWith(
+      '/consents/consent-3/audit',
+      auditEntry,
+    );
 
     const findings: ConsentDriftFinding[] = [
       {
@@ -185,7 +217,9 @@ describe('HttpConsentApiClient', () => {
       },
     ];
     await client.publishDrift('consent-3', findings);
-    expect(axiosStub.post).toHaveBeenCalledWith('/consents/consent-3/drift', { findings });
+    expect(axiosStub.post).toHaveBeenCalledWith('/consents/consent-3/drift', {
+      findings,
+    });
   });
 
   it('returns null when the API responds with 404', async () => {
@@ -196,7 +230,10 @@ describe('HttpConsentApiClient', () => {
     });
     (axiosStub.get as jest.Mock).mockRejectedValue(notFoundError);
 
-    const client = new HttpConsentApiClient({ baseUrl: 'https://privacy.example.com' }, axiosStub);
+    const client = new HttpConsentApiClient(
+      { baseUrl: 'https://privacy.example.com' },
+      axiosStub,
+    );
     await expect(client.fetchConsent('missing')).resolves.toBeNull();
   });
 });

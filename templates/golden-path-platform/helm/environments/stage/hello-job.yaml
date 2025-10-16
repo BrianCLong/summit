@@ -1,5 +1,5 @@
 image:
   tag: stage
-schedule: "*/2 * * * *"
+schedule: '*/2 * * * *'
 serviceAccount:
   roleArn: arn:aws:iam::123456789012:role/golden-path-stage-job

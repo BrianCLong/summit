@@ -7,7 +7,7 @@ const tracer = trace.getTracer('redaction', '24.2.0');
 const redactionApplied = new Counter({
   name: 'redaction_applied_total',
   help: 'Total field redactions applied',
-  labelNames: ['tenant_id', 'field', 'rule']
+  labelNames: ['tenant_id', 'field', 'rule'],
 });
 
 type RedactionRule = 'pii' | 'financial' | 'sensitive' | 'k_anon';
@@ -28,26 +28,26 @@ interface FieldMetadata {
 
 const FIELD_METADATA: Record<string, FieldMetadata> = {
   // Sensitive fields that may need redaction
-  'email': { type: 'string', pii: true },
-  'phone': { type: 'string', pii: true },
-  'ssn': { type: 'string', pii: true },
-  'creditCard': { type: 'string', financial: true },
-  'bankAccount': { type: 'string', financial: true },
-  'ip': { type: 'string', sensitive: true },
-  'location': { type: 'object', sensitive: true },
-  'userId': { type: 'string', sensitive: true },
-  'sessionId': { type: 'string', sensitive: true },
-  
+  email: { type: 'string', pii: true },
+  phone: { type: 'string', pii: true },
+  ssn: { type: 'string', pii: true },
+  creditCard: { type: 'string', financial: true },
+  bankAccount: { type: 'string', financial: true },
+  ip: { type: 'string', sensitive: true },
+  location: { type: 'object', sensitive: true },
+  userId: { type: 'string', sensitive: true },
+  sessionId: { type: 'string', sensitive: true },
+
   // Standard fields that are usually safe
-  'id': { type: 'string' },
-  'type': { type: 'string' },
-  'value': { type: 'number' },
-  'timestamp': { type: 'string' },
-  'source': { type: 'string' },
-  'weight': { type: 'number' },
-  'score': { type: 'number' },
-  'status': { type: 'string' },
-  'tenantId': { type: 'string' }
+  id: { type: 'string' },
+  type: { type: 'string' },
+  value: { type: 'number' },
+  timestamp: { type: 'string' },
+  source: { type: 'string' },
+  weight: { type: 'number' },
+  score: { type: 'number' },
+  status: { type: 'string' },
+  tenantId: { type: 'string' },
 };
 
 export class RedactionService {
@@ -57,33 +57,41 @@ export class RedactionService {
     obj: any,
     policy: RedactionPolicy,
     tenantId: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<any> {
-    return tracer.startActiveSpan('redaction.redact_object', async (span: Span) => {
-      span.setAttributes({
-        'tenant_id': tenantId,
-        'rules': policy.rules.join(','),
-        'has_k_anon': !!policy.kAnonThreshold
-      });
+    return tracer.startActiveSpan(
+      'redaction.redact_object',
+      async (span: Span) => {
+        span.setAttributes({
+          tenant_id: tenantId,
+          rules: policy.rules.join(','),
+          has_k_anon: !!policy.kAnonThreshold,
+        });
 
-      try {
-        const redacted = await this.processObject(obj, policy, tenantId, context);
-        return redacted;
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+        try {
+          const redacted = await this.processObject(
+            obj,
+            policy,
+            tenantId,
+            context,
+          );
+          return redacted;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setStatus({ code: 2, message: (error as Error).message });
+          throw error;
+        } finally {
+          span.end();
+        }
+      },
+    );
   }
 
   private async processObject(
     obj: any,
     policy: RedactionPolicy,
     tenantId: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<any> {
     if (obj === null || obj === undefined) {
       return obj;
@@ -91,7 +99,7 @@ export class RedactionService {
 
     if (Array.isArray(obj)) {
       return Promise.all(
-        obj.map(item => this.processObject(item, policy, tenantId, context))
+        obj.map((item) => this.processObject(item, policy, tenantId, context)),
       );
     }
 
@@ -103,19 +111,29 @@ export class RedactionService {
 
     for (const [field, value] of Object.entries(obj)) {
       const shouldRedact = this.shouldRedactField(field, policy);
-      
+
       if (shouldRedact) {
         const redactionRule = this.getApplicableRule(field, policy);
-        result[field] = this.applyRedaction(field, value, redactionRule, policy);
-        
-        redactionApplied.inc({ 
-          tenant_id: tenantId, 
-          field, 
-          rule: redactionRule 
+        result[field] = this.applyRedaction(
+          field,
+          value,
+          redactionRule,
+          policy,
+        );
+
+        redactionApplied.inc({
+          tenant_id: tenantId,
+          field,
+          rule: redactionRule,
         });
       } else if (typeof value === 'object' && value !== null) {
         // Recursively process nested objects
-        result[field] = await this.processObject(value, policy, tenantId, context);
+        result[field] = await this.processObject(
+          value,
+          policy,
+          tenantId,
+          context,
+        );
       } else {
         result[field] = value;
       }
@@ -141,7 +159,7 @@ export class RedactionService {
     }
 
     // Check if any policy rule applies to this field
-    return policy.rules.some(rule => {
+    return policy.rules.some((rule) => {
       switch (rule) {
         case 'pii':
           return metadata.pii === true;
@@ -180,7 +198,7 @@ export class RedactionService {
     field: string,
     value: any,
     rule: string,
-    policy: RedactionPolicy
+    policy: RedactionPolicy,
   ): any {
     const mask = policy.redactionMask || this.defaultMask;
 
@@ -212,16 +230,16 @@ export class RedactionService {
         // Partial redaction for PII (show first/last chars)
         if (value.length <= 4) return mask;
         return value.charAt(0) + mask + value.charAt(value.length - 1);
-      
+
       case 'financial':
         // Show only last 4 digits for financial data
         if (value.length <= 4) return mask;
         return mask + value.slice(-4);
-      
+
       case 'sensitive':
         // Full redaction for sensitive data
         return mask;
-      
+
       default:
         return mask;
     }
@@ -248,14 +266,14 @@ export class RedactionService {
     const kAnonFields = ['location', 'age', 'category'];
     const result = { ...obj };
 
-    kAnonFields.forEach(field => {
+    kAnonFields.forEach((field) => {
       if (result[field]) {
         // Generalize the field to maintain k-anonymity
         result[field] = this.generalizeField(result[field], threshold);
-        redactionApplied.inc({ 
-          tenant_id: tenantId, 
-          field, 
-          rule: 'k_anon' 
+        redactionApplied.inc({
+          tenant_id: tenantId,
+          field,
+          rule: 'k_anon',
         });
       }
     });
@@ -281,7 +299,7 @@ export class RedactionService {
   async redactGraphQLResponse(
     response: any,
     policy: RedactionPolicy,
-    tenantId: string
+    tenantId: string,
   ): Promise<any> {
     if (!response || !response.data) {
       return response;
@@ -289,20 +307,23 @@ export class RedactionService {
 
     return {
       ...response,
-      data: await this.redactObject(response.data, policy, tenantId)
+      data: await this.redactObject(response.data, policy, tenantId),
     };
   }
 
-  createRedactionPolicy(rules: RedactionRule[], options?: {
-    kAnonThreshold?: number;
-    allowedFields?: string[];
-    redactionMask?: string;
-  }): RedactionPolicy {
+  createRedactionPolicy(
+    rules: RedactionRule[],
+    options?: {
+      kAnonThreshold?: number;
+      allowedFields?: string[];
+      redactionMask?: string;
+    },
+  ): RedactionPolicy {
     return {
       rules,
       kAnonThreshold: options?.kAnonThreshold,
       allowedFields: options?.allowedFields,
-      redactionMask: options?.redactionMask
+      redactionMask: options?.redactionMask,
     };
   }
 
@@ -311,7 +332,7 @@ export class RedactionService {
       supportedRules: ['pii', 'financial', 'sensitive', 'k_anon'],
       defaultMask: this.defaultMask,
       fieldsWithMetadata: Object.keys(FIELD_METADATA).length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

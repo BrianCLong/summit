@@ -9,6 +9,7 @@
 ---
 
 ## Executive Summary
+
 We’re in a strong build-out phase with many of the right primitives already present in the repo: policy/controls, provenance/evidence, observability/alerting, CI/CD hooks, connectors, a workflow surface (Switchboard/Conductor UI), data pipelines, and packaging scaffolding (charts/deploy). The next two phases—**MVP‑2** and **GA**—should lock in zero‑trust policy gates, provenance receipts on all privileged flows, p95 performance on a realistic multi‑tenant graph, and cost attribution with per‑tenant finops dashboards. GA should add hosted SaaS hardening, compliance packs, and white‑label kit readiness.
 
 This document provides a 360° PRD + Spec and a concrete execution plan that maps onto the current repository structure.
@@ -16,9 +17,11 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Where We Are (Current State Assessment)
+
 > Snapshot derived from the current repository structure, scripts, and conventions.
 
 ### Codebase Shape (selected top‑level dirs)
+
 - **`companyos/`** — Core platform logic (graph/entities, workflow, policy hooks) — foundation for Internal Platform & SaaS.
 - **`conductor-ui/`, `dashboard/`, `apps/`, `client/`** — User surfaces (Switchboard-style tri‑pane UX, ops dashboards, clients/SDKs).
 - **`api/`, `apis/`, `contracts/`** — HTTP/JSON and typed interfaces; good base to converge to OAS3 and SDK generation.
@@ -32,6 +35,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 - **`brands/`, `compose/`** — Theming/brand and local stack orchestration.
 
 ### Strengths
+
 - Zero‑trust mindset evident (controls, security, audits present).
 - Provenance-first artifacts exist; the schema/coverage needs to be standardized and enforced.
 - Multi‑tenant intent present (dashboards, connectors, cost awareness hooks in analytics/finops scaffolding).
@@ -39,6 +43,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 - UI surfaces for Switchboard/Conductor and Ops dashboards exist; need consolidation & polish.
 
 ### Gaps / Risks
+
 - **Policy Coverage:** Not all privileged flows appear to be policy‑gated with OPA/ABAC and preflight simulation.
 - **Provenance Coverage:** Evidence/Receipt emission likely partial; needs universal coverage + signing/notary.
 - **Performance:** Target p95 <1.5s on 50k‑node graph not yet demonstrated with exemplars + perf gates.
@@ -51,6 +56,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## North Star & SLOs
+
 - **North Star:** Operate Summit on CompanyOS + Switchboard internally, then externalize as white‑label + hosted SaaS without sacrificing zero‑trust, provenance, or margin.
 - **SLOs (Phase Targets):**
   - **MVP‑2:** p95 < 1.5s across 6 critical flows on a 50k‑node multi‑tenant graph; p99 error rate <0.5%.
@@ -59,12 +65,15 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## MVP‑2 — Product Requirements (PRD)
+
 ### Users & Jobs
+
 - **Internal Operators:** run the business, approve high‑risk ops with rationale, incident mgmt, runbooks.
 - **Builders/Analysts:** author policies, model entities/relationships, query lineage, explore graph.
 - **Partners (early):** try white‑label kit, theme the UI, integrate identity/storage.
 
 ### In‑Scope
+
 1. **Policy Layer (OPA/ABAC) v1.0**
    - Role/attribute catalogs; environment‑scoped attributes; preflight policy simulation.
    - Git‑versioned policy bundle with regression suite; policy decision logging.
@@ -84,11 +93,13 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
    - SBOMs + SLSA attestations, image signing (cosign), policy‑gated deploys.
 
 ### Out‑of‑Scope (MVP‑2)
+
 - Hosted SaaS billing + payments integration.
 - Advanced data residency/sharding and BYOK; these land in GA.
 - Marketplace of connectors (keep a minimal set for now).
 
 ### Acceptance Criteria (MVP‑2)
+
 - **Policy:** ≥90% of privileged endpoints/actions call OPA; simulation CLI returns PASS/FAIL; decisions are logged and queryable.
 - **Provenance:** 100% of privileged flows emit signed receipts to ledger; selective‑disclosure endpoint returns redacted proofs.
 - **Perf:** Perf harness run on 50k‑node, 10‑tenant dataset; p95<1.5s across: create‑entity, grant‑entitlement, run‑workflow, approval, policy‑simulate, provenance‑fetch.
@@ -99,7 +110,9 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## GA — Product Requirements (PRD)
+
 ### Additional In‑Scope
+
 1. **Hosted SaaS Hardening**
    - Multi‑tenant isolation enforcement (namespaces/quotas/ABAC); DR playbooks with automated drills; chaos tests.
 2. **Compliance Packs**
@@ -112,6 +125,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
    - Region tags, residency policies, KMS rotation, customer‑managed keys (BYOK) for Enterprise.
 
 ### Acceptance Criteria (GA)
+
 - **Reliability:** API uptime ≥99.9% measured over 30d; RPO ≤15m, RTO ≤60m validated in drills with evidence.
 - **Security:** Zero critical vulns; least‑privilege IAM; dual‑control deletes.
 - **Provenance:** Evidence bundles exportable; verify receipts across 100% of admin flows.
@@ -121,7 +135,9 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## System Specification (Design & Implementation Plan)
+
 ### 1) Reference Architecture
+
 - **Core:** CompanyOS (graph engine + policy layer + provenance ledger) exposed via APIs.
 - **Switchboard:** Conductor‑style UI: tri‑pane (Graph / Timeline / Map), command palette, approvals & rationale, incident/runbook center.
 - **Policy:** OPA sidecar or library, ABAC; policy bundles shipped with app; policy simulator endpoint + CLI.
@@ -132,11 +148,13 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 - **Identity:** OIDC/OAuth2; SCIM for provisioning; JIT claims mapping to ABAC.
 
 ### 2) Data Model (Sketch)
+
 - **Entities:** `Person`, `Company`, `Asset`, `Workflow`, `Policy`, `Receipt`, `EvidenceBundle`, `Tenant`, `Invoice`, `Runbook`, `Incident`.
 - **Edges/Lineage:** `OWNS`, `MEMBER_OF`, `ENTITLED_TO`, `TRIGGERS`, `EMITS`, `GOVERNS`, `BILLS_TO`.
 - **Receipts:** `{id, actor, action, target, policy_decision, evidence_refs[], hash, signature, timestamp, tenant}`.
 
 ### 3) APIs (OAS3 Targets)
+
 - **/auth/** — OIDC callback, token exchange.
 - **/entities/** — CRUD + lineage; batch ingest.
 - **/policy/** — simulate (dry‑run), decision logs, bundle version.
@@ -147,31 +165,37 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 - **/admin/** — purge request (with dual‑control), export evidence bundles.
 
 ### 4) Policy Bundle (OPA/ABAC)
+
 - **Catalogs:** roles (Admin, Operator, Approver, Auditor, Partner), attributes (env, tenant_id, data_class, region).
 - **Coverage:** privileged flows (authz, approvals, deletions, export, policy changes) must call OPA.
 - **Simulation Harness:** load fixtures, run query set, diff against golden outputs; regression required to merge.
 
 ### 5) Provenance Ledger
+
 - **Emitters:** middleware wraps privileged endpoints to emit receipts.
 - **Signing:** cosign or KMS (per‑env keys); receipts are hashed and signed; optional timestamping via external notary.
 - **Selective Disclosure:** redact fields based on viewer attributes; produce verifiable proofs.
 
 ### 6) Observability & SLOs
+
 - **Dashboards:** latency/error by flow; policy decision rates; receipt emission rates; per‑tenant usage.
 - **Alerting:** SLO burn alerts; missing‑receipt detector; policy‑denial spikes; DR drill reminders.
 - **Perf Harness:** `benchmarks/harness` with 50k‑node, 10‑tenant synthetic data; CI gate with thresholds.
 
 ### 7) FinOps & Billing
+
 - **Metering:** interceptors write standardized usage records.
 - **Attribution:** cost model: infra (compute/storage/network) + 3rd‑party (LLM/api) → split per tenant via usage keys.
 - **Dashboards:** tenant cost, unit economics; export CSV; pricing tier simulator.
 - **Billing Hooks:** Webhook to invoicing; not in MVP‑2 scope to charge, only generate artifacts.
 
 ### 8) Tenancy & Isolation
+
 - **Hard Boundaries:** tenant_id in every table/index; namespace per tenant; resource quotas; secret scoping.
 - **Tests:** policy tests prevent cross‑tenant reads; chaos test simulates noisy neighbor.
 
 ### 9) Packaging & Deployment
+
 - **Helm Charts:** values for single‑tenant (internal) and multi‑tenant (SaaS beta); feature flags.
 - **Terraform:** modules for core infra, identity, storage, monitoring.
 - **Release Train:** canary + ramp controller; freeze windows; automated rollbacks; provenance attached to releases.
@@ -179,6 +203,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Mapping Plan → Repository
+
 - **Policies:** `controls/` → organize OPA bundles; add `controls/tests/` with fixtures + regressions.
 - **Provenance:** `.evidence/`, `audit/` → introduce canonical `schemas/receipt.json`, `schemas/evidence.json`.
 - **Perf:** `benchmarks/harness/` → standard 50k‑node dataset; CI job; artifacts in `artifacts/benchmarks/`.
@@ -192,9 +217,11 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Deliverables (Definition of Done)
+
 **Every feature is “done” only with:** tests, policies, dashboards, docs, and provenance receipts.
 
 ### MVP‑2 DoD
+
 - Policy bundle + simulator + ≥90% coverage (privileged flows).
 - Receipts on 100% of privileged flows with signed hashes.
 - SLO dashboards + probes; perf harness gates; error budget policy.
@@ -203,6 +230,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 - SBOM + SLSA + signed images; policy‑gated deploys.
 
 ### GA DoD
+
 - DR drill evidence; purge manifest E2E; data residency toggles.
 - Cost attribution ≥95% accuracy; pricing tiers in docs; invoice hooks.
 - White‑label kit shipped (themes, policy profiles, sample tenant export/import).
@@ -211,24 +239,29 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Work Plan & Milestones (90 Days)
+
 ### Sprint 1–2 (Weeks 1–4)
+
 - Policy bundle v1 + simulator harness; gate merges on policy coverage.
 - Provenance middleware + schemas; sign receipts; evidence viewer API.
 - OAS canonicalization + TS SDK generation; contract tests in CI.
 - Perf harness scaffolding; create 50k‑node dataset; baseline p95 numbers.
 
 ### Sprint 3–4 (Weeks 5–8)
+
 - Observability pack: dashboards + alert rules; synthetic probes; trace exemplars.
 - FinOps metering schema + pipeline; basic tenant cost dashboard.
 - UI Approvals & Rationale Center; incident/runbook hub MVP.
 - Helm/Terraform installation flow; seed data + sample policies.
 
 ### Sprint 5–6 (Weeks 9–12) — MVP‑2 Cut
+
 - Perf tuning to hit p95<1.5s; error budget policy live.
 - Policy coverage audit; provenance coverage audit; close gaps.
 - Docs: runbooks, policy cookbook, API handbook, quickstart.
 
 ### Sprint 7–9 (Weeks 13–18) — Toward GA
+
 - DR drills + evidence; purge manifest E2E; chaos tests.
 - Data residency flags; BYOK hooks; multi‑region ref arch.
 - FinOps accuracy to ≥95%; pricing tiers + invoice hooks.
@@ -237,6 +270,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Acceptance Tests (Samples)
+
 - **AT‑POL‑001:** Changing any `controls/*.rego` re‑runs simulation; merge blocked if regressions.
 - **AT‑PROV‑003:** Deleting an entity emits receipt with dual‑control approval and signature.
 - **AT‑PERF‑002:** Under 10 concurrent tenants, 500 rps mix, p95 across 6 flows <1.5s.
@@ -246,6 +280,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Security Posture Enhancements
+
 - Least‑privilege IAM maps; environment‑scoped secrets; rotation schedule.
 - Dual‑control deletes & exports; policy‑gated deploys; kill‑switches.
 - SBOM per image; SLSA level targets; vulnerability budget zero for criticals.
@@ -254,6 +289,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Docs & Packaging to Ship
+
 - **Reference Architecture** diagrams + trust boundaries + cost profiles.
 - **OPA/ABAC Policy Bundle** cookbook + role/attribute catalogs.
 - **Provenance Ledger** schema guide + selective disclosure explainer.
@@ -266,6 +302,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Backlog (Prioritized)
+
 1. Policy preflight & coverage reporter
 2. Receipt signer + viewer API + redaction proofs
 3. OpenAPI canonical spec + SDK generator
@@ -280,6 +317,7 @@ This document provides a 360° PRD + Spec and a concrete execution plan that map
 ---
 
 ## Changelog Template (keep with every merge)
+
 ```
 Feature: <name>
 Scope: <module>
@@ -290,4 +328,3 @@ Security: <SBOM/SLSA status>
 Docs: <runbooks/handbooks updated>
 Cost: <COGS delta, metering keys>
 ```
-

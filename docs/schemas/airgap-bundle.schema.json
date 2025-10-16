@@ -5,12 +5,48 @@
   "type": "object",
   "required": ["manifestVersion", "artifacts", "policies", "signatures"],
   "properties": {
-    "manifestVersion": {"type": "string", "enum": ["1"]},
-    "source": {"type": "string"},
-    "artifacts": {"type": "array", "items": {"type": "object", "required": ["digest", "type"], "properties": {"digest": {"type": "string"}, "type": {"type": "string"}, "sbom": {"type": "string"}}}},
-    "toolchains": {"type": "array", "items": {"type": "object", "required": ["name", "digest"], "properties": {"name": {"type": "string"}, "digest": {"type": "string"}}}},
-    "policies": {"type": "object", "properties": {"residency": {"type": "string"}, "exportControlProfile": {"type": "string"}}},
-    "signatures": {"type": "array", "items": {"type": "object", "required": ["key", "sig"], "properties": {"key": {"type": "string"}, "sig": {"type": "string"}}}}
+    "manifestVersion": { "type": "string", "enum": ["1"] },
+    "source": { "type": "string" },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["digest", "type"],
+        "properties": {
+          "digest": { "type": "string" },
+          "type": { "type": "string" },
+          "sbom": { "type": "string" }
+        }
+      }
+    },
+    "toolchains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "digest"],
+        "properties": {
+          "name": { "type": "string" },
+          "digest": { "type": "string" }
+        }
+      }
+    },
+    "policies": {
+      "type": "object",
+      "properties": {
+        "residency": { "type": "string" },
+        "exportControlProfile": { "type": "string" }
+      }
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "sig"],
+        "properties": {
+          "key": { "type": "string" },
+          "sig": { "type": "string" }
+        }
+      }
+    }
   }
 }
-

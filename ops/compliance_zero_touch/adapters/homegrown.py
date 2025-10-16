@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, List
 
 from ..models.base import (
     ImpactDimension,
@@ -29,8 +28,8 @@ class HomegrownAdapter(PolicyAdapter):
         infra = json.loads(config_path.read_text())
         controls = json.loads(control_path.read_text())
 
-        findings: List[PolicyFinding] = []
-        metrics: Dict[str, float] = {}
+        findings: list[PolicyFinding] = []
+        metrics: dict[str, float] = {}
 
         for control in controls["controls"]:
             if control["id"] == "MC-CUST-001":
@@ -68,9 +67,11 @@ class HomegrownAdapter(PolicyAdapter):
 
         metrics["controls_evaluated"] = len(controls["controls"])
         coverage = 1.0
-        return PolicyEvaluationResult(adapter=self.name, findings=findings, metrics=metrics, coverage=coverage)
+        return PolicyEvaluationResult(
+            adapter=self.name, findings=findings, metrics=metrics, coverage=coverage
+        )
 
-    def scoring(self, findings: List[PolicyFinding]) -> MultiFactorScore:
+    def scoring(self, findings: list[PolicyFinding]) -> MultiFactorScore:
         penalty = sum(
             {
                 Severity.CRITICAL: 35,
@@ -96,7 +97,7 @@ class HomegrownAdapter(PolicyAdapter):
             rationale=rationale,
         )
 
-    def regulatory_alignment(self) -> dict[str, List[RegulatoryRequirement]]:
+    def regulatory_alignment(self) -> dict[str, list[RegulatoryRequirement]]:
         return {
             "MC-CUST-001": [
                 RegulatoryRequirement(

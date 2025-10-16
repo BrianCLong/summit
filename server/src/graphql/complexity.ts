@@ -10,7 +10,9 @@ export function complexityRule(max = 1500): (context: any) => ASTVisitor {
       Field() {
         count += 1;
         if (count > max) {
-          context.reportError(new GraphQLError(`Query too complex: ${count} (max ${max})`));
+          context.reportError(
+            new GraphQLError(`Query too complex: ${count} (max ${max})`),
+          );
         }
       },
     } as ASTVisitor;

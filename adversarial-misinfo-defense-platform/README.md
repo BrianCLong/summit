@@ -58,8 +58,8 @@ detector = platform['detector']
 
 # Analyze text for misinformation
 text_samples = [
-    "This shocking revelation will change everything!",
-    "Research shows balanced approaches are beneficial."
+    "This shocking revelation will change everything you thought you knew!",
+    "Research shows balanced diets and regular exercise are beneficial."
 ]
 
 results = detector.detect_text_misinfo(text_samples)
@@ -69,6 +69,7 @@ print(results)
 ## Components
 
 ### Detection Modules
+
 - `text_detector.py`: Advanced NLP techniques for text misinformation
 - `image_detector.py`: Computer vision for image manipulation detection
 - `audio_detector.py`: Acoustic analysis for audio deepfake detection
@@ -77,11 +78,13 @@ print(results)
 - `deepfake_detector.py`: Comprehensive deepfake identification
 
 ### Training & Evolution
+
 - `adversarial_training.py`: GAN-based adversarial sample generation
 - `tactic_evolution.py`: Autonomous tactic evolution system
 - `red_blue_team.py`: Red/Blue team exercise management
 
 ### Validation
+
 - `validation_suite.py`: Comprehensive benchmarking suite
 - `VALIDATION_REPORT.md`: Detailed validation results
 
@@ -90,7 +93,7 @@ print(results)
 - `USER_GUIDE.md`: Detailed usage guide
 - `PATENT_CLAIM_CHECKLIST.md`: Intellectual property mapping
 - `VALIDATION_REPORT.md`: Performance benchmarks
-- `FINAL_SUMMARY.md`: Implementation summary
+- `example_usage.py`: Usage examples
 
 ## Requirements
 

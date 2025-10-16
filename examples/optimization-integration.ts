@@ -5,7 +5,7 @@ import { OptimizationManager } from '../server/src/optimization/index.js';
 
 /**
  * Complete IntelGraph Performance Optimization Integration Example
- * 
+ *
  * This example demonstrates how to integrate all optimization systems
  * into an Express.js application with full monitoring and cost control.
  */
@@ -20,32 +20,32 @@ const optimizationManager = new OptimizationManager({
     enableQueryCaching: true,
     enableMaterializedViews: true,
     queryTimeoutMs: 30000,
-    cacheMaxMemoryMB: 512
+    cacheMaxMemoryMB: 512,
   },
   postgres: {
     enableQueryCaching: true,
     enableAutoIndexing: true,
     connectionPoolSize: 25,
-    slowQueryThresholdMs: 1000
+    slowQueryThresholdMs: 1000,
   },
   apiGateway: {
     enableResponseCaching: true,
     enableCircuitBreaker: true,
     enableBulkhead: true,
-    enableRequestBatching: true
+    enableRequestBatching: true,
   },
   costOptimization: {
     enableIntelligentRouting: true,
     enableBudgetTracking: true,
     enableCostPrediction: true,
-    defaultBudgetLimit: 100.0
+    defaultBudgetLimit: 100.0,
   },
   monitoring: {
     metricsRetentionHours: 72,
     alertingEnabled: true,
     sloMonitoringEnabled: true,
-    regressionDetectionEnabled: true
-  }
+    regressionDetectionEnabled: true,
+  },
 });
 
 // Middleware setup
@@ -61,33 +61,43 @@ async function setupOptimization() {
     const middleware = optimizationManager.getOptimizedQueryMiddleware();
 
     // Apply global middleware for API optimization
-    app.use('/api', middleware.responseCache({
-      ttl: 300, // 5 minutes cache
-      staleWhileRevalidate: 600, // Serve stale for 10 minutes while revalidating
-      tags: ['api_response']
-    }));
+    app.use(
+      '/api',
+      middleware.responseCache({
+        ttl: 300, // 5 minutes cache
+        staleWhileRevalidate: 600, // Serve stale for 10 minutes while revalidating
+        tags: ['api_response'],
+      }),
+    );
 
-    app.use('/api', middleware.circuitBreaker({
-      failureThreshold: 5,
-      resetTimeoutMs: 60000,
-      monitoringPeriodMs: 10000,
-      halfOpenMaxCalls: 3
-    }));
+    app.use(
+      '/api',
+      middleware.circuitBreaker({
+        failureThreshold: 5,
+        resetTimeoutMs: 60000,
+        monitoringPeriodMs: 10000,
+        halfOpenMaxCalls: 3,
+      }),
+    );
 
-    app.use('/api', middleware.bulkhead({
-      maxConcurrent: 100,
-      queueSize: 50,
-      timeoutMs: 30000
-    }));
+    app.use(
+      '/api',
+      middleware.bulkhead({
+        maxConcurrent: 100,
+        queueSize: 50,
+        timeoutMs: 30000,
+      }),
+    );
 
     app.use('/api', middleware.budgetTracking());
 
     // Example: Neo4j query endpoint with optimization
-    app.post('/api/neo4j/query', 
-      middleware.neo4jQuery({ 
+    app.post(
+      '/api/neo4j/query',
+      middleware.neo4jQuery({
         useCache: true,
         cacheTtl: 600,
-        timeout: 15000
+        timeout: 15000,
       }),
       async (req, res) => {
         try {
@@ -99,8 +109,8 @@ async function setupOptimization() {
               metadata: {
                 optimizations: req.optimizedQuery.optimizationApplied,
                 cacheHit: req.optimizedQuery.cacheHit,
-                executionTime: req.optimizedQuery.metrics.executionTimeMs
-              }
+                executionTime: req.optimizedQuery.metrics.executionTimeMs,
+              },
             });
           }
 
@@ -110,15 +120,16 @@ async function setupOptimization() {
           console.error('Neo4j query error:', error);
           res.status(500).json({ error: error.message });
         }
-      }
+      },
     );
 
-    // Example: PostgreSQL query endpoint with optimization  
-    app.post('/api/postgres/query',
+    // Example: PostgreSQL query endpoint with optimization
+    app.post(
+      '/api/postgres/query',
       middleware.postgresQuery({
         useCache: true,
         cacheTtl: 300,
-        readOnly: true
+        readOnly: true,
       }),
       async (req, res) => {
         try {
@@ -130,8 +141,8 @@ async function setupOptimization() {
                 optimizations: req.optimizedQuery.optimizationApplied,
                 cacheHit: req.optimizedQuery.cacheHit,
                 executionTime: req.optimizedQuery.executionTime,
-                planUsed: req.optimizedQuery.planUsed ? true : false
-              }
+                planUsed: req.optimizedQuery.planUsed ? true : false,
+              },
             });
           }
 
@@ -140,7 +151,7 @@ async function setupOptimization() {
           console.error('PostgreSQL query error:', error);
           res.status(500).json({ error: error.message });
         }
-      }
+      },
     );
 
     // Example: AI model request with intelligent routing
@@ -160,7 +171,7 @@ async function setupOptimization() {
           contextSize: input.length,
           expectedOutputSize: task.expectedOutputSize || 1000,
           userId,
-          tenantId
+          tenantId,
         });
 
         // Return model selection for client to use
@@ -171,16 +182,15 @@ async function setupOptimization() {
             name: modelSelection.selectedModel.name,
             provider: modelSelection.selectedModel.provider,
             estimatedCost: modelSelection.costPrediction.estimatedCost,
-            reasoning: modelSelection.reasoning
+            reasoning: modelSelection.reasoning,
           },
-          alternatives: modelSelection.alternatives.map(alt => ({
+          alternatives: modelSelection.alternatives.map((alt) => ({
             id: alt.id,
             name: alt.name,
-            provider: alt.provider
+            provider: alt.provider,
           })),
-          optimizations: modelSelection.optimizationApplied
+          optimizations: modelSelection.optimizationApplied,
         });
-
       } catch (error) {
         console.error('AI model selection error:', error);
         res.status(500).json({ error: error.message });
@@ -249,7 +259,7 @@ async function setupOptimization() {
         const results = await optimizationManager.clearAllCaches();
         res.json({
           success: true,
-          results
+          results,
         });
       } catch (error) {
         console.error('Cache clear error:', error);
@@ -261,12 +271,13 @@ async function setupOptimization() {
     app.post('/api/admin/optimize/indexes', async (req, res) => {
       try {
         const limit = parseInt(req.body.limit) || 5;
-        const createdIndexes = await optimizationManager.createRecommendedIndexes(limit);
-        
+        const createdIndexes =
+          await optimizationManager.createRecommendedIndexes(limit);
+
         res.json({
           success: true,
           createdIndexes,
-          message: `Created ${createdIndexes.length} recommended indexes`
+          message: `Created ${createdIndexes.length} recommended indexes`,
         });
       } catch (error) {
         console.error('Index optimization error:', error);
@@ -279,12 +290,12 @@ async function setupOptimization() {
       try {
         const { userId, tenantId } = req.params;
         const { limit } = req.body;
-        
+
         await optimizationManager.updateBudgetLimit(userId, tenantId, limit);
-        
+
         res.json({
           success: true,
-          message: `Budget limit updated to $${limit} for user ${userId}`
+          message: `Budget limit updated to $${limit} for user ${userId}`,
         });
       } catch (error) {
         console.error('Budget update error:', error);
@@ -303,7 +314,7 @@ async function setupOptimization() {
         optimizationManager.updateConfig(req.body);
         res.json({
           success: true,
-          message: 'Configuration updated successfully'
+          message: 'Configuration updated successfully',
         });
       } catch (error) {
         console.error('Config update error:', error);
@@ -312,32 +323,35 @@ async function setupOptimization() {
     });
 
     // Example: Batched requests endpoint
-    app.post('/api/batch', 
-      middleware.requestBatching(),
-      async (req, res) => {
-        // The batching middleware will handle grouping similar requests
-        // This endpoint would process the batched requests
-        res.json({
-          success: true,
-          message: 'Batch request processed',
-          batchId: req.headers['x-batch-id']
-        });
-      }
-    );
-
-    // Error handling middleware
-    app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      console.error('Unhandled error:', error);
-      res.status(500).json({
-        error: 'Internal server error',
-        message: error.message,
-        optimizations: {
-          enabled: optimizationManager.getConfig().enabled,
-          systemHealth: 'degraded'
-        }
+    app.post('/api/batch', middleware.requestBatching(), async (req, res) => {
+      // The batching middleware will handle grouping similar requests
+      // This endpoint would process the batched requests
+      res.json({
+        success: true,
+        message: 'Batch request processed',
+        batchId: req.headers['x-batch-id'],
       });
     });
 
+    // Error handling middleware
+    app.use(
+      (
+        error: Error,
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+      ) => {
+        console.error('Unhandled error:', error);
+        res.status(500).json({
+          error: 'Internal server error',
+          message: error.message,
+          optimizations: {
+            enabled: optimizationManager.getConfig().enabled,
+            systemHealth: 'degraded',
+          },
+        });
+      },
+    );
   } catch (error) {
     console.error('❌ Failed to setup optimization:', error);
     process.exit(1);
@@ -347,9 +361,11 @@ async function setupOptimization() {
 // Server startup
 async function startServer() {
   await setupOptimization();
-  
+
   app.listen(port, () => {
-    console.log(`🚀 IntelGraph server with optimization running on port ${port}`);
+    console.log(
+      `🚀 IntelGraph server with optimization running on port ${port}`,
+    );
     console.log(`📊 Dashboard: http://localhost:${port}/api/admin/dashboard`);
     console.log(`📈 Metrics: http://localhost:${port}/api/admin/metrics`);
     console.log(`🚨 Alerts: http://localhost:${port}/api/admin/alerts`);
@@ -392,31 +408,35 @@ startServer().catch((error) => {
 
 // Example 1: Custom cache configuration for specific routes
 export const customCacheExample = () => {
-  const customCache = optimizationManager.getOptimizedQueryMiddleware().responseCache({
-    ttl: 600, // 10 minutes
-    staleWhileRevalidate: 1200, // 20 minutes stale serving
-    shouldCache: (req, res) => {
-      // Only cache successful responses
-      return res.statusCode === 200 && req.method === 'GET';
-    },
-    cacheKey: (req) => {
-      // Custom cache key generation
-      return `custom:${req.user?.id}:${req.path}:${JSON.stringify(req.query)}`;
-    },
-    tags: ['user_data', 'analytics'] // For targeted invalidation
-  });
+  const customCache = optimizationManager
+    .getOptimizedQueryMiddleware()
+    .responseCache({
+      ttl: 600, // 10 minutes
+      staleWhileRevalidate: 1200, // 20 minutes stale serving
+      shouldCache: (req, res) => {
+        // Only cache successful responses
+        return res.statusCode === 200 && req.method === 'GET';
+      },
+      cacheKey: (req) => {
+        // Custom cache key generation
+        return `custom:${req.user?.id}:${req.path}:${JSON.stringify(req.query)}`;
+      },
+      tags: ['user_data', 'analytics'], // For targeted invalidation
+    });
 
   return customCache;
 };
 
 // Example 2: Circuit breaker with custom configuration
 export const customCircuitBreakerExample = () => {
-  const circuitBreaker = optimizationManager.getOptimizedQueryMiddleware().circuitBreaker({
-    failureThreshold: 10, // Open after 10 failures
-    resetTimeoutMs: 120000, // Reset after 2 minutes
-    monitoringPeriodMs: 15000, // Monitor over 15 seconds
-    halfOpenMaxCalls: 5 // Allow 5 test calls in half-open state
-  });
+  const circuitBreaker = optimizationManager
+    .getOptimizedQueryMiddleware()
+    .circuitBreaker({
+      failureThreshold: 10, // Open after 10 failures
+      resetTimeoutMs: 120000, // Reset after 2 minutes
+      monitoringPeriodMs: 15000, // Monitor over 15 seconds
+      halfOpenMaxCalls: 5, // Allow 5 test calls in half-open state
+    });
 
   return circuitBreaker;
 };
@@ -434,13 +454,13 @@ export const intelligentModelSelectionExample = async () => {
     contextSize: 4000, // 4k tokens context
     expectedOutputSize: 1000, // 1k tokens output
     userId: 'user123',
-    tenantId: 'tenant456'
+    tenantId: 'tenant456',
   });
 
   console.log('Selected model:', selection.selectedModel.name);
   console.log('Estimated cost:', selection.costPrediction.estimatedCost);
   console.log('Reasoning:', selection.reasoning);
-  
+
   return selection;
 };
 

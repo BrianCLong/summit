@@ -1,15 +1,15 @@
 groups:
-- name: slo-burn
-  rules:
-    - record: error_rate:ratio1m
-      expr: sum(rate(http_requests_total{code=~"5.."}[1m]))/sum(rate(http_requests_total[1m]))
-    - record: error_rate:ratio5m
-      expr: sum(rate(http_requests_total{code=~"5.."}[5m]))/sum(rate(http_requests_total[5m]))
-    - alert: FastBurn
-      expr: error_rate:ratio1m > 0.05 and error_rate:ratio5m > 0.03
-      for: 5m
-      labels: { severity: critical }
-    - alert: SlowBurn
-      expr: error_rate:ratio5m > 0.02
-      for: 30m
-      labels: { severity: warning }
+  - name: slo-burn
+    rules:
+      - record: error_rate:ratio1m
+        expr: sum(rate(http_requests_total{code=~"5.."}[1m]))/sum(rate(http_requests_total[1m]))
+      - record: error_rate:ratio5m
+        expr: sum(rate(http_requests_total{code=~"5.."}[5m]))/sum(rate(http_requests_total[5m]))
+      - alert: FastBurn
+        expr: error_rate:ratio1m > 0.05 and error_rate:ratio5m > 0.03
+        for: 5m
+        labels: { severity: critical }
+      - alert: SlowBurn
+        expr: error_rate:ratio5m > 0.02
+        for: 30m
+        labels: { severity: warning }

@@ -1,12 +1,12 @@
 """Tests for the minimal OSINT service."""
 
-from fastapi.testclient import TestClient
 import pathlib
 import sys
 
-sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / 'src'))
-from main import app  # type: ignore
+from fastapi.testclient import TestClient
 
+sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
+from main import app  # type: ignore
 
 client = TestClient(app)
 

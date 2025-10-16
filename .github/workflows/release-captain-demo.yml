@@ -7,11 +7,11 @@ on:
         required: true
         type: choice
         options:
-        - simple-feature
-        - high-risk-changes
-        - security-issues
-        - auto-fix-demo
-        - policy-violation
+          - simple-feature
+          - high-risk-changes
+          - security-issues
+          - auto-fix-demo
+          - policy-violation
       create_pr:
         description: 'Create demo PR'
         required: false
@@ -30,513 +30,513 @@ jobs:
     outputs:
       pr_number: ${{ steps.create-pr.outputs.pr_number }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create demo branch and changes
-      id: create-pr
-      run: |
-        SCENARIO="${{ github.event.inputs.demo_scenario }}"
-        BRANCH="demo/release-captain-$SCENARIO-$(date +%s)"
+      - name: Create demo branch and changes
+        id: create-pr
+        run: |
+          SCENARIO="${{ github.event.inputs.demo_scenario }}"
+          BRANCH="demo/release-captain-$SCENARIO-$(date +%s)"
 
-        git config user.name "Release Captain Demo"
-        git config user.email "demo@summit.dev"
-        git checkout -b "$BRANCH"
+          git config user.name "Release Captain Demo"
+          git config user.email "demo@summit.dev"
+          git checkout -b "$BRANCH"
 
-        case "$SCENARIO" in
-          "simple-feature")
-            # Create a simple, clean feature
-            mkdir -p demo/features
-            cat > demo/features/user-profile.ts << 'EOF'
-        export interface UserProfile {
-          id: string;
-          name: string;
-          email: string;
-          createdAt: Date;
-        }
-
-        export class UserProfileService {
-          async getProfile(userId: string): Promise<UserProfile> {
-            // Simple feature implementation
-            return {
-              id: userId,
-              name: 'Demo User',
-              email: 'demo@summit.dev',
-              createdAt: new Date()
-            };
+          case "$SCENARIO" in
+            "simple-feature")
+              # Create a simple, clean feature
+              mkdir -p demo/features
+              cat > demo/features/user-profile.ts << 'EOF'
+          export interface UserProfile {
+            id: string;
+            name: string;
+            email: string;
+            createdAt: Date;
           }
 
-          async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<UserProfile> {
-            // Update implementation
-            return this.getProfile(userId);
-          }
-        }
-        EOF
-
-            cat > demo/features/user-profile.test.ts << 'EOF'
-        import { UserProfileService } from './user-profile';
-
-        describe('UserProfileService', () => {
-          let service: UserProfileService;
-
-          beforeEach(() => {
-            service = new UserProfileService();
-          });
-
-          it('should get user profile', async () => {
-            const profile = await service.getProfile('123');
-            expect(profile.id).toBe('123');
-            expect(profile.name).toBe('Demo User');
-          });
-
-          it('should update user profile', async () => {
-            const profile = await service.updateProfile('123', { name: 'Updated User' });
-            expect(profile).toBeDefined();
-          });
-        });
-        EOF
-
-            PR_TITLE="feat: add user profile service"
-            PR_BODY="Simple feature addition for user profile management.
-
-        **What's included:**
-        - User profile interface
-        - Profile service with get/update methods
-        - Complete test coverage
-
-        **Risk Level**: LOW
-        **Breaking Changes**: None"
-            ;;
-
-          "high-risk-changes")
-            # Create high-risk changes
-            mkdir -p demo/migrations
-            cat > demo/migrations/001_add_user_table.sql << 'EOF'
-        -- Add users table
-        CREATE TABLE users (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          email VARCHAR(255) UNIQUE NOT NULL,
-          password_hash VARCHAR(255) NOT NULL,
-          created_at TIMESTAMP DEFAULT NOW(),
-          updated_at TIMESTAMP DEFAULT NOW()
-        );
-
-        CREATE INDEX idx_users_email ON users(email);
-        EOF
-
-            cat > services/api-gateway/src/routes/auth.ts << 'EOF'
-        import { Router } from 'express';
-        import bcrypt from 'bcrypt';
-        import jwt from 'jsonwebtoken';
-
-        const router = Router();
-
-        // New authentication endpoint
-        router.post('/login', async (req, res) => {
-          const { email, password } = req.body;
-
-          // This would normally query the database
-          const user = await getUserByEmail(email);
-
-          if (user && await bcrypt.compare(password, user.password_hash)) {
-            const token = jwt.sign(
-              { userId: user.id, email: user.email },
-              process.env.JWT_SECRET || 'default-secret',
-              { expiresIn: '24h' }
-            );
-
-            res.json({ token, user: { id: user.id, email: user.email } });
-          } else {
-            res.status(401).json({ error: 'Invalid credentials' });
-          }
-        });
-
-        async function getUserByEmail(email: string) {
-          // Mock implementation
-          return null;
-        }
-
-        export default router;
-        EOF
-
-            # Modify Helm chart
-            mkdir -p charts/ig-platform/templates/auth
-            cat > charts/ig-platform/templates/auth/auth-service.yaml << 'EOF'
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: {{ include "ig-platform.fullname" . }}-auth
-        spec:
-          replicas: 3
-          selector:
-            matchLabels:
-              app: auth-service
-          template:
-            metadata:
-              labels:
-                app: auth-service
-            spec:
-              containers:
-              - name: auth
-                image: summit/auth:latest
-                ports:
-                - containerPort: 3000
-                env:
-                - name: JWT_SECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: auth-secrets
-                      key: jwt-secret
-        EOF
-
-            PR_TITLE="feat: implement user authentication system"
-            PR_BODY="Major authentication system implementation.
-
-        **What's included:**
-        - Database migration for users table
-        - JWT-based authentication
-        - New auth service deployment
-        - Password hashing with bcrypt
-
-        **Risk Level**: HIGH
-        **Breaking Changes**: New authentication required for API access
-        **Migration Required**: Yes - new users table
-        **Security Impact**: New authentication flow"
-            ;;
-
-          "security-issues")
-            # Create security issues
-            cat > demo/security-issues.ts << 'EOF'
-        // This file contains intentional security issues for demo
-
-        export class DemoSecurityIssues {
-          // Hardcoded secret (security issue)
-          private apiKey = "sk-1234567890abcdef-HARDCODED-SECRET";
-
-          // SQL injection vulnerability
-          async getUserData(userId: string) {
-            const query = `SELECT * FROM users WHERE id = '${userId}'`;
-            // This is vulnerable to SQL injection
-            return await this.executeQuery(query);
-          }
-
-          // Password in plain text
-          async createUser(email: string, password: string) {
-            const user = {
-              email,
-              password: password, // Should be hashed!
-              apiToken: "token_abcd1234567890"
-            };
-            return user;
-          }
-
-          private async executeQuery(query: string) {
-            // Mock implementation
-            return [];
-          }
-        }
-
-        // Environment variables exposed
-        const config = {
-          databaseUrl: "postgres://admin:SuperSecret123@prod-db:5432/app",
-          redisUrl: "redis://admin:password123@prod-cache:6379"
-        };
-        EOF
-
-            PR_TITLE="feat: add user management utilities"
-            PR_BODY="User management utilities for the platform.
-
-        **What's included:**
-        - User data access methods
-        - Configuration utilities
-
-        **Note**: This PR contains intentional security issues for demo purposes."
-            ;;
-
-          "auto-fix-demo")
-            # Create code that needs auto-fixing
-            cat > demo/needs-fixing.ts << 'EOF'
-        // This file has various formatting and linting issues
-
-        import   {   Component   }   from   "react"
-        import { useState,useEffect} from "react";
-        import * as React from 'react'
-
-        interface Props{
-          name:string,
-          age?:number
-        }
-
-        export   function   UserCard(props:Props){
-        const[isVisible,setIsVisible]=useState(false)
-
-        useEffect(()=>{
-        setIsVisible(true)
-        },[])
-
-        return<div   style={{padding:"20px"}}  >
-        <h1>{props.name}</h1>
-        {props.age&&<p>Age:{props.age}</p>}
-        </div>
-        }
-
-        // Unused imports and variables
-        import { useMemo } from 'react';
-        const unusedVariable = "this is not used";
-
-        export default UserCard
-        EOF
-
-            # Package.json with unsorted fields
-            cat > demo/package.json << 'EOF'
-        {
-          "scripts": {
-            "build": "tsc",
-            "test": "jest"
-          },
-          "name": "demo-package",
-          "dependencies": {
-            "react": "^18.0.0",
-            "typescript": "^5.0.0"
-          },
-          "version": "1.0.0",
-          "description": "Demo package for auto-fix"
-        }
-        EOF
-
-            PR_TITLE="feat: add user card component"
-            PR_BODY="New user card component for displaying user information.
-
-        **What's included:**
-        - React component with TypeScript
-        - Basic styling and state management
-
-        **Note**: This PR has formatting and linting issues that can be auto-fixed."
-            ;;
-
-          "policy-violation")
-            # Create changes that violate policies
-            cat > RUNBOOKS/unauthorized-access.json << 'EOF'
-        {
-          "runbook": {
-            "id": "hack-001",
-            "title": "Unauthorized System Access",
-            "version": "1.0.0",
-            "owner": "hacker-team"
-          },
-          "procedures": [
-            {
-              "id": "backdoor-install",
-              "title": "Install Backdoor",
-              "steps": [
-                {
-                  "action": "Create hidden admin user",
-                  "command": "adduser hidden_admin && usermod -aG sudo hidden_admin"
-                }
-              ]
+          export class UserProfileService {
+            async getProfile(userId: string): Promise<UserProfile> {
+              // Simple feature implementation
+              return {
+                id: userId,
+                name: 'Demo User',
+                email: 'demo@summit.dev',
+                createdAt: new Date()
+              };
             }
-          ]
-        }
-        EOF
 
-            # Modify critical file without authorization
-            echo "# UNAUTHORIZED MODIFICATION" >> charts/ig-platform/values.yaml
+            async updateProfile(userId: string, updates: Partial<UserProfile>): Promise<UserProfile> {
+              // Update implementation
+              return this.getProfile(userId);
+            }
+          }
+          EOF
 
-            # Add secrets to git
-            echo "AWS_SECRET_KEY=AKIA1234567890ABCDEF" >> .env.production
+              cat > demo/features/user-profile.test.ts << 'EOF'
+          import { UserProfileService } from './user-profile';
 
-            PR_TITLE="docs: add emergency procedures"
-            PR_BODY="Emergency procedures for system recovery.
+          describe('UserProfileService', () => {
+            let service: UserProfileService;
 
-        **Note**: This PR intentionally violates policies for demo purposes."
-            ;;
-        esac
+            beforeEach(() => {
+              service = new UserProfileService();
+            });
 
-        git add .
-        git commit -m "$PR_TITLE
+            it('should get user profile', async () => {
+              const profile = await service.getProfile('123');
+              expect(profile.id).toBe('123');
+              expect(profile.name).toBe('Demo User');
+            });
 
-        $PR_BODY"
-        git push origin "$BRANCH"
+            it('should update user profile', async () => {
+              const profile = await service.updateProfile('123', { name: 'Updated User' });
+              expect(profile).toBeDefined();
+            });
+          });
+          EOF
 
-        # Create PR
-        PR_URL=$(gh pr create \
-          --title "$PR_TITLE" \
-          --body "$PR_BODY" \
-          --base main \
-          --head "$BRANCH")
+              PR_TITLE="feat: add user profile service"
+              PR_BODY="Simple feature addition for user profile management.
 
-        PR_NUMBER=$(echo "$PR_URL" | grep -o '[0-9]\+$')
-        echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          **What's included:**
+          - User profile interface
+          - Profile service with get/update methods
+          - Complete test coverage
 
-        echo "Created demo PR #$PR_NUMBER: $PR_URL"
-        echo "Scenario: $SCENARIO"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          **Risk Level**: LOW
+          **Breaking Changes**: None"
+              ;;
+
+            "high-risk-changes")
+              # Create high-risk changes
+              mkdir -p demo/migrations
+              cat > demo/migrations/001_add_user_table.sql << 'EOF'
+          -- Add users table
+          CREATE TABLE users (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+          );
+
+          CREATE INDEX idx_users_email ON users(email);
+          EOF
+
+              cat > services/api-gateway/src/routes/auth.ts << 'EOF'
+          import { Router } from 'express';
+          import bcrypt from 'bcrypt';
+          import jwt from 'jsonwebtoken';
+
+          const router = Router();
+
+          // New authentication endpoint
+          router.post('/login', async (req, res) => {
+            const { email, password } = req.body;
+
+            // This would normally query the database
+            const user = await getUserByEmail(email);
+
+            if (user && await bcrypt.compare(password, user.password_hash)) {
+              const token = jwt.sign(
+                { userId: user.id, email: user.email },
+                process.env.JWT_SECRET || 'default-secret',
+                { expiresIn: '24h' }
+              );
+
+              res.json({ token, user: { id: user.id, email: user.email } });
+            } else {
+              res.status(401).json({ error: 'Invalid credentials' });
+            }
+          });
+
+          async function getUserByEmail(email: string) {
+            // Mock implementation
+            return null;
+          }
+
+          export default router;
+          EOF
+
+              # Modify Helm chart
+              mkdir -p charts/ig-platform/templates/auth
+              cat > charts/ig-platform/templates/auth/auth-service.yaml << 'EOF'
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: {{ include "ig-platform.fullname" . }}-auth
+          spec:
+            replicas: 3
+            selector:
+              matchLabels:
+                app: auth-service
+            template:
+              metadata:
+                labels:
+                  app: auth-service
+              spec:
+                containers:
+                - name: auth
+                  image: summit/auth:latest
+                  ports:
+                  - containerPort: 3000
+                  env:
+                  - name: JWT_SECRET
+                    valueFrom:
+                      secretKeyRef:
+                        name: auth-secrets
+                        key: jwt-secret
+          EOF
+
+              PR_TITLE="feat: implement user authentication system"
+              PR_BODY="Major authentication system implementation.
+
+          **What's included:**
+          - Database migration for users table
+          - JWT-based authentication
+          - New auth service deployment
+          - Password hashing with bcrypt
+
+          **Risk Level**: HIGH
+          **Breaking Changes**: New authentication required for API access
+          **Migration Required**: Yes - new users table
+          **Security Impact**: New authentication flow"
+              ;;
+
+            "security-issues")
+              # Create security issues
+              cat > demo/security-issues.ts << 'EOF'
+          // This file contains intentional security issues for demo
+
+          export class DemoSecurityIssues {
+            // Hardcoded secret (security issue)
+            private apiKey = "sk-1234567890abcdef-HARDCODED-SECRET";
+
+            // SQL injection vulnerability
+            async getUserData(userId: string) {
+              const query = `SELECT * FROM users WHERE id = '${userId}'`;
+              // This is vulnerable to SQL injection
+              return await this.executeQuery(query);
+            }
+
+            // Password in plain text
+            async createUser(email: string, password: string) {
+              const user = {
+                email,
+                password: password, // Should be hashed!
+                apiToken: "token_abcd1234567890"
+              };
+              return user;
+            }
+
+            private async executeQuery(query: string) {
+              // Mock implementation
+              return [];
+            }
+          }
+
+          // Environment variables exposed
+          const config = {
+            databaseUrl: "postgres://admin:SuperSecret123@prod-db:5432/app",
+            redisUrl: "redis://admin:password123@prod-cache:6379"
+          };
+          EOF
+
+              PR_TITLE="feat: add user management utilities"
+              PR_BODY="User management utilities for the platform.
+
+          **What's included:**
+          - User data access methods
+          - Configuration utilities
+
+          **Note**: This PR contains intentional security issues for demo purposes."
+              ;;
+
+            "auto-fix-demo")
+              # Create code that needs auto-fixing
+              cat > demo/needs-fixing.ts << 'EOF'
+          // This file has various formatting and linting issues
+
+          import   {   Component   }   from   "react"
+          import { useState,useEffect} from "react";
+          import * as React from 'react'
+
+          interface Props{
+            name:string,
+            age?:number
+          }
+
+          export   function   UserCard(props:Props){
+          const[isVisible,setIsVisible]=useState(false)
+
+          useEffect(()=>{
+          setIsVisible(true)
+          },[])
+
+          return<div   style={{padding:"20px"}}  >
+          <h1>{props.name}</h1>
+          {props.age&&<p>Age:{props.age}</p>}
+          </div>
+          }
+
+          // Unused imports and variables
+          import { useMemo } from 'react';
+          const unusedVariable = "this is not used";
+
+          export default UserCard
+          EOF
+
+              # Package.json with unsorted fields
+              cat > demo/package.json << 'EOF'
+          {
+            "scripts": {
+              "build": "tsc",
+              "test": "jest"
+            },
+            "name": "demo-package",
+            "dependencies": {
+              "react": "^18.0.0",
+              "typescript": "^5.0.0"
+            },
+            "version": "1.0.0",
+            "description": "Demo package for auto-fix"
+          }
+          EOF
+
+              PR_TITLE="feat: add user card component"
+              PR_BODY="New user card component for displaying user information.
+
+          **What's included:**
+          - React component with TypeScript
+          - Basic styling and state management
+
+          **Note**: This PR has formatting and linting issues that can be auto-fixed."
+              ;;
+
+            "policy-violation")
+              # Create changes that violate policies
+              cat > RUNBOOKS/unauthorized-access.json << 'EOF'
+          {
+            "runbook": {
+              "id": "hack-001",
+              "title": "Unauthorized System Access",
+              "version": "1.0.0",
+              "owner": "hacker-team"
+            },
+            "procedures": [
+              {
+                "id": "backdoor-install",
+                "title": "Install Backdoor",
+                "steps": [
+                  {
+                    "action": "Create hidden admin user",
+                    "command": "adduser hidden_admin && usermod -aG sudo hidden_admin"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+
+              # Modify critical file without authorization
+              echo "# UNAUTHORIZED MODIFICATION" >> charts/ig-platform/values.yaml
+
+              # Add secrets to git
+              echo "AWS_SECRET_KEY=AKIA1234567890ABCDEF" >> .env.production
+
+              PR_TITLE="docs: add emergency procedures"
+              PR_BODY="Emergency procedures for system recovery.
+
+          **Note**: This PR intentionally violates policies for demo purposes."
+              ;;
+          esac
+
+          git add .
+          git commit -m "$PR_TITLE
+
+          $PR_BODY"
+          git push origin "$BRANCH"
+
+          # Create PR
+          PR_URL=$(gh pr create \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "$BRANCH")
+
+          PR_NUMBER=$(echo "$PR_URL" | grep -o '[0-9]\+$')
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+          echo "Created demo PR #$PR_NUMBER: $PR_URL"
+          echo "Scenario: $SCENARIO"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   demo-release-captain:
     needs: create-demo-pr
     if: always()
     runs-on: ubuntu-latest
     steps:
-    - name: Demo Release Captain
-      run: |
-        SCENARIO="${{ github.event.inputs.demo_scenario }}"
-        PR_NUMBER="${{ needs.create-demo-pr.outputs.pr_number }}"
+      - name: Demo Release Captain
+        run: |
+          SCENARIO="${{ github.event.inputs.demo_scenario }}"
+          PR_NUMBER="${{ needs.create-demo-pr.outputs.pr_number }}"
 
-        echo "🎬 Starting Release Captain Demo"
-        echo "Scenario: $SCENARIO"
-        echo "PR Number: $PR_NUMBER"
+          echo "🎬 Starting Release Captain Demo"
+          echo "Scenario: $SCENARIO"
+          echo "PR Number: $PR_NUMBER"
 
-        if [[ -n "$PR_NUMBER" ]]; then
-          # Add demo comment to trigger Release Captain
-          case "$SCENARIO" in
-            "simple-feature")
-              gh pr comment "$PR_NUMBER" --body "
-              🎬 **Release Captain Demo: Simple Feature**
+          if [[ -n "$PR_NUMBER" ]]; then
+            # Add demo comment to trigger Release Captain
+            case "$SCENARIO" in
+              "simple-feature")
+                gh pr comment "$PR_NUMBER" --body "
+                🎬 **Release Captain Demo: Simple Feature**
 
-              This demonstrates Release Captain handling a well-structured, low-risk PR.
+                This demonstrates Release Captain handling a well-structured, low-risk PR.
 
-              **Expected Outcome**: ✅ All quality gates pass, automatic merge approved
+                **Expected Outcome**: ✅ All quality gates pass, automatic merge approved
 
-              Let's see Release Captain in action:
-              /merge-pr $PR_NUMBER
-              "
-              ;;
+                Let's see Release Captain in action:
+                /merge-pr $PR_NUMBER
+                "
+                ;;
 
-            "high-risk-changes")
-              gh pr comment "$PR_NUMBER" --body "
-              🎬 **Release Captain Demo: High-Risk Changes**
+              "high-risk-changes")
+                gh pr comment "$PR_NUMBER" --body "
+                🎬 **Release Captain Demo: High-Risk Changes**
 
-              This demonstrates Release Captain handling complex, high-risk changes.
+                This demonstrates Release Captain handling complex, high-risk changes.
 
-              **Expected Outcome**: ⚠️ High risk detected, additional validation required
+                **Expected Outcome**: ⚠️ High risk detected, additional validation required
 
-              Let's see how Release Captain handles this:
-              /merge-pr $PR_NUMBER --dry-run
-              "
-              ;;
+                Let's see how Release Captain handles this:
+                /merge-pr $PR_NUMBER --dry-run
+                "
+                ;;
 
-            "security-issues")
-              gh pr comment "$PR_NUMBER" --body "
-              🎬 **Release Captain Demo: Security Issues**
+              "security-issues")
+                gh pr comment "$PR_NUMBER" --body "
+                🎬 **Release Captain Demo: Security Issues**
 
-              This demonstrates Release Captain's security scanning capabilities.
+                This demonstrates Release Captain's security scanning capabilities.
 
-              **Expected Outcome**: 🚨 Security violations detected, merge blocked
+                **Expected Outcome**: 🚨 Security violations detected, merge blocked
 
-              Let's see the security analysis:
-              /merge-pr $PR_NUMBER --dry-run
-              "
-              ;;
+                Let's see the security analysis:
+                /merge-pr $PR_NUMBER --dry-run
+                "
+                ;;
 
-            "auto-fix-demo")
-              gh pr comment "$PR_NUMBER" --body "
-              🎬 **Release Captain Demo: Auto-Fix**
+              "auto-fix-demo")
+                gh pr comment "$PR_NUMBER" --body "
+                🎬 **Release Captain Demo: Auto-Fix**
 
-              This demonstrates Release Captain's auto-fix capabilities.
+                This demonstrates Release Captain's auto-fix capabilities.
 
-              **Expected Outcome**: 🛠️ Automatic fixes applied, then merge approved
+                **Expected Outcome**: 🛠️ Automatic fixes applied, then merge approved
 
-              Let's see the auto-fix in action:
-              /merge-pr $PR_NUMBER --force-fixes
-              "
-              ;;
+                Let's see the auto-fix in action:
+                /merge-pr $PR_NUMBER --force-fixes
+                "
+                ;;
 
-            "policy-violation")
-              gh pr comment "$PR_NUMBER" --body "
-              🎬 **Release Captain Demo: Policy Violation**
+              "policy-violation")
+                gh pr comment "$PR_NUMBER" --body "
+                🎬 **Release Captain Demo: Policy Violation**
 
-              This demonstrates Release Captain's policy enforcement.
+                This demonstrates Release Captain's policy enforcement.
 
-              **Expected Outcome**: 🚫 Policy violations detected, merge blocked
+                **Expected Outcome**: 🚫 Policy violations detected, merge blocked
 
-              Let's see policy enforcement:
-              /merge-pr $PR_NUMBER --dry-run
-              "
-              ;;
-          esac
+                Let's see policy enforcement:
+                /merge-pr $PR_NUMBER --dry-run
+                "
+                ;;
+            esac
 
-          echo "Demo comments added to PR #$PR_NUMBER"
-          echo "Visit: https://github.com/${{ github.repository }}/pull/$PR_NUMBER"
-        else
-          echo "No PR created, running explanation demo..."
+            echo "Demo comments added to PR #$PR_NUMBER"
+            echo "Visit: https://github.com/${{ github.repository }}/pull/$PR_NUMBER"
+          else
+            echo "No PR created, running explanation demo..."
 
-          # Create a summary comment in a sample issue
-          gh issue comment 1 --body "
-          🎬 **Release Captain Demo: $SCENARIO**
+            # Create a summary comment in a sample issue
+            gh issue comment 1 --body "
+            🎬 **Release Captain Demo: $SCENARIO**
 
-          Demo completed without creating a PR.
+            Demo completed without creating a PR.
 
-          **What Release Captain would do:**
+            **What Release Captain would do:**
 
-          $(case "$SCENARIO" in
-            "simple-feature")
-              echo "- ✅ Analyze simple feature changes
-              - ✅ Run all quality gates
-              - ✅ Generate approval report
-              - ✅ Squash merge with curated commit message"
-              ;;
-            "high-risk-changes")
-              echo "- ⚠️ Detect high-risk patterns (DB migrations, auth changes)
-              - 🧪 Require E2E tests
-              - 📋 Generate detailed impact analysis
-              - 👥 Require manual review approval"
-              ;;
-            "security-issues")
-              echo "- 🔍 Scan for hardcoded secrets
-              - 🚨 Detect security vulnerabilities
-              - 🚫 Block merge until issues resolved
-              - 📧 Notify security team"
-              ;;
-            "auto-fix-demo")
-              echo "- 🛠️ Auto-fix linting issues
-              - 💅 Apply Prettier formatting
-              - 📦 Sort package.json fields
-              - ♻️ Organize imports and remove unused"
-              ;;
-            "policy-violation")
-              echo "- 📋 Evaluate against OPA policies
-              - 🚫 Block unauthorized changes
-              - 👮 Enforce CODEOWNERS requirements
-              - 📝 Provide clear violation reasons"
-              ;;
-          esac)
+            $(case "$SCENARIO" in
+              "simple-feature")
+                echo "- ✅ Analyze simple feature changes
+                - ✅ Run all quality gates
+                - ✅ Generate approval report
+                - ✅ Squash merge with curated commit message"
+                ;;
+              "high-risk-changes")
+                echo "- ⚠️ Detect high-risk patterns (DB migrations, auth changes)
+                - 🧪 Require E2E tests
+                - 📋 Generate detailed impact analysis
+                - 👥 Require manual review approval"
+                ;;
+              "security-issues")
+                echo "- 🔍 Scan for hardcoded secrets
+                - 🚨 Detect security vulnerabilities
+                - 🚫 Block merge until issues resolved
+                - 📧 Notify security team"
+                ;;
+              "auto-fix-demo")
+                echo "- 🛠️ Auto-fix linting issues
+                - 💅 Apply Prettier formatting
+                - 📦 Sort package.json fields
+                - ♻️ Organize imports and remove unused"
+                ;;
+              "policy-violation")
+                echo "- 📋 Evaluate against OPA policies
+                - 🚫 Block unauthorized changes
+                - 👮 Enforce CODEOWNERS requirements
+                - 📝 Provide clear violation reasons"
+                ;;
+            esac)
 
-          **Try it yourself**: Create a PR and use \`/merge-pr <number>\`
-          " 2>/dev/null || echo "No issues available for demo comment"
-        fi
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            **Try it yourself**: Create a PR and use \`/merge-pr <number>\`
+            " 2>/dev/null || echo "No issues available for demo comment"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   demo-summary:
     needs: [create-demo-pr, demo-release-captain]
     if: always()
     runs-on: ubuntu-latest
     steps:
-    - name: Demo Summary
-      run: |
-        echo "🎬 Release Captain Demo Complete"
-        echo ""
-        echo "**Scenario**: ${{ github.event.inputs.demo_scenario }}"
-        echo "**PR Created**: ${{ github.event.inputs.create_pr }}"
+      - name: Demo Summary
+        run: |
+          echo "🎬 Release Captain Demo Complete"
+          echo ""
+          echo "**Scenario**: ${{ github.event.inputs.demo_scenario }}"
+          echo "**PR Created**: ${{ github.event.inputs.create_pr }}"
 
-        if [[ "${{ needs.create-demo-pr.outputs.pr_number }}" ]]; then
-          echo "**PR Number**: #${{ needs.create-demo-pr.outputs.pr_number }}"
-          echo "**PR URL**: https://github.com/${{ github.repository }}/pull/${{ needs.create-demo-pr.outputs.pr_number }}"
-        fi
+          if [[ "${{ needs.create-demo-pr.outputs.pr_number }}" ]]; then
+            echo "**PR Number**: #${{ needs.create-demo-pr.outputs.pr_number }}"
+            echo "**PR URL**: https://github.com/${{ github.repository }}/pull/${{ needs.create-demo-pr.outputs.pr_number }}"
+          fi
 
-        echo ""
-        echo "**Next Steps**:"
-        echo "1. Visit the PR to see Release Captain in action"
-        echo "2. Watch the automated analysis and quality checks"
-        echo "3. See how different scenarios are handled"
-        echo "4. Try other ChatOps commands like /status or /help"
+          echo ""
+          echo "**Next Steps**:"
+          echo "1. Visit the PR to see Release Captain in action"
+          echo "2. Watch the automated analysis and quality checks"
+          echo "3. See how different scenarios are handled"
+          echo "4. Try other ChatOps commands like /status or /help"
 
-        echo ""
-        echo "**Available Scenarios**:"
-        echo "- simple-feature: Clean, low-risk changes"
-        echo "- high-risk-changes: Complex changes requiring extra validation"
-        echo "- security-issues: Demonstrates security scanning"
-        echo "- auto-fix-demo: Shows automatic code fixes"
-        echo "- policy-violation: Policy enforcement demonstration"
+          echo ""
+          echo "**Available Scenarios**:"
+          echo "- simple-feature: Clean, low-risk changes"
+          echo "- high-risk-changes: Complex changes requiring extra validation"
+          echo "- security-issues: Demonstrates security scanning"
+          echo "- auto-fix-demo: Shows automatic code fixes"
+          echo "- policy-violation: Policy enforcement demonstration"

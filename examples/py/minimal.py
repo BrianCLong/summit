@@ -1,15 +1,17 @@
 import asyncio
+
 from maestro_sdk.client import MaestroClient
 
 BASE_URL = "http://localhost:8080"  # Your Maestro API URL
 TOKEN = "your_auth_token"  # Your authentication token
+
 
 async def main():
     client = MaestroClient(base_url=BASE_URL, token=TOKEN)
 
     try:
         print("Listing runs...")
-        runs = await client.runs_list() # Using the low-level generated client method
+        runs = await client.runs_list()  # Using the low-level generated client method
         if runs:
             for run in runs:
                 print(f"Run ID: {run['id']}, Status: {run['status']}")
@@ -23,7 +25,7 @@ async def main():
 
         # Tail run logs
         print("\nTailing logs for the new run (simplified)...")
-        logs = await client.tail_logs(new_run['id'])
+        logs = await client.tail_logs(new_run["id"])
         print("Logs:", logs)
 
         # Fetch evidence (placeholder)
@@ -33,6 +35,7 @@ async def main():
 
     except Exception as e:
         print(f"Error in SDK example: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

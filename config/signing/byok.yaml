@@ -1,6 +1,6 @@
-tenantId: "tenantA"
-primaryKID: "kms:us-west:abcd1234"
-backupKID: "kms:us-west:wxyz9876"
+tenantId: 'tenantA'
+primaryKID: 'kms:us-west:abcd1234'
+backupKID: 'kms:us-west:wxyz9876'
 rotation:
   overlapDays: 7
   enforced: true

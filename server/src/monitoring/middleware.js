@@ -8,7 +8,7 @@ const { metrics } = require('./metrics');
  */
 function httpMetricsMiddleware(req, res, next) {
   const start = Date.now();
-  
+
   // Track request count
   metrics.httpRequestsTotal.inc({
     method: req.method,
@@ -18,7 +18,7 @@ function httpMetricsMiddleware(req, res, next) {
 
   // Override res.end to capture response metrics
   const originalEnd = res.end;
-  res.end = function(...args) {
+  res.end = function (...args) {
     const duration = (Date.now() - start) / 1000;
     const route = req.route?.path || req.path || 'unknown';
 
@@ -29,9 +29,9 @@ function httpMetricsMiddleware(req, res, next) {
         route,
         status_code: res.statusCode,
       },
-      duration
+      duration,
     );
-    
+
     // Update total counter with actual status
     metrics.httpRequestsTotal.inc({
       method: req.method,
@@ -39,19 +39,26 @@ function httpMetricsMiddleware(req, res, next) {
       status_code: res.statusCode,
     });
 
-    if (route.startsWith('/api') || route.startsWith('/graphql') || route.startsWith('/monitoring')) {
-      const tenantId = (req.headers['x-tenant-id'] || req.headers['x-tenant']) ?? 'unknown';
+    if (
+      route.startsWith('/api') ||
+      route.startsWith('/graphql') ||
+      route.startsWith('/monitoring')
+    ) {
+      const tenantId =
+        (req.headers['x-tenant-id'] || req.headers['x-tenant']) ?? 'unknown';
       metrics.businessApiCallsTotal.inc({
         service: req.baseUrl || 'maestro-api',
         route,
         status_code: String(res.statusCode),
-        tenant: Array.isArray(tenantId) ? tenantId[0] : String(tenantId || 'unknown'),
+        tenant: Array.isArray(tenantId)
+          ? tenantId[0]
+          : String(tenantId || 'unknown'),
       });
     }
 
     originalEnd.apply(this, args);
   };
-  
+
   next();
 }
 
@@ -63,50 +70,52 @@ function graphqlMetricsMiddleware() {
     requestDidStart() {
       return {
         didResolveOperation(requestContext) {
-          const operationName = requestContext.request.operationName || 'anonymous';
+          const operationName =
+            requestContext.request.operationName || 'anonymous';
           const operationType = requestContext.operationName || 'unknown';
-          
+
           // Track GraphQL request
           metrics.graphqlRequestsTotal.inc({
             operation: operationName,
             operation_type: operationType,
             status: 'started',
           });
-          
+
           requestContext.metrics = {
             startTime: Date.now(),
             operationName,
             operationType,
           };
         },
-        
+
         didEncounterErrors(requestContext) {
           const { operationName } = requestContext.metrics || {};
-          
-          requestContext.errors.forEach(error => {
+
+          requestContext.errors.forEach((error) => {
             metrics.graphqlErrors.inc({
               operation: operationName || 'unknown',
               error_type: error.constructor.name || 'GraphQLError',
             });
           });
         },
-        
+
         willSendResponse(requestContext) {
           const metricData = requestContext.metrics;
           if (!metricData) return;
-          
+
           const duration = (Date.now() - metricData.startTime) / 1000;
-          const hasErrors = requestContext.errors && requestContext.errors.length > 0;
-          
+          const hasErrors =
+            requestContext.errors && requestContext.errors.length > 0;
+
           // Track GraphQL request duration
           metrics.graphqlRequestDuration.observe(
             {
               operation: metricData.operationName,
               operation_type: metricData.operationType,
             },
-            duration
+            duration,
           );
-          
+
           // Update request status
           metrics.graphqlRequestsTotal.inc({
             operation: metricData.operationName,
@@ -126,7 +135,7 @@ function trackDbQuery(database, operation, queryFunction) {
   return async (...args) => {
     const start = Date.now();
     let status = 'success';
-    
+
     try {
       const result = await queryFunction(...args);
       return result;
@@ -135,12 +144,9 @@ function trackDbQuery(database, operation, queryFunction) {
       throw error;
     } finally {
       const duration = (Date.now() - start) / 1000;
-      
-      metrics.dbQueryDuration.observe(
-        { database, operation },
-        duration
-      );
-      
+
+      metrics.dbQueryDuration.observe({ database, operation }, duration);
+
       metrics.dbQueriesTotal.inc({
         database,
         operation,
@@ -157,13 +163,13 @@ function trackAiJob(jobType, jobFunction) {
   return async (...args) => {
     const start = Date.now();
     let status = 'success';
-    
+
     // Increment queued counter
     metrics.aiJobsQueued.inc({ job_type: jobType });
-    
+
     // Increment processing counter
     metrics.aiJobsProcessing.inc({ job_type: jobType });
-    
+
     try {
       const result = await jobFunction(...args);
       return result;
@@ -172,19 +178,16 @@ function trackAiJob(jobType, jobFunction) {
       throw error;
     } finally {
       const duration = (Date.now() - start) / 1000;
-      
+
       // Decrement processing counter
       metrics.aiJobsProcessing.dec({ job_type: jobType });
-      
+
       // Decrement queued counter
       metrics.aiJobsQueued.dec({ job_type: jobType });
-      
+
       // Track job duration and completion
-      metrics.aiJobDuration.observe(
-        { job_type: jobType, status },
-        duration
-      );
-      
+      metrics.aiJobDuration.observe({ job_type: jobType, status }, duration);
+
       metrics.aiJobsTotal.inc({
         job_type: jobType,
         status,
@@ -199,16 +202,16 @@ function trackAiJob(jobType, jobFunction) {
 function trackGraphOperation(operation, investigationId, operationFunction) {
   return async (...args) => {
     const start = Date.now();
-    
+
     try {
       const result = await operationFunction(...args);
       return result;
     } finally {
       const duration = (Date.now() - start) / 1000;
-      
+
       metrics.graphOperationDuration.observe(
         { operation, investigation_id: investigationId },
-        duration
+        duration,
       );
     }
   };
@@ -220,11 +223,11 @@ function trackGraphOperation(operation, investigationId, operationFunction) {
 function trackWebSocketConnection(io) {
   io.on('connection', (socket) => {
     metrics.websocketConnections.inc();
-    
+
     socket.on('disconnect', () => {
       metrics.websocketConnections.dec();
     });
-    
+
     // Track messages
     socket.use((packet, next) => {
       const [eventType] = packet;
@@ -234,10 +237,10 @@ function trackWebSocketConnection(io) {
       });
       next();
     });
-    
+
     // Override emit to track outgoing messages
     const originalEmit = socket.emit;
-    socket.emit = function(eventType, ...args) {
+    socket.emit = function (eventType, ...args) {
       metrics.websocketMessages.inc({
         direction: 'outgoing',
         event_type: eventType,

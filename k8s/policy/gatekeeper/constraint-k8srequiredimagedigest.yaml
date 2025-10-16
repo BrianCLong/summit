@@ -5,9 +5,9 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
+      - apiGroups: ['']
+        kinds: ['Pod']
   parameters:
     repos:
-      - "ghcr.io/your-org/"
-      - "your-private-registry.io/"
+      - 'ghcr.io/your-org/'
+      - 'your-private-registry.io/'

@@ -2,8 +2,10 @@
  * Monitoring and observability endpoints
  */
 import express from 'express';
+import { z } from 'zod';
 import { register, webVitalValue } from '../monitoring/metrics.js';
 import { performHealthCheck, getCachedHealthStatus, livenessProbe, readinessProbe, checkDatabase, checkNeo4j, checkRedis, checkMlService, checkSystemResources, } from '../monitoring/health.js';
+import { recordBusinessEvent, } from '../monitoring/businessMetrics.js';
 const router = express.Router();
 router.use(express.json());
 /**
@@ -191,6 +193,33 @@ router.get('/health/system', (req, res) => {
         });
     }
 });
+const businessMetricSchema = z.object({
+    type: z.enum(['user_signup', 'api_call', 'revenue']),
+    tenant: z.string().min(1).optional(),
+    plan: z.string().min(1).optional(),
+    service: z.string().min(1).optional(),
+    route: z.string().min(1).optional(),
+    statusCode: z.number().int().optional(),
+    amount: z.number().optional(),
+    currency: z.string().min(1).optional(),
+    metadata: z.record(z.any()).optional(),
+});
+router.post('/metrics/business', (req, res) => {
+    try {
+        const payload = businessMetricSchema.parse(req.body);
+        recordBusinessEvent(payload);
+        res.status(202).json({
+            status: 'accepted',
+            recordedAt: new Date().toISOString(),
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            error: 'Invalid business metric payload',
+            details: error instanceof Error ? error.message : String(error),
+        });
+    }
+});
 /**
  * Collect Web Vitals metrics from clients
  * POST /web-vitals
@@ -205,7 +234,9 @@ router.post('/web-vitals', (req, res) => {
         res.status(204).end();
     }
     catch (error) {
-        res.status(500).json({ error: 'Failed to record web vital', details: error.message });
+        res
+            .status(500)
+            .json({ error: 'Failed to record web vital', details: error.message });
     }
 });
 export default router;

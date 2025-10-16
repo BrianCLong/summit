@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -9,9 +9,9 @@ import {
   MenuItem,
   Box,
   IconButton,
-} from "@mui/material";
-import { Add, Delete } from "@mui/icons-material";
-import { gql, useMutation } from "@apollo/client";
+} from '@mui/material';
+import { Add, Delete } from '@mui/icons-material';
+import { gql, useMutation } from '@apollo/client';
 
 const UPDATE_INVESTIGATION = gql`
   mutation UpdateInvestigation($id: ID!, $input: UpdateInvestigationInput!) {
@@ -32,7 +32,7 @@ export default function CustomSchemaModal({
   const [save] = useMutation(UPDATE_INVESTIGATION);
 
   const addField = () =>
-    setFields([...fields, { name: "", type: "string", options: [] }]);
+    setFields([...fields, { name: '', type: 'string', options: [] }]);
   const updateField = (index, key, value) => {
     const next = [...fields];
     next[index] = { ...next[index], [key]: value };
@@ -54,19 +54,19 @@ export default function CustomSchemaModal({
         {fields.map((field, idx) => (
           <Box
             key={idx}
-            sx={{ display: "flex", gap: 1, mb: 1, alignItems: "center" }}
+            sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}
           >
             <TextField
               label="Field Name"
               value={field.name}
-              onChange={(e) => updateField(idx, "name", e.target.value)}
+              onChange={(e) => updateField(idx, 'name', e.target.value)}
               size="small"
             />
             <TextField
               select
               label="Type"
               value={field.type}
-              onChange={(e) => updateField(idx, "type", e.target.value)}
+              onChange={(e) => updateField(idx, 'type', e.target.value)}
               size="small"
               sx={{ minWidth: 120 }}
             >
@@ -74,15 +74,15 @@ export default function CustomSchemaModal({
               <MenuItem value="number">number</MenuItem>
               <MenuItem value="enum">enum</MenuItem>
             </TextField>
-            {field.type === "enum" && (
+            {field.type === 'enum' && (
               <TextField
                 label="Options"
-                value={field.options.join(",")}
+                value={field.options.join(',')}
                 onChange={(e) =>
                   updateField(
                     idx,
-                    "options",
-                    e.target.value.split(",").map((v) => v.trim()),
+                    'options',
+                    e.target.value.split(',').map((v) => v.trim()),
                   )
                 }
                 size="small"

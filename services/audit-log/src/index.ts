@@ -16,7 +16,10 @@ app.use(express.json());
 
 export const log: AuditRecord[] = [];
 
-export function computeHash(record: Omit<AuditRecord, 'hash'>, prevHash: string): string {
+export function computeHash(
+  record: Omit<AuditRecord, 'hash'>,
+  prevHash: string,
+): string {
   const data = JSON.stringify(record) + prevHash;
   return crypto.createHash('sha256').update(data).digest('hex');
 }

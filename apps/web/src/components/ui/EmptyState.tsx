@@ -52,14 +52,10 @@ export function EmptyState({
         </p>
       )}
       {action && (
-        <Button
-          onClick={action.onClick}
-          variant={action.variant || 'default'}
-        >
+        <Button onClick={action.onClick} variant={action.variant || 'default'}>
           {action.label}
         </Button>
       )}
     </div>
   )
 }
-

@@ -2,9 +2,9 @@
  * Entity Model Tests
  * Tests for Neo4j entity modeling, constraints, indexes, and migrations
  */
-const { EntityModelService, entityModelService } = require('../services/EntityModelService');
+const { EntityModelService, entityModelService, } = require('../services/EntityModelService');
 const { migrationManager } = require('../db/migrations/index');
-const { connectNeo4j, connectPostgres, getNeo4jDriver, closeConnections } = require('../config/database');
+const { connectNeo4j, connectPostgres, getNeo4jDriver, closeConnections, } = require('../config/database');
 describe('Entity Model System', () => {
     beforeAll(async () => {
         // Set up test database connections
@@ -23,7 +23,7 @@ describe('Entity Model System', () => {
             const status = await migrationManager.status();
             expect(Array.isArray(status)).toBe(true);
             // Should have at least the initial migrations
-            const migrationVersions = status.map(s => s.version);
+            const migrationVersions = status.map((s) => s.version);
             expect(migrationVersions).toContain('001_initial_entity_model');
             expect(migrationVersions).toContain('002_entity_type_specialization');
         });
@@ -72,7 +72,9 @@ describe('Entity Model System', () => {
         })
       `, { id: entityId })).rejects.toThrow();
             // Cleanup
-            await session.run('MATCH (e:Entity {id: $id}) DELETE e', { id: entityId });
+            await session.run('MATCH (e:Entity {id: $id}) DELETE e', {
+                id: entityId,
+            });
         });
         test('should enforce required fields', async () => {
             // Entity without required type should fail
@@ -130,7 +132,7 @@ describe('Entity Model System', () => {
                         type: i % 2 === 0 ? 'PERSON' : 'ORGANIZATION',
                         label: `Test Entity ${i}`,
                         investigationId: testInvestigationId,
-                        confidence: 0.5 + (i * 0.1)
+                        confidence: 0.5 + i * 0.1,
                     });
                 }
                 // Create test relationships
@@ -203,7 +205,7 @@ describe('Entity Model System', () => {
             expect(perfStats).toHaveProperty('investigationId');
             expect(perfStats).toHaveProperty('queryStats');
             expect(Array.isArray(perfStats.queryStats)).toBe(true);
-            perfStats.queryStats.forEach(stat => {
+            perfStats.queryStats.forEach((stat) => {
                 expect(stat).toHaveProperty('queryName');
                 expect(stat).toHaveProperty('executionTimeMs');
                 expect(stat).toHaveProperty('resultCount');

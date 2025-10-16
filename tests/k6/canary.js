@@ -6,8 +6,8 @@ export const options = {
   duration: '1m',
   thresholds: {
     http_req_failed: ['rate<0.01'],
-    http_req_duration: ['p(95)<700', 'p(99)<1500']
-  }
+    http_req_duration: ['p(95)<700', 'p(99)<1500'],
+  },
 };
 
 export default function () {

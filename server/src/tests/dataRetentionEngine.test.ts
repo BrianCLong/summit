@@ -6,19 +6,22 @@ import { RetentionAuditLogger } from '../governance/retention/auditLogger.js';
 
 function createMockPool() {
   return {
-    query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 })
+    query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
   } as unknown as Pool;
 }
 
 function createAuditLogger(): RetentionAuditLogger {
   return {
-    log: jest.fn().mockResolvedValue(undefined)
+    log: jest.fn().mockResolvedValue(undefined),
   };
 }
 
-function createMetadata(overrides: Partial<DatasetMetadata> = {}): DatasetMetadata {
+function createMetadata(
+  overrides: Partial<DatasetMetadata> = {},
+): DatasetMetadata {
   return {
-    datasetId: overrides.datasetId ?? `dataset-${Math.random().toString(36).slice(2)}`,
+    datasetId:
+      overrides.datasetId ?? `dataset-${Math.random().toString(36).slice(2)}`,
     name: overrides.name ?? 'Test Dataset',
     description: overrides.description,
     dataType: overrides.dataType ?? 'communications',
@@ -26,11 +29,14 @@ function createMetadata(overrides: Partial<DatasetMetadata> = {}): DatasetMetada
     containsFinancialData: overrides.containsFinancialData ?? false,
     containsHealthData: overrides.containsHealthData ?? false,
     jurisdictions: overrides.jurisdictions ?? ['us'],
-    tags: overrides.tags ?? ['neo4j:label:TestLabel', 'postgres:table:test_table'],
+    tags: overrides.tags ?? [
+      'neo4j:label:TestLabel',
+      'postgres:table:test_table',
+    ],
     storageSystems: overrides.storageSystems ?? ['neo4j', 'postgres'],
     owner: overrides.owner ?? 'tester@intelgraph.dev',
     createdAt: overrides.createdAt ?? new Date(),
-    recordCount: overrides.recordCount
+    recordCount: overrides.recordCount,
   };
 }
 
@@ -40,14 +46,21 @@ describe('DataRetentionEngine', () => {
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
     const runCypher = jest.fn().mockResolvedValue([]);
-    const engine = new DataRetentionEngine({ pool, scheduler, auditLogger, runCypher });
+    const engine = new DataRetentionEngine({
+      pool,
+      scheduler,
+      auditLogger,
+      runCypher,
+    });
 
     const metadata = createMetadata();
     const record = await engine.registerDataset(metadata, 'tester');
 
     expect(record.policy.templateId).toBe('pii-365d');
     expect(record.policy.retentionDays).toBe(365);
-    expect((auditLogger.log as jest.Mock).mock.calls[0][0].event).toBe('policy.applied');
+    expect((auditLogger.log as jest.Mock).mock.calls[0][0].event).toBe(
+      'policy.applied',
+    );
 
     scheduler.stop();
   });
@@ -57,7 +70,12 @@ describe('DataRetentionEngine', () => {
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
     const runCypher = jest.fn().mockResolvedValue([]);
-    const engine = new DataRetentionEngine({ pool, scheduler, auditLogger, runCypher });
+    const engine = new DataRetentionEngine({
+      pool,
+      scheduler,
+      auditLogger,
+      runCypher,
+    });
 
     const metadata = createMetadata({ datasetId: 'legal-hold-test' });
     await engine.registerDataset(metadata, 'tester');
@@ -67,13 +85,15 @@ describe('DataRetentionEngine', () => {
       reason: 'Pending litigation',
       requestedBy: 'legal@intelgraph.dev',
       createdAt: new Date(),
-      scope: 'full'
+      scope: 'full',
     };
 
     await engine.applyLegalHold('legal-hold-test', legalHold);
     await engine.purgeDataset('legal-hold-test', 'manual');
 
-    expect((auditLogger.log as jest.Mock)).toHaveBeenCalledWith(expect.objectContaining({ event: 'purge.skipped' }));
+    expect(auditLogger.log as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'purge.skipped' }),
+    );
 
     scheduler.stop();
   });
@@ -83,14 +103,23 @@ describe('DataRetentionEngine', () => {
     const scheduler = new RetentionScheduler(5);
     const auditLogger = createAuditLogger();
     const runCypher = jest.fn().mockResolvedValue([]);
-    const engine = new DataRetentionEngine({ pool, scheduler, auditLogger, runCypher });
+    const engine = new DataRetentionEngine({
+      pool,
+      scheduler,
+      auditLogger,
+      runCypher,
+    });
 
     const metadata = createMetadata({
       datasetId: 'scheduled-dataset',
       dataType: 'analytics',
       containsPersonalData: false,
-      tags: ['neo4j:label:RetentionNode', 'postgres:table:retention_table', 'public-intel'],
-      storageSystems: ['neo4j', 'postgres']
+      tags: [
+        'neo4j:label:RetentionNode',
+        'postgres:table:retention_table',
+        'public-intel',
+      ],
+      storageSystems: ['neo4j', 'postgres'],
     });
 
     await engine.registerDataset(metadata, 'scheduler');
@@ -98,9 +127,9 @@ describe('DataRetentionEngine', () => {
 
     await scheduler.runDueTasks(new Date(Date.now() + 20));
 
-    expect((pool.query as unknown as jest.Mock)).toHaveBeenCalledWith(
+    expect(pool.query as unknown as jest.Mock).toHaveBeenCalledWith(
       expect.stringContaining('DELETE FROM retention_table'),
-      ['scheduled-dataset']
+      ['scheduled-dataset'],
     );
     expect(runCypher).toHaveBeenCalled();
 
@@ -112,7 +141,12 @@ describe('DataRetentionEngine', () => {
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
     const runCypher = jest.fn().mockResolvedValue([]);
-    const engine = new DataRetentionEngine({ pool, scheduler, auditLogger, runCypher });
+    const engine = new DataRetentionEngine({
+      pool,
+      scheduler,
+      auditLogger,
+      runCypher,
+    });
 
     const metadata = createMetadata({ datasetId: 'report-dataset' });
     await engine.registerDataset(metadata, 'compliance');
@@ -122,10 +156,13 @@ describe('DataRetentionEngine', () => {
       reason: 'Regulatory request',
       requestedBy: 'compliance@intelgraph.dev',
       createdAt: new Date(),
-      scope: 'full'
+      scope: 'full',
     });
 
-    const report = engine.generateComplianceReport(new Date(Date.now() - 1000), new Date(Date.now() + 1000));
+    const report = engine.generateComplianceReport(
+      new Date(Date.now() - 1000),
+      new Date(Date.now() + 1000),
+    );
 
     expect(report.totalDatasets).toBeGreaterThanOrEqual(1);
     expect(report.datasetsOnLegalHold).toBeGreaterThanOrEqual(1);
@@ -139,22 +176,33 @@ describe('DataRetentionEngine', () => {
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
     const runCypher = jest.fn().mockResolvedValue([]);
-    const engine = new DataRetentionEngine({ pool, scheduler, auditLogger, runCypher });
+    const engine = new DataRetentionEngine({
+      pool,
+      scheduler,
+      auditLogger,
+      runCypher,
+    });
 
     const metadata = createMetadata({ datasetId: 'archive-dataset' });
     await engine.registerDataset(metadata, 'archiver');
 
-    await engine.archiveDataset('archive-dataset', 'archiver', 'glacier://intelgraph/archive-dataset');
+    await engine.archiveDataset(
+      'archive-dataset',
+      'archiver',
+      'glacier://intelgraph/archive-dataset',
+    );
 
-    expect((pool.query as unknown as jest.Mock)).toHaveBeenCalledWith(
+    expect(pool.query as unknown as jest.Mock).toHaveBeenCalledWith(
       expect.stringContaining('UPDATE data_retention_records'),
-      expect.any(Array)
+      expect.any(Array),
     );
     expect(runCypher).toHaveBeenCalledWith(
       expect.stringContaining('MATCH (n { datasetId: $datasetId })'),
-      expect.objectContaining({ datasetId: 'archive-dataset' })
+      expect.objectContaining({ datasetId: 'archive-dataset' }),
     );
-    expect((auditLogger.log as jest.Mock)).toHaveBeenCalledWith(expect.objectContaining({ event: 'archive.completed' }));
+    expect(auditLogger.log as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'archive.completed' }),
+    );
 
     scheduler.stop();
   });

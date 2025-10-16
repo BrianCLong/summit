@@ -13,7 +13,10 @@ export type JwtClaims = Record<string, unknown> & {
   aud?: string | string[];
 };
 
-export async function verifyJwt(token: string, jwksUrl: string): Promise<JwtClaims> {
+export async function verifyJwt(
+  token: string,
+  jwksUrl: string,
+): Promise<JwtClaims> {
   const jwks = jose.createRemoteJWKSet(new URL(jwksUrl));
   const { payload } = await jose.jwtVerify(token, jwks);
   return payload as JwtClaims;

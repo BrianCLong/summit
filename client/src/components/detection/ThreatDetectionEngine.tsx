@@ -25,7 +25,15 @@ interface ThreatAlert {
   status: 'new' | 'investigating' | 'confirmed' | 'false_positive' | 'resolved';
   affectedEntities: string[];
   indicators: Array<{
-    type: 'ip' | 'domain' | 'hash' | 'url' | 'email' | 'filename' | 'registry' | 'process';
+    type:
+      | 'ip'
+      | 'domain'
+      | 'hash'
+      | 'url'
+      | 'email'
+      | 'filename'
+      | 'registry'
+      | 'process';
     value: string;
     confidence: number;
   }>;
@@ -47,7 +55,13 @@ interface ThreatAlert {
 interface IncidentCase {
   id: string;
   title: string;
-  status: 'open' | 'investigating' | 'containment' | 'eradication' | 'recovery' | 'closed';
+  status:
+    | 'open'
+    | 'investigating'
+    | 'containment'
+    | 'eradication'
+    | 'recovery'
+    | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
   category:
     | 'malware'
@@ -129,7 +143,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
     'dashboard' | 'alerts' | 'incidents' | 'signatures' | 'response'
   >('dashboard');
   const [selectedAlert, setSelectedAlert] = useState<ThreatAlert | null>(null);
-  const [selectedIncident, setSelectedIncident] = useState<IncidentCase | null>(null);
+  const [selectedIncident, setSelectedIncident] = useState<IncidentCase | null>(
+    null,
+  );
   const [isDetectionRunning, setIsDetectionRunning] = useState(true);
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -165,8 +181,14 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         type: 'behavioral',
         severity: 'high',
         confidence: 85,
-        description: 'Detection of suspicious PowerShell commands often used in attacks',
-        indicators: ['powershell.exe', 'encoded command', 'download', 'invoke-expression'],
+        description:
+          'Detection of suspicious PowerShell commands often used in attacks',
+        indicators: [
+          'powershell.exe',
+          'encoded command',
+          'download',
+          'invoke-expression',
+        ],
         mitreTactics: ['T1059.001', 'T1105'],
         mitreID: 'T1059.001',
         isActive: true,
@@ -179,7 +201,8 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         type: 'behavioral',
         severity: 'critical',
         confidence: 92,
-        description: 'Detects patterns indicative of lateral movement across network',
+        description:
+          'Detects patterns indicative of lateral movement across network',
         indicators: ['psexec', 'wmic', 'net use', 'admin$'],
         mitreTactics: ['T1021', 'T1077'],
         mitreID: 'T1021.001',
@@ -193,8 +216,13 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         type: 'anomaly',
         severity: 'high',
         confidence: 78,
-        description: 'Unusual data transfer patterns suggesting potential exfiltration',
-        indicators: ['large file transfers', 'compressed archives', 'unusual destinations'],
+        description:
+          'Unusual data transfer patterns suggesting potential exfiltration',
+        indicators: [
+          'large file transfers',
+          'compressed archives',
+          'unusual destinations',
+        ],
         mitreTactics: ['T1041', 'T1002'],
         mitreID: 'T1041',
         isActive: true,
@@ -207,7 +235,8 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         type: 'signature',
         severity: 'critical',
         confidence: 95,
-        description: 'Detection of tools and techniques used for credential extraction',
+        description:
+          'Detection of tools and techniques used for credential extraction',
         indicators: ['mimikatz', 'lsass.exe', 'procdump', 'sekurlsa'],
         mitreTactics: ['T1003'],
         mitreID: 'T1003.001',
@@ -221,8 +250,13 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         type: 'ml_model',
         severity: 'high',
         confidence: 88,
-        description: 'ML model detecting command and control communication patterns',
-        indicators: ['periodic beacons', 'encrypted traffic', 'suspicious domains'],
+        description:
+          'ML model detecting command and control communication patterns',
+        indicators: [
+          'periodic beacons',
+          'encrypted traffic',
+          'suspicious domains',
+        ],
         mitreTactics: ['T1071', 'T1102'],
         mitreID: 'T1071.001',
         isActive: true,
@@ -235,7 +269,13 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
   };
 
   const generateMockAlerts = () => {
-    const severities: ThreatAlert['severity'][] = ['info', 'low', 'medium', 'high', 'critical'];
+    const severities: ThreatAlert['severity'][] = [
+      'info',
+      'low',
+      'medium',
+      'high',
+      'critical',
+    ];
     const statuses: ThreatAlert['status'][] = [
       'new',
       'investigating',
@@ -245,14 +285,18 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
     ];
 
     const mockAlerts: ThreatAlert[] = Array.from({ length: 25 }, (_, i) => {
-      const severity = severities[Math.floor(Math.random() * severities.length)];
-      const status = i < 5 ? 'new' : statuses[Math.floor(Math.random() * statuses.length)];
+      const severity =
+        severities[Math.floor(Math.random() * severities.length)];
+      const status =
+        i < 5 ? 'new' : statuses[Math.floor(Math.random() * statuses.length)];
 
       return {
         id: `alert-${String(i + 1).padStart(3, '0')}`,
         signatureId: `sig-${String.fromCharCode(48 + (i % 5) + 1).padStart(3, '0')}`,
         signatureName: `Threat Signature ${i + 1}`,
-        timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+        timestamp: new Date(
+          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+        ),
         severity,
         confidence: Math.random() * 40 + 60,
         status,
@@ -273,15 +317,23 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         ],
         context: {
           sourceIP: `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-          processName: ['powershell.exe', 'cmd.exe', 'explorer.exe'][Math.floor(Math.random() * 3)],
-          username: ['user1', 'admin', 'service_account'][Math.floor(Math.random() * 3)],
+          processName: ['powershell.exe', 'cmd.exe', 'explorer.exe'][
+            Math.floor(Math.random() * 3)
+          ],
+          username: ['user1', 'admin', 'service_account'][
+            Math.floor(Math.random() * 3)
+          ],
         },
-        mitreTechniques: ['T1059.001', 'T1021.001', 'T1003.001'][Math.floor(Math.random() * 3)],
+        mitreTechniques: ['T1059.001', 'T1021.001', 'T1003.001'][
+          Math.floor(Math.random() * 3)
+        ],
         notes: [],
       };
     });
 
-    setAlerts(mockAlerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
+    setAlerts(
+      mockAlerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
+    );
   };
 
   const generateMockIncidents = () => {
@@ -292,11 +344,23 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
       'insider_threat',
       'apt',
     ];
-    const priorities: IncidentCase['priority'][] = ['low', 'medium', 'high', 'critical'];
-    const statuses: IncidentCase['status'][] = ['open', 'investigating', 'containment', 'recovery'];
+    const priorities: IncidentCase['priority'][] = [
+      'low',
+      'medium',
+      'high',
+      'critical',
+    ];
+    const statuses: IncidentCase['status'][] = [
+      'open',
+      'investigating',
+      'containment',
+      'recovery',
+    ];
 
     const mockIncidents: IncidentCase[] = Array.from({ length: 8 }, (_, i) => {
-      const createdDate = new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000);
+      const createdDate = new Date(
+        Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000,
+      );
 
       return {
         id: `inc-${String(i + 1).padStart(3, '0')}`,
@@ -305,10 +369,16 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
         priority: priorities[Math.floor(Math.random() * priorities.length)],
         category: categories[Math.floor(Math.random() * categories.length)],
         createdDate,
-        lastUpdated: new Date(createdDate.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000),
-        assignedTeam: ['SOC Team', 'Incident Response', 'Forensics'][Math.floor(Math.random() * 3)],
+        lastUpdated: new Date(
+          createdDate.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000,
+        ),
+        assignedTeam: ['SOC Team', 'Incident Response', 'Forensics'][
+          Math.floor(Math.random() * 3)
+        ],
         affectedSystems: [`system-${Math.floor(Math.random() * 50)}`],
-        alerts: [`alert-${String(Math.floor(Math.random() * 25) + 1).padStart(3, '0')}`],
+        alerts: [
+          `alert-${String(Math.floor(Math.random() * 25) + 1).padStart(3, '0')}`,
+        ],
         timeline: [
           {
             timestamp: createdDate,
@@ -326,9 +396,15 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
           },
         ],
         impactAssessment: {
-          confidentiality: ['none', 'low', 'medium', 'high'][Math.floor(Math.random() * 4)] as any,
-          integrity: ['none', 'low', 'medium', 'high'][Math.floor(Math.random() * 4)] as any,
-          availability: ['none', 'low', 'medium', 'high'][Math.floor(Math.random() * 4)] as any,
+          confidentiality: ['none', 'low', 'medium', 'high'][
+            Math.floor(Math.random() * 4)
+          ] as any,
+          integrity: ['none', 'low', 'medium', 'high'][
+            Math.floor(Math.random() * 4)
+          ] as any,
+          availability: ['none', 'low', 'medium', 'high'][
+            Math.floor(Math.random() * 4)
+          ] as any,
           businessImpact: 'Under investigation',
           affectedUsers: Math.floor(Math.random() * 1000),
           estimatedCost: Math.floor(Math.random() * 100000),
@@ -336,7 +412,11 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
       };
     });
 
-    setIncidents(mockIncidents.sort((a, b) => b.createdDate.getTime() - a.createdDate.getTime()));
+    setIncidents(
+      mockIncidents.sort(
+        (a, b) => b.createdDate.getTime() - a.createdDate.getTime(),
+      ),
+    );
   };
 
   const simulateRealTimeDetection = () => {
@@ -357,12 +437,20 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
   };
 
   const generateRandomAlert = (): ThreatAlert => {
-    const severities: ThreatAlert['severity'][] = ['info', 'low', 'medium', 'high', 'critical'];
+    const severities: ThreatAlert['severity'][] = [
+      'info',
+      'low',
+      'medium',
+      'high',
+      'critical',
+    ];
     const severity = severities[Math.floor(Math.random() * severities.length)];
 
     return {
       id: `alert-${Date.now()}`,
-      signatureId: signatures[Math.floor(Math.random() * signatures.length)]?.id || 'sig-001',
+      signatureId:
+        signatures[Math.floor(Math.random() * signatures.length)]?.id ||
+        'sig-001',
       signatureName: 'Real-time Detection',
       timestamp: new Date(),
       severity,
@@ -421,17 +509,24 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
     const last24h = now - 24 * 60 * 60 * 1000;
     const last7d = now - 7 * 24 * 60 * 60 * 1000;
 
-    const alertsLast24h = alerts.filter((a) => a.timestamp.getTime() > last24h).length;
-    const alertsLast7d = alerts.filter((a) => a.timestamp.getTime() > last7d).length;
+    const alertsLast24h = alerts.filter(
+      (a) => a.timestamp.getTime() > last24h,
+    ).length;
+    const alertsLast7d = alerts.filter(
+      (a) => a.timestamp.getTime() > last7d,
+    ).length;
 
     const criticalAlerts = alerts.filter(
       (a) => a.severity === 'critical' && a.status !== 'resolved',
     ).length;
     const openIncidents = incidents.filter((i) => i.status !== 'closed').length;
 
-    const falsePositives = alerts.filter((a) => a.status === 'false_positive').length;
+    const falsePositives = alerts.filter(
+      (a) => a.status === 'false_positive',
+    ).length;
     const totalAlerts = alerts.length;
-    const falsePositiveRate = totalAlerts > 0 ? falsePositives / totalAlerts : 0;
+    const falsePositiveRate =
+      totalAlerts > 0 ? falsePositives / totalAlerts : 0;
 
     const threatTypeCounts = alerts.reduce(
       (acc, alert) => {
@@ -463,15 +558,22 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
     setMetrics(newMetrics);
   };
 
-  const updateAlertStatus = (alertId: string, newStatus: ThreatAlert['status']) => {
+  const updateAlertStatus = (
+    alertId: string,
+    newStatus: ThreatAlert['status'],
+  ) => {
     setAlerts((prev) =>
-      prev.map((alert) => (alert.id === alertId ? { ...alert, status: newStatus } : alert)),
+      prev.map((alert) =>
+        alert.id === alertId ? { ...alert, status: newStatus } : alert,
+      ),
     );
   };
 
   const assignAlert = (alertId: string, analyst: string) => {
     setAlerts((prev) =>
-      prev.map((alert) => (alert.id === alertId ? { ...alert, assignedAnalyst: analyst } : alert)),
+      prev.map((alert) =>
+        alert.id === alertId ? { ...alert, assignedAnalyst: analyst } : alert,
+      ),
     );
   };
 
@@ -518,7 +620,8 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
   };
 
   const filteredAlerts = alerts.filter((alert) => {
-    const severityMatch = filterSeverity === 'all' || alert.severity === filterSeverity;
+    const severityMatch =
+      filterSeverity === 'all' || alert.severity === filterSeverity;
     const statusMatch = filterStatus === 'all' || alert.status === filterStatus;
     return severityMatch && statusMatch;
   });
@@ -568,7 +671,8 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
             onClick={() => setActiveView('incidents')}
             className={`px-4 py-2 rounded-md ${activeView === 'incidents' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
           >
-            🔥 Incidents ({incidents.filter((i) => i.status !== 'closed').length})
+            🔥 Incidents (
+            {incidents.filter((i) => i.status !== 'closed').length})
           </button>
           <button
             onClick={() => setActiveView('signatures')}
@@ -591,15 +695,21 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg border p-4">
-              <div className="text-2xl font-bold text-red-600">{metrics.criticalAlerts}</div>
+              <div className="text-2xl font-bold text-red-600">
+                {metrics.criticalAlerts}
+              </div>
               <div className="text-sm text-gray-600">Critical Alerts</div>
             </div>
             <div className="bg-white rounded-lg border p-4">
-              <div className="text-2xl font-bold text-orange-600">{metrics.openIncidents}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {metrics.openIncidents}
+              </div>
               <div className="text-sm text-gray-600">Open Incidents</div>
             </div>
             <div className="bg-white rounded-lg border p-4">
-              <div className="text-2xl font-bold text-blue-600">{metrics.alertsLast24h}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {metrics.alertsLast24h}
+              </div>
               <div className="text-sm text-gray-600">Alerts (24h)</div>
             </div>
             <div className="bg-white rounded-lg border p-4">
@@ -616,7 +726,10 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
               <h3 className="font-semibold mb-4">Top Threat Types</h3>
               <div className="space-y-3">
                 {metrics.topThreatTypes.map((threat, index) => (
-                  <div key={threat.type} className="flex items-center justify-between">
+                  <div
+                    key={threat.type}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm">{threat.type}</span>
                     <div className="flex items-center gap-2">
                       <div className="w-24 h-2 bg-gray-200 rounded-full">
@@ -627,7 +740,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
                           }}
                         ></div>
                       </div>
-                      <span className="text-sm font-medium">{threat.count}</span>
+                      <span className="text-sm font-medium">
+                        {threat.count}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -638,25 +753,33 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
               <h3 className="font-semibold mb-4">Response Metrics</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Mean Time to Detection:</span>
+                  <span className="text-sm text-gray-600">
+                    Mean Time to Detection:
+                  </span>
                   <span className="text-sm font-medium">
                     {metrics.meanTimeToDetection.toFixed(1)} min
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Mean Time to Response:</span>
+                  <span className="text-sm text-gray-600">
+                    Mean Time to Response:
+                  </span>
                   <span className="text-sm font-medium">
                     {metrics.meanTimeToResponse.toFixed(1)} min
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Average Response Time:</span>
+                  <span className="text-sm text-gray-600">
+                    Average Response Time:
+                  </span>
                   <span className="text-sm font-medium">
                     {metrics.averageResponseTime.toFixed(1)} min
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">False Positive Rate:</span>
+                  <span className="text-sm text-gray-600">
+                    False Positive Rate:
+                  </span>
                   <span className="text-sm font-medium">
                     {(metrics.falsePositiveRate * 100).toFixed(1)}%
                   </span>
@@ -720,7 +843,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
                       {alert.status.replace('_', ' ').toUpperCase()}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500">{alert.timestamp.toLocaleString()}</div>
+                  <div className="text-xs text-gray-500">
+                    {alert.timestamp.toLocaleString()}
+                  </div>
                 </div>
 
                 <h4 className="font-medium mb-1">{alert.signatureName}</h4>
@@ -731,7 +856,10 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
 
                 <div className="flex flex-wrap gap-1">
                   {alert.indicators.map((indicator, index) => (
-                    <span key={index} className="px-2 py-1 bg-gray-100 text-xs rounded">
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-gray-100 text-xs rounded"
+                    >
                       {indicator.type}: {indicator.value}
                     </span>
                   ))}
@@ -748,7 +876,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
             {filteredAlerts.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 <div className="text-4xl mb-4">🚨</div>
-                <h3 className="text-lg font-medium mb-2">No alerts match your filters</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  No alerts match your filters
+                </h3>
                 <p>Try adjusting your filter criteria</p>
               </div>
             )}
@@ -781,7 +911,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
                     {incident.category.replace('_', ' ').toUpperCase()}
                   </span>
                 </div>
-                <div className="text-xs text-gray-500">{incident.createdDate.toLocaleString()}</div>
+                <div className="text-xs text-gray-500">
+                  {incident.createdDate.toLocaleString()}
+                </div>
               </div>
 
               <h4 className="font-medium mb-2">{incident.title}</h4>
@@ -793,7 +925,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
                 </div>
                 <div>
                   <span className="text-gray-600">Affected Systems:</span>
-                  <span className="ml-2">{incident.affectedSystems.length}</span>
+                  <span className="ml-2">
+                    {incident.affectedSystems.length}
+                  </span>
                 </div>
                 <div>
                   <span className="text-gray-600">Related Alerts:</span>
@@ -801,13 +935,17 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
                 </div>
                 <div>
                   <span className="text-gray-600">Containment Actions:</span>
-                  <span className="ml-2">{incident.containmentActions.length}</span>
+                  <span className="ml-2">
+                    {incident.containmentActions.length}
+                  </span>
                 </div>
               </div>
 
               <div className="mt-3 text-sm">
                 <span className="text-gray-600">Impact: </span>
-                <span className="text-red-600">C:{incident.impactAssessment.confidentiality}</span>
+                <span className="text-red-600">
+                  C:{incident.impactAssessment.confidentiality}
+                </span>
                 <span className="text-orange-600 ml-2">
                   I:{incident.impactAssessment.integrity}
                 </span>
@@ -855,12 +993,16 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
               </div>
 
               <h4 className="font-medium mb-2">{signature.name}</h4>
-              <p className="text-sm text-gray-600 mb-3">{signature.description}</p>
+              <p className="text-sm text-gray-600 mb-3">
+                {signature.description}
+              </p>
 
               <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                 <div>
                   <span className="text-gray-600">Confidence:</span>
-                  <span className="ml-2 font-medium">{signature.confidence}%</span>
+                  <span className="ml-2 font-medium">
+                    {signature.confidence}%
+                  </span>
                 </div>
                 <div>
                   <span className="text-gray-600">False Positive Rate:</span>
@@ -874,7 +1016,10 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
                 <span className="text-sm text-gray-600">MITRE Tactics:</span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {signature.mitreTactics.map((tactic) => (
-                    <span key={tactic} className="px-2 py-1 bg-gray-100 text-xs rounded">
+                    <span
+                      key={tactic}
+                      className="px-2 py-1 bg-gray-100 text-xs rounded"
+                    >
                       {tactic}
                     </span>
                   ))}
@@ -903,7 +1048,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
       {activeView === 'response' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg border p-6">
-            <h3 className="text-lg font-semibold mb-4">🚨 Automated Response Actions</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              🚨 Automated Response Actions
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 border rounded-lg">
@@ -949,7 +1096,9 @@ const ThreatDetectionEngine: React.FC<ThreatDetectionEngineProps> = ({
           </div>
 
           <div className="bg-white rounded-lg border p-6">
-            <h3 className="text-lg font-semibold mb-4">⚡ Response Playbooks</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              ⚡ Response Playbooks
+            </h3>
 
             <div className="space-y-3">
               {[

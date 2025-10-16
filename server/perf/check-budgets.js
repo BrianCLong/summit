@@ -15,7 +15,9 @@ const memory = micro.memoryMb;
 
 let ok = true;
 if (latencyP95 > budget.p95LatencyMs) {
-  console.error(`p95 latency ${latencyP95}ms exceeds budget ${budget.p95LatencyMs}ms`);
+  console.error(
+    `p95 latency ${latencyP95}ms exceeds budget ${budget.p95LatencyMs}ms`,
+  );
   ok = false;
 }
 if (rps < budget.peakRps) {

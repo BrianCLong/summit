@@ -86,7 +86,9 @@ function buildPipelines(total: number): PipelineRecord[] {
     return {
       id,
       name: `Pipeline ${index + 1}`,
-      owners: [randomChoice(owners), randomChoice(owners)].filter((v, idx, arr) => arr.indexOf(v) === idx),
+      owners: [randomChoice(owners), randomChoice(owners)].filter(
+        (v, idx, arr) => arr.indexOf(v) === idx,
+      ),
       status,
       lastRun: formatISO(lastRun),
       leadTimeMinutes: 30 + Math.floor(Math.random() * 120),
@@ -147,7 +149,8 @@ function buildRuns(): RunMetadata[] {
     commit: `c${(1000 + idx).toString(16)}`,
     branch: idx % 2 === 0 ? 'main' : 'release/2025.09',
     initiator: idx % 3 === 0 ? 'build-bot' : randomChoice(owners),
-    environment: idx % 4 === 0 ? 'production' : idx % 4 === 1 ? 'staging' : 'dev',
+    environment:
+      idx % 4 === 0 ? 'production' : idx % 4 === 1 ? 'staging' : 'dev',
     durationSeconds: 360 + Math.floor(Math.random() * 900),
     retries: idx % 5 === 0 ? 1 : 0,
     startedAt: formatISO(addMinutes(now, -idx * 120)),
@@ -193,9 +196,24 @@ function buildReleases(): ReleaseTrain[] {
 
 function buildSloSnapshots(): SloSnapshot[] {
   return [
-    { service: 'pipeline-api', latencyP95Ms: 820, errorRate: 0.002, saturation: 0.61 },
-    { service: 'artifact-proxy', latencyP95Ms: 1340, errorRate: 0.006, saturation: 0.72 },
-    { service: 'policy-engine', latencyP95Ms: 640, errorRate: 0.001, saturation: 0.55 },
+    {
+      service: 'pipeline-api',
+      latencyP95Ms: 820,
+      errorRate: 0.002,
+      saturation: 0.61,
+    },
+    {
+      service: 'artifact-proxy',
+      latencyP95Ms: 1340,
+      errorRate: 0.006,
+      saturation: 0.72,
+    },
+    {
+      service: 'policy-engine',
+      latencyP95Ms: 640,
+      errorRate: 0.001,
+      saturation: 0.55,
+    },
   ];
 }
 

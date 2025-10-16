@@ -8,4 +8,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: node services/fabric/dist/entry.js build  # spins spot runners in cheapest region
+      - run: node services/fabric/dist/entry.js build # spins spot runners in cheapest region

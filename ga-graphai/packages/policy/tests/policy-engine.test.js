@@ -15,7 +15,7 @@ const baseCandidate = {
   safetyTier: SAFETY_TIERS.A,
   licenseClass: LICENSE_CLASSES.MIT_OK,
   residency: 'us-west',
-  constraints: { pii: false }
+  constraints: { pii: false },
 };
 
 test('filterCandidates removes disallowed residency and license', () => {
@@ -23,22 +23,31 @@ test('filterCandidates removes disallowed residency and license', () => {
   const candidates = [
     baseCandidate,
     { ...baseCandidate, id: 'model-b', residency: 'eu-central' },
-    { ...baseCandidate, id: 'model-c', licenseClass: LICENSE_CLASSES.RESTRICTED_TOS }
+    {
+      ...baseCandidate,
+      id: 'model-c',
+      licenseClass: LICENSE_CLASSES.RESTRICTED_TOS,
+    },
   ];
   const allowed = policy.filterCandidates(candidates);
-  assert.deepEqual(allowed.map((c) => c.id), ['model-a']);
+  assert.deepEqual(
+    allowed.map((c) => c.id),
+    ['model-a'],
+  );
 });
 
 test('enforceTaskPolicy throws when residency not allowed for tenant', () => {
-  const policy = new PolicyEngine({ allowedResidencies: ['us-west', 'eu-central'] });
+  const policy = new PolicyEngine({
+    allowedResidencies: ['us-west', 'eu-central'],
+  });
   const candidate = { ...baseCandidate, residency: 'ap-south' };
   assert.throws(
     () =>
       policy.enforceTaskPolicy(
         { id: 'task-1', policy: { allowedResidencies: ['us-west'] } },
-        candidate
+        candidate,
       ),
-    PolicyViolation
+    PolicyViolation,
   );
 });
 
@@ -46,7 +55,7 @@ test('redaction removes obvious secret markers', () => {
   const payload = {
     summary: 'hello',
     password: 'super secret',
-    nested: { email: 'user@example.com' }
+    nested: { email: 'user@example.com' },
   };
   const sanitized = redactPayload(payload);
   assert.equal(sanitized.password, '[REDACTED]');
@@ -54,10 +63,16 @@ test('redaction removes obvious secret markers', () => {
 });
 
 test('enforceTaskPolicy returns audit metadata for compliant candidate', () => {
-  const policy = new PolicyEngine({ allowedResidencies: ['us-west', 'eu-central'] });
+  const policy = new PolicyEngine({
+    allowedResidencies: ['us-west', 'eu-central'],
+  });
   const result = policy.enforceTaskPolicy(
-    { id: 'task-1', policy: { tenant: 'acme', containsPii: true }, skills: ['summarization'] },
-    baseCandidate
+    {
+      id: 'task-1',
+      policy: { tenant: 'acme', containsPii: true },
+      skills: ['summarization'],
+    },
+    baseCandidate,
   );
   assert.ok(result.tags.includes('tenant:acme'));
   assert.ok(result.tags.includes('skill:summarization'));

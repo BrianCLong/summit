@@ -1,8 +1,8 @@
 groups:
-- name: log-budget
-  rules:
-    - record: logs:per_min
-      expr: sum(rate(app_logs_total[1m]))
-    - alert: LogBudgetExceeded
-      expr: logs:per_min > 2000
-      for: 10m
+  - name: log-budget
+    rules:
+      - record: logs:per_min
+        expr: sum(rate(app_logs_total[1m]))
+      - alert: LogBudgetExceeded
+        expr: logs:per_min > 2000
+        for: 10m

@@ -16,4 +16,3 @@ describe('GitHub App raw-body route', () => {
     expect([200, 400, 401, 503]).toContain(res.status);
   });
 });
-

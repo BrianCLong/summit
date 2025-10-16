@@ -1,5 +1,10 @@
 import { createClient, RedisClientType } from 'redis';
-import { recHit, recMiss, recSet, cacheLocalSize } from '../metrics/cacheMetrics.js';
+import {
+  recHit,
+  recMiss,
+  recSet,
+  cacheLocalSize,
+} from '../metrics/cacheMetrics.js';
 
 export interface CacheEntry<T> {
   data: T;
@@ -16,11 +21,20 @@ export class CacheService {
   constructor() {
     // Initialize Redis client if available
     try {
-      const url = process.env.REDIS_URL || (process.env.REDIS_HOST ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}` : undefined);
+      const url =
+        process.env.REDIS_URL ||
+        (process.env.REDIS_HOST
+          ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}`
+          : undefined);
       if (url) {
         this.redisClient = createClient({ url });
-        this.redisClient.on('error', (err) => console.warn('[CACHE] Redis client error:', err));
-        this.redisClient.connect().then(() => console.log('[CACHE] Redis cache connected')).catch((e) => console.warn('[CACHE] Redis connect failed', e));
+        this.redisClient.on('error', (err) =>
+          console.warn('[CACHE] Redis client error:', err),
+        );
+        this.redisClient
+          .connect()
+          .then(() => console.log('[CACHE] Redis cache connected'))
+          .catch((e) => console.warn('[CACHE] Redis connect failed', e));
       } else {
         console.log('[CACHE] Using in-memory cache only');
       }
@@ -94,8 +108,14 @@ export class CacheService {
     if (this.redisClient) {
       try {
         const rkey = `${this.namespace}:${key}`;
-        const payload: CacheEntry<T> = { data, timestamp: Date.now(), ttl: cacheTTL };
-        await this.redisClient.set(rkey, JSON.stringify(payload), { EX: cacheTTL });
+        const payload: CacheEntry<T> = {
+          data,
+          timestamp: Date.now(),
+          ttl: cacheTTL,
+        };
+        await this.redisClient.set(rkey, JSON.stringify(payload), {
+          EX: cacheTTL,
+        });
         recSet('redis', op);
       } catch (e) {
         console.warn('[CACHE] Redis set error:', e);
@@ -142,7 +162,10 @@ export class CacheService {
     if (!this.redisClient) return;
     let cursor = 0;
     do {
-      const res: any = await (this.redisClient as any).scan(cursor, { MATCH: pattern, COUNT: 1000 });
+      const res: any = await (this.redisClient as any).scan(cursor, {
+        MATCH: pattern,
+        COUNT: 1000,
+      });
       cursor = res.cursor;
       const keys: string[] = res.keys || res[1] || [];
       for (const k of keys) yield k;

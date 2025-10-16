@@ -5,7 +5,7 @@ const service = new WatchlistService();
 export const watchlistResolvers = {
   Query: {
     watchlists: () => service.all(),
-    watchlist: (_: any, { id }: any) => service.get(id)
+    watchlist: (_: any, { id }: any) => service.get(id),
   },
   Mutation: {
     createWatchlist: (_: any, args: any) => service.create(args),
@@ -17,11 +17,12 @@ export const watchlistResolvers = {
       service.remove(id, entityIds);
       return service.get(id);
     },
-    importWatchlistCsv: (_: any, { name }: any) => service.create({ name, type: 'import' }),
-    exportWatchlistCsv: () => '' ,
+    importWatchlistCsv: (_: any, { name }: any) =>
+      service.create({ name, type: 'import' }),
+    exportWatchlistCsv: () => '',
     deleteWatchlist: (_: any, { id }: any) => {
       delete (service as any).lists[id];
       return true;
-    }
-  }
+    },
+  },
 };

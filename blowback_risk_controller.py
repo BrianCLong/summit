@@ -9,8 +9,8 @@ provocations while respecting civil liberties.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Any
+from dataclasses import asdict, dataclass, field
+from typing import Any
 
 
 class ValidationError(ValueError):
@@ -26,10 +26,10 @@ class RiskScoreConfig:
     reversibility_weight: float = 1.0
     reversibility_ceiling: float = 10.0
     reversibility_floor: float = 0.0
-    tuning_parameter_weights: Dict[str, float] = field(default_factory=dict)
-    audience_weights: Dict[str, float] = field(default_factory=dict)
+    tuning_parameter_weights: dict[str, float] = field(default_factory=dict)
+    audience_weights: dict[str, float] = field(default_factory=dict)
 
-    def apply_tuning(self, score: float, path: "BlowbackPath") -> float:
+    def apply_tuning(self, score: float, path: BlowbackPath) -> float:
         """Adjust the risk score using tuning parameters and audience weights."""
 
         adjusted = score
@@ -72,9 +72,7 @@ class RiskScoreConfig:
         ):
             for key, value in mapping.items():
                 if value < 0:
-                    raise ValidationError(
-                        f"{mapping_name} contains negative weight for '{key}'"
-                    )
+                    raise ValidationError(f"{mapping_name} contains negative weight for '{key}'")
 
 
 @dataclass
@@ -86,11 +84,11 @@ class BlowbackPath:
     likelihood: int
     impact: int
     reversibility: int
-    tripwires: List[str] = field(default_factory=list)
-    tuning_parameters: Dict[str, float] = field(default_factory=dict)
-    audience_segments: List[str] = field(default_factory=list)
-    channels: List[str] = field(default_factory=list)
-    notes: Optional[str] = None
+    tripwires: list[str] = field(default_factory=list)
+    tuning_parameters: dict[str, float] = field(default_factory=dict)
+    audience_segments: list[str] = field(default_factory=list)
+    channels: list[str] = field(default_factory=list)
+    notes: str | None = None
 
     def __post_init__(self) -> None:
         self._validate_scale(self.likelihood, "likelihood")
@@ -109,7 +107,7 @@ class BlowbackPath:
                 f"{field_name} must be between 1 and 10 inclusive; received {value}"
             )
 
-    def risk_score(self, config: Optional[RiskScoreConfig] = None) -> float:
+    def risk_score(self, config: RiskScoreConfig | None = None) -> float:
         """Compute an adjustable composite risk score."""
 
         config = config or RiskScoreConfig()
@@ -118,12 +116,12 @@ class BlowbackPath:
         impact_term = self.impact * config.impact_weight
         reversibility_gap = config.reversibility_ceiling - self.reversibility
         reversibility_term = max(config.reversibility_floor, reversibility_gap)
-        base_score = likelihood_term * impact_term * (
-            reversibility_term * config.reversibility_weight
+        base_score = (
+            likelihood_term * impact_term * (reversibility_term * config.reversibility_weight)
         )
         return config.apply_tuning(base_score, self)
 
-    def risk_details(self, config: Optional[RiskScoreConfig] = None) -> Dict[str, float]:
+    def risk_details(self, config: RiskScoreConfig | None = None) -> dict[str, float]:
         """Return a breakdown of the components used for the score."""
 
         config = config or RiskScoreConfig()
@@ -132,8 +130,8 @@ class BlowbackPath:
         impact_term = self.impact * config.impact_weight
         reversibility_gap = config.reversibility_ceiling - self.reversibility
         reversibility_term = max(config.reversibility_floor, reversibility_gap)
-        base_score = likelihood_term * impact_term * (
-            reversibility_term * config.reversibility_weight
+        base_score = (
+            likelihood_term * impact_term * (reversibility_term * config.reversibility_weight)
         )
         adjusted = config.apply_tuning(base_score, self)
         return {
@@ -150,9 +148,9 @@ class Provocation:
     """Describes a piece of bait and the safest counter-moves."""
 
     bait: str
-    counter_moves: List[str]
+    counter_moves: list[str]
     confidence: str
-    tuning_rules: Dict[str, str] = field(default_factory=dict)
+    tuning_rules: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -166,7 +164,7 @@ class CoolingPlay:
     timing: str
     expected_effect: str
     risks: str
-    tuning_sliders: Dict[str, float] = field(default_factory=dict)
+    tuning_sliders: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -174,9 +172,9 @@ class IntegrityFriction:
     """Lawful friction measure with policy references."""
 
     name: str
-    references: List[str]
-    intensity_levels: Dict[str, float]
-    audience_applications: List[str]
+    references: list[str]
+    intensity_levels: dict[str, float]
+    audience_applications: list[str]
 
 
 @dataclass
@@ -188,7 +186,7 @@ class Indicator:
     amber: str
     red: str
     play_trigger: str
-    customizable_params: Dict[str, float]
+    customizable_params: dict[str, float]
     fusion_logic: str
 
 
@@ -202,7 +200,7 @@ class MessengerProfile:
     reach: str
     notes: str
     selection_algo: str
-    variants: Dict[str, str] = field(default_factory=dict)
+    variants: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -210,21 +208,21 @@ class TimebandAction:
     """Actions and pivots for a given timeband."""
 
     band: str
-    actions: List[str]
-    resources: List[str]
-    conditions: List[str]
-    pivots: List[str]
+    actions: list[str]
+    resources: list[str]
+    conditions: list[str]
+    pivots: list[str]
 
 
 @dataclass
 class MeasurementPlan:
     """Metric and audit plan for assessing impact."""
 
-    metrics: List[str]
-    dashboards: List[str]
+    metrics: list[str]
+    dashboards: list[str]
     cadence: str
-    weights: Dict[str, float]
-    tuning_views: List[str]
+    weights: dict[str, float]
+    tuning_views: list[str]
 
 
 @dataclass
@@ -236,15 +234,15 @@ class BlowbackRiskController:
     serialization or inspection.
     """
 
-    paths: List[BlowbackPath] = field(default_factory=list)
-    provocations: List[Provocation] = field(default_factory=list)
-    cooling_plays: List[CoolingPlay] = field(default_factory=list)
-    frictions: List[IntegrityFriction] = field(default_factory=list)
-    indicators: List[Indicator] = field(default_factory=list)
-    messengers: List[MessengerProfile] = field(default_factory=list)
-    timebands: List[TimebandAction] = field(default_factory=list)
-    measurement_plan: Optional[MeasurementPlan] = None
-    transparency_note: Optional[str] = None
+    paths: list[BlowbackPath] = field(default_factory=list)
+    provocations: list[Provocation] = field(default_factory=list)
+    cooling_plays: list[CoolingPlay] = field(default_factory=list)
+    frictions: list[IntegrityFriction] = field(default_factory=list)
+    indicators: list[Indicator] = field(default_factory=list)
+    messengers: list[MessengerProfile] = field(default_factory=list)
+    timebands: list[TimebandAction] = field(default_factory=list)
+    measurement_plan: MeasurementPlan | None = None
+    transparency_note: str | None = None
 
     def add_path(self, path: BlowbackPath) -> None:
         self.paths.append(path)
@@ -273,7 +271,7 @@ class BlowbackRiskController:
     def set_transparency_note(self, note: str) -> None:
         self.transparency_note = note
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return a dictionary representation of the full plan."""
 
         return {
@@ -284,14 +282,12 @@ class BlowbackRiskController:
             "indicators": [asdict(i) for i in self.indicators],
             "credible_messengers": [asdict(m) for m in self.messengers],
             "timeband_playbook": [asdict(t) for t in self.timebands],
-            "measurement_plan": asdict(self.measurement_plan)
-            if self.measurement_plan
-            else None,
+            "measurement_plan": asdict(self.measurement_plan) if self.measurement_plan else None,
             "transparency_note": self.transparency_note,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "BlowbackRiskController":
+    def from_dict(cls, data: dict[str, Any]) -> BlowbackRiskController:
         """Recreate a controller from a serialized dictionary."""
         controller = cls()
         for p in data.get("blowback_map", []):
@@ -314,15 +310,13 @@ class BlowbackRiskController:
             controller.set_transparency_note(note)
         return controller
 
-    def rank_paths(
-        self, config: Optional[RiskScoreConfig] = None
-    ) -> List[BlowbackPath]:
+    def rank_paths(self, config: RiskScoreConfig | None = None) -> list[BlowbackPath]:
         """Return paths ordered by descending risk score."""
 
         config = config or RiskScoreConfig()
         return sorted(self.paths, key=lambda p: p.risk_score(config), reverse=True)
 
-    def aggregate_risk(self, config: Optional[RiskScoreConfig] = None) -> Dict[str, Any]:
+    def aggregate_risk(self, config: RiskScoreConfig | None = None) -> dict[str, Any]:
         """Return summary statistics for stored blowback paths."""
 
         config = config or RiskScoreConfig()
@@ -338,7 +332,7 @@ class BlowbackRiskController:
         scores = [(path, path.risk_score(config)) for path in self.paths]
         highest_path, highest_score = max(scores, key=lambda item: item[1])
         average_score = sum(score for _, score in scores) / len(scores)
-        audience_totals: Dict[str, float] = {}
+        audience_totals: dict[str, float] = {}
         for path, score in scores:
             segments = path.audience_segments or ["general"]
             for segment in segments:
@@ -351,27 +345,27 @@ class BlowbackRiskController:
         }
 
     def high_risk_tripwires(
-        self, threshold: float, config: Optional[RiskScoreConfig] = None
-    ) -> Dict[str, List[str]]:
+        self, threshold: float, config: RiskScoreConfig | None = None
+    ) -> dict[str, list[str]]:
         """Return tripwires for paths exceeding the given risk threshold."""
 
         if threshold < 0:
             raise ValidationError("Threshold must be non-negative")
         config = config or RiskScoreConfig()
-        alerts: Dict[str, List[str]] = {}
+        alerts: dict[str, list[str]] = {}
         for path in self.paths:
             score = path.risk_score(config)
             if score >= threshold:
                 alerts[path.path] = list(path.tripwires)
         return alerts
 
-    def validate(self, config: Optional[RiskScoreConfig] = None) -> None:
+    def validate(self, config: RiskScoreConfig | None = None) -> None:
         """Validate controller contents and optional scoring configuration."""
 
         if config is not None:
             config.validate()
 
-        errors: List[str] = []
+        errors: list[str] = []
         seen_paths = set()
         for path in self.paths:
             if path.path in seen_paths:
@@ -387,9 +381,7 @@ class BlowbackRiskController:
         if self.measurement_plan:
             for metric, weight in self.measurement_plan.weights.items():
                 if weight < 0:
-                    errors.append(
-                        f"Measurement weight for '{metric}' must be non-negative"
-                    )
+                    errors.append(f"Measurement weight for '{metric}' must be non-negative")
 
         if errors:
             raise ValidationError("; ".join(errors))

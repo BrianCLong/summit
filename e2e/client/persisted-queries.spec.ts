@@ -20,7 +20,10 @@ test.describe('Persisted Queries E2E Tests', () => {
     // This is a simplified example. In a real app, you'd use your Apollo Client
     // or a similar mechanism to send the request.
     const [response] = await Promise.all([
-      page.waitForResponse(res => res.url().includes('/graphql') && res.request().method() === 'POST'),
+      page.waitForResponse(
+        (res) =>
+          res.url().includes('/graphql') && res.request().method() === 'POST',
+      ),
       page.evaluate(async () => {
         const query = `
           query GetEntities {
@@ -55,7 +58,10 @@ test.describe('Persisted Queries E2E Tests', () => {
     await page.goto('/');
 
     const [response] = await Promise.all([
-      page.waitForResponse(res => res.url().includes('/graphql') && res.request().method() === 'POST'),
+      page.waitForResponse(
+        (res) =>
+          res.url().includes('/graphql') && res.request().method() === 'POST',
+      ),
       page.evaluate(async () => {
         const query = `
           query UnknownQuery {
@@ -67,7 +73,7 @@ test.describe('Persisted Queries E2E Tests', () => {
           headers: {
             'Content-Type': 'application/json',
             'x-apollo-operation-id': 'unknown-operation-id', // An ID not in the manifest
-            'PERSISTED_QUERIES': '1', // Ensure persisted queries are enforced
+            PERSISTED_QUERIES: '1', // Ensure persisted queries are enforced
           },
           body: JSON_stringify({ query }),
         });
@@ -77,6 +83,8 @@ test.describe('Persisted Queries E2E Tests', () => {
     expect(response.status()).toBe(200); // GraphQL errors often return 200 OK with errors in body
     const responseBody = await response.json();
     expect(responseBody.errors).toBeDefined();
-    expect(responseBody.errors[0].message).toContain('Unknown persisted operation');
+    expect(responseBody.errors[0].message).toContain(
+      'Unknown persisted operation',
+    );
   });
 });

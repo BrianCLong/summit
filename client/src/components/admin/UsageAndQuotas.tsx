@@ -39,11 +39,15 @@ declare global {
  * React component for displaying Usage & Quotas for a tenant.
  * Allows tenant admins to view their plan, usage, and simulate invoices.
  */
-export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => {
+export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({
+  tenantId,
+}) => {
   const { data, loading, error, refetch } = useQuery(GET_USAGE_DATA, {
     variables: { tenantId, w: '30d' }, // Default to last 30 days usage
   });
-  const [simulateInvoice, { loading: simulatingInvoice }] = useMutation(SIMULATE_INVOICE_MUTATION);
+  const [simulateInvoice, { loading: simulatingInvoice }] = useMutation(
+    SIMULATE_INVOICE_MUTATION,
+  );
 
   // jQuery wiring for the simulate invoice button
   React.useEffect(() => {
@@ -52,7 +56,11 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
 
     const handleClick = async () => {
       const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString(); // Start of current month
+      const start = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1,
+      ).toISOString(); // Start of current month
       const end = now.toISOString(); // Current date
 
       try {
@@ -91,16 +99,21 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Plan Details Card */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="font-semibold text-lg text-gray-700 mb-2">Current Plan</h3>
-          <div className="mb-2 font-semibold">Plan: {tenantPlan?.planId || 'N/A'}</div>
-          {tenantPlan?.overrides && Object.keys(tenantPlan.overrides).length > 0 && (
-            <div className="text-sm text-gray-600">
-              <p className="font-medium">Overrides:</p>
-              <pre className="bg-gray-100 p-2 rounded text-xs">
-                {JSON.stringify(tenantPlan.overrides, null, 2)}
-              </pre>
-            </div>
-          )}
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            Current Plan
+          </h3>
+          <div className="mb-2 font-semibold">
+            Plan: {tenantPlan?.planId || 'N/A'}
+          </div>
+          {tenantPlan?.overrides &&
+            Object.keys(tenantPlan.overrides).length > 0 && (
+              <div className="text-sm text-gray-600">
+                <p className="font-medium">Overrides:</p>
+                <pre className="bg-gray-100 p-2 rounded text-xs">
+                  {JSON.stringify(tenantPlan.overrides, null, 2)}
+                </pre>
+              </div>
+            )}
           <button className="mt-4 px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">
             Upgrade Plan
           </button>
@@ -108,7 +121,9 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
 
         {/* Usage Summary Card */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="font-semibold text-lg text-gray-700 mb-2">Usage Summary (Last 30 Days)</h3>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            Usage Summary (Last 30 Days)
+          </h3>
           <ul className="list-disc list-inside text-gray-600">
             {usageSummary?.length > 0 ? (
               usageSummary.map((u: any) => (
@@ -125,7 +140,9 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
 
       {/* Invoice Simulation Card */}
       <div className="mt-6 bg-white p-4 rounded-lg shadow">
-        <h3 className="font-semibold text-lg text-gray-700 mb-2">Invoice Simulation</h3>
+        <h3 className="font-semibold text-lg text-gray-700 mb-2">
+          Invoice Simulation
+        </h3>
         <p className="text-gray-600 mb-3">
           Simulate an invoice for the current month based on your usage.
         </p>
@@ -133,7 +150,9 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({ tenantId }) => 
           id="btnInvoice"
           className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
         >
-          {simulatingInvoice ? 'Simulating...' : 'Simulate Current Month Invoice'}
+          {simulatingInvoice
+            ? 'Simulating...'
+            : 'Simulate Current Month Invoice'}
         </button>
         <pre
           id="invoiceOut"

@@ -16,45 +16,35 @@
       "totalDelta": -10,
       "unit": "%",
       "direction": "improved",
-      "drivers": [
-        "Automated evidence collection via transparency tooling"
-      ]
+      "drivers": ["Automated evidence collection via transparency tooling"]
     },
     {
       "metric": "dataResidencyCutover",
       "totalDelta": 4,
       "unit": "hours",
       "direction": "degraded",
-      "drivers": [
-        "Migration to EU sovereign regions"
-      ]
+      "drivers": ["Migration to EU sovereign regions"]
     },
     {
       "metric": "onCallLoad",
       "totalDelta": 2,
       "unit": "FTE",
       "direction": "degraded",
-      "drivers": [
-        "Need expanded on-call coverage for faster notification"
-      ]
+      "drivers": ["Need expanded on-call coverage for faster notification"]
     },
     {
       "metric": "storageCost",
       "totalDelta": 15,
       "unit": "%",
       "direction": "degraded",
-      "drivers": [
-        "Longer retention window"
-      ]
+      "drivers": ["Longer retention window"]
     },
     {
       "metric": "transferLatency",
       "totalDelta": 12,
       "unit": "%",
       "direction": "degraded",
-      "drivers": [
-        "Geo-fencing and compliance routing"
-      ]
+      "drivers": ["Geo-fencing and compliance routing"]
     }
   ]
 }

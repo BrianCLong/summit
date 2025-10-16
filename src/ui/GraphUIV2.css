@@ -59,7 +59,7 @@
   min-width: 120px;
 }
 
-.incident-filters input[type="range"] {
+.incident-filters input[type='range'] {
   width: 100px;
   accent-color: #4299e1;
 }
@@ -724,11 +724,11 @@
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .incident-metrics-summary {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -739,17 +739,17 @@
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .node-details-panel {
     position: relative;
     width: 100%;
     margin: 1rem 0;
   }
-  
+
   .incidents-container {
     height: 50vh;
   }
-  
+
   .incident-stats {
     flex-wrap: wrap;
   }
@@ -757,14 +757,26 @@
 
 /* Animation Classes */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-2px); }
-  75% { transform: translateX(2px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
 }
 
 .critical-alert {

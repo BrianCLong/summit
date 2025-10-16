@@ -99,10 +99,15 @@ const getScoreColor = (score: number): ChipProps['color'] => {
   return 'error';
 };
 
-export default function ResultList({ results, loading = false }: ResultListProps) {
+export default function ResultList({
+  results,
+  loading = false,
+}: ResultListProps) {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState('relevance');
-  const [menuAnchor, setMenuAnchor] = useState<{ [key: string]: HTMLElement | null }>({});
+  const [menuAnchor, setMenuAnchor] = useState<{
+    [key: string]: HTMLElement | null;
+  }>({});
   const [bookmarked, setBookmarked] = useState<Set<string>>(new Set());
 
   const resultsPerPage = 10;
@@ -112,7 +117,9 @@ export default function ResultList({ results, loading = false }: ResultListProps
       case 'relevance':
         return b.score - a.score;
       case 'date':
-        return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+        return (
+          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+        );
       case 'title':
         return a.title.localeCompare(b.title);
       case 'type':
@@ -123,9 +130,15 @@ export default function ResultList({ results, loading = false }: ResultListProps
   });
 
   const startIndex = (page - 1) * resultsPerPage;
-  const paginatedResults = sortedResults.slice(startIndex, startIndex + resultsPerPage);
+  const paginatedResults = sortedResults.slice(
+    startIndex,
+    startIndex + resultsPerPage,
+  );
 
-  const handleMenuOpen = (resultId: string, event: React.MouseEvent<HTMLElement>) => {
+  const handleMenuOpen = (
+    resultId: string,
+    event: React.MouseEvent<HTMLElement>,
+  ) => {
     setMenuAnchor({ ...menuAnchor, [resultId]: event.currentTarget });
   };
 
@@ -172,13 +185,24 @@ export default function ResultList({ results, loading = false }: ResultListProps
   return (
     <Box>
       {/* Results Header */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h6">{results.length.toLocaleString()} results found</Typography>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 3 }}
+      >
+        <Typography variant="h6">
+          {results.length.toLocaleString()} results found
+        </Typography>
 
         <Stack direction="row" spacing={2} alignItems="center">
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Sort by</InputLabel>
-            <Select value={sortBy} label="Sort by" onChange={(e) => setSortBy(e.target.value)}>
+            <Select
+              value={sortBy}
+              label="Sort by"
+              onChange={(e) => setSortBy(e.target.value)}
+            >
               <SelectMenuItem value="relevance">Relevance</SelectMenuItem>
               <SelectMenuItem value="date">Date</SelectMenuItem>
               <SelectMenuItem value="title">Title</SelectMenuItem>
@@ -191,7 +215,10 @@ export default function ResultList({ results, loading = false }: ResultListProps
       {/* Results List */}
       <Stack spacing={2}>
         {paginatedResults.map((result) => (
-          <Card key={result.id} sx={{ borderRadius: 3, '&:hover': { boxShadow: 4 } }}>
+          <Card
+            key={result.id}
+            sx={{ borderRadius: 3, '&:hover': { boxShadow: 4 } }}
+          >
             <CardContent>
               <Stack direction="row" spacing={2} alignItems="flex-start">
                 <Avatar
@@ -205,9 +232,18 @@ export default function ResultList({ results, loading = false }: ResultListProps
                 </Avatar>
 
                 <Box sx={{ flex: 1 }}>
-                  <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
+                  <Stack
+                    direction="row"
+                    alignItems="flex-start"
+                    justifyContent="space-between"
+                  >
                     <Box sx={{ flex: 1 }}>
-                      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={2}
+                        sx={{ mb: 1 }}
+                      >
                         <Typography
                           variant="h6"
                           sx={{
@@ -229,7 +265,9 @@ export default function ResultList({ results, loading = false }: ResultListProps
                           variant="outlined"
                         />
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
                           <Typography variant="caption" color="text.secondary">
                             Relevance:
                           </Typography>
@@ -242,13 +280,24 @@ export default function ResultList({ results, loading = false }: ResultListProps
                         </Box>
                       </Stack>
 
-                      <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 2 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        paragraph
+                        sx={{ mb: 2 }}
+                      >
                         {result.description}
                       </Typography>
 
-                      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={2}
+                        sx={{ mb: 2 }}
+                      >
                         <Typography variant="caption" color="text.secondary">
-                          Last updated: {new Date(result.lastUpdated).toLocaleDateString()}
+                          Last updated:{' '}
+                          {new Date(result.lastUpdated).toLocaleDateString()}
                         </Typography>
                       </Stack>
 
@@ -279,9 +328,22 @@ export default function ResultList({ results, loading = false }: ResultListProps
 
                     {/* Actions */}
                     <Stack direction="row" spacing={1}>
-                      <Tooltip title={bookmarked.has(result.id) ? 'Remove bookmark' : 'Bookmark'}>
-                        <IconButton size="small" onClick={() => toggleBookmark(result.id)}>
-                          {bookmarked.has(result.id) ? <Star color="warning" /> : <StarBorder />}
+                      <Tooltip
+                        title={
+                          bookmarked.has(result.id)
+                            ? 'Remove bookmark'
+                            : 'Bookmark'
+                        }
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={() => toggleBookmark(result.id)}
+                        >
+                          {bookmarked.has(result.id) ? (
+                            <Star color="warning" />
+                          ) : (
+                            <StarBorder />
+                          )}
                         </IconButton>
                       </Tooltip>
 
@@ -298,7 +360,10 @@ export default function ResultList({ results, loading = false }: ResultListProps
                       </Tooltip>
 
                       <Tooltip title="More actions">
-                        <IconButton size="small" onClick={(e) => handleMenuOpen(result.id, e)}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(result.id, e)}
+                        >
                           <MoreVert />
                         </IconButton>
                       </Tooltip>
@@ -309,28 +374,37 @@ export default function ResultList({ results, loading = false }: ResultListProps
 
               {/* Additional metadata based on entity type */}
               {result.metadata && (
-                <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderTopColor: 'divider' }}>
+                <Box
+                  sx={{
+                    mt: 2,
+                    pt: 2,
+                    borderTop: '1px solid',
+                    borderTopColor: 'divider',
+                  }}
+                >
                   <Stack direction="row" spacing={4}>
-                    {result.type === 'PERSON' && result.metadata.organization && (
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Organization
-                        </Typography>
-                        <Typography variant="body2">
-                          {result.metadata.organization as string}
-                        </Typography>
-                      </Box>
-                    )}
-                    {result.type === 'ORGANIZATION' && result.metadata.industry && (
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Industry
-                        </Typography>
-                        <Typography variant="body2">
-                          {result.metadata.industry as string}
-                        </Typography>
-                      </Box>
-                    )}
+                    {result.type === 'PERSON' &&
+                      result.metadata.organization && (
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Organization
+                          </Typography>
+                          <Typography variant="body2">
+                            {result.metadata.organization as string}
+                          </Typography>
+                        </Box>
+                      )}
+                    {result.type === 'ORGANIZATION' &&
+                      result.metadata.industry && (
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Industry
+                          </Typography>
+                          <Typography variant="body2">
+                            {result.metadata.industry as string}
+                          </Typography>
+                        </Box>
+                      )}
                     {result.type === 'IOC' && result.metadata.threatType && (
                       <Box>
                         <Typography variant="caption" color="text.secondary">
@@ -356,7 +430,12 @@ export default function ResultList({ results, loading = false }: ResultListProps
                                 ? 'warning'
                                 : 'success'
                           }
-                          sx={{ width: 60, height: 6, borderRadius: 3, mt: 0.5 }}
+                          sx={{
+                            width: 60,
+                            height: 6,
+                            borderRadius: 3,
+                            mt: 0.5,
+                          }}
                         />
                       </Box>
                     )}
@@ -420,9 +499,10 @@ export default function ResultList({ results, loading = false }: ResultListProps
       {results.length > 0 && (
         <Alert severity="info" sx={{ mt: 3 }}>
           <Typography variant="body2">
-            Showing {startIndex + 1}-{Math.min(startIndex + resultsPerPage, results.length)} of{' '}
-            {results.length} results. Results are sorted by {sortBy} and filtered based on your
-            search criteria.
+            Showing {startIndex + 1}-
+            {Math.min(startIndex + resultsPerPage, results.length)} of{' '}
+            {results.length} results. Results are sorted by {sortBy} and
+            filtered based on your search criteria.
           </Typography>
         </Alert>
       )}

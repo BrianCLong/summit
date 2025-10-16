@@ -3,9 +3,20 @@
 
 // No-op tracer shim to avoid OTEL dependency
 // Azure SDK loaded dynamically to avoid type resolution requirement during typecheck
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const azureBlob: any = (() => { try { return require('@azure/storage-blob'); } catch { return {}; } })();
-const { BlobServiceClient, StorageSharedKeyCredential, BlobSASPermissions, generateBlobSASQueryParameters } = azureBlob as any;
+ 
+const azureBlob: any = (() => {
+  try {
+    return require('@azure/storage-blob');
+  } catch {
+    return {};
+  }
+})();
+const {
+  BlobServiceClient,
+  StorageSharedKeyCredential,
+  BlobSASPermissions,
+  generateBlobSASQueryParameters,
+} = azureBlob as any;
 type ContainerClient = any;
 type BlockBlobClient = any;
 type BlobHTTPHeaders = any;
@@ -14,7 +25,10 @@ import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 
 const tracer = {
-  startActiveSpan: async (_name: string, fn: (span: any) => Promise<any> | any) => {
+  startActiveSpan: async (
+    _name: string,
+    fn: (span: any) => Promise<any> | any,
+  ) => {
     const span = {
       setAttributes: (_a?: any) => {},
       recordException: (_e?: any) => {},
@@ -29,27 +43,27 @@ const tracer = {
 const azureOperations = new Counter({
   name: 'azure_operations_total',
   help: 'Total Azure Blob operations',
-  labelNames: ['tenant_id', 'operation', 'container', 'result']
+  labelNames: ['tenant_id', 'operation', 'container', 'result'],
 });
 
 const azureLatency = new Histogram({
   name: 'azure_operation_latency_ms',
   help: 'Azure Blob operation latency',
   buckets: [10, 50, 100, 500, 1000, 5000, 10000],
-  labelNames: ['operation', 'container']
+  labelNames: ['operation', 'container'],
 });
 
 const azureBlobSize = new Histogram({
   name: 'azure_blob_size_bytes',
   help: 'Size of Azure blobs processed',
   buckets: [1024, 10240, 102400, 1048576, 10485760, 104857600], // 1KB to 100MB
-  labelNames: ['operation', 'container']
+  labelNames: ['operation', 'container'],
 });
 
 const azureConnections = new Gauge({
   name: 'azure_active_connections',
   help: 'Active Azure Blob connections',
-  labelNames: ['tenant_id']
+  labelNames: ['tenant_id'],
 });
 
 export interface AzureConnectorConfig {
@@ -132,23 +146,40 @@ export class AzureConnector extends EventEmitter {
     try {
       // Initialize Azure Blob Service Client
       if (config.connectionString) {
-        this.blobServiceClient = BlobServiceClient.fromConnectionString(config.connectionString);
+        this.blobServiceClient = BlobServiceClient.fromConnectionString(
+          config.connectionString,
+        );
       } else if (config.sasToken) {
-        const blobServiceUri = config.endpoint || `https://${config.accountName}.blob.core.windows.net`;
-        this.blobServiceClient = new BlobServiceClient(`${blobServiceUri}?${config.sasToken}`);
+        const blobServiceUri =
+          config.endpoint ||
+          `https://${config.accountName}.blob.core.windows.net`;
+        this.blobServiceClient = new BlobServiceClient(
+          `${blobServiceUri}?${config.sasToken}`,
+        );
       } else if (config.accountKey) {
-        const credential = new StorageSharedKeyCredential(config.accountName, config.accountKey);
-        const blobServiceUri = config.endpoint || `https://${config.accountName}.blob.core.windows.net`;
-        this.blobServiceClient = new BlobServiceClient(blobServiceUri, credential);
+        const credential = new StorageSharedKeyCredential(
+          config.accountName,
+          config.accountKey,
+        );
+        const blobServiceUri =
+          config.endpoint ||
+          `https://${config.accountName}.blob.core.windows.net`;
+        this.blobServiceClient = new BlobServiceClient(
+          blobServiceUri,
+          credential,
+        );
       } else {
-        throw new Error('Azure credentials must be provided (connectionString, sasToken, or accountKey)');
+        throw new Error(
+          'Azure credentials must be provided (connectionString, sasToken, or accountKey)',
+        );
       }
 
-      this.containerClient = this.blobServiceClient.getContainerClient(config.containerName);
+      this.containerClient = this.blobServiceClient.getContainerClient(
+        config.containerName,
+      );
 
       azureConnections.inc({ tenant_id: tenantId });
       this.emit('connected', { tenantId, container: config.containerName });
-
     } catch (error) {
       this.emit('error', { tenantId, error });
       throw error;
@@ -158,20 +189,21 @@ export class AzureConnector extends EventEmitter {
   async uploadBlob(
     blobName: string,
     data: Buffer | Readable | string,
-    options: UploadOptions = {}
+    options: UploadOptions = {},
   ): Promise<AzureBlobMetadata> {
     return tracer.startActiveSpan('azure.upload_blob', async (span: any) => {
       span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'blob_name': blobName,
-        'overwrite': options.overwrite !== false
+        tenant_id: this.tenantId,
+        container: this.config.containerName,
+        blob_name: blobName,
+        overwrite: options.overwrite !== false,
       });
 
       const startTime = Date.now();
 
       try {
-        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+        const blockBlobClient =
+          this.containerClient.getBlockBlobClient(blobName);
 
         let uploadResponse;
         const uploadOptions: any = {
@@ -185,17 +217,25 @@ export class AzureConnector extends EventEmitter {
         };
 
         if (Buffer.isBuffer(data)) {
-          uploadResponse = await blockBlobClient.upload(data, data.length, uploadOptions);
+          uploadResponse = await blockBlobClient.upload(
+            data,
+            data.length,
+            uploadOptions,
+          );
         } else if (data instanceof Readable) {
           uploadResponse = await blockBlobClient.uploadStream(
             data,
             options.blockSize || 4 * 1024 * 1024, // 4MB blocks
             options.maxConcurrency || 5,
-            uploadOptions
+            uploadOptions,
           );
         } else if (typeof data === 'string') {
           const buffer = Buffer.from(data);
-          uploadResponse = await blockBlobClient.upload(buffer, buffer.length, uploadOptions);
+          uploadResponse = await blockBlobClient.upload(
+            buffer,
+            buffer.length,
+            uploadOptions,
+          );
         } else {
           throw new Error('Unsupported data type for upload');
         }
@@ -206,44 +246,43 @@ export class AzureConnector extends EventEmitter {
 
         azureBlobSize.observe(
           { operation: 'upload', container: this.config.containerName },
-          metadata.size
+          metadata.size,
         );
 
         azureLatency.observe(
           { operation: 'upload', container: this.config.containerName },
-          Date.now() - startTime
+          Date.now() - startTime,
         );
 
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'upload', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'upload',
           container: this.config.containerName,
-          result: 'success' 
+          result: 'success',
         });
 
         span.setAttributes?.({
-          'blob_size': metadata.size,
-          'content_type': metadata.contentType,
-          'access_tier': metadata.accessTier || 'unknown',
-          'etag': metadata.etag
+          blob_size: metadata.size,
+          content_type: metadata.contentType,
+          access_tier: metadata.accessTier || 'unknown',
+          etag: metadata.etag,
         });
 
-        this.emit('blobUploaded', { 
-          tenantId: this.tenantId, 
-          blobName, 
-          metadata 
+        this.emit('blobUploaded', {
+          tenantId: this.tenantId,
+          blobName,
+          metadata,
         });
 
         return metadata;
-
       } catch (error) {
         span.recordException?.(error as Error);
         span.setStatus?.({ message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'upload', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'upload',
           container: this.config.containerName,
-          result: 'error' 
+          result: 'error',
         });
         throw error;
       } finally {
@@ -252,19 +291,23 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  async downloadBlob(blobName: string, options: DownloadOptions = {}): Promise<Buffer> {
+  async downloadBlob(
+    blobName: string,
+    options: DownloadOptions = {},
+  ): Promise<Buffer> {
     return tracer.startActiveSpan('azure.download_blob', async (span: any) => {
       span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'blob_name': blobName,
-        'range_request': !!options.range
+        tenant_id: this.tenantId,
+        container: this.config.containerName,
+        blob_name: blobName,
+        range_request: !!options.range,
       });
 
       const startTime = Date.now();
 
       try {
-        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+        const blockBlobClient =
+          this.containerClient.getBlockBlobClient(blobName);
 
         const downloadOptions: any = {
           conditions: options.conditions,
@@ -274,14 +317,14 @@ export class AzureConnector extends EventEmitter {
         if (options.range) {
           downloadOptions.range = {
             offset: options.range.offset,
-            count: options.range.count
+            count: options.range.count,
           };
         }
 
         const downloadResponse = await blockBlobClient.download(
           options.range?.offset || 0,
           options.range?.count,
-          downloadOptions
+          downloadOptions,
         );
 
         if (!downloadResponse.readableStreamBody) {
@@ -300,42 +343,41 @@ export class AzureConnector extends EventEmitter {
 
         azureBlobSize.observe(
           { operation: 'download', container: this.config.containerName },
-          data.length
+          data.length,
         );
 
         azureLatency.observe(
           { operation: 'download', container: this.config.containerName },
-          Date.now() - startTime
+          Date.now() - startTime,
         );
 
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'download', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download',
           container: this.config.containerName,
-          result: 'success' 
+          result: 'success',
         });
 
         span.setAttributes?.({
-          'blob_size': data.length,
-          'content_type': downloadResponse.contentType || 'unknown'
+          blob_size: data.length,
+          content_type: downloadResponse.contentType || 'unknown',
         });
 
-        this.emit('blobDownloaded', { 
-          tenantId: this.tenantId, 
-          blobName, 
-          size: data.length 
+        this.emit('blobDownloaded', {
+          tenantId: this.tenantId,
+          blobName,
+          size: data.length,
         });
 
         return data;
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'download', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download',
           container: this.config.containerName,
-          result: 'error' 
+          result: 'error',
         });
         throw error;
       } finally {
@@ -344,46 +386,49 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  async deleteBlob(blobName: string, options: { deleteSnapshots?: 'include' | 'only' } = {}): Promise<void> {
+  async deleteBlob(
+    blobName: string,
+    options: { deleteSnapshots?: 'include' | 'only' } = {},
+  ): Promise<void> {
     return tracer.startActiveSpan('azure.delete_blob', async (span: any) => {
       span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'blob_name': blobName,
-        'delete_snapshots': options.deleteSnapshots || 'none'
+        tenant_id: this.tenantId,
+        container: this.config.containerName,
+        blob_name: blobName,
+        delete_snapshots: options.deleteSnapshots || 'none',
       });
 
       const startTime = Date.now();
 
       try {
-        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+        const blockBlobClient =
+          this.containerClient.getBlockBlobClient(blobName);
 
         await blockBlobClient.delete({
-          deleteSnapshots: options.deleteSnapshots
+          deleteSnapshots: options.deleteSnapshots,
         });
 
         azureLatency.observe(
           { operation: 'delete', container: this.config.containerName },
-          Date.now() - startTime
+          Date.now() - startTime,
         );
 
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'delete', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'delete',
           container: this.config.containerName,
-          result: 'success' 
+          result: 'success',
         });
 
         this.emit('blobDeleted', { tenantId: this.tenantId, blobName });
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'delete', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'delete',
           container: this.config.containerName,
-          result: 'error' 
+          result: 'error',
         });
         throw error;
       } finally {
@@ -395,39 +440,39 @@ export class AzureConnector extends EventEmitter {
   async getBlobMetadata(blobName: string): Promise<AzureBlobMetadata> {
     return tracer.startActiveSpan('azure.get_metadata', async (span: any) => {
       span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'blob_name': blobName
+        tenant_id: this.tenantId,
+        container: this.config.containerName,
+        blob_name: blobName,
       });
 
       const startTime = Date.now();
 
       try {
-        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+        const blockBlobClient =
+          this.containerClient.getBlockBlobClient(blobName);
         const propertiesResponse = await blockBlobClient.getProperties();
 
         azureLatency.observe(
           { operation: 'metadata', container: this.config.containerName },
-          Date.now() - startTime
+          Date.now() - startTime,
         );
 
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'metadata', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'metadata',
           container: this.config.containerName,
-          result: 'success' 
+          result: 'success',
         });
 
         return this.mapAzureMetadata(blobName, propertiesResponse);
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'metadata', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'metadata',
           container: this.config.containerName,
-          result: 'error' 
+          result: 'error',
         });
         throw error;
       } finally {
@@ -436,13 +481,15 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  async listBlobs(options: ListOptions = {}): Promise<{ blobs: AzureBlobMetadata[]; continuationToken?: string }> {
+  async listBlobs(
+    options: ListOptions = {},
+  ): Promise<{ blobs: AzureBlobMetadata[]; continuationToken?: string }> {
     return tracer.startActiveSpan('azure.list_blobs', async (span: any) => {
       span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'prefix': options.prefix || '',
-        'max_results': options.maxResults || 1000
+        tenant_id: this.tenantId,
+        container: this.config.containerName,
+        prefix: options.prefix || '',
+        max_results: options.maxResults || 1000,
       });
 
       const startTime = Date.now();
@@ -456,10 +503,12 @@ export class AzureConnector extends EventEmitter {
         };
 
         const blobs: AzureBlobMetadata[] = [];
-        const iterator = this.containerClient.listBlobsFlat(listOptions).byPage({
-          maxPageSize: options.maxResults || 1000,
-          continuationToken: options.continuationToken
-        });
+        const iterator = this.containerClient
+          .listBlobsFlat(listOptions)
+          .byPage({
+            maxPageSize: options.maxResults || 1000,
+            continuationToken: options.continuationToken,
+          });
 
         const page = await iterator.next();
         if (!page.done && page.value) {
@@ -470,34 +519,33 @@ export class AzureConnector extends EventEmitter {
 
         azureLatency.observe(
           { operation: 'list', container: this.config.containerName },
-          Date.now() - startTime
+          Date.now() - startTime,
         );
 
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'list', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'list',
           container: this.config.containerName,
-          result: 'success' 
+          result: 'success',
         });
 
         span.setAttributes?.({
-          'blobs_count': blobs.length,
-          'has_continuation': !!page.value?.continuationToken
+          blobs_count: blobs.length,
+          has_continuation: !!page.value?.continuationToken,
         });
 
         return {
           blobs,
-          continuationToken: page.value?.continuationToken
+          continuationToken: page.value?.continuationToken,
         };
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'list', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'list',
           container: this.config.containerName,
-          result: 'error' 
+          result: 'error',
         });
         throw error;
       } finally {
@@ -506,58 +554,64 @@ export class AzureConnector extends EventEmitter {
     });
   }
 
-  async copyBlob(sourceBlob: string, destinationBlob: string, sourceUrl?: string): Promise<void> {
+  async copyBlob(
+    sourceBlob: string,
+    destinationBlob: string,
+    sourceUrl?: string,
+  ): Promise<void> {
     return tracer.startActiveSpan('azure.copy_blob', async (span: any) => {
       span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'source_blob': sourceBlob,
-        'destination_blob': destinationBlob,
-        'cross_account': !!sourceUrl
+        tenant_id: this.tenantId,
+        container: this.config.containerName,
+        source_blob: sourceBlob,
+        destination_blob: destinationBlob,
+        cross_account: !!sourceUrl,
       });
 
       const startTime = Date.now();
 
       try {
-        const destinationBlobClient = this.containerClient.getBlockBlobClient(destinationBlob);
-        
+        const destinationBlobClient =
+          this.containerClient.getBlockBlobClient(destinationBlob);
+
         let copySource: string;
         if (sourceUrl) {
           copySource = sourceUrl;
         } else {
-          const sourceBlobClient = this.containerClient.getBlockBlobClient(sourceBlob);
+          const sourceBlobClient =
+            this.containerClient.getBlockBlobClient(sourceBlob);
           copySource = sourceBlobClient.url;
         }
 
-        const copyPoller = await destinationBlobClient.beginCopyFromURL(copySource);
+        const copyPoller =
+          await destinationBlobClient.beginCopyFromURL(copySource);
         await copyPoller.pollUntilDone();
 
         azureLatency.observe(
           { operation: 'copy', container: this.config.containerName },
-          Date.now() - startTime
+          Date.now() - startTime,
         );
 
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'copy', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'copy',
           container: this.config.containerName,
-          result: 'success' 
+          result: 'success',
         });
 
-        this.emit('blobCopied', { 
-          tenantId: this.tenantId, 
-          sourceBlob, 
-          destinationBlob 
+        this.emit('blobCopied', {
+          tenantId: this.tenantId,
+          sourceBlob,
+          destinationBlob,
         });
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'copy', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'copy',
           container: this.config.containerName,
-          result: 'error' 
+          result: 'error',
         });
         throw error;
       } finally {
@@ -567,111 +621,129 @@ export class AzureConnector extends EventEmitter {
   }
 
   async generateSasUrl(
-    blobName: string, 
+    blobName: string,
     permissions: string = 'r',
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Promise<string> {
-    return tracer.startActiveSpan('azure.generate_sas_url', async (span: any) => {
-      span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'blob_name': blobName,
-        'permissions': permissions,
-        'expires_in': expiresIn
-      });
+    return tracer.startActiveSpan(
+      'azure.generate_sas_url',
+      async (span: any) => {
+        span.setAttributes?.({
+          tenant_id: this.tenantId,
+          container: this.config.containerName,
+          blob_name: blobName,
+          permissions: permissions,
+          expires_in: expiresIn,
+        });
 
-      try {
-        if (!this.config.accountKey) {
-          throw new Error('Account key required for SAS URL generation');
+        try {
+          if (!this.config.accountKey) {
+            throw new Error('Account key required for SAS URL generation');
+          }
+
+          const sasPermissions = BlobSASPermissions.parse(permissions);
+          const expiryTime = new Date();
+          expiryTime.setSeconds(expiryTime.getSeconds() + expiresIn);
+
+          const credential = new StorageSharedKeyCredential(
+            this.config.accountName,
+            this.config.accountKey,
+          );
+
+          const sasToken = generateBlobSASQueryParameters(
+            {
+              containerName: this.config.containerName,
+              blobName,
+              permissions: sasPermissions,
+              expiresOn: expiryTime,
+            },
+            credential,
+          ).toString();
+
+          const blockBlobClient =
+            this.containerClient.getBlockBlobClient(blobName);
+          const sasUrl = `${blockBlobClient.url}?${sasToken}`;
+
+          azureOperations.inc({
+            tenant_id: this.tenantId,
+            operation: 'sas_url',
+            container: this.config.containerName,
+            result: 'success',
+          });
+
+          return sasUrl;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setStatus({ code: 2, message: (error as Error).message });
+          azureOperations.inc({
+            tenant_id: this.tenantId,
+            operation: 'sas_url',
+            container: this.config.containerName,
+            result: 'error',
+          });
+          throw error;
+        } finally {
+          span.end();
         }
-
-        const sasPermissions = BlobSASPermissions.parse(permissions);
-        const expiryTime = new Date();
-        expiryTime.setSeconds(expiryTime.getSeconds() + expiresIn);
-
-        const credential = new StorageSharedKeyCredential(this.config.accountName, this.config.accountKey);
-
-        const sasToken = generateBlobSASQueryParameters({
-          containerName: this.config.containerName,
-          blobName,
-          permissions: sasPermissions,
-          expiresOn: expiryTime,
-        }, credential).toString();
-
-        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
-        const sasUrl = `${blockBlobClient.url}?${sasToken}`;
-
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'sas_url', 
-          container: this.config.containerName,
-          result: 'success' 
-        });
-
-        return sasUrl;
-
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'sas_url', 
-          container: this.config.containerName,
-          result: 'error' 
-        });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      },
+    );
   }
 
-  async setAccessTier(blobName: string, tier: 'Hot' | 'Cool' | 'Archive'): Promise<void> {
-    return tracer.startActiveSpan('azure.set_access_tier', async (span: any) => {
-      span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'blob_name': blobName,
-        'tier': tier
-      });
-
-      const startTime = Date.now();
-
-      try {
-        const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
-        await blockBlobClient.setAccessTier(tier);
-
-        azureLatency.observe(
-          { operation: 'set_tier', container: this.config.containerName },
-          Date.now() - startTime
-        );
-
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'set_tier', 
+  async setAccessTier(
+    blobName: string,
+    tier: 'Hot' | 'Cool' | 'Archive',
+  ): Promise<void> {
+    return tracer.startActiveSpan(
+      'azure.set_access_tier',
+      async (span: any) => {
+        span.setAttributes?.({
+          tenant_id: this.tenantId,
           container: this.config.containerName,
-          result: 'success' 
+          blob_name: blobName,
+          tier: tier,
         });
 
-        this.emit('tierChanged', { tenantId: this.tenantId, blobName, tier });
+        const startTime = Date.now();
 
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'set_tier', 
-          container: this.config.containerName,
-          result: 'error' 
-        });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+        try {
+          const blockBlobClient =
+            this.containerClient.getBlockBlobClient(blobName);
+          await blockBlobClient.setAccessTier(tier);
+
+          azureLatency.observe(
+            { operation: 'set_tier', container: this.config.containerName },
+            Date.now() - startTime,
+          );
+
+          azureOperations.inc({
+            tenant_id: this.tenantId,
+            operation: 'set_tier',
+            container: this.config.containerName,
+            result: 'success',
+          });
+
+          this.emit('tierChanged', { tenantId: this.tenantId, blobName, tier });
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setStatus({ code: 2, message: (error as Error).message });
+          azureOperations.inc({
+            tenant_id: this.tenantId,
+            operation: 'set_tier',
+            container: this.config.containerName,
+            result: 'error',
+          });
+          throw error;
+        } finally {
+          span.end();
+        }
+      },
+    );
   }
 
-  private mapAzureMetadata(blobName: string, properties: any): AzureBlobMetadata {
+  private mapAzureMetadata(
+    blobName: string,
+    properties: any,
+  ): AzureBlobMetadata {
     return {
       name: blobName,
       container: this.config.containerName,
@@ -684,7 +756,7 @@ export class AzureConnector extends EventEmitter {
       metadata: properties.metadata,
       tags: properties.tagCount > 0 ? properties.tags : undefined,
       versionId: properties.versionId,
-      isCurrentVersion: properties.isCurrentVersion
+      isCurrentVersion: properties.isCurrentVersion,
     };
   }
 
@@ -693,7 +765,8 @@ export class AzureConnector extends EventEmitter {
       name: blobItem.name,
       container: this.config.containerName,
       size: blobItem.properties.contentLength || 0,
-      contentType: blobItem.properties.contentType || 'application/octet-stream',
+      contentType:
+        blobItem.properties.contentType || 'application/octet-stream',
       contentMD5: blobItem.properties.contentMD5,
       etag: blobItem.properties.etag,
       lastModified: blobItem.properties.lastModified,
@@ -701,7 +774,7 @@ export class AzureConnector extends EventEmitter {
       metadata: blobItem.metadata,
       tags: blobItem.tags,
       versionId: blobItem.versionId,
-      isCurrentVersion: blobItem.isCurrentVersion
+      isCurrentVersion: blobItem.isCurrentVersion,
     };
   }
 
@@ -711,19 +784,23 @@ export class AzureConnector extends EventEmitter {
   }
 
   // Health check method
-  async healthCheck(): Promise<{ healthy: boolean; latency?: number; error?: string }> {
+  async healthCheck(): Promise<{
+    healthy: boolean;
+    latency?: number;
+    error?: string;
+  }> {
     const startTime = Date.now();
-    
+
     try {
       await this.containerClient.exists();
       const latency = Date.now() - startTime;
-      
+
       return { healthy: true, latency };
     } catch (error) {
-      return { 
-        healthy: false, 
+      return {
+        healthy: false,
         latency: Date.now() - startTime,
-        error: (error as Error).message 
+        error: (error as Error).message,
       };
     }
   }
@@ -732,46 +809,45 @@ export class AzureConnector extends EventEmitter {
   async batchDelete(blobNames: string[]): Promise<void> {
     return tracer.startActiveSpan('azure.batch_delete', async (span: any) => {
       span.setAttributes?.({
-        'tenant_id': this.tenantId,
-        'container': this.config.containerName,
-        'blob_count': blobNames.length
+        tenant_id: this.tenantId,
+        container: this.config.containerName,
+        blob_count: blobNames.length,
       });
 
       const startTime = Date.now();
 
       try {
-        const deletePromises = blobNames.map(blobName => 
-          this.containerClient.getBlockBlobClient(blobName).delete()
+        const deletePromises = blobNames.map((blobName) =>
+          this.containerClient.getBlockBlobClient(blobName).delete(),
         );
 
         await Promise.all(deletePromises);
 
         azureLatency.observe(
           { operation: 'batch_delete', container: this.config.containerName },
-          Date.now() - startTime
+          Date.now() - startTime,
         );
 
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'batch_delete', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'batch_delete',
           container: this.config.containerName,
-          result: 'success' 
+          result: 'success',
         });
 
-        this.emit('batchDeleted', { 
-          tenantId: this.tenantId, 
-          blobNames, 
-          count: blobNames.length 
+        this.emit('batchDeleted', {
+          tenantId: this.tenantId,
+          blobNames,
+          count: blobNames.length,
         });
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        azureOperations.inc({ 
-          tenant_id: this.tenantId, 
-          operation: 'batch_delete', 
+        azureOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'batch_delete',
           container: this.config.containerName,
-          result: 'error' 
+          result: 'error',
         });
         throw error;
       } finally {

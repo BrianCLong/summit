@@ -56,7 +56,10 @@ async function ensureTable() {
   try {
     await pool.query(sql);
   } catch (e) {
-    logger.warn({ err: e }, 'failed to ensure maestro_tickets table (mock mode?)');
+    logger.warn(
+      { err: e },
+      'failed to ensure maestro_tickets table (mock mode?)',
+    );
   }
 }
 
@@ -113,7 +116,11 @@ export type TicketFilters = {
   repo?: string;
 };
 
-export async function listTickets(limit = 50, offset = 0, filters: TicketFilters = {}) {
+export async function listTickets(
+  limit = 50,
+  offset = 0,
+  filters: TicketFilters = {},
+) {
   await ensureTable();
   const pool = getPostgresPool();
   try {
@@ -157,7 +164,11 @@ export async function listTickets(limit = 50, offset = 0, filters: TicketFilters
       title: r.title,
       status: r.status,
       assignee: r.assignee,
-      labels: Array.isArray(r.labels) ? r.labels : r.labels ? Object.values(r.labels) : [],
+      labels: Array.isArray(r.labels)
+        ? r.labels
+        : r.labels
+          ? Object.values(r.labels)
+          : [],
       priority: r.priority,
       sprint: r.sprint,
       project: r.project,
@@ -186,7 +197,10 @@ export async function listTicketRuns(provider: string, externalId: string) {
   }
 }
 
-export async function listTicketDeployments(provider: string, externalId: string) {
+export async function listTicketDeployments(
+  provider: string,
+  externalId: string,
+) {
   await ensureTable();
   const pool = getPostgresPool();
   try {
@@ -194,7 +208,11 @@ export async function listTicketDeployments(provider: string, externalId: string
       'SELECT deployment_id, env FROM ticket_deployments WHERE ticket_provider=$1 AND ticket_external_id=$2',
       [provider, externalId],
     );
-    return res.rows.map((r) => ({ id: r.deployment_id, env: r.env, status: null }));
+    return res.rows.map((r) => ({
+      id: r.deployment_id,
+      env: r.env,
+      status: null,
+    }));
   } catch (e) {
     return [];
   }
@@ -210,7 +228,9 @@ export function mapGitHubIssue(payload: any): Ticket | null {
     title: issue.title,
     status: issue.state,
     assignee: issue.assignee?.login ?? null,
-    labels: (issue.labels || []).map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean),
+    labels: (issue.labels || [])
+      .map((l: any) => (typeof l === 'string' ? l : l.name))
+      .filter(Boolean),
     priority: null,
     sprint: null,
     project: payload?.repository?.name ?? null,
@@ -242,8 +262,11 @@ export function mapJiraIssue(payload: any): Ticket | null {
   };
 }
 
-
-export async function addTicketRunLink(provider: string, externalId: string, runId: string) {
+export async function addTicketRunLink(
+  provider: string,
+  externalId: string,
+  runId: string,
+) {
   await ensureTable();
   const pool = getPostgresPool();
   try {
@@ -258,7 +281,12 @@ export async function addTicketRunLink(provider: string, externalId: string, run
   }
 }
 
-export async function addTicketDeploymentLink(provider: string, externalId: string, deploymentId: string, env?: string) {
+export async function addTicketDeploymentLink(
+  provider: string,
+  externalId: string,
+  deploymentId: string,
+  env?: string,
+) {
   await ensureTable();
   const pool = getPostgresPool();
   try {

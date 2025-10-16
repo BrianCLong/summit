@@ -1,12 +1,12 @@
-name: "Video Pipeline"
-description: "Transcribe→caption→summary"
+name: 'Video Pipeline'
+description: 'Transcribe→caption→summary'
 nodes:
   - id: asr
     type: tool
-    params: { tool: "whisper", model: "large-v3" }
+    params: { tool: 'whisper', model: 'large-v3' }
   - id: cap
     type: tool
-    params: { tool: "subtitle", style: "srt" }
+    params: { tool: 'subtitle', style: 'srt' }
   - id: sum
     type: llm
     params: { provider: openai, model: gpt-4o-mini }
@@ -16,4 +16,3 @@ edges:
 policies:
   - type: budget
     capUSD: 0.04
-

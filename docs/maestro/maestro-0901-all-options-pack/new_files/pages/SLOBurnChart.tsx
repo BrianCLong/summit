@@ -8,7 +8,11 @@ export default function SLOBurnChart() {
   }));
   return (
     <div className="p-6">
-      <LineTimeseries title="SLO Burn (demo)" data={series} ariaLabel="SLO burn trend" />
+      <LineTimeseries
+        title="SLO Burn (demo)"
+        data={series}
+        ariaLabel="SLO burn trend"
+      />
     </div>
   );
 }

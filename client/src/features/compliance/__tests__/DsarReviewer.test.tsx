@@ -22,9 +22,7 @@ describe('DsarReviewer', () => {
       status: 'pending',
       submittedAt: '2025-09-02T12:00:00.000Z',
       replayAvailable: false,
-      proofs: [
-        { connector: 'postgres', type: 'deletion', hash: 'abc12345' },
-      ],
+      proofs: [{ connector: 'postgres', type: 'deletion', hash: 'abc12345' }],
     },
   ];
 
@@ -36,7 +34,9 @@ describe('DsarReviewer', () => {
     expect(screen.getByText('sub-1')).toBeInTheDocument();
     expect(screen.getByText('sub-2')).toBeInTheDocument();
 
-    const replayButton = screen.getByRole('button', { name: /Replay DSAR request req-1/i });
+    const replayButton = screen.getByRole('button', {
+      name: /Replay DSAR request req-1/i,
+    });
     fireEvent.click(replayButton);
     expect(onReplay).toHaveBeenCalledWith('req-1');
   });

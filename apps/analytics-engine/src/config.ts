@@ -15,7 +15,10 @@ export const config = {
       user: process.env.POSTGRES_USER || 'intelgraph',
       password: process.env.POSTGRES_PASSWORD || 'password',
       database: process.env.POSTGRES_DB || 'intelgraph',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     },
 
     neo4j: {
@@ -41,9 +44,15 @@ export const config = {
   },
 
   dashboard: {
-    maxWidgetsPerDashboard: parseInt(process.env.MAX_WIDGETS_PER_DASHBOARD || '50'),
-    maxDashboardsPerUser: parseInt(process.env.MAX_DASHBOARDS_PER_USER || '100'),
-    defaultRefreshInterval: parseInt(process.env.DEFAULT_REFRESH_INTERVAL || '300'), // 5 minutes
+    maxWidgetsPerDashboard: parseInt(
+      process.env.MAX_WIDGETS_PER_DASHBOARD || '50',
+    ),
+    maxDashboardsPerUser: parseInt(
+      process.env.MAX_DASHBOARDS_PER_USER || '100',
+    ),
+    defaultRefreshInterval: parseInt(
+      process.env.DEFAULT_REFRESH_INTERVAL || '300',
+    ), // 5 minutes
     allowPublicDashboards: process.env.ALLOW_PUBLIC_DASHBOARDS !== 'false',
   },
 

@@ -56,8 +56,8 @@ class QueuePerformanceMonitor {
       const requestOptions = {
         method: options.method || 'GET',
         headers: {
-          'Authorization': `token ${config.githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
+          Authorization: `token ${config.githubToken}`,
+          Accept: 'application/vnd.github.v3+json',
           'User-Agent': 'queue-performance-monitor/1.0',
           ...options.headers,
         },
@@ -65,11 +65,15 @@ class QueuePerformanceMonitor {
 
       const req = https.request(url, requestOptions, (res) => {
         let data = '';
-        res.on('data', chunk => data += chunk);
+        res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
           try {
             const jsonData = JSON.parse(data);
-            resolve({ status: res.statusCode, data: jsonData, headers: res.headers });
+            resolve({
+              status: res.statusCode,
+              data: jsonData,
+              headers: res.headers,
+            });
           } catch (e) {
             resolve({ status: res.statusCode, data, headers: res.headers });
           }
@@ -95,18 +99,20 @@ class QueuePerformanceMonitor {
     try {
       // Get merge queue status
       const queueResponse = await this.githubAPI(
-        `/repos/${config.owner}/${config.repo}/merge-queue`
+        `/repos/${config.owner}/${config.repo}/merge-queue`,
       );
 
       if (queueResponse.status === 200) {
         const queueData = queueResponse.data;
         this.metrics.queue_entries = queueData.entries || [];
 
-        console.log(`📈 Current queue size: ${this.metrics.queue_entries.length}`);
+        console.log(
+          `📈 Current queue size: ${this.metrics.queue_entries.length}`,
+        );
 
         // Calculate wait times for entries in queue
         const now = new Date();
-        this.metrics.wait_times = this.metrics.queue_entries.map(entry => {
+        this.metrics.wait_times = this.metrics.queue_entries.map((entry) => {
           const entryTime = new Date(entry.created_at);
           return now - entryTime;
         });
@@ -114,7 +120,7 @@ class QueuePerformanceMonitor {
 
       // Get recent workflow runs for CI performance
       const runsResponse = await this.githubAPI(
-        `/repos/${config.owner}/${config.repo}/actions/runs?per_page=50&status=completed`
+        `/repos/${config.owner}/${config.repo}/actions/runs?per_page=50&status=completed`,
       );
 
       if (runsResponse.status === 200) {
@@ -127,7 +133,8 @@ class QueuePerformanceMonitor {
 
         for (const run of runs) {
           if (run.created_at && run.updated_at) {
-            const duration = new Date(run.updated_at) - new Date(run.created_at);
+            const duration =
+              new Date(run.updated_at) - new Date(run.created_at);
             this.metrics.ci_durations.push(duration);
 
             if (run.conclusion === 'success') {
@@ -139,11 +146,12 @@ class QueuePerformanceMonitor {
         }
 
         console.log(`⏱️  Recent CI runs: ${runs.length}`);
-        console.log(`✅ Success rate: ${(this.metrics.success_counts / runs.length * 100).toFixed(1)}%`);
+        console.log(
+          `✅ Success rate: ${((this.metrics.success_counts / runs.length) * 100).toFixed(1)}%`,
+        );
       }
 
       return this.metrics;
-
     } catch (error) {
       console.error('❌ Failed to collect queue metrics:', error.message);
       throw error;
@@ -158,9 +166,11 @@ class QueuePerformanceMonitor {
       queue_size: this.metrics.queue_entries.length,
       wait_times: this.calculatePercentiles(this.metrics.wait_times),
       ci_durations: this.calculatePercentiles(this.metrics.ci_durations),
-      success_rate: this.metrics.success_counts /
+      success_rate:
+        this.metrics.success_counts /
         (this.metrics.success_counts + this.metrics.failure_counts),
-      failure_rate: this.metrics.failure_counts /
+      failure_rate:
+        this.metrics.failure_counts /
         (this.metrics.success_counts + this.metrics.failure_counts),
     };
 
@@ -331,7 +341,9 @@ class QueuePerformanceMonitor {
       'cache-to': ['type=gha,mode=max'],
     };
 
-    console.log('💡 Recommendation: Update Docker build actions with advanced caching');
+    console.log(
+      '💡 Recommendation: Update Docker build actions with advanced caching',
+    );
 
     return {
       type: 'docker_caching',
@@ -347,7 +359,9 @@ class QueuePerformanceMonitor {
     console.log('🔄 Enabling auto-rebase before queue...');
 
     // This would update branch protection rules
-    console.log('💡 Recommendation: Enable "Require branches to be up to date"');
+    console.log(
+      '💡 Recommendation: Enable "Require branches to be up to date"',
+    );
 
     return {
       type: 'auto_rebase',
@@ -374,7 +388,9 @@ class QueuePerformanceMonitor {
       },
     };
 
-    console.log('💡 Recommendation: Maximize job parallelization in CI workflow');
+    console.log(
+      '💡 Recommendation: Maximize job parallelization in CI workflow',
+    );
 
     return {
       type: 'ci_parallelization',
@@ -391,7 +407,7 @@ class QueuePerformanceMonitor {
 
     // Get recent failed runs
     const failedRuns = await this.githubAPI(
-      `/repos/${config.owner}/${config.repo}/actions/runs?status=failure&per_page=20`
+      `/repos/${config.owner}/${config.repo}/actions/runs?status=failure&per_page=20`,
     );
 
     const patterns = {
@@ -449,11 +465,12 @@ class QueuePerformanceMonitor {
       },
       slo_compliance: {
         violations_count: violations.length,
-        critical_violations: violations.filter(v => v.severity === 'critical').length,
+        critical_violations: violations.filter((v) => v.severity === 'critical')
+          .length,
         status: violations.length === 0 ? '✅ COMPLIANT' : '❌ VIOLATED',
       },
       optimizations_applied: optimizations.length,
-      recommendations: optimizations.map(opt => opt.type),
+      recommendations: optimizations.map((opt) => opt.type),
     };
 
     return report;
@@ -463,13 +480,17 @@ class QueuePerformanceMonitor {
    * Send alerts for critical violations
    */
   async sendAlerts(violations) {
-    const criticalViolations = violations.filter(v => v.severity === 'critical');
+    const criticalViolations = violations.filter(
+      (v) => v.severity === 'critical',
+    );
 
     if (criticalViolations.length > 0) {
       console.log('🚨 CRITICAL: Queue performance SLO violations detected!');
 
       for (const violation of criticalViolations) {
-        console.log(`   • ${violation.type}: ${violation.current} > ${violation.target}`);
+        console.log(
+          `   • ${violation.type}: ${violation.current} > ${violation.target}`,
+        );
       }
 
       // In a real implementation, this would send to Slack, PagerDuty, etc.
@@ -498,7 +519,9 @@ class QueuePerformanceMonitor {
     console.log(`   • p95 wait time: ${config.targets.p95_wait_time / 60000}m`);
     console.log(`   • p99 wait time: ${config.targets.p99_wait_time / 60000}m`);
     console.log(`   • Max queue size: ${config.targets.max_queue_size}`);
-    console.log(`   • Max CI duration: ${config.targets.max_ci_duration / 60000}m`);
+    console.log(
+      `   • Max CI duration: ${config.targets.max_ci_duration / 60000}m`,
+    );
 
     try {
       // Collect metrics
@@ -511,9 +534,8 @@ class QueuePerformanceMonitor {
       const violations = this.evaluateSLOs(stats);
 
       // Apply optimizations if needed
-      const optimizations = violations.length > 0
-        ? await this.applyOptimizations(violations)
-        : [];
+      const optimizations =
+        violations.length > 0 ? await this.applyOptimizations(violations) : [];
 
       // Generate report
       const report = this.generateReport(stats, violations, optimizations);
@@ -528,14 +550,21 @@ class QueuePerformanceMonitor {
 
       // Save report to file
       if (process.env.OUTPUT_FILE) {
-        await fs.writeFile(process.env.OUTPUT_FILE, JSON.stringify(report, null, 2));
+        await fs.writeFile(
+          process.env.OUTPUT_FILE,
+          JSON.stringify(report, null, 2),
+        );
         console.log(`📄 Report saved to ${process.env.OUTPUT_FILE}`);
       }
 
       // Exit with appropriate code
-      const criticalViolations = violations.filter(v => v.severity === 'critical').length;
+      const criticalViolations = violations.filter(
+        (v) => v.severity === 'critical',
+      ).length;
       if (criticalViolations > 0) {
-        console.log('\n🚨 CRITICAL violations detected - immediate attention required!');
+        console.log(
+          '\n🚨 CRITICAL violations detected - immediate attention required!',
+        );
         process.exit(1);
       } else if (violations.length > 0) {
         console.log('\n⚠️  SLO violations detected - optimization recommended');
@@ -544,7 +573,6 @@ class QueuePerformanceMonitor {
         console.log('\n✅ All SLOs within targets - queue performance healthy');
         process.exit(0);
       }
-
     } catch (error) {
       console.error('❌ Queue performance monitoring failed:', error.message);
       process.exit(1);

@@ -33,7 +33,7 @@ export function Layout() {
     <div className="h-screen flex bg-background">
       {/* Sidebar Navigation */}
       <Navigation user={user} />
-      
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
@@ -42,7 +42,7 @@ export function Layout() {
             <div className="flex-1">
               <h1 className="text-lg font-semibold">IntelGraph Platform</h1>
             </div>
-            
+
             {/* Search trigger - actual search modal is rendered globally */}
             <div className="flex items-center gap-4">
               <div className="text-sm text-muted-foreground">

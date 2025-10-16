@@ -31,7 +31,13 @@ export interface ComplianceRequirement {
   controls: string[]; // Control IDs
   evidence: string[]; // Evidence type IDs
   automated: boolean;
-  frequency: 'continuous' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually';
+  frequency:
+    | 'continuous'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'quarterly'
+    | 'annually';
   status: 'compliant' | 'non_compliant' | 'not_applicable' | 'pending';
   lastAssessed: Date;
   nextAssessment: Date;
@@ -139,7 +145,14 @@ export interface EvidenceRequirement {
   id: string;
   name: string;
   description: string;
-  type: 'document' | 'log' | 'screenshot' | 'report' | 'certificate' | 'code' | 'configuration';
+  type:
+    | 'document'
+    | 'log'
+    | 'screenshot'
+    | 'report'
+    | 'certificate'
+    | 'code'
+    | 'configuration';
   frequency: 'once' | 'periodic' | 'continuous';
   retention: number; // days
   format: string[];
@@ -306,7 +319,13 @@ export interface ComplianceReport {
 export interface ReportPeriod {
   start: Date;
   end: Date;
-  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually' | 'on_demand';
+  frequency:
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'quarterly'
+    | 'annually'
+    | 'on_demand';
 }
 
 export interface ReportContent {
@@ -377,7 +396,7 @@ export interface ReportRecipient {
 
 /**
  * Compliance & Governance Automation Engine for Maestro v10
- * 
+ *
  * Provides comprehensive compliance automation with:
  * - Automated compliance checking and reporting
  * - Policy enforcement and violation detection
@@ -403,7 +422,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
     logger: Logger,
     metricsCollector: MetricsCollector,
     policyEngine: PolicyEngine,
-    auditTrailManager: AuditTrailManager
+    auditTrailManager: AuditTrailManager,
   ) {
     super();
     this.logger = logger;
@@ -442,11 +461,16 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       this.startBackgroundProcesses();
 
       this.isInitialized = true;
-      this.logger.info('Compliance & Governance Engine v10 initialized successfully');
-      
+      this.logger.info(
+        'Compliance & Governance Engine v10 initialized successfully',
+      );
+
       this.emit('initialized');
     } catch (error) {
-      this.logger.error('Failed to initialize Compliance & Governance Engine:', error);
+      this.logger.error(
+        'Failed to initialize Compliance & Governance Engine:',
+        error,
+      );
       throw error;
     }
   }
@@ -455,7 +479,9 @@ export class ComplianceGovernanceEngine extends EventEmitter {
    * Register a compliance framework
    */
   async registerFramework(framework: ComplianceFramework): Promise<void> {
-    this.logger.info(`Registering compliance framework: ${framework.name} v${framework.version}`);
+    this.logger.info(
+      `Registering compliance framework: ${framework.name} v${framework.version}`,
+    );
 
     try {
       // Validate framework
@@ -476,7 +502,6 @@ export class ComplianceGovernanceEngine extends EventEmitter {
 
       this.logger.info(`Framework registered successfully: ${framework.id}`);
       this.emit('frameworkRegistered', framework);
-
     } catch (error) {
       this.logger.error(`Failed to register framework ${framework.id}:`, error);
       throw error;
@@ -506,7 +531,6 @@ export class ComplianceGovernanceEngine extends EventEmitter {
 
       this.logger.info(`Policy created successfully: ${policy.id}`);
       this.emit('policyCreated', policy);
-
     } catch (error) {
       this.logger.error(`Failed to create policy ${policy.id}:`, error);
       throw error;
@@ -522,7 +546,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       services?: string[];
       environments?: string[];
       requirements?: string[];
-    }
+    },
   ): Promise<{
     assessmentId: string;
     framework: ComplianceFramework;
@@ -542,7 +566,9 @@ export class ComplianceGovernanceEngine extends EventEmitter {
     try {
       // Determine requirements to assess
       const requirements = scope?.requirements
-        ? framework.requirements.filter(r => scope.requirements!.includes(r.id))
+        ? framework.requirements.filter((r) =>
+            scope.requirements!.includes(r.id),
+          )
         : framework.requirements;
 
       // Run assessment for each requirement
@@ -556,16 +582,19 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       const summary = this.generateComplianceSummary(results);
 
       // Collect findings
-      const findings = results.flatMap(r => r.findings);
+      const findings = results.flatMap((r) => r.findings);
 
       // Generate recommendations
-      const recommendations = await this.generateRecommendations(results, findings);
+      const recommendations = await this.generateRecommendations(
+        results,
+        findings,
+      );
 
       this.logger.info(`Compliance assessment completed: ${assessmentId}`, {
         totalRequirements: results.length,
         compliant: summary.compliantRequirements,
         nonCompliant: summary.nonCompliantRequirements,
-        criticalFindings: summary.criticalFindings
+        criticalFindings: summary.criticalFindings,
       });
 
       const assessmentResult = {
@@ -574,14 +603,16 @@ export class ComplianceGovernanceEngine extends EventEmitter {
         results,
         summary,
         findings,
-        recommendations
+        recommendations,
       };
 
       this.emit('assessmentCompleted', assessmentResult);
       return assessmentResult;
-
     } catch (error) {
-      this.logger.error(`Compliance assessment failed: ${assessmentId}:`, error);
+      this.logger.error(
+        `Compliance assessment failed: ${assessmentId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -595,19 +626,24 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       services?: string[];
       environments?: string[];
       timeRange?: { start: Date; end: Date };
-    }
+    },
   ): Promise<PolicyViolation[]> {
     this.logger.info('Detecting policy violations...');
 
     try {
-      const policies = policyId 
+      const policies = policyId
         ? [this.policies.get(policyId)!]
-        : Array.from(this.policies.values()).filter(p => p.status === 'active');
+        : Array.from(this.policies.values()).filter(
+            (p) => p.status === 'active',
+          );
 
       const violations: PolicyViolation[] = [];
 
       for (const policy of policies) {
-        const policyViolations = await this.violationDetector.detectViolations(policy, scope);
+        const policyViolations = await this.violationDetector.detectViolations(
+          policy,
+          scope,
+        );
         violations.push(...policyViolations);
       }
 
@@ -620,7 +656,6 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       this.emit('violationsDetected', violations);
 
       return violations;
-
     } catch (error) {
       this.logger.error('Failed to detect violations:', error);
       return [];
@@ -640,7 +675,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
         environments?: string[];
       };
       distribution: ReportDistribution;
-    }
+    },
   ): Promise<ComplianceReport> {
     const reportId = `report_${type}_${Date.now()}`;
     this.logger.info(`Generating ${type} compliance report: ${reportId}`);
@@ -655,15 +690,35 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       generatedBy: 'system',
       generatedAt: new Date(),
       content: {
-        summary: { overallScore: 0, totalRequirements: 0, compliantRequirements: 0, nonCompliantRequirements: 0, pendingRequirements: 0, criticalFindings: 0, highRiskFindings: 0 },
-        details: { requirementsByFramework: {}, controlsByCategory: {}, findingsByCategory: {}, remediationStatus: {} },
+        summary: {
+          overallScore: 0,
+          totalRequirements: 0,
+          compliantRequirements: 0,
+          nonCompliantRequirements: 0,
+          pendingRequirements: 0,
+          criticalFindings: 0,
+          highRiskFindings: 0,
+        },
+        details: {
+          requirementsByFramework: {},
+          controlsByCategory: {},
+          findingsByCategory: {},
+          remediationStatus: {},
+        },
         findings: [],
         recommendations: [],
-        metrics: { meanTimeToDetection: 0, meanTimeToRemediation: 0, falsePositiveRate: 0, controlEffectiveness: 0, auditCoverage: 0, automationRate: 0 },
+        metrics: {
+          meanTimeToDetection: 0,
+          meanTimeToRemediation: 0,
+          falsePositiveRate: 0,
+          controlEffectiveness: 0,
+          auditCoverage: 0,
+          automationRate: 0,
+        },
         trends: [],
-        attachments: []
+        attachments: [],
       },
-      distribution: config.distribution
+      distribution: config.distribution,
     };
 
     this.reports.set(reportId, report);
@@ -676,7 +731,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
         scope: config.scope,
         frameworks: this.frameworks,
         policies: this.policies,
-        auditEvents: this.auditEvents
+        auditEvents: this.auditEvents,
       });
 
       report.content = content;
@@ -689,7 +744,6 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       this.emit('reportGenerated', report);
 
       return report;
-
     } catch (error) {
       report.status = 'failed';
       this.logger.error(`Failed to generate report ${reportId}:`, error);
@@ -704,7 +758,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
     const auditEvent: AuditEvent = {
       ...event,
       id: this.generateAuditId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Store audit event
@@ -760,18 +814,21 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       // Get framework-specific compliance
       const byFramework: Record<string, ComplianceSummary> = {};
       for (const [frameworkId, framework] of this.frameworks.entries()) {
-        byFramework[frameworkId] = await this.calculateFrameworkCompliance(framework);
+        byFramework[frameworkId] =
+          await this.calculateFrameworkCompliance(framework);
       }
 
       // Count active violations
-      const activeViolations = await this.violationDetector.countActiveViolations();
+      const activeViolations =
+        await this.violationDetector.countActiveViolations();
 
       // Count pending remediation
       const pendingRemediation = await this.countPendingRemediation();
 
       // Count recent audit events
       const auditEvents = this.auditEvents.filter(
-        event => event.timestamp >= new Date(Date.now() - 24 * 60 * 60 * 1000)
+        (event) =>
+          event.timestamp >= new Date(Date.now() - 24 * 60 * 60 * 1000),
       ).length;
 
       // Get recent findings
@@ -787,9 +844,8 @@ export class ComplianceGovernanceEngine extends EventEmitter {
         pendingRemediation,
         auditEvents,
         recentFindings,
-        upcomingAssessments
+        upcomingAssessments,
       };
-
     } catch (error) {
       this.logger.error('Failed to get compliance overview:', error);
       throw error;
@@ -827,12 +883,16 @@ export class ComplianceGovernanceEngine extends EventEmitter {
     // Validate rules
     for (const rule of policy.rules) {
       if (!rule.id || !rule.name || !rule.condition || !rule.action) {
-        throw new Error('Policy rule must have id, name, condition, and action');
+        throw new Error(
+          'Policy rule must have id, name, condition, and action',
+        );
       }
     }
   }
 
-  private async setupRequirementMonitoring(requirement: ComplianceRequirement): Promise<void> {
+  private async setupRequirementMonitoring(
+    requirement: ComplianceRequirement,
+  ): Promise<void> {
     // Setup automated monitoring for the requirement
     if (requirement.frequency === 'continuous') {
       // Setup real-time monitoring
@@ -845,46 +905,60 @@ export class ComplianceGovernanceEngine extends EventEmitter {
 
   private async assessRequirement(
     requirement: ComplianceRequirement,
-    scope?: any
+    scope?: any,
   ): Promise<ComplianceAssessmentResult> {
     try {
       return await this.complianceScanner.assessRequirement(requirement, scope);
     } catch (error) {
-      this.logger.error(`Failed to assess requirement ${requirement.id}:`, error);
-      
+      this.logger.error(
+        `Failed to assess requirement ${requirement.id}:`,
+        error,
+      );
+
       return {
         requirementId: requirement.id,
         status: 'non_compliant',
         score: 0,
-        findings: [{
-          id: this.generateFindingId(),
-          severity: 'high',
-          description: `Assessment failed: ${error.message}`,
-          impact: 'Cannot determine compliance status',
-          likelihood: 'high',
-          category: 'assessment_error',
-          location: requirement.id,
-          evidence: [],
-          recommendations: ['Investigate assessment failure', 'Ensure monitoring systems are operational'],
-          status: 'open'
-        }],
+        findings: [
+          {
+            id: this.generateFindingId(),
+            severity: 'high',
+            description: `Assessment failed: ${error.message}`,
+            impact: 'Cannot determine compliance status',
+            likelihood: 'high',
+            category: 'assessment_error',
+            location: requirement.id,
+            evidence: [],
+            recommendations: [
+              'Investigate assessment failure',
+              'Ensure monitoring systems are operational',
+            ],
+            status: 'open',
+          },
+        ],
         evidence: [],
         controlResults: [],
         lastAssessed: new Date(),
-        nextAssessment: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        nextAssessment: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
     }
   }
 
-  private generateComplianceSummary(results: ComplianceAssessmentResult[]): ComplianceSummary {
+  private generateComplianceSummary(
+    results: ComplianceAssessmentResult[],
+  ): ComplianceSummary {
     const total = results.length;
-    const compliant = results.filter(r => r.status === 'compliant').length;
-    const nonCompliant = results.filter(r => r.status === 'non_compliant').length;
-    const pending = results.filter(r => r.status === 'pending').length;
-    
-    const allFindings = results.flatMap(r => r.findings);
-    const critical = allFindings.filter(f => f.severity === 'critical').length;
-    const high = allFindings.filter(f => f.severity === 'high').length;
+    const compliant = results.filter((r) => r.status === 'compliant').length;
+    const nonCompliant = results.filter(
+      (r) => r.status === 'non_compliant',
+    ).length;
+    const pending = results.filter((r) => r.status === 'pending').length;
+
+    const allFindings = results.flatMap((r) => r.findings);
+    const critical = allFindings.filter(
+      (f) => f.severity === 'critical',
+    ).length;
+    const high = allFindings.filter((f) => f.severity === 'high').length;
 
     const overallScore = total > 0 ? (compliant / total) * 100 : 0;
 
@@ -895,33 +969,40 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       nonCompliantRequirements: nonCompliant,
       pendingRequirements: pending,
       criticalFindings: critical,
-      highRiskFindings: high
+      highRiskFindings: high,
     };
   }
 
   private async generateRecommendations(
     results: ComplianceAssessmentResult[],
-    findings: Finding[]
+    findings: Finding[],
   ): Promise<string[]> {
     const recommendations: string[] = [];
 
     // Analyze patterns in findings
-    const findingsByCategory = findings.reduce((acc, finding) => {
-      acc[finding.category] = (acc[finding.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const findingsByCategory = findings.reduce(
+      (acc, finding) => {
+        acc[finding.category] = (acc[finding.category] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     // Generate category-specific recommendations
     Object.entries(findingsByCategory).forEach(([category, count]) => {
       if (count >= 3) {
-        recommendations.push(`Address systemic issues in ${category} (${count} findings)`);
+        recommendations.push(
+          `Address systemic issues in ${category} (${count} findings)`,
+        );
       }
     });
 
     // Check for critical findings
-    const criticalFindings = findings.filter(f => f.severity === 'critical');
+    const criticalFindings = findings.filter((f) => f.severity === 'critical');
     if (criticalFindings.length > 0) {
-      recommendations.push(`Immediately address ${criticalFindings.length} critical findings`);
+      recommendations.push(
+        `Immediately address ${criticalFindings.length} critical findings`,
+      );
     }
 
     // Check compliance score
@@ -931,7 +1012,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
     }
 
     // Add specific finding recommendations
-    findings.forEach(finding => {
+    findings.forEach((finding) => {
       recommendations.push(...finding.recommendations);
     });
 
@@ -951,21 +1032,21 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       details: {
         policyId: violation.policyId,
         ruleId: violation.ruleId,
-        violation: violation.description
+        violation: violation.description,
       },
       metadata: {
         correlation: violation.id,
         source: 'policy_engine',
         retention: 2555, // 7 years
         encrypted: true,
-        signed: true
-      }
+        signed: true,
+      },
     });
 
     // Execute policy action
     const policy = this.policies.get(violation.policyId);
     if (policy) {
-      const rule = policy.rules.find(r => r.id === violation.ruleId);
+      const rule = policy.rules.find((r) => r.id === violation.ruleId);
       if (rule) {
         await this.policyEngine.executeAction(rule.action, violation);
       }
@@ -983,7 +1064,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
         location: violation.location,
         evidence: [violation.evidence].filter(Boolean),
         recommendations: violation.recommendations || [],
-        status: 'open'
+        status: 'open',
       };
 
       this.emit('findingCreated', finding);
@@ -1005,7 +1086,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       this.emit('complianceAlert', {
         type: 'security_incident',
         event,
-        frameworks: ['SOC2', 'ISO27001']
+        frameworks: ['SOC2', 'ISO27001'],
       });
     }
 
@@ -1014,7 +1095,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       this.emit('complianceAlert', {
         type: 'access_violation',
         event,
-        frameworks: ['SOC2', 'GDPR']
+        frameworks: ['SOC2', 'GDPR'],
       });
     }
   }
@@ -1033,11 +1114,13 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       nonCompliantRequirements: Math.floor(allRequirements.length * 0.1),
       pendingRequirements: Math.floor(allRequirements.length * 0.043),
       criticalFindings: 2,
-      highRiskFindings: 5
+      highRiskFindings: 5,
     };
   }
 
-  private async calculateFrameworkCompliance(framework: ComplianceFramework): Promise<ComplianceSummary> {
+  private async calculateFrameworkCompliance(
+    framework: ComplianceFramework,
+  ): Promise<ComplianceSummary> {
     // Mock calculation - in real implementation, would assess framework requirements
     const total = framework.requirements.length;
     const compliant = Math.floor(total * 0.8);
@@ -1051,7 +1134,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       nonCompliantRequirements: nonCompliant,
       pendingRequirements: pending,
       criticalFindings: 1,
-      highRiskFindings: 2
+      highRiskFindings: 2,
     };
   }
 
@@ -1065,17 +1148,21 @@ export class ComplianceGovernanceEngine extends EventEmitter {
     return []; // Mock value
   }
 
-  private async getUpcomingAssessments(): Promise<{ framework: string; dueDate: Date }[]> {
+  private async getUpcomingAssessments(): Promise<
+    { framework: string; dueDate: Date }[]
+  > {
     const upcoming: { framework: string; dueDate: Date }[] = [];
-    
+
     for (const [frameworkId, framework] of this.frameworks.entries()) {
       // Calculate next assessment date based on audit frequency
       const nextAssessment = new Date();
-      nextAssessment.setDate(nextAssessment.getDate() + framework.auditFrequency);
-      
+      nextAssessment.setDate(
+        nextAssessment.getDate() + framework.auditFrequency,
+      );
+
       upcoming.push({
         framework: framework.name,
-        dueDate: nextAssessment
+        dueDate: nextAssessment,
       });
     }
 
@@ -1102,9 +1189,14 @@ export class ComplianceGovernanceEngine extends EventEmitter {
   private startBackgroundProcesses(): void {
     // Start continuous monitoring for frameworks that require it
     for (const framework of this.frameworks.values()) {
-      const continuousRequirements = framework.requirements.filter(r => r.frequency === 'continuous');
+      const continuousRequirements = framework.requirements.filter(
+        (r) => r.frequency === 'continuous',
+      );
       if (continuousRequirements.length > 0) {
-        this.complianceScanner.startContinuousMonitoring(framework.id, continuousRequirements);
+        this.complianceScanner.startContinuousMonitoring(
+          framework.id,
+          continuousRequirements,
+        );
       }
     }
 
@@ -1119,25 +1211,31 @@ export class ComplianceGovernanceEngine extends EventEmitter {
   private async runScheduledAssessments(): Promise<void> {
     // Check for due assessments
     const now = new Date();
-    
+
     for (const framework of this.frameworks.values()) {
       for (const requirement of framework.requirements) {
         if (requirement.nextAssessment <= now) {
           try {
             await this.assessRequirement(requirement);
-            
+
             // Update next assessment date
             requirement.lastAssessed = now;
-            requirement.nextAssessment = this.calculateNextAssessmentDate(requirement);
+            requirement.nextAssessment =
+              this.calculateNextAssessmentDate(requirement);
           } catch (error) {
-            this.logger.error(`Scheduled assessment failed for ${requirement.id}:`, error);
+            this.logger.error(
+              `Scheduled assessment failed for ${requirement.id}:`,
+              error,
+            );
           }
         }
       }
     }
   }
 
-  private calculateNextAssessmentDate(requirement: ComplianceRequirement): Date {
+  private calculateNextAssessmentDate(
+    requirement: ComplianceRequirement,
+  ): Date {
     const now = new Date();
     const next = new Date(now);
 
@@ -1167,7 +1265,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
   private cleanupOldAuditEvents(): void {
     // Remove audit events older than their retention period
     const now = new Date();
-    this.auditEvents = this.auditEvents.filter(event => {
+    this.auditEvents = this.auditEvents.filter((event) => {
       const retentionEnd = new Date(event.timestamp);
       retentionEnd.setDate(retentionEnd.getDate() + event.metadata.retention);
       return retentionEnd > now;
@@ -1177,12 +1275,12 @@ export class ComplianceGovernanceEngine extends EventEmitter {
   private async loadComplianceFrameworks(): Promise<void> {
     this.logger.info('Loading compliance frameworks...');
     // Implementation would load from persistent storage
-    
+
     // Load common frameworks
     const frameworks = [
       this.createSOC2Framework(),
       this.createGDPRFramework(),
-      this.createISO27001Framework()
+      this.createISO27001Framework(),
     ];
 
     for (const framework of frameworks) {
@@ -1202,14 +1300,16 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       id: 'soc2_type2',
       name: 'SOC 2 Type II',
       version: '2017',
-      description: 'System and Organization Controls 2 Type II compliance framework',
+      description:
+        'System and Organization Controls 2 Type II compliance framework',
       requirements: [
         {
           id: 'cc1.1',
           framework: 'soc2_type2',
           section: 'CC1',
           title: 'Control Environment - Integrity and Ethical Values',
-          description: 'The entity demonstrates a commitment to integrity and ethical values.',
+          description:
+            'The entity demonstrates a commitment to integrity and ethical values.',
           category: 'operational',
           severity: 'high',
           controls: ['cc1.1.1', 'cc1.1.2'],
@@ -1218,15 +1318,15 @@ export class ComplianceGovernanceEngine extends EventEmitter {
           frequency: 'quarterly',
           status: 'pending',
           lastAssessed: new Date(),
-          nextAssessment: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-        }
+          nextAssessment: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+        },
         // More requirements would be added
       ],
       controls: [],
       evidence: [],
       auditFrequency: 365,
       certificationRequired: true,
-      applicableRegions: ['US', 'CA']
+      applicableRegions: ['US', 'CA'],
     };
   }
 
@@ -1242,7 +1342,8 @@ export class ComplianceGovernanceEngine extends EventEmitter {
           framework: 'gdpr',
           section: 'Article 32',
           title: 'Security of processing',
-          description: 'Technical and organisational measures to ensure security of processing',
+          description:
+            'Technical and organisational measures to ensure security of processing',
           category: 'security',
           severity: 'critical',
           controls: ['encryption', 'access_control'],
@@ -1251,15 +1352,15 @@ export class ComplianceGovernanceEngine extends EventEmitter {
           frequency: 'continuous',
           status: 'pending',
           lastAssessed: new Date(),
-          nextAssessment: new Date(Date.now() + 24 * 60 * 60 * 1000)
-        }
+          nextAssessment: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
         // More requirements would be added
       ],
       controls: [],
       evidence: [],
       auditFrequency: 365,
       certificationRequired: false,
-      applicableRegions: ['EU', 'UK']
+      applicableRegions: ['EU', 'UK'],
     };
   }
 
@@ -1275,7 +1376,8 @@ export class ComplianceGovernanceEngine extends EventEmitter {
           framework: 'iso27001',
           section: 'A.8.1.1',
           title: 'Inventory of assets',
-          description: 'Assets associated with information and information processing facilities',
+          description:
+            'Assets associated with information and information processing facilities',
           category: 'security',
           severity: 'medium',
           controls: ['asset_inventory', 'asset_classification'],
@@ -1284,15 +1386,15 @@ export class ComplianceGovernanceEngine extends EventEmitter {
           frequency: 'monthly',
           status: 'pending',
           lastAssessed: new Date(),
-          nextAssessment: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        }
+          nextAssessment: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
         // More requirements would be added
       ],
       controls: [],
       evidence: [],
       auditFrequency: 365,
       certificationRequired: true,
-      applicableRegions: ['global']
+      applicableRegions: ['global'],
     };
   }
 
@@ -1321,7 +1423,7 @@ export class ComplianceGovernanceEngine extends EventEmitter {
       auditEvents: this.auditEvents.length,
       activeViolations: 0, // Would be calculated from violation detector
       reports: this.reports.size,
-      complianceScore: 85.7 // Would be calculated from assessments
+      complianceScore: 85.7, // Would be calculated from assessments
     };
   }
 

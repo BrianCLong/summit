@@ -28,7 +28,10 @@ async function ensureTable() {
       CREATE INDEX IF NOT EXISTS idx_uat_run ON maestro_uat_checkpoints(run_id);
     `);
   } catch (e) {
-    logger.warn({ err: e }, 'ensureTable maestro_uat_checkpoints failed (mock mode?)');
+    logger.warn(
+      { err: e },
+      'ensureTable maestro_uat_checkpoints failed (mock mode?)',
+    );
   }
 }
 
@@ -39,7 +42,13 @@ export async function addUATCheckpoint(c: UATCheckpoint) {
     await pool.query(
       `INSERT INTO maestro_uat_checkpoints (run_id, checkpoint, verdict, evidence_uris, actor)
        VALUES ($1,$2,$3,$4,$5)`,
-      [c.run_id, c.checkpoint, c.verdict, c.evidence_uris ? JSON.stringify(c.evidence_uris) : null, c.actor ?? null],
+      [
+        c.run_id,
+        c.checkpoint,
+        c.verdict,
+        c.evidence_uris ? JSON.stringify(c.evidence_uris) : null,
+        c.actor ?? null,
+      ],
     );
     return { ok: true };
   } catch (e) {
@@ -72,4 +81,3 @@ export async function listUATCheckpoints(runId: string) {
     return [];
   }
 }
-

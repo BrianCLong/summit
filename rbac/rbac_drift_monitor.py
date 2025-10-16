@@ -1,14 +1,14 @@
 """Nightly drift monitoring for RBAC roles."""
+
 import csv
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
 
-from .role_inference_engine import RoleInferenceEngine
-from .dynamic_privilege_recommender import DynamicPrivilegeRecommender
-from intelgraph_postgres_client import PostgresClient
 from intelgraph_neo4j_client import Neo4jClient
+from intelgraph_postgres_client import PostgresClient
 
+from .dynamic_privilege_recommender import DynamicPrivilegeRecommender
+from .role_inference_engine import RoleInferenceEngine
 
 REPORT_DIR = Path(__file__).resolve().parent / "reports"
 
@@ -23,7 +23,7 @@ def run_monitor():  # pragma: no cover - CLI utility
     engine.cluster_behaviours(feats)
     roles = engine.infer_roles(feats)
 
-    flagged_users: Dict[str, float] = {}
+    flagged_users: dict[str, float] = {}
     for user, vec in feats.items():
         _, flagged = engine.deviation_from_centroid(vec)
         if flagged:

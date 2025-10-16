@@ -4,8 +4,8 @@
  * Orchestrates complex multi-step analysis workflows across data sources
  */
 
-const { v4: uuidv4 } = require("uuid");
-const EventEmitter = require("events");
+const { v4: uuidv4 } = require('uuid');
+const EventEmitter = require('events');
 
 class CopilotOrchestrationService extends EventEmitter {
   constructor(
@@ -48,10 +48,10 @@ class CopilotOrchestrationService extends EventEmitter {
    */
   initializeQueryPlanners() {
     // Entity-focused planning
-    this.queryPlanners.set("ENTITY_ANALYSIS", {
-      name: "Entity Analysis Planner",
+    this.queryPlanners.set('ENTITY_ANALYSIS', {
+      name: 'Entity Analysis Planner',
       description:
-        "Plans queries focused on specific entities and their relationships",
+        'Plans queries focused on specific entities and their relationships',
       patterns: [
         /who is (.+)/i,
         /what do we know about (.+)/i,
@@ -62,9 +62,9 @@ class CopilotOrchestrationService extends EventEmitter {
     });
 
     // Relationship discovery planning
-    this.queryPlanners.set("RELATIONSHIP_DISCOVERY", {
-      name: "Relationship Discovery Planner",
-      description: "Plans queries to discover connections between entities",
+    this.queryPlanners.set('RELATIONSHIP_DISCOVERY', {
+      name: 'Relationship Discovery Planner',
+      description: 'Plans queries to discover connections between entities',
       patterns: [
         /how is (.+) connected to (.+)/i,
         /what is the relationship between (.+) and (.+)/i,
@@ -75,9 +75,9 @@ class CopilotOrchestrationService extends EventEmitter {
     });
 
     // Temporal analysis planning
-    this.queryPlanners.set("TEMPORAL_ANALYSIS", {
-      name: "Temporal Analysis Planner",
-      description: "Plans time-based queries and trend analysis",
+    this.queryPlanners.set('TEMPORAL_ANALYSIS', {
+      name: 'Temporal Analysis Planner',
+      description: 'Plans time-based queries and trend analysis',
       patterns: [
         /what happened (on|during|between) (.+)/i,
         /timeline of (.+)/i,
@@ -88,9 +88,9 @@ class CopilotOrchestrationService extends EventEmitter {
     });
 
     // Multi-source investigation planning
-    this.queryPlanners.set("MULTI_SOURCE_INVESTIGATION", {
-      name: "Multi-Source Investigation Planner",
-      description: "Plans complex investigations across multiple data sources",
+    this.queryPlanners.set('MULTI_SOURCE_INVESTIGATION', {
+      name: 'Multi-Source Investigation Planner',
+      description: 'Plans complex investigations across multiple data sources',
       patterns: [
         /investigate (.+)/i,
         /comprehensive analysis of (.+)/i,
@@ -101,9 +101,9 @@ class CopilotOrchestrationService extends EventEmitter {
     });
 
     // Geospatial analysis planning
-    this.queryPlanners.set("GEOSPATIAL_ANALYSIS", {
-      name: "Geospatial Analysis Planner",
-      description: "Plans location-based queries and spatial analysis",
+    this.queryPlanners.set('GEOSPATIAL_ANALYSIS', {
+      name: 'Geospatial Analysis Planner',
+      description: 'Plans location-based queries and spatial analysis',
       patterns: [
         /where is (.+)/i,
         /locations associated with (.+)/i,
@@ -114,9 +114,9 @@ class CopilotOrchestrationService extends EventEmitter {
     });
 
     // Pattern detection planning
-    this.queryPlanners.set("PATTERN_DETECTION", {
-      name: "Pattern Detection Planner",
-      description: "Plans queries to detect patterns and anomalies",
+    this.queryPlanners.set('PATTERN_DETECTION', {
+      name: 'Pattern Detection Planner',
+      description: 'Plans queries to detect patterns and anomalies',
       patterns: [
         /find patterns(.*)/i,
         /suspicious patterns(.*)/i,
@@ -137,54 +137,54 @@ class CopilotOrchestrationService extends EventEmitter {
    */
   loadDomainKnowledge() {
     // Entity type knowledge
-    this.domainKnowledge.set("entity_types", {
+    this.domainKnowledge.set('entity_types', {
       person: [
-        "individual",
-        "suspect",
-        "person of interest",
-        "subject",
-        "target",
+        'individual',
+        'suspect',
+        'person of interest',
+        'subject',
+        'target',
       ],
       organization: [
-        "company",
-        "corporation",
-        "business",
-        "enterprise",
-        "firm",
+        'company',
+        'corporation',
+        'business',
+        'enterprise',
+        'firm',
       ],
-      location: ["address", "place", "venue", "site", "coordinates"],
-      event: ["incident", "occurrence", "meeting", "transaction", "activity"],
-      communication: ["phone call", "message", "email", "text", "conversation"],
-      financial: ["transaction", "payment", "transfer", "account", "money"],
+      location: ['address', 'place', 'venue', 'site', 'coordinates'],
+      event: ['incident', 'occurrence', 'meeting', 'transaction', 'activity'],
+      communication: ['phone call', 'message', 'email', 'text', 'conversation'],
+      financial: ['transaction', 'payment', 'transfer', 'account', 'money'],
     });
 
     // Relationship type knowledge
-    this.domainKnowledge.set("relationship_types", {
-      association: ["knows", "associated with", "connected to", "related to"],
-      employment: ["works for", "employed by", "employee of", "staff at"],
-      ownership: ["owns", "belongs to", "property of", "owned by"],
-      communication: ["calls", "messages", "emails", "contacts", "talks to"],
-      location: ["lives at", "located at", "based in", "resides at"],
+    this.domainKnowledge.set('relationship_types', {
+      association: ['knows', 'associated with', 'connected to', 'related to'],
+      employment: ['works for', 'employed by', 'employee of', 'staff at'],
+      ownership: ['owns', 'belongs to', 'property of', 'owned by'],
+      communication: ['calls', 'messages', 'emails', 'contacts', 'talks to'],
+      location: ['lives at', 'located at', 'based in', 'resides at'],
       financial: [
-        "pays",
-        "receives from",
-        "transfers to",
-        "owes",
-        "transaction with",
+        'pays',
+        'receives from',
+        'transfers to',
+        'owes',
+        'transaction with',
       ],
     });
 
     // Query intent classification
-    this.domainKnowledge.set("query_intents", {
-      discovery: ["find", "discover", "locate", "search", "identify"],
-      analysis: ["analyze", "examine", "investigate", "study", "assess"],
-      comparison: ["compare", "contrast", "versus", "against", "relative to"],
-      aggregation: ["total", "count", "sum", "average", "statistics"],
-      temporal: ["when", "timeline", "history", "chronology", "sequence"],
-      causal: ["why", "because", "reason", "cause", "effect", "result"],
+    this.domainKnowledge.set('query_intents', {
+      discovery: ['find', 'discover', 'locate', 'search', 'identify'],
+      analysis: ['analyze', 'examine', 'investigate', 'study', 'assess'],
+      comparison: ['compare', 'contrast', 'versus', 'against', 'relative to'],
+      aggregation: ['total', 'count', 'sum', 'average', 'statistics'],
+      temporal: ['when', 'timeline', 'history', 'chronology', 'sequence'],
+      causal: ['why', 'because', 'reason', 'cause', 'effect', 'result'],
     });
 
-    this.logger.info("Loaded domain knowledge base for query understanding");
+    this.logger.info('Loaded domain knowledge base for query understanding');
   }
 
   /**
@@ -201,7 +201,7 @@ class CopilotOrchestrationService extends EventEmitter {
         timestamp: new Date(),
         ...context,
       },
-      status: "ANALYZING",
+      status: 'ANALYZING',
       steps: [],
       results: null,
       executionTime: 0,
@@ -217,7 +217,7 @@ class CopilotOrchestrationService extends EventEmitter {
       // Step 1: Parse and understand the query
       const queryAnalysis = await this.analyzeQuery(queryText, context);
       query.analysis = queryAnalysis;
-      query.status = "PLANNING";
+      query.status = 'PLANNING';
 
       // Step 2: Generate execution plan
       const executionPlan = await this.generateExecutionPlan(
@@ -225,21 +225,21 @@ class CopilotOrchestrationService extends EventEmitter {
         context,
       );
       query.plan = executionPlan;
-      query.status = "EXECUTING";
+      query.status = 'EXECUTING';
 
-      this.emit("queryPlanned", JSON.parse(JSON.stringify(query)));
+      this.emit('queryPlanned', JSON.parse(JSON.stringify(query)));
 
       // Step 3: Execute the plan
       const results = await this.executePlan(executionPlan, query);
       query.results = results;
-      query.status = "COMPLETED";
+      query.status = 'COMPLETED';
       query.confidence = this.calculateResultConfidence(results);
 
       this.metrics.successfulQueries++;
       this.metrics.complexQueriesHandled +=
         executionPlan.complexity > 0.7 ? 1 : 0;
 
-      this.emit("queryCompleted", query);
+      this.emit('queryCompleted', query);
       this.logger.info(`Query orchestration completed`, {
         queryId,
         steps: query.steps.length,
@@ -252,10 +252,10 @@ class CopilotOrchestrationService extends EventEmitter {
         queryId,
         error,
       });
-      query.status = "FAILED";
+      query.status = 'FAILED';
       query.error = error.message;
       this.metrics.failedQueries++;
-      this.emit("queryFailed", query);
+      this.emit('queryFailed', query);
       throw error;
     }
   }
@@ -305,7 +305,7 @@ class CopilotOrchestrationService extends EventEmitter {
     // Calculate confidence in understanding
     analysis.confidence = this.calculateAnalysisConfidence(analysis);
 
-    this.logger.info("Query analysis completed", {
+    this.logger.info('Query analysis completed', {
       intent: analysis.intent,
       queryType: analysis.queryType,
       entityCount: analysis.entities.length,
@@ -345,7 +345,7 @@ class CopilotOrchestrationService extends EventEmitter {
     plan.estimatedTime = specificPlan.estimatedTime;
     plan.parallelizable = specificPlan.parallelizable;
 
-    this.logger.info("Execution plan generated", {
+    this.logger.info('Execution plan generated', {
       strategy: plan.strategy,
       stepCount: plan.steps.length,
       dataSources: plan.dataSources,
@@ -401,7 +401,7 @@ class CopilotOrchestrationService extends EventEmitter {
   async planEntityAnalysis(analysis, context) {
     const plan = {
       steps: [],
-      dataSources: ["neo4j", "multimodal"],
+      dataSources: ['neo4j', 'multimodal'],
       estimatedTime: 2000,
       parallelizable: true,
     };
@@ -411,9 +411,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 1: Find entity in graph database
     plan.steps.push({
       id: uuidv4(),
-      type: "GRAPH_QUERY",
+      type: 'GRAPH_QUERY',
       description: `Find entity: ${entityName}`,
-      operation: "findEntity",
+      operation: 'findEntity',
       parameters: {
         entityName,
         investigationId: context.investigationId,
@@ -424,9 +424,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 2: Get entity relationships
     plan.steps.push({
       id: uuidv4(),
-      type: "GRAPH_QUERY",
+      type: 'GRAPH_QUERY',
       description: `Get relationships for: ${entityName}`,
-      operation: "getEntityRelationships",
+      operation: 'getEntityRelationships',
       parameters: {
         entityName,
         maxDepth: 2,
@@ -438,12 +438,12 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 3: Find multimodal evidence
     plan.steps.push({
       id: uuidv4(),
-      type: "MULTIMODAL_SEARCH",
+      type: 'MULTIMODAL_SEARCH',
       description: `Find multimodal evidence for: ${entityName}`,
-      operation: "multimodalSearch",
+      operation: 'multimodalSearch',
       parameters: {
         query: entityName,
-        mediaTypes: ["TEXT", "IMAGE", "AUDIO", "VIDEO"],
+        mediaTypes: ['TEXT', 'IMAGE', 'AUDIO', 'VIDEO'],
         minConfidence: 0.6,
       },
       estimatedTime: 1200,
@@ -452,12 +452,12 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 4: Analyze entity importance
     plan.steps.push({
       id: uuidv4(),
-      type: "GRAPH_ANALYTICS",
+      type: 'GRAPH_ANALYTICS',
       description: `Calculate centrality metrics for: ${entityName}`,
-      operation: "calculateCentrality",
+      operation: 'calculateCentrality',
       parameters: {
         entityName,
-        metrics: ["betweenness", "degree", "pagerank"],
+        metrics: ['betweenness', 'degree', 'pagerank'],
       },
       estimatedTime: 300,
     });
@@ -468,7 +468,7 @@ class CopilotOrchestrationService extends EventEmitter {
   async planRelationshipDiscovery(analysis, context) {
     const plan = {
       steps: [],
-      dataSources: ["neo4j", "federated"],
+      dataSources: ['neo4j', 'federated'],
       estimatedTime: 3000,
       parallelizable: false, // Sequential for path finding
     };
@@ -484,9 +484,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 1: Find shortest paths
     plan.steps.push({
       id: uuidv4(),
-      type: "GRAPH_QUERY",
+      type: 'GRAPH_QUERY',
       description: `Find paths between ${entities[0].name} and ${entities[1].name}`,
-      operation: "findShortestPaths",
+      operation: 'findShortestPaths',
       parameters: {
         sourceEntity: entities[0].name,
         targetEntity: entities[1].name,
@@ -499,9 +499,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 2: Analyze relationship patterns
     plan.steps.push({
       id: uuidv4(),
-      type: "GRAPH_ANALYTICS",
-      description: "Analyze relationship patterns",
-      operation: "analyzeRelationshipPatterns",
+      type: 'GRAPH_ANALYTICS',
+      description: 'Analyze relationship patterns',
+      operation: 'analyzeRelationshipPatterns',
       parameters: {
         entities: entities.map((e) => e.name),
         includeIndirect: true,
@@ -512,9 +512,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 3: Federated relationship search
     plan.steps.push({
       id: uuidv4(),
-      type: "FEDERATED_SEARCH",
-      description: "Search federated instances for relationships",
-      operation: "federatedRelationshipSearch",
+      type: 'FEDERATED_SEARCH',
+      description: 'Search federated instances for relationships',
+      operation: 'federatedRelationshipSearch',
       parameters: {
         entities: entities.map((e) => e.name),
         relationshipTypes: analysis.relationships,
@@ -528,7 +528,7 @@ class CopilotOrchestrationService extends EventEmitter {
   async planTemporalAnalysis(analysis, context) {
     const plan = {
       steps: [],
-      dataSources: ["neo4j", "multimodal"],
+      dataSources: ['neo4j', 'multimodal'],
       estimatedTime: 2500,
       parallelizable: true,
     };
@@ -539,9 +539,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 1: Query temporal relationships
     plan.steps.push({
       id: uuidv4(),
-      type: "GRAPH_QUERY",
-      description: "Query temporal relationships",
-      operation: "findTemporalRelationships",
+      type: 'GRAPH_QUERY',
+      description: 'Query temporal relationships',
+      operation: 'findTemporalRelationships',
       parameters: {
         timeRange: timeScope,
         entities: entities.map((e) => e.name),
@@ -553,13 +553,13 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 2: Build timeline
     plan.steps.push({
       id: uuidv4(),
-      type: "TIMELINE_ANALYSIS",
-      description: "Build event timeline",
-      operation: "buildTimeline",
+      type: 'TIMELINE_ANALYSIS',
+      description: 'Build event timeline',
+      operation: 'buildTimeline',
       parameters: {
         timeRange: timeScope,
         entities: entities.map((e) => e.name),
-        granularity: "hour",
+        granularity: 'hour',
       },
       estimatedTime: 800,
     });
@@ -567,9 +567,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 3: Find temporal patterns
     plan.steps.push({
       id: uuidv4(),
-      type: "PATTERN_ANALYSIS",
-      description: "Detect temporal patterns",
-      operation: "detectTemporalPatterns",
+      type: 'PATTERN_ANALYSIS',
+      description: 'Detect temporal patterns',
+      operation: 'detectTemporalPatterns',
       parameters: {
         timeRange: timeScope,
         entities: entities.map((e) => e.name),
@@ -583,7 +583,7 @@ class CopilotOrchestrationService extends EventEmitter {
   async planMultiSourceInvestigation(analysis, context) {
     const plan = {
       steps: [],
-      dataSources: ["neo4j", "multimodal", "federated", "ai_extraction"],
+      dataSources: ['neo4j', 'multimodal', 'federated', 'ai_extraction'],
       estimatedTime: 8000,
       parallelizable: true,
     };
@@ -593,9 +593,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 1: Comprehensive entity search
     plan.steps.push({
       id: uuidv4(),
-      type: "COMPREHENSIVE_SEARCH",
+      type: 'COMPREHENSIVE_SEARCH',
       description: `Comprehensive search for: ${target}`,
-      operation: "comprehensiveEntitySearch",
+      operation: 'comprehensiveEntitySearch',
       parameters: {
         target,
         includeAliases: true,
@@ -608,12 +608,12 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 2: Multi-modal analysis
     plan.steps.push({
       id: uuidv4(),
-      type: "MULTIMODAL_ANALYSIS",
-      description: "Multi-modal evidence analysis",
-      operation: "analyzeMultimodalEvidence",
+      type: 'MULTIMODAL_ANALYSIS',
+      description: 'Multi-modal evidence analysis',
+      operation: 'analyzeMultimodalEvidence',
       parameters: {
         target,
-        mediaTypes: ["TEXT", "IMAGE", "AUDIO", "VIDEO", "DOCUMENT"],
+        mediaTypes: ['TEXT', 'IMAGE', 'AUDIO', 'VIDEO', 'DOCUMENT'],
         deepAnalysis: true,
       },
       estimatedTime: 3000,
@@ -622,9 +622,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 3: Federated intelligence gathering
     plan.steps.push({
       id: uuidv4(),
-      type: "FEDERATED_SEARCH",
-      description: "Federated intelligence gathering",
-      operation: "gatherFederatedIntelligence",
+      type: 'FEDERATED_SEARCH',
+      description: 'Federated intelligence gathering',
+      operation: 'gatherFederatedIntelligence',
       parameters: {
         target,
         maxInstances: 10,
@@ -636,15 +636,15 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 4: AI-powered analysis
     plan.steps.push({
       id: uuidv4(),
-      type: "AI_ANALYSIS",
-      description: "AI-powered pattern analysis",
-      operation: "aiPatternAnalysis",
+      type: 'AI_ANALYSIS',
+      description: 'AI-powered pattern analysis',
+      operation: 'aiPatternAnalysis',
       parameters: {
         target,
         analysisTypes: [
-          "relationship_inference",
-          "anomaly_detection",
-          "risk_assessment",
+          'relationship_inference',
+          'anomaly_detection',
+          'risk_assessment',
         ],
         confidence_threshold: 0.7,
       },
@@ -657,22 +657,22 @@ class CopilotOrchestrationService extends EventEmitter {
   async planGeospatialAnalysis(analysis, context) {
     const plan = {
       steps: [],
-      dataSources: ["neo4j", "geospatial"],
+      dataSources: ['neo4j', 'geospatial'],
       estimatedTime: 3500,
       parallelizable: true,
     };
 
     const location =
       analysis.spatialScope ||
-      analysis.entities.find((e) => e.type === "LOCATION");
+      analysis.entities.find((e) => e.type === 'LOCATION');
     const target = analysis.entities[0]?.name || analysis.keywords[0];
 
     // Step 1: Geocode and normalize locations
     plan.steps.push({
       id: uuidv4(),
-      type: "GEOSPATIAL_QUERY",
-      description: "Geocode and normalize locations",
-      operation: "geocodeLocations",
+      type: 'GEOSPATIAL_QUERY',
+      description: 'Geocode and normalize locations',
+      operation: 'geocodeLocations',
       parameters: {
         target,
         location,
@@ -685,13 +685,13 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 2: Spatial relationship analysis
     plan.steps.push({
       id: uuidv4(),
-      type: "SPATIAL_ANALYSIS",
-      description: "Analyze spatial relationships",
-      operation: "analyzeSpatialRelationships",
+      type: 'SPATIAL_ANALYSIS',
+      description: 'Analyze spatial relationships',
+      operation: 'analyzeSpatialRelationships',
       parameters: {
         target,
         location,
-        analysisTypes: ["proximity", "movement_patterns", "co_location"],
+        analysisTypes: ['proximity', 'movement_patterns', 'co_location'],
       },
       estimatedTime: 1500,
     });
@@ -699,9 +699,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 3: Generate geospatial visualization
     plan.steps.push({
       id: uuidv4(),
-      type: "VISUALIZATION",
-      description: "Generate geospatial visualization",
-      operation: "createGeospatialVisualization",
+      type: 'VISUALIZATION',
+      description: 'Generate geospatial visualization',
+      operation: 'createGeospatialVisualization',
       parameters: {
         target,
         location,
@@ -717,7 +717,7 @@ class CopilotOrchestrationService extends EventEmitter {
   async planPatternDetection(analysis, context) {
     const plan = {
       steps: [],
-      dataSources: ["neo4j", "ai_analysis"],
+      dataSources: ['neo4j', 'ai_analysis'],
       estimatedTime: 4000,
       parallelizable: false, // Sequential for building on results
     };
@@ -727,9 +727,9 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 1: Collect entity data
     plan.steps.push({
       id: uuidv4(),
-      type: "DATA_COLLECTION",
+      type: 'DATA_COLLECTION',
       description: `Collect data for pattern analysis: ${target}`,
-      operation: "collectEntityData",
+      operation: 'collectEntityData',
       parameters: {
         target,
         includeRelationships: true,
@@ -742,18 +742,18 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 2: Behavioral pattern analysis
     plan.steps.push({
       id: uuidv4(),
-      type: "PATTERN_ANALYSIS",
-      description: "Analyze behavioral patterns",
-      operation: "analyzeBehavioralPatterns",
+      type: 'PATTERN_ANALYSIS',
+      description: 'Analyze behavioral patterns',
+      operation: 'analyzeBehavioralPatterns',
       parameters: {
         target,
         patternTypes: [
-          "communication",
-          "movement",
-          "transaction",
-          "association",
+          'communication',
+          'movement',
+          'transaction',
+          'association',
         ],
-        timeWindow: "30_days",
+        timeWindow: '30_days',
       },
       estimatedTime: 1500,
     });
@@ -761,15 +761,15 @@ class CopilotOrchestrationService extends EventEmitter {
     // Step 3: Anomaly detection
     plan.steps.push({
       id: uuidv4(),
-      type: "ANOMALY_DETECTION",
-      description: "Detect anomalous patterns",
-      operation: "detectAnomalies",
+      type: 'ANOMALY_DETECTION',
+      description: 'Detect anomalous patterns',
+      operation: 'detectAnomalies',
       parameters: {
         target,
         algorithms: [
-          "isolation_forest",
-          "statistical_outlier",
-          "graph_anomaly",
+          'isolation_forest',
+          'statistical_outlier',
+          'graph_anomaly',
         ],
         sensitivity: 0.8,
       },
@@ -795,8 +795,8 @@ class CopilotOrchestrationService extends EventEmitter {
     // If any graph query failed, surface error
     for (let i = 0; i < settled.length; i++) {
       if (
-        steps[i].type === "GRAPH_QUERY" &&
-        steps[i].status === "FAILED" &&
+        steps[i].type === 'GRAPH_QUERY' &&
+        steps[i].status === 'FAILED' &&
         steps[i].error
       ) {
         throw new Error(steps[i].error);
@@ -806,62 +806,62 @@ class CopilotOrchestrationService extends EventEmitter {
 
   async executeStep(step, query, results) {
     const stepStart = Date.now();
-    step.status = "EXECUTING";
+    step.status = 'EXECUTING';
     step.startedAt = new Date();
 
     query.steps.push(step);
-    this.emit("stepStarted", { query, step });
+    this.emit('stepStarted', { query, step });
 
     try {
       let stepResults = null;
 
       switch (step.type) {
-        case "GRAPH_QUERY":
+        case 'GRAPH_QUERY':
           stepResults = await this.executeGraphQuery(step);
           break;
-        case "MULTIMODAL_SEARCH":
+        case 'MULTIMODAL_SEARCH':
           stepResults = await this.executeMultimodalSearch(step);
           break;
-        case "FEDERATED_SEARCH":
+        case 'FEDERATED_SEARCH':
           stepResults = await this.executeFederatedSearch(step);
           break;
-        case "AI_ANALYSIS":
+        case 'AI_ANALYSIS':
           stepResults = await this.executeAIAnalysis(step);
           break;
-        case "GRAPH_ANALYTICS":
+        case 'GRAPH_ANALYTICS':
           stepResults = await this.executeGraphAnalytics(step);
           break;
-        case "TIMELINE_ANALYSIS":
+        case 'TIMELINE_ANALYSIS':
           stepResults = await this.executeTimelineAnalysis(step);
           break;
-        case "PATTERN_ANALYSIS":
+        case 'PATTERN_ANALYSIS':
           stepResults = await this.executePatternAnalysis(step);
           break;
-        case "GEOSPATIAL_QUERY":
+        case 'GEOSPATIAL_QUERY':
           stepResults = await this.executeGeospatialQuery(step);
           break;
-        case "VISUALIZATION":
+        case 'VISUALIZATION':
           stepResults = await this.executeVisualization(step);
           break;
         default:
           throw new Error(`Unknown step type: ${step.type}`);
       }
 
-      step.status = "COMPLETED";
+      step.status = 'COMPLETED';
       step.results = stepResults;
       step.executionTime = Date.now() - stepStart;
 
       // Merge step results into overall results
       this.mergeStepResults(stepResults, results);
 
-      this.emit("stepCompleted", { query, step });
+      this.emit('stepCompleted', { query, step });
     } catch (error) {
-      step.status = "FAILED";
+      step.status = 'FAILED';
       step.error = error.message;
       step.executionTime = Date.now() - stepStart;
 
       this.logger.error(`Step execution failed: ${step.description}`, error);
-      this.emit("stepFailed", { query, step, error });
+      this.emit('stepFailed', { query, step, error });
 
       // Continue with other steps unless critical
       if (step.critical !== false) {
@@ -877,7 +877,7 @@ class CopilotOrchestrationService extends EventEmitter {
     const session = this.driver?.session?.();
     try {
       if (session?.run) {
-        await session.run("RETURN 1");
+        await session.run('RETURN 1');
       }
     } finally {
       await session?.close?.();
@@ -886,10 +886,10 @@ class CopilotOrchestrationService extends EventEmitter {
     await this.delay(step.estimatedTime || 1000);
     return {
       entities: [
-        { id: "1", label: "Mock Entity", type: "PERSON", confidence: 0.9 },
+        { id: '1', label: 'Mock Entity', type: 'PERSON', confidence: 0.9 },
       ],
       relationships: [
-        { id: "1", type: "KNOWS", source: "1", target: "2", confidence: 0.8 },
+        { id: '1', type: 'KNOWS', source: '1', target: '2', confidence: 0.8 },
       ],
     };
   }
@@ -900,14 +900,14 @@ class CopilotOrchestrationService extends EventEmitter {
     return {
       entities: [
         {
-          id: "2",
-          label: "Multimodal Entity",
-          type: "PERSON",
+          id: '2',
+          label: 'Multimodal Entity',
+          type: 'PERSON',
           confidence: 0.85,
-          source: "IMAGE",
+          source: 'IMAGE',
         },
       ],
-      mediaSources: [{ id: "m1", type: "IMAGE", filename: "evidence.jpg" }],
+      mediaSources: [{ id: 'm1', type: 'IMAGE', filename: 'evidence.jpg' }],
     };
   }
 
@@ -917,15 +917,15 @@ class CopilotOrchestrationService extends EventEmitter {
     return {
       entities: [
         {
-          id: "3",
-          label: "Federated Entity",
-          type: "ORGANIZATION",
+          id: '3',
+          label: 'Federated Entity',
+          type: 'ORGANIZATION',
           confidence: 0.87,
-          instance: "remote1",
+          instance: 'remote1',
         },
       ],
       relationships: [],
-      instances: ["remote1", "remote2"],
+      instances: ['remote1', 'remote2'],
     };
   }
 
@@ -935,16 +935,16 @@ class CopilotOrchestrationService extends EventEmitter {
     return {
       insights: [
         {
-          type: "PATTERN_DETECTED",
-          description: "Unusual communication pattern detected",
+          type: 'PATTERN_DETECTED',
+          description: 'Unusual communication pattern detected',
           confidence: 0.82,
-          entities: ["entity1", "entity2"],
+          entities: ['entity1', 'entity2'],
         },
       ],
       anomalies: [
         {
-          type: "BEHAVIORAL_ANOMALY",
-          description: "Significant deviation from normal behavior",
+          type: 'BEHAVIORAL_ANOMALY',
+          description: 'Significant deviation from normal behavior',
           severity: 0.75,
         },
       ],
@@ -959,7 +959,7 @@ class CopilotOrchestrationService extends EventEmitter {
         entity1: { betweenness: 0.85, degree: 15, pagerank: 0.12 },
       },
       clusters: [
-        { id: "cluster1", entities: ["entity1", "entity2"], cohesion: 0.78 },
+        { id: 'cluster1', entities: ['entity1', 'entity2'], cohesion: 0.78 },
       ],
     };
   }
@@ -970,16 +970,16 @@ class CopilotOrchestrationService extends EventEmitter {
     return {
       timeline: [
         {
-          timestamp: "2024-01-15T10:00:00Z",
-          event: "Communication event",
-          entities: ["entity1", "entity2"],
+          timestamp: '2024-01-15T10:00:00Z',
+          event: 'Communication event',
+          entities: ['entity1', 'entity2'],
           confidence: 0.9,
         },
       ],
       patterns: [
         {
-          type: "PERIODIC",
-          description: "Weekly communication pattern",
+          type: 'PERIODIC',
+          description: 'Weekly communication pattern',
           confidence: 0.85,
         },
       ],
@@ -992,9 +992,9 @@ class CopilotOrchestrationService extends EventEmitter {
     return {
       patterns: [
         {
-          type: "COMMUNICATION_BURST",
-          description: "Increased communication activity detected",
-          timeframe: "2024-01-10 to 2024-01-15",
+          type: 'COMMUNICATION_BURST',
+          description: 'Increased communication activity detected',
+          timeframe: '2024-01-10 to 2024-01-15',
           confidence: 0.88,
         },
       ],
@@ -1008,16 +1008,16 @@ class CopilotOrchestrationService extends EventEmitter {
     return {
       locations: [
         {
-          address: "123 Main St, City",
+          address: '123 Main St, City',
           coordinates: { lat: 40.7128, lon: -74.006 },
           confidence: 0.95,
         },
       ],
       spatialRelationships: [
         {
-          entity1: "entity1",
-          entity2: "location1",
-          relationship: "NEAR",
+          entity1: 'entity1',
+          entity2: 'location1',
+          relationship: 'NEAR',
           distance: 150,
         },
       ],
@@ -1030,9 +1030,9 @@ class CopilotOrchestrationService extends EventEmitter {
     return {
       visualizations: [
         {
-          type: "NETWORK_GRAPH",
+          type: 'NETWORK_GRAPH',
           data: { nodes: [], edges: [] },
-          config: { layout: "force-directed" },
+          config: { layout: 'force-directed' },
         },
       ],
     };
@@ -1048,14 +1048,14 @@ class CopilotOrchestrationService extends EventEmitter {
     // Simple keyword extraction (in production, use NLP)
     return text
       .toLowerCase()
-      .replace(/[^\w\s]/g, " ")
+      .replace(/[^\w\s]/g, ' ')
       .split(/\s+/)
       .filter((word) => word.length > 2)
       .slice(0, 10);
   }
 
   classifyQueryIntent(text) {
-    const intents = this.domainKnowledge.get("query_intents");
+    const intents = this.domainKnowledge.get('query_intents');
 
     for (const [intent, keywords] of Object.entries(intents)) {
       if (keywords.some((keyword) => text.includes(keyword))) {
@@ -1063,7 +1063,7 @@ class CopilotOrchestrationService extends EventEmitter {
       }
     }
 
-    return "discovery"; // default
+    return 'discovery'; // default
   }
 
   identifyQueryType(text) {
@@ -1073,7 +1073,7 @@ class CopilotOrchestrationService extends EventEmitter {
       }
     }
 
-    return "ENTITY_ANALYSIS"; // default
+    return 'ENTITY_ANALYSIS'; // default
   }
 
   async extractEntityMentions(text, context) {
@@ -1084,7 +1084,7 @@ class CopilotOrchestrationService extends EventEmitter {
     if (keywords.length > 0) {
       entities.push({
         name: keywords[0],
-        type: "UNKNOWN",
+        type: 'UNKNOWN',
         confidence: 0.7,
         mentions: [{ start: 0, end: keywords[0].length }],
       });
@@ -1095,7 +1095,7 @@ class CopilotOrchestrationService extends EventEmitter {
 
   extractRelationshipMentions(text) {
     const relationships = [];
-    const relationshipTypes = this.domainKnowledge.get("relationship_types");
+    const relationshipTypes = this.domainKnowledge.get('relationship_types');
 
     for (const [type, keywords] of Object.entries(relationshipTypes)) {
       if (keywords.some((keyword) => text.toLowerCase().includes(keyword))) {
@@ -1121,7 +1121,7 @@ class CopilotOrchestrationService extends EventEmitter {
       const match = text.match(pattern);
       if (match) {
         return {
-          type: "RELATIVE",
+          type: 'RELATIVE',
           value: match[0],
           confidence: 0.8,
         };
@@ -1142,7 +1142,7 @@ class CopilotOrchestrationService extends EventEmitter {
       const match = text.match(pattern);
       if (match) {
         return {
-          type: "GEOGRAPHIC",
+          type: 'GEOGRAPHIC',
           value: match[0],
           confidence: 0.7,
         };
@@ -1206,7 +1206,7 @@ class CopilotOrchestrationService extends EventEmitter {
     // Generate additional insights based on results
     if (results.entities.length > 10) {
       insights.push({
-        type: "HIGH_ENTITY_COUNT",
+        type: 'HIGH_ENTITY_COUNT',
         description: `Query returned ${results.entities.length} entities, suggesting a complex network`,
         confidence: 0.8,
       });
@@ -1214,8 +1214,8 @@ class CopilotOrchestrationService extends EventEmitter {
 
     if (results.relationships.length === 0) {
       insights.push({
-        type: "NO_RELATIONSHIPS",
-        description: "No relationships found - entities may be isolated",
+        type: 'NO_RELATIONSHIPS',
+        description: 'No relationships found - entities may be isolated',
         confidence: 0.7,
       });
     }
@@ -1263,7 +1263,7 @@ class CopilotOrchestrationService extends EventEmitter {
       successRate:
         totalQueries > 0
           ? ((this.metrics.successfulQueries / totalQueries) * 100).toFixed(2)
-          : "0",
+          : '0',
       planningAccuracy:
         totalQueries > 0
           ? ((this.metrics.complexQueriesHandled / totalQueries) * 100).toFixed(
@@ -1287,10 +1287,10 @@ class CopilotOrchestrationService extends EventEmitter {
     const query = this.activeQueries.get(queryId);
     if (!query) return false;
 
-    query.status = "CANCELLED";
+    query.status = 'CANCELLED';
     query.completedAt = new Date();
 
-    this.emit("queryCancelled", query);
+    this.emit('queryCancelled', query);
     return true;
   }
 }

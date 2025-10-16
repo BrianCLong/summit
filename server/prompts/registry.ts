@@ -41,18 +41,21 @@ export class PromptRegistry {
 
       // Load all prompt templates
       const files = await fs.readdir(this.promptsDir);
-      const yamlFiles = files.filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
+      const yamlFiles = files.filter(
+        (f) => f.endsWith('.yaml') || f.endsWith('.yml'),
+      );
 
       for (const file of yamlFiles) {
         await this.loadPrompt(path.join(this.promptsDir, file));
       }
 
       logger.info(`Loaded ${this.prompts.size} prompt templates`, {
-        templates: Array.from(this.prompts.keys())
+        templates: Array.from(this.prompts.keys()),
       });
-
     } catch (error: any) {
-      logger.error('Failed to initialize prompt registry', { error: error.message });
+      logger.error('Failed to initialize prompt registry', {
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -68,15 +71,14 @@ export class PromptRegistry {
       }
 
       this.prompts.set(prompt.meta.id, prompt);
-      logger.debug('Loaded prompt template', { 
+      logger.debug('Loaded prompt template', {
         id: prompt.meta.id,
-        file: path.basename(filePath)
+        file: path.basename(filePath),
       });
-
     } catch (error: any) {
-      logger.error('Failed to load prompt', { 
-        file: filePath, 
-        error: error.message 
+      logger.error('Failed to load prompt', {
+        file: filePath,
+        error: error.message,
       });
       throw error;
     }
@@ -103,11 +105,14 @@ export class PromptRegistry {
     return this.renderTemplate(prompt.template, inputs);
   }
 
-  private validateInputs(prompt: PromptTemplate, inputs: Record<string, any>): void {
+  private validateInputs(
+    prompt: PromptTemplate,
+    inputs: Record<string, any>,
+  ): void {
     const required = Object.keys(prompt.inputs);
     const provided = Object.keys(inputs);
-    
-    const missing = required.filter(key => !(key in inputs));
+
+    const missing = required.filter((key) => !(key in inputs));
     if (missing.length > 0) {
       throw new Error(`Missing required inputs: ${missing.join(', ')}`);
     }
@@ -116,7 +121,9 @@ export class PromptRegistry {
     for (const [key, expectedType] of Object.entries(prompt.inputs)) {
       const value = inputs[key];
       if (!this.validateType(value, expectedType)) {
-        throw new Error(`Invalid type for ${key}: expected ${expectedType}, got ${typeof value}`);
+        throw new Error(
+          `Invalid type for ${key}: expected ${expectedType}, got ${typeof value}`,
+        );
       }
     }
   }
@@ -138,9 +145,12 @@ export class PromptRegistry {
     }
   }
 
-  private renderTemplate(template: string, inputs: Record<string, any>): string {
+  private renderTemplate(
+    template: string,
+    inputs: Record<string, any>,
+  ): string {
     let rendered = template;
-    
+
     // Handle simple {{variable}} replacements
     for (const [key, value] of Object.entries(inputs)) {
       const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
@@ -173,30 +183,34 @@ export class PromptRegistry {
         if (!Array.isArray(array)) {
           return '';
         }
-        
-        return array.map(item => {
-          if (typeof item === 'object') {
-            // Replace {{property}} in item template
-            let rendered = itemTemplate;
-            for (const [key, value] of Object.entries(item)) {
-              rendered = rendered.replace(
-                new RegExp(`{{\\s*${key}\\s*}}`, 'g'),
-                String(value)
-              );
+
+        return array
+          .map((item) => {
+            if (typeof item === 'object') {
+              // Replace {{property}} in item template
+              let rendered = itemTemplate;
+              for (const [key, value] of Object.entries(item)) {
+                rendered = rendered.replace(
+                  new RegExp(`{{\\s*${key}\\s*}}`, 'g'),
+                  String(value),
+                );
+              }
+              return rendered;
+            } else {
+              // Replace {{.}} with item value
+              return itemTemplate.replace(/{{\.}}/g, String(item));
             }
-            return rendered;
-          } else {
-            // Replace {{.}} with item value
-            return itemTemplate.replace(/{{\.}}/g, String(item));
-          }
-        }).join('');
-      }
+          })
+          .join('');
+      },
     );
   }
 
   async runGoldenTests(promptId?: string): Promise<TestResult[]> {
     const results: TestResult[] = [];
-    const promptsToTest = promptId ? [this.getPrompt(promptId)].filter(Boolean) : this.getAllPrompts();
+    const promptsToTest = promptId
+      ? [this.getPrompt(promptId)].filter(Boolean)
+      : this.getAllPrompts();
 
     for (const prompt of promptsToTest) {
       if (!prompt!.examples?.length) {
@@ -206,8 +220,8 @@ export class PromptRegistry {
       for (const example of prompt!.examples) {
         try {
           const rendered = this.render(prompt!.meta.id, example.inputs);
-          const passed = example.expected_contains.every(expected => 
-            rendered.includes(expected)
+          const passed = example.expected_contains.every((expected) =>
+            rendered.includes(expected),
           );
 
           results.push({
@@ -216,11 +230,12 @@ export class PromptRegistry {
             passed,
             rendered,
             expectedContains: example.expected_contains,
-            missingExpected: passed ? [] : example.expected_contains.filter(expected => 
-              !rendered.includes(expected)
-            )
+            missingExpected: passed
+              ? []
+              : example.expected_contains.filter(
+                  (expected) => !rendered.includes(expected),
+                ),
           });
-
         } catch (error: any) {
           results.push({
             promptId: prompt!.meta.id,
@@ -228,19 +243,19 @@ export class PromptRegistry {
             passed: false,
             error: error.message,
             expectedContains: example.expected_contains,
-            missingExpected: example.expected_contains
+            missingExpected: example.expected_contains,
           });
         }
       }
     }
 
-    const passed = results.filter(r => r.passed).length;
+    const passed = results.filter((r) => r.passed).length;
     const total = results.length;
-    
-    logger.info('Golden tests completed', { 
-      passed, 
-      total, 
-      successRate: total > 0 ? (passed / total * 100).toFixed(1) + '%' : '0%' 
+
+    logger.info('Golden tests completed', {
+      passed,
+      total,
+      successRate: total > 0 ? ((passed / total) * 100).toFixed(1) + '%' : '0%',
     });
 
     return results;

@@ -1,6 +1,6 @@
 /**
  * Advanced AI-Powered Search and Discovery Engine
- * 
+ *
  * Provides intelligent search capabilities for documentation including:
  * - Semantic search with vector embeddings
  * - Natural language query processing
@@ -143,7 +143,6 @@ export class AISearchEngine extends EventEmitter {
       this.isInitialized = true;
       this.emit('initialized');
       console.log('✅ Search engine initialized successfully');
-
     } catch (error) {
       console.error('❌ Failed to initialize search engine:', error);
       throw error;
@@ -157,7 +156,7 @@ export class AISearchEngine extends EventEmitter {
     // Generate embedding for the document
     const embedding = await this.generateEmbedding(
       `${document.title} ${document.content}`,
-      document.language
+      document.language,
     );
 
     document.embedding = embedding;
@@ -184,7 +183,10 @@ export class AISearchEngine extends EventEmitter {
   /**
    * Update document in search index
    */
-  public async updateDocument(documentId: string, updates: Partial<SearchDocument>): Promise<void> {
+  public async updateDocument(
+    documentId: string,
+    updates: Partial<SearchDocument>,
+  ): Promise<void> {
     const existing = this.searchIndex.get(documentId);
     if (!existing) {
       throw new Error(`Document ${documentId} not found`);
@@ -196,7 +198,7 @@ export class AISearchEngine extends EventEmitter {
     if (updates.title || updates.content) {
       updated.embedding = await this.generateEmbedding(
         `${updated.title} ${updated.content}`,
-        updated.language
+        updated.language,
       );
       this.vectorIndex.set(documentId, updated.embedding);
     }
@@ -212,7 +214,7 @@ export class AISearchEngine extends EventEmitter {
    */
   public async search(query: SearchQuery): Promise<SearchResponse> {
     const startTime = Date.now();
-    
+
     // Check cache first
     const cacheKey = this.generateCacheKey(query);
     if (this.queryCache.has(cacheKey)) {
@@ -223,19 +225,28 @@ export class AISearchEngine extends EventEmitter {
 
     try {
       // Process and clean query
-      const processedQuery = await this.processQuery(query.query, query.language);
+      const processedQuery = await this.processQuery(
+        query.query,
+        query.language,
+      );
 
       // Get semantic search results
-      const semanticResults = await this.performSemanticSearch(processedQuery, query);
+      const semanticResults = await this.performSemanticSearch(
+        processedQuery,
+        query,
+      );
 
       // Get keyword search results
-      const keywordResults = await this.performKeywordSearch(processedQuery, query);
+      const keywordResults = await this.performKeywordSearch(
+        processedQuery,
+        query,
+      );
 
       // Combine and rank results
       const combinedResults = await this.combineAndRankResults(
         semanticResults,
         keywordResults,
-        query
+        query,
       );
 
       // Apply filters and facets
@@ -245,19 +256,32 @@ export class AISearchEngine extends EventEmitter {
       const facets = this.generateFacets(filteredResults, query.facets || []);
 
       // Generate suggestions and corrections
-      const suggestions = await this.generateSuggestions(query.query, query.language);
-      const correctedQuery = await this.getQueryCorrection(query.query, query.language);
+      const suggestions = await this.generateSuggestions(
+        query.query,
+        query.language,
+      );
+      const correctedQuery = await this.getQueryCorrection(
+        query.query,
+        query.language,
+      );
 
       // Personalize results if enabled
       let personalizedResults = filteredResults;
       if (this.config.enablePersonalization && query.userId) {
-        personalizedResults = await this.personalizeResults(filteredResults, query.userId);
+        personalizedResults = await this.personalizeResults(
+          filteredResults,
+          query.userId,
+        );
       }
 
       // Paginate results
       const page = query.page || 1;
       const limit = query.limit || this.config.maxResults;
-      const paginatedResults = this.paginateResults(personalizedResults, page, limit);
+      const paginatedResults = this.paginateResults(
+        personalizedResults,
+        page,
+        limit,
+      );
 
       const response: SearchResponse = {
         query: query.query,
@@ -268,7 +292,7 @@ export class AISearchEngine extends EventEmitter {
         queryTime: Date.now() - startTime,
         correctedQuery,
         relatedQueries: await this.getRelatedQueries(query.query),
-        pagination: paginatedResults.pagination
+        pagination: paginatedResults.pagination,
       };
 
       // Cache the response
@@ -282,7 +306,6 @@ export class AISearchEngine extends EventEmitter {
       this.trackSearchQuery(query, response);
 
       return response;
-
     } catch (error) {
       console.error('❌ Search error:', error);
       throw new Error(`Search failed: ${error.message}`);
@@ -292,19 +315,25 @@ export class AISearchEngine extends EventEmitter {
   /**
    * Get auto-complete suggestions
    */
-  public async getAutoComplete(partialQuery: string, language?: string): Promise<AutoCompleteResult> {
+  public async getAutoComplete(
+    partialQuery: string,
+    language?: string,
+  ): Promise<AutoCompleteResult> {
     if (!this.config.enableAutoComplete) {
       return { suggestions: [], completions: [], popularQueries: [] };
     }
 
-    const suggestions = await this.generateAutoCompleteSuggestions(partialQuery, language);
+    const suggestions = await this.generateAutoCompleteSuggestions(
+      partialQuery,
+      language,
+    );
     const completions = await this.generateCompletions(partialQuery, language);
     const popularQueries = await this.getPopularQueries(language);
 
     return {
       suggestions,
       completions,
-      popularQueries
+      popularQueries,
     };
   }
 
@@ -314,7 +343,7 @@ export class AISearchEngine extends EventEmitter {
   public async getSearchAnalytics(
     startDate: Date,
     endDate: Date,
-    filters?: { [key: string]: any }
+    filters?: { [key: string]: any },
   ): Promise<SearchAnalytics> {
     // Implementation would connect to analytics storage
     return {
@@ -327,7 +356,7 @@ export class AISearchEngine extends EventEmitter {
       searchSuccessRate: 0,
       queryRefinementRate: 0,
       popularFilters: {},
-      searchTrends: []
+      searchTrends: [],
     };
   }
 
@@ -348,7 +377,6 @@ export class AISearchEngine extends EventEmitter {
 
       console.log('✅ Search index rebuilt successfully');
       this.emit('index_rebuilt');
-
     } catch (error) {
       console.error('❌ Failed to rebuild index:', error);
       throw error;
@@ -390,13 +418,19 @@ export class AISearchEngine extends EventEmitter {
     }
   }
 
-  private async generateEmbedding(text: string, language?: string): Promise<number[]> {
+  private async generateEmbedding(
+    text: string,
+    language?: string,
+  ): Promise<number[]> {
     // Placeholder for actual embedding generation
     // Would use the configured embedding service
     return new Array(768).fill(0).map(() => Math.random());
   }
 
-  private async processQuery(query: string, language?: string): Promise<string> {
+  private async processQuery(
+    query: string,
+    language?: string,
+  ): Promise<string> {
     // Clean and normalize the query
     let processed = query.toLowerCase().trim();
 
@@ -411,9 +445,15 @@ export class AISearchEngine extends EventEmitter {
     return processed;
   }
 
-  private async performSemanticSearch(query: string, searchQuery: SearchQuery): Promise<SearchResult[]> {
+  private async performSemanticSearch(
+    query: string,
+    searchQuery: SearchQuery,
+  ): Promise<SearchResult[]> {
     // Generate query embedding
-    const queryEmbedding = await this.generateEmbedding(query, searchQuery.language);
+    const queryEmbedding = await this.generateEmbedding(
+      query,
+      searchQuery.language,
+    );
 
     const results: SearchResult[] = [];
 
@@ -422,8 +462,13 @@ export class AISearchEngine extends EventEmitter {
       const document = this.searchIndex.get(docId)!;
 
       // Apply type and category filters early
-      if (searchQuery.type && !searchQuery.type.includes(document.type)) continue;
-      if (searchQuery.category && !searchQuery.category.includes(document.category)) continue;
+      if (searchQuery.type && !searchQuery.type.includes(document.type))
+        continue;
+      if (
+        searchQuery.category &&
+        !searchQuery.category.includes(document.category)
+      )
+        continue;
 
       const similarity = this.cosineSimilarity(queryEmbedding, docEmbedding);
 
@@ -437,7 +482,7 @@ export class AISearchEngine extends EventEmitter {
           score: similarity,
           snippet: this.generateSnippet(document.content, query),
           highlights: this.generateHighlights(document.content, query),
-          metadata: document.metadata
+          metadata: document.metadata,
         });
       }
     }
@@ -446,22 +491,34 @@ export class AISearchEngine extends EventEmitter {
     return results.sort((a, b) => b.score - a.score);
   }
 
-  private async performKeywordSearch(query: string, searchQuery: SearchQuery): Promise<SearchResult[]> {
+  private async performKeywordSearch(
+    query: string,
+    searchQuery: SearchQuery,
+  ): Promise<SearchResult[]> {
     const keywords = query.split(/\s+/);
     const results: SearchResult[] = [];
 
     for (const [docId, document] of this.searchIndex) {
       // Apply filters
-      if (searchQuery.type && !searchQuery.type.includes(document.type)) continue;
-      if (searchQuery.category && !searchQuery.category.includes(document.category)) continue;
+      if (searchQuery.type && !searchQuery.type.includes(document.type))
+        continue;
+      if (
+        searchQuery.category &&
+        !searchQuery.category.includes(document.category)
+      )
+        continue;
 
       let score = 0;
       const searchText = `${document.title} ${document.content}`.toLowerCase();
 
       // Calculate keyword matching score
       for (const keyword of keywords) {
-        const titleMatches = (document.title.toLowerCase().match(new RegExp(keyword, 'g')) || []).length;
-        const contentMatches = (document.content.toLowerCase().match(new RegExp(keyword, 'g')) || []).length;
+        const titleMatches = (
+          document.title.toLowerCase().match(new RegExp(keyword, 'g')) || []
+        ).length;
+        const contentMatches = (
+          document.content.toLowerCase().match(new RegExp(keyword, 'g')) || []
+        ).length;
 
         // Weight title matches more heavily
         score += titleMatches * 2 + contentMatches;
@@ -477,7 +534,7 @@ export class AISearchEngine extends EventEmitter {
           score,
           snippet: this.generateSnippet(document.content, query),
           highlights: this.generateHighlights(document.content, query),
-          metadata: document.metadata
+          metadata: document.metadata,
         });
       }
     }
@@ -488,7 +545,7 @@ export class AISearchEngine extends EventEmitter {
   private async combineAndRankResults(
     semanticResults: SearchResult[],
     keywordResults: SearchResult[],
-    query: SearchQuery
+    query: SearchQuery,
   ): Promise<SearchResult[]> {
     const combined = new Map<string, SearchResult>();
 
@@ -502,7 +559,7 @@ export class AISearchEngine extends EventEmitter {
       const existing = combined.get(result.id);
       if (existing) {
         // Combine scores
-        existing.score = existing.score + (result.score * 0.3);
+        existing.score = existing.score + result.score * 0.3;
       } else {
         result.score = result.score * 0.3; // Weight keyword results
         combined.set(result.id, result);
@@ -510,7 +567,9 @@ export class AISearchEngine extends EventEmitter {
     }
 
     // Convert to array and sort by combined score
-    const finalResults = Array.from(combined.values()).sort((a, b) => b.score - a.score);
+    const finalResults = Array.from(combined.values()).sort(
+      (a, b) => b.score - a.score,
+    );
 
     // Apply priority boost from document metadata
     for (const result of finalResults) {
@@ -521,18 +580,21 @@ export class AISearchEngine extends EventEmitter {
     return finalResults.sort((a, b) => b.score - a.score);
   }
 
-  private applyFilters(results: SearchResult[], query: SearchQuery): SearchResult[] {
+  private applyFilters(
+    results: SearchResult[],
+    query: SearchQuery,
+  ): SearchResult[] {
     let filtered = results;
 
     if (query.tags && query.tags.length > 0) {
-      filtered = filtered.filter(result => {
+      filtered = filtered.filter((result) => {
         const doc = this.searchIndex.get(result.id)!;
-        return query.tags!.some(tag => doc.tags.includes(tag));
+        return query.tags!.some((tag) => doc.tags.includes(tag));
       });
     }
 
     if (query.filters) {
-      filtered = filtered.filter(result => {
+      filtered = filtered.filter((result) => {
         const doc = this.searchIndex.get(result.id)!;
         return Object.entries(query.filters!).every(([key, value]) => {
           return doc.metadata[key] === value;
@@ -543,7 +605,10 @@ export class AISearchEngine extends EventEmitter {
     return filtered;
   }
 
-  private generateFacets(results: SearchResult[], requestedFacets: string[]): { [facet: string]: FacetResult[] } {
+  private generateFacets(
+    results: SearchResult[],
+    requestedFacets: string[],
+  ): { [facet: string]: FacetResult[] } {
     const facets: { [facet: string]: FacetResult[] } = {};
 
     for (const facetName of requestedFacets) {
@@ -580,44 +645,59 @@ export class AISearchEngine extends EventEmitter {
     return facets;
   }
 
-  private async generateSuggestions(query: string, language?: string): Promise<string[]> {
+  private async generateSuggestions(
+    query: string,
+    language?: string,
+  ): Promise<string[]> {
     // Implementation for query suggestions
     return [];
   }
 
-  private async getQueryCorrection(query: string, language?: string): Promise<string | undefined> {
+  private async getQueryCorrection(
+    query: string,
+    language?: string,
+  ): Promise<string | undefined> {
     // Implementation for spell correction
     return undefined;
   }
 
-  private async personalizeResults(results: SearchResult[], userId: string): Promise<SearchResult[]> {
+  private async personalizeResults(
+    results: SearchResult[],
+    userId: string,
+  ): Promise<SearchResult[]> {
     const userProfile = this.userProfiles.get(userId);
     if (!userProfile) return results;
 
     // Apply personalization based on user profile
-    return results.map(result => {
-      const doc = this.searchIndex.get(result.id)!;
-      let personalizedScore = result.score;
+    return results
+      .map((result) => {
+        const doc = this.searchIndex.get(result.id)!;
+        let personalizedScore = result.score;
 
-      // Boost based on user preferences
-      if (userProfile.preferredTypes.includes(doc.type)) {
-        personalizedScore *= 1.2;
-      }
+        // Boost based on user preferences
+        if (userProfile.preferredTypes.includes(doc.type)) {
+          personalizedScore *= 1.2;
+        }
 
-      if (userProfile.preferredCategories.includes(doc.category)) {
-        personalizedScore *= 1.1;
-      }
+        if (userProfile.preferredCategories.includes(doc.category)) {
+          personalizedScore *= 1.1;
+        }
 
-      // Boost based on user history
-      if (userProfile.clickedDocuments.includes(doc.id)) {
-        personalizedScore *= 1.15;
-      }
+        // Boost based on user history
+        if (userProfile.clickedDocuments.includes(doc.id)) {
+          personalizedScore *= 1.15;
+        }
 
-      return { ...result, score: personalizedScore };
-    }).sort((a, b) => b.score - a.score);
+        return { ...result, score: personalizedScore };
+      })
+      .sort((a, b) => b.score - a.score);
   }
 
-  private paginateResults(results: SearchResult[], page: number, limit: number): {
+  private paginateResults(
+    results: SearchResult[],
+    page: number,
+    limit: number,
+  ): {
     results: SearchResult[];
     pagination: SearchResponse['pagination'];
   } {
@@ -632,12 +712,16 @@ export class AISearchEngine extends EventEmitter {
         currentPage: page,
         totalPages,
         hasNext: page < totalPages,
-        hasPrevious: page > 1
-      }
+        hasPrevious: page > 1,
+      },
     };
   }
 
-  private generateSnippet(content: string, query: string, maxLength: number = 200): string {
+  private generateSnippet(
+    content: string,
+    query: string,
+    maxLength: number = 200,
+  ): string {
     const words = content.split(/\s+/);
     const queryWords = query.toLowerCase().split(/\s+/);
 
@@ -649,8 +733,8 @@ export class AISearchEngine extends EventEmitter {
       const snippet = words.slice(i, i + 30).join(' ');
       if (snippet.length > maxLength) break;
 
-      const matches = queryWords.filter(qw => 
-        snippet.toLowerCase().includes(qw)
+      const matches = queryWords.filter((qw) =>
+        snippet.toLowerCase().includes(qw),
       ).length;
 
       if (matches > maxMatches) {
@@ -681,7 +765,7 @@ export class AISearchEngine extends EventEmitter {
     const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
     const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
     const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
-    
+
     return dotProduct / (magnitudeA * magnitudeB);
   }
 
@@ -705,7 +789,7 @@ export class AISearchEngine extends EventEmitter {
       resultsCount: response.totalResults,
       queryTime: response.queryTime,
       userId: query.userId,
-      sessionId: query.sessionId
+      sessionId: query.sessionId,
     });
   }
 
@@ -714,16 +798,24 @@ export class AISearchEngine extends EventEmitter {
     return text;
   }
 
-  private async generateAutoCompleteSuggestions(partialQuery: string, language?: string): Promise<string[]> {
+  private async generateAutoCompleteSuggestions(
+    partialQuery: string,
+    language?: string,
+  ): Promise<string[]> {
     // Implementation for auto-complete suggestions
     return [];
   }
 
-  private async generateCompletions(partialQuery: string, language?: string): Promise<Array<{
-    text: string;
-    type: 'query' | 'document' | 'category';
-    score: number;
-  }>> {
+  private async generateCompletions(
+    partialQuery: string,
+    language?: string,
+  ): Promise<
+    Array<{
+      text: string;
+      type: 'query' | 'document' | 'category';
+      score: number;
+    }>
+  > {
     return [];
   }
 

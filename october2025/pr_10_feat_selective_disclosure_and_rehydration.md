@@ -32,7 +32,7 @@ _Squash alt:_ **feat: selective disclosure policies + audit rehydration API**
 
 ### `PR-feat-selective-disclosure-and-rehydration.patch`
 
-```diff
+````diff
 diff --git a/impl/ledger-svc/app/schemas.py b/impl/ledger-svc/app/schemas.py
 index 5a5a5a5..6c6c6c6 100644
 --- a/impl/ledger-svc/app/schemas.py
@@ -338,7 +338,7 @@ index 1111111..2222222 100644
 +```
 +
 +**Auditor flow**: use `/audit/rehydrate` to obtain masked canonical inputs and proof trail. For sensitive payloads, request scoped rehydration token (future endpoint) to access plaintext under supervision.
-```
+````
 
 ---
 
@@ -347,15 +347,18 @@ index 1111111..2222222 100644
 **Title:** feat: selective disclosure policies + audit rehydration API
 
 **Summary**
+
 - Adds per‑tenant **AnchorPolicy** with allow/deny lists and salting; stored server‑side, hot‑reload via `POST /anchor/policy`
 - Extends anchor response with `policy_version`; adds `/audit/rehydrate` returning masked canonical inputs and proofs
 - Includes tests covering masking + salting + rehydration
 
 **Security/Privacy**
+
 - Default policy = no salt, no allow/deny (behavior unchanged)
 - Auditor rehydration returns **masked** inputs; plaintext access gated for a later tokenized flow
 
 **How to test locally**
+
 ```bash
 make bootstrap
 nohup make run &
@@ -366,4 +369,3 @@ curl -X POST localhost:4600/anchor/policy \
 python3 benchmark/latency_harness.py --endpoint http://localhost:4600
 curl 'http://localhost:4600/audit/rehydrate?op_id=&tenant_id=t1' | jq
 ```
-

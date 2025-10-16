@@ -11,7 +11,7 @@ import {
   ArticleRecord,
   ClaimRecord,
   ProvenanceRecord,
-  SafetyReview
+  SafetyReview,
 } from './types.js';
 
 interface PipelineResult {
@@ -33,15 +33,24 @@ function buildArtifactDir(hash: string, baseDir = 'artifacts'): string {
   return path.join(baseDir, hash);
 }
 
-export async function runFetch(url: string, baseDir = 'artifacts'): Promise<PipelineResult> {
+export async function runFetch(
+  url: string,
+  baseDir = 'artifacts',
+): Promise<PipelineResult> {
   const fetchResult = await fetchWithWayback(url);
   const hash = computeSha256(fetchResult.html);
   const artifactDir = buildArtifactDir(hash, baseDir);
 
   await writeFile(artifactDir, 'raw.html', fetchResult.html);
 
-  const article = extractArticleRecord(fetchResult.html, fetchResult.usedUrl, fetchResult.archiveUrl);
-  const cleanText = article.sections.map((section) => section.text).join('\n\n');
+  const article = extractArticleRecord(
+    fetchResult.html,
+    fetchResult.usedUrl,
+    fetchResult.archiveUrl,
+  );
+  const cleanText = article.sections
+    .map((section) => section.text)
+    .join('\n\n');
   await writeFile(artifactDir, 'clean.txt', cleanText);
 
   const claims = generateClaims(article, hash);
@@ -54,13 +63,21 @@ export async function runFetch(url: string, baseDir = 'artifacts'): Promise<Pipe
     archiveUrl: fetchResult.archiveUrl,
     sha256: hash,
     toolVersions: {
-      govbrief: version
-    }
+      govbrief: version,
+    },
   };
 
-  await writeFile(artifactDir, 'article.json', JSON.stringify(article, null, 2));
+  await writeFile(
+    artifactDir,
+    'article.json',
+    JSON.stringify(article, null, 2),
+  );
   await writeFile(artifactDir, 'claims.json', JSON.stringify(claims, null, 2));
-  await writeFile(artifactDir, 'provenance.json', JSON.stringify(provenance, null, 2));
+  await writeFile(
+    artifactDir,
+    'provenance.json',
+    JSON.stringify(provenance, null, 2),
+  );
   await writeFile(artifactDir, 'safety.json', JSON.stringify(safety, null, 2));
 
   return {
@@ -68,7 +85,7 @@ export async function runFetch(url: string, baseDir = 'artifacts'): Promise<Pipe
     claims,
     provenance,
     safety,
-    artifactDir
+    artifactDir,
   };
 }
 
@@ -77,7 +94,7 @@ export async function runBrief(artifactDir: string): Promise<string> {
     fs.readFile(path.join(artifactDir, 'article.json'), 'utf8'),
     fs.readFile(path.join(artifactDir, 'claims.json'), 'utf8'),
     fs.readFile(path.join(artifactDir, 'provenance.json'), 'utf8'),
-    fs.readFile(path.join(artifactDir, 'safety.json'), 'utf8')
+    fs.readFile(path.join(artifactDir, 'safety.json'), 'utf8'),
   ]);
 
   const article: ArticleRecord = JSON.parse(articleRaw);
@@ -86,7 +103,9 @@ export async function runBrief(artifactDir: string): Promise<string> {
   const safety: SafetyReview = JSON.parse(safetyRaw);
 
   if (safety.flags.some((flag) => flag.severity === 'high')) {
-    throw new Error('Brief generation blocked: high-severity safety flags present.');
+    throw new Error(
+      'Brief generation blocked: high-severity safety flags present.',
+    );
   }
 
   const brief = composeBrief(article, claims, provenance, safety);

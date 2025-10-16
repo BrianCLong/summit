@@ -43,9 +43,9 @@ watch -n 10 "kubectl -n $NS get canary $CANARY -o wide"
 PROM_PF_NS=monitoring
 kubectl -n "$PROM_PF_NS" port-forward svc/prometheus-operated 9090:9090 >/dev/null 2>&1 &
 PROM_URL=http://127.0.0.1:9090
-curl -sG "$PROM_URL/api/v1/query" --data-urlencode 
+curl -sG "$PROM_URL/api/v1/query" --data-urlencode
  'query=histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~"intelgraph.*"}[10m])))'
-curl -sG "$PROM_URL/api/v1/query" --data-urlencode 
+curl -sG "$PROM_URL/api/v1/query" --data-urlencode
  'query=sum(rate(http_requests_total{status=~"5..",job=~"intelgraph.*"}[10m]))/sum(rate(http_requests_total{job=~"intelgraph.*"}[10m]))'
 
 # App smoke (prod)
@@ -76,11 +76,11 @@ kubectl -n "$NS" get deploy,pods | grep intelgraph
 The wrapper writes: `release_playbook/evidence/<GA_TAG>.md`.
 Add links/screenshots to:
 
-*   Flagger events & final phase
-*   Grafana golden dashboards
-*   Prometheus alert history (burn-rate test)
-*   Cosign verify output (already captured)
-*   SBOM attachments on the GitHub Release
+- Flagger events & final phase
+- Grafana golden dashboards
+- Prometheus alert history (burn-rate test)
+- Cosign verify output (already captured)
+- SBOM attachments on the GitHub Release
 
 ## T+1h / T+24h quick checks
 
@@ -100,5 +100,7 @@ trivy image --severity CRITICAL --exit-code 1 ghcr.io/brianclong/intelgraph:v202
 > IntelGraph GA v2025.09.19-ga is live via Flagger canary: 10% → 50% → 100% passed SLO gates (p95 < 1.5s, 5xx < 1%).
 > Signed images (Cosign), SBOM (SPDX/CycloneDX) attached. Runbooks + evidence: `release_playbook/evidence/v2025.09.19-ga.md`.
 > Rollback verified. Monitoring on-call for 24h.
+
+```
 
 ```

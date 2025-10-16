@@ -16,7 +16,11 @@ import { gql, useQuery } from '@apollo/client';
 
 const ACTIVITY_FEED_QUERY = gql`
   query ActivityFeedData {
-    serverStats { uptime totalInvestigations totalEntities }
+    serverStats {
+      uptime
+      totalInvestigations
+      totalEntities
+    }
   }
 `;
 
@@ -39,7 +43,9 @@ const ACTION_COLORS = {
 
 export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
   // Fallback to a lightweight query with polling; replace with subscription when available
-  const { data, loading } = useQuery(ACTIVITY_FEED_QUERY, { pollInterval: 10000 });
+  const { data, loading } = useQuery(ACTIVITY_FEED_QUERY, {
+    pollInterval: 10000,
+  });
   const activities: Array<any> = (data?.activityFeed ?? []).slice(0, maxItems);
 
   if (loading && activities.length === 0) {
@@ -48,7 +54,9 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
         <Typography variant="h6" gutterBottom>
           Activity Feed
         </Typography>
-        <Typography color="text.secondary">Loading recent activity...</Typography>
+        <Typography color="text.secondary">
+          Loading recent activity...
+        </Typography>
       </Paper>
     );
   }
@@ -57,7 +65,9 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
     <Paper elevation={1} sx={{ p: 2, maxHeight: 400, overflow: 'auto' }}>
       <Typography variant="h6" gutterBottom>
         Live Activity Feed
-        {activities.length > 0 && <Chip size="small" label={activities.length} sx={{ ml: 1 }} />}
+        {activities.length > 0 && (
+          <Chip size="small" label={activities.length} sx={{ ml: 1 }} />
+        )}
       </Typography>
 
       {activities.length === 0 ? (
@@ -71,7 +81,8 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
               <ListItem alignItems="flex-start">
                 <ListItemAvatar>
                   <Avatar sx={{ width: 32, height: 32 }}>
-                    {activity.actor?.displayName?.charAt(0).toUpperCase() || '?'}
+                    {activity.actor?.displayName?.charAt(0).toUpperCase() ||
+                      '?'}
                   </Avatar>
                 </ListItemAvatar>
 
@@ -85,18 +96,26 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
                         size="small"
                         label={activity.action}
                         color={
-                          ACTION_COLORS[activity.action as keyof typeof ACTION_COLORS] || 'default'
+                          ACTION_COLORS[
+                            activity.action as keyof typeof ACTION_COLORS
+                          ] || 'default'
                         }
                         sx={{ height: 20, fontSize: '0.7rem' }}
                       />
-                      <Typography variant="body2" color="text.secondary" component="span">
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        component="span"
+                      >
                         {activity.target?.name}
                       </Typography>
                     </Box>
                   }
                   secondary={
                     <Typography variant="caption" color="text.secondary">
-                      {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(activity.timestamp), {
+                        addSuffix: true,
+                      })}
                       {activity.target?.type && (
                         <Chip
                           size="small"
@@ -110,7 +129,9 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
                 />
               </ListItem>
 
-              {index < activities.length - 1 && <Divider variant="inset" component="li" />}
+              {index < activities.length - 1 && (
+                <Divider variant="inset" component="li" />
+              )}
             </React.Fragment>
           ))}
         </List>

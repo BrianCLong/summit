@@ -23,7 +23,7 @@ import {
   DialogContent,
   DialogActions,
   Switch,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
 import {
   Group,
@@ -38,19 +38,19 @@ import {
   Phone,
   Share,
   LocationOn,
-  Schedule
+  Schedule,
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 
-function UserPresence({ 
-  websocketService, 
-  currentUser, 
+function UserPresence({
+  websocketService,
+  currentUser,
   investigationId,
   showDetailed = false,
   position = 'top-right',
   onUserClick,
   onInviteUser,
-  maxVisible = 5
+  maxVisible = 5,
 }) {
   const [users, setUsers] = useState(new Map());
   const [anchorEl, setAnchorEl] = useState(null);
@@ -64,7 +64,7 @@ function UserPresence({
     online: '#4caf50',
     away: '#ff9800',
     busy: '#f44336',
-    offline: '#9e9e9e'
+    offline: '#9e9e9e',
   };
 
   useEffect(() => {
@@ -76,12 +76,12 @@ function UserPresence({
       userId: currentUser.id,
       userName: currentUser.firstName || currentUser.name || 'User',
       avatar: currentUser.avatar,
-      status: 'online'
+      status: 'online',
     });
 
     // Handle user presence updates
     const handleUserJoined = (data) => {
-      setUsers(prev => {
+      setUsers((prev) => {
         const newUsers = new Map(prev);
         newUsers.set(data.userId, {
           id: data.userId,
@@ -91,28 +91,28 @@ function UserPresence({
           joinedAt: new Date(),
           lastActivity: new Date(),
           location: data.location,
-          isCurrentUser: data.userId === currentUser.id
+          isCurrentUser: data.userId === currentUser.id,
         });
         return newUsers;
       });
     };
 
     const handleUserLeft = (data) => {
-      setUsers(prev => {
+      setUsers((prev) => {
         const newUsers = new Map(prev);
         const user = newUsers.get(data.userId);
         if (user) {
           newUsers.set(data.userId, {
             ...user,
             status: 'offline',
-            leftAt: new Date()
+            leftAt: new Date(),
           });
         }
         return newUsers;
       });
 
       // Remove from activities
-      setUserActivities(prev => {
+      setUserActivities((prev) => {
         const newActivities = new Map(prev);
         newActivities.delete(data.userId);
         return newActivities;
@@ -120,7 +120,7 @@ function UserPresence({
     };
 
     const handleStatusUpdate = (data) => {
-      setUsers(prev => {
+      setUsers((prev) => {
         const newUsers = new Map(prev);
         const user = newUsers.get(data.userId);
         if (user) {
@@ -128,7 +128,7 @@ function UserPresence({
             ...user,
             status: data.status,
             lastActivity: new Date(),
-            location: data.location || user.location
+            location: data.location || user.location,
           });
         }
         return newUsers;
@@ -136,26 +136,26 @@ function UserPresence({
     };
 
     const handleUserActivity = (data) => {
-      setUserActivities(prev => {
+      setUserActivities((prev) => {
         const newActivities = new Map(prev);
         newActivities.set(data.userId, {
           action: data.action,
           details: data.details,
           timestamp: new Date(data.timestamp),
-          location: data.location
+          location: data.location,
         });
         return newActivities;
       });
 
       // Update user last activity
-      setUsers(prev => {
+      setUsers((prev) => {
         const newUsers = new Map(prev);
         const user = newUsers.get(data.userId);
         if (user) {
           newUsers.set(data.userId, {
             ...user,
             lastActivity: new Date(data.timestamp),
-            location: data.location || user.location
+            location: data.location || user.location,
           });
         }
         return newUsers;
@@ -173,7 +173,7 @@ function UserPresence({
       websocketService.emit('user_heartbeat', {
         investigationId,
         userId: currentUser.id,
-        status: document.hidden ? 'away' : 'online'
+        status: document.hidden ? 'away' : 'online',
       });
     }, 30000); // Every 30 seconds
 
@@ -183,7 +183,7 @@ function UserPresence({
       websocketService.emit('user_status_update', {
         investigationId,
         userId: currentUser.id,
-        status
+        status,
       });
     };
 
@@ -200,25 +200,32 @@ function UserPresence({
       // Send leave event
       websocketService.emit('leave_presence', {
         investigationId,
-        userId: currentUser.id
+        userId: currentUser.id,
       });
     };
   }, [websocketService, currentUser, investigationId]);
 
-  const activeUsers = Array.from(users.values()).filter(user => 
-    user.status !== 'offline' || (showInactive && user.leftAt && 
-      (Date.now() - user.leftAt.getTime()) < 300000) // Show for 5 minutes after leaving
+  const activeUsers = Array.from(users.values()).filter(
+    (user) =>
+      user.status !== 'offline' ||
+      (showInactive &&
+        user.leftAt &&
+        Date.now() - user.leftAt.getTime() < 300000), // Show for 5 minutes after leaving
   );
 
-  const onlineCount = activeUsers.filter(user => user.status === 'online').length;
-  const awayCount = activeUsers.filter(user => user.status === 'away').length;
+  const onlineCount = activeUsers.filter(
+    (user) => user.status === 'online',
+  ).length;
+  const awayCount = activeUsers.filter((user) => user.status === 'away').length;
 
   const getActivityDescription = (userId) => {
     const activity = userActivities.get(userId);
     if (!activity) return null;
 
-    const timeAgo = formatDistanceToNow(activity.timestamp, { addSuffix: true });
-    
+    const timeAgo = formatDistanceToNow(activity.timestamp, {
+      addSuffix: true,
+    });
+
     switch (activity.action) {
       case 'viewing_graph':
         return `Viewing graph ${timeAgo}`;
@@ -240,7 +247,10 @@ function UserPresence({
           <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
             {user.name}
           </Typography>
-          <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Typography
+            variant="caption"
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+          >
             <Circle sx={{ fontSize: 8, color: statusColors[user.status] }} />
             {user.status}
           </Typography>
@@ -250,7 +260,10 @@ function UserPresence({
             </Typography>
           )}
           {user.location && (
-            <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+            >
               <LocationOn sx={{ fontSize: 12 }} />
               {user.location}
             </Typography>
@@ -263,25 +276,25 @@ function UserPresence({
         overlap="circular"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         badgeContent={
-          <Circle 
-            sx={{ 
-              fontSize: 12, 
+          <Circle
+            sx={{
+              fontSize: 12,
               color: statusColors[user.status],
               bgcolor: 'background.paper',
               borderRadius: '50%',
-              p: 0.25
-            }} 
+              p: 0.25,
+            }}
           />
         }
       >
         <Avatar
           src={user.avatar}
-          sx={{ 
-            width: size, 
+          sx={{
+            width: size,
             height: size,
             cursor: 'pointer',
             border: user.isCurrentUser ? '2px solid' : 'none',
-            borderColor: 'primary.main'
+            borderColor: 'primary.main',
           }}
           onClick={() => onUserClick?.(user)}
         >
@@ -309,13 +322,13 @@ function UserPresence({
             alignItems: 'center',
             gap: 2,
             zIndex: 1000,
-            minWidth: 200
+            minWidth: 200,
           }}
         >
           <Group color="primary" />
-          
+
           <AvatarGroup max={maxVisible} sx={{ flexGrow: 1 }}>
-            {activeUsers.map(user => (
+            {activeUsers.map((user) => (
               <UserAvatar key={user.id} user={user} size={32} />
             ))}
           </AvatarGroup>
@@ -337,8 +350,8 @@ function UserPresence({
             )}
           </Box>
 
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             onClick={(e) => setAnchorEl(e.currentTarget)}
           >
             <MoreVert />
@@ -350,8 +363,18 @@ function UserPresence({
       {showDetailed && (
         <Card sx={{ width: 300, mb: 2 }}>
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+              >
                 <Group />
                 Team ({activeUsers.length})
               </Typography>
@@ -361,8 +384,8 @@ function UserPresence({
             </Box>
 
             <List dense>
-              {activeUsers.map(user => (
-                <ListItemButton 
+              {activeUsers.map((user) => (
+                <ListItemButton
                   key={user.id}
                   onClick={() => onUserClick?.(user)}
                   sx={{ borderRadius: 1 }}
@@ -372,14 +395,19 @@ function UserPresence({
                   </ListItemAvatar>
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
                         {user.name}
                         {user.isCurrentUser && (
                           <Chip label="You" size="small" variant="outlined" />
                         )}
                       </Box>
                     }
-                    secondary={getActivityDescription(user.id) || `${user.status} since ${formatDistanceToNow(user.joinedAt, { addSuffix: true })}`}
+                    secondary={
+                      getActivityDescription(user.id) ||
+                      `${user.status} since ${formatDistanceToNow(user.joinedAt, { addSuffix: true })}`
+                    }
                   />
                   <Box sx={{ display: 'flex', gap: 0.5 }}>
                     <IconButton size="small">
@@ -431,7 +459,9 @@ function UserPresence({
             <PersonAdd sx={{ mr: 1 }} />
             Invite User
           </ListItemButton>
-          <ListItemButton onClick={() => navigator.share?.({ url: window.location.href })}>
+          <ListItemButton
+            onClick={() => navigator.share?.({ url: window.location.href })}
+          >
             <Share sx={{ mr: 1 }} />
             Share Investigation
           </ListItemButton>
@@ -462,7 +492,8 @@ function UserPresence({
               label="Show recently offline users"
             />
             <Typography variant="body2" color="text.secondary">
-              Your presence information helps team members know when you're actively working on the investigation.
+              Your presence information helps team members know when you're
+              actively working on the investigation.
             </Typography>
           </Box>
         </DialogContent>
@@ -482,7 +513,7 @@ function UserPresence({
             left: position.includes('left') ? 16 : 'auto',
             zIndex: 1000,
             bgcolor: 'background.paper',
-            boxShadow: 1
+            boxShadow: 1,
           }}
           onClick={() => setIsVisible(true)}
         >

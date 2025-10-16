@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-const { verifyAuditChain, verifyAuditChainDetailed } = require('../packages/policy-audit');
+const {
+  verifyAuditChain,
+  verifyAuditChainDetailed,
+} = require('../packages/policy-audit');
 
 const file = process.argv[2];
 if (!file) {

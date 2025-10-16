@@ -53,7 +53,11 @@ export interface WorkerPoolConfig {
 }
 
 export interface LoadBalancerConfig {
-  algorithm: 'round-robin' | 'least-connections' | 'weighted-response-time' | 'adaptive';
+  algorithm:
+    | 'round-robin'
+    | 'least-connections'
+    | 'weighted-response-time'
+    | 'adaptive';
   healthCheckInterval: number;
   failureThreshold: number;
   recoveryThreshold: number;
@@ -68,7 +72,7 @@ const RequestContextSchema = z.object({
   timeout: z.number().positive().max(300000), // max 5 minutes
   retries: z.number().int().min(0).max(5),
   metadata: z.record(z.any()),
-  correlationId: z.string().optional()
+  correlationId: z.string().optional(),
 });
 
 export class ConcurrentRequestHandler extends EventEmitter {
@@ -78,43 +82,43 @@ export class ConcurrentRequestHandler extends EventEmitter {
   private loadBalancer: LoadBalancer;
   private rateLimiter: RateLimiter;
   private metrics: MetricsCollector;
-  
+
   // Queue management
   private priorityQueues: Map<number, RequestContext[]> = new Map();
   private processingRequests: Map<string, RequestContext> = new Map();
   private requestResults: Map<string, ProcessingResult> = new Map();
-  
+
   // Configuration
   private maxConcurrent: number = 50;
   private batchSize: number = 10;
   private backpressureThreshold: number = 100;
-  
+
   constructor(
     redis: Redis,
     logger: Logger,
     workerPoolConfig: WorkerPoolConfig,
-    loadBalancerConfig: LoadBalancerConfig
+    loadBalancerConfig: LoadBalancerConfig,
   ) {
     super();
-    
+
     this.redis = redis;
     this.logger = logger;
     this.workerPool = new WorkerPool(workerPoolConfig, logger);
     this.loadBalancer = new LoadBalancer(loadBalancerConfig, logger);
     this.rateLimiter = new RateLimiter(redis, logger);
     this.metrics = new MetricsCollector(logger);
-    
+
     // Initialize priority queues (0-10)
     for (let i = 0; i <= 10; i++) {
       this.priorityQueues.set(i, []);
     }
-    
+
     // Start processing loop
     this.startProcessingLoop();
-    
+
     // Start metrics collection
     this.metrics.start();
-    
+
     // Setup cleanup
     process.on('SIGTERM', () => this.gracefulShutdown());
     process.on('SIGINT', () => this.gracefulShutdown());
@@ -125,7 +129,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
    */
   async submitRequest<T>(
     request: RequestContext,
-    processor: (ctx: RequestContext) => Promise<T>
+    processor: (ctx: RequestContext) => Promise<T>,
   ): Promise<string> {
     // Validate request
     const validation = RequestContextSchema.safeParse(request);
@@ -137,7 +141,9 @@ export class ConcurrentRequestHandler extends EventEmitter {
 
     try {
       // Rate limiting check
-      const rateLimitResult = await this.rateLimiter.checkLimit(request.tenantId);
+      const rateLimitResult = await this.rateLimiter.checkLimit(
+        request.tenantId,
+      );
       if (!rateLimitResult.allowed) {
         throw new Error(`Rate limit exceeded: ${rateLimitResult.reason}`);
       }
@@ -159,8 +165,8 @@ export class ConcurrentRequestHandler extends EventEmitter {
         300, // 5 minutes
         JSON.stringify({
           processorCode: processor.toString(),
-          context: request
-        })
+          context: request,
+        }),
       );
 
       // Add to priority queue
@@ -173,21 +179,26 @@ export class ConcurrentRequestHandler extends EventEmitter {
       // Emit event
       this.emit('requestSubmitted', { requestId: request.id, priority });
 
-      this.logger.info({
-        requestId: request.id,
-        tenantId: request.tenantId,
-        priority,
-        queueLength: totalQueued + 1
-      }, 'Request submitted to concurrent handler');
+      this.logger.info(
+        {
+          requestId: request.id,
+          tenantId: request.tenantId,
+          priority,
+          queueLength: totalQueued + 1,
+        },
+        'Request submitted to concurrent handler',
+      );
 
       return request.id;
-
     } catch (error) {
-      this.logger.error({
-        requestId: request.id,
-        error: error.message
-      }, 'Failed to submit request');
-      
+      this.logger.error(
+        {
+          requestId: request.id,
+          error: error.message,
+        },
+        'Failed to submit request',
+      );
+
       this.metrics.recordRequestFailed(request.tenantId, startTime);
       throw error;
     }
@@ -196,7 +207,10 @@ export class ConcurrentRequestHandler extends EventEmitter {
   /**
    * Get result of processed request
    */
-  async getResult(requestId: string, timeout: number = 30000): Promise<ProcessingResult> {
+  async getResult(
+    requestId: string,
+    timeout: number = 30000,
+  ): Promise<ProcessingResult> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeout) {
@@ -216,7 +230,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
       }
 
       // Wait a bit before checking again
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     throw new Error(`Timeout waiting for result of request ${requestId}`);
@@ -228,7 +242,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
   getQueueMetrics(): QueueMetrics {
     const pending = this.getTotalQueuedRequests();
     const processing = this.processingRequests.size;
-    
+
     return {
       pending,
       processing,
@@ -236,7 +250,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
       failed: this.metrics.getFailedCount(),
       avgWaitTime: this.metrics.getAverageWaitTime(),
       avgProcessingTime: this.metrics.getAverageProcessingTime(),
-      throughput: this.metrics.getThroughput()
+      throughput: this.metrics.getThroughput(),
     };
   }
 
@@ -247,18 +261,17 @@ export class ConcurrentRequestHandler extends EventEmitter {
     while (true) {
       try {
         const batch = this.getNextBatch();
-        
+
         if (batch.length === 0) {
-          await new Promise(resolve => setTimeout(resolve, 10)); // 10ms wait
+          await new Promise((resolve) => setTimeout(resolve, 10)); // 10ms wait
           continue;
         }
 
         // Process batch concurrently
         await this.processBatch(batch);
-
       } catch (error) {
         this.logger.error({ error: error.message }, 'Error in processing loop');
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1s backoff
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // 1s backoff
       }
     }
   }
@@ -269,7 +282,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
   private getNextBatch(): RequestContext[] {
     const batch: RequestContext[] = [];
     const availableSlots = this.maxConcurrent - this.processingRequests.size;
-    
+
     if (availableSlots <= 0) {
       return batch;
     }
@@ -277,9 +290,13 @@ export class ConcurrentRequestHandler extends EventEmitter {
     const batchSize = Math.min(this.batchSize, availableSlots);
 
     // Process from highest to lowest priority
-    for (let priority = 10; priority >= 0 && batch.length < batchSize; priority--) {
+    for (
+      let priority = 10;
+      priority >= 0 && batch.length < batchSize;
+      priority--
+    ) {
       const queue = this.priorityQueues.get(priority)!;
-      
+
       while (queue.length > 0 && batch.length < batchSize) {
         const request = queue.shift()!;
         batch.push(request);
@@ -293,8 +310,10 @@ export class ConcurrentRequestHandler extends EventEmitter {
    * Process batch of requests
    */
   private async processBatch(batch: RequestContext[]): Promise<void> {
-    const processingPromises = batch.map(request => this.processRequest(request));
-    
+    const processingPromises = batch.map((request) =>
+      this.processRequest(request),
+    );
+
     // Wait for all to complete (or fail)
     await Promise.allSettled(processingPromises);
   }
@@ -304,19 +323,22 @@ export class ConcurrentRequestHandler extends EventEmitter {
    */
   private async processRequest(request: RequestContext): Promise<void> {
     const startTime = Date.now();
-    
+
     // Mark as processing
     this.processingRequests.set(request.id, request);
 
     try {
-      this.logger.debug({
-        requestId: request.id,
-        tenantId: request.tenantId
-      }, 'Starting request processing');
+      this.logger.debug(
+        {
+          requestId: request.id,
+          tenantId: request.tenantId,
+        },
+        'Starting request processing',
+      );
 
       // Get optimal worker
       const worker = await this.loadBalancer.getOptimalWorker(
-        await this.workerPool.getAvailableWorkers()
+        await this.workerPool.getAvailableWorkers(),
       );
 
       if (!worker) {
@@ -328,64 +350,82 @@ export class ConcurrentRequestHandler extends EventEmitter {
 
       // Store result
       this.requestResults.set(request.id, result);
-      await this.redis.setex(`result:${request.id}`, 300, JSON.stringify(result));
+      await this.redis.setex(
+        `result:${request.id}`,
+        300,
+        JSON.stringify(result),
+      );
 
       // Update metrics
-      this.metrics.recordRequestCompleted(request.tenantId, startTime, result.duration);
+      this.metrics.recordRequestCompleted(
+        request.tenantId,
+        startTime,
+        result.duration,
+      );
 
       // Emit success event
-      this.emit('requestCompleted', { 
-        requestId: request.id, 
-        success: true, 
-        duration: result.duration 
+      this.emit('requestCompleted', {
+        requestId: request.id,
+        success: true,
+        duration: result.duration,
       });
 
-      this.logger.info({
-        requestId: request.id,
-        tenantId: request.tenantId,
-        duration: result.duration,
-        success: result.success
-      }, 'Request processed successfully');
-
+      this.logger.info(
+        {
+          requestId: request.id,
+          tenantId: request.tenantId,
+          duration: result.duration,
+          success: result.success,
+        },
+        'Request processed successfully',
+      );
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Create error result
       const result: ProcessingResult = {
         requestId: request.id,
         success: false,
         error: error.message,
         duration,
-        resources: { memoryUsed: 0, cpuTime: 0 }
+        resources: { memoryUsed: 0, cpuTime: 0 },
       };
 
       // Store error result
       this.requestResults.set(request.id, result);
-      await this.redis.setex(`result:${request.id}`, 300, JSON.stringify(result));
+      await this.redis.setex(
+        `result:${request.id}`,
+        300,
+        JSON.stringify(result),
+      );
 
       // Update metrics
       this.metrics.recordRequestFailed(request.tenantId, startTime);
 
       // Emit failure event
-      this.emit('requestFailed', { 
-        requestId: request.id, 
-        error: error.message, 
-        duration 
+      this.emit('requestFailed', {
+        requestId: request.id,
+        error: error.message,
+        duration,
       });
 
-      this.logger.error({
-        requestId: request.id,
-        tenantId: request.tenantId,
-        error: error.message,
-        duration
-      }, 'Request processing failed');
+      this.logger.error(
+        {
+          requestId: request.id,
+          tenantId: request.tenantId,
+          error: error.message,
+          duration,
+        },
+        'Request processing failed',
+      );
 
       // Retry if configured
       if (request.retries > 0) {
         request.retries--;
-        this.priorityQueues.get(Math.max(0, request.priority - 1))!.push(request);
+        this.priorityQueues
+          .get(Math.max(0, request.priority - 1))!
+          .push(request);
       }
-
     } finally {
       // Remove from processing
       this.processingRequests.delete(request.id);
@@ -396,8 +436,8 @@ export class ConcurrentRequestHandler extends EventEmitter {
    * Execute request on worker thread
    */
   private async executeOnWorker(
-    worker: Worker, 
-    request: RequestContext
+    worker: Worker,
+    request: RequestContext,
   ): Promise<ProcessingResult> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -406,7 +446,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
 
       worker.once('message', (result) => {
         clearTimeout(timeout);
-        
+
         if (result.error) {
           reject(new Error(result.error));
         } else {
@@ -423,7 +463,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
       worker.postMessage({
         type: 'execute',
         requestId: request.id,
-        context: request
+        context: request,
       });
     });
   }
@@ -443,7 +483,9 @@ export class ConcurrentRequestHandler extends EventEmitter {
    * Graceful shutdown
    */
   private async gracefulShutdown(): Promise<void> {
-    this.logger.info('Starting graceful shutdown of concurrent request handler');
+    this.logger.info(
+      'Starting graceful shutdown of concurrent request handler',
+    );
 
     try {
       // Stop accepting new requests
@@ -453,8 +495,11 @@ export class ConcurrentRequestHandler extends EventEmitter {
       const shutdownTimeout = 30000;
       const startTime = Date.now();
 
-      while (this.processingRequests.size > 0 && Date.now() - startTime < shutdownTimeout) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+      while (
+        this.processingRequests.size > 0 &&
+        Date.now() - startTime < shutdownTimeout
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       // Cleanup workers
@@ -464,9 +509,11 @@ export class ConcurrentRequestHandler extends EventEmitter {
       this.metrics.stop();
 
       this.logger.info('Graceful shutdown completed');
-
     } catch (error) {
-      this.logger.error({ error: error.message }, 'Error during graceful shutdown');
+      this.logger.error(
+        { error: error.message },
+        'Error during graceful shutdown',
+      );
     }
   }
 }
@@ -494,7 +541,7 @@ class WorkerPool {
   private createWorker(): Worker {
     const workerId = randomUUID();
     const worker = new Worker(__filename, {
-      workerData: { workerId }
+      workerData: { workerId },
     });
 
     worker.on('error', (error) => {
@@ -518,8 +565,8 @@ class WorkerPool {
   }
 
   async shutdown(): Promise<void> {
-    const terminationPromises = Array.from(this.workers.values()).map(worker =>
-      worker.terminate()
+    const terminationPromises = Array.from(this.workers.values()).map(
+      (worker) => worker.terminate(),
     );
     await Promise.all(terminationPromises);
     this.workers.clear();
@@ -532,7 +579,10 @@ class WorkerPool {
 class LoadBalancer {
   private config: LoadBalancerConfig;
   private logger: Logger;
-  private workerStats: Map<string, { connections: number; responseTime: number }> = new Map();
+  private workerStats: Map<
+    string,
+    { connections: number; responseTime: number }
+  > = new Map();
   private roundRobinIndex = 0;
 
   constructor(config: LoadBalancerConfig, logger: Logger) {
@@ -546,16 +596,16 @@ class LoadBalancer {
     switch (this.config.algorithm) {
       case 'round-robin':
         return this.getRoundRobinWorker(workers);
-      
+
       case 'least-connections':
         return this.getLeastConnectionsWorker(workers);
-      
+
       case 'weighted-response-time':
         return this.getWeightedResponseTimeWorker(workers);
-      
+
       case 'adaptive':
         return this.getAdaptiveWorker(workers);
-      
+
       default:
         return workers[0];
     }
@@ -595,21 +645,23 @@ class RateLimiter {
     this.logger = logger;
   }
 
-  async checkLimit(tenantId: string): Promise<{ allowed: boolean; reason?: string }> {
+  async checkLimit(
+    tenantId: string,
+  ): Promise<{ allowed: boolean; reason?: string }> {
     const key = `rate_limit:${tenantId}`;
     const limit = 100; // requests per minute
     const window = 60; // seconds
 
     const current = await this.redis.incr(key);
-    
+
     if (current === 1) {
       await this.redis.expire(key, window);
     }
 
     if (current > limit) {
-      return { 
-        allowed: false, 
-        reason: `Rate limit exceeded: ${current}/${limit} requests per minute` 
+      return {
+        allowed: false,
+        reason: `Rate limit exceeded: ${current}/${limit} requests per minute`,
       };
     }
 
@@ -628,7 +680,7 @@ class MetricsCollector {
     failed: 0,
     totalWaitTime: 0,
     totalProcessingTime: 0,
-    startTime: Date.now()
+    startTime: Date.now(),
   };
 
   constructor(logger: Logger) {
@@ -650,7 +702,11 @@ class MetricsCollector {
     this.metrics.submitted++;
   }
 
-  recordRequestCompleted(tenantId: string, startTime: number, duration: number): void {
+  recordRequestCompleted(
+    tenantId: string,
+    startTime: number,
+    duration: number,
+  ): void {
     this.metrics.completed++;
     this.metrics.totalWaitTime += Date.now() - startTime;
     this.metrics.totalProcessingTime += duration;
@@ -675,7 +731,9 @@ class MetricsCollector {
   }
 
   getAverageProcessingTime(): number {
-    return this.metrics.completed > 0 ? this.metrics.totalProcessingTime / this.metrics.completed : 0;
+    return this.metrics.completed > 0
+      ? this.metrics.totalProcessingTime / this.metrics.completed
+      : 0;
   }
 
   getThroughput(): number {
@@ -684,16 +742,19 @@ class MetricsCollector {
   }
 
   private logMetrics(): void {
-    this.logger.info({
-      metrics: {
-        submitted: this.metrics.submitted,
-        completed: this.metrics.completed,
-        failed: this.metrics.failed,
-        averageWaitTime: this.getAverageWaitTime(),
-        averageProcessingTime: this.getAverageProcessingTime(),
-        throughput: this.getThroughput()
-      }
-    }, 'Concurrent handler metrics');
+    this.logger.info(
+      {
+        metrics: {
+          submitted: this.metrics.submitted,
+          completed: this.metrics.completed,
+          failed: this.metrics.failed,
+          averageWaitTime: this.getAverageWaitTime(),
+          averageProcessingTime: this.getAverageProcessingTime(),
+          throughput: this.getThroughput(),
+        },
+      },
+      'Concurrent handler metrics',
+    );
   }
 }
 
@@ -712,13 +773,13 @@ if (!isMainThread && parentPort) {
         // Get processor from Redis
         const redis = new Redis(process.env.REDIS_URL);
         const processorData = await redis.get(`processor:${requestId}`);
-        
+
         if (!processorData) {
           throw new Error('Processor not found');
         }
 
         const { processorCode } = JSON.parse(processorData);
-        
+
         // Execute processor function
         const processor = eval(`(${processorCode})`);
         const result = await processor(context);
@@ -733,12 +794,11 @@ if (!isMainThread && parentPort) {
           duration: endTime - startTime,
           resources: {
             memoryUsed: endMemory - startMemory,
-            cpuTime: process.cpuUsage().user
-          }
+            cpuTime: process.cpuUsage().user,
+          },
         });
 
         await redis.disconnect();
-
       } catch (error) {
         const endTime = Date.now();
 
@@ -749,8 +809,8 @@ if (!isMainThread && parentPort) {
           duration: endTime - startTime,
           resources: {
             memoryUsed: 0,
-            cpuTime: 0
-          }
+            cpuTime: 0,
+          },
         });
       }
     }

@@ -31,13 +31,34 @@ export const resolvers = {
     ...cetResolvers.Query,
 
     // ABAC-wrapped high-value resolvers
-    entity: withABAC(entityResolvers.Query?.entity || (async()=>null), 'read'),
-    investigation: withABAC(investigationResolvers.Query?.investigation || (async()=>null), 'read'),
-    investigations: withABAC(investigationResolvers.Query?.investigations || (async()=>[]), 'read'),
-    caseById: withABAC(cetResolvers.Query?.caseById || (async()=>null), 'read'),
-    caseExport: withABAC(cetResolvers.Query?.caseExport || (async()=>null), 'read'),
-    evidenceAnnotations: withABAC(cetResolvers.Query?.evidenceAnnotations || (async()=>[]), 'read'),
-    triageSuggestions: withABAC(cetResolvers.Query?.triageSuggestions || (async()=>[]), 'read'),
+    entity: withABAC(
+      entityResolvers.Query?.entity || (async () => null),
+      'read',
+    ),
+    investigation: withABAC(
+      investigationResolvers.Query?.investigation || (async () => null),
+      'read',
+    ),
+    investigations: withABAC(
+      investigationResolvers.Query?.investigations || (async () => []),
+      'read',
+    ),
+    caseById: withABAC(
+      cetResolvers.Query?.caseById || (async () => null),
+      'read',
+    ),
+    caseExport: withABAC(
+      cetResolvers.Query?.caseExport || (async () => null),
+      'read',
+    ),
+    evidenceAnnotations: withABAC(
+      cetResolvers.Query?.evidenceAnnotations || (async () => []),
+      'read',
+    ),
+    triageSuggestions: withABAC(
+      cetResolvers.Query?.triageSuggestions || (async () => []),
+      'read',
+    ),
 
     // Global search across all types
     globalSearch: async (_, { query, types }, context) => {
@@ -54,19 +75,23 @@ export const resolvers = {
 
         if (!types || types.includes('entities')) {
           searchPromises.push(
-            entityResolvers.Query.searchEntities(_, { query }, context).then((entities) => {
-              results.entities = entities;
-            }),
+            entityResolvers.Query.searchEntities(_, { query }, context).then(
+              (entities) => {
+                results.entities = entities;
+              },
+            ),
           );
         }
 
         if (!types || types.includes('investigations')) {
           searchPromises.push(
-            investigationResolvers.Query.investigations(_, { query }, context).then(
-              (investigations) => {
-                results.investigations = investigations;
-              },
-            ),
+            investigationResolvers.Query.investigations(
+              _,
+              { query },
+              context,
+            ).then((investigations) => {
+              results.investigations = investigations;
+            }),
           );
         }
 
@@ -103,12 +128,30 @@ export const resolvers = {
     ...relationshipResolvers.Mutation,
     ...investigationResolvers.Mutation,
     ...userResolvers.Mutation,
-    createCase: withABAC(cetResolvers.Mutation?.createCase || (async()=>null), 'create'),
-    approveCase: withABAC(cetResolvers.Mutation?.approveCase || (async()=>null), 'update'),
-    annotateEvidence: withABAC(cetResolvers.Mutation?.annotateEvidence || (async()=>null), 'update'),
-    triageSuggest: withABAC(cetResolvers.Mutation?.triageSuggest || (async()=>null), 'create'),
-    triageApprove: withABAC(cetResolvers.Mutation?.triageApprove || (async()=>null), 'update'),
-    triageMaterialize: withABAC(cetResolvers.Mutation?.triageMaterialize || (async()=>null), 'update'),
+    createCase: withABAC(
+      cetResolvers.Mutation?.createCase || (async () => null),
+      'create',
+    ),
+    approveCase: withABAC(
+      cetResolvers.Mutation?.approveCase || (async () => null),
+      'update',
+    ),
+    annotateEvidence: withABAC(
+      cetResolvers.Mutation?.annotateEvidence || (async () => null),
+      'update',
+    ),
+    triageSuggest: withABAC(
+      cetResolvers.Mutation?.triageSuggest || (async () => null),
+      'create',
+    ),
+    triageApprove: withABAC(
+      cetResolvers.Mutation?.triageApprove || (async () => null),
+      'update',
+    ),
+    triageMaterialize: withABAC(
+      cetResolvers.Mutation?.triageMaterialize || (async () => null),
+      'update',
+    ),
   },
 
   // Subscriptions for real-time updates
@@ -116,7 +159,9 @@ export const resolvers = {
     entityUpdated: {
       subscribe: async function* (_, { investigationId }, context) {
         const { redis } = context.dataSources;
-        const channel = investigationId ? `entity:updated:${investigationId}` : 'entity:updated';
+        const channel = investigationId
+          ? `entity:updated:${investigationId}`
+          : 'entity:updated';
 
         // Subscribe to Redis channel for entity updates
         const subscriber = redis.duplicate();

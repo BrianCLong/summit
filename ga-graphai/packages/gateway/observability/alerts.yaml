@@ -7,21 +7,21 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "AI fabric spend approaching soft cap"
-          description: "Latest call consumed {{ $value }} USD; review downgrade strategy."
+          summary: 'AI fabric spend approaching soft cap'
+          description: 'Latest call consumed {{ $value }} USD; review downgrade strategy.'
       - alert: AIPolicyDeniesSpike
         expr: increase(ai_policy_denies_total[5m]) > 5
         for: 2m
         labels:
           severity: critical
         annotations:
-          summary: "Policy denies spike"
-          description: "More than 5 policy denials in 5m. Investigate caps/licensing."
+          summary: 'Policy denies spike'
+          description: 'More than 5 policy denials in 5m. Investigate caps/licensing.'
       - alert: AILatencyBudgetBurn
         expr: histogram_quantile(0.95, sum(rate(ai_call_latency_ms_bucket[5m])) by (le)) > 700
         for: 3m
         labels:
           severity: critical
         annotations:
-          summary: "p95 latency over SLO"
-          description: "AI fabric p95 latency exceeded 700ms for 3m."
+          summary: 'p95 latency over SLO'
+          description: 'AI fabric p95 latency exceeded 700ms for 3m.'

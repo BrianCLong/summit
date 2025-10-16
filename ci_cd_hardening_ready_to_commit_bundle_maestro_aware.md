@@ -3,6 +3,7 @@ Below is a **drop‑in bundle** you can commit at repo root. It wires reusable C
 ---
 
 ## File Map
+
 ```
 .github/
   CODEOWNERS
@@ -54,6 +55,7 @@ security/
 ## Repo Hygiene
 
 ### `.github/CODEOWNERS`
+
 ```txt
 # Require reviews from owners by path
 *       @your-org/platform @your-org/app-owners
@@ -64,30 +66,38 @@ security/
 ```
 
 ### `.github/pull_request_template.md`
+
 ```md
 ## Summary
+
 - What & why:
 
 ## Risk & Flags
+
 - Feature flags (name, default):
 - Data/schema changes (link to migration plan):
 - Rollback steps:
 
 ## Tests
+
 - Unit/Contract/E2E coverage summary:
 
 ## Observability
+
 - New metrics/traces/log fields:
 
 ## Checklist
+
 - [ ] Feature behind a flag if risky
 - [ ] Migration plan + rollback attached (if schema)
 - [ ] Runbook updated if behavior change
 ```
 
 ### `.github/ISSUE_TEMPLATE.md`
+
 ```md
 ## Definition of Ready
+
 - Scope
 - Risks
 - Tests
@@ -99,9 +109,11 @@ security/
 ---
 
 ## Reusable Workflows (GitHub Actions)
+
 > If you use GitLab/Buildkite, mirror these semantics; jobs/steps are portable.
 
 ### `.github/workflows/ci-reusable-build.yml`
+
 ```yaml
 name: ci-reusable-build
 on:
@@ -146,6 +158,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-reusable-test.yml`
+
 ```yaml
 name: ci-reusable-test
 on:
@@ -172,6 +185,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-reusable-scan.yml`
+
 ```yaml
 name: ci-reusable-scan
 on:
@@ -197,6 +211,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-reusable-package.yml`
+
 ```yaml
 name: ci-reusable-package
 on:
@@ -227,6 +242,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-reusable-publish.yml`
+
 ```yaml
 name: ci-reusable-publish
 on:
@@ -251,6 +267,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-reusable-deploy.yml`
+
 ```yaml
 name: ci-reusable-deploy
 on:
@@ -282,6 +299,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-migration-gate.yml`
+
 ```yaml
 name: migration-gate
 on:
@@ -305,6 +323,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-nightly.yml`
+
 ```yaml
 name: nightly-health
 on:
@@ -320,6 +339,7 @@ jobs:
 ```
 
 ### `.github/workflows/ci-pr.yml` (orchestrator for PRs)
+
 ```yaml
 name: ci-pr
 on:
@@ -373,6 +393,7 @@ jobs:
 ## OPA Policies
 
 ### `.ci/policies/terraform_plan.rego`
+
 ```rego
 package terraform.policy
 
@@ -391,6 +412,7 @@ deny[msg] {
 ```
 
 ### `.ci/policies/helm_values.rego`
+
 ```rego
 package helm.values
 
@@ -408,6 +430,7 @@ deny[msg] {
 ```
 
 ### `.ci/policies/migrations.rego`
+
 ```rego
 package db.migrations
 
@@ -420,6 +443,7 @@ deny[msg] {
 ```
 
 ### `.ci/policies/license_policy.rego`
+
 ```rego
 package license.policy
 
@@ -437,6 +461,7 @@ warn[msg] {
 ## CI Scripts
 
 ### `.ci/scripts/preview_deploy.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -451,6 +476,7 @@ helm upgrade --install app ./helm -n "$NS" \
 ```
 
 ### `.ci/scripts/preview_destroy.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -459,6 +485,7 @@ kubectl delete ns pr-${PR_NUMBER} --wait=false || true
 ```
 
 ### `.ci/scripts/otel_wrap.sh`
+
 ```bash
 #!/usr/bin/env bash
 # Wrap a command with otel-cli if available
@@ -471,6 +498,7 @@ fi
 ```
 
 ### `.ci/scripts/sbom_cyclonedx.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -481,6 +509,7 @@ mv sbom.json security/sbom/sbom-${GITHUB_SHA}.json
 ```
 
 ### `.ci/scripts/verify_provenance.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -494,6 +523,7 @@ exit 0
 ## Helm Canary Values
 
 ### `helm/values-canary.yaml`
+
 ```yaml
 replicaCount: 3
 strategy:
@@ -519,6 +549,7 @@ podSecurityContext:
 ```
 
 ### `helm/templates/healthchecks.yaml`
+
 ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -538,6 +569,7 @@ spec:
 ## Terraform OPA Config
 
 ### `terraform/opa-policy-config.yaml`
+
 ```yaml
 metadata:
   change_control:
@@ -549,15 +581,17 @@ metadata:
 ## Configs
 
 ### `.ci/config/feature_flags.yml`
+
 ```yaml
 flags:
   risky_feature:
     owner: team-app
     default: false
-    description: "Example risky code path behind flag"
+    description: 'Example risky code path behind flag'
 ```
 
 ### `.ci/config/slo.yml`
+
 ```yaml
 slo:
   p95_ms: 1500
@@ -570,19 +604,23 @@ slo:
 ## Runbooks
 
 ### `ops/runbooks/canary.md`
+
 ```md
 **Objective**: Gradual rollout with auto-rollback triggers.
+
 - Steps: 5% → 25% → 50% → 100%
 - Golden signals: p95 latency, error rate, saturation.
 - Rollback if any exceed thresholds for 5 minutes.
 ```
 
 ### `ops/runbooks/rollback.md`
+
 ```md
 **Rollback**: `helm rollback app <REVISION>`; confirm via health dashboard; capture audit ID.
 ```
 
 ### `ops/runbooks/migration.md`
+
 ```md
 **Gate**: PR must include `docs/migrations/plan.md`, `docs/migrations/rollback.md`, and `db/migrations/DRYRUN_RESULT.txt`.
 ```
@@ -592,11 +630,13 @@ slo:
 ## Security Docs
 
 ### `security/signing/README.md`
+
 ```md
 Use Cosign keyless or key-based. Store private key in repo secrets. Verify in deploy.
 ```
 
 ### `security/sbom/README.md`
+
 ```md
 CycloneDX SBOM generated per build; publish as artifact and store under `security/sbom/`.
 ```
@@ -604,6 +644,7 @@ CycloneDX SBOM generated per build; publish as artifact and store under `securit
 ---
 
 ## Notes for Maestro Conductor Integration
+
 - Trigger **`ci-pr.yml`** on PR events; Maestro can also invoke reusable workflows directly via `workflow_call` for batch operations.
 - Pass trace IDs via environment variables; optional `otel_wrap.sh` spans steps when `otel-cli` present.
 - Promotion to **stage/prod** should reuse `ci-reusable-deploy.yml` with `environment: stage|prod` and require green SLO dashboards prior to dispatch (hook Maestro to block on SLO API).
@@ -612,6 +653,7 @@ CycloneDX SBOM generated per build; publish as artifact and store under `securit
 ---
 
 ## Secrets & Parameters (set in repo/org settings)
+
 - `REGISTRY_USER`, `REGISTRY_TOKEN`
 - `COSIGN_PRIVATE_KEY`, `COSIGN_PASSWORD` (or use keyless)
 - `KUBE_CONFIG` (base64 Kubeconfig for preview + envs)
@@ -619,8 +661,8 @@ CycloneDX SBOM generated per build; publish as artifact and store under `securit
 ---
 
 ## Next Steps
+
 1. Commit this bundle; replace `TODO:` placeholders.
 2. Create `docs/migrations/plan.md` and `docs/migrations/rollback.md` templates.
 3. Add environment protection rules for **stage** and **prod**; require approvals.
 4. Wire Maestro to call `ci-reusable-*` workflows and capture trace/audit IDs.
-

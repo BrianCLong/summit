@@ -2,6 +2,6 @@
   "id": "evt1",
   "type": "payment_intent.succeeded",
   "data": {
-    "object": {"metadata": {"orderId": "order123"}}
+    "object": { "metadata": { "orderId": "order123" } }
   }
 }

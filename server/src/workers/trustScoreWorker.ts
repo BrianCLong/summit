@@ -6,12 +6,22 @@ let timer: any;
 
 export function startTrustWorker() {
   if (process.env.ENABLE_TRUST_WORKER !== 'true') return;
-  const tenants = (process.env.TRUST_WORKER_TENANTS || 't0').split(',').map((s) => s.trim()).filter(Boolean);
-  const subjects = (process.env.TRUST_WORKER_SUBJECTS || 'global').split(',').map((s) => s.trim()).filter(Boolean);
+  const tenants = (process.env.TRUST_WORKER_TENANTS || 't0')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const subjects = (process.env.TRUST_WORKER_SUBJECTS || 'global')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   async function tick() {
     for (const t of tenants) {
       for (const s of subjects) {
-        try { await recomputeTrustForTenant(t, s); } catch (e) { console.warn('trust worker error', e); }
+        try {
+          await recomputeTrustForTenant(t, s);
+        } catch (e) {
+          console.warn('trust worker error', e);
+        }
       }
     }
   }
@@ -20,5 +30,6 @@ export function startTrustWorker() {
   tick().catch(() => {});
 }
 
-export function stopTrustWorker() { if (timer) clearInterval(timer); }
-
+export function stopTrustWorker() {
+  if (timer) clearInterval(timer);
+}

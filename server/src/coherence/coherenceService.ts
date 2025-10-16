@@ -67,13 +67,13 @@ export class CoherenceService {
       scoreThreshold: 0.8,
       riskThreshold: 0.7,
       enableSlack: false,
-      enableEmail: false
-    }
+      enableEmail: false,
+    },
   };
 
   constructor(
     private neo4j: Neo4jService,
-    private redis: RedisService
+    private redis: RedisService,
   ) {
     // Initialize all components
     this.signalIngest = new CoherenceSignalIngest(neo4j, redis);
@@ -81,61 +81,75 @@ export class CoherenceService {
     this.activityIndex = new ActivityFingerprintIndex(neo4j, redis);
     this.narrativeModel = new NarrativeImpactModel(neo4j, redis);
     this.missionVault = new MissionVault(neo4j, redis);
-    
+
     this.graphqlResolvers = new CoherenceGraphQLResolvers(
       neo4j,
       redis,
       this.activityIndex,
       this.narrativeModel,
-      this.missionVault
+      this.missionVault,
     );
 
     // Initialize periodic analysis
     this.initializePeriodicAnalysis();
 
     logger.info('Coherence service initialized', {
-      components: ['signalIngest', 'graphqlResolvers', 'subscriptionManager', 'activityIndex', 'narrativeModel', 'missionVault']
+      components: [
+        'signalIngest',
+        'graphqlResolvers',
+        'subscriptionManager',
+        'activityIndex',
+        'narrativeModel',
+        'missionVault',
+      ],
     });
   }
 
-  async analyzeCoherence(tenantId: string, options: {
-    timeRange?: { start: string; end: string };
-    forceRefresh?: boolean;
-    includeRealTimeAnalysis?: boolean;
-  } = {}): Promise<CoherenceAnalysisResult> {
+  async analyzeCoherence(
+    tenantId: string,
+    options: {
+      timeRange?: { start: string; end: string };
+      forceRefresh?: boolean;
+      includeRealTimeAnalysis?: boolean;
+    } = {},
+  ): Promise<CoherenceAnalysisResult> {
     const analysisId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
     try {
-      logger.info('Starting coherence analysis', { tenantId, analysisId, options });
+      logger.info('Starting coherence analysis', {
+        tenantId,
+        analysisId,
+        options,
+      });
 
       // Get configuration for this tenant
       const config = await this.getTenantConfiguration(tenantId);
 
       // Step 1: Gather signals for analysis
-      const signals = await this.gatherSignalsForAnalysis(tenantId, options.timeRange);
-      
+      const signals = await this.gatherSignalsForAnalysis(
+        tenantId,
+        options.timeRange,
+      );
+
       if (signals.length === 0) {
         return this.createEmptyAnalysisResult(tenantId, analysisId);
       }
 
       // Step 2: Run parallel intelligence analysis
-      const [
-        activityFingerprints,
-        narrativeImpacts,
-        missionContext
-      ] = await Promise.all([
-        this.activityIndex.indexActivity(tenantId, signals),
-        this.narrativeModel.analyzeNarrativeImpact(tenantId, signals),
-        this.missionVault.getMissionContext(tenantId)
-      ]);
+      const [activityFingerprints, narrativeImpacts, missionContext] =
+        await Promise.all([
+          this.activityIndex.indexActivity(tenantId, signals),
+          this.narrativeModel.analyzeNarrativeImpact(tenantId, signals),
+          this.missionVault.getMissionContext(tenantId),
+        ]);
 
       // Step 3: Calculate coherence score
       const coherenceScore = await this.calculateCoherenceScore(tenantId, {
         signals,
         activityFingerprints,
         narrativeImpacts,
-        missionContext
+        missionContext,
       });
 
       // Step 4: Generate insights
@@ -144,7 +158,7 @@ export class CoherenceService {
         activityFingerprints,
         narrativeImpacts,
         signals,
-        config
+        config,
       });
 
       // Step 5: Assess data quality
@@ -155,7 +169,7 @@ export class CoherenceService {
         await this.triggerRealTimeUpdates(tenantId, {
           coherenceScore,
           activityFingerprints,
-          narrativeImpacts
+          narrativeImpacts,
         });
       }
 
@@ -167,15 +181,19 @@ export class CoherenceService {
         intelligence: {
           activityFingerprints: activityFingerprints.slice(0, 20), // Top 20
           narrativeImpacts: narrativeImpacts.slice(0, 10), // Top 10
-          missionContext
+          missionContext,
         },
         insights,
         metadata: {
           analysisTime: new Date().toISOString(),
           signalCount: signals.length,
-          confidenceLevel: this.calculateOverallConfidence(activityFingerprints, narrativeImpacts, coherenceScore),
-          dataQuality
-        }
+          confidenceLevel: this.calculateOverallConfidence(
+            activityFingerprints,
+            narrativeImpacts,
+            coherenceScore,
+          ),
+          dataQuality,
+        },
       };
 
       // Store analysis result
@@ -190,23 +208,33 @@ export class CoherenceService {
         coherenceStatus: result.coherenceStatus,
         signalCount: signals.length,
         fingerprintCount: activityFingerprints.length,
-        narrativeCount: narrativeImpacts.length
+        narrativeCount: narrativeImpacts.length,
       });
 
       return result;
-
     } catch (error) {
-      logger.error('Coherence analysis failed', { error, tenantId, analysisId });
+      logger.error('Coherence analysis failed', {
+        error,
+        tenantId,
+        analysisId,
+      });
       throw error;
     }
   }
 
-  async ingestSignal(tenantId: string, signalData: any): Promise<{ success: boolean; signalId: string; triggeredAnalysis?: boolean }> {
+  async ingestSignal(
+    tenantId: string,
+    signalData: any,
+  ): Promise<{
+    success: boolean;
+    signalId: string;
+    triggeredAnalysis?: boolean;
+  }> {
     try {
       // Use the signal ingest service
       const ingestResult = await this.signalIngest.ingestSignalIdempotent({
         ...signalData,
-        tenantId
+        tenantId,
       });
 
       // Check if we should trigger real-time analysis
@@ -215,10 +243,16 @@ export class CoherenceService {
 
       if (config.enableRealTimeAnalysis) {
         // Trigger analysis for high-value signals
-        if (signalData.value * signalData.weight >= config.notificationSettings.scoreThreshold) {
+        if (
+          signalData.value * signalData.weight >=
+          config.notificationSettings.scoreThreshold
+        ) {
           setImmediate(() => {
-            this.analyzeCoherence(tenantId, { includeRealTimeAnalysis: true })
-              .catch(error => logger.error('Real-time analysis failed', { error, tenantId }));
+            this.analyzeCoherence(tenantId, {
+              includeRealTimeAnalysis: true,
+            }).catch((error) =>
+              logger.error('Real-time analysis failed', { error, tenantId }),
+            );
           });
           triggeredAnalysis = true;
         }
@@ -227,9 +261,8 @@ export class CoherenceService {
       return {
         success: true,
         signalId: ingestResult.signalId,
-        triggeredAnalysis
+        triggeredAnalysis,
       };
-
     } catch (error) {
       logger.error('Signal ingestion failed', { error, tenantId, signalData });
       throw error;
@@ -247,13 +280,14 @@ export class CoherenceService {
     try {
       // Get latest analysis result
       const latestAnalysis = await this.getLatestAnalysisResult(tenantId);
-      
+
       // Get active missions count
-      const activeMissions = await this.missionVault.getActiveMissions(tenantId);
-      
+      const activeMissions =
+        await this.missionVault.getActiveMissions(tenantId);
+
       // Get recent alerts/anomalies
       const recentAlerts = await this.getRecentAlerts(tenantId);
-      
+
       // Check system health
       const systemHealth = await this.checkSystemHealth(tenantId);
 
@@ -263,9 +297,8 @@ export class CoherenceService {
         lastAnalysis: latestAnalysis?.metadata.analysisTime || 'never',
         activeMissions: activeMissions.length,
         recentAlerts,
-        systemHealth
+        systemHealth,
       };
-
     } catch (error) {
       logger.error('Failed to get coherence status', { error, tenantId });
       return {
@@ -274,16 +307,26 @@ export class CoherenceService {
         lastAnalysis: 'error',
         activeMissions: 0,
         recentAlerts: [],
-        systemHealth: { status: 'error', message: 'Unable to determine system health' }
+        systemHealth: {
+          status: 'error',
+          message: 'Unable to determine system health',
+        },
       };
     }
   }
 
-  async configureTenant(tenantId: string, config: Partial<CoherenceConfiguration>): Promise<void> {
+  async configureTenant(
+    tenantId: string,
+    config: Partial<CoherenceConfiguration>,
+  ): Promise<void> {
     const fullConfig = { ...this.defaultConfig, ...config };
-    
-    await this.redis.setex(`config:${tenantId}`, 86400, JSON.stringify(fullConfig)); // 24h cache
-    
+
+    await this.redis.setex(
+      `config:${tenantId}`,
+      86400,
+      JSON.stringify(fullConfig),
+    ); // 24h cache
+
     // Restart periodic analysis with new interval
     if (config.analysisInterval && this.analysisTimers.has(tenantId)) {
       clearInterval(this.analysisTimers.get(tenantId)!);
@@ -294,52 +337,75 @@ export class CoherenceService {
   }
 
   // Getters for individual services (for GraphQL integration)
-  getSignalIngest(): CoherenceSignalIngest { return this.signalIngest; }
-  getGraphQLResolvers(): CoherenceGraphQLResolvers { return this.graphqlResolvers; }
-  getSubscriptionManager(): CoherenceSubscriptionManager { return this.subscriptionManager; }
-  getActivityIndex(): ActivityFingerprintIndex { return this.activityIndex; }
-  getNarrativeModel(): NarrativeImpactModel { return this.narrativeModel; }
-  getMissionVault(): MissionVault { return this.missionVault; }
+  getSignalIngest(): CoherenceSignalIngest {
+    return this.signalIngest;
+  }
+  getGraphQLResolvers(): CoherenceGraphQLResolvers {
+    return this.graphqlResolvers;
+  }
+  getSubscriptionManager(): CoherenceSubscriptionManager {
+    return this.subscriptionManager;
+  }
+  getActivityIndex(): ActivityFingerprintIndex {
+    return this.activityIndex;
+  }
+  getNarrativeModel(): NarrativeImpactModel {
+    return this.narrativeModel;
+  }
+  getMissionVault(): MissionVault {
+    return this.missionVault;
+  }
 
   private async initializePeriodicAnalysis(): Promise<void> {
     try {
       // Get list of active tenants
       const tenants = await this.getActiveTenants();
-      
+
       for (const tenantId of tenants) {
         const config = await this.getTenantConfiguration(tenantId);
         this.startPeriodicAnalysis(tenantId, config);
       }
 
-      logger.info('Periodic analysis initialized', { tenantCount: tenants.length });
-
+      logger.info('Periodic analysis initialized', {
+        tenantCount: tenants.length,
+      });
     } catch (error) {
       logger.error('Failed to initialize periodic analysis', { error });
     }
   }
 
-  private startPeriodicAnalysis(tenantId: string, config: CoherenceConfiguration): void {
+  private startPeriodicAnalysis(
+    tenantId: string,
+    config: CoherenceConfiguration,
+  ): void {
     if (this.analysisTimers.has(tenantId)) {
       clearInterval(this.analysisTimers.get(tenantId)!);
     }
 
-    const timer = setInterval(async () => {
-      try {
-        await this.analyzeCoherence(tenantId, { includeRealTimeAnalysis: true });
-      } catch (error) {
-        logger.error('Periodic analysis failed', { error, tenantId });
-      }
-    }, config.analysisInterval * 60 * 1000); // Convert minutes to milliseconds
+    const timer = setInterval(
+      async () => {
+        try {
+          await this.analyzeCoherence(tenantId, {
+            includeRealTimeAnalysis: true,
+          });
+        } catch (error) {
+          logger.error('Periodic analysis failed', { error, tenantId });
+        }
+      },
+      config.analysisInterval * 60 * 1000,
+    ); // Convert minutes to milliseconds
 
     this.analysisTimers.set(tenantId, timer);
 
-    logger.debug('Started periodic analysis', { 
-      tenantId, 
-      intervalMinutes: config.analysisInterval 
+    logger.debug('Started periodic analysis', {
+      tenantId,
+      intervalMinutes: config.analysisInterval,
     });
   }
 
-  private async getTenantConfiguration(tenantId: string): Promise<CoherenceConfiguration> {
+  private async getTenantConfiguration(
+    tenantId: string,
+  ): Promise<CoherenceConfiguration> {
     const cached = await this.redis.get(`config:${tenantId}`);
     if (cached) {
       return JSON.parse(cached);
@@ -347,24 +413,29 @@ export class CoherenceService {
     return this.defaultConfig;
   }
 
-  private async gatherSignalsForAnalysis(tenantId: string, timeRange?: { start: string; end: string }): Promise<any[]> {
+  private async gatherSignalsForAnalysis(
+    tenantId: string,
+    timeRange?: { start: string; end: string },
+  ): Promise<any[]> {
     const session = this.neo4j.getSession();
-    
+
     try {
       const params: any = { tenantId };
       let whereClause = '';
 
       if (timeRange) {
-        whereClause = 'WHERE s.ts >= datetime($startTime) AND s.ts <= datetime($endTime)';
+        whereClause =
+          'WHERE s.ts >= datetime($startTime) AND s.ts <= datetime($endTime)';
         params.startTime = timeRange.start;
         params.endTime = timeRange.end;
       } else {
         // Default to last 24 hours
-        whereClause = 'WHERE s.ts >= datetime() - duration(\'P1D\')';
+        whereClause = "WHERE s.ts >= datetime() - duration('P1D')";
       }
 
-      const result = await session.executeRead(async tx => {
-        return await tx.run(`
+      const result = await session.executeRead(async (tx) => {
+        return await tx.run(
+          `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
           ${whereClause}
           RETURN s {
@@ -377,10 +448,12 @@ export class CoherenceService {
             .provenance_id
           } as signal
           ORDER BY s.ts DESC
-        `, params);
+        `,
+          params,
+        );
       });
 
-      return result.records.map(record => {
+      return result.records.map((record) => {
         const signal = record.get('signal');
         return {
           signalId: signal.signal_id,
@@ -389,22 +462,28 @@ export class CoherenceService {
           weight: signal.weight || 1.0,
           source: signal.source,
           ts: signal.ts,
-          provenanceId: signal.provenance_id
+          provenanceId: signal.provenance_id,
         };
       });
-
     } finally {
       await session.close();
     }
   }
 
-  private async calculateCoherenceScore(tenantId: string, data: {
-    signals: any[];
-    activityFingerprints: any[];
-    narrativeImpacts: any[];
-    missionContext: any;
-  }): Promise<{ score: number; status: 'high' | 'medium' | 'low' | 'insufficient' }> {
-    const { signals, activityFingerprints, narrativeImpacts, missionContext } = data;
+  private async calculateCoherenceScore(
+    tenantId: string,
+    data: {
+      signals: any[];
+      activityFingerprints: any[];
+      narrativeImpacts: any[];
+      missionContext: any;
+    },
+  ): Promise<{
+    score: number;
+    status: 'high' | 'medium' | 'low' | 'insufficient';
+  }> {
+    const { signals, activityFingerprints, narrativeImpacts, missionContext } =
+      data;
 
     if (signals.length < 10) {
       return { score: 0, status: 'insufficient' };
@@ -412,25 +491,29 @@ export class CoherenceService {
 
     // Base coherence from signals
     const signalCoherence = this.calculateSignalCoherence(signals);
-    
+
     // Activity coherence
-    const activityCoherence = this.calculateActivityCoherence(activityFingerprints);
-    
-    // Narrative coherence  
-    const narrativeCoherence = this.calculateNarrativeCoherence(narrativeImpacts);
-    
+    const activityCoherence =
+      this.calculateActivityCoherence(activityFingerprints);
+
+    // Narrative coherence
+    const narrativeCoherence =
+      this.calculateNarrativeCoherence(narrativeImpacts);
+
     // Mission alignment (if mission context exists)
-    const missionAlignment = missionContext ? this.calculateMissionAlignment(missionContext, signals) : 0.5;
+    const missionAlignment = missionContext
+      ? this.calculateMissionAlignment(missionContext, signals)
+      : 0.5;
 
     // Weighted average
     const weights = {
       signal: 0.4,
       activity: 0.25,
       narrative: 0.25,
-      mission: 0.1
+      mission: 0.1,
     };
 
-    const overallScore = 
+    const overallScore =
       signalCoherence * weights.signal +
       activityCoherence * weights.activity +
       narrativeCoherence * weights.narrative +
@@ -449,9 +532,12 @@ export class CoherenceService {
     if (!signals.length) return 0;
 
     // Weighted average of signal values
-    const weightedSum = signals.reduce((sum, signal) => sum + (signal.value * signal.weight), 0);
+    const weightedSum = signals.reduce(
+      (sum, signal) => sum + signal.value * signal.weight,
+      0,
+    );
     const totalWeight = signals.reduce((sum, signal) => sum + signal.weight, 0);
-    
+
     return totalWeight > 0 ? Math.min(1, weightedSum / totalWeight) : 0;
   }
 
@@ -459,11 +545,13 @@ export class CoherenceService {
     if (!fingerprints.length) return 0.5; // Neutral if no activity data
 
     // Average confidence of activity fingerprints
-    const avgConfidence = fingerprints.reduce((sum, fp) => sum + fp.confidence, 0) / fingerprints.length;
-    
+    const avgConfidence =
+      fingerprints.reduce((sum, fp) => sum + fp.confidence, 0) /
+      fingerprints.length;
+
     // Adjust for pattern diversity (more patterns = higher coherence)
     const diversityBonus = Math.min(0.2, fingerprints.length / 50);
-    
+
     return Math.min(1, avgConfidence + diversityBonus);
   }
 
@@ -471,97 +559,144 @@ export class CoherenceService {
     if (!impacts.length) return 0.5; // Neutral if no narrative data
 
     // Weight by impact magnitude and confidence
-    const weightedSum = impacts.reduce((sum, impact) => sum + (impact.magnitude * impact.confidence), 0);
-    const totalWeight = impacts.reduce((sum, impact) => sum + impact.confidence, 0);
-    
+    const weightedSum = impacts.reduce(
+      (sum, impact) => sum + impact.magnitude * impact.confidence,
+      0,
+    );
+    const totalWeight = impacts.reduce(
+      (sum, impact) => sum + impact.confidence,
+      0,
+    );
+
     return totalWeight > 0 ? Math.min(1, weightedSum / totalWeight) : 0.5;
   }
 
-  private calculateMissionAlignment(missionContext: any, signals: any[]): number {
+  private calculateMissionAlignment(
+    missionContext: any,
+    signals: any[],
+  ): number {
     // Simple alignment based on signal relevance to mission objectives
     if (!missionContext || !missionContext.objectives) return 0.5;
 
     // Count signals that relate to mission objectives (simplified heuristic)
-    const relevantSignals = signals.filter(signal => {
-      return missionContext.objectives.some((obj: any) => 
-        signal.type.includes(obj.type) || signal.source.includes('mission')
+    const relevantSignals = signals.filter((signal) => {
+      return missionContext.objectives.some(
+        (obj: any) =>
+          signal.type.includes(obj.type) || signal.source.includes('mission'),
       );
     });
 
     return relevantSignals.length / signals.length;
   }
 
-  private async generateInsights(tenantId: string, data: {
-    coherenceScore: any;
-    activityFingerprints: any[];
-    narrativeImpacts: any[];
-    signals: any[];
-    config: CoherenceConfiguration;
-  }): Promise<any> {
-    const { coherenceScore, activityFingerprints, narrativeImpacts, signals, config } = data;
+  private async generateInsights(
+    tenantId: string,
+    data: {
+      coherenceScore: any;
+      activityFingerprints: any[];
+      narrativeImpacts: any[];
+      signals: any[];
+      config: CoherenceConfiguration;
+    },
+  ): Promise<any> {
+    const {
+      coherenceScore,
+      activityFingerprints,
+      narrativeImpacts,
+      signals,
+      config,
+    } = data;
 
     // Generate trend analysis
     const trends = await this.analyzeTrends(tenantId, signals);
-    
+
     // Detect anomalies
     const anomalies = this.detectAnomalies(signals, config.anomalyThreshold);
-    
+
     // Assess risks
-    const riskAssessment = this.assessRisks(coherenceScore, activityFingerprints, narrativeImpacts);
-    
+    const riskAssessment = this.assessRisks(
+      coherenceScore,
+      activityFingerprints,
+      narrativeImpacts,
+    );
+
     // Generate recommendations
-    const recommendations = this.generateRecommendations(coherenceScore, trends, anomalies, riskAssessment);
+    const recommendations = this.generateRecommendations(
+      coherenceScore,
+      trends,
+      anomalies,
+      riskAssessment,
+    );
 
     return {
       trends,
       anomalies,
       riskAssessment,
-      recommendations
+      recommendations,
     };
   }
 
-  private async analyzeTrends(tenantId: string, signals: any[]): Promise<any[]> {
+  private async analyzeTrends(
+    tenantId: string,
+    signals: any[],
+  ): Promise<any[]> {
     // Simple trend analysis - could be enhanced with ML
     const hourlyGroups = new Map<string, any[]>();
-    
-    signals.forEach(signal => {
-      const hour = new Date(signal.ts).toISOString().substring(0, 13) + ':00:00.000Z';
+
+    signals.forEach((signal) => {
+      const hour =
+        new Date(signal.ts).toISOString().substring(0, 13) + ':00:00.000Z';
       if (!hourlyGroups.has(hour)) {
         hourlyGroups.set(hour, []);
       }
       hourlyGroups.get(hour)!.push(signal);
     });
 
-    const trends = Array.from(hourlyGroups.entries()).map(([hour, hourSignals]) => {
-      const avgValue = hourSignals.reduce((sum, s) => sum + s.value * s.weight, 0) / hourSignals.length;
-      return {
-        timestamp: hour,
-        value: avgValue,
-        count: hourSignals.length
-      };
-    }).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    const trends = Array.from(hourlyGroups.entries())
+      .map(([hour, hourSignals]) => {
+        const avgValue =
+          hourSignals.reduce((sum, s) => sum + s.value * s.weight, 0) /
+          hourSignals.length;
+        return {
+          timestamp: hour,
+          value: avgValue,
+          count: hourSignals.length,
+        };
+      })
+      .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
     return trends;
   }
 
   private detectAnomalies(signals: any[], threshold: number): any[] {
-    const values = signals.map(s => s.value * s.weight);
+    const values = signals.map((s) => s.value * s.weight);
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-    const stddev = Math.sqrt(values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length);
+    const stddev = Math.sqrt(
+      values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length,
+    );
 
-    return signals.filter(signal => {
-      const deviation = Math.abs((signal.value * signal.weight) - mean);
-      return deviation > (threshold * stddev);
-    }).map(signal => ({
-      signalId: signal.signalId,
-      timestamp: signal.ts,
-      value: signal.value * signal.weight,
-      deviation: Math.abs((signal.value * signal.weight) - mean),
-      severity: Math.abs((signal.value * signal.weight) - mean) > (3 * stddev) ? 'high' : 'medium'
-    }));
+    return signals
+      .filter((signal) => {
+        const deviation = Math.abs(signal.value * signal.weight - mean);
+        return deviation > threshold * stddev;
+      })
+      .map((signal) => ({
+        signalId: signal.signalId,
+        timestamp: signal.ts,
+        value: signal.value * signal.weight,
+        deviation: Math.abs(signal.value * signal.weight - mean),
+        severity:
+          Math.abs(signal.value * signal.weight - mean) > 3 * stddev
+            ? 'high'
+            : 'medium',
+      }));
   }
 
-  private assessRisks(coherenceScore: any, activityFingerprints: any[], narrativeImpacts: any[]): any {
+  private assessRisks(
+    coherenceScore: any,
+    activityFingerprints: any[],
+    narrativeImpacts: any[],
+  ): any {
     let riskLevel = 'low';
     const riskFactors = [];
 
@@ -570,91 +705,129 @@ export class CoherenceService {
       riskFactors.push('Low coherence score');
     }
 
-    const highRiskFingerprints = activityFingerprints.filter(fp => fp.metadata.riskLevel === 'high');
+    const highRiskFingerprints = activityFingerprints.filter(
+      (fp) => fp.metadata.riskLevel === 'high',
+    );
     if (highRiskFingerprints.length > 0) {
       riskLevel = 'high';
-      riskFactors.push(`${highRiskFingerprints.length} high-risk activity patterns detected`);
+      riskFactors.push(
+        `${highRiskFingerprints.length} high-risk activity patterns detected`,
+      );
     }
 
-    const highImpactNarratives = narrativeImpacts.filter(ni => ni.magnitude > 0.8);
+    const highImpactNarratives = narrativeImpacts.filter(
+      (ni) => ni.magnitude > 0.8,
+    );
     if (highImpactNarratives.length > 0) {
       if (riskLevel === 'low') riskLevel = 'medium';
-      riskFactors.push(`${highImpactNarratives.length} high-impact narrative shifts detected`);
+      riskFactors.push(
+        `${highImpactNarratives.length} high-impact narrative shifts detected`,
+      );
     }
 
     return {
       level: riskLevel,
       factors: riskFactors,
-      score: riskLevel === 'high' ? 0.8 : riskLevel === 'medium' ? 0.5 : 0.2
+      score: riskLevel === 'high' ? 0.8 : riskLevel === 'medium' ? 0.5 : 0.2,
     };
   }
 
-  private generateRecommendations(coherenceScore: any, trends: any[], anomalies: any[], riskAssessment: any): string[] {
+  private generateRecommendations(
+    coherenceScore: any,
+    trends: any[],
+    anomalies: any[],
+    riskAssessment: any,
+  ): string[] {
     const recommendations = [];
 
     if (coherenceScore.score < 0.5) {
-      recommendations.push('Increase signal collection frequency to improve coherence baseline');
+      recommendations.push(
+        'Increase signal collection frequency to improve coherence baseline',
+      );
     }
 
     if (anomalies.length > 5) {
-      recommendations.push('Investigate detected anomalies for potential security concerns');
+      recommendations.push(
+        'Investigate detected anomalies for potential security concerns',
+      );
     }
 
     if (riskAssessment.level === 'high') {
       recommendations.push('Escalate high-risk factors to security team');
-      recommendations.push('Consider implementing additional monitoring controls');
+      recommendations.push(
+        'Consider implementing additional monitoring controls',
+      );
     }
 
     if (trends.length > 0) {
       const recentTrend = trends[trends.length - 1];
       const previousTrend = trends[Math.max(0, trends.length - 2)];
-      
+
       if (recentTrend.value < previousTrend.value * 0.8) {
-        recommendations.push('Recent coherence decline detected - review system health');
+        recommendations.push(
+          'Recent coherence decline detected - review system health',
+        );
       }
     }
 
-    return recommendations.length > 0 ? recommendations : ['System operating within normal parameters'];
+    return recommendations.length > 0
+      ? recommendations
+      : ['System operating within normal parameters'];
   }
 
-  private calculateOverallConfidence(activityFingerprints: any[], narrativeImpacts: any[], coherenceScore: any): number {
+  private calculateOverallConfidence(
+    activityFingerprints: any[],
+    narrativeImpacts: any[],
+    coherenceScore: any,
+  ): number {
     let confidence = coherenceScore.score * 0.4; // Base confidence from coherence
 
     if (activityFingerprints.length > 0) {
-      const avgActivityConfidence = activityFingerprints.reduce((sum, fp) => sum + fp.confidence, 0) / activityFingerprints.length;
+      const avgActivityConfidence =
+        activityFingerprints.reduce((sum, fp) => sum + fp.confidence, 0) /
+        activityFingerprints.length;
       confidence += avgActivityConfidence * 0.3;
     }
 
     if (narrativeImpacts.length > 0) {
-      const avgNarrativeConfidence = narrativeImpacts.reduce((sum, ni) => sum + ni.confidence, 0) / narrativeImpacts.length;
+      const avgNarrativeConfidence =
+        narrativeImpacts.reduce((sum, ni) => sum + ni.confidence, 0) /
+        narrativeImpacts.length;
       confidence += avgNarrativeConfidence * 0.3;
     }
 
     return Math.min(1, confidence);
   }
 
-  private async assessDataQuality(tenantId: string, signals: any[]): Promise<any> {
+  private async assessDataQuality(
+    tenantId: string,
+    signals: any[],
+  ): Promise<any> {
     const totalSignals = signals.length;
-    const signalsWithProvenance = signals.filter(s => s.provenanceId).length;
-    const recentSignals = signals.filter(s => {
+    const signalsWithProvenance = signals.filter((s) => s.provenanceId).length;
+    const recentSignals = signals.filter((s) => {
       const age = Date.now() - new Date(s.ts).getTime();
       return age < 86400000; // Less than 24 hours old
     }).length;
 
-    const provenanceRatio = totalSignals > 0 ? signalsWithProvenance / totalSignals : 0;
+    const provenanceRatio =
+      totalSignals > 0 ? signalsWithProvenance / totalSignals : 0;
     const freshnessRatio = totalSignals > 0 ? recentSignals / totalSignals : 0;
 
     return {
-      score: (provenanceRatio * 0.5) + (freshnessRatio * 0.5),
+      score: provenanceRatio * 0.5 + freshnessRatio * 0.5,
       metrics: {
         totalSignals,
         provenanceCompliance: provenanceRatio,
-        freshnessRatio
-      }
+        freshnessRatio,
+      },
     };
   }
 
-  private createEmptyAnalysisResult(tenantId: string, analysisId: string): CoherenceAnalysisResult {
+  private createEmptyAnalysisResult(
+    tenantId: string,
+    analysisId: string,
+  ): CoherenceAnalysisResult {
     return {
       tenantId,
       analysisId,
@@ -663,28 +836,44 @@ export class CoherenceService {
       intelligence: {
         activityFingerprints: [],
         narrativeImpacts: [],
-        missionContext: null
+        missionContext: null,
       },
       insights: {
         trends: [],
         anomalies: [],
-        riskAssessment: { level: 'unknown', factors: ['No data available'], score: 0 },
-        recommendations: ['Increase signal collection to enable coherence analysis']
+        riskAssessment: {
+          level: 'unknown',
+          factors: ['No data available'],
+          score: 0,
+        },
+        recommendations: [
+          'Increase signal collection to enable coherence analysis',
+        ],
       },
       metadata: {
         analysisTime: new Date().toISOString(),
         signalCount: 0,
         confidenceLevel: 0,
-        dataQuality: { score: 0, metrics: { totalSignals: 0, provenanceCompliance: 0, freshnessRatio: 0 } }
-      }
+        dataQuality: {
+          score: 0,
+          metrics: {
+            totalSignals: 0,
+            provenanceCompliance: 0,
+            freshnessRatio: 0,
+          },
+        },
+      },
     };
   }
 
-  private async triggerRealTimeUpdates(tenantId: string, data: {
-    coherenceScore: any;
-    activityFingerprints: any[];
-    narrativeImpacts: any[];
-  }): Promise<void> {
+  private async triggerRealTimeUpdates(
+    tenantId: string,
+    data: {
+      coherenceScore: any;
+      activityFingerprints: any[];
+      narrativeImpacts: any[];
+    },
+  ): Promise<void> {
     // Trigger GraphQL subscriptions
     await this.subscriptionManager.publishCoherenceUpdate({
       tenantId,
@@ -692,43 +881,58 @@ export class CoherenceService {
       status: data.coherenceScore.status,
       signalCount: 0, // Would be calculated
       timestamp: new Date().toISOString(),
-      changeType: 'score_change'
+      changeType: 'score_change',
     });
 
     // Publish activity updates
-    for (const fingerprint of data.activityFingerprints.slice(0, 5)) { // Top 5
+    for (const fingerprint of data.activityFingerprints.slice(0, 5)) {
+      // Top 5
       await this.subscriptionManager.publishActivityUpdate({
         tenantId,
         activityId: fingerprint.id,
         fingerprint,
         timestamp: new Date().toISOString(),
         confidence: fingerprint.confidence,
-        changeType: 'new_activity'
+        changeType: 'new_activity',
       });
     }
 
     // Publish narrative updates
-    for (const impact of data.narrativeImpacts.slice(0, 3)) { // Top 3
+    for (const impact of data.narrativeImpacts.slice(0, 3)) {
+      // Top 3
       await this.subscriptionManager.publishNarrativeUpdate({
         tenantId,
         narrativeId: impact.id,
         impact,
         timestamp: new Date().toISOString(),
-        severity: impact.magnitude > 0.7 ? 'high' : impact.magnitude > 0.4 ? 'medium' : 'low',
-        changeType: 'narrative_shift'
+        severity:
+          impact.magnitude > 0.7
+            ? 'high'
+            : impact.magnitude > 0.4
+              ? 'medium'
+              : 'low',
+        changeType: 'narrative_shift',
       });
     }
   }
 
-  private async storeAnalysisResult(tenantId: string, result: CoherenceAnalysisResult): Promise<void> {
+  private async storeAnalysisResult(
+    tenantId: string,
+    result: CoherenceAnalysisResult,
+  ): Promise<void> {
     // Store in Redis for fast access
-    await this.redis.setex(`analysis:latest:${tenantId}`, 86400, JSON.stringify(result));
-    
+    await this.redis.setex(
+      `analysis:latest:${tenantId}`,
+      86400,
+      JSON.stringify(result),
+    );
+
     // Store in Neo4j for historical analysis
     const session = this.neo4j.getSession();
     try {
-      await session.executeWrite(async tx => {
-        await tx.run(`
+      await session.executeWrite(async (tx) => {
+        await tx.run(
+          `
           MATCH (t:Tenant {tenant_id: $tenantId})
           CREATE (a:CoherenceAnalysis {
             analysis_id: $analysisId,
@@ -741,23 +945,27 @@ export class CoherenceService {
             result_data: $resultData
           })
           CREATE (t)-[:HAS_ANALYSIS]->(a)
-        `, {
-          tenantId: result.tenantId,
-          analysisId: result.analysisId,
-          coherenceScore: result.coherenceScore,
-          coherenceStatus: result.coherenceStatus,
-          confidenceLevel: result.metadata.confidenceLevel,
-          signalCount: result.metadata.signalCount,
-          analysisTime: result.metadata.analysisTime,
-          resultData: JSON.stringify(result)
-        });
+        `,
+          {
+            tenantId: result.tenantId,
+            analysisId: result.analysisId,
+            coherenceScore: result.coherenceScore,
+            coherenceStatus: result.coherenceStatus,
+            confidenceLevel: result.metadata.confidenceLevel,
+            signalCount: result.metadata.signalCount,
+            analysisTime: result.metadata.analysisTime,
+            resultData: JSON.stringify(result),
+          },
+        );
       });
     } finally {
       await session.close();
     }
   }
 
-  private async getLatestAnalysisResult(tenantId: string): Promise<CoherenceAnalysisResult | null> {
+  private async getLatestAnalysisResult(
+    tenantId: string,
+  ): Promise<CoherenceAnalysisResult | null> {
     const cached = await this.redis.get(`analysis:latest:${tenantId}`);
     return cached ? JSON.parse(cached) : null;
   }
@@ -765,7 +973,7 @@ export class CoherenceService {
   private async getActiveTenants(): Promise<string[]> {
     const session = this.neo4j.getSession();
     try {
-      const result = await session.executeRead(async tx => {
+      const result = await session.executeRead(async (tx) => {
         return await tx.run(`
           MATCH (t:Tenant)
           WHERE EXISTS((t)-[:EMITS]->(:Signal))
@@ -773,7 +981,7 @@ export class CoherenceService {
         `);
       });
 
-      return result.records.map(record => record.get('tenantId'));
+      return result.records.map((record) => record.get('tenantId'));
     } finally {
       await session.close();
     }
@@ -785,14 +993,16 @@ export class CoherenceService {
     if (!latestAnalysis) return [];
 
     const alerts = [];
-    
+
     // Add anomaly alerts
-    alerts.push(...latestAnalysis.insights.anomalies.map(anomaly => ({
-      type: 'anomaly',
-      severity: anomaly.severity,
-      timestamp: anomaly.timestamp,
-      message: `Anomalous signal detected (deviation: ${anomaly.deviation.toFixed(2)})`
-    })));
+    alerts.push(
+      ...latestAnalysis.insights.anomalies.map((anomaly) => ({
+        type: 'anomaly',
+        severity: anomaly.severity,
+        timestamp: anomaly.timestamp,
+        message: `Anomalous signal detected (deviation: ${anomaly.deviation.toFixed(2)})`,
+      })),
+    );
 
     // Add risk alerts
     if (latestAnalysis.insights.riskAssessment.level === 'high') {
@@ -800,7 +1010,7 @@ export class CoherenceService {
         type: 'risk',
         severity: 'high',
         timestamp: latestAnalysis.metadata.analysisTime,
-        message: `High risk level detected: ${latestAnalysis.insights.riskAssessment.factors.join(', ')}`
+        message: `High risk level detected: ${latestAnalysis.insights.riskAssessment.factors.join(', ')}`,
       });
     }
 
@@ -811,14 +1021,14 @@ export class CoherenceService {
     try {
       // Check Neo4j connectivity
       const neo4jHealthy = await this.neo4j.verifyConnectivity();
-      
+
       // Check Redis connectivity
-      const redisHealthy = await this.redis.ping() === 'PONG';
-      
+      const redisHealthy = (await this.redis.ping()) === 'PONG';
+
       // Check signal ingestion rate
       const recentSignals = await this.gatherSignalsForAnalysis(tenantId, {
         start: new Date(Date.now() - 3600000).toISOString(), // Last hour
-        end: new Date().toISOString()
+        end: new Date().toISOString(),
       });
 
       const ingestionRate = recentSignals.length; // Signals per hour
@@ -830,19 +1040,18 @@ export class CoherenceService {
         components: {
           neo4j: neo4jHealthy ? 'healthy' : 'unhealthy',
           redis: redisHealthy ? 'healthy' : 'unhealthy',
-          ingestion: ingestionRate > 0 ? 'healthy' : 'low'
+          ingestion: ingestionRate > 0 ? 'healthy' : 'low',
         },
         metrics: {
           ingestionRate,
-          lastCheck: new Date().toISOString()
-        }
+          lastCheck: new Date().toISOString(),
+        },
       };
-
     } catch (error) {
       return {
         status: 'error',
         message: 'Unable to perform health check',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -850,15 +1059,15 @@ export class CoherenceService {
   // Cleanup method
   async shutdown(): Promise<void> {
     logger.info('Shutting down coherence service');
-    
+
     // Clear all analysis timers
     for (const [tenantId, timer] of this.analysisTimers.entries()) {
       clearInterval(timer);
       logger.debug('Stopped periodic analysis', { tenantId });
     }
-    
+
     this.analysisTimers.clear();
-    
+
     logger.info('Coherence service shutdown complete');
   }
 }

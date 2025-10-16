@@ -1,6 +1,16 @@
-export type Purpose = 'investigation' | 't&s' | 'benchmarking' | 'release_notes' | 'compliance';
+export type Purpose =
+  | 'investigation'
+  | 't&s'
+  | 'benchmarking'
+  | 'release_notes'
+  | 'compliance';
 export type RetentionTier = 'short' | 'standard';
-export type TargetExtraction = 'license' | 'version' | 'cve' | 'owner' | 'policy';
+export type TargetExtraction =
+  | 'license'
+  | 'version'
+  | 'cve'
+  | 'owner'
+  | 'policy';
 export type Focus = 'failures' | 'changelog' | 'compliance';
 
 export interface ProvenanceMetadata {
@@ -81,7 +91,8 @@ export interface ParseRequestBody {
   bytes?: string;
 }
 
-export interface ParseResponseBody extends DoclingResponse<{ fragments: DocFragment[] }>{}
+export interface ParseResponseBody
+  extends DoclingResponse<{ fragments: DocFragment[] }> {}
 
 export interface SummarizeRequestBody {
   requestId: string;
@@ -94,7 +105,8 @@ export interface SummarizeRequestBody {
   relatedFragmentIds?: string[];
 }
 
-export interface SummarizeResponseBody extends DoclingResponse<SummaryResponse>{}
+export interface SummarizeResponseBody
+  extends DoclingResponse<SummaryResponse> {}
 
 export interface ExtractRequestBody {
   requestId: string;
@@ -107,4 +119,5 @@ export interface ExtractRequestBody {
   fragmentIds?: string[];
 }
 
-export interface ExtractResponseBody extends DoclingResponse<{ findings: ExtractionFinding[] }>{}
+export interface ExtractResponseBody
+  extends DoclingResponse<{ findings: ExtractionFinding[] }> {}

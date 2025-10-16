@@ -64,7 +64,9 @@ describe('VideoFrameExtractor', () => {
         expect(ffmpeg.mock.results[0].value.addOption).toHaveBeenCalledWith('-vf', 'fps=1/2');
     });
     it('should extract audio when extractAudio is true', async () => {
-        const { audio } = await extractor.extract(mockVideoPath, { extractAudio: true });
+        const { audio } = await extractor.extract(mockVideoPath, {
+            extractAudio: true,
+        });
         expect(audio).toBeDefined();
         expect(audio?.audioPath).toContain('audio-');
         expect(audio?.audioPath).toContain('.mp3');
@@ -75,7 +77,10 @@ describe('VideoFrameExtractor', () => {
     it('should clean up temporary directory', async () => {
         const tempDirToClean = '/tmp/some-temp-dir';
         await extractor.cleanup(tempDirToClean);
-        expect(fs.rm).toHaveBeenCalledWith(tempDirToClean, { recursive: true, force: true });
+        expect(fs.rm).toHaveBeenCalledWith(tempDirToClean, {
+            recursive: true,
+            force: true,
+        });
     });
     it('should handle ffmpeg errors during frame extraction', async () => {
         ffmpeg.mockImplementationOnce(() => ({

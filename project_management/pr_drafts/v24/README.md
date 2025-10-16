@@ -2,16 +2,16 @@ This folder contains ready-to-paste **PR description drafts** plus shared sectio
 
 ## Drafts
 
-* **PR-01-runtime-unification-node20.md** — Unify Node.js toolchain on v20
-* **PR-02-runtime-unification-python312.md** — Unify Python toolchain on 3.12
-* **PR-03-otel-coverage-tier1.md** — Expand OpenTelemetry coverage (Tier 1 services)
-* **PR-04-pipeline-slo-migration-canary.md** — Migrate pipeline SLOs via canary
-* **PR-05-release-train-slo-reusable.md** — Reusable release-train SLO workflows
-* **PR-06-canary-default-helm.md** — Helm chart: canary-by-default toggles
-* **PR-07-migration-gate.md** — Schema/Data migration gate wiring
-* **PR-08-opa-policy-enforcement.md** — OPA policy enforcement guardrails
-* **PR-09-ci-hygiene-speed.md** — CI hygiene + speedups
-* **PR-10-v24-modules-containerize-chart.md** — Containerize v24 modules & chart updates
+- **PR-01-runtime-unification-node20.md** — Unify Node.js toolchain on v20
+- **PR-02-runtime-unification-python312.md** — Unify Python toolchain on 3.12
+- **PR-03-otel-coverage-tier1.md** — Expand OpenTelemetry coverage (Tier 1 services)
+- **PR-04-pipeline-slo-migration-canary.md** — Migrate pipeline SLOs via canary
+- **PR-05-release-train-slo-reusable.md** — Reusable release-train SLO workflows
+- **PR-06-canary-default-helm.md** — Helm chart: canary-by-default toggles
+- **PR-07-migration-gate.md** — Schema/Data migration gate wiring
+- **PR-08-opa-policy-enforcement.md** — OPA policy enforcement guardrails
+- **PR-09-ci-hygiene-speed.md** — CI hygiene + speedups
+- **PR-10-v24-modules-containerize-chart.md** — Containerize v24 modules & chart updates
 
 Shared: [`SHARED-SECTIONS.md`](./SHARED-SECTIONS.md) (risk, rollback, evidence).
 

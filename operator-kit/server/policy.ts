@@ -70,7 +70,8 @@ export type Policy = {
   _loadedAt?: number;
 };
 
-const POLICY_FILE = process.env.POLICY_FILE || path.resolve('config/router.policy.yml');
+const POLICY_FILE =
+  process.env.POLICY_FILE || path.resolve('config/router.policy.yml');
 let cached: Policy | null = null;
 
 export function loadPolicy(): Policy {

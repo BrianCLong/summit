@@ -7,8 +7,15 @@ import { render, screen, within, act } from '@testing-library/react';
 import { withUser } from '../test-utils/user';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import EnhancedAIAssistant, { AssistantEvent } from '../EnhancedAIAssistant';
-import { makeFakeClock, makeFakeTransport, makeStreamingTransport } from '../test-utils/fakes';
-import { expectTextAcrossElements, expectLastAssistantMessageToContain } from '../test-utils/text';
+import {
+  makeFakeClock,
+  makeFakeTransport,
+  makeStreamingTransport,
+} from '../test-utils/fakes';
+import {
+  expectTextAcrossElements,
+  expectLastAssistantMessageToContain,
+} from '../test-utils/text';
 import { emitSpeechResult } from '../test-utils/voice';
 import { flushMicrotasks } from '../test-utils/flush';
 import { installStreamingFetchMock } from '../test-utils/fetch';
@@ -54,16 +61,18 @@ describe('EnhancedAIAssistant', () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} />);
 
     expect(screen.getByText(/Hello! I'm IntelBot/)).toBeInTheDocument();
-    expect(screen.getByRole('status', { name: /assistant-status/i })).toHaveTextContent(/Online/);
+    expect(
+      screen.getByRole('status', { name: /assistant-status/i }),
+    ).toHaveTextContent(/Online/);
   });
 
   it('displays assistant name and status', () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} />);
 
     expect(screen.getByText('IntelBot')).toBeInTheDocument();
-    expect(screen.getByRole('status', { name: /assistant-status/i })).toHaveTextContent(
-      /Intelligence Analysis Assistant • Online/,
-    );
+    expect(
+      screen.getByRole('status', { name: /assistant-status/i }),
+    ).toHaveTextContent(/Intelligence Analysis Assistant • Online/);
   });
 
   it('streams assistant tokens and settles to idle', async () => {
@@ -125,8 +134,13 @@ describe('EnhancedAIAssistant', () => {
     const log = await screen.findByTestId('message-log');
 
     // User message should appear
-    const userMessageArticle = within(log).getAllByRole('article', { name: 'user' })[0];
-    await expectTextAcrossElements(userMessageArticle, 'Find all connections to John Doe');
+    const userMessageArticle = within(log).getAllByRole('article', {
+      name: 'user',
+    })[0];
+    await expectTextAcrossElements(
+      userMessageArticle,
+      'Find all connections to John Doe',
+    );
     await expectTextAcrossElements(log, /I understand your query/);
 
     // Should settle to online eventually
@@ -157,8 +171,13 @@ describe('EnhancedAIAssistant', () => {
     await flushMicrotasks(); // Flush transport events
 
     const log = await screen.findByTestId('message-log');
-    const userMessageArticle = within(log).getAllByRole('article', { name: 'user' })[0];
-    await expectTextAcrossElements(userMessageArticle, 'Show me recent transactions');
+    const userMessageArticle = within(log).getAllByRole('article', {
+      name: 'user',
+    })[0];
+    await expectTextAcrossElements(
+      userMessageArticle,
+      'Show me recent transactions',
+    );
     await expectTextAcrossElements(log, /My response/);
   });
 
@@ -220,7 +239,9 @@ describe('EnhancedAIAssistant', () => {
   });
 
   it('toggles voice commands', async () => {
-    renderWithTheme(<EnhancedAIAssistant {...defaultProps} enableVoice={true} />);
+    renderWithTheme(
+      <EnhancedAIAssistant {...defaultProps} enableVoice={true} />,
+    );
 
     const micButton = screen.getByLabelText(/start voice/i);
     // Initially should show "Start Voice"
@@ -235,7 +256,9 @@ describe('EnhancedAIAssistant', () => {
   });
 
   it('disables voice button when voice is not enabled', () => {
-    renderWithTheme(<EnhancedAIAssistant {...defaultProps} enableVoice={false} />);
+    renderWithTheme(
+      <EnhancedAIAssistant {...defaultProps} enableVoice={false} />,
+    );
 
     const micButton = screen.getByLabelText(/start voice/i);
     expect(micButton).toBeDisabled();
@@ -327,7 +350,9 @@ describe('EnhancedAIAssistant', () => {
 
     // Check message log has proper role
     expect(screen.getByTestId('message-log')).toHaveAttribute('role', 'log');
-    expect(screen.getByRole('status', { name: /assistant-status/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('status', { name: /assistant-status/i }),
+    ).toBeInTheDocument();
   });
 
   it('shows proper ARIA structure for messages', async () => {
@@ -357,14 +382,22 @@ describe('EnhancedAIAssistant', () => {
 
     // Wait for assistant response using robust text assertion
     await expectTextAcrossElements(log, /Test response/);
-    const assistantArticles = within(log).getAllByRole('article', { name: 'assistant' });
+    const assistantArticles = within(log).getAllByRole('article', {
+      name: 'assistant',
+    });
     expect(assistantArticles.length).toBeGreaterThanOrEqual(1);
   });
 
   it('legacy fallback streams and completes to idle', async () => {
     installStreamingFetchMock(['I ', 'understand ', 'your ', 'query']);
     // Render WITHOUT a transport to force fallback in the component
-    renderWithTheme(<EnhancedAIAssistant {...defaultProps} typingDelayMs={0} debounceMs={0} />);
+    renderWithTheme(
+      <EnhancedAIAssistant
+        {...defaultProps}
+        typingDelayMs={0}
+        debounceMs={0}
+      />,
+    );
 
     const log = await screen.findByTestId('message-log');
     await expectTextAcrossElements(log, /I understand your query/i);

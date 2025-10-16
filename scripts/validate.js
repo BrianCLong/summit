@@ -25,7 +25,11 @@ function checkEnvVar(varName, required = true) {
     addResult(`Security: ${varName}`, 'FAIL', 'Environment variable missing');
     return false;
   } else if (value) {
-    addResult(`Security: ${varName}`, 'PASS', 'Environment variable configured');
+    addResult(
+      `Security: ${varName}`,
+      'PASS',
+      'Environment variable configured',
+    );
     return true;
   } else {
     addResult(`Security: ${varName}`, 'PASS', 'Optional environment variable');
@@ -50,10 +54,10 @@ function checkGraphQLTypes() {
   try {
     const schemaPath = path.join(__dirname, '../server/src/graphql/schema.ts');
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
-    
+
     // Check for v24 Coherence types
     const requiredTypes = ['Signal', 'CoherenceScore', 'Query', 'Mutation'];
-    requiredTypes.forEach(type => {
+    requiredTypes.forEach((type) => {
       if (schemaContent.includes(`type ${type}`)) {
         addResult(`GraphQL Type: ${type}`, 'PASS', 'Type definition found');
       } else {
@@ -71,27 +75,55 @@ function checkDatabaseClients() {
   try {
     const pgPath = path.join(__dirname, '../server/src/db/pg.ts');
     const pgContent = fs.readFileSync(pgPath, 'utf8');
-    
-    if (pgContent.includes('import { Pool }') && pgContent.includes('healthCheck')) {
-      addResult('PostgreSQL Database', 'PASS', 'Real client implemented with health checks');
+
+    if (
+      pgContent.includes('import { Pool }') &&
+      pgContent.includes('healthCheck')
+    ) {
+      addResult(
+        'PostgreSQL Database',
+        'PASS',
+        'Real client implemented with health checks',
+      );
     } else {
-      addResult('PostgreSQL Database', 'FAIL', 'Still using stub implementation');
+      addResult(
+        'PostgreSQL Database',
+        'FAIL',
+        'Still using stub implementation',
+      );
     }
-    
+
     const neoPath = path.join(__dirname, '../server/src/db/neo4j.ts');
     const neoContent = fs.readFileSync(neoPath, 'utf8');
-    
-    if (neoContent.includes('import neo4j') && neoContent.includes('healthCheck')) {
-      addResult('Neo4j Database', 'PASS', 'Real driver implemented with health checks');
+
+    if (
+      neoContent.includes('import neo4j') &&
+      neoContent.includes('healthCheck')
+    ) {
+      addResult(
+        'Neo4j Database',
+        'PASS',
+        'Real driver implemented with health checks',
+      );
     } else {
       addResult('Neo4j Database', 'FAIL', 'Still using stub implementation');
     }
-    
-    const pubsubPath = path.join(__dirname, '../server/src/subscriptions/pubsub.ts');
+
+    const pubsubPath = path.join(
+      __dirname,
+      '../server/src/subscriptions/pubsub.ts',
+    );
     const pubsubContent = fs.readFileSync(pubsubPath, 'utf8');
-    
-    if (pubsubContent.includes('Redis') && pubsubContent.includes('healthCheck')) {
-      addResult('Redis Cache', 'PASS', 'Redis PubSub implemented with health checks');
+
+    if (
+      pubsubContent.includes('Redis') &&
+      pubsubContent.includes('healthCheck')
+    ) {
+      addResult(
+        'Redis Cache',
+        'PASS',
+        'Redis PubSub implemented with health checks',
+      );
     } else {
       addResult('Redis Cache', 'FAIL', 'Redis not properly configured');
     }
@@ -109,7 +141,11 @@ function checkPersistedQueries() {
       const queryCount = Object.keys(pqContent).length;
       addResult('Persisted Queries', 'PASS', `${queryCount} queries defined`);
     } else {
-      addResult('Persisted Queries', 'FAIL', 'Persisted queries file not found');
+      addResult(
+        'Persisted Queries',
+        'FAIL',
+        'Persisted queries file not found',
+      );
     }
   } catch (error) {
     addResult('Persisted Queries', 'FAIL', error.message);
@@ -140,8 +176,8 @@ console.log('\nPerformance Testing:');
 checkFile('.maestro/tests/k6', 'Performance Test Directory');
 
 // Summary
-const passed = results.filter(r => r.status === 'PASS').length;
-const failed = results.filter(r => r.status === 'FAIL').length;
+const passed = results.filter((r) => r.status === 'PASS').length;
+const failed = results.filter((r) => r.status === 'FAIL').length;
 const total = results.length;
 const successRate = Math.round((passed / total) * 100);
 
@@ -158,9 +194,9 @@ const report = {
     total,
     passed,
     failed,
-    successRate
+    successRate,
   },
-  details: results
+  details: results,
 };
 
 const reportPath = path.join(__dirname, '../validation-report.json');

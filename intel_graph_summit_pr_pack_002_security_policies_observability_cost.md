@@ -5,11 +5,13 @@ This pack deepens security and promotion safety with deploy-time verification, r
 ---
 
 ## PR 11 — Sigstore policy‑controller (enforce signed images & provenance)
+
 **Purpose:** Only allow images signed by CI with attached provenance.
 
 **Files:**
 
 **`k8s/sigstore/policy-controller.yaml`** (install via Helm or static manifest; example value snippet)
+
 ```yaml
 apiVersion: policy.sigstore.dev/v1alpha1
 kind: ClusterImagePolicy
@@ -17,12 +19,12 @@ metadata:
   name: require-signed-and-provenance
 spec:
   images:
-    - glob: "ghcr.io/<org>/<repo>/*"
+    - glob: 'ghcr.io/<org>/<repo>/*'
   authorities:
     - keyless:
         identities:
           - issuer: https://token.actions.githubusercontent.com
-            subjectRegExp: ".*"
+            subjectRegExp: '.*'
   attestations:
     - name: slsa-provenance
       predicateType: https://slsa.dev/provenance/v1
@@ -37,25 +39,27 @@ spec:
 ---
 
 ## PR 12 — SLSA L3 provenance in CI
+
 **Purpose:** Emit in‑toto/SLSA attestations and push to GHCR.
 
 **Files:**
 
 **`.github/workflows/ci-security.yml`** (add after image build)
+
 ```yaml
-  containers:
-    steps:
-      # ... build/tag image step above
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3
-      - name: Sign image (keyless)
-        env: { COSIGN_EXPERIMENTAL: 'true' }
-        run: cosign sign --yes $IMAGE
-      - name: Generate SLSA provenance
-        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
-        with:
-          base64-subjects: "sha256:${{ steps.digest.outputs.sha256 }}"
-          upload-assets: true
+containers:
+  steps:
+    # ... build/tag image step above
+    - name: Install cosign
+      uses: sigstore/cosign-installer@v3
+    - name: Sign image (keyless)
+      env: { COSIGN_EXPERIMENTAL: 'true' }
+      run: cosign sign --yes $IMAGE
+    - name: Generate SLSA provenance
+      uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+      with:
+        base64-subjects: 'sha256:${{ steps.digest.outputs.sha256 }}'
+        upload-assets: true
 ```
 
 **Rollback:** Comment out SLSA step; keep signing.
@@ -63,11 +67,13 @@ spec:
 ---
 
 ## PR 13 — Kyverno policies (secure-by-default workloads)
+
 **Purpose:** Enforce non‑root, drop dangerous capabilities, deny `:latest`, require resources and labels.
 
 **Files:**
 
 **`k8s/kyverno/policies.yaml`**
+
 ```yaml
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -79,15 +85,15 @@ spec:
     - name: disallow-latest-tag
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: "Image tag :latest is not allowed"
+        message: 'Image tag :latest is not allowed'
         pattern:
           spec:
             containers:
-              - image: "!*:latest"
+              - image: '!*:latest'
     - name: require-nonroot-readonly
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: "Containers must run as non-root and read-only"
+        message: 'Containers must run as non-root and read-only'
         pattern:
           spec:
             securityContext:
@@ -104,30 +110,30 @@ spec:
             containers:
               - securityContext:
                   capabilities:
-                    drop: ["ALL"]
+                    drop: ['ALL']
     - name: require-requests-limits
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: "CPU/Memory requests & limits required"
+        message: 'CPU/Memory requests & limits required'
         pattern:
           spec:
             containers:
               - resources:
                   requests:
-                    cpu: "?*"
-                    memory: "?*"
+                    cpu: '?*'
+                    memory: '?*'
                   limits:
-                    cpu: "?*"
-                    memory: "?*"
+                    cpu: '?*'
+                    memory: '?*'
     - name: require-owner-labels
-      match: { resources: { kinds: [Pod,Deployment,Rollout] } }
+      match: { resources: { kinds: [Pod, Deployment, Rollout] } }
       validate:
-        message: "owner and tier labels are required"
+        message: 'owner and tier labels are required'
         pattern:
           metadata:
             labels:
-              owner: "?*"
-              tier: "?*"
+              owner: '?*'
+              tier: '?*'
 ```
 
 **Rollback:** Set `validationFailureAction: audit`.
@@ -135,19 +141,21 @@ spec:
 ---
 
 ## PR 14 — Pod Security Admission (PSA) enforce Restricted
+
 **Purpose:** Baseline K8s hardening aligned with PSA.
 
 **Files:**
 
 **`k8s/namespaces/prod.yaml`** (example)
+
 ```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: prod
   labels:
-    pod-security.kubernetes.io/enforce: "restricted"
-    pod-security.kubernetes.io/enforce-version: "latest"
+    pod-security.kubernetes.io/enforce: 'restricted'
+    pod-security.kubernetes.io/enforce-version: 'latest'
 ```
 
 **Rollback:** Remove/relax PSA labels to `baseline`.
@@ -155,11 +163,13 @@ metadata:
 ---
 
 ## PR 15 — NetworkPolicies: default deny + explicit allows
+
 **Purpose:** Limit blast radius; permit only needed flows.
 
 **Files:**
 
 **`k8s/network/default-deny.yaml`**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -170,6 +180,7 @@ spec:
 ```
 
 **`k8s/network/allow-ingress.yaml`** (example for web)
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -192,15 +203,17 @@ spec:
 ---
 
 ## PR 16 — Defaults in Helm: resources, PDB, HPA
+
 **Purpose:** Prevent noisy neighbors; ensure availability during rollouts.
 
 **Files:**
 
 **`charts/app/values.yaml`** (append)
+
 ```yaml
 resources:
   requests: { cpu: 100m, memory: 256Mi }
-  limits:   { cpu: 500m, memory: 512Mi }
+  limits: { cpu: 500m, memory: 512Mi }
 
 hpa:
   enabled: true
@@ -214,6 +227,7 @@ pdb:
 ```
 
 **`charts/app/templates/hpa.yaml`**
+
 ```yaml
 {{- if .Values.hpa.enabled }}
 apiVersion: autoscaling/v2
@@ -238,6 +252,7 @@ spec:
 ```
 
 **`charts/app/templates/pdb.yaml`**
+
 ```yaml
 {{- if .Values.pdb.enabled }}
 apiVersion: policy/v1
@@ -257,11 +272,13 @@ spec:
 ---
 
 ## PR 17 — Argo Rollouts Analysis (automatic canary checks)
+
 **Purpose:** Gate canary with metrics (5xx rate, p95 latency) and roll back automatically.
 
 **Files:**
 
 **`k8s/argo/analysis-templates.yaml`**
+
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
@@ -289,12 +306,13 @@ spec:
 ```
 
 **`charts/app/templates/rollout.yaml`** (append under canary)
+
 ```yaml
-      analysis:
-        templates:
-          - templateName: web-health
-        startingStep: 1
-        args: []
+analysis:
+  templates:
+    - templateName: web-health
+  startingStep: 1
+  args: []
 ```
 
 **Rollback:** Remove analysis block; keep simple step canary.
@@ -302,11 +320,13 @@ spec:
 ---
 
 ## PR 18 — k6 smoke/load in verify pipeline
+
 **Purpose:** Synthetic test for the critical user journey.
 
 **Files:**
 
 **`load/k6/smoke.js`**
+
 ```js
 import http from 'k6/http';
 import { check, sleep } from 'k6';
@@ -319,14 +339,15 @@ export default function () {
 ```
 
 **`.github/workflows/verify-release.yml`** (append)
+
 ```yaml
-  verify:
-    steps:
-      - uses: grafana/k6-action@v0.3.1
-        with:
-          filename: load/k6/smoke.js
-        env:
-          BASE_URL: ${{ secrets.STAGE_BASE_URL }}
+verify:
+  steps:
+    - uses: grafana/k6-action@v0.3.1
+      with:
+        filename: load/k6/smoke.js
+      env:
+        BASE_URL: ${{ secrets.STAGE_BASE_URL }}
 ```
 
 **Rollback:** Remove k6 step.
@@ -334,22 +355,25 @@ export default function () {
 ---
 
 ## PR 19 — Infracost budget gate
+
 **Purpose:** Fail PRs when cost delta exceeds threshold.
 
 **Files:**
 
 **`.github/workflows/infra-plan.yml`** (append)
+
 ```yaml
-  plan:
-    steps:
-      - uses: infracost/actions/setup@v3
-      - run: infracost breakdown --path=infra --format=json --out-file=infracost.json
-      - run: infracost comment github --path=infracost.json --behavior=update
-      - name: Enforce budget
-        run: node scripts/infracost_enforce.js
+plan:
+  steps:
+    - uses: infracost/actions/setup@v3
+    - run: infracost breakdown --path=infra --format=json --out-file=infracost.json
+    - run: infracost comment github --path=infracost.json --behavior=update
+    - name: Enforce budget
+      run: node scripts/infracost_enforce.js
 ```
 
 **`scripts/infracost_enforce.js`**
+
 ```js
 const fs = require('fs');
 const data = JSON.parse(fs.readFileSync('infracost.json', 'utf8'));
@@ -367,11 +391,13 @@ console.log(`✅ Cost delta ${delta} <= ${LIMIT}`);
 ---
 
 ## PR 20 — Terraform drift detection (scheduled)
+
 **Purpose:** Catch infra drift early.
 
 **Files:**
 
 **`.github/workflows/infra-drift.yml`**
+
 ```yaml
 name: infra-drift
 on:
@@ -397,11 +423,13 @@ jobs:
 ---
 
 ## PR 21 — Preview environment auto‑teardown
+
 **Purpose:** Clean up PR namespaces on close to cut costs and surface area.
 
 **Files:**
 
 **`.github/workflows/preview-teardown.yml`**
+
 ```yaml
 name: preview-teardown
 on:
@@ -423,11 +451,13 @@ jobs:
 ---
 
 ## PR 22 — Feature‑flag governance + kill switch
+
 **Purpose:** Safer rollouts; emergency stop for risky features.
 
 **Files:**
 
 **`feature-flags/flags.yaml`**
+
 ```yaml
 features:
   graph_reranker_v2:
@@ -440,14 +470,17 @@ features:
     default: false
     owners: [data]
     guardrails:
-      requires: ["db_migration_2025_09_gate"]
+      requires: ['db_migration_2025_09_gate']
 ```
 
 **`scripts/ffctl.ts`**
+
 ```ts
 #!/usr/bin/env ts-node
 import fs from 'fs';
-const flags = JSON.parse(JSON.stringify(require('../feature-flags/flags.yaml')));
+const flags = JSON.parse(
+  JSON.stringify(require('../feature-flags/flags.yaml')),
+);
 const [name, value] = process.argv.slice(2);
 if (!flags.features[name]) throw new Error('Unknown flag');
 flags.features[name].default = value === 'true';
@@ -456,6 +489,7 @@ console.log(`Set ${name}=${value}`);
 ```
 
 **`.github/workflows/flags-promote.yml`**
+
 ```yaml
 name: flags-promote
 on: workflow_dispatch
@@ -472,19 +506,21 @@ jobs:
 ---
 
 # Cutover Sequence (half day)
-1) Install **policy‑controller** and **Kyverno** with `validationFailureAction: audit`.
-2) Merge CI changes to produce signatures + SLSA; verify allow in audit mode.
-3) Flip policies to **enforce**.
-4) Deploy **AnalysisTemplates**; test canary with synthetic k6 + Prometheus gate.
-5) Enable **preview-teardown** and **infra-drift** schedules.
-6) Set **Infracost** threshold to a conservative value (e.g., $25/month delta) and tune.
+
+1. Install **policy‑controller** and **Kyverno** with `validationFailureAction: audit`.
+2. Merge CI changes to produce signatures + SLSA; verify allow in audit mode.
+3. Flip policies to **enforce**.
+4. Deploy **AnalysisTemplates**; test canary with synthetic k6 + Prometheus gate.
+5. Enable **preview-teardown** and **infra-drift** schedules.
+6. Set **Infracost** threshold to a conservative value (e.g., $25/month delta) and tune.
 
 # Rollback
+
 - All policies can be set to `audit` or removed; rollouts analysis can be disabled without redeploying images. CI changes are additive; simply disable steps.
 
 # Ownership
+
 - **Platform:** PR 11, 13–17, 21
 - **CI/Supply chain:** PR 12, 19–20
 - **FinOps:** PR 19
 - **Release/QA:** PR 17–18, 22
-

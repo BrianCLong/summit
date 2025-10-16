@@ -66,35 +66,45 @@ gh workflow run golden-pr-tests.yml
 ### Test Scenarios
 
 #### 1. Low Risk Frontend Change
+
 **Expected**: Auto-approved and merged
+
 - Simple component addition
 - Tests included
 - No breaking changes
 - Clean build and lint
 
 #### 2. Medium Risk Backend Change
+
 **Expected**: Approved with additional checks
+
 - API endpoint modification
 - Database interactions
 - Integration tests required
 - Code owner approval needed
 
 #### 3. High Risk Migration
+
 **Expected**: Requires migration review
+
 - Database schema changes
 - Manual review flag required
 - Extended testing gates
 - Rollback plan validation
 
 #### 4. Security Violation
+
 **Expected**: Blocked immediately
+
 - Hardcoded secrets detected
 - Gitleaks findings
 - Policy violations
 - Manual intervention required
 
 #### 5. Failing Tests
+
 **Expected**: Blocked until fixed
+
 - Unit test failures
 - Build errors
 - Quality gate failures
@@ -250,13 +260,13 @@ gh api /repos/OWNER/REPO/code-scanning/alerts \
 
 ### Expected Performance Targets
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Workflow Duration | < 15 minutes | 95th percentile |
-| Quality Gate Pass Rate | > 90% | Weekly average |
-| Auto-Fix Success Rate | > 75% | For fixable issues |
-| False Positive Rate | < 5% | Security scans |
-| Time to Merge | < 2 hours | Ready PRs |
+| Metric                 | Target       | Measurement        |
+| ---------------------- | ------------ | ------------------ |
+| Workflow Duration      | < 15 minutes | 95th percentile    |
+| Quality Gate Pass Rate | > 90%        | Weekly average     |
+| Auto-Fix Success Rate  | > 75%        | For fixable issues |
+| False Positive Rate    | < 5%         | Security scans     |
+| Time to Merge          | < 2 hours    | Ready PRs          |
 
 ### Performance Testing
 
@@ -275,16 +285,19 @@ time opa eval -d .github/policies -i test.json "data.summit.release.decision"
 ### Severity Levels
 
 #### P0 - Release Captain Down
+
 - Complete system failure
 - All PRs blocked
 - Immediate manual override needed
 
 #### P1 - Degraded Performance
+
 - Slow workflows
 - Intermittent failures
 - Quality gates timing out
 
 #### P2 - Configuration Issues
+
 - Policy evaluation errors
 - Security scan failures
 - Non-blocking warnings
@@ -345,12 +358,12 @@ vi .github/audit-allowlist.json
 
 ## 📞 Escalation Contacts
 
-| Role | Contact | Responsibility |
-|------|---------|----------------|
-| Platform Team | @platform-team | Primary Release Captain maintenance |
-| SRE Team | @sre-team | Emergency overrides and incident response |
-| Security Team | @security-team | Policy updates and security reviews |
-| On-Call Engineer | PagerDuty | 24/7 incident response |
+| Role             | Contact        | Responsibility                            |
+| ---------------- | -------------- | ----------------------------------------- |
+| Platform Team    | @platform-team | Primary Release Captain maintenance       |
+| SRE Team         | @sre-team      | Emergency overrides and incident response |
+| Security Team    | @security-team | Policy updates and security reviews       |
+| On-Call Engineer | PagerDuty      | 24/7 incident response                    |
 
 ---
 
@@ -361,5 +374,5 @@ vi .github/audit-allowlist.json
 - [Security Scanning Guide](../docs/security/scanning-guide.md)
 - [Deployment Runbooks](./deployment-procedures.md)
 
-*Last updated: $(date '+%Y-%m-%d')*
-*Version: 1.0*
+_Last updated: $(date '+%Y-%m-%d')_
+_Version: 1.0_

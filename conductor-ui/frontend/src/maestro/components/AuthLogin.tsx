@@ -18,7 +18,9 @@ async function sha256(plain: string) {
 function generateRandomString(length: number) {
   const array = new Uint32Array(length / 2);
   window.crypto.getRandomValues(array);
-  return Array.from(array, (dec) => ('0' + dec.toString(16)).substr(-2)).join('');
+  return Array.from(array, (dec) => ('0' + dec.toString(16)).substr(-2)).join(
+    '',
+  );
 }
 
 export default function AuthLogin() {
@@ -35,7 +37,8 @@ export default function AuthLogin() {
       };
       const OIDC_AUTHORIZATION_ENDPOINTS: Record<string, string> = {
         auth0: 'https://YOUR_AUTH0_DOMAIN/authorize',
-        azuread: 'https://login.microsoftonline.com/YOUR_AZUREAD_TENANT_ID/oauth2/v2.0/authorize',
+        azuread:
+          'https://login.microsoftonline.com/YOUR_AZUREAD_TENANT_ID/oauth2/v2.0/authorize',
         google: 'https://accounts.google.com/o/oauth2/v2/auth',
       };
       const OIDC_REDIRECT_URIS: Record<string, string> = {
@@ -82,7 +85,9 @@ export default function AuthLogin() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="p-8 bg-white rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold text-center mb-6">Login to Maestro</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Login to Maestro
+        </h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <button
           onClick={() => handleLogin('auth0')}

@@ -1,11 +1,13 @@
 """Lightweight Python client for the Query-Time Pseudonymization Gateway."""
+
 from __future__ import annotations
 
 import json
 import urllib.error
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, Optional
+from typing import Any
 
 
 class QpgError(RuntimeError):
@@ -14,18 +16,20 @@ class QpgError(RuntimeError):
 
 @dataclass
 class TokenizeResult:
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
 
 class QpgClient:
     """Client for interacting with the QPG service."""
 
-    def __init__(self, base_url: str, opener: Optional[urllib.request.OpenerDirector] = None) -> None:
+    def __init__(self, base_url: str, opener: urllib.request.OpenerDirector | None = None) -> None:
         self._base_url = base_url.rstrip("/")
         self._opener = opener or urllib.request.build_opener()
 
-    def tokenize(self, tenant: str, purpose: str, payload: Dict[str, Any]) -> TokenizeResult:
-        body = json.dumps({"tenant": tenant, "purpose": purpose, "payload": payload}).encode("utf-8")
+    def tokenize(self, tenant: str, purpose: str, payload: dict[str, Any]) -> TokenizeResult:
+        body = json.dumps({"tenant": tenant, "purpose": purpose, "payload": payload}).encode(
+            "utf-8"
+        )
         request = urllib.request.Request(
             url=f"{self._base_url}/tokenize",
             data=body,
@@ -36,7 +40,9 @@ class QpgClient:
         data = json.loads(response.read().decode("utf-8"))
         return TokenizeResult(payload=data["payload"])
 
-    def reveal(self, tenant: str, purpose: str, field: str, token: str, shares: Iterable[str]) -> str:
+    def reveal(
+        self, tenant: str, purpose: str, field: str, token: str, shares: Iterable[str]
+    ) -> str:
         body = json.dumps(
             {
                 "tenant": tenant,

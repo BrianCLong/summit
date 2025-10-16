@@ -3,15 +3,18 @@
   "title": "Docs Frontmatter",
   "type": "object",
   "additionalProperties": true,
-  "required": ["title","summary","owner","version"],
+  "required": ["title", "summary", "owner", "version"],
   "properties": {
-    "title": {"type": "string", "minLength": 3},
-    "summary": {"type": "string", "minLength": 10},
-    "owner": {"type": "string"},
-    "version": {"type": "string"},
-    "tags": {"type": "array", "items": {"type": "string"}},
-    "visibility": {"type": "string", "enum": ["public","partner","internal"]},
-    "index": {"type": "boolean"},
-    "canonical": {"type": "string", "format": "uri"}
+    "title": { "type": "string", "minLength": 3 },
+    "summary": { "type": "string", "minLength": 10 },
+    "owner": { "type": "string" },
+    "version": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "visibility": {
+      "type": "string",
+      "enum": ["public", "partner", "internal"]
+    },
+    "index": { "type": "boolean" },
+    "canonical": { "type": "string", "format": "uri" }
   }
 }

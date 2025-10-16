@@ -5,12 +5,12 @@ apiVersion: orchestration.intelgraph.io/v1
 kind: BuildPipeline
 metadata:
   name: intelgraph-build
-  version: "27.0.0"
+  version: '27.0.0'
 
 spec:
   # Global configuration
   global:
-    timeout: "30m"
+    timeout: '30m'
     parallel_jobs: 4
     cache_enabled: true
     fail_fast: false
@@ -144,7 +144,7 @@ spec:
             - npm test -- --coverage --reporter=json --outputFile=../../reports/test-web.json
 
     - name: build-services
-      parallel: false  # Respect dependency order
+      parallel: false # Respect dependency order
       jobs:
         - name: build-common
           service: common
@@ -246,8 +246,8 @@ spec:
           commands:
             - echo "Signing artifacts with cosign..."
             - for artifact in dist/*.tgz dist/*.tar.gz; do
-                cosign sign-blob --yes $artifact --output-signature=${artifact}.sig
-                cosign sign-blob --yes $artifact --output-certificate=${artifact}.pem
+              cosign sign-blob --yes $artifact --output-signature=${artifact}.sig
+              cosign sign-blob --yes $artifact --output-certificate=${artifact}.pem
               done
 
         - name: attest-sboms
@@ -255,7 +255,7 @@ spec:
           commands:
             - echo "Creating SBOM attestations..."
             - for sbom in dist/*.sbom.json; do
-                cosign attest --yes --predicate=$sbom --type=cyclonedx
+              cosign attest --yes --predicate=$sbom --type=cyclonedx
               done
 
     - name: integration-tests
@@ -264,7 +264,7 @@ spec:
         - name: docker-compose-test
           commands:
             - docker-compose -f docker-compose.test.yml up -d
-            - sleep 30  # Allow services to start
+            - sleep 30 # Allow services to start
             - npm run test:integration
             - docker-compose -f docker-compose.test.yml down
 
@@ -306,17 +306,17 @@ spec:
   # Environment-specific configurations
   environments:
     dev:
-      cache_ttl: "1h"
+      cache_ttl: '1h'
       parallel_jobs: 2
       skip_security_scans: true
 
     staging:
-      cache_ttl: "4h"
+      cache_ttl: '4h'
       parallel_jobs: 4
       require_all_tests: true
 
     prod:
-      cache_ttl: "24h"
+      cache_ttl: '24h'
       parallel_jobs: 8
       require_all_tests: true
       require_security_scans: true

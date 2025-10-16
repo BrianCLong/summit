@@ -10,7 +10,7 @@ describe('Integration Service - P2 Priority', () => {
         mockLogger = {
             info: jest.fn(),
             error: jest.fn(),
-            warn: jest.fn()
+            warn: jest.fn(),
         };
         integrationService = new IntegrationService(mockLogger);
     });
@@ -21,17 +21,17 @@ describe('Integration Service - P2 Priority', () => {
         test('should initialize all enterprise connectors', () => {
             const connectors = integrationService.getConnectors();
             expect(connectors.length).toBeGreaterThanOrEqual(12);
-            expect(connectors.map(c => c.id)).toContain('SPLUNK');
-            expect(connectors.map(c => c.id)).toContain('ELASTIC');
-            expect(connectors.map(c => c.id)).toContain('PALANTIR');
-            expect(connectors.map(c => c.id)).toContain('IBM_I2');
-            expect(connectors.map(c => c.id)).toContain('CLEAR');
-            expect(connectors.map(c => c.id)).toContain('LEXISNEXIS');
-            expect(connectors.map(c => c.id)).toContain('MISP');
-            expect(connectors.map(c => c.id)).toContain('VIRUSTOTAL');
-            expect(connectors.map(c => c.id)).toContain('AWS_DETECTIVE');
-            expect(connectors.map(c => c.id)).toContain('SLACK');
-            expect(connectors.map(c => c.id)).toContain('TEAMS');
+            expect(connectors.map((c) => c.id)).toContain('SPLUNK');
+            expect(connectors.map((c) => c.id)).toContain('ELASTIC');
+            expect(connectors.map((c) => c.id)).toContain('PALANTIR');
+            expect(connectors.map((c) => c.id)).toContain('IBM_I2');
+            expect(connectors.map((c) => c.id)).toContain('CLEAR');
+            expect(connectors.map((c) => c.id)).toContain('LEXISNEXIS');
+            expect(connectors.map((c) => c.id)).toContain('MISP');
+            expect(connectors.map((c) => c.id)).toContain('VIRUSTOTAL');
+            expect(connectors.map((c) => c.id)).toContain('AWS_DETECTIVE');
+            expect(connectors.map((c) => c.id)).toContain('SLACK');
+            expect(connectors.map((c) => c.id)).toContain('TEAMS');
         });
         test('should configure connector categories correctly', () => {
             const splunk = integrationService.getConnector('SPLUNK');
@@ -74,16 +74,18 @@ describe('Integration Service - P2 Priority', () => {
                 endpoint: 'https://splunk.example.com:8089',
                 authentication: {
                     type: 'api_key',
-                    credentials: { apiKey: 'test-api-key' }
+                    credentials: { apiKey: 'test-api-key' },
                 },
                 settings: { timeout: 30000 },
-                userId: 'admin123'
+                userId: 'admin123',
             };
             // Mock validation and test methods
-            integrationService.validateAuthentication = jest.fn().mockResolvedValue(true);
+            integrationService.validateAuthentication = jest
+                .fn()
+                .mockResolvedValue(true);
             integrationService.testConnection = jest.fn().mockResolvedValue({
                 success: true,
-                responseTime: 250
+                responseTime: 250,
             });
             const connection = await integrationService.createConnection(connectionData);
             expect(connection.id).toBeDefined();
@@ -101,22 +103,20 @@ describe('Integration Service - P2 Priority', () => {
                 connectorId: 'ELASTIC',
                 authentication: {
                     type: 'api_key',
-                    credentials: {} // Missing apiKey
+                    credentials: {}, // Missing apiKey
                 },
-                userId: 'admin123'
+                userId: 'admin123',
             };
-            await expect(integrationService.createConnection(connectionData))
-                .rejects.toThrow('API key is required');
+            await expect(integrationService.createConnection(connectionData)).rejects.toThrow('API key is required');
         });
         test('should reject connections with invalid connectors', async () => {
             const connectionData = {
                 name: 'Invalid Connector Connection',
                 connectorId: 'INVALID_CONNECTOR',
                 authentication: { type: 'api_key', credentials: { apiKey: 'test' } },
-                userId: 'admin123'
+                userId: 'admin123',
             };
-            await expect(integrationService.createConnection(connectionData))
-                .rejects.toThrow('Unknown connector: INVALID_CONNECTOR');
+            await expect(integrationService.createConnection(connectionData)).rejects.toThrow('Unknown connector: INVALID_CONNECTOR');
         });
         test('should fail connection creation on test failure', async () => {
             const connectionData = {
@@ -124,17 +124,18 @@ describe('Integration Service - P2 Priority', () => {
                 connectorId: 'SPLUNK',
                 authentication: {
                     type: 'api_key',
-                    credentials: { apiKey: 'invalid-key' }
+                    credentials: { apiKey: 'invalid-key' },
                 },
-                userId: 'admin123'
+                userId: 'admin123',
             };
-            integrationService.validateAuthentication = jest.fn().mockResolvedValue(true);
+            integrationService.validateAuthentication = jest
+                .fn()
+                .mockResolvedValue(true);
             integrationService.testConnection = jest.fn().mockResolvedValue({
                 success: false,
-                error: 'Authentication failed'
+                error: 'Authentication failed',
             });
-            await expect(integrationService.createConnection(connectionData))
-                .rejects.toThrow('Connection test failed: Authentication failed');
+            await expect(integrationService.createConnection(connectionData)).rejects.toThrow('Connection test failed: Authentication failed');
         });
         test('should update existing connections', async () => {
             const connection = {
@@ -143,19 +144,23 @@ describe('Integration Service - P2 Priority', () => {
                 connectorId: 'ELASTIC',
                 authentication: {
                     type: 'api_key',
-                    credentials: 'encrypted_old_creds'
-                }
+                    credentials: 'encrypted_old_creds',
+                },
             };
             integrationService.connections.set('conn123', connection);
             const updates = {
                 name: 'Updated Name',
                 authentication: {
                     type: 'api_key',
-                    credentials: { apiKey: 'new-api-key' }
-                }
+                    credentials: { apiKey: 'new-api-key' },
+                },
             };
-            integrationService.encryptCredentials = jest.fn().mockReturnValue('encrypted_new_creds');
-            integrationService.testConnection = jest.fn().mockResolvedValue({ success: true });
+            integrationService.encryptCredentials = jest
+                .fn()
+                .mockReturnValue('encrypted_new_creds');
+            integrationService.testConnection = jest
+                .fn()
+                .mockResolvedValue({ success: true });
             const updatedConnection = await integrationService.updateConnection('conn123', updates);
             expect(updatedConnection.name).toBe('Updated Name');
             expect(updatedConnection.authentication.credentials).toBe('encrypted_new_creds');
@@ -181,8 +186,8 @@ describe('Integration Service - P2 Priority', () => {
             const connection = {
                 authentication: {
                     type: 'api_key',
-                    credentials: { apiKey: 'test-key' }
-                }
+                    credentials: { apiKey: 'test-key' },
+                },
             };
             const connector = { authentication: ['api_key'] };
             const result = await integrationService.validateAuthentication(connection, connector);
@@ -192,8 +197,8 @@ describe('Integration Service - P2 Priority', () => {
             const connection = {
                 authentication: {
                     type: 'username_password',
-                    credentials: { username: 'admin', password: 'secret' }
-                }
+                    credentials: { username: 'admin', password: 'secret' },
+                },
             };
             const connector = { authentication: ['username_password'] };
             const result = await integrationService.validateAuthentication(connection, connector);
@@ -203,8 +208,8 @@ describe('Integration Service - P2 Priority', () => {
             const connection = {
                 authentication: {
                     type: 'oauth2',
-                    token: 'oauth-token'
-                }
+                    token: 'oauth-token',
+                },
             };
             const connector = { authentication: ['oauth2'] };
             const result = await integrationService.validateAuthentication(connection, connector);
@@ -216,9 +221,9 @@ describe('Integration Service - P2 Priority', () => {
                     type: 'aws_credentials',
                     credentials: {
                         accessKeyId: 'AKIA...',
-                        secretAccessKey: 'secret'
-                    }
-                }
+                        secretAccessKey: 'secret',
+                    },
+                },
             };
             const connector = { authentication: ['aws_credentials'] };
             const result = await integrationService.validateAuthentication(connection, connector);
@@ -226,32 +231,32 @@ describe('Integration Service - P2 Priority', () => {
         });
         test('should reject unsupported authentication types', async () => {
             const connection = {
-                authentication: { type: 'unsupported_auth' }
+                authentication: { type: 'unsupported_auth' },
             };
             const connector = { authentication: ['api_key'] };
-            await expect(integrationService.validateAuthentication(connection, connector))
-                .rejects.toThrow('Authentication type unsupported_auth not supported');
+            await expect(integrationService.validateAuthentication(connection, connector)).rejects.toThrow('Authentication type unsupported_auth not supported');
         });
         test('should reject incomplete credentials', async () => {
             const connection = {
                 authentication: {
                     type: 'username_password',
-                    credentials: { username: 'admin' } // Missing password
-                }
+                    credentials: { username: 'admin' }, // Missing password
+                },
             };
             const connector = { authentication: ['username_password'] };
-            await expect(integrationService.validateAuthentication(connection, connector))
-                .rejects.toThrow('Username and password are required');
+            await expect(integrationService.validateAuthentication(connection, connector)).rejects.toThrow('Username and password are required');
         });
     });
     describe('Connection Testing', () => {
         test('should test connections successfully', async () => {
             const connection = { id: 'conn123', endpoint: 'https://api.example.com' };
             const connector = { id: 'SPLUNK' };
-            integrationService.getTestEndpoint = jest.fn().mockReturnValue('/api/status');
+            integrationService.getTestEndpoint = jest
+                .fn()
+                .mockReturnValue('/api/status');
             integrationService.makeRequest = jest.fn().mockResolvedValue({
                 data: { status: 'ok' },
-                responseTime: 150
+                responseTime: 150,
             });
             const result = await integrationService.testConnection(connection, connector);
             expect(result.success).toBe(true);
@@ -261,20 +266,30 @@ describe('Integration Service - P2 Priority', () => {
         test('should handle connection test failures', async () => {
             const connection = { id: 'conn123' };
             const connector = { id: 'ELASTIC' };
-            integrationService.getTestEndpoint = jest.fn().mockReturnValue('/_cluster/health');
-            integrationService.makeRequest = jest.fn().mockRejectedValue(new Error('Connection timeout'));
+            integrationService.getTestEndpoint = jest
+                .fn()
+                .mockReturnValue('/_cluster/health');
+            integrationService.makeRequest = jest
+                .fn()
+                .mockRejectedValue(new Error('Connection timeout'));
             const result = await integrationService.testConnection(connection, connector);
             expect(result.success).toBe(false);
             expect(result.error).toBe('Connection timeout');
         });
         test('should use appropriate test endpoints for each connector', () => {
-            const splunkEndpoint = integrationService.getTestEndpoint({ id: 'SPLUNK' });
+            const splunkEndpoint = integrationService.getTestEndpoint({
+                id: 'SPLUNK',
+            });
             expect(splunkEndpoint).toBe('/services/server/info');
-            const elasticEndpoint = integrationService.getTestEndpoint({ id: 'ELASTIC' });
+            const elasticEndpoint = integrationService.getTestEndpoint({
+                id: 'ELASTIC',
+            });
             expect(elasticEndpoint).toBe('/_cluster/health');
             const mispEndpoint = integrationService.getTestEndpoint({ id: 'MISP' });
             expect(mispEndpoint).toBe('/servers/getVersion');
-            const defaultEndpoint = integrationService.getTestEndpoint({ id: 'UNKNOWN' });
+            const defaultEndpoint = integrationService.getTestEndpoint({
+                id: 'UNKNOWN',
+            });
             expect(defaultEndpoint).toBe('/');
         });
     });
@@ -284,7 +299,13 @@ describe('Integration Service - P2 Priority', () => {
                 id: 'conn123',
                 connectorId: 'SPLUNK',
                 status: 'ACTIVE',
-                metrics: { requests: 0, successes: 0, failures: 0, dataTransferred: 0, lastRequest: null }
+                metrics: {
+                    requests: 0,
+                    successes: 0,
+                    failures: 0,
+                    dataTransferred: 0,
+                    lastRequest: null,
+                },
             };
             integrationService.connections.set('conn123', connection);
             const query = { search: 'index=main | head 10' };
@@ -293,7 +314,7 @@ describe('Integration Service - P2 Priority', () => {
             integrationService.executeQuery = jest.fn().mockResolvedValue({
                 success: true,
                 data: [{ event: 'test event' }],
-                dataSize: 1024
+                dataSize: 1024,
             });
             const result = await integrationService.queryData('conn123', query);
             expect(result.success).toBe(true);
@@ -306,25 +327,24 @@ describe('Integration Service - P2 Priority', () => {
         test('should reject queries on inactive connections', async () => {
             const connection = {
                 id: 'conn123',
-                status: 'FAILED'
+                status: 'FAILED',
             };
             integrationService.connections.set('conn123', connection);
-            await expect(integrationService.queryData('conn123', {}))
-                .rejects.toThrow('Connection is not active');
+            await expect(integrationService.queryData('conn123', {})).rejects.toThrow('Connection is not active');
         });
         test('should handle query execution failures', async () => {
             const connection = {
                 id: 'conn123',
                 connectorId: 'ELASTIC',
                 status: 'ACTIVE',
-                metrics: { requests: 0, successes: 0, failures: 0 }
+                metrics: { requests: 0, successes: 0, failures: 0 },
             };
             integrationService.connections.set('conn123', connection);
             const connector = { id: 'ELASTIC' };
             integrationService.getConnector = jest.fn().mockReturnValue(connector);
             integrationService.executeQuery = jest.fn().mockResolvedValue({
                 success: false,
-                error: 'Query syntax error'
+                error: 'Query syntax error',
             });
             const result = await integrationService.queryData('conn123', {});
             expect(result.success).toBe(false);
@@ -341,9 +361,11 @@ describe('Integration Service - P2 Priority', () => {
                 type: 'INCREMENTAL',
                 schedule: '0 9 * * *', // Daily at 9 AM
                 filters: { index: 'security' },
-                userId: 'admin123'
+                userId: 'admin123',
             };
-            integrationService.calculateNextRun = jest.fn().mockReturnValue(new Date(Date.now() + 60000));
+            integrationService.calculateNextRun = jest
+                .fn()
+                .mockReturnValue(new Date(Date.now() + 60000));
             const syncJob = await integrationService.createSyncJob(syncJobData);
             expect(syncJob.id).toBeDefined();
             expect(syncJob.name).toBe('Daily Data Sync');
@@ -359,19 +381,24 @@ describe('Integration Service - P2 Priority', () => {
                 id: 'job123',
                 connectionId: 'conn123',
                 status: 'CREATED',
-                metrics: { totalRuns: 0, successfulRuns: 0, recordsProcessed: 0, averageDuration: 0 }
+                metrics: {
+                    totalRuns: 0,
+                    successfulRuns: 0,
+                    recordsProcessed: 0,
+                    averageDuration: 0,
+                },
             };
             const connection = {
                 id: 'conn123',
                 connectorId: 'SPLUNK',
-                status: 'ACTIVE'
+                status: 'ACTIVE',
             };
             integrationService.syncJobs.set('job123', syncJob);
             integrationService.connections.set('conn123', connection);
             const connector = { id: 'SPLUNK' };
             integrationService.getConnector = jest.fn().mockReturnValue(connector);
             integrationService.executeSyncOperation = jest.fn().mockResolvedValue({
-                recordsProcessed: 150
+                recordsProcessed: 150,
             });
             const result = await integrationService.runSyncJob('job123');
             expect(result.recordsProcessed).toBe(150);
@@ -385,15 +412,18 @@ describe('Integration Service - P2 Priority', () => {
             const syncJob = {
                 id: 'job123',
                 connectionId: 'conn123',
-                metrics: { totalRuns: 0, failedRuns: 0 }
+                metrics: { totalRuns: 0, failedRuns: 0 },
             };
             const connection = { id: 'conn123', status: 'ACTIVE' };
             integrationService.syncJobs.set('job123', syncJob);
             integrationService.connections.set('conn123', connection);
-            integrationService.getConnector = jest.fn().mockReturnValue({ id: 'SPLUNK' });
-            integrationService.executeSyncOperation = jest.fn().mockRejectedValue(new Error('Sync operation failed'));
-            await expect(integrationService.runSyncJob('job123'))
-                .rejects.toThrow('Sync operation failed');
+            integrationService.getConnector = jest
+                .fn()
+                .mockReturnValue({ id: 'SPLUNK' });
+            integrationService.executeSyncOperation = jest
+                .fn()
+                .mockRejectedValue(new Error('Sync operation failed'));
+            await expect(integrationService.runSyncJob('job123')).rejects.toThrow('Sync operation failed');
             expect(syncJob.status).toBe('FAILED');
             expect(syncJob.metrics.totalRuns).toBe(1);
             expect(syncJob.metrics.failedRuns).toBe(1);
@@ -406,17 +436,19 @@ describe('Integration Service - P2 Priority', () => {
                 id: 'ready_job',
                 status: 'CREATED',
                 nextRun: pastTime,
-                schedule: '*/5 * * * *'
+                schedule: '*/5 * * * *',
             };
             const notReadyJob = {
                 id: 'not_ready_job',
                 status: 'CREATED',
-                nextRun: futureTime
+                nextRun: futureTime,
             };
             integrationService.syncJobs.set('ready_job', readyJob);
             integrationService.syncJobs.set('not_ready_job', notReadyJob);
             integrationService.runSyncJob = jest.fn().mockResolvedValue({});
-            integrationService.calculateNextRun = jest.fn().mockReturnValue(new Date(Date.now() + 5 * 60000));
+            integrationService.calculateNextRun = jest
+                .fn()
+                .mockReturnValue(new Date(Date.now() + 5 * 60000));
             await integrationService.processScheduledSyncs();
             expect(integrationService.runSyncJob).toHaveBeenCalledWith('ready_job');
             expect(integrationService.runSyncJob).not.toHaveBeenCalledWith('not_ready_job');
@@ -429,10 +461,10 @@ describe('Integration Service - P2 Priority', () => {
                 name: 'Investigation Alert Webhook',
                 url: 'https://external-system.com/webhooks/alerts',
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer token123' },
+                headers: { Authorization: 'Bearer token123' },
                 events: ['INVESTIGATION_CREATED', 'ENTITY_ADDED'],
                 filters: { priority: 'HIGH' },
-                userId: 'admin123'
+                userId: 'admin123',
             };
             const webhook = await integrationService.createWebhook(webhookData);
             expect(webhook.id).toBeDefined();
@@ -453,17 +485,25 @@ describe('Integration Service - P2 Priority', () => {
                 enabled: true,
                 secret: 'webhook_secret',
                 timeout: 10000,
-                metrics: { totalDeliveries: 0, successfulDeliveries: 0, averageResponseTime: 0 }
+                metrics: {
+                    totalDeliveries: 0,
+                    successfulDeliveries: 0,
+                    averageResponseTime: 0,
+                },
             };
             integrationService.webhooks.set('webhook123', webhook);
             const eventData = {
                 type: 'ENTITY_CREATED',
-                data: { entityId: 'ent123', label: 'New Entity' }
+                data: { entityId: 'ent123', label: 'New Entity' },
             };
-            integrationService.matchesWebhookFilters = jest.fn().mockReturnValue(true);
-            integrationService.generateWebhookSignature = jest.fn().mockReturnValue('signature123');
+            integrationService.matchesWebhookFilters = jest
+                .fn()
+                .mockReturnValue(true);
+            integrationService.generateWebhookSignature = jest
+                .fn()
+                .mockReturnValue('signature123');
             integrationService.makeWebhookRequest = jest.fn().mockResolvedValue({
-                status: 200
+                status: 200,
             });
             const result = await integrationService.triggerWebhook('webhook123', eventData);
             expect(result).toBe(true);
@@ -480,15 +520,23 @@ describe('Integration Service - P2 Priority', () => {
                 filters: {},
                 retryCount: 3,
                 retryDelay: 1000,
-                metrics: { totalDeliveries: 0, failedDeliveries: 0 }
+                metrics: { totalDeliveries: 0, failedDeliveries: 0 },
             };
             integrationService.webhooks.set('webhook123', webhook);
             const eventData = { type: 'TEST_EVENT', data: {} };
-            integrationService.matchesWebhookFilters = jest.fn().mockReturnValue(true);
-            integrationService.generateWebhookSignature = jest.fn().mockReturnValue('sig');
-            integrationService.makeWebhookRequest = jest.fn().mockRejectedValue(new Error('Network timeout'));
+            integrationService.matchesWebhookFilters = jest
+                .fn()
+                .mockReturnValue(true);
+            integrationService.generateWebhookSignature = jest
+                .fn()
+                .mockReturnValue('sig');
+            integrationService.makeWebhookRequest = jest
+                .fn()
+                .mockRejectedValue(new Error('Network timeout'));
             integrationService.retryWebhook = jest.fn();
-            integrationService.triggerWebhook('webhook123', eventData).then(result => {
+            integrationService
+                .triggerWebhook('webhook123', eventData)
+                .then((result) => {
                 expect(result).toBe(false);
                 expect(webhook.metrics.totalDeliveries).toBe(1);
                 expect(webhook.metrics.failedDeliveries).toBe(1);
@@ -504,7 +552,8 @@ describe('Integration Service - P2 Priority', () => {
                         done(error);
                     }
                 }, 1100);
-            }).catch(error => {
+            })
+                .catch((error) => {
                 done(error); // Catch any errors from triggerWebhook
             });
         });
@@ -512,7 +561,7 @@ describe('Integration Service - P2 Priority', () => {
             const webhook = {
                 id: 'disabled_webhook',
                 enabled: false,
-                events: ['TEST_EVENT']
+                events: ['TEST_EVENT'],
             };
             integrationService.webhooks.set('disabled_webhook', webhook);
             const eventData = { type: 'TEST_EVENT', data: {} };
@@ -522,19 +571,19 @@ describe('Integration Service - P2 Priority', () => {
         test('should filter events based on webhook configuration', () => {
             const webhook = {
                 events: ['ENTITY_CREATED', 'ENTITY_UPDATED'],
-                filters: { priority: 'HIGH', type: 'PERSON' }
+                filters: { priority: 'HIGH', type: 'PERSON' },
             };
             const matchingEvent = {
                 type: 'ENTITY_CREATED',
-                data: { priority: 'HIGH', type: 'PERSON' }
+                data: { priority: 'HIGH', type: 'PERSON' },
             };
             const nonMatchingEvent1 = {
                 type: 'ENTITY_DELETED', // Wrong event type
-                data: { priority: 'HIGH', type: 'PERSON' }
+                data: { priority: 'HIGH', type: 'PERSON' },
             };
             const nonMatchingEvent2 = {
                 type: 'ENTITY_CREATED',
-                data: { priority: 'LOW', type: 'PERSON' } // Wrong priority
+                data: { priority: 'LOW', type: 'PERSON' }, // Wrong priority
             };
             expect(integrationService.matchesWebhookFilters(matchingEvent, webhook)).toBe(true);
             expect(integrationService.matchesWebhookFilters(nonMatchingEvent1, webhook)).toBe(false);
@@ -567,9 +616,18 @@ describe('Integration Service - P2 Priority', () => {
     describe('Connection Health and Metrics', () => {
         test('should track connection metrics', () => {
             // Set up some connections
-            integrationService.connections.set('conn1', { status: 'ACTIVE', connectorId: 'SPLUNK' });
-            integrationService.connections.set('conn2', { status: 'ACTIVE', connectorId: 'ELASTIC' });
-            integrationService.connections.set('conn3', { status: 'FAILED', connectorId: 'SPLUNK' });
+            integrationService.connections.set('conn1', {
+                status: 'ACTIVE',
+                connectorId: 'SPLUNK',
+            });
+            integrationService.connections.set('conn2', {
+                status: 'ACTIVE',
+                connectorId: 'ELASTIC',
+            });
+            integrationService.connections.set('conn3', {
+                status: 'FAILED',
+                connectorId: 'SPLUNK',
+            });
             const metrics = integrationService.getMetrics();
             expect(metrics.totalConnectors).toBe(0); // Based on initialization
             expect(metrics.connectionHealth).toBe('66.67'); // 2 active out of 3 total
@@ -588,9 +646,18 @@ describe('Integration Service - P2 Priority', () => {
             expect(integrationService.getConnectionHealth()).toBe('66.67');
         });
         test('should provide connector breakdown statistics', () => {
-            integrationService.connections.set('splunk1', { connectorId: 'SPLUNK', status: 'ACTIVE' });
-            integrationService.connections.set('splunk2', { connectorId: 'SPLUNK', status: 'FAILED' });
-            integrationService.connections.set('elastic1', { connectorId: 'ELASTIC', status: 'ACTIVE' });
+            integrationService.connections.set('splunk1', {
+                connectorId: 'SPLUNK',
+                status: 'ACTIVE',
+            });
+            integrationService.connections.set('splunk2', {
+                connectorId: 'SPLUNK',
+                status: 'FAILED',
+            });
+            integrationService.connections.set('elastic1', {
+                connectorId: 'ELASTIC',
+                status: 'ACTIVE',
+            });
             const breakdown = integrationService.getConnectorBreakdown();
             expect(breakdown.SPLUNK.total).toBe(2);
             expect(breakdown.SPLUNK.active).toBe(1);
@@ -645,16 +712,12 @@ describe('Integration Service - P2 Priority', () => {
     });
     describe('Error Handling', () => {
         test('should handle connection not found errors', async () => {
-            await expect(integrationService.updateConnection('nonexistent', {}))
-                .rejects.toThrow('Connection not found');
-            await expect(integrationService.deleteConnection('nonexistent'))
-                .rejects.toThrow('Connection not found');
-            await expect(integrationService.queryData('nonexistent', {}))
-                .rejects.toThrow('Connection not found');
+            await expect(integrationService.updateConnection('nonexistent', {})).rejects.toThrow('Connection not found');
+            await expect(integrationService.deleteConnection('nonexistent')).rejects.toThrow('Connection not found');
+            await expect(integrationService.queryData('nonexistent', {})).rejects.toThrow('Connection not found');
         });
         test('should handle sync job not found errors', async () => {
-            await expect(integrationService.runSyncJob('nonexistent'))
-                .rejects.toThrow('Sync job not found');
+            await expect(integrationService.runSyncJob('nonexistent')).rejects.toThrow('Sync job not found');
         });
         test('should handle webhook not found gracefully', async () => {
             const result = await integrationService.triggerWebhook('nonexistent', {});
@@ -672,7 +735,7 @@ describe('Integration Service - P2 Priority', () => {
             integrationService.makeRequest = jest.fn().mockResolvedValue({
                 data: { status: 'ok', message: 'Test response' },
                 status: 200,
-                responseTime: 123
+                responseTime: 123,
             });
             const response = await integrationService.makeRequest({ endpoint: 'https://api.example.com' }, 'GET', '/test');
             expect(response.data).toEqual({ status: 'ok', message: 'Test response' });
@@ -681,32 +744,38 @@ describe('Integration Service - P2 Priority', () => {
         });
     });
 });
-// Performance and integration tests  
+// Performance and integration tests
 describe('Integration Service Performance', () => {
     let integrationService;
     beforeEach(() => {
         integrationService = new IntegrationService({
             info: jest.fn(),
             error: jest.fn(),
-            warn: jest.fn()
+            warn: jest.fn(),
         });
     });
     test('should handle many concurrent connections efficiently', async () => {
-        const connectionRequests = Array(50).fill().map((_, i) => ({
+        const connectionRequests = Array(50)
+            .fill()
+            .map((_, i) => ({
             name: `Connection ${i}`,
             connectorId: 'SPLUNK',
             endpoint: `https://splunk${i}.example.com`,
             authentication: {
                 type: 'api_key',
-                credentials: { apiKey: `key${i}` }
+                credentials: { apiKey: `key${i}` },
             },
-            userId: `user${i % 5}` // 5 different users
+            userId: `user${i % 5}`, // 5 different users
         }));
         // Mock methods
-        integrationService.validateAuthentication = jest.fn().mockResolvedValue(true);
-        integrationService.testConnection = jest.fn().mockResolvedValue({ success: true });
+        integrationService.validateAuthentication = jest
+            .fn()
+            .mockResolvedValue(true);
+        integrationService.testConnection = jest
+            .fn()
+            .mockResolvedValue({ success: true });
         const startTime = Date.now();
-        const connections = await Promise.all(connectionRequests.map(req => integrationService.createConnection(req)));
+        const connections = await Promise.all(connectionRequests.map((req) => integrationService.createConnection(req)));
         const duration = Date.now() - startTime;
         expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
         expect(connections).toHaveLength(50);
@@ -714,25 +783,34 @@ describe('Integration Service Performance', () => {
     });
     test('should efficiently process webhook deliveries', async () => {
         // Create many webhooks
-        const webhooks = Array(100).fill().map((_, i) => ({
+        const webhooks = Array(100)
+            .fill()
+            .map((_, i) => ({
             id: `webhook${i}`,
             url: `https://webhook${i}.example.com`,
             events: ['TEST_EVENT'],
             enabled: true,
             filters: {},
-            metrics: { totalDeliveries: 0, successfulDeliveries: 0, failedDeliveries: 0, averageResponseTime: 0 }
+            metrics: {
+                totalDeliveries: 0,
+                successfulDeliveries: 0,
+                failedDeliveries: 0,
+                averageResponseTime: 0,
+            },
         }));
-        webhooks.forEach(webhook => {
+        webhooks.forEach((webhook) => {
             integrationService.webhooks.set(webhook.id, webhook);
         });
         integrationService.matchesWebhookFilters = jest.fn().mockReturnValue(true);
-        integrationService.makeWebhookRequest = jest.fn().mockResolvedValue({ status: 200 });
+        integrationService.makeWebhookRequest = jest
+            .fn()
+            .mockResolvedValue({ status: 200 });
         const eventData = { type: 'TEST_EVENT', data: { test: 'data' } };
         const startTime = Date.now();
-        const results = await Promise.all(webhooks.map(webhook => integrationService.triggerWebhook(webhook.id, eventData)));
+        const results = await Promise.all(webhooks.map((webhook) => integrationService.triggerWebhook(webhook.id, eventData)));
         const duration = Date.now() - startTime;
         expect(duration).toBeLessThan(8000); // Should complete within 8 seconds
-        expect(results.every(r => r === true)).toBe(true);
+        expect(results.every((r) => r === true)).toBe(true);
         expect(integrationService.metrics.webhookDeliveries).toBe(100);
     });
 });

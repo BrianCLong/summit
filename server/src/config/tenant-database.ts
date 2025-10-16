@@ -17,7 +17,8 @@ interface ConfigMap {
 }
 
 const configPath =
-  process.env.TENANT_DB_CONFIG || path.resolve(process.cwd(), 'server/tenant-databases.json');
+  process.env.TENANT_DB_CONFIG ||
+  path.resolve(process.cwd(), 'server/tenant-databases.json');
 let configs: ConfigMap = {};
 let version = 0;
 

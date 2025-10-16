@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
 export interface AuditEntry {
   id: string;
@@ -25,7 +31,11 @@ export function useReasonForAccess() {
   return ctx;
 }
 
-export function ReasonForAccessProvider({ children }: { children: React.ReactNode }) {
+export function ReasonForAccessProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [prompt, setPrompt] = useState<PromptState | null>(null);
   const [isOpen, setOpen] = useState(false);
@@ -69,7 +79,12 @@ export function ReasonForAccessProvider({ children }: { children: React.ReactNod
   return (
     <ReasonContext.Provider value={value}>
       {children}
-      <ReasonForAccessModal open={isOpen} resource={prompt?.resource} onCancel={closePrompt} onSubmit={submitReason} />
+      <ReasonForAccessModal
+        open={isOpen}
+        resource={prompt?.resource}
+        onCancel={closePrompt}
+        onSubmit={submitReason}
+      />
     </ReasonContext.Provider>
   );
 }
@@ -100,12 +115,18 @@ function ReasonForAccessModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur">
       <div className="w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-        <h2 className="text-lg font-semibold text-slate-50">Reason for access required</h2>
+        <h2 className="text-lg font-semibold text-slate-50">
+          Reason for access required
+        </h2>
         <p className="mt-2 text-sm text-slate-300">
-          Provide a justification to open <span className="font-medium text-white">{resource}</span>. This reason is recorded in
-          the tenant-local audit log.
+          Provide a justification to open{' '}
+          <span className="font-medium text-white">{resource}</span>. This
+          reason is recorded in the tenant-local audit log.
         </p>
-        <label htmlFor="reason" className="mt-4 block text-sm font-medium text-slate-200">
+        <label
+          htmlFor="reason"
+          className="mt-4 block text-sm font-medium text-slate-200"
+        >
           Reason
         </label>
         <textarea

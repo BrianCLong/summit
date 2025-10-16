@@ -1,0 +1,73 @@
+name: Typecheck (changed workspaces)
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: typecheck-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Compute changed workspaces
+        id: set
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.sha }}"
+          changed=$(git diff --name-only "$base" "$head" | tr '\n' '\0' | xargs -0 -n1 dirname | sort -u)
+          pkgs=()
+          for d in $changed; do
+            if [[ "$d" =~ ^(apps|packages|services|contracts)/[^/]+ ]]; then
+              root="${BASH_REMATCH[0]}"
+              if [ -f "$root/package.json" ]; then pkgs+=("$root"); fi
+            fi
+          done
+          pkgs=($(printf "%s\n" "${pkgs[@]}" | sort -u))
+          if [ ${#pkgs[@]} -eq 0 ]; then
+            echo 'matrix={"include":[]}' >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          printf 'matrix={"include":[' >> $GITHUB_OUTPUT
+          first=true
+          for p in "${pkgs[@]}"; do
+            $first || printf ',' >> $GITHUB_OUTPUT
+            first=false
+            printf '{"path":"%s"}' "$p" >> $GITHUB_OUTPUT
+          done
+          printf ']}' >> $GITHUB_OUTPUT
+
+  tsc:
+    needs: detect
+    if: needs.detect.outputs.matrix != '{"include":[]}'
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 6
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x', cache: 'pnpm' }
+      - name: Install
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm i --frozen-lockfile=false
+      - name: Typecheck (${{ matrix.path }})
+        shell: bash
+        run: |
+          if [ -f "${{ matrix.path }}/tsconfig.json" ]; then
+            pnpm exec tsc -p "${{ matrix.path }}/tsconfig.json" --noEmit
+          else
+            echo "No tsconfig in ${{ matrix.path }}; skipping"
+          fi

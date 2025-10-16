@@ -5,10 +5,12 @@ Title: feat(obs): add OTEL spans + Prom exemplars (gateway, conductor, graph, ap
 Why: Golden signals and SLO enforcement need trace + metrics.
 
 Changes:
+
 - Add ingress→downstream spans; propagate `trace_id` to logs.
 - Wire exemplars in HTTP histogram metrics.
 
 Files (targets exist):
+
 - services/gateway/** · services/conductor/** · services/graph/** · services/api/** · services/billing/** · workers/index/**
 
 Acceptance: Dashboards show p95/err for these paths; logs include `trace_id`.

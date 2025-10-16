@@ -41,7 +41,11 @@ export interface EnumSlotSchema<T extends string> extends BaseSlotSchema<T> {
   readonly values: readonly T[];
 }
 
-export type SlotSchema = StringSlotSchema | NumberSlotSchema | BooleanSlotSchema | EnumSlotSchema<string>;
+export type SlotSchema =
+  | StringSlotSchema
+  | NumberSlotSchema
+  | BooleanSlotSchema
+  | EnumSlotSchema<string>;
 
 export type SlotSchemaMap = Record<string, SlotSchema>;
 
@@ -59,7 +63,9 @@ export type SlotValues<TSlots extends SlotSchemaMap> = {
   [K in keyof TSlots]: SlotValue<TSlots[K]>;
 };
 
-export type PartialSlotValues<TSlots extends SlotSchemaMap> = Partial<SlotValues<TSlots>>;
+export type PartialSlotValues<TSlots extends SlotSchemaMap> = Partial<
+  SlotValues<TSlots>
+>;
 
 export interface SlotValidationSuccess<T> {
   readonly valid: true;
@@ -71,20 +77,31 @@ export interface SlotValidationFailure {
   readonly errors: SlotErrorDetail[];
 }
 
-export type SlotValidationOutcome<T> = SlotValidationSuccess<T> | SlotValidationFailure;
+export type SlotValidationOutcome<T> =
+  | SlotValidationSuccess<T>
+  | SlotValidationFailure;
 
-export function stringSlot(options: Omit<StringSlotSchema, 'kind'> = {}): StringSlotSchema {
+export function stringSlot(
+  options: Omit<StringSlotSchema, 'kind'> = {},
+): StringSlotSchema {
   return { kind: 'string', ...options };
 }
 
-export function numberSlot(options: Omit<NumberSlotSchema, 'kind'> = {}): NumberSlotSchema {
+export function numberSlot(
+  options: Omit<NumberSlotSchema, 'kind'> = {},
+): NumberSlotSchema {
   return { kind: 'number', ...options };
 }
 
-export function booleanSlot(options: Omit<BooleanSlotSchema, 'kind'> = {}): BooleanSlotSchema {
+export function booleanSlot(
+  options: Omit<BooleanSlotSchema, 'kind'> = {},
+): BooleanSlotSchema {
   return { kind: 'boolean', ...options };
 }
 
-export function enumSlot<T extends string>(values: readonly T[], options: Omit<EnumSlotSchema<T>, 'kind' | 'values'> = {}): EnumSlotSchema<T> {
+export function enumSlot<T extends string>(
+  values: readonly T[],
+  options: Omit<EnumSlotSchema<T>, 'kind' | 'values'> = {},
+): EnumSlotSchema<T> {
   return { kind: 'enum', values, ...options };
 }

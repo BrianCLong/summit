@@ -16,8 +16,8 @@ describe('DocForge link checker', () => {
     expect(result.broken).toEqual([
       {
         source: 'index.html',
-        target: 'missing/page.html'
-      }
+        target: 'missing/page.html',
+      },
     ]);
   });
 });

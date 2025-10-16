@@ -1,4 +1,3 @@
-
 # ADR-013: Graph Rendering Strategy
 
 **Status:** Proposed

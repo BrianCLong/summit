@@ -1,17 +1,17 @@
 area: ingestion/connectors
 intent: certify
-objective: "Certify 5 connectors with manifest+mapping, rate-limit policy, sample data, golden IO tests."
+objective: 'Certify 5 connectors with manifest+mapping, rate-limit policy, sample data, golden IO tests.'
 connectors: [stix_taxii, splunk, sentinel, csv, elasticsearch]
 work_items:
   - id: CN-1
-    story: "Per-connector: hello world, mapping spec, rate limits"
+    story: 'Per-connector: hello world, mapping spec, rate limits'
   - id: CN-2
-    story: "Golden IO tests (sample datasets, schema checks, idempotency)"
+    story: 'Golden IO tests (sample datasets, schema checks, idempotency)'
   - id: CN-3
-    story: "Docs: quickstarts + mapping examples"
+    story: 'Docs: quickstarts + mapping examples'
 acceptance:
-  - "All 5 pass golden tests in CI; samples ingest end-to-end"
+  - 'All 5 pass golden tests in CI; samples ingest end-to-end'
 definition_of_done:
-  - "Conformance tests & example data packaged"
-owners: { DRI: "data-pipelines", support: ["docs","sre"] }
-metrics: ["connectors_passing >= 5", "ingestion_10k_docs_minutes <= 5"]
+  - 'Conformance tests & example data packaged'
+owners: { DRI: 'data-pipelines', support: ['docs', 'sre'] }
+metrics: ['connectors_passing >= 5', 'ingestion_10k_docs_minutes <= 5']

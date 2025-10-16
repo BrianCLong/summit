@@ -3,7 +3,7 @@ on:
   push:
     tags: ['v2.5.0-rc.*', 'v2.5.0']
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -16,19 +16,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run typed ESLint
         run: npm run lint
-      
+
       - name: Typecheck all workspaces
         run: npm run typecheck
 
@@ -38,19 +38,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build tools
         run: npm run build --if-present
-      
+
       - name: Check for explicit 'any' types
         run: |
           if [ -f tools/find-any.ts ]; then
@@ -65,7 +65,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Verify NL→Cypher distribution
         run: |
           test -d ./server/dist/nl2cypher || { echo "NL→Cypher dist not found"; exit 1; }
@@ -78,19 +78,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Install OpenAPI diff tool
         run: npm install -g openapi-diff
-      
+
       - name: Check Core API compatibility
         run: |
           if [ -f openapi/baselines/v2.4.yaml ]; then
@@ -98,7 +98,7 @@ jobs:
           else
             echo "⚠️  No baseline found for Core API - first release"
           fi
-      
+
       - name: Check Maestro API compatibility
         run: |
           if [ -f openapi/baselines/v1.2.yaml ]; then
@@ -113,19 +113,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run security audit
         run: npm audit --audit-level moderate
-      
+
       - name: Scan for secrets
         uses: trufflesecurity/trufflehog@main
         with:
@@ -152,23 +152,23 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build all workspaces
         run: npm run build
-      
+
       - name: Run NL→Cypher guardrail tests
         run: |
           if [ -f server/__tests__/nl2cypher-guardrails.test.ts ]; then
@@ -176,7 +176,7 @@ jobs:
           else
             echo "⚠️  NL→Cypher guardrail tests not found"
           fi
-      
+
       - name: Run core test suite
         run: npm run test --if-present
         env:
@@ -192,36 +192,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Install CycloneDX
         run: npm install -g @cyclonedx/cyclonedx-npm
-      
+
       - name: Generate SBOM
         run: |
           cyclonedx-npm --output-file sbom-core.json
           cd prov-ledger-service && cyclonedx-npm --output-file ../sbom-prov-ledger.json
-      
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
           cosign-release: 'v2.2.0'
-      
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -230,7 +230,7 @@ jobs:
           tags: |
             type=ref,event=tag
             type=sha
-      
+
       - name: Build and push Docker image
         id: build
         uses: docker/build-push-action@v5
@@ -240,7 +240,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      
+
       - name: Sign container image
         run: |
           cosign sign --yes \
@@ -249,7 +249,7 @@ jobs:
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-      
+
       - name: Attest SBOM
         run: |
           cosign attest --yes \
@@ -260,7 +260,7 @@ jobs:
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-      
+
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -277,27 +277,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build prov-ledger service
         run: |
           cd prov-ledger-service && npm run build
-      
+
       - name: Test provenance CLI
         run: |
           # Create a test bundle
           mkdir -p test-bundle
           echo "sample data" > test-bundle/data.txt
           echo '{"files":[{"path":"data.txt","sha256":"'$(sha256sum test-bundle/data.txt | cut -d' ' -f1)'"}],"merkle_root":"test"}' > test-bundle/manifest.json
-          
+
           # Test verification (should fail with test data)
           if prov-ledger-service/dist/cli.js verify test-bundle; then
             echo "⚠️  Verification unexpectedly passed"
@@ -308,7 +308,16 @@ jobs:
   release-gate:
     name: Release Go/No-Go Gate
     runs-on: ubuntu-latest
-    needs: [typed-eslint, ban-any, nl2cypher-artifact, openapi-diff, security-scan, build-test, prov-ledger-verify]
+    needs:
+      [
+        typed-eslint,
+        ban-any,
+        nl2cypher-artifact,
+        openapi-diff,
+        security-scan,
+        build-test,
+        prov-ledger-verify,
+      ]
     if: startsWith(github.ref, 'refs/tags/v2.5.0')
     steps:
       - name: Release Decision
@@ -323,7 +332,7 @@ jobs:
           echo "✅ Provenance verification: TESTED"
           echo ""
           echo "🚀 RELEASE APPROVED - Ready for production deployment"
-          
+
       - name: Create release
         uses: actions/create-release@v1
         env:
@@ -333,32 +342,32 @@ jobs:
           release_name: IntelGraph v2.5.0 "Autonomous Intelligence"
           body: |
             # IntelGraph v2.5.0 "Autonomous Intelligence" 🚀
-            
+
             ## 🎯 Key Features
             - **Prov-Ledger GA**: Cryptographic provenance verification with CLI
             - **ABAC/OPA Integration**: Field-level elision with policy explainability
             - **Query Cost Guard**: Budget-aware execution with preview estimates
             - **NL→Cypher Sandbox**: Hardened natural language to Cypher translation
             - **SLO Monitoring**: P95 latency targets with intelligent alerting
-            
+
             ## 🔧 Technical Improvements
             - Complete OpenAPI 3.0 specifications with N-2 compatibility
             - Enhanced Neo4j query optimization with materialized views
             - Comprehensive security scanning and SBOM attestation
             - Production-ready Helm charts with canary deployment support
-            
+
             ## 📊 Performance
             - 60-80% query performance improvements
             - Sub-1.5s P95 latency target
             - Intelligent caching with Redis integration
             - Auto-scaling with resource optimization
-            
+
             ## 🛡️ Security & Compliance
             - Cryptographic verification of all data exports
             - Field-level access control with audit trails
             - GDPR/CCPA compliance with data minimization
             - SOC2 Type II ready architecture
-            
+
             See deployment guide: https://docs.intelgraph.ai/deployment/v2.5.0
           draft: false
           prerelease: false

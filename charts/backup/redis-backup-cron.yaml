@@ -8,15 +8,15 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: "0 */6 * * *"  # Every 6 hours
-  timeZone: "UTC"
+  schedule: '0 */6 * * *' # Every 6 hours
+  timeZone: 'UTC'
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 1800  # 30 minute timeout
+      activeDeadlineSeconds: 1800 # 30 minute timeout
       backoffLimit: 2
       template:
         metadata:
@@ -32,215 +32,215 @@ spec:
             fsGroup: 65532
           serviceAccountName: redis-backup
           containers:
-          - name: redis-backup
-            image: redis:6.2-alpine
-            imagePullPolicy: IfNotPresent
-            command:
-            - /bin/sh
-            - -c
-            - |
-              set -euo pipefail
-              
-              # Configuration
-              BACKUP_NAME="redis-backup-$(date +%Y%m%d-%H%M%S)"
-              BACKUP_DIR="/backups/${BACKUP_NAME}"
-              RETENTION_DAYS=7  # Shorter retention for Redis due to cache nature
-              
-              echo "Starting Redis backup: ${BACKUP_NAME}"
-              
-              # Create backup directory
-              mkdir -p "${BACKUP_DIR}"
-              
-              # Test Redis connection
-              echo "Testing Redis connection..."
-              redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} ping
-              
-              # Get Redis info for backup metadata
-              REDIS_VERSION=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info server | grep redis_version | cut -d: -f2 | tr -d '\r')
-              DB_COUNT=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info keyspace | grep -c "^db" || echo "0")
-              MEMORY_USAGE=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info memory | grep used_memory_human | cut -d: -f2 | tr -d '\r')
-              
-              # Create RDB snapshot via BGSAVE
-              echo "Creating RDB snapshot..."
-              redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} BGSAVE
-              
-              # Wait for background save to complete
-              echo "Waiting for BGSAVE to complete..."
-              while [ "$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} LASTSAVE)" = "$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} LASTSAVE)" ]; do
-                if redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info persistence | grep -q "rdb_bgsave_in_progress:0"; then
-                  break
-                fi
-                sleep 5
-              done
-              
-              # Get key statistics for all databases
-              echo "Collecting key statistics..."
-              for db in $(seq 0 15); do
-                KEY_COUNT=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} DBSIZE 2>/dev/null || echo "0")
-                if [ "${KEY_COUNT}" -gt "0" ]; then
-                  echo "Database ${db}: ${KEY_COUNT} keys" >> "${BACKUP_DIR}/key_stats.txt"
-                  
-                  # Sample key types and TTLs
-                  redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} --scan --count 100 | head -20 | while read key; do
-                    KEY_TYPE=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} TYPE "$key" 2>/dev/null || echo "unknown")
-                    KEY_TTL=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} TTL "$key" 2>/dev/null || echo "-1")
-                    echo "DB${db} ${key}: type=${KEY_TYPE}, ttl=${KEY_TTL}" >> "${BACKUP_DIR}/sample_keys.txt"
+            - name: redis-backup
+              image: redis:6.2-alpine
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+
+                  # Configuration
+                  BACKUP_NAME="redis-backup-$(date +%Y%m%d-%H%M%S)"
+                  BACKUP_DIR="/backups/${BACKUP_NAME}"
+                  RETENTION_DAYS=7  # Shorter retention for Redis due to cache nature
+
+                  echo "Starting Redis backup: ${BACKUP_NAME}"
+
+                  # Create backup directory
+                  mkdir -p "${BACKUP_DIR}"
+
+                  # Test Redis connection
+                  echo "Testing Redis connection..."
+                  redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} ping
+
+                  # Get Redis info for backup metadata
+                  REDIS_VERSION=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info server | grep redis_version | cut -d: -f2 | tr -d '\r')
+                  DB_COUNT=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info keyspace | grep -c "^db" || echo "0")
+                  MEMORY_USAGE=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info memory | grep used_memory_human | cut -d: -f2 | tr -d '\r')
+
+                  # Create RDB snapshot via BGSAVE
+                  echo "Creating RDB snapshot..."
+                  redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} BGSAVE
+
+                  # Wait for background save to complete
+                  echo "Waiting for BGSAVE to complete..."
+                  while [ "$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} LASTSAVE)" = "$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} LASTSAVE)" ]; do
+                    if redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info persistence | grep -q "rdb_bgsave_in_progress:0"; then
+                      break
+                    fi
+                    sleep 5
                   done
-                fi
-              done
-              
-              # Export configuration
-              echo "Backing up Redis configuration..."
-              redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} CONFIG GET "*" > "${BACKUP_DIR}/redis.conf"
-              
-              # Create logical backup of critical keys (non-cache data)
-              echo "Creating logical backup of critical keys..."
-              
-              # Export session data (if using Redis for sessions)
-              redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 0 --scan --pattern "session:*" | \
-                xargs -I {} redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 0 DUMP {} | \
-                gzip > "${BACKUP_DIR}/sessions_dump.gz" 2>/dev/null || echo "No sessions found"
-              
-              # Export user authentication tokens
-              redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 1 --scan --pattern "auth:*" | \
-                xargs -I {} redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 1 DUMP {} | \
-                gzip > "${BACKUP_DIR}/auth_tokens_dump.gz" 2>/dev/null || echo "No auth tokens found"
-              
-              # Export application state (non-transient data)
-              redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 2 --scan --pattern "state:*" | \
-                xargs -I {} redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 2 DUMP {} | \
-                gzip > "${BACKUP_DIR}/app_state_dump.gz" 2>/dev/null || echo "No app state found"
-              
-              # Create backup manifest
-              cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
-              {
-                "backup_name": "${BACKUP_NAME}",
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "redis_version": "${REDIS_VERSION}",
-                "backup_type": "rdb_snapshot + logical",
-                "database_count": ${DB_COUNT},
-                "memory_usage": "${MEMORY_USAGE}",
-                "backup_size_bytes": $(du -sb "${BACKUP_DIR}" | cut -f1),
-                "retention_policy": "${RETENTION_DAYS} days",
-                "includes_config": true,
-                "backup_method": "BGSAVE + selective dump"
-              }
-              EOF
-              
-              # Create a simple RDB file copy (if accessible)
-              # Note: In production, this would require access to Redis data directory
-              # For now, we'll create a timestamp file as placeholder
-              echo "RDB snapshot completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${BACKUP_DIR}/rdb_snapshot.info"
-              
-              # Compress backup for storage efficiency
-              echo "Compressing backup..."
-              tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
-              rm -rf "${BACKUP_DIR}"
-              
-              # Upload to S3 with encryption
-              echo "Uploading to S3..."
-              aws s3 cp "${BACKUP_DIR}.tar.gz" \
-                "s3://${BACKUP_BUCKET}/redis/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --server-side-encryption AES256 \
-                --storage-class STANDARD_IA \
-                --metadata backup-type=redis,memory-usage=${MEMORY_USAGE},timestamp=$(date +%s)
-              
-              # Cross-region replication
-              echo "Replicating to DR region..."
-              aws s3 cp "s3://${BACKUP_BUCKET}/redis/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                "s3://${DR_BACKUP_BUCKET}/redis/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --source-region ${AWS_REGION} \
-                --region ${DR_AWS_REGION}
-              
-              # Cleanup local backup
-              rm -f "${BACKUP_DIR}.tar.gz"
-              
-              # Store current Redis state for comparison
-              CURRENT_STATE=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info stats | grep -E "(total_commands_processed|total_connections_received|keyspace_hits|keyspace_misses)")
-              aws s3 cp - "s3://${BACKUP_BUCKET}/redis/state/$(date +%Y/%m/%d)/${BACKUP_NAME}-state.txt" << EOF
-              ${CURRENT_STATE}
-              backup_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-              EOF
-              
-              # Cleanup old backups (shorter retention for Redis)
-              echo "Cleaning up old backups..."
-              aws s3 ls "s3://${BACKUP_BUCKET}/redis/" --recursive | \
-                awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
-                xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
-              
-              # Send success notification
-              curl -X POST "${SLACK_WEBHOOK_URL}" \
-                -H 'Content-Type: application/json' \
-                -d "{\"text\":\"✅ Redis backup completed successfully: ${BACKUP_NAME}\\nMemory Usage: ${MEMORY_USAGE}\\nDatabases: ${DB_COUNT}\"}" || true
-              
-              echo "Redis backup completed successfully: ${BACKUP_NAME}"
-              
-            env:
-            - name: REDIS_HOST
-              value: "redis.database"
-            - name: REDIS_PORT
-              value: "6379"
-            - name: BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: DR_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-backup-bucket
-            - name: AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: aws-region
-            - name: DR_AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-aws-region
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "256Mi"
-                cpu: "100m"
-              limits:
-                memory: "1Gi"
-                cpu: "500m"
-            volumeMounts:
-            - name: backup-storage
-              mountPath: /backups
-            - name: tmp-volume
-              mountPath: /tmp
+
+                  # Get key statistics for all databases
+                  echo "Collecting key statistics..."
+                  for db in $(seq 0 15); do
+                    KEY_COUNT=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} DBSIZE 2>/dev/null || echo "0")
+                    if [ "${KEY_COUNT}" -gt "0" ]; then
+                      echo "Database ${db}: ${KEY_COUNT} keys" >> "${BACKUP_DIR}/key_stats.txt"
+                      
+                      # Sample key types and TTLs
+                      redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} --scan --count 100 | head -20 | while read key; do
+                        KEY_TYPE=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} TYPE "$key" 2>/dev/null || echo "unknown")
+                        KEY_TTL=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${db} TTL "$key" 2>/dev/null || echo "-1")
+                        echo "DB${db} ${key}: type=${KEY_TYPE}, ttl=${KEY_TTL}" >> "${BACKUP_DIR}/sample_keys.txt"
+                      done
+                    fi
+                  done
+
+                  # Export configuration
+                  echo "Backing up Redis configuration..."
+                  redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} CONFIG GET "*" > "${BACKUP_DIR}/redis.conf"
+
+                  # Create logical backup of critical keys (non-cache data)
+                  echo "Creating logical backup of critical keys..."
+
+                  # Export session data (if using Redis for sessions)
+                  redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 0 --scan --pattern "session:*" | \
+                    xargs -I {} redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 0 DUMP {} | \
+                    gzip > "${BACKUP_DIR}/sessions_dump.gz" 2>/dev/null || echo "No sessions found"
+
+                  # Export user authentication tokens
+                  redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 1 --scan --pattern "auth:*" | \
+                    xargs -I {} redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 1 DUMP {} | \
+                    gzip > "${BACKUP_DIR}/auth_tokens_dump.gz" 2>/dev/null || echo "No auth tokens found"
+
+                  # Export application state (non-transient data)
+                  redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 2 --scan --pattern "state:*" | \
+                    xargs -I {} redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n 2 DUMP {} | \
+                    gzip > "${BACKUP_DIR}/app_state_dump.gz" 2>/dev/null || echo "No app state found"
+
+                  # Create backup manifest
+                  cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
+                  {
+                    "backup_name": "${BACKUP_NAME}",
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "redis_version": "${REDIS_VERSION}",
+                    "backup_type": "rdb_snapshot + logical",
+                    "database_count": ${DB_COUNT},
+                    "memory_usage": "${MEMORY_USAGE}",
+                    "backup_size_bytes": $(du -sb "${BACKUP_DIR}" | cut -f1),
+                    "retention_policy": "${RETENTION_DAYS} days",
+                    "includes_config": true,
+                    "backup_method": "BGSAVE + selective dump"
+                  }
+                  EOF
+
+                  # Create a simple RDB file copy (if accessible)
+                  # Note: In production, this would require access to Redis data directory
+                  # For now, we'll create a timestamp file as placeholder
+                  echo "RDB snapshot completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${BACKUP_DIR}/rdb_snapshot.info"
+
+                  # Compress backup for storage efficiency
+                  echo "Compressing backup..."
+                  tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
+                  rm -rf "${BACKUP_DIR}"
+
+                  # Upload to S3 with encryption
+                  echo "Uploading to S3..."
+                  aws s3 cp "${BACKUP_DIR}.tar.gz" \
+                    "s3://${BACKUP_BUCKET}/redis/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --server-side-encryption AES256 \
+                    --storage-class STANDARD_IA \
+                    --metadata backup-type=redis,memory-usage=${MEMORY_USAGE},timestamp=$(date +%s)
+
+                  # Cross-region replication
+                  echo "Replicating to DR region..."
+                  aws s3 cp "s3://${BACKUP_BUCKET}/redis/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    "s3://${DR_BACKUP_BUCKET}/redis/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --source-region ${AWS_REGION} \
+                    --region ${DR_AWS_REGION}
+
+                  # Cleanup local backup
+                  rm -f "${BACKUP_DIR}.tar.gz"
+
+                  # Store current Redis state for comparison
+                  CURRENT_STATE=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info stats | grep -E "(total_commands_processed|total_connections_received|keyspace_hits|keyspace_misses)")
+                  aws s3 cp - "s3://${BACKUP_BUCKET}/redis/state/$(date +%Y/%m/%d)/${BACKUP_NAME}-state.txt" << EOF
+                  ${CURRENT_STATE}
+                  backup_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+                  EOF
+
+                  # Cleanup old backups (shorter retention for Redis)
+                  echo "Cleaning up old backups..."
+                  aws s3 ls "s3://${BACKUP_BUCKET}/redis/" --recursive | \
+                    awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
+                    xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
+
+                  # Send success notification
+                  curl -X POST "${SLACK_WEBHOOK_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"text\":\"✅ Redis backup completed successfully: ${BACKUP_NAME}\\nMemory Usage: ${MEMORY_USAGE}\\nDatabases: ${DB_COUNT}\"}" || true
+
+                  echo "Redis backup completed successfully: ${BACKUP_NAME}"
+
+              env:
+                - name: REDIS_HOST
+                  value: 'redis.database'
+                - name: REDIS_PORT
+                  value: '6379'
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: DR_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-backup-bucket
+                - name: AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: aws-region
+                - name: DR_AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-aws-region
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '256Mi'
+                  cpu: '100m'
+                limits:
+                  memory: '1Gi'
+                  cpu: '500m'
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                - name: tmp-volume
+                  mountPath: /tmp
           volumes:
-          - name: backup-storage
-            emptyDir:
-              sizeLimit: 5Gi
-          - name: tmp-volume
-            emptyDir:
-              sizeLimit: 1Gi
+            - name: backup-storage
+              emptyDir:
+                sizeLimit: 5Gi
+            - name: tmp-volume
+              emptyDir:
+                sizeLimit: 1Gi
           tolerations:
-          - key: "backup-workload"
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
+            - key: 'backup-workload'
+              operator: 'Equal'
+              value: 'true'
+              effect: 'NoSchedule'
           nodeSelector:
-            node-type: "backup-optimized"
+            node-type: 'backup-optimized'
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -251,7 +251,7 @@ metadata:
     app.kubernetes.io/name: redis-backup
     app.kubernetes.io/component: backup
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/redis-backup-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/redis-backup-role'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -259,12 +259,12 @@ metadata:
   namespace: database
   name: redis-backup
 rules:
-- apiGroups: [""]
-  resources: ["pods", "services"]
-  verbs: ["get", "list"]
-- apiGroups: [""]
-  resources: ["secrets", "configmaps"]
-  verbs: ["get"]
+  - apiGroups: ['']
+    resources: ['pods', 'services']
+    verbs: ['get', 'list']
+  - apiGroups: ['']
+    resources: ['secrets', 'configmaps']
+    verbs: ['get']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -272,9 +272,9 @@ metadata:
   name: redis-backup
   namespace: database
 subjects:
-- kind: ServiceAccount
-  name: redis-backup
-  namespace: database
+  - kind: ServiceAccount
+    name: redis-backup
+    namespace: database
 roleRef:
   kind: Role
   name: redis-backup

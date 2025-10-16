@@ -1,1 +1,3 @@
-export function stabilizationMatrix(config) { return { matrix: 'Stabilization Matrix Placeholder' }; }
+export function stabilizationMatrix(config) {
+  return { matrix: 'Stabilization Matrix Placeholder' };
+}

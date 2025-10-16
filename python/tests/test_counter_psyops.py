@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import MagicMock, patch
 
 # Placeholder for NLP and Graph libraries
 # In a real scenario, these would be actual imports like:
@@ -8,8 +7,10 @@ from unittest.mock import MagicMock, patch
 # import networkx
 # from transformers import pipeline
 
+
 class MockNLP:
     """Mock NLP capabilities for testing."""
+
     def analyze_sentiment(self, text):
         if "crisis" in text or "fear" in text:
             return {"label": "NEGATIVE", "score": 0.9}
@@ -22,8 +23,10 @@ class MockNLP:
             return [{"text": "government", "type": "ORG"}]
         return []
 
+
 class MockGraph:
     """Mock Graph capabilities for testing narrative propagation."""
+
     def __init__(self):
         self.nodes = {}
         self.edges = []
@@ -40,7 +43,9 @@ class MockGraph:
     def get_node_attributes(self, node_id):
         return self.nodes.get(node_id, {})
 
+
 # --- Core Components (as described in the prompt) ---
+
 
 class NarrativeDetector:
     def __init__(self, nlp_model=None, graph_model=None):
@@ -62,8 +67,9 @@ class NarrativeDetector:
             "is_adversarial": is_adversarial,
             "sentiment": sentiment,
             "entities": entities,
-            "original_text": text
+            "original_text": text,
         }
+
 
 class CounterStrategyGenerator:
     def __init__(self, nlp_model=None):
@@ -77,7 +83,9 @@ class CounterStrategyGenerator:
             return flipped_text
         return original_text
 
-    def inject_credibility(self, text, source="reputable_source.org", fact="Fact: Data supports this."):
+    def inject_credibility(
+        self, text, source="reputable_source.org", fact="Fact: Data supports this."
+    ):
         return f"{text} (Source: {source}, Fact-check: {fact})"
 
     def amplify_source(self, counter_message, alternative_source="trusted_news.com"):
@@ -86,10 +94,17 @@ class CounterStrategyGenerator:
     def obfuscate_message(self, message):
         # Simple obfuscation: add random phrasing
         import random
-        phrases = ["It is important to note that", "Consider this perspective:", "Further analysis suggests:"]
+
+        phrases = [
+            "It is important to note that",
+            "Consider this perspective:",
+            "Further analysis suggests:",
+        ]
         return f"{random.choice(phrases)} {message}"
 
+
 # --- Unit Tests ---
+
 
 class TestCounterPsyOps(unittest.TestCase):
 
@@ -116,7 +131,7 @@ class TestCounterPsyOps(unittest.TestCase):
             "is_adversarial": True,
             "sentiment": {"label": "NEGATIVE", "score": 0.9},
             "entities": [],
-            "original_text": "The crisis will bring fear."
+            "original_text": "The crisis will bring fear.",
         }
         flipped_text = self.counter_strategy_generator.sentiment_flip(narrative_analysis)
         self.assertIn("opportunity", flipped_text)
@@ -127,7 +142,10 @@ class TestCounterPsyOps(unittest.TestCase):
     def test_inject_credibility(self):
         message = "This is a statement."
         credible_message = self.counter_strategy_generator.inject_credibility(message)
-        self.assertIn("(Source: reputable_source.org, Fact-check: Fact: Data supports this.)", credible_message)
+        self.assertIn(
+            "(Source: reputable_source.org, Fact-check: Fact: Data supports this.)",
+            credible_message,
+        )
 
     def test_amplify_source(self):
         message = "Counter message."
@@ -138,9 +156,12 @@ class TestCounterPsyOps(unittest.TestCase):
         message = "Secret counter operation."
         obfuscated_message = self.counter_strategy_generator.obfuscate_message(message)
         self.assertNotEqual(message, obfuscated_message)
-        self.assertTrue(obfuscated_message.startswith("It is important to note that") or
-                        obfuscated_message.startswith("Consider this perspective:") or
-                        obfuscated_message.startswith("Further analysis suggests:"))
+        self.assertTrue(
+            obfuscated_message.startswith("It is important to note that")
+            or obfuscated_message.startswith("Consider this perspective:")
+            or obfuscated_message.startswith("Further analysis suggests:")
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

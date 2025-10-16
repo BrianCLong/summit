@@ -17,17 +17,23 @@ export default [
       globals: { ...globals.node },
       parserOptions: {
         // Avoid project: './tsconfig.json' until tsconfig includes tests to prevent perf/parse errors
-        ecmaFeatures: { jsx: false }
-      }
+        ecmaFeatures: { jsx: false },
+      },
     },
     linterOptions: { reportUnusedDisableDirectives: true },
     rules: {
       '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],
-      '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }],
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false } },
+      ],
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        { prefer: 'type-imports' },
+      ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'no-process-exit': 'off'
-    }
+      'no-process-exit': 'off',
+    },
   },
   {
     files: ['tests/**/*.ts', '**/*.spec.ts', '**/*.test.ts'],
@@ -36,8 +42,8 @@ export default [
     rules: {
       'jest/expect-expect': 'warn',
       'jest/no-disabled-tests': 'warn',
-      'jest/no-identical-title': 'error'
-    }
+      'jest/no-identical-title': 'error',
+    },
   },
-  prettier
+  prettier,
 ];

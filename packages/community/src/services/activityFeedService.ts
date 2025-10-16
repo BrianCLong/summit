@@ -19,7 +19,7 @@ export class ActivityFeedService {
       type: input.type,
       summary: input.summary,
       createdAt: new Date(),
-      metadata: { ...(input.metadata ?? {}) }
+      metadata: { ...(input.metadata ?? {}) },
     };
 
     this.store.appendActivity(event);
@@ -33,7 +33,9 @@ export class ActivityFeedService {
   public getLatest(userId: string, limit: number): ActivityEvent[] {
     return this.store
       .listActivities(userId)
-      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+      .sort(
+        (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
+      )
       .slice(0, limit);
   }
 }

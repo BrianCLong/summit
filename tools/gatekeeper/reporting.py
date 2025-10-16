@@ -1,9 +1,11 @@
 """Reporting utilities for Gatekeeper lint results."""
+
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
+
 import defusedxml.ElementTree as ET
 
 from .lint import LintIssue
@@ -25,7 +27,9 @@ class ConsoleReporter:
 
         counts = Counter(issue.severity for issue in issues)
         total = len(issues)
-        summary_parts = [f"{total} issues"] + [f"{count} {severity}" for severity, count in counts.items()]
+        summary_parts = [f"{total} issues"] + [
+            f"{count} {severity}" for severity, count in counts.items()
+        ]
         print("Summary:", ", ".join(summary_parts))
         print(f"JUnit report written to {junit_path}")
 

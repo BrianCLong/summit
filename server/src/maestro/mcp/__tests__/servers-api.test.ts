@@ -66,7 +66,11 @@ describe('MCP Servers API', () => {
   it('creates an MCP server', async () => {
     const res = await request(app)
       .post('/api/maestro/v1/mcp/servers')
-      .send({ name: 'local-graphops', url: 'ws://localhost:9001', scopes: ['graph:read'] })
+      .send({
+        name: 'local-graphops',
+        url: 'ws://localhost:9001',
+        scopes: ['graph:read'],
+      })
       .expect(201);
     expect(res.body).toHaveProperty('id');
     expect(res.body).toHaveProperty('name', 'local-graphops');
@@ -74,13 +78,17 @@ describe('MCP Servers API', () => {
   });
 
   it('lists servers', async () => {
-    const res = await request(app).get('/api/maestro/v1/mcp/servers').expect(200);
+    const res = await request(app)
+      .get('/api/maestro/v1/mcp/servers')
+      .expect(200);
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body[0]).toHaveProperty('name');
   });
 
   it('gets a server by id', async () => {
-    const res = await request(app).get('/api/maestro/v1/mcp/servers/s1').expect(200);
+    const res = await request(app)
+      .get('/api/maestro/v1/mcp/servers/s1')
+      .expect(200);
     expect(res.body).toHaveProperty('id', 's1');
   });
 

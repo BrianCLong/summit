@@ -5,5 +5,5 @@ global.fetch = jest.fn(() =>
   Promise.resolve({
     text: () => Promise.resolve('ok'),
     json: () => Promise.resolve({}),
-  })
+  }),
 );

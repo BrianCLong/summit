@@ -3,13 +3,20 @@
   "title": "ProofCarryingPR",
   "type": "object",
   "properties": {
-    "specCoverage": {"type":"number","minimum":0.9},
-    "invariants": {"type":"array","items":{"type":"string"}},
-    "cepGuards": {"type":"array","items":{"type":"string"}},
-    "mutationScore": {"type":"number","minimum":0.7},
-    "perfP95BudgetMs": {"type":"number"},
-    "riskCap": {"type":"number","maximum":0.7},
-    "sbomCriticals": {"type":"number","maximum":0}
+    "specCoverage": { "type": "number", "minimum": 0.9 },
+    "invariants": { "type": "array", "items": { "type": "string" } },
+    "cepGuards": { "type": "array", "items": { "type": "string" } },
+    "mutationScore": { "type": "number", "minimum": 0.7 },
+    "perfP95BudgetMs": { "type": "number" },
+    "riskCap": { "type": "number", "maximum": 0.7 },
+    "sbomCriticals": { "type": "number", "maximum": 0 }
   },
-  "required":["specCoverage","invariants","mutationScore","perfP95BudgetMs","riskCap","sbomCriticals"]
+  "required": [
+    "specCoverage",
+    "invariants",
+    "mutationScore",
+    "perfP95BudgetMs",
+    "riskCap",
+    "sbomCriticals"
+  ]
 }

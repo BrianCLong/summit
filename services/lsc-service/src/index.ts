@@ -1,4 +1,3 @@
-
 // services/lsc-service/src/index.ts
 import express from 'express';
 
@@ -13,14 +12,21 @@ const caseStore: any = {};
 app.post('/events', (req, res) => {
   const { eventType, data, prId } = req.body;
   console.log(`Received event: ${eventType} for PR ${prId}`);
-  
+
   if (!evidenceStore[prId]) {
     evidenceStore[prId] = [];
   }
-  evidenceStore[prId].push({ eventType, data, receivedAt: new Date().toISOString() });
+  evidenceStore[prId].push({
+    eventType,
+    data,
+    receivedAt: new Date().toISOString(),
+  });
 
   // TODO: Add logic to build the GSN graph based on events
-  caseStore[prId] = { goal: { id: 'G1', text: `PR ${prId} is safe` }, claims: [] };
+  caseStore[prId] = {
+    goal: { id: 'G1', text: `PR ${prId} is safe` },
+    claims: [],
+  };
 
   res.status(202).send({ status: 'accepted' });
 });

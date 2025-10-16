@@ -16,7 +16,11 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
@@ -37,15 +41,70 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Explore', href: '/explore', icon: Search, resource: 'investigations', action: 'read' },
-  { name: 'Alerts', href: '/alerts', icon: AlertTriangle, badge: 3, resource: 'alerts', action: 'read' },
-  { name: 'Cases', href: '/cases', icon: FileText, resource: 'cases', action: 'read' },
-  { name: 'Command Center', href: '/dashboards/command-center', icon: BarChart3, resource: 'dashboards', action: 'read' },
-  { name: 'Supply Chain', href: '/dashboards/supply-chain', icon: BarChart3, resource: 'dashboards', action: 'read' },
-  { name: 'Data Sources', href: '/data/sources', icon: Database, resource: 'data', action: 'read' },
-  { name: 'Models', href: '/models', icon: Brain, resource: 'models', action: 'read' },
-  { name: 'Reports', href: '/reports', icon: FileBarChart, resource: 'reports', action: 'read' },
-  { name: 'Admin', href: '/admin', icon: Settings, resource: 'admin', action: 'read' },
+  {
+    name: 'Explore',
+    href: '/explore',
+    icon: Search,
+    resource: 'investigations',
+    action: 'read',
+  },
+  {
+    name: 'Alerts',
+    href: '/alerts',
+    icon: AlertTriangle,
+    badge: 3,
+    resource: 'alerts',
+    action: 'read',
+  },
+  {
+    name: 'Cases',
+    href: '/cases',
+    icon: FileText,
+    resource: 'cases',
+    action: 'read',
+  },
+  {
+    name: 'Command Center',
+    href: '/dashboards/command-center',
+    icon: BarChart3,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
+    name: 'Supply Chain',
+    href: '/dashboards/supply-chain',
+    icon: BarChart3,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
+    name: 'Data Sources',
+    href: '/data/sources',
+    icon: Database,
+    resource: 'data',
+    action: 'read',
+  },
+  {
+    name: 'Models',
+    href: '/models',
+    icon: Brain,
+    resource: 'models',
+    action: 'read',
+  },
+  {
+    name: 'Reports',
+    href: '/reports',
+    icon: FileBarChart,
+    resource: 'reports',
+    action: 'read',
+  },
+  {
+    name: 'Admin',
+    href: '/admin',
+    icon: Settings,
+    resource: 'admin',
+    action: 'read',
+  },
 ]
 
 const supportItems: NavItem[] = [
@@ -59,18 +118,18 @@ export function Navigation({ user }: NavigationProps) {
   const { openSearch } = useSearch()
 
   const NavItemComponent = ({ item }: { item: NavItem }) => {
-    const { hasPermission } = useRbac(
-      item.resource || '',
-      item.action || '',
-      { user, fallback: !item.resource }
-    )
+    const { hasPermission } = useRbac(item.resource || '', item.action || '', {
+      user,
+      fallback: !item.resource,
+    })
 
     if (item.resource && !hasPermission) {
       return null
     }
 
-    const isActive = location.pathname === item.href || 
-                     (item.href !== '/' && location.pathname.startsWith(item.href))
+    const isActive =
+      location.pathname === item.href ||
+      (item.href !== '/' && location.pathname.startsWith(item.href))
 
     return (
       <Tooltip>
@@ -93,9 +152,7 @@ export function Navigation({ user }: NavigationProps) {
             )}
           </NavLink>
         </TooltipTrigger>
-        <TooltipContent side="right">
-          {item.name}
-        </TooltipContent>
+        <TooltipContent side="right">{item.name}</TooltipContent>
       </Tooltip>
     )
   }
@@ -106,7 +163,9 @@ export function Navigation({ user }: NavigationProps) {
       <div className="p-6 border-b">
         <NavLink to="/" className="flex items-center gap-3">
           <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">IG</span>
+            <span className="text-primary-foreground font-bold text-sm">
+              IG
+            </span>
           </div>
           <div className="font-semibold text-lg">IntelGraph</div>
         </NavLink>
@@ -130,31 +189,31 @@ export function Navigation({ user }: NavigationProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
           Intelligence
         </div>
-        {navItems.slice(0, 3).map((item) => (
+        {navItems.slice(0, 3).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 5).map((item) => (
+        {navItems.slice(3, 5).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(5).map((item) => (
+        {navItems.slice(5).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
       </div>
 
       {/* Support & User */}
       <div className="p-4 border-t space-y-2">
-        {supportItems.map((item) => (
+        {supportItems.map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
-        
+
         {/* User Profile & Logout */}
         <div className="pt-4 space-y-2">
           <div className="flex items-center gap-3 px-3 py-2">
@@ -170,7 +229,7 @@ export function Navigation({ user }: NavigationProps) {
               </div>
             </div>
           </div>
-          
+
           <Button
             variant="ghost"
             size="sm"

@@ -1,14 +1,13 @@
 """Command line interface for the Gatekeeper RBAC policy linter."""
+
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
-from typing import List
 
 from .lint import LintIssue, expand_policy_globs, lint_policies, lint_roles
 from .reporting import ConsoleReporter, JunitReporter
-
 
 DEFAULT_JUNIT_PATH = Path("gatekeeper-report.xml")
 
@@ -50,20 +49,22 @@ def _run_check(args: argparse.Namespace) -> int:
     roles_path = Path(args.roles)
     role_result = lint_roles(roles_path, normalize=args.fix)
 
-    issues: List[LintIssue] = list(policy_result.issues) + list(role_result.issues)
+    issues: list[LintIssue] = list(policy_result.issues) + list(role_result.issues)
 
     if args.fix and role_result.normalized is not None:
         roles_path.write_text(role_result.normalized, encoding="utf-8")
 
     junit_path = Path(args.junit)
     JunitReporter().write(issues, output=junit_path)
-    ConsoleReporter().render(issues, checked_files=len(policy_result.checked_files), junit_path=junit_path)
+    ConsoleReporter().render(
+        issues, checked_files=len(policy_result.checked_files), junit_path=junit_path
+    )
 
     has_errors = any(issue.severity != "warning" for issue in issues)
     return 1 if has_errors else 0
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 

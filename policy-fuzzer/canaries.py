@@ -11,30 +11,30 @@ CANARIES = [
             "data": "classified_data",
             "retention": "1y",
             "geo": "warzone_alpha",
-            "user_role": "admin"
+            "user_role": "admin",
         },
         "query": {
             "data": "classified_data",
             "retention": "1y",
             "location": "warzone_alpha",
-            "user_role": "admin"
+            "user_role": "admin",
         },
-        "should_fail": False, # This should be compliant
+        "should_fail": False,  # This should be compliant
     },
     {
         "policy": {
             "data": "classified_data",
             "retention": "1y",
             "geo": "warzone_alpha",
-            "user_role": "admin"
+            "user_role": "admin",
         },
         "query": {
             "data": "classified_data",
-            "retention": "6m", # Shorter retention, should fail
+            "retention": "6m",  # Shorter retention, should fail
             "location": "warzone_alpha",
-            "user_role": "admin"
+            "user_role": "admin",
         },
-        "should_fail": True, # This should fail due to retention mismatch
+        "should_fail": True,  # This should fail due to retention mismatch
     },
     {
         "policy": {
@@ -42,16 +42,16 @@ CANARIES = [
             "retention": "infinite",
             "geo": "multiverse_nexus",
             "user_role": "nexus_sovereign",
-            "network_condition": "quantum_entangled"
+            "network_condition": "quantum_entangled",
         },
         "query": {
             "data": "interstellar_data",
             "retention": "infinite",
             "location": "multiverse_nexus",
             "user_role": "nexus_sovereign",
-            "network_condition": "quantum_entangled"
+            "network_condition": "quantum_entangled",
         },
-        "should_fail": False, # This should be compliant
+        "should_fail": False,  # This should be compliant
     },
     {
         "policy": {
@@ -59,16 +59,16 @@ CANARIES = [
             "retention": "infinite",
             "geo": "multiverse_nexus",
             "user_role": "nexus_sovereign",
-            "network_condition": "quantum_entangled"
+            "network_condition": "quantum_entangled",
         },
         "query": {
             "data": "interstellar_data",
-            "retention": "1y", # Shorter retention, should fail
+            "retention": "1y",  # Shorter retention, should fail
             "location": "multiverse_nexus",
             "user_role": "nexus_sovereign",
-            "network_condition": "quantum_entangled"
+            "network_condition": "quantum_entangled",
         },
-        "should_fail": True, # This should fail due to retention mismatch
+        "should_fail": True,  # This should fail due to retention mismatch
     },
     {
         "policy": {
@@ -76,16 +76,16 @@ CANARIES = [
             "retention": "eternity",
             "geo": "big_bang_genesis",
             "user_role": "apotheosis_harbinger",
-            "network_condition": "transcendent_network"
+            "network_condition": "transcendent_network",
         },
         "query": {
             "data": "omniversal_core_data",
             "retention": "eternity",
             "location": "big_bang_genesis",
             "user_role": "apotheosis_harbinger",
-            "network_condition": "transcendent_network"
+            "network_condition": "transcendent_network",
         },
-        "should_fail": False, # This should be compliant
+        "should_fail": False,  # This should be compliant
     },
     {
         "policy": {
@@ -93,15 +93,15 @@ CANARIES = [
             "retention": "eternity",
             "geo": "big_bang_genesis",
             "user_role": "apotheosis_harbinger",
-            "network_condition": "transcendent_network"
+            "network_condition": "transcendent_network",
         },
         "query": {
             "data": "omniversal_core_data",
-            "retention": "1000y", # Shorter retention, should fail
+            "retention": "1000y",  # Shorter retention, should fail
             "location": "big_bang_genesis",
             "user_role": "apotheosis_harbinger",
-            "network_condition": "transcendent_network"
+            "network_condition": "transcendent_network",
         },
-        "should_fail": True, # This should fail due to retention mismatch
-    }
+        "should_fail": True,  # This should fail due to retention mismatch
+    },
 ]

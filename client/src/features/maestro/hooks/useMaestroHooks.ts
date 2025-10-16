@@ -59,7 +59,10 @@ export function useDebouncedValue<T>(value: T, delayMs: number) {
   return debounced;
 }
 
-export function useLiveLogFeed(lines: string[], opts: { followTail: boolean; intervalMs?: number }) {
+export function useLiveLogFeed(
+  lines: string[],
+  opts: { followTail: boolean; intervalMs?: number },
+) {
   const { followTail, intervalMs = 300 } = opts;
   const [visible, setVisible] = React.useState<string[]>(lines.slice(0, 200));
   const [cursor, setCursor] = React.useState(200);

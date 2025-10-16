@@ -194,7 +194,10 @@ export class MonitoringObservabilityService extends EventEmitter {
           ...health,
           lastCheck: new Date(),
           responseTime,
-          uptime: serviceName === 'intelgraph-server' ? process.uptime() : Math.random() * 86400,
+          uptime:
+            serviceName === 'intelgraph-server'
+              ? process.uptime()
+              : Math.random() * 86400,
           metrics: {
             cpu: Math.random() * 80 + 10,
             memory: Math.random() * 70 + 20,
@@ -239,7 +242,10 @@ export class MonitoringObservabilityService extends EventEmitter {
           });
         }
 
-        this.emit('health-check-completed', { service: serviceName, health: updatedHealth });
+        this.emit('health-check-completed', {
+          service: serviceName,
+          health: updatedHealth,
+        });
       }
     } catch (error) {
       console.error('[MONITORING] Health check error:', error);
@@ -311,7 +317,8 @@ export class MonitoringObservabilityService extends EventEmitter {
     const recentErrors = this.logs.filter(
       (log) =>
         log.level === 'error' ||
-        (log.level === 'fatal' && Date.now() - log.timestamp.getTime() < 300000), // Last 5 minutes
+        (log.level === 'fatal' &&
+          Date.now() - log.timestamp.getTime() < 300000), // Last 5 minutes
     );
 
     if (recentErrors.length > 10) {
@@ -362,7 +369,9 @@ export class MonitoringObservabilityService extends EventEmitter {
     const spans = this.traces.get(traceId);
     if (!spans) return;
 
-    const span = spanId ? spans.find((s) => s.id === spanId) : spans[spans.length - 1];
+    const span = spanId
+      ? spans.find((s) => s.id === spanId)
+      : spans[spans.length - 1];
     if (!span) return;
 
     span.endTime = new Date();
@@ -393,7 +402,11 @@ export class MonitoringObservabilityService extends EventEmitter {
         threshold: 5000,
         currentValue: span.duration,
         tags: ['performance', 'trace'],
-        metadata: { traceId, spanId: span.id, operationName: span.operationName },
+        metadata: {
+          traceId,
+          spanId: span.id,
+          operationName: span.operationName,
+        },
       });
     }
 
@@ -401,7 +414,10 @@ export class MonitoringObservabilityService extends EventEmitter {
   }
 
   public createAlert(
-    alertData: Omit<SystemAlert, 'id' | 'timestamp' | 'acknowledged' | 'resolved'>,
+    alertData: Omit<
+      SystemAlert,
+      'id' | 'timestamp' | 'acknowledged' | 'resolved'
+    >,
   ): SystemAlert {
     const alert: SystemAlert = {
       ...alertData,
@@ -462,7 +478,9 @@ export class MonitoringObservabilityService extends EventEmitter {
     let alerts = Array.from(this.alerts.values());
 
     if (filters.severity) {
-      alerts = alerts.filter((alert) => filters.severity!.includes(alert.severity));
+      alerts = alerts.filter((alert) =>
+        filters.severity!.includes(alert.severity),
+      );
     }
 
     if (filters.type) {
@@ -470,7 +488,9 @@ export class MonitoringObservabilityService extends EventEmitter {
     }
 
     if (filters.acknowledged !== undefined) {
-      alerts = alerts.filter((alert) => alert.acknowledged === filters.acknowledged);
+      alerts = alerts.filter(
+        (alert) => alert.acknowledged === filters.acknowledged,
+      );
     }
 
     if (filters.resolved !== undefined) {
@@ -655,8 +675,11 @@ export class MonitoringObservabilityService extends EventEmitter {
       overall = 'degraded';
     }
 
-    const avgResponseTime = services.reduce((sum, s) => sum + s.responseTime, 0) / services.length;
-    const errorRate = services.reduce((sum, s) => sum + s.metrics.errorRate, 0) / services.length;
+    const avgResponseTime =
+      services.reduce((sum, s) => sum + s.responseTime, 0) / services.length;
+    const errorRate =
+      services.reduce((sum, s) => sum + s.metrics.errorRate, 0) /
+      services.length;
     const uptime = Math.max(...services.map((s) => s.uptime));
 
     return {

@@ -6,7 +6,7 @@ test('golden path', async ({ page }) => {
   await page.fill('#password', process.env.E2E_PASS!);
   await page.click('text=Sign in');
   await expect(page.locator('text=Welcome')).toBeVisible();
-  await page.fill('#q','graph');
-  await page.press('#q','Enter');
+  await page.fill('#q', 'graph');
+  await page.press('#q', 'Enter');
   await expect(page.locator('[data-test=result]')).toHaveCountGreaterThan(0);
 });

@@ -3,7 +3,12 @@ import React, { useMemo } from 'react';
 type Node = { id: string; label?: string; durationMs?: number; cost?: number };
 type Edge = { from: string; to: string };
 type Graph = { nodes: Node[]; edges: Edge[] };
-type Delta = { durationDeltaMs?: number; costDelta?: number; changed?: boolean; reason?: string };
+type Delta = {
+  durationDeltaMs?: number;
+  costDelta?: number;
+  changed?: boolean;
+  reason?: string;
+};
 
 type Props = {
   current: Graph;
@@ -31,7 +36,10 @@ function criticalPathIds(g: Graph): string[] {
   };
   g.nodes.forEach((n) => order(n.id));
   // reconstruct a path by greedy choice
-  const start = g.nodes.reduce((a, b) => (order(a.id) > order(b.id) ? a : b), g.nodes[0]);
+  const start = g.nodes.reduce(
+    (a, b) => (order(a.id) > order(b.id) ? a : b),
+    g.nodes[0],
+  );
   const path: string[] = [];
   let cur = start?.id;
   const visited = new Set();
@@ -47,7 +55,11 @@ function criticalPathIds(g: Graph): string[] {
   return path;
 }
 
-export default function GraphDiff({ current, previous, nodeDeltas = {} }: Props) {
+export default function GraphDiff({
+  current,
+  previous,
+  nodeDeltas = {},
+}: Props) {
   const cp = useMemo(() => criticalPathIds(current), [current]);
   const prevNodeMap = useMemo(
     () => Object.fromEntries(previous.nodes.map((n) => [n.id, n])),
@@ -76,7 +88,9 @@ export default function GraphDiff({ current, previous, nodeDeltas = {} }: Props)
             >
               <div className="flex items-center justify-between">
                 <div className="font-mono text-sm">{n.id}</div>
-                {changed && <span className="text-xs text-amber-700">changed</span>}
+                {changed && (
+                  <span className="text-xs text-amber-700">changed</span>
+                )}
               </div>
               <div className="text-sm">
                 <div>
@@ -87,10 +101,14 @@ export default function GraphDiff({ current, previous, nodeDeltas = {} }: Props)
                 </div>
                 <div>
                   Cost: ${(n.cost ?? 0).toFixed?.(4) || (n.cost ?? 0)}{' '}
-                  {delta.costDelta != null ? <em>Δ {delta.costDelta}</em> : null}
+                  {delta.costDelta != null ? (
+                    <em>Δ {delta.costDelta}</em>
+                  ) : null}
                 </div>
                 {delta.reason && (
-                  <div className="text-xs text-gray-600">Reason: {delta.reason}</div>
+                  <div className="text-xs text-gray-600">
+                    Reason: {delta.reason}
+                  </div>
                 )}
               </div>
             </div>

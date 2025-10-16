@@ -18,18 +18,18 @@ const API_KEY = __ENV.API_KEY || 'test-api-key';
 
 export const options = {
   stages: [
-    { duration: '30s', target: 10 },  // Ramp up
-    { duration: '60s', target: 50 },  // Sustain load
-    { duration: '30s', target: 0 },   // Ramp down
+    { duration: '30s', target: 10 }, // Ramp up
+    { duration: '60s', target: 50 }, // Sustain load
+    { duration: '30s', target: 0 }, // Ramp down
   ],
 
   thresholds: {
     // Go/No-Go gates
-    'http_req_duration': ['p95<500'],          // 95th percentile < 500ms
-    'http_req_failed': ['rate<0.05'],          // Error rate < 5%
-    'nlq_latency': ['p95<2000'],               // NL→Cypher p95 < 2s
-    'cypher_latency': ['p95<1000'],            // Cypher execution p95 < 1s
-    'errors': ['rate<0.01'],                   // Custom error rate < 1%
+    http_req_duration: ['p95<500'], // 95th percentile < 500ms
+    http_req_failed: ['rate<0.05'], // Error rate < 5%
+    nlq_latency: ['p95<2000'], // NL→Cypher p95 < 2s
+    cypher_latency: ['p95<1000'], // Cypher execution p95 < 1s
+    errors: ['rate<0.01'], // Custom error rate < 1%
   },
 };
 
@@ -38,18 +38,18 @@ const testQueries = [
   {
     type: 'nl2cypher',
     query: 'Find all entities connected to John Doe',
-    expectedPattern: /MATCH.*John Doe/i
+    expectedPattern: /MATCH.*John Doe/i,
   },
   {
     type: 'nl2cypher',
     query: 'Show investigations from the last 30 days',
-    expectedPattern: /MATCH.*Investigation.*duration/i
+    expectedPattern: /MATCH.*Investigation.*duration/i,
   },
   {
     type: 'cypher',
     query: 'MATCH (n:Person) RETURN count(n) LIMIT 1',
-    expectedPattern: /\d+/
-  }
+    expectedPattern: /\d+/,
+  },
 ];
 
 export function setup() {
@@ -65,12 +65,12 @@ export function setup() {
   return { baseUrl: BASE_URL };
 }
 
-export default function(data) {
+export default function (data) {
   if (!data) return;
 
   const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${API_KEY}`,
+    Authorization: `Bearer ${API_KEY}`,
     'x-request-id': `k6-${__VU}-${__ITER}`,
   };
 
@@ -100,13 +100,17 @@ function testNL2Cypher(baseUrl, headers) {
   const query = testQueries[0]; // Use first NL query
   const startTime = Date.now();
 
-  const response = http.post(`${baseUrl}/api/nl2cypher`, JSON.stringify({
-    query: query.query,
-    context: {
-      userId: 'test-user',
-      tenantId: 'test-tenant'
-    }
-  }), { headers });
+  const response = http.post(
+    `${baseUrl}/api/nl2cypher`,
+    JSON.stringify({
+      query: query.query,
+      context: {
+        userId: 'test-user',
+        tenantId: 'test-tenant',
+      },
+    }),
+    { headers },
+  );
 
   const duration = Date.now() - startTime;
   nlqLatency.add(duration);
@@ -136,10 +140,14 @@ function testCypherExecution(baseUrl, headers) {
   const query = testQueries[2]; // Use Cypher query
   const startTime = Date.now();
 
-  const response = http.post(`${baseUrl}/api/cypher`, JSON.stringify({
-    cypher: query.query,
-    parameters: {}
-  }), { headers });
+  const response = http.post(
+    `${baseUrl}/api/cypher`,
+    JSON.stringify({
+      cypher: query.query,
+      parameters: {},
+    }),
+    { headers },
+  );
 
   const duration = Date.now() - startTime;
   cypherLatency.add(duration);
@@ -159,14 +167,18 @@ function testCypherExecution(baseUrl, headers) {
 
   if (!success) {
     errorRate.add(1);
-    console.error(`Cypher execution failed: ${response.status} ${response.body}`);
+    console.error(
+      `Cypher execution failed: ${response.status} ${response.body}`,
+    );
   } else {
     errorRate.add(0);
   }
 }
 
 function testEntitySearch(baseUrl, headers) {
-  const response = http.get(`${baseUrl}/api/entities?search=test&limit=10`, { headers });
+  const response = http.get(`${baseUrl}/api/entities?search=test&limit=10`, {
+    headers,
+  });
 
   const success = check(response, {
     'Entity search status is 200': (r) => r.status === 200,
@@ -188,7 +200,9 @@ function testEntitySearch(baseUrl, headers) {
 }
 
 function testInvestigationList(baseUrl, headers) {
-  const response = http.get(`${baseUrl}/api/investigations?limit=20`, { headers });
+  const response = http.get(`${baseUrl}/api/investigations?limit=20`, {
+    headers,
+  });
 
   const success = check(response, {
     'Investigation list status is 200': (r) => r.status === 200,
@@ -217,8 +231,8 @@ export function teardown(data) {
   // Optional: Clean up test data
   const cleanupResponse = http.delete(`${data.baseUrl}/api/test-cleanup`, {
     headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-    }
+      Authorization: `Bearer ${API_KEY}`,
+    },
   });
 
   if (cleanupResponse.status === 200) {

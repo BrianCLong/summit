@@ -11,7 +11,9 @@ export interface HardwareSecurityModule {
 export class SoftwareHSM implements HardwareSecurityModule {
   async sign(data: Buffer, key: KeyVersion): Promise<Buffer> {
     if (!key.privateKeyPem) {
-      throw new Error(`Key ${key.id} version ${key.version} missing private key material`);
+      throw new Error(
+        `Key ${key.id} version ${key.version} missing private key material`,
+      );
     }
 
     switch (key.algorithm) {
@@ -52,7 +54,9 @@ export class SoftwareHSM implements HardwareSecurityModule {
       return key.publicKeyPem;
     }
     if (!key.privateKeyPem) {
-      throw new Error(`Key ${key.id} version ${key.version} missing material to derive public key`);
+      throw new Error(
+        `Key ${key.id} version ${key.version} missing material to derive public key`,
+      );
     }
     const privateKey = crypto.createPrivateKey(key.privateKeyPem);
     const publicKey = crypto.createPublicKey(privateKey);
@@ -72,7 +76,10 @@ export interface Rfc3161Options {
 }
 
 export class Rfc3161TimestampingService implements TimestampingService {
-  constructor(private readonly endpoint: string, private readonly options: Rfc3161Options = {}) {}
+  constructor(
+    private readonly endpoint: string,
+    private readonly options: Rfc3161Options = {},
+  ) {}
 
   async getTimestampToken(payload: Buffer): Promise<string> {
     const response = await fetch(this.endpoint, {
@@ -88,7 +95,9 @@ export class Rfc3161TimestampingService implements TimestampingService {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Timestamping service responded with ${response.status}: ${text}`);
+      throw new Error(
+        `Timestamping service responded with ${response.status}: ${text}`,
+      );
     }
 
     // Try to parse JSON { token }
@@ -96,7 +105,9 @@ export class Rfc3161TimestampingService implements TimestampingService {
     if (contentType.includes('application/json')) {
       const body = (await response.json()) as { token?: string };
       if (!body.token) {
-        throw new Error('Timestamping service returned JSON without token field');
+        throw new Error(
+          'Timestamping service returned JSON without token field',
+        );
       }
       return body.token;
     }
@@ -131,7 +142,9 @@ export class Rfc3161TimestampingService implements TimestampingService {
       return false;
     }
 
-    const body = (await response.json().catch(() => ({}))) as { valid?: boolean };
+    const body = (await response.json().catch(() => ({}))) as {
+      valid?: boolean;
+    };
     return body.valid === true;
   }
 }

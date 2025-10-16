@@ -1,14 +1,16 @@
 # 1) Helm chart — support image digest pinning (patch)
 
 **File:** `charts/intelgraph/values.yaml` (add digest field)
+
 ```yaml
 image:
   repository: ghcr.io/<org>/intelgraph-server
   tag: latest
-  digest: "" # when set, image will be pulled by digest
+  digest: '' # when set, image will be pulled by digest
 ```
 
 **File:** `charts/intelgraph/templates/deployment.yaml` (render image by digest when provided)
+
 ```diff
 -        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
 +        image: {{- if .Values.image.digest }}{{ .Values.image.repository }}@{{ .Values.image.digest }}{{- else }}{{ .Values.image.repository }}:{{ .Values.image.tag }}{{- end }}
@@ -22,6 +24,7 @@ image:
 # 2) Unified release.yml — pin digest + cosign sign/attest (patch)
 
 **File:** `.github/workflows/release.yml` (insert/modify steps)
+
 ```diff
  jobs:
    build-publish:
@@ -62,6 +65,7 @@ image:
 ```
 
 **Deploy jobs** — set the digest when calling Helm (example for EKS; mirror in GKE/AKS blocks):
+
 ```diff
 -      - name: Helm canary 10%
 +      - name: Helm canary 10% (pinned digest)
@@ -75,11 +79,13 @@ image:
 ```
 
 > If your workflow uses separate jobs, expose the digest via job output:
+
 ```yaml
-  build-publish:
-    outputs:
-      digest: ${{ steps.build.outputs.digest }}
+build-publish:
+  outputs:
+    digest: ${{ steps.build.outputs.digest }}
 ```
+
 …and reference it as `${{ needs.build-publish.outputs.digest }}` in deploy jobs.
 
 ---
@@ -87,6 +93,7 @@ image:
 # 3) Grafana dashboard — v24 Coherence SLOs (JSON)
 
 **File:** `kubernetes/grafana-dashboard.json`
+
 ```json
 {
   "title": "v24 Coherence — API & Subscriptions SLOs",
@@ -98,7 +105,9 @@ image:
       "type": "timeseries",
       "title": "GraphQL p95 duration (s)",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))"
+        }
       ],
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
     },
@@ -106,7 +115,9 @@ image:
       "type": "timeseries",
       "title": "GraphQL p99 duration (s)",
       "targets": [
-        { "expr": "histogram_quantile(0.99, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))" }
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))"
+        }
       ],
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
     },
@@ -114,7 +125,9 @@ image:
       "type": "stat",
       "title": "Error rate % (5m)",
       "targets": [
-        { "expr": "sum(rate(graphql_requests_total{status=~\"5..\"}[5m])) / sum(rate(graphql_requests_total[5m])) * 100" }
+        {
+          "expr": "sum(rate(graphql_requests_total{status=~\"5..\"}[5m])) / sum(rate(graphql_requests_total[5m])) * 100"
+        }
       ],
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 8 }
     },
@@ -122,28 +135,40 @@ image:
       "type": "timeseries",
       "title": "Subscription fan-out p95 (ms)",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[$__rate_interval])) by (le))" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[$__rate_interval])) by (le))"
+        }
       ],
       "gridPos": { "h": 6, "w": 16, "x": 8, "y": 8 }
     },
     {
       "type": "gauge",
       "title": "SLO — Read p95 threshold",
-      "targets": [ { "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le))" } ],
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le))"
+        }
+      ],
       "fieldConfig": { "defaults": { "max": 0.35 } },
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 14 }
     },
     {
       "type": "gauge",
       "title": "SLO — Sub fan-out p95 threshold",
-      "targets": [ { "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[5m])) by (le))" } ],
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[5m])) by (le))"
+        }
+      ],
       "fieldConfig": { "defaults": { "max": 250 } },
       "gridPos": { "h": 6, "w": 8, "x": 8, "y": 14 }
     },
     {
       "type": "stat",
       "title": "Requests per second",
-      "targets": [ { "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" } ],
+      "targets": [
+        { "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" }
+      ],
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 14 }
     }
   ],
@@ -156,6 +181,7 @@ image:
 # 4) Git commands — safe branch cleanup & recovery
 
 **Delete merged branch (local + remote)**
+
 ```bash
 git checkout main && git pull
 # Safety check — ensure fully merged
@@ -169,9 +195,9 @@ git push origin --delete feature/v24-coherence-slice-1
 ```
 
 **Recover (if needed)**
+
 ```bash
 # From the release tag
 git checkout -b feature/v24-coherence-slice-1 v24.0.0
 # Or via reflog (find SHA then): git checkout -b feature/v24-coherence-slice-1 <sha>
 ```
-

@@ -45,12 +45,16 @@ export const buildRectificationProof = (
   changes,
 });
 
-export const validateRectificationProof = (proof: RectificationProof): boolean => {
+export const validateRectificationProof = (
+  proof: RectificationProof,
+): boolean => {
   if (!proof.afterSnapshot) {
     return false;
   }
   const recomputedAfter = hashDeterministic(proof.afterSnapshot);
-  return recomputedAfter === proof.afterHash && proof.afterHash !== proof.beforeHash;
+  return (
+    recomputedAfter === proof.afterHash && proof.afterHash !== proof.beforeHash
+  );
 };
 
 export interface DeletionProof {
@@ -80,8 +84,14 @@ export const buildDeletionProof = (
 
 export const validateDeletionProof = (proof: DeletionProof): boolean => {
   const subjectMissing = !proof.remainingSubjectIds.includes(proof.subjectId);
-  const listHashMatches = hashDeterministic(proof.remainingSubjectIds) === proof.subjectListHash;
-  return subjectMissing && listHashMatches && typeof proof.dataHash === 'string' && proof.dataHash.length === 64;
+  const listHashMatches =
+    hashDeterministic(proof.remainingSubjectIds) === proof.subjectListHash;
+  return (
+    subjectMissing &&
+    listHashMatches &&
+    typeof proof.dataHash === 'string' &&
+    proof.dataHash.length === 64
+  );
 };
 
 export const validateDeletionProofAgainstSnapshot = (
@@ -89,10 +99,16 @@ export const validateDeletionProofAgainstSnapshot = (
   snapshot: ConnectorSnapshot,
 ): boolean => {
   const subjectMissing = !snapshot.subjectIds.includes(proof.subjectId);
-  const subjectListHashMatches = hashDeterministic(snapshot.subjectIds) === proof.subjectListHash;
+  const subjectListHashMatches =
+    hashDeterministic(snapshot.subjectIds) === proof.subjectListHash;
   const dataHashMatches = hashDeterministic(snapshot.data) === proof.dataHash;
   return subjectMissing && subjectListHashMatches && dataHashMatches;
 };
 
-export const validateDeletionProofs = (proofs: DeletionProof[], subjectId: string): boolean =>
-  proofs.every((proof) => validateDeletionProof(proof) && proof.subjectId === subjectId);
+export const validateDeletionProofs = (
+  proofs: DeletionProof[],
+  subjectId: string,
+): boolean =>
+  proofs.every(
+    (proof) => validateDeletionProof(proof) && proof.subjectId === subjectId,
+  );

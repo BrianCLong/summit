@@ -1,10 +1,12 @@
 # 🚀 MC Platform v0.3.4 T-0 LAUNCH SEQUENCE
+
 **Epic: Trust, Throughput, Tenants**
 **Status: CLEARED FOR IMMEDIATE LAUNCH**
 
 ## 🎯 **T-0 GO SEQUENCE (Copy/Paste Ready)**
 
 ### **1) Final Gate Sanity Check (Idempotent)**
+
 ```bash
 # Validate gate consistency
 bash scripts/validate-canary-gates.sh
@@ -17,6 +19,7 @@ make validate-canary
 ```
 
 ### **2) Execute Full Go-Live**
+
 ```bash
 # Make executable and run complete deployment
 chmod +x scripts/execute-v034-go-live.sh
@@ -37,6 +40,7 @@ Use prepared Slack templates in `comms/templates/v0.3.4-slack-messages.md`:
 ## ⚡ **IMMEDIATE POST-CUTOVER (10-Minute Sweep)**
 
 ### **Grafana Dashboard Checks**
+
 ```bash
 # GraphQL p95 monitoring
 curl -s "$PROM_URL/api/v1/query?query=histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket[5m]))" | jq .
@@ -45,6 +49,7 @@ curl -s "$PROM_URL/api/v1/query?query=histogram_quantile(0.95, rate(graphql_requ
 ```
 
 ### **A/A Replication Lag**
+
 ```bash
 # Check replication lag
 curl -s "$PROM_URL/api/v1/query?query=postgresql_replication_lag_seconds" | jq .
@@ -53,6 +58,7 @@ curl -s "$PROM_URL/api/v1/query?query=postgresql_replication_lag_seconds" | jq .
 ```
 
 ### **SIEM Delivery Rate**
+
 ```bash
 # Check SIEM delivery
 curl -s "$PROM_URL/api/v1/query?query=siem_delivery_success_rate" | jq .
@@ -61,6 +67,7 @@ curl -s "$PROM_URL/api/v1/query?query=siem_delivery_success_rate" | jq .
 ```
 
 ### **Budget Guard Status**
+
 ```bash
 # Check budget guard events
 curl -s "$PROM_URL/api/v1/query?query=budget_guard_enforcement_duration_seconds" | jq .
@@ -69,6 +76,7 @@ curl -s "$PROM_URL/api/v1/query?query=budget_guard_enforcement_duration_seconds"
 ```
 
 ### **Provenance API Health**
+
 ```bash
 # Spot check provenance queries
 curl -s "$PROVENANCE_API/traces/trace_001" -H "Accept: application/json"
@@ -80,6 +88,7 @@ curl -s "$PROVENANCE_API/traces/trace_002" -H "Accept: application/json"
 ## 🤖 **DAY-1 AUTOMATION (Already Wired)**
 
 Nightly 02:10 UTC job automatically produces:
+
 - Operations Delta with signed evidence
 - Slack notification in #deployment-updates
 - Comprehensive SLO validation
@@ -89,6 +98,7 @@ Nightly 02:10 UTC job automatically produces:
 ## 🚨 **INSTANT ROLLBACK (Only If Trigger Fires)**
 
 ### **Emergency Rollback Commands**
+
 ```bash
 # Immediate rollback to v0.3.3
 helm rollback agent-workbench 1 && \
@@ -102,6 +112,7 @@ kubectl patch configmap feature-flags -p '{"data":{"v034_features":"false"}}'
 ```
 
 ### **Rollback Evidence Collection**
+
 ```bash
 # Collect rollback metrics and evidence
 python3 tools/collect-rollback-evidence.py --cause="[ROLLBACK_REASON]" --metrics-snapshot
@@ -110,6 +121,7 @@ python3 tools/collect-rollback-evidence.py --cause="[ROLLBACK_REASON]" --metrics
 ## 🏆 **FINAL READINESS CONFIRMATION**
 
 ### **✅ PRE-FLIGHT STATUS**
+
 - [x] **Gate Consistency**: LOCKED with CI validation
 - [x] **Evidence Bundle**: Cryptographically signed and verified
 - [x] **Epic Features**: All 5 epics production-ready
@@ -118,6 +130,7 @@ python3 tools/collect-rollback-evidence.py --cause="[ROLLBACK_REASON]" --metrics
 - [x] **Communications**: Slack templates ready
 
 ### **✅ EPIC DEPLOYMENT READINESS**
+
 - [x] **E1 - Differential Privacy**: Mathematical ε/δ guarantees, zero PII violations
 - [x] **E2 - Config Auto-Remediation**: <10min MTTR with crypto attestation
 - [x] **E3 - Budget Guard**: <120s enforcement (achieved 45.2ms average!)
@@ -125,6 +138,7 @@ python3 tools/collect-rollback-evidence.py --cause="[ROLLBACK_REASON]" --metrics
 - [x] **E5 - Autonomy Tier-3**: TENANT_004/005 with 0.932 safety score
 
 ### **✅ OPERATIONAL EXCELLENCE**
+
 - [x] **Zero-drift deployment** with configuration locking
 - [x] **Championship-level automation** with comprehensive error handling
 - [x] **Enterprise-grade evidence** with cryptographic validation

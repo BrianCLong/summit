@@ -7,16 +7,16 @@ spec:
   background: true
   rules:
     - name: enforce-resources
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "CPU and memory requests/limits required"
+        message: 'CPU and memory requests/limits required'
         pattern:
           spec:
             containers:
-            - resources:
-                requests:
-                  memory: "?*"
-                  cpu: "?*"
-                limits:
-                  memory: "?*"
-                  cpu: "?*"
+              - resources:
+                  requests:
+                    memory: '?*'
+                    cpu: '?*'
+                  limits:
+                    memory: '?*'
+                    cpu: '?*'

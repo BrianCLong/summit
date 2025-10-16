@@ -4,7 +4,11 @@
     {
       "type": "timeseries",
       "title": "Plugin Invocations",
-      "targets": [{ "expr": "sum by (plugin,status) (rate(plugin_invocations_total[5m]))" }]
+      "targets": [
+        {
+          "expr": "sum by (plugin,status) (rate(plugin_invocations_total[5m]))"
+        }
+      ]
     },
     {
       "type": "timeseries",

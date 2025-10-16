@@ -15,11 +15,11 @@ const baselineSnapshot: WorkflowSnapshot = {
       purpose: 'ingest baseline',
       retention: 'standard-365d',
       licenseClass: 'internal',
-      pii: false
+      pii: false,
     },
     constraints: {
       latencyP95Ms: 2000,
-      budgetUSD: 100
+      budgetUSD: 100,
     },
     nodes: [
       {
@@ -28,7 +28,7 @@ const baselineSnapshot: WorkflowSnapshot = {
         name: 'Extract',
         params: { endpoint: 'https://api.mc.example/v1/export' },
         policy: { handlesPii: false },
-        produces: [{ name: 'raw', type: 'generic' }]
+        produces: [{ name: 'raw', type: 'generic' }],
       },
       {
         id: 'transform',
@@ -36,12 +36,10 @@ const baselineSnapshot: WorkflowSnapshot = {
         name: 'Transform',
         params: { script: 'normalize' },
         consumes: [{ name: 'raw', type: 'generic' }],
-        produces: [{ name: 'normalized', type: 'generic' }]
-      }
+        produces: [{ name: 'normalized', type: 'generic' }],
+      },
     ],
-    edges: [
-      { from: 'extract', to: 'transform', on: 'success' }
-    ]
+    edges: [{ from: 'extract', to: 'transform', on: 'success' }],
   },
   dependencies: [
     {
@@ -51,30 +49,30 @@ const baselineSnapshot: WorkflowSnapshot = {
       version: '1.2.0',
       domain: 'data',
       criticality: 'high',
-      attachedNodes: ['transform']
-    }
+      attachedNodes: ['transform'],
+    },
   ],
   policyBindings: [
     {
       controlId: 'privacy-guard',
       domain: 'privacy',
       coverage: 'full',
-      impactedNodes: ['extract']
-    }
+      impactedNodes: ['extract'],
+    },
   ],
   runtime: {
     stats: {
       latencyMs: 900,
       costUSD: 40,
       criticalPath: ['extract', 'transform'],
-      retries: 0
+      retries: 0,
     },
     resourceProfiles: [
       { nodeId: 'extract', latencyMs: 450, costUSD: 15 },
-      { nodeId: 'transform', latencyMs: 450, costUSD: 25 }
+      { nodeId: 'transform', latencyMs: 450, costUSD: 25 },
     ],
-    incidents: []
-  }
+    incidents: [],
+  },
 };
 
 const targetSnapshot: WorkflowSnapshot = {
@@ -90,11 +88,11 @@ const targetSnapshot: WorkflowSnapshot = {
       purpose: 'ingest with anonymization',
       retention: 'standard-365d',
       licenseClass: 'internal',
-      pii: true
+      pii: true,
     },
     constraints: {
       latencyP95Ms: 2200,
-      budgetUSD: 120
+      budgetUSD: 120,
     },
     nodes: [
       {
@@ -103,7 +101,7 @@ const targetSnapshot: WorkflowSnapshot = {
         name: 'Extract',
         params: { endpoint: 'https://api.mc.example/v2/export' },
         policy: { handlesPii: true },
-        produces: [{ name: 'raw', type: 'generic' }]
+        produces: [{ name: 'raw', type: 'generic' }],
       },
       {
         id: 'anonymize',
@@ -113,7 +111,7 @@ const targetSnapshot: WorkflowSnapshot = {
         consumes: [{ name: 'raw', type: 'generic' }],
         produces: [{ name: 'masked', type: 'generic' }],
         policy: { handlesPii: true },
-        estimates: { costUSD: 10, latencyP95Ms: 350 }
+        estimates: { costUSD: 10, latencyP95Ms: 350 },
       },
       {
         id: 'transform',
@@ -121,13 +119,13 @@ const targetSnapshot: WorkflowSnapshot = {
         name: 'Transform',
         params: { script: 'normalize-v2' },
         consumes: [{ name: 'masked', type: 'generic' }],
-        produces: [{ name: 'normalized', type: 'generic' }]
-      }
+        produces: [{ name: 'normalized', type: 'generic' }],
+      },
     ],
     edges: [
       { from: 'extract', to: 'anonymize', on: 'success' },
-      { from: 'anonymize', to: 'transform', on: 'success' }
-    ]
+      { from: 'anonymize', to: 'transform', on: 'success' },
+    ],
   },
   dependencies: [
     {
@@ -137,7 +135,7 @@ const targetSnapshot: WorkflowSnapshot = {
       version: '2.0.0',
       domain: 'data',
       criticality: 'mission-critical',
-      attachedNodes: ['transform']
+      attachedNodes: ['transform'],
     },
     {
       id: 'privacy-service',
@@ -146,44 +144,44 @@ const targetSnapshot: WorkflowSnapshot = {
       version: '5.1.0',
       domain: 'privacy',
       criticality: 'high',
-      attachedNodes: ['anonymize']
-    }
+      attachedNodes: ['anonymize'],
+    },
   ],
   policyBindings: [
     {
       controlId: 'privacy-guard',
       domain: 'privacy',
       coverage: 'partial',
-      impactedNodes: ['extract', 'anonymize']
+      impactedNodes: ['extract', 'anonymize'],
     },
     {
       controlId: 'reg-ops',
       domain: 'regulatory',
       coverage: 'none',
-      impactedNodes: ['transform']
-    }
+      impactedNodes: ['transform'],
+    },
   ],
   runtime: {
     stats: {
       latencyMs: 1500,
       costUSD: 65,
       criticalPath: ['extract', 'anonymize', 'transform'],
-      retries: 2
+      retries: 2,
     },
     resourceProfiles: [
       { nodeId: 'extract', latencyMs: 500, costUSD: 20 },
       { nodeId: 'anonymize', latencyMs: 600, costUSD: 15 },
-      { nodeId: 'transform', latencyMs: 400, costUSD: 30 }
+      { nodeId: 'transform', latencyMs: 400, costUSD: 30 },
     ],
     incidents: [
       {
         id: 'incident-1',
         severity: 'high',
         summary: 'Data surge triggered throttling',
-        nodes: ['anonymize']
-      }
-    ]
-  }
+        nodes: ['anonymize'],
+      },
+    ],
+  },
 };
 
 describe('workflow diff engine', () => {
@@ -191,19 +189,35 @@ describe('workflow diff engine', () => {
     const result = diffWorkflowSnapshots(baselineSnapshot, targetSnapshot);
 
     expect(result.graphDelta.baselineFingerprint).not.toEqual(
-      result.graphDelta.targetFingerprint
+      result.graphDelta.targetFingerprint,
     );
-    expect(result.functionalChanges.some((change) => change.severity === 'critical')).toBe(true);
+    expect(
+      result.functionalChanges.some((change) => change.severity === 'critical'),
+    ).toBe(true);
     expect(result.dependencyChanges.length).toBeGreaterThan(0);
-    expect(result.dependencyChanges.some((change) => change.domain === 'data')).toBe(true);
-    expect(result.policyChanges.some((change) => change.domain === 'regulatory')).toBe(true);
-    expect(result.runtimeChanges.some((change) => change.impactedNodes.includes('anonymize'))).toBe(
-      true
-    );
+    expect(
+      result.dependencyChanges.some((change) => change.domain === 'data'),
+    ).toBe(true);
+    expect(
+      result.policyChanges.some((change) => change.domain === 'regulatory'),
+    ).toBe(true);
+    expect(
+      result.runtimeChanges.some((change) =>
+        change.impactedNodes.includes('anonymize'),
+      ),
+    ).toBe(true);
 
-    expect(result.riskAnnotations.some((annotation) => annotation.domain === 'privacy')).toBe(true);
+    expect(
+      result.riskAnnotations.some(
+        (annotation) => annotation.domain === 'privacy',
+      ),
+    ).toBe(true);
     expect(result.migrationPlan.steps.length).toBeGreaterThan(0);
-    expect(result.migrationPlan.tests.map((test) => test.name)).toContain('policy-regression');
-    expect(result.continuousChecks.map((check) => check.name)).toContain('gapless-merge-simulator');
+    expect(result.migrationPlan.tests.map((test) => test.name)).toContain(
+      'policy-regression',
+    );
+    expect(result.continuousChecks.map((check) => check.name)).toContain(
+      'gapless-merge-simulator',
+    );
   });
 });

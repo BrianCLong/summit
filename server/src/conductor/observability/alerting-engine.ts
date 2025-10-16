@@ -82,7 +82,9 @@ export class AlertingEngine {
   /**
    * Create production-ready alert rule
    */
-  async createAlertRule(rule: Omit<AlertRule, 'id' | 'createdAt'>): Promise<AlertRule> {
+  async createAlertRule(
+    rule: Omit<AlertRule, 'id' | 'createdAt'>,
+  ): Promise<AlertRule> {
     const alertRule: AlertRule = {
       ...rule,
       id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -123,7 +125,10 @@ export class AlertingEngine {
       client.release();
     }
 
-    logger.info('Alert rule created', { ruleId: alertRule.id, name: alertRule.name });
+    logger.info('Alert rule created', {
+      ruleId: alertRule.id,
+      name: alertRule.name,
+    });
     return alertRule;
   }
 
@@ -146,7 +151,10 @@ export class AlertingEngine {
       }
 
       // Update evaluation metrics
-      prometheusConductorMetrics.recordOperationalMetric('alert_rules_evaluated', rules.length);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'alert_rules_evaluated',
+        rules.length,
+      );
     } catch (error) {
       logger.error('Alert evaluation loop failed', { error: error.message });
     }
@@ -241,7 +249,9 @@ export class AlertingEngine {
   /**
    * Configure alert destination
    */
-  async configureDestination(destination: Omit<AlertDestination, 'id'>): Promise<AlertDestination> {
+  async configureDestination(
+    destination: Omit<AlertDestination, 'id'>,
+  ): Promise<AlertDestination> {
     const alertDestination: AlertDestination = {
       ...destination,
       id: `dest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -282,7 +292,11 @@ export class AlertingEngine {
    * Set up on-call rotation
    */
   async configureOnCallRotation(rotation: OnCallRotation): Promise<void> {
-    await this.redis.hset('oncall_rotations', rotation.scheduleId, JSON.stringify(rotation));
+    await this.redis.hset(
+      'oncall_rotations',
+      rotation.scheduleId,
+      JSON.stringify(rotation),
+    );
 
     // Schedule rotation event
     await this.redis.zadd(
@@ -340,7 +354,9 @@ export class AlertingEngine {
 
     // Validate duration format
     if (!/^\d+[smhd]$/.test(rule.duration)) {
-      throw new Error('Invalid duration format. Use format like "5m", "1h", "1d"');
+      throw new Error(
+        'Invalid duration format. Use format like "5m", "1h", "1d"',
+      );
     }
 
     // Validate severity
@@ -400,7 +416,11 @@ export class AlertingEngine {
         const labels = result.metric || {};
 
         // Check threshold
-        const shouldAlert = this.evaluateThreshold(value, rule.threshold, rule.comparison);
+        const shouldAlert = this.evaluateThreshold(
+          value,
+          rule.threshold,
+          rule.comparison,
+        );
         const fingerprint = this.calculateAlertFingerprint(rule, labels);
 
         if (shouldAlert) {
@@ -421,11 +441,18 @@ export class AlertingEngine {
         await this.resolveAlert(fingerprint);
       }
     } catch (error) {
-      logger.error('Rule evaluation failed', { ruleId: rule.id, error: error.message });
+      logger.error('Rule evaluation failed', {
+        ruleId: rule.id,
+        error: error.message,
+      });
     }
   }
 
-  private evaluateThreshold(value: number, threshold: number, comparison: string): boolean {
+  private evaluateThreshold(
+    value: number,
+    threshold: number,
+    comparison: string,
+  ): boolean {
     switch (comparison) {
       case 'gt':
         return value > threshold;
@@ -444,7 +471,10 @@ export class AlertingEngine {
     }
   }
 
-  private async checkAlertDuration(rule: AlertRule, fingerprint: string): Promise<boolean> {
+  private async checkAlertDuration(
+    rule: AlertRule,
+    fingerprint: string,
+  ): Promise<boolean> {
     // Check Redis for duration tracking
     const durationKey = `alert_duration:${fingerprint}`;
     const firstBreach = await this.redis.get(durationKey);
@@ -491,7 +521,10 @@ export class AlertingEngine {
     return this.parseDurationToSeconds(duration) * 1000;
   }
 
-  private calculateAlertFingerprint(rule: AlertRule, labels: Record<string, string>): string {
+  private calculateAlertFingerprint(
+    rule: AlertRule,
+    labels: Record<string, string>,
+  ): string {
     const labelStr = Object.entries(labels)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}=${v}`)
@@ -510,9 +543,12 @@ export class AlertingEngine {
 
     // Replace template variables
     message = message.replace(/\{\{\s*\.Value\s*\}\}/g, value.toString());
-    message = message.replace(/\{\{\s*\.Labels\.(\w+)\s*\}\}/g, (match, labelName) => {
-      return labels[labelName] || 'unknown';
-    });
+    message = message.replace(
+      /\{\{\s*\.Labels\.(\w+)\s*\}\}/g,
+      (match, labelName) => {
+        return labels[labelName] || 'unknown';
+      },
+    );
 
     return message;
   }
@@ -533,7 +569,9 @@ export class AlertingEngine {
     }
   }
 
-  private async getMatchingDestinations(alert: Alert): Promise<AlertDestination[]> {
+  private async getMatchingDestinations(
+    alert: Alert,
+  ): Promise<AlertDestination[]> {
     const client = await this.pool.connect();
     try {
       const result = await client.query(`
@@ -552,7 +590,10 @@ export class AlertingEngine {
         }))
         .filter((dest) => {
           // Filter by severity
-          if (dest.severityFilter.length > 0 && !dest.severityFilter.includes(alert.severity)) {
+          if (
+            dest.severityFilter.length > 0 &&
+            !dest.severityFilter.includes(alert.severity)
+          ) {
             return false;
           }
 
@@ -568,7 +609,10 @@ export class AlertingEngine {
     }
   }
 
-  private async sendAlert(alert: Alert, destination: AlertDestination): Promise<void> {
+  private async sendAlert(
+    alert: Alert,
+    destination: AlertDestination,
+  ): Promise<void> {
     switch (destination.type) {
       case 'pagerduty':
         await this.sendPagerDutyAlert(alert, destination.config);
@@ -617,7 +661,11 @@ export class AlertingEngine {
 
   private async sendSlackAlert(alert: Alert, config: any): Promise<void> {
     const color =
-      alert.severity === 'critical' ? 'danger' : alert.severity === 'warning' ? 'warning' : 'good';
+      alert.severity === 'critical'
+        ? 'danger'
+        : alert.severity === 'warning'
+          ? 'warning'
+          : 'good';
 
     const payload = {
       text: `🚨 ${alert.severity.toUpperCase()} Alert`,
@@ -629,7 +677,11 @@ export class AlertingEngine {
           fields: [
             { title: 'Severity', value: alert.severity, short: true },
             { title: 'Status', value: alert.status, short: true },
-            { title: 'Started At', value: alert.startsAt.toISOString(), short: true },
+            {
+              title: 'Started At',
+              value: alert.startsAt.toISOString(),
+              short: true,
+            },
           ],
           actions: [
             {
@@ -780,7 +832,10 @@ View Details: ${alert.generatorUrl}
     }
   }
 
-  private async performRotation(scheduleId: string, rotation: OnCallRotation): Promise<void> {
+  private async performRotation(
+    scheduleId: string,
+    rotation: OnCallRotation,
+  ): Promise<void> {
     // Rotate to next on-call
     const newRotation: OnCallRotation = {
       ...rotation,
@@ -789,7 +844,11 @@ View Details: ${alert.generatorUrl}
       rotationAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Next week
     };
 
-    await this.redis.hset('oncall_rotations', scheduleId, JSON.stringify(newRotation));
+    await this.redis.hset(
+      'oncall_rotations',
+      scheduleId,
+      JSON.stringify(newRotation),
+    );
 
     logger.info('On-call rotation performed', {
       scheduleId,

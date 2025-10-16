@@ -17,29 +17,42 @@ export class OpenAIChatAdapter implements LLMAdapter {
     this.defaultSystemPrompt = options.systemPrompt;
   }
 
-  format<TSlots extends SlotSchemaMap>(compiled: CompiledPrompt<TSlots>, options: Record<string, unknown> = {}) {
-    const overrideModel = typeof options.model === 'string' ? (options.model as string) : undefined;
-    const overrideSystem = typeof options.systemPrompt === 'string' ? (options.systemPrompt as string) : undefined;
+  format<TSlots extends SlotSchemaMap>(
+    compiled: CompiledPrompt<TSlots>,
+    options: Record<string, unknown> = {},
+  ) {
+    const overrideModel =
+      typeof options.model === 'string' ? (options.model as string) : undefined;
+    const overrideSystem =
+      typeof options.systemPrompt === 'string'
+        ? (options.systemPrompt as string)
+        : undefined;
 
     return {
       model: overrideModel ?? this.defaultModel,
-      messages: buildMessages(compiled, overrideSystem ?? this.defaultSystemPrompt),
+      messages: buildMessages(
+        compiled,
+        overrideSystem ?? this.defaultSystemPrompt,
+      ),
       metadata: {
         template: compiled.name,
         slots: Object.keys(compiled.slots),
-        values: compiled.values
-      }
+        values: compiled.values,
+      },
     };
   }
 }
 
 function buildMessages<TSlots extends SlotSchemaMap>(
   compiled: CompiledPrompt<TSlots>,
-  systemPrompt?: string
+  systemPrompt?: string,
 ): Array<{ role: 'system' | 'user'; content: string }> {
   const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
   if (systemPrompt ?? compiled.metadata?.systemPrompt) {
-    messages.push({ role: 'system', content: String(systemPrompt ?? compiled.metadata?.systemPrompt) });
+    messages.push({
+      role: 'system',
+      content: String(systemPrompt ?? compiled.metadata?.systemPrompt),
+    });
   } else if (compiled.description) {
     messages.push({ role: 'system', content: compiled.description });
   }

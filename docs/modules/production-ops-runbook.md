@@ -393,7 +393,9 @@ kubectl rollout status deployment/api -n intelgraph
     }
 
     function showToast(message, type) {
-      var toast = $('<div class="toast toast-' + type + '">' + message + '</div>');
+      var toast = $(
+        '<div class="toast toast-' + type + '">' + message + '</div>',
+      );
       $('.toast-container').append(toast);
       setTimeout(function () {
         toast.fadeOut(300, function () {
@@ -418,7 +420,13 @@ function sendToAnalytics({ name, value, id, delta }) {
   fetch('/api/metrics/web-vitals', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ metric: name, value, id, delta, url: location.href }),
+    body: JSON.stringify({
+      metric: name,
+      value,
+      id,
+      delta,
+      url: location.href,
+    }),
   });
 }
 

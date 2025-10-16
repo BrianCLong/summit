@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from statistics import mean
-from typing import Dict, List, Sequence
 
 from .sampling import SampleResult
 from .utils import Record, group_by
 
 
-def population_stats(records: Sequence[Record], metric: str) -> Dict[str, float]:
+def population_stats(records: Sequence[Record], metric: str) -> dict[str, float]:
     values = [record.metric(metric) for record in records]
     n = len(values)
     pop_mean = mean(values)
@@ -21,8 +21,8 @@ def population_stats(records: Sequence[Record], metric: str) -> Dict[str, float]
     }
 
 
-def sample_stats(result: SampleResult, metric: str) -> Dict[str, float]:
-    values: List[float] = []
+def sample_stats(result: SampleResult, metric: str) -> dict[str, float]:
+    values: list[float] = []
     for item in result.sampled:
         value = item.record.metric(metric)
         if item.draw_count > 1:
@@ -43,9 +43,9 @@ def sample_stats(result: SampleResult, metric: str) -> Dict[str, float]:
 @dataclass
 class Evaluation:
     plan_type: str
-    proof: Dict[str, object]
-    population: Dict[str, float]
-    sample: Dict[str, float]
+    proof: dict[str, object]
+    population: dict[str, float]
+    sample: dict[str, float]
     expected_bias: float
     observed_bias: float
     expected_variance: float
@@ -85,7 +85,7 @@ def estimate_variance(
     result: SampleResult,
     population: Sequence[Record],
     metric: str,
-    sample_stats_result: Dict[str, float],
+    sample_stats_result: dict[str, float],
 ) -> float:
     metadata = result.metadata or {}
     n_population = len(population)
@@ -113,9 +113,9 @@ def estimate_variance(
             total += (Wh**2) * ((1 - nh / Nh) * sh2 / nh)
         return total
     if result.plan_type == "pps":
-        metadata_probs: Dict[int, float] = metadata.get("probabilities", {})  # type: ignore[arg-type]
+        metadata_probs: dict[int, float] = metadata.get("probabilities", {})  # type: ignore[arg-type]
         draws = max(1, int(metadata.get("draws", 1)))
-        contributions: List[float] = []
+        contributions: list[float] = []
         for item in result.sampled:
             base_prob = metadata_probs.get(item.record.index)
             if base_prob is None or base_prob == 0:
@@ -136,7 +136,7 @@ def analytical_expectations(
     result: SampleResult,
     population: Sequence[Record],
     metric: str,
-    pop_stats: Dict[str, float],
+    pop_stats: dict[str, float],
 ) -> tuple[float, float]:
     n_population = len(population)
     metadata = result.metadata or {}
@@ -149,17 +149,13 @@ def analytical_expectations(
         if n_population <= 1 or n_sample == 0:
             expected_variance = 0.0
         else:
-            expected_variance = (
-                (1 - n_sample / n_population)
-                * pop_stats["variance"]
-                / n_sample
-            )
+            expected_variance = (1 - n_sample / n_population) * pop_stats["variance"] / n_sample
         return expected_bias, expected_variance
     if result.plan_type == "stratified":
         expected_bias = 0.0
         strata_keys = metadata.get("strata_keys", [])
         strata_groups = group_by(population, strata_keys)
-        strata_meta: Dict[str, Dict[str, int]] = metadata.get("strata", {})
+        strata_meta: dict[str, dict[str, int]] = metadata.get("strata", {})
         expected_variance = 0.0
         for key, records_in_stratum in strata_groups.items():
             Nh = len(records_in_stratum)
@@ -174,9 +170,9 @@ def analytical_expectations(
         return expected_bias, expected_variance
     if result.plan_type == "pps":
         # Hansen-Hurwitz estimator variance
-        probability_map: Dict[int, float] = metadata.get("probabilities", {})  # type: ignore[arg-type]
+        probability_map: dict[int, float] = metadata.get("probabilities", {})  # type: ignore[arg-type]
         draws = max(1, int(metadata.get("draws", 1)))
-        contributions: List[float] = []
+        contributions: list[float] = []
         for item in result.sampled:
             base_prob = probability_map.get(item.record.index)
             if base_prob is None or base_prob == 0:

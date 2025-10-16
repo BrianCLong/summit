@@ -1,4 +1,4 @@
-```markdown
+````markdown
 ---
 slug: sprint-2025-09-29-bravo-artifacts
 version: v2025.09.29-b3
@@ -15,43 +15,53 @@ _Source basis: repository bundles `summit-main` and `summit-2025.09.23.1710` wit
 ---
 
 ## 1) Pull Request Template
+
 **Path:** `.github/pull_request_template.md`
+
 ```markdown
 ## Summary
 
 ## Change Type
+
 - [ ] App code
 - [ ] Infra/IaC (Terraform/Helm)
 - [ ] Security/Policy (OPA/Secrets)
 - [ ] Data migration (requires migration gate)
 
 ## Risk & Canary Plan
+
 - rollout: 10→30→60→100
 - guardrails: error-rate, p95 latency
 - rollback: `helm rollback <release> <rev>` + feature-flags
 
 ## Testing
+
 - unit:
 - e2e:
 - perf (k6):
 - security (SAST/SCA):
 
 ## Observability
+
 - traces added/updated:
 - metrics/dashboards:
 - logs (structured fields):
 
 ## Checklist
+
 - [ ] No plaintext secrets
 - [ ] SBOM produced; no CRITICAL vulns
 - [ ] Migration gate artifact attached (if schema)
 - [ ] Runbook updated
 ```
+````
 
 ---
 
 ## 2) Auto-label by Path (Projects V2 friendly)
+
 **Path:** `.github/labeler.yml`
+
 ```yaml
 ci/cd:
   - .github/workflows/**
@@ -76,8 +86,10 @@ feature-flag:
 migration-gate:
   - ops/migrations/**
 ```
+
 Add workflow:
 **Path:** `.github/workflows/labeler.yml`
+
 ```yaml
 name: Pull Request Labeler
 on:
@@ -97,7 +109,9 @@ jobs:
 ---
 
 ## 3) Makefile — Preview, Canary, Rollback
+
 **Path:** `Makefile`
+
 ```make
 REG ?= ghcr.io/your-org
 APP ?= app
@@ -131,17 +145,19 @@ rollback:
 ---
 
 ## 4) Helm Overlays — Canary & Preview
+
 **Path:** `charts/app/values-canary.yaml`
+
 ```yaml
 rollout:
   enabled: true
   steps:
     - setWeight: 10
-    - pause: {duration: 2m}
+    - pause: { duration: 2m }
     - setWeight: 30
-    - pause: {duration: 5m}
+    - pause: { duration: 5m }
     - setWeight: 60
-    - pause: {duration: 10m}
+    - pause: { duration: 10m }
 metrics:
   - name: error-rate
     provider: prometheus
@@ -154,24 +170,28 @@ metrics:
     failureLimit: 1
     query: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.5
 ```
+
 **Path:** `charts/preview/values.yaml`
+
 ```yaml
 image:
   tag: latest
 resources:
-  requests: { cpu: "50m", memory: "128Mi" }
-  limits: { cpu: "250m", memory: "512Mi" }
+  requests: { cpu: '50m', memory: '128Mi' }
+  limits: { cpu: '250m', memory: '512Mi' }
 env:
   - name: NODE_ENV
-    value: "staging"
+    value: 'staging'
   - name: FEATURE_FLAGS
-    value: "safe_defaults"
+    value: 'safe_defaults'
 ```
 
 ---
 
 ## 5) Prometheus Alert Rules — RED + Burn Rate
+
 **Path:** `charts/monitoring/templates/alerts-canary.yaml`
+
 ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -180,30 +200,32 @@ metadata:
   labels: { role: canary }
 spec:
   groups:
-  - name: canary.rules
-    rules:
-    - alert: CanaryHighErrorRate
-      expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.02
-      for: 5m
-      labels: { severity: critical, signal: error }
-      annotations: { summary: "Canary error rate > 2%" }
-    - alert: CanaryLatencyP95High
-      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.5
-      for: 5m
-      labels: { severity: critical, signal: latency }
-      annotations: { summary: "Canary p95 latency > 1.5s" }
-    - alert: ErrorBudgetBurnFast
-      expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+    - name: canary.rules
+      rules:
+        - alert: CanaryHighErrorRate
+          expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.02
+          for: 5m
+          labels: { severity: critical, signal: error }
+          annotations: { summary: 'Canary error rate > 2%' }
+        - alert: CanaryLatencyP95High
+          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.5
+          for: 5m
+          labels: { severity: critical, signal: latency }
+          annotations: { summary: 'Canary p95 latency > 1.5s' }
+        - alert: ErrorBudgetBurnFast
+          expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
             / sum(rate(http_requests_total[5m])) by (service)) > 0.02
-      for: 2m
-      labels: { severity: page, burn: fast }
-      annotations: { summary: "Fast burn: 2%+ errors" }
+          for: 2m
+          labels: { severity: page, burn: fast }
+          annotations: { summary: 'Fast burn: 2%+ errors' }
 ```
 
 ---
 
 ## 6) Grafana Dashboards — RED per Service
+
 **Path:** `charts/grafana/dashboards/red.json`
+
 ```json
 {
   "title": "Service RED (p95, error rate, requests)",
@@ -219,7 +241,9 @@ spec:
 ---
 
 ## 7) OTEL Config (Collector) & App Hints
+
 **Path:** `charts/ig-platform/templates/otel-collector-configmap.yaml`
+
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -247,7 +271,9 @@ data:
         traces: { receivers: [otlp], processors: [batch], exporters: [otlp] }
         metrics: { receivers: [otlp], processors: [batch], exporters: [prometheus] }
 ```
+
 **Node/Express middleware snippet** (drop in `services/api-gateway/otel/middleware.ts`):
+
 ```ts
 import { context, trace, SpanStatusCode } from '@opentelemetry/api';
 export function withTrace(name: string, fn: any) {
@@ -256,15 +282,22 @@ export function withTrace(name: string, fn: any) {
     await tracer.startActiveSpan(name, async (span) => {
       try {
         span.setAttribute('http.route', req.path);
-        span.setAttribute('user.id.hash', req.headers['x-user'] ? String(req.headers['x-user']).slice(-8) : 'anon');
-        span.setAttribute('feature_flags', process.env.FEATURE_FLAGS||'');
+        span.setAttribute(
+          'user.id.hash',
+          req.headers['x-user']
+            ? String(req.headers['x-user']).slice(-8)
+            : 'anon',
+        );
+        span.setAttribute('feature_flags', process.env.FEATURE_FLAGS || '');
         await fn(req, res, next);
         span.setStatus({ code: SpanStatusCode.OK });
-      } catch (e:any) {
+      } catch (e: any) {
         span.recordException(e);
         span.setStatus({ code: SpanStatusCode.ERROR, message: e.message });
         next(e);
-      } finally { span.end(); }
+      } finally {
+        span.end();
+      }
     });
   };
 }
@@ -273,33 +306,40 @@ export function withTrace(name: string, fn: any) {
 ---
 
 ## 8) OPA/Gatekeeper Policies
+
 **Path:** `policy/constraints.yaml`
+
 ```yaml
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredProbes
 metadata: { name: require-probes }
 spec:
-  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
+  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
   parameters: { livenessProbe: true, readinessProbe: true }
 ---
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: DisallowLatestTag
 metadata: { name: disallow-latest }
 spec:
-  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
+  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
 ```
 
 ---
 
 ## 9) Sealed Secrets (pattern)
+
 **Path:** `secrets/README.md`
+
 ```md
 # Sealed Secrets
+
 - Create secret: `kubectl create secret generic app-secrets -n prod --from-literal=API_KEY=... --dry-run=client -o yaml > secret.yaml`
 - Seal: `kubeseal --controller-name=sealed-secrets --format yaml < secret.yaml > sealed-secret.yaml`
 - Commit `sealed-secret.yaml`, never commit `secret.yaml`.
 ```
+
 **Path:** `.github/workflows/sealed-secrets-validate.yml`
+
 ```yaml
 name: Validate Sealed Secrets
 on: [pull_request]
@@ -316,7 +356,9 @@ jobs:
 ---
 
 ## 10) Migration Gate Scripts
+
 **Path:** `ops/migrations/migrate.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -326,7 +368,9 @@ psql "$DB" -c "BEGIN; \i $FILE; ROLLBACK;" >/dev/null
 sha=$(sha256sum "$FILE" | awk '{print $1}')
 echo "$FILE sha256=$sha" > "$FILE.sha"
 ```
+
 **Path:** `.github/workflows/migration-gate.yml`
+
 ```yaml
 name: migration-gate
 on: [pull_request]
@@ -346,7 +390,9 @@ jobs:
 ---
 
 ## 11) Service-Specific Health & Probes
+
 **Path:** `services/api-gateway/k8s/deployment.yaml` (excerpt)
+
 ```yaml
 livenessProbe:
   httpGet: { path: /health, port: 8080 }
@@ -357,36 +403,46 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 ```
+
 Repeat for `services/ingest`, `services/docs-api`.
 
 ---
 
 ## 12) DR Drill Playbook (Stage)
+
 **Path:** `runbooks/dr-drill-stage.md`
+
 ```md
 # DR Drill — Stage
+
 ## Preconditions
+
 - Read replicas healthy; PITR enabled; backups < 24h old
 - Health checks in Route53 green
 
 ## Steps
+
 1. Freeze writes on primary (feature flag `writes_enabled=false`).
 2. Promote replica in secondary region; update DNS weight to 100.
 3. Run smoke (`/health`,`/ready`), functional path, and data checksums.
 4. Record timestamps: start, promote, DNS propagate, healthy, accept traffic.
 
 ## Success Criteria
+
 - RTO ≤ 15 min, RPO ≤ 5 min
 - Dashboards show stable p95 and error rate
 
 ## Rollback
+
 - Flip DNS back; re-enable writes; reconcile lagging events
 ```
 
 ---
 
 ## 13) Release Notes Generator (CLI)
+
 **Path:** `tools/release-notes.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -407,7 +463,9 @@ EOF
 ---
 
 ## 14) Soak & Go/No-Go Checklist (to pin)
+
 **Path:** `checklists/go-no-go.md`
+
 ```md
 - [ ] Stage stable ≥ 48h
 - [ ] Canary metrics green
@@ -419,5 +477,7 @@ EOF
 ---
 
 _End of artifacts._
+
 ```
 
+```

@@ -4,7 +4,11 @@ import TimelinePane from '../../../components/TimelinePane';
 import PolicyBadge from '../../../components/PolicyBadge';
 import { api } from '../../../lib/api';
 
-export default async function EntityPage({ params }: { params: { id: string } }) {
+export default async function EntityPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const data = await api(`/views/tripane?entity_id=${params.id}`);
   return (
     <div>

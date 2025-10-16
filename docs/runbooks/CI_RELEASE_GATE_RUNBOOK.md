@@ -25,6 +25,7 @@ The release gate enforces fail-closed policy validation before any code reaches 
 **Workflow**: `.github/workflows/policy.check.release-gate.yml`
 
 **Triggers**:
+
 - Pull requests to `main`
 - Pushes to `main` branch
 - Git tags
@@ -32,6 +33,7 @@ The release gate enforces fail-closed policy validation before any code reaches 
 - Manual workflow dispatch
 
 **Inputs Validated**:
+
 ```yaml
 ci_status: "success" | "failure"
 tests_passed: true | false
@@ -56,12 +58,14 @@ critical_vulnerabilities: 0
 **Workflow**: `.github/workflows/build-sbom-provenance.yml`
 
 **Triggers**:
+
 - Pushes to `main`
 - Tags
 - Pull requests
 - Releases
 
 **Artifacts Generated**:
+
 - `sbom.json` (CycloneDX JSON)
 - `sbom.xml` (CycloneDX XML)
 - `provenance.json` (SLSA v0.2)
@@ -76,11 +80,13 @@ critical_vulnerabilities: 0
 **Workflow**: `.github/workflows/security-scans-sarif.yml`
 
 **Triggers**:
+
 - Pull requests
 - Pushes to `main`
 - Weekly schedule (Mondays 8 AM UTC)
 
 **Scans Performed**:
+
 1. **CodeQL** - JavaScript/TypeScript + Python (security-extended queries)
 2. **Trivy Filesystem** - Dependencies + OS packages (CRITICAL, HIGH, MEDIUM)
 3. **Trivy Config** - IaC misconfigurations (CRITICAL, HIGH)
@@ -98,17 +104,20 @@ critical_vulnerabilities: 0
 **Workflow**: `.github/workflows/k6-golden-flow.yml`
 
 **Triggers**:
+
 - Pull requests
 - Pushes to `main`
 - Nightly schedule (2 AM UTC)
 
 **Tests**:
+
 - Login flow (SLO: <2s)
 - Query graph data (SLO: <1.5s)
 - Render visualization (SLO: <3s)
 - Export with provenance (SLO: <5s)
 
 **Thresholds**:
+
 - API p95 latency: <1.5s
 - Golden flow success rate: >99%
 - HTTP error rate: <1%
@@ -122,16 +131,19 @@ critical_vulnerabilities: 0
 **Workflow**: `.github/workflows/e2e-golden-path.yml`
 
 **Triggers**:
+
 - Pull requests
 - Pushes to `main`
 - Daily schedule (6 AM UTC)
 - Manual dispatch
 
 **Services**:
+
 - OPA (port 8181)
 - Neo4j (ports 7687, 7474)
 
 **Test Flow**:
+
 1. Seed test data (3 entities, 2 relationships)
 2. Execute NL→Cypher query
 3. Attempt export without step-up (expect 403)
@@ -141,6 +153,7 @@ critical_vulnerabilities: 0
 7. Verify OPA policy outcomes
 
 **Proof Artifacts** (8 files in `e2e-proof/`):
+
 - `01_seed_response.json`
 - `02_query_response.json`
 - `03a_export_blocked.json`
@@ -211,6 +224,7 @@ denial_reason := reason if {
 ### Violation Handling
 
 **If policy denies**:
+
 1. PR/push is blocked with detailed violation message
 2. Violation includes:
    - Category (ci_checks_failed, missing_artifacts, security_gate_failed, critical_vulns)
@@ -219,6 +233,7 @@ denial_reason := reason if {
 3. Audit record created with policy decision + inputs
 
 **Appeal Process**:
+
 1. Create issue with label `release-gate-appeal`
 2. Include: PR/tag URL, violation message, justification
 3. Release Engineering reviews within 4 hours
@@ -233,6 +248,7 @@ denial_reason := reason if {
 **Symptom**: PR fails with "Required artifacts not present"
 
 **Diagnosis**:
+
 ```bash
 # Check if SBOM workflow ran
 gh run list --workflow=build-sbom-provenance.yml --limit 5
@@ -242,6 +258,7 @@ gh run view <run-id> --log | grep "Upload SBOM"
 ```
 
 **Resolution**:
+
 1. Verify `package.json` exists and is valid
 2. Re-trigger SBOM workflow:
    ```bash
@@ -257,6 +274,7 @@ gh run view <run-id> --log | grep "Upload SBOM"
 **Symptom**: Release gate fails with "Critical vulnerabilities found"
 
 **Diagnosis**:
+
 ```bash
 # View security scan results
 gh run list --workflow=security-scans-sarif.yml --limit 1
@@ -270,11 +288,13 @@ gh api repos/BrianCLong/summit/code-scanning/alerts \
 **Resolution Options**:
 
 **Option A: Fix vulnerability**
+
 1. Update dependency: `npm update <package>`
 2. Commit fix
 3. Re-run security scans
 
 **Option B: Request waiver** (if fix not available)
+
 1. Document in `SECURITY_WAIVERS.md`:
    ```markdown
    | WAV-001 | CVE-2025-1234 | CRITICAL | lodash@4.17.0 | No patch available; risk mitigated by WAF rules | WAF blocking all untrusted inputs | security-team | 2025-11-01 | ACTIVE |
@@ -290,6 +310,7 @@ gh api repos/BrianCLong/summit/code-scanning/alerts \
 **Symptom**: Golden Path E2E fails at step 3a (export blocked)
 
 **Diagnosis**:
+
 ```bash
 # View E2E logs
 gh run list --workflow=e2e-golden-path.yml --limit 1
@@ -304,6 +325,7 @@ cat e2e-proof/06_opa_deny.json | jq '.'
 ```
 
 **Resolution**:
+
 1. Verify OPA policy is loaded correctly
 2. Check step-up token format:
    ```bash
@@ -320,6 +342,7 @@ cat e2e-proof/06_opa_deny.json | jq '.'
 **Symptom**: Slack alert "#alerts" shows "OPA p95 latency >500ms"
 
 **Diagnosis**:
+
 ```bash
 # Check Prometheus metrics
 curl "http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,rate(opa_decision_duration_seconds_bucket[5m]))"
@@ -331,6 +354,7 @@ open "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p
 ```
 
 **Resolution**:
+
 1. Identify slow policy: Check OPA decision logs
 2. Optimize policy: Reduce loops, cache results
 3. Scale OPA: Increase replicas if CPU-bound
@@ -352,6 +376,7 @@ open "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p
 - [ ] No blocking issues with label `release-blocker`
 
 **Create release**:
+
 ```bash
 # Tag with release version
 git tag -a 2025.10.HALLOWEEN -m "October 2025 Release"
@@ -368,6 +393,7 @@ gh release create 2025.10.HALLOWEEN \
 ```
 
 **Post-release**:
+
 - [ ] Verify SBOM + provenance attached to release
 - [ ] Verify release notes complete (all sections filled)
 - [ ] Update Project #8 with release tag
@@ -380,12 +406,14 @@ gh release create 2025.10.HALLOWEEN \
 ### Policy Evaluation Debug
 
 **Check policy inputs**:
+
 ```bash
 # View workflow run inputs
 gh run view <run-id> --log | grep "OPA Input"
 ```
 
 **Test policy locally**:
+
 ```bash
 # Install OPA
 brew install opa
@@ -412,6 +440,7 @@ EOF
 ```
 
 **Expected output**:
+
 ```json
 {
   "result": [
@@ -420,7 +449,7 @@ EOF
         {
           "value": true,
           "text": "data.release_gate.allow",
-          "location": {"row": 1, "col": 1}
+          "location": { "row": 1, "col": 1 }
         }
       ]
     }
@@ -431,6 +460,7 @@ EOF
 ### Workflow Re-runs
 
 **Re-run failed workflow**:
+
 ```bash
 # List recent runs
 gh run list --workflow=policy.check.release-gate.yml --limit 5
@@ -473,6 +503,7 @@ gh pr edit <pr-number> --add-label release-gate-bypass
 - **False positive rate**: <2%
 
 **Query**:
+
 ```promql
 # Policy evaluation latency
 histogram_quantile(0.95, rate(opa_eval_duration_seconds_bucket{policy="release_gate"}[5m]))

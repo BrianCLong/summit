@@ -9,7 +9,14 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { trace, context, propagation, metrics, SpanStatusCode, SpanKind } from '@opentelemetry/api';
+import {
+  trace,
+  context,
+  propagation,
+  metrics,
+  SpanStatusCode,
+  SpanKind,
+} from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from '@opentelemetry/api-metrics';
 import { EventEmitter } from 'events';
 
@@ -57,7 +64,8 @@ export class MaestroTracer extends EventEmitter {
     const resource = new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
       [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-      [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: this.config.environment,
+      [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
+        this.config.environment,
       [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'maestro',
     });
 
@@ -80,36 +88,56 @@ export class MaestroTracer extends EventEmitter {
         port: this.config.prometheusPort || 9090,
       }),
       instrumentations:
-        this.config.enableAutoInstrumentation !== false ? [getNodeAutoInstrumentations()] : [],
+        this.config.enableAutoInstrumentation !== false
+          ? [getNodeAutoInstrumentations()]
+          : [],
     });
   }
 
   private initializeTracer(): void {
-    this.tracer = trace.getTracer(this.config.serviceName, this.config.serviceVersion);
+    this.tracer = trace.getTracer(
+      this.config.serviceName,
+      this.config.serviceVersion,
+    );
   }
 
   private initializeMetrics(): void {
-    this.meter = metrics.getMeter(this.config.serviceName, this.config.serviceVersion);
+    this.meter = metrics.getMeter(
+      this.config.serviceName,
+      this.config.serviceVersion,
+    );
 
     // Workflow metrics
-    this.workflowRunsTotal = this.meter.createCounter('maestro_workflow_runs_total', {
-      description: 'Total number of workflow runs',
-    });
+    this.workflowRunsTotal = this.meter.createCounter(
+      'maestro_workflow_runs_total',
+      {
+        description: 'Total number of workflow runs',
+      },
+    );
 
-    this.workflowDuration = this.meter.createHistogram('maestro_workflow_duration_seconds', {
-      description: 'Workflow execution duration in seconds',
-      unit: 's',
-    });
+    this.workflowDuration = this.meter.createHistogram(
+      'maestro_workflow_duration_seconds',
+      {
+        description: 'Workflow execution duration in seconds',
+        unit: 's',
+      },
+    );
 
     // Step metrics
-    this.stepExecutionsTotal = this.meter.createCounter('maestro_step_executions_total', {
-      description: 'Total number of step executions',
-    });
+    this.stepExecutionsTotal = this.meter.createCounter(
+      'maestro_step_executions_total',
+      {
+        description: 'Total number of step executions',
+      },
+    );
 
-    this.stepDuration = this.meter.createHistogram('maestro_step_duration_seconds', {
-      description: 'Step execution duration in seconds',
-      unit: 's',
-    });
+    this.stepDuration = this.meter.createHistogram(
+      'maestro_step_duration_seconds',
+      {
+        description: 'Step execution duration in seconds',
+        unit: 's',
+      },
+    );
 
     // System metrics
     this.activeRuns = this.meter.createGauge('maestro_active_runs', {
@@ -421,7 +449,11 @@ export function getTracer(): MaestroTracer {
 
 // Decorator for automatic tracing
 export function traced(operationName?: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -431,7 +463,9 @@ export function traced(operationName?: string) {
       );
 
       try {
-        const result = await tracer.withSpan(span, () => originalMethod.apply(this, args));
+        const result = await tracer.withSpan(span, () =>
+          originalMethod.apply(this, args),
+        );
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
       } catch (error) {

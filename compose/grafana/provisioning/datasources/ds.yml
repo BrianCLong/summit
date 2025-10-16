@@ -5,4 +5,3 @@ datasources:
     access: proxy
     url: http://prom:9090
     isDefault: true
-

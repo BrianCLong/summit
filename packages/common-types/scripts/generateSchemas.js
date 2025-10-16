@@ -25,5 +25,8 @@ mkdirSync(outDir, { recursive: true });
 
 for (const [name, schema] of Object.entries(schemas)) {
   const jsonSchema = zodToJsonSchema(schema, { name });
-  writeFileSync(join(outDir, `${name}.json`), JSON.stringify(jsonSchema, null, 2));
+  writeFileSync(
+    join(outDir, `${name}.json`),
+    JSON.stringify(jsonSchema, null, 2),
+  );
 }

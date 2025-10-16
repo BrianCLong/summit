@@ -1,4 +1,10 @@
-import { BotCluster, Cluster, Graph, Pattern, RelationshipType } from './types.js';
+import {
+  BotCluster,
+  Cluster,
+  Graph,
+  Pattern,
+  RelationshipType,
+} from './types.js';
 
 const SHARE_TYPE: RelationshipType = 'share';
 const MENTION_TYPE: RelationshipType = 'mention';
@@ -22,9 +28,14 @@ export class MotifAnalyzer {
     }
 
     for (const [target, members] of shareTargets.entries()) {
-      const activeMembers = Array.from(members.entries()).filter(([, weight]) => weight >= 2);
+      const activeMembers = Array.from(members.entries()).filter(
+        ([, weight]) => weight >= 2,
+      );
       if (activeMembers.length >= 3) {
-        const activityScore = activeMembers.reduce((acc, [, weight]) => acc + weight, 0);
+        const activityScore = activeMembers.reduce(
+          (acc, [, weight]) => acc + weight,
+          0,
+        );
         clusters.push({
           label: `Coordinated share burst targeting ${target}`,
           members: activeMembers.map(([member]) => member),
@@ -42,15 +53,23 @@ export class MotifAnalyzer {
 
     for (const edge of graph.edges) {
       if (edge.types.includes(SHARE_TYPE)) {
-        amplificationByNode.set(edge.from, (amplificationByNode.get(edge.from) ?? 0) + edge.weight);
+        amplificationByNode.set(
+          edge.from,
+          (amplificationByNode.get(edge.from) ?? 0) + edge.weight,
+        );
       }
       if (edge.types.includes(MENTION_TYPE)) {
-        amplificationByNode.set(edge.from, (amplificationByNode.get(edge.from) ?? 0) + edge.weight * 0.5);
+        amplificationByNode.set(
+          edge.from,
+          (amplificationByNode.get(edge.from) ?? 0) + edge.weight * 0.5,
+        );
       }
     }
 
     const clusters: Cluster[] = [];
-    const sorted = Array.from(amplificationByNode.entries()).sort((a, b) => b[1] - a[1]);
+    const sorted = Array.from(amplificationByNode.entries()).sort(
+      (a, b) => b[1] - a[1],
+    );
     const topNodes = sorted.filter(([, score]) => score >= 3);
     if (topNodes.length > 0) {
       clusters.push({
@@ -64,13 +83,18 @@ export class MotifAnalyzer {
 
   identifyCoordinatedBehavior(graph: Graph): Pattern[] {
     const patterns: Pattern[] = [];
-    const neighborMap = new Map<string, Map<string, { weight: number; types: RelationshipType[] }>>();
+    const neighborMap = new Map<
+      string,
+      Map<string, { weight: number; types: RelationshipType[] }>
+    >();
 
     for (const edge of graph.edges) {
       if (!neighborMap.has(edge.from)) {
         neighborMap.set(edge.from, new Map());
       }
-      neighborMap.get(edge.from)!.set(edge.to, { weight: edge.weight, types: edge.types });
+      neighborMap
+        .get(edge.from)!
+        .set(edge.to, { weight: edge.weight, types: edge.types });
     }
 
     const visitedPairs = new Set<string>();
@@ -98,7 +122,9 @@ export class MotifAnalyzer {
           if (!infoB) {
             continue;
           }
-          const hasCoordinatedType = infoA.types.some((type) => infoB.types.includes(type));
+          const hasCoordinatedType = infoA.types.some((type) =>
+            infoB.types.includes(type),
+          );
           if (!hasCoordinatedType) {
             continue;
           }

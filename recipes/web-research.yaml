@@ -1,12 +1,12 @@
-name: "Web Research"
-description: "Crawl→dedupe→summarize"
+name: 'Web Research'
+description: 'Crawl→dedupe→summarize'
 nodes:
   - id: crawl
     type: tool
-    params: { tool: "crawler", maxPages: 25 }
+    params: { tool: 'crawler', maxPages: 25 }
   - id: dedupe
     type: tool
-    params: { tool: "minhash" }
+    params: { tool: 'minhash' }
   - id: sum
     type: llm
     params: { provider: openai, model: gpt-4o-mini }
@@ -16,4 +16,3 @@ edges:
 policies:
   - type: budget
     capUSD: 0.02
-

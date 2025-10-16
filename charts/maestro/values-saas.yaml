@@ -5,14 +5,13 @@ multiTenant:
     refillPerSec: 1
 byok:
   enabled: true
-  vaultTransitMount: "transit"
-  keyNameTpl: "{{ .Tenant }}-dek"
+  vaultTransitMount: 'transit'
+  keyNameTpl: '{{ .Tenant }}-dek'
 cleanroom:
   enabled: true
-  enclaveService: "enclave.intelgraph.svc.cluster.local:8443"
+  enclaveService: 'enclave.intelgraph.svc.cluster.local:8443'
 saaSFlags:
-  cleanrooms: "allowlist"
-  federation: "allowlist"
+  cleanrooms: 'allowlist'
+  federation: 'allowlist'
 billing:
-  exportBucket: "intelgraph-billing"
-
+  exportBucket: 'intelgraph-billing'

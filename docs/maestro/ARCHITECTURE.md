@@ -449,7 +449,10 @@ CREATE POLICY tenant_isolation ON runs
 class EvidenceService {
   async storeEvidence(runId: string, evidence: any) {
     const key = `runs/${runId}/evidence-${Date.now()}.json`;
-    const hash = crypto.createHash('sha256').update(JSON.stringify(evidence)).digest('hex');
+    const hash = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(evidence))
+      .digest('hex');
 
     // Store with Object Lock
     const result = await s3
@@ -458,7 +461,9 @@ class EvidenceService {
         Key: key,
         Body: JSON.stringify(evidence),
         ObjectLockMode: 'GOVERNANCE',
-        ObjectLockRetainUntilDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+        ObjectLockRetainUntilDate: new Date(
+          Date.now() + 90 * 24 * 60 * 60 * 1000,
+        ),
         Metadata: {
           'sha256-hash': hash,
           'run-id': runId,
@@ -502,7 +507,9 @@ const accessibilityTests = {
     const ariaLabels = await page.$$eval('[aria-label]', (els) =>
       els.map((el) => el.getAttribute('aria-label')),
     );
-    expect(ariaLabels.every((label) => label && label.trim().length > 0)).toBe(true);
+    expect(ariaLabels.every((label) => label && label.trim().length > 0)).toBe(
+      true,
+    );
   },
 };
 ```
@@ -520,7 +527,9 @@ class FocusManager {
     );
 
     const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    const lastElement = focusableElements[
+      focusableElements.length - 1
+    ] as HTMLElement;
 
     container.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {

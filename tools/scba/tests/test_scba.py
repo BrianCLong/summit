@@ -69,9 +69,15 @@ def run_attacks(policy: EndpointPolicy) -> list:
     store = PolicyStore({policy.endpoint: policy})
     auditor = SideChannelBudgetAuditor(store, seed=1337)
     probe = make_probe(policy)
-    auditor.register_attack(policy.endpoint, LengthLeakAttack(probe, secrets=("0", "1"), samples_per_secret=15))
-    auditor.register_attack(policy.endpoint, CoarseTimerAttack(probe, secrets=("fast", "slow"), samples_per_secret=15))
-    auditor.register_attack(policy.endpoint, CacheWarmAttack(probe, secrets=("cold", "warm"), samples_per_secret=15))
+    auditor.register_attack(
+        policy.endpoint, LengthLeakAttack(probe, secrets=("0", "1"), samples_per_secret=15)
+    )
+    auditor.register_attack(
+        policy.endpoint, CoarseTimerAttack(probe, secrets=("fast", "slow"), samples_per_secret=15)
+    )
+    auditor.register_attack(
+        policy.endpoint, CacheWarmAttack(probe, secrets=("cold", "warm"), samples_per_secret=15)
+    )
     return auditor.run()
 
 

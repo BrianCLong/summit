@@ -14,5 +14,11 @@ export default function AssistantPage() {
     [mode],
   );
 
-  return <EnhancedAIAssistant transport={transport} typingDelayMs={150} debounceMs={120} />;
+  return (
+    <EnhancedAIAssistant
+      transport={transport}
+      typingDelayMs={150}
+      debounceMs={120}
+    />
+  );
 }

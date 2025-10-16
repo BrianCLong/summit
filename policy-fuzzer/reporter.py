@@ -4,6 +4,7 @@ import os
 
 REPORTS_DIR = "policy-fuzzer/reports"
 
+
 def assess_impact_and_severity(failing_case):
     """Assesses the impact and severity of a failing case based on its reason."""
     reason = failing_case.get("reason", "")
@@ -22,11 +23,16 @@ def assess_impact_and_severity(failing_case):
     elif "outside policy window" in reason:
         severity = "High"
         impact = "Time Window Policy Bypass"
-    elif "Consent policy requires" in reason or "License policy requires" in reason or "Geo policy requires" in reason:
+    elif (
+        "Consent policy requires" in reason
+        or "License policy requires" in reason
+        or "Geo policy requires" in reason
+    ):
         severity = "Critical"
         impact = "Direct Policy Violation"
 
     return severity, impact
+
 
 def generate_html_report(failing_cases, coverage_data):
     """Generates an HTML report of failing cases and coverage data."""
@@ -71,14 +77,16 @@ def generate_html_report(failing_cases, coverage_data):
 
     # Sort failing cases by severity (Critical > High > Medium > Low)
     severity_order = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
-    sorted_failing_cases = sorted(failing_cases, key=lambda x: severity_order.get(x.get("severity", "Low"), 0), reverse=True)
+    sorted_failing_cases = sorted(
+        failing_cases, key=lambda x: severity_order.get(x.get("severity", "Low"), 0), reverse=True
+    )
 
     # Generate failing cases table
     failing_cases_table = ""
     if sorted_failing_cases:
         failing_cases_table = "<table><tr><th>Severity</th><th>Impact</th><th>Policy</th><th>Query</th><th>Reason</th><th>Reproducer</th></tr>"
         for i, case in enumerate(sorted_failing_cases):
-            reproducer_link = f"<a href=\"reproducer_{i}.py\">reproducer_{i}.py</a>"
+            reproducer_link = f'<a href="reproducer_{i}.py">reproducer_{i}.py</a>'
             failing_cases_table += f"<tr><td>{case.get('severity', 'N/A')}</td><td>{case.get('impact', 'N/A')}</td><td><pre>{case['policy']}</pre></td><td><pre>{case['query']}</pre></td><td>{case['reason']}</td><td>{reproducer_link}</td></tr>"
         failing_cases_table += "</table>"
     else:
@@ -88,13 +96,19 @@ def generate_html_report(failing_cases, coverage_data):
     coverage_heatmap_table = "<table><tr><th>Layer/Metric</th><th>Count</th></tr>"
     for layer, metrics in coverage_data.items():
         for metric, count in metrics.items():
-            color_class = f"color-{min(count // 10, 9)}" # Scale count to 0-9 for coloring
-            coverage_heatmap_table += f"<tr><td>{layer}.{metric}</td><td class=\"heatmap-cell {color_class}\">{count}</td></tr>"
+            color_class = f"color-{min(count // 10, 9)}"  # Scale count to 0-9 for coloring
+            coverage_heatmap_table += f'<tr><td>{layer}.{metric}</td><td class="heatmap-cell {color_class}">{count}</td></tr>'
     coverage_heatmap_table += "</table>"
 
     with open(report_path, "w") as f:
-        f.write(html_content.format(failing_cases_table=failing_cases_table, coverage_heatmap_table=coverage_heatmap_table))
+        f.write(
+            html_content.format(
+                failing_cases_table=failing_cases_table,
+                coverage_heatmap_table=coverage_heatmap_table,
+            )
+        )
     print(f"HTML report generated at: {report_path}")
+
 
 def generate_reports(failing_cases, coverage_data):
     """Generates various reports based on fuzzing results."""
@@ -127,7 +141,9 @@ def generate_reports(failing_cases, coverage_data):
             with open(os.path.join(REPORTS_DIR, f"reproducer_{i}.py"), "w") as f:
                 f.write(f"# Reproducer for failing case {i+1}\n")
                 f.write("from datetime import datetime\n")
-                f.write("from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window\n")
+                f.write(
+                    "from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window\n"
+                )
                 f.write(f"policy = {case['policy']}\n")
                 f.write(f"query = {case['query']}\n")
                 f.write("\n")
@@ -137,11 +153,15 @@ def generate_reports(failing_cases, coverage_data):
                 f.write("retention_result, _ = check_retention(policy, query)\n")
                 f.write("time_window_result, _ = check_time_window(policy, query)\n")
                 f.write("\n")
-                f.write("is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])\n")
-                f.write(f"print(f\"Policy: {policy}\")\n")
-                f.write(f"print(f\"Query: {query}\")\n")
-                f.write(f"print(f\"Is Compliant: {is_compliant}\")\n")
-                f.write(f"# Expected: {'Non-compliant' if 'Metamorphic' in case['reason'] else 'Compliant'}\n")
+                f.write(
+                    "is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])\n"
+                )
+                f.write(f'print(f"Policy: {policy}")\n')
+                f.write(f'print(f"Query: {query}")\n')
+                f.write(f'print(f"Is Compliant: {is_compliant}")\n')
+                f.write(
+                    f"# Expected: {'Non-compliant' if 'Metamorphic' in case['reason'] else 'Compliant'}\n"
+                )
 
     # Generate coverage heatmap text report (existing functionality)
     with open(os.path.join(REPORTS_DIR, "coverage_heatmap.txt"), "w") as f:

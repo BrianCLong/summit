@@ -43,7 +43,7 @@ router.get('/status', async (req, res) => {
 router.get('/gates', async (req, res) => {
   try {
     const pool = getPostgresPool();
-    
+
     // Get ER precision metrics
     const erMetrics = await pool.query(`
       SELECT 
@@ -83,7 +83,7 @@ router.get('/gates', async (req, res) => {
       SELECT get_ga_appeal_metrics(7) as metrics
     `);
 
-    // Get export metrics  
+    // Get export metrics
     const exportMetrics = await pool.query(`
       SELECT get_ga_export_metrics(7) as metrics
     `);
@@ -100,44 +100,60 @@ router.get('/gates', async (req, res) => {
     `);
 
     const gates = [
-      ...erMetrics.rows.map(row => ({
+      ...erMetrics.rows.map((row) => ({
         name: `ER_PRECISION_${row.entity_type}`,
         description: `Entity Resolution ${row.entity_type} precision`,
         currentValue: parseFloat(row.precision),
         threshold: parseFloat(row.target_precision),
         status: row.meets_threshold ? 'PASS' : 'FAIL',
-        category: 'Entity Resolution'
+        category: 'Entity Resolution',
       })),
       {
         name: 'APPEALS_SLA',
         description: 'Policy appeals SLA compliance',
-        currentValue: parseFloat(appealMetrics.rows[0]?.metrics?.sla_compliance_rate || '0'),
-        threshold: 0.90,
-        status: parseFloat(appealMetrics.rows[0]?.metrics?.sla_compliance_rate || '0') >= 0.90 ? 'PASS' : 'FAIL',
-        category: 'Policy & Appeals'
+        currentValue: parseFloat(
+          appealMetrics.rows[0]?.metrics?.sla_compliance_rate || '0',
+        ),
+        threshold: 0.9,
+        status:
+          parseFloat(
+            appealMetrics.rows[0]?.metrics?.sla_compliance_rate || '0',
+          ) >= 0.9
+            ? 'PASS'
+            : 'FAIL',
+        category: 'Policy & Appeals',
       },
       {
         name: 'EXPORT_INTEGRITY',
         description: 'Export manifest integrity rate',
-        currentValue: parseFloat(exportMetrics.rows[0]?.metrics?.integrity_rate || '0'),
+        currentValue: parseFloat(
+          exportMetrics.rows[0]?.metrics?.integrity_rate || '0',
+        ),
         threshold: 0.95,
-        status: parseFloat(exportMetrics.rows[0]?.metrics?.integrity_rate || '0') >= 0.95 ? 'PASS' : 'FAIL',
-        category: 'Export & Provenance'
+        status:
+          parseFloat(exportMetrics.rows[0]?.metrics?.integrity_rate || '0') >=
+          0.95
+            ? 'PASS'
+            : 'FAIL',
+        category: 'Export & Provenance',
       },
       {
         name: 'COPILOT_SUCCESS',
         description: 'Copilot NL→Cypher success rate',
         currentValue: parseFloat(copilotMetrics.rows[0]?.success_rate || '0'),
-        threshold: 0.80,
-        status: parseFloat(copilotMetrics.rows[0]?.success_rate || '0') >= 0.80 ? 'PASS' : 'FAIL',
-        category: 'AI Copilot'
-      }
+        threshold: 0.8,
+        status:
+          parseFloat(copilotMetrics.rows[0]?.success_rate || '0') >= 0.8
+            ? 'PASS'
+            : 'FAIL',
+        category: 'AI Copilot',
+      },
     ];
 
     // Calculate overall status
-    const passingGates = gates.filter(g => g.status === 'PASS').length;
+    const passingGates = gates.filter((g) => g.status === 'PASS').length;
     const totalGates = gates.length;
-    
+
     let overallStatus: string;
     if (passingGates === totalGates) {
       overallStatus = 'GO';
@@ -152,9 +168,8 @@ router.get('/gates', async (req, res) => {
       passingGates,
       totalGates,
       gates,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     log.error({ error: error.message }, 'Failed to get GA Core gates');
     res.status(500).json({ error: 'Failed to get gates' });
@@ -169,9 +184,9 @@ router.get('/trends/:metric', async (req, res) => {
     const { metric } = req.params;
     const { days = 7 } = req.query;
     const pool = getPostgresPool();
-    
+
     let query: string;
-    let params: any[] = [days];
+    const params: any[] = [days];
 
     switch (metric) {
       case 'er_precision':
@@ -186,7 +201,7 @@ router.get('/trends/:metric', async (req, res) => {
           ORDER BY date DESC
         `;
         break;
-        
+
       case 'appeal_sla':
         query = `
           SELECT 
@@ -198,7 +213,7 @@ router.get('/trends/:metric', async (req, res) => {
           ORDER BY appeal_date DESC
         `;
         break;
-        
+
       case 'export_integrity':
         query = `
           SELECT 
@@ -210,22 +225,24 @@ router.get('/trends/:metric', async (req, res) => {
           ORDER BY export_date DESC
         `;
         break;
-        
+
       default:
         return res.status(400).json({ error: 'Unknown metric' });
     }
 
     const result = await pool.query(query, params);
-    
+
     res.json({
       metric,
       days: parseInt(days as string),
       data: result.rows,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    log.error({ error: error.message, metric: req.params.metric }, 'Failed to get metric trends');
+    log.error(
+      { error: error.message, metric: req.params.metric },
+      'Failed to get metric trends',
+    );
     res.status(500).json({ error: 'Failed to get trends' });
   }
 });
@@ -236,9 +253,15 @@ router.get('/trends/:metric', async (req, res) => {
 router.get('/dashboard', async (req, res) => {
   try {
     const pool = getPostgresPool();
-    
+
     // Get all key metrics in parallel
-    const [erMetrics, appealMetrics, exportMetrics, copilotMetrics, systemMetrics] = await Promise.all([
+    const [
+      erMetrics,
+      appealMetrics,
+      exportMetrics,
+      copilotMetrics,
+      systemMetrics,
+    ] = await Promise.all([
       // ER precision
       pool.query(`
         SELECT 
@@ -250,7 +273,7 @@ router.get('/dashboard', async (req, res) => {
         WHERE last_updated >= NOW() - INTERVAL '1 day'
         ORDER BY entity_type
       `),
-      
+
       // Appeals
       pool.query(`
         SELECT 
@@ -262,7 +285,7 @@ router.get('/dashboard', async (req, res) => {
         WHERE appeal_date = CURRENT_DATE
         LIMIT 1
       `),
-      
+
       // Exports
       pool.query(`
         SELECT 
@@ -274,7 +297,7 @@ router.get('/dashboard', async (req, res) => {
         WHERE export_date = CURRENT_DATE
         LIMIT 1
       `),
-      
+
       // Copilot
       pool.query(`
         SELECT 
@@ -286,7 +309,7 @@ router.get('/dashboard', async (req, res) => {
         LEFT JOIN nl_cypher_executions e ON t.id = e.translation_id
         WHERE t.created_at >= CURRENT_DATE
       `),
-      
+
       // System performance
       pool.query(`
         SELECT 
@@ -294,45 +317,68 @@ router.get('/dashboard', async (req, res) => {
           AVG(EXTRACT(EPOCH FROM (updated_at - created_at))) as avg_response_time
         FROM merge_decisions
         WHERE created_at >= CURRENT_DATE
-      `)
+      `),
     ]);
 
     const dashboard = {
       timestamp: new Date().toISOString(),
       entityResolution: {
-        personPrecision: erMetrics.rows.find(r => r.entity_type === 'PERSON')?.precision || 1.0,
-        orgPrecision: erMetrics.rows.find(r => r.entity_type === 'ORG')?.precision || 1.0,
-        totalDecisions: erMetrics.rows.reduce((sum, r) => sum + parseInt(r.total_decisions || '0'), 0),
-        reviewsRequired: erMetrics.rows.reduce((sum, r) => sum + parseInt(r.reviews_required || '0'), 0)
+        personPrecision:
+          erMetrics.rows.find((r) => r.entity_type === 'PERSON')?.precision ||
+          1.0,
+        orgPrecision:
+          erMetrics.rows.find((r) => r.entity_type === 'ORG')?.precision || 1.0,
+        totalDecisions: erMetrics.rows.reduce(
+          (sum, r) => sum + parseInt(r.total_decisions || '0'),
+          0,
+        ),
+        reviewsRequired: erMetrics.rows.reduce(
+          (sum, r) => sum + parseInt(r.reviews_required || '0'),
+          0,
+        ),
       },
       policyAppeals: {
         totalAppeals: appealMetrics.rows[0]?.total_appeals || 0,
         pendingAppeals: appealMetrics.rows[0]?.pending_appeals || 0,
-        slaCompliance: parseFloat(appealMetrics.rows[0]?.sla_compliance_rate || '1.0'),
-        avgResponseHours: parseFloat(appealMetrics.rows[0]?.avg_response_hours || '0')
+        slaCompliance: parseFloat(
+          appealMetrics.rows[0]?.sla_compliance_rate || '1.0',
+        ),
+        avgResponseHours: parseFloat(
+          appealMetrics.rows[0]?.avg_response_hours || '0',
+        ),
       },
       exports: {
         totalExports: exportMetrics.rows[0]?.total_exports || 0,
         bundleExports: exportMetrics.rows[0]?.bundle_exports || 0,
-        integrityRate: parseFloat(exportMetrics.rows[0]?.bundle_integrity_rate || '1.0'),
-        avgBundleSize: parseFloat(exportMetrics.rows[0]?.avg_bundle_size_mb || '0')
+        integrityRate: parseFloat(
+          exportMetrics.rows[0]?.bundle_integrity_rate || '1.0',
+        ),
+        avgBundleSize: parseFloat(
+          exportMetrics.rows[0]?.avg_bundle_size_mb || '0',
+        ),
       },
       copilot: {
         totalQueries: copilotMetrics.rows[0]?.total_queries || 0,
         successfulQueries: copilotMetrics.rows[0]?.successful_queries || 0,
-        successRate: copilotMetrics.rows[0]?.total_queries > 0 ? 
-          copilotMetrics.rows[0].successful_queries / copilotMetrics.rows[0].total_queries : 0,
-        avgConfidence: parseFloat(copilotMetrics.rows[0]?.avg_confidence || '0'),
-        highRiskQueries: copilotMetrics.rows[0]?.high_risk_queries || 0
+        successRate:
+          copilotMetrics.rows[0]?.total_queries > 0
+            ? copilotMetrics.rows[0].successful_queries /
+              copilotMetrics.rows[0].total_queries
+            : 0,
+        avgConfidence: parseFloat(
+          copilotMetrics.rows[0]?.avg_confidence || '0',
+        ),
+        highRiskQueries: copilotMetrics.rows[0]?.high_risk_queries || 0,
       },
       performance: {
         totalRequests: systemMetrics.rows[0]?.total_requests || 0,
-        avgResponseTime: parseFloat(systemMetrics.rows[0]?.avg_response_time || '0')
-      }
+        avgResponseTime: parseFloat(
+          systemMetrics.rows[0]?.avg_response_time || '0',
+        ),
+      },
     };
 
     res.json(dashboard);
-
   } catch (error) {
     log.error({ error: error.message }, 'Failed to get dashboard data');
     res.status(500).json({ error: 'Failed to get dashboard data' });

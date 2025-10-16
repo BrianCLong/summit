@@ -33,7 +33,10 @@ interface GraphData {
 }
 
 function App() {
-  const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [] });
+  const [graphData, setGraphData] = useState<GraphData>({
+    nodes: [],
+    edges: [],
+  });
   const [neighborhoodMode, setNeighborhoodMode] = useState<boolean>(false);
   const [events, setEvents] = useState<EventItem[]>([]);
 

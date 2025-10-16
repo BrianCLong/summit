@@ -475,7 +475,9 @@ export class ThreatActorVisualization extends VisualizationPlugin {
   name = 'threat-actor-viz';
 
   shouldApply(node) {
-    return node.data.type === 'Person' && node.data.attributes.threat_actor === true;
+    return (
+      node.data.type === 'Person' && node.data.attributes.threat_actor === true
+    );
   }
 
   apply(node, canvas) {

@@ -3,7 +3,7 @@
 # Tests on this list are systematically tracked and eliminated
 
 metadata:
-  last_updated: "2024-09-19T00:00:00Z"
+  last_updated: '2024-09-19T00:00:00Z'
   total_quarantined: 0
   total_fixed: 0
   stability_target: 99.5%
@@ -34,54 +34,54 @@ recently_fixed:
 # Retry strategies for different test categories
 retry_strategies:
   network_dependent:
-    description: "Tests that make external HTTP calls"
+    description: 'Tests that make external HTTP calls'
     max_retries: 3
     retry_delay_ms: 1000
     exponential_backoff: true
     patterns:
-      - "**/*api*.test.ts"
-      - "**/*http*.test.ts"
-      - "**/*fetch*.test.ts"
+      - '**/*api*.test.ts'
+      - '**/*http*.test.ts'
+      - '**/*fetch*.test.ts'
 
   database_dependent:
-    description: "Tests that interact with database"
+    description: 'Tests that interact with database'
     max_retries: 2
     retry_delay_ms: 500
     reset_db_state: true
     patterns:
-      - "**/*db*.test.ts"
-      - "**/*repository*.test.ts"
-      - "**/*migration*.test.ts"
+      - '**/*db*.test.ts'
+      - '**/*repository*.test.ts'
+      - '**/*migration*.test.ts'
 
   file_system_dependent:
-    description: "Tests that read/write files"
+    description: 'Tests that read/write files'
     max_retries: 5
     retry_delay_ms: 200
     cleanup_files: true
     patterns:
-      - "**/*file*.test.ts"
-      - "**/*upload*.test.ts"
-      - "**/*export*.test.ts"
+      - '**/*file*.test.ts'
+      - '**/*upload*.test.ts'
+      - '**/*export*.test.ts'
 
   time_dependent:
-    description: "Tests with timing requirements"
+    description: 'Tests with timing requirements'
     max_retries: 3
     retry_delay_ms: 100
     allow_time_variance: true
     patterns:
-      - "**/*timeout*.test.ts"
-      - "**/*schedule*.test.ts"
-      - "**/*timer*.test.ts"
+      - '**/*timeout*.test.ts'
+      - '**/*schedule*.test.ts'
+      - '**/*timer*.test.ts'
 
   browser_dependent:
-    description: "End-to-end browser tests"
+    description: 'End-to-end browser tests'
     max_retries: 2
     retry_delay_ms: 2000
     reset_browser_state: true
     patterns:
-      - "**/*e2e*.test.ts"
-      - "**/*playwright*.test.ts"
-      - "**/*selenium*.test.ts"
+      - '**/*e2e*.test.ts'
+      - '**/*playwright*.test.ts'
+      - '**/*selenium*.test.ts'
 
 # Stability requirements by test type
 stability_requirements:
@@ -110,29 +110,29 @@ detection_config:
   # Automatically flag tests as potentially flaky
   auto_detection:
     enabled: true
-    failure_rate_threshold: 5%  # Flag if >5% failure rate
+    failure_rate_threshold: 5% # Flag if >5% failure rate
     min_runs_for_detection: 20
     consecutive_failure_threshold: 3
 
   # Patterns that indicate flakiness
   flaky_indicators:
-    - "timeout"
-    - "race condition"
-    - "timing"
-    - "intermittent"
-    - "sometimes fails"
-    - "CI only"
+    - 'timeout'
+    - 'race condition'
+    - 'timing'
+    - 'intermittent'
+    - 'sometimes fails'
+    - 'CI only'
 
   # Exclude patterns from flaky detection
   exclude_from_detection:
-    - "**/*manual*.test.ts"
-    - "**/*stress*.test.ts"
-    - "**/*load*.test.ts"
+    - '**/*manual*.test.ts'
+    - '**/*stress*.test.ts'
+    - '**/*load*.test.ts'
 
 # Monitoring and reporting
 monitoring:
   slack_notifications:
-    channel: "#engineering-quality"
+    channel: '#engineering-quality'
     notify_on_quarantine: true
     notify_on_fix: true
     daily_digest: true
@@ -182,15 +182,15 @@ tools:
 escalation:
   # When to escalate flaky tests
   escalation_triggers:
-    - high_impact_test_flaky: "24 hours"
-    - multiple_tests_flaky: "48 hours"
-    - stability_below_target: "72 hours"
+    - high_impact_test_flaky: '24 hours'
+    - multiple_tests_flaky: '48 hours'
+    - stability_below_target: '72 hours'
 
   # Who to escalate to
   escalation_contacts:
-    level_1: "team-lead"
-    level_2: "engineering-manager"
-    level_3: "cto"
+    level_1: 'team-lead'
+    level_2: 'engineering-manager'
+    level_3: 'cto'
 
 # Historical data for trending
 historical_tracking:
@@ -229,24 +229,24 @@ automation:
   # Auto-create GitHub issues
   auto_issue_creation:
     enabled: true
-    template: ".github/ISSUE_TEMPLATE/flaky-test.md"
-    labels: ["bug", "flaky-test", "quality"]
+    template: '.github/ISSUE_TEMPLATE/flaky-test.md'
+    labels: ['bug', 'flaky-test', 'quality']
 
   # Auto-assign to test authors
   auto_assignment:
     enabled: true
-    fallback_assignee: "qa-team"
+    fallback_assignee: 'qa-team'
 
 # Documentation and training
 documentation:
-  best_practices_link: "docs/testing/best-practices.md"
-  flaky_test_guide: "docs/testing/flaky-tests.md"
-  debugging_guide: "docs/testing/debugging-flaky-tests.md"
+  best_practices_link: 'docs/testing/best-practices.md'
+  flaky_test_guide: 'docs/testing/flaky-tests.md'
+  debugging_guide: 'docs/testing/debugging-flaky-tests.md'
 
 # Example commands for managing flaky tests
 commands:
-  detect_flaky: "npm run test:detect-flaky"
+  detect_flaky: 'npm run test:detect-flaky'
   quarantine_test: "npm run test:quarantine -- --test-pattern='pattern'"
-  run_quarantined: "npm run test:quarantined"
-  stability_report: "npm run test:stability-report"
+  run_quarantined: 'npm run test:quarantined'
+  stability_report: 'npm run test:stability-report'
   fix_validation: "npm run test:validate-fix -- --test-pattern='pattern'"

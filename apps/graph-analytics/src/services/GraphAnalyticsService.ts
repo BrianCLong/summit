@@ -195,10 +195,14 @@ export class GraphAnalyticsService {
       const totalEdges = overview.get('totalEdges').toNumber();
       const avgDegree = overview.get('avgDegree');
 
-      const density = totalNodes > 1 ? (2 * totalEdges) / (totalNodes * (totalNodes - 1)) : 0;
+      const density =
+        totalNodes > 1 ? (2 * totalEdges) / (totalNodes * (totalNodes - 1)) : 0;
 
       // Calculate centrality metrics
-      const centralityResults = await this.calculateCentralityMetrics(session, filters);
+      const centralityResults = await this.calculateCentralityMetrics(
+        session,
+        filters,
+      );
 
       // Detect communities
       const communities = await this.detectCommunities(session, filters);
@@ -220,18 +224,34 @@ export class GraphAnalyticsService {
         const componentsResult = await session.run(componentsQuery, {
           nodeLabels: filters?.nodeLabels || [],
         });
-        components = componentsResult.records[0].get('componentCount').toNumber();
+        components = componentsResult.records[0]
+          .get('componentCount')
+          .toNumber();
       } catch (error) {
-        logger.warn('Could not calculate connected components (APOC not available)');
+        logger.warn(
+          'Could not calculate connected components (APOC not available)',
+        );
       }
 
       // Calculate clustering coefficient
       const clustering = await this.calculateGlobalClustering(session, filters);
 
       // Get top nodes by different metrics
-      const topNodesByDegree = await this.getTopNodesByDegree(session, filters, 10);
-      const topNodesByCentrality = await this.getTopNodesByCentrality(session, filters, 10);
-      const topNodesByPageRank = await this.getTopNodesByPageRank(session, filters, 10);
+      const topNodesByDegree = await this.getTopNodesByDegree(
+        session,
+        filters,
+        10,
+      );
+      const topNodesByCentrality = await this.getTopNodesByCentrality(
+        session,
+        filters,
+        10,
+      );
+      const topNodesByPageRank = await this.getTopNodesByPageRank(
+        session,
+        filters,
+        10,
+      );
 
       const result = {
         overview: {
@@ -320,7 +340,9 @@ export class GraphAnalyticsService {
           };
         }
       } catch (error) {
-        logger.warn('APOC shortest path algorithm not available, using simple path');
+        logger.warn(
+          'APOC shortest path algorithm not available, using simple path',
+        );
       }
 
       // Find all paths (limited)
@@ -389,9 +411,14 @@ export class GraphAnalyticsService {
     const session = this.neo4jDriver.session();
 
     try {
-      logger.info(`Analyzing influence for node ${nodeId}`, { depth, relationshipTypes });
+      logger.info(`Analyzing influence for node ${nodeId}`, {
+        depth,
+        relationshipTypes,
+      });
 
-      const relFilter = relationshipTypes?.length ? `WHERE type(r) in $relationshipTypes` : '';
+      const relFilter = relationshipTypes?.length
+        ? `WHERE type(r) in $relationshipTypes`
+        : '';
 
       // Calculate direct connections and their strength
       const directInfluenceQuery = `
@@ -416,8 +443,12 @@ export class GraphAnalyticsService {
       });
 
       const directRecord = directResult.records[0];
-      const directConnections = directRecord.get('directConnections').toNumber();
-      const totalDirectInfluence = directRecord.get('totalDirectInfluence').toNumber();
+      const directConnections = directRecord
+        .get('directConnections')
+        .toNumber();
+      const totalDirectInfluence = directRecord
+        .get('totalDirectInfluence')
+        .toNumber();
       const keyConnections = directRecord.get('keyConnections');
 
       // Calculate reachability within specified depth
@@ -439,7 +470,9 @@ export class GraphAnalyticsService {
           depth,
           relationshipTypes: relationshipTypes || [],
         });
-        reachableNodes = reachabilityResult.records[0].get('reachableNodes').toNumber();
+        reachableNodes = reachabilityResult.records[0]
+          .get('reachableNodes')
+          .toNumber();
       } catch (error) {
         logger.warn('APOC reachability analysis not available');
       }
@@ -462,16 +495,23 @@ export class GraphAnalyticsService {
       });
 
       const indirectRecord = indirectResult.records[0];
-      const indirectConnections = indirectRecord.get('indirectConnections').toNumber();
-      const totalIndirectInfluence = indirectRecord.get('totalIndirectInfluence').toNumber();
+      const indirectConnections = indirectRecord
+        .get('indirectConnections')
+        .toNumber();
+      const totalIndirectInfluence = indirectRecord
+        .get('totalIndirectInfluence')
+        .toNumber();
 
       // Calculate overall influence score (normalized)
       const maxPossibleReachability = await this.getNetworkSize();
       const reachability = reachableNodes / maxPossibleReachability;
-      const directInfluence = totalDirectInfluence / Math.max(directConnections, 1);
-      const indirectInfluence = totalIndirectInfluence / Math.max(indirectConnections, 1);
+      const directInfluence =
+        totalDirectInfluence / Math.max(directConnections, 1);
+      const indirectInfluence =
+        totalIndirectInfluence / Math.max(indirectConnections, 1);
 
-      const influenceScore = 0.4 * directInfluence + 0.3 * indirectInfluence + 0.3 * reachability;
+      const influenceScore =
+        0.4 * directInfluence + 0.3 * indirectInfluence + 0.3 * reachability;
 
       const propagationPotential = directConnections * reachability;
 
@@ -526,13 +566,19 @@ export class GraphAnalyticsService {
 
       // Structural anomalies
       if (types.includes('structural')) {
-        const structuralAnomalies = await this.detectStructuralAnomalies(session, thresholds);
+        const structuralAnomalies = await this.detectStructuralAnomalies(
+          session,
+          thresholds,
+        );
         anomalies.push(...structuralAnomalies);
       }
 
       // Behavioral anomalies
       if (types.includes('behavioral')) {
-        const behavioralAnomalies = await this.detectBehavioralAnomalies(session, thresholds);
+        const behavioralAnomalies = await this.detectBehavioralAnomalies(
+          session,
+          thresholds,
+        );
         anomalies.push(...behavioralAnomalies);
       }
 
@@ -549,7 +595,8 @@ export class GraphAnalyticsService {
       // Sort by severity and confidence
       anomalies.sort((a, b) => {
         const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
-        const severityDiff = severityOrder[b.severity] - severityOrder[a.severity];
+        const severityDiff =
+          severityOrder[b.severity] - severityOrder[a.severity];
         if (severityDiff !== 0) return severityDiff;
         return b.confidence - a.confidence;
       });
@@ -611,11 +658,13 @@ export class GraphAnalyticsService {
                 pattern: template.cypherPattern,
                 significance: Math.log(occurrences + 1) / Math.log(10), // Log scale
                 occurrences,
-                examples: nodeGroups.slice(0, 10).map((nodes: string[], index: number) => ({
-                  nodes,
-                  relationships: relationshipGroups[index] || [],
-                  context: {},
-                })),
+                examples: nodeGroups
+                  .slice(0, 10)
+                  .map((nodes: string[], index: number) => ({
+                    nodes,
+                    relationships: relationshipGroups[index] || [],
+                    context: {},
+                  })),
               });
             }
           }
@@ -647,11 +696,14 @@ export class GraphAnalyticsService {
     try {
       logger.info('Analyzing temporal evolution', { timeframe, intervals });
 
-      const intervalDuration = (timeframe.end.getTime() - timeframe.start.getTime()) / intervals;
+      const intervalDuration =
+        (timeframe.end.getTime() - timeframe.start.getTime()) / intervals;
       const snapshots = [];
 
       for (let i = 0; i <= intervals; i++) {
-        const snapshotTime = new Date(timeframe.start.getTime() + i * intervalDuration);
+        const snapshotTime = new Date(
+          timeframe.start.getTime() + i * intervalDuration,
+        );
 
         const snapshotQuery = `
           MATCH (n)
@@ -671,7 +723,8 @@ export class GraphAnalyticsService {
         const record = snapshotResult.records[0];
         const nodeCount = record.get('nodeCount').toNumber();
         const edgeCount = record.get('edgeCount').toNumber();
-        const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
+        const density =
+          nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
 
         // Get components count (simplified)
         const components = nodeCount > 0 ? 1 : 0;
@@ -712,17 +765,21 @@ export class GraphAnalyticsService {
       // Calculate volatility (standard deviation of growth rates)
       const growthRates = [];
       for (let i = 1; i < snapshots.length; i++) {
-        const prevTotal = snapshots[i - 1].nodeCount + snapshots[i - 1].edgeCount;
+        const prevTotal =
+          snapshots[i - 1].nodeCount + snapshots[i - 1].edgeCount;
         const currTotal = snapshots[i].nodeCount + snapshots[i].edgeCount;
         if (prevTotal > 0) {
           growthRates.push((currTotal - prevTotal) / prevTotal);
         }
       }
 
-      const meanGrowthRate = growthRates.reduce((sum, rate) => sum + rate, 0) / growthRates.length;
+      const meanGrowthRate =
+        growthRates.reduce((sum, rate) => sum + rate, 0) / growthRates.length;
       const volatility = Math.sqrt(
-        growthRates.reduce((sum, rate) => sum + Math.pow(rate - meanGrowthRate, 2), 0) /
-          growthRates.length,
+        growthRates.reduce(
+          (sum, rate) => sum + Math.pow(rate - meanGrowthRate, 2),
+          0,
+        ) / growthRates.length,
       );
 
       const result: TemporalAnalysis = {
@@ -759,13 +816,19 @@ export class GraphAnalyticsService {
     return {};
   }
 
-  private async detectCommunities(session: Session, filters?: any): Promise<Community[]> {
+  private async detectCommunities(
+    session: Session,
+    filters?: any,
+  ): Promise<Community[]> {
     // Community detection using Louvain or similar algorithm
     // This is a simplified placeholder
     return [];
   }
 
-  private async calculateGlobalClustering(session: Session, filters?: any): Promise<number> {
+  private async calculateGlobalClustering(
+    session: Session,
+    filters?: any,
+  ): Promise<number> {
     // Calculate global clustering coefficient
     return 0.0;
   }
@@ -894,9 +957,17 @@ export class GraphAnalyticsService {
     return [];
   }
 
-  private async cacheResult(key: string, data: any, ttl: number): Promise<void> {
+  private async cacheResult(
+    key: string,
+    data: any,
+    ttl: number,
+  ): Promise<void> {
     try {
-      await this.redisClient.setEx(`graph-analytics:${key}`, ttl, JSON.stringify(data));
+      await this.redisClient.setEx(
+        `graph-analytics:${key}`,
+        ttl,
+        JSON.stringify(data),
+      );
     } catch (error) {
       logger.warn('Failed to cache result:', error);
     }

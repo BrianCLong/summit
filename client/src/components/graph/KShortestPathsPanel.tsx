@@ -27,7 +27,10 @@ import {
   FilterList,
   PlayArrow,
 } from '@mui/icons-material';
-import { useKShortestPathsLazyQuery, useCancelPathFindingMutation } from '../../generated/graphql';
+import {
+  useKShortestPathsLazyQuery,
+  useCancelPathFindingMutation,
+} from '../../generated/graphql';
 
 interface KShortestPathsPanelProps {
   selectedNodes: string[];
@@ -106,7 +109,11 @@ export function KShortestPathsPanel({
 
         {selectedNodes.length >= 2 && (
           <Tooltip title="Use selected nodes">
-            <Button size="small" onClick={handleSelectFromGraph} startIcon={<FilterList />}>
+            <Button
+              size="small"
+              onClick={handleSelectFromGraph}
+              startIcon={<FilterList />}
+            >
               From Selection
             </Button>
           </Tooltip>
@@ -139,7 +146,9 @@ export function KShortestPathsPanel({
             label="Max Paths (k)"
             type="number"
             value={k}
-            onChange={(e) => setK(Math.min(MAX_K, Math.max(1, parseInt(e.target.value) || 1)))}
+            onChange={(e) =>
+              setK(Math.min(MAX_K, Math.max(1, parseInt(e.target.value) || 1)))
+            }
             size="small"
             inputProps={{ min: 1, max: MAX_K }}
           />
@@ -149,7 +158,9 @@ export function KShortestPathsPanel({
             type="number"
             value={maxDepth}
             onChange={(e) =>
-              setMaxDepth(Math.min(MAX_DEPTH, Math.max(1, parseInt(e.target.value) || 1)))
+              setMaxDepth(
+                Math.min(MAX_DEPTH, Math.max(1, parseInt(e.target.value) || 1)),
+              )
             }
             size="small"
             inputProps={{ min: 1, max: MAX_DEPTH }}
@@ -219,8 +230,9 @@ export function KShortestPathsPanel({
       {metadata && (
         <Box sx={{ mb: 2, p: 1.5, bgcolor: 'grey.50', borderRadius: 1 }}>
           <Typography variant="caption" color="text.secondary">
-            Found {metadata.pathsFound} path{metadata.pathsFound !== 1 ? 's' : ''} in{' '}
-            {metadata.searchTime}ms • Explored {metadata.nodesExplored} nodes • Max depth reached:{' '}
+            Found {metadata.pathsFound} path
+            {metadata.pathsFound !== 1 ? 's' : ''} in {metadata.searchTime}ms •
+            Explored {metadata.nodesExplored} nodes • Max depth reached:{' '}
             {metadata.maxDepthReached}
           </Typography>
         </Box>
@@ -244,8 +256,12 @@ export function KShortestPathsPanel({
                 >
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle2">Path {index + 1}</Typography>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <Typography variant="subtitle2">
+                          Path {index + 1}
+                        </Typography>
                         <Chip
                           size="small"
                           label={`${path.length} hops`}
@@ -259,7 +275,11 @@ export function KShortestPathsPanel({
                           variant="outlined"
                         />
                         {path.significance && (
-                          <Chip size="small" label="Significant" color="warning" />
+                          <Chip
+                            size="small"
+                            label="Significant"
+                            color="warning"
+                          />
                         )}
                       </Box>
                     }
@@ -284,8 +304,9 @@ export function KShortestPathsPanel({
 
       {paths.length === 0 && !loading && !error && sourceId && targetId && (
         <Alert severity="info">
-          No paths found between the selected nodes within the specified constraints. Try increasing
-          the maximum depth or adjusting the path type filter.
+          No paths found between the selected nodes within the specified
+          constraints. Try increasing the maximum depth or adjusting the path
+          type filter.
         </Alert>
       )}
     </Paper>

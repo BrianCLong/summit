@@ -25,13 +25,15 @@ function rootMutationFields(operation: any): string[] {
   return [...names];
 }
 
-export function invalidationPlugin(map: InvalidationMap = defaultMap): ApolloServerPlugin {
+export function invalidationPlugin(
+  map: InvalidationMap = defaultMap,
+): ApolloServerPlugin {
   return {
     async requestDidStart() {
       let patterns: string[] = [];
       let mutate = false;
       return {
-        didResolveOperation(ctx) {
+        async didResolveOperation(ctx: any) {
           try {
             if (ctx.operation?.operation !== 'mutation') return;
             const roots = rootMutationFields(ctx.operation);
@@ -43,10 +45,11 @@ export function invalidationPlugin(map: InvalidationMap = defaultMap): ApolloSer
             }
           } catch {}
         },
-        async willSendResponse(ctx) {
+        async willSendResponse(ctx: any) {
           try {
             if (!mutate) return;
-            const hasErrors = Array.isArray(ctx?.errors) && ctx.errors.length > 0;
+            const hasErrors =
+              Array.isArray(ctx?.errors) && ctx.errors.length > 0;
             if (!hasErrors && patterns.length) await emitInvalidation(patterns);
           } catch {}
         },

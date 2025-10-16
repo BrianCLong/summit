@@ -39,7 +39,9 @@ export default function PlaybookDialog({
           <div className="mb-1">Signature</div>
           <code className="break-all text-xs">{sig}</code>
           {providerGuess && (
-            <div className="mt-2 text-xs text-gray-500">Provider: {providerGuess}</div>
+            <div className="mt-2 text-xs text-gray-500">
+              Provider: {providerGuess}
+            </div>
           )}
         </div>
         <div className="mt-3 flex gap-2">

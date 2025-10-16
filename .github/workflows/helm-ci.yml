@@ -2,13 +2,13 @@ name: helm-ci
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'infra/helm/**'
       - 'charts/**'
       - 'helm/**'
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'infra/helm/**'
       - 'charts/**'

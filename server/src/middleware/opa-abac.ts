@@ -54,7 +54,7 @@ export class OPAClient implements OPAClient {
           headers: {
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       const result = response.data?.result;
@@ -75,7 +75,6 @@ export class OPAClient implements OPAClient {
       });
 
       return result;
-
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
@@ -99,7 +98,7 @@ export class OPAClient implements OPAClient {
 export function validateOIDCToken(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   const span = tracer.startSpan('validate-oidc-token');
 
@@ -113,7 +112,11 @@ export function validateOIDCToken(
           id: 'dev-user',
           tenant: 'default',
           roles: ['developer'],
-          scopes: ['purpose:investigation', 'purpose:threat-intel', 'scope:pii'],
+          scopes: [
+            'purpose:investigation',
+            'purpose:threat-intel',
+            'scope:pii',
+          ],
           residency: 'US',
           email: 'dev@topicality.co',
         };
@@ -133,7 +136,9 @@ export function validateOIDCToken(
     // In production, implement proper OIDC validation
     // For development/demo, decode without verification
     if (process.env.NODE_ENV === 'development') {
-      const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+      const decoded = JSON.parse(
+        Buffer.from(token.split('.')[1], 'base64').toString(),
+      );
       (req as any).user = {
         id: decoded.sub || 'demo-user',
         tenant: decoded.tenant || 'default',
@@ -158,7 +163,6 @@ export function validateOIDCToken(
     // const decoded = verify(token, publicKey, { issuer }) as JwtPayload;
 
     throw new Error('Production OIDC validation not yet implemented');
-
   } catch (error) {
     span.recordException(error as Error);
     span.setStatus({ code: 2, message: (error as Error).message });
@@ -168,7 +172,9 @@ export function validateOIDCToken(
       throw error;
     }
 
-    logger.error('Token validation failed', { error: (error as Error).message });
+    logger.error('Token validation failed', {
+      error: (error as Error).message,
+    });
     throw new AuthenticationError('Invalid or expired token');
   }
 }
@@ -178,8 +184,9 @@ export function validateOIDCToken(
  */
 export function buildGraphQLContext(opaClient: OPAClient) {
   return ({ req }: { req: Request }) => {
-    const requestId = req.headers['x-request-id'] as string ||
-                     `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const requestId =
+      (req.headers['x-request-id'] as string) ||
+      `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const user = (req as any).user as User | undefined;
 
@@ -224,7 +231,10 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
         operation_type: req.method.toLowerCase() as any,
       };
 
-      const allowed = await opaClient.evaluate('intelgraph.abac.allow', policyInput);
+      const allowed = await opaClient.evaluate(
+        'intelgraph.abac.allow',
+        policyInput,
+      );
 
       if (!allowed) {
         span.setStatus({ code: 2, message: 'Access denied by policy' });
@@ -239,13 +249,15 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
 
       span.end();
       next();
-
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
       span.end();
 
-      if (error instanceof AuthenticationError || error instanceof ForbiddenError) {
+      if (
+        error instanceof AuthenticationError ||
+        error instanceof ForbiddenError
+      ) {
         throw error;
       }
 
@@ -266,7 +278,12 @@ export function createAuthzDirective(opaClient: OPAClient) {
     visitFieldDefinition(field: any, details: any) {
       const { resolve = defaultFieldResolver } = field;
 
-      field.resolve = async function(source: any, args: any, context: any, info: any) {
+      field.resolve = async function (
+        source: any,
+        args: any,
+        context: any,
+        info: any,
+      ) {
         const span = tracer.startSpan('field-level-authz', {
           attributes: {
             'graphql.field.name': info.fieldName,
@@ -290,25 +307,30 @@ export function createAuthzDirective(opaClient: OPAClient) {
               ...(source && source.id && { id: source.id }),
               ...(source && source.purpose && { purpose: source.purpose }),
               ...(source && source.region && { region: source.region }),
-              ...(source && source.pii_flags && { pii_flags: source.pii_flags }),
+              ...(source &&
+                source.pii_flags && { pii_flags: source.pii_flags }),
             },
             operation_type: 'query', // TODO: Detect mutation vs query
             field_name: info.fieldName,
           };
 
-          const allowed = await opaClient.evaluate('intelgraph.abac.graphql_allowed', policyInput);
+          const allowed = await opaClient.evaluate(
+            'intelgraph.abac.graphql_allowed',
+            policyInput,
+          );
 
           if (!allowed) {
             span.setStatus({ code: 2, message: 'Field access denied' });
             span.end();
-            throw new ForbiddenError(`Access denied to field ${info.fieldName}`);
+            throw new ForbiddenError(
+              `Access denied to field ${info.fieldName}`,
+            );
           }
 
           span.setAttributes({ 'authz.field.allowed': true });
           span.end();
 
           return resolve.call(this, source, args, context, info);
-
         } catch (error) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
@@ -323,7 +345,11 @@ export function createAuthzDirective(opaClient: OPAClient) {
 /**
  * Residency enforcement middleware for US-only data locality
  */
-export function residencyEnforcementMiddleware(req: Request, res: Response, next: NextFunction) {
+export function residencyEnforcementMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const user = (req as any).user as User;
 
   if (user && user.residency !== 'US') {
@@ -340,6 +366,11 @@ export function residencyEnforcementMiddleware(req: Request, res: Response, next
 }
 
 // Default field resolver placeholder
-const defaultFieldResolver = (source: any, args: any, context: any, info: any) => {
+const defaultFieldResolver = (
+  source: any,
+  args: any,
+  context: any,
+  info: any,
+) => {
   return source[info.fieldName];
 };

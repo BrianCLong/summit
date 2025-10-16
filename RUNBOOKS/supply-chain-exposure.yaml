@@ -7,14 +7,14 @@ tasks:
     name: Map Software Dependencies
     uses: connector:elastic
     with:
-      sources: ["sbom", "package-lock", "requirements"]
+      sources: ['sbom', 'package-lock', 'requirements']
 
   - id: vulnerability_scanning
     name: Scan for Vulnerabilities
     uses: analyze:risk
     needs: [dependency_mapping]
     with:
-      vulnerability_feeds: ["nvd", "github", "snyk"]
+      vulnerability_feeds: ['nvd', 'github', 'snyk']
 
   - id: exposure_analysis
     name: Analyze Exposure Paths

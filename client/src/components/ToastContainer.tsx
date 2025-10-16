@@ -28,7 +28,9 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   maxToasts = 5,
   position = 'top-right',
 }) => {
-  const [toasts, setToasts] = useState<(ToastProps & { timestamp: number })[]>([]);
+  const [toasts, setToasts] = useState<(ToastProps & { timestamp: number })[]>(
+    [],
+  );
 
   const addToast = useCallback(
     (toastData: Omit<ToastProps, 'id' | 'onDismiss'>) => {
@@ -105,12 +107,16 @@ export const useToastHelpers = () => {
   const { addToast } = useToast();
 
   return {
-    success: (title: string, message?: string) => addToast({ type: 'success', title, message }),
+    success: (title: string, message?: string) =>
+      addToast({ type: 'success', title, message }),
 
-    error: (title: string, message?: string) => addToast({ type: 'error', title, message }),
+    error: (title: string, message?: string) =>
+      addToast({ type: 'error', title, message }),
 
-    warning: (title: string, message?: string) => addToast({ type: 'warning', title, message }),
+    warning: (title: string, message?: string) =>
+      addToast({ type: 'warning', title, message }),
 
-    info: (title: string, message?: string) => addToast({ type: 'info', title, message }),
+    info: (title: string, message?: string) =>
+      addToast({ type: 'info', title, message }),
   };
 };

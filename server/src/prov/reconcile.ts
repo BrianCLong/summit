@@ -9,7 +9,7 @@ export async function reconcileRoots(runId: string) {
   );
   if (!rows.length) return { ok: false } as const;
   const roots = new Set(rows.map((r: any) => r.root));
-  if (roots.size === 1) return { ok: true, root: roots.values().next().value } as const;
+  if (roots.size === 1)
+    return { ok: true, root: roots.values().next().value } as const;
   return { ok: false, conflict: Array.from(roots) } as const;
 }
-

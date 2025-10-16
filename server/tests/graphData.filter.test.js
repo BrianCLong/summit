@@ -49,7 +49,8 @@ describe('graphData filtering', () => {
               customMetadata: JSON.stringify({ tags: ['keep'] }),
             },
           };
-        if (key === 'from') return { properties: nodeRecords[0].get().properties };
+        if (key === 'from')
+          return { properties: nodeRecords[0].get().properties };
         return { properties: nodeRecords[1].get().properties };
       },
     };

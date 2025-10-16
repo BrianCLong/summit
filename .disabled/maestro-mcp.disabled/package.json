@@ -10,6 +10,12 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@intelgraph/mcp-core": "*"
+    "@intelgraph/mcp-core": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   }
 }

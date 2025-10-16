@@ -15,13 +15,12 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListItemSecondaryAction,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Badge,
-  Tooltip
+  Tooltip,
 } from '@mui/material';
 import {
   Comment,
@@ -34,7 +33,7 @@ import {
   ThumbDown,
   Attachment,
   Close,
-  Send
+  Send,
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { gql, useLazyQuery } from '@apollo/client';
@@ -55,12 +54,12 @@ const COMMENTS_QUERY = gql`
 `;
 import { useSelector } from 'react-redux';
 
-function CommentSystem({ 
-  targetType, 
-  targetId, 
+function CommentSystem({
+  targetType,
+  targetId,
   investigationId,
   socket,
-  onCommentCountChange 
+  onCommentCountChange,
 }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -72,10 +71,11 @@ function CommentSystem({
   const [filterType, setFilterType] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
   const [attachmentDialog, setAttachmentDialog] = useState(false);
-  
-  const { user } = useSelector(state => state.auth);
+
+  const { user } = useSelector((state) => state.auth);
   const commentInputRef = useRef(null);
-  const [loadCommentsQuery, { data: commentsData, called }] = useLazyQuery(COMMENTS_QUERY);
+  const [loadCommentsQuery, { data: commentsData, called }] =
+    useLazyQuery(COMMENTS_QUERY);
 
   useEffect(() => {
     // Load persisted comments
@@ -91,7 +91,7 @@ function CommentSystem({
 
   useEffect(() => {
     if (commentsData?.comments) {
-      const transformed = commentsData.comments.map(c => ({
+      const transformed = commentsData.comments.map((c) => ({
         id: c.id,
         content: c.content,
         author: { id: c.userId, firstName: 'User', lastName: '' },
@@ -100,7 +100,7 @@ function CommentSystem({
         reactions: { likes: 0, dislikes: 0 },
         replies: [],
         tags: [],
-        priority: 'normal'
+        priority: 'normal',
       }));
       setComments(transformed);
     }
@@ -116,18 +116,18 @@ function CommentSystem({
 
   const handleCommentUpdate = (data) => {
     const { type, comment, commentId } = data;
-    
+
     switch (type) {
       case 'comment_added':
-        setComments(prev => [comment, ...prev]);
+        setComments((prev) => [comment, ...prev]);
         break;
       case 'comment_updated':
-        setComments(prev => prev.map(c => 
-          c.id === comment.id ? { ...c, ...comment } : c
-        ));
+        setComments((prev) =>
+          prev.map((c) => (c.id === comment.id ? { ...c, ...comment } : c)),
+        );
         break;
       case 'comment_deleted':
-        setComments(prev => prev.filter(c => c.id !== commentId));
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
         break;
       default:
         break;
@@ -149,7 +149,7 @@ function CommentSystem({
       priority: 'normal',
       targetType,
       targetId,
-      investigationId
+      investigationId,
     };
 
     try {
@@ -157,36 +157,36 @@ function CommentSystem({
         // Add as reply
         const reply = {
           ...comment,
-          id: `${replyTo}-${Date.now()}`
+          id: `${replyTo}-${Date.now()}`,
         };
-        
-        setComments(prev => prev.map(c => 
-          c.id === replyTo 
-            ? { ...c, replies: [...c.replies, reply] }
-            : c
-        ));
-        
+
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === replyTo ? { ...c, replies: [...c.replies, reply] } : c,
+          ),
+        );
+
         if (socket) {
           socket.emit('comment:add', {
             investigationId,
             comment: reply,
-            parentId: replyTo
+            parentId: replyTo,
           });
         }
-        
+
         setReplyTo(null);
       } else {
         // Add as new comment
-        setComments(prev => [comment, ...prev]);
-        
+        setComments((prev) => [comment, ...prev]);
+
         if (socket) {
           socket.emit('comment:add', {
             investigationId,
-            comment
+            comment,
           });
         }
       }
-      
+
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -195,19 +195,21 @@ function CommentSystem({
 
   const handleEditComment = async (commentId, newContent) => {
     try {
-      setComments(prev => prev.map(c => 
-        c.id === commentId 
-          ? { ...c, content: newContent, edited: true, editedAt: new Date() }
-          : c
-      ));
-      
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId
+            ? { ...c, content: newContent, edited: true, editedAt: new Date() }
+            : c,
+        ),
+      );
+
       if (socket) {
         socket.emit('comment:update', {
           investigationId,
-          comment: { id: commentId, content: newContent }
+          comment: { id: commentId, content: newContent },
         });
       }
-      
+
       setEditingComment(null);
     } catch (error) {
       console.error('Error editing comment:', error);
@@ -216,15 +218,15 @@ function CommentSystem({
 
   const handleDeleteComment = async (commentId) => {
     try {
-      setComments(prev => prev.filter(c => c.id !== commentId));
-      
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+
       if (socket) {
         socket.emit('comment:delete', {
           investigationId,
-          commentId
+          commentId,
         });
       }
-      
+
       setMenuAnchor(null);
       setSelectedComment(null);
     } catch (error) {
@@ -233,18 +235,20 @@ function CommentSystem({
   };
 
   const handleReaction = (commentId, reactionType) => {
-    setComments(prev => prev.map(c => {
-      if (c.id === commentId) {
-        const reactions = { ...c.reactions };
-        reactions[reactionType] = (reactions[reactionType] || 0) + 1;
-        return { ...c, reactions };
-      }
-      return c;
-    }));
+    setComments((prev) =>
+      prev.map((c) => {
+        if (c.id === commentId) {
+          const reactions = { ...c.reactions };
+          reactions[reactionType] = (reactions[reactionType] || 0) + 1;
+          return { ...c, reactions };
+        }
+        return c;
+      }),
+    );
   };
 
   const toggleReplies = (commentId) => {
-    setShowReplies(prev => {
+    setShowReplies((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(commentId)) {
         newSet.delete(commentId);
@@ -257,25 +261,34 @@ function CommentSystem({
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'error';
-      case 'medium': return 'warning';
-      case 'low': return 'info';
-      default: return 'default';
+      case 'high':
+        return 'error';
+      case 'medium':
+        return 'warning';
+      case 'low':
+        return 'info';
+      default:
+        return 'default';
     }
   };
 
   const getTypeIcon = (type) => {
     switch (type) {
-      case 'observation': return '👁️';
-      case 'analysis': return '📊';
-      case 'question': return '❓';
-      case 'alert': return '🚨';
-      default: return '💬';
+      case 'observation':
+        return '👁️';
+      case 'analysis':
+        return '📊';
+      case 'question':
+        return '❓';
+      case 'alert':
+        return '🚨';
+      default:
+        return '💬';
     }
   };
 
   const filteredAndSortedComments = comments
-    .filter(comment => {
+    .filter((comment) => {
       if (filterType === 'all') return true;
       return comment.type === filterType;
     })
@@ -286,7 +299,11 @@ function CommentSystem({
         case 'oldest':
           return new Date(a.timestamp) - new Date(b.timestamp);
         case 'most_reactions':
-          return (b.reactions.likes + b.reactions.dislikes) - (a.reactions.likes + a.reactions.dislikes);
+          return (
+            b.reactions.likes +
+            b.reactions.dislikes -
+            (a.reactions.likes + a.reactions.dislikes)
+          );
         default:
           return 0;
       }
@@ -352,14 +369,20 @@ function CommentSystem({
           fullWidth
           multiline
           rows={3}
-          placeholder={replyTo ? "Write a reply..." : "Add a comment..."}
+          placeholder={replyTo ? 'Write a reply...' : 'Add a comment...'}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           variant="outlined"
           inputProps={{ 'aria-label': replyTo ? 'reply text' : 'comment text' }}
           sx={{ mb: 2 }}
         />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               startIcon={<Attachment />}
@@ -385,20 +408,44 @@ function CommentSystem({
         <List>
           {filteredAndSortedComments.map((comment) => (
             <React.Fragment key={comment.id}>
-              <ListItem alignItems="flex-start" sx={{ py: 2 }}>
+              <ListItem
+                alignItems="flex-start"
+                sx={{ py: 2 }}
+                secondaryAction={
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      setMenuAnchor(e.currentTarget);
+                      setSelectedComment(comment);
+                    }}
+                  >
+                    <MoreVert />
+                  </IconButton>
+                }
+              >
                 <ListItemAvatar>
                   <Avatar sx={{ bgcolor: 'primary.main' }}>
-                    {comment.author.firstName[0]}{comment.author.lastName[0]}
+                    {comment.author.firstName[0]}
+                    {comment.author.lastName[0]}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        mb: 1,
+                      }}
+                    >
                       <Typography variant="subtitle2">
                         {comment.author.firstName} {comment.author.lastName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {formatDistanceToNow(new Date(comment.timestamp), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(comment.timestamp), {
+                          addSuffix: true,
+                        })}
                       </Typography>
                       <Chip
                         size="small"
@@ -434,7 +481,14 @@ function CommentSystem({
                           <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
                             <Button
                               size="small"
-                              onClick={(e) => handleEditComment(comment.id, e.target.previousSibling.querySelector('textarea').value)}
+                              onClick={(e) =>
+                                handleEditComment(
+                                  comment.id,
+                                  e.target.previousSibling.querySelector(
+                                    'textarea',
+                                  ).value,
+                                )
+                              }
                             >
                               Save
                             </Button>
@@ -451,10 +505,10 @@ function CommentSystem({
                           <Typography variant="body2" sx={{ mt: 1, mb: 1 }}>
                             {comment.content}
                           </Typography>
-                          
+
                           {comment.tags.length > 0 && (
                             <Box sx={{ mb: 1 }}>
-                              {comment.tags.map(tag => (
+                              {comment.tags.map((tag) => (
                                 <Chip
                                   key={tag}
                                   label={tag}
@@ -466,13 +520,25 @@ function CommentSystem({
                             </Box>
                           )}
 
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                              mt: 1,
+                            }}
+                          >
                             <Tooltip title="Like">
                               <IconButton
                                 size="small"
-                                onClick={() => handleReaction(comment.id, 'likes')}
+                                onClick={() =>
+                                  handleReaction(comment.id, 'likes')
+                                }
                               >
-                                <Badge badgeContent={comment.reactions.likes} color="primary">
+                                <Badge
+                                  badgeContent={comment.reactions.likes}
+                                  color="primary"
+                                >
                                   <ThumbUp fontSize="small" />
                                 </Badge>
                               </IconButton>
@@ -480,9 +546,14 @@ function CommentSystem({
                             <Tooltip title="Dislike">
                               <IconButton
                                 size="small"
-                                onClick={() => handleReaction(comment.id, 'dislikes')}
+                                onClick={() =>
+                                  handleReaction(comment.id, 'dislikes')
+                                }
                               >
-                                <Badge badgeContent={comment.reactions.dislikes} color="error">
+                                <Badge
+                                  badgeContent={comment.reactions.dislikes}
+                                  color="error"
+                                >
                                   <ThumbDown fontSize="small" />
                                 </Badge>
                               </IconButton>
@@ -502,7 +573,8 @@ function CommentSystem({
                                 size="small"
                                 onClick={() => toggleReplies(comment.id)}
                               >
-                                {showReplies.has(comment.id) ? 'Hide' : 'Show'} {comment.replies.length} replies
+                                {showReplies.has(comment.id) ? 'Hide' : 'Show'}{' '}
+                                {comment.replies.length} replies
                               </Button>
                             )}
                           </Box>
@@ -511,46 +583,48 @@ function CommentSystem({
                     </Box>
                   }
                 />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      setMenuAnchor(e.currentTarget);
-                      setSelectedComment(comment);
-                    }}
-                  >
-                    <MoreVert />
-                  </IconButton>
-                </ListItemSecondaryAction>
               </ListItem>
 
               {/* Replies */}
-              {showReplies.has(comment.id) && comment.replies.map((reply) => (
-                <ListItem key={reply.id} sx={{ pl: 8, py: 1 }}>
-                  <ListItemAvatar>
-                    <Avatar size="small" sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>
-                      {reply.author.firstName[0]}{reply.author.lastName[0]}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle2" fontSize="0.875rem">
-                          {reply.author.firstName} {reply.author.lastName}
+              {showReplies.has(comment.id) &&
+                comment.replies.map((reply) => (
+                  <ListItem key={reply.id} sx={{ pl: 8, py: 1 }}>
+                    <ListItemAvatar>
+                      <Avatar
+                        size="small"
+                        sx={{
+                          bgcolor: 'secondary.main',
+                          width: 32,
+                          height: 32,
+                        }}
+                      >
+                        {reply.author.firstName[0]}
+                        {reply.author.lastName[0]}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
+                          <Typography variant="subtitle2" fontSize="0.875rem">
+                            {reply.author.firstName} {reply.author.lastName}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatDistanceToNow(new Date(reply.timestamp), {
+                              addSuffix: true,
+                            })}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={
+                        <Typography variant="body2" fontSize="0.875rem">
+                          {reply.content}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatDistanceToNow(new Date(reply.timestamp), { addSuffix: true })}
-                        </Typography>
-                      </Box>
-                    }
-                    secondary={
-                      <Typography variant="body2" fontSize="0.875rem">
-                        {reply.content}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              ))}
+                      }
+                    />
+                  </ListItem>
+                ))}
 
               <Divider />
             </React.Fragment>

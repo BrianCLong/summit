@@ -40,7 +40,7 @@ jobs:
         uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62
       - name: Verify cosign signatures
         env:
-          COSIGN_YES: "1"
+          COSIGN_YES: '1'
         run: |
           cosign verify --keyless ${{ github.event.inputs.serviceImage }}
           cosign verify --keyless ${{ github.event.inputs.jobImage }}

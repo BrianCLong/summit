@@ -1,7 +1,7 @@
 name: backlog-guard
 description: Detects GitHub Actions queue saturation and outputs 'saturated' boolean
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Install GitHub CLI
       shell: bash
@@ -52,11 +52,11 @@ runs:
 
 outputs:
   saturated:
-    description: "true if queue depth >= threshold (default 15)"
+    description: 'true if queue depth >= threshold (default 15)'
     value: ${{ steps.detect.outputs.saturated }}
   queued:
-    description: "Current queue depth at time of check"
+    description: 'Current queue depth at time of check'
     value: ${{ steps.detect.outputs.queued }}
   threshold:
-    description: "Threshold value used for saturation detection"
+    description: 'Threshold value used for saturation detection'
     value: ${{ steps.detect.outputs.threshold }}

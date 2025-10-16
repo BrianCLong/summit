@@ -68,13 +68,18 @@ function GraphPreview({
       setSimulationNodes((currentNodes) => {
         return currentNodes.map((node) => {
           // Simple circular layout with some randomness
-          const angle = (nodes.findIndex((n) => n.id === node.id) / nodes.length) * Math.PI * 2;
+          const angle =
+            (nodes.findIndex((n) => n.id === node.id) / nodes.length) *
+            Math.PI *
+            2;
           const radius = Math.min(width, height) * 0.3;
           const centerX = width / 2;
           const centerY = height / 2;
 
-          const targetX = centerX + Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
-          const targetY = centerY + Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
+          const targetX =
+            centerX + Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
+          const targetY =
+            centerY + Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
 
           // Smooth movement towards target position
           const currentX = node.x || centerX;
@@ -153,7 +158,8 @@ function GraphPreview({
 
       const radius = hoveredNode === node.id ? 8 : 6;
       const color =
-        nodeTypeColors[node.type as keyof typeof nodeTypeColors] || nodeTypeColors.generic;
+        nodeTypeColors[node.type as keyof typeof nodeTypeColors] ||
+        nodeTypeColors.generic;
 
       // Node circle
       ctx.fillStyle = color;
@@ -198,7 +204,9 @@ function GraphPreview({
     const hoveredNodeId =
       simulationNodes.find((node) => {
         if (!node.x || !node.y) return false;
-        const distance = Math.sqrt(Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2));
+        const distance = Math.sqrt(
+          Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2),
+        );
         return distance <= 8;
       })?.id || null;
 
@@ -218,7 +226,9 @@ function GraphPreview({
     // Find clicked node
     const clickedNode = simulationNodes.find((node) => {
       if (!node.x || !node.y) return false;
-      const distance = Math.sqrt(Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2));
+      const distance = Math.sqrt(
+        Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2),
+      );
       return distance <= 8;
     });
 
@@ -237,7 +247,9 @@ function GraphPreview({
           marginBottom: '12px',
         }}
       >
-        <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0 }}>{title}</h3>
+        <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0 }}>
+          {title}
+        </h3>
 
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {/* Legend */}
@@ -245,7 +257,10 @@ function GraphPreview({
             {Object.entries(nodeTypeColors)
               .slice(0, 4)
               .map(([type, color]) => (
-                <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div
+                  key={type}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
                   <div
                     style={{
                       width: '8px',

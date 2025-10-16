@@ -1,4 +1,5 @@
 expectations:
   - expect_table_row_count_to_be_between: { min_value: 100000 }
   - expect_column_values_to_not_be_null: { column: 'doc_id' }
-  - expect_column_values_to_be_between: { column: 'score', min_value: 0, max_value: 1 }
+  - expect_column_values_to_be_between:
+      { column: 'score', min_value: 0, max_value: 1 }

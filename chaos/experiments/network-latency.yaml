@@ -7,13 +7,13 @@ metadata:
   name: network-latency-experiment
   namespace: intelgraph-staging
   annotations:
-    chaos.alpha.kubernetes.io/experiment-type: "network-chaos"
-    chaos.alpha.kubernetes.io/scope: "scoped"
-    chaos.alpha.kubernetes.io/safety-level: "medium"
+    chaos.alpha.kubernetes.io/experiment-type: 'network-chaos'
+    chaos.alpha.kubernetes.io/scope: 'scoped'
+    chaos.alpha.kubernetes.io/safety-level: 'medium'
 spec:
   appinfo:
     appns: intelgraph-staging
-    applabel: "app=intelgraph-server"
+    applabel: 'app=intelgraph-server'
     appkind: deployment
 
   chaosServiceAccount: chaos-service-account
@@ -27,93 +27,99 @@ spec:
           env:
             # Inject 100ms latency
             - name: NETWORK_LATENCY
-              value: "100"  # 100ms additional latency
+              value: '100' # 100ms additional latency
 
             - name: TOTAL_CHAOS_DURATION
-              value: "120"  # 2 minutes
+              value: '120' # 2 minutes
 
             - name: RAMP_TIME
-              value: "0"
+              value: '0'
 
             # Target specific network interface
             - name: NETWORK_INTERFACE
-              value: "eth0"
+              value: 'eth0'
 
             # Apply to 50% of traffic
             - name: NETWORK_PACKET_LOSS_PERCENTAGE
-              value: "0"  # No packet loss, just latency
+              value: '0' # No packet loss, just latency
 
             # Jitter configuration
             - name: JITTER
-              value: "10"  # 10ms jitter
+              value: '10' # 10ms jitter
 
             # Target configuration
             - name: TARGET_CONTAINER
-              value: "intelgraph-server"
+              value: 'intelgraph-server'
 
             - name: PODS_AFFECTED_PERC
-              value: "50"  # Affect 50% of pods
+              value: '50' # Affect 50% of pods
 
             # Destination filtering (optional)
             - name: DESTINATION_IPS
-              value: ""  # Empty = all destinations
+              value: '' # Empty = all destinations
 
             - name: DESTINATION_HOSTS
-              value: ""  # Can target specific hosts
+              value: '' # Can target specific hosts
 
         # Health probes during latency injection
         probe:
-          - name: "latency-tolerance-probe"
-            type: "httpProbe"
-            mode: "Continuous"
+          - name: 'latency-tolerance-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
             runProperties:
-              probeTimeout: 10  # Increased timeout for latency
+              probeTimeout: 10 # Increased timeout for latency
               retry: 3
               interval: 15
             httpProbe/inputs:
-              url: "http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health"
+              url: 'http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health'
               insecureSkipTLS: true
-              responseTimeout: 8  # Allow for additional latency
+              responseTimeout: 8 # Allow for additional latency
               method:
                 get:
-                  criteria: "=="
-                  responseCode: "200"
+                  criteria: '=='
+                  responseCode: '200'
 
-          - name: "graphql-latency-probe"
-            type: "httpProbe"
-            mode: "Continuous"
+          - name: 'graphql-latency-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
             runProperties:
               probeTimeout: 15
               retry: 2
               interval: 20
             httpProbe/inputs:
-              url: "http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/graphql"
+              url: 'http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/graphql'
               insecureSkipTLS: true
               responseTimeout: 12
               method:
                 post:
-                  contentType: "application/json"
+                  contentType: 'application/json'
                   body: '{"query": "query { __typename }"}'
-                  criteria: "=="
-                  responseCode: "200"
+                  criteria: '=='
+                  responseCode: '200'
 
-          - name: "database-connectivity-probe"
-            type: "cmdProbe"
-            mode: "Edge"  # Run at start and end
+          - name: 'database-connectivity-probe'
+            type: 'cmdProbe'
+            mode: 'Edge' # Run at start and end
             runProperties:
               probeTimeout: 10
               retry: 3
               interval: 5
             cmdProbe/inputs:
-              command: "nc"
-              args: ["-z", "-v", "postgres.intelgraph-staging.svc.cluster.local", "5432"]
+              command: 'nc'
+              args:
+                [
+                  '-z',
+                  '-v',
+                  'postgres.intelgraph-staging.svc.cluster.local',
+                  '5432',
+                ]
               source:
-                image: "busybox:latest"
+                image: 'busybox:latest'
                 inheritInputs: true
               comparator:
-                type: "string"
-                criteria: "contains"
-                value: "open"
+                type: 'string'
+                criteria: 'contains'
+                value: 'open'
 
 ---
 apiVersion: litmuschaos.io/v1alpha1
@@ -130,20 +136,20 @@ spec:
   definition:
     scope: Namespaced
     permissions:
-      - apiGroups: [""]
-        resources: ["pods"]
-        verbs: ["list", "get", "patch", "create", "update", "delete"]
-      - apiGroups: [""]
-        resources: ["events"]
-        verbs: ["create", "get", "list", "patch", "update"]
-      - apiGroups: [""]
-        resources: ["pods/exec"]
-        verbs: ["get", "list", "create"]
-      - apiGroups: ["litmuschaos.io"]
-        resources: ["chaosengines", "chaosexperiments", "chaosresults"]
-        verbs: ["get", "list", "patch", "update"]
+      - apiGroups: ['']
+        resources: ['pods']
+        verbs: ['list', 'get', 'patch', 'create', 'update', 'delete']
+      - apiGroups: ['']
+        resources: ['events']
+        verbs: ['create', 'get', 'list', 'patch', 'update']
+      - apiGroups: ['']
+        resources: ['pods/exec']
+        verbs: ['get', 'list', 'create']
+      - apiGroups: ['litmuschaos.io']
+        resources: ['chaosengines', 'chaosexperiments', 'chaosresults']
+        verbs: ['get', 'list', 'patch', 'update']
 
-    image: "litmuschaos/go-runner:latest"
+    image: 'litmuschaos/go-runner:latest'
     imagePullPolicy: Always
     args:
       - -c
@@ -154,46 +160,46 @@ spec:
 
     env:
       - name: TOTAL_CHAOS_DURATION
-        value: "60"
+        value: '60'
 
       - name: RAMP_TIME
-        value: ""
+        value: ''
 
       - name: NETWORK_INTERFACE
-        value: "eth0"
+        value: 'eth0'
 
       - name: NETWORK_LATENCY
-        value: "100"
+        value: '100'
 
       - name: JITTER
-        value: "10"
+        value: '10'
 
       - name: TARGET_CONTAINER
-        value: ""
+        value: ''
 
       - name: PODS_AFFECTED_PERC
-        value: ""
+        value: ''
 
       - name: TARGET_PODS
-        value: ""
+        value: ''
 
       - name: CONTAINER_RUNTIME
-        value: "containerd"
+        value: 'containerd'
 
       - name: SOCKET_PATH
-        value: "/run/containerd/containerd.sock"
+        value: '/run/containerd/containerd.sock'
 
       - name: DESTINATION_IPS
-        value: ""
+        value: ''
 
       - name: DESTINATION_HOSTS
-        value: ""
+        value: ''
 
       - name: DEFAULT_HEALTH_CHECK
-        value: "false"
+        value: 'false'
 
       - name: SEQUENCE
-        value: "parallel"
+        value: 'parallel'
 
     labels:
       name: pod-network-latency
@@ -215,18 +221,18 @@ spec:
     once: false
     repeat:
       timeRange:
-        startTime: "03:00"
-        endTime: "03:30"
+        startTime: '03:00'
+        endTime: '03:30'
       properties:
-        minChaosInterval: "15m"
+        minChaosInterval: '15m'
       workDays:
-        includedDays: "wed"  # Wednesday only
-        excludedDays: "mon,tue,thu,fri,sat,sun"
+        includedDays: 'wed' # Wednesday only
+        excludedDays: 'mon,tue,thu,fri,sat,sun'
 
   engineTemplateSpec:
     appinfo:
       appns: intelgraph-staging
-      applabel: "app=intelgraph-server"
+      applabel: 'app=intelgraph-server'
       appkind: deployment
 
     chaosServiceAccount: chaos-service-account
@@ -238,10 +244,10 @@ spec:
           components:
             env:
               - name: NETWORK_LATENCY
-                value: "50"  # Milder latency for scheduled runs
+                value: '50' # Milder latency for scheduled runs
               - name: TOTAL_CHAOS_DURATION
-                value: "90"
+                value: '90'
               - name: JITTER
-                value: "5"
+                value: '5'
               - name: PODS_AFFECTED_PERC
-                value: "30"
+                value: '30'

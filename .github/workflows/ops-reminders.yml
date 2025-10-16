@@ -1,8 +1,8 @@
 name: ops-reminders
 on:
   schedule:
-    - cron: "0 15 * * 1"   # Every Monday 15:00 UTC – weekly release train
-    - cron: "0 16 1 * *"   # 1st of each month 16:00 UTC – monthly hygiene
+    - cron: '0 15 * * 1' # Every Monday 15:00 UTC – weekly release train
+    - cron: '0 16 1 * *' # 1st of each month 16:00 UTC – monthly hygiene
   workflow_dispatch: {}
 
 permissions:

@@ -1,6 +1,7 @@
 Helm charts for IntelGraph services.
 
 Charts included:
+
 - server
 - client
 - neo4j
@@ -11,6 +12,7 @@ Charts included:
 - osint-service
 
 Each chart supports:
+
 - Ingress with cert-manager annotations
 - HPA (optional)
 - ServiceMonitor (optional) for Prometheus Operator
@@ -19,4 +21,3 @@ Each chart supports:
 - Optional ExternalSecrets or plain Secret
 
 See each chart's values.yaml for configuration.
-

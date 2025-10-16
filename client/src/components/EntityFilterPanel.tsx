@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Autocomplete,
   Box,
@@ -9,24 +9,24 @@ import {
   Stack,
   TextField,
   Typography,
-} from "@mui/material";
-import { Link as RouterLink, useSearchParams } from "react-router-dom";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import LocalizationProvider from "@mui/lab/LocalizationProvider";
-import DatePicker from "@mui/lab/DatePicker";
-import { apiFetch } from "../services/api";
+} from '@mui/material';
+import { Link as RouterLink, useSearchParams } from 'react-router-dom';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import DatePicker from '@mui/lab/DatePicker';
+import { apiFetch } from '../services/api';
 
 interface EntityOption {
   id: string;
   label: string;
 }
 
-const tagOptions = ["Person", "Organization", "Location", "Event"];
+const tagOptions = ['Person', 'Organization', 'Location', 'Event'];
 
 function EntityFilterPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [confidence, setConfidence] = useState<number[]>([0, 1]);
@@ -34,15 +34,15 @@ function EntityFilterPanel() {
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    const q = searchParams.get("entity");
-    const tagsParam = searchParams.get("tags");
-    const confParam = searchParams.get("confidence");
-    const startParam = searchParams.get("startDate");
-    const endParam = searchParams.get("endDate");
+    const q = searchParams.get('entity');
+    const tagsParam = searchParams.get('tags');
+    const confParam = searchParams.get('confidence');
+    const startParam = searchParams.get('startDate');
+    const endParam = searchParams.get('endDate');
     if (q) setQuery(q);
-    if (tagsParam) setTags(tagsParam.split(",").filter(Boolean));
+    if (tagsParam) setTags(tagsParam.split(',').filter(Boolean));
     if (confParam) {
-      const [min, max] = confParam.split("-").map(Number);
+      const [min, max] = confParam.split('-').map(Number);
       if (!isNaN(min) && !isNaN(max)) setConfidence([min, max]);
     }
     if (startParam) setStartDate(new Date(startParam));
@@ -73,24 +73,24 @@ function EntityFilterPanel() {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (query) params.set("entity", query);
-    if (tags.length) params.set("tags", tags.join(","));
+    if (query) params.set('entity', query);
+    if (tags.length) params.set('tags', tags.join(','));
     if (confidence[0] !== 0 || confidence[1] !== 1)
-      params.set("confidence", `${confidence[0]}-${confidence[1]}`);
-    if (startDate) params.set("startDate", startDate.toISOString());
-    if (endDate) params.set("endDate", endDate.toISOString());
+      params.set('confidence', `${confidence[0]}-${confidence[1]}`);
+    if (startDate) params.set('startDate', startDate.toISOString());
+    if (endDate) params.set('endDate', endDate.toISOString());
     setSearchParams(params, { replace: true });
   }, [query, tags, confidence, startDate, endDate]);
 
   const resultsLink = useMemo(() => {
     const params = new URLSearchParams();
-    if (query) params.set("entity", query);
-    if (tags.length) params.set("tags", tags.join(","));
+    if (query) params.set('entity', query);
+    if (tags.length) params.set('tags', tags.join(','));
     if (confidence[0] !== 0 || confidence[1] !== 1)
-      params.set("confidence", `${confidence[0]}-${confidence[1]}`);
-    if (startDate) params.set("startDate", startDate.toISOString());
-    if (endDate) params.set("endDate", endDate.toISOString());
-    params.set("page", "1");
+      params.set('confidence', `${confidence[0]}-${confidence[1]}`);
+    if (startDate) params.set('startDate', startDate.toISOString());
+    if (endDate) params.set('endDate', endDate.toISOString());
+    params.set('page', '1');
     return `/entities?${params.toString()}`;
   }, [query, tags, confidence, startDate, endDate]);
 

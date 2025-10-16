@@ -79,12 +79,19 @@ export class PolicyEngine {
   private redis: Redis;
   private opaClient: AxiosInstance;
   private config: PolicyEngineConfig;
-  private policyCache = new Map<string, { decision: PolicyDecision; timestamp: number }>();
+  private policyCache = new Map<
+    string,
+    { decision: PolicyDecision; timestamp: number }
+  >();
 
-  constructor(pool: Pool, redis: Redis, config: Partial<PolicyEngineConfig> = {}) {
+  constructor(
+    pool: Pool,
+    redis: Redis,
+    config: Partial<PolicyEngineConfig> = {},
+  ) {
     this.pool = pool;
     this.redis = redis;
-    
+
     this.config = {
       opaUrl: config.opaUrl || 'http://localhost:8181',
       opaTimeout: config.opaTimeout || 5000,
@@ -92,20 +99,20 @@ export class PolicyEngine {
       enableCaching: config.enableCaching ?? true,
       enableMetrics: config.enableMetrics ?? true,
       defaultDecision: config.defaultDecision || 'deny',
-      reasonForAccessRequired: config.reasonForAccessRequired ?? true
+      reasonForAccessRequired: config.reasonForAccessRequired ?? true,
     };
 
     this.opaClient = axios.create({
       baseURL: this.config.opaUrl,
       timeout: this.config.opaTimeout,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     logger.info('PolicyEngine initialized', {
       opaUrl: this.config.opaUrl,
-      config: this.config
+      config: this.config,
     });
   }
 
@@ -124,14 +131,14 @@ export class PolicyEngine {
           logger.debug('Policy decision from cache', {
             cacheKey,
             decision: cached.decision,
-            correlationId: input.context.correlationId
+            correlationId: input.context.correlationId,
           });
-          
+
           return {
             decision: cached.decision,
             evaluatedRules: [],
             evaluationTime: Date.now() - startTime,
-            cached: true
+            cached: true,
           };
         }
       }
@@ -160,21 +167,21 @@ export class PolicyEngine {
         prometheusConductorMetrics.recordOperationalMetric(
           'policy_evaluation_duration_ms',
           evaluationTime,
-          { 
+          {
             decision: decision.allow ? 'allow' : 'deny',
             action_type: input.action.type,
-            category: input.action.category 
-          }
+            category: input.action.category,
+          },
         );
 
         prometheusConductorMetrics.recordOperationalEvent(
           'policy_evaluation',
           decision.allow,
-          { 
+          {
             action_type: input.action.type,
             category: input.action.category,
-            tenant_id: input.subject.tenantId
-          }
+            tenant_id: input.subject.tenantId,
+          },
         );
       }
 
@@ -184,35 +191,34 @@ export class PolicyEngine {
         actionType: input.action.type,
         userId: input.subject.userId,
         correlationId: input.context.correlationId,
-        reason: decision.reason
+        reason: decision.reason,
       });
 
       return {
         decision,
         evaluatedRules: applicableRules,
         evaluationTime,
-        cached: false
+        cached: false,
       };
-
     } catch (error) {
       const evaluationTime = Date.now() - startTime;
-      
+
       logger.error('Policy evaluation failed', {
         error: error.message,
         evaluationTime,
         actionType: input.action.type,
         userId: input.subject.userId,
-        correlationId: input.context.correlationId
+        correlationId: input.context.correlationId,
       });
 
       if (this.config.enableMetrics) {
         prometheusConductorMetrics.recordOperationalEvent(
           'policy_evaluation_error',
           false,
-          { 
+          {
             error_type: error.name,
-            action_type: input.action.type
-          }
+            action_type: input.action.type,
+          },
         );
       }
 
@@ -220,14 +226,14 @@ export class PolicyEngine {
       const defaultDecision: PolicyDecision = {
         allow: this.config.defaultDecision === 'allow',
         reason: `Policy evaluation failed: ${error.message}`,
-        metadata: { error: true, defaultDecision: true }
+        metadata: { error: true, defaultDecision: true },
       };
 
       return {
         decision: defaultDecision,
         evaluatedRules: [],
         evaluationTime,
-        cached: false
+        cached: false,
       };
     }
   }
@@ -249,9 +255,11 @@ export class PolicyEngine {
     }
 
     // Check if reason for access is required for privileged operations
-    if (this.config.reasonForAccessRequired && 
-        ['WRITE', 'DEPLOY', 'ROLLBACK'].includes(input.action.category) && 
-        !input.context.reasonForAccess) {
+    if (
+      this.config.reasonForAccessRequired &&
+      ['WRITE', 'DEPLOY', 'ROLLBACK'].includes(input.action.category) &&
+      !input.context.reasonForAccess
+    ) {
       errors.push('reasonForAccess is required for privileged operations');
     }
 
@@ -265,7 +273,7 @@ export class PolicyEngine {
    */
   private async loadApplicableRules(input: PolicyInput): Promise<PolicyRule[]> {
     const client = await this.pool.connect();
-    
+
     try {
       const result = await client.query(
         `SELECT id, name, version, category, priority, enabled, conditions, actions, metadata
@@ -273,28 +281,38 @@ export class PolicyEngine {
          WHERE enabled = true
            AND (effective_from IS NULL OR effective_from <= NOW())
            AND (effective_until IS NULL OR effective_until > NOW())
-         ORDER BY priority ASC, created_at ASC`
+         ORDER BY priority ASC, created_at ASC`,
       );
 
-      const allRules = result.rows.map(row => ({
+      const allRules = result.rows.map((row) => ({
         ...row,
-        conditions: typeof row.conditions === 'string' ? JSON.parse(row.conditions) : row.conditions,
-        actions: typeof row.actions === 'string' ? JSON.parse(row.actions) : row.actions,
-        metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata
+        conditions:
+          typeof row.conditions === 'string'
+            ? JSON.parse(row.conditions)
+            : row.conditions,
+        actions:
+          typeof row.actions === 'string'
+            ? JSON.parse(row.actions)
+            : row.actions,
+        metadata:
+          typeof row.metadata === 'string'
+            ? JSON.parse(row.metadata)
+            : row.metadata,
       }));
 
       // Filter rules that are applicable to this request
-      const applicableRules = allRules.filter(rule => this.isRuleApplicable(rule, input));
+      const applicableRules = allRules.filter((rule) =>
+        this.isRuleApplicable(rule, input),
+      );
 
       logger.debug('Loaded applicable policy rules', {
         totalRules: allRules.length,
         applicableRules: applicableRules.length,
         actionType: input.action.type,
-        category: input.action.category
+        category: input.action.category,
       });
 
       return applicableRules;
-
     } finally {
       client.release();
     }
@@ -307,38 +325,50 @@ export class PolicyEngine {
     const conditions = rule.conditions;
 
     // Check action type
-    if (conditions.action_types && 
-        !conditions.action_types.includes(input.action.type)) {
+    if (
+      conditions.action_types &&
+      !conditions.action_types.includes(input.action.type)
+    ) {
       return false;
     }
 
     // Check action category
-    if (conditions.action_categories && 
-        !conditions.action_categories.includes(input.action.category)) {
+    if (
+      conditions.action_categories &&
+      !conditions.action_categories.includes(input.action.category)
+    ) {
       return false;
     }
 
     // Check autonomy level
-    if (conditions.max_autonomy_level !== undefined && 
-        input.context.autonomyLevel > conditions.max_autonomy_level) {
+    if (
+      conditions.max_autonomy_level !== undefined &&
+      input.context.autonomyLevel > conditions.max_autonomy_level
+    ) {
       return false;
     }
 
     // Check tenant
-    if (conditions.tenants && 
-        !conditions.tenants.includes(input.subject.tenantId)) {
+    if (
+      conditions.tenants &&
+      !conditions.tenants.includes(input.subject.tenantId)
+    ) {
       return false;
     }
 
     // Check resource type
-    if (conditions.resource_types && 
-        !conditions.resource_types.includes(input.resource.type)) {
+    if (
+      conditions.resource_types &&
+      !conditions.resource_types.includes(input.resource.type)
+    ) {
       return false;
     }
 
     // Check environment
-    if (conditions.environments && 
-        !conditions.environments.includes(input.context.environment)) {
+    if (
+      conditions.environments &&
+      !conditions.environments.includes(input.context.environment)
+    ) {
       return false;
     }
 
@@ -358,33 +388,36 @@ export class PolicyEngine {
    * Evaluate policy using OPA
    */
   private async evaluateWithOPA(
-    input: PolicyInput, 
-    applicableRules: PolicyRule[]
+    input: PolicyInput,
+    applicableRules: PolicyRule[],
   ): Promise<PolicyDecision> {
     try {
       // Prepare OPA input
       const opaInput = {
         input: {
           ...input,
-          applicable_rules: applicableRules.map(rule => ({
+          applicable_rules: applicableRules.map((rule) => ({
             id: rule.id,
             name: rule.name,
             category: rule.category,
             conditions: rule.conditions,
-            actions: rule.actions
-          }))
-        }
+            actions: rule.actions,
+          })),
+        },
       };
 
       // Make request to OPA
-      const response = await this.opaClient.post('/v1/data/orchestrator/allow', opaInput);
-      
+      const response = await this.opaClient.post(
+        '/v1/data/orchestrator/allow',
+        opaInput,
+      );
+
       const result = response.data.result;
-      
+
       if (typeof result === 'boolean') {
         return {
           allow: result,
-          reason: result ? 'Policy allows action' : 'Policy denies action'
+          reason: result ? 'Policy allows action' : 'Policy denies action',
         };
       }
 
@@ -392,25 +425,26 @@ export class PolicyEngine {
         return {
           allow: result.allow || false,
           deny: result.deny || false,
-          reason: result.reason || (result.allow ? 'Policy allows action' : 'Policy denies action'),
+          reason:
+            result.reason ||
+            (result.allow ? 'Policy allows action' : 'Policy denies action'),
           obligations: result.obligations || [],
-          metadata: result.metadata || {}
+          metadata: result.metadata || {},
         };
       }
 
       throw new Error('Invalid OPA response format');
-
     } catch (error) {
       if (error.response) {
         logger.error('OPA evaluation failed', {
           status: error.response.status,
           data: error.response.data,
-          actionType: input.action.type
+          actionType: input.action.type,
         });
       } else {
         logger.error('OPA request failed', {
           error: error.message,
-          actionType: input.action.type
+          actionType: input.action.type,
         });
       }
 
@@ -423,43 +457,49 @@ export class PolicyEngine {
    * Fallback local policy evaluation
    */
   private async evaluateLocally(
-    input: PolicyInput, 
-    applicableRules: PolicyRule[]
+    input: PolicyInput,
+    applicableRules: PolicyRule[],
   ): Promise<PolicyDecision> {
     logger.warn('Falling back to local policy evaluation', {
       actionType: input.action.type,
-      rulesCount: applicableRules.length
+      rulesCount: applicableRules.length,
     });
 
     // Basic safety checks
     for (const rule of applicableRules) {
       if (rule.category === 'SAFETY') {
         const conditions = rule.conditions;
-        
+
         // Check blocked actions
-        if (conditions.blocked_actions && 
-            conditions.blocked_actions.includes(input.action.type)) {
+        if (
+          conditions.blocked_actions &&
+          conditions.blocked_actions.includes(input.action.type)
+        ) {
           return {
             allow: false,
-            reason: `Action ${input.action.type} is blocked by safety policy ${rule.name}`
+            reason: `Action ${input.action.type} is blocked by safety policy ${rule.name}`,
           };
         }
 
         // Check autonomy level limits
-        if (conditions.max_autonomy_level !== undefined && 
-            input.context.autonomyLevel > conditions.max_autonomy_level) {
+        if (
+          conditions.max_autonomy_level !== undefined &&
+          input.context.autonomyLevel > conditions.max_autonomy_level
+        ) {
           return {
             allow: false,
-            reason: `Autonomy level ${input.context.autonomyLevel} exceeds maximum ${conditions.max_autonomy_level}`
+            reason: `Autonomy level ${input.context.autonomyLevel} exceeds maximum ${conditions.max_autonomy_level}`,
           };
         }
 
         // Check budget limits
-        if (conditions.max_budget_per_run !== undefined && 
-            input.context.budgetRemaining < 0) {
+        if (
+          conditions.max_budget_per_run !== undefined &&
+          input.context.budgetRemaining < 0
+        ) {
           return {
             allow: false,
-            reason: 'Budget exhausted, action not permitted'
+            reason: 'Budget exhausted, action not permitted',
           };
         }
       }
@@ -467,35 +507,43 @@ export class PolicyEngine {
       // Check approval requirements
       if (rule.category === 'APPROVAL') {
         const conditions = rule.conditions;
-        
+
         if (conditions.require_approval_for) {
           const requireApproval = conditions.require_approval_for;
-          
-          if (requireApproval.autonomy_levels && 
-              requireApproval.autonomy_levels.includes(input.context.autonomyLevel)) {
+
+          if (
+            requireApproval.autonomy_levels &&
+            requireApproval.autonomy_levels.includes(
+              input.context.autonomyLevel,
+            )
+          ) {
             return {
               allow: false,
               reason: `Autonomy level ${input.context.autonomyLevel} requires approval`,
-              obligations: ['REQUIRE_APPROVAL']
+              obligations: ['REQUIRE_APPROVAL'],
             };
           }
 
-          if (requireApproval.high_cost_actions && 
-              input.context.budgetRemaining < requireApproval.high_cost_actions) {
+          if (
+            requireApproval.high_cost_actions &&
+            input.context.budgetRemaining < requireApproval.high_cost_actions
+          ) {
             return {
               allow: false,
               reason: 'High cost action requires approval',
-              obligations: ['REQUIRE_APPROVAL']
+              obligations: ['REQUIRE_APPROVAL'],
             };
           }
 
-          if (requireApproval.production_deployments && 
-              input.action.category === 'DEPLOY' && 
-              input.context.environment === 'production') {
+          if (
+            requireApproval.production_deployments &&
+            input.action.category === 'DEPLOY' &&
+            input.context.environment === 'production'
+          ) {
             return {
               allow: false,
               reason: 'Production deployment requires approval',
-              obligations: ['REQUIRE_APPROVAL']
+              obligations: ['REQUIRE_APPROVAL'],
             };
           }
         }
@@ -506,14 +554,14 @@ export class PolicyEngine {
     if (input.action.category === 'READ' && input.context.autonomyLevel <= 2) {
       return {
         allow: true,
-        reason: 'Read operation with low autonomy level allowed'
+        reason: 'Read operation with low autonomy level allowed',
       };
     }
 
     // Default deny for everything else in fallback mode
     return {
       allow: false,
-      reason: 'Local policy evaluation: default deny for safety'
+      reason: 'Local policy evaluation: default deny for safety',
     };
   }
 
@@ -530,7 +578,7 @@ export class PolicyEngine {
       resourceType: input.resource.type,
       resourceId: input.resource.id,
       autonomyLevel: input.context.autonomyLevel,
-      environment: input.context.environment
+      environment: input.context.environment,
     };
 
     return `policy:${Buffer.from(JSON.stringify(keyData)).toString('base64')}`;
@@ -539,11 +587,16 @@ export class PolicyEngine {
   /**
    * Get cached policy decision
    */
-  private async getCachedDecision(cacheKey: string): Promise<{ decision: PolicyDecision } | null> {
+  private async getCachedDecision(
+    cacheKey: string,
+  ): Promise<{ decision: PolicyDecision } | null> {
     try {
       if (this.policyCache.has(cacheKey)) {
         const cached = this.policyCache.get(cacheKey)!;
-        if (Date.now() - cached.timestamp < this.config.cacheTtlSeconds * 1000) {
+        if (
+          Date.now() - cached.timestamp <
+          this.config.cacheTtlSeconds * 1000
+        ) {
           return { decision: cached.decision };
         } else {
           this.policyCache.delete(cacheKey);
@@ -553,13 +606,13 @@ export class PolicyEngine {
       const redisResult = await this.redis.get(cacheKey);
       if (redisResult) {
         const cached = JSON.parse(redisResult);
-        
+
         // Store in local cache too
         this.policyCache.set(cacheKey, {
           decision: cached.decision,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
-        
+
         return { decision: cached.decision };
       }
 
@@ -567,7 +620,7 @@ export class PolicyEngine {
     } catch (error) {
       logger.error('Failed to get cached policy decision', {
         error: error.message,
-        cacheKey
+        cacheKey,
       });
       return null;
     }
@@ -576,29 +629,32 @@ export class PolicyEngine {
   /**
    * Cache policy decision
    */
-  private async cacheDecision(cacheKey: string, decision: PolicyDecision): Promise<void> {
+  private async cacheDecision(
+    cacheKey: string,
+    decision: PolicyDecision,
+  ): Promise<void> {
     try {
       const cacheData = {
         decision,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // Store in local cache
       this.policyCache.set(cacheKey, {
         decision,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       // Store in Redis with TTL
       await this.redis.setex(
         cacheKey,
         this.config.cacheTtlSeconds,
-        JSON.stringify(cacheData)
+        JSON.stringify(cacheData),
       );
     } catch (error) {
       logger.error('Failed to cache policy decision', {
         error: error.message,
-        cacheKey
+        cacheKey,
       });
     }
   }
@@ -609,10 +665,10 @@ export class PolicyEngine {
   private async recordPolicyEvaluation(
     input: PolicyInput,
     decision: PolicyDecision,
-    evaluatedRules: PolicyRule[]
+    evaluatedRules: PolicyRule[],
   ): Promise<void> {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query(
         `INSERT INTO orchestration_events (
@@ -625,21 +681,28 @@ export class PolicyEngine {
           JSON.stringify({
             decision,
             input: {
-              subject: { userId: input.subject.userId, tenantId: input.subject.tenantId },
+              subject: {
+                userId: input.subject.userId,
+                tenantId: input.subject.tenantId,
+              },
               action: input.action,
               resource: { type: input.resource.type, id: input.resource.id },
-              context: input.context
+              context: input.context,
             },
-            evaluatedRules: evaluatedRules.map(rule => ({ id: rule.id, name: rule.name, category: rule.category }))
+            evaluatedRules: evaluatedRules.map((rule) => ({
+              id: rule.id,
+              name: rule.name,
+              category: rule.category,
+            })),
           }),
           input.context.correlationId,
-          'policy-engine'
-        ]
+          'policy-engine',
+        ],
       );
     } catch (error) {
       logger.error('Failed to record policy evaluation', {
         error: error.message,
-        correlationId: input.context.correlationId
+        correlationId: input.context.correlationId,
       });
     } finally {
       client.release();
@@ -662,10 +725,10 @@ export class PolicyEngine {
       metadata?: Record<string, any>;
       effectiveFrom?: Date;
       effectiveUntil?: Date;
-    } = {}
+    } = {},
   ): Promise<string> {
     const client = await this.pool.connect();
-    
+
     try {
       const result = await client.query(
         `INSERT INTO orchestration_policies (
@@ -683,8 +746,8 @@ export class PolicyEngine {
           JSON.stringify(options.actions || {}),
           JSON.stringify(options.metadata || {}),
           options.effectiveFrom || new Date(),
-          options.effectiveUntil
-        ]
+          options.effectiveUntil,
+        ],
       );
 
       const policyId = result.rows[0].id;
@@ -693,7 +756,7 @@ export class PolicyEngine {
         policyId,
         name,
         category,
-        createdBy
+        createdBy,
       });
 
       // Clear policy cache
@@ -717,10 +780,10 @@ export class PolicyEngine {
       actions?: Record<string, any>;
       metadata?: Record<string, any>;
       priority?: number;
-    }
+    },
   ): Promise<void> {
     const client = await this.pool.connect();
-    
+
     try {
       const setClause: string[] = [];
       const values: any[] = [];
@@ -730,27 +793,27 @@ export class PolicyEngine {
         setClause.push(`enabled = $${paramIndex++}`);
         values.push(updates.enabled);
       }
-      
+
       if (updates.rules) {
         setClause.push(`rules = $${paramIndex++}`);
         values.push(JSON.stringify(updates.rules));
       }
-      
+
       if (updates.conditions) {
         setClause.push(`conditions = $${paramIndex++}`);
         values.push(JSON.stringify(updates.conditions));
       }
-      
+
       if (updates.actions) {
         setClause.push(`actions = $${paramIndex++}`);
         values.push(JSON.stringify(updates.actions));
       }
-      
+
       if (updates.metadata) {
         setClause.push(`metadata = $${paramIndex++}`);
         values.push(JSON.stringify(updates.metadata));
       }
-      
+
       if (updates.priority !== undefined) {
         setClause.push(`priority = $${paramIndex++}`);
         values.push(updates.priority);
@@ -761,14 +824,13 @@ export class PolicyEngine {
 
       await client.query(
         `UPDATE orchestration_policies SET ${setClause.join(', ')} WHERE id = $${paramIndex}`,
-        values
+        values,
       );
 
       logger.info('Policy rule updated', { policyId, updates });
 
       // Clear policy cache
       await this.clearPolicyCache();
-
     } finally {
       client.release();
     }
@@ -779,15 +841,16 @@ export class PolicyEngine {
    */
   async deletePolicyRule(policyId: string): Promise<void> {
     const client = await this.pool.connect();
-    
+
     try {
-      await client.query('DELETE FROM orchestration_policies WHERE id = $1', [policyId]);
-      
+      await client.query('DELETE FROM orchestration_policies WHERE id = $1', [
+        policyId,
+      ]);
+
       logger.info('Policy rule deleted', { policyId });
 
       // Clear policy cache
       await this.clearPolicyCache();
-
     } finally {
       client.release();
     }
@@ -824,30 +887,31 @@ export class PolicyEngine {
     evaluationsLast24h: number;
   }> {
     const client = await this.pool.connect();
-    
+
     try {
       const [rulesResult, eventsResult] = await Promise.all([
         client.query(
-          'SELECT category, enabled, COUNT(*) as count FROM orchestration_policies GROUP BY category, enabled'
+          'SELECT category, enabled, COUNT(*) as count FROM orchestration_policies GROUP BY category, enabled',
         ),
         client.query(
-          "SELECT COUNT(*) as count FROM orchestration_events WHERE event_type = 'policy.evaluation' AND timestamp > NOW() - INTERVAL '24 hours'"
-        )
+          "SELECT COUNT(*) as count FROM orchestration_events WHERE event_type = 'policy.evaluation' AND timestamp > NOW() - INTERVAL '24 hours'",
+        ),
       ]);
 
       let totalRules = 0;
       let enabledRules = 0;
       const rulesByCategory: Record<string, number> = {};
 
-      rulesResult.rows.forEach(row => {
+      rulesResult.rows.forEach((row) => {
         const count = parseInt(row.count);
         totalRules += count;
-        
+
         if (row.enabled) {
           enabledRules += count;
         }
 
-        rulesByCategory[row.category] = (rulesByCategory[row.category] || 0) + count;
+        rulesByCategory[row.category] =
+          (rulesByCategory[row.category] || 0) + count;
       });
 
       const evaluationsLast24h = parseInt(eventsResult.rows[0].count);
@@ -857,9 +921,8 @@ export class PolicyEngine {
         enabledRules,
         rulesByCategory,
         cacheHitRate: 0, // Would need to track this with metrics
-        evaluationsLast24h
+        evaluationsLast24h,
       };
-
     } finally {
       client.release();
     }
@@ -870,10 +933,10 @@ export class PolicyEngine {
 
 export async function enforcePolicy(
   policyEngine: PolicyEngine,
-  input: PolicyInput
+  input: PolicyInput,
 ): Promise<void> {
   const result = await policyEngine.evaluatePolicy(input);
-  
+
   if (!result.decision.allow) {
     const error = new Error(result.decision.reason || 'Policy denied');
     error.name = 'PolicyDeniedError';
@@ -885,9 +948,9 @@ export async function enforcePolicy(
     logger.info('Policy obligations required', {
       obligations: result.decision.obligations,
       actionType: input.action.type,
-      correlationId: input.context.correlationId
+      correlationId: input.context.correlationId,
     });
-    
+
     // Could trigger approval workflows, notifications, etc.
   }
 }
@@ -895,24 +958,28 @@ export async function enforcePolicy(
 export function createPolicyInput(
   userId: string,
   tenantId: string,
-  action: { type: string; category: 'READ' | 'WRITE' | 'DEPLOY' | 'ROLLBACK'; params?: Record<string, any> },
+  action: {
+    type: string;
+    category: 'READ' | 'WRITE' | 'DEPLOY' | 'ROLLBACK';
+    params?: Record<string, any>;
+  },
   resource: { type: string; id: string; attributes?: Record<string, any> },
-  context: { 
-    environment: string; 
-    autonomyLevel: number; 
-    budgetRemaining: number; 
-    correlationId?: string; 
+  context: {
+    environment: string;
+    autonomyLevel: number;
+    budgetRemaining: number;
+    correlationId?: string;
     reasonForAccess?: string;
     userRoles?: string[];
     userAttributes?: Record<string, any>;
-  }
+  },
 ): PolicyInput {
   return {
     subject: {
       userId,
       tenantId,
       roles: context.userRoles || [],
-      attributes: context.userAttributes || {}
+      attributes: context.userAttributes || {},
     },
     action,
     resource,
@@ -922,8 +989,8 @@ export function createPolicyInput(
       autonomyLevel: context.autonomyLevel,
       budgetRemaining: context.budgetRemaining,
       correlationId: context.correlationId,
-      reasonForAccess: context.reasonForAccess
-    }
+      reasonForAccess: context.reasonForAccess,
+    },
   };
 }
 

@@ -64,7 +64,7 @@ export class SOARConnectorV1Service {
     prisma: PrismaClient,
     redis: Redis,
     logger: Logger,
-    config: SOARConnectorConfig
+    config: SOARConnectorConfig,
   ) {
     this.prisma = prisma;
     this.redis = redis;
@@ -79,29 +79,35 @@ export class SOARConnectorV1Service {
   async createIncidentTicket(
     alertId: string,
     alertData: any,
-    system: 'servicenow' | 'jira' = 'servicenow'
+    system: 'servicenow' | 'jira' = 'servicenow',
   ): Promise<TicketLink> {
     const operationId = `create_ticket_${alertId}_${Date.now()}`;
-    
+
     try {
       // Check for existing ticket to ensure idempotency
       const existingTicket = await this.getExistingTicket(alertId, system);
       if (existingTicket) {
-        this.logger.info('Ticket already exists for alert, returning existing', {
-          alertId,
-          ticketId: existingTicket.external_id
-        });
+        this.logger.info(
+          'Ticket already exists for alert, returning existing',
+          {
+            alertId,
+            ticketId: existingTicket.external_id,
+          },
+        );
         return existingTicket;
       }
 
       // Create ticket with retry logic
       let ticketData: any;
       let attempt = 0;
-      
+
       while (attempt < this.RETRY_ATTEMPTS) {
         try {
           if (system === 'servicenow') {
-            ticketData = await this.createServiceNowIncident(alertData, operationId);
+            ticketData = await this.createServiceNowIncident(
+              alertData,
+              operationId,
+            );
           } else {
             ticketData = await this.createJiraIssue(alertData, operationId);
           }
@@ -111,14 +117,14 @@ export class SOARConnectorV1Service {
           if (attempt >= this.RETRY_ATTEMPTS) {
             throw error;
           }
-          
+
           this.logger.warn('Ticket creation failed, retrying', {
             alertId,
             system,
             attempt,
-            error: error.message
+            error: error.message,
           });
-          
+
           await this.delay(this.RETRY_DELAY_MS * attempt);
         }
       }
@@ -142,19 +148,18 @@ export class SOARConnectorV1Service {
         alertId,
         system,
         externalId: ticketData.id,
-        ticketLinkId: ticketLink.id
+        ticketLinkId: ticketLink.id,
       });
 
       // Set up automatic status sync
       await this.scheduleStatusSync(ticketLink.id);
 
       return ticketLink as TicketLink;
-
     } catch (error) {
       this.logger.error('Failed to create incident ticket', {
         alertId,
         system,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -163,13 +168,10 @@ export class SOARConnectorV1Service {
   /**
    * Update existing ticket with new information
    */
-  async updateTicket(
-    ticketLinkId: string,
-    updates: any
-  ): Promise<void> {
+  async updateTicket(ticketLinkId: string, updates: any): Promise<void> {
     try {
       const ticketLink = await this.prisma.ticketLink.findUnique({
-        where: { id: ticketLinkId }
+        where: { id: ticketLinkId },
       });
 
       if (!ticketLink) {
@@ -187,27 +189,26 @@ export class SOARConnectorV1Service {
         where: { id: ticketLinkId },
         data: {
           updated_at: new Date(),
-          status: updates.status || ticketLink.status
-        }
+          status: updates.status || ticketLink.status,
+        },
       });
 
       this.logger.info('Ticket updated successfully', {
         ticketLinkId,
         externalId: ticketLink.external_id,
-        system: ticketLink.external_system
+        system: ticketLink.external_system,
       });
-
     } catch (error) {
       this.logger.error('Failed to update ticket', {
         ticketLinkId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
   }
 
   /**
-   * B2 - EDR quarantine action  
+   * B2 - EDR quarantine action
    * AC: dry-run mode; result telemetry; rollback procedure
    */
   async quarantineHost(
@@ -215,10 +216,10 @@ export class SOARConnectorV1Service {
     hostIdentifier: string,
     initiatedBy: string,
     dryRun: boolean = false,
-    requireApproval: boolean = true
+    requireApproval: boolean = true,
   ): Promise<ContainmentAction> {
     const actionId = `qa_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
       // Create containment action record
       const action = await this.prisma.containmentAction.create({
@@ -232,8 +233,8 @@ export class SOARConnectorV1Service {
           initiated_at: new Date(),
           rollback_available: true,
           approval_required: requireApproval,
-          dry_run: dryRun
-        }
+          dry_run: dryRun,
+        },
       });
 
       // Handle approval if required
@@ -242,34 +243,34 @@ export class SOARConnectorV1Service {
           action_type: 'Host Quarantine',
           target: hostIdentifier,
           alert_id: alertId,
-          risk_level: 'high'
+          risk_level: 'high',
         });
-        
+
         this.logger.info('Host quarantine pending approval', {
           actionId,
           hostIdentifier,
-          alertId
+          alertId,
         });
-        
+
         return action as ContainmentAction;
       }
 
       // Execute quarantine action
       let result: any;
-      
+
       if (dryRun) {
         result = await this.simulateHostQuarantine(hostIdentifier);
         this.logger.info('Host quarantine dry-run completed', {
           actionId,
           hostIdentifier,
-          result
+          result,
         });
       } else {
         result = await this.executeHostQuarantine(hostIdentifier);
         this.logger.info('Host quarantine executed', {
           actionId,
           hostIdentifier,
-          result
+          result,
         });
       }
 
@@ -279,28 +280,31 @@ export class SOARConnectorV1Service {
         data: {
           status: 'completed',
           completed_at: new Date(),
-          result: JSON.stringify(result)
-        }
+          result: JSON.stringify(result),
+        },
       });
 
       // Record telemetry
-      await this.recordContainmentTelemetry(actionId, 'host_quarantine', result);
+      await this.recordContainmentTelemetry(
+        actionId,
+        'host_quarantine',
+        result,
+      );
 
       // Schedule rollback check if needed
       if (!dryRun && result.success) {
         await this.scheduleRollbackCheck(actionId, '24h');
       }
 
-      return await this.prisma.containmentAction.findUnique({
-        where: { id: actionId }
-      }) as ContainmentAction;
-
+      return (await this.prisma.containmentAction.findUnique({
+        where: { id: actionId },
+      })) as ContainmentAction;
     } catch (error) {
       this.logger.error('Host quarantine failed', {
         actionId,
         hostIdentifier,
         alertId,
-        error: error.message
+        error: error.message,
       });
 
       // Update action status to failed
@@ -309,8 +313,8 @@ export class SOARConnectorV1Service {
         data: {
           status: 'failed',
           completed_at: new Date(),
-          result: JSON.stringify({ error: error.message })
-        }
+          result: JSON.stringify({ error: error.message }),
+        },
       });
 
       throw error;
@@ -325,7 +329,7 @@ export class SOARConnectorV1Service {
     alertId: string,
     accountIdentifier: string,
     initiatedBy: string,
-    approverUserId?: string
+    approverUserId?: string,
   ): Promise<ContainmentAction> {
     const actionId = `ad_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
@@ -342,8 +346,8 @@ export class SOARConnectorV1Service {
           initiated_by: initiatedBy,
           initiated_at: new Date(),
           rollback_available: true,
-          approval_required: true
-        }
+          approval_required: true,
+        },
       });
 
       // Require approval gate
@@ -356,7 +360,7 @@ export class SOARConnectorV1Service {
         target: accountIdentifier,
         alert_id: alertId,
         risk_level: 'high',
-        approver_id: approverUserId
+        approver_id: approverUserId,
       });
 
       // Simulate approval for demo (in production, this would be async)
@@ -365,15 +369,15 @@ export class SOARConnectorV1Service {
         data: {
           status: 'in_progress',
           approved_by: approverUserId,
-          approved_at: new Date()
-        }
+          approved_at: new Date(),
+        },
       });
 
       // Execute account disable with timeout
       const executionTimeout = 120000; // 2 minutes
       const result = await Promise.race([
         this.executeAccountDisable(accountIdentifier),
-        this.timeout(executionTimeout, 'Account disable execution timeout')
+        this.timeout(executionTimeout, 'Account disable execution timeout'),
       ]);
 
       const executionTime = Date.now() - startTime;
@@ -386,9 +390,9 @@ export class SOARConnectorV1Service {
           completed_at: new Date(),
           result: JSON.stringify({
             ...result,
-            execution_time_ms: executionTime
-          })
-        }
+            execution_time_ms: executionTime,
+          }),
+        },
       });
 
       // Create detailed audit log
@@ -401,15 +405,16 @@ export class SOARConnectorV1Service {
         alert_id: alertId,
         execution_time_ms: executionTime,
         result: result.success ? 'SUCCESS' : 'FAILED',
-        details: result
+        details: result,
       });
 
       // Check execution time SLO
-      if (executionTime > 120000) { // 2 minutes
+      if (executionTime > 120000) {
+        // 2 minutes
         this.logger.warn('Account disable exceeded SLO', {
           actionId,
           executionTime,
-          sloMs: 120000
+          sloMs: 120000,
         });
       }
 
@@ -417,21 +422,20 @@ export class SOARConnectorV1Service {
         actionId,
         accountIdentifier,
         executionTime,
-        success: result.success
+        success: result.success,
       });
 
-      return await this.prisma.containmentAction.findUnique({
-        where: { id: actionId }
-      }) as ContainmentAction;
-
+      return (await this.prisma.containmentAction.findUnique({
+        where: { id: actionId },
+      })) as ContainmentAction;
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       this.logger.error('Account disable failed', {
         actionId,
         accountIdentifier,
         executionTime,
-        error: error.message
+        error: error.message,
       });
 
       // Update action status and audit
@@ -442,9 +446,9 @@ export class SOARConnectorV1Service {
           completed_at: new Date(),
           result: JSON.stringify({
             error: error.message,
-            execution_time_ms: executionTime
-          })
-        }
+            execution_time_ms: executionTime,
+          }),
+        },
       });
 
       await this.createAuditLog({
@@ -455,7 +459,7 @@ export class SOARConnectorV1Service {
         alert_id: alertId,
         execution_time_ms: executionTime,
         result: 'FAILED',
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -469,10 +473,10 @@ export class SOARConnectorV1Service {
     alertId: string,
     fileHash: string,
     hashType: 'md5' | 'sha1' | 'sha256',
-    initiatedBy: string
+    initiatedBy: string,
   ): Promise<ContainmentAction> {
     const actionId = `hb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
       const action = await this.prisma.containmentAction.create({
         data: {
@@ -484,8 +488,8 @@ export class SOARConnectorV1Service {
           initiated_by: initiatedBy,
           initiated_at: new Date(),
           rollback_available: true,
-          approval_required: false // Hash blocking typically doesn't require approval
-        }
+          approval_required: false, // Hash blocking typically doesn't require approval
+        },
       });
 
       // Execute hash block across available EDR platforms
@@ -496,8 +500,8 @@ export class SOARConnectorV1Service {
         data: {
           status: result.success ? 'completed' : 'failed',
           completed_at: new Date(),
-          result: JSON.stringify(result)
-        }
+          result: JSON.stringify(result),
+        },
       });
 
       // Record telemetry
@@ -507,19 +511,18 @@ export class SOARConnectorV1Service {
         actionId,
         fileHash,
         hashType,
-        success: result.success
+        success: result.success,
       });
 
-      return await this.prisma.containmentAction.findUnique({
-        where: { id: actionId }
-      }) as ContainmentAction;
-
+      return (await this.prisma.containmentAction.findUnique({
+        where: { id: actionId },
+      })) as ContainmentAction;
     } catch (error) {
       this.logger.error('Hash block failed', {
         actionId,
         fileHash,
         hashType,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -528,10 +531,13 @@ export class SOARConnectorV1Service {
   /**
    * Rollback containment action if possible
    */
-  async rollbackContainment(actionId: string, initiatedBy: string): Promise<void> {
+  async rollbackContainment(
+    actionId: string,
+    initiatedBy: string,
+  ): Promise<void> {
     try {
       const action = await this.prisma.containmentAction.findUnique({
-        where: { id: actionId }
+        where: { id: actionId },
       });
 
       if (!action || !action.rollback_available) {
@@ -564,22 +570,21 @@ export class SOARConnectorV1Service {
             ...JSON.parse(action.result || '{}'),
             rollback: rollbackResult,
             rolled_back_by: initiatedBy,
-            rolled_back_at: new Date()
-          })
-        }
+            rolled_back_at: new Date(),
+          }),
+        },
       });
 
       this.logger.info('Containment action rolled back', {
         actionId,
         type: action.type,
         target: action.target,
-        initiatedBy
+        initiatedBy,
       });
-
     } catch (error) {
       this.logger.error('Containment rollback failed', {
         actionId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -587,13 +592,16 @@ export class SOARConnectorV1Service {
 
   // Private helper methods
 
-  private async createServiceNowIncident(alertData: any, operationId: string): Promise<any> {
+  private async createServiceNowIncident(
+    alertData: any,
+    operationId: string,
+  ): Promise<any> {
     if (!this.config.servicenow) {
       throw new Error('ServiceNow not configured');
     }
 
     const auth = Buffer.from(
-      `${this.config.servicenow.username}:${this.config.servicenow.password}`
+      `${this.config.servicenow.username}:${this.config.servicenow.password}`,
     ).toString('base64');
 
     const incident = {
@@ -603,7 +611,7 @@ export class SOARConnectorV1Service {
       category: 'security',
       subcategory: 'security incident',
       u_correlation_id: operationId,
-      u_alert_id: alertData.id
+      u_alert_id: alertData.id,
     };
 
     const response = await fetch(
@@ -611,35 +619,40 @@ export class SOARConnectorV1Service {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${auth}`,
+          Authorization: `Basic ${auth}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(incident)
-      }
+        body: JSON.stringify(incident),
+      },
     );
 
     if (!response.ok) {
-      throw new Error(`ServiceNow API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `ServiceNow API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     const result = await response.json();
-    
+
     return {
       id: result.result.sys_id,
       url: `${this.config.servicenow.instance_url}/nav_to.do?uri=${this.config.servicenow.table}.do?sys_id=${result.result.sys_id}`,
       status: result.result.state,
-      number: result.result.number
+      number: result.result.number,
     };
   }
 
-  private async createJiraIssue(alertData: any, operationId: string): Promise<any> {
+  private async createJiraIssue(
+    alertData: any,
+    operationId: string,
+  ): Promise<any> {
     if (!this.config.jira) {
       throw new Error('Jira not configured');
     }
 
     const auth = Buffer.from(
-      `${this.config.jira.username}:${this.config.jira.api_token}`
+      `${this.config.jira.username}:${this.config.jira.api_token}`,
     ).toString('base64');
 
     const issue = {
@@ -650,30 +663,35 @@ export class SOARConnectorV1Service {
         description: this.formatAlertForTicket(alertData),
         priority: { name: this.mapAlertPriorityToJira(alertData.severity) },
         labels: ['security', 'intelgraph', operationId],
-        customfield_10001: alertData.id // Alert ID custom field
-      }
+        customfield_10001: alertData.id, // Alert ID custom field
+      },
     };
 
-    const response = await fetch(`${this.config.jira.base_url}/rest/api/3/issue`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+    const response = await fetch(
+      `${this.config.jira.base_url}/rest/api/3/issue`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(issue),
       },
-      body: JSON.stringify(issue)
-    });
+    );
 
     if (!response.ok) {
-      throw new Error(`Jira API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Jira API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     const result = await response.json();
-    
+
     return {
       id: result.key,
       url: `${this.config.jira.base_url}/browse/${result.key}`,
-      status: 'Open'
+      status: 'Open',
     };
   }
 
@@ -691,7 +709,9 @@ export class SOARConnectorV1Service {
       case 'defender':
         return await this.defenderQuarantine(hostIdentifier);
       default:
-        throw new Error(`Unsupported EDR platform: ${this.config.edr.platform}`);
+        throw new Error(
+          `Unsupported EDR platform: ${this.config.edr.platform}`,
+        );
     }
   }
 
@@ -701,82 +721,86 @@ export class SOARConnectorV1Service {
       success: true,
       action: 'quarantine_simulation',
       target: hostIdentifier,
-      message: 'Dry run completed successfully - no actual quarantine performed',
-      timestamp: new Date()
+      message:
+        'Dry run completed successfully - no actual quarantine performed',
+      timestamp: new Date(),
     };
   }
 
   private async crowdStrikeQuarantine(hostIdentifier: string): Promise<any> {
     // Mock CrowdStrike API call
     await this.delay(1000); // Simulate API call
-    
+
     return {
       success: true,
       action: 'host_quarantine',
       target: hostIdentifier,
       platform: 'crowdstrike',
       quarantine_id: `cs_${Date.now()}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   private async sentinelOneQuarantine(hostIdentifier: string): Promise<any> {
     // Mock SentinelOne API call
     await this.delay(1000);
-    
+
     return {
       success: true,
       action: 'host_quarantine',
       target: hostIdentifier,
       platform: 'sentinelone',
       quarantine_id: `s1_${Date.now()}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   private async defenderQuarantine(hostIdentifier: string): Promise<any> {
     // Mock Microsoft Defender API call
     await this.delay(1000);
-    
+
     return {
       success: true,
       action: 'host_quarantine',
       target: hostIdentifier,
       platform: 'defender',
       quarantine_id: `def_${Date.now()}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   private async executeAccountDisable(accountIdentifier: string): Promise<any> {
     // Mock account disable - would integrate with identity provider
     await this.delay(500);
-    
+
     return {
       success: true,
       action: 'account_disable',
       target: accountIdentifier,
       disabled_at: new Date(),
-      provider: 'active_directory'
+      provider: 'active_directory',
     };
   }
 
-  private async executeHashBlock(fileHash: string, hashType: string): Promise<any> {
+  private async executeHashBlock(
+    fileHash: string,
+    hashType: string,
+  ): Promise<any> {
     // Mock hash blocking across EDR platforms
     await this.delay(800);
-    
+
     return {
       success: true,
       action: 'hash_block',
       hash: fileHash,
       hash_type: hashType,
       platforms_updated: ['crowdstrike', 'defender'],
-      blocked_at: new Date()
+      blocked_at: new Date(),
     };
   }
 
   // Rollback methods
-  
+
   private async rollbackHostQuarantine(target: string): Promise<any> {
     await this.delay(500);
     return { success: true, action: 'unquarantine', target };
@@ -794,13 +818,16 @@ export class SOARConnectorV1Service {
 
   // Utility methods
 
-  private async getExistingTicket(alertId: string, system: string): Promise<TicketLink | null> {
-    return await this.prisma.ticketLink.findFirst({
+  private async getExistingTicket(
+    alertId: string,
+    system: string,
+  ): Promise<TicketLink | null> {
+    return (await this.prisma.ticketLink.findFirst({
       where: {
         alert_id: alertId,
-        external_system: system
-      }
-    }) as TicketLink | null;
+        external_system: system,
+      },
+    })) as TicketLink | null;
   }
 
   private formatAlertForTicket(alertData: any): string {
@@ -818,38 +845,45 @@ Generated by IntelGraph Security Platform`;
 
   private mapAlertPriorityToServiceNow(severity: string): string {
     const mapping: Record<string, string> = {
-      'critical': '1',
-      'high': '2', 
-      'medium': '3',
-      'low': '4'
+      critical: '1',
+      high: '2',
+      medium: '3',
+      low: '4',
     };
     return mapping[severity?.toLowerCase()] || '3';
   }
 
   private mapAlertPriorityToJira(severity: string): string {
     const mapping: Record<string, string> = {
-      'critical': 'Highest',
-      'high': 'High',
-      'medium': 'Medium', 
-      'low': 'Low'
+      critical: 'Highest',
+      high: 'High',
+      medium: 'Medium',
+      low: 'Low',
     };
     return mapping[severity?.toLowerCase()] || 'Medium';
   }
 
-  private async requestContainmentApproval(actionId: string, approvalData: any): Promise<any> {
+  private async requestContainmentApproval(
+    actionId: string,
+    approvalData: any,
+  ): Promise<any> {
     // In production, this would create approval request and notify approvers
     // For demo, we'll auto-approve
     await this.delay(100);
     return { approved: true, approver: 'system', timestamp: new Date() };
   }
 
-  private async recordContainmentTelemetry(actionId: string, actionType: string, result: any): Promise<void> {
+  private async recordContainmentTelemetry(
+    actionId: string,
+    actionType: string,
+    result: any,
+  ): Promise<void> {
     // Record metrics for monitoring and reporting
     this.logger.info('Containment telemetry', {
       action_id: actionId,
       action_type: actionType,
       success: result.success,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -859,8 +893,8 @@ Generated by IntelGraph Security Platform`;
       data: {
         ...logData,
         timestamp: new Date(),
-        hash: this.generateAuditHash(logData)
-      }
+        hash: this.generateAuditHash(logData),
+      },
     });
   }
 
@@ -874,30 +908,39 @@ Generated by IntelGraph Security Platform`;
     await this.redis.sadd('ticket_sync_queue', ticketLinkId);
   }
 
-  private async scheduleRollbackCheck(actionId: string, delay: string): Promise<void> {
+  private async scheduleRollbackCheck(
+    actionId: string,
+    delay: string,
+  ): Promise<void> {
     // Schedule automatic rollback check
-    await this.redis.sadd('rollback_check_queue', JSON.stringify({
-      action_id: actionId,
-      scheduled_for: Date.now() + this.parseDuration(delay)
-    }));
+    await this.redis.sadd(
+      'rollback_check_queue',
+      JSON.stringify({
+        action_id: actionId,
+        scheduled_for: Date.now() + this.parseDuration(delay),
+      }),
+    );
   }
 
   private parseDuration(duration: string): number {
     const match = duration.match(/^(\d+)(h|m|s)$/);
     if (!match) return 0;
-    
+
     const [, value, unit] = match;
     const multipliers = { s: 1000, m: 60000, h: 3600000 };
     return parseInt(value) * multipliers[unit];
   }
 
-  private async updateServiceNowIncident(incidentId: string, updates: any): Promise<void> {
+  private async updateServiceNowIncident(
+    incidentId: string,
+    updates: any,
+  ): Promise<void> {
     // Implementation for ServiceNow updates
     this.logger.debug('ServiceNow incident update', { incidentId, updates });
   }
 
   private async updateJiraIssue(issueKey: string, updates: any): Promise<void> {
-    // Implementation for Jira updates  
+    // Implementation for Jira updates
     this.logger.debug('Jira issue update', { issueKey, updates });
   }
 
@@ -908,6 +951,6 @@ Generated by IntelGraph Security Platform`;
   }
 
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

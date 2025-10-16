@@ -1,5 +1,8 @@
 import path from 'node:path';
-import { credentials, loadPackageDefinition as loadGrpcPackageDefinition } from '@grpc/grpc-js';
+import {
+  credentials,
+  loadPackageDefinition as loadGrpcPackageDefinition,
+} from '@grpc/grpc-js';
 import { loadSync, Options as ProtoLoaderOptions } from '@grpc/proto-loader';
 
 type JobClass = 'batch' | 'online';
@@ -35,7 +38,7 @@ const loaderOptions: ProtoLoaderOptions = {
   longs: Number,
   enums: String,
   defaults: true,
-  oneofs: true
+  oneofs: true,
 };
 
 export class MtfsClient {
@@ -58,7 +61,7 @@ export class MtfsClient {
           job_class: options.jobClass,
           policy_tier: options.policyTier,
           resource_units: options.resourceUnits,
-          weight: options.weight
+          weight: options.weight,
         },
         (err: Error | null, response: { job_id: number }) => {
           if (err) {
@@ -66,7 +69,7 @@ export class MtfsClient {
             return;
           }
           resolve(response.job_id);
-        }
+        },
       );
     });
   }
@@ -92,29 +95,38 @@ export class MtfsClient {
             reject(err);
             return;
           }
-          resolve(response.snapshots.map((snapshot) => this.mapAllocation(snapshot)));
-        }
+          resolve(
+            response.snapshots.map((snapshot) => this.mapAllocation(snapshot)),
+          );
+        },
       );
     });
   }
 
-  async simulate(overrides: SimulationOverride[], steps: number): Promise<Allocation[]> {
+  async simulate(
+    overrides: SimulationOverride[],
+    steps: number,
+  ): Promise<Allocation[]> {
     return new Promise((resolve, reject) => {
       this.client.Simulate(
         {
           overrides: overrides.map((override) => ({
             tenant_id: override.tenantId,
-            weight: override.weight
+            weight: override.weight,
           })),
-          steps
+          steps,
         },
         (err: Error | null, response: { allocations: any[] }) => {
           if (err) {
             reject(err);
             return;
           }
-          resolve(response.allocations.map((allocation) => this.mapAllocation(allocation)));
-        }
+          resolve(
+            response.allocations.map((allocation) =>
+              this.mapAllocation(allocation),
+            ),
+          );
+        },
       );
     });
   }
@@ -130,7 +142,7 @@ export class MtfsClient {
       waitRounds: allocation.wait_rounds,
       slaBreach: allocation.sla_breach,
       snapshotJson: allocation.snapshot_json,
-      signature: allocation.signature
+      signature: allocation.signature,
     };
   }
 }

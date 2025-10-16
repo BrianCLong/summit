@@ -17,11 +17,11 @@ test('detects breaking changes when required field is removed', () => {
   const registry = new SchemaRegistry({ contractsDir: tmpDir });
   const metadataPolicies = [
     { field: 'id', action: 'pass' },
-    { field: 'email', action: 'tokenize' }
+    { field: 'email', action: 'tokenize' },
   ];
   registry.initContract('test-contract', {
     fieldPolicies: metadataPolicies,
-    classification: ['PII']
+    classification: ['PII'],
   });
   const contractDir = path.join(tmpDir, 'test-contract');
   const latest = registry.listVersions('test-contract').pop();
@@ -32,11 +32,17 @@ test('detects breaking changes when required field is removed', () => {
   fs.writeFileSync(schemaPath, JSON.stringify(schema, null, 2));
   const bumpedMetadata = { ...schema['x-data-spine'], version: '1.1.0' };
   const bumped = buildJsonSchema('test-contract', '1.1.0', bumpedMetadata, {
-    id: { type: 'string' }
+    id: { type: 'string' },
   });
   fs.mkdirSync(path.join(contractDir, '1.1.0'));
-  fs.writeFileSync(path.join(contractDir, '1.1.0', 'schema.json'), JSON.stringify(bumped, null, 2));
-  const result = registry.checkCompatibility('test-contract', { fromVersion: '1.0.0', toVersion: '1.1.0' });
+  fs.writeFileSync(
+    path.join(contractDir, '1.1.0', 'schema.json'),
+    JSON.stringify(bumped, null, 2),
+  );
+  const result = registry.checkCompatibility('test-contract', {
+    fromVersion: '1.0.0',
+    toVersion: '1.1.0',
+  });
   assert.strictEqual(result.ok, false);
   assert.ok(result.messages.some((message) => message.includes('email')));
 });
@@ -48,8 +54,8 @@ test('bump creates new semver version with updated metadata', () => {
     classification: ['PII'],
     fieldPolicies: [
       { field: 'id', action: 'pass' },
-      { field: 'email', action: 'tokenize' }
-    ]
+      { field: 'email', action: 'tokenize' },
+    ],
   });
   const result = registry.bumpVersion('bump-test', 'minor');
   assert.strictEqual(result.version, '1.1.0');

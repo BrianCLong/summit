@@ -1,5 +1,5 @@
 import { compare } from './util/diff';
-export async function shadowQuery(q){
+export async function shadowQuery(q) {
   const cur = await searchActive(q);
   const cand = await searchCandidate(q);
   const { jaccard, overlapAt10 } = compare(cur.top10, cand.top10);

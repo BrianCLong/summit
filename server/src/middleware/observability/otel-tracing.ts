@@ -4,7 +4,11 @@
  * Stribol: "OTEL traces across gateway→services; smoke test asserts spans exist"
  */
 
-import { SpanStatusCode, SpanKind, tracer as noopTracer } from '../../observability/telemetry.js';
+import {
+  SpanStatusCode,
+  SpanKind,
+  tracer as noopTracer,
+} from '../../observability/telemetry.js';
 import { Request, Response, NextFunction } from 'express';
 import logger from '../../utils/logger.js';
 
@@ -42,7 +46,8 @@ export class OTelTracingService {
       enabled: false,
       service_name: process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
       service_version: process.env.OTEL_SERVICE_VERSION || '2.5.0',
-      jaeger_endpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
+      jaeger_endpoint:
+        process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
       prometheus_enabled: process.env.PROMETHEUS_ENABLED !== 'false',
       sample_rate: parseFloat(process.env.OTEL_SAMPLE_RATE || '0.1'),
     };
@@ -92,7 +97,11 @@ export class OTelTracingService {
   }
 
   // Committee requirement: Streaming operation tracing
-  traceStreamingOperation<T>(operationType: string, messageCount: number, parentSpan?: any) {
+  traceStreamingOperation<T>(
+    operationType: string,
+    messageCount: number,
+    parentSpan?: any,
+  ) {
     return async (streamOperation: () => Promise<T>): Promise<T> => {
       return await streamOperation();
     };
@@ -139,7 +148,8 @@ export class OTelTracingService {
         span.setAttributes({
           'authority.check_result': 'denied',
           'authority.success': false,
-          'authority.denial_reason': error instanceof Error ? error.message : String(error),
+          'authority.denial_reason':
+            error instanceof Error ? error.message : String(error),
         });
 
         span.setStatus({

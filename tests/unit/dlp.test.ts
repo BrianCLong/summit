@@ -1,11 +1,22 @@
 /**
  * DLP Service Unit Tests
- * 
+ *
  * Comprehensive test suite for the DLP service and middleware.
  */
 
-import { describe, test, expect, beforeEach, beforeAll, afterAll, jest } from '@jest/globals';
-import { dlpService, DLPContext } from '../../server/src/services/DLPService.js';
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  beforeAll,
+  afterAll,
+  jest,
+} from '@jest/globals';
+import {
+  dlpService,
+  DLPContext,
+} from '../../server/src/services/DLPService.js';
 import { createDLPMiddleware } from '../../server/src/middleware/dlpMiddleware.js';
 import { Request, Response } from 'express';
 
@@ -13,8 +24,8 @@ import { Request, Response } from 'express';
 jest.mock('../../server/src/db/redis.js', () => ({
   redisClient: {
     get: jest.fn().mockResolvedValue(null),
-    setex: jest.fn().mockResolvedValue('OK')
-  }
+    setex: jest.fn().mockResolvedValue('OK'),
+  },
 }));
 
 // Mock logger
@@ -23,8 +34,8 @@ jest.mock('../../server/src/config/logger.js', () => ({
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-    debug: jest.fn()
-  }
+    debug: jest.fn(),
+  },
 }));
 
 describe('DLP Service', () => {
@@ -36,7 +47,7 @@ describe('DLP Service', () => {
       tenantId: 'test-tenant',
       userRole: 'user',
       operationType: 'write',
-      contentType: 'application/json'
+      contentType: 'application/json',
     };
   });
 
@@ -47,23 +58,27 @@ describe('DLP Service', () => {
         description: 'Test DLP policy',
         enabled: true,
         priority: 1,
-        conditions: [{
-          type: 'content_match' as const,
-          operator: 'contains' as const,
-          value: 'test-pattern'
-        }],
-        actions: [{
-          type: 'alert' as const,
-          severity: 'medium' as const
-        }],
-        exemptions: []
+        conditions: [
+          {
+            type: 'content_match' as const,
+            operator: 'contains' as const,
+            value: 'test-pattern',
+          },
+        ],
+        actions: [
+          {
+            type: 'alert' as const,
+            severity: 'medium' as const,
+          },
+        ],
+        exemptions: [],
       };
 
       dlpService.addPolicy(policy);
       const policies = dlpService.listPolicies();
-      
+
       expect(policies.length).toBeGreaterThan(0);
-      expect(policies.some(p => p.name === 'Test Policy')).toBe(true);
+      expect(policies.some((p) => p.name === 'Test Policy')).toBe(true);
     });
 
     test('should update existing policies', () => {
@@ -73,27 +88,31 @@ describe('DLP Service', () => {
         description: 'Original description',
         enabled: true,
         priority: 1,
-        conditions: [{
-          type: 'content_match' as const,
-          operator: 'contains' as const,
-          value: 'test'
-        }],
-        actions: [{
-          type: 'alert' as const,
-          severity: 'low' as const
-        }],
-        exemptions: []
+        conditions: [
+          {
+            type: 'content_match' as const,
+            operator: 'contains' as const,
+            value: 'test',
+          },
+        ],
+        actions: [
+          {
+            type: 'alert' as const,
+            severity: 'low' as const,
+          },
+        ],
+        exemptions: [],
       };
 
       dlpService.addPolicy(policy);
-      
+
       const updated = dlpService.updatePolicy('test-policy', {
         description: 'Updated description',
-        enabled: false
+        enabled: false,
       });
-      
+
       expect(updated).toBe(true);
-      
+
       const retrievedPolicy = dlpService.getPolicy('test-policy');
       expect(retrievedPolicy?.description).toBe('Updated description');
       expect(retrievedPolicy?.enabled).toBe(false);
@@ -106,21 +125,25 @@ describe('DLP Service', () => {
         description: 'Policy to be deleted',
         enabled: true,
         priority: 1,
-        conditions: [{
-          type: 'content_match' as const,
-          operator: 'contains' as const,
-          value: 'delete-me'
-        }],
-        actions: [{
-          type: 'block' as const,
-          severity: 'high' as const
-        }],
-        exemptions: []
+        conditions: [
+          {
+            type: 'content_match' as const,
+            operator: 'contains' as const,
+            value: 'delete-me',
+          },
+        ],
+        actions: [
+          {
+            type: 'block' as const,
+            severity: 'high' as const,
+          },
+        ],
+        exemptions: [],
       };
 
       dlpService.addPolicy(policy);
       expect(dlpService.getPolicy('delete-test')).toBeTruthy();
-      
+
       const deleted = dlpService.deletePolicy('delete-test');
       expect(deleted).toBe(true);
       expect(dlpService.getPolicy('delete-test')).toBeUndefined();
@@ -129,9 +152,10 @@ describe('DLP Service', () => {
 
   describe('Content Scanning', () => {
     test('should detect PII in content', async () => {
-      const content = 'My email is john.doe@example.com and my SSN is 123-45-6789';
+      const content =
+        'My email is john.doe@example.com and my SSN is 123-45-6789';
       const results = await dlpService.scanContent(content, testContext);
-      
+
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].matched).toBe(true);
       expect(results[0].metadata.detectedEntities).toContain('email');
@@ -139,32 +163,36 @@ describe('DLP Service', () => {
     });
 
     test('should detect credentials in content', async () => {
-      const content = 'API_KEY=sk-1234567890abcdef1234567890abcdef and SECRET_TOKEN=abc123def456';
+      const content =
+        'API_KEY=sk-1234567890abcdef1234567890abcdef and SECRET_TOKEN=abc123def456';
       const results = await dlpService.scanContent(content, testContext);
-      
+
       expect(results.length).toBeGreaterThan(0);
-      expect(results.some(r => r.policyId === 'credentials-detection')).toBe(true);
+      expect(results.some((r) => r.policyId === 'credentials-detection')).toBe(
+        true,
+      );
     });
 
     test('should detect financial data', async () => {
-      const content = 'Credit card: 4111-1111-1111-1111, Bank account: 123456789012';
+      const content =
+        'Credit card: 4111-1111-1111-1111, Bank account: 123456789012';
       const results = await dlpService.scanContent(content, testContext);
-      
+
       expect(results.length).toBeGreaterThan(0);
-      expect(results.some(r => r.policyId === 'financial-data')).toBe(true);
+      expect(results.some((r) => r.policyId === 'financial-data')).toBe(true);
     });
 
     test('should respect exemptions', async () => {
       const exemptContext: DLPContext = {
         ...testContext,
-        userRole: 'admin'
+        userRole: 'admin',
       };
-      
+
       const content = 'john.doe@example.com';
       const results = await dlpService.scanContent(content, exemptContext);
-      
+
       // Admin should be exempted from some policies
-      const piiResults = results.filter(r => r.policyId === 'pii-detection');
+      const piiResults = results.filter((r) => r.policyId === 'pii-detection');
       expect(piiResults.length).toBe(0);
     });
 
@@ -172,13 +200,13 @@ describe('DLP Service', () => {
       const content = {
         user: {
           email: 'test@example.com',
-          ssn: '123-45-6789'
+          ssn: '123-45-6789',
         },
         payment: {
-          creditCard: '4111-1111-1111-1111'
-        }
+          creditCard: '4111-1111-1111-1111',
+        },
       };
-      
+
       const results = await dlpService.scanContent(content, testContext);
       expect(results.length).toBeGreaterThan(0);
     });
@@ -188,13 +216,10 @@ describe('DLP Service', () => {
     test('should redact sensitive content', async () => {
       const content = 'Email: user@example.com, SSN: 123-45-6789';
       const scanResults = await dlpService.scanContent(content, testContext);
-      
-      const { processedContent, actionsApplied, blocked } = await dlpService.applyActions(
-        content,
-        scanResults,
-        testContext
-      );
-      
+
+      const { processedContent, actionsApplied, blocked } =
+        await dlpService.applyActions(content, scanResults, testContext);
+
       expect(actionsApplied).toContain('redacted');
       expect(processedContent).toContain('[REDACTED]');
       expect(processedContent).not.toContain('user@example.com');
@@ -205,13 +230,13 @@ describe('DLP Service', () => {
     test('should block critical violations', async () => {
       const content = 'API_KEY=sk-very-secret-key-12345678901234567890';
       const scanResults = await dlpService.scanContent(content, testContext);
-      
+
       const { actionsApplied, blocked } = await dlpService.applyActions(
         content,
         scanResults,
-        testContext
+        testContext,
       );
-      
+
       expect(actionsApplied).toContain('blocked');
       expect(blocked).toBe(true);
     });
@@ -233,16 +258,16 @@ describe('DLP Middleware', () => {
       user: {
         id: 'test-user',
         tenantId: 'test-tenant',
-        role: 'user'
+        role: 'user',
       },
       ip: '127.0.0.1',
-      get: jest.fn().mockReturnValue('application/json')
+      get: jest.fn().mockReturnValue('application/json'),
     };
 
     mockResponse = {
       json: jest.fn(),
       send: jest.fn(),
-      status: jest.fn().mockReturnThis()
+      status: jest.fn().mockReturnThis(),
     };
 
     mockNext = jest.fn();
@@ -252,55 +277,69 @@ describe('DLP Middleware', () => {
     const middleware = createDLPMiddleware({
       enabled: true,
       scanBody: true,
-      blockOnViolation: true
+      blockOnViolation: true,
     });
 
-    await middleware(mockRequest as Request, mockResponse as Response, mockNext);
-    
+    await middleware(
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext,
+    );
+
     expect(mockNext).toHaveBeenCalled();
     expect((mockRequest as any).dlp?.scanned).toBe(true);
-    expect((mockRequest as any).dlp?.violations.length).toBeGreaterThanOrEqual(0);
+    expect((mockRequest as any).dlp?.violations.length).toBeGreaterThanOrEqual(
+      0,
+    );
   });
 
   test('should block request with critical violations', async () => {
-    mockRequest.body = { 
+    mockRequest.body = {
       apiKey: 'sk-1234567890abcdef1234567890abcdef',
-      data: 'test content'
+      data: 'test content',
     };
 
     const middleware = createDLPMiddleware({
       enabled: true,
       scanBody: true,
-      blockOnViolation: true
+      blockOnViolation: true,
     });
 
     await expect(
-      middleware(mockRequest as Request, mockResponse as Response, mockNext)
+      middleware(mockRequest as Request, mockResponse as Response, mockNext),
     ).rejects.toThrow(/DLP_VIOLATION/);
   });
 
   test('should respect exemptions for routes', async () => {
     mockRequest.path = '/health';
-    
+
     const middleware = createDLPMiddleware({
       enabled: true,
       exemptRoutes: ['/health'],
-      scanBody: true
+      scanBody: true,
     });
 
-    await middleware(mockRequest as Request, mockResponse as Response, mockNext);
-    
+    await middleware(
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext,
+    );
+
     expect(mockNext).toHaveBeenCalled();
     expect((mockRequest as any).dlp).toBeUndefined();
   });
 
   test('should handle disabled DLP', async () => {
     const middleware = createDLPMiddleware({
-      enabled: false
+      enabled: false,
     });
 
-    await middleware(mockRequest as Request, mockResponse as Response, mockNext);
-    
+    await middleware(
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext,
+    );
+
     expect(mockNext).toHaveBeenCalled();
     expect((mockRequest as any).dlp).toBeUndefined();
   });
@@ -308,25 +347,29 @@ describe('DLP Middleware', () => {
   test('should redact content in read-only mode', async () => {
     mockRequest.body = {
       email: 'sensitive@example.com',
-      data: 'other data'
+      data: 'other data',
     };
 
     const middleware = createDLPMiddleware({
       enabled: true,
       scanBody: true,
-      blockOnViolation: false // Read-only mode
+      blockOnViolation: false, // Read-only mode
     });
 
-    await middleware(mockRequest as Request, mockResponse as Response, mockNext);
-    
+    await middleware(
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext,
+    );
+
     expect(mockNext).toHaveBeenCalled();
     expect((mockRequest as any).dlp?.scanned).toBe(true);
-    
+
     // Content should be redacted but request not blocked
     if ((mockRequest as any).dlp?.violations.length > 0) {
       expect(mockRequest.body).not.toEqual({
         email: 'sensitive@example.com',
-        data: 'other data'
+        data: 'other data',
       });
     }
   });
@@ -342,12 +385,13 @@ describe('DLP GraphQL Plugin', () => {
 
 describe('DLP Performance', () => {
   test('should handle large content efficiently', async () => {
-    const largeContent = 'a'.repeat(10000) + ' email@example.com ' + 'b'.repeat(10000);
-    
+    const largeContent =
+      'a'.repeat(10000) + ' email@example.com ' + 'b'.repeat(10000);
+
     const startTime = Date.now();
     const results = await dlpService.scanContent(largeContent, testContext);
     const endTime = Date.now();
-    
+
     expect(endTime - startTime).toBeLessThan(1000); // Should complete within 1 second
     expect(results.length).toBeGreaterThan(0);
   });
@@ -368,20 +412,22 @@ describe('DLP Configuration', () => {
         enabled: true,
         priority: 1,
         conditions: [], // Invalid - no conditions
-        actions: [{
-          type: 'alert' as const,
-          severity: 'medium' as const
-        }],
-        exemptions: []
+        actions: [
+          {
+            type: 'alert' as const,
+            severity: 'medium' as const,
+          },
+        ],
+        exemptions: [],
       });
     }).not.toThrow(); // Service should handle gracefully
   });
 
   test('should load default policies on startup', () => {
     const policies = dlpService.listPolicies();
-    
-    expect(policies.some(p => p.id === 'pii-detection')).toBe(true);
-    expect(policies.some(p => p.id === 'credentials-detection')).toBe(true);
-    expect(policies.some(p => p.id === 'financial-data')).toBe(true);
+
+    expect(policies.some((p) => p.id === 'pii-detection')).toBe(true);
+    expect(policies.some((p) => p.id === 'credentials-detection')).toBe(true);
+    expect(policies.some((p) => p.id === 'financial-data')).toBe(true);
   });
 });

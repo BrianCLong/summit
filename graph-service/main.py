@@ -1,19 +1,21 @@
 import json
 import os
 import time
+
 from kafka import KafkaConsumer
+from kafka.errors import NoBrokersAvailable
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
-from kafka.errors import NoBrokersAvailable
 
 print("Graph service starting up...")
 
-KAFKA_BOOTSTRAP_SERVERS = os.environ.get('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
-NLP_POSTS_TOPIC = 'nlp.posts' # Still consume from here for now, but will change to threat.clusters
-THREAT_CLUSTERS_TOPIC = 'threat.clusters' # New topic for clustered data
-NEO4J_URI = os.environ.get('NEO4J_URI', 'bolt://localhost:7687')
-NEO4J_USER = os.environ.get('NEO4J_USER', 'neo4j')
-NEO4J_PASSWORD = os.environ.get('NEO4J_PASSWORD', 'password')
+KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+NLP_POSTS_TOPIC = "nlp.posts"  # Still consume from here for now, but will change to threat.clusters
+THREAT_CLUSTERS_TOPIC = "threat.clusters"  # New topic for clustered data
+NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "password")
+
 
 class Neo4jClient:
     def __init__(self, uri, user, password):
@@ -59,35 +61,61 @@ class Neo4jClient:
             "ON CREATE SET p.text = $text, p.platform = $platform, p.timestamp = $timestamp "
             "RETURN p"
         )
-        tx.run(query, id=post['id'], text=post['text'], platform=post['platform'], timestamp=post['timestamp'])
+        tx.run(
+            query,
+            id=post["id"],
+            text=post["text"],
+            platform=post["platform"],
+            timestamp=post["timestamp"],
+        )
 
         # Create User node and link to Post
-        user = post.get('metadata', {}).get('user', 'unknown')
+        user = post.get("metadata", {}).get("user", "unknown")
         tx.run("MERGE (u:User {name: $user})", user=user)
-        tx.run("MATCH (u:User {name: $user}), (p:Post {id: $id}) MERGE (u)-[:AUTHORED]->(p)", user=user, id=post['id'])
+        tx.run(
+            "MATCH (u:User {name: $user}), (p:Post {id: $id}) MERGE (u)-[:AUTHORED]->(p)",
+            user=user,
+            id=post["id"],
+        )
 
         # Create Entity nodes and link to Post
-        for entity in post.get('nlp', {}).get('entities', []):
-            tx.run("MERGE (e:Entity {text: $text, type: $label})", text=entity['text'], label=entity['label'])
-            tx.run("MATCH (p:Post {id: $id}), (e:Entity {text: $text, type: $label}) MERGE (p)-[:CONTAINS]->(e)",
-                   id=post['id'], text=entity['text'], label=entity['label'])
+        for entity in post.get("nlp", {}).get("entities", []):
+            tx.run(
+                "MERGE (e:Entity {text: $text, type: $label})",
+                text=entity["text"],
+                label=entity["label"],
+            )
+            tx.run(
+                "MATCH (p:Post {id: $id}), (e:Entity {text: $text, type: $label}) MERGE (p)-[:CONTAINS]->(e)",
+                id=post["id"],
+                text=entity["text"],
+                label=entity["label"],
+            )
 
     @staticmethod
     def _create_cluster_and_link_post(tx, cluster_info):
-        cluster_id = cluster_info['cluster_id']
-        post_id = cluster_info['post_id']
-        timestamp = cluster_info['timestamp']
-        text_sample = cluster_info['text_sample']
+        cluster_id = cluster_info["cluster_id"]
+        post_id = cluster_info["post_id"]
+        timestamp = cluster_info["timestamp"]
+        text_sample = cluster_info["text_sample"]
 
         # Create or merge Cluster node
-        tx.run("MERGE (c:Cluster {id: $cluster_id}) "
-               "ON CREATE SET c.created_at = $timestamp, c.sample_text = $text_sample",
-               cluster_id=cluster_id, timestamp=timestamp, text_sample=text_sample)
+        tx.run(
+            "MERGE (c:Cluster {id: $cluster_id}) "
+            "ON CREATE SET c.created_at = $timestamp, c.sample_text = $text_sample",
+            cluster_id=cluster_id,
+            timestamp=timestamp,
+            text_sample=text_sample,
+        )
 
         # Link Post to Cluster
-        tx.run("MATCH (p:Post {id: $post_id}), (c:Cluster {id: $cluster_id}) "
-               "MERGE (p)-[:BELONGS_TO]->(c)",
-               post_id=post_id, cluster_id=cluster_id)
+        tx.run(
+            "MATCH (p:Post {id: $post_id}), (c:Cluster {id: $cluster_id}) "
+            "MERGE (p)-[:BELONGS_TO]->(c)",
+            post_id=post_id,
+            cluster_id=cluster_id,
+        )
+
 
 def main():
     print("Starting graph service main function...")
@@ -99,16 +127,18 @@ def main():
 
     for attempt in range(max_attempts):
         try:
-            print(f"Attempting to connect consumer to Kafka (Attempt {attempt + 1}/{max_attempts})...")
+            print(
+                f"Attempting to connect consumer to Kafka (Attempt {attempt + 1}/{max_attempts})..."
+            )
             # Consume from THREAT_CLUSTERS_TOPIC instead of NLP_POSTS_TOPIC
             consumer = KafkaConsumer(
                 THREAT_CLUSTERS_TOPIC,
-                bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS.split(','),
-                auto_offset_reset='earliest',
-                group_id='graph-builder',
-                value_deserializer=lambda x: json.loads(x.decode('utf-8'))
+                bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS.split(","),
+                auto_offset_reset="earliest",
+                group_id="graph-builder",
+                value_deserializer=lambda x: json.loads(x.decode("utf-8")),
             )
-            consumer.poll(timeout_ms=1000) # Test connection
+            consumer.poll(timeout_ms=1000)  # Test connection
             print("Successfully connected consumer to Kafka.")
             break
         except NoBrokersAvailable as e:
@@ -123,10 +153,13 @@ def main():
     print("Graph service consumer starting...")
     for message in consumer:
         cluster_info = message.value
-        print(f"Adding cluster info to graph for post: {cluster_info['post_id']} in cluster {cluster_info['cluster_id']}")
+        print(
+            f"Adding cluster info to graph for post: {cluster_info['post_id']} in cluster {cluster_info['cluster_id']}"
+        )
         neo4j_client.add_cluster_info(cluster_info)
 
     neo4j_client.close()
+
 
 if __name__ == "__main__":
     main()

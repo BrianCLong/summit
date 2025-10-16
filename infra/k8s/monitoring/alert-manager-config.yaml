@@ -289,10 +289,10 @@ type: Opaque
 data:
   # SMTP password for email alerts
   smtp-password: c210cC1wYXNzd29yZC1wcm9k # smtp-password-prod (base64)
-  
+
   # Slack webhook URL
   slack-webhook-url: aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAwL0IwMC94eHh4eHg= # webhook-url (base64)
-  
+
   # PagerDuty service keys
   pagerduty-service-key: cGFnZXJkdXR5LXNlcnZpY2Uta2V5LXByb2Q= # pagerduty-service-key-prod (base64)
   pagerduty-db-key: cGFnZXJkdXR5LWRiLXNlcnZpY2Uta2V5LXByb2Q= # pagerduty-db-service-key-prod (base64)
@@ -313,7 +313,7 @@ data:
     {{ define "intelgraph.title" }}
     [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] IntelGraph Alert
     {{ end }}
-    
+
     {{ define "intelgraph.description" }}
     {{ range .Alerts }}
     *Alert:* {{ .Annotations.summary }}
@@ -327,10 +327,10 @@ data:
     ---
     {{ end }}
     {{ end }}
-    
+
     {{ define "slack.intelgraph.text" }}
     {{ if .CommonAnnotations.summary }}{{ .CommonAnnotations.summary }}{{ else }}{{ .GroupLabels.alertname }}{{ end }}
-    
+
     {{ range .Alerts }}
     {{ if .Annotations.description }}{{ .Annotations.description }}{{ end }}
     *Labels:* {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
@@ -340,7 +340,7 @@ data:
 ---
 # Slack notification templates
 apiVersion: v1
-kind: ConfigMap  
+kind: ConfigMap
 metadata:
   name: slack-alert-templates
   namespace: monitoring

@@ -37,4 +37,3 @@ prometheus:
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
     scrapeInterval: 30s
-

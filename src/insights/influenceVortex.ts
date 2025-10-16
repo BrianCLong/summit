@@ -1,1 +1,3 @@
-export function influenceVortex(config) { return { vortex: 'Influence Vortex Placeholder' }; }
+export function influenceVortex(config) {
+  return { vortex: 'Influence Vortex Placeholder' };
+}

@@ -12,7 +12,9 @@ test.describe('Run Viewer', () => {
     await expect(page.locator('text=Loading run data...')).toBeVisible();
 
     // Wait for the error state (since test-run-123 doesn't exist)
-    await expect(page.locator('text=Error loading run data:')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Error loading run data:')).toBeVisible({
+      timeout: 10000,
+    });
 
     // Should show retry button
     await expect(page.locator('button:has-text("Retry")')).toBeVisible();
@@ -24,14 +26,16 @@ test.describe('Run Viewer', () => {
 
     // Should show error message
     await expect(page.locator('text=No runId provided')).toBeVisible();
-    await expect(page.locator('text=Please include ?runId=<run-id> in the URL')).toBeVisible();
+    await expect(
+      page.locator('text=Please include ?runId=<run-id> in the URL'),
+    ).toBeVisible();
   });
 
   test('should show DAG when run data is loaded', async ({ page }) => {
     // Mock the API response
-    await page.route('/api/maestro/v1/runs/*', async route => {
+    await page.route('/api/maestro/v1/runs/*', async (route) => {
       const runId = route.url().split('/').pop();
-      
+
       const mockResponse = {
         id: runId,
         name: `Test Run ${runId}`,
@@ -47,7 +51,7 @@ test.describe('Run Viewer', () => {
             parents: [],
             duration: 5000,
             startTime: '2025-09-07T10:00:00Z',
-            endTime: '2025-09-07T10:00:05Z'
+            endTime: '2025-09-07T10:00:05Z',
           },
           {
             id: 'step-2',
@@ -57,7 +61,7 @@ test.describe('Run Viewer', () => {
             duration: 120000,
             startTime: '2025-09-07T10:00:05Z',
             endTime: '2025-09-07T10:02:05Z',
-            traceId: 'trace-abc-123'
+            traceId: 'trace-abc-123',
           },
           {
             id: 'step-3',
@@ -66,9 +70,9 @@ test.describe('Run Viewer', () => {
             parents: ['step-2'],
             duration: 60000,
             startTime: '2025-09-07T10:02:05Z',
-            endTime: '2025-09-07T10:03:05Z'
-          }
-        ]
+            endTime: '2025-09-07T10:03:05Z',
+          },
+        ],
       };
 
       await route.fulfill({ json: mockResponse });
@@ -84,7 +88,9 @@ test.describe('Run Viewer', () => {
     await expect(page.locator('text=Duration: 300s')).toBeVisible();
 
     // Should render the DAG visualization (React Flow)
-    await expect(page.locator('[role="region"][aria-label="Run graph"]')).toBeVisible();
+    await expect(
+      page.locator('[role="region"][aria-label="Run graph"]'),
+    ).toBeVisible();
 
     // Should show step nodes
     await expect(page.locator('text=Initialize')).toBeVisible();
@@ -107,12 +113,12 @@ test.describe('Run Viewer', () => {
 
   test('should update DAG when run status changes', async ({ page }) => {
     let requestCount = 0;
-    
+
     // Mock API to simulate run progression
-    await page.route('/api/maestro/v1/runs/*', async route => {
+    await page.route('/api/maestro/v1/runs/*', async (route) => {
       requestCount++;
       const runId = route.url().split('/').pop();
-      
+
       let mockResponse;
       if (requestCount === 1) {
         // First request: running state
@@ -125,21 +131,21 @@ test.describe('Run Viewer', () => {
               id: 'step-1',
               name: 'Initialize',
               state: 'completed',
-              parents: []
+              parents: [],
             },
             {
-              id: 'step-2', 
+              id: 'step-2',
               name: 'Processing',
               state: 'running',
-              parents: ['step-1']
+              parents: ['step-1'],
             },
             {
               id: 'step-3',
               name: 'Finalize',
               state: 'pending',
-              parents: ['step-2']
-            }
-          ]
+              parents: ['step-2'],
+            },
+          ],
         };
       } else {
         // Later requests: completed state
@@ -150,23 +156,23 @@ test.describe('Run Viewer', () => {
           steps: [
             {
               id: 'step-1',
-              name: 'Initialize', 
+              name: 'Initialize',
               state: 'completed',
-              parents: []
+              parents: [],
             },
             {
               id: 'step-2',
               name: 'Processing',
-              state: 'completed', 
-              parents: ['step-1']
+              state: 'completed',
+              parents: ['step-1'],
             },
             {
               id: 'step-3',
               name: 'Finalize',
               state: 'completed',
-              parents: ['step-2'] 
-            }
-          ]
+              parents: ['step-2'],
+            },
+          ],
         };
       }
 
@@ -178,7 +184,7 @@ test.describe('Run Viewer', () => {
     // Initially should show running status
     await expect(page.locator('text=RUNNING')).toBeVisible();
     await expect(page.locator('text=Auto-refreshing (5s)')).toBeVisible();
-    
+
     // Should show mixed step states
     await expect(page.locator('text=Running: 1')).toBeVisible();
     await expect(page.locator('text=Pending: 1')).toBeVisible();
@@ -195,7 +201,7 @@ test.describe('Run Viewer', () => {
 
   test('should be accessible with keyboard navigation', async ({ page }) => {
     // Mock successful run data
-    await page.route('/api/maestro/v1/runs/*', async route => {
+    await page.route('/api/maestro/v1/runs/*', async (route) => {
       await route.fulfill({
         json: {
           id: 'accessible-run',
@@ -206,17 +212,19 @@ test.describe('Run Viewer', () => {
               id: 'step-1',
               name: 'Test Step',
               state: 'completed',
-              parents: []
-            }
-          ]
-        }
+              parents: [],
+            },
+          ],
+        },
       });
     });
 
     await page.goto('/runs/viewer?runId=accessible-run');
 
     // Check ARIA labels
-    await expect(page.locator('[role="region"][aria-label="Run graph"]')).toBeVisible();
+    await expect(
+      page.locator('[role="region"][aria-label="Run graph"]'),
+    ).toBeVisible();
 
     // Should be able to navigate to refresh button with keyboard
     await page.keyboard.press('Tab');

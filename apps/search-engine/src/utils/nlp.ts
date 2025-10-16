@@ -29,7 +29,10 @@ export class NLPProcessor {
       { text: 'location address place geography', label: 'geographic' },
       { text: 'document file report paper', label: 'document' },
       { text: 'event incident occurrence happening', label: 'temporal' },
-      { text: 'organization company business enterprise', label: 'organization' },
+      {
+        text: 'organization company business enterprise',
+        label: 'organization',
+      },
     ];
 
     trainingData.forEach((item) => {
@@ -85,7 +88,11 @@ export class NLPProcessor {
       .map(([phrase]) => phrase);
   }
 
-  private generateNGrams(tokens: string[], minN: number, maxN: number): string[] {
+  private generateNGrams(
+    tokens: string[],
+    minN: number,
+    maxN: number,
+  ): string[] {
     const nGrams: string[] = [];
 
     for (let n = minN; n <= maxN; n++) {
@@ -173,17 +180,28 @@ export class NLPProcessor {
   }
 
   detectLanguage(text: string): string {
-    const languages = ['english', 'spanish', 'french', 'german', 'italian', 'portuguese'];
+    const languages = [
+      'english',
+      'spanish',
+      'french',
+      'german',
+      'italian',
+      'portuguese',
+    ];
     const scores: Record<string, number> = {};
 
     languages.forEach((lang) => {
       const langStopwords = stopword[lang as keyof typeof stopword] || [];
       const tokens = this.tokenize(text);
-      const stopwordCount = tokens.filter((token) => langStopwords.includes(token)).length;
+      const stopwordCount = tokens.filter((token) =>
+        langStopwords.includes(token),
+      ).length;
       scores[lang] = stopwordCount / tokens.length;
     });
 
-    return Object.entries(scores).reduce((a, b) => (scores[a[0]] > scores[b[0]] ? a : b))[0];
+    return Object.entries(scores).reduce((a, b) =>
+      scores[a[0]] > scores[b[0]] ? a : b,
+    )[0];
   }
 
   calculateTextSimilarity(text1: string, text2: string): number {

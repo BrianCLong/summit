@@ -11,10 +11,13 @@ Example (Socket.IO client):
 import { io } from 'socket.io-client';
 
 // General realtime (ai:insight)
-const realtime = io(import.meta.env.VITE_WS_URL || 'http://localhost:4000/realtime', {
-  transports: ['websocket'],
-  auth: { token: localStorage.getItem('token') },
-});
+const realtime = io(
+  import.meta.env.VITE_WS_URL || 'http://localhost:4000/realtime',
+  {
+    transports: ['websocket'],
+    auth: { token: localStorage.getItem('token') },
+  },
+);
 
 realtime.on('connect', () => {
   realtime.emit('join_ai_entity', { entityId: 'e123' });
@@ -25,19 +28,30 @@ realtime.on('ai:insight', (payload) => {
 });
 
 // Graph analytics progressive updates
-const analytics = io(import.meta.env.VITE_WS_URL?.replace(/\/$/, '') + '/graph-analytics', {
-  transports: ['websocket'],
-  auth: { token: localStorage.getItem('token') },
-});
+const analytics = io(
+  import.meta.env.VITE_WS_URL?.replace(/\/$/, '') + '/graph-analytics',
+  {
+    transports: ['websocket'],
+    auth: { token: localStorage.getItem('token') },
+  },
+);
 
 analytics.on('connect', () => {
   analytics.emit('join_job', { jobId: 'job-123' });
 });
 
-analytics.on('progress', (ev) => { /* show in-progress */ });
-analytics.on('result', (ev) => { /* append partial result */ });
-analytics.on('error', (ev) => { /* display error */ });
-analytics.on('complete', (ev) => { /* finalize */ });
+analytics.on('progress', (ev) => {
+  /* show in-progress */
+});
+analytics.on('result', (ev) => {
+  /* append partial result */
+});
+analytics.on('error', (ev) => {
+  /* display error */
+});
+analytics.on('complete', (ev) => {
+  /* finalize */
+});
 ```
 
 Tip: In local dev or tests, you can bypass Socket.IO JWT auth on the analytics namespace by setting `DISABLE_SOCKET_AUTH=1` on the server.
@@ -54,4 +68,3 @@ npm i
 E2E_WS_URL=http://localhost:4000 E2E_REDIS_URL=redis://localhost:6379/1 \
   npm run test:e2e -- tests/e2e/analytics-bridge.spec.ts
 ```
-

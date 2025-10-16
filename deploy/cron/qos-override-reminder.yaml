@@ -15,12 +15,18 @@ spec:
               image: node:18-alpine
               env:
                 - name: DATABASE_URL
-                  valueFrom: { secretKeyRef: { name: app-secrets, key: DATABASE_URL } }
+                  valueFrom:
+                    { secretKeyRef: { name: app-secrets, key: DATABASE_URL } }
                 - name: SLACK_QOS_CSM_WEBHOOK
-                  valueFrom: { secretKeyRef: { name: app-secrets, key: SLACK_QOS_CSM_WEBHOOK } }
+                  valueFrom:
+                    {
+                      secretKeyRef:
+                        { name: app-secrets, key: SLACK_QOS_CSM_WEBHOOK },
+                    }
                 - name: QOS_OVERRIDE_REMINDER_HOURS
                   value: '24'
-              command: ['node', '/app/services/admin/cron/qos_override_reminder.ts']
+              command:
+                ['node', '/app/services/admin/cron/qos_override_reminder.ts']
               volumeMounts:
                 - name: repo
                   mountPath: /app

@@ -5,11 +5,13 @@ Twelve PRs that harden performance and security from the browser/CDN edge inward
 ---
 
 ## PR 59 — Frontend performance budgets (Lighthouse CI)
+
 **Purpose:** Prevent regressions in LCP/CLS/JS weight.
 
 **Files**
 
 **`.lighthouserc.js`**
+
 ```js
 module.exports = {
   ci: {
@@ -18,14 +20,15 @@ module.exports = {
       assertions: {
         'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
         'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
-        'total-byte-weight': ['warn', { maxNumericValue: 900000 }]
-      }
-    }
-  }
+        'total-byte-weight': ['warn', { maxNumericValue: 900000 }],
+      },
+    },
+  },
 };
 ```
 
 **`.github/workflows/lhci.yml`**
+
 ```yaml
 name: lhci
 on: [pull_request]
@@ -46,31 +49,44 @@ jobs:
 ---
 
 ## PR 60 — RUM: web‑vitals → Prometheus
+
 **Purpose:** Client‑side UX telemetry back to SLOs.
 
 **Files**
 
 **`web/public/rum.js`**
+
 ```js
 import { onCLS, onFID, onLCP, onINP } from 'web-vitals';
 const endpoint = '/rum';
-function send(name, value){
-  navigator.sendBeacon(endpoint, JSON.stringify({ name, value, ts: Date.now(), ua: navigator.userAgent }));
+function send(name, value) {
+  navigator.sendBeacon(
+    endpoint,
+    JSON.stringify({ name, value, ts: Date.now(), ua: navigator.userAgent }),
+  );
 }
-onCLS(v => send('CLS', v.value));
-onFID(v => send('FID', v.value));
-onLCP(v => send('LCP', v.value));
-onINP(v => send('INP', v.value));
+onCLS((v) => send('CLS', v.value));
+onFID((v) => send('FID', v.value));
+onLCP((v) => send('LCP', v.value));
+onINP((v) => send('INP', v.value));
 ```
 
 **`server/routes/rum.ts`**
+
 ```ts
 import express from 'express';
 import client from 'prom-client';
 const r = express.Router();
-const g = new client.Gauge({ name: 'rum_metric', help: 'web vitals', labelNames: ['name'] });
+const g = new client.Gauge({
+  name: 'rum_metric',
+  help: 'web vitals',
+  labelNames: ['name'],
+});
 r.post('/rum', express.text({ type: '*/*' }), (req, res) => {
-  try { const { name, value } = JSON.parse(req.body||'{}'); g.set({ name }, Number(value)); } catch {}
+  try {
+    const { name, value } = JSON.parse(req.body || '{}');
+    g.set({ name }, Number(value));
+  } catch {}
   res.status(204).end();
 });
 export default r;
@@ -81,11 +97,13 @@ export default r;
 ---
 
 ## PR 61 — CSP + Trusted Types + SRI
+
 **Purpose:** Block XSS and supply‑chain injection via strict CSP.
 
 **Files**
 
 **`server/security/csp.ts`**
+
 ```ts
 import helmet from 'helmet';
 export const csp = helmet.contentSecurityPolicy({
@@ -96,14 +114,25 @@ export const csp = helmet.contentSecurityPolicy({
     objectSrc: ["'none'"],
     baseUri: ["'self'"],
     requireTrustedTypesFor: ["'script'"],
-  }
+  },
 });
 ```
 
 **`web/index.html`** (SRI example)
+
 ```html
-<link rel="preload" as="script" href="/static/app.js" integrity="sha384-..." crossorigin="anonymous" />
-<script src="/static/app.js" integrity="sha384-..." crossorigin="anonymous"></script>
+<link
+  rel="preload"
+  as="script"
+  href="/static/app.js"
+  integrity="sha384-..."
+  crossorigin="anonymous"
+/>
+<script
+  src="/static/app.js"
+  integrity="sha384-..."
+  crossorigin="anonymous"
+></script>
 ```
 
 **Rollback:** Relax CSP directives; remove Trusted Types requirement.
@@ -111,11 +140,13 @@ export const csp = helmet.contentSecurityPolicy({
 ---
 
 ## PR 62 — CDN blue/green (weighted DNS or Ingress canary)
+
 **Purpose:** Stage CDN/edge config changes safely.
 
 **Files (option A: Route53 weighted)**
 
 **`infra/cdn/weighted-dns.tf`**
+
 ```hcl
 resource "aws_route53_record" "web_blue" {
   zone_id = var.zone_id
@@ -138,14 +169,15 @@ resource "aws_route53_record" "web_green" {
 **Files (option B: NGINX Ingress canary)**
 
 **`k8s/ingress/web-canary.yaml`**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: web-canary
   annotations:
-    nginx.ingress.kubernetes.io/canary: "true"
-    nginx.ingress.kubernetes.io/canary-weight: "10"
+    nginx.ingress.kubernetes.io/canary: 'true'
+    nginx.ingress.kubernetes.io/canary-weight: '10'
 spec:
   rules:
     - host: web.example.com
@@ -161,20 +193,22 @@ spec:
 ---
 
 ## PR 63 — Edge canary by header/cookie
+
 **Purpose:** Safely test with internal users or cohorts.
 
 **Files**
 
 **`k8s/ingress/web-header-canary.yaml`**
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: web-canary-header
   annotations:
-    nginx.ingress.kubernetes.io/canary: "true"
-    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
-    nginx.ingress.kubernetes.io/canary-by-header-value: "1"
+    nginx.ingress.kubernetes.io/canary: 'true'
+    nginx.ingress.kubernetes.io/canary-by-header: 'X-Canary'
+    nginx.ingress.kubernetes.io/canary-by-header-value: '1'
 spec:
   rules:
     - host: web.example.com
@@ -190,16 +224,19 @@ spec:
 ---
 
 ## PR 64 — Mobile staged rollout (optional)
+
 **Purpose:** Gate risky mobile features; automate staged release tracks.
 
 **Files**
 
 **`mobile/flags.yaml`**
+
 ```yaml
 mobile_ranker_v2: { default: false, owners: [mobile] }
 ```
 
 **`.github/workflows/mobile-release.yml`**
+
 ```yaml
 name: mobile-release
 on: workflow_dispatch
@@ -217,11 +254,13 @@ jobs:
 ---
 
 ## PR 65 — Chaos for stores (latency & kill)
+
 **Purpose:** Prove graceful degradation when Neo4j/Redis degrade.
 
 **Files**
 
 **`k8s/chaos/redis-latency.yaml`** (tc/netem via busybox)
+
 ```yaml
 apiVersion: batch/v1
 kind: Job
@@ -233,12 +272,16 @@ spec:
       containers:
         - name: netem
           image: alpine
-          securityContext: { capabilities: { add: ["NET_ADMIN"] } }
-          command: ["/bin/sh","-c"]
-          args: ["apk add tc && tc qdisc add dev eth0 root netem delay 200ms && sleep 300 && tc qdisc del dev eth0 root netem"]
+          securityContext: { capabilities: { add: ['NET_ADMIN'] } }
+          command: ['/bin/sh', '-c']
+          args:
+            [
+              'apk add tc && tc qdisc add dev eth0 root netem delay 200ms && sleep 300 && tc qdisc del dev eth0 root netem',
+            ]
 ```
 
 **`k8s/chaos/neo4j-kill.yaml`**
+
 ```yaml
 apiVersion: batch/v1
 kind: Job
@@ -250,8 +293,11 @@ spec:
       containers:
         - name: killer
           image: bitnami/kubectl
-          command: ["/bin/sh","-c"]
-          args: ["kubectl -n stage delete pod -l app.kubernetes.io/name=graph --field-selector=status.phase=Running --limit=1"]
+          command: ['/bin/sh', '-c']
+          args:
+            [
+              'kubectl -n stage delete pod -l app.kubernetes.io/name=graph --field-selector=status.phase=Running --limit=1',
+            ]
 ```
 
 **Rollback:** Do not schedule jobs; run only by hand.
@@ -259,11 +305,13 @@ spec:
 ---
 
 ## PR 66 — Feature flag lifecycle & sunsets
+
 **Purpose:** Prevent flag sprawl; enforce expirations and removals.
 
 **Files**
 
 **`feature-flags/flags.yaml`** (add `expires` key)
+
 ```yaml
 ranker_v2:
   default: false
@@ -272,17 +320,26 @@ ranker_v2:
 ```
 
 **`scripts/flags-audit.ts`**
+
 ```ts
 import fs from 'fs';
 import yaml from 'js-yaml';
-const flags = yaml.load(fs.readFileSync('feature-flags/flags.yaml', 'utf8')) as any;
-const today = new Date().toISOString().slice(0,10);
-const expired = Object.entries(flags.features||flags).filter(([,v]: any) => v.expires && v.expires < today);
-if (expired.length) { console.error('Expired flags:', expired.map(([k])=>k).join(',')); process.exit(1); }
+const flags = yaml.load(
+  fs.readFileSync('feature-flags/flags.yaml', 'utf8'),
+) as any;
+const today = new Date().toISOString().slice(0, 10);
+const expired = Object.entries(flags.features || flags).filter(
+  ([, v]: any) => v.expires && v.expires < today,
+);
+if (expired.length) {
+  console.error('Expired flags:', expired.map(([k]) => k).join(','));
+  process.exit(1);
+}
 console.log('No expired flags.');
 ```
 
 **`.github/workflows/flags-audit.yml`**
+
 ```yaml
 name: flags-audit
 on:
@@ -301,11 +358,13 @@ jobs:
 ---
 
 ## PR 67 — Service catalog (Backstage descriptors)
+
 **Purpose:** Clear ownership, systems, and dependencies for audits.
 
 **Files**
 
 **`catalog/catalog-info.yaml`**
+
 ```yaml
 apiVersion: backstage.io/v1alpha1
 kind: Component
@@ -325,11 +384,13 @@ spec:
 ---
 
 ## PR 68 — Quarterly access review automation
+
 **Purpose:** Prove least‑privilege with auditable reviews.
 
 **Files**
 
 **`.github/workflows/access-review.yml`**
+
 ```yaml
 name: access-review
 on:
@@ -355,11 +416,13 @@ jobs:
 ---
 
 ## PR 69 — Base image policy (distroless/Wolfi only)
+
 **Purpose:** Reduce CVE surface and supply‑chain risk.
 
 **Files**
 
 **`policy/rego/baseimage.rego`**
+
 ```rego
 package images
 allow {
@@ -370,6 +433,7 @@ allow {
 ```
 
 **`.github/workflows/baseimage-check.yml`**
+
 ```yaml
 name: baseimage-check
 on: [pull_request]
@@ -389,31 +453,41 @@ jobs:
 ---
 
 ## PR 70 — KMS envelope encryption helper + rotation
+
 **Purpose:** Encrypt sensitive fields at rest with KMS, support key rotation.
 
 **Files**
 
 **`server/crypto/kms.ts`**
+
 ```ts
 import { KMSClient, EncryptCommand, DecryptCommand } from '@aws-sdk/client-kms';
 const kms = new KMSClient({});
 const KEY_ID = process.env.KMS_KEY_ID!;
-export async function enc(plaintext: Buffer){
-  const r = await kms.send(new EncryptCommand({ KeyId: KEY_ID, Plaintext: plaintext }));
+export async function enc(plaintext: Buffer) {
+  const r = await kms.send(
+    new EncryptCommand({ KeyId: KEY_ID, Plaintext: plaintext }),
+  );
   return Buffer.from(r.CiphertextBlob as Uint8Array).toString('base64');
 }
-export async function dec(ciphertextB64: string){
-  const r = await kms.send(new DecryptCommand({ CiphertextBlob: Buffer.from(ciphertextB64,'base64') }));
+export async function dec(ciphertextB64: string) {
+  const r = await kms.send(
+    new DecryptCommand({
+      CiphertextBlob: Buffer.from(ciphertextB64, 'base64'),
+    }),
+  );
   return Buffer.from(r.Plaintext as Uint8Array);
 }
 ```
 
 **`scripts/rotate_dek.ts`**
+
 ```ts
 // Re-encrypt selected columns with new DEK; idempotent, chunked
 ```
 
 **`.github/workflows/rotate-dek.yml`**
+
 ```yaml
 name: rotate-dek
 on: workflow_dispatch
@@ -433,16 +507,18 @@ jobs:
 ---
 
 # Cutover (half day)
-1) Enable **Lighthouse CI** and **RUM** in stage; tune thresholds; fix quick wins.
-2) Roll out **CSP/Trusted Types** in report‑only mode, then enforce.
-3) Introduce **CDN blue/green** with 10% green; verify canary and header‑based cohorts.
-4) Run **store chaos** on stage; confirm graceful degradation & alerts.
-5) Turn on **flag sunsets** audit and open issues for expired flags.
-6) Seed **service catalog** with core services; wire owners.
-7) Schedule **access review** and **base image policy** as required checks.
-8) Integrate **KMS envelope encryption** for sensitive fields; dry‑run rotation.
+
+1. Enable **Lighthouse CI** and **RUM** in stage; tune thresholds; fix quick wins.
+2. Roll out **CSP/Trusted Types** in report‑only mode, then enforce.
+3. Introduce **CDN blue/green** with 10% green; verify canary and header‑based cohorts.
+4. Run **store chaos** on stage; confirm graceful degradation & alerts.
+5. Turn on **flag sunsets** audit and open issues for expired flags.
+6. Seed **service catalog** with core services; wire owners.
+7. Schedule **access review** and **base image policy** as required checks.
+8. Integrate **KMS envelope encryption** for sensitive fields; dry‑run rotation.
 
 # Rollback
+
 - Reduce DNS/Ingress weights to 0; remove canary.
 - Disable CSP enforcement (keep report‑only).
 - Stop RUM collection; remove route.
@@ -450,10 +526,10 @@ jobs:
 - Mark flags without expiries as `expires: null` temporarily.
 
 # Ownership
+
 - **Web/Frontend:** PR 59–61, 63
 - **Platform/Edge:** PR 62, 69
 - **SRE/Platform:** PR 65, 68
 - **Security:** PR 61, 69, 70
 - **Data/Backend:** PR 60, 70
 - **DX/Arborist:** PR 66, 67
-

@@ -3,9 +3,9 @@ kind: Ingress
 metadata:
   name: web-canary-header
   annotations:
-    nginx.ingress.kubernetes.io/canary: "true"
-    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
-    nginx.ingress.kubernetes.io/canary-by-header-value: "1"
+    nginx.ingress.kubernetes.io/canary: 'true'
+    nginx.ingress.kubernetes.io/canary-by-header: 'X-Canary'
+    nginx.ingress.kubernetes.io/canary-by-header-value: '1'
 spec:
   rules:
     - host: web.example.com

@@ -3,7 +3,7 @@ import {
   ArbitrageAgent,
   CompositeDataFeed,
   HeadToHeadEvaluator,
-  InMemoryDataFeed
+  InMemoryDataFeed,
 } from '../src/index.js';
 import type { BaselineRun } from '../src/evaluator.js';
 import type { CompositeMarketSnapshot, WorkloadProfile } from '../src/types.js';
@@ -17,7 +17,7 @@ const baseSnapshot: CompositeMarketSnapshot = {
       spotPricePerUnit: 0.18,
       reservedPricePerUnit: 0.24,
       currency: 'USD',
-      timestamp: '2025-03-01T00:00:00.000Z'
+      timestamp: '2025-03-01T00:00:00.000Z',
     },
     {
       provider: 'azure',
@@ -25,22 +25,22 @@ const baseSnapshot: CompositeMarketSnapshot = {
       spotPricePerUnit: 0.2,
       reservedPricePerUnit: 0.26,
       currency: 'USD',
-      timestamp: '2025-03-01T00:00:00.000Z'
-    }
+      timestamp: '2025-03-01T00:00:00.000Z',
+    },
   ],
   energy: [
     {
       region: 'us-east-1',
       carbonIntensityGramsPerKwh: 380,
       pricePerKwh: 0.11,
-      timestamp: '2025-03-01T00:00:00.000Z'
+      timestamp: '2025-03-01T00:00:00.000Z',
     },
     {
       region: 'eastus',
       carbonIntensityGramsPerKwh: 460,
       pricePerKwh: 0.12,
-      timestamp: '2025-03-01T00:00:00.000Z'
-    }
+      timestamp: '2025-03-01T00:00:00.000Z',
+    },
   ],
   demand: [
     {
@@ -49,7 +49,7 @@ const baseSnapshot: CompositeMarketSnapshot = {
       resource: 'compute',
       predictedUtilization: 0.62,
       confidence: 0.8,
-      timestamp: '2025-03-01T00:00:00.000Z'
+      timestamp: '2025-03-01T00:00:00.000Z',
     },
     {
       provider: 'azure',
@@ -57,8 +57,8 @@ const baseSnapshot: CompositeMarketSnapshot = {
       resource: 'compute',
       predictedUtilization: 0.54,
       confidence: 0.7,
-      timestamp: '2025-03-01T00:00:00.000Z'
-    }
+      timestamp: '2025-03-01T00:00:00.000Z',
+    },
   ],
   regulation: [
     {
@@ -67,7 +67,7 @@ const baseSnapshot: CompositeMarketSnapshot = {
       incentivePerUnit: 0.02,
       penaltyPerUnit: 0.01,
       notes: 'energy credit',
-      effectiveDate: '2025-02-01'
+      effectiveDate: '2025-02-01',
     },
     {
       provider: 'azure',
@@ -75,9 +75,9 @@ const baseSnapshot: CompositeMarketSnapshot = {
       incentivePerUnit: 0.015,
       penaltyPerUnit: 0.0,
       notes: 'sustainability grant',
-      effectiveDate: '2025-01-15'
-    }
-  ]
+      effectiveDate: '2025-01-15',
+    },
+  ],
 };
 
 const workload: WorkloadProfile = {
@@ -86,13 +86,18 @@ const workload: WorkloadProfile = {
   resourceBreakdown: { compute: 0.7, storage: 0.2, network: 0.1 },
   availabilityTier: 'mission-critical',
   burstable: true,
-  sustainabilityWeight: 0.6
+  sustainabilityWeight: 0.6,
 };
 
 describe('CompositeDataFeed', () => {
   it('aggregates data across multiple sources', async () => {
     const feedA = new InMemoryDataFeed(baseSnapshot.financial, [], [], []);
-    const feedB = new InMemoryDataFeed([], baseSnapshot.energy, baseSnapshot.demand, baseSnapshot.regulation);
+    const feedB = new InMemoryDataFeed(
+      [],
+      baseSnapshot.energy,
+      baseSnapshot.demand,
+      baseSnapshot.regulation,
+    );
     const composite = new CompositeDataFeed([feedA, feedB]);
     const snapshot = await composite.fetchSnapshot();
     expect(snapshot.financial).toHaveLength(2);
@@ -105,7 +110,9 @@ describe('CompositeDataFeed', () => {
 describe('ArbitrageAgent', () => {
   it('produces ranked recommendations for a workload', () => {
     const agent = new ArbitrageAgent();
-    const portfolio = agent.recommendPortfolio(baseSnapshot, workload, { topN: 3 });
+    const portfolio = agent.recommendPortfolio(baseSnapshot, workload, {
+      topN: 3,
+    });
     expect(portfolio.length).toBeGreaterThan(0);
     expect(portfolio[0].estimatedSavings).toBeGreaterThan(0);
   });
@@ -118,7 +125,7 @@ describe('HeadToHeadEvaluator', () => {
       {
         tool: 'aws-compute-optimizer',
         workload,
-        baselineSavings: 0.04
+        baselineSavings: 0.04,
       },
       {
         tool: 'spot-io',
@@ -126,10 +133,10 @@ describe('HeadToHeadEvaluator', () => {
           ...workload,
           id: 'burst-etl',
           burstable: true,
-          availabilityTier: 'flex'
+          availabilityTier: 'flex',
         },
-        baselineSavings: 0.06
-      }
+        baselineSavings: 0.06,
+      },
     ];
     const report = evaluator.run(baseSnapshot, baselines);
     expect(report.results).toHaveLength(2);

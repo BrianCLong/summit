@@ -6,7 +6,11 @@
       "title": "Pools Registered",
       "targets": [{ "expr": "count(count by (pool) (maestro_pool_info))" }]
     },
-    { "type": "table", "title": "Pool Costs", "targets": [{ "expr": "maestro_pool_cpu_sec_usd" }] },
+    {
+      "type": "table",
+      "title": "Pool Costs",
+      "targets": [{ "expr": "maestro_pool_cpu_sec_usd" }]
+    },
     {
       "type": "timeseries",
       "title": "Heartbeats",

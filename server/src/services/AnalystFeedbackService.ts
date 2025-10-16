@@ -37,10 +37,12 @@ export class AnalystFeedbackService {
   /**
    * Record analyst feedback for an alert
    */
-  async recordFeedback(feedback: Omit<AnalystFeedback, 'id' | 'createdAt'>): Promise<AnalystFeedback> {
+  async recordFeedback(
+    feedback: Omit<AnalystFeedback, 'id' | 'createdAt'>,
+  ): Promise<AnalystFeedback> {
     try {
       // PII redaction for rationale
-      const redactedRationale = feedback.rationale 
+      const redactedRationale = feedback.rationale
         ? this.redactPII(feedback.rationale)
         : undefined;
 
@@ -64,7 +66,10 @@ export class AnalystFeedbackService {
 
       return feedbackRecord as AnalystFeedback;
     } catch (error) {
-      this.logger.error('Failed to record analyst feedback', { error, feedback });
+      this.logger.error('Failed to record analyst feedback', {
+        error,
+        feedback,
+      });
       throw new Error('Failed to record feedback');
     }
   }
@@ -72,7 +77,9 @@ export class AnalystFeedbackService {
   /**
    * Store label in the label store
    */
-  async storeLabel(label: Omit<LabelStoreEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<LabelStoreEntry> {
+  async storeLabel(
+    label: Omit<LabelStoreEntry, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<LabelStoreEntry> {
     try {
       const labelEntry = await this.prisma.labelStore.upsert({
         where: {
@@ -164,7 +171,7 @@ export class AnalystFeedbackService {
         orderBy: { createdAt: 'desc' },
       });
 
-      const trainingData = feedbackWithLabels.map(feedback => ({
+      const trainingData = feedbackWithLabels.map((feedback) => ({
         alertId: feedback.alertId,
         features: this.extractAlertFeatures(feedback.alert),
         labels: feedback.alert.labels.reduce((acc, label) => {
@@ -211,13 +218,18 @@ export class AnalystFeedbackService {
         },
       });
 
-      const totalFeedback = stats.reduce((sum, stat) => sum + stat._count.id, 0);
-      const averageConfidence = stats.reduce((sum, stat) => sum + (stat._avg.confidence || 0), 0) / stats.length;
+      const totalFeedback = stats.reduce(
+        (sum, stat) => sum + stat._count.id,
+        0,
+      );
+      const averageConfidence =
+        stats.reduce((sum, stat) => sum + (stat._avg.confidence || 0), 0) /
+        stats.length;
 
       return {
         totalFeedback,
         averageConfidence,
-        breakdown: stats.map(stat => ({
+        breakdown: stats.map((stat) => ({
           feedbackType: stat.feedbackType,
           reasonCode: stat.reasonCode,
           count: stat._count.id,
@@ -236,14 +248,20 @@ export class AnalystFeedbackService {
    */
   private redactPII(text: string): string {
     // Remove email addresses
-    text = text.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]');
-    
+    text = text.replace(
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+      '[EMAIL_REDACTED]',
+    );
+
     // Remove phone numbers
     text = text.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE_REDACTED]');
-    
+
     // Remove IP addresses
-    text = text.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP_REDACTED]');
-    
+    text = text.replace(
+      /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g,
+      '[IP_REDACTED]',
+    );
+
     // Remove potential SSNs
     text = text.replace(/\b\d{3}-?\d{2}-?\d{4}\b/g, '[SSN_REDACTED]');
 
@@ -291,7 +309,10 @@ export class AnalystFeedbackService {
         // await this.mlService.triggerRetraining();
       }
     } catch (error) {
-      this.logger.error('Failed to check retraining conditions', { error, alertId });
+      this.logger.error('Failed to check retraining conditions', {
+        error,
+        alertId,
+      });
     }
   }
 }

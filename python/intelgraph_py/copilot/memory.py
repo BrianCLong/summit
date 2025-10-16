@@ -8,9 +8,8 @@ exportable for retraining or audit.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -26,9 +25,9 @@ class MemoryEvent:
 class MemoryChain:
     """A chain of interactions: user action -> AI insight -> analyst response."""
 
-    user_action: Optional[MemoryEvent] = None
-    ai_insight: Optional[MemoryEvent] = None
-    analyst_response: Optional[MemoryEvent] = None
+    user_action: MemoryEvent | None = None
+    ai_insight: MemoryEvent | None = None
+    analyst_response: MemoryEvent | None = None
 
 
 class InMemoryStore:
@@ -39,13 +38,13 @@ class InMemoryStore:
     """
 
     def __init__(self) -> None:
-        self._store: Dict[str, List[MemoryChain]] = {}
+        self._store: dict[str, list[MemoryChain]] = {}
 
-    def save(self, session_id: str, user_id: str, chains: List[MemoryChain]) -> None:
+    def save(self, session_id: str, user_id: str, chains: list[MemoryChain]) -> None:
         key = f"{session_id}:{user_id}"
         self._store[key] = chains
 
-    def load(self, session_id: str, user_id: str) -> List[MemoryChain]:
+    def load(self, session_id: str, user_id: str) -> list[MemoryChain]:
         key = f"{session_id}:{user_id}"
         return self._store.get(key, [])
 
@@ -53,14 +52,14 @@ class InMemoryStore:
 class CopilotMemory:
     """High level API for interacting with the copilot memory."""
 
-    def __init__(self, store: Optional[InMemoryStore] = None) -> None:
+    def __init__(self, store: InMemoryStore | None = None) -> None:
         self.store = store or InMemoryStore()
 
     # Internal helpers -------------------------------------------------
-    def _get_chains(self, session_id: str, user_id: str) -> List[MemoryChain]:
+    def _get_chains(self, session_id: str, user_id: str) -> list[MemoryChain]:
         return list(self.store.load(session_id, user_id))
 
-    def _save_chains(self, session_id: str, user_id: str, chains: List[MemoryChain]) -> None:
+    def _save_chains(self, session_id: str, user_id: str, chains: list[MemoryChain]) -> None:
         self.store.save(session_id, user_id, chains)
 
     # Public API -------------------------------------------------------
@@ -68,9 +67,7 @@ class CopilotMemory:
         """Start a new chain with a user action."""
         chains = self._get_chains(session_id, user_id)
         chains.append(
-            MemoryChain(
-                user_action=MemoryEvent("user_action", content, datetime.utcnow())
-            )
+            MemoryChain(user_action=MemoryEvent("user_action", content, datetime.utcnow()))
         )
         self._save_chains(session_id, user_id, chains)
 
@@ -82,24 +79,19 @@ class CopilotMemory:
         chains[-1].ai_insight = MemoryEvent("ai_insight", content, datetime.utcnow())
         self._save_chains(session_id, user_id, chains)
 
-    def add_analyst_response(
-        self, session_id: str, user_id: str, content: str
-    ) -> None:
+    def add_analyst_response(self, session_id: str, user_id: str, content: str) -> None:
         """Attach an analyst response to the most recent chain."""
         chains = self._get_chains(session_id, user_id)
         if not chains:
             chains.append(MemoryChain())
-        chains[-1].analyst_response = MemoryEvent(
-            "analyst_response", content, datetime.utcnow()
-        )
+        chains[-1].analyst_response = MemoryEvent("analyst_response", content, datetime.utcnow())
         self._save_chains(session_id, user_id, chains)
 
-    def get_memory_chain(self, session_id: str, user_id: str) -> List[MemoryChain]:
+    def get_memory_chain(self, session_id: str, user_id: str) -> list[MemoryChain]:
         """Return the list of memory chains for the session and user."""
         return self._get_chains(session_id, user_id)
 
-    def export_memory(self, session_id: str, user_id: str) -> List[Dict[str, dict]]:
+    def export_memory(self, session_id: str, user_id: str) -> list[dict[str, dict]]:
         """Export memory chains as dictionaries for serialization."""
         chains = self._get_chains(session_id, user_id)
         return [asdict(chain) for chain in chains]
-

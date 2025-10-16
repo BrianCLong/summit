@@ -9,7 +9,7 @@ import {
   AssetManager,
   type AssetCriticality,
   type AssetRegistrationInput,
-  type AssetUsageEvent
+  type AssetUsageEvent,
 } from '../../../packages/shared/asset-manager';
 
 export interface DataAsset {
@@ -51,7 +51,12 @@ export interface LineageEdge {
 
 export interface QualityMetric {
   assetId: string;
-  metricType: 'completeness' | 'accuracy' | 'consistency' | 'timeliness' | 'validity';
+  metricType:
+    | 'completeness'
+    | 'accuracy'
+    | 'consistency'
+    | 'timeliness'
+    | 'validity';
   value: number;
   threshold: number;
   status: 'pass' | 'warn' | 'fail';
@@ -100,7 +105,9 @@ export class DataLineageTracker extends EventEmitter {
 
   constructor(assetManager?: AssetManager<DataAssetMetadata>) {
     super();
-    this.assetManager = assetManager ?? new AssetManager<DataAssetMetadata>({ usageHistoryLimit: 200 });
+    this.assetManager =
+      assetManager ??
+      new AssetManager<DataAssetMetadata>({ usageHistoryLimit: 200 });
   }
 
   private syncDataAssetWithManager(asset: DataAsset): void {
@@ -108,7 +115,9 @@ export class DataLineageTracker extends EventEmitter {
     this.assetManager.registerAsset(registration);
   }
 
-  private toDataAssetRegistration(asset: DataAsset): AssetRegistrationInput<DataAssetMetadata> {
+  private toDataAssetRegistration(
+    asset: DataAsset,
+  ): AssetRegistrationInput<DataAssetMetadata> {
     return {
       id: asset.id,
       name: asset.name,
@@ -122,20 +131,32 @@ export class DataLineageTracker extends EventEmitter {
         location: asset.location,
         metadata: asset.metadata,
         tags: asset.tags,
-        owner: asset.owner
-      }
+        owner: asset.owner,
+      },
     };
   }
 
   private deriveDataAssetCriticality(asset: DataAsset): AssetCriticality {
-    const tags = asset.tags.map(tag => tag.toLowerCase());
-    if (tags.some(tag => ['pii', 'phi', 'restricted', 'classified'].includes(tag))) {
+    const tags = asset.tags.map((tag) => tag.toLowerCase());
+    if (
+      tags.some((tag) =>
+        ['pii', 'phi', 'restricted', 'classified'].includes(tag),
+      )
+    ) {
       return 'critical';
     }
-    if (tags.some(tag => ['financial', 'gold', 'authoritative', 'mission_critical'].includes(tag))) {
+    if (
+      tags.some((tag) =>
+        ['financial', 'gold', 'authoritative', 'mission_critical'].includes(
+          tag,
+        ),
+      )
+    ) {
       return 'high';
     }
-    if (tags.some(tag => ['internal', 'sensitive', 'regulated'].includes(tag))) {
+    if (
+      tags.some((tag) => ['internal', 'sensitive', 'regulated'].includes(tag))
+    ) {
       return 'medium';
     }
     return 'low';
@@ -158,8 +179,8 @@ export class DataLineageTracker extends EventEmitter {
       healthScore: score,
       metadata: {
         lastQualityMetric: latest,
-        qualitySampleSize: metrics.length
-      }
+        qualitySampleSize: metrics.length,
+      },
     });
   }
 
@@ -171,22 +192,27 @@ export class DataLineageTracker extends EventEmitter {
     const weight: Record<QualityMetric['status'], number> = {
       pass: 1,
       warn: 0.6,
-      fail: 0.2
+      fail: 0.2,
     };
 
-    const total = metrics.reduce((sum, metric) => sum + weight[metric.status], 0);
+    const total = metrics.reduce(
+      (sum, metric) => sum + weight[metric.status],
+      0,
+    );
     return Math.round((total / metrics.length) * 100);
   }
 
   /**
    * Register a new data asset
    */
-  registerAsset(asset: Omit<DataAsset, 'id' | 'createdAt' | 'updatedAt'>): DataAsset {
+  registerAsset(
+    asset: Omit<DataAsset, 'id' | 'createdAt' | 'updatedAt'>,
+  ): DataAsset {
     const fullAsset: DataAsset = {
       ...asset,
       id: this.generateAssetId(asset.name, asset.location),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.assets.set(fullAsset.id, fullAsset);
@@ -197,8 +223,8 @@ export class DataLineageTracker extends EventEmitter {
       outcome: 'success',
       details: {
         type: fullAsset.type,
-        location: fullAsset.location
-      }
+        location: fullAsset.location,
+      },
     });
 
     return fullAsset;
@@ -207,10 +233,12 @@ export class DataLineageTracker extends EventEmitter {
   /**
    * Track a data transformation
    */
-  trackTransformation(transformation: Omit<DataTransformation, 'id'>): DataTransformation {
+  trackTransformation(
+    transformation: Omit<DataTransformation, 'id'>,
+  ): DataTransformation {
     const fullTransformation: DataTransformation = {
       ...transformation,
-      id: crypto.randomUUID()
+      id: crypto.randomUUID(),
     };
 
     this.transformations.set(fullTransformation.id, fullTransformation);
@@ -221,24 +249,26 @@ export class DataLineageTracker extends EventEmitter {
     for (const inputAssetId of fullTransformation.inputAssets) {
       this.recordDataAssetUsage(inputAssetId, {
         context: 'transformation_input',
-        outcome: fullTransformation.status === 'failure' ? 'failure' : 'success',
+        outcome:
+          fullTransformation.status === 'failure' ? 'failure' : 'success',
         details: {
           transformationId: fullTransformation.id,
           name: fullTransformation.name,
-          type: fullTransformation.type
-        }
+          type: fullTransformation.type,
+        },
       });
     }
 
     for (const outputAssetId of fullTransformation.outputAssets) {
       this.recordDataAssetUsage(outputAssetId, {
         context: 'transformation_output',
-        outcome: fullTransformation.status === 'failure' ? 'warning' : 'success',
+        outcome:
+          fullTransformation.status === 'failure' ? 'warning' : 'success',
         details: {
           transformationId: fullTransformation.id,
           name: fullTransformation.name,
-          type: fullTransformation.type
-        }
+          type: fullTransformation.type,
+        },
       });
 
       this.assetManager.updateAsset(outputAssetId, {
@@ -248,9 +278,9 @@ export class DataLineageTracker extends EventEmitter {
             executedAt: fullTransformation.executedAt,
             status: fullTransformation.status,
             type: fullTransformation.type,
-            executedBy: fullTransformation.executedBy
-          }
-        }
+            executedBy: fullTransformation.executedBy,
+          },
+        },
       });
 
       for (const inputAssetId of fullTransformation.inputAssets) {
@@ -266,7 +296,10 @@ export class DataLineageTracker extends EventEmitter {
   /**
    * Get complete lineage for an asset
    */
-  getLineage(assetId: string, direction: 'upstream' | 'downstream' | 'both' = 'both'): {
+  getLineage(
+    assetId: string,
+    direction: 'upstream' | 'downstream' | 'both' = 'both',
+  ): {
     nodes: DataAsset[];
     edges: LineageEdge[];
     transformations: DataTransformation[];
@@ -276,21 +309,33 @@ export class DataLineageTracker extends EventEmitter {
     const lineageEdges: LineageEdge[] = [];
     const lineageTransformations = new Map<string, DataTransformation>();
 
-    this.traverseLineage(assetId, direction, visitedNodes, lineageNodes, lineageEdges, lineageTransformations);
+    this.traverseLineage(
+      assetId,
+      direction,
+      visitedNodes,
+      lineageNodes,
+      lineageEdges,
+      lineageTransformations,
+    );
 
     return {
       nodes: Array.from(lineageNodes.values()),
       edges: lineageEdges,
-      transformations: Array.from(lineageTransformations.values())
+      transformations: Array.from(lineageTransformations.values()),
     };
   }
 
   /**
    * Perform impact analysis for changes to an asset
    */
-  analyzeImpact(assetId: string, changeType: 'schema' | 'data' | 'deletion'): ImpactAnalysis {
+  analyzeImpact(
+    assetId: string,
+    changeType: 'schema' | 'data' | 'deletion',
+  ): ImpactAnalysis {
     const downstreamLineage = this.getLineage(assetId, 'downstream');
-    const impactedAssets = downstreamLineage.nodes.map(n => n.id).filter(id => id !== assetId);
+    const impactedAssets = downstreamLineage.nodes
+      .map((n) => n.id)
+      .filter((id) => id !== assetId);
 
     // Calculate severity based on number of downstream assets and their importance
     const severity = this.calculateImpactSeverity(impactedAssets, changeType);
@@ -299,7 +344,10 @@ export class DataLineageTracker extends EventEmitter {
     const propagationPath = this.buildPropagationPath(assetId, impactedAssets);
 
     // Estimate affected rows (simplified)
-    const estimatedAffectedRows = this.estimateAffectedRows(assetId, impactedAssets);
+    const estimatedAffectedRows = this.estimateAffectedRows(
+      assetId,
+      impactedAssets,
+    );
 
     // Identify business impact
     const businessImpact = this.identifyBusinessImpact(impactedAssets);
@@ -310,8 +358,8 @@ export class DataLineageTracker extends EventEmitter {
       details: {
         changeType,
         severity,
-        impactedAssets: impactedAssets.length
-      }
+        impactedAssets: impactedAssets.length,
+      },
     });
 
     for (const impactedAssetId of impactedAssets) {
@@ -321,8 +369,8 @@ export class DataLineageTracker extends EventEmitter {
         details: {
           sourceAsset: assetId,
           severity,
-          changeType
-        }
+          changeType,
+        },
       });
     }
 
@@ -332,9 +380,9 @@ export class DataLineageTracker extends EventEmitter {
           changeType,
           severity,
           impactedAssets,
-          analyzedAt: new Date()
-        }
-      }
+          analyzedAt: new Date(),
+        },
+      },
     });
 
     return {
@@ -343,7 +391,7 @@ export class DataLineageTracker extends EventEmitter {
       severity,
       propagationPath,
       estimatedAffectedRows,
-      businessImpact
+      businessImpact,
     };
   }
 
@@ -372,12 +420,17 @@ export class DataLineageTracker extends EventEmitter {
 
     this.recordDataAssetUsage(metric.assetId, {
       context: 'quality_metric',
-      outcome: metric.status === 'fail' ? 'failure' : metric.status === 'warn' ? 'warning' : 'success',
+      outcome:
+        metric.status === 'fail'
+          ? 'failure'
+          : metric.status === 'warn'
+            ? 'warning'
+            : 'success',
       details: {
         metricType: metric.metricType,
         value: metric.value,
-        threshold: metric.threshold
-      }
+        threshold: metric.threshold,
+      },
     });
     this.refreshQualityInManager(metric.assetId);
   }
@@ -385,7 +438,10 @@ export class DataLineageTracker extends EventEmitter {
   /**
    * Get data quality report for an asset
    */
-  getQualityReport(assetId: string, timeRange?: { start: Date; end: Date }): {
+  getQualityReport(
+    assetId: string,
+    timeRange?: { start: Date; end: Date },
+  ): {
     overall_score: number;
     metrics: QualityMetric[];
     trends: Record<string, 'improving' | 'stable' | 'degrading'>;
@@ -395,20 +451,21 @@ export class DataLineageTracker extends EventEmitter {
 
     let filteredMetrics = metrics;
     if (timeRange) {
-      filteredMetrics = metrics.filter(m =>
-        m.measuredAt >= timeRange.start && m.measuredAt <= timeRange.end
+      filteredMetrics = metrics.filter(
+        (m) => m.measuredAt >= timeRange.start && m.measuredAt <= timeRange.end,
       );
     }
 
     const overallScore = this.calculateOverallQualityScore(filteredMetrics);
     const trends = this.calculateQualityTrends(filteredMetrics);
-    const recommendations = this.generateQualityRecommendations(filteredMetrics);
+    const recommendations =
+      this.generateQualityRecommendations(filteredMetrics);
 
     return {
       overall_score: overallScore,
       metrics: filteredMetrics,
       trends,
-      recommendations
+      recommendations,
     };
   }
 
@@ -418,7 +475,7 @@ export class DataLineageTracker extends EventEmitter {
   } {
     return {
       summary: this.assetManager.getDomainSummary('data'),
-      assets: this.assetManager.listAssets({ domain: 'data' }).slice(0, limit)
+      assets: this.assetManager.listAssets({ domain: 'data' }).slice(0, limit),
     };
   }
 
@@ -432,11 +489,19 @@ export class DataLineageTracker extends EventEmitter {
     qualityThreshold?: number;
     lastUpdatedAfter?: Date;
   }): DataAsset[] {
-    return Array.from(this.assets.values()).filter(asset => {
+    return Array.from(this.assets.values()).filter((asset) => {
       if (criteria.type && asset.type !== criteria.type) return false;
       if (criteria.owner && asset.owner !== criteria.owner) return false;
-      if (criteria.tags && !criteria.tags.every(tag => asset.tags.includes(tag))) return false;
-      if (criteria.lastUpdatedAfter && asset.updatedAt < criteria.lastUpdatedAfter) return false;
+      if (
+        criteria.tags &&
+        !criteria.tags.every((tag) => asset.tags.includes(tag))
+      )
+        return false;
+      if (
+        criteria.lastUpdatedAfter &&
+        asset.updatedAt < criteria.lastUpdatedAfter
+      )
+        return false;
 
       if (criteria.qualityThreshold) {
         const quality = this.getQualityReport(asset.id);
@@ -462,17 +527,24 @@ export class DataLineageTracker extends EventEmitter {
       : Array.from(this.transformations.values());
 
     const totalExecutions = transformations.length;
-    const successfulExecutions = transformations.filter(t => t.status === 'success').length;
-    const successRate = totalExecutions > 0 ? successfulExecutions / totalExecutions : 0;
+    const successfulExecutions = transformations.filter(
+      (t) => t.status === 'success',
+    ).length;
+    const successRate =
+      totalExecutions > 0 ? successfulExecutions / totalExecutions : 0;
 
-    const executionTimes = transformations.map(t => t.executionTime);
-    const averageExecutionTime = executionTimes.length > 0
-      ? executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length
-      : 0;
+    const executionTimes = transformations.map((t) => t.executionTime);
+    const averageExecutionTime =
+      executionTimes.length > 0
+        ? executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length
+        : 0;
 
-    const lastExecution = transformations.length > 0
-      ? transformations.reduce((latest, t) => latest.executedAt > t.executedAt ? latest : t).executedAt
-      : null;
+    const lastExecution =
+      transformations.length > 0
+        ? transformations.reduce((latest, t) =>
+            latest.executedAt > t.executedAt ? latest : t,
+          ).executedAt
+        : null;
 
     // Calculate quality impact (simplified)
     const qualityImpact = this.calculateQualityImpact(transformations);
@@ -482,7 +554,7 @@ export class DataLineageTracker extends EventEmitter {
       success_rate: successRate,
       average_execution_time: averageExecutionTime,
       quality_impact: qualityImpact,
-      last_execution: lastExecution
+      last_execution: lastExecution,
     };
   }
 
@@ -493,7 +565,7 @@ export class DataLineageTracker extends EventEmitter {
     const assets = Array.from(this.assets.values());
     const transformations = Array.from(this.transformations.values());
 
-    let schema = `
+    const schema = `
 type DataAsset {
   id: ID!
   name: String!
@@ -592,7 +664,11 @@ type Mutation {
 
   private generateAssetId(name: string, location: string): string {
     const content = `${name}:${location}`;
-    return crypto.createHash('sha256').update(content).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(content)
+      .digest('hex')
+      .substring(0, 16);
   }
 
   private updateLineageGraph(transformation: DataTransformation): void {
@@ -607,8 +683,8 @@ type Mutation {
           weight: 1.0,
           metadata: {
             transformation_type: transformation.type,
-            executed_at: transformation.executedAt
-          }
+            executed_at: transformation.executedAt,
+          },
         };
 
         if (!this.lineageGraph.has(inputId)) {
@@ -625,7 +701,7 @@ type Mutation {
     visited: Set<string>,
     nodes: Map<string, DataAsset>,
     edges: LineageEdge[],
-    transformations: Map<string, DataTransformation>
+    transformations: Map<string, DataTransformation>,
   ): void {
     if (visited.has(assetId)) return;
     visited.add(assetId);
@@ -644,7 +720,14 @@ type Mutation {
         if (transformation) {
           transformations.set(transformation.id, transformation);
         }
-        this.traverseLineage(edge.to, direction, visited, nodes, edges, transformations);
+        this.traverseLineage(
+          edge.to,
+          direction,
+          visited,
+          nodes,
+          edges,
+          transformations,
+        );
       }
     }
 
@@ -654,24 +737,38 @@ type Mutation {
         for (const edge of edgeList) {
           if (edge.to === assetId) {
             edges.push(edge);
-            const transformation = this.transformations.get(edge.transformationId);
+            const transformation = this.transformations.get(
+              edge.transformationId,
+            );
             if (transformation) {
               transformations.set(transformation.id, transformation);
             }
-            this.traverseLineage(fromId, direction, visited, nodes, edges, transformations);
+            this.traverseLineage(
+              fromId,
+              direction,
+              visited,
+              nodes,
+              edges,
+              transformations,
+            );
           }
         }
       }
     }
   }
 
-  private calculateImpactSeverity(impactedAssets: string[], changeType: string): 'low' | 'medium' | 'high' | 'critical' {
+  private calculateImpactSeverity(
+    impactedAssets: string[],
+    changeType: string,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     const assetCount = impactedAssets.length;
 
     // Business critical assets
-    const criticalAssets = impactedAssets.filter(id => {
+    const criticalAssets = impactedAssets.filter((id) => {
       const asset = this.assets.get(id);
-      return asset?.tags.includes('critical') || asset?.tags.includes('production');
+      return (
+        asset?.tags.includes('critical') || asset?.tags.includes('production')
+      );
     }).length;
 
     if (changeType === 'deletion' && criticalAssets > 0) return 'critical';
@@ -680,12 +777,18 @@ type Mutation {
     return 'low';
   }
 
-  private buildPropagationPath(assetId: string, impactedAssets: string[]): string[] {
+  private buildPropagationPath(
+    assetId: string,
+    impactedAssets: string[],
+  ): string[] {
     // Simplified propagation path - in practice, this would use graph algorithms
     return [assetId, ...impactedAssets.slice(0, 5)];
   }
 
-  private estimateAffectedRows(assetId: string, impactedAssets: string[]): number {
+  private estimateAffectedRows(
+    assetId: string,
+    impactedAssets: string[],
+  ): number {
     // Simplified estimation - would use actual row counts in practice
     return impactedAssets.length * 1000000;
   }
@@ -697,10 +800,14 @@ type Mutation {
       const asset = this.assets.get(assetId);
       if (!asset) continue;
 
-      if (asset.tags.includes('revenue')) impacts.push('Revenue reporting affected');
-      if (asset.tags.includes('compliance')) impacts.push('Regulatory compliance at risk');
-      if (asset.tags.includes('customer-facing')) impacts.push('Customer experience degradation');
-      if (asset.tags.includes('ml-model')) impacts.push('ML model performance degradation');
+      if (asset.tags.includes('revenue'))
+        impacts.push('Revenue reporting affected');
+      if (asset.tags.includes('compliance'))
+        impacts.push('Regulatory compliance at risk');
+      if (asset.tags.includes('customer-facing'))
+        impacts.push('Customer experience degradation');
+      if (asset.tags.includes('ml-model'))
+        impacts.push('ML model performance degradation');
     }
 
     return [...new Set(impacts)];
@@ -711,24 +818,28 @@ type Mutation {
 
     const weights = {
       completeness: 0.25,
-      accuracy: 0.30,
-      consistency: 0.20,
+      accuracy: 0.3,
+      consistency: 0.2,
       timeliness: 0.15,
-      validity: 0.10
+      validity: 0.1,
     };
 
     let totalScore = 0;
     let totalWeight = 0;
 
-    const metricsByType = metrics.reduce((acc, metric) => {
-      if (!acc[metric.metricType]) acc[metric.metricType] = [];
-      acc[metric.metricType].push(metric);
-      return acc;
-    }, {} as Record<string, QualityMetric[]>);
+    const metricsByType = metrics.reduce(
+      (acc, metric) => {
+        if (!acc[metric.metricType]) acc[metric.metricType] = [];
+        acc[metric.metricType].push(metric);
+        return acc;
+      },
+      {} as Record<string, QualityMetric[]>,
+    );
 
     for (const [type, typeMetrics] of Object.entries(metricsByType)) {
       const weight = weights[type] || 0.1;
-      const avgScore = typeMetrics.reduce((sum, m) => sum + m.value, 0) / typeMetrics.length;
+      const avgScore =
+        typeMetrics.reduce((sum, m) => sum + m.value, 0) / typeMetrics.length;
       totalScore += avgScore * weight;
       totalWeight += weight;
     }
@@ -736,14 +847,19 @@ type Mutation {
     return totalWeight > 0 ? totalScore / totalWeight : 0;
   }
 
-  private calculateQualityTrends(metrics: QualityMetric[]): Record<string, 'improving' | 'stable' | 'degrading'> {
+  private calculateQualityTrends(
+    metrics: QualityMetric[],
+  ): Record<string, 'improving' | 'stable' | 'degrading'> {
     const trends: Record<string, 'improving' | 'stable' | 'degrading'> = {};
 
-    const metricsByType = metrics.reduce((acc, metric) => {
-      if (!acc[metric.metricType]) acc[metric.metricType] = [];
-      acc[metric.metricType].push(metric);
-      return acc;
-    }, {} as Record<string, QualityMetric[]>);
+    const metricsByType = metrics.reduce(
+      (acc, metric) => {
+        if (!acc[metric.metricType]) acc[metric.metricType] = [];
+        acc[metric.metricType].push(metric);
+        return acc;
+      },
+      {} as Record<string, QualityMetric[]>,
+    );
 
     for (const [type, typeMetrics] of Object.entries(metricsByType)) {
       if (typeMetrics.length < 2) {
@@ -751,7 +867,9 @@ type Mutation {
         continue;
       }
 
-      typeMetrics.sort((a, b) => a.measuredAt.getTime() - b.measuredAt.getTime());
+      typeMetrics.sort(
+        (a, b) => a.measuredAt.getTime() - b.measuredAt.getTime(),
+      );
       const recent = typeMetrics.slice(-10);
       const older = typeMetrics.slice(-20, -10);
 
@@ -760,8 +878,10 @@ type Mutation {
         continue;
       }
 
-      const recentAvg = recent.reduce((sum, m) => sum + m.value, 0) / recent.length;
-      const olderAvg = older.reduce((sum, m) => sum + m.value, 0) / older.length;
+      const recentAvg =
+        recent.reduce((sum, m) => sum + m.value, 0) / recent.length;
+      const olderAvg =
+        older.reduce((sum, m) => sum + m.value, 0) / older.length;
 
       const change = (recentAvg - olderAvg) / olderAvg;
 
@@ -777,30 +897,43 @@ type Mutation {
     const recommendations: string[] = [];
 
     const recentMetrics = metrics.slice(-20);
-    const failingMetrics = recentMetrics.filter(m => m.status === 'fail');
+    const failingMetrics = recentMetrics.filter((m) => m.status === 'fail');
 
     if (failingMetrics.length > 0) {
-      const failuresByType = failingMetrics.reduce((acc, m) => {
-        acc[m.metricType] = (acc[m.metricType] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const failuresByType = failingMetrics.reduce(
+        (acc, m) => {
+          acc[m.metricType] = (acc[m.metricType] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
       for (const [type, count] of Object.entries(failuresByType)) {
         switch (type) {
           case 'completeness':
-            recommendations.push('Implement data validation rules to prevent null/missing values');
+            recommendations.push(
+              'Implement data validation rules to prevent null/missing values',
+            );
             break;
           case 'accuracy':
-            recommendations.push('Review data source quality and transformation logic');
+            recommendations.push(
+              'Review data source quality and transformation logic',
+            );
             break;
           case 'consistency':
-            recommendations.push('Standardize data formats and establish referential integrity');
+            recommendations.push(
+              'Standardize data formats and establish referential integrity',
+            );
             break;
           case 'timeliness':
-            recommendations.push('Optimize data pipeline performance and scheduling');
+            recommendations.push(
+              'Optimize data pipeline performance and scheduling',
+            );
             break;
           case 'validity':
-            recommendations.push('Add business rule validation and data type constraints');
+            recommendations.push(
+              'Add business rule validation and data type constraints',
+            );
             break;
         }
       }
@@ -809,12 +942,18 @@ type Mutation {
     return recommendations;
   }
 
-  private calculateQualityImpact(transformations: DataTransformation[]): number {
-    const transformationsWithQuality = transformations.filter(t => t.qualityScore !== undefined);
+  private calculateQualityImpact(
+    transformations: DataTransformation[],
+  ): number {
+    const transformationsWithQuality = transformations.filter(
+      (t) => t.qualityScore !== undefined,
+    );
 
     if (transformationsWithQuality.length === 0) return 0;
 
-    const avgQuality = transformationsWithQuality.reduce((sum, t) => sum + t.qualityScore!, 0) / transformationsWithQuality.length;
+    const avgQuality =
+      transformationsWithQuality.reduce((sum, t) => sum + t.qualityScore!, 0) /
+      transformationsWithQuality.length;
     return avgQuality;
   }
 }

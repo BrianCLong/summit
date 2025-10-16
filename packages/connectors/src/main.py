@@ -2,11 +2,12 @@ from __future__ import annotations
 
 """FastAPI service exposing a minimal subset of IntelGraph connectors API."""
 
-from fastapi import FastAPI
-from pydantic import BaseModel
 from datetime import datetime
 
-from . import orchestrator, mapping
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from . import orchestrator
 from .models import ConnectorKind, RunStatus, store
 
 app = FastAPI(title="IntelGraph Connectors Demo")

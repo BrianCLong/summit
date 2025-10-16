@@ -9,29 +9,34 @@ function generatePlanForGoal(goalId, goalText) {
     // Example rules: look for keywords to create tasks
     steps.push({
         id: uuid(),
-        kind: "NEO4J_QUERY",
-        input: JSON.stringify({ cypher: "MATCH (p:Person)-[r:COMMUNICATED]->(p2:Person) RETURN p,p2,r LIMIT 100" }),
-        status: "PENDING"
+        kind: 'NEO4J_QUERY',
+        input: JSON.stringify({
+            cypher: 'MATCH (p:Person)-[r:COMMUNICATED]->(p2:Person) RETURN p,p2,r LIMIT 100',
+        }),
+        status: 'PENDING',
     });
     if (/\bcommunity|cluster|coordinator\b/i.test(goalText)) {
         steps.push({
             id: uuid(),
-            kind: "GRAPH_ANALYTICS",
-            input: JSON.stringify({ algo: "pagerank", limit: 50 }),
-            status: "PENDING"
+            kind: 'GRAPH_ANALYTICS',
+            input: JSON.stringify({ algo: 'pagerank', limit: 50 }),
+            status: 'PENDING',
         });
     }
     steps.push({
         id: uuid(),
-        kind: "SUMMARIZE",
-        input: JSON.stringify({ fields: ["top_entities", "key_links"], audience: "analyst" }),
-        status: "PENDING"
+        kind: 'SUMMARIZE',
+        input: JSON.stringify({
+            fields: ['top_entities', 'key_links'],
+            audience: 'analyst',
+        }),
+        status: 'PENDING',
     });
     return {
         id: uuid(),
         goalId,
         steps,
-        createdAt
+        createdAt,
     };
 }
 module.exports = { generatePlanForGoal };

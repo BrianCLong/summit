@@ -70,6 +70,7 @@ This guide provides step-by-step instructions for deploying the IntelGraph Platf
 ### Hardware Requirements
 
 #### **Minimum Production Requirements**
+
 ```yaml
 compute_nodes: 5
 cpu_per_node: 8 cores (16 vCPUs)
@@ -79,6 +80,7 @@ network: 10 Gbps connection
 ```
 
 #### **Recommended Production Requirements**
+
 ```yaml
 compute_nodes: 10
 cpu_per_node: 16 cores (32 vCPUs)
@@ -88,6 +90,7 @@ network: 25 Gbps connection
 ```
 
 #### **High-Availability Requirements**
+
 ```yaml
 compute_nodes: 15+ (across 3 AZs)
 cpu_per_node: 32 cores (64 vCPUs)
@@ -99,17 +102,20 @@ network: 100 Gbps connection
 ### Software Requirements
 
 #### **Kubernetes Cluster**
+
 - **Version:** 1.28+ (1.29+ recommended)
 - **CNI:** Calico, Cilium, or Flannel with Network Policy support
 - **CSI:** Block and file storage support
 - **Ingress:** NGINX Ingress Controller v1.8+
 
 #### **Container Runtime**
+
 - **containerd:** v1.7+ (recommended)
 - **Docker:** v24+ (alternative)
 - **Image Registry:** Private registry with RBAC and scanning
 
 #### **External Dependencies**
+
 - **PostgreSQL:** v14+ (v15+ recommended)
 - **Neo4j:** v5.13+ (latest recommended)
 - **Redis:** v7.0+ (v7.2+ recommended)
@@ -118,6 +124,7 @@ network: 100 Gbps connection
 ### Network Requirements
 
 #### **Internal Network**
+
 ```yaml
 cluster_cidr: 10.244.0.0/16
 service_cidr: 10.96.0.0/12
@@ -125,18 +132,20 @@ pod_cidr: 10.244.0.0/16
 ```
 
 #### **External Access**
+
 ```yaml
 public_endpoints:
   - api.intelgraph.ai
   - maestro.intelgraph.ai
   - grafana.intelgraph.ai
-  
+
 private_endpoints:
   - internal-api.intelgraph.ai
   - admin.intelgraph.ai
 ```
 
 #### **Security Groups / Firewall Rules**
+
 ```yaml
 ingress_rules:
   - protocol: HTTPS
@@ -145,7 +154,7 @@ ingress_rules:
   - protocol: HTTP
     port: 80
     source: 0.0.0.0/0 (redirect to HTTPS)
-    
+
 internal_rules:
   - protocol: TCP
     ports: [5432, 7687, 6379]
@@ -159,6 +168,7 @@ internal_rules:
 ### 1. Kubernetes Cluster Setup
 
 #### **Using kubeadm (On-Premises)**
+
 ```bash
 # Install kubeadm, kubelet, kubectl
 curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
@@ -183,6 +193,7 @@ kubeadm token create --print-join-command
 #### **Using Managed Kubernetes (EKS/GKE/AKS)**
 
 ##### **AWS EKS Setup**
+
 ```bash
 # Install eksctl
 curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
@@ -205,6 +216,7 @@ eksctl create cluster \
 ```
 
 ##### **Google GKE Setup**
+
 ```bash
 # Create GKE cluster
 gcloud container clusters create intelgraph-prod \
@@ -224,6 +236,7 @@ gcloud container clusters create intelgraph-prod \
 ### 2. Storage Configuration
 
 #### **Persistent Volume Setup**
+
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -240,6 +253,7 @@ volumeBindingMode: WaitForFirstConsumer
 ```
 
 #### **Apply Storage Classes**
+
 ```bash
 kubectl apply -f - <<EOF
 apiVersion: storage.k8s.io/v1
@@ -280,6 +294,7 @@ kubectl label namespace intelgraph-system pod-security.kubernetes.io/enforce=res
 ### 1. PostgreSQL Cluster Deployment
 
 #### **Using Helm (CloudNativePG)**
+
 ```bash
 # Add CloudNativePG operator
 helm repo add cnpg https://cloudnative-pg.github.io/charts
@@ -299,7 +314,7 @@ metadata:
   namespace: intelgraph
 spec:
   instances: 3
-  
+
   postgresql:
     parameters:
       max_connections: "500"
@@ -307,21 +322,21 @@ spec:
       effective_cache_size: "1GB"
       work_mem: "16MB"
       max_worker_processes: "8"
-      
+
   bootstrap:
     initdb:
       database: intelgraph
       owner: intelgraph
       secret:
         name: postgres-credentials
-        
+
   storage:
     size: 500Gi
     storageClass: fast-ssd
-    
+
   monitoring:
     enabled: true
-    
+
   backup:
     retentionPolicy: "30d"
     barmanObjectStore:
@@ -332,6 +347,7 @@ EOF
 ```
 
 #### **Create Database Credentials**
+
 ```bash
 kubectl create secret generic postgres-credentials \
   --namespace intelgraph \
@@ -342,6 +358,7 @@ kubectl create secret generic postgres-credentials \
 ### 2. Neo4j Cluster Deployment
 
 #### **Using Neo4j Helm Chart**
+
 ```bash
 # Add Neo4j Helm repository
 helm repo add neo4j https://helm.neo4j.com/neo4j
@@ -371,6 +388,7 @@ helm install neo4j-cluster neo4j/neo4j \
 ### 3. Redis Cluster Deployment
 
 #### **Using Redis Operator**
+
 ```bash
 # Install Redis Operator
 kubectl apply -f https://raw.githubusercontent.com/OT-CONTAINER-KIT/redis-operator/master/config/manager/manager.yaml
@@ -412,6 +430,7 @@ EOF
 ### 1. Helm Chart Installation
 
 #### **Add IntelGraph Helm Repository**
+
 ```bash
 # Add the repository
 helm repo add intelgraph https://charts.intelgraph.ai
@@ -419,32 +438,33 @@ helm repo update
 ```
 
 #### **Create Values File**
+
 Create `production-values.yaml`:
 
 ```yaml
 # production-values.yaml
 global:
-  imageRegistry: "registry.intelgraph.ai"
-  imageTag: "v2.5.0"
-  environment: "production"
-  
+  imageRegistry: 'registry.intelgraph.ai'
+  imageTag: 'v2.5.0'
+  environment: 'production'
+
 intelgraph:
   replicaCount: 5
   image:
     repository: intelgraph/core
-    tag: "v2.5.0"
+    tag: 'v2.5.0'
     pullPolicy: IfNotPresent
-  
+
   service:
     type: ClusterIP
     port: 3000
-  
+
   ingress:
     enabled: true
     className: nginx
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
-      nginx.ingress.kubernetes.io/rate-limit: "1000"
+      nginx.ingress.kubernetes.io/rate-limit: '1000'
     hosts:
       - host: api.intelgraph.ai
         paths:
@@ -462,7 +482,7 @@ intelgraph:
     limits:
       cpu: 4000m
       memory: 8Gi
-  
+
   autoscaling:
     enabled: true
     minReplicas: 5
@@ -475,13 +495,13 @@ maestro:
   replicaCount: 3
   image:
     repository: intelgraph/maestro
-    tag: "v2.5.0"
-  
+    tag: 'v2.5.0'
+
   autonomousOrchestrator:
     enabled: true
-    autonomyLevel: 2  # Guarded auto-plan
+    autonomyLevel: 2 # Guarded auto-plan
     maxConcurrentRuns: 50
-    
+
   premiumRouting:
     enabled: true
     thompsonSampling: true
@@ -492,7 +512,7 @@ maestro:
         weight: 0.3
       - name: gemini-ultra
         weight: 0.3
-  
+
   policyEngine:
     enabled: true
     opaUrl: http://opa.security.svc.cluster.local:8181
@@ -511,20 +531,20 @@ maestro:
 
 databases:
   postgresql:
-    enabled: false  # Using external cluster
+    enabled: false # Using external cluster
     host: intelgraph-postgres-rw.intelgraph.svc.cluster.local
     port: 5432
     database: intelgraph
     existingSecret: postgres-credentials
-    
+
   neo4j:
-    enabled: false  # Using external cluster
+    enabled: false # Using external cluster
     host: neo4j-cluster.intelgraph.svc.cluster.local
     port: 7687
     existingSecret: neo4j-credentials
-    
+
   redis:
-    enabled: false  # Using external cluster
+    enabled: false # Using external cluster
     host: intelgraph-redis.intelgraph.svc.cluster.local
     port: 6379
 
@@ -547,6 +567,7 @@ security:
 ```
 
 #### **Deploy Application**
+
 ```bash
 # Install the application
 helm install intelgraph intelgraph/intelgraph \
@@ -587,6 +608,7 @@ kubectl rollout status deployment/maestro-orchestrator -n intelgraph
 ### 1. TLS/SSL Setup
 
 #### **Install cert-manager**
+
 ```bash
 # Add cert-manager Helm repository
 helm repo add jetstack https://charts.jetstack.io
@@ -707,6 +729,7 @@ EOF
 ### 4. Secrets Management
 
 #### **Using External Secrets Operator**
+
 ```bash
 # Install External Secrets Operator
 helm repo add external-secrets https://charts.external-secrets.io
@@ -796,6 +819,7 @@ EOF
 ### 1. Database Backups
 
 #### **PostgreSQL Backup**
+
 ```bash
 # Configure automated backups in CloudNativePG cluster
 kubectl patch cluster intelgraph-postgres -n intelgraph --type merge -p '{
@@ -810,7 +834,7 @@ kubectl patch cluster intelgraph-postgres -n intelgraph --type merge -p '{
             "key": "ACCESS_KEY_ID"
           },
           "secretAccessKey": {
-            "name": "backup-credentials", 
+            "name": "backup-credentials",
             "key": "SECRET_ACCESS_KEY"
           }
         },
@@ -824,6 +848,7 @@ kubectl patch cluster intelgraph-postgres -n intelgraph --type merge -p '{
 ```
 
 #### **Neo4j Backup**
+
 ```bash
 # Create backup CronJob
 kubectl apply -f - <<EOF
@@ -895,40 +920,43 @@ velero schedule create intelgraph-backup \
 ### 1. Resource Optimization
 
 #### **CPU and Memory Tuning**
+
 ```yaml
 # Update deployment resource limits
 spec:
   containers:
-  - name: intelgraph-core
-    resources:
-      requests:
-        cpu: "2000m"
-        memory: "4Gi"
-      limits:
-        cpu: "8000m"  
-        memory: "16Gi"
+    - name: intelgraph-core
+      resources:
+        requests:
+          cpu: '2000m'
+          memory: '4Gi'
+        limits:
+          cpu: '8000m'
+          memory: '16Gi'
 ```
 
 #### **JVM Tuning (for Neo4j)**
+
 ```yaml
 env:
-- name: NEO4J_dbms_memory_heap_initial_size
-  value: "4g"
-- name: NEO4J_dbms_memory_heap_max_size
-  value: "8g"
-- name: NEO4J_dbms_memory_pagecache_size
-  value: "4g"
-- name: NEO4J_dbms_jvm_additional
-  value: "-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions"
+  - name: NEO4J_dbms_memory_heap_initial_size
+    value: '4g'
+  - name: NEO4J_dbms_memory_heap_max_size
+    value: '8g'
+  - name: NEO4J_dbms_memory_pagecache_size
+    value: '4g'
+  - name: NEO4J_dbms_jvm_additional
+    value: '-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions'
 ```
 
 ### 2. Database Performance
 
 #### **PostgreSQL Tuning**
+
 ```sql
 -- Execute these optimizations on PostgreSQL cluster
 ALTER SYSTEM SET shared_buffers = '512MB';
-ALTER SYSTEM SET effective_cache_size = '2GB';  
+ALTER SYSTEM SET effective_cache_size = '2GB';
 ALTER SYSTEM SET work_mem = '32MB';
 ALTER SYSTEM SET maintenance_work_mem = '256MB';
 ALTER SYSTEM SET max_worker_processes = 16;
@@ -938,12 +966,13 @@ SELECT pg_reload_conf();
 ```
 
 #### **Neo4j Performance Configuration**
+
 ```bash
 # Apply Neo4j performance settings
 kubectl patch configmap neo4j-config -n intelgraph --patch '{
   "data": {
     "NEO4J_dbms_query_cache_size": "512",
-    "NEO4J_dbms_tx_state_memory_allocation": "ON_HEAP", 
+    "NEO4J_dbms_tx_state_memory_allocation": "ON_HEAP",
     "NEO4J_dbms_memory_transaction_total_max": "1g",
     "NEO4J_dbms_checkpoint_interval_tx": "100000"
   }
@@ -953,12 +982,13 @@ kubectl patch configmap neo4j-config -n intelgraph --patch '{
 ### 3. Application Performance
 
 #### **Enable Performance Features**
+
 ```bash
 # Update application configuration
 kubectl patch configmap intelgraph-config -n intelgraph --patch '{
   "data": {
     "ENABLE_QUERY_CACHING": "true",
-    "ENABLE_RESPONSE_COMPRESSION": "true", 
+    "ENABLE_RESPONSE_COMPRESSION": "true",
     "ENABLE_CONNECTION_POOLING": "true",
     "MAX_CONCURRENT_REQUESTS": "1000",
     "THOMPSON_SAMPLING_ENABLED": "true"
@@ -997,7 +1027,7 @@ kubectl get ingress -n intelgraph
 # Check database connectivity
 echo "🗄️  Checking database connectivity..."
 kubectl exec -n intelgraph deployment/intelgraph-core -- nc -zv postgres-svc 5432
-kubectl exec -n intelgraph deployment/intelgraph-core -- nc -zv neo4j-svc 7687  
+kubectl exec -n intelgraph deployment/intelgraph-core -- nc -zv neo4j-svc 7687
 kubectl exec -n intelgraph deployment/intelgraph-core -- nc -zv redis-svc 6379
 
 # Check application endpoints
@@ -1081,6 +1111,7 @@ echo "✅ Security validation completed!"
 ### Common Issues and Solutions
 
 #### **1. Pod Startup Issues**
+
 ```bash
 # Debug pod startup problems
 kubectl describe pod <pod-name> -n intelgraph
@@ -1092,6 +1123,7 @@ kubectl describe nodes
 ```
 
 #### **2. Database Connection Issues**
+
 ```bash
 # Test database connectivity
 kubectl run -it --rm debug --image=postgres:15 -- psql -h intelgraph-postgres-rw.intelgraph.svc.cluster.local -U intelgraph
@@ -1102,6 +1134,7 @@ kubectl exec -it neo4j-cluster-core-0 -n intelgraph -- cypher-shell "CALL db.pin
 ```
 
 #### **3. Performance Issues**
+
 ```bash
 # Monitor resource usage
 kubectl top pods -n intelgraph --sort-by=memory
@@ -1113,6 +1146,7 @@ curl https://maestro.intelgraph.ai/api/maestro/v1/metrics
 ```
 
 #### **4. Network Connectivity Issues**
+
 ```bash
 # Test internal networking
 kubectl run -it --rm netshoot --image=nicolaka/netshoot
@@ -1124,6 +1158,7 @@ nc -zv intelgraph-core.intelgraph.svc.cluster.local 3000
 ### Emergency Procedures
 
 #### **Service Restart**
+
 ```bash
 # Restart specific services
 kubectl rollout restart deployment/intelgraph-core -n intelgraph
@@ -1134,6 +1169,7 @@ kubectl rollout status deployment/intelgraph-core -n intelgraph
 ```
 
 #### **Database Recovery**
+
 ```bash
 # PostgreSQL recovery
 kubectl exec -it intelgraph-postgres-1 -n intelgraph -- pg_ctl reload
@@ -1143,6 +1179,7 @@ kubectl delete pod neo4j-cluster-core-0 -n intelgraph  # Pod will be recreated
 ```
 
 #### **Full System Recovery**
+
 ```bash
 # Restore from backup using Velero
 velero restore create --from-backup intelgraph-backup-20250901
@@ -1156,6 +1193,7 @@ velero restore get
 ### Regular Maintenance Tasks
 
 #### **Weekly Tasks**
+
 ```bash
 #!/bin/bash
 # weekly-maintenance.sh
@@ -1179,6 +1217,7 @@ echo "✅ Weekly maintenance completed!"
 ```
 
 #### **Monthly Tasks**
+
 ```bash
 #!/bin/bash
 # monthly-maintenance.sh
@@ -1201,6 +1240,7 @@ echo "✅ Monthly maintenance completed!"
 ### Scaling Procedures
 
 #### **Horizontal Scaling**
+
 ```bash
 # Scale application replicas
 kubectl scale deployment intelgraph-core --replicas=10 -n intelgraph
@@ -1211,6 +1251,7 @@ kubectl patch cluster intelgraph-postgres -n intelgraph --type merge -p '{"spec"
 ```
 
 #### **Vertical Scaling**
+
 ```bash
 # Increase resource limits
 kubectl patch deployment intelgraph-core -n intelgraph -p '{
@@ -1225,7 +1266,7 @@ kubectl patch deployment intelgraph-core -n intelgraph -p '{
               "memory": "32Gi"
             },
             "requests": {
-              "cpu": "4000m", 
+              "cpu": "4000m",
               "memory": "8Gi"
             }
           }
@@ -1243,6 +1284,7 @@ kubectl patch deployment intelgraph-core -n intelgraph -p '{
 This production deployment guide provides comprehensive instructions for deploying IntelGraph Platform v2.5.0 "Autonomous Intelligence" to a production environment. The deployment includes enterprise-grade security, monitoring, backup, and performance optimization features.
 
 ### Key Success Metrics
+
 - **Deployment Time:** < 4 hours for complete setup
 - **System Availability:** 99.9% uptime SLA
 - **Performance:** < 2s response times for 95% of requests
@@ -1250,6 +1292,7 @@ This production deployment guide provides comprehensive instructions for deployi
 - **Scalability:** Support for 1M+ concurrent users
 
 ### Next Steps
+
 1. **Monitor System Performance** using the deployed monitoring stack
 2. **Configure Alerting** for critical system events
 3. **Set Up Regular Backups** and test restore procedures

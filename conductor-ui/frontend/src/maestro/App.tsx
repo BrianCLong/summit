@@ -1,5 +1,13 @@
 import React, { useMemo, Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, Navigate, Link, useParams } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  NavLink,
+  Navigate,
+  Link,
+  useParams,
+} from 'react-router-dom';
 import { AuthProvider, ProtectedRoute, useAuth } from './auth/auth-context';
 import UserProfile from './components/UserProfile';
 import CommandPalette from './components/CommandPalette';
@@ -8,8 +16,12 @@ import CommandPalette from './components/CommandPalette';
 const ControlHub = lazy(() => import('./components/ControlHub'));
 const RunsList = lazy(() => import('./components/RunsList'));
 const EnhancedRunDetail = lazy(() => import('./components/EnhancedRunDetail'));
-const EnhancedRoutingStudio = lazy(() => import('./components/EnhancedRoutingStudio'));
-const EnhancedObservability = lazy(() => import('./components/EnhancedObservability'));
+const EnhancedRoutingStudio = lazy(
+  () => import('./components/EnhancedRoutingStudio'),
+);
+const EnhancedObservability = lazy(
+  () => import('./components/EnhancedObservability'),
+);
 
 // Lazy-load page components
 const RunDetail = lazy(() => import('./pages/RunDetail'));
@@ -26,15 +38,17 @@ const CICD = lazy(() => import('./pages/CICD'));
 
 function AuthCallback() {
   const { isLoading, error } = useAuth();
-  
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Authentication Error
+          </h2>
           <p className="text-slate-600 mb-6">{error}</p>
-          <button 
-            onClick={() => window.location.href = '/maestro/login'}
+          <button
+            onClick={() => (window.location.href = '/maestro/login')}
             className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
           >
             Try Again
@@ -43,7 +57,7 @@ function AuthCallback() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center">
@@ -56,21 +70,29 @@ function AuthCallback() {
 
 function AuthLogin() {
   const { login } = useAuth();
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center">
-        <div className="h-12 w-12 rounded bg-indigo-600 mx-auto mb-6" aria-hidden />
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Sign In to Maestro</h2>
-        <p className="text-slate-600 mb-6">Access the Maestro control plane with your credentials.</p>
-        <button 
+        <div
+          className="h-12 w-12 rounded bg-indigo-600 mx-auto mb-6"
+          aria-hidden
+        />
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">
+          Sign In to Maestro
+        </h2>
+        <p className="text-slate-600 mb-6">
+          Access the Maestro control plane with your credentials.
+        </p>
+        <button
           onClick={login}
           className="rounded bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-700 font-semibold"
         >
           Continue with OIDC
         </button>
         <p className="text-xs text-slate-500 mt-4">
-          You'll be redirected to your identity provider to complete authentication.
+          You'll be redirected to your identity provider to complete
+          authentication.
         </p>
       </div>
     </div>
@@ -108,7 +130,8 @@ function Shell({ children }: { children: React.ReactNode }) {
         const handler = (ev: KeyboardEvent) => {
           const m = ev.key.toLowerCase();
           if (m === 'r') window.history.pushState({}, '', '/maestro/runs');
-          if (m === 'o') window.history.pushState({}, '', '/maestro/observability');
+          if (m === 'o')
+            window.history.pushState({}, '', '/maestro/observability');
           if (m === 't') window.history.pushState({}, '', '/maestro/tickets');
           window.dispatchEvent(new PopStateEvent('popstate'));
           window.removeEventListener('keydown', handler);
@@ -135,7 +158,9 @@ function Shell({ children }: { children: React.ReactNode }) {
               <div className="text-sm font-semibold tracking-wide text-slate-700">
                 Maestro builds IntelGraph v2
               </div>
-              <div className="text-xs text-slate-500">Maestro ≠ IntelGraph — Control Plane</div>
+              <div className="text-xs text-slate-500">
+                Maestro ≠ IntelGraph — Control Plane
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -184,11 +209,15 @@ function Shell({ children }: { children: React.ReactNode }) {
                   className={({ isActive }) =>
                     [
                       'block rounded px-3 py-2 hover:bg-slate-100',
-                      isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700',
+                      isActive
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'text-slate-700',
                     ].join(' ')
                   }
                   end
-                  aria-current={({ isActive }) => (isActive ? 'page' : undefined) as any}
+                  aria-current={({ isActive }) =>
+                    (isActive ? 'page' : undefined) as any
+                  }
                 >
                   {label as string}
                 </NavLink>
@@ -207,7 +236,10 @@ function Shell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+      />
     </div>
   );
 }
@@ -223,10 +255,14 @@ function Card({
 }) {
   return (
     <section className="rounded-lg border bg-white shadow-sm">
-      <div className="border-b px-4 py-2 text-sm font-semibold text-slate-700">{title}</div>
+      <div className="border-b px-4 py-2 text-sm font-semibold text-slate-700">
+        {title}
+      </div>
       <div className="px-4 py-3">{children}</div>
       {footer && (
-        <div className="border-t bg-slate-50 px-4 py-2 text-xs text-slate-500">{footer}</div>
+        <div className="border-t bg-slate-50 px-4 py-2 text-xs text-slate-500">
+          {footer}
+        </div>
       )}
     </section>
   );
@@ -245,7 +281,9 @@ function Home() {
           />
           <div>
             <div className="text-sm text-slate-600">Current Level</div>
-            <div className="text-2xl font-semibold">L{data?.autonomy?.level ?? 0}</div>
+            <div className="text-2xl font-semibold">
+              L{data?.autonomy?.level ?? 0}
+            </div>
             <div className="text-xs text-slate-500">
               Canary: {Math.round((data?.autonomy?.canary ?? 0) * 100)}%
             </div>
@@ -256,23 +294,31 @@ function Home() {
         <ul className="text-sm text-slate-700">
           <li>
             Success rate:{' '}
-            <span className="font-semibold">{Math.round((data?.health?.success ?? 0) * 100)}%</span>
+            <span className="font-semibold">
+              {Math.round((data?.health?.success ?? 0) * 100)}%
+            </span>
           </li>
           <li>
-            P95 latency: <span className="font-semibold">{data?.health?.p95 ?? '—'} ms</span>
+            P95 latency:{' '}
+            <span className="font-semibold">{data?.health?.p95 ?? '—'} ms</span>
           </li>
           <li>
-            Burn rate: <span className="font-semibold">{data?.health?.burn ?? '—'}×</span>
+            Burn rate:{' '}
+            <span className="font-semibold">{data?.health?.burn ?? '—'}×</span>
           </li>
         </ul>
       </Card>
       <Card title="Budgets">
         <ul className="text-sm text-slate-700">
           <li>
-            Remaining: <span className="font-semibold">${data?.budgets?.remaining ?? 0}</span>
+            Remaining:{' '}
+            <span className="font-semibold">
+              ${data?.budgets?.remaining ?? 0}
+            </span>
           </li>
           <li>
-            Hard cap: <span className="font-semibold">${data?.budgets?.cap ?? 0}</span>
+            Hard cap:{' '}
+            <span className="font-semibold">${data?.budgets?.cap ?? 0}</span>
           </li>
         </ul>
       </Card>
@@ -286,20 +332,30 @@ function Home() {
                 className="flex items-center justify-between border-b py-2 last:border-0"
               >
                 <span className="font-mono text-xs">{r.id}</span>
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">{r.status}</span>
+                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">
+                  {r.status}
+                </span>
               </div>
             ))}
           </div>
         </Card>
         <Card title="Pending Approvals">
-          <div className="text-sm text-slate-600">{data?.approvals?.length || 0} items</div>
+          <div className="text-sm text-slate-600">
+            {data?.approvals?.length || 0} items
+          </div>
         </Card>
       </div>
 
-      <Card title="Recent Changes" footer="Provenance and diffs are recorded for each change.">
+      <Card
+        title="Recent Changes"
+        footer="Provenance and diffs are recorded for each change."
+      >
         <div className="text-sm text-slate-600">
           {data?.changes?.slice(0, 6).map((c, i) => (
-            <div key={i} className="grid grid-cols-[140px_1fr] gap-3 border-b py-2 last:border-0">
+            <div
+              key={i}
+              className="grid grid-cols-[140px_1fr] gap-3 border-b py-2 last:border-0"
+            >
               <span className="font-mono text-xs text-slate-500">{c.at}</span>
               <div>
                 <div className="text-slate-800">{c.title}</div>
@@ -344,7 +400,10 @@ function Pipelines() {
             <div className="text-sm text-slate-600">Version {p.version}</div>
             <div className="mt-2 text-xs text-slate-500">Owner: {p.owner}</div>
             <div className="mt-3 text-xs">
-              <Link className="text-indigo-700 hover:underline" to={`/maestro/pipelines/${p.id}`}>
+              <Link
+                className="text-indigo-700 hover:underline"
+                to={`/maestro/pipelines/${p.id}`}
+              >
                 Open
               </Link>
             </div>
@@ -399,14 +458,20 @@ function Autonomy() {
       <Card title="Policies">
         <ul className="text-sm text-slate-700">
           {data?.policies?.map((p, i) => (
-            <li key={i} className="flex items-center justify-between border-b py-2 last:border-0">
+            <li
+              key={i}
+              className="flex items-center justify-between border-b py-2 last:border-0"
+            >
               <span>{p.title}</span>
               <span className="text-xs text-slate-500">{p.state}</span>
             </li>
           ))}
         </ul>
       </Card>
-      <Card title="Simulation" footer="Preview impact; risk bands and SLO deltas shown here.">
+      <Card
+        title="Simulation"
+        footer="Preview impact; risk bands and SLO deltas shown here."
+      >
         {error && <div className="mb-2 text-sm text-red-700">{error}</div>}
         {!decision && (
           <div className="text-sm text-slate-600">
@@ -423,19 +488,23 @@ function Autonomy() {
             </div>
             {decision?.decision?.gates?.length > 0 && (
               <div>
-                Gates: <span className="text-xs">{decision.decision.gates.join(', ')}</span>
+                Gates:{' '}
+                <span className="text-xs">
+                  {decision.decision.gates.join(', ')}
+                </span>
               </div>
             )}
-            {Array.isArray(decision?.decision?.reasons) && decision.decision.reasons.length > 0 && (
-              <div>
-                Reasons:
-                <ul className="list-disc pl-5">
-                  {decision.decision.reasons.map((r: string, i: number) => (
-                    <li key={i}>{r}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {Array.isArray(decision?.decision?.reasons) &&
+              decision.decision.reasons.length > 0 && (
+                <div>
+                  Reasons:
+                  <ul className="list-disc pl-5">
+                    {decision.decision.reasons.map((r: string, i: number) => (
+                      <li key={i}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
           </div>
         )}
       </Card>
@@ -453,7 +522,9 @@ function Recipes() {
         {data?.map((r) => (
           <Card key={r.id} title={r.name}>
             <div className="text-xs text-slate-500">v{r.version}</div>
-            <div className="mt-2 text-sm text-slate-700">Verified: {r.verified ? 'Yes' : 'No'}</div>
+            <div className="mt-2 text-sm text-slate-700">
+              Verified: {r.verified ? 'Yes' : 'No'}
+            </div>
           </Card>
         ))}
       </div>
@@ -464,43 +535,49 @@ function Recipes() {
 function Observability() {
   const { useObservability } = api();
   const { data } = useObservability();
-  const [tab, setTab] = React.useState<'Dashboards' | 'Traces' | 'Logs' | 'Alerts' | 'SLOs'>(
-    'Dashboards',
-  );
+  const [tab, setTab] = React.useState<
+    'Dashboards' | 'Traces' | 'Logs' | 'Alerts' | 'SLOs'
+  >('Dashboards');
   return (
     <div className="space-y-3">
       <h2 className="text-lg font-semibold">Observability & SLOs</h2>
       <div className="flex gap-2 border-b">
-        {(['Dashboards', 'Traces', 'Logs', 'Alerts', 'SLOs'] as const).map((t) => (
-          <button
-            key={t}
-            role="tab"
-            aria-selected={tab === t}
-            className={[
-              'rounded-t px-3 py-1.5 text-sm',
-              tab === t
-                ? 'bg-white font-semibold text-slate-800 border border-b-transparent'
-                : 'text-slate-600 hover:bg-slate-100',
-            ].join(' ')}
-            onClick={() => setTab(t)}
-          >
-            {t}
-          </button>
-        ))}
+        {(['Dashboards', 'Traces', 'Logs', 'Alerts', 'SLOs'] as const).map(
+          (t) => (
+            <button
+              key={t}
+              role="tab"
+              aria-selected={tab === t}
+              className={[
+                'rounded-t px-3 py-1.5 text-sm',
+                tab === t
+                  ? 'bg-white font-semibold text-slate-800 border border-b-transparent'
+                  : 'text-slate-600 hover:bg-slate-100',
+              ].join(' ')}
+              onClick={() => setTab(t)}
+            >
+              {t}
+            </button>
+          ),
+        )}
       </div>
       <Card title="Golden Signals">
         <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           <li>
-            Latency p95: <span className="font-semibold">{data?.latencyP95} ms</span>
+            Latency p95:{' '}
+            <span className="font-semibold">{data?.latencyP95} ms</span>
           </li>
           <li>
-            Error rate: <span className="font-semibold">{data?.errorRate}%</span>
+            Error rate:{' '}
+            <span className="font-semibold">{data?.errorRate}%</span>
           </li>
           <li>
-            Throughput: <span className="font-semibold">{data?.throughput}/min</span>
+            Throughput:{' '}
+            <span className="font-semibold">{data?.throughput}/min</span>
           </li>
           <li>
-            Queue depth: <span className="font-semibold">{data?.queueDepth}</span>
+            Queue depth:{' '}
+            <span className="font-semibold">{data?.queueDepth}</span>
           </li>
         </ul>
       </Card>
@@ -548,7 +625,8 @@ function Cost() {
       </Card>
       <Card title="Budgets">
         <div className="text-sm text-slate-700">
-          Utilization: {data?.utilization}% • Hard cap: ${budget?.cap ?? data?.cap}
+          Utilization: {data?.utilization}% • Hard cap: $
+          {budget?.cap ?? data?.cap}
         </div>
         <div className="mt-2 flex items-center gap-2 text-sm">
           <label className="text-slate-600" htmlFor="cap">
@@ -622,7 +700,8 @@ function Admin() {
       <h2 className="text-lg font-semibold">Admin Studio</h2>
       <Card title="Registry">
         <div className="text-sm text-slate-600">
-          Schema registry • Connectors • Feature Flags • Access (RBAC/ABAC) • Audit • Jobs
+          Schema registry • Connectors • Feature Flags • Access (RBAC/ABAC) •
+          Audit • Jobs
         </div>
       </Card>
     </div>
@@ -637,7 +716,8 @@ export default function MaestroApp() {
       <BrowserRouter basename="/maestro">
         <Routes>
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/login" element={<AuthLogin />} /> {/* Add a dedicated login route */}
+          <Route path="/login" element={<AuthLogin />} />{' '}
+          {/* Add a dedicated login route */}
           <Route
             path="/*"
             element={
@@ -648,9 +728,15 @@ export default function MaestroApp() {
                       <Route path="/" element={<ControlHub />} />
                       <Route path="/runs" element={<Runs />} />
                       <Route path="/runs/:id" element={<EnhancedRunDetail />} />
-                      <Route path="/runs/:id/compare" element={<CompareRun />} />
+                      <Route
+                        path="/runs/:id/compare"
+                        element={<CompareRun />}
+                      />
                       <Route path="/pipelines" element={<Pipelines />} />
-                      <Route path="/pipelines/:id" element={<PipelineDetail />} />
+                      <Route
+                        path="/pipelines/:id"
+                        element={<PipelineDetail />}
+                      />
                       <Route
                         path="/autonomy"
                         element={
@@ -660,11 +746,19 @@ export default function MaestroApp() {
                         }
                       />
                       <Route path="/recipes" element={<Recipes />} />
-                      <Route path="/observability" element={<EnhancedObservability />} />
-                      <Route path="/tenants/observability" element={<TenantObservability />} />
+                      <Route
+                        path="/observability"
+                        element={<EnhancedObservability />}
+                      />
+                      <Route
+                        path="/tenants/observability"
+                        element={<TenantObservability />}
+                      />
                       <Route
                         path="/tenants/costs"
-                        element={React.createElement(require('./pages/TenantCosts').default)}
+                        element={React.createElement(
+                          require('./pages/TenantCosts').default,
+                        )}
                       />
                       <Route path="/cost" element={<Cost />} />
                       <Route
@@ -683,7 +777,10 @@ export default function MaestroApp() {
                           </ProtectedRoute>
                         }
                       />
-                      <Route path="/ops/dlq/signatures" element={<DLQSignatures />} />
+                      <Route
+                        path="/ops/dlq/signatures"
+                        element={<DLQSignatures />}
+                      />
                       <Route
                         path="/ops/dlq/policy"
                         element={
@@ -694,13 +791,17 @@ export default function MaestroApp() {
                       />
                       <Route
                         path="/ops/dlq/root"
-                        element={React.createElement(require('./pages/DLQRootCauses').default)}
+                        element={React.createElement(
+                          require('./pages/DLQRootCauses').default,
+                        )}
                       />
                       <Route
                         path="/ops/dlq/sim"
                         element={
                           <ProtectedRoute roles={['operator']}>
-                            {React.createElement(require('./pages/DLQSimulator').default)}
+                            {React.createElement(
+                              require('./pages/DLQSimulator').default,
+                            )}
                           </ProtectedRoute>
                         }
                       />
@@ -766,11 +867,15 @@ function ServingLanePanel() {
         <div className="text-sm grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="rounded border p-2">
             <div className="text-xs text-slate-500">Queue depth</div>
-            <div className="text-2xl font-semibold">{m.summary?.qDepth ?? '—'}</div>
+            <div className="text-2xl font-semibold">
+              {m.summary?.qDepth ?? '—'}
+            </div>
           </div>
           <div className="rounded border p-2">
             <div className="text-xs text-slate-500">Batch size</div>
-            <div className="text-2xl font-semibold">{m.summary?.batch ?? '—'}</div>
+            <div className="text-2xl font-semibold">
+              {m.summary?.batch ?? '—'}
+            </div>
           </div>
           <div className="rounded border p-2">
             <div className="text-xs text-slate-500">KV hit ratio</div>

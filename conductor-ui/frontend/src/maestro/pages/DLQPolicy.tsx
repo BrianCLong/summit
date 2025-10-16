@@ -48,7 +48,9 @@ export default function DLQPolicy() {
               type="number"
               className="w-24 rounded border px-2 py-1"
               value={p.maxReplaysPerMinute}
-              onChange={(e) => setP({ ...p, maxReplaysPerMinute: Number(e.target.value) })}
+              onChange={(e) =>
+                setP({ ...p, maxReplaysPerMinute: Number(e.target.value) })
+              }
             />
           </label>
         </div>

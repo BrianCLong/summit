@@ -104,7 +104,10 @@ export class PersonalizationEngine extends EventEmitter {
   /**
    * Get or create user profile
    */
-  async getUserProfile(userId: string, context?: UserContext): Promise<UserProfile> {
+  async getUserProfile(
+    userId: string,
+    context?: UserContext,
+  ): Promise<UserProfile> {
     let profile = this.userProfiles.get(userId);
 
     if (!profile) {
@@ -123,7 +126,10 @@ export class PersonalizationEngine extends EventEmitter {
   /**
    * Create new user profile
    */
-  private async createUserProfile(userId: string, context?: UserContext): Promise<UserProfile> {
+  private async createUserProfile(
+    userId: string,
+    context?: UserContext,
+  ): Promise<UserProfile> {
     const profile: UserProfile = {
       userId,
       createdAt: new Date(),
@@ -137,10 +143,10 @@ export class PersonalizationEngine extends EventEmitter {
         totalTime: 0,
         pageViews: 0,
         searchQueries: 0,
-        contentInteractions: 0
+        contentInteractions: 0,
       },
       segments: [],
-      customAttributes: {}
+      customAttributes: {},
     };
 
     // Assign initial segments
@@ -153,7 +159,10 @@ export class PersonalizationEngine extends EventEmitter {
   /**
    * Update user profile based on behavior
    */
-  private async updateUserProfile(profile: UserProfile, context: UserContext): Promise<void> {
+  private async updateUserProfile(
+    profile: UserProfile,
+    context: UserContext,
+  ): Promise<void> {
     // Update visit statistics
     profile.behavior.visitCount++;
     profile.behavior.pageViews++;
@@ -182,9 +191,13 @@ export class PersonalizationEngine extends EventEmitter {
   /**
    * Generate personalized content for user
    */
-  async personalizeContent(userId: string, contentId: string, context: PersonalizationContext): Promise<PersonalizedContent> {
+  async personalizeContent(
+    userId: string,
+    contentId: string,
+    context: PersonalizationContext,
+  ): Promise<PersonalizedContent> {
     const profile = await this.getUserProfile(userId, context.userContext);
-    
+
     // Get base content
     const baseContent = await this.getBaseContent(contentId);
     if (!baseContent) {
@@ -192,13 +205,23 @@ export class PersonalizationEngine extends EventEmitter {
     }
 
     // Apply personalization strategies
-    const personalizedContent = await this.applyPersonalizationStrategies(baseContent, profile, context);
+    const personalizedContent = await this.applyPersonalizationStrategies(
+      baseContent,
+      profile,
+      context,
+    );
 
     // Generate recommendations
-    const recommendations = await this.generateContentRecommendations(profile, context);
+    const recommendations = await this.generateContentRecommendations(
+      profile,
+      context,
+    );
 
     // Apply A/B testing variants if active
-    const experimentVariant = await this.getExperimentVariant(userId, contentId);
+    const experimentVariant = await this.getExperimentVariant(
+      userId,
+      contentId,
+    );
     if (experimentVariant) {
       personalizedContent.variant = experimentVariant;
       await this.applyExperimentVariant(personalizedContent, experimentVariant);
@@ -208,7 +231,7 @@ export class PersonalizationEngine extends EventEmitter {
     await this.trackPersonalizationEvent(userId, contentId, {
       strategy: personalizedContent.strategy,
       variant: personalizedContent.variant,
-      recommendations: recommendations.length
+      recommendations: recommendations.length,
     });
 
     return {
@@ -218,8 +241,8 @@ export class PersonalizationEngine extends EventEmitter {
         personalized: true,
         strategy: personalizedContent.strategy,
         confidence: personalizedContent.confidence,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     };
   }
 
@@ -227,15 +250,17 @@ export class PersonalizationEngine extends EventEmitter {
    * Apply personalization strategies
    */
   private async applyPersonalizationStrategies(
-    content: BaseContent, 
-    profile: UserProfile, 
-    context: PersonalizationContext
+    content: BaseContent,
+    profile: UserProfile,
+    context: PersonalizationContext,
   ): Promise<PersonalizedContent> {
     const strategies: PersonalizationStrategy[] = [];
 
     // Skill level adaptation
     if (this.shouldAdaptForSkillLevel(profile, content)) {
-      strategies.push(await this.adaptForSkillLevel(content, profile.skillLevel));
+      strategies.push(
+        await this.adaptForSkillLevel(content, profile.skillLevel),
+      );
     }
 
     // Interest-based customization
@@ -255,32 +280,45 @@ export class PersonalizationEngine extends EventEmitter {
 
     // Language/locale adaptation
     if (profile.preferences.language && profile.preferences.language !== 'en') {
-      strategies.push(await this.adaptForLanguage(content, profile.preferences.language));
+      strategies.push(
+        await this.adaptForLanguage(content, profile.preferences.language),
+      );
     }
 
     // Apply the most appropriate strategy
-    const primaryStrategy = this.selectBestStrategy(strategies, profile, context);
-    
+    const primaryStrategy = this.selectBestStrategy(
+      strategies,
+      profile,
+      context,
+    );
+
     return {
       ...content,
       ...primaryStrategy.adaptedContent,
       strategy: primaryStrategy.name,
-      confidence: primaryStrategy.confidence
+      confidence: primaryStrategy.confidence,
     };
   }
 
   /**
    * Generate AI-powered content recommendations
    */
-  async generateContentRecommendations(profile: UserProfile, context: PersonalizationContext): Promise<Recommendation[]> {
+  async generateContentRecommendations(
+    profile: UserProfile,
+    context: PersonalizationContext,
+  ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     // Collaborative filtering recommendations
-    const collaborativeRecs = await this.getCollaborativeRecommendations(profile);
+    const collaborativeRecs =
+      await this.getCollaborativeRecommendations(profile);
     recommendations.push(...collaborativeRecs);
 
     // Content-based recommendations
-    const contentBasedRecs = await this.getContentBasedRecommendations(profile, context);
+    const contentBasedRecs = await this.getContentBasedRecommendations(
+      profile,
+      context,
+    );
     recommendations.push(...contentBasedRecs);
 
     // Hybrid recommendations
@@ -295,7 +333,10 @@ export class PersonalizationEngine extends EventEmitter {
     recommendations.sort((a, b) => b.score - a.score);
 
     // Apply diversity and freshness filters
-    const diversifiedRecs = await this.diversifyRecommendations(recommendations, profile);
+    const diversifiedRecs = await this.diversifyRecommendations(
+      recommendations,
+      profile,
+    );
 
     // Cache recommendations
     this.recommendations.set(profile.userId, diversifiedRecs.slice(0, 10));
@@ -318,13 +359,15 @@ export class PersonalizationEngine extends EventEmitter {
     const userBehavior = this.behaviorData.get(userId) || [];
     userBehavior.push({
       ...event,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Apply retention policy
     const retentionPeriod = this.config.behaviorTracking.retention;
     const cutoffDate = new Date(Date.now() - retentionPeriod);
-    const filteredBehavior = userBehavior.filter(e => e.timestamp > cutoffDate);
+    const filteredBehavior = userBehavior.filter(
+      (e) => e.timestamp > cutoffDate,
+    );
 
     this.behaviorData.set(userId, filteredBehavior);
 
@@ -339,14 +382,22 @@ export class PersonalizationEngine extends EventEmitter {
   /**
    * Run A/B test experiment
    */
-  async runExperiment(experimentId: string, userId: string, context: ExperimentContext): Promise<ExperimentResult> {
+  async runExperiment(
+    experimentId: string,
+    userId: string,
+    context: ExperimentContext,
+  ): Promise<ExperimentResult> {
     const experiment = this.experiments.get(experimentId);
     if (!experiment || !experiment.active) {
       return { variant: 'control', participated: false };
     }
 
     // Check if user is eligible
-    const eligible = await this.checkExperimentEligibility(experiment, userId, context);
+    const eligible = await this.checkExperimentEligibility(
+      experiment,
+      userId,
+      context,
+    );
     if (!eligible) {
       return { variant: 'control', participated: false };
     }
@@ -360,7 +411,7 @@ export class PersonalizationEngine extends EventEmitter {
     return {
       variant: variant.name,
       participated: true,
-      metadata: variant.metadata
+      metadata: variant.metadata,
     };
   }
 
@@ -375,7 +426,7 @@ export class PersonalizationEngine extends EventEmitter {
       recommendations: await this.getRecommendationInsights(),
       experiments: await this.getExperimentInsights(),
       performance: await this.getPersonalizationPerformance(),
-      trends: await this.getPersonalizationTrends()
+      trends: await this.getPersonalizationTrends(),
     };
 
     this.emit('insights:generated', insights);
@@ -400,13 +451,14 @@ export class PersonalizationEngine extends EventEmitter {
     const adaptOptimization = await this.optimizeContentAdaptation();
     results.push(adaptOptimization);
 
-    const overallImprovement = results.reduce((sum, r) => sum + r.improvement, 0) / results.length;
+    const overallImprovement =
+      results.reduce((sum, r) => sum + r.improvement, 0) / results.length;
 
     const optimizationResult: OptimizationResult = {
       timestamp: new Date(),
       overallImprovement,
       optimizations: results,
-      recommendations: this.generateOptimizationRecommendations(results)
+      recommendations: this.generateOptimizationRecommendations(results),
     };
 
     this.emit('optimization:completed', optimizationResult);
@@ -432,7 +484,11 @@ export class PersonalizationEngine extends EventEmitter {
   private async loadUserProfiles(): Promise<void> {
     // Load existing user profiles from storage
     try {
-      const profilesPath = path.join(process.cwd(), 'data', 'user-profiles.json');
+      const profilesPath = path.join(
+        process.cwd(),
+        'data',
+        'user-profiles.json',
+      );
       if (fs.existsSync(profilesPath)) {
         const profilesData = JSON.parse(fs.readFileSync(profilesPath, 'utf8'));
         for (const [userId, profileData] of Object.entries(profilesData)) {
@@ -444,7 +500,9 @@ export class PersonalizationEngine extends EventEmitter {
     }
   }
 
-  private async inferDemographics(context?: UserContext): Promise<UserDemographics> {
+  private async inferDemographics(
+    context?: UserContext,
+  ): Promise<UserDemographics> {
     const demographics: UserDemographics = {};
 
     if (context?.userAgent) {
@@ -468,21 +526,29 @@ export class PersonalizationEngine extends EventEmitter {
       notifications: {
         email: false,
         push: false,
-        inApp: true
+        inApp: true,
       },
       privacy: {
         analytics: true,
         personalization: true,
-        cookies: 'essential'
-      }
+        cookies: 'essential',
+      },
     };
   }
 
-  private async assignUserSegments(profile: UserProfile, context?: UserContext): Promise<string[]> {
+  private async assignUserSegments(
+    profile: UserProfile,
+    context?: UserContext,
+  ): Promise<string[]> {
     const segments: string[] = [];
-    
-    for (const segmentConfig of this.config.userProfiling.segmentation.segments) {
-      const matches = await this.evaluateSegmentCriteria(profile, segmentConfig, context);
+
+    for (const segmentConfig of this.config.userProfiling.segmentation
+      .segments) {
+      const matches = await this.evaluateSegmentCriteria(
+        profile,
+        segmentConfig,
+        context,
+      );
       if (matches) {
         segments.push(segmentConfig.id);
       }
@@ -491,9 +557,12 @@ export class PersonalizationEngine extends EventEmitter {
     return segments;
   }
 
-  private async updateInterests(profile: UserProfile, topic: string): Promise<void> {
-    const existingInterest = profile.interests.find(i => i.topic === topic);
-    
+  private async updateInterests(
+    profile: UserProfile,
+    topic: string,
+  ): Promise<void> {
+    const existingInterest = profile.interests.find((i) => i.topic === topic);
+
     if (existingInterest) {
       existingInterest.score += 0.1;
       existingInterest.lastInteraction = new Date();
@@ -502,25 +571,28 @@ export class PersonalizationEngine extends EventEmitter {
         topic,
         score: 0.1,
         firstInteraction: new Date(),
-        lastInteraction: new Date()
+        lastInteraction: new Date(),
       });
     }
 
     // Normalize interest scores
     const totalScore = profile.interests.reduce((sum, i) => sum + i.score, 0);
-    profile.interests.forEach(i => i.score /= totalScore);
+    profile.interests.forEach((i) => (i.score /= totalScore));
 
     // Keep only top 20 interests
     profile.interests.sort((a, b) => b.score - a.score);
     profile.interests = profile.interests.slice(0, 20);
   }
 
-  private async updateSkillLevel(profile: UserProfile, contentDifficulty: string): Promise<void> {
+  private async updateSkillLevel(
+    profile: UserProfile,
+    contentDifficulty: string,
+  ): Promise<void> {
     const difficultyMap = {
-      'beginner': 1,
-      'intermediate': 2,
-      'advanced': 3,
-      'expert': 4
+      beginner: 1,
+      intermediate: 2,
+      advanced: 3,
+      expert: 4,
     };
 
     const userLevel = difficultyMap[profile.skillLevel] || 2;
@@ -530,7 +602,10 @@ export class PersonalizationEngine extends EventEmitter {
     if (contentLevel > userLevel) {
       // User engaging with more difficult content
       const newLevel = Math.min(4, userLevel + 0.1);
-      profile.skillLevel = Object.keys(difficultyMap).find(k => difficultyMap[k] === Math.round(newLevel)) || profile.skillLevel;
+      profile.skillLevel =
+        Object.keys(difficultyMap).find(
+          (k) => difficultyMap[k] === Math.round(newLevel),
+        ) || profile.skillLevel;
     }
   }
 
@@ -538,29 +613,43 @@ export class PersonalizationEngine extends EventEmitter {
     // Simple user agent parsing (in production, use a library like ua-parser-js)
     return {
       type: userAgent.includes('Mobile') ? 'mobile' : 'desktop',
-      os: userAgent.includes('Windows') ? 'windows' : userAgent.includes('Mac') ? 'macos' : 'linux',
-      browser: userAgent.includes('Chrome') ? 'chrome' : userAgent.includes('Firefox') ? 'firefox' : 'other'
+      os: userAgent.includes('Windows')
+        ? 'windows'
+        : userAgent.includes('Mac')
+          ? 'macos'
+          : 'linux',
+      browser: userAgent.includes('Chrome')
+        ? 'chrome'
+        : userAgent.includes('Firefox')
+          ? 'firefox'
+          : 'other',
     };
   }
 
-  private async getCollaborativeRecommendations(profile: UserProfile): Promise<Recommendation[]> {
+  private async getCollaborativeRecommendations(
+    profile: UserProfile,
+  ): Promise<Recommendation[]> {
     // Implement collaborative filtering algorithm
     const similarUsers = await this.findSimilarUsers(profile);
     const recommendations: Recommendation[] = [];
 
     for (const similarUser of similarUsers.slice(0, 10)) {
-      const userContent = await this.getUserContentInteractions(similarUser.userId);
-      const profileContent = await this.getUserContentInteractions(profile.userId);
-      
+      const userContent = await this.getUserContentInteractions(
+        similarUser.userId,
+      );
+      const profileContent = await this.getUserContentInteractions(
+        profile.userId,
+      );
+
       // Find content that similar user engaged with but current user hasn't
-      const newContent = userContent.filter(c => !profileContent.includes(c));
-      
+      const newContent = userContent.filter((c) => !profileContent.includes(c));
+
       for (const contentId of newContent.slice(0, 5)) {
         recommendations.push({
           contentId,
           type: 'collaborative',
           score: similarUser.similarity * 0.8,
-          reason: 'Users with similar interests also viewed this'
+          reason: 'Users with similar interests also viewed this',
         });
       }
     }
@@ -568,14 +657,17 @@ export class PersonalizationEngine extends EventEmitter {
     return recommendations;
   }
 
-  private async findSimilarUsers(profile: UserProfile): Promise<UserSimilarity[]> {
+  private async findSimilarUsers(
+    profile: UserProfile,
+  ): Promise<UserSimilarity[]> {
     const similarities: UserSimilarity[] = [];
 
     for (const [userId, otherProfile] of this.userProfiles) {
       if (userId === profile.userId) continue;
 
       const similarity = this.calculateUserSimilarity(profile, otherProfile);
-      if (similarity > 0.3) { // Threshold for similarity
+      if (similarity > 0.3) {
+        // Threshold for similarity
         similarities.push({ userId, similarity });
       }
     }
@@ -583,62 +675,86 @@ export class PersonalizationEngine extends EventEmitter {
     return similarities.sort((a, b) => b.similarity - a.similarity);
   }
 
-  private calculateUserSimilarity(profile1: UserProfile, profile2: UserProfile): number {
+  private calculateUserSimilarity(
+    profile1: UserProfile,
+    profile2: UserProfile,
+  ): number {
     let similarity = 0;
     let factors = 0;
 
     // Interest similarity
     if (profile1.interests.length > 0 && profile2.interests.length > 0) {
-      const interestSim = this.calculateInterestSimilarity(profile1.interests, profile2.interests);
+      const interestSim = this.calculateInterestSimilarity(
+        profile1.interests,
+        profile2.interests,
+      );
       similarity += interestSim;
       factors++;
     }
 
     // Behavior similarity
-    const behaviorSim = this.calculateBehaviorSimilarity(profile1.behavior, profile2.behavior);
+    const behaviorSim = this.calculateBehaviorSimilarity(
+      profile1.behavior,
+      profile2.behavior,
+    );
     similarity += behaviorSim;
     factors++;
 
     // Segment similarity
-    const commonSegments = profile1.segments.filter(s => profile2.segments.includes(s));
-    const segmentSim = commonSegments.length / Math.max(profile1.segments.length, profile2.segments.length);
+    const commonSegments = profile1.segments.filter((s) =>
+      profile2.segments.includes(s),
+    );
+    const segmentSim =
+      commonSegments.length /
+      Math.max(profile1.segments.length, profile2.segments.length);
     similarity += segmentSim;
     factors++;
 
     return factors > 0 ? similarity / factors : 0;
   }
 
-  private calculateInterestSimilarity(interests1: Interest[], interests2: Interest[]): number {
-    const topics1 = new Set(interests1.map(i => i.topic));
-    const topics2 = new Set(interests2.map(i => i.topic));
-    const intersection = new Set([...topics1].filter(t => topics2.has(t)));
+  private calculateInterestSimilarity(
+    interests1: Interest[],
+    interests2: Interest[],
+  ): number {
+    const topics1 = new Set(interests1.map((i) => i.topic));
+    const topics2 = new Set(interests2.map((i) => i.topic));
+    const intersection = new Set([...topics1].filter((t) => topics2.has(t)));
     const union = new Set([...topics1, ...topics2]);
-    
+
     return intersection.size / union.size;
   }
 
-  private calculateBehaviorSimilarity(behavior1: UserBehavior, behavior2: UserBehavior): number {
+  private calculateBehaviorSimilarity(
+    behavior1: UserBehavior,
+    behavior2: UserBehavior,
+  ): number {
     // Simple behavior similarity based on normalized metrics
     const metrics1 = [
       behavior1.visitCount / 100,
       behavior1.totalTime / 10000,
       behavior1.pageViews / 100,
-      behavior1.searchQueries / 50
+      behavior1.searchQueries / 50,
     ];
-    
+
     const metrics2 = [
       behavior2.visitCount / 100,
       behavior2.totalTime / 10000,
       behavior2.pageViews / 100,
-      behavior2.searchQueries / 50
+      behavior2.searchQueries / 50,
     ];
 
     // Calculate cosine similarity
-    const dotProduct = metrics1.reduce((sum, m1, i) => sum + m1 * metrics2[i], 0);
+    const dotProduct = metrics1.reduce(
+      (sum, m1, i) => sum + m1 * metrics2[i],
+      0,
+    );
     const magnitude1 = Math.sqrt(metrics1.reduce((sum, m) => sum + m * m, 0));
     const magnitude2 = Math.sqrt(metrics2.reduce((sum, m) => sum + m * m, 0));
 
-    return magnitude1 > 0 && magnitude2 > 0 ? dotProduct / (magnitude1 * magnitude2) : 0;
+    return magnitude1 > 0 && magnitude2 > 0
+      ? dotProduct / (magnitude1 * magnitude2)
+      : 0;
   }
 
   // Additional private methods (abbreviated for space)
@@ -647,56 +763,80 @@ export class PersonalizationEngine extends EventEmitter {
     return null;
   }
 
-  private shouldAdaptForSkillLevel(profile: UserProfile, content: BaseContent): boolean {
+  private shouldAdaptForSkillLevel(
+    profile: UserProfile,
+    content: BaseContent,
+  ): boolean {
     return content.difficulty && content.difficulty !== profile.skillLevel;
   }
 
-  private async adaptForSkillLevel(content: BaseContent, skillLevel: string): Promise<PersonalizationStrategy> {
+  private async adaptForSkillLevel(
+    content: BaseContent,
+    skillLevel: string,
+  ): Promise<PersonalizationStrategy> {
     return {
       name: 'skill-level-adaptation',
       adaptedContent: content,
-      confidence: 0.8
+      confidence: 0.8,
     };
   }
 
-  private async adaptForInterests(content: BaseContent, interests: Interest[]): Promise<PersonalizationStrategy> {
+  private async adaptForInterests(
+    content: BaseContent,
+    interests: Interest[],
+  ): Promise<PersonalizationStrategy> {
     return {
       name: 'interest-based',
       adaptedContent: content,
-      confidence: 0.7
+      confidence: 0.7,
     };
   }
 
-  private async adaptForRole(content: BaseContent, role: string): Promise<PersonalizationStrategy> {
+  private async adaptForRole(
+    content: BaseContent,
+    role: string,
+  ): Promise<PersonalizationStrategy> {
     return {
       name: 'role-based',
       adaptedContent: content,
-      confidence: 0.9
+      confidence: 0.9,
     };
   }
 
-  private async adaptForDevice(content: BaseContent, deviceInfo: DeviceInfo): Promise<PersonalizationStrategy> {
+  private async adaptForDevice(
+    content: BaseContent,
+    deviceInfo: DeviceInfo,
+  ): Promise<PersonalizationStrategy> {
     return {
       name: 'device-adaptation',
       adaptedContent: content,
-      confidence: 0.6
+      confidence: 0.6,
     };
   }
 
-  private async adaptForLanguage(content: BaseContent, language: string): Promise<PersonalizationStrategy> {
+  private async adaptForLanguage(
+    content: BaseContent,
+    language: string,
+  ): Promise<PersonalizationStrategy> {
     return {
       name: 'language-adaptation',
       adaptedContent: content,
-      confidence: 0.9
+      confidence: 0.9,
     };
   }
 
-  private selectBestStrategy(strategies: PersonalizationStrategy[], profile: UserProfile, context: PersonalizationContext): PersonalizationStrategy {
-    return strategies.sort((a, b) => b.confidence - a.confidence)[0] || {
-      name: 'default',
-      adaptedContent: {} as BaseContent,
-      confidence: 0.5
-    };
+  private selectBestStrategy(
+    strategies: PersonalizationStrategy[],
+    profile: UserProfile,
+    context: PersonalizationContext,
+  ): PersonalizationStrategy {
+    return (
+      strategies.sort((a, b) => b.confidence - a.confidence)[0] || {
+        name: 'default',
+        adaptedContent: {} as BaseContent,
+        confidence: 0.5,
+      }
+    );
   }
 }
 

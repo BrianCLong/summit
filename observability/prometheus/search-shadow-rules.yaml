@@ -1,8 +1,8 @@
 groups:
-- name: search-shadow
-  rules:
-    - record: search_shadow_overlap_at_10
-      expr: histogram_quantile(0.5, sum(rate(search_shadow_overlap10_bucket[5m])) by (le))
-    - alert: ShadowOverlapLow
-      expr: search_shadow_overlap_at_10 < 0.6
-      for: 10m
+  - name: search-shadow
+    rules:
+      - record: search_shadow_overlap_at_10
+        expr: histogram_quantile(0.5, sum(rate(search_shadow_overlap10_bucket[5m])) by (le))
+      - alert: ShadowOverlapLow
+        expr: search_shadow_overlap_at_10 < 0.6
+        for: 10m

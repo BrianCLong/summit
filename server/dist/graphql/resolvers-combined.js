@@ -22,9 +22,9 @@ export const resolvers = {
         },
         copilotGoals: async (_, { investigationId }) => {
             return investigationId
-                ? goals.filter(g => g.investigationId === String(investigationId))
+                ? goals.filter((g) => g.investigationId === String(investigationId))
                 : goals;
-        }
+        },
     },
     Mutation: {
         ...(copilotResolvers.Mutation || {}),
@@ -56,21 +56,21 @@ export const resolvers = {
         },
         logout: async () => {
             return true;
-        }
+        },
     },
     Subscription: {
         ...(copilotResolvers.Subscription || {}),
         ...(aiResolvers.Subscription || {}),
         ...(annotationsResolvers.Subscription || {}),
         investigationUpdated: {
-            subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
+            subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
         },
         entityAdded: {
-            subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
-        }
+            subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED']),
+        },
     },
     User: {
-        fullName: (user) => `${user.firstName} ${user.lastName}`
+        fullName: (user) => `${user.firstName} ${user.lastName}`,
     },
     Entity: {
         ...(annotationsResolvers.Entity || {}),

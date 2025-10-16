@@ -1,4 +1,3 @@
-
 // conductor-ui/frontend/src/views/tools/SemanticSearchView.tsx
 import React, { useState } from 'react';
 
@@ -26,12 +25,28 @@ export const SemanticSearchView = () => {
   return (
     <div>
       <h1>Semantic Search</h1>
-      <input type="text" value={query} onChange={e => setQuery(e.target.value)} style={{ width: '400px' }} />
-      <button onClick={handleSearch} disabled={isLoading}>{isLoading ? 'Searching...' : 'Ask'}</button>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        style={{ width: '400px' }}
+      />
+      <button onClick={handleSearch} disabled={isLoading}>
+        {isLoading ? 'Searching...' : 'Ask'}
+      </button>
       <div>
         {results.map((r, i) => (
-          <div key={i} style={{ border: '1px solid #eee', padding: '8px', margin: '8px 0' }}>
-            <strong>{r.path} (Score: {r.score.toFixed(2)})</strong>
+          <div
+            key={i}
+            style={{
+              border: '1px solid #eee',
+              padding: '8px',
+              margin: '8px 0',
+            }}
+          >
+            <strong>
+              {r.path} (Score: {r.score.toFixed(2)})
+            </strong>
             <p>{r.summary}</p>
           </div>
         ))}

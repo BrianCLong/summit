@@ -22,7 +22,11 @@ function sanitize(value: any): any {
   return value;
 }
 
-export default function sanitizeRequest(req: Request, res: Response, next: NextFunction): void {
+export default function sanitizeRequest(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
   if (req.body) req.body = sanitize(req.body);
   if (req.query) req.query = sanitize(req.query);
   next();

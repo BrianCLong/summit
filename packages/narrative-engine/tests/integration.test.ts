@@ -6,8 +6,20 @@ import { SimulationEngine } from '../src/core/SimulationEngine.js';
 const config = {
   initialTimestamp: 0,
   actors: [
-    { id: 'planner', name: 'Planner Poe', mood: 4, resilience: 0.4, influence: 1.5 },
-    { id: 'respond', name: 'Responder Rae', mood: 2, resilience: 0.3, influence: 1.2 },
+    {
+      id: 'planner',
+      name: 'Planner Poe',
+      mood: 4,
+      resilience: 0.4,
+      influence: 1.5,
+    },
+    {
+      id: 'respond',
+      name: 'Responder Rae',
+      mood: 2,
+      resilience: 0.3,
+      influence: 1.2,
+    },
   ],
   relationships: [
     { sourceId: 'planner', targetId: 'respond', type: 'ally', intensity: 0.7 },
@@ -44,14 +56,19 @@ describe('Narrative API integration', () => {
       });
       expect(initResponse.status).toBe(200);
 
-      const injectResponse = await fetch(`${baseUrl}/api/narrative/inject-event`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(crisisEvent),
-      });
+      const injectResponse = await fetch(
+        `${baseUrl}/api/narrative/inject-event`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(crisisEvent),
+        },
+      );
       expect(injectResponse.status).toBe(202);
 
-      const stepResponse = await fetch(`${baseUrl}/api/narrative/step`, { method: 'POST' });
+      const stepResponse = await fetch(`${baseUrl}/api/narrative/step`, {
+        method: 'POST',
+      });
       expect(stepResponse.status).toBe(200);
 
       const stateResponse = await fetch(`${baseUrl}/api/narrative/state`);
@@ -67,7 +84,7 @@ describe('Narrative API integration', () => {
       expect(planner?.mood).toBeLessThan(4);
     } finally {
       await new Promise<void>((resolve, reject) =>
-        server.close((error) => (error ? reject(error) : resolve()))
+        server.close((error) => (error ? reject(error) : resolve())),
       );
     }
   });

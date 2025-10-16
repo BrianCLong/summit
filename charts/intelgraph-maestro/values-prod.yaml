@@ -21,15 +21,15 @@ api:
     enabled: true
     minReplicas: 5
     maxReplicas: 50
-    targetCPUUtilizationPercentage: 60  # More conservative in production
+    targetCPUUtilizationPercentage: 60 # More conservative in production
     targetMemoryUtilizationPercentage: 70
 
   # Strict production SLO targets
   slo:
     availability: 99.95
-    latencyP95: 300  # ms - Stricter than design target
-    latencyP99: 800  # ms
-    writeLatencyP95: 600  # ms
+    latencyP95: 300 # ms - Stricter than design target
+    latencyP99: 800 # ms
+    writeLatencyP95: 600 # ms
 
 client:
   replicaCount: 5
@@ -43,7 +43,7 @@ client:
 
   cdn:
     enabled: true
-    cachePolicy: "max-age=31536000, immutable"
+    cachePolicy: 'max-age=31536000, immutable'
 
 gateway:
   replicaCount: 3
@@ -102,11 +102,11 @@ neo4j:
 
   # Optimized for large graphs
   config:
-    dbms.memory.heap.initial_size: "8G"
-    dbms.memory.heap.max_size: "16G"
-    dbms.memory.pagecache.size: "8G"
-    dbms.tx_log.rotation.retention_policy: "100M size"
-    dbms.checkpoint.interval: "300s"
+    dbms.memory.heap.initial_size: '8G'
+    dbms.memory.heap.max_size: '16G'
+    dbms.memory.pagecache.size: '8G'
+    dbms.tx_log.rotation.retention_policy: '100M size'
+    dbms.checkpoint.interval: '300s'
 
 redis:
   architecture: replication
@@ -149,13 +149,13 @@ kafka:
 # Production ingress with multiple domains
 ingress:
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    nginx.ingress.kubernetes.io/rate-limit: "1000"
-    nginx.ingress.kubernetes.io/rate-limit-burst: "2000"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-buffer-size: '16k'
+    nginx.ingress.kubernetes.io/proxy-body-size: '100m'
+    nginx.ingress.kubernetes.io/rate-limit: '1000'
+    nginx.ingress.kubernetes.io/rate-limit-burst: '2000'
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
 
   hosts:
     - host: maestro.intelgraph.ai
@@ -179,7 +179,7 @@ ingress:
 # Full production observability stack
 prometheus:
   server:
-    retention: "90d"
+    retention: '90d'
     persistentVolume:
       size: 500Gi
       storageClass: premium-ssd
@@ -248,10 +248,10 @@ featureFlags:
     coherence: true
     multiRegion: true
     advancedPolicy: true
-    chaosEngineering: false  # Disabled in production
+    chaosEngineering: false # Disabled in production
 
   experimental:
-    aiAssistant: false  # Disabled until fully validated
+    aiAssistant: false # Disabled until fully validated
     federatedQuery: false
     edgeCompute: false
 
@@ -285,14 +285,14 @@ multiTenant:
 costManagement:
   budgetAlerts:
     enabled: true
-    monthlyBudget: 18000  # USD
+    monthlyBudget: 18000 # USD
     alertThresholds: [50, 80, 95]
 
   resourceQuotas:
     enabled: true
-    cpu: "100000m"  # 100 cores
-    memory: "400Gi"
-    persistentVolumeClaims: "100"
+    cpu: '100000m' # 100 cores
+    memory: '400Gi'
+    persistentVolumeClaims: '100'
 
 # Production topology spread
 topologySpreadConstraints:
@@ -306,16 +306,16 @@ nodeAffinity:
   enabled: true
   requiredDuringSchedulingIgnoredDuringExecution:
     nodeSelectorTerms:
-    - matchExpressions:
-      - key: node-type
-        operator: In
-        values: ["compute-optimized"]
+      - matchExpressions:
+          - key: node-type
+            operator: In
+            values: ['compute-optimized']
 
 # Backup and disaster recovery
 backup:
   enabled: true
-  schedule: "0 2 * * *"  # Daily at 2 AM
-  retention: "30d"
+  schedule: '0 2 * * *' # Daily at 2 AM
+  retention: '30d'
 
   destinations:
     - name: s3-primary

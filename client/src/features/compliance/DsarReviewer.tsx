@@ -36,7 +36,12 @@ const statusLabel: Record<RequestStatus, string> = {
 };
 
 const OperationBadge = ({ operation }: { operation: Operation }) => {
-  const color = operation === 'export' ? '#2563eb' : operation === 'rectify' ? '#047857' : '#dc2626';
+  const color =
+    operation === 'export'
+      ? '#2563eb'
+      : operation === 'rectify'
+        ? '#047857'
+        : '#dc2626';
   return (
     <span
       style={{
@@ -57,26 +62,37 @@ const OperationBadge = ({ operation }: { operation: Operation }) => {
 
 const ProofList = ({ proofs }: { proofs: ProofSummary[] }) => {
   if (!proofs.length) {
-    return <p style={{ margin: 0, fontStyle: 'italic' }}>No proofs attached.</p>;
+    return (
+      <p style={{ margin: 0, fontStyle: 'italic' }}>No proofs attached.</p>
+    );
   }
   return (
     <ul style={{ margin: '8px 0 0', paddingLeft: 16 }}>
       {proofs.map((proof) => (
-        <li key={`${proof.type}-${proof.connector}-${proof.hash}`} style={{ marginBottom: 4 }}>
-          <strong>{proof.connector}</strong> — {proof.type} proof <code>{proof.hash.slice(0, 8)}…</code>
+        <li
+          key={`${proof.type}-${proof.connector}-${proof.hash}`}
+          style={{ marginBottom: 4 }}
+        >
+          <strong>{proof.connector}</strong> — {proof.type} proof{' '}
+          <code>{proof.hash.slice(0, 8)}…</code>
         </li>
       ))}
     </ul>
   );
 };
 
-export const DsarReviewer = ({ requests, onReplay, onInspect }: DsarReviewerProps) => {
+export const DsarReviewer = ({
+  requests,
+  onReplay,
+  onInspect,
+}: DsarReviewerProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sortedRequests = useMemo(
     () =>
-      [...requests].sort((a, b) =>
-        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
+      [...requests].sort(
+        (a, b) =>
+          new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
       ),
     [requests],
   );
@@ -93,12 +109,20 @@ export const DsarReviewer = ({ requests, onReplay, onInspect }: DsarReviewerProp
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th style={{ textAlign: 'left', padding: '8px 12px' }}>Subject</th>
+              <th style={{ textAlign: 'left', padding: '8px 12px' }}>
+                Subject
+              </th>
               <th style={{ textAlign: 'left', padding: '8px 12px' }}>Tenant</th>
-              <th style={{ textAlign: 'left', padding: '8px 12px' }}>Operation</th>
+              <th style={{ textAlign: 'left', padding: '8px 12px' }}>
+                Operation
+              </th>
               <th style={{ textAlign: 'left', padding: '8px 12px' }}>Status</th>
-              <th style={{ textAlign: 'left', padding: '8px 12px' }}>Submitted</th>
-              <th style={{ textAlign: 'left', padding: '8px 12px' }}>Actions</th>
+              <th style={{ textAlign: 'left', padding: '8px 12px' }}>
+                Submitted
+              </th>
+              <th style={{ textAlign: 'left', padding: '8px 12px' }}>
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -122,7 +146,9 @@ export const DsarReviewer = ({ requests, onReplay, onInspect }: DsarReviewerProp
                   <td style={{ padding: '8px 12px' }}>
                     <OperationBadge operation={request.operation} />
                   </td>
-                  <td style={{ padding: '8px 12px' }}>{statusLabel[request.status]}</td>
+                  <td style={{ padding: '8px 12px' }}>
+                    {statusLabel[request.status]}
+                  </td>
                   <td style={{ padding: '8px 12px' }}>
                     {new Date(request.submittedAt).toLocaleString()}
                   </td>
@@ -154,7 +180,13 @@ export const DsarReviewer = ({ requests, onReplay, onInspect }: DsarReviewerProp
           </tbody>
         </table>
       </div>
-      <aside style={{ flex: '1 1 50%', borderLeft: '1px solid #e5e7eb', paddingLeft: 24 }}>
+      <aside
+        style={{
+          flex: '1 1 50%',
+          borderLeft: '1px solid #e5e7eb',
+          paddingLeft: 24,
+        }}
+      >
         <h3 style={{ marginTop: 0 }}>Request details</h3>
         {activeRequest ? (
           <div>
@@ -172,7 +204,8 @@ export const DsarReviewer = ({ requests, onReplay, onInspect }: DsarReviewerProp
             </p>
             {activeRequest.exportLocation && (
               <p style={{ margin: '4px 0' }}>
-                <strong>Export pack:</strong> <code>{activeRequest.exportLocation}</code>
+                <strong>Export pack:</strong>{' '}
+                <code>{activeRequest.exportLocation}</code>
               </p>
             )}
             {activeRequest.proofs && activeRequest.proofs.length > 0 && (
@@ -183,7 +216,9 @@ export const DsarReviewer = ({ requests, onReplay, onInspect }: DsarReviewerProp
             )}
           </div>
         ) : (
-          <p style={{ fontStyle: 'italic' }}>Select a request to inspect its fulfillment artifacts.</p>
+          <p style={{ fontStyle: 'italic' }}>
+            Select a request to inspect its fulfillment artifacts.
+          </p>
         )}
       </aside>
     </div>

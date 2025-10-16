@@ -9,21 +9,21 @@ metadata:
     app.kubernetes.io/component: infrastructure
 data:
   # Primary and DR region configuration
-  primary-region: "us-west-2"
-  dr-region: "us-east-1"
-  
+  primary-region: 'us-west-2'
+  dr-region: 'us-east-1'
+
   # RTO/RPO targets
-  rto-target: "4h"  # Recovery Time Objective: 4 hours
-  rpo-target: "15m" # Recovery Point Objective: 15 minutes
-  
+  rto-target: '4h' # Recovery Time Objective: 4 hours
+  rpo-target: '15m' # Recovery Point Objective: 15 minutes
+
   # Failover configuration
-  failover-mode: "manual"  # manual | automatic
-  failover-threshold: "90"  # % health threshold
-  
+  failover-mode: 'manual' # manual | automatic
+  failover-threshold: '90' # % health threshold
+
   # Cross-region replication settings
-  replication-enabled: "true"
-  replication-frequency: "6h"
-  
+  replication-enabled: 'true'
+  replication-frequency: '6h'
+
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -34,14 +34,14 @@ metadata:
     app.kubernetes.io/name: dr-replication
     app.kubernetes.io/component: disaster-recovery
 spec:
-  schedule: "0 */6 * * *"  # Every 6 hours
-  timeZone: "UTC"
+  schedule: '0 */6 * * *' # Every 6 hours
+  timeZone: 'UTC'
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 7200  # 2 hour timeout
+      activeDeadlineSeconds: 7200 # 2 hour timeout
       template:
         spec:
           restartPolicy: Never
@@ -51,208 +51,208 @@ spec:
             runAsGroup: 65532
           serviceAccountName: dr-replication
           containers:
-          - name: dr-sync
-            image: amazon/aws-cli:latest
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              SYNC_NAME="dr-sync-$(date +%Y%m%d-%H%M%S)"
-              echo "Starting DR replication sync: ${SYNC_NAME}"
-              
-              # Sync primary backups to DR region
-              echo "Syncing database backups to DR region..."
-              aws s3 sync "s3://${PRIMARY_BACKUP_BUCKET}" "s3://${DR_BACKUP_BUCKET}" \
-                --source-region ${PRIMARY_REGION} \
-                --region ${DR_REGION} \
-                --exclude "*" \
-                --include "neo4j/*" \
-                --include "postgres/*" \
-                --include "redis/*" \
-                --storage-class STANDARD_IA \
-                --delete
-              
-              # Sync configuration backups
-              echo "Syncing configuration backups to DR region..."
-              aws s3 sync "s3://${PRIMARY_BACKUP_BUCKET}/kubernetes" "s3://${DR_BACKUP_BUCKET}/kubernetes" \
-                --source-region ${PRIMARY_REGION} \
-                --region ${DR_REGION} \
-                --storage-class STANDARD_IA \
-                --delete
-              
-              # Sync application artifacts
-              echo "Syncing application artifacts to DR region..."
-              aws s3 sync "s3://${ARTIFACT_BUCKET}" "s3://${DR_ARTIFACT_BUCKET}" \
-                --source-region ${PRIMARY_REGION} \
-                --region ${DR_REGION} \
-                --exclude "*" \
-                --include "docker-images/*" \
-                --include "helm-charts/*" \
-                --include "ml-models/*" \
-                --storage-class STANDARD_IA
-              
-              # Replicate container images to DR region ECR
-              echo "Replicating container images to DR region..."
-              
-              # Get list of images from primary region
-              IMAGES=(
-                "intelgraph/active-measures"
-                "intelgraph/graph-analytics" 
-                "intelgraph/search-engine"
-                "intelgraph/feed-processor"
-                "intelgraph/mobile-interface"
-                "intelgraph/maestro-control-plane"
-              )
-              
-              for image in "${IMAGES[@]}"; do
-                echo "Replicating ${image}..."
-                
-                # Get latest tag
-                LATEST_TAG=$(aws ecr describe-images --repository-name ${image} --region ${PRIMARY_REGION} \
-                  --query 'imageDetails[0].imageTags[0]' --output text 2>/dev/null || echo "latest")
-                
-                # Pull from primary region
-                aws ecr get-login-password --region ${PRIMARY_REGION} | \
-                  docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com
-                
-                docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com/${image}:${LATEST_TAG}
-                
-                # Tag for DR region
-                docker tag ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com/${image}:${LATEST_TAG} \
-                  ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com/${image}:${LATEST_TAG}
-                
-                # Push to DR region
-                aws ecr get-login-password --region ${DR_REGION} | \
-                  docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com
-                
-                # Create repository if it doesn't exist
-                aws ecr create-repository --repository-name ${image} --region ${DR_REGION} 2>/dev/null || true
-                
-                docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com/${image}:${LATEST_TAG}
-                
-                # Cleanup local images
-                docker rmi ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com/${image}:${LATEST_TAG} || true
-                docker rmi ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com/${image}:${LATEST_TAG} || true
-              done
-              
-              # Create DR sync report
-              SYNC_REPORT="/tmp/dr-sync-report.json"
-              cat > ${SYNC_REPORT} << EOF
-              {
-                "sync_name": "${SYNC_NAME}",
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "primary_region": "${PRIMARY_REGION}",
-                "dr_region": "${DR_REGION}",
-                "synced_buckets": [
-                  "${PRIMARY_BACKUP_BUCKET}",
-                  "${ARTIFACT_BUCKET}"
-                ],
-                "replicated_images": $(printf '%s\n' "${IMAGES[@]}" | jq -R . | jq -s .),
-                "sync_duration_seconds": $(($(date +%s) - ${SYNC_START:-$(date +%s)}))
-              }
-              EOF
-              
-              # Upload sync report
-              aws s3 cp ${SYNC_REPORT} \
-                "s3://${DR_BACKUP_BUCKET}/dr-reports/$(date +%Y/%m/%d)/${SYNC_NAME}.json" \
-                --region ${DR_REGION}
-              
-              # Test DR infrastructure health
-              echo "Testing DR infrastructure health..."
-              
-              # Check DR S3 buckets accessibility
-              aws s3 ls "s3://${DR_BACKUP_BUCKET}" --region ${DR_REGION} >/dev/null
-              aws s3 ls "s3://${DR_ARTIFACT_BUCKET}" --region ${DR_REGION} >/dev/null
-              
-              # Check DR ECR repositories
-              for image in "${IMAGES[@]}"; do
-                aws ecr describe-repositories --repository-names ${image} --region ${DR_REGION} >/dev/null
-              done
-              
-              # Send success notification
-              curl -X POST "${SLACK_WEBHOOK_URL}" \
-                -H 'Content-Type: application/json' \
-                -d "{\"text\":\"✅ DR replication sync completed: ${SYNC_NAME}\\nPrimary: ${PRIMARY_REGION} → DR: ${DR_REGION}\\nImages replicated: ${#IMAGES[@]}\"}" || true
-              
-              echo "DR replication sync completed successfully: ${SYNC_NAME}"
-              
-            env:
-            - name: PRIMARY_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: dr-config
-                  key: primary-region
-            - name: DR_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: dr-config
-                  key: dr-region
-            - name: PRIMARY_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: DR_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-backup-bucket
-            - name: ARTIFACT_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: artifact-bucket
-            - name: DR_ARTIFACT_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-artifact-bucket
-            - name: AWS_ACCOUNT_ID
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: aws-account-id
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            - name: SYNC_START
-              value: "$(date +%s)"
-            resources:
-              requests:
-                memory: "1Gi"
-                cpu: "500m"
-              limits:
-                memory: "4Gi"
-                cpu: "2000m"
-            volumeMounts:
-            - name: docker-sock
-              mountPath: /var/run/docker.sock
+            - name: dr-sync
+              image: amazon/aws-cli:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  SYNC_NAME="dr-sync-$(date +%Y%m%d-%H%M%S)"
+                  echo "Starting DR replication sync: ${SYNC_NAME}"
+
+                  # Sync primary backups to DR region
+                  echo "Syncing database backups to DR region..."
+                  aws s3 sync "s3://${PRIMARY_BACKUP_BUCKET}" "s3://${DR_BACKUP_BUCKET}" \
+                    --source-region ${PRIMARY_REGION} \
+                    --region ${DR_REGION} \
+                    --exclude "*" \
+                    --include "neo4j/*" \
+                    --include "postgres/*" \
+                    --include "redis/*" \
+                    --storage-class STANDARD_IA \
+                    --delete
+
+                  # Sync configuration backups
+                  echo "Syncing configuration backups to DR region..."
+                  aws s3 sync "s3://${PRIMARY_BACKUP_BUCKET}/kubernetes" "s3://${DR_BACKUP_BUCKET}/kubernetes" \
+                    --source-region ${PRIMARY_REGION} \
+                    --region ${DR_REGION} \
+                    --storage-class STANDARD_IA \
+                    --delete
+
+                  # Sync application artifacts
+                  echo "Syncing application artifacts to DR region..."
+                  aws s3 sync "s3://${ARTIFACT_BUCKET}" "s3://${DR_ARTIFACT_BUCKET}" \
+                    --source-region ${PRIMARY_REGION} \
+                    --region ${DR_REGION} \
+                    --exclude "*" \
+                    --include "docker-images/*" \
+                    --include "helm-charts/*" \
+                    --include "ml-models/*" \
+                    --storage-class STANDARD_IA
+
+                  # Replicate container images to DR region ECR
+                  echo "Replicating container images to DR region..."
+
+                  # Get list of images from primary region
+                  IMAGES=(
+                    "intelgraph/active-measures"
+                    "intelgraph/graph-analytics" 
+                    "intelgraph/search-engine"
+                    "intelgraph/feed-processor"
+                    "intelgraph/mobile-interface"
+                    "intelgraph/maestro-control-plane"
+                  )
+
+                  for image in "${IMAGES[@]}"; do
+                    echo "Replicating ${image}..."
+                    
+                    # Get latest tag
+                    LATEST_TAG=$(aws ecr describe-images --repository-name ${image} --region ${PRIMARY_REGION} \
+                      --query 'imageDetails[0].imageTags[0]' --output text 2>/dev/null || echo "latest")
+                    
+                    # Pull from primary region
+                    aws ecr get-login-password --region ${PRIMARY_REGION} | \
+                      docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com
+                    
+                    docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com/${image}:${LATEST_TAG}
+                    
+                    # Tag for DR region
+                    docker tag ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com/${image}:${LATEST_TAG} \
+                      ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com/${image}:${LATEST_TAG}
+                    
+                    # Push to DR region
+                    aws ecr get-login-password --region ${DR_REGION} | \
+                      docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com
+                    
+                    # Create repository if it doesn't exist
+                    aws ecr create-repository --repository-name ${image} --region ${DR_REGION} 2>/dev/null || true
+                    
+                    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com/${image}:${LATEST_TAG}
+                    
+                    # Cleanup local images
+                    docker rmi ${AWS_ACCOUNT_ID}.dkr.ecr.${PRIMARY_REGION}.amazonaws.com/${image}:${LATEST_TAG} || true
+                    docker rmi ${AWS_ACCOUNT_ID}.dkr.ecr.${DR_REGION}.amazonaws.com/${image}:${LATEST_TAG} || true
+                  done
+
+                  # Create DR sync report
+                  SYNC_REPORT="/tmp/dr-sync-report.json"
+                  cat > ${SYNC_REPORT} << EOF
+                  {
+                    "sync_name": "${SYNC_NAME}",
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "primary_region": "${PRIMARY_REGION}",
+                    "dr_region": "${DR_REGION}",
+                    "synced_buckets": [
+                      "${PRIMARY_BACKUP_BUCKET}",
+                      "${ARTIFACT_BUCKET}"
+                    ],
+                    "replicated_images": $(printf '%s\n' "${IMAGES[@]}" | jq -R . | jq -s .),
+                    "sync_duration_seconds": $(($(date +%s) - ${SYNC_START:-$(date +%s)}))
+                  }
+                  EOF
+
+                  # Upload sync report
+                  aws s3 cp ${SYNC_REPORT} \
+                    "s3://${DR_BACKUP_BUCKET}/dr-reports/$(date +%Y/%m/%d)/${SYNC_NAME}.json" \
+                    --region ${DR_REGION}
+
+                  # Test DR infrastructure health
+                  echo "Testing DR infrastructure health..."
+
+                  # Check DR S3 buckets accessibility
+                  aws s3 ls "s3://${DR_BACKUP_BUCKET}" --region ${DR_REGION} >/dev/null
+                  aws s3 ls "s3://${DR_ARTIFACT_BUCKET}" --region ${DR_REGION} >/dev/null
+
+                  # Check DR ECR repositories
+                  for image in "${IMAGES[@]}"; do
+                    aws ecr describe-repositories --repository-names ${image} --region ${DR_REGION} >/dev/null
+                  done
+
+                  # Send success notification
+                  curl -X POST "${SLACK_WEBHOOK_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"text\":\"✅ DR replication sync completed: ${SYNC_NAME}\\nPrimary: ${PRIMARY_REGION} → DR: ${DR_REGION}\\nImages replicated: ${#IMAGES[@]}\"}" || true
+
+                  echo "DR replication sync completed successfully: ${SYNC_NAME}"
+
+              env:
+                - name: PRIMARY_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: dr-config
+                      key: primary-region
+                - name: DR_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: dr-config
+                      key: dr-region
+                - name: PRIMARY_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: DR_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-backup-bucket
+                - name: ARTIFACT_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: artifact-bucket
+                - name: DR_ARTIFACT_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-artifact-bucket
+                - name: AWS_ACCOUNT_ID
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: aws-account-id
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+                - name: SYNC_START
+                  value: '$(date +%s)'
+              resources:
+                requests:
+                  memory: '1Gi'
+                  cpu: '500m'
+                limits:
+                  memory: '4Gi'
+                  cpu: '2000m'
+              volumeMounts:
+                - name: docker-sock
+                  mountPath: /var/run/docker.sock
           volumes:
-          - name: docker-sock
-            hostPath:
-              path: /var/run/docker.sock
-              type: Socket
+            - name: docker-sock
+              hostPath:
+                path: /var/run/docker.sock
+                type: Socket
           tolerations:
-          - key: "backup-workload"
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
+            - key: 'backup-workload'
+              operator: 'Equal'
+              value: 'true'
+              effect: 'NoSchedule'
           nodeSelector:
-            node-type: "backup-optimized"
+            node-type: 'backup-optimized'
 ---
 # DR Health Check and Failover Decision
 apiVersion: batch/v1
@@ -264,14 +264,14 @@ metadata:
     app.kubernetes.io/name: dr-health-check
     app.kubernetes.io/component: disaster-recovery
 spec:
-  schedule: "*/5 * * * *"  # Every 5 minutes
-  timeZone: "UTC"
-  successfulJobsHistoryLimit: 12  # Keep 1 hour of history
+  schedule: '*/5 * * * *' # Every 5 minutes
+  timeZone: 'UTC'
+  successfulJobsHistoryLimit: 12 # Keep 1 hour of history
   failedJobsHistoryLimit: 6
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 240  # 4 minute timeout
+      activeDeadlineSeconds: 240 # 4 minute timeout
       template:
         spec:
           restartPolicy: Never
@@ -281,198 +281,198 @@ spec:
             runAsGroup: 65532
           serviceAccountName: dr-health-check
           containers:
-          - name: health-checker
-            image: alpine/curl:latest
-            command:
-            - /bin/sh
-            - -c
-            - |
-              set -euo pipefail
-              
-              HEALTH_CHECK_ID="dr-health-$(date +%Y%m%d-%H%M%S)"
-              echo "Starting DR health check: ${HEALTH_CHECK_ID}"
-              
-              # Initialize health status
-              HEALTH_SCORE=0
-              MAX_SCORE=100
-              ISSUES=()
-              
-              # Test 1: Primary region API health (25 points)
-              echo "Testing primary region API health..."
-              if curl -f --max-time 10 "${PRIMARY_API_ENDPOINT}/health" >/dev/null 2>&1; then
-                HEALTH_SCORE=$((HEALTH_SCORE + 25))
-                echo "✅ Primary API healthy"
-              else
-                ISSUES+=("Primary API unhealthy")
-                echo "❌ Primary API unhealthy"
-              fi
-              
-              # Test 2: Database connectivity (25 points)
-              echo "Testing database connectivity..."
-              if curl -f --max-time 10 "${PRIMARY_API_ENDPOINT}/health/database" >/dev/null 2>&1; then
-                HEALTH_SCORE=$((HEALTH_SCORE + 25))
-                echo "✅ Database connectivity healthy"
-              else
-                ISSUES+=("Database connectivity issues")
-                echo "❌ Database connectivity issues"
-              fi
-              
-              # Test 3: Critical services (25 points)
-              echo "Testing critical services..."
-              CRITICAL_SERVICES=(
-                "neo4j"
-                "postgres"
-                "redis"
-                "active-measures"
-              )
-              
-              HEALTHY_SERVICES=0
-              for service in "${CRITICAL_SERVICES[@]}"; do
-                if curl -f --max-time 5 "${PRIMARY_API_ENDPOINT}/health/services/${service}" >/dev/null 2>&1; then
-                  HEALTHY_SERVICES=$((HEALTHY_SERVICES + 1))
-                fi
-              done
-              
-              if [[ ${HEALTHY_SERVICES} -eq ${#CRITICAL_SERVICES[@]} ]]; then
-                HEALTH_SCORE=$((HEALTH_SCORE + 25))
-                echo "✅ All critical services healthy"
-              else
-                ISSUES+=("${HEALTHY_SERVICES}/${#CRITICAL_SERVICES[@]} critical services healthy")
-                echo "⚠️ Only ${HEALTHY_SERVICES}/${#CRITICAL_SERVICES[@]} critical services healthy"
-              fi
-              
-              # Test 4: Infrastructure metrics (25 points)
-              echo "Testing infrastructure metrics..."
-              # This would typically check cluster node health, resource usage, etc.
-              # For now, we'll assume healthy if previous tests pass
-              if [[ ${HEALTH_SCORE} -ge 50 ]]; then
-                HEALTH_SCORE=$((HEALTH_SCORE + 25))
-                echo "✅ Infrastructure metrics healthy"
-              else
-                ISSUES+=("Infrastructure metrics degraded")
-                echo "❌ Infrastructure metrics degraded"
-              fi
-              
-              # Calculate health percentage
-              HEALTH_PERCENTAGE=$((HEALTH_SCORE * 100 / MAX_SCORE))
-              
-              # Create health report
-              HEALTH_REPORT="/tmp/dr-health-report.json"
-              cat > ${HEALTH_REPORT} << EOF
-              {
-                "health_check_id": "${HEALTH_CHECK_ID}",
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "health_score": ${HEALTH_SCORE},
-                "health_percentage": ${HEALTH_PERCENTAGE},
-                "status": "$(if [[ ${HEALTH_PERCENTAGE} -ge 80 ]]; then echo 'healthy'; elif [[ ${HEALTH_PERCENTAGE} -ge 50 ]]; then echo 'degraded'; else echo 'critical'; fi)",
-                "issues": $(printf '%s\n' "${ISSUES[@]}" | jq -R . | jq -s . || echo '[]'),
-                "rto_target": "${RTO_TARGET}",
-                "rpo_target": "${RPO_TARGET}",
-                "failover_threshold": ${FAILOVER_THRESHOLD}
-              }
-              EOF
-              
-              # Store health report
-              aws s3 cp ${HEALTH_REPORT} \
-                "s3://${DR_BACKUP_BUCKET}/health-checks/$(date +%Y/%m/%d/%H)/${HEALTH_CHECK_ID}.json" \
-                --region ${DR_REGION}
-              
-              # Check if failover is needed (automatic mode only)
-              if [[ "${FAILOVER_MODE}" == "automatic" && ${HEALTH_PERCENTAGE} -lt ${FAILOVER_THRESHOLD} ]]; then
-                echo "Health percentage (${HEALTH_PERCENTAGE}%) below failover threshold (${FAILOVER_THRESHOLD}%)"
-                
-                # Create failover alert
-                curl -X POST "${SLACK_WEBHOOK_URL}" \
-                  -H 'Content-Type: application/json' \
-                  -d "{
-                    \"text\": \"🚨 CRITICAL: Automatic failover triggered!\",
-                    \"attachments\": [{
-                      \"color\": \"danger\",
-                      \"fields\": [
-                        {\"title\": \"Health Score\", \"value\": \"${HEALTH_PERCENTAGE}%\", \"short\": true},
-                        {\"title\": \"Threshold\", \"value\": \"${FAILOVER_THRESHOLD}%\", \"short\": true},
-                        {\"title\": \"Issues\", \"value\": \"$(printf '%s, ' "${ISSUES[@]}" | sed 's/, $//')\", \"short\": false}
-                      ]
-                    }]
-                  }" || true
-                
-                # In a real implementation, this would trigger automated failover procedures
-                echo "FAILOVER TRIGGER: Health check failed - automatic failover would be initiated"
-                
-              elif [[ ${HEALTH_PERCENTAGE} -lt 80 ]]; then
-                # Send degraded performance alert
-                STATUS_EMOJI="⚠️"
-                if [[ ${HEALTH_PERCENTAGE} -lt 50 ]]; then
-                  STATUS_EMOJI="🚨"
-                fi
-                
-                curl -X POST "${SLACK_WEBHOOK_URL}" \
-                  -H 'Content-Type: application/json' \
-                  -d "{\"text\":\"${STATUS_EMOJI} IntelGraph health check: ${HEALTH_PERCENTAGE}% ($(printf '%s, ' "${ISSUES[@]}" | sed 's/, $//'))\"}\" || true
-              fi
-              
-              echo "DR health check completed: ${HEALTH_PERCENTAGE}% healthy"
-              
-              # Exit with error code if critical
-              if [[ ${HEALTH_PERCENTAGE} -lt 25 ]]; then
-                exit 1
-              fi
-              
-            env:
-            - name: PRIMARY_API_ENDPOINT
-              value: "https://api.intelgraph.ai"
-            - name: DR_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: dr-config
-                  key: dr-region
-            - name: RTO_TARGET
-              valueFrom:
-                configMapKeyRef:
-                  name: dr-config
-                  key: rto-target
-            - name: RPO_TARGET
-              valueFrom:
-                configMapKeyRef:
-                  name: dr-config
-                  key: rpo-target
-            - name: FAILOVER_MODE
-              valueFrom:
-                configMapKeyRef:
-                  name: dr-config
-                  key: failover-mode
-            - name: FAILOVER_THRESHOLD
-              valueFrom:
-                configMapKeyRef:
-                  name: dr-config
-                  key: failover-threshold
-            - name: DR_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-backup-bucket
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "128Mi"
-                cpu: "100m"
-              limits:
-                memory: "256Mi"
-                cpu: "200m"
+            - name: health-checker
+              image: alpine/curl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+
+                  HEALTH_CHECK_ID="dr-health-$(date +%Y%m%d-%H%M%S)"
+                  echo "Starting DR health check: ${HEALTH_CHECK_ID}"
+
+                  # Initialize health status
+                  HEALTH_SCORE=0
+                  MAX_SCORE=100
+                  ISSUES=()
+
+                  # Test 1: Primary region API health (25 points)
+                  echo "Testing primary region API health..."
+                  if curl -f --max-time 10 "${PRIMARY_API_ENDPOINT}/health" >/dev/null 2>&1; then
+                    HEALTH_SCORE=$((HEALTH_SCORE + 25))
+                    echo "✅ Primary API healthy"
+                  else
+                    ISSUES+=("Primary API unhealthy")
+                    echo "❌ Primary API unhealthy"
+                  fi
+
+                  # Test 2: Database connectivity (25 points)
+                  echo "Testing database connectivity..."
+                  if curl -f --max-time 10 "${PRIMARY_API_ENDPOINT}/health/database" >/dev/null 2>&1; then
+                    HEALTH_SCORE=$((HEALTH_SCORE + 25))
+                    echo "✅ Database connectivity healthy"
+                  else
+                    ISSUES+=("Database connectivity issues")
+                    echo "❌ Database connectivity issues"
+                  fi
+
+                  # Test 3: Critical services (25 points)
+                  echo "Testing critical services..."
+                  CRITICAL_SERVICES=(
+                    "neo4j"
+                    "postgres"
+                    "redis"
+                    "active-measures"
+                  )
+
+                  HEALTHY_SERVICES=0
+                  for service in "${CRITICAL_SERVICES[@]}"; do
+                    if curl -f --max-time 5 "${PRIMARY_API_ENDPOINT}/health/services/${service}" >/dev/null 2>&1; then
+                      HEALTHY_SERVICES=$((HEALTHY_SERVICES + 1))
+                    fi
+                  done
+
+                  if [[ ${HEALTHY_SERVICES} -eq ${#CRITICAL_SERVICES[@]} ]]; then
+                    HEALTH_SCORE=$((HEALTH_SCORE + 25))
+                    echo "✅ All critical services healthy"
+                  else
+                    ISSUES+=("${HEALTHY_SERVICES}/${#CRITICAL_SERVICES[@]} critical services healthy")
+                    echo "⚠️ Only ${HEALTHY_SERVICES}/${#CRITICAL_SERVICES[@]} critical services healthy"
+                  fi
+
+                  # Test 4: Infrastructure metrics (25 points)
+                  echo "Testing infrastructure metrics..."
+                  # This would typically check cluster node health, resource usage, etc.
+                  # For now, we'll assume healthy if previous tests pass
+                  if [[ ${HEALTH_SCORE} -ge 50 ]]; then
+                    HEALTH_SCORE=$((HEALTH_SCORE + 25))
+                    echo "✅ Infrastructure metrics healthy"
+                  else
+                    ISSUES+=("Infrastructure metrics degraded")
+                    echo "❌ Infrastructure metrics degraded"
+                  fi
+
+                  # Calculate health percentage
+                  HEALTH_PERCENTAGE=$((HEALTH_SCORE * 100 / MAX_SCORE))
+
+                  # Create health report
+                  HEALTH_REPORT="/tmp/dr-health-report.json"
+                  cat > ${HEALTH_REPORT} << EOF
+                  {
+                    "health_check_id": "${HEALTH_CHECK_ID}",
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "health_score": ${HEALTH_SCORE},
+                    "health_percentage": ${HEALTH_PERCENTAGE},
+                    "status": "$(if [[ ${HEALTH_PERCENTAGE} -ge 80 ]]; then echo 'healthy'; elif [[ ${HEALTH_PERCENTAGE} -ge 50 ]]; then echo 'degraded'; else echo 'critical'; fi)",
+                    "issues": $(printf '%s\n' "${ISSUES[@]}" | jq -R . | jq -s . || echo '[]'),
+                    "rto_target": "${RTO_TARGET}",
+                    "rpo_target": "${RPO_TARGET}",
+                    "failover_threshold": ${FAILOVER_THRESHOLD}
+                  }
+                  EOF
+
+                  # Store health report
+                  aws s3 cp ${HEALTH_REPORT} \
+                    "s3://${DR_BACKUP_BUCKET}/health-checks/$(date +%Y/%m/%d/%H)/${HEALTH_CHECK_ID}.json" \
+                    --region ${DR_REGION}
+
+                  # Check if failover is needed (automatic mode only)
+                  if [[ "${FAILOVER_MODE}" == "automatic" && ${HEALTH_PERCENTAGE} -lt ${FAILOVER_THRESHOLD} ]]; then
+                    echo "Health percentage (${HEALTH_PERCENTAGE}%) below failover threshold (${FAILOVER_THRESHOLD}%)"
+                    
+                    # Create failover alert
+                    curl -X POST "${SLACK_WEBHOOK_URL}" \
+                      -H 'Content-Type: application/json' \
+                      -d "{
+                        \"text\": \"🚨 CRITICAL: Automatic failover triggered!\",
+                        \"attachments\": [{
+                          \"color\": \"danger\",
+                          \"fields\": [
+                            {\"title\": \"Health Score\", \"value\": \"${HEALTH_PERCENTAGE}%\", \"short\": true},
+                            {\"title\": \"Threshold\", \"value\": \"${FAILOVER_THRESHOLD}%\", \"short\": true},
+                            {\"title\": \"Issues\", \"value\": \"$(printf '%s, ' "${ISSUES[@]}" | sed 's/, $//')\", \"short\": false}
+                          ]
+                        }]
+                      }" || true
+                    
+                    # In a real implementation, this would trigger automated failover procedures
+                    echo "FAILOVER TRIGGER: Health check failed - automatic failover would be initiated"
+                    
+                  elif [[ ${HEALTH_PERCENTAGE} -lt 80 ]]; then
+                    # Send degraded performance alert
+                    STATUS_EMOJI="⚠️"
+                    if [[ ${HEALTH_PERCENTAGE} -lt 50 ]]; then
+                      STATUS_EMOJI="🚨"
+                    fi
+                    
+                    curl -X POST "${SLACK_WEBHOOK_URL}" \
+                      -H 'Content-Type: application/json' \
+                      -d "{\"text\":\"${STATUS_EMOJI} IntelGraph health check: ${HEALTH_PERCENTAGE}% ($(printf '%s, ' "${ISSUES[@]}" | sed 's/, $//'))\"}\" || true
+                  fi
+
+                  echo "DR health check completed: ${HEALTH_PERCENTAGE}% healthy"
+
+                  # Exit with error code if critical
+                  if [[ ${HEALTH_PERCENTAGE} -lt 25 ]]; then
+                    exit 1
+                  fi
+
+              env:
+                - name: PRIMARY_API_ENDPOINT
+                  value: 'https://api.intelgraph.ai'
+                - name: DR_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: dr-config
+                      key: dr-region
+                - name: RTO_TARGET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: dr-config
+                      key: rto-target
+                - name: RPO_TARGET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: dr-config
+                      key: rpo-target
+                - name: FAILOVER_MODE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: dr-config
+                      key: failover-mode
+                - name: FAILOVER_THRESHOLD
+                  valueFrom:
+                    configMapKeyRef:
+                      name: dr-config
+                      key: failover-threshold
+                - name: DR_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-backup-bucket
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '128Mi'
+                  cpu: '100m'
+                limits:
+                  memory: '256Mi'
+                  cpu: '200m'
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -480,7 +480,7 @@ metadata:
   name: dr-replication
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/dr-replication-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/dr-replication-role'
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -488,4 +488,4 @@ metadata:
   name: dr-health-check
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/dr-health-check-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/dr-health-check-role'

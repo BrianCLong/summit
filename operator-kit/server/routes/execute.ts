@@ -26,9 +26,16 @@ execRouter.post('/', async (req, res) => {
     };
 
     // Example of parsing headers and updating QuotaStore
-    const limit = parseInt(providerResponseHeaders['x-ratelimit-limit'] || '0', 10);
-    const remaining = parseInt(providerResponseHeaders['x-ratelimit-remaining'] || '0', 10);
-    const resetTime = parseInt(providerResponseHeaders['x-ratelimit-reset'] || '0', 10) * 1000; // Convert to milliseconds
+    const limit = parseInt(
+      providerResponseHeaders['x-ratelimit-limit'] || '0',
+      10,
+    );
+    const remaining = parseInt(
+      providerResponseHeaders['x-ratelimit-remaining'] || '0',
+      10,
+    );
+    const resetTime =
+      parseInt(providerResponseHeaders['x-ratelimit-reset'] || '0', 10) * 1000; // Convert to milliseconds
 
     // Assuming 'decision_detail.model' is the model used
     // And 'tokensTotal' is the unit
@@ -51,7 +58,12 @@ execRouter.post('/', async (req, res) => {
     res.json(payload);
   } catch (e: any) {
     errorsTotal.labels('/route/execute', '500').inc();
-    emit({ type: 'error', route: '/route/execute', code: 500, msg: e?.message });
+    emit({
+      type: 'error',
+      route: '/route/execute',
+      code: 500,
+      msg: e?.message,
+    });
     res.status(500).json({ error: 'execution_failed', audit_id });
   }
 });

@@ -46,78 +46,35 @@
     "zh-TW": "鴉片類止痛藥"
   },
   "variantMap": {
-    "ar-SA": [
-      "muskinaat afyoniya"
-    ],
-    "da-DK": [
-      "opioid smertestiller",
-      "oxy piller",
-      "receptpligtige opioider"
-    ],
+    "ar-SA": ["muskinaat afyoniya"],
+    "da-DK": ["opioid smertestiller", "oxy piller", "receptpligtige opioider"],
     "de-DE": [
       "Opioid Schmerzmittel",
       "Oxy",
       "verschreibungspflichtige Opioide"
     ],
-    "en-GB": [
-      "controlled opioids",
-      "opiate painkillers",
-      "oxy tabs"
-    ],
+    "en-GB": ["controlled opioids", "opiate painkillers", "oxy tabs"],
     "en-US": [
       "hillbilly heroin",
       "opiod pain killers",
       "oxy",
       "prescription opioids"
     ],
-    "es-ES": [
-      "opioides recetados",
-      "oxicodona"
-    ],
-    "es-MX": [
-      "opioides analgesicos",
-      "opioides controlados",
-      "oxicontin"
-    ],
-    "fi-FI": [
-      "oksy tabletti",
-      "opioidi kipulaake",
-      "reseptillä opioideja"
-    ],
-    "fr-CA": [
-      "analgesiques opioides ca",
-      "opioïdes prescrits",
-      "oxy québec"
-    ],
-    "fr-FR": [
-      "opioïdes sur ordonnance",
-      "oxycontin"
-    ],
-    "hi-IN": [
-      "opioid dard nivarak"
-    ],
+    "es-ES": ["opioides recetados", "oxicodona"],
+    "es-MX": ["opioides analgesicos", "opioides controlados", "oxicontin"],
+    "fi-FI": ["oksy tabletti", "opioidi kipulaake", "reseptillä opioideja"],
+    "fr-CA": ["analgesiques opioides ca", "opioïdes prescrits", "oxy québec"],
+    "fr-FR": ["opioïdes sur ordonnance", "oxycontin"],
+    "hi-IN": ["opioid dard nivarak"],
     "it-IT": [
       "analgesici oppioidi it",
       "oppioidi su prescrizione",
       "ossicodone"
     ],
-    "ja-JP": [
-      "opioido chin tsuu yaku",
-      "オキシ",
-      "処方オピオイド"
-    ],
-    "ko-KR": [
-      "opioid jintongje"
-    ],
-    "nl-NL": [
-      "opioide pijnstiller",
-      "oxy pillen",
-      "voorgeschreven opioïden"
-    ],
-    "pt-BR": [
-      "opioides controlados",
-      "oxicodona br"
-    ],
+    "ja-JP": ["opioido chin tsuu yaku", "オキシ", "処方オピオイド"],
+    "ko-KR": ["opioid jintongje"],
+    "nl-NL": ["opioide pijnstiller", "oxy pillen", "voorgeschreven opioïden"],
+    "pt-BR": ["opioides controlados", "oxicodona br"],
     "pt-PT": [
       "analgesicos opioides pt",
       "opióides sujeitos a receita",
@@ -128,15 +85,7 @@
       "oxy tabletter",
       "receptbelagda opioider"
     ],
-    "zh-CN": [
-      "a pian zhi tong yao",
-      "处方阿片",
-      "羟考酮"
-    ],
-    "zh-TW": [
-      "ya pian zhi tong yao",
-      "羥考酮",
-      "處方鴉片"
-    ]
+    "zh-CN": ["a pian zhi tong yao", "处方阿片", "羟考酮"],
+    "zh-TW": ["ya pian zhi tong yao", "羥考酮", "處方鴉片"]
   }
 }

@@ -14,10 +14,20 @@ export default function GrafanaLinkCard() {
           Quick links to Grafana and Jaeger for live metrics and traces.
         </Typography>
         <Stack direction="row" spacing={2}>
-          <Button href={grafana} target="_blank" rel="noreferrer" variant="contained">
+          <Button
+            href={grafana}
+            target="_blank"
+            rel="noreferrer"
+            variant="contained"
+          >
             Open Grafana
           </Button>
-          <Button href={jaeger} target="_blank" rel="noreferrer" variant="outlined">
+          <Button
+            href={jaeger}
+            target="_blank"
+            rel="noreferrer"
+            variant="outlined"
+          >
             Open Jaeger
           </Button>
         </Stack>

@@ -1,18 +1,24 @@
 import { createClient } from 'redis';
-import { recHit, recMiss, recSet, cacheLocalSize } from '../metrics/cacheMetrics.js';
+import { recHit, recMiss, recSet, cacheLocalSize, } from '../metrics/cacheMetrics.js';
 export class CacheService {
+    memoryCache = new Map();
+    redisClient = null;
+    namespace = process.env.CACHE_NAMESPACE || 'maestro';
+    defaultTTL = 300; // 5 minutes default TTL
     constructor() {
-        this.memoryCache = new Map();
-        this.redisClient = null;
-        this.namespace = process.env.CACHE_NAMESPACE || 'maestro';
-        this.defaultTTL = 300; // 5 minutes default TTL
         // Initialize Redis client if available
         try {
-            const url = process.env.REDIS_URL || (process.env.REDIS_HOST ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}` : undefined);
+            const url = process.env.REDIS_URL ||
+                (process.env.REDIS_HOST
+                    ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}`
+                    : undefined);
             if (url) {
                 this.redisClient = createClient({ url });
                 this.redisClient.on('error', (err) => console.warn('[CACHE] Redis client error:', err));
-                this.redisClient.connect().then(() => console.log('[CACHE] Redis cache connected')).catch((e) => console.warn('[CACHE] Redis connect failed', e));
+                this.redisClient
+                    .connect()
+                    .then(() => console.log('[CACHE] Redis cache connected'))
+                    .catch((e) => console.warn('[CACHE] Redis connect failed', e));
             }
             else {
                 console.log('[CACHE] Using in-memory cache only');
@@ -84,8 +90,14 @@ export class CacheService {
         if (this.redisClient) {
             try {
                 const rkey = `${this.namespace}:${key}`;
-                const payload = { data, timestamp: Date.now(), ttl: cacheTTL };
-                await this.redisClient.set(rkey, JSON.stringify(payload), { EX: cacheTTL });
+                const payload = {
+                    data,
+                    timestamp: Date.now(),
+                    ttl: cacheTTL,
+                };
+                await this.redisClient.set(rkey, JSON.stringify(payload), {
+                    EX: cacheTTL,
+                });
                 recSet('redis', op);
             }
             catch (e) {
@@ -133,7 +145,10 @@ export class CacheService {
             return;
         let cursor = 0;
         do {
-            const res = await this.redisClient.scan(cursor, { MATCH: pattern, COUNT: 1000 });
+            const res = await this.redisClient.scan(cursor, {
+                MATCH: pattern,
+                COUNT: 1000,
+            });
             cursor = res.cursor;
             const keys = res.keys || res[1] || [];
             for (const k of keys)

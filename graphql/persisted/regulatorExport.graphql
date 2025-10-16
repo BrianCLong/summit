@@ -1,1 +1,12 @@
-mutation regulatorExport($tenant: Tenant!, $profile: String!) { regulatorExport(tenant: $tenant, profile: $profile) { ok url sizeBytes audit { evidenceId ts actor } } }
+mutation regulatorExport($tenant: Tenant!, $profile: String!) {
+  regulatorExport(tenant: $tenant, profile: $profile) {
+    ok
+    url
+    sizeBytes
+    audit {
+      evidenceId
+      ts
+      actor
+    }
+  }
+}

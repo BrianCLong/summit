@@ -13,16 +13,16 @@ golden_io_tests:
   - test_atom_parsing.py
   - test_deduplication.py
 rate_limit:
-  requests_per_hour: 60  # 1 per minute max per feed
+  requests_per_hour: 60 # 1 per minute max per feed
   burst_limit: 5
   backoff_strategy: exponential
   max_retries: 3
 pii_flags:
-  - author_names: "May contain journalist/author names"
-  - quoted_individuals: "May contain names in article content"
-license: "varies-by-feed"
-classification: "open-source"
-retention_policy: "90-days"  # News data retention
+  - author_names: 'May contain journalist/author names'
+  - quoted_individuals: 'May contain names in article content'
+license: 'varies-by-feed'
+classification: 'open-source'
+retention_policy: '90-days' # News data retention
 feed_configuration:
   poll_interval_minutes: 30
   max_items_per_poll: 100
@@ -34,22 +34,22 @@ feed_configuration:
     sentiment_analysis: false
 supported_feeds:
   threat_intel:
-    - name: "Krebs on Security"
-      url: "https://krebsonsecurity.com/feed/"
-      category: "cybersecurity"
-    - name: "SANS ISC"
-      url: "https://isc.sans.edu/rssfeed.xml"
-      category: "cybersecurity"
-    - name: "Threatpost"
-      url: "https://threatpost.com/feed/"
-      category: "cybersecurity"
+    - name: 'Krebs on Security'
+      url: 'https://krebsonsecurity.com/feed/'
+      category: 'cybersecurity'
+    - name: 'SANS ISC'
+      url: 'https://isc.sans.edu/rssfeed.xml'
+      category: 'cybersecurity'
+    - name: 'Threatpost'
+      url: 'https://threatpost.com/feed/'
+      category: 'cybersecurity'
   general_news:
-    - name: "Reuters Security"
-      url: "https://feeds.reuters.com/reuters/technologyNews"
-      category: "technology"
-    - name: "BBC Technology"
-      url: "http://feeds.bbci.co.uk/news/technology/rss.xml"
-      category: "technology"
+    - name: 'Reuters Security'
+      url: 'https://feeds.reuters.com/reuters/technologyNews'
+      category: 'technology'
+    - name: 'BBC Technology'
+      url: 'http://feeds.bbci.co.uk/news/technology/rss.xml'
+      category: 'technology'
 dependencies:
   - python>=3.8
   - feedparser>=6.0.0
@@ -59,18 +59,18 @@ dependencies:
   - nltk>=3.6.0
   - dateutil>=2.8.0
 configuration:
-  user_agent: "IntelGraph RSS Connector 1.0"
+  user_agent: 'IntelGraph RSS Connector 1.0'
   timeout_seconds: 30
   verify_ssl: true
   enable_caching: true
   cache_ttl_minutes: 15
-  max_content_length: 1048576  # 1MB
+  max_content_length: 1048576 # 1MB
   allowed_content_types:
-    - "application/rss+xml"
-    - "application/atom+xml"
-    - "application/xml"
-    - "text/xml"
+    - 'application/rss+xml'
+    - 'application/atom+xml'
+    - 'application/xml'
+    - 'text/xml'
   deduplication:
-    method: "content_hash"
-    hash_fields: ["title", "link", "description"]
+    method: 'content_hash'
+    hash_fields: ['title', 'link', 'description']
     similarity_threshold: 0.85

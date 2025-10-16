@@ -1,6 +1,7 @@
 # Bug Bash Runbook Checklist
 
 ## R1 - Authentication & Authorization
+
 - [ ] User registration flow
 - [ ] Login/logout functionality
 - [ ] Password reset flow
@@ -10,6 +11,7 @@
 - [ ] API key management
 
 ## R2 - Data Ingestion & Processing
+
 - [ ] File upload functionality
 - [ ] Bulk data import
 - [ ] Real-time data streaming
@@ -19,6 +21,7 @@
 - [ ] Error notification system
 
 ## R3 - Graph Visualization & Navigation
+
 - [ ] Graph rendering performance
 - [ ] Node/edge interaction
 - [ ] Layout algorithms
@@ -28,6 +31,7 @@
 - [ ] Responsive design
 
 ## R4 - Search & Discovery
+
 - [ ] Full-text search accuracy
 - [ ] Faceted search functionality
 - [ ] Search performance
@@ -37,6 +41,7 @@
 - [ ] Saved searches
 
 ## R5 - Analytics & Reporting
+
 - [ ] Dashboard loading performance
 - [ ] Chart/graph accuracy
 - [ ] Export functionality
@@ -46,6 +51,7 @@
 - [ ] Data filtering
 
 ## R6 - System Administration
+
 - [ ] User management interface
 - [ ] System monitoring dashboard
 - [ ] Configuration management
@@ -55,6 +61,7 @@
 - [ ] Health checks
 
 ## Cross-Cutting Concerns
+
 - [ ] Mobile responsiveness
 - [ ] Browser compatibility
 - [ ] Accessibility compliance

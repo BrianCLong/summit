@@ -47,8 +47,13 @@ jest.mock('pg', () => {
       return client;
     });
 
-    public readonly queryHandler = jest.fn(async () => ({ rows: [], rowCount: 0 }));
-    public readonly query = jest.fn(async (config: any) => this.queryHandler(config));
+    public readonly queryHandler = jest.fn(async () => ({
+      rows: [],
+      rowCount: 0,
+    }));
+    public readonly query = jest.fn(async (config: any) =>
+      this.queryHandler(config),
+    );
     public readonly end = jest.fn(async () => {
       this.closed = true;
     });
@@ -139,7 +144,10 @@ describe('Managed PostgreSQL pool', () => {
     const pool = getPostgresPool();
     const [writePool, readPool] = getMockPools();
 
-    readPool.queryHandler.mockResolvedValue({ rows: [{ value: 1 }], rowCount: 1 });
+    readPool.queryHandler.mockResolvedValue({
+      rows: [{ value: 1 }],
+      rowCount: 1,
+    });
 
     const result = await pool.query('SELECT * FROM widgets');
 
@@ -148,7 +156,10 @@ describe('Managed PostgreSQL pool', () => {
     expect(writePool.connectCalls).toBe(0);
 
     const client = readPool.clients[0];
-    const timeoutCall = client.query.mock.calls.find(([sql]) => typeof sql === 'string' && sql.startsWith('SET statement_timeout'));
+    const timeoutCall = client.query.mock.calls.find(
+      ([sql]) =>
+        typeof sql === 'string' && sql.startsWith('SET statement_timeout'),
+    );
     expect(timeoutCall?.[1]?.[0]).toBe(5000);
   });
 
@@ -165,7 +176,9 @@ describe('Managed PostgreSQL pool', () => {
     await pool.query('SELECT * FROM accounts WHERE id = $1', ['a']);
     await pool.query('SELECT * FROM accounts WHERE id = $1', ['b']);
 
-    const executed = readPool.statements.filter((stmt) => stmt.text.includes('FROM accounts'));
+    const executed = readPool.statements.filter((stmt) =>
+      stmt.text.includes('FROM accounts'),
+    );
     expect(executed).toHaveLength(2);
     expect(executed[0].name).toBeDefined();
     expect(executed[0].name).toBe(executed[1].name);
@@ -213,7 +226,10 @@ describe('Managed PostgreSQL pool', () => {
       (err as any).code = 'ECONNRESET';
       throw err;
     });
-    writePool.queryHandler.mockResolvedValue({ rows: [{ ok: true }], rowCount: 1 });
+    writePool.queryHandler.mockResolvedValue({
+      rows: [{ ok: true }],
+      rowCount: 1,
+    });
 
     await expect(pool.query('SELECT 1')).rejects.toThrow('read failed');
     await expect(pool.query('SELECT 1')).rejects.toThrow('read failed');
@@ -232,7 +248,10 @@ describe('Managed PostgreSQL pool', () => {
     const pool = getPostgresPool();
     const [, readPool] = getMockPools();
 
-    readPool.queryHandler.mockResolvedValue({ rows: [{ ok: true }], rowCount: 1 });
+    readPool.queryHandler.mockResolvedValue({
+      rows: [{ ok: true }],
+      rowCount: 1,
+    });
 
     await pool.query('SELECT * FROM widgets');
 
@@ -270,11 +289,12 @@ describe('Managed PostgreSQL pool', () => {
 
     await pool.query('SELECT 1');
 
-    const leakTimeout = timeoutSpy.mock.calls.find(([, timeout]) => timeout === 1234);
+    const leakTimeout = timeoutSpy.mock.calls.find(
+      ([, timeout]) => timeout === 1234,
+    );
     expect(leakTimeout).toBeDefined();
 
     timeoutSpy.mockRestore();
     jest.useRealTimers();
   });
 });
-

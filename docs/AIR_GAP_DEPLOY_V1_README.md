@@ -14,6 +14,7 @@ Air-Gap Deploy v1 provides a complete offline deployment package for IntelGraph 
 ### 1. Offline Bundle Creator (`scripts/airgap/create-offline-bundle.sh`)
 
 Automated script that creates complete air-gap deployment bundle with:
+
 - Docker image list with digests
 - Image export to tar files
 - SHA256 checksum manifest
@@ -22,6 +23,7 @@ Automated script that creates complete air-gap deployment bundle with:
 - Documentation package
 
 **Features**:
+
 - Pulls all required Docker images
 - Extracts cryptographic digests (SHA256)
 - Saves images to transferable tar files
@@ -55,12 +57,14 @@ airgap-bundle/
 ### 3. Private Registry Mirror Script (`01-setup-private-registry.sh`)
 
 Automated registry setup with:
+
 - Image loading from tar files
 - Tagging for private registry
 - Push to air-gap registry
 - Verification logging
 
 **Steps**:
+
 1. Load all images from bundle
 2. Tag images for private registry
 3. Push to internal registry
@@ -69,12 +73,14 @@ Automated registry setup with:
 ### 4. Deployment Script (`02-deploy-airgap.sh`)
 
 Complete deployment automation with:
+
 - Environment configuration injection
 - Docker Compose generation
 - Service orchestration
 - Health check integration
 
 **Services Deployed**:
+
 - PostgreSQL (metadata store)
 - Neo4j (graph database)
 - Redis (cache)
@@ -85,6 +91,7 @@ Complete deployment automation with:
 ### 5. Configuration Injection
 
 Template-based config management:
+
 - Database credentials
 - Registry URLs
 - Service endpoints
@@ -92,6 +99,7 @@ Template-based config management:
 - Feature flags
 
 **Config Template** (`config/config-template.env`):
+
 ```bash
 PRIVATE_REGISTRY_URL=registry.airgap.local:5000
 POSTGRES_PASSWORD=<secure-password>
@@ -103,6 +111,7 @@ JWT_SECRET=<secure-secret>
 ### 6. Checksum Manifest
 
 SHA256 verification for:
+
 - All Docker image tar files
 - Configuration files
 - Deployment scripts
@@ -112,6 +121,7 @@ SHA256 verification for:
 ### 7. Dry-Run Transcript
 
 Automated execution transcript including:
+
 - Pre-flight checks
 - Image manifest with digests
 - Checksum verification results
@@ -122,12 +132,14 @@ Automated execution transcript including:
 ## Acceptance Criteria
 
 ### ✅ 1. Offline Bundle with Image List + Digests
+
 - [x] Image list generated for all services
 - [x] Cryptographic digests (SHA256) extracted
 - [x] Images saved to transferable tar files
 - [x] Digest verification script included
 
 ### ✅ 2. Private Registry Mirror Steps
+
 - [x] Registry setup automation script
 - [x] Image loading from bundle
 - [x] Tagging for private registry
@@ -135,6 +147,7 @@ Automated execution transcript including:
 - [x] Verification steps documented
 
 ### ✅ 3. Config/Secret Injection Approach
+
 - [x] Configuration template created
 - [x] Environment variable injection
 - [x] Secret management documented
@@ -142,6 +155,7 @@ Automated execution transcript including:
 - [x] Validation steps included
 
 ### ✅ 4. Checksum Manifest + Dry-Run Transcript
+
 - [x] SHA256 checksums for all images
 - [x] Overall manifest checksum
 - [x] Verification script included
@@ -149,6 +163,7 @@ Automated execution transcript including:
 - [x] Rollback documented
 
 ### ✅ 5. Transcript Passes; Checksums Match; Rollback Documented
+
 - [x] Execution transcript complete
 - [x] All checksums verified
 - [x] Rollback script functional
@@ -236,6 +251,7 @@ If deployment fails:
 ### Checksum Verification
 
 All images include SHA256 digests:
+
 ```bash
 # Verify individual image
 sha256sum -c checksums/images.sha256
@@ -265,6 +281,7 @@ sha256sum -c checksums/manifest.sha256
 ### Bundle Creation Fails
 
 **Issue**: Docker pull fails
+
 ```bash
 # Solution: Check Docker registry access
 docker login ghcr.io
@@ -272,6 +289,7 @@ docker login ghcr.io
 ```
 
 **Issue**: Digest extraction fails
+
 ```bash
 # Solution: Pull image first
 docker pull <image>
@@ -281,12 +299,14 @@ docker inspect --format='{{index .RepoDigests 0}}' <image>
 ### Deployment Fails
 
 **Issue**: Checksum mismatch
+
 ```bash
 # Solution: Re-transfer bundle or re-create
 ./scripts/airgap/create-offline-bundle.sh
 ```
 
 **Issue**: Registry push fails
+
 ```bash
 # Solution: Check registry credentials
 docker login $PRIVATE_REGISTRY_URL
@@ -294,6 +314,7 @@ docker login $PRIVATE_REGISTRY_URL
 ```
 
 **Issue**: Service won't start
+
 ```bash
 # Solution: Check logs and config
 docker-compose logs <service>
@@ -332,6 +353,7 @@ sha256sum -c images.sha256 && echo "✅ All checksums match"
 2. `docs/AIR_GAP_DEPLOY_V1_README.md` (this file) - Documentation
 
 **Generated Bundle Structure**:
+
 - 4 deployment scripts (setup, deploy, verify, rollback)
 - 2 checksum files (images, manifest)
 - 1 configuration template

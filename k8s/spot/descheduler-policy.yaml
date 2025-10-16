@@ -4,9 +4,9 @@ metadata:
   name: descheduler-policy
 spec:
   strategies:
-    "RemovePodsViolatingInterPodAntiAffinity":
+    'RemovePodsViolatingInterPodAntiAffinity':
       enabled: true
-    "RemovePodsViolatingNodeAffinity":
+    'RemovePodsViolatingNodeAffinity':
       enabled: true
-    "RemovePodsViolatingNodeTaints":
+    'RemovePodsViolatingNodeTaints':
       enabled: true

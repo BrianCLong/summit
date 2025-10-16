@@ -55,26 +55,26 @@ export class V24Platform {
     const httpPushResult = await this.ingestEngine.finalizeHttpPush({
       targetRPS: this.config.targets.ingestRPS,
       p95Target: 100, // ms
-      enableBackoff: true
+      enableBackoff: true,
     });
 
     // S1.2 Kafka Consumer GA: at‑least‑once with dedupe key
     const kafkaResult = await this.ingestEngine.setupKafkaConsumer({
       dedupeKey: '(tenant,source,signal_id,ts)',
       recoveryTime: 5 * 60 * 1000, // 5 minutes
-      maxDuplicateRate: 0.001 // ≤ 0.1%
+      maxDuplicateRate: 0.001, // ≤ 0.1%
     });
 
     // S1.3 Dedupe Telemetry
     const metricsResult = await this.observability.setupDedupeMetrics({
       warnThreshold: 0.1, // ≥ 10%
-      critThreshold: 0.2  // ≥ 20%
+      critThreshold: 0.2, // ≥ 20%
     });
 
     return {
       httpPushGA: httpPushResult.success,
       kafkaConsumerGA: kafkaResult.success,
-      dedupeMetrics: metricsResult.success
+      dedupeMetrics: metricsResult.success,
     };
   }
 
@@ -90,25 +90,25 @@ export class V24Platform {
     const cacheResult = await this.cacheOptimizer.setupTenantCaching({
       targetHitRate: this.config.targets.cacheHitRate,
       targetRPS: 200,
-      latencyImprovement: 0.2 // ≥ 20%
+      latencyImprovement: 0.2, // ≥ 20%
     });
 
     // S2.2 RPS Limiter Tuning
     const limiterResult = await this.cacheOptimizer.tuneRateLimiter({
       adaptiveByTenant: true,
-      preventThrottling: true
+      preventThrottling: true,
     });
 
     // S2.3 Cost Dashboard
     const dashboardResult = await this.observability.setupCostDashboard({
       budgetAlerts: [0.8, 0.95], // 80%, 95%
-      monthlyProjections: true
+      monthlyProjections: true,
     });
 
     return {
       cacheHitRate: cacheResult.hitRate,
       rateLimiterTuned: limiterResult.success,
-      costDashboard: dashboardResult.success
+      costDashboard: dashboardResult.success,
     };
   }
 
@@ -124,26 +124,26 @@ export class V24Platform {
       return {
         readReplicasActive: false,
         residencyGuardEnabled: false,
-        latencyImprovement: 0
+        latencyImprovement: 0,
       };
     }
 
     // S3.1 Read Replicas
     const replicasResult = await this.multiRegionRouter.setupReadReplicas({
       regions: ['us-east-1', 'eu-west-1'],
-      targetImprovement: this.config.targets.readLatencyImprovement
+      targetImprovement: this.config.targets.readLatencyImprovement,
     });
 
     // S3.2 Residency Guard
     const guardResult = await this.multiRegionRouter.setupResidencyGuard({
       enforceDataAccess: true,
-      policySimulation: true
+      policySimulation: true,
     });
 
     return {
       readReplicasActive: replicasResult.success,
       residencyGuardEnabled: guardResult.success,
-      latencyImprovement: replicasResult.improvementPercent || 0
+      latencyImprovement: replicasResult.improvementPercent || 0,
     };
   }
 
@@ -158,19 +158,19 @@ export class V24Platform {
     // S4.1 Fine‑grained Scopes
     const scopesResult = await this.policyEngine.setupFineGrainedScopes({
       scopes: ['coherence:read:self', 'coherence:write:self'],
-      targetCoverage: this.config.targets.policyTestCoverage
+      targetCoverage: this.config.targets.policyTestCoverage,
     });
 
     // S4.2 Retention Jobs
     const retentionResult = await this.policyEngine.setupRetentionJobs({
       parameterizedTTL: true,
-      dryRunMode: true
+      dryRunMode: true,
     });
 
     return {
       fineGrainedScopes: scopesResult.success,
       retentionJobs: retentionResult.success,
-      testCoverage: scopesResult.coverage || 0
+      testCoverage: scopesResult.coverage || 0,
     };
   }
 
@@ -185,20 +185,20 @@ export class V24Platform {
     // S5.1 Subscription Metrics
     const metricsResult = await this.observability.addSubscriptionMetrics({
       histogram: 'subscription_fanout_latency_ms',
-      percentiles: [0.95, 0.99]
+      percentiles: [0.95, 0.99],
     });
 
     // S5.2 Trace Sampling
     const tracingResult = await this.observability.setupTracing({
       samplingRate: 0.15, // 10-20%
       baggageTenant: true,
-      endToEndCoverage: 0.95
+      endToEndCoverage: 0.95,
     });
 
     return {
       subscriptionMetrics: metricsResult.success,
       traceSampling: tracingResult.success,
-      sloCompliance: tracingResult.coverage || 0
+      sloCompliance: tracingResult.coverage || 0,
     };
   }
 
@@ -213,19 +213,19 @@ export class V24Platform {
     // S6.1 Kill‑Switch Drill
     const killSwitchResult = await this.resilience.testKillSwitch({
       targetMTTR: this.config.targets.mttr,
-      featureFlag: 'v24.coherence=false'
+      featureFlag: 'v24.coherence=false',
     });
 
     // S6.2 Dependency Faults
     const faultResult = await this.resilience.testDependencyFaults({
       services: ['Redis', 'Neo4j'],
-      gracefulDegradation: true
+      gracefulDegradation: true,
     });
 
     return {
       killSwitchTested: killSwitchResult.success,
       dependencyFaultsTested: faultResult.success,
-      mttr: killSwitchResult.actualMTTR || 0
+      mttr: killSwitchResult.actualMTTR || 0,
     };
   }
 
@@ -241,20 +241,20 @@ export class V24Platform {
     const cliResult = await this.ingestEngine.setupPersistedQueryCLI({
       hashValidation: true,
       schemaCheck: true,
-      ciGate: true
+      ciGate: true,
     });
 
     // S7.2 Golden Datasets
     const datasetsResult = await this.ingestEngine.setupGoldenDatasets({
       tenants: 10,
       signalsPerDay: 10000,
-      varianceTarget: 0.05 // ±5%
+      varianceTarget: 0.05, // ±5%
     });
 
     return {
       persistedQueryCLI: cliResult.success,
       goldenDatasets: datasetsResult.success,
-      ciGatesActive: cliResult.ciGateEnabled || false
+      ciGatesActive: cliResult.ciGateEnabled || false,
     };
   }
 
@@ -269,7 +269,7 @@ export class V24Platform {
     const results = {
       success: true,
       completedEpics: [] as string[],
-      metrics: {} as any
+      metrics: {} as any,
     };
 
     try {
@@ -301,7 +301,9 @@ export class V24Platform {
       if (this.config.epics.policyExpansion) {
         const policyResult = await this.expandPolicyCapabilities();
         results.metrics.policy = policyResult;
-        if (policyResult.testCoverage >= this.config.targets.policyTestCoverage) {
+        if (
+          policyResult.testCoverage >= this.config.targets.policyTestCoverage
+        ) {
           results.completedEpics.push('E4-PolicyExpansion');
         }
       }
@@ -329,7 +331,6 @@ export class V24Platform {
           results.completedEpics.push('E7-DeveloperExperience');
         }
       }
-
     } catch (error) {
       results.success = false;
       results.metrics.error = error;
@@ -345,11 +346,13 @@ export class V24Platform {
       components: {
         ingest: await this.ingestEngine.getHealth(),
         cache: await this.cacheOptimizer.getHealth(),
-        multiRegion: this.config.epics.multiRegion ? await this.multiRegionRouter.getHealth() : null,
+        multiRegion: this.config.epics.multiRegion
+          ? await this.multiRegionRouter.getHealth()
+          : null,
         policy: await this.policyEngine.getHealth(),
         observability: await this.observability.getHealth(),
-        resilience: await this.resilience.getHealth()
-      }
+        resilience: await this.resilience.getHealth(),
+      },
     };
   }
 }

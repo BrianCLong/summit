@@ -4,9 +4,10 @@
 import os from 'os';
 import { performance } from 'perf_hooks';
 import { dbQueryDuration, dbQueriesTotal } from './metrics.js';
+import { evaluateHealthForRemediation } from './remediation.js';
 // Health check status cache
 let healthStatus = {
-    status: "unknown",
+    status: 'unknown',
     timestamp: new Date().toISOString(),
     checks: {},
 };
@@ -23,20 +24,20 @@ async function checkDatabase() {
             connectionTimeoutMillis: 5000,
         });
         const start = performance.now();
-        const result = await pool.query("SELECT 1 as healthy");
+        const result = await pool.query('SELECT 1 as healthy');
         const responseTime = performance.now() - start;
         await pool.end();
         return {
-            status: "healthy",
+            status: 'healthy',
             responseTime: Math.round(responseTime),
-            details: "PostgreSQL connection successful",
+            details: 'PostgreSQL connection successful',
         };
     }
     catch (error) {
         return {
-            status: "unhealthy",
+            status: 'unhealthy',
             error: error.message,
-            details: "PostgreSQL connection failed",
+            details: 'PostgreSQL connection failed',
         };
     }
 }
@@ -49,36 +50,32 @@ async function checkNeo4j() {
     const start = performance.now();
     try {
         const neo4j = await import('neo4j-driver');
-        const driver = neo4j.driver(process.env.NEO4J_URI || 'bolt://localhost:7687', neo4j.auth.basic(process.env.NEO4J_USER || "neo4j", process.env.NEO4J_PASSWORD || "password"), { connectionTimeout: 5000 });
+        const driver = neo4j.driver(process.env.NEO4J_URI || 'bolt://localhost:7687', neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'), { connectionTimeout: 5000 });
         session = driver.session();
-        await session.run("RETURN 1 as healthy");
+        await session.run('RETURN 1 as healthy');
         const responseTime = performance.now() - start;
-        dbQueryDuration
-            .labels("neo4j", "health")
-            .observe(responseTime / 1000);
-        dbQueriesTotal.labels("neo4j", "health", "success").inc();
+        dbQueryDuration.labels('neo4j', 'health').observe(responseTime / 1000);
+        dbQueriesTotal.labels('neo4j', 'health', 'success').inc();
         await session.close();
         await driver.close();
         return {
-            status: "healthy",
+            status: 'healthy',
             responseTime: Math.round(responseTime),
-            details: "Neo4j connection successful",
+            details: 'Neo4j connection successful',
         };
     }
     catch (error) {
         const responseTime = performance.now() - start;
-        dbQueryDuration
-            .labels("neo4j", "health")
-            .observe(responseTime / 1000);
-        dbQueriesTotal.labels("neo4j", "health", "error").inc();
+        dbQueryDuration.labels('neo4j', 'health').observe(responseTime / 1000);
+        dbQueriesTotal.labels('neo4j', 'health', 'error').inc();
         if (session)
             await session.close();
         if (driver)
             await driver.close();
         return {
-            status: "unhealthy",
+            status: 'unhealthy',
             error: error.message,
-            details: "Neo4j connection failed",
+            details: 'Neo4j connection failed',
         };
     }
 }
@@ -89,7 +86,7 @@ async function checkRedis() {
     try {
         const Redis = (await import('ioredis')).default;
         const redis = new Redis({
-            host: process.env.REDIS_HOST || "localhost",
+            host: process.env.REDIS_HOST || 'localhost',
             port: process.env.REDIS_PORT || 6379,
             connectTimeout: 5000,
             lazyConnect: true,
@@ -99,16 +96,16 @@ async function checkRedis() {
         const responseTime = performance.now() - start;
         redis.disconnect();
         return {
-            status: "healthy",
+            status: 'healthy',
             responseTime: Math.round(responseTime),
-            details: "Redis connection successful",
+            details: 'Redis connection successful',
         };
     }
     catch (error) {
         return {
-            status: "unhealthy",
+            status: 'unhealthy',
             error: error.message,
-            details: "Redis connection failed",
+            details: 'Redis connection failed',
         };
     }
 }
@@ -127,15 +124,15 @@ async function checkMlService() {
         if (response.ok) {
             const data = await response.json();
             return {
-                status: "healthy",
+                status: 'healthy',
                 responseTime: Math.round(responseTime),
-                details: "ML service reachable",
+                details: 'ML service reachable',
                 mlServiceStatus: data.status,
             };
         }
         else {
             return {
-                status: "unhealthy",
+                status: 'unhealthy',
                 responseTime: Math.round(responseTime),
                 details: `ML service returned ${response.status}`,
             };
@@ -143,9 +140,9 @@ async function checkMlService() {
     }
     catch (error) {
         return {
-            status: "unhealthy",
+            status: 'unhealthy',
             error: error.message,
-            details: "ML service unreachable",
+            details: 'ML service unreachable',
         };
     }
 }
@@ -159,7 +156,7 @@ function checkSystemResources() {
     const memoryUsagePercent = ((totalMemory - freeMemory) / totalMemory) * 100;
     const cpuUsage = process.cpuUsage();
     const loadAverage = os.loadavg();
-    const status = memoryUsagePercent > 90 ? "unhealthy" : "healthy";
+    const status = memoryUsagePercent > 90 ? 'unhealthy' : 'healthy';
     return {
         status,
         memory: {
@@ -175,9 +172,9 @@ function checkSystemResources() {
             loadAverage: loadAverage.map((load) => Math.round(load * 100) / 100),
         },
         uptime: Math.round(process.uptime()),
-        details: status === "healthy"
-            ? "System resources within limits"
-            : "High memory usage detected",
+        details: status === 'healthy'
+            ? 'System resources within limits'
+            : 'High memory usage detected',
     };
 }
 /**
@@ -194,42 +191,46 @@ async function performHealthCheck() {
             Promise.resolve(checkSystemResources()),
         ]);
         const checks = {
-            database: database.status === "fulfilled"
+            database: database.status === 'fulfilled'
                 ? database.value
-                : { status: "unhealthy", error: database.reason?.message },
-            neo4j: neo4j.status === "fulfilled"
+                : { status: 'unhealthy', error: database.reason?.message },
+            neo4j: neo4j.status === 'fulfilled'
                 ? neo4j.value
-                : { status: "unhealthy", error: neo4j.reason?.message },
-            redis: redis.status === "fulfilled"
+                : { status: 'unhealthy', error: neo4j.reason?.message },
+            redis: redis.status === 'fulfilled'
                 ? redis.value
-                : { status: "unhealthy", error: redis.reason?.message },
-            mlService: mlService.status === "fulfilled"
+                : { status: 'unhealthy', error: redis.reason?.message },
+            mlService: mlService.status === 'fulfilled'
                 ? mlService.value
-                : { status: "unhealthy", error: mlService.reason?.message },
-            systemResources: systemResources.status === "fulfilled"
+                : { status: 'unhealthy', error: mlService.reason?.message },
+            systemResources: systemResources.status === 'fulfilled'
                 ? systemResources.value
-                : { status: "unhealthy", error: systemResources.reason?.message },
+                : { status: 'unhealthy', error: systemResources.reason?.message },
         };
-        const allHealthy = Object.values(checks).every((check) => check.status === "healthy");
-        const overallStatus = allHealthy ? "healthy" : "unhealthy";
+        const allHealthy = Object.values(checks).every((check) => check.status === 'healthy');
+        const overallStatus = allHealthy ? 'healthy' : 'unhealthy';
         const totalTime = Math.round(performance.now() - startTime);
         healthStatus = {
             status: overallStatus,
             timestamp: new Date().toISOString(),
             responseTime: totalTime,
-            version: process.env.npm_package_version || "1.0.0",
-            environment: process.env.NODE_ENV || "development",
+            version: process.env.npm_package_version || '1.0.0',
+            environment: process.env.NODE_ENV || 'development',
             checks,
         };
+        if (overallStatus === 'unhealthy') {
+            await evaluateHealthForRemediation(healthStatus);
+        }
         return healthStatus;
     }
     catch (error) {
         healthStatus = {
-            status: "unhealthy",
+            status: 'unhealthy',
             timestamp: new Date().toISOString(),
             error: error.message,
             checks: {},
         };
+        await evaluateHealthForRemediation(healthStatus);
         return healthStatus;
     }
 }
@@ -244,7 +245,7 @@ function getCachedHealthStatus() {
  */
 async function livenessProbe() {
     return {
-        status: "alive",
+        status: 'alive',
         timestamp: new Date().toISOString(),
         uptime: Math.round(process.uptime()),
         pid: process.pid,
@@ -258,9 +259,9 @@ async function readinessProbe() {
         // Quick checks for critical dependencies
         const dbCheck = await checkDatabase();
         const redisCheck = await checkRedis();
-        const ready = dbCheck.status === "healthy" && redisCheck.status === "healthy";
+        const ready = dbCheck.status === 'healthy' && redisCheck.status === 'healthy';
         return {
-            status: ready ? "ready" : "not_ready",
+            status: ready ? 'ready' : 'not_ready',
             timestamp: new Date().toISOString(),
             checks: {
                 database: dbCheck.status,
@@ -270,7 +271,7 @@ async function readinessProbe() {
     }
     catch (error) {
         return {
-            status: "not_ready",
+            status: 'not_ready',
             timestamp: new Date().toISOString(),
             error: error.message,
         };
@@ -282,11 +283,11 @@ const healthCheckInterval = setInterval(async () => {
         await performHealthCheck();
     }
     catch (error) {
-        console.error("Health check error:", error);
+        console.error('Health check error:', error);
     }
 }, 30000);
 // Cleanup interval on process exit
-process.on("SIGTERM", () => {
+process.on('SIGTERM', () => {
     clearInterval(healthCheckInterval);
 });
 export { performHealthCheck, getCachedHealthStatus, livenessProbe, readinessProbe, checkDatabase, checkNeo4j, checkRedis, checkMlService, checkSystemResources, };

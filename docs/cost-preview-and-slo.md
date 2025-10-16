@@ -40,4 +40,3 @@ Rules are included under `charts/monitoring/rules/query-cost-guard.yaml` and pic
   - Signals governance/policy or supply‑chain integrity regressions.
 
 > Tune thresholds in the rules file as operating thresholds are validated in staging.
-

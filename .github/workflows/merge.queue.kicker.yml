@@ -1,0 +1,26 @@
+name: Merge Queue Kicker
+on:
+  workflow_run:
+    workflows: ['CI (green)']
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  nudge:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x' }
+      - name: Install gh
+        uses: cli/gh-action@v2
+      - name: Nudge branches that match patterns
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/pr_batch_fix.sh || true
+          DRY_RUN=true MATCH='feat/|fix/|codex/' bash scripts/pr_batch_fix.sh || true
+          MATCH='feat/|fix/|codex/' bash scripts/pr_batch_fix.sh || true

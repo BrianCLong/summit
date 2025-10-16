@@ -21,140 +21,140 @@ spec:
         app: falco
         app.kubernetes.io/name: falco
       annotations:
-        checksum/config: "UPDATE_ON_CONFIG_CHANGE"
+        checksum/config: 'UPDATE_ON_CONFIG_CHANGE'
     spec:
       serviceAccountName: falco
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
-      - name: falco
-        image: falcosecurity/falco:0.35.1
-        imagePullPolicy: IfNotPresent
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 1024Mi
-          requests:
-            cpu: 100m
-            memory: 512Mi
-        securityContext:
-          privileged: true
-          readOnlyRootFilesystem: true
-        args:
-        - /usr/bin/falco
-        - --cri=/run/containerd/containerd.sock
-        - --cri-timeout=10s
-        - -K=/var/run/secrets/kubernetes.io/serviceaccount/token
-        - -k=https://$(KUBERNETES_SERVICE_HOST)
-        - --k8s-node=$(FALCO_K8S_NODE_NAME)
-        - -pk
-        env:
-        - name: FALCO_K8S_NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        - name: FALCO_GRPC_BIND_ADDRESS
-          value: "unix:///run/falco/falco.sock"
-        - name: FALCO_GRPC_THREAD_POOL_SIZE
-          value: "8"
-        volumeMounts:
-        - mountPath: /dev
-          name: dev-fs
-          readOnly: true
-        - mountPath: /proc
-          name: proc-fs
-          readOnly: true
-        - mountPath: /boot
-          name: boot-fs
-          readOnly: true
-        - mountPath: /lib/modules
-          name: lib-modules
-          readOnly: true
-        - mountPath: /usr
-          name: usr-fs
-          readOnly: true
-        - mountPath: /etc/falco
-          name: falco-config
-        - mountPath: /run/falco
-          name: falco-socket-dir
-        - mountPath: /run/containerd/containerd.sock
-          name: containerd-socket
-        - mountPath: /var/run/docker.sock
-          name: docker-socket
-        - mountPath: /etc/falco/rules.d
-          name: intelgraph-rules
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8765
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          timeoutSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8765
-          initialDelaySeconds: 30
-          periodSeconds: 15
-          timeoutSeconds: 5
+        - name: falco
+          image: falcosecurity/falco:0.35.1
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: true
+          args:
+            - /usr/bin/falco
+            - --cri=/run/containerd/containerd.sock
+            - --cri-timeout=10s
+            - -K=/var/run/secrets/kubernetes.io/serviceaccount/token
+            - -k=https://$(KUBERNETES_SERVICE_HOST)
+            - --k8s-node=$(FALCO_K8S_NODE_NAME)
+            - -pk
+          env:
+            - name: FALCO_K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: FALCO_GRPC_BIND_ADDRESS
+              value: 'unix:///run/falco/falco.sock'
+            - name: FALCO_GRPC_THREAD_POOL_SIZE
+              value: '8'
+          volumeMounts:
+            - mountPath: /dev
+              name: dev-fs
+              readOnly: true
+            - mountPath: /proc
+              name: proc-fs
+              readOnly: true
+            - mountPath: /boot
+              name: boot-fs
+              readOnly: true
+            - mountPath: /lib/modules
+              name: lib-modules
+              readOnly: true
+            - mountPath: /usr
+              name: usr-fs
+              readOnly: true
+            - mountPath: /etc/falco
+              name: falco-config
+            - mountPath: /run/falco
+              name: falco-socket-dir
+            - mountPath: /run/containerd/containerd.sock
+              name: containerd-socket
+            - mountPath: /var/run/docker.sock
+              name: docker-socket
+            - mountPath: /etc/falco/rules.d
+              name: intelgraph-rules
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8765
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8765
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
 
-      - name: falco-exporter
-        image: falcosecurity/falco-exporter:0.8.2
-        imagePullPolicy: IfNotPresent
-        args:
-        - /usr/bin/falco-exporter
-        - --client-socket=unix:///run/falco/falco.sock
-        ports:
-        - containerPort: 9376
-          name: metrics
-        resources:
-          limits:
-            cpu: 100m
-            memory: 128Mi
-          requests:
-            cpu: 10m
-            memory: 32Mi
-        securityContext:
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 65534
-        volumeMounts:
-        - mountPath: /run/falco
-          name: falco-socket-dir
+        - name: falco-exporter
+          image: falcosecurity/falco-exporter:0.8.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - /usr/bin/falco-exporter
+            - --client-socket=unix:///run/falco/falco.sock
+          ports:
+            - containerPort: 9376
+              name: metrics
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+          volumeMounts:
+            - mountPath: /run/falco
+              name: falco-socket-dir
 
       volumes:
-      - name: dev-fs
-        hostPath:
-          path: /dev
-      - name: proc-fs
-        hostPath:
-          path: /proc
-      - name: boot-fs
-        hostPath:
-          path: /boot
-      - name: lib-modules
-        hostPath:
-          path: /lib/modules
-      - name: usr-fs
-        hostPath:
-          path: /usr
-      - name: containerd-socket
-        hostPath:
-          path: /run/containerd/containerd.sock
-      - name: docker-socket
-        hostPath:
-          path: /var/run/docker.sock
-      - name: falco-config
-        configMap:
-          name: falco
-          items:
-          - key: falco.yaml
-            path: falco.yaml
-      - name: intelgraph-rules
-        configMap:
-          name: intelgraph-falco-rules
-      - name: falco-socket-dir
-        emptyDir: {}
+        - name: dev-fs
+          hostPath:
+            path: /dev
+        - name: proc-fs
+          hostPath:
+            path: /proc
+        - name: boot-fs
+          hostPath:
+            path: /boot
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: usr-fs
+          hostPath:
+            path: /usr
+        - name: containerd-socket
+          hostPath:
+            path: /run/containerd/containerd.sock
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+        - name: falco-config
+          configMap:
+            name: falco
+            items:
+              - key: falco.yaml
+                path: falco.yaml
+        - name: intelgraph-rules
+          configMap:
+            name: intelgraph-falco-rules
+        - name: falco-socket-dir
+          emptyDir: {}
 
 ---
 # Falco ServiceAccount
@@ -171,15 +171,16 @@ kind: ClusterRole
 metadata:
   name: falco
 rules:
-- apiGroups: [""]
-  resources: ["nodes", "namespaces", "pods", "replicationcontrollers", "services"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["extensions"]
-  resources: ["daemonsets", "deployments", "replicasets"]
-  verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources:
+      ['nodes', 'namespaces', 'pods', 'replicationcontrollers', 'services']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['apps']
+    resources: ['daemonsets', 'deployments', 'replicasets', 'statefulsets']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['extensions']
+    resources: ['daemonsets', 'deployments', 'replicasets']
+    verbs: ['get', 'list', 'watch']
 
 ---
 # Falco ClusterRoleBinding
@@ -192,9 +193,9 @@ roleRef:
   kind: ClusterRole
   name: falco
 subjects:
-- kind: ServiceAccount
-  name: falco
-  namespace: falco
+  - kind: ServiceAccount
+    name: falco
+    namespace: falco
 
 ---
 # Falco Configuration
@@ -209,15 +210,15 @@ data:
       - /etc/falco/falco_rules.yaml
       - /etc/falco/falco_rules.local.yaml
       - /etc/falco/rules.d
-    
+
     time_format_iso_8601: true
     priority: debug
-    
+
     # Output channels
     stdout_output:
       enabled: true
       keep_alive: false
-    
+
     syslog_output:
       enabled: false
       
@@ -228,7 +229,7 @@ data:
       enabled: true
       
     grpc_bind_address: "unix:///run/falco/falco.sock"
-    
+
     webserver:
       enabled: true
       listen_port: 8765
@@ -264,21 +265,21 @@ data:
         library_path: libcloudtrail.so
       - name: json
         library_path: libjson.so
-    
+
     # Buffered outputs
     buffered_outputs: false
-    
+
     # Outputs rate limiting
     outputs:
       rate: 1
       max_burst: 1000
-    
+
     # Include additional configuration
     output_timeout: 2000
     log_stderr: true
     log_syslog: true
     log_level: info
-    
+
     metrics:
       enabled: true
       interval: 1h
@@ -298,13 +299,13 @@ metadata:
 data:
   intelgraph_rules.yaml: |
     # IntelGraph Container Security Rules
-    
+
     # Baseline macros for IntelGraph
     - macro: intelgraph_containers
       condition: >
         (container.image.repository startswith "intelgraph/" or
          k8s_ns = "intelgraph")
-    
+
     - macro: intelgraph_sensitive_files
       condition: >
         (fd.name startswith /etc/ssl or
@@ -316,7 +317,7 @@ data:
          fd.name endswith "/token" or
          fd.name endswith "/.dockercfg" or
          fd.name endswith "/.dockerconfigjson")
-    
+
     # Critical security violations
     - rule: IntelGraph Container Privilege Escalation
       desc: Detect privilege escalation in IntelGraph containers
@@ -335,7 +336,7 @@ data:
          image=%container.image.repository k8s.pod=%k8s.pod.name)
       priority: CRITICAL
       tags: [intelgraph, privilege_escalation, security]
-    
+
     - rule: IntelGraph Sensitive File Access
       desc: Monitor access to sensitive files in IntelGraph containers
       condition: >
@@ -349,7 +350,7 @@ data:
          container=%container.name k8s.pod=%k8s.pod.name)
       priority: WARNING
       tags: [intelgraph, file_access, security]
-    
+
     - rule: IntelGraph Unauthorized Network Activity
       desc: Detect unauthorized network connections from IntelGraph
       condition: >
@@ -364,7 +365,7 @@ data:
          command=%proc.cmdline container=%container.name)
       priority: WARNING
       tags: [intelgraph, network, security]
-    
+
     - rule: IntelGraph Process Injection
       desc: Detect potential process injection attacks
       condition: >
@@ -379,7 +380,7 @@ data:
          container=%container.name k8s.pod=%k8s.pod.name)
       priority: HIGH
       tags: [intelgraph, process_injection, security]
-    
+
     - rule: IntelGraph Crypto Mining Activity
       desc: Detect cryptocurrency mining in IntelGraph containers
       condition: >
@@ -395,7 +396,7 @@ data:
          k8s.pod=%k8s.pod.name k8s.ns=%k8s.ns.name)
       priority: CRITICAL
       tags: [intelgraph, crypto_mining, security]
-    
+
     - rule: IntelGraph Unexpected Binary Execution
       desc: Monitor execution of unexpected binaries
       condition: >
@@ -410,7 +411,7 @@ data:
          container=%container.name k8s.pod=%k8s.pod.name)
       priority: WARNING
       tags: [intelgraph, unexpected_binary, security]
-    
+
     - rule: IntelGraph File System Modification
       desc: Monitor unauthorized file system changes
       condition: >
@@ -426,7 +427,7 @@ data:
          container=%container.name k8s.pod=%k8s.pod.name)
       priority: WARNING
       tags: [intelgraph, file_modification, security]
-    
+
     - rule: IntelGraph Container Escape Attempt
       desc: Detect container escape attempts
       condition: >
@@ -444,7 +445,7 @@ data:
          container=%container.name k8s.pod=%k8s.pod.name)
       priority: CRITICAL
       tags: [intelgraph, container_escape, security]
-    
+
     # Resource abuse detection
     - rule: IntelGraph High Memory Usage Process
       desc: Detect processes consuming excessive memory
@@ -458,7 +459,7 @@ data:
          container=%container.name k8s.pod=%k8s.pod.name)
       priority: WARNING
       tags: [intelgraph, resource_abuse, performance]
-    
+
     # Configuration and secrets access
     - rule: IntelGraph Kubernetes Secrets Access
       desc: Monitor access to Kubernetes secrets
@@ -472,7 +473,7 @@ data:
          container=%container.name k8s.pod=%k8s.pod.name)
       priority: INFO
       tags: [intelgraph, secrets_access, kubernetes]
-    
+
     # Application-specific rules
     - rule: IntelGraph Database Connection Anomaly
       desc: Detect unusual database connection patterns
@@ -503,9 +504,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 9376
-    targetPort: 9376
-    name: metrics
+    - port: 9376
+      targetPort: 9376
+      name: metrics
   selector:
     app: falco
 
@@ -523,9 +524,9 @@ spec:
     matchLabels:
       app: falco
   endpoints:
-  - port: metrics
-    interval: 30s
-    path: /metrics
+    - port: metrics
+      interval: 30s
+      path: /metrics
 
 ---
 # PrometheusRule for Falco alerts
@@ -536,22 +537,22 @@ metadata:
   namespace: falco
 spec:
   groups:
-  - name: falco.rules
-    rules:
-    - alert: FalcoAlert
-      expr: increase(falco_events[5m]) > 0
-      for: 0m
-      labels:
-        severity: warning
-      annotations:
-        summary: "Falco security alert"
-        description: "Falco detected {{ $value }} security events in the last 5 minutes"
-    
-    - alert: FalcoCriticalAlert
-      expr: increase(falco_events{priority="Critical"}[5m]) > 0
-      for: 0m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Falco critical security alert"
-        description: "Falco detected {{ $value }} critical security events in the last 5 minutes"
+    - name: falco.rules
+      rules:
+        - alert: FalcoAlert
+          expr: increase(falco_events[5m]) > 0
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Falco security alert'
+            description: 'Falco detected {{ $value }} security events in the last 5 minutes'
+
+        - alert: FalcoCriticalAlert
+          expr: increase(falco_events{priority="Critical"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Falco critical security alert'
+            description: 'Falco detected {{ $value }} critical security events in the last 5 minutes'

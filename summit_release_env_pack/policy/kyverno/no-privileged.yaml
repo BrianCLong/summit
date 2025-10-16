@@ -7,11 +7,11 @@ spec:
   background: true
   rules:
     - name: deny-privileged
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "Privileged containers are not allowed"
+        message: 'Privileged containers are not allowed'
         pattern:
           spec:
             containers:
-            - securityContext:
-                privileged: "false"
+              - securityContext:
+                  privileged: 'false'

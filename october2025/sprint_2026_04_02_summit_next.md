@@ -1,5 +1,6 @@
 ```markdown
 # Sprint Plan — Summit / IntelGraph / Maestro Conductor
+
 **Slug/Version:** `sprint-2026-04-02-intelgraph-summit-v1.12.0`
 **Dates:** Apr 2–Apr 16, 2026 (2 weeks)
 **Timezone:** America/Denver
@@ -9,6 +10,7 @@
 ---
 
 ## 0) North‑Star & Guardrails
+
 - **North‑Star:** 2 production tenants live and stable; 1 additional pilot countersigned; webinar → ≥ 20 qualified meetings; marketplace leads ≥ 50 cumulative.
 - **SLOs:** Availability ≥ 99.8%; Read P95 ≤ 220 ms; Policy P95 ≤ 8 ms; Ingest success ≥ 99.0% (24h), Error budget burn < 10%.
 - **Security & Governance:** 0 criticals; SBOM on `v1.12.0`; access reviews completed; schema approvals enforced; ER audit coverage ≥ 98%.
@@ -16,6 +18,7 @@
 ---
 
 ## 1) Objectives (Demo on Apr 16)
+
 1. **Conversions Operationalized:** both production tenants through migration, Day‑2 ops, and success plans with weekly scorecards.
 2. **Playbooks GA:** save/share/run with ACLs, params, schedules, exports; approval/audit linkage.
 3. **ServiceNow Incident Connector GA:** rate‑limited, monitored, with CI contract tests and DLQ auto‑replay policy.
@@ -27,6 +30,7 @@
 ---
 
 ## 2) Scope & Priority
+
 - **P0 (Must):** Production ops acceptance, Playbooks GA (ACLs + scheduler), ServiceNow GA, TI scoring/suppression + budgets, access reviews + backup drill, policy coverage report, NPS in‑app, reference v2.
 - **P1 (Should):** Audit export automation, connector SLOs per tenant, analytics v5 (playbook adoption + cost), marketplace install telemetry improvements.
 - **P2 (Could):** Map auto‑binning; SDK snippet generator for playbooks; cost anomaly RCA notes.
@@ -35,6 +39,7 @@
 ---
 
 ## 3) Swimlanes & Owners
+
 - **Product/GTM (Felix):** Conversions ops acceptance, reference case v2, ABM wave‑3, webinar follow‑ups, partner calendar.
 - **Frontend:** Playbooks GA (ACLs, scheduler UI), report annotations polish, NPS widget, analytics v5.
 - **Backend:** Playbooks scheduler/runner, ServiceNow GA hardening, TI scoring/suppression, audit export automation, policy coverage service.
@@ -47,12 +52,14 @@
 ## 4) Backlog (Stories & Tasks)
 
 ### P0 — Conversions Operationalized
+
 - **P0‑1** Day‑2 Ops Sign‑off (owner: SRE/Product)
   - On‑call, quotas/budgets, backup cadence, runbooks acknowledged by both tenants.
 - **P0‑2** Weekly Scorecards (owner: Product/SRE)
   - TTI, usage, incidents, policy hits; shared MD/PDF to execs.
 
 ### P0 — Playbooks GA
+
 - **P0‑3** ACLs & Sharing (owner: FE/SecEng)
   - Role/tenant scoped; audit on run; link tokens with expiry.
 - **P0‑4** Scheduler & Runner (owner: BE/SRE)
@@ -61,6 +68,7 @@
   - Include inline highlights & provenance; PDF/MD; respects redaction & branding.
 
 ### P0 — ServiceNow Incident Connector GA
+
 - **P0‑6** Contract Tests & Fixtures (owner: BE/Data)
   - CI matrix for endpoints; schema changes caught; sample payloads.
 - **P0‑7** DLQ Auto‑replay (owner: SRE)
@@ -69,6 +77,7 @@
   - Latency/error panels; alert thresholds; pager wiring.
 
 ### P0 — Threat Intel v5
+
 - **P0‑9** Confidence Scoring (owner: Data/BE)
   - Score model; thresholds; display in UI; exportable.
 - **P0‑10** Suppression Rules (owner: BE)
@@ -77,6 +86,7 @@
   - Monthly caps; 80% notify, 100% block; override path; logs.
 
 ### P0 — Governance & Hygiene
+
 - **P0‑12** Access Reviews (owner: SecEng)
   - Quarterly review; generate report; revoke stale access.
 - **P0‑13** Policy Coverage Report (owner: SecEng/BE)
@@ -87,12 +97,14 @@
   - Block ingest in prod until approved; audit & override with reason.
 
 ### P0 — Customer Evidence & NPS
+
 - **P0‑16** Reference Case v2 (owner: GTM/Product)
   - Situation→Approach→Results; quotes/screens; legal ok.
 - **P0‑17** In‑App NPS (owner: FE/BE)
   - Prompt post‑report export or week 3; store score & verbatim; export.
 
 ### P1 — Analytics & Telemetry
+
 - **P1‑1** Analytics v5 (owner: FE/SRE)
   - Playbook adoption by persona; cost/usage overlays; export CSV.
 - **P1‑2** Marketplace Telemetry (owner: BE)
@@ -103,6 +115,7 @@
 ---
 
 ## 5) Acceptance Criteria & DoD
+
 - **Production tenants:** both conversions have Day‑2 ops sign‑off; weekly scorecards sent; SLOs green.
 - **Playbooks GA:** ACLs enforced; schedules run; alerts on failure; exports include annotations & provenance.
 - **ServiceNow GA:** contract tests pass; SLO panels active; DLQ auto‑replay functioning; throttling verified.
@@ -114,15 +127,17 @@
 ---
 
 ## 6) Cadence & Dates
-- **Standup:** 09:30 MT daily  
-- **Mid‑sprint demo:** Apr 9, 15:00 MT  
-- **Code freeze:** Apr 15, 12:00 MT  
-- **Review & demo:** Apr 16, 15:00 MT  
+
+- **Standup:** 09:30 MT daily
+- **Mid‑sprint demo:** Apr 9, 15:00 MT
+- **Code freeze:** Apr 15, 12:00 MT
+- **Review & demo:** Apr 16, 15:00 MT
 - **Retro:** Apr 16, 16:00 MT
 
 ---
 
 ## 7) Metrics
+
 - **Business:** ARR commit, meetings booked, pilots signed, NPS.
 - **Product:** playbook saves/runs, export count, TI suppression %, ServiceNow SLOs.
 - **Ops:** error budget, ingest success %, backup RTO/RPO, access revocations.
@@ -130,6 +145,7 @@
 ---
 
 ## 8) Deliverables (Repos & Docs)
+
 - `docs/ops/day2_signoffs/{tenantA.md,tenantB.md}` + `docs/gtm/scorecards/{tenantA.md,tenantB.md}`
 - `server/src/playbooks/{acl.ts,scheduler.ts,runner.ts}` + `client/src/features/playbooks/ga/*`
 - `ingestion/connectors/servicenow/tests/*` + `ops/dlq/auto_replay.yaml` + `ops/dashboards/connector_servicenow_slo.json`
@@ -144,6 +160,7 @@
 ---
 
 ## 9) Demo Script (Apr 16)
+
 1. Review production tenant scorecards & SLOs; show Day‑2 sign‑offs.
 2. Run a scheduled playbook; failure alert demo; export annotated report.
 3. Show ServiceNow GA: contract tests, SLO panel, DLQ auto‑replay.
@@ -156,4 +173,3 @@
 **Owner:** Felix (The B.I.Z.) — VP Sales/BD/Growth  
 **Last Updated:** Oct 16, 2025 (v1.12.0 plan)
 ```
-

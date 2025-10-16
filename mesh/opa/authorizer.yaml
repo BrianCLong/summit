@@ -10,7 +10,14 @@ spec:
       containers:
         - name: opa
           image: openpolicyagent/opa:latest-envoy
-          args: ["run","--server","--addr=localhost:8181","--config-file=/config/config.yaml","/policy"]
+          args:
+            [
+              'run',
+              '--server',
+              '--addr=localhost:8181',
+              '--config-file=/config/config.yaml',
+              '/policy',
+            ]
           volumeMounts:
             - { name: policy, mountPath: /policy }
             - { name: conf, mountPath: /config }

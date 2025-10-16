@@ -13,7 +13,11 @@ export interface CiAnnotation {
   url?: string;
 }
 
-export default function CiSummary({ annotations }: { annotations: CiAnnotation[] }) {
+export default function CiSummary({
+  annotations,
+}: {
+  annotations: CiAnnotation[];
+}) {
   const by = (lvl: 'notice' | 'warning' | 'failure') =>
     annotations.filter((a) => a.level === lvl).length;
   const repos = new Set(annotations.map((a) => a.repo).filter(Boolean));

@@ -1,7 +1,7 @@
-
 # server/src/governance/audit_logger.py
 
 import datetime
+
 
 def log_audit_event(who: str, what: str, why: str, when: datetime.datetime, details: dict):
     """
@@ -11,6 +11,7 @@ def log_audit_event(who: str, what: str, why: str, when: datetime.datetime, deta
     # In a real system, this would write to an immutable log store.
     pass
 
+
 def prompt_reason_for_access(user_id: str, resource: str) -> str:
     """
     Stub for prompting user for reason-for-access.
@@ -18,6 +19,7 @@ def prompt_reason_for_access(user_id: str, resource: str) -> str:
     print(f"Prompting {user_id} for reason to access {resource}")
     # Simulate user input
     return f"User {user_id} provided reason: 'Investigating {resource} for security incident.'"
+
 
 def detect_misuse_and_poisoning(log_data: list) -> list:
     """

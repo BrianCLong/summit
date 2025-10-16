@@ -4,12 +4,22 @@ spec:
       containers:
         - name: redis
           image: redis:7
-          args: ["redis-server","/etc/redis/redis.conf"]
+          args: ['redis-server', '/etc/redis/redis.conf']
           volumeMounts:
             - name: config
               mountPath: /etc/redis
-          readinessProbe: { tcpSocket: { port: 6379 }, initialDelaySeconds: 5, periodSeconds: 5 }
-          livenessProbe: { tcpSocket: { port: 6379 }, initialDelaySeconds: 15, periodSeconds: 10 }
+          readinessProbe:
+            {
+              tcpSocket: { port: 6379 },
+              initialDelaySeconds: 5,
+              periodSeconds: 5,
+            }
+          livenessProbe:
+            {
+              tcpSocket: { port: 6379 },
+              initialDelaySeconds: 15,
+              periodSeconds: 10,
+            }
       volumes:
         - name: config
           configMap: { name: redis-config }

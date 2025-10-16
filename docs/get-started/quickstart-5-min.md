@@ -5,13 +5,16 @@ owner: docs
 ---
 
 ## Prerequisites
+
 - Node/Python versions, keys (if any)
 
 ## Steps
+
 1. Install
 2. Configure
 3. Run
 4. Validate
 
 ## Troubleshooting
+
 - Common first-run errors

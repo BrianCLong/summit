@@ -23,11 +23,15 @@ async function ensureAiSuggestionDataset(days: number): Promise<void> {
       containsFinancialData: false,
       containsHealthData: false,
       jurisdictions: ['global'],
-      tags: ['neo4j:label:AISuggestion', 'retention:auto', 'postgres:table:ai_suggestions_shadow'],
+      tags: [
+        'neo4j:label:AISuggestion',
+        'retention:auto',
+        'postgres:table:ai_suggestions_shadow',
+      ],
       storageSystems: ['neo4j', 'postgres'],
       owner: 'governance@intelgraph.dev',
       createdAt: new Date(),
-      recordCount: undefined
+      recordCount: undefined,
     };
 
     await retentionEngine.registerDataset(metadata, 'system');

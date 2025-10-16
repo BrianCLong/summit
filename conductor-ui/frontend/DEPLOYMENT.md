@@ -4,7 +4,7 @@ This document outlines the deployment process for the Maestro Build Plane UI to 
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - SSH access to deployment target
 - Environment variables configured
 - Grafana instance set up (optional)
@@ -14,16 +14,19 @@ This document outlines the deployment process for the Maestro Build Plane UI to 
 The application supports three environments with corresponding configuration files:
 
 ### Development (`.env.development`)
+
 - Local development with mock services
 - OIDC via local Keycloak
 - No authentication required for some features
 
-### Staging (`.env.staging`) 
+### Staging (`.env.staging`)
+
 - Pre-production testing environment
 - Limited feature flags enabled
 - Staging authentication provider
 
 ### Production (`.env.production`)
+
 - Full feature set enabled
 - Production authentication and monitoring
 - Strict security policies
@@ -31,16 +34,19 @@ The application supports three environments with corresponding configuration fil
 ## Build Process
 
 ### Standard Build
+
 ```bash
 npm run build
 ```
 
 ### Production Build (Recommended)
+
 ```bash
 npm run build:production
 ```
 
 This script:
+
 - ✅ Runs type checking and linting
 - 🏗️ Builds with production optimizations
 - 📊 Analyzes bundle size
@@ -49,6 +55,7 @@ This script:
 - 🔒 Performs security checks
 
 ### Build Output
+
 ```
 dist/
 ├── index.html              # Main entry point
@@ -64,6 +71,7 @@ dist/
 ## Deployment
 
 ### Quick Deploy to Production
+
 ```bash
 npm run deploy:production
 ```
@@ -71,11 +79,13 @@ npm run deploy:production
 ### Manual Deployment Steps
 
 1. **Build the application:**
+
    ```bash
    npm run build:production
    ```
 
 2. **Configure deployment target:**
+
    ```bash
    export DEPLOY_TARGET="maestro-dev.topicality.co"
    export DEPLOY_USER="deployer"
@@ -98,6 +108,7 @@ npm run deploy:production
 ## Environment Variables
 
 ### Required Production Variables
+
 ```bash
 VITE_API_BASE_URL=https://maestro-dev.topicality.co/api/maestro/v1
 VITE_OIDC_ISSUER=https://auth.topicality.co
@@ -105,6 +116,7 @@ VITE_OIDC_CLIENT_ID=maestro-ui-prod
 ```
 
 ### Optional Variables
+
 ```bash
 # Monitoring
 VITE_SENTRY_DSN=your-sentry-dsn
@@ -125,6 +137,7 @@ npm run setup:grafana
 ```
 
 Required environment variables:
+
 ```bash
 GRAFANA_URL=https://grafana.maestro-dev.topicality.co
 GRAFANA_ADMIN_TOKEN=your-admin-token
@@ -134,14 +147,17 @@ PROMETHEUS_URL=http://prometheus:9090
 ## Health Checks
 
 ### Application Health
+
 - **URL:** `https://maestro-dev.topicality.co/maestro`
 - **Expected:** 200 response with Maestro UI
 
 ### Build Information
+
 - **URL:** `https://maestro-dev.topicality.co/maestro/build-manifest.json`
 - **Contains:** Version, timestamp, git info
 
 ### API Health
+
 - **URL:** `https://maestro-dev.topicality.co/api/maestro/v1/health`
 - **Expected:** `{"status": "healthy"}`
 
@@ -150,11 +166,13 @@ PROMETHEUS_URL=http://prometheus:9090
 ### Build Failures
 
 1. **Type errors:**
+
    ```bash
    npm run type-check
    ```
 
 2. **Linting errors:**
+
    ```bash
    npm run lint -- --fix
    ```
@@ -167,11 +185,13 @@ PROMETHEUS_URL=http://prometheus:9090
 ### Deployment Failures
 
 1. **Connection issues:**
+
    ```bash
    ssh deployer@maestro-dev.topicality.co "echo 'Connection test'"
    ```
 
 2. **Permission issues:**
+
    ```bash
    # On target server
    sudo chown -R www-data:www-data /var/www/maestro
@@ -190,6 +210,7 @@ PROMETHEUS_URL=http://prometheus:9090
 ### Performance Issues
 
 1. **Check bundle size:**
+
    ```bash
    npm run bundle:analyze
    ```
@@ -207,17 +228,21 @@ PROMETHEUS_URL=http://prometheus:9090
 ## Security Considerations
 
 ### Content Security Policy
+
 The application enforces strict CSP in production:
+
 - No inline scripts or styles
 - Limited external domains
 - Integrity checks for all assets
 
 ### Authentication
+
 - OIDC with PKCE flow
 - JWT token validation
 - Role-based access control
 
 ### Asset Integrity
+
 - Subresource Integrity (SRI) hashes
 - Asset fingerprinting
 - Secure delivery over HTTPS
@@ -225,16 +250,19 @@ The application enforces strict CSP in production:
 ## Monitoring & Observability
 
 ### Application Metrics
+
 - Page load times
 - Bundle download metrics
 - Authentication success rates
 
 ### Error Tracking
+
 - JavaScript errors via Sentry (optional)
 - Network request failures
 - Authentication failures
 
 ### Dashboards
+
 - Grafana dashboards for infrastructure
 - Real-time performance monitoring
 - Alert configuration
@@ -260,6 +288,7 @@ If issues are detected after deployment:
 ## Support
 
 For deployment issues:
+
 1. Check this documentation
 2. Review deployment logs
 3. Verify environment configuration

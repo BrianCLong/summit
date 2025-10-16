@@ -7,25 +7,28 @@
 ---
 
 ## 1) Sprint Goal
+
 “Turn disclosure‑first into **audit‑ready by default**: every hardened release emits a **Compliance Pack** (SOC2‑lite + DPIA/DPA if applicable), redacts sensitive outputs, links to Maestro/IntelGraph, and proves **backup/restore** and **incident runbooks** with verifiable artifacts.”
 
 ---
 
 ## 2) Objectives & Key Results (OKRs)
-1) **Disclosure Pack → Compliance Pack** (auto‑generated) across active repos.  
-   *Measure:* Release includes `compliance-pack.zip` with manifests + hashes.
-2) **Backup/Restore verification ≥ 1 per repo** with evidence.  
-   *Measure:* Maestro run contains `backup` → `restore` checks + success signal.
-3) **Policy bundle v1.2** (data residency + retention) enforced.  
-   *Measure:* `opa test` green; bundle hash pinned in Compliance Pack.
-4) **Redaction & export watermarking** on by default for sensitive exports.  
-   *Measure:* CI shows redaction scanner pass; sample exports carry watermark.
-5) **Design‑partner Trust Demo** runs end‑to‑end from Portal with proof links.  
-   *Measure:* Portal v1.1 surfaces compliance indicators (green/yellow/red).
+
+1. **Disclosure Pack → Compliance Pack** (auto‑generated) across active repos.  
+   _Measure:_ Release includes `compliance-pack.zip` with manifests + hashes.
+2. **Backup/Restore verification ≥ 1 per repo** with evidence.  
+   _Measure:_ Maestro run contains `backup` → `restore` checks + success signal.
+3. **Policy bundle v1.2** (data residency + retention) enforced.  
+   _Measure:_ `opa test` green; bundle hash pinned in Compliance Pack.
+4. **Redaction & export watermarking** on by default for sensitive exports.  
+   _Measure:_ CI shows redaction scanner pass; sample exports carry watermark.
+5. **Design‑partner Trust Demo** runs end‑to‑end from Portal with proof links.  
+   _Measure:_ Portal v1.1 surfaces compliance indicators (green/yellow/red).
 
 ---
 
 ## 3) Deliverables (Definition of Done)
+
 - **Compliance Pack Composer**: composite action that aggregates SBOM, provenance, attestations, OSV/Trivy summaries, OPA bundle/version, Decision log, Maestro run links, DPIA/DPA, Risk & Ethics memo, backup/restore evidence, export‑redaction report → `compliance-pack.zip`.
 - **OPA Policy v1.2**: residency + retention policies + tests.
 - **Backup/Restore Runbook + scripts** with verification harness.
@@ -36,25 +39,28 @@
 ---
 
 ## 4) Work Plan & Owners
-| Date | Work Item | Owner | Exit Criteria |
-|---|---|---|---|
-| Nov 17 | Kick, scope sync, secrets & env | Co‑CEO + SecOps | `RESIDENCY_REGION`, `RETENTION_DAYS` published; tokens verified |
-| Nov 18 | Composite action: Compliance Pack | DevEx | `compliance-pack.zip` produced in dry‑run |
-| Nov 19 | OPA v1.2 (residency & retention) | SecOps | `opa test` green; policy hash emitted |
-| Nov 20 | Redaction/Watermark CLI + CI step | DevEx | Sample artifacts redacted + watermarked; CI gate passes |
-| Nov 21 | Backup/Restore scripts + harness | SRE | Test data backed up/restored; checks pass; evidence logged |
-| Nov 24 | Incident Response tabletop v1 | Co‑CEO | Decision.md (IR) created; lessons added to risk memo |
-| Nov 25 | Portal v1.1 (compliance view) | PM + Co‑CEO | Portal displays status + download link; no secrets |
-| Dec 2  | Repo roll‑out & parity close | DevEx | All active repos emit Compliance Pack |
-| Dec 4  | Demo & drill replay | Co‑CEO | Live demo: portal + restore proof + IR tabletop |
-| Dec 5  | Sprint close, retro, risks update | Co‑CEO | Metrics and heatmap updated; next sprint brief drafted |
+
+| Date   | Work Item                         | Owner           | Exit Criteria                                                   |
+| ------ | --------------------------------- | --------------- | --------------------------------------------------------------- |
+| Nov 17 | Kick, scope sync, secrets & env   | Co‑CEO + SecOps | `RESIDENCY_REGION`, `RETENTION_DAYS` published; tokens verified |
+| Nov 18 | Composite action: Compliance Pack | DevEx           | `compliance-pack.zip` produced in dry‑run                       |
+| Nov 19 | OPA v1.2 (residency & retention)  | SecOps          | `opa test` green; policy hash emitted                           |
+| Nov 20 | Redaction/Watermark CLI + CI step | DevEx           | Sample artifacts redacted + watermarked; CI gate passes         |
+| Nov 21 | Backup/Restore scripts + harness  | SRE             | Test data backed up/restored; checks pass; evidence logged      |
+| Nov 24 | Incident Response tabletop v1     | Co‑CEO          | Decision.md (IR) created; lessons added to risk memo            |
+| Nov 25 | Portal v1.1 (compliance view)     | PM + Co‑CEO     | Portal displays status + download link; no secrets              |
+| Dec 2  | Repo roll‑out & parity close      | DevEx           | All active repos emit Compliance Pack                           |
+| Dec 4  | Demo & drill replay               | Co‑CEO          | Live demo: portal + restore proof + IR tabletop                 |
+| Dec 5  | Sprint close, retro, risks update | Co‑CEO          | Metrics and heatmap updated; next sprint brief drafted          |
 
 ---
 
 ## 5) Artifacts & Scaffolding
 
 ### 5.1 Composite Action — Compliance Pack Composer
+
 **Path:** `.github/actions/compliance-pack/action.yml`
+
 ```yaml
 name: 'Compliance Pack Composer'
 description: 'Bundle disclosure + compliance evidence into compliance-pack.zip'
@@ -89,28 +95,32 @@ runs:
 ```
 
 ### 5.2 Workflow Patch — Add Compliance Pack & Portal Upload
+
 **Path:** `.github/workflows/release.hardened.yml` (extend)
+
 ```yaml
-  compliance:
-    needs: [verify]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with: { name: sbom, path: . }
-      - uses: actions/download-artifact@v4
-        with: { name: provenance, path: . }
-      - uses: actions/download-artifact@v4
-        with: { name: disclosure, path: . }
-      - uses: ./.github/actions/compliance-pack
-      - name: Attach Compliance Pack
-        uses: softprops/action-gh-release@v2
-        with:
-          files: compliance-pack.zip
+compliance:
+  needs: [verify]
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with: { name: sbom, path: . }
+    - uses: actions/download-artifact@v4
+      with: { name: provenance, path: . }
+    - uses: actions/download-artifact@v4
+      with: { name: disclosure, path: . }
+    - uses: ./.github/actions/compliance-pack
+    - name: Attach Compliance Pack
+      uses: softprops/action-gh-release@v2
+      with:
+        files: compliance-pack.zip
 ```
 
 ### 5.3 OPA Policy v1.2 — Residency & Retention
+
 **Path:** `policies/residency_retention.rego`
+
 ```rego
 package governance
 
@@ -129,14 +139,20 @@ deny_reason[r] { input.resource.region != data.residency.allowed[_]; r := "regio
 ```
 
 **Data file:** `policies/data.json`
+
 ```json
-{ "residency": { "allowed": ["us-west-2", "eu-central-1"] }, "retention": { "days": 30 } }
+{
+  "residency": { "allowed": ["us-west-2", "eu-central-1"] },
+  "retention": { "days": 30 }
+}
 ```
 
 **Tests:** `opa test policies -v`
 
 ### 5.4 Backup/Restore Harness
+
 **Path:** `scripts/backup_restore.sh`
+
 ```bash
 set -euo pipefail
 BACKUP_FILE="artifacts/backup-$(date +%Y%m%d%H%M%S).tgz"
@@ -152,20 +168,25 @@ jq -n --arg backup "$BACKUP_FILE" '{backup:$backup, restore_ok:true, ts:now|toda
 ```
 
 ### 5.5 Redaction & Watermark CLI
+
 **Path:** `tools/redactor/redactor.js`
+
 ```js
 #!/usr/bin/env node
-import fs from 'node:fs'
+import fs from 'node:fs';
 const input = process.argv[2];
-const out = process.argv[3] || 'redacted_'+input;
-let text = fs.readFileSync(input,'utf8');
-text = text.replace(/\b(SECRET|TOKEN|KEY)\b[^\n]*/g,'[REDACTED]');
-text = `<!-- watermark: export by Topicality — ${new Date().toISOString()} -->\n`+text;
+const out = process.argv[3] || 'redacted_' + input;
+let text = fs.readFileSync(input, 'utf8');
+text = text.replace(/\b(SECRET|TOKEN|KEY)\b[^\n]*/g, '[REDACTED]');
+text =
+  `<!-- watermark: export by Topicality — ${new Date().toISOString()} -->\n` +
+  text;
 fs.writeFileSync(out, text);
-console.log(JSON.stringify({input, out}))
+console.log(JSON.stringify({ input, out }));
 ```
 
 **CI step:**
+
 ```yaml
   redaction:
     runs-on: ubuntu-latest
@@ -178,9 +199,12 @@ console.log(JSON.stringify({input, out}))
 ```
 
 ### 5.6 Incident Response Tabletop — Decision Template
+
 **Path:** `compliance/IR.Tabletop.md`
+
 ```md
 # Incident Response Tabletop — v1
+
 **Scenario:**
 **Detection:**
 **Containment:**
@@ -192,48 +216,63 @@ console.log(JSON.stringify({input, out}))
 ```
 
 ### 5.7 Portal v1.1 — Compliance Indicators
+
 **Path:** `tools/disclosure-portal/components/Status.tsx`
+
 ```tsx
-export default function Status({criticals, attested, policySha}:{criticals:number; attested:boolean; policySha:string}){
-  const color = !attested || criticals>0 ? 'red' : 'green'
-  return <div className={`status ${color}`}>
-    <strong>{attested? 'Attested' : 'Not attested'}</strong>
-    <span> | Trivy criticals: {criticals}</span>
-    <span> | Policy: {policySha.slice(0,12)}</span>
-  </div>
+export default function Status({
+  criticals,
+  attested,
+  policySha,
+}: {
+  criticals: number;
+  attested: boolean;
+  policySha: string;
+}) {
+  const color = !attested || criticals > 0 ? 'red' : 'green';
+  return (
+    <div className={`status ${color}`}>
+      <strong>{attested ? 'Attested' : 'Not attested'}</strong>
+      <span> | Trivy criticals: {criticals}</span>
+      <span> | Policy: {policySha.slice(0, 12)}</span>
+    </div>
+  );
 }
 ```
 
 ---
 
 ## 6) Metrics & Alerts
+
 - **Compliance pack coverage:** 100% tags include `compliance-pack.zip` (alert if < 100%).
 - **Backup/restore verification:** at least 1 per repo/quarter (alert at 0).
-- **Redaction pass:** 100% sensitive exports redacted/watermarked (alert if any fail).  
+- **Redaction pass:** 100% sensitive exports redacted/watermarked (alert if any fail).
 - **Policy drift:** portal shows red if bundle hash != registry current.
 
 ---
 
 ## 7) Risks & Mitigations
-| Risk | Likelihood | Impact | Mitigation |
-|---|---:|---:|---|
-| Backup data sensitivity | Med | High | Use masked test datasets; DLP scan before upload |
-| Residency misconfig | Low | High | Default deny, tests include negative cases |
-| Redaction gaps | Med | Med | Expand patterns; add manual spot‑check in IR tabletop |
+
+| Risk                    | Likelihood | Impact | Mitigation                                            |
+| ----------------------- | ---------: | -----: | ----------------------------------------------------- |
+| Backup data sensitivity |        Med |   High | Use masked test datasets; DLP scan before upload      |
+| Residency misconfig     |        Low |   High | Default deny, tests include negative cases            |
+| Redaction gaps          |        Med |    Med | Expand patterns; add manual spot‑check in IR tabletop |
 
 ---
 
 ## 8) Alignment Notes
-- Builds directly on Sprints 1–3: hardened release, policy registry, portal.  
-- Preps Q4 close: design‑partner onboarding with Compliance Packs and portal evidence.  
+
+- Builds directly on Sprints 1–3: hardened release, policy registry, portal.
+- Preps Q4 close: design‑partner onboarding with Compliance Packs and portal evidence.
 - Two‑way door: all changes toggled via workflow inputs and policy version pinning.
 
 ---
 
 ## 9) Exit Checklist
-- Compliance Pack generated and attached on tag release (all repos).  
-- OPA v1.2 merged; bundle hash pinned in packs and portal.  
-- Backup/restore harness executed; evidence recorded in Maestro & packs.  
-- IR tabletop executed; Decision logged; lessons merged.  
-- Portal v1.1 deployed; indicators green for latest tags.
 
+- Compliance Pack generated and attached on tag release (all repos).
+- OPA v1.2 merged; bundle hash pinned in packs and portal.
+- Backup/restore harness executed; evidence recorded in Maestro & packs.
+- IR tabletop executed; Decision logged; lessons merged.
+- Portal v1.1 deployed; indicators green for latest tags.

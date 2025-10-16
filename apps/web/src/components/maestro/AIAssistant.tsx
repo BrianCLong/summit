@@ -52,12 +52,14 @@ export function AIAssistant({ context }: AIAssistantProps) {
   useEffect(() => {
     if (context && messages.length === 0) {
       const greeting = generateContextualGreeting(context)
-      setMessages([{
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: greeting,
-        timestamp: new Date(),
-      }])
+      setMessages([
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: greeting,
+          timestamp: new Date(),
+        },
+      ])
     }
   }, [context])
 
@@ -69,7 +71,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
     if (ctx?.recentErrors?.length) {
       return `👋 I noticed some recent errors in your Maestro runs. I can help troubleshoot issues, explain error messages, or suggest optimizations. What would you like to know?`
     }
-    
+
     if (ctx?.runId) {
       return `👋 I'm here to help with your Maestro run ${ctx.runId.slice(0, 8)}... I can explain what's happening, help with approvals, or suggest improvements. How can I assist?`
     }
@@ -105,7 +107,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
       })
 
       const data = await response.json()
-      
+
       const assistantMessage: AIMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -117,14 +119,15 @@ export function AIAssistant({ context }: AIAssistantProps) {
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Failed to send message to AI assistant:', error)
-      
+
       const errorMessage: AIMessage = {
         id: crypto.randomUUID(),
         role: 'system',
-        content: 'Sorry, I encountered an error. Please try again or check the system status.',
+        content:
+          'Sorry, I encountered an error. Please try again or check the system status.',
         timestamp: new Date(),
       }
-      
+
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
@@ -140,22 +143,25 @@ export function AIAssistant({ context }: AIAssistantProps) {
 
   const executeAction = async (action: string, params?: any) => {
     try {
-      const response = await fetch(`/api/maestro/v1/ai-assistant/actions/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ params, context }),
-      })
+      const response = await fetch(
+        `/api/maestro/v1/ai-assistant/actions/${action}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ params, context }),
+        }
+      )
 
       if (response.ok) {
         const result = await response.json()
-        
+
         const actionMessage: AIMessage = {
           id: crypto.randomUUID(),
           role: 'assistant',
           content: `✅ Action completed: ${result.message || `Executed ${action}`}`,
           timestamp: new Date(),
         }
-        
+
         setMessages(prev => [...prev, actionMessage])
       }
     } catch (error) {
@@ -170,10 +176,10 @@ export function AIAssistant({ context }: AIAssistantProps) {
 
   const quickPrompts = [
     "What's the status of my current run?",
-    "Why did my router choose this model?",
-    "How can I improve performance?",
-    "Explain this error message",
-    "Show me cost optimization tips",
+    'Why did my router choose this model?',
+    'How can I improve performance?',
+    'Explain this error message',
+    'Show me cost optimization tips',
   ]
 
   if (!isOpen) {
@@ -211,7 +217,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+        {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -221,12 +227,14 @@ export function AIAssistant({ context }: AIAssistantProps) {
                 message.role === 'user'
                   ? 'bg-blue-600 text-white'
                   : message.role === 'system'
-                  ? 'bg-red-100 text-red-800 border border-red-200'
-                  : 'bg-gray-100 text-gray-900'
+                    ? 'bg-red-100 text-red-800 border border-red-200'
+                    : 'bg-gray-100 text-gray-900'
               }`}
             >
-              <div className="whitespace-pre-wrap text-sm">{message.content}</div>
-              
+              <div className="whitespace-pre-wrap text-sm">
+                {message.content}
+              </div>
+
               {/* Message metadata */}
               {message.metadata && (
                 <div className="mt-2 space-y-2">
@@ -240,39 +248,48 @@ export function AIAssistant({ context }: AIAssistantProps) {
                           style={{ width: `${message.metadata.confidence}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs opacity-75">{message.metadata.confidence}%</span>
+                      <span className="text-xs opacity-75">
+                        {message.metadata.confidence}%
+                      </span>
                     </div>
                   )}
 
                   {/* Suggestions */}
-                  {message.metadata.suggestions && message.metadata.suggestions.length > 0 && (
-                    <div className="space-y-1">
-                      <div className="text-xs opacity-75">Suggestions:</div>
-                      {message.metadata.suggestions.map((suggestion, idx) => (
-                        <div key={idx} className="text-xs bg-blue-50 text-blue-800 p-2 rounded">
-                          💡 {suggestion}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  {message.metadata.actions && message.metadata.actions.length > 0 && (
-                    <div className="space-y-1">
-                      <div className="text-xs opacity-75">Actions:</div>
+                  {message.metadata.suggestions &&
+                    message.metadata.suggestions.length > 0 && (
                       <div className="space-y-1">
-                        {message.metadata.actions.map((action, idx) => (
-                          <button
+                        <div className="text-xs opacity-75">Suggestions:</div>
+                        {message.metadata.suggestions.map((suggestion, idx) => (
+                          <div
                             key={idx}
-                            onClick={() => executeAction(action.action, action.params)}
-                            className="block w-full text-left text-xs bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors"
+                            className="text-xs bg-blue-50 text-blue-800 p-2 rounded"
                           >
-                            🔧 {action.label}
-                          </button>
+                            💡 {suggestion}
+                          </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                  {/* Actions */}
+                  {message.metadata.actions &&
+                    message.metadata.actions.length > 0 && (
+                      <div className="space-y-1">
+                        <div className="text-xs opacity-75">Actions:</div>
+                        <div className="space-y-1">
+                          {message.metadata.actions.map((action, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() =>
+                                executeAction(action.action, action.params)
+                              }
+                              className="block w-full text-left text-xs bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors"
+                            >
+                              🔧 {action.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                 </div>
               )}
 
@@ -295,8 +312,14 @@ export function AIAssistant({ context }: AIAssistantProps) {
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: '0.1s' }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: '0.2s' }}
+                  ></div>
                 </div>
                 <span className="text-sm text-gray-600">Thinking...</span>
               </div>
@@ -333,7 +356,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
             ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={e => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask me about Maestro..."
             className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

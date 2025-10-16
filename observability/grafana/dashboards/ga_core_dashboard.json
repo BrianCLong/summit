@@ -32,55 +32,76 @@
     {
       "type": "stat",
       "title": "NLQ p95 (s)",
-      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "targets": [{
-        "expr": "nlq_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
-        "legendFormat": "p95"
-      }]
+      "targets": [
+        {
+          "expr": "nlq_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "p95"
+        }
+      ]
     },
     {
       "type": "stat",
       "title": "Ingest p95 (s)",
-      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "targets": [{
-        "expr": "ingest_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
-        "legendFormat": "p95"
-      }]
+      "targets": [
+        {
+          "expr": "ingest_latency_seconds_p95{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "p95"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Export decisions (allow/deny/redacted)",
-      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
       "targets": [
-        {"expr": "sum by (decision) (increase(export_decisions_total{env=\"$env\",tenant=~\"$tenant\"}[5m]))", "legendFormat": "{{decision}}"}
+        {
+          "expr": "sum by (decision) (increase(export_decisions_total{env=\"$env\",tenant=~\"$tenant\"}[5m]))",
+          "legendFormat": "{{decision}}"
+        }
       ]
     },
     {
       "type": "gauge",
       "title": "ER precision",
-      "gridPos": {"x": 0, "y": 12, "w": 6, "h": 6},
+      "gridPos": { "x": 0, "y": 12, "w": 6, "h": 6 },
       "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "fieldConfig": {"defaults": {"min": 0, "max": 1}},
-      "targets": [{"expr": "er_precision{env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "precision"}]
+      "fieldConfig": { "defaults": { "min": 0, "max": 1 } },
+      "targets": [
+        {
+          "expr": "er_precision{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "precision"
+        }
+      ]
     },
     {
       "type": "gauge",
       "title": "ER recall",
-      "gridPos": {"x": 6, "y": 12, "w": 6, "h": 6},
+      "gridPos": { "x": 6, "y": 12, "w": 6, "h": 6 },
       "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "fieldConfig": {"defaults": {"min": 0, "max": 1}},
-      "targets": [{"expr": "er_recall{env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "recall"}]
+      "fieldConfig": { "defaults": { "min": 0, "max": 1 } },
+      "targets": [
+        {
+          "expr": "er_recall{env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "recall"
+        }
+      ]
     },
     {
       "type": "stat",
       "title": "SLO burn rate",
-      "gridPos": {"x": 0, "y": 18, "w": 12, "h": 4},
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 4 },
       "datasource": { "type": "prometheus", "uid": "${DS_PROM}" },
-      "targets": [{"expr": "slo_error_budget_burn_rate{service=\"ga-core\",env=\"$env\",tenant=~\"$tenant\"}", "legendFormat": "burn"}]
+      "targets": [
+        {
+          "expr": "slo_error_budget_burn_rate{service=\"ga-core\",env=\"$env\",tenant=~\"$tenant\"}",
+          "legendFormat": "burn"
+        }
+      ]
     }
   ]
 }
-

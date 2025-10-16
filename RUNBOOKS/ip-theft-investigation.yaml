@@ -7,29 +7,29 @@ tasks:
     name: Analyze Access Patterns
     uses: connector:elastic
     with:
-      logs: ["file-access", "email", "network-traffic"]
-      time_range: "180d"
+      logs: ['file-access', 'email', 'network-traffic']
+      time_range: '180d'
 
   - id: anomaly_detection
     name: Detect Suspicious Access
     uses: ml:forecast
     needs: [access_pattern_analysis]
     with:
-      anomaly_types: ["unusual_volume", "off_hours", "unauthorized_systems"]
+      anomaly_types: ['unusual_volume', 'off_hours', 'unauthorized_systems']
 
   - id: data_flow_mapping
     name: Map Data Flows
     uses: graph:entity-resolution
     needs: [anomaly_detection]
     with:
-      entity_types: ["file", "user", "system", "external_endpoint"]
+      entity_types: ['file', 'user', 'system', 'external_endpoint']
 
   - id: exfiltration_scoring
     name: Score Exfiltration Risk
     uses: analyze:risk
     needs: [data_flow_mapping]
     with:
-      model: "data-exfiltration-v3"
+      model: 'data-exfiltration-v3'
 
   - id: investigation_insights
     name: Generate Investigation Insights
@@ -41,7 +41,7 @@ tasks:
     uses: export:bundle
     needs: [investigation_insights]
     with:
-      format: "forensic-evidence"
+      format: 'forensic-evidence'
 
 kpis:
   - detection_accuracy

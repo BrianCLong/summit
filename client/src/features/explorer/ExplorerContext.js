@@ -24,7 +24,9 @@ function reducer(state, action) {
 export function ExplorerProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <ExplorerContext.Provider value={{ state, dispatch }}>{children}</ExplorerContext.Provider>
+    <ExplorerContext.Provider value={{ state, dispatch }}>
+      {children}
+    </ExplorerContext.Provider>
   );
 }
 

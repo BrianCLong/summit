@@ -6,7 +6,7 @@ import {
   MaintainerApproval,
   ConfigDrift,
   SmokeTestResult,
-  ApiChange
+  ApiChange,
 } from '../conductor/deployment/deploymentGateService';
 
 describe('DeploymentGateService', () => {
@@ -15,7 +15,7 @@ describe('DeploymentGateService', () => {
     environment: 'pre-production',
     stagingEnvironment: 'staging',
     requestedBy: 'release.bot',
-    releaseTag: 'v2024.10.01'
+    releaseTag: 'v2024.10.01',
   };
 
   const asyncContextMock = <T>(value: T) =>
@@ -25,54 +25,73 @@ describe('DeploymentGateService', () => {
 
   const asyncDiffMock = <T>(value: T) =>
     jest
-      .fn<(source: string, target: string, context: DeploymentValidationContext) => Promise<T>>()
+      .fn<
+        (
+          source: string,
+          target: string,
+          context: DeploymentValidationContext,
+        ) => Promise<T>
+      >()
       .mockResolvedValue(value);
 
   const slackMock = () =>
     jest
-      .fn<(message: string, payload: Record<string, unknown>) => Promise<void>>()
+      .fn<
+        (message: string, payload: Record<string, unknown>) => Promise<void>
+      >()
       .mockResolvedValue(undefined);
 
   const createAdapters = (
-    overrides: Partial<Record<keyof DeploymentGateAdapters, any>> = {}
+    overrides: Partial<Record<keyof DeploymentGateAdapters, any>> = {},
   ): DeploymentGateAdapters => {
     const logger = {
       info: jest.fn(),
       warn: jest.fn(),
-      error: jest.fn()
+      error: jest.fn(),
     };
 
     const base = {
       migrations: {
         getPendingMigrations: asyncContextMock<string[]>([]),
-        getFailedMigrations: asyncContextMock<string[]>([])
+        getFailedMigrations: asyncContextMock<string[]>([]),
       },
       readiness: {
-        getUnhealthyServices: asyncContextMock<string[]>([])
+        getUnhealthyServices: asyncContextMock<string[]>([]),
       },
       configuration: {
-        diffEnvironments: asyncDiffMock<ConfigDrift[]>([])
+        diffEnvironments: asyncDiffMock<ConfigDrift[]>([]),
       },
       smokeTests: {
-        run: asyncContextMock<SmokeTestResult>({ passed: true, durationMs: 1200 })
+        run: asyncContextMock<SmokeTestResult>({
+          passed: true,
+          durationMs: 1200,
+        }),
       },
       api: {
-        getBreakingChanges: asyncContextMock<ApiChange[]>([])
+        getBreakingChanges: asyncContextMock<ApiChange[]>([]),
       },
       release: {
-        hasRollbackPlan: asyncContextMock<boolean>(true)
+        hasRollbackPlan: asyncContextMock<boolean>(true),
       },
       approvals: {
         getMaintainerApprovals: asyncContextMock<MaintainerApproval[]>([
-          { user: 'alice', role: 'maintainer', approvedAt: new Date().toISOString() },
-          { user: 'bob', role: 'maintainer', approvedAt: new Date().toISOString() }
-        ])
+          {
+            user: 'alice',
+            role: 'maintainer',
+            approvedAt: new Date().toISOString(),
+          },
+          {
+            user: 'bob',
+            role: 'maintainer',
+            approvedAt: new Date().toISOString(),
+          },
+        ]),
       },
       slack: {
-        notify: slackMock()
+        notify: slackMock(),
       },
       logger,
-      ...overrides
+      ...overrides,
     } as unknown as DeploymentGateAdapters;
 
     return base;
@@ -90,27 +109,37 @@ describe('DeploymentGateService', () => {
     expect(report.checks.every((check) => check.status === 'pass')).toBe(true);
     expect(adapters.slack.notify).not.toHaveBeenCalled();
     expect(adapters.logger.info).toHaveBeenCalledWith(
-      expect.objectContaining({ event: 'deployment_gate_completed', status: 'pass' }),
-      'Deployment gate validation completed'
+      expect.objectContaining({
+        event: 'deployment_gate_completed',
+        status: 'pass',
+      }),
+      'Deployment gate validation completed',
     );
   });
 
   it('blocks deployment and notifies Slack when any check fails', async () => {
     const adapters = createAdapters({
       readiness: {
-        getUnhealthyServices: asyncContextMock<string[]>(['api-service', 'worker'])
+        getUnhealthyServices: asyncContextMock<string[]>([
+          'api-service',
+          'worker',
+        ]),
       },
       smokeTests: {
         run: asyncContextMock<SmokeTestResult>({
           passed: false,
-          failures: ['GET /health returned 500']
-        })
+          failures: ['GET /health returned 500'],
+        }),
       },
       approvals: {
         getMaintainerApprovals: asyncContextMock<MaintainerApproval[]>([
-          { user: 'alice', role: 'maintainer', approvedAt: new Date().toISOString() }
-        ])
-      }
+          {
+            user: 'alice',
+            role: 'maintainer',
+            approvedAt: new Date().toISOString(),
+          },
+        ]),
+      },
     });
     const service = new DeploymentGateService(adapters);
 
@@ -124,12 +153,14 @@ describe('DeploymentGateService', () => {
       expect.objectContaining({
         buildId: buildContext.buildId,
         environment: buildContext.environment,
-        failures: expect.any(Array)
-      })
+        failures: expect.any(Array),
+      }),
     );
     expect(adapters.logger.error).not.toHaveBeenCalledWith(
-      expect.objectContaining({ event: 'deployment_gate_slack_notification_failed' }),
-      expect.any(String)
+      expect.objectContaining({
+        event: 'deployment_gate_slack_notification_failed',
+      }),
+      expect.any(String),
     );
   });
 
@@ -137,19 +168,30 @@ describe('DeploymentGateService', () => {
     const adapters = createAdapters({
       approvals: {
         getMaintainerApprovals: asyncContextMock<MaintainerApproval[]>([
-          { user: 'alice', role: 'maintainer', approvedAt: new Date().toISOString() },
-          { user: 'sam', role: 'contributor', approvedAt: new Date().toISOString() }
-        ])
-      }
+          {
+            user: 'alice',
+            role: 'maintainer',
+            approvedAt: new Date().toISOString(),
+          },
+          {
+            user: 'sam',
+            role: 'contributor',
+            approvedAt: new Date().toISOString(),
+          },
+        ]),
+      },
     });
-    const service = new DeploymentGateService(adapters, { requiredMaintainerApprovals: 2 });
+    const service = new DeploymentGateService(adapters, {
+      requiredMaintainerApprovals: 2,
+    });
 
     const report = await service.validate(buildContext);
 
-    const approvalsCheck = report.checks.find((check) => check.name === 'Maintainer approvals');
+    const approvalsCheck = report.checks.find(
+      (check) => check.name === 'Maintainer approvals',
+    );
     expect(approvalsCheck?.status).toBe('fail');
     expect(approvalsCheck?.details).toContain('1/2');
     expect(report.blocked).toBe(true);
   });
 });
-

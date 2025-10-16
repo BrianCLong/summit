@@ -7,11 +7,11 @@ spec:
   background: true
   rules:
     - name: ro-rootfs
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "Containers must use readOnlyRootFilesystem"
+        message: 'Containers must use readOnlyRootFilesystem'
         pattern:
           spec:
             containers:
-            - securityContext:
-                readOnlyRootFilesystem: true
+              - securityContext:
+                  readOnlyRootFilesystem: true

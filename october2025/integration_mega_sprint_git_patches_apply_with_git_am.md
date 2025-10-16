@@ -3,6 +3,7 @@
 > Squashed mailbox-format patches implementing the Unification Release glue: config renderer + drift CI, gateway auth & subject propagation, budget slow‑killer, ledger search/export, Policy Inspector UI, DSAR hook, Helm hardening (HPA/PDB/NP/CSI), `make mega`, and CI unification gates. Save these files and apply in order.
 
 ## How to apply
+
 ```bash
 mkdir -p patches && cd patches
 # Save the files below as 0006-*.patch ... 0012-*.patch
@@ -21,7 +22,8 @@ git am 0006-feat-config-renderer-and-drift-ci.patch \
 ---
 
 ## 0006-feat-config-renderer-and-drift-ci.patch
-```
+
+````
 From aaaaaaaa00000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
 Date: Wed, 1 Oct 2025 11:10:00 -0600
@@ -101,11 +103,12 @@ index 0000000..2222222
 +      - uses: actions/checkout@v4
 +      - run: node tools/config/render.ts
 +      - run: git diff --exit-code || (echo "Run render.ts and commit generated files" && exit 1)
-```
+````
 
 ---
 
 ## 0007-feat-gateway-auth-and-subject-propagation.patch
+
 ```
 From bbbbbbbb00000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -151,6 +154,7 @@ diff --git a/services/gateway-graphql/src/index.ts b/services/gateway-graphql/sr
 ---
 
 ## 0008-feat-budget-slow-killer.patch
+
 ```
 From cccccccc00000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -168,6 +172,7 @@ Adds AbortController-based wrapper; instruments analytics/pattern resolvers.
 ---
 
 ## 0009-feat-ledger-search-and-proof-export.patch
+
 ```
 From dddddddd00000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -182,6 +187,7 @@ Subject: [PATCH] feat(ledger): search endpoint + W3C-style proof export
 ---
 
 ## 0010-feat-webapp-policy-inspector-and-dsar.patch
+
 ```
 From eeeeeeee00000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -199,6 +205,7 @@ Subject: [PATCH] feat(webapp): Policy Inspector + DSAR button
 ---
 
 ## 0011-chore-helm-hardening-hpa-pdb-netpol-csi.patch
+
 ```
 From ffffffff00000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -216,6 +223,7 @@ Subject: [PATCH] chore(helm): HPA, PDB, NetworkPolicies, CSI secrets scaffolding
 ---
 
 ## 0012-chore-make-mega-and-unification-ci.patch
+
 ```
 From 9999999900000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -231,6 +239,7 @@ Subject: [PATCH] chore(ci): make mega target and unification gates workflow
 ---
 
 ## Notes
+
 - Patches are squashed and assume the prior PR patch series is already applied.
 - Replace `KEYCLOAK_ISSUER/AUDIENCE` and secret placeholders as needed.
 - Dev uses `.secrets.json` for vault lookups—production should use Vault CSI.

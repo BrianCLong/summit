@@ -3,7 +3,7 @@ import type {
   AssetDescriptor,
   DiscoveryEvent,
   DiscoveryEventType,
-  DiscoveryProvider
+  DiscoveryProvider,
 } from './types';
 
 function toComparable(asset: AssetDescriptor): string {
@@ -64,7 +64,8 @@ export class AssetDiscoveryEngine {
         seen.add(asset.id);
         events.push(...this.upsert(asset, provider.id));
       }
-      const previous = this.providerAssets.get(provider.id) ?? new Set<string>();
+      const previous =
+        this.providerAssets.get(provider.id) ?? new Set<string>();
       for (const assetId of previous) {
         if (!seen.has(assetId)) {
           this.removeSource(assetId, provider.id);
@@ -126,7 +127,7 @@ export class AssetDiscoveryEngine {
   private emitEvent(
     type: DiscoveryEventType,
     asset: AssetDescriptor,
-    previous?: AssetDescriptor
+    previous?: AssetDescriptor,
   ): DiscoveryEvent {
     const event: DiscoveryEvent = { type, asset, previous };
     this.emitter.emit('event', event);

@@ -1,10 +1,16 @@
-function createResult({ name, description, passed, details = [], remediation }) {
+function createResult({
+  name,
+  description,
+  passed,
+  details = [],
+  remediation,
+}) {
   return {
     name,
     description,
     passed,
     details,
-    remediation
+    remediation,
   };
 }
 
@@ -17,13 +23,13 @@ function summarize(results) {
       failures: failures.map((failure) => ({
         name: failure.name,
         details: failure.details,
-        remediation: failure.remediation
-      }))
-    }
+        remediation: failure.remediation,
+      })),
+    },
   };
 }
 
 module.exports = {
   createResult,
-  summarize
+  summarize,
 };

@@ -6,7 +6,12 @@ from .fixtures import client
 
 def test_ethics_block(monkeypatch):
     c = client()
-    payload = {"subgraph": {"nodes": [{"id": "A"}], "edges": []}, "outputs": [], "model": {"name": "m", "version": "1"}, "options": {"text": "persuade"}}
+    payload = {
+        "subgraph": {"nodes": [{"id": "A"}], "edges": []},
+        "outputs": [],
+        "model": {"name": "m", "version": "1"},
+        "options": {"text": "persuade"},
+    }
     res = c.post("/explain", json=payload, headers={"x-api-key": "test"})
     assert res.status_code == 400
 
@@ -18,7 +23,15 @@ def test_invalid_api_key(monkeypatch):
 
     get_settings.cache_clear()
     c = client()
-    res = c.post("/explain", json={"subgraph": {"nodes": [], "edges": []}, "outputs": [], "model": {"name": "m", "version": "1"}}, headers={"x-api-key": "bad"})
+    res = c.post(
+        "/explain",
+        json={
+            "subgraph": {"nodes": [], "edges": []},
+            "outputs": [],
+            "model": {"name": "m", "version": "1"},
+        },
+        headers={"x-api-key": "bad"},
+    )
     assert res.status_code == 401
 
 
@@ -28,6 +41,10 @@ def test_oversize(monkeypatch):
 
     get_settings.cache_clear()
     c = client()
-    payload = {"subgraph": {"nodes": [{"id": "A"}, {"id": "B"}], "edges": []}, "outputs": [], "model": {"name": "m", "version": "1"}}
+    payload = {
+        "subgraph": {"nodes": [{"id": "A"}, {"id": "B"}], "edges": []},
+        "outputs": [],
+        "model": {"name": "m", "version": "1"},
+    }
     res = c.post("/explain", json=payload, headers={"x-api-key": "test"})
     assert res.status_code == 413

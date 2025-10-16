@@ -19,7 +19,12 @@ export default function InvestigationList() {
   return (
     <Card sx={{ m: 2, borderRadius: 3 }}>
       <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ mb: 1 }}
+        >
           <Typography variant="h6">Investigations</Typography>
           <Button variant="contained">Create from Template</Button>
         </Stack>

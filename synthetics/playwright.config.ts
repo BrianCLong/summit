@@ -1,2 +1,5 @@
 import { defineConfig } from '@playwright/test';
-export default defineConfig({ retries: 1, use: { trace: 'on', screenshot: 'only-on-failure' } });
+export default defineConfig({
+  retries: 1,
+  use: { trace: 'on', screenshot: 'only-on-failure' },
+});

@@ -1,9 +1,9 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
-import { 
-  ExclamationTriangleIcon, 
-  ArrowPathIcon, 
+import {
+  ExclamationTriangleIcon,
+  ArrowPathIcon,
   ClipboardDocumentIcon,
-  BugAntIcon 
+  BugAntIcon,
 } from '@heroicons/react/24/outline'
 
 interface Props {
@@ -45,7 +45,7 @@ export class MaestroErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Maestro Error Boundary caught an error:', error, errorInfo)
-    
+
     this.setState({
       error,
       errorInfo,
@@ -147,14 +147,14 @@ User Agent: ${navigator.userAgent}
               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
                 <BugAntIcon className="h-8 w-8 text-red-600" />
               </div>
-              
+
               <h1 className="text-2xl font-semibold text-gray-900 mb-4">
                 Something went wrong
               </h1>
-              
+
               <p className="text-gray-600 mb-6">
-                The Maestro interface encountered an unexpected error. 
-                Our team has been notified and is working on a fix.
+                The Maestro interface encountered an unexpected error. Our team
+                has been notified and is working on a fix.
               </p>
 
               {/* Error details (collapsible) */}
@@ -164,10 +164,12 @@ User Agent: ${navigator.userAgent}
                 </summary>
                 <div className="text-xs font-mono text-gray-600 space-y-2">
                   <div>
-                    <strong>Error:</strong> {this.state.error?.name || 'Unknown'}
+                    <strong>Error:</strong>{' '}
+                    {this.state.error?.name || 'Unknown'}
                   </div>
                   <div>
-                    <strong>Message:</strong> {this.state.error?.message || 'No message'}
+                    <strong>Message:</strong>{' '}
+                    {this.state.error?.message || 'No message'}
                   </div>
                   {this.state.error?.stack && (
                     <div>
@@ -185,9 +187,13 @@ User Agent: ${navigator.userAgent}
                 {this.props.enableRetry !== false && (
                   <button
                     onClick={this.handleRetry}
-                    disabled={this.state.isRetrying || this.state.retryCount >= (this.props.maxRetries || 3)}
+                    disabled={
+                      this.state.isRetrying ||
+                      this.state.retryCount >= (this.props.maxRetries || 3)
+                    }
                     className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors ${
-                      this.state.isRetrying || this.state.retryCount >= (this.props.maxRetries || 3)
+                      this.state.isRetrying ||
+                      this.state.retryCount >= (this.props.maxRetries || 3)
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
@@ -195,12 +201,14 @@ User Agent: ${navigator.userAgent}
                     {this.state.isRetrying ? (
                       <>
                         <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
-                        Retrying... ({this.state.retryCount}/{this.props.maxRetries || 3})
+                        Retrying... ({this.state.retryCount}/
+                        {this.props.maxRetries || 3})
                       </>
                     ) : (
                       <>
                         <ArrowPathIcon className="h-4 w-4 mr-2" />
-                        Try Again ({this.state.retryCount}/{this.props.maxRetries || 3})
+                        Try Again ({this.state.retryCount}/
+                        {this.props.maxRetries || 3})
                       </>
                     )}
                   </button>
@@ -265,27 +273,30 @@ export function withMaestroErrorBoundary<T extends object>(
 
 // Hook for programmatic error reporting
 export function useMaestroErrorReporting() {
-  const reportError = React.useCallback(async (error: Error, context?: Record<string, any>) => {
-    try {
-      await fetch('/api/maestro/v1/errors/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          error: {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-          },
-          context,
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-          timestamp: new Date().toISOString(),
-        }),
-      })
-    } catch (reportError) {
-      console.error('Failed to report error:', reportError)
-    }
-  }, [])
+  const reportError = React.useCallback(
+    async (error: Error, context?: Record<string, any>) => {
+      try {
+        await fetch('/api/maestro/v1/errors/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error: {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+            },
+            context,
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+          }),
+        })
+      } catch (reportError) {
+        console.error('Failed to report error:', reportError)
+      }
+    },
+    []
+  )
 
   return { reportError }
 }

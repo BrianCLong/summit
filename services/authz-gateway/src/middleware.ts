@@ -38,14 +38,19 @@ async function buildResource(
     return attributeService.getResourceAttributes(resourceId);
   }
   const tenantId = String(req.headers['x-tenant-id'] || subject.tenantId);
-  const residency = String(req.headers['x-resource-residency'] || subject.residency);
+  const residency = String(
+    req.headers['x-resource-residency'] || subject.residency,
+  );
   const classification = String(
     req.headers['x-resource-classification'] || subject.clearance,
   );
   const tagsHeader = req.headers['x-resource-tags'];
   const tags =
     typeof tagsHeader === 'string'
-      ? tagsHeader.split(',').map((tag) => tag.trim()).filter(Boolean)
+      ? tagsHeader
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean)
       : [];
   return {
     id: req.path,
@@ -58,7 +63,10 @@ async function buildResource(
 
 const logger = pino({ name: 'authz-require-auth' });
 
-export function requireAuth(attributeService: AttributeService, options: Options) {
+export function requireAuth(
+  attributeService: AttributeService,
+  options: Options,
+) {
   return async (
     req: AuthenticatedRequest,
     res: Response,
@@ -117,7 +125,9 @@ export function requireAuth(attributeService: AttributeService, options: Options
                 reason: decision.reason,
               });
           }
-          return res.status(403).json({ error: 'forbidden', reason: decision.reason });
+          return res
+            .status(403)
+            .json({ error: 'forbidden', reason: decision.reason });
         }
         req.obligations = decision.obligations;
       }

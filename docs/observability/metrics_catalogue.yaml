@@ -2,7 +2,7 @@ version: 1
 updated: 2025-09-28
 owners:
   team: sre-observability
-  slack: "#observability"
+  slack: '#observability'
   pagerduty_service: summit-observability
 metrics:
   - id: api_request_latency

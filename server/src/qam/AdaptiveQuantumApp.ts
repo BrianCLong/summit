@@ -85,7 +85,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
     depth: { min: 1, max: 20 },
     qubits: { min: 1, max: 50 },
     shots: { min: 100, max: 10000 },
-    optimization_level: { min: 0, max: 3 }
+    optimization_level: { min: 0, max: 3 },
   };
 
   private availableBackends = [
@@ -94,18 +94,29 @@ export class AdaptiveQuantumApp extends EventEmitter {
     'ibmq_qasm_simulator',
     'ibmq_manila',
     'ibmq_bogota',
-    'aer_simulator'
+    'aer_simulator',
   ];
 
   private availableGates = [
-    'H', 'X', 'Y', 'Z', 'RX', 'RY', 'RZ',
-    'CNOT', 'CZ', 'CX', 'SWAP', 'CCX', 'U3'
+    'H',
+    'X',
+    'Y',
+    'Z',
+    'RX',
+    'RY',
+    'RZ',
+    'CNOT',
+    'CZ',
+    'CX',
+    'SWAP',
+    'CCX',
+    'U3',
   ];
 
   constructor(
     appId: string,
     tenantId: string,
-    initialParameters?: Partial<QuantumCircuitParameters>
+    initialParameters?: Partial<QuantumCircuitParameters>,
   ) {
     super();
     this.appId = appId;
@@ -119,33 +130,33 @@ export class AdaptiveQuantumApp extends EventEmitter {
       backend: 'qasm_simulator',
       shots: 1024,
       optimization_level: 1,
-      ...initialParameters
+      ...initialParameters,
     };
 
     // Initialize optimizers and managers
     this.linucb = new LinUCBOptimizer({
       contextDimension: 12, // Circuit features + backend metrics
       explorationAlpha: 0.25,
-      confidenceLevel: 0.95
+      confidenceLevel: 0.95,
     });
 
     this.stateManager = new RedisStateManager({
       keyPrefix: `qam:${tenantId}:${appId}`,
       encryptionEnabled: true,
       compressionEnabled: true,
-      merkleTreeEnabled: true
+      merkleTreeEnabled: true,
     });
 
     this.privacyAccountant = new DifferentialPrivacyAccountant({
       defaultEpsilon: 1.0,
       defaultDelta: 1e-5,
-      compositionMethod: 'RDP' // Rényi Differential Privacy
+      compositionMethod: 'RDP', // Rényi Differential Privacy
     });
 
     logger.info('AdaptiveQuantumApp initialized', {
       appId: this.appId,
       tenantId: this.tenantId,
-      initialParameters: this.currentParameters
+      initialParameters: this.currentParameters,
     });
   }
 
@@ -159,7 +170,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
 
       logger.info('Executing quantum circuit', {
         executionId,
-        parameters: this.currentParameters
+        parameters: this.currentParameters,
       });
 
       // Simulate quantum circuit execution
@@ -173,13 +184,19 @@ export class AdaptiveQuantumApp extends EventEmitter {
       this.emit('circuit_executed', {
         executionId,
         parameters: this.currentParameters,
-        results
+        results,
       });
 
       return results;
     } catch (error) {
-      logger.error('Circuit execution failed', { error, parameters: this.currentParameters });
-      this.emit('execution_error', { error, parameters: this.currentParameters });
+      logger.error('Circuit execution failed', {
+        error,
+        parameters: this.currentParameters,
+      });
+      this.emit('execution_error', {
+        error,
+        parameters: this.currentParameters,
+      });
       throw error;
     }
   }
@@ -190,7 +207,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
   async learnFromExecution(
     executionId: string,
     results: ExecutionResults,
-    feedback: PerformanceFeedback
+    feedback: PerformanceFeedback,
   ): Promise<LearningUpdate> {
     try {
       if (!this.learningEnabled) {
@@ -199,7 +216,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
           parametersUpdated: false,
           explorationRate: this.explorationRate,
           confidenceScores: {},
-          nextRecommendation: this.currentParameters
+          nextRecommendation: this.currentParameters,
         };
       }
 
@@ -212,7 +229,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
         parameters: { ...this.currentParameters },
         results,
         feedback,
-        reward
+        reward,
       };
 
       // Add to history
@@ -224,7 +241,10 @@ export class AdaptiveQuantumApp extends EventEmitter {
       }
 
       // Update LinUCB state
-      const learningUpdate = await this.updateLinUCBState(performancePoint, reward);
+      const learningUpdate = await this.updateLinUCBState(
+        performancePoint,
+        reward,
+      );
 
       // Update backend metrics
       await this.updateBackendMetrics(this.currentParameters.backend, results);
@@ -236,14 +256,14 @@ export class AdaptiveQuantumApp extends EventEmitter {
       this.emit('learning_update', {
         executionId,
         performancePoint,
-        learningUpdate
+        learningUpdate,
       });
 
       logger.info('Learning update completed', {
         executionId,
         reward,
         explorationRate: learningUpdate.explorationRate,
-        parametersUpdated: learningUpdate.parametersUpdated
+        parametersUpdated: learningUpdate.parametersUpdated,
       });
 
       return learningUpdate;
@@ -274,7 +294,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       logger.debug('Next parameters recommended', {
         optimization: optimization.armId,
         confidence: optimization.confidence,
-        parameters: boundedParameters
+        parameters: boundedParameters,
       });
 
       return boundedParameters;
@@ -287,10 +307,12 @@ export class AdaptiveQuantumApp extends EventEmitter {
   /**
    * Update current parameters (can be manual or from optimization)
    */
-  async updateParameters(newParameters: Partial<QuantumCircuitParameters>): Promise<void> {
+  async updateParameters(
+    newParameters: Partial<QuantumCircuitParameters>,
+  ): Promise<void> {
     const updatedParameters = {
       ...this.currentParameters,
-      ...newParameters
+      ...newParameters,
     };
 
     // Validate and bound parameters
@@ -301,17 +323,17 @@ export class AdaptiveQuantumApp extends EventEmitter {
       this.appId,
       this.tenantId,
       { parameters: this.currentParameters },
-      ['parameters', 'update']
+      ['parameters', 'update'],
     );
 
     this.emit('parameters_updated', {
       previous: this.currentParameters,
-      updated: this.currentParameters
+      updated: this.currentParameters,
     });
 
     logger.info('Parameters updated', {
       appId: this.appId,
-      parameters: this.currentParameters
+      parameters: this.currentParameters,
     });
   }
 
@@ -327,12 +349,11 @@ export class AdaptiveQuantumApp extends EventEmitter {
         const metrics = this.backendMetrics.get(backend);
         if (metrics) {
           // Calculate composite score
-          const score = (
+          const score =
             (1 - metrics.avgLatency / 10000) * 0.3 + // Latency weight
             metrics.successRate * 0.4 + // Success rate weight
             (1 - metrics.costPerExecution / 1000) * 0.2 + // Cost weight
-            metrics.reliability * 0.1 // Reliability weight
-          );
+            metrics.reliability * 0.1; // Reliability weight
           backendScores.set(backend, score);
         } else {
           // Default score for unknown backends
@@ -354,7 +375,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       logger.debug('Optimal backend selected', {
         backend: bestBackend,
         score: bestScore,
-        allScores: Object.fromEntries(backendScores)
+        allScores: Object.fromEntries(backendScores),
       });
 
       return bestBackend;
@@ -381,7 +402,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
 
       logger.info('Adaptive optimization completed', {
         previousParameters: this.currentParameters,
-        optimizedParameters: nextParameters
+        optimizedParameters: nextParameters,
       });
     } catch (error) {
       logger.error('Adaptive optimization failed', { error });
@@ -400,13 +421,17 @@ export class AdaptiveQuantumApp extends EventEmitter {
         avgReward: 0,
         avgLatency: 0,
         successRate: 0,
-        totalExecutions: 0
+        totalExecutions: 0,
       };
     }
 
-    const avgReward = recentHistory.reduce((sum, p) => sum + p.reward, 0) / recentHistory.length;
-    const avgLatency = recentHistory.reduce((sum, p) => sum + p.feedback.latency, 0) / recentHistory.length;
-    const successCount = recentHistory.filter(p => p.results.success).length;
+    const avgReward =
+      recentHistory.reduce((sum, p) => sum + p.reward, 0) /
+      recentHistory.length;
+    const avgLatency =
+      recentHistory.reduce((sum, p) => sum + p.feedback.latency, 0) /
+      recentHistory.length;
+    const successCount = recentHistory.filter((p) => p.results.success).length;
     const successRate = successCount / recentHistory.length;
 
     return {
@@ -415,7 +440,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       successRate,
       totalExecutions: this.performanceHistory.length,
       recentPerformance: recentHistory.slice(-10),
-      backendMetrics: Object.fromEntries(this.backendMetrics)
+      backendMetrics: Object.fromEntries(this.backendMetrics),
     };
   }
 
@@ -423,20 +448,26 @@ export class AdaptiveQuantumApp extends EventEmitter {
 
   private async simulateExecution(): Promise<ExecutionResults> {
     // Simulate quantum circuit execution with realistic timing and costs
-    const baseLatency = 100 + this.currentParameters.depth * 50 + this.currentParameters.shots * 0.1;
+    const baseLatency =
+      100 +
+      this.currentParameters.depth * 50 +
+      this.currentParameters.shots * 0.1;
     const jitter = Math.random() * 100;
     const executionTime = baseLatency + jitter;
 
     // Calculate costs based on backend and circuit complexity
     const baseCost = this.getBackendCost(this.currentParameters.backend);
-    const complexityCost = (this.currentParameters.depth * this.currentParameters.qubits * 0.01);
+    const complexityCost =
+      this.currentParameters.depth * this.currentParameters.qubits * 0.01;
     const shotsCost = this.currentParameters.shots * 0.0001;
     const totalCost = baseCost + complexityCost + shotsCost;
 
     // Simulate accuracy based on circuit depth and backend
     const baseAccuracy = 0.95;
     const depthPenalty = this.currentParameters.depth * 0.02;
-    const backendBonus = this.getBackendAccuracyBonus(this.currentParameters.backend);
+    const backendBonus = this.getBackendAccuracyBonus(
+      this.currentParameters.backend,
+    );
     const accuracy = Math.max(0.1, baseAccuracy - depthPenalty + backendBonus);
 
     // Simulate error rate
@@ -450,12 +481,15 @@ export class AdaptiveQuantumApp extends EventEmitter {
       errorRate,
       metadata: {
         backend: this.currentParameters.backend,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
   }
 
-  private calculateReward(results: ExecutionResults, feedback: PerformanceFeedback): number {
+  private calculateReward(
+    results: ExecutionResults,
+    feedback: PerformanceFeedback,
+  ): number {
     // Multi-objective reward function
     const successWeight = results.success ? 1.0 : 0.0;
     const latencyReward = Math.max(0, 1 - feedback.latency / 5000); // Normalize to 5s max
@@ -472,49 +506,66 @@ export class AdaptiveQuantumApp extends EventEmitter {
     );
   }
 
-  private async updateLinUCBState(performancePoint: PerformancePoint, reward: number): Promise<LearningUpdate> {
+  private async updateLinUCBState(
+    performancePoint: PerformancePoint,
+    reward: number,
+  ): Promise<LearningUpdate> {
     // Extract context features
     const contextFeatures = this.extractContextFeatures();
 
     // Update LinUCB with new observation
     const armId = this.parametersToArmId(performancePoint.parameters);
-    const updateResult = await this.linucb.updateWithReward(armId, contextFeatures, reward);
+    const updateResult = await this.linucb.updateWithReward(
+      armId,
+      contextFeatures,
+      reward,
+    );
 
     // Get next recommendation
-    const nextOptimization = await this.linucb.selectOptimalArm(contextFeatures);
+    const nextOptimization =
+      await this.linucb.selectOptimalArm(contextFeatures);
     const nextRecommendation = this.optimizationToParameters(nextOptimization);
 
     return {
       parametersUpdated: true,
       explorationRate: this.explorationRate,
       confidenceScores: updateResult.confidenceScores || {},
-      nextRecommendation: this.boundParameters(nextRecommendation)
+      nextRecommendation: this.boundParameters(nextRecommendation),
     };
   }
 
-  private async updateBackendMetrics(backend: string, results: ExecutionResults): Promise<void> {
+  private async updateBackendMetrics(
+    backend: string,
+    results: ExecutionResults,
+  ): Promise<void> {
     const current = this.backendMetrics.get(backend) || {
       avgLatency: 0,
       successRate: 0,
       costPerExecution: 0,
       reliability: 0.5,
-      lastUsed: new Date()
+      lastUsed: new Date(),
     };
 
     // Exponential moving average updates
     const alpha = 0.1;
     const updatedMetrics: BackendMetrics = {
-      avgLatency: current.avgLatency * (1 - alpha) + results.executionTime * alpha,
-      successRate: current.successRate * (1 - alpha) + (results.success ? 1 : 0) * alpha,
-      costPerExecution: current.costPerExecution * (1 - alpha) + results.costs * alpha,
-      reliability: current.reliability * (1 - alpha) + (results.success ? 1 : 0) * alpha,
-      lastUsed: new Date()
+      avgLatency:
+        current.avgLatency * (1 - alpha) + results.executionTime * alpha,
+      successRate:
+        current.successRate * (1 - alpha) + (results.success ? 1 : 0) * alpha,
+      costPerExecution:
+        current.costPerExecution * (1 - alpha) + results.costs * alpha,
+      reliability:
+        current.reliability * (1 - alpha) + (results.success ? 1 : 0) * alpha,
+      lastUsed: new Date(),
     };
 
     this.backendMetrics.set(backend, updatedMetrics);
   }
 
-  private async persistLearningState(performancePoint: PerformancePoint): Promise<void> {
+  private async persistLearningState(
+    performancePoint: PerformancePoint,
+  ): Promise<void> {
     try {
       // Use differential privacy for state persistence
       const privacyQuery = {
@@ -522,10 +573,11 @@ export class AdaptiveQuantumApp extends EventEmitter {
         epsilon: 0.1,
         delta: 1e-6,
         sensitivityBound: 1.0,
-        dataPoints: 1
+        dataPoints: 1,
       };
 
-      const privacyLoss = await this.privacyAccountant.consumeBudget(privacyQuery);
+      const privacyLoss =
+        await this.privacyAccountant.consumeBudget(privacyQuery);
 
       if (privacyLoss.budgetExceeded) {
         logger.warn('Privacy budget exceeded, skipping state persistence');
@@ -533,7 +585,10 @@ export class AdaptiveQuantumApp extends EventEmitter {
       }
 
       // Add noise for differential privacy
-      const noisyPerformancePoint = this.addDifferentialPrivacyNoise(performancePoint, privacyLoss.noiseScale);
+      const noisyPerformancePoint = this.addDifferentialPrivacyNoise(
+        performancePoint,
+        privacyLoss.noiseScale,
+      );
 
       // Persist to Redis with encryption
       await this.stateManager.saveState(
@@ -542,9 +597,9 @@ export class AdaptiveQuantumApp extends EventEmitter {
         {
           learningState: noisyPerformancePoint,
           timestamp: new Date(),
-          privacyLoss: privacyLoss
+          privacyLoss: privacyLoss,
         },
-        ['learning', 'performance', 'private']
+        ['learning', 'performance', 'private'],
       );
     } catch (error) {
       logger.error('Failed to persist learning state', { error });
@@ -565,7 +620,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       this.getRecentSuccessRate(),
       this.explorationRate,
       Math.min(1, this.performanceHistory.length / 100), // Experience factor
-      Date.now() % (24 * 60 * 60 * 1000) / (24 * 60 * 60 * 1000) // Time of day
+      (Date.now() % (24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000), // Time of day
     ];
   }
 
@@ -578,7 +633,9 @@ export class AdaptiveQuantumApp extends EventEmitter {
     return depthBin * 100 + qubitBin * 10 + Math.max(0, backendBin);
   }
 
-  private optimizationToParameters(optimization: any): QuantumCircuitParameters {
+  private optimizationToParameters(
+    optimization: any,
+  ): QuantumCircuitParameters {
     // Convert LinUCB optimization result back to parameters
     const armId = optimization.armId;
     const depthBin = Math.floor(armId / 100);
@@ -589,20 +646,44 @@ export class AdaptiveQuantumApp extends EventEmitter {
       depth: Math.min(20, (depthBin + 1) * 5),
       qubits: Math.min(50, (qubitBin + 1) * 10),
       gates: this.selectOptimalGates(),
-      backend: this.availableBackends[Math.min(backendBin, this.availableBackends.length - 1)],
+      backend:
+        this.availableBackends[
+          Math.min(backendBin, this.availableBackends.length - 1)
+        ],
       shots: this.currentParameters.shots, // Keep current shots
-      optimization_level: this.currentParameters.optimization_level // Keep current opt level
+      optimization_level: this.currentParameters.optimization_level, // Keep current opt level
     };
   }
 
-  private boundParameters(parameters: QuantumCircuitParameters): QuantumCircuitParameters {
+  private boundParameters(
+    parameters: QuantumCircuitParameters,
+  ): QuantumCircuitParameters {
     return {
-      depth: Math.max(this.parameterBounds.depth.min, Math.min(this.parameterBounds.depth.max, parameters.depth)),
-      qubits: Math.max(this.parameterBounds.qubits.min, Math.min(this.parameterBounds.qubits.max, parameters.qubits)),
-      gates: parameters.gates.filter(gate => this.availableGates.includes(gate)),
-      backend: this.availableBackends.includes(parameters.backend) ? parameters.backend : this.availableBackends[0],
-      shots: Math.max(this.parameterBounds.shots.min, Math.min(this.parameterBounds.shots.max, parameters.shots)),
-      optimization_level: Math.max(this.parameterBounds.optimization_level.min, Math.min(this.parameterBounds.optimization_level.max, parameters.optimization_level))
+      depth: Math.max(
+        this.parameterBounds.depth.min,
+        Math.min(this.parameterBounds.depth.max, parameters.depth),
+      ),
+      qubits: Math.max(
+        this.parameterBounds.qubits.min,
+        Math.min(this.parameterBounds.qubits.max, parameters.qubits),
+      ),
+      gates: parameters.gates.filter((gate) =>
+        this.availableGates.includes(gate),
+      ),
+      backend: this.availableBackends.includes(parameters.backend)
+        ? parameters.backend
+        : this.availableBackends[0],
+      shots: Math.max(
+        this.parameterBounds.shots.min,
+        Math.min(this.parameterBounds.shots.max, parameters.shots),
+      ),
+      optimization_level: Math.max(
+        this.parameterBounds.optimization_level.min,
+        Math.min(
+          this.parameterBounds.optimization_level.max,
+          parameters.optimization_level,
+        ),
+      ),
     };
   }
 
@@ -621,43 +702,53 @@ export class AdaptiveQuantumApp extends EventEmitter {
       .map(([gate]) => gate);
 
     // Return top 3-5 gates
-    const gateCount = Math.min(5, Math.max(3, Math.floor(Math.random() * 3) + 3));
+    const gateCount = Math.min(
+      5,
+      Math.max(3, Math.floor(Math.random() * 3) + 3),
+    );
     return sortedGates.slice(0, gateCount);
   }
 
   private calculateGatePerformance(gate: string): number {
-    const relevantHistory = this.performanceHistory.filter(p => p.parameters.gates.includes(gate));
+    const relevantHistory = this.performanceHistory.filter((p) =>
+      p.parameters.gates.includes(gate),
+    );
     if (relevantHistory.length === 0) return 0.5; // Default performance
 
-    return relevantHistory.reduce((sum, p) => sum + p.reward, 0) / relevantHistory.length;
+    return (
+      relevantHistory.reduce((sum, p) => sum + p.reward, 0) /
+      relevantHistory.length
+    );
   }
 
   private getBackendCost(backend: string): number {
     const costs: Record<string, number> = {
-      'qasm_simulator': 0.01,
-      'statevector_simulator': 0.02,
-      'ibmq_qasm_simulator': 0.05,
-      'ibmq_manila': 0.50,
-      'ibmq_bogota': 0.45,
-      'aer_simulator': 0.015
+      qasm_simulator: 0.01,
+      statevector_simulator: 0.02,
+      ibmq_qasm_simulator: 0.05,
+      ibmq_manila: 0.5,
+      ibmq_bogota: 0.45,
+      aer_simulator: 0.015,
     };
     return costs[backend] || 0.1;
   }
 
   private getBackendAccuracyBonus(backend: string): number {
     const bonuses: Record<string, number> = {
-      'statevector_simulator': 0.05,
-      'aer_simulator': 0.03,
-      'qasm_simulator': 0.01,
-      'ibmq_qasm_simulator': 0.02,
-      'ibmq_manila': -0.02,
-      'ibmq_bogota': -0.01
+      statevector_simulator: 0.05,
+      aer_simulator: 0.03,
+      qasm_simulator: 0.01,
+      ibmq_qasm_simulator: 0.02,
+      ibmq_manila: -0.02,
+      ibmq_bogota: -0.01,
     };
     return bonuses[backend] || 0;
   }
 
   private getBackendFeature(backend: string): number {
-    return this.availableBackends.indexOf(backend) / this.availableBackends.length;
+    return (
+      this.availableBackends.indexOf(backend) / this.availableBackends.length
+    );
   }
 
   private getRecentAvgReward(): number {
@@ -669,17 +760,22 @@ export class AdaptiveQuantumApp extends EventEmitter {
   private getRecentAvgLatency(): number {
     const recent = this.performanceHistory.slice(-10);
     if (recent.length === 0) return 1000;
-    return recent.reduce((sum, p) => sum + p.feedback.latency, 0) / recent.length;
+    return (
+      recent.reduce((sum, p) => sum + p.feedback.latency, 0) / recent.length
+    );
   }
 
   private getRecentSuccessRate(): number {
     const recent = this.performanceHistory.slice(-10);
     if (recent.length === 0) return 0.8;
-    const successes = recent.filter(p => p.results.success).length;
+    const successes = recent.filter((p) => p.results.success).length;
     return successes / recent.length;
   }
 
-  private addDifferentialPrivacyNoise(performancePoint: PerformancePoint, noiseScale: number): PerformancePoint {
+  private addDifferentialPrivacyNoise(
+    performancePoint: PerformancePoint,
+    noiseScale: number,
+  ): PerformancePoint {
     // Add Laplace noise for differential privacy
     const laplacianNoise = () => {
       const u = Math.random() - 0.5;
@@ -688,12 +784,21 @@ export class AdaptiveQuantumApp extends EventEmitter {
 
     return {
       ...performancePoint,
-      reward: Math.max(0, Math.min(1, performancePoint.reward + laplacianNoise() * 0.1)),
+      reward: Math.max(
+        0,
+        Math.min(1, performancePoint.reward + laplacianNoise() * 0.1),
+      ),
       feedback: {
         ...performancePoint.feedback,
-        latency: Math.max(0, performancePoint.feedback.latency + laplacianNoise() * 100),
-        throughput: Math.max(0, performancePoint.feedback.throughput + laplacianNoise() * 10)
-      }
+        latency: Math.max(
+          0,
+          performancePoint.feedback.latency + laplacianNoise() * 100,
+        ),
+        throughput: Math.max(
+          0,
+          performancePoint.feedback.throughput + laplacianNoise() * 10,
+        ),
+      },
     };
   }
 
@@ -725,7 +830,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       explorationRate: this.explorationRate,
       performanceHistorySize: this.performanceHistory.length,
       availableBackends: this.availableBackends,
-      backendMetrics: Object.fromEntries(this.backendMetrics)
+      backendMetrics: Object.fromEntries(this.backendMetrics),
     };
   }
 
@@ -743,9 +848,9 @@ export class AdaptiveQuantumApp extends EventEmitter {
         {
           finalState: this.getCurrentState(),
           performanceHistory: this.performanceHistory.slice(-100), // Keep recent history
-          shutdownTimestamp: new Date()
+          shutdownTimestamp: new Date(),
         },
-        ['shutdown', 'final_state']
+        ['shutdown', 'final_state'],
       );
     } catch (error) {
       logger.error('Failed to persist final state', { error });

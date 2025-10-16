@@ -18,11 +18,11 @@ spec:
     - name: drop-net-raw-sys-admin
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
-        message: "Containers must drop NET_RAW and SYS_ADMIN capabilities."
+        message: 'Containers must drop NET_RAW and SYS_ADMIN capabilities.'
         pattern:
           spec:
             containers:

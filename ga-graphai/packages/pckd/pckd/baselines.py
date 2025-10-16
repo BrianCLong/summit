@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
-
 import numpy as np
 
 from .models import LogisticStudent, LogisticTeacher
@@ -18,7 +16,7 @@ def knowledge_distillation(
     alpha: float = 0.5,
     learning_rate: float = 0.3,
     epochs: int = 250,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Train the student with a simple KD objective."""
 
     if temperature <= 0:
@@ -56,7 +54,9 @@ def knowledge_distillation(
     }
 
 
-def dpo_alignment_stub(student: LogisticStudent, reference_margin: float = 0.1) -> Tuple[str, float]:
+def dpo_alignment_stub(
+    student: LogisticStudent, reference_margin: float = 0.1
+) -> tuple[str, float]:
     """Stub for Direct Preference Optimization style alignment."""
 
     margin = max(reference_margin, 0.0)

@@ -20,7 +20,15 @@ spec:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: { { .Values.env.OTEL_EXPORTER_OTLP_ENDPOINT | quote } }
           readinessProbe:
-            { httpGet: { path: /healthz, port: 4002 }, initialDelaySeconds: 5, periodSeconds: 10 }
+            {
+              httpGet: { path: /healthz, port: 4002 },
+              initialDelaySeconds: 5,
+              periodSeconds: 10,
+            }
           livenessProbe:
-            { httpGet: { path: /healthz, port: 4002 }, initialDelaySeconds: 20, periodSeconds: 20 }
+            {
+              httpGet: { path: /healthz, port: 4002 },
+              initialDelaySeconds: 20,
+              periodSeconds: 20,
+            }
           resources: { { - toYaml .Values.resources | nindent 12 } }

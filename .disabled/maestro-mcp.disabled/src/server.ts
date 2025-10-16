@@ -1,17 +1,21 @@
-import { createMcpServer, ToolRegistry, orchestratorToolkit } from '@intelgraph/mcp-core';
+import {
+  createMcpServer,
+  ToolRegistry,
+  orchestratorToolkit,
+} from '@intelgraph/mcp-core';
 
 const registries = {
-  tools: new ToolRegistry()
+  tools: new ToolRegistry(),
 };
 
 const toolkit = orchestratorToolkit({
   runJob: async (tenantId, jobId, params) => ({
     runId: `${tenantId}:${jobId}:${Date.now()}`,
-    metadata: params ?? {}
+    metadata: params ?? {},
   }),
   jobStatus: async (_tenantId, runId) => ({
-    status: runId.endsWith('7') ? 'succeeded' : 'running'
-  })
+    status: runId.endsWith('7') ? 'succeeded' : 'running',
+  }),
 });
 
 toolkit.tools.forEach((tool) => registries.tools.register(tool));
@@ -27,7 +31,7 @@ void (async () => {
       transport,
       http: { port },
       jwksUrl: process.env.JWKS_URL,
-      registries
+      registries,
     });
   } catch (error) {
     console.error('[maestro-mcp] failed to start MCP server', error);

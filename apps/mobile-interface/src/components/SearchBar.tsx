@@ -65,12 +65,16 @@ export function SearchBar({
 
   // Voice search functionality
   const startVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    if (
+      !('webkitSpeechRecognition' in window) &&
+      !('SpeechRecognition' in window)
+    ) {
       alert('Speech recognition not supported in this browser');
       return;
     }
 
-    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    const SpeechRecognition =
+      window.webkitSpeechRecognition || window.SpeechRecognition;
     const recognition = new SpeechRecognition();
 
     recognition.continuous = false;
@@ -104,7 +108,9 @@ export function SearchBar({
     try {
       if (!('BarcodeDetector' in window)) {
         // Fallback to camera access
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
         // Implementation would require additional QR scanning library
         console.log('QR Scanner opened', stream);
       } else {
@@ -160,7 +166,9 @@ export function SearchBar({
           `}
         >
           {/* Search Icon */}
-          <MagnifyingGlassIcon className={`${iconSizes[size]} text-intel-400 ml-4 flex-shrink-0`} />
+          <MagnifyingGlassIcon
+            className={`${iconSizes[size]} text-intel-400 ml-4 flex-shrink-0`}
+          />
 
           {/* Input Field */}
           <input
@@ -252,21 +260,23 @@ export function SearchBar({
                   Recent Searches
                 </h3>
                 <div className="space-y-2">
-                  {['threat intelligence', 'case 2024-001', 'john doe'].map((recent, index) => (
-                    <button
-                      key={index}
-                      onClick={() =>
-                        handleSuggestionClick({
-                          id: `recent-${index}`,
-                          text: recent,
-                          type: 'recent',
-                        })
-                      }
-                      className="block w-full text-left px-3 py-2 text-sm text-intel-600 dark:text-intel-400 hover:bg-intel-50 dark:hover:bg-intel-700 rounded-lg transition-colors"
-                    >
-                      {recent}
-                    </button>
-                  ))}
+                  {['threat intelligence', 'case 2024-001', 'john doe'].map(
+                    (recent, index) => (
+                      <button
+                        key={index}
+                        onClick={() =>
+                          handleSuggestionClick({
+                            id: `recent-${index}`,
+                            text: recent,
+                            type: 'recent',
+                          })
+                        }
+                        className="block w-full text-left px-3 py-2 text-sm text-intel-600 dark:text-intel-400 hover:bg-intel-50 dark:hover:bg-intel-700 rounded-lg transition-colors"
+                      >
+                        {recent}
+                      </button>
+                    ),
+                  )}
                 </div>
               </div>
             )}
@@ -289,8 +299,10 @@ export function SearchBar({
                         <div className="font-medium">{suggestion.text}</div>
                         {suggestion.metadata && (
                           <div className="text-xs text-intel-500 dark:text-intel-400 mt-1">
-                            {suggestion.type === 'entity' && `Entity • ${suggestion.metadata.type}`}
-                            {suggestion.type === 'case' && `Case • ${suggestion.metadata.status}`}
+                            {suggestion.type === 'entity' &&
+                              `Entity • ${suggestion.metadata.type}`}
+                            {suggestion.type === 'case' &&
+                              `Case • ${suggestion.metadata.status}`}
                           </div>
                         )}
                       </div>

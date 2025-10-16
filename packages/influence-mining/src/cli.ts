@@ -35,7 +35,10 @@ function parseArgs(argv: string[]): CliArgs {
   return { input, output };
 }
 
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const packageRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+);
 const repoRoot = path.resolve(packageRoot, '..', '..');
 
 function resolveInputPath(filePath: string): string {
@@ -117,7 +120,10 @@ function main(): void {
     const enriched = extractor.enrich(network);
     const ranked = extractor.rankNodes(enriched);
     const output = { ...enriched, rankings: ranked.rankings };
-    fs.writeFileSync(path.resolve(args.output), JSON.stringify(output, null, 2));
+    fs.writeFileSync(
+      path.resolve(args.output),
+      JSON.stringify(output, null, 2),
+    );
     // eslint-disable-next-line no-console
     console.log(`Wrote influence network to ${path.resolve(args.output)}`);
   } catch (error) {

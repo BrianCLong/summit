@@ -5,23 +5,36 @@
   "type": "object",
   "required": ["apiVersion", "targets"],
   "properties": {
-    "apiVersion": {"type": "string", "enum": ["cbl/v1"]},
-    "toolchains": {"type": "object"},
+    "apiVersion": { "type": "string", "enum": ["cbl/v1"] },
+    "toolchains": { "type": "object" },
     "targets": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["name", "type", "inputs", "outputs"],
         "properties": {
-          "name": {"type": "string"},
-          "type": {"type": "string", "enum": ["ts", "go", "python", "java", "cpp", "swift", "docker"]},
-          "inputs": {"type": "array", "items": {"type": "string"}},
-          "outputs": {"type": "array", "items": {"type": "string"}},
-          "cache": {"type": "object", "properties": {"key": {"type": "string"}}},
-          "policy": {"type": "object", "properties": {"residency": {"type": "string"}, "sbom": {"type": "string"}, "network": {"type": "array", "items": {"type": "string"}}, "secrets": {"type": "array", "items": {"type": "string"}}}}
+          "name": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["ts", "go", "python", "java", "cpp", "swift", "docker"]
+          },
+          "inputs": { "type": "array", "items": { "type": "string" } },
+          "outputs": { "type": "array", "items": { "type": "string" } },
+          "cache": {
+            "type": "object",
+            "properties": { "key": { "type": "string" } }
+          },
+          "policy": {
+            "type": "object",
+            "properties": {
+              "residency": { "type": "string" },
+              "sbom": { "type": "string" },
+              "network": { "type": "array", "items": { "type": "string" } },
+              "secrets": { "type": "array", "items": { "type": "string" } }
+            }
+          }
         }
       }
     }
   }
 }
-

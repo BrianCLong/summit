@@ -1,4 +1,3 @@
-
 # tests/chaos/pod-delete-experiment.yaml
 apiVersion: litmuschaos.io/v1alpha1
 kind: ChaosEngine

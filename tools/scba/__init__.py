@@ -6,9 +6,9 @@ with a thin Go wrapper located in ``tools/scba/cmd`` for teams that prefer a
 static binary interface.
 """
 
-from .attacks import CoarseTimerAttack, LengthLeakAttack, CacheWarmAttack
-from .policies import LeakBudget, EndpointPolicy, PolicyStore
-from .runner import SideChannelBudgetAuditor, AuditFinding
+from .attacks import CacheWarmAttack, CoarseTimerAttack, LengthLeakAttack
+from .policies import EndpointPolicy, LeakBudget, PolicyStore
+from .runner import AuditFinding, SideChannelBudgetAuditor
 
 __all__ = [
     "CoarseTimerAttack",

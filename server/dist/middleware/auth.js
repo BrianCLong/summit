@@ -5,7 +5,7 @@ export async function ensureAuthenticated(req, res, next) {
         const auth = req.headers.authorization || '';
         const token = auth.startsWith('Bearer ')
             ? auth.slice('Bearer '.length)
-            : (req.headers['x-access-token'] || null);
+            : req.headers['x-access-token'] || null;
         if (!token)
             return res.status(401).json({ error: 'Unauthorized' });
         const user = await authService.verifyToken(token);

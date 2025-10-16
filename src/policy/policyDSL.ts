@@ -61,8 +61,9 @@ export class PolicyEngine {
       condition: 'pr.additions + pr.deletions > 800',
       action: 'warn',
       severity: 'medium',
-      reason: 'Large PRs are harder to review and more likely to contain bugs. Consider breaking into smaller changes.',
-      exemptions: ['hotfix/', 'migration/', 'generated/']
+      reason:
+        'Large PRs are harder to review and more likely to contain bugs. Consider breaking into smaller changes.',
+      exemptions: ['hotfix/', 'migration/', 'generated/'],
     });
 
     this.addRule({
@@ -72,8 +73,9 @@ export class PolicyEngine {
       condition: 'pr.additions + pr.deletions > 2000',
       action: 'block',
       severity: 'high',
-      reason: 'Extremely large PRs cannot be effectively reviewed. Must be broken down.',
-      exemptions: ['data-migration/', 'vendor-update/']
+      reason:
+        'Extremely large PRs cannot be effectively reviewed. Must be broken down.',
+      exemptions: ['data-migration/', 'vendor-update/'],
     });
 
     // Quality gates
@@ -84,7 +86,8 @@ export class PolicyEngine {
       condition: 'checks.testsPass === false',
       action: 'block',
       severity: 'high',
-      reason: 'All tests must pass before merging to maintain code quality and prevent regressions.'
+      reason:
+        'All tests must pass before merging to maintain code quality and prevent regressions.',
     });
 
     this.addRule({
@@ -94,7 +97,8 @@ export class PolicyEngine {
       condition: 'checks.lintsPass === false',
       action: 'warn',
       severity: 'medium',
-      reason: 'Code should follow established style guidelines for consistency and maintainability.'
+      reason:
+        'Code should follow established style guidelines for consistency and maintainability.',
     });
 
     // Security policies
@@ -102,20 +106,24 @@ export class PolicyEngine {
       id: 'security-files',
       name: 'Security File Changes',
       description: 'Security-related files require special review',
-      condition: 'pr.files.some(f => f.includes("auth") || f.includes("security") || f.includes("password"))',
+      condition:
+        'pr.files.some(f => f.includes("auth") || f.includes("security") || f.includes("password"))',
       action: 'warn',
       severity: 'high',
-      reason: 'Changes to security-critical files require additional security review to prevent vulnerabilities.'
+      reason:
+        'Changes to security-critical files require additional security review to prevent vulnerabilities.',
     });
 
     this.addRule({
       id: 'env-changes',
       name: 'Environment Changes',
       description: 'Environment file changes need careful review',
-      condition: 'pr.files.some(f => f.includes(".env") || f.includes("config"))',
+      condition:
+        'pr.files.some(f => f.includes(".env") || f.includes("config"))',
       action: 'warn',
       severity: 'medium',
-      reason: 'Configuration changes can affect system behavior and should be reviewed carefully.'
+      reason:
+        'Configuration changes can affect system behavior and should be reviewed carefully.',
     });
 
     // Timing policies
@@ -126,17 +134,20 @@ export class PolicyEngine {
       condition: 'timing.day === 5 && timing.hour >= 15',
       action: 'warn',
       severity: 'medium',
-      reason: 'Friday afternoon deployments can cause weekend incidents when support is limited.'
+      reason:
+        'Friday afternoon deployments can cause weekend incidents when support is limited.',
     });
 
     this.addRule({
       id: 'no-weekend-deployments',
       name: 'No Weekend Deployments',
       description: 'Block weekend deployments unless hotfix',
-      condition: '(timing.day === 0 || timing.day === 6) && !pr.branch.startsWith("hotfix/")',
+      condition:
+        '(timing.day === 0 || timing.day === 6) && !pr.branch.startsWith("hotfix/")',
       action: 'block',
       severity: 'medium',
-      reason: 'Weekend deployments should be avoided unless they are critical hotfixes.'
+      reason:
+        'Weekend deployments should be avoided unless they are critical hotfixes.',
     });
 
     // Risk-based policies
@@ -147,7 +158,8 @@ export class PolicyEngine {
       condition: 'risk.score > 75',
       action: 'warn',
       severity: 'high',
-      reason: 'High-risk changes require thorough manual review to prevent potential issues.'
+      reason:
+        'High-risk changes require thorough manual review to prevent potential issues.',
     });
 
     this.addRule({
@@ -157,7 +169,8 @@ export class PolicyEngine {
       condition: 'risk.score > 90',
       action: 'block',
       severity: 'critical',
-      reason: 'Extremely high-risk changes must be redesigned or broken down before proceeding.'
+      reason:
+        'Extremely high-risk changes must be redesigned or broken down before proceeding.',
     });
 
     // Database policies
@@ -165,10 +178,12 @@ export class PolicyEngine {
       id: 'migration-review',
       name: 'Database Migration Review',
       description: 'Database migrations need special attention',
-      condition: 'pr.files.some(f => f.includes("migration") || f.includes("schema"))',
+      condition:
+        'pr.files.some(f => f.includes("migration") || f.includes("schema"))',
       action: 'warn',
       severity: 'high',
-      reason: 'Database migrations can cause data loss and downtime. Require DBA review and rollback plan.'
+      reason:
+        'Database migrations can cause data loss and downtime. Require DBA review and rollback plan.',
     });
 
     // Dependency policies
@@ -176,10 +191,12 @@ export class PolicyEngine {
       id: 'dependency-updates',
       name: 'Dependency Update Review',
       description: 'Dependency updates need security review',
-      condition: 'pr.files.some(f => f.includes("package.json") || f.includes("requirements.txt"))',
+      condition:
+        'pr.files.some(f => f.includes("package.json") || f.includes("requirements.txt"))',
       action: 'warn',
       severity: 'medium',
-      reason: 'Dependency updates can introduce security vulnerabilities or breaking changes.'
+      reason:
+        'Dependency updates can introduce security vulnerabilities or breaking changes.',
     });
   }
 
@@ -207,7 +224,7 @@ export class PolicyEngine {
     summary: string;
   }> {
     const evaluations: PolicyEvaluation[] = [];
-    
+
     for (const rule of this.rules.values()) {
       try {
         const evaluation = await this.evaluateRule(rule, context);
@@ -219,13 +236,13 @@ export class PolicyEngine {
           matched: false,
           reason: `Evaluation failed: ${error.message}`,
           evidence: [],
-          action: 'allow'
+          action: 'allow',
         });
       }
     }
 
-    const blockers = evaluations.filter(e => e.action === 'block');
-    const warnings = evaluations.filter(e => e.action === 'warn');
+    const blockers = evaluations.filter((e) => e.action === 'block');
+    const warnings = evaluations.filter((e) => e.action === 'warn');
     const allowed = blockers.length === 0;
 
     const summary = this.generateSummary(allowed, blockers, warnings);
@@ -235,22 +252,27 @@ export class PolicyEngine {
       evaluations,
       blockers,
       warnings,
-      summary
+      summary,
     };
   }
 
-  private async evaluateRule(rule: PolicyRule, context: PolicyContext): Promise<PolicyEvaluation> {
+  private async evaluateRule(
+    rule: PolicyRule,
+    context: PolicyContext,
+  ): Promise<PolicyEvaluation> {
     // Check exemptions first
     if (rule.exemptions) {
       for (const exemption of rule.exemptions) {
-        if (context.pr.branch.includes(exemption) || 
-            context.pr.files.some(f => f.includes(exemption))) {
+        if (
+          context.pr.branch.includes(exemption) ||
+          context.pr.files.some((f) => f.includes(exemption))
+        ) {
           return {
             rule,
             matched: false,
             reason: `Exempted by pattern: ${exemption}`,
             evidence: [],
-            action: 'allow'
+            action: 'allow',
           };
         }
       }
@@ -258,14 +280,14 @@ export class PolicyEngine {
 
     // Evaluate condition
     const matched = this.evaluateCondition(rule.condition, context);
-    
+
     if (!matched) {
       return {
         rule,
         matched: false,
         reason: 'Condition not met',
         evidence: [],
-        action: 'allow'
+        action: 'allow',
       };
     }
 
@@ -277,14 +299,23 @@ export class PolicyEngine {
       matched: true,
       reason: rule.reason,
       evidence,
-      action: rule.action
+      action: rule.action,
     };
   }
 
-  private evaluateCondition(condition: string, context: PolicyContext): boolean {
+  private evaluateCondition(
+    condition: string,
+    context: PolicyContext,
+  ): boolean {
     try {
       // Simple expression evaluator - in production, use a proper parser
-      const func = new Function('pr', 'checks', 'risk', 'timing', `return ${condition}`);
+      const func = new Function(
+        'pr',
+        'checks',
+        'risk',
+        'timing',
+        `return ${condition}`,
+      );
       return func(context.pr, context.checks, context.risk, context.timing);
     } catch (error) {
       console.warn('Failed to evaluate condition:', condition, error.message);
@@ -297,15 +328,18 @@ export class PolicyEngine {
 
     // Basic evidence collection based on rule type
     if (rule.condition.includes('pr.additions + pr.deletions')) {
-      evidence.push(`Total changes: ${context.pr.additions + context.pr.deletions} lines`);
+      evidence.push(
+        `Total changes: ${context.pr.additions + context.pr.deletions} lines`,
+      );
     }
 
     if (rule.condition.includes('pr.files')) {
-      const relevantFiles = context.pr.files.filter(f => 
-        rule.condition.includes('auth') && f.includes('auth') ||
-        rule.condition.includes('security') && f.includes('security') ||
-        rule.condition.includes('.env') && f.includes('.env') ||
-        rule.condition.includes('migration') && f.includes('migration')
+      const relevantFiles = context.pr.files.filter(
+        (f) =>
+          (rule.condition.includes('auth') && f.includes('auth')) ||
+          (rule.condition.includes('security') && f.includes('security')) ||
+          (rule.condition.includes('.env') && f.includes('.env')) ||
+          (rule.condition.includes('migration') && f.includes('migration')),
       );
       if (relevantFiles.length > 0) {
         evidence.push(`Relevant files: ${relevantFiles.join(', ')}`);
@@ -320,21 +354,35 @@ export class PolicyEngine {
     }
 
     if (rule.condition.includes('timing')) {
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      evidence.push(`Timing: ${days[context.timing.day]} at ${context.timing.hour}:00`);
+      const days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+      evidence.push(
+        `Timing: ${days[context.timing.day]} at ${context.timing.hour}:00`,
+      );
     }
 
     return evidence;
   }
 
-  private generateSummary(allowed: boolean, blockers: PolicyEvaluation[], warnings: PolicyEvaluation[]): string {
+  private generateSummary(
+    allowed: boolean,
+    blockers: PolicyEvaluation[],
+    warnings: PolicyEvaluation[],
+  ): string {
     if (blockers.length > 0) {
-      const reasons = blockers.map(b => b.rule.name).join(', ');
+      const reasons = blockers.map((b) => b.rule.name).join(', ');
       return `❌ **BLOCKED** by policies: ${reasons}. Address these issues before proceeding.`;
     }
 
     if (warnings.length > 0) {
-      const reasons = warnings.map(w => w.rule.name).join(', ');
+      const reasons = warnings.map((w) => w.rule.name).join(', ');
       return `⚠️ **WARNINGS** from policies: ${reasons}. Consider addressing these concerns.`;
     }
 

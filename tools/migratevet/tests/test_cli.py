@@ -5,9 +5,9 @@ from __future__ import annotations
 import subprocess
 import sys
 import time
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
 
 from tools.migratevet.scanner import scan_directory
 

@@ -8,8 +8,9 @@ import PersistedQueriesPlugin from '../plugins/persistedQueries.js';
 class WSPersistedQueriesMiddleware {
     constructor(options = {}) {
         this.persistedQueriesPlugin = new PersistedQueriesPlugin(options);
-        this.enabled = process.env.NODE_ENV === 'production' &&
-            process.env.ALLOW_NON_PERSISTED_QUERIES !== 'true';
+        this.enabled =
+            process.env.NODE_ENV === 'production' &&
+                process.env.ALLOW_NON_PERSISTED_QUERIES !== 'true';
     }
     /**
      * Create middleware for graphql-ws useServer
@@ -46,12 +47,12 @@ class WSPersistedQueriesMiddleware {
             },
             onError: async (ctx, message, errors) => {
                 // Log WS-specific errors
-                console.error('WebSocket GraphQL errors:', errors.map(e => e.message));
+                console.error('WebSocket GraphQL errors:', errors.map((e) => e.message));
                 return errors;
             },
             onComplete: async (ctx, message) => {
                 // Optional: Clean up resources
-            }
+            },
         };
     }
     /**
@@ -60,7 +61,7 @@ class WSPersistedQueriesMiddleware {
     getStats() {
         return {
             ...this.persistedQueriesPlugin.getStats(),
-            wsEnabled: this.enabled
+            wsEnabled: this.enabled,
         };
     }
 }

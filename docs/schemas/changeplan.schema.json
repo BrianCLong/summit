@@ -5,16 +5,16 @@
   "type": "object",
   "required": ["version", "targets", "codemods", "rollout"],
   "properties": {
-    "version": {"type": "string", "enum": ["1"]},
-    "name": {"type": "string"},
-    "description": {"type": "string"},
+    "version": { "type": "string", "enum": ["1"] },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
     "targets": {
       "type": "object",
       "required": ["include"],
       "properties": {
-        "include": {"type": "array", "items": {"type": "string"}},
-        "exclude": {"type": "array", "items": {"type": "string"}},
-        "filters": {"type": "array", "items": {"type": "string"}}
+        "include": { "type": "array", "items": { "type": "string" } },
+        "exclude": { "type": "array", "items": { "type": "string" } },
+        "filters": { "type": "array", "items": { "type": "string" } }
       }
     },
     "codemods": {
@@ -23,21 +23,35 @@
         "type": "object",
         "required": ["id", "language", "rule"],
         "properties": {
-          "id": {"type": "string"},
-          "language": {"type": "string", "enum": ["ts", "js", "go", "python", "java"]},
-          "adapter": {"type": "string", "enum": ["jscodeshift", "ts-morph", "go/ast", "ruff", "openrewrite"]},
-          "rule": {"type": "string"},
-          "dryRun": {"type": "boolean", "default": true},
-          "tests": {"type": "array", "items": {"type": "string"}}
+          "id": { "type": "string" },
+          "language": {
+            "type": "string",
+            "enum": ["ts", "js", "go", "python", "java"]
+          },
+          "adapter": {
+            "type": "string",
+            "enum": ["jscodeshift", "ts-morph", "go/ast", "ruff", "openrewrite"]
+          },
+          "rule": { "type": "string" },
+          "dryRun": { "type": "boolean", "default": true },
+          "tests": { "type": "array", "items": { "type": "string" } }
         }
       }
     },
     "gates": {
       "type": "object",
       "properties": {
-        "apiCompatibility": {"type": "string", "enum": ["block", "warn", "off"], "default": "block"},
-        "semverPolicy": {"type": "string", "enum": ["strict", "lenient"], "default": "strict"},
-        "testCoverageMin": {"type": "number", "minimum": 0, "maximum": 1}
+        "apiCompatibility": {
+          "type": "string",
+          "enum": ["block", "warn", "off"],
+          "default": "block"
+        },
+        "semverPolicy": {
+          "type": "string",
+          "enum": ["strict", "lenient"],
+          "default": "strict"
+        },
+        "testCoverageMin": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     },
     "rollout": {
@@ -46,19 +60,18 @@
       "properties": {
         "waves": {
           "type": "array",
-          "items": {"type": "integer", "minimum": 1, "maximum": 100}
+          "items": { "type": "integer", "minimum": 1, "maximum": 100 }
         },
         "slo": {
           "type": "object",
           "properties": {
-            "greenRate": {"type": "number", "minimum": 0, "maximum": 1},
-            "flakeBudget": {"type": "number", "minimum": 0, "maximum": 1},
-            "perfDeltaMax": {"type": "number"}
+            "greenRate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "flakeBudget": { "type": "number", "minimum": 0, "maximum": 1 },
+            "perfDeltaMax": { "type": "number" }
           }
         },
-        "rateCapPerHour": {"type": "integer", "minimum": 1}
+        "rateCapPerHour": { "type": "integer", "minimum": 1 }
       }
     }
   }
 }
-

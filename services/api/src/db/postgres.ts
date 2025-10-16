@@ -26,7 +26,10 @@ class PostgreSQLConnection {
       max: 20, // Maximum number of clients in the pool
       idleTimeoutMillis: 30000, // How long a client is allowed to remain idle
       connectionTimeoutMillis: 10000, // How long to wait for a connection
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     };
 
     try {
@@ -55,7 +58,11 @@ class PostgreSQLConnection {
     }
   }
 
-  async query<T = any>(text: string, params?: any[], client?: PoolClient): Promise<QueryResult<T>> {
+  async query<T = any>(
+    text: string,
+    params?: any[],
+    client?: PoolClient,
+  ): Promise<QueryResult<T>> {
     if (!this.pool && !client) {
       throw new Error('PostgreSQL pool not initialized');
     }
@@ -96,7 +103,9 @@ class PostgreSQLConnection {
     return this.pool.connect();
   }
 
-  async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
+  async transaction<T>(
+    callback: (client: PoolClient) => Promise<T>,
+  ): Promise<T> {
     const client = await this.getClient();
 
     try {
@@ -124,7 +133,9 @@ class PostgreSQLConnection {
   ): Promise<T | null> {
     const keys = Object.keys(conditions);
     const values = Object.values(conditions);
-    const whereClause = keys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
+    const whereClause = keys
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(' AND ');
 
     const query = `SELECT * FROM ${table} WHERE ${whereClause} LIMIT 1`;
     const result = await this.query<T>(query, values, client);
@@ -148,7 +159,9 @@ class PostgreSQLConnection {
     let query = `SELECT * FROM ${table}`;
 
     if (keys.length > 0) {
-      const whereClause = keys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
+      const whereClause = keys
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(' AND ');
       query += ` WHERE ${whereClause}`;
     }
 
@@ -200,7 +213,9 @@ class PostgreSQLConnection {
     const conditionKeys = Object.keys(conditions);
     const conditionValues = Object.values(conditions);
 
-    const setClause = dataKeys.map((key, index) => `${key} = $${index + 1}`).join(', ');
+    const setClause = dataKeys
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(', ');
     const whereClause = conditionKeys
       .map((key, index) => `${key} = $${dataKeys.length + index + 1}`)
       .join(' AND ');
@@ -212,7 +227,11 @@ class PostgreSQLConnection {
       RETURNING ${returning}
     `;
 
-    const result = await this.query<T>(query, [...dataValues, ...conditionValues], client);
+    const result = await this.query<T>(
+      query,
+      [...dataValues, ...conditionValues],
+      client,
+    );
     return result.rows[0] || null;
   }
 
@@ -223,7 +242,9 @@ class PostgreSQLConnection {
   ): Promise<number> {
     const keys = Object.keys(conditions);
     const values = Object.values(conditions);
-    const whereClause = keys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
+    const whereClause = keys
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(' AND ');
 
     const query = `DELETE FROM ${table} WHERE ${whereClause}`;
     const result = await this.query(query, values, client);
@@ -238,7 +259,9 @@ class PostgreSQLConnection {
         return { status: 'disconnected' };
       }
 
-      const result = await this.query('SELECT version(), now() as current_time');
+      const result = await this.query(
+        'SELECT version(), now() as current_time',
+      );
       return {
         status: 'healthy',
         details: {

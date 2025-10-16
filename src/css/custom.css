@@ -1,3 +1,21 @@
-.skip-link{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
-.skip-link:focus{ left:0; top:0; width:auto; height:auto; background:#fff; padding:.5rem; z-index:1000; }
-:focus{ outline: 2px solid #0f766e; outline-offset: 2px; }
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  background: #fff;
+  padding: 0.5rem;
+  z-index: 1000;
+}
+:focus {
+  outline: 2px solid #0f766e;
+  outline-offset: 2px;
+}

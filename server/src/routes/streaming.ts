@@ -4,7 +4,10 @@
  */
 
 import express from 'express';
-import { requireAuthority, requireReasonForAccess } from '../middleware/authority.js';
+import {
+  requireAuthority,
+  requireReasonForAccess,
+} from '../middleware/authority.js';
 import StreamingIngestWorker from '../services/streaming/ingest-worker.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import logger from '../utils/logger.js';
@@ -23,15 +26,24 @@ router.post(
     const span = otelService.getCurrentSpan();
 
     try {
-      const { source, data_type, raw_data, priority = 5, metadata = {}, correlation_id } = req.body;
+      const {
+        source,
+        data_type,
+        raw_data,
+        priority = 5,
+        metadata = {},
+        correlation_id,
+      } = req.body;
 
       // Validate required fields
       if (!source || !data_type || !raw_data) {
         otelService.addSpanAttributes({
           'streaming.validation_error': true,
-          'streaming.missing_fields': ['source', 'data_type', 'raw_data'].filter(
-            (field) => !req.body[field],
-          ),
+          'streaming.missing_fields': [
+            'source',
+            'data_type',
+            'raw_data',
+          ].filter((field) => !req.body[field]),
         });
 
         return res.status(400).json({
@@ -41,7 +53,13 @@ router.post(
         });
       }
 
-      const validDataTypes = ['event', 'entity', 'relationship', 'document', 'metric'];
+      const validDataTypes = [
+        'event',
+        'entity',
+        'relationship',
+        'document',
+        'metric',
+      ];
       if (!validDataTypes.includes(data_type)) {
         otelService.addSpanAttributes({
           'streaming.validation_error': true,
@@ -108,7 +126,8 @@ router.post(
     } catch (error) {
       otelService.addSpanAttributes({
         'streaming.ingest_error': true,
-        'streaming.error': error instanceof Error ? error.message : String(error),
+        'streaming.error':
+          error instanceof Error ? error.message : String(error),
       });
 
       logger.error({
@@ -231,7 +250,8 @@ router.post(
     } catch (error) {
       otelService.addSpanAttributes({
         'streaming.batch_error': true,
-        'streaming.error': error instanceof Error ? error.message : String(error),
+        'streaming.error':
+          error instanceof Error ? error.message : String(error),
       });
 
       logger.error({
@@ -296,7 +316,8 @@ router.post(
       if (user.clearance_level < 4) {
         return res.status(403).json({
           success: false,
-          error: 'Queue management requires administrative clearance (level 4+)',
+          error:
+            'Queue management requires administrative clearance (level 4+)',
           code: 'INSUFFICIENT_CLEARANCE',
         });
       }
@@ -441,7 +462,9 @@ router.get(
 router.get('/health', async (req, res) => {
   try {
     const metrics = ingestWorker.getMetrics();
-    const isHealthy = metrics.worker_status === 'healthy' || metrics.worker_status === 'degraded';
+    const isHealthy =
+      metrics.worker_status === 'healthy' ||
+      metrics.worker_status === 'degraded';
 
     res.status(isHealthy ? 200 : 503).json({
       success: isHealthy,

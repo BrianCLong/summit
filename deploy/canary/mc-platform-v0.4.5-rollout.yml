@@ -25,7 +25,7 @@ spec:
           virtualService:
             name: mc-platform-vs
             routes:
-            - primary
+              - primary
           destinationRule:
             name: mc-platform-dr
             canarySubsetName: canary
@@ -33,47 +33,47 @@ spec:
 
       # Cohort: internal tenants + 5% random traffic
       steps:
-      - setWeight: 5
-        pause:
-          duration: 5m
-      - setWeight: 10
-        pause:
-          duration: 10m
-      - setWeight: 25
-        pause:
-          duration: 15m
-      - setWeight: 50
-        pause:
-          duration: 20m
-      - setWeight: 75
-        pause:
-          duration: 10m
+        - setWeight: 5
+          pause:
+            duration: 5m
+        - setWeight: 10
+          pause:
+            duration: 10m
+        - setWeight: 25
+          pause:
+            duration: 15m
+        - setWeight: 50
+          pause:
+            duration: 20m
+        - setWeight: 75
+          pause:
+            duration: 10m
 
       # Analysis Template for Promotion Gates
       analysis:
         templates:
-        - templateName: mc-platform-v045-success-rate
-          args:
-          - name: service-name
-            value: mc-platform
-        - templateName: mc-platform-v045-latency
-          args:
-          - name: service-name
-            value: mc-platform
-        - templateName: mc-platform-v045-reweighter-health
-          args:
-          - name: service-name
-            value: mc-platform
-        - templateName: mc-platform-v045-pq-verification
-          args:
-          - name: service-name
-            value: mc-platform
+          - templateName: mc-platform-v045-success-rate
+            args:
+              - name: service-name
+                value: mc-platform
+          - templateName: mc-platform-v045-latency
+            args:
+              - name: service-name
+                value: mc-platform
+          - templateName: mc-platform-v045-reweighter-health
+            args:
+              - name: service-name
+                value: mc-platform
+          - templateName: mc-platform-v045-pq-verification
+            args:
+              - name: service-name
+                value: mc-platform
 
         # Analysis Schedule
         startingStep: 1
         args:
-        - name: service-name
-          value: mc-platform-canary
+          - name: service-name
+            value: mc-platform-canary
 
       # Auto-promotion on success
       scaleDownDelaySeconds: 300
@@ -92,62 +92,62 @@ spec:
         component: qam
     spec:
       containers:
-      - name: mc-platform
-        image: mc-platform:v0.4.5
-        ports:
-        - containerPort: 8080
-          name: http
-        - containerPort: 9090
-          name: metrics
+        - name: mc-platform
+          image: mc-platform:v0.4.5
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
 
-        # Environment Configuration
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: MC_VERSION
-          value: "v0.4.5"
-        - name: INCIDENT_REWEIGHTER_ENABLED
-          value: "true"
-        - name: FEATURE_FLAGS_ENDPOINT
-          value: "http://feature-flags:8080"
+          # Environment Configuration
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: MC_VERSION
+              value: 'v0.4.5'
+            - name: INCIDENT_REWEIGHTER_ENABLED
+              value: 'true'
+            - name: FEATURE_FLAGS_ENDPOINT
+              value: 'http://feature-flags:8080'
 
-        # Resource Requirements
-        resources:
-          requests:
-            cpu: 200m
-            memory: 512Mi
-          limits:
-            cpu: 1000m
-            memory: 1Gi
+          # Resource Requirements
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
 
-        # Health Checks
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
+          # Health Checks
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
 
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
 
-        # Startup Probe
-        startupProbe:
-          httpGet:
-            path: /health/startup
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 6
+          # Startup Probe
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
 
       # Security Configuration
       securityContext:
@@ -168,15 +168,15 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - mc-platform
-              topologyKey: kubernetes.io/hostname
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - mc-platform
+                topologyKey: kubernetes.io/hostname
 
 ---
 # Analysis Templates for Promotion Gates
@@ -188,21 +188,21 @@ metadata:
   namespace: mc-platform
 spec:
   args:
-  - name: service-name
+    - name: service-name
   metrics:
-  - name: success-rate
-    interval: 1m
-    count: 5
-    successCondition: result[0] >= 0.995
-    failureLimit: 2
-    provider:
-      prometheus:
-        address: http://prometheus:9090
-        query: |
-          (
-            rate(mc_decision_success_total{service="{{args.service-name}}"}[5m]) /
-            rate(mc_decision_total{service="{{args.service-name}}"}[5m])
-          )
+    - name: success-rate
+      interval: 1m
+      count: 5
+      successCondition: result[0] >= 0.995
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus:9090
+          query: |
+            (
+              rate(mc_decision_success_total{service="{{args.service-name}}"}[5m]) /
+              rate(mc_decision_total{service="{{args.service-name}}"}[5m])
+            )
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -212,20 +212,20 @@ metadata:
   namespace: mc-platform
 spec:
   args:
-  - name: service-name
+    - name: service-name
   metrics:
-  - name: p95-latency
-    interval: 1m
-    count: 5
-    successCondition: result[0] <= 250
-    failureLimit: 3
-    provider:
-      prometheus:
-        address: http://prometheus:9090
-        query: |
-          histogram_quantile(0.95,
-            rate(mc_decision_latency_ms_bucket{service="{{args.service-name}}"}[5m])
-          )
+    - name: p95-latency
+      interval: 1m
+      count: 5
+      successCondition: result[0] <= 250
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus:9090
+          query: |
+            histogram_quantile(0.95,
+              rate(mc_decision_latency_ms_bucket{service="{{args.service-name}}"}[5m])
+            )
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -235,44 +235,44 @@ metadata:
   namespace: mc-platform
 spec:
   args:
-  - name: service-name
+    - name: service-name
   metrics:
-  - name: reweighter-activation
-    interval: 30s
-    count: 10
-    successCondition: result[0] == result[0] # Always pass if metric exists
-    provider:
-      prometheus:
-        address: http://prometheus:9090
-        query: |
-          mc_incident_reweighter_active{service="{{args.service-name}}"}
+    - name: reweighter-activation
+      interval: 30s
+      count: 10
+      successCondition: result[0] == result[0] # Always pass if metric exists
+      provider:
+        prometheus:
+          address: http://prometheus:9090
+          query: |
+            mc_incident_reweighter_active{service="{{args.service-name}}"}
 
-  - name: exploration-reduction-during-incident
-    interval: 30s
-    count: 5
-    # Only evaluate if incident is active
-    successCondition: "true" # Custom logic handled in runbook
-    provider:
-      prometheus:
-        address: http://prometheus:9090
-        query: |
-          (
-            (mc_incident_reweighter_active{service="{{args.service-name}}"} == 1) and
-            (mc_exploration_rate{service="{{args.service-name}}"} <= 0.6 * mc_exploration_rate_baseline{service="{{args.service-name}}"})
-          ) or
-          (mc_incident_reweighter_active{service="{{args.service-name}}"} == 0)
+    - name: exploration-reduction-during-incident
+      interval: 30s
+      count: 5
+      # Only evaluate if incident is active
+      successCondition: 'true' # Custom logic handled in runbook
+      provider:
+        prometheus:
+          address: http://prometheus:9090
+          query: |
+            (
+              (mc_incident_reweighter_active{service="{{args.service-name}}"} == 1) and
+              (mc_exploration_rate{service="{{args.service-name}}"} <= 0.6 * mc_exploration_rate_baseline{service="{{args.service-name}}"})
+            ) or
+            (mc_incident_reweighter_active{service="{{args.service-name}}"} == 0)
 
-  - name: weight-pin-duration-check
-    interval: 1m
-    count: 3
-    # Ensure pins don't exceed 2h10m
-    successCondition: "(result[0] <= 7800) or isNaN(result[0])"
-    provider:
-      prometheus:
-        address: http://prometheus:9090
-        query: |
-          (time() - mc_pin_start_timestamp{service="{{args.service-name}}"}) *
-          on() mc_weights_pinned{service="{{args.service-name}}"}
+    - name: weight-pin-duration-check
+      interval: 1m
+      count: 3
+      # Ensure pins don't exceed 2h10m
+      successCondition: '(result[0] <= 7800) or isNaN(result[0])'
+      provider:
+        prometheus:
+          address: http://prometheus:9090
+          query: |
+            (time() - mc_pin_start_timestamp{service="{{args.service-name}}"}) *
+            on() mc_weights_pinned{service="{{args.service-name}}"}
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -282,20 +282,20 @@ metadata:
   namespace: mc-platform
 spec:
   args:
-  - name: service-name
+    - name: service-name
   metrics:
-  - name: pq-dual-sig-status
-    interval: 5m
-    count: 1
-    successCondition: result[0] == 1
-    provider:
-      prometheus:
-        address: http://prometheus:9090
-        query: |
-          mc_pq_dual_sig_verification_status{
-            service="{{args.service-name}}",
-            git_sha=~"$(git rev-parse HEAD)"
-          }
+    - name: pq-dual-sig-status
+      interval: 5m
+      count: 1
+      successCondition: result[0] == 1
+      provider:
+        prometheus:
+          address: http://prometheus:9090
+          query: |
+            mc_pq_dual_sig_verification_status{
+              service="{{args.service-name}}",
+              git_sha=~"$(git rev-parse HEAD)"
+            }
 
 ---
 # Canary Service
@@ -311,12 +311,12 @@ spec:
   selector:
     app: mc-platform
   ports:
-  - name: http
-    port: 80
-    targetPort: 8080
-  - name: metrics
-    port: 9090
-    targetPort: 9090
+    - name: http
+      port: 80
+      targetPort: 8080
+    - name: metrics
+      port: 9090
+      targetPort: 9090
 
 ---
 # Stable Service
@@ -332,12 +332,12 @@ spec:
   selector:
     app: mc-platform
   ports:
-  - name: http
-    port: 80
-    targetPort: 8080
-  - name: metrics
-    port: 9090
-    targetPort: 9090
+    - name: http
+      port: 80
+      targetPort: 8080
+    - name: metrics
+      port: 9090
+      targetPort: 9090
 
 ---
 # Virtual Service for Traffic Routing
@@ -348,32 +348,32 @@ metadata:
   namespace: mc-platform
 spec:
   hosts:
-  - mc-platform
+    - mc-platform
   http:
-  - name: primary
-    match:
-    - headers:
-        # Internal tenants header for cohort targeting
-        x-tenant-cohort:
-          exact: internal
-    - headers:
-        # Canary user header
-        x-canary-user:
-          exact: "true"
-    route:
-    - destination:
-        host: mc-platform
-        subset: canary
-      weight: 100
-  - route:
-    - destination:
-        host: mc-platform
-        subset: stable
-      weight: 100
-    - destination:
-        host: mc-platform
-        subset: canary
-      weight: 0
+    - name: primary
+      match:
+        - headers:
+            # Internal tenants header for cohort targeting
+            x-tenant-cohort:
+              exact: internal
+        - headers:
+            # Canary user header
+            x-canary-user:
+              exact: 'true'
+      route:
+        - destination:
+            host: mc-platform
+            subset: canary
+          weight: 100
+    - route:
+        - destination:
+            host: mc-platform
+            subset: stable
+          weight: 100
+        - destination:
+            host: mc-platform
+            subset: canary
+          weight: 0
 
 ---
 # Destination Rule for Traffic Management
@@ -385,37 +385,37 @@ metadata:
 spec:
   host: mc-platform
   subsets:
-  - name: stable
-    labels:
-      app: mc-platform
-    portLevelSettings:
-    - port:
-        number: 8080
-      connectionPool:
-        tcp:
-          maxConnections: 100
-        http:
-          http1MaxPendingRequests: 50
-          maxRequestsPerConnection: 10
-      circuitBreaker:
-        consecutiveErrors: 5
-        interval: 30s
-        baseEjectionTime: 30s
+    - name: stable
+      labels:
+        app: mc-platform
+      portLevelSettings:
+        - port:
+            number: 8080
+          connectionPool:
+            tcp:
+              maxConnections: 100
+            http:
+              http1MaxPendingRequests: 50
+              maxRequestsPerConnection: 10
+          circuitBreaker:
+            consecutiveErrors: 5
+            interval: 30s
+            baseEjectionTime: 30s
 
-  - name: canary
-    labels:
-      app: mc-platform
-      version: v0.4.5
-    portLevelSettings:
-    - port:
-        number: 8080
-      connectionPool:
-        tcp:
-          maxConnections: 100
-        http:
-          http1MaxPendingRequests: 50
-          maxRequestsPerConnection: 10
-      circuitBreaker:
-        consecutiveErrors: 3  # More sensitive for canary
-        interval: 30s
-        baseEjectionTime: 30s
+    - name: canary
+      labels:
+        app: mc-platform
+        version: v0.4.5
+      portLevelSettings:
+        - port:
+            number: 8080
+          connectionPool:
+            tcp:
+              maxConnections: 100
+            http:
+              http1MaxPendingRequests: 50
+              maxRequestsPerConnection: 10
+          circuitBreaker:
+            consecutiveErrors: 3 # More sensitive for canary
+            interval: 30s
+            baseEjectionTime: 30s

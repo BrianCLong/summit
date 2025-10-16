@@ -2,9 +2,9 @@ name: Type Safety & Coverage Gates
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read

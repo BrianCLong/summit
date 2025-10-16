@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { AlertTriangle, Shield, Target, Clock, Filter, Download, RefreshCw } from 'lucide-react'
+import {
+  AlertTriangle,
+  Shield,
+  Target,
+  Clock,
+  Filter,
+  Download,
+  RefreshCw,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -9,13 +17,22 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
-import { useAlerts, useAlertUpdates, useUpdateAlertStatus } from '@/hooks/useGraphQL'
+import {
+  useAlerts,
+  useAlertUpdates,
+  useUpdateAlertStatus,
+} from '@/hooks/useGraphQL'
 import mockData from '@/mock/data.json'
 import type { Alert, KPIMetric } from '@/types'
 
 export default function AlertsPage() {
   // GraphQL hooks
-  const { data: alertsData, loading: alertsLoading, error: alertsError, refetch } = useAlerts()
+  const {
+    data: alertsData,
+    loading: alertsLoading,
+    error: alertsError,
+    refetch,
+  } = useAlerts()
   const { data: alertUpdates } = useAlertUpdates()
   const [updateAlertStatus] = useUpdateAlertStatus()
 
@@ -60,7 +77,11 @@ export default function AlertsPage() {
   const filteredAlerts = alerts.filter(alert => {
     if (selectedSeverity && alert.severity !== selectedSeverity) return false
     if (selectedStatus && alert.status !== selectedStatus) return false
-    if (searchQuery && !alert.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
+    if (
+      searchQuery &&
+      !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false
     return true
   })
 
@@ -71,8 +92,11 @@ export default function AlertsPage() {
       title: 'Critical Alerts',
       value: alerts.filter(a => a.severity === 'critical').length,
       format: 'number',
-      status: alerts.filter(a => a.severity === 'critical').length > 0 ? 'error' : 'success',
-      change: { value: 12, direction: 'up', period: 'last hour' }
+      status:
+        alerts.filter(a => a.severity === 'critical').length > 0
+          ? 'error'
+          : 'success',
+      change: { value: 12, direction: 'up', period: 'last hour' },
     },
     {
       id: 'active',
@@ -80,7 +104,7 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'open').length,
       format: 'number',
       status: 'warning',
-      change: { value: 5, direction: 'down', period: 'last hour' }
+      change: { value: 5, direction: 'down', period: 'last hour' },
     },
     {
       id: 'resolved',
@@ -88,7 +112,7 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'resolved').length,
       format: 'number',
       status: 'success',
-      change: { value: 23, direction: 'up', period: 'yesterday' }
+      change: { value: 23, direction: 'up', period: 'yesterday' },
     },
     {
       id: 'response',
@@ -96,19 +120,29 @@ export default function AlertsPage() {
       value: 156,
       format: 'duration',
       status: 'neutral',
-      change: { value: 8, direction: 'down', period: 'last week' }
-    }
+      change: { value: 8, direction: 'down', period: 'last week' },
+    },
   ]
 
   const handleStatusChange = async (alertId: string, newStatus: string) => {
     try {
       if (alertsData) {
-        await updateAlertStatus({ variables: { id: alertId, status: newStatus } })
+        await updateAlertStatus({
+          variables: { id: alertId, status: newStatus },
+        })
       } else {
         // Update mock data
-        setAlerts(prev => prev.map(alert =>
-          alert.id === alertId ? { ...alert, status: newStatus, updatedAt: new Date().toISOString() } : alert
-        ))
+        setAlerts(prev =>
+          prev.map(alert =>
+            alert.id === alertId
+              ? {
+                  ...alert,
+                  status: newStatus,
+                  updatedAt: new Date().toISOString(),
+                }
+              : alert
+          )
+        )
       }
     } catch (error) {
       console.error('Failed to update alert status:', error)
@@ -127,20 +161,29 @@ export default function AlertsPage() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-500'
-      case 'high': return 'bg-orange-500'
-      case 'medium': return 'bg-yellow-500'
-      case 'low': return 'bg-blue-500'
-      default: return 'bg-gray-500'
+      case 'critical':
+        return 'bg-red-500'
+      case 'high':
+        return 'bg-orange-500'
+      case 'medium':
+        return 'bg-yellow-500'
+      case 'low':
+        return 'bg-blue-500'
+      default:
+        return 'bg-gray-500'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return 'destructive'
-      case 'investigating': return 'warning'
-      case 'resolved': return 'success'
-      default: return 'secondary'
+      case 'open':
+        return 'destructive'
+      case 'investigating':
+        return 'warning'
+      case 'resolved':
+        return 'success'
+      default:
+        return 'secondary'
     }
   }
 
@@ -151,7 +194,7 @@ export default function AlertsPage() {
           icon="alert"
           title="Failed to load alerts"
           description={error.message}
-          action={{ label: "Retry", onClick: () => window.location.reload() }}
+          action={{ label: 'Retry', onClick: () => window.location.reload() }}
         />
       </div>
     )
@@ -165,7 +208,7 @@ export default function AlertsPage() {
           <h1 className="text-3xl font-bold">Security Alerts</h1>
           <ConnectionStatus />
         </div>
-        
+
         <div className="flex items-center gap-3">
           <SearchBar
             placeholder="Search alerts..."
@@ -173,12 +216,19 @@ export default function AlertsPage() {
             onChange={setSearchQuery}
             className="w-80"
           />
-          
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+            />
             Refresh
           </Button>
-          
+
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -195,7 +245,7 @@ export default function AlertsPage() {
           <span className="text-sm font-medium">Severity:</span>
           <select
             value={selectedSeverity}
-            onChange={(e) => setSelectedSeverity(e.target.value)}
+            onChange={e => setSelectedSeverity(e.target.value)}
             className="px-3 py-1 border rounded-md text-sm"
           >
             <option value="">All</option>
@@ -205,12 +255,12 @@ export default function AlertsPage() {
             <option value="low">Low</option>
           </select>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Status:</span>
           <select
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            onChange={e => setSelectedStatus(e.target.value)}
             className="px-3 py-1 border rounded-md text-sm"
           >
             <option value="">All</option>
@@ -251,12 +301,12 @@ export default function AlertsPage() {
               title="No alerts found"
               description="Try adjusting your filters or search criteria"
               action={{
-                label: "Clear Filters",
+                label: 'Clear Filters',
                 onClick: () => {
                   setSearchQuery('')
                   setSelectedSeverity('')
                   setSelectedStatus('')
-                }
+                },
               }}
             />
           ) : (
@@ -272,10 +322,12 @@ export default function AlertsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredAlerts.map((alert) => (
+                {filteredAlerts.map(alert => (
                   <tr key={alert.id} className="group">
                     <td>
-                      <div className={`w-3 h-3 rounded-full ${getSeverityColor(alert.severity)}`} />
+                      <div
+                        className={`w-3 h-3 rounded-full ${getSeverityColor(alert.severity)}`}
+                      />
                     </td>
                     <td>
                       <div>
@@ -286,7 +338,13 @@ export default function AlertsPage() {
                       </div>
                     </td>
                     <td>
-                      <Badge variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}>
+                      <Badge
+                        variant={
+                          alert.severity === 'critical'
+                            ? 'destructive'
+                            : 'secondary'
+                        }
+                      >
                         {alert.severity}
                       </Badge>
                     </td>
@@ -304,7 +362,9 @@ export default function AlertsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleStatusChange(alert.id, 'investigating')}
+                            onClick={() =>
+                              handleStatusChange(alert.id, 'investigating')
+                            }
                           >
                             Investigate
                           </Button>
@@ -313,7 +373,9 @@ export default function AlertsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleStatusChange(alert.id, 'resolved')}
+                            onClick={() =>
+                              handleStatusChange(alert.id, 'resolved')
+                            }
                           >
                             Resolve
                           </Button>

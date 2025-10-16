@@ -14,12 +14,8 @@
       "timestamp": "2025-09-26T23:28:25.137551Z",
       "component": "autonomy_gateway",
       "action": "validate_tier3_safety",
-      "inputs": [
-        "10b7e123e7997494"
-      ],
-      "outputs": [
-        "adb86f3d09165f9e"
-      ],
+      "inputs": ["10b7e123e7997494"],
+      "outputs": ["adb86f3d09165f9e"],
       "metadata": {
         "safety_score": 0.932,
         "6_point_validation": true,
@@ -34,18 +30,10 @@
       "timestamp": "2025-09-26T23:28:25.137559Z",
       "component": "policy_engine",
       "action": "validate_request",
-      "inputs": [
-        "476b8b49a6849557"
-      ],
-      "outputs": [
-        "0d52df2131701ffe"
-      ],
+      "inputs": ["476b8b49a6849557"],
+      "outputs": ["0d52df2131701ffe"],
       "metadata": {
-        "policies_checked": [
-          "residency",
-          "privacy",
-          "budget"
-        ],
+        "policies_checked": ["residency", "privacy", "budget"],
         "all_passed": true
       },
       "duration_ms": 0.045,
@@ -57,12 +45,8 @@
       "timestamp": "2025-09-26T23:28:25.137562Z",
       "component": "llm_gateway",
       "action": "generate_response",
-      "inputs": [
-        "0d52df2131701ffe"
-      ],
-      "outputs": [
-        "c335c42b344d776a"
-      ],
+      "inputs": ["0d52df2131701ffe"],
+      "outputs": ["c335c42b344d776a"],
       "metadata": {
         "model": "claude-3.5-sonnet",
         "tokens": 1247,
@@ -77,12 +61,8 @@
       "timestamp": "2025-09-26T23:28:25.137565Z",
       "component": "response_formatter",
       "action": "format_response",
-      "inputs": [
-        "c335c42b344d776a"
-      ],
-      "outputs": [
-        "6e54b5de194b3295"
-      ],
+      "inputs": ["c335c42b344d776a"],
+      "outputs": ["6e54b5de194b3295"],
       "metadata": {
         "format": "markdown",
         "attestation_included": true
@@ -96,12 +76,8 @@
       "timestamp": "2025-09-26T23:28:25.137567Z",
       "component": "attestation_service",
       "action": "sign_response",
-      "inputs": [
-        "6e54b5de194b3295"
-      ],
-      "outputs": [
-        "358c394fec84143c"
-      ],
+      "inputs": ["6e54b5de194b3295"],
+      "outputs": ["358c394fec84143c"],
       "metadata": {
         "signature_type": "ed25519",
         "jwks_version": "v2025.09"

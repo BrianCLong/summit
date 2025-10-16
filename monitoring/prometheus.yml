@@ -4,13 +4,13 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - "alert_rules.yml"
+  - 'alert_rules.yml'
 
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
-          - alertmanager:9093
+            - alertmanager:9093
 
 scrape_configs:
   # IntelGraph Server metrics
@@ -20,7 +20,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 10s
     scrape_timeout: 5s
-    
+
   # IntelGraph ML Service metrics
   - job_name: 'intelgraph-ml'
     static_configs:
@@ -28,37 +28,36 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 10s
     scrape_timeout: 5s
-    
+
   # PostgreSQL metrics (via postgres_exporter)
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres-exporter:9187']
     scrape_interval: 30s
-    
+
   # Redis metrics (via redis_exporter)
   - job_name: 'redis'
     static_configs:
       - targets: ['redis-exporter:9121']
     scrape_interval: 30s
-    
+
   # Neo4j metrics (via neo4j_exporter)
   - job_name: 'neo4j'
     static_configs:
       - targets: ['neo4j-exporter:9113']
     scrape_interval: 30s
-    
+
   # Node Exporter for system metrics
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['node-exporter:9100']
     scrape_interval: 30s
-    
+
   # Prometheus itself
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
     scrape_interval: 30s
-
 # Remote write configuration (for long-term storage)
 # remote_write:
 #   - url: "http://your-remote-storage:9201/api/v1/write"

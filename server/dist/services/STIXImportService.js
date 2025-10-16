@@ -9,8 +9,8 @@
  * - Provenance metadata preservation
  * - Deduplication based on STIX IDs
  */
-const axios = require("axios");
-const { v4: uuid } = require("uuid");
+const axios = require('axios');
+const { v4: uuid } = require('uuid');
 class STIXImportService {
     constructor(neo4jDriver, pgClient, socketIO) {
         this.neo4j = neo4jDriver;
@@ -22,12 +22,12 @@ class STIXImportService {
      * Start TAXII collection import
      */
     async startTaxiiImport(options) {
-        const { taxiiUrl, collectionId, investigationId, auth, userId, tenantId = "default", addedAfter = null, limit = 1000, } = options;
+        const { taxiiUrl, collectionId, investigationId, auth, userId, tenantId = 'default', addedAfter = null, limit = 1000, } = options;
         const jobId = uuid();
         const job = {
             id: jobId,
-            type: "TAXII",
-            status: "pending",
+            type: 'TAXII',
+            status: 'pending',
             taxiiUrl,
             collectionId,
             investigationId,
@@ -60,12 +60,12 @@ class STIXImportService {
      * Start STIX bundle import from file
      */
     async startStixBundleImport(options) {
-        const { bundlePath, investigationId, userId, tenantId = "default", } = options;
+        const { bundlePath, investigationId, userId, tenantId = 'default', } = options;
         const jobId = uuid();
         const job = {
             id: jobId,
-            type: "STIX_BUNDLE",
-            status: "pending",
+            type: 'STIX_BUNDLE',
+            status: 'pending',
             bundlePath,
             investigationId,
             userId,
@@ -95,13 +95,13 @@ class STIXImportService {
     async processTaxiiCollection(job) {
         const session = this.neo4j.session();
         try {
-            job.status = "running";
+            job.status = 'running';
             job.startedAt = new Date().toISOString();
             await this.updateJob(job);
             await this.emitProgress(job);
             const client = this.createTaxiiClient(job.taxiiUrl, job.auth);
             let hasMore = true;
-            while (hasMore && job.status === "running") {
+            while (hasMore && job.status === 'running') {
                 const response = await this.fetchTaxiiObjects(client, job);
                 if (response.objects && response.objects.length > 0) {
                     await this.processStixObjects(response.objects, job, session);
@@ -112,16 +112,16 @@ class STIXImportService {
                 await this.updateJob(job);
                 await this.emitProgress(job);
             }
-            job.status = "completed";
+            job.status = 'completed';
             job.finishedAt = new Date().toISOString();
             await this.updateJob(job);
             await this.emitProgress(job);
         }
         catch (error) {
-            job.status = "failed";
+            job.status = 'failed';
             job.finishedAt = new Date().toISOString();
             job.errors.push({
-                type: "TAXII_ERROR",
+                type: 'TAXII_ERROR',
                 message: error.message,
                 timestamp: new Date().toISOString(),
             });
@@ -138,30 +138,30 @@ class STIXImportService {
      */
     async processStixBundle(job) {
         const session = this.neo4j.session();
-        const fs = require("fs");
+        const fs = require('fs');
         try {
-            job.status = "running";
+            job.status = 'running';
             job.startedAt = new Date().toISOString();
             await this.updateJob(job);
             await this.emitProgress(job);
-            const bundleData = JSON.parse(fs.readFileSync(job.bundlePath, "utf8"));
-            if (bundleData.type !== "bundle") {
+            const bundleData = JSON.parse(fs.readFileSync(job.bundlePath, 'utf8'));
+            if (bundleData.type !== 'bundle') {
                 throw new Error('Invalid STIX bundle: missing type "bundle"');
             }
             if (bundleData.objects && Array.isArray(bundleData.objects)) {
                 job.stats.totalObjects = bundleData.objects.length;
                 await this.processStixObjects(bundleData.objects, job, session);
             }
-            job.status = "completed";
+            job.status = 'completed';
             job.finishedAt = new Date().toISOString();
             await this.updateJob(job);
             await this.emitProgress(job);
         }
         catch (error) {
-            job.status = "failed";
+            job.status = 'failed';
             job.finishedAt = new Date().toISOString();
             job.errors.push({
-                type: "BUNDLE_ERROR",
+                type: 'BUNDLE_ERROR',
                 message: error.message,
                 timestamp: new Date().toISOString(),
             });
@@ -178,16 +178,16 @@ class STIXImportService {
      */
     createTaxiiClient(baseUrl, auth) {
         const headers = {
-            Accept: "application/taxii+json;version=2.1",
-            "Content-Type": "application/taxii+json;version=2.1",
+            Accept: 'application/taxii+json;version=2.1',
+            'Content-Type': 'application/taxii+json;version=2.1',
         };
         if (auth) {
-            if (auth.type === "basic") {
-                const token = Buffer.from(`${auth.username}:${auth.password}`).toString("base64");
-                headers["Authorization"] = `Basic ${token}`;
+            if (auth.type === 'basic') {
+                const token = Buffer.from(`${auth.username}:${auth.password}`).toString('base64');
+                headers['Authorization'] = `Basic ${token}`;
             }
-            else if (auth.type === "bearer") {
-                headers["Authorization"] = `Bearer ${auth.token}`;
+            else if (auth.type === 'bearer') {
+                headers['Authorization'] = `Bearer ${auth.token}`;
             }
         }
         return axios.create({
@@ -237,7 +237,7 @@ class STIXImportService {
         // Process SDOs first
         for (const sdo of sdos) {
             try {
-                const confidence = typeof sdo.confidence === "number" ? sdo.confidence / 100 : 1.0;
+                const confidence = typeof sdo.confidence === 'number' ? sdo.confidence / 100 : 1.0;
                 await this.processStixDomainObject(sdo, job, session, confidence);
                 job.stats.createdNodes++;
             }
@@ -248,7 +248,7 @@ class STIXImportService {
         // Then process SROs
         for (const sro of sros) {
             try {
-                const confidence = typeof sro.confidence === "number" ? sro.confidence / 100 : 1.0;
+                const confidence = typeof sro.confidence === 'number' ? sro.confidence / 100 : 1.0;
                 await this.processStixRelationshipObject(sro, job, session, confidence);
                 job.stats.createdRelationships++;
             }
@@ -262,25 +262,25 @@ class STIXImportService {
      */
     isStixDomainObject(obj) {
         const sdoTypes = [
-            "attack-pattern",
-            "campaign",
-            "course-of-action",
-            "grouping",
-            "identity",
-            "incident",
-            "indicator",
-            "infrastructure",
-            "intrusion-set",
-            "location",
-            "malware",
-            "malware-analysis",
-            "note",
-            "observed-data",
-            "opinion",
-            "report",
-            "threat-actor",
-            "tool",
-            "vulnerability",
+            'attack-pattern',
+            'campaign',
+            'course-of-action',
+            'grouping',
+            'identity',
+            'incident',
+            'indicator',
+            'infrastructure',
+            'intrusion-set',
+            'location',
+            'malware',
+            'malware-analysis',
+            'note',
+            'observed-data',
+            'opinion',
+            'report',
+            'threat-actor',
+            'tool',
+            'vulnerability',
         ];
         return sdoTypes.includes(obj.type);
     }
@@ -288,14 +288,14 @@ class STIXImportService {
      * Check if object is a STIX Relationship Object (SRO)
      */
     isStixRelationshipObject(obj) {
-        return obj.type === "relationship" || obj.type === "sighting";
+        return obj.type === 'relationship' || obj.type === 'sighting';
     }
     /**
      * Process STIX Domain Object
      */
     async processStixDomainObject(sdo, job, session, confidence = 1.0) {
         const domainMapping = this.mapStixToDomain(sdo);
-        const provenance = job.taxiiUrl || job.bundlePath || sdo.created_by_ref || "STIX";
+        const provenance = job.taxiiUrl || job.bundlePath || sdo.created_by_ref || 'STIX';
         const cypher = `
       MERGE (n:${domainMapping.label} {
         stix_id: $stixId,
@@ -327,7 +327,7 @@ class STIXImportService {
             userId: job.userId,
             jobId: job.id,
             investigationId: job.investigationId,
-            sourceVersion: sdo.spec_version || "2.1",
+            sourceVersion: sdo.spec_version || '2.1',
             provenance,
             confidence,
         });
@@ -337,7 +337,7 @@ class STIXImportService {
      */
     async processStixRelationshipObject(sro, job, session, confidence = 1.0) {
         const relationshipType = this.mapStixRelationshipType(sro.relationship_type || sro.type);
-        const provenance = job.taxiiUrl || job.bundlePath || sro.created_by_ref || "STIX";
+        const provenance = job.taxiiUrl || job.bundlePath || sro.created_by_ref || 'STIX';
         const cypher = `
       MATCH (source {stix_id: $sourceRef, _tenantId: $tenantId})
       MATCH (target {stix_id: $targetRef, _tenantId: $tenantId})
@@ -369,7 +369,7 @@ class STIXImportService {
             created: sro.created,
             modified: sro.modified,
         };
-        if (sro.type === "sighting") {
+        if (sro.type === 'sighting') {
             properties.count = sro.count || 1;
             properties.first_seen = sro.first_seen;
             properties.last_seen = sro.last_seen;
@@ -392,46 +392,46 @@ class STIXImportService {
      */
     mapStixToDomain(stixObj) {
         const typeMapping = {
-            "threat-actor": "THREAT_ACTOR",
-            malware: "MALWARE",
-            "attack-pattern": "ATTACK_PATTERN",
-            campaign: "CAMPAIGN",
-            indicator: "INDICATOR",
-            identity: "IDENTITY",
-            infrastructure: "INFRASTRUCTURE",
-            "intrusion-set": "INTRUSION_SET",
-            tool: "TOOL",
-            vulnerability: "VULNERABILITY",
-            report: "REPORT",
-            "observed-data": "OBSERVED_DATA",
+            'threat-actor': 'THREAT_ACTOR',
+            malware: 'MALWARE',
+            'attack-pattern': 'ATTACK_PATTERN',
+            campaign: 'CAMPAIGN',
+            indicator: 'INDICATOR',
+            identity: 'IDENTITY',
+            infrastructure: 'INFRASTRUCTURE',
+            'intrusion-set': 'INTRUSION_SET',
+            tool: 'TOOL',
+            vulnerability: 'VULNERABILITY',
+            report: 'REPORT',
+            'observed-data': 'OBSERVED_DATA',
         };
-        const label = typeMapping[stixObj.type] || "STIX_OBJECT";
+        const label = typeMapping[stixObj.type] || 'STIX_OBJECT';
         const properties = {
             stix_type: stixObj.type,
             name: stixObj.name,
             description: stixObj.description,
             created: stixObj.created,
             modified: stixObj.modified,
-            spec_version: stixObj.spec_version || "2.1",
+            spec_version: stixObj.spec_version || '2.1',
         };
         // Add type-specific properties
         switch (stixObj.type) {
-            case "threat-actor":
+            case 'threat-actor':
                 properties.aliases = stixObj.aliases;
                 properties.threat_actor_types = stixObj.threat_actor_types;
                 properties.sophistication = stixObj.sophistication;
                 break;
-            case "malware":
+            case 'malware':
                 properties.malware_types = stixObj.malware_types;
                 properties.is_family = stixObj.is_family;
                 break;
-            case "indicator":
+            case 'indicator':
                 properties.pattern = stixObj.pattern;
                 properties.indicator_types = stixObj.indicator_types;
                 properties.valid_from = stixObj.valid_from;
                 properties.valid_until = stixObj.valid_until;
                 break;
-            case "vulnerability":
+            case 'vulnerability':
                 properties.cve_id = this.extractCveId(stixObj.external_references);
                 properties.cvss_score = this.extractCvssScore(stixObj.external_references);
                 break;
@@ -451,22 +451,22 @@ class STIXImportService {
      */
     mapStixRelationshipType(stixType) {
         const mapping = {
-            uses: "USES",
-            indicates: "INDICATES",
-            targets: "TARGETS",
-            "attributed-to": "ATTRIBUTED_TO",
-            mitigates: "MITIGATES",
-            impersonates: "IMPERSONATES",
-            compromises: "COMPROMISES",
-            "communicates-with": "COMMUNICATES_WITH",
-            delivers: "DELIVERS",
-            downloads: "DOWNLOADS",
-            drops: "DROPS",
-            exploits: "EXPLOITS",
-            "variant-of": "VARIANT_OF",
-            sighting: "SIGHTING",
+            uses: 'USES',
+            indicates: 'INDICATES',
+            targets: 'TARGETS',
+            'attributed-to': 'ATTRIBUTED_TO',
+            mitigates: 'MITIGATES',
+            impersonates: 'IMPERSONATES',
+            compromises: 'COMPROMISES',
+            'communicates-with': 'COMMUNICATES_WITH',
+            delivers: 'DELIVERS',
+            downloads: 'DOWNLOADS',
+            drops: 'DROPS',
+            exploits: 'EXPLOITS',
+            'variant-of': 'VARIANT_OF',
+            sighting: 'SIGHTING',
         };
-        return mapping[stixType] || "RELATED_TO";
+        return mapping[stixType] || 'RELATED_TO';
     }
     /**
      * Extract CVE ID from external references
@@ -474,7 +474,7 @@ class STIXImportService {
     extractCveId(externalRefs) {
         if (!externalRefs)
             return null;
-        const cveRef = externalRefs.find((ref) => ref.source_name === "cve" || ref.external_id?.startsWith("CVE-"));
+        const cveRef = externalRefs.find((ref) => ref.source_name === 'cve' || ref.external_id?.startsWith('CVE-'));
         return cveRef?.external_id || null;
     }
     /**
@@ -483,7 +483,7 @@ class STIXImportService {
     extractCvssScore(externalRefs) {
         if (!externalRefs)
             return null;
-        const cvssRef = externalRefs.find((ref) => ref.source_name?.includes("cvss") || ref.description?.includes("CVSS"));
+        const cvssRef = externalRefs.find((ref) => ref.source_name?.includes('cvss') || ref.description?.includes('CVSS'));
         return cvssRef?.score || null;
     }
     /**
@@ -492,7 +492,7 @@ class STIXImportService {
     handleObjectError(error, stixObj, job) {
         job.stats.errors++;
         job.errors.push({
-            type: "OBJECT_ERROR",
+            type: 'OBJECT_ERROR',
             stixId: stixObj.id,
             stixType: stixObj.type,
             message: error.message,
@@ -557,10 +557,10 @@ class STIXImportService {
                 stats: job.stats,
                 recentErrors: job.errors.slice(-5),
             };
-            this.io.to(`import:job:${job.id}`).emit("import:progress", progress);
+            this.io.to(`import:job:${job.id}`).emit('import:progress', progress);
             this.io
                 .to(`investigation:${job.investigationId}`)
-                .emit("import:progress", progress);
+                .emit('import:progress', progress);
         }
     }
     /**
@@ -583,8 +583,8 @@ class STIXImportService {
             collectionId: row.collection_id,
             bundlePath: row.bundle_path,
             cursor: row.cursor,
-            stats: JSON.parse(row.stats || "{}"),
-            errors: JSON.parse(row.errors || "[]"),
+            stats: JSON.parse(row.stats || '{}'),
+            errors: JSON.parse(row.errors || '[]'),
             createdAt: row.created_at,
             startedAt: row.started_at,
             finishedAt: row.finished_at,
@@ -612,8 +612,8 @@ class STIXImportService {
             collectionId: row.collection_id,
             bundlePath: row.bundle_path,
             cursor: row.cursor,
-            stats: JSON.parse(row.stats || "{}"),
-            errors: JSON.parse(row.errors || "[]"),
+            stats: JSON.parse(row.stats || '{}'),
+            errors: JSON.parse(row.errors || '[]'),
             createdAt: row.created_at,
             startedAt: row.started_at,
             finishedAt: row.finished_at,
@@ -624,11 +624,11 @@ class STIXImportService {
      */
     async resumeTaxiiImport(jobId) {
         const job = await this.getJob(jobId);
-        if (!job || job.type !== "TAXII") {
-            throw new Error("Invalid or non-TAXII job");
+        if (!job || job.type !== 'TAXII') {
+            throw new Error('Invalid or non-TAXII job');
         }
-        if (job.status !== "failed" && job.status !== "paused") {
-            throw new Error("Job cannot be resumed");
+        if (job.status !== 'failed' && job.status !== 'paused') {
+            throw new Error('Job cannot be resumed');
         }
         this.activeJobs.set(jobId, job);
         setImmediate(() => this.processTaxiiCollection(job));

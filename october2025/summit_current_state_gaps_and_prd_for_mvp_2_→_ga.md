@@ -15,11 +15,13 @@
 We have broad scaffolding and a lot of code in place (3.8k commits, rich folder surface). The next step is to harden a **thin, end‑to‑end workflow** for 2–3 flagship use cases, then scale to GA quality with multi‑tenant security, SLOs, and compliance.
 
 **MVP‑2 focus (next major milestone):**
+
 - Lock an E2E loop for **Threat Intel → Detection → Triage → Response** and **Influence/Campaign Monitoring**.
 - Ship **Entity Resolution**, **Alert Triage**, **Campaign Clustering**, **Playbooks v1**, and **Operator Copilot** across API, UI, and runbooks.
 - Productionize ingestion & storage (schemas, backfills, idempotency), secrets/KMS, RBAC, audit, and on‑call.
 
 **GA focus:**
+
 - Multi‑tenant, SOC 2 foundations, SLOs, scale tests, golden signals, data governance, and plugin marketplace for connectors & detectors.
 - SLA’d endpoints/APIs, versioned models, export controls, and enterprise deployment patterns (BYO‑cloud and managed).
 
@@ -71,12 +73,14 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 ## 2) Users, jobs‑to‑be‑done, and flagship workflows
 
 ### Primary users
+
 - **Intel & Trust/Safety analysts** (T&S, IR, CTI, InfoOps) — identify campaigns, actors, narratives; map spread; recommend interventions.
 - **Cyber fusion/SOC operators** — triage alerts, correlate across sources, trigger playbooks, report impact.
 - **Executives & comms** — situational awareness, KPIs, risk posture, narrative health.
 - **Integrators/partners** — build connectors, detectors, and playbooks.
 
 ### Top workflows to nail (MVP‑2)
+
 1. **Campaign Monitoring (Influence/Active Measures)**
    - Sources → normalize → **entity & narrative extraction** → **campaign clustering** → **risk score** → alert → operator copilot → report.
 2. **Security Triage (Threat + Brand + Insider blend)**
@@ -89,25 +93,30 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 ## 3) System architecture (target for MVP‑2)
 
 **Data plane**
+
 - **Connectors** → **Ingestion Bus** (Kafka/Redpanda or SQS/SNS) → **Transformers** (Flink/Beam or Python workers) → **Storage**:
   - Hot: Postgres for metadata; Elasticsearch/OpenSearch for search; Redis for queues/caching.
   - Warm: Parquet in object store (S3/GCS) + Delta/Iceberg for batch/ML.
   - Graph: Neo4j/JanusGraph or PG‑graph extension for entities/relations.
 
 **ML plane**
+
 - Extraction models (NER, relation, stance), clustering (HDBSCAN + embeddings), ranking/scoring, detector plug‑ins.
 - **Model registry** with versioning, A/B, offline eval harness tied to `GOLDEN/datasets`.
 
 **Control plane**
+
 - **API Gateway** (REST/GraphQL), AuthN (OIDC), AuthZ (OPA/Rego or Zanzibar‑style tuples), rate‑limits.
 - **Rules & Alerting**: declarative rules (YAML) → alert routes → oncall.
 - **Playbooks**: declarative actions (HTTP, ticketing, takedown requests, comms templates) with guardrails.
 
 **Experience**
+
 - **Web client**: Workspaces → Feeds → Cases → Graph → Briefs → Settings.
 - **Operator Copilot**: retrieval‑augmented helper grounded in case context with immutable audit.
 
 **Security**
+
 - KMS‑backed secrets, envelope encryption, tenant isolation, full audit (who/what/when/why), data minimization.
 
 ---
@@ -138,25 +147,30 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 ## 6) Gaps & risks (from current state → target)
 
 **Product gaps**
+
 - Clear **golden workflows** across app: Workspaces, Cases, Alert Triage, Campaigns, Briefs.
 - **Entity resolution** & **campaign clustering** hardened with quality bars and operator overrides.
 - **Playbooks** (actionability) and **Operator Copilot** grounded in case context with guardrails.
 
 **Platform gaps**
+
 - **Multi‑tenant isolation** across data, search, and graph.
 - **Schema registry** + **contract tests** for connectors and transforms; backfill tooling.
 - **Secret/KMS integration** end‑to‑end; key rotation; scoped tokens for connectors.
 - **SLIs/SLOs** + pager duty; chaos and capacity planning; perf budgets in CI.
 
 **Security & compliance**
+
 - Formal threat model; hardened authz (OPA policies), audit trails, content provenance chain.
 - Data governance: retention, subject rights process, lineage, and tagging.
 
 **Data/ML**
+
 - Model registry & eval harness tied to `GOLDEN/datasets`; bias/abuse tests; explainability surfaces.
 - Embedding/search drift monitoring; ground‑truth feedback loop (analyst labels).
 
 **Delivery**
+
 - Release trains; migrations; feature flags; versioned APIs; upgrade playbooks.
 
 ---
@@ -164,15 +178,18 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 ## 7) MVP‑2 Product Requirements Document (PRD)
 
 ### 7.1 Goal & success metrics
+
 **Goal:** Ship an opinionated, reliable E2E loop for Campaign Monitoring and Security Triage used daily by pilot customers.
 
 **North‑star metrics**
+
 - Triage efficiency: **≥40% reduction** in mean time to triage (MTTT) vs baseline tools.
 - Signal quality: **Precision@Top‑N ≥ 0.85** for alerts; **≥70% analyst acceptance** of campaign clusters.
 - Adoption: **DAU/WAU ≥ 35%**, **≥5 active cases/user/week** among analysts in 2 pilot tenants.
 - Reliability: **99.9% API**; **P95 ingest→alert < 10m**.
 
 ### 7.2 In‑scope features
+
 1. **Workspaces & Cases v1**
    - Case lifecycle (open, triage, investigate, actioned, closed) with SLA timers and audit.
    - Case feed: linked alerts, artifacts, entities, and graph view.
@@ -206,12 +223,15 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
    - One‑click Executive Brief export (PDF/HTML) from a case/campaign.
 
 ### 7.3 Out of scope (MVP‑2)
+
 - Marketplace, BYO‑LLM, auto‑remediation without approval, fine‑grained tenant IAM delegation, mobile app.
 
 ### 7.4 Constraints & dependencies
+
 - Requires baseline KMS, OIDC SSO, RBAC, audit, SLOs, and hardened deploy path (staging → prod), see §8.
 
 ### 7.5 Acceptance criteria
+
 - Two pilot tenants in production‑like environment using the workflows weekly.
 - p95 ingest→alert <10m; API availability ≥99.9%; error budgets tracked with burn alerts.
 - Precision@N across top rules ≥0.85 measured against `GOLDEN/datasets` + analyst labels.
@@ -222,26 +242,31 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 ## 8) MVP‑2 Engineering plan (abridged)
 
 **8.1 Architecture hardening**
+
 - Introduce **schema registry** for events/artifacts; versioned transforms; idempotent sinks.
 - Consolidate storage: Postgres (metadata), OpenSearch (search), S3/Parquet (lake), Graph store. Migrations with Liquibase/Flyway.
 - **AuthN/Z**: OIDC (Okta/AzureAD), RBAC with OPA policies; scoped API tokens per connector; per‑tenant KMS keys.
 
 **8.2 Observability & SRE**
+
 - SLIs: availability, latency, error rate, freshness. **SLOs codified** in config. Golden signals per service.
 - Tracing: OpenTelemetry end‑to‑end; log redaction; sampling rules.
 - On‑call runbooks; synthetic canaries for ingest & API; chaos experiments monthly.
 
 **8.3 Data/ML**
+
 - **Model registry** with semantic versioning, feature store contracts, and promoted/stable channels.
 - Eval harness wired to `GOLDEN/datasets` + held‑out validation; continuous quality dashboards.
 - Feedback ingestion from UI for human‑in‑the‑loop training; drift monitors.
 
 **8.4 Security**
+
 - Threat model & STRIDE walkthroughs per service; code scanning gates; SBOM & provenance attestation for builds (SLSA Level 2 path).
 - Secrets: KMS + sealed secrets in deploy; auto‑rotation; break‑glass procedures.
 - **Audit**: append‑only logs, tamper‑evident (hash chains), access reviews.
 
 **8.5 Delivery**
+
 - Environments: dev, staging, prod with tenant fixtures.
 - Feature flags + migrations; blue/green for API; rollback playbook.
 - Release train: bi‑weekly minor; monthly hardening; versioned API `v1` locked at GA.
@@ -251,6 +276,7 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 ## 9) GA scope (v1.0)
 
 ### 9.1 Product
+
 - **Multi‑tenant GA**: strong isolation (DB/schema, index prefixes, KMS per tenant), SCIM provisioning, delegated admin.
 - **Marketplace**: connectors & detectors as packages with review/signing; revenue share mechanics.
 - **Playbooks v2**: approval workflows, human‑in‑the‑loop loops, outcome tracking, and rollback.
@@ -258,6 +284,7 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 - **Compliance pack**: SOC 2 Type II controls, data lifecycle tooling, export controls & geo fences.
 
 ### 9.2 Engineering
+
 - Scale tests: 1B artifacts, 10M entities; failover drills; capacity model & autoscaling.
 - Search excellence: semantic + lexical hybrid, synonym packs, time‑decay ranking, per‑tenant boosters.
 - **Cost guardrails**: quota management, tiering, cold storage lifecycle policies.
@@ -265,6 +292,7 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 - **Extensibility**: SDKs for connectors/detectors/playbooks; stable contracts; samples.
 
 ### 9.3 GA acceptance
+
 - 3+ enterprise tenants live; referenceable. SLOs met 3 months. Independent pen‑test passed; SOC 2 audit underway.
 - Marketplace with ≥10 community connectors and ≥5 detectors.
 - Upgrade safe: zero‑downtime migrations demonstrated.
@@ -276,9 +304,11 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 ### 10.1 APIs (v1 draft)
 
 **Authentication**
+
 - OIDC/OAuth2; PATs for automation; mTLS optional for ingest.
 
 **Objects**
+
 - `POST /v1/artifacts` (bulk supported) — idempotent on `source_id` + `source_ts`.
 - `POST /v1/entities:resolve` — returns canonical entity + evidence; supports batch.
 - `POST /v1/alerts:ingest` — rule hits from external systems.
@@ -287,12 +317,15 @@ We have broad scaffolding and a lot of code in place (3.8k commits, rich folder 
 - `POST /v1/copilot:answer` — RAG answer with citations and redaction report.
 
 **Webhooks**
+
 - `case.changed`, `alert.created`, `playbook.step.requested`, `playbook.step.completed`.
 
 **Quotas**
+
 - Default: 500 RPS burst 1000; payload ≤ 10 MB; ingest batch ≤ 10k artifacts.
 
 ### 10.2 Rule DSL (sketch)
+
 ```yaml
 version: 1
 rule: name: "Narrative surge: vaccine-hesitancy" id: rule-123
@@ -307,26 +340,29 @@ then:
 ```
 
 ### 10.3 Playbook schema (v1)
+
 ```yaml
 id: pb-001
-name: "Coordinate takedown request"
+name: 'Coordinate takedown request'
 triggers: [alert.created where severity >= HIGH and source == influence]
 steps:
   - id: draft-brief
     action: template.render
-    input: {template: "takedown_request_v1", case_id: $case.id}
+    input: { template: 'takedown_request_v1', case_id: $case.id }
     approvals: [T&S Lead]
   - id: send-legal
     action: http.post
-    input: {url: $secrets.LEGAL_WEBHOOK, body: $prev.output}
-    guardrails: {rate_limit: 5/min, dry_run: false}
+    input: { url: $secrets.LEGAL_WEBHOOK, body: $prev.output }
+    guardrails: { rate_limit: 5/min, dry_run: false }
 ```
 
 ### 10.4 Data quality gates
+
 - Connector contract tests; schema validation; freshness SLA alarms.
 - De‑dup & canonicalization metrics; cluster cohesion/separation metrics.
 
 ### 10.5 UI surfaces (MVP‑2)
+
 - **Workspaces**: tenant switcher, data sources, rules, playbooks.
 - **Cases**: queue, keyboard triage, evidence panel, graph, actions.
 - **Campaigns**: clusters list, growth chart, key actors, confidence, "what changed".
@@ -338,17 +374,21 @@ steps:
 ## 11) Program plan & timelines (indicative)
 
 **Now → +4 weeks (Stabilize & Thin Slice)**
+
 - Lock schemas; wire ingestion→storage→search; ship Cases/Alerts skeleton; enable 2 connectors end‑to‑end.
 
 **+5 → +10 weeks (MVP‑2)**
+
 - Ship Entity Resolution v1; Campaign Clustering v1; Triage & Playbooks v1; Operator Copilot v0.9; 6 connectors.
 
 **+11 → +20 weeks (Hardening & GA)**
+
 - Multi‑tenant isolation; SLOs & scale tests; compliance pack; SDKs; marketplace beta; GA sign‑off.
 
 ---
 
 ## 12) RACI (MVP‑2)
+
 - **PM**: owns scope, acceptance, and stakeholder sync.
 - **Tech Lead (Platform)**: ingestion, storage, API, authn/z, SRE.
 - **Tech Lead (ML)**: extraction, clustering, ER, eval harness.
@@ -359,6 +399,7 @@ steps:
 ---
 
 ## 13) Open questions
+
 - Which connectors are contractual must‑haves for pilots? (name the 6)
 - What data residency/retention constraints per pilot?
 - Preferred graph store vs PG‑graph? (operational trade‑offs)
@@ -368,11 +409,11 @@ steps:
 ---
 
 ## 14) Appendix: Quality & safety bars
+
 - **Red‑team prompts** vs copilot; jailbreak resistance; PII redaction tests.
 - **Bias/abuse tests** on narratives and actor attribution; explainability: show evidence & confidence ranges.
 - **Human‑in‑the‑loop**: every irreversible action requires review & two‑person rule for sensitive playbooks.
 
 ---
 
-*End of document.*
-
+_End of document._

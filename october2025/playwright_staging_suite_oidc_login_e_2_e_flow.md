@@ -5,6 +5,7 @@ End‑to‑end browser tests for **staging** that validate OIDC login (Keycloak)
 ---
 
 ## 0) Repo Layout
+
 ```
 webapp/
 ├─ tests/stage/
@@ -23,11 +24,13 @@ webapp/
 ---
 
 ## 1) Playwright Config (staging)
+
 ```ts
 // webapp/tests/stage/playwright.stage.config.ts
 import { defineConfig, devices } from '@playwright/test';
 
-const BASE_URL = process.env.STAGE_BASE_URL || 'https://gateway.stage.example.com';
+const BASE_URL =
+  process.env.STAGE_BASE_URL || 'https://gateway.stage.example.com';
 
 export default defineConfig({
   testDir: __dirname,
@@ -42,19 +45,20 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     viewport: { width: 1440, height: 900 },
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });
 ```
 
 ---
 
 ## 2) Fixture: Users & Selectors
+
 ```ts
 // webapp/tests/stage/fixtures/users.ts
 export const kc = {
-  issuer: process.env.KEYCLOAK_ISSUER || 'https://keycloak.stage.example.com/auth/realms/intelgraph',
+  issuer:
+    process.env.KEYCLOAK_ISSUER ||
+    'https://keycloak.stage.example.com/auth/realms/intelgraph',
   webClientId: process.env.KC_WEB_CLIENT_ID || 'intelgraph-web',
   testUser: process.env.KC_TEST_USER || 'lead',
   testPass: process.env.KC_TEST_PASS || 'ChangeMe!123',
@@ -84,6 +88,7 @@ export const sel = {
 ---
 
 ## 3) Test 01 — OIDC Login
+
 ```ts
 // webapp/tests/stage/01-login.spec.ts
 import { test, expect } from '@playwright/test';
@@ -100,13 +105,16 @@ test('logs in via Keycloak and shows analyst UI', async ({ page }) => {
   // Redirect back
   await page.waitForURL(/\/$/);
   await expect(page.locator('text=Tri‑Pane')).toBeVisible();
-  await page.context().storageState({ path: 'webapp/tests/stage/.auth-state.json' });
+  await page
+    .context()
+    .storageState({ path: 'webapp/tests/stage/.auth-state.json' });
 });
 ```
 
 ---
 
 ## 4) Test 02 — NL→Cypher + Analytics
+
 ```ts
 // webapp/tests/stage/02-nl2cypher-analytics.spec.ts
 import { test, expect } from '@playwright/test';
@@ -120,13 +128,16 @@ test('preview NL query and run PageRank', async ({ page }) => {
   await page.click(sel.nlRun);
   await expect(page.getByText('Estimated rows')).toBeVisible();
   await page.click(sel.analyticsRun);
-  await expect(page.getByText('PageRank complete')).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText('PageRank complete')).toBeVisible({
+    timeout: 60_000,
+  });
 });
 ```
 
 ---
 
 ## 5) Test 03 — Case & Report Studio
+
 ```ts
 // webapp/tests/stage/03-case-report.spec.ts
 import { test, expect } from '@playwright/test';
@@ -150,6 +161,7 @@ test('create a case and render a report', async ({ page }) => {
 ---
 
 ## 6) Test 04 — XAI & Wallet
+
 ```ts
 // webapp/tests/stage/04-xai-wallet.spec.ts
 import { test, expect } from '@playwright/test';
@@ -172,6 +184,7 @@ test('explain a node and issue a wallet', async ({ page }) => {
 ---
 
 ## 7) Test 05 — Policy Inspector & Compliance Hooks
+
 ```ts
 // webapp/tests/stage/05-policy-compliance.spec.ts
 import { test, expect } from '@playwright/test';
@@ -182,12 +195,18 @@ test.use({ storageState: 'webapp/tests/stage/.auth-state.json' });
 test('simulate a denied export with reason code', async ({ page }) => {
   await page.goto('/policy');
   await page.click(sel.policyMenu);
-  await page.locator('textarea').fill(JSON.stringify({
-    subject: { sub: 'u1', roles: ['analyst'] },
-    resource: { kind: 'doc', sensitivity: 'restricted' },
-    action: 'EXPORT',
-    context: { purpose: 'investigation', court_order: false }
-  }, null, 2));
+  await page.locator('textarea').fill(
+    JSON.stringify(
+      {
+        subject: { sub: 'u1', roles: ['analyst'] },
+        resource: { kind: 'doc', sensitivity: 'restricted' },
+        action: 'EXPORT',
+        context: { purpose: 'investigation', court_order: false },
+      },
+      null,
+      2,
+    ),
+  );
   await page.getByRole('button', { name: 'Simulate' }).click();
   await expect(page.getByText('Export requires court order')).toBeVisible();
 });
@@ -196,6 +215,7 @@ test('simulate a denied export with reason code', async ({ page }) => {
 ---
 
 ## 8) package.json Scripts
+
 ```json
 // webapp/package.json (snippet)
 {
@@ -209,6 +229,7 @@ test('simulate a denied export with reason code', async ({ page }) => {
 ---
 
 ## 9) GitHub Actions — Staging E2E
+
 ```yaml
 # .github/workflows/stage-e2e.yaml
 name: stage-e2e
@@ -237,14 +258,18 @@ jobs:
         run: pnpm --filter webapp run stage:e2e
       - name: Upload report
         uses: actions/upload-artifact@v4
-        with: { name: playwright-report-stage, path: webapp/playwright-report-stage }
+        with:
+          {
+            name: playwright-report-stage,
+            path: webapp/playwright-report-stage,
+          }
 ```
 
 ---
 
 ## 10) Notes & Hardening
+
 - For WebAuthn/step‑up routes, add a separate test that uses a test realm with password‑only for CI, or mock ACR in Keycloak.
 - If the SPA is on a different host than the gateway, set `STAGE_BASE_URL` to the SPA origin.
 - Ensure CORS/redirect URIs are configured for `intelgraph-web` in Keycloak.
 - Tie CI user to the `pilot` group (tenant attribute) to exercise budget/policy paths.
-

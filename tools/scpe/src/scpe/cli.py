@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from .errors import ReceiptError, SCPEError
 from .receipt import build_receipt, verify_receipt, write_receipt
@@ -16,9 +16,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Supply-Chain Provenance Enforcer")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    verify_parser = subparsers.add_parser(
-        "verify", help="Validate artifacts, SBOM, and provenance"
-    )
+    verify_parser = subparsers.add_parser("verify", help="Validate artifacts, SBOM, and provenance")
     verify_parser.add_argument(
         "--config", required=True, help="Path to the SCPE configuration file"
     )
@@ -30,9 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
     receipt_parser = subparsers.add_parser(
         "receipt-verify", help="Verify the integrity of a SCPE receipt"
     )
-    receipt_parser.add_argument(
-        "--receipt", required=True, help="Path to the receipt JSON file"
-    )
+    receipt_parser.add_argument("--receipt", required=True, help="Path to the receipt JSON file")
 
     return parser
 

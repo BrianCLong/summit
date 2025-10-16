@@ -27,51 +27,58 @@ async function startServer() {
   try {
     // Initialize infrastructure
     logger.info('Initializing V24 Global Coherence Ecosystem...');
-    
+
     await initializeDatabase();
     await initializePostgres();
     await initializeRedis();
-    
+
     // Setup observability
     setupObservability();
-    
+
     // Create HTTP server
     const app = express();
     const httpServer = http.createServer(app);
-    
+
     // Security middleware
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "https:"],
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+          },
         },
-      },
-      crossOriginEmbedderPolicy: false
-    }));
-    
+        crossOriginEmbedderPolicy: false,
+      }),
+    );
+
     app.use(compression());
-    app.use(cors({
-      origin: config.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
-      credentials: true
-    }));
-    
+    app.use(
+      cors({
+        origin: config.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
+        credentials: true,
+      }),
+    );
+
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-    
+
     // Setup WebSocket server for subscriptions
     const wsServer = new WebSocketServer({
       server: httpServer,
       path: GRAPHQL_PATH,
     });
-    
-    const serverCleanup = useServer({ 
-      schema: { typeDefs, resolvers },
-      context: createContext
-    }, wsServer);
-    
+
+    const serverCleanup = useServer(
+      {
+        schema: { typeDefs, resolvers },
+        context: createContext,
+      },
+      wsServer,
+    );
+
     // Create Apollo Server
     const server = new ApolloServer({
       typeDefs,
@@ -93,51 +100,57 @@ async function startServer() {
         return {
           message: err.message,
           code: err.extensions?.code || 'INTERNAL_ERROR',
-          path: err.path
+          path: err.path,
         };
       },
       introspection: config.NODE_ENV !== 'production',
-      includeStacktraceInErrorResponses: config.NODE_ENV !== 'production'
+      includeStacktraceInErrorResponses: config.NODE_ENV !== 'production',
     });
-    
+
     await server.start();
-    
+
     // Setup GraphQL endpoint
     app.use(
       GRAPHQL_PATH,
       expressMiddleware(server, {
         context: createContext,
-      })
+      }),
     );
-    
+
     // Setup coherence signal ingest endpoints
     setupIngest(app);
-    
+
     // Health check endpoint
     app.get('/health', (req, res) => {
       res.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
         version: config.APP_VERSION || '1.0.0',
-        service: 'v24-coherence-ecosystem'
+        service: 'v24-coherence-ecosystem',
       });
     });
-    
+
     // Start background services
     if (config.KAFKA_ENABLED === 'true') {
       startKafkaConsumer();
     }
-    
+
     // Start materialization service
     startMaterializer();
-    
+
     // Start server
     httpServer.listen(PORT, () => {
-      logger.info(`🚀 V24 Global Coherence Ecosystem ready at http://localhost:${PORT}${GRAPHQL_PATH}`);
-      logger.info(`🔌 WebSocket subscriptions ready at ws://localhost:${PORT}${GRAPHQL_PATH}`);
-      logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
+      logger.info(
+        `🚀 V24 Global Coherence Ecosystem ready at http://localhost:${PORT}${GRAPHQL_PATH}`,
+      );
+      logger.info(
+        `🔌 WebSocket subscriptions ready at ws://localhost:${PORT}${GRAPHQL_PATH}`,
+      );
+      logger.info(
+        `📊 Health check available at http://localhost:${PORT}/health`,
+      );
     });
-    
+
     // Graceful shutdown
     const shutdown = async (signal: string) => {
       logger.info(`Received ${signal}, shutting down gracefully...`);
@@ -146,12 +159,14 @@ async function startServer() {
         process.exit(0);
       });
     };
-    
+
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
-    
   } catch (error) {
-    logger.error('Failed to start server', { error: error.message, stack: error.stack });
+    logger.error('Failed to start server', {
+      error: error.message,
+      stack: error.stack,
+    });
     process.exit(1);
   }
 }

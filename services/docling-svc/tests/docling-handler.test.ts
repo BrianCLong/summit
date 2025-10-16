@@ -31,16 +31,27 @@ describe('docling handler', () => {
         promptHash: 'hash',
         parameters: {},
         policyTags: [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       usage: { characters: 42, costUsd: 0.01, latencyMs: 10 },
-      result: { fragments: [{ id: 'f-1', text: 'hello world', mimeType: 'text/plain', sha256: 'abc', sizeBytes: 5, metadata: {} }] },
-      policySignals: []
+      result: {
+        fragments: [
+          {
+            id: 'f-1',
+            text: 'hello world',
+            mimeType: 'text/plain',
+            sha256: 'abc',
+            sizeBytes: 5,
+            metadata: {},
+          },
+        ],
+      },
+      policySignals: [],
     };
     const client = {
       parse: jest.fn().mockResolvedValue(mockResponse),
       summarize: jest.fn(),
-      extract: jest.fn()
+      extract: jest.fn(),
     } as any;
 
     const app = buildApp(new DoclingHandler(client));
@@ -52,7 +63,7 @@ describe('docling handler', () => {
         purpose: 'investigation',
         retention: 'short',
         contentType: 'text/plain',
-        bytes: Buffer.from('log content').toString('base64')
+        bytes: Buffer.from('log content').toString('base64'),
       });
 
     expect(res.status).toBe(200);
@@ -73,17 +84,17 @@ describe('docling handler', () => {
         promptHash: 'hash',
         parameters: {},
         policyTags: [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       usage: { characters: 10, costUsd: 0.01, latencyMs: 5 },
       result: { fragments: [] },
-      policySignals: []
+      policySignals: [],
     } satisfies DoclingResponse<{ fragments: any[] }>;
 
     const client = {
       parse: jest.fn().mockResolvedValue(mockResponse),
       summarize: jest.fn(),
-      extract: jest.fn()
+      extract: jest.fn(),
     } as any;
     const handler = new DoclingHandler(client);
     const app = buildApp(handler);
@@ -94,7 +105,7 @@ describe('docling handler', () => {
       purpose: 'investigation',
       retention: 'short',
       contentType: 'text/plain',
-      bytes: Buffer.from('hello world').toString('base64')
+      bytes: Buffer.from('hello world').toString('base64'),
     };
 
     const first = await request(app).post('/v1/parse').send(payload);
@@ -118,11 +129,11 @@ describe('docling handler', () => {
         promptHash: 'hash',
         parameters: {},
         policyTags: [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       usage: { characters: 12, costUsd: 0.01, latencyMs: 5 },
       result: { fragments: [] },
-      policySignals: []
+      policySignals: [],
     };
     const client = {
       parse: jest
@@ -130,7 +141,7 @@ describe('docling handler', () => {
         .mockRejectedValueOnce(new Error('boom'))
         .mockResolvedValueOnce(fallbackResponse),
       summarize: jest.fn(),
-      extract: jest.fn()
+      extract: jest.fn(),
     } as any;
 
     const app = buildApp(new DoclingHandler(client));
@@ -142,7 +153,7 @@ describe('docling handler', () => {
         purpose: 'investigation',
         retention: 'short',
         contentType: 'text/plain',
-        bytes: Buffer.from('log content').toString('base64')
+        bytes: Buffer.from('log content').toString('base64'),
       });
 
     expect(res.status).toBe(502);

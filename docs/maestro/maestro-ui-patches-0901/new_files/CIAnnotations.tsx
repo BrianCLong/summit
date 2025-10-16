@@ -12,10 +12,13 @@ type Annotation = {
 };
 
 async function fetchAnnotations(since?: string): Promise<Annotation[]> {
-  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base =
+    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
   const qs = new URLSearchParams();
   if (since) qs.set('since', since);
-  const res = await fetch(`${base}/ci/annotations?${qs.toString()}`, { credentials: 'omit' });
+  const res = await fetch(`${base}/ci/annotations?${qs.toString()}`, {
+    credentials: 'omit',
+  });
   if (!res.ok) throw new Error('Failed to load annotations');
   return res.json();
 }
@@ -68,14 +71,19 @@ export default function CIAnnotationsPage() {
             <section key={level} className="border rounded-xl p-4 shadow-sm">
               <h2 className="text-lg font-medium capitalize">
                 {level}{' '}
-                <span className="text-sm text-gray-500">({grouped[level]?.length ?? 0})</span>
+                <span className="text-sm text-gray-500">
+                  ({grouped[level]?.length ?? 0})
+                </span>
               </h2>
               <ul className="mt-2 space-y-2 max-h-[60vh] overflow-auto pr-2">
                 {(grouped[level] ?? []).map((a, idx) => (
                   <li key={idx} className="border rounded p-2">
                     <div className="text-sm text-gray-600">
                       Run{' '}
-                      <Link className="underline" to={`/maestro/runs/${a.runId}`}>
+                      <Link
+                        className="underline"
+                        to={`/maestro/runs/${a.runId}`}
+                      >
                         #{a.runId}
                       </Link>
                     </div>

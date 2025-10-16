@@ -36,7 +36,16 @@ export interface TriggerConfig {
 
 export interface ConditionExpression {
   field: string;
-  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'in' | 'exists';
+  operator:
+    | 'eq'
+    | 'ne'
+    | 'gt'
+    | 'gte'
+    | 'lt'
+    | 'lte'
+    | 'contains'
+    | 'in'
+    | 'exists';
   value: any;
   logicalOperator?: 'and' | 'or';
   children?: ConditionExpression[];
@@ -45,7 +54,14 @@ export interface ConditionExpression {
 export interface WorkflowStep {
   id: string;
   name: string;
-  type: 'action' | 'condition' | 'loop' | 'parallel' | 'delay' | 'human' | 'subprocess';
+  type:
+    | 'action'
+    | 'condition'
+    | 'loop'
+    | 'parallel'
+    | 'delay'
+    | 'human'
+    | 'subprocess';
   config: StepConfig;
   position: { x: number; y: number };
   connections: StepConnection[];
@@ -281,7 +297,9 @@ export class WorkflowService extends EventEmitter {
         this.handleExecutionError(execution, error);
       });
 
-      logger.info(`Workflow execution started: ${executionId} for workflow ${workflowId}`);
+      logger.info(
+        `Workflow execution started: ${executionId} for workflow ${workflowId}`,
+      );
       this.emit('workflow.execution.started', execution);
 
       return execution;
@@ -299,7 +317,9 @@ export class WorkflowService extends EventEmitter {
       // Find entry point (steps with no incoming connections)
       const entrySteps = workflow.steps.filter(
         (step) =>
-          !workflow.steps.some((s) => s.connections.some((c) => c.targetStepId === step.id)),
+          !workflow.steps.some((s) =>
+            s.connections.some((c) => c.targetStepId === step.id),
+          ),
       );
 
       if (entrySteps.length === 0) {
@@ -307,7 +327,9 @@ export class WorkflowService extends EventEmitter {
       }
 
       // Execute entry steps in parallel
-      const promises = entrySteps.map((step) => this.executeStep(execution, workflow, step));
+      const promises = entrySteps.map((step) =>
+        this.executeStep(execution, workflow, step),
+      );
       await Promise.all(promises);
 
       // Mark execution as completed
@@ -341,7 +363,9 @@ export class WorkflowService extends EventEmitter {
       execution.currentStep = step.id;
       await this.saveExecution(execution);
 
-      logger.info(`Executing step: ${step.name} (${step.id}) in workflow ${execution.id}`);
+      logger.info(
+        `Executing step: ${step.name} (${step.id}) in workflow ${execution.id}`,
+      );
       this.emit('workflow.step.started', execution, step);
 
       let result: any;
@@ -376,12 +400,15 @@ export class WorkflowService extends EventEmitter {
       stepExecution.status = 'completed';
       stepExecution.completedAt = new Date();
       stepExecution.duration =
-        stepExecution.completedAt.getTime() - stepExecution.startedAt!.getTime();
+        stepExecution.completedAt.getTime() -
+        stepExecution.startedAt!.getTime();
       stepExecution.output = result;
 
       // Update execution context with step outputs
       if (step.config.outputMappings && result) {
-        for (const [contextKey, outputKey] of Object.entries(step.config.outputMappings)) {
+        for (const [contextKey, outputKey] of Object.entries(
+          step.config.outputMappings,
+        )) {
           execution.context[contextKey] = result[outputKey];
         }
       }
@@ -398,7 +425,10 @@ export class WorkflowService extends EventEmitter {
     }
   }
 
-  private async executeActionStep(execution: WorkflowExecution, step: WorkflowStep): Promise<any> {
+  private async executeActionStep(
+    execution: WorkflowExecution,
+    step: WorkflowStep,
+  ): Promise<any> {
     const { actionType, actionConfig } = step.config;
 
     if (!actionType) {
@@ -472,7 +502,11 @@ export class WorkflowService extends EventEmitter {
       const childSteps = this.findChildSteps(workflow, step);
       for (const childStep of childSteps) {
         const tempExecution = { ...execution, context: loopContext };
-        const result = await this.executeStep(tempExecution, workflow, childStep);
+        const result = await this.executeStep(
+          tempExecution,
+          workflow,
+          childStep,
+        );
         results.push(result);
       }
     }
@@ -480,7 +514,10 @@ export class WorkflowService extends EventEmitter {
     return { loopResults: results, iterations: actualIterations };
   }
 
-  private async executeDelayStep(execution: WorkflowExecution, step: WorkflowStep): Promise<any> {
+  private async executeDelayStep(
+    execution: WorkflowExecution,
+    step: WorkflowStep,
+  ): Promise<any> {
     const { delayMs = 1000 } = step.config;
 
     await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -488,7 +525,10 @@ export class WorkflowService extends EventEmitter {
     return { delayed: delayMs };
   }
 
-  private async executeHumanStep(execution: WorkflowExecution, step: WorkflowStep): Promise<any> {
+  private async executeHumanStep(
+    execution: WorkflowExecution,
+    step: WorkflowStep,
+  ): Promise<any> {
     const { assignees, dueDate, formConfig } = step.config;
 
     if (!assignees || assignees.length === 0) {
@@ -541,9 +581,14 @@ export class WorkflowService extends EventEmitter {
       const checkCompletion = () => {
         const currentExecution = this.executionQueue.get(subExecution.id);
         if (currentExecution?.status === 'completed') {
-          resolve({ subExecutionId: subExecution.id, result: currentExecution.context });
+          resolve({
+            subExecutionId: subExecution.id,
+            result: currentExecution.context,
+          });
         } else if (currentExecution?.status === 'failed') {
-          reject(new Error(`Subprocess failed: ${currentExecution.error?.message}`));
+          reject(
+            new Error(`Subprocess failed: ${currentExecution.error?.message}`),
+          );
         } else {
           setTimeout(checkCompletion, 1000);
         }
@@ -559,10 +604,16 @@ export class WorkflowService extends EventEmitter {
     stepResult: any,
   ): Promise<void> {
     for (const connection of currentStep.connections) {
-      const shouldExecute = this.shouldExecuteConnection(connection, stepResult, execution.context);
+      const shouldExecute = this.shouldExecuteConnection(
+        connection,
+        stepResult,
+        execution.context,
+      );
 
       if (shouldExecute) {
-        const nextStep = workflow.steps.find((s) => s.id === connection.targetStepId);
+        const nextStep = workflow.steps.find(
+          (s) => s.id === connection.targetStepId,
+        );
         if (nextStep) {
           await this.executeStep(execution, workflow, nextStep);
         }
@@ -584,14 +635,20 @@ export class WorkflowService extends EventEmitter {
         return !!stepResult?.error;
       case 'custom':
         return connection.customCondition
-          ? this.evaluateCondition(connection.customCondition, { ...context, stepResult })
+          ? this.evaluateCondition(connection.customCondition, {
+              ...context,
+              stepResult,
+            })
           : true;
       default:
         return true;
     }
   }
 
-  private evaluateCondition(condition: ConditionExpression, context: Record<string, any>): boolean {
+  private evaluateCondition(
+    condition: ConditionExpression,
+    context: Record<string, any>,
+  ): boolean {
     const fieldValue = this.getNestedValue(context, condition.field);
     let result = false;
 
@@ -618,7 +675,9 @@ export class WorkflowService extends EventEmitter {
         result = String(fieldValue).includes(condition.value);
         break;
       case 'in':
-        result = Array.isArray(condition.value) && condition.value.includes(fieldValue);
+        result =
+          Array.isArray(condition.value) &&
+          condition.value.includes(fieldValue);
         break;
       case 'exists':
         result = fieldValue !== undefined && fieldValue !== null;
@@ -645,12 +704,17 @@ export class WorkflowService extends EventEmitter {
     return path.split('.').reduce((current, key) => current?.[key], obj);
   }
 
-  private prepareStepInput(execution: WorkflowExecution, step: WorkflowStep): Record<string, any> {
+  private prepareStepInput(
+    execution: WorkflowExecution,
+    step: WorkflowStep,
+  ): Record<string, any> {
     let input = { ...execution.context };
 
     if (step.config.inputMappings) {
       input = {};
-      for (const [inputKey, contextKey] of Object.entries(step.config.inputMappings)) {
+      for (const [inputKey, contextKey] of Object.entries(
+        step.config.inputMappings,
+      )) {
         input[inputKey] = this.getNestedValue(execution.context, contextKey);
       }
     }
@@ -658,13 +722,19 @@ export class WorkflowService extends EventEmitter {
     return input;
   }
 
-  private findChildSteps(workflow: WorkflowDefinition, parentStep: WorkflowStep): WorkflowStep[] {
+  private findChildSteps(
+    workflow: WorkflowDefinition,
+    parentStep: WorkflowStep,
+  ): WorkflowStep[] {
     return workflow.steps.filter((step) =>
       parentStep.connections.some((conn) => conn.targetStepId === step.id),
     );
   }
 
-  private async handleExecutionError(execution: WorkflowExecution, error: any): Promise<void> {
+  private async handleExecutionError(
+    execution: WorkflowExecution,
+    error: any,
+  ): Promise<void> {
     execution.status = 'failed';
     execution.completedAt = new Date();
     execution.error = {
@@ -689,21 +759,30 @@ export class WorkflowService extends EventEmitter {
     stepExecution.status = 'failed';
     stepExecution.completedAt = new Date();
     stepExecution.duration =
-      stepExecution.completedAt.getTime() - (stepExecution.startedAt?.getTime() || 0);
+      stepExecution.completedAt.getTime() -
+      (stepExecution.startedAt?.getTime() || 0);
     stepExecution.error = error.message;
 
     // Handle retries
-    if (step.retryConfig && stepExecution.retryCount < step.retryConfig.maxRetries) {
+    if (
+      step.retryConfig &&
+      stepExecution.retryCount < step.retryConfig.maxRetries
+    ) {
       stepExecution.retryCount++;
       stepExecution.status = 'pending';
 
       const delay = step.retryConfig.exponentialBackoff
-        ? step.retryConfig.retryDelay * Math.pow(2, stepExecution.retryCount - 1)
+        ? step.retryConfig.retryDelay *
+          Math.pow(2, stepExecution.retryCount - 1)
         : step.retryConfig.retryDelay;
 
       setTimeout(() => {
-        this.executeStep(execution, { steps: [step] } as WorkflowDefinition, step).catch(
-          (retryError) => logger.error(`Step retry failed: ${step.id}`, retryError),
+        this.executeStep(
+          execution,
+          { steps: [step] } as WorkflowDefinition,
+          step,
+        ).catch((retryError) =>
+          logger.error(`Step retry failed: ${step.id}`, retryError),
         );
       }, delay);
 
@@ -866,7 +945,9 @@ export class WorkflowService extends EventEmitter {
     };
   }
 
-  private async setupWorkflowTriggers(workflow: WorkflowDefinition): Promise<void> {
+  private async setupWorkflowTriggers(
+    workflow: WorkflowDefinition,
+  ): Promise<void> {
     for (const trigger of workflow.triggers) {
       if (!trigger.isEnabled) continue;
 
@@ -900,7 +981,10 @@ export class WorkflowService extends EventEmitter {
     trigger: WorkflowTrigger,
   ): Promise<void> {
     // Event listener setup
-    logger.info(`Setting up event trigger for workflow ${workflow.id}:`, trigger.config.eventType);
+    logger.info(
+      `Setting up event trigger for workflow ${workflow.id}:`,
+      trigger.config.eventType,
+    );
   }
 
   private async setupWebhookTrigger(

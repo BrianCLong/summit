@@ -39,7 +39,10 @@ export default function pbacPlugin() {
                                 const decision = await evaluate(action, user, resource, env);
                                 if (!decision?.allow) {
                                     throw new GraphQLError('Forbidden', {
-                                        extensions: { code: 'FORBIDDEN', reason: decision?.reason || 'policy_denied' },
+                                        extensions: {
+                                            code: 'FORBIDDEN',
+                                            reason: decision?.reason || 'policy_denied',
+                                        },
                                     });
                                 }
                             }
@@ -47,7 +50,9 @@ export default function pbacPlugin() {
                                 if (e instanceof GraphQLError)
                                     throw e;
                                 // If AccessControl throws unexpectedly, default to deny-safe
-                                throw new GraphQLError('Forbidden', { extensions: { code: 'FORBIDDEN' } });
+                                throw new GraphQLError('Forbidden', {
+                                    extensions: { code: 'FORBIDDEN' },
+                                });
                             }
                             // Authorization passed, continue with execution
                         },
@@ -57,5 +62,4 @@ export default function pbacPlugin() {
         },
     };
 }
-;
 //# sourceMappingURL=pbac.js.map

@@ -84,9 +84,9 @@
             }
           ],
           "thresholds": [
-            {"color": "green", "value": 0},
-            {"color": "yellow", "value": 200},
-            {"color": "red", "value": 250}
+            { "color": "green", "value": 0 },
+            { "color": "yellow", "value": 200 },
+            { "color": "red", "value": 250 }
           ]
         },
         {
@@ -99,9 +99,9 @@
             }
           ],
           "thresholds": [
-            {"color": "green", "value": 0},
-            {"color": "yellow", "value": 0.003},
-            {"color": "red", "value": 0.005}
+            { "color": "green", "value": 0 },
+            { "color": "yellow", "value": 0.003 },
+            { "color": "red", "value": 0.005 }
           ]
         },
         {

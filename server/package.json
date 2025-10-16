@@ -10,6 +10,7 @@
     "dev:worker": "cross-env NODE_ENV=development CONDUCTOR_ROLE=worker WORKER_PORT=4100 nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm' src/conductor/worker-entrypoint.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

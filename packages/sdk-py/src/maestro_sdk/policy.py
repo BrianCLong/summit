@@ -1,5 +1,7 @@
 import requests
+
 from .types import PolicyContext
+
 
 class PolicyClient:
     def __init__(self, base_url: str, session: requests.Session | None = None):

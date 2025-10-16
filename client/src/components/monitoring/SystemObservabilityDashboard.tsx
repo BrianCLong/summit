@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 
 interface MetricData {
   timestamp: number;
@@ -99,11 +105,17 @@ interface SystemObservabilityDashboardProps {
   investigationId?: string;
   refreshInterval?: number;
   onAlertAcknowledge?: (alertId: string) => void;
-  onMetricThresholdExceeded?: (metric: string, value: number, threshold: number) => void;
+  onMetricThresholdExceeded?: (
+    metric: string,
+    value: number,
+    threshold: number,
+  ) => void;
   className?: string;
 }
 
-const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> = ({
+const SystemObservabilityDashboard: React.FC<
+  SystemObservabilityDashboardProps
+> = ({
   investigationId,
   refreshInterval = 30000,
   onAlertAcknowledge,
@@ -114,7 +126,8 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
     'overview' | 'metrics' | 'logs' | 'alerts' | 'services'
   >('overview');
   const [serviceHealth, setServiceHealth] = useState<ServiceHealth[]>([]);
-  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
+  const [performanceMetrics, setPerformanceMetrics] =
+    useState<PerformanceMetrics | null>(null);
   const [systemAlerts, setSystemAlerts] = useState<SystemAlert[]>([]);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [selectedTimeRange, setSelectedTimeRange] = useState<string>('1h');
@@ -203,7 +216,8 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
         severity: 'critical',
         service: 'neo4j',
         title: 'High Query Response Time',
-        description: 'Graph database query response time exceeding SLA threshold',
+        description:
+          'Graph database query response time exceeding SLA threshold',
         metric: 'response_time',
         threshold: 100,
         currentValue: 125,
@@ -302,7 +316,10 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
     const points = 50;
     const interval = 60000; // 1 minute intervals
 
-    const generateSeries = (baseValue: number, variation: number): MetricData[] => {
+    const generateSeries = (
+      baseValue: number,
+      variation: number,
+    ): MetricData[] => {
       return Array.from({ length: points }, (_, i) => ({
         timestamp: now - (points - i - 1) * interval,
         value: Math.max(0, baseValue + (Math.random() - 0.5) * variation),
@@ -366,7 +383,10 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
           ...service,
           lastCheck: new Date(),
           responseTime: service.responseTime + (Math.random() - 0.5) * 20,
-          errorRate: Math.max(0, service.errorRate + (Math.random() - 0.5) * 0.1),
+          errorRate: Math.max(
+            0,
+            service.errorRate + (Math.random() - 0.5) * 0.1,
+          ),
         })),
       );
 
@@ -517,7 +537,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
   const criticalAlerts = systemAlerts.filter(
     (alert) => alert.severity === 'critical' && alert.status === 'active',
   );
-  const healthyServices = serviceHealth.filter((service) => service.status === 'healthy');
+  const healthyServices = serviceHealth.filter(
+    (service) => service.status === 'healthy',
+  );
 
   return (
     <div
@@ -539,7 +561,14 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
           </h3>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '12px',
+              }}
+            >
               <span>Real-time:</span>
               <button
                 onClick={() => setIsRealTimeEnabled(!isRealTimeEnabled)}
@@ -596,7 +625,8 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                 fontWeight: '600',
               }}
             >
-              🚨 {criticalAlerts.length} Critical Alert{criticalAlerts.length > 1 ? 's' : ''} Active
+              🚨 {criticalAlerts.length} Critical Alert
+              {criticalAlerts.length > 1 ? 's' : ''} Active
               <button
                 onClick={() => setActiveView('alerts')}
                 style={{
@@ -617,7 +647,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
         )}
 
         {/* View Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--hairline)' }}>
+        <div
+          style={{ display: 'flex', borderBottom: '1px solid var(--hairline)' }}
+        >
           {[
             { key: 'overview', label: '🏠 Overview' },
             { key: 'metrics', label: '📈 Metrics' },
@@ -633,7 +665,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                 backgroundColor: 'transparent',
                 border: 'none',
                 borderBottom:
-                  activeView === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                  activeView === tab.key
+                    ? '2px solid #1a73e8'
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: activeView === tab.key ? '600' : '400',
@@ -676,7 +710,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                 >
                   {healthyServices.length}/{serviceHealth.length}
                 </div>
-                <div style={{ fontSize: '14px', color: '#666' }}>Services Healthy</div>
+                <div style={{ fontSize: '14px', color: '#666' }}>
+                  Services Healthy
+                </div>
               </div>
 
               <div
@@ -697,7 +733,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                 >
                   {criticalAlerts.length}
                 </div>
-                <div style={{ fontSize: '14px', color: '#666' }}>Critical Alerts</div>
+                <div style={{ fontSize: '14px', color: '#666' }}>
+                  Critical Alerts
+                </div>
               </div>
 
               <div
@@ -745,12 +783,19 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                   ]?.value.toFixed(1) || 0}
                   %
                 </div>
-                <div style={{ fontSize: '14px', color: '#666' }}>Memory Usage</div>
+                <div style={{ fontSize: '14px', color: '#666' }}>
+                  Memory Usage
+                </div>
               </div>
             </div>
 
             {/* Service Status Overview */}
-            <div style={{ border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <div
+              style={{
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
+            >
               <div
                 style={{
                   padding: '16px',
@@ -783,13 +828,17 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                         borderRadius: '6px',
                       }}
                     >
-                      <div style={{ fontSize: '20px' }}>{getStatusIcon(service.status)}</div>
+                      <div style={{ fontSize: '20px' }}>
+                        {getStatusIcon(service.status)}
+                      </div>
 
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '13px', fontWeight: '600' }}>{service.name}</div>
+                        <div style={{ fontSize: '13px', fontWeight: '600' }}>
+                          {service.name}
+                        </div>
                         <div style={{ fontSize: '11px', color: '#666' }}>
-                          {service.uptime.toFixed(2)}% uptime • {service.responseTime.toFixed(0)}ms
-                          avg
+                          {service.uptime.toFixed(2)}% uptime •{' '}
+                          {service.responseTime.toFixed(0)}ms avg
                         </div>
                       </div>
 
@@ -824,7 +873,12 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
             }}
           >
             {/* CPU Metrics */}
-            <div style={{ border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <div
+              style={{
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
+            >
               <div
                 style={{
                   padding: '16px',
@@ -859,7 +913,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                   }}
                 >
                   <div>📊</div>
-                  <div style={{ fontSize: '12px', marginTop: '8px' }}>CPU Usage Chart</div>
+                  <div style={{ fontSize: '12px', marginTop: '8px' }}>
+                    CPU Usage Chart
+                  </div>
                   <div style={{ fontSize: '11px' }}>
                     {performanceMetrics.cpu.cores} cores • Load:{' '}
                     {performanceMetrics.cpu.load.join(', ')}
@@ -869,7 +925,12 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
             </div>
 
             {/* Memory Metrics */}
-            <div style={{ border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <div
+              style={{
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
+            >
               <div
                 style={{
                   padding: '16px',
@@ -904,9 +965,12 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                   }}
                 >
                   <div>💾</div>
-                  <div style={{ fontSize: '12px', marginTop: '8px' }}>Memory Usage Chart</div>
+                  <div style={{ fontSize: '12px', marginTop: '8px' }}>
+                    Memory Usage Chart
+                  </div>
                   <div style={{ fontSize: '11px' }}>
-                    Total: {formatBytes(performanceMetrics.memory.total)} • Available:{' '}
+                    Total: {formatBytes(performanceMetrics.memory.total)} •
+                    Available:{' '}
                     {formatBytes(performanceMetrics.memory.available)}
                   </div>
                 </div>
@@ -914,7 +978,12 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
             </div>
 
             {/* Network Metrics */}
-            <div style={{ border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <div
+              style={{
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
+            >
               <div
                 style={{
                   padding: '16px',
@@ -923,7 +992,8 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                 }}
               >
                 <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>
-                  Network I/O ({performanceMetrics.network.connections} connections)
+                  Network I/O ({performanceMetrics.network.connections}{' '}
+                  connections)
                 </h4>
               </div>
               <div
@@ -945,7 +1015,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                   }}
                 >
                   <div>🌐</div>
-                  <div style={{ fontSize: '12px', marginTop: '8px' }}>Network Traffic Chart</div>
+                  <div style={{ fontSize: '12px', marginTop: '8px' }}>
+                    Network Traffic Chart
+                  </div>
                   <div style={{ fontSize: '11px' }}>
                     Latency:{' '}
                     {performanceMetrics.network.latency[
@@ -958,7 +1030,12 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
             </div>
 
             {/* Database Metrics */}
-            <div style={{ border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+            <div
+              style={{
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
+            >
               <div
                 style={{
                   padding: '16px',
@@ -967,7 +1044,8 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                 }}
               >
                 <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>
-                  Database Performance ({performanceMetrics.database.slowQueries} slow queries)
+                  Database Performance (
+                  {performanceMetrics.database.slowQueries} slow queries)
                 </h4>
               </div>
               <div
@@ -989,9 +1067,12 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                   }}
                 >
                   <div>🗄️</div>
-                  <div style={{ fontSize: '12px', marginTop: '8px' }}>Database Metrics Chart</div>
+                  <div style={{ fontSize: '12px', marginTop: '8px' }}>
+                    Database Metrics Chart
+                  </div>
                   <div style={{ fontSize: '11px' }}>
-                    Replication lag: {performanceMetrics.database.replication.lag}s • Status:{' '}
+                    Replication lag:{' '}
+                    {performanceMetrics.database.replication.lag}s • Status:{' '}
                     {performanceMetrics.database.replication.status}
                   </div>
                 </div>
@@ -1002,7 +1083,11 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
 
         {activeView === 'services' && (
           <div
-            style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              overflow: 'auto',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
             <div
               style={{
@@ -1033,10 +1118,24 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                       marginBottom: '12px',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ fontSize: '24px' }}>{getStatusIcon(service.status)}</div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                      }}
+                    >
+                      <div style={{ fontSize: '24px' }}>
+                        {getStatusIcon(service.status)}
+                      </div>
                       <div>
-                        <h5 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                        <h5
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            margin: '0 0 4px 0',
+                          }}
+                        >
                           {service.name}
                         </h5>
                         <div style={{ fontSize: '12px', color: '#666' }}>
@@ -1063,32 +1162,41 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                   <div
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                      gridTemplateColumns:
+                        'repeat(auto-fit, minmax(150px, 1fr))',
                       gap: '16px',
                       marginBottom: '12px',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '12px', color: '#666' }}>Uptime</div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        Uptime
+                      </div>
                       <div style={{ fontSize: '14px', fontWeight: '600' }}>
                         {service.uptime.toFixed(2)}%
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '12px', color: '#666' }}>Response Time</div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        Response Time
+                      </div>
                       <div style={{ fontSize: '14px', fontWeight: '600' }}>
                         {service.responseTime.toFixed(0)}ms
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '12px', color: '#666' }}>Error Rate</div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        Error Rate
+                      </div>
                       <div style={{ fontSize: '14px', fontWeight: '600' }}>
                         {service.errorRate.toFixed(2)}%
                       </div>
                     </div>
                     {service.replicas && (
                       <div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Replicas</div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                          Replicas
+                        </div>
                         <div style={{ fontSize: '14px', fontWeight: '600' }}>
                           {service.replicas.ready}/{service.replicas.desired}
                         </div>
@@ -1098,10 +1206,22 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
 
                   {service.dependencies.length > 0 && (
                     <div>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '4px',
+                        }}
+                      >
                         Dependencies
                       </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '4px',
+                        }}
+                      >
                         {service.dependencies.map((dep) => (
                           <span
                             key={dep}
@@ -1126,7 +1246,9 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
         )}
 
         {activeView === 'logs' && (
-          <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <div
+            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+          >
             {/* Log Filters */}
             <div
               style={{
@@ -1228,7 +1350,13 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                         marginBottom: '4px',
                       }}
                     >
-                      <span style={{ color: '#666', minWidth: '140px', fontFamily: 'monospace' }}>
+                      <span
+                        style={{
+                          color: '#666',
+                          minWidth: '140px',
+                          fontFamily: 'monospace',
+                        }}
+                      >
                         {log.timestamp.toISOString()}
                       </span>
                       <span
@@ -1245,22 +1373,42 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                       >
                         {log.level.toUpperCase()}
                       </span>
-                      <span style={{ minWidth: '120px', color: '#1a73e8' }}>{log.service}</span>
+                      <span style={{ minWidth: '120px', color: '#1a73e8' }}>
+                        {log.service}
+                      </span>
                       <span style={{ flex: 1 }}>{log.message}</span>
                     </div>
 
                     {log.metadata && (
-                      <div style={{ marginLeft: '156px', color: '#666', fontSize: '11px' }}>
-                        {log.metadata.requestId && `Request: ${log.metadata.requestId} • `}
-                        {log.metadata.userId && `User: ${log.metadata.userId} • `}
-                        {log.metadata.duration && `Duration: ${log.metadata.duration}ms • `}
-                        {log.metadata.statusCode && `Status: ${log.metadata.statusCode}`}
+                      <div
+                        style={{
+                          marginLeft: '156px',
+                          color: '#666',
+                          fontSize: '11px',
+                        }}
+                      >
+                        {log.metadata.requestId &&
+                          `Request: ${log.metadata.requestId} • `}
+                        {log.metadata.userId &&
+                          `User: ${log.metadata.userId} • `}
+                        {log.metadata.duration &&
+                          `Duration: ${log.metadata.duration}ms • `}
+                        {log.metadata.statusCode &&
+                          `Status: ${log.metadata.statusCode}`}
                       </div>
                     )}
 
                     {log.stackTrace && (
-                      <details style={{ marginLeft: '156px', marginTop: '8px' }}>
-                        <summary style={{ cursor: 'pointer', color: '#666', fontSize: '11px' }}>
+                      <details
+                        style={{ marginLeft: '156px', marginTop: '8px' }}
+                      >
+                        <summary
+                          style={{
+                            cursor: 'pointer',
+                            color: '#666',
+                            fontSize: '11px',
+                          }}
+                        >
                           Stack Trace
                         </summary>
                         <pre
@@ -1286,7 +1434,11 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
 
         {activeView === 'alerts' && (
           <div
-            style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              overflow: 'auto',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
             <div
               style={{
@@ -1307,7 +1459,8 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                   style={{
                     padding: '16px',
                     borderBottom: '1px solid #f0f0f0',
-                    backgroundColor: alert.status === 'active' ? '#fff8f0' : 'transparent',
+                    backgroundColor:
+                      alert.status === 'active' ? '#fff8f0' : 'transparent',
                   }}
                 >
                   <div
@@ -1339,14 +1492,28 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                         >
                           {alert.severity.toUpperCase()}
                         </span>
-                        <span style={{ fontSize: '14px', fontWeight: '600' }}>{alert.title}</span>
+                        <span style={{ fontSize: '14px', fontWeight: '600' }}>
+                          {alert.title}
+                        </span>
                       </div>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '4px',
+                        }}
+                      >
                         {alert.service} • {alert.timestamp.toLocaleString()}
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
                       <span
                         style={{
                           fontSize: '11px',
@@ -1384,11 +1551,14 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
                     </div>
                   </div>
 
-                  <div style={{ fontSize: '13px', marginBottom: '8px' }}>{alert.description}</div>
+                  <div style={{ fontSize: '13px', marginBottom: '8px' }}>
+                    {alert.description}
+                  </div>
 
                   <div style={{ fontSize: '12px', color: '#666' }}>
-                    <strong>Metric:</strong> {alert.metric} •<strong> Threshold:</strong>{' '}
-                    {alert.threshold} •<strong> Current:</strong> {alert.currentValue}
+                    <strong>Metric:</strong> {alert.metric} •
+                    <strong> Threshold:</strong> {alert.threshold} •
+                    <strong> Current:</strong> {alert.currentValue}
                     {alert.assignedTo && (
                       <>
                         {' • '}
@@ -1399,7 +1569,12 @@ const SystemObservabilityDashboard: React.FC<SystemObservabilityDashboardProps> 
 
                   {alert.tags.length > 0 && (
                     <div
-                      style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '8px' }}
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
+                        marginTop: '8px',
+                      }}
                     >
                       {alert.tags.map((tag) => (
                         <span

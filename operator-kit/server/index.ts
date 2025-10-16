@@ -19,14 +19,18 @@ const PORT = Number(process.env.PORT || 8787);
 const app = express();
 
 app.use(express.json({ limit: '2mb' }));
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'),
+  { flags: 'a' },
+);
 app.use(morgan('combined', { stream: accessLogStream }));
 app.use(securityMiddleware);
 app.use(
   cors({
     origin: (origin, cb) => {
       const allow = (
-        process.env.CORS_ORIGINS || 'http://127.0.0.1:5173,http://localhost:5173'
+        process.env.CORS_ORIGINS ||
+        'http://127.0.0.1:5173,http://localhost:5173'
       ).split(',');
       if (!origin || allow.includes(origin)) return cb(null, true);
       return cb(new Error('CORS blocked'));

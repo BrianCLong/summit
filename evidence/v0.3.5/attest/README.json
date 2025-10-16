@@ -1,1 +1,5 @@
-{"evidence_type": "attestation_framework", "version": "v0.3.5", "status": "initialized"}
+{
+  "evidence_type": "attestation_framework",
+  "version": "v0.3.5",
+  "status": "initialized"
+}

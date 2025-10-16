@@ -1,8 +1,6 @@
 import json
 import subprocess
-import sys
 from pathlib import Path
-from typing import Optional
 
 
 def run(cmd, check=True):
@@ -10,7 +8,9 @@ def run(cmd, check=True):
 
 
 def repo_slug():
-    out = run(["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]).stdout.strip()
+    out = run(
+        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]
+    ).stdout.strip()
     return out
 
 
@@ -36,16 +36,18 @@ def load_priorities() -> dict:
 def ensure_project(owner: str, title: str) -> tuple[int, str]:
     # Try to view project by title
     try:
-        out = run([
-            "gh",
-            "project",
-            "view",
-            title,
-            "--owner",
-            owner,
-            "--format",
-            "json",
-        ]).stdout
+        out = run(
+            [
+                "gh",
+                "project",
+                "view",
+                title,
+                "--owner",
+                owner,
+                "--format",
+                "json",
+            ]
+        ).stdout
         p = json.loads(out)
         if p and "number" in p and "id" in p:
             return int(p["number"]), p["id"]
@@ -54,26 +56,28 @@ def ensure_project(owner: str, title: str) -> tuple[int, str]:
     # Try to create project (may fail if disabled)
     try:
         run(["gh", "project", "create", "--owner", owner, "--title", title])
-        out = run([
-            "gh",
-            "project",
-            "view",
-            title,
-            "--owner",
-            owner,
-            "--format",
-            "json",
-        ]).stdout
+        out = run(
+            [
+                "gh",
+                "project",
+                "view",
+                title,
+                "--owner",
+                owner,
+                "--format",
+                "json",
+            ]
+        ).stdout
         p = json.loads(out)
         if p and "number" in p and "id" in p:
             return int(p["number"]), p["id"]
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         raise SystemExit(
             "Projects (v2) may be disabled for your account/org. Please create a project named 'MVP1 Delivery' in the UI and re-run this script."
         )
 
 
-def get_priority_field(owner: str, project_number: int) -> tuple[Optional[str], dict]:
+def get_priority_field(owner: str, project_number: int) -> tuple[str | None, dict]:
     try:
         out = run(
             [
@@ -116,14 +120,25 @@ def set_priority(owner: str, project_id: str, item_id: str, field_id: str, optio
 
 
 def list_mvp1_issues(slug: str):
-    out = run([
-        "gh", "issue", "list", "--repo", slug, "--label", "mvp1",
-        "--state", "open", "--json", "number,title,url,labels"
-    ]).stdout
+    out = run(
+        [
+            "gh",
+            "issue",
+            "list",
+            "--repo",
+            slug,
+            "--label",
+            "mvp1",
+            "--state",
+            "open",
+            "--json",
+            "number,title,url,labels",
+        ]
+    ).stdout
     return json.loads(out)
 
 
-def add_to_project(owner: str, project_number: int, issue_url: str) -> Optional[str]:
+def add_to_project(owner: str, project_number: int, issue_url: str) -> str | None:
     out = run(
         [
             "gh",
@@ -166,7 +181,9 @@ def main():
         print(f"Added {len(issues)} items to project {number}.")
     except SystemExit as e:
         print(str(e))
-        print("As a fallback, create a classic board or v2 project in the UI, then re-run this script to auto-add items.")
+        print(
+            "As a fallback, create a classic board or v2 project in the UI, then re-run this script to auto-add items."
+        )
 
 
 if __name__ == "__main__":

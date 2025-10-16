@@ -1,21 +1,21 @@
-from .celery_app import celery_app
-from .models import (
-    get_entity_resolver,
-    get_link_predictor,
-    get_community_detector,
-    get_text_analyzer
-)
-from typing import Dict, Any, List, Tuple
-import numpy as np
-import networkx as nx
-import os
-import logging
 import asyncio
+import logging
+import os
+from typing import Any
+
+import networkx as nx
 
 from .cache import (
     fingerprint_graph,
     get_cached_communities,
     set_cached_communities,
+)
+from .celery_app import celery_app
+from .models import (
+    get_community_detector,
+    get_entity_resolver,
+    get_link_predictor,
+    get_text_analyzer,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,23 +23,31 @@ logger = logging.getLogger(__name__)
 _NLP_PIPE = None
 try:
     # optional spaCy pipeline if enabled and available
-    if os.getenv("USE_SPACY","false").lower() == "true":
+    if os.getenv("USE_SPACY", "false").lower() == "true":
         from .security import optional_spacy
+
         _NLP_PIPE = optional_spacy()
 except Exception:
     _NLP_PIPE = None
 
 # === NLP: Enhanced entity extraction with multiple approaches
 
+
 @celery_app.task
-def task_nlp_entities(payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_nlp_entities(payload: dict[str, Any]) -> dict[str, Any]:
     docs = payload["docs"]
     text_analyzer = get_text_analyzer()
     results = []
 
     for d in docs:
         text = d["text"]
-        analysis = {"entities": [], "sentiment": {}, "keywords": [], "language": None, "language_confidence": 0.0}
+        analysis = {
+            "entities": [],
+            "sentiment": {},
+            "keywords": [],
+            "language": None,
+            "language_confidence": 0.0,
+        }
         try:
             analysis = text_analyzer.analyze_text(text)
         except Exception as e:
@@ -49,36 +57,44 @@ def task_nlp_entities(payload: Dict[str, Any]) -> Dict[str, Any]:
         if _NLP_PIPE:
             try:
                 for e in _NLP_PIPE(text).ents:
-                    ents.append({
-                        "text": e.text,
-                        "label": e.label_,
-                        "start": e.start_char,
-                        "end": e.end_char,
-                        "confidence": 0.95,
-                        "source": "spacy",
-                    })
+                    ents.append(
+                        {
+                            "text": e.text,
+                            "label": e.label_,
+                            "start": e.start_char,
+                            "end": e.end_char,
+                            "confidence": 0.95,
+                            "source": "spacy",
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"spaCy processing failed: {e}")
 
         if not ents:
             tokens = text.split()
-            ents = [{"text": t, "label": "ORG", "confidence": 0.3, "source": "heuristic"}
-                   for t in tokens if t.isupper() and len(t) > 2]
+            ents = [
+                {"text": t, "label": "ORG", "confidence": 0.3, "source": "heuristic"}
+                for t in tokens
+                if t.isupper() and len(t) > 2
+            ]
 
-        results.append({
-            "doc_id": d["id"],
-            "entities": ents,
-            "sentiment": analysis.get("sentiment", {}),
-            "keywords": analysis.get("keywords", []),
-            "language": analysis.get("language"),
-            "language_confidence": analysis.get("language_confidence"),
-        })
+        results.append(
+            {
+                "doc_id": d["id"],
+                "entities": ents,
+                "sentiment": analysis.get("sentiment", {}),
+                "keywords": analysis.get("keywords", []),
+                "language": analysis.get("language"),
+                "language_confidence": analysis.get("language_confidence"),
+            }
+        )
 
     return {"job_id": payload.get("job_id"), "kind": "nlp_entities", "results": results}
 
+
 # === ER: Advanced entity resolution using transformer embeddings
 @celery_app.task
-def task_entity_resolution(payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_entity_resolution(payload: dict[str, Any]) -> dict[str, Any]:
     recs = payload["records"]
     threshold = payload.get("threshold", 0.82)
 
@@ -93,16 +109,17 @@ def task_entity_resolution(payload: Dict[str, Any]) -> Dict[str, Any]:
             "method": "transformer" if entity_resolver.use_transformers else "tfidf",
             "threshold": threshold,
             "total_entities": len(recs),
-            "matches_found": len(links)
+            "matches_found": len(links),
         }
     except Exception as e:
         logger.error(f"Entity resolution failed: {e}")
         # Fallback to simple approach
         return _fallback_entity_resolution(payload)
 
+
 # === Link Prediction: Advanced multi-algorithm approach
 @celery_app.task
-def task_link_prediction(payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_link_prediction(payload: dict[str, Any]) -> dict[str, Any]:
     edges = payload.get("edges", [])
     top_k = payload.get("top_k", 50)
     method = payload.get("method", "adamic_adar")
@@ -117,15 +134,16 @@ def task_link_prediction(payload: Dict[str, Any]) -> Dict[str, Any]:
             "predictions": predictions,
             "method": method,
             "total_edges": len(edges),
-            "predictions_count": len(predictions)
+            "predictions_count": len(predictions),
         }
     except Exception as e:
         logger.error(f"Link prediction failed: {e}")
         return _fallback_link_prediction(payload)
 
+
 # === Community Detection: Advanced multi-algorithm approach
 @celery_app.task
-def task_community_detect(payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_community_detect(payload: dict[str, Any]) -> dict[str, Any]:
     edges = payload.get("edges", [])
     algorithm = payload.get("algorithm", "louvain")
     resolution = payload.get("resolution", 1.0)
@@ -145,9 +163,7 @@ def task_community_detect(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         community_detector = get_community_detector()
-        communities = community_detector.detect_communities(
-            edges, algorithm, resolution
-        )
+        communities = community_detector.detect_communities(edges, algorithm, resolution)
         result_core = {
             "communities": communities,
             "algorithm": algorithm,
@@ -176,10 +192,12 @@ def task_community_detect(payload: Dict[str, Any]) -> Dict[str, Any]:
     result_core["kind"] = "community_detect"
     return result_core
 
+
 # === Audio and Image Entity Extraction ===
 
+
 @celery_app.task
-def task_audio_entity_extraction(payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_audio_entity_extraction(payload: dict[str, Any]) -> dict[str, Any]:
     """Simple audio entity extraction using transcript heuristics"""
     audios = payload.get("audio", [])
     results = []
@@ -188,18 +206,22 @@ def task_audio_entity_extraction(payload: Dict[str, Any]) -> Dict[str, Any]:
         transcript = audio.get("transcript", "")
         entities = []
         if "Alice" in transcript:
-            entities.append({
-                "text": "Alice",
-                "label": "PERSON",
-                "confidence": 0.9,
-                "source": "heuristic",
-            })
+            entities.append(
+                {
+                    "text": "Alice",
+                    "label": "PERSON",
+                    "confidence": 0.9,
+                    "source": "heuristic",
+                }
+            )
 
-        results.append({
-            "audio_id": audio.get("id", idx),
-            "transcript": transcript,
-            "entities": entities,
-        })
+        results.append(
+            {
+                "audio_id": audio.get("id", idx),
+                "transcript": transcript,
+                "entities": entities,
+            }
+        )
 
     return {
         "job_id": payload.get("job_id"),
@@ -209,22 +231,21 @@ def task_audio_entity_extraction(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @celery_app.task
-def task_image_entity_extraction(payload: Dict[str, Any]) -> Dict[str, Any]:
+def task_image_entity_extraction(payload: dict[str, Any]) -> dict[str, Any]:
     """Simple image entity extraction based on provided labels"""
     images = payload.get("images", [])
     results = []
 
     for idx, image in enumerate(images):
         labels = image.get("labels", [])
-        entities = [
-            {"label": label, "confidence": 0.8, "source": "heuristic"}
-            for label in labels
-        ]
+        entities = [{"label": label, "confidence": 0.8, "source": "heuristic"} for label in labels]
 
-        results.append({
-            "image_id": image.get("id", idx),
-            "entities": entities,
-        })
+        results.append(
+            {
+                "image_id": image.get("id", idx),
+                "entities": entities,
+            }
+        )
 
     return {
         "job_id": payload.get("job_id"),
@@ -232,8 +253,9 @@ def task_image_entity_extraction(payload: Dict[str, Any]) -> Dict[str, Any]:
         "results": results,
     }
 
+
 # === Fallback functions for error handling ===
-def _fallback_entity_resolution(payload: Dict[str, Any]) -> Dict[str, Any]:
+def _fallback_entity_resolution(payload: dict[str, Any]) -> dict[str, Any]:
     """Simple fallback entity resolution"""
     recs = payload["records"]
     threshold = payload.get("threshold", 0.82)
@@ -245,13 +267,16 @@ def _fallback_entity_resolution(payload: Dict[str, Any]) -> Dict[str, Any]:
             name2 = (recs[j].get("name") or "").lower()
             if name1 and name2:
                 # Simple string similarity
-                similarity = len(set(name1.split()) & set(name2.split())) / max(len(name1.split()), len(name2.split()))
+                similarity = len(set(name1.split()) & set(name2.split())) / max(
+                    len(name1.split()), len(name2.split())
+                )
                 if similarity >= threshold:
                     links.append((recs[i]["id"], recs[j]["id"], similarity))
 
     return {"job_id": payload.get("job_id"), "kind": "entity_resolution", "links": links}
 
-def _fallback_link_prediction(payload: Dict[str, Any]) -> Dict[str, Any]:
+
+def _fallback_link_prediction(payload: dict[str, Any]) -> dict[str, Any]:
     """Simple fallback link prediction"""
     edges = payload.get("edges", [])
     G = nx.Graph()
@@ -268,9 +293,14 @@ def _fallback_link_prediction(payload: Dict[str, Any]) -> Dict[str, Any]:
                     candidates.append({"u": u, "v": v, "score": score})
 
     candidates.sort(key=lambda x: x["score"], reverse=True)
-    return {"job_id": payload.get("job_id"), "kind": "link_prediction", "predictions": candidates[:payload.get("top_k", 50)]}
+    return {
+        "job_id": payload.get("job_id"),
+        "kind": "link_prediction",
+        "predictions": candidates[: payload.get("top_k", 50)],
+    }
 
-def _fallback_community_detection(payload: Dict[str, Any]) -> Dict[str, Any]:
+
+def _fallback_community_detection(payload: dict[str, Any]) -> dict[str, Any]:
     """Simple fallback community detection"""
     edges = payload.get("edges", [])
     G = nx.Graph()

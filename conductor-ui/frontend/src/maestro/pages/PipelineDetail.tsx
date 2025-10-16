@@ -19,10 +19,12 @@ export default function PipelineDetail() {
   const [yaml, setYaml] = React.useState('');
   const [plan, setPlan] = React.useState<any | null>(null);
   const [msg, setMsg] = React.useState<string | null>(null);
-  const [tab, setTab] = React.useState<'overview' | 'validate' | 'policy' | 'observability'>(
-    'overview',
-  );
-  const pipelineIdOrName = (pipe?.name || id || 'intelgraph_pr_build') as string;
+  const [tab, setTab] = React.useState<
+    'overview' | 'validate' | 'policy' | 'observability'
+  >('overview');
+  const pipelineIdOrName = (pipe?.name ||
+    id ||
+    'intelgraph_pr_build') as string;
   const [baseline, setBaseline] = React.useState<any>(null);
   React.useEffect(() => {
     (async () => {
@@ -76,7 +78,9 @@ export default function PipelineDetail() {
       {tab === 'overview' && (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <section className="rounded border bg-white p-3">
-            <div className="mb-2 text-sm font-semibold text-slate-700">YAML</div>
+            <div className="mb-2 text-sm font-semibold text-slate-700">
+              YAML
+            </div>
             <textarea
               aria-label="Pipeline YAML"
               className="h-[50vh] w-full rounded border p-2 font-mono text-xs"
@@ -85,8 +89,12 @@ export default function PipelineDetail() {
             />
           </section>
           <section className="rounded border bg-white p-3">
-            <div className="text-sm text-slate-600">Owner: {pipe?.owner || '—'}</div>
-            <div className="text-sm text-slate-600">Version: {pipe?.version || '—'}</div>
+            <div className="text-sm text-slate-600">
+              Owner: {pipe?.owner || '—'}
+            </div>
+            <div className="text-sm text-slate-600">
+              Version: {pipe?.version || '—'}
+            </div>
           </section>
         </div>
       )}
@@ -94,7 +102,9 @@ export default function PipelineDetail() {
       {tab === 'validate' && (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <section className="rounded border bg-white p-3">
-            <div className="mb-2 text-sm font-semibold text-slate-700">YAML</div>
+            <div className="mb-2 text-sm font-semibold text-slate-700">
+              YAML
+            </div>
             <textarea
               aria-label="Pipeline YAML"
               className="h-[50vh] w-full rounded border p-2 font-mono text-xs"
@@ -135,9 +145,13 @@ export default function PipelineDetail() {
             </div>
           </section>
           <section className="rounded border bg-white p-3">
-            <div className="mb-2 text-sm font-semibold text-slate-700">Diff & Impact</div>
+            <div className="mb-2 text-sm font-semibold text-slate-700">
+              Diff & Impact
+            </div>
             {!plan && (
-              <div className="text-sm text-slate-500">Click Plan Preview to see changes.</div>
+              <div className="text-sm text-slate-500">
+                Click Plan Preview to see changes.
+              </div>
             )}
             {plan && (
               <div className="text-sm">
@@ -160,7 +174,9 @@ export default function PipelineDetail() {
 
       {tab === 'policy' && (
         <section className="rounded border bg-white p-3">
-          <div className="mb-2 text-sm font-semibold text-slate-700">Policy Explain</div>
+          <div className="mb-2 text-sm font-semibold text-slate-700">
+            Policy Explain
+          </div>
           <div>
             <button
               className="rounded border px-2 py-1 text-xs"
@@ -189,7 +205,11 @@ export default function PipelineDetail() {
       )}
 
       {tab === 'observability' && (
-        <div role="tabpanel" aria-label="Pipeline observability" className="space-y-3">
+        <div
+          role="tabpanel"
+          aria-label="Pipeline observability"
+          className="space-y-3"
+        >
           <section className="rounded-2xl border p-4 space-y-2">
             <div className="text-sm font-medium">Eval baselines</div>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
@@ -199,7 +219,10 @@ export default function PipelineDetail() {
                   className="w-full rounded border px-2 py-1"
                   value={baseline?.latencyMs || 600000}
                   onChange={(e) =>
-                    setBaseline({ ...(baseline || {}), latencyMs: Number(e.target.value) })
+                    setBaseline({
+                      ...(baseline || {}),
+                      latencyMs: Number(e.target.value),
+                    })
                   }
                 />
               </label>
@@ -209,7 +232,10 @@ export default function PipelineDetail() {
                   className="w-full rounded border px-2 py-1"
                   value={baseline?.failPct || 0.02}
                   onChange={(e) =>
-                    setBaseline({ ...(baseline || {}), failPct: Number(e.target.value) })
+                    setBaseline({
+                      ...(baseline || {}),
+                      failPct: Number(e.target.value),
+                    })
                   }
                 />
               </label>
@@ -219,7 +245,10 @@ export default function PipelineDetail() {
                   className="w-full rounded border px-2 py-1"
                   value={baseline?.costUsd || 2.5}
                   onChange={(e) =>
-                    setBaseline({ ...(baseline || {}), costUsd: Number(e.target.value) })
+                    setBaseline({
+                      ...(baseline || {}),
+                      costUsd: Number(e.target.value),
+                    })
                   }
                 />
               </label>
@@ -229,7 +258,10 @@ export default function PipelineDetail() {
                   className="w-full rounded border px-2 py-1"
                   value={baseline?.policy || 0}
                   onChange={(e) =>
-                    setBaseline({ ...(baseline || {}), policy: Number(e.target.value) })
+                    setBaseline({
+                      ...(baseline || {}),
+                      policy: Number(e.target.value),
+                    })
                   }
                 />
               </label>
@@ -248,17 +280,24 @@ export default function PipelineDetail() {
           <ErrorBudgetBurn pipeline={pipelineIdOrName} />
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <GrafanaPanel
-              uid={(window as any).__MAESTRO_CFG__?.grafanaDashboards?.slo || 'maestro-slo'}
-              vars={{ pipeline: pipelineIdOrName }}
-            />
-            <GrafanaPanel
               uid={
-                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.overview || 'maestro-overview'
+                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.slo ||
+                'maestro-slo'
               }
               vars={{ pipeline: pipelineIdOrName }}
             />
             <GrafanaPanel
-              uid={(window as any).__MAESTRO_CFG__?.grafanaDashboards?.cost || 'maestro-cost'}
+              uid={
+                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.overview ||
+                'maestro-overview'
+              }
+              vars={{ pipeline: pipelineIdOrName }}
+            />
+            <GrafanaPanel
+              uid={
+                (window as any).__MAESTRO_CFG__?.grafanaDashboards?.cost ||
+                'maestro-cost'
+              }
               vars={{ pipeline: pipelineIdOrName }}
             />
           </div>

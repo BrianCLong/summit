@@ -1,8 +1,8 @@
 groups:
-- name: search-quality
-  rules:
-    - record: search_ctr_5m
-      expr: sum(rate(search_clicks_total[5m])) / sum(rate(search_impressions_total[5m]))
-    - alert: CTRDrop
-      expr: search_ctr_5m < 0.5 * scalar(avg_over_time(search_ctr_5m[1d]))
-      for: 30m
+  - name: search-quality
+    rules:
+      - record: search_ctr_5m
+        expr: sum(rate(search_clicks_total[5m])) / sum(rate(search_impressions_total[5m]))
+      - alert: CTRDrop
+        expr: search_ctr_5m < 0.5 * scalar(avg_over_time(search_ctr_5m[1d]))
+        for: 30m

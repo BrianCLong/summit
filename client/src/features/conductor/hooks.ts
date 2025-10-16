@@ -5,7 +5,11 @@ import { StepNode } from './panels/ProvenanceTree';
 
 type Fetcher<T> = () => Promise<T>;
 
-function useData<T>(fetcher: Fetcher<T>, deps: unknown[] = [], opts: { refreshMs?: number } = {}) {
+function useData<T>(
+  fetcher: Fetcher<T>,
+  deps: unknown[] = [],
+  opts: { refreshMs?: number } = {},
+) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,51 +46,77 @@ function useData<T>(fetcher: Fetcher<T>, deps: unknown[] = [], opts: { refreshMs
 
 export function useRolloutSteps() {
   const api = (import.meta.env.VITE_ROLLOUTS_API as string) || '';
-  return useData<RolloutStep[]>(async () => {
-    if (api) {
-      const r = await fetch(api);
-      if (!r.ok) throw new Error('rollouts api error');
-      return (await r.json()) as RolloutStep[];
-    }
-    return [
-      { weight: 10, status: 'completed', analysis: 'pass' },
-      { weight: 25, status: 'completed', analysis: 'pass' },
-      { weight: 50, status: 'running', analysis: 'running' },
-      { weight: 100, status: 'pending' },
-    ];
-  }, [api], { refreshMs: 15000 });
+  return useData<RolloutStep[]>(
+    async () => {
+      if (api) {
+        const r = await fetch(api);
+        if (!r.ok) throw new Error('rollouts api error');
+        return (await r.json()) as RolloutStep[];
+      }
+      return [
+        { weight: 10, status: 'completed', analysis: 'pass' },
+        { weight: 25, status: 'completed', analysis: 'pass' },
+        { weight: 50, status: 'running', analysis: 'running' },
+        { weight: 100, status: 'pending' },
+      ];
+    },
+    [api],
+    { refreshMs: 15000 },
+  );
 }
 
 export function useCanaryHealth(target: string) {
   const prom = (import.meta.env.VITE_PROM_URL as string) || '';
-  return useData<{ availability: number; p95TtfbMs: number; errorRate: number }>(async () => {
-    if (prom) {
-      const q1 = `avg_over_time(probe_success{job="blackbox",instance="${target}"}[5m])`;
-      const q2 = `histogram_quantile(0.95,sum(rate(probe_http_duration_seconds_bucket{job="blackbox",instance="${target}",phase="first_byte"}[5m])) by (le))`;
-      const [a1, a2] = await Promise.all([
-        fetch(`${prom}/api/v1/query?query=${encodeURIComponent(q1)}`).then((r) => r.json()),
-        fetch(`${prom}/api/v1/query?query=${encodeURIComponent(q2)}`).then((r) => r.json()),
-      ]);
-      const availability = Number(a1.data?.result?.[0]?.value?.[1] || 0);
-      const p95TtfbMs = Number(a2.data?.result?.[0]?.value?.[1] || 0) * 1000;
-      return { availability, p95TtfbMs, errorRate: 0 };
-    }
-    return { availability: 0.997, p95TtfbMs: 870, errorRate: 0.003 };
-  }, [prom, target], { refreshMs: 30000 });
+  return useData<{
+    availability: number;
+    p95TtfbMs: number;
+    errorRate: number;
+  }>(
+    async () => {
+      if (prom) {
+        const q1 = `avg_over_time(probe_success{job="blackbox",instance="${target}"}[5m])`;
+        const q2 = `histogram_quantile(0.95,sum(rate(probe_http_duration_seconds_bucket{job="blackbox",instance="${target}",phase="first_byte"}[5m])) by (le))`;
+        const [a1, a2] = await Promise.all([
+          fetch(`${prom}/api/v1/query?query=${encodeURIComponent(q1)}`).then(
+            (r) => r.json(),
+          ),
+          fetch(`${prom}/api/v1/query?query=${encodeURIComponent(q2)}`).then(
+            (r) => r.json(),
+          ),
+        ]);
+        const availability = Number(a1.data?.result?.[0]?.value?.[1] || 0);
+        const p95TtfbMs = Number(a2.data?.result?.[0]?.value?.[1] || 0) * 1000;
+        return { availability, p95TtfbMs, errorRate: 0 };
+      }
+      return { availability: 0.997, p95TtfbMs: 870, errorRate: 0.003 };
+    },
+    [prom, target],
+    { refreshMs: 30000 },
+  );
 }
 
 export function useBudgetDenials() {
   const api = (import.meta.env.VITE_POLICY_API as string) || '';
-  return useData<Denial[]>(async () => {
-    if (api) {
-      const r = await fetch(`${api}/denials?window=24h`);
-      if (!r.ok) throw new Error('policy api error');
-      return (await r.json()) as Denial[];
-    }
-    return [
-      { time: new Date().toISOString(), tenant: 'acme', caseId: '42', reason: 'Daily budget exceeded for LLM_HEAVY', rule: 'budget.daily.usd' },
-    ];
-  }, [api], { refreshMs: 60000 });
+  return useData<Denial[]>(
+    async () => {
+      if (api) {
+        const r = await fetch(`${api}/denials?window=24h`);
+        if (!r.ok) throw new Error('policy api error');
+        return (await r.json()) as Denial[];
+      }
+      return [
+        {
+          time: new Date().toISOString(),
+          tenant: 'acme',
+          caseId: '42',
+          reason: 'Daily budget exceeded for LLM_HEAVY',
+          rule: 'budget.daily.usd',
+        },
+      ];
+    },
+    [api],
+    { refreshMs: 60000 },
+  );
 }
 
 export function useProvenanceRoot() {

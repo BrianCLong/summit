@@ -21,7 +21,10 @@ export interface FilesServerConfig {
 
 export class FilesServer {
   private server: WebSocket.Server;
-  private rateLimitCache = new Map<string, { count: number; resetTime: number }>();
+  private rateLimitCache = new Map<
+    string,
+    { count: number; resetTime: number }
+  >();
 
   // Available tools
   private tools: MCPTool[] = [
@@ -199,7 +202,12 @@ export class FilesServer {
               await this.handleToolExecute(ws, message, authToken);
               break;
             default:
-              this.sendError(ws, message.id, -32601, `Method '${message.method}' not found`);
+              this.sendError(
+                ws,
+                message.id,
+                -32601,
+                `Method '${message.method}' not found`,
+              );
           }
         } catch (error) {
           console.error('Error processing message:', error);
@@ -325,7 +333,12 @@ export class FilesServer {
       ws.send(JSON.stringify(response));
     } catch (error) {
       console.error(`Error executing tool ${name}:`, error);
-      this.sendError(ws, message.id, -32000, `Tool execution failed: ${error.message}`);
+      this.sendError(
+        ws,
+        message.id,
+        -32000,
+        `Tool execution failed: ${error.message}`,
+      );
     }
   }
 
@@ -407,7 +420,12 @@ export class FilesServer {
   }
 
   private async putFile(args: any): Promise<any> {
-    const { path: filePath, content, encoding = 'utf8', createDirs = false } = args;
+    const {
+      path: filePath,
+      content,
+      encoding = 'utf8',
+      createDirs = false,
+    } = args;
 
     const fullPath = this.resolvePath(filePath);
     await this.validatePath(fullPath);
@@ -444,7 +462,11 @@ export class FilesServer {
   }
 
   private async listFiles(args: any): Promise<any> {
-    const { path: dirPath = '.', recursive = false, includeHidden = false } = args;
+    const {
+      path: dirPath = '.',
+      recursive = false,
+      includeHidden = false,
+    } = args;
 
     const fullPath = this.resolvePath(dirPath);
     await this.validatePath(fullPath);
@@ -568,7 +590,10 @@ export class FilesServer {
   private async validateFileAccess(fullPath: string): Promise<void> {
     const ext = path.extname(fullPath).toLowerCase();
 
-    if (this.config.allowedExtensions.length > 0 && !this.config.allowedExtensions.includes(ext)) {
+    if (
+      this.config.allowedExtensions.length > 0 &&
+      !this.config.allowedExtensions.includes(ext)
+    ) {
       throw new Error(`File type '${ext}' not allowed`);
     }
   }
@@ -591,7 +616,12 @@ export class FilesServer {
     // e.g., check for protected files, backup requirements
   }
 
-  private sendError(ws: WebSocket, id: string, code: number, message: string): void {
+  private sendError(
+    ws: WebSocket,
+    id: string,
+    code: number,
+    message: string,
+  ): void {
     const response: MCPResponse = {
       jsonrpc: '2.0',
       id,

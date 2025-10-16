@@ -8,32 +8,35 @@ Provides continuous compliance monitoring without exposing sensitive tenant data
 """
 
 import asyncio
-import json
-import time
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone, timedelta
 import logging
+import time
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any
 
-from .circuits import ZKFSACircuit, ZKFSAProof, create_demo_circuits
+from .circuits import ZKFSACircuit, ZKFSAProof
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class AuditConfiguration:
     """ZKFSA audit configuration"""
+
     tenant_id: str
     fairness_threshold: float = 0.8
     safety_threshold: float = 0.95
     audit_interval_hours: int = 6
-    protected_attributes: List[str] = None
-    safety_policies: List[str] = None
+    protected_attributes: list[str] = None
+    safety_policies: list[str] = None
     auto_remediation: bool = True
-    notification_webhook: Optional[str] = None
+    notification_webhook: str | None = None
+
 
 @dataclass
 class AuditResult:
     """Complete audit result with recommendations"""
+
     audit_id: str
     tenant_id: str
     timestamp: str
@@ -42,8 +45,9 @@ class AuditResult:
     overall_compliance: bool
     fairness_score: float
     safety_score: float
-    recommendations: List[str]
-    remediation_actions: List[str]
+    recommendations: list[str]
+    remediation_actions: list[str]
+
 
 class ZKFSARunner:
     """ZKFSA audit orchestration engine
@@ -54,10 +58,10 @@ class ZKFSARunner:
     SLA: <30s end-to-end audit, >99.5% privacy preservation, 24/7 monitoring
     """
 
-    def __init__(self, configurations: List[AuditConfiguration]):
+    def __init__(self, configurations: list[AuditConfiguration]):
         self.configurations = {config.tenant_id: config for config in configurations}
-        self.audit_history: Dict[str, List[AuditResult]] = {}
-        self.running_audits: Dict[str, asyncio.Task] = {}
+        self.audit_history: dict[str, list[AuditResult]] = {}
+        self.running_audits: dict[str, asyncio.Task] = {}
 
         # Performance metrics
         self.total_audits = 0
@@ -101,8 +105,9 @@ class ZKFSARunner:
                 # Trim history (keep last 30 days)
                 cutoff = datetime.now(timezone.utc) - timedelta(days=30)
                 self.audit_history[config.tenant_id] = [
-                    r for r in self.audit_history[config.tenant_id]
-                    if datetime.fromisoformat(r.timestamp.replace('Z', '+00:00')) > cutoff
+                    r
+                    for r in self.audit_history[config.tenant_id]
+                    if datetime.fromisoformat(r.timestamp.replace("Z", "+00:00")) > cutoff
                 ]
 
                 # Handle non-compliance
@@ -113,10 +118,12 @@ class ZKFSARunner:
                 if config.notification_webhook:
                     await self._send_notification(config, result)
 
-                logger.info(f"Audit completed for {config.tenant_id}: "
-                           f"compliance={result.overall_compliance}, "
-                           f"fairness={result.fairness_score:.3f}, "
-                           f"safety={result.safety_score:.3f}")
+                logger.info(
+                    f"Audit completed for {config.tenant_id}: "
+                    f"compliance={result.overall_compliance}, "
+                    f"fairness={result.fairness_score:.3f}, "
+                    f"safety={result.safety_score:.3f}"
+                )
 
                 # Wait for next audit interval
                 await asyncio.sleep(config.audit_interval_hours * 3600)
@@ -146,14 +153,14 @@ class ZKFSARunner:
             fairness_proof = fairness_circuit.generate_fairness_proof(
                 model_outputs=model_outputs,
                 protected_attributes=config.protected_attributes or ["gender", "race", "age"],
-                threshold=config.fairness_threshold
+                threshold=config.fairness_threshold,
             )
 
             # Generate safety proof
             safety_proof = safety_circuit.generate_safety_proof(
                 model_outputs=model_outputs,
                 safety_policies=config.safety_policies or ["no_harm", "no_bias", "content_filter"],
-                threshold=config.safety_threshold
+                threshold=config.safety_threshold,
             )
 
             # Determine overall compliance
@@ -163,16 +170,12 @@ class ZKFSARunner:
 
             # Generate recommendations
             recommendations = self._generate_recommendations(
-                fairness_proof.fairness_score,
-                safety_proof.safety_score,
-                config
+                fairness_proof.fairness_score, safety_proof.safety_score, config
             )
 
             # Generate remediation actions
             remediation_actions = self._generate_remediation_actions(
-                fairness_proof.fairness_score,
-                safety_proof.safety_score,
-                config
+                fairness_proof.fairness_score, safety_proof.safety_score, config
             )
 
             # Create audit result
@@ -186,7 +189,7 @@ class ZKFSARunner:
                 fairness_score=fairness_proof.fairness_score,
                 safety_score=safety_proof.safety_score,
                 recommendations=recommendations,
-                remediation_actions=remediation_actions
+                remediation_actions=remediation_actions,
             )
 
             # Update metrics
@@ -194,8 +197,10 @@ class ZKFSARunner:
             self.total_audit_time += audit_time
             self.successful_audits += 1
 
-            logger.info(f"Audit executed: {audit_id}, time={audit_time:.2f}s, "
-                       f"compliance={overall_compliance}")
+            logger.info(
+                f"Audit executed: {audit_id}, time={audit_time:.2f}s, "
+                f"compliance={overall_compliance}"
+            )
 
             return result
 
@@ -204,7 +209,7 @@ class ZKFSARunner:
             logger.error(f"Audit execution error: {e}")
             raise
 
-    async def _get_tenant_model_outputs(self, tenant_id: str) -> List[Dict[str, Any]]:
+    async def _get_tenant_model_outputs(self, tenant_id: str) -> list[dict[str, Any]]:
         """Get recent model outputs for tenant (simulated)"""
         # Simulate fetching recent model decisions and outputs
         # In production, this would query the tenant's model serving infrastructure
@@ -215,13 +220,14 @@ class ZKFSARunner:
                 "model_output": {"prediction": 0.8, "confidence": 0.9},
                 "input_features": {"age": 35, "income": 50000},
                 "protected_attributes": {"gender": "F", "race": "Hispanic"},
-                "safety_labels": {"harmful": False, "biased": False, "safe": True}
+                "safety_labels": {"harmful": False, "biased": False, "safe": True},
             }
             for i in range(100)  # Simulate 100 recent decisions
         ]
 
-    def _generate_recommendations(self, fairness_score: float, safety_score: float,
-                                config: AuditConfiguration) -> List[str]:
+    def _generate_recommendations(
+        self, fairness_score: float, safety_score: float, config: AuditConfiguration
+    ) -> list[str]:
         """Generate compliance improvement recommendations"""
         recommendations = []
 
@@ -247,8 +253,9 @@ class ZKFSARunner:
 
         return recommendations
 
-    def _generate_remediation_actions(self, fairness_score: float, safety_score: float,
-                                    config: AuditConfiguration) -> List[str]:
+    def _generate_remediation_actions(
+        self, fairness_score: float, safety_score: float, config: AuditConfiguration
+    ) -> list[str]:
         """Generate automated remediation actions"""
         actions = []
 
@@ -265,9 +272,11 @@ class ZKFSARunner:
 
     async def _handle_non_compliance(self, config: AuditConfiguration, result: AuditResult):
         """Handle non-compliance scenarios"""
-        logger.warning(f"Non-compliance detected for {config.tenant_id}: "
-                      f"fairness={result.fairness_score:.3f}, "
-                      f"safety={result.safety_score:.3f}")
+        logger.warning(
+            f"Non-compliance detected for {config.tenant_id}: "
+            f"fairness={result.fairness_score:.3f}, "
+            f"safety={result.safety_score:.3f}"
+        )
 
         # Execute auto-remediation if enabled
         if config.auto_remediation and result.remediation_actions:
@@ -286,18 +295,19 @@ class ZKFSARunner:
         # Simulate sending notification to webhook
         logger.info(f"Sending notification for {config.tenant_id} to {config.notification_webhook}")
 
-    def get_tenant_audit_history(self, tenant_id: str, days: int = 7) -> List[AuditResult]:
+    def get_tenant_audit_history(self, tenant_id: str, days: int = 7) -> list[AuditResult]:
         """Get audit history for tenant"""
         if tenant_id not in self.audit_history:
             return []
 
         cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         return [
-            result for result in self.audit_history[tenant_id]
-            if datetime.fromisoformat(result.timestamp.replace('Z', '+00:00')) > cutoff
+            result
+            for result in self.audit_history[tenant_id]
+            if datetime.fromisoformat(result.timestamp.replace("Z", "+00:00")) > cutoff
         ]
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get runner performance metrics"""
         avg_audit_time = self.total_audit_time / max(self.total_audits, 1)
         success_rate = self.successful_audits / max(self.total_audits, 1)
@@ -310,7 +320,7 @@ class ZKFSARunner:
             "avg_audit_time_s": avg_audit_time,
             "sla_compliance_pct": 100.0 if avg_audit_time < 30 else 0.0,  # <30s SLA
             "active_tenants": len(self.configurations),
-            "running_audits": len(self.running_audits)
+            "running_audits": len(self.running_audits),
         }
 
     async def stop_auditing(self):
@@ -333,15 +343,15 @@ if __name__ == "__main__":
                 fairness_threshold=0.8,
                 safety_threshold=0.95,
                 audit_interval_hours=1,  # More frequent for demo
-                auto_remediation=True
+                auto_remediation=True,
             ),
             AuditConfiguration(
                 tenant_id="TENANT_002",
                 fairness_threshold=0.85,
                 safety_threshold=0.98,
                 audit_interval_hours=2,
-                auto_remediation=False
-            )
+                auto_remediation=False,
+            ),
         ]
 
         # Create runner
@@ -351,8 +361,10 @@ if __name__ == "__main__":
         print("=== ZKFSA Runner Demo ===")
         for config in configs:
             result = await runner.run_manual_audit(config.tenant_id)
-            print(f"Audit {result.audit_id}: compliance={result.overall_compliance}, "
-                  f"fairness={result.fairness_score:.3f}, safety={result.safety_score:.3f}")
+            print(
+                f"Audit {result.audit_id}: compliance={result.overall_compliance}, "
+                f"fairness={result.fairness_score:.3f}, safety={result.safety_score:.3f}"
+            )
 
         print(f"Performance: {runner.get_performance_metrics()}")
 

@@ -43,16 +43,25 @@ function getService(context) {
     try {
       driver = getNeo4jDriver();
     } catch (error) {
-      context?.logger?.error?.('Graph analytics resolver failed to acquire Neo4j driver', error);
+      context?.logger?.error?.(
+        'Graph analytics resolver failed to acquire Neo4j driver',
+        error,
+      );
     }
 
     try {
       redis = getRedisClient();
     } catch (error) {
-      context?.logger?.warn?.('Graph analytics resolver failed to acquire Redis client', error);
+      context?.logger?.warn?.(
+        'Graph analytics resolver failed to acquire Redis client',
+        error,
+      );
     }
 
-    context.__graphAnalyticsService = new GraphAnalyticsService({ driver, redis });
+    context.__graphAnalyticsService = new GraphAnalyticsService({
+      driver,
+      redis,
+    });
   }
 
   return context.__graphAnalyticsService;

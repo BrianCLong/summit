@@ -29,12 +29,29 @@ export class RedisRateLimiter {
 
   private domainConfigs: Map<string, TokenBucketConfig> = new Map([
     // High-value compliant domains with generous limits
-    ['docs.python.org', { domain: 'docs.python.org', capacity: 300, refillRate: 5 / 60 }],
-    ['github.com', { domain: 'github.com', capacity: 240, refillRate: 4 / 60, burstAllowance: 10 }],
-    ['stackoverflow.com', { domain: 'stackoverflow.com', capacity: 180, refillRate: 3 / 60 }],
+    [
+      'docs.python.org',
+      { domain: 'docs.python.org', capacity: 300, refillRate: 5 / 60 },
+    ],
+    [
+      'github.com',
+      {
+        domain: 'github.com',
+        capacity: 240,
+        refillRate: 4 / 60,
+        burstAllowance: 10,
+      },
+    ],
+    [
+      'stackoverflow.com',
+      { domain: 'stackoverflow.com', capacity: 180, refillRate: 3 / 60 },
+    ],
     ['arxiv.org', { domain: 'arxiv.org', capacity: 120, refillRate: 2 / 60 }],
     ['nist.gov', { domain: 'nist.gov', capacity: 90, refillRate: 1.5 / 60 }],
-    ['kubernetes.io', { domain: 'kubernetes.io', capacity: 150, refillRate: 2.5 / 60 }],
+    [
+      'kubernetes.io',
+      { domain: 'kubernetes.io', capacity: 150, refillRate: 2.5 / 60 },
+    ],
 
     // Additional domains for Day 1 completion
     ['nodejs.org', { domain: 'nodejs.org', capacity: 120, refillRate: 2 / 60 }],
@@ -42,7 +59,10 @@ export class RedisRateLimiter {
       'developer.mozilla.org',
       { domain: 'developer.mozilla.org', capacity: 200, refillRate: 3 / 60 },
     ],
-    ['wikipedia.org', { domain: 'wikipedia.org', capacity: 100, refillRate: 1.5 / 60 }],
+    [
+      'wikipedia.org',
+      { domain: 'wikipedia.org', capacity: 100, refillRate: 1.5 / 60 },
+    ],
     ['openai.com', { domain: 'openai.com', capacity: 60, refillRate: 1 / 60 }],
   ]);
 
@@ -179,7 +199,10 @@ export class RedisRateLimiter {
     refillRate: number;
     resetTime: number;
   }> {
-    const config = this.domainConfigs.get(domain) || { ...this.defaultConfig, domain };
+    const config = this.domainConfigs.get(domain) || {
+      ...this.defaultConfig,
+      domain,
+    };
     const bucketKey = `rate_bucket:${domain}:${tenantId}`;
     const now = Date.now() / 1000;
 
@@ -197,10 +220,16 @@ export class RedisRateLimiter {
         tokens: Math.floor(currentTokens),
         capacity: config.capacity,
         refillRate: config.refillRate,
-        resetTime: Math.floor(now + (config.capacity - currentTokens) / config.refillRate),
+        resetTime: Math.floor(
+          now + (config.capacity - currentTokens) / config.refillRate,
+        ),
       };
     } catch (error) {
-      logger.error('Failed to get bucket status', { domain, tenantId, error: error.message });
+      logger.error('Failed to get bucket status', {
+        domain,
+        tenantId,
+        error: error.message,
+      });
       return {
         tokens: config.capacity,
         capacity: config.capacity,
@@ -213,16 +242,29 @@ export class RedisRateLimiter {
   /**
    * Update domain configuration
    */
-  async updateDomainConfig(domain: string, config: Partial<TokenBucketConfig>): Promise<void> {
-    const existingConfig = this.domainConfigs.get(domain) || { ...this.defaultConfig, domain };
+  async updateDomainConfig(
+    domain: string,
+    config: Partial<TokenBucketConfig>,
+  ): Promise<void> {
+    const existingConfig = this.domainConfigs.get(domain) || {
+      ...this.defaultConfig,
+      domain,
+    };
     const newConfig = { ...existingConfig, ...config };
 
     this.domainConfigs.set(domain, newConfig);
 
     // Persist to Redis for cross-instance sync
-    await this.redis.hset('rate_limit_configs', domain, JSON.stringify(newConfig));
+    await this.redis.hset(
+      'rate_limit_configs',
+      domain,
+      JSON.stringify(newConfig),
+    );
 
-    logger.info('Updated domain rate limit config', { domain, config: newConfig });
+    logger.info('Updated domain rate limit config', {
+      domain,
+      config: newConfig,
+    });
   }
 
   /**
@@ -237,7 +279,10 @@ export class RedisRateLimiter {
           const config = JSON.parse(configStr);
           this.domainConfigs.set(domain, config);
         } catch (error) {
-          logger.warn('Failed to parse domain config', { domain, error: error.message });
+          logger.warn('Failed to parse domain config', {
+            domain,
+            error: error.message,
+          });
         }
       }
 
@@ -258,10 +303,14 @@ export class RedisRateLimiter {
 
     logger.info('Reset rate limit bucket', { domain, tenantId });
 
-    prometheusConductorMetrics.recordOperationalEvent('rate_limit_reset', true, {
-      domain,
-      tenant_id: tenantId,
-    });
+    prometheusConductorMetrics.recordOperationalEvent(
+      'rate_limit_reset',
+      true,
+      {
+        domain,
+        tenant_id: tenantId,
+      },
+    );
   }
 
   /**

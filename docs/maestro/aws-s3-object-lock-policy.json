@@ -46,7 +46,10 @@
         "s3:GetObjectRetention",
         "s3:ListBucket"
       ],
-      "Resource": ["arn:aws:s3:::maestro-evidence-bucket", "arn:aws:s3:::maestro-evidence-bucket/*"]
+      "Resource": [
+        "arn:aws:s3:::maestro-evidence-bucket",
+        "arn:aws:s3:::maestro-evidence-bucket/*"
+      ]
     },
     {
       "Sid": "AllowWriteWithObjectLock",
@@ -54,7 +57,11 @@
       "Principal": {
         "AWS": "arn:aws:iam::ACCOUNT-ID:role/maestro-evidence-writer"
       },
-      "Action": ["s3:PutObject", "s3:PutObjectRetention", "s3:PutObjectLegalHold"],
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectRetention",
+        "s3:PutObjectLegalHold"
+      ],
       "Resource": "arn:aws:s3:::maestro-evidence-bucket/*",
       "Condition": {
         "StringEquals": {
@@ -62,7 +69,10 @@
         },
         "NumericBetween": {
           "s3:object-lock-retain-until-date": {
-            "aws:RequestedRegion": ["2024-01-01T00:00:00Z", "2030-12-31T23:59:59Z"]
+            "aws:RequestedRegion": [
+              "2024-01-01T00:00:00Z",
+              "2030-12-31T23:59:59Z"
+            ]
           }
         }
       }
@@ -75,7 +85,10 @@
       "Resource": "arn:aws:s3:::maestro-evidence-bucket/*",
       "Condition": {
         "StringNotEquals": {
-          "aws:userid": ["AIDACKCEVSQ6C2EXAMPLE:admin-user", "AROACKCEVSQ6C2EXAMPLE:maestro-admin"]
+          "aws:userid": [
+            "AIDACKCEVSQ6C2EXAMPLE:admin-user",
+            "AROACKCEVSQ6C2EXAMPLE:maestro-admin"
+          ]
         }
       }
     }

@@ -2,9 +2,9 @@
   "monthlyUsd": 3000,
   "softPct": 0.85,
   "hardPct": 1.0,
-  "prio": { 
-    "main": 1.0, 
-    "pull_request": 0.6, 
+  "prio": {
+    "main": 1.0,
+    "pull_request": 0.6,
     "preview": 0.5,
     "v24_coherence": 0.8
   },

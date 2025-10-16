@@ -12,16 +12,16 @@ ingress:
   className: nginx
   hosts:
     - host: console.topicality.co
-      paths: [ { path: /, pathType: Prefix } ]
+      paths: [{ path: /, pathType: Prefix }]
   tls:
     - secretName: companyos-console-tls
-      hosts: [ console.topicality.co ]
+      hosts: [console.topicality.co]
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 
 serviceAccount:
   create: true
-  name: ""
+  name: ''
   annotations: {}
 
 resources:
@@ -50,7 +50,7 @@ rollout:
               - name: service-name
                 value: companyos-console
               - name: namespace
-                value: {{ .Release.Namespace }}
+                value: { { .Release.Namespace } }
         - setWeight: 40
         - pause: { duration: 60s }
         - analysis:
@@ -60,7 +60,7 @@ rollout:
               - name: service-name
                 value: companyos-console
               - name: namespace
-                value: {{ .Release.Namespace }}
+                value: { { .Release.Namespace } }
         - setWeight: 60
         - pause: { duration: 60s }
         - analysis:
@@ -70,7 +70,7 @@ rollout:
               - name: service-name
                 value: companyos-console
               - name: namespace
-                value: {{ .Release.Namespace }}
+                value: { { .Release.Namespace } }
         - setWeight: 80
         - pause: { duration: 60s }
         - analysis:
@@ -80,5 +80,5 @@ rollout:
               - name: service-name
                 value: companyos-console
               - name: namespace
-                value: {{ .Release.Namespace }}
+                value: { { .Release.Namespace } }
         - setWeight: 100

@@ -16,13 +16,13 @@ This document describes the data flows within the IntelGraph platform and the se
 
 ### Handling Requirements
 
-| Classification | Encryption | Access Control | Retention | Backup |
-|---------------|------------|----------------|-----------|--------|
-| Public        | Optional   | Public         | 7 years   | Standard |
-| Internal      | TLS        | Authenticated  | 5 years   | Standard |
-| Confidential  | TLS + AES-256 | Role-based  | 3 years   | Encrypted |
-| Restricted    | TLS + AES-256 | Need-to-know | 10 years  | Air-gapped |
-| Top Secret    | TLS + AES-256 | Compartmented | 25 years | Classified |
+| Classification | Encryption    | Access Control | Retention | Backup     |
+| -------------- | ------------- | -------------- | --------- | ---------- |
+| Public         | Optional      | Public         | 7 years   | Standard   |
+| Internal       | TLS           | Authenticated  | 5 years   | Standard   |
+| Confidential   | TLS + AES-256 | Role-based     | 3 years   | Encrypted  |
+| Restricted     | TLS + AES-256 | Need-to-know   | 10 years  | Air-gapped |
+| Top Secret     | TLS + AES-256 | Compartmented  | 25 years  | Classified |
 
 ## Data Flow Diagrams
 
@@ -35,6 +35,7 @@ User → WAF → Load Balancer → API Gateway → Auth Service → Database
 ```
 
 **Security Controls**:
+
 - TLS 1.3 end-to-end encryption
 - JWT token validation with short expiry
 - Multi-factor authentication verification
@@ -52,6 +53,7 @@ External Source → API Gateway → Validation → Enrichment → Classification
 ```
 
 **Security Controls**:
+
 - Input validation and sanitization
 - Malware scanning of uploaded files
 - Automated content classification
@@ -72,6 +74,7 @@ User ← Response Filter ← Result Enrichment ← Classification ←───�
 ```
 
 **Security Controls**:
+
 - Query parameterization to prevent injection
 - Role-based access control (RBAC)
 - Row-level security policies
@@ -90,6 +93,7 @@ Export Request → Approval → Data Extraction → Redaction → Format → Del
 ```
 
 **Security Controls**:
+
 - Approval workflow for sensitive exports
 - Automated and manual redaction processes
 - Watermarking and tracking of exported documents
@@ -110,6 +114,7 @@ Internet → WAF → DMZ → Application Tier → Database Tier → Backup Tier
 ```
 
 **Security Controls**:
+
 - Firewall rules restricting inter-tier communication
 - Network access control lists (NACLs)
 - VPN access for administrative functions
@@ -137,6 +142,7 @@ Application → Connection Pool → TLS → Database Proxy → Encrypted Storage
 ```
 
 **Encryption Specifications**:
+
 - **Algorithm**: AES-256-GCM with AEAD
 - **Key Management**: AWS KMS / HashiCorp Vault
 - **Key Rotation**: Automatic monthly rotation
@@ -156,18 +162,19 @@ File Upload → Virus Scan → Classification → Encryption → Storage → Ind
 
 ### Role-Based Access Control (RBAC)
 
-| Role | Data Access | Export | Admin | Audit |
-|------|-------------|--------|-------|-------|
-| Analyst | Read Confidential | Approval Required | No | No |
-| Senior Analyst | Read Restricted | Self-Approve | Limited | No |
-| Manager | Read All | Approve Others | Department | Read |
-| Admin | Technical Access | No | System | No |
-| Auditor | Read Audit Logs | Audit Only | No | Full |
-| Security | Security Logs | Security Only | Security | Security |
+| Role           | Data Access       | Export            | Admin      | Audit    |
+| -------------- | ----------------- | ----------------- | ---------- | -------- |
+| Analyst        | Read Confidential | Approval Required | No         | No       |
+| Senior Analyst | Read Restricted   | Self-Approve      | Limited    | No       |
+| Manager        | Read All          | Approve Others    | Department | Read     |
+| Admin          | Technical Access  | No                | System     | No       |
+| Auditor        | Read Audit Logs   | Audit Only        | No         | Full     |
+| Security       | Security Logs     | Security Only     | Security   | Security |
 
 ### Attribute-Based Access Control (ABAC)
 
 Additional controls based on:
+
 - **Time**: Working hours, emergency access
 - **Location**: Geographic restrictions, secure facilities
 - **Device**: Managed devices, security compliance
@@ -200,6 +207,7 @@ Outbound Data → Content Analysis → Policy Check → Action
 ### Audit Trail Requirements
 
 All data access and modifications must include:
+
 - **Who**: User identity and authentication method
 - **What**: Specific data accessed or action performed
 - **When**: Timestamp with timezone
@@ -209,13 +217,13 @@ All data access and modifications must include:
 
 ### Log Retention
 
-| Log Type | Retention Period | Storage Location | Encryption |
-|----------|------------------|------------------|------------|
-| Authentication | 7 years | SIEM + Archive | AES-256 |
-| Data Access | 10 years | SIEM + Archive | AES-256 |
-| System Events | 5 years | SIEM + Archive | AES-256 |
-| Security Events | 10 years | SIEM + Archive | AES-256 |
-| Audit Logs | 25 years | Immutable Store | AES-256 |
+| Log Type        | Retention Period | Storage Location | Encryption |
+| --------------- | ---------------- | ---------------- | ---------- |
+| Authentication  | 7 years          | SIEM + Archive   | AES-256    |
+| Data Access     | 10 years         | SIEM + Archive   | AES-256    |
+| System Events   | 5 years          | SIEM + Archive   | AES-256    |
+| Security Events | 10 years         | SIEM + Archive   | AES-256    |
+| Audit Logs      | 25 years         | Immutable Store  | AES-256    |
 
 ## Incident Response
 
@@ -238,6 +246,7 @@ All data access and modifications must include:
 ## Review and Maintenance
 
 This document is reviewed quarterly and updated for:
+
 - New data sources and integrations
 - Changes in data classification requirements
 - Regulatory compliance updates

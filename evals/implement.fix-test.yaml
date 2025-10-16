@@ -1,7 +1,7 @@
 id: implement.fix-test@v2
 fixtures:
-  - failing_tests: "tests/service_A.spec.ts::should_retry"
-    context_files: ["server/serviceA.ts", "server/retry.ts"]
+  - failing_tests: 'tests/service_A.spec.ts::should_retry'
+    context_files: ['server/serviceA.ts', 'server/retry.ts']
 checks:
   - type: patch_applies
   - type: tests_pass
@@ -9,8 +9,8 @@ checks:
     max: 0.65
   - type: structured_requirements
     require:
-      - "adds test that reproduces prior failure"
-      - "does not change public API"
+      - 'adds test that reproduces prior failure'
+      - 'does not change public API'
 scoring:
   exact: 0.4
   tests: 0.4

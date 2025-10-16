@@ -20,7 +20,12 @@ async function ensureTable() {
   }
 }
 
-export async function savePipelineDef(id: string, name: string, nodes: any[], edges: any[]) {
+export async function savePipelineDef(
+  id: string,
+  name: string,
+  nodes: any[],
+  edges: any[],
+) {
   await ensureTable();
   const pool = getPostgresPool();
   try {
@@ -41,10 +46,19 @@ export async function getPipelineDef(id: string) {
   await ensureTable();
   const pool = getPostgresPool();
   try {
-    const res = await pool.query(`SELECT id, name, nodes, edges, updated_at FROM pipeline_defs WHERE id=$1`, [id]);
+    const res = await pool.query(
+      `SELECT id, name, nodes, edges, updated_at FROM pipeline_defs WHERE id=$1`,
+      [id],
+    );
     if (!res.rows.length) return null;
     const r = res.rows[0];
-    return { id: r.id, name: r.name, nodes: r.nodes, edges: r.edges, updated_at: r.updated_at };
+    return {
+      id: r.id,
+      name: r.name,
+      nodes: r.nodes,
+      edges: r.edges,
+      updated_at: r.updated_at,
+    };
   } catch (e) {
     logger.warn({ err: e }, 'getPipelineDef failed');
     return null;

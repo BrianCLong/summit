@@ -3,10 +3,12 @@
 Title: feat(delivery): enable canary + analysis in charts/maestro (values-canary overlay)
 
 Files:
+
 - charts/maestro/values-canary.yaml (new)
 - (docs update) charts/maestro/README.md (append usage)
 
 Patch: add the canary overlay YAML (from kit) and docs:
+
 ```
 helm upgrade maestro charts/maestro -f values.yaml -f values-canary.yaml
 ```

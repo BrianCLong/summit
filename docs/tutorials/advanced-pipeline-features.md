@@ -1,4 +1,3 @@
-
 # Tutorial: Advanced Pipeline Features
 
 This tutorial guides you through using advanced features in Maestro pipelines, such as conditional steps, dynamic inputs, and custom notifications.

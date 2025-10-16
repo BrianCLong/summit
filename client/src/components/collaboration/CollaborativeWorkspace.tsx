@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 
 interface User {
   id: string;
@@ -102,12 +108,15 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
 }) => {
   const [workspace, setWorkspace] = useState<SharedWorkspace | null>(null);
   const [activeUsers, setActiveUsers] = useState<User[]>([]);
-  const [collaborationEvents, setCollaborationEvents] = useState<CollaborationEvent[]>([]);
+  const [collaborationEvents, setCollaborationEvents] = useState<
+    CollaborationEvent[]
+  >([]);
   const [annotations, setAnnotations] = useState<LiveAnnotation[]>([]);
   const [showParticipants, setShowParticipants] = useState(false);
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
-  const [newAnnotation, setNewAnnotation] = useState<Partial<LiveAnnotation> | null>(null);
+  const [newAnnotation, setNewAnnotation] =
+    useState<Partial<LiveAnnotation> | null>(null);
   const [cursorPositions, setCursorPositions] = useState<{
     [userId: string]: { x: number; y: number };
   }>({});
@@ -155,9 +164,24 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
       investigationIds: investigationId ? [investigationId] : [],
       sharedEntities: ['entity-001', 'entity-002', 'entity-003'],
       permissions: {
-        'user-002': { canEdit: true, canComment: true, canShare: true, canDelete: false },
-        'user-003': { canEdit: true, canComment: true, canShare: false, canDelete: false },
-        'user-004': { canEdit: false, canComment: true, canShare: false, canDelete: false },
+        'user-002': {
+          canEdit: true,
+          canComment: true,
+          canShare: true,
+          canDelete: false,
+        },
+        'user-003': {
+          canEdit: true,
+          canComment: true,
+          canShare: false,
+          canDelete: false,
+        },
+        'user-004': {
+          canEdit: false,
+          canComment: true,
+          canShare: false,
+          canDelete: false,
+        },
       },
       settings: {
         allowAnonymousViewing: false,
@@ -178,7 +202,8 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
         id: 'annotation-001',
         userId: 'user-002',
         type: 'comment',
-        content: 'This connection pattern looks suspicious - potential C2 infrastructure',
+        content:
+          'This connection pattern looks suspicious - potential C2 infrastructure',
         position: { x: 450, y: 200 },
         targetId: 'entity-001',
         timestamp: Date.now() - 1200000,
@@ -212,7 +237,9 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
   // Initialize workspace and WebSocket connection
   useEffect(() => {
     setWorkspace(mockWorkspace);
-    setActiveUsers(mockWorkspace.participants.filter((user) => user.status === 'active'));
+    setActiveUsers(
+      mockWorkspace.participants.filter((user) => user.status === 'active'),
+    );
     setAnnotations(mockAnnotations);
 
     // Mock WebSocket connection
@@ -229,8 +256,9 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
         id: `event-${Date.now()}`,
         type: Math.random() > 0.5 ? 'cursor_move' : 'selection_change',
         userId:
-          mockWorkspace.participants[Math.floor(Math.random() * mockWorkspace.participants.length)]
-            .id,
+          mockWorkspace.participants[
+            Math.floor(Math.random() * mockWorkspace.participants.length)
+          ].id,
         timestamp: Date.now(),
         data: { x: Math.random() * 800, y: Math.random() * 600 },
       };
@@ -337,12 +365,16 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
       '#2196f3',
       '#00bcd4',
     ];
-    const index = workspace?.participants.findIndex((u) => u.id === userId) || 0;
+    const index =
+      workspace?.participants.findIndex((u) => u.id === userId) || 0;
     return colors[index % colors.length];
   };
 
   const getUserName = (userId: string) => {
-    return workspace?.participants.find((u) => u.id === userId)?.name || 'Unknown User';
+    return (
+      workspace?.participants.find((u) => u.id === userId)?.name ||
+      'Unknown User'
+    );
   };
 
   const formatTimeAgo = (timestamp: number) => {
@@ -544,7 +576,8 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
                   top: annotation.position.y,
                   width: annotation.position.width,
                   height: annotation.position.height,
-                  pointerEvents: annotation.type === 'comment' ? 'auto' : 'none',
+                  pointerEvents:
+                    annotation.type === 'comment' ? 'auto' : 'none',
                   zIndex: 900,
                 }}
               >
@@ -722,7 +755,9 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
           {['comment', 'highlight', 'arrow'].map((type) => (
             <button
               key={type}
-              onClick={(e) => handleAnnotationStart(e, type as LiveAnnotation['type'])}
+              onClick={(e) =>
+                handleAnnotationStart(e, type as LiveAnnotation['type'])
+              }
               style={{
                 padding: '8px',
                 fontSize: '16px',
@@ -795,7 +830,12 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
                     backgroundColor: getUserColor(event.userId),
                   }}
                 />
-                <span style={{ color: getUserColor(event.userId), fontWeight: '500' }}>
+                <span
+                  style={{
+                    color: getUserColor(event.userId),
+                    fontWeight: '500',
+                  }}
+                >
                   {getUserName(event.userId)}
                 </span>
                 <span style={{ color: '#666' }}>

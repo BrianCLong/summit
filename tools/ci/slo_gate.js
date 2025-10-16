@@ -2,16 +2,20 @@
 const https = require('https');
 const http = require('http');
 
-function get(url){
-  return new Promise((resolve,reject)=>{
-    const lib = url.startsWith('https')? https : http;
-    lib.get(url,(res)=>{
-      let data=''; res.on('data',d=>data+=d); res.on('end',()=>resolve({status:res.statusCode, body:data}));
-    }).on('error',reject);
+function get(url) {
+  return new Promise((resolve, reject) => {
+    const lib = url.startsWith('https') ? https : http;
+    lib
+      .get(url, (res) => {
+        let data = '';
+        res.on('data', (d) => (data += d));
+        res.on('end', () => resolve({ status: res.statusCode, body: data }));
+      })
+      .on('error', reject);
   });
 }
 
-async function main(){
+async function main() {
   const args = require('minimist')(process.argv.slice(2));
   const runbook = args.runbook || process.env.SLO_RUNBOOK || 'conductor';
   const tenant = args.tenant || process.env.SLO_TENANT || 'acme';
@@ -23,10 +27,13 @@ async function main(){
   const j = JSON.parse(body);
   const burn = Number(j.burnRate || 0);
   console.log(`SLO burn for ${runbook}/${tenant}: ${burn}`);
-  if (burn >= maxBurn){
+  if (burn >= maxBurn) {
     console.error(`Burn ${burn} >= max ${maxBurn} — blocking promotion`);
     process.exit(1);
   }
 }
 
-main().catch(e=>{ console.error(e.message||e); process.exit(2); });
+main().catch((e) => {
+  console.error(e.message || e);
+  process.exit(2);
+});

@@ -1,6 +1,5 @@
 import pytest
 from fastapi.testclient import TestClient
-
 from ig_rl.clients.policy import PolicyClient
 from ig_rl.config import ServiceConfig
 from ig_rl.provenance.logger import ProvenanceLogger
@@ -29,7 +28,11 @@ def test_register_reward_endpoint(test_app):
     client, _ = test_app
     response = client.post(
         "/register_reward",
-        json={"env": "graph_coa", "name": "coa", "kpi_weights": {"time_to_insight": 0.7, "accuracy": 0.3}},
+        json={
+            "env": "graph_coa",
+            "name": "coa",
+            "kpi_weights": {"time_to_insight": 0.7, "accuracy": 0.3},
+        },
     )
     assert response.status_code == 200
     assert response.json()["status"] == "ok"

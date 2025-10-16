@@ -12,7 +12,8 @@ export async function createJiraIssue({
   const res = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: 'Basic ' + Buffer.from(`${email}:${apiToken}`).toString('base64'),
+      Authorization:
+        'Basic ' + Buffer.from(`${email}:${apiToken}`).toString('base64'),
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
@@ -25,6 +26,7 @@ export async function createJiraIssue({
       },
     }),
   });
-  if (!res.ok) throw new Error(`Jira create failed: ${res.status} ${await res.text()}`);
+  if (!res.ok)
+    throw new Error(`Jira create failed: ${res.status} ${await res.text()}`);
   return res.json();
 }

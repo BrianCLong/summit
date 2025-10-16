@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: resource-optimizer, namespace: prod }
 spec:
-  schedule: "0 0 * * *" # daily
+  schedule: '0 0 * * *' # daily
   jobTemplate:
     spec:
       template:
@@ -11,4 +11,4 @@ spec:
           containers:
             - name: optimizer
               image: python:3.9-slim
-              command: ["python","/app/scripts/resource-optimizer.py"]
+              command: ['python', '/app/scripts/resource-optimizer.py']

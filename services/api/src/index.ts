@@ -25,7 +25,9 @@ async function startServer() {
     // Create Socket.IO server for realtime features
     const io = new SocketIOServer(httpServer, {
       cors: {
-        origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+        origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+          'http://localhost:3000',
+        ],
         methods: ['GET', 'POST'],
         credentials: true,
       },

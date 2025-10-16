@@ -567,7 +567,7 @@ jobs:
         with:
           name: quantum-ready-certification
           path: QUANTUM_READY_CERTIFICATION.md
-          retention-days: 365  # Keep certification for 1 year
+          retention-days: 365 # Keep certification for 1 year
 
   notification:
     name: Quantum-Ready Notification

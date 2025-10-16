@@ -28,10 +28,10 @@ datasources:
     type: elasticsearch
     access: proxy
     url: http://elasticsearch-apm:9200
-    database: "intelgraph-logs-*"
+    database: 'intelgraph-logs-*'
     editable: true
     jsonData:
-      timeField: "@timestamp"
+      timeField: '@timestamp'
       esVersion: 70
       logMessageField: message
       logLevelField: level

@@ -19,7 +19,7 @@ export async function fetchWithWayback(url: string): Promise<FetchResult> {
       return {
         html,
         usedUrl: url,
-        retrievedAt: new Date(start).toISOString()
+        retrievedAt: new Date(start).toISOString(),
       };
     }
   } catch (error) {
@@ -29,14 +29,16 @@ export async function fetchWithWayback(url: string): Promise<FetchResult> {
   const fallbackUrl = `${WAYBACK_PREFIX}${url}`;
   const fallbackResponse = await fetch(fallbackUrl, { headers });
   if (!fallbackResponse.ok) {
-    throw new Error(`Failed to fetch article from live and Wayback sources: ${fallbackResponse.status}`);
+    throw new Error(
+      `Failed to fetch article from live and Wayback sources: ${fallbackResponse.status}`,
+    );
   }
   const html = await fallbackResponse.text();
   return {
     html,
     usedUrl: url,
     archiveUrl: fallbackResponse.url,
-    retrievedAt: new Date(start).toISOString()
+    retrievedAt: new Date(start).toISOString(),
   };
 }
 
@@ -44,7 +46,11 @@ export async function ensureDirectory(dir: string): Promise<void> {
   await fs.mkdir(dir, { recursive: true });
 }
 
-export async function writeFile(dir: string, filename: string, content: string): Promise<void> {
+export async function writeFile(
+  dir: string,
+  filename: string,
+  content: string,
+): Promise<void> {
   await ensureDirectory(dir);
   await fs.writeFile(path.join(dir, filename), content, 'utf8');
 }

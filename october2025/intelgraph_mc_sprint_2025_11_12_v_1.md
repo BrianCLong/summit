@@ -1,4 +1,4 @@
-```markdown
+````markdown
 ---
 slug: intelgraph-mc-sprint-2025-11-12
 version: v1.0
@@ -16,11 +16,14 @@ status: planned
 > **Mission (Sprint N+3)**: Productize ER for GA, ship end‑user search & graph UX, introduce API versioning/deprecations, SOC 2 readiness pack, and harden backups/restore + autoscaling. Keep SLOs/cost guardrails green and deliver evidence bundle v4.
 
 ## Conductor Summary (Commit)
+
 **Assumptions & Provenance**
+
 - Builds on prior sprints through 2025‑11‑11 prod release: DR validated, JDBC adapters, ER v0.2 shadow, GDS analytics v0.1.
 - Summit bundles still pending import; placeholders marked _[ATTACH FROM SUMMIT BUNDLE]_.
 
 **Goals**
+
 1. **ER GA (v1.0)**: approve flow, rollbacks, model registry, thresholds per tenant.
 2. **Search & Explore**: Graph search API (hybrid keyword + attribute filters) and React explorer slice (Cytoscape).
 3. **API Versioning**: GraphQL schema versioning policy, deprecations, and compatibility tests.
@@ -29,24 +32,29 @@ status: planned
 6. **FinOps polish**: tenant budgets enforcement in UI + alerts; LLM spend caps visible to admins.
 
 **Non‑Goals**
+
 - Advanced text search (vector/embedding) beyond keyword + filters.
 - Cross‑cloud DR.
 
 **Constraints**
+
 - SLOs unchanged and enforced as gates. DR/RTO/RPO from last sprint maintained.
 - Cost guardrails unchanged; alert at 80% burn.
 
 **Risks**
+
 - R1: ER rollouts cause merge regressions. _Mitigation_: staged rollout per tenant, rollback tooling.
 - R2: Schema deprecations break clients. _Mitigation_: contract tests + safelist validation.
 - R3: Backup/restore window impacts SLOs. _Mitigation_: throttle + maintenance windows.
 
 **Definition of Done**
+
 - ER v1.0 enabled for at least 2 pilot tenants with rollback tested; Search/Explorer shipped behind feature flag; API v1 deprecations published with tests; SOC 2 evidence pack v1 exported; backup/restore drills pass with signed timings; autoscaling policies deployed.
 
 ---
 
 ## Swimlanes
+
 - **Lane A — ER GA** (DS + Backend)
 - **Lane B — Search & Explorer** (Frontend + Backend)
 - **Lane C — API Versioning** (Backend + QA)
@@ -57,9 +65,11 @@ status: planned
 ---
 
 ## Backlog (Epics → Stories → Tasks) + RACI
+
 Estimates in SP.
 
 ### EPIC A: ER GA v1.0 (32 SP)
+
 - **A‑1** Model registry & pinning (8 SP) — _Backend (R), DS (C), MC (A)_
   - AC: model artifacts have SHA, metadata, provenance; rollout per tenant.
 - **A‑2** Tenant thresholds & policies (8 SP) — _Backend (R), Sec (C)_
@@ -70,6 +80,7 @@ Estimates in SP.
   - AC: approve/reject, diffs, provenance panel.
 
 ### EPIC B: Search & Explorer v0.9 (28 SP)
+
 - **B‑1** Search API (keyword + filters) (10 SP) — _Backend (R)_
   - AC: cursor pagination, p95 ≤ 350 ms, persisted query.
 - **B‑2** Explorer React slice (Cytoscape) (10 SP) — _Frontend (R)_
@@ -78,16 +89,19 @@ Estimates in SP.
   - AC: ABAC per field/edge; redaction in UI.
 
 ### EPIC C: API Versioning & Compat (22 SP)
+
 - **C‑1** Versioning policy & headers (6 SP) — _Backend (R), MC (A)_
 - **C‑2** Deprecation markers (6 SP) — _Backend (R)_
 - **C‑3** Contract tests & safelist verifier (10 SP) — _QA (R), Backend (C)_
 
 ### EPIC D: SOC 2 Readiness Pack (24 SP)
+
 - **D‑1** Control mapping (CC1–CC9, CC6.3 etc.) (8 SP) — _Sec (R)_
 - **D‑2** Audit log coverage & retention (8 SP) — _Backend (R)_
 - **D‑3** Access review workflow + evidence export (8 SP) — _Sec (R), SRE (C)_
 
 ### EPIC E: Data Safety & Scaling (26 SP)
+
 - **E‑1** PG/Neo4j PITR & restore drills (10 SP) — _Platform (R), SRE (A)_
   - AC: recovery ≤ 30 min; data checksums verified.
 - **E‑2** HPA/VPA autoscaling policies (8 SP) — _SRE (R)_
@@ -96,6 +110,7 @@ Estimates in SP.
   - AC: schedules, encryption, retention tiers.
 
 ### EPIC F: FinOps & Admin UX (18 SP)
+
 - **F‑1** Budget alerts to Slack/Email (6 SP) — _SRE (R)_
 - **F‑2** Admin UI caps (6 SP) — _Frontend (R)_
 - **F‑3** Cost drill‑downs (6 SP) — _Backend (R), PM (C)_
@@ -105,6 +120,7 @@ _Total_: **150 SP** (descope: C‑2 or F‑3 if capacity < 135 SP).
 ---
 
 ## Architecture (Deltas)
+
 ```mermaid
 flowchart LR
   UI[Explorer UI]--Persisted IDs-->GW
@@ -121,6 +137,7 @@ flowchart LR
     HPA[Autoscaling]
   end
 ```
+````
 
 **ADR‑010**: Introduce API versioning via schema docs + deprecation windows; clients negotiate via safelisted op IDs. _Trade‑off_: management overhead vs stability.
 
@@ -131,7 +148,9 @@ flowchart LR
 ---
 
 ## Data & Policy
+
 **Search Index (PG)**
+
 ```sql
 ALTER TABLE entity_text ADD COLUMN tsv tsvector;
 CREATE INDEX entity_text_tsv_idx ON entity_text USING GIN(tsv);
@@ -142,6 +161,7 @@ FOR EACH ROW EXECUTE FUNCTION entity_text_update();
 ```
 
 **Model Registry (PG)**
+
 ```sql
 CREATE TABLE model_artifacts (
   model_id TEXT PRIMARY KEY,
@@ -153,44 +173,67 @@ CREATE TABLE model_artifacts (
 ```
 
 **Policy Delta**
+
 - ER materialization requires `purpose ∈ {investigation, fraud-risk}` and tenant threshold satisfied.
 - Audit logs retained `standard-365d`; access reviews `long-1825d` or `legal-hold` when applicable.
 
 ---
 
 ## APIs & Schemas
+
 **GraphQL — Search & Versioning**
+
 ```graphql
-"""API version advertised via schema and response headers"""
+"""
+API version advertised via schema and response headers
+"""
 scalar DateTime
 
-type SearchHit { id: ID!, kind: String!, score: Float, snippet: String }
+type SearchHit {
+  id: ID!
+  kind: String!
+  score: Float
+  snippet: String
+}
 
 type Query {
-  search(q: String!, filters: JSON, after: String): SearchResult! @auth(abac: "entity.search")
+  search(q: String!, filters: JSON, after: String): SearchResult!
+    @auth(abac: "entity.search")
   apiVersion: String!
 }
 
-type SearchResult { hits: [SearchHit!]!, nextCursor: String }
+type SearchResult {
+  hits: [SearchHit!]!
+  nextCursor: String
+}
 ```
 
 **Response Headers**
+
 - `x-ig-api-version: v1`
 - `x-ig-deprecations: entity.attributes.value (EOL 2026‑03‑31)`
 
 **Persisted Query Example**
+
 ```json
-{ "id":"search:v1", "hash":"sha256-...", "abac":["entity.search"], "roles":["reader"] }
+{
+  "id": "search:v1",
+  "hash": "sha256-...",
+  "abac": ["entity.search"],
+  "roles": ["reader"]
+}
 ```
 
 ---
 
 ## Security & Privacy
+
 - **Access Reviews**: quarterly; export CSV + signed manifest.
 - **Audit Coverage**: login, policy decision, ER approve/reject, search queries (hash only), admin cap changes.
 - **Crypto**: backup encryption at rest + in transit; signed restore proof.
 
 **OPA (deprecation access guard)**
+
 ```rego
 package intelgraph.schema
 
@@ -206,12 +249,14 @@ deprecated(field) {
 ---
 
 ## Observability & SLOs
+
 - New metrics: search latency p95/p99; index bloat; ER materialization rate; backup duration; restore RTO; autoscaler actions/min.
 - Alerts: search p95 > 350 ms 10m; restore > 30 min; autoscaler thrash (>5 scale ops/10m); access review overdue.
 
 ---
 
 ## Testing Strategy
+
 - **Unit**: search ranking, pagination; model registry; rollback logic.
 - **Contract**: deprecation headers, version negotiation; search persisted queries.
 - **E2E**: ER approve→merge→rollback; backup/restore drill; admin caps.
@@ -219,6 +264,7 @@ deprecated(field) {
 - **Chaos**: index bloat and vacuum; scorer unavailability fallback → rules.
 
 **Acceptance Packs**
+
 - Given tenant threshold and purpose tag, ER materializes with signed provenance; rollback restores prior state.
 - Given search term with filters, results paginated and p95 ≤ 350 ms; ABAC enforced.
 - Given restore drill, RTO ≤ 30 min, checksum OK.
@@ -227,6 +273,7 @@ deprecated(field) {
 ---
 
 ## CI/CD & IaC
+
 ```yaml
 name: api-versioning
 on: [push]
@@ -240,10 +287,11 @@ jobs:
 ```
 
 **Helm Values (autoscaling)**
+
 ```yaml
 resources:
-  requests: { cpu: "250m", memory: "512Mi" }
-  limits: { cpu: "2", memory: "2Gi" }
+  requests: { cpu: '250m', memory: '512Mi' }
+  limits: { cpu: '2', memory: '2Gi' }
 autoscaling:
   enabled: true
   minReplicas: 3
@@ -257,6 +305,7 @@ autoscaling:
 ---
 
 ## Code & Scaffolds
+
 ```
 repo/
   services/er/
@@ -278,6 +327,7 @@ repo/
 ```
 
 **Search SQL (excerpt)**
+
 ```sql
 SELECT id, kind, ts_rank(tsv, plainto_tsquery($1)) AS score
 FROM entity_text
@@ -288,18 +338,24 @@ LIMIT $limit OFFSET $offset;
 ```
 
 **Explorer React (excerpt)**
+
 ```tsx
 import CytoscapeComponent from 'react-cytoscapejs';
-export default function Explorer(){
+export default function Explorer() {
   return (
     <div className="p-4">
-      <CytoscapeComponent elements={[]} stylesheet={[]} style={{ height: 600 }} />
+      <CytoscapeComponent
+        elements={[]}
+        stylesheet={[]}
+        style={{ height: 600 }}
+      />
     </div>
   );
 }
 ```
 
 **PITR script (bash excerpt)**
+
 ```bash
 # assume WAL archiving enabled
 ts=$(date -u +%Y%m%dT%H%M%SZ)
@@ -312,33 +368,39 @@ psql -c 'SELECT 1';
 ---
 
 ## Release Plan & Runbooks
+
 - **Staging cuts**: 2025‑11‑15, 2025‑11‑22.
 - **Prod**: 2025‑11‑25 (canary 10% → 50% → 100%).
 
 **Backout**
+
 - Disable ER GA (revert to v0.2 shadow), hide Search/Explorer behind flag, pause deprecations.
 
 **Evidence Bundle v4**
+
 - Model registry manifest + SHA; ER approval logs; search perf reports; deprecation compat results; backup/restore timings; autoscaling policy and events; signed manifest.
 
 ---
 
 ## RACI (Consolidated)
-| Workstream | R | A | C | I |
-|---|---|---|---|---|
-| ER GA | Backend | MC | DS, Sec | PM |
-| Search & Explorer | Frontend | Tech Lead | Backend, Sec | PM |
-| API Versioning | Backend | MC | QA | PM |
-| SOC 2 Pack | Security | MC | SRE | PM |
-| Safety & Scaling | Platform | SRE TL | Sec | PM |
-| FinOps UX | SRE | PM | Frontend | All |
+
+| Workstream        | R        | A         | C            | I   |
+| ----------------- | -------- | --------- | ------------ | --- |
+| ER GA             | Backend  | MC        | DS, Sec      | PM  |
+| Search & Explorer | Frontend | Tech Lead | Backend, Sec | PM  |
+| API Versioning    | Backend  | MC        | QA           | PM  |
+| SOC 2 Pack        | Security | MC        | SRE          | PM  |
+| Safety & Scaling  | Platform | SRE TL    | Sec          | PM  |
+| FinOps UX         | SRE      | PM        | Frontend     | All |
 
 ---
 
 ## Open Items
+
 1. Attach UI wireframes for Explorer & Decision Center _[ATTACH FROM SUMMIT BUNDLE]_.
 2. Confirm deprecation timeline with top clients.
 3. Verify backup storage costs vs budget.
 
 ```
 
+```

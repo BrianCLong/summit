@@ -45,7 +45,8 @@ export class AuditChainVerifier {
 
   constructor(
     chainPath = './data/audit',
-    secretKey = process.env.AUDIT_CHAIN_SECRET || 'default-secret-change-in-production',
+    secretKey = process.env.AUDIT_CHAIN_SECRET ||
+      'default-secret-change-in-production',
     hashAlgorithm = 'sha256',
   ) {
     this.chainPath = chainPath;
@@ -64,7 +65,11 @@ export class AuditChainVerifier {
     const recordHash = this.hashAuditRecord(record);
 
     // Create chain link hash that includes previous hash
-    const chainHash = this.createChainHash(recordHash, previousHash, sequenceNumber);
+    const chainHash = this.createChainHash(
+      recordHash,
+      previousHash,
+      sequenceNumber,
+    );
 
     const chainLink: ChainLink = {
       auditId: record.id,
@@ -116,7 +121,8 @@ export class AuditChainVerifier {
 
       // Verify record hash
       const expectedRecordHash = this.hashAuditRecord(record);
-      const previousHash = i === 0 ? 'genesis' : chains[i - 1]?.currentHash || 'genesis';
+      const previousHash =
+        i === 0 ? 'genesis' : chains[i - 1]?.currentHash || 'genesis';
       const expectedChainHash = this.createChainHash(
         expectedRecordHash,
         previousHash,
@@ -141,7 +147,8 @@ export class AuditChainVerifier {
       }
     }
 
-    const integrityPercentage = records.length > 0 ? (verifiedRecords / records.length) * 100 : 100;
+    const integrityPercentage =
+      records.length > 0 ? (verifiedRecords / records.length) * 100 : 100;
 
     return {
       isValid: brokenChains === 0,
@@ -224,7 +231,11 @@ export class AuditChainVerifier {
   /**
    * Verify an integrity proof
    */
-  public verifyIntegrityProof(proof: string, fromRecordId: string, toRecordId: string): boolean {
+  public verifyIntegrityProof(
+    proof: string,
+    fromRecordId: string,
+    toRecordId: string,
+  ): boolean {
     const records = this.loadRecordRange(fromRecordId, toRecordId);
     const chains = records.map((r) => this.loadChainLink(r.id)).filter(Boolean);
 
@@ -265,7 +276,9 @@ export class AuditChainVerifier {
       ...this.verifyChainIntegrity(),
       // Override with filtered data
       totalRecords: filteredRecords.length,
-      verifiedRecords: filteredRecords.filter((r) => this.verifyRecord(r.id).isValid).length,
+      verifiedRecords: filteredRecords.filter(
+        (r) => this.verifyRecord(r.id).isValid,
+      ).length,
     } as any;
 
     const exportData = {
@@ -326,7 +339,9 @@ export class AuditChainVerifier {
   }
 
   private createHmac(data: string): string {
-    return createHmac(this.hashAlgorithm, this.secretKey).update(data).digest('hex');
+    return createHmac(this.hashAlgorithm, this.secretKey)
+      .update(data)
+      .digest('hex');
   }
 
   private getLastHash(): string {
@@ -425,7 +440,9 @@ export class AuditChainVerifier {
 
     try {
       const index = JSON.parse(readFileSync(indexPath, 'utf8'));
-      return index.map((entry: any) => this.loadRecord(entry.id)).filter(Boolean);
+      return index
+        .map((entry: any) => this.loadRecord(entry.id))
+        .filter(Boolean);
     } catch (error) {
       console.error('Failed to load audit index:', error);
       return [];
@@ -440,14 +457,19 @@ export class AuditChainVerifier {
 
     try {
       const index = JSON.parse(readFileSync(indexPath, 'utf8'));
-      return index.map((entry: any) => this.loadChainLink(entry.id)).filter(Boolean);
+      return index
+        .map((entry: any) => this.loadChainLink(entry.id))
+        .filter(Boolean);
     } catch (error) {
       console.error('Failed to load chain index:', error);
       return [];
     }
   }
 
-  private loadRecordRange(fromRecordId: string, toRecordId: string): AuditRecord[] {
+  private loadRecordRange(
+    fromRecordId: string,
+    toRecordId: string,
+  ): AuditRecord[] {
     const allRecords = this.loadAllRecords();
     const fromIndex = allRecords.findIndex((r) => r.id === fromRecordId);
     const toIndex = allRecords.findIndex((r) => r.id === toRecordId);

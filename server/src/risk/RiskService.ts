@@ -16,12 +16,18 @@ export class RiskService {
     this.engine = new RiskEngine(data.weights, data.bias, data.version || 'v1');
   }
 
-  async compute(entityId: string, window: '24h' | '7d' | '30d'): Promise<RiskResult> {
+  async compute(
+    entityId: string,
+    window: '24h' | '7d' | '30d',
+  ): Promise<RiskResult> {
     const features = await this.store.getFeatures(entityId, window);
     return this.engine.score(features, window);
   }
 
-  async recomputeBatch(entityIds: string[], window: '24h' | '7d' | '30d'): Promise<RiskResult[]> {
+  async recomputeBatch(
+    entityIds: string[],
+    window: '24h' | '7d' | '30d',
+  ): Promise<RiskResult[]> {
     const results: RiskResult[] = [];
     for (const id of entityIds) {
       results.push(await this.compute(id, window));

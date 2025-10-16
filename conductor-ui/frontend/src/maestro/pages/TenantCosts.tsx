@@ -10,7 +10,8 @@ import ModelAnomalyPanels from '../components/ModelAnomalyPanels';
 
 export default function TenantCosts() {
   const [tenant, setTenant] = useState('acme');
-  const cfg: any = (window as any).__MAESTRO_CFG__ || (window as any).MAESTRO_CFG || {};
+  const cfg: any =
+    (window as any).__MAESTRO_CFG__ || (window as any).MAESTRO_CFG || {};
   const {
     listAlertRoutes,
     createAlertRoute,
@@ -83,7 +84,8 @@ export default function TenantCosts() {
             }`}
           >
             Budget: {budgetPolicy.type.toUpperCase()} Cap ${budgetPolicy.limit}
-            {budgetPolicy.type === 'soft' && ` (Grace: ${budgetPolicy.grace * 100}%)`}
+            {budgetPolicy.type === 'soft' &&
+              ` (Grace: ${budgetPolicy.grace * 100}%)`}
           </span>
         )}
         <button
@@ -104,7 +106,10 @@ export default function TenantCosts() {
       <TenantCost tenant={tenant} />
       <TenantBudgetForecast tenant={tenant} />
       <TenantCostAnomalies tenant={tenant} />
-      <section className="space-y-2 rounded-2xl border p-4" aria-label="Alert routes">
+      <section
+        className="space-y-2 rounded-2xl border p-4"
+        aria-label="Alert routes"
+      >
         <div className="text-sm font-medium">Forecast alert routes</div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <label className="flex items-center gap-2">
@@ -151,7 +156,10 @@ export default function TenantCosts() {
           >
             Create route
           </button>
-          <button className="rounded border px-3 py-2" onClick={() => testAlertEvent({ tenant })}>
+          <button
+            className="rounded border px-3 py-2"
+            onClick={() => testAlertEvent({ tenant })}
+          >
             Test alert
           </button>
         </div>
@@ -176,7 +184,9 @@ export default function TenantCosts() {
                     <td>
                       <button
                         className="text-red-600 underline"
-                        onClick={() => deleteAlertRoute(r.id).then(refreshRoutes)}
+                        onClick={() =>
+                          deleteAlertRoute(r.id).then(refreshRoutes)
+                        }
                       >
                         Delete
                       </button>
@@ -195,12 +205,18 @@ export default function TenantCosts() {
         </div>
       </section>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <GrafanaPanel uid={cfg?.grafanaDashboards?.cost || 'maestro-cost'} vars={{ tenant }} />
+        <GrafanaPanel
+          uid={cfg?.grafanaDashboards?.cost || 'maestro-cost'}
+          vars={{ tenant }}
+        />
         <GrafanaPanel
           uid={cfg?.grafanaDashboards?.overview || 'maestro-overview'}
           vars={{ tenant }}
         />
-        <GrafanaPanel uid={cfg?.grafanaDashboards?.slo || 'maestro-slo'} vars={{ tenant }} />
+        <GrafanaPanel
+          uid={cfg?.grafanaDashboards?.slo || 'maestro-slo'}
+          vars={{ tenant }}
+        />
       </div>
       <ModelAnomalyPanels tenant={tenant} />
     </section>

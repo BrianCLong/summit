@@ -16,8 +16,8 @@ groups:
             mc_platform_reasoning_speed_improvement
           ) / 3
         labels:
-          version: "v0.4.0"
-          component: "transcendent_intelligence"
+          version: 'v0.4.0'
+          component: 'transcendent_intelligence'
 
       # Record evolution success rate
       - record: mc_platform:evolution_success_rate_5m
@@ -27,8 +27,8 @@ groups:
             rate(mc_platform_evolution_proposals_submitted_total[5m])
           ) * 100
         labels:
-          version: "v0.4.0"
-          component: "evolution_system"
+          version: 'v0.4.0'
+          component: 'evolution_system'
 
       # Record quantum advantage achievement
       - record: mc_platform:quantum_advantage_achievement_ratio
@@ -36,8 +36,8 @@ groups:
           mc_platform_quantum_operations_advantage_sum /
           mc_platform_quantum_operations_total
         labels:
-          version: "v0.4.0"
-          component: "quantum_cognition"
+          version: 'v0.4.0'
+          component: 'quantum_cognition'
 
       # === SAFETY AND CONTAINMENT ALERTS ===
 
@@ -50,9 +50,9 @@ groups:
           version: v0.4.0
           component: safety_monitoring
         annotations:
-          summary: "Transcendent intelligence safety score below critical threshold"
-          description: "Safety score is {{ $value | humanize }}, below the required 0.95 threshold for tenant {{ $labels.tenant }}"
-          runbook_url: "https://docs.mc-platform.com/runbooks/safety-score-low"
+          summary: 'Transcendent intelligence safety score below critical threshold'
+          description: 'Safety score is {{ $value | humanize }}, below the required 0.95 threshold for tenant {{ $labels.tenant }}'
+          runbook_url: 'https://docs.mc-platform.com/runbooks/safety-score-low'
 
       # Critical: Emergency containment triggered
       - alert: EmergencyContainmentActivated
@@ -63,9 +63,9 @@ groups:
           version: v0.4.0
           component: containment_system
         annotations:
-          summary: "Emergency containment has been activated"
-          description: "Emergency containment of type {{ $labels.containment_type }} activated for tenant {{ $labels.tenant }}"
-          runbook_url: "https://docs.mc-platform.com/runbooks/emergency-containment"
+          summary: 'Emergency containment has been activated'
+          description: 'Emergency containment of type {{ $labels.containment_type }} activated for tenant {{ $labels.tenant }}'
+          runbook_url: 'https://docs.mc-platform.com/runbooks/emergency-containment'
 
       # Warning: Human oversight disabled for high-risk operations
       - alert: HumanOversightDisabledHighRisk
@@ -78,8 +78,8 @@ groups:
           version: v0.4.0
           component: human_oversight
         annotations:
-          summary: "Human oversight disabled for high-risk autonomous operations"
-          description: "Autonomy tier {{ $labels.autonomy_tier }} operations running without human oversight for tenant {{ $labels.tenant }}"
+          summary: 'Human oversight disabled for high-risk autonomous operations'
+          description: 'Autonomy tier {{ $labels.autonomy_tier }} operations running without human oversight for tenant {{ $labels.tenant }}'
 
       # === EVOLUTION SYSTEM ALERTS ===
 
@@ -96,8 +96,8 @@ groups:
           version: v0.4.0
           component: evolution_sandbox
         annotations:
-          summary: "Evolution sandbox validation failure rate high"
-          description: "Sandbox validation failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}"
+          summary: 'Evolution sandbox validation failure rate high'
+          description: 'Sandbox validation failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}'
 
       # Critical: Evolution weight sum constraint violation
       - alert: EvolutionWeightSumViolation
@@ -108,8 +108,8 @@ groups:
           version: v0.4.0
           component: evolution_policy
         annotations:
-          summary: "Evolution proposal violates weight sum constraint"
-          description: "Evolution weight sum is {{ $value }}, exceeding maximum 1.0 for proposal {{ $labels.proposal_id }}"
+          summary: 'Evolution proposal violates weight sum constraint'
+          description: 'Evolution weight sum is {{ $value }}, exceeding maximum 1.0 for proposal {{ $labels.proposal_id }}'
 
       # Warning: High-risk evolution without additional approvals
       - alert: HighRiskEvolutionInsufficientApprovals
@@ -122,8 +122,8 @@ groups:
           version: v0.4.0
           component: evolution_approval
         annotations:
-          summary: "High-risk evolution lacks required additional approvals"
-          description: "Proposal {{ $labels.proposal_id }} has risk level HIGH but only {{ $value }} additional approvals"
+          summary: 'High-risk evolution lacks required additional approvals'
+          description: 'Proposal {{ $labels.proposal_id }} has risk level HIGH but only {{ $value }} additional approvals'
 
       # === QUANTUM OPERATIONS ALERTS ===
 
@@ -136,8 +136,8 @@ groups:
           version: v0.4.0
           component: quantum_operations
         annotations:
-          summary: "Quantum coherence time below threshold"
-          description: "Coherence time is {{ $value }}μs, below minimum 50μs for tenant {{ $labels.tenant }}"
+          summary: 'Quantum coherence time below threshold'
+          description: 'Coherence time is {{ $value }}μs, below minimum 50μs for tenant {{ $labels.tenant }}'
 
       # Critical: Quantum error rate too high
       - alert: QuantumErrorRateHigh
@@ -148,8 +148,8 @@ groups:
           version: v0.4.0
           component: quantum_operations
         annotations:
-          summary: "Quantum operation error rate exceeds threshold"
-          description: "Error rate is {{ $value | humanizePercentage }}, above maximum 1% for tenant {{ $labels.tenant }}"
+          summary: 'Quantum operation error rate exceeds threshold'
+          description: 'Error rate is {{ $value | humanizePercentage }}, above maximum 1% for tenant {{ $labels.tenant }}'
 
       # Warning: Quantum entanglement limit approached
       - alert: QuantumEntanglementLimitApproached
@@ -160,8 +160,8 @@ groups:
           version: v0.4.0
           component: quantum_operations
         annotations:
-          summary: "Quantum entanglement approaching safety limit"
-          description: "{{ $value }} qubits entangled, approaching limit of 1000 for tenant {{ $labels.tenant }}"
+          summary: 'Quantum entanglement approaching safety limit'
+          description: '{{ $value }} qubits entangled, approaching limit of 1000 for tenant {{ $labels.tenant }}'
 
       # === AUTONOMY TIER ALERTS ===
 
@@ -174,8 +174,8 @@ groups:
           version: v0.4.0
           component: autonomy_monitoring
         annotations:
-          summary: "Autonomy compensation rate approaching threshold"
-          description: "24h compensation rate is {{ $value | humanizePercentage }}, approaching 0.5% limit for tenant {{ $labels.tenant }}"
+          summary: 'Autonomy compensation rate approaching threshold'
+          description: '24h compensation rate is {{ $value | humanizePercentage }}, approaching 0.5% limit for tenant {{ $labels.tenant }}'
 
       # Critical: Autonomy compensation rate exceeded
       - alert: AutonomyCompensationRateExceeded
@@ -186,8 +186,8 @@ groups:
           version: v0.4.0
           component: autonomy_monitoring
         annotations:
-          summary: "Autonomy compensation rate exceeded safety threshold"
-          description: "24h compensation rate is {{ $value | humanizePercentage }}, above 0.5% safety limit for tenant {{ $labels.tenant }}"
+          summary: 'Autonomy compensation rate exceeded safety threshold'
+          description: '24h compensation rate is {{ $value | humanizePercentage }}, above 0.5% safety limit for tenant {{ $labels.tenant }}'
 
       # Warning: Autonomy tier time limit approached
       - alert: AutonomyTierTimeLimitApproached
@@ -201,8 +201,8 @@ groups:
           version: v0.4.0
           component: autonomy_monitoring
         annotations:
-          summary: "Autonomy operation approaching tier time limit"
-          description: "Operation running for {{ $value }}s, 80% of {{ $labels.autonomy_tier }} limit for tenant {{ $labels.tenant }}"
+          summary: 'Autonomy operation approaching tier time limit'
+          description: 'Operation running for {{ $value }}s, 80% of {{ $labels.autonomy_tier }} limit for tenant {{ $labels.tenant }}'
 
       # === PERFORMANCE AND COMPLIANCE ALERTS ===
 
@@ -215,8 +215,8 @@ groups:
           version: v0.4.0
           component: performance_monitoring
         annotations:
-          summary: "Transcendent intelligence performance below expectations"
-          description: "Performance multiplier is {{ $value }}, below expected 5.0x baseline for tenant {{ $labels.tenant }}"
+          summary: 'Transcendent intelligence performance below expectations'
+          description: 'Performance multiplier is {{ $value }}, below expected 5.0x baseline for tenant {{ $labels.tenant }}'
 
       # Critical: Transcendent operation timeout
       - alert: TranscendentOperationTimeout
@@ -227,8 +227,8 @@ groups:
           version: v0.4.0
           component: performance_monitoring
         annotations:
-          summary: "Transcendent operation exceeded timeout threshold"
-          description: "Operation {{ $labels.operation_name }} running for {{ $value }}s, exceeding 5min timeout for tenant {{ $labels.tenant }}"
+          summary: 'Transcendent operation exceeded timeout threshold'
+          description: 'Operation {{ $labels.operation_name }} running for {{ $value }}s, exceeding 5min timeout for tenant {{ $labels.tenant }}'
 
       # Warning: ZK fairness proof generation failing
       - alert: ZKFairnessProofGenerationFailing
@@ -243,8 +243,8 @@ groups:
           version: v0.4.0
           component: fairness_validation
         annotations:
-          summary: "ZK fairness proof generation failure rate high"
-          description: "Fairness proof failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}"
+          summary: 'ZK fairness proof generation failure rate high'
+          description: 'Fairness proof failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}'
 
       # === EVIDENCE AND AUDIT ALERTS ===
 
@@ -257,8 +257,8 @@ groups:
           version: v0.4.0
           component: evidence_system
         annotations:
-          summary: "Transcendent operation evidence generation failed"
-          description: "Evidence generation failed for operation {{ $labels.operation_id }} in tenant {{ $labels.tenant }}"
+          summary: 'Transcendent operation evidence generation failed'
+          description: 'Evidence generation failed for operation {{ $labels.operation_id }} in tenant {{ $labels.tenant }}'
 
       # Warning: Post-quantum signature verification failing
       - alert: PostQuantumSignatureVerificationFailing
@@ -273,8 +273,8 @@ groups:
           version: v0.4.0
           component: post_quantum_security
         annotations:
-          summary: "Post-quantum signature verification failure rate high"
-          description: "PQ signature verification failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}"
+          summary: 'Post-quantum signature verification failure rate high'
+          description: 'PQ signature verification failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}'
 
       # === REGULATORY AND COMPLIANCE ALERTS ===
 
@@ -287,8 +287,8 @@ groups:
           version: v0.4.0
           component: regulatory_compliance
         annotations:
-          summary: "Data residency compliance violation detected"
-          description: "Operation {{ $labels.operation_name }} violates data residency for tenant {{ $labels.tenant }} in region {{ $labels.region }}"
+          summary: 'Data residency compliance violation detected'
+          description: 'Operation {{ $labels.operation_name }} violates data residency for tenant {{ $labels.tenant }} in region {{ $labels.region }}'
 
       # Warning: Purpose limitation validation failing
       - alert: PurposeLimitationValidationFailing
@@ -299,5 +299,5 @@ groups:
           version: v0.4.0
           component: regulatory_compliance
         annotations:
-          summary: "Purpose limitation compliance failing"
-          description: "Operation {{ $labels.operation_name }} fails purpose limitation check for tenant {{ $labels.tenant }}"
+          summary: 'Purpose limitation compliance failing'
+          description: 'Operation {{ $labels.operation_name }} fails purpose limitation check for tenant {{ $labels.tenant }}'

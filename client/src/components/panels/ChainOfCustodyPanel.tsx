@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export default function ChainOfCustodyPanel() {
   const [entries, setEntries] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("/audit/export?investigation_id=demo&format=JSON")
+    fetch('/audit/export?investigation_id=demo&format=JSON')
       .then((r) => r.json())
       .then((d) => setEntries(d.entries || []))
       .catch(() => setEntries([]));
@@ -23,7 +23,7 @@ export default function ChainOfCustodyPanel() {
       <button
         onClick={() =>
           (window.location.href =
-            "/audit/export?investigation_id=demo&format=PDF")
+            '/audit/export?investigation_id=demo&format=PDF')
         }
       >
         Export Report

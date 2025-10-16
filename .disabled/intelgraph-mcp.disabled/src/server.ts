@@ -3,7 +3,7 @@ import {
   ToolRegistry,
   ResourceRegistry,
   PromptRegistry,
-  graphToolkit
+  graphToolkit,
 } from '@intelgraph/mcp-core';
 
 const cypher = async (_tenant: string, query: string, params?: unknown) => {
@@ -12,20 +12,22 @@ const cypher = async (_tenant: string, query: string, params?: unknown) => {
     {
       query,
       params: params ?? {},
-      provenance: 'example'
-    }
+      provenance: 'example',
+    },
   ];
 };
 
 const registries = {
   tools: new ToolRegistry(),
   resources: new ResourceRegistry(),
-  prompts: new PromptRegistry()
+  prompts: new PromptRegistry(),
 };
 
 const toolkit = graphToolkit({ cypher });
 toolkit.tools.forEach((tool) => registries.tools.register(tool));
-toolkit.resources.forEach((resource) => registries.resources.register(resource));
+toolkit.resources.forEach((resource) =>
+  registries.resources.register(resource),
+);
 toolkit.prompts.forEach((prompt) => registries.prompts.register(prompt));
 
 const transport = process.env.MCP_TRANSPORT === 'http' ? 'http' : 'stdio';
@@ -39,7 +41,7 @@ void (async () => {
       transport,
       http: { port },
       jwksUrl: process.env.JWKS_URL,
-      registries
+      registries,
     });
   } catch (error) {
     console.error('[intelgraph-mcp] failed to start MCP server', error);

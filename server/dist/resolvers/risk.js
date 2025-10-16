@@ -4,9 +4,15 @@ export const riskResolvers = {
     Query: {
         riskSummary: async (_, { entityId, window }) => {
             const res = await service.compute(entityId, window);
-            return { entityId, score: res.score, band: res.band, window: res.window, topContributions: res.contributions.slice(0, 5) };
+            return {
+                entityId,
+                score: res.score,
+                band: res.band,
+                window: res.window,
+                topContributions: res.contributions.slice(0, 5),
+            };
         },
-        topRiskEntities: async () => []
-    }
+        topRiskEntities: async () => [],
+    },
 };
 //# sourceMappingURL=risk.js.map

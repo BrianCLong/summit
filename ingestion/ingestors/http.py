@@ -1,6 +1,10 @@
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List
+
+from collections.abc import Iterable
+from typing import Any
+
 import requests
+
 from .base import Ingestor
 
 
@@ -9,9 +13,9 @@ class HTTPIngestor(Ingestor):
 
     def __init__(self, producer: Any, topic: str, urls: Iterable[str]):
         super().__init__(producer, topic)
-        self.urls: List[str] = list(urls)
+        self.urls: list[str] = list(urls)
 
-    def fetch(self) -> Iterable[Dict[str, Any]]:
+    def fetch(self) -> Iterable[dict[str, Any]]:
         for url in self.urls:
             resp = requests.get(url, timeout=10)
             data = resp.json()
@@ -21,7 +25,7 @@ class HTTPIngestor(Ingestor):
             else:
                 yield data
 
-    def normalize(self, item: Dict[str, Any]) -> Dict[str, Any]:
+    def normalize(self, item: dict[str, Any]) -> dict[str, Any]:
         return {
             "id": item.get("id") or hash(str(item)),
             "platform": "http",

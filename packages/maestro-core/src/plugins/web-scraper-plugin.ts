@@ -159,7 +159,10 @@ export class WebScraperPlugin implements StepPlugin {
     try {
       // Check robots.txt compliance
       if (this.config.respectRobotsTxt) {
-        const allowed = await this.checkRobotsAllowed(url, this.config.userAgent!);
+        const allowed = await this.checkRobotsAllowed(
+          url,
+          this.config.userAgent!,
+        );
         if (!allowed) {
           throw new Error(`Robots.txt disallows scraping ${stepConfig.url}`);
         }
@@ -202,7 +205,11 @@ export class WebScraperPlugin implements StepPlugin {
 
       // Cache the result if enabled
       if (stepConfig.caching?.enabled) {
-        await this.updateCache(stepConfig, extractedData, response.headers.etag);
+        await this.updateCache(
+          stepConfig,
+          extractedData,
+          response.headers.etag,
+        );
       }
 
       // Calculate cost (bandwidth + processing time)
@@ -246,7 +253,10 @@ export class WebScraperPlugin implements StepPlugin {
     console.log(`Web scraper compensation completed for ${stepConfig.url}`);
   }
 
-  private async checkRobotsAllowed(url: URL, userAgent: string): Promise<boolean> {
+  private async checkRobotsAllowed(
+    url: URL,
+    userAgent: string,
+  ): Promise<boolean> {
     const robotsUrl = `${url.protocol}//${url.host}/robots.txt`;
 
     try {
@@ -281,7 +291,9 @@ export class WebScraperPlugin implements StepPlugin {
     }
   }
 
-  private async applyRateLimiting(stepConfig: WebScraperStepConfig): Promise<void> {
+  private async applyRateLimiting(
+    stepConfig: WebScraperStepConfig,
+  ): Promise<void> {
     const delay = stepConfig.rateLimiting?.delay || this.config.defaultDelay!;
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
@@ -300,7 +312,8 @@ export class WebScraperPlugin implements StepPlugin {
       url: stepConfig.url,
       headers: {
         ...stepConfig.headers,
-        Accept: 'text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
         DNT: '1',
@@ -314,7 +327,11 @@ export class WebScraperPlugin implements StepPlugin {
     }
 
     // Add proxy if proxy rotation is enabled
-    if (this.config.enableProxyRotation && this.config.proxies && this.config.proxies.length > 0) {
+    if (
+      this.config.enableProxyRotation &&
+      this.config.proxies &&
+      this.config.proxies.length > 0
+    ) {
       const proxy = this.selectProxy();
       if (proxy) {
         requestConfig.proxy = proxy;
@@ -334,10 +351,17 @@ export class WebScraperPlugin implements StepPlugin {
         }
 
         // Handle rate limiting
-        if (error.response?.status === 429 && stepConfig.rateLimiting?.respectRetryAfter) {
-          const retryAfter = parseInt(error.response.headers['retry-after'] || '60');
+        if (
+          error.response?.status === 429 &&
+          stepConfig.rateLimiting?.respectRetryAfter
+        ) {
+          const retryAfter = parseInt(
+            error.response.headers['retry-after'] || '60',
+          );
           console.log(`Rate limited, waiting ${retryAfter} seconds`);
-          await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
+          await new Promise((resolve) =>
+            setTimeout(resolve, retryAfter * 1000),
+          );
           continue;
         }
 
@@ -352,7 +376,10 @@ export class WebScraperPlugin implements StepPlugin {
     throw lastError;
   }
 
-  private validateResponse(response: any, stepConfig: WebScraperStepConfig): void {
+  private validateResponse(
+    response: any,
+    stepConfig: WebScraperStepConfig,
+  ): void {
     const expectedCodes = stepConfig.validation?.expectedStatusCodes || [200];
 
     if (!expectedCodes.includes(response.status)) {
@@ -362,7 +389,9 @@ export class WebScraperPlugin implements StepPlugin {
     // Check for required content
     if (stepConfig.validation?.requiredContent) {
       const content =
-        typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        typeof response.data === 'string'
+          ? response.data
+          : JSON.stringify(response.data);
 
       for (const required of stepConfig.validation.requiredContent) {
         if (!content.includes(required)) {
@@ -374,7 +403,9 @@ export class WebScraperPlugin implements StepPlugin {
     // Check for forbidden content
     if (stepConfig.validation?.forbiddenContent) {
       const content =
-        typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        typeof response.data === 'string'
+          ? response.data
+          : JSON.stringify(response.data);
 
       for (const forbidden of stepConfig.validation.forbiddenContent) {
         if (content.includes(forbidden)) {
@@ -578,7 +609,11 @@ export class WebScraperPlugin implements StepPlugin {
     return entry.data;
   }
 
-  private updateCache(stepConfig: WebScraperStepConfig, data: any, etag?: string): void {
+  private updateCache(
+    stepConfig: WebScraperStepConfig,
+    data: any,
+    etag?: string,
+  ): void {
     const cacheKey = this.getCacheKey(stepConfig);
 
     this.cache.set(cacheKey, {
@@ -606,7 +641,10 @@ export class WebScraperPlugin implements StepPlugin {
       return null;
     }
 
-    const proxy = this.config.proxies[Math.floor(Math.random() * this.config.proxies.length)];
+    const proxy =
+      this.config.proxies[
+        Math.floor(Math.random() * this.config.proxies.length)
+      ];
     const [host, port] = proxy.split(':');
 
     return {

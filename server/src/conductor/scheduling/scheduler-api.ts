@@ -2,7 +2,11 @@
 // Provides endpoints for scheduling requests, budget management, and queue monitoring
 
 import express from 'express';
-import { costAwareScheduler, SchedulingContext, BudgetConfig } from './cost-aware-scheduler';
+import {
+  costAwareScheduler,
+  SchedulingContext,
+  BudgetConfig,
+} from './cost-aware-scheduler';
 import { ExpertArm } from '../learn/bandit';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 
@@ -34,7 +38,11 @@ schedulerRouter.post('/schedule', async (req, res) => {
     const scheduleRequest: ScheduleRequest = req.body;
 
     // Validation
-    if (!scheduleRequest.expertType || !scheduleRequest.tenantId || !scheduleRequest.requestId) {
+    if (
+      !scheduleRequest.expertType ||
+      !scheduleRequest.tenantId ||
+      !scheduleRequest.requestId
+    ) {
       return res.status(400).json({
         success: false,
         message: 'expertType, tenantId, and requestId are required',
@@ -67,9 +75,13 @@ schedulerRouter.post('/schedule', async (req, res) => {
       expertType: scheduleRequest.expertType,
       priority: scheduleRequest.priority || 'normal',
       estimatedCost:
-        scheduleRequest.estimatedCost || costEstimates[scheduleRequest.expertType] || 0.01,
+        scheduleRequest.estimatedCost ||
+        costEstimates[scheduleRequest.expertType] ||
+        0.01,
       estimatedDuration:
-        scheduleRequest.estimatedDuration || durationEstimates[scheduleRequest.expertType] || 30000,
+        scheduleRequest.estimatedDuration ||
+        durationEstimates[scheduleRequest.expertType] ||
+        30000,
       tenantId: scheduleRequest.tenantId,
       requestId: scheduleRequest.requestId,
       timeout: scheduleRequest.timeout || 300000, // 5 minutes default
@@ -87,7 +99,10 @@ schedulerRouter.post('/schedule', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('scheduler_request', decision.approved);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'scheduler_request',
+      decision.approved,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'scheduler_decision_time',
       response.processingTime,
@@ -140,7 +155,10 @@ schedulerRouter.post('/dequeue/:queueName', async (req, res) => {
       });
     }
 
-    prometheusConductorMetrics.recordOperationalEvent('scheduler_task_dequeued', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'scheduler_task_dequeued',
+      true,
+    );
 
     res.json({
       success: true,
@@ -163,12 +181,26 @@ schedulerRouter.post('/dequeue/:queueName', async (req, res) => {
  */
 schedulerRouter.post('/complete', async (req, res) => {
   try {
-    const { queueName, requestId, actualCost, processingTime, tenantId, result } = req.body;
+    const {
+      queueName,
+      requestId,
+      actualCost,
+      processingTime,
+      tenantId,
+      result,
+    } = req.body;
 
-    if (!queueName || !requestId || actualCost === undefined || !processingTime || !tenantId) {
+    if (
+      !queueName ||
+      !requestId ||
+      actualCost === undefined ||
+      !processingTime ||
+      !tenantId
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'queueName, requestId, actualCost, processingTime, and tenantId are required',
+        message:
+          'queueName, requestId, actualCost, processingTime, and tenantId are required',
       });
     }
 
@@ -353,7 +385,9 @@ schedulerRouter.get('/queues', async (req, res) => {
       summary: {
         totalPendingTasks: queues.reduce((sum, q) => sum + q.pending, 0),
         totalProcessingTasks: queues.reduce((sum, q) => sum + q.processing, 0),
-        avgWaitTime: queues.reduce((sum, q) => sum + q.avgWaitTime, 0) / queues.length || 0,
+        avgWaitTime:
+          queues.reduce((sum, q) => sum + q.avgWaitTime, 0) / queues.length ||
+          0,
       },
       timestamp: Date.now(),
     });
@@ -401,9 +435,14 @@ schedulerRouter.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`Scheduler API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    console.log(
+      `Scheduler API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`,
+    );
 
-    prometheusConductorMetrics.recordOperationalMetric('scheduler_api_request_duration', duration);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'scheduler_api_request_duration',
+      duration,
+    );
     prometheusConductorMetrics.recordOperationalEvent(
       `scheduler_api_${req.method.toLowerCase()}`,
       res.statusCode < 400,

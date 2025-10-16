@@ -8,5 +8,8 @@
     "types": ["node", "jest"]
   },
   "include": ["src"],
-  "references": [{ "path": "../../packages/types" }, { "path": "../../packages/ai-core" }]
+  "references": [
+    { "path": "../../packages/types" },
+    { "path": "../../packages/ai-core" }
+  ]
 }

@@ -51,7 +51,10 @@ export class RelationshipRepo {
   /**
    * Create new relationship with dual-write
    */
-  async create(input: RelationshipInput, userId: string): Promise<Relationship> {
+  async create(
+    input: RelationshipInput,
+    userId: string,
+  ): Promise<Relationship> {
     const id = uuidv4();
     const client = await this.pg.connect();
 
@@ -102,7 +105,10 @@ export class RelationshipRepo {
         [
           uuidv4(),
           'relationship.upsert',
-          JSON.stringify({ id: relationship.id, tenantId: relationship.tenant_id }),
+          JSON.stringify({
+            id: relationship.id,
+            tenantId: relationship.tenant_id,
+          }),
         ],
       );
 
@@ -143,7 +149,10 @@ export class RelationshipRepo {
     try {
       await client.query('BEGIN');
 
-      const { rowCount } = await client.query(`DELETE FROM relationships WHERE id = $1`, [id]);
+      const { rowCount } = await client.query(
+        `DELETE FROM relationships WHERE id = $1`,
+        [id],
+      );
 
       if (rowCount && rowCount > 0) {
         // Outbox event for Neo4j cleanup

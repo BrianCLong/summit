@@ -63,7 +63,8 @@ export interface OPAEvaluationResult {
 
 export class PolicySimulator extends EventEmitter {
   private policyRules: Map<string, PolicyRule> = new Map();
-  private costModels: Map<string, (context: any, changes: any[]) => number> = new Map();
+  private costModels: Map<string, (context: any, changes: any[]) => number> =
+    new Map();
   private simulationHistory: Array<{
     scenario: string;
     result: PolicySimulationResult;
@@ -98,7 +99,7 @@ export class PolicySimulator extends EventEmitter {
         }
       `,
       severity: 'critical',
-      enabled: true
+      enabled: true,
     });
 
     // Budget policy rules
@@ -119,7 +120,7 @@ export class PolicySimulator extends EventEmitter {
         }
       `,
       severity: 'high',
-      enabled: true
+      enabled: true,
     });
 
     // Data residency rules
@@ -137,7 +138,7 @@ export class PolicySimulator extends EventEmitter {
         }
       `,
       severity: 'critical',
-      enabled: true
+      enabled: true,
     });
 
     // Model access rules
@@ -162,7 +163,7 @@ export class PolicySimulator extends EventEmitter {
         }
       `,
       severity: 'medium',
-      enabled: true
+      enabled: true,
     });
   }
 
@@ -171,7 +172,7 @@ export class PolicySimulator extends EventEmitter {
     this.costModels.set('llm', (context: any, changes: any[]) => {
       const baseTokens = changes.length * 1000; // 1k tokens per change
       const tokenCost = 0.002; // $0.002 per 1k tokens
-      return baseTokens * tokenCost / 1000;
+      return (baseTokens * tokenCost) / 1000;
     });
 
     // CI cost model
@@ -203,16 +204,25 @@ export class PolicySimulator extends EventEmitter {
     try {
       // Run OPA evaluation
       const opaResult = await this.evaluateOPA(scenario);
-      
+
       // Calculate cost predictions
       const costResult = await this.predictCosts(scenario);
-      
+
       // Calculate risk score
-      const riskScore = this.calculateRiskScore(scenario, opaResult, costResult);
-      
+      const riskScore = this.calculateRiskScore(
+        scenario,
+        opaResult,
+        costResult,
+      );
+
       // Generate recommendations
-      const recommendations = this.generateRecommendations(scenario, opaResult, costResult, riskScore);
-      
+      const recommendations = this.generateRecommendations(
+        scenario,
+        opaResult,
+        costResult,
+        riskScore,
+      );
+
       const result: PolicySimulationResult = {
         scenario: scenario.plan,
         changes: scenario.changes,
@@ -220,19 +230,19 @@ export class PolicySimulator extends EventEmitter {
         opa: {
           denies: opaResult.violatedRules.length,
           reasons: opaResult.reasons,
-          rules: opaResult.violatedRules
+          rules: opaResult.violatedRules,
         },
         cost: costResult,
         pass: opaResult.allow && costResult.usd <= scenario.context.budgets.usd,
         riskScore,
-        recommendations
+        recommendations,
       };
 
       // Store simulation history
       this.simulationHistory.push({
         scenario: scenario.plan,
         result,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       // Emit events
@@ -242,19 +252,23 @@ export class PolicySimulator extends EventEmitter {
 
       this.emit('simulationComplete', result);
       return result;
-
     } catch (error) {
-      this.emit('simulationError', { scenario: scenario.plan, error: error.message });
+      this.emit('simulationError', {
+        scenario: scenario.plan,
+        error: error.message,
+      });
       throw error;
     }
   }
 
-  private async evaluateOPA(scenario: PolicyScenario): Promise<OPAEvaluationResult> {
+  private async evaluateOPA(
+    scenario: PolicyScenario,
+  ): Promise<OPAEvaluationResult> {
     const input = {
       action: this.inferAction(scenario.changes),
       context: scenario.context,
       changes: scenario.changes,
-      cost: await this.predictCosts(scenario)
+      cost: await this.predictCosts(scenario),
     };
 
     const violatedRules: string[] = [];
@@ -278,18 +292,24 @@ export class PolicySimulator extends EventEmitter {
       violatedRules,
       metadata: {
         rulesEvaluated: this.policyRules.size,
-        inputSize: JSON.stringify(input).length
-      }
+        inputSize: JSON.stringify(input).length,
+      },
     };
   }
 
-  private async evaluateRule(rule: PolicyRule, input: any): Promise<string | null> {
+  private async evaluateRule(
+    rule: PolicyRule,
+    input: any,
+  ): Promise<string | null> {
     // Mock OPA evaluation - in reality would use @open-policy-agent/opa-wasm
     // For now, implement key rules directly
-    
+
     switch (rule.id) {
       case 'iam-write-access':
-        if (input.action === 'write' && input.changes.some((c: any) => c.path.includes('passwd'))) {
+        if (
+          input.action === 'write' &&
+          input.changes.some((c: any) => c.path.includes('passwd'))
+        ) {
           return 'Write access to system files denied';
         }
         break;
@@ -301,17 +321,21 @@ export class PolicySimulator extends EventEmitter {
         break;
 
       case 'data-residency':
-        if (input.context.region === 'eu-west' && 
-            input.changes.some((c: any) => c.path.includes('pii')) &&
-            !input.context.region.startsWith('eu-')) {
+        if (
+          input.context.region === 'eu-west' &&
+          input.changes.some((c: any) => c.path.includes('pii')) &&
+          !input.context.region.startsWith('eu-')
+        ) {
           return 'PII data must be stored in EU for EU region';
         }
         break;
 
       case 'model-caps':
-        if (input.action === 'model_call' && 
-            input.context.tenant === 'trial' &&
-            input.changes.some((c: any) => c.path.includes('large-model'))) {
+        if (
+          input.action === 'model_call' &&
+          input.context.tenant === 'trial' &&
+          input.changes.some((c: any) => c.path.includes('large-model'))
+        ) {
           return 'Trial tenants cannot access large models';
         }
         break;
@@ -322,13 +346,17 @@ export class PolicySimulator extends EventEmitter {
 
   private inferAction(changes: Array<{ path: string; diff: string }>): string {
     // Infer action type from changes
-    if (changes.some(c => c.path.includes('policy') || c.path.includes('auth'))) {
+    if (
+      changes.some((c) => c.path.includes('policy') || c.path.includes('auth'))
+    ) {
       return 'policy_change';
     }
-    if (changes.some(c => c.path.includes('model') || c.path.includes('ai'))) {
+    if (
+      changes.some((c) => c.path.includes('model') || c.path.includes('ai'))
+    ) {
       return 'model_call';
     }
-    if (changes.some(c => c.diff.includes('+'))) {
+    if (changes.some((c) => c.diff.includes('+'))) {
       return 'write';
     }
     return 'read';
@@ -350,13 +378,15 @@ export class PolicySimulator extends EventEmitter {
     }
 
     // Add region-specific multipliers
-    const regionMultiplier = this.getRegionCostMultiplier(scenario.context.region);
+    const regionMultiplier = this.getRegionCostMultiplier(
+      scenario.context.region,
+    );
     totalUSD *= regionMultiplier;
 
     return {
       usd: Math.round(totalUSD * 100) / 100, // Round to 2 decimal places
       predicted: true,
-      breakdown
+      breakdown,
     };
   }
 
@@ -365,23 +395,23 @@ export class PolicySimulator extends EventEmitter {
       'us-east-1': 1.0,
       'us-west-2': 1.05,
       'eu-west-1': 1.15,
-      'ap-southeast-1': 1.20,
-      'ap-northeast-1': 1.25
+      'ap-southeast-1': 1.2,
+      'ap-northeast-1': 1.25,
     };
-    return multipliers[region] || 1.10; // Default 10% premium for unknown regions
+    return multipliers[region] || 1.1; // Default 10% premium for unknown regions
   }
 
   private calculateRiskScore(
     scenario: PolicyScenario,
     opaResult: OPAEvaluationResult,
-    costResult: any
+    costResult: any,
   ): number {
     let risk = 0;
 
     // Policy violation risk
     if (opaResult.violatedRules.length > 0) {
       risk += 0.4;
-      
+
       // Critical violations increase risk more
       for (const ruleId of opaResult.violatedRules) {
         const rule = this.policyRules.get(ruleId);
@@ -404,7 +434,11 @@ export class PolicySimulator extends EventEmitter {
 
     // Critical path risk
     const criticalPaths = ['auth/', 'security/', 'policy/', 'admin/'];
-    if (scenario.changes.some(c => criticalPaths.some(cp => c.path.includes(cp)))) {
+    if (
+      scenario.changes.some((c) =>
+        criticalPaths.some((cp) => c.path.includes(cp)),
+      )
+    ) {
       risk += 0.15;
     }
 
@@ -415,7 +449,7 @@ export class PolicySimulator extends EventEmitter {
     scenario: PolicyScenario,
     opaResult: OPAEvaluationResult,
     costResult: any,
-    riskScore: number
+    riskScore: number,
   ): string[] {
     const recommendations: string[] = [];
 
@@ -423,12 +457,16 @@ export class PolicySimulator extends EventEmitter {
     if (opaResult.violatedRules.length > 0) {
       recommendations.push('Address policy violations before proceeding');
       recommendations.push('Consider alternative implementation approaches');
-      
+
       if (opaResult.violatedRules.includes('iam-write-access')) {
-        recommendations.push('Use service accounts instead of direct file access');
+        recommendations.push(
+          'Use service accounts instead of direct file access',
+        );
       }
       if (opaResult.violatedRules.includes('budget-limits')) {
-        recommendations.push('Optimize implementation to reduce resource usage');
+        recommendations.push(
+          'Optimize implementation to reduce resource usage',
+        );
       }
     }
 
@@ -460,7 +498,11 @@ export class PolicySimulator extends EventEmitter {
   /**
    * Run policy mutation testing to verify rule effectiveness
    */
-  async runMutationTest(): Promise<{ coverage: number; mutations: number; failures: number }> {
+  async runMutationTest(): Promise<{
+    coverage: number;
+    mutations: number;
+    failures: number;
+  }> {
     const mutations = [];
     let failures = 0;
 
@@ -477,20 +519,28 @@ export class PolicySimulator extends EventEmitter {
       const survived = await this.testPolicyMutation(mutation);
       if (survived) {
         failures++;
-        this.emit('policyMutationSurvived', { mutation, ruleId: mutation.originalId });
+        this.emit('policyMutationSurvived', {
+          mutation,
+          ruleId: mutation.originalId,
+        });
       }
     }
 
-    const coverage = mutations.length > 0 ? (mutations.length - failures) / mutations.length : 1;
+    const coverage =
+      mutations.length > 0
+        ? (mutations.length - failures) / mutations.length
+        : 1;
 
     return {
       coverage,
       mutations: mutations.length,
-      failures
+      failures,
     };
   }
 
-  private generatePolicyMutations(rule: PolicyRule): Array<PolicyRule & { originalId: string }> {
+  private generatePolicyMutations(
+    rule: PolicyRule,
+  ): Array<PolicyRule & { originalId: string }> {
     const mutations = [];
 
     // Mutation 1: Change comparison operators
@@ -498,7 +548,7 @@ export class PolicySimulator extends EventEmitter {
       ...rule,
       id: `${rule.id}_mut_1`,
       originalId: rule.id,
-      rego: rule.rego.replace(/>/g, '>=').replace(/</g, '<=')
+      rego: rule.rego.replace(/>/g, '>=').replace(/</g, '<='),
     };
     mutations.push(mutation1);
 
@@ -507,7 +557,7 @@ export class PolicySimulator extends EventEmitter {
       ...rule,
       id: `${rule.id}_mut_2`,
       originalId: rule.id,
-      rego: rule.rego.replace(/startswith\(/g, 'contains(')
+      rego: rule.rego.replace(/startswith\(/g, 'contains('),
     };
     mutations.push(mutation2);
 
@@ -516,25 +566,27 @@ export class PolicySimulator extends EventEmitter {
       ...rule,
       id: `${rule.id}_mut_3`,
       originalId: rule.id,
-      rego: rule.rego.replace(/not /g, '').replace(/== "write"/g, '== "read"')
+      rego: rule.rego.replace(/not /g, '').replace(/== "write"/g, '== "read"'),
     };
     mutations.push(mutation3);
 
     return mutations;
   }
 
-  private async testPolicyMutation(mutation: PolicyRule & { originalId: string }): Promise<boolean> {
+  private async testPolicyMutation(
+    mutation: PolicyRule & { originalId: string },
+  ): Promise<boolean> {
     // Test scenarios that should fail with the original rule
     const testScenarios = this.generateTestScenarios(mutation.originalId);
-    
+
     for (const testScenario of testScenarios) {
       // Temporarily replace rule for testing
       const originalRule = this.policyRules.get(mutation.originalId);
       this.policyRules.set(mutation.originalId, mutation);
-      
+
       try {
         const result = await this.simulate(testScenario);
-        
+
         // If mutation allows what should be denied, it survived (bad)
         if (result.pass && !testScenario.shouldPass) {
           this.policyRules.set(mutation.originalId, originalRule!);
@@ -545,7 +597,7 @@ export class PolicySimulator extends EventEmitter {
         this.policyRules.set(mutation.originalId, originalRule!);
         continue;
       }
-      
+
       // Restore original rule
       this.policyRules.set(mutation.originalId, originalRule!);
     }
@@ -553,7 +605,9 @@ export class PolicySimulator extends EventEmitter {
     return false; // Mutation was killed (good)
   }
 
-  private generateTestScenarios(ruleId: string): Array<PolicyScenario & { shouldPass: boolean }> {
+  private generateTestScenarios(
+    ruleId: string,
+  ): Array<PolicyScenario & { shouldPass: boolean }> {
     const scenarios = [];
 
     switch (ruleId) {
@@ -561,19 +615,29 @@ export class PolicySimulator extends EventEmitter {
         scenarios.push({
           plan: 'test-iam-violation',
           changes: [{ path: '/etc/passwd', diff: '+password_change' }],
-          context: { region: 'us-east-1', tenant: 'test', budgets: { usd: 10, ci_mins: 50 } },
+          context: {
+            region: 'us-east-1',
+            tenant: 'test',
+            budgets: { usd: 10, ci_mins: 50 },
+          },
           checks: ['opa'],
-          shouldPass: false
+          shouldPass: false,
         });
         break;
 
       case 'budget-limits':
         scenarios.push({
           plan: 'test-budget-violation',
-          changes: [{ path: 'expensive-operation.ts', diff: '+large_model_call' }],
-          context: { region: 'us-east-1', tenant: 'test', budgets: { usd: 0.1, ci_mins: 1 } },
+          changes: [
+            { path: 'expensive-operation.ts', diff: '+large_model_call' },
+          ],
+          context: {
+            region: 'us-east-1',
+            tenant: 'test',
+            budgets: { usd: 0.1, ci_mins: 1 },
+          },
           checks: ['opa'],
-          shouldPass: false
+          shouldPass: false,
         });
         break;
     }
@@ -584,7 +648,11 @@ export class PolicySimulator extends EventEmitter {
   /**
    * Get simulation history
    */
-  getSimulationHistory(): Array<{ scenario: string; result: PolicySimulationResult; timestamp: number }> {
+  getSimulationHistory(): Array<{
+    scenario: string;
+    result: PolicySimulationResult;
+    timestamp: number;
+  }> {
     return this.simulationHistory;
   }
 

@@ -21,8 +21,18 @@ import {
   Paper,
   Grid,
 } from '@mui/material';
-import { Description, Business, Gavel, Security, Analytics, Assessment } from '@mui/icons-material';
-import { useReportTemplatesQuery, useGenerateReportMutation } from '../../generated/graphql';
+import {
+  Description,
+  Business,
+  Gavel,
+  Security,
+  Analytics,
+  Assessment,
+} from '@mui/icons-material';
+import {
+  useReportTemplatesQuery,
+  useGenerateReportMutation,
+} from '../../generated/graphql';
 
 interface ReportTemplateSelectorProps {
   open: boolean;
@@ -45,10 +55,30 @@ const EXECUTIVE_TEMPLATE = {
   type: 'Executive',
   description: 'High-level overview for leadership and decision makers',
   sections: [
-    { id: 'exec-summary', name: 'Executive Summary', type: 'summary', required: true },
-    { id: 'key-findings', name: 'Key Findings', type: 'findings', required: true },
-    { id: 'recommendations', name: 'Recommendations', type: 'recommendations', required: true },
-    { id: 'risk-assessment', name: 'Risk Assessment', type: 'risk', required: false },
+    {
+      id: 'exec-summary',
+      name: 'Executive Summary',
+      type: 'summary',
+      required: true,
+    },
+    {
+      id: 'key-findings',
+      name: 'Key Findings',
+      type: 'findings',
+      required: true,
+    },
+    {
+      id: 'recommendations',
+      name: 'Recommendations',
+      type: 'recommendations',
+      required: true,
+    },
+    {
+      id: 'risk-assessment',
+      name: 'Risk Assessment',
+      type: 'risk',
+      required: false,
+    },
     { id: 'next-steps', name: 'Next Steps', type: 'actions', required: false },
   ],
 };
@@ -59,13 +89,43 @@ const FORENSICS_TEMPLATE = {
   type: 'Forensics',
   description: 'Detailed technical analysis for legal and compliance purposes',
   sections: [
-    { id: 'chain-custody', name: 'Chain of Custody', type: 'custody', required: true },
+    {
+      id: 'chain-custody',
+      name: 'Chain of Custody',
+      type: 'custody',
+      required: true,
+    },
     { id: 'methodology', name: 'Methodology', type: 'method', required: true },
-    { id: 'technical-analysis', name: 'Technical Analysis', type: 'analysis', required: true },
-    { id: 'evidence-summary', name: 'Evidence Summary', type: 'evidence', required: true },
-    { id: 'timeline', name: 'Timeline of Events', type: 'timeline', required: false },
-    { id: 'conclusions', name: 'Conclusions', type: 'conclusions', required: true },
-    { id: 'appendices', name: 'Technical Appendices', type: 'appendix', required: false },
+    {
+      id: 'technical-analysis',
+      name: 'Technical Analysis',
+      type: 'analysis',
+      required: true,
+    },
+    {
+      id: 'evidence-summary',
+      name: 'Evidence Summary',
+      type: 'evidence',
+      required: true,
+    },
+    {
+      id: 'timeline',
+      name: 'Timeline of Events',
+      type: 'timeline',
+      required: false,
+    },
+    {
+      id: 'conclusions',
+      name: 'Conclusions',
+      type: 'conclusions',
+      required: true,
+    },
+    {
+      id: 'appendices',
+      name: 'Technical Appendices',
+      type: 'appendix',
+      required: false,
+    },
   ],
 };
 
@@ -88,14 +148,22 @@ export function ReportTemplateSelector({
 
   React.useEffect(() => {
     if (selectedTemplateData) {
-      setSelectedSections(selectedTemplateData.sections.filter((s) => s.required).map((s) => s.id));
-      setReportTitle(`${selectedTemplateData.name} - ${new Date().toLocaleDateString()}`);
+      setSelectedSections(
+        selectedTemplateData.sections
+          .filter((s) => s.required)
+          .map((s) => s.id),
+      );
+      setReportTitle(
+        `${selectedTemplateData.name} - ${new Date().toLocaleDateString()}`,
+      );
     }
   }, [selectedTemplateData]);
 
   const handleSectionToggle = (sectionId: string) => {
     setSelectedSections((prev) =>
-      prev.includes(sectionId) ? prev.filter((id) => id !== sectionId) : [...prev, sectionId],
+      prev.includes(sectionId)
+        ? prev.filter((id) => id !== sectionId)
+        : [...prev, sectionId],
     );
   };
 
@@ -139,7 +207,8 @@ export function ReportTemplateSelector({
           <Grid container spacing={2}>
             {templates.map((template) => {
               const IconComponent =
-                TEMPLATE_ICONS[template.type as keyof typeof TEMPLATE_ICONS] || Description;
+                TEMPLATE_ICONS[template.type as keyof typeof TEMPLATE_ICONS] ||
+                Description;
               const isSelected = selectedTemplate === template.id;
 
               return (
@@ -155,8 +224,17 @@ export function ReportTemplateSelector({
                     }}
                     onClick={() => setSelectedTemplate(template.id)}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                      <IconComponent color={isSelected ? 'primary' : 'action'} />
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        mb: 1,
+                      }}
+                    >
+                      <IconComponent
+                        color={isSelected ? 'primary' : 'action'}
+                      />
                       <Typography variant="h6">{template.name}</Typography>
                       <Chip
                         size="small"
@@ -204,7 +282,9 @@ export function ReportTemplateSelector({
                       primary={section.name}
                       secondary={section.required ? 'Required' : 'Optional'}
                     />
-                    {section.required && <Chip size="small" label="Required" color="primary" />}
+                    {section.required && (
+                      <Chip size="small" label="Required" color="primary" />
+                    )}
                   </ListItem>
                 ))}
               </List>
@@ -230,7 +310,12 @@ export function ReportTemplateSelector({
         <Button
           variant="contained"
           onClick={handleGenerate}
-          disabled={!selectedTemplate || !reportTitle || selectedSections.length === 0 || loading}
+          disabled={
+            !selectedTemplate ||
+            !reportTitle ||
+            selectedSections.length === 0 ||
+            loading
+          }
         >
           {loading ? 'Generating...' : 'Generate Report'}
         </Button>

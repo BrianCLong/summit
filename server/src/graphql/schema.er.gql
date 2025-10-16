@@ -72,7 +72,10 @@ extend type Query {
 
   mergeDecision(id: ID!): MergeDecision
 
-  entityResolutionStats(entityType: String, timeRange: String = "7d"): EntityResolutionStats!
+  entityResolutionStats(
+    entityType: String
+    timeRange: String = "7d"
+  ): EntityResolutionStats!
 
   reconcileQueue(
     limit: Int = 20

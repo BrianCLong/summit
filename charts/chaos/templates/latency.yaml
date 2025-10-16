@@ -6,7 +6,12 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: tc
-        image: alpine
-        securityContext: { capabilities: { add: ["NET_ADMIN"] } }
-        command: ["sh","-c","apk add tc && tc qdisc add dev eth0 root netem delay 200ms 20ms distribution normal && sleep 30 && tc qdisc del dev eth0 root netem"]
+        - name: tc
+          image: alpine
+          securityContext: { capabilities: { add: ['NET_ADMIN'] } }
+          command:
+            [
+              'sh',
+              '-c',
+              'apk add tc && tc qdisc add dev eth0 root netem delay 200ms 20ms distribution normal && sleep 30 && tc qdisc del dev eth0 root netem',
+            ]

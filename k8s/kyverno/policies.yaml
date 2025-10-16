@@ -8,15 +8,15 @@ spec:
     - name: disallow-latest-tag
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: "Image tag :latest is not allowed"
+        message: 'Image tag :latest is not allowed'
         pattern:
           spec:
             containers:
-              - image: "!*:latest"
+              - image: '!*:latest'
     - name: require-nonroot-readonly
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: "Containers must run as non-root and read-only"
+        message: 'Containers must run as non-root and read-only'
         pattern:
           spec:
             securityContext:
@@ -33,27 +33,27 @@ spec:
             containers:
               - securityContext:
                   capabilities:
-                    drop: ["ALL"]
+                    drop: ['ALL']
     - name: require-requests-limits
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: "CPU/Memory requests & limits required"
+        message: 'CPU/Memory requests & limits required'
         pattern:
           spec:
             containers:
               - resources:
                   requests:
-                    cpu: "?*"
-                    memory: "?*"
+                    cpu: '?*'
+                    memory: '?*'
                   limits:
-                    cpu: "?*"
-                    memory: "?*"
+                    cpu: '?*'
+                    memory: '?*'
     - name: require-owner-labels
-      match: { resources: { kinds: [Pod,Deployment,Rollout] } }
+      match: { resources: { kinds: [Pod, Deployment, Rollout] } }
       validate:
-        message: "owner and tier labels are required"
+        message: 'owner and tier labels are required'
         pattern:
           metadata:
             labels:
-              owner: "?*"
-              tier: "?*"
+              owner: '?*'
+              tier: '?*'

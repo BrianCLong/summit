@@ -80,7 +80,10 @@ type ConsentApi = {
   fetchConsent(consentId: string): Promise<ConsentRecord | null>;
   upsertConsent(consent: ConsentRecord): Promise<void>;
   recordAuditTrail(entry: ConsentAuditEntry): Promise<void>;
-  publishDrift?(consentId: string, findings: ConsentDriftFinding[]): Promise<void>;
+  publishDrift?(
+    consentId: string,
+    findings: ConsentDriftFinding[],
+  ): Promise<void>;
 };
 
 type HttpConsentApiClientOptions = {
@@ -115,13 +118,17 @@ function stableSerialize(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map(stableSerialize).join(',')}]`;
   }
-  const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b));
+  const entries = Object.entries(value as Record<string, unknown>).sort(
+    ([a], [b]) => a.localeCompare(b),
+  );
   return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stableSerialize(v)}`).join(',')}}`;
 }
 
 export class HttpConsentApiClient implements ConsentApi {
   private readonly client: AxiosInstance;
-  private readonly options: Required<Pick<HttpConsentApiClientOptions, 'baseUrl' | 'token' | 'timeoutMs'>>;
+  private readonly options: Required<
+    Pick<HttpConsentApiClientOptions, 'baseUrl' | 'token' | 'timeoutMs'>
+  >;
 
   constructor(options: HttpConsentApiClientOptions, client?: AxiosInstance) {
     if (!options.baseUrl) {
@@ -132,11 +139,14 @@ export class HttpConsentApiClient implements ConsentApi {
       token: options.token ?? '',
       timeoutMs: options.timeoutMs ?? 5000,
     };
-    this.client = client ??
+    this.client =
+      client ??
       axios.create({
         baseURL: this.options.baseUrl,
         timeout: this.options.timeoutMs,
-        headers: this.options.token ? { Authorization: `Bearer ${this.options.token}` } : undefined,
+        headers: this.options.token
+          ? { Authorization: `Bearer ${this.options.token}` }
+          : undefined,
       });
   }
 
@@ -160,7 +170,10 @@ export class HttpConsentApiClient implements ConsentApi {
     await this.client.post(`/consents/${entry.consentId}/audit`, entry);
   }
 
-  async publishDrift(consentId: string, findings: ConsentDriftFinding[]): Promise<void> {
+  async publishDrift(
+    consentId: string,
+    findings: ConsentDriftFinding[],
+  ): Promise<void> {
     if (!findings.length) return;
     await this.client.post(`/consents/${consentId}/drift`, { findings });
   }
@@ -177,25 +190,36 @@ export class ConsentReconciler {
   private readonly requireNoticeForCcpa: boolean;
   private readonly requireProofForGdpr: boolean;
 
-  constructor(private readonly api: ConsentApi, options: ConsentReconcilerOptions = {}) {
+  constructor(
+    private readonly api: ConsentApi,
+    options: ConsentReconcilerOptions = {},
+  ) {
     this.actor = options.actor ?? 'consent-reconciler';
     this.clockSkewToleranceMs = options.clockSkewToleranceMs ?? 5 * 60 * 1000;
     this.requireNoticeForCcpa = options.requireNoticeForCcpa ?? true;
     this.requireProofForGdpr = options.requireProofForGdpr ?? true;
   }
 
-  async reconcile(consentId: string, snapshots: ConsentStateSnapshot[]): Promise<ConsentReconciliationResult> {
+  async reconcile(
+    consentId: string,
+    snapshots: ConsentStateSnapshot[],
+  ): Promise<ConsentReconciliationResult> {
     if (!snapshots.length) {
       throw new Error('No consent snapshots provided for reconciliation');
     }
     const uniqueIds = new Set(snapshots.map((snapshot) => snapshot.consentId));
     if (uniqueIds.size !== 1 || !uniqueIds.has(consentId)) {
-      throw new Error('Snapshots must belong to the consentId being reconciled');
+      throw new Error(
+        'Snapshots must belong to the consentId being reconciled',
+      );
     }
 
     const { canonical, stale } = this.resolveConflicts(snapshots);
     const existing = await this.api.fetchConsent(consentId);
-    const nextVersion = existing && existing.version >= canonical.version ? existing.version + 1 : canonical.version;
+    const nextVersion =
+      existing && existing.version >= canonical.version
+        ? existing.version + 1
+        : canonical.version;
     const lastSyncedAt = new Date().toISOString();
     const canonicalRecord: ConsentRecord = {
       ...this.omitSource(canonical),
@@ -208,7 +232,12 @@ export class ConsentReconciler {
 
     const compliance = this.validateCompliance(canonicalRecord);
     const driftFindings = this.detectDrift(canonicalRecord, snapshots);
-    const auditTrail = this.generateAuditTrail(canonicalRecord, stale, compliance, driftFindings);
+    const auditTrail = this.generateAuditTrail(
+      canonicalRecord,
+      stale,
+      compliance,
+      driftFindings,
+    );
 
     await this.api.upsertConsent(canonicalRecord);
     for (const entry of auditTrail) {
@@ -232,7 +261,8 @@ export class ConsentReconciler {
       if (a.version !== b.version) {
         return b.version - a.version;
       }
-      const timeDiff = new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+      const timeDiff =
+        new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
       if (timeDiff !== 0) {
         return timeDiff;
       }
@@ -241,12 +271,17 @@ export class ConsentReconciler {
 
     const canonicalBase = ordered[0];
     const merged = this.mergeMetadata(canonicalBase, ordered);
-    const stale = ordered.slice(1).filter((snapshot) => this.hasMeaningfulDifference(merged, snapshot));
+    const stale = ordered
+      .slice(1)
+      .filter((snapshot) => this.hasMeaningfulDifference(merged, snapshot));
 
     return { canonical: merged, stale };
   }
 
-  private mergeMetadata(canonical: ConsentStateSnapshot, snapshots: ConsentStateSnapshot[]): ConsentStateSnapshot {
+  private mergeMetadata(
+    canonical: ConsentStateSnapshot,
+    snapshots: ConsentStateSnapshot[],
+  ): ConsentStateSnapshot {
     const mergedMetadata: Record<string, unknown> = {};
     const mergedPreferences: ConsentPreferences = {};
     const mergedPurposes = new Set<string>(canonical.purposes ?? []);
@@ -271,13 +306,24 @@ export class ConsentReconciler {
     };
   }
 
-  private hasMeaningfulDifference(reference: ConsentStateSnapshot, snapshot: ConsentStateSnapshot): boolean {
+  private hasMeaningfulDifference(
+    reference: ConsentStateSnapshot,
+    snapshot: ConsentStateSnapshot,
+  ): boolean {
     if (reference.status !== snapshot.status) return true;
     if (reference.version !== snapshot.version) return true;
-    if (Math.abs(new Date(reference.lastUpdated).getTime() - new Date(snapshot.lastUpdated).getTime()) > this.clockSkewToleranceMs) {
+    if (
+      Math.abs(
+        new Date(reference.lastUpdated).getTime() -
+          new Date(snapshot.lastUpdated).getTime(),
+      ) > this.clockSkewToleranceMs
+    ) {
       return true;
     }
-    if (sortPurposes(reference.purposes).join(',') !== sortPurposes(snapshot.purposes).join(',')) {
+    if (
+      sortPurposes(reference.purposes).join(',') !==
+      sortPurposes(snapshot.purposes).join(',')
+    ) {
       return true;
     }
     const referenceMetadata = stableSerialize(reference.metadata ?? {});
@@ -326,7 +372,8 @@ export class ConsentReconciler {
           framework: 'GDPR',
           severity: 'warning',
           code: 'GDPR_PROOF_MISSING',
-          message: 'Proof of consent capture is recommended for GDPR defensibility.',
+          message:
+            'Proof of consent capture is recommended for GDPR defensibility.',
           field: 'proof',
         });
       }
@@ -340,16 +387,21 @@ export class ConsentReconciler {
           framework: 'CCPA',
           severity: 'error',
           code: 'CCPA_NOTICE_REQUIRED',
-          message: 'CCPA requires notice to be provided prior to consent capture.',
+          message:
+            'CCPA requires notice to be provided prior to consent capture.',
           field: 'metadata.ccpaNoticeProvided',
         });
       }
-      if (consent.status === 'denied' && consent.preferences?.doNotSell !== true) {
+      if (
+        consent.status === 'denied' &&
+        consent.preferences?.doNotSell !== true
+      ) {
         issues.push({
           framework: 'CCPA',
           severity: 'warning',
           code: 'CCPA_DNS_MISSING',
-          message: 'Denied status should include a Do Not Sell preference flag.',
+          message:
+            'Denied status should include a Do Not Sell preference flag.',
           field: 'preferences.doNotSell',
         });
       }
@@ -365,7 +417,10 @@ export class ConsentReconciler {
     };
   }
 
-  private detectDrift(canonical: ConsentRecord, snapshots: ConsentStateSnapshot[]): ConsentDriftFinding[] {
+  private detectDrift(
+    canonical: ConsentRecord,
+    snapshots: ConsentStateSnapshot[],
+  ): ConsentDriftFinding[] {
     const findings: ConsentDriftFinding[] = [];
     const canonicalPurposes = sortPurposes(canonical.purposes);
     const canonicalPrefs = canonical.preferences ?? {};
@@ -375,35 +430,75 @@ export class ConsentReconciler {
     for (const snapshot of snapshots) {
       const deltas: ConsentDriftDelta[] = [];
       if (snapshot.version !== canonical.version) {
-        deltas.push({ field: 'version', expected: canonical.version, actual: snapshot.version });
+        deltas.push({
+          field: 'version',
+          expected: canonical.version,
+          actual: snapshot.version,
+        });
       }
       if (snapshot.status !== canonical.status) {
-        deltas.push({ field: 'status', expected: canonical.status, actual: snapshot.status });
+        deltas.push({
+          field: 'status',
+          expected: canonical.status,
+          actual: snapshot.status,
+        });
       }
       const snapshotPurposes = sortPurposes(snapshot.purposes);
       if (snapshotPurposes.join(',') !== canonicalPurposes.join(',')) {
-        deltas.push({ field: 'purposes', expected: canonicalPurposes, actual: snapshotPurposes });
+        deltas.push({
+          field: 'purposes',
+          expected: canonicalPurposes,
+          actual: snapshotPurposes,
+        });
       }
       const snapshotTimestamp = new Date(snapshot.lastUpdated).getTime();
-      if (Math.abs(snapshotTimestamp - canonicalTimestamp) > this.clockSkewToleranceMs) {
-        deltas.push({ field: 'lastUpdated', expected: canonical.lastUpdated, actual: snapshot.lastUpdated });
+      if (
+        Math.abs(snapshotTimestamp - canonicalTimestamp) >
+        this.clockSkewToleranceMs
+      ) {
+        deltas.push({
+          field: 'lastUpdated',
+          expected: canonical.lastUpdated,
+          actual: snapshot.lastUpdated,
+        });
       }
       const snapshotPrefs = snapshot.preferences ?? {};
-      const allPrefKeys = new Set([...Object.keys(canonicalPrefs), ...Object.keys(snapshotPrefs)]);
+      const allPrefKeys = new Set([
+        ...Object.keys(canonicalPrefs),
+        ...Object.keys(snapshotPrefs),
+      ]);
       for (const key of allPrefKeys) {
         if (canonicalPrefs[key] !== snapshotPrefs[key]) {
-          deltas.push({ field: `preferences.${key}`, expected: canonicalPrefs[key], actual: snapshotPrefs[key] });
+          deltas.push({
+            field: `preferences.${key}`,
+            expected: canonicalPrefs[key],
+            actual: snapshotPrefs[key],
+          });
         }
       }
       const snapshotMetadata = snapshot.metadata ?? {};
-      const allMetaKeys = new Set([...Object.keys(canonicalMetadata), ...Object.keys(snapshotMetadata)]);
+      const allMetaKeys = new Set([
+        ...Object.keys(canonicalMetadata),
+        ...Object.keys(snapshotMetadata),
+      ]);
       for (const key of allMetaKeys) {
-        if (stableSerialize(canonicalMetadata[key]) !== stableSerialize(snapshotMetadata[key])) {
-          deltas.push({ field: `metadata.${key}`, expected: canonicalMetadata[key], actual: snapshotMetadata[key] });
+        if (
+          stableSerialize(canonicalMetadata[key]) !==
+          stableSerialize(snapshotMetadata[key])
+        ) {
+          deltas.push({
+            field: `metadata.${key}`,
+            expected: canonicalMetadata[key],
+            actual: snapshotMetadata[key],
+          });
         }
       }
       if (deltas.length) {
-        findings.push({ source: snapshot.source, deltas, detectedAt: new Date().toISOString() });
+        findings.push({
+          source: snapshot.source,
+          deltas,
+          detectedAt: new Date().toISOString(),
+        });
       }
     }
 
@@ -460,7 +555,9 @@ export class ConsentReconciler {
     return entries;
   }
 
-  private omitSource(snapshot: ConsentStateSnapshot): Omit<ConsentStateSnapshot, 'source'> {
+  private omitSource(
+    snapshot: ConsentStateSnapshot,
+  ): Omit<ConsentStateSnapshot, 'source'> {
     const { source, ...rest } = snapshot;
     return rest;
   }

@@ -40,7 +40,15 @@ export interface ComplianceConfig {
 export interface SecurityScanner {
   id: string;
   name: string;
-  type: 'sast' | 'dast' | 'sca' | 'secrets' | 'container' | 'infrastructure' | 'content' | 'custom';
+  type:
+    | 'sast'
+    | 'dast'
+    | 'sca'
+    | 'secrets'
+    | 'container'
+    | 'infrastructure'
+    | 'content'
+    | 'custom';
   enabled: boolean;
   configuration: ScannerConfig;
   rules: SecurityRule[];
@@ -123,7 +131,9 @@ export class SecurityComplianceEngine extends EventEmitter {
   /**
    * Create scanner instance based on type
    */
-  private createScannerInstance(scanner: SecurityScanner): SecurityScannerInstance {
+  private createScannerInstance(
+    scanner: SecurityScanner,
+  ): SecurityScannerInstance {
     switch (scanner.type) {
       case 'sast':
         return new SASTScanner(scanner);
@@ -147,7 +157,10 @@ export class SecurityComplianceEngine extends EventEmitter {
   /**
    * Execute comprehensive security scan
    */
-  async executeSecurityScan(scanType?: string, target?: string): Promise<SecurityScanResult> {
+  async executeSecurityScan(
+    scanType?: string,
+    target?: string,
+  ): Promise<SecurityScanResult> {
     const scanId = this.generateScanId();
     const startTime = Date.now();
 
@@ -175,19 +188,25 @@ export class SecurityComplianceEngine extends EventEmitter {
       await this.checkSecurityThresholds(aggregatedResult);
 
       // Generate report
-      const report = await this.generateSecurityReport(scanId, aggregatedResult);
+      const report = await this.generateSecurityReport(
+        scanId,
+        aggregatedResult,
+      );
 
       const scanDuration = Date.now() - startTime;
-      this.emit('scan:completed', { scanId, duration: scanDuration, findings: aggregatedResult.findings.length });
+      this.emit('scan:completed', {
+        scanId,
+        duration: scanDuration,
+        findings: aggregatedResult.findings.length,
+      });
 
       return {
         scanId,
         timestamp: new Date(),
         duration: scanDuration,
         results: aggregatedResult,
-        report
+        report,
       };
-
     } catch (error) {
       this.emit('scan:failed', { scanId, error });
       throw error;
@@ -197,8 +216,12 @@ export class SecurityComplianceEngine extends EventEmitter {
   /**
    * Run compliance assessment
    */
-  async runComplianceAssessment(frameworkId: string): Promise<ComplianceAssessmentResult> {
-    const framework = this.config.compliance.frameworks.find(f => f.id === frameworkId);
+  async runComplianceAssessment(
+    frameworkId: string,
+  ): Promise<ComplianceAssessmentResult> {
+    const framework = this.config.compliance.frameworks.find(
+      (f) => f.id === frameworkId,
+    );
     if (!framework) {
       throw new Error(`Compliance framework ${frameworkId} not found`);
     }
@@ -217,7 +240,10 @@ export class SecurityComplianceEngine extends EventEmitter {
     const overallScore = this.calculateComplianceScore(assessmentResults);
 
     // Generate evidence
-    const evidence = await this.collectComplianceEvidence(framework, assessmentResults);
+    const evidence = await this.collectComplianceEvidence(
+      framework,
+      assessmentResults,
+    );
 
     // Update compliance state
     const complianceState: ComplianceState = {
@@ -227,12 +253,15 @@ export class SecurityComplianceEngine extends EventEmitter {
       status: overallScore >= 80 ? 'compliant' : 'non-compliant',
       requirements: assessmentResults,
       evidence,
-      nextAssessment: this.calculateNextAssessmentDate(framework)
+      nextAssessment: this.calculateNextAssessmentDate(framework),
     };
 
     this.complianceState.set(frameworkId, complianceState);
 
-    this.emit('compliance:assessment-completed', { frameworkId, score: overallScore });
+    this.emit('compliance:assessment-completed', {
+      frameworkId,
+      score: overallScore,
+    });
 
     return {
       framework: framework.id,
@@ -241,7 +270,8 @@ export class SecurityComplianceEngine extends EventEmitter {
       status: complianceState.status,
       results: assessmentResults,
       evidence,
-      recommendations: await this.generateComplianceRecommendations(assessmentResults)
+      recommendations:
+        await this.generateComplianceRecommendations(assessmentResults),
     };
   }
 
@@ -254,18 +284,21 @@ export class SecurityComplianceEngine extends EventEmitter {
       this.scanForCredentials(),
       this.scanForPII(),
       this.scanForAPIKeys(),
-      this.scanForCertificates()
+      this.scanForCertificates(),
     ];
 
     const results = await Promise.all(scanners);
     const findings = results.flat();
 
     // Classify findings by severity
-    const criticalFindings = findings.filter(f => f.severity === 'critical');
-    const highFindings = findings.filter(f => f.severity === 'high');
+    const criticalFindings = findings.filter((f) => f.severity === 'critical');
+    const highFindings = findings.filter((f) => f.severity === 'high');
 
     // Auto-remediate if configured
-    if (this.config.policies.find(p => p.category === 'data')?.enforcement === 'strict') {
+    if (
+      this.config.policies.find((p) => p.category === 'data')?.enforcement ===
+      'strict'
+    ) {
       await this.autoRemediateSensitiveData(criticalFindings);
     }
 
@@ -275,14 +308,14 @@ export class SecurityComplianceEngine extends EventEmitter {
       criticalFindings: criticalFindings.length,
       highFindings: highFindings.length,
       findings,
-      recommendations: this.generateDataProtectionRecommendations(findings)
+      recommendations: this.generateDataProtectionRecommendations(findings),
     };
 
     if (criticalFindings.length > 0) {
       await this.triggerSecurityAlert('data-leakage', {
         severity: 'critical',
         findings: criticalFindings.length,
-        description: 'Critical data leakage detected'
+        description: 'Critical data leakage detected',
       });
     }
 
@@ -301,20 +334,20 @@ export class SecurityComplianceEngine extends EventEmitter {
     const report: AccessAnalysisReport = {
       timestamp: new Date(),
       totalRequests: accessLogs.length,
-      uniqueUsers: new Set(accessLogs.map(log => log.userId)).size,
+      uniqueUsers: new Set(accessLogs.map((log) => log.userId)).size,
       anomalies,
       topPages: this.getTopAccessedPages(accessLogs),
-      suspiciousActivity: anomalies.filter(a => a.riskLevel === 'high'),
-      recommendations: this.generateAccessRecommendations(anomalies)
+      suspiciousActivity: anomalies.filter((a) => a.riskLevel === 'high'),
+      recommendations: this.generateAccessRecommendations(anomalies),
     };
 
     // Alert on high-risk anomalies
-    const highRiskAnomalies = anomalies.filter(a => a.riskLevel === 'high');
+    const highRiskAnomalies = anomalies.filter((a) => a.riskLevel === 'high');
     if (highRiskAnomalies.length > 0) {
       await this.triggerSecurityAlert('access-anomaly', {
         severity: 'high',
         anomalies: highRiskAnomalies.length,
-        description: 'Suspicious access patterns detected'
+        description: 'Suspicious access patterns detected',
       });
     }
 
@@ -334,7 +367,7 @@ export class SecurityComplianceEngine extends EventEmitter {
       threats: await this.getThreatIntelligence(),
       incidents: await this.getSecurityIncidents(),
       trends: await this.getSecurityTrends(),
-      recommendations: await this.getSecurityRecommendations()
+      recommendations: await this.getSecurityRecommendations(),
     };
 
     this.emit('dashboard:generated', dashboard);
@@ -344,7 +377,9 @@ export class SecurityComplianceEngine extends EventEmitter {
   /**
    * Automated vulnerability remediation
    */
-  async autoRemediateVulnerabilities(scanId: string): Promise<RemediationResult> {
+  async autoRemediateVulnerabilities(
+    scanId: string,
+  ): Promise<RemediationResult> {
     const scanResults = this.scanResults.get(scanId);
     if (!scanResults) {
       throw new Error(`Scan results for ${scanId} not found`);
@@ -371,7 +406,7 @@ export class SecurityComplianceEngine extends EventEmitter {
         results.push({
           actionId: action.id,
           success: false,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -380,9 +415,9 @@ export class SecurityComplianceEngine extends EventEmitter {
       scanId,
       timestamp: new Date(),
       totalActions: remediationActions.length,
-      successfulActions: results.filter(r => r.success).length,
-      failedActions: results.filter(r => !r.success).length,
-      results
+      successfulActions: results.filter((r) => r.success).length,
+      failedActions: results.filter((r) => !r.success).length,
+      results,
     };
 
     this.emit('remediation:completed', remediationResult);
@@ -392,7 +427,9 @@ export class SecurityComplianceEngine extends EventEmitter {
   /**
    * Generate compliance evidence package
    */
-  async generateComplianceEvidence(frameworkId: string): Promise<ComplianceEvidencePackage> {
+  async generateComplianceEvidence(
+    frameworkId: string,
+  ): Promise<ComplianceEvidencePackage> {
     const complianceState = this.complianceState.get(frameworkId);
     if (!complianceState) {
       throw new Error(`Compliance state for ${frameworkId} not found`);
@@ -406,7 +443,7 @@ export class SecurityComplianceEngine extends EventEmitter {
       status: complianceState.status,
       controls: [],
       artifacts: [],
-      attestations: []
+      attestations: [],
     };
 
     // Collect control evidence
@@ -416,7 +453,8 @@ export class SecurityComplianceEngine extends EventEmitter {
     }
 
     // Collect artifacts
-    evidencePackage.artifacts = await this.collectComplianceArtifacts(frameworkId);
+    evidencePackage.artifacts =
+      await this.collectComplianceArtifacts(frameworkId);
 
     // Generate attestations
     evidencePackage.attestations = await this.generateAttestations(frameworkId);
@@ -451,11 +489,17 @@ export class SecurityComplianceEngine extends EventEmitter {
   /**
    * Security incident response
    */
-  async handleSecurityIncident(incident: SecurityIncident): Promise<IncidentResponse> {
+  async handleSecurityIncident(
+    incident: SecurityIncident,
+  ): Promise<IncidentResponse> {
     const incidentId = this.generateIncidentId();
     const startTime = Date.now();
 
-    this.emit('incident:started', { incidentId, type: incident.type, severity: incident.severity });
+    this.emit('incident:started', {
+      incidentId,
+      type: incident.type,
+      severity: incident.severity,
+    });
 
     // Classify incident
     const classification = await this.classifyIncident(incident);
@@ -468,7 +512,10 @@ export class SecurityComplianceEngine extends EventEmitter {
     const evidence = await this.collectIncidentEvidence(incident);
 
     // Generate timeline
-    const timeline = await this.generateIncidentTimeline(incident, responseActions);
+    const timeline = await this.generateIncidentTimeline(
+      incident,
+      responseActions,
+    );
 
     const response: IncidentResponse = {
       incidentId,
@@ -479,7 +526,7 @@ export class SecurityComplianceEngine extends EventEmitter {
       actions: responseActions,
       evidence,
       timeline,
-      status: 'resolved'
+      status: 'resolved',
     };
 
     this.emit('incident:resolved', { incidentId, duration: response.duration });
@@ -487,42 +534,49 @@ export class SecurityComplianceEngine extends EventEmitter {
   }
 
   // Private utility methods
-  private async aggregateScanResults(results: ScanResult[]): Promise<AggregatedScanResult> {
-    const allFindings = results.flatMap(r => r.findings);
-    
+  private async aggregateScanResults(
+    results: ScanResult[],
+  ): Promise<AggregatedScanResult> {
+    const allFindings = results.flatMap((r) => r.findings);
+
     return {
       findings: allFindings,
       summary: {
         total: allFindings.length,
-        critical: allFindings.filter(f => f.severity === 'critical').length,
-        high: allFindings.filter(f => f.severity === 'high').length,
-        medium: allFindings.filter(f => f.severity === 'medium').length,
-        low: allFindings.filter(f => f.severity === 'low').length
+        critical: allFindings.filter((f) => f.severity === 'critical').length,
+        high: allFindings.filter((f) => f.severity === 'high').length,
+        medium: allFindings.filter((f) => f.severity === 'medium').length,
+        low: allFindings.filter((f) => f.severity === 'low').length,
       },
       categories: this.categorizeFindings(allFindings),
-      recommendations: this.generateRecommendations(allFindings)
+      recommendations: this.generateRecommendations(allFindings),
     };
   }
 
-  private async checkSecurityThresholds(result: AggregatedScanResult): Promise<void> {
+  private async checkSecurityThresholds(
+    result: AggregatedScanResult,
+  ): Promise<void> {
     for (const threshold of this.config.scanning.thresholds) {
-      const count = result.summary[threshold.severity as keyof typeof result.summary];
+      const count =
+        result.summary[threshold.severity as keyof typeof result.summary];
       if (count > threshold.maxCount) {
         await this.triggerSecurityAlert('threshold-exceeded', {
           severity: threshold.severity,
           count,
           threshold: threshold.maxCount,
-          description: `Security threshold exceeded: ${count} ${threshold.severity} findings`
+          description: `Security threshold exceeded: ${count} ${threshold.severity} findings`,
         });
       }
     }
   }
 
-  private async assessComplianceRequirement(requirement: ComplianceRequirement): Promise<ControlAssessmentResult> {
+  private async assessComplianceRequirement(
+    requirement: ComplianceRequirement,
+  ): Promise<ControlAssessmentResult> {
     // Implement compliance requirement assessment logic
     const evidence = await this.collectRequirementEvidence(requirement);
     const score = this.calculateRequirementScore(requirement, evidence);
-    
+
     return {
       requirementId: requirement.id,
       title: requirement.title,
@@ -530,7 +584,10 @@ export class SecurityComplianceEngine extends EventEmitter {
       status: score >= 80 ? 'compliant' : 'non-compliant',
       evidence,
       gaps: await this.identifyComplianceGaps(requirement, evidence),
-      recommendations: await this.generateRequirementRecommendations(requirement, score)
+      recommendations: await this.generateRequirementRecommendations(
+        requirement,
+        score,
+      ),
     };
   }
 
@@ -539,14 +596,17 @@ export class SecurityComplianceEngine extends EventEmitter {
     return results.reduce((sum, r) => sum + r.score, 0) / results.length;
   }
 
-  private async triggerSecurityAlert(type: string, details: any): Promise<void> {
+  private async triggerSecurityAlert(
+    type: string,
+    details: any,
+  ): Promise<void> {
     const alert: SecurityAlert = {
       id: this.generateAlertId(),
       type,
       severity: details.severity,
       timestamp: new Date(),
       details,
-      status: 'active'
+      status: 'active',
     };
 
     const alerts = this.securityAlerts.get(type) || [];
@@ -607,7 +667,7 @@ export class SecurityComplianceEngine extends EventEmitter {
 // Abstract security scanner base class
 abstract class SecurityScannerInstance {
   constructor(protected config: SecurityScanner) {}
-  
+
   abstract initialize(): Promise<void>;
   abstract updateRules(): Promise<void>;
   abstract scan(target?: string): Promise<ScanResult>;
@@ -631,7 +691,7 @@ class SASTScanner extends SecurityScannerInstance {
       target: target || 'codebase',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }
@@ -653,7 +713,7 @@ class DASTScanner extends SecurityScannerInstance {
       target: target || 'application',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }
@@ -675,7 +735,7 @@ class SCAScanner extends SecurityScannerInstance {
       target: target || 'dependencies',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }
@@ -697,7 +757,7 @@ class SecretsScanner extends SecurityScannerInstance {
       target: target || 'repository',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }
@@ -719,7 +779,7 @@ class ContainerScanner extends SecurityScannerInstance {
       target: target || 'containers',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }
@@ -741,7 +801,7 @@ class InfrastructureScanner extends SecurityScannerInstance {
       target: target || 'infrastructure',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }
@@ -763,7 +823,7 @@ class ContentSecurityScanner extends SecurityScannerInstance {
       target: target || 'content',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }
@@ -785,7 +845,7 @@ class CustomScanner extends SecurityScannerInstance {
       target: target || 'custom',
       findings: [],
       duration: 0,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }

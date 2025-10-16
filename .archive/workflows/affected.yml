@@ -15,7 +15,7 @@ concurrency:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-  
+
 jobs:
   affected:
     runs-on: ubuntu-latest
@@ -23,7 +23,7 @@ jobs:
       affected-packages: ${{ steps.affected.outputs.packages }}
       should-test: ${{ steps.affected.outputs.should-test }}
       should-build: ${{ steps.affected.outputs.should-build }}
-    
+
     services:
       neo4j:
         image: neo4j:5
@@ -37,7 +37,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          
+
       postgres:
         image: postgres:16
         ports:
@@ -50,7 +50,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          
+
       redis:
         image: redis:7
         ports:
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
@@ -74,10 +74,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Compute affected packages
         id: affected
         run: |
@@ -87,12 +87,12 @@ jobs:
           else
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
-          
+
           echo "Comparing against: $BASE"
-          
+
           # Use Turbo to find affected packages
           AFFECTED=$(npx turbo run build --filter="...$BASE" --dry-run=json | jq -c '.packages[]' | tr '\n' ' ')
-          
+
           # Check if any packages are affected
           if [ -n "$AFFECTED" ]; then
             echo "should-build=true" >> $GITHUB_OUTPUT
@@ -101,7 +101,7 @@ jobs:
             echo "should-build=false" >> $GITHUB_OUTPUT
             echo "should-test=false" >> $GITHUB_OUTPUT
           fi
-          
+
           echo "packages=$AFFECTED" >> $GITHUB_OUTPUT
           echo "Affected packages: $AFFECTED"
 
@@ -114,9 +114,9 @@ jobs:
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
           pnpm turbo run build --filter="...$BASE" --cache-dir=.turbo
-          
+
       - name: Lint affected packages
-        if: steps.affected.outputs.should-build == 'true'  
+        if: steps.affected.outputs.should-build == 'true'
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             BASE="HEAD~1"
@@ -124,7 +124,7 @@ jobs:
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
           pnpm turbo run lint --filter="...$BASE" --cache-dir=.turbo
-          
+
       - name: Typecheck affected packages
         if: steps.affected.outputs.should-build == 'true'
         run: |
@@ -155,7 +155,7 @@ jobs:
         if: always()
         run: |
           node scripts/collect-timings.js > ci/test-timings.json || echo "{}" > ci/test-timings.json
-          
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -176,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
@@ -185,10 +185,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Security scan affected
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then

@@ -4,7 +4,8 @@ permissions:
   contents: read
 on:
   workflow_dispatch:
-    inputs: { name: { required: true }, batch: { required: false, default: '1000' } }
+    inputs:
+      { name: { required: true }, batch: { required: false, default: '1000' } }
 jobs:
   run:
     runs-on: ubuntu-latest

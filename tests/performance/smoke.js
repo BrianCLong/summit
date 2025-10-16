@@ -113,9 +113,13 @@ export function setup() {
   });
 
   // Authenticate and get token
-  const authResponse = http.post(`${BASE_URL}/auth/login`, JSON.stringify(TEST_USER), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const authResponse = http.post(
+    `${BASE_URL}/auth/login`,
+    JSON.stringify(TEST_USER),
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 
   check(authResponse, {
     'Authentication successful': (r) => r.status === 200,
@@ -141,7 +145,12 @@ export default function (data) {
   testGraphQLQuery('userProfile', QUERIES.userProfile, {}, headers, 'rbac');
 
   // 3. Test Investigations List
-  testGraphQLQuery('investigations', QUERIES.investigations, { limit: 10 }, headers);
+  testGraphQLQuery(
+    'investigations',
+    QUERIES.investigations,
+    { limit: 10 },
+    headers,
+  );
 
   // 4. Test Entities Query
   testGraphQLQuery(
@@ -284,7 +293,8 @@ function testMetricsEndpoint() {
 
   check(response, {
     'Metrics endpoint accessible': (r) => r.status === 200,
-    'Metrics contains GraphQL data': (r) => r.body.includes('graphql_requests_total'),
+    'Metrics contains GraphQL data': (r) =>
+      r.body.includes('graphql_requests_total'),
     'Metrics contains RBAC data': (r) => r.body.includes('rbac_checks_total'),
   });
 }

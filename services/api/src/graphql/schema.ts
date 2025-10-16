@@ -351,11 +351,18 @@ export const typeDefs = gql`
 
     # Relationship queries
     relationship(id: ID!): Relationship
-    relationships(filter: RelationshipFilter, limit: Int = 50, offset: Int = 0): [Relationship!]!
+    relationships(
+      filter: RelationshipFilter
+      limit: Int = 50
+      offset: Int = 0
+    ): [Relationship!]!
 
     # Investigation queries
     investigation(id: ID!): Investigation
-    investigations(status: InvestigationStatus, limit: Int = 20): [Investigation!]!
+    investigations(
+      status: InvestigationStatus
+      limit: Int = 20
+    ): [Investigation!]!
 
     # Analytics queries
     findPaths(input: PathfindingInput!): PathfindingResult!
@@ -381,7 +388,11 @@ export const typeDefs = gql`
 
     # Relationship mutations
     createRelationship(input: CreateRelationshipInput!): Relationship!
-    updateRelationship(id: ID!, properties: JSON, confidence: Float): Relationship!
+    updateRelationship(
+      id: ID!
+      properties: JSON
+      confidence: Float
+    ): Relationship!
     deleteRelationship(id: ID!): Boolean!
 
     # Investigation mutations
@@ -393,11 +404,22 @@ export const typeDefs = gql`
       status: InvestigationStatus
     ): Investigation!
     deleteInvestigation(id: ID!): Boolean!
-    addEntityToInvestigation(investigationId: ID!, entityId: ID!): Investigation!
+    addEntityToInvestigation(
+      investigationId: ID!
+      entityId: ID!
+    ): Investigation!
 
     # Hypothesis mutations
-    createHypothesis(investigationId: ID!, title: String!, description: String!): Hypothesis!
-    updateHypothesis(id: ID!, confidence: Float, status: HypothesisStatus): Hypothesis!
+    createHypothesis(
+      investigationId: ID!
+      title: String!
+      description: String!
+    ): Hypothesis!
+    updateHypothesis(
+      id: ID!
+      confidence: Float
+      status: HypothesisStatus
+    ): Hypothesis!
 
     # Bulk operations
     bulkCreateEntities(entities: [CreateEntityInput!]!): [Entity!]!
@@ -412,10 +434,31 @@ export const typeDefs = gql`
     analysisCompleted(jobId: ID!): JSON!
   }
   # Cases & Evidence & Triage (PR-19–22)
-  type Case { id: ID!, title: String!, status: String!, createdAt: DateTime }
-  type Annotation { id: ID!, range: String!, note: String!, author: String }
-  type Suggestion { id: ID!, type: String!, status: String!, data: JSON, score: Float }
-  enum TriageType { TEXT LINK ROUTE_ANOMALY OTHER }
+  type Case {
+    id: ID!
+    title: String!
+    status: String!
+    createdAt: DateTime
+  }
+  type Annotation {
+    id: ID!
+    range: String!
+    note: String!
+    author: String
+  }
+  type Suggestion {
+    id: ID!
+    type: String!
+    status: String!
+    data: JSON
+    score: Float
+  }
+  enum TriageType {
+    TEXT
+    LINK
+    ROUTE_ANOMALY
+    OTHER
+  }
 
   extend type Query {
     caseById(id: ID!): Case

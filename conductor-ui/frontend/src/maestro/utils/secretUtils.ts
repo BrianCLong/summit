@@ -23,8 +23,15 @@ export interface RedactionOptions {
 /**
  * Redacts sensitive information from text
  */
-export const redactSensitive = (text: string, options: RedactionOptions = {}): string => {
-  const { showFirst = 0, showLast = 0, replacement = '***REDACTED***' } = options;
+export const redactSensitive = (
+  text: string,
+  options: RedactionOptions = {},
+): string => {
+  const {
+    showFirst = 0,
+    showLast = 0,
+    replacement = '***REDACTED***',
+  } = options;
 
   let redacted = text;
 
@@ -32,7 +39,9 @@ export const redactSensitive = (text: string, options: RedactionOptions = {}): s
     redacted = redacted.replace(pattern, (match, captured) => {
       if (captured) {
         const start = captured.substring(0, showFirst);
-        const end = captured.substring(Math.max(showFirst, captured.length - showLast));
+        const end = captured.substring(
+          Math.max(showFirst, captured.length - showLast),
+        );
         return match.replace(captured, `${start}${replacement}${end}`);
       }
       return replacement;

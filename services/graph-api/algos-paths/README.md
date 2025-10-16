@@ -5,7 +5,12 @@ Provides shortest path, k-shortest paths, and constrained searches with policy, 
 ## Usage
 
 ```ts
-import { shortestPath, kShortestPaths, constrainedPaths, PathEdge } from './index';
+import {
+  shortestPath,
+  kShortestPaths,
+  constrainedPaths,
+  PathEdge,
+} from './index';
 
 const edges: PathEdge[] = [
   { from: 'A', to: 'B', weight: 1, policy: 'allow', territory: 'US', time: 1 },

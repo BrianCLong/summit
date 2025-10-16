@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type {
   ConsentIntegrationModule,
   ConsentStateEnvelope,
-  ConsentValidationScenario
+  ConsentValidationScenario,
 } from 'common-types';
 import { ConsentStateReconciler } from '../src/index';
 
@@ -10,7 +10,7 @@ function buildEnvelope(
   overrides: Partial<ConsentStateEnvelope> & {
     state: Partial<ConsentStateEnvelope['state']>;
     source?: Partial<ConsentStateEnvelope['source']>;
-  }
+  },
 ): ConsentStateEnvelope {
   const base: ConsentStateEnvelope = {
     state: {
@@ -23,28 +23,28 @@ function buildEnvelope(
       version: 1,
       lawfulBasis: 'consent',
       overrides: [],
-      metadata: { source: 'unit-test' }
+      metadata: { source: 'unit-test' },
     },
     source: {
       domain: 'mc',
       service: 'consent-api',
       endpoint: 'v1',
       environment: 'prod',
-      topologyPath: ['global', 'prod']
+      topologyPath: ['global', 'prod'],
     },
     policyBinding: {
       id: 'policy-analytics',
       version: '1.0.0',
-      hash: 'abc123'
+      hash: 'abc123',
     },
-    evidence: ['ledger://consent/user-123']
+    evidence: ['ledger://consent/user-123'],
   };
 
   return {
     ...base,
     ...overrides,
     state: { ...base.state, ...overrides.state },
-    source: { ...base.source, ...(overrides.source ?? {}) }
+    source: { ...base.source, ...(overrides.source ?? {}) },
   };
 }
 
@@ -59,10 +59,10 @@ describe('ConsentStateReconciler', () => {
           status: 'denied',
           updatedAt: new Date('2024-01-02T00:00:00Z').toISOString(),
           version: 2,
-          overrides: ['gdpr-withdrawal']
+          overrides: ['gdpr-withdrawal'],
         },
-        source: { service: 'consent-bridge' }
-      })
+        source: { service: 'consent-bridge' },
+      }),
     );
 
     expect(resolution.finalState.status).toBe('denied');
@@ -74,7 +74,9 @@ describe('ConsentStateReconciler', () => {
     expect(conflict?.candidates).toHaveLength(2);
 
     const audit = reconciler.getAuditLog();
-    expect(audit.some(entry => entry.action === 'conflict-generated')).toBe(true);
+    expect(audit.some((entry) => entry.action === 'conflict-generated')).toBe(
+      true,
+    );
   });
 
   it('invokes integration modules and emits resolution events', async () => {
@@ -83,7 +85,7 @@ describe('ConsentStateReconciler', () => {
     const module: ConsentIntegrationModule = {
       name: 'mc-adapter',
       supportedDomains: ['mc'],
-      sync: syncSpy
+      sync: syncSpy,
     };
     reconciler.registerModule(module);
 
@@ -95,9 +97,9 @@ describe('ConsentStateReconciler', () => {
         state: {
           status: 'granted',
           updatedAt: new Date('2024-02-01T00:00:00Z').toISOString(),
-          version: 3
-        }
-      })
+          version: 3,
+        },
+      }),
     );
 
     expect(syncSpy).toHaveBeenCalledTimes(1);
@@ -112,25 +114,26 @@ describe('ConsentStateReconciler', () => {
     const scenarios: ConsentValidationScenario[] = [
       {
         id: 'conflict-strict-deny',
-        description: 'Deny should override granted consent when conflicts exist',
+        description:
+          'Deny should override granted consent when conflicts exist',
         setup: [
           buildEnvelope({}),
           buildEnvelope({
             state: {
               status: 'denied',
               updatedAt: new Date('2024-03-01T00:00:00Z').toISOString(),
-              version: 4
+              version: 4,
             },
-            source: { domain: 'intelgraph', service: 'policy-sync' }
-          })
+            source: { domain: 'intelgraph', service: 'policy-sync' },
+          }),
         ],
         expectation: {
           subjectId: 'user-123',
           policyId: 'policy-analytics',
           expectedStatus: 'denied',
-          expectedConflicts: 1
-        }
-      }
+          expectedConflicts: 1,
+        },
+      },
     ];
 
     const report = await reconciler.runValidation(scenarios);
@@ -149,9 +152,9 @@ describe('ConsentStateReconciler', () => {
         state: {
           subjectId: 'user-1',
           updatedAt: new Date('2024-04-01T00:00:00Z').toISOString(),
-          version: 1
-        }
-      })
+          version: 1,
+        },
+      }),
     );
 
     await reconciler.ingest(
@@ -162,21 +165,25 @@ describe('ConsentStateReconciler', () => {
           status: 'revoked',
           scopes: ['marketing'],
           updatedAt: new Date('2024-04-02T00:00:00Z').toISOString(),
-          version: 2
+          version: 2,
         },
-        source: { domain: 'intelgraph', service: 'graph-consent', topologyPath: ['global', 'edge'] }
-      })
+        source: {
+          domain: 'intelgraph',
+          service: 'graph-consent',
+          topologyPath: ['global', 'edge'],
+        },
+      }),
     );
 
     const snapshot = reconciler.getTopologySnapshot();
     expect(snapshot.nodes.length).toBe(2);
 
-    const mcNode = snapshot.nodes.find(node => node.domain === 'mc');
+    const mcNode = snapshot.nodes.find((node) => node.domain === 'mc');
     expect(mcNode).toBeTruthy();
     expect(mcNode?.totalSubjects).toBe(1);
     expect(mcNode?.statuses.granted).toBe(1);
 
-    const igNode = snapshot.nodes.find(node => node.domain === 'intelgraph');
+    const igNode = snapshot.nodes.find((node) => node.domain === 'intelgraph');
     expect(igNode).toBeTruthy();
     expect(igNode?.statuses.revoked).toBe(1);
   });

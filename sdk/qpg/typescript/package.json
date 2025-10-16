@@ -8,7 +8,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
-  "keywords": ["qpg", "tokenization", "pseudonymization"],
+  "keywords": [
+    "qpg",
+    "tokenization",
+    "pseudonymization"
+  ],
   "author": "Summit",
   "license": "MIT",
   "devDependencies": {

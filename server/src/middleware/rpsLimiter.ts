@@ -24,14 +24,20 @@ export function rpsLimiter(req: Request, res: Response, next: NextFunction) {
 
   if (clientData.count > MAX_REQUESTS_PER_WINDOW) {
     // S2.2 RPS Limiter Tuning: Proper 429 + Retry-After
-    res.status(429).set('Retry-After', Math.ceil((clientData.lastReset + WINDOW_SIZE_MS - now) / 1000)).send('Too Many Requests');
+    res
+      .status(429)
+      .set(
+        'Retry-After',
+        Math.ceil((clientData.lastReset + WINDOW_SIZE_MS - now) / 1000),
+      )
+      .send('Too Many Requests');
     return;
   }
 
   // S2.2 RPS Limiter Tuning: Adaptive limiting by tenant weight (placeholder)
   // This would involve looking up tenant-specific limits and adjusting MAX_REQUESTS_PER_WINDOW dynamically.
   // For now, a simple log.
-  console.log("Applying adaptive limiting by tenant weight (placeholder).");
+  console.log('Applying adaptive limiting by tenant weight (placeholder).');
 
   next();
 }

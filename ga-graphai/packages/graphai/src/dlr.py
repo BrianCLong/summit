@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Iterable, Mapping, MutableMapping, Sequence
 
 import networkx as nx
 
@@ -37,7 +37,7 @@ class LineageGraph:
         object.__setattr__(self, "nodes", MappingProxyType(dict(self.nodes)))
 
     @classmethod
-    def from_dict(cls, payload: Mapping[str, object]) -> "LineageGraph":
+    def from_dict(cls, payload: Mapping[str, object]) -> LineageGraph:
         """Create a graph from a JSON-serialisable mapping."""
 
         raw_nodes = payload.get("nodes", [])
@@ -78,8 +78,7 @@ class RecomputePlan:
     def to_dict(self) -> dict[str, object]:
         return {
             "plan": [
-                {"node": step.node, "action": step.action, "sign": step.sign}
-                for step in self.steps
+                {"node": step.node, "action": step.action, "sign": step.sign} for step in self.steps
             ],
             "cache_reuse": dict(self.cache_reuse),
             "total_cost": self.total_cost,
@@ -199,13 +198,9 @@ def compute_recompute_plan(
                 total_time += node.compute_time
 
     if max_cost is not None and total_cost - max_cost > tolerance:
-        raise ValueError(
-            f"Recompute plan cost {total_cost:.3f} exceeds max_cost {max_cost:.3f}"
-        )
+        raise ValueError(f"Recompute plan cost {total_cost:.3f} exceeds max_cost {max_cost:.3f}")
     if max_time is not None and total_time - max_time > tolerance:
-        raise ValueError(
-            f"Recompute plan time {total_time:.3f} exceeds max_time {max_time:.3f}"
-        )
+        raise ValueError(f"Recompute plan time {total_time:.3f} exceeds max_time {max_time:.3f}")
 
     return RecomputePlan(
         steps=tuple(steps),
@@ -235,8 +230,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="append",
         help="Target artifact(s) to align with run B. Repeatable.",
     )
-    parser.add_argument("--max-time", type=float, default=None, help="Optional maximum recompute time budget")
-    parser.add_argument("--max-cost", type=float, default=None, help="Optional maximum recompute cost budget")
+    parser.add_argument(
+        "--max-time", type=float, default=None, help="Optional maximum recompute time budget"
+    )
+    parser.add_argument(
+        "--max-cost", type=float, default=None, help="Optional maximum recompute cost budget"
+    )
     parser.add_argument(
         "--tolerance",
         type=float,

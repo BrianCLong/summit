@@ -3,7 +3,7 @@ name: rebuild-verify
 permissions:
   contents: read
 on:
-  push: { tags: ["v*.*.*"] }
+  push: { tags: ['v*.*.*'] }
 jobs:
   build-a:
     runs-on: ubuntu-latest
@@ -15,7 +15,7 @@ jobs:
       - name: Build image A
         run: docker buildx build -t ghcr.io/${{ github.repository }}/maestro:${{ github.ref_name }} --load .
       - uses: anchore/sbom-action @db/migrations/V16__v09_autopilot.sql
-        with: { path: ".", format: "cyclonedx", output-file: "sbom-a.json" }
+        with: { path: '.', format: 'cyclonedx', output-file: 'sbom-a.json' }
       - name: Attest (cosign keyless)
         run: cosign attest --predicate sbom-a.json --type cyclonedx ghcr.io/${{ github.repository }}/maestro:${{ github.ref_name }} || true
   build-b:

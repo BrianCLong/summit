@@ -2,7 +2,10 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: maestro-mtls-alerts
-  namespace: {{ .Values.metrics.prometheusRule.namespace | default .Release.Namespace }}
+  namespace:
+    {
+      { .Values.metrics.prometheusRule.namespace | default .Release.Namespace },
+    }
   labels:
     release: kube-prometheus-stack
 spec:
@@ -17,6 +20,5 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "mTLS ratio below 100%"
-            description: "mTLS percent over last 5m dropped below 100%. Investigate plaintext traffic."
-
+            summary: 'mTLS ratio below 100%'
+            description: 'mTLS percent over last 5m dropped below 100%. Investigate plaintext traffic.'

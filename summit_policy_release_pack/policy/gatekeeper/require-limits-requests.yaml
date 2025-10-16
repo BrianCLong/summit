@@ -2,7 +2,7 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sContainerLimits
 metadata: { name: require-limits }
 spec:
-  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }
+  match: { kinds: [{ apiGroups: [''], kinds: ['Pod'] }] }
   parameters:
     cpu: { required: true }
     memory: { required: true }

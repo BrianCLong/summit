@@ -1,10 +1,10 @@
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-modsecurity: 'true'
     nginx.ingress.kubernetes.io/modsecurity-snippet: |
       SecRuleEngine On
       Include /etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf
-    nginx.ingress.kubernetes.io/proxy-body-size: "2m"
-    nginx.ingress.kubernetes.io/limit-rps: "10"
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: "2"
-    nginx.ingress.kubernetes.io/limit-whitelist: "10.0.0.0/8"
+    nginx.ingress.kubernetes.io/proxy-body-size: '2m'
+    nginx.ingress.kubernetes.io/limit-rps: '10'
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: '2'
+    nginx.ingress.kubernetes.io/limit-whitelist: '10.0.0.0/8'

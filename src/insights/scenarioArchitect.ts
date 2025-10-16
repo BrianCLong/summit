@@ -1,1 +1,3 @@
-export function scenarioArchitect(config) { return { architect: 'Scenario Architect Placeholder' }; }
+export function scenarioArchitect(config) {
+  return { architect: 'Scenario Architect Placeholder' };
+}

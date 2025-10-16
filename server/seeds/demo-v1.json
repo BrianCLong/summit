@@ -234,18 +234,40 @@
     {
       "question": "What connects Alice to GlobalSupply Inc?",
       "expectedAnswer": "Alice Chen works at TechCorp and has regular communications with Bob Martinez, who coordinates vendor relationships for GlobalSupply Inc. They both signed a $50M supply contract and attended the February 2024 vendor meeting together.",
-      "expectedEntities": ["entity-alice-001", "entity-globalsupply-004", "entity-bob-002"],
+      "expectedEntities": [
+        "entity-alice-001",
+        "entity-globalsupply-004",
+        "entity-bob-002"
+      ],
       "expectedPaths": [
-        ["entity-alice-001", "rel-alice-bob-003", "entity-bob-002", "rel-bob-globalsupply-002", "entity-globalsupply-004"]
+        [
+          "entity-alice-001",
+          "rel-alice-bob-003",
+          "entity-bob-002",
+          "rel-bob-globalsupply-002",
+          "entity-globalsupply-004"
+        ]
       ]
     },
     {
       "question": "Who has access to the supply contract?",
       "expectedAnswer": "The supply contract SC-2024-789 was signed by both TechCorp (through Alice Chen) and GlobalSupply Inc (through Bob Martinez). Both Alice and Bob have direct access as signatories.",
-      "expectedEntities": ["entity-contract-005", "entity-alice-001", "entity-bob-002"],
+      "expectedEntities": [
+        "entity-contract-005",
+        "entity-alice-001",
+        "entity-bob-002"
+      ],
       "expectedPaths": [
-        ["entity-alice-001", "rel-techcorp-contract-004", "entity-contract-005"],
-        ["entity-bob-002", "rel-globalsupply-contract-005", "entity-contract-005"]
+        [
+          "entity-alice-001",
+          "rel-techcorp-contract-004",
+          "entity-contract-005"
+        ],
+        [
+          "entity-bob-002",
+          "rel-globalsupply-contract-005",
+          "entity-contract-005"
+        ]
       ]
     }
   ]

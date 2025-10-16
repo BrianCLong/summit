@@ -9,7 +9,15 @@ import { promisify } from 'util';
 const execAsync = promisify(execFile);
 
 // Types aligned with Chair's synthesis
-type Capability = 'read' | 'transform' | 'egress:http' | 'egress:domain' | 'exec:container' | 'exec:function' | 'storage:write' | 'auth:impersonate';
+type Capability =
+  | 'read'
+  | 'transform'
+  | 'egress:http'
+  | 'egress:domain'
+  | 'exec:container'
+  | 'exec:function'
+  | 'storage:write'
+  | 'auth:impersonate';
 
 interface PluginManifest {
   name: string;
@@ -49,7 +57,18 @@ const PluginManifestSchema = z.object({
   author: z.string().min(1),
   description: z.string().min(10).max(1000),
   signer: z.string().min(1),
-  scopes: z.array(z.enum(['read', 'transform', 'egress:http', 'egress:domain', 'exec:container', 'exec:function', 'storage:write', 'auth:impersonate'])),
+  scopes: z.array(
+    z.enum([
+      'read',
+      'transform',
+      'egress:http',
+      'egress:domain',
+      'exec:container',
+      'exec:function',
+      'storage:write',
+      'auth:impersonate',
+    ]),
+  ),
   sbomHash: z.string().regex(/^[a-f0-9]{64}$/i), // SHA-256 hash
   signature: z.string().min(1),
   buildProvenance: z.object({
@@ -59,12 +78,14 @@ const PluginManifestSchema = z.object({
     sourceRepo: z.string().url(),
     commitHash: z.string().regex(/^[a-f0-9]{40}$/i),
   }),
-  authorityBinding: z.object({
-    dpia: z.boolean(),
-    reasonForAccess: z.array(z.string()),
-    retentionClass: z.string(),
-    piiCategories: z.array(z.string()),
-  }).optional(),
+  authorityBinding: z
+    .object({
+      dpia: z.boolean(),
+      reasonForAccess: z.array(z.string()),
+      retentionClass: z.string(),
+      piiCategories: z.array(z.string()),
+    })
+    .optional(),
 });
 
 const RevocationSchema = z.object({
@@ -92,10 +113,10 @@ export class PluginManager {
     const signers = process.env.TRUSTED_PLUGIN_SIGNERS?.split(',') || [
       'intelgraph-official',
       'verified-partner-tier1',
-      'community-verified'
+      'community-verified',
     ];
-    
-    signers.forEach(signer => this.trustedSigners.add(signer));
+
+    signers.forEach((signer) => this.trustedSigners.add(signer));
   }
 
   private async loadRevocationFeeds() {
@@ -115,60 +136,68 @@ export class PluginManager {
       // Placeholder for actual export control entities
       'sanctioned-entity-1',
       'restricted-domain.com',
-      'blocked-author'
+      'blocked-author',
     ];
-    
-    exportControlEntities.forEach(entity => this.exportControlList.add(entity));
+
+    exportControlEntities.forEach((entity) =>
+      this.exportControlList.add(entity),
+    );
   }
 
   /**
    * Verify and load plugin according to Chair's synthesis
    */
-  async verifyAndLoad(manifest: PluginManifest, tenantPolicy: TenantPolicy): Promise<{
+  async verifyAndLoad(
+    manifest: PluginManifest,
+    tenantPolicy: TenantPolicy,
+  ): Promise<{
     loaded: boolean;
     audit: any;
     riskScore?: number;
     requiresApproval?: boolean;
   }> {
     const span = otelService.createSpan('marketplace.verify-and-load');
-    
+
     try {
       // Validate manifest schema
       const validatedManifest = PluginManifestSchema.parse(manifest);
-      
+
       // Check export controls (Starkey's requirement)
       if (this.isExportControlled(manifest)) {
         throw new Error('export-control-violation');
       }
-      
+
       // Check signer allowlist
       if (!tenantPolicy.allowedSigners.includes(manifest.signer)) {
         throw new Error('signer-denied');
       }
-      
+
       // Check capability scopes
-      const unauthorizedScopes = manifest.scopes.filter(scope => 
-        !tenantPolicy.allowedScopes.includes(scope)
+      const unauthorizedScopes = manifest.scopes.filter(
+        (scope) => !tenantPolicy.allowedScopes.includes(scope),
       );
       if (unauthorizedScopes.length > 0) {
         throw new Error(`scope-denied: ${unauthorizedScopes.join(', ')}`);
       }
-      
+
       // Verify signature and SBOM
       await this.verifySignature(manifest);
       await this.verifySBOM(manifest);
-      
+
       // Check revocation status
       if (this.isRevoked(manifest)) {
         throw new Error('plugin-revoked');
       }
-      
+
       // Calculate action risk score
       const riskScore = this.calculateActionRiskScore(manifest, tenantPolicy);
       const requiresApproval = riskScore >= 0.35; // From Chair's OPA policy
-      
+
       // Authority Binding check (Foster's requirement)
-      if (tenantPolicy.requireAuthorityBinding && this.hasHighRiskActions(manifest.scopes)) {
+      if (
+        tenantPolicy.requireAuthorityBinding &&
+        this.hasHighRiskActions(manifest.scopes)
+      ) {
         if (!manifest.authorityBinding?.dpia) {
           throw new Error('dpia-required');
         }
@@ -176,7 +205,7 @@ export class PluginManager {
           throw new Error('reason-for-access-required');
         }
       }
-      
+
       // Store verification audit
       const audit = {
         signer: manifest.signer,
@@ -188,9 +217,9 @@ export class PluginManager {
         exportControlChecked: true,
         authorityBindingPresent: !!manifest.authorityBinding,
       };
-      
+
       await this.storeVerificationAudit(manifest, audit);
-      
+
       otelService.addSpanAttributes({
         'marketplace.plugin_name': manifest.name,
         'marketplace.plugin_version': manifest.version,
@@ -198,7 +227,7 @@ export class PluginManager {
         'marketplace.risk_score': riskScore,
         'marketplace.requires_approval': requiresApproval,
       });
-      
+
       return { loaded: true, audit, riskScore, requiresApproval };
     } catch (error: any) {
       console.error('Plugin verification failed:', error);
@@ -212,9 +241,13 @@ export class PluginManager {
   /**
    * Publish plugin to marketplace with Authority Binding checks
    */
-  async publishPlugin(manifest: PluginManifest, sbomFile: Buffer, pluginBundle: Buffer): Promise<string> {
+  async publishPlugin(
+    manifest: PluginManifest,
+    sbomFile: Buffer,
+    pluginBundle: Buffer,
+  ): Promise<string> {
     const span = otelService.createSpan('marketplace.publish-plugin');
-    
+
     try {
       const validatedManifest = PluginManifestSchema.parse(manifest);
       const pool = getPostgresPool();
@@ -248,7 +281,7 @@ export class PluginManager {
           pluginBundle,
           sbomFile,
           'pending-review',
-        ]
+        ],
       );
 
       // Create review queue entry if needed
@@ -266,7 +299,7 @@ export class PluginManager {
               authorityBinding: manifest.authorityBinding,
               riskFactors: this.identifyRiskFactors(manifest),
             }),
-          ]
+          ],
         );
       }
 
@@ -284,7 +317,7 @@ export class PluginManager {
    */
   async revokePlugin(revocation: any): Promise<void> {
     const span = otelService.createSpan('marketplace.revoke-plugin');
-    
+
     try {
       const validatedRevocation = RevocationSchema.parse(revocation);
       const pool = getPostgresPool();
@@ -301,17 +334,20 @@ export class PluginManager {
           JSON.stringify(validatedRevocation.affectedVersions),
           validatedRevocation.effectiveDate,
           validatedRevocation.details || '',
-        ]
+        ],
       );
 
       // Update local revocation cache
-      this.revokedPlugins.set(validatedRevocation.pluginId, validatedRevocation);
+      this.revokedPlugins.set(
+        validatedRevocation.pluginId,
+        validatedRevocation,
+      );
 
       // Immediate kill-switch: disable plugin across all tenants if global
       if (validatedRevocation.scope === 'global') {
         await pool.query(
           'UPDATE marketplace_plugins SET status = $1 WHERE id = $2',
-          ['revoked', validatedRevocation.pluginId]
+          ['revoked', validatedRevocation.pluginId],
         );
 
         // Send revocation notification to all active installations
@@ -327,7 +363,7 @@ export class PluginManager {
           'plugin_revoked',
           validatedRevocation.pluginId,
           JSON.stringify(validatedRevocation),
-        ]
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -346,14 +382,17 @@ export class PluginManager {
   /**
    * Calculate action risk score per Chair's OPA policy
    */
-  private calculateActionRiskScore(manifest: PluginManifest, tenantPolicy: TenantPolicy): number {
+  private calculateActionRiskScore(
+    manifest: PluginManifest,
+    tenantPolicy: TenantPolicy,
+  ): number {
     // Implement Chair's risk formula: sensitivity × blast × reversibility × tenant
     let sensitivity = 0.1; // Base sensitivity
     let blastRadius = 0.1; // Base blast radius
     let reversibility = 0.1; // Base irreversibility (lower is more reversible)
-    
+
     // Scope-based scoring
-    manifest.scopes.forEach(scope => {
+    manifest.scopes.forEach((scope) => {
       switch (scope) {
         case 'read':
           sensitivity += 0.1;
@@ -401,8 +440,11 @@ export class PluginManager {
     const tenantPosture = tenantPolicy.maxRiskScore / 10; // Normalize to 0-0.1 range
 
     // Chair's formula
-    const riskScore = Math.min(1.0, sensitivity * blastRadius * reversibility * (1 + tenantPosture));
-    
+    const riskScore = Math.min(
+      1.0,
+      sensitivity * blastRadius * reversibility * (1 + tenantPosture),
+    );
+
     return riskScore;
   }
 
@@ -411,10 +453,10 @@ export class PluginManager {
     try {
       const contentToVerify = this.getSignableContent(manifest);
       const publicKey = await this.getSignerPublicKey(manifest.signer);
-      
+
       const verifier = createVerify('RSA-SHA256');
       verifier.update(contentToVerify);
-      
+
       const isValid = verifier.verify(publicKey, manifest.signature, 'base64');
       if (!isValid) {
         throw new Error('invalid-signature');
@@ -443,13 +485,13 @@ export class PluginManager {
     // Check against export control lists
     if (this.exportControlList.has(manifest.author)) return true;
     if (this.exportControlList.has(manifest.signer)) return true;
-    
+
     // Check build provenance
     if (manifest.buildProvenance.sourceRepo) {
       const repoHost = new URL(manifest.buildProvenance.sourceRepo).hostname;
       if (this.exportControlList.has(repoHost)) return true;
     }
-    
+
     return false;
   }
 
@@ -459,8 +501,13 @@ export class PluginManager {
   }
 
   private hasHighRiskActions(scopes: Capability[]): boolean {
-    const highRiskScopes: Capability[] = ['exec:container', 'exec:function', 'auth:impersonate', 'egress:domain'];
-    return scopes.some(scope => highRiskScopes.includes(scope));
+    const highRiskScopes: Capability[] = [
+      'exec:container',
+      'exec:function',
+      'auth:impersonate',
+      'egress:domain',
+    ];
+    return scopes.some((scope) => highRiskScopes.includes(scope));
   }
 
   private requiresReview(manifest: PluginManifest): boolean {
@@ -468,14 +515,16 @@ export class PluginManager {
     return (
       this.hasHighRiskActions(manifest.scopes) ||
       !this.trustedSigners.has(manifest.signer) ||
-      (manifest.authorityBinding && manifest.authorityBinding.piiCategories.length > 0)
+      (manifest.authorityBinding &&
+        manifest.authorityBinding.piiCategories.length > 0)
     );
   }
 
   private getReviewType(manifest: PluginManifest): string {
     if (this.hasHighRiskActions(manifest.scopes)) return 'security-review';
     if (!this.trustedSigners.has(manifest.signer)) return 'signer-verification';
-    if (manifest.authorityBinding?.piiCategories?.length) return 'privacy-review';
+    if (manifest.authorityBinding?.piiCategories?.length)
+      return 'privacy-review';
     return 'standard-review';
   }
 
@@ -487,7 +536,7 @@ export class PluginManager {
       highRiskApprovalRequired: false,
       maxRiskScore: 1.0,
     });
-    
+
     if (riskScore >= 0.7) return 'high';
     if (riskScore >= 0.35) return 'medium';
     return 'low';
@@ -495,13 +544,18 @@ export class PluginManager {
 
   private identifyRiskFactors(manifest: PluginManifest): string[] {
     const riskFactors: string[] = [];
-    
-    if (manifest.scopes.includes('exec:container')) riskFactors.push('container-execution');
-    if (manifest.scopes.includes('auth:impersonate')) riskFactors.push('privilege-escalation');
-    if (manifest.scopes.some(s => s.startsWith('egress:'))) riskFactors.push('data-exfiltration');
-    if (manifest.authorityBinding?.piiCategories?.length) riskFactors.push('pii-processing');
-    if (!this.trustedSigners.has(manifest.signer)) riskFactors.push('untrusted-signer');
-    
+
+    if (manifest.scopes.includes('exec:container'))
+      riskFactors.push('container-execution');
+    if (manifest.scopes.includes('auth:impersonate'))
+      riskFactors.push('privilege-escalation');
+    if (manifest.scopes.some((s) => s.startsWith('egress:')))
+      riskFactors.push('data-exfiltration');
+    if (manifest.authorityBinding?.piiCategories?.length)
+      riskFactors.push('pii-processing');
+    if (!this.trustedSigners.has(manifest.signer))
+      riskFactors.push('untrusted-signer');
+
     return riskFactors;
   }
 
@@ -524,10 +578,10 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
       // In production, fetch from official revocation service
       const pool = getPostgresPool();
       const result = await pool.query(
-        'SELECT plugin_id, reason, scope FROM plugin_revocations WHERE created_at > now() - interval \'1 hour\''
+        "SELECT plugin_id, reason, scope FROM plugin_revocations WHERE created_at > now() - interval '1 hour'",
       );
-      
-      result.rows.forEach(row => {
+
+      result.rows.forEach((row) => {
         this.revokedPlugins.set(row.plugin_id, row);
       });
     } catch (error) {
@@ -538,7 +592,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
   private async notifyPluginRevocation(revocation: any): Promise<void> {
     // Send notifications to all tenants with active installations
     const pool = getPostgresPool();
-    
+
     await pool.query(
       `INSERT INTO plugin_notifications (
         plugin_id, notification_type, message, created_at
@@ -547,13 +601,16 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
         revocation.pluginId,
         'revocation',
         `Plugin ${revocation.pluginId} has been revoked due to: ${revocation.reason}`,
-      ]
+      ],
     );
   }
 
-  private async storeVerificationAudit(manifest: PluginManifest, audit: any): Promise<void> {
+  private async storeVerificationAudit(
+    manifest: PluginManifest,
+    audit: any,
+  ): Promise<void> {
     const pool = getPostgresPool();
-    
+
     await pool.query(
       `INSERT INTO plugin_verification_audit (
         plugin_id, plugin_name, plugin_version, signer, verification_result, created_at
@@ -564,7 +621,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
         manifest.version,
         manifest.signer,
         JSON.stringify(audit),
-      ]
+      ],
     );
   }
 }

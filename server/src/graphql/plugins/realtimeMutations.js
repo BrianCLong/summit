@@ -9,14 +9,17 @@ function realtimeMutationsPlugin() {
       const { request, operationName, contextValue } = requestContext;
       // Check if the operation is a mutation. Apollo Server's request.query contains the GraphQL query string.
       // A simple check for 'mutation' keyword at the start of the query string.
-      const isMutation = request.query && request.query.trim().startsWith('mutation');
+      const isMutation =
+        request.query && request.query.trim().startsWith('mutation');
 
       if (isMutation) {
         const opId = request.http.headers.get('x-op-id');
         if (opId) {
           const redis = getRedisClient();
           if (!redis) {
-            logger.warn('Redis client not available for realtimeMutationsPlugin. Idempotency will not be applied.');
+            logger.warn(
+              'Redis client not available for realtimeMutationsPlugin. Idempotency will not be applied.',
+            );
             return;
           }
           const idempotencyKey = `idempotency:${opId}`;
@@ -33,25 +36,37 @@ function realtimeMutationsPlugin() {
                   requestContext.response.data = JSON.parse(cachedResult);
                   requestContext.response.http.status = 200; // Ensure 200 OK for cached response
                 } catch (e) {
-                  logger.error(`Failed to parse cached result for opId ${opId}: ${e.message}`);
+                  logger.error(
+                    `Failed to parse cached result for opId ${opId}: ${e.message}`,
+                  );
                   // If parsing fails, treat as if no cache hit and let the original mutation proceed (or error)
                 }
-              }
+              },
             };
           }
 
           // Store the result after the mutation is executed
           return {
             async willSendResponse(requestContext) {
-              if (requestContext.response.data && !requestContext.response.errors) {
+              if (
+                requestContext.response.data &&
+                !requestContext.response.errors
+              ) {
                 try {
                   // Cache for 1 hour (3600 seconds)
-                  await redis.set(idempotencyKey, JSON.stringify(requestContext.response.data), 'EX', 3600);
+                  await redis.set(
+                    idempotencyKey,
+                    JSON.stringify(requestContext.response.data),
+                    'EX',
+                    3600,
+                  );
                 } catch (e) {
-                  logger.error(`Failed to cache result for opId ${opId}: ${e.message}`);
+                  logger.error(
+                    `Failed to cache result for opId ${opId}: ${e.message}`,
+                  );
                 }
               }
-            }
+            },
           };
         }
       }

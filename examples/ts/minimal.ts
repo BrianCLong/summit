@@ -13,7 +13,9 @@ async function main() {
 
     // Start a new run
     console.log('\nStarting a new run...');
-    const newRun = await client.startRun('my-pipeline-id', { estimatedCost: 0.05 }); // Assuming startRun takes pipelineId and params
+    const newRun = await client.startRun('my-pipeline-id', {
+      estimatedCost: 0.05,
+    }); // Assuming startRun takes pipelineId and params
     console.log('New Run ID:', newRun.id);
 
     // Tail run logs

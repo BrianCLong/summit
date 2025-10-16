@@ -1,14 +1,34 @@
 scalar JSON
 
 type Plugin {
-  id: ID!, name: String!, version: String!, ociUri: String!, digest: String!,
-  capabilities: JSON!, risk: String!, approved: Boolean!, sbom: JSON, provenance: JSON
+  id: ID!
+  name: String!
+  version: String!
+  ociUri: String!
+  digest: String!
+  capabilities: JSON!
+  risk: String!
+  approved: Boolean!
+  sbom: JSON
+  provenance: JSON
 }
-type PluginVuln { cve: String!, severity: String!, pkg: String, version: String, fixVersion: String }
+type PluginVuln {
+  cve: String!
+  severity: String!
+  pkg: String
+  version: String
+  fixVersion: String
+}
 
 input RegisterPluginInput {
-  name: String!, version: String!, ociUri: String!, digest: String!,
-  signature: String!, capabilities: JSON!, sbom: JSON, provenance: JSON
+  name: String!
+  version: String!
+  ociUri: String!
+  digest: String!
+  signature: String!
+  capabilities: JSON!
+  sbom: JSON
+  provenance: JSON
 }
 
 extend type Query {

@@ -25,32 +25,38 @@ make audit             # Generate provenance ledger
 ## What Gets Preserved
 
 ### 1. Untracked Files
+
 - **Location**: `ops/untracked-import/`
 - **Source**: All untracked files from iCloud repo
 - **Preservation**: Original directory structure maintained
 - **Committed**: Yes, with full history
 
 ### 2. Reflogs
+
 - **Location**: `green-lock-ledger/reflog_all.txt`
 - **Coverage**: All 25,589+ reflog entries
 - **Purpose**: Recovery of any "lost" commits
 
 ### 3. Dangling Commits
+
 - **Location**: `green-lock-ledger/dangling_commits.txt`
 - **Detection**: via `git fsck --lost-found`
 - **Recovery**: Can be cherry-picked if needed
 
 ### 4. Stashes
+
 - **Location**: `green-lock-ledger/stash_list.txt`
 - **Coverage**: All stashed changes
 - **Recovery**: Manual inspection and application
 
 ### 5. Complete Bundle
+
 - **Location**: `green-lock-ledger/summit-ALL.bundle`
 - **Contents**: Every branch, tag, and ref
 - **Purpose**: Ultimate backup and recovery
 
 ### 6. Branch Inventory
+
 - **Current**: 461 branches preserved in "corrupt" remote
 - **Access**: `git branch -r | grep corrupt/`
 - **Safety**: Nothing deleted, everything accessible
@@ -58,7 +64,9 @@ make audit             # Generate provenance ledger
 ## The Stabilization Strategy
 
 ### Problem
+
 Main branch had 100% CI failure rate due to:
+
 1. Scheduled workflows monitoring non-existent production endpoints
 2. Heavy integration tests with flaky dependencies
 3. Contract tests requiring external services
@@ -82,6 +90,7 @@ name: Stabilization: Build & Unit Tests
 ### Branch Protection Update
 
 **Before**:
+
 ```json
 {
   "required_status_checks": {
@@ -99,6 +108,7 @@ name: Stabilization: Build & Unit Tests
 ```
 
 **After**:
+
 ```json
 {
   "required_status_checks": {
@@ -124,16 +134,18 @@ gh pr merge $PR_NUM --squash --auto --delete-branch
 
 - **--squash**: Single commit per PR
 - **--auto**: Merge when checks pass
-- --delete-branch**: Clean up automatically
+- --delete-branch\*\*: Clean up automatically
 
 ## Execution Plan
 
 ### Phase 1: Capture (1 minute)
+
 ```bash
 make capture
 ```
 
 **Artifacts Created**:
+
 - `green-lock-ledger/untracked_snapshot.txt` - List of all untracked files
 - `green-lock-ledger/reflog_all.txt` - All reflog entries (25,589+)
 - `green-lock-ledger/fsck.txt` - File system check results
@@ -142,22 +154,26 @@ make capture
 - `green-lock-ledger/dangling_commits.txt` - Orphaned commits
 
 ### Phase 2: Stabilize (2 minutes)
+
 ```bash
 make stabilize
 ```
 
 **Actions**:
+
 - Creates `.github/workflows/stabilization.yml`
 - Commits to main
 - Pushes to origin
 - Workflow becomes available for use
 
 ### Phase 3: Set Protection (1 minute)
+
 ```bash
 make set-protection
 ```
 
 **Actions**:
+
 - Fetches current branch protection settings
 - Creates new minimal protection config
 - Updates main branch protection via GitHub API
@@ -166,11 +182,13 @@ make set-protection
 **Result**: Main now requires only "Stabilization: Build & Unit Tests"
 
 ### Phase 4: Harvest Untracked (2-5 minutes)
+
 ```bash
 make harvest-untracked
 ```
 
 **Process**:
+
 1. Read untracked file list
 2. Copy each file from broken repo to `ops/untracked-import/`
 3. Preserve directory structure
@@ -179,6 +197,7 @@ make harvest-untracked
 6. Push to origin
 
 **Example Structure**:
+
 ```
 ops/untracked-import/
 ├── October25/
@@ -189,11 +208,13 @@ ops/untracked-import/
 ```
 
 ### Phase 5: Batch PRs (10-30 minutes)
+
 ```bash
 make batch-prs
 ```
 
 **Per-PR Process**:
+
 1. Fetch PR metadata
 2. Checkout PR branch
 3. Create empty commit (trigger CI)
@@ -202,27 +223,32 @@ make batch-prs
 6. Return to main
 
 **Monitoring**:
+
 ```bash
 watch -n 10 'gh pr list | grep -E "mergeable|checks"'
 ```
 
 ### Phase 6: Finalize (2 minutes)
+
 ```bash
 make finalize
 ```
 
 **Actions**:
+
 - Rerun any failed main branch checks
 - Tag current state: `green-lock-stabilized-YYYYMMDD-HHMM`
 - Push tags
 - Generate success banner
 
 ### Phase 7: Audit (1 minute)
+
 ```bash
 make audit
 ```
 
 **Generates**:
+
 - `green-lock-ledger/provenance.csv` with:
   - All branch refs
   - All remote refs
@@ -233,6 +259,7 @@ make audit
 ## Verification
 
 ### Check Main Branch Status
+
 ```bash
 gh run list --branch main --limit 5
 ```
@@ -240,6 +267,7 @@ gh run list --branch main --limit 5
 **Expected**: Latest runs show "success" for Stabilization check
 
 ### Check PR Status
+
 ```bash
 gh pr list --state open
 ```
@@ -247,6 +275,7 @@ gh pr list --state open
 **Expected**: PRs show "Checks passing" and "Auto-merge enabled"
 
 ### Verify Untracked Import
+
 ```bash
 ls -la ops/untracked-import/
 git log --oneline -- ops/untracked-import/ | head -5
@@ -255,6 +284,7 @@ git log --oneline -- ops/untracked-import/ | head -5
 **Expected**: Files present, commit shows import message
 
 ### Check Provenance Ledger
+
 ```bash
 wc -l green-lock-ledger/provenance.csv
 cat green-lock-ledger/provenance.csv | head -10
@@ -265,6 +295,7 @@ cat green-lock-ledger/provenance.csv | head -10
 ## Recovery Procedures
 
 ### Recover a Dangling Commit
+
 ```bash
 # View dangling commits
 cat green-lock-ledger/dangling_commits.txt
@@ -277,6 +308,7 @@ git cherry-pick <commit-sha>
 ```
 
 ### Recover from Bundle
+
 ```bash
 # Clone from bundle
 git clone green-lock-ledger/summit-ALL.bundle recovered-repo
@@ -290,6 +322,7 @@ git cherry-pick <branch-name>
 ```
 
 ### Access Corrupt Remote Branches
+
 ```bash
 # List all branches from broken repo
 git branch -r | grep corrupt/
@@ -308,6 +341,7 @@ After main is green and PRs are merged:
 ### 1. Add Quarantine Gates to Heavy Jobs
 
 Edit failing workflows:
+
 ```yaml
 jobs:
   pact-contracts:
@@ -345,6 +379,7 @@ Once 2-3 workflows are stable:
 ## Safety Features
 
 ### Zero Data Loss Guarantee
+
 - **Bundle**: Complete repo backup before any changes
 - **Reflog**: All 25,589+ entries preserved
 - **Untracked**: Every file imported to git
@@ -353,7 +388,9 @@ Once 2-3 workflows are stable:
 - **Dangling**: All orphaned commits cataloged
 
 ### Reversibility
+
 All changes can be reversed:
+
 ```bash
 # Restore original branch protection
 gh api -X PUT /repos/$OWNER/$REPO/branches/main/protection \
@@ -369,7 +406,9 @@ gh pr list --json number -q '.[].number' | xargs -I{} gh pr merge {} --disable-a
 ```
 
 ### Audit Trail
+
 Every operation logged:
+
 - **Git commits**: What changed and when
 - **Provenance CSV**: Complete ref history
 - **Ledger artifacts**: Original states preserved
@@ -378,18 +417,21 @@ Every operation logged:
 ## Success Criteria
 
 ### Immediate (1 hour)
+
 - ✅ Stabilization workflow created and passing
 - ✅ Branch protection updated
 - ✅ Untracked files committed
 - ✅ All PRs have auto-merge enabled
 
 ### Short-term (1 day)
+
 - ✅ Main branch shows green status
 - ✅ All PRs merged or identified for manual review
 - ✅ Provenance ledger complete
 - ✅ Zero work lost
 
 ### Medium-term (1 week)
+
 - ✅ 2-3 additional workflows re-enabled and green
 - ✅ Merge queue operational
 - ✅ PR velocity restored
@@ -398,6 +440,7 @@ Every operation logged:
 ## Troubleshooting
 
 ### Stabilization Workflow Fails
+
 ```bash
 # Check logs
 gh run list --workflow="Stabilization: Build & Unit Tests" --limit 1
@@ -410,6 +453,7 @@ gh run view --log
 ```
 
 ### PR Auto-Merge Not Triggering
+
 ```bash
 # Check PR status
 gh pr view $PR_NUM --json statusCheckRollup
@@ -422,6 +466,7 @@ gh pr merge $PR_NUM --squash --auto
 ```
 
 ### Untracked Files Too Large
+
 ```bash
 # Check sizes
 du -sh ops/untracked-import/*
@@ -442,4 +487,4 @@ git commit -m "chore: LFS track large binaries"
 
 ---
 
-*Green-Lock Orchestrator v1.0 - Zero Data Loss, Maximum Velocity*
+_Green-Lock Orchestrator v1.0 - Zero Data Loss, Maximum Velocity_

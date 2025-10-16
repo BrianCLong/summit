@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-import sys
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 from connectors.src.main import app
 

@@ -34,7 +34,7 @@ import {
   Select,
   MenuItem,
   Switch,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
 import {
   Security as SecurityIcon,
@@ -55,7 +55,7 @@ import {
   Visibility as VisibilityIcon,
   Person as PersonIcon,
   Business as BusinessIcon,
-  Description as DocumentIcon
+  Description as DocumentIcon,
 } from '@mui/icons-material';
 
 // Advanced threat scoring algorithms
@@ -64,7 +64,7 @@ const ThreatScoringEngine = {
   calculateThreatScore: (entity, context = {}) => {
     let score = 0;
     const factors = [];
-    
+
     // Network connectivity risk (0-25 points)
     const connectivityRisk = Math.min(25, (entity.connections || 0) * 2);
     score += connectivityRisk;
@@ -73,9 +73,14 @@ const ThreatScoringEngine = {
       score: connectivityRisk,
       max: 25,
       description: `${entity.connections || 0} connections in network`,
-      risk: connectivityRisk > 15 ? 'high' : connectivityRisk > 8 ? 'medium' : 'low'
+      risk:
+        connectivityRisk > 15
+          ? 'high'
+          : connectivityRisk > 8
+            ? 'medium'
+            : 'low',
     });
-    
+
     // Financial risk indicators (0-25 points)
     const financialRisk = entity.financialFlags ? 20 : Math.random() * 15;
     score += financialRisk;
@@ -83,10 +88,12 @@ const ThreatScoringEngine = {
       category: 'Financial Indicators',
       score: Math.round(financialRisk),
       max: 25,
-      description: entity.financialFlags ? 'Suspicious financial patterns' : 'Standard financial profile',
-      risk: financialRisk > 18 ? 'high' : financialRisk > 10 ? 'medium' : 'low'
+      description: entity.financialFlags
+        ? 'Suspicious financial patterns'
+        : 'Standard financial profile',
+      risk: financialRisk > 18 ? 'high' : financialRisk > 10 ? 'medium' : 'low',
     });
-    
+
     // Behavioral anomalies (0-25 points)
     const behavioralRisk = entity.behaviorFlags ? 18 : Math.random() * 12;
     score += behavioralRisk;
@@ -94,10 +101,13 @@ const ThreatScoringEngine = {
       category: 'Behavioral Patterns',
       score: Math.round(behavioralRisk),
       max: 25,
-      description: entity.behaviorFlags ? 'Anomalous behavior detected' : 'Normal behavior patterns',
-      risk: behavioralRisk > 15 ? 'high' : behavioralRisk > 8 ? 'medium' : 'low'
+      description: entity.behaviorFlags
+        ? 'Anomalous behavior detected'
+        : 'Normal behavior patterns',
+      risk:
+        behavioralRisk > 15 ? 'high' : behavioralRisk > 8 ? 'medium' : 'low',
     });
-    
+
     // Geographic risk factors (0-15 points)
     const geoRisk = entity.highRiskLocation ? 12 : Math.random() * 8;
     score += geoRisk;
@@ -105,10 +115,12 @@ const ThreatScoringEngine = {
       category: 'Geographic Risk',
       score: Math.round(geoRisk),
       max: 15,
-      description: entity.highRiskLocation ? 'High-risk geographic exposure' : 'Standard geographic profile',
-      risk: geoRisk > 10 ? 'high' : geoRisk > 5 ? 'medium' : 'low'
+      description: entity.highRiskLocation
+        ? 'High-risk geographic exposure'
+        : 'Standard geographic profile',
+      risk: geoRisk > 10 ? 'high' : geoRisk > 5 ? 'medium' : 'low',
     });
-    
+
     // Temporal risk patterns (0-10 points)
     const temporalRisk = entity.timePatternFlags ? 8 : Math.random() * 5;
     score += temporalRisk;
@@ -116,40 +128,49 @@ const ThreatScoringEngine = {
       category: 'Temporal Patterns',
       score: Math.round(temporalRisk),
       max: 10,
-      description: entity.timePatternFlags ? 'Suspicious timing patterns' : 'Normal temporal behavior',
-      risk: temporalRisk > 7 ? 'high' : temporalRisk > 4 ? 'medium' : 'low'
+      description: entity.timePatternFlags
+        ? 'Suspicious timing patterns'
+        : 'Normal temporal behavior',
+      risk: temporalRisk > 7 ? 'high' : temporalRisk > 4 ? 'medium' : 'low',
     });
-    
+
     return {
       totalScore: Math.round(score),
       maxScore: 100,
-      riskLevel: score > 75 ? 'critical' : score > 50 ? 'high' : score > 25 ? 'medium' : 'low',
+      riskLevel:
+        score > 75
+          ? 'critical'
+          : score > 50
+            ? 'high'
+            : score > 25
+              ? 'medium'
+              : 'low',
       factors: factors,
       confidence: 0.85 + Math.random() * 0.12,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
   },
-  
+
   // Network-based threat propagation
   analyzeNetworkThreats: (entities, relationships) => {
     const threats = [];
-    
+
     // Hub vulnerability analysis
-    const hubEntities = entities.filter(e => (e.connections || 0) > 8);
-    hubEntities.forEach(hub => {
+    const hubEntities = entities.filter((e) => (e.connections || 0) > 8);
+    hubEntities.forEach((hub) => {
       threats.push({
         type: 'NETWORK_HUB_RISK',
         severity: 'high',
         entity: hub.id,
         description: `High-connectivity hub poses network-wide risk`,
         impact: 'Network compromise potential',
-        mitigation: 'Enhanced monitoring and access controls'
+        mitigation: 'Enhanced monitoring and access controls',
       });
     });
-    
+
     // Cluster infection risk
     const clusters = this.identifyRiskClusters(entities, relationships);
-    clusters.forEach(cluster => {
+    clusters.forEach((cluster) => {
       if (cluster.riskScore > 60) {
         threats.push({
           type: 'CLUSTER_CONTAMINATION',
@@ -157,87 +178,88 @@ const ThreatScoringEngine = {
           entities: cluster.members,
           description: `Risk cluster detected with ${cluster.members.length} entities`,
           impact: 'Potential for coordinated threat activity',
-          mitigation: 'Segment monitoring and risk isolation'
+          mitigation: 'Segment monitoring and risk isolation',
         });
       }
     });
-    
+
     // Bridge node vulnerabilities
     const bridgeNodes = this.identifyBridgeNodes(entities, relationships);
-    bridgeNodes.forEach(bridge => {
+    bridgeNodes.forEach((bridge) => {
       threats.push({
         type: 'BRIDGE_VULNERABILITY',
         severity: 'medium',
         entity: bridge.id,
         description: 'Critical bridge node connecting network segments',
         impact: 'Cross-segment threat propagation risk',
-        mitigation: 'Enhanced bridge monitoring and controls'
+        mitigation: 'Enhanced bridge monitoring and controls',
       });
     });
-    
+
     return threats;
   },
-  
+
   // Advanced clustering for risk assessment
   identifyRiskClusters: (entities, relationships) => {
     // Simplified clustering based on risk scores
     const clusters = [];
     const processed = new Set();
-    
-    entities.forEach(entity => {
+
+    entities.forEach((entity) => {
       if (processed.has(entity.id)) return;
-      
+
       const cluster = {
         id: `cluster_${clusters.length}`,
         members: [entity.id],
         riskScore: 0,
-        connections: []
+        connections: [],
       };
-      
+
       // Find connected high-risk entities
       const connected = relationships
-        .filter(r => r.from === entity.id || r.to === entity.id)
-        .map(r => r.from === entity.id ? r.to : r.from)
-        .filter(id => !processed.has(id));
-      
-      connected.forEach(connectedId => {
-        const connectedEntity = entities.find(e => e.id === connectedId);
+        .filter((r) => r.from === entity.id || r.to === entity.id)
+        .map((r) => (r.from === entity.id ? r.to : r.from))
+        .filter((id) => !processed.has(id));
+
+      connected.forEach((connectedId) => {
+        const connectedEntity = entities.find((e) => e.id === connectedId);
         if (connectedEntity && (connectedEntity.riskScore || 0) > 40) {
           cluster.members.push(connectedId);
           processed.add(connectedId);
         }
       });
-      
+
       if (cluster.members.length > 1) {
-        cluster.riskScore = cluster.members.reduce((sum, id) => {
-          const e = entities.find(ent => ent.id === id);
-          return sum + (e?.riskScore || 30);
-        }, 0) / cluster.members.length;
-        
+        cluster.riskScore =
+          cluster.members.reduce((sum, id) => {
+            const e = entities.find((ent) => ent.id === id);
+            return sum + (e?.riskScore || 30);
+          }, 0) / cluster.members.length;
+
         clusters.push(cluster);
       }
-      
+
       processed.add(entity.id);
     });
-    
+
     return clusters;
   },
-  
+
   // Bridge node identification
   identifyBridgeNodes: (entities, relationships) => {
     // Simplified bridge detection
-    return entities.filter(entity => {
-      const connections = relationships.filter(r => 
-        r.from === entity.id || r.to === entity.id
+    return entities.filter((entity) => {
+      const connections = relationships.filter(
+        (r) => r.from === entity.id || r.to === entity.id,
       ).length;
       return connections >= 5 && connections <= 10; // Bridge characteristics
     });
   },
-  
+
   // Threat trend analysis
   analyzeThreatTrends: (historicalData) => {
     const trends = [];
-    
+
     // Simulated trend analysis
     trends.push({
       type: 'THREAT_ESCALATION',
@@ -245,20 +267,20 @@ const ThreatScoringEngine = {
       magnitude: 15,
       timeframe: '7 days',
       description: 'Threat scores showing upward trend',
-      confidence: 0.78
+      confidence: 0.78,
     });
-    
+
     trends.push({
       type: 'NETWORK_EXPANSION',
       direction: 'stable',
       magnitude: 3,
       timeframe: '14 days',
       description: 'Network growth within normal parameters',
-      confidence: 0.92
+      confidence: 0.92,
     });
-    
+
     return trends;
-  }
+  },
 };
 
 // Classify indicators into threat categories
@@ -274,7 +296,7 @@ const classifyEntityIndicators = (indicators = []) => {
       }
       return acc;
     },
-    { ttps: 0, cves: 0, other: 0 }
+    { ttps: 0, cves: 0, other: 0 },
   );
 };
 
@@ -290,7 +312,7 @@ const generateThreatEntities = () => {
       behaviorFlags: false,
       highRiskLocation: false,
       timePatternFlags: true,
-      indicators: ['T1059', 'CVE-2023-1234']
+      indicators: ['T1059', 'CVE-2023-1234'],
     },
     {
       id: 'org_1',
@@ -301,7 +323,7 @@ const generateThreatEntities = () => {
       behaviorFlags: true,
       highRiskLocation: true,
       timePatternFlags: false,
-      indicators: ['CVE-2023-4567']
+      indicators: ['CVE-2023-4567'],
     },
     {
       id: 'person_2',
@@ -312,7 +334,7 @@ const generateThreatEntities = () => {
       behaviorFlags: false,
       highRiskLocation: false,
       timePatternFlags: false,
-      indicators: []
+      indicators: [],
     },
     {
       id: 'document_1',
@@ -323,7 +345,7 @@ const generateThreatEntities = () => {
       behaviorFlags: false,
       highRiskLocation: false,
       timePatternFlags: true,
-      indicators: ['T1105']
+      indicators: ['T1105'],
     },
     {
       id: 'person_3',
@@ -334,15 +356,15 @@ const generateThreatEntities = () => {
       behaviorFlags: true,
       highRiskLocation: true,
       timePatternFlags: true,
-      indicators: ['T1027', 'CVE-2022-9999']
-    }
+      indicators: ['T1027', 'CVE-2022-9999'],
+    },
   ];
 
   // Calculate threat scores
-  return entities.map(entity => ({
+  return entities.map((entity) => ({
     ...entity,
     indicatorSummary: classifyEntityIndicators(entity.indicators || []),
-    threatAssessment: ThreatScoringEngine.calculateThreatScore(entity)
+    threatAssessment: ThreatScoringEngine.calculateThreatScore(entity),
   }));
 };
 
@@ -360,7 +382,7 @@ export default function ThreatAssessmentEngine() {
   const runThreatAnalysis = async () => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
-    
+
     // Simulate analysis phases
     const phases = [
       'Collecting entity data...',
@@ -368,25 +390,28 @@ export default function ThreatAssessmentEngine() {
       'Analyzing network threats...',
       'Detecting risk clusters...',
       'Generating threat trends...',
-      'Finalizing assessment...'
+      'Finalizing assessment...',
     ];
-    
+
     for (let i = 0; i < phases.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 600));
-      setAnalysisProgress((i + 1) / phases.length * 100);
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      setAnalysisProgress(((i + 1) / phases.length) * 100);
     }
-    
+
     // Recalculate threat scores
-    const updatedEntities = entities.map(entity => ({
+    const updatedEntities = entities.map((entity) => ({
       ...entity,
-      threatAssessment: ThreatScoringEngine.calculateThreatScore(entity)
+      threatAssessment: ThreatScoringEngine.calculateThreatScore(entity),
     }));
-    
+
     // Analyze network threats
     const relationships = []; // Simplified relationships
-    const threats = ThreatScoringEngine.analyzeNetworkThreats(updatedEntities, relationships);
+    const threats = ThreatScoringEngine.analyzeNetworkThreats(
+      updatedEntities,
+      relationships,
+    );
     const trends = ThreatScoringEngine.analyzeThreatTrends([]);
-    
+
     setEntities(updatedEntities);
     setNetworkThreats(threats);
     setThreatTrends(trends);
@@ -403,35 +428,53 @@ export default function ThreatAssessmentEngine() {
 
   const getRiskColor = (riskLevel) => {
     switch (riskLevel) {
-      case 'critical': return '#d32f2f';
-      case 'high': return '#f57c00';
-      case 'medium': return '#fbc02d';
-      case 'low': return '#388e3c';
-      default: return '#757575';
+      case 'critical':
+        return '#d32f2f';
+      case 'high':
+        return '#f57c00';
+      case 'medium':
+        return '#fbc02d';
+      case 'low':
+        return '#388e3c';
+      default:
+        return '#757575';
     }
   };
 
   const getRiskIcon = (riskLevel) => {
     switch (riskLevel) {
-      case 'critical': return <ErrorIcon />;
-      case 'high': return <WarningIcon />;
-      case 'medium': return <SpeedIcon />;
-      case 'low': return <CheckCircleIcon />;
-      default: return <SecurityIcon />;
+      case 'critical':
+        return <ErrorIcon />;
+      case 'high':
+        return <WarningIcon />;
+      case 'medium':
+        return <SpeedIcon />;
+      case 'low':
+        return <CheckCircleIcon />;
+      default:
+        return <SecurityIcon />;
     }
   };
 
   const getEntityIcon = (type) => {
     switch (type) {
-      case 'person': return <PersonIcon />;
-      case 'organization': return <BusinessIcon />;
-      case 'document': return <DocumentIcon />;
-      default: return <SecurityIcon />;
+      case 'person':
+        return <PersonIcon />;
+      case 'organization':
+        return <BusinessIcon />;
+      case 'document':
+        return <DocumentIcon />;
+      default:
+        return <SecurityIcon />;
     }
   };
 
   const filteredEntities = entities
-    .filter(entity => filterRisk === 'all' || entity.threatAssessment.riskLevel === filterRisk)
+    .filter(
+      (entity) =>
+        filterRisk === 'all' ||
+        entity.threatAssessment.riskLevel === filterRisk,
+    )
     .sort((a, b) => {
       switch (sortBy) {
         case 'threatScore':
@@ -447,11 +490,12 @@ export default function ThreatAssessmentEngine() {
 
   const totalIndicators = entities.reduce(
     (sum, e) => sum + (e.indicators ? e.indicators.length : 0),
-    0
+    0,
   );
 
   const overallRiskLevel = Math.round(
-    entities.reduce((sum, e) => sum + e.threatAssessment.totalScore, 0) / entities.length
+    entities.reduce((sum, e) => sum + e.threatAssessment.totalScore, 0) /
+      entities.length,
   );
 
   return (
@@ -459,7 +503,13 @@ export default function ThreatAssessmentEngine() {
       {/* Header */}
       <Card sx={{ mb: 2 }}>
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <Box>
               <Badge badgeContent={totalIndicators} color="secondary">
                 <Typography variant="h4" gutterBottom>
@@ -472,27 +522,44 @@ export default function ThreatAssessmentEngine() {
             </Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h3" sx={{ color: getRiskColor(overallRiskLevel > 75 ? 'critical' : overallRiskLevel > 50 ? 'high' : overallRiskLevel > 25 ? 'medium' : 'low') }}>
+                <Typography
+                  variant="h3"
+                  sx={{
+                    color: getRiskColor(
+                      overallRiskLevel > 75
+                        ? 'critical'
+                        : overallRiskLevel > 50
+                          ? 'high'
+                          : overallRiskLevel > 25
+                            ? 'medium'
+                            : 'low',
+                    ),
+                  }}
+                >
                   {overallRiskLevel}
                 </Typography>
                 <Typography variant="caption">Overall Risk</Typography>
               </Box>
               <Tooltip title="Run Analysis">
-                <IconButton onClick={runThreatAnalysis} disabled={isAnalyzing} color="primary">
+                <IconButton
+                  onClick={runThreatAnalysis}
+                  disabled={isAnalyzing}
+                  color="primary"
+                >
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
             </Box>
           </Box>
-          
+
           {isAnalyzing && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 🔄 AI threat assessment algorithms analyzing...
               </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={analysisProgress} 
+              <LinearProgress
+                variant="determinate"
+                value={analysisProgress}
                 sx={{ height: 6, borderRadius: 3 }}
               />
             </Box>
@@ -508,7 +575,7 @@ export default function ThreatAssessmentEngine() {
               <Typography variant="h6" gutterBottom>
                 ⚙️ Analysis Controls
               </Typography>
-              
+
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Sort By</InputLabel>
                 <Select
@@ -550,14 +617,25 @@ export default function ThreatAssessmentEngine() {
 
               <Divider sx={{ my: 2 }} />
 
-              <Typography variant="subtitle2" gutterBottom>📊 Risk Distribution</Typography>
-              {['critical', 'high', 'medium', 'low'].map(level => {
-                const count = entities.filter(e => e.threatAssessment.riskLevel === level).length;
+              <Typography variant="subtitle2" gutterBottom>
+                📊 Risk Distribution
+              </Typography>
+              {['critical', 'high', 'medium', 'low'].map((level) => {
+                const count = entities.filter(
+                  (e) => e.threatAssessment.riskLevel === level,
+                ).length;
                 return (
-                  <Box key={level} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Chip 
-                      label={level.toUpperCase()} 
-                      size="small" 
+                  <Box
+                    key={level}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      mb: 1,
+                    }}
+                  >
+                    <Chip
+                      label={level.toUpperCase()}
+                      size="small"
                       sx={{ bgcolor: getRiskColor(level), color: 'white' }}
                     />
                     <Typography variant="body2">{count}</Typography>
@@ -579,7 +657,7 @@ export default function ThreatAssessmentEngine() {
               <Typography variant="h6" gutterBottom>
                 🎯 Entity Threat Scores
               </Typography>
-              
+
               <TableContainer sx={{ maxHeight: '70vh' }}>
                 <Table stickyHeader>
                   <TableHead>
@@ -596,43 +674,84 @@ export default function ThreatAssessmentEngine() {
                     {filteredEntities.map((entity) => (
                       <TableRow key={entity.id}>
                         <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Avatar sx={{ width: 32, height: 32, bgcolor: getRiskColor(entity.threatAssessment.riskLevel) }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            <Avatar
+                              sx={{
+                                width: 32,
+                                height: 32,
+                                bgcolor: getRiskColor(
+                                  entity.threatAssessment.riskLevel,
+                                ),
+                              }}
+                            >
                               {getEntityIcon(entity.type)}
                             </Avatar>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 500 }}
+                              >
                                 {entity.name}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 {entity.type} • {entity.connections} connections
                               </Typography>
                             </Box>
                           </Box>
                         </TableCell>
                         <TableCell align="center">
-                          <Chip 
-                            icon={getRiskIcon(entity.threatAssessment.riskLevel)}
+                          <Chip
+                            icon={getRiskIcon(
+                              entity.threatAssessment.riskLevel,
+                            )}
                             label={entity.threatAssessment.riskLevel.toUpperCase()}
-                            sx={{ 
-                              bgcolor: getRiskColor(entity.threatAssessment.riskLevel),
-                              color: 'white'
+                            sx={{
+                              bgcolor: getRiskColor(
+                                entity.threatAssessment.riskLevel,
+                              ),
+                              color: 'white',
                             }}
                           />
                         </TableCell>
                         <TableCell align="center">
-                          <Typography variant="h6" sx={{ color: getRiskColor(entity.threatAssessment.riskLevel) }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              color: getRiskColor(
+                                entity.threatAssessment.riskLevel,
+                              ),
+                            }}
+                          >
                             {entity.threatAssessment.totalScore}/100
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
                           <Typography variant="body2">
-                            {(entity.threatAssessment.confidence * 100).toFixed(0)}%
+                            {(entity.threatAssessment.confidence * 100).toFixed(
+                              0,
+                            )}
+                            %
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
-                          <Chip label={`TTPs: ${entity.indicatorSummary.ttps}`} size="small" sx={{ mr: 0.5 }} />
-                          <Chip label={`CVEs: ${entity.indicatorSummary.cves}`} size="small" />
+                          <Chip
+                            label={`TTPs: ${entity.indicatorSummary.ttps}`}
+                            size="small"
+                            sx={{ mr: 0.5 }}
+                          />
+                          <Chip
+                            label={`CVEs: ${entity.indicatorSummary.cves}`}
+                            size="small"
+                          />
                         </TableCell>
                         <TableCell align="center">
                           <Tooltip title="View Details">
@@ -673,7 +792,10 @@ export default function ThreatAssessmentEngine() {
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontSize: '0.85rem' }}
+                            >
                               {threat.description}
                             </Typography>
                           }
@@ -700,7 +822,10 @@ export default function ThreatAssessmentEngine() {
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontSize: '0.85rem' }}
+                            >
                               {trend.description}
                             </Typography>
                           }
@@ -714,7 +839,9 @@ export default function ThreatAssessmentEngine() {
 
               <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
                 <Typography variant="caption" color="text.secondary">
-                  🧠 <strong>AI Threat Engine:</strong> Multi-layered machine learning models analyze network topology, behavioral patterns, and risk propagation for comprehensive threat assessment.
+                  🧠 <strong>AI Threat Engine:</strong> Multi-layered machine
+                  learning models analyze network topology, behavioral patterns,
+                  and risk propagation for comprehensive threat assessment.
                 </Typography>
               </Box>
             </CardContent>

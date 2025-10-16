@@ -14,14 +14,14 @@ Key differentiators:
 
 ## Layered Control Plane
 
-| Layer | Agent Module | Highlights |
-| --- | --- | --- |
-| **Discovery Layer** | `AssetDiscoveryEngine` | Auto-registers assets from pluggable discovery providers, deduplicates multi-source data, and tracks lifecycle deltas to trigger downstream orchestration. |
-| **Telemetry Layer** | `HealthMonitor` + `AnomalyDetector` | Normalises streaming health signals, maintains rich history windows, and executes adaptive z-score + trend detection to flag spikes, drifts, or oscillations in milliseconds. |
-| **Cognitive Healing Layer** | `SelfHealingOrchestrator` | Evaluates context-aware strategies (failover, live runbooks, load rebalancing) with per-asset cooldowns and policy checks before executing automated interventions. |
-| **Optimisation Layer** | `CostLatencyOptimizer` | Builds rolling series for latency, throughput, cost, and saturation to generate high-confidence right-sizing, scale-out, or scale-in recommendations. |
-| **Execution Layer** | `JobRouter` | Scores eligible targets across cost, reliability, compliance, and sovereignty to route multi-cloud jobs with deterministic fallbacks. |
-| **Command Layer** | `MaestroConductor` | Coordinates every layer, exposes a concise API, and ensures every telemetry pulse can trigger discovery, healing, optimisation, and routing workflows. |
+| Layer                       | Agent Module                        | Highlights                                                                                                                                                                    |
+| --------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Discovery Layer**         | `AssetDiscoveryEngine`              | Auto-registers assets from pluggable discovery providers, deduplicates multi-source data, and tracks lifecycle deltas to trigger downstream orchestration.                    |
+| **Telemetry Layer**         | `HealthMonitor` + `AnomalyDetector` | Normalises streaming health signals, maintains rich history windows, and executes adaptive z-score + trend detection to flag spikes, drifts, or oscillations in milliseconds. |
+| **Cognitive Healing Layer** | `SelfHealingOrchestrator`           | Evaluates context-aware strategies (failover, live runbooks, load rebalancing) with per-asset cooldowns and policy checks before executing automated interventions.           |
+| **Optimisation Layer**      | `CostLatencyOptimizer`              | Builds rolling series for latency, throughput, cost, and saturation to generate high-confidence right-sizing, scale-out, or scale-in recommendations.                         |
+| **Execution Layer**         | `JobRouter`                         | Scores eligible targets across cost, reliability, compliance, and sovereignty to route multi-cloud jobs with deterministic fallbacks.                                         |
+| **Command Layer**           | `MaestroConductor`                  | Coordinates every layer, exposes a concise API, and ensures every telemetry pulse can trigger discovery, healing, optimisation, and routing workflows.                        |
 
 ## Agent Collaboration Flow
 

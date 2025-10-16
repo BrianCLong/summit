@@ -7,5 +7,5 @@ export const csp = helmet.contentSecurityPolicy({
     objectSrc: ["'none'"],
     baseUri: ["'self'"],
     requireTrustedTypesFor: ["'script'"],
-  }
+  },
 });

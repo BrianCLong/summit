@@ -5,7 +5,13 @@
 
 import { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLError } from 'graphql';
-import { visit, Kind, OperationDefinitionNode, SelectionSetNode, FieldNode } from 'graphql';
+import {
+  visit,
+  Kind,
+  OperationDefinitionNode,
+  SelectionSetNode,
+  FieldNode,
+} from 'graphql';
 import logger from '../../utils/logger';
 
 interface BudgetPluginOptions {
@@ -13,17 +19,17 @@ interface BudgetPluginOptions {
    * Whether to enforce budget directives (feature flag)
    */
   enforceBudget?: boolean;
-  
+
   /**
    * Whether to log violations for monitoring
    */
   logViolations?: boolean;
-  
+
   /**
    * Tenant allowlist for bypass (emergency only)
    */
   allowlistTenants?: string[];
-  
+
   /**
    * Operations allowlist for bypass (health checks, etc)
    */
@@ -37,12 +43,14 @@ interface MutationFieldInfo {
   tenantId?: string;
 }
 
-export function requireBudgetPlugin(options: BudgetPluginOptions = {}): ApolloServerPlugin {
+export function requireBudgetPlugin(
+  options: BudgetPluginOptions = {},
+): ApolloServerPlugin {
   const {
     enforcebudget = process.env.REQUIRE_BUDGET_PLUGIN === 'true',
     logViolations = true,
     allowlistTenants = [],
-    allowlistOperations = []
+    allowlistOperations = [],
   } = options;
 
   return {
@@ -54,54 +62,58 @@ export function requireBudgetPlugin(options: BudgetPluginOptions = {}): ApolloSe
             return;
           }
 
-          const operationName = requestContext.operation.name?.value || 'unnamed';
-          
+          const operationName =
+            requestContext.operation.name?.value || 'unnamed';
+
           // Check operation allowlist
           if (allowlistOperations.includes(operationName)) {
             return;
           }
 
           // Extract tenant from context (set by auth middleware)
-          const tenantId = requestContext.contextValue?.user?.tenantId || 
-                           requestContext.contextValue?.tenantId;
-          
+          const tenantId =
+            requestContext.contextValue?.user?.tenantId ||
+            requestContext.contextValue?.tenantId;
+
           // Check tenant allowlist
           if (tenantId && allowlistTenants.includes(tenantId)) {
             logger.warn('Budget enforcement bypassed for allowlisted tenant', {
               tenantId,
-              operationName
+              operationName,
             });
             return;
           }
 
           const schema = requestContext.schema;
           const mutationType = schema.getMutationType();
-          
+
           if (!mutationType) {
             return; // No mutation type defined
           }
 
           // Extract selected mutation fields
-          const selectedFields = extractMutationFields(requestContext.operation);
+          const selectedFields = extractMutationFields(
+            requestContext.operation,
+          );
           const violations: MutationFieldInfo[] = [];
 
           // Check each selected field for @budget directive
           for (const fieldName of selectedFields) {
             const field = mutationType.getFields()[fieldName];
-            
+
             if (!field) {
               continue; // Field doesn't exist (will error elsewhere)
             }
 
             const hasBudgetDirective = !!field.astNode?.directives?.some(
-              directive => directive.name.value === 'budget'
+              (directive) => directive.name.value === 'budget',
             );
 
             const fieldInfo: MutationFieldInfo = {
               fieldName,
               hasBudgetDirective,
               operationName,
-              tenantId
+              tenantId,
             };
 
             if (!hasBudgetDirective) {
@@ -111,48 +123,51 @@ export function requireBudgetPlugin(options: BudgetPluginOptions = {}): ApolloSe
 
           // Handle violations
           if (violations.length > 0) {
-            const violationFields = violations.map(v => v.fieldName);
-            
+            const violationFields = violations.map((v) => v.fieldName);
+
             if (logViolations) {
               logger.error('Mutation fields missing @budget directive', {
                 operationName,
                 tenantId,
                 violations: violationFields,
-                enforced: enforcebudget
+                enforced: enforcebudget,
               });
             }
 
             if (enforcebudget) {
               throw new GraphQLError(
                 `Mutation fields missing required @budget directive: ${violationFields.join(', ')}. ` +
-                `All mutations must declare budget limits for cost control.`,
+                  `All mutations must declare budget limits for cost control.`,
                 {
                   extensions: {
                     code: 'BUDGET_DIRECTIVE_REQUIRED',
                     violations: violationFields,
                     operationName,
-                    tenantId
-                  }
-                }
+                    tenantId,
+                  },
+                },
               );
             } else {
               // Warn mode: log but allow execution
-              logger.warn('Budget directive violations detected but not enforced', {
-                operationName,
-                tenantId,
-                violations: violationFields
-              });
+              logger.warn(
+                'Budget directive violations detected but not enforced',
+                {
+                  operationName,
+                  tenantId,
+                  violations: violationFields,
+                },
+              );
             }
           } else {
             logger.debug('All mutation fields have @budget directive', {
               operationName,
               tenantId,
-              fields: selectedFields
+              fields: selectedFields,
             });
           }
-        }
+        },
       };
-    }
+    },
   };
 }
 
@@ -177,7 +192,7 @@ function extractMutationFields(operation: OperationDefinitionNode): string[] {
       if (isTopLevel && node.name.value) {
         fieldNames.add(node.name.value);
       }
-    }
+    },
   });
 
   return Array.from(fieldNames);
@@ -191,10 +206,9 @@ export function createRequireBudgetPlugin(): ApolloServerPlugin {
     enforcebudget: process.env.REQUIRE_BUDGET_ENFORCEMENT === 'true',
     logViolations: process.env.LOG_BUDGET_VIOLATIONS !== 'false',
     allowlistTenants: process.env.BUDGET_ALLOWLIST_TENANTS?.split(',') || [],
-    allowlistOperations: process.env.BUDGET_ALLOWLIST_OPERATIONS?.split(',') || [
-      'healthCheck',
-      'introspectionQuery'
-    ]
+    allowlistOperations: process.env.BUDGET_ALLOWLIST_OPERATIONS?.split(
+      ',',
+    ) || ['healthCheck', 'introspectionQuery'],
   });
 }
 
@@ -205,26 +219,27 @@ export const budgetPluginMetrics = {
   violationsDetected: 0,
   violationsEnforced: 0,
   allowlistBypasses: 0,
-  
+
   recordViolation(enforced: boolean): void {
     this.violationsDetected++;
     if (enforced) {
       this.violationsEnforced++;
     }
   },
-  
+
   recordBypass(): void {
     this.allowlistBypasses++;
   },
-  
+
   getStats() {
     return {
       violationsDetected: this.violationsDetected,
       violationsEnforced: this.violationsEnforced,
       allowlistBypasses: this.allowlistBypasses,
-      enforcementRate: this.violationsDetected > 0 
-        ? this.violationsEnforced / this.violationsDetected 
-        : 1.0
+      enforcementRate:
+        this.violationsDetected > 0
+          ? this.violationsEnforced / this.violationsDetected
+          : 1.0,
     };
-  }
+  },
 };

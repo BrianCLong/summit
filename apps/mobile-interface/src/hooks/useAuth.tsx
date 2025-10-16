@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { useRouter } from 'next/router';
 import { apiClient } from '@/services/api';
 import toast from 'react-hot-toast';
@@ -196,14 +202,18 @@ export function useAuth() {
 }
 
 // HOC for protected routes
-export function withAuth<P extends object>(WrappedComponent: React.ComponentType<P>) {
+export function withAuth<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+) {
   return function AuthenticatedComponent(props: P) {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
       if (!isLoading && !isAuthenticated) {
-        router.push(`/auth/signin?returnUrl=${encodeURIComponent(router.asPath)}`);
+        router.push(
+          `/auth/signin?returnUrl=${encodeURIComponent(router.asPath)}`,
+        );
       }
     }, [isAuthenticated, isLoading, router]);
 

@@ -15,17 +15,17 @@ intelgraph-api:
     className: nginx
     hosts:
       - host: api.topicality.co
-        paths: [ { path: /, pathType: Prefix } ]
+        paths: [{ path: /, pathType: Prefix }]
     tls:
       - secretName: intelgraph-api-tls
-        hosts: [ api.topicality.co ]
+        hosts: [api.topicality.co]
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       external-dns.alpha.kubernetes.io/hostname: api.topicality.co
   serviceAccount:
     create: true
     annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/companyos-intelgraph-irsa   # <-- set to actual IRSA role ARN
+      eks.amazonaws.com/role-arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/companyos-intelgraph-irsa # <-- set to actual IRSA role ARN
 
 companyos-console:
   image:
@@ -36,10 +36,10 @@ companyos-console:
     className: nginx
     hosts:
       - host: console.topicality.co
-        paths: [ { path: /, pathType: Prefix } ]
+        paths: [{ path: /, pathType: Prefix }]
     tls:
       - secretName: companyos-console-tls
-        hosts: [ console.topicality.co ]
+        hosts: [console.topicality.co]
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       external-dns.alpha.kubernetes.io/hostname: console.topicality.co
@@ -54,4 +54,4 @@ mc-runner:
   serviceAccount:
     create: true
     annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/companyos-mc-irsa   # optional, set if runner needs AWS APIs
+      eks.amazonaws.com/role-arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/companyos-mc-irsa # optional, set if runner needs AWS APIs

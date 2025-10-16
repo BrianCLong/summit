@@ -43,8 +43,10 @@ export default function AdminFeatureFlags() {
 
   const { getFeatureFlags, updateFeatureFlag, getAuditLog } = api();
   const confirmDialogRef = useRef<HTMLDivElement>(null);
-  
-  useFocusTrap(confirmDialogRef, showConfirmDialog, () => setShowConfirmDialog(false));
+
+  useFocusTrap(confirmDialogRef, showConfirmDialog, () =>
+    setShowConfirmDialog(false),
+  );
 
   useEffect(() => {
     loadFlags();
@@ -86,9 +88,9 @@ export default function AdminFeatureFlags() {
       });
 
       // Update local state optimistically
-      setFlags(prev => prev.map(f => 
-        f.id === updatedFlag.id ? updatedFlag : f
-      ));
+      setFlags((prev) =>
+        prev.map((f) => (f.id === updatedFlag.id ? updatedFlag : f)),
+      );
 
       // Emit audit event
       const auditEvent: AuditEvent = {
@@ -102,16 +104,17 @@ export default function AdminFeatureFlags() {
         timestamp: new Date().toISOString(),
       };
 
-      setAuditLog(prev => [auditEvent, ...prev]);
-
+      setAuditLog((prev) => [auditEvent, ...prev]);
     } catch (error) {
       console.error('Failed to update feature flag:', error);
       // In a real app, show error notification
-      
+
       // Rollback optimistic update on failure
-      setFlags(prev => prev.map(f => 
-        f.id === pendingUpdate.flag.id ? pendingUpdate.flag : f
-      ));
+      setFlags((prev) =>
+        prev.map((f) =>
+          f.id === pendingUpdate.flag.id ? pendingUpdate.flag : f,
+        ),
+      );
     } finally {
       setShowConfirmDialog(false);
       setPendingUpdate(null);
@@ -119,16 +122,17 @@ export default function AdminFeatureFlags() {
     }
   };
 
-  const filteredFlags = flags.filter(flag => 
-    flag.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    flag.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    flag.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredFlags = flags.filter(
+    (flag) =>
+      flag.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      flag.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      flag.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const getFlagsByCategory = () => {
     const categories: Record<string, FeatureFlag[]> = {};
-    
-    filteredFlags.forEach(flag => {
+
+    filteredFlags.forEach((flag) => {
       const category = flag.metadata?.category || 'General';
       if (!categories[category]) {
         categories[category] = [];
@@ -152,9 +156,12 @@ export default function AdminFeatureFlags() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Feature Flags Administration</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Feature Flags Administration
+        </h1>
         <p className="text-gray-600 mt-1">
-          Manage feature flags and rollout controls. All changes are audited and logged.
+          Manage feature flags and rollout controls. All changes are audited and
+          logged.
         </p>
       </div>
 
@@ -183,22 +190,30 @@ export default function AdminFeatureFlags() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Feature Flags */}
         <div className={`${showAuditLog ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
-          {Object.keys(flagsByCategory).map(category => (
+          {Object.keys(flagsByCategory).map((category) => (
             <div key={category} className="mb-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{category}</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                {category}
+              </h2>
               <div className="space-y-4">
-                {flagsByCategory[category].map(flag => (
+                {flagsByCategory[category].map((flag) => (
                   <div key={flag.id} className="bg-white rounded-lg shadow p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-medium text-gray-900">{flag.name}</h3>
-                          <code className="px-2 py-1 bg-gray-100 text-sm rounded">{flag.key}</code>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            flag.enabled 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {flag.name}
+                          </h3>
+                          <code className="px-2 py-1 bg-gray-100 text-sm rounded">
+                            {flag.key}
+                          </code>
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              flag.enabled
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
                             {flag.enabled ? 'Enabled' : 'Disabled'}
                           </span>
                           {flag.rolloutPercentage !== undefined && (
@@ -207,17 +222,22 @@ export default function AdminFeatureFlags() {
                             </span>
                           )}
                         </div>
-                        
+
                         <p className="text-gray-600 mb-3">{flag.description}</p>
-                        
+
                         <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>Modified: {new Date(flag.updatedAt).toLocaleString()}</span>
+                          <span>
+                            Modified:{' '}
+                            {new Date(flag.updatedAt).toLocaleString()}
+                          </span>
                           <span>by {flag.lastModifiedBy}</span>
                         </div>
-                        
+
                         {flag.conditions && flag.conditions.length > 0 && (
                           <div className="mt-3">
-                            <div className="text-sm font-medium text-gray-700 mb-1">Conditions:</div>
+                            <div className="text-sm font-medium text-gray-700 mb-1">
+                              Conditions:
+                            </div>
                             <div className="flex flex-wrap gap-1">
                               {flag.conditions.map((condition, index) => (
                                 <span
@@ -231,7 +251,7 @@ export default function AdminFeatureFlags() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="ml-4">
                         <button
                           onClick={() => handleToggleFlag(flag, !flag.enabled)}
@@ -268,25 +288,35 @@ export default function AdminFeatureFlags() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {auditLog.map(event => (
-                      <div key={event.id} className="border-l-4 border-blue-500 pl-4 py-2">
+                    {auditLog.map((event) => (
+                      <div
+                        key={event.id}
+                        className="border-l-4 border-blue-500 pl-4 py-2"
+                      >
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`px-2 py-1 text-xs font-medium rounded ${
-                            event.action === 'enabled' ? 'bg-green-100 text-green-800' :
-                            event.action === 'disabled' ? 'bg-red-100 text-red-800' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded ${
+                              event.action === 'enabled'
+                                ? 'bg-green-100 text-green-800'
+                                : event.action === 'disabled'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-blue-100 text-blue-800'
+                            }`}
+                          >
                             {event.action.toUpperCase()}
                           </span>
                         </div>
                         <div className="text-sm text-gray-900 mb-1">
-                          Flag: {flags.find(f => f.id === event.flagId)?.name || 'Unknown'}
+                          Flag:{' '}
+                          {flags.find((f) => f.id === event.flagId)?.name ||
+                            'Unknown'}
                         </div>
                         <div className="text-xs text-gray-600 mb-2">
                           Reason: {event.reason}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {event.performedBy} • {new Date(event.timestamp).toLocaleString()}
+                          {event.performedBy} •{' '}
+                          {new Date(event.timestamp).toLocaleString()}
                         </div>
                       </div>
                     ))}
@@ -309,23 +339,26 @@ export default function AdminFeatureFlags() {
             <h2 className="text-lg font-semibold mb-4">
               {pendingUpdate.newValue ? 'Enable' : 'Disable'} Feature Flag
             </h2>
-            
+
             <div className="mb-4">
               <div className="text-sm text-gray-700 mb-2">
-                <strong>{pendingUpdate.flag.name}</strong> ({pendingUpdate.flag.key})
+                <strong>{pendingUpdate.flag.name}</strong> (
+                {pendingUpdate.flag.key})
               </div>
               <div className="text-sm text-gray-600 mb-4">
                 {pendingUpdate.flag.description}
               </div>
-              
-              <div className={`p-3 rounded ${
-                pendingUpdate.newValue 
-                  ? 'bg-green-50 border border-green-200' 
-                  : 'bg-red-50 border border-red-200'
-              }`}>
+
+              <div
+                className={`p-3 rounded ${
+                  pendingUpdate.newValue
+                    ? 'bg-green-50 border border-green-200'
+                    : 'bg-red-50 border border-red-200'
+                }`}
+              >
                 <div className="text-sm font-medium">
-                  {pendingUpdate.newValue 
-                    ? '✅ This flag will be ENABLED' 
+                  {pendingUpdate.newValue
+                    ? '✅ This flag will be ENABLED'
                     : '❌ This flag will be DISABLED'}
                 </div>
                 {pendingUpdate.flag.rolloutPercentage !== undefined && (

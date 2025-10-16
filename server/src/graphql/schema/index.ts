@@ -14,8 +14,11 @@ import provenanceTypeDefs from '../schema.provenance.js';
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
 const { aiTypeDefs } = aiModule as { aiTypeDefs: any };
-const { annotationsTypeDefs } = annotationsModule as { annotationsTypeDefs: any };
-const graphragTypes = (graphragTypesModule as any).default || graphragTypesModule;
+const { annotationsTypeDefs } = annotationsModule as {
+  annotationsTypeDefs: any;
+};
+const graphragTypes =
+  (graphragTypesModule as any).default || graphragTypesModule;
 
 const base = gql`
   scalar JSON

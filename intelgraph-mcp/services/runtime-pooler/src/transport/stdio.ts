@@ -7,12 +7,16 @@ export type StdioProcess = {
   stream: AsyncGenerator<unknown>;
 };
 
-export async function launch(command: string, args: string[] = [], env: Record<string, string> = {}): Promise<StdioProcess> {
+export async function launch(
+  command: string,
+  args: string[] = [],
+  env: Record<string, string> = {},
+): Promise<StdioProcess> {
   const disableSandbox = process.env.NSJAIL_DISABLE === '1';
   const child = disableSandbox
     ? spawn(command, args, {
         stdio: ['pipe', 'pipe', 'inherit'],
-        env: { ...process.env, ...env }
+        env: { ...process.env, ...env },
       })
     : spawn(
         process.env.NSJAIL_BIN ?? 'nsjail',
@@ -22,12 +26,12 @@ export async function launch(command: string, args: string[] = [], env: Record<s
           process.env.NSJAIL_CONFIG ?? '/etc/nsjail/mcp-stdio.cfg',
           '--',
           command,
-          ...args
+          ...args,
         ],
         {
           stdio: ['pipe', 'pipe', 'inherit'],
-          env: { ...process.env, ...env }
-        }
+          env: { ...process.env, ...env },
+        },
       );
 
   if (!child.stdin || !child.stdout) {
@@ -61,6 +65,6 @@ export async function launch(command: string, args: string[] = [], env: Record<s
   return {
     pid: child.pid ?? -1,
     write,
-    stream: readStream()
+    stream: readStream(),
   };
 }

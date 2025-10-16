@@ -28,7 +28,7 @@ data:
             max-active: 5
             max-idle: 5
             min-idle: 1
-    
+
     conductor:
       server:
         port: 8080
@@ -97,7 +97,7 @@ spec:
               name: metrics
           env:
             - name: JAVA_OPTS
-              value: "-Xms256m -Xmx512m -XX:+UseG1GC"
+              value: '-Xms256m -Xmx512m -XX:+UseG1GC'
             - name: CONDUCTOR_CONFIG_FILE
               value: /app/config/application.yml
           livenessProbe:

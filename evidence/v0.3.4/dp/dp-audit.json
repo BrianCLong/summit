@@ -8,10 +8,7 @@
   "mathematical_guarantees": {
     "epsilon_differential_privacy": true,
     "delta_differential_privacy": true,
-    "noise_mechanisms": [
-      "laplace",
-      "gaussian"
-    ],
+    "noise_mechanisms": ["laplace", "gaussian"],
     "privacy_proof": "Composition theorem ensures \u03b5-DP with Laplace noise, (\u03b5,\u03b4)-DP with Gaussian noise"
   },
   "tenant_budgets": {
@@ -21,7 +18,7 @@
       "epsilon_consumed": 0.5,
       "epsilon_remaining": 9.5,
       "utilization_percent": 5.0,
-      "delta": 1e-05,
+      "delta": 1e-5,
       "budget_status": "healthy"
     },
     "TENANT_002": {
@@ -30,7 +27,7 @@
       "epsilon_consumed": 0.5,
       "epsilon_remaining": 9.5,
       "utilization_percent": 5.0,
-      "delta": 1e-05,
+      "delta": 1e-5,
       "budget_status": "healthy"
     },
     "TENANT_003": {
@@ -39,7 +36,7 @@
       "epsilon_consumed": 0.5,
       "epsilon_remaining": 9.5,
       "utilization_percent": 5.0,
-      "delta": 1e-05,
+      "delta": 1e-5,
       "budget_status": "healthy"
     },
     "TENANT_004": {
@@ -48,7 +45,7 @@
       "epsilon_consumed": 0.0,
       "epsilon_remaining": 10.0,
       "utilization_percent": 0.0,
-      "delta": 1e-05,
+      "delta": 1e-5,
       "budget_status": "healthy"
     },
     "TENANT_005": {
@@ -57,7 +54,7 @@
       "epsilon_consumed": 0.0,
       "epsilon_remaining": 10.0,
       "utilization_percent": 0.0,
-      "delta": 1e-05,
+      "delta": 1e-5,
       "budget_status": "healthy"
     }
   },

@@ -2,7 +2,7 @@ name: build-and-push
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 env:
@@ -11,7 +11,7 @@ env:
   IMAGE_PREFIX: summit-company
 
 permissions:
-  id-token: write   # OIDC
+  id-token: write # OIDC
   contents: read
 
 jobs:
@@ -49,7 +49,7 @@ jobs:
       - name: Sign image (keyless via GitHub OIDC)
         if: ${{ steps.login-ecr.outcome == 'success' }}
         env:
-          COSIGN_EXPERIMENTAL: "true"
+          COSIGN_EXPERIMENTAL: 'true'
         run: |
           SVC=${{ matrix.service }}
           case "$SVC" in
@@ -63,7 +63,7 @@ jobs:
       - name: Generate SLSA Provenance (keyless via GitHub OIDC)
         if: ${{ steps.login-ecr.outcome == 'success' }}
         env:
-          COSIGN_EXPERIMENTAL: "true"
+          COSIGN_EXPERIMENTAL: 'true'
         run: |
           SVC=${{ matrix.service }}
           case "$SVC" in

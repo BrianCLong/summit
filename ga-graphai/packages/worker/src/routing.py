@@ -4,8 +4,8 @@ from __future__ import annotations
 
 """Assignment engine for distributing tickets across worker pools."""
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Iterable, Sequence
 
 from prompt_engineering import PromptTuning
 
@@ -35,7 +35,7 @@ class WorkerProfile:
     max_concurrent: int
     current_load: int = 0
 
-    def clone(self) -> "WorkerProfile":
+    def clone(self) -> WorkerProfile:
         return WorkerProfile(
             identifier=self.identifier,
             display_name=self.display_name,
@@ -105,15 +105,15 @@ class TicketRouter:
     def _select_worker(self, ticket: Ticket) -> WorkerProfile | None:
         override = self._manual_overrides.get(ticket.identifier)
         eligible_workers = [
-            worker
-            for worker in self._workers
-            if worker.current_load < worker.max_concurrent
+            worker for worker in self._workers if worker.current_load < worker.max_concurrent
         ]
         if not eligible_workers:
             return None
 
         if override:
-            worker = next((worker for worker in eligible_workers if worker.identifier == override), None)
+            worker = next(
+                (worker for worker in eligible_workers if worker.identifier == override), None
+            )
             if worker:
                 worker.current_load += 1
                 return worker
@@ -135,10 +135,25 @@ class TicketRouter:
 
     def _manual_plan(self, mode: str) -> ManualControlPlan:
         if mode == "manual":
-            return ManualControlPlan(mode="manual", pause_before_navigation=True, pause_before_prompt=True, pause_before_capture=True)
+            return ManualControlPlan(
+                mode="manual",
+                pause_before_navigation=True,
+                pause_before_prompt=True,
+                pause_before_capture=True,
+            )
         if mode == "guided":
-            return ManualControlPlan(mode="guided", pause_before_navigation=False, pause_before_prompt=True, pause_before_capture=True)
-        return ManualControlPlan(mode="auto", pause_before_navigation=False, pause_before_prompt=False, pause_before_capture=False)
+            return ManualControlPlan(
+                mode="guided",
+                pause_before_navigation=False,
+                pause_before_prompt=True,
+                pause_before_capture=True,
+            )
+        return ManualControlPlan(
+            mode="auto",
+            pause_before_navigation=False,
+            pause_before_prompt=False,
+            pause_before_capture=False,
+        )
 
     def _derive_tuning(self, ticket: Ticket) -> PromptTuning:
         if ticket.priority >= 4:

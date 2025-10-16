@@ -7,9 +7,9 @@ spec:
   background: true
   rules:
     - name: nonroot
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "runAsNonRoot must be true"
+        message: 'runAsNonRoot must be true'
         pattern:
           spec:
             securityContext:

@@ -36,7 +36,10 @@ export type EnrichJob = {
 //   },
 // });
 
-export async function enqueueEnrichment(payload: EnrichJob, opts: JobsOptions = { attempts: 2 }) {
+export async function enqueueEnrichment(
+  payload: EnrichJob,
+  opts: JobsOptions = { attempts: 2 },
+) {
   return enrichQueue.add('enrich', payload, opts);
 }
 
@@ -52,9 +55,9 @@ function extractEntities(text: string) {
     push('PersonOrOrg', v),
   );
   // Emails
-  (text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g) || []).forEach((v) =>
-    push('Email', v),
-  );
+  (
+    text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g) || []
+  ).forEach((v) => push('Email', v));
   // URLs
   (text.match(/\bhttps?:\/\/[^\s)]+/g) || []).forEach((v) => push('URL', v));
   // Hashtags
@@ -64,9 +67,13 @@ function extractEntities(text: string) {
 
   // Custom entity types (simple regex for demonstration)
   // Wallet (example: starts with 0x, followed by hex chars)
-  (text.match(/\b0x[a-fA-F0-9]{40}\b/g) || []).forEach((v) => push('Wallet', v));
+  (text.match(/\b0x[a-fA-F0-9]{40}\b/g) || []).forEach((v) =>
+    push('Wallet', v),
+  );
   // Domain (example: example.com, sub.domain.co)
-  (text.match(/\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}\b/g) || []).forEach((v) => push('Domain', v));
+  (text.match(/\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}\b/g) || []).forEach((v) =>
+    push('Domain', v),
+  );
   // Malware (example: specific names, case-insensitive)
   const malwareKeywords = ['Ryuk', 'WannaCry', 'NotPetya'];
   malwareKeywords.forEach((keyword) => {

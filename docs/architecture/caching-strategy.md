@@ -1,4 +1,3 @@
-
 # GraphQL Caching Strategy
 
 This document outlines the Redis-based caching strategy for the GraphQL gateway.

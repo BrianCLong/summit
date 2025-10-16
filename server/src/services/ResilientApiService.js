@@ -10,41 +10,46 @@ const { EventEmitter } = require('events');
 class ResilientApiService extends EventEmitter {
   constructor(options = {}) {
     super();
-    
+
     this.name = options.name || 'api-service';
     this.baseURL = options.baseURL;
     this.timeout = options.timeout || 30000;
     this.headers = options.headers || {};
-    
+
     // Create axios instance with default config
     this.axios = axios.create({
       baseURL: this.baseURL,
       timeout: this.timeout,
       headers: {
         'User-Agent': 'Maestro-Conductor/1.0',
-        ...this.headers
+        ...this.headers,
       },
-      validateStatus: (status) => status < 500 // Don't treat 4xx as errors for retry logic
+      validateStatus: (status) => status < 500, // Don't treat 4xx as errors for retry logic
     });
 
     // Setup resilience patterns
-    this.circuitBreaker = resilienceManager.getCircuitBreaker(`${this.name}-api`, {
-      failureThreshold: 5,
-      recoveryTimeout: 60000, // 1 minute
-      monitoringWindow: 300000, // 5 minutes
-      expectedErrors: [
-        'ECONNREFUSED',
-        'ENOTFOUND', 
-        'ETIMEDOUT',
-        'ECONNRESET',
-        '401', '403', '404' // Client errors shouldn't trip circuit
-      ]
-    });
+    this.circuitBreaker = resilienceManager.getCircuitBreaker(
+      `${this.name}-api`,
+      {
+        failureThreshold: 5,
+        recoveryTimeout: 60000, // 1 minute
+        monitoringWindow: 300000, // 5 minutes
+        expectedErrors: [
+          'ECONNREFUSED',
+          'ENOTFOUND',
+          'ETIMEDOUT',
+          'ECONNRESET',
+          '401',
+          '403',
+          '404', // Client errors shouldn't trip circuit
+        ],
+      },
+    );
 
     this.bulkhead = resilienceManager.getBulkhead(`${this.name}-api`, {
       maxConcurrent: 15,
       queueSize: 100,
-      timeoutMs: 45000
+      timeoutMs: 45000,
     });
 
     this.retryPolicy = resilienceManager.getRetryPolicy(`${this.name}-api`, {
@@ -53,11 +58,13 @@ class ResilientApiService extends EventEmitter {
       maxDelay: 10000,
       retryableErrors: [
         'ECONNRESET',
-        'ETIMEDOUT', 
+        'ETIMEDOUT',
         'ENOTFOUND',
         '429', // Rate limited
-        '502', '503', '504' // Server errors
-      ]
+        '502',
+        '503',
+        '504', // Server errors
+      ],
     });
 
     this.setupEventHandlers();
@@ -86,44 +93,52 @@ class ResilientApiService extends EventEmitter {
     this.axios.interceptors.request.use(
       (config) => {
         config.metadata = { startTime: Date.now() };
-        logger.debug(`API request started: ${config.method?.toUpperCase()} ${config.url}`);
+        logger.debug(
+          `API request started: ${config.method?.toUpperCase()} ${config.url}`,
+        );
         return config;
       },
       (error) => {
         logger.error('API request error:', error);
         return Promise.reject(error);
-      }
+      },
     );
 
     // Response interceptor for logging and metrics
     this.axios.interceptors.response.use(
       (response) => {
         const duration = Date.now() - response.config.metadata.startTime;
-        logger.debug(`API response: ${response.status} ${response.config.url} (${duration}ms)`);
-        
+        logger.debug(
+          `API response: ${response.status} ${response.config.url} (${duration}ms)`,
+        );
+
         this.emit('requestCompleted', {
           url: response.config.url,
           method: response.config.method,
           status: response.status,
-          duration
+          duration,
         });
-        
+
         return response;
       },
       (error) => {
-        const duration = error.config?.metadata ? Date.now() - error.config.metadata.startTime : 0;
-        logger.error(`API error: ${error.message} ${error.config?.url} (${duration}ms)`);
-        
+        const duration = error.config?.metadata
+          ? Date.now() - error.config.metadata.startTime
+          : 0;
+        logger.error(
+          `API error: ${error.message} ${error.config?.url} (${duration}ms)`,
+        );
+
         this.emit('requestFailed', {
           url: error.config?.url,
           method: error.config?.method,
           error: error.message,
           status: error.response?.status,
-          duration
+          duration,
         });
-        
+
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -135,15 +150,17 @@ class ResilientApiService extends EventEmitter {
       `${this.name}-request`,
       async () => {
         const response = await this.axios.request(config);
-        
+
         // Handle HTTP error status codes
         if (response.status >= 400) {
-          const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          const error = new Error(
+            `HTTP ${response.status}: ${response.statusText}`,
+          );
           error.status = response.status;
           error.response = response;
           throw error;
         }
-        
+
         return response;
       },
       {
@@ -154,17 +171,24 @@ class ResilientApiService extends EventEmitter {
         enableTimeout: true,
         circuitBreaker: {
           failureThreshold: 5,
-          expectedErrors: ['401', '403', '404', '400'] // Client errors
+          expectedErrors: ['401', '403', '404', '400'], // Client errors
         },
         retry: {
           maxAttempts: 3,
-          retryableErrors: ['ECONNRESET', 'ETIMEDOUT', '429', '502', '503', '504']
+          retryableErrors: [
+            'ECONNRESET',
+            'ETIMEDOUT',
+            '429',
+            '502',
+            '503',
+            '504',
+          ],
         },
         bulkhead: {
           maxConcurrent: 15,
-          queueSize: 100
-        }
-      }
+          queueSize: 100,
+        },
+      },
     );
   }
 
@@ -194,34 +218,34 @@ class ResilientApiService extends EventEmitter {
    */
   async batchRequests(requests, options = {}) {
     const { maxConcurrency = 5, failFast = false } = options;
-    
+
     return resilienceManager.executeWithResilience(
       `${this.name}-batch`,
       async () => {
         const results = [];
         const errors = [];
-        
+
         // Process requests in batches to control concurrency
         for (let i = 0; i < requests.length; i += maxConcurrency) {
           const batch = requests.slice(i, i + maxConcurrency);
-          
+
           const batchPromises = batch.map(async (request, index) => {
             try {
               const result = await this.request(request);
               return { index: i + index, success: true, result };
             } catch (error) {
               const errorResult = { index: i + index, success: false, error };
-              
+
               if (failFast) {
                 throw error;
               }
-              
+
               return errorResult;
             }
           });
-          
+
           const batchResults = await Promise.all(batchPromises);
-          
+
           for (const result of batchResults) {
             if (result.success) {
               results[result.index] = result.result;
@@ -230,7 +254,7 @@ class ResilientApiService extends EventEmitter {
             }
           }
         }
-        
+
         return { results, errors };
       },
       {
@@ -238,8 +262,8 @@ class ResilientApiService extends EventEmitter {
         enableCircuitBreaker: false, // Individual requests handle circuit breaking
         enableRetry: false, // Individual requests handle retries
         enableBulkhead: true,
-        enableTimeout: true
-      }
+        enableTimeout: true,
+      },
     );
   }
 
@@ -249,24 +273,24 @@ class ResilientApiService extends EventEmitter {
   async healthCheck() {
     try {
       const startTime = Date.now();
-      
+
       // Try to make a lightweight request (HEAD or GET to root/health endpoint)
       const response = await this.axios.request({
         method: 'HEAD',
         url: this.baseURL || '/',
-        timeout: 5000
+        timeout: 5000,
       });
-      
+
       const latency = Date.now() - startTime;
-      
+
       return {
         healthy: response.status < 400,
         latency,
         status: response.status,
         details: {
           circuitState: this.circuitBreaker.state,
-          baseURL: this.baseURL
-        }
+          baseURL: this.baseURL,
+        },
       };
     } catch (error) {
       return {
@@ -275,8 +299,8 @@ class ResilientApiService extends EventEmitter {
         details: {
           circuitState: this.circuitBreaker.state,
           baseURL: this.baseURL,
-          lastError: error.code || error.response?.status
-        }
+          lastError: error.code || error.response?.status,
+        },
       };
     }
   }
@@ -292,8 +316,8 @@ class ResilientApiService extends EventEmitter {
       bulkhead: this.bulkhead.getStatus(),
       axios: {
         timeout: this.timeout,
-        defaultHeaders: this.headers
-      }
+        defaultHeaders: this.headers,
+      },
     };
   }
 
@@ -305,17 +329,20 @@ class ResilientApiService extends EventEmitter {
       this.timeout = config.timeout;
       this.axios.defaults.timeout = config.timeout;
     }
-    
+
     if (config.headers) {
       this.headers = { ...this.headers, ...config.headers };
-      this.axios.defaults.headers = { ...this.axios.defaults.headers, ...config.headers };
+      this.axios.defaults.headers = {
+        ...this.axios.defaults.headers,
+        ...config.headers,
+      };
     }
-    
+
     if (config.baseURL) {
       this.baseURL = config.baseURL;
       this.axios.defaults.baseURL = config.baseURL;
     }
-    
+
     logger.info(`Updated API service config for '${this.name}'`, config);
   }
 
@@ -324,7 +351,7 @@ class ResilientApiService extends EventEmitter {
    */
   destroy() {
     this.removeAllListeners();
-    
+
     // Cancel any pending requests
     if (this.axios.defaults.cancelToken) {
       this.axios.defaults.cancelToken.cancel('Service destroyed');
@@ -347,10 +374,10 @@ class ApiServiceFactory {
     if (!this.services.has(name)) {
       const service = new ResilientApiService({ name, ...options });
       this.services.set(name, service);
-      
+
       logger.info(`Created resilient API service: ${name}`, options);
     }
-    
+
     return this.services.get(name);
   }
 
@@ -382,18 +409,18 @@ class ApiServiceFactory {
    */
   async getAllHealthStatus() {
     const statuses = {};
-    
+
     for (const [name, service] of this.services) {
       try {
         statuses[name] = await service.healthCheck();
       } catch (error) {
         statuses[name] = {
           healthy: false,
-          error: error.message
+          error: error.message,
         };
       }
     }
-    
+
     return statuses;
   }
 
@@ -402,11 +429,11 @@ class ApiServiceFactory {
    */
   getAllMetrics() {
     const metrics = {};
-    
+
     for (const [name, service] of this.services) {
       metrics[name] = service.getMetrics();
     }
-    
+
     return metrics;
   }
 
@@ -427,5 +454,5 @@ const apiServiceFactory = new ApiServiceFactory();
 module.exports = {
   ResilientApiService,
   ApiServiceFactory,
-  apiServiceFactory
+  apiServiceFactory,
 };

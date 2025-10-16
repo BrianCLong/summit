@@ -1,0 +1,81 @@
+name: k6 Smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: k6-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+      strict: ${{ steps.decide.outputs.strict }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: paths
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            app:
+              - 'apps/**'
+              - '.github/k6/**'
+      - name: Decide
+        id: decide
+        run: |
+          run="${{ steps.paths.outputs.app }}"
+          strict="false"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            labels=$(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event) }}' || true)
+            if echo "$labels" | grep -q '^ui:smoke$'; then run="true"; fi
+            if echo "$labels" | grep -q '^perf:strict$'; then strict="true"; fi
+          fi
+          echo "run=$run" >> $GITHUB_OUTPUT
+          echo "strict=$strict" >> $GITHUB_OUTPUT
+
+  smoke:
+    needs: detect
+    if: needs.detect.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x', cache: 'pnpm' }
+      - name: Install & heal
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm i -w --frozen-lockfile=false
+          node scripts/monorepo_heal.mjs || true
+      - name: Boot minimal stack
+        run: |
+          if [ -f .github/ci/docker-compose.ci.yml ]; then
+            docker compose -f .github/ci/docker-compose.ci.yml up -d
+            sleep 5
+          fi
+      - name: Run k6 smoke
+        id: k6
+        uses: grafana/k6-action@v0.3.1
+        continue-on-error: ${{ needs.detect.outputs.strict != 'true' }}
+        with:
+          filename: .github/k6/smoke.js
+        env:
+          UI_URL: http://localhost:3000
+          API_URL: http://localhost:4000
+      - name: Upload k6 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-smoke-${{ github.run_id }}
+          path: .github/k6/*.json
+          retention-days: 7
+      - name: Compose down
+        if: always()
+        run: |
+          if [ -f .github/ci/docker-compose.ci.yml ]; then
+            docker compose -f .github/ci/docker-compose.ci.yml down -v
+          fi

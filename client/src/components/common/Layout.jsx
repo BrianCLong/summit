@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import {
   Box,
   AppBar,
@@ -13,7 +13,7 @@ import {
   ListItemText,
   ListItemButton,
   Divider,
-} from "@mui/material";
+} from '@mui/material';
 import {
   Menu as MenuIcon,
   Dashboard,
@@ -24,35 +24,35 @@ import {
   DarkMode,
   LightMode,
   Psychology,
-} from "@mui/icons-material";
-import { SystemAPI } from "../../services/api";
-import { Chip, Tooltip } from "@mui/material";
-import AlertsBell from "./AlertsBell";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { toggleSidebar, toggleTheme } from "../../store/slices/uiSlice";
+} from '@mui/icons-material';
+import { SystemAPI } from '../../services/api';
+import { Chip, Tooltip } from '@mui/material';
+import AlertsBell from './AlertsBell';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { toggleSidebar, toggleTheme } from '../../store/slices/uiSlice';
 
 const DRAWER_WIDTH = 240;
 
 const menuItems = [
-  { text: "Dashboard", icon: <Dashboard />, path: "/dashboard" },
-  { text: "Investigations", icon: <Description />, path: "/investigations" },
-  { text: "Graph Explorer", icon: <AccountTree />, path: "/graph" },
-  { text: "Geo Map", icon: <AccountTree />, path: "/geoint" },
-  { text: "Copilot Goals", icon: <Description />, path: "/copilot" },
-  { text: "AI Analysis", icon: <Psychology />, path: "/ai/analysis" },
-  { text: "AI Suggestions", icon: <Description />, path: "/ai/suggestions" },
-  { text: "Vision", icon: <Description />, path: "/vision" },
-  { text: "Simulation", icon: <Description />, path: "/simulate" },
-  { text: "Sentiment", icon: <Description />, path: "/sentiment" },
-  { text: "External Data", icon: <Description />, path: "/external" },
-  { text: "Reports", icon: <Description />, path: "/reports" },
-  { text: "Activity", icon: <History />, path: "/activity" },
-  { text: "System", icon: <Settings />, path: "/system" },
-  { text: "Instances", icon: <Settings />, path: "/admin/instances" },
-  { text: "Admin Roles", icon: <Settings />, path: "/admin/roles" },
-  { text: "OSINT Feeds", icon: <Settings />, path: "/admin/osint-feeds" },
-  { text: "Version History", icon: <History />, path: "/versions" },
+  { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
+  { text: 'Investigations', icon: <Description />, path: '/investigations' },
+  { text: 'Graph Explorer', icon: <AccountTree />, path: '/graph' },
+  { text: 'Geo Map', icon: <AccountTree />, path: '/geoint' },
+  { text: 'Copilot Goals', icon: <Description />, path: '/copilot' },
+  { text: 'AI Analysis', icon: <Psychology />, path: '/ai/analysis' },
+  { text: 'AI Suggestions', icon: <Description />, path: '/ai/suggestions' },
+  { text: 'Vision', icon: <Description />, path: '/vision' },
+  { text: 'Simulation', icon: <Description />, path: '/simulate' },
+  { text: 'Sentiment', icon: <Description />, path: '/sentiment' },
+  { text: 'External Data', icon: <Description />, path: '/external' },
+  { text: 'Reports', icon: <Description />, path: '/reports' },
+  { text: 'Activity', icon: <History />, path: '/activity' },
+  { text: 'System', icon: <Settings />, path: '/system' },
+  { text: 'Instances', icon: <Settings />, path: '/admin/instances' },
+  { text: 'Admin Roles', icon: <Settings />, path: '/admin/roles' },
+  { text: 'OSINT Feeds', icon: <Settings />, path: '/admin/osint-feeds' },
+  { text: 'Version History', icon: <History />, path: '/versions' },
 ];
 
 function Layout() {
@@ -100,17 +100,17 @@ function Layout() {
   }, []);
 
   return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
       <AppBar
         position="fixed"
         color="default"
         sx={{
           width: {
-            sm: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : "100%",
+            sm: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
           },
           ml: { sm: sidebarOpen ? `${DRAWER_WIDTH}px` : 0 },
-          transition: "width 0.25s, margin 0.25s",
-          backgroundColor: "background.paper",
+          transition: 'width 0.25s, margin 0.25s',
+          backgroundColor: 'background.paper',
         }}
       >
         <Toolbar>
@@ -136,13 +136,13 @@ function Layout() {
             title={`Services: ${
               Object.entries(readyStatus.services || {})
                 .map(([k, v]) => `${k}:${v}`)
-                .join(", ") || "unknown"
+                .join(', ') || 'unknown'
             }`}
           >
             <Chip
               size="small"
-              label={readyStatus.ready ? "Ready" : "Degraded"}
-              color={readyStatus.ready ? "success" : "warning"}
+              label={readyStatus.ready ? 'Ready' : 'Degraded'}
+              color={readyStatus.ready ? 'success' : 'warning'}
               sx={{ mr: 2 }}
             />
           </Tooltip>
@@ -157,7 +157,7 @@ function Layout() {
             onClick={() => dispatch(toggleTheme())}
             sx={{ ml: 1 }}
           >
-            {theme === "dark" ? <LightMode /> : <DarkMode />}
+            {theme === 'dark' ? <LightMode /> : <DarkMode />}
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -172,17 +172,17 @@ function Layout() {
         <Drawer
           variant="persistent"
           sx={{
-            display: { xs: "none", sm: "block" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
               width: DRAWER_WIDTH,
-              transition: "width 0.25s",
+              transition: 'width 0.25s',
             },
           }}
           open={sidebarOpen}
         >
           <Toolbar />
-          <Box sx={{ overflow: "auto" }}>
+          <Box sx={{ overflow: 'auto' }}>
             <List>
               {menuItems.map((item) => (
                 <ListItem key={item.text} disablePadding>
@@ -190,7 +190,7 @@ function Layout() {
                     onClick={() => handleNavigation(item.path)}
                     selected={location.pathname === item.path}
                     aria-current={
-                      location.pathname === item.path ? "page" : undefined
+                      location.pathname === item.path ? 'page' : undefined
                     }
                   >
                     <ListItemIcon>{item.icon}</ListItemIcon>
@@ -209,13 +209,13 @@ function Layout() {
         sx={{
           flexGrow: 1,
           width: {
-            sm: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : "100%",
+            sm: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
           },
-          transition: "width 0.3s",
+          transition: 'width 0.3s',
         }}
       >
         <Toolbar />
-        <Box sx={{ p: 3, height: "calc(100vh - 64px)", overflow: "auto" }}>
+        <Box sx={{ p: 3, height: 'calc(100vh - 64px)', overflow: 'auto' }}>
           <Outlet />
         </Box>
       </Box>

@@ -15,14 +15,16 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Database connection
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/provenance'
+  connectionString:
+    process.env.DATABASE_URL ||
+    'postgres://postgres:postgres@localhost:5432/provenance',
 });
 
 // Schemas
 const CreateClaimSchema = z.object({
   content: z.record(z.any()),
   signature: z.string().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 });
 
 const ClaimSchema = z.object({
@@ -31,7 +33,7 @@ const ClaimSchema = z.object({
   hash: z.string(),
   signature: z.string().optional(),
   metadata: z.record(z.any()).optional(),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime(),
 });
 
 const ProvenanceChainSchema = z.object({
@@ -40,19 +42,21 @@ const ProvenanceChainSchema = z.object({
   transforms: z.array(z.string()),
   sources: z.array(z.string()),
   lineage: z.record(z.any()),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime(),
 });
 
 const ManifestSchema = z.object({
   version: z.string(),
-  claims: z.array(z.object({
-    id: z.string(),
-    hash: z.string(),
-    transforms: z.array(z.string())
-  })),
+  claims: z.array(
+    z.object({
+      id: z.string(),
+      hash: z.string(),
+      transforms: z.array(z.string()),
+    }),
+  ),
   hash_chain: z.string(),
   signature: z.string().optional(),
-  generated_at: z.string().datetime()
+  generated_at: z.string().datetime(),
 });
 
 type CreateClaim = z.infer<typeof CreateClaimSchema>;
@@ -87,13 +91,13 @@ function policyMiddleware(request: any, reply: any, done: any) {
     if (dryRun) {
       request.log.warn('Policy violation in dry-run mode', {
         missingAuth: !authorityId,
-        missingReason: !reasonForAccess
+        missingReason: !reasonForAccess,
       });
       request.policyWarnings = request.policyWarnings || [];
       request.policyWarnings.push({
         error: 'Policy denial',
         reason: 'Missing authority binding or reason-for-access',
-        appealPath: '/ombudsman/appeals'
+        appealPath: '/ombudsman/appeals',
       });
       return done();
     }
@@ -101,7 +105,7 @@ function policyMiddleware(request: any, reply: any, done: any) {
     return reply.status(403).send({
       error: 'Policy denial',
       reason: 'Missing authority binding or reason-for-access',
-      appealPath: '/ombudsman/appeals'
+      appealPath: '/ombudsman/appeals',
     });
   }
 
@@ -114,14 +118,16 @@ function policyMiddleware(request: any, reply: any, done: any) {
 const server = Fastify({
   logger: {
     level: NODE_ENV === 'development' ? 'debug' : 'info',
-    ...(NODE_ENV === 'development' ? { transport: { target: 'pino-pretty' } } : {})
-  }
+    ...(NODE_ENV === 'development'
+      ? { transport: { target: 'pino-pretty' } }
+      : {}),
+  },
 });
 
 // Register plugins
 server.register(helmet);
 server.register(cors, {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
 });
 
 // Add policy middleware to all routes
@@ -137,8 +143,8 @@ server.get('/health', async (request, reply) => {
       timestamp: new Date().toISOString(),
       version: '1.0.0',
       dependencies: {
-        database: 'healthy'
-      }
+        database: 'healthy',
+      },
     };
   } catch (error) {
     reply.status(503);
@@ -146,116 +152,141 @@ server.get('/health', async (request, reply) => {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       dependencies: {
-        database: 'unhealthy'
-      }
+        database: 'unhealthy',
+      },
     };
   }
 });
 
 // Create claim
-server.post<{ Body: CreateClaim }>('/claims', {
-  schema: {
-    body: CreateClaimSchema
-  }
-}, async (request, reply) => {
-  try {
-    const { content, signature, metadata } = request.body;
-    const id = generateClaimId();
-    const hash = generateHash(content);
-    const createdAt = new Date().toISOString();
+server.post<{ Body: CreateClaim }>(
+  '/claims',
+  {
+    schema: {
+      body: CreateClaimSchema,
+    },
+  },
+  async (request, reply) => {
+    try {
+      const { content, signature, metadata } = request.body;
+      const id = generateClaimId();
+      const hash = generateHash(content);
+      const createdAt = new Date().toISOString();
 
-    const result = await pool.query(
-      `INSERT INTO claims (id, content, hash, signature, metadata, created_at, authority_id, reason_for_access)
+      const result = await pool.query(
+        `INSERT INTO claims (id, content, hash, signature, metadata, created_at, authority_id, reason_for_access)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [id, JSON.stringify(content), hash, signature, JSON.stringify(metadata), createdAt,
-       (request as any).authorityId, (request as any).reasonForAccess]
-    );
+        [
+          id,
+          JSON.stringify(content),
+          hash,
+          signature,
+          JSON.stringify(metadata),
+          createdAt,
+          (request as any).authorityId,
+          (request as any).reasonForAccess,
+        ],
+      );
 
-    const claim: Claim = {
-      id: result.rows[0].id,
-      content: result.rows[0].content,
-      hash: result.rows[0].hash,
-      signature: result.rows[0].signature,
-      metadata: result.rows[0].metadata,
-      created_at: result.rows[0].created_at
-    };
+      const claim: Claim = {
+        id: result.rows[0].id,
+        content: result.rows[0].content,
+        hash: result.rows[0].hash,
+        signature: result.rows[0].signature,
+        metadata: result.rows[0].metadata,
+        created_at: result.rows[0].created_at,
+      };
 
-    server.log.info('Created claim', {
-      claimId: id,
-      hash,
-      authority: (request as any).authorityId
-    });
+      server.log.info('Created claim', {
+        claimId: id,
+        hash,
+        authority: (request as any).authorityId,
+      });
 
-    return claim;
-  } catch (error) {
-    server.log.error('Failed to create claim', error);
-    reply.status(500);
-    return { error: 'Failed to create claim' };
-  }
-});
+      return claim;
+    } catch (error) {
+      server.log.error('Failed to create claim', error);
+      reply.status(500);
+      return { error: 'Failed to create claim' };
+    }
+  },
+);
 
 // Get claim by ID
-server.get<{ Params: { id: string } }>('/claims/:id', async (request, reply) => {
-  try {
-    const { id } = request.params;
+server.get<{ Params: { id: string } }>(
+  '/claims/:id',
+  async (request, reply) => {
+    try {
+      const { id } = request.params;
 
-    const result = await pool.query(
-      'SELECT id, content, hash, signature, metadata, created_at FROM claims WHERE id = $1',
-      [id]
-    );
+      const result = await pool.query(
+        'SELECT id, content, hash, signature, metadata, created_at FROM claims WHERE id = $1',
+        [id],
+      );
 
-    if (result.rows.length === 0) {
-      reply.status(404);
-      return { error: 'Claim not found' };
+      if (result.rows.length === 0) {
+        reply.status(404);
+        return { error: 'Claim not found' };
+      }
+
+      const claim: Claim = {
+        id: result.rows[0].id,
+        content: result.rows[0].content,
+        hash: result.rows[0].hash,
+        signature: result.rows[0].signature,
+        metadata: result.rows[0].metadata,
+        created_at: result.rows[0].created_at,
+      };
+
+      return claim;
+    } catch (error) {
+      server.log.error('Failed to get claim', error);
+      reply.status(500);
+      return { error: 'Failed to retrieve claim' };
     }
-
-    const claim: Claim = {
-      id: result.rows[0].id,
-      content: result.rows[0].content,
-      hash: result.rows[0].hash,
-      signature: result.rows[0].signature,
-      metadata: result.rows[0].metadata,
-      created_at: result.rows[0].created_at
-    };
-
-    return claim;
-  } catch (error) {
-    server.log.error('Failed to get claim', error);
-    reply.status(500);
-    return { error: 'Failed to retrieve claim' };
-  }
-});
+  },
+);
 
 // Get provenance by claim ID
-server.get<{ Querystring: { claimId: string } }>('/provenance', async (request, reply) => {
-  try {
-    const { claimId } = request.query;
+server.get<{ Querystring: { claimId: string } }>(
+  '/provenance',
+  async (request, reply) => {
+    try {
+      const { claimId } = request.query;
 
-    const result = await pool.query(
-      'SELECT * FROM provenance_chains WHERE claim_id = $1 ORDER BY created_at DESC',
-      [claimId]
-    );
+      const result = await pool.query(
+        'SELECT * FROM provenance_chains WHERE claim_id = $1 ORDER BY created_at DESC',
+        [claimId],
+      );
 
-    const chains: ProvenanceChain[] = result.rows.map(row => ({
-      id: row.id,
-      claim_id: row.claim_id,
-      transforms: row.transforms,
-      sources: row.sources,
-      lineage: row.lineage,
-      created_at: row.created_at
-    }));
+      const chains: ProvenanceChain[] = result.rows.map((row) => ({
+        id: row.id,
+        claim_id: row.claim_id,
+        transforms: row.transforms,
+        sources: row.sources,
+        lineage: row.lineage,
+        created_at: row.created_at,
+      }));
 
-    return chains;
-  } catch (error) {
-    server.log.error('Failed to get provenance', error);
-    reply.status(500);
-    return { error: 'Failed to retrieve provenance' };
-  }
-});
+      return chains;
+    } catch (error) {
+      server.log.error('Failed to get provenance', error);
+      reply.status(500);
+      return { error: 'Failed to retrieve provenance' };
+    }
+  },
+);
 
 // Create provenance chain
-server.post<{ Body: { claimId: string; transforms: string[]; sources: string[]; lineage: any } }>('/provenance', async (request, reply) => {
+server.post<{
+  Body: {
+    claimId: string;
+    transforms: string[];
+    sources: string[];
+    lineage: any;
+  };
+}>('/provenance', async (request, reply) => {
   try {
     const { claimId, transforms, sources, lineage } = request.body;
     const id = generateProvenanceId();
@@ -265,8 +296,15 @@ server.post<{ Body: { claimId: string; transforms: string[]; sources: string[]; 
       `INSERT INTO provenance_chains (id, claim_id, transforms, sources, lineage, created_at, authority_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [id, claimId, JSON.stringify(transforms), JSON.stringify(sources),
-       JSON.stringify(lineage), createdAt, (request as any).authorityId]
+      [
+        id,
+        claimId,
+        JSON.stringify(transforms),
+        JSON.stringify(sources),
+        JSON.stringify(lineage),
+        createdAt,
+        (request as any).authorityId,
+      ],
     );
 
     const chain: ProvenanceChain = {
@@ -275,13 +313,13 @@ server.post<{ Body: { claimId: string; transforms: string[]; sources: string[]; 
       transforms: result.rows[0].transforms,
       sources: result.rows[0].sources,
       lineage: result.rows[0].lineage,
-      created_at: result.rows[0].created_at
+      created_at: result.rows[0].created_at,
     };
 
     server.log.info('Created provenance chain', {
       provenanceId: id,
       claimId,
-      authority: (request as any).authorityId
+      authority: (request as any).authorityId,
     });
 
     return chain;
@@ -293,24 +331,27 @@ server.post<{ Body: { claimId: string; transforms: string[]; sources: string[]; 
 });
 
 // Verify hash
-server.post<{ Body: { content: any; expectedHash: string } }>('/hash/verify', async (request, reply) => {
-  try {
-    const { content, expectedHash } = request.body;
-    const actualHash = generateHash(content);
-    const isValid = actualHash === expectedHash;
+server.post<{ Body: { content: any; expectedHash: string } }>(
+  '/hash/verify',
+  async (request, reply) => {
+    try {
+      const { content, expectedHash } = request.body;
+      const actualHash = generateHash(content);
+      const isValid = actualHash === expectedHash;
 
-    return {
-      valid: isValid,
-      expected_hash: expectedHash,
-      actual_hash: actualHash,
-      verified_at: new Date().toISOString()
-    };
-  } catch (error) {
-    server.log.error('Failed to verify hash', error);
-    reply.status(500);
-    return { error: 'Hash verification failed' };
-  }
-});
+      return {
+        valid: isValid,
+        expected_hash: expectedHash,
+        actual_hash: actualHash,
+        verified_at: new Date().toISOString(),
+      };
+    } catch (error) {
+      server.log.error('Failed to verify hash', error);
+      reply.status(500);
+      return { error: 'Hash verification failed' };
+    }
+  },
+);
 
 // Export manifest
 server.get('/export/manifest', async (request, reply) => {
@@ -325,25 +366,25 @@ server.get('/export/manifest', async (request, reply) => {
       ORDER BY c.created_at DESC
     `);
 
-    const claims = claimsResult.rows.map(row => ({
+    const claims = claimsResult.rows.map((row) => ({
       id: row.id,
       hash: row.hash,
-      transforms: row.transforms.filter((t: any) => t !== null)
+      transforms: row.transforms.filter((t: any) => t !== null),
     }));
 
     // Generate hash chain
-    const hashChain = generateHash(claims.map(c => c.hash).join(''));
+    const hashChain = generateHash(claims.map((c) => c.hash).join(''));
 
     const manifest: Manifest = {
       version: '1.0',
       claims,
       hash_chain: hashChain,
-      generated_at: new Date().toISOString()
+      generated_at: new Date().toISOString(),
     };
 
     server.log.info('Generated export manifest', {
       claimCount: claims.length,
-      authority: (request as any).authorityId
+      authority: (request as any).authorityId,
     });
 
     return manifest;
@@ -358,7 +399,9 @@ server.get('/export/manifest', async (request, reply) => {
 const start = async () => {
   try {
     await server.listen({ port: PORT, host: '0.0.0.0' });
-    server.log.info(`🗃️  Prov-Ledger service ready at http://localhost:${PORT}`);
+    server.log.info(
+      `🗃️  Prov-Ledger service ready at http://localhost:${PORT}`,
+    );
   } catch (err) {
     server.log.error(err);
     process.exit(1);

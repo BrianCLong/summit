@@ -1,8 +1,9 @@
 import os
-from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
-import sys
 import pathlib
+import sys
+from unittest.mock import MagicMock
+
+from fastapi.testclient import TestClient
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent))
 
@@ -19,7 +20,9 @@ def test_sentiment_endpoint_triggers_task(monkeypatch):
     mock_task = MagicMock()
     monkeypatch.setattr("intelgraph_py.tasks.analyze_sentiment.delay", lambda *a, **k: mock_task)
     mock_task.id = "task123"
-    res = client.post("/analyze/sentiment", json={"node_id": "1", "node_label": "Report", "text": "good"})
+    res = client.post(
+        "/analyze/sentiment", json={"node_id": "1", "node_label": "Report", "text": "good"}
+    )
     assert res.status_code == 200
     assert res.json()["task_id"] == "task123"
     assert mock_task.id == "task123"
@@ -33,18 +36,24 @@ def test_analyze_sentiment_task_updates_graph(monkeypatch):
         def run(self, q, **p):
             self.q = q
             self.params = p
+
         def __enter__(self):
             return self
+
         def __exit__(self, exc_type, exc, tb):
             pass
+
     class DummyDriver:
         def session(self):
             return DummySession()
+
         def close(self):
             pass
-    monkeypatch.setattr("intelgraph_py.tasks.GraphDatabase", MagicMock(driver=lambda *a, **k: DummyDriver()))
+
+    monkeypatch.setattr(
+        "intelgraph_py.tasks.GraphDatabase", MagicMock(driver=lambda *a, **k: DummyDriver())
+    )
 
     result = analyze_sentiment("42", "Great job", "Report")
     assert result["sentimentLabel"] == "positive"
     assert result["sentimentScore"] == 0.95
-

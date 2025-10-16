@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
 import type {
   EntityDynamicState,
   NarrativeEvent,
@@ -9,8 +9,12 @@ import type {
   StoryArc,
   TimeVariantParameter,
   SimulationEntity,
-} from "./types.js";
-import { LLMDrivenNarrativeGenerator, NarrativeGenerator, RuleBasedNarrativeGenerator } from "./generators.js";
+} from './types.js';
+import {
+  LLMDrivenNarrativeGenerator,
+  NarrativeGenerator,
+  RuleBasedNarrativeGenerator,
+} from './generators.js';
 
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
@@ -23,11 +27,17 @@ export class NarrativeSimulationEngine {
   constructor(private readonly config: SimulationConfig) {
     const start = new Date();
     const entities = Object.fromEntries(
-      config.initialEntities.map((entity) => [entity.id, this.bootstrapEntityState(entity)]),
+      config.initialEntities.map((entity) => [
+        entity.id,
+        this.bootstrapEntityState(entity),
+      ]),
     );
 
     const parameters = Object.fromEntries(
-      (config.initialParameters ?? []).map((parameter) => [parameter.name, this.bootstrapParameter(parameter.name, parameter.value)]),
+      (config.initialParameters ?? []).map((parameter) => [
+        parameter.name,
+        this.bootstrapParameter(parameter.name, parameter.value),
+      ]),
     );
 
     this.state = {
@@ -43,8 +53,8 @@ export class NarrativeSimulationEngine {
       arcs: [],
       recentEvents: [],
       narrative: {
-        mode: "rule-based",
-        summary: "Simulation initialized.",
+        mode: 'rule-based',
+        summary: 'Simulation initialized.',
         highlights: [],
         risks: [],
         opportunities: [],
@@ -72,8 +82,14 @@ export class NarrativeSimulationEngine {
     };
   }
 
-  setGeneratorMode(mode: NarrativeGeneratorMode, llmClientConfig?: SimulationConfig["llmClient"]): void {
-    this.generator = this.createGenerator(mode, { ...this.config, llmClient: llmClientConfig });
+  setGeneratorMode(
+    mode: NarrativeGeneratorMode,
+    llmClientConfig?: SimulationConfig['llmClient'],
+  ): void {
+    this.generator = this.createGenerator(mode, {
+      ...this.config,
+      llmClient: llmClientConfig,
+    });
   }
 
   queueEvent(event: NarrativeEvent): void {
@@ -86,7 +102,9 @@ export class NarrativeSimulationEngine {
       this.advanceClock();
       const ready = this.dequeueReadyEvents();
       ready.forEach((event) => this.applyEvent(event));
-      this.state.recentEvents = [...this.state.recentEvents, ...ready].slice(-HISTORY_LIMIT);
+      this.state.recentEvents = [...this.state.recentEvents, ...ready].slice(
+        -HISTORY_LIMIT,
+      );
       this.state.arcs = this.computeArcs();
       await this.refreshNarrative(ready);
       this.applyNaturalDynamics();
@@ -95,10 +113,14 @@ export class NarrativeSimulationEngine {
     return this.state;
   }
 
-  injectActorAction(actorId: string, description: string, overrides?: Partial<NarrativeEvent>): void {
+  injectActorAction(
+    actorId: string,
+    description: string,
+    overrides?: Partial<NarrativeEvent>,
+  ): void {
     const action: NarrativeEvent = {
       id: randomUUID(),
-      type: "intervention",
+      type: 'intervention',
       actorId,
       targetIds: overrides?.targetIds,
       theme: overrides?.theme ?? this.state.themes[0],
@@ -122,7 +144,10 @@ export class NarrativeSimulationEngine {
   }
 
   private async refreshNarrative(recent: NarrativeEvent[]): Promise<void> {
-    const narration: NarrativeNarration = await this.generator.generate(this.state, recent);
+    const narration: NarrativeNarration = await this.generator.generate(
+      this.state,
+      recent,
+    );
     this.state.narrative = narration;
   }
 
@@ -130,7 +155,7 @@ export class NarrativeSimulationEngine {
     return {
       ...entity,
       pressure: 0.2,
-      trend: "stable",
+      trend: 'stable',
       lastUpdatedTick: 0,
       history: [
         {
@@ -142,11 +167,14 @@ export class NarrativeSimulationEngine {
     };
   }
 
-  private bootstrapParameter(name: string, value: number): TimeVariantParameter {
+  private bootstrapParameter(
+    name: string,
+    value: number,
+  ): TimeVariantParameter {
     return {
       name,
       value,
-      trend: "stable",
+      trend: 'stable',
       history: [
         {
           tick: 0,
@@ -156,8 +184,11 @@ export class NarrativeSimulationEngine {
     };
   }
 
-  private createGenerator(mode: NarrativeGeneratorMode | undefined, config: SimulationConfig): NarrativeGenerator {
-    if (mode === "llm" && config.llmClient) {
+  private createGenerator(
+    mode: NarrativeGeneratorMode | undefined,
+    config: SimulationConfig,
+  ): NarrativeGenerator {
+    if (mode === 'llm' && config.llmClient) {
       return new LLMDrivenNarrativeGenerator(config.llmClient);
     }
     return new RuleBasedNarrativeGenerator();
@@ -166,7 +197,8 @@ export class NarrativeSimulationEngine {
   private advanceClock(): void {
     this.state.tick += 1;
     this.state.timestamp = new Date(
-      this.state.startedAt.getTime() + this.state.tick * this.state.tickIntervalMinutes * 60_000,
+      this.state.startedAt.getTime() +
+        this.state.tick * this.state.tickIntervalMinutes * 60_000,
     );
   }
 
@@ -196,7 +228,9 @@ export class NarrativeSimulationEngine {
 
     if (event.parameterAdjustments?.length) {
       event.parameterAdjustments.forEach((param) => {
-        const existing = this.state.parameters[param.name] ?? this.bootstrapParameter(param.name, 0);
+        const existing =
+          this.state.parameters[param.name] ??
+          this.bootstrapParameter(param.name, 0);
         existing.value += param.delta;
         existing.history.push({ tick: this.state.tick, value: existing.value });
         existing.trend = this.calculateTrend(existing.history);
@@ -216,7 +250,8 @@ export class NarrativeSimulationEngine {
             actorId: related.id,
             targetIds: [],
             intensity: event.intensity * edge.strength * 0.5,
-            sentimentShift: (event.sentimentShift ?? 0) * edge.strength * related.resilience,
+            sentimentShift:
+              (event.sentimentShift ?? 0) * edge.strength * related.resilience,
             influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
           };
           this.adjustEntityState(related, propagatedEvent, edge.strength * 0.5);
@@ -225,14 +260,32 @@ export class NarrativeSimulationEngine {
     }
   }
 
-  private adjustEntityState(entity: EntityDynamicState, event: NarrativeEvent, weight: number): void {
-    const sentimentDelta = (event.sentimentShift ?? 0) * event.intensity * weight * (1 - entity.resilience * 0.5);
-    const influenceDelta = (event.influenceShift ?? 0) * weight * (1 - entity.volatility * 0.5);
+  private adjustEntityState(
+    entity: EntityDynamicState,
+    event: NarrativeEvent,
+    weight: number,
+  ): void {
+    const sentimentDelta =
+      (event.sentimentShift ?? 0) *
+      event.intensity *
+      weight *
+      (1 - entity.resilience * 0.5);
+    const influenceDelta =
+      (event.influenceShift ?? 0) * weight * (1 - entity.volatility * 0.5);
 
     entity.sentiment = this.clamp(entity.sentiment + sentimentDelta, -1, 1);
     entity.influence = this.clamp(entity.influence + influenceDelta, 0, 1.5);
-    entity.pressure = this.clamp(entity.pressure + Math.abs(sentimentDelta) * 0.5, 0, 1);
-    entity.trend = sentimentDelta > MOMENTUM_SENSITIVITY ? "rising" : sentimentDelta < -MOMENTUM_SENSITIVITY ? "falling" : "stable";
+    entity.pressure = this.clamp(
+      entity.pressure + Math.abs(sentimentDelta) * 0.5,
+      0,
+      1,
+    );
+    entity.trend =
+      sentimentDelta > MOMENTUM_SENSITIVITY
+        ? 'rising'
+        : sentimentDelta < -MOMENTUM_SENSITIVITY
+          ? 'falling'
+          : 'stable';
     entity.lastEventId = event.id;
     entity.lastUpdatedTick = this.state.tick;
     entity.history.push({
@@ -264,10 +317,23 @@ export class NarrativeSimulationEngine {
         0,
         1,
       );
-      const previous = this.state.arcs.find((arc) => arc.theme === theme)?.momentum ?? momentum;
+      const previous =
+        this.state.arcs.find((arc) => arc.theme === theme)?.momentum ??
+        momentum;
       const delta = momentum - previous;
-      const outlook = delta > MOMENTUM_SENSITIVITY ? "improving" : delta < -MOMENTUM_SENSITIVITY ? "degrading" : "steady";
-      const confidence = this.clamp(entityScores.slice(0, 3).reduce((total, current) => total + current.score, 0), 0, 1);
+      const outlook =
+        delta > MOMENTUM_SENSITIVITY
+          ? 'improving'
+          : delta < -MOMENTUM_SENSITIVITY
+            ? 'degrading'
+            : 'steady';
+      const confidence = this.clamp(
+        entityScores
+          .slice(0, 3)
+          .reduce((total, current) => total + current.score, 0),
+        0,
+        1,
+      );
 
       return {
         theme,
@@ -275,31 +341,35 @@ export class NarrativeSimulationEngine {
         outlook,
         confidence,
         keyEntities: entityScores.slice(0, 3).map((entry) => entry.name),
-        narrative: this.renderArcNarrative(theme, outlook, entityScores.slice(0, 2)),
+        narrative: this.renderArcNarrative(
+          theme,
+          outlook,
+          entityScores.slice(0, 2),
+        ),
       };
     });
   }
 
   private renderArcNarrative(
     theme: string,
-    outlook: "improving" | "degrading" | "steady",
+    outlook: 'improving' | 'degrading' | 'steady',
     leaders: Array<{ name: string; score: number }>,
   ): string {
-    const leadNames = leaders.map((leader) => leader.name).join(", ");
+    const leadNames = leaders.map((leader) => leader.name).join(', ');
     const outlookText =
-      outlook === "improving"
-        ? "Narrative sentiment trending upward."
-        : outlook === "degrading"
-        ? "Narrative momentum deteriorating."
-        : "Narrative pressure stable.";
-    return `${theme}: ${outlookText}${leadNames ? ` Key drivers: ${leadNames}.` : ""}`;
+      outlook === 'improving'
+        ? 'Narrative sentiment trending upward.'
+        : outlook === 'degrading'
+          ? 'Narrative momentum deteriorating.'
+          : 'Narrative pressure stable.';
+    return `${theme}: ${outlookText}${leadNames ? ` Key drivers: ${leadNames}.` : ''}`;
   }
 
   private applyNaturalDynamics(): void {
     Object.values(this.state.entities).forEach((entity) => {
       const decay = (entity.pressure - entity.resilience * 0.3) * 0.05;
       entity.pressure = this.clamp(entity.pressure - decay, 0, 1);
-      if (entity.trend === "stable") {
+      if (entity.trend === 'stable') {
         const regression = (entity.sentiment - 0) * 0.02;
         entity.sentiment = this.clamp(entity.sentiment - regression, -1, 1);
       }
@@ -316,14 +386,19 @@ export class NarrativeSimulationEngine {
     });
   }
 
-  private calculateTrend(history: Array<{ tick: number; value: number }>): "rising" | "falling" | "stable" {
-    if (history.length < 2) return "stable";
+  private calculateTrend(
+    history: Array<{ tick: number; value: number }>,
+  ): 'rising' | 'falling' | 'stable' {
+    if (history.length < 2) return 'stable';
     const recent = history.slice(-3);
-    const deltas = recent.slice(1).map((point, index) => point.value - recent[index].value);
-    const avgDelta = deltas.reduce((total, value) => total + value, 0) / (deltas.length || 1);
-    if (avgDelta > MOMENTUM_SENSITIVITY / 2) return "rising";
-    if (avgDelta < -MOMENTUM_SENSITIVITY / 2) return "falling";
-    return "stable";
+    const deltas = recent
+      .slice(1)
+      .map((point, index) => point.value - recent[index].value);
+    const avgDelta =
+      deltas.reduce((total, value) => total + value, 0) / (deltas.length || 1);
+    if (avgDelta > MOMENTUM_SENSITIVITY / 2) return 'rising';
+    if (avgDelta < -MOMENTUM_SENSITIVITY / 2) return 'falling';
+    return 'stable';
   }
 
   private clamp(value: number, min: number, max: number): number {

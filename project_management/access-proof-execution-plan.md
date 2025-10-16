@@ -1,12 +1,14 @@
 # Access + Proof Execution Plan (Oct 3–17, 2025)
 
 ## Decision Summary
+
 - **Go**: Ship the "Access + Proof" program within 14 days covering Minimal Mode, Offline Core (read/query with outbox), Pretrained Pull, and CI Benchmarks.
 - **Rationale**: Fastest route to unlock adoption lift and create credible demos. All subsequent scope depends on the success of these proofs.
 
 ## Execution Timeline & Owners
 
 ### Week 1 — "Boot & Prove" (Oct 3–10)
+
 Owners: Platform (@platform-lead), AI/Models (@ml-lead), Docs/Community (@community-maintainer)
 
 1. **Minimal Mode (compose + flags)**
@@ -41,6 +43,7 @@ Owners: Platform (@platform-lead), AI/Models (@ml-lead), Docs/Community (@commun
    - **Measure**: all new PRs require DCO; CODEOWNERS enforced on `/deploy`, `/models`, `/security` paths.
 
 ## Exit Criteria (by Oct 17)
+
 - TTFV ≤ 15 min.
 - p95 latency (Minimal profile demo endpoints) ≤ 1 s.
 - ≥ 10 use-case submissions.
@@ -48,47 +51,64 @@ Owners: Platform (@platform-lead), AI/Models (@ml-lead), Docs/Community (@commun
 - Offline e2e suite green.
 
 ## KPI Guardrails & Automation
-| KPI | Target | Source of Truth |
-| --- | --- | --- |
-| Time-to-First-Value | ≤ 15 min | `make demo-minimal` prints duration |
-| Demo p95 (Minimal) | ≤ 1,000 ms | k6 CI artifact |
-| Peak RAM (Minimal) | ≤ 4 GB | `/metrics` sample during demo |
-| Use-Case Submissions | ≥ 10 | GitHub issues with `use-case` label |
-| Model Provenance | 100% bundles signed | CI verification step |
-| Regression Block | PR failure on >10% | CI comparator |
+
+| KPI                  | Target              | Source of Truth                     |
+| -------------------- | ------------------- | ----------------------------------- |
+| Time-to-First-Value  | ≤ 15 min            | `make demo-minimal` prints duration |
+| Demo p95 (Minimal)   | ≤ 1,000 ms          | k6 CI artifact                      |
+| Peak RAM (Minimal)   | ≤ 4 GB              | `/metrics` sample during demo       |
+| Use-Case Submissions | ≥ 10                | GitHub issues with `use-case` label |
+| Model Provenance     | 100% bundles signed | CI verification step                |
+| Regression Block     | PR failure on >10%  | CI comparator                       |
 
 ## Critical Observation Guardrails
 
 ### A. Avoid Badge Fatigue (Trustworthy Gamification)
+
 - **Reward only value**: Issue badges only when a labeled PR closes an issue tied to an approved roadmap or milestone.
 - **Small influence, not power**: Badge holders ("Docs Hero", "Bug Slayer") receive one quarterly vote to elevate a backlog item into the next grooming cycle; no merge authority granted.
 - **Spam brakes**: Automation ignores PRs below LOC threshold unless labeled `docs` or `infra`; throttle duplicate badge awards per month.
 
 ### B. Signal-over-Noise Use-Case Triage
+
 - **Rubric**: Score 0–3 each for repeatability, breadth, feasibility (≤ 8 weeks), governance risk (reverse-scored).
 - **SLA**: Initial triage within 72 hours; publish monthly "top 5" summary; every item links to a Decision node (context, options, decision, risks).
 
 ### C. Interop Minimal Contract
+
 - **Export-first API**: Provide STIX 2.1 export at `/export/stix` for entities {Person, Org, Domain, Addr} and relations {owns, affiliated, resolves_to}.
 - **Versioning**: Require `Accept: application/stix+json; version=1`; guarantee non-breaking behavior for 90 days; signal deprecations via response header.
 - **Maltego starter**: Deliver a read-only transform that calls `/export/stix?entity=<id>`.
 
 ## Security & Supply Chain Requirements
+
 1. **Model Bundle Manifest (CI-enforced)**
+
    ```json
    {
      "name": "intelgraph-nlp-minimal",
      "version": "2025.10.0",
      "sha256": "<bundle-sha>",
      "artifacts": [
-       {"path": "nlp/entity-extractor.onnx", "sha256": "...", "license": "Apache-2.0", "origin": "hf://..."},
-       {"path": "tokenizer.json", "sha256": "...", "license": "Apache-2.0", "origin": "..."}
+       {
+         "path": "nlp/entity-extractor.onnx",
+         "sha256": "...",
+         "license": "Apache-2.0",
+         "origin": "hf://..."
+       },
+       {
+         "path": "tokenizer.json",
+         "sha256": "...",
+         "license": "Apache-2.0",
+         "origin": "..."
+       }
      ],
-     "slsa": {"provenance": "attached.json"},
-     "sbom": {"spdx": "sbom.spdx.json"},
-     "tested_against": {"api": "vX.Y.Z", "profile": "minimal"}
+     "slsa": { "provenance": "attached.json" },
+     "sbom": { "spdx": "sbom.spdx.json" },
+     "tested_against": { "api": "vX.Y.Z", "profile": "minimal" }
    }
    ```
+
    - **Policy**: Refuse to run if hash or license verification fails; log a provenance claim.
 
 2. **Threat-Model Hotspots & Controls**
@@ -98,11 +118,13 @@ Owners: Platform (@platform-lead), AI/Models (@ml-lead), Docs/Community (@commun
    - Metrics leakage → require authentication on metrics endpoint for non-dev builds.
 
 ## Docs & UX First-Run Expectations
+
 - **README stopwatch**: Provide a copy/paste one-liner that records start/stop times and suggests remedies when RAM < 4 GB.
 - **Troubleshooting**: Map the top 10 errors to fixes and link the guide from CI failures.
 - **Secure by default**: Minimal profile binds to localhost and ships with a synthetic, non-PII demo dataset.
 
 ## Issue Backlog (Ready for Ticketing)
+
 1. A1 – Minimal profile & flags (Platform) — DoD above.
 2. A2 – Pretrained bundle & verification (AI/Models).
 3. B1 – k6 CI & regression gate (Platform).
@@ -114,11 +136,13 @@ Owners: Platform (@platform-lead), AI/Models (@ml-lead), Docs/Community (@commun
 9. C4 – Gamification action with value rubric (Community).
 
 ## Budget Constraints
+
 - Bundled storage/egress: $25–$50 per month (HF or S3-compatible).
 - CI minutes for k6 expansion: +$10–$30 per month.
 - All other efforts rely on scoped MVP labor within existing teams.
 
 ## Next PR Wave Expectations
+
 - Green performance badge with README table auto-populated from CI artifacts.
 - Model bundle manifest checked into `models/` with CI signature verification.
 - Offline e2e test that disables WAN, supports query, and syncs on reconnect.

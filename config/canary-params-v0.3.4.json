@@ -21,9 +21,24 @@
     "provenance_query_p95_ms_5m": 200
   },
   "waves": [
-    {"name": "canary_20", "traffic_pct": 20, "bake_minutes": 60, "required_gates": ["p95_latency", "error_rate"]},
-    {"name": "canary_50", "traffic_pct": 50, "bake_minutes": 60, "required_gates": ["p95_latency", "error_rate", "throughput"]},
-    {"name": "production", "traffic_pct": 100, "bake_minutes": 0, "required_gates": ["all"]}
+    {
+      "name": "canary_20",
+      "traffic_pct": 20,
+      "bake_minutes": 60,
+      "required_gates": ["p95_latency", "error_rate"]
+    },
+    {
+      "name": "canary_50",
+      "traffic_pct": 50,
+      "bake_minutes": 60,
+      "required_gates": ["p95_latency", "error_rate", "throughput"]
+    },
+    {
+      "name": "production",
+      "traffic_pct": 100,
+      "bake_minutes": 0,
+      "required_gates": ["all"]
+    }
   ],
   "feature_flags": {
     "differential_privacy_enabled": true,

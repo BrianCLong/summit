@@ -5,11 +5,13 @@ This report details all incomplete actionable items found in markdown files modi
 ## High-Priority Actionable Items
 
 ### `docs/EMASS_EVIDENCE_BUNDLE.md`
+
 - The Authorizing Official signature is pending.
   - `**Digitally Signed by:** Authorizing Official`
   - `**Date:** [TO BE SIGNED]`
 
 ### `docs/archived/PULL_REQUEST_TEMPLATE.md` & `/.github/pull_request_template.md`
+
 - These pull request templates have incomplete checklists.
   - `[ ] My code follows the style guidelines of this project`
   - `[ ] I have performed a self-review of my own code`
@@ -25,6 +27,7 @@ This report details all incomplete actionable items found in markdown files modi
   - `[ ] Error budget burn within policy (link)`
 
 ### `docs/gameday/checklist.md`
+
 - The pre-flight checklist, communications checklist, and abort/rollback criteria are all incomplete.
   - `[ ] Confirm all team members are available.`
   - `[ ] Review the scenario and objectives.`
@@ -37,6 +40,7 @@ This report details all incomplete actionable items found in markdown files modi
   - `[ ] Document rollback procedures for each step.`
 
 ### `docs/how-to/upgrade-to-v24.md`
+
 - The staging validation checklist and post-upgrade checks are incomplete.
   - `[ ] Test deployment in staging environment`
   - `[ ] Verify all integrations work with new API schema`
@@ -52,11 +56,13 @@ This report details all incomplete actionable items found in markdown files modi
   - `[ ] Certificate verification active`
 
 ### `docs/release/quality-template.md`
+
 - The owner confirmation checklist is incomplete.
   - `[ ] All quality gates passed.`
   - `[ ] Metrics are within acceptable thresholds.`
 
 ### `docs/search-queries.md`
+
 - Several high-priority and medium-priority content gaps have been identified and need to be addressed.
   - `[ ] **Kubernetes Production Deployment Guide**`
   - `[ ] **API Rate Limiting Configuration**`
@@ -73,6 +79,7 @@ This report details all incomplete actionable items found in markdown files modi
   - `[ ] **Search Analytics Dashboard**: Real-time search metrics`
 
 ### `ops/go-no-go-checklist.md` & `release/go-no-go.md`
+
 - The go/no-go checklists are incomplete.
   - `Date: ____`
   - `Time (America/Denver): ____`
@@ -87,6 +94,7 @@ This report details all incomplete actionable items found in markdown files modi
   - `[ ] Secrets validated in prod`
 
 ### `postmortems/v24-retro-template.md`
+
 - The post-mortem template is not filled out.
   - `Date Range: ____`
   - `Facilitator: ____`
@@ -100,6 +108,7 @@ This report details all incomplete actionable items found in markdown files modi
   - `[ ] ____ (Owner, YYYY‑MM‑DD)`
 
 ### `summit_policy_release_pack/tickets/*.md` & `summit_ticket_pack (1)/tickets/*.md`
+
 - All tickets in these packs are incomplete and require owners, estimates, and sub-tasks to be filled in.
 
 ## Other Incomplete Items

@@ -24,12 +24,19 @@ async function executeWithMetrics(service, actionName, action, context) {
   try {
     await action(context);
     serviceAutoRemediationsTotal.inc(metricLabels);
-    logger.info({ service, action: actionName }, 'Auto-remediation executed successfully');
+    logger.info(
+      { service, action: actionName },
+      'Auto-remediation executed successfully',
+    );
   } catch (error) {
     metricLabels.result = 'failed';
     serviceAutoRemediationsTotal.inc(metricLabels);
     logger.error(
-      { service, action: actionName, error: error instanceof Error ? error.message : error },
+      {
+        service,
+        action: actionName,
+        error: error instanceof Error ? error.message : error,
+      },
       'Auto-remediation action failed',
     );
   }
@@ -51,7 +58,10 @@ export async function evaluateHealthForRemediation(healthStatus) {
     const serviceKey = service.toLowerCase();
     const actions = registry.get(serviceKey);
     if (!actions || actions.length === 0) {
-      logger.debug({ service }, 'No remediation handlers registered for service');
+      logger.debug(
+        { service },
+        'No remediation handlers registered for service',
+      );
       continue;
     }
 
@@ -59,22 +69,32 @@ export async function evaluateHealthForRemediation(healthStatus) {
       const cooldownKey = getCooldownKey(serviceKey, name);
       const lastRun = lastExecution.get(cooldownKey) ?? 0;
       if (now - lastRun < COOLDOWN_MS) {
-        logger.debug({ service, action: name }, 'Skipping remediation due to cooldown');
+        logger.debug(
+          { service, action: name },
+          'Skipping remediation due to cooldown',
+        );
         continue;
       }
 
-      await executeWithMetrics(serviceKey, name, execute, { healthStatus, failingCheck: check });
+      await executeWithMetrics(serviceKey, name, execute, {
+        healthStatus,
+        failingCheck: check,
+      });
       lastExecution.set(cooldownKey, now);
     }
   }
 }
 
 registerRemediationHandler('database', 'recycle-write-pool', async () => {
-  logger.warn('Attempting to recycle Postgres connection pool after failed health check');
+  logger.warn(
+    'Attempting to recycle Postgres connection pool after failed health check',
+  );
 });
 
 registerRemediationHandler('redis', 'flush-connection', async () => {
-  logger.warn('Triggering Redis client flush to recover from connectivity failure');
+  logger.warn(
+    'Triggering Redis client flush to recover from connectivity failure',
+  );
 });
 
 registerRemediationHandler('neo4j', 'reset-driver', async () => {

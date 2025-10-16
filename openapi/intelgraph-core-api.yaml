@@ -4,23 +4,23 @@ info:
   description: |
     IntelGraph Core API provides comprehensive intelligence analysis capabilities with graph-based data visualization, 
     AI-enhanced analytics, and real-time collaboration features.
-    
+
     ## Key Features
     - **Graph Analytics**: Advanced graph querying and analysis
     - **AI Enhancement**: Machine learning-powered insights
     - **Real-time Collaboration**: Live updates and sharing
     - **Security**: Enterprise-grade authentication and authorization
     - **Compliance**: GDPR/CCPA compliant with comprehensive audit logging
-    
+
     ## Authentication
     All API endpoints require JWT authentication unless explicitly marked as public.
     Include the JWT token in the Authorization header: `Authorization: Bearer <token>`
-    
+
     ## Rate Limiting
     - **Free Tier**: 100 requests per hour
     - **Professional**: 1,000 requests per hour  
     - **Enterprise**: 10,000 requests per hour
-    
+
     ## GraphQL Integration
     This API also exposes a GraphQL endpoint at `/graphql` for more flexible querying.
   version: 2.1.0
@@ -36,7 +36,7 @@ info:
 servers:
   - url: https://api.intelgraph.ai/v2
     description: Production server
-  - url: https://api-staging.intelgraph.ai/v2  
+  - url: https://api-staging.intelgraph.ai/v2
     description: Staging server
   - url: http://localhost:4000/v2
     description: Development server
@@ -285,11 +285,11 @@ paths:
               properties:
                 query:
                   type: string
-                  example: "MATCH (n:Entity) RETURN n LIMIT 10"
+                  example: 'MATCH (n:Entity) RETURN n LIMIT 10'
                 parameters:
                   type: object
                   additionalProperties: true
-                  example: { "limit": 10 }
+                  example: { 'limit': 10 }
                 includeMetrics:
                   type: boolean
                   default: false
@@ -460,12 +460,18 @@ paths:
                   format: uuid
                 analysisType:
                   type: string
-                  enum: [community_detection, centrality_analysis, anomaly_detection, pattern_recognition]
+                  enum:
+                    [
+                      community_detection,
+                      centrality_analysis,
+                      anomaly_detection,
+                      pattern_recognition,
+                    ]
                   example: community_detection
                 parameters:
                   type: object
                   additionalProperties: true
-                  example: { "algorithm": "louvain", "resolution": 1.0 }
+                  example: { 'algorithm': 'louvain', 'resolution': 1.0 }
       responses:
         '200':
           description: Analysis completed successfully
@@ -655,10 +661,10 @@ components:
           format: uuid
         name:
           type: string
-          example: "Threat Analysis Q4 2024"
+          example: 'Threat Analysis Q4 2024'
         description:
           type: string
-          example: "Comprehensive threat landscape analysis"
+          example: 'Comprehensive threat landscape analysis'
         nodeCount:
           type: integer
           example: 1250
@@ -669,7 +675,7 @@ components:
           type: array
           items:
             type: string
-          example: ["threat-intel", "q4-2024"]
+          example: ['threat-intel', 'q4-2024']
         createdAt:
           type: string
           format: date-time
@@ -725,16 +731,16 @@ components:
           type: string
           minLength: 1
           maxLength: 255
-          example: "New Investigation"
+          example: 'New Investigation'
         description:
           type: string
           maxLength: 1000
-          example: "Investigation into recent security incidents"
+          example: 'Investigation into recent security incidents'
         tags:
           type: array
           items:
             type: string
-          example: ["security", "investigation"]
+          example: ['security', 'investigation']
         configuration:
           type: object
           properties:
@@ -768,20 +774,20 @@ components:
           format: uuid
         type:
           type: string
-          example: "Person"
+          example: 'Person'
         properties:
           type: object
           additionalProperties: true
           example:
-            name: "John Doe"
-            email: "john.doe@example.com"
-            department: "Engineering"
+            name: 'John Doe'
+            email: 'john.doe@example.com'
+            department: 'Engineering'
         metadata:
           type: object
           properties:
             source:
               type: string
-              example: "OSINT"
+              example: 'OSINT'
             confidence:
               type: number
               format: float
@@ -804,13 +810,13 @@ components:
       properties:
         type:
           type: string
-          example: "Person"
+          example: 'Person'
         properties:
           type: object
           additionalProperties: true
           example:
-            name: "John Doe"
-            email: "john.doe@example.com"
+            name: 'John Doe'
+            email: 'john.doe@example.com'
         metadata:
           type: object
           properties:
@@ -830,7 +836,7 @@ components:
           format: uuid
         type:
           type: string
-          example: "KNOWS"
+          example: 'KNOWS'
         sourceId:
           type: string
           format: uuid
@@ -841,8 +847,8 @@ components:
           type: object
           additionalProperties: true
           example:
-            relationship_type: "colleague"
-            since: "2020-01-15"
+            relationship_type: 'colleague'
+            since: '2020-01-15'
         metadata:
           type: object
           properties:
@@ -863,7 +869,7 @@ components:
       properties:
         type:
           type: string
-          example: "KNOWS"
+          example: 'KNOWS'
         sourceId:
           type: string
           format: uuid
@@ -906,7 +912,7 @@ components:
       properties:
         analysisType:
           type: string
-          example: "community_detection"
+          example: 'community_detection'
         results:
           type: object
           additionalProperties: true

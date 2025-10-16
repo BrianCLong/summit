@@ -17,38 +17,65 @@ const PipelineUpdate = z.object({
   spec: z.record(z.any()).optional(),
 });
 
-router.get('/pipelines', requirePermission('pipeline:read'), async (_req, res) => {
-  const items = await pipelinesRepo.list();
-  res.json(items);
-});
+router.get(
+  '/pipelines',
+  requirePermission('pipeline:read'),
+  async (_req, res) => {
+    const items = await pipelinesRepo.list();
+    res.json(items);
+  },
+);
 
-router.post('/pipelines', requirePermission('pipeline:create'), async (req, res) => {
-  const parse = PipelineCreate.safeParse(req.body || {});
-  if (!parse.success)
-    return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
-  const created = await pipelinesRepo.create(parse.data.name, parse.data.spec);
-  res.status(201).json(created);
-});
+router.post(
+  '/pipelines',
+  requirePermission('pipeline:create'),
+  async (req, res) => {
+    const parse = PipelineCreate.safeParse(req.body || {});
+    if (!parse.success)
+      return res
+        .status(400)
+        .json({ error: 'invalid_input', details: parse.error.issues });
+    const created = await pipelinesRepo.create(
+      parse.data.name,
+      parse.data.spec,
+    );
+    res.status(201).json(created);
+  },
+);
 
-router.get('/pipelines/:id', requirePermission('pipeline:read'), async (req, res) => {
-  const got = await pipelinesRepo.get(req.params.id);
-  if (!got) return res.status(404).json({ error: 'not_found' });
-  res.json(got);
-});
+router.get(
+  '/pipelines/:id',
+  requirePermission('pipeline:read'),
+  async (req, res) => {
+    const got = await pipelinesRepo.get(req.params.id);
+    if (!got) return res.status(404).json({ error: 'not_found' });
+    res.json(got);
+  },
+);
 
-router.put('/pipelines/:id', requirePermission('pipeline:update'), async (req, res) => {
-  const parse = PipelineUpdate.safeParse(req.body || {});
-  if (!parse.success)
-    return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
-  const upd = await pipelinesRepo.update(req.params.id, parse.data);
-  if (!upd) return res.status(404).json({ error: 'not_found' });
-  res.json(upd);
-});
+router.put(
+  '/pipelines/:id',
+  requirePermission('pipeline:update'),
+  async (req, res) => {
+    const parse = PipelineUpdate.safeParse(req.body || {});
+    if (!parse.success)
+      return res
+        .status(400)
+        .json({ error: 'invalid_input', details: parse.error.issues });
+    const upd = await pipelinesRepo.update(req.params.id, parse.data);
+    if (!upd) return res.status(404).json({ error: 'not_found' });
+    res.json(upd);
+  },
+);
 
-router.delete('/pipelines/:id', requirePermission('pipeline:update'), async (req, res) => {
-  const ok = await pipelinesRepo.delete(req.params.id);
-  res.status(ok ? 204 : 404).send();
-});
+router.delete(
+  '/pipelines/:id',
+  requirePermission('pipeline:update'),
+  async (req, res) => {
+    const ok = await pipelinesRepo.delete(req.params.id);
+    res.status(ok ? 204 : 404).send();
+  },
+);
 
 // Policy hints (stub)
 router.post('/pipelines/hints', async (req, res) => {
@@ -56,8 +83,14 @@ router.post('/pipelines/hints', async (req, res) => {
   const hints: string[] = [];
   // Static heuristics
   if ((spec as any).nodes?.length > 8)
-    hints.push('Consider breaking into stages; >8 nodes may impact readability and retries');
-  if ((spec as any).nodes?.some((n: any) => n.type === 'llm' && n.temperature > 0.7))
+    hints.push(
+      'Consider breaking into stages; >8 nodes may impact readability and retries',
+    );
+  if (
+    (spec as any).nodes?.some(
+      (n: any) => n.type === 'llm' && n.temperature > 0.7,
+    )
+  )
     hints.push('High temperature; consider lower for determinism in CI flows');
   // OPA policy hints (if engine available)
   try {
@@ -72,7 +105,10 @@ router.post('/pipelines/hints', async (req, res) => {
         resource: 'pipeline',
         tenantId: (req as any).tenant || 'default',
       } as any;
-      const decision = await engine.evaluatePolicy('conductor/pipeline_hints', context);
+      const decision = await engine.evaluatePolicy(
+        'conductor/pipeline_hints',
+        context,
+      );
       if (decision?.conditions?.length)
         hints.push(...decision.conditions.map((w: any) => String(w)));
     }
@@ -90,8 +126,16 @@ router.post('/pipelines/copilot/suggest', async (req, res) => {
     spec: {
       nodes: [
         { id: 'source', type: 'ingest', config: { source: 'kb://docs' } },
-        { id: 'transform', type: 'normalize', config: { policy: 'pii-redact' } },
-        { id: 'analyze', type: 'llm', config: { model: 'gpt-4o', temperature: 0.2 } },
+        {
+          id: 'transform',
+          type: 'normalize',
+          config: { policy: 'pii-redact' },
+        },
+        {
+          id: 'analyze',
+          type: 'llm',
+          config: { model: 'gpt-4o', temperature: 0.2 },
+        },
       ],
       edges: [
         { from: 'source', to: 'transform' },

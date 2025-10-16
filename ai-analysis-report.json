@@ -101,11 +101,7 @@
         "description": "IP accessed project resources outside normal hours",
         "severity": 0.7,
         "evidence": {
-          "access_times": [
-            "02:30:00",
-            "03:15:00",
-            "04:20:00"
-          ],
+          "access_times": ["02:30:00", "03:15:00", "04:20:00"],
           "normal_pattern": "09:00-17:00",
           "deviation_score": 0.85
         }
@@ -171,11 +167,7 @@
     ],
     "nl_analysis": {
       "intent": "security_investigation",
-      "entities_mentioned": [
-        "John Anderson",
-        "Project Alpha",
-        "malware"
-      ],
+      "entities_mentioned": ["John Anderson", "Project Alpha", "malware"],
       "query_type": "threat_assessment",
       "confidence": 0.91,
       "suggested_queries": [

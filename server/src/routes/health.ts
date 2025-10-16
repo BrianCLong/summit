@@ -10,10 +10,11 @@ export default function createHealth(db?: { $queryRaw?: Function }) {
       if (db?.$queryRaw) await (db.$queryRaw as any)`SELECT 1`;
       return res.status(200).json({ ready: true });
     } catch (e) {
-      return res.status(503).json({ ready: false, error: (e as Error).message });
+      return res
+        .status(503)
+        .json({ ready: false, error: (e as Error).message });
     }
   });
 
   return r;
 }
-

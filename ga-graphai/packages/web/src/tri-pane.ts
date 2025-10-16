@@ -45,12 +45,16 @@ export class TriPaneController {
       evidence: [...initialEvidence],
       policyBindings: [],
       confidenceOpacity: 1,
-      savedViews: {}
+      savedViews: {},
     };
   }
 
   get current(): TriPaneState {
-    return { ...this.state, evidence: [...this.state.evidence], policyBindings: [...this.state.policyBindings] };
+    return {
+      ...this.state,
+      evidence: [...this.state.evidence],
+      policyBindings: [...this.state.policyBindings],
+    };
   }
 
   on(panel: Panel, listener: Listener): () => void {
@@ -65,8 +69,15 @@ export class TriPaneController {
     this.state.mapSelection = evidence[0]?.id;
     this.state.timelineSelection = evidence.at(-1)?.id;
     this.state.evidence = evidence;
-    this.state.policyBindings = Array.from(new Set(evidence.flatMap(item => item.policies)));
-    this.state.confidenceOpacity = clamp(evidence.reduce((acc, item) => acc + item.confidence, 0) / Math.max(evidence.length, 1), 0, 1);
+    this.state.policyBindings = Array.from(
+      new Set(evidence.flatMap((item) => item.policies)),
+    );
+    this.state.confidenceOpacity = clamp(
+      evidence.reduce((acc, item) => acc + item.confidence, 0) /
+        Math.max(evidence.length, 1),
+      0,
+      1,
+    );
     this.emit('graph');
     this.emit('map');
     this.emit('timeline');
@@ -93,7 +104,10 @@ export class TriPaneController {
     if (this.metrics.length === 0) {
       return 0;
     }
-    const total = this.metrics.reduce((sum, metric) => sum + metric.durationMs, 0);
+    const total = this.metrics.reduce(
+      (sum, metric) => sum + metric.durationMs,
+      0,
+    );
     return Math.round(total / this.metrics.length);
   }
 
@@ -108,7 +122,7 @@ export class TriPaneController {
         ...view,
         evidence: [...view.evidence],
         policyBindings: [...view.policyBindings],
-        savedViews: { ...this.state.savedViews }
+        savedViews: { ...this.state.savedViews },
       };
       this.emit('graph');
       this.emit('map');
@@ -123,7 +137,7 @@ export class TriPaneController {
       focus: this.state.graphSelection,
       evidence: [...this.state.evidence],
       policyBindings: [...this.state.policyBindings],
-      confidenceOpacity: this.state.confidenceOpacity
+      confidenceOpacity: this.state.confidenceOpacity,
     };
   }
 

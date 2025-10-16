@@ -124,7 +124,13 @@ interface GeofenceZone {
 
 interface SpatialAnalysis {
   id: string;
-  type: 'hotspot' | 'cluster' | 'pattern' | 'anomaly' | 'correlation' | 'prediction';
+  type:
+    | 'hotspot'
+    | 'cluster'
+    | 'pattern'
+    | 'anomaly'
+    | 'correlation'
+    | 'prediction';
   name: string;
   description: string;
   area: {
@@ -233,12 +239,18 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
   >('map');
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const [mapZoom, setMapZoom] = useState(12);
-  const [geospatialPoints, setGeospatialPoints] = useState<GeospatialPoint[]>([]);
+  const [geospatialPoints, setGeospatialPoints] = useState<GeospatialPoint[]>(
+    [],
+  );
   const [movementTracks, setMovementTracks] = useState<MovementTrack[]>([]);
   const [geofenceZones, setGeofenceZones] = useState<GeofenceZone[]>([]);
   const [spatialAnalyses, setSpatialAnalyses] = useState<SpatialAnalysis[]>([]);
-  const [selectedPoint, setSelectedPoint] = useState<GeospatialPoint | null>(null);
-  const [selectedTrack, setSelectedTrack] = useState<MovementTrack | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<GeospatialPoint | null>(
+    null,
+  );
+  const [selectedTrack, setSelectedTrack] = useState<MovementTrack | null>(
+    null,
+  );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [layerVisibility, setLayerVisibility] = useState({
     points: true,
@@ -282,89 +294,109 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
       'witness',
     ];
 
-    const mockPoints: GeospatialPoint[] = Array.from({ length: 150 }, (_, i) => {
-      const latOffset = (Math.random() - 0.5) * 0.2; // ~11km radius
-      const lngOffset = (Math.random() - 0.5) * 0.2;
+    const mockPoints: GeospatialPoint[] = Array.from(
+      { length: 150 },
+      (_, i) => {
+        const latOffset = (Math.random() - 0.5) * 0.2; // ~11km radius
+        const lngOffset = (Math.random() - 0.5) * 0.2;
 
-      return {
-        id: `point-${String(i + 1).padStart(3, '0')}`,
-        name: `Location ${i + 1}`,
-        type: pointTypes[Math.floor(Math.random() * pointTypes.length)],
-        coordinates: {
-          latitude: mapCenter.latitude + latOffset,
-          longitude: mapCenter.longitude + lngOffset,
-          altitude: Math.random() > 0.7 ? Math.floor(Math.random() * 500) + 10 : undefined,
-          accuracy: Math.floor(Math.random() * 50) + 5,
-        },
-        address: {
-          street: `${Math.floor(Math.random() * 999) + 1} ${['Main', 'Oak', 'First', 'Second', 'Park', 'Washington'][Math.floor(Math.random() * 6)]} St`,
-          city: ['New York', 'Brooklyn', 'Queens', 'Manhattan', 'Bronx'][
-            Math.floor(Math.random() * 5)
-          ],
-          state: 'NY',
-          country: 'United States',
-          postalCode: `${Math.floor(Math.random() * 90000) + 10000}`,
-        },
-        timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-        confidence: Math.random() * 40 + 60,
-        source: sources[Math.floor(Math.random() * sources.length)],
-        metadata: {
-          elevation: Math.floor(Math.random() * 100) + 1,
-          description: `Mock location data point ${i + 1}`,
-          deviceId: Math.random() > 0.5 ? `device-${Math.floor(Math.random() * 100)}` : undefined,
-        },
-        associations:
-          Math.random() > 0.7
-            ? [
-                {
-                  id: `entity-${Math.floor(Math.random() * 50)}`,
-                  type: ['person', 'event', 'device'][Math.floor(Math.random() * 3)] as any,
-                  relationship: ['owner', 'participant', 'witness'][
-                    Math.floor(Math.random() * 3)
-                  ] as any,
-                  confidence: Math.random() * 30 + 70,
-                },
-              ]
-            : [],
-        tags:
-          Math.random() > 0.5
-            ? ['surveillance', 'meeting', 'residence', 'commercial'][Math.floor(Math.random() * 4)]
-            : [],
-        riskLevel: ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)] as any,
-      };
-    });
+        return {
+          id: `point-${String(i + 1).padStart(3, '0')}`,
+          name: `Location ${i + 1}`,
+          type: pointTypes[Math.floor(Math.random() * pointTypes.length)],
+          coordinates: {
+            latitude: mapCenter.latitude + latOffset,
+            longitude: mapCenter.longitude + lngOffset,
+            altitude:
+              Math.random() > 0.7
+                ? Math.floor(Math.random() * 500) + 10
+                : undefined,
+            accuracy: Math.floor(Math.random() * 50) + 5,
+          },
+          address: {
+            street: `${Math.floor(Math.random() * 999) + 1} ${['Main', 'Oak', 'First', 'Second', 'Park', 'Washington'][Math.floor(Math.random() * 6)]} St`,
+            city: ['New York', 'Brooklyn', 'Queens', 'Manhattan', 'Bronx'][
+              Math.floor(Math.random() * 5)
+            ],
+            state: 'NY',
+            country: 'United States',
+            postalCode: `${Math.floor(Math.random() * 90000) + 10000}`,
+          },
+          timestamp: new Date(
+            Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+          ),
+          confidence: Math.random() * 40 + 60,
+          source: sources[Math.floor(Math.random() * sources.length)],
+          metadata: {
+            elevation: Math.floor(Math.random() * 100) + 1,
+            description: `Mock location data point ${i + 1}`,
+            deviceId:
+              Math.random() > 0.5
+                ? `device-${Math.floor(Math.random() * 100)}`
+                : undefined,
+          },
+          associations:
+            Math.random() > 0.7
+              ? [
+                  {
+                    id: `entity-${Math.floor(Math.random() * 50)}`,
+                    type: ['person', 'event', 'device'][
+                      Math.floor(Math.random() * 3)
+                    ] as any,
+                    relationship: ['owner', 'participant', 'witness'][
+                      Math.floor(Math.random() * 3)
+                    ] as any,
+                    confidence: Math.random() * 30 + 70,
+                  },
+                ]
+              : [],
+          tags:
+            Math.random() > 0.5
+              ? ['surveillance', 'meeting', 'residence', 'commercial'][
+                  Math.floor(Math.random() * 4)
+                ]
+              : [],
+          riskLevel: ['low', 'medium', 'high', 'critical'][
+            Math.floor(Math.random() * 4)
+          ] as any,
+        };
+      },
+    );
 
     setGeospatialPoints(mockPoints);
   };
 
   const generateMockMovementTracks = () => {
     const mockTracks: MovementTrack[] = Array.from({ length: 15 }, (_, i) => {
-      const trackPoints = Array.from({ length: Math.floor(Math.random() * 20) + 5 }, (_, j) => {
-        const timeOffset = j * 15 * 60 * 1000; // 15 minutes apart
-        const latOffset = (Math.random() - 0.5) * 0.05;
-        const lngOffset = (Math.random() - 0.5) * 0.05;
+      const trackPoints = Array.from(
+        { length: Math.floor(Math.random() * 20) + 5 },
+        (_, j) => {
+          const timeOffset = j * 15 * 60 * 1000; // 15 minutes apart
+          const latOffset = (Math.random() - 0.5) * 0.05;
+          const lngOffset = (Math.random() - 0.5) * 0.05;
 
-        return {
-          id: `track-${i}-point-${j}`,
-          name: `Track ${i + 1} Point ${j + 1}`,
-          type: 'device' as const,
-          coordinates: {
-            latitude: mapCenter.latitude + latOffset + j * 0.001,
-            longitude: mapCenter.longitude + lngOffset + j * 0.001,
-            accuracy: Math.floor(Math.random() * 20) + 5,
-          },
-          timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000 + timeOffset),
-          confidence: Math.random() * 20 + 80,
-          source: 'gps' as const,
-          metadata: {
-            speed: Math.random() * 60 + 10,
-            bearing: Math.random() * 360,
-          },
-          associations: [],
-          tags: [],
-          riskLevel: 'low' as const,
-        };
-      });
+          return {
+            id: `track-${i}-point-${j}`,
+            name: `Track ${i + 1} Point ${j + 1}`,
+            type: 'device' as const,
+            coordinates: {
+              latitude: mapCenter.latitude + latOffset + j * 0.001,
+              longitude: mapCenter.longitude + lngOffset + j * 0.001,
+              accuracy: Math.floor(Math.random() * 20) + 5,
+            },
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000 + timeOffset),
+            confidence: Math.random() * 20 + 80,
+            source: 'gps' as const,
+            metadata: {
+              speed: Math.random() * 60 + 10,
+              bearing: Math.random() * 360,
+            },
+            associations: [],
+            tags: [],
+            riskLevel: 'low' as const,
+          };
+        },
+      );
 
       const startTime = trackPoints[0].timestamp;
       const endTime = trackPoints[trackPoints.length - 1].timestamp;
@@ -373,13 +405,16 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
       return {
         id: `track-${String(i + 1).padStart(3, '0')}`,
         entityId: `entity-${i + 1}`,
-        entityType: ['person', 'vehicle', 'device'][Math.floor(Math.random() * 3)] as any,
+        entityType: ['person', 'vehicle', 'device'][
+          Math.floor(Math.random() * 3)
+        ] as any,
         points: trackPoints,
         startTime,
         endTime,
         totalDistance,
         averageSpeed:
-          totalDistance / ((endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60)),
+          totalDistance /
+          ((endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60)),
         maxSpeed: Math.random() * 80 + 20,
         trajectory: {
           straightLine: Math.random() > 0.7,
@@ -427,7 +462,10 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
         type: 'exclusion',
         shape: 'circle',
         geometry: {
-          center: { latitude: mapCenter.latitude + 0.01, longitude: mapCenter.longitude + 0.01 },
+          center: {
+            latitude: mapCenter.latitude + 0.01,
+            longitude: mapCenter.longitude + 0.01,
+          },
           radius: 500,
         },
         alerts: [
@@ -456,10 +494,22 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
         shape: 'polygon',
         geometry: {
           points: [
-            { latitude: mapCenter.latitude - 0.02, longitude: mapCenter.longitude - 0.02 },
-            { latitude: mapCenter.latitude - 0.02, longitude: mapCenter.longitude + 0.02 },
-            { latitude: mapCenter.latitude + 0.02, longitude: mapCenter.longitude + 0.02 },
-            { latitude: mapCenter.latitude + 0.02, longitude: mapCenter.longitude - 0.02 },
+            {
+              latitude: mapCenter.latitude - 0.02,
+              longitude: mapCenter.longitude - 0.02,
+            },
+            {
+              latitude: mapCenter.latitude - 0.02,
+              longitude: mapCenter.longitude + 0.02,
+            },
+            {
+              latitude: mapCenter.latitude + 0.02,
+              longitude: mapCenter.longitude + 0.02,
+            },
+            {
+              latitude: mapCenter.latitude + 0.02,
+              longitude: mapCenter.longitude - 0.02,
+            },
           ],
         },
         alerts: [],
@@ -484,7 +534,10 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
         name: 'Activity Hotspot Downtown',
         description: 'Increased activity concentration in downtown area',
         area: {
-          center: { latitude: mapCenter.latitude, longitude: mapCenter.longitude },
+          center: {
+            latitude: mapCenter.latitude,
+            longitude: mapCenter.longitude,
+          },
           radius: 1000,
           boundingBox: {
             north: mapCenter.latitude + 0.01,
@@ -528,9 +581,13 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
         id: 'analysis-002',
         type: 'pattern',
         name: 'Recurring Movement Pattern',
-        description: 'Daily recurring movement between residential and commercial areas',
+        description:
+          'Daily recurring movement between residential and commercial areas',
         area: {
-          center: { latitude: mapCenter.latitude + 0.05, longitude: mapCenter.longitude - 0.03 },
+          center: {
+            latitude: mapCenter.latitude + 0.05,
+            longitude: mapCenter.longitude - 0.03,
+          },
           radius: 2000,
         },
         metrics: {
@@ -681,12 +738,22 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
           streetViewAvailable: true,
           buildingHeight: Math.floor(Math.random() * 50) + 5,
           parkingSpaces: Math.floor(Math.random() * 100) + 10,
-          securityFeatures: ['CCTV Cameras', 'Security Guard', 'Access Control'],
+          securityFeatures: [
+            'CCTV Cameras',
+            'Security Guard',
+            'Access Control',
+          ],
         },
       },
       threatAssessment: {
-        riskLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as any,
-        factors: ['High foot traffic', 'Multiple entry points', 'Limited surveillance'],
+        riskLevel: ['low', 'medium', 'high'][
+          Math.floor(Math.random() * 3)
+        ] as any,
+        factors: [
+          'High foot traffic',
+          'Multiple entry points',
+          'Limited surveillance',
+        ],
         mitigations: [
           'Increase security presence',
           'Install additional cameras',
@@ -702,11 +769,14 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
       point.timestamp <= timeRange.end &&
       (searchQuery === '' ||
         point.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        point.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
+        point.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        )),
   );
 
   const filteredTracks = movementTracks.filter(
-    (track) => track.startTime >= timeRange.start && track.endTime <= timeRange.end,
+    (track) =>
+      track.startTime >= timeRange.start && track.endTime <= timeRange.end,
   );
 
   return (
@@ -714,7 +784,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
       {/* Header */}
       <div className="mb-6 border-b pb-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">Geospatial Intelligence & Location Analysis</h2>
+          <h2 className="text-2xl font-bold">
+            Geospatial Intelligence & Location Analysis
+          </h2>
           <div className="flex items-center gap-4">
             <input
               type="text"
@@ -777,33 +849,47 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-4xl mb-4">🗺️</div>
-                    <h3 className="text-xl font-semibold mb-2">Interactive Geospatial Map</h3>
+                    <h3 className="text-xl font-semibold mb-2">
+                      Interactive Geospatial Map
+                    </h3>
                     <p className="text-gray-600 mb-4">
-                      Center: {mapCenter.latitude.toFixed(4)}, {mapCenter.longitude.toFixed(4)}
+                      Center: {mapCenter.latitude.toFixed(4)},{' '}
+                      {mapCenter.longitude.toFixed(4)}
                     </p>
                     <div className="text-sm text-gray-500">
-                      {filteredPoints.length} points • {filteredTracks.length} tracks •{' '}
-                      {geofenceZones.filter((g) => g.isActive).length} geofences
+                      {filteredPoints.length} points • {filteredTracks.length}{' '}
+                      tracks • {geofenceZones.filter((g) => g.isActive).length}{' '}
+                      geofences
                     </div>
                   </div>
                 </div>
 
                 {/* Map Controls */}
                 <div className="absolute top-4 right-4 space-y-2">
-                  <button className="bg-white border px-3 py-2 rounded shadow text-sm">+</button>
-                  <button className="bg-white border px-3 py-2 rounded shadow text-sm">−</button>
+                  <button className="bg-white border px-3 py-2 rounded shadow text-sm">
+                    +
+                  </button>
+                  <button className="bg-white border px-3 py-2 rounded shadow text-sm">
+                    −
+                  </button>
                 </div>
 
                 {/* Layer Controls */}
                 <div className="absolute top-4 left-4 bg-white rounded-lg border p-3 shadow">
                   <h4 className="font-medium text-sm mb-2">Layers</h4>
                   {Object.entries(layerVisibility).map(([layer, visible]) => (
-                    <label key={layer} className="flex items-center text-sm mb-1">
+                    <label
+                      key={layer}
+                      className="flex items-center text-sm mb-1"
+                    >
                       <input
                         type="checkbox"
                         checked={visible}
                         onChange={(e) =>
-                          setLayerVisibility((prev) => ({ ...prev, [layer]: e.target.checked }))
+                          setLayerVisibility((prev) => ({
+                            ...prev,
+                            [layer]: e.target.checked,
+                          }))
                         }
                         className="mr-2"
                       />
@@ -823,7 +909,10 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                     type="datetime-local"
                     value={timeRange.start.toISOString().slice(0, 16)}
                     onChange={(e) =>
-                      setTimeRange((prev) => ({ ...prev, start: new Date(e.target.value) }))
+                      setTimeRange((prev) => ({
+                        ...prev,
+                        start: new Date(e.target.value),
+                      }))
                     }
                     className="w-full px-3 py-2 border rounded text-sm"
                   />
@@ -831,7 +920,10 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                     type="datetime-local"
                     value={timeRange.end.toISOString().slice(0, 16)}
                     onChange={(e) =>
-                      setTimeRange((prev) => ({ ...prev, end: new Date(e.target.value) }))
+                      setTimeRange((prev) => ({
+                        ...prev,
+                        end: new Date(e.target.value),
+                      }))
                     }
                     className="w-full px-3 py-2 border rounded text-sm"
                   />
@@ -843,7 +935,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Total Points:</span>
-                    <span className="font-medium">{geospatialPoints.length}</span>
+                    <span className="font-medium">
+                      {geospatialPoints.length}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Filtered Points:</span>
@@ -861,7 +955,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                   </div>
                   <div className="flex justify-between">
                     <span>Analyses:</span>
-                    <span className="font-medium">{spatialAnalyses.length}</span>
+                    <span className="font-medium">
+                      {spatialAnalyses.length}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -870,7 +966,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 <h3 className="font-semibold mb-3">Quick Actions</h3>
                 <div className="space-y-2">
                   <button
-                    onClick={() => createGeofence('New Alert Zone', 'alert', mapCenter, 500)}
+                    onClick={() =>
+                      createGeofence('New Alert Zone', 'alert', mapCenter, 500)
+                    }
                     className="w-full px-3 py-2 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 text-sm"
                   >
                     Create Geofence
@@ -912,7 +1010,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 </div>
                 <div className="text-right text-sm">
                   <div>{track.startTime.toLocaleDateString()}</div>
-                  <div className="text-xs text-gray-500">{track.totalDistance.toFixed(1)} km</div>
+                  <div className="text-xs text-gray-500">
+                    {track.totalDistance.toFixed(1)} km
+                  </div>
                 </div>
               </div>
 
@@ -921,22 +1021,29 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                   <span className="text-gray-600">Duration:</span>
                   <div className="font-medium">
                     {Math.round(
-                      (track.endTime.getTime() - track.startTime.getTime()) / (1000 * 60 * 60),
+                      (track.endTime.getTime() - track.startTime.getTime()) /
+                        (1000 * 60 * 60),
                     )}
                     h
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Avg Speed:</span>
-                  <div className="font-medium">{track.averageSpeed.toFixed(1)} km/h</div>
+                  <div className="font-medium">
+                    {track.averageSpeed.toFixed(1)} km/h
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Max Speed:</span>
-                  <div className="font-medium">{track.maxSpeed.toFixed(1)} km/h</div>
+                  <div className="font-medium">
+                    {track.maxSpeed.toFixed(1)} km/h
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Frequent Stops:</span>
-                  <div className="font-medium">{track.analysis.frequentLocations.length}</div>
+                  <div className="font-medium">
+                    {track.analysis.frequentLocations.length}
+                  </div>
                 </div>
               </div>
 
@@ -965,11 +1072,14 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
 
               {track.analysis.patterns.length > 0 && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                  <span className="text-sm font-medium">Detected Patterns:</span>
+                  <span className="text-sm font-medium">
+                    Detected Patterns:
+                  </span>
                   <div className="text-xs text-gray-600 mt-1">
                     {track.analysis.patterns.map((pattern) => (
                       <div key={pattern.type}>
-                        • {pattern.description} ({pattern.confidence.toFixed(0)}% confidence)
+                        • {pattern.description} ({pattern.confidence.toFixed(0)}
+                        % confidence)
                       </div>
                     ))}
                   </div>
@@ -981,7 +1091,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
           {filteredTracks.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <div className="text-4xl mb-4">📍</div>
-              <h3 className="text-lg font-medium mb-2">No movement tracks in time range</h3>
+              <h3 className="text-lg font-medium mb-2">
+                No movement tracks in time range
+              </h3>
               <p>Adjust the time range to see movement data</p>
             </div>
           )}
@@ -1015,7 +1127,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                     </span>
                     <span
                       className={`px-2 py-1 text-xs rounded ${
-                        zone.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                        zone.isActive
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-700'
                       }`}
                     >
                       {zone.isActive ? 'ACTIVE' : 'INACTIVE'}
@@ -1050,14 +1164,18 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 </div>
                 <div>
                   <span className="text-gray-600">Created:</span>
-                  <div className="font-medium">{zone.createdDate.toLocaleDateString()}</div>
+                  <div className="font-medium">
+                    {zone.createdDate.toLocaleDateString()}
+                  </div>
                 </div>
               </div>
 
               {zone.rules.dwellTimeLimit && (
                 <div className="text-sm text-gray-600 mb-2">
                   <span>Dwell limit:</span>{' '}
-                  <span className="font-medium">{zone.rules.dwellTimeLimit} minutes</span>
+                  <span className="font-medium">
+                    {zone.rules.dwellTimeLimit} minutes
+                  </span>
                 </div>
               )}
 
@@ -1067,8 +1185,12 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                     Recent Alerts ({zone.alerts.length})
                   </span>
                   {zone.alerts.slice(0, 3).map((alert) => (
-                    <div key={alert.id} className="text-sm text-orange-700 mt-1">
-                      • {alert.alertType} by {alert.entityId} - {alert.timestamp.toLocaleString()}
+                    <div
+                      key={alert.id}
+                      className="text-sm text-orange-700 mt-1"
+                    >
+                      • {alert.alertType} by {alert.entityId} -{' '}
+                      {alert.timestamp.toLocaleString()}
                     </div>
                   ))}
                 </div>
@@ -1168,7 +1290,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h4 className="font-semibold">{analysis.name}</h4>
-                    <p className="text-sm text-gray-600">{analysis.description}</p>
+                    <p className="text-sm text-gray-600">
+                      {analysis.description}
+                    </p>
                   </div>
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded capitalize">
                     {analysis.type}
@@ -1178,28 +1302,39 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
                   <div>
                     <span className="text-gray-600">Confidence:</span>
-                    <div className="font-medium">{analysis.metrics.confidence.toFixed(1)}%</div>
+                    <div className="font-medium">
+                      {analysis.metrics.confidence.toFixed(1)}%
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Significance:</span>
-                    <div className="font-medium">{analysis.metrics.significance.toFixed(2)}</div>
+                    <div className="font-medium">
+                      {analysis.metrics.significance.toFixed(2)}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Density:</span>
-                    <div className="font-medium">{analysis.metrics.density.toFixed(1)}</div>
+                    <div className="font-medium">
+                      {analysis.metrics.density.toFixed(1)}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Entities:</span>
-                    <div className="font-medium">{analysis.entities.length}</div>
+                    <div className="font-medium">
+                      {analysis.entities.length}
+                    </div>
                   </div>
                 </div>
 
                 {analysis.insights.length > 0 && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                    <span className="text-green-800 font-medium">Key Insights:</span>
+                    <span className="text-green-800 font-medium">
+                      Key Insights:
+                    </span>
                     {analysis.insights.map((insight, index) => (
                       <div key={index} className="text-sm text-green-700 mt-1">
-                        • {insight.description} ({insight.confidence.toFixed(1)}% confidence)
+                        • {insight.description} ({insight.confidence.toFixed(1)}
+                        % confidence)
                       </div>
                     ))}
                   </div>
@@ -1210,7 +1345,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
             {spatialAnalyses.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 <div className="text-4xl mb-4">📊</div>
-                <h3 className="text-lg font-medium mb-2">No spatial analyses yet</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  No spatial analyses yet
+                </h3>
                 <p>Run analysis tools to discover spatial patterns</p>
               </div>
             )}
@@ -1222,7 +1359,9 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
       {activeView === 'intelligence' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg border p-6">
-            <h3 className="text-lg font-semibold mb-4">Location Intelligence Tools</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Location Intelligence Tools
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
@@ -1261,7 +1400,11 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                   icon: '📡',
                   desc: 'Cell tower and network coverage',
                 },
-                { name: 'Threat Assessment', icon: '⚠️', desc: 'Security and risk evaluation' },
+                {
+                  name: 'Threat Assessment',
+                  icon: '⚠️',
+                  desc: 'Security and risk evaluation',
+                },
               ].map((tool) => (
                 <button
                   key={tool.name}
@@ -1277,17 +1420,21 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
           </div>
 
           <div className="bg-white rounded-lg border p-6">
-            <h3 className="text-lg font-semibold mb-4">Sample Location Intelligence Report</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Sample Location Intelligence Report
+            </h3>
 
             <div className="space-y-4">
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-2">📍 Location Overview</h4>
                 <div className="text-sm text-gray-600">
                   <div>
-                    <strong>Address:</strong> 123 Intelligence Ave, Analytics City, NY 10001
+                    <strong>Address:</strong> 123 Intelligence Ave, Analytics
+                    City, NY 10001
                   </div>
                   <div>
-                    <strong>Coordinates:</strong> {mapCenter.latitude.toFixed(6)},{' '}
+                    <strong>Coordinates:</strong>{' '}
+                    {mapCenter.latitude.toFixed(6)},{' '}
                     {mapCenter.longitude.toFixed(6)}
                   </div>
                   <div>
@@ -1322,20 +1469,25 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
               </div>
 
               <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">🛰️ Infrastructure & Communications</h4>
+                <h4 className="font-medium mb-2">
+                  🛰️ Infrastructure & Communications
+                </h4>
                 <div className="text-sm text-gray-600">
                   <div>
-                    <strong>Nearby Transport:</strong> Bus stops (0.2km), Subway station (0.4km)
+                    <strong>Nearby Transport:</strong> Bus stops (0.2km), Subway
+                    station (0.4km)
                   </div>
                   <div>
-                    <strong>Cell Coverage:</strong> Verizon (Strong), AT&T (Moderate), T-Mobile
-                    (Weak)
+                    <strong>Cell Coverage:</strong> Verizon (Strong), AT&T
+                    (Moderate), T-Mobile (Weak)
                   </div>
                   <div>
-                    <strong>Internet Providers:</strong> Verizon FiOS, Spectrum, AT&T
+                    <strong>Internet Providers:</strong> Verizon FiOS, Spectrum,
+                    AT&T
                   </div>
                   <div>
-                    <strong>Security Features:</strong> CCTV cameras, keycard access, security desk
+                    <strong>Security Features:</strong> CCTV cameras, keycard
+                    access, security desk
                   </div>
                 </div>
               </div>
@@ -1344,15 +1496,16 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
                 <h4 className="font-medium mb-2">⚠️ Threat Assessment</h4>
                 <div className="text-sm text-gray-600">
                   <div>
-                    <strong>Risk Factors:</strong> High foot traffic, multiple entry points,
-                    adjacent to government building
+                    <strong>Risk Factors:</strong> High foot traffic, multiple
+                    entry points, adjacent to government building
                   </div>
                   <div>
-                    <strong>Mitigation:</strong> Enhanced screening, visitor management, perimeter
-                    monitoring
+                    <strong>Mitigation:</strong> Enhanced screening, visitor
+                    management, perimeter monitoring
                   </div>
                   <div>
-                    <strong>Vulnerabilities:</strong> Public parking garage, limited sight lines
+                    <strong>Vulnerabilities:</strong> Public parking garage,
+                    limited sight lines
                   </div>
                 </div>
               </div>
@@ -1365,8 +1518,12 @@ const GeospatialIntelligence: React.FC<GeospatialIntelligenceProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 text-center">
             <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <h3 className="text-lg font-medium mb-2">Running Spatial Analysis</h3>
-            <p className="text-gray-600">Processing geospatial data and identifying patterns...</p>
+            <h3 className="text-lg font-medium mb-2">
+              Running Spatial Analysis
+            </h3>
+            <p className="text-gray-600">
+              Processing geospatial data and identifying patterns...
+            </p>
           </div>
         </div>
       )}

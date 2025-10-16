@@ -1,12 +1,14 @@
 # Proof-First Core GA Sprint Plan
 
 ## Sprint Overview
+
 - **Name:** Proof-First Core GA
 - **Duration:** 2 weeks
 - **Goal:** Deliver a verifiable vertical slice that covers provenance and claim ledger (beta), NL-to-Cypher copilot, entity resolution service stub, SLO and cost guard instrumentation, and the tri-pane UI integration to establish repeatable acceptance packs for the GA roadmap.
 - **Non-goals:** Federated multi-graph search, advanced simulations, end-to-end Graph-XAI fairness and robustness work beyond scaffolding.
 
 ## Success Criteria
+
 - External verifier accepts an export manifest produced by the provenance ledger using golden fixtures.
 - Natural language to Cypher pipeline achieves ≥95% syntactic validity on the regression corpus and supports sandbox execution with undo.
 - Entity resolution service exposes `/er/candidates`, `/er/merge`, `/er/explain` with reversible merges, labeled policies, and explainability payloads that pass golden fixtures.
@@ -14,7 +16,9 @@
 - Tri-pane UI (graph, map, timeline) ships provenance-aware tooltips, synchronized brushing, "Explain this view" overlays, and demonstrates improved time-to-path discovery versus baseline benchmarks.
 
 ## Backlog (MoSCoW)
+
 ### Must Have
+
 1. **Provenance & Claim Ledger (beta)**
    - Register evidence, parse claims, and export hash manifest representing a Merkle tree of transforms.
    - Provide external verifier CLI that validates manifests on fixtures and surfaces license-based export blocks with human readable reasons.
@@ -31,26 +35,31 @@
    - Synchronize graph/map/timeline views, include provenance tooltips, confidence-driven opacity, saved view seeds, and "Explain this view" overlays that surface evidence maps and policy bindings.
 
 ### Should Have
+
 - **Policy Guardrails (OPA/ABAC)**
   - Enforce license and authority bindings for queries and exports, expose simulation (dry-run) endpoints, and ensure blocked actions surface appeal paths.
 - **Connector Golden Paths**
   - Ship RSS/EDGAR (OSINT), STIX/TAXII (CTI), and CSV ingest connectors with manifests, mapping tests, rate limit policies, and sample datasets.
 
 ### Could Have
+
 - **Predictive Suite Stub**
   - Provide a timeline forecasting API with synthetic confidence bands and placeholder XAI overlays connected to nodes and edges.
 
 ### Will Not Have (This Sprint)
+
 - Federated multi-graph search.
 - Advanced deception lab scenarios.
 - Full production Graph-XAI fairness and robustness dashboards.
 
 ## Definition of Ready
+
 - Acceptance tests and fixtures enumerated for each backlog item.
 - Policy bindings and authority models documented with rollback plans.
 - Align each deliverable to reusable acceptance patterns (ER explainability, policy-by-default, provenance integrity).
 
 ## Definition of Done
+
 - CI green with unit, contract, and acceptance packs.
 - UI screenshot diffs captured for explainability flows.
 - External verifier artifacts attached to the sprint deliverable bundle.
@@ -58,27 +67,32 @@
 - Audit logs populated for merges, policy decisions, and export events.
 
 ## Quality, Observability, and Security
+
 - OpenTelemetry traces and Prometheus metrics wired into every service.
 - Cost Guard exposes budget decisions, kill actions, and alert streams.
 - ABAC/OPA policies enforced with step-up WebAuthn for export actions and license/authority compiler paths.
 - UX checks ensure reduced time-to-first insight and zero uncited assertions in UI or copilot outputs.
 
 ## Risks and Mitigations
+
 - **Query planner regressions** risk breaching SLOs → run k6 load tests and fall back to slow-query killer.
 - **Entity resolution false merges** → include human-in-the-loop adjudication, reversible merges, and confidence decay strategies.
 - **Provenance manifest drift** → enforce external verifier in CI and raise tamper alarms on mismatches.
 
 ## DevEx and Operations Notes
+
 - Maintain trunk-based flow with feature branches landing through PRs that attach acceptance evidence.
 - CI must run lint, unit, contract, acceptance, and attach `prov-verify` logs plus UI screenshots.
 - Chaos scenario: terminate a query copilot pod under load and confirm SLO dashboards plus alerts remain within tolerance.
 
 ## Connector Golden Path Deliverables
+
 - `connectors/rss_news/manifest.yaml` with mapping tests and rate limiting.
 - `connectors/stix_taxii/manifest.yaml` converting indicators to canonical entities/edges.
 - `connectors/csv_ingest/manifest.yaml` with schema mapping, PII flags, and sample dataset coverage.
 
 ## Codex Squad Prompt
+
 ```
 system: >
   You are the IntelGraph Core Engineering swarm. Build a verifiable vertical slice for the

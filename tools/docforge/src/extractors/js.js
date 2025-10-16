@@ -64,12 +64,12 @@ function extractJsDocs(source) {
       kind,
       summary: summarize(description),
       description,
-      signature: signatureLine.trim()
+      signature: signatureLine.trim(),
     });
   }
   return results;
 }
 
 module.exports = {
-  extractJsDocs
+  extractJsDocs,
 };

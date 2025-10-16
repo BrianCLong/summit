@@ -1,11 +1,24 @@
 // Main Conductor Implementation
 // Orchestrates MoE routing with MCP tool execution and security controls
 
-import { ConductInput, ConductResult, RouteDecision, ExpertType } from './types';
+import {
+  ConductInput,
+  ConductResult,
+  RouteDecision,
+  ExpertType,
+} from './types';
 import { moERouter } from './router';
-import { mcpClient, mcpRegistry, executeToolAnywhere, initializeMCPClient } from './mcp/client';
+import {
+  mcpClient,
+  mcpRegistry,
+  executeToolAnywhere,
+  initializeMCPClient,
+} from './mcp/client';
 import { randomUUID as uuid } from 'crypto';
-import { BudgetAdmissionController, createBudgetController } from './admission/budget-control';
+import {
+  BudgetAdmissionController,
+  createBudgetController,
+} from './admission/budget-control';
 import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
 import { ConductorCache } from './cache';
@@ -39,7 +52,11 @@ export interface ConductorConfig {
 
 export class Conductor {
   private activeTaskCount = 0;
-  private queue: { input: ConductInput; resolve: (r: ConductResult)=>void; reject: (e: any)=>void }[] = [];
+  private queue: {
+    input: ConductInput;
+    resolve: (r: ConductResult) => void;
+    reject: (e: any) => void;
+  }[] = [];
   private auditLog: any[] = []; // Keep existing auditLog
   private budgetController: BudgetAdmissionController; // Add this line
   private cache: ConductorCache;
@@ -58,7 +75,9 @@ export class Conductor {
     this.budgetController = createBudgetController(redisClient);
     this.cache = new ConductorCache();
     this.missionControlResolver = new MissionControlConflictResolver();
-    try { registerBuiltins(); } catch {}
+    try {
+      registerBuiltins();
+    } catch {}
   }
 
   /**
@@ -76,23 +95,34 @@ export class Conductor {
     const startTime = performance.now();
 
     // Determine tenantId for budget control
-    const tenantId = input.userContext?.tenantId || (input.userContext as any)?.tenant || 'global';
+    const tenantId =
+      input.userContext?.tenantId ||
+      (input.userContext as any)?.tenant ||
+      'global';
     let missionControlResolution: MissionControlResolution | null = null;
     let missionControlLogs: string[] = [];
 
     try {
       if (input.missionControlContext) {
-        missionControlResolution = this.missionControlResolver.resolve(input.missionControlContext);
+        missionControlResolution = this.missionControlResolver.resolve(
+          input.missionControlContext,
+        );
 
         if (!missionControlResolution.allowProceed) {
           const deferReason =
             missionControlResolution.deferred.find(
-              (entry) => entry.missionId === input.missionControlContext?.currentMissionId,
+              (entry) =>
+                entry.missionId ===
+                input.missionControlContext?.currentMissionId,
             )?.reason || 'Mission deferred by arbitration';
-          throw new Error(`Mission control deferred ${input.missionControlContext.currentMissionId}: ${deferReason}`);
+          throw new Error(
+            `Mission control deferred ${input.missionControlContext.currentMissionId}: ${deferReason}`,
+          );
         }
 
-        missionControlLogs = this.formatMissionControlLogs(missionControlResolution);
+        missionControlLogs = this.formatMissionControlLogs(
+          missionControlResolution,
+        );
       }
 
       // Quotas admission
@@ -114,9 +144,11 @@ export class Conductor {
       const decision = moERouter.route(input);
 
       // Cache lookup (if enabled)
-      const cacheEnabled = (process.env.CACHE_ENABLED ?? 'true').toLowerCase() === 'true';
-      const tenantForCache = input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
-      let cached: any | null = null;
+      const cacheEnabled =
+        (process.env.CACHE_ENABLED ?? 'true').toLowerCase() === 'true';
+      const tenantForCache =
+        input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
+      const cached: any | null = null;
       let cacheKey = '';
       if (cacheEnabled) {
         cacheKey = this.makeCacheKey(decision.expert, input);
@@ -134,7 +166,10 @@ export class Conductor {
               auditId,
             };
             if (missionControlLogs.length) {
-              conductResult.logs = [...missionControlLogs, ...conductResult.logs];
+              conductResult.logs = [
+                ...missionControlLogs,
+                ...conductResult.logs,
+              ];
             }
             if (this.config.auditEnabled) {
               this.logAudit({
@@ -153,18 +188,26 @@ export class Conductor {
       }
 
       // Placeholder for estimated cost of the current task
-      const estimatedTaskCost = 0.01; 
+      const estimatedTaskCost = 0.01;
 
       // Perform budget admission check for the current task + accumulated run cost
-      const admissionDecision = await this.budgetController.admit(decision.expert, estimatedTaskCost, {
-        userId: input.userContext?.userId,
-        tenantId: tenantId,
-      });
+      const admissionDecision = await this.budgetController.admit(
+        decision.expert,
+        estimatedTaskCost,
+        {
+          userId: input.userContext?.userId,
+          tenantId: tenantId,
+        },
+      );
 
       if (!admissionDecision.admit) {
         // Preempt the run if budget is exceeded
         if (input.runId) {
-          await runsRepo.update(input.runId, { status: 'failed', error_message: 'Budget cap exceeded' }, tenantId);
+          await runsRepo.update(
+            input.runId,
+            { status: 'failed', error_message: 'Budget cap exceeded' },
+            tenantId,
+          );
           this.logAudit({
             auditId,
             input,
@@ -179,17 +222,27 @@ export class Conductor {
 
       // Residency + security gates
       const residency = (input.userContext as any)?.residency || undefined;
-      const region = (input.userContext as any)?.region || this.config?.llmProviders?.light?.endpoint?.match(/(eu|us\-east|us\-west)/)?.[1];
+      const region =
+        (input.userContext as any)?.region ||
+        this.config?.llmProviders?.light?.endpoint?.match(
+          /(eu|us\-east|us\-west)/,
+        )?.[1];
       if (residency) {
         const r = await checkResidency({ region, residency });
         if (!r.allow) {
-          throw new Error(`Residency gate denied: ${r.reason || `${region} vs ${residency}`}`);
+          throw new Error(
+            `Residency gate denied: ${r.reason || `${region} vs ${residency}`}`,
+          );
         }
       }
       await this.validateSecurity(input, decision);
 
       // Execute with selected expert
-      const result = await this.executeWithExpert(decision.expert, input, decision);
+      const result = await this.executeWithExpert(
+        decision.expert,
+        input,
+        decision,
+      );
       if (missionControlLogs.length) {
         result.logs = [...missionControlLogs, ...result.logs];
       }
@@ -208,20 +261,32 @@ export class Conductor {
       if (cacheEnabled && cacheKey) {
         try {
           const buf = Buffer.from(JSON.stringify(conductResult.output ?? null));
-          await this.cache.write(cacheKey, buf, { expert: decision.expert, ts: Date.now() }, undefined, tenantForCache);
+          await this.cache.write(
+            cacheKey,
+            buf,
+            { expert: decision.expert, ts: Date.now() },
+            undefined,
+            tenantForCache,
+          );
           conductResult.logs.push(`cache:set key=${cacheKey}`);
         } catch {}
       }
 
       // Usage accrual (runs count now, resource metrics TBD)
-      try { await accrueUsage(tenantId, { runInc: true }); } catch {}
+      try {
+        await accrueUsage(tenantId, { runInc: true });
+      } catch {}
 
       // Record actual spending for the task
       if (result.cost) {
-        await this.budgetController.recordSpending(decision.expert, result.cost, {
-          userId: input.userContext?.userId,
-          tenantId: tenantId,
-        });
+        await this.budgetController.recordSpending(
+          decision.expert,
+          result.cost,
+          {
+            userId: input.userContext?.userId,
+            tenantId: tenantId,
+          },
+        );
       }
 
       // Audit logging
@@ -240,7 +305,11 @@ export class Conductor {
     } catch (error) {
       const endTime = performance.now();
 
-      const redacted = (s: string) => s.replace(/(api[_-]?key|token|secret)\s*[:=]\s*["']?([A-Za-z0-9\-_]{4,})["']?/gi, (_m,k)=>`${k}: ****`);
+      const redacted = (s: string) =>
+        s.replace(
+          /(api[_-]?key|token|secret)\s*[:=]\s*["']?([A-Za-z0-9\-_]{4,})["']?/gi,
+          (_m, k) => `${k}: ****`,
+        );
       const errorResult: ConductResult = {
         expertId: 'LLM_LIGHT', // fallback
         output: null,
@@ -272,7 +341,12 @@ export class Conductor {
   }
 
   private makeCacheKey(expert: string, input: ConductInput) {
-    const basis = JSON.stringify({ expert, task: input.task, dataRefs: input.dataRefs, ctx: input.userContext });
+    const basis = JSON.stringify({
+      expert,
+      task: input.task,
+      dataRefs: input.dataRefs,
+      ctx: input.userContext,
+    });
     return createHash('sha1').update(basis).digest('hex');
   }
 
@@ -286,7 +360,10 @@ export class Conductor {
   /**
    * Validate security constraints
    */
-  private async validateSecurity(input: ConductInput, decision: RouteDecision): Promise<void> {
+  private async validateSecurity(
+    input: ConductInput,
+    decision: RouteDecision,
+  ): Promise<void> {
     // PII/Secret data constraints
     if (input.sensitivity === 'secret') {
       if (decision.expert === 'LLM_LIGHT' || decision.expert === 'LLM_HEAVY') {
@@ -297,7 +374,9 @@ export class Conductor {
 
         // Check if LLM provider has enterprise agreement for secret data
         if (!llmConfig?.endpoint.includes('enterprise')) {
-          throw new Error('Secret data cannot be processed by non-enterprise LLM providers');
+          throw new Error(
+            'Secret data cannot be processed by non-enterprise LLM providers',
+          );
         }
       }
     }
@@ -307,7 +386,9 @@ export class Conductor {
       const requiredScopes = this.getRequiredScopes(decision.expert);
       const userScopes = input.userContext.scopes;
 
-      const hasPermission = requiredScopes.every((scope) => userScopes.includes(scope));
+      const hasPermission = requiredScopes.every((scope) =>
+        userScopes.includes(scope),
+      );
       if (!hasPermission) {
         throw new Error(
           `Insufficient permissions for ${decision.expert}. Required: ${requiredScopes.join(', ')}`,
@@ -368,7 +449,9 @@ export class Conductor {
     }
   }
 
-  private formatMissionControlLogs(resolution: MissionControlResolution): string[] {
+  private formatMissionControlLogs(
+    resolution: MissionControlResolution,
+  ): string[] {
     const logs: string[] = [];
     const summary = resolution.arbitrationSummary;
     const assignment = resolution.currentAssignment;
@@ -478,7 +561,9 @@ export class Conductor {
           input.userContext?.scopes,
         );
 
-        logs.push(`File search completed: ${result.result.results.length} files found`);
+        logs.push(
+          `File search completed: ${result.result.results.length} files found`,
+        );
         return {
           output: result.result,
           logs,
@@ -535,8 +620,11 @@ export class Conductor {
     logs: string[],
   ): Promise<{ output: any; logs: string[]; cost?: number }> {
     // Plugin integration
-    const tenant = input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
-    const p = (input.userContext as any)?.plugin as { name?: string; inputs?: any } | undefined;
+    const tenant =
+      input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
+    const p = (input.userContext as any)?.plugin as
+      | { name?: string; inputs?: any }
+      | undefined;
     if (p?.name) {
       logs.push(`OSINT via plugin: ${p.name}`);
       const out = await runPlugin(p.name, p.inputs || {}, { tenant });
@@ -558,7 +646,11 @@ export class Conductor {
     }
 
     logs.push('OSINT tool execution (mock)');
-    return { output: { query: input.task, sources: [], findings: [], confidence: 0.5 }, logs, cost: 0.003 };
+    return {
+      output: { query: input.task, sources: [], findings: [], confidence: 0.5 },
+      logs,
+      cost: 0.003,
+    };
   }
 
   /**
@@ -593,7 +685,7 @@ export class Conductor {
 
     return {
       output: {
-        answer: `Based on the investigation context, here is the response to: "${input.task}"`, 
+        answer: `Based on the investigation context, here is the response to: "${input.task}"`,
         sources: ['Document A', 'Entity B', 'Relationship C'],
         confidence: 0.85,
         citations: ['doc_1', 'doc_2'],
@@ -612,7 +704,9 @@ export class Conductor {
     logs: string[],
   ): Promise<{ output: any; logs: string[]; cost?: number }> {
     const config =
-      expert === 'LLM_LIGHT' ? this.config.llmProviders.light : this.config.llmProviders.heavy;
+      expert === 'LLM_LIGHT'
+        ? this.config.llmProviders.light
+        : this.config.llmProviders.heavy;
 
     if (!config) {
       throw new Error(`${expert} provider not configured`);
@@ -626,7 +720,7 @@ export class Conductor {
 
     return {
       output: {
-        response: `Mock ${expert} response for: "${input.task}"`, 
+        response: `Mock ${expert} response for: "${input.task}"`,
         model: config.model,
         usage: {
           promptTokens: estimatedTokens,
@@ -644,7 +738,8 @@ export class Conductor {
     const lower = task.toLowerCase();
     if (lower.includes('pagerank')) return 'pagerank';
     if (lower.includes('community')) return 'community';
-    if (lower.includes('shortest') || lower.includes('path')) return 'shortestPath';
+    if (lower.includes('shortest') || lower.includes('path'))
+      return 'shortestPath';
     if (lower.includes('betweenness')) return 'betweenness';
     if (lower.includes('closeness')) return 'closeness';
     return 'pagerank'; // default

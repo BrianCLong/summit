@@ -60,9 +60,9 @@ export class SemanticMemory {
   }
 
   async store(
-    content: string, 
+    content: string,
     type: MemoryEntry['type'],
-    metadata: Partial<MemoryEntry['metadata']> = {}
+    metadata: Partial<MemoryEntry['metadata']> = {},
   ): Promise<string> {
     const id = this.generateId(content, type);
     const existing = this.entries.get(id);
@@ -87,9 +87,9 @@ export class SemanticMemory {
         lastAccessed: new Date().toISOString(),
         success: true,
         tags: [],
-        ...metadata
+        ...metadata,
       },
-      relations: []
+      relations: [],
     };
 
     // Generate embedding for semantic search
@@ -102,7 +102,7 @@ export class SemanticMemory {
     // Extract tags automatically
     entry.metadata.tags = [
       ...entry.metadata.tags,
-      ...this.extractTags(content, type)
+      ...this.extractTags(content, type),
     ];
 
     this.entries.set(id, entry);
@@ -119,53 +119,60 @@ export class SemanticMemory {
 
     // Filter by type
     if (query.type && query.type.length > 0) {
-      candidates = candidates.filter(entry => query.type!.includes(entry.type));
+      candidates = candidates.filter((entry) =>
+        query.type!.includes(entry.type),
+      );
     }
 
     // Filter by tags
     if (query.tags && query.tags.length > 0) {
-      candidates = candidates.filter(entry => 
-        query.tags!.some(tag => entry.metadata.tags.includes(tag))
+      candidates = candidates.filter((entry) =>
+        query.tags!.some((tag) => entry.metadata.tags.includes(tag)),
       );
     }
 
     // Semantic similarity search
     const results: SemanticResult[] = [];
-    
+
     if (candidates.length === 0) {
       return results;
     }
 
     try {
       const queryEmbedding = await this.generateEmbedding(query.query);
-      
+
       for (const entry of candidates) {
         if (!entry.embedding) continue;
-        
-        const similarity = this.cosineSimilarity(queryEmbedding, entry.embedding);
-        
+
+        const similarity = this.cosineSimilarity(
+          queryEmbedding,
+          entry.embedding,
+        );
+
         if (similarity >= (query.similarity || 0.7)) {
           results.push({
             entry,
             similarity,
-            rank: 0 // Will be set after sorting
+            rank: 0, // Will be set after sorting
           });
         }
       }
     } catch (error) {
-      console.warn('Failed to perform semantic search, falling back to text search');
-      
+      console.warn(
+        'Failed to perform semantic search, falling back to text search',
+      );
+
       // Fallback to text-based search
       const queryLower = query.query.toLowerCase();
       for (const entry of candidates) {
         const contentLower = entry.content.toLowerCase();
-        
+
         if (contentLower.includes(queryLower)) {
           const similarity = this.textSimilarity(queryLower, contentLower);
           results.push({
             entry,
             similarity,
-            rank: 0
+            rank: 0,
           });
         }
       }
@@ -173,8 +180,10 @@ export class SemanticMemory {
 
     // Sort by similarity and frequency
     results.sort((a, b) => {
-      const scoreA = a.similarity * 0.7 + (a.entry.metadata.frequency / 100) * 0.3;
-      const scoreB = b.similarity * 0.7 + (b.entry.metadata.frequency / 100) * 0.3;
+      const scoreA =
+        a.similarity * 0.7 + (a.entry.metadata.frequency / 100) * 0.3;
+      const scoreB =
+        b.similarity * 0.7 + (b.entry.metadata.frequency / 100) * 0.3;
       return scoreB - scoreA;
     });
 
@@ -186,7 +195,7 @@ export class SemanticMemory {
     });
 
     const limited = results.slice(0, query.limit || 10);
-    
+
     // Persist updated access times
     if (limited.length > 0) {
       await this.persistMemory();
@@ -228,11 +237,11 @@ export class SemanticMemory {
   async cleanup(olderThanDays: number = 90): Promise<number> {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - olderThanDays);
-    
+
     let removed = 0;
     for (const [id, entry] of this.entries.entries()) {
       const lastAccessed = new Date(entry.metadata.lastAccessed);
-      
+
       if (lastAccessed < cutoff && entry.metadata.frequency < 2) {
         this.entries.delete(id);
         removed++;
@@ -264,7 +273,7 @@ export class SemanticMemory {
       totalEntries: this.entries.size,
       typeDistribution,
       averageFrequency: totalFrequency / this.entries.size || 0,
-      memorySize: JSON.stringify(Array.from(this.entries.values())).length
+      memorySize: JSON.stringify(Array.from(this.entries.values())).length,
     };
   }
 
@@ -276,10 +285,7 @@ export class SemanticMemory {
   }
 
   private normalizeContent(content: string): string {
-    return content
-      .trim()
-      .replace(/\s+/g, ' ')
-      .substring(0, 10000); // Limit content size
+    return content.trim().replace(/\s+/g, ' ').substring(0, 10000); // Limit content size
   }
 
   private extractProjectName(): string {
@@ -293,7 +299,7 @@ export class SemanticMemory {
 
   private extractTags(content: string, type: string): string[] {
     const tags: string[] = [];
-    
+
     // Language/framework tags
     const patterns = {
       typescript: /\.ts|interface|type|export/i,
@@ -305,7 +311,7 @@ export class SemanticMemory {
       error: /error|exception|fail|throw/i,
       api: /api|endpoint|route|express/i,
       database: /sql|query|database|db\./i,
-      security: /auth|token|password|security/i
+      security: /auth|token|password|security/i,
     };
 
     for (const [tag, pattern] of Object.entries(patterns)) {
@@ -325,7 +331,7 @@ export class SemanticMemory {
     // For now, we'll use a simple hash-based approach
     const hash = createHash('sha256').update(text).digest();
     const embedding: number[] = [];
-    
+
     for (let i = 0; i < Math.min(this.vectorDimension, hash.length * 8); i++) {
       const byteIndex = Math.floor(i / 8);
       const bitIndex = i % 8;
@@ -361,13 +367,15 @@ export class SemanticMemory {
   private textSimilarity(query: string, content: string): number {
     const queryWords = query.split(/\s+/);
     const contentWords = content.split(/\s+/);
-    
+
     const querySet = new Set(queryWords);
     const contentSet = new Set(contentWords);
-    
-    const intersection = new Set([...querySet].filter(x => contentSet.has(x)));
+
+    const intersection = new Set(
+      [...querySet].filter((x) => contentSet.has(x)),
+    );
     const union = new Set([...querySet, ...contentSet]);
-    
+
     return intersection.size / union.size; // Jaccard similarity
   }
 
@@ -376,7 +384,7 @@ export class SemanticMemory {
       await access(this.indexPath);
       const data = await readFile(this.indexPath, 'utf8');
       const entries: MemoryEntry[] = JSON.parse(data);
-      
+
       this.entries.clear();
       for (const entry of entries) {
         this.entries.set(entry.id, entry);
@@ -400,14 +408,22 @@ export class SemanticMemory {
     if (this.entries.size <= this.maxEntries) return;
 
     // Remove least frequently used entries
-    const sortedEntries = Array.from(this.entries.values())
-      .sort((a, b) => {
-        const scoreA = a.metadata.frequency + (Date.now() - new Date(a.metadata.lastAccessed).getTime()) / (1000 * 60 * 60 * 24);
-        const scoreB = b.metadata.frequency + (Date.now() - new Date(b.metadata.lastAccessed).getTime()) / (1000 * 60 * 60 * 24);
-        return scoreA - scoreB;
-      });
+    const sortedEntries = Array.from(this.entries.values()).sort((a, b) => {
+      const scoreA =
+        a.metadata.frequency +
+        (Date.now() - new Date(a.metadata.lastAccessed).getTime()) /
+          (1000 * 60 * 60 * 24);
+      const scoreB =
+        b.metadata.frequency +
+        (Date.now() - new Date(b.metadata.lastAccessed).getTime()) /
+          (1000 * 60 * 60 * 24);
+      return scoreA - scoreB;
+    });
 
-    const toRemove = sortedEntries.slice(0, this.entries.size - this.maxEntries);
+    const toRemove = sortedEntries.slice(
+      0,
+      this.entries.size - this.maxEntries,
+    );
     for (const entry of toRemove) {
       this.entries.delete(entry.id);
     }

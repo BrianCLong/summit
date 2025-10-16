@@ -8,6 +8,7 @@ This package adds a reproducible local stack (Neo4j + OPA + Kafka) and baseline 
 
 **Branch:** `feature/local-stack-perf`  
 **Open PR:**
+
 ```bash
 git checkout -b feature/local-stack-perf
 # apply patches below, commit, push
@@ -19,6 +20,7 @@ gh pr create -t "Local stack (Neo4j+OPA+Kafka) & k6 perf tests" -b "docker-compo
 ## 1) docker-compose stack
 
 **Patch:**
+
 ```diff
 *** Begin Patch
 *** Add File: docker-compose.yml
@@ -81,6 +83,7 @@ gh pr create -t "Local stack (Neo4j+OPA+Kafka) & k6 perf tests" -b "docker-compo
 ```
 
 ### Minimal Dockerfile for API
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/Dockerfile
@@ -113,6 +116,7 @@ gh pr create -t "Local stack (Neo4j+OPA+Kafka) & k6 perf tests" -b "docker-compo
 ```
 
 Optional seed script:
+
 ```diff
 *** Begin Patch
 *** Add File: scripts/seed.sh
@@ -249,4 +253,3 @@ Optional seed script:
 - Wire **API → OPA** with a proper authz check per request (plugin calling `POST /v1/data/intelgraph/authz`).
 - Add **Kafka topics** and a placeholder **ingest** service container once connectors start emitting events.
 - Integrate **GitHub Action** to run k6 with `grafana/k6-action` on PRs labelled `perf`.
-

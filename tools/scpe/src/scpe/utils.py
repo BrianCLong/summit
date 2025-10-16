@@ -5,8 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Dict
-
+from typing import Any
 
 _HASH_CHUNK_SIZE = 1024 * 1024
 
@@ -27,7 +26,7 @@ def compute_file_digest(path: Path, algorithm: str) -> str:
     return hasher.hexdigest()
 
 
-def canonical_json(data: Dict[str, Any]) -> str:
+def canonical_json(data: dict[str, Any]) -> str:
     """Render JSON with deterministic ordering and no whitespace."""
 
     return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)

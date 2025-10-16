@@ -2,7 +2,12 @@ import { randomUUID } from 'crypto';
 import type { JSONValue, ProvenanceEntry } from './types.js';
 
 function toJsonValue(input: unknown): JSONValue {
-  if (input === null || typeof input === 'string' || typeof input === 'number' || typeof input === 'boolean') {
+  if (
+    input === null ||
+    typeof input === 'string' ||
+    typeof input === 'number' ||
+    typeof input === 'boolean'
+  ) {
     return input as JSONValue;
   }
   if (Array.isArray(input)) {

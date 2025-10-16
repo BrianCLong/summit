@@ -1,4 +1,3 @@
-
 // tools/ast/postcondition-checker.ts
 
 /**
@@ -15,12 +14,15 @@ interface Postcondition {
  * Checks if a given code snippet satisfies all specified postconditions.
  * This is a simplified mock for demonstration purposes.
  */
-export function checkPostconditions(code: string, postconditions: Postcondition[]): {
+export function checkPostconditions(
+  code: string,
+  postconditions: Postcondition[],
+): {
   allPassed: boolean;
   results: { name: string; passed: boolean; message?: string }[];
 } {
   console.log('Checking postconditions...');
-  const results = postconditions.map(pc => {
+  const results = postconditions.map((pc) => {
     try {
       const passed = pc.checkFunction(code);
       return { name: pc.name, passed };
@@ -29,7 +31,7 @@ export function checkPostconditions(code: string, postconditions: Postcondition[
     }
   });
 
-  const allPassed = results.every(r => r.passed);
+  const allPassed = results.every((r) => r.passed);
   return { allPassed, results };
 }
 

@@ -1,10 +1,10 @@
-import { Octokit } from "@octokit/rest";
-import { logger } from "../../server/utils/logger";
-import { prBudgetTracker } from "../../server/ai/llmBudget";
+import { Octokit } from '@octokit/rest';
+import { logger } from '../../server/utils/logger';
+import { prBudgetTracker } from '../../server/ai/llmBudget';
 
 export interface PRHealth {
   score: number; // 0-100
-  riskLevel: "low" | "medium" | "high";
+  riskLevel: 'low' | 'medium' | 'high';
   checks: {
     complexity: HealthCheck;
     testCoverage: HealthCheck;
@@ -18,7 +18,7 @@ export interface PRHealth {
 }
 
 interface HealthCheck {
-  status: "pass" | "warn" | "fail";
+  status: 'pass' | 'warn' | 'fail';
   score: number;
   message: string;
   details?: any;
@@ -34,27 +34,32 @@ export class PRHealthBot {
 
     try {
       const health = await this.calculatePRHealth(owner, repo, prNumber, pr);
-      
+
       // Post comment with health analysis
       await this.postHealthComment(owner, repo, prNumber, health);
-      
-      logger.info("PR health analysis completed", {
+
+      logger.info('PR health analysis completed', {
         owner,
-        repo, 
+        repo,
         prNumber,
         score: health.score,
-        riskLevel: health.riskLevel
+        riskLevel: health.riskLevel,
       });
-
     } catch (error: any) {
-      logger.error("PR health analysis failed", { 
-        owner, repo, prNumber, 
-        error: error.message 
+      logger.error('PR health analysis failed', {
+        owner,
+        repo,
+        prNumber,
+        error: error.message,
       });
     }
   }
 
-  async getPRHealth(owner: string, repo: string, prNumber: number): Promise<PRHealth> {
+  async getPRHealth(
+    owner: string,
+    repo: string,
+    prNumber: number,
+  ): Promise<PRHealth> {
     const { data: pr } = await this.octokit.pulls.get({
       owner,
       repo,
@@ -65,10 +70,10 @@ export class PRHealthBot {
   }
 
   private async calculatePRHealth(
-    owner: string, 
-    repo: string, 
-    prNumber: number, 
-    pr: any
+    owner: string,
+    repo: string,
+    prNumber: number,
+    pr: any,
   ): Promise<PRHealth> {
     // Gather data for analysis
     const [files, commits, reviews, checks] = await Promise.all([
@@ -87,7 +92,14 @@ export class PRHealthBot {
     const llmBudget = await this.checkLLMBudget(prNumber);
 
     // Calculate overall score
-    const checks = { complexity, testCoverage, reviewVelocity, flakeRisk, securityRisk, llmBudget };
+    const checks = {
+      complexity,
+      testCoverage,
+      reviewVelocity,
+      flakeRisk,
+      securityRisk,
+      llmBudget,
+    };
     const score = this.calculateOverallScore(checks);
     const riskLevel = this.determineRiskLevel(score);
     const recommendations = this.generateRecommendations(checks);
@@ -102,28 +114,34 @@ export class PRHealthBot {
     };
   }
 
-  private async checkComplexity(files: any[], commits: any[]): Promise<HealthCheck> {
+  private async checkComplexity(
+    files: any[],
+    commits: any[],
+  ): Promise<HealthCheck> {
     const filesChanged = files.length;
-    const linesChanged = files.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+    const linesChanged = files.reduce(
+      (sum, f) => sum + f.additions + f.deletions,
+      0,
+    );
     const commitsCount = commits.length;
 
     let score = 100;
-    let status: "pass" | "warn" | "fail" = "pass";
-    let message = "Complexity looks good";
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
+    let message = 'Complexity looks good';
 
     if (filesChanged > 20) {
       score -= 30;
-      status = "warn";
+      status = 'warn';
       message = `High file count: ${filesChanged} files`;
     } else if (filesChanged > 10) {
       score -= 15;
-      status = "warn";
+      status = 'warn';
       message = `Moderate file count: ${filesChanged} files`;
     }
 
     if (linesChanged > 1000) {
       score -= 25;
-      status = status === "pass" ? "warn" : "fail";
+      status = status === 'pass' ? 'warn' : 'fail';
       message += `. Large changeset: ${linesChanged} lines`;
     }
 
@@ -140,30 +158,39 @@ export class PRHealthBot {
     };
   }
 
-  private async checkTestCoverage(files: any[], checks: any[]): Promise<HealthCheck> {
-    const testFiles = files.filter(f => 
-      f.filename.includes('.test.') || 
-      f.filename.includes('.spec.') ||
-      f.filename.includes('__tests__')
+  private async checkTestCoverage(
+    files: any[],
+    checks: any[],
+  ): Promise<HealthCheck> {
+    const testFiles = files.filter(
+      (f) =>
+        f.filename.includes('.test.') ||
+        f.filename.includes('.spec.') ||
+        f.filename.includes('__tests__'),
     );
-    const codeFiles = files.filter(f => 
-      !f.filename.includes('.test.') && 
-      !f.filename.includes('.spec.') &&
-      (f.filename.endsWith('.ts') || f.filename.endsWith('.js') || f.filename.endsWith('.tsx') || f.filename.endsWith('.jsx'))
+    const codeFiles = files.filter(
+      (f) =>
+        !f.filename.includes('.test.') &&
+        !f.filename.includes('.spec.') &&
+        (f.filename.endsWith('.ts') ||
+          f.filename.endsWith('.js') ||
+          f.filename.endsWith('.tsx') ||
+          f.filename.endsWith('.jsx')),
     );
 
-    const testRatio = codeFiles.length > 0 ? testFiles.length / codeFiles.length : 1;
+    const testRatio =
+      codeFiles.length > 0 ? testFiles.length / codeFiles.length : 1;
     let score = Math.min(100, testRatio * 100);
-    let status: "pass" | "warn" | "fail" = "pass";
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
     let message = `Test coverage looks good (${testFiles.length} test files for ${codeFiles.length} code files)`;
 
     if (testRatio < 0.3 && codeFiles.length > 2) {
       score = 40;
-      status = "fail";
+      status = 'fail';
       message = `Low test coverage: ${testFiles.length} test files for ${codeFiles.length} code files`;
     } else if (testRatio < 0.5 && codeFiles.length > 1) {
       score = 65;
-      status = "warn";
+      status = 'warn';
       message = `Moderate test coverage: ${testFiles.length} test files for ${codeFiles.length} code files`;
     }
 
@@ -171,26 +198,33 @@ export class PRHealthBot {
       status,
       score,
       message,
-      details: { testFiles: testFiles.length, codeFiles: codeFiles.length, ratio: testRatio },
+      details: {
+        testFiles: testFiles.length,
+        codeFiles: codeFiles.length,
+        ratio: testRatio,
+      },
     };
   }
 
-  private async checkReviewVelocity(pr: any, reviews: any[]): Promise<HealthCheck> {
+  private async checkReviewVelocity(
+    pr: any,
+    reviews: any[],
+  ): Promise<HealthCheck> {
     const prAge = Date.now() - new Date(pr.created_at).getTime();
     const ageHours = prAge / (1000 * 60 * 60);
     const reviewCount = reviews.length;
 
     let score = 100;
-    let status: "pass" | "warn" | "fail" = "pass";
-    let message = "Review velocity on track";
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
+    let message = 'Review velocity on track';
 
     if (ageHours > 48 && reviewCount === 0) {
       score = 30;
-      status = "fail";
+      status = 'fail';
       message = `PR ${ageHours.toFixed(1)}h old with no reviews`;
     } else if (ageHours > 24 && reviewCount === 0) {
       score = 60;
-      status = "warn";
+      status = 'warn';
       message = `PR ${ageHours.toFixed(1)}h old, awaiting first review`;
     } else if (reviewCount > 0) {
       message = `${reviewCount} review(s) received`;
@@ -204,7 +238,10 @@ export class PRHealthBot {
     };
   }
 
-  private async checkFlakeRisk(files: any[], checks: any[]): Promise<HealthCheck> {
+  private async checkFlakeRisk(
+    files: any[],
+    checks: any[],
+  ): Promise<HealthCheck> {
     // Check for patterns that commonly cause flaky tests
     const flakePatterns = [
       /setTimeout|setInterval/,
@@ -218,26 +255,32 @@ export class PRHealthBot {
     const riskyFiles: string[] = [];
 
     for (const file of files) {
-      if (file.filename.includes('.test.') || file.filename.includes('.spec.')) {
+      if (
+        file.filename.includes('.test.') ||
+        file.filename.includes('.spec.')
+      ) {
         // In a real implementation, we'd fetch the file content
         // For now, simulate based on filename patterns
-        if (file.filename.includes('integration') || file.filename.includes('e2e')) {
+        if (
+          file.filename.includes('integration') ||
+          file.filename.includes('e2e')
+        ) {
           flakeRisk += 10;
           riskyFiles.push(file.filename);
         }
       }
     }
 
-    let score = Math.max(0, 100 - flakeRisk);
-    let status: "pass" | "warn" | "fail" = "pass";
-    let message = "Low flake risk";
+    const score = Math.max(0, 100 - flakeRisk);
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
+    let message = 'Low flake risk';
 
     if (flakeRisk > 30) {
-      status = "fail";
-      message = "High flake risk detected";
+      status = 'fail';
+      message = 'High flake risk detected';
     } else if (flakeRisk > 15) {
-      status = "warn";
-      message = "Moderate flake risk";
+      status = 'warn';
+      message = 'Moderate flake risk';
     }
 
     return {
@@ -249,21 +292,22 @@ export class PRHealthBot {
   }
 
   private async checkSecurityRisk(files: any[]): Promise<HealthCheck> {
-    const securityFiles = files.filter(f => 
-      f.filename.includes('auth') ||
-      f.filename.includes('security') ||
-      f.filename.includes('password') ||
-      f.filename.includes('token') ||
-      f.filename.includes('.env')
+    const securityFiles = files.filter(
+      (f) =>
+        f.filename.includes('auth') ||
+        f.filename.includes('security') ||
+        f.filename.includes('password') ||
+        f.filename.includes('token') ||
+        f.filename.includes('.env'),
     );
 
     let score = 100;
-    let status: "pass" | "warn" | "fail" = "pass";
-    let message = "No security concerns detected";
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
+    let message = 'No security concerns detected';
 
     if (securityFiles.length > 0) {
       score = 70;
-      status = "warn";
+      status = 'warn';
       message = `${securityFiles.length} security-sensitive file(s) modified`;
     }
 
@@ -271,33 +315,33 @@ export class PRHealthBot {
       status,
       score,
       message,
-      details: { securityFiles: securityFiles.map(f => f.filename) },
+      details: { securityFiles: securityFiles.map((f) => f.filename) },
     };
   }
 
   private async checkLLMBudget(prNumber: number): Promise<HealthCheck> {
     const budget = prBudgetTracker.getBudgetSummary(prNumber);
-    
+
     if (!budget) {
       return {
-        status: "pass",
+        status: 'pass',
         score: 100,
-        message: "No LLM budget usage yet",
-        details: { budgetUsed: 0, budgetRemaining: 0 }
+        message: 'No LLM budget usage yet',
+        details: { budgetUsed: 0, budgetRemaining: 0 },
       };
     }
 
     const { utilization, usedUSD, remainingUSD } = budget;
-    let score = Math.max(0, 100 - utilization);
-    let status: "pass" | "warn" | "fail" = "pass";
+    const score = Math.max(0, 100 - utilization);
+    let status: 'pass' | 'warn' | 'fail' = 'pass';
     let message = `LLM budget: $${usedUSD.toFixed(2)} used (${utilization.toFixed(1)}%)`;
 
     if (utilization > 90) {
-      status = "fail";
-      message += " - Budget nearly exhausted";
+      status = 'fail';
+      message += ' - Budget nearly exhausted';
     } else if (utilization > 75) {
-      status = "warn";
-      message += " - High budget usage";
+      status = 'warn';
+      message += ' - High budget usage';
     }
 
     return {
@@ -322,67 +366,86 @@ export class PRHealthBot {
       Object.entries(checks).reduce((sum, [key, check]) => {
         const weight = weights[key as keyof typeof weights] || 0;
         return sum + check.score * weight;
-      }, 0)
+      }, 0),
     );
   }
 
-  private determineRiskLevel(score: number): "low" | "medium" | "high" {
-    if (score >= 80) return "low";
-    if (score >= 60) return "medium";
-    return "high";
+  private determineRiskLevel(score: number): 'low' | 'medium' | 'high' {
+    if (score >= 80) return 'low';
+    if (score >= 60) return 'medium';
+    return 'high';
   }
 
-  private generateRecommendations(checks: Record<string, HealthCheck>): string[] {
+  private generateRecommendations(
+    checks: Record<string, HealthCheck>,
+  ): string[] {
     const recommendations: string[] = [];
 
-    if (checks.complexity.status === "fail") {
-      recommendations.push("Consider breaking this PR into smaller chunks");
+    if (checks.complexity.status === 'fail') {
+      recommendations.push('Consider breaking this PR into smaller chunks');
     }
 
-    if (checks.testCoverage.status === "fail") {
-      recommendations.push("Add tests for the new functionality");
+    if (checks.testCoverage.status === 'fail') {
+      recommendations.push('Add tests for the new functionality');
     }
 
-    if (checks.reviewVelocity.status === "fail") {
-      recommendations.push("Ping reviewers or consider assigning different reviewers");
+    if (checks.reviewVelocity.status === 'fail') {
+      recommendations.push(
+        'Ping reviewers or consider assigning different reviewers',
+      );
     }
 
-    if (checks.flakeRisk.status === "warn" || checks.flakeRisk.status === "fail") {
-      recommendations.push("Review tests for potential flakiness patterns");
+    if (
+      checks.flakeRisk.status === 'warn' ||
+      checks.flakeRisk.status === 'fail'
+    ) {
+      recommendations.push('Review tests for potential flakiness patterns');
     }
 
-    if (checks.securityRisk.status === "warn") {
-      recommendations.push("Request security team review for sensitive changes");
+    if (checks.securityRisk.status === 'warn') {
+      recommendations.push(
+        'Request security team review for sensitive changes',
+      );
     }
 
-    if (checks.llmBudget.status === "warn") {
-      recommendations.push("Consider optimizing AI agent usage to stay within budget");
+    if (checks.llmBudget.status === 'warn') {
+      recommendations.push(
+        'Consider optimizing AI agent usage to stay within budget',
+      );
     }
 
     return recommendations;
   }
 
-  private estimateMergeTime(checks: Record<string, HealthCheck>, reviewCount: number): string {
+  private estimateMergeTime(
+    checks: Record<string, HealthCheck>,
+    reviewCount: number,
+  ): string {
     let baseHours = 4;
 
     if (checks.complexity.score < 70) baseHours += 8;
     if (checks.testCoverage.score < 70) baseHours += 4;
     if (reviewCount === 0) baseHours += 12;
-    if (checks.securityRisk.status === "warn") baseHours += 24;
+    if (checks.securityRisk.status === 'warn') baseHours += 24;
 
-    if (baseHours <= 8) return "< 8 hours";
-    if (baseHours <= 24) return "< 1 day"; 
-    if (baseHours <= 48) return "1-2 days";
-    return "2+ days";
+    if (baseHours <= 8) return '< 8 hours';
+    if (baseHours <= 24) return '< 1 day';
+    if (baseHours <= 48) return '1-2 days';
+    return '2+ days';
   }
 
   private async postHealthComment(
     owner: string,
     repo: string,
     prNumber: number,
-    health: PRHealth
+    health: PRHealth,
   ): Promise<void> {
-    const emoji = health.riskLevel === "low" ? "✅" : health.riskLevel === "medium" ? "⚠️" : "❌";
+    const emoji =
+      health.riskLevel === 'low'
+        ? '✅'
+        : health.riskLevel === 'medium'
+          ? '⚠️'
+          : '❌';
     const body = this.formatHealthComment(health, emoji);
 
     // Check if we already posted a health comment
@@ -392,8 +455,8 @@ export class PRHealthBot {
       issue_number: prNumber,
     });
 
-    const existingComment = comments.find(c => 
-      c.body?.includes("🤖 **Maestro PR Health Check**")
+    const existingComment = comments.find((c) =>
+      c.body?.includes('🤖 **Maestro PR Health Check**'),
     );
 
     if (existingComment) {
@@ -416,8 +479,8 @@ export class PRHealthBot {
   }
 
   private formatHealthComment(health: PRHealth, emoji: string): string {
-    const checkEmoji = (status: string) => 
-      status === "pass" ? "✅" : status === "warn" ? "⚠️" : "❌";
+    const checkEmoji = (status: string) =>
+      status === 'pass' ? '✅' : status === 'warn' ? '⚠️' : '❌';
 
     return `🤖 **Maestro PR Health Check** ${emoji}
 
@@ -425,14 +488,18 @@ export class PRHealthBot {
 **Estimated Merge Time:** ${health.estimatedMergeTime}
 
 ## Health Checks
-${Object.entries(health.checks).map(([key, check]) => 
-  `- ${checkEmoji(check.status)} **${key}**: ${check.message} (${check.score}/100)`
-).join('\n')}
+${Object.entries(health.checks)
+  .map(
+    ([key, check]) =>
+      `- ${checkEmoji(check.status)} **${key}**: ${check.message} (${check.score}/100)`,
+  )
+  .join('\n')}
 
 ## Recommendations
-${health.recommendations.length > 0 ? 
-  health.recommendations.map(r => `- ${r}`).join('\n') : 
-  "No recommendations - looking good! 🎉"
+${
+  health.recommendations.length > 0
+    ? health.recommendations.map((r) => `- ${r}`).join('\n')
+    : 'No recommendations - looking good! 🎉'
 }
 
 ---

@@ -6,27 +6,27 @@
 
 ## 0) Quick Decision Tree
 
-* **I need a local demo now (single laptop):** Go to **A. Docker Compose Quickstart**.
-* **We run on k8s (dev/stage/prod):** Go to **B. Helm on Kubernetes**.
-* **We want cloud infra provisioned for us:** Go to **C. Terraform + Helm**.
-* **We’re disconnected/air‑gapped:** Go to **D. Offline Kit**.
+- **I need a local demo now (single laptop):** Go to **A. Docker Compose Quickstart**.
+- **We run on k8s (dev/stage/prod):** Go to **B. Helm on Kubernetes**.
+- **We want cloud infra provisioned for us:** Go to **C. Terraform + Helm**.
+- **We’re disconnected/air‑gapped:** Go to **D. Offline Kit**.
 
 ---
 
 ## Prerequisites (all paths)
 
-*   **Hardware:** 8 CPUs, 16 GB RAM, 40 GB free disk (demo); scale up for pilots.
-*   **Accounts/Secrets:**
+- **Hardware:** 8 CPUs, 16 GB RAM, 40 GB free disk (demo); scale up for pilots.
+- **Accounts/Secrets:**
+  - OIDC (or local) auth; demo can run with local users.
+  - Optional data connectors may require keys (e.g., VirusTotal, MISP). Leave disabled for demo.
 
-    *   OIDC (or local) auth; demo can run with local users.
-    *   Optional data connectors may require keys (e.g., VirusTotal, MISP). Leave disabled for demo.
-*   **Ports (local demo):** 3000 (web), 8080 (GraphQL), 7687 (graph DB), 9092 (Kafka). Adjust if occupied.
+- **Ports (local demo):** 3000 (web), 8080 (GraphQL), 7687 (graph DB), 9092 (Kafka). Adjust if occupied.
 
 ---
 
 ## A) Docker Compose Quickstart (10–15 min)
 
-**Best for:** Fast demo on a single machine with synthetic dataset *Aurora‑Phish*.
+**Best for:** Fast demo on a single machine with synthetic dataset _Aurora‑Phish_.
 
 1.  **Clone and prepare environment**
 
@@ -68,12 +68,12 @@ watch -n 2 'docker compose -f deploy/compose/demo.yaml ps'
 ./scripts/bootstrap_users.sh   --gateway http://localhost:8080   --users ./deploy/bootstrap/users-demo.yaml
 ```
 
-*Default demo roles:* `Analyst`, `Approver`, `Ombuds`, `Admin`.
+_Default demo roles:_ `Analyst`, `Approver`, `Ombuds`, `Admin`.
 
 5.  **Open the app & login**
 
-*   **Web UI:** [http://localhost:3000](http://localhost:3000)
-*   Use the credentials created above (see `users-demo.yaml`).
+- **Web UI:** [http://localhost:3000](http://localhost:3000)
+- Use the credentials created above (see `users-demo.yaml`).
 
 6.  **Run the smoke test** (see **E. Smoke Test & First 5 Clicks**).
 
@@ -214,7 +214,7 @@ kubectl -n intelgraph apply -f offline/jobs/seed-aurora-offline.yaml
 
 ## E) Smoke Test & First 5 Clicks (all paths)
 
-1.  **Login →** `Cases → Aurora‑Phish` (status: *Open*).
+1.  **Login →** `Cases → Aurora‑Phish` (status: _Open_).
 2.  **Run** saved query: `Policy‑Aware Shortest Path` → observe denial/approval prompt.
 3.  **Open** `ER Explain` on an entity → review merge features/weights.
 4.  **Run** Copilot prompt: "Summarize likely cluster membership and cite evidence." → check citations.
@@ -224,41 +224,41 @@ kubectl -n intelgraph apply -f offline/jobs/seed-aurora-offline.yaml
 
 ## F) Configuration Notes
 
-*   **Auth:** For demo, local users suffice. For pilots, configure OIDC (issuer, client ID/secret) in Helm values.
-*   **Connectors:** Optional keys in `values.*.yaml` or `.env`; keep disabled for demo to avoid egress.
-*   **Data & Policy:** Start with `policy-v1` (deny by default); simulate changes in **Policy Simulator** before enabling.
-*   **Resources:** Demo footprints are conservative; increase CPU/memory for analytics jobs in pilot.
+- **Auth:** For demo, local users suffice. For pilots, configure OIDC (issuer, client ID/secret) in Helm values.
+- **Connectors:** Optional keys in `values.*.yaml` or `.env`; keep disabled for demo to avoid egress.
+- **Data & Policy:** Start with `policy-v1` (deny by default); simulate changes in **Policy Simulator** before enabling.
+- **Resources:** Demo footprints are conservative; increase CPU/memory for analytics jobs in pilot.
 
 ---
 
 ## G) Troubleshooting Quick Hits
 
-*   **Web 502/blank:** Gateway not ready; `kubectl get pods -n intelgraph` or `docker compose ps` for health.
-*   **Login fails (OIDC):** Check clock skew, redirect URI, and client secrets.
-*   **Seeding errors:** Verify GraphQL gateway URL and that migrations completed.
-*   **Policy blocks export unexpectedly:** Open **License/TOS** pane → review clause, use **appeal path** if appropriate.
-*   **High latency:** Check SLO dashboard; reduce query depth or enable sampled results.
+- **Web 502/blank:** Gateway not ready; `kubectl get pods -n intelgraph` or `docker compose ps` for health.
+- **Login fails (OIDC):** Check clock skew, redirect URI, and client secrets.
+- **Seeding errors:** Verify GraphQL gateway URL and that migrations completed.
+- **Policy blocks export unexpectedly:** Open **License/TOS** pane → review clause, use **appeal path** if appropriate.
+- **High latency:** Check SLO dashboard; reduce query depth or enable sampled results.
 
 ---
 
 ## H) Stop, Reset, Upgrade
 
-*   **Stop local demo:** `docker compose down`.
-*   **Reset demo data:** `./scripts/demo_reset.sh`.
-*   **Upgrade on k8s:** `helm upgrade --install ...` with a new image tag; jobs are idempotent.
+- **Stop local demo:** `docker compose down`.
+- **Reset demo data:** `./scripts/demo_reset.sh`.
+- **Upgrade on k8s:** `helm upgrade --install ...` with a new image tag; jobs are idempotent.
 
 ---
 
 ## I) Security & Compliance Reminders
 
-*   Use demo keys only for demos; rotate secrets on pilot.
-*   Keep optional connectors off unless license/authority is confirmed.
-*   Ensure data minimization and purpose limitation labels are applied at ingest.
+- Use demo keys only for demos; rotate secrets on pilot.
+- Keep optional connectors off unless license/authority is confirmed.
+- Ensure data minimization and purpose limitation labels are applied at ingest.
 
 ---
 
 ## J) Next Steps (Pilot)
 
-*   Confirm **owner**, **datasets**, and **success metrics**.
-*   Run the 15‑minute demo (scripts provided) with stakeholders.
-*   Capture metrics: TTFI, false‑positive rate, p95 latency, disclosure verification pass rate.
+- Confirm **owner**, **datasets**, and **success metrics**.
+- Run the 15‑minute demo (scripts provided) with stakeholders.
+- Capture metrics: TTFI, false‑positive rate, p95 latency, disclosure verification pass rate.

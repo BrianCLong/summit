@@ -1,16 +1,17 @@
 import io
-from pathlib import Path
-
-import numpy as np
-import torch
-import torch.nn as nn
-from PIL import Image
-import httpx
 import json
 
 # Ensure the app package is on the import path when tests are executed from
 # the repository root.
 import sys
+from pathlib import Path
+
+import httpx
+import numpy as np
+import torch
+import torch.nn as nn
+from PIL import Image
+
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from app.edge import OfflineProcessor, SyncManager

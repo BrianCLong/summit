@@ -119,7 +119,10 @@ paths:
           {
             description: OK,
             content:
-              { application/json: { schema: { $ref: '#/components/schemas/ScoreResponse' } } },
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ScoreResponse' } },
+              },
           }
 components:
   schemas:
@@ -149,10 +152,17 @@ channels:
       publish:
         {
           message:
-            { name: RawIntel, payload: { type: object, properties: { doc: { type: string } } } },
+            {
+              name: RawIntel,
+              payload: { type: object, properties: { doc: { type: string } } },
+            },
         },
     }
-  intel.enriched: { subscribe: { message: { name: EnrichedIntel, payload: { type: object } } } }
+  intel.enriched:
+    {
+      subscribe:
+        { message: { name: EnrichedIntel, payload: { type: object } } },
+    }
   alerts:
     {
       subscribe:
@@ -160,7 +170,8 @@ channels:
           message:
             {
               name: Alert,
-              payload: { type: object, properties: { risk_score: { type: number } } },
+              payload:
+                { type: object, properties: { risk_score: { type: number } } },
             },
         },
     }
@@ -382,7 +393,11 @@ properties:
   role: { type: string, enum: ['adversary', 'partner'] }
   jurisdictions: { type: array, items: { type: string } }
   policy_class: { type: string }
-  signals: { type: array, items: { type: object, properties: { name: { type: string } } } }
+  signals:
+    {
+      type: array,
+      items: { type: object, properties: { name: { type: string } } },
+    }
 required: [id, role, policy_class]
 ```
 

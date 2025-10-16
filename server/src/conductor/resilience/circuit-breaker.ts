@@ -233,7 +233,10 @@ export class ResourcePool {
         this.queuedRequests++;
 
         // Record queue metrics
-        prometheusConductorMetrics.recordSecurityEvent('bulkhead_queue_add', true);
+        prometheusConductorMetrics.recordSecurityEvent(
+          'bulkhead_queue_add',
+          true,
+        );
       }
     });
   }
@@ -302,14 +305,21 @@ export class ServiceResilienceManager {
 
     // Get or create circuit breaker
     if (!this.circuitBreakers.has(cbKey)) {
-      this.circuitBreakers.set(cbKey, new CircuitBreaker(cbKey, config?.circuitBreakerConfig));
+      this.circuitBreakers.set(
+        cbKey,
+        new CircuitBreaker(cbKey, config?.circuitBreakerConfig),
+      );
     }
 
     const circuitBreaker = this.circuitBreakers.get(cbKey)!;
 
     // Execute with both circuit breaker and bulkhead protection
     return circuitBreaker.execute(async () => {
-      return this.bulkheadIsolator.executeInPool(serviceName, fn, config?.maxConcurrency);
+      return this.bulkheadIsolator.executeInPool(
+        serviceName,
+        fn,
+        config?.maxConcurrency,
+      );
     });
   }
 
@@ -416,7 +426,9 @@ export async function executeMCPCall<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   const config =
-    server === 'graphops' ? ResilienceConfigs.MCP_GRAPHOPS : ResilienceConfigs.MCP_FILES;
+    server === 'graphops'
+      ? ResilienceConfigs.MCP_GRAPHOPS
+      : ResilienceConfigs.MCP_FILES;
   return conductorResilienceManager.executeResillient(
     `MCP_${server.toUpperCase()}`,
     operation,
@@ -429,7 +441,10 @@ export async function executeLLMCall<T>(
   model: 'heavy' | 'light',
   fn: () => Promise<T>,
 ): Promise<T> {
-  const config = model === 'heavy' ? ResilienceConfigs.LLM_HEAVY : ResilienceConfigs.LLM_LIGHT;
+  const config =
+    model === 'heavy'
+      ? ResilienceConfigs.LLM_HEAVY
+      : ResilienceConfigs.LLM_LIGHT;
   return conductorResilienceManager.executeResillient(
     `LLM_${model.toUpperCase()}`,
     'generate',
@@ -438,7 +453,10 @@ export async function executeLLMCall<T>(
   );
 }
 
-export async function executeDatabaseCall<T>(operation: string, fn: () => Promise<T>): Promise<T> {
+export async function executeDatabaseCall<T>(
+  operation: string,
+  fn: () => Promise<T>,
+): Promise<T> {
   return conductorResilienceManager.executeResillient(
     'DATABASE',
     operation,

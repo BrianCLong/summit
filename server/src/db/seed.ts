@@ -4,7 +4,8 @@ import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 
 const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
+  process.env.DATABASE_URL ||
+  'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
 
 const pool = new Pool({ connectionString: DATABASE_URL });
 
@@ -15,9 +16,18 @@ async function seedData() {
     // Create sample pipelines
     const pipelineIds = [];
     const pipelines = [
-      { name: 'Build IntelGraph', spec: { nodes: [{ type: 'build', cmd: 'npm run build' }] } },
-      { name: 'Run Tests', spec: { nodes: [{ type: 'test', cmd: 'npm test' }] } },
-      { name: 'Deploy Production', spec: { nodes: [{ type: 'deploy', env: 'production' }] } },
+      {
+        name: 'Build IntelGraph',
+        spec: { nodes: [{ type: 'build', cmd: 'npm run build' }] },
+      },
+      {
+        name: 'Run Tests',
+        spec: { nodes: [{ type: 'test', cmd: 'npm test' }] },
+      },
+      {
+        name: 'Deploy Production',
+        spec: { nodes: [{ type: 'deploy', env: 'production' }] },
+      },
     ];
 
     for (const pipeline of pipelines) {
@@ -38,12 +48,16 @@ async function seedData() {
     for (let i = 0; i < runCount; i++) {
       const pipeline = pipelineIds[i % pipelineIds.length];
       const status = statuses[i % statuses.length];
-      const startTime = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000); // Random time in last week
+      const startTime = new Date(
+        Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+      ); // Random time in last week
       const durationMs =
         status === 'succeeded' || status === 'failed'
           ? Math.floor(Math.random() * 300000) + 10000 // 10s to 5min
           : null;
-      const completedAt = durationMs ? new Date(startTime.getTime() + durationMs) : null;
+      const completedAt = durationMs
+        ? new Date(startTime.getTime() + durationMs)
+        : null;
       const cost = Number((Math.random() * 5).toFixed(2));
 
       const runId = uuidv4();
@@ -71,9 +85,24 @@ async function seedData() {
 
     // Create sample executors
     const executors = [
-      { name: 'cpu-executor-1', kind: 'cpu', labels: ['linux', 'x64'], capacity: 4 },
-      { name: 'gpu-executor-1', kind: 'gpu', labels: ['cuda', 'ml'], capacity: 1 },
-      { name: 'cpu-executor-2', kind: 'cpu', labels: ['linux', 'arm64'], capacity: 2 },
+      {
+        name: 'cpu-executor-1',
+        kind: 'cpu',
+        labels: ['linux', 'x64'],
+        capacity: 4,
+      },
+      {
+        name: 'gpu-executor-1',
+        kind: 'gpu',
+        labels: ['cuda', 'ml'],
+        capacity: 1,
+      },
+      {
+        name: 'cpu-executor-2',
+        kind: 'cpu',
+        labels: ['linux', 'arm64'],
+        capacity: 2,
+      },
     ];
 
     for (const executor of executors) {

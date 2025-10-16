@@ -56,7 +56,9 @@ function validateImageConfig(img, path) {
 
   // Check for mutable tags (must be empty)
   if (tag && tag !== '') {
-    errors.push(`${path}: image.tag must be empty (found: "${tag}"). Use digest instead.`);
+    errors.push(
+      `${path}: image.tag must be empty (found: "${tag}"). Use digest instead.`,
+    );
   }
 
   // Check for required digest
@@ -64,9 +66,13 @@ function validateImageConfig(img, path) {
     errors.push(`${path}: image.digest sha256 is required`);
   } else if (!digest.startsWith('sha256:')) {
     if (digest === 'sha256:example123') {
-      console.warn(`⚠️  ${path}: Using example digest - replace with actual digest from CI`);
+      console.warn(
+        `⚠️  ${path}: Using example digest - replace with actual digest from CI`,
+      );
     } else {
-      errors.push(`${path}: image.digest must start with 'sha256:' (found: "${digest}")`);
+      errors.push(
+        `${path}: image.digest must start with 'sha256:' (found: "${digest}")`,
+      );
     }
   }
 
@@ -169,5 +175,5 @@ if (require.main === module) {
 module.exports = {
   checkValuesYaml,
   validateImageConfig,
-  walk
+  walk,
 };

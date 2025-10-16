@@ -11,7 +11,11 @@ import { disclosureMetrics } from '../metrics/disclosureMetrics.js';
 import { RedactionService } from '../redaction/redact.js';
 import fetch from 'node-fetch';
 
-export type ExportArtifact = 'audit-trail' | 'sbom' | 'attestations' | 'policy-reports';
+export type ExportArtifact =
+  | 'audit-trail'
+  | 'sbom'
+  | 'attestations'
+  | 'policy-reports';
 
 export interface DisclosureExportRequest {
   tenantId: string;
@@ -21,7 +25,11 @@ export interface DisclosureExportRequest {
   callbackUrl?: string;
 }
 
-export type DisclosureExportStatus = 'pending' | 'running' | 'completed' | 'failed';
+export type DisclosureExportStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed';
 
 export interface DisclosureExportJob {
   id: string;
@@ -50,13 +58,20 @@ interface InternalJob extends DisclosureExportJob {
 const MAX_WINDOW_DAYS = 31;
 const MAX_EVENTS = 10_000;
 const JOB_TTL_DAYS = 7;
-const DEFAULT_ARTIFACTS: ExportArtifact[] = ['audit-trail', 'sbom', 'attestations', 'policy-reports'];
+const DEFAULT_ARTIFACTS: ExportArtifact[] = [
+  'audit-trail',
+  'sbom',
+  'attestations',
+  'policy-reports',
+];
 
 const requestSchema = z.object({
   tenantId: z.string().min(1),
   startTime: z.string().transform((value) => new Date(value)),
   endTime: z.string().transform((value) => new Date(value)),
-  artifacts: z.array(z.enum(['audit-trail', 'sbom', 'attestations', 'policy-reports'])).optional(),
+  artifacts: z
+    .array(z.enum(['audit-trail', 'sbom', 'attestations', 'policy-reports']))
+    .optional(),
   callbackUrl: z.string().url().optional(),
 });
 
@@ -80,7 +95,9 @@ function merkleFromHashes(hashes: string[]): string {
     for (let i = 0; i < layer.length; i += 2) {
       const left = layer[i];
       const right = layer[i + 1] ?? layer[i];
-      const hash = createHash('sha256').update(left + right).digest('hex');
+      const hash = createHash('sha256')
+        .update(left + right)
+        .digest('hex');
       next.push(hash);
     }
     layer = next;
@@ -95,7 +112,10 @@ export class DisclosureExportService {
   async createJob(input: unknown): Promise<DisclosureExportJob> {
     const parsed = requestSchema.parse(input);
 
-    if (Number.isNaN(parsed.startTime.getTime()) || Number.isNaN(parsed.endTime.getTime())) {
+    if (
+      Number.isNaN(parsed.startTime.getTime()) ||
+      Number.isNaN(parsed.endTime.getTime())
+    ) {
       throw new Error('invalid_time_range');
     }
 
@@ -103,7 +123,9 @@ export class DisclosureExportService {
       throw new Error('end_before_start');
     }
 
-    const diffDays = (parsed.endTime.getTime() - parsed.startTime.getTime()) / (1000 * 60 * 60 * 24);
+    const diffDays =
+      (parsed.endTime.getTime() - parsed.startTime.getTime()) /
+      (1000 * 60 * 60 * 24);
     if (diffDays > MAX_WINDOW_DAYS) {
       throw new Error('window_too_large');
     }
@@ -124,11 +146,15 @@ export class DisclosureExportService {
         tenantId: parsed.tenantId,
         startTime: parsed.startTime,
         endTime: parsed.endTime,
-        artifacts: parsed.artifacts?.length ? parsed.artifacts : DEFAULT_ARTIFACTS,
+        artifacts: parsed.artifacts?.length
+          ? parsed.artifacts
+          : DEFAULT_ARTIFACTS,
         callbackUrl: parsed.callbackUrl,
       },
       workingDir,
-      expiresAt: new Date(Date.now() + JOB_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(
+        Date.now() + JOB_TTL_DAYS * 24 * 60 * 60 * 1000,
+      ).toISOString(),
       attestations: [],
       artifactDigests: {},
     };
@@ -156,7 +182,9 @@ export class DisclosureExportService {
     return this.publicJob(job);
   }
 
-  getDownload(jobId: string): { job: DisclosureExportJob; filePath: string } | undefined {
+  getDownload(
+    jobId: string,
+  ): { job: DisclosureExportJob; filePath: string } | undefined {
     const job = this.jobs.get(jobId);
     if (!job || !job.bundlePath) return undefined;
     return { job: this.publicJob(job), filePath: job.bundlePath };
@@ -177,11 +205,26 @@ export class DisclosureExportService {
 
     try {
       const pool = getPostgresPool();
-      const { tenantId, startTime, endTime, artifacts: requestedArtifacts, callbackUrl } = job.request;
+      const {
+        tenantId,
+        startTime,
+        endTime,
+        artifacts: requestedArtifacts,
+        callbackUrl,
+      } = job.request;
 
       if (requestedArtifacts.includes('audit-trail')) {
-        const result = await this.collectAuditTrail({ job, pool, startTime, endTime });
-        artifacts.push({ name: 'audit-trail.json', path: result.filePath, sha256: result.hash });
+        const result = await this.collectAuditTrail({
+          job,
+          pool,
+          startTime,
+          endTime,
+        });
+        artifacts.push({
+          name: 'audit-trail.json',
+          path: result.filePath,
+          sha256: result.hash,
+        });
         artifactHashes.push(result.hash);
         job.artifactDigests['audit-trail.json'] = result.hash;
         job.artifactStats['audit-trail'] = result.count;
@@ -189,9 +232,18 @@ export class DisclosureExportService {
       }
 
       if (requestedArtifacts.includes('sbom')) {
-        const result = await this.collectSbomReports({ job, pool, startTime, endTime });
+        const result = await this.collectSbomReports({
+          job,
+          pool,
+          startTime,
+          endTime,
+        });
         if (result) {
-          artifacts.push({ name: 'sbom-reports.json', path: result.filePath, sha256: result.hash });
+          artifacts.push({
+            name: 'sbom-reports.json',
+            path: result.filePath,
+            sha256: result.hash,
+          });
           artifactHashes.push(result.hash);
           job.artifactDigests['sbom-reports.json'] = result.hash;
           job.artifactStats['sbom'] = result.count;
@@ -200,9 +252,18 @@ export class DisclosureExportService {
       }
 
       if (requestedArtifacts.includes('policy-reports')) {
-        const result = await this.collectPolicyReports({ job, pool, startTime, endTime });
+        const result = await this.collectPolicyReports({
+          job,
+          pool,
+          startTime,
+          endTime,
+        });
         if (result) {
-          artifacts.push({ name: 'policy-reports.json', path: result.filePath, sha256: result.hash });
+          artifacts.push({
+            name: 'policy-reports.json',
+            path: result.filePath,
+            sha256: result.hash,
+          });
           artifactHashes.push(result.hash);
           job.artifactDigests['policy-reports.json'] = result.hash;
           job.artifactStats['policy-reports'] = result.count;
@@ -211,9 +272,18 @@ export class DisclosureExportService {
       }
 
       if (requestedArtifacts.includes('attestations')) {
-        const result = await this.collectAttestations({ job, pool, startTime, endTime });
+        const result = await this.collectAttestations({
+          job,
+          pool,
+          startTime,
+          endTime,
+        });
         if (result) {
-          artifacts.push({ name: 'attestations.json', path: result.filePath, sha256: result.hash });
+          artifacts.push({
+            name: 'attestations.json',
+            path: result.filePath,
+            sha256: result.hash,
+          });
           artifactHashes.push(result.hash);
           job.artifactDigests['attestations.json'] = result.hash;
           job.artifactStats['attestations'] = result.count;
@@ -241,7 +311,12 @@ export class DisclosureExportService {
       job.warnings = warnings;
 
       const stats = await fs.stat(bundlePath);
-      disclosureMetrics.exportCompleted(job.tenantId, Date.now() - startedAt, stats.size, warnings);
+      disclosureMetrics.exportCompleted(
+        job.tenantId,
+        Date.now() - startedAt,
+        stats.size,
+        warnings,
+      );
 
       if (callbackUrl) {
         await this.notifyWebhook(callbackUrl, job).catch((error) => {
@@ -258,7 +333,11 @@ export class DisclosureExportService {
     }
   }
 
-  private buildClaimSet(job: InternalJob, artifactHashes: string[], warnings: string[]) {
+  private buildClaimSet(
+    job: InternalJob,
+    artifactHashes: string[],
+    warnings: string[],
+  ) {
     const signature = this.signClaimSet({
       jobId: job.id,
       tenantId: job.tenantId,
@@ -285,7 +364,8 @@ export class DisclosureExportService {
   }
 
   private signClaimSet(payload: Record<string, unknown>) {
-    const secret = process.env.DISCLOSURE_SIGNING_SECRET || 'dev-disclosure-secret';
+    const secret =
+      process.env.DISCLOSURE_SIGNING_SECRET || 'dev-disclosure-secret';
     const keyId = process.env.DISCLOSURE_SIGNING_KEY_ID || 'local-dev';
     const bytes = Buffer.from(JSON.stringify(payload));
     const digest = createHash('sha256').update(bytes).digest('hex');
@@ -326,16 +406,26 @@ export class DisclosureExportService {
        WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
        ORDER BY created_at ASC
        LIMIT $4`,
-      [job.tenantId, startTime.toISOString(), endTime.toISOString(), MAX_EVENTS + 1],
+      [
+        job.tenantId,
+        startTime.toISOString(),
+        endTime.toISOString(),
+        MAX_EVENTS + 1,
+      ],
     );
 
     const truncated = rows.length > MAX_EVENTS;
     const selected = truncated ? rows.slice(0, MAX_EVENTS) : rows;
     const sanitized: any[] = [];
     for (const row of selected) {
-      const clean = await this.redaction.redactObject(row, {
-        rules: ['pii', 'sensitive', 'financial'],
-      }, job.tenantId, { jobId: job.id });
+      const clean = await this.redaction.redactObject(
+        row,
+        {
+          rules: ['pii', 'sensitive', 'financial'],
+        },
+        job.tenantId,
+        { jobId: job.id },
+      );
       sanitized.push(clean);
     }
 
@@ -380,7 +470,10 @@ export class DisclosureExportService {
     }
 
     const normalized = rows.map((row: any) => ({
-      createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+      createdAt:
+        row.created_at instanceof Date
+          ? row.created_at.toISOString()
+          : row.created_at,
       sbom: row.sbom,
     }));
 
@@ -391,7 +484,12 @@ export class DisclosureExportService {
     });
 
     const hash = await hashFile(filePath);
-    return { filePath, count: normalized.length, hash, warnings: [] as string[] };
+    return {
+      filePath,
+      count: normalized.length,
+      hash,
+      warnings: [] as string[],
+    };
   }
 
   private async collectPolicyReports({
@@ -420,9 +518,14 @@ export class DisclosureExportService {
 
     const sanitized: any[] = [];
     for (const row of rows) {
-      const clean = await this.redaction.redactObject(row, {
-        rules: ['pii', 'sensitive'],
-      }, job.tenantId, { jobId: job.id, artifact: 'policy' });
+      const clean = await this.redaction.redactObject(
+        row,
+        {
+          rules: ['pii', 'sensitive'],
+        },
+        job.tenantId,
+        { jobId: job.id, artifact: 'policy' },
+      );
       sanitized.push(clean);
     }
 
@@ -433,7 +536,12 @@ export class DisclosureExportService {
     });
 
     const hash = await hashFile(filePath);
-    return { filePath, count: sanitized.length, hash, warnings: [] as string[] };
+    return {
+      filePath,
+      count: sanitized.length,
+      hash,
+      warnings: [] as string[],
+    };
   }
 
   private async collectAttestations({
@@ -461,7 +569,10 @@ export class DisclosureExportService {
     }
 
     const attestations = rows.map((row: any) => ({
-      createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+      createdAt:
+        row.created_at instanceof Date
+          ? row.created_at.toISOString()
+          : row.created_at,
       attestation: row.attestation,
     }));
 
@@ -474,7 +585,9 @@ export class DisclosureExportService {
     const hash = await hashFile(filePath);
 
     const mismatchedDigests = this.verifyAttestationSubjects(attestations, job);
-    const warnings = mismatchedDigests.length ? mismatchedDigests.map((id) => `subject_digest_mismatch:${id}`) : [];
+    const warnings = mismatchedDigests.length
+      ? mismatchedDigests.map((id) => `subject_digest_mismatch:${id}`)
+      : [];
 
     return {
       filePath,
@@ -485,7 +598,10 @@ export class DisclosureExportService {
     };
   }
 
-  private verifyAttestationSubjects(attestations: any[], job: InternalJob): string[] {
+  private verifyAttestationSubjects(
+    attestations: any[],
+    job: InternalJob,
+  ): string[] {
     const mismatches: string[] = [];
     const artifactHashes = new Set(Object.values(job.artifactDigests));
     for (const entry of attestations) {
@@ -502,7 +618,10 @@ export class DisclosureExportService {
     return mismatches;
   }
 
-  private async writeJsonObject(filePath: string, obj: Record<string, unknown>): Promise<void> {
+  private async writeJsonObject(
+    filePath: string,
+    obj: Record<string, unknown>,
+  ): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       const stream = createWriteStream(filePath, { encoding: 'utf8' });
       stream.on('error', reject);

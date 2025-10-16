@@ -50,13 +50,13 @@ Deliver a one-line installation experience that enables any Summit service to em
 
 ### Delivered Artifacts (MVP Kickoff)
 
-| Artifact | Location | Notes |
-| -------- | -------- | ----- |
-| Metrics catalogue | [`docs/observability/metrics_catalogue.yaml`](metrics_catalogue.yaml) | Canonical list of metrics, owners, dimensions, retention, and alert bindings. |
-| Grafana dashboards | [`docs/observability/dashboards/`](dashboards) | JSON exports for the four golden dashboards (Overview, Availability & Reliability, Performance & Latency, Infrastructure & Saturation). |
-| Alert policies | [`docs/observability/alerts/observability-first-alerts.yaml`](alerts/observability-first-alerts.yaml) | Alertmanager routing with PagerDuty, Slack, and synthetic drill receivers. |
-| Incident runbooks | [`docs/observability/runbooks/`](runbooks) | Markdown runbooks aligned to latency, error budget, and saturation alerts. |
-| SLO documentation template | [`docs/observability/slo/sample-service-slo.md`](slo/sample-service-slo.md) | Template for teams to document objectives, SLIs, dependencies, and review cadence. |
+| Artifact                   | Location                                                                                              | Notes                                                                                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Metrics catalogue          | [`docs/observability/metrics_catalogue.yaml`](metrics_catalogue.yaml)                                 | Canonical list of metrics, owners, dimensions, retention, and alert bindings.                                                           |
+| Grafana dashboards         | [`docs/observability/dashboards/`](dashboards)                                                        | JSON exports for the four golden dashboards (Overview, Availability & Reliability, Performance & Latency, Infrastructure & Saturation). |
+| Alert policies             | [`docs/observability/alerts/observability-first-alerts.yaml`](alerts/observability-first-alerts.yaml) | Alertmanager routing with PagerDuty, Slack, and synthetic drill receivers.                                                              |
+| Incident runbooks          | [`docs/observability/runbooks/`](runbooks)                                                            | Markdown runbooks aligned to latency, error budget, and saturation alerts.                                                              |
+| SLO documentation template | [`docs/observability/slo/sample-service-slo.md`](slo/sample-service-slo.md)                           | Template for teams to document objectives, SLIs, dependencies, and review cadence.                                                      |
 
 ## Interfaces & Integration Contracts
 
@@ -139,14 +139,15 @@ Dashboards leverage exemplars to jump into traces, linking to service dependency
 
 ## Execution Timeline (6 Weeks)
 
-| Week | Focus                    | Milestones |
-| ---- | ------------------------ | ---------- |
+| Week | Focus                    | Milestones                                                                                      |
+| ---- | ------------------------ | ----------------------------------------------------------------------------------------------- |
 | 1    | Planning & Foundations   | Metric catalogue review; security sign-off; baseline dashboards skeleton; synthetic probe plan. |
-| 2    | Go SDK                   | Init, middleware, exporters functional; sample Go service instrumented. |
-| 3    | Node & Python SDKs       | Express/FastAPI integrations; structured logging; initial docs. |
-| 4    | Dashboards & Alerts      | Grafana JSON drafts; alert policies authored; runbook outlines. |
-| 5    | Integration & Validation | Demo service full trace path; synthetic load tests; alert drills recorded. |
-| 6    | Polish & Launch          | Package publishing; final documentation; evidence bundle; demo dry run. |
+| 2    | Go SDK                   | Init, middleware, exporters functional; sample Go service instrumented.                         |
+| 3    | Node & Python SDKs       | Express/FastAPI integrations; structured logging; initial docs.                                 |
+| 4    | Dashboards & Alerts      | Grafana JSON drafts; alert policies authored; runbook outlines.                                 |
+| 5    | Integration & Validation | Demo service full trace path; synthetic load tests; alert drills recorded.                      |
+| 6    | Polish & Launch          | Package publishing; final documentation; evidence bundle; demo dry run.                         |
+
 ## Team & Stakeholders
 
 - **Engineering Lead:** Coordinates SDK development, ensures release quality.

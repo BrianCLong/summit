@@ -212,15 +212,22 @@ export class PrometheusConductorMetrics {
   /**
    * Update MCP server status
    */
-  public updateMCPServerStatus(serverName: string, url: string, healthy: boolean): void {
+  public updateMCPServerStatus(
+    serverName: string,
+    url: string,
+    healthy: boolean,
+  ): void {
     conductorMcpServerStatus.set({ server: serverName, url }, healthy ? 1 : 0);
   }
 
   /**
    * Update system health status
    */
-  public updateSystemHealthStatus(status: 'healthy' | 'degraded' | 'unhealthy'): void {
-    const statusValue = status === 'healthy' ? 1 : status === 'degraded' ? 0.5 : 0;
+  public updateSystemHealthStatus(
+    status: 'healthy' | 'degraded' | 'unhealthy',
+  ): void {
+    const statusValue =
+      status === 'healthy' ? 1 : status === 'degraded' ? 0.5 : 0;
     conductorSystemHealthStatus.set(statusValue);
   }
 
@@ -233,7 +240,10 @@ export class PrometheusConductorMetrics {
     userId: string,
     remaining: number,
   ): void {
-    conductorQuotaRemainingGauge.set({ expert, quota_type: quotaType, user_id: userId }, remaining);
+    conductorQuotaRemainingGauge.set(
+      { expert, quota_type: quotaType, user_id: userId },
+      remaining,
+    );
   }
 
   /**
@@ -246,7 +256,10 @@ export class PrometheusConductorMetrics {
   /**
    * Record task timeout
    */
-  public recordTaskTimeout(expert: ExpertType, timeoutType: 'execution' | 'routing' | 'mcp'): void {
+  public recordTaskTimeout(
+    expert: ExpertType,
+    timeoutType: 'execution' | 'routing' | 'mcp',
+  ): void {
     conductorTaskTimeoutTotal.inc({ expert, timeout_type: timeoutType });
   }
 }

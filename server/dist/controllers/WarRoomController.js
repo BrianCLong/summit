@@ -14,19 +14,19 @@ class WarRoomController {
      */
     async createWarRoom(req, res) {
         try {
-            const { name, description, investigationId, participants = [] } = req.body;
+            const { name, description, investigationId, participants = [], } = req.body;
             const userId = req.user.id;
             // Validate required fields
             if (!name || !investigationId) {
                 return res.status(400).json({
-                    error: 'Name and investigation ID are required'
+                    error: 'Name and investigation ID are required',
                 });
             }
             // Check permissions
             const hasPermission = await this.auth.canCreateWarRoom(userId, investigationId);
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to create war room'
+                    error: 'Insufficient permissions to create war room',
                 });
             }
             const warRoomId = `wr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -42,29 +42,29 @@ class WarRoomController {
                 createdAt: new Date(),
                 participants: [
                     { userId, role: 'admin', joinedAt: new Date() },
-                    ...participants.map(p => ({ ...p, joinedAt: new Date() }))
+                    ...participants.map((p) => ({ ...p, joinedAt: new Date() })),
                 ],
                 status: 'active',
                 settings: {
                     maxParticipants: 20,
                     allowGuestAccess: false,
                     recordSession: true,
-                    autoArchiveAfterHours: 24
-                }
+                    autoArchiveAfterHours: 24,
+                },
             };
             // Save to database (would use proper DB in production)
             await this.saveWarRoomMetadata(metadata);
             res.status(201).json({
                 warRoom: metadata,
                 joinUrl: `/war-rooms/${warRoomId}`,
-                message: 'War room created successfully'
+                message: 'War room created successfully',
             });
         }
         catch (error) {
             console.error('Error creating war room:', error);
             res.status(500).json({
                 error: 'Failed to create war room',
-                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined,
             });
         }
     }
@@ -80,13 +80,13 @@ class WarRoomController {
             const hasAccess = await this.auth.canAccessWarRoom(userId, id);
             if (!hasAccess) {
                 return res.status(403).json({
-                    error: 'Access denied to this war room'
+                    error: 'Access denied to this war room',
                 });
             }
             const metadata = await this.getWarRoomMetadata(id);
             if (!metadata) {
                 return res.status(404).json({
-                    error: 'War room not found'
+                    error: 'War room not found',
                 });
             }
             // Get current statistics
@@ -96,14 +96,14 @@ class WarRoomController {
                 stats,
                 currentUser: {
                     userId,
-                    role: this.getUserRoleInRoom(metadata, userId)
-                }
+                    role: this.getUserRoleInRoom(metadata, userId),
+                },
             });
         }
         catch (error) {
             console.error('Error getting war room:', error);
             res.status(500).json({
-                error: 'Failed to retrieve war room'
+                error: 'Failed to retrieve war room',
             });
         }
     }
@@ -119,17 +119,17 @@ class WarRoomController {
                 status,
                 investigationId,
                 limit: parseInt(limit),
-                offset: parseInt(offset)
+                offset: parseInt(offset),
             });
             // Add current statistics for active rooms
             const warRoomsWithStats = await Promise.all(warRooms.map(async (room) => {
-                const stats = room.status === 'active' ?
-                    this.warRoomSync.getRoomStats(room.id) :
-                    null;
+                const stats = room.status === 'active'
+                    ? this.warRoomSync.getRoomStats(room.id)
+                    : null;
                 return {
                     ...room,
                     stats,
-                    userRole: this.getUserRoleInRoom(room, userId)
+                    userRole: this.getUserRoleInRoom(room, userId),
                 };
             }));
             res.json({
@@ -137,14 +137,14 @@ class WarRoomController {
                 pagination: {
                     limit: parseInt(limit),
                     offset: parseInt(offset),
-                    total: warRoomsWithStats.length
-                }
+                    total: warRoomsWithStats.length,
+                },
             });
         }
         catch (error) {
             console.error('Error listing war rooms:', error);
             res.status(500).json({
-                error: 'Failed to list war rooms'
+                error: 'Failed to list war rooms',
             });
         }
     }
@@ -161,13 +161,13 @@ class WarRoomController {
             const hasPermission = await this.auth.canModifyWarRoom(userId, id);
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to modify war room'
+                    error: 'Insufficient permissions to modify war room',
                 });
             }
             const metadata = await this.getWarRoomMetadata(id);
             if (!metadata) {
                 return res.status(404).json({
-                    error: 'War room not found'
+                    error: 'War room not found',
                 });
             }
             // Validate and apply updates
@@ -182,18 +182,18 @@ class WarRoomController {
                 ...metadata,
                 ...validUpdates,
                 updatedAt: new Date(),
-                updatedBy: userId
+                updatedBy: userId,
             };
             await this.updateWarRoomMetadata(id, updatedMetadata);
             res.json({
                 warRoom: updatedMetadata,
-                message: 'War room updated successfully'
+                message: 'War room updated successfully',
             });
         }
         catch (error) {
             console.error('Error updating war room:', error);
             res.status(500).json({
-                error: 'Failed to update war room'
+                error: 'Failed to update war room',
             });
         }
     }
@@ -210,20 +210,20 @@ class WarRoomController {
             const hasPermission = await this.auth.canModifyWarRoom(requesterId, id);
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to add participants'
+                    error: 'Insufficient permissions to add participants',
                 });
             }
             const metadata = await this.getWarRoomMetadata(id);
             if (!metadata) {
                 return res.status(404).json({
-                    error: 'War room not found'
+                    error: 'War room not found',
                 });
             }
             // Check if user is already a participant
-            const existingParticipant = metadata.participants.find(p => p.userId === targetUserId);
+            const existingParticipant = metadata.participants.find((p) => p.userId === targetUserId);
             if (existingParticipant) {
                 return res.status(400).json({
-                    error: 'User is already a participant'
+                    error: 'User is already a participant',
                 });
             }
             // Add participant
@@ -231,22 +231,22 @@ class WarRoomController {
                 userId: targetUserId,
                 role,
                 joinedAt: new Date(),
-                addedBy: requesterId
+                addedBy: requesterId,
             });
             await this.updateWarRoomMetadata(id, metadata);
             res.json({
                 participant: {
                     userId: targetUserId,
                     role,
-                    joinedAt: new Date()
+                    joinedAt: new Date(),
                 },
-                message: 'Participant added successfully'
+                message: 'Participant added successfully',
             });
         }
         catch (error) {
             console.error('Error adding participant:', error);
             res.status(500).json({
-                error: 'Failed to add participant'
+                error: 'Failed to add participant',
             });
         }
     }
@@ -260,31 +260,31 @@ class WarRoomController {
             const requesterId = req.user.id;
             // Check permissions (can remove self or if admin)
             const hasPermission = targetUserId === requesterId ||
-                await this.auth.canModifyWarRoom(requesterId, id);
+                (await this.auth.canModifyWarRoom(requesterId, id));
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to remove participant'
+                    error: 'Insufficient permissions to remove participant',
                 });
             }
             const metadata = await this.getWarRoomMetadata(id);
             if (!metadata) {
                 return res.status(404).json({
-                    error: 'War room not found'
+                    error: 'War room not found',
                 });
             }
             // Remove participant
-            metadata.participants = metadata.participants.filter(p => p.userId !== targetUserId);
+            metadata.participants = metadata.participants.filter((p) => p.userId !== targetUserId);
             await this.updateWarRoomMetadata(id, metadata);
             // Force disconnect from sync service if currently connected
             await this.warRoomSync.leaveWarRoom(null, id, targetUserId);
             res.json({
-                message: 'Participant removed successfully'
+                message: 'Participant removed successfully',
             });
         }
         catch (error) {
             console.error('Error removing participant:', error);
             res.status(500).json({
-                error: 'Failed to remove participant'
+                error: 'Failed to remove participant',
             });
         }
     }
@@ -300,18 +300,18 @@ class WarRoomController {
             const hasPermission = await this.auth.canModifyWarRoom(userId, id);
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to archive war room'
+                    error: 'Insufficient permissions to archive war room',
                 });
             }
             const metadata = await this.getWarRoomMetadata(id);
             if (!metadata) {
                 return res.status(404).json({
-                    error: 'War room not found'
+                    error: 'War room not found',
                 });
             }
             if (metadata.status === 'archived') {
                 return res.status(400).json({
-                    error: 'War room is already archived'
+                    error: 'War room is already archived',
                 });
             }
             // Archive the war room
@@ -322,13 +322,13 @@ class WarRoomController {
             await this.warRoomSync.archiveWarRoom(id);
             res.json({
                 warRoom: metadata,
-                message: 'War room archived successfully'
+                message: 'War room archived successfully',
             });
         }
         catch (error) {
             console.error('Error archiving war room:', error);
             res.status(500).json({
-                error: 'Failed to archive war room'
+                error: 'Failed to archive war room',
             });
         }
     }
@@ -345,22 +345,22 @@ class WarRoomController {
             const hasAccess = await this.auth.canAccessWarRoom(userId, id);
             if (!hasAccess) {
                 return res.status(403).json({
-                    error: 'Access denied to this war room'
+                    error: 'Access denied to this war room',
                 });
             }
             const room = this.warRoomSync.warRooms.get(id);
             if (!room) {
                 return res.status(404).json({
-                    error: 'War room not found or not active'
+                    error: 'War room not found or not active',
                 });
             }
             let operations = [...room.operationLog];
             // Apply filters
             if (operation_type) {
-                operations = operations.filter(op => op.type === operation_type);
+                operations = operations.filter((op) => op.type === operation_type);
             }
             if (user_id) {
-                operations = operations.filter(op => op.userId === user_id);
+                operations = operations.filter((op) => op.userId === user_id);
             }
             // Sort by most recent first
             operations.sort((a, b) => b.appliedAt - a.appliedAt);
@@ -371,14 +371,14 @@ class WarRoomController {
                 pagination: {
                     limit: parseInt(limit),
                     offset: parseInt(offset),
-                    total: operations.length
-                }
+                    total: operations.length,
+                },
             });
         }
         catch (error) {
             console.error('Error getting operation history:', error);
             res.status(500).json({
-                error: 'Failed to retrieve operation history'
+                error: 'Failed to retrieve operation history',
             });
         }
     }
@@ -393,24 +393,24 @@ class WarRoomController {
             const hasAccess = await this.auth.canAccessWarRoom(userId, id);
             if (!hasAccess) {
                 return res.status(403).json({
-                    error: 'Access denied to this war room'
+                    error: 'Access denied to this war room',
                 });
             }
             const room = this.warRoomSync.warRooms.get(id);
             if (!room) {
                 return res.status(404).json({
-                    error: 'War room not found or not active'
+                    error: 'War room not found or not active',
                 });
             }
             res.json({
                 conflicts: room.conflictQueue || [],
-                pendingResolution: room.conflictQueue.filter(c => !c.resolved).length
+                pendingResolution: room.conflictQueue.filter((c) => !c.resolved).length,
             });
         }
         catch (error) {
             console.error('Error getting conflicts:', error);
             res.status(500).json({
-                error: 'Failed to retrieve conflicts'
+                error: 'Failed to retrieve conflicts',
             });
         }
     }
@@ -426,19 +426,19 @@ class WarRoomController {
             const hasPermission = await this.auth.canModifyWarRoom(userId, id);
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to resolve conflicts'
+                    error: 'Insufficient permissions to resolve conflicts',
                 });
             }
             const room = this.warRoomSync.warRooms.get(id);
             if (!room) {
                 return res.status(404).json({
-                    error: 'War room not found'
+                    error: 'War room not found',
                 });
             }
-            const conflict = room.conflictQueue.find(c => c.id === conflictId);
+            const conflict = room.conflictQueue.find((c) => c.id === conflictId);
             if (!conflict) {
                 return res.status(404).json({
-                    error: 'Conflict not found'
+                    error: 'Conflict not found',
                 });
             }
             // Apply the resolution
@@ -452,13 +452,13 @@ class WarRoomController {
             }
             res.json({
                 conflict,
-                message: 'Conflict resolved successfully'
+                message: 'Conflict resolved successfully',
             });
         }
         catch (error) {
             console.error('Error resolving conflict:', error);
             res.status(500).json({
-                error: 'Failed to resolve conflict'
+                error: 'Failed to resolve conflict',
             });
         }
     }
@@ -489,13 +489,13 @@ class WarRoomController {
         }
         let rooms = Array.from(this.warRoomMetadataStore.values());
         // Filter by user participation
-        rooms = rooms.filter(room => room.participants.some(p => p.userId === userId));
+        rooms = rooms.filter((room) => room.participants.some((p) => p.userId === userId));
         // Apply additional filters
         if (filters.status) {
-            rooms = rooms.filter(room => room.status === filters.status);
+            rooms = rooms.filter((room) => room.status === filters.status);
         }
         if (filters.investigationId) {
-            rooms = rooms.filter(room => room.investigationId === filters.investigationId);
+            rooms = rooms.filter((room) => room.investigationId === filters.investigationId);
         }
         // Sort by creation date (most recent first)
         rooms.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -505,7 +505,7 @@ class WarRoomController {
         return rooms.slice(start, end);
     }
     getUserRoleInRoom(roomMetadata, userId) {
-        const participant = roomMetadata.participants.find(p => p.userId === userId);
+        const participant = roomMetadata.participants.find((p) => p.userId === userId);
         return participant ? participant.role : null;
     }
 }

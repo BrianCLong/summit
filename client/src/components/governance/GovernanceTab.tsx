@@ -66,16 +66,21 @@ export const GovernanceTab: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Data Governance Center</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        Data Governance Center
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Retention Policies Card */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="font-semibold text-lg text-gray-700 mb-2">Retention Policies</h3>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            Retention Policies
+          </h3>
           <ul className="list-disc list-inside text-gray-600">
             {data?.governancePolicies.map((p: any) => (
               <li key={p.klass}>
-                <span className="font-semibold">{p.klass}</span> &mdash; {p.ttlDays} days
+                <span className="font-semibold">{p.klass}</span> &mdash;{' '}
+                {p.ttlDays} days
               </li>
             ))}
           </ul>
@@ -83,7 +88,9 @@ export const GovernanceTab: React.FC = () => {
 
         {/* Actions Card */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="font-semibold text-lg text-gray-700 mb-2">Administrative Actions</h3>
+          <h3 className="font-semibold text-lg text-gray-700 mb-2">
+            Administrative Actions
+          </h3>
           <div className="flex flex-col space-y-2">
             <button
               id="rotateKeysBtn"
@@ -106,8 +113,8 @@ export const GovernanceTab: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
           <h4 className="font-semibold text-xl mb-4">Confirm Key Rotation</h4>
           <p className="text-gray-600 mb-4">
-            This is an irreversible action. Please provide a reason for this rotation (e.g.,
-            'Quarterly security policy').
+            This is an irreversible action. Please provide a reason for this
+            rotation (e.g., 'Quarterly security policy').
           </p>
           <input
             type="text"

@@ -12,12 +12,32 @@
       "schema": {
         "name": "customers",
         "fields": [
-          { "fieldName": "full_name", "piiHints": ["fullName"], "riskLevel": "high" },
+          {
+            "fieldName": "full_name",
+            "piiHints": ["fullName"],
+            "riskLevel": "high"
+          },
           { "fieldName": "email", "piiHints": ["email"], "riskLevel": "high" },
-          { "fieldName": "phone", "piiHints": ["mobileNumber", "phoneNumber"], "riskLevel": "high" },
-          { "fieldName": "home_address", "piiHints": ["homeAddress"], "riskLevel": "critical" },
-          { "fieldName": "dob", "piiHints": ["dateOfBirth"], "riskLevel": "medium" },
-          { "fieldName": "ssn", "piiHints": ["socialSecurityNumber"], "riskLevel": "critical" }
+          {
+            "fieldName": "phone",
+            "piiHints": ["mobileNumber", "phoneNumber"],
+            "riskLevel": "high"
+          },
+          {
+            "fieldName": "home_address",
+            "piiHints": ["homeAddress"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "dob",
+            "piiHints": ["dateOfBirth"],
+            "riskLevel": "medium"
+          },
+          {
+            "fieldName": "ssn",
+            "piiHints": ["socialSecurityNumber"],
+            "riskLevel": "critical"
+          }
         ]
       },
       "data": {
@@ -35,12 +55,36 @@
       "schema": {
         "name": "customers",
         "fields": [
-          { "fieldName": "preferred_name", "piiHints": ["preferredName"], "riskLevel": "medium" },
-          { "fieldName": "passport", "piiHints": ["passportNumber"], "riskLevel": "critical" },
-          { "fieldName": "billing_address", "piiHints": ["billingAddress"], "riskLevel": "high" },
-          { "fieldName": "credit_card", "piiHints": ["creditCardNumber"], "riskLevel": "critical" },
-          { "fieldName": "card_expiration", "piiHints": ["cardExpiration"], "riskLevel": "high" },
-          { "fieldName": "card_cvv", "piiHints": ["cardSecurityCode"], "riskLevel": "critical" }
+          {
+            "fieldName": "preferred_name",
+            "piiHints": ["preferredName"],
+            "riskLevel": "medium"
+          },
+          {
+            "fieldName": "passport",
+            "piiHints": ["passportNumber"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "billing_address",
+            "piiHints": ["billingAddress"],
+            "riskLevel": "high"
+          },
+          {
+            "fieldName": "credit_card",
+            "piiHints": ["creditCardNumber"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "card_expiration",
+            "piiHints": ["cardExpiration"],
+            "riskLevel": "high"
+          },
+          {
+            "fieldName": "card_cvv",
+            "piiHints": ["cardSecurityCode"],
+            "riskLevel": "critical"
+          }
         ]
       },
       "data": {
@@ -58,12 +102,36 @@
       "schema": {
         "name": "patients",
         "fields": [
-          { "fieldName": "patient_id", "piiHints": ["patientId"], "riskLevel": "critical" },
-          { "fieldName": "insurance_policy", "piiHints": ["insurancePolicyNumber"], "riskLevel": "critical" },
-          { "fieldName": "diagnosis", "piiHints": ["medicalDiagnosis"], "riskLevel": "critical" },
-          { "fieldName": "prescription", "piiHints": ["prescription"], "riskLevel": "critical" },
-          { "fieldName": "allergy", "piiHints": ["allergy"], "riskLevel": "high" },
-          { "fieldName": "genetic_marker", "piiHints": ["geneticMarker"], "riskLevel": "critical" }
+          {
+            "fieldName": "patient_id",
+            "piiHints": ["patientId"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "insurance_policy",
+            "piiHints": ["insurancePolicyNumber"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "diagnosis",
+            "piiHints": ["medicalDiagnosis"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "prescription",
+            "piiHints": ["prescription"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "allergy",
+            "piiHints": ["allergy"],
+            "riskLevel": "high"
+          },
+          {
+            "fieldName": "genetic_marker",
+            "piiHints": ["geneticMarker"],
+            "riskLevel": "critical"
+          }
         ]
       },
       "data": {
@@ -81,12 +149,32 @@
       "schema": {
         "name": "iot_devices",
         "fields": [
-          { "fieldName": "device_id", "piiHints": ["deviceId"], "riskLevel": "high" },
+          {
+            "fieldName": "device_id",
+            "piiHints": ["deviceId"],
+            "riskLevel": "high"
+          },
           { "fieldName": "imei", "piiHints": ["imei"], "riskLevel": "high" },
-          { "fieldName": "ip_address", "piiHints": ["ipAddress"], "riskLevel": "high" },
-          { "fieldName": "mac_address", "piiHints": ["macAddress"], "riskLevel": "high" },
-          { "fieldName": "latitude", "piiHints": ["latitude"], "riskLevel": "medium" },
-          { "fieldName": "longitude", "piiHints": ["longitude"], "riskLevel": "medium" }
+          {
+            "fieldName": "ip_address",
+            "piiHints": ["ipAddress"],
+            "riskLevel": "high"
+          },
+          {
+            "fieldName": "mac_address",
+            "piiHints": ["macAddress"],
+            "riskLevel": "high"
+          },
+          {
+            "fieldName": "latitude",
+            "piiHints": ["latitude"],
+            "riskLevel": "medium"
+          },
+          {
+            "fieldName": "longitude",
+            "piiHints": ["longitude"],
+            "riskLevel": "medium"
+          }
         ]
       },
       "data": {
@@ -104,10 +192,26 @@
       "schema": {
         "name": "biometrics",
         "fields": [
-          { "fieldName": "fingerprint_hash", "piiHints": ["biometricFingerprint"], "riskLevel": "critical" },
-          { "fieldName": "voice_print", "piiHints": ["biometricVoice"], "riskLevel": "critical" },
-          { "fieldName": "face_embedding", "piiHints": ["biometricFace"], "riskLevel": "critical" },
-          { "fieldName": "dna_sequence", "piiHints": ["biometricDNA"], "riskLevel": "critical" }
+          {
+            "fieldName": "fingerprint_hash",
+            "piiHints": ["biometricFingerprint"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "voice_print",
+            "piiHints": ["biometricVoice"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "face_embedding",
+            "piiHints": ["biometricFace"],
+            "riskLevel": "critical"
+          },
+          {
+            "fieldName": "dna_sequence",
+            "piiHints": ["biometricDNA"],
+            "riskLevel": "critical"
+          }
         ]
       },
       "data": {

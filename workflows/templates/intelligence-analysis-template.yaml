@@ -1,328 +1,346 @@
 # Intelligence Analysis Workflow Template
 # Reusable template for conducting intelligence analysis investigations
 name: intelligence-analysis-template
-version: "1.0.0"
-description: "Reusable template for intelligence analysis workflows with customizable parameters"
+version: '1.0.0'
+description: 'Reusable template for intelligence analysis workflows with customizable parameters'
 
 metadata:
-  tags: ["template", "intelligence", "analysis", "investigation"]
-  author: "IntelGraph Platform Team"
-  created: "2025-01-20"
-  category: "intelligence"
-  template_type: "parametric"
-  
+  tags: ['template', 'intelligence', 'analysis', 'investigation']
+  author: 'IntelGraph Platform Team'
+  created: '2025-01-20'
+  category: 'intelligence'
+  template_type: 'parametric'
+
 # Template parameters that can be customized
 parameters:
   # Investigation Parameters
   investigation_id:
     type: string
     required: true
-    description: "Unique identifier for the investigation"
-    
+    description: 'Unique identifier for the investigation'
+
   target_entity:
     type: string
     required: true
-    description: "Primary entity or subject of investigation"
-    
+    description: 'Primary entity or subject of investigation'
+
   investigation_purpose:
     type: string
     required: true
-    enum: ["due_diligence", "threat_assessment", "compliance_check", "competitive_intelligence"]
-    description: "Purpose of the investigation"
-    
+    enum:
+      [
+        'due_diligence',
+        'threat_assessment',
+        'compliance_check',
+        'competitive_intelligence',
+      ]
+    description: 'Purpose of the investigation'
+
   urgency:
     type: string
-    default: "medium"
-    enum: ["low", "medium", "high", "critical"]
-    description: "Investigation urgency level"
-    
+    default: 'medium'
+    enum: ['low', 'medium', 'high', 'critical']
+    description: 'Investigation urgency level'
+
   # Evidence Collection Parameters
   evidence_sources:
     type: array
-    default: ["web", "social", "public_records"]
+    default: ['web', 'social', 'public_records']
     items:
       type: string
-      enum: ["web", "social", "public_records", "news", "financial", "legal"]
-    description: "Sources to collect evidence from"
-    
+      enum: ['web', 'social', 'public_records', 'news', 'financial', 'legal']
+    description: 'Sources to collect evidence from'
+
   search_depth:
     type: string
-    default: "standard"
-    enum: ["surface", "standard", "deep", "comprehensive"]
-    description: "Depth of search and analysis"
-    
+    default: 'standard'
+    enum: ['surface', 'standard', 'deep', 'comprehensive']
+    description: 'Depth of search and analysis'
+
   # Analysis Parameters
   confidence_threshold:
     type: number
     default: 0.7
     minimum: 0.5
     maximum: 1.0
-    description: "Minimum confidence threshold for analysis results"
-    
+    description: 'Minimum confidence threshold for analysis results'
+
   analysis_types:
     type: array
-    default: ["entity_extraction", "relationship_mapping", "sentiment_analysis"]
+    default: ['entity_extraction', 'relationship_mapping', 'sentiment_analysis']
     items:
       type: string
-      enum: ["entity_extraction", "relationship_mapping", "sentiment_analysis", "timeline_construction", "credibility_assessment"]
-    description: "Types of analysis to perform"
-    
+      enum:
+        [
+          'entity_extraction',
+          'relationship_mapping',
+          'sentiment_analysis',
+          'timeline_construction',
+          'credibility_assessment',
+        ]
+    description: 'Types of analysis to perform'
+
   # Budget and Resource Parameters
   max_budget_usd:
     type: number
     default: 25.0
     minimum: 1.0
     maximum: 500.0
-    description: "Maximum budget for the investigation"
-    
+    description: 'Maximum budget for the investigation'
+
   max_duration_minutes:
     type: number
     default: 60
     minimum: 10
     maximum: 480
-    description: "Maximum duration for the investigation"
-    
+    description: 'Maximum duration for the investigation'
+
   # Output Parameters
   report_format:
     type: string
-    default: "comprehensive"
-    enum: ["summary", "standard", "comprehensive", "detailed"]
-    description: "Format and detail level of the final report"
-    
+    default: 'comprehensive'
+    enum: ['summary', 'standard', 'comprehensive', 'detailed']
+    description: 'Format and detail level of the final report'
+
   classification_level:
     type: string
-    default: "unclassified"
-    enum: ["unclassified", "internal", "confidential", "restricted"]
-    description: "Classification level for the investigation"
+    default: 'unclassified'
+    enum: ['unclassified', 'internal', 'confidential', 'restricted']
+    description: 'Classification level for the investigation'
 
 # Template variables (derived from parameters)
 variables:
-  case_id: "${parameters.investigation_id}"
-  analysis_target: "${parameters.target_entity}"
-  purpose: "${parameters.investigation_purpose}"
-  urgency_level: "${parameters.urgency}"
-  sources: "${parameters.evidence_sources}"
-  confidence_min: "${parameters.confidence_threshold}"
-  budget_limit: "${parameters.max_budget_usd}"
-  time_limit: "${parameters.max_duration_minutes}"
+  case_id: '${parameters.investigation_id}'
+  analysis_target: '${parameters.target_entity}'
+  purpose: '${parameters.investigation_purpose}'
+  urgency_level: '${parameters.urgency}'
+  sources: '${parameters.evidence_sources}'
+  confidence_min: '${parameters.confidence_threshold}'
+  budget_limit: '${parameters.max_budget_usd}'
+  time_limit: '${parameters.max_duration_minutes}'
 
 # Template tasks (with parameter substitution)
 tasks:
   # Phase 1: Investigation Setup
   - name: initialize_investigation
     type: case_management
-    description: "Initialize new intelligence investigation"
+    description: 'Initialize new intelligence investigation'
     timeout: 30s
     config:
-      operation: "create_investigation"
+      operation: 'create_investigation'
       investigation_data:
-        id: "${variables.case_id}"
-        title: "Investigation: ${variables.analysis_target}"
-        purpose: "${variables.purpose}"
-        classification: "${parameters.classification_level}"
-        urgency: "${variables.urgency_level}"
-        analyst: "${user.id}"
-        tags: ["${variables.purpose}", "template-generated"]
+        id: '${variables.case_id}'
+        title: 'Investigation: ${variables.analysis_target}'
+        purpose: '${variables.purpose}'
+        classification: '${parameters.classification_level}'
+        urgency: '${variables.urgency_level}'
+        analyst: '${user.id}'
+        tags: ['${variables.purpose}', 'template-generated']
     outputs:
-      investigation_id: "$.investigation.id"
-      investigation_status: "$.investigation.status"
-      
+      investigation_id: '$.investigation.id'
+      investigation_status: '$.investigation.status'
+
   # Phase 2: Evidence Collection Planning
   - name: plan_evidence_collection
     type: evidence_planning
-    description: "Plan evidence collection strategy"
+    description: 'Plan evidence collection strategy'
     timeout: 60s
-    depends_on: ["initialize_investigation"]
+    depends_on: ['initialize_investigation']
     config:
-      investigation_id: "${tasks.initialize_investigation.outputs.investigation_id}"
-      target: "${variables.analysis_target}"
-      sources: "${variables.sources}"
-      search_depth: "${parameters.search_depth}"
+      investigation_id: '${tasks.initialize_investigation.outputs.investigation_id}'
+      target: '${variables.analysis_target}'
+      sources: '${variables.sources}'
+      search_depth: '${parameters.search_depth}'
       budget_allocation:
         web_search: 40
         social_media: 30
         public_records: 20
         news_analysis: 10
     outputs:
-      collection_plan: "$.plan"
-      estimated_cost: "$.estimated_cost_usd"
-      
+      collection_plan: '$.plan'
+      estimated_cost: '$.estimated_cost_usd'
+
   # Phase 3: Web Intelligence Collection
   - name: collect_web_intelligence
     type: web_orchestration
-    description: "Collect intelligence from web sources"
-    timeout: "${parameters.max_duration_minutes * 0.4}m"
-    depends_on: ["plan_evidence_collection"]
+    description: 'Collect intelligence from web sources'
+    timeout: '${parameters.max_duration_minutes * 0.4}m'
+    depends_on: ['plan_evidence_collection']
     condition: "contains(variables.sources, 'web')"
     config:
-      query: "Collect comprehensive intelligence about ${variables.analysis_target} for ${variables.purpose}"
+      query: 'Collect comprehensive intelligence about ${variables.analysis_target} for ${variables.purpose}'
       context:
-        purpose: "${variables.purpose}"
-        urgency: "${variables.urgency_level}"
-        budgetLimit: "${variables.budget_limit * 0.4}"
-        qualityThreshold: "${variables.confidence_min}"
+        purpose: '${variables.purpose}'
+        urgency: '${variables.urgency_level}'
+        budgetLimit: '${variables.budget_limit * 0.4}'
+        qualityThreshold: '${variables.confidence_min}'
         expectedOutputLength: 3000
-        synthesisStrategy: "${parameters.search_depth}"
+        synthesisStrategy: '${parameters.search_depth}'
     outputs:
-      web_intelligence: "$.result.synthesis"
-      web_sources_count: "$.metadata.sourcesUsed"
-      web_confidence: "$.confidence"
-      
+      web_intelligence: '$.result.synthesis'
+      web_sources_count: '$.metadata.sourcesUsed'
+      web_confidence: '$.confidence'
+
   # Phase 4: Social Media Analysis
   - name: analyze_social_media
     type: social_media_analysis
-    description: "Analyze social media presence and activities"
-    timeout: "${parameters.max_duration_minutes * 0.3}m"
-    depends_on: ["plan_evidence_collection"]
+    description: 'Analyze social media presence and activities'
+    timeout: '${parameters.max_duration_minutes * 0.3}m'
+    depends_on: ['plan_evidence_collection']
     condition: "contains(variables.sources, 'social')"
     config:
-      target: "${variables.analysis_target}"
-      platforms: ["twitter", "linkedin", "facebook"]
-      analysis_types: ["sentiment", "network", "content"]
-      time_range: "30d"
-      confidence_threshold: "${variables.confidence_min}"
+      target: '${variables.analysis_target}'
+      platforms: ['twitter', 'linkedin', 'facebook']
+      analysis_types: ['sentiment', 'network', 'content']
+      time_range: '30d'
+      confidence_threshold: '${variables.confidence_min}'
     outputs:
-      social_profile: "$.analysis.profile"
-      social_sentiment: "$.analysis.sentiment"
-      social_network: "$.analysis.network"
-      
+      social_profile: '$.analysis.profile'
+      social_sentiment: '$.analysis.sentiment'
+      social_network: '$.analysis.network'
+
   # Phase 5: Public Records Research
   - name: research_public_records
     type: public_records_search
-    description: "Research public records and databases"
-    timeout: "${parameters.max_duration_minutes * 0.3}m"
-    depends_on: ["plan_evidence_collection"]
+    description: 'Research public records and databases'
+    timeout: '${parameters.max_duration_minutes * 0.3}m'
+    depends_on: ['plan_evidence_collection']
     condition: "contains(variables.sources, 'public_records')"
     config:
-      entity: "${variables.analysis_target}"
-      databases: ["corporate_filings", "property_records", "court_records"]
-      search_type: "${parameters.search_depth}"
-      verification_level: "standard"
+      entity: '${variables.analysis_target}'
+      databases: ['corporate_filings', 'property_records', 'court_records']
+      search_type: '${parameters.search_depth}'
+      verification_level: 'standard'
     outputs:
-      public_records: "$.records"
-      records_count: "$.records.length"
-      verification_status: "$.verification.status"
-      
+      public_records: '$.records'
+      records_count: '$.records.length'
+      verification_status: '$.verification.status'
+
   # Phase 6: Evidence Analysis and Synthesis
   - name: synthesize_evidence
     type: analysis_engine
-    description: "Synthesize and analyze collected evidence"
-    timeout: "${parameters.max_duration_minutes * 0.4}m"
-    depends_on: ["collect_web_intelligence", "analyze_social_media", "research_public_records"]
+    description: 'Synthesize and analyze collected evidence'
+    timeout: '${parameters.max_duration_minutes * 0.4}m'
+    depends_on:
+      [
+        'collect_web_intelligence',
+        'analyze_social_media',
+        'research_public_records',
+      ]
     config:
-      analysis_types: "${parameters.analysis_types}"
+      analysis_types: '${parameters.analysis_types}'
       evidence_sources:
-        web_intelligence: "${tasks.collect_web_intelligence.outputs.web_intelligence}"
-        social_analysis: "${tasks.analyze_social_media.outputs.social_profile}"
-        public_records: "${tasks.research_public_records.outputs.public_records}"
-      confidence_threshold: "${variables.confidence_min}"
-      synthesis_strategy: "${parameters.search_depth}"
+        web_intelligence: '${tasks.collect_web_intelligence.outputs.web_intelligence}'
+        social_analysis: '${tasks.analyze_social_media.outputs.social_profile}'
+        public_records: '${tasks.research_public_records.outputs.public_records}'
+      confidence_threshold: '${variables.confidence_min}'
+      synthesis_strategy: '${parameters.search_depth}'
     outputs:
-      entities: "$.analysis.entities"
-      relationships: "$.analysis.relationships"
-      timeline: "$.analysis.timeline"
-      insights: "$.analysis.insights"
-      confidence_score: "$.analysis.confidence"
-      
+      entities: '$.analysis.entities'
+      relationships: '$.analysis.relationships'
+      timeline: '$.analysis.timeline'
+      insights: '$.analysis.insights'
+      confidence_score: '$.analysis.confidence'
+
   # Phase 7: Quality Assurance
   - name: quality_assessment
     type: quality_assurance
-    description: "Assess quality and completeness of analysis"
+    description: 'Assess quality and completeness of analysis'
     timeout: 60s
-    depends_on: ["synthesize_evidence"]
+    depends_on: ['synthesize_evidence']
     config:
-      analysis_data: "${tasks.synthesize_evidence.outputs}"
+      analysis_data: '${tasks.synthesize_evidence.outputs}'
       quality_criteria:
-        - "source_diversity"
-        - "information_completeness"
-        - "credibility_verification"
-        - "temporal_relevance"
+        - 'source_diversity'
+        - 'information_completeness'
+        - 'credibility_verification'
+        - 'temporal_relevance'
       minimum_quality_score: 0.7
     outputs:
-      quality_score: "$.quality.overall_score"
-      quality_report: "$.quality.detailed_report"
-      recommendations: "$.quality.recommendations"
-      
+      quality_score: '$.quality.overall_score'
+      quality_report: '$.quality.detailed_report'
+      recommendations: '$.quality.recommendations'
+
   # Phase 8: Report Generation
   - name: generate_report
     type: report_generation
-    description: "Generate investigation report"
+    description: 'Generate investigation report'
     timeout: 120s
-    depends_on: ["quality_assessment"]
+    depends_on: ['quality_assessment']
     config:
-      template: "intelligence_analysis_${parameters.report_format}"
-      classification: "${parameters.classification_level}"
+      template: 'intelligence_analysis_${parameters.report_format}'
+      classification: '${parameters.classification_level}'
       data:
-        investigation: "${tasks.initialize_investigation.outputs}"
-        evidence_plan: "${tasks.plan_evidence_collection.outputs}"
-        analysis: "${tasks.synthesize_evidence.outputs}"
-        quality: "${tasks.quality_assessment.outputs}"
-      format: ["pdf", "json"]
+        investigation: '${tasks.initialize_investigation.outputs}'
+        evidence_plan: '${tasks.plan_evidence_collection.outputs}'
+        analysis: '${tasks.synthesize_evidence.outputs}'
+        quality: '${tasks.quality_assessment.outputs}'
+      format: ['pdf', 'json']
     outputs:
-      report_id: "$.report.id"
-      report_url: "$.report.url"
-      report_pages: "$.report.pages"
-      
+      report_id: '$.report.id'
+      report_url: '$.report.url'
+      report_pages: '$.report.pages'
+
   # Phase 9: Evidence Package Export
   - name: package_evidence
     type: evidence_export
-    description: "Package evidence for archival and sharing"
+    description: 'Package evidence for archival and sharing'
     timeout: 90s
-    depends_on: ["generate_report"]
+    depends_on: ['generate_report']
     config:
-      investigation_id: "${tasks.initialize_investigation.outputs.investigation_id}"
+      investigation_id: '${tasks.initialize_investigation.outputs.investigation_id}'
       include_raw_data: true
       include_analysis: true
       include_report: true
       encryption: true
-      classification: "${parameters.classification_level}"
+      classification: '${parameters.classification_level}'
     outputs:
-      package_id: "$.package.id"
-      package_url: "$.package.url"
-      package_size_mb: "$.package.size_mb"
+      package_id: '$.package.id'
+      package_url: '$.package.url'
+      package_size_mb: '$.package.size_mb'
 
 # Template success criteria
 success_criteria:
   - condition: "tasks.initialize_investigation.outputs.investigation_status == 'active'"
-    message: "Investigation initialized successfully"
-  - condition: "tasks.synthesize_evidence.outputs.confidence_score >= parameters.confidence_threshold"
-    message: "Analysis meets confidence threshold"
-  - condition: "tasks.quality_assessment.outputs.quality_score >= 0.7"
-    message: "Quality assessment meets minimum standards"
-  - condition: "tasks.generate_report.outputs.report_id != null"
-    message: "Investigation report generated successfully"
+    message: 'Investigation initialized successfully'
+  - condition: 'tasks.synthesize_evidence.outputs.confidence_score >= parameters.confidence_threshold'
+    message: 'Analysis meets confidence threshold'
+  - condition: 'tasks.quality_assessment.outputs.quality_score >= 0.7'
+    message: 'Quality assessment meets minimum standards'
+  - condition: 'tasks.generate_report.outputs.report_id != null'
+    message: 'Investigation report generated successfully'
 
 # Template failure handling
 on_failure:
   - type: alert
     severity: warning
-    message: "Intelligence analysis failed for ${variables.analysis_target}"
-    details: "Investigation ${variables.case_id} failed at task: ${failure.task}"
+    message: 'Intelligence analysis failed for ${variables.analysis_target}'
+    details: 'Investigation ${variables.case_id} failed at task: ${failure.task}'
   - type: case_management
-    operation: "update_investigation"
-    investigation_id: "${tasks.initialize_investigation.outputs.investigation_id}"
-    status: "failed"
-    notes: "Template execution failed: ${failure.message}"
+    operation: 'update_investigation'
+    investigation_id: '${tasks.initialize_investigation.outputs.investigation_id}'
+    status: 'failed'
+    notes: 'Template execution failed: ${failure.message}'
 
 # Template success handling
 on_success:
   - type: case_management
-    operation: "complete_investigation"
-    investigation_id: "${tasks.initialize_investigation.outputs.investigation_id}"
-    final_report: "${tasks.generate_report.outputs.report_id}"
-    evidence_package: "${tasks.package_evidence.outputs.package_id}"
+    operation: 'complete_investigation'
+    investigation_id: '${tasks.initialize_investigation.outputs.investigation_id}'
+    final_report: '${tasks.generate_report.outputs.report_id}'
+    evidence_package: '${tasks.package_evidence.outputs.package_id}'
   - type: metrics
-    increment: "intelligence_analysis_success_total"
+    increment: 'intelligence_analysis_success_total'
     labels:
-      purpose: "${variables.purpose}"
-      urgency: "${variables.urgency_level}"
-      template: "intelligence-analysis"
+      purpose: '${variables.purpose}'
+      urgency: '${variables.urgency_level}'
+      template: 'intelligence-analysis'
 
 # Template resource requirements
 resources:
-  cpu_limit: "1000m"
-  memory_limit: "2Gi"
-  timeout: "${parameters.max_duration_minutes}m"
+  cpu_limit: '1000m'
+  memory_limit: '2Gi'
+  timeout: '${parameters.max_duration_minutes}m'
   max_retries: 1
 
 # Template observability
@@ -331,57 +349,57 @@ observability:
   metrics: true
   logs: true
   custom_metrics:
-    - name: "intelligence_analysis_duration"
-      value: "${workflow.execution_duration}"
+    - name: 'intelligence_analysis_duration'
+      value: '${workflow.execution_duration}'
       labels:
-        purpose: "${variables.purpose}"
-        target: "${variables.analysis_target}"
-    - name: "intelligence_analysis_cost"
-      value: "${workflow.total_cost_usd}"
+        purpose: '${variables.purpose}'
+        target: '${variables.analysis_target}'
+    - name: 'intelligence_analysis_cost'
+      value: '${workflow.total_cost_usd}'
       labels:
-        purpose: "${variables.purpose}"
-        urgency: "${variables.urgency_level}"
+        purpose: '${variables.purpose}'
+        urgency: '${variables.urgency_level}'
 
 # Template usage examples
 usage_examples:
-  - name: "Corporate Due Diligence"
-    description: "Conduct due diligence on a potential business partner"
+  - name: 'Corporate Due Diligence'
+    description: 'Conduct due diligence on a potential business partner'
     parameters:
-      investigation_id: "dd-acme-corp-2025"
-      target_entity: "ACME Corporation"
-      investigation_purpose: "due_diligence"
-      evidence_sources: ["web", "public_records", "financial"]
-      search_depth: "comprehensive"
+      investigation_id: 'dd-acme-corp-2025'
+      target_entity: 'ACME Corporation'
+      investigation_purpose: 'due_diligence'
+      evidence_sources: ['web', 'public_records', 'financial']
+      search_depth: 'comprehensive'
       max_budget_usd: 50.0
-      
-  - name: "Threat Assessment"
-    description: "Assess potential security threat from an individual"
+
+  - name: 'Threat Assessment'
+    description: 'Assess potential security threat from an individual'
     parameters:
-      investigation_id: "threat-assessment-2025-001"
-      target_entity: "John Suspicious"
-      investigation_purpose: "threat_assessment"
-      urgency: "high"
-      evidence_sources: ["web", "social", "public_records"]
+      investigation_id: 'threat-assessment-2025-001'
+      target_entity: 'John Suspicious'
+      investigation_purpose: 'threat_assessment'
+      urgency: 'high'
+      evidence_sources: ['web', 'social', 'public_records']
       confidence_threshold: 0.8
-      
-  - name: "Quick Background Check"
-    description: "Perform a quick background check"
+
+  - name: 'Quick Background Check'
+    description: 'Perform a quick background check'
     parameters:
-      investigation_id: "bg-check-quick"
-      target_entity: "Jane Applicant"
-      investigation_purpose: "compliance_check"
-      search_depth: "surface"
+      investigation_id: 'bg-check-quick'
+      target_entity: 'Jane Applicant'
+      investigation_purpose: 'compliance_check'
+      search_depth: 'surface'
       max_budget_usd: 10.0
       max_duration_minutes: 15
-      report_format: "summary"
+      report_format: 'summary'
 
 # Template validation rules
 validation_rules:
-  - rule: "parameters.max_budget_usd > 0"
-    message: "Budget must be greater than zero"
-  - rule: "parameters.confidence_threshold >= 0.5"
-    message: "Confidence threshold must be at least 0.5"
-  - rule: "parameters.max_duration_minutes >= 10"
-    message: "Investigation must run for at least 10 minutes"
-  - rule: "len(parameters.evidence_sources) > 0"
-    message: "At least one evidence source must be specified"
+  - rule: 'parameters.max_budget_usd > 0'
+    message: 'Budget must be greater than zero'
+  - rule: 'parameters.confidence_threshold >= 0.5'
+    message: 'Confidence threshold must be at least 0.5'
+  - rule: 'parameters.max_duration_minutes >= 10'
+    message: 'Investigation must run for at least 10 minutes'
+  - rule: 'len(parameters.evidence_sources) > 0'
+    message: 'At least one evidence source must be specified'

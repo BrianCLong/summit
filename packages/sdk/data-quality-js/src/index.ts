@@ -15,7 +15,8 @@ const post = async (url: string, body: unknown) => {
   return res.json();
 };
 
-export const createRule = (base: string, rule: Rule) => post(`${base}/dq/rules`, rule);
+export const createRule = (base: string, rule: Rule) =>
+  post(`${base}/dq/rules`, rule);
 export const evaluate = (base: string, payload: unknown, rules: Rule[]) =>
   post(`${base}/dq/evaluate`, { payload, rules });
 export const quarantineRetry = (base: string, id: string) =>

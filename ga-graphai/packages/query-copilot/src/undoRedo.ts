@@ -48,10 +48,13 @@ export class UndoRedoManager<TState> {
     return this.state;
   }
 
-  snapshot(): { history: readonly UndoRedoCommand<TState>[]; redo: readonly UndoRedoCommand<TState>[] } {
+  snapshot(): {
+    history: readonly UndoRedoCommand<TState>[];
+    redo: readonly UndoRedoCommand<TState>[];
+  } {
     return {
       history: [...this.history],
-      redo: [...this.undone]
+      redo: [...this.undone],
     };
   }
 }

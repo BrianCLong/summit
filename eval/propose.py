@@ -1,9 +1,11 @@
 import json
+
 import yaml
+
 
 def main():
     try:
-        with open("eval/out/results.json", "r") as f:
+        with open("eval/out/results.json") as f:
             results = json.load(f)
     except FileNotFoundError:
         print("eval/out/results.json not found. Cannot propose weights.")
@@ -22,14 +24,13 @@ def main():
     weights = {model: round(weight_per_model, 2) for model in models}
 
     # Assuming a single route for now, as per router.yaml
-    router_weights = {
-        "nlp/summarize": weights
-    }
+    router_weights = {"nlp/summarize": weights}
 
     with open("router/weights.yaml", "w") as f:
         yaml.dump(router_weights, f, indent=2)
 
     print("Generated router/weights.yaml with proposed weights.")
+
 
 if __name__ == "__main__":
     main()

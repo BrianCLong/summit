@@ -13,9 +13,10 @@ import logging
 import math
 import re
 import time
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any
 
 import yaml
 
@@ -31,14 +32,14 @@ class ChaosExperimentSpec:
     name: str
     description: str
     type: str
-    target: Dict[str, Any]
-    fault_injection: Dict[str, Any]
+    target: dict[str, Any]
+    fault_injection: dict[str, Any]
     expected_behavior: Sequence[Any] = field(default_factory=list)
     success_criteria: Sequence[Any] = field(default_factory=list)
-    raw: Dict[str, Any] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, payload: Dict[str, Any]) -> "ChaosExperimentSpec":
+    def from_dict(cls, payload: dict[str, Any]) -> ChaosExperimentSpec:
         known_keys = {
             "name",
             "description",
@@ -48,7 +49,9 @@ class ChaosExperimentSpec:
             "expected_behavior",
             "success_criteria",
         }
-        missing = [key for key in ("name", "description", "type", "fault_injection") if key not in payload]
+        missing = [
+            key for key in ("name", "description", "type", "fault_injection") if key not in payload
+        ]
         if missing:
             raise ValueError(f"Experiment definition missing required keys: {missing}")
 
@@ -81,13 +84,13 @@ class ChaosExperimentResult:
     success: bool
     started_at: float
     finished_at: float
-    hook_result: Optional[chaos_hooks.HookExecutionResult]
-    notes: List[str] = field(default_factory=list)
-    metrics: Dict[str, Any] = field(default_factory=dict)
-    drill_type: Optional[str] = None
+    hook_result: chaos_hooks.HookExecutionResult | None
+    notes: list[str] = field(default_factory=list)
+    metrics: dict[str, Any] = field(default_factory=dict)
+    drill_type: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
-        payload: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {
             "name": self.name,
             "success": self.success,
             "started_at": self.started_at,
@@ -112,10 +115,10 @@ class ChaosExperimentResult:
 class ChaosSuite:
     """Container for parsed chaos configuration."""
 
-    experiments: List[ChaosExperimentSpec]
-    compound: List[Dict[str, Any]]
-    baseline: Dict[str, Any]
-    validation: Dict[str, Any]
+    experiments: list[ChaosExperimentSpec]
+    compound: list[dict[str, Any]]
+    baseline: dict[str, Any]
+    validation: dict[str, Any]
 
 
 def _parse_duration_to_seconds(duration: str) -> int:
@@ -146,9 +149,9 @@ class ChaosRunner:
     def run_suite(
         self,
         *,
-        experiment_names: Optional[Sequence[str]] = None,
-        drill_type: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        experiment_names: Sequence[str] | None = None,
+        drill_type: str | None = None,
+    ) -> dict[str, Any]:
         suite = self._load_suite()
         filtered = self._filter_experiments(suite.experiments, experiment_names)
         allowed_names = (
@@ -157,7 +160,7 @@ class ChaosRunner:
             else {experiment.name for experiment in suite.experiments}
         )
 
-        results: List[ChaosExperimentResult] = []
+        results: list[ChaosExperimentResult] = []
         for experiment in filtered:
             results.append(self._run_single_experiment(experiment, drill_type=drill_type))
 
@@ -203,9 +206,9 @@ class ChaosRunner:
 
     def _filter_experiments(
         self,
-        experiments: List[ChaosExperimentSpec],
-        experiment_names: Optional[Sequence[str]],
-    ) -> List[ChaosExperimentSpec]:
+        experiments: list[ChaosExperimentSpec],
+        experiment_names: Sequence[str] | None,
+    ) -> list[ChaosExperimentSpec]:
         if not experiment_names:
             return list(experiments)
 
@@ -219,11 +222,11 @@ class ChaosRunner:
         self,
         experiment: ChaosExperimentSpec,
         *,
-        drill_type: Optional[str],
+        drill_type: str | None,
     ) -> ChaosExperimentResult:
         start_time = time.time()
-        notes: List[str] = []
-        hook_result: Optional[chaos_hooks.HookExecutionResult]
+        notes: list[str] = []
+        hook_result: chaos_hooks.HookExecutionResult | None
 
         try:
             hook_result = self._dispatch_fault(experiment)
@@ -254,13 +257,13 @@ class ChaosRunner:
 
     def _run_compound_experiments(
         self,
-        compound_definitions: Iterable[Dict[str, Any]],
-        experiment_lookup: Dict[str, ChaosExperimentSpec],
+        compound_definitions: Iterable[dict[str, Any]],
+        experiment_lookup: dict[str, ChaosExperimentSpec],
         *,
         allowed_names: set[str],
-        drill_type: Optional[str],
-    ) -> List[ChaosExperimentResult]:
-        results: List[ChaosExperimentResult] = []
+        drill_type: str | None,
+    ) -> list[ChaosExperimentResult]:
+        results: list[ChaosExperimentResult] = []
         for definition in compound_definitions:
             name = definition.get("name")
             experiment_names = definition.get("experiments", [])
@@ -295,7 +298,9 @@ class ChaosRunner:
 
         return results
 
-    def _dispatch_fault(self, experiment: ChaosExperimentSpec) -> Optional[chaos_hooks.HookExecutionResult]:
+    def _dispatch_fault(
+        self, experiment: ChaosExperimentSpec
+    ) -> chaos_hooks.HookExecutionResult | None:
         fault_type = experiment.fault_injection.get("type")
         if not fault_type:
             raise ValueError(f"Experiment {experiment.name} missing fault injection type")
@@ -360,9 +365,9 @@ class ChaosRunner:
 
     def _summarize_results(
         self,
-        results: List[ChaosExperimentResult],
-        baseline: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        results: list[ChaosExperimentResult],
+        baseline: dict[str, Any],
+    ) -> dict[str, Any]:
         total = len(results)
         successes = sum(1 for result in results if result.success)
         pass_rate = successes / total if total else 0.0
@@ -397,7 +402,7 @@ def run_pod_kill_chaos_test(
     *,
     namespace: str = "default",
     dry_run: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     results = [
         chaos_hooks.inject_pod_kill_hook(pod, namespace=namespace, dry_run=dry_run)
         for pod in target_pods
@@ -416,7 +421,7 @@ def run_broker_kill_chaos_test(
     *,
     namespace: str = "default",
     dry_run: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     results = [
         chaos_hooks.inject_broker_kill_hook(broker, namespace=namespace, dry_run=dry_run)
         for broker in target_brokers

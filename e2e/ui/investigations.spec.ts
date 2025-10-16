@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test('Investigations list renders and navigates to detail', async ({ page }) => {
+test('Investigations list renders and navigates to detail', async ({
+  page,
+}) => {
   await page.goto('/investigations');
   await expect(page.getByText('Investigations')).toBeVisible();
   // Navigate to a detail page (mock id)

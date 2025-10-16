@@ -35,7 +35,11 @@ export class CollabClient extends EventEmitter {
     this.send({ type: 'selection.update', entityId, selection });
   }
 
-  addComment(entityId: string, text: string, commentId = crypto.randomUUID()): void {
+  addComment(
+    entityId: string,
+    text: string,
+    commentId = crypto.randomUUID(),
+  ): void {
     this.send({ type: 'comment.add', entityId, commentId, text });
   }
 

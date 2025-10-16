@@ -72,9 +72,15 @@ describe('FederatedAttributionEngine', () => {
   class StubConnector implements AnalyticsConnector {
     public payloads: AttributionResult[] = [];
 
-    constructor(public readonly id: string, public readonly name: string) {}
+    constructor(
+      public readonly id: string,
+      public readonly name: string,
+    ) {}
 
-    async sendAttribution(payload: { connectorId: string; result: AttributionResult }): Promise<void> {
+    async sendAttribution(payload: {
+      connectorId: string;
+      result: AttributionResult;
+    }): Promise<void> {
       this.payloads.push(payload.result);
     }
   }
@@ -94,20 +100,28 @@ describe('FederatedAttributionEngine', () => {
   it('computes multi-touch attribution models', () => {
     const engine = buildEngine();
     grantConsent(engine);
-    touchpoints.forEach(tp => engine.recordEvent(tp));
+    touchpoints.forEach((tp) => engine.recordEvent(tp));
 
     engine.recordConversion(conversion);
 
     const firstTouch = engine.computeAttribution(conversion, 'first_touch');
     expect(firstTouch?.contributions).toHaveLength(3);
-    expect(firstTouch?.contributions.find(c => c.event.eventId === 'evt-1')?.weight).toBe(1);
-    expect(firstTouch?.contributions.find(c => c.event.eventId === 'evt-2')?.weight).toBe(0);
+    expect(
+      firstTouch?.contributions.find((c) => c.event.eventId === 'evt-1')
+        ?.weight,
+    ).toBe(1);
+    expect(
+      firstTouch?.contributions.find((c) => c.event.eventId === 'evt-2')
+        ?.weight,
+    ).toBe(0);
 
     const linear = engine.computeAttribution(conversion, 'linear');
-    expect(linear?.contributions.every(c => c.weight === 1 / 3)).toBe(true);
+    expect(linear?.contributions.every((c) => c.weight === 1 / 3)).toBe(true);
 
-    const decay = engine.computeAttribution(conversion, 'time_decay', { halfLifeHours: 24 });
-    const weights = decay?.contributions.map(c => c.weight ?? 0) ?? [];
+    const decay = engine.computeAttribution(conversion, 'time_decay', {
+      halfLifeHours: 24,
+    });
+    const weights = decay?.contributions.map((c) => c.weight ?? 0) ?? [];
     const total = weights.reduce((acc, value) => acc + value, 0);
     expect(total).toBeCloseTo(1, 5);
     expect(weights[weights.length - 1]).toBeGreaterThan(weights[0]);
@@ -116,7 +130,7 @@ describe('FederatedAttributionEngine', () => {
   it('provides conversion path analysis without including the conversion touchpoint', () => {
     const engine = buildEngine();
     grantConsent(engine);
-    touchpoints.forEach(tp => engine.recordEvent(tp));
+    touchpoints.forEach((tp) => engine.recordEvent(tp));
     engine.recordConversion(conversion);
 
     const summary = engine.analyzeConversionPath(userId, conversion);
@@ -130,7 +144,7 @@ describe('FederatedAttributionEngine', () => {
   it('generates privacy-safe cohort metrics', () => {
     const engine = buildEngine();
     grantConsent(engine);
-    touchpoints.forEach(tp => engine.recordEvent(tp));
+    touchpoints.forEach((tp) => engine.recordEvent(tp));
     engine.recordConversion(conversion);
 
     const secondConversion: ConversionEvent = {
@@ -158,12 +172,15 @@ describe('FederatedAttributionEngine', () => {
   it('dispatches real-time attribution results to registered connectors', async () => {
     const engine = buildEngine();
     grantConsent(engine);
-    touchpoints.forEach(tp => engine.recordEvent(tp));
+    touchpoints.forEach((tp) => engine.recordEvent(tp));
 
     const connector = new StubConnector('ga', 'Google Analytics');
     engine.registerConnector(connector);
 
-    const result = await engine.processRealTimeAttribution(conversion, 'u_shaped');
+    const result = await engine.processRealTimeAttribution(
+      conversion,
+      'u_shaped',
+    );
     expect(result).not.toBeNull();
     expect(connector.payloads).toHaveLength(1);
     expect(connector.payloads[0].model).toBe('u_shaped');

@@ -6,7 +6,7 @@ import {
   NvdFeed,
   RiskComputationOptions,
   ToolProfileInput,
-  ToolRiskProfile
+  ToolRiskProfile,
 } from './types.js';
 import { AllowlistSigner } from './signer.js';
 
@@ -37,7 +37,7 @@ export class ToolRiskRegistry {
       networkEgressClasses: [...input.networkEgressClasses],
       cves: [],
       riskScore: 0,
-      lastUpdated: now
+      lastUpdated: now,
     };
     this.profiles.set(key, profile);
     return this.recalculate(profile);
@@ -46,14 +46,20 @@ export class ToolRiskRegistry {
   getProfile(tool: string, version: string): ToolRiskProfile | undefined {
     const key = profileKey(tool, version);
     const profile = this.profiles.get(key);
-    return profile ? { ...profile, networkEgressClasses: [...profile.networkEgressClasses], cves: [...profile.cves] } : undefined;
+    return profile
+      ? {
+          ...profile,
+          networkEgressClasses: [...profile.networkEgressClasses],
+          cves: [...profile.cves],
+        }
+      : undefined;
   }
 
   allProfiles(): ToolRiskProfile[] {
     return Array.from(this.profiles.values()).map((profile) => ({
       ...profile,
       networkEgressClasses: [...profile.networkEgressClasses],
-      cves: [...profile.cves]
+      cves: [...profile.cves],
     }));
   }
 
@@ -74,7 +80,7 @@ export class ToolRiskRegistry {
     const updated: ToolRiskProfile = {
       ...profile,
       riskScore: computeRiskScore(profile, this.riskOptions),
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
     this.profiles.set(profileKey(profile.tool, profile.version), updated);
     return updated;
@@ -82,10 +88,12 @@ export class ToolRiskRegistry {
 
   generateAllowlistManifest(
     signer: AllowlistSigner,
-    options: AllowlistOptions
+    options: AllowlistOptions,
   ): AllowlistManifest {
     const include = options.includeTools?.map((tool) => tool.toLowerCase());
-    const exclude = new Set(options.excludeTools?.map((tool) => tool.toLowerCase()) ?? []);
+    const exclude = new Set(
+      options.excludeTools?.map((tool) => tool.toLowerCase()) ?? [],
+    );
     const entries = this.allProfiles()
       .filter((profile) => profile.riskScore <= options.riskThreshold)
       .filter((profile) => {
@@ -104,7 +112,7 @@ export class ToolRiskRegistry {
         riskScore: profile.riskScore,
         sbomDigest: profile.sbomDigest,
         dataAccessScope: profile.dataAccessScope,
-        networkEgressClasses: [...profile.networkEgressClasses]
+        networkEgressClasses: [...profile.networkEgressClasses],
       }))
       .sort((a, b) => {
         const toolCompare = a.tool.localeCompare(b.tool);
@@ -116,7 +124,7 @@ export class ToolRiskRegistry {
 
     const manifestPayload = {
       environment: options.environment,
-      entries
+      entries,
     };
     return signer.sign(manifestPayload);
   }

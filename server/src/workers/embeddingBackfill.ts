@@ -11,7 +11,8 @@ export async function backfillEmbeddings(tenantId: string) {
   const session = getNeo4jDriver().session();
   const pg = getPostgresPool();
   const res = await session.run(
-    'MATCH (e:Entity {tenantId:$t}) RETURN e.id AS id, e.type AS type, e.label AS label LIMIT 50000', { t: tenantId }
+    'MATCH (e:Entity {tenantId:$t}) RETURN e.id AS id, e.type AS type, e.label AS label LIMIT 50000',
+    { t: tenantId },
   );
   for (const r of res.records) {
     const text = `${r.get('type')} ${r.get('label')}`;
@@ -21,7 +22,7 @@ export async function backfillEmbeddings(tenantId: string) {
        VALUES ($1,$2,$3::vector,$4)
        ON CONFLICT (tenant_id, entity_id)
        DO UPDATE SET embedding=$3::vector, model=$4, updated_at=NOW()`,
-      [tenantId, r.get('id'), `[${emb.join(',')}]`, 'text-embedding-3-small']
+      [tenantId, r.get('id'), `[${emb.join(',')}]`, 'text-embedding-3-small'],
     );
   }
   await session.close();

@@ -282,7 +282,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-          exit-code: '0'  # Don't fail on vulnerabilities, just report
+          exit-code: '0' # Don't fail on vulnerabilities, just report
 
       - name: Secret Scanning (gitleaks)
         uses: gitleaks/gitleaks-action@v2
@@ -401,7 +401,7 @@ jobs:
         env:
           SERVICE_NAME: intelgraph-server
           GIT_SHA: ${{ github.sha }}
-          OTEL_SANITY_TIMEOUT: 90000  # 90 seconds
+          OTEL_SANITY_TIMEOUT: 90000 # 90 seconds
 
       - name: OTEL Status Summary
         if: always()
@@ -422,7 +422,16 @@ jobs:
   merge-readiness:
     name: Merge Readiness Check
     runs-on: ubuntu-latest
-    needs: [setup, lint-and-typecheck, unit-integration-tests, schema-api-validation, security-gates, build-and-attestation, otel-sanity]
+    needs:
+      [
+        setup,
+        lint-and-typecheck,
+        unit-integration-tests,
+        schema-api-validation,
+        security-gates,
+        build-and-attestation,
+        otel-sanity,
+      ]
     if: always()
     steps:
       - name: Evaluate merge readiness

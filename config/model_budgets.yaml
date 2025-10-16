@@ -5,54 +5,54 @@ apiVersion: config.maestro.dev/v1
 kind: ModelBudgets
 metadata:
   name: intelgraph-model-budgets
-  version: "27.0.0"
+  version: '27.0.0'
 
 spec:
   # Global configuration
   global:
-    currency: "USD"
-    tracking_window: "1h"  # Budget window: 1 hour
-    daily_reset: "00:00:00Z"
-    cost_calculator: "token-based"  # token-based | time-based
+    currency: 'USD'
+    tracking_window: '1h' # Budget window: 1 hour
+    daily_reset: '00:00:00Z'
+    cost_calculator: 'token-based' # token-based | time-based
 
   # Environment-specific budgets
   environments:
     dev:
-      hourly_budget: 5.00    # $5/hour for development
-      daily_budget: 50.00    # $50/day max
+      hourly_budget: 5.00 # $5/hour for development
+      daily_budget: 50.00 # $50/day max
       model_limits:
-        gpt-4: 2.00          # $2/hour for GPT-4
-        gpt-3.5-turbo: 3.00  # $3/hour for GPT-3.5
-        claude-3: 2.00       # $2/hour for Claude
-      breach_action: "throttle"  # throttle | block | alert
+        gpt-4: 2.00 # $2/hour for GPT-4
+        gpt-3.5-turbo: 3.00 # $3/hour for GPT-3.5
+        claude-3: 2.00 # $2/hour for Claude
+      breach_action: 'throttle' # throttle | block | alert
 
     staging:
-      hourly_budget: 15.00   # $15/hour for staging
-      daily_budget: 200.00   # $200/day max
+      hourly_budget: 15.00 # $15/hour for staging
+      daily_budget: 200.00 # $200/day max
       model_limits:
         gpt-4: 8.00
         gpt-3.5-turbo: 10.00
         claude-3: 8.00
-      breach_action: "alert"
+      breach_action: 'alert'
 
     prod:
-      hourly_budget: 100.00  # $100/hour for production
-      daily_budget: 1000.00  # $1000/day max
+      hourly_budget: 100.00 # $100/hour for production
+      daily_budget: 1000.00 # $1000/day max
       model_limits:
         gpt-4: 40.00
         gpt-3.5-turbo: 60.00
         claude-3: 40.00
-      breach_action: "alert"
+      breach_action: 'alert'
 
   # Model provider configuration
   providers:
     openai:
-      api_key_ref: "openai-api-key"
-      base_url: "https://api.openai.com/v1"
-      timeout: "30s"
+      api_key_ref: 'openai-api-key'
+      base_url: 'https://api.openai.com/v1'
+      timeout: '30s'
       retry_policy:
         max_retries: 3
-        backoff: "exponential"
+        backoff: 'exponential'
       models:
         gpt-4:
           cost_per_1k_input_tokens: 0.03
@@ -66,12 +66,12 @@ spec:
           temperature_range: [0.0, 1.0]
 
     anthropic:
-      api_key_ref: "anthropic-api-key"
-      base_url: "https://api.anthropic.com"
-      timeout: "45s"
+      api_key_ref: 'anthropic-api-key'
+      base_url: 'https://api.anthropic.com'
+      timeout: '45s'
       retry_policy:
         max_retries: 3
-        backoff: "exponential"
+        backoff: 'exponential'
       models:
         claude-3-sonnet:
           cost_per_1k_input_tokens: 0.003
@@ -81,41 +81,41 @@ spec:
 
   # Routing rules
   routing:
-    default_provider: "openai"
-    default_model: "gpt-3.5-turbo"
+    default_provider: 'openai'
+    default_model: 'gpt-3.5-turbo'
 
     # Route by request type
     routes:
-      - name: "nl2cypher"
+      - name: 'nl2cypher'
         match:
-          request_type: "nl2cypher"
+          request_type: 'nl2cypher'
         destination:
-          provider: "openai"
-          model: "gpt-4"
+          provider: 'openai'
+          model: 'gpt-4'
         priority: 1
 
-      - name: "entity-extraction"
+      - name: 'entity-extraction'
         match:
-          request_type: "entity_extraction"
+          request_type: 'entity_extraction'
         destination:
-          provider: "openai"
-          model: "gpt-3.5-turbo"
+          provider: 'openai'
+          model: 'gpt-3.5-turbo'
         priority: 2
 
-      - name: "analysis"
+      - name: 'analysis'
         match:
-          request_type: "analysis"
+          request_type: 'analysis'
         destination:
-          provider: "anthropic"
-          model: "claude-3-sonnet"
+          provider: 'anthropic'
+          model: 'claude-3-sonnet'
         priority: 3
 
-      - name: "fallback"
+      - name: 'fallback'
         match:
-          request_type: "*"
+          request_type: '*'
         destination:
-          provider: "openai"
-          model: "gpt-3.5-turbo"
+          provider: 'openai'
+          model: 'gpt-3.5-turbo'
         priority: 999
 
   # Safety guardrails
@@ -125,48 +125,48 @@ spec:
       enabled: true
       alert_thresholds:
         - percentage: 75
-          action: "alert"
-          notification: "slack"
+          action: 'alert'
+          notification: 'slack'
         - percentage: 90
-          action: "throttle"
-          notification: "pagerduty"
+          action: 'throttle'
+          notification: 'pagerduty'
         - percentage: 100
-          action: "block"
-          notification: "emergency"
+          action: 'block'
+          notification: 'emergency'
 
     # Request validation
     request_validation:
       max_prompt_length: 10000
       min_prompt_length: 10
       blocked_patterns:
-        - "password"
-        - "api_key"
-        - "secret"
-        - "token"
+        - 'password'
+        - 'api_key'
+        - 'secret'
+        - 'token'
       required_headers:
-        - "x-request-id"
-        - "x-user-id"
+        - 'x-request-id'
+        - 'x-user-id'
 
     # Response filtering
     response_filtering:
       enabled: true
       max_response_length: 50000
       filter_patterns:
-        - "(?i)password"
-        - "(?i)api[_-]?key"
-        - "(?i)secret"
+        - '(?i)password'
+        - '(?i)api[_-]?key'
+        - '(?i)secret'
 
   # Deterministic settings for testing
   testing:
     deterministic_mode: true
     default_temperature: 0.0
     default_seed: 42
-    golden_transcripts_path: "tests/golden/model_interactions"
+    golden_transcripts_path: 'tests/golden/model_interactions'
 
   # Sampling and logging
   observability:
-    request_sampling: 0.1  # Sample 10% of requests
-    log_level: "info"
+    request_sampling: 0.1 # Sample 10% of requests
+    log_level: 'info'
     metrics_enabled: true
     tracing_enabled: true
 
@@ -174,53 +174,53 @@ spec:
     exporters:
       prometheus:
         enabled: true
-        endpoint: "http://prometheus:9090"
+        endpoint: 'http://prometheus:9090'
       jaeger:
         enabled: true
-        endpoint: "http://jaeger:14268"
+        endpoint: 'http://jaeger:14268'
 
   # Circuit breaker configuration
   circuit_breaker:
     enabled: true
-    failure_threshold: 5      # Fail after 5 consecutive errors
-    recovery_timeout: "30s"   # Try again after 30 seconds
-    half_open_requests: 3     # Allow 3 requests when half-open
+    failure_threshold: 5 # Fail after 5 consecutive errors
+    recovery_timeout: '30s' # Try again after 30 seconds
+    half_open_requests: 3 # Allow 3 requests when half-open
 
   # Model health checks
   health_checks:
     enabled: true
-    interval: "5m"
-    timeout: "10s"
+    interval: '5m'
+    timeout: '10s'
     endpoints:
-      - provider: "openai"
-        model: "gpt-3.5-turbo"
-        test_prompt: "Hello"
-        expected_response_pattern: "(?i)hello|hi|greeting"
-      - provider: "anthropic"
-        model: "claude-3-sonnet"
-        test_prompt: "Test"
-        expected_response_pattern: "(?i)test|hello"
+      - provider: 'openai'
+        model: 'gpt-3.5-turbo'
+        test_prompt: 'Hello'
+        expected_response_pattern: '(?i)hello|hi|greeting'
+      - provider: 'anthropic'
+        model: 'claude-3-sonnet'
+        test_prompt: 'Test'
+        expected_response_pattern: '(?i)test|hello'
 
   # Emergency overrides
   emergency_overrides:
     enabled: true
     operator_approval_required: true
-    auto_expire_after: "1h"
+    auto_expire_after: '1h'
     audit_trail: true
 
     # Break-glass scenarios
     scenarios:
-      - name: "production-incident"
-        trigger: "manual"
+      - name: 'production-incident'
+        trigger: 'manual'
         actions:
-          - "remove_budget_limits"
-          - "enable_all_providers"
-          - "bypass_routing_rules"
-        approval_roles: ["admin", "oncall-engineer"]
+          - 'remove_budget_limits'
+          - 'enable_all_providers'
+          - 'bypass_routing_rules'
+        approval_roles: ['admin', 'oncall-engineer']
 
-      - name: "provider-outage"
-        trigger: "health_check_failure"
+      - name: 'provider-outage'
+        trigger: 'health_check_failure'
         actions:
-          - "failover_to_backup_provider"
-          - "increase_retry_limits"
-        approval_roles: ["admin"]
+          - 'failover_to_backup_provider'
+          - 'increase_retry_limits'
+        approval_roles: ['admin']

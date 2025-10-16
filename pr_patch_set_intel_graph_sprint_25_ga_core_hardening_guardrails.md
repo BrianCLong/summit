@@ -5,9 +5,11 @@
 ---
 
 ## PR 1 — feat(policy): **export policy + simulate/enforce + DLP redactions + WebAuthn step‑up**
+
 **Branch:** `feature/policy-export-opa`
 
 ### What’s included
+
 - `policies/export.rego` — production‑ready OPA policy implementing:
   - **simulate/enforce** modes
   - **DLP redactions** for `pii:*` tags + explicit paths
@@ -21,6 +23,7 @@
 > If you want to **replace** my policy with your attached `export.rego`, simply drop it over `policies/export.rego`. Tests are compatible with the spec as written in the Day‑1 handoff.
 
 ### Patch (unified diff)
+
 ```diff
 *** Begin Patch
 *** Add File: policies/export.rego
@@ -241,7 +244,7 @@
 *** End Patch
 ```
 
-```diff
+````diff
 *** Begin Patch
 *** Add File: docs/policies/export.md
 +# Export Policy — Decision Contract
@@ -285,14 +288,16 @@
 +**Rollout**: enable **simulate** for first 48h; toggle **enforce** thereafter.
 +
 *** End Patch
-```
+````
 
 ---
 
 ## PR 2 — chore(obs): **Grafana‑as‑code — GA Core Guardrails dashboard + provisioning**
+
 **Branch:** `chore/grafana-ga-core-dashboard`
 
 ### What’s included
+
 - `observability/grafana/dashboards/ga_core_dashboard.json` — minimal but working dashboard matching Day‑1 panels: **NLQ p95**, **ingest p95**, **export allow/deny/redacted**, **ER precision/recall**, **SLO burn**.
 - `observability/grafana/provisioning/dashboards/ga-core.yml` — file provider.
 - `observability/README.md` — import notes (set Prometheus UID; vars `env`, `tenant`).
@@ -300,6 +305,7 @@
 > If you prefer your attached JSON, drop it over the dashboard file; provisioning will pick it up.
 
 ### Patch (unified diff)
+
 ```diff
 *** Begin Patch
 *** Add File: observability/grafana/dashboards/ga_core_dashboard.json
@@ -429,15 +435,18 @@
 ---
 
 ## PR 3 — chore(pm): **/project/pm Jira CSV + import guide**
+
 **Branch:** `chore/pm-sprint25-jira-csv`
 
 ### What’s included
+
 - `project/pm/sprint25_jira.csv.placeholder` — marker file; replace with your attached CSV.
 - `project/pm/README.md` — Jira import steps (mapped to your handoff).
 
 > Replace the placeholder with your `sprint25_jira.csv` attachment before merge. Keeping the CSV in repo under `/project/pm/` gives us a reproducible import.
 
 ### Patch (unified diff)
+
 ```diff
 *** Begin Patch
 *** Add File: project/pm/sprint25_jira.csv.placeholder
@@ -465,6 +474,7 @@
 ---
 
 ## How to apply locally
+
 ```bash
 # from repo root
 # PR 1
@@ -481,7 +491,7 @@ git apply path/to/pr3.patch && git add -A && git commit -m "chore(pm): add Sprin
 ```
 
 ## Notes
+
 - **Policy rollout**: start `simulate` for 48h, then switch to `enforce`.
 - **Grafana**: set Prometheus **UID** and confirm `env`/`tenant` labels exist.
 - **CSV**: replace placeholder with your file before merging PR 3.
-

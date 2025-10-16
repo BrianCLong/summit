@@ -33,5 +33,11 @@ input StartRunInput {
 type Mutation {
   createRunDraft(input: CreateRunDraftInput!): SafeResult!
   startRun(input: StartRunInput!): SafeResult!
-  registerUATCheckpoint(runId: ID!, checkpoint: String!, evidenceURIs: [String!], verdict: String!, meta: SafeMeta!): SafeResult!
+  registerUATCheckpoint(
+    runId: ID!
+    checkpoint: String!
+    evidenceURIs: [String!]
+    verdict: String!
+    meta: SafeMeta!
+  ): SafeResult!
 }

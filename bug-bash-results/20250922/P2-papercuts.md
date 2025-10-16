@@ -1,6 +1,7 @@
 # P2 - Papercuts (Minor Usability Issues)
 
 ## Template
+
 ```
 **Issue ID**: P2-001
 **Component**: [UI/API/Backend/Integration]
@@ -14,5 +15,5 @@
 ```
 
 ## Issues Found
-<!-- Add P2 issues below -->
 
+<!-- Add P2 issues below -->

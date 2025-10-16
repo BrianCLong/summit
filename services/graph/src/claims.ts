@@ -77,28 +77,40 @@ export class ClaimRepo {
   /**
    * Create a CONTRADICTS relationship between two claims by their ids.
    */
-  async linkContradictionById(claimIdA: string, claimIdB: string): Promise<void> {
+  async linkContradictionById(
+    claimIdA: string,
+    claimIdB: string,
+  ): Promise<void> {
     const session = this.driver.session();
     try {
       await session.executeWrite((tx) =>
-        tx.run(`MATCH (a:Claim {id:$a}), (b:Claim {id:$b}) MERGE (a)-[:CONTRADICTS]->(b)`, {
-          a: claimIdA,
-          b: claimIdB,
-        }),
+        tx.run(
+          `MATCH (a:Claim {id:$a}), (b:Claim {id:$b}) MERGE (a)-[:CONTRADICTS]->(b)`,
+          {
+            a: claimIdA,
+            b: claimIdB,
+          },
+        ),
       );
     } finally {
       await session.close();
     }
   }
 
-  async unlinkContradictionById(claimIdA: string, claimIdB: string): Promise<void> {
+  async unlinkContradictionById(
+    claimIdA: string,
+    claimIdB: string,
+  ): Promise<void> {
     const session = this.driver.session();
     try {
       await session.executeWrite((tx) =>
-        tx.run(`MATCH (a:Claim {id:$a})-[r:CONTRADICTS]->(b:Claim {id:$b}) DELETE r`, {
-          a: claimIdA,
-          b: claimIdB,
-        }),
+        tx.run(
+          `MATCH (a:Claim {id:$a})-[r:CONTRADICTS]->(b:Claim {id:$b}) DELETE r`,
+          {
+            a: claimIdA,
+            b: claimIdB,
+          },
+        ),
       );
     } finally {
       await session.close();
@@ -109,7 +121,9 @@ export class ClaimRepo {
     const session = this.driver.session();
     try {
       const res = await session.executeRead((tx) =>
-        tx.run(`MATCH (:Claim {id:$id})-[:CONTRADICTS]->(c:Claim) RETURN c`, { id: claimId }),
+        tx.run(`MATCH (:Claim {id:$id})-[:CONTRADICTS]->(c:Claim) RETURN c`, {
+          id: claimId,
+        }),
       );
       return res.records.map((r) => this.nodeToClaim(r.get('c')));
     } finally {

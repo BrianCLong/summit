@@ -17,8 +17,8 @@ spec:
             sum(rate(http_requests_total{job="{{args.service-name}}", namespace="{{args.namespace}}", code=~"5.."}[1m]))
             /
             sum(rate(http_requests_total{job="{{args.service-name}}", namespace="{{args.namespace}}"}[1m]))
-      successCondition: "{{ .value < 0.01 }}" # Error rate < 1%
-      failureCondition: "{{ .value >= 0.01 }}" # Error rate >= 0.01 (1%)
+      successCondition: '{{ .value < 0.01 }}' # Error rate < 1%
+      failureCondition: '{{ .value >= 0.01 }}' # Error rate >= 0.01 (1%)
     - name: p99-latency
       interval: 1m
       failureLimit: 1
@@ -27,5 +27,5 @@ spec:
           address: http://prometheus-kube-prometheus-stack-prometheus:9090 # Adjust if Prometheus is elsewhere
           query: |
             histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="{{args.service-name}}", namespace="{{args.namespace}}"}[1m])) by (le))
-      successCondition: "{{ .value < 0.5 }}" # p99 latency < 500ms
-      failureCondition: "{{ .value >= 0.5 }}" # p99 latency >= 500ms
+      successCondition: '{{ .value < 0.5 }}' # p99 latency < 500ms
+      failureCondition: '{{ .value >= 0.5 }}' # p99 latency >= 500ms

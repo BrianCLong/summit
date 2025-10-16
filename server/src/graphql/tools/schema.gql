@@ -1,10 +1,19 @@
 scalar JSON
 
-type LintIssue { rule: String!, severity: String!, path: String!, message: String!, quickFix: String }
-type SimulationVerdict { stepId: ID!, decision: String!, reason: String! }
+type LintIssue {
+  rule: String!
+  severity: String!
+  path: String!
+  message: String!
+  quickFix: String
+}
+type SimulationVerdict {
+  stepId: ID!
+  decision: String!
+  reason: String!
+}
 
 extend type Query {
   lintRunbook(yaml: String!): [LintIssue!]!
   simulatePolicy(yaml: String!): [SimulationVerdict!]!
 }
-

@@ -1,19 +1,19 @@
 # Topicality — Agent-First, Human-Amplified Positioning Pack
 
-*Last updated: 2025-09-28*
+_Last updated: 2025-09-28_
 Owner: CEO + Product Marketing
 
 ---
 
 ## 0) Governance Alignment & Quick Links
 
-| Resource | Purpose | Owner |
-| --- | --- | --- |
-| [Agent-First Positioning Policy](../policy/agent-first-positioning-policy.md) | Binding policy for messaging, collateral, approvals, and evidence standards. | CEO + Product Marketing |
-| [Mission, Vision & Values](../governance/mission-vision-values.md) | Defines the human-amplified mission, future state vision, and core values that every asset must reinforce. | Executive Leadership + People |
-| [Documentation Governance Charter](../governance/documentation-charter.md) | Establishes governance roles, review cadence, and QA for all published materials. | Docs Council |
-| [COMPLIANCE](../COMPLIANCE.md) & [SECURITY_AND_PRIVACY](../SECURITY_AND_PRIVACY.md) | Guardrails for disclosure packs, attestations, data handling, and policy labels referenced throughout this pack. | Security & Compliance |
-| [Governance Style Guide](../governance/style-guide.md) | Style, tone, and accessibility rules for derivative collateral. | Docs Team |
+| Resource                                                                            | Purpose                                                                                                          | Owner                         |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| [Agent-First Positioning Policy](../policy/agent-first-positioning-policy.md)       | Binding policy for messaging, collateral, approvals, and evidence standards.                                     | CEO + Product Marketing       |
+| [Mission, Vision & Values](../governance/mission-vision-values.md)                  | Defines the human-amplified mission, future state vision, and core values that every asset must reinforce.       | Executive Leadership + People |
+| [Documentation Governance Charter](../governance/documentation-charter.md)          | Establishes governance roles, review cadence, and QA for all published materials.                                | Docs Council                  |
+| [COMPLIANCE](../COMPLIANCE.md) & [SECURITY_AND_PRIVACY](../SECURITY_AND_PRIVACY.md) | Guardrails for disclosure packs, attestations, data handling, and policy labels referenced throughout this pack. | Security & Compliance         |
+| [Governance Style Guide](../governance/style-guide.md)                              | Style, tone, and accessibility rules for derivative collateral.                                                  | Docs Team                     |
 
 **How to use this pack:** Confirm policy alignment in §0 before tailoring any section below. Every derivative asset should cite the employment commitment (§5), governance evidence (§4), and mission/vision/values statements as codified in the linked resources above.
 
@@ -59,28 +59,28 @@ Automation is often sold as replacement. We reject that. Topicality’s agent-fi
 
 1. **Agent-First Architecture**
 
-* Multi-agent orchestration with conductor + guardrails
-* Built-in disclosure packs per run (inputs, models, costs, provenance)
+- Multi-agent orchestration with conductor + guardrails
+- Built-in disclosure packs per run (inputs, models, costs, provenance)
 
 2. **Human Development Parity**
 
-* Every agent improvement pairs with a human upskilling plan
-* Role blueprints: agent tasks, human decisions, escalation paths
+- Every agent improvement pairs with a human upskilling plan
+- Role blueprints: agent tasks, human decisions, escalation paths
 
 3. **Provable ROI**
 
-* Time-to-first-value ≤ 14 days
-* Decision & artifact counters with evidence links (IntelGraph/Meastro)
+- Time-to-first-value ≤ 14 days
+- Decision & artifact counters with evidence links (IntelGraph/Meastro)
 
 4. **Governance by Design**
 
-* OPA ABAC, WebAuthn/FIDO2, data minimization, SOC2-lite path
-* Policy labels: origin, sensitivity, legal basis, retention
+- OPA ABAC, WebAuthn/FIDO2, data minimization, SOC2-lite path
+- Policy labels: origin, sensitivity, legal basis, retention
 
 5. **People-Positive Economics**
 
-* Output per FTE rises; headcount stability committed
-* Retraining budget tied to automation savings
+- Output per FTE rises; headcount stability committed
+- Retraining budget tied to automation savings
 
 **Proof assets to ship:** before/after benchmarks, disclosure pack templates, customer quotes about role elevation, incident/rollback logs (zero critical violations), reskilling completions.
 
@@ -93,26 +93,26 @@ We do not use Topicality agents to justify involuntary reductions. Automation sa
 
 **Definition of terms**
 
-* *“Never let a person go”* = no involuntary reductions **due to automation**.
-* Scope: full-time employees on teams using Topicality.
-* Time-bound: stated per-customer contract term; renewable with results.
-* Exceptions: performance or structural shifts **not** caused by automation; documented in governance log with exec sign-off.
+- _“Never let a person go”_ = no involuntary reductions **due to automation**.
+- Scope: full-time employees on teams using Topicality.
+- Time-bound: stated per-customer contract term; renewable with results.
+- Exceptions: performance or structural shifts **not** caused by automation; documented in governance log with exec sign-off.
 
 **Governance mechanics**
 
-* Quarterly attestation co-signed by customer sponsor and Topicality
-* Savings ledger → reskilling budget (floor %)
-* Public metrics: roles elevated, new skills certified, promotions enabled
+- Quarterly attestation co-signed by customer sponsor and Topicality
+- Savings ledger → reskilling budget (floor %)
+- Public metrics: roles elevated, new skills certified, promotions enabled
 
 ---
 
 ## 6) Differentiators vs. Market
 
-* **Provenance over prediction:** we ship disclosure packs with every meaningful run.
-* **Agent-first, not prompt-first:** orchestrated agents with policies, not loose copilots.
-* **Employment-safe:** codified pledge + metrics.
-* **Two-week proof path:** value slice in ≤14 days, ROI plan ≤8 weeks.
-* **White-label ready:** exportable modules with governance pack.
+- **Provenance over prediction:** we ship disclosure packs with every meaningful run.
+- **Agent-first, not prompt-first:** orchestrated agents with policies, not loose copilots.
+- **Employment-safe:** codified pledge + metrics.
+- **Two-week proof path:** value slice in ≤14 days, ROI plan ≤8 weeks.
+- **White-label ready:** exportable modules with governance pack.
 
 ---
 
@@ -147,13 +147,13 @@ Open standards for policies and manifests; your data, your keys, exportable arti
 **Homepage hero**
 Agent-first automation. **Human-amplified results.**
 Scale output without layoffs—backed by disclosure-first governance.
-CTA: *See a 14-day value slice*
+CTA: _See a 14-day value slice_
 
 **Product section**
 
-* Orchestrate agents with policies, escalations, and evidence.
-* Prove value with run-linked disclosure packs.
-* Grow people with role blueprints and reskilling paths.
+- Orchestrate agents with policies, escalations, and evidence.
+- Prove value with run-linked disclosure packs.
+- Grow people with role blueprints and reskilling paths.
 
 **Investor one-liner**
 We turn automation into durable human leverage, with governance that enterprises can trust.
@@ -168,13 +168,13 @@ Topicality is an agent-first automation platform that amplifies people, not repl
 
 ## 10) Role Blueprint Template (Human ↔ Agent)
 
-* **Mission:** e.g., “Speed qualified pipeline”
-* **Human owner:** accountable decision-maker
-* **Agent squad:** names, scopes, escalation thresholds
-* **Guardrails:** policies, data access, logs
-* **KPIs:** throughput, quality, cycle time, cost
-* **Learning plan:** human upskilling modules tied to agent upgrades
-* **Proof artifacts:** disclosure packs, before/after benchmarks
+- **Mission:** e.g., “Speed qualified pipeline”
+- **Human owner:** accountable decision-maker
+- **Agent squad:** names, scopes, escalation thresholds
+- **Guardrails:** policies, data access, logs
+- **KPIs:** throughput, quality, cycle time, cost
+- **Learning plan:** human upskilling modules tied to agent upgrades
+- **Proof artifacts:** disclosure packs, before/after benchmarks
 
 ---
 
@@ -182,17 +182,17 @@ Topicality is an agent-first automation platform that amplifies people, not repl
 
 **Leading indicators**
 
-* time_to_first_value_days (target ≤ 14)
-* agent_to_human_ratio by team
-* escalation_rate (down over time)
-* reskilling_budget_utilization ≥ floor
+- time_to_first_value_days (target ≤ 14)
+- agent_to_human_ratio by team
+- escalation_rate (down over time)
+- reskilling_budget_utilization ≥ floor
 
 **Lagging indicators**
 
-* output_per_fte ↑
-* error_rate_p95 ≤ threshold
-* promotions_enabled (#, % of team)
-* **employment_stability:** 0 involuntary reductions due to automation (attested)
+- output_per_fte ↑
+- error_rate_p95 ≤ threshold
+- promotions_enabled (#, % of team)
+- **employment_stability:** 0 involuntary reductions due to automation (attested)
 
 ---
 
@@ -206,37 +206,37 @@ Topicality is an agent-first automation platform that amplifies people, not repl
 
 ## 13) Packaging & Pricing Narrative
 
-* **Start**: Design-partner bundle (fixed price, 14-day value slice, governance pack included).
-* **Scale**: Per-agent-hour with SLOs; savings-share optional **only** when employment pledge is maintained.
-* **People Fund**: % of automation savings automatically allocated to reskilling.
+- **Start**: Design-partner bundle (fixed price, 14-day value slice, governance pack included).
+- **Scale**: Per-agent-hour with SLOs; savings-share optional **only** when employment pledge is maintained.
+- **People Fund**: % of automation savings automatically allocated to reskilling.
 
 ---
 
 ## 14) Risk & Ethics Notes (External-ready)
 
-* Formal exceptions policy; documented with reason codes; board-visible.
-* DPA/DPIA ready; data minimization by default; redactions on export.
-* Accessibility & bias checks included in disclosure pack.
+- Formal exceptions policy; documented with reason codes; board-visible.
+- DPA/DPIA ready; data minimization by default; redactions on export.
+- Accessibility & bias checks included in disclosure pack.
 
 ---
 
 ## 15) FAQ (External)
 
-* **Q:** Have you ever caused a customer to eliminate roles?
+- **Q:** Have you ever caused a customer to eliminate roles?
   **A:** Our pledge is no involuntary reductions due to automation. We provide quarterly attestations; to date, customers report stability or growth in impacted teams.
-* **Q:** What happens if savings don’t materialize?
+- **Q:** What happens if savings don’t materialize?
   **A:** We reduce scope or roll back per the canary and rollback policy; you keep the role maps and artifacts.
-* **Q:** Can we export everything?
+- **Q:** Can we export everything?
   **A:** Yes—policies, manifests, and disclosure packs are portable.
 
 ---
 
 ## 16) Internal Enablement (Talk Tracks)
 
-* **Lead with the pledge**, follow with proof.
-* **Show the graph and the logs**—provenance builds trust.
-* **Anchor on value slices**, not moonshots.
-* **Tie savings to people growth**—make it tangible (training seats, certifications, promotions).
+- **Lead with the pledge**, follow with proof.
+- **Show the graph and the logs**—provenance builds trust.
+- **Anchor on value slices**, not moonshots.
+- **Tie savings to people growth**—make it tangible (training seats, certifications, promotions).
 
 ---
 
@@ -252,11 +252,11 @@ Topicality is an agent-first automation platform that amplifies people, not repl
 
 ## 18) Boilerplate Disclosures (Use in Decks/Contracts)
 
-* Definition of “no involuntary reductions due to automation”
-* Attestation schedule and signers
-* Exceptions and documentation flow
-* Savings-to-Reskilling allocation
-* Data policy summary (ABAC, minimization, residency)
+- Definition of “no involuntary reductions due to automation”
+- Attestation schedule and signers
+- Exceptions and documentation flow
+- Savings-to-Reskilling allocation
+- Data policy summary (ABAC, minimization, residency)
 
 ---
 
@@ -274,46 +274,44 @@ Agent platforms are moving from copilots to accountable automations. Boards want
 
 **Live metrics (as of {{DATE}})**
 
-* North Star: provable decisions trusted (rolling 30d): **{{NS_DECISIONS_30D}}**
-* Time to first value (median): **{{TTFV_DAYS}} days** (target ≤14)
-* Provenance manifest coverage: **{{PROVENANCE_COVERAGE}}%** (target 100%)
-* Reliability SLO (last 90d): **{{RELIABILITY_SLO}}%** (target ≥99.9%)
-* Design partners signed (QTD): **{{DESIGN_PARTNERS_QTD}}** / target {{N_DESIGN_PARTNERS|5}}
-* Gross margin (L90D blended): **{{GROSS_MARGIN}}%**
-* Payback period (blended): **{{PAYBACK_MONTHS}} months**
+- North Star: provable decisions trusted (rolling 30d): **{{NS_DECISIONS_30D}}**
+- Time to first value (median): **{{TTFV_DAYS}} days** (target ≤14)
+- Provenance manifest coverage: **{{PROVENANCE_COVERAGE}}%** (target 100%)
+- Reliability SLO (last 90d): **{{RELIABILITY_SLO}}%** (target ≥99.9%)
+- Design partners signed (QTD): **{{DESIGN_PARTNERS_QTD}}** / target {{N_DESIGN_PARTNERS|5}}
+- Gross margin (L90D blended): **{{GROSS_MARGIN}}%**
+- Payback period (blended): **{{PAYBACK_MONTHS}} months**
 
 **Unit economics snapshot**
 
-* Agent-hour COGS: **${{AGENT_HOUR_COGS}}**
-* Average deal ARR: **${{AVG_DEAL_ARR}}**
-* Net revenue retention (cohort {{COHORT}}): **{{NRR_PCT}}%**
+- Agent-hour COGS: **${{AGENT_HOUR_COGS}}**
+- Average deal ARR: **${{AVG_DEAL_ARR}}**
+- Net revenue retention (cohort {{COHORT}}): **{{NRR_PCT}}%**
 
 **Case studies**
 
 1. **Series C Fintech — RevOps Pipeline Acceleration**
-
-   * Baseline: MQL→SQL cycle **{{BASELINE_CYCLE_DAYS}} d**; SDR capacity binding.
-   * Intervention: 3-agent squad (enrich, qualify, route) with escalation to AE; policy labels + disclosure packs per run.
-   * Result (8 weeks): Throughput **{{THROUGHPUT_X}}×**; CAC payback **−{{CAC_REDUCTION_PCT}}%**; **0** involuntary reductions due to automation.
-   * Evidence: Maestro run **{{RUN_ID}}**, Disclosure pack **{{PKG_ID}}**.
+   - Baseline: MQL→SQL cycle **{{BASELINE_CYCLE_DAYS}} d**; SDR capacity binding.
+   - Intervention: 3-agent squad (enrich, qualify, route) with escalation to AE; policy labels + disclosure packs per run.
+   - Result (8 weeks): Throughput **{{THROUGHPUT_X}}×**; CAC payback **−{{CAC_REDUCTION_PCT}}%**; **0** involuntary reductions due to automation.
+   - Evidence: Maestro run **{{RUN_ID}}**, Disclosure pack **{{PKG_ID}}**.
 
 2. **Global SaaS — Support Triage & Knowledge Ops**
-
-   * Baseline: CSAT **{{BASE_CSAT}}**, FRT **{{BASE_FRT}} min**.
-   * Intervention: triage + retrieval agents; human-in-loop escalation < {{ESC_RATE_TARGET}}%.
-   * Result (12 weeks): CSAT **+{{CSAT_DELTA}} pts**, FRT **−{{FRT_DELTA}}%**, agent escalations **{{ESC_RATE_ACTUAL}}%**, **0** workforce reductions.
-   * Evidence: Runs **{{RUN_IDS}}**; Policy bundle **{{POLICY_ID}}**.
+   - Baseline: CSAT **{{BASE_CSAT}}**, FRT **{{BASE_FRT}} min**.
+   - Intervention: triage + retrieval agents; human-in-loop escalation < {{ESC_RATE_TARGET}}%.
+   - Result (12 weeks): CSAT **+{{CSAT_DELTA}} pts**, FRT **−{{FRT_DELTA}}%**, agent escalations **{{ESC_RATE_ACTUAL}}%**, **0** workforce reductions.
+   - Evidence: Runs **{{RUN_IDS}}**; Policy bundle **{{POLICY_ID}}**.
 
 **Moat & defensibility**
 
-* Data: IntelGraph claim/decision graph; governance artifacts per customer.
-* Process: release gate with SBOM/SLSA and canary/rollback; compliance-first sales motion.
-* GTM: design-partner → white-label modules; short time-to-proof; pricing tied to savings **only with** employment pledge.
+- Data: IntelGraph claim/decision graph; governance artifacts per customer.
+- Process: release gate with SBOM/SLSA and canary/rollback; compliance-first sales motion.
+- GTM: design-partner → white-label modules; short time-to-proof; pricing tied to savings **only with** employment pledge.
 
 **Asks**
 
-* Intros to {{VERTICAL_INTROS}}; co-development partners for {{MODULE}}
-* Board observer with enterprise GTM depth.
+- Intros to {{VERTICAL_INTROS}}; co-development partners for {{MODULE}}
+- Board observer with enterprise GTM depth.
 
 ---
 
@@ -324,35 +322,35 @@ Join Topicality to build multi-agent systems that make people 2–5× more effec
 
 **Why candidates choose us**
 
-* Employment-safe mission: automation that elevates roles, not eliminates them.
-* Craft + impact: ship governed agents to real customers in weeks, with visible metrics.
-* Growth model: every agent upgrade pairs with a human learning sprint.
+- Employment-safe mission: automation that elevates roles, not eliminates them.
+- Craft + impact: ship governed agents to real customers in weeks, with visible metrics.
+- Growth model: every agent upgrade pairs with a human learning sprint.
 
 **Live team metrics ({{DATE}})**
 
-* Promotions enabled YTD: **{{PROMOTIONS_YTD}}**
-* Learning sprints completed per engineer (median, L90D): **{{LEARN_SPRINTS}}**
-* Production incidents (sev-1, L90D): **{{SEV1_COUNT}}** (auto-rollback policy active)
-* Open-source & research contributions: **{{OSS_CONTRIBS}}**
+- Promotions enabled YTD: **{{PROMOTIONS_YTD}}**
+- Learning sprints completed per engineer (median, L90D): **{{LEARN_SPRINTS}}**
+- Production incidents (sev-1, L90D): **{{SEV1_COUNT}}** (auto-rollback policy active)
+- Open-source & research contributions: **{{OSS_CONTRIBS}}**
 
 **What you’ll do**
 
-* Design agent squads with clear escalation + guardrails.
-* Ship disclosure packs and logs customers trust.
-* Measure impact in operator KPIs, not just model scores.
+- Design agent squads with clear escalation + guardrails.
+- Ship disclosure packs and logs customers trust.
+- Measure impact in operator KPIs, not just model scores.
 
 **Case studies (team impact)**
 
-* **Agent Conductor v{{CONDUCTOR_VER}}** cut run latency p95 to **{{LATENCY_P95}} ms** and enabled **{{NEW_MODULES}}** new modules.
-* **Governance Pack** rollout reached **{{DISCLOSURE_COVERAGE}}%** coverage across customers.
+- **Agent Conductor v{{CONDUCTOR_VER}}** cut run latency p95 to **{{LATENCY_P95}} ms** and enabled **{{NEW_MODULES}}** new modules.
+- **Governance Pack** rollout reached **{{DISCLOSURE_COVERAGE}}%** coverage across customers.
 
 **Benefits & culture**
 
-* Learning budget linked to automation savings; conference + cert support.
-* Remote-first with quarterly build weeks; equity with performance multipliers.
-* Transparent metrics; blameless postmortems; policy-driven access.
+- Learning budget linked to automation savings; conference + cert support.
+- Remote-first with quarterly build weeks; equity with performance multipliers.
+- Transparent metrics; blameless postmortems; policy-driven access.
 
-CTA: *See our “Agent-First, Human-Amplified” pledge and ship a 14-day value slice with us.*
+CTA: _See our “Agent-First, Human-Amplified” pledge and ship a 14-day value slice with us._
 
 ---
 
@@ -363,11 +361,11 @@ Agent-first automation that increases throughput **now** and locks in governance
 
 **Proof (live, {{DATE}})**
 
-* Median time to first value: **{{TTFV_DAYS}} days**
-* Output per FTE (post-deployment): **+{{OPFTE_DELTA}}%**
-* Escalation rate: **{{ESC_RATE}}%** and trending down
-* Employment stability: **0** involuntary reductions due to automation (attested)
-* Reliability SLO (last 90d): **{{RELIABILITY_SLO}}%**
+- Median time to first value: **{{TTFV_DAYS}} days**
+- Output per FTE (post-deployment): **+{{OPFTE_DELTA}}%**
+- Escalation rate: **{{ESC_RATE}}%** and trending down
+- Employment stability: **0** involuntary reductions due to automation (attested)
+- Reliability SLO (last 90d): **{{RELIABILITY_SLO}}%**
 
 **How we deploy (2-week value slice)**
 
@@ -378,44 +376,43 @@ Agent-first automation that increases throughput **now** and locks in governance
 
 **Case studies**
 
-* **Operations — Order Exceptions**
+- **Operations — Order Exceptions**
+  - Before: exception backlog **{{BACKLOG_BEFORE}}**; avg handle **{{AHT_BEFORE}} min**.
+  - After (6 weeks): backlog **−{{BACKLOG_DELTA}}%**; AHT **−{{AHT_DELTA}}%**; quality holds at **≥{{QUALITY_TARGET}}%**; **0** reductions.
+  - Governance: policy labels, audit logs, rollback plan executed in sandbox.
 
-  * Before: exception backlog **{{BACKLOG_BEFORE}}**; avg handle **{{AHT_BEFORE}} min**.
-  * After (6 weeks): backlog **−{{BACKLOG_DELTA}}%**; AHT **−{{AHT_DELTA}}%**; quality holds at **≥{{QUALITY_TARGET}}%**; **0** reductions.
-  * Governance: policy labels, audit logs, rollback plan executed in sandbox.
-
-* **Support — Triage & Deflection**
-
-  * Before: FRT **{{BASE_FRT}} min**, deflection **{{BASE_DEFLECT}}%**.
-  * After (8 weeks): FRT **−{{FRT_DELTA}}%**, deflection **+{{DEFLECT_DELTA}} pts**, CSAT **+{{CSAT_DELTA}} pts**; **0** reductions.
-  * Evidence: disclosure packs linked; customer attestation on workforce stability.
+- **Support — Triage & Deflection**
+  - Before: FRT **{{BASE_FRT}} min**, deflection **{{BASE_DEFLECT}}%**.
+  - After (8 weeks): FRT **−{{FRT_DELTA}}%**, deflection **+{{DEFLECT_DELTA}} pts**, CSAT **+{{CSAT_DELTA}} pts**; **0** reductions.
+  - Evidence: disclosure packs linked; customer attestation on workforce stability.
 
 **Commercials**
 
-* Start: fixed-price design-partner bundle (includes governance pack).
-* Scale: per-agent-hour with SLOs; optional savings-share with employment pledge.
-* People Fund: % of savings earmarked for your team’s training.
+- Start: fixed-price design-partner bundle (includes governance pack).
+- Scale: per-agent-hour with SLOs; optional savings-share with employment pledge.
+- People Fund: % of savings earmarked for your team’s training.
 
 **Security & compliance**
 OPA ABAC; WebAuthn/FIDO2; data minimization & residency; SBOM/SLSA on each release; DLP redaction by default.
 
-CTA: *Book a value slice. We’ll baseline your metrics and show impact in 14 days.*
+CTA: _Book a value slice. We’ll baseline your metrics and show impact in 14 days._
 
 ---
 
 ## 20) Collateral Artifacts & Templates (Policy Aligned)
 
-| Asset | Purpose | Location / Link | Owner | Refresh Cadence |
-| --- | --- | --- | --- | --- |
-| Executive sales deck | Anchor narrative for C-suite conversations; maps to §1–§6 storytelling arc. | `/sales/decks/topicality-agent-first/` (repo folder) | Product Marketing | Monthly or on major launch |
-| Website hero & product modules | Public messaging aligned to employment pledge and governance commitments. | `website/cms/topicality-agent-first` (CMS collection) | Growth Marketing | Bi-weekly content sync |
-| Analyst / board briefing memo | Summarizes governance evidence, adoption metrics, and employment outcomes. | `/docs/sales/topicality-agent-first-briefing-memo.md` (create via §20.4 template) | CEO Staff | Quarterly |
-| Email sequence (3-touch) | Design partner outreach referencing 14-day value slice and pledge. | `/sales/sequences/topicality-agent-first/` | Revenue Ops | Quarterly |
-| Internal enablement kit | Talk tracks, objection handlers, compliance checklist for GTM teams. | `/sales/enablement/topicality-agent-first/` | Sales Enablement | Monthly |
+| Asset                          | Purpose                                                                     | Location / Link                                                                   | Owner             | Refresh Cadence            |
+| ------------------------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------- | -------------------------- |
+| Executive sales deck           | Anchor narrative for C-suite conversations; maps to §1–§6 storytelling arc. | `/sales/decks/topicality-agent-first/` (repo folder)                              | Product Marketing | Monthly or on major launch |
+| Website hero & product modules | Public messaging aligned to employment pledge and governance commitments.   | `website/cms/topicality-agent-first` (CMS collection)                             | Growth Marketing  | Bi-weekly content sync     |
+| Analyst / board briefing memo  | Summarizes governance evidence, adoption metrics, and employment outcomes.  | `/docs/sales/topicality-agent-first-briefing-memo.md` (create via §20.4 template) | CEO Staff         | Quarterly                  |
+| Email sequence (3-touch)       | Design partner outreach referencing 14-day value slice and pledge.          | `/sales/sequences/topicality-agent-first/`                                        | Revenue Ops       | Quarterly                  |
+| Internal enablement kit        | Talk tracks, objection handlers, compliance checklist for GTM teams.        | `/sales/enablement/topicality-agent-first/`                                       | Sales Enablement  | Monthly                    |
 
 > **Policy note:** Before distributing any asset above, confirm it passes the [Agent-First Positioning Policy compliance checklist](../policy/agent-first-positioning-policy.md#10-compliance-verification-checklist) and cites the mission/vision/values statements where applicable.
 
 ### 20.1 Sales Deck Narrative Framework
+
 1. **Opening (Mission & Vision)** – Reinforce the [mission](../governance/mission-vision-values.md#mission) and [vision](../governance/mission-vision-values.md#vision) in slide 1.
 2. **Problem Framing** – Use §4 value pillars + customer pain metrics.
 3. **Solution Overview** – Map agent squads to human roles; highlight governance stack.
@@ -425,18 +422,21 @@ CTA: *Book a value slice. We’ll baseline your metrics and show impact in 14 da
 7. **Call to Action** – Offer 14-day value slice; include compliance contacts.
 
 ### 20.2 Web & Landing Page Modules
+
 - **Hero copy:** Reuse §9 homepage block; add CTA linking to policy and pledge.
 - **Value module:** Feature §4 pillars with icons; each card links to evidence.
 - **Governance banner:** Inline references to [COMPLIANCE](../COMPLIANCE.md) and [SECURITY_AND_PRIVACY](../SECURITY_AND_PRIVACY.md) docs.
 - **Employment pledge badge:** Link to §5 and policy checklist for transparency.
 
 ### 20.3 Email & Sequence Templates
+
 - **Touch 1 (Mission-aligned intro):** Reference mission/vision, highlight employment pledge.
 - **Touch 2 (Evidence proof):** Share disclosure pack snippet + metrics table from §11.
 - **Touch 3 (Value slice CTA):** Invite to 14-day plan (§12) and attach attestation template.
 - Include signature footer linking to the [Agent-First Positioning Policy](../policy/agent-first-positioning-policy.md) and governance resources.
 
 ### 20.4 Analyst & Board Briefing Memo Outline
+
 1. Executive summary with policy adherence statement.
 2. Governance evidence (policy labels, disclosure packs, security posture).
 3. Employment impact dashboard (roles elevated, reskilling spend, promotions).
@@ -444,6 +444,7 @@ CTA: *Book a value slice. We’ll baseline your metrics and show impact in 14 da
 5. Appendices: attestation copies, exception log (if any), next review date.
 
 ### 20.5 Internal Enablement Kit Checklist
+
 - Updated talk tracks (§16) with mission/vision references.
 - Objection response cards linking to policy clauses (§3 of policy).
 - Role-play scenarios that reinforce escalation paths (§10 template).
@@ -453,12 +454,12 @@ CTA: *Book a value slice. We’ll baseline your metrics and show impact in 14 da
 
 ## 21) Policy Compliance & Update Log
 
-| Date | Change Summary | Sections Impacted | Owner | Approvals |
-| --- | --- | --- | --- | --- |
-| 2025-09-28 | Added governance alignment map and collateral inventory; linked to new policy + mission/vision/values statements. | §0, §20, §21 | Product Marketing | CEO ✓ · CRO ✓ · Head of People ✓ |
+| Date       | Change Summary                                                                                                    | Sections Impacted | Owner             | Approvals                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------------- | ----------------- | ----------------- | -------------------------------- |
+| 2025-09-28 | Added governance alignment map and collateral inventory; linked to new policy + mission/vision/values statements. | §0, §20, §21      | Product Marketing | CEO ✓ · CRO ✓ · Head of People ✓ |
 
 **Next review:** Align with quarterly policy review (§6 of the policy). Record future updates here with references to pull requests and approval tickets.
 
 ---
 
-*End of pack. Replace {{DATE}} on publish and localize copy as needed.*
+_End of pack. Replace {{DATE}} on publish and localize copy as needed._

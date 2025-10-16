@@ -9,23 +9,23 @@ const config: Config = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@intelgraph/mcp-core$': '<rootDir>/src/index.ts',
-    '^@intelgraph/mcp-core/(.*)$': '<rootDir>/src/$1'
+    '^@intelgraph/mcp-core/(.*)$': '<rootDir>/src/$1',
   },
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.test.json',
-      useESM: true
-    }
+      useESM: true,
+    },
   },
   transform: {
     '^.+\\.ts$': [
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.test.json',
-        useESM: true
-      }
-    ]
-  }
+        useESM: true,
+      },
+    ],
+  },
 };
 
 export default config;

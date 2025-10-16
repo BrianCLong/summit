@@ -2,13 +2,13 @@ version: '3.9'
 services:
   api:
     build: .github/ci/api-stub
-    ports: ["4000:4000"]
+    ports: ['4000:4000']
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    ports: ['6379:6379']
   ui:
     build: ./client
     environment:
       - VITE_API_URL=http://api:4000
-    ports: ["3000:3000"]
-    depends_on: [ api ]
+    ports: ['3000:3000']
+    depends_on: [api]

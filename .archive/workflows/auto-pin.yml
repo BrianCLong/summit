@@ -11,7 +11,7 @@ on:
         description: 'Optional maestro-control-plane digest (sha256:...) to set placeholders'
         required: false
   schedule:
-    - cron: '0 7 * * 1'  # weekly Monday 07:00 UTC
+    - cron: '0 7 * * 1' # weekly Monday 07:00 UTC
 
 permissions:
   contents: write
@@ -58,4 +58,3 @@ jobs:
           branch: chore/auto-pin-images
           signoff: true
           delete-branch: true
-

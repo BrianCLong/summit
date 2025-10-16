@@ -2,11 +2,7 @@
   "title": "IntelGraph — GA Core Guardrails & SLOs",
   "uid": "ig-ga-core",
   "timezone": "browser",
-  "tags": [
-    "intelgraph",
-    "sprint25",
-    "ga-core"
-  ],
+  "tags": ["intelgraph", "sprint25", "ga-core"],
   "schemaVersion": 38,
   "version": 1,
   "panels": [

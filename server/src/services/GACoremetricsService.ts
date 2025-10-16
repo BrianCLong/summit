@@ -3,7 +3,13 @@
  * Collects and exposes metrics from all GA Core systems for release decisions
  */
 
-import { register, Gauge, Histogram, Counter, collectDefaultMetrics } from 'prom-client';
+import {
+  register,
+  Gauge,
+  Histogram,
+  Counter,
+  collectDefaultMetrics,
+} from 'prom-client';
 import { getPostgresPool } from '../config/database';
 import { getNeo4jDriver } from '../config/database';
 import logger from '../config/logger';
@@ -18,30 +24,30 @@ export class GACoreMetricsService {
   // GA Core Release Status (0=NO GO, 0.5=CONDITIONAL GO, 1=GO)
   private gaCoreOverallStatus = new Gauge({
     name: 'ga_core_overall_status',
-    help: 'Overall GA Core release status (0=NO GO, 0.5=CONDITIONAL GO, 1=GO)'
+    help: 'Overall GA Core release status (0=NO GO, 0.5=CONDITIONAL GO, 1=GO)',
   });
 
   // Entity Resolution Precision Metrics
   private erPrecisionPersonCurrent = new Gauge({
     name: 'er_precision_person_current',
-    help: 'Current Entity Resolution precision for PERSON entities'
+    help: 'Current Entity Resolution precision for PERSON entities',
   });
 
   private erPrecisionOrgCurrent = new Gauge({
-    name: 'er_precision_org_current', 
-    help: 'Current Entity Resolution precision for ORG entities'
+    name: 'er_precision_org_current',
+    help: 'Current Entity Resolution precision for ORG entities',
   });
 
   private erPrecisionPersonDaily = new Gauge({
     name: 'er_precision_person_daily',
     help: 'Daily Entity Resolution precision for PERSON entities',
-    labelNames: ['date']
+    labelNames: ['date'],
   });
 
   private erPrecisionOrgDaily = new Gauge({
     name: 'er_precision_org_daily',
     help: 'Daily Entity Resolution precision for ORG entities',
-    labelNames: ['date']
+    labelNames: ['date'],
   });
 
   // Merge Decision Performance
@@ -49,54 +55,54 @@ export class GACoreMetricsService {
     name: 'merge_decision_duration_seconds',
     help: 'Time taken to make merge decisions',
     labelNames: ['entity_type', 'method'],
-    buckets: [0.1, 0.5, 1, 2, 5, 10, 30]
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 30],
   });
 
   // Policy & Appeals Metrics
   private policyDenialsWithAppealsRate = new Gauge({
     name: 'policy_denials_with_appeals_rate',
-    help: 'Percentage of policy denials that have appeal paths available'
+    help: 'Percentage of policy denials that have appeal paths available',
   });
 
   private policyAppealSlaComplianceRate = new Gauge({
     name: 'policy_appeal_sla_compliance_rate',
-    help: 'Percentage of policy appeals responded to within SLA'
+    help: 'Percentage of policy appeals responded to within SLA',
   });
 
   // Export Integrity Metrics
   private exportManifestIntegrityRate = new Gauge({
     name: 'export_manifest_integrity_rate',
-    help: 'Percentage of exports with valid manifest integrity'
+    help: 'Percentage of exports with valid manifest integrity',
   });
 
   private exportBundleVerificationRate = new Gauge({
     name: 'export_bundle_verification_rate',
-    help: 'Percentage of export bundles that pass verification'
+    help: 'Percentage of export bundles that pass verification',
   });
 
   // Copilot NL→Cypher Metrics
   private copilotNlSuccessRate = new Gauge({
     name: 'copilot_nl_success_rate',
-    help: 'Success rate of NL to Cypher translations'
+    help: 'Success rate of NL to Cypher translations',
   });
 
   // Hypothesis Rigor Score
   private hypothesisRigorScoreAvg = new Gauge({
     name: 'hypothesis_rigor_score_avg',
-    help: 'Average hypothesis rigor score (0-10)'
+    help: 'Average hypothesis rigor score (0-10)',
   });
 
   // Data Quality Score
   private dataQualityScoreOverall = new Gauge({
     name: 'data_quality_score_overall',
-    help: 'Overall data quality score (0-1)'
+    help: 'Overall data quality score (0-1)',
   });
 
   // GA Core Gate Status (detailed)
   private gaCoreGateStatus = new Gauge({
     name: 'ga_core_gate_status',
     help: 'Individual GA Core gate status',
-    labelNames: ['gate', 'status', 'requirement', 'current_value', 'threshold']
+    labelNames: ['gate', 'status', 'requirement', 'current_value', 'threshold'],
   });
 
   private erService = new HybridEntityResolutionService();
@@ -112,12 +118,15 @@ export class GACoreMetricsService {
       try {
         await this.collectAllMetrics();
       } catch (error) {
-        log.error({ error: error.message }, 'Failed to collect GA Core metrics');
+        log.error(
+          { error: error.message },
+          'Failed to collect GA Core metrics',
+        );
       }
     }, 30000);
 
     // Initial collection
-    this.collectAllMetrics().catch(error => {
+    this.collectAllMetrics().catch((error) => {
       log.error({ error: error.message }, 'Initial metrics collection failed');
     });
   }
@@ -131,7 +140,7 @@ export class GACoreMetricsService {
       this.collectExportIntegrityMetrics(),
       this.collectCopilotMetrics(),
       this.collectHypothesisRigorMetrics(),
-      this.collectDataQualityMetrics()
+      this.collectDataQualityMetrics(),
     ]);
 
     // Calculate overall GA Core status
@@ -156,7 +165,7 @@ export class GACoreMetricsService {
 
       for (const row of currentMetrics.rows) {
         const precision = parseFloat(row.precision);
-        
+
         if (row.entity_type === 'PERSON') {
           this.erPrecisionPersonCurrent.set(precision);
         } else if (row.entity_type === 'ORG') {
@@ -178,7 +187,7 @@ export class GACoreMetricsService {
       for (const row of dailyMetrics.rows) {
         const precision = parseFloat(row.precision);
         const date = row.metric_date;
-        
+
         if (row.entity_type === 'PERSON') {
           this.erPrecisionPersonDaily.set({ date }, precision);
         } else if (row.entity_type === 'ORG') {
@@ -188,7 +197,10 @@ export class GACoreMetricsService {
 
       log.debug('Collected ER precision metrics');
     } catch (error) {
-      log.error({ error: error.message }, 'Failed to collect ER precision metrics');
+      log.error(
+        { error: error.message },
+        'Failed to collect ER precision metrics',
+      );
     }
   }
 
@@ -204,7 +216,7 @@ export class GACoreMetricsService {
       const metrics = appealMetrics.rows[0]?.metrics;
       if (metrics) {
         this.policyAppealSlaComplianceRate.set(
-          parseFloat(metrics.sla_compliance_rate)
+          parseFloat(metrics.sla_compliance_rate),
         );
       }
 
@@ -218,12 +230,17 @@ export class GACoreMetricsService {
           AND decision = 'DENY'
       `);
 
-      const appealsRate = parseFloat(denialMetrics.rows[0]?.appeals_rate || '0');
+      const appealsRate = parseFloat(
+        denialMetrics.rows[0]?.appeals_rate || '0',
+      );
       this.policyDenialsWithAppealsRate.set(appealsRate);
 
       log.debug('Collected policy appeal metrics');
     } catch (error) {
-      log.error({ error: error.message }, 'Failed to collect policy appeal metrics');
+      log.error(
+        { error: error.message },
+        'Failed to collect policy appeal metrics',
+      );
     }
   }
 
@@ -239,18 +256,21 @@ export class GACoreMetricsService {
       const metrics = exportMetrics.rows[0]?.metrics;
       if (metrics) {
         this.exportManifestIntegrityRate.set(
-          parseFloat(metrics.integrity_rate)
+          parseFloat(metrics.integrity_rate),
         );
-        
+
         // Bundle verification rate (assume same as integrity for now)
         this.exportBundleVerificationRate.set(
-          parseFloat(metrics.integrity_rate)
+          parseFloat(metrics.integrity_rate),
         );
       }
 
       log.debug('Collected export integrity metrics');
     } catch (error) {
-      log.error({ error: error.message }, 'Failed to collect export integrity metrics');
+      log.error(
+        { error: error.message },
+        'Failed to collect export integrity metrics',
+      );
     }
   }
 
@@ -268,7 +288,9 @@ export class GACoreMetricsService {
         WHERE t.created_at >= NOW() - INTERVAL '7 days'
       `);
 
-      const successRate = parseFloat(copilotMetrics.rows[0]?.success_rate || '0');
+      const successRate = parseFloat(
+        copilotMetrics.rows[0]?.success_rate || '0',
+      );
       this.copilotNlSuccessRate.set(successRate);
 
       log.debug('Collected Copilot metrics');
@@ -291,12 +313,17 @@ export class GACoreMetricsService {
           AND confidence IS NOT NULL
       `);
 
-      const rigorScore = parseFloat(rigorMetrics.rows[0]?.avg_rigor_score || '7');
+      const rigorScore = parseFloat(
+        rigorMetrics.rows[0]?.avg_rigor_score || '7',
+      );
       this.hypothesisRigorScoreAvg.set(rigorScore);
 
       log.debug('Collected hypothesis rigor metrics');
     } catch (error) {
-      log.error({ error: error.message }, 'Failed to collect hypothesis rigor metrics');
+      log.error(
+        { error: error.message },
+        'Failed to collect hypothesis rigor metrics',
+      );
     }
   }
 
@@ -313,13 +340,17 @@ export class GACoreMetricsService {
         RETURN (with_names + with_dates)::float / (total * 2) as quality_score
       `);
 
-      const qualityScore = result.records[0]?.get('quality_score')?.toNumber() || 0.8;
+      const qualityScore =
+        result.records[0]?.get('quality_score')?.toNumber() || 0.8;
       this.dataQualityScoreOverall.set(qualityScore);
 
       await session.close();
       log.debug('Collected data quality metrics');
     } catch (error) {
-      log.error({ error: error.message }, 'Failed to collect data quality metrics');
+      log.error(
+        { error: error.message },
+        'Failed to collect data quality metrics',
+      );
     }
   }
 
@@ -337,52 +368,55 @@ export class GACoreMetricsService {
         {
           name: 'ER_PRECISION_PERSON',
           current: personPrecision?.values?.[0]?.value || 0,
-          threshold: 0.90,
-          requirement: 'Entity Resolution PERSON precision >= 90%'
+          threshold: 0.9,
+          requirement: 'Entity Resolution PERSON precision >= 90%',
         },
         {
           name: 'ER_PRECISION_ORG',
           current: orgPrecision?.values?.[0]?.value || 0,
           threshold: 0.88,
-          requirement: 'Entity Resolution ORG precision >= 88%'
+          requirement: 'Entity Resolution ORG precision >= 88%',
         },
         {
           name: 'APPEALS_SLA',
           current: appealsSla?.values?.[0]?.value || 0,
-          threshold: 0.90,
-          requirement: 'Policy appeals SLA compliance >= 90%'
+          threshold: 0.9,
+          requirement: 'Policy appeals SLA compliance >= 90%',
         },
         {
           name: 'EXPORT_INTEGRITY',
           current: exportIntegrity?.values?.[0]?.value || 0,
           threshold: 0.95,
-          requirement: 'Export manifest integrity >= 95%'
+          requirement: 'Export manifest integrity >= 95%',
         },
         {
           name: 'COPILOT_SUCCESS',
           current: copilotSuccess?.values?.[0]?.value || 0,
-          threshold: 0.80,
-          requirement: 'Copilot NL→Cypher success rate >= 80%'
-        }
+          threshold: 0.8,
+          requirement: 'Copilot NL→Cypher success rate >= 80%',
+        },
       ];
 
       // Set individual gate metrics
       for (const gate of gates) {
         const status = gate.current >= gate.threshold ? 'PASS' : 'FAIL';
-        
-        this.gaCoreGateStatus.set({
-          gate: gate.name,
-          status,
-          requirement: gate.requirement,
-          current_value: gate.current.toFixed(4),
-          threshold: gate.threshold.toString()
-        }, gate.current >= gate.threshold ? 1 : 0);
+
+        this.gaCoreGateStatus.set(
+          {
+            gate: gate.name,
+            status,
+            requirement: gate.requirement,
+            current_value: gate.current.toFixed(4),
+            threshold: gate.threshold.toString(),
+          },
+          gate.current >= gate.threshold ? 1 : 0,
+        );
       }
 
       // Calculate overall status
-      const passingGates = gates.filter(g => g.current >= g.threshold).length;
+      const passingGates = gates.filter((g) => g.current >= g.threshold).length;
       const totalGates = gates.length;
-      
+
       let overallStatus: number;
       if (passingGates === totalGates) {
         overallStatus = 1.0; // GO
@@ -395,23 +429,32 @@ export class GACoreMetricsService {
       this.gaCoreOverallStatus.set(overallStatus);
 
       // Log status
-      const statusText = overallStatus === 1 ? 'GO' : 
-                        overallStatus === 0.5 ? 'CONDITIONAL GO' : 'NO GO';
-      
-      log.info({
-        status: statusText,
-        passingGates,
-        totalGates,
-        gates: gates.map(g => ({
-          name: g.name,
-          pass: g.current >= g.threshold,
-          current: g.current,
-          threshold: g.threshold
-        }))
-      }, 'GA Core overall status calculated');
+      const statusText =
+        overallStatus === 1
+          ? 'GO'
+          : overallStatus === 0.5
+            ? 'CONDITIONAL GO'
+            : 'NO GO';
 
+      log.info(
+        {
+          status: statusText,
+          passingGates,
+          totalGates,
+          gates: gates.map((g) => ({
+            name: g.name,
+            pass: g.current >= g.threshold,
+            current: g.current,
+            threshold: g.threshold,
+          })),
+        },
+        'GA Core overall status calculated',
+      );
     } catch (error) {
-      log.error({ error: error.message }, 'Failed to calculate overall GA status');
+      log.error(
+        { error: error.message },
+        'Failed to calculate overall GA status',
+      );
     }
   }
 
@@ -421,7 +464,7 @@ export class GACoreMetricsService {
   recordMergeDecisionTime(
     entityType: string,
     method: string,
-    durationSeconds: number
+    durationSeconds: number,
   ): void {
     this.mergeDecisionDuration
       .labels(entityType, method)
@@ -439,15 +482,19 @@ export class GACoreMetricsService {
   }> {
     const overallMetric = await this.gaCoreOverallStatus.get();
     const overallValue = overallMetric?.values?.[0]?.value || 0;
-    
-    const overall = overallValue === 1 ? 'GO' :
-                   overallValue === 0.5 ? 'CONDITIONAL_GO' : 'NO_GO';
+
+    const overall =
+      overallValue === 1
+        ? 'GO'
+        : overallValue === 0.5
+          ? 'CONDITIONAL_GO'
+          : 'NO_GO';
 
     return {
       overall,
       score: overallValue,
       gates: [], // Would populate from gate metrics
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 

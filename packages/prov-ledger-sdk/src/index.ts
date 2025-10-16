@@ -12,13 +12,13 @@ export const ClaimSchema = z.object({
   hash: z.string(),
   signature: z.string().optional(),
   metadata: z.record(z.any()).optional(),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime(),
 });
 
 export const CreateClaimSchema = z.object({
   content: z.record(z.any()),
   signature: z.string().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 });
 
 export const ProvenanceChainSchema = z.object({
@@ -27,26 +27,28 @@ export const ProvenanceChainSchema = z.object({
   transforms: z.array(z.string()),
   sources: z.array(z.string()),
   lineage: z.record(z.any()),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime(),
 });
 
 export const ManifestSchema = z.object({
   version: z.string(),
-  claims: z.array(z.object({
-    id: z.string(),
-    hash: z.string(),
-    transforms: z.array(z.string())
-  })),
+  claims: z.array(
+    z.object({
+      id: z.string(),
+      hash: z.string(),
+      transforms: z.array(z.string()),
+    }),
+  ),
   hash_chain: z.string(),
   signature: z.string().optional(),
-  generated_at: z.string().datetime()
+  generated_at: z.string().datetime(),
 });
 
 export const HashVerificationSchema = z.object({
   valid: z.boolean(),
   expected_hash: z.string(),
   actual_hash: z.string(),
-  verified_at: z.string().datetime()
+  verified_at: z.string().datetime(),
 });
 
 // Types
@@ -60,7 +62,7 @@ export type HashVerification = z.infer<typeof HashVerificationSchema>;
 export class ProvLedgerClient {
   constructor(
     private baseUrl: string,
-    private headers: Record<string, string> = {}
+    private headers: Record<string, string> = {},
   ) {}
 
   async createClaim(claim: CreateClaim): Promise<Claim> {
@@ -68,9 +70,9 @@ export class ProvLedgerClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...this.headers
+        ...this.headers,
       },
-      body: JSON.stringify(claim)
+      body: JSON.stringify(claim),
     });
 
     if (!response.ok) {
@@ -83,7 +85,7 @@ export class ProvLedgerClient {
 
   async getClaim(id: string): Promise<Claim | null> {
     const response = await fetch(`${this.baseUrl}/claims/${id}`, {
-      headers: this.headers
+      headers: this.headers,
     });
 
     if (response.status === 404) {
@@ -99,9 +101,12 @@ export class ProvLedgerClient {
   }
 
   async getProvenanceByClaim(claimId: string): Promise<ProvenanceChain[]> {
-    const response = await fetch(`${this.baseUrl}/provenance?claimId=${encodeURIComponent(claimId)}`, {
-      headers: this.headers
-    });
+    const response = await fetch(
+      `${this.baseUrl}/provenance?claimId=${encodeURIComponent(claimId)}`,
+      {
+        headers: this.headers,
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to get provenance: ${response.status}`);
@@ -115,20 +120,20 @@ export class ProvLedgerClient {
     claimId: string,
     transforms: string[],
     sources: string[],
-    lineage: any
+    lineage: any,
   ): Promise<ProvenanceChain> {
     const response = await fetch(`${this.baseUrl}/provenance`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...this.headers
+        ...this.headers,
       },
       body: JSON.stringify({
         claimId,
         transforms,
         sources,
-        lineage
-      })
+        lineage,
+      }),
     });
 
     if (!response.ok) {
@@ -139,17 +144,20 @@ export class ProvLedgerClient {
     return ProvenanceChainSchema.parse(data);
   }
 
-  async verifyHash(content: any, expectedHash: string): Promise<HashVerification> {
+  async verifyHash(
+    content: any,
+    expectedHash: string,
+  ): Promise<HashVerification> {
     const response = await fetch(`${this.baseUrl}/hash/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...this.headers
+        ...this.headers,
       },
       body: JSON.stringify({
         content,
-        expectedHash
-      })
+        expectedHash,
+      }),
     });
 
     if (!response.ok) {
@@ -162,7 +170,7 @@ export class ProvLedgerClient {
 
   async exportManifest(): Promise<Manifest> {
     const response = await fetch(`${this.baseUrl}/export/manifest`, {
-      headers: this.headers
+      headers: this.headers,
     });
 
     if (!response.ok) {
@@ -173,9 +181,13 @@ export class ProvLedgerClient {
     return ManifestSchema.parse(data);
   }
 
-  async healthCheck(): Promise<{ status: string; timestamp: string; version: string }> {
+  async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    version: string;
+  }> {
     const response = await fetch(`${this.baseUrl}/health`, {
-      headers: this.headers
+      headers: this.headers,
     });
 
     if (!response.ok) {
@@ -190,7 +202,7 @@ export class ProvLedgerClient {
 export function createProvLedgerClient(
   baseUrl: string,
   authorityId?: string,
-  reasonForAccess?: string
+  reasonForAccess?: string,
 ): ProvLedgerClient {
   const headers: Record<string, string> = {};
 
@@ -207,7 +219,9 @@ export function createProvLedgerClient(
 
 export function generateContentHash(content: any): string {
   // Simple hash generation - in production, use crypto module
-  return Buffer.from(JSON.stringify(content, Object.keys(content).sort())).toString('base64');
+  return Buffer.from(
+    JSON.stringify(content, Object.keys(content).sort()),
+  ).toString('base64');
 }
 
 // Higher-level convenience functions
@@ -217,18 +231,18 @@ export class ProvenanceTracker {
   async trackDataIngestion(
     dataSource: string,
     dataset: any,
-    metadata?: any
+    metadata?: any,
   ): Promise<Claim> {
     return this.client.createClaim({
       content: {
         type: 'data_ingestion',
         source: dataSource,
-        dataset
+        dataset,
       },
       metadata: {
         ...metadata,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
@@ -236,7 +250,7 @@ export class ProvenanceTracker {
     sourceClaimId: string,
     transformType: string,
     transformConfig: any,
-    resultData: any
+    resultData: any,
   ): Promise<{ claim: Claim; provenance: ProvenanceChain }> {
     // Create claim for transformed data
     const claim = await this.client.createClaim({
@@ -244,12 +258,12 @@ export class ProvenanceTracker {
         type: 'data_transformation',
         transform_type: transformType,
         config: transformConfig,
-        result: resultData
+        result: resultData,
       },
       metadata: {
         source_claim_id: sourceClaimId,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
 
     // Create provenance chain
@@ -260,8 +274,8 @@ export class ProvenanceTracker {
       {
         transform_config: transformConfig,
         input_hash: '', // Would calculate from source claim
-        output_hash: claim.hash
-      }
+        output_hash: claim.hash,
+      },
     );
 
     return { claim, provenance };
@@ -270,18 +284,18 @@ export class ProvenanceTracker {
   async trackExport(
     sourceClaimIds: string[],
     exportFormat: string,
-    exportData: any
+    exportData: any,
   ): Promise<{ claim: Claim; provenance: ProvenanceChain }> {
     const claim = await this.client.createClaim({
       content: {
         type: 'data_export',
         format: exportFormat,
-        data: exportData
+        data: exportData,
       },
       metadata: {
         source_claims: sourceClaimIds,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
 
     const provenance = await this.client.createProvenanceChain(
@@ -290,8 +304,8 @@ export class ProvenanceTracker {
       sourceClaimIds,
       {
         export_format: exportFormat,
-        source_claims: sourceClaimIds
-      }
+        source_claims: sourceClaimIds,
+      },
     );
 
     return { claim, provenance };
@@ -304,7 +318,7 @@ export class ProvenanceTracker {
   }> {
     const [claim, chains] = await Promise.all([
       this.client.getClaim(claimId),
-      this.client.getProvenanceByClaim(claimId)
+      this.client.getProvenanceByClaim(claimId),
     ]);
 
     if (!claim) {
@@ -313,18 +327,18 @@ export class ProvenanceTracker {
 
     // Get all source claims
     const sourceClaimIds = new Set<string>();
-    chains.forEach(chain => {
-      chain.sources.forEach(source => sourceClaimIds.add(source));
+    chains.forEach((chain) => {
+      chain.sources.forEach((source) => sourceClaimIds.add(source));
     });
 
     const sourcesClaims = await Promise.all(
-      Array.from(sourceClaimIds).map(id => this.client.getClaim(id))
+      Array.from(sourceClaimIds).map((id) => this.client.getClaim(id)),
     );
 
     return {
       claim,
       chains,
-      sourcesClaims: sourcesClaims.filter((c): c is Claim => c !== null)
+      sourcesClaims: sourcesClaims.filter((c): c is Claim => c !== null),
     };
   }
 }

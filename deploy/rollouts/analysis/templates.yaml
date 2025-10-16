@@ -7,11 +7,11 @@ spec:
   args:
     - name: job
     - name: p95_threshold
-      value: "0.8"          # seconds
+      value: '0.8' # seconds
     - name: err_threshold
-      value: "0.02"         # 2%
+      value: '0.02' # 2%
     - name: window
-      value: "5m"
+      value: '5m'
   metrics:
     - name: p95_latency
       interval: 60s
@@ -46,9 +46,9 @@ spec:
   args:
     - name: job
     - name: availability_threshold
-      value: "0.995"
+      value: '0.995'
     - name: window
-      value: "5m"
+      value: '5m'
   metrics:
     - name: availability
       interval: 60s

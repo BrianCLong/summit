@@ -6,7 +6,7 @@ export let options = {
   stages: [
     { duration: '1m', target: 20 }, // ramp-up to 20 users
     { duration: '3m', target: 20 }, // stay at 20 users
-    { duration: '30s', target: 0 },  // ramp-down
+    { duration: '30s', target: 0 }, // ramp-down
   ],
   thresholds: {
     http_req_duration: ['p(95)<500'], // 95% of requests below 500ms
@@ -27,7 +27,9 @@ export default function () {
         }
       }
     `;
-    const res = http.post(url, JSON.stringify({ query: query }), { headers: headers });
+    const res = http.post(url, JSON.stringify({ query: query }), {
+      headers: headers,
+    });
     check(res, { 'read status 200': (r) => r.status === 200 });
   } else {
     // Write operation (30% of requests)
@@ -47,7 +49,11 @@ export default function () {
         props: { name: `Test Entity ${entityId}`, value: Math.random() },
       },
     };
-    const res = http.post(url, JSON.stringify({ query: mutation, variables: variables }), { headers: headers });
+    const res = http.post(
+      url,
+      JSON.stringify({ query: mutation, variables: variables }),
+      { headers: headers },
+    );
     check(res, { 'write status 200': (r) => r.status === 200 });
   }
 

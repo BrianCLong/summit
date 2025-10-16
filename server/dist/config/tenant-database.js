@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-const configPath = process.env.TENANT_DB_CONFIG || path.resolve(process.cwd(), 'server/tenant-databases.json');
+const configPath = process.env.TENANT_DB_CONFIG ||
+    path.resolve(process.cwd(), 'server/tenant-databases.json');
 let configs = {};
 let version = 0;
 function loadConfigs() {

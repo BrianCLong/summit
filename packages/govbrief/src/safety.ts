@@ -1,11 +1,35 @@
 import { ClaimRecord, SafetyFlag, SafetyReview } from './types.js';
 
-const BLOCKED_PATTERNS: { pattern: RegExp; severity: SafetyFlag['severity']; message: string }[] = [
-  { pattern: /how to/i, severity: 'medium', message: 'Potential instructional phrasing detected.' },
-  { pattern: /explosive/i, severity: 'high', message: 'Explosive-related term detected.' },
-  { pattern: /kill|attack|bomb/i, severity: 'medium', message: 'Violent operational term detected.' },
-  { pattern: /doxx/i, severity: 'high', message: 'Potential doxxing reference detected.' },
-  { pattern: /dehumaniz/i, severity: 'medium', message: 'Dehumanizing language detected.' }
+const BLOCKED_PATTERNS: {
+  pattern: RegExp;
+  severity: SafetyFlag['severity'];
+  message: string;
+}[] = [
+  {
+    pattern: /how to/i,
+    severity: 'medium',
+    message: 'Potential instructional phrasing detected.',
+  },
+  {
+    pattern: /explosive/i,
+    severity: 'high',
+    message: 'Explosive-related term detected.',
+  },
+  {
+    pattern: /kill|attack|bomb/i,
+    severity: 'medium',
+    message: 'Violent operational term detected.',
+  },
+  {
+    pattern: /doxx/i,
+    severity: 'high',
+    message: 'Potential doxxing reference detected.',
+  },
+  {
+    pattern: /dehumaniz/i,
+    severity: 'medium',
+    message: 'Dehumanizing language detected.',
+  },
 ];
 
 export function reviewSafety(claims: ClaimRecord[]): SafetyReview {
@@ -16,7 +40,7 @@ export function reviewSafety(claims: ClaimRecord[]): SafetyReview {
       if (rule.pattern.test(claim.text)) {
         flags.push({
           severity: rule.severity,
-          message: `${rule.message} (claim ${claim.claimId})`
+          message: `${rule.message} (claim ${claim.claimId})`,
         });
       }
     }
@@ -24,7 +48,10 @@ export function reviewSafety(claims: ClaimRecord[]): SafetyReview {
 
   return {
     flags,
-    notes: flags.length === 0 ? 'No safety risks detected.' : 'Review flagged content before release.',
-    checkedAt: new Date().toISOString()
+    notes:
+      flags.length === 0
+        ? 'No safety risks detected.'
+        : 'Review flagged content before release.',
+    checkedAt: new Date().toISOString(),
   };
 }

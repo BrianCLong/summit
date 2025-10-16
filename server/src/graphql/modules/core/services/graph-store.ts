@@ -10,7 +10,9 @@ export function createGraphStore(): GraphStore {
       return typeof limit === 'number' ? entities.slice(0, limit) : entities;
     },
     async getRelationships(entityId: string) {
-      return relationships.filter((r) => r.source === entityId || r.target === entityId);
+      return relationships.filter(
+        (r) => r.source === entityId || r.target === entityId,
+      );
     },
     async upsertEntity(input) {
       const index = entities.findIndex((e) => e.id === input.id);

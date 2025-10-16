@@ -81,11 +81,11 @@ class ExportTool {
   async exportTenantData(options: ExportOptions): Promise<string> {
     return tracer.startActiveSpan('export.tenant_data', async (span: Span) => {
       span.setAttributes({
-        'export_id': this.exportId,
-        'tenant_id': options.tenantId,
-        'purpose': options.purpose,
-        'include_postgres': options.includePostgres,
-        'include_neo4j': options.includeNeo4j
+        export_id: this.exportId,
+        tenant_id: options.tenantId,
+        purpose: options.purpose,
+        include_postgres: options.includePostgres,
+        include_neo4j: options.includeNeo4j,
       });
 
       try {
@@ -127,7 +127,6 @@ class ExportTool {
 
         console.log(`✅ Export completed: ${bundlePath}`);
         return bundlePath;
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
@@ -140,7 +139,9 @@ class ExportTool {
 
   private async initializeManifest(options: ExportOptions): Promise<void> {
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + (options.expirationDays * 24 * 60 * 60 * 1000));
+    const expiresAt = new Date(
+      now.getTime() + options.expirationDays * 24 * 60 * 60 * 1000,
+    );
 
     this.manifest = {
       version: '24.3.0',
@@ -155,7 +156,7 @@ class ExportTool {
       dataClassifications: options.dataClassifications || [],
       provenance: [],
       files: [],
-      checksums: {}
+      checksums: {},
     };
 
     // Add initial provenance entry
@@ -165,7 +166,7 @@ class ExportTool {
       actor: options.requestedBy,
       region: this.manifest.region,
       purpose: options.purpose,
-      dataTypes: this.getDataTypes(options)
+      dataTypes: this.getDataTypes(options),
     });
   }
 
@@ -179,7 +180,7 @@ class ExportTool {
       try {
         // Export tenant-specific data using pg_dump with custom queries
         const exportQuery = this.buildPostgreSQLExportQuery(options.tenantId);
-        
+
         // Use pg_dump with custom query
         await this.runCommand('pg_dump', [
           process.env.DATABASE_URL!,
@@ -188,18 +189,18 @@ class ExportTool {
           '--data-only',
           '--inserts',
           `--file=${filepath}`,
-          `--where=tenant_id='${options.tenantId}'`
+          `--where=tenant_id='${options.tenantId}'`,
         ]);
 
         // Get file stats
         const stats = await this.getFileStats(filepath);
-        
+
         this.manifest.files.push({
           filename,
           type: 'postgresql',
           size: stats.size,
           checksum: stats.checksum,
-          compressed: false
+          compressed: false,
         });
 
         // Add provenance entry
@@ -209,19 +210,20 @@ class ExportTool {
           actor: 'exporter',
           region: this.manifest.region,
           purpose: options.purpose,
-          dataTypes: ['audit_logs', 'coherence_scores', 'user_sessions']
+          dataTypes: ['audit_logs', 'coherence_scores', 'user_sessions'],
         });
 
         span.setAttributes({
-          'file_size': stats.size,
-          'file_checksum': stats.checksum
+          file_size: stats.size,
+          file_checksum: stats.checksum,
         });
 
         console.log(`✅ PostgreSQL export completed: ${stats.size} bytes`);
-
       } catch (error) {
         span.recordException(error as Error);
-        throw new Error(`PostgreSQL export failed: ${(error as Error).message}`);
+        throw new Error(
+          `PostgreSQL export failed: ${(error as Error).message}`,
+        );
       } finally {
         span.end();
       }
@@ -239,13 +241,17 @@ class ExportTool {
         // Export tenant-specific nodes and relationships
         const cypherQueries = [
           `MATCH (n) WHERE n.tenant_id = '${options.tenantId}' RETURN n`,
-          `MATCH (n)-[r]->(m) WHERE n.tenant_id = '${options.tenantId}' AND m.tenant_id = '${options.tenantId}' RETURN n, r, m`
+          `MATCH (n)-[r]->(m) WHERE n.tenant_id = '${options.tenantId}' AND m.tenant_id = '${options.tenantId}' RETURN n, r, m`,
         ];
 
         let exportData = '';
         for (const query of cypherQueries) {
-          const result = await neo.run(query, {}, { tenantId: options.tenantId });
-          
+          const result = await neo.run(
+            query,
+            {},
+            { tenantId: options.tenantId },
+          );
+
           // Convert result to Cypher CREATE statements
           exportData += this.convertNeo4jResultToCypher(result);
         }
@@ -254,13 +260,13 @@ class ExportTool {
 
         // Get file stats
         const stats = await this.getFileStats(filepath);
-        
+
         this.manifest.files.push({
           filename,
           type: 'neo4j',
           size: stats.size,
           checksum: stats.checksum,
-          compressed: false
+          compressed: false,
         });
 
         // Add provenance entry
@@ -270,16 +276,15 @@ class ExportTool {
           actor: 'exporter',
           region: this.manifest.region,
           purpose: options.purpose,
-          dataTypes: ['signals', 'entities', 'relationships']
+          dataTypes: ['signals', 'entities', 'relationships'],
         });
 
         span.setAttributes({
-          'file_size': stats.size,
-          'file_checksum': stats.checksum
+          file_size: stats.size,
+          file_checksum: stats.checksum,
         });
 
         console.log(`✅ Neo4j export completed: ${stats.size} bytes`);
-
       } catch (error) {
         span.recordException(error as Error);
         throw new Error(`Neo4j export failed: ${(error as Error).message}`);
@@ -307,30 +312,29 @@ class ExportTool {
             purpose: options.purpose,
             requestedBy: options.requestedBy,
             region: this.manifest.region,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         };
 
         await writeFile(filepath, JSON.stringify(metadata, null, 2), 'utf8');
 
         // Get file stats
         const stats = await this.getFileStats(filepath);
-        
+
         this.manifest.files.push({
           filename,
           type: 'metadata',
           size: stats.size,
           checksum: stats.checksum,
-          compressed: false
+          compressed: false,
         });
 
         span.setAttributes({
-          'file_size': stats.size,
-          'file_checksum': stats.checksum
+          file_size: stats.size,
+          file_checksum: stats.checksum,
         });
 
         console.log(`✅ Metadata export completed: ${stats.size} bytes`);
-
       } catch (error) {
         span.recordException(error as Error);
         throw new Error(`Metadata export failed: ${(error as Error).message}`);
@@ -352,39 +356,51 @@ class ExportTool {
   }
 
   private async createBundle(options: ExportOptions): Promise<string> {
-    return tracer.startActiveSpan('export.create_bundle', async (span: Span) => {
-      console.log('📦 Creating export bundle...');
+    return tracer.startActiveSpan(
+      'export.create_bundle',
+      async (span: Span) => {
+        console.log('📦 Creating export bundle...');
 
-      // Write manifest to file
-      const manifestPath = join(this.workDir, 'manifest.json');
-      await writeFile(manifestPath, JSON.stringify(this.manifest, null, 2), 'utf8');
+        // Write manifest to file
+        const manifestPath = join(this.workDir, 'manifest.json');
+        await writeFile(
+          manifestPath,
+          JSON.stringify(this.manifest, null, 2),
+          'utf8',
+        );
 
-      // Create tar bundle
-      const bundleName = `${this.exportId}-${options.tenantId}.tar.gz`;
-      const bundlePath = join(options.outputDir, bundleName);
+        // Create tar bundle
+        const bundleName = `${this.exportId}-${options.tenantId}.tar.gz`;
+        const bundlePath = join(options.outputDir, bundleName);
 
-      // Ensure output directory exists
-      await mkdir(dirname(bundlePath), { recursive: true });
+        // Ensure output directory exists
+        await mkdir(dirname(bundlePath), { recursive: true });
 
-      // Create compressed tar
-      await tar.create({
-        gzip: true,
-        file: bundlePath,
-        cwd: this.workDir
-      }, ['manifest.json', ...this.manifest.files.map(f => f.filename)]);
+        // Create compressed tar
+        await tar.create(
+          {
+            gzip: true,
+            file: bundlePath,
+            cwd: this.workDir,
+          },
+          ['manifest.json', ...this.manifest.files.map((f) => f.filename)],
+        );
 
-      span.setAttributes({
-        'bundle_path': bundlePath,
-        'bundle_size': (await this.getFileStats(bundlePath)).size
-      });
+        span.setAttributes({
+          bundle_path: bundlePath,
+          bundle_size: (await this.getFileStats(bundlePath)).size,
+        });
 
-      console.log(`✅ Bundle created: ${bundlePath}`);
-      return bundlePath;
-
-    });
+        console.log(`✅ Bundle created: ${bundlePath}`);
+        return bundlePath;
+      },
+    );
   }
 
-  private async signBundle(bundlePath: string, cosignKey: string): Promise<void> {
+  private async signBundle(
+    bundlePath: string,
+    cosignKey: string,
+  ): Promise<void> {
     return tracer.startActiveSpan('export.sign_bundle', async (span: Span) => {
       console.log('🔏 Signing bundle with cosign...');
 
@@ -392,21 +408,22 @@ class ExportTool {
         // Sign with cosign
         await this.runCommand('cosign', [
           'sign-blob',
-          '--key', cosignKey,
-          '--output-signature', `${bundlePath}.sig`,
-          bundlePath
+          '--key',
+          cosignKey,
+          '--output-signature',
+          `${bundlePath}.sig`,
+          bundlePath,
         ]);
 
         // Update manifest with signature info
         this.manifest.signature = `${bundlePath}.sig`;
 
         span.setAttributes({
-          'signed': true,
-          'signature_file': `${bundlePath}.sig`
+          signed: true,
+          signature_file: `${bundlePath}.sig`,
         });
 
         console.log(`✅ Bundle signed: ${bundlePath}.sig`);
-
       } catch (error) {
         span.recordException(error as Error);
         throw new Error(`Bundle signing failed: ${(error as Error).message}`);
@@ -416,66 +433,77 @@ class ExportTool {
     });
   }
 
-  private async createAttestation(bundlePath: string, options: ExportOptions): Promise<void> {
-    return tracer.startActiveSpan('export.create_attestation', async (span: Span) => {
-      console.log('📜 Creating attestation...');
+  private async createAttestation(
+    bundlePath: string,
+    options: ExportOptions,
+  ): Promise<void> {
+    return tracer.startActiveSpan(
+      'export.create_attestation',
+      async (span: Span) => {
+        console.log('📜 Creating attestation...');
 
-      const attestation = {
-        _type: 'https://in-toto.io/Statement/v0.1',
-        subject: [{
-          name: bundlePath,
-          digest: {
-            sha256: await this.calculateFileChecksum(bundlePath)
-          }
-        }],
-        predicateType: 'https://maestro.dev/attestation/export/v1',
-        predicate: {
-          exportManifest: this.manifest,
-          buildDefinition: {
-            buildType: 'https://maestro.dev/export/v1',
-            externalParameters: {
-              tenantId: options.tenantId,
-              purpose: options.purpose,
-              requestedBy: options.requestedBy
+        const attestation = {
+          _type: 'https://in-toto.io/Statement/v0.1',
+          subject: [
+            {
+              name: bundlePath,
+              digest: {
+                sha256: await this.calculateFileChecksum(bundlePath),
+              },
             },
-            internalParameters: {
-              exportId: this.exportId,
-              region: this.manifest.region,
-              version: '24.3.0'
+          ],
+          predicateType: 'https://maestro.dev/attestation/export/v1',
+          predicate: {
+            exportManifest: this.manifest,
+            buildDefinition: {
+              buildType: 'https://maestro.dev/export/v1',
+              externalParameters: {
+                tenantId: options.tenantId,
+                purpose: options.purpose,
+                requestedBy: options.requestedBy,
+              },
+              internalParameters: {
+                exportId: this.exportId,
+                region: this.manifest.region,
+                version: '24.3.0',
+              },
+              resolvedDependencies: this.manifest.files.map((f) => ({
+                uri: f.filename,
+                digest: { sha256: f.checksum },
+                mediaType: this.getMediaType(f.type),
+              })),
             },
-            resolvedDependencies: this.manifest.files.map(f => ({
-              uri: f.filename,
-              digest: { sha256: f.checksum },
-              mediaType: this.getMediaType(f.type)
-            }))
+            runDetails: {
+              builder: {
+                id: `maestro-exporter-${this.manifest.region}`,
+                version: '24.3.0',
+              },
+              metadata: {
+                invocationId: this.exportId,
+                startedOn: this.manifest.createdAt,
+                finishedOn: new Date().toISOString(),
+              },
+            },
           },
-          runDetails: {
-            builder: {
-              id: `maestro-exporter-${this.manifest.region}`,
-              version: '24.3.0'
-            },
-            metadata: {
-              invocationId: this.exportId,
-              startedOn: this.manifest.createdAt,
-              finishedOn: new Date().toISOString()
-            }
-          }
-        }
-      };
+        };
 
-      const attestationPath = `${bundlePath}.att`;
-      await writeFile(attestationPath, JSON.stringify(attestation, null, 2), 'utf8');
+        const attestationPath = `${bundlePath}.att`;
+        await writeFile(
+          attestationPath,
+          JSON.stringify(attestation, null, 2),
+          'utf8',
+        );
 
-      this.manifest.attestation = attestationPath;
+        this.manifest.attestation = attestationPath;
 
-      span.setAttributes({
-        'attestation_file': attestationPath,
-        'predicate_type': attestation.predicateType
-      });
+        span.setAttributes({
+          attestation_file: attestationPath,
+          predicate_type: attestation.predicateType,
+        });
 
-      console.log(`✅ Attestation created: ${attestationPath}`);
-
-    });
+        console.log(`✅ Attestation created: ${attestationPath}`);
+      },
+    );
   }
 
   // Helper methods
@@ -491,7 +519,7 @@ class ExportTool {
 
   private convertNeo4jResultToCypher(result: any): string {
     let cypher = '';
-    
+
     for (const record of result.records) {
       const keys = record.keys;
       for (const key of keys) {
@@ -505,7 +533,7 @@ class ExportTool {
         }
       }
     }
-    
+
     return cypher;
   }
 
@@ -513,19 +541,22 @@ class ExportTool {
     return await pg.oneOrNone(
       'SELECT tenant_id, region_tag, residency_region, residency_class, created_at FROM tenants WHERE tenant_id = $1',
       [tenantId],
-      { tenantId }
+      { tenantId },
     );
   }
 
   private async getSchemaInfo(): Promise<any> {
-    const pgSchema = await pg.many('SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema = $1', ['public']);
+    const pgSchema = await pg.many(
+      'SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema = $1',
+      ['public'],
+    );
     return { postgresql: pgSchema };
   }
 
   private async getDataStatistics(tenantId: string): Promise<any> {
     const stats = {
       postgresql: {},
-      neo4j: {}
+      neo4j: {},
     };
 
     // PostgreSQL stats
@@ -534,7 +565,7 @@ class ExportTool {
       const result = await pg.oneOrNone(
         `SELECT COUNT(*) as count FROM ${table} WHERE tenant_id = $1`,
         [tenantId],
-        { tenantId }
+        { tenantId },
       );
       stats.postgresql[table] = parseInt(result?.count || '0');
     }
@@ -543,7 +574,7 @@ class ExportTool {
     const nodeResult = await neo.run(
       'MATCH (n) WHERE n.tenant_id = $tenantId RETURN count(n) as count',
       { tenantId },
-      { tenantId }
+      { tenantId },
     );
     stats.neo4j.nodes = nodeResult.records[0]?.get('count')?.toNumber() || 0;
 
@@ -560,15 +591,21 @@ class ExportTool {
 
   private getMediaType(type: string): string {
     switch (type) {
-      case 'postgresql': return 'application/sql';
-      case 'neo4j': return 'application/x-cypher-query';
-      case 'metadata': return 'application/json';
-      default: return 'application/octet-stream';
+      case 'postgresql':
+        return 'application/sql';
+      case 'neo4j':
+        return 'application/x-cypher-query';
+      case 'metadata':
+        return 'application/json';
+      default:
+        return 'application/octet-stream';
     }
   }
 
-  private async getFileStats(filepath: string): Promise<{ size: number; checksum: string }> {
-    const stats = await import('fs').then(fs => fs.promises.stat(filepath));
+  private async getFileStats(
+    filepath: string,
+  ): Promise<{ size: number; checksum: string }> {
+    const stats = await import('fs').then((fs) => fs.promises.stat(filepath));
     const checksum = await this.calculateFileChecksum(filepath);
     return { size: stats.size, checksum };
   }
@@ -577,8 +614,8 @@ class ExportTool {
     return new Promise((resolve, reject) => {
       const hash = createHash('sha256');
       const stream = createReadStream(filepath);
-      
-      stream.on('data', chunk => hash.update(chunk));
+
+      stream.on('data', (chunk) => hash.update(chunk));
       stream.on('end', () => resolve(hash.digest('hex')));
       stream.on('error', reject);
     });
@@ -587,7 +624,7 @@ class ExportTool {
   private async runCommand(command: string, args: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
       const child = spawn(command, args, { stdio: 'inherit' });
-      
+
       child.on('close', (code) => {
         if (code === 0) {
           resolve();
@@ -595,7 +632,7 @@ class ExportTool {
           reject(new Error(`Command failed with exit code ${code}`));
         }
       });
-      
+
       child.on('error', reject);
     });
   }
@@ -613,9 +650,18 @@ program
   .command('export')
   .description('Export tenant data with signed attestation')
   .requiredOption('-t, --tenant-id <tenantId>', 'Tenant ID to export')
-  .requiredOption('-p, --purpose <purpose>', 'Purpose of export (legal_compliance, data_migration, analytics, backup)')
-  .requiredOption('-r, --requested-by <email>', 'Email of person requesting export')
-  .requiredOption('-o, --output-dir <dir>', 'Output directory for export bundle')
+  .requiredOption(
+    '-p, --purpose <purpose>',
+    'Purpose of export (legal_compliance, data_migration, analytics, backup)',
+  )
+  .requiredOption(
+    '-r, --requested-by <email>',
+    'Email of person requesting export',
+  )
+  .requiredOption(
+    '-o, --output-dir <dir>',
+    'Output directory for export bundle',
+  )
   .option('--include-postgres', 'Include PostgreSQL data', true)
   .option('--include-neo4j', 'Include Neo4j data', true)
   .option('--include-metadata', 'Include metadata', true)
@@ -624,11 +670,14 @@ program
   .option('--sign', 'Sign export bundle with cosign', true)
   .option('--cosign-key <path>', 'Path to cosign private key')
   .option('--expiration-days <days>', 'Days until export expires', '30')
-  .option('--data-classifications <classifications>', 'Comma-separated data classifications')
+  .option(
+    '--data-classifications <classifications>',
+    'Comma-separated data classifications',
+  )
   .action(async (options) => {
     try {
       const exportTool = new ExportTool();
-      
+
       const exportOptions: ExportOptions = {
         tenantId: options.tenantId,
         purpose: options.purpose,
@@ -642,13 +691,12 @@ program
         sign: options.sign,
         cosignKey: options.cosignKey,
         expirationDays: parseInt(options.expirationDays),
-        dataClassifications: options.dataClassifications?.split(',')
+        dataClassifications: options.dataClassifications?.split(','),
       };
 
       const bundlePath = await exportTool.exportTenantData(exportOptions);
       console.log(`\n🎉 Export completed successfully!`);
       console.log(`Bundle: ${bundlePath}`);
-      
     } catch (error) {
       console.error('❌ Export failed:', error);
       process.exit(1);

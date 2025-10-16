@@ -4,25 +4,23 @@ Red/Blue Team Module for Adversarial Misinformation Defense Platform
 This module implements adversarial red team simulations and blue team defensive scenarios
 with a scenario builder UI for creating and managing adversarial exercises.
 """
-import numpy as np
-import torch
-import torch.nn as nn
-from typing import List, Dict, Any, Optional, Tuple, Union
-from pathlib import Path
-import random
+
 import json
 import logging
-from datetime import datetime
-from dataclasses import dataclass, asdict
-from enum import Enum
 import uuid
 from abc import ABC, abstractmethod
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class TeamRole(Enum):
     """
     Roles in red/blue team exercises
     """
+
     RED_TEAM_ATTACKER = "red_team_attacker"
     BLUE_TEAM_DEFENDER = "blue_team_defender"
     WHITE_TEAM_OBSERVER = "white_team_observer"
@@ -33,6 +31,7 @@ class ExerciseType(Enum):
     """
     Types of adversarial exercises
     """
+
     SOCIAL_ENGINEERING = "social_engineering"
     DEEPFAKE_DETECTION = "deepfake_detection"
     MEME_CAMPAIGN = "meme_campaign"
@@ -46,6 +45,7 @@ class ScenarioDifficulty(Enum):
     """
     Difficulty levels for scenarios
     """
+
     BEGINNER = "beginner"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
@@ -58,26 +58,27 @@ class AdversarialScenario:
     """
     Definition of an adversarial scenario for red/blue team exercises
     """
+
     scenario_id: str
     name: str
     description: str
     exercise_type: ExerciseType
     difficulty: ScenarioDifficulty
-    objectives: List[str]
-    constraints: List[str]
-    success_criteria: List[str]
-    resources_required: Dict[str, Any]
+    objectives: list[str]
+    constraints: list[str]
+    success_criteria: list[str]
+    resources_required: dict[str, Any]
     estimated_duration: int  # minutes
-    team_roles: List[TeamRole]
-    threat_actors_involved: List[str]
-    detection_methods_to_test: List[str]
-    mitigation_strategies: List[str]
+    team_roles: list[TeamRole]
+    threat_actors_involved: list[str]
+    detection_methods_to_test: list[str]
+    mitigation_strategies: list[str]
     created_by: str
     created_date: datetime
     last_modified: datetime
     version: str
-    tags: List[str]
-    dependencies: List[str]  # Other scenario IDs this depends on
+    tags: list[str]
+    dependencies: list[str]  # Other scenario IDs this depends on
 
 
 @dataclass
@@ -85,37 +86,38 @@ class ExerciseSession:
     """
     Instance of an exercise session
     """
+
     session_id: str
     scenario_id: str
     start_time: datetime
-    end_time: Optional[datetime]
-    participating_teams: List[Dict[str, Any]]  # Team role and members
+    end_time: datetime | None
+    participating_teams: list[dict[str, Any]]  # Team role and members
     current_phase: str
-    metrics: Dict[str, Any]  # Real-time metrics during exercise
-    incidents: List[Dict[str, Any]]  # Incidents that occurred
-    decisions_made: List[Dict[str, Any]]  # Key decisions during exercise
-    final_evaluation: Optional[Dict[str, Any]]  # Final evaluation results
+    metrics: dict[str, Any]  # Real-time metrics during exercise
+    incidents: list[dict[str, Any]]  # Incidents that occurred
+    decisions_made: list[dict[str, Any]]  # Key decisions during exercise
+    final_evaluation: dict[str, Any] | None  # Final evaluation results
 
 
 class ScenarioBuilderInterface(ABC):
     """
     Abstract interface for scenario builders
     """
-    
+
     @abstractmethod
     def create_scenario(self, **kwargs) -> AdversarialScenario:
         """
         Create a new scenario
         """
         pass
-    
+
     @abstractmethod
     def modify_scenario(self, scenario_id: str, **kwargs) -> AdversarialScenario:
         """
         Modify an existing scenario
         """
         pass
-    
+
     @abstractmethod
     def validate_scenario(self, scenario: AdversarialScenario) -> bool:
         """
@@ -128,21 +130,21 @@ class RedBlueTeamExerciseManager:
     """
     Manager for red/blue team adversarial exercises
     """
-    
+
     def __init__(self):
         """
         Initialize the exercise manager
         """
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
-        
+
         # Store scenarios and exercise sessions
-        self.scenarios: Dict[str, AdversarialScenario] = {}
-        self.exercise_sessions: Dict[str, ExerciseSession] = {}
-        
+        self.scenarios: dict[str, AdversarialScenario] = {}
+        self.exercise_sessions: dict[str, ExerciseSession] = {}
+
         # Initialize with some basic scenarios
         self._initialize_basic_scenarios()
-    
+
     def _initialize_basic_scenarios(self):
         """
         Initialize with basic adversarial scenarios
@@ -157,22 +159,22 @@ class RedBlueTeamExerciseManager:
                 objectives=[
                     "Identify phishing attempts in email communications",
                     "Recognize manipulation tactics in social interactions",
-                    "Report suspicious activities appropriately"
+                    "Report suspicious activities appropriately",
                 ],
                 constraints=[
                     "Limited to email-based attacks",
                     "No physical access to systems",
-                    "Time limit of 30 minutes"
+                    "Time limit of 30 minutes",
                 ],
                 success_criteria=[
                     "Correctly identify 80% of phishing attempts",
                     "Report all suspicious emails within 5 minutes",
-                    "No credential disclosures"
+                    "No credential disclosures",
                 ],
                 resources_required={
                     "email_server": 1,
                     "participant_accounts": 10,
-                    "red_team_personnel": 2
+                    "red_team_personnel": 2,
                 },
                 estimated_duration=30,
                 team_roles=[TeamRole.RED_TEAM_ATTACKER, TeamRole.BLUE_TEAM_DEFENDER],
@@ -184,7 +186,7 @@ class RedBlueTeamExerciseManager:
                 last_modified=datetime.now(),
                 version="1.0",
                 tags=["phishing", "email", "beginner"],
-                dependencies=[]
+                dependencies=[],
             ),
             AdversarialScenario(
                 scenario_id=str(uuid.uuid4()),
@@ -195,43 +197,61 @@ class RedBlueTeamExerciseManager:
                 objectives=[
                     "Detect coordinated meme distribution patterns",
                     "Identify manipulated content and false narratives",
-                    "Track source origins and amplification networks"
+                    "Track source origins and amplification networks",
                 ],
                 constraints=[
                     "Limited to social media platforms",
                     "Maximum 100 participants",
-                    "Duration of 2 hours"
+                    "Duration of 2 hours",
                 ],
                 success_criteria=[
                     "Detect 75% of manipulated content",
                     "Map 90% of amplification network",
-                    "Identify campaign origin within 30 minutes"
+                    "Identify campaign origin within 30 minutes",
                 ],
                 resources_required={
                     "social_media_accounts": 50,
                     "content_creators": 5,
-                    "analytics_tools": 2
+                    "analytics_tools": 2,
                 },
                 estimated_duration=120,
-                team_roles=[TeamRole.RED_TEAM_ATTACKER, TeamRole.BLUE_TEAM_DEFENDER, TeamRole.WHITE_TEAM_OBSERVER],
+                team_roles=[
+                    TeamRole.RED_TEAM_ATTACKER,
+                    TeamRole.BLUE_TEAM_DEFENDER,
+                    TeamRole.WHITE_TEAM_OBSERVER,
+                ],
                 threat_actors_involved=["Meme Warfare Collective"],
-                detection_methods_to_test=["content analysis", "network analysis", "behavioral patterns"],
-                mitigation_strategies=["fact checking", "content moderation", "source verification"],
+                detection_methods_to_test=[
+                    "content analysis",
+                    "network analysis",
+                    "behavioral patterns",
+                ],
+                mitigation_strategies=[
+                    "fact checking",
+                    "content moderation",
+                    "source verification",
+                ],
                 created_by="System",
                 created_date=datetime.now(),
                 last_modified=datetime.now(),
                 version="1.0",
                 tags=["memes", "social_media", "intermediate"],
-                dependencies=[]
-            )
+                dependencies=[],
+            ),
         ]
-        
+
         for scenario in basic_scenarios:
             self.scenarios[scenario.scenario_id] = scenario
-    
-    def create_scenario(self, name: str, description: str, exercise_type: ExerciseType,
-                       difficulty: ScenarioDifficulty, objectives: List[str],
-                       **kwargs) -> AdversarialScenario:
+
+    def create_scenario(
+        self,
+        name: str,
+        description: str,
+        exercise_type: ExerciseType,
+        difficulty: ScenarioDifficulty,
+        objectives: list[str],
+        **kwargs,
+    ) -> AdversarialScenario:
         """
         Create a new adversarial scenario
         """
@@ -242,22 +262,24 @@ class RedBlueTeamExerciseManager:
             exercise_type=exercise_type,
             difficulty=difficulty,
             objectives=objectives,
-            constraints=kwargs.get('constraints', []),
-            success_criteria=kwargs.get('success_criteria', []),
-            resources_required=kwargs.get('resources_required', {}),
-            estimated_duration=kwargs.get('estimated_duration', 60),
-            team_roles=kwargs.get('team_roles', [TeamRole.RED_TEAM_ATTACKER, TeamRole.BLUE_TEAM_DEFENDER]),
-            threat_actors_involved=kwargs.get('threat_actors_involved', []),
-            detection_methods_to_test=kwargs.get('detection_methods_to_test', []),
-            mitigation_strategies=kwargs.get('mitigation_strategies', []),
-            created_by=kwargs.get('created_by', 'Unknown'),
+            constraints=kwargs.get("constraints", []),
+            success_criteria=kwargs.get("success_criteria", []),
+            resources_required=kwargs.get("resources_required", {}),
+            estimated_duration=kwargs.get("estimated_duration", 60),
+            team_roles=kwargs.get(
+                "team_roles", [TeamRole.RED_TEAM_ATTACKER, TeamRole.BLUE_TEAM_DEFENDER]
+            ),
+            threat_actors_involved=kwargs.get("threat_actors_involved", []),
+            detection_methods_to_test=kwargs.get("detection_methods_to_test", []),
+            mitigation_strategies=kwargs.get("mitigation_strategies", []),
+            created_by=kwargs.get("created_by", "Unknown"),
             created_date=datetime.now(),
             last_modified=datetime.now(),
-            version=kwargs.get('version', '1.0'),
-            tags=kwargs.get('tags', []),
-            dependencies=kwargs.get('dependencies', [])
+            version=kwargs.get("version", "1.0"),
+            tags=kwargs.get("tags", []),
+            dependencies=kwargs.get("dependencies", []),
         )
-        
+
         # Validate the scenario
         if self.validate_scenario(scenario):
             self.scenarios[scenario.scenario_id] = scenario
@@ -266,22 +288,22 @@ class RedBlueTeamExerciseManager:
         else:
             self.logger.error(f"Invalid scenario: {scenario.name}")
             raise ValueError("Invalid scenario configuration")
-    
-    def modify_scenario(self, scenario_id: str, **kwargs) -> Optional[AdversarialScenario]:
+
+    def modify_scenario(self, scenario_id: str, **kwargs) -> AdversarialScenario | None:
         """
         Modify an existing scenario
         """
         if scenario_id in self.scenarios:
             scenario = self.scenarios[scenario_id]
-            
+
             # Update fields if provided
             for key, value in kwargs.items():
                 if hasattr(scenario, key):
                     setattr(scenario, key, value)
-            
+
             # Update last modified timestamp
             scenario.last_modified = datetime.now()
-            
+
             # Re-validate the scenario
             if self.validate_scenario(scenario):
                 self.scenarios[scenario_id] = scenario
@@ -293,7 +315,7 @@ class RedBlueTeamExerciseManager:
         else:
             self.logger.warning(f"Scenario ID not found: {scenario_id}")
             return None
-    
+
     def validate_scenario(self, scenario: AdversarialScenario) -> bool:
         """
         Validate that a scenario is properly formed
@@ -301,36 +323,37 @@ class RedBlueTeamExerciseManager:
         # Check required fields
         if not scenario.name or not scenario.description:
             return False
-        
+
         if not scenario.objectives:
             return False
-        
+
         # Check that estimated duration is positive
         if scenario.estimated_duration <= 0:
             return False
-        
+
         # Check that there are team roles defined
         if not scenario.team_roles:
             return False
-        
+
         # Check dependencies exist (if any)
         for dep_id in scenario.dependencies:
             if dep_id not in self.scenarios:
                 self.logger.warning(f"Dependency scenario not found: {dep_id}")
                 return False
-        
+
         return True
-    
-    def start_exercise_session(self, scenario_id: str, 
-                             participating_teams: List[Dict[str, Any]]) -> ExerciseSession:
+
+    def start_exercise_session(
+        self, scenario_id: str, participating_teams: list[dict[str, Any]]
+    ) -> ExerciseSession:
         """
         Start a new exercise session based on a scenario
         """
         if scenario_id not in self.scenarios:
             raise ValueError(f"Scenario ID not found: {scenario_id}")
-        
+
         scenario = self.scenarios[scenario_id]
-        
+
         session = ExerciseSession(
             session_id=str(uuid.uuid4()),
             scenario_id=scenario_id,
@@ -341,14 +364,14 @@ class RedBlueTeamExerciseManager:
             metrics={},
             incidents=[],
             decisions_made=[],
-            final_evaluation=None
+            final_evaluation=None,
         )
-        
+
         self.exercise_sessions[session.session_id] = session
         self.logger.info(f"Started exercise session for scenario: {scenario.name}")
         return session
-    
-    def update_exercise_metrics(self, session_id: str, metrics: Dict[str, Any]):
+
+    def update_exercise_metrics(self, session_id: str, metrics: dict[str, Any]):
         """
         Update real-time metrics during an exercise
         """
@@ -358,31 +381,31 @@ class RedBlueTeamExerciseManager:
             self.logger.info(f"Updated metrics for session {session_id}")
         else:
             self.logger.warning(f"Session ID not found: {session_id}")
-    
-    def record_incident(self, session_id: str, incident: Dict[str, Any]):
+
+    def record_incident(self, session_id: str, incident: dict[str, Any]):
         """
         Record an incident that occurred during an exercise
         """
         if session_id in self.exercise_sessions:
             session = self.exercise_sessions[session_id]
-            incident['timestamp'] = datetime.now().isoformat()
+            incident["timestamp"] = datetime.now().isoformat()
             session.incidents.append(incident)
             self.logger.info(f"Recorded incident in session {session_id}")
         else:
             self.logger.warning(f"Session ID not found: {session_id}")
-    
-    def record_decision(self, session_id: str, decision: Dict[str, Any]):
+
+    def record_decision(self, session_id: str, decision: dict[str, Any]):
         """
         Record a key decision made during an exercise
         """
         if session_id in self.exercise_sessions:
             session = self.exercise_sessions[session_id]
-            decision['timestamp'] = datetime.now().isoformat()
+            decision["timestamp"] = datetime.now().isoformat()
             session.decisions_made.append(decision)
             self.logger.info(f"Recorded decision in session {session_id}")
         else:
             self.logger.warning(f"Session ID not found: {session_id}")
-    
+
     def advance_exercise_phase(self, session_id: str, new_phase: str):
         """
         Advance the exercise to a new phase
@@ -393,9 +416,10 @@ class RedBlueTeamExerciseManager:
             self.logger.info(f"Advanced session {session_id} to phase: {new_phase}")
         else:
             self.logger.warning(f"Session ID not found: {session_id}")
-    
-    def complete_exercise_session(self, session_id: str, 
-                                evaluation: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+
+    def complete_exercise_session(
+        self, session_id: str, evaluation: dict[str, Any]
+    ) -> dict[str, Any] | None:
         """
         Complete an exercise session and record final evaluation
         """
@@ -403,7 +427,7 @@ class RedBlueTeamExerciseManager:
             session = self.exercise_sessions[session_id]
             session.end_time = datetime.now()
             session.final_evaluation = evaluation
-            
+
             # Generate comprehensive report
             report = self._generate_exercise_report(session)
             self.logger.info(f"Completed exercise session {session_id}")
@@ -411,21 +435,23 @@ class RedBlueTeamExerciseManager:
         else:
             self.logger.warning(f"Session ID not found: {session_id}")
             return None
-    
-    def _generate_exercise_report(self, session: ExerciseSession) -> Dict[str, Any]:
+
+    def _generate_exercise_report(self, session: ExerciseSession) -> dict[str, Any]:
         """
         Generate a comprehensive report for a completed exercise session
         """
         scenario = self.scenarios[session.scenario_id]
-        
+
         # Calculate performance metrics
         total_incidents = len(session.incidents)
-        resolved_incidents = len([i for i in session.incidents if i.get('resolved', False)])
+        resolved_incidents = len([i for i in session.incidents if i.get("resolved", False)])
         resolution_rate = resolved_incidents / total_incidents if total_incidents > 0 else 0.0
-        
+
         # Calculate time-based metrics
-        duration = (session.end_time - session.start_time).total_seconds() / 60 if session.end_time else 0
-        
+        duration = (
+            (session.end_time - session.start_time).total_seconds() / 60 if session.end_time else 0
+        )
+
         report = {
             "session_id": session.session_id,
             "scenario_name": scenario.name,
@@ -442,51 +468,57 @@ class RedBlueTeamExerciseManager:
             "incidents_summary": session.incidents,
             "decisions_summary": session.decisions_made,
             "final_evaluation": session.final_evaluation,
-            "report_timestamp": datetime.now().isoformat()
+            "report_timestamp": datetime.now().isoformat(),
         }
-        
+
         return report
-    
-    def get_scenario_by_id(self, scenario_id: str) -> Optional[AdversarialScenario]:
+
+    def get_scenario_by_id(self, scenario_id: str) -> AdversarialScenario | None:
         """
         Get a scenario by its ID
         """
         return self.scenarios.get(scenario_id)
-    
-    def get_all_scenarios(self) -> List[AdversarialScenario]:
+
+    def get_all_scenarios(self) -> list[AdversarialScenario]:
         """
         Get all scenarios
         """
         return list(self.scenarios.values())
-    
-    def get_scenarios_by_type(self, exercise_type: ExerciseType) -> List[AdversarialScenario]:
+
+    def get_scenarios_by_type(self, exercise_type: ExerciseType) -> list[AdversarialScenario]:
         """
         Get scenarios filtered by exercise type
         """
-        return [scenario for scenario in self.scenarios.values() 
-                if scenario.exercise_type == exercise_type]
-    
-    def get_scenarios_by_difficulty(self, difficulty: ScenarioDifficulty) -> List[AdversarialScenario]:
+        return [
+            scenario
+            for scenario in self.scenarios.values()
+            if scenario.exercise_type == exercise_type
+        ]
+
+    def get_scenarios_by_difficulty(
+        self, difficulty: ScenarioDifficulty
+    ) -> list[AdversarialScenario]:
         """
         Get scenarios filtered by difficulty level
         """
-        return [scenario for scenario in self.scenarios.values() 
-                if scenario.difficulty == difficulty]
-    
-    def get_active_sessions(self) -> List[ExerciseSession]:
+        return [
+            scenario for scenario in self.scenarios.values() if scenario.difficulty == difficulty
+        ]
+
+    def get_active_sessions(self) -> list[ExerciseSession]:
         """
         Get all currently active (not completed) exercise sessions
         """
-        return [session for session in self.exercise_sessions.values() 
-                if session.end_time is None]
-    
-    def get_completed_sessions(self) -> List[ExerciseSession]:
+        return [session for session in self.exercise_sessions.values() if session.end_time is None]
+
+    def get_completed_sessions(self) -> list[ExerciseSession]:
         """
         Get all completed exercise sessions
         """
-        return [session for session in self.exercise_sessions.values() 
-                if session.end_time is not None]
-    
+        return [
+            session for session in self.exercise_sessions.values() if session.end_time is not None
+        ]
+
     def delete_scenario(self, scenario_id: str) -> bool:
         """
         Delete a scenario (and all dependent scenarios)
@@ -494,51 +526,50 @@ class RedBlueTeamExerciseManager:
         if scenario_id in self.scenarios:
             # Check for dependencies
             dependent_scenarios = [
-                s for s in self.scenarios.values() 
-                if scenario_id in s.dependencies
+                s for s in self.scenarios.values() if scenario_id in s.dependencies
             ]
-            
+
             if dependent_scenarios:
                 self.logger.warning(f"Cannot delete scenario {scenario_id} - has dependencies")
                 return False
-            
+
             del self.scenarios[scenario_id]
             self.logger.info(f"Deleted scenario {scenario_id}")
             return True
         else:
             self.logger.warning(f"Scenario ID not found: {scenario_id}")
             return False
-    
-    def export_scenario(self, scenario_id: str, filepath: Union[str, Path]):
+
+    def export_scenario(self, scenario_id: str, filepath: str | Path):
         """
         Export a scenario to a file
         """
         if scenario_id in self.scenarios:
             scenario = self.scenarios[scenario_id]
             try:
-                with open(str(filepath), 'w') as f:
+                with open(str(filepath), "w") as f:
                     json.dump(asdict(scenario), f, indent=2, default=str)
                 self.logger.info(f"Exported scenario {scenario_id} to {filepath}")
             except Exception as e:
                 self.logger.error(f"Error exporting scenario: {str(e)}")
         else:
             self.logger.warning(f"Scenario ID not found: {scenario_id}")
-    
-    def import_scenario(self, filepath: Union[str, Path]) -> Optional[AdversarialScenario]:
+
+    def import_scenario(self, filepath: str | Path) -> AdversarialScenario | None:
         """
         Import a scenario from a file
         """
         try:
-            with open(str(filepath), 'r') as f:
+            with open(str(filepath)) as f:
                 scenario_data = json.load(f)
-            
+
             # Convert datetime strings back to datetime objects
-            for key in ['created_date', 'last_modified']:
+            for key in ["created_date", "last_modified"]:
                 if key in scenario_data:
                     scenario_data[key] = datetime.fromisoformat(scenario_data[key])
-            
+
             scenario = AdversarialScenario(**scenario_data)
-            
+
             # Validate and store the scenario
             if self.validate_scenario(scenario):
                 self.scenarios[scenario.scenario_id] = scenario
@@ -550,42 +581,49 @@ class RedBlueTeamExerciseManager:
         except Exception as e:
             self.logger.error(f"Error importing scenario: {str(e)}")
             return None
-    
-    def generate_custom_scenario(self, template_scenario_id: str, 
-                               modifications: Dict[str, Any]) -> AdversarialScenario:
+
+    def generate_custom_scenario(
+        self, template_scenario_id: str, modifications: dict[str, Any]
+    ) -> AdversarialScenario:
         """
         Generate a custom scenario based on a template with modifications
         """
         if template_scenario_id not in self.scenarios:
             raise ValueError(f"Template scenario ID not found: {template_scenario_id}")
-        
+
         # Get template scenario
         template = self.scenarios[template_scenario_id]
-        
+
         # Create modified copy
         modified_scenario = AdversarialScenario(
             scenario_id=str(uuid.uuid4()),
-            name=modifications.get('name', f"{template.name} (Custom)"),
-            description=modifications.get('description', template.description),
-            exercise_type=modifications.get('exercise_type', template.exercise_type),
-            difficulty=modifications.get('difficulty', template.difficulty),
-            objectives=modifications.get('objectives', template.objectives),
-            constraints=modifications.get('constraints', template.constraints),
-            success_criteria=modifications.get('success_criteria', template.success_criteria),
-            resources_required=modifications.get('resources_required', template.resources_required),
-            estimated_duration=modifications.get('estimated_duration', template.estimated_duration),
-            team_roles=modifications.get('team_roles', template.team_roles),
-            threat_actors_involved=modifications.get('threat_actors_involved', template.threat_actors_involved),
-            detection_methods_to_test=modifications.get('detection_methods_to_test', template.detection_methods_to_test),
-            mitigation_strategies=modifications.get('mitigation_strategies', template.mitigation_strategies),
-            created_by=modifications.get('created_by', template.created_by),
+            name=modifications.get("name", f"{template.name} (Custom)"),
+            description=modifications.get("description", template.description),
+            exercise_type=modifications.get("exercise_type", template.exercise_type),
+            difficulty=modifications.get("difficulty", template.difficulty),
+            objectives=modifications.get("objectives", template.objectives),
+            constraints=modifications.get("constraints", template.constraints),
+            success_criteria=modifications.get("success_criteria", template.success_criteria),
+            resources_required=modifications.get("resources_required", template.resources_required),
+            estimated_duration=modifications.get("estimated_duration", template.estimated_duration),
+            team_roles=modifications.get("team_roles", template.team_roles),
+            threat_actors_involved=modifications.get(
+                "threat_actors_involved", template.threat_actors_involved
+            ),
+            detection_methods_to_test=modifications.get(
+                "detection_methods_to_test", template.detection_methods_to_test
+            ),
+            mitigation_strategies=modifications.get(
+                "mitigation_strategies", template.mitigation_strategies
+            ),
+            created_by=modifications.get("created_by", template.created_by),
             created_date=datetime.now(),
             last_modified=datetime.now(),
-            version=modifications.get('version', f"{template.version}-custom"),
-            tags=modifications.get('tags', template.tags),
-            dependencies=modifications.get('dependencies', template.dependencies)
+            version=modifications.get("version", f"{template.version}-custom"),
+            tags=modifications.get("tags", template.tags),
+            dependencies=modifications.get("dependencies", template.dependencies),
         )
-        
+
         # Validate and store the custom scenario
         if self.validate_scenario(modified_scenario):
             self.scenarios[modified_scenario.scenario_id] = modified_scenario
@@ -600,46 +638,46 @@ class ScenarioBuilderCLI:
     """
     Command-line interface for building scenarios
     """
-    
+
     def __init__(self, manager: RedBlueTeamExerciseManager):
         self.manager = manager
         self.logger = logging.getLogger(__name__)
-    
+
     def run_interactive_builder(self):
         """
         Run interactive scenario builder
         """
         print("=== Adversarial Scenario Builder ===")
         print("Building a new adversarial scenario...")
-        
+
         # Get basic scenario information
         name = input("Scenario Name: ")
         description = input("Description: ")
-        
+
         # Get exercise type
         print("\nExercise Types:")
         for i, etype in enumerate(ExerciseType, 1):
             print(f"{i}. {etype.value}")
-        
+
         try:
-            type_choice = int(input("Select Exercise Type (1-{}): ".format(len(ExerciseType))))
+            type_choice = int(input(f"Select Exercise Type (1-{len(ExerciseType)}): "))
             exercise_type = list(ExerciseType)[type_choice - 1]
         except (ValueError, IndexError):
             print("Invalid selection. Using default.")
             exercise_type = ExerciseType.SOCIAL_ENGINEERING
-        
+
         # Get difficulty level
         print("\nDifficulty Levels:")
         for i, diff in enumerate(ScenarioDifficulty, 1):
             print(f"{i}. {diff.value}")
-        
+
         try:
-            diff_choice = int(input("Select Difficulty (1-{}): ".format(len(ScenarioDifficulty))))
+            diff_choice = int(input(f"Select Difficulty (1-{len(ScenarioDifficulty)}): "))
             difficulty = list(ScenarioDifficulty)[diff_choice - 1]
         except (ValueError, IndexError):
             print("Invalid selection. Using default.")
             difficulty = ScenarioDifficulty.INTERMEDIATE
-        
+
         # Get objectives
         print("\nEnter objectives (one per line, empty line to finish):")
         objectives = []
@@ -648,7 +686,7 @@ class ScenarioBuilderCLI:
             if not obj:
                 break
             objectives.append(obj)
-        
+
         # Create the scenario
         try:
             scenario = self.manager.create_scenario(
@@ -657,13 +695,13 @@ class ScenarioBuilderCLI:
                 exercise_type=exercise_type,
                 difficulty=difficulty,
                 objectives=objectives,
-                created_by="CLI User"
+                created_by="CLI User",
             )
-            
-            print(f"\nScenario created successfully!")
+
+            print("\nScenario created successfully!")
             print(f"Scenario ID: {scenario.scenario_id}")
             print(f"Name: {scenario.name}")
-            
+
         except Exception as e:
             print(f"Error creating scenario: {str(e)}")
 

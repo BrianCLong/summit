@@ -3,7 +3,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
 
-const QUARANTINE_DIR = process.env.QUARANTINE_DIR || path.join(process.cwd(), 'quarantine');
+const QUARANTINE_DIR =
+  process.env.QUARANTINE_DIR || path.join(process.cwd(), 'quarantine');
 const KPW_MEDIA_URL = process.env.KPW_MEDIA_URL || 'http://localhost:7102';
 const LAC_URL = process.env.LAC_URL || 'http://localhost:7103'; // Assuming LAC has an API
 
@@ -12,13 +13,19 @@ fs.mkdir(QUARANTINE_DIR, { recursive: true }).catch(console.error);
 
 export const dropResolvers = {
   Mutation: {
-    submitDrop: async (_: any, { input }: { input: { payload: string; metadata?: string } }) => {
+    submitDrop: async (
+      _: any,
+      { input }: { input: { payload: string; metadata?: string } },
+    ) => {
       const dropId = uuidv4();
       const quarantinePath = path.join(QUARANTINE_DIR, `${dropId}.drop`);
 
       try {
         // 1. Store raw payload in quarantine
-        await fs.writeFile(quarantinePath, Buffer.from(input.payload, 'base64'));
+        await fs.writeFile(
+          quarantinePath,
+          Buffer.from(input.payload, 'base64'),
+        );
 
         let status = 'QUARANTINED';
         let reason = 'Stored in quarantine, awaiting verification.';
@@ -27,8 +34,9 @@ export const dropResolvers = {
         // In a real scenario, the payload would be processed to generate step commits
         // and then sent to KPW-Media for wallet building/verification.
         // For MVP, we simulate a verification call.
-        const kpwVerifyResult = await axios.post(`${KPW_MEDIA_URL}/kpw/verify`, { bundle: {} }) // Placeholder bundle
-          .then(res => res.data.ok)
+        const kpwVerifyResult = await axios
+          .post(`${KPW_MEDIA_URL}/kpw/verify`, { bundle: {} }) // Placeholder bundle
+          .then((res) => res.data.ok)
           .catch(() => false);
 
         if (!kpwVerifyResult) {
@@ -37,12 +45,16 @@ export const dropResolvers = {
 
         // 3. Simulate LAC evaluation
         // This would involve compiling a policy and evaluating it against the drop's context.
-        const lacEvalResult = await axios.post(`${LAC_URL}/lac/evaluate`, { context: {}, policy: {} }) // Placeholder context/policy
-          .then(res => res.data.allow)
+        const lacEvalResult = await axios
+          .post(`${LAC_URL}/lac/evaluate`, { context: {}, policy: {} }) // Placeholder context/policy
+          .then((res) => res.data.allow)
           .catch(() => false);
 
         if (!lacEvalResult) {
-          reason = (reason === 'Stored in quarantine, awaiting verification.') ? 'LAC policy denied.' : reason + ' LAC policy denied.';
+          reason =
+            reason === 'Stored in quarantine, awaiting verification.'
+              ? 'LAC policy denied.'
+              : reason + ' LAC policy denied.';
         }
 
         if (kpwVerifyResult && lacEvalResult) {
@@ -54,10 +66,13 @@ export const dropResolvers = {
         }
 
         return { id: dropId, status, reason };
-
       } catch (error: any) {
         console.error(`Error submitting drop ${dropId}:`, error);
-        return { id: dropId, status: 'QUARANTINED', reason: `Processing error: ${error.message}` };
+        return {
+          id: dropId,
+          status: 'QUARANTINED',
+          reason: `Processing error: ${error.message}`,
+        };
       }
     },
   },

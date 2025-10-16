@@ -1,5 +1,9 @@
 import { applyConnectorRedactions } from './redaction';
-import { buildDeletionProof, buildRectificationProof, hashDeterministic } from './proofs';
+import {
+  buildDeletionProof,
+  buildRectificationProof,
+  hashDeterministic,
+} from './proofs';
 import type {
   DataSubjectFulfillmentOptions,
   DSARConnector,
@@ -30,7 +34,9 @@ export class DataSubjectFulfillmentEngine {
   async execute(request: DSARRequest): Promise<DSARResponse> {
     const verification = await this.options.identityVerifier.verify(request);
     if (!verification.verified) {
-      throw new Error(`Identity verification failed: ${verification.reason ?? 'unknown reason'}`);
+      throw new Error(
+        `Identity verification failed: ${verification.reason ?? 'unknown reason'}`,
+      );
     }
     const cacheKey = request.replayKey ?? request.requestId;
     const cached = this.cache.get(cacheKey);
@@ -61,7 +67,10 @@ export class DataSubjectFulfillmentEngine {
     return response;
   }
 
-  private buildMeta(idempotentReplay: boolean, verification: IdentityVerification): DSARResponseMeta {
+  private buildMeta(
+    idempotentReplay: boolean,
+    verification: IdentityVerification,
+  ): DSARResponseMeta {
     return {
       idempotentReplay,
       identityVerification: verification,
@@ -72,10 +81,22 @@ export class DataSubjectFulfillmentEngine {
     request: DSARRequest,
     verification: IdentityVerification,
   ): Promise<DSARResponse> {
-    const connectorPayloads: { name: string; data: unknown; applied: string[]; hash: string }[] = [];
+    const connectorPayloads: {
+      name: string;
+      data: unknown;
+      applied: string[];
+      hash: string;
+    }[] = [];
     for (const connector of this.connectors.values()) {
-      const collected = await connector.collect(request.subjectId, request.tenantId);
-      const { data, applied } = applyConnectorRedactions(connector.name, collected, this.options.redactionRules);
+      const collected = await connector.collect(
+        request.subjectId,
+        request.tenantId,
+      );
+      const { data, applied } = applyConnectorRedactions(
+        connector.name,
+        collected,
+        this.options.redactionRules,
+      );
       connectorPayloads.push({
         name: connector.name,
         data,
@@ -124,7 +145,10 @@ export class DataSubjectFulfillmentEngine {
 
     const signedPack = this.options.signer.sign(payload, manifest);
     const objectKey = `${request.tenantId}/${request.requestId}.json`;
-    const location = await this.options.storage.putObject(objectKey, JSON.stringify(signedPack));
+    const location = await this.options.storage.putObject(
+      objectKey,
+      JSON.stringify(signedPack),
+    );
 
     await this.options.kafka.publish('dsar.fulfillment', {
       requestId: request.requestId,
@@ -156,14 +180,28 @@ export class DataSubjectFulfillmentEngine {
       if (typeof connector.rectify !== 'function') {
         continue;
       }
-      const connectorPatch = payload[connector.name] as Record<string, unknown> | undefined;
+      const connectorPatch = payload[connector.name] as
+        | Record<string, unknown>
+        | undefined;
       if (!connectorPatch || Object.keys(connectorPatch).length === 0) {
         continue;
       }
       const before = await connector.snapshot();
-      await connector.rectify(request.subjectId, request.tenantId, connectorPatch);
+      await connector.rectify(
+        request.subjectId,
+        request.tenantId,
+        connectorPatch,
+      );
       const after = await connector.snapshot();
-      proofs.push(buildRectificationProof(request.requestId, connector.name, before, after, connectorPatch));
+      proofs.push(
+        buildRectificationProof(
+          request.requestId,
+          connector.name,
+          before,
+          after,
+          connectorPatch,
+        ),
+      );
       await this.options.kafka.publish('dsar.fulfillment', {
         requestId: request.requestId,
         operation: 'rectify',
@@ -191,7 +229,14 @@ export class DataSubjectFulfillmentEngine {
       }
       await connector.delete(request.subjectId, request.tenantId);
       const snapshot = await connector.snapshot();
-      proofs.push(buildDeletionProof(request.requestId, connector.name, request.subjectId, snapshot));
+      proofs.push(
+        buildDeletionProof(
+          request.requestId,
+          connector.name,
+          request.subjectId,
+          snapshot,
+        ),
+      );
       await this.options.kafka.publish('dsar.fulfillment', {
         requestId: request.requestId,
         operation: 'delete',
@@ -213,7 +258,8 @@ export const registerConnector = (
   engine: DataSubjectFulfillmentEngine,
   connector: DSARConnector,
 ): void => {
-  const map = (engine as unknown as { connectors: Map<string, DSARConnector> }).connectors;
+  const map = (engine as unknown as { connectors: Map<string, DSARConnector> })
+    .connectors;
   if (map.has(connector.name)) {
     throw new Error(`Connector ${connector.name} already registered`);
   }

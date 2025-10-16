@@ -7,34 +7,39 @@ Hybrid classical + post-quantum cryptographic signing for ultimate future-proof 
 Implements Ed25519 (classical) + Dilithium2 (post-quantum) dual-signature scheme.
 """
 
-import json
-import hmac
-import hashlib
-import time
 import base64
-from typing import Dict, Any, Optional, List, NamedTuple
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+import hashlib
+import hmac
+import json
 import logging
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from typing import Any, NamedTuple
 
 logger = logging.getLogger(__name__)
 
+
 class PQASignature(NamedTuple):
     """Post-Quantum Attestation dual signature structure"""
-    classical_sig: str      # Ed25519 signature (or HMAC-SHA256 in demo)
-    quantum_sig: str        # Dilithium2 signature (or simulated in demo)
-    timestamp: str          # RFC3339 timestamp
-    signer_id: str          # Identity of signing entity
-    key_version: str        # Key version for rotation tracking
+
+    classical_sig: str  # Ed25519 signature (or HMAC-SHA256 in demo)
+    quantum_sig: str  # Dilithium2 signature (or simulated in demo)
+    timestamp: str  # RFC3339 timestamp
+    signer_id: str  # Identity of signing entity
+    key_version: str  # Key version for rotation tracking
+
 
 @dataclass
 class PQAAttestation:
     """Complete post-quantum attestation bundle"""
-    payload: Dict[str, Any]
+
+    payload: dict[str, Any]
     signature: PQASignature
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     attestation_id: str
-    chain_id: str           # For chaining attestations
+    chain_id: str  # For chaining attestations
+
 
 class PQASigner:
     """Hybrid classical + post-quantum attestation signer
@@ -58,9 +63,12 @@ class PQASigner:
 
         logger.info(f"PQA Signer initialized: {signer_id}, key_version={self.key_version}")
 
-    def sign_attestation(self, payload: Dict[str, Any],
-                        metadata: Optional[Dict[str, Any]] = None,
-                        chain_from: Optional[str] = None) -> PQAAttestation:
+    def sign_attestation(
+        self,
+        payload: dict[str, Any],
+        metadata: dict[str, Any] | None = None,
+        chain_from: str | None = None,
+    ) -> PQAAttestation:
         """Create post-quantum attestation with dual signatures
 
         Args:
@@ -89,7 +97,7 @@ class PQASigner:
             "timestamp": timestamp,
             "signer_id": self.signer_id,
             "key_version": self.key_version,
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         # Generate dual signatures
@@ -102,7 +110,7 @@ class PQASigner:
             quantum_sig=quantum_sig,
             timestamp=timestamp,
             signer_id=self.signer_id,
-            key_version=self.key_version
+            key_version=self.key_version,
         )
 
         # Determine chain_id
@@ -114,7 +122,7 @@ class PQASigner:
             signature=signature,
             metadata=metadata or {},
             attestation_id=attestation_id,
-            chain_id=chain_id
+            chain_id=chain_id,
         )
 
         # Update metrics
@@ -122,43 +130,40 @@ class PQASigner:
         self.sign_count += 1
         self.total_sign_time += sign_time
 
-        logger.info(f"PQA attestation created: {attestation_id}, "
-                   f"sign_time={sign_time*1000:.2f}ms")
+        logger.info(
+            f"PQA attestation created: {attestation_id}, " f"sign_time={sign_time*1000:.2f}ms"
+        )
 
         return attestation
 
-    def _sign_classical(self, data: Dict[str, Any]) -> str:
+    def _sign_classical(self, data: dict[str, Any]) -> str:
         """Generate classical cryptographic signature (Ed25519 simulation)"""
-        canonical_json = json.dumps(data, sort_keys=True, separators=(',', ':'))
-        message_bytes = canonical_json.encode('utf-8')
+        canonical_json = json.dumps(data, sort_keys=True, separators=(",", ":"))
+        message_bytes = canonical_json.encode("utf-8")
 
         # Demo: HMAC-SHA256 (production would use Ed25519)
-        signature_bytes = hmac.new(
-            self.classical_key,
-            message_bytes,
-            hashlib.sha256
-        ).digest()
+        signature_bytes = hmac.new(self.classical_key, message_bytes, hashlib.sha256).digest()
 
-        return base64.b64encode(signature_bytes).decode('ascii')
+        return base64.b64encode(signature_bytes).decode("ascii")
 
-    def _sign_quantum(self, data: Dict[str, Any]) -> str:
+    def _sign_quantum(self, data: dict[str, Any]) -> str:
         """Generate post-quantum signature (Dilithium2 simulation)"""
-        canonical_json = json.dumps(data, sort_keys=True, separators=(',', ':'))
-        message_bytes = canonical_json.encode('utf-8')
+        canonical_json = json.dumps(data, sort_keys=True, separators=(",", ":"))
+        message_bytes = canonical_json.encode("utf-8")
 
         # Demo: Dilithium2 simulation using HMAC with quantum key
         # Production would use actual Dilithium2 implementation
         signature_bytes = hmac.new(
             self.quantum_key,
             b"DILITHIUM2:" + message_bytes,
-            hashlib.sha512  # Dilithium2 uses larger signatures
+            hashlib.sha512,  # Dilithium2 uses larger signatures
         ).digest()
 
-        return base64.b64encode(signature_bytes).decode('ascii')
+        return base64.b64encode(signature_bytes).decode("ascii")
 
-    def _canonicalize(self, data: Dict[str, Any]) -> str:
+    def _canonicalize(self, data: dict[str, Any]) -> str:
         """Create canonical representation for signing"""
-        return json.dumps(data, sort_keys=True, separators=(',', ':'))
+        return json.dumps(data, sort_keys=True, separators=(",", ":"))
 
     def _generate_attestation_id(self) -> str:
         """Generate unique attestation identifier"""
@@ -168,14 +173,14 @@ class PQASigner:
         hash_bytes = hashlib.sha256(unique_data.encode()).digest()
         return f"pqa_{base64.b32encode(hash_bytes[:10]).decode().lower()}"
 
-    def get_performance_metrics(self) -> Dict[str, float]:
+    def get_performance_metrics(self) -> dict[str, float]:
         """Get signer performance metrics"""
         avg_sign_time = self.total_sign_time / max(self.sign_count, 1)
         return {
             "sign_count": self.sign_count,
             "avg_sign_time_ms": avg_sign_time * 1000,
             "total_sign_time_s": self.total_sign_time,
-            "sla_compliance_pct": 100.0 if avg_sign_time < 0.005 else 0.0  # <5ms SLA
+            "sla_compliance_pct": 100.0 if avg_sign_time < 0.005 else 0.0,  # <5ms SLA
         }
 
     def export_attestation(self, attestation: PQAAttestation) -> str:
@@ -202,12 +207,11 @@ if __name__ == "__main__":
         "operation": "policy_enforcement",
         "result": "allowed",
         "policy_hash": "sha256:abc123...",
-        "tenant_id": "TENANT_001"
+        "tenant_id": "TENANT_001",
     }
 
     attestation = signer.sign_attestation(
-        payload=test_payload,
-        metadata={"environment": "demo", "version": "0.3.8"}
+        payload=test_payload, metadata={"environment": "demo", "version": "0.3.8"}
     )
 
     print("=== PQA Attestation Demo ===")

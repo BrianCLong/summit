@@ -11,6 +11,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  ListItemButton, // Added import
   Popper,
   ClickAwayListener,
   Fade,
@@ -28,7 +29,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
 } from '@mui/material';
 import {
   Mic,
@@ -52,9 +53,11 @@ import {
   Help,
   AutoAwesome,
   Lightbulb,
-  QuestionMark
+  QuestionMark,
 } from '@mui/icons-material';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from 'react-speech-recognition';
 
 function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   const [query, setQuery] = useState('');
@@ -72,7 +75,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     transcript,
     listening,
     resetTranscript,
-    browserSupportsSpeechRecognition
+    browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
 
   useEffect(() => {
@@ -100,7 +103,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       query: queryText,
       timestamp: new Date().toISOString(),
       resultCount: results?.nodes?.length || 0,
-      success: true
+      success: true,
     };
 
     const newHistory = [historyItem, ...queryHistory.slice(0, 19)]; // Keep only 20 items
@@ -118,48 +121,84 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     const lowerQuery = queryText.toLowerCase();
 
     // Entity type suggestions
-    const entityTypes = ['person', 'organization', 'location', 'document', 'event'];
-    entityTypes.forEach(type => {
+    const entityTypes = [
+      'person',
+      'organization',
+      'location',
+      'document',
+      'event',
+    ];
+    entityTypes.forEach((type) => {
       if (type.includes(lowerQuery)) {
         suggestions.push({
           type: 'entity_type',
           text: `Show all ${type}s`,
           icon: <Group />,
-          confidence: 0.9
+          confidence: 0.9,
         });
       }
     });
 
     // Relationship suggestions
-    const relationships = ['connected to', 'works for', 'located at', 'owns', 'related to'];
-    relationships.forEach(rel => {
+    const relationships = [
+      'connected to',
+      'works for',
+      'located at',
+      'owns',
+      'related to',
+    ];
+    relationships.forEach((rel) => {
       if (rel.includes(lowerQuery) || lowerQuery.includes(rel.split(' ')[0])) {
         suggestions.push({
           type: 'relationship',
           text: `Find entities ${rel} something`,
           icon: <AccountTree />,
-          confidence: 0.8
+          confidence: 0.8,
         });
       }
     });
 
     // Analysis suggestions
     const analysisPatterns = [
-      { pattern: ['find', 'search', 'show'], text: 'Find entities matching criteria', icon: <Search /> },
-      { pattern: ['analyze', 'analysis'], text: 'Perform network analysis', icon: <TrendingUp /> },
-      { pattern: ['central', 'important', 'key'], text: 'Find central/important entities', icon: <Star /> },
-      { pattern: ['isolated', 'disconnected'], text: 'Find isolated entities', icon: <Warning /> },
-      { pattern: ['cluster', 'group'], text: 'Find clusters in the network', icon: <Group /> },
-      { pattern: ['path', 'route', 'connection'], text: 'Find paths between entities', icon: <AccountTree /> }
+      {
+        pattern: ['find', 'search', 'show'],
+        text: 'Find entities matching criteria',
+        icon: <Search />,
+      },
+      {
+        pattern: ['analyze', 'analysis'],
+        text: 'Perform network analysis',
+        icon: <TrendingUp />,
+      },
+      {
+        pattern: ['central', 'important', 'key'],
+        text: 'Find central/important entities',
+        icon: <Star />,
+      },
+      {
+        pattern: ['isolated', 'disconnected'],
+        text: 'Find isolated entities',
+        icon: <Warning />,
+      },
+      {
+        pattern: ['cluster', 'group'],
+        text: 'Find clusters in the network',
+        icon: <Group />,
+      },
+      {
+        pattern: ['path', 'route', 'connection'],
+        text: 'Find paths between entities',
+        icon: <AccountTree />,
+      },
     ];
 
     analysisPatterns.forEach(({ pattern, text, icon }) => {
-      if (pattern.some(p => lowerQuery.includes(p))) {
+      if (pattern.some((p) => lowerQuery.includes(p))) {
         suggestions.push({
           type: 'analysis',
           text,
           icon,
-          confidence: 0.7
+          confidence: 0.7,
         });
       }
     });
@@ -172,16 +211,16 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         'Analyze network centrality',
         'Find isolated entities',
         'Show recent events',
-        'Find suspicious relationships'
+        'Find suspicious relationships',
       ];
 
-      examples.forEach(example => {
+      examples.forEach((example) => {
         if (example.toLowerCase().includes(lowerQuery)) {
           suggestions.push({
             type: 'example',
             text: example,
             icon: <Lightbulb />,
-            confidence: 0.6
+            confidence: 0.6,
           });
         }
       });
@@ -192,88 +231,97 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
   const parseNaturalLanguageQuery = (queryText) => {
     const query = queryText.toLowerCase().trim();
-    
+
     // Define parsing patterns
     const patterns = [
       // Show/Find entities
       {
-        regex: /(?:show|find|get|list)\s+(?:all\s+)?(\w+)s?(?:\s+(?:in|at|from|near)\s+(.+))?/,
+        regex:
+          /(?:show|find|get|list)\s+(?:all\s+)?(\w+)s?(?:\s+(?:in|at|from|near)\s+(.+))?/,
         handler: (matches) => ({
           action: 'filter',
           entityType: matches[1].toUpperCase(),
           location: matches[2]?.trim(),
-          cypher: matches[2] 
+          cypher: matches[2]
             ? `MATCH (n:${matches[1].toUpperCase()})-[:LOCATED_AT]->(l) WHERE l.label =~ '.*${matches[2]}.*' RETURN n`
-            : `MATCH (n:${matches[1].toUpperCase()}) RETURN n`
-        })
+            : `MATCH (n:${matches[1].toUpperCase()}) RETURN n`,
+        }),
       },
-      
+
       // Connected entities
       {
-        regex: /(?:find|show|get)\s+(?:entities|nodes|people|organizations)?\s*(?:connected|linked|related)\s+to\s+(.+)/,
+        regex:
+          /(?:find|show|get)\s+(?:entities|nodes|people|organizations)?\s*(?:connected|linked|related)\s+to\s+(.+)/,
         handler: (matches) => ({
           action: 'connected',
           target: matches[1].trim(),
-          cypher: `MATCH (target)-[r]-(connected) WHERE target.label =~ '.*${matches[1]}.*' RETURN target, r, connected`
-        })
+          cypher: `MATCH (target)-[r]-(connected) WHERE target.label =~ '.*${matches[1]}.*' RETURN target, r, connected`,
+        }),
       },
-      
+
       // Paths between entities
       {
-        regex: /(?:find|show|get)\s+(?:path|route|connection)s?\s+(?:between|from)\s+(.+?)\s+(?:to|and)\s+(.+)/,
+        regex:
+          /(?:find|show|get)\s+(?:path|route|connection)s?\s+(?:between|from)\s+(.+?)\s+(?:to|and)\s+(.+)/,
         handler: (matches) => ({
           action: 'path',
           source: matches[1].trim(),
           target: matches[2].trim(),
-          cypher: `MATCH path = shortestPath((source)-[*]-(target)) WHERE source.label =~ '.*${matches[1]}.*' AND target.label =~ '.*${matches[2]}.*' RETURN path`
-        })
+          cypher: `MATCH path = shortestPath((source)-[*]-(target)) WHERE source.label =~ '.*${matches[1]}.*' AND target.label =~ '.*${matches[2]}.*' RETURN path`,
+        }),
       },
-      
+
       // Centrality analysis
       {
-        regex: /(?:analyze|find|show)\s+(?:central|important|key|hub)\s+(?:entities|nodes)/,
+        regex:
+          /(?:analyze|find|show)\s+(?:central|important|key|hub)\s+(?:entities|nodes)/,
         handler: () => ({
           action: 'centrality',
-          cypher: 'MATCH (n)-[r]-() WITH n, count(r) as degree ORDER BY degree DESC LIMIT 10 RETURN n, degree'
-        })
+          cypher:
+            'MATCH (n)-[r]-() WITH n, count(r) as degree ORDER BY degree DESC LIMIT 10 RETURN n, degree',
+        }),
       },
-      
+
       // Isolated entities
       {
-        regex: /(?:find|show|get)\s+(?:isolated|disconnected|orphan)\s+(?:entities|nodes)/,
+        regex:
+          /(?:find|show|get)\s+(?:isolated|disconnected|orphan)\s+(?:entities|nodes)/,
         handler: () => ({
           action: 'isolated',
-          cypher: 'MATCH (n) WHERE NOT (n)-[]-() RETURN n'
-        })
+          cypher: 'MATCH (n) WHERE NOT (n)-[]-() RETURN n',
+        }),
       },
-      
+
       // Recent entities (with date)
       {
         regex: /(?:find|show|get)\s+(?:recent|new|latest)\s+(\w+)s?/,
         handler: (matches) => ({
           action: 'recent',
           entityType: matches[1].toUpperCase(),
-          cypher: `MATCH (n:${matches[1].toUpperCase()}) WHERE n.created_at > datetime() - duration('P30D') RETURN n ORDER BY n.created_at DESC`
-        })
+          cypher: `MATCH (n:${matches[1].toUpperCase()}) WHERE n.created_at > datetime() - duration('P30D') RETURN n ORDER BY n.created_at DESC`,
+        }),
       },
-      
+
       // Suspicious/anomalous entities
       {
-        regex: /(?:find|show|get)\s+(?:suspicious|anomalous|unusual|strange)\s+(?:entities|relationships|connections)/,
+        regex:
+          /(?:find|show|get)\s+(?:suspicious|anomalous|unusual|strange)\s+(?:entities|relationships|connections)/,
         handler: () => ({
           action: 'anomalous',
-          cypher: 'MATCH (n)-[r]-() WITH n, count(r) as degree WHERE degree > 10 RETURN n, degree ORDER BY degree DESC'
-        })
+          cypher:
+            'MATCH (n)-[r]-() WITH n, count(r) as degree WHERE degree > 10 RETURN n, degree ORDER BY degree DESC',
+        }),
       },
-      
+
       // Clusters
       {
         regex: /(?:find|show|analyze)\s+(?:clusters|groups|communities)/,
         handler: () => ({
           action: 'clusters',
-          cypher: 'CALL gds.louvain.stream("myGraph") YIELD nodeId, communityId RETURN nodeId, communityId'
-        })
-      }
+          cypher:
+            'CALL gds.louvain.stream("myGraph") YIELD nodeId, communityId RETURN nodeId, communityId',
+        }),
+      },
     ];
 
     // Try to match patterns
@@ -285,12 +333,12 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     }
 
     // Fallback: keyword search
-    const keywords = query.split(/\s+/).filter(word => word.length > 2);
+    const keywords = query.split(/\s+/).filter((word) => word.length > 2);
     if (keywords.length > 0) {
       return {
         action: 'search',
         keywords,
-        cypher: `MATCH (n) WHERE any(keyword IN [${keywords.map(k => `'${k}'`).join(', ')}] WHERE n.label =~ ('.*' + keyword + '.*')) RETURN n`
+        cypher: `MATCH (n) WHERE any(keyword IN [${keywords.map((k) => `'${k}'`).join(', ')}] WHERE n.label =~ ('.*' + keyword + '.*')) RETURN n`,
       };
     }
 
@@ -305,16 +353,17 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
     try {
       const parsedQuery = parseNaturalLanguageQuery(queryText);
-      
+
       if (!parsedQuery) {
         setResults({
-          error: 'Could not understand the query. Please try rephrasing or use the help examples.',
+          error:
+            'Could not understand the query. Please try rephrasing or use the help examples.',
           suggestions: [
             'Show all organizations',
             'Find people connected to John Doe',
             'Analyze network centrality',
-            'Find isolated entities'
-          ]
+            'Find isolated entities',
+          ],
         });
         setLoading(false);
         return;
@@ -322,10 +371,10 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
       // Execute the parsed query
       const results = await executeGraphQuery(parsedQuery);
-      
+
       setResults(results);
       saveToHistory(queryText, results);
-      
+
       if (onQueryResult) {
         onQueryResult(results);
       }
@@ -333,12 +382,11 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       if (onQueryExecuted) {
         onQueryExecuted(parsedQuery, results);
       }
-
     } catch (error) {
       console.error('Error executing query:', error);
       setResults({
         error: error.message,
-        suggestion: 'Please try a different query or check the syntax.'
+        suggestion: 'Please try a different query or check the syntax.',
       });
     } finally {
       setLoading(false);
@@ -348,11 +396,16 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   const executeGraphQuery = async (parsedQuery) => {
     if (!cy) throw new Error('Graph not available');
 
-    const results = { action: parsedQuery.action, nodes: [], edges: [], metadata: {} };
+    const results = {
+      action: parsedQuery.action,
+      nodes: [],
+      edges: [],
+      metadata: {},
+    };
 
     switch (parsedQuery.action) {
       case 'filter':
-        const filteredNodes = cy.nodes().filter(node => {
+        const filteredNodes = cy.nodes().filter((node) => {
           const nodeData = node.data();
           let matches = true;
 
@@ -361,35 +414,46 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           }
 
           if (parsedQuery.location) {
-            const locationText = (nodeData.properties?.location || nodeData.properties?.address || '').toLowerCase();
-            matches = matches && locationText.includes(parsedQuery.location.toLowerCase());
+            const locationText = (
+              nodeData.properties?.location ||
+              nodeData.properties?.address ||
+              ''
+            ).toLowerCase();
+            matches =
+              matches &&
+              locationText.includes(parsedQuery.location.toLowerCase());
           }
 
           return matches;
         });
 
-        results.nodes = filteredNodes.map(n => n.data());
+        results.nodes = filteredNodes.map((n) => n.data());
         results.metadata.count = filteredNodes.length;
-        
+
         // Highlight in graph
         cy.elements().removeClass('highlighted');
         filteredNodes.addClass('highlighted');
         break;
 
       case 'connected':
-        const targetNodes = cy.nodes().filter(node => 
-          node.data().label?.toLowerCase().includes(parsedQuery.target.toLowerCase())
-        );
+        const targetNodes = cy
+          .nodes()
+          .filter((node) =>
+            node
+              .data()
+              .label?.toLowerCase()
+              .includes(parsedQuery.target.toLowerCase()),
+          );
 
         if (targetNodes.length > 0) {
           const targetNode = targetNodes[0];
           const connectedElements = targetNode.neighborhood().union(targetNode);
-          
-          results.nodes = connectedElements.nodes().map(n => n.data());
-          results.edges = connectedElements.edges().map(e => e.data());
+
+          results.nodes = connectedElements.nodes().map((n) => n.data());
+          results.edges = connectedElements.edges().map((e) => e.data());
           results.metadata.target = targetNode.data();
           results.metadata.count = connectedElements.nodes().length - 1; // Exclude target
-          
+
           // Highlight in graph
           cy.elements().removeClass('highlighted');
           connectedElements.addClass('highlighted');
@@ -397,27 +461,37 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         break;
 
       case 'path':
-        const sourceNodes = cy.nodes().filter(node => 
-          node.data().label?.toLowerCase().includes(parsedQuery.source.toLowerCase())
-        );
-        const targetNodesCandidates = cy.nodes().filter(node => 
-          node.data().label?.toLowerCase().includes(parsedQuery.target.toLowerCase())
-        );
+        const sourceNodes = cy
+          .nodes()
+          .filter((node) =>
+            node
+              .data()
+              .label?.toLowerCase()
+              .includes(parsedQuery.source.toLowerCase()),
+          );
+        const targetNodesCandidates = cy
+          .nodes()
+          .filter((node) =>
+            node
+              .data()
+              .label?.toLowerCase()
+              .includes(parsedQuery.target.toLowerCase()),
+          );
 
         if (sourceNodes.length > 0 && targetNodesCandidates.length > 0) {
           const source = sourceNodes[0];
           const target = targetNodesCandidates[0];
-          
+
           // Simple BFS to find shortest path
           const path = findShortestPath(cy, source, target);
-          
+
           if (path.length > 0) {
-            results.nodes = path.nodes.map(n => n.data());
-            results.edges = path.edges.map(e => e.data());
+            results.nodes = path.nodes.map((n) => n.data());
+            results.edges = path.edges.map((e) => e.data());
             results.metadata.pathLength = path.length;
             results.metadata.source = source.data();
             results.metadata.target = target.data();
-            
+
             // Highlight path in graph
             cy.elements().removeClass('highlighted');
             path.nodes.addClass('highlighted');
@@ -431,50 +505,59 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         break;
 
       case 'centrality':
-        const centralityData = cy.nodes().map(node => ({
-          node: node.data(),
-          degree: node.degree(),
-          betweenness: calculateBetweennessCentrality(cy, node),
-          closeness: calculateClosenessCentrality(cy, node)
-        })).sort((a, b) => b.degree - a.degree).slice(0, 10);
+        const centralityData = cy
+          .nodes()
+          .map((node) => ({
+            node: node.data(),
+            degree: node.degree(),
+            betweenness: calculateBetweennessCentrality(cy, node),
+            closeness: calculateClosenessCentrality(cy, node),
+          }))
+          .sort((a, b) => b.degree - a.degree)
+          .slice(0, 10);
 
-        results.nodes = centralityData.map(d => d.node);
+        results.nodes = centralityData.map((d) => d.node);
         results.metadata.centrality = centralityData;
         results.metadata.count = centralityData.length;
 
         // Highlight top central nodes
         cy.elements().removeClass('highlighted');
-        centralityData.slice(0, 5).forEach(d => {
+        centralityData.slice(0, 5).forEach((d) => {
           cy.getElementById(d.node.id).addClass('highlighted');
         });
         break;
 
       case 'isolated':
-        const isolatedNodes = cy.nodes().filter(node => node.degree() === 0);
-        
-        results.nodes = isolatedNodes.map(n => n.data());
+        const isolatedNodes = cy.nodes().filter((node) => node.degree() === 0);
+
+        results.nodes = isolatedNodes.map((n) => n.data());
         results.metadata.count = isolatedNodes.length;
-        
+
         // Highlight isolated nodes
         cy.elements().removeClass('highlighted');
         isolatedNodes.addClass('highlighted');
         break;
 
       case 'search':
-        const searchResults = cy.nodes().filter(node => {
+        const searchResults = cy.nodes().filter((node) => {
           const nodeData = node.data();
-          const searchText = (nodeData.label + ' ' + (nodeData.type || '') + ' ' + 
-                             JSON.stringify(nodeData.properties || {})).toLowerCase();
-          
-          return parsedQuery.keywords.some(keyword => 
-            searchText.includes(keyword.toLowerCase())
+          const searchText = (
+            nodeData.label +
+            ' ' +
+            (nodeData.type || '') +
+            ' ' +
+            JSON.stringify(nodeData.properties || {})
+          ).toLowerCase();
+
+          return parsedQuery.keywords.some((keyword) =>
+            searchText.includes(keyword.toLowerCase()),
           );
         });
 
-        results.nodes = searchResults.map(n => n.data());
+        results.nodes = searchResults.map((n) => n.data());
         results.metadata.keywords = parsedQuery.keywords;
         results.metadata.count = searchResults.length;
-        
+
         // Highlight search results
         cy.elements().removeClass('highlighted');
         searchResults.addClass('highlighted');
@@ -491,29 +574,29 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   const findShortestPath = (cy, source, target) => {
     const visited = new Set();
     const queue = [{ node: source, path: [source], edges: [] }];
-    
+
     while (queue.length > 0) {
       const { node, path, edges } = queue.shift();
-      
+
       if (node.id() === target.id()) {
         return { nodes: path, edges, length: path.length - 1 };
       }
-      
+
       if (visited.has(node.id())) continue;
       visited.add(node.id());
-      
-      node.connectedEdges().forEach(edge => {
+
+      node.connectedEdges().forEach((edge) => {
         const otherNode = edge.otherNode(node);
         if (!visited.has(otherNode.id())) {
           queue.push({
             node: otherNode,
             path: [...path, otherNode],
-            edges: [...edges, edge]
+            edges: [...edges, edge],
           });
         }
       });
     }
-    
+
     return { nodes: [], edges: [], length: 0 };
   };
 
@@ -522,24 +605,24 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     // Simplified calculation - count shortest paths passing through node
     let betweenness = 0;
     const allNodes = cy.nodes();
-    
+
     for (let i = 0; i < allNodes.length; i++) {
       for (let j = i + 1; j < allNodes.length; j++) {
         if (allNodes[i].id() !== node.id() && allNodes[j].id() !== node.id()) {
           const path = findShortestPath(cy, allNodes[i], allNodes[j]);
-          if (path.nodes.some(n => n.id() === node.id())) {
+          if (path.nodes.some((n) => n.id() === node.id())) {
             betweenness++;
           }
         }
       }
     }
-    
+
     return betweenness;
   };
 
   const calculateClosenessCentrality = (cy, node) => {
     const distances = [];
-    cy.nodes().forEach(otherNode => {
+    cy.nodes().forEach((otherNode) => {
       if (otherNode.id() !== node.id()) {
         const path = findShortestPath(cy, node, otherNode);
         if (path.length > 0) {
@@ -547,7 +630,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         }
       }
     });
-    
+
     if (distances.length === 0) return 0;
     const avgDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
     return avgDistance > 0 ? 1 / avgDistance : 0;
@@ -558,7 +641,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       alert('Your browser does not support speech recognition');
       return;
     }
-    
+
     resetTranscript();
     SpeechRecognition.startListening({ continuous: true });
     setIsListening(true);
@@ -589,7 +672,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     'Show paths between Acme Corp and Document A',
     'Find suspicious relationships',
     'Show recent events',
-    'Find clusters in the network'
+    'Find clusters in the network',
   ];
 
   return (
@@ -630,7 +713,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                 <IconButton onClick={() => setShowHelp(true)}>
                   <Help />
                 </IconButton>
-                <IconButton 
+                <IconButton
                   onClick={() => executeQuery()}
                   disabled={!query.trim() || loading}
                   color="primary"
@@ -638,7 +721,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                   {loading ? <CircularProgress size={20} /> : <Send />}
                 </IconButton>
               </Box>
-            )
+            ),
           }}
         />
 
@@ -653,22 +736,20 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             <Paper elevation={3} sx={{ mt: 1 }}>
               <List dense>
                 {suggestions.map((suggestion, index) => (
-                  <ListItem 
-                    key={index}
-                    button
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    <ListItemIcon>{suggestion.icon}</ListItemIcon>
-                    <ListItemText 
-                      primary={suggestion.text}
-                      secondary={
-                        <Chip 
-                          label={`${(suggestion.confidence * 100).toFixed(0)}%`}
-                          size="small"
-                          variant="outlined"
-                        />
-                      }
-                    />
+                  <ListItem key={index} disablePadding>
+                    <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
+                      <ListItemIcon>{suggestion.icon}</ListItemIcon>
+                      <ListItemText
+                        primary={suggestion.text}
+                        secondary={
+                          <Chip
+                            label={`${(suggestion.confidence * 100).toFixed(0)}%`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        }
+                      />
+                    </ListItemButton>
                   </ListItem>
                 ))}
               </List>
@@ -683,7 +764,9 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Mic />
             Listening... Speak your query
-            <Button size="small" onClick={stopListening}>Stop</Button>
+            <Button size="small" onClick={stopListening}>
+              Stop
+            </Button>
           </Box>
         </Alert>
       )}
@@ -697,13 +780,17 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                 <Typography variant="body2">{results.error}</Typography>
                 {results.suggestions && (
                   <Box sx={{ mt: 1 }}>
-                    <Typography variant="caption">Try these instead:</Typography>
+                    <Typography variant="caption">
+                      Try these instead:
+                    </Typography>
                     {results.suggestions.map((suggestion, index) => (
                       <Chip
                         key={index}
                         label={suggestion}
                         size="small"
-                        onClick={() => handleSuggestionClick({ text: suggestion })}
+                        onClick={() =>
+                          handleSuggestionClick({ text: suggestion })
+                        }
                         sx={{ m: 0.5 }}
                       />
                     ))}
@@ -712,10 +799,17 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
               </Alert>
             ) : (
               <>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+                >
                   <CheckCircle color="success" />
                   <Typography variant="h6">Query Results</Typography>
-                  <Badge badgeContent={results.metadata?.count || results.nodes?.length || 0} color="primary">
+                  <Badge
+                    badgeContent={
+                      results.metadata?.count || results.nodes?.length || 0
+                    }
+                    color="primary"
+                  >
                     <Chip label={results.action} variant="outlined" />
                   </Badge>
                 </Box>
@@ -723,21 +817,23 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                 {results.nodes && results.nodes.length > 0 && (
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Typography>Found {results.nodes.length} entities</Typography>
+                      <Typography>
+                        Found {results.nodes.length} entities
+                      </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
                         {results.nodes.slice(0, 10).map((node, index) => (
                           <ListItem key={index}>
                             <ListItemIcon>
-                              <Chip 
-                                label={node.type} 
+                              <Chip
+                                label={node.type}
                                 size="small"
                                 color="primary"
                                 variant="outlined"
                               />
                             </ListItemIcon>
-                            <ListItemText 
+                            <ListItemText
                               primary={node.label}
                               secondary={`ID: ${node.id}`}
                             />
@@ -753,16 +849,17 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                   </Accordion>
                 )}
 
-                {results.metadata && Object.keys(results.metadata).length > 0 && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Analysis Details:
-                    </Typography>
-                    <pre style={{ fontSize: '0.75rem', color: '#666' }}>
-                      {JSON.stringify(results.metadata, null, 2)}
-                    </pre>
-                  </Box>
-                )}
+                {results.metadata &&
+                  Object.keys(results.metadata).length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Analysis Details:
+                      </Typography>
+                      <pre style={{ fontSize: '0.75rem', color: '#666' }}>
+                        {JSON.stringify(results.metadata, null, 2)}
+                      </pre>
+                    </Box>
+                  )}
               </>
             )}
           </CardContent>
@@ -778,18 +875,16 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             </Typography>
             <List dense>
               {queryHistory.slice(0, 5).map((item) => (
-                <ListItem 
-                  key={item.id}
-                  button
-                  onClick={() => handleHistoryClick(item)}
-                >
-                  <ListItemIcon>
-                    <History />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.query}
-                    secondary={`${new Date(item.timestamp).toLocaleString()} • ${item.resultCount} results`}
-                  />
+                <ListItem key={item.id} disablePadding>
+                  <ListItemButton onClick={() => handleHistoryClick(item)}>
+                    <ListItemIcon>
+                      <History />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.query}
+                      secondary={`${new Date(item.timestamp).toLocaleString()} • ${item.resultCount} results`}
+                    />
+                  </ListItemButton>
                 </ListItem>
               ))}
             </List>
@@ -811,19 +906,19 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           </Typography>
           <List>
             {exampleQueries.map((example, index) => (
-              <ListItem 
-                key={index}
-                button
-                onClick={() => {
-                  setQuery(example);
-                  setShowHelp(false);
-                  executeQuery(example);
-                }}
-              >
-                <ListItemIcon>
-                  <QuestionMark />
-                </ListItemIcon>
-                <ListItemText primary={example} />
+              <ListItem key={index} disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    setQuery(example);
+                    setShowHelp(false);
+                    executeQuery(example);
+                  }}
+                >
+                  <ListItemIcon>
+                    <QuestionMark />
+                  </ListItemIcon>
+                  <ListItemText primary={example} />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
@@ -835,25 +930,25 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           </Typography>
           <List dense>
             <ListItem>
-              <ListItemText 
+              <ListItemText
                 primary="Entity Queries"
                 secondary="'Show all [entities]', 'Find [entity type] in [location]'"
               />
             </ListItem>
             <ListItem>
-              <ListItemText 
+              <ListItemText
                 primary="Relationship Queries"
                 secondary="'Find entities connected to [name]', 'Show paths between [A] and [B]'"
               />
             </ListItem>
             <ListItem>
-              <ListItemText 
+              <ListItemText
                 primary="Analysis Queries"
                 secondary="'Analyze centrality', 'Find clusters', 'Show isolated entities'"
               />
             </ListItem>
             <ListItem>
-              <ListItemText 
+              <ListItemText
                 primary="Filter Queries"
                 secondary="'Show recent [entities]', 'Find suspicious relationships'"
               />

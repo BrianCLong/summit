@@ -1,5 +1,5 @@
 groups:
-- name: tenant-sli
-  rules:
-    - record: tenant:http_error_rate:ratio5m
-      expr: sum by (tenant) (rate(http_requests_total{code=~"5.."}[5m])) / sum by (tenant) (rate(http_requests_total[5m]))
+  - name: tenant-sli
+    rules:
+      - record: tenant:http_error_rate:ratio5m
+        expr: sum by (tenant) (rate(http_requests_total{code=~"5.."}[5m])) / sum by (tenant) (rate(http_requests_total[5m]))

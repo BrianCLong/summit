@@ -22,7 +22,9 @@ async function checkSLOs() {
 
   for (const [name, query] of Object.entries(queries)) {
     try {
-      const response = await axios.get(`${PROMETHEUS_URL}/api/v1/query`, { params: { query } });
+      const response = await axios.get(`${PROMETHEUS_URL}/api/v1/query`, {
+        params: { query },
+      });
       const value = parseFloat(response.data.data.result[0].value[1]);
       console.log(`${name}: ${value}`);
     } catch (error) {

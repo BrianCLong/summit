@@ -3,6 +3,7 @@
 Title: feat(db): add migration gate with dry‑run & manual approval
 
 Files:
+
 - .maestro/pipeline.yaml (already modified in PR 4)
 - scripts/migration_gate.sh (added in PR 4)
 - docs/runbooks/migration-gate.md (new)

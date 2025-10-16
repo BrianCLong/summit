@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
 import axios from 'axios';
 import express from 'express';
 import request from 'supertest';
@@ -155,9 +163,16 @@ function policyOracle(input: AuthorizationInput): AuthorizationDecision {
     return { allowed: false, reason: 'residency_mismatch', obligations: [] };
   }
   if (input.resource.tags.includes('admin-only')) {
-    return { allowed: false, reason: 'least_privilege_violation', obligations: [] };
+    return {
+      allowed: false,
+      reason: 'least_privilege_violation',
+      obligations: [],
+    };
   }
-  if (input.resource.classification !== 'public' && input.context.currentAcr !== 'loa2') {
+  if (
+    input.resource.classification !== 'public' &&
+    input.context.currentAcr !== 'loa2'
+  ) {
     return {
       allowed: false,
       reason: 'step_up_required',
@@ -167,7 +182,11 @@ function policyOracle(input: AuthorizationInput): AuthorizationDecision {
     };
   }
   if (input.subject.riskScore > 80) {
-    return { allowed: false, reason: 'risk_threshold_exceeded', obligations: [] };
+    return {
+      allowed: false,
+      reason: 'risk_threshold_exceeded',
+      obligations: [],
+    };
   }
   return { allowed: true, reason: 'allow', obligations: [] };
 }
@@ -224,13 +243,12 @@ describe('governance gate fuzzing', () => {
       'services/authz-gateway/src/policy.ts',
     ];
     for (const file of targetFiles) {
-      const match = map
-        .files()
-        .find((candidate) => candidate.endsWith(file));
+      const match = map.files().find((candidate) => candidate.endsWith(file));
       if (!match) {
         continue;
       }
-      const summary = map.fileCoverageFor(match).toSummary().data as CoverageSummaryData;
+      const summary = map.fileCoverageFor(match).toSummary()
+        .data as CoverageSummaryData;
       coverageSnapshots.push({ file, summary });
       expect(summary.statements.pct).toBeGreaterThan(0);
       expect(summary.branches.pct).toBeGreaterThan(0);
@@ -262,7 +280,9 @@ describe('governance gate fuzzing', () => {
     const subjectArb = fc.record({
       id: fc.string({ minLength: 1, maxLength: 24 }),
       tenantId: fc.string({ minLength: 1, maxLength: 16 }),
-      roles: fc.array(fc.string({ minLength: 1, maxLength: 16 }), { maxLength: 5 }),
+      roles: fc.array(fc.string({ minLength: 1, maxLength: 16 }), {
+        maxLength: 5,
+      }),
       entitlements: fc.array(fc.string({ minLength: 1, maxLength: 16 }), {
         maxLength: 5,
       }),
@@ -270,16 +290,24 @@ describe('governance gate fuzzing', () => {
       clearance: fc.string({ minLength: 3, maxLength: 12 }),
       loa: fc.constantFrom('loa1', 'loa2', 'loa3'),
       riskScore: fc.integer({ min: 0, max: 100 }),
-      groups: fc.array(fc.string({ minLength: 1, maxLength: 16 }), { maxLength: 5 }),
+      groups: fc.array(fc.string({ minLength: 1, maxLength: 16 }), {
+        maxLength: 5,
+      }),
       metadata: fc.dictionary(
         fc.string({ minLength: 1, maxLength: 12 }),
         fc.string({ minLength: 0, maxLength: 24 }),
         { maxKeys: 4 },
       ),
-      lastSyncedAt: fc.option(fc.date().map((d) => d.toISOString()), { nil: undefined }),
-      lastReviewedAt: fc.option(fc.date().map((d) => d.toISOString()), {
-        nil: undefined,
-      }),
+      lastSyncedAt: fc.option(
+        fc.date().map((d) => d.toISOString()),
+        { nil: undefined },
+      ),
+      lastReviewedAt: fc.option(
+        fc.date().map((d) => d.toISOString()),
+        {
+          nil: undefined,
+        },
+      ),
     });
 
     const resourceArb = fc.record({
@@ -287,7 +315,9 @@ describe('governance gate fuzzing', () => {
       tenantId: fc.string({ minLength: 1, maxLength: 16 }),
       residency: fc.string({ minLength: 2, maxLength: 8 }),
       classification: fc.string({ minLength: 3, maxLength: 12 }),
-      tags: fc.array(fc.string({ minLength: 1, maxLength: 16 }), { maxLength: 5 }),
+      tags: fc.array(fc.string({ minLength: 1, maxLength: 16 }), {
+        maxLength: 5,
+      }),
     });
 
     const decisionContextArb = fc.record({
@@ -315,9 +345,12 @@ describe('governance gate fuzzing', () => {
                 fc.record(
                   {
                     type: fc.string({ minLength: 1, maxLength: 16 }),
-                    mechanism: fc.option(fc.string({ minLength: 1, maxLength: 16 }), {
-                      nil: undefined,
-                    }),
+                    mechanism: fc.option(
+                      fc.string({ minLength: 1, maxLength: 16 }),
+                      {
+                        nil: undefined,
+                      },
+                    ),
                     required_acr: fc.option(
                       fc.string({ minLength: 3, maxLength: 12 }),
                       { nil: undefined },
@@ -356,7 +389,12 @@ describe('governance gate fuzzing', () => {
         policyResponseArb,
         async (subject, resource, action, context, response) => {
           propertyRuns += 1;
-          const input: AuthorizationInput = { subject, resource, action, context };
+          const input: AuthorizationInput = {
+            subject,
+            resource,
+            action,
+            context,
+          };
 
           if (response.kind === 'ok') {
             mockedAxios.post.mockResolvedValueOnce({
@@ -417,15 +455,26 @@ describe('governance gate fuzzing', () => {
       .mockImplementation(async (input) => policyOracle(input));
 
     const mutationArb = fc.record({
-      tenantId: fc.option(fc.string({ minLength: 1, maxLength: 16 }), { nil: undefined }),
-      residency: fc.option(fc.constantFrom('us', 'eu', 'apac', 'latam'), { nil: undefined }),
-      classification: fc.option(fc.constantFrom('public', 'internal', 'restricted'), {
+      tenantId: fc.option(fc.string({ minLength: 1, maxLength: 16 }), {
         nil: undefined,
       }),
-      tags: fc.array(fc.constantFrom('admin-only', 'sensitive', 'pii'), { maxLength: 2 }),
+      residency: fc.option(fc.constantFrom('us', 'eu', 'apac', 'latam'), {
+        nil: undefined,
+      }),
+      classification: fc.option(
+        fc.constantFrom('public', 'internal', 'restricted'),
+        {
+          nil: undefined,
+        },
+      ),
+      tags: fc.array(fc.constantFrom('admin-only', 'sensitive', 'pii'), {
+        maxLength: 2,
+      }),
       degradeAcr: fc.boolean(),
       tamperToken: fc.boolean(),
-      riskScore: fc.option(fc.integer({ min: 0, max: 100 }), { nil: undefined }),
+      riskScore: fc.option(fc.integer({ min: 0, max: 100 }), {
+        nil: undefined,
+      }),
     });
 
     await fc.assert(
@@ -439,8 +488,10 @@ describe('governance gate fuzzing', () => {
 
         const tenantHeader = mutation.tenantId ?? baseSubject.tenantId;
         const residencyHeader = mutation.residency ?? baseResource.residency;
-        const classificationHeader = mutation.classification ?? baseResource.classification;
-        const tags = mutation.tags.length > 0 ? Array.from(new Set(mutation.tags)) : [];
+        const classificationHeader =
+          mutation.classification ?? baseResource.classification;
+        const tags =
+          mutation.tags.length > 0 ? Array.from(new Set(mutation.tags)) : [];
 
         const acr = mutation.degradeAcr ? 'loa1' : 'loa2';
         let token = await issueToken(currentSubject.id, acr);
@@ -508,7 +559,9 @@ describe('governance gate fuzzing', () => {
           expect(response.body.ok).toBe(true);
         } else if (expectedDecision.reason === 'step_up_required') {
           expect(response.body.error).toBe('step_up_required');
-          expect(response.body.obligations).toEqual(expectedDecision.obligations);
+          expect(response.body.obligations).toEqual(
+            expectedDecision.obligations,
+          );
         } else {
           expect(response.body.error).toBe('forbidden');
           expect(response.body.reason).toBe(expectedDecision.reason);
@@ -581,7 +634,10 @@ describe('governance gate fuzzing', () => {
 
       expect([200, 401, 403]).toContain(response.status);
       if (response.status === 401) {
-        expect(response.body.error === 'invalid_token' || response.body.error === 'step_up_required').toBe(true);
+        expect(
+          response.body.error === 'invalid_token' ||
+            response.body.error === 'step_up_required',
+        ).toBe(true);
       }
 
       recordFinding(adversarialFindings, {

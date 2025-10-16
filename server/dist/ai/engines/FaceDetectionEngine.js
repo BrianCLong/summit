@@ -3,9 +3,10 @@ import path from 'path';
 import pino from 'pino';
 const logger = pino({ name: 'FaceDetectionEngine' });
 export class FaceDetectionEngine {
+    config;
+    isInitialized = false;
+    identityDatabase = new Map();
     constructor(config) {
-        this.isInitialized = false;
-        this.identityDatabase = new Map();
         this.config = config;
     }
     /**
@@ -34,7 +35,7 @@ export class FaceDetectionEngine {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        const { minFaceSize = 20, confidenceThreshold = 0.7, extractFeatures = true, recognizeIdentities = false, analyzeEmotions = true, estimateAge = true, estimateGender = true, enableQualityCheck = true } = options;
+        const { minFaceSize = 20, confidenceThreshold = 0.7, extractFeatures = true, recognizeIdentities = false, analyzeEmotions = true, estimateAge = true, estimateGender = true, enableQualityCheck = true, } = options;
         logger.info(`Starting face detection for: ${imagePath}`);
         try {
             // Run primary face detection
@@ -75,7 +76,7 @@ export class FaceDetectionEngine {
             }
             // Filter by quality if quality check is enabled
             const qualifiedDetections = enableQualityCheck
-                ? detections.filter(d => d.qualityScore && d.qualityScore > 0.5)
+                ? detections.filter((d) => d.qualityScore && d.qualityScore > 0.5)
                 : detections;
             logger.info(`Face detection completed: ${qualifiedDetections.length} faces detected`);
             return qualifiedDetections;
@@ -120,9 +121,12 @@ export class FaceDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'mtcnn_detection.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--min-face-size', minFaceSize.toString(),
-                '--confidence', confidenceThreshold.toString()
+                '--image',
+                imagePath,
+                '--min-face-size',
+                minFaceSize.toString(),
+                '--confidence',
+                confidenceThreshold.toString(),
             ];
             if (this.config.enableGPU) {
                 args.push('--device', 'cuda');
@@ -163,11 +167,16 @@ export class FaceDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'video_face_detection.py');
             const args = [
                 pythonScript,
-                '--video', videoPath,
-                '--frame-rate', frameRate.toString(),
-                '--start-time', startTime.toString(),
-                '--min-face-size', (faceOptions.minFaceSize || 20).toString(),
-                '--confidence', (faceOptions.confidenceThreshold || 0.7).toString()
+                '--video',
+                videoPath,
+                '--frame-rate',
+                frameRate.toString(),
+                '--start-time',
+                startTime.toString(),
+                '--min-face-size',
+                (faceOptions.minFaceSize || 20).toString(),
+                '--confidence',
+                (faceOptions.confidenceThreshold || 0.7).toString(),
             ];
             if (endTime !== undefined) {
                 args.push('--end-time', endTime.toString());
@@ -225,8 +234,10 @@ export class FaceDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'face_landmarks.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
+                '--image',
+                imagePath,
+                '--bbox',
+                `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -264,8 +275,10 @@ export class FaceDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'face_features.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
+                '--image',
+                imagePath,
+                '--bbox',
+                `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -303,8 +316,10 @@ export class FaceDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'emotion_analysis.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
+                '--image',
+                imagePath,
+                '--bbox',
+                `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -344,8 +359,10 @@ export class FaceDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'age_estimation.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
+                '--image',
+                imagePath,
+                '--bbox',
+                `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -383,8 +400,10 @@ export class FaceDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'gender_estimation.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
+                '--image',
+                imagePath,
+                '--bbox',
+                `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -426,15 +445,15 @@ export class FaceDetectionEngine {
                     y: Math.round(face.bbox[1]),
                     width: Math.round(face.bbox[2]),
                     height: Math.round(face.bbox[3]),
-                    confidence: face.confidence
+                    confidence: face.confidence,
                 },
                 confidence: face.confidence,
                 landmarks: this.getDefaultLandmarks({
                     x: face.bbox[0],
                     y: face.bbox[1],
                     width: face.bbox[2],
-                    height: face.bbox[3]
-                })
+                    height: face.bbox[3],
+                }),
             });
         }
         return detections;
@@ -449,7 +468,7 @@ export class FaceDetectionEngine {
             frameResults.push({
                 frame: frameResult.frame_number,
                 timestamp: frameResult.timestamp,
-                faces
+                faces,
             });
         }
         return frameResults;
@@ -501,7 +520,8 @@ export class FaceDetectionEngine {
             for (const [trackId, trackHistory] of tracks.entries()) {
                 if (!activeTrackIds.has(trackId)) {
                     const frameGap = frameResult.frame - this.getLastFrameNumber(trackHistory);
-                    if (frameGap > 5) { // Remove if not seen for 5 frames
+                    if (frameGap > 5) {
+                        // Remove if not seen for 5 frames
                         tracks.delete(trackId);
                     }
                 }
@@ -532,7 +552,7 @@ export class FaceDetectionEngine {
                 detection.landmarks.rightEye.confidence,
                 detection.landmarks.nose.confidence,
                 detection.landmarks.leftMouth.confidence,
-                detection.landmarks.rightMouth.confidence
+                detection.landmarks.rightMouth.confidence,
             ].reduce((sum, conf) => sum + (conf || 0), 0) / 5;
             landmarkScore = avgLandmarkConfidence;
         }
@@ -592,7 +612,7 @@ export class FaceDetectionEngine {
      */
     getDominantEmotion(emotions) {
         const entries = Object.entries(emotions);
-        const dominant = entries.reduce((max, [emotion, score]) => score > max.score ? { emotion, score } : max, { emotion: 'neutral', score: 0 });
+        const dominant = entries.reduce((max, [emotion, score]) => (score > max.score ? { emotion, score } : max), { emotion: 'neutral', score: 0 });
         return dominant.emotion;
     }
     /**
@@ -602,11 +622,23 @@ export class FaceDetectionEngine {
         const centerX = boundingBox.x + boundingBox.width / 2;
         const centerY = boundingBox.y + boundingBox.height / 2;
         return {
-            leftEye: { x: centerX - boundingBox.width * 0.2, y: centerY - boundingBox.height * 0.1 },
-            rightEye: { x: centerX + boundingBox.width * 0.2, y: centerY - boundingBox.height * 0.1 },
+            leftEye: {
+                x: centerX - boundingBox.width * 0.2,
+                y: centerY - boundingBox.height * 0.1,
+            },
+            rightEye: {
+                x: centerX + boundingBox.width * 0.2,
+                y: centerY - boundingBox.height * 0.1,
+            },
             nose: { x: centerX, y: centerY },
-            leftMouth: { x: centerX - boundingBox.width * 0.15, y: centerY + boundingBox.height * 0.2 },
-            rightMouth: { x: centerX + boundingBox.width * 0.15, y: centerY + boundingBox.height * 0.2 }
+            leftMouth: {
+                x: centerX - boundingBox.width * 0.15,
+                y: centerY + boundingBox.height * 0.2,
+            },
+            rightMouth: {
+                x: centerX + boundingBox.width * 0.15,
+                y: centerY + boundingBox.height * 0.2,
+            },
         };
     }
     /**
@@ -620,7 +652,7 @@ export class FaceDetectionEngine {
             surprised: 0.1,
             fearful: 0.1,
             disgusted: 0.1,
-            neutral: 0.4
+            neutral: 0.4,
         };
     }
     /**
@@ -651,7 +683,7 @@ export class FaceDetectionEngine {
         return new Promise((resolve, reject) => {
             const python = spawn(this.config.pythonPath, [
                 '-c',
-                'import mtcnn, facenet_pytorch, cv2; print("Dependencies OK")'
+                'import mtcnn, facenet_pytorch, cv2; print("Dependencies OK")',
             ]);
             python.on('close', (code) => {
                 if (code === 0) {

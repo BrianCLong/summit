@@ -23,8 +23,12 @@ export async function writeCoC(
   const eventHash = createHash('sha256')
     .update(prevHash + payload)
     .digest('hex');
-  const signature = sign(null, Buffer.from(eventHash), privateKey).toString('base64');
-  await db.custodyEvent.create({ data: { ...event, prevHash, eventHash, signature } });
+  const signature = sign(null, Buffer.from(eventHash), privateKey).toString(
+    'base64',
+  );
+  await db.custodyEvent.create({
+    data: { ...event, prevHash, eventHash, signature },
+  });
   return eventHash;
 }
 
@@ -36,7 +40,14 @@ export function verifyChain(events: any[], publicKey: KeyObject): boolean {
   let prevHash = 'GENESIS';
   for (const e of events) {
     const { caseId, attachmentId, actorId, action, at, payload } = e;
-    const payloadStr = JSON.stringify({ caseId, attachmentId, actorId, action, at, payload });
+    const payloadStr = JSON.stringify({
+      caseId,
+      attachmentId,
+      actorId,
+      action,
+      at,
+      payload,
+    });
     const hash = createHash('sha256')
       .update(prevHash + payloadStr)
       .digest('hex');

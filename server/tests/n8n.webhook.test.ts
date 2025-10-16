@@ -18,8 +18,15 @@ describe('n8n webhook', () => {
 
   it('accepts good signature', async () => {
     const app = await createApp();
-    const body = JSON.stringify({ runId: 'run-123', artifact: 'n8n.json', content: { ok: true } });
-    const sig = crypto.createHmac('sha256', 'test-secret').update(body).digest('hex');
+    const body = JSON.stringify({
+      runId: 'run-123',
+      artifact: 'n8n.json',
+      content: { ok: true },
+    });
+    const sig = crypto
+      .createHmac('sha256', 'test-secret')
+      .update(body)
+      .digest('hex');
     const res = await request(app)
       .post('/webhooks/n8n')
       .set('content-type', 'application/json')
@@ -29,4 +36,3 @@ describe('n8n webhook', () => {
     expect(res.body.ok).toBe(true);
   });
 });
-

@@ -68,12 +68,12 @@ export interface HealthSample {
 }
 
 export type RolloutStatus =
-  | "idle"
-  | "running"
-  | "holding"
-  | "completed"
-  | "rolling_back"
-  | "aborted";
+  | 'idle'
+  | 'running'
+  | 'holding'
+  | 'completed'
+  | 'rolling_back'
+  | 'aborted';
 
 export interface StepHealthHistory {
   stepIndex: number;
@@ -105,7 +105,14 @@ export interface HealthEvaluation {
 }
 
 export interface EvaluationOutcome {
-  action: "start_step" | "promote" | "hold" | "rollback" | "complete" | "abort" | "noop";
+  action:
+    | 'start_step'
+    | 'promote'
+    | 'hold'
+    | 'rollback'
+    | 'complete'
+    | 'abort'
+    | 'noop';
   reason: string;
   state: CanaryState;
   compositeScore: number;

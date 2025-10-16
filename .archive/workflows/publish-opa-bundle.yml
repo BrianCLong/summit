@@ -4,8 +4,8 @@ permissions:
   contents: read
 on:
   push:
-    branches: [ main ]
-    paths: [ 'policies/opa/**' ]
+    branches: [main]
+    paths: ['policies/opa/**']
   tags:
     - 'v*'
 

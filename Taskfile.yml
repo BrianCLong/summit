@@ -12,18 +12,18 @@ tasks:
     desc: Install project dependencies
 
   policy:apply:
-    desc: "Apply Gatekeeper/Kyverno policies"
+    desc: 'Apply Gatekeeper/Kyverno policies'
     cmds:
       - kubectl apply -f k8s/policy/gatekeeper/
       - kubectl apply -f k8s/policy/kyverno/
 
   observability:apply:
-    desc: "Apply Prometheus alerts and Grafana dashboards"
+    desc: 'Apply Prometheus alerts and Grafana dashboards'
     cmds:
       - kubectl create configmap prom-alerts --from-file=observability/prometheus/alerts.yml -n monitoring --dry-run=client -o yaml | kubectl apply -f -
       - kubectl create configmap grafana-build-platform --from-file=observability/grafana/dashboards/build-platform.json -n monitoring --dry-run=client -o yaml | kubectl apply -f -
 
   otel:apply:
-    desc: "Deploy or update OTel Collector config"
+    desc: 'Deploy or update OTel Collector config'
     cmds:
       - kubectl create configmap otel-collector-config --from-file=observability/otel/collector-config.yaml -n observability --dry-run=client -o yaml | kubectl apply -f -

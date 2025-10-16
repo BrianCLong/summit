@@ -40,22 +40,26 @@ export class TestImpactAnalyzer {
 
   private async initializeAnalyzer(): Promise<void> {
     console.log('🔍 Initializing Test Impact Analyzer...');
-    
+
     await this.discoverTestTargets();
     await this.buildDependencyGraph();
     await this.mapPackageBoundaries();
-    
+
     console.log(`📋 Discovered ${this.testTargets.length} test targets`);
-    console.log(`🕸️  Mapped ${this.dependencyGraph.size} dependency relationships`);
+    console.log(
+      `🕸️  Mapped ${this.dependencyGraph.size} dependency relationships`,
+    );
   }
 
   /**
    * Analyze impact of changes and return affected tests
    */
   async analyzeImpact(changeset: ChangeSet): Promise<ImpactResult> {
-    console.log(`🎯 Analyzing impact for ${changeset.files.length} changed files...`);
-    
-    const changedFiles = changeset.files.map(f => this.normalizePath(f));
+    console.log(
+      `🎯 Analyzing impact for ${changeset.files.length} changed files...`,
+    );
+
+    const changedFiles = changeset.files.map((f) => this.normalizePath(f));
     const impactedTests = new Set<TestTarget>();
     let confidence: 'high' | 'medium' | 'low' = 'high';
     let reason: 'changed' | 'dependency' | 'fallback' = 'changed';
@@ -74,7 +78,7 @@ export class TestImpactAnalyzer {
     for (const file of changedFiles) {
       if (!this.isTestFile(file)) {
         const relatedTests = this.findTestsForSourceFile(file);
-        relatedTests.forEach(test => {
+        relatedTests.forEach((test) => {
           impactedTests.add(test);
           if (reason === 'changed') reason = 'dependency';
         });
@@ -86,7 +90,7 @@ export class TestImpactAnalyzer {
       const dependentFiles = this.getDependentFiles(file);
       for (const dependent of dependentFiles) {
         const relatedTests = this.findTestsForSourceFile(dependent);
-        relatedTests.forEach(test => {
+        relatedTests.forEach((test) => {
           impactedTests.add(test);
           if (reason !== 'fallback') reason = 'dependency';
         });
@@ -101,7 +105,7 @@ export class TestImpactAnalyzer {
         impactedTests: this.testTargets,
         reason: 'fallback',
         confidence: 'low',
-        recommendation: 'run_all'
+        recommendation: 'run_all',
       };
     }
 
@@ -117,7 +121,10 @@ export class TestImpactAnalyzer {
       impactedTests: Array.from(impactedTests),
       reason,
       confidence,
-      recommendation: this.getRecommendation(impactedTests.size, this.testTargets.length)
+      recommendation: this.getRecommendation(
+        impactedTests.size,
+        this.testTargets.length,
+      ),
     };
 
     this.logAnalysisResult(result);
@@ -129,17 +136,23 @@ export class TestImpactAnalyzer {
    */
   async getChangesFromGit(base: string = 'HEAD~1'): Promise<ChangeSet> {
     try {
-      const gitOutput = execSync(`git diff --name-only ${base}`, { 
+      const gitOutput = execSync(`git diff --name-only ${base}`, {
         encoding: 'utf8',
-        cwd: this.projectRoot
+        cwd: this.projectRoot,
       });
-      
-      const files = gitOutput.trim().split('\n').filter(f => f.length > 0);
-      
+
+      const files = gitOutput
+        .trim()
+        .split('\n')
+        .filter((f) => f.length > 0);
+
       return {
         files,
         base,
-        commit: execSync('git rev-parse HEAD', { encoding: 'utf8', cwd: this.projectRoot }).trim()
+        commit: execSync('git rev-parse HEAD', {
+          encoding: 'utf8',
+          cwd: this.projectRoot,
+        }).trim(),
       };
     } catch (error) {
       console.warn('⚠️  Could not get git changes, using fallback');
@@ -150,40 +163,40 @@ export class TestImpactAnalyzer {
   private async discoverTestTargets(): Promise<void> {
     const testPatterns = [
       '**/*.test.ts',
-      '**/*.test.js', 
+      '**/*.test.js',
       '**/*.spec.ts',
       '**/*.spec.js',
       '**/test/**/*.ts',
       '**/tests/**/*.ts',
-      '**/__tests__/**/*.ts'
+      '**/__tests__/**/*.ts',
     ];
 
     const testFiles: string[] = [];
-    
+
     for (const pattern of testPatterns) {
-      const matches = await glob(pattern, { 
+      const matches = await glob(pattern, {
         cwd: this.projectRoot,
-        ignore: ['**/node_modules/**', '**/dist/**', '**/.next/**']
+        ignore: ['**/node_modules/**', '**/dist/**', '**/.next/**'],
       });
       testFiles.push(...matches);
     }
 
     // Deduplicate and create test targets
     const uniqueFiles = [...new Set(testFiles)];
-    
+
     for (const file of uniqueFiles) {
       const fullPath = path.join(this.projectRoot, file);
       const stats = await fs.stat(fullPath).catch(() => null);
-      
+
       if (stats) {
         const testTarget: TestTarget = {
           name: path.basename(file, path.extname(file)),
           path: file,
           type: this.classifyTestType(file),
           dependencies: await this.extractTestDependencies(file),
-          estimatedDuration: this.estimateTestDuration(file, stats.size)
+          estimatedDuration: this.estimateTestDuration(file, stats.size),
         };
-        
+
         this.testTargets.push(testTarget);
       }
     }
@@ -193,7 +206,7 @@ export class TestImpactAnalyzer {
     // Simplified dependency analysis - in production this would be much more sophisticated
     const sourceFiles = await glob('**/*.{ts,js}', {
       cwd: this.projectRoot,
-      ignore: ['**/node_modules/**', '**/dist/**']
+      ignore: ['**/node_modules/**', '**/dist/**'],
     });
 
     for (const file of sourceFiles) {
@@ -206,52 +219,61 @@ export class TestImpactAnalyzer {
     // Find package.json files to understand module boundaries
     const packageFiles = await glob('**/package.json', {
       cwd: this.projectRoot,
-      ignore: ['**/node_modules/**']
+      ignore: ['**/node_modules/**'],
     });
 
     for (const pkgFile of packageFiles) {
       const pkgDir = path.dirname(pkgFile);
-      const packageJson = JSON.parse(await fs.readFile(path.join(this.projectRoot, pkgFile), 'utf8'));
-      
+      const packageJson = JSON.parse(
+        await fs.readFile(path.join(this.projectRoot, pkgFile), 'utf8'),
+      );
+
       // Map files in this package
       const packageFiles = await glob('**/*.{ts,js}', {
         cwd: path.join(this.projectRoot, pkgDir),
-        ignore: ['**/node_modules/**', '**/dist/**']
+        ignore: ['**/node_modules/**', '**/dist/**'],
       });
-      
-      this.packageBoundaries.set(packageJson.name || pkgDir, packageFiles.map(f => path.join(pkgDir, f)));
+
+      this.packageBoundaries.set(
+        packageJson.name || pkgDir,
+        packageFiles.map((f) => path.join(pkgDir, f)),
+      );
     }
   }
 
   private isTestFile(filePath: string): boolean {
-    return /\.(test|spec)\.(ts|js)$/.test(filePath) || 
-           filePath.includes('/test/') || 
-           filePath.includes('/tests/') ||
-           filePath.includes('/__tests__/');
+    return (
+      /\.(test|spec)\.(ts|js)$/.test(filePath) ||
+      filePath.includes('/test/') ||
+      filePath.includes('/tests/') ||
+      filePath.includes('/__tests__/')
+    );
   }
 
   private findTestTarget(filePath: string): TestTarget | undefined {
-    return this.testTargets.find(target => target.path === filePath);
+    return this.testTargets.find((target) => target.path === filePath);
   }
 
   private findTestsForSourceFile(sourceFile: string): TestTarget[] {
     const relatedTests: TestTarget[] = [];
-    
+
     // Convention-based mapping
     const baseName = path.basename(sourceFile, path.extname(sourceFile));
     const sourceDir = path.dirname(sourceFile);
-    
+
     // Look for co-located test files
     const testPatterns = [
       `${baseName}.test.ts`,
       `${baseName}.test.js`,
       `${baseName}.spec.ts`,
-      `${baseName}.spec.js`
+      `${baseName}.spec.js`,
     ];
-    
+
     for (const pattern of testPatterns) {
       const testPath = path.join(sourceDir, pattern);
-      const testTarget = this.testTargets.find(t => t.path.endsWith(testPath));
+      const testTarget = this.testTargets.find((t) =>
+        t.path.endsWith(testPath),
+      );
       if (testTarget) {
         relatedTests.push(testTarget);
       }
@@ -262,7 +284,9 @@ export class TestImpactAnalyzer {
     for (const testDir of testDirs) {
       for (const pattern of testPatterns) {
         const testPath = path.join(sourceDir, testDir, pattern);
-        const testTarget = this.testTargets.find(t => t.path.includes(testPath));
+        const testTarget = this.testTargets.find((t) =>
+          t.path.includes(testPath),
+        );
         if (testTarget) {
           relatedTests.push(testTarget);
         }
@@ -271,10 +295,10 @@ export class TestImpactAnalyzer {
 
     // Package-based mapping
     for (const [packageName, files] of this.packageBoundaries) {
-      if (files.some(f => f.includes(sourceFile))) {
+      if (files.some((f) => f.includes(sourceFile))) {
         // Find tests in the same package
-        const packageTests = this.testTargets.filter(t => 
-          files.some(f => f.includes(t.path))
+        const packageTests = this.testTargets.filter((t) =>
+          files.some((f) => f.includes(t.path)),
         );
         relatedTests.push(...packageTests);
       }
@@ -285,28 +309,38 @@ export class TestImpactAnalyzer {
 
   private getDependentFiles(file: string): string[] {
     const dependents: string[] = [];
-    
+
     // Find files that import this file
     for (const [sourceFile, dependencies] of this.dependencyGraph) {
       if (dependencies.has(file)) {
         dependents.push(sourceFile);
       }
     }
-    
+
     return dependents;
   }
 
   private checkFallbackConditions(changedFiles: string[]): string[] {
     const triggers: string[] = [];
-    
+
     // Configuration file changes
-    const configFiles = ['package.json', 'tsconfig.json', 'jest.config.js', 'webpack.config.js', '.env'];
-    if (changedFiles.some(f => configFiles.some(config => f.endsWith(config)))) {
+    const configFiles = [
+      'package.json',
+      'tsconfig.json',
+      'jest.config.js',
+      'webpack.config.js',
+      '.env',
+    ];
+    if (
+      changedFiles.some((f) => configFiles.some((config) => f.endsWith(config)))
+    ) {
       triggers.push('config_change');
     }
 
     // Core infrastructure changes
-    if (changedFiles.some(f => f.includes('build/') || f.includes('scripts/'))) {
+    if (
+      changedFiles.some((f) => f.includes('build/') || f.includes('scripts/'))
+    ) {
       triggers.push('build_infra_change');
     }
 
@@ -316,8 +350,19 @@ export class TestImpactAnalyzer {
     }
 
     // Unknown file types
-    const knownExtensions = ['.ts', '.js', '.tsx', '.jsx', '.json', '.md', '.yml', '.yaml'];
-    if (changedFiles.some(f => !knownExtensions.some(ext => f.endsWith(ext)))) {
+    const knownExtensions = [
+      '.ts',
+      '.js',
+      '.tsx',
+      '.jsx',
+      '.json',
+      '.md',
+      '.yml',
+      '.yaml',
+    ];
+    if (
+      changedFiles.some((f) => !knownExtensions.some((ext) => f.endsWith(ext)))
+    ) {
       triggers.push('unknown_file_types');
     }
 
@@ -334,7 +379,10 @@ export class TestImpactAnalyzer {
   private async extractTestDependencies(file: string): Promise<string[]> {
     // Simplified - would use proper AST parsing in production
     try {
-      const content = await fs.readFile(path.join(this.projectRoot, file), 'utf8');
+      const content = await fs.readFile(
+        path.join(this.projectRoot, file),
+        'utf8',
+      );
       return this.extractImportsFromContent(content);
     } catch {
       return [];
@@ -343,7 +391,10 @@ export class TestImpactAnalyzer {
 
   private async extractImports(file: string): Promise<string[]> {
     try {
-      const content = await fs.readFile(path.join(this.projectRoot, file), 'utf8');
+      const content = await fs.readFile(
+        path.join(this.projectRoot, file),
+        'utf8',
+      );
       return this.extractImportsFromContent(content);
     } catch {
       return [];
@@ -354,14 +405,14 @@ export class TestImpactAnalyzer {
     const imports: string[] = [];
     const importRegex = /import.*?from\s+['"]([^'"]+)['"]/g;
     let match;
-    
+
     while ((match = importRegex.exec(content)) !== null) {
       const importPath = match[1];
       if (importPath.startsWith('.')) {
         imports.push(importPath);
       }
     }
-    
+
     return imports;
   }
 
@@ -369,15 +420,18 @@ export class TestImpactAnalyzer {
     // Rough estimation based on file size and type
     const baseTime = 100; // 100ms base
     const sizeMultiplier = Math.max(1, size / 1000); // 1ms per KB
-    
+
     if (file.includes('e2e')) return baseTime * 50 * sizeMultiplier;
     if (file.includes('integration')) return baseTime * 10 * sizeMultiplier;
     return baseTime * sizeMultiplier;
   }
 
-  private getRecommendation(impactedCount: number, totalCount: number): 'run_selected' | 'run_all' | 'run_fallback' {
+  private getRecommendation(
+    impactedCount: number,
+    totalCount: number,
+  ): 'run_selected' | 'run_all' | 'run_fallback' {
     const ratio = impactedCount / totalCount;
-    
+
     if (ratio === 0) return 'run_fallback';
     if (ratio < 0.3) return 'run_selected';
     if (ratio < 0.7) return 'run_selected';
@@ -391,8 +445,8 @@ export class TestImpactAnalyzer {
   private logAnalysisResult(result: ImpactResult): void {
     const total = this.testTargets.length;
     const impacted = result.impactedTests.length;
-    const reduction = ((total - impacted) / total * 100).toFixed(1);
-    
+    const reduction = (((total - impacted) / total) * 100).toFixed(1);
+
     console.log('\n🎯 Test Impact Analysis Result');
     console.log('='.repeat(40));
     console.log(`Total tests: ${total}`);
@@ -401,10 +455,10 @@ export class TestImpactAnalyzer {
     console.log(`Confidence: ${result.confidence}`);
     console.log(`Reason: ${result.reason}`);
     console.log(`Recommendation: ${result.recommendation}`);
-    
+
     if (result.impactedTests.length > 0 && result.impactedTests.length < 10) {
       console.log('\nImpacted tests:');
-      result.impactedTests.forEach(test => {
+      result.impactedTests.forEach((test) => {
         console.log(`  • ${test.name} (${test.type})`);
       });
     }
@@ -414,8 +468,8 @@ export class TestImpactAnalyzer {
 // CLI interface for testing
 if (import.meta.url === `file://${process.argv[1]}`) {
   const analyzer = new TestImpactAnalyzer();
-  
-  analyzer.getChangesFromGit().then(async changeset => {
+
+  analyzer.getChangesFromGit().then(async (changeset) => {
     const result = await analyzer.analyzeImpact(changeset);
     process.exit(result.recommendation === 'run_all' ? 1 : 0);
   });

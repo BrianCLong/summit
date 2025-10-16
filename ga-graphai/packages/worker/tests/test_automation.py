@@ -18,7 +18,7 @@ from automation import (  # noqa: E402
 )
 from main import execute_ticket, plan_tickets  # noqa: E402
 from prompt_engineering import PromptEngineer, PromptTuning  # noqa: E402
-from routing import ManualControlPlan, Ticket, WorkParcel, WorkerProfile  # noqa: E402
+from routing import ManualControlPlan, Ticket, WorkerProfile, WorkParcel  # noqa: E402
 
 
 class FakeHttpClient:
@@ -35,7 +35,9 @@ class RecordingController:
     def __init__(self) -> None:
         self.stages: list[str] = []
 
-    def await_confirmation(self, stage: str, parcel: WorkParcel) -> None:  # noqa: ARG002 - interface requirement
+    def await_confirmation(
+        self, stage: str, parcel: WorkParcel
+    ) -> None:  # noqa: ARG002 - interface requirement
         self.stages.append(stage)
 
 
@@ -58,8 +60,18 @@ def test_orchestrator_runs_full_cycle():
         automation_mode="guided",
         context={"ticket": "T1"},
     )
-    worker = WorkerProfile(identifier="worker-a", display_name="A", capabilities=frozenset({"navigation"}), max_concurrent=1)
-    manual = ManualControlPlan(mode="guided", pause_before_navigation=False, pause_before_prompt=True, pause_before_capture=True)
+    worker = WorkerProfile(
+        identifier="worker-a",
+        display_name="A",
+        capabilities=frozenset({"navigation"}),
+        max_concurrent=1,
+    )
+    manual = ManualControlPlan(
+        mode="guided",
+        pause_before_navigation=False,
+        pause_before_prompt=True,
+        pause_before_capture=True,
+    )
     tuning = PromptTuning(system_instruction="Do the work", temperature=0.2, max_tokens=256)
     parcel = WorkParcel(ticket=ticket, worker=worker, manual_control=manual, prompt_tuning=tuning)
 
@@ -97,7 +109,9 @@ def test_execute_ticket_uses_overrides(monkeypatch: pytest.MonkeyPatch):
     stub_results: list[WorkProduct] = []
 
     class StubOrchestrator:
-        def execute(self, parcel: WorkParcel, engineer: PromptEngineer) -> WorkProduct:  # noqa: ARG002 - interface requirement
+        def execute(
+            self, parcel: WorkParcel, engineer: PromptEngineer
+        ) -> WorkProduct:  # noqa: ARG002 - interface requirement
             result = WorkProduct(
                 ticket_id=parcel.ticket.identifier,
                 worker_id=parcel.worker.identifier,

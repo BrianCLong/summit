@@ -13,37 +13,37 @@ interface IdempotencyOptions {
    * Redis client instance (will create default if not provided)
    */
   redisClient?: RedisClientType;
-  
+
   /**
    * TTL for idempotency keys in milliseconds
    * Default: 10 minutes
    */
   ttlMs?: number;
-  
+
   /**
    * Whether to hash request body for signature
    * Default: true
    */
   includeBody?: boolean;
-  
+
   /**
    * Whether to include query parameters in signature
    * Default: true
    */
   includeQuery?: boolean;
-  
+
   /**
    * Headers to include in idempotency signature
    * Default: ['authorization', 'x-tenant-id']
    */
   includeHeaders?: string[];
-  
+
   /**
    * Maximum size of request body to hash (bytes)
    * Default: 1MB
    */
   maxBodySize?: number;
-  
+
   /**
    * Feature flag to enable/disable idempotency
    * Default: process.env.ENABLE_IDEMPOTENCY === 'true'
@@ -71,11 +71,14 @@ class IdempotencyManager {
       ttlMs: options.ttlMs || 10 * 60 * 1000, // 10 minutes
       includeBody: options.includeBody ?? true,
       includeQuery: options.includeQuery ?? true,
-      includeHeaders: options.includeHeaders || ['authorization', 'x-tenant-id'],
+      includeHeaders: options.includeHeaders || [
+        'authorization',
+        'x-tenant-id',
+      ],
       maxBodySize: options.maxBodySize || 1024 * 1024, // 1MB
-      enabled: options.enabled ?? process.env.ENABLE_IDEMPOTENCY === 'true'
+      enabled: options.enabled ?? process.env.ENABLE_IDEMPOTENCY === 'true',
     };
-    
+
     this.redis = this.options.redisClient;
   }
 
@@ -83,16 +86,20 @@ class IdempotencyManager {
     const client = createClient({
       url: process.env.REDIS_URL || 'redis://localhost:6379',
       socket: {
-        reconnectStrategy: (retries) => Math.min(retries * 50, 500)
-      }
+        reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+      },
     });
 
     client.on('error', (err) => {
-      logger.error('Redis client error in idempotency middleware', { error: err });
+      logger.error('Redis client error in idempotency middleware', {
+        error: err,
+      });
     });
 
-    client.connect().catch(err => {
-      logger.error('Failed to connect Redis client for idempotency', { error: err });
+    client.connect().catch((err) => {
+      logger.error('Failed to connect Redis client for idempotency', {
+        error: err,
+      });
     });
 
     return client;
@@ -102,16 +109,13 @@ class IdempotencyManager {
    * Generate deterministic hash for request signature
    */
   private generateRequestSignature(req: Request): string {
-    const components: string[] = [
-      req.method,
-      req.originalUrl || req.url
-    ];
+    const components: string[] = [req.method, req.originalUrl || req.url];
 
     // Include query parameters
     if (this.options.includeQuery && Object.keys(req.query).length > 0) {
       const sortedQuery = Object.keys(req.query)
         .sort()
-        .map(key => `${key}=${req.query[key]}`)
+        .map((key) => `${key}=${req.query[key]}`)
         .join('&');
       components.push(`query:${sortedQuery}`);
     }
@@ -126,33 +130,32 @@ class IdempotencyManager {
 
     // Include request body
     if (this.options.includeBody && req.body) {
-      const bodyString = typeof req.body === 'string' 
-        ? req.body 
-        : JSON.stringify(req.body);
-      
+      const bodyString =
+        typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+
       if (bodyString.length <= this.options.maxBodySize) {
         components.push(`body:${bodyString}`);
       } else {
         // For large bodies, include size and hash of first/last chunks
         const firstChunk = bodyString.slice(0, 1000);
         const lastChunk = bodyString.slice(-1000);
-        const sizeHash = createHash('md5').update(bodyString.length.toString()).digest('hex');
+        const sizeHash = createHash('md5')
+          .update(bodyString.length.toString())
+          .digest('hex');
         components.push(`body:large:${firstChunk}:${lastChunk}:${sizeHash}`);
       }
     }
 
-    return createHash('sha256')
-      .update(components.join('|'))
-      .digest('hex');
+    return createHash('sha256').update(components.join('|')).digest('hex');
   }
 
   /**
    * Check if request is a duplicate and handle accordingly
    */
   async processRequest(
-    req: Request, 
-    res: Response, 
-    next: NextFunction
+    req: Request,
+    res: Response,
+    next: NextFunction,
   ): Promise<void> {
     try {
       if (!this.options.enabled) {
@@ -160,7 +163,7 @@ class IdempotencyManager {
       }
 
       const idempotencyKey = req.get('Idempotency-Key');
-      
+
       if (!idempotencyKey) {
         // No idempotency key provided - allow request
         return next();
@@ -169,60 +172,69 @@ class IdempotencyManager {
       if (!this.isValidIdempotencyKey(idempotencyKey)) {
         res.status(400).json({
           error: 'Invalid idempotency key format',
-          code: 'INVALID_IDEMPOTENCY_KEY'
+          code: 'INVALID_IDEMPOTENCY_KEY',
         });
         return;
       }
 
       const requestSignature = this.generateRequestSignature(req);
       const redisKey = `idempotency:${idempotencyKey}:${requestSignature}`;
-      
+
       // Extract metadata for logging
-      const tenantId = req.get('x-tenant-id') || 
-                      (req as any).user?.tenantId || 
-                      (req.body as any)?.tenantId;
+      const tenantId =
+        req.get('x-tenant-id') ||
+        (req as any).user?.tenantId ||
+        (req.body as any)?.tenantId;
       const operationName = (req.body as any)?.operationName;
 
       // Try to acquire idempotency lock
-      const lockResult = await this.redis.set(redisKey, JSON.stringify({
-        requestHash: requestSignature,
-        createdAt: new Date().toISOString(),
-        tenantId,
-        operationName,
-        completed: false
-      } as IdempotencyRecord), {
-        NX: true, // Only set if key doesn't exist
-        PX: this.options.ttlMs // Set expiration in milliseconds
-      });
+      const lockResult = await this.redis.set(
+        redisKey,
+        JSON.stringify({
+          requestHash: requestSignature,
+          createdAt: new Date().toISOString(),
+          tenantId,
+          operationName,
+          completed: false,
+        } as IdempotencyRecord),
+        {
+          NX: true, // Only set if key doesn't exist
+          PX: this.options.ttlMs, // Set expiration in milliseconds
+        },
+      );
 
       if (!lockResult) {
         // Key already exists - this is a duplicate request
         const existingRecord = await this.redis.get(redisKey);
-        
+
         if (existingRecord) {
           try {
             const record: IdempotencyRecord = JSON.parse(existingRecord);
-            
-            if (record.completed && record.responseStatus && record.responseBody) {
+
+            if (
+              record.completed &&
+              record.responseStatus &&
+              record.responseBody
+            ) {
               // Return cached response
               res.status(record.responseStatus);
               res.set('X-Idempotency', 'hit');
               res.json(JSON.parse(record.responseBody));
-              
+
               logger.info('Idempotency hit - returning cached response', {
                 idempotencyKey,
                 requestSignature,
                 tenantId,
                 operationName,
-                cachedStatus: record.responseStatus
+                cachedStatus: record.responseStatus,
               });
-              
+
               return;
             }
           } catch (parseError) {
             logger.warn('Failed to parse existing idempotency record', {
               idempotencyKey,
-              error: parseError
+              error: parseError,
             });
           }
         }
@@ -231,40 +243,40 @@ class IdempotencyManager {
         res.status(409).json({
           error: 'Duplicate request detected',
           code: 'IDEMPOTENCY_CONFLICT',
-          message: 'A request with this idempotency key is already being processed'
+          message:
+            'A request with this idempotency key is already being processed',
         });
-        
+
         logger.warn('Idempotency conflict detected', {
           idempotencyKey,
           requestSignature,
           tenantId,
-          operationName
+          operationName,
         });
-        
+
         return;
       }
 
       // Request is unique - proceed with processing
       res.set('X-Idempotency', 'accepted');
-      
+
       // Hook response completion to cache result
       this.hookResponseCompletion(req, res, redisKey);
-      
+
       logger.debug('Idempotency key accepted', {
         idempotencyKey,
         requestSignature,
         tenantId,
-        operationName
+        operationName,
       });
 
       next();
-
     } catch (error) {
-      logger.error('Idempotency middleware error', { 
+      logger.error('Idempotency middleware error', {
         error,
-        idempotencyKey: req.get('Idempotency-Key')
+        idempotencyKey: req.get('Idempotency-Key'),
       });
-      
+
       // Fail open - allow request to proceed
       next();
     }
@@ -273,14 +285,18 @@ class IdempotencyManager {
   /**
    * Hook into response to cache successful results
    */
-  private hookResponseCompletion(req: Request, res: Response, redisKey: string): void {
+  private hookResponseCompletion(
+    req: Request,
+    res: Response,
+    redisKey: string,
+  ): void {
     const originalSend = res.json;
     let responseCaptured = false;
 
-    res.json = function(body: any) {
+    res.json = function (body: any) {
       if (!responseCaptured) {
         responseCaptured = true;
-        
+
         // Cache successful responses
         if (res.statusCode >= 200 && res.statusCode < 300) {
           const record: IdempotencyRecord = {
@@ -290,17 +306,19 @@ class IdempotencyManager {
             operationName: (req.body as any)?.operationName,
             completed: true,
             responseStatus: res.statusCode,
-            responseBody: JSON.stringify(body)
+            responseBody: JSON.stringify(body),
           };
 
-          this.redis.set(redisKey, JSON.stringify(record), {
-            PX: this.options.ttlMs
-          }).catch(error => {
-            logger.error('Failed to cache idempotency response', { 
-              error,
-              redisKey 
+          this.redis
+            .set(redisKey, JSON.stringify(record), {
+              PX: this.options.ttlMs,
+            })
+            .catch((error) => {
+              logger.error('Failed to cache idempotency response', {
+                error,
+                redisKey,
+              });
             });
-          });
         }
       }
 
@@ -325,26 +343,24 @@ class IdempotencyManager {
       const pattern = 'idempotency:*';
       let cursor = 0;
       let deletedCount = 0;
-      
+
       do {
         const scanResult = await this.redis.scan(cursor, {
           MATCH: pattern,
-          COUNT: 100
+          COUNT: 100,
         });
-        
+
         cursor = scanResult.cursor;
         const keys = scanResult.keys;
-        
+
         if (keys.length > 0) {
           const deleted = await this.redis.del(keys);
           deletedCount += deleted;
         }
-        
       } while (cursor !== 0);
-      
+
       logger.info('Idempotency cleanup completed', { deletedCount });
       return deletedCount;
-      
     } catch (error) {
       logger.error('Idempotency cleanup failed', { error });
       return 0;
@@ -368,11 +384,11 @@ class IdempotencyManager {
       do {
         const scanResult = await this.redis.scan(cursor, {
           MATCH: pattern,
-          COUNT: 100
+          COUNT: 100,
         });
-        
+
         cursor = scanResult.cursor;
-        
+
         for (const key of scanResult.keys) {
           const record = await this.redis.get(key);
           if (record) {
@@ -388,15 +404,13 @@ class IdempotencyManager {
             }
           }
         }
-        
       } while (cursor !== 0);
 
       return {
         activeKeys,
         completedKeys,
-        errorRate: 0 // TODO: Track error rate in metrics
+        errorRate: 0, // TODO: Track error rate in metrics
       };
-
     } catch (error) {
       logger.error('Failed to get idempotency stats', { error });
       return { activeKeys: -1, completedKeys: -1, errorRate: -1 };
@@ -414,7 +428,7 @@ export function createIdempotencyMiddleware(options?: IdempotencyOptions) {
   if (!globalIdempotencyManager) {
     globalIdempotencyManager = new IdempotencyManager(options);
   }
-  
+
   return (req: Request, res: Response, next: NextFunction) => {
     return globalIdempotencyManager!.processRequest(req, res, next);
   };

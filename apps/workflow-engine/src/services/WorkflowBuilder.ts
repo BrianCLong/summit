@@ -13,7 +13,10 @@ export interface WorkflowTemplate {
   description: string;
   category: string;
   tags: string[];
-  definition: Omit<WorkflowDefinition, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>;
+  definition: Omit<
+    WorkflowDefinition,
+    'id' | 'createdBy' | 'createdAt' | 'updatedAt'
+  >;
   isBuiltIn: boolean;
   preview?: string;
 }
@@ -264,7 +267,9 @@ export class WorkflowBuilder {
     return this;
   }
 
-  setErrorHandling(errorHandling: 'stop' | 'continue' | 'retry'): WorkflowBuilder {
+  setErrorHandling(
+    errorHandling: 'stop' | 'continue' | 'retry',
+  ): WorkflowBuilder {
     if (!this.workflow.settings) {
       this.workflow.settings = {
         errorHandling: 'stop',
@@ -324,7 +329,10 @@ export class WorkflowBuilder {
     return this;
   }
 
-  build(): Omit<WorkflowDefinition, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'> {
+  build(): Omit<
+    WorkflowDefinition,
+    'id' | 'createdBy' | 'createdAt' | 'updatedAt'
+  > {
     if (!this.workflow.name) {
       throw new Error('Workflow name is required');
     }
@@ -475,7 +483,11 @@ export class WorkflowBuilder {
         {
           formConfig: {
             fields: [
-              { name: 'severity', type: 'select', options: ['Low', 'Medium', 'High', 'Critical'] },
+              {
+                name: 'severity',
+                type: 'select',
+                options: ['Low', 'Medium', 'High', 'Critical'],
+              },
               { name: 'impact', type: 'text', required: true },
               { name: 'next_steps', type: 'textarea', required: true },
             ],
@@ -562,7 +574,11 @@ export class WorkflowBuilder {
         {
           formConfig: {
             fields: [
-              { name: 'decision', type: 'select', options: ['Approve', 'Reject'] },
+              {
+                name: 'decision',
+                type: 'select',
+                options: ['Approve', 'Reject'],
+              },
               { name: 'comments', type: 'textarea' },
             ],
           },
@@ -595,7 +611,10 @@ export class WorkflowBuilder {
           method: 'POST',
           data: {
             requestId: '{{request.id}}',
-            approvedBy: ['{{manager_approval.user}}', '{{director_approval.user}}'],
+            approvedBy: [
+              '{{manager_approval.user}}',
+              '{{director_approval.user}}',
+            ],
           },
         },
         { x: 100, y: 400 },
@@ -630,7 +649,9 @@ export const BuiltInWorkflowTemplates: WorkflowTemplate[] = [
     description: 'Automated pipeline for processing and analyzing new entities',
     category: 'data-processing',
     tags: ['entities', 'ml', 'automation'],
-    definition: WorkflowBuilder.createDataProcessingWorkflow('Entity Processing Pipeline').build(),
+    definition: WorkflowBuilder.createDataProcessingWorkflow(
+      'Entity Processing Pipeline',
+    ).build(),
     isBuiltIn: true,
   },
   {
@@ -650,7 +671,9 @@ export const BuiltInWorkflowTemplates: WorkflowTemplate[] = [
     description: 'Multi-stage approval workflow for case actions',
     category: 'approval',
     tags: ['approval', 'case-management', 'governance'],
-    definition: WorkflowBuilder.createApprovalWorkflow('Case Approval Process').build(),
+    definition: WorkflowBuilder.createApprovalWorkflow(
+      'Case Approval Process',
+    ).build(),
     isBuiltIn: true,
   },
 ];

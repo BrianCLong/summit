@@ -74,7 +74,7 @@ describe('AI Routes - Video Analysis', () => {
       expect(mockQueueAdd).toHaveBeenCalledWith(
         'video-analysis-job',
         expect.objectContaining({ mediaPath: '/path/to/video.mp4' }),
-        expect.objectContaining({ jobId: expect.any(String) })
+        expect.objectContaining({ jobId: expect.any(String) }),
       );
     });
 
@@ -117,7 +117,9 @@ describe('AI Routes - Video Analysis', () => {
         finishedOn: Date.now(),
       });
 
-      const response = await request(app).get('/api/ai/job-status/completed-job');
+      const response = await request(app).get(
+        '/api/ai/job-status/completed-job',
+      );
 
       expect(response.statusCode).toBe(200);
       expect(response.body.success).toBe(true);
@@ -151,7 +153,9 @@ describe('AI Routes - Video Analysis', () => {
     it('should return 404 if job is not found', async () => {
       mockQueueGetJob.mockResolvedValueOnce(null);
 
-      const response = await request(app).get('/api/ai/job-status/non-existent-job');
+      const response = await request(app).get(
+        '/api/ai/job-status/non-existent-job',
+      );
 
       expect(response.statusCode).toBe(404);
       expect(response.body.error).toBe('Job not found');

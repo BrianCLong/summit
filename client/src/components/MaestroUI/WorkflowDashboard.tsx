@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Grid, 
-  Chip, 
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
   Button,
   IconButton,
   LinearProgress,
@@ -17,7 +17,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  Divider
+  Divider,
 } from '@mui/material';
 import {
   PlayArrow,
@@ -27,7 +27,7 @@ import {
   CheckCircle,
   Error,
   Schedule,
-  Info
+  Info,
 } from '@mui/icons-material';
 
 interface Workflow {
@@ -60,10 +60,14 @@ interface WorkflowDefinition {
 
 export const WorkflowDashboard: React.FC = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [workflowDefinitions, setWorkflowDefinitions] = useState<WorkflowDefinition[]>([]);
+  const [workflowDefinitions, setWorkflowDefinitions] = useState<
+    WorkflowDefinition[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
+  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(
+    null,
+  );
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Mock data for demonstration
@@ -83,16 +87,16 @@ export const WorkflowDashboard: React.FC = () => {
             taskType: 'health_check_task',
             status: 'COMPLETED',
             startTime: '2023-12-01T10:00:10Z',
-            endTime: '2023-12-01T10:01:00Z'
+            endTime: '2023-12-01T10:01:00Z',
           },
           {
             taskId: 'system-info-001',
             taskType: 'system_info_task',
             status: 'COMPLETED',
             startTime: '2023-12-01T10:01:00Z',
-            endTime: '2023-12-01T10:02:00Z'
-          }
-        ]
+            endTime: '2023-12-01T10:02:00Z',
+          },
+        ],
       },
       {
         workflowId: 'hello-case-001',
@@ -107,36 +111,43 @@ export const WorkflowDashboard: React.FC = () => {
             taskType: 'data_ingest_task',
             status: 'COMPLETED',
             startTime: '2023-12-01T10:30:10Z',
-            endTime: '2023-12-01T10:31:00Z'
+            endTime: '2023-12-01T10:31:00Z',
           },
           {
             taskId: 'entity-resolution-001',
             taskType: 'entity_resolution_task',
             status: 'IN_PROGRESS',
-            startTime: '2023-12-01T10:31:00Z'
+            startTime: '2023-12-01T10:31:00Z',
           },
           {
             taskId: 'graph-analysis-001',
             taskType: 'graph_analysis_task',
-            status: 'SCHEDULED'
-          }
-        ]
-      }
+            status: 'SCHEDULED',
+          },
+        ],
+      },
     ];
 
     const mockDefinitions: WorkflowDefinition[] = [
       {
         name: 'hello_world_workflow',
-        description: 'Basic IntelGraph Maestro orchestrator health check workflow',
+        description:
+          'Basic IntelGraph Maestro orchestrator health check workflow',
         version: 1,
-        tasks: ['health_check_task', 'system_info_task']
+        tasks: ['health_check_task', 'system_info_task'],
       },
       {
         name: 'hello_case_workflow',
-        description: 'End-to-end IntelGraph value loop: ingest → resolve → analyze → brief',
+        description:
+          'End-to-end IntelGraph value loop: ingest → resolve → analyze → brief',
         version: 1,
-        tasks: ['data_ingest_task', 'entity_resolution_task', 'graph_analysis_task', 'intelligence_brief_task']
-      }
+        tasks: [
+          'data_ingest_task',
+          'entity_resolution_task',
+          'graph_analysis_task',
+          'intelligence_brief_task',
+        ],
+      },
     ];
 
     // Simulate API call delay
@@ -161,7 +172,9 @@ export const WorkflowDashboard: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string): "success" | "error" | "warning" | "info" | "default" => {
+  const getStatusColor = (
+    status: string,
+  ): 'success' | 'error' | 'warning' | 'info' | 'default' => {
     switch (status) {
       case 'COMPLETED':
         return 'success';
@@ -194,7 +207,9 @@ export const WorkflowDashboard: React.FC = () => {
 
   const calculateProgress = (workflow: Workflow): number => {
     if (!workflow.tasks || workflow.tasks.length === 0) return 0;
-    const completedTasks = workflow.tasks.filter(t => t.status === 'COMPLETED').length;
+    const completedTasks = workflow.tasks.filter(
+      (t) => t.status === 'COMPLETED',
+    ).length;
     return (completedTasks / workflow.tasks.length) * 100;
   };
 
@@ -214,7 +229,12 @@ export const WorkflowDashboard: React.FC = () => {
 
   return (
     <Box p={3}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h4" gutterBottom>
           IntelGraph Maestro Workflows
         </Typography>
@@ -242,7 +262,11 @@ export const WorkflowDashboard: React.FC = () => {
           <Grid item xs={12} md={6} key={definition.name}>
             <Card>
               <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="start">
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="start"
+                >
                   <Box>
                     <Typography variant="h6" gutterBottom>
                       {definition.name}
@@ -250,7 +274,11 @@ export const WorkflowDashboard: React.FC = () => {
                     <Typography variant="body2" color="text.secondary" mb={2}>
                       {definition.description}
                     </Typography>
-                    <Chip label={`v${definition.version}`} size="small" color="primary" />
+                    <Chip
+                      label={`v${definition.version}`}
+                      size="small"
+                      color="primary"
+                    />
                   </Box>
                   <Button
                     variant="contained"
@@ -276,21 +304,27 @@ export const WorkflowDashboard: React.FC = () => {
           <Grid item xs={12} key={workflow.workflowId}>
             <Card>
               <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="start"
+                  mb={2}
+                >
                   <Box>
                     <Box display="flex" alignItems="center" gap={1} mb={1}>
                       {getStatusIcon(workflow.status)}
                       <Typography variant="h6">
                         {workflow.workflowName}
                       </Typography>
-                      <Chip 
-                        label={workflow.status} 
+                      <Chip
+                        label={workflow.status}
                         color={getStatusColor(workflow.status)}
                         size="small"
                       />
                     </Box>
                     <Typography variant="body2" color="text.secondary">
-                      ID: {workflow.workflowId} | Started: {new Date(workflow.startTime).toLocaleString()}
+                      ID: {workflow.workflowId} | Started:{' '}
+                      {new Date(workflow.startTime).toLocaleString()}
                     </Typography>
                     {workflow.correlationId && (
                       <Typography variant="body2" color="text.secondary">
@@ -316,20 +350,23 @@ export const WorkflowDashboard: React.FC = () => {
                     )}
                   </Box>
                 </Box>
-                
+
                 {workflow.status === 'RUNNING' && (
                   <Box>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                      <Typography variant="body2">
-                        Progress
-                      </Typography>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={1}
+                    >
+                      <Typography variant="body2">Progress</Typography>
                       <Typography variant="body2">
                         {Math.round(calculateProgress(workflow))}%
                       </Typography>
                     </Box>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={calculateProgress(workflow)} 
+                    <LinearProgress
+                      variant="determinate"
+                      value={calculateProgress(workflow)}
                     />
                   </Box>
                 )}
@@ -340,8 +377,8 @@ export const WorkflowDashboard: React.FC = () => {
       </Grid>
 
       {/* Workflow Details Dialog */}
-      <Dialog 
-        open={detailsOpen} 
+      <Dialog
+        open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
         maxWidth="md"
         fullWidth
@@ -365,8 +402,8 @@ export const WorkflowDashboard: React.FC = () => {
                   <Typography variant="body2" color="text.secondary">
                     Status
                   </Typography>
-                  <Chip 
-                    label={selectedWorkflow.status} 
+                  <Chip
+                    label={selectedWorkflow.status}
                     color={getStatusColor(selectedWorkflow.status)}
                     size="small"
                   />
@@ -384,16 +421,15 @@ export const WorkflowDashboard: React.FC = () => {
                     End Time
                   </Typography>
                   <Typography variant="body1">
-                    {selectedWorkflow.endTime 
+                    {selectedWorkflow.endTime
                       ? new Date(selectedWorkflow.endTime).toLocaleString()
-                      : 'Running...'
-                    }
+                      : 'Running...'}
                   </Typography>
                 </Grid>
               </Grid>
 
               <Divider sx={{ my: 2 }} />
-              
+
               <Typography variant="h6" gutterBottom>
                 Tasks
               </Typography>
@@ -421,9 +457,7 @@ export const WorkflowDashboard: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailsOpen(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setDetailsOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

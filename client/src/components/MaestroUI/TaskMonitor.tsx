@@ -24,7 +24,7 @@ import {
   Button,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
 } from '@mui/material';
 import {
   Visibility,
@@ -32,7 +32,7 @@ import {
   Error,
   CheckCircle,
   Schedule,
-  ExpandMore
+  ExpandMore,
 } from '@mui/icons-material';
 
 interface TaskExecution {
@@ -83,20 +83,20 @@ export const TaskMonitor: React.FC = () => {
         inputData: {
           message: 'Hello from IntelGraph Maestro!',
           timestamp: '2023-12-01T10:00:00Z',
-          environment: 'dev'
+          environment: 'dev',
         },
         outputData: {
           status: 'healthy',
           checks: ['postgres', 'redis', 'workers'],
-          timestamp: '2023-12-01T10:01:00Z'
+          timestamp: '2023-12-01T10:01:00Z',
         },
         logs: [
           'Starting health check...',
           'Checking PostgreSQL connection... OK',
           'Checking Redis connection... OK',
           'Checking worker availability... OK',
-          'Health check completed successfully'
-        ]
+          'Health check completed successfully',
+        ],
       },
       {
         taskId: 'data-ingest-002',
@@ -109,15 +109,15 @@ export const TaskMonitor: React.FC = () => {
         inputData: {
           sources: [
             { type: 'osint', url: 'https://api.example.com/intel-feed' },
-            { type: 'social', platform: 'twitter' }
+            { type: 'social', platform: 'twitter' },
           ],
-          batch_size: 100
+          batch_size: 100,
         },
         logs: [
           'Starting data ingestion...',
           'Processing OSINT source...',
-          'Fetching social media data...'
-        ]
+          'Fetching social media data...',
+        ],
       },
       {
         taskId: 'entity-resolve-003',
@@ -132,7 +132,7 @@ export const TaskMonitor: React.FC = () => {
         reasonForIncompletion: 'Connection timeout to ML service',
         inputData: {
           entities: ['person', 'organization', 'location'],
-          threshold: 0.85
+          threshold: 0.85,
         },
         logs: [
           'Starting entity resolution...',
@@ -142,9 +142,9 @@ export const TaskMonitor: React.FC = () => {
           'ERROR: Connection timeout to ML service after 30s',
           'Retrying... (attempt 2/2)',
           'ERROR: Connection timeout to ML service after 30s',
-          'Task failed after maximum retries'
-        ]
-      }
+          'Task failed after maximum retries',
+        ],
+      },
     ];
 
     const mockStats: TaskStatistics = {
@@ -152,7 +152,7 @@ export const TaskMonitor: React.FC = () => {
       runningTasks: 3,
       completedTasks: 142,
       failedTasks: 11,
-      averageExecutionTime: 45000
+      averageExecutionTime: 45000,
     };
 
     setTimeout(() => {
@@ -176,7 +176,9 @@ export const TaskMonitor: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string): "success" | "error" | "warning" | "info" | "default" => {
+  const getStatusColor = (
+    status: string,
+  ): 'success' | 'error' | 'warning' | 'info' | 'default' => {
     switch (status) {
       case 'COMPLETED':
         return 'success';
@@ -197,8 +199,8 @@ export const TaskMonitor: React.FC = () => {
     return `${(ms / 60000).toFixed(1)}m`;
   };
 
-  const filteredTasks = tasks.filter(task => 
-    filter === 'ALL' || task.status === filter
+  const filteredTasks = tasks.filter(
+    (task) => filter === 'ALL' || task.status === filter,
   );
 
   const handleViewDetails = (task: TaskExecution) => {
@@ -219,10 +221,13 @@ export const TaskMonitor: React.FC = () => {
 
   return (
     <Box p={3}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">
-          Task Monitor
-        </Typography>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h4">Task Monitor</Typography>
         <Button
           variant="outlined"
           startIcon={<Refresh />}
@@ -292,15 +297,17 @@ export const TaskMonitor: React.FC = () => {
           Filter by Status
         </Typography>
         <Box display="flex" gap={1} flexWrap="wrap">
-          {['ALL', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'SCHEDULED'].map((status) => (
-            <Chip
-              key={status}
-              label={status.replace('_', ' ')}
-              onClick={() => setFilter(status)}
-              color={filter === status ? 'primary' : 'default'}
-              variant={filter === status ? 'filled' : 'outlined'}
-            />
-          ))}
+          {['ALL', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'SCHEDULED'].map(
+            (status) => (
+              <Chip
+                key={status}
+                label={status.replace('_', ' ')}
+                onClick={() => setFilter(status)}
+                color={filter === status ? 'primary' : 'default'}
+                variant={filter === status ? 'filled' : 'outlined'}
+              />
+            ),
+          )}
         </Box>
       </Box>
 
@@ -340,16 +347,16 @@ export const TaskMonitor: React.FC = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body2">
-                    {task.workflowType}
-                  </Typography>
+                  <Typography variant="body2">{task.workflowType}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {task.workflowInstanceId}
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {task.startTime ? new Date(task.startTime).toLocaleString() : 'N/A'}
+                    {task.startTime
+                      ? new Date(task.startTime).toLocaleString()
+                      : 'N/A'}
                   </Typography>
                 </TableCell>
                 <TableCell>
@@ -387,9 +394,7 @@ export const TaskMonitor: React.FC = () => {
         maxWidth="lg"
         fullWidth
       >
-        <DialogTitle>
-          Task Details: {selectedTask?.taskType}
-        </DialogTitle>
+        <DialogTitle>Task Details: {selectedTask?.taskType}</DialogTitle>
         <DialogContent>
           {selectedTask && (
             <Box>
@@ -399,11 +404,17 @@ export const TaskMonitor: React.FC = () => {
                     Basic Information
                   </Typography>
                   <Box mb={2}>
-                    <Typography variant="body2" color="text.secondary">Task ID</Typography>
-                    <Typography variant="body1">{selectedTask.taskId}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Task ID
+                    </Typography>
+                    <Typography variant="body1">
+                      {selectedTask.taskId}
+                    </Typography>
                   </Box>
                   <Box mb={2}>
-                    <Typography variant="body2" color="text.secondary">Status</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Status
+                    </Typography>
                     <Chip
                       label={selectedTask.status}
                       color={getStatusColor(selectedTask.status)}
@@ -411,9 +422,15 @@ export const TaskMonitor: React.FC = () => {
                     />
                   </Box>
                   <Box mb={2}>
-                    <Typography variant="body2" color="text.secondary">Workflow</Typography>
-                    <Typography variant="body1">{selectedTask.workflowType}</Typography>
-                    <Typography variant="body2" color="text.secondary">{selectedTask.workflowInstanceId}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Workflow
+                    </Typography>
+                    <Typography variant="body1">
+                      {selectedTask.workflowType}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {selectedTask.workflowInstanceId}
+                    </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -421,26 +438,40 @@ export const TaskMonitor: React.FC = () => {
                     Execution Details
                   </Typography>
                   <Box mb={2}>
-                    <Typography variant="body2" color="text.secondary">Start Time</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Start Time
+                    </Typography>
                     <Typography variant="body1">
-                      {selectedTask.startTime ? new Date(selectedTask.startTime).toLocaleString() : 'N/A'}
+                      {selectedTask.startTime
+                        ? new Date(selectedTask.startTime).toLocaleString()
+                        : 'N/A'}
                     </Typography>
                   </Box>
                   <Box mb={2}>
-                    <Typography variant="body2" color="text.secondary">End Time</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      End Time
+                    </Typography>
                     <Typography variant="body1">
-                      {selectedTask.endTime ? new Date(selectedTask.endTime).toLocaleString() : 'Running...'}
+                      {selectedTask.endTime
+                        ? new Date(selectedTask.endTime).toLocaleString()
+                        : 'Running...'}
                     </Typography>
                   </Box>
                   <Box mb={2}>
-                    <Typography variant="body2" color="text.secondary">Duration</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Duration
+                    </Typography>
                     <Typography variant="body1">
                       {formatDuration(selectedTask.executionTime)}
                     </Typography>
                   </Box>
                   <Box mb={2}>
-                    <Typography variant="body2" color="text.secondary">Retry Count</Typography>
-                    <Typography variant="body1">{selectedTask.retryCount}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Retry Count
+                    </Typography>
+                    <Typography variant="body1">
+                      {selectedTask.retryCount}
+                    </Typography>
                   </Box>
                 </Grid>
               </Grid>
@@ -448,7 +479,8 @@ export const TaskMonitor: React.FC = () => {
               {selectedTask.reasonForIncompletion && (
                 <Alert severity="error" sx={{ mb: 3 }}>
                   <Typography variant="body2">
-                    <strong>Failure Reason:</strong> {selectedTask.reasonForIncompletion}
+                    <strong>Failure Reason:</strong>{' '}
+                    {selectedTask.reasonForIncompletion}
                   </Typography>
                 </Alert>
               )}
@@ -495,10 +527,12 @@ export const TaskMonitor: React.FC = () => {
                           key={index}
                           variant="body2"
                           component="div"
-                          sx={{ 
-                            color: log.startsWith('ERROR') ? 'error.main' : 'grey.100',
+                          sx={{
+                            color: log.startsWith('ERROR')
+                              ? 'error.main'
+                              : 'grey.100',
                             fontFamily: 'monospace',
-                            fontSize: '0.8rem'
+                            fontSize: '0.8rem',
                           }}
                         >
                           {log}

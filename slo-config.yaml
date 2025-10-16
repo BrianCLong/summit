@@ -1,4 +1,3 @@
-
 # slo-config.yaml
 # Defines the Service Level Objectives for a service in the catalog.
 
@@ -9,52 +8,52 @@ metadata:
   name: maestro-api
 spec:
   # Human-readable description of the service.
-  description: "Core API for the Maestro CI/CD Platform"
+  description: 'Core API for the Maestro CI/CD Platform'
 
   # A list of objectives for this service.
   objectives:
-    - name: "API Availability"
-      description: "The API should be available and serving non-5xx responses."
+    - name: 'API Availability'
+      description: 'The API should be available and serving non-5xx responses.'
       # 99.9% availability over a 28-day window.
       target: 99.9
       window: 28d
       # Service Level Indicator (SLI) definition.
       sli:
-        type: "prometheus"
+        type: 'prometheus'
         query: |
           sum(rate(maestro_api_requests_total{status!~"5.."}[5m]))
           /
           sum(rate(maestro_api_requests_total[5m]))
 
-    - name: "API Latency"
-      description: "95% of API requests should complete in under 250ms."
+    - name: 'API Latency'
+      description: '95% of API requests should complete in under 250ms.'
       # 99% of the time, the latency target should be met.
       target: 99.0
       window: 28d
       sli:
-        type: "prometheus"
+        type: 'prometheus'
         query: |
           sum(rate(maestro_api_request_latency_seconds_bucket{le="0.25"}[5m]))
           /
           sum(rate(maestro_api_request_latency_seconds_count[5m]))
 
-    - name: "Docling Parse Latency"
-      description: "Docling parse p95 latency stays under 900ms for build artifacts."
+    - name: 'Docling Parse Latency'
+      description: 'Docling parse p95 latency stays under 900ms for build artifacts.'
       target: 99.0
       window: 28d
       sli:
-        type: "prometheus"
+        type: 'prometheus'
         query: |
           sum(rate(docling_inference_duration_seconds_bucket{operation="parse",le="0.9"}[5m]))
           /
           sum(rate(docling_inference_duration_seconds_count{operation="parse"}[5m]))
 
-    - name: "Docling Summarize Latency"
-      description: "Docling summarize p95 latency stays under 1.5s for build logs."
+    - name: 'Docling Summarize Latency'
+      description: 'Docling summarize p95 latency stays under 1.5s for build logs.'
       target: 99.0
       window: 28d
       sli:
-        type: "prometheus"
+        type: 'prometheus'
         query: |
           sum(rate(docling_inference_duration_seconds_bucket{operation="summarize",le="1.5"}[5m]))
           /

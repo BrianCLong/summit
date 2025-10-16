@@ -14,7 +14,7 @@ data:
     cache:
       dir: /tmp/trivy-cache
       ttl: 72h
-    
+
     db:
       skip-update: false
       
@@ -26,16 +26,16 @@ data:
       config: /etc/trivy/secret.yaml
       
     severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
-    
+
     output: table
     format: json
-    
+
     exit-code: 1  # Exit with error if vulnerabilities found
-    
+
     ignore-policy: |
       # Ignore specific CVEs that are false positives or accepted risks
       # CVE-2023-12345  # Example: Library XYZ false positive
-      
+
   secret.yaml: |
     # Secret scanning rules
     rules:
@@ -65,7 +65,7 @@ metadata:
   name: container-vulnerability-scan
   namespace: intelgraph-security
 spec:
-  schedule: "0 2 * * *"  # Daily at 2 AM
+  schedule: '0 2 * * *' # Daily at 2 AM
   jobTemplate:
     spec:
       template:
@@ -77,58 +77,58 @@ spec:
             runAsUser: 1000
             fsGroup: 1000
           containers:
-          - name: trivy-scanner
-            image: aquasec/trivy:latest
-            command:
-            - /bin/sh
-            - -c
-            args:
-            - |
-              # Update vulnerability database
-              trivy image --download-db-only
-              
-              # Scan all IntelGraph images
-              for image in $(kubectl get pods -n intelgraph -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n' | sort -u); do
-                echo "Scanning image: $image"
-                trivy image --config /etc/trivy/trivy.yaml --format json --output /tmp/scan-results-$(echo $image | tr '/' '-' | tr ':' '-').json $image
-              done
-              
-              # Upload results to security dashboard
-              curl -X POST "${SECURITY_DASHBOARD_URL}/api/v1/scan-results" \
-                -H "Authorization: Bearer ${API_TOKEN}" \
-                -H "Content-Type: application/json" \
-                -d @/tmp/scan-results-*.json
-                
-            env:
-            - name: SECURITY_DASHBOARD_URL
-              valueFrom:
-                secretKeyRef:
-                  name: scanner-secrets
-                  key: dashboard-url
-            - name: API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: scanner-secrets
-                  key: api-token
-            volumeMounts:
-            - name: trivy-config
-              mountPath: /etc/trivy
-            - name: scan-results
-              mountPath: /tmp
-            resources:
-              limits:
-                cpu: 500m
-                memory: 1Gi
-              requests:
-                cpu: 100m
-                memory: 256Mi
+            - name: trivy-scanner
+              image: aquasec/trivy:latest
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                  # Update vulnerability database
+                  trivy image --download-db-only
+
+                  # Scan all IntelGraph images
+                  for image in $(kubectl get pods -n intelgraph -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n' | sort -u); do
+                    echo "Scanning image: $image"
+                    trivy image --config /etc/trivy/trivy.yaml --format json --output /tmp/scan-results-$(echo $image | tr '/' '-' | tr ':' '-').json $image
+                  done
+
+                  # Upload results to security dashboard
+                  curl -X POST "${SECURITY_DASHBOARD_URL}/api/v1/scan-results" \
+                    -H "Authorization: Bearer ${API_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -d @/tmp/scan-results-*.json
+
+              env:
+                - name: SECURITY_DASHBOARD_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: scanner-secrets
+                      key: dashboard-url
+                - name: API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: scanner-secrets
+                      key: api-token
+              volumeMounts:
+                - name: trivy-config
+                  mountPath: /etc/trivy
+                - name: scan-results
+                  mountPath: /tmp
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
           volumes:
-          - name: trivy-config
-            configMap:
-              name: trivy-config
-          - name: scan-results
-            emptyDir:
-              sizeLimit: 1Gi
+            - name: trivy-config
+              configMap:
+                name: trivy-config
+            - name: scan-results
+              emptyDir:
+                sizeLimit: 1Gi
 
 ---
 # Service Account for scanner
@@ -146,12 +146,12 @@ kind: ClusterRole
 metadata:
   name: scanner-role
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list"]
-- apiGroups: ["apps"]
-  resources: ["deployments", "replicasets"]
-  verbs: ["get", "list"]
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['get', 'list']
+  - apiGroups: ['apps']
+    resources: ['deployments', 'replicasets']
+    verbs: ['get', 'list']
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -159,9 +159,9 @@ kind: ClusterRoleBinding
 metadata:
   name: scanner-rolebinding
 subjects:
-- kind: ServiceAccount
-  name: scanner-service-account
-  namespace: intelgraph-security
+  - kind: ServiceAccount
+    name: scanner-service-account
+    namespace: intelgraph-security
 roleRef:
   kind: ClusterRole
   name: scanner-role
@@ -219,64 +219,64 @@ spec:
         runAsUser: 1000
         fsGroup: 1000
       containers:
-      - name: scanner
-        image: intelgraph/security-scanner:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: SCANNER_CONFIG_PATH
-          value: "/etc/scanner/config.yaml"
-        - name: TRIVY_CONFIG_PATH
-          value: "/etc/trivy/trivy.yaml"
-        - name: SNYK_CONFIG_PATH
-          value: "/etc/snyk/snyk.json"
-        volumeMounts:
-        - name: scanner-config
-          mountPath: /etc/scanner
-        - name: trivy-config
-          mountPath: /etc/trivy
-        - name: snyk-config
-          mountPath: /etc/snyk
-        - name: scan-cache
-          mountPath: /tmp/scan-cache
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 2Gi
-          requests:
-            cpu: 200m
-            memory: 512Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: scanner
+          image: intelgraph/security-scanner:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SCANNER_CONFIG_PATH
+              value: '/etc/scanner/config.yaml'
+            - name: TRIVY_CONFIG_PATH
+              value: '/etc/trivy/trivy.yaml'
+            - name: SNYK_CONFIG_PATH
+              value: '/etc/snyk/snyk.json'
+          volumeMounts:
+            - name: scanner-config
+              mountPath: /etc/scanner
+            - name: trivy-config
+              mountPath: /etc/trivy
+            - name: snyk-config
+              mountPath: /etc/snyk
+            - name: scan-cache
+              mountPath: /tmp/scan-cache
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: scanner-config
-        configMap:
-          name: scanner-config
-      - name: trivy-config
-        configMap:
-          name: trivy-config
-      - name: snyk-config
-        configMap:
-          name: snyk-config
-      - name: scan-cache
-        emptyDir:
-          sizeLimit: 2Gi
+        - name: scanner-config
+          configMap:
+            name: scanner-config
+        - name: trivy-config
+          configMap:
+            name: trivy-config
+        - name: snyk-config
+          configMap:
+            name: snyk-config
+        - name: scan-cache
+          emptyDir:
+            sizeLimit: 2Gi
 
 ---
 # Scanner Service
@@ -289,8 +289,8 @@ spec:
   selector:
     app: security-scanner
   ports:
-  - port: 80
-    targetPort: 8080
+    - port: 80
+      targetPort: 8080
   type: ClusterIP
 
 ---
@@ -391,7 +391,7 @@ metadata:
   name: sbom-generator
   namespace: intelgraph-security
 spec:
-  schedule: "0 3 * * 0"  # Weekly on Sunday at 3 AM
+  schedule: '0 3 * * 0' # Weekly on Sunday at 3 AM
   jobTemplate:
     spec:
       template:
@@ -399,44 +399,44 @@ spec:
           serviceAccountName: scanner-service-account
           restartPolicy: OnFailure
           containers:
-          - name: syft-sbom-generator
-            image: anchore/syft:latest
-            command:
-            - /bin/sh
-            - -c
-            args:
-            - |
-              # Generate SBOM for all IntelGraph images
-              for image in $(kubectl get pods -n intelgraph -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n' | sort -u); do
-                echo "Generating SBOM for image: $image"
-                syft packages $image -o spdx-json > /tmp/sbom-$(echo $image | tr '/' '-' | tr ':' '-').json
-                syft packages $image -o cyclonedx-json > /tmp/sbom-cyclonedx-$(echo $image | tr '/' '-' | tr ':' '-').json
-              done
-              
-              # Upload SBOMs to artifact repository
-              curl -X POST "${ARTIFACT_REPO_URL}/api/v1/sboms" \
-                -H "Authorization: Bearer ${API_TOKEN}" \
-                -H "Content-Type: application/json" \
-                -d @/tmp/sbom-*.json
-                
-            env:
-            - name: ARTIFACT_REPO_URL
-              valueFrom:
-                secretKeyRef:
-                  name: scanner-secrets
-                  key: artifact-repo-url
-            - name: API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: scanner-secrets
-                  key: api-token
-            resources:
-              limits:
-                cpu: 500m
-                memory: 1Gi
-              requests:
-                cpu: 100m
-                memory: 256Mi
+            - name: syft-sbom-generator
+              image: anchore/syft:latest
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                  # Generate SBOM for all IntelGraph images
+                  for image in $(kubectl get pods -n intelgraph -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n' | sort -u); do
+                    echo "Generating SBOM for image: $image"
+                    syft packages $image -o spdx-json > /tmp/sbom-$(echo $image | tr '/' '-' | tr ':' '-').json
+                    syft packages $image -o cyclonedx-json > /tmp/sbom-cyclonedx-$(echo $image | tr '/' '-' | tr ':' '-').json
+                  done
+
+                  # Upload SBOMs to artifact repository
+                  curl -X POST "${ARTIFACT_REPO_URL}/api/v1/sboms" \
+                    -H "Authorization: Bearer ${API_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -d @/tmp/sbom-*.json
+
+              env:
+                - name: ARTIFACT_REPO_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: scanner-secrets
+                      key: artifact-repo-url
+                - name: API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: scanner-secrets
+                      key: api-token
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
 
 ---
 # Secrets for scanner integrations
@@ -447,11 +447,11 @@ metadata:
   namespace: intelgraph-security
 type: Opaque
 data:
-  dashboard-url: "" # Base64 encoded security dashboard URL
-  api-token: "" # Base64 encoded API token
-  artifact-repo-url: "" # Base64 encoded artifact repository URL
-  slack-webhook-url: "" # Base64 encoded Slack webhook URL
-  security-webhook-url: "" # Base64 encoded security webhook URL
+  dashboard-url: '' # Base64 encoded security dashboard URL
+  api-token: '' # Base64 encoded API token
+  artifact-repo-url: '' # Base64 encoded artifact repository URL
+  slack-webhook-url: '' # Base64 encoded Slack webhook URL
+  security-webhook-url: '' # Base64 encoded security webhook URL
 
 ---
 # Network Policy for security scanner
@@ -465,36 +465,36 @@ spec:
     matchLabels:
       app: security-scanner
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: intelgraph
-    ports:
-    - protocol: TCP
-      port: 8080
+    - from:
+        - podSelector:
+            matchLabels:
+              app: intelgraph
+      ports:
+        - protocol: TCP
+          port: 8080
   egress:
-  # Allow DNS
-  - to: []
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
-  # Allow HTTPS for external API calls
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443
-  # Allow connection to Kubernetes API
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 6443
-  # Allow connection to Docker registries
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 5000
+    # Allow DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow HTTPS for external API calls
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow connection to Kubernetes API
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 6443
+    # Allow connection to Docker registries
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 5000

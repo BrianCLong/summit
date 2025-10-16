@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: neo4j-backup, namespace: prod }
 spec:
-  schedule: "0 * * * *" # hourly incrementals
+  schedule: '0 * * * *' # hourly incrementals
   jobTemplate:
     spec:
       template:
@@ -12,7 +12,7 @@ spec:
             - name: backup
               image: neo4j:5
               envFrom: [{ secretRef: { name: neo4j-backup } }]
-              command: ["/bin/bash","-lc"]
+              command: ['/bin/bash', '-lc']
               args:
                 - |
                   neo4j-admin database backup --from=graph-core-0.graph:6362 --parallel-processes=4 --backup-dir=/tmp/backup graph;

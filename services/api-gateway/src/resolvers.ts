@@ -3,9 +3,11 @@ import { Kind } from 'graphql/language';
 
 const DateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
-  serialize: (value: any) => value instanceof Date ? value.toISOString() : value,
+  serialize: (value: any) =>
+    value instanceof Date ? value.toISOString() : value,
   parseValue: (value: any) => new Date(value),
-  parseLiteral: (ast) => ast.kind === Kind.STRING ? new Date(ast.value) : null,
+  parseLiteral: (ast) =>
+    ast.kind === Kind.STRING ? new Date(ast.value) : null,
 });
 
 const JSONScalar = new GraphQLScalarType({
@@ -45,15 +47,18 @@ export const resolvers = {
     // XAI resolvers (delegated to graph-xai service)
     explainEntity: async (parent: any, args: any, context: any) => {
       const { entityId, model, version } = args;
-      const response = await fetch(`${process.env.GRAPH_XAI_URL}/explain/entity`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authority-ID': context.authorityId,
-          'X-Reason-For-Access': context.reasonForAccess,
+      const response = await fetch(
+        `${process.env.GRAPH_XAI_URL}/explain/entity`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Authority-ID': context.authorityId,
+            'X-Reason-For-Access': context.reasonForAccess,
+          },
+          body: JSON.stringify({ entityId, model, version }),
         },
-        body: JSON.stringify({ entityId, model, version })
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`XAI service error: ${response.status}`);
@@ -64,12 +69,15 @@ export const resolvers = {
 
     // Provenance resolvers (delegated to prov-ledger service)
     claim: async (parent: any, args: any, context: any) => {
-      const response = await fetch(`${process.env.PROV_LEDGER_URL}/claims/${args.id}`, {
-        headers: {
-          'X-Authority-ID': context.authorityId,
-          'X-Reason-For-Access': context.reasonForAccess,
-        }
-      });
+      const response = await fetch(
+        `${process.env.PROV_LEDGER_URL}/claims/${args.id}`,
+        {
+          headers: {
+            'X-Authority-ID': context.authorityId,
+            'X-Reason-For-Access': context.reasonForAccess,
+          },
+        },
+      );
 
       if (!response.ok) {
         return null;
@@ -79,12 +87,15 @@ export const resolvers = {
     },
 
     provenance: async (parent: any, args: any, context: any) => {
-      const response = await fetch(`${process.env.PROV_LEDGER_URL}/provenance?claimId=${args.claimId}`, {
-        headers: {
-          'X-Authority-ID': context.authorityId,
-          'X-Reason-For-Access': context.reasonForAccess,
-        }
-      });
+      const response = await fetch(
+        `${process.env.PROV_LEDGER_URL}/provenance?claimId=${args.claimId}`,
+        {
+          headers: {
+            'X-Authority-ID': context.authorityId,
+            'X-Reason-For-Access': context.reasonForAccess,
+          },
+        },
+      );
 
       if (!response.ok) {
         return null;
@@ -95,12 +106,15 @@ export const resolvers = {
 
     // Runbook resolvers (delegated to agent-runtime service)
     runbook: async (parent: any, args: any, context: any) => {
-      const response = await fetch(`${process.env.AGENT_RUNTIME_URL}/runbooks/${args.id}`, {
-        headers: {
-          'X-Authority-ID': context.authorityId,
-          'X-Reason-For-Access': context.reasonForAccess,
-        }
-      });
+      const response = await fetch(
+        `${process.env.AGENT_RUNTIME_URL}/runbooks/${args.id}`,
+        {
+          headers: {
+            'X-Authority-ID': context.authorityId,
+            'X-Reason-For-Access': context.reasonForAccess,
+          },
+        },
+      );
 
       if (!response.ok) {
         return null;
@@ -119,7 +133,7 @@ export const resolvers = {
         headers: {
           'X-Authority-ID': context.authorityId,
           'X-Reason-For-Access': context.reasonForAccess,
-        }
+        },
       });
 
       if (!response.ok) {
@@ -131,12 +145,15 @@ export const resolvers = {
 
     // Forecast resolvers (delegated to predictive-suite service)
     forecast: async (parent: any, args: any, context: any) => {
-      const response = await fetch(`${process.env.PREDICTIVE_SUITE_URL}/forecasts/${args.id}`, {
-        headers: {
-          'X-Authority-ID': context.authorityId,
-          'X-Reason-For-Access': context.reasonForAccess,
-        }
-      });
+      const response = await fetch(
+        `${process.env.PREDICTIVE_SUITE_URL}/forecasts/${args.id}`,
+        {
+          headers: {
+            'X-Authority-ID': context.authorityId,
+            'X-Reason-For-Access': context.reasonForAccess,
+          },
+        },
+      );
 
       if (!response.ok) {
         return null;
@@ -156,7 +173,7 @@ export const resolvers = {
           'X-Authority-ID': context.authorityId,
           'X-Reason-For-Access': context.reasonForAccess,
         },
-        body: JSON.stringify(args.input)
+        body: JSON.stringify(args.input),
       });
 
       if (!response.ok) {
@@ -168,19 +185,22 @@ export const resolvers = {
 
     // Runbook mutations
     startRunbook: async (parent: any, args: any, context: any) => {
-      const response = await fetch(`${process.env.AGENT_RUNTIME_URL}/runbooks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authority-ID': context.authorityId,
-          'X-Reason-For-Access': context.reasonForAccess,
+      const response = await fetch(
+        `${process.env.AGENT_RUNTIME_URL}/runbooks`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Authority-ID': context.authorityId,
+            'X-Reason-For-Access': context.reasonForAccess,
+          },
+          body: JSON.stringify({
+            name: args.name,
+            version: args.version,
+            inputs: args.inputs,
+          }),
         },
-        body: JSON.stringify({
-          name: args.name,
-          version: args.version,
-          inputs: args.inputs
-        })
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to start runbook: ${response.status}`);
@@ -191,15 +211,18 @@ export const resolvers = {
 
     // Forecast mutations
     createForecast: async (parent: any, args: any, context: any) => {
-      const response = await fetch(`${process.env.PREDICTIVE_SUITE_URL}/forecast`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authority-ID': context.authorityId,
-          'X-Reason-For-Access': context.reasonForAccess,
+      const response = await fetch(
+        `${process.env.PREDICTIVE_SUITE_URL}/forecast`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Authority-ID': context.authorityId,
+            'X-Reason-For-Access': context.reasonForAccess,
+          },
+          body: JSON.stringify(args.input),
         },
-        body: JSON.stringify(args.input)
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to create forecast: ${response.status}`);

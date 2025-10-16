@@ -24,7 +24,7 @@ export async function makeBundle({
   artifacts,
   claimSet,
   merkleRoot,
-  attestations
+  attestations,
 }: BundleParams): Promise<BundleResult> {
   const outPath = `/tmp/bundle_${Date.now()}.zip`;
   const out = createWriteStream(outPath);
@@ -37,9 +37,9 @@ export async function makeBundle({
     merkleRoot,
     claimSetSummary: {
       id: claimSet.id,
-      count: (claimSet.claims || []).length
+      count: (claimSet.claims || []).length,
     },
-    attestations
+    attestations,
   };
 
   zip.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
@@ -52,7 +52,8 @@ export async function makeBundle({
   await zip.finalize();
 
   const sha256 = await calculateFileHash(outPath);
-  const worm = (process.env.AUDIT_WORM_ENABLED || 'false').toLowerCase() === 'true';
+  const worm =
+    (process.env.AUDIT_WORM_ENABLED || 'false').toLowerCase() === 'true';
   const bucket = process.env.AUDIT_BUCKET;
 
   if (worm && bucket) {

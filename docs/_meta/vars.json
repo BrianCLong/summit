@@ -1,1 +1,5 @@
-{ "PRODUCT": "IntelGraph", "LATEST": "v24", "SUPPORT_EMAIL": "support@example.com" }
+{
+  "PRODUCT": "IntelGraph",
+  "LATEST": "v24",
+  "SUPPORT_EMAIL": "support@example.com"
+}

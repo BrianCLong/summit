@@ -1,6 +1,12 @@
 import pLimit from 'p-limit';
 import { randomUUID } from 'crypto';
-import { ensurePrewarmedSnapshot, checkoutVm, releaseVm, invokeSandbox, VmHandle } from './vm-pool';
+import {
+  ensurePrewarmedSnapshot,
+  checkoutVm,
+  releaseVm,
+  invokeSandbox,
+  VmHandle,
+} from './vm-pool';
 import { createRecording } from './replay-client';
 
 export type Session = {
@@ -25,7 +31,7 @@ export class Scheduler {
       vm,
       transport: 'http+sse',
       createdAt: new Date().toISOString(),
-      recordingId
+      recordingId,
     };
     this.active.set(session.id, session);
     return session;

@@ -159,9 +159,12 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
     pollInterval: 10000, // Refresh every 10 seconds
   });
 
-  const [createOperation, { loading: creatingOperation }] = useMutation(CREATE_OPERATION);
-  const [combineMeasures, { loading: combiningMeasures }] = useMutation(COMBINE_MEASURES);
-  const [runSimulation, { loading: runningSimulation }] = useMutation(RUN_SIMULATION);
+  const [createOperation, { loading: creatingOperation }] =
+    useMutation(CREATE_OPERATION);
+  const [combineMeasures, { loading: combiningMeasures }] =
+    useMutation(COMBINE_MEASURES);
+  const [runSimulation, { loading: runningSimulation }] =
+    useMutation(RUN_SIMULATION);
 
   // Real-time operation updates
   const { data: operationUpdate } = useSubscription(OPERATION_UPDATES, {
@@ -198,9 +201,13 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
       categories,
       riskLevels,
       averageEffectiveness:
-        activeMeasures.length > 0 ? totalEffectiveness / activeMeasures.length : 0,
+        activeMeasures.length > 0
+          ? totalEffectiveness / activeMeasures.length
+          : 0,
       unattributablePercentage:
-        activeMeasures.length > 0 ? (unattributableCount / activeMeasures.length) * 100 : 0,
+        activeMeasures.length > 0
+          ? (unattributableCount / activeMeasures.length) * 100
+          : 0,
     };
   }, [activeMeasures]);
 
@@ -226,15 +233,18 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
         const measure2 = activeMeasures[j];
 
         // Simple compatibility scoring based on category and risk level
-        const categoryCompatibility = measure1.category === measure2.category ? 0.8 : 0.3;
+        const categoryCompatibility =
+          measure1.category === measure2.category ? 0.8 : 0.3;
         const riskCompatibility =
           Math.abs(
-            (RISK_COLORS[measure1.riskLevel] ? 1 : 0) - (RISK_COLORS[measure2.riskLevel] ? 1 : 0),
+            (RISK_COLORS[measure1.riskLevel] ? 1 : 0) -
+              (RISK_COLORS[measure2.riskLevel] ? 1 : 0),
           ) < 2
             ? 0.7
             : 0.2;
 
-        const compatibilityScore = (categoryCompatibility + riskCompatibility) / 2;
+        const compatibilityScore =
+          (categoryCompatibility + riskCompatibility) / 2;
 
         if (compatibilityScore > 0.5) {
           edges.push({
@@ -278,7 +288,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
   // Event handlers
   const handleMeasureSelect = (measureId) => {
     setSelectedMeasures((prev) =>
-      prev.includes(measureId) ? prev.filter((id) => id !== measureId) : [...prev, measureId],
+      prev.includes(measureId)
+        ? prev.filter((id) => id !== measureId)
+        : [...prev, measureId],
     );
   };
 
@@ -338,7 +350,8 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">
-          Error loading data: {portfolioError?.message || operationsError?.message}
+          Error loading data:{' '}
+          {portfolioError?.message || operationsError?.message}
         </Alert>
       </Box>
     );
@@ -362,7 +375,8 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
             Active Measures Portfolio
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            Military-grade intelligence operations management and simulation platform
+            Military-grade intelligence operations management and simulation
+            platform
           </Typography>
         </Box>
         <Button
@@ -376,7 +390,10 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+        <Tabs
+          value={activeTab}
+          onChange={(e, newValue) => setActiveTab(newValue)}
+        >
           <Tab
             label={
               <Badge badgeContent={totalMeasures} color="primary">
@@ -449,7 +466,15 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
         </Grid>
 
         {/* Actions */}
-        <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+        <Box
+          sx={{
+            mb: 3,
+            display: 'flex',
+            gap: 2,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
@@ -532,7 +557,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
                       />
                       {(measure.effectivenessRating * 100).toFixed(1)}%
                     </TableCell>
-                    <TableCell>{(measure.unattributabilityScore * 100).toFixed(1)}%</TableCell>
+                    <TableCell>
+                      {(measure.unattributabilityScore * 100).toFixed(1)}%
+                    </TableCell>
                     <TableCell>
                       <IconButton size="small">
                         <VisibilityIcon />
@@ -566,8 +593,8 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
         </Typography>
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            Node size indicates effectiveness rating. Blue nodes are selected measures. Edges show
-            compatibility between measures.
+            Node size indicates effectiveness rating. Blue nodes are selected
+            measures. Edges show compatibility between measures.
           </Typography>
         </Box>
         <Box sx={{ height: 600, border: '1px solid #ccc' }}>
@@ -612,7 +639,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               </Typography>
               <Slider
                 value={tuners.proportionality}
-                onChange={(e, value) => setTuners({ ...tuners, proportionality: value })}
+                onChange={(e, value) =>
+                  setTuners({ ...tuners, proportionality: value })
+                }
                 min={0}
                 max={1}
                 step={0.01}
@@ -629,7 +658,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               </Typography>
               <Slider
                 value={tuners.riskTolerance}
-                onChange={(e, value) => setTuners({ ...tuners, riskTolerance: value })}
+                onChange={(e, value) =>
+                  setTuners({ ...tuners, riskTolerance: value })
+                }
                 min={0}
                 max={1}
                 step={0.01}
@@ -641,10 +672,14 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               />
             </Box>
             <Box>
-              <Typography gutterBottom>Ethical Index: {tuners.ethicalIndex.toFixed(2)}</Typography>
+              <Typography gutterBottom>
+                Ethical Index: {tuners.ethicalIndex.toFixed(2)}
+              </Typography>
               <Slider
                 value={tuners.ethicalIndex}
-                onChange={(e, value) => setTuners({ ...tuners, ethicalIndex: value })}
+                onChange={(e, value) =>
+                  setTuners({ ...tuners, ethicalIndex: value })
+                }
                 min={0}
                 max={1}
                 step={0.01}
@@ -657,7 +692,8 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
             </Box>
             <Box>
               <Typography gutterBottom>
-                Unattributability Requirement: {tuners.unattributabilityRequirement.toFixed(2)}
+                Unattributability Requirement:{' '}
+                {tuners.unattributabilityRequirement.toFixed(2)}
               </Typography>
               <Slider
                 value={tuners.unattributabilityRequirement}
@@ -703,14 +739,21 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
             <TextField
               label="Operation Name"
               value={newOperation.name}
-              onChange={(e) => setNewOperation({ ...newOperation, name: e.target.value })}
+              onChange={(e) =>
+                setNewOperation({ ...newOperation, name: e.target.value })
+              }
               fullWidth
               required
             />
             <TextField
               label="Description"
               value={newOperation.description}
-              onChange={(e) => setNewOperation({ ...newOperation, description: e.target.value })}
+              onChange={(e) =>
+                setNewOperation({
+                  ...newOperation,
+                  description: e.target.value,
+                })
+              }
               fullWidth
               multiline
               rows={3}
@@ -721,7 +764,10 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
               <Select
                 value={newOperation.classification}
                 onChange={(e) =>
-                  setNewOperation({ ...newOperation, classification: e.target.value })
+                  setNewOperation({
+                    ...newOperation,
+                    classification: e.target.value,
+                  })
                 }
                 label="Classification Level"
               >
@@ -739,7 +785,9 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {selectedMeasures.map((measureId) => {
-                    const measure = activeMeasures.find((m) => m.id === measureId);
+                    const measure = activeMeasures.find(
+                      (m) => m.id === measureId,
+                    );
                     return measure ? (
                       <Chip
                         key={measureId}
@@ -760,11 +808,18 @@ const PortfolioDashboard = ({ tuners: initialTuners }) => {
             onClick={() => {
               setOperationDialogOpen(false);
               // Here you would call createOperation mutation
-              console.log('Creating operation:', newOperation, 'with measures:', selectedMeasures);
+              console.log(
+                'Creating operation:',
+                newOperation,
+                'with measures:',
+                selectedMeasures,
+              );
             }}
             variant="contained"
             disabled={
-              !newOperation.name || !newOperation.description || selectedMeasures.length === 0
+              !newOperation.name ||
+              !newOperation.description ||
+              selectedMeasures.length === 0
             }
           >
             Create Operation

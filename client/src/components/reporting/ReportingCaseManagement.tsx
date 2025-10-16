@@ -16,7 +16,12 @@ interface CaseFile {
     | 'threat_hunting';
   status: 'draft' | 'active' | 'review' | 'approved' | 'closed' | 'archived';
   priority: 'low' | 'medium' | 'high' | 'critical';
-  classification: 'public' | 'internal' | 'confidential' | 'restricted' | 'top_secret';
+  classification:
+    | 'public'
+    | 'internal'
+    | 'confidential'
+    | 'restricted'
+    | 'top_secret';
   assignedTo: {
     primary: string;
     team: string[];
@@ -36,7 +41,14 @@ interface CaseFile {
   }>;
   evidence: Array<{
     id: string;
-    type: 'document' | 'media' | 'digital' | 'physical' | 'testimony' | 'log' | 'analysis';
+    type:
+      | 'document'
+      | 'media'
+      | 'digital'
+      | 'physical'
+      | 'testimony'
+      | 'log'
+      | 'analysis';
     name: string;
     source: string;
     hash?: string;
@@ -74,8 +86,19 @@ interface Report {
   template: string;
   caseId: string;
   status: 'draft' | 'review' | 'approved' | 'published' | 'archived';
-  audience: 'internal' | 'client' | 'legal' | 'executive' | 'technical' | 'public';
-  classification: 'public' | 'internal' | 'confidential' | 'restricted' | 'top_secret';
+  audience:
+    | 'internal'
+    | 'client'
+    | 'legal'
+    | 'executive'
+    | 'technical'
+    | 'public';
+  classification:
+    | 'public'
+    | 'internal'
+    | 'confidential'
+    | 'restricted'
+    | 'top_secret';
   sections: Array<{
     id: string;
     title: string;
@@ -143,7 +166,14 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  type: 'analysis' | 'collection' | 'review' | 'approval' | 'export' | 'followup' | 'compliance';
+  type:
+    | 'analysis'
+    | 'collection'
+    | 'review'
+    | 'approval'
+    | 'export'
+    | 'followup'
+    | 'compliance';
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'in_progress' | 'review' | 'completed' | 'cancelled';
   assignedTo: string;
@@ -229,10 +259,25 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
           deadline: new Date('2024-02-15'),
         },
         entities: [
-          { id: 'e1', type: 'organization', name: 'Pacific Holdings Ltd', role: 'subject' },
+          {
+            id: 'e1',
+            type: 'organization',
+            name: 'Pacific Holdings Ltd',
+            role: 'subject',
+          },
           { id: 'e2', type: 'person', name: 'Alex Morrison', role: 'subject' },
-          { id: 'e3', type: 'location', name: 'Zurich Office Complex', role: 'location' },
-          { id: 'e4', type: 'financial_account', name: 'Account #78429X', role: 'evidence' },
+          {
+            id: 'e3',
+            type: 'location',
+            name: 'Zurich Office Complex',
+            role: 'location',
+          },
+          {
+            id: 'e4',
+            type: 'financial_account',
+            name: 'Account #78429X',
+            role: 'evidence',
+          },
         ],
         evidence: [
           {
@@ -242,8 +287,16 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
             source: 'Financial Institution',
             hash: 'sha256:abc123def456',
             chainOfCustody: [
-              { timestamp: new Date('2024-01-12'), handler: 'John Smith', action: 'received' },
-              { timestamp: new Date('2024-01-13'), handler: 'Maria Rodriguez', action: 'analyzed' },
+              {
+                timestamp: new Date('2024-01-12'),
+                handler: 'John Smith',
+                action: 'received',
+              },
+              {
+                timestamp: new Date('2024-01-13'),
+                handler: 'Maria Rodriguez',
+                action: 'analyzed',
+              },
             ],
           },
           {
@@ -253,8 +306,16 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
             source: 'IT Forensics',
             hash: 'sha256:def789ghi012',
             chainOfCustody: [
-              { timestamp: new Date('2024-01-14'), handler: 'David Chen', action: 'extracted' },
-              { timestamp: new Date('2024-01-15'), handler: 'Sarah Johnson', action: 'reviewed' },
+              {
+                timestamp: new Date('2024-01-14'),
+                handler: 'David Chen',
+                action: 'extracted',
+              },
+              {
+                timestamp: new Date('2024-01-15'),
+                handler: 'Sarah Johnson',
+                action: 'reviewed',
+              },
             ],
           },
         ],
@@ -276,7 +337,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
       {
         id: 'case-002',
         title: 'Cybersecurity Incident Response - Data Breach',
-        description: 'Investigation into unauthorized data access and potential data exfiltration',
+        description:
+          'Investigation into unauthorized data access and potential data exfiltration',
         caseType: 'incident',
         status: 'review',
         priority: 'critical',
@@ -292,9 +354,24 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
           deadline: new Date('2024-02-05'),
         },
         entities: [
-          { id: 'e5', type: 'system', name: 'Corporate Database Server', role: 'subject' },
-          { id: 'e6', type: 'person', name: 'Unknown Attacker', role: 'subject' },
-          { id: 'e7', type: 'ip_address', name: '192.168.1.100', role: 'evidence' },
+          {
+            id: 'e5',
+            type: 'system',
+            name: 'Corporate Database Server',
+            role: 'subject',
+          },
+          {
+            id: 'e6',
+            type: 'person',
+            name: 'Unknown Attacker',
+            role: 'subject',
+          },
+          {
+            id: 'e7',
+            type: 'ip_address',
+            name: '192.168.1.100',
+            role: 'evidence',
+          },
         ],
         evidence: [
           {
@@ -303,7 +380,11 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
             name: 'System Access Logs',
             source: 'SIEM System',
             chainOfCustody: [
-              { timestamp: new Date('2024-01-21'), handler: 'Sarah Johnson', action: 'collected' },
+              {
+                timestamp: new Date('2024-01-21'),
+                handler: 'Sarah Johnson',
+                action: 'collected',
+              },
             ],
           },
         ],
@@ -311,7 +392,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
           {
             id: 'f2',
             title: 'Unauthorized Database Access',
-            description: 'Evidence of unauthorized access to customer database between 2-4 AM',
+            description:
+              'Evidence of unauthorized access to customer database between 2-4 AM',
             confidence: 92,
             impact: 'critical',
             category: 'security_breach',
@@ -338,7 +420,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
             id: 's1',
             title: 'Executive Summary',
             type: 'summary',
-            content: 'Investigation reveals significant financial irregularities...',
+            content:
+              'Investigation reveals significant financial irregularities...',
             order: 1,
             required: true,
           },
@@ -382,7 +465,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
       {
         id: 'task-001',
         title: 'Complete Financial Analysis',
-        description: 'Analyze bank statements and transaction patterns for suspicious activity',
+        description:
+          'Analyze bank statements and transaction patterns for suspicious activity',
         type: 'analysis',
         priority: 'high',
         status: 'in_progress',
@@ -395,7 +479,10 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
         checklist: [
           { item: 'Review Q4 bank statements', completed: true },
           { item: 'Identify suspicious transactions', completed: true },
-          { item: 'Cross-reference with business activities', completed: false },
+          {
+            item: 'Cross-reference with business activities',
+            completed: false,
+          },
           { item: 'Document findings', completed: false },
         ],
         created: new Date('2024-01-15'),
@@ -404,7 +491,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
       {
         id: 'task-002',
         title: 'Incident Response Report Review',
-        description: 'Review and approve the cybersecurity incident response report',
+        description:
+          'Review and approve the cybersecurity incident response report',
         type: 'review',
         priority: 'critical',
         status: 'pending',
@@ -466,7 +554,11 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
         audience: ['executive', 'client'],
         classification: ['internal', 'confidential'],
         customFields: [
-          { name: 'estimated_financial_impact', type: 'number', required: false },
+          {
+            name: 'estimated_financial_impact',
+            type: 'number',
+            required: false,
+          },
           {
             name: 'risk_level',
             type: 'select',
@@ -535,7 +627,14 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
             name: 'analysis_tools_used',
             type: 'multiselect',
             required: true,
-            options: ['EnCase', 'FTK', 'Autopsy', 'Volatility', 'Wireshark', 'Other'],
+            options: [
+              'EnCase',
+              'FTK',
+              'Autopsy',
+              'Volatility',
+              'Wireshark',
+              'Other',
+            ],
           },
         ],
       },
@@ -618,7 +717,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
         formats,
         timestamp: new Date(),
         downloadUrls: formats.map(
-          (format) => `https://reports.intelgraph.com/export/${reportId}.${format}`,
+          (format) =>
+            `https://reports.intelgraph.com/export/${reportId}.${format}`,
         ),
       };
 
@@ -654,9 +754,13 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
         searchTerm === '' ||
         caseFile.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         caseFile.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        caseFile.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesStatus = filterStatus === 'all' || caseFile.status === filterStatus;
-      const matchesType = filterType === 'all' || caseFile.caseType === filterType;
+        caseFile.tags.some((tag) =>
+          tag.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+      const matchesStatus =
+        filterStatus === 'all' || caseFile.status === filterStatus;
+      const matchesType =
+        filterType === 'all' || caseFile.caseType === filterType;
       return matchesSearch && matchesStatus && matchesType;
     });
   }, [cases, searchTerm, filterStatus, filterType]);
@@ -666,8 +770,11 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
       const matchesSearch =
         searchTerm === '' ||
         report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
+        report.tags.some((tag) =>
+          tag.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+      const matchesStatus =
+        filterStatus === 'all' || report.status === filterStatus;
       const matchesType = filterType === 'all' || report.type === filterType;
       return matchesSearch && matchesStatus && matchesType;
     });
@@ -679,7 +786,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
         searchTerm === '' ||
         task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
+      const matchesStatus =
+        filterStatus === 'all' || task.status === filterStatus;
       const matchesType = filterType === 'all' || task.type === filterType;
       return matchesSearch && matchesStatus && matchesType;
     });
@@ -699,11 +807,18 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
               <strong>{reports.length}</strong> Reports
             </span>
             <span className="stat">
-              <strong>{tasks.filter((t) => t.status !== 'completed').length}</strong> Active Tasks
+              <strong>
+                {tasks.filter((t) => t.status !== 'completed').length}
+              </strong>{' '}
+              Active Tasks
             </span>
             <span className="stat">
               <strong>
-                {cases.filter((c) => c.priority === 'critical' || c.priority === 'high').length}
+                {
+                  cases.filter(
+                    (c) => c.priority === 'critical' || c.priority === 'high',
+                  ).length
+                }
               </strong>{' '}
               High Priority
             </span>
@@ -815,7 +930,10 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
           <div className="cases-tab">
             <div className="tab-header">
               <h3>Case Files</h3>
-              <button className="primary-button" onClick={() => setShowNewCaseModal(true)}>
+              <button
+                className="primary-button"
+                onClick={() => setShowNewCaseModal(true)}
+              >
                 + New Case
               </button>
             </div>
@@ -837,15 +955,21 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                           <span className={`case-type ${caseFile.caseType}`}>
                             {caseFile.caseType.replace('_', ' ')}
                           </span>
-                          <span className={`priority-badge ${caseFile.priority}`}>
+                          <span
+                            className={`priority-badge ${caseFile.priority}`}
+                          >
                             {caseFile.priority}
                           </span>
                         </div>
-                        <div className={`status-indicator ${caseFile.status}`}></div>
+                        <div
+                          className={`status-indicator ${caseFile.status}`}
+                        ></div>
                       </div>
 
                       <div className="case-title">{caseFile.title}</div>
-                      <div className="case-description">{caseFile.description}</div>
+                      <div className="case-description">
+                        {caseFile.description}
+                      </div>
 
                       <div className="case-stats">
                         <div className="stat-item">
@@ -873,7 +997,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
 
                       <div className="case-timeline">
                         <div className="timeline-item">
-                          <strong>Updated:</strong> {caseFile.timeline.updated.toLocaleDateString()}
+                          <strong>Updated:</strong>{' '}
+                          {caseFile.timeline.updated.toLocaleDateString()}
                         </div>
                         {caseFile.timeline.deadline && (
                           <div className="timeline-item">
@@ -913,19 +1038,25 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                         <div className="case-id">#{caseFile.id}</div>
                       </div>
                       <div className="col-type">
-                        <span className={`case-type-badge ${caseFile.caseType}`}>
+                        <span
+                          className={`case-type-badge ${caseFile.caseType}`}
+                        >
                           {caseFile.caseType}
                         </span>
                       </div>
                       <div className="col-status">
-                        <span className={`status-badge ${caseFile.status}`}>{caseFile.status}</span>
+                        <span className={`status-badge ${caseFile.status}`}>
+                          {caseFile.status}
+                        </span>
                       </div>
                       <div className="col-priority">
                         <span className={`priority-badge ${caseFile.priority}`}>
                           {caseFile.priority}
                         </span>
                       </div>
-                      <div className="col-assignee">{caseFile.assignedTo.primary}</div>
+                      <div className="col-assignee">
+                        {caseFile.assignedTo.primary}
+                      </div>
                       <div className="col-updated">
                         {caseFile.timeline.updated.toLocaleDateString()}
                       </div>
@@ -940,34 +1071,47 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
 
               {viewMode === 'kanban' && (
                 <div className="kanban-board">
-                  {['draft', 'active', 'review', 'approved', 'closed'].map((status) => (
-                    <div key={status} className="kanban-column">
-                      <div className="column-header">
-                        <h4>{status.toUpperCase()}</h4>
-                        <span className="count">
-                          {filteredCases.filter((c) => c.status === status).length}
-                        </span>
-                      </div>
-                      <div className="column-cards">
-                        {filteredCases
-                          .filter((c) => c.status === status)
-                          .map((caseFile) => (
-                            <div key={caseFile.id} className="kanban-card">
-                              <div className="card-header">
-                                <span className={`priority-dot ${caseFile.priority}`}></span>
-                                <span className="case-type">{caseFile.caseType}</span>
+                  {['draft', 'active', 'review', 'approved', 'closed'].map(
+                    (status) => (
+                      <div key={status} className="kanban-column">
+                        <div className="column-header">
+                          <h4>{status.toUpperCase()}</h4>
+                          <span className="count">
+                            {
+                              filteredCases.filter((c) => c.status === status)
+                                .length
+                            }
+                          </span>
+                        </div>
+                        <div className="column-cards">
+                          {filteredCases
+                            .filter((c) => c.status === status)
+                            .map((caseFile) => (
+                              <div key={caseFile.id} className="kanban-card">
+                                <div className="card-header">
+                                  <span
+                                    className={`priority-dot ${caseFile.priority}`}
+                                  ></span>
+                                  <span className="case-type">
+                                    {caseFile.caseType}
+                                  </span>
+                                </div>
+                                <div className="card-title">
+                                  {caseFile.title}
+                                </div>
+                                <div className="card-assignee">
+                                  👤 {caseFile.assignedTo.primary}
+                                </div>
+                                <div className="card-stats">
+                                  <span>📋 {caseFile.findings.length}</span>
+                                  <span>🔍 {caseFile.evidence.length}</span>
+                                </div>
                               </div>
-                              <div className="card-title">{caseFile.title}</div>
-                              <div className="card-assignee">👤 {caseFile.assignedTo.primary}</div>
-                              <div className="card-stats">
-                                <span>📋 {caseFile.findings.length}</span>
-                                <span>🔍 {caseFile.evidence.length}</span>
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </div>
@@ -978,11 +1122,17 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                 <div className="panel-header">
                   <h3>{selectedCase.title}</h3>
                   <div className="panel-actions">
-                    <button className="action-button" onClick={() => setShowNewReportModal(true)}>
+                    <button
+                      className="action-button"
+                      onClick={() => setShowNewReportModal(true)}
+                    >
                       📄 Generate Report
                     </button>
                     <button className="action-button">✏️ Edit Case</button>
-                    <button className="close-button" onClick={() => setSelectedCase(null)}>
+                    <button
+                      className="close-button"
+                      onClick={() => setSelectedCase(null)}
+                    >
                       ✕
                     </button>
                   </div>
@@ -994,7 +1144,9 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                     <div className="info-grid">
                       <div className="info-item">
                         <label>Type:</label>
-                        <span className={`case-type-badge ${selectedCase.caseType}`}>
+                        <span
+                          className={`case-type-badge ${selectedCase.caseType}`}
+                        >
                           {selectedCase.caseType}
                         </span>
                       </div>
@@ -1006,13 +1158,17 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                       </div>
                       <div className="info-item">
                         <label>Priority:</label>
-                        <span className={`priority-badge ${selectedCase.priority}`}>
+                        <span
+                          className={`priority-badge ${selectedCase.priority}`}
+                        >
                           {selectedCase.priority}
                         </span>
                       </div>
                       <div className="info-item">
                         <label>Classification:</label>
-                        <span className={`classification-badge ${selectedCase.classification}`}>
+                        <span
+                          className={`classification-badge ${selectedCase.classification}`}
+                        >
                           {selectedCase.classification}
                         </span>
                       </div>
@@ -1023,13 +1179,16 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                     <h4>Team Assignment</h4>
                     <div className="team-details">
                       <div>
-                        <strong>Lead Investigator:</strong> {selectedCase.assignedTo.primary}
+                        <strong>Lead Investigator:</strong>{' '}
+                        {selectedCase.assignedTo.primary}
                       </div>
                       <div>
-                        <strong>Team Members:</strong> {selectedCase.assignedTo.team.join(', ')}
+                        <strong>Team Members:</strong>{' '}
+                        {selectedCase.assignedTo.team.join(', ')}
                       </div>
                       <div>
-                        <strong>Reviewers:</strong> {selectedCase.assignedTo.reviewers.join(', ')}
+                        <strong>Reviewers:</strong>{' '}
+                        {selectedCase.assignedTo.reviewers.join(', ')}
                       </div>
                     </div>
                   </div>
@@ -1040,15 +1199,23 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                       {selectedCase.findings.map((finding) => (
                         <div key={finding.id} className="finding-item">
                           <div className="finding-header">
-                            <span className="finding-title">{finding.title}</span>
+                            <span className="finding-title">
+                              {finding.title}
+                            </span>
                             <div className="finding-metrics">
-                              <span className="confidence">Confidence: {finding.confidence}%</span>
-                              <span className={`impact-badge ${finding.impact}`}>
+                              <span className="confidence">
+                                Confidence: {finding.confidence}%
+                              </span>
+                              <span
+                                className={`impact-badge ${finding.impact}`}
+                              >
                                 {finding.impact}
                               </span>
                             </div>
                           </div>
-                          <div className="finding-description">{finding.description}</div>
+                          <div className="finding-description">
+                            {finding.description}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1063,7 +1230,9 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                             <span className={`evidence-type ${evidence.type}`}>
                               {evidence.type}
                             </span>
-                            <span className="evidence-name">{evidence.name}</span>
+                            <span className="evidence-name">
+                              {evidence.name}
+                            </span>
                           </div>
                           <div className="evidence-details">
                             <div>
@@ -1071,12 +1240,13 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                             </div>
                             {evidence.hash && (
                               <div>
-                                <strong>Hash:</strong> <code>{evidence.hash}</code>
+                                <strong>Hash:</strong>{' '}
+                                <code>{evidence.hash}</code>
                               </div>
                             )}
                             <div>
-                              <strong>Chain of Custody:</strong> {evidence.chainOfCustody.length}{' '}
-                              entries
+                              <strong>Chain of Custody:</strong>{' '}
+                              {evidence.chainOfCustody.length} entries
                             </div>
                           </div>
                         </div>
@@ -1094,7 +1264,10 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
           <div className="reports-tab">
             <div className="tab-header">
               <h3>Generated Reports</h3>
-              <button className="primary-button" onClick={() => setShowNewReportModal(true)}>
+              <button
+                className="primary-button"
+                onClick={() => setShowNewReportModal(true)}
+              >
                 + Generate Report
               </button>
             </div>
@@ -1108,10 +1281,16 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                 >
                   <div className="report-header">
                     <div className="report-meta">
-                      <span className={`report-type ${report.type}`}>{report.type}</span>
-                      <span className={`status-badge ${report.status}`}>{report.status}</span>
+                      <span className={`report-type ${report.type}`}>
+                        {report.type}
+                      </span>
+                      <span className={`status-badge ${report.status}`}>
+                        {report.status}
+                      </span>
                     </div>
-                    <div className={`audience-badge ${report.audience}`}>{report.audience}</div>
+                    <div className={`audience-badge ${report.audience}`}>
+                      {report.audience}
+                    </div>
                   </div>
 
                   <div className="report-title">{report.title}</div>
@@ -1119,13 +1298,15 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                   <div className="report-info">
                     <div className="info-item">
                       <strong>Case:</strong>{' '}
-                      {cases.find((c) => c.id === report.caseId)?.title || 'N/A'}
+                      {cases.find((c) => c.id === report.caseId)?.title ||
+                        'N/A'}
                     </div>
                     <div className="info-item">
                       <strong>Author:</strong> {report.author.primary}
                     </div>
                     <div className="info-item">
-                      <strong>Updated:</strong> {report.timeline.updated.toLocaleDateString()}
+                      <strong>Updated:</strong>{' '}
+                      {report.timeline.updated.toLocaleDateString()}
                     </div>
                   </div>
 
@@ -1147,7 +1328,10 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                   <div className="report-exports">
                     <strong>Exports:</strong>
                     {report.exports.map((exp, index) => (
-                      <span key={index} className={`export-badge ${exp.format}`}>
+                      <span
+                        key={index}
+                        className={`export-badge ${exp.format}`}
+                      >
                         {exp.format.toUpperCase()}
                       </span>
                     ))}
@@ -1176,11 +1360,17 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                 <div className="panel-header">
                   <h3>{selectedReport.title}</h3>
                   <div className="panel-actions">
-                    <button className="action-button" onClick={() => setShowExportModal(true)}>
+                    <button
+                      className="action-button"
+                      onClick={() => setShowExportModal(true)}
+                    >
                       📤 Export Report
                     </button>
                     <button className="action-button">✏️ Edit Report</button>
-                    <button className="close-button" onClick={() => setSelectedReport(null)}>
+                    <button
+                      className="close-button"
+                      onClick={() => setSelectedReport(null)}
+                    >
                       ✕
                     </button>
                   </div>
@@ -1192,25 +1382,33 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                     <div className="info-grid">
                       <div className="info-item">
                         <label>Type:</label>
-                        <span className={`report-type-badge ${selectedReport.type}`}>
+                        <span
+                          className={`report-type-badge ${selectedReport.type}`}
+                        >
                           {selectedReport.type}
                         </span>
                       </div>
                       <div className="info-item">
                         <label>Status:</label>
-                        <span className={`status-badge ${selectedReport.status}`}>
+                        <span
+                          className={`status-badge ${selectedReport.status}`}
+                        >
                           {selectedReport.status}
                         </span>
                       </div>
                       <div className="info-item">
                         <label>Audience:</label>
-                        <span className={`audience-badge ${selectedReport.audience}`}>
+                        <span
+                          className={`audience-badge ${selectedReport.audience}`}
+                        >
                           {selectedReport.audience}
                         </span>
                       </div>
                       <div className="info-item">
                         <label>Classification:</label>
-                        <span className={`classification-badge ${selectedReport.classification}`}>
+                        <span
+                          className={`classification-badge ${selectedReport.classification}`}
+                        >
                           {selectedReport.classification}
                         </span>
                       </div>
@@ -1225,10 +1423,18 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                         .map((section) => (
                           <div key={section.id} className="section-item">
                             <div className="section-header">
-                              <span className="section-order">{section.order}</span>
-                              <span className="section-title">{section.title}</span>
-                              <span className={`section-type ${section.type}`}>{section.type}</span>
-                              {section.required && <span className="required-badge">Required</span>}
+                              <span className="section-order">
+                                {section.order}
+                              </span>
+                              <span className="section-title">
+                                {section.title}
+                              </span>
+                              <span className={`section-type ${section.type}`}>
+                                {section.type}
+                              </span>
+                              {section.required && (
+                                <span className="required-badge">Required</span>
+                              )}
                             </div>
                             <div className="section-preview">
                               {section.content.substring(0, 150)}...
@@ -1252,7 +1458,9 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                           </span>
                           <span className="export-version">v{exp.version}</span>
                           {exp.downloadUrl && (
-                            <button className="download-button">📥 Download</button>
+                            <button className="download-button">
+                              📥 Download
+                            </button>
                           )}
                         </div>
                       ))}
@@ -1277,10 +1485,16 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                 <div key={task.id} className="task-card">
                   <div className="task-header">
                     <div className="task-meta">
-                      <span className={`task-type ${task.type}`}>{task.type}</span>
-                      <span className={`priority-badge ${task.priority}`}>{task.priority}</span>
+                      <span className={`task-type ${task.type}`}>
+                        {task.type}
+                      </span>
+                      <span className={`priority-badge ${task.priority}`}>
+                        {task.priority}
+                      </span>
                     </div>
-                    <span className={`status-indicator ${task.status}`}>{task.status}</span>
+                    <span className={`status-indicator ${task.status}`}>
+                      {task.status}
+                    </span>
                   </div>
 
                   <div className="task-title">{task.title}</div>
@@ -1291,7 +1505,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                       <strong>Assigned to:</strong> {task.assignedTo}
                     </div>
                     <div className="detail-item">
-                      <strong>Deadline:</strong> {task.deadline.toLocaleDateString()}
+                      <strong>Deadline:</strong>{' '}
+                      {task.deadline.toLocaleDateString()}
                     </div>
                     <div className="detail-item">
                       <strong>Progress:</strong>
@@ -1304,8 +1519,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                         ></div>
                       </div>
                       <span className="progress-text">
-                        {task.checklist.filter((item) => item.completed).length} /{' '}
-                        {task.checklist.length}
+                        {task.checklist.filter((item) => item.completed).length}{' '}
+                        / {task.checklist.length}
                       </span>
                     </div>
                   </div>
@@ -1314,14 +1529,20 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                     <h5>Checklist:</h5>
                     {task.checklist.slice(0, 3).map((item, index) => (
                       <div key={index} className="checklist-item">
-                        <span className={`checkbox ${item.completed ? 'checked' : ''}`}>
+                        <span
+                          className={`checkbox ${item.completed ? 'checked' : ''}`}
+                        >
                           {item.completed ? '✓' : '☐'}
                         </span>
-                        <span className={item.completed ? 'completed' : ''}>{item.item}</span>
+                        <span className={item.completed ? 'completed' : ''}>
+                          {item.item}
+                        </span>
                       </div>
                     ))}
                     {task.checklist.length > 3 && (
-                      <div className="checklist-more">+{task.checklist.length - 3} more items</div>
+                      <div className="checklist-more">
+                        +{task.checklist.length - 3} more items
+                      </div>
                     )}
                   </div>
 
@@ -1331,7 +1552,9 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                         {task.actualHours}h / {task.estimatedHours}h
                       </span>
                     )}
-                    {!task.actualHours && <span>Est. {task.estimatedHours}h</span>}
+                    {!task.actualHours && (
+                      <span>Est. {task.estimatedHours}h</span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1351,24 +1574,30 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
               {templates.map((template) => (
                 <div key={template.id} className="template-card">
                   <div className="template-header">
-                    <span className={`template-type ${template.type}`}>{template.type}</span>
+                    <span className={`template-type ${template.type}`}>
+                      {template.type}
+                    </span>
                   </div>
 
                   <div className="template-title">{template.name}</div>
-                  <div className="template-description">{template.description}</div>
+                  <div className="template-description">
+                    {template.description}
+                  </div>
 
                   <div className="template-info">
                     <div className="info-item">
                       <strong>Sections:</strong> {template.sections.length}
                       <span className="required-count">
-                        ({template.sections.filter((s) => s.required).length} required)
+                        ({template.sections.filter((s) => s.required).length}{' '}
+                        required)
                       </span>
                     </div>
                     <div className="info-item">
                       <strong>Audience:</strong> {template.audience.join(', ')}
                     </div>
                     <div className="info-item">
-                      <strong>Classification:</strong> {template.classification.join(', ')}
+                      <strong>Classification:</strong>{' '}
+                      {template.classification.join(', ')}
                     </div>
                   </div>
 
@@ -1377,7 +1606,9 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                     {template.sections.slice(0, 4).map((section) => (
                       <div key={section.id} className="section-preview-item">
                         <span className="section-title">{section.title}</span>
-                        {section.required && <span className="required-indicator">*</span>}
+                        {section.required && (
+                          <span className="required-indicator">*</span>
+                        )}
                       </div>
                     ))}
                     {template.sections.length > 4 && (
@@ -1432,7 +1663,9 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                 <div className="metric-card">
                   <div className="metric-value">
                     {Math.round(
-                      (tasks.filter((t) => t.status === 'completed').length / tasks.length) * 100,
+                      (tasks.filter((t) => t.status === 'completed').length /
+                        tasks.length) *
+                        100,
                     )}
                     %
                   </div>
@@ -1442,7 +1675,8 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                 <div className="metric-card">
                   <div className="metric-value">
                     {Math.round(
-                      reports.reduce((acc, r) => acc + r.analytics.views, 0) / reports.length,
+                      reports.reduce((acc, r) => acc + r.analytics.views, 0) /
+                        reports.length,
                     )}
                   </div>
                   <div className="metric-label">Avg Report Views</div>
@@ -1455,8 +1689,12 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                   <h4>Case Status Distribution</h4>
                   <div className="status-chart">
                     {['active', 'review', 'closed', 'draft'].map((status) => {
-                      const count = cases.filter((c) => c.status === status).length;
-                      const percentage = Math.round((count / cases.length) * 100);
+                      const count = cases.filter(
+                        (c) => c.status === status,
+                      ).length;
+                      const percentage = Math.round(
+                        (count / cases.length) * 100,
+                      );
                       return (
                         <div key={status} className="status-bar">
                           <div className="bar-label">
@@ -1481,12 +1719,18 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                   <h4>Priority Distribution</h4>
                   <div className="priority-chart">
                     {['critical', 'high', 'medium', 'low'].map((priority) => {
-                      const count = cases.filter((c) => c.priority === priority).length;
-                      const percentage = Math.round((count / cases.length) * 100);
+                      const count = cases.filter(
+                        (c) => c.priority === priority,
+                      ).length;
+                      const percentage = Math.round(
+                        (count / cases.length) * 100,
+                      );
                       return (
                         <div key={priority} className="priority-item">
                           <span className={`priority-dot ${priority}`}></span>
-                          <span className="priority-label">{priority.toUpperCase()}</span>
+                          <span className="priority-label">
+                            {priority.toUpperCase()}
+                          </span>
                           <span className="priority-count">
                             {count} ({percentage}%)
                           </span>
@@ -1521,9 +1765,15 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                 <div className="chart-section">
                   <h4>Team Workload</h4>
                   <div className="workload-chart">
-                    {Array.from(new Set(cases.map((c) => c.assignedTo.primary))).map((assignee) => {
-                      const assignedCases = cases.filter((c) => c.assignedTo.primary === assignee);
-                      const activeCases = assignedCases.filter((c) => c.status === 'active').length;
+                    {Array.from(
+                      new Set(cases.map((c) => c.assignedTo.primary)),
+                    ).map((assignee) => {
+                      const assignedCases = cases.filter(
+                        (c) => c.assignedTo.primary === assignee,
+                      );
+                      const activeCases = assignedCases.filter(
+                        (c) => c.status === 'active',
+                      ).length;
                       return (
                         <div key={assignee} className="workload-item">
                           <div className="assignee-name">{assignee}</div>
@@ -1531,10 +1781,14 @@ const ReportingCaseManagement: React.FC<ReportingCaseManagementProps> = ({
                             <div className="bar-container">
                               <div
                                 className="bar-fill workload"
-                                style={{ width: `${Math.min((activeCases / 5) * 100, 100)}%` }}
+                                style={{
+                                  width: `${Math.min((activeCases / 5) * 100, 100)}%`,
+                                }}
                               ></div>
                             </div>
-                            <span className="workload-count">{activeCases} active cases</span>
+                            <span className="workload-count">
+                              {activeCases} active cases
+                            </span>
                           </div>
                         </div>
                       );

@@ -49,7 +49,10 @@ class MockMediaRecorder {
     this.onstop?.();
   }
 }
-Object.defineProperty(window, 'MediaRecorder', { writable: true, value: MockMediaRecorder });
+Object.defineProperty(window, 'MediaRecorder', {
+  writable: true,
+  value: MockMediaRecorder,
+});
 
 Element.prototype.scrollTo = jest.fn();
 

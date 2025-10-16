@@ -39,7 +39,13 @@ policy:
 
     - name: xai/grok
       class: hosted
-      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
+      quota:
+        {
+          type: rolling,
+          window: header_driven,
+          unit: requests,
+          cap: from_headers,
+        }
       loa_max: 1
 
     - name: perplexity/api
@@ -54,7 +60,13 @@ policy:
 
     - name: venice/api
       class: hosted
-      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
+      quota:
+        {
+          type: rolling,
+          window: header_driven,
+          unit: requests,
+          cap: from_headers,
+        }
       loa_max: 0
 
   routing_rules:

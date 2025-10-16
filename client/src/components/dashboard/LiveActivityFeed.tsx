@@ -161,22 +161,44 @@ export default function LiveActivityFeed() {
         onClick={handleToggleExpand}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Badge badgeContent={newActivityCount} color="error" invisible={newActivityCount === 0}>
+          <Badge
+            badgeContent={newActivityCount}
+            color="error"
+            invisible={newActivityCount === 0}
+          >
             <TimelineIcon />
           </Badge>
           <Typography variant="h6">Live Activity</Typography>
           {loading && (
-            <Chip label="Connecting..." size="small" color="warning" variant="outlined" />
+            <Chip
+              label="Connecting..."
+              size="small"
+              color="warning"
+              variant="outlined"
+            />
           )}
-          {error && <Chip label="Offline" size="small" color="error" variant="outlined" />}
+          {error && (
+            <Chip
+              label="Offline"
+              size="small"
+              color="error"
+              variant="outlined"
+            />
+          )}
         </Box>
-        <IconButton size="small">{isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+        <IconButton size="small">
+          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </IconButton>
       </Box>
 
       <Collapse in={isExpanded}>
         <Box sx={{ pb: 2 }}>
           {activities.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ p: 2, textAlign: 'center' }}
+            >
               No recent activity
             </Typography>
           ) : (
@@ -188,8 +210,17 @@ export default function LiveActivityFeed() {
                   </ListItemIcon>
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                        <Typography variant="body2">{activity.message}</Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {activity.message}
+                        </Typography>
                         <Chip
                           label={activity.type.toLowerCase().replace('_', ' ')}
                           size="small"
@@ -199,7 +230,14 @@ export default function LiveActivityFeed() {
                       </Box>
                     }
                     secondary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mt: 0.5,
+                        }}
+                      >
                         <Typography variant="caption" color="text.secondary">
                           {activity.actor.name}
                         </Typography>

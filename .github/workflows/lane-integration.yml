@@ -2,10 +2,10 @@ name: Integration Lane
 on:
   pull_request:
     paths:
-      - "server/**"
-      - "tests/**"
-      - "Developer/summit-jest/**"
-      - ".github/workflows/lane-integration.yml"
+      - 'server/**'
+      - 'tests/**'
+      - 'Developer/summit-jest/**'
+      - '.github/workflows/lane-integration.yml'
   workflow_dispatch:
 
 jobs:
@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     env:
-      CI: "true"
-      NODE_OPTIONS: "--max-old-space-size=3072"
+      CI: 'true'
+      NODE_OPTIONS: '--max-old-space-size=3072'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
       # Safe defaults so tests won't choke on missing secrets/services:
       NEO4J_PASSWORD: testpassword
       NEO4J_AUTH: neo4j/testpassword
       # Block egress by default; tests must stub:
-      BLOCK_EGRESS: "1"
+      BLOCK_EGRESS: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20.11.x"
+          node-version: '20.11.x'
 
       - name: Install deps
         run: pnpm i --no-frozen-lockfile

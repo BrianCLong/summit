@@ -49,7 +49,6 @@ class EvidenceBundleGenerator {
       console.log(`✅ Evidence bundle generated at: ${this.bundlePath}`);
       console.log('📦 Bundle contents:');
       await this.listBundleContents();
-
     } catch (error) {
       console.error('❌ Evidence bundle generation failed:', error.message);
       process.exit(1);
@@ -83,7 +82,7 @@ class EvidenceBundleGenerator {
       console.log('  🧪 Running k6 performance tests...');
       const k6Output = execSync(
         'k6 run tests/k6/api-performance.js --out json=k6-results.json',
-        { encoding: 'utf8', timeout: 300000 }
+        { encoding: 'utf8', timeout: 300000 },
       );
 
       // Read k6 results
@@ -108,9 +107,12 @@ class EvidenceBundleGenerator {
         error_rate_pct: (k6Results.slo_validation?.error_rate || 0.008) * 100,
       },
       slo_compliance: {
-        read_performance: (k6Results.slo_validation?.entity_by_id_p95_ms || 280) < 350,
-        write_performance: (k6Results.slo_validation?.write_p95_ms || 450) < 700,
-        path_performance: (k6Results.slo_validation?.path_between_p95_ms || 850) < 1200,
+        read_performance:
+          (k6Results.slo_validation?.entity_by_id_p95_ms || 280) < 350,
+        write_performance:
+          (k6Results.slo_validation?.write_p95_ms || 450) < 700,
+        path_performance:
+          (k6Results.slo_validation?.path_between_p95_ms || 850) < 1200,
         error_rate: (k6Results.slo_validation?.error_rate || 0.008) < 0.02,
       },
       ingest_performance: {
@@ -122,12 +124,18 @@ class EvidenceBundleGenerator {
     this.artifacts.slos = sloValidation;
     await this.writeJSON('slo-validation.json', sloValidation);
 
-    const overallCompliance = Object.values(sloValidation.slo_compliance).every(v => v);
-    console.log(`  ${overallCompliance ? '✅' : '❌'} SLO compliance: ${overallCompliance ? 'PASSED' : 'FAILED'}`);
+    const overallCompliance = Object.values(sloValidation.slo_compliance).every(
+      (v) => v,
+    );
+    console.log(
+      `  ${overallCompliance ? '✅' : '❌'} SLO compliance: ${overallCompliance ? 'PASSED' : 'FAILED'}`,
+    );
 
     // Log individual SLOs
     Object.entries(sloValidation.slo_compliance).forEach(([key, passed]) => {
-      console.log(`    ${passed ? '✅' : '❌'} ${key}: ${passed ? 'PASS' : 'FAIL'}`);
+      console.log(
+        `    ${passed ? '✅' : '❌'} ${key}: ${passed ? 'PASS' : 'FAIL'}`,
+      );
     });
   }
 
@@ -140,7 +148,7 @@ class EvidenceBundleGenerator {
       vulnerability_scan: await this.runSecurityScan(),
       oidc_configuration: await this.validateOIDCConfig(),
       encryption_at_rest: true, // Mock - TODO: Validate actual encryption
-      network_isolation: true,   // Mock - TODO: Validate network policies
+      network_isolation: true, // Mock - TODO: Validate network policies
     };
 
     this.artifacts.security = security;
@@ -184,10 +192,16 @@ class EvidenceBundleGenerator {
         'evidence-bundle',
         '*.log',
       ]),
-      docker_configs: this.calculateFileHash('deploy/compose/docker-compose.dev.yml'),
+      docker_configs: this.calculateFileHash(
+        'deploy/compose/docker-compose.dev.yml',
+      ),
       k6_tests: this.calculateFileHash('tests/k6/api-performance.js'),
-      opa_policies: this.calculateFileHash('deploy/compose/policies/intelgraph.rego'),
-      graphql_schema: this.calculateFileHash('server/src/graphql/intelgraph/schema.ts'),
+      opa_policies: this.calculateFileHash(
+        'deploy/compose/policies/intelgraph.rego',
+      ),
+      graphql_schema: this.calculateFileHash(
+        'server/src/graphql/intelgraph/schema.ts',
+      ),
     };
 
     this.artifacts.artifact_hashes = hashes;
@@ -220,7 +234,9 @@ class EvidenceBundleGenerator {
         ],
 
         compliance_status: {
-          technical_slos: Object.values(this.artifacts.slos?.slo_compliance || {}).every(v => v),
+          technical_slos: Object.values(
+            this.artifacts.slos?.slo_compliance || {},
+          ).every((v) => v),
           security_requirements: true,
           data_residency: true, // US-only enforcement
           cost_guardrails: true, // Within $18k/mo infrastructure budget
@@ -253,7 +269,9 @@ class EvidenceBundleGenerator {
       // Acceptance Criteria
       acceptance_criteria: {
         e2e_slice_operational: true,
-        slo_compliance: Object.values(this.artifacts.slos?.slo_compliance || {}).every(v => v),
+        slo_compliance: Object.values(
+          this.artifacts.slos?.slo_compliance || {},
+        ).every((v) => v),
         security_posture: true,
         cost_efficiency: true,
         documentation_complete: true,
@@ -282,11 +300,16 @@ class EvidenceBundleGenerator {
     };
 
     await this.writeJSON('EVIDENCE_BUNDLE_SUMMARY.json', summary);
-    await this.writeMarkdown('EVIDENCE_BUNDLE_SUMMARY.md', this.formatSummaryAsMarkdown(summary));
+    await this.writeMarkdown(
+      'EVIDENCE_BUNDLE_SUMMARY.md',
+      this.formatSummaryAsMarkdown(summary),
+    );
 
     console.log('  ✅ Summary report generated');
     console.log(`\n🎯 Sprint 0 Status: ${summary.sprint_0_status}`);
-    console.log(`📊 Overall Acceptance: ${Object.values(summary.acceptance_criteria).every(v => v) ? 'READY ✅' : 'PENDING ⏳'}`);
+    console.log(
+      `📊 Overall Acceptance: ${Object.values(summary.acceptance_criteria).every((v) => v) ? 'READY ✅' : 'PENDING ⏳'}`,
+    );
   }
 
   // Helper methods
@@ -300,7 +323,9 @@ class EvidenceBundleGenerator {
 
   getGitBranch() {
     try {
-      return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+      return execSync('git rev-parse --abbrev-ref HEAD', {
+        encoding: 'utf8',
+      }).trim();
     } catch {
       return 'unknown';
     }
@@ -316,12 +341,15 @@ class EvidenceBundleGenerator {
 
   calculateFileHash(filePath) {
     try {
-      import('fs').then(fsModule => {
+      import('fs').then((fsModule) => {
         const content = fsModule.readFileSync(filePath);
         return crypto.createHash('sha256').update(content).digest('hex');
       });
       // Fallback synchronous version
-      const content = crypto.createHash('sha256').update(filePath + Date.now()).digest('hex');
+      const content = crypto
+        .createHash('sha256')
+        .update(filePath + Date.now())
+        .digest('hex');
       return content.substring(0, 16);
     } catch {
       return 'file-not-found';
@@ -331,15 +359,23 @@ class EvidenceBundleGenerator {
   calculateDirectoryHash(dirPath, exclude = []) {
     // Simplified directory hashing - in production, use more sophisticated approach
     const timestamp = new Date().toISOString();
-    return crypto.createHash('sha256').update(`${dirPath}-${timestamp}`).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(`${dirPath}-${timestamp}`)
+      .digest('hex')
+      .substring(0, 16);
   }
 
   async collectWorkflowFiles() {
     const workflowDir = '.github/workflows';
     try {
       const files = await fs.readdir(workflowDir);
-      return files.filter(f => f.endsWith('.yml') || f.endsWith('.yaml'))
-                 .map(f => ({ file: f, hash: this.calculateFileHash(path.join(workflowDir, f)) }));
+      return files
+        .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
+        .map((f) => ({
+          file: f,
+          hash: this.calculateFileHash(path.join(workflowDir, f)),
+        }));
     } catch {
       return [];
     }
@@ -352,7 +388,7 @@ class EvidenceBundleGenerator {
       'deploy/compose/prometheus.yml',
     ];
 
-    return configs.map(config => ({
+    return configs.map((config) => ({
       file: config,
       hash: this.calculateFileHash(config),
     }));
@@ -360,11 +396,15 @@ class EvidenceBundleGenerator {
 
   async collectOPAPolicies() {
     try {
-      const policyContent = await fs.readFile('deploy/compose/policies/intelgraph.rego', 'utf8');
+      const policyContent = await fs.readFile(
+        'deploy/compose/policies/intelgraph.rego',
+        'utf8',
+      );
       return {
         policy_file: 'intelgraph.rego',
         hash: crypto.createHash('sha256').update(policyContent).digest('hex'),
-        rules_count: (policyContent.match(/^[a-zA-Z_][a-zA-Z0-9_]* :=/gm) || []).length,
+        rules_count: (policyContent.match(/^[a-zA-Z_][a-zA-Z0-9_]* :=/gm) || [])
+          .length,
       };
     } catch {
       return { error: 'Policy file not found' };
@@ -488,19 +528,24 @@ class EvidenceBundleGenerator {
 
 ## Key Achievements
 
-${summary.executive_summary.key_achievements.map(achievement => `- ${achievement}`).join('\n')}
+${summary.executive_summary.key_achievements.map((achievement) => `- ${achievement}`).join('\n')}
 
 ## Acceptance Criteria Status
 
-${Object.entries(summary.acceptance_criteria).map(([criteria, status]) =>
-  `- **${criteria}**: ${status ? '✅ PASS' : '❌ FAIL'}`
-).join('\n')}
+${Object.entries(summary.acceptance_criteria)
+  .map(
+    ([criteria, status]) =>
+      `- **${criteria}**: ${status ? '✅ PASS' : '❌ FAIL'}`,
+  )
+  .join('\n')}
 
 ## Performance SLO Validation
 
-${Object.entries(summary.technical_evidence.performance_validation.slo_compliance).map(([slo, met]) =>
-  `- **${slo}**: ${met ? '✅ MET' : '❌ NOT MET'}`
-).join('\n')}
+${Object.entries(
+  summary.technical_evidence.performance_validation.slo_compliance,
+)
+  .map(([slo, met]) => `- **${slo}**: ${met ? '✅ MET' : '❌ NOT MET'}`)
+  .join('\n')}
 
 ## Security Compliance
 
@@ -512,18 +557,18 @@ ${Object.entries(summary.technical_evidence.performance_validation.slo_complianc
 
 ## Evidence Artifacts
 
-${Object.entries(summary.evidence_artifacts).map(([key, file]) =>
-  `- **${key}**: \`${file}\``
-).join('\n')}
+${Object.entries(summary.evidence_artifacts)
+  .map(([key, file]) => `- **${key}**: \`${file}\``)
+  .join('\n')}
 
 ## Next Steps
 
-${summary.next_steps.map(step => `1. ${step}`).join('\n')}
+${summary.next_steps.map((step) => `1. ${step}`).join('\n')}
 
 ---
 
 **Evidence Bundle Version:** ${summary.evidence_bundle_version}
-**Validation Status:** ${Object.values(summary.acceptance_criteria).every(v => v) ? '✅ READY FOR ACCEPTANCE' : '⏳ PENDING'}
+**Validation Status:** ${Object.values(summary.acceptance_criteria).every((v) => v) ? '✅ READY FOR ACCEPTANCE' : '⏳ PENDING'}
 `;
   }
 

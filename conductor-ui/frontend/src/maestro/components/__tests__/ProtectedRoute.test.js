@@ -8,7 +8,10 @@ jest.mock('../../contexts/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
 // Mock AuthLogin component as it's a dependency
-jest.mock('../../pages/AuthLogin', () => () => _jsx('div', { children: 'AuthLogin Component' }));
+jest.mock(
+  '../../pages/AuthLogin',
+  () => () => _jsx('div', { children: 'AuthLogin Component' }),
+);
 const mockUseAuth = useAuth;
 const TestPage = () => _jsx('div', { children: 'Protected Content' });
 const Fallback403 = () => _jsx('div', { children: '403 Forbidden' });
@@ -33,7 +36,9 @@ describe('ProtectedRoute', () => {
       hasTenantAccess: jest.fn(),
     });
     render(
-      _jsx(BrowserRouter, { children: _jsx(ProtectedRoute, { children: _jsx(TestPage, {}) }) }),
+      _jsx(BrowserRouter, {
+        children: _jsx(ProtectedRoute, { children: _jsx(TestPage, {}) }),
+      }),
     );
     expect(screen.getByText('Authenticating...')).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
@@ -54,14 +59,21 @@ describe('ProtectedRoute', () => {
       hasTenantAccess: jest.fn(),
     });
     render(
-      _jsx(BrowserRouter, { children: _jsx(ProtectedRoute, { children: _jsx(TestPage, {}) }) }),
+      _jsx(BrowserRouter, {
+        children: _jsx(ProtectedRoute, { children: _jsx(TestPage, {}) }),
+      }),
     );
     expect(screen.getByText('AuthLogin Component')).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
   it('renders protected content when authenticated and no roles/tenant required', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: [], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: [],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -75,14 +87,21 @@ describe('ProtectedRoute', () => {
       hasTenantAccess: jest.fn(() => true),
     });
     render(
-      _jsx(BrowserRouter, { children: _jsx(ProtectedRoute, { children: _jsx(TestPage, {}) }) }),
+      _jsx(BrowserRouter, {
+        children: _jsx(ProtectedRoute, { children: _jsx(TestPage, {}) }),
+      }),
     );
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
     expect(screen.queryByText('AuthLogin Component')).not.toBeInTheDocument();
   });
   it('renders 403 for role-denied access', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['viewer'], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['viewer'],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -97,18 +116,28 @@ describe('ProtectedRoute', () => {
     });
     render(
       _jsx(BrowserRouter, {
-        children: _jsx(ProtectedRoute, { roles: ['admin'], children: _jsx(TestPage, {}) }),
+        children: _jsx(ProtectedRoute, {
+          roles: ['admin'],
+          children: _jsx(TestPage, {}),
+        }),
       }),
     );
     expect(screen.getByText('Access Denied')).toBeInTheDocument();
     expect(
-      screen.getByText(/You don't have the required role\(s\) to access this resource./i),
+      screen.getByText(
+        /You don't have the required role\(s\) to access this resource./i,
+      ),
     ).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
   it('renders fallback component for role-denied access if provided', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['viewer'], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['viewer'],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -156,11 +185,16 @@ describe('ProtectedRoute', () => {
     });
     render(
       _jsx(BrowserRouter, {
-        children: _jsx(ProtectedRoute, { tenant: 'tenantB', children: _jsx(TestPage, {}) }),
+        children: _jsx(ProtectedRoute, {
+          tenant: 'tenantB',
+          children: _jsx(TestPage, {}),
+        }),
       }),
     );
     expect(screen.getByText('Tenant Access Required')).toBeInTheDocument();
-    expect(screen.getByText(/You don't have access to tenant/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/You don't have access to tenant/i),
+    ).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
   it('renders fallback component for tenant-denied access if provided', () => {
@@ -194,11 +228,18 @@ describe('ProtectedRoute', () => {
       }),
     );
     expect(screen.getByText('403 Forbidden')).toBeInTheDocument();
-    expect(screen.queryByText('Tenant Access Required')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Tenant Access Required'),
+    ).not.toBeInTheDocument();
   });
   it('renders protected content when authenticated and authorized by role', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['admin'], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['admin'],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -213,7 +254,10 @@ describe('ProtectedRoute', () => {
     });
     render(
       _jsx(BrowserRouter, {
-        children: _jsx(ProtectedRoute, { roles: ['admin'], children: _jsx(TestPage, {}) }),
+        children: _jsx(ProtectedRoute, {
+          roles: ['admin'],
+          children: _jsx(TestPage, {}),
+        }),
       }),
     );
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
@@ -241,7 +285,10 @@ describe('ProtectedRoute', () => {
     });
     render(
       _jsx(BrowserRouter, {
-        children: _jsx(ProtectedRoute, { tenant: 'tenantB', children: _jsx(TestPage, {}) }),
+        children: _jsx(ProtectedRoute, {
+          tenant: 'tenantB',
+          children: _jsx(TestPage, {}),
+        }),
       }),
     );
     expect(screen.getByText('Protected Content')).toBeInTheDocument();

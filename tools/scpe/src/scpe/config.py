@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from .errors import ConfigError
 
 
-def load_config(path: str | Path) -> Dict[str, Any]:
+def load_config(path: str | Path) -> dict[str, Any]:
     """Load a SCPE configuration file (YAML or JSON)."""
 
     config_path = Path(path)
@@ -36,7 +36,7 @@ def load_config(path: str | Path) -> Dict[str, Any]:
     return data
 
 
-def _load_yaml(text: str) -> Dict[str, Any]:
+def _load_yaml(text: str) -> dict[str, Any]:
     try:
         import yaml  # type: ignore
     except ImportError as exc:  # pragma: no cover - runtime guard

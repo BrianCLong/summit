@@ -161,7 +161,9 @@ export class EmbeddingUpsertWorker {
   async deleteEmbedding(entityId: string): Promise<void> {
     const client = await this.getPool().connect();
     try {
-      await client.query('DELETE FROM entity_embeddings WHERE entity_id = $1', [entityId]);
+      await client.query('DELETE FROM entity_embeddings WHERE entity_id = $1', [
+        entityId,
+      ]);
       logger.debug('Embedding deleted', { entityId });
     } finally {
       client.release();
@@ -260,7 +262,7 @@ export const embeddingUpsertWorker = {
 
   async getStats(): Promise<WorkerStats> {
     return this.instance.getStats();
-  }
+  },
 };
 
 export default embeddingUpsertWorker;

@@ -3,6 +3,7 @@
 > Mailbox-format patches to: (1) run **Stripe CLI** inside **docker‑compose.dev** for local webhooks; (2) add **CSV / ClickHouse / BigQuery** adapters to the revenue rollup; (3) ship a **one‑click demo** that spins a full trial tenant (Checkout → Install → Seed → Dashboards). Save and apply in order.
 
 ## How to apply
+
 ```bash
 mkdir -p patches && cd patches
 # Save files below as 0028-*.patch ... 0036-*.patch
@@ -22,6 +23,7 @@ git am 0028-dev-stripe-cli-docker-compose.patch \
 ---
 
 ## 0028-dev-stripe-cli-docker-compose.patch
+
 ```
 From 2828282800000000000000000000000000000028 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -63,6 +65,7 @@ index 1111111..2222222 100644
 ---
 
 ## 0029-ops-webhooks-tunnels-and-env.patch
+
 ```
 From 2929292900000000000000000000000000000029 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -92,6 +95,7 @@ index 0000000..3333333
 ---
 
 ## 0030-feat-metrics-adapters-csv-clickhouse-bigquery.patch
+
 ```
 From 3030303000000000000000000000000000000030 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -147,6 +151,7 @@ index aaaaaaa..bbbbbbb 100644
 ---
 
 ## 0031-feat-rollup-config-and-cli.patch
+
 ```
 From 3131313100000000000000000000000000000031 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -175,6 +180,7 @@ index 0000000..ccccccc
 ---
 
 ## 0032-ops-grafana-csv-datasource-and-server.patch
+
 ```
 From 3232323200000000000000000000000000000032 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -214,6 +220,7 @@ index 0000000..eeeeeee
 ---
 
 ## 0033-scripts-one-click-demo-trial-tenant.patch
+
 ```
 From 3333333300000000000000000000000000000033 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -268,6 +275,7 @@ index 0000000..ffffff0
 ---
 
 ## 0034-ci-demo-run-and-artifacts.patch
+
 ```
 From 3434343400000000000000000000000000000034 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -304,6 +312,7 @@ index 0000000..1212121
 ---
 
 ## 0035-docs-demo-playbook-and-connector-setup.patch
+
 ```
 From 3535353500000000000000000000000000000035 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -320,6 +329,7 @@ Subject: [PATCH] docs: Demo playbook + ClickHouse/BigQuery connector setup guide
 ---
 
 ## 0036-make-dev-webhooks-rollup-demo.patch
+
 ```
 From 3636363600000000000000000000000000000036 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -348,8 +358,8 @@ index aaaaaaa..bbbbbbb 100644
 ---
 
 ## Notes
+
 - **Stripe CLI** container reads `STRIPE_KEY` from `.env.dev` and forwards to `billing:7080/webhook`. The CLI prints the signing secret; copy to `STRIPE_WEBHOOK_SECRET` if needed.
 - **Metrics backends**: set `tools/metrics/config.json.backend` to `csv|clickhouse|bigquery` (or pass `BACKEND` env and have a thin shim update file before run, if desired).
 - **CSV Grafana datasource** uses the community plugin `marcusolsson-csv-datasource`; ensure it’s installed on Grafana or import via plugin catalog.
 - **One‑click demo** assumes staging endpoints exist and you have a Grafana API token.
-

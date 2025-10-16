@@ -94,17 +94,20 @@ export class AuditDashboard extends EventEmitter {
   /**
    * Get comprehensive dashboard metrics
    */
-  async getMetrics(timeRange: { start: Date; end: Date }): Promise<DashboardMetrics> {
+  async getMetrics(timeRange: {
+    start: Date;
+    end: Date;
+  }): Promise<DashboardMetrics> {
     const cacheKey = `metrics-${timeRange.start.toISOString()}-${timeRange.end.toISOString()}`;
     const cached = this.getCachedData(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const events = await this.queryEvents({ timeRange });
     const metrics = this.calculateMetrics(events, timeRange);
-    
+
     this.setCachedData(cacheKey, metrics);
     return metrics;
   }
@@ -116,10 +119,10 @@ export class AuditDashboard extends EventEmitter {
     const recentEvents = await this.queryEvents({
       timeRange: {
         start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
-        end: new Date()
+        end: new Date(),
       },
       severities: ['HIGH', 'CRITICAL'],
-      limit
+      limit,
     });
 
     return this.generateSecurityAlerts(recentEvents);
@@ -128,7 +131,10 @@ export class AuditDashboard extends EventEmitter {
   /**
    * Generate compliance report
    */
-  async getComplianceReport(timeRange: { start: Date; end: Date }): Promise<ComplianceReport> {
+  async getComplianceReport(timeRange: {
+    start: Date;
+    end: Date;
+  }): Promise<ComplianceReport> {
     const events = await this.queryEvents({ timeRange });
     return this.generateComplianceReport(events);
   }
@@ -140,8 +146,8 @@ export class AuditDashboard extends EventEmitter {
     const recentEvents = await this.queryEvents({
       timeRange: {
         start: new Date(Date.now() - 60 * 60 * 1000), // Last hour
-        end: new Date()
-      }
+        end: new Date(),
+      },
     });
 
     return this.calculateSystemHealth(recentEvents);
@@ -153,12 +159,12 @@ export class AuditDashboard extends EventEmitter {
   async getUserRiskAnalysis(userId?: string, days = 30): Promise<any> {
     const timeRange = {
       start: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
-      end: new Date()
+      end: new Date(),
     };
 
     const events = await this.queryEvents({
       timeRange,
-      users: userId ? [userId] : undefined
+      users: userId ? [userId] : undefined,
     });
 
     return this.analyzeUserRisk(events, userId);
@@ -170,12 +176,12 @@ export class AuditDashboard extends EventEmitter {
   async getResourceAnalysis(resource?: string, days = 30): Promise<any> {
     const timeRange = {
       start: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
-      end: new Date()
+      end: new Date(),
     };
 
     const events = await this.queryEvents({
       timeRange,
-      resources: resource ? [resource] : undefined
+      resources: resource ? [resource] : undefined,
     });
 
     return this.analyzeResourceAccess(events, resource);
@@ -202,29 +208,35 @@ export class AuditDashboard extends EventEmitter {
   async exportComplianceReport(
     format: 'JSON' | 'CSV' | 'PDF' | 'XLSX',
     timeRange: { start: Date; end: Date },
-    includeDetails = false
+    includeDetails = false,
   ): Promise<Buffer> {
     const events = await this.queryEvents({ timeRange });
     const complianceReport = this.generateComplianceReport(events);
-    
+
     switch (format) {
       case 'JSON':
-        return Buffer.from(JSON.stringify({
-          report: complianceReport,
-          events: includeDetails ? events : events.length,
-          generated: new Date(),
-          timeRange
-        }, null, 2));
-        
+        return Buffer.from(
+          JSON.stringify(
+            {
+              report: complianceReport,
+              events: includeDetails ? events : events.length,
+              generated: new Date(),
+              timeRange,
+            },
+            null,
+            2,
+          ),
+        );
+
       case 'CSV':
         return this.generateCSVReport(events, complianceReport);
-        
+
       case 'PDF':
         return this.generatePDFReport(events, complianceReport, timeRange);
-        
+
       case 'XLSX':
         return this.generateExcelReport(events, complianceReport, timeRange);
-        
+
       default:
         throw new Error(`Unsupported export format: ${format}`);
     }
@@ -236,7 +248,7 @@ export class AuditDashboard extends EventEmitter {
   async getTrendAnalysis(metric: string, days = 30): Promise<any> {
     const timeRange = {
       start: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
-      end: new Date()
+      end: new Date(),
     };
 
     const events = await this.queryEvents({ timeRange });
@@ -268,7 +280,7 @@ export class AuditDashboard extends EventEmitter {
     this.emit('real_time_update', {
       type: 'audit_event',
       event,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Check for immediate alerts
@@ -283,12 +295,16 @@ export class AuditDashboard extends EventEmitter {
   /**
    * Calculate comprehensive metrics from events
    */
-  private calculateMetrics(events: AuditEvent[], timeRange: { start: Date; end: Date }): DashboardMetrics {
+  private calculateMetrics(
+    events: AuditEvent[],
+    timeRange: { start: Date; end: Date },
+  ): DashboardMetrics {
     const eventsByCategory = this.groupBy(events, 'category');
     const eventsBySeverity = this.groupBy(events, 'severity');
-    
-    const failedEvents = events.filter(e => e.outcome === 'FAILURE');
-    const failureRate = events.length > 0 ? (failedEvents.length / events.length) * 100 : 0;
+
+    const failedEvents = events.filter((e) => e.outcome === 'FAILURE');
+    const failureRate =
+      events.length > 0 ? (failedEvents.length / events.length) * 100 : 0;
 
     const userStats = this.calculateUserStats(events);
     const resourceStats = this.calculateResourceStats(events);
@@ -299,14 +315,18 @@ export class AuditDashboard extends EventEmitter {
     return {
       timeRange,
       totalEvents: events.length,
-      eventsByCategory: Object.fromEntries(Object.entries(eventsByCategory).map(([k, v]) => [k, v.length])),
-      eventsBySeverity: Object.fromEntries(Object.entries(eventsBySeverity).map(([k, v]) => [k, v.length])),
+      eventsByCategory: Object.fromEntries(
+        Object.entries(eventsByCategory).map(([k, v]) => [k, v.length]),
+      ),
+      eventsBySeverity: Object.fromEntries(
+        Object.entries(eventsBySeverity).map(([k, v]) => [k, v.length]),
+      ),
       failureRate,
       topUsers: userStats.slice(0, 10),
       topResources: resourceStats.slice(0, 10),
       anomalies,
       complianceStatus,
-      systemHealth
+      systemHealth,
     };
   }
 
@@ -317,10 +337,10 @@ export class AuditDashboard extends EventEmitter {
     const alerts: AnomalyAlert[] = [];
 
     // Failed authentication patterns
-    const failedAuth = events.filter(e => 
-      e.category === 'AUTHENTICATION' && e.outcome === 'FAILURE'
+    const failedAuth = events.filter(
+      (e) => e.category === 'AUTHENTICATION' && e.outcome === 'FAILURE',
     );
-    
+
     if (failedAuth.length > 10) {
       alerts.push({
         id: `alert-${Date.now()}-auth`,
@@ -329,13 +349,15 @@ export class AuditDashboard extends EventEmitter {
         severity: 'HIGH',
         description: `${failedAuth.length} failed authentication attempts detected`,
         confidence: 0.9,
-        details: { failedAttempts: failedAuth.length }
+        details: { failedAttempts: failedAuth.length },
       });
     }
 
     // Privilege escalation detection
-    const privEscalation = events.filter(e =>
-      e.action.includes('ROLE_CHANGE') || e.action.includes('PERMISSION_GRANT')
+    const privEscalation = events.filter(
+      (e) =>
+        e.action.includes('ROLE_CHANGE') ||
+        e.action.includes('PERMISSION_GRANT'),
     );
 
     if (privEscalation.length > 0) {
@@ -346,7 +368,7 @@ export class AuditDashboard extends EventEmitter {
         severity: 'CRITICAL',
         description: 'Potential privilege escalation detected',
         confidence: 0.8,
-        details: { events: privEscalation.length }
+        details: { events: privEscalation.length },
       });
     }
 
@@ -357,34 +379,35 @@ export class AuditDashboard extends EventEmitter {
    * Generate compliance report from events
    */
   private generateComplianceReport(events: AuditEvent[]): ComplianceReport {
-    const dataAccessEvents = events.filter(e => e.category === 'DATA_ACCESS');
-    const authEvents = events.filter(e => e.category === 'AUTHENTICATION');
-    
+    const dataAccessEvents = events.filter((e) => e.category === 'DATA_ACCESS');
+    const authEvents = events.filter((e) => e.category === 'AUTHENTICATION');
+
     return {
       gdpr: {
         compliant: this.checkGDPRCompliance(events),
         violations: this.countGDPRViolations(events),
-        dataRetentionCompliance: this.calculateDataRetentionCompliance(events)
+        dataRetentionCompliance: this.calculateDataRetentionCompliance(events),
       },
       sox: {
         compliant: this.checkSOXCompliance(events),
         auditTrailCompleteness: this.calculateAuditTrailCompleteness(events),
-        accessControlCompliance: this.calculateAccessControlCompliance(events)
+        accessControlCompliance: this.calculateAccessControlCompliance(events),
       },
       pci: {
         compliant: this.checkPCICompliance(events),
-        cardholderDataAccess: dataAccessEvents.filter(e => 
-          e.details.dataClassification === 'PCI'
+        cardholderDataAccess: dataAccessEvents.filter(
+          (e) => e.details.dataClassification === 'PCI',
         ).length,
-        securityViolations: this.countPCIViolations(events)
+        securityViolations: this.countPCIViolations(events),
       },
       hipaa: {
         compliant: this.checkHIPAACompliance(events),
-        phiAccessCompliance: dataAccessEvents.filter(e =>
-          e.details.dataClassification === 'PHI'
+        phiAccessCompliance: dataAccessEvents.filter(
+          (e) => e.details.dataClassification === 'PHI',
         ).length,
-        minimumNecessaryCompliance: this.calculateMinimumNecessaryCompliance(events)
-      }
+        minimumNecessaryCompliance:
+          this.calculateMinimumNecessaryCompliance(events),
+      },
     };
   }
 
@@ -392,20 +415,22 @@ export class AuditDashboard extends EventEmitter {
    * Calculate system health metrics
    */
   private calculateSystemHealth(events: AuditEvent[]): SystemHealthMetrics {
-    const systemEvents = events.filter(e => e.category === 'SYSTEM');
-    const errorEvents = events.filter(e => e.outcome === 'FAILURE');
-    
-    const errorRate = events.length > 0 ? (errorEvents.length / events.length) * 100 : 0;
+    const systemEvents = events.filter((e) => e.category === 'SYSTEM');
+    const errorEvents = events.filter((e) => e.outcome === 'FAILURE');
+
+    const errorRate =
+      events.length > 0 ? (errorEvents.length / events.length) * 100 : 0;
     const avgProcessingTime = this.calculateAverageProcessingTime(events);
     const throughput = this.calculateThroughput(events);
 
     return {
-      auditLoggerHealth: errorRate < 5 ? 'HEALTHY' : errorRate < 15 ? 'DEGRADED' : 'CRITICAL',
+      auditLoggerHealth:
+        errorRate < 5 ? 'HEALTHY' : errorRate < 15 ? 'DEGRADED' : 'CRITICAL',
       storageHealth: this.assessStorageHealth(systemEvents),
       siemConnectivity: this.assessSIEMConnectivity(systemEvents),
       processingLatency: avgProcessingTime,
       errorRate,
-      throughput
+      throughput,
     };
   }
 
@@ -413,21 +438,27 @@ export class AuditDashboard extends EventEmitter {
    * Helper methods for calculations
    */
   private groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
-    return array.reduce((groups, item) => {
-      const group = String(item[key]);
-      groups[group] = groups[group] || [];
-      groups[group].push(item);
-      return groups;
-    }, {} as Record<string, T[]>);
+    return array.reduce(
+      (groups, item) => {
+        const group = String(item[key]);
+        groups[group] = groups[group] || [];
+        groups[group].push(item);
+        return groups;
+      },
+      {} as Record<string, T[]>,
+    );
   }
 
   private calculateUserStats(events: AuditEvent[]) {
-    const userGroups = this.groupBy(events.filter(e => e.userId), 'userId');
+    const userGroups = this.groupBy(
+      events.filter((e) => e.userId),
+      'userId',
+    );
     return Object.entries(userGroups)
       .map(([userId, userEvents]) => ({
         userId,
         count: userEvents.length,
-        riskScore: this.calculateUserRiskScore(userEvents)
+        riskScore: this.calculateUserRiskScore(userEvents),
       }))
       .sort((a, b) => b.count - a.count);
   }
@@ -437,18 +468,20 @@ export class AuditDashboard extends EventEmitter {
     return Object.entries(resourceGroups)
       .map(([resource, resourceEvents]) => ({
         resource,
-        count: resourceEvents.length
+        count: resourceEvents.length,
       }))
       .sort((a, b) => b.count - a.count);
   }
 
   private calculateUserRiskScore(events: AuditEvent[]): number {
-    const failedEvents = events.filter(e => e.outcome === 'FAILURE').length;
-    const criticalEvents = events.filter(e => e.severity === 'CRITICAL').length;
+    const failedEvents = events.filter((e) => e.outcome === 'FAILURE').length;
+    const criticalEvents = events.filter(
+      (e) => e.severity === 'CRITICAL',
+    ).length;
     const baseScore = events.length * 0.1;
     const failureBonus = failedEvents * 5;
     const criticalBonus = criticalEvents * 10;
-    
+
     return Math.min(100, Math.round(baseScore + failureBonus + criticalBonus));
   }
 
@@ -459,11 +492,11 @@ export class AuditDashboard extends EventEmitter {
 
   // Compliance check methods (simplified implementations)
   private checkGDPRCompliance(events: AuditEvent[]): boolean {
-    return events.every(e => e.details.gdprCompliant !== false);
+    return events.every((e) => e.details.gdprCompliant !== false);
   }
 
   private countGDPRViolations(events: AuditEvent[]): number {
-    return events.filter(e => e.details.gdprViolation === true).length;
+    return events.filter((e) => e.details.gdprViolation === true).length;
   }
 
   private calculateDataRetentionCompliance(events: AuditEvent[]): number {
@@ -475,7 +508,7 @@ export class AuditDashboard extends EventEmitter {
   }
 
   private calculateAuditTrailCompleteness(events: AuditEvent[]): number {
-    return 98; // Placeholder percentage  
+    return 98; // Placeholder percentage
   }
 
   private calculateAccessControlCompliance(events: AuditEvent[]): number {
@@ -498,11 +531,15 @@ export class AuditDashboard extends EventEmitter {
     return 96; // Placeholder percentage
   }
 
-  private assessStorageHealth(events: AuditEvent[]): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' {
+  private assessStorageHealth(
+    events: AuditEvent[],
+  ): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' {
     return 'HEALTHY'; // Placeholder
   }
 
-  private assessSIEMConnectivity(events: AuditEvent[]): 'CONNECTED' | 'DISCONNECTED' | 'ERROR' {
+  private assessSIEMConnectivity(
+    events: AuditEvent[],
+  ): 'CONNECTED' | 'DISCONNECTED' | 'ERROR' {
     return 'CONNECTED'; // Placeholder
   }
 
@@ -533,28 +570,49 @@ export class AuditDashboard extends EventEmitter {
       category: event.category,
       severity: event.severity,
       outcome: event.outcome,
-      timestamp: event.timestamp
+      timestamp: event.timestamp,
     });
   }
 
   // Data export methods (simplified implementations)
-  private generateCSVReport(events: AuditEvent[], report: ComplianceReport): Buffer {
-    const csv = 'timestamp,user,action,resource,outcome,severity\n' +
-      events.map(e => `${e.timestamp.toISOString()},${e.userId || 'N/A'},${e.action},${e.resource},${e.outcome},${e.severity}`).join('\n');
+  private generateCSVReport(
+    events: AuditEvent[],
+    report: ComplianceReport,
+  ): Buffer {
+    const csv =
+      'timestamp,user,action,resource,outcome,severity\n' +
+      events
+        .map(
+          (e) =>
+            `${e.timestamp.toISOString()},${e.userId || 'N/A'},${e.action},${e.resource},${e.outcome},${e.severity}`,
+        )
+        .join('\n');
     return Buffer.from(csv);
   }
 
-  private generatePDFReport(events: AuditEvent[], report: ComplianceReport, timeRange: any): Buffer {
+  private generatePDFReport(
+    events: AuditEvent[],
+    report: ComplianceReport,
+    timeRange: any,
+  ): Buffer {
     // PDF generation would use a library like PDFKit
     return Buffer.from('PDF Report Placeholder');
   }
 
-  private generateExcelReport(events: AuditEvent[], report: ComplianceReport, timeRange: any): Buffer {
+  private generateExcelReport(
+    events: AuditEvent[],
+    report: ComplianceReport,
+    timeRange: any,
+  ): Buffer {
     // Excel generation would use a library like ExcelJS
     return Buffer.from('Excel Report Placeholder');
   }
 
-  private calculateTrends(events: AuditEvent[], metric: string, days: number): any {
+  private calculateTrends(
+    events: AuditEvent[],
+    metric: string,
+    days: number,
+  ): any {
     // Trend calculation implementation
     return { trend: 'stable', change: 0 };
   }
@@ -574,11 +632,14 @@ export class AuditDashboard extends EventEmitter {
       byHour: this.aggregateByTimeInterval(events, 'hour'),
       byDay: this.aggregateByTimeInterval(events, 'day'),
       byCategory: this.groupBy(events, 'category'),
-      bySeverity: this.groupBy(events, 'severity')
+      bySeverity: this.groupBy(events, 'severity'),
     };
   }
 
-  private aggregateByTimeInterval(events: AuditEvent[], interval: 'hour' | 'day'): any {
+  private aggregateByTimeInterval(
+    events: AuditEvent[],
+    interval: 'hour' | 'day',
+  ): any {
     // Time interval aggregation
     return {};
   }

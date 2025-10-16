@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-export type EnvironmentName = 'development' | 'staging' | 'qa' | 'production' | string;
+export type EnvironmentName =
+  | 'development'
+  | 'staging'
+  | 'qa'
+  | 'production'
+  | string;
 
 export interface SecretReference {
   provider: string;
@@ -101,11 +106,23 @@ export interface FeatureFlagAdapter {
 }
 
 export interface RepositoryWriter<TConfig = Record<string, any>> {
-  saveVersion(configId: string, version: ConfigVersion<TConfig>, auditEntry: AuditEntry): Promise<void>;
-  getLatestVersion(configId: string): Promise<ConfigVersion<TConfig> | undefined>;
-  getVersion(configId: string, versionNumber: number): Promise<ConfigVersion<TConfig> | undefined>;
+  saveVersion(
+    configId: string,
+    version: ConfigVersion<TConfig>,
+    auditEntry: AuditEntry,
+  ): Promise<void>;
+  getLatestVersion(
+    configId: string,
+  ): Promise<ConfigVersion<TConfig> | undefined>;
+  getVersion(
+    configId: string,
+    versionNumber: number,
+  ): Promise<ConfigVersion<TConfig> | undefined>;
   listVersions(configId: string): Promise<ConfigVersion<TConfig>[]>;
   recordAppliedState(configId: string, state: AppliedState): Promise<void>;
-  getAppliedState(configId: string, environment: EnvironmentName): Promise<AppliedState | undefined>;
+  getAppliedState(
+    configId: string,
+    environment: EnvironmentName,
+  ): Promise<AppliedState | undefined>;
   getAuditTrail(configId: string): Promise<AuditEntry[]>;
 }

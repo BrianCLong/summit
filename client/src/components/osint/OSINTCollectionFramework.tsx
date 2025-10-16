@@ -108,7 +108,13 @@ interface OSINTArtifact {
   };
   tags: string[];
   flags: Array<{
-    type: 'misinformation' | 'threat' | 'sensitive' | 'urgent' | 'duplicate' | 'expired';
+    type:
+      | 'misinformation'
+      | 'threat'
+      | 'sensitive'
+      | 'urgent'
+      | 'duplicate'
+      | 'expired';
     reason: string;
     flaggedBy: string;
     flaggedAt: Date;
@@ -152,7 +158,13 @@ interface OSINTCollection {
 
 interface ThreatIndicator {
   id: string;
-  type: 'ioc' | 'ttp' | 'vulnerability' | 'campaign' | 'actor' | 'infrastructure';
+  type:
+    | 'ioc'
+    | 'ttp'
+    | 'vulnerability'
+    | 'campaign'
+    | 'actor'
+    | 'infrastructure';
   value: string;
   severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
   confidence: number;
@@ -178,15 +190,32 @@ interface OSINTAnalytics {
     totalArtifacts: number;
     uniqueSources: number;
     averageQuality: number;
-    topTopics: Array<{ topic: string; count: number; trend: 'up' | 'down' | 'stable' }>;
-    geographicDistribution: Array<{ country: string; count: number; percentage: number }>;
-    languageDistribution: Array<{ language: string; count: number; percentage: number }>;
+    topTopics: Array<{
+      topic: string;
+      count: number;
+      trend: 'up' | 'down' | 'stable';
+    }>;
+    geographicDistribution: Array<{
+      country: string;
+      count: number;
+      percentage: number;
+    }>;
+    languageDistribution: Array<{
+      language: string;
+      count: number;
+      percentage: number;
+    }>;
   };
   trends: {
     collectionVolume: Array<{ date: Date; count: number }>;
     qualityTrend: Array<{ date: Date; quality: number }>;
     topicEvolution: Array<{ date: Date; topics: { [topic: string]: number } }>;
-    sentimentTrend: Array<{ date: Date; positive: number; negative: number; neutral: number }>;
+    sentimentTrend: Array<{
+      date: Date;
+      positive: number;
+      negative: number;
+      neutral: number;
+    }>;
   };
   threats: {
     newIndicators: number;
@@ -216,7 +245,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
   className = '',
 }) => {
   const [activeView, setActiveView] = useState<
-    'dashboard' | 'sources' | 'collections' | 'artifacts' | 'threats' | 'analytics'
+    | 'dashboard'
+    | 'sources'
+    | 'collections'
+    | 'artifacts'
+    | 'threats'
+    | 'analytics'
   >('dashboard');
   const [osintSources, setOsintSources] = useState<OSINTSource[]>([]);
   const [collections, setCollections] = useState<OSINTCollection[]>([]);
@@ -224,7 +258,8 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
   const [threats, setThreats] = useState<ThreatIndicator[]>([]);
   const [analytics, setAnalytics] = useState<OSINTAnalytics | null>(null);
   const [isCollecting, setIsCollecting] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState<OSINTCollection | null>(null);
+  const [selectedCollection, setSelectedCollection] =
+    useState<OSINTCollection | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterRisk, setFilterRisk] = useState<string>('all');
@@ -232,7 +267,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
   const sourceCategories = [
     { id: 'social_media', name: 'Social Media', icon: '📱', color: '#1da1f2' },
     { id: 'web_search', name: 'Web Search', icon: '🔍', color: '#34a853' },
-    { id: 'public_records', name: 'Public Records', icon: '📋', color: '#ea4335' },
+    {
+      id: 'public_records',
+      name: 'Public Records',
+      icon: '📋',
+      color: '#ea4335',
+    },
     { id: 'news_media', name: 'News Media', icon: '📰', color: '#ff6d00' },
     { id: 'government', name: 'Government', icon: '🏛️', color: '#1976d2' },
     { id: 'academic', name: 'Academic', icon: '🎓', color: '#7b1fa2' },
@@ -269,7 +309,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
         apiEndpoint: 'https://api.twitter.com/2/',
         isActive: true,
         lastCollected: new Date(Date.now() - 15 * 60 * 1000),
-        dataQuality: { reliability: 0.85, timeliness: 0.95, completeness: 0.78, accuracy: 0.82 },
+        dataQuality: {
+          reliability: 0.85,
+          timeliness: 0.95,
+          completeness: 0.78,
+          accuracy: 0.82,
+        },
         collectionRules: {
           keywords: ['cybersecurity', 'threat intelligence', 'data breach'],
           languages: ['en', 'es', 'fr'],
@@ -287,7 +332,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
         url: 'https://reddit.com',
         isActive: true,
         lastCollected: new Date(Date.now() - 45 * 60 * 1000),
-        dataQuality: { reliability: 0.75, timeliness: 0.88, completeness: 0.85, accuracy: 0.79 },
+        dataQuality: {
+          reliability: 0.75,
+          timeliness: 0.88,
+          completeness: 0.85,
+          accuracy: 0.79,
+        },
         collectionRules: {
           keywords: ['security', 'hacking', 'malware', 'phishing'],
           contentTypes: ['posts', 'comments'],
@@ -304,7 +354,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
         apiEndpoint: 'https://newsapi.org/v2/',
         isActive: true,
         lastCollected: new Date(Date.now() - 30 * 60 * 1000),
-        dataQuality: { reliability: 0.92, timeliness: 0.9, completeness: 0.88, accuracy: 0.91 },
+        dataQuality: {
+          reliability: 0.92,
+          timeliness: 0.9,
+          completeness: 0.88,
+          accuracy: 0.91,
+        },
         collectionRules: {
           keywords: ['cyber attack', 'data breach', 'ransomware', 'APT'],
           languages: ['en'],
@@ -322,7 +377,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
         url: 'https://pastebin.com',
         isActive: true,
         lastCollected: new Date(Date.now() - 10 * 60 * 1000),
-        dataQuality: { reliability: 0.65, timeliness: 0.98, completeness: 0.7, accuracy: 0.68 },
+        dataQuality: {
+          reliability: 0.65,
+          timeliness: 0.98,
+          completeness: 0.7,
+          accuracy: 0.68,
+        },
         collectionRules: {
           keywords: ['password', 'breach', 'dump', 'leak', 'hack'],
           contentTypes: ['pastes'],
@@ -339,7 +399,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
         apiEndpoint: 'https://www.sec.gov/Archives/edgar/data/',
         isActive: true,
         lastCollected: new Date(Date.now() - 120 * 60 * 1000),
-        dataQuality: { reliability: 0.98, timeliness: 0.7, completeness: 0.95, accuracy: 0.97 },
+        dataQuality: {
+          reliability: 0.98,
+          timeliness: 0.7,
+          completeness: 0.95,
+          accuracy: 0.97,
+        },
         collectionRules: {
           keywords: ['cybersecurity', 'data breach', 'incident'],
           contentTypes: ['10-K', '10-Q', '8-K'],
@@ -358,7 +423,8 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
       {
         id: 'collection-001',
         name: 'APT Campaign Monitoring',
-        description: 'Continuous monitoring for advanced persistent threat campaigns',
+        description:
+          'Continuous monitoring for advanced persistent threat campaigns',
         status: 'active',
         createdBy: 'Threat Intelligence Team',
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
@@ -368,7 +434,10 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
             query: 'APT29 OR Cozy Bear OR "advanced persistent threat"',
             sources: ['twitter-api', 'google-news', 'reddit-scraper'],
             priority: 'critical',
-            schedule: { frequency: 'hourly', nextRun: new Date(Date.now() + 45 * 60 * 1000) },
+            schedule: {
+              frequency: 'hourly',
+              nextRun: new Date(Date.now() + 45 * 60 * 1000),
+            },
           },
           {
             query: 'state-sponsored attack OR nation-state',
@@ -391,7 +460,10 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
           minCredibility: 0.5,
           excludeKeywords: ['false positive', 'outdated'],
           requiredKeywords: [],
-          dateRange: { start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), end: new Date() },
+          dateRange: {
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            end: new Date(),
+          },
         },
       },
       {
@@ -447,119 +519,151 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
       'high',
       'critical',
     ];
-    const sentiments: ('positive' | 'negative' | 'neutral')[] = ['positive', 'negative', 'neutral'];
+    const sentiments: ('positive' | 'negative' | 'neutral')[] = [
+      'positive',
+      'negative',
+      'neutral',
+    ];
 
-    const mockArtifacts: OSINTArtifact[] = Array.from({ length: 150 }, (_, i) => ({
-      id: `artifact-${String(i + 1).padStart(3, '0')}`,
-      sourceId: osintSources[Math.floor(Math.random() * osintSources.length)]?.id || 'twitter-api',
-      sourceName:
-        osintSources[Math.floor(Math.random() * osintSources.length)]?.name || 'Twitter API v2',
-      title: `Intelligence Artifact ${i + 1}`,
-      content: `Mock OSINT content for artifact ${i + 1}. This represents intelligence data collected from open sources including social media, news, and technical platforms.`,
-      contentType: contentTypes[Math.floor(Math.random() * contentTypes.length)],
-      url: `https://source-${i}.com/artifact/${i + 1}`,
-      author:
-        Math.random() > 0.3
-          ? {
-              username: `user_${i + 1}`,
-              displayName: `Source User ${i + 1}`,
-              verified: Math.random() > 0.7,
-              followers: Math.floor(Math.random() * 100000),
-              profileUrl: `https://platform.com/user_${i + 1}`,
-            }
-          : undefined,
-      metadata: {
-        language: ['en', 'es', 'fr', 'de', 'zh'][Math.floor(Math.random() * 5)],
-        location:
-          Math.random() > 0.4
+    const mockArtifacts: OSINTArtifact[] = Array.from(
+      { length: 150 },
+      (_, i) => ({
+        id: `artifact-${String(i + 1).padStart(3, '0')}`,
+        sourceId:
+          osintSources[Math.floor(Math.random() * osintSources.length)]?.id ||
+          'twitter-api',
+        sourceName:
+          osintSources[Math.floor(Math.random() * osintSources.length)]?.name ||
+          'Twitter API v2',
+        title: `Intelligence Artifact ${i + 1}`,
+        content: `Mock OSINT content for artifact ${i + 1}. This represents intelligence data collected from open sources including social media, news, and technical platforms.`,
+        contentType:
+          contentTypes[Math.floor(Math.random() * contentTypes.length)],
+        url: `https://source-${i}.com/artifact/${i + 1}`,
+        author:
+          Math.random() > 0.3
             ? {
-                country: ['United States', 'United Kingdom', 'Germany', 'France', 'China'][
-                  Math.floor(Math.random() * 5)
-                ],
-                city: ['New York', 'London', 'Berlin', 'Paris', 'Beijing'][
-                  Math.floor(Math.random() * 5)
-                ],
-                coordinates:
-                  Math.random() > 0.7
-                    ? {
-                        latitude: Math.random() * 180 - 90,
-                        longitude: Math.random() * 360 - 180,
-                      }
-                    : undefined,
+                username: `user_${i + 1}`,
+                displayName: `Source User ${i + 1}`,
+                verified: Math.random() > 0.7,
+                followers: Math.floor(Math.random() * 100000),
+                profileUrl: `https://platform.com/user_${i + 1}`,
               }
             : undefined,
-        timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-        collectedAt: new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000),
-        sentiment: sentiments[Math.floor(Math.random() * sentiments.length)],
-        topics: [
-          'cybersecurity',
-          'threat intelligence',
-          'data breach',
-          'malware',
-          'phishing',
-        ].slice(0, Math.floor(Math.random() * 3) + 1),
-        mentions:
-          Math.random() > 0.6
-            ? [
-                `@user${Math.floor(Math.random() * 100)}`,
-                `@company${Math.floor(Math.random() * 50)}`,
-              ]
-            : [],
-        hashtags:
-          Math.random() > 0.5
-            ? ['#cybersecurity', '#infosec', '#threatintel'].slice(
-                0,
-                Math.floor(Math.random() * 2) + 1,
-              )
-            : [],
-        confidence: Math.random() * 40 + 60,
-      },
-      analysis: {
-        relevanceScore: Math.random() * 40 + 60,
-        credibilityScore: Math.random() * 50 + 50,
-        riskLevel: riskLevels[Math.floor(Math.random() * riskLevels.length)],
-        entityExtractions: [
-          {
-            type: ['person', 'organization', 'location', 'technology'][
-              Math.floor(Math.random() * 4)
-            ] as any,
-            value: `Entity_${i + 1}`,
-            confidence: Math.random() * 30 + 70,
-            context: 'Extracted from content analysis',
-          },
-        ],
-        keyPhrases: ['threat actor', 'data exfiltration', 'command and control'].slice(
-          0,
-          Math.floor(Math.random() * 2) + 1,
+        metadata: {
+          language: ['en', 'es', 'fr', 'de', 'zh'][
+            Math.floor(Math.random() * 5)
+          ],
+          location:
+            Math.random() > 0.4
+              ? {
+                  country: [
+                    'United States',
+                    'United Kingdom',
+                    'Germany',
+                    'France',
+                    'China',
+                  ][Math.floor(Math.random() * 5)],
+                  city: ['New York', 'London', 'Berlin', 'Paris', 'Beijing'][
+                    Math.floor(Math.random() * 5)
+                  ],
+                  coordinates:
+                    Math.random() > 0.7
+                      ? {
+                          latitude: Math.random() * 180 - 90,
+                          longitude: Math.random() * 360 - 180,
+                        }
+                      : undefined,
+                }
+              : undefined,
+          timestamp: new Date(
+            Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+          ),
+          collectedAt: new Date(
+            Date.now() - Math.random() * 2 * 60 * 60 * 1000,
+          ),
+          sentiment: sentiments[Math.floor(Math.random() * sentiments.length)],
+          topics: [
+            'cybersecurity',
+            'threat intelligence',
+            'data breach',
+            'malware',
+            'phishing',
+          ].slice(0, Math.floor(Math.random() * 3) + 1),
+          mentions:
+            Math.random() > 0.6
+              ? [
+                  `@user${Math.floor(Math.random() * 100)}`,
+                  `@company${Math.floor(Math.random() * 50)}`,
+                ]
+              : [],
+          hashtags:
+            Math.random() > 0.5
+              ? ['#cybersecurity', '#infosec', '#threatintel'].slice(
+                  0,
+                  Math.floor(Math.random() * 2) + 1,
+                )
+              : [],
+          confidence: Math.random() * 40 + 60,
+        },
+        analysis: {
+          relevanceScore: Math.random() * 40 + 60,
+          credibilityScore: Math.random() * 50 + 50,
+          riskLevel: riskLevels[Math.floor(Math.random() * riskLevels.length)],
+          entityExtractions: [
+            {
+              type: ['person', 'organization', 'location', 'technology'][
+                Math.floor(Math.random() * 4)
+              ] as any,
+              value: `Entity_${i + 1}`,
+              confidence: Math.random() * 30 + 70,
+              context: 'Extracted from content analysis',
+            },
+          ],
+          keyPhrases: [
+            'threat actor',
+            'data exfiltration',
+            'command and control',
+          ].slice(0, Math.floor(Math.random() * 2) + 1),
+          relationships:
+            Math.random() > 0.7
+              ? [
+                  {
+                    subject: `Entity_${i + 1}`,
+                    predicate: 'associated_with',
+                    object: `ThreatActor_${Math.floor(Math.random() * 10)}`,
+                    confidence: Math.random() * 30 + 70,
+                  },
+                ]
+              : [],
+        },
+        tags: ['osint', 'intelligence', 'threat'].concat(
+          Math.random() > 0.5 ? ['urgent'] : [],
         ),
-        relationships:
-          Math.random() > 0.7
+        flags:
+          Math.random() > 0.8
             ? [
                 {
-                  subject: `Entity_${i + 1}`,
-                  predicate: 'associated_with',
-                  object: `ThreatActor_${Math.floor(Math.random() * 10)}`,
-                  confidence: Math.random() * 30 + 70,
+                  type: ['threat', 'sensitive', 'urgent'][
+                    Math.floor(Math.random() * 3)
+                  ] as any,
+                  reason:
+                    'High-priority intelligence item requiring immediate attention',
+                  flaggedBy: 'Automated Analysis System',
+                  flaggedAt: new Date(
+                    Date.now() - Math.random() * 60 * 60 * 1000,
+                  ),
                 },
               ]
             : [],
-      },
-      tags: ['osint', 'intelligence', 'threat'].concat(Math.random() > 0.5 ? ['urgent'] : []),
-      flags:
-        Math.random() > 0.8
-          ? [
-              {
-                type: ['threat', 'sensitive', 'urgent'][Math.floor(Math.random() * 3)] as any,
-                reason: 'High-priority intelligence item requiring immediate attention',
-                flaggedBy: 'Automated Analysis System',
-                flaggedAt: new Date(Date.now() - Math.random() * 60 * 60 * 1000),
-              },
-            ]
-          : [],
-    }));
+      }),
+    );
 
     setArtifacts(
-      mockArtifacts.sort((a, b) => b.metadata.timestamp.getTime() - a.metadata.timestamp.getTime()),
+      mockArtifacts.sort(
+        (a, b) =>
+          b.metadata.timestamp.getTime() - a.metadata.timestamp.getTime(),
+      ),
     );
   };
 
@@ -580,45 +684,66 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
       'critical',
     ];
 
-    const mockThreats: ThreatIndicator[] = Array.from({ length: 75 }, (_, i) => ({
-      id: `threat-${String(i + 1).padStart(3, '0')}`,
-      type: threatTypes[Math.floor(Math.random() * threatTypes.length)],
-      value: `ThreatIndicator_${i + 1}`,
-      severity: severityLevels[Math.floor(Math.random() * severityLevels.length)],
-      confidence: Math.random() * 40 + 60,
-      source: ['Intelligence Feed Alpha', 'OSINT Collection Beta', 'Threat Research Team'][
-        Math.floor(Math.random() * 3)
-      ],
-      firstSeen: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000),
-      lastSeen: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-      contexts: [
-        {
-          campaign:
-            Math.random() > 0.5 ? `Campaign_${Math.floor(Math.random() * 20) + 1}` : undefined,
-          malwareFamily:
-            Math.random() > 0.6
-              ? ['Emotet', 'Trickbot', 'Ryuk', 'Maze'][Math.floor(Math.random() * 4)]
-              : undefined,
-          attackVector: ['Email', 'Web', 'USB', 'Network'][Math.floor(Math.random() * 4)],
-          targetSector: ['Financial', 'Healthcare', 'Government', 'Technology'][
-            Math.floor(Math.random() * 4)
-          ],
-          geography: ['Global', 'North America', 'Europe', 'Asia-Pacific'][
-            Math.floor(Math.random() * 4)
-          ],
-          description: `Threat context description for indicator ${i + 1}`,
-        },
-      ],
-      mitreTactics: ['T1566.001', 'T1059.001', 'T1055', 'T1003.001'].slice(
-        0,
-        Math.floor(Math.random() * 3) + 1,
-      ),
-      associatedArtifacts: [
-        `artifact-${String(Math.floor(Math.random() * 150) + 1).padStart(3, '0')}`,
-      ],
-    }));
+    const mockThreats: ThreatIndicator[] = Array.from(
+      { length: 75 },
+      (_, i) => ({
+        id: `threat-${String(i + 1).padStart(3, '0')}`,
+        type: threatTypes[Math.floor(Math.random() * threatTypes.length)],
+        value: `ThreatIndicator_${i + 1}`,
+        severity:
+          severityLevels[Math.floor(Math.random() * severityLevels.length)],
+        confidence: Math.random() * 40 + 60,
+        source: [
+          'Intelligence Feed Alpha',
+          'OSINT Collection Beta',
+          'Threat Research Team',
+        ][Math.floor(Math.random() * 3)],
+        firstSeen: new Date(
+          Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000,
+        ),
+        lastSeen: new Date(
+          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+        ),
+        contexts: [
+          {
+            campaign:
+              Math.random() > 0.5
+                ? `Campaign_${Math.floor(Math.random() * 20) + 1}`
+                : undefined,
+            malwareFamily:
+              Math.random() > 0.6
+                ? ['Emotet', 'Trickbot', 'Ryuk', 'Maze'][
+                    Math.floor(Math.random() * 4)
+                  ]
+                : undefined,
+            attackVector: ['Email', 'Web', 'USB', 'Network'][
+              Math.floor(Math.random() * 4)
+            ],
+            targetSector: [
+              'Financial',
+              'Healthcare',
+              'Government',
+              'Technology',
+            ][Math.floor(Math.random() * 4)],
+            geography: ['Global', 'North America', 'Europe', 'Asia-Pacific'][
+              Math.floor(Math.random() * 4)
+            ],
+            description: `Threat context description for indicator ${i + 1}`,
+          },
+        ],
+        mitreTactics: ['T1566.001', 'T1059.001', 'T1055', 'T1003.001'].slice(
+          0,
+          Math.floor(Math.random() * 3) + 1,
+        ),
+        associatedArtifacts: [
+          `artifact-${String(Math.floor(Math.random() * 150) + 1).padStart(3, '0')}`,
+        ],
+      }),
+    );
 
-    setThreats(mockThreats.sort((a, b) => b.lastSeen.getTime() - a.lastSeen.getTime()));
+    setThreats(
+      mockThreats.sort((a, b) => b.lastSeen.getTime() - a.lastSeen.getTime()),
+    );
   };
 
   const generateMockAnalytics = () => {
@@ -716,10 +841,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
       const newArtifact: OSINTArtifact = {
         id: `artifact-${Date.now()}`,
         sourceId:
-          osintSources[Math.floor(Math.random() * osintSources.length)]?.id || 'twitter-api',
+          osintSources[Math.floor(Math.random() * osintSources.length)]?.id ||
+          'twitter-api',
         sourceName: 'Real-time Collection',
         title: 'New Intelligence Artifact',
-        content: 'Real-time intelligence artifact discovered through automated collection',
+        content:
+          'Real-time intelligence artifact discovered through automated collection',
         contentType: 'social_post',
         metadata: {
           language: 'en',
@@ -732,7 +859,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
         analysis: {
           relevanceScore: Math.random() * 40 + 60,
           credibilityScore: Math.random() * 50 + 50,
-          riskLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as any,
+          riskLevel: ['low', 'medium', 'high'][
+            Math.floor(Math.random() * 3)
+          ] as any,
           entityExtractions: [],
           keyPhrases: ['real-time intelligence'],
           relationships: [],
@@ -751,14 +880,17 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
         id: `threat-${Date.now()}`,
         type: 'ioc',
         value: `RealTime_IOC_${Date.now()}`,
-        severity: ['medium', 'high', 'critical'][Math.floor(Math.random() * 3)] as any,
+        severity: ['medium', 'high', 'critical'][
+          Math.floor(Math.random() * 3)
+        ] as any,
         confidence: Math.random() * 30 + 70,
         source: 'Real-time OSINT Collection',
         firstSeen: new Date(),
         lastSeen: new Date(),
         contexts: [
           {
-            description: 'Threat indicator discovered through real-time OSINT collection',
+            description:
+              'Threat indicator discovered through real-time OSINT collection',
             attackVector: 'Unknown',
             targetSector: 'Multiple',
           },
@@ -771,7 +903,11 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
     }
   };
 
-  const createNewCollection = (name: string, description: string, queries: string[]) => {
+  const createNewCollection = (
+    name: string,
+    description: string,
+    queries: string[],
+  ) => {
     const newCollection: OSINTCollection = {
       id: `collection-${Date.now()}`,
       name,
@@ -851,13 +987,17 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
       searchQuery === '' ||
       artifact.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       artifact.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      artifact.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      artifact.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
 
     const matchesCategory =
       filterCategory === 'all' ||
-      osintSources.find((s) => s.id === artifact.sourceId)?.category === filterCategory;
+      osintSources.find((s) => s.id === artifact.sourceId)?.category ===
+        filterCategory;
 
-    const matchesRisk = filterRisk === 'all' || artifact.analysis.riskLevel === filterRisk;
+    const matchesRisk =
+      filterRisk === 'all' || artifact.analysis.riskLevel === filterRisk;
 
     return matchesSearch && matchesCategory && matchesRisk;
   });
@@ -880,7 +1020,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
       {/* Header */}
       <div className="mb-6 border-b pb-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">OSINT Collection & Analysis Framework</h2>
+          <h2 className="text-2xl font-bold">
+            OSINT Collection & Analysis Framework
+          </h2>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div
@@ -891,7 +1033,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
               </span>
             </div>
             <button
-              onClick={isCollecting ? stopRealTimeCollection : startRealTimeCollection}
+              onClick={
+                isCollecting ? stopRealTimeCollection : startRealTimeCollection
+              }
               className={`px-4 py-2 rounded-md text-sm ${
                 isCollecting
                   ? 'bg-red-100 text-red-700 hover:bg-red-200'
@@ -920,7 +1064,8 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
             onClick={() => setActiveView('collections')}
             className={`px-4 py-2 rounded-md whitespace-nowrap ${activeView === 'collections' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
           >
-            📂 Collections ({collections.filter((c) => c.status === 'active').length})
+            📂 Collections (
+            {collections.filter((c) => c.status === 'active').length})
           </button>
           <button
             onClick={() => setActiveView('artifacts')}
@@ -933,7 +1078,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
             className={`px-4 py-2 rounded-md whitespace-nowrap ${activeView === 'threats' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
           >
             ⚠️ Threats (
-            {threats.filter((t) => t.severity === 'high' || t.severity === 'critical').length})
+            {
+              threats.filter(
+                (t) => t.severity === 'high' || t.severity === 'critical',
+              ).length
+            }
+            )
           </button>
           <button
             onClick={() => setActiveView('analytics')}
@@ -950,12 +1100,16 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg border p-4">
-              <div className="text-2xl font-bold text-blue-600">{artifacts.length}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {artifacts.length}
+              </div>
               <div className="text-sm text-gray-600">Total Artifacts</div>
               <div className="text-xs text-gray-500 mt-1">
                 {
                   artifacts.filter(
-                    (a) => a.analysis.riskLevel === 'high' || a.analysis.riskLevel === 'critical',
+                    (a) =>
+                      a.analysis.riskLevel === 'high' ||
+                      a.analysis.riskLevel === 'critical',
                   ).length
                 }{' '}
                 high-risk
@@ -976,7 +1130,11 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
               </div>
               <div className="text-sm text-gray-600">Running Collections</div>
               <div className="text-xs text-gray-500 mt-1">
-                {collections.reduce((sum, c) => sum + c.searchQueries.length, 0)} queries
+                {collections.reduce(
+                  (sum, c) => sum + c.searchQueries.length,
+                  0,
+                )}{' '}
+                queries
               </div>
             </div>
             <div className="bg-white rounded-lg border p-4">
@@ -985,26 +1143,37 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
               </div>
               <div className="text-sm text-gray-600">Critical Threats</div>
               <div className="text-xs text-gray-500 mt-1">
-                {threats.filter((t) => t.severity === 'high').length} high severity
+                {threats.filter((t) => t.severity === 'high').length} high
+                severity
               </div>
             </div>
           </div>
 
           {/* Source Categories Overview */}
           <div className="bg-white rounded-lg border p-6">
-            <h3 className="text-lg font-semibold mb-4">Collection Sources by Category</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Collection Sources by Category
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {sourceCategories.map((category) => {
                 const sourceCount = osintSources.filter(
                   (s) => s.category === category.id && s.isActive,
                 ).length;
                 return (
-                  <div key={category.id} className="text-center p-3 border rounded-lg">
-                    <div className="text-2xl mb-2" style={{ color: category.color }}>
+                  <div
+                    key={category.id}
+                    className="text-center p-3 border rounded-lg"
+                  >
+                    <div
+                      className="text-2xl mb-2"
+                      style={{ color: category.color }}
+                    >
                       {category.icon}
                     </div>
                     <div className="font-medium text-sm">{category.name}</div>
-                    <div className="text-xs text-gray-500">{sourceCount} active</div>
+                    <div className="text-xs text-gray-500">
+                      {sourceCount} active
+                    </div>
                   </div>
                 );
               })}
@@ -1014,11 +1183,15 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
           {/* Recent Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg border p-4">
-              <h3 className="font-semibold mb-4">Recent High-Priority Artifacts</h3>
+              <h3 className="font-semibold mb-4">
+                Recent High-Priority Artifacts
+              </h3>
               <div className="space-y-3">
                 {artifacts
                   .filter(
-                    (a) => a.analysis.riskLevel === 'high' || a.analysis.riskLevel === 'critical',
+                    (a) =>
+                      a.analysis.riskLevel === 'high' ||
+                      a.analysis.riskLevel === 'critical',
                   )
                   .slice(0, 5)
                   .map((artifact) => (
@@ -1027,8 +1200,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                       className="flex items-start justify-between p-3 border rounded-lg"
                     >
                       <div className="flex-1">
-                        <div className="font-medium text-sm">{artifact.title}</div>
-                        <div className="text-xs text-gray-600">{artifact.sourceName}</div>
+                        <div className="font-medium text-sm">
+                          {artifact.title}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {artifact.sourceName}
+                        </div>
                         <div className="text-xs text-gray-500">
                           {artifact.metadata.timestamp.toLocaleString()}
                         </div>
@@ -1084,10 +1261,15 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                     <div
                       className="text-2xl"
                       style={{
-                        color: sourceCategories.find((c) => c.id === source.category)?.color,
+                        color: sourceCategories.find(
+                          (c) => c.id === source.category,
+                        )?.color,
                       }}
                     >
-                      {sourceCategories.find((c) => c.id === source.category)?.icon}
+                      {
+                        sourceCategories.find((c) => c.id === source.category)
+                          ?.icon
+                      }
                     </div>
                     <div>
                       <h4 className="font-semibold">{source.name}</h4>
@@ -1098,7 +1280,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                   </div>
                   <span
                     className={`px-2 py-1 text-xs rounded ${
-                      source.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                      source.isActive
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-700'
                     }`}
                   >
                     {source.isActive ? 'ACTIVE' : 'INACTIVE'}
@@ -1113,7 +1297,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                   <div>
                     <span className="text-gray-600">Last Collected:</span>
                     <div className="font-medium text-xs">
-                      {source.lastCollected ? source.lastCollected.toLocaleString() : 'Never'}
+                      {source.lastCollected
+                        ? source.lastCollected.toLocaleString()
+                        : 'Never'}
                     </div>
                   </div>
                 </div>
@@ -1122,29 +1308,36 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                   <span className="text-xs text-gray-600">Data Quality:</span>
                   <div className="grid grid-cols-2 gap-2 mt-1">
                     <div className="text-xs">
-                      Reliability: {(source.dataQuality.reliability * 100).toFixed(0)}%
+                      Reliability:{' '}
+                      {(source.dataQuality.reliability * 100).toFixed(0)}%
                     </div>
                     <div className="text-xs">
-                      Timeliness: {(source.dataQuality.timeliness * 100).toFixed(0)}%
+                      Timeliness:{' '}
+                      {(source.dataQuality.timeliness * 100).toFixed(0)}%
                     </div>
                   </div>
                 </div>
 
                 {source.credentials && (
                   <div className="text-xs text-gray-600">
-                    <div>Rate Limit: {source.credentials.rateLimits.requestsPerHour}/hour</div>
+                    <div>
+                      Rate Limit:{' '}
+                      {source.credentials.rateLimits.requestsPerHour}/hour
+                    </div>
                   </div>
                 )}
 
                 <div className="mt-3 flex flex-wrap gap-1">
-                  {source.collectionRules.keywords.slice(0, 3).map((keyword) => (
-                    <span
-                      key={keyword}
-                      className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
-                    >
-                      {keyword}
-                    </span>
-                  ))}
+                  {source.collectionRules.keywords
+                    .slice(0, 3)
+                    .map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                      >
+                        {keyword}
+                      </span>
+                    ))}
                   {source.collectionRules.keywords.length > 3 && (
                     <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
                       +{source.collectionRules.keywords.length - 3} more
@@ -1188,7 +1381,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                 </div>
                 <div>
                   <span className="text-gray-600">New Today:</span>
-                  <div className="font-medium text-green-600">{collection.statistics.newToday}</div>
+                  <div className="font-medium text-green-600">
+                    {collection.statistics.newToday}
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-600">High Risk:</span>
@@ -1199,7 +1394,10 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                 <div>
                   <span className="text-gray-600">Quality:</span>
                   <div className="font-medium">
-                    {(collection.statistics.averageCredibility * 100).toFixed(0)}%
+                    {(collection.statistics.averageCredibility * 100).toFixed(
+                      0,
+                    )}
+                    %
                   </div>
                 </div>
               </div>
@@ -1211,8 +1409,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                     <div key={index} className="p-2 bg-gray-50 rounded text-sm">
                       <div className="font-mono text-xs">{query.query}</div>
                       <div className="text-xs text-gray-600 mt-1">
-                        Priority: {query.priority} • Frequency: {query.schedule.frequency} •
-                        Sources: {query.sources.length}
+                        Priority: {query.priority} • Frequency:{' '}
+                        {query.schedule.frequency} • Sources:{' '}
+                        {query.sources.length}
                       </div>
                     </div>
                   ))}
@@ -1225,8 +1424,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
               </div>
 
               <div className="text-xs text-gray-600">
-                Created by {collection.createdBy} on {collection.createdAt.toLocaleDateString()} •
-                Last updated: {collection.lastUpdated.toLocaleString()}
+                Created by {collection.createdBy} on{' '}
+                {collection.createdAt.toLocaleDateString()} • Last updated:{' '}
+                {collection.lastUpdated.toLocaleString()}
               </div>
             </div>
           ))}
@@ -1234,9 +1434,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
           {collections.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <div className="text-4xl mb-4">📂</div>
-              <h3 className="text-lg font-medium mb-2">No collections configured</h3>
+              <h3 className="text-lg font-medium mb-2">
+                No collections configured
+              </h3>
               <p className="mb-4">
-                Create your first OSINT collection to start gathering intelligence
+                Create your first OSINT collection to start gathering
+                intelligence
               </p>
               <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                 Create Collection
@@ -1290,7 +1493,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <h4 className="font-semibold">{artifact.title}</h4>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{artifact.content}</p>
+                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                      {artifact.content}
+                    </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 ml-4">
                     <span
@@ -1335,21 +1540,26 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                   <div className="mb-3">
                     <span className="text-xs text-gray-600">Entities:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {artifact.analysis.entityExtractions.slice(0, 3).map((entity, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded"
-                        >
-                          {entity.type}: {entity.value}
-                        </span>
-                      ))}
+                      {artifact.analysis.entityExtractions
+                        .slice(0, 3)
+                        .map((entity, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded"
+                          >
+                            {entity.type}: {entity.value}
+                          </span>
+                        ))}
                     </div>
                   </div>
                 )}
 
                 <div className="flex flex-wrap gap-1">
                   {artifact.tags.map((tag) => (
-                    <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                    <span
+                      key={tag}
+                      className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                    >
                       {tag}
                     </span>
                   ))}
@@ -1373,8 +1583,12 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
             {filteredArtifacts.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 <div className="text-4xl mb-4">📄</div>
-                <h3 className="text-lg font-medium mb-2">No artifacts match your filters</h3>
-                <p>Try adjusting your search criteria or collection parameters</p>
+                <h3 className="text-lg font-medium mb-2">
+                  No artifacts match your filters
+                </h3>
+                <p>
+                  Try adjusting your search criteria or collection parameters
+                </p>
               </div>
             )}
           </div>
@@ -1426,7 +1640,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                     </div>
                   </div>
                   <div className="text-right text-sm">
-                    <div className="font-medium">{threat.confidence.toFixed(0)}% confidence</div>
+                    <div className="font-medium">
+                      {threat.confidence.toFixed(0)}% confidence
+                    </div>
                     <div className="text-xs text-gray-500">
                       {threat.lastSeen.toLocaleDateString()}
                     </div>
@@ -1440,11 +1656,15 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                   </div>
                   <div>
                     <span className="text-gray-600">First Seen:</span>
-                    <div className="font-medium">{threat.firstSeen.toLocaleDateString()}</div>
+                    <div className="font-medium">
+                      {threat.firstSeen.toLocaleDateString()}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Associated Artifacts:</span>
-                    <div className="font-medium">{threat.associatedArtifacts.length}</div>
+                    <div className="font-medium">
+                      {threat.associatedArtifacts.length}
+                    </div>
                   </div>
                 </div>
 
@@ -1456,7 +1676,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                         Campaign: {threat.contexts[0].campaign}
                       </div>
                     )}
-                    <div className="text-sm text-gray-700">{threat.contexts[0].description}</div>
+                    <div className="text-sm text-gray-700">
+                      {threat.contexts[0].description}
+                    </div>
                   </div>
                 )}
 
@@ -1478,7 +1700,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
             {filteredThreats.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 <div className="text-4xl mb-4">⚠️</div>
-                <h3 className="text-lg font-medium mb-2">No threats match your filters</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  No threats match your filters
+                </h3>
                 <p>Adjust your search criteria to see more threat indicators</p>
               </div>
             )}
@@ -1490,7 +1714,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
       {activeView === 'analytics' && analytics && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg border p-6">
-            <h3 className="text-lg font-semibold mb-4">Collection Analytics Summary</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Collection Analytics Summary
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
@@ -1524,10 +1750,15 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
               <h4 className="font-semibold mb-3">Top Topics</h4>
               <div className="space-y-2">
                 {analytics.summary.topTopics.map((topic) => (
-                  <div key={topic.topic} className="flex items-center justify-between">
+                  <div
+                    key={topic.topic}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm">{topic.topic}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{topic.count.toLocaleString()}</span>
+                      <span className="text-sm font-medium">
+                        {topic.count.toLocaleString()}
+                      </span>
                       <span
                         className={`text-xs px-1 py-0.5 rounded ${
                           topic.trend === 'up'
@@ -1537,7 +1768,11 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
                               : 'bg-gray-100 text-gray-700'
                         }`}
                       >
-                        {topic.trend === 'up' ? '↗' : topic.trend === 'down' ? '↘' : '→'}
+                        {topic.trend === 'up'
+                          ? '↗'
+                          : topic.trend === 'down'
+                            ? '↘'
+                            : '→'}
                       </span>
                     </div>
                   </div>
@@ -1548,20 +1783,27 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
             <div className="bg-white rounded-lg border p-4">
               <h4 className="font-semibold mb-3">Geographic Distribution</h4>
               <div className="space-y-2">
-                {analytics.summary.geographicDistribution.slice(0, 5).map((geo) => (
-                  <div key={geo.country} className="flex items-center justify-between">
-                    <span className="text-sm">{geo.country}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gray-200 rounded-full">
-                        <div
-                          className="h-full bg-blue-600 rounded-full"
-                          style={{ width: `${geo.percentage}%` }}
-                        ></div>
+                {analytics.summary.geographicDistribution
+                  .slice(0, 5)
+                  .map((geo) => (
+                    <div
+                      key={geo.country}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-sm">{geo.country}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gray-200 rounded-full">
+                          <div
+                            className="h-full bg-blue-600 rounded-full"
+                            style={{ width: `${geo.percentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium w-8">
+                          {geo.percentage.toFixed(0)}%
+                        </span>
                       </div>
-                      <span className="text-sm font-medium w-8">{geo.percentage.toFixed(0)}%</span>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
 
@@ -1569,11 +1811,18 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
               <h4 className="font-semibold mb-3">Language Distribution</h4>
               <div className="space-y-2">
                 {analytics.summary.languageDistribution.map((lang) => (
-                  <div key={lang.language} className="flex items-center justify-between">
+                  <div
+                    key={lang.language}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-sm">{lang.language}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{lang.count.toLocaleString()}</span>
-                      <span className="text-xs text-gray-500">({lang.percentage.toFixed(1)}%)</span>
+                      <span className="text-sm font-medium">
+                        {lang.count.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ({lang.percentage.toFixed(1)}%)
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1583,16 +1832,21 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
             <div className="bg-white rounded-lg border p-4">
               <h4 className="font-semibold mb-3">Threat Overview</h4>
               <div className="space-y-2">
-                {Object.entries(analytics.threats.riskDistribution).map(([level, count]) => (
-                  <div key={level} className="flex items-center justify-between">
-                    <span className="text-sm capitalize">{level}:</span>
-                    <span
-                      className={`px-2 py-1 text-xs rounded font-medium ${getRiskColor(level)}`}
+                {Object.entries(analytics.threats.riskDistribution).map(
+                  ([level, count]) => (
+                    <div
+                      key={level}
+                      className="flex items-center justify-between"
                     >
-                      {count}
-                    </span>
-                  </div>
-                ))}
+                      <span className="text-sm capitalize">{level}:</span>
+                      <span
+                        className={`px-2 py-1 text-xs rounded font-medium ${getRiskColor(level)}`}
+                      >
+                        {count}
+                      </span>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
           </div>

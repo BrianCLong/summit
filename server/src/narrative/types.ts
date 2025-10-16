@@ -1,4 +1,4 @@
-export type NarrativeGeneratorMode = "rule-based" | "llm";
+export type NarrativeGeneratorMode = 'rule-based' | 'llm';
 
 export interface RelationshipEdge {
   targetId: string;
@@ -12,8 +12,8 @@ export interface EntityThemeVector {
 export interface SimulationEntity {
   id: string;
   name: string;
-  type: "actor" | "group";
-  alignment: "ally" | "neutral" | "opposition";
+  type: 'actor' | 'group';
+  alignment: 'ally' | 'neutral' | 'opposition';
   influence: number;
   sentiment: number;
   volatility: number;
@@ -25,7 +25,7 @@ export interface SimulationEntity {
 
 export interface EntityDynamicState extends SimulationEntity {
   pressure: number;
-  trend: "rising" | "falling" | "stable";
+  trend: 'rising' | 'falling' | 'stable';
   lastEventId?: string;
   lastUpdatedTick: number;
   history: Array<{
@@ -38,14 +38,19 @@ export interface EntityDynamicState extends SimulationEntity {
 export interface TimeVariantParameter {
   name: string;
   value: number;
-  trend: "rising" | "falling" | "stable";
+  trend: 'rising' | 'falling' | 'stable';
   history: Array<{
     tick: number;
     value: number;
   }>;
 }
 
-export type NarrativeEventType = "social" | "political" | "information" | "intervention" | "system";
+export type NarrativeEventType =
+  | 'social'
+  | 'political'
+  | 'information'
+  | 'intervention'
+  | 'system';
 
 export interface NarrativeEvent {
   id: string;
@@ -68,7 +73,7 @@ export interface NarrativeEvent {
 export interface StoryArc {
   theme: string;
   momentum: number;
-  outlook: "improving" | "degrading" | "steady";
+  outlook: 'improving' | 'degrading' | 'steady';
   confidence: number;
   keyEntities: string[];
   narrative: string;

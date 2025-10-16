@@ -11,7 +11,8 @@ export interface EngagementCascadeConfig {
   synergyScale?: number;
 }
 
-interface ResolvedEngagementCascadeConfig extends Required<EngagementCascadeConfig> {}
+interface ResolvedEngagementCascadeConfig
+  extends Required<EngagementCascadeConfig> {}
 
 interface CascadeTier {
   name: string;
@@ -117,7 +118,11 @@ const computeBaselineLatency = (
   const collaborationBoost = config.collaborationIntensity * 180;
 
   const rawLatency =
-    1800 - collaborationBoost - synergyEntropy * 55 - hybridBonus - stabilityBonus;
+    1800 -
+    collaborationBoost -
+    synergyEntropy * 55 -
+    hybridBonus -
+    stabilityBonus;
 
   return clamp(rawLatency, 420, 2400);
 };
@@ -126,22 +131,43 @@ const computeBaselineCompute = (
   baselineLatency: number,
   config: ResolvedEngagementCascadeConfig,
 ): number => {
-  const amplificationWeight = clamp(config.engagementAmplification / 200, 0.2, 1.2);
+  const amplificationWeight = clamp(
+    config.engagementAmplification / 200,
+    0.2,
+    1.2,
+  );
   return baselineLatency * (1.1 + amplificationWeight * 0.45);
 };
 
 const computeSpeculativeHitRate = (
   config: ResolvedEngagementCascadeConfig,
 ): number => {
-  const amplificationFactor = clamp(config.engagementAmplification / 120, 0, 1.1);
-  const intensityFactor = clamp((config.influenceIntensity - 0.5) / 2, -0.2, 0.35);
+  const amplificationFactor = clamp(
+    config.engagementAmplification / 120,
+    0,
+    1.1,
+  );
+  const intensityFactor = clamp(
+    (config.influenceIntensity - 0.5) / 2,
+    -0.2,
+    0.35,
+  );
   const dataSyncBonus = config.globalDataSync ? 0.05 : -0.03;
-  const integrityBonus = clamp(Math.log10(1 / config.integrityThreshold) * 0.0075, 0, 0.12);
+  const integrityBonus = clamp(
+    Math.log10(1 / config.integrityThreshold) * 0.0075,
+    0,
+    0.12,
+  );
   const hybridBonus = config.hybridCoordination ? 0.03 : -0.02;
 
   const base = 0.58;
   const hitRate =
-    base + amplificationFactor * 0.2 + intensityFactor + dataSyncBonus + integrityBonus + hybridBonus;
+    base +
+    amplificationFactor * 0.2 +
+    intensityFactor +
+    dataSyncBonus +
+    integrityBonus +
+    hybridBonus;
 
   return clamp(hitRate, 0.55, 0.97);
 };
@@ -186,22 +212,41 @@ export function engagementCascade(
   const resolvedConfig = resolveConfig(config);
 
   const baselineLatency = computeBaselineLatency(resolvedConfig);
-  const baselineCompute = computeBaselineCompute(baselineLatency, resolvedConfig);
+  const baselineCompute = computeBaselineCompute(
+    baselineLatency,
+    resolvedConfig,
+  );
 
   const speculativeHitRate = computeSpeculativeHitRate(resolvedConfig);
-  const verificationReuse = computeVerificationReuse(resolvedConfig, speculativeHitRate);
+  const verificationReuse = computeVerificationReuse(
+    resolvedConfig,
+    speculativeHitRate,
+  );
 
   const draftLatency = computeDraftLatency(baselineLatency, resolvedConfig);
-  const verifierLatency = computeVerifierLatency(baselineLatency, verificationReuse);
-  const fallbackLatency = computeFallbackLatency(baselineLatency, speculativeHitRate);
+  const verifierLatency = computeVerifierLatency(
+    baselineLatency,
+    verificationReuse,
+  );
+  const fallbackLatency = computeFallbackLatency(
+    baselineLatency,
+    speculativeHitRate,
+  );
 
-  const verificationEffectiveLatency = verifierLatency * (1 - verificationReuse);
+  const verificationEffectiveLatency =
+    verifierLatency * (1 - verificationReuse);
   const fallbackRate = 1 - speculativeHitRate;
 
   const expectedLatency =
-    draftLatency + verificationEffectiveLatency + fallbackLatency * fallbackRate;
+    draftLatency +
+    verificationEffectiveLatency +
+    fallbackLatency * fallbackRate;
 
-  const amplificationFactor = clamp(resolvedConfig.engagementAmplification / 150, 0, 1);
+  const amplificationFactor = clamp(
+    resolvedConfig.engagementAmplification / 150,
+    0,
+    1,
+  );
 
   const draftCompute = draftLatency * (0.45 - amplificationFactor * 0.12);
   const verifierCompute = verifierLatency * (1 - verificationReuse) * 0.9;
@@ -253,7 +298,9 @@ export function engagementCascade(
   const guardrails: EngagementCascadeGuardrails = {
     fallbackRate: toFixedNumber(fallbackRate, 3),
     minimumConfidence: toFixedNumber(0.78 + verificationReuse * 0.1, 3),
-    evaluationWindowMs: Math.round(90000 / resolvedConfig.collaborationIntensity),
+    evaluationWindowMs: Math.round(
+      90000 / resolvedConfig.collaborationIntensity,
+    ),
     abortConditions: [
       'Latency regression beyond 10% of monolithic baseline.',
       resolvedConfig.complianceStandard
@@ -303,7 +350,8 @@ export function engagementCascade(
       {
         name: 'verifier-latency-regression',
         severity: 'medium',
-        trigger: 'Verifier effective latency exceeds baseline by 15% for 3 consecutive intervals',
+        trigger:
+          'Verifier effective latency exceeds baseline by 15% for 3 consecutive intervals',
       },
       {
         name: 'fallback-surge',
@@ -337,7 +385,10 @@ export function engagementCascade(
   };
 }
 
-function computePrefillTokens(hitRate: number, amplificationFactor: number): number {
+function computePrefillTokens(
+  hitRate: number,
+  amplificationFactor: number,
+): number {
   const baseTokens = 180;
   const speculativeBonus = hitRate * 140;
   const amplificationBonus = amplificationFactor * 120;

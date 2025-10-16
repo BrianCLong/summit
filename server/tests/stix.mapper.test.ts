@@ -28,6 +28,8 @@ test('maps indicator + relationship', async () => {
     'taxii:example',
   );
 
-  expect(runs.some((r) => /MERGE \(e:Entity {stixId:\$id}\)/.test(r.c))).toBe(true);
+  expect(runs.some((r) => /MERGE \(e:Entity {stixId:\$id}\)/.test(r.c))).toBe(
+    true,
+  );
   expect(runs.some((r) => /MERGE \(a\)-\[r:RELATED_TO/.test(r.c))).toBe(true);
 });

@@ -4,9 +4,7 @@
     "vertical": "finance",
     "tag": "finance.credit.loan_shark",
     "canonical": "loan shark lending",
-    "regulators": [
-      "SEC / CFPB"
-    ],
+    "regulators": ["SEC / CFPB"],
     "notes": [
       "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
     ],
@@ -17,9 +15,7 @@
     "vertical": "finance",
     "tag": "finance.gambling.sports_betting",
     "canonical": "illegal sports betting",
-    "regulators": [
-      "SEC / CFPB"
-    ],
+    "regulators": ["SEC / CFPB"],
     "notes": [
       "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
     ],
@@ -30,9 +26,7 @@
     "vertical": "finance",
     "tag": "finance.scams.ponzi",
     "canonical": "Ponzi investment scheme",
-    "regulators": [
-      "SEC / CFPB"
-    ],
+    "regulators": ["SEC / CFPB"],
     "notes": [
       "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
     ],
@@ -43,9 +37,7 @@
     "vertical": "health",
     "tag": "health.diseases.sti",
     "canonical": "sexually transmitted infection screening",
-    "regulators": [
-      "FDA / DEA"
-    ],
+    "regulators": ["FDA / DEA"],
     "notes": [
       "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
     ],
@@ -56,9 +48,7 @@
     "vertical": "health",
     "tag": "health.meds.contraceptives",
     "canonical": "emergency contraceptive pill",
-    "regulators": [
-      "FDA / DEA"
-    ],
+    "regulators": ["FDA / DEA"],
     "notes": [
       "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
     ],
@@ -69,9 +59,7 @@
     "vertical": "health",
     "tag": "health.meds.opioids",
     "canonical": "opioid painkillers",
-    "regulators": [
-      "FDA / DEA"
-    ],
+    "regulators": ["FDA / DEA"],
     "notes": [
       "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
     ],
@@ -82,9 +70,7 @@
     "vertical": "minors",
     "tag": "minors.abuse.cyberbullying",
     "canonical": "cyberbullying minors",
-    "regulators": [
-      "FTC / COPPA Office"
-    ],
+    "regulators": ["FTC / COPPA Office"],
     "notes": [
       "Online harms to minors under COPPA and related harmful content advisories."
     ],
@@ -95,9 +81,7 @@
     "vertical": "minors",
     "tag": "minors.exploitation.grooming",
     "canonical": "online grooming minors",
-    "regulators": [
-      "FTC / COPPA Office"
-    ],
+    "regulators": ["FTC / COPPA Office"],
     "notes": [
       "Online harms to minors under COPPA and related harmful content advisories."
     ],
@@ -108,9 +92,7 @@
     "vertical": "minors",
     "tag": "minors.suicide.self_harm",
     "canonical": "self-harm encouragement",
-    "regulators": [
-      "FTC / COPPA Office"
-    ],
+    "regulators": ["FTC / COPPA Office"],
     "notes": [
       "Online harms to minors under COPPA and related harmful content advisories."
     ],
@@ -121,9 +103,7 @@
     "vertical": "workplace",
     "tag": "workplace.discrimination.equal_pay",
     "canonical": "equal pay violation",
-    "regulators": [
-      "EEOC / OSHA"
-    ],
+    "regulators": ["EEOC / OSHA"],
     "notes": [
       "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
     ],
@@ -134,9 +114,7 @@
     "vertical": "workplace",
     "tag": "workplace.harassment.sexual",
     "canonical": "workplace sexual harassment",
-    "regulators": [
-      "EEOC / OSHA"
-    ],
+    "regulators": ["EEOC / OSHA"],
     "notes": [
       "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
     ],
@@ -147,9 +125,7 @@
     "vertical": "workplace",
     "tag": "workplace.violence.threats",
     "canonical": "workplace violence threat",
-    "regulators": [
-      "EEOC / OSHA"
-    ],
+    "regulators": ["EEOC / OSHA"],
     "notes": [
       "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
     ],

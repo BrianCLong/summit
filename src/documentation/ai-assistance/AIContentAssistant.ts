@@ -1,6 +1,6 @@
 /**
  * AI-Powered Content Assistance and Automation Tools
- * 
+ *
  * Provides intelligent content creation and improvement features:
  * - Automated content generation from code and APIs
  * - Smart content suggestions and improvements
@@ -51,7 +51,13 @@ export interface AIModel {
 }
 
 export interface ContentGenerationRequest {
-  type: 'api_docs' | 'tutorial' | 'reference' | 'guide' | 'example' | 'changelog';
+  type:
+    | 'api_docs'
+    | 'tutorial'
+    | 'reference'
+    | 'guide'
+    | 'example'
+    | 'changelog';
   source: 'code' | 'api_spec' | 'requirements' | 'existing_content';
   input: string | CodeAnalysis | APISpecification;
   targetAudience: 'beginner' | 'intermediate' | 'advanced' | 'all';
@@ -98,7 +104,13 @@ export interface ContentSuggestion {
   id: string;
   type: 'improvement' | 'addition' | 'correction' | 'enhancement';
   priority: 'low' | 'medium' | 'high' | 'critical';
-  category: 'grammar' | 'style' | 'structure' | 'content' | 'examples' | 'accessibility';
+  category:
+    | 'grammar'
+    | 'style'
+    | 'structure'
+    | 'content'
+    | 'examples'
+    | 'accessibility';
   title: string;
   description: string;
   currentContent?: string;
@@ -132,7 +144,13 @@ export interface QualityAssessment {
 }
 
 export interface QualityIssue {
-  type: 'grammar' | 'spelling' | 'style' | 'structure' | 'technical' | 'accessibility';
+  type:
+    | 'grammar'
+    | 'spelling'
+    | 'style'
+    | 'structure'
+    | 'technical'
+    | 'accessibility';
   severity: 'info' | 'warning' | 'error' | 'critical';
   message: string;
   position?: { line: number; column: number };
@@ -144,7 +162,12 @@ export interface ContentGap {
   id: string;
   title: string;
   description: string;
-  category: 'missing_section' | 'insufficient_examples' | 'outdated_content' | 'broken_links' | 'incomplete_api_docs';
+  category:
+    | 'missing_section'
+    | 'insufficient_examples'
+    | 'outdated_content'
+    | 'broken_links'
+    | 'incomplete_api_docs';
   priority: 'low' | 'medium' | 'high' | 'critical';
   affectedPaths: string[];
   suggestedAction: string;
@@ -184,7 +207,9 @@ export class AIContentAssistant extends EventEmitter {
     super();
     this.config = config;
     this.codeAnalyzer = new CodeAnalyzer();
-    this.contentQualityAnalyzer = new ContentQualityAnalyzer(config.models.contentReview);
+    this.contentQualityAnalyzer = new ContentQualityAnalyzer(
+      config.models.contentReview,
+    );
     this.gapAnalyzer = new ContentGapAnalyzer();
   }
 
@@ -204,7 +229,6 @@ export class AIContentAssistant extends EventEmitter {
 
       console.log('✅ AI content assistant initialized');
       this.emit('initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize AI assistant:', error);
       throw error;
@@ -214,7 +238,9 @@ export class AIContentAssistant extends EventEmitter {
   /**
    * Generate content automatically
    */
-  public async generateContent(request: ContentGenerationRequest): Promise<GeneratedContent> {
+  public async generateContent(
+    request: ContentGenerationRequest,
+  ): Promise<GeneratedContent> {
     console.log(`📝 Generating ${request.type} content...`);
 
     const client = this.modelClients.get('contentGeneration');
@@ -234,7 +260,10 @@ export class AIContentAssistant extends EventEmitter {
       const generatedText = await client.generate(prompt);
 
       // Post-process and validate
-      const processedContent = await this.postProcessContent(generatedText, request);
+      const processedContent = await this.postProcessContent(
+        generatedText,
+        request,
+      );
 
       const result: GeneratedContent = {
         id: this.generateContentId(),
@@ -246,16 +275,15 @@ export class AIContentAssistant extends EventEmitter {
           prompt: prompt,
           targetAudience: request.targetAudience,
           language: request.language,
-          format: request.format
+          format: request.format,
         },
         quality: await this.assessContentQuality(processedContent),
         suggestions: await this.getSuggestions(processedContent),
-        tags: await this.generateSmartTags(processedContent)
+        tags: await this.generateSmartTags(processedContent),
       };
 
       this.emit('content_generated', result);
       return result;
-
     } catch (error) {
       console.error('❌ Content generation failed:', error);
       throw new Error(`Content generation failed: ${error.message}`);
@@ -265,7 +293,10 @@ export class AIContentAssistant extends EventEmitter {
   /**
    * Get content improvement suggestions
    */
-  public async getSuggestions(content: string, contentType?: string): Promise<ContentSuggestion[]> {
+  public async getSuggestions(
+    content: string,
+    contentType?: string,
+  ): Promise<ContentSuggestion[]> {
     console.log('💡 Analyzing content for improvements...');
 
     const suggestions: ContentSuggestion[] = [];
@@ -296,7 +327,10 @@ export class AIContentAssistant extends EventEmitter {
   /**
    * Assess content quality
    */
-  public async assessContentQuality(content: string, context?: any): Promise<QualityAssessment> {
+  public async assessContentQuality(
+    content: string,
+    context?: any,
+  ): Promise<QualityAssessment> {
     console.log('📊 Assessing content quality...');
 
     return await this.contentQualityAnalyzer.assess(content, context);
@@ -308,7 +342,7 @@ export class AIContentAssistant extends EventEmitter {
   public async detectContentGaps(
     existingContent: Map<string, string>,
     codebase?: CodeAnalysis,
-    apiSpec?: APISpecification
+    apiSpec?: APISpecification,
   ): Promise<ContentGap[]> {
     console.log('🔍 Detecting content gaps...');
 
@@ -316,31 +350,44 @@ export class AIContentAssistant extends EventEmitter {
 
     // Analyze missing API documentation
     if (apiSpec) {
-      const apiGaps = await this.detectAPIDocumentationGaps(existingContent, apiSpec);
+      const apiGaps = await this.detectAPIDocumentationGaps(
+        existingContent,
+        apiSpec,
+      );
       gaps.push(...apiGaps);
     }
 
     // Analyze missing code documentation
     if (codebase) {
-      const codeGaps = await this.detectCodeDocumentationGaps(existingContent, codebase);
+      const codeGaps = await this.detectCodeDocumentationGaps(
+        existingContent,
+        codebase,
+      );
       gaps.push(...codeGaps);
     }
 
     // Analyze content completeness
-    const completenessGaps = await this.analyzeContentCompleteness(existingContent);
+    const completenessGaps =
+      await this.analyzeContentCompleteness(existingContent);
     gaps.push(...completenessGaps);
 
     // Analyze outdated content
     const outdatedGaps = await this.detectOutdatedContent(existingContent);
     gaps.push(...outdatedGaps);
 
-    return gaps.sort((a, b) => this.priorityToNumber(b.priority) - this.priorityToNumber(a.priority));
+    return gaps.sort(
+      (a, b) =>
+        this.priorityToNumber(b.priority) - this.priorityToNumber(a.priority),
+    );
   }
 
   /**
    * Generate smart tags
    */
-  public async generateSmartTags(content: string, metadata?: any): Promise<SmartTag[]> {
+  public async generateSmartTags(
+    content: string,
+    metadata?: any,
+  ): Promise<SmartTag[]> {
     if (!this.config.features.smartTagging) {
       return [];
     }
@@ -381,7 +428,7 @@ Respond with a JSON array of tags with confidence scores.
   public async generateExamples(
     description: string,
     language: string,
-    complexity: 'basic' | 'intermediate' | 'advanced' = 'basic'
+    complexity: 'basic' | 'intermediate' | 'advanced' = 'basic',
   ): Promise<ExampleGeneration[]> {
     console.log(`💻 Generating ${complexity} ${language} examples...`);
 
@@ -417,16 +464,21 @@ Generate 2-3 different examples showing different approaches or use cases.
   /**
    * Auto-fix content issues
    */
-  public async autoFixIssues(content: string, suggestions: ContentSuggestion[]): Promise<string> {
+  public async autoFixIssues(
+    content: string,
+    suggestions: ContentSuggestion[],
+  ): Promise<string> {
     let fixedContent = content;
 
-    const autoFixableSuggestions = suggestions.filter(s => s.autoApplicable && !s.requiresReview);
+    const autoFixableSuggestions = suggestions.filter(
+      (s) => s.autoApplicable && !s.requiresReview,
+    );
 
     for (const suggestion of autoFixableSuggestions) {
       if (suggestion.position && suggestion.currentContent) {
         fixedContent = fixedContent.replace(
           suggestion.currentContent,
-          suggestion.suggestedContent
+          suggestion.suggestedContent,
         );
       }
     }
@@ -439,7 +491,7 @@ Generate 2-3 different examples showing different approaches or use cases.
    */
   public async convertNaturalLanguage(
     naturalLanguage: string,
-    targetFormat: 'markdown' | 'html' | 'rst' = 'markdown'
+    targetFormat: 'markdown' | 'html' | 'rst' = 'markdown',
   ): Promise<string> {
     console.log('🔄 Converting natural language to documentation...');
 
@@ -472,7 +524,7 @@ Output only the formatted ${targetFormat} content.
    */
   public async batchProcessContent(
     contentPaths: string[],
-    improvements: ('grammar' | 'style' | 'examples' | 'structure')[]
+    improvements: ('grammar' | 'style' | 'examples' | 'structure')[],
   ): Promise<BatchProcessResult> {
     console.log(`📦 Batch processing ${contentPaths.length} content files...`);
 
@@ -484,41 +536,49 @@ Output only the formatted ${targetFormat} content.
       summary: {
         totalSuggestions: 0,
         autoApplied: 0,
-        requiresReview: 0
-      }
+        requiresReview: 0,
+      },
     };
 
     for (const contentPath of contentPaths) {
       try {
         const content = await this.loadContent(contentPath);
         const suggestions = await this.getSuggestions(content);
-        
-        const applicableSuggestions = suggestions.filter(s => 
-          improvements.some(imp => s.category.includes(imp))
+
+        const applicableSuggestions = suggestions.filter((s) =>
+          improvements.some((imp) => s.category.includes(imp)),
         );
 
-        const fixedContent = await this.autoFixIssues(content, applicableSuggestions);
-        
+        const fixedContent = await this.autoFixIssues(
+          content,
+          applicableSuggestions,
+        );
+
         results.results.push({
           path: contentPath,
           success: true,
           originalLength: content.length,
           processedLength: fixedContent.length,
           suggestionsCount: applicableSuggestions.length,
-          autoAppliedCount: applicableSuggestions.filter(s => s.autoApplicable).length,
-          content: fixedContent
+          autoAppliedCount: applicableSuggestions.filter(
+            (s) => s.autoApplicable,
+          ).length,
+          content: fixedContent,
         });
 
         results.successful++;
         results.summary.totalSuggestions += applicableSuggestions.length;
-        results.summary.autoApplied += applicableSuggestions.filter(s => s.autoApplicable).length;
-        results.summary.requiresReview += applicableSuggestions.filter(s => s.requiresReview).length;
-
+        results.summary.autoApplied += applicableSuggestions.filter(
+          (s) => s.autoApplicable,
+        ).length;
+        results.summary.requiresReview += applicableSuggestions.filter(
+          (s) => s.requiresReview,
+        ).length;
       } catch (error) {
         results.results.push({
           path: contentPath,
           success: false,
-          error: error.message
+          error: error.message,
         });
         results.failed++;
       }
@@ -546,7 +606,10 @@ Output only the formatted ${targetFormat} content.
     }
   }
 
-  private buildGenerationPrompt(request: ContentGenerationRequest, context: any): string {
+  private buildGenerationPrompt(
+    request: ContentGenerationRequest,
+    context: any,
+  ): string {
     let prompt = `Generate ${request.type} documentation with the following requirements:
 
 Target Audience: ${request.targetAudience}
@@ -575,36 +638,44 @@ Include Code Snippets: ${request.includeCodeSnippets}
     return prompt;
   }
 
-  private async postProcessContent(content: string, request: ContentGenerationRequest): Promise<string> {
+  private async postProcessContent(
+    content: string,
+    request: ContentGenerationRequest,
+  ): Promise<string> {
     // Clean up common AI generation artifacts
     let processed = content.trim();
-    
+
     // Remove common prefixes/suffixes
-    processed = processed.replace(/^(Here's|Here is|The following is).*?:\s*\n*/i, '');
+    processed = processed.replace(
+      /^(Here's|Here is|The following is).*?:\s*\n*/i,
+      '',
+    );
     processed = processed.replace(/\n*I hope this helps!?.*$/i, '');
-    
+
     // Ensure proper formatting for the target format
     if (request.format === 'markdown') {
       processed = this.cleanMarkdown(processed);
     }
-    
+
     return processed;
   }
 
   private cleanMarkdown(content: string): string {
     // Fix common markdown issues
     let cleaned = content;
-    
+
     // Ensure proper heading hierarchy
     cleaned = cleaned.replace(/^#+\s*/gm, (match) => {
       const level = match.trim().length;
       return '#'.repeat(Math.min(level, 6)) + ' ';
     });
-    
+
     return cleaned;
   }
 
-  private async checkGrammarAndStyle(content: string): Promise<ContentSuggestion[]> {
+  private async checkGrammarAndStyle(
+    content: string,
+  ): Promise<ContentSuggestion[]> {
     const client = this.modelClients.get('grammarCheck');
     if (!client) return [];
 
@@ -625,12 +696,17 @@ Identify specific issues with their positions and provide suggestions for improv
     }
   }
 
-  private async checkStyleGuide(content: string, contentType?: string): Promise<ContentSuggestion[]> {
+  private async checkStyleGuide(
+    content: string,
+    contentType?: string,
+  ): Promise<ContentSuggestion[]> {
     // Implementation for style guide checking
     return [];
   }
 
-  private async analyzeContentStructure(content: string): Promise<ContentSuggestion[]> {
+  private async analyzeContentStructure(
+    content: string,
+  ): Promise<ContentSuggestion[]> {
     // Implementation for content structure analysis
     return [];
   }
@@ -642,7 +718,7 @@ Identify specific issues with their positions and provide suggestions for improv
 
   private async detectAPIDocumentationGaps(
     existingContent: Map<string, string>,
-    apiSpec: APISpecification
+    apiSpec: APISpecification,
   ): Promise<ContentGap[]> {
     // Implementation for API documentation gap detection
     return [];
@@ -650,18 +726,22 @@ Identify specific issues with their positions and provide suggestions for improv
 
   private async detectCodeDocumentationGaps(
     existingContent: Map<string, string>,
-    codebase: CodeAnalysis
+    codebase: CodeAnalysis,
   ): Promise<ContentGap[]> {
     // Implementation for code documentation gap detection
     return [];
   }
 
-  private async analyzeContentCompleteness(existingContent: Map<string, string>): Promise<ContentGap[]> {
+  private async analyzeContentCompleteness(
+    existingContent: Map<string, string>,
+  ): Promise<ContentGap[]> {
     // Implementation for content completeness analysis
     return [];
   }
 
-  private async detectOutdatedContent(existingContent: Map<string, string>): Promise<ContentGap[]> {
+  private async detectOutdatedContent(
+    existingContent: Map<string, string>,
+  ): Promise<ContentGap[]> {
     // Implementation for outdated content detection
     return [];
   }
@@ -674,7 +754,7 @@ Identify specific issues with their positions and provide suggestions for improv
         category: tag.category || 'topic',
         confidence: tag.confidence || 0.5,
         relevance: tag.relevance || 0.5,
-        reasoning: tag.reasoning || ''
+        reasoning: tag.reasoning || '',
       }));
     } catch (error) {
       console.warn('⚠️ Failed to parse smart tags:', error.message);
@@ -685,7 +765,7 @@ Identify specific issues with their positions and provide suggestions for improv
   private parseExamplesFromResponse(
     response: string,
     language: string,
-    complexity: string
+    complexity: string,
   ): ExampleGeneration[] {
     // Implementation for parsing examples from AI response
     return [];
@@ -714,7 +794,7 @@ Identify specific issues with their positions and provide suggestions for improv
 // Supporting classes and interfaces
 abstract class AIModelClient {
   constructor(protected model: AIModel) {}
-  
+
   abstract initialize(): Promise<void>;
   abstract generate(prompt: string): Promise<string>;
 }
@@ -785,7 +865,7 @@ class CodeAnalyzer {
       types: [],
       dependencies: [],
       complexity: { overall: 'medium', functions: {}, classes: {} },
-      documentation: { coverage: 0, quality: 'poor', missing: [] }
+      documentation: { coverage: 0, quality: 'poor', missing: [] },
     };
   }
 }
@@ -803,13 +883,13 @@ class ContentQualityAnalyzer {
         completeness: 75,
         consistency: 85,
         accessibility: 70,
-        engagement: 80
+        engagement: 80,
       },
       issues: [],
       strengths: [],
       recommendations: [],
       readabilityScore: 75,
-      targetAudienceAlignment: 80
+      targetAudienceAlignment: 80,
     };
   }
 }

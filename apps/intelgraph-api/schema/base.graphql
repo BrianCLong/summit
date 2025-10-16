@@ -1,23 +1,137 @@
 # Entities & Relationships (SDL)
 
-type Organization { id: ID!, name: String!, region: String, createdAt: String! }
-type Tenant { id: ID!, orgId: ID!, name: String!, createdAt: String! }
-type User { id: ID!, tenantId: ID!, email: String!, roles: [Role!]!, createdAt: String! } # Updated to link to Role
-type Role { id: ID!, name: String!, permissions: [Permission!]!, createdAt: String! } # New Role type
-type Permission { id: ID!, name: String!, description: String, createdAt: String! } # New Permission type
-type Policy { id: ID!, tenantId: ID!, name: String!, version: String!, body: String!, createdAt: String! } # Added tenantId for scoping
-type Asset { id: ID!, tenantId: ID!, kind: String!, uri: String, labels: [String!], createdAt: String! }
-type DataSet { id: ID!, tenantId: ID!, name: String!, source: String, createdAt: String! }
-type Model { id: ID!, tenantId: ID!, name: String!, version: String!, createdAt: String! }
-type Eval { id: ID!, tenantId: ID!, modelId: ID!, name: String!, score: Float, reportURI: String, createdAt: String! } # Added tenantId for scoping
-type Task { id: ID!, tenantId: ID!, planId: ID!, name: String!, status: String!, createdAt: String!, updatedAt: String } # Added tenantId for scoping
-type Plan { id: ID!, tenantId: ID!, name: String!, status: String!, createdAt: String!, updatedAt: String } # Added tenantId for scoping
-type Artifact { id: ID!, tenantId: ID!, planId: ID!, kind: String!, uri: String!, hash: String, signature: String, createdAt: String! } # Added tenantId for scoping
-type Incident { id: ID!, tenantId: ID!, severity: String!, description: String!, createdAt: String! }
-type Risk { id: ID!, tenantId: ID!, category: String!, level: String!, createdAt: String! }
-type Control { id: ID!, tenantId: ID!, name: String!, evidenceURI: String, createdAt: String! }
-type KPI { id: ID!, tenantId: ID!, name: String!, value: Float!, ts: String! }
-type OKR { id: ID!, tenantId: ID!, objective: String!, keyResults: [String!]!, ts: String! }
+type Organization {
+  id: ID!
+  name: String!
+  region: String
+  createdAt: String!
+}
+type Tenant {
+  id: ID!
+  orgId: ID!
+  name: String!
+  createdAt: String!
+}
+type User {
+  id: ID!
+  tenantId: ID!
+  email: String!
+  roles: [Role!]!
+  createdAt: String!
+} # Updated to link to Role
+type Role {
+  id: ID!
+  name: String!
+  permissions: [Permission!]!
+  createdAt: String!
+} # New Role type
+type Permission {
+  id: ID!
+  name: String!
+  description: String
+  createdAt: String!
+} # New Permission type
+type Policy {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  version: String!
+  body: String!
+  createdAt: String!
+} # Added tenantId for scoping
+type Asset {
+  id: ID!
+  tenantId: ID!
+  kind: String!
+  uri: String
+  labels: [String!]
+  createdAt: String!
+}
+type DataSet {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  source: String
+  createdAt: String!
+}
+type Model {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  version: String!
+  createdAt: String!
+}
+type Eval {
+  id: ID!
+  tenantId: ID!
+  modelId: ID!
+  name: String!
+  score: Float
+  reportURI: String
+  createdAt: String!
+} # Added tenantId for scoping
+type Task {
+  id: ID!
+  tenantId: ID!
+  planId: ID!
+  name: String!
+  status: String!
+  createdAt: String!
+  updatedAt: String
+} # Added tenantId for scoping
+type Plan {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  status: String!
+  createdAt: String!
+  updatedAt: String
+} # Added tenantId for scoping
+type Artifact {
+  id: ID!
+  tenantId: ID!
+  planId: ID!
+  kind: String!
+  uri: String!
+  hash: String
+  signature: String
+  createdAt: String!
+} # Added tenantId for scoping
+type Incident {
+  id: ID!
+  tenantId: ID!
+  severity: String!
+  description: String!
+  createdAt: String!
+}
+type Risk {
+  id: ID!
+  tenantId: ID!
+  category: String!
+  level: String!
+  createdAt: String!
+}
+type Control {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  evidenceURI: String
+  createdAt: String!
+}
+type KPI {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  value: Float!
+  ts: String!
+}
+type OKR {
+  id: ID!
+  tenantId: ID!
+  objective: String!
+  keyResults: [String!]!
+  ts: String!
+}
 
 type Provenance {
   who: String!
@@ -41,8 +155,23 @@ type Query {
 }
 
 type Mutation {
-  upsertPolicy(tenantId: ID!, name: String!, version: String!, body: String!): Policy! # Added tenantId for scoping
-  recordArtifact(tenantId: ID!, planId: ID!, kind: String!, uri: String!, hash: String, signature: String, userId: ID, serviceAccountId: ID, artifactHash: String): Artifact! # Added tenantId and provenance fields
+  upsertPolicy(
+    tenantId: ID!
+    name: String!
+    version: String!
+    body: String!
+  ): Policy! # Added tenantId for scoping
+  recordArtifact(
+    tenantId: ID!
+    planId: ID!
+    kind: String!
+    uri: String!
+    hash: String
+    signature: String
+    userId: ID
+    serviceAccountId: ID
+    artifactHash: String
+  ): Artifact! # Added tenantId and provenance fields
   assignRoleToUser(userId: ID!, roleId: ID!): User! # New mutation
   createRole(name: String!, permissionIds: [ID!]): Role! # New mutation
   createPermission(name: String!, description: String): Permission! # New mutation

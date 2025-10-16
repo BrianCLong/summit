@@ -25,8 +25,16 @@ r.post('/route/execute', async (req, res) => {
       latencyMs / 1000,
     );
     const audit_id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    await upsertRunReport(audit_id, JSON.stringify({ decision, req }, null, 0) + '\n');
-    res.json({ audit_id, latency_ms: latencyMs, output, explain: decision.reasons });
+    await upsertRunReport(
+      audit_id,
+      JSON.stringify({ decision, req }, null, 0) + '\n',
+    );
+    res.json({
+      audit_id,
+      latency_ms: latencyMs,
+      output,
+      explain: decision.reasons,
+    });
   } catch (e: any) {
     routeExecuteLatency.observe(
       { model, stream: String(Boolean(req.body.stream)), status: 'err' },

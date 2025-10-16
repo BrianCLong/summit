@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from .scanner import Finding, ScanResult
 
@@ -22,13 +22,7 @@ def render_markdown(result: ScanResult) -> str:
     lines.append("| --- | --- | --- | --- | --- |")
     for finding in result.findings:
         lines.append(
-            "| {severity} | {rule} | {file} | {line} | {match} |".format(
-                severity=finding.severity,
-                rule=finding.rule,
-                file=finding.file,
-                line=finding.line,
-                match=finding.redacted,
-            )
+            f"| {finding.severity} | {finding.rule} | {finding.file} | {finding.line} | {finding.redacted} |"
         )
     return "\n".join(lines)
 

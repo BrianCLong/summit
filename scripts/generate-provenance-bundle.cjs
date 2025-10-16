@@ -16,7 +16,7 @@ class ProvenanceBundleGenerator {
         version: '1.0.0',
         release_tag: 'v0.4.0-week4-observability-action',
         environment: 'GREEN-TRAIN-Week4',
-        generator: 'provenance-bundle-generator'
+        generator: 'provenance-bundle-generator',
       },
       build: {},
       tests: {},
@@ -25,8 +25,8 @@ class ProvenanceBundleGenerator {
       finops: {},
       manifest: {
         files: [],
-        signatures: []
-      }
+        signatures: [],
+      },
     };
   }
 
@@ -68,7 +68,7 @@ class ProvenanceBundleGenerator {
       sbom: await this.generateSBOM(),
       container_digests: await this.generateContainerDigests(),
       helm_values: await this.collectHelmValues(),
-      source_files: await this.collectSourceFiles()
+      source_files: await this.collectSourceFiles(),
     };
   }
 
@@ -90,7 +90,7 @@ class ProvenanceBundleGenerator {
       version: 1,
       metadata: {
         timestamp: new Date().toISOString(),
-        tools: ['npm', 'pnpm']
+        tools: ['npm', 'pnpm'],
       },
       components: [
         {
@@ -101,13 +101,16 @@ class ProvenanceBundleGenerator {
           hashes: [
             {
               alg: 'SHA-256',
-              content: this.generateHash(JSON.stringify(packageJson))
-            }
-          ]
+              content: this.generateHash(JSON.stringify(packageJson)),
+            },
+          ],
         },
         ...this.generateDependencyComponents(packageJson.dependencies || {}),
-        ...this.generateDependencyComponents(packageJson.devDependencies || {}, 'dev')
-      ]
+        ...this.generateDependencyComponents(
+          packageJson.devDependencies || {},
+          'dev',
+        ),
+      ],
     };
   }
 
@@ -115,17 +118,21 @@ class ProvenanceBundleGenerator {
    * Generate dependency components for SBOM
    */
   generateDependencyComponents(dependencies, scope = 'required') {
-    return Object.entries(dependencies).slice(0, 10).map(([name, version]) => ({
-      type: 'library',
-      name: name,
-      version: version.replace(/[\^~]/, ''),
-      scope: scope,
-      purl: `pkg:npm/${name}@${version.replace(/[\^~]/, '')}`,
-      hashes: [{
-        alg: 'SHA-256',
-        content: this.generateHash(`${name}@${version}`)
-      }]
-    }));
+    return Object.entries(dependencies)
+      .slice(0, 10)
+      .map(([name, version]) => ({
+        type: 'library',
+        name: name,
+        version: version.replace(/[\^~]/, ''),
+        scope: scope,
+        purl: `pkg:npm/${name}@${version.replace(/[\^~]/, '')}`,
+        hashes: [
+          {
+            alg: 'SHA-256',
+            content: this.generateHash(`${name}@${version}`),
+          },
+        ],
+      }));
   }
 
   /**
@@ -138,15 +145,15 @@ class ProvenanceBundleGenerator {
         tag: 'v0.4.0-week4',
         digest: 'sha256:' + this.generateHash('intelgraph-server:v0.4.0-week4'),
         size: '245MB',
-        created: new Date().toISOString()
+        created: new Date().toISOString(),
       },
       'insight-ai': {
         registry: 'ghcr.io/intelgraph/insight-ai',
         tag: 'v0.1.0-mvp0',
         digest: 'sha256:' + this.generateHash('insight-ai:v0.1.0-mvp0'),
         size: '1.2GB',
-        created: new Date().toISOString()
-      }
+        created: new Date().toISOString(),
+      },
     };
   }
 
@@ -154,7 +161,10 @@ class ProvenanceBundleGenerator {
    * Collect Helm values (redacted)
    */
   async collectHelmValues() {
-    const helmPath = path.join(process.cwd(), 'deploy/helm/intelgraph/values.yaml');
+    const helmPath = path.join(
+      process.cwd(),
+      'deploy/helm/intelgraph/values.yaml',
+    );
 
     if (!fs.existsSync(helmPath)) {
       return { redacted: true, reason: 'values.yaml not found' };
@@ -169,11 +179,11 @@ class ProvenanceBundleGenerator {
         replicas: 3,
         resources: {
           requests: { cpu: 'REDACTED', memory: 'REDACTED' },
-          limits: { cpu: 'REDACTED', memory: 'REDACTED' }
+          limits: { cpu: 'REDACTED', memory: 'REDACTED' },
         },
         secrets: 'REDACTED',
-        config: 'REDACTED'
-      }
+        config: 'REDACTED',
+      },
     };
   }
 
@@ -189,7 +199,7 @@ class ProvenanceBundleGenerator {
       'services/insight-ai/app.py',
       'performance-budgets.json',
       'chaos/experiments/pod-killer.yaml',
-      'scripts/finops-guardrails.cjs'
+      'scripts/finops-guardrails.cjs',
     ];
 
     for (const file of importantFiles) {
@@ -200,7 +210,7 @@ class ProvenanceBundleGenerator {
           path: file,
           hash: this.generateHash(content),
           size: content.length,
-          last_modified: fs.statSync(filePath).mtime.toISOString()
+          last_modified: fs.statSync(filePath).mtime.toISOString(),
         });
       }
     }
@@ -223,7 +233,7 @@ class ProvenanceBundleGenerator {
       'auto-rollback-validation.json',
       'ai-insights-validation.json',
       'performance-budgets-validation.json',
-      'chaos-experiments-validation.json'
+      'chaos-experiments-validation.json',
     ];
 
     for (const reportFile of validationFiles) {
@@ -235,8 +245,8 @@ class ProvenanceBundleGenerator {
           passed: report.passed,
           failed: report.failed,
           total: report.passed + report.failed,
-          success_rate: report.passed / (report.passed + report.failed) * 100,
-          evidence_count: report.evidence?.length || 0
+          success_rate: (report.passed / (report.passed + report.failed)) * 100,
+          evidence_count: report.evidence?.length || 0,
         };
       }
     }
@@ -251,8 +261,8 @@ class ProvenanceBundleGenerator {
         lines: 85.7,
         branches: 82.3,
         functions: 88.9,
-        statements: 84.1
-      }
+        statements: 84.1,
+      },
     };
 
     testReports.integration_tests = {
@@ -260,7 +270,7 @@ class ProvenanceBundleGenerator {
       passed: 40,
       failed: 2,
       success_rate: 95.2,
-      critical_paths_coverage: 91.2
+      critical_paths_coverage: 91.2,
     };
 
     testReports.e2e_tests = {
@@ -268,7 +278,12 @@ class ProvenanceBundleGenerator {
       passed: 17,
       failed: 1,
       success_rate: 94.4,
-      scenarios: ['user_login', 'entity_creation', 'graph_traversal', 'analytics_dashboard']
+      scenarios: [
+        'user_login',
+        'entity_creation',
+        'graph_traversal',
+        'analytics_dashboard',
+      ],
     };
 
     this.bundle.tests = testReports;
@@ -284,7 +299,7 @@ class ProvenanceBundleGenerator {
       dashboards: await this.collectDashboards(),
       alert_rules: await this.collectAlertRules(),
       trace_exemplars: await this.generateTraceExemplars(),
-      slo_metrics: await this.collectSLOMetrics()
+      slo_metrics: await this.collectSLOMetrics(),
     };
   }
 
@@ -296,7 +311,9 @@ class ProvenanceBundleGenerator {
     const dashboards = {};
 
     if (fs.existsSync(dashboardDir)) {
-      const dashboardFiles = fs.readdirSync(dashboardDir).filter(f => f.endsWith('.json'));
+      const dashboardFiles = fs
+        .readdirSync(dashboardDir)
+        .filter((f) => f.endsWith('.json'));
 
       for (const dashFile of dashboardFiles) {
         const dashPath = path.join(dashboardDir, dashFile);
@@ -307,7 +324,7 @@ class ProvenanceBundleGenerator {
           title: dashboard.dashboard?.title || dashFile,
           panels: dashboard.dashboard?.panels?.length || 0,
           hash: this.generateHash(dashContent),
-          exported_at: new Date().toISOString()
+          exported_at: new Date().toISOString(),
         };
       }
     }
@@ -323,7 +340,9 @@ class ProvenanceBundleGenerator {
     const alertRules = {};
 
     if (fs.existsSync(rulesDir)) {
-      const ruleFiles = fs.readdirSync(rulesDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
+      const ruleFiles = fs
+        .readdirSync(rulesDir)
+        .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
 
       for (const ruleFile of ruleFiles) {
         const rulePath = path.join(rulesDir, ruleFile);
@@ -337,7 +356,7 @@ class ProvenanceBundleGenerator {
           alert_rules: alertCount,
           record_rules: recordCount,
           hash: this.generateHash(ruleContent),
-          validated_at: new Date().toISOString()
+          validated_at: new Date().toISOString(),
         };
       }
     }
@@ -354,20 +373,20 @@ class ProvenanceBundleGenerator {
         trace_id: '1a2b3c4d5e6f7890',
         span_id: 'abcd1234',
         duration_ms: 125,
-        status: 'success'
+        status: 'success',
       },
       graphql_to_database: {
         trace_id: '2b3c4d5e6f7890ab',
         span_id: 'bcde2345',
         duration_ms: 45,
-        status: 'success'
+        status: 'success',
       },
       ai_insights_request: {
         trace_id: '3c4d5e6f7890abcd',
         span_id: 'cdef3456',
         duration_ms: 89,
-        status: 'success'
-      }
+        status: 'success',
+      },
     };
   }
 
@@ -379,19 +398,19 @@ class ProvenanceBundleGenerator {
       availability: {
         current: 99.7,
         target: 99.5,
-        error_budget_remaining: 78.3
+        error_budget_remaining: 78.3,
       },
       latency: {
         p95_ms: 186,
         p99_ms: 423,
         target_p95_ms: 200,
-        target_p99_ms: 500
+        target_p99_ms: 500,
       },
       error_rate: {
         current: 0.012,
-        target: 0.020,
-        budget_consumption: 60.0
-      }
+        target: 0.02,
+        budget_consumption: 60.0,
+      },
     };
   }
 
@@ -405,7 +424,7 @@ class ProvenanceBundleGenerator {
       opa_evaluations: await this.generateOPAEvaluations(),
       retention_mapping: await this.generateRetentionMapping(),
       security_scan: await this.generateSecurityScan(),
-      compliance_report: await this.generateComplianceReport()
+      compliance_report: await this.generateComplianceReport(),
     };
   }
 
@@ -420,34 +439,34 @@ class ProvenanceBundleGenerator {
           name: 'container-security-policy',
           result: 'allow',
           violations: 0,
-          warnings: 2
+          warnings: 2,
         },
         {
           name: 'resource-limits-policy',
           result: 'allow',
           violations: 0,
-          warnings: 0
+          warnings: 0,
         },
         {
           name: 'network-policy',
           result: 'allow',
           violations: 0,
-          warnings: 1
+          warnings: 1,
         },
         {
           name: 'data-retention-policy',
           result: 'allow',
           violations: 0,
-          warnings: 0
-        }
+          warnings: 0,
+        },
       ],
       summary: {
         total_policies: 4,
         allowed: 4,
         denied: 0,
         total_violations: 0,
-        total_warnings: 3
-      }
+        total_warnings: 3,
+      },
     };
   }
 
@@ -460,26 +479,26 @@ class ProvenanceBundleGenerator {
         retention_period: '30d',
         classification: 'sensitive',
         encryption: 'field-level',
-        purpose_tags: ['analytics', 'user-experience']
+        purpose_tags: ['analytics', 'user-experience'],
       },
       system_logs: {
         retention_period: '90d',
         classification: 'operational',
         encryption: 'at-rest',
-        purpose_tags: ['debugging', 'audit']
+        purpose_tags: ['debugging', 'audit'],
       },
       metrics_data: {
         retention_period: '1y',
         classification: 'operational',
         encryption: 'at-rest',
-        purpose_tags: ['monitoring', 'analytics']
+        purpose_tags: ['monitoring', 'analytics'],
       },
       audit_logs: {
         retention_period: '7y',
         classification: 'compliance',
         encryption: 'at-rest',
-        purpose_tags: ['audit', 'legal']
-      }
+        purpose_tags: ['audit', 'legal'],
+      },
     };
   }
 
@@ -495,18 +514,18 @@ class ProvenanceBundleGenerator {
         high: 2,
         medium: 8,
         low: 15,
-        total: 25
+        total: 25,
       },
       secrets_scan: {
         secrets_found: 0,
         false_positives: 3,
-        status: 'clean'
+        status: 'clean',
       },
       license_compliance: {
         non_compliant_licenses: 0,
         flagged_licenses: 1,
-        status: 'compliant'
-      }
+        status: 'compliant',
+      },
     };
   }
 
@@ -524,14 +543,14 @@ class ProvenanceBundleGenerator {
         {
           control: 'CC6.1',
           severity: 'medium',
-          description: 'Enhanced logging required for admin actions'
+          description: 'Enhanced logging required for admin actions',
         },
         {
           control: 'CC7.2',
           severity: 'low',
-          description: 'Documentation update needed for incident response'
-        }
-      ]
+          description: 'Documentation update needed for incident response',
+        },
+      ],
     };
   }
 
@@ -545,7 +564,9 @@ class ProvenanceBundleGenerator {
     const finopsReportPath = path.join(process.cwd(), 'finops-report.json');
 
     if (fs.existsSync(finopsReportPath)) {
-      const finopsReport = JSON.parse(fs.readFileSync(finopsReportPath, 'utf8'));
+      const finopsReport = JSON.parse(
+        fs.readFileSync(finopsReportPath, 'utf8'),
+      );
       this.bundle.finops = finopsReport;
     } else {
       // Generate simulated FinOps data
@@ -553,18 +574,18 @@ class ProvenanceBundleGenerator {
         budget_analysis: {
           development: { utilization_percent: 64.0, status: 'healthy' },
           staging: { utilization_percent: 68.0, status: 'healthy' },
-          production: { utilization_percent: 64.0, status: 'healthy' }
+          production: { utilization_percent: 64.0, status: 'healthy' },
         },
         cost_optimization: {
           potential_savings: 4250,
           recommendations: 8,
-          high_priority: 3
+          high_priority: 3,
         },
         unit_costs: {
           ingested_events_per_1k: 0.08,
           graphql_calls_per_1m: 1.75,
-          within_targets: true
-        }
+          within_targets: true,
+        },
       };
     }
   }
@@ -592,7 +613,7 @@ class ProvenanceBundleGenerator {
             path: `evidence/${file}`,
             hash: this.generateHash(content),
             size: content.length,
-            type: this.getFileType(file)
+            type: this.getFileType(file),
           });
         }
       }
@@ -603,7 +624,7 @@ class ProvenanceBundleGenerator {
       'performance-budgets.json',
       'monitoring/prometheus/error-budget-rules.yml',
       'scripts/auto-rollback.sh',
-      'scripts/finops-guardrails.cjs'
+      'scripts/finops-guardrails.cjs',
     ];
 
     for (const configFile of configFiles) {
@@ -615,7 +636,7 @@ class ProvenanceBundleGenerator {
           path: configFile,
           hash: this.generateHash(content),
           size: content.length,
-          type: this.getFileType(configFile)
+          type: this.getFileType(configFile),
         });
       }
     }
@@ -638,7 +659,7 @@ class ProvenanceBundleGenerator {
       keyid: 'green-train-release-key',
       signature: this.generateHash(`${bundleHash}-signature`),
       timestamp: new Date().toISOString(),
-      signer: 'GREEN-TRAIN-Week4-Release'
+      signer: 'GREEN-TRAIN-Week4-Release',
     };
 
     this.bundle.manifest.signatures.push(signature);
@@ -680,8 +701,14 @@ class ProvenanceBundleGenerator {
    */
   generateBundleSummary() {
     const testSummary = this.bundle.tests;
-    const totalTests = Object.values(testSummary).reduce((sum, test) => sum + (test.total || 0), 0);
-    const totalPassed = Object.values(testSummary).reduce((sum, test) => sum + (test.passed || 0), 0);
+    const totalTests = Object.values(testSummary).reduce(
+      (sum, test) => sum + (test.total || 0),
+      0,
+    );
+    const totalPassed = Object.values(testSummary).reduce(
+      (sum, test) => sum + (test.passed || 0),
+      0,
+    );
 
     return `# GREEN TRAIN Week-4 Provenance Bundle
 
@@ -694,7 +721,7 @@ class ProvenanceBundleGenerator {
 ### Test Results
 - **Total Tests**: ${totalTests}
 - **Passed**: ${totalPassed}
-- **Success Rate**: ${(totalPassed / totalTests * 100).toFixed(1)}%
+- **Success Rate**: ${((totalPassed / totalTests) * 100).toFixed(1)}%
 
 ### Coverage
 - **Line Coverage**: ${testSummary.unit_tests?.coverage?.lines || 0}%
@@ -778,7 +805,7 @@ jq '.build.sbom' provenance/export-manifest.json
       '.js': 'script',
       '.cjs': 'script',
       '.py': 'script',
-      '.md': 'documentation'
+      '.md': 'documentation',
     };
     return typeMap[ext] || 'unknown';
   }
@@ -787,12 +814,15 @@ jq '.build.sbom' provenance/export-manifest.json
 // CLI execution
 if (require.main === module) {
   const generator = new ProvenanceBundleGenerator();
-  generator.generate().then(success => {
-    process.exit(success ? 0 : 1);
-  }).catch(error => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
+  generator
+    .generate()
+    .then((success) => {
+      process.exit(success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Fatal error:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = ProvenanceBundleGenerator;

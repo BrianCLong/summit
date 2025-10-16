@@ -45,4 +45,3 @@ The scaffold favors convention over configuration so platform and application te
    ```
 
 See the documentation under `docs/` for release management, rollback drills, and compliance evidence expectations.
-

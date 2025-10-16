@@ -1,7 +1,10 @@
 import { ReplayResult, Signer, SparManifest } from './types';
 import { computeHash, stableStringify } from './utils';
 
-export function replayManifest(manifest: SparManifest, signer?: Signer): ReplayResult {
+export function replayManifest(
+  manifest: SparManifest,
+  signer?: Signer,
+): ReplayResult {
   const canonicalPayload = {
     promptTemplate: manifest.promptTemplate,
     inputs: manifest.inputs,

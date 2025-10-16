@@ -103,8 +103,18 @@ interface AlertTriageV2PanelProps {
 }
 
 const FEEDBACK_TYPES = [
-  { value: 'thumbs_up', label: 'Accurate', icon: <ThumbUp />, color: 'success' },
-  { value: 'thumbs_down', label: 'Inaccurate', icon: <ThumbDown />, color: 'error' },
+  {
+    value: 'thumbs_up',
+    label: 'Accurate',
+    icon: <ThumbUp />,
+    color: 'success',
+  },
+  {
+    value: 'thumbs_down',
+    label: 'Inaccurate',
+    icon: <ThumbDown />,
+    color: 'error',
+  },
   { value: 'escalate', label: 'Escalate', icon: <Flag />, color: 'warning' },
   { value: 'dismiss', label: 'Dismiss', icon: <Close />, color: 'default' },
 ];
@@ -133,37 +143,46 @@ export default function AlertTriageV2Panel({
   const [rationale, setRationale] = useState('');
   const [confidence, setConfidence] = useState(3);
 
-  const { data: feedbackData, refetch: refetchFeedback } = useQuery(GET_ALERT_FEEDBACK_QUERY, {
-    variables: { alertId },
-    skip: !alertId,
-  });
+  const { data: feedbackData, refetch: refetchFeedback } = useQuery(
+    GET_ALERT_FEEDBACK_QUERY,
+    {
+      variables: { alertId },
+      skip: !alertId,
+    },
+  );
 
   const { data: scoringData } = useQuery(TRIAGE_SCORING_QUERY, {
     variables: { alertId },
     skip: !alertId,
   });
 
-  const [recordFeedback, { loading: feedbackLoading }] = useMutation(RECORD_FEEDBACK_MUTATION, {
-    onCompleted: () => {
-      setFeedbackDialogOpen(false);
-      refetchFeedback();
-      setSelectedFeedbackType('');
-      setReasonCode('');
-      setRationale('');
-      setConfidence(3);
+  const [recordFeedback, { loading: feedbackLoading }] = useMutation(
+    RECORD_FEEDBACK_MUTATION,
+    {
+      onCompleted: () => {
+        setFeedbackDialogOpen(false);
+        refetchFeedback();
+        setSelectedFeedbackType('');
+        setReasonCode('');
+        setRationale('');
+        setConfidence(3);
+      },
+      onError: (error) => {
+        console.error('Failed to record feedback:', error);
+      },
     },
-    onError: (error) => {
-      console.error('Failed to record feedback:', error);
-    },
-  });
+  );
 
-  const handleQuickAction = useCallback((action: string) => {
-    if (action === 'feedback') {
-      setFeedbackDialogOpen(true);
-    } else {
-      onAction(action, { alertId });
-    }
-  }, [alertId, onAction]);
+  const handleQuickAction = useCallback(
+    (action: string) => {
+      if (action === 'feedback') {
+        setFeedbackDialogOpen(true);
+      } else {
+        onAction(action, { alertId });
+      }
+    },
+    [alertId, onAction],
+  );
 
   const handleFeedbackSubmit = async () => {
     if (!selectedFeedbackType || !reasonCode) return;
@@ -185,7 +204,8 @@ export default function AlertTriageV2Panel({
     if (!scoringData?.triageScoring) return null;
 
     const { score, confidence, reasoning, factors } = scoringData.triageScoring;
-    const scoreColor = score >= 0.8 ? 'error' : score >= 0.6 ? 'warning' : 'success';
+    const scoreColor =
+      score >= 0.8 ? 'error' : score >= 0.6 ? 'warning' : 'success';
 
     return (
       <Card sx={{ mb: 2 }}>
@@ -194,18 +214,22 @@ export default function AlertTriageV2Panel({
             <Assessment sx={{ mr: 1, color: 'primary.main' }} />
             <Typography variant="h6">Triage Scoring</Typography>
           </Box>
-          
+
           <Box display="flex" alignItems="center" mb={2}>
-            <Typography variant="h4" color={`${scoreColor}.main`} sx={{ mr: 2 }}>
+            <Typography
+              variant="h4"
+              color={`${scoreColor}.main`}
+              sx={{ mr: 2 }}
+            >
               {(score * 100).toFixed(0)}%
             </Typography>
             <Box flex={1}>
               <Typography variant="body2" color="text.secondary">
                 Risk Score (Confidence: {(confidence * 100).toFixed(0)}%)
               </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={score * 100} 
+              <LinearProgress
+                variant="determinate"
+                value={score * 100}
                 color={scoreColor}
                 sx={{ mt: 1 }}
               />
@@ -223,15 +247,25 @@ export default function AlertTriageV2Panel({
             <AccordionDetails>
               <Box>
                 {factors.map((factor, index) => (
-                  <Box key={index} display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Box
+                    key={index}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={1}
+                  >
                     <Typography variant="body2">{factor.name}</Typography>
                     <Box display="flex" alignItems="center">
-                      <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mr: 1 }}
+                      >
                         {(factor.contribution * 100).toFixed(1)}%
                       </Typography>
-                      <Chip 
-                        size="small" 
-                        label={factor.value} 
+                      <Chip
+                        size="small"
+                        label={factor.value}
                         variant="outlined"
                       />
                     </Box>
@@ -252,7 +286,7 @@ export default function AlertTriageV2Panel({
           <Security sx={{ mr: 1, verticalAlign: 'middle' }} />
           Quick Actions
         </Typography>
-        
+
         <Box display="flex" flexWrap="wrap" gap={1}>
           <Button
             variant="contained"
@@ -307,9 +341,12 @@ export default function AlertTriageV2Panel({
           <Typography variant="h6" gutterBottom>
             Evidence Summary
           </Typography>
-          
+
           {alertData.evidenceSnippets.map((snippet, index) => (
-            <Box key={index} sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+            <Box
+              key={index}
+              sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
+            >
               <Typography variant="body2" gutterBottom>
                 {snippet.summary}
               </Typography>
@@ -345,33 +382,57 @@ export default function AlertTriageV2Panel({
           <Typography variant="h6" gutterBottom>
             Feedback History
           </Typography>
-          
+
           {feedbackData.alertFeedback.map((feedback) => (
-            <Box key={feedback.id} sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+            <Box
+              key={feedback.id}
+              sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
+            >
               <Box display="flex" alignItems="center" mb={1}>
                 <Chip
                   size="small"
-                  label={FEEDBACK_TYPES.find(ft => ft.value === feedback.feedbackType)?.label}
-                  color={FEEDBACK_TYPES.find(ft => ft.value === feedback.feedbackType)?.color}
-                  icon={FEEDBACK_TYPES.find(ft => ft.value === feedback.feedbackType)?.icon}
+                  label={
+                    FEEDBACK_TYPES.find(
+                      (ft) => ft.value === feedback.feedbackType,
+                    )?.label
+                  }
+                  color={
+                    FEEDBACK_TYPES.find(
+                      (ft) => ft.value === feedback.feedbackType,
+                    )?.color
+                  }
+                  icon={
+                    FEEDBACK_TYPES.find(
+                      (ft) => ft.value === feedback.feedbackType,
+                    )?.icon
+                  }
                 />
-                <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
-                  by {feedback.analyst.name} • {new Date(feedback.createdAt).toLocaleString()}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ ml: 2 }}
+                >
+                  by {feedback.analyst.name} •{' '}
+                  {new Date(feedback.createdAt).toLocaleString()}
                 </Typography>
               </Box>
-              
+
               <Typography variant="body2" sx={{ mb: 1 }}>
                 Reason: {feedback.reasonCode}
               </Typography>
-              
+
               {feedback.rationale && (
                 <Typography variant="body2" color="text.secondary">
                   {feedback.rationale}
                 </Typography>
               )}
-              
+
               <Box display="flex" alignItems="center" mt={1}>
-                <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mr: 1 }}
+                >
                   Confidence:
                 </Typography>
                 <Rating value={feedback.confidence * 5} size="small" readOnly />

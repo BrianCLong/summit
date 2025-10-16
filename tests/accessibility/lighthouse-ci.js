@@ -145,7 +145,10 @@ class AccessibilityTester {
       this.results.push(result);
 
       // Save detailed report
-      const reportPath = path.join(this.outputDir, `lighthouse-${view.name}.json`);
+      const reportPath = path.join(
+        this.outputDir,
+        `lighthouse-${view.name}.json`,
+      );
       await fs.writeFile(reportPath, JSON.stringify(lhr, null, 2));
 
       console.log(
@@ -230,7 +233,8 @@ class AccessibilityTester {
     const totalViews = this.results.length;
     const passingViews = this.results.filter((r) => r.passes_target).length;
     const averageScore =
-      this.results.reduce((sum, r) => sum + (r.accessibility_score || 0), 0) / totalViews;
+      this.results.reduce((sum, r) => sum + (r.accessibility_score || 0), 0) /
+      totalViews;
 
     const summary = {
       timestamp: new Date().toISOString(),
@@ -252,7 +256,9 @@ class AccessibilityTester {
     const failingViews = this.results.filter((r) => !r.passes_target);
 
     if (failingViews.length > 0) {
-      recommendations.push(`${failingViews.length} views need accessibility improvements`);
+      recommendations.push(
+        `${failingViews.length} views need accessibility improvements`,
+      );
 
       // Common issues analysis
       const commonIssues = {};

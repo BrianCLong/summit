@@ -1,6 +1,6 @@
 # IntelGraph GA Q4 2025 – GitHub Project Plan
 
-> Repo: `github.com/BrianCLong/intelgraph`  ·  Timeframe: **Sep 29 – Dec 19, 2025** (6 sprints × 2 weeks)  ·  Goal: **GA Core** + **Prov‑Ledger (beta)** + **Predictive (alpha)** with governance-by-design.
+> Repo: `github.com/BrianCLong/intelgraph` · Timeframe: **Sep 29 – Dec 19, 2025** (6 sprints × 2 weeks) · Goal: **GA Core** + **Prov‑Ledger (beta)** + **Predictive (alpha)** with governance-by-design.
 
 ---
 
@@ -26,14 +26,14 @@
 
 ### 1.1 Project fields
 
-* `Status` (select): Backlog, Ready, In Progress, In Review, Blocked, Done
-* `Area` (select): Graph, Ingest, ER, Analytics, Copilot, Governance, Prov‑Ledger, Ops, UI, Docs
-* `Priority` (select): P0, P1, P2
-* `Sprint` (text): e.g., `S3 (Nov 3–14)`
-* `Owner` (user)
-* `Risk` (select): Low, Medium, High
-* `Story Points` (number)
-* `Exit Criteria` (text)
+- `Status` (select): Backlog, Ready, In Progress, In Review, Blocked, Done
+- `Area` (select): Graph, Ingest, ER, Analytics, Copilot, Governance, Prov‑Ledger, Ops, UI, Docs
+- `Priority` (select): P0, P1, P2
+- `Sprint` (text): e.g., `S3 (Nov 3–14)`
+- `Owner` (user)
+- `Risk` (select): Low, Medium, High
+- `Story Points` (number)
+- `Exit Criteria` (text)
 
 ### 1.2 Create via `gh` CLI
 
@@ -106,13 +106,13 @@ jq -r '.[] | [.name,.color] | @tsv' .github/labels.json | while IFS=$'\t' read -
 
 ## 3) Branching, Protections & Envs
 
-* **Branches:** `main`, `develop`, feature branches per workstream:
+- **Branches:** `main`, `develop`, feature branches per workstream:
   `feature/prov-ledger-beta`, `feature/nl2cypher-sandbox`, `feature/er-v1-explainable`, `feature/cost-guard`, `feature/tri-pane-ui`, `feature/opa-abac`, `feature/pcq-dag-runner-alpha`.
-* **Protections (recommended):**
+- **Protections (recommended):**
+  - Require PR, linear history, signed commits, 2 code owners, status checks (CI, SAST, lint, test).
+  - Disallow force-push; dismiss stale approvals on new commits; require conversations resolved.
 
-  * Require PR, linear history, signed commits, 2 code owners, status checks (CI, SAST, lint, test).
-  * Disallow force-push; dismiss stale approvals on new commits; require conversations resolved.
-* **CLI:**
+- **CLI:**
 
 ```bash
 # protect main & develop
@@ -135,7 +135,7 @@ done
 
 ```yaml
 name: Feature request
-labels: ["prio:P1"]
+labels: ['prio:P1']
 body:
   - type: textarea
     id: context
@@ -151,7 +151,20 @@ body:
     id: area
     attributes:
       label: Area
-      options: [Graph, Ingest, ER, Analytics, Copilot, Governance, Prov-Ledger, Ops, UI, Docs, Fuzzer]
+      options:
+        [
+          Graph,
+          Ingest,
+          ER,
+          Analytics,
+          Copilot,
+          Governance,
+          Prov-Ledger,
+          Ops,
+          UI,
+          Docs,
+          Fuzzer,
+        ]
   - type: input
     id: exit
     attributes:
@@ -164,7 +177,7 @@ body:
 
 ```yaml
 name: Bug report
-labels: ["prio:P0"]
+labels: ['prio:P0']
 body:
   - type: textarea
     id: reproduce
@@ -259,7 +272,7 @@ jobs:
 name: Release
 on:
   push:
-    tags: [ 'v*.*.*' ]
+    tags: ['v*.*.*']
 jobs:
   publish-charts:
     runs-on: ubuntu-latest
@@ -320,56 +333,56 @@ Each epic is a GitHub issue with child issues. Add to Project, set `Status=Backl
 
 ### EPIC-1: Graph Core & API
 
-* **Exit:** Time-travel queries; policy-aware shortest path; p95<1.5s synthetic; cost hints enforced.
-* **Children:** schema v1, bitemporal edges, GraphQL gateway, persisted queries, cost limiter, query cookbook, perf tests.
+- **Exit:** Time-travel queries; policy-aware shortest path; p95<1.5s synthetic; cost hints enforced.
+- **Children:** schema v1, bitemporal edges, GraphQL gateway, persisted queries, cost limiter, query cookbook, perf tests.
 
 ### EPIC-2: Ingest & 10 Connectors
 
-* **Exit:** 10 connectors w/ manifests + golden IO tests; Ingest Wizard.
-* **List (v1):** CSV, RSS, STIX/TAXII, MISP, OFAC sanctions, DNS/WHOIS, S3 bucket, HTTP fetcher, Kafka, IMAP email.
+- **Exit:** 10 connectors w/ manifests + golden IO tests; Ingest Wizard.
+- **List (v1):** CSV, RSS, STIX/TAXII, MISP, OFAC sanctions, DNS/WHOIS, S3 bucket, HTTP fetcher, Kafka, IMAP email.
 
 ### EPIC-3: Entity Resolution v1 (Explainable)
 
-* **Exit:** Scorecards, merge/split APIs, override logs, golden datasets.
+- **Exit:** Scorecards, merge/split APIs, override logs, golden datasets.
 
 ### EPIC-4: Analytics v1
 
-* **Exit:** Link/path centralities; pattern templates (burst, co-presence); anomaly queues; hypothesis workbench MVP.
+- **Exit:** Link/path centralities; pattern templates (burst, co-presence); anomaly queues; hypothesis workbench MVP.
 
 ### EPIC-5: Copilot v1 (Auditable)
 
-* **Exit:** NL→Cypher preview w/ cost/row estimates; RAG w/ inline citations; guardrail denials with reasons; feature flag.
+- **Exit:** NL→Cypher preview w/ cost/row estimates; RAG w/ inline citations; guardrail denials with reasons; feature flag.
 
 ### EPIC-6: Governance & Security
 
-* **Exit:** OPA ABAC, immutable audit, WebAuthn, policy simulation view; dual-control high-risk actions.
+- **Exit:** OPA ABAC, immutable audit, WebAuthn, policy simulation view; dual-control high-risk actions.
 
 ### EPIC-7: Prov‑Ledger (beta) & PCQ groundwork
 
-* **Exit:** Evidence registration; export manifests (Merkle); deterministic DAG runner proto; replay determinism test.
+- **Exit:** Evidence registration; export manifests (Merkle); deterministic DAG runner proto; replay determinism test.
 
 ### EPIC-8: Ops/Observability/FinOps
 
-* **Exit:** OTEL traces; Prom/Grafana dashboards; SLO alerts; slow-query killer; archive tiering; chaos drills.
+- **Exit:** OTEL traces; Prom/Grafana dashboards; SLO alerts; slow-query killer; archive tiering; chaos drills.
 
 ### EPIC-9: UI/UX Tri‑pane
 
-* **Exit:** Graph/Timeline/Map with synced brushing; command palette; XAI overlays; a11y pass.
+- **Exit:** Graph/Timeline/Map with synced brushing; command palette; XAI overlays; a11y pass.
 
 ### EPIC-10: Runbooks R1–R7, R9, R10
 
-* **Exit:** 10 runbooks published; KPIs defined; sample datasets wired; export templates.
+- **Exit:** 10 runbooks published; KPIs defined; sample datasets wired; export templates.
 
 ### EPIC-11: Policy Fuzzer
 
-* **Exit:** Fuzzer integrated into CI; HTML reports with severity/impact; comprehensive attack grammars; property/metamorphic testing.
-* **Children:** Implement sophisticated attack grammars, develop automated oracle, enhance coverage metrics, improve reporting and UX, refine fuzzer configuration.
+- **Exit:** Fuzzer integrated into CI; HTML reports with severity/impact; comprehensive attack grammars; property/metamorphic testing.
+- **Children:** Implement sophisticated attack grammars, develop automated oracle, enhance coverage metrics, improve reporting and UX, refine fuzzer configuration.
 
 ---
 
 ## 9) Seed Issues (per Epic)
 
-> *Create via `gh issue create` or the script below. Story points assume 3/5/8 scale. Adjust owners.*
+> _Create via `gh issue create` or the script below. Story points assume 3/5/8 scale. Adjust owners._
 
 ```bash
 cat > .github/seed-issues.csv <<'CSV'
@@ -417,27 +430,30 @@ Fuzzer: Improved Reporting and UX,HTML reports with visual heatmap, root cause a
 Fuzzer: Refined Configuration,Add command-line options to enable/disable attack grammar categories,area:fuzzer;prio:P1,,M4,3
 CSV
 ```
+
 # Create milestones
+
 for M in "M1: Graph Core & API" "M2: Ingest & ER v1" "M3: Copilot v1" "M4: Governance & Security" "M5: Prov-Ledger (beta)" "M6: GA RC"; do
-  gh milestone create "$M" || true
+gh milestone create "$M" || true
 done
 
 # Create issues from CSV (requires csvkit)
+
 pipx install csvkit >/dev/null 2>&1 || true
 csvcut -c Title,Body,Labels,Milestone .github/seed-issues.csv | tail -n +2 | while IFS=, read -r title body labels ms; do
-  gh issue create --title "$title" --body "$body" --label $(echo $labels | tr ';' ',') --milestone "$ms"
+gh issue create --title "$title" --body "$body" --label $(echo $labels | tr ';' ',') --milestone "$ms"
 done
 
 ---
 
 ## 10) Test Strategy
 
-* **Unit:** Jest (Node), Pytest (Python). Thresholds: lines 85%, branches 70%.
-* **Integration:** Supertest for GraphQL; docker-compose spins Neo4j + OPA + Kafka.
-* **Perf:** K6 scenarios: query latency, ingest throughput, ER merges/s.
-* **Security:** ZAP baseline on UI; OPA policy unit tests; secret/dep scans.
-* **Fuzzing:** Policy fuzzer with advanced attack grammars, oracle, and metamorphic testing.
-* **Acceptance (per epic):** Gherkin scenarios stored in `tests/acceptance/` and wired to CI with tags per Area.
+- **Unit:** Jest (Node), Pytest (Python). Thresholds: lines 85%, branches 70%.
+- **Integration:** Supertest for GraphQL; docker-compose spins Neo4j + OPA + Kafka.
+- **Perf:** K6 scenarios: query latency, ingest throughput, ER merges/s.
+- **Security:** ZAP baseline on UI; OPA policy unit tests; secret/dep scans.
+- **Fuzzing:** Policy fuzzer with advanced attack grammars, oracle, and metamorphic testing.
+- **Acceptance (per epic):** Gherkin scenarios stored in `tests/acceptance/` and wired to CI with tags per Area.
 
 **Example Gherkin (Graph time-travel):**
 
@@ -463,36 +479,36 @@ Feature: Time-travel queries
 
 ## 12) Docs, Training & Enablement
 
-* `/docs/architecture/` ADRs; `/docs/cookbook/` query recipes; `/docs/runbooks/` R1–R10 with KPIs & legal preconditions.
-* Training ladders: Analyst I/II, Operator, Ombudsman, Admin; labs & datasets under `/training/`.
+- `/docs/architecture/` ADRs; `/docs/cookbook/` query recipes; `/docs/runbooks/` R1–R10 with KPIs & legal preconditions.
+- Training ladders: Analyst I/II, Operator, Ombudsman, Admin; labs & datasets under `/training/`.
 
 ---
 
 ## 13) Next Actions (Week 1)
 
-* Create project, labels, milestones via scripts above.
-* Submit scaffolding PR: templates, CI, CODEOWNERS, directories, Makefile.
-* Spin preview env for `feature/tri-pane-ui`.
-* Kick off EPIC-1 spike on cost guard + persisted queries.
+- Create project, labels, milestones via scripts above.
+- Submit scaffolding PR: templates, CI, CODEOWNERS, directories, Makefile.
+- Spin preview env for `feature/tri-pane-ui`.
+- Kick off EPIC-1 spike on cost guard + persisted queries.
 
 ---
 
 ## 14) Risks & Mitigations
 
-* **ER quality risk** → Golden datasets; override logs; nightly evaluation.
-* **Perf regressions** → Budgets + perf tests in CI; query kill switch.
-* **Scope creep** → Milestone exit criteria are gates; change control via ADRs.
-* **Governance delay** → Policy simulation MVP by M4; dual-control limited scope.
+- **ER quality risk** → Golden datasets; override logs; nightly evaluation.
+- **Perf regressions** → Budgets + perf tests in CI; query kill switch.
+- **Scope creep** → Milestone exit criteria are gates; change control via ADRs.
+- **Governance delay** → Policy simulation MVP by M4; dual-control limited scope.
 
 ---
 
 ## 15) Tracking KPIs (from Day 1)
 
-* Trust: % outputs with proofs (Prov‑Ledger).
-* Speed: time‑to‑first‑insight; replay determinism rate.
-* Safety: adverse-event rate; guardrail denials with reasons.
-* Cost/Energy: $/insight; joules/insight; cost-guard savings.
-* Federation: # partners using PCQ/Prov artifacts.
+- Trust: % outputs with proofs (Prov‑Ledger).
+- Speed: time‑to‑first‑insight; replay determinism rate.
+- Safety: adverse-event rate; guardrail denials with reasons.
+- Cost/Energy: $/insight; joules/insight; cost-guard savings.
+- Federation: # partners using PCQ/Prov artifacts.
 
 ---
 
@@ -521,6 +537,7 @@ gh-pages -d charts
 
 ```md
 # ADR-000: Title
+
 - Date:
 - Status: Proposed | Accepted | Superseded
 - Context

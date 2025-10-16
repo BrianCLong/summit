@@ -1,4 +1,3 @@
-
 # ADR-020: Persisted Queries & Service Worker Caching
 
 **Status:** Proposed

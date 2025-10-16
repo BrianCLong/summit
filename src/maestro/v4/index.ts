@@ -1,5 +1,5 @@
 // Maestro Conductor v0.4 - "Align & Automate" — Autonomous Release Train
-// Sprint Goal: Scale from fast CI and first‑gen agents to a risk‑aware, cost‑optimized, 
+// Sprint Goal: Scale from fast CI and first‑gen agents to a risk‑aware, cost‑optimized,
 // self‑healing automation that merges safe PRs and ships on a schedule with high confidence.
 
 export { MaestroConductorV4 } from './conductor';

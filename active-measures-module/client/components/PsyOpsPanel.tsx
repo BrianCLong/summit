@@ -132,7 +132,8 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 'Maintain operational security',
               ],
               timeHorizon: 'Medium-term (1-6 months)',
-              targetAudience: 'Multi-demographic with psychographic segmentation',
+              targetAudience:
+                'Multi-demographic with psychographic segmentation',
               narrativeThemes: [
                 'Democratic values and transparency',
                 'Economic stability and prosperity',
@@ -153,7 +154,10 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                   phase: 'Development',
                   duration: 60,
                   targetSegments: ['Target demographics', 'Opinion leaders'],
-                  methods: ['Multi-platform messaging', 'Influencer engagement'],
+                  methods: [
+                    'Multi-platform messaging',
+                    'Influencer engagement',
+                  ],
                 },
               ],
               timingConsiderations: [
@@ -176,7 +180,10 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                   category: 'Social Amplification',
                   effectiveness: 0.8,
                   attribution: 0.3,
-                  requirements: ['Influencer network', 'Relationship management'],
+                  requirements: [
+                    'Influencer network',
+                    'Relationship management',
+                  ],
                 },
                 {
                   name: 'Sentiment Monitoring',
@@ -202,7 +209,8 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
               {
                 method: 'Organic Content Creation',
                 whenToUse: 'Long-term narrative building',
-                howToImplement: 'Create authentic, engaging content aligned with target values',
+                howToImplement:
+                  'Create authentic, engaging content aligned with target values',
                 riskLevel: 0.2,
                 effectivenessScore: 0.7,
               },
@@ -229,7 +237,12 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 agreeableness: 0.5,
                 neuroticism: 0.8,
               },
-              communicationChannels: ['Facebook', 'Twitter', 'Local news', 'WhatsApp'],
+              communicationChannels: [
+                'Facebook',
+                'Twitter',
+                'Local news',
+                'WhatsApp',
+              ],
               susceptibilityRating: 'HIGH',
             },
             {
@@ -244,7 +257,12 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                 agreeableness: 0.6,
                 neuroticism: 0.4,
               },
-              communicationChannels: ['LinkedIn', 'Email newsletters', 'Podcasts', 'YouTube'],
+              communicationChannels: [
+                'LinkedIn',
+                'Email newsletters',
+                'Podcasts',
+                'YouTube',
+              ],
               susceptibilityRating: 'MEDIUM',
             },
             {
@@ -313,7 +331,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
         <CardContent className="flex items-center justify-center h-64">
           <div className="text-center">
             <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Select an operation to view PsyOps analysis</p>
+            <p className="text-muted-foreground">
+              Select an operation to view PsyOps analysis
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -357,7 +377,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
             </span>
             <div className="flex items-center space-x-2">
               <Progress value={value * 100} className="w-16 h-2" />
-              <span className="text-xs w-8 text-right">{(value * 100).toFixed(0)}%</span>
+              <span className="text-xs w-8 text-right">
+                {(value * 100).toFixed(0)}%
+              </span>
             </div>
           </div>
         ))}
@@ -375,7 +397,10 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeView} onValueChange={(value: any) => setActiveView(value)}>
+          <Tabs
+            value={activeView}
+            onValueChange={(value: any) => setActiveView(value)}
+          >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="framework">Framework</TabsTrigger>
               <TabsTrigger value="segmentation">Segmentation</TabsTrigger>
@@ -398,12 +423,14 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                       <div>
                         <h4 className="font-medium mb-2">Objectives</h4>
                         <ul className="text-sm space-y-1">
-                          {psyOpsData.framework.strategic.objectives.map((objective, index) => (
-                            <li key={index} className="flex items-start">
-                              <CheckCircle className="h-3 w-3 mr-2 mt-0.5 text-green-500" />
-                              {objective}
-                            </li>
-                          ))}
+                          {psyOpsData.framework.strategic.objectives.map(
+                            (objective, index) => (
+                              <li key={index} className="flex items-start">
+                                <CheckCircle className="h-3 w-3 mr-2 mt-0.5 text-green-500" />
+                                {objective}
+                              </li>
+                            ),
+                          )}
                         </ul>
                       </div>
 
@@ -412,11 +439,13 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                       <div>
                         <h4 className="font-medium mb-2">Narrative Themes</h4>
                         <div className="flex flex-wrap gap-2">
-                          {psyOpsData.framework.strategic.narrativeThemes.map((theme, index) => (
-                            <Badge key={index} variant="outline">
-                              {theme}
-                            </Badge>
-                          ))}
+                          {psyOpsData.framework.strategic.narrativeThemes.map(
+                            (theme, index) => (
+                              <Badge key={index} variant="outline">
+                                {theme}
+                              </Badge>
+                            ),
+                          )}
                         </div>
                       </div>
 
@@ -439,33 +468,41 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {psyOpsData.framework.tactical.techniques.map((technique, index) => (
-                          <div key={index} className="p-3 border rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                              <h5 className="font-medium text-sm">{technique.name}</h5>
-                              <Badge variant="outline" className="text-xs">
-                                {technique.category}
-                              </Badge>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 text-xs">
-                              <div>
-                                <span className="font-medium">Effectiveness:</span>
-                                <Progress
-                                  value={technique.effectiveness * 100}
-                                  className="mt-1 h-2"
-                                />
+                        {psyOpsData.framework.tactical.techniques.map(
+                          (technique, index) => (
+                            <div key={index} className="p-3 border rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h5 className="font-medium text-sm">
+                                  {technique.name}
+                                </h5>
+                                <Badge variant="outline" className="text-xs">
+                                  {technique.category}
+                                </Badge>
                               </div>
-                              <div>
-                                <span className="font-medium">Attribution:</span>
-                                <Progress
-                                  value={technique.attribution * 100}
-                                  className="mt-1 h-2"
-                                  // Lower attribution is better, so invert color logic
-                                />
+                              <div className="grid grid-cols-2 gap-4 text-xs">
+                                <div>
+                                  <span className="font-medium">
+                                    Effectiveness:
+                                  </span>
+                                  <Progress
+                                    value={technique.effectiveness * 100}
+                                    className="mt-1 h-2"
+                                  />
+                                </div>
+                                <div>
+                                  <span className="font-medium">
+                                    Attribution:
+                                  </span>
+                                  <Progress
+                                    value={technique.attribution * 100}
+                                    className="mt-1 h-2"
+                                    // Lower attribution is better, so invert color logic
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ),
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -480,30 +517,38 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {psyOpsData.framework.operational.campaigns.map((campaign, index) => (
-                          <div key={index} className="p-4 border rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                              <h5 className="font-medium">{campaign.name}</h5>
-                              <Badge variant="outline">{campaign.phase}</Badge>
-                            </div>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex items-center">
-                                <Clock className="h-3 w-3 mr-1" />
-                                Duration: {campaign.duration} days
+                        {psyOpsData.framework.operational.campaigns.map(
+                          (campaign, index) => (
+                            <div key={index} className="p-4 border rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h5 className="font-medium">{campaign.name}</h5>
+                                <Badge variant="outline">
+                                  {campaign.phase}
+                                </Badge>
                               </div>
-                              <div>
-                                <span className="font-medium">Methods:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {campaign.methods.map((method, i) => (
-                                    <Badge key={i} variant="secondary" className="text-xs">
-                                      {method}
-                                    </Badge>
-                                  ))}
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  Duration: {campaign.duration} days
+                                </div>
+                                <div>
+                                  <span className="font-medium">Methods:</span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {campaign.methods.map((method, i) => (
+                                      <Badge
+                                        key={i}
+                                        variant="secondary"
+                                        className="text-xs"
+                                      >
+                                        {method}
+                                      </Badge>
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ),
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -521,14 +566,20 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                   <Card
                     key={segment.id}
                     className={`cursor-pointer transition-all ${
-                      selectedSegment === segment.id ? 'ring-2 ring-blue-500' : ''
+                      selectedSegment === segment.id
+                        ? 'ring-2 ring-blue-500'
+                        : ''
                     }`}
                     onClick={() => setSelectedSegment(segment.id)}
                   >
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center justify-between">
                         <span>{segment.name}</span>
-                        <Badge className={getSusceptibilityColor(segment.susceptibilityRating)}>
+                        <Badge
+                          className={getSusceptibilityColor(
+                            segment.susceptibilityRating,
+                          )}
+                        >
                           {segment.susceptibilityRating}
                         </Badge>
                       </CardTitle>
@@ -538,13 +589,20 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                         <div className="text-2xl font-bold">
                           {(segment.size / 1000000).toFixed(1)}M
                         </div>
-                        <div className="text-xs text-muted-foreground">Estimated reach</div>
+                        <div className="text-xs text-muted-foreground">
+                          Estimated reach
+                        </div>
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2 text-sm">Vulnerability Score</h4>
+                        <h4 className="font-medium mb-2 text-sm">
+                          Vulnerability Score
+                        </h4>
                         <div className="flex items-center space-x-2">
-                          <Progress value={segment.vulnerabilityScore * 100} className="flex-1" />
+                          <Progress
+                            value={segment.vulnerabilityScore * 100}
+                            className="flex-1"
+                          />
                           <span className="text-sm font-medium">
                             {(segment.vulnerabilityScore * 100).toFixed(0)}%
                           </span>
@@ -552,18 +610,28 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2 text-sm">OCEAN Traits</h4>
+                        <h4 className="font-medium mb-2 text-sm">
+                          OCEAN Traits
+                        </h4>
                         {renderOceanTraits(segment.oceanTraits)}
                       </div>
 
                       <div>
-                        <h4 className="font-medium mb-2 text-sm">Communication Channels</h4>
+                        <h4 className="font-medium mb-2 text-sm">
+                          Communication Channels
+                        </h4>
                         <div className="flex flex-wrap gap-1">
-                          {segment.communicationChannels.slice(0, 3).map((channel, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {channel}
-                            </Badge>
-                          ))}
+                          {segment.communicationChannels
+                            .slice(0, 3)
+                            .map((channel, index) => (
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {channel}
+                              </Badge>
+                            ))}
                           {segment.communicationChannels.length > 3 && (
                             <Badge variant="outline" className="text-xs">
                               +{segment.communicationChannels.length - 3}
@@ -591,15 +659,22 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                     {psyOpsData.heatmap && (
                       <div className="space-y-4">
                         {psyOpsData.heatmap.segments.map((segment) => (
-                          <div key={segment.segmentId} className="p-3 border rounded-lg">
-                            <h5 className="font-medium mb-2">{segment.segmentName}</h5>
+                          <div
+                            key={segment.segmentId}
+                            className="p-3 border rounded-lg"
+                          >
+                            <h5 className="font-medium mb-2">
+                              {segment.segmentName}
+                            </h5>
                             <div className="space-y-2">
                               {segment.vulnerabilities.map((vuln, index) => (
                                 <div
                                   key={index}
                                   className="flex items-center justify-between text-sm"
                                 >
-                                  <span className="capitalize">{vuln.type.replace('_', ' ')}</span>
+                                  <span className="capitalize">
+                                    {vuln.type.replace('_', ' ')}
+                                  </span>
                                   <div className="flex items-center space-x-2">
                                     <div className="w-16 h-2 bg-gray-200 rounded-full">
                                       <div
@@ -610,7 +685,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                                               ? 'bg-yellow-500'
                                               : 'bg-green-500'
                                         }`}
-                                        style={{ width: `${vuln.combinedScore * 100}%` }}
+                                        style={{
+                                          width: `${vuln.combinedScore * 100}%`,
+                                        }}
                                       />
                                     </div>
                                     <span className="text-xs font-medium w-8 text-right">
@@ -638,34 +715,49 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                   <CardContent>
                     {psyOpsData.framework && (
                       <div className="space-y-3">
-                        {psyOpsData.framework.decisionMatrix.map((decision, index) => (
-                          <div key={index} className="p-3 border rounded-lg">
-                            <h5 className="font-medium text-sm mb-1">{decision.method}</h5>
-                            <p className="text-xs text-muted-foreground mb-2">
-                              {decision.whenToUse}
-                            </p>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              <div>
-                                <span className="font-medium">Risk Level:</span>
-                                <div className="flex items-center mt-1">
-                                  <div
-                                    className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(decision.riskLevel)}`}
-                                  />
-                                  <span>{(decision.riskLevel * 100).toFixed(0)}%</span>
+                        {psyOpsData.framework.decisionMatrix.map(
+                          (decision, index) => (
+                            <div key={index} className="p-3 border rounded-lg">
+                              <h5 className="font-medium text-sm mb-1">
+                                {decision.method}
+                              </h5>
+                              <p className="text-xs text-muted-foreground mb-2">
+                                {decision.whenToUse}
+                              </p>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                  <span className="font-medium">
+                                    Risk Level:
+                                  </span>
+                                  <div className="flex items-center mt-1">
+                                    <div
+                                      className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(decision.riskLevel)}`}
+                                    />
+                                    <span>
+                                      {(decision.riskLevel * 100).toFixed(0)}%
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                              <div>
-                                <span className="font-medium">Effectiveness:</span>
-                                <div className="flex items-center mt-1">
-                                  <div
-                                    className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(1 - decision.effectivenessScore)}`}
-                                  />
-                                  <span>{(decision.effectivenessScore * 100).toFixed(0)}%</span>
+                                <div>
+                                  <span className="font-medium">
+                                    Effectiveness:
+                                  </span>
+                                  <div className="flex items-center mt-1">
+                                    <div
+                                      className={`w-2 h-2 rounded-full mr-1 ${getRiskColor(1 - decision.effectivenessScore)}`}
+                                    />
+                                    <span>
+                                      {(
+                                        decision.effectivenessScore * 100
+                                      ).toFixed(0)}
+                                      %
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ),
+                        )}
                       </div>
                     )}
                   </CardContent>
@@ -677,9 +769,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  PsyOps execution requires proper authorization and compliance with ethical
-                  guidelines. All operations must be approved through the established chain of
-                  command.
+                  PsyOps execution requires proper authorization and compliance
+                  with ethical guidelines. All operations must be approved
+                  through the established chain of command.
                 </AlertDescription>
               </Alert>
 
@@ -691,7 +783,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Target Analysis Complete</span>
+                        <span className="text-sm">
+                          Target Analysis Complete
+                        </span>
                         <CheckCircle className="h-4 w-4 text-green-500" />
                       </div>
                       <div className="flex items-center justify-between">
@@ -699,7 +793,9 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                         <CheckCircle className="h-4 w-4 text-green-500" />
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Legal Compliance Verified</span>
+                        <span className="text-sm">
+                          Legal Compliance Verified
+                        </span>
                         <CheckCircle className="h-4 w-4 text-green-500" />
                       </div>
                       <div className="flex items-center justify-between">
@@ -718,11 +814,15 @@ const PsyOpsPanel: React.FC<PsyOpsPanelProps> = ({ operationId }) => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center">
                         <div className="text-lg font-bold">85%</div>
-                        <div className="text-xs text-muted-foreground">Readiness Score</div>
+                        <div className="text-xs text-muted-foreground">
+                          Readiness Score
+                        </div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-bold">12</div>
-                        <div className="text-xs text-muted-foreground">Active Metrics</div>
+                        <div className="text-xs text-muted-foreground">
+                          Active Metrics
+                        </div>
                       </div>
                     </div>
                     <Button className="w-full" disabled>

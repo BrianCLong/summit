@@ -125,7 +125,9 @@ export default function VisualPipelines() {
               )}
               {suggestion && (
                 <Paper sx={{ p: 1, mt: 2 }}>
-                  <Typography variant="subtitle1">Copilot Suggestion</Typography>
+                  <Typography variant="subtitle1">
+                    Copilot Suggestion
+                  </Typography>
                   <pre style={{ whiteSpace: 'pre-wrap' }}>
                     {JSON.stringify(suggestion, null, 2)}
                   </pre>

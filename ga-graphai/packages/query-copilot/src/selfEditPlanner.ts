@@ -27,7 +27,7 @@ const STATUS_WEIGHTS: Record<string, number> = {
 
 export function buildSelfEditEvaluationPlan(
   registry: SelfEditRegistry,
-  options: SelfEditEvaluationPlanOptions = {}
+  options: SelfEditEvaluationPlanOptions = {},
 ): SelfEditEvaluationPlanItem[] {
   const maxPerDomain = options.maxPerDomain ?? 3;
   const includeRejected = options.includeRejected ?? false;
@@ -37,7 +37,7 @@ export function buildSelfEditEvaluationPlan(
 
   const candidates = registry
     .list()
-    .filter(record => {
+    .filter((record) => {
       if (!includeRejected && record.status === 'rejected') {
         return false;
       }
@@ -46,7 +46,7 @@ export function buildSelfEditEvaluationPlan(
       }
       return true;
     })
-    .map(record => {
+    .map((record) => {
       const scorecard = registry.getScorecard(record.id, {
         threshold,
         minVerifierCount,
@@ -83,13 +83,26 @@ export function buildSelfEditEvaluationPlan(
   return selections;
 }
 
-function computePriority(record: SelfEditRecord, scorecard: SelfEditScorecard, now: Date): number {
+function computePriority(
+  record: SelfEditRecord,
+  scorecard: SelfEditScorecard,
+  now: Date,
+): number {
   const statusWeight = STATUS_WEIGHTS[record.status] ?? 0;
   const readyBoost = scorecard.ready ? 150 : 0;
   const reviewBoost = record.approval ? 40 : 0;
-  const freshnessMinutes = Math.max(0, (now.getTime() - Date.parse(record.updatedAt)) / 60000);
+  const freshnessMinutes = Math.max(
+    0,
+    (now.getTime() - Date.parse(record.updatedAt)) / 60000,
+  );
   const freshnessPenalty = Math.min(100, freshnessMinutes);
   const averageScore = scorecard.averageScore ?? 0;
 
-  return statusWeight + readyBoost + reviewBoost + averageScore * 100 - freshnessPenalty;
+  return (
+    statusWeight +
+    readyBoost +
+    reviewBoost +
+    averageScore * 100 -
+    freshnessPenalty
+  );
 }

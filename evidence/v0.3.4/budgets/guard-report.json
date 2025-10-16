@@ -26,10 +26,7 @@
       },
       "ml_predictions": {
         "predicted_daily_usage": 1575.0,
-        "confidence_interval": [
-          1260.0,
-          1890.0
-        ],
+        "confidence_interval": [1260.0, 1890.0],
         "anomaly_score": 0.35,
         "recommended_limits": {
           "daily_limit": 1890.0,
@@ -52,10 +49,7 @@
       },
       "ml_predictions": {
         "predicted_daily_usage": 1358.3333333333333,
-        "confidence_interval": [
-          1086.6666666666667,
-          1629.9999999999998
-        ],
+        "confidence_interval": [1086.6666666666667, 1629.9999999999998],
         "anomaly_score": 0.45,
         "recommended_limits": {
           "daily_limit": 1629.9999999999998,
@@ -78,10 +72,7 @@
       },
       "ml_predictions": {
         "predicted_daily_usage": 1600.0,
-        "confidence_interval": [
-          1280.0,
-          1920.0
-        ],
+        "confidence_interval": [1280.0, 1920.0],
         "anomaly_score": 0.2,
         "recommended_limits": {
           "daily_limit": 1920.0,
@@ -104,10 +95,7 @@
       },
       "ml_predictions": {
         "predicted_daily_usage": 1350.0,
-        "confidence_interval": [
-          1080.0,
-          1620.0
-        ],
+        "confidence_interval": [1080.0, 1620.0],
         "anomaly_score": 0.7,
         "recommended_limits": {
           "daily_limit": 1620.0,
@@ -153,10 +141,7 @@
       },
       "ml_predictions": {
         "predicted_daily_usage": 1162.5,
-        "confidence_interval": [
-          930.0,
-          1395.0
-        ],
+        "confidence_interval": [930.0, 1395.0],
         "anomaly_score": 0.425,
         "recommended_limits": {
           "daily_limit": 1395.0,

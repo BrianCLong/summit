@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@apps/*": ["apps/*/src"],
+      "@packages/*": ["packages/*/src"],
+      "@services/*": ["services/*/src"],
+      "@contracts/*": ["contracts/*/src"]
+    }
+  }
+}

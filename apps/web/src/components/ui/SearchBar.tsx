@@ -39,10 +39,7 @@ export function SearchBar({
 
   return (
     <div
-      className={cn(
-        'relative flex items-center w-full max-w-md',
-        className
-      )}
+      className={cn('relative flex items-center w-full max-w-md', className)}
     >
       <div className="relative w-full">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -75,4 +72,3 @@ export function SearchBar({
     </div>
   )
 }
-

@@ -22,70 +22,70 @@
 
 ### EPIC A: Provenance & Claim Ledger (beta)
 
-| Story | User Value | Acceptance Criteria |
-| ----- | ---------- | ------------------- |
+| Story                                              | User Value                                                                        | Acceptance Criteria                                                                                                                                                                           |
+| -------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A1. Evidence Registration & Transform Tracking** | Analysts register evidence with immutable lineage to export verifiable manifests. | - `POST /evidence/register` persists source hash + metadata<br>- Transform steps recorded (operation, model+version, config checksum)<br>- Export produces `hash-manifest.json` (Merkle tree) |
-| **A2. External Verifier (CLI)** | Compliance reviewers verify manifests independently. | - `prov-verify fixtures/case-demo` exits 0 on untampered bundle<br>- Tamper yields non-zero exit + human-readable diff |
-| **A3. License/Authority Blockers on Export** | Approvers block non-compliant exports with reasons. | - Blocked export returns `{reason, license_clause, owner, appeal_path}` |
+| **A2. External Verifier (CLI)**                    | Compliance reviewers verify manifests independently.                              | - `prov-verify fixtures/case-demo` exits 0 on untampered bundle<br>- Tamper yields non-zero exit + human-readable diff                                                                        |
+| **A3. License/Authority Blockers on Export**       | Approvers block non-compliant exports with reasons.                               | - Blocked export returns `{reason, license_clause, owner, appeal_path}`                                                                                                                       |
 
 ### EPIC B: NL→Cypher Copilot (auditable)
 
-| Story | User Value | Acceptance Criteria |
-| ----- | ---------- | ------------------- |
+| Story                               | User Value                                                  | Acceptance Criteria                                                                                                          |
+| ----------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **B1. Prompt→Preview→Sandbox Exec** | Analysts preview generated Cypher with cost before running. | - `nl_to_cypher(prompt, schema)` returns `{cypher, cost_estimate}`<br>- Sandbox execute returns preview; undo/redo supported |
-| **B2. Quality & Safety Gates** | Leads ensure ≥ 95% syntactic validity and safe rollback. | - Test corpus produces ≥ 95% syntactic validity<br>- Diff vs. manual Cypher snapshot; rollback tested |
+| **B2. Quality & Safety Gates**      | Leads ensure ≥ 95% syntactic validity and safe rollback.    | - Test corpus produces ≥ 95% syntactic validity<br>- Diff vs. manual Cypher snapshot; rollback tested                        |
 
 ### EPIC C: Entity Resolution (v0)
 
-| Story | User Value | Acceptance Criteria |
-| ----- | ---------- | ------------------- |
-| **C1. Candidate Generation & Merge** | Analysts adjudicate merges safely. | - `/er/candidates`, `/er/merge` endpoints exist<br>- Merges reversible; audit includes user + reason |
-| **C2. Explainability Endpoint** | Analysts trust merges via transparency. | - `/er/explain` returns blocking features + scores + rationale |
+| Story                                | User Value                              | Acceptance Criteria                                                                                  |
+| ------------------------------------ | --------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **C1. Candidate Generation & Merge** | Analysts adjudicate merges safely.      | - `/er/candidates`, `/er/merge` endpoints exist<br>- Merges reversible; audit includes user + reason |
+| **C2. Explainability Endpoint**      | Analysts trust merges via transparency. | - `/er/explain` returns blocking features + scores + rationale                                       |
 
 ### EPIC D: Ops (SLO + Cost Guard)
 
-| Story | User Value | Acceptance Criteria |
-| ----- | ---------- | ------------------- |
-| **D1. SLO Dashboards** | SREs monitor p95 graph latency for SLO enforcement. | - Dashboards deployed; alert fires under induced load |
-| **D2. Cost Guard (budgeter + killer)** | SREs manage cost and availability. | - Synthetic hog killed; event visible on dashboard & alert channel |
+| Story                                  | User Value                                          | Acceptance Criteria                                                |
+| -------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| **D1. SLO Dashboards**                 | SREs monitor p95 graph latency for SLO enforcement. | - Dashboards deployed; alert fires under induced load              |
+| **D2. Cost Guard (budgeter + killer)** | SREs manage cost and availability.                  | - Synthetic hog killed; event visible on dashboard & alert channel |
 
 ### EPIC E: UI – Tri-Pane + Explain View
 
-| Story | User Value | Acceptance Criteria |
-| ----- | ---------- | ------------------- |
-| **E1. Tri-Pane Integration (graph/map/timeline)** | Users explore faster with synchronized panes. | - Brushing sync across panes; saved view works |
-| **E2. Explain This View** | Users see provenance overlays and policies. | - Tooltip shows provenance & confidence opacity; “Explain” lists evidence nodes & policies |
+| Story                                             | User Value                                    | Acceptance Criteria                                                                        |
+| ------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **E1. Tri-Pane Integration (graph/map/timeline)** | Users explore faster with synchronized panes. | - Brushing sync across panes; saved view works                                             |
+| **E2. Explain This View**                         | Users see provenance overlays and policies.   | - Tooltip shows provenance & confidence opacity; “Explain” lists evidence nodes & policies |
 
 ---
 
 ## 2. Sprint Backlog (Issues)
 
-| ID | Description | Stack | Estimate | Owner |
-| -- | ----------- | ----- | -------- | ----- |
-| A-1 | Implement `/evidence/register` (Go, repo `services/prov-ledger`) | Backend | 5 SP | Backend |
-| A-2 | Transform recorder middleware (Go) | Backend | 3 SP | Backend |
-| A-3 | Export `hash-manifest.json` (Merkle) | Backend | 5 SP | Backend |
-| A-4 | `prov-verify` CLI with diffing | Tools | 5 SP | Tools |
-| A-5 | Export blocker policy evaluation (OPA pass-through) | Backend | 5 SP | Backend |
-| B-1 | `nl_to_cypher` module + schema prompt composer (TS) | AI/FE | 8 SP | FE/AI |
-| B-2 | Cost estimator & preview panel (TS) | FE | 5 SP | FE |
-| B-3 | Sandbox executor + undo/redo (TS) | FE | 5 SP | FE |
-| B-4 | Corpus + tests to ≥95% syntax validity | QA/AI | 5 SP | QA/AI |
-| C-1 | Blocking + candidate generation (Go) | Backend | 5 SP | Backend |
-| C-2 | `/er/merge` reversible merges + audit log | Backend | 5 SP | Backend |
-| C-3 | `/er/explain` (features + rationale) | Backend | 3 SP | Backend |
-| C-4 | Golden fixtures `er/golden/*.json` | Data | 3 SP | Data |
-| D-1 | OTEL traces + Prom metrics emitters | Platform | 5 SP | Platform |
-| D-2 | Dashboards JSON (p95, errors, Cost Guard) | Platform | 3 SP | Platform |
-| D-3 | Cost Guard plan budget + killer | Platform | 5 SP | Platform |
-| D-4 | k6 load scripts + alert wiring | Platform | 5 SP | Platform |
-| E-1 | Tri-pane shell & routing `/case/:id/explore` | FE | 5 SP | FE |
-| E-2 | Sync brushing across panes | FE | 5 SP | FE |
-| E-3 | Explain overlay + provenance tooltips | FE | 5 SP | FE |
-| E-4 | Cypress benchmarks + screenshot diffs | QA/FE | 3 SP | QA/FE |
-| F-1 | RSS/News connector w/ manifest & tests | Integrations | 5 SP | Integrations |
-| F-2 | STIX/TAXII connector | Integrations | 5 SP | Integrations |
-| F-3 | CSV ingest wizard + PII flags | Integrations | 5 SP | Integrations |
+| ID  | Description                                                      | Stack        | Estimate | Owner        |
+| --- | ---------------------------------------------------------------- | ------------ | -------- | ------------ |
+| A-1 | Implement `/evidence/register` (Go, repo `services/prov-ledger`) | Backend      | 5 SP     | Backend      |
+| A-2 | Transform recorder middleware (Go)                               | Backend      | 3 SP     | Backend      |
+| A-3 | Export `hash-manifest.json` (Merkle)                             | Backend      | 5 SP     | Backend      |
+| A-4 | `prov-verify` CLI with diffing                                   | Tools        | 5 SP     | Tools        |
+| A-5 | Export blocker policy evaluation (OPA pass-through)              | Backend      | 5 SP     | Backend      |
+| B-1 | `nl_to_cypher` module + schema prompt composer (TS)              | AI/FE        | 8 SP     | FE/AI        |
+| B-2 | Cost estimator & preview panel (TS)                              | FE           | 5 SP     | FE           |
+| B-3 | Sandbox executor + undo/redo (TS)                                | FE           | 5 SP     | FE           |
+| B-4 | Corpus + tests to ≥95% syntax validity                           | QA/AI        | 5 SP     | QA/AI        |
+| C-1 | Blocking + candidate generation (Go)                             | Backend      | 5 SP     | Backend      |
+| C-2 | `/er/merge` reversible merges + audit log                        | Backend      | 5 SP     | Backend      |
+| C-3 | `/er/explain` (features + rationale)                             | Backend      | 3 SP     | Backend      |
+| C-4 | Golden fixtures `er/golden/*.json`                               | Data         | 3 SP     | Data         |
+| D-1 | OTEL traces + Prom metrics emitters                              | Platform     | 5 SP     | Platform     |
+| D-2 | Dashboards JSON (p95, errors, Cost Guard)                        | Platform     | 3 SP     | Platform     |
+| D-3 | Cost Guard plan budget + killer                                  | Platform     | 5 SP     | Platform     |
+| D-4 | k6 load scripts + alert wiring                                   | Platform     | 5 SP     | Platform     |
+| E-1 | Tri-pane shell & routing `/case/:id/explore`                     | FE           | 5 SP     | FE           |
+| E-2 | Sync brushing across panes                                       | FE           | 5 SP     | FE           |
+| E-3 | Explain overlay + provenance tooltips                            | FE           | 5 SP     | FE           |
+| E-4 | Cypress benchmarks + screenshot diffs                            | QA/FE        | 3 SP     | QA/FE        |
+| F-1 | RSS/News connector w/ manifest & tests                           | Integrations | 5 SP     | Integrations |
+| F-2 | STIX/TAXII connector                                             | Integrations | 5 SP     | Integrations |
+| F-3 | CSV ingest wizard + PII flags                                    | Integrations | 5 SP     | Integrations |
 
 ---
 
@@ -124,7 +124,7 @@
 name: ci
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -170,25 +170,32 @@ name: Feature request
 about: Propose a capability or improvement
 labels: feat, needs-triage
 ---
+
 ## User Story
+
 As a <role>, I want <capability> so that <outcome>.
 
 ## Acceptance Criteria
+
 - [ ]
 - [ ]
 
 ## Non-Goals
+
 -
 
 ## Telemetry & Security
+
 Metrics:
 Traces:
 Auth scope:
 
 ## Test Fixtures
+
 Path(s):
 
 ## Dependencies
+
 -
 ```
 
@@ -200,9 +207,11 @@ name: Bug report
 about: Help us fix a defect
 labels: bug, needs-triage
 ---
+
 ## Summary
 
 ## Steps to Reproduce
+
 1.
 2.
 
@@ -225,6 +234,7 @@ labels: bug, needs-triage
 ## How (Design/Implementation)
 
 ## Acceptance Evidence
+
 - [ ] Unit tests
 - [ ] Contract tests
 - [ ] Acceptance pack output attached (screenshots, CLI logs)
@@ -233,6 +243,7 @@ labels: bug, needs-triage
 ## Risk & Rollback
 
 ## Checklist
+
 - [ ] Codeowners approved
 - [ ] Security review (if policy/export touching)
 - [ ] Telemetry added (metrics/traces)
@@ -264,9 +275,14 @@ labels: bug, needs-triage
 import http from 'k6/http';
 import { sleep, check } from 'k6';
 export const options = { vus: 10, duration: '2m' };
-export default function() {
-  const r = http.post('https://api.local/query', { cypher: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100' });
-  check(r, { 'status 200': (res) => res.status === 200, 'latency ok': (res) => res.timings.duration < 1500 });
+export default function () {
+  const r = http.post('https://api.local/query', {
+    cypher: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100',
+  });
+  check(r, {
+    'status 200': (res) => res.status === 200,
+    'latency ok': (res) => res.timings.duration < 1500,
+  });
   sleep(1);
 }
 ```
@@ -340,14 +356,14 @@ fixtures/
 
 ## 15. RACI (Condensed)
 
-| Function | Scope |
-| -------- | ----- |
-| Backend | Prov-Ledger, ER service |
-| FE/AI | NL→Cypher UI + corpus, tri-pane, explain overlay |
-| Platform/SRE | OTEL/Prom, dashboards, k6, Cost Guard |
-| Integrations | Connectors golden path |
-| QA | Acceptance packs, Cypress, screenshot diffs |
-| Security | OPA/ABAC, export blockers, WebAuthn |
+| Function     | Scope                                            |
+| ------------ | ------------------------------------------------ |
+| Backend      | Prov-Ledger, ER service                          |
+| FE/AI        | NL→Cypher UI + corpus, tri-pane, explain overlay |
+| Platform/SRE | OTEL/Prom, dashboards, k6, Cost Guard            |
+| Integrations | Connectors golden path                           |
+| QA           | Acceptance packs, Cypress, screenshot diffs      |
+| Security     | OPA/ABAC, export blockers, WebAuthn              |
 
 ---
 

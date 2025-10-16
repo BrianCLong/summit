@@ -7,11 +7,11 @@ spec:
   background: true
   rules:
     - name: deny-host-ns
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "hostNetwork/PID/IPC not allowed"
+        message: 'hostNetwork/PID/IPC not allowed'
         pattern:
           spec:
-            hostNetwork: "false"
-            hostPID: "false"
-            hostIPC: "false"
+            hostNetwork: 'false'
+            hostPID: 'false'
+            hostIPC: 'false'

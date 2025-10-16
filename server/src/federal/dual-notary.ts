@@ -49,7 +49,8 @@ export class DualNotaryService {
   constructor(config?: Partial<z.infer<typeof DualNotaryConfigSchema>>) {
     this.config = DualNotaryConfigSchema.parse({
       ...config,
-      tsaEnabled: process.env.TSA_ENABLED === 'true' && !process.env.AIRGAP_ENABLED,
+      tsaEnabled:
+        process.env.TSA_ENABLED === 'true' && !process.env.AIRGAP_ENABLED,
       tsa: {
         url: process.env.TSA_URL || config?.tsa?.url,
         timeout: Number(process.env.TSA_TIMEOUT) || config?.tsa?.timeout,
@@ -79,20 +80,24 @@ export class DualNotaryService {
    */
   async signRootWithHSM(rootHex: string): Promise<string> {
     const span = otelService.createSpan('notary.hsm_sign');
-    
+
     try {
       if (!this.config.hsmEnabled || !this.pkcs11Ctx) {
         throw new Error('HSM not available for signing');
       }
 
       const rootBuffer = Buffer.from(rootHex, 'hex');
-      
+
       // Hash the root before signing (best practice)
       const hash = crypto.createHash('sha384').update(rootBuffer).digest();
-      
-      const signature = ecdsaP384Sign(this.pkcs11Ctx, this.config.hsmKeyLabel, hash);
+
+      const signature = ecdsaP384Sign(
+        this.pkcs11Ctx,
+        this.config.hsmKeyLabel,
+        hash,
+      );
       const signatureBase64 = signature.toString('base64');
-      
+
       otelService.addSpanAttributes({
         'notary.hsm.root_hex': rootHex,
         'notary.hsm.signature_length': signature.length,
@@ -101,7 +106,6 @@ export class DualNotaryService {
 
       console.log(`✅ HSM signed root: ${rootHex.substring(0, 16)}...`);
       return signatureBase64;
-      
     } catch (error: any) {
       console.error('HSM root signing failed:', error);
       otelService.recordException(error);
@@ -117,7 +121,7 @@ export class DualNotaryService {
    */
   async getTimestampFromTSA(rootHex: string): Promise<string> {
     const span = otelService.createSpan('notary.tsa_timestamp');
-    
+
     try {
       if (!this.config.tsaEnabled || !this.config.tsa.url) {
         throw new Error('TSA not configured or disabled');
@@ -126,56 +130,66 @@ export class DualNotaryService {
       // Create temporary files for OpenSSL TSA operations
       const tempDir = '/tmp/tsa-' + Date.now();
       await fs.mkdir(tempDir, { recursive: true });
-      
+
       const rootBinPath = `${tempDir}/root.bin`;
       const tsqPath = `${tempDir}/tsq.der`;
       const tsrPath = `${tempDir}/tsr.der`;
-      
+
       try {
         // Write binary root data
         const rootBuffer = Buffer.from(rootHex, 'hex');
         await fs.writeFile(rootBinPath, rootBuffer);
-        
+
         // Create timestamp query
         const queryCmd = [
-          'openssl', 'ts', 
+          'openssl',
+          'ts',
           '-query',
           `-${this.config.tsa.hashAlgorithm.toLowerCase()}`,
-          '-data', rootBinPath,
+          '-data',
+          rootBinPath,
           '-no_nonce',
           this.config.tsa.requiresCert ? '-cert' : '',
-          '-out', tsqPath
-        ].filter(Boolean).join(' ');
-        
+          '-out',
+          tsqPath,
+        ]
+          .filter(Boolean)
+          .join(' ');
+
         await execAsync(queryCmd, { timeout: 5000 });
-        
+
         // Send query to TSA
         const curlCmd = [
-          'curl', '-sS',
-          '-H', 'Content-Type: application/timestamp-query',
-          '--data-binary', `@${tsqPath}`,
-          '--max-time', (this.config.tsa.timeout / 1000).toString(),
+          'curl',
+          '-sS',
+          '-H',
+          'Content-Type: application/timestamp-query',
+          '--data-binary',
+          `@${tsqPath}`,
+          '--max-time',
+          (this.config.tsa.timeout / 1000).toString(),
           this.config.tsa.url!,
-          '-o', tsrPath
+          '-o',
+          tsrPath,
         ].join(' ');
-        
+
         let lastError: Error | null = null;
-        
+
         // Retry logic for TSA requests
         for (let attempt = 0; attempt <= this.config.tsa.retries; attempt++) {
           try {
             await execAsync(curlCmd, { timeout: this.config.tsa.timeout });
-            
+
             // Verify response exists and is valid
             const tsrStats = await fs.stat(tsrPath);
             if (tsrStats.size === 0) {
               throw new Error('Empty TSA response');
             }
-            
+
             // Read and encode TSA response
             const tsrBuffer = await fs.readFile(tsrPath);
             const tsrBase64 = tsrBuffer.toString('base64');
-            
+
             otelService.addSpanAttributes({
               'notary.tsa.url': this.config.tsa.url!,
               'notary.tsa.attempts': attempt + 1,
@@ -183,21 +197,24 @@ export class DualNotaryService {
               'notary.tsa.hash_algorithm': this.config.tsa.hashAlgorithm,
             });
 
-            console.log(`✅ TSA timestamp obtained from ${this.config.tsa.url} (attempt ${attempt + 1})`);
+            console.log(
+              `✅ TSA timestamp obtained from ${this.config.tsa.url} (attempt ${attempt + 1})`,
+            );
             return tsrBase64;
-            
           } catch (error: any) {
             lastError = error;
             if (attempt < this.config.tsa.retries) {
               const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-              console.warn(`TSA attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error.message);
-              await new Promise(resolve => setTimeout(resolve, delay));
+              console.warn(
+                `TSA attempt ${attempt + 1} failed, retrying in ${delay}ms:`,
+                error.message,
+              );
+              await new Promise((resolve) => setTimeout(resolve, delay));
             }
           }
         }
-        
+
         throw lastError || new Error('All TSA attempts failed');
-        
       } finally {
         // Clean up temporary files
         try {
@@ -206,7 +223,6 @@ export class DualNotaryService {
           console.warn('Failed to cleanup TSA temp files:', cleanupError);
         }
       }
-      
     } catch (error: any) {
       console.error('TSA timestamp failed:', error);
       otelService.recordException(error);
@@ -222,7 +238,7 @@ export class DualNotaryService {
    */
   async notarizeRoot(rootHex: string): Promise<NotarizedRoot> {
     const span = otelService.createSpan('notary.notarize_root');
-    
+
     try {
       const notarized: NotarizedRoot = {
         rootHex,
@@ -271,9 +287,10 @@ export class DualNotaryService {
         'notary.tsa_valid': notarized.verification.tsaValid,
       });
 
-      console.log(`✅ Root notarized via: ${notarized.notarizedBy.join(' + ')}`);
+      console.log(
+        `✅ Root notarized via: ${notarized.notarizedBy.join(' + ')}`,
+      );
       return notarized;
-      
     } catch (error: any) {
       console.error('Root notarization failed:', error);
       otelService.recordException(error);
@@ -294,7 +311,7 @@ export class DualNotaryService {
     errors: string[];
   }> {
     const span = otelService.createSpan('notary.verify_root');
-    
+
     try {
       const errors: string[] = [];
       let hsmVerification = false;
@@ -306,7 +323,8 @@ export class DualNotaryService {
           // In production, would use HSM public key to verify signature
           // For now, validate signature format and presence
           const sigBuffer = Buffer.from(notarized.hsmSignature, 'base64');
-          if (sigBuffer.length >= 64) { // ECDSA P-384 signature should be ~96 bytes
+          if (sigBuffer.length >= 64) {
+            // ECDSA P-384 signature should be ~96 bytes
             hsmVerification = true;
           } else {
             errors.push('HSM signature too short');
@@ -316,32 +334,35 @@ export class DualNotaryService {
         }
       }
 
-      // Verify TSA response if present  
+      // Verify TSA response if present
       if (notarized.tsaResponse) {
         try {
           // Create temporary file for TSA verification
           const tempDir = '/tmp/tsa-verify-' + Date.now();
           await fs.mkdir(tempDir, { recursive: true });
-          
+
           try {
             const tsrPath = `${tempDir}/tsr.der`;
             const rootPath = `${tempDir}/root.bin`;
-            
+
             // Write TSA response and root data
             const tsrBuffer = Buffer.from(notarized.tsaResponse, 'base64');
             await fs.writeFile(tsrPath, tsrBuffer);
             await fs.writeFile(rootPath, Buffer.from(notarized.rootHex, 'hex'));
-            
+
             // Verify TSA response (if TSA root certificates are available)
             const verifyCmd = [
-              'openssl', 'ts',
+              'openssl',
+              'ts',
               '-verify',
-              '-in', tsrPath,
-              '-data', rootPath,
+              '-in',
+              tsrPath,
+              '-data',
+              rootPath,
               // In production, add: '-CAfile', '/path/to/tsa-root.pem',
               // In production, add: '-untrusted', '/path/to/tsa-chain.pem'
             ].join(' ');
-            
+
             try {
               await execAsync(verifyCmd, { timeout: 5000 });
               tsaVerification = true;
@@ -354,11 +375,9 @@ export class DualNotaryService {
                 errors.push('TSA response structurally invalid');
               }
             }
-            
           } finally {
             await fs.rm(tempDir, { recursive: true, force: true });
           }
-          
         } catch (error: any) {
           errors.push(`TSA verification failed: ${error.message}`);
         }
@@ -379,12 +398,11 @@ export class DualNotaryService {
         tsaVerification,
         errors,
       };
-      
     } catch (error: any) {
       console.error('Root verification failed:', error);
       otelService.recordException(error);
       span.setStatus({ code: 2, message: error.message });
-      
+
       return {
         valid: false,
         hsmVerification: false,
@@ -407,9 +425,9 @@ export class DualNotaryService {
   } {
     const hsmAvailable = this.config.hsmEnabled && this.pkcs11Ctx !== null;
     const tsaAvailable = this.config.tsaEnabled && !!this.config.tsa.url;
-    
+
     let recommendedMode: 'HSM_ONLY' | 'DUAL_PATH' | 'UNAVAILABLE';
-    
+
     if (hsmAvailable && tsaAvailable) {
       recommendedMode = 'DUAL_PATH';
     } else if (hsmAvailable) {
@@ -417,7 +435,7 @@ export class DualNotaryService {
     } else {
       recommendedMode = 'UNAVAILABLE';
     }
-    
+
     return {
       hsmAvailable,
       tsaAvailable,
@@ -437,7 +455,7 @@ export class DualNotaryService {
   }> {
     let hsmHealthy = false;
     let tsaHealthy = false;
-    
+
     // Check HSM
     if (this.config.hsmEnabled) {
       try {
@@ -448,7 +466,7 @@ export class DualNotaryService {
         console.warn('HSM health check failed:', error);
       }
     }
-    
+
     // Check TSA connectivity
     if (this.config.tsaEnabled && this.config.tsa.url) {
       try {
@@ -460,9 +478,9 @@ export class DualNotaryService {
         console.warn('TSA health check failed:', error);
       }
     }
-    
+
     let status: 'healthy' | 'degraded' | 'unhealthy';
-    
+
     if (hsmHealthy && (!this.config.tsaEnabled || tsaHealthy)) {
       status = 'healthy';
     } else if (hsmHealthy || tsaHealthy) {
@@ -470,7 +488,7 @@ export class DualNotaryService {
     } else {
       status = 'unhealthy';
     }
-    
+
     return {
       status,
       hsm: hsmHealthy,

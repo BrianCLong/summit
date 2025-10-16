@@ -5,6 +5,7 @@ owner: docs
 ---
 
 ## Top 5 tasks
+
 - Monitor system performance
 - Respond to alerts
 - Execute runbooks
@@ -12,9 +13,11 @@ owner: docs
 - Perform routine maintenance
 
 ## Troubleshooting
+
 - Performance bottlenecks
 - Incident resolution
 
 ## Contact/support paths
+
 - On-call rotation
 - Internal chat channels

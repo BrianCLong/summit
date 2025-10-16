@@ -3,5 +3,4 @@ name: neo4j
 description: Neo4j database StatefulSet (for non-managed option)
 type: application
 version: 0.1.0
-appVersion: "5"
-
+appVersion: '5'

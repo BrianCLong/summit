@@ -12,4 +12,8 @@ jobs:
       - run: echo "${{ toJson(github.event.workflow_run) }}" > run.json
       - run: node tools/ci/quarantine.ts
       - uses: stefanzweifel/git-auto-commit-action@v5
-        with: { commit_message: "ci: quarantine flaky tests [skip ci]", file_pattern: "tests/.quarantine.json" }
+        with:
+          {
+            commit_message: 'ci: quarantine flaky tests [skip ci]',
+            file_pattern: 'tests/.quarantine.json',
+          }

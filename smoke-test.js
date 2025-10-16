@@ -23,7 +23,7 @@ function requestJson(target, { method = 'GET', headers = {}, body } = {}) {
       port: url.port || (url.protocol === 'https:' ? 443 : 80),
       path: `${url.pathname}${url.search}`,
       headers,
-      timeout: timeoutMs
+      timeout: timeoutMs,
     };
 
     const req = client.request(options, (res) => {
@@ -68,13 +68,15 @@ async function testGraphQL() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload)
+        'Content-Length': Buffer.byteLength(payload),
       },
-      body: payload
+      body: payload,
     });
     const parsed = JSON.parse(response.body || '{}');
     const ok = parsed?.data?.__typename === 'Query';
-    console.log(`${ok ? '✅' : '❌'} GraphQL API: ${ok ? 'resolved schema root' : 'unexpected response'}`);
+    console.log(
+      `${ok ? '✅' : '❌'} GraphQL API: ${ok ? 'resolved schema root' : 'unexpected response'}`,
+    );
     return ok;
   } catch (error) {
     console.log(`❌ GraphQL API: ${error.message}`);
@@ -92,13 +94,14 @@ async function runSmokeTests() {
     () => testEndpoint('http://localhost:4010/health', 'Mock services'),
     () => testEndpoint('http://localhost:4100/health', 'Worker health'),
     () => testEndpoint('http://localhost:8181/health', 'OPA health'),
-    () => testEndpoint('http://localhost:9464/metrics', 'OTEL collector metrics'),
-    () => testEndpoint('http://localhost:16686', 'Jaeger UI')
+    () =>
+      testEndpoint('http://localhost:9464/metrics', 'OTEL collector metrics'),
+    () => testEndpoint('http://localhost:16686', 'Jaeger UI'),
   ];
 
   let passed = 0;
   for (const check of checks) {
-    // eslint-disable-next-line no-await-in-loop
+     
     if (await check()) {
       passed += 1;
     }

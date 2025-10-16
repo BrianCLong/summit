@@ -16,18 +16,18 @@ export const SPRINT_PLANS_2025: SprintPlan[] = [
     id: 'sprint-sep-8-19-2025',
     name: 'Foundation Sprint - Sep 8-19, 2025',
     startDate: '2025-09-08',
-    endDate: '2025-09-19', 
+    endDate: '2025-09-19',
     goals: [
       'Establish core IntelGraph infrastructure',
       'Implement basic Maestro Conductor functionality',
-      'Set up CI/CD pipelines'
+      'Set up CI/CD pipelines',
     ],
     deliverables: [
       'Core platform architecture',
       'Basic conductor implementation',
-      'Initial documentation framework'
+      'Initial documentation framework',
     ],
-    status: 'completed'
+    status: 'completed',
   },
   {
     id: 'sprint-sep-22-oct-3-2025',
@@ -37,14 +37,14 @@ export const SPRINT_PLANS_2025: SprintPlan[] = [
     goals: [
       'Advanced platform features',
       'Enhanced security and governance',
-      'Performance optimizations'
+      'Performance optimizations',
     ],
     deliverables: [
       'Advanced policy engine',
       'Multi-region capabilities',
-      'Performance monitoring'
+      'Performance monitoring',
     ],
-    status: 'completed'
+    status: 'completed',
   },
   {
     id: 'sprint-oct-6-17-2025',
@@ -54,14 +54,14 @@ export const SPRINT_PLANS_2025: SprintPlan[] = [
     goals: [
       'AI/ML integration',
       'Graph intelligence features',
-      'Automated decision making'
+      'Automated decision making',
     ],
     deliverables: [
       'AI-powered insights',
       'Automated workflows',
-      'Intelligence dashboards'
+      'Intelligence dashboards',
     ],
-    status: 'completed'
+    status: 'completed',
   },
   {
     id: 'sprint-oct-20-31-2025',
@@ -71,14 +71,14 @@ export const SPRINT_PLANS_2025: SprintPlan[] = [
     goals: [
       'Enterprise-grade features',
       'Scalability improvements',
-      'Advanced integrations'
+      'Advanced integrations',
     ],
     deliverables: [
       'Enterprise security features',
       'Scalable architecture',
-      'Third-party integrations'
+      'Third-party integrations',
     ],
-    status: 'completed'
+    status: 'completed',
   },
   {
     id: 'sprint-nov-3-14-2025',
@@ -88,14 +88,14 @@ export const SPRINT_PLANS_2025: SprintPlan[] = [
     goals: [
       'Performance optimization',
       'Cost reduction',
-      'User experience improvements'
+      'User experience improvements',
     ],
     deliverables: [
       'Optimized performance',
       'Cost-effective operations',
-      'Enhanced user interface'
+      'Enhanced user interface',
     ],
-    status: 'completed'
+    status: 'completed',
   },
   {
     id: 'sprint-nov-17-28-2025',
@@ -105,14 +105,14 @@ export const SPRINT_PLANS_2025: SprintPlan[] = [
     goals: [
       'Innovation features',
       'Experimental capabilities',
-      'Future-proofing'
+      'Future-proofing',
     ],
     deliverables: [
       'Innovative features',
       'Experimental implementations',
-      'Future roadmap'
+      'Future roadmap',
     ],
-    status: 'completed'
+    status: 'completed',
   },
   {
     id: 'sprint-dec-1-12-2025',
@@ -122,32 +122,28 @@ export const SPRINT_PLANS_2025: SprintPlan[] = [
     goals: [
       'Final optimizations',
       'Documentation completion',
-      'Release preparation'
+      'Release preparation',
     ],
     deliverables: [
       'Final optimizations',
       'Complete documentation',
-      'Release packages'
+      'Release packages',
     ],
-    status: 'completed'
+    status: 'completed',
   },
   {
     id: 'sprint-dec-15-23-2025',
     name: 'Release Sprint - Dec 15-23, 2025',
     startDate: '2025-12-15',
     endDate: '2025-12-23',
-    goals: [
-      'Production deployment',
-      'Final testing',
-      'Go-live preparation'
-    ],
+    goals: ['Production deployment', 'Final testing', 'Go-live preparation'],
     deliverables: [
       'Production deployment',
       'Comprehensive testing',
-      'Go-live readiness'
+      'Go-live readiness',
     ],
-    status: 'completed'
-  }
+    status: 'completed',
+  },
 ];
 
 export class SprintPlanManager {
@@ -156,24 +152,26 @@ export class SprintPlanManager {
   }
 
   getSprintById(id: string): SprintPlan | undefined {
-    return SPRINT_PLANS_2025.find(sprint => sprint.id === id);
+    return SPRINT_PLANS_2025.find((sprint) => sprint.id === id);
   }
 
   getCompletedSprints(): SprintPlan[] {
-    return SPRINT_PLANS_2025.filter(sprint => sprint.status === 'completed');
+    return SPRINT_PLANS_2025.filter((sprint) => sprint.status === 'completed');
   }
 
   getCurrentSprint(): SprintPlan | undefined {
-    return SPRINT_PLANS_2025.find(sprint => sprint.status === 'in-progress');
+    return SPRINT_PLANS_2025.find((sprint) => sprint.status === 'in-progress');
   }
 
   getUpcomingSprints(): SprintPlan[] {
-    return SPRINT_PLANS_2025.filter(sprint => sprint.status === 'planned');
+    return SPRINT_PLANS_2025.filter((sprint) => sprint.status === 'planned');
   }
 
   getTotalDeliverables(): number {
-    return SPRINT_PLANS_2025.reduce((total, sprint) => 
-      total + sprint.deliverables.length, 0);
+    return SPRINT_PLANS_2025.reduce(
+      (total, sprint) => total + sprint.deliverables.length,
+      0,
+    );
   }
 
   getCompletionRate(): number {

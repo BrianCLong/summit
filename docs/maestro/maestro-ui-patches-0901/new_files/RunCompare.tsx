@@ -17,7 +17,8 @@ type CompareResponse = {
 };
 
 async function fetchCompare(runId: string): Promise<CompareResponse> {
-  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base =
+    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
   const res = await fetch(`${base}/runs/${runId}/compare/previous`);
   if (!res.ok) throw new Error('Failed to compare');
   return res.json();
@@ -67,7 +68,8 @@ export default function RunComparePage() {
                   <div className="font-mono">{n.id}</div>
                   <div>{n.reason || 'Changed'}</div>
                   <div>
-                    Duration Δ: {n.durationDeltaMs ?? 0} ms · Cost Δ: {n.costDelta ?? 0}
+                    Duration Δ: {n.durationDeltaMs ?? 0} ms · Cost Δ:{' '}
+                    {n.costDelta ?? 0}
                   </div>
                 </li>
               ))}

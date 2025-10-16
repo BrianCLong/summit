@@ -7,7 +7,9 @@
     "rate_min_delay_ms": 1000,
     "extractor_templates": { "/3/**": "article_v2" },
     "auth_type": "none",
-    "path_rules": [{ "pattern": "/3/**", "extractor": "article_v2", "headless": false }]
+    "path_rules": [
+      { "pattern": "/3/**", "extractor": "article_v2", "headless": false }
+    ]
   },
   {
     "site": "developer.mozilla.org",

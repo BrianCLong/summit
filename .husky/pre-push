@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+# Strict on protected branches, soft otherwise
+if [ "$BRANCH" = "main" ] || echo "$BRANCH" | grep -Eq '^release/|^hotfix/'; then
+  STRICT=true BASE_REF="origin/main" MAX_FILES=200 MAX_FILE_MB=5     bash scripts/pr_guard.sh --strict || exit 1
+else
+  BASE_REF="origin/main" bash scripts/pr_guard.sh || true
+fi
+
+# Chain Git LFS pre-push if available
+if command -v git-lfs >/dev/null 2>&1; then
+  git lfs pre-push "$@"
+fi
+
+# Fast sanity tests
+if [ "$BRANCH" = "main" ] || echo "$BRANCH" | grep -Eq '^release/|^hotfix/'; then
+  npm run test:quick
+else
+  npm run test:quick || true
+fi

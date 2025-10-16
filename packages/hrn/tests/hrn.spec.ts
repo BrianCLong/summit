@@ -16,6 +16,8 @@ describe('HRN', () => {
 
   test('should throw error if not enough signatures', () => {
     const signatures = ['sig1']; // Less than 2/3
-    expect(() => issueHIT('subject1', nodes, signatures)).toThrow("Not enough weighted signatures to issue HIT");
+    expect(() => issueHIT('subject1', nodes, signatures)).toThrow(
+      'Not enough weighted signatures to issue HIT',
+    );
   });
 });

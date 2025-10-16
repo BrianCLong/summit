@@ -27,15 +27,23 @@ const slice = createSlice({
       state.contextMenu = { open: true, ...action.payload };
     },
     contextMenuClose(state) {
-      state.contextMenu = { open: false, x: 0, y: 0, targetType: null, targetId: null };
+      state.contextMenu = {
+        open: false,
+        x: 0,
+        y: 0,
+        targetType: null,
+        targetId: null,
+      };
     },
     insightReceived(state, action) {
       const { entityId, data } = action.payload;
-      state.aiInsights[entityId] = { ...data, updatedAt: new Date().toISOString() };
+      state.aiInsights[entityId] = {
+        ...data,
+        updatedAt: new Date().toISOString(),
+      };
     },
   },
 });
 
 export const graphInteractionActions = slice.actions;
 export default slice.reducer;
-

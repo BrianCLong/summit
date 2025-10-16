@@ -27,36 +27,37 @@ export class MaestroMemory {
 
   async initialize(): Promise<void> {
     console.log('🧠 Initializing Maestro Memory System...');
-    
+
     const start = Date.now();
-    
-    await Promise.all([
-      this.semantic.initialize(),
-      this.cache.initialize()
-    ]);
+
+    await Promise.all([this.semantic.initialize(), this.cache.initialize()]);
 
     const duration = Date.now() - start;
     console.log(`✅ Memory system ready (${duration}ms)`);
-    
+
     // Log stats
     const [semanticStats, cacheStats] = await Promise.all([
       this.semantic.getStats(),
-      this.cache.getStats()
+      this.cache.getStats(),
     ]);
 
-    console.log(`📊 Semantic Memory: ${semanticStats.totalEntries} entries, ${(semanticStats.memorySize / 1024).toFixed(1)}KB`);
-    console.log(`💾 Prompt Cache: ${cacheStats.size} entries, hit rate: ${(cacheStats.hitRate * 100).toFixed(1)}%`);
+    console.log(
+      `📊 Semantic Memory: ${semanticStats.totalEntries} entries, ${(semanticStats.memorySize / 1024).toFixed(1)}KB`,
+    );
+    console.log(
+      `💾 Prompt Cache: ${cacheStats.size} entries, hit rate: ${(cacheStats.hitRate * 100).toFixed(1)}%`,
+    );
   }
 
   async storeExperience(
     content: string,
     type: 'code' | 'error' | 'solution' | 'pattern' | 'context',
     success: boolean,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): Promise<string> {
     const memoryId = await this.semantic.store(content, type, {
       ...metadata,
-      success
+      success,
     });
 
     // Also cache if it's a solution or pattern that worked
@@ -70,11 +71,11 @@ export class MaestroMemory {
           cost: metadata.cost || 0,
           tokens: metadata.tokens || { input: 0, output: 0 },
           latency: metadata.latency || 0,
-          context: metadata.context || {}
+          context: metadata.context || {},
         },
-        metadata.context || {}
+        metadata.context || {},
       );
-      
+
       console.log(`💾 Cached successful ${type}: ${cacheId}`);
     }
 
@@ -84,7 +85,7 @@ export class MaestroMemory {
   async recall(
     query: string,
     type?: string[],
-    useCache: boolean = true
+    useCache: boolean = true,
   ): Promise<{
     cached?: any;
     semantic: any[];
@@ -93,7 +94,7 @@ export class MaestroMemory {
     const results = {
       cached: undefined,
       semantic: [],
-      recommendations: []
+      recommendations: [],
     };
 
     // Try cache first
@@ -110,36 +111,48 @@ export class MaestroMemory {
       query,
       type,
       limit: 5,
-      similarity: 0.6
+      similarity: 0.6,
     });
 
     results.semantic = semanticResults;
 
     // Generate recommendations based on what we found
     if (semanticResults.length > 0) {
-      const successfulResults = semanticResults.filter(r => r.entry.metadata.success);
-      const failedResults = semanticResults.filter(r => !r.entry.metadata.success);
+      const successfulResults = semanticResults.filter(
+        (r) => r.entry.metadata.success,
+      );
+      const failedResults = semanticResults.filter(
+        (r) => !r.entry.metadata.success,
+      );
 
       if (successfulResults.length > 0) {
-        results.recommendations.push(`Found ${successfulResults.length} successful similar experiences`);
+        results.recommendations.push(
+          `Found ${successfulResults.length} successful similar experiences`,
+        );
       }
-      
+
       if (failedResults.length > 0) {
-        results.recommendations.push(`⚠️ Found ${failedResults.length} failed attempts - avoid these patterns`);
+        results.recommendations.push(
+          `⚠️ Found ${failedResults.length} failed attempts - avoid these patterns`,
+        );
       }
 
       // Pattern analysis
       const patterns = semanticResults
-        .filter(r => r.entry.type === 'pattern')
-        .map(r => r.entry.metadata.tags)
+        .filter((r) => r.entry.type === 'pattern')
+        .map((r) => r.entry.metadata.tags)
         .flat();
-      
+
       if (patterns.length > 0) {
         const uniquePatterns = [...new Set(patterns)];
-        results.recommendations.push(`Related patterns: ${uniquePatterns.join(', ')}`);
+        results.recommendations.push(
+          `Related patterns: ${uniquePatterns.join(', ')}`,
+        );
       }
     } else {
-      results.recommendations.push('No similar experiences found - exploring new territory');
+      results.recommendations.push(
+        'No similar experiences found - exploring new territory',
+      );
     }
 
     return results;
@@ -149,7 +162,7 @@ export class MaestroMemory {
     originalQuery: string,
     solution: string,
     success: boolean,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): Promise<void> {
     // Store the learning experience
     await this.storeExperience(
@@ -158,8 +171,8 @@ export class MaestroMemory {
       success,
       {
         ...metadata,
-        originalQuery
-      }
+        originalQuery,
+      },
     );
 
     // If this was successful, update related semantic memories
@@ -167,12 +180,12 @@ export class MaestroMemory {
       const relatedMemories = await this.semantic.retrieve({
         query: originalQuery,
         limit: 3,
-        similarity: 0.7
+        similarity: 0.7,
       });
 
       const solutionId = await this.semantic.store(solution, 'solution', {
         ...metadata,
-        success: true
+        success: true,
       });
 
       // Create relations between the solution and related memories
@@ -182,24 +195,32 @@ export class MaestroMemory {
     }
   }
 
-  async cleanup(options: {
-    semanticOlderThanDays?: number;
-    cacheCleanup?: boolean;
-    optimize?: boolean;
-  } = {}): Promise<{
+  async cleanup(
+    options: {
+      semanticOlderThanDays?: number;
+      cacheCleanup?: boolean;
+      optimize?: boolean;
+    } = {},
+  ): Promise<{
     semantic: { removed: number };
-    cache: { expired: number; invalidated: number; optimized?: { removed: number; compacted: number } };
+    cache: {
+      expired: number;
+      invalidated: number;
+      optimized?: { removed: number; compacted: number };
+    };
   }> {
     console.log('🧹 Cleaning up memory system...');
 
     const results = {
       semantic: { removed: 0 },
-      cache: { expired: 0, invalidated: 0, optimized: undefined as any }
+      cache: { expired: 0, invalidated: 0, optimized: undefined as any },
     };
 
     // Cleanup semantic memory
     if (options.semanticOlderThanDays !== undefined) {
-      results.semantic.removed = await this.semantic.cleanup(options.semanticOlderThanDays);
+      results.semantic.removed = await this.semantic.cleanup(
+        options.semanticOlderThanDays,
+      );
     }
 
     // Cleanup cache
@@ -214,7 +235,9 @@ export class MaestroMemory {
       results.cache.optimized = await this.cache.optimizeCache();
     }
 
-    console.log(`🧹 Cleanup complete: ${results.semantic.removed} semantic entries, ${results.cache.expired + results.cache.invalidated} cache entries removed`);
+    console.log(
+      `🧹 Cleanup complete: ${results.semantic.removed} semantic entries, ${results.cache.expired + results.cache.invalidated} cache entries removed`,
+    );
 
     return results;
   }
@@ -229,7 +252,7 @@ export class MaestroMemory {
   }> {
     const [semanticStats, cacheStats] = await Promise.all([
       this.semantic.getStats(),
-      this.cache.getStats()
+      this.cache.getStats(),
     ]);
 
     // This is a simplified export - in a real implementation,
@@ -239,8 +262,8 @@ export class MaestroMemory {
       cache: [], // Would export non-sensitive cache entries
       stats: {
         semantic: semanticStats,
-        cache: cacheStats
-      }
+        cache: cacheStats,
+      },
     };
   }
 }
@@ -248,7 +271,7 @@ export class MaestroMemory {
 // Utility functions for integration with agents
 export async function withMemory<T>(
   operation: (memory: MaestroMemory) => Promise<T>,
-  projectRoot?: string
+  projectRoot?: string,
 ): Promise<T> {
   const memory = MaestroMemory.getInstance(projectRoot);
   await memory.initialize();
@@ -259,7 +282,7 @@ export async function cacheableOperation<T>(
   key: string,
   operation: () => Promise<T>,
   ttl: number = 3600,
-  projectRoot?: string
+  projectRoot?: string,
 ): Promise<T> {
   const memory = MaestroMemory.getInstance(projectRoot);
   await memory.initialize();
@@ -284,7 +307,7 @@ export async function cacheableOperation<T>(
     'operation',
     { success: true },
     {},
-    ttl
+    ttl,
   );
 
   return result;

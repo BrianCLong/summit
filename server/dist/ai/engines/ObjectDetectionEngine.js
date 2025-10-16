@@ -3,9 +3,10 @@ import path from 'path';
 import pino from 'pino';
 const logger = pino({ name: 'ObjectDetectionEngine' });
 export class ObjectDetectionEngine {
+    config;
+    isInitialized = false;
+    availableModels = [];
     constructor(config) {
-        this.isInitialized = false;
-        this.availableModels = [];
         this.config = config;
     }
     /**
@@ -32,7 +33,7 @@ export class ObjectDetectionEngine {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        const { model = 'yolov8n', confidenceThreshold = 0.5, nmsThreshold = 0.4, maxDetections = 100, enableTracking = false, extractFeatures = false, customClasses = [] } = options;
+        const { model = 'yolov8n', confidenceThreshold = 0.5, nmsThreshold = 0.4, maxDetections = 100, enableTracking = false, extractFeatures = false, customClasses = [], } = options;
         logger.info(`Starting object detection for: ${imagePath} with model: ${model}`);
         try {
             // Validate model availability
@@ -65,7 +66,7 @@ export class ObjectDetectionEngine {
             await this.initialize();
         }
         const { model = 'yolov8n', confidenceThreshold = 0.5, nmsThreshold = 0.4, maxDetections = 100, frameRate = 1, // Process 1 frame per second
-        startTime = 0, endTime, enableTemporalSmoothing = true, enableTracking = true } = options;
+        startTime = 0, endTime, enableTemporalSmoothing = true, enableTracking = true, } = options;
         logger.info(`Starting video object detection for: ${videoPath}`);
         try {
             const results = await this.runVideoObjectDetection(videoPath, model, confidenceThreshold, nmsThreshold, maxDetections, frameRate, startTime, endTime);
@@ -93,11 +94,16 @@ export class ObjectDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'yolo_detection.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--model', model,
-                '--confidence', confidenceThreshold.toString(),
-                '--nms', nmsThreshold.toString(),
-                '--max-detections', maxDetections.toString()
+                '--image',
+                imagePath,
+                '--model',
+                model,
+                '--confidence',
+                confidenceThreshold.toString(),
+                '--nms',
+                nmsThreshold.toString(),
+                '--max-detections',
+                maxDetections.toString(),
             ];
             if (customClasses.length > 0) {
                 args.push('--classes', customClasses.join(','));
@@ -141,12 +147,18 @@ export class ObjectDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'yolo_video_detection.py');
             const args = [
                 pythonScript,
-                '--video', videoPath,
-                '--model', model,
-                '--confidence', confidenceThreshold.toString(),
-                '--nms', nmsThreshold.toString(),
-                '--max-detections', maxDetections.toString(),
-                '--frame-rate', frameRate.toString()
+                '--video',
+                videoPath,
+                '--model',
+                model,
+                '--confidence',
+                confidenceThreshold.toString(),
+                '--nms',
+                nmsThreshold.toString(),
+                '--max-detections',
+                maxDetections.toString(),
+                '--frame-rate',
+                frameRate.toString(),
             ];
             if (startTime !== undefined) {
                 args.push('--start-time', startTime.toString());
@@ -200,10 +212,10 @@ export class ObjectDetectionEngine {
                     y: Math.round(detection.bbox[1]),
                     width: Math.round(detection.bbox[2]),
                     height: Math.round(detection.bbox[3]),
-                    confidence: detection.confidence
+                    confidence: detection.confidence,
                 },
                 model,
-                features: detection.features || undefined
+                features: detection.features || undefined,
             });
         }
         return detections;
@@ -218,7 +230,7 @@ export class ObjectDetectionEngine {
             frameResults.push({
                 frame: frameResult.frame_number,
                 timestamp: frameResult.timestamp,
-                detections
+                detections,
             });
         }
         return frameResults;
@@ -246,8 +258,10 @@ export class ObjectDetectionEngine {
             const pythonScript = path.join(this.config.modelsPath, 'feature_extraction.py');
             const args = [
                 pythonScript,
-                '--image', imagePath,
-                '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
+                '--image',
+                imagePath,
+                '--bbox',
+                `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -332,7 +346,8 @@ export class ObjectDetectionEngine {
                 if (!activeTrackIds.has(trackId)) {
                     const lastFrame = trackHistory[trackHistory.length - 1];
                     const frameGap = frameResult.frame - this.getFrameNumber(lastFrame);
-                    if (frameGap > 10) { // Remove if not seen for 10 frames
+                    if (frameGap > 10) {
+                        // Remove if not seen for 10 frames
                         tracks.delete(trackId);
                     }
                 }
@@ -376,13 +391,14 @@ export class ObjectDetectionEngine {
             const avgX = window.reduce((sum, d) => sum + d.boundingBox.x, 0) / window.length;
             const avgY = window.reduce((sum, d) => sum + d.boundingBox.y, 0) / window.length;
             const avgWidth = window.reduce((sum, d) => sum + d.boundingBox.width, 0) / window.length;
-            const avgHeight = window.reduce((sum, d) => sum + d.boundingBox.height, 0) / window.length;
+            const avgHeight = window.reduce((sum, d) => sum + d.boundingBox.height, 0) /
+                window.length;
             track[i].boundingBox = {
                 ...track[i].boundingBox,
                 x: Math.round(avgX),
                 y: Math.round(avgY),
                 width: Math.round(avgWidth),
-                height: Math.round(avgHeight)
+                height: Math.round(avgHeight),
             };
         }
     }
@@ -416,7 +432,7 @@ export class ObjectDetectionEngine {
         return new Promise((resolve, reject) => {
             const python = spawn(this.config.pythonPath, [
                 '-c',
-                'import ultralytics, cv2, numpy; print("Dependencies OK")'
+                'import ultralytics, cv2, numpy; print("Dependencies OK")',
             ]);
             python.on('close', (code) => {
                 if (code === 0) {
@@ -437,9 +453,21 @@ export class ObjectDetectionEngine {
     async loadAvailableModels() {
         try {
             const models = [
-                'yolov8n', 'yolov8s', 'yolov8m', 'yolov8l', 'yolov8x',
-                'yolov9n', 'yolov9s', 'yolov9m', 'yolov9l', 'yolov9x',
-                'yolo11n', 'yolo11s', 'yolo11m', 'yolo11l', 'yolo11x'
+                'yolov8n',
+                'yolov8s',
+                'yolov8m',
+                'yolov8l',
+                'yolov8x',
+                'yolov9n',
+                'yolov9s',
+                'yolov9m',
+                'yolov9l',
+                'yolov9x',
+                'yolo11n',
+                'yolo11s',
+                'yolo11m',
+                'yolo11l',
+                'yolo11x',
             ];
             this.availableModels = models;
             logger.info(`Available models: ${this.availableModels.join(', ')}`);

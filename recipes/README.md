@@ -21,4 +21,3 @@ GraphQL
 Example
 
 See rag-qa.yaml, sql-agent.yaml, web-research.yaml, comfy-image.yaml, video-pipeline.yaml.
-

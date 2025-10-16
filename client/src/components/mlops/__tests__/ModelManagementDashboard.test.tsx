@@ -36,7 +36,9 @@ describe('ModelManagementDashboard', () => {
   it('renders search and filters', () => {
     render(<ModelManagementDashboard {...defaultProps} />);
 
-    expect(screen.getByPlaceholderText(/Search models, tags, or algorithms/)).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(/Search models, tags, or algorithms/),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue('All Status')).toBeInTheDocument();
   });
 
@@ -45,9 +47,13 @@ describe('ModelManagementDashboard', () => {
 
     expect(screen.getByText(/ML Models/)).toBeInTheDocument();
     // Should show mock model data
-    expect(screen.getByText('Entity Resolution Neural Network')).toBeInTheDocument();
+    expect(
+      screen.getByText('Entity Resolution Neural Network'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Anomaly Detection Ensemble')).toBeInTheDocument();
-    expect(screen.getByText('Sentiment Analysis Transformer')).toBeInTheDocument();
+    expect(
+      screen.getByText('Sentiment Analysis Transformer'),
+    ).toBeInTheDocument();
   });
 
   it('switches between view tabs', async () => {
@@ -56,29 +62,41 @@ describe('ModelManagementDashboard', () => {
 
     // Switch to training jobs
     await user.click(screen.getByText(/🏋️ Training Jobs/));
-    expect(screen.getByText(/Training Jobs/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Training Jobs/ }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Training Job job-001/)).toBeInTheDocument();
 
     // Switch to experiments
     await user.click(screen.getByText(/🧪 Experiments/));
     expect(screen.getByText(/ML Experiments/)).toBeInTheDocument();
-    expect(screen.getByText('Entity Resolution Optimization')).toBeInTheDocument();
+    expect(
+      screen.getByText('Entity Resolution Optimization'),
+    ).toBeInTheDocument();
 
     // Switch to monitoring
     await user.click(screen.getByText(/📊 Monitoring/));
-    expect(screen.getByText(/📊 Model Monitoring Dashboard/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/📊 Model Monitoring Dashboard/),
+    ).toBeInTheDocument();
   });
 
   it('filters models by search query', async () => {
     const user = userEvent.setup();
     render(<ModelManagementDashboard {...defaultProps} />);
 
-    const searchInput = screen.getByPlaceholderText(/Search models, tags, or algorithms/);
+    const searchInput = screen.getByPlaceholderText(
+      /Search models, tags, or algorithms/,
+    );
     await user.type(searchInput, 'Entity Resolution');
 
     // Should show filtered results
-    expect(screen.getByText('Entity Resolution Neural Network')).toBeInTheDocument();
-    expect(screen.queryByText('Sentiment Analysis Transformer')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Entity Resolution Neural Network'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Sentiment Analysis Transformer'),
+    ).not.toBeInTheDocument();
   });
 
   it('filters models by status', async () => {
@@ -90,13 +108,20 @@ describe('ModelManagementDashboard', () => {
 
     expect(statusSelect).toHaveValue('production');
     // Should show only production models
-    expect(screen.getByText('Entity Resolution Neural Network')).toBeInTheDocument();
+    expect(
+      screen.getByText('Entity Resolution Neural Network'),
+    ).toBeInTheDocument();
   });
 
   it('selects model and shows details', async () => {
     const user = userEvent.setup();
     const onModelSelect = jest.fn();
-    render(<ModelManagementDashboard {...defaultProps} onModelSelect={onModelSelect} />);
+    render(
+      <ModelManagementDashboard
+        {...defaultProps}
+        onModelSelect={onModelSelect}
+      />,
+    );
 
     // Click on a model
     await user.click(screen.getByText('Entity Resolution Neural Network'));
@@ -110,7 +135,12 @@ describe('ModelManagementDashboard', () => {
   it('calls model select callback', async () => {
     const user = userEvent.setup();
     const onModelSelect = jest.fn();
-    render(<ModelManagementDashboard {...defaultProps} onModelSelect={onModelSelect} />);
+    render(
+      <ModelManagementDashboard
+        {...defaultProps}
+        onModelSelect={onModelSelect}
+      />,
+    );
 
     await user.click(screen.getByText('Entity Resolution Neural Network'));
 
@@ -148,7 +178,12 @@ describe('ModelManagementDashboard', () => {
   it('handles model deployment', async () => {
     const user = userEvent.setup();
     const onDeployModel = jest.fn();
-    render(<ModelManagementDashboard {...defaultProps} onDeployModel={onDeployModel} />);
+    render(
+      <ModelManagementDashboard
+        {...defaultProps}
+        onDeployModel={onDeployModel}
+      />,
+    );
 
     // Select a staging model
     await user.click(screen.getByText('Anomaly Detection Ensemble'));
@@ -173,10 +208,12 @@ describe('ModelManagementDashboard', () => {
     await user.click(screen.getByText('Entity Resolution Neural Network'));
 
     // Should show performance metrics
-    expect(screen.getByText(/Accuracy: 94.2%/)).toBeInTheDocument();
-    expect(screen.getByText(/Precision: 92.8%/)).toBeInTheDocument();
-    expect(screen.getByText(/Recall: 95.6%/)).toBeInTheDocument();
-    expect(screen.getByText(/F1 Score: 94.2%/)).toBeInTheDocument();
+    const hasText = (t: string) => (_: string, node: Element | null) =>
+      !!node && node.textContent?.includes(t);
+    expect(screen.getByText(hasText('Accuracy: 94.2%'))).toBeInTheDocument();
+    expect(screen.getByText(hasText('Precision: 92.8%'))).toBeInTheDocument();
+    expect(screen.getByText(hasText('Recall: 95.6%'))).toBeInTheDocument();
+    expect(screen.getByText(hasText('F1 Score: 94.2%'))).toBeInTheDocument();
   });
 
   it('displays model environment information', async () => {
@@ -236,7 +273,12 @@ describe('ModelManagementDashboard', () => {
   it('handles experiment selection', async () => {
     const user = userEvent.setup();
     const onExperimentSelect = jest.fn();
-    render(<ModelManagementDashboard {...defaultProps} onExperimentSelect={onExperimentSelect} />);
+    render(
+      <ModelManagementDashboard
+        {...defaultProps}
+        onExperimentSelect={onExperimentSelect}
+      />,
+    );
 
     // Switch to experiments tab
     await user.click(screen.getByText(/🧪 Experiments/));
@@ -273,18 +315,29 @@ describe('ModelManagementDashboard', () => {
     await user.click(screen.getByText(/📊 Monitoring/));
 
     // Should show monitoring coming soon message
-    expect(screen.getByText(/🚧 Monitoring dashboard coming soon/)).toBeInTheDocument();
-    expect(screen.getByText(/Real-time performance metrics/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/🚧 Monitoring dashboard coming soon/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Real-time performance metrics/),
+    ).toBeInTheDocument();
   });
 
   it('handles investigation ID prop', () => {
-    render(<ModelManagementDashboard {...defaultProps} investigationId="inv-999" />);
+    render(
+      <ModelManagementDashboard {...defaultProps} investigationId="inv-999" />,
+    );
 
     expect(screen.getByText(/ML Models/)).toBeInTheDocument();
   });
 
   it('applies custom className', () => {
-    render(<ModelManagementDashboard {...defaultProps} className="custom-mlops-class" />);
+    render(
+      <ModelManagementDashboard
+        {...defaultProps}
+        className="custom-mlops-class"
+      />,
+    );
 
     const container = screen
       .getByText(/🤖 MLOps Model Management/)
@@ -314,7 +367,9 @@ describe('ModelManagementDashboard', () => {
     const user = userEvent.setup();
     render(<ModelManagementDashboard {...defaultProps} />);
 
-    const searchInput = screen.getByPlaceholderText(/Search models, tags, or algorithms/);
+    const searchInput = screen.getByPlaceholderText(
+      /Search models, tags, or algorithms/,
+    );
     await user.type(searchInput, 'nonexistent-model');
 
     // Should show no results
@@ -329,7 +384,9 @@ describe('ModelManagementDashboard', () => {
     expect(screen.getByText(/🎯 Models \(\d+\)/)).toBeInTheDocument();
 
     // Apply filter to change count
-    const searchInput = screen.getByPlaceholderText(/Search models, tags, or algorithms/);
+    const searchInput = screen.getByPlaceholderText(
+      /Search models, tags, or algorithms/,
+    );
     await user.type(searchInput, 'Entity');
 
     // Count should update
@@ -345,14 +402,18 @@ describe('ModelManagementDashboard', () => {
 
     // Should show endpoint information
     expect(screen.getByText(/Endpoints/)).toBeInTheDocument();
-    expect(screen.getByText(/\/api\/models\/entity-resolution\/predict/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/\/api\/models\/entity-resolution\/predict/),
+    ).toBeInTheDocument();
   });
 
   it('handles hover states on model cards', async () => {
     const user = userEvent.setup();
     render(<ModelManagementDashboard {...defaultProps} />);
 
-    const modelCard = screen.getByText('Entity Resolution Neural Network').closest('div');
+    const modelCard = screen
+      .getByText('Entity Resolution Neural Network')
+      .closest('div');
 
     // Hover should work without errors
     if (modelCard) {
@@ -360,6 +421,8 @@ describe('ModelManagementDashboard', () => {
       await user.unhover(modelCard);
     }
 
-    expect(screen.getByText('Entity Resolution Neural Network')).toBeInTheDocument();
+    expect(
+      screen.getByText('Entity Resolution Neural Network'),
+    ).toBeInTheDocument();
   });
 });

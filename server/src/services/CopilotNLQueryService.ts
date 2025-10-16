@@ -27,7 +27,10 @@ export class CopilotNLQueryService {
     // Simple pattern matching for MVP
     const { query } = request;
 
-    if (query.toLowerCase().includes('find') || query.toLowerCase().includes('show')) {
+    if (
+      query.toLowerCase().includes('find') ||
+      query.toLowerCase().includes('show')
+    ) {
       return {
         cypher: 'MATCH (n) RETURN n LIMIT 10',
         explanation: `Generated safe Cypher for: "${query}"`,

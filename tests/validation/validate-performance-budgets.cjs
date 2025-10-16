@@ -15,7 +15,7 @@ class PerformanceBudgetValidator {
       tests: [],
       passed: 0,
       failed: 0,
-      evidence: []
+      evidence: [],
     };
   }
 
@@ -34,7 +34,9 @@ class PerformanceBudgetValidator {
       await this.validateCIIntegration();
       await this.generateEvidence();
 
-      console.log(`✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`);
+      console.log(
+        `✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`,
+      );
       return this.results.failed === 0;
     } catch (error) {
       console.error('❌ Validation failed:', error.message);
@@ -59,7 +61,12 @@ class PerformanceBudgetValidator {
       const budgets = JSON.parse(budgetContent);
 
       // Validate budget structure
-      const requiredSections = ['global', 'endpoints', 'monitoring', 'enforcement'];
+      const requiredSections = [
+        'global',
+        'endpoints',
+        'monitoring',
+        'enforcement',
+      ];
       for (const section of requiredSections) {
         if (!budgets[section]) {
           throw new Error(`Required budget section missing: ${section}`);
@@ -68,7 +75,11 @@ class PerformanceBudgetValidator {
 
       // Validate global defaults
       const globalDefaults = budgets.global;
-      const requiredDefaults = ['default_p95_budget_ms', 'default_p99_budget_ms', 'default_error_rate_budget'];
+      const requiredDefaults = [
+        'default_p95_budget_ms',
+        'default_p99_budget_ms',
+        'default_error_rate_budget',
+      ];
       for (const defaultKey of requiredDefaults) {
         if (!globalDefaults[defaultKey]) {
           throw new Error(`Required global default missing: ${defaultKey}`);
@@ -86,22 +97,32 @@ class PerformanceBudgetValidator {
 
           // Validate endpoint budget structure
           const endpointBudget = endpoints[endpoint];
-          const requiredFields = ['p95_budget_ms', 'p99_budget_ms', 'error_rate_budget'];
+          const requiredFields = [
+            'p95_budget_ms',
+            'p99_budget_ms',
+            'error_rate_budget',
+          ];
 
           for (const field of requiredFields) {
             if (endpointBudget[field] === undefined) {
-              throw new Error(`Endpoint ${endpoint} missing required field: ${field}`);
+              throw new Error(
+                `Endpoint ${endpoint} missing required field: ${field}`,
+              );
             }
           }
         }
       }
 
       if (endpointsFound < requiredEndpoints.length) {
-        throw new Error(`Only ${endpointsFound}/${requiredEndpoints.length} required endpoints configured`);
+        throw new Error(
+          `Only ${endpointsFound}/${requiredEndpoints.length} required endpoints configured`,
+        );
       }
 
       // Validate critical path protection
-      const criticalEndpoints = Object.entries(endpoints).filter(([_, config]) => config.critical);
+      const criticalEndpoints = Object.entries(endpoints).filter(
+        ([_, config]) => config.critical,
+      );
       if (criticalEndpoints.length === 0) {
         throw new Error('No critical endpoints identified');
       }
@@ -110,13 +131,16 @@ class PerformanceBudgetValidator {
       test.details = `Budget config with ${Object.keys(endpoints).length} endpoints, ${criticalEndpoints.length} critical paths`;
 
       // Generate budget hash for provenance
-      const budgetHash = crypto.createHash('sha256').update(budgetContent).digest('hex');
+      const budgetHash = crypto
+        .createHash('sha256')
+        .update(budgetContent)
+        .digest('hex');
       this.results.evidence.push({
         type: 'performance_budgets',
         file: budgetPath,
         hash: budgetHash,
         total_endpoints: Object.keys(endpoints).length,
-        critical_endpoints: criticalEndpoints.length
+        critical_endpoints: criticalEndpoints.length,
       });
 
       this.results.passed++;
@@ -154,7 +178,10 @@ class PerformanceBudgetValidator {
 
       let stricterBudgets = 0;
       for (const { endpoint, config } of criticalEndpoints) {
-        if (config.p95_budget_ms <= globalP95 && config.error_rate_budget <= globalErrorRate) {
+        if (
+          config.p95_budget_ms <= globalP95 &&
+          config.error_rate_budget <= globalErrorRate
+        ) {
           stricterBudgets++;
         }
       }
@@ -186,7 +213,7 @@ class PerformanceBudgetValidator {
         type: 'critical_path_protection',
         critical_endpoints: criticalEndpoints.length,
         stricter_budgets: stricterBudgets,
-        protected_system_paths: protectedPaths
+        protected_system_paths: protectedPaths,
       });
 
       this.results.passed++;
@@ -206,7 +233,10 @@ class PerformanceBudgetValidator {
     const test = { name: 'PR Blocking Mechanism', status: 'running' };
 
     try {
-      const checkerPath = path.join(process.cwd(), 'scripts/endpoint-budget-checker.js');
+      const checkerPath = path.join(
+        process.cwd(),
+        'scripts/endpoint-budget-checker.js',
+      );
 
       if (!fs.existsSync(checkerPath)) {
         throw new Error('Budget checker script not found');
@@ -220,7 +250,7 @@ class PerformanceBudgetValidator {
         'validateEndpoint',
         'generateReport',
         'fail.*regression',
-        'exit.*1'
+        'exit.*1',
       ];
 
       let featuresFound = 0;
@@ -238,7 +268,7 @@ class PerformanceBudgetValidator {
       // Check CI integration
       const workflowPaths = [
         '.github/workflows/ci-comprehensive.yml',
-        '.github/workflows/pr-validation.yml'
+        '.github/workflows/pr-validation.yml',
       ];
 
       let ciIntegration = false;
@@ -246,7 +276,10 @@ class PerformanceBudgetValidator {
         const fullPath = path.join(process.cwd(), workflowPath);
         if (fs.existsSync(fullPath)) {
           const workflowContent = fs.readFileSync(fullPath, 'utf8');
-          if (workflowContent.includes('budget') || workflowContent.includes('performance')) {
+          if (
+            workflowContent.includes('budget') ||
+            workflowContent.includes('performance')
+          ) {
             ciIntegration = true;
             break;
           }
@@ -258,7 +291,7 @@ class PerformanceBudgetValidator {
         'generateReport',
         'markdown',
         'regression',
-        'baseline'
+        'baseline',
       ];
 
       let reportingFound = 0;
@@ -276,7 +309,7 @@ class PerformanceBudgetValidator {
         checker_features: featuresFound,
         ci_integration: ciIntegration,
         reporting_features: reportingFound,
-        checker_file: checkerPath
+        checker_file: checkerPath,
       });
 
       this.results.passed++;
@@ -300,13 +333,13 @@ class PerformanceBudgetValidator {
       const baselineMetrics = {
         '/health': { p95: 45, p99: 85, error_rate: 0.0008 },
         '/graphql': { p95: 280, p99: 650, error_rate: 0.015 },
-        '/api/v1/entities': { p95: 220, p99: 480, error_rate: 0.012 }
+        '/api/v1/entities': { p95: 220, p99: 480, error_rate: 0.012 },
       };
 
       const currentMetrics = {
         '/health': { p95: 65, p99: 120, error_rate: 0.002 }, // Regression in latency
         '/graphql': { p95: 420, p99: 950, error_rate: 0.028 }, // Regression in all metrics
-        '/api/v1/entities': { p95: 210, p99: 450, error_rate: 0.010 } // No regression
+        '/api/v1/entities': { p95: 210, p99: 450, error_rate: 0.01 }, // No regression
       };
 
       // Load budget configuration
@@ -336,28 +369,31 @@ class PerformanceBudgetValidator {
             budget_limits: {
               p95: budget.p95_budget_ms,
               p99: budget.p99_budget_ms,
-              error_rate: budget.error_rate_budget
-            }
+              error_rate: budget.error_rate_budget,
+            },
           });
         }
       }
 
       // Validate regression detection
       if (regressions.length === 0) {
-        throw new Error('No regressions detected in simulation with known issues');
+        throw new Error(
+          'No regressions detected in simulation with known issues',
+        );
       }
 
       // Check for critical path regressions
-      const criticalRegressions = regressions.filter(r => r.critical);
-      const shouldFailPR = criticalRegressions.length > 0 ||
-                          (budgets.enforcement.fail_pr_on_any_breach && regressions.length > 0);
+      const criticalRegressions = regressions.filter((r) => r.critical);
+      const shouldFailPR =
+        criticalRegressions.length > 0 ||
+        (budgets.enforcement.fail_pr_on_any_breach && regressions.length > 0);
 
       // Simulate PR status
       const prStatus = {
         should_fail: shouldFailPR,
         total_regressions: regressions.length,
         critical_regressions: criticalRegressions.length,
-        decision: shouldFailPR ? 'BLOCK_PR' : 'ALLOW_PR'
+        decision: shouldFailPR ? 'BLOCK_PR' : 'ALLOW_PR',
       };
 
       test.status = 'passed';
@@ -366,7 +402,7 @@ class PerformanceBudgetValidator {
         baseline_metrics: baselineMetrics,
         current_metrics: currentMetrics,
         regressions: regressions,
-        pr_status: prStatus
+        pr_status: prStatus,
       };
 
       this.results.evidence.push({
@@ -374,7 +410,7 @@ class PerformanceBudgetValidator {
         regressions_detected: regressions.length,
         critical_regressions: criticalRegressions.length,
         pr_decision: prStatus.decision,
-        simulation_results: test.simulation
+        simulation_results: test.simulation,
       });
 
       this.results.passed++;
@@ -391,10 +427,16 @@ class PerformanceBudgetValidator {
    * Test 5: Validate Budget Checker Script
    */
   async validateBudgetCheckerScript() {
-    const test = { name: 'Budget Checker Script Validation', status: 'running' };
+    const test = {
+      name: 'Budget Checker Script Validation',
+      status: 'running',
+    };
 
     try {
-      const checkerPath = path.join(process.cwd(), 'scripts/endpoint-budget-checker.js');
+      const checkerPath = path.join(
+        process.cwd(),
+        'scripts/endpoint-budget-checker.js',
+      );
 
       if (!fs.existsSync(checkerPath)) {
         throw new Error('Budget checker script not found');
@@ -402,17 +444,18 @@ class PerformanceBudgetValidator {
 
       // Simulate script execution (in real scenario, would actually run the script)
       const simulatedExecution = {
-        command: 'node scripts/endpoint-budget-checker.js --report reports/budgets.json --fail-on-regressions',
+        command:
+          'node scripts/endpoint-budget-checker.js --report reports/budgets.json --fail-on-regressions',
         exit_code: 1, // Fail due to regression
         stdout: [
           'Checking endpoint performance budgets...',
           'Found 2 budget violations:',
           '  /graphql: p95 420ms > budget 300ms',
           '  /graphql: error_rate 2.8% > budget 2.0%',
-          'Critical path violations detected - failing PR'
+          'Critical path violations detected - failing PR',
         ].join('\n'),
         stderr: '',
-        duration: '1.2s'
+        duration: '1.2s',
       };
 
       // Validate script arguments and options
@@ -422,7 +465,7 @@ class PerformanceBudgetValidator {
         '--report',
         '--fail-on-regressions',
         '--baseline',
-        '--threshold'
+        '--threshold',
       ];
 
       let scriptOptionsFound = 0;
@@ -449,7 +492,7 @@ class PerformanceBudgetValidator {
         type: 'budget_checker_script',
         script_options: scriptOptionsFound,
         output_formats: outputFormatsFound,
-        execution_simulation: simulatedExecution
+        execution_simulation: simulatedExecution,
       });
 
       this.results.passed++;
@@ -470,7 +513,10 @@ class PerformanceBudgetValidator {
 
     try {
       // Check for CI workflow integration
-      const workflowPath = path.join(process.cwd(), '.github/workflows/ci-comprehensive.yml');
+      const workflowPath = path.join(
+        process.cwd(),
+        '.github/workflows/ci-comprehensive.yml',
+      );
 
       if (!fs.existsSync(workflowPath)) {
         throw new Error('CI workflow not found');
@@ -483,7 +529,7 @@ class PerformanceBudgetValidator {
         'budget.*check',
         'endpoint.*budget',
         'performance.*budget',
-        'endpoint-budget-checker'
+        'endpoint-budget-checker',
       ];
 
       let budgetStepFound = false;
@@ -499,7 +545,7 @@ class PerformanceBudgetValidator {
       const failurePatterns = [
         'fail.*on.*regression',
         'exit.*1',
-        'budget.*violation'
+        'budget.*violation',
       ];
 
       let failureHandling = false;
@@ -515,7 +561,7 @@ class PerformanceBudgetValidator {
       const artifactPatterns = [
         'upload.*artifact',
         'budget.*report',
-        'performance.*report'
+        'performance.*report',
       ];
 
       let artifactCollection = false;
@@ -536,11 +582,11 @@ class PerformanceBudgetValidator {
           'setup-node',
           'install-dependencies',
           'run-budget-checker',
-          'upload-report'
+          'upload-report',
         ],
         result: 'failed',
         reason: 'Critical endpoint budget violation',
-        artifacts: ['budget-report.json', 'performance-analysis.md']
+        artifacts: ['budget-report.json', 'performance-analysis.md'],
       };
 
       if (!budgetStepFound) {
@@ -556,7 +602,7 @@ class PerformanceBudgetValidator {
         budget_step_found: budgetStepFound,
         failure_handling: failureHandling,
         artifact_collection: artifactCollection,
-        ci_simulation: ciSimulation
+        ci_simulation: ciSimulation,
       });
 
       this.results.passed++;
@@ -579,23 +625,35 @@ class PerformanceBudgetValidator {
     }
 
     // Generate validation report
-    const reportPath = path.join(evidenceDir, 'performance-budgets-validation.json');
+    const reportPath = path.join(
+      evidenceDir,
+      'performance-budgets-validation.json',
+    );
     fs.writeFileSync(reportPath, JSON.stringify(this.results, null, 2));
 
     // Generate budget configuration snapshot
-    const budgetSnapshotPath = path.join(evidenceDir, 'budget-config-snapshot.json');
+    const budgetSnapshotPath = path.join(
+      evidenceDir,
+      'budget-config-snapshot.json',
+    );
     const budgetPath = path.join(process.cwd(), 'performance-budgets.json');
 
     if (fs.existsSync(budgetPath)) {
       const budgetContent = fs.readFileSync(budgetPath, 'utf8');
       const budgetSnapshot = {
         timestamp: new Date().toISOString(),
-        config_hash: crypto.createHash('sha256').update(budgetContent).digest('hex'),
+        config_hash: crypto
+          .createHash('sha256')
+          .update(budgetContent)
+          .digest('hex'),
         config: JSON.parse(budgetContent),
-        validation_status: this.results.failed === 0 ? 'passed' : 'failed'
+        validation_status: this.results.failed === 0 ? 'passed' : 'failed',
       };
 
-      fs.writeFileSync(budgetSnapshotPath, JSON.stringify(budgetSnapshot, null, 2));
+      fs.writeFileSync(
+        budgetSnapshotPath,
+        JSON.stringify(budgetSnapshot, null, 2),
+      );
     }
 
     // Generate CI logs simulation
@@ -607,31 +665,32 @@ class PerformanceBudgetValidator {
         {
           timestamp: new Date(Date.now() - 120000).toISOString(),
           level: 'INFO',
-          message: 'Starting endpoint performance budget validation'
+          message: 'Starting endpoint performance budget validation',
         },
         {
           timestamp: new Date(Date.now() - 90000).toISOString(),
           level: 'INFO',
-          message: 'Loading budget configuration from performance-budgets.json'
+          message: 'Loading budget configuration from performance-budgets.json',
         },
         {
           timestamp: new Date(Date.now() - 60000).toISOString(),
           level: 'WARN',
-          message: 'Budget violation detected: /graphql p95 latency 420ms > budget 300ms'
+          message:
+            'Budget violation detected: /graphql p95 latency 420ms > budget 300ms',
         },
         {
           timestamp: new Date(Date.now() - 30000).toISOString(),
           level: 'ERROR',
-          message: 'Critical endpoint budget violation - failing PR'
+          message: 'Critical endpoint budget violation - failing PR',
         },
         {
           timestamp: new Date().toISOString(),
           level: 'INFO',
-          message: 'Budget validation completed with violations'
-        }
+          message: 'Budget validation completed with violations',
+        },
       ],
       exit_code: 1,
-      duration: '2.1s'
+      duration: '2.1s',
     };
 
     fs.writeFileSync(ciLogsPath, JSON.stringify(ciLogs, null, 2));
@@ -646,12 +705,15 @@ class PerformanceBudgetValidator {
 // CLI execution
 if (require.main === module) {
   const validator = new PerformanceBudgetValidator();
-  validator.validate().then(success => {
-    process.exit(success ? 0 : 1);
-  }).catch(error => {
-    console.error('Fatal validation error:', error);
-    process.exit(1);
-  });
+  validator
+    .validate()
+    .then((success) => {
+      process.exit(success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Fatal validation error:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = PerformanceBudgetValidator;

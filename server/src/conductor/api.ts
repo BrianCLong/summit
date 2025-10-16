@@ -17,7 +17,12 @@ router.get('/v1/approvals', async (_req, res) => {
        WHERE e.kind = 'approval.created' AND s.status = 'BLOCKED'
        ORDER BY e.ts DESC LIMIT 200`,
     );
-    const items = rows.map(r => ({ runId: r.run_id, stepId: r.step_id, createdAt: r.created_at, labels: Array.isArray(r.labels) ? r.labels : [] }));
+    const items = rows.map((r) => ({
+      runId: r.run_id,
+      stepId: r.step_id,
+      createdAt: r.created_at,
+      labels: Array.isArray(r.labels) ? r.labels : [],
+    }));
     span?.end();
     return res.json({ items });
   } catch (e: any) {
@@ -30,7 +35,9 @@ router.get('/v1/schedules', async (_req, res) => {
   try {
     const span = otelService.createSpan('conductor.schedules.list');
     const pool = getPostgresPool();
-    const { rows } = await pool.query(`SELECT id, runbook, cron, enabled, last_run_at FROM schedules ORDER BY runbook, id`);
+    const { rows } = await pool.query(
+      `SELECT id, runbook, cron, enabled, last_run_at FROM schedules ORDER BY runbook, id`,
+    );
     span?.end();
     res.json({ items: rows });
   } catch (e: any) {
@@ -44,8 +51,12 @@ router.post('/v1/schedules', express.json(), async (req, res) => {
     const pool = getPostgresPool();
     const id = crypto.randomUUID();
     const { runbook, cron, enabled } = req.body || {};
-    if (!runbook || !cron) return res.status(400).json({ error: 'runbook and cron required' });
-    await pool.query(`INSERT INTO schedules (id, runbook, cron, enabled) VALUES ($1,$2,$3,$4)`, [id, runbook, cron, enabled !== false]);
+    if (!runbook || !cron)
+      return res.status(400).json({ error: 'runbook and cron required' });
+    await pool.query(
+      `INSERT INTO schedules (id, runbook, cron, enabled) VALUES ($1,$2,$3,$4)`,
+      [id, runbook, cron, enabled !== false],
+    );
     span?.end();
     res.status(201).json({ id, runbook, cron, enabled: enabled !== false });
   } catch (e: any) {
@@ -61,11 +72,21 @@ router.patch('/v1/schedules/:id', express.json(), async (req, res) => {
     const { enabled, cron } = req.body || {};
     const sets: string[] = [];
     const vals: any[] = [];
-    if (typeof enabled === 'boolean') { sets.push(`enabled = $${sets.length + 1}`); vals.push(enabled); }
-    if (typeof cron === 'string' && cron.length) { sets.push(`cron = $${sets.length + 1}`); vals.push(cron); }
-    if (!sets.length) return res.status(400).json({ error: 'no fields to update' });
+    if (typeof enabled === 'boolean') {
+      sets.push(`enabled = $${sets.length + 1}`);
+      vals.push(enabled);
+    }
+    if (typeof cron === 'string' && cron.length) {
+      sets.push(`cron = $${sets.length + 1}`);
+      vals.push(cron);
+    }
+    if (!sets.length)
+      return res.status(400).json({ error: 'no fields to update' });
     vals.push(id);
-    await pool.query(`UPDATE schedules SET ${sets.join(', ')} WHERE id=$${vals.length}`, vals);
+    await pool.query(
+      `UPDATE schedules SET ${sets.join(', ')} WHERE id=$${vals.length}`,
+      vals,
+    );
     span?.end();
     res.json({ ok: true });
   } catch (e: any) {

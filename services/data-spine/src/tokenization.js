@@ -27,11 +27,14 @@ function detokenize(token, material) {
   const key = deriveKey(material);
   const iv = deriveIv(material);
   const decipher = crypto.createDecipheriv('aes-256-ctr', key, iv);
-  const decrypted = Buffer.concat([decipher.update(Buffer.from(String(token), 'base64')), decipher.final()]);
+  const decrypted = Buffer.concat([
+    decipher.update(Buffer.from(String(token), 'base64')),
+    decipher.final(),
+  ]);
   return decrypted.toString();
 }
 
 module.exports = {
   tokenize,
-  detokenize
+  detokenize,
 };

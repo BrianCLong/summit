@@ -14,33 +14,20 @@
           "title": "S3 server-side encryption is disabled",
           "description": "Terraform module is missing encryption settings for S3 buckets.",
           "severity": "critical",
-          "impacted_assets": [
-            "terraform.modules.storage"
-          ],
+          "impacted_assets": ["terraform.modules.storage"],
           "remediation": "Enable `server_side_encryption_configuration` with AWS KMS-managed keys.",
-          "evidences": [
-            "terraform/modules/storage.tf"
-          ],
-          "references": [
-            "GDPR Art. 32",
-            "PCI-DSS 3.4"
-          ]
+          "evidences": ["terraform/modules/storage.tf"],
+          "references": ["GDPR Art. 32", "PCI-DSS 3.4"]
         },
         {
           "control_id": "OPA-COST-TAGGING",
           "title": "Cost center tags missing",
           "description": "Resources are missing `owner` and `cost_center` tags required for chargeback.",
           "severity": "medium",
-          "impacted_assets": [
-            "terraform.modules.compute"
-          ],
+          "impacted_assets": ["terraform.modules.compute"],
           "remediation": "Add mandatory tags through Terraform `default_tags`.",
-          "evidences": [
-            "terraform/modules/compute.tf"
-          ],
-          "references": [
-            "ISO 27001 A.8.1.1"
-          ]
+          "evidences": ["terraform/modules/compute.tf"],
+          "references": ["ISO 27001 A.8.1.1"]
         }
       ]
     },
@@ -56,17 +43,10 @@
           "title": "IAM policy grants wildcard permissions",
           "description": "Sentinel detected IAM policy configured with `*` permissions.",
           "severity": "high",
-          "impacted_assets": [
-            "iam.policy.admin"
-          ],
+          "impacted_assets": ["iam.policy.admin"],
           "remediation": "Split administrative duties into scoped roles and enforce MFA.",
-          "evidences": [
-            "terraform/iam/policies/admin.json"
-          ],
-          "references": [
-            "HIPAA 164.308(a)(3)",
-            "FedRAMP AC-6"
-          ]
+          "evidences": ["terraform/iam/policies/admin.json"],
+          "references": ["HIPAA 164.308(a)(3)", "FedRAMP AC-6"]
         }
       ]
     },
@@ -82,51 +62,30 @@
           "title": "Namespace prod missing network policy",
           "description": "Kyverno detected missing default deny network policy for the namespace.",
           "severity": "high",
-          "impacted_assets": [
-            "k8s.namespace.prod"
-          ],
+          "impacted_assets": ["k8s.namespace.prod"],
           "remediation": "Apply a Kyverno policy to enforce baseline network policies.",
-          "evidences": [
-            "manifests/prod/namespace.yaml"
-          ],
-          "references": [
-            "ISO 27001 A.13.1.1",
-            "FedRAMP SC-7"
-          ]
+          "evidences": ["manifests/prod/namespace.yaml"],
+          "references": ["ISO 27001 A.13.1.1", "FedRAMP SC-7"]
         },
         {
           "control_id": "KYVERNO-IMAGE-PULL-PROD",
           "title": "Namespace prod using non-Always image pull policy",
           "description": "Non-Always policies risk stale container images bypassing security patches.",
           "severity": "medium",
-          "impacted_assets": [
-            "k8s.namespace.prod"
-          ],
+          "impacted_assets": ["k8s.namespace.prod"],
           "remediation": "Set `imagePullPolicy: Always` on deployments handling regulated workloads.",
-          "evidences": [
-            "manifests/prod/deployment.yaml"
-          ],
-          "references": [
-            "HIPAA 164.312(c)(1)",
-            "GDPR Art. 25"
-          ]
+          "evidences": ["manifests/prod/deployment.yaml"],
+          "references": ["HIPAA 164.312(c)(1)", "GDPR Art. 25"]
         },
         {
           "control_id": "KYVERNO-RUNTIME-SCAN",
           "title": "Runtime scan detected critical vulnerabilities",
           "description": "Container runtime scan surfaced critical CVEs requiring patching.",
           "severity": "critical",
-          "impacted_assets": [
-            "k8s.cluster.prod"
-          ],
+          "impacted_assets": ["k8s.cluster.prod"],
           "remediation": "Initiate rolling patch workflow via Summit auto-patcher.",
-          "evidences": [
-            "trivy/reports/prod.json"
-          ],
-          "references": [
-            "PCI-DSS 6.3",
-            "HIPAA 164.308(a)(1)(ii)(D)"
-          ]
+          "evidences": ["trivy/reports/prod.json"],
+          "references": ["PCI-DSS 6.3", "HIPAA 164.308(a)(1)(ii)(D)"]
         }
       ]
     },
@@ -142,34 +101,20 @@
           "title": "Customer data isolation",
           "description": "Ensure MC data is isolated from Summit tenants via network segmentation and IAM scoping.",
           "severity": "critical",
-          "impacted_assets": [
-            "k8s.namespace.prod"
-          ],
+          "impacted_assets": ["k8s.namespace.prod"],
           "remediation": "Deploy Calico baseline deny-all with service mesh segmentation.",
-          "evidences": [
-            "kubernetes/namespaces/prod.yaml"
-          ],
-          "references": [
-            "GDPR Art. 32",
-            "HIPAA 164.308(a)(4)"
-          ]
+          "evidences": ["kubernetes/namespaces/prod.yaml"],
+          "references": ["GDPR Art. 32", "HIPAA 164.308(a)(4)"]
         },
         {
           "control_id": "SUM-OPS-014",
           "title": "Economic auto-scaling guardrails",
           "description": "Maintain auto-scaling budgets below 5% monthly variance with automated anomaly remediation.",
           "severity": "high",
-          "impacted_assets": [
-            "aws.guardduty"
-          ],
+          "impacted_assets": ["aws.guardduty"],
           "remediation": "Enable automated GuardDuty to Security Hub workflow with budget-aware remediation lambdas.",
-          "evidences": [
-            "runtime/guardduty.json"
-          ],
-          "references": [
-            "ISO 27001 A.12.1",
-            "FedRAMP CM-2"
-          ]
+          "evidences": ["runtime/guardduty.json"],
+          "references": ["ISO 27001 A.12.1", "FedRAMP CM-2"]
         }
       ]
     }
@@ -181,10 +126,7 @@
       "changes": {
         "terraform/modules/storage.tf": "resource \"aws_s3_bucket_server_side_encryption_configuration\" ..."
       },
-      "applies_to": [
-        "mc-storage",
-        "summit-storage"
-      ],
+      "applies_to": ["mc-storage", "summit-storage"],
       "estimated_savings": 4200.0,
       "estimated_risk_reduction": 0.35
     },
@@ -194,9 +136,7 @@
       "changes": {
         "terraform/iam/policies/admin.json": "{\"Version\":\"2012-10-17\",...}"
       },
-      "applies_to": [
-        "iam.policy.admin"
-      ],
+      "applies_to": ["iam.policy.admin"],
       "estimated_savings": 2700.0,
       "estimated_risk_reduction": 0.28
     },
@@ -206,9 +146,7 @@
       "changes": {
         "manifests/prod/network-policy.yaml": "apiVersion: networking.k8s.io/v1 ..."
       },
-      "applies_to": [
-        "k8s.namespace.prod"
-      ],
+      "applies_to": ["k8s.namespace.prod"],
       "estimated_savings": 1500.0,
       "estimated_risk_reduction": 0.22
     },
@@ -218,9 +156,7 @@
       "changes": {
         "ci/pipeline.yaml": "include: patch-runtime-cves"
       },
-      "applies_to": [
-        "k8s.cluster.prod"
-      ],
+      "applies_to": ["k8s.cluster.prod"],
       "estimated_savings": 5200.0,
       "estimated_risk_reduction": 0.4
     }
@@ -231,66 +167,42 @@
       "question": "Confirm enforcement timeline and business exception status?",
       "suggested_decision": "Approve remediation",
       "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
-      "stakeholders": [
-        "CISO",
-        "GC",
-        "FinOps"
-      ]
+      "stakeholders": ["CISO", "GC", "FinOps"]
     },
     {
       "control_id": "SENTINEL-AIM-LEAST-PRIVILEGE",
       "question": "Confirm enforcement timeline and business exception status?",
       "suggested_decision": "Approve remediation",
       "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
-      "stakeholders": [
-        "CISO",
-        "GC",
-        "FinOps"
-      ]
+      "stakeholders": ["CISO", "GC", "FinOps"]
     },
     {
       "control_id": "KYVERNO-NP-PROD",
       "question": "Confirm enforcement timeline and business exception status?",
       "suggested_decision": "Approve remediation",
       "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
-      "stakeholders": [
-        "CISO",
-        "GC",
-        "FinOps"
-      ]
+      "stakeholders": ["CISO", "GC", "FinOps"]
     },
     {
       "control_id": "KYVERNO-RUNTIME-SCAN",
       "question": "Confirm enforcement timeline and business exception status?",
       "suggested_decision": "Approve remediation",
       "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
-      "stakeholders": [
-        "CISO",
-        "GC",
-        "FinOps"
-      ]
+      "stakeholders": ["CISO", "GC", "FinOps"]
     },
     {
       "control_id": "MC-CUST-001",
       "question": "Confirm enforcement timeline and business exception status?",
       "suggested_decision": "Approve remediation",
       "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
-      "stakeholders": [
-        "CISO",
-        "GC",
-        "FinOps"
-      ]
+      "stakeholders": ["CISO", "GC", "FinOps"]
     },
     {
       "control_id": "SUM-OPS-014",
       "question": "Confirm enforcement timeline and business exception status?",
       "suggested_decision": "Approve remediation",
       "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
-      "stakeholders": [
-        "CISO",
-        "GC",
-        "FinOps"
-      ]
+      "stakeholders": ["CISO", "GC", "FinOps"]
     }
   ],
   "multi_factor_score": {

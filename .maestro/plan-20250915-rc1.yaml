@@ -1,4 +1,3 @@
-
 plan: rc1-sprint
 window: { start: 2025-09-15, end: 2025-09-29, tz: America/Denver }
 release_tag: v0.1.0-rc1
@@ -19,13 +18,13 @@ gates:
   - name: budget
     run: node tools/cost-guard/check.js --fail-on-breach
 metrics:
-  nl_cypher_valid_pct: ">= 0.95"
-  p95_graph_ms: "<= 1500"
-  ingestion_10k_docs_minutes: "<= 5"
-  connectors_passing: ">= 5"
-  exports_verified_pct: "= 100"
+  nl_cypher_valid_pct: '>= 0.95'
+  p95_graph_ms: '<= 1500'
+  ingestion_10k_docs_minutes: '<= 5'
+  connectors_passing: '>= 5'
+  exports_verified_pct: '= 100'
 freeze:
   code_freeze: 2025-09-27T17:00:00-06:00
 rollout:
   strategy: canary
-  duration: "24h"
+  duration: '24h'

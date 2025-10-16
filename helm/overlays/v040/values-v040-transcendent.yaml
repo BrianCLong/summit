@@ -3,60 +3,60 @@
 
 # Global configuration
 global:
-  version: "v0.4.0"
+  version: 'v0.4.0'
   transcendentMode:
     enabled: true
-    safetyLevel: "PRODUCTION"
+    safetyLevel: 'PRODUCTION'
     humanOversightRequired: true
 
 # Application configuration
 app:
   image:
-    tag: "v0.4.0-transcendent"
+    tag: 'v0.4.0-transcendent'
 
   env:
     # Transcendent Intelligence Configuration
-    TRANSCENDENT_INTELLIGENCE_ENABLED: "true"
-    QUANTUM_COGNITION_ENABLED: "true"
-    EVOLUTION_SANDBOX_ENABLED: "true"
+    TRANSCENDENT_INTELLIGENCE_ENABLED: 'true'
+    QUANTUM_COGNITION_ENABLED: 'true'
+    EVOLUTION_SANDBOX_ENABLED: 'true'
 
     # Safety and Compliance
-    SAFETY_SCORE_THRESHOLD: "0.95"
-    HUMAN_OVERSIGHT_REQUIRED: "true"
-    EMERGENCY_ROLLBACK_ENABLED: "true"
+    SAFETY_SCORE_THRESHOLD: '0.95'
+    HUMAN_OVERSIGHT_REQUIRED: 'true'
+    EMERGENCY_ROLLBACK_ENABLED: 'true'
 
     # Evolution System
-    EVOLUTION_WEIGHT_SUM_LIMIT: "1.0"
-    EVOLUTION_SANDBOX_TIMEOUT: "300s"
-    EVOLUTION_APPROVAL_REQUIRED: "true"
+    EVOLUTION_WEIGHT_SUM_LIMIT: '1.0'
+    EVOLUTION_SANDBOX_TIMEOUT: '300s'
+    EVOLUTION_APPROVAL_REQUIRED: 'true'
 
     # Quantum Operations
-    QUANTUM_COHERENCE_MIN_TIME: "50.0"
-    QUANTUM_ERROR_RATE_MAX: "0.01"
-    QUANTUM_ENTANGLEMENT_LIMIT: "1000"
+    QUANTUM_COHERENCE_MIN_TIME: '50.0'
+    QUANTUM_ERROR_RATE_MAX: '0.01'
+    QUANTUM_ENTANGLEMENT_LIMIT: '1000'
 
     # Autonomy Configuration
-    AUTONOMY_COMPENSATION_RATE_LIMIT: "0.005"
-    AUTONOMY_HUMAN_OVERRIDE_TIMEOUT: "60s"
-    AUTONOMY_SAFETY_CHECK_INTERVAL: "5m"
+    AUTONOMY_COMPENSATION_RATE_LIMIT: '0.005'
+    AUTONOMY_HUMAN_OVERRIDE_TIMEOUT: '60s'
+    AUTONOMY_SAFETY_CHECK_INTERVAL: '5m'
 
     # Post-Quantum Security
-    PQ_SIGNATURES_ENABLED: "true"
-    DUAL_SIGNATURE_SCHEME: "true"
+    PQ_SIGNATURES_ENABLED: 'true'
+    DUAL_SIGNATURE_SCHEME: 'true'
 
     # Evidence and Audit
-    EVIDENCE_GENERATION_REQUIRED: "true"
-    EVIDENCE_RETENTION_YEARS: "7"
-    CRYPTOGRAPHIC_SIGNING_ENABLED: "true"
+    EVIDENCE_GENERATION_REQUIRED: 'true'
+    EVIDENCE_RETENTION_YEARS: '7'
+    CRYPTOGRAPHIC_SIGNING_ENABLED: 'true'
 
 # Resource allocation for transcendent workloads
 resources:
   requests:
-    cpu: "2000m"
-    memory: "4Gi"
+    cpu: '2000m'
+    memory: '4Gi'
   limits:
-    cpu: "4000m"
-    memory: "8Gi"
+    cpu: '4000m'
+    memory: '8Gi'
 
 # Horizontal Pod Autoscaler for quantum workloads
 autoscaling:
@@ -69,15 +69,15 @@ autoscaling:
     scaleUp:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 15
+        - type: Percent
+          value: 100
+          periodSeconds: 15
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 10
-        periodSeconds: 60
+        - type: Percent
+          value: 10
+          periodSeconds: 60
 
 # Service configuration
 service:
@@ -96,14 +96,14 @@ service:
 ingress:
   enabled: true
   annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/backend-protocol: 'HTTP'
     # Transcendent operation timeouts
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '300'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '300'
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '60'
   hosts:
     - host: mc-platform-v040.example.com
       paths:
@@ -139,32 +139,32 @@ networkPolicy:
     - Egress
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            name: monitoring
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
       ports:
-      - protocol: TCP
-        port: 9090
+        - protocol: TCP
+          port: 9090
     - from:
-      - namespaceSelector:
-          matchLabels:
-            name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
       ports:
-      - protocol: TCP
-        port: 4000
+        - protocol: TCP
+          port: 4000
   egress:
     # Allow DNS
     - to: []
       ports:
-      - protocol: UDP
-        port: 53
+        - protocol: UDP
+          port: 53
     # Allow external services for sandbox validation
     - to: []
       ports:
-      - protocol: TCP
-        port: 443
-      - protocol: TCP
-        port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
 
 # ServiceMonitor for Prometheus integration
 serviceMonitor:
@@ -203,7 +203,7 @@ prometheusRule:
             severity: critical
             version: v0.4.0
           annotations:
-            summary: "Transcendent intelligence safety score below critical threshold"
+            summary: 'Transcendent intelligence safety score below critical threshold'
         - alert: QuantumCoherenceTimeDegraded
           expr: mc_platform_quantum_coherence_time_microseconds < 50.0
           for: 2m
@@ -211,7 +211,7 @@ prometheusRule:
             severity: warning
             version: v0.4.0
           annotations:
-            summary: "Quantum coherence time below threshold"
+            summary: 'Quantum coherence time below threshold'
 
 # ConfigMap for transcendent configuration
 configMap:
@@ -246,18 +246,18 @@ secret:
   type: Opaque
   data:
     # Base64 encoded placeholder keys (replace with actual keys)
-    pq-signing-key: "cGxhY2Vob2xkZXItcG9zdC1xdWFudHVtLXNpZ25pbmcta2V5"
-    pq-verification-key: "cGxhY2Vob2xkZXItcG9zdC1xdWFudHVtLXZlcmlmaWNhdGlvbi1rZXk="
-    evidence-encryption-key: "cGxhY2Vob2xkZXItZXZpZGVuY2UtZW5jcnlwdGlvbi1rZXk="
+    pq-signing-key: 'cGxhY2Vob2xkZXItcG9zdC1xdWFudHVtLXNpZ25pbmcta2V5'
+    pq-verification-key: 'cGxhY2Vob2xkZXItcG9zdC1xdWFudHVtLXZlcmlmaWNhdGlvbi1rZXk='
+    evidence-encryption-key: 'cGxhY2Vob2xkZXItZXZpZGVuY2UtZW5jcnlwdGlvbi1rZXk='
 
 # PersistentVolumeClaim for evolution sandbox workspace
 persistence:
   enabled: true
   accessMode: ReadWriteOnce
   size: 10Gi
-  storageClass: "fast-ssd"
+  storageClass: 'fast-ssd'
   annotations:
-    volume.beta.kubernetes.io/storage-provisioner: "kubernetes.io/aws-ebs"
+    volume.beta.kubernetes.io/storage-provisioner: 'kubernetes.io/aws-ebs'
 
 # Init containers for transcendent setup
 initContainers:
@@ -286,14 +286,14 @@ sidecars:
         name: quantum-metrics
     env:
       - name: QUANTUM_METRICS_PORT
-        value: "9091"
+        value: '9091'
     resources:
       requests:
-        cpu: "100m"
-        memory: "128Mi"
+        cpu: '100m'
+        memory: '128Mi'
       limits:
-        cpu: "200m"
-        memory: "256Mi"
+        cpu: '200m'
+        memory: '256Mi'
 
 # Health checks for transcendent operations
 livenessProbe:
@@ -327,62 +327,62 @@ startupProbe:
 # Pod disruption budget for high availability
 podDisruptionBudget:
   enabled: true
-  minAvailable: "50%"
+  minAvailable: '50%'
 
 # Node affinity for transcendent workloads
 nodeAffinity:
   requiredDuringSchedulingIgnoredDuringExecution:
     nodeSelectorTerms:
-    - matchExpressions:
-      - key: node-type
-        operator: In
-        values:
-        - transcendent-compute
-        - high-performance
+      - matchExpressions:
+          - key: node-type
+            operator: In
+            values:
+              - transcendent-compute
+              - high-performance
 
 # Pod anti-affinity for distribution
 podAntiAffinity:
   preferredDuringSchedulingIgnoredDuringExecution:
-  - weight: 100
-    podAffinityTerm:
-      labelSelector:
-        matchExpressions:
-        - key: app
-          operator: In
-          values:
-          - mc-platform
-      topologyKey: kubernetes.io/hostname
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - mc-platform
+        topologyKey: kubernetes.io/hostname
 
 # Tolerations for dedicated transcendent nodes
 tolerations:
-  - key: "transcendent-workload"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"
+  - key: 'transcendent-workload'
+    operator: 'Equal'
+    value: 'true'
+    effect: 'NoSchedule'
 
 # Priority class for transcendent operations
-priorityClassName: "transcendent-priority"
+priorityClassName: 'transcendent-priority'
 
 # Service account with transcendent permissions
 serviceAccount:
   create: true
-  name: "mc-platform-transcendent"
+  name: 'mc-platform-transcendent'
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::ACCOUNT:role/mc-platform-transcendent-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::ACCOUNT:role/mc-platform-transcendent-role'
 
 # RBAC for transcendent operations
 rbac:
   create: true
   rules:
-    - apiGroups: [""]
-      resources: ["secrets", "configmaps"]
-      verbs: ["get", "list", "watch"]
-    - apiGroups: ["batch"]
-      resources: ["jobs"]
-      verbs: ["create", "get", "list", "watch", "delete"]
-    - apiGroups: ["apps"]
-      resources: ["deployments"]
-      verbs: ["get", "list", "watch"]
+    - apiGroups: ['']
+      resources: ['secrets', 'configmaps']
+      verbs: ['get', 'list', 'watch']
+    - apiGroups: ['batch']
+      resources: ['jobs']
+      verbs: ['create', 'get', 'list', 'watch', 'delete']
+    - apiGroups: ['apps']
+      resources: ['deployments']
+      verbs: ['get', 'list', 'watch']
 
 # Volume mounts for transcendent operations
 volumeMounts:
@@ -398,10 +398,10 @@ volumeMounts:
 volumes:
   - name: workspace
     persistentVolumeClaim:
-      claimName: "{{ include \"mc-platform.fullname\" . }}-workspace"
+      claimName: '{{ include "mc-platform.fullname" . }}-workspace'
   - name: config
     configMap:
-      name: "{{ include \"mc-platform.fullname\" . }}-config"
+      name: '{{ include "mc-platform.fullname" . }}-config'
   - name: secrets
     secret:
-      secretName: "{{ include \"mc-platform.fullname\" . }}-secrets"
+      secretName: '{{ include "mc-platform.fullname" . }}-secrets'

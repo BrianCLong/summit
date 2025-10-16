@@ -32,13 +32,18 @@ incidentRouter.post('/incidents', async (req, res) => {
       timestamp: Date.now(),
     };
 
-    const incidentId = await incidentResponseEngine.handleIncident(incidentContext);
+    const incidentId =
+      await incidentResponseEngine.handleIncident(incidentContext);
 
     // Create war room for P0/P1 incidents
     let warRoomId: string | undefined;
     if (severity === 'P0' || severity === 'P1') {
       const commander = (req.headers['x-user-id'] as string) || 'system';
-      warRoomId = await warRoomCoordinator.createWarRoom(incidentId, commander, incidentContext);
+      warRoomId = await warRoomCoordinator.createWarRoom(
+        incidentId,
+        commander,
+        incidentContext,
+      );
     }
 
     res.status(201).json({
@@ -452,7 +457,8 @@ incidentRouter.post('/war-rooms/:id/actions', async (req, res) => {
 
     if (!assignerUserId || !assignedTo || !title || !description || !priority) {
       return res.status(400).json({
-        error: 'Missing required fields: assignerUserId, assignedTo, title, description, priority',
+        error:
+          'Missing required fields: assignerUserId, assignedTo, title, description, priority',
       });
     }
 
@@ -560,7 +566,12 @@ incidentRouter.post('/war-rooms/:id/escalate', async (req, res) => {
       });
     }
 
-    await warRoomCoordinator.escalateIncident(id, userId, reason, escalationLevel);
+    await warRoomCoordinator.escalateIncident(
+      id,
+      userId,
+      reason,
+      escalationLevel,
+    );
 
     res.json({
       message: 'Incident escalated successfully',

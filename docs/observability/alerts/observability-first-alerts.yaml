@@ -1,4 +1,3 @@
-
 global:
   resolve_timeout: 5m
 route:
@@ -27,8 +26,8 @@ receivers:
     slackConfigs:
       - api_url: ${SLACK_WEBHOOK_URL}
         channel: '#observability-alarms'
-        title: "{{ template \"slack.title\" . }}"
-        text: "{{ template \"slack.text\" . }}"
+        title: '{{ template "slack.title" . }}'
+        text: '{{ template "slack.text" . }}'
         send_resolved: true
         footer: Observability First SLO kits
   - name: synthetic-drill

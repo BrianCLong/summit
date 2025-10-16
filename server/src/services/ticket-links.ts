@@ -5,20 +5,34 @@ export interface TicketIdentifier {
   externalId: string;
 }
 
-export async function linkTicketToRun({ provider, externalId, runId }: {provider:string; externalId:string; runId:string}) {
+export async function linkTicketToRun({
+  provider,
+  externalId,
+  runId,
+}: {
+  provider: string;
+  externalId: string;
+  runId: string;
+}) {
   const pool = getPostgresPool();
   await pool.query(
     `INSERT INTO ticket_runs (provider, external_id, run_id)
      VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
-    [provider, externalId, runId]
+    [provider, externalId, runId],
   );
 }
 
-export async function addTicketRunLink(ticket: TicketIdentifier, runId: string, metadata?: Record<string, any>) {
+export async function addTicketRunLink(
+  ticket: TicketIdentifier,
+  runId: string,
+  metadata?: Record<string, any>,
+) {
   const pool = getPostgresPool();
-  
+
   // Check if run exists
-  const runExists = await pool.query('SELECT id FROM runs WHERE id = $1', [runId]);
+  const runExists = await pool.query('SELECT id FROM runs WHERE id = $1', [
+    runId,
+  ]);
   if (runExists.rows.length === 0) {
     throw new Error(`Run ${runId} not found`);
   }
@@ -26,11 +40,13 @@ export async function addTicketRunLink(ticket: TicketIdentifier, runId: string, 
   // Check if ticket exists
   const ticketExists = await pool.query(
     'SELECT id FROM tickets WHERE provider = $1 AND external_id = $2',
-    [ticket.provider, ticket.externalId]
+    [ticket.provider, ticket.externalId],
   );
-  
+
   if (ticketExists.rows.length === 0) {
-    console.warn(`Ticket ${ticket.provider}:${ticket.externalId} not found, skipping link creation`);
+    console.warn(
+      `Ticket ${ticket.provider}:${ticket.externalId} not found, skipping link creation`,
+    );
     return null;
   }
 
@@ -38,28 +54,43 @@ export async function addTicketRunLink(ticket: TicketIdentifier, runId: string, 
     `INSERT INTO ticket_runs (provider, external_id, run_id, metadata, created_at)
      VALUES ($1, $2, $3, $4, NOW()) ON CONFLICT (provider, external_id, run_id) DO UPDATE SET 
      metadata = EXCLUDED.metadata, created_at = NOW()`,
-    [ticket.provider, ticket.externalId, runId, JSON.stringify(metadata || {})]
+    [ticket.provider, ticket.externalId, runId, JSON.stringify(metadata || {})],
   );
-  
-  console.log(`Linked ticket ${ticket.provider}:${ticket.externalId} to run ${runId}`);
+
+  console.log(
+    `Linked ticket ${ticket.provider}:${ticket.externalId} to run ${runId}`,
+  );
 }
 
-export async function linkTicketToDeployment({ provider, externalId, deploymentId }:{
-  provider:string; externalId:string; deploymentId:string
+export async function linkTicketToDeployment({
+  provider,
+  externalId,
+  deploymentId,
+}: {
+  provider: string;
+  externalId: string;
+  deploymentId: string;
 }) {
   const pool = getPostgresPool();
   await pool.query(
     `INSERT INTO ticket_deployments (provider, external_id, deployment_id)
      VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
-    [provider, externalId, deploymentId]
+    [provider, externalId, deploymentId],
   );
 }
 
-export async function addTicketDeploymentLink(ticket: TicketIdentifier, deploymentId: string, metadata?: Record<string, any>) {
+export async function addTicketDeploymentLink(
+  ticket: TicketIdentifier,
+  deploymentId: string,
+  metadata?: Record<string, any>,
+) {
   const pool = getPostgresPool();
-  
+
   // Check if deployment exists
-  const deploymentExists = await pool.query('SELECT id FROM deployments WHERE id = $1', [deploymentId]);
+  const deploymentExists = await pool.query(
+    'SELECT id FROM deployments WHERE id = $1',
+    [deploymentId],
+  );
   if (deploymentExists.rows.length === 0) {
     throw new Error(`Deployment ${deploymentId} not found`);
   }
@@ -67,11 +98,13 @@ export async function addTicketDeploymentLink(ticket: TicketIdentifier, deployme
   // Check if ticket exists
   const ticketExists = await pool.query(
     'SELECT id FROM tickets WHERE provider = $1 AND external_id = $2',
-    [ticket.provider, ticket.externalId]
+    [ticket.provider, ticket.externalId],
   );
-  
+
   if (ticketExists.rows.length === 0) {
-    console.warn(`Ticket ${ticket.provider}:${ticket.externalId} not found, skipping link creation`);
+    console.warn(
+      `Ticket ${ticket.provider}:${ticket.externalId} not found, skipping link creation`,
+    );
     return null;
   }
 
@@ -79,21 +112,34 @@ export async function addTicketDeploymentLink(ticket: TicketIdentifier, deployme
     `INSERT INTO ticket_deployments (provider, external_id, deployment_id, metadata, created_at)
      VALUES ($1, $2, $3, $4, NOW()) ON CONFLICT (provider, external_id, deployment_id) DO UPDATE SET 
      metadata = EXCLUDED.metadata, created_at = NOW()`,
-    [ticket.provider, ticket.externalId, deploymentId, JSON.stringify(metadata || {})]
+    [
+      ticket.provider,
+      ticket.externalId,
+      deploymentId,
+      JSON.stringify(metadata || {}),
+    ],
   );
-  
-  console.log(`Linked ticket ${ticket.provider}:${ticket.externalId} to deployment ${deploymentId}`);
+
+  console.log(
+    `Linked ticket ${ticket.provider}:${ticket.externalId} to deployment ${deploymentId}`,
+  );
 }
 
-export async function getTicketLinks({ provider, externalId }:{provider:string; externalId:string}) {
+export async function getTicketLinks({
+  provider,
+  externalId,
+}: {
+  provider: string;
+  externalId: string;
+}) {
   const pool = getPostgresPool();
   const runs = await pool.query(
     `SELECT run_id AS id FROM ticket_runs WHERE provider=$1 AND external_id=$2 ORDER BY created_at DESC`,
-    [provider, externalId]
+    [provider, externalId],
   );
   const deployments = await pool.query(
     `SELECT deployment_id AS id FROM ticket_deployments WHERE provider=$1 AND external_id=$2 ORDER BY created_at DESC`,
-    [provider, externalId]
+    [provider, externalId],
   );
   return { runs: runs.rows, deployments: deployments.rows };
 }
@@ -101,7 +147,10 @@ export async function getTicketLinks({ provider, externalId }:{provider:string; 
 /**
  * Extract ticket information from PR URL or commit message
  */
-export function extractTicketFromPR(prUrl: string, body?: string): TicketIdentifier | null {
+export function extractTicketFromPR(
+  prUrl: string,
+  body?: string,
+): TicketIdentifier | null {
   // GitHub issue patterns
   if (prUrl.includes('github.com')) {
     const issuePattern = /#(\d+)/g;
@@ -109,7 +158,7 @@ export function extractTicketFromPR(prUrl: string, body?: string): TicketIdentif
     if (match) {
       return {
         provider: 'github',
-        externalId: match[0].replace('#', '')
+        externalId: match[0].replace('#', ''),
       };
     }
   }
@@ -120,7 +169,7 @@ export function extractTicketFromPR(prUrl: string, body?: string): TicketIdentif
   if (jiraMatch) {
     return {
       provider: 'jira',
-      externalId: jiraMatch[0]
+      externalId: jiraMatch[0],
     };
   }
 
@@ -130,12 +179,14 @@ export function extractTicketFromPR(prUrl: string, body?: string): TicketIdentif
 /**
  * Extract ticket information from run/deployment metadata
  */
-export function extractTicketFromMetadata(metadata: Record<string, any>): TicketIdentifier | null {
+export function extractTicketFromMetadata(
+  metadata: Record<string, any>,
+): TicketIdentifier | null {
   // Direct ticket reference in metadata
   if (metadata.ticket?.provider && metadata.ticket?.external_id) {
     return {
       provider: metadata.ticket.provider,
-      externalId: metadata.ticket.external_id
+      externalId: metadata.ticket.external_id,
     };
   }
 
@@ -152,4 +203,3 @@ export function extractTicketFromMetadata(metadata: Record<string, any>): Ticket
 
   return null;
 }
-

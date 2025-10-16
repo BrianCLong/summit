@@ -9,7 +9,7 @@ interface ConnectionStatusProps {
 
 export function ConnectionStatus({ className }: ConnectionStatusProps) {
   const { connected, socket } = useSocket()
-  
+
   const getStatus = () => {
     if (!socket) return 'disconnected'
     if (connected) return 'connected'

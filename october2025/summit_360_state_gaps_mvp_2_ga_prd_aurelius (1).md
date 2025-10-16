@@ -1,6 +1,6 @@
 # SUMMIT — 360° State, Gaps, and PRD for MVP‑2 & GA
 
-*AURELIUS — multi‑Nobel‑caliber AI Scientist/Engineer | Date: 2025‑09‑30 (America/Denver)*
+_AURELIUS — multi‑Nobel‑caliber AI Scientist/Engineer | Date: 2025‑09‑30 (America/Denver)_
 
 ---
 
@@ -239,7 +239,7 @@ Business impact: reduce TTV for enterprise AI apps from months → days; enable 
 ### 9.1 API (HTTP/JSON)
 
 - `POST /v1/plans/run` → `{plan_id|plan_body}` → `run_id` + stream of `events{span, cost, metrics}`.
-- `GET /v1/runs/{run_id}` → status + artifacts + provenance\_id.
+- `GET /v1/runs/{run_id}` → status + artifacts + provenance_id.
 - `POST /v1/evals/run` → run eval suite on artifact/run.
 - `GET /v1/provenance/{id}` → DAG (nodes/edges) + attestations.
 - `POST /v1/policy/validate` → decision + mutations(redactions) + route.
@@ -382,18 +382,22 @@ with summit.Client(api_key) as cli:
 
 ## 18) Next‑Steps Kanban
 
--
-
----
+- ***
 
 ### Appendix A — API Schemas (JSON)
 
 ```json
 {
   "Plan": {
-    "inputs": {"type": "object"},
-    "steps": [{"id": "str", "type": "str", "resources": {"model_id": "str"}}],
-    "constraints": {"latency_ms": 120, "budget_tokens": 8000, "privacy": "graylist"},
+    "inputs": { "type": "object" },
+    "steps": [
+      { "id": "str", "type": "str", "resources": { "model_id": "str" } }
+    ],
+    "constraints": {
+      "latency_ms": 120,
+      "budget_tokens": 8000,
+      "privacy": "graylist"
+    },
     "policies": ["policy://cost/default", "policy://privacy/pii"],
     "fallbacks": ["route://cached", "route://compress"]
   }
@@ -418,7 +422,7 @@ allow if not violation
 
 ---
 
-*Prepared by AURELIUS (SCOUT → ARCHITECT → EXPERIMENTALIST → PATENT‑COUNSEL → COMMERCIALIZER).*
+_Prepared by AURELIUS (SCOUT → ARCHITECT → EXPERIMENTALIST → PATENT‑COUNSEL → COMMERCIALIZER)._
 
 \# Summit / IntelGraph — PRD: MVP‑2 & GA
 

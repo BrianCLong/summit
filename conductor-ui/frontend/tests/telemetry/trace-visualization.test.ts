@@ -53,7 +53,9 @@ test.describe('Trace Visualization @telemetry', () => {
 
   test('should display trace visualization', async ({ page }) => {
     // Check for trace visualization container
-    await expect(page.locator('[data-testid="trace-visualization"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="trace-visualization"]'),
+    ).toBeVisible();
     await expect(page.locator('text=Distributed Trace')).toBeVisible();
   });
 
@@ -67,16 +69,22 @@ test.describe('Trace Visualization @telemetry', () => {
 
   test('should switch between visualization modes', async ({ page }) => {
     // Test timeline view (default)
-    await expect(page.locator('button:has-text("Timeline")')).toHaveClass(/bg-blue-100/);
+    await expect(page.locator('button:has-text("Timeline")')).toHaveClass(
+      /bg-blue-100/,
+    );
 
     // Switch to tree view
     await page.click('button:has-text("Tree")');
-    await expect(page.locator('button:has-text("Tree")')).toHaveClass(/bg-blue-100/);
+    await expect(page.locator('button:has-text("Tree")')).toHaveClass(
+      /bg-blue-100/,
+    );
     await expect(page.locator('.trace-tree')).toBeVisible();
 
     // Switch to flamegraph view
     await page.click('button:has-text("Flamegraph")');
-    await expect(page.locator('button:has-text("Flamegraph")')).toHaveClass(/bg-blue-100/);
+    await expect(page.locator('button:has-text("Flamegraph")')).toHaveClass(
+      /bg-blue-100/,
+    );
     await expect(page.locator('.flamegraph')).toBeVisible();
   });
 
@@ -130,7 +138,10 @@ test.describe('Trace Visualization @telemetry', () => {
   test('should handle trace errors', async ({ page }) => {
     // Mock error response
     await page.route('/api/maestro/v1/telemetry/traces/*', async (route) => {
-      await route.fulfill({ status: 500, json: { error: 'Trace service unavailable' } });
+      await route.fulfill({
+        status: 500,
+        json: { error: 'Trace service unavailable' },
+      });
     });
 
     await page.reload();
@@ -311,38 +322,43 @@ test.describe('Trace Visualization @telemetry', () => {
 
   test('should handle trace search functionality', async ({ page }) => {
     // Mock search endpoint
-    await page.route('/api/maestro/v1/telemetry/traces/search', async (route) => {
-      const mockResults = {
-        traces: [
-          {
-            traceId: 'trace-search-result',
-            spans: [
-              {
-                spanId: 'span-search',
-                traceId: 'trace-search-result',
-                name: 'searched.operation',
-                startTime: Date.now() - 10000,
+    await page.route(
+      '/api/maestro/v1/telemetry/traces/search',
+      async (route) => {
+        const mockResults = {
+          traces: [
+            {
+              traceId: 'trace-search-result',
+              spans: [
+                {
+                  spanId: 'span-search',
+                  traceId: 'trace-search-result',
+                  name: 'searched.operation',
+                  startTime: Date.now() - 10000,
+                  duration: 1500,
+                  status: 1,
+                  attributes: { 'maestro.run.id': 'run_001' },
+                  events: [],
+                  links: [],
+                  resource: {
+                    attributes: { 'service.name': 'search-service' },
+                  },
+                  instrumentationScope: { name: '@maestro/telemetry' },
+                },
+              ],
+              summary: {
                 duration: 1500,
-                status: 1,
-                attributes: { 'maestro.run.id': 'run_001' },
-                events: [],
-                links: [],
-                resource: { attributes: { 'service.name': 'search-service' } },
-                instrumentationScope: { name: '@maestro/telemetry' },
+                spanCount: 1,
+                errorCount: 0,
+                services: ['search-service'],
               },
-            ],
-            summary: {
-              duration: 1500,
-              spanCount: 1,
-              errorCount: 0,
-              services: ['search-service'],
             },
-          },
-        ],
-      };
+          ],
+        };
 
-      await route.fulfill({ json: mockResults });
-    });
+        await route.fulfill({ json: mockResults });
+      },
+    );
 
     // If there's a search functionality in the UI
     const searchButton = page.locator('button:has-text("Search")');

@@ -6,7 +6,10 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Trend, Counter } from 'k6/metrics';
-import { randomString, randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
+import {
+  randomString,
+  randomIntBetween,
+} from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 // Custom metrics
 const errorRate = new Rate('symphony_errors');
@@ -51,7 +54,10 @@ const MODELS = ['local/llama', 'local/llama-cpu', 'local/qwen-coder'];
 const CONTEXTS = {
   short: 'Simple test query',
   medium: 'A' + 'B'.repeat(500) + 'complex analysis task with moderate context',
-  long: 'C' + 'D'.repeat(2000) + 'very detailed analysis requiring extensive context processing',
+  long:
+    'C' +
+    'D'.repeat(2000) +
+    'very detailed analysis requiring extensive context processing',
 };
 
 function generateWorkload() {
@@ -91,7 +97,11 @@ function makeRequest(payload, tags = {}) {
     ),
   };
 
-  const response = http.post(`${PROXY_URL}/route/execute`, JSON.stringify(payload), params);
+  const response = http.post(
+    `${PROXY_URL}/route/execute`,
+    JSON.stringify(payload),
+    params,
+  );
   const endTime = Date.now();
   const duration = endTime - startTime;
 
@@ -103,7 +113,10 @@ function makeRequest(payload, tags = {}) {
   const sloThreshold = isLocal ? 2500 : 6000;
 
   if (duration > sloThreshold) {
-    sloBreaches.add(1, { breach_type: 'latency', provider: isLocal ? 'local' : 'remote' });
+    sloBreaches.add(1, {
+      breach_type: 'latency',
+      provider: isLocal ? 'local' : 'remote',
+    });
   }
 
   return response;

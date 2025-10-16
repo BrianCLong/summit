@@ -10,4 +10,8 @@ models:
     config: { contract: true }
 sources:
   - name: raw
-    freshness: { warn_after: { count: 2, period: hour }, error_after: { count: 4, period: hour } }
+    freshness:
+      {
+        warn_after: { count: 2, period: hour },
+        error_after: { count: 4, period: hour },
+      }

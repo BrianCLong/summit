@@ -88,15 +88,22 @@ export class StateManager extends EventEmitter {
   }
 
   async initialize(): Promise<void> {
-    this.logger.info('StateManager initialized for Maestro Conductor rollback safeguards');
+    this.logger.info(
+      'StateManager initialized for Maestro Conductor rollback safeguards',
+    );
   }
 
-  async createSnapshot(deploymentId: string, services: string[]): Promise<DeploymentSnapshot> {
+  async createSnapshot(
+    deploymentId: string,
+    services: string[],
+  ): Promise<DeploymentSnapshot> {
     const state = this.ensureDeployment(deploymentId, services);
-    const snapshotServices = Array.from(state.services.values()).map(service => ({
-      ...service,
-      lastUpdated: new Date(service.lastUpdated)
-    }));
+    const snapshotServices = Array.from(state.services.values()).map(
+      (service) => ({
+        ...service,
+        lastUpdated: new Date(service.lastUpdated),
+      }),
+    );
 
     const snapshot: DeploymentSnapshot = {
       id: `${deploymentId}-snapshot-${Date.now()}`,
@@ -109,8 +116,11 @@ export class StateManager extends EventEmitter {
       trafficPolicy: { ...state.trafficPolicy },
       metadata: {
         serviceCount: snapshotServices.length,
-        replicas: snapshotServices.reduce((sum, service) => sum + service.replicas, 0)
-      }
+        replicas: snapshotServices.reduce(
+          (sum, service) => sum + service.replicas,
+          0,
+        ),
+      },
     };
 
     state.snapshots.push(snapshot);
@@ -124,14 +134,14 @@ export class StateManager extends EventEmitter {
       action: 'snapshot_created',
       timestamp: new Date(),
       status: 'success',
-      details: { checksum: snapshot.checksum }
+      details: { checksum: snapshot.checksum },
     });
 
     this.emit('snapshotCreated', snapshot);
     this.logger.info(`Created deployment snapshot ${snapshot.id}`, {
       deploymentId,
       checksum: snapshot.checksum,
-      services: snapshot.services.length
+      services: snapshot.services.length,
     });
 
     return snapshot;
@@ -174,7 +184,7 @@ export class StateManager extends EventEmitter {
     state.recoveryPlan.lastUpdated = new Date();
     this.emit('recoveryPlanRegenerated', {
       deploymentId,
-      snapshotId: snapshot.id
+      snapshotId: snapshot.id,
     });
 
     return state.recoveryPlan;
@@ -194,21 +204,26 @@ export class StateManager extends EventEmitter {
     for (const service of snapshot.services) {
       state.services.set(service.serviceId, {
         ...service,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
     }
 
     state.trafficPolicy = { ...snapshot.trafficPolicy };
-    this.recordAction(state, 'restore_state', 'success', { snapshotId: snapshot.id });
+    this.recordAction(state, 'restore_state', 'success', {
+      snapshotId: snapshot.id,
+    });
     this.emit('stateRestored', { deploymentId, snapshotId: snapshot.id });
 
     this.logger.info(`Restored deployment ${deploymentId} from snapshot`, {
       snapshotId: snapshot.id,
-      checksum: snapshot.checksum
+      checksum: snapshot.checksum,
     });
   }
 
-  async restoreServiceTier(deploymentId: string, tier: ServiceTier | 'all'): Promise<string[]> {
+  async restoreServiceTier(
+    deploymentId: string,
+    tier: ServiceTier | 'all',
+  ): Promise<string[]> {
     const state = this.deployments.get(deploymentId);
     if (!state) {
       throw new Error(`Deployment ${deploymentId} has no tracked state`);
@@ -219,18 +234,23 @@ export class StateManager extends EventEmitter {
       throw new Error(`No snapshot available for deployment ${deploymentId}`);
     }
 
-    const targetServices = snapshot.services.filter(service => tier === 'all' ? true : service.tier === tier);
+    const targetServices = snapshot.services.filter((service) =>
+      tier === 'all' ? true : service.tier === tier,
+    );
     const restored: string[] = [];
 
     for (const service of targetServices) {
       state.services.set(service.serviceId, {
         ...service,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
       restored.push(service.serviceId);
     }
 
-    this.recordAction(state, 'restore_service_tier', 'success', { tier, restored });
+    this.recordAction(state, 'restore_service_tier', 'success', {
+      tier,
+      restored,
+    });
     this.emit('serviceTierRestored', { deploymentId, tier, restored });
 
     return restored;
@@ -243,18 +263,26 @@ export class StateManager extends EventEmitter {
     }
 
     const restored = await this.restoreServiceTier(deploymentId, 'canary');
-    this.logger.warn(`Rolled back canary instances for ${deploymentId}`, { services: restored });
+    this.logger.warn(`Rolled back canary instances for ${deploymentId}`, {
+      services: restored,
+    });
 
-    return restored.map(serviceId => state.services.get(serviceId)!) ;
+    return restored.map((serviceId) => state.services.get(serviceId)!);
   }
 
-  async restartServices(deploymentId: string, services?: string[]): Promise<ServiceState[]> {
+  async restartServices(
+    deploymentId: string,
+    services?: string[],
+  ): Promise<ServiceState[]> {
     const state = this.deployments.get(deploymentId);
     if (!state) {
       throw new Error(`Deployment ${deploymentId} has no tracked state`);
     }
 
-    const targetServices = services && services.length > 0 ? services : Array.from(state.services.keys());
+    const targetServices =
+      services && services.length > 0
+        ? services
+        : Array.from(state.services.keys());
     const restarted: ServiceState[] = [];
 
     for (const serviceId of targetServices) {
@@ -267,15 +295,17 @@ export class StateManager extends EventEmitter {
         lastUpdated: new Date(),
         metadata: {
           ...service.metadata,
-          restartedAt: new Date().toISOString()
-        }
+          restartedAt: new Date().toISOString(),
+        },
       };
 
       state.services.set(serviceId, updated);
       restarted.push(updated);
     }
 
-    this.recordAction(state, 'restart_services', 'success', { services: targetServices });
+    this.recordAction(state, 'restart_services', 'success', {
+      services: targetServices,
+    });
     this.emit('servicesRestarted', { deploymentId, services: targetServices });
 
     return restarted;
@@ -291,7 +321,7 @@ export class StateManager extends EventEmitter {
       mode: 'stopped',
       canaryPercentage: 0,
       primaryPercentage: 0,
-      notes: 'Traffic halted for rollback'
+      notes: 'Traffic halted for rollback',
     };
 
     this.recordAction(state, 'stop_traffic', 'success', {});
@@ -308,14 +338,18 @@ export class StateManager extends EventEmitter {
       mode: 'normal',
       canaryPercentage: 0,
       primaryPercentage: 100,
-      notes: 'Traffic restored after rollback'
+      notes: 'Traffic restored after rollback',
     };
 
     this.recordAction(state, 'resume_traffic', 'success', {});
     this.emit('trafficUpdated', { deploymentId, policy: state.trafficPolicy });
   }
 
-  async reduceTraffic(deploymentId: string, canaryPercentage: number, note?: string): Promise<void> {
+  async reduceTraffic(
+    deploymentId: string,
+    canaryPercentage: number,
+    note?: string,
+  ): Promise<void> {
     const state = this.deployments.get(deploymentId);
     if (!state) {
       throw new Error(`Deployment ${deploymentId} has no tracked state`);
@@ -325,14 +359,17 @@ export class StateManager extends EventEmitter {
       mode: 'shift',
       canaryPercentage,
       primaryPercentage: Math.max(0, 100 - canaryPercentage),
-      notes: note || 'Progressive rollback traffic shift'
+      notes: note || 'Progressive rollback traffic shift',
     };
 
     this.recordAction(state, 'traffic_shift', 'success', { canaryPercentage });
     this.emit('trafficUpdated', { deploymentId, policy: state.trafficPolicy });
   }
 
-  async validateRecovery(deploymentId: string, tiers: (ServiceTier | 'all')[] = ['all']): Promise<RecoveryValidation> {
+  async validateRecovery(
+    deploymentId: string,
+    tiers: (ServiceTier | 'all')[] = ['all'],
+  ): Promise<RecoveryValidation> {
     const state = this.deployments.get(deploymentId);
     if (!state) {
       throw new Error(`Deployment ${deploymentId} has no tracked state`);
@@ -347,46 +384,57 @@ export class StateManager extends EventEmitter {
     const issues: string[] = [];
 
     for (const tier of tiers) {
-      const services = Array.from(state.services.values()).filter(service => tier === 'all' ? true : service.tier === tier);
+      const services = Array.from(state.services.values()).filter((service) =>
+        tier === 'all' ? true : service.tier === tier,
+      );
       for (const service of services) {
         if (service.status !== 'running') {
           failingServices.push(service.serviceId);
           issues.push(`${service.serviceId} in tier ${tier} not running`);
         }
 
-        const baseline = snapshot.services.find(s => s.serviceId === service.serviceId);
+        const baseline = snapshot.services.find(
+          (s) => s.serviceId === service.serviceId,
+        );
         if (baseline && baseline.version !== service.version) {
-          issues.push(`${service.serviceId} version mismatch: expected ${baseline.version}, found ${service.version}`);
+          issues.push(
+            `${service.serviceId} version mismatch: expected ${baseline.version}, found ${service.version}`,
+          );
         }
       }
     }
 
     const healthy = failingServices.length === 0 && issues.length === 0;
 
-    this.recordAction(state, 'validate_recovery', healthy ? 'success' : 'failed', {
-      tiers,
-      issues,
-      failingServices
-    });
+    this.recordAction(
+      state,
+      'validate_recovery',
+      healthy ? 'success' : 'failed',
+      {
+        tiers,
+        issues,
+        failingServices,
+      },
+    );
 
     return {
       healthy,
       failingServices,
-      issues
+      issues,
     };
   }
 
   async markRecoveryStep(
     deploymentId: string,
     stepId: string,
-    status: 'pending' | 'in_progress' | 'completed' | 'failed'
+    status: 'pending' | 'in_progress' | 'completed' | 'failed',
   ): Promise<void> {
     const state = this.deployments.get(deploymentId);
     if (!state || !state.recoveryPlan) {
       return;
     }
 
-    const step = state.recoveryPlan.steps.find(item => item.id === stepId);
+    const step = state.recoveryPlan.steps.find((item) => item.id === stepId);
     if (!step) {
       return;
     }
@@ -396,17 +444,25 @@ export class StateManager extends EventEmitter {
     this.emit('recoveryStepUpdated', { deploymentId, stepId, status });
   }
 
-  getServicesByTier(deploymentId: string, tier: ServiceTier | 'all'): ServiceState[] {
+  getServicesByTier(
+    deploymentId: string,
+    tier: ServiceTier | 'all',
+  ): ServiceState[] {
     const state = this.deployments.get(deploymentId);
     if (!state) {
       return [];
     }
 
     const services = Array.from(state.services.values());
-    return tier === 'all' ? services : services.filter(service => service.tier === tier);
+    return tier === 'all'
+      ? services
+      : services.filter((service) => service.tier === tier);
   }
 
-  private ensureDeployment(deploymentId: string, services: string[]): DeploymentRuntimeState {
+  private ensureDeployment(
+    deploymentId: string,
+    services: string[],
+  ): DeploymentRuntimeState {
     let state = this.deployments.get(deploymentId);
     if (!state) {
       state = {
@@ -416,10 +472,10 @@ export class StateManager extends EventEmitter {
         trafficPolicy: {
           mode: 'normal',
           canaryPercentage: 0,
-          primaryPercentage: 100
+          primaryPercentage: 100,
         },
         recoveryLog: [],
-        createdAt: new Date()
+        createdAt: new Date(),
       };
       this.deployments.set(deploymentId, state);
     }
@@ -427,14 +483,23 @@ export class StateManager extends EventEmitter {
     for (let index = 0; index < services.length; index++) {
       const serviceId = services[index];
       if (!state.services.has(serviceId)) {
-        state.services.set(serviceId, this.createDefaultServiceState(serviceId, index === 0 ? 'canary' : 'primary'));
+        state.services.set(
+          serviceId,
+          this.createDefaultServiceState(
+            serviceId,
+            index === 0 ? 'canary' : 'primary',
+          ),
+        );
       }
     }
 
     return state;
   }
 
-  private createDefaultServiceState(serviceId: string, tier: ServiceTier): ServiceState {
+  private createDefaultServiceState(
+    serviceId: string,
+    tier: ServiceTier,
+  ): ServiceState {
     return {
       serviceId,
       version: 'baseline',
@@ -445,12 +510,15 @@ export class StateManager extends EventEmitter {
       lastUpdated: new Date(),
       metadata: {
         createdFrom: 'default',
-        tier
-      }
+        tier,
+      },
     };
   }
 
-  private calculateChecksum(services: ServiceState[], trafficPolicy: TrafficPolicy): string {
+  private calculateChecksum(
+    services: ServiceState[],
+    trafficPolicy: TrafficPolicy,
+  ): string {
     const hash = createHash('sha256');
     hash.update(JSON.stringify({ services, trafficPolicy }));
     return hash.digest('hex');
@@ -467,11 +535,12 @@ export class StateManager extends EventEmitter {
       {
         id: 'drain-canary-traffic',
         name: 'Drain canary traffic',
-        description: 'Shift traffic away from canary instances before restoration',
+        description:
+          'Shift traffic away from canary instances before restoration',
         tier: 'canary',
         action: 'traffic_shift',
         status: 'pending',
-        dependencies: []
+        dependencies: [],
       },
       {
         id: 'restore-canary',
@@ -480,7 +549,7 @@ export class StateManager extends EventEmitter {
         tier: 'canary',
         action: 'restore',
         status: 'pending',
-        dependencies: ['drain-canary-traffic']
+        dependencies: ['drain-canary-traffic'],
       },
       {
         id: 'validate-canary',
@@ -489,7 +558,7 @@ export class StateManager extends EventEmitter {
         tier: 'canary',
         action: 'validate',
         status: 'pending',
-        dependencies: ['restore-canary']
+        dependencies: ['restore-canary'],
       },
       {
         id: 'restore-primary',
@@ -498,16 +567,17 @@ export class StateManager extends EventEmitter {
         tier: 'primary',
         action: 'restore',
         status: 'pending',
-        dependencies: ['validate-canary']
+        dependencies: ['validate-canary'],
       },
       {
         id: 'restart-primary',
         name: 'Restart primary services',
-        description: 'Ensure all primary services are running on restored version',
+        description:
+          'Ensure all primary services are running on restored version',
         tier: 'primary',
         action: 'restart',
         status: 'pending',
-        dependencies: ['restore-primary']
+        dependencies: ['restore-primary'],
       },
       {
         id: 'validate-platform',
@@ -516,8 +586,8 @@ export class StateManager extends EventEmitter {
         tier: 'all',
         action: 'validate',
         status: 'pending',
-        dependencies: ['restart-primary']
-      }
+        dependencies: ['restart-primary'],
+      },
     ];
 
     return {
@@ -525,17 +595,22 @@ export class StateManager extends EventEmitter {
       snapshotId: snapshot.id,
       createdAt: new Date(),
       steps,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
-  private recordAction(state: DeploymentRuntimeState, action: string, status: 'success' | 'failed', details: Record<string, any>): void {
+  private recordAction(
+    state: DeploymentRuntimeState,
+    action: string,
+    status: 'success' | 'failed',
+    details: Record<string, any>,
+  ): void {
     state.recoveryLog.push({
       id: `${action}-${Date.now()}`,
       action,
       status,
       timestamp: new Date(),
-      details
+      details,
     });
   }
 }

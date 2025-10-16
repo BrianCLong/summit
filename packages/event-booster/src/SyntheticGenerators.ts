@@ -59,7 +59,8 @@ const createEvent = (
 const resolveStartTimestamp = (provided?: number): number =>
   provided ?? Date.now();
 
-const resolveInterval = (provided?: number): number => Math.max(1, provided ?? 1000);
+const resolveInterval = (provided?: number): number =>
+  Math.max(1, provided ?? 1000);
 
 /**
  * Generates a uniform stream of events spaced by {@link UniformGeneratorOptions.intervalMs}.
@@ -90,7 +91,9 @@ export const generateUniformEvents = (
 /**
  * Produces bursts of heightened activity separated by idle windows.
  */
-export const generateBurstEvents = (options: BurstGeneratorOptions): EventRecord[] => {
+export const generateBurstEvents = (
+  options: BurstGeneratorOptions,
+): EventRecord[] => {
   const random = options.random ?? defaultRandom;
   const start = resolveStartTimestamp(options.startTimestamp);
   const interval = resolveInterval(options.intervalMs);
@@ -126,7 +129,9 @@ export const generateBurstEvents = (options: BurstGeneratorOptions): EventRecord
 /**
  * Generates a seasonal waveform using a sine wave for the signal attribute.
  */
-export const generateSeasonalEvents = (options: SeasonalGeneratorOptions): EventRecord[] => {
+export const generateSeasonalEvents = (
+  options: SeasonalGeneratorOptions,
+): EventRecord[] => {
   const random = options.random ?? defaultRandom;
   const start = resolveStartTimestamp(options.startTimestamp);
   const interval = resolveInterval(options.intervalMs);
@@ -140,7 +145,8 @@ export const generateSeasonalEvents = (options: SeasonalGeneratorOptions): Event
   let index = 0;
   for (let period = 0; period < options.periods; period += 1) {
     for (let point = 0; point < options.pointsPerPeriod; point += 1) {
-      const phase = (2 * Math.PI * point) / options.pointsPerPeriod + phaseOffset;
+      const phase =
+        (2 * Math.PI * point) / options.pointsPerPeriod + phaseOffset;
       const signal = baseline + Math.sin(phase) * amplitude;
       const jitter = (random() - 0.5) * interval * 0.1;
       events.push(
@@ -162,7 +168,9 @@ export const generateSeasonalEvents = (options: SeasonalGeneratorOptions): Event
 /**
  * Injects sporadic anomalies into a mostly stable stream.
  */
-export const generateAnomalyEvents = (options: AnomalyGeneratorOptions): EventRecord[] => {
+export const generateAnomalyEvents = (
+  options: AnomalyGeneratorOptions,
+): EventRecord[] => {
   const random = options.random ?? defaultRandom;
   const start = resolveStartTimestamp(options.startTimestamp);
   const interval = resolveInterval(options.intervalMs);

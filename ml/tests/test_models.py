@@ -1,18 +1,21 @@
 """
 Test cases for ML models and algorithms
 """
-import pytest
+
+from unittest.mock import MagicMock
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pytest
+
 from ml.app.models import (
+    CommunityDetector,
     EntityResolver,
     LinkPredictor,
-    CommunityDetector,
     TextAnalyzer,
+    get_community_detector,
     get_entity_resolver,
     get_link_predictor,
-    get_community_detector,
-    get_text_analyzer
+    get_text_analyzer,
 )
 
 
@@ -23,16 +26,12 @@ class TestEntityResolver:
         """Test EntityResolver can be initialized"""
         resolver = EntityResolver()
         assert resolver is not None
-        assert hasattr(resolver, 'use_transformers')
+        assert hasattr(resolver, "use_transformers")
 
     def test_extract_features_basic(self):
         """Test basic feature extraction"""
         resolver = EntityResolver()
-        entity = {
-            "id": "1",
-            "name": "John Doe",
-            "attrs": {"email": "john@example.com"}
-        }
+        entity = {"id": "1", "name": "John Doe", "attrs": {"email": "john@example.com"}}
 
         features = resolver.extract_features(entity)
         assert isinstance(features, np.ndarray)
@@ -44,7 +43,7 @@ class TestEntityResolver:
         entities = [
             {"id": "1", "name": "John Smith"},
             {"id": "2", "name": "J. Smith"},
-            {"id": "3", "name": "Jane Doe"}
+            {"id": "3", "name": "Jane Doe"},
         ]
 
         matches = resolver.resolve_entities(entities, threshold=0.5)
@@ -70,7 +69,7 @@ class TestEntityResolver:
         resolver = EntityResolver()
         entities = [
             {"id": "1", "name": "Completely Different Name"},
-            {"id": "2", "name": "Totally Unrelated Text"}
+            {"id": "2", "name": "Totally Unrelated Text"},
         ]
 
         # High threshold should return no matches
@@ -85,8 +84,8 @@ class TestLinkPredictor:
         """Test LinkPredictor can be initialized"""
         predictor = LinkPredictor()
         assert predictor is not None
-        assert hasattr(predictor, 'methods')
-        assert 'adamic_adar' in predictor.methods
+        assert hasattr(predictor, "methods")
+        assert "adamic_adar" in predictor.methods
 
     def test_predict_links_simple_graph(self):
         """Test link prediction on a simple graph"""
@@ -145,8 +144,8 @@ class TestCommunityDetector:
         """Test CommunityDetector can be initialized"""
         detector = CommunityDetector()
         assert detector is not None
-        assert hasattr(detector, 'algorithms')
-        assert 'greedy_modularity' in detector.algorithms
+        assert hasattr(detector, "algorithms")
+        assert "greedy_modularity" in detector.algorithms
 
     def test_detect_communities_simple_graph(self):
         """Test community detection on a simple graph"""
@@ -191,7 +190,9 @@ class TestCommunityDetector:
 
         # Test different resolution values
         for resolution in [0.5, 1.0, 1.5]:
-            communities = detector.detect_communities(edges, algorithm="greedy_modularity", resolution=resolution)
+            communities = detector.detect_communities(
+                edges, algorithm="greedy_modularity", resolution=resolution
+            )
             assert isinstance(communities, list)
 
 
@@ -202,7 +203,7 @@ class TestTextAnalyzer:
         """Test TextAnalyzer can be initialized"""
         analyzer = TextAnalyzer()
         assert analyzer is not None
-        assert hasattr(analyzer, 'entity_patterns')
+        assert hasattr(analyzer, "entity_patterns")
 
     def test_extract_entities_email(self):
         """Test email entity extraction"""
@@ -274,24 +275,30 @@ class TestTextAnalyzer:
         entities = analyzer.extract_entities("   ")
         assert isinstance(entities, list)
 
-
-
     def test_analyze_text_language_detection(self, mocker):
         """Test language detection and sentiment routing"""
         analyzer = TextAnalyzer()
-        mock_detect = mocker.patch('ml.app.models.detect_langs')
-        mock_detect.return_value = [MagicMock(lang='fr', prob=0.88)]
-        mock_pipeline = mocker.patch('ml.app.models.pipeline')
-        ner_mock = MagicMock(return_value=[{'word': 'Paris', 'entity_group': 'LOC', 'start': 0, 'end': 5, 'score': 0.9}])
-        sent_mock = MagicMock(return_value=[{'label': 'POSITIVE', 'score': 0.95}])
+        mock_detect = mocker.patch("ml.app.models.detect_langs")
+        mock_detect.return_value = [MagicMock(lang="fr", prob=0.88)]
+        mock_pipeline = mocker.patch("ml.app.models.pipeline")
+        ner_mock = MagicMock(
+            return_value=[
+                {"word": "Paris", "entity_group": "LOC", "start": 0, "end": 5, "score": 0.9}
+            ]
+        )
+        sent_mock = MagicMock(return_value=[{"label": "POSITIVE", "score": 0.95}])
+
         def side_effect(task, model=None, tokenizer=None, **kwargs):
-            return ner_mock if task == 'ner' else sent_mock
+            return ner_mock if task == "ner" else sent_mock
+
         mock_pipeline.side_effect = side_effect
-        result = analyzer.analyze_text('Bonjour Paris')
-        assert result['language'] == 'fr'
-        assert abs(result['language_confidence'] - 0.88) < 1e-6
-        assert result['sentiment']['label'] == 'POSITIVE'
-        assert any(ent['text'] == 'Paris' for ent in result['entities'])
+        result = analyzer.analyze_text("Bonjour Paris")
+        assert result["language"] == "fr"
+        assert abs(result["language_confidence"] - 0.88) < 1e-6
+        assert result["sentiment"]["label"] == "POSITIVE"
+        assert any(ent["text"] == "Paris" for ent in result["entities"])
+
+
 class TestModelSingletons:
     """Test singleton pattern for model instances"""
 
@@ -328,11 +335,7 @@ class TestErrorHandling:
         resolver = EntityResolver()
 
         # Entities with missing fields
-        malformed_entities = [
-            {"id": "1"},  # No name
-            {"name": "John"},  # No ID
-            {}  # Empty
-        ]
+        malformed_entities = [{"id": "1"}, {"name": "John"}, {}]  # No name  # No ID  # Empty
 
         # Should not crash
         try:

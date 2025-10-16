@@ -1,20 +1,20 @@
-import * as neo4j from "neo4j-driver";
-import dotenv from "dotenv";
-import pino from "pino";
+import * as neo4j from 'neo4j-driver';
+import dotenv from 'dotenv';
+import pino from 'pino';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
-} from "../metrics/neo4jMetrics.js";
+} from '../metrics/neo4jMetrics.js';
 
 dotenv.config();
 
-const logger: pino.Logger = pino();
+const logger: ReturnType<typeof pino> = pino();
 
-const NEO4J_URI = process.env.NEO4J_URI || "bolt://neo4j:7687";
-const NEO4J_USER = process.env.NEO4J_USER || "neo4j";
-const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || "devpassword";
+const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
+const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
+const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
 
 let driver: neo4j.Driver;
 
@@ -27,7 +27,7 @@ export function getNeo4jDriver(): neo4j.Driver {
         NEO4J_URI,
         neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
       );
-      logger.info("Neo4j driver initialized.");
+      logger.info('Neo4j driver initialized.');
       const originalSession = driver.session.bind(driver);
       driver.session = (options?: any) => {
         const session = originalSession(options);
@@ -38,7 +38,7 @@ export function getNeo4jDriver(): neo4j.Driver {
         .verifyConnectivity()
         .then(() => neo4jConnectivityUp.set(1))
         .catch(() => {
-          logger.warn("Neo4j connection failed - switching to mock mode");
+          logger.warn('Neo4j connection failed - switching to mock mode');
           neo4jConnectivityUp.set(0);
           isMockMode = true;
         });
@@ -97,8 +97,29 @@ function createMockNeo4jDriver(): neo4j.Driver {
 export async function closeNeo4jDriver(): Promise<void> {
   if (driver) {
     await driver.close();
-    logger.info("Neo4j driver closed.");
-    driver = null; // Clear the driver instance
+    logger.info('Neo4j driver closed.');
+    (driver as any) = null; // Clear the driver instance
+  }
+}
+
+export class Neo4jService {
+  constructor(private readonly _driver: neo4j.Driver = getNeo4jDriver()) {}
+
+  getSession(options?: neo4j.SessionOptions) {
+    return this._driver.session(options as any);
+  }
+
+  async close(): Promise<void> {
+    await this._driver.close();
+  }
+
+  async verifyConnectivity(): Promise<boolean> {
+    try {
+      await this._driver.verifyConnectivity();
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
@@ -109,7 +130,7 @@ function instrumentSession(session: any) {
     params?: any,
     labels: { operation?: string; label?: string } = {},
   ) => {
-    const { operation = "unknown", label = "general" } = labels;
+    const { operation = 'unknown', label = 'general' } = labels;
     const start = Date.now();
     neo4jQueryTotal.inc({ operation, label });
     try {

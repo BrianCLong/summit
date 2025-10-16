@@ -1,41 +1,41 @@
 # Operations & Release Management Labels
 - name: ops
-  color: "1f883d"
-  description: "Operational tasks and procedures"
+  color: '1f883d'
+  description: 'Operational tasks and procedures'
 
 - name: release-train
-  color: "0e8a16"
-  description: "Weekly release train activities"
+  color: '0e8a16'
+  description: 'Weekly release train activities'
 
 - name: hygiene
-  color: "b60205"
-  description: "Monthly operational hygiene tasks"
+  color: 'b60205'
+  description: 'Monthly operational hygiene tasks'
 
-- name: "cadence:weekly"
-  color: "5319e7"
-  description: "Weekly recurring tasks"
+- name: 'cadence:weekly'
+  color: '5319e7'
+  description: 'Weekly recurring tasks'
 
-- name: "cadence:monthly"
-  color: "5319e7"
-  description: "Monthly recurring tasks"
+- name: 'cadence:monthly'
+  color: '5319e7'
+  description: 'Monthly recurring tasks'
 
-- name: "priority:high"
-  color: "b60205"
-  description: "High priority items"
+- name: 'priority:high'
+  color: 'b60205'
+  description: 'High priority items'
 
-- name: "priority:normal"
-  color: "c2e0c6"
-  description: "Normal priority items"
+- name: 'priority:normal'
+  color: 'c2e0c6'
+  description: 'Normal priority items'
 
 # Additional operational labels
 - name: evidence
-  color: "ffc107"
-  description: "Evidence collection and audit trails"
+  color: 'ffc107'
+  description: 'Evidence collection and audit trails'
 
 - name: chaos
-  color: "dc3545"
-  description: "Chaos engineering and DR testing"
+  color: 'dc3545'
+  description: 'Chaos engineering and DR testing'
 
 - name: security
-  color: "6610f2"
-  description: "Security-related tasks"
+  color: '6610f2'
+  description: 'Security-related tasks'

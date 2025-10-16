@@ -16,7 +16,10 @@ export const toCwsTaxonomy = (canon: LocaleCanonMap): CwsTagExport[] => {
     for (const term of terms) {
       const existing = byTag.get(term.tag);
       const variants = unique(
-        sortBy(term.variants.map(variant => variant.value), value => normalize(value))
+        sortBy(
+          term.variants.map((variant) => variant.value),
+          (value) => normalize(value),
+        ),
       );
 
       if (existing) {
@@ -29,7 +32,7 @@ export const toCwsTaxonomy = (canon: LocaleCanonMap): CwsTagExport[] => {
           vertical: term.vertical,
           locales: [locale],
           canonicalByLocale: { [locale]: term.canonical },
-          variantMap: { [locale]: variants }
+          variantMap: { [locale]: variants },
         });
       }
     }
@@ -37,9 +40,9 @@ export const toCwsTaxonomy = (canon: LocaleCanonMap): CwsTagExport[] => {
 
   const exports: CwsTagExport[] = [];
   for (const record of byTag.values()) {
-    record.locales = sortBy(record.locales, locale => locale);
+    record.locales = sortBy(record.locales, (locale) => locale);
     exports.push(record);
   }
 
-  return sortBy(exports, entry => entry.tag);
+  return sortBy(exports, (entry) => entry.tag);
 };

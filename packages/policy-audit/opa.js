@@ -17,11 +17,14 @@ async function resolveOpa(opts = {}) {
   if (fs.existsSync(target)) return target;
 
   const urls = {
-    linux: 'https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static',
-    darwin: 'https://openpolicyagent.org/downloads/latest/opa_darwin_amd64_static',
+    linux:
+      'https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static',
+    darwin:
+      'https://openpolicyagent.org/downloads/latest/opa_darwin_amd64_static',
     win32: 'https://openpolicyagent.org/downloads/latest/opa_windows_amd64.exe',
   };
-  const downloadUrl = opts.opaUrl || process.env.OPA_URL || urls[platform] || urls.linux;
+  const downloadUrl =
+    opts.opaUrl || process.env.OPA_URL || urls[platform] || urls.linux;
   try {
     const proto = downloadUrl.startsWith('https') ? https : http;
     try {

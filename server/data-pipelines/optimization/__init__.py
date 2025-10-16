@@ -2,7 +2,7 @@
 
 from .batching import AdaptiveBatcher, BatchPlan
 from .benchmark import BenchmarkResult, BenchmarkSuite
-from .monitoring import PipelineDashboard, PipelineMonitor, PipelineMetrics
+from .monitoring import PipelineDashboard, PipelineMetrics, PipelineMonitor
 from .pipeline_optimizer import PipelineOptimizer, PipelineTask, RetryPolicy
 from .queue import PriorityJobQueue, QueuedJob
 from .resilience import CircuitBreaker, RetryError, retry_with_backoff

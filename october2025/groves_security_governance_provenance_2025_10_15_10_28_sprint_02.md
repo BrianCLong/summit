@@ -8,8 +8,10 @@
 ---
 
 ## 0) Roll‑forward & Context
+
 **From Sprint‑01:** Authority‑Bound Gateway online; Prov‑Bundle v1.0; Cost Guard MVP; Audit/Ombuds loop; DR/Chaos cadence established.  
 **Carry‑over debt:**
+
 - Detached signature verification & Merkle root validation in `prov-verify` CLI.
 - Enricher step‑hashes for OCR/STT/redaction in 2 ETL paths.
 - Budget burn alerts fine‑tuning for two tenants.
@@ -19,16 +21,18 @@
 ---
 
 ## 1) Objectives (Definition of Victory)
-1) **Prov‑Ledger v1.1 (Verifiable, Signed, Shareable):** detached sigs + Merkle root verification, license/authority binding, and tamper‑evident zip export.
-2) **Contradiction Intelligence UI:** graph overlays (density heatmap), lineage drill‑in, and exportable contradiction report.
-3) **Vector Governance (Per‑Case):** retention, purpose constraints, and recall redaction pipeline wired to policy labels.
-4) **Enclave Transforms (Option):** run sensitive transforms in a signed enclave profile with attest logs.
-5) **Ops Hardening:** budget guardrails GA; slow‑query hints surfaced; SLO burn & chaos evidence auto‑published.
-6) **Compliance Mapping:** SOC 2 + ISO 27001 control linkage for policy/audit/provenance features (control IDs in UI & docs).
+
+1. **Prov‑Ledger v1.1 (Verifiable, Signed, Shareable):** detached sigs + Merkle root verification, license/authority binding, and tamper‑evident zip export.
+2. **Contradiction Intelligence UI:** graph overlays (density heatmap), lineage drill‑in, and exportable contradiction report.
+3. **Vector Governance (Per‑Case):** retention, purpose constraints, and recall redaction pipeline wired to policy labels.
+4. **Enclave Transforms (Option):** run sensitive transforms in a signed enclave profile with attest logs.
+5. **Ops Hardening:** budget guardrails GA; slow‑query hints surfaced; SLO burn & chaos evidence auto‑published.
+6. **Compliance Mapping:** SOC 2 + ISO 27001 control linkage for policy/audit/provenance features (control IDs in UI & docs).
 
 ---
 
 ## 2) Deliverables
+
 - **D1. Prov‑Verify v1.1**
   - Merkle root file `manifest.root` and signature `manifest.sig` (cosign/PKI pluggable).
   - CLI validation for manifests, evidence, transforms, and signature chains.
@@ -54,6 +58,7 @@
 ## 3) Epics → Stories → Tasks
 
 ### EPIC A — Prov‑Ledger v1.1
+
 - **A1. Manifest Root & Signatures**
   - T1. Compute Merkle root over `evidence/` and `transforms/`; store `manifest.root`.
   - T2. Detached signature via cosign + PKI backends; trust policy config.
@@ -66,6 +71,7 @@
   - T2. Negative tests: truncated, swapped, or re‑ordered files.
 
 ### EPIC B — Contradiction Intelligence UI
+
 - **B1. Density Heatmap**
   - T1. Compute contradiction score per node/edge.
   - T2. Graph layer toggle + legend; perf budget < 120ms render for 10k nodes.
@@ -76,6 +82,7 @@
   - T1. PDF/JSON export; includes manifest bundle IDs for cited evidence.
 
 ### EPIC C — Vector Index Governance
+
 - **C1. Label‑Aware Sharding**
   - T1. Index shards per retention/purpose; readers gated by policy.
 - **C2. Recall/Redaction Pipeline**
@@ -83,11 +90,13 @@
   - T2. Backpressure + progress meter for large cases.
 
 ### EPIC D — Enclave Transforms (Alpha)
+
 - **D1. Enclave Profile**
   - T1. Add profile `secure‑transform` (SGX/SEV/TEE‑agnostic abstraction).
   - T2. Attestation log capture; verify on export.
 
 ### EPIC E — Ops & Compliance
+
 - **E1. Cost Guard GA**
   - T1. Budget registry v2; unit‑economics dashboard.
   - T2. Gateway hinting: alternative query path + pagination guidance.
@@ -99,6 +108,7 @@
 ---
 
 ## 4) Acceptance Criteria
+
 - **Prov‑Ledger v1.1**
   - `prov-verify` exits 0 on good pack, non‑zero on any tamper; includes clear error; covers Merkle & signatures.
   - 100% of enrichers attach step hashes; backfill covers ≥95% legacy.
@@ -118,6 +128,7 @@
 ## 5) Interfaces & Schemas (Scaffolding)
 
 ### 5.1 Merkle Root & Signature Files
+
 ```text
 bundle/
   manifest.json
@@ -130,6 +141,7 @@ bundle/
 ```
 
 ### 5.2 CLI Exit Codes
+
 ```txt
 0  OK
 10 HASH_MISMATCH
@@ -140,6 +152,7 @@ bundle/
 ```
 
 ### 5.3 Graph API — Contradiction Score
+
 ```graphql
 type Node {
   id: ID!
@@ -148,6 +161,7 @@ type Node {
 ```
 
 ### 5.4 Vector Governance Policy (excerpt)
+
 ```yaml
 case:
   id: CASE-123
@@ -161,14 +175,16 @@ case:
 ```
 
 ### 5.5 Enclave Profile (values.yaml)
+
 ```yaml
 secureTransform:
   enabled: true
   attestation: required
-  allowedTools: ["ocr-v4", "redactor-v3"]
+  allowedTools: ['ocr-v4', 'redactor-v3']
 ```
 
 ### 5.6 Auditor Export (CSV headers)
+
 ```csv
 action_id,ui_label,control_ref,evidence_artifact
 POLICY_CHANGE,Policy Simulation,SOC2-CC7.2;ISO27001-A.8.33,policy-impact-*.html
@@ -178,6 +194,7 @@ EXPORT_DISCLOSURE,Disclosure Pack,SOC2-CC1.2;ISO27001-A.5.32,disclosure-pack-*.t
 ---
 
 ## 6) Test Plan
+
 - **Verifier:** golden good/bad packs; fuzz re‑orderings; missing files; invalid sigs; enclave‑attest missing.
 - **UI Heatmap:** perf harness with 10k nodes; visual snapshot tests; a11y color‑contrast.
 - **Vector Governance:** policy toggles trigger redaction; recall latency < P95 5m for 1M vectors.
@@ -187,12 +204,14 @@ EXPORT_DISCLOSURE,Disclosure Pack,SOC2-CC1.2;ISO27001-A.5.32,disclosure-pack-*.t
 ---
 
 ## 7) Ops & Evidence
+
 - CI artifact index published under `ops/evidence/<date>/index.json` with links to chaos runs, PITR, failover, and verifier conformance.
 - Grafana v2 panels: contradiction events, vector redaction throughput, budget burn v2.
 
 ---
 
 ## 8) Documentation & ADRs
+
 - ADR‑047: Verifiable Manifest Roots & Detached Signatures.
 - ADR‑048: Contradiction Intelligence Scoring.
 - ADR‑049: Vector Governance & Retention‑Purpose Sharding.
@@ -203,9 +222,10 @@ EXPORT_DISCLOSURE,Disclosure Pack,SOC2-CC1.2;ISO27001-A.5.32,disclosure-pack-*.t
 ---
 
 ## 9) RACI & Cadence
-- **R:** Groves Workstream.  
-- **A:** Chief Architect.  
-- **C:** Legal/Compliance, SRE, Data Steward, UI Lead.  
+
+- **R:** Groves Workstream.
+- **A:** Chief Architect.
+- **C:** Legal/Compliance, SRE, Data Steward, UI Lead.
 - **I:** Seat owners (Wolf, Inman, le Carré), Prov‑Ledger team.
 
 **Ceremonies:** Daily stand‑up; Mid‑sprint demo (2025‑10‑22); Sprint review (2025‑10‑28); Retro + next sprint planning.
@@ -213,34 +233,37 @@ EXPORT_DISCLOSURE,Disclosure Pack,SOC2-CC1.2;ISO27001-A.5.32,disclosure-pack-*.t
 ---
 
 ## 10) Dependencies
+
 - Observability v2 deployed; UI graph overlay hooks; PKI keys & trust policy; Enclave runtime nodes in staging.
 
 ---
 
 ## 11) Out‑of‑Scope (parking lot)
-- Federated multi‑graph search governance.  
-- Marketplace compliance scans.  
+
+- Federated multi‑graph search governance.
+- Marketplace compliance scans.
 - Full XAI overlays for ER/forecasting (next‑next sprint).
 
 ---
 
 ## 12) Shipping Checklist
-- [ ] CI green on verifier, contradiction UI, vector governance, enclave profile.  
-- [ ] Security scan zero criticals; SBOM updated.  
-- [ ] Docs/ADRs merged; control map visible in UI.  
-- [ ] Dashboards live; alerts tuned.  
-- [ ] Demo script and dataset updated.  
+
+- [ ] CI green on verifier, contradiction UI, vector governance, enclave profile.
+- [ ] Security scan zero criticals; SBOM updated.
+- [ ] Docs/ADRs merged; control map visible in UI.
+- [ ] Dashboards live; alerts tuned.
+- [ ] Demo script and dataset updated.
 - [ ] Rollback instructions tested.
 
 ---
 
 ## 13) Appendix — Fixtures & Samples
-- `fixtures/prov/case‑beta/` signed bundles with good/bad sigs.  
-- `fixtures/graph/contradictions/` synthetic graphs for perf & UX tests.  
-- `fixtures/vector/` policy‑labeled shards & redaction sequences.  
+
+- `fixtures/prov/case‑beta/` signed bundles with good/bad sigs.
+- `fixtures/graph/contradictions/` synthetic graphs for perf & UX tests.
+- `fixtures/vector/` policy‑labeled shards & redaction sequences.
 - `fixtures/enclave/attest-logs/` good/bad attestations.
 
 ---
 
 **No loose ends.** We move, we verify, we leave a paper trail an auditor will salute.
-

@@ -47,9 +47,13 @@ describe('DistributedConfigService', () => {
   let service: DistributedConfigService<typeof baseConfig>;
 
   beforeEach(() => {
-    repository = new InMemoryConfigRepository(() => new Date('2024-01-01T00:00:00Z'));
+    repository = new InMemoryConfigRepository(
+      () => new Date('2024-01-01T00:00:00Z'),
+    );
     secretResolver = {
-      resolve: jest.fn(async ({ provider, key }) => `${provider}:${key}:resolved`),
+      resolve: jest.fn(
+        async ({ provider, key }) => `${provider}:${key}:resolved`,
+      ),
     };
     featureFlagAdapter = {
       updateFlags: jest.fn(async () => undefined),
@@ -75,9 +79,13 @@ describe('DistributedConfigService', () => {
       metadata: { actor: 'alice' },
     });
 
-    const resolved = await service.getConfig('service-core', { environment: 'staging' });
+    const resolved = await service.getConfig('service-core', {
+      environment: 'staging',
+    });
     expect(resolved.version.metadata.version).toBe(1);
-    expect(resolved.effectiveConfig.endpoint).toBe('https://staging.example.com');
+    expect(resolved.effectiveConfig.endpoint).toBe(
+      'https://staging.example.com',
+    );
     expect(resolved.effectiveConfig.features.enableStreaming).toBe(true);
   });
 
@@ -113,7 +121,9 @@ describe('DistributedConfigService', () => {
       provider: 'vault',
       key: 'database/password',
     });
-    expect(resolved.effectiveConfig.database.password).toBe('vault:database/password:resolved');
+    expect(resolved.effectiveConfig.database.password).toBe(
+      'vault:database/password:resolved',
+    );
   });
 
   it('supports canary releases and deterministic assignment', async () => {
@@ -148,7 +158,11 @@ describe('DistributedConfigService', () => {
         experimentId: 'streaming-toggle',
         variants: [
           { name: 'control', weight: 1, config: {} },
-          { name: 'variant', weight: 1, config: { features: { enableStreaming: true } } },
+          {
+            name: 'variant',
+            weight: 1,
+            config: { features: { enableStreaming: true } },
+          },
         ],
         startAt: new Date('2023-12-31T23:00:00Z'),
       },
@@ -179,9 +193,16 @@ describe('DistributedConfigService', () => {
       featureFlags: { STREAMING_BETA: true },
     });
 
-    expect(featureFlagAdapter.updateFlags).toHaveBeenCalledWith({ STREAMING_BETA: true });
+    expect(featureFlagAdapter.updateFlags).toHaveBeenCalledWith({
+      STREAMING_BETA: true,
+    });
 
-    const rolledBack = await service.rollback('service-core', 1, 'grace', 'revert retries');
+    const rolledBack = await service.rollback(
+      'service-core',
+      1,
+      'grace',
+      'revert retries',
+    );
     expect(rolledBack.metadata.version).toBe(3);
 
     const resolved = await service.getConfig('service-core');

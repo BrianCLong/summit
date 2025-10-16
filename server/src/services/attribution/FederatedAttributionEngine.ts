@@ -20,7 +20,11 @@ export type TouchpointChannel =
   | 'direct'
   | 'other';
 
-export type ConsentType = 'analytics' | 'personalization' | 'advertising' | 'cross_domain';
+export type ConsentType =
+  | 'analytics'
+  | 'personalization'
+  | 'advertising'
+  | 'cross_domain';
 
 export interface AttributionEvent {
   eventId: string;
@@ -186,7 +190,10 @@ export class FederatedAttributionEngine extends EventEmitter {
   }
 
   registerNode(node: FederatedNode): void {
-    this.nodes.set(node.nodeId, { ...node, lastHeartbeat: node.lastHeartbeat || Date.now() });
+    this.nodes.set(node.nodeId, {
+      ...node,
+      lastHeartbeat: node.lastHeartbeat || Date.now(),
+    });
     this.emit('nodeRegistered', node);
   }
 
@@ -223,14 +230,17 @@ export class FederatedAttributionEngine extends EventEmitter {
       ...record,
       timestamp: record.timestamp,
       expiresAt:
-        record.expiresAt ?? record.timestamp + this.config.consentRefreshDays * 24 * 60 * 60 * 1000,
+        record.expiresAt ??
+        record.timestamp + this.config.consentRefreshDays * 24 * 60 * 60 * 1000,
     };
     this.consentLedger.set(ledgerKey, [...existing, sanitized]);
     this.emit('consentRecorded', sanitized);
   }
 
   getConsentHistory(userId: string, domain: string): ConsentRecord[] {
-    return [...(this.consentLedger.get(this.getConsentKey(userId, domain)) ?? [])];
+    return [
+      ...(this.consentLedger.get(this.getConsentKey(userId, domain)) ?? []),
+    ];
   }
 
   recordEvent(event: AttributionEvent): boolean {
@@ -241,7 +251,10 @@ export class FederatedAttributionEngine extends EventEmitter {
     }
 
     const timeline = this.journeys.get(event.userId) ?? [];
-    const sanitized: AttributionEvent = { ...event, timestamp: event.timestamp };
+    const sanitized: AttributionEvent = {
+      ...event,
+      timestamp: event.timestamp,
+    };
     timeline.push(sanitized);
     timeline.sort((a, b) => a.timestamp - b.timestamp);
     this.journeys.set(event.userId, this.pruneEvents(timeline));
@@ -254,7 +267,10 @@ export class FederatedAttributionEngine extends EventEmitter {
   }
 
   recordConversion(conversion: ConversionEvent): boolean {
-    const recorded = this.recordEvent({ ...conversion, requiredConsents: conversion.requiredConsents });
+    const recorded = this.recordEvent({
+      ...conversion,
+      requiredConsents: conversion.requiredConsents,
+    });
     if (!recorded) {
       return false;
     }
@@ -267,30 +283,43 @@ export class FederatedAttributionEngine extends EventEmitter {
     return true;
   }
 
-  analyzeConversionPath(userId: string, conversion?: ConversionEvent): ConversionPathSummary | null {
+  analyzeConversionPath(
+    userId: string,
+    conversion?: ConversionEvent,
+  ): ConversionPathSummary | null {
     const journey = this.getJourney(userId);
     if (journey.length === 0) {
       return null;
     }
 
-    const lastTouch = conversion ?? (journey[journey.length - 1] as ConversionEvent);
-    const lookbackLimit = lastTouch.timestamp - this.config.lookbackWindowDays * 24 * 60 * 60 * 1000;
+    const lastTouch =
+      conversion ?? (journey[journey.length - 1] as ConversionEvent);
+    const lookbackLimit =
+      lastTouch.timestamp -
+      this.config.lookbackWindowDays * 24 * 60 * 60 * 1000;
     const relevant = journey
-      .filter(event => event.timestamp <= lastTouch.timestamp && event.timestamp >= lookbackLimit)
-      .filter(event => event.eventId !== lastTouch.eventId);
+      .filter(
+        (event) =>
+          event.timestamp <= lastTouch.timestamp &&
+          event.timestamp >= lookbackLimit,
+      )
+      .filter((event) => event.eventId !== lastTouch.eventId);
 
     if (relevant.length === 0) {
       return null;
     }
 
-    const channels = relevant.map(t => t.channel);
-    const domains = relevant.map(t => t.domain);
-    const campaigns = relevant.map(t => t.campaign).filter((c): c is string => Boolean(c));
+    const channels = relevant.map((t) => t.channel);
+    const domains = relevant.map((t) => t.domain);
+    const campaigns = relevant
+      .map((t) => t.campaign)
+      .filter((c): c is string => Boolean(c));
     const firstTouch = relevant[0];
     const preConversionLast = relevant[relevant.length - 1];
 
     const duration = lastTouch.timestamp - firstTouch.timestamp;
-    const averageInterval = relevant.length > 1 ? duration / (relevant.length - 1) : 0;
+    const averageInterval =
+      relevant.length > 1 ? duration / (relevant.length - 1) : 0;
 
     return {
       userId,
@@ -316,17 +345,28 @@ export class FederatedAttributionEngine extends EventEmitter {
       return null;
     }
 
-    const lookbackLimit = conversion.timestamp - this.config.lookbackWindowDays * 24 * 60 * 60 * 1000;
+    const lookbackLimit =
+      conversion.timestamp -
+      this.config.lookbackWindowDays * 24 * 60 * 60 * 1000;
     const candidates = journey
-      .filter(event => event.timestamp <= conversion.timestamp && event.timestamp >= lookbackLimit)
-      .filter(event => event.eventId !== conversion.eventId);
+      .filter(
+        (event) =>
+          event.timestamp <= conversion.timestamp &&
+          event.timestamp >= lookbackLimit,
+      )
+      .filter((event) => event.eventId !== conversion.eventId);
 
     if (candidates.length === 0) {
       return null;
     }
 
-    const weights = this.calculateWeights(candidates, conversion, model, options);
-    const contributions: AttributionContribution[] = candidates.map(event => {
+    const weights = this.calculateWeights(
+      candidates,
+      conversion,
+      model,
+      options,
+    );
+    const contributions: AttributionContribution[] = candidates.map((event) => {
       const weight = weights.get(event.eventId) ?? 0;
       return {
         event,
@@ -335,9 +375,13 @@ export class FederatedAttributionEngine extends EventEmitter {
       };
     });
 
-    const totalContribution = contributions.reduce((acc, current) => acc + current.contributionValue, 0);
-    const uniqueChannels = new Set(candidates.map(event => event.channel)).size;
-    const uniqueDomains = new Set(candidates.map(event => event.domain)).size;
+    const totalContribution = contributions.reduce(
+      (acc, current) => acc + current.contributionValue,
+      0,
+    );
+    const uniqueChannels = new Set(candidates.map((event) => event.channel))
+      .size;
+    const uniqueDomains = new Set(candidates.map((event) => event.domain)).size;
 
     const result: AttributionResult = {
       conversion,
@@ -369,7 +413,8 @@ export class FederatedAttributionEngine extends EventEmitter {
       return null;
     }
 
-    const windowLimit = Date.now() - this.config.realTimeWindowMinutes * 60 * 1000;
+    const windowLimit =
+      Date.now() - this.config.realTimeWindowMinutes * 60 * 1000;
     const scores = this.realTimeScores.get(conversion.userId) ?? [];
     scores.push({
       conversionId: conversion.conversionId,
@@ -377,7 +422,7 @@ export class FederatedAttributionEngine extends EventEmitter {
       score: attribution.totalContribution,
       updatedAt: Date.now(),
     });
-    const filtered = scores.filter(score => score.updatedAt >= windowLimit);
+    const filtered = scores.filter((score) => score.updatedAt >= windowLimit);
     this.realTimeScores.set(conversion.userId, filtered);
 
     await this.dispatchToConnectors(attribution);
@@ -389,7 +434,12 @@ export class FederatedAttributionEngine extends EventEmitter {
   }
 
   generateCohortMetrics(definition: CohortDefinition): CohortMetrics | null {
-    const lookbackMs = (definition.lookbackDays ?? this.config.lookbackWindowDays) * 24 * 60 * 60 * 1000;
+    const lookbackMs =
+      (definition.lookbackDays ?? this.config.lookbackWindowDays) *
+      24 *
+      60 *
+      60 *
+      1000;
     const horizon = Date.now() - lookbackMs;
 
     const populations: ConversionEvent[] = [];
@@ -398,7 +448,10 @@ export class FederatedAttributionEngine extends EventEmitter {
         if (conversion.timestamp < horizon) {
           continue;
         }
-        if (definition.goalTypes && !definition.goalTypes.includes(conversion.goalType)) {
+        if (
+          definition.goalTypes &&
+          !definition.goalTypes.includes(conversion.goalType)
+        ) {
           continue;
         }
         if (definition.minValue && conversion.value < definition.minValue) {
@@ -408,10 +461,18 @@ export class FederatedAttributionEngine extends EventEmitter {
         if (!path) {
           continue;
         }
-        if (definition.channels && !path.channels.some(channel => definition.channels?.includes(channel))) {
+        if (
+          definition.channels &&
+          !path.channels.some((channel) =>
+            definition.channels?.includes(channel),
+          )
+        ) {
           continue;
         }
-        if (definition.domains && !path.domains.some(domain => definition.domains?.includes(domain))) {
+        if (
+          definition.domains &&
+          !path.domains.some((domain) => definition.domains?.includes(domain))
+        ) {
           continue;
         }
         populations.push(conversion);
@@ -422,15 +483,22 @@ export class FederatedAttributionEngine extends EventEmitter {
       return null;
     }
 
-    const totalValue = populations.reduce((acc, conversion) => acc + conversion.value, 0);
+    const totalValue = populations.reduce(
+      (acc, conversion) => acc + conversion.value,
+      0,
+    );
     const averageValue = totalValue / populations.length;
-    const touches = populations.map(conversion => this.analyzeConversionPath(conversion.userId, conversion)?.touches ?? 0);
-    const averageTouches = touches.reduce((acc, current) => acc + current, 0) / populations.length;
+    const touches = populations.map(
+      (conversion) =>
+        this.analyzeConversionPath(conversion.userId, conversion)?.touches ?? 0,
+    );
+    const averageTouches =
+      touches.reduce((acc, current) => acc + current, 0) / populations.length;
 
     const channels = new Set<TouchpointChannel>();
-    populations.forEach(conversion => {
+    populations.forEach((conversion) => {
       const path = this.analyzeConversionPath(conversion.userId, conversion);
-      path?.channels.forEach(channel => channels.add(channel));
+      path?.channels.forEach((channel) => channels.add(channel));
     });
 
     const noise = this.generateLaplaceNoise();
@@ -453,27 +521,37 @@ export class FederatedAttributionEngine extends EventEmitter {
   }
 
   private async dispatchToConnectors(result: AttributionResult): Promise<void> {
-    const tasks = Array.from(this.connectors.values()).map(async connector => {
-      try {
-        await connector.sendAttribution({ connectorId: connector.id, result });
-      } catch (error) {
-        this.emit('connectorError', { connectorId: connector.id, error });
-      }
-    });
+    const tasks = Array.from(this.connectors.values()).map(
+      async (connector) => {
+        try {
+          await connector.sendAttribution({
+            connectorId: connector.id,
+            result,
+          });
+        } catch (error) {
+          this.emit('connectorError', { connectorId: connector.id, error });
+        }
+      },
+    );
 
     await Promise.all(tasks);
   }
 
   private pruneEvents(events: AttributionEvent[]): AttributionEvent[] {
-    const retentionBoundary = Date.now() - this.config.retentionWindowDays * 24 * 60 * 60 * 1000;
-    return events.filter(event => event.timestamp >= retentionBoundary);
+    const retentionBoundary =
+      Date.now() - this.config.retentionWindowDays * 24 * 60 * 60 * 1000;
+    return events.filter((event) => event.timestamp >= retentionBoundary);
   }
 
   private getConsentKey(userId: string, domain: string): string {
     return `${userId}:${domain}`;
   }
 
-  private hasValidConsent(userId: string, domain: string, consents: ConsentType[]): boolean {
+  private hasValidConsent(
+    userId: string,
+    domain: string,
+    consents: ConsentType[],
+  ): boolean {
     const history = this.consentLedger.get(this.getConsentKey(userId, domain));
     if (!history || history.length === 0) {
       return false;
@@ -481,14 +559,16 @@ export class FederatedAttributionEngine extends EventEmitter {
 
     const now = Date.now();
     const latest = [...history]
-      .filter(entry => entry.granted && (!entry.expiresAt || entry.expiresAt > now))
+      .filter(
+        (entry) => entry.granted && (!entry.expiresAt || entry.expiresAt > now),
+      )
       .sort((a, b) => b.timestamp - a.timestamp)[0];
 
     if (!latest) {
       return false;
     }
 
-    return consents.every(type => latest.consentTypes.includes(type));
+    return consents.every((type) => latest.consentTypes.includes(type));
   }
 
   private calculateWeights(
@@ -539,7 +619,7 @@ export class FederatedAttributionEngine extends EventEmitter {
       return weights;
     }
     const share = 1 / events.length;
-    events.forEach(event => weights.set(event.eventId, share));
+    events.forEach((event) => weights.set(event.eventId, share));
     return weights;
   }
 
@@ -554,13 +634,16 @@ export class FederatedAttributionEngine extends EventEmitter {
       return weights;
     }
 
-    const decayWeights = events.map(event => {
+    const decayWeights = events.map((event) => {
       const hours = (conversion.timestamp - event.timestamp) / (1000 * 60 * 60);
       const weight = Math.pow(0.5, hours / halfLifeHours);
       return { event, weight };
     });
 
-    const total = decayWeights.reduce((acc, current) => acc + current.weight, 0);
+    const total = decayWeights.reduce(
+      (acc, current) => acc + current.weight,
+      0,
+    );
     decayWeights.forEach(({ event, weight }) => {
       weights.set(event.eventId, weight / total);
     });
@@ -579,7 +662,7 @@ export class FederatedAttributionEngine extends EventEmitter {
 
     const firstWeight = 0.4;
     const lastWeight = 0.4;
-    const middleWeight = events.length > 2 ? (0.2 / (events.length - 2)) : 0;
+    const middleWeight = events.length > 2 ? 0.2 / (events.length - 2) : 0;
 
     events.forEach((event, index) => {
       if (index === 0) {
@@ -602,8 +685,14 @@ export class FederatedAttributionEngine extends EventEmitter {
       return weights;
     }
 
-    if (options?.customWeights && options.customWeights.size === events.length) {
-      const total = Array.from(options.customWeights.values()).reduce((acc, value) => acc + value, 0);
+    if (
+      options?.customWeights &&
+      options.customWeights.size === events.length
+    ) {
+      const total = Array.from(options.customWeights.values()).reduce(
+        (acc, value) => acc + value,
+        0,
+      );
       options.customWeights.forEach((weight, eventId) => {
         weights.set(eventId, weight / total);
       });
@@ -612,7 +701,7 @@ export class FederatedAttributionEngine extends EventEmitter {
 
     const firstWeight = 0.3;
     const lastWeight = 0.5;
-    const middleShare = events.length > 2 ? (0.2 / (events.length - 2)) : 0.2;
+    const middleShare = events.length > 2 ? 0.2 / (events.length - 2) : 0.2;
 
     events.forEach((event, index) => {
       if (index === 0) {

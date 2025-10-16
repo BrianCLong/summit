@@ -7,7 +7,7 @@ performs extraction via the source connector, applies mappings and runs a
 ``not_null`` data quality check if configured.
 """
 
-from typing import Dict, Iterable, Iterator, List, Mapping
+from collections.abc import Mapping
 
 from . import dq, mapping
 from .models import Run, RunStatus, store
@@ -36,7 +36,7 @@ def run_pipeline(run: Run, map_yaml: str | None, dq_field: str | None) -> Run:
     rows = list(source.read_full(stream))
 
     # Mapping
-    mapped_rows: List[Mapping[str, str]] = rows
+    mapped_rows: list[Mapping[str, str]] = rows
     if map_yaml:
         mconf = mapping.parse_mapping(map_yaml)
         mapped_rows = []

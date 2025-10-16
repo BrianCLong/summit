@@ -15,7 +15,5 @@
     "warnings": []
   },
   "bundle_integrity": true,
-  "recommendations": [
-    "Bundle verification successful - ready for deployment"
-  ]
+  "recommendations": ["Bundle verification successful - ready for deployment"]
 }

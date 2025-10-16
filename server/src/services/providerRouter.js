@@ -2,9 +2,12 @@ import assert from 'node:assert';
 
 const PROVIDER_BOOTSTRAP_HINTS = {
   groq: 'Add GROQ_API_KEY in settings to unlock fast free-tier throughput.',
-  openrouter: 'Add OPENROUTER_API_KEY to access multiple free/discounted models as fallback.',
-  openai: 'Add OPENAI_API_KEY to unlock premium reasoning (paid, respect caps).',
-  anthropic: 'Add ANTHROPIC_API_KEY to unlock long-context drafting (paid, respect caps).',
+  openrouter:
+    'Add OPENROUTER_API_KEY to access multiple free/discounted models as fallback.',
+  openai:
+    'Add OPENAI_API_KEY to unlock premium reasoning (paid, respect caps).',
+  anthropic:
+    'Add ANTHROPIC_API_KEY to unlock long-context drafting (paid, respect caps).',
 };
 
 const MODEL_TAG_DEFAULTS = {
@@ -70,18 +73,32 @@ const providers = [
   {
     name: 'groq',
     envKey: 'GROQ_API_KEY',
-    supports: (tag) => ['fast.code', 'fast.summarize', 'cheap.translate', 'vision.ocr', 'rag.docs', 'rag.graph', 'reason.dense', 'reason.long', 'reason.safety'].includes(tag),
+    supports: (tag) =>
+      [
+        'fast.code',
+        'fast.summarize',
+        'cheap.translate',
+        'vision.ocr',
+        'rag.docs',
+        'rag.graph',
+        'reason.dense',
+        'reason.long',
+        'reason.safety',
+      ].includes(tag),
     estimate: (tag) => ({ costUsd: 0, p95ms: tag === 'fast.code' ? 300 : 800 }),
     call: async (payload) => {
       assert(hasEnv('GROQ_API_KEY'), 'Missing GROQ_API_KEY');
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
       const data = await response.json();
       return {
         ok: response.ok,
@@ -99,14 +116,17 @@ const providers = [
     estimate: () => ({ costUsd: 0, p95ms: 1200 }),
     call: async (payload) => {
       assert(hasEnv('OPENROUTER_API_KEY'), 'Missing OPENROUTER_API_KEY');
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
       const data = await response.json();
       return {
         ok: response.ok,
@@ -124,14 +144,17 @@ const providers = [
     estimate: () => ({ costUsd: 0.02, p95ms: 1500 }),
     call: async (payload) => {
       assert(hasEnv('OPENAI_API_KEY'), 'Missing OPENAI_API_KEY');
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
       const data = await response.json();
       return {
         ok: response.ok,
@@ -145,7 +168,14 @@ const providers = [
   {
     name: 'anthropic',
     envKey: 'ANTHROPIC_API_KEY',
-    supports: (tag) => ['reason.long', 'reason.safety', 'reason.dense', 'rag.docs', 'rag.graph'].includes(tag),
+    supports: (tag) =>
+      [
+        'reason.long',
+        'reason.safety',
+        'reason.dense',
+        'rag.docs',
+        'rag.graph',
+      ].includes(tag),
     estimate: () => ({ costUsd: 0.03, p95ms: 1600 }),
     call: async (payload) => {
       assert(hasEnv('ANTHROPIC_API_KEY'), 'Missing ANTHROPIC_API_KEY');
@@ -174,7 +204,9 @@ const providers = [
 ];
 
 function hasEnv(key) {
-  return typeof process.env[key] === 'string' && process.env[key].trim().length > 0;
+  return (
+    typeof process.env[key] === 'string' && process.env[key].trim().length > 0
+  );
 }
 
 function tagToEnvKey(tag) {
@@ -264,10 +296,9 @@ export async function routeLLM(opts, payload) {
   const modelHint = skippedForModel.size
     ? `Model mapping missing for providers: ${Array.from(skippedForModel).join(', ')}.`
     : '';
-  const message = [lastErr, hints, modelHint]
-    .filter(Boolean)
-    .join(' ')
-    .trim() || 'No eligible provider within budgets. Add keys or relax caps.';
+  const message =
+    [lastErr, hints, modelHint].filter(Boolean).join(' ').trim() ||
+    'No eligible provider within budgets. Add keys or relax caps.';
 
   return {
     ok: false,

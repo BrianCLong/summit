@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import uuid
-from typing import Dict, List, Optional
 
 import numpy as np
 import torch
@@ -22,27 +21,27 @@ from ..xai.explainer import Explainer
 
 class AdviceRequest(BaseModel):
     env: str = Field(..., description="Environment identifier")
-    state: List[float] = Field(..., description="Flattened observation vector")
-    candidate_actions: Optional[List[str]] = Field(None, description="Policy-filtered actions")
-    case_id: Optional[str] = Field(None, description="Case identifier for provenance")
+    state: list[float] = Field(..., description="Flattened observation vector")
+    candidate_actions: list[str] | None = Field(None, description="Policy-filtered actions")
+    case_id: str | None = Field(None, description="Case identifier for provenance")
 
 
 class AdviceResponse(BaseModel):
     action: str
     score: float
-    constraints: List[str]
+    constraints: list[str]
     explanation_ref: str
 
 
 class RegisterRewardRequest(BaseModel):
     env: str
     name: str
-    kpi_weights: Dict[str, float]
+    kpi_weights: dict[str, float]
 
 
 class TrainRequest(BaseModel):
     env: str
-    job_id: Optional[str] = None
+    job_id: str | None = None
 
 
 class TrainResponse(BaseModel):
@@ -54,7 +53,7 @@ class ExplainResponse(BaseModel):
     decision_id: str
     rationale: str
     counterfactual: str
-    features: Dict[str, float]
+    features: dict[str, float]
 
 
 DEFAULT_ACTIONS = [
@@ -70,7 +69,7 @@ def create_app(
     *,
     policy_client: PolicyClient,
     provenance_logger: ProvenanceLogger,
-    explainer: Optional[Explainer] = None,
+    explainer: Explainer | None = None,
 ) -> FastAPI:
     app = FastAPI(title="IG-RL Service", version="0.1.0")
     reward_hub = RewardHub(config.reward.kpi_weights)
@@ -88,10 +87,10 @@ def create_app(
     app.state.policy_client = policy_client
     app.state.provenance = provenance_logger
     app.state.explainer = explainer
-    app.state.explanations: Dict[str, ExplainResponse] = {}
+    app.state.explanations: dict[str, ExplainResponse] = {}
 
     @app.post("/register_reward")
-    async def register_reward(request: RegisterRewardRequest) -> Dict[str, str]:
+    async def register_reward(request: RegisterRewardRequest) -> dict[str, str]:
         reward_hub.register(request.name, request.kpi_weights)
         return {"status": "ok"}
 
@@ -120,7 +119,9 @@ def create_app(
         )
         decision_id = str(uuid.uuid4())
         state_hash = policy_client.state_fingerprint(request.state)
-        explanation = app.state.explainer.explain(np.array(request.state, dtype=float), action, reward_obs.components)
+        explanation = app.state.explainer.explain(
+            np.array(request.state, dtype=float), action, reward_obs.components
+        )
         explanation.decision_id = decision_id
         explain_payload = ExplainResponse(
             decision_id=decision_id,
@@ -142,7 +143,9 @@ def create_app(
             ),
         )
 
-        constraints = [name for name, allowed in zip(candidate_actions, mask) if not allowed]
+        constraints = [
+            name for name, allowed in zip(candidate_actions, mask, strict=False) if not allowed
+        ]
 
         return AdviceResponse(
             action=action,

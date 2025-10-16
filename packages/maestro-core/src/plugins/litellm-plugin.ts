@@ -39,7 +39,10 @@ export interface LiteLLMStepConfig {
       parameters: any;
     };
   }>;
-  tool_choice?: 'none' | 'auto' | { type: 'function'; function: { name: string } };
+  tool_choice?:
+    | 'none'
+    | 'auto'
+    | { type: 'function'; function: { name: string } };
 }
 
 export class LiteLLMPlugin implements StepPlugin {
@@ -71,17 +74,29 @@ export class LiteLLMPlugin implements StepPlugin {
     }
 
     // Validate that either prompt or messages are provided
-    if (!stepConfig.prompt && !stepConfig.prompt_template && !stepConfig.messages) {
-      throw new Error('LiteLLM step requires either prompt, prompt_template, or messages');
+    if (
+      !stepConfig.prompt &&
+      !stepConfig.prompt_template &&
+      !stepConfig.messages
+    ) {
+      throw new Error(
+        'LiteLLM step requires either prompt, prompt_template, or messages',
+      );
     }
 
     // Validate prompt template exists if specified
-    if (stepConfig.prompt_template && !this.promptTemplates.has(stepConfig.prompt_template)) {
+    if (
+      stepConfig.prompt_template &&
+      !this.promptTemplates.has(stepConfig.prompt_template)
+    ) {
       throw new Error(`Unknown prompt template: ${stepConfig.prompt_template}`);
     }
 
     // Validate model format (provider/model-name)
-    if (!stepConfig.model.includes('/') && !this.isBuiltinModel(stepConfig.model)) {
+    if (
+      !stepConfig.model.includes('/') &&
+      !this.isBuiltinModel(stepConfig.model)
+    ) {
       console.warn(
         `Model ${stepConfig.model} should be in format 'provider/model-name' for proper routing`,
       );
@@ -160,7 +175,9 @@ export class LiteLLMPlugin implements StepPlugin {
   ): Promise<void> {
     // LiteLLM calls are generally not compensatable (can't "undo" an AI generation)
     // But we can log the compensation attempt for audit trails
-    console.log(`LiteLLM compensation called for step ${step.id} in run ${context.run_id}`);
+    console.log(
+      `LiteLLM compensation called for step ${step.id} in run ${context.run_id}`,
+    );
 
     // Could potentially:
     // 1. Mark the output as "compensated" in metadata
@@ -183,7 +200,9 @@ export class LiteLLMPlugin implements StepPlugin {
     if (stepConfig.prompt_template) {
       const template = this.promptTemplates.get(stepConfig.prompt_template);
       if (!template) {
-        throw new Error(`Prompt template not found: ${stepConfig.prompt_template}`);
+        throw new Error(
+          `Prompt template not found: ${stepConfig.prompt_template}`,
+        );
       }
 
       const prompt = this.renderTemplate(template, {
@@ -273,12 +292,16 @@ export class LiteLLMPlugin implements StepPlugin {
     }
 
     const promptCost = (usage.prompt_tokens / 1000) * baseCostPer1kTokens.input;
-    const completionCost = (usage.completion_tokens / 1000) * baseCostPer1kTokens.output;
+    const completionCost =
+      (usage.completion_tokens / 1000) * baseCostPer1kTokens.output;
 
     return promptCost + completionCost;
   }
 
-  private getBaseCostForModel(model: string): { input: number; output: number } {
+  private getBaseCostForModel(model: string): {
+    input: number;
+    output: number;
+  } {
     // Simplified pricing - real implementation would have comprehensive model pricing
     const pricing: Record<string, { input: number; output: number }> = {
       'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
@@ -293,7 +316,10 @@ export class LiteLLMPlugin implements StepPlugin {
     return pricing[baseModel] || { input: 0.002, output: 0.006 }; // Default pricing
   }
 
-  private renderTemplate(template: string, variables: Record<string, any>): string {
+  private renderTemplate(
+    template: string,
+    variables: Record<string, any>,
+  ): string {
     let result = template;
 
     for (const [key, value] of Object.entries(variables)) {
@@ -305,7 +331,12 @@ export class LiteLLMPlugin implements StepPlugin {
   }
 
   private isBuiltinModel(model: string): boolean {
-    const builtinModels = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4o-mini', 'claude-3-haiku'];
+    const builtinModels = [
+      'gpt-3.5-turbo',
+      'gpt-4',
+      'gpt-4o-mini',
+      'claude-3-haiku',
+    ];
     return builtinModels.includes(model);
   }
 

@@ -5,7 +5,7 @@ import resolvers from '../graphql/resolvers/index.js';
 import { authDirective } from '../graphql/authDirective.js';
 import { getContext } from '../lib/auth.js';
 export async function makeGraphServer(opts = {}) {
-    let schema = makeExecutableSchema({ typeDefs, resolvers });
+    let schema = makeExecutableSchema({ typeDefs, resolvers: resolvers });
     const { authDirectiveTransformer } = authDirective();
     schema = authDirectiveTransformer(schema);
     const server = new ApolloServer({
@@ -30,11 +30,18 @@ export async function makeGraphServer(opts = {}) {
                     }
                     : null);
             const withUser = injectedUser
-                ? { ...base, user: injectedUser, isAuthenticated: true, tenantId: injectedUser.tenant }
+                ? {
+                    ...base,
+                    user: injectedUser,
+                    isAuthenticated: true,
+                    tenantId: injectedUser.tenant,
+                }
                 : base;
             // Merge/override additional context
             if (opts.context) {
-                const extra = typeof opts.context === 'function' ? await opts.context(withUser) : opts.context;
+                const extra = typeof opts.context === 'function'
+                    ? await opts.context(withUser)
+                    : opts.context;
                 return { ...withUser, ...extra };
             }
             return withUser;

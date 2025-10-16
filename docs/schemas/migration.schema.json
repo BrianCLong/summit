@@ -5,21 +5,30 @@
   "type": "object",
   "required": ["name", "steps", "guardrails"],
   "properties": {
-    "name": {"type": "string"},
-    "database": {"type": "string", "enum": ["postgres", "mysql", "rds"]},
+    "name": { "type": "string" },
+    "database": { "type": "string", "enum": ["postgres", "mysql", "rds"] },
     "guardrails": {
       "type": "object",
       "properties": {
-        "latency_p95_max_delta": {"type": "number"},
-        "replica_lag_max_s": {"type": "number"},
-        "lock_wait_ms_p95": {"type": "number"}
+        "latency_p95_max_delta": { "type": "number" },
+        "replica_lag_max_s": { "type": "number" },
+        "lock_wait_ms_p95": { "type": "number" }
       }
     },
-    "shadowVerify": {"type": "boolean", "default": true},
+    "shadowVerify": { "type": "boolean", "default": true },
     "steps": {
       "type": "array",
-      "items": {"type": "object", "required": ["type", "sql"], "properties": {"type": {"type": "string", "enum": ["ddl", "dml", "index", "backfill"]}, "sql": {"type": "string"}}}
+      "items": {
+        "type": "object",
+        "required": ["type", "sql"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["ddl", "dml", "index", "backfill"]
+          },
+          "sql": { "type": "string" }
+        }
+      }
     }
   }
 }
-

@@ -19,14 +19,14 @@ export class MaestroConductorV19 {
     return {
       version: '0.19.0',
       success: true,
-      features: this.config.features
+      features: this.config.features,
     };
   }
 
   async getMetrics(): Promise<any> {
     return {
       version: '0.19.0',
-      config: this.config
+      config: this.config,
     };
   }
 }

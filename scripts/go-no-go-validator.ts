@@ -192,7 +192,12 @@ class GoNoGoValidator {
           false,
         );
       } else {
-        this.addResult('quality_gates', 'flaky_tests', 'PASS', 'No flaky tests detected');
+        this.addResult(
+          'quality_gates',
+          'flaky_tests',
+          'PASS',
+          'No flaky tests detected',
+        );
       }
     } catch (error) {
       this.addResult(
@@ -212,17 +217,29 @@ class GoNoGoValidator {
     // Test OPA connectivity and policy evaluation
     try {
       const testInput = {
-        subject: { sub: 'test_user', tenant: 'test_tenant', roles: ['viewer'], clearance: 1 },
+        subject: {
+          sub: 'test_user',
+          tenant: 'test_tenant',
+          roles: ['viewer'],
+          clearance: 1,
+        },
         action: 'read',
-        resource: { type: 'entity', tenant: 'test_tenant', tags: { sensitivity: 1 } },
+        resource: {
+          type: 'entity',
+          tenant: 'test_tenant',
+          tags: { sensitivity: 1 },
+        },
         context: { purpose: 'testing', request_id: 'test_123' },
       };
 
-      const response = await fetch(`${process.env.OPA_URL}/v1/data/intelgraph/authz`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: testInput }),
-      });
+      const response = await fetch(
+        `${process.env.OPA_URL}/v1/data/intelgraph/authz`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input: testInput }),
+        },
+      );
 
       if (!response.ok) {
         this.addResult(
@@ -236,7 +253,12 @@ class GoNoGoValidator {
       } else {
         const { result } = await response.json();
         if (typeof result?.allow === 'boolean') {
-          this.addResult('authz', 'opa_connectivity', 'PASS', 'OPA responding correctly');
+          this.addResult(
+            'authz',
+            'opa_connectivity',
+            'PASS',
+            'OPA responding correctly',
+          );
         } else {
           this.addResult(
             'authz',
@@ -272,7 +294,8 @@ class GoNoGoValidator {
 
       const row = tagCheck.rows[0];
       const tagCoverage = row.entities_with_tags / row.total_entities;
-      const tenantTagCoverage = row.entities_with_tenant_tag / row.total_entities;
+      const tenantTagCoverage =
+        row.entities_with_tenant_tag / row.total_entities;
 
       if (tagCoverage < 0.95) {
         // 95% tag coverage required
@@ -325,17 +348,25 @@ class GoNoGoValidator {
     // Test cross-tenant isolation
     try {
       const crossTenantTest = {
-        subject: { sub: 'user1', tenant: 'tenant_a', roles: ['admin'], clearance: 5 },
+        subject: {
+          sub: 'user1',
+          tenant: 'tenant_a',
+          roles: ['admin'],
+          clearance: 5,
+        },
         action: 'read',
         resource: { type: 'entity', tenant: 'tenant_b', tags: {} },
         context: { purpose: 'testing' },
       };
 
-      const response = await fetch(`${process.env.OPA_URL}/v1/data/intelgraph/authz`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: crossTenantTest }),
-      });
+      const response = await fetch(
+        `${process.env.OPA_URL}/v1/data/intelgraph/authz`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input: crossTenantTest }),
+        },
+      );
 
       const { result } = await response.json();
 
@@ -390,7 +421,9 @@ class GoNoGoValidator {
         // Test that high utilization triggers appropriate responses
         if (utilization > 0.95) {
           // Check if degradation is active
-          const degradationCheck = await this.redis.get(`budget_degradation:${row.tenant_id}`);
+          const degradationCheck = await this.redis.get(
+            `budget_degradation:${row.tenant_id}`,
+          );
           if (!degradationCheck) {
             this.addResult(
               'budgets',
@@ -495,7 +528,9 @@ class GoNoGoValidator {
         }
 
         // Check for poison pills
-        const quarantineCount = await this.redis.lLen(`quarantine:${queueType}`);
+        const quarantineCount = await this.redis.lLen(
+          `quarantine:${queueType}`,
+        );
         if (quarantineCount > 10) {
           this.addResult(
             'queues',
@@ -521,9 +556,12 @@ class GoNoGoValidator {
     // Test KEDA scaling response
     try {
       // Check if KEDA is scaling appropriately
-      const keda_status = execSync('kubectl get scaledobjects -l app=conductor -o json', {
-        encoding: 'utf8',
-      });
+      const keda_status = execSync(
+        'kubectl get scaledobjects -l app=conductor -o json',
+        {
+          encoding: 'utf8',
+        },
+      );
       const scaledObjects = JSON.parse(keda_status);
 
       if (scaledObjects.items.length > 0) {
@@ -534,7 +572,14 @@ class GoNoGoValidator {
           `KEDA managing ${scaledObjects.items.length} scaled objects`,
         );
       } else {
-        this.addResult('queues', 'keda_scaling', 'WARN', 'No KEDA scaled objects found', {}, false);
+        this.addResult(
+          'queues',
+          'keda_scaling',
+          'WARN',
+          'No KEDA scaled objects found',
+          {},
+          false,
+        );
       }
     } catch (error) {
       this.addResult(
@@ -611,7 +656,12 @@ class GoNoGoValidator {
           false,
         );
       } else {
-        this.addResult('runbooks', 'approval_workflow', 'PASS', 'Approval workflow healthy');
+        this.addResult(
+          'runbooks',
+          'approval_workflow',
+          'PASS',
+          'Approval workflow healthy',
+        );
       }
     } catch (error) {
       this.addResult(
@@ -674,7 +724,8 @@ class GoNoGoValidator {
 
         if (conflictCheck.rows.length > 0) {
           const conflictRow = conflictCheck.rows[0];
-          const autoResolveRate = conflictRow.auto_resolved / conflictRow.total_conflicts;
+          const autoResolveRate =
+            conflictRow.auto_resolved / conflictRow.total_conflicts;
 
           if (autoResolveRate < 0.85) {
             // 85% auto-resolution required
@@ -696,7 +747,14 @@ class GoNoGoValidator {
           }
         }
       } else {
-        this.addResult('edge', 'edge_nodes', 'WARN', 'No edge nodes configured', {}, false);
+        this.addResult(
+          'edge',
+          'edge_nodes',
+          'WARN',
+          'No edge nodes configured',
+          {},
+          false,
+        );
       }
     } catch (error) {
       this.addResult(
@@ -718,7 +776,12 @@ class GoNoGoValidator {
 
     const sloChecks = [
       { name: 'api_p95_latency', threshold: 300, current: 247, unit: 'ms' },
-      { name: 'system_availability', threshold: 99.9, current: 99.97, unit: '%' },
+      {
+        name: 'system_availability',
+        threshold: 99.9,
+        current: 99.97,
+        unit: '%',
+      },
       { name: 'error_rate', threshold: 0.5, current: 0.12, unit: '%' },
     ];
 
@@ -861,10 +924,14 @@ class GoNoGoValidator {
       );
     } else if (summary.failed > 0) {
       overall = 'CONDITIONAL_GO';
-      recommendations.push(`⚠️ ${summary.failed} non-blocking failures should be addressed`);
+      recommendations.push(
+        `⚠️ ${summary.failed} non-blocking failures should be addressed`,
+      );
     } else {
       overall = 'GO';
-      recommendations.push('✅ All critical systems validated - ready for production deployment');
+      recommendations.push(
+        '✅ All critical systems validated - ready for production deployment',
+      );
     }
 
     if (summary.warnings > 0) {

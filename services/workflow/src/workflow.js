@@ -68,11 +68,16 @@ class WorkflowEngine extends EventEmitter {
   }
 
   _calcDeadline(slaSeconds) {
-    return typeof slaSeconds === 'number' ? Date.now() + slaSeconds * 1000 : null;
+    return typeof slaSeconds === 'number'
+      ? Date.now() + slaSeconds * 1000
+      : null;
   }
 
   _sanitizeChecklist(items) {
-    return items.map((text) => ({ text: String(text).replace(/[<>]/g, ''), done: false }));
+    return items.map((text) => ({
+      text: String(text).replace(/[<>]/g, ''),
+      done: false,
+    }));
   }
 }
 

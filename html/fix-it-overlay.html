@@ -1,8 +1,33 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Fix‑It</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>body{font-family:system-ui;margin:16px}.btn{margin:4px}</style></head>
-<body>
-<div><button class=btn id=rename>Rename API</button><button class=btn id=docs>Patch Docs</button></div>
-<script>
-$(function(){ $('#rename').on('click',function(){ $.post('/api/fixit/rename',{from:'foo',to:'bar'}); }); $('#docs').on('click',function(){ $.post('/api/fixit/docs',{id:'PR-1'}); }); });
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Fix‑It</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: system-ui;
+        margin: 16px;
+      }
+      .btn {
+        margin: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <button class="btn" id="rename">Rename API</button
+      ><button class="btn" id="docs">Patch Docs</button>
+    </div>
+    <script>
+      $(function () {
+        $('#rename').on('click', function () {
+          $.post('/api/fixit/rename', { from: 'foo', to: 'bar' });
+        });
+        $('#docs').on('click', function () {
+          $.post('/api/fixit/docs', { id: 'PR-1' });
+        });
+      });
+    </script>
+  </body>
+</html>

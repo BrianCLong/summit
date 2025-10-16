@@ -1,4 +1,9 @@
-import { CooperationArtifact, WorkbookCommand, WorkbookReceipt, TaskSpec } from '@ga-graphai/common-types';
+import {
+  CooperationArtifact,
+  WorkbookCommand,
+  WorkbookReceipt,
+  TaskSpec,
+} from '@ga-graphai/common-types';
 
 import { GenerationInput, ResourceAdapter } from '../capabilityRegistry.js';
 import { GuardedGenerator } from '../promptOps.js';
@@ -34,7 +39,10 @@ export interface ProofOfUsefulWorkbookResult {
 export class ProofOfUsefulWorkbookCoordinator {
   private readonly guard = new GuardedGenerator();
 
-  async execute(task: TaskSpec, resource: ResourceAdapter): Promise<ProofOfUsefulWorkbookResult> {
+  async execute(
+    task: TaskSpec,
+    resource: ResourceAdapter,
+  ): Promise<ProofOfUsefulWorkbookResult> {
     const generated = await resource.generate({
       task,
       strand: 'implementation',
@@ -47,11 +55,14 @@ export class ProofOfUsefulWorkbookCoordinator {
     }
     const evidence = [
       ...(generated.evidence ?? []),
-      ...(receipt
-        ? receipt.artifacts
-        : []),
+      ...(receipt ? receipt.artifacts : []),
     ];
-    const { artifact } = this.guard.enforce('proof-of-useful-workbook', generated.content, [], evidence);
+    const { artifact } = this.guard.enforce(
+      'proof-of-useful-workbook',
+      generated.content,
+      [],
+      evidence,
+    );
     return { artifact, receipt };
   }
 }

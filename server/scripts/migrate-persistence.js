@@ -27,7 +27,12 @@ async function runPostgresMigrations() {
 
   try {
     // Read migration file
-    const migrationPath = path.join(__dirname, '..', 'migrations', '001_core_persistence.sql');
+    const migrationPath = path.join(
+      __dirname,
+      '..',
+      'migrations',
+      '001_core_persistence.sql',
+    );
     const migration = fs.readFileSync(migrationPath, 'utf8');
 
     // Create migrations tracking table
@@ -45,7 +50,9 @@ async function runPostgresMigrations() {
     );
 
     if (rows.length > 0) {
-      console.log('✅ PostgreSQL migration 001_core_persistence already applied');
+      console.log(
+        '✅ PostgreSQL migration 001_core_persistence already applied',
+      );
       return;
     }
 
@@ -57,7 +64,9 @@ async function runPostgresMigrations() {
     ]);
     await client.query('COMMIT');
 
-    console.log('✅ PostgreSQL migration 001_core_persistence applied successfully');
+    console.log(
+      '✅ PostgreSQL migration 001_core_persistence applied successfully',
+    );
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('❌ PostgreSQL migration failed:', error.message);
@@ -71,13 +80,21 @@ async function runPostgresMigrations() {
 async function runNeo4jConstraints() {
   console.log('🔄 Running Neo4j constraints...');
 
-  const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD));
+  const driver = neo4j.driver(
+    NEO4J_URI,
+    neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+  );
 
   const session = driver.session();
 
   try {
     // Read constraints file
-    const constraintsPath = path.join(__dirname, '..', 'migrations', 'neo4j_constraints.cypher');
+    const constraintsPath = path.join(
+      __dirname,
+      '..',
+      'migrations',
+      'neo4j_constraints.cypher',
+    );
     const constraints = fs.readFileSync(constraintsPath, 'utf8');
 
     // Split by lines and filter out comments/empty lines
@@ -97,7 +114,9 @@ async function runNeo4jConstraints() {
         console.log(`✅ Neo4j: ${statement.split('\n')[0]}`);
       } catch (error) {
         if (error.message.includes('already exists')) {
-          console.log(`⚠️  Neo4j: ${statement.split('\n')[0]} (already exists)`);
+          console.log(
+            `⚠️  Neo4j: ${statement.split('\n')[0]} (already exists)`,
+          );
         } else {
           console.error(`❌ Neo4j statement failed: ${statement}`);
           console.error('Error:', error.message);
@@ -120,10 +139,15 @@ async function testConnections() {
   try {
     const pool = new Pool({ connectionString: POSTGRES_URL });
     const client = await pool.connect();
-    const result = await client.query('SELECT NOW() as current_time, version()');
+    const result = await client.query(
+      'SELECT NOW() as current_time, version()',
+    );
     console.log('✅ PostgreSQL connection:', {
       time: result.rows[0].current_time,
-      version: result.rows[0].version.split(' ')[0] + ' ' + result.rows[0].version.split(' ')[1],
+      version:
+        result.rows[0].version.split(' ')[0] +
+        ' ' +
+        result.rows[0].version.split(' ')[1],
     });
     client.release();
     await pool.end();
@@ -134,12 +158,17 @@ async function testConnections() {
 
   // Test Neo4j
   try {
-    const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD));
+    const driver = neo4j.driver(
+      NEO4J_URI,
+      neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+    );
 
     await driver.verifyConnectivity();
 
     const session = driver.session();
-    const result = await session.run('CALL dbms.components() YIELD name, versions, edition');
+    const result = await session.run(
+      'CALL dbms.components() YIELD name, versions, edition',
+    );
     console.log('✅ Neo4j connection:', {
       name: result.records[0].get('name'),
       version: result.records[0].get('versions')[0],
@@ -171,7 +200,9 @@ async function main() {
     console.log('');
     console.log('Next steps:');
     console.log('1. Start the outbox worker: npm run worker:outbox');
-    console.log('2. Test GraphQL operations: curl http://localhost:4000/graphql');
+    console.log(
+      '2. Test GraphQL operations: curl http://localhost:4000/graphql',
+    );
     console.log('3. Monitor metrics: curl http://localhost:4000/metrics');
   } catch (error) {
     console.error('\n💥 Migration failed:', error.message);
@@ -184,4 +215,8 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { runPostgresMigrations, runNeo4jConstraints, testConnections };
+module.exports = {
+  runPostgresMigrations,
+  runNeo4jConstraints,
+  testConnections,
+};

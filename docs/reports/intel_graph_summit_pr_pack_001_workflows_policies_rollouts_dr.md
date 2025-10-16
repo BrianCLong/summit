@@ -11,6 +11,7 @@ This pack contains concrete, copy‑pasteable changes split into 10 small PRs. E
 **Files:**
 
 **`.github/workflows/ci.yml`**
+
 ```yaml
 name: CI
 on:
@@ -30,6 +31,7 @@ jobs:
 ```
 
 **`.github/workflows/ci-core.yml`**
+
 ```yaml
 name: ci-core
 on: { workflow_call: {} }
@@ -52,6 +54,7 @@ jobs:
 ```
 
 **`.github/workflows/ci-security.yml`**
+
 ```yaml
 name: ci-security
 on: { workflow_call: {} }
@@ -71,9 +74,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write     # for keyless signing
+      id-token: write # for keyless signing
       attestations: write # provenance
-      packages: write     # ghcr push if needed
+      packages: write # ghcr push if needed
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
@@ -109,6 +112,7 @@ jobs:
 ```
 
 **`.github/workflows/ci-preview.yml`**
+
 ```yaml
 name: ci-preview
 on: { workflow_call: {} }
@@ -162,6 +166,7 @@ jobs:
 **Files:**
 
 **`.gitignore`** (append)
+
 ```gitignore
 # no local secrets
 .env
@@ -171,6 +176,7 @@ jobs:
 ```
 
 **`.gitleaks.toml`** (baseline with allowlist expiry)
+
 ```toml
 [extend]
 path = ""
@@ -180,8 +186,10 @@ regex = "^REDACTED-PLACEHOLDER-ONLY$"
 ```
 
 **`SECURITY/secrets-policy.md`**
+
 ```md
 # Secrets Policy
+
 - No secrets in repo or CI logs.
 - Kubernetes secrets via External Secrets or Sealed Secrets only.
 - Terraform pulls secrets from AWS SSM/Secrets Manager (never variables).
@@ -199,6 +207,7 @@ regex = "^REDACTED-PLACEHOLDER-ONLY$"
 **Files:**
 
 **`infra/envs/prod/main.tf`** (excerpt)
+
 ```hcl
 data "aws_ssm_parameter" "db_password" {
   name            = "/intelgraph/prod/db/password"
@@ -213,12 +222,14 @@ module "aurora" {
 ```
 
 **`infra/policies/tfsec.yaml`**
+
 ```yaml
 severity: HIGH
 minimum_severity: MEDIUM
 ```
 
 **`.github/workflows/infra-plan.yml`**
+
 ```yaml
 name: infra-plan
 on: [pull_request]
@@ -247,6 +258,7 @@ jobs:
 **Files:**
 
 **`charts/app/templates/rollout.yaml`**
+
 ```yaml
 {{- if .Values.rollout.enabled }}
 apiVersion: argoproj.io/v1alpha1
@@ -279,6 +291,7 @@ spec:
 ```
 
 **`charts/app/values.yaml`**
+
 ```yaml
 rollout:
   enabled: true
@@ -295,6 +308,7 @@ rollout:
 **Files:**
 
 **`policy/rego/deploy_gates.rego`**
+
 ```rego
 package deploy.gates
 
@@ -308,6 +322,7 @@ allow {
 ```
 
 **`policy/tests/deploy_gates_test.yaml`**
+
 ```yaml
 - name: denies critical vulns
   input:
@@ -322,6 +337,7 @@ allow {
 ```
 
 **`.github/workflows/policy-check.yml`**
+
 ```yaml
 name: policy-check
 on: [pull_request]
@@ -347,6 +363,7 @@ jobs:
 **Files:**
 
 **`observability/prometheus/alerts.yaml`**
+
 ```yaml
 groups:
 - name: api-slo
@@ -363,14 +380,16 @@ groups:
 ```
 
 **`scripts/verify_release.ts`**
+
 ```ts
 import fetch from 'node-fetch';
 
 const PROM = process.env.PROM_URL!; // e.g. https://prometheus.dev.svc
-const Q = 'sum(rate(http_requests_total{code=~"5.."}[5m]))/sum(rate(http_requests_total[5m]))';
+const Q =
+  'sum(rate(http_requests_total{code=~"5.."}[5m]))/sum(rate(http_requests_total[5m]))';
 const THRESH = parseFloat(process.env.ERROR_BUDGET_THRESH || '0.02');
 
-async function main(){
+async function main() {
   const r = await fetch(`${PROM}/api/v1/query?query=${encodeURIComponent(Q)}`);
   const j = await r.json();
   const v = parseFloat(j.data.result?.[0]?.value?.[1] || '0');
@@ -381,10 +400,14 @@ async function main(){
   }
   console.log(`✅ Error budget burn ${v} <= ${THRESH}`);
 }
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
 ```
 
 **`.github/workflows/verify-release.yml`**
+
 ```yaml
 name: verify-release
 on: { workflow_call: {} }
@@ -413,6 +436,7 @@ jobs:
 **Files:**
 
 **`.github/workflows/release.yml`**
+
 ```yaml
 name: release
 on:
@@ -462,12 +486,13 @@ jobs:
 **Files:**
 
 **`k8s/cronjobs/dr-restore.yaml`**
+
 ```yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata: { name: dr-restore-verify }
 spec:
-  schedule: "0 3 * * 1" # weekly Monday 03:00
+  schedule: '0 3 * * 1' # weekly Monday 03:00
   jobTemplate:
     spec:
       template:
@@ -476,7 +501,7 @@ spec:
           containers:
             - name: restore
               image: alpine:latest
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   echo "Restoring snapshot to scratch namespace...";
@@ -485,6 +510,7 @@ spec:
 ```
 
 **`.github/workflows/dr-verify.yml`**
+
 ```yaml
 name: dr-verify
 on:
@@ -509,23 +535,25 @@ jobs:
 **Files:**
 
 **`.github/dependabot.yml`**
+
 ```yaml
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: "/"
-    schedule: { interval: weekly, day: monday, time: "03:00" }
+    directory: '/'
+    schedule: { interval: weekly, day: monday, time: '03:00' }
     groups:
       minor-and-patch:
-        patterns: ["*"]
-        update-types: ["minor","patch"]
+        patterns: ['*']
+        update-types: ['minor', 'patch']
     open-pull-requests-limit: 10
-    pull-request-branch-name: { separator: "-" }
+    pull-request-branch-name: { separator: '-' }
     rebase-strategy: auto
-    reviewers: ["team/security"]
+    reviewers: ['team/security']
 ```
 
 **`.github/workflows/auto-merge-safe.yml`**
+
 ```yaml
 name: auto-merge-safe
 on: [pull_request]
@@ -550,6 +578,7 @@ jobs:
 **Files:**
 
 **`scripts/protect.sh`**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -573,6 +602,7 @@ done
 ---
 
 # Cutover Plan (1 day)
+
 1. Create the 10 PRs in order; mark **PR 1** and **PR 2** as **required checks**.
 2. Merge **PR 3**; provision SSM params; rotate any credentials.
 3. Merge **PR 4–7**; validate canary on stage and promotion gate.
@@ -580,13 +610,14 @@ done
 5. Apply **PR 10** protections via `scripts/protect.sh`.
 
 # Rollback Plan
+
 - All PRs are additive and reversible; roll back by reverting individual commits.
 - Canary can be disabled with a single values flag.
 - Admission gates can be temporarily bypassed via environment rules **with reason-for-access recorded**.
 
 # Owner Matrix
+
 - **DevEx/CI:** PR 1, 7, 10
 - **Security:** PR 2, 5
 - **Platform:** PR 3, 4, 6, 8
 - **Release Captain:** Coordinates cutover, owns canary plan, and soak verification.
-

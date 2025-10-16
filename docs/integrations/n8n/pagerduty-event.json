@@ -1,10 +1,46 @@
 {
   "name": "integration/pagerduty-event",
   "nodes": [
-    { "parameters": { "path": "integration/pagerduty-event" }, "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 300], "name": "Webhook" },
-    { "parameters": { "httpMethod": "POST", "url": "https://events.pagerduty.com/v2/enqueue", "jsonParameters": true, "options": {}, "bodyParametersJson": "={{$json.payload}}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [450, 300], "name": "PagerDuty Event" },
-    { "parameters": { "httpMethod": "POST", "url": "={{$json[\"maestroCallbackUrl\"]}}", "jsonParameters": true, "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" }, "bodyParametersJson": "={{$json[\"maestroBody\"]}}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [700, 300], "name": "Maestro Callback" }
+    {
+      "parameters": { "path": "integration/pagerduty-event" },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "https://events.pagerduty.com/v2/enqueue",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{$json.payload}}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "name": "PagerDuty Event"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "={{$json[\"maestroCallbackUrl\"]}}",
+        "jsonParameters": true,
+        "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" },
+        "bodyParametersJson": "={{$json[\"maestroBody\"]}}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "name": "Maestro Callback"
+    }
   ],
-  "connections": { "Webhook": { "main": [[{"node": "PagerDuty Event", "type": "main", "index": 0}]] }, "PagerDuty Event": { "main": [[{"node": "Maestro Callback", "type": "main", "index": 0}]] } }
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "PagerDuty Event", "type": "main", "index": 0 }]]
+    },
+    "PagerDuty Event": {
+      "main": [[{ "node": "Maestro Callback", "type": "main", "index": 0 }]]
+    }
+  }
 }
-

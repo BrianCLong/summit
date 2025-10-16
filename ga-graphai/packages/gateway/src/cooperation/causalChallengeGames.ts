@@ -56,10 +56,12 @@ export class CausalChallengeGamesCoordinator {
       revisedContent = repaired.content;
     }
 
-    const { artifact } = this.guard.enforce('causal-challenge-games', revisedContent, [], [
-      ...(base.evidence ?? []),
-      ...(challengesOutput.evidence ?? []),
-    ]);
+    const { artifact } = this.guard.enforce(
+      'causal-challenge-games',
+      revisedContent,
+      [],
+      [...(base.evidence ?? []), ...(challengesOutput.evidence ?? [])],
+    );
 
     return {
       artifact,

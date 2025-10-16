@@ -39,7 +39,8 @@ export function useFpsProbe(enabled = import.meta.env.DEV) {
       ? Math.round(fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length)
       : 0;
 
-  const minFps = fpsHistory.length > 0 ? Math.round(Math.min(...fpsHistory)) : 0;
+  const minFps =
+    fpsHistory.length > 0 ? Math.round(Math.min(...fpsHistory)) : 0;
 
   return {
     current: fps,

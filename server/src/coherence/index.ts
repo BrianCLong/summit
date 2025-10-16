@@ -1,10 +1,10 @@
 /**
  * V24 Global Coherence Ecosystem - Main Integration Module
- * 
+ *
  * This module provides a comprehensive intelligence analysis platform that combines
  * signal ingestion, activity fingerprinting, narrative impact modeling, and mission
  * context management into a unified coherence assessment system.
- * 
+ *
  * Key capabilities:
  * - Real-time signal ingestion with deduplication and provenance tracking
  * - Activity pattern recognition and behavioral fingerprinting
@@ -81,11 +81,11 @@ export class CoherenceEcosystem {
       this.neo4j = new Neo4jService(
         this.config.neo4j.uri,
         this.config.neo4j.username,
-        this.config.neo4j.password
+        this.config.neo4j.password,
       );
 
       this.redis = new RedisService({
-        url: this.config.redis.url
+        url: this.config.redis.url,
       });
 
       await this.neo4j.initialize();
@@ -112,13 +112,14 @@ export class CoherenceEcosystem {
           'Activity Index',
           'Narrative Model',
           'Mission Vault',
-          'GraphQL Subscriptions'
-        ]
+          'GraphQL Subscriptions',
+        ],
       });
-
     } catch (error) {
       logger.error('Failed to initialize Coherence Ecosystem', { error });
-      throw new Error(`Coherence Ecosystem initialization failed: ${error.message}`);
+      throw new Error(
+        `Coherence Ecosystem initialization failed: ${error.message}`,
+      );
     }
   }
 
@@ -169,7 +170,10 @@ export class CoherenceEcosystem {
   /**
    * Integrate with Express application
    */
-  integrateWithExpress(app: Application, basePath: string = '/api/v1/coherence'): void {
+  integrateWithExpress(
+    app: Application,
+    basePath: string = '/api/v1/coherence',
+  ): void {
     if (!this.isInitialized) {
       throw new Error('Coherence ecosystem not initialized');
     }
@@ -194,13 +198,15 @@ export class CoherenceEcosystem {
     try {
       // Check Neo4j connectivity
       components.neo4j = {
-        status: await this.neo4j.verifyConnectivity() ? 'healthy' : 'unhealthy'
+        status: (await this.neo4j.verifyConnectivity())
+          ? 'healthy'
+          : 'unhealthy',
       };
 
       // Check Redis connectivity
       const redisPing = await this.redis.ping();
       components.redis = {
-        status: redisPing === 'PONG' ? 'healthy' : 'unhealthy'
+        status: redisPing === 'PONG' ? 'healthy' : 'unhealthy',
       };
 
       // Check coherence service
@@ -213,10 +219,14 @@ export class CoherenceEcosystem {
 
       // Check subscription manager
       if (this.subscriptionManager) {
-        const subscriptionCounts = this.subscriptionManager.getSubscriptionCounts();
+        const subscriptionCounts =
+          this.subscriptionManager.getSubscriptionCounts();
         components.subscriptionManager = {
           status: 'healthy',
-          activeSubscriptions: Object.values(subscriptionCounts).reduce((sum, count) => sum + count, 0)
+          activeSubscriptions: Object.values(subscriptionCounts).reduce(
+            (sum, count) => sum + count,
+            0,
+          ),
         };
       } else {
         components.subscriptionManager = { status: 'unhealthy' };
@@ -224,12 +234,14 @@ export class CoherenceEcosystem {
       }
 
       // Determine overall status
-      if (components.neo4j.status !== 'healthy' || components.redis.status !== 'healthy') {
+      if (
+        components.neo4j.status !== 'healthy' ||
+        components.redis.status !== 'healthy'
+      ) {
         overallStatus = 'unhealthy';
       } else if (components.subscriptionManager.status !== 'healthy') {
         overallStatus = 'degraded';
       }
-
     } catch (error) {
       logger.error('Health check failed', { error });
       overallStatus = 'unhealthy';
@@ -239,7 +251,7 @@ export class CoherenceEcosystem {
     return {
       status: overallStatus,
       components,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -267,7 +279,6 @@ export class CoherenceEcosystem {
       this.isInitialized = false;
 
       logger.info('V24 Global Coherence Ecosystem shutdown complete');
-
     } catch (error) {
       logger.error('Error during ecosystem shutdown', { error });
       throw error;
@@ -281,7 +292,7 @@ export class CoherenceEcosystem {
     const session = this.neo4j.getSession();
 
     try {
-      await session.executeWrite(async tx => {
+      await session.executeWrite(async (tx) => {
         // Create constraints for unique identifiers
         await tx.run(`
           CREATE CONSTRAINT tenant_id_unique IF NOT EXISTS
@@ -331,7 +342,6 @@ export class CoherenceEcosystem {
       });
 
       logger.info('Database schema setup completed');
-
     } finally {
       await session.close();
     }
@@ -352,20 +362,28 @@ export class CoherenceEcosystem {
         scoreThreshold: 0.8,
         riskThreshold: 0.7,
         enableSlack: !!this.config.notifications?.slack?.webhookUrl,
-        enableEmail: !!this.config.notifications?.email?.smtpHost
-      }
+        enableEmail: !!this.config.notifications?.email?.smtpHost,
+      },
     };
 
-    await this.redis.setex('coherence:default:config', 86400, JSON.stringify(defaultConfig));
+    await this.redis.setex(
+      'coherence:default:config',
+      86400,
+      JSON.stringify(defaultConfig),
+    );
 
-    logger.info('Default configurations initialized', { config: defaultConfig });
+    logger.info('Default configurations initialized', {
+      config: defaultConfig,
+    });
   }
 }
 
 /**
  * Factory function to create a configured Coherence Ecosystem instance
  */
-export function createCoherenceEcosystem(config: CoherenceEcosystemConfig): CoherenceEcosystem {
+export function createCoherenceEcosystem(
+  config: CoherenceEcosystemConfig,
+): CoherenceEcosystem {
   return new CoherenceEcosystem(config);
 }
 
@@ -376,41 +394,41 @@ export {
   CoherenceService,
   CoherenceSubscriptionManager,
   subscriptionResolvers,
-  createCoherenceRoutes
+  createCoherenceRoutes,
 };
 
 export type {
   CoherenceAnalysisResult,
-  CoherenceConfiguration
+  CoherenceConfiguration,
 } from './coherenceService';
 
 export type {
   ActivityFingerprint,
   BehavioralSignature,
-  ActivityPattern
+  ActivityPattern,
 } from './intelligence/activityFingerprintIndex';
 
 export type {
   NarrativeImpact,
   NarrativeThread,
-  PropagationNode
+  PropagationNode,
 } from './intelligence/narrativeImpactModel';
 
 export type {
   MissionContext,
   MissionObjective,
-  RiskProfile
+  RiskProfile,
 } from './intelligence/missionVault';
 
 export type {
   CoherenceUpdate,
   ActivityUpdate,
-  NarrativeUpdate
+  NarrativeUpdate,
 } from './graphql/subscriptions';
 
 /**
  * Usage Examples:
- * 
+ *
  * // Basic initialization
  * const ecosystem = createCoherenceEcosystem({
  *   neo4j: { uri: 'bolt://localhost:7687', username: 'neo4j', password: 'password' },
@@ -419,23 +437,23 @@ export type {
  *   api: { enableRateLimiting: true, enableDebugEndpoints: false },
  *   notifications: {}
  * });
- * 
+ *
  * await ecosystem.initialize();
- * 
+ *
  * // Express integration
  * app.use('/api/v1/coherence', ecosystem.getRouter());
- * 
+ *
  * // GraphQL integration
  * const subscriptionResolvers = ecosystem.getSubscriptionResolvers();
- * 
+ *
  * // Direct service usage
  * const coherenceService = ecosystem.getCoherenceService();
  * const result = await coherenceService.analyzeCoherence('tenant-123');
- * 
+ *
  * // Health monitoring
  * const health = await ecosystem.healthCheck();
  * console.log('Ecosystem status:', health.status);
- * 
+ *
  * // Graceful shutdown
  * process.on('SIGTERM', async () => {
  *   await ecosystem.shutdown();

@@ -18,7 +18,9 @@ async function execCommand(command, args, { capture = false, cwd, env } = {}) {
         if (code === 0) {
           resolve();
         } else {
-          reject(new Error(`${command} ${args.join(' ')} exited with code ${code}`));
+          reject(
+            new Error(`${command} ${args.join(' ')} exited with code ${code}`),
+          );
         }
       });
       return;
@@ -40,7 +42,9 @@ async function execCommand(command, args, { capture = false, cwd, env } = {}) {
       if (code === 0) {
         resolve({ stdout, stderr });
       } else {
-        const error = new Error(`${command} ${args.join(' ')} exited with code ${code}`);
+        const error = new Error(
+          `${command} ${args.join(' ')} exited with code ${code}`,
+        );
         error.stdout = stdout;
         error.stderr = stderr;
         reject(error);
@@ -77,12 +81,15 @@ async function fetchText(url, timeoutMs = 10000) {
   }
 }
 
-async function pollWithStatus(checkFn, {
-  timeoutMs = 20000,
-  intervalMs = 1500,
-  label = 'check',
-  logger = console,
-} = {}) {
+async function pollWithStatus(
+  checkFn,
+  {
+    timeoutMs = 20000,
+    intervalMs = 1500,
+    label = 'check',
+    logger = console,
+  } = {},
+) {
   const start = Date.now();
   const errors = [];
   let attempts = 0;
@@ -127,11 +134,29 @@ async function runSmokeTest({ composeFile, reportPath, logger = console }) {
 
   try {
     const upStart = Date.now();
-    await execCommand('docker', ['compose', '-f', composeFile, 'up', '-d', '--build', '--remove-orphans', '--wait', '--wait-timeout', '120']);
-    steps.push({ name: 'compose_up', status: 'ok', durationMs: Date.now() - upStart });
+    await execCommand('docker', [
+      'compose',
+      '-f',
+      composeFile,
+      'up',
+      '-d',
+      '--build',
+      '--remove-orphans',
+      '--wait',
+      '--wait-timeout',
+      '120',
+    ]);
+    steps.push({
+      name: 'compose_up',
+      status: 'ok',
+      durationMs: Date.now() - upStart,
+    });
 
     const pipelineStart = Date.now();
-    pipelineResult = await runHelloPipeline({ endpoint: 'http://localhost:4000/graphql', token: 'dev-token' });
+    pipelineResult = await runHelloPipeline({
+      endpoint: 'http://localhost:4000/graphql',
+      token: 'dev-token',
+    });
     steps.push({
       name: 'hello_pipeline',
       status: 'ok',
@@ -143,19 +168,27 @@ async function runSmokeTest({ composeFile, reportPath, logger = console }) {
     });
 
     const logsStart = Date.now();
-    const logs = await execCommand('docker', ['compose', '-f', composeFile, 'logs', 'api', '--tail', '150'], { capture: true });
+    const logs = await execCommand(
+      'docker',
+      ['compose', '-f', composeFile, 'logs', 'api', '--tail', '150'],
+      { capture: true },
+    );
     logsTail = logs.stdout.trim();
-    steps.push({ name: 'api_logs', status: 'ok', durationMs: Date.now() - logsStart });
+    steps.push({
+      name: 'api_logs',
+      status: 'ok',
+      durationMs: Date.now() - logsStart,
+    });
 
     const jaegerStart = Date.now();
-    const {
-      result: jaegerResponse,
-      attempts: jaegerAttempts,
-    } = await pollWithStatus(
-      () => fetchJson('http://localhost:16686/api/services'),
-      { timeoutMs: 20000, intervalMs: 2000, label: 'jaeger', logger },
-    );
-    jaegerServices = Array.isArray(jaegerResponse.data) ? jaegerResponse.data : [];
+    const { result: jaegerResponse, attempts: jaegerAttempts } =
+      await pollWithStatus(
+        () => fetchJson('http://localhost:16686/api/services'),
+        { timeoutMs: 20000, intervalMs: 2000, label: 'jaeger', logger },
+      );
+    jaegerServices = Array.isArray(jaegerResponse.data)
+      ? jaegerResponse.data
+      : [];
     const jaegerOk = jaegerServices.includes('intelgraph-api');
     steps.push({
       name: 'jaeger_services',
@@ -166,13 +199,13 @@ async function runSmokeTest({ composeFile, reportPath, logger = console }) {
     });
 
     const metricsStart = Date.now();
-    const {
-      result: metricsResult,
-      attempts: metricsAttempts,
-    } = await pollWithStatus(
-      () => fetchText('http://localhost:9464/metrics'),
-      { timeoutMs: 15000, intervalMs: 2000, label: 'otel-metrics', logger },
-    );
+    const { result: metricsResult, attempts: metricsAttempts } =
+      await pollWithStatus(() => fetchText('http://localhost:9464/metrics'), {
+        timeoutMs: 15000,
+        intervalMs: 2000,
+        label: 'otel-metrics',
+        logger,
+      });
     metricsSample = metricsResult;
     const metricsOk = metricsSample.includes('http_requests_total');
     steps.push({
@@ -184,13 +217,26 @@ async function runSmokeTest({ composeFile, reportPath, logger = console }) {
 
     try {
       const targets = await fetchJson('http://localhost:9090/api/v1/targets');
-      promTargets = (targets.data?.activeTargets || []).map((target) => target.labels?.job || target.labels?.service || target.scrapeUrl);
-      steps.push({ name: 'prometheus_targets', status: 'ok', durationMs: 0, targets: promTargets });
+      promTargets = (targets.data?.activeTargets || []).map(
+        (target) =>
+          target.labels?.job || target.labels?.service || target.scrapeUrl,
+      );
+      steps.push({
+        name: 'prometheus_targets',
+        status: 'ok',
+        durationMs: 0,
+        targets: promTargets,
+      });
     } catch (error) {
       if (logger?.warn) {
         logger.warn(`[prometheus] failed to fetch targets: ${error.message}`);
       }
-      steps.push({ name: 'prometheus_targets', status: 'warn', durationMs: 0, error: error.message });
+      steps.push({
+        name: 'prometheus_targets',
+        status: 'warn',
+        durationMs: 0,
+        error: error.message,
+      });
     }
   } catch (error) {
     steps.push({ name: 'smoke', status: 'fail', error: error.message });

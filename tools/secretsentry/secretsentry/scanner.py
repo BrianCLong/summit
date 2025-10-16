@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 import math
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
 
 from .allowlist import Allowlist
 from .rules import DEFAULT_IGNORES, PATTERN_RULES
@@ -27,7 +27,7 @@ class ScanResult:
     findings: list[Finding]
     scanned_files: int
 
-    def sorted(self) -> "ScanResult":
+    def sorted(self) -> ScanResult:
         self.findings.sort(key=lambda f: (f.file, f.line, f.rule))
         return self
 
@@ -68,11 +68,11 @@ def _iter_candidate_strings(line: str) -> Iterable[str]:
     pattern = re.compile(r"[A-Za-z0-9+/=_-]{20,}")
     for match in pattern.finditer(line):
         token = match.group(0)
-        parts = [p for p in token.split('=') if len(p) >= 20]
+        parts = [p for p in token.split("=") if len(p) >= 20]
         if not parts:
             parts = [token]
         for part in parts:
-            trimmed = part.strip('-_')
+            trimmed = part.strip("-_")
             if len(trimmed) >= 20:
                 yield trimmed
 
@@ -111,16 +111,12 @@ def scan_path(
         except OSError:
             continue
         for idx, line in enumerate(content.splitlines(), start=1):
-            findings.extend(
-                _evaluate_line(relative, idx, line)
-            )
+            findings.extend(_evaluate_line(relative, idx, line))
     result = ScanResult(findings=findings, scanned_files=scanned_files)
     return result.sorted()
 
 
-def _resolve_allowlist(
-    root_path: Path, allowlist_path: Path | str | None
-) -> Path | None:
+def _resolve_allowlist(root_path: Path, allowlist_path: Path | str | None) -> Path | None:
     if allowlist_path is None:
         candidate = root_path / ".secretsentryignore"
         return candidate if candidate.is_file() else None

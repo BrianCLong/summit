@@ -15,13 +15,13 @@ class ResilientNeo4jConnection extends EventEmitter {
       failureThreshold: 3,
       recoveryTimeout: 30000, // 30 seconds
       monitoringWindow: 120000, // 2 minutes
-      expectedErrors: ['ServiceUnavailable', 'SessionExpired']
+      expectedErrors: ['ServiceUnavailable', 'SessionExpired'],
     });
 
     this.bulkhead = resilienceManager.getBulkhead('neo4j', {
       maxConcurrent: 20, // Neo4j connection pool size
       queueSize: 50,
-      timeoutMs: 15000
+      timeoutMs: 15000,
     });
 
     this.setupEventHandlers();
@@ -60,7 +60,12 @@ class ResilientNeo4jConnection extends EventEmitter {
     return this.executeTransaction(query, parameters, 'WRITE', config);
   }
 
-  async executeTransaction(query, parameters = {}, accessMode = 'READ', config = {}) {
+  async executeTransaction(
+    query,
+    parameters = {},
+    accessMode = 'READ',
+    config = {},
+  ) {
     return resilienceManager.executeWithResilience(
       `neo4j-${accessMode.toLowerCase()}`,
       async () => {
@@ -82,13 +87,17 @@ class ResilientNeo4jConnection extends EventEmitter {
         timeout: 30000,
         retry: {
           maxAttempts: 3,
-          retryableErrors: ['ServiceUnavailable', 'TransientError', 'ECONNRESET']
+          retryableErrors: [
+            'ServiceUnavailable',
+            'TransientError',
+            'ECONNRESET',
+          ],
         },
         circuitBreaker: {
           failureThreshold: 3,
-          expectedErrors: ['ClientError'] // Don't trip on client errors
-        }
-      }
+          expectedErrors: ['ClientError'], // Don't trip on client errors
+        },
+      },
     );
   }
 
@@ -98,13 +107,13 @@ class ResilientNeo4jConnection extends EventEmitter {
       return {
         healthy: true,
         latency: Date.now() - Date.now(),
-        details: { records: result.records.length }
+        details: { records: result.records.length },
       };
     } catch (error) {
       return {
         healthy: false,
         error: error.message,
-        details: { circuitState: this.circuitBreaker.state }
+        details: { circuitState: this.circuitBreaker.state },
       };
     }
   }
@@ -115,8 +124,10 @@ class ResilientNeo4jConnection extends EventEmitter {
       ...this.bulkhead.getStatus(),
       connection: {
         available: this.driver.supportsMultiDb(),
-        serverInfo: this.driver.getServerInfo ? this.driver.getServerInfo() : null
-      }
+        serverInfo: this.driver.getServerInfo
+          ? this.driver.getServerInfo()
+          : null,
+      },
     };
   }
 }
@@ -125,18 +136,18 @@ class ResilientPostgresConnection extends EventEmitter {
   constructor(pool) {
     super();
     this.pool = pool;
-    
+
     this.circuitBreaker = resilienceManager.getCircuitBreaker('postgres', {
       failureThreshold: 5,
       recoveryTimeout: 60000, // 1 minute
       monitoringWindow: 300000, // 5 minutes
-      expectedErrors: ['ECONNREFUSED', 'ENOTFOUND']
+      expectedErrors: ['ECONNREFUSED', 'ENOTFOUND'],
     });
 
     this.bulkhead = resilienceManager.getBulkhead('postgres', {
       maxConcurrent: 15, // Based on pool size
       queueSize: 100,
-      timeoutMs: 20000
+      timeoutMs: 20000,
     });
 
     this.setupEventHandlers();
@@ -188,13 +199,13 @@ class ResilientPostgresConnection extends EventEmitter {
         timeout: 20000,
         retry: {
           maxAttempts: 3,
-          retryableErrors: ['ECONNRESET', 'ENOTFOUND', 'ETIMEDOUT']
+          retryableErrors: ['ECONNRESET', 'ENOTFOUND', 'ETIMEDOUT'],
         },
         circuitBreaker: {
           failureThreshold: 5,
-          expectedErrors: ['23505', '23503'] // Unique violation, foreign key violation
-        }
-      }
+          expectedErrors: ['23505', '23503'], // Unique violation, foreign key violation
+        },
+      },
     );
   }
 
@@ -206,12 +217,12 @@ class ResilientPostgresConnection extends EventEmitter {
         try {
           await client.query('BEGIN');
           const results = [];
-          
+
           for (const query of queries) {
             const result = await client.query(query.text, query.parameters);
             results.push(result);
           }
-          
+
           await client.query('COMMIT');
           return results;
         } catch (error) {
@@ -225,9 +236,9 @@ class ResilientPostgresConnection extends EventEmitter {
         timeout: 30000,
         retry: {
           maxAttempts: 2, // Fewer retries for transactions
-          retryableErrors: ['ECONNRESET', 'ENOTFOUND']
-        }
-      }
+          retryableErrors: ['ECONNRESET', 'ENOTFOUND'],
+        },
+      },
     );
   }
 
@@ -236,15 +247,15 @@ class ResilientPostgresConnection extends EventEmitter {
       const startTime = Date.now();
       const result = await this.query('SELECT NOW() as current_time');
       const latency = Date.now() - startTime;
-      
+
       return {
         healthy: true,
         latency,
         details: {
           totalConnections: this.pool.totalCount,
           idleConnections: this.pool.idleCount,
-          waitingConnections: this.pool.waitingCount
-        }
+          waitingConnections: this.pool.waitingCount,
+        },
       };
     } catch (error) {
       return {
@@ -255,9 +266,9 @@ class ResilientPostgresConnection extends EventEmitter {
           poolStats: {
             totalConnections: this.pool.totalCount,
             idleConnections: this.pool.idleCount,
-            waitingConnections: this.pool.waitingCount
-          }
-        }
+            waitingConnections: this.pool.waitingCount,
+          },
+        },
       };
     }
   }
@@ -269,8 +280,8 @@ class ResilientPostgresConnection extends EventEmitter {
       pool: {
         totalConnections: this.pool.totalCount,
         idleConnections: this.pool.idleCount,
-        waitingConnections: this.pool.waitingCount
-      }
+        waitingConnections: this.pool.waitingCount,
+      },
     };
   }
 }
@@ -279,18 +290,18 @@ class ResilientRedisConnection extends EventEmitter {
   constructor(client) {
     super();
     this.client = client;
-    
+
     this.circuitBreaker = resilienceManager.getCircuitBreaker('redis', {
       failureThreshold: 3,
       recoveryTimeout: 30000, // 30 seconds
       monitoringWindow: 120000, // 2 minutes
-      expectedErrors: ['READONLY', 'LOADING', 'MASTERDOWN']
+      expectedErrors: ['READONLY', 'LOADING', 'MASTERDOWN'],
     });
 
     this.bulkhead = resilienceManager.getBulkhead('redis', {
       maxConcurrent: 25,
       queueSize: 200,
-      timeoutMs: 5000 // Redis should be fast
+      timeoutMs: 5000, // Redis should be fast
     });
 
     this.setupEventHandlers();
@@ -334,13 +345,13 @@ class ResilientRedisConnection extends EventEmitter {
         timeout: 5000,
         retry: {
           maxAttempts: 3,
-          retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND']
+          retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND'],
         },
         circuitBreaker: {
           failureThreshold: 3,
-          expectedErrors: ['WRONGTYPE', 'READONLY'] // Expected Redis errors
-        }
-      }
+          expectedErrors: ['WRONGTYPE', 'READONLY'], // Expected Redis errors
+        },
+      },
     );
   }
 
@@ -391,21 +402,21 @@ class ResilientRedisConnection extends EventEmitter {
         return {
           healthy: false,
           error: 'Redis client not available',
-          details: { circuitState: this.circuitBreaker.state }
+          details: { circuitState: this.circuitBreaker.state },
         };
       }
 
       const startTime = Date.now();
       const result = await this.execute('ping');
       const latency = Date.now() - startTime;
-      
+
       return {
         healthy: result === 'PONG',
         latency,
         details: {
           status: this.client.status,
-          mode: this.client.mode
-        }
+          mode: this.client.mode,
+        },
       };
     } catch (error) {
       return {
@@ -413,8 +424,8 @@ class ResilientRedisConnection extends EventEmitter {
         error: error.message,
         details: {
           circuitState: this.circuitBreaker.state,
-          clientStatus: this.client ? this.client.status : 'unavailable'
-        }
+          clientStatus: this.client ? this.client.status : 'unavailable',
+        },
       };
     }
   }
@@ -423,12 +434,16 @@ class ResilientRedisConnection extends EventEmitter {
     return {
       ...this.circuitBreaker.getHealthMetrics(),
       ...this.bulkhead.getStatus(),
-      client: this.client ? {
-        status: this.client.status,
-        mode: this.client.mode,
-        commandQueue: this.client.commandQueueLength,
-        offlineQueue: this.client.offlineQueue ? this.client.offlineQueue.length : 0
-      } : null
+      client: this.client
+        ? {
+            status: this.client.status,
+            mode: this.client.mode,
+            commandQueue: this.client.commandQueueLength,
+            offlineQueue: this.client.offlineQueue
+              ? this.client.offlineQueue.length
+              : 0,
+          }
+        : null,
     };
   }
 }
@@ -436,5 +451,5 @@ class ResilientRedisConnection extends EventEmitter {
 module.exports = {
   ResilientNeo4jConnection,
   ResilientPostgresConnection,
-  ResilientRedisConnection
+  ResilientRedisConnection,
 };

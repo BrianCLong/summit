@@ -32,7 +32,7 @@ data:
             min-idle: 5
             max-wait: 10000ms
         timeout: 5000ms
-    
+
     conductor:
       server:
         port: 8080
@@ -84,7 +84,7 @@ data:
         name: /var/log/conductor/conductor.log
         max-size: 100MB
         max-history: 10
-        
+
   log4j2.xml: |
     <?xml version="1.0" encoding="UTF-8"?>
     <Configuration status="WARN">

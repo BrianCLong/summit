@@ -105,7 +105,11 @@ export interface ChatMessage {
 export interface ConflictResolution {
   id: string;
   operationIds: string[];
-  conflictType: 'concurrent_edit' | 'version_mismatch' | 'permission_denied' | 'data_validation';
+  conflictType:
+    | 'concurrent_edit'
+    | 'version_mismatch'
+    | 'permission_denied'
+    | 'data_validation';
   resolution: 'auto_merge' | 'user_choice' | 'last_write_wins' | 'manual_merge';
   resolvedBy?: string;
   timestamp: Date;
@@ -137,7 +141,7 @@ export class CollaborationEngine extends EventEmitter {
     workspaceId: string,
     name: string,
     createdBy: string,
-    settings: Partial<CollaborationSession['settings']> = {}
+    settings: Partial<CollaborationSession['settings']> = {},
   ): Promise<CollaborationSession> {
     const session: CollaborationSession = {
       id: uuidv4(),
@@ -155,9 +159,9 @@ export class CollaborationEngine extends EventEmitter {
         chatEnabled: true,
         voiceEnabled: false,
         screenShareEnabled: false,
-        ...settings
+        ...settings,
       },
-      metadata: {}
+      metadata: {},
     };
 
     this.sessions.set(session.id, session);
@@ -172,7 +176,10 @@ export class CollaborationEngine extends EventEmitter {
   /**
    * Join a collaboration session
    */
-  async joinSession(sessionId: string, user: CollaborationUser): Promise<boolean> {
+  async joinSession(
+    sessionId: string,
+    user: CollaborationUser,
+  ): Promise<boolean> {
     const session = this.sessions.get(sessionId);
     if (!session || !session.isActive) {
       return false;
@@ -191,11 +198,21 @@ export class CollaborationEngine extends EventEmitter {
     }
 
     // Add user to session
-    const existingUserIndex = session.participants.findIndex(p => p.id === user.id);
+    const existingUserIndex = session.participants.findIndex(
+      (p) => p.id === user.id,
+    );
     if (existingUserIndex >= 0) {
-      session.participants[existingUserIndex] = { ...user, isOnline: true, lastSeen: new Date() };
+      session.participants[existingUserIndex] = {
+        ...user,
+        isOnline: true,
+        lastSeen: new Date(),
+      };
     } else {
-      session.participants.push({ ...user, isOnline: true, lastSeen: new Date() });
+      session.participants.push({
+        ...user,
+        isOnline: true,
+        lastSeen: new Date(),
+      });
     }
 
     // Initialize presence data
@@ -205,17 +222,21 @@ export class CollaborationEngine extends EventEmitter {
       sessionId,
       timestamp: new Date(),
       type: 'activity',
-      data: { status: 'joined' }
+      data: { status: 'joined' },
     });
 
     // Send session state to new participant
     await this.sendSessionState(sessionId, user.id);
 
     // Notify other participants
-    await this.broadcastToSession(sessionId, {
-      type: 'user_joined',
-      data: { user }
-    }, user.id);
+    await this.broadcastToSession(
+      sessionId,
+      {
+        type: 'user_joined',
+        data: { user },
+      },
+      user.id,
+    );
 
     this.emit('user_joined', { sessionId, user });
     return true;
@@ -229,7 +250,7 @@ export class CollaborationEngine extends EventEmitter {
     if (!session) return;
 
     // Update user status
-    const userIndex = session.participants.findIndex(p => p.id === userId);
+    const userIndex = session.participants.findIndex((p) => p.id === userId);
     if (userIndex >= 0) {
       session.participants[userIndex].isOnline = false;
       session.participants[userIndex].lastSeen = new Date();
@@ -245,10 +266,14 @@ export class CollaborationEngine extends EventEmitter {
     this.connections.delete(`${sessionId}:${userId}`);
 
     // Notify other participants
-    await this.broadcastToSession(sessionId, {
-      type: 'user_left',
-      data: { userId }
-    }, userId);
+    await this.broadcastToSession(
+      sessionId,
+      {
+        type: 'user_left',
+        data: { userId },
+      },
+      userId,
+    );
 
     this.emit('user_left', { sessionId, userId });
   }
@@ -256,7 +281,10 @@ export class CollaborationEngine extends EventEmitter {
   /**
    * Apply an operation to the session state
    */
-  async applyOperation(sessionId: string, operation: Operation): Promise<TransformedOperation> {
+  async applyOperation(
+    sessionId: string,
+    operation: Operation,
+  ): Promise<TransformedOperation> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error('Session not found');
@@ -269,17 +297,30 @@ export class CollaborationEngine extends EventEmitter {
 
     // Get existing operations for conflict detection
     const existingOps = this.operations.get(sessionId) || [];
-    
+
     // Transform operation against concurrent operations
-    const transformedOp = await this.operationTransformer.transform(operation, existingOps);
-    
+    const transformedOp = await this.operationTransformer.transform(
+      operation,
+      existingOps,
+    );
+
     // Check for conflicts
-    const conflicts = await this.conflictResolver.detectConflicts(transformedOp, existingOps);
-    
+    const conflicts = await this.conflictResolver.detectConflicts(
+      transformedOp,
+      existingOps,
+    );
+
     if (conflicts.length > 0) {
       // Handle conflicts
-      const resolution = await this.conflictResolver.resolveConflicts(conflicts, transformedOp);
-      this.emit('conflict_resolved', { sessionId, operation: transformedOp, resolution });
+      const resolution = await this.conflictResolver.resolveConflicts(
+        conflicts,
+        transformedOp,
+      );
+      this.emit('conflict_resolved', {
+        sessionId,
+        operation: transformedOp,
+        resolution,
+      });
     }
 
     // Store operation
@@ -287,10 +328,14 @@ export class CollaborationEngine extends EventEmitter {
     this.operations.set(sessionId, existingOps);
 
     // Broadcast to all participants
-    await this.broadcastToSession(sessionId, {
-      type: 'operation',
-      data: transformedOp
-    }, operation.userId);
+    await this.broadcastToSession(
+      sessionId,
+      {
+        type: 'operation',
+        data: transformedOp,
+      },
+      operation.userId,
+    );
 
     this.emit('operation_applied', { sessionId, operation: transformedOp });
     return transformedOp;
@@ -299,7 +344,11 @@ export class CollaborationEngine extends EventEmitter {
   /**
    * Update user presence information
    */
-  async updatePresence(sessionId: string, userId: string, presenceUpdate: Partial<PresenceUpdate>): Promise<void> {
+  async updatePresence(
+    sessionId: string,
+    userId: string,
+    presenceUpdate: Partial<PresenceUpdate>,
+  ): Promise<void> {
     const presenceMap = this.presenceData.get(sessionId);
     if (!presenceMap) return;
 
@@ -309,7 +358,7 @@ export class CollaborationEngine extends EventEmitter {
       timestamp: new Date(),
       type: 'cursor',
       data: {},
-      ...presenceUpdate
+      ...presenceUpdate,
     };
 
     presenceMap.set(userId, update);
@@ -317,7 +366,7 @@ export class CollaborationEngine extends EventEmitter {
     // Update user object in session
     const session = this.sessions.get(sessionId);
     if (session) {
-      const user = session.participants.find(p => p.id === userId);
+      const user = session.participants.find((p) => p.id === userId);
       if (user) {
         if (update.type === 'cursor' && update.data.cursor) {
           user.cursor = update.data.cursor;
@@ -330,16 +379,23 @@ export class CollaborationEngine extends EventEmitter {
     }
 
     // Broadcast presence update
-    await this.broadcastToSession(sessionId, {
-      type: 'presence_update',
-      data: update
-    }, userId);
+    await this.broadcastToSession(
+      sessionId,
+      {
+        type: 'presence_update',
+        data: update,
+      },
+      userId,
+    );
   }
 
   /**
    * Send a chat message
    */
-  async sendChatMessage(sessionId: string, message: Omit<ChatMessage, 'id' | 'timestamp'>): Promise<ChatMessage> {
+  async sendChatMessage(
+    sessionId: string,
+    message: Omit<ChatMessage, 'id' | 'timestamp'>,
+  ): Promise<ChatMessage> {
     const session = this.sessions.get(sessionId);
     if (!session || !session.settings.chatEnabled) {
       throw new Error('Chat not available');
@@ -348,7 +404,7 @@ export class CollaborationEngine extends EventEmitter {
     const chatMessage: ChatMessage = {
       id: uuidv4(),
       timestamp: new Date(),
-      ...message
+      ...message,
     };
 
     const history = this.chatHistory.get(sessionId)!;
@@ -362,7 +418,7 @@ export class CollaborationEngine extends EventEmitter {
     // Broadcast message
     await this.broadcastToSession(sessionId, {
       type: 'chat_message',
-      data: chatMessage
+      data: chatMessage,
     });
 
     this.emit('chat_message', { sessionId, message: chatMessage });
@@ -375,14 +431,16 @@ export class CollaborationEngine extends EventEmitter {
   getSessionState(sessionId: string): any {
     const session = this.sessions.get(sessionId);
     const operations = this.operations.get(sessionId) || [];
-    const presence = Array.from(this.presenceData.get(sessionId)?.values() || []);
+    const presence = Array.from(
+      this.presenceData.get(sessionId)?.values() || [],
+    );
     const chat = this.chatHistory.get(sessionId) || [];
 
     return {
       session,
       operations: operations.slice(-100), // Last 100 operations
       presence,
-      chat: chat.slice(-50) // Last 50 messages
+      chat: chat.slice(-50), // Last 50 messages
     };
   }
 
@@ -396,18 +454,24 @@ export class CollaborationEngine extends EventEmitter {
 
     if (!session) return null;
 
-    const activeUsers = session.participants.filter(p => p.isOnline).length;
+    const activeUsers = session.participants.filter((p) => p.isOnline).length;
     const totalOperations = operations.length;
-    const operationsByUser = operations.reduce((acc, op) => {
-      acc[op.userId] = (acc[op.userId] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const operationsByUser = operations.reduce(
+      (acc, op) => {
+        acc[op.userId] = (acc[op.userId] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     const chatMessages = chat.length;
-    const messagesByUser = chat.reduce((acc, msg) => {
-      acc[msg.userId] = (acc[msg.userId] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const messagesByUser = chat.reduce(
+      (acc, msg) => {
+        acc[msg.userId] = (acc[msg.userId] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return {
       sessionId,
@@ -419,9 +483,9 @@ export class CollaborationEngine extends EventEmitter {
       messagesByUser,
       sessionDuration: Date.now() - session.createdAt.getTime(),
       lastActivity: Math.max(
-        ...operations.map(op => op.timestamp.getTime()),
-        ...chat.map(msg => msg.timestamp.getTime())
-      )
+        ...operations.map((op) => op.timestamp.getTime()),
+        ...chat.map((msg) => msg.timestamp.getTime()),
+      ),
     };
   }
 
@@ -430,12 +494,12 @@ export class CollaborationEngine extends EventEmitter {
    */
   private setupWebSocketServer(port: number): void {
     this.wsServer = new WebSocketServer({ port });
-    
+
     this.wsServer.on('connection', (ws: WebSocket, request: any) => {
       const url = new URL(request.url!, `http://${request.headers.host}`);
       const sessionId = url.searchParams.get('sessionId');
       const userId = url.searchParams.get('userId');
-      
+
       if (!sessionId || !userId) {
         ws.close(1002, 'Missing session or user ID');
         return;
@@ -450,7 +514,9 @@ export class CollaborationEngine extends EventEmitter {
           await this.handleWebSocketMessage(sessionId, userId, message);
         } catch (error) {
           console.error('WebSocket message error:', error);
-          ws.send(JSON.stringify({ type: 'error', data: { message: error.message } }));
+          ws.send(
+            JSON.stringify({ type: 'error', data: { message: error.message } }),
+          );
         }
       });
 
@@ -471,37 +537,43 @@ export class CollaborationEngine extends EventEmitter {
   /**
    * Handle WebSocket messages
    */
-  private async handleWebSocketMessage(sessionId: string, userId: string, message: any): Promise<void> {
+  private async handleWebSocketMessage(
+    sessionId: string,
+    userId: string,
+    message: any,
+  ): Promise<void> {
     switch (message.type) {
       case 'operation':
         await this.applyOperation(sessionId, {
           ...message.data,
           userId,
           sessionId,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
         break;
-        
+
       case 'presence_update':
         await this.updatePresence(sessionId, userId, message.data);
         break;
-        
+
       case 'chat_message':
         await this.sendChatMessage(sessionId, {
           ...message.data,
           userId,
-          sessionId
+          sessionId,
         });
         break;
-        
+
       case 'ping':
         const connectionId = `${sessionId}:${userId}`;
         const ws = this.connections.get(connectionId);
         if (ws) {
-          ws.send(JSON.stringify({ type: 'pong', data: { timestamp: Date.now() } }));
+          ws.send(
+            JSON.stringify({ type: 'pong', data: { timestamp: Date.now() } }),
+          );
         }
         break;
-        
+
       default:
         console.warn('Unknown message type:', message.type);
     }
@@ -510,34 +582,43 @@ export class CollaborationEngine extends EventEmitter {
   /**
    * Send session state to a specific user
    */
-  private async sendSessionState(sessionId: string, userId: string): Promise<void> {
+  private async sendSessionState(
+    sessionId: string,
+    userId: string,
+  ): Promise<void> {
     const connectionId = `${sessionId}:${userId}`;
     const ws = this.connections.get(connectionId);
-    
+
     if (ws && ws.readyState === WebSocket.OPEN) {
       const state = this.getSessionState(sessionId);
-      ws.send(JSON.stringify({
-        type: 'session_state',
-        data: state
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'session_state',
+          data: state,
+        }),
+      );
     }
   }
 
   /**
    * Broadcast message to all session participants except sender
    */
-  private async broadcastToSession(sessionId: string, message: any, excludeUserId?: string): Promise<void> {
+  private async broadcastToSession(
+    sessionId: string,
+    message: any,
+    excludeUserId?: string,
+  ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
     const messageStr = JSON.stringify(message);
-    
+
     for (const participant of session.participants) {
       if (participant.id === excludeUserId || !participant.isOnline) continue;
-      
+
       const connectionId = `${sessionId}:${participant.id}`;
       const ws = this.connections.get(connectionId);
-      
+
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(messageStr);
       }
@@ -547,8 +628,11 @@ export class CollaborationEngine extends EventEmitter {
   /**
    * Validate operation permissions and structure
    */
-  private validateOperation(operation: Operation, session: CollaborationSession): boolean {
-    const user = session.participants.find(p => p.id === operation.userId);
+  private validateOperation(
+    operation: Operation,
+    session: CollaborationSession,
+  ): boolean {
+    const user = session.participants.find((p) => p.id === operation.userId);
     if (!user || !user.isOnline) return false;
 
     // Check permissions
@@ -567,16 +651,21 @@ export class CollaborationEngine extends EventEmitter {
   /**
    * Request approval for joining session
    */
-  private async requestApproval(sessionId: string, user: CollaborationUser): Promise<void> {
+  private async requestApproval(
+    sessionId: string,
+    user: CollaborationUser,
+  ): Promise<void> {
     // Notify admins/owners for approval
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
-    const admins = session.participants.filter(p => ['admin', 'owner'].includes(p.role));
-    
+    const admins = session.participants.filter((p) =>
+      ['admin', 'owner'].includes(p.role),
+    );
+
     await this.broadcastToSession(sessionId, {
       type: 'approval_request',
-      data: { user }
+      data: { user },
     });
 
     this.emit('approval_requested', { sessionId, user });
@@ -593,30 +682,32 @@ export class CollaborationEngine extends EventEmitter {
   }
 
   private cleanupInactiveSessions(): void {
-    const cutoff = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
-    
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000; // 24 hours
+
     for (const [sessionId, session] of this.sessions.entries()) {
-      const hasActiveUsers = session.participants.some(p => p.isOnline);
+      const hasActiveUsers = session.participants.some((p) => p.isOnline);
       const lastActivity = Math.max(
-        ...session.participants.map(p => p.lastSeen.getTime())
+        ...session.participants.map((p) => p.lastSeen.getTime()),
       );
-      
+
       if (!hasActiveUsers && lastActivity < cutoff) {
         this.sessions.delete(sessionId);
         this.operations.delete(sessionId);
         this.presenceData.delete(sessionId);
         this.chatHistory.delete(sessionId);
-        
+
         this.emit('session_cleaned_up', { sessionId });
       }
     }
   }
 
   private cleanupOldOperations(): void {
-    const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days
-    
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
+
     for (const [sessionId, operations] of this.operations.entries()) {
-      const recentOps = operations.filter(op => op.timestamp.getTime() > cutoff);
+      const recentOps = operations.filter(
+        (op) => op.timestamp.getTime() > cutoff,
+      );
       if (recentOps.length < operations.length) {
         this.operations.set(sessionId, recentOps);
       }
@@ -628,17 +719,20 @@ export class CollaborationEngine extends EventEmitter {
  * Operation Transformer - Handles operational transforms for conflict resolution
  */
 class OperationTransformer {
-  async transform(operation: Operation, existingOps: Operation[]): Promise<TransformedOperation> {
+  async transform(
+    operation: Operation,
+    existingOps: Operation[],
+  ): Promise<TransformedOperation> {
     let transformedOp: TransformedOperation = {
       ...operation,
       transformed: false,
-      transformedAgainst: []
+      transformedAgainst: [],
     };
 
     // Find concurrent operations (operations that happened after this one started)
-    const concurrentOps = existingOps.filter(op => 
-      op.timestamp > operation.timestamp && 
-      this.affectsTarget(op, operation)
+    const concurrentOps = existingOps.filter(
+      (op) =>
+        op.timestamp > operation.timestamp && this.affectsTarget(op, operation),
     );
 
     if (concurrentOps.length === 0) {
@@ -655,58 +749,75 @@ class OperationTransformer {
     return transformedOp;
   }
 
-  private async transformAgainst(op1: TransformedOperation, op2: Operation): Promise<TransformedOperation> {
+  private async transformAgainst(
+    op1: TransformedOperation,
+    op2: Operation,
+  ): Promise<TransformedOperation> {
     // Operational transform logic based on operation types
     if (op1.type === 'insert' && op2.type === 'insert') {
       return this.transformInsertInsert(op1, op2);
     }
-    
+
     if (op1.type === 'delete' && op2.type === 'delete') {
       return this.transformDeleteDelete(op1, op2);
     }
-    
+
     if (op1.type === 'update' && op2.type === 'update') {
       return this.transformUpdateUpdate(op1, op2);
     }
-    
+
     // Cross-type transforms
-    if ((op1.type === 'insert' && op2.type === 'delete') || 
-        (op1.type === 'delete' && op2.type === 'insert')) {
+    if (
+      (op1.type === 'insert' && op2.type === 'delete') ||
+      (op1.type === 'delete' && op2.type === 'insert')
+    ) {
       return this.transformInsertDelete(op1, op2);
     }
 
     return op1;
   }
 
-  private transformInsertInsert(op1: TransformedOperation, op2: Operation): TransformedOperation {
+  private transformInsertInsert(
+    op1: TransformedOperation,
+    op2: Operation,
+  ): TransformedOperation {
     // Adjust position if inserting at same location
-    if (op1.data.target === op2.data.target && op1.data.position >= op2.data.position) {
+    if (
+      op1.data.target === op2.data.target &&
+      op1.data.position >= op2.data.position
+    ) {
       return {
         ...op1,
         data: {
           ...op1.data,
-          position: op1.data.position + 1
-        }
+          position: op1.data.position + 1,
+        },
       };
     }
     return op1;
   }
 
-  private transformDeleteDelete(op1: TransformedOperation, op2: Operation): TransformedOperation {
+  private transformDeleteDelete(
+    op1: TransformedOperation,
+    op2: Operation,
+  ): TransformedOperation {
     // If same target, operation is void
     if (op1.data.target === op2.data.target) {
       return {
         ...op1,
         data: {
           ...op1.data,
-          action: 'void'
-        }
+          action: 'void',
+        },
       };
     }
     return op1;
   }
 
-  private transformUpdateUpdate(op1: TransformedOperation, op2: Operation): TransformedOperation {
+  private transformUpdateUpdate(
+    op1: TransformedOperation,
+    op2: Operation,
+  ): TransformedOperation {
     // Merge updates or use conflict resolution
     if (op1.data.target === op2.data.target) {
       return {
@@ -714,31 +825,39 @@ class OperationTransformer {
         conflictResolution: 'merge',
         data: {
           ...op1.data,
-          oldValue: op2.data.newValue // Update old value to reflect concurrent change
-        }
+          oldValue: op2.data.newValue, // Update old value to reflect concurrent change
+        },
       };
     }
     return op1;
   }
 
-  private transformInsertDelete(op1: TransformedOperation, op2: Operation): TransformedOperation {
+  private transformInsertDelete(
+    op1: TransformedOperation,
+    op2: Operation,
+  ): TransformedOperation {
     // Adjust positions based on insertions/deletions
-    if (op1.type === 'insert' && op2.type === 'delete' && 
-        op1.data.position > op2.data.position) {
+    if (
+      op1.type === 'insert' &&
+      op2.type === 'delete' &&
+      op1.data.position > op2.data.position
+    ) {
       return {
         ...op1,
         data: {
           ...op1.data,
-          position: op1.data.position - 1
-        }
+          position: op1.data.position - 1,
+        },
       };
     }
     return op1;
   }
 
   private affectsTarget(op1: Operation, op2: Operation): boolean {
-    return op1.data.target === op2.data.target || 
-           op1.data.targetType === op2.data.targetType;
+    return (
+      op1.data.target === op2.data.target ||
+      op1.data.targetType === op2.data.targetType
+    );
   }
 }
 
@@ -746,36 +865,45 @@ class OperationTransformer {
  * Conflict Resolver - Handles conflict detection and resolution
  */
 class ConflictResolver {
-  async detectConflicts(operation: TransformedOperation, existingOps: Operation[]): Promise<ConflictResolution[]> {
+  async detectConflicts(
+    operation: TransformedOperation,
+    existingOps: Operation[],
+  ): Promise<ConflictResolution[]> {
     const conflicts: ConflictResolution[] = [];
-    
+
     // Find operations that conflict with the current one
-    const conflictingOps = existingOps.filter(op => 
-      this.isConflicting(operation, op)
+    const conflictingOps = existingOps.filter((op) =>
+      this.isConflicting(operation, op),
     );
 
     if (conflictingOps.length > 0) {
       conflicts.push({
         id: uuidv4(),
-        operationIds: [operation.id, ...conflictingOps.map(op => op.id)],
+        operationIds: [operation.id, ...conflictingOps.map((op) => op.id)],
         conflictType: this.getConflictType(operation, conflictingOps[0]),
-        resolution: this.getAutoResolutionStrategy(operation, conflictingOps[0]),
+        resolution: this.getAutoResolutionStrategy(
+          operation,
+          conflictingOps[0],
+        ),
         timestamp: new Date(),
         details: {
           operation,
-          conflictingOperations: conflictingOps
-        }
+          conflictingOperations: conflictingOps,
+        },
       });
     }
 
     return conflicts;
   }
 
-  async resolveConflicts(conflicts: ConflictResolution[], operation: TransformedOperation): Promise<ConflictResolution> {
+  async resolveConflicts(
+    conflicts: ConflictResolution[],
+    operation: TransformedOperation,
+  ): Promise<ConflictResolution> {
     // For now, use the first conflict's resolution
     // In a real implementation, this would be more sophisticated
     const conflict = conflicts[0];
-    
+
     switch (conflict.resolution) {
       case 'auto_merge':
         return this.autoMergeConflict(conflict, operation);
@@ -788,46 +916,60 @@ class ConflictResolver {
 
   private isConflicting(op1: Operation, op2: Operation): boolean {
     // Same target, different changes
-    return op1.data.target === op2.data.target &&
-           op1.userId !== op2.userId &&
-           Math.abs(op1.timestamp.getTime() - op2.timestamp.getTime()) < 5000; // Within 5 seconds
+    return (
+      op1.data.target === op2.data.target &&
+      op1.userId !== op2.userId &&
+      Math.abs(op1.timestamp.getTime() - op2.timestamp.getTime()) < 5000
+    ); // Within 5 seconds
   }
 
-  private getConflictType(op1: Operation, op2: Operation): ConflictResolution['conflictType'] {
+  private getConflictType(
+    op1: Operation,
+    op2: Operation,
+  ): ConflictResolution['conflictType'] {
     if (op1.type === op2.type && op1.data.target === op2.data.target) {
       return 'concurrent_edit';
     }
     return 'version_mismatch';
   }
 
-  private getAutoResolutionStrategy(op1: Operation, op2: Operation): ConflictResolution['resolution'] {
+  private getAutoResolutionStrategy(
+    op1: Operation,
+    op2: Operation,
+  ): ConflictResolution['resolution'] {
     // Simple strategy: last write wins for most operations
     if (op1.timestamp > op2.timestamp) {
       return 'last_write_wins';
     }
-    
+
     // For updates, try to merge
     if (op1.type === 'update' && op2.type === 'update') {
       return 'auto_merge';
     }
-    
+
     return 'manual_merge';
   }
 
-  private autoMergeConflict(conflict: ConflictResolution, operation: TransformedOperation): ConflictResolution {
+  private autoMergeConflict(
+    conflict: ConflictResolution,
+    operation: TransformedOperation,
+  ): ConflictResolution {
     // Implement auto-merge logic
     return {
       ...conflict,
       resolution: 'auto_merge',
-      resolvedBy: 'system'
+      resolvedBy: 'system',
     };
   }
 
-  private lastWriteWinsConflict(conflict: ConflictResolution, operation: TransformedOperation): ConflictResolution {
+  private lastWriteWinsConflict(
+    conflict: ConflictResolution,
+    operation: TransformedOperation,
+  ): ConflictResolution {
     return {
       ...conflict,
       resolution: 'last_write_wins',
-      resolvedBy: 'system'
+      resolvedBy: 'system',
     };
   }
 }

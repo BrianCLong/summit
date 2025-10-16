@@ -15,5 +15,5 @@ function slugify(text) {
 
 module.exports = {
   sanitizeId,
-  slugify
+  slugify,
 };

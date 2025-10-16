@@ -3,7 +3,7 @@ import type { PolicyRule } from 'common-types';
 import {
   PolicyBacktestEngine,
   type PolicyHistory,
-  type HistoricalPolicyEvent
+  type HistoricalPolicyEvent,
 } from '../src/index.ts';
 
 const allowAnalystReadV1: PolicyRule = {
@@ -12,16 +12,18 @@ const allowAnalystReadV1: PolicyRule = {
   effect: 'allow',
   actions: ['report:read'],
   resources: ['analytics'],
-  conditions: [{ attribute: 'roles', operator: 'includes', value: ['analyst'] }],
-  obligations: [{ type: 'record-provenance' }]
+  conditions: [
+    { attribute: 'roles', operator: 'includes', value: ['analyst'] },
+  ],
+  obligations: [{ type: 'record-provenance' }],
 };
 
 const allowAnalystReadV11: PolicyRule = {
   ...allowAnalystReadV1,
   conditions: [
     { attribute: 'roles', operator: 'includes', value: ['analyst'] },
-    { attribute: 'region', operator: 'eq', value: 'us-east-1' }
-  ]
+    { attribute: 'region', operator: 'eq', value: 'us-east-1' },
+  ],
 };
 
 const denyContractorRule: PolicyRule = {
@@ -30,7 +32,9 @@ const denyContractorRule: PolicyRule = {
   effect: 'deny',
   actions: ['report:read'],
   resources: ['analytics'],
-  conditions: [{ attribute: 'roles', operator: 'includes', value: ['contractor'] }]
+  conditions: [
+    { attribute: 'roles', operator: 'includes', value: ['contractor'] },
+  ],
 };
 
 const history: PolicyHistory[] = [
@@ -42,39 +46,42 @@ const history: PolicyHistory[] = [
         version: '1.0.0',
         capturedAt: '2024-01-01T00:00:00Z',
         rules: [allowAnalystReadV1],
-        metadata: { label: 'initial rollout' }
+        metadata: { label: 'initial rollout' },
       },
       {
         policyId: 'governance',
         version: '1.1.0',
         capturedAt: '2024-02-01T00:00:00Z',
         rules: [allowAnalystReadV11],
-        metadata: { label: 'regional guardrail' }
+        metadata: { label: 'regional guardrail' },
       },
       {
         policyId: 'governance',
         version: '2.0.0',
         capturedAt: '2024-03-01T00:00:00Z',
         rules: [allowAnalystReadV11, denyContractorRule],
-        metadata: { label: 'contractor restriction' }
-      }
-    ]
-  }
+        metadata: { label: 'contractor restriction' },
+      },
+    ],
+  },
 ];
 
 describe('PolicyBacktestEngine', () => {
   const engine = new PolicyBacktestEngine(history);
 
   it('supports temporal snapshot queries and retrieval', () => {
-    const febSnapshot = engine.getSnapshotAt('governance', '2024-02-15T12:00:00Z');
+    const febSnapshot = engine.getSnapshotAt(
+      'governance',
+      '2024-02-15T12:00:00Z',
+    );
     expect(febSnapshot?.version).toBe('1.1.0');
 
     const marchRange = engine.querySnapshots('governance', {
       from: '2024-02-01T00:00:00Z',
-      to: '2024-03-31T23:59:59Z'
+      to: '2024-03-31T23:59:59Z',
     });
     expect(marchRange).toHaveLength(2);
-    expect(marchRange.map(snapshot => snapshot.version)).toContain('2.0.0');
+    expect(marchRange.map((snapshot) => snapshot.version)).toContain('2.0.0');
   });
 
   it('identifies policy version drift', () => {
@@ -97,10 +104,10 @@ describe('PolicyBacktestEngine', () => {
             tenantId: 'tenant-1',
             userId: 'user-1',
             roles: ['analyst'],
-            region: 'us-east-1'
-          }
+            region: 'us-east-1',
+          },
         },
-        expectedEffect: 'allow'
+        expectedEffect: 'allow',
       },
       {
         id: 'evt-2',
@@ -112,11 +119,11 @@ describe('PolicyBacktestEngine', () => {
             tenantId: 'tenant-1',
             userId: 'user-2',
             roles: ['analyst'],
-            region: 'eu-west-1'
-          }
+            region: 'eu-west-1',
+          },
         },
         expectedEffect: 'allow',
-        metadata: { source: 'historical-approval' }
+        metadata: { source: 'historical-approval' },
       },
       {
         id: 'evt-3',
@@ -128,11 +135,11 @@ describe('PolicyBacktestEngine', () => {
             tenantId: 'tenant-1',
             userId: 'user-3',
             roles: ['analyst', 'contractor'],
-            region: 'us-east-1'
-          }
+            region: 'us-east-1',
+          },
         },
-        expectedEffect: 'deny'
-      }
+        expectedEffect: 'deny',
+      },
     ];
 
     const report = engine.retroactiveComplianceCheck('governance', events);
@@ -149,9 +156,16 @@ describe('PolicyBacktestEngine', () => {
     expect(report.impact.ruleHits['deny-contractors']).toBe(1);
     expect(report.impact.obligationCounts['record-provenance']).toBe(1);
 
-    const auditTrail = engine.getAuditTrail({ policyId: 'governance', simulationType: 'retroactive' });
+    const auditTrail = engine.getAuditTrail({
+      policyId: 'governance',
+      simulationType: 'retroactive',
+    });
     expect(auditTrail).toHaveLength(3);
-    expect(auditTrail.some(entry => entry.eventId === 'evt-2' && entry.compliant === false)).toBe(true);
+    expect(
+      auditTrail.some(
+        (entry) => entry.eventId === 'evt-2' && entry.compliant === false,
+      ),
+    ).toBe(true);
   });
 
   it('simulates rollbacks and highlights divergences', () => {
@@ -166,9 +180,9 @@ describe('PolicyBacktestEngine', () => {
             tenantId: 'tenant-1',
             userId: 'user-4',
             roles: ['analyst', 'contractor'],
-            region: 'us-east-1'
-          }
-        }
+            region: 'us-east-1',
+          },
+        },
       },
       {
         id: 'rollback-2',
@@ -180,13 +194,17 @@ describe('PolicyBacktestEngine', () => {
             tenantId: 'tenant-1',
             userId: 'user-5',
             roles: ['analyst'],
-            region: 'us-east-1'
-          }
-        }
-      }
+            region: 'us-east-1',
+          },
+        },
+      },
     ];
 
-    const rollback = engine.simulateRollback('governance', '1.0.0', rollbackEvents);
+    const rollback = engine.simulateRollback(
+      'governance',
+      '1.0.0',
+      rollbackEvents,
+    );
     expect(rollback.targetVersion).toBe('1.0.0');
     expect(rollback.baselineVersions).toContain('2.0.0');
     expect(rollback.evaluatedEvents).toBe(2);
@@ -199,7 +217,9 @@ describe('PolicyBacktestEngine', () => {
   });
 
   it('can skip events without snapshots when configured', () => {
-    const skipEngine = new PolicyBacktestEngine(history, { missingSnapshotStrategy: 'skip' });
+    const skipEngine = new PolicyBacktestEngine(history, {
+      missingSnapshotStrategy: 'skip',
+    });
     const skipReport = skipEngine.retroactiveComplianceCheck('governance', [
       {
         id: 'pre-history',
@@ -211,10 +231,10 @@ describe('PolicyBacktestEngine', () => {
             tenantId: 'tenant-1',
             userId: 'user-6',
             roles: ['analyst'],
-            region: 'us-east-1'
-          }
-        }
-      }
+            region: 'us-east-1',
+          },
+        },
+      },
     ]);
 
     expect(skipReport.evaluatedEvents).toBe(0);

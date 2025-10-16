@@ -18,12 +18,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile && (cd server && pnpm install --frozen-lockfile) && (cd client && pnpm install --frozen-lockfile)
       - run: pnpm test -- --ci
-        env: 
+        env:
           JEST_RETRY_TIMES: '1'
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: junit
           path: reports/junit
 

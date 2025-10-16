@@ -35,12 +35,15 @@ function parseArgs() {
                WHERE relname = 'entity_embeddings' AND attname = 'embedding'`;
     const { rows } = await pg.query(q);
     // For vector, atttypmod = 4 + 4 * dims (impl detail); we’ll just attempt alter unconditionally.
-    await pg.query(`ALTER TABLE entity_embeddings ALTER COLUMN embedding TYPE vector(${dimension})`);
-    console.log(`✅ Adjusted entity_embeddings.embedding to vector(${dimension})`);
+    await pg.query(
+      `ALTER TABLE entity_embeddings ALTER COLUMN embedding TYPE vector(${dimension})`,
+    );
+    console.log(
+      `✅ Adjusted entity_embeddings.embedding to vector(${dimension})`,
+    );
     process.exit(0);
   } catch (e) {
     console.error('❌ Adjust dimension failed:', e.message);
     process.exit(1);
   }
 })();
-

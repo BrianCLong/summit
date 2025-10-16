@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   nodes: [],
@@ -16,36 +16,36 @@ const initialState = {
   },
   loading: false,
   error: null,
-}
+};
 
 const graphSlice = createSlice({
   name: 'graph',
   initialState,
   reducers: {
     setGraphData: (state, action) => {
-      state.nodes = action.payload.nodes || []
-      state.edges = action.payload.edges || []
+      state.nodes = action.payload.nodes || [];
+      state.edges = action.payload.edges || [];
     },
     addNode: (state, action) => {
-      state.nodes.push(action.payload)
+      state.nodes.push(action.payload);
     },
     addEdge: (state, action) => {
-      state.edges.push(action.payload)
+      state.edges.push(action.payload);
     },
     setSelectedNodes: (state, action) => {
-      state.selectedNodes = action.payload
+      state.selectedNodes = action.payload;
     },
     setSelectedEdges: (state, action) => {
-      state.selectedEdges = action.payload
+      state.selectedEdges = action.payload;
     },
     clearGraph: (state) => {
-      state.nodes = []
-      state.edges = []
-      state.selectedNodes = []
-      state.selectedEdges = []
+      state.nodes = [];
+      state.edges = [];
+      state.selectedNodes = [];
+      state.selectedEdges = [];
     },
   },
-})
+});
 
 export const {
   setGraphData,
@@ -54,6 +54,6 @@ export const {
   setSelectedNodes,
   setSelectedEdges,
   clearGraph,
-} = graphSlice.actions
+} = graphSlice.actions;
 
-export default graphSlice.reducer
+export default graphSlice.reducer;

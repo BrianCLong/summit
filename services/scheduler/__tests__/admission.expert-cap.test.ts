@@ -24,7 +24,11 @@ test('uses per-expert cap when present', () => {
   const ctrl = new AdmissionController(writeQoS(dir));
   const d = ctrl.shouldAdmit(
     { tenantTier: 'business', expert: 'osint_analysis', exploration: true },
-    { recentExploreRatio: 0.1, queueOldestAgeSec: 1, tenantBudgetRemaining: 1.0 }, // 10% < 12% cap
+    {
+      recentExploreRatio: 0.1,
+      queueOldestAgeSec: 1,
+      tenantBudgetRemaining: 1.0,
+    }, // 10% < 12% cap
   );
   expect(d.ok).toBe(true);
 });

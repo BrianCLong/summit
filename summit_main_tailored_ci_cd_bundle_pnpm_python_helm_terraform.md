@@ -3,6 +3,7 @@ This bundle adapts the previous generic plan to your **summit-main** repo struct
 ---
 
 ## File Map
+
 ```
 .github/
   workflows/
@@ -43,6 +44,7 @@ terraform/opa-policy-config.yaml
 ## Reusable Workflows
 
 ### `.github/workflows/wf-reuse-build-node.yml`
+
 ```yaml
 name: wf-reuse-build-node
 on:
@@ -77,6 +79,7 @@ jobs:
 ```
 
 ### `.github/workflows/wf-reuse-test-node.yml`
+
 ```yaml
 name: wf-reuse-test-node
 on:
@@ -109,6 +112,7 @@ jobs:
 ```
 
 ### `.github/workflows/wf-reuse-build-python.yml`
+
 ```yaml
 name: wf-reuse-build-python
 on:
@@ -136,6 +140,7 @@ jobs:
 ```
 
 ### `.github/workflows/wf-reuse-test-python.yml`
+
 ```yaml
 name: wf-reuse-test-python
 on:
@@ -166,6 +171,7 @@ jobs:
 ```
 
 ### `.github/workflows/wf-reuse-scan.yml`
+
 ```yaml
 name: wf-reuse-scan
 on:
@@ -186,6 +192,7 @@ jobs:
 ```
 
 ### `.github/workflows/wf-reuse-package.yml`
+
 ```yaml
 name: wf-reuse-package
 on:
@@ -217,6 +224,7 @@ jobs:
 ```
 
 ### `.github/workflows/wf-reuse-publish.yml`
+
 ```yaml
 name: wf-reuse-publish
 on:
@@ -241,6 +249,7 @@ jobs:
 ```
 
 ### `.github/workflows/wf-reuse-deploy.yml`
+
 ```yaml
 name: wf-reuse-deploy
 on:
@@ -275,6 +284,7 @@ jobs:
 ## PR Orchestrator with Path Filters
 
 ### `.github/workflows/pr.yml`
+
 ```yaml
 name: pr
 on:
@@ -358,6 +368,7 @@ jobs:
 ## Helper Scripts
 
 ### `.ci/scripts/changed_paths.py`
+
 ```python
 import json, os, subprocess, pathlib, sys
 # Derive changed paths for PR; fallback to repo scan if not available
@@ -373,6 +384,7 @@ print(json.dumps({"node": sorted(node), "python": sorted(python)}))
 ```
 
 ### `.ci/scripts/setup_pnpm.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -381,6 +393,7 @@ corepack prepare pnpm@latest --activate
 ```
 
 ### `.ci/scripts/python_bootstrap.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -390,6 +403,7 @@ pip install -U pip pytest pytest-cov
 ```
 
 ### `.ci/scripts/sbom_cyclonedx.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -402,6 +416,7 @@ if [ -f requirements.txt ] || [ -f pyproject.toml ]; then pip install cyclonedx-
 ```
 
 ### `.ci/scripts/preview_deploy.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -415,6 +430,7 @@ helm upgrade --install summit ./helm -n "$NS" \
 ```
 
 ### `.ci/scripts/verify_goldens.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -427,6 +443,7 @@ exit 0
 ## OPA Policies (tailored)
 
 ### `.ci/policies/terraform_plan.rego`
+
 ```rego
 package terraform.policy
 
@@ -440,6 +457,7 @@ deny[msg] {
 ```
 
 ### `.ci/policies/helm_values.rego`
+
 ```rego
 package helm.values
 
@@ -461,17 +479,19 @@ deny[msg] {
 ## Canary Values
 
 ### `helm/values-canary.yaml`
+
 ```yaml
 replicaCount: 3
 strategy:
   type: RollingUpdate
   rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
 readinessProbe: { httpGet: { path: /healthz, port: http } }
-livenessProbe:  { httpGet: { path: /livez,  port: http } }
+livenessProbe: { httpGet: { path: /livez, port: http } }
 resources:
   requests: { cpu: 100m, memory: 256Mi }
-  limits:   { cpu: 500m, memory: 512Mi }
-podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+  limits: { cpu: 500m, memory: 512Mi }
+podSecurityContext:
+  { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
 ```
 
 ---
@@ -479,6 +499,7 @@ podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault
 ## CODEOWNERS & PR Template
 
 ### `.github/CODEOWNERS`
+
 ```txt
 * @your-org/platform @your-org/app-owners
 /helm/ @your-org/platform
@@ -488,10 +509,12 @@ podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault
 ```
 
 ### `.github/pull_request_template.md`
+
 ```md
 ### Summary
 
 ### Risk & Flags
+
 - Feature flags:
 - Data/schema:
 - Rollback:
@@ -501,6 +524,7 @@ podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault
 ### Observability
 
 ### Checklist
+
 - [ ] Risky code behind flag
 - [ ] Docs/runbooks updated
 ```
@@ -508,6 +532,7 @@ podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault
 ---
 
 ## Environment & Secrets
+
 - `REGISTRY_USER`, `REGISTRY_TOKEN`
 - `COSIGN_PRIVATE_KEY`, `COSIGN_PASSWORD`
 - `KUBE_CONFIG`
@@ -515,8 +540,8 @@ podSecurityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault
 ---
 
 ## Notes
+
 - Node uses **pnpm** with corepack and lockfile enforcement.
 - Python targets **3.11** and discovers packages by path; adjust if you need a tox matrix.
 - Preview envs namespace per PR: `pr-<number>`; script auto-creates/destroys.
 - Maestro can call `wf-reuse-*` directly via `workflow_call` for batch orchestration and pass trace IDs.
-

@@ -73,8 +73,14 @@ export class ProvenanceLedgerService {
 
   // Committee requirement: Content hashing for integrity
   private generateContentHash(content: any): string {
-    const normalizedContent = JSON.stringify(content, Object.keys(content).sort());
-    return crypto.createHash('sha256').update(normalizedContent, 'utf8').digest('hex');
+    const normalizedContent = JSON.stringify(
+      content,
+      Object.keys(content).sort(),
+    );
+    return crypto
+      .createHash('sha256')
+      .update(normalizedContent, 'utf8')
+      .digest('hex');
   }
 
   // Committee requirement: Cryptographic signatures for immutability
@@ -90,12 +96,20 @@ export class ProvenanceLedgerService {
 
   // Starkey dissent requirement: Immutable provenance chain recording
   async recordProvenanceEntry(
-    entry: Omit<ProvenanceChain, 'id' | 'content_hash' | 'timestamp' | 'signature'>,
+    entry: Omit<
+      ProvenanceChain,
+      'id' | 'content_hash' | 'timestamp' | 'signature'
+    >,
   ): Promise<string> {
     const id = crypto.randomUUID();
     const timestamp = new Date();
     const content_hash = this.generateContentHash({ ...entry, timestamp });
-    const signature = this.generateSignature({ id, content_hash, ...entry, timestamp });
+    const signature = this.generateSignature({
+      id,
+      content_hash,
+      ...entry,
+      timestamp,
+    });
 
     const provenanceEntry: ProvenanceChain = {
       id,
@@ -299,7 +313,9 @@ export class ProvenanceLedgerService {
     });
 
     // Get provenance chain for all claims
-    const provenance_chain = await this.getProvenanceChain(bundleData.claims.map((c) => c.id));
+    const provenance_chain = await this.getProvenanceChain(
+      bundleData.claims.map((c) => c.id),
+    );
 
     // Create bundle hash
     const bundle_content = {
@@ -364,7 +380,8 @@ export class ProvenanceLedgerService {
       });
 
       logger.info({
-        message: 'Immutable disclosure bundle created - Starkey dissent compliance',
+        message:
+          'Immutable disclosure bundle created - Starkey dissent compliance',
         bundle_id,
         bundle_hash,
         immutable_seal,
@@ -381,7 +398,9 @@ export class ProvenanceLedgerService {
   }
 
   // Committee requirement: Provenance chain verification
-  async verifyProvenanceChain(entityIds: string[]): Promise<{ valid: boolean; errors: string[] }> {
+  async verifyProvenanceChain(
+    entityIds: string[],
+  ): Promise<{ valid: boolean; errors: string[] }> {
     const errors: string[] = [];
 
     try {
@@ -432,7 +451,9 @@ export class ProvenanceLedgerService {
   }
 
   // Helper method to get provenance chain
-  private async getProvenanceChain(entityIds: string[]): Promise<ProvenanceChain[]> {
+  private async getProvenanceChain(
+    entityIds: string[],
+  ): Promise<ProvenanceChain[]> {
     const placeholders = entityIds.map((_, i) => `$${i + 1}`).join(', ');
     const result = await timescaleQuery(
       `

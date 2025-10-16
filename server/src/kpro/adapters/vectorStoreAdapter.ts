@@ -1,15 +1,16 @@
 import fetchFn from 'node-fetch';
 import crypto from 'crypto';
-import {
-  VectorDocument,
-  VectorIndexSnapshot,
-} from '../types.js';
+import { VectorDocument, VectorIndexSnapshot } from '../types.js';
 
-export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
+export type FetchLike = (
+  input: string,
+  init?: RequestInit,
+) => Promise<Response>;
 
-const defaultFetch: FetchLike = (typeof fetch !== 'undefined'
-  ? fetch.bind(globalThis)
-  : (fetchFn as unknown as FetchLike));
+const defaultFetch: FetchLike =
+  typeof fetch !== 'undefined'
+    ? fetch.bind(globalThis)
+    : (fetchFn as unknown as FetchLike);
 
 export interface VectorStoreAdapter {
   readonly name: string;
@@ -127,7 +128,7 @@ export class PineconeVectorStoreAdapter implements VectorStoreAdapter {
         throw new Error(`Pinecone list failed: ${res.status} ${body}`);
       }
       const data: any = await res.json();
-      ids.push(...((data.vectors ?? []).map((v: any) => v.id)));
+      ids.push(...(data.vectors ?? []).map((v: any) => v.id));
       next = data.pagination?.next;
     } while (next);
     ids.sort();
@@ -159,7 +160,10 @@ export class WeaviateVectorStoreAdapter implements VectorStoreAdapter {
     if (!options.className) {
       throw new Error('Weaviate className is required');
     }
-    this.baseUrl = `${options.scheme || 'https'}://${options.host}`.replace(/\/$/, '');
+    this.baseUrl = `${options.scheme || 'https'}://${options.host}`.replace(
+      /\/$/,
+      '',
+    );
     this.className = options.className;
     this.apiKey = options.apiKey;
     this.fetch = options.fetch ?? defaultFetch;
@@ -268,7 +272,9 @@ export class WeaviateVectorStoreAdapter implements VectorStoreAdapter {
         after = undefined;
         break;
       }
-      ids.push(...batch.map((item: any) => item._additional?.id).filter(Boolean));
+      ids.push(
+        ...batch.map((item: any) => item._additional?.id).filter(Boolean),
+      );
       after = batch[batch.length - 1]?._additional?.id;
     } while (after);
     ids.sort();

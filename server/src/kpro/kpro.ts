@@ -56,11 +56,17 @@ export class KnowledgePurgeReindexOrchestrator {
     await this.audit.append({
       runId: request.runId,
       type: 'forget.received',
-      payload: { ids, triggeredBy: request.triggeredBy, issuedAt: request.issuedAt },
+      payload: {
+        ids,
+        triggeredBy: request.triggeredBy,
+        issuedAt: request.issuedAt,
+      },
     });
 
     const purgeProofs: PurgeProof[] = [];
-    const beforeSnapshots = await Promise.all(this.vectorStores.map((vs) => vs.snapshot()));
+    const beforeSnapshots = await Promise.all(
+      this.vectorStores.map((vs) => vs.snapshot()),
+    );
 
     await this.chunkStore.deleteByDocumentIds(ids);
     await Promise.all(this.caches.map((cache) => cache.invalidate(ids)));
@@ -75,7 +81,8 @@ export class KnowledgePurgeReindexOrchestrator {
       await store.removeByIds(vectorIds);
       const afterSnapshot = await store.snapshot();
       const before = beforeSnapshots.find((s) => s.adapter === store.name);
-      if (!before) throw new Error(`Missing snapshot for adapter ${store.name}`);
+      if (!before)
+        throw new Error(`Missing snapshot for adapter ${store.name}`);
       const diff = computeDiff(before, afterSnapshot);
       const absence = await store.fetchByIds(vectorIds);
       if (absence.length) {
@@ -116,7 +123,11 @@ export class KnowledgePurgeReindexOrchestrator {
         const documents = normalizedChunks.map((chunk) => ({
           id: `${doc.id}:${chunk.id}`,
           values: chunk.embedding,
-          metadata: { documentId: doc.id, version: chunk.version, text: chunk.text },
+          metadata: {
+            documentId: doc.id,
+            version: chunk.version,
+            text: chunk.text,
+          },
         }));
         await store.upsert(documents);
         await this.audit.append({
@@ -157,18 +168,25 @@ export class KnowledgePurgeReindexOrchestrator {
     for (const event of filtered) {
       switch (event.type) {
         case 'vector.delete':
-          await context.applyVectorDelete(event.payload.adapter, event.payload.ids);
+          await context.applyVectorDelete(
+            event.payload.adapter,
+            event.payload.ids,
+          );
           break;
         case 'vector.upsert':
           await context.applyVectorUpsert(
             event.payload.adapter,
-            (event.payload.documents ?? []).map((doc: VectorDocument) => ({ ...doc })),
+            (event.payload.documents ?? []).map((doc: VectorDocument) => ({
+              ...doc,
+            })),
           );
           break;
         case 'chunk.replace':
           await context.applyChunkReplace(
             event.payload.documentId,
-            (event.payload.chunks ?? []).map((chunk: ChunkRecord) => ({ ...chunk })),
+            (event.payload.chunks ?? []).map((chunk: ChunkRecord) => ({
+              ...chunk,
+            })),
             event.payload.document,
           );
           break;
@@ -178,7 +196,9 @@ export class KnowledgePurgeReindexOrchestrator {
     }
   }
 
-  private async rechunkAndEmbed(document: DocumentRecord): Promise<ChunkRebuildResult> {
+  private async rechunkAndEmbed(
+    document: DocumentRecord,
+  ): Promise<ChunkRebuildResult> {
     const chunks = await this.chunking.chunk(document);
     return { documentId: document.id, chunks };
   }

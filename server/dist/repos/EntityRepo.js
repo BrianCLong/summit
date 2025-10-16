@@ -6,6 +6,8 @@ import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 const repoLogger = logger.child({ name: 'EntityRepo' });
 export class EntityRepo {
+    pg;
+    neo4j;
     constructor(pg, neo4j) {
         this.pg = pg;
         this.neo4j = neo4j;
@@ -32,7 +34,11 @@ export class EntityRepo {
             const entity = rows[0];
             // 2. Outbox event for Neo4j sync
             await client.query(`INSERT INTO outbox_events (id, topic, payload)
-         VALUES ($1, $2, $3)`, [uuidv4(), 'entity.upsert', JSON.stringify({ id: entity.id, tenantId: entity.tenant_id })]);
+         VALUES ($1, $2, $3)`, [
+                uuidv4(),
+                'entity.upsert',
+                JSON.stringify({ id: entity.id, tenantId: entity.tenant_id }),
+            ]);
             await client.query('COMMIT');
             // 3. Attempt immediate Neo4j write (best effort)
             try {
@@ -88,7 +94,11 @@ export class EntityRepo {
             const entity = rows[0];
             // Outbox event for Neo4j sync
             await client.query(`INSERT INTO outbox_events (id, topic, payload)
-         VALUES ($1, $2, $3)`, [uuidv4(), 'entity.upsert', JSON.stringify({ id: entity.id, tenantId: entity.tenant_id })]);
+         VALUES ($1, $2, $3)`, [
+                uuidv4(),
+                'entity.upsert',
+                JSON.stringify({ id: entity.id, tenantId: entity.tenant_id }),
+            ]);
             await client.query('COMMIT');
             // Best effort Neo4j update
             try {

@@ -15,8 +15,8 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "High API latency detected on IntelGraph API"
-            description: "IntelGraph API p99 latency is consistently above 500ms for 5 minutes."
+            summary: 'High API latency detected on IntelGraph API'
+            description: 'IntelGraph API p99 latency is consistently above 500ms for 5 minutes.'
 
         - alert: HighApiErrorRate
           expr: sum(rate(http_requests_total{job="intelgraph-api", code=~"5.."}[5m])) / sum(rate(http_requests_total{job="intelgraph-api"}[5m])) > 0.05
@@ -24,8 +24,8 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "High API error rate detected on IntelGraph API"
-            description: "IntelGraph API is returning more than 5% 5xx errors for 5 minutes."
+            summary: 'High API error rate detected on IntelGraph API'
+            description: 'IntelGraph API is returning more than 5% 5xx errors for 5 minutes.'
 
         - alert: ApiSaturationHigh
           expr: sum(rate(process_cpu_seconds_total{job="intelgraph-api"}[5m])) / sum(process_cpu_seconds_total{job="intelgraph-api"}) > 0.8
@@ -33,8 +33,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "IntelGraph API CPU saturation is high"
-            description: "IntelGraph API CPU utilization is consistently above 80% for 10 minutes, indicating potential saturation."
+            summary: 'IntelGraph API CPU saturation is high'
+            description: 'IntelGraph API CPU utilization is consistently above 80% for 10 minutes, indicating potential saturation.'
 
         - alert: CertExpirySoon
           expr: probe_ssl_earliest_cert_expiry_days{job="blackbox-exporter"} < 7
@@ -42,8 +42,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "SSL certificate for {{ $labels.instance }} expires soon"
-            description: "SSL certificate for {{ $labels.instance }} will expire in less than 7 days."
+            summary: 'SSL certificate for {{ $labels.instance }} expires soon'
+            description: 'SSL certificate for {{ $labels.instance }} will expire in less than 7 days.'
 
         - alert: HpaThrashing
           expr: changes(kube_horizontalpodautoscaler_status_current_replicas[15m]) > 5
@@ -51,5 +51,5 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "HPA thrashing detected"
-            description: "Horizontal Pod Autoscaler for {{ $labels.horizontalpodautoscaler }} is thrashing (scaling more than 5 times in 15 minutes)."
+            summary: 'HPA thrashing detected'
+            description: 'Horizontal Pod Autoscaler for {{ $labels.horizontalpodautoscaler }} is thrashing (scaling more than 5 times in 15 minutes).'

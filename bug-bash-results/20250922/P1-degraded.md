@@ -1,6 +1,7 @@
 # P1 - Degraded Issues (Impacts User Experience)
 
 ## Template
+
 ```
 **Issue ID**: P1-001
 **Component**: [UI/API/Backend/Integration]
@@ -15,5 +16,5 @@
 ```
 
 ## Issues Found
-<!-- Add P1 issues below -->
 
+<!-- Add P1 issues below -->

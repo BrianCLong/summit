@@ -14,7 +14,9 @@ function extractGoDocs(source) {
     if (!description) {
       return;
     }
-    const nameMatchFunc = signature.match(/^func\s+(?:\([^)]*\)\s*)?([A-Za-z0-9_]+)/);
+    const nameMatchFunc = signature.match(
+      /^func\s+(?:\([^)]*\)\s*)?([A-Za-z0-9_]+)/,
+    );
     const nameMatchType = signature.match(/^type\s+([A-Za-z0-9_]+)/);
     const nameMatchConst = signature.match(/^(?:const|var)\s+([A-Za-z0-9_]+)/);
     let name = 'symbol';
@@ -34,7 +36,7 @@ function extractGoDocs(source) {
       kind,
       summary: summarize(description),
       description,
-      signature: signature.trim()
+      signature: signature.trim(),
     });
   }
 
@@ -45,7 +47,12 @@ function extractGoDocs(source) {
       commentBuffer.push(trimmed.replace(/^\/\//, '').trim());
       continue;
     }
-    if (trimmed.startsWith('func ') || trimmed.startsWith('type ') || trimmed.startsWith('const ') || trimmed.startsWith('var ')) {
+    if (
+      trimmed.startsWith('func ') ||
+      trimmed.startsWith('type ') ||
+      trimmed.startsWith('const ') ||
+      trimmed.startsWith('var ')
+    ) {
       flushDoc(trimmed, trimmed);
     } else {
       commentBuffer = [];
@@ -56,5 +63,5 @@ function extractGoDocs(source) {
 }
 
 module.exports = {
-  extractGoDocs
+  extractGoDocs,
 };

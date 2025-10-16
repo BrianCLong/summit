@@ -8,8 +8,10 @@ jest.mock('../../src/recipes/loader.js');
 jest.mock('../../src/featureFlags/flagsmith.js');
 jest.mock('crypto');
 
-const mockLoadRecipe = require('../../src/recipes/loader.js').loadRecipe as jest.MockedFunction<any>;
-const mockFlagEnabled = require('../../src/featureFlags/flagsmith.js').isEnabled as jest.MockedFunction<any>;
+const mockLoadRecipe = require('../../src/recipes/loader.js')
+  .loadRecipe as jest.MockedFunction<any>;
+const mockFlagEnabled = require('../../src/featureFlags/flagsmith.js')
+  .isEnabled as jest.MockedFunction<any>;
 const mockCrypto = require('crypto') as jest.Mocked<typeof import('crypto')>;
 
 describe('GraphQL startRecipe Integration Tests', () => {
@@ -37,15 +39,17 @@ describe('GraphQL startRecipe Integration Tests', () => {
     beforeEach(() => {
       // Mock file system calls
       jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readdirSync').mockReturnValue(['test-recipe.yaml', 'other-recipe.yml'] as any);
-      
+      jest
+        .spyOn(fs, 'readdirSync')
+        .mockReturnValue(['test-recipe.yaml', 'other-recipe.yml'] as any);
+
       mockLoadRecipe.mockResolvedValue({
         name: 'Test Recipe',
         description: 'A test recipe for integration testing',
         inputs: {
           requiredParam: { required: true, type: 'string' },
-          optionalParam: { required: false, type: 'number', default: 42 }
-        }
+          optionalParam: { required: false, type: 'number', default: 42 },
+        },
       });
     });
 
@@ -64,7 +68,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
 
       const variables = {
         name: 'test-recipe',
-        inputs: { requiredParam: 'test-value' }
+        inputs: { requiredParam: 'test-value' },
       };
 
       const response = await executeGraphQL(mutation, variables);
@@ -76,7 +80,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
         auditId: 'audit-test-uuid-123',
         status: 'QUEUED',
         recipe: 'test-recipe.yaml',
-        inputs: { requiredParam: 'test-value' }
+        inputs: { requiredParam: 'test-value' },
       });
     });
 
@@ -91,11 +95,15 @@ describe('GraphQL startRecipe Integration Tests', () => {
         }
       `;
 
-      const response = await executeGraphQL(mutation, { name: 'nonexistent-recipe' });
+      const response = await executeGraphQL(mutation, {
+        name: 'nonexistent-recipe',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].message).toContain('Recipe \'nonexistent-recipe\' not found');
+      expect(response.body.errors[0].message).toContain(
+        "Recipe 'nonexistent-recipe' not found",
+      );
     });
 
     it('should validate required inputs', async () => {
@@ -109,14 +117,16 @@ describe('GraphQL startRecipe Integration Tests', () => {
 
       const variables = {
         name: 'test-recipe',
-        inputs: { optionalParam: 123 } // Missing requiredParam
+        inputs: { optionalParam: 123 }, // Missing requiredParam
       };
 
       const response = await executeGraphQL(mutation, variables);
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].message).toBe('Required input \'requiredParam\' is missing');
+      expect(response.body.errors[0].message).toBe(
+        "Required input 'requiredParam' is missing",
+      );
     });
 
     it('should handle recipe loading errors', async () => {
@@ -134,7 +144,9 @@ describe('GraphQL startRecipe Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].message).toBe('Recipe loading error: Invalid YAML syntax');
+      expect(response.body.errors[0].message).toBe(
+        'Recipe loading error: Invalid YAML syntax',
+      );
     });
 
     it('should enforce budget plugin when required', async () => {
@@ -152,15 +164,18 @@ describe('GraphQL startRecipe Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].message).toBe('Budget plugin is required but not available in context');
+      expect(response.body.errors[0].message).toBe(
+        'Budget plugin is required but not available in context',
+      );
 
       delete process.env.REQUIRE_BUDGET_PLUGIN;
     });
 
     it('should work with recipe files having .yml extension', async () => {
-      jest.spyOn(fs, 'existsSync')
+      jest
+        .spyOn(fs, 'existsSync')
         .mockReturnValueOnce(false) // .yaml not found
-        .mockReturnValueOnce(true);  // .yml found
+        .mockReturnValueOnce(true); // .yml found
 
       const mutation = `
         mutation StartRecipe($name: String!) {
@@ -186,7 +201,9 @@ describe('GraphQL startRecipe Integration Tests', () => {
         }
       `;
 
-      const response = await executeGraphQL(mutation, { name: 'test-recipe.yaml' });
+      const response = await executeGraphQL(mutation, {
+        name: 'test-recipe.yaml',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
@@ -196,7 +213,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
     it('should handle empty inputs gracefully', async () => {
       mockLoadRecipe.mockResolvedValue({
         name: 'Simple Recipe',
-        description: 'No inputs required'
+        description: 'No inputs required',
       });
 
       const mutation = `
@@ -208,7 +225,9 @@ describe('GraphQL startRecipe Integration Tests', () => {
         }
       `;
 
-      const response = await executeGraphQL(mutation, { name: 'simple-recipe' });
+      const response = await executeGraphQL(mutation, {
+        name: 'simple-recipe',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeUndefined();
@@ -237,8 +256,10 @@ describe('GraphQL startRecipe Integration Tests', () => {
 
       expect(response.status).toBe(200);
       const mutations = response.body.data.__schema.mutationType.fields;
-      const startRecipeMutation = mutations.find((f: any) => f.name === 'startRecipe');
-      
+      const startRecipeMutation = mutations.find(
+        (f: any) => f.name === 'startRecipe',
+      );
+
       expect(startRecipeMutation).toBeDefined();
     });
   });
@@ -278,7 +299,9 @@ describe('GraphQL startRecipe Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].message).toContain('Failed to load recipe');
+      expect(response.body.errors[0].message).toContain(
+        'Failed to load recipe',
+      );
     });
   });
 
@@ -302,7 +325,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body.data.startRecipe).toEqual({
         runId: 'recipe-run-run-uuid-123',
-        auditId: 'audit-audit-uuid-456'
+        auditId: 'audit-audit-uuid-456',
       });
     });
   });

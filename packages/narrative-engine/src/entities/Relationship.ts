@@ -40,7 +40,12 @@ export class Relationship {
   }
 
   influenceFromMood(mood: number): number {
-    const direction = this.type === 'ally' || this.type === 'family' ? 1 : this.type === 'rival' ? -1 : 0.25;
+    const direction =
+      this.type === 'ally' || this.type === 'family'
+        ? 1
+        : this.type === 'rival'
+          ? -1
+          : 0.25;
     const scaled = mood * this.intensity * this.trust * direction;
     return Math.max(-5, Math.min(5, scaled));
   }

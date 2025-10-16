@@ -1,10 +1,15 @@
 {
   "_type": "https://in-toto.io/Statement/v0.1",
   "predicateType": "https://slsa.dev/provenance/v0.2",
-  "subject": [{"name": "intelgraph", "digest": {"sha256": "abc123def456"}}],
+  "subject": [{ "name": "intelgraph", "digest": { "sha256": "abc123def456" } }],
   "predicate": {
-    "builder": {"id": "https://github.com/BrianCLong/summit/actions"},
+    "builder": { "id": "https://github.com/BrianCLong/summit/actions" },
     "buildType": "https://github.com/actions/runner",
-    "invocation": {"configSource": {"uri": "https://github.com/BrianCLong/summit", "digest": {"sha1": "045cfb663"}}}
+    "invocation": {
+      "configSource": {
+        "uri": "https://github.com/BrianCLong/summit",
+        "digest": { "sha1": "045cfb663" }
+      }
+    }
   }
 }

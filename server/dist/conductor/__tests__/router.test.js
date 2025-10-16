@@ -126,8 +126,14 @@ describe('MoERouter', () => {
         test('calculates complexity score correctly', () => {
             const simpleTask = 'Hello';
             const complexTask = 'Analyze comprehensive forensic investigation legal policy regulatory framework advanced multi-step detailed complex deep';
-            const simpleDecision = router.route({ task: simpleTask, sensitivity: 'low' });
-            const complexDecision = router.route({ task: complexTask, sensitivity: 'low' });
+            const simpleDecision = router.route({
+                task: simpleTask,
+                sensitivity: 'low',
+            });
+            const complexDecision = router.route({
+                task: complexTask,
+                sensitivity: 'low',
+            });
             expect(simpleDecision.features.complexityScore).toBeLessThan(complexDecision.features.complexityScore);
             expect(complexDecision.features.complexityScore).toBeGreaterThan(5);
         });

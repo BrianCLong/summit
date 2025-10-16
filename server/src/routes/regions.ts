@@ -11,7 +11,9 @@ r.get('/regions/stream', async (req, res) => {
     Connection: 'keep-alive',
   });
   const tick = async () => {
-    const { rows: latest } = await pg.query(`SELECT COALESCE(MAX(seq),0) AS max FROM run_ledger`);
+    const { rows: latest } = await pg.query(
+      `SELECT COALESCE(MAX(seq),0) AS max FROM run_ledger`,
+    );
     const max = Number(latest[0].max || 0);
     const { rows: wms } = await pg.query(
       `SELECT peer, last_seq, EXTRACT(EPOCH FROM now()-updated_at)::int AS age FROM ledger_watermarks`,

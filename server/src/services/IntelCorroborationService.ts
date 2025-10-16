@@ -50,7 +50,10 @@ export class IntelCorroborationService {
     const now = Date.now();
 
     for (const e of evidence) {
-      const ts = typeof e.timestamp === 'number' ? e.timestamp : new Date(e.timestamp).getTime();
+      const ts =
+        typeof e.timestamp === 'number'
+          ? e.timestamp
+          : new Date(e.timestamp).getTime();
       const ageDays = Math.max(0, (now - ts) / (1000 * 60 * 60 * 24));
       const recency = 1 / (1 + ageDays); // simple time decay
       const weight = (e.trust || 0) * recency;
@@ -65,7 +68,8 @@ export class IntelCorroborationService {
 
     const evidenceScore = totalWeight ? supportWeight / totalWeight : 0.5;
     const manual = this.getAnalystAverage(claimId);
-    const confidenceScore = manual != null ? (evidenceScore + manual) / 2 : evidenceScore;
+    const confidenceScore =
+      manual != null ? (evidenceScore + manual) / 2 : evidenceScore;
 
     return { confidenceScore, corroboratedBy, disputedBy };
   }

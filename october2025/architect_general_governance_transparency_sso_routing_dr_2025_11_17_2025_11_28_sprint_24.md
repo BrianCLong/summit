@@ -8,6 +8,7 @@
 ---
 
 ## 0) Executive Summary
+
 - **Track A (Now‑value):**
   - **Policy Transparency:** Push policy bundle signatures to **Rekor** (or transparency log of choice) and verify at startup; show verification status in UI.
   - **SSO Federation & ABAC Mapper:** OIDC/SAML attribute ingest → ABAC mapping → OPA input; mapper UI + tests.
@@ -20,6 +21,7 @@
   - **Error Budget Enforcement:** Pre‑deploy burn‑rate check; block rollouts if breach ongoing.
 
 **Definition of Done:**
+
 - Policy bundle verify path checks signature + transparency inclusion proof; UI shows green check + bundle digest.
 - SSO logins produce ABAC context; deny/allow decisions evidence includes federation attributes (redacted).
 - Routing favors region healthy target; failover drill succeeds; evidence attached.
@@ -30,54 +32,61 @@
 
 ## 1) Objectives & Key Results
 
-**OBJ‑1: Transparency‑Logged Policy Bundles**  
-- **KR1.1** CI logs Rekor entry UUID for `switchboard.bundle.tar.gz`.  
-- **KR1.2** Init verify checks cosign + Rekor inclusion proof; startup blocked on failure.  
+**OBJ‑1: Transparency‑Logged Policy Bundles**
+
+- **KR1.1** CI logs Rekor entry UUID for `switchboard.bundle.tar.gz`.
+- **KR1.2** Init verify checks cosign + Rekor inclusion proof; startup blocked on failure.
 - **KR1.3** UI banner displays bundle digest, Rekor UUID, verify timestamp.
 
-**OBJ‑2: SSO Federation with ABAC Mapper**  
-- **KR2.1** Support OIDC (Auth0/Entra) + SAML (Okta) claims ingestion.  
-- **KR2.2** Mapping DSL → ABAC context (`role`, `residency`, `classification_cap`, `groups`).  
+**OBJ‑2: SSO Federation with ABAC Mapper**
+
+- **KR2.1** Support OIDC (Auth0/Entra) + SAML (Okta) claims ingestion.
+- **KR2.2** Mapping DSL → ABAC context (`role`, `residency`, `classification_cap`, `groups`).
 - **KR2.3** Policy tests confirm mapped attributes enforce step‑up and residency.
 
-**OBJ‑3: Multi‑Cloud Multi‑Region Routing**  
-- **KR3.1** DNS/GSLB health checks per region (US‑A, EU‑B).  
-- **KR3.2** Sticky `x-region` cookie + override UI; synthetic probes per region cloud.  
+**OBJ‑3: Multi‑Cloud Multi‑Region Routing**
+
+- **KR3.1** DNS/GSLB health checks per region (US‑A, EU‑B).
+- **KR3.2** Sticky `x-region` cookie + override UI; synthetic probes per region cloud.
 - **KR3.3** Failover drill: blackhole region; SLOs hold; auto‑rollback works if score < 90.
 
-**OBJ‑4: Automated DR Simulations**  
-- **KR4.1** Weekly workflow: backup verify + restore into sandbox; integrity diff.  
-- **KR4.2** Evidence pack archived (hashes, counts, timings).  
+**OBJ‑4: Automated DR Simulations**
+
+- **KR4.1** Weekly workflow: backup verify + restore into sandbox; integrity diff.
+- **KR4.2** Evidence pack archived (hashes, counts, timings).
 - **KR4.3** RPO≤15m/RTO≤30m met.
 
-**OBJ‑5: Audit Advanced Search & Presets**  
-- **KR5.1** Postgres FTS (`GIN` on `to_tsvector('simple', jsonb::text)`) for `subject/resource/context`.  
-- **KR5.2** Saved queries API + UI; one‑click export with manifest.  
+**OBJ‑5: Audit Advanced Search & Presets**
+
+- **KR5.1** Postgres FTS (`GIN` on `to_tsvector('simple', jsonb::text)`) for `subject/resource/context`.
+- **KR5.2** Saved queries API + UI; one‑click export with manifest.
 - **KR5.3** p95 query latency ≤300ms for 1M rows (staging dataset).
 
-**OBJ‑6: Canary Scoring + Error Budget Gate**  
-- **KR6.1** Weighted scoring across journeys: Home(30), Agents(25), Audit(25), Admin(20).  
-- **KR6.2** Gate requires score ≥90; otherwise rollback.  
+**OBJ‑6: Canary Scoring + Error Budget Gate**
+
+- **KR6.1** Weighted scoring across journeys: Home(30), Agents(25), Audit(25), Admin(20).
+- **KR6.2** Gate requires score ≥90; otherwise rollback.
 - **KR6.3** Pre‑deploy burn‑rate check (last 1h) <% error budget; block if >2x.
 
 ---
 
 ## 2) Work Breakdown & Owners
 
-| # | Epic | Issue | Owner | Acceptance | Evidence |
-|---|------|-------|-------|------------|----------|
-| A | Policy | Rekor log + verify gate | SRE | Startup blocks on unverifiable bundle | Rekor UUID, verify logs |
-| B | SSO | OIDC/SAML ingest + mapper UI | AppEng | Mappings applied; tests green | Login traces, audit entries |
-| C | Routing | DNS/GSLB + region cookie | SRE | Failover drill success | Probe reports, route logs |
-| D | DR | Weekly restore sim | ProdOps | RPO/RTO met | Evidence pack with hashes |
-| E | Audit | FTS indexes + saved queries | DataEng | p95 ≤300ms | EXPLAIN ANALYZE, timings |
-| F | Release | Canary score + budget gate | DevOps | Gate enforces thresholds | CI logs, rollback proof |
+| #   | Epic    | Issue                        | Owner   | Acceptance                            | Evidence                    |
+| --- | ------- | ---------------------------- | ------- | ------------------------------------- | --------------------------- |
+| A   | Policy  | Rekor log + verify gate      | SRE     | Startup blocks on unverifiable bundle | Rekor UUID, verify logs     |
+| B   | SSO     | OIDC/SAML ingest + mapper UI | AppEng  | Mappings applied; tests green         | Login traces, audit entries |
+| C   | Routing | DNS/GSLB + region cookie     | SRE     | Failover drill success                | Probe reports, route logs   |
+| D   | DR      | Weekly restore sim           | ProdOps | RPO/RTO met                           | Evidence pack with hashes   |
+| E   | Audit   | FTS indexes + saved queries  | DataEng | p95 ≤300ms                            | EXPLAIN ANALYZE, timings    |
+| F   | Release | Canary score + budget gate   | DevOps  | Gate enforces thresholds              | CI logs, rollback proof     |
 
 ---
 
 ## 3) Implementation Artifacts (Drop‑in)
 
 ### 3.1 CI: Build, Sign, Attest & Rekor Log (`.github/workflows/policy.bundle.yml`)
+
 ```yaml
 name: policy-bundle
 on: [push]
@@ -102,6 +111,7 @@ jobs:
 ```
 
 ### 3.2 Init Verify with Rekor Inclusion (`deploy/helm/switchboard/templates/init-verify.yaml`)
+
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -111,7 +121,7 @@ spec:
   initContainers:
     - name: verify-bundle
       image: ghcr.io/org/verify-tool:latest
-      command: ["/bin/sh","-c"]
+      command: ['/bin/sh', '-c']
       args:
         - >-
           set -e; \
@@ -121,18 +131,33 @@ spec:
   containers:
     - name: noop
       image: busybox
-      command: ["sh","-c","sleep 1"]
-  volumes: [{ name: policy, configMap: { name: switchboard-policy-cm }}]
+      command: ['sh', '-c', 'sleep 1']
+  volumes: [{ name: policy, configMap: { name: switchboard-policy-cm } }]
 ```
 
 ### 3.3 UI: Policy Verify Banner (`apps/web/src/components/PolicyVerifyBanner.tsx`)
+
 ```tsx
-export function PolicyVerifyBanner({ digest, rekorUUID, verifiedAt }:{digest:string, rekorUUID:string, verifiedAt:string}){
+export function PolicyVerifyBanner({
+  digest,
+  rekorUUID,
+  verifiedAt,
+}: {
+  digest: string;
+  rekorUUID: string;
+  verifiedAt: string;
+}) {
   return (
     <div className="rounded-2xl p-3 bg-emerald-50 border border-emerald-200">
       <div className="text-sm">Policy bundle verified ✓</div>
       <div className="text-xs font-mono break-all">{digest}</div>
-      <a className="text-xs underline" href={`https://rekor.tlog.dev/entries/${rekorUUID}`} target="_blank">transparency record</a>
+      <a
+        className="text-xs underline"
+        href={`https://rekor.tlog.dev/entries/${rekorUUID}`}
+        target="_blank"
+      >
+        transparency record
+      </a>
       <div className="text-xs">{new Date(verifiedAt).toLocaleString()}</div>
     </div>
   );
@@ -140,48 +165,57 @@ export function PolicyVerifyBanner({ digest, rekorUUID, verifiedAt }:{digest:str
 ```
 
 ### 3.4 SSO Federation — Mapping DSL & UI
+
 **Mapping DSL (`config/sso/abac-map.yaml`)**
+
 ```yaml
 version: 1
 providers:
   - name: okta_saml
-    match: { issuer: "https://okta.example.com/app/..." }
+    match: { issuer: 'https://okta.example.com/app/...' }
     map:
-      role: "${assertion.attributes.role}" # e.g., Admin/Operator/Analyst
-      residency: "${assertion.attributes.region}" # US/EU
-      classification_cap: "${assertion.attributes.clearance}" # 0..3
-      groups: "${assertion.attributes.groups}" # CSV
+      role: '${assertion.attributes.role}' # e.g., Admin/Operator/Analyst
+      residency: '${assertion.attributes.region}' # US/EU
+      classification_cap: '${assertion.attributes.clearance}' # 0..3
+      groups: '${assertion.attributes.groups}' # CSV
   - name: entra_oidc
-    match: { issuer: "https://login.microsoftonline.com/<tenant>/v2.0" }
+    match: { issuer: 'https://login.microsoftonline.com/<tenant>/v2.0' }
     map:
-      role: "${claims.roles[0]}"
-      residency: "${claims.extension_region}"
-      groups: "${claims.groups}"
+      role: '${claims.roles[0]}'
+      residency: '${claims.extension_region}'
+      groups: '${claims.groups}'
 ```
 
 **Mapper (`apps/server/lib/abac-map.ts`)**
+
 ```ts
 import yaml from 'js-yaml';
-export function mapToAbac(payload:any, cfgYaml:string){
-  const cfg:any = yaml.load(cfgYaml); // validate against schema in CI
-  const p = cfg.providers.find((p:any)=> matches(p.match, payload.issuer));
-  if(!p) throw new Error('no_provider_match');
-  const ctx:any = { subject:{ authenticated:true } };
+export function mapToAbac(payload: any, cfgYaml: string) {
+  const cfg: any = yaml.load(cfgYaml); // validate against schema in CI
+  const p = cfg.providers.find((p: any) => matches(p.match, payload.issuer));
+  if (!p) throw new Error('no_provider_match');
+  const ctx: any = { subject: { authenticated: true } };
   ctx.subject.role = evalTpl(p.map.role, payload);
   ctx.subject.residency = evalTpl(p.map.residency, payload);
-  ctx.subject.classification_cap = Number(evalTpl(p.map.classification_cap||'2', payload));
-  ctx.subject.groups = evalTpl(p.map.groups||'[]', payload);
+  ctx.subject.classification_cap = Number(
+    evalTpl(p.map.classification_cap || '2', payload),
+  );
+  ctx.subject.groups = evalTpl(p.map.groups || '[]', payload);
   return ctx;
 }
 ```
 
 **SSO Settings UI (excerpt)**
+
 ```tsx
 // apps/web/src/app/admin/sso/page.tsx
-export default function SSOMapper(){ /* upload/edit abac-map.yaml, validate, test mapping with sample assertion */ }
+export default function SSOMapper() {
+  /* upload/edit abac-map.yaml, validate, test mapping with sample assertion */
+}
 ```
 
 ### 3.5 OPA Policy Use of Federation Context (`policies/switchboard_v0_4.rego`)
+
 ```rego
 package switchboard
 
@@ -201,7 +235,9 @@ deny[{"code":"GROUP_REQUIRED"}] if {
 ```
 
 ### 3.6 Multi‑Region / Multi‑Cloud Routing
+
 **DNS/GSLB (pseudo‑config)**
+
 ```hcl
 record "switchboard.example.com" {
   type = "ALIAS"
@@ -212,19 +248,24 @@ record "switchboard.example.com" {
 ```
 
 **Edge Sticky Cookie**
+
 ```ts
 // apps/web/src/middleware.ts
-export function middleware(req:any){
-  const cookies = req.cookies; let region = cookies.get('x-region')?.value;
-  if(!region){ region = detect(req); }
+export function middleware(req: any) {
+  const cookies = req.cookies;
+  let region = cookies.get('x-region')?.value;
+  if (!region) {
+    region = detect(req);
+  }
   const res = NextResponse.next();
-  res.cookies.set('x-region', region, { maxAge: 60*60*24*7 });
+  res.cookies.set('x-region', region, { maxAge: 60 * 60 * 24 * 7 });
   res.headers.set('x-region', region);
   return res;
 }
 ```
 
 **Probes per Cloud**
+
 ```yaml
 # ops/synthetics/probe.multi.yaml
 probes:
@@ -233,6 +274,7 @@ probes:
 ```
 
 ### 3.7 Automated DR Simulation (`.github/workflows/dr-sim.yml`)
+
 ```yaml
 name: dr-sim
 on:
@@ -254,7 +296,9 @@ jobs:
 ```
 
 ### 3.8 Audit Advanced Search
+
 **Indexes (`db/migrations/20251117_audit_fts.sql`)**
+
 ```sql
 create extension if not exists pg_trgm;
 create index if not exists audit_events_ts on audit_events using gin (ts);
@@ -262,29 +306,45 @@ create index if not exists audit_events_ft on audit_events using gin ((to_tsvect
 ```
 
 **Search API**
+
 ```ts
 // /api/audit/search?q=analyst+deny+EU&from=...&to=...
 ```
 
 **Saved Queries (`apps/web/src/app/audit/saved.ts`)**
+
 ```ts
-export type SavedQuery = { id:string, name:string, q:string, from?:string, to?:string };
+export type SavedQuery = {
+  id: string;
+  name: string;
+  q: string;
+  from?: string;
+  to?: string;
+};
 ```
 
 ### 3.9 Canary Scoring & Error Budget Gate
+
 **Scoring Script (`ops/gates/canary-score.js`)**
+
 ```js
-const fs=require('fs');
-const weights={ home:0.30, agents:0.25, audit:0.25, admin:0.20 };
-const results=JSON.parse(fs.readFileSync('probe.results.json','utf8'));
-function score(){
-  let s=0; for(const k of Object.keys(weights)){ const r=results[k]; s += (r.pass?1:0)*weights[k]*100; }
-  console.log(`score=${s}`); if(s<90) process.exit(1);
+const fs = require('fs');
+const weights = { home: 0.3, agents: 0.25, audit: 0.25, admin: 0.2 };
+const results = JSON.parse(fs.readFileSync('probe.results.json', 'utf8'));
+function score() {
+  let s = 0;
+  for (const k of Object.keys(weights)) {
+    const r = results[k];
+    s += (r.pass ? 1 : 0) * weights[k] * 100;
+  }
+  console.log(`score=${s}`);
+  if (s < 90) process.exit(1);
 }
 score();
 ```
 
 **Burn‑Rate Check (`ops/gates/burnrate.sh`)**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -294,6 +354,7 @@ awk "BEGIN { exit ($BURN>2.0) }"
 ```
 
 **Deploy Gate**
+
 ```yaml
 - name: Canary score gate
   run: node ops/gates/canary-score.js
@@ -304,6 +365,7 @@ awk "BEGIN { exit ($BURN>2.0) }"
 ---
 
 ## 4) Testing Strategy
+
 - **Unit:** Mapper DSL parser; policy deny codes; scoring script; FTS query builder.
 - **Integration:** Startup verify (unsigned/rekor‑missing); SSO login mapping; failover drill; DR restore integrity.
 - **Security:** Rekor verify paths; signed bundle enforcement; SSO claims validation; DLP continues.
@@ -312,6 +374,7 @@ awk "BEGIN { exit ($BURN>2.0) }"
 ---
 
 ## 5) Acceptance Checklist (DoR → DoD)
+
 - [ ] Rekor inclusion proof verified at startup; UI banner renders digest + UUID.
 - [ ] OIDC/SAML mapping works; ABAC context visible in audit (redacted); policy v0.4 tests green.
 - [ ] Region routing across cloud A/B with sticky cookie; probes green; failover drill passes.
@@ -322,6 +385,7 @@ awk "BEGIN { exit ($BURN>2.0) }"
 ---
 
 ## 6) Risks & Mitigations
+
 - **Transparency log availability** → cache inclusion proof; allow degraded start with feature flag only in staging; prod blocks.
 - **IdP claim drift** → schema validation + tests with sample assertions; versioned mappings.
 - **DNS/GSLB propagation delays** → short TTLs; health‑based failover; edge override for emergency.
@@ -330,16 +394,17 @@ awk "BEGIN { exit ($BURN>2.0) }"
 ---
 
 ## 7) Evidence Hooks
-- **Rekor UUID:** …  
-- **Bundle digest:** …  
-- **SSO mapping test vectors:** …  
-- **Failover drill timestamp:** …  
-- **DR restore duration:** …  
-- **Audit search p95:** …  
+
+- **Rekor UUID:** …
+- **Bundle digest:** …
+- **SSO mapping test vectors:** …
+- **Failover drill timestamp:** …
+- **DR restore duration:** …
+- **Audit search p95:** …
 - **Canary score & burn rate:** …
 
 ---
 
 ## 8) Backlog Seed (Sprint 25)
-- Policy transparency monitor with alerts; attribute mapper UI presets per IdP; geo‑sharding for audit data; region‑aware caching; UI session continuity during failover; anomaly detection on audit streams; A/B scoring per cohort; provenance viewer (bundle → Rekor → release → runtime verify).
 
+- Policy transparency monitor with alerts; attribute mapper UI presets per IdP; geo‑sharding for audit data; region‑aware caching; UI session continuity during failover; anomaly detection on audit streams; A/B scoring per cohort; provenance viewer (bundle → Rekor → release → runtime verify).

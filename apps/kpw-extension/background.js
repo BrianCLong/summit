@@ -1,1 +1,3 @@
-chrome.runtime.onInstalled.addListener(() => { /* no-op for MVP */ });
+chrome.runtime.onInstalled.addListener(() => {
+  /* no-op for MVP */
+});

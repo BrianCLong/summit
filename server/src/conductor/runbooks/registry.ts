@@ -138,10 +138,16 @@ class RunbookSigningService {
   /**
    * Sign a runbook
    */
-  signRunbook(runbook: Omit<Runbook, 'signature'>, signer: string): RunbookSignature {
+  signRunbook(
+    runbook: Omit<Runbook, 'signature'>,
+    signer: string,
+  ): RunbookSignature {
     // Create canonical hash of runbook content
     const canonicalContent = this.canonicalizeRunbook(runbook);
-    const hash = crypto.createHash('sha256').update(canonicalContent).digest('hex');
+    const hash = crypto
+      .createHash('sha256')
+      .update(canonicalContent)
+      .digest('hex');
 
     // Sign the hash
     const sign = crypto.createSign('RSA-SHA256');
@@ -167,8 +173,13 @@ class RunbookSigningService {
       const runbookWithoutSignature = { ...runbook };
       delete (runbookWithoutSignature as any).signature;
 
-      const canonicalContent = this.canonicalizeRunbook(runbookWithoutSignature);
-      const hash = crypto.createHash('sha256').update(canonicalContent).digest('hex');
+      const canonicalContent = this.canonicalizeRunbook(
+        runbookWithoutSignature,
+      );
+      const hash = crypto
+        .createHash('sha256')
+        .update(canonicalContent)
+        .digest('hex');
 
       // Verify hash matches
       if (hash !== runbook.signature.hash) {
@@ -179,7 +190,11 @@ class RunbookSigningService {
       // Verify signature
       const verify = crypto.createVerify('RSA-SHA256');
       verify.update(hash);
-      return verify.verify(runbook.signature.publicKey, runbook.signature.signature, 'hex');
+      return verify.verify(
+        runbook.signature.publicKey,
+        runbook.signature.signature,
+        'hex',
+      );
     } catch (error) {
       console.error('Runbook signature verification failed:', error);
       return false;
@@ -223,7 +238,10 @@ class ApprovalWorkflowEngine {
   /**
    * Initiate approval workflow for runbook execution
    */
-  async initiateApproval(execution: RunbookExecution, workflow: ApprovalWorkflow): Promise<void> {
+  async initiateApproval(
+    execution: RunbookExecution,
+    workflow: ApprovalWorkflow,
+  ): Promise<void> {
     const approvalId = crypto.randomUUID();
 
     const approvalRequest = {
@@ -250,10 +268,19 @@ class ApprovalWorkflowEngine {
     await this.redis.zadd('pending_approvals', Date.now(), approvalId);
 
     // Schedule timeout handler
-    await this.redis.zadd('approval_timeouts', approvalRequest.timeoutAt, approvalId);
+    await this.redis.zadd(
+      'approval_timeouts',
+      approvalRequest.timeoutAt,
+      approvalId,
+    );
 
-    console.log(`Approval workflow initiated: ${approvalId} for execution ${execution.id}`);
-    prometheusConductorMetrics.recordOperationalEvent('approval_workflow_initiated', true);
+    console.log(
+      `Approval workflow initiated: ${approvalId} for execution ${execution.id}`,
+    );
+    prometheusConductorMetrics.recordOperationalEvent(
+      'approval_workflow_initiated',
+      true,
+    );
   }
 
   /**
@@ -282,9 +309,15 @@ class ApprovalWorkflowEngine {
       const approval = JSON.parse(approvalData);
 
       // Check if already processed by this approver
-      const existingApproval = approval.approvals.find((a: any) => a.approverId === approverId);
+      const existingApproval = approval.approvals.find(
+        (a: any) => a.approverId === approverId,
+      );
       if (existingApproval) {
-        return { success: false, approved: false, message: 'Already processed by this approver' };
+        return {
+          success: false,
+          approved: false,
+          message: 'Already processed by this approver',
+        };
       }
 
       // Add approval/rejection
@@ -300,7 +333,9 @@ class ApprovalWorkflowEngine {
 
       // Check if workflow is complete
       const isApproved = this.checkApprovalComplete(approval);
-      const isRejected = approval.approvals.some((a: any) => a.decision === 'rejected');
+      const isRejected = approval.approvals.some(
+        (a: any) => a.decision === 'rejected',
+      );
 
       if (isApproved) {
         approval.status = 'approved';
@@ -311,7 +346,11 @@ class ApprovalWorkflowEngine {
       }
 
       // Update approval request
-      await this.redis.setex(`approval:${approvalId}`, 3600, JSON.stringify(approval));
+      await this.redis.setex(
+        `approval:${approvalId}`,
+        3600,
+        JSON.stringify(approval),
+      );
 
       prometheusConductorMetrics.recordOperationalEvent(
         'approval_processed',
@@ -329,7 +368,11 @@ class ApprovalWorkflowEngine {
       };
     } catch (error) {
       console.error('Approval processing error:', error);
-      return { success: false, approved: false, message: 'Failed to process approval' };
+      return {
+        success: false,
+        approved: false,
+        message: 'Failed to process approval',
+      };
     }
   }
 
@@ -354,9 +397,14 @@ class ApprovalWorkflowEngine {
   /**
    * Notify stakeholders of approval completion
    */
-  private async notifyApprovalComplete(approval: any, isApproved: boolean): Promise<void> {
+  private async notifyApprovalComplete(
+    approval: any,
+    isApproved: boolean,
+  ): Promise<void> {
     // Implementation would integrate with notification systems
-    console.log(`Approval ${approval.id} ${isApproved ? 'approved' : 'rejected'}`);
+    console.log(
+      `Approval ${approval.id} ${isApproved ? 'approved' : 'rejected'}`,
+    );
 
     // Remove from pending queue
     await this.redis.zrem('pending_approvals', approval.id);
@@ -389,7 +437,10 @@ export class RunbookRegistry {
   /**
    * Register a new runbook
    */
-  async registerRunbook(runbook: Omit<Runbook, 'signature'>, author: string): Promise<string> {
+  async registerRunbook(
+    runbook: Omit<Runbook, 'signature'>,
+    author: string,
+  ): Promise<string> {
     try {
       // Sign the runbook
       const signature = this.signingService.signRunbook(runbook, author);
@@ -400,23 +451,36 @@ export class RunbookRegistry {
       await this.redis.set(key, JSON.stringify(signedRunbook));
 
       // Add to version index
-      await this.redis.zadd(`runbook_versions:${runbook.id}`, Date.now(), runbook.version);
+      await this.redis.zadd(
+        `runbook_versions:${runbook.id}`,
+        Date.now(),
+        runbook.version,
+      );
 
       // Add to category index
       await this.redis.sadd(`runbooks:${runbook.category}`, runbook.id);
 
       // Add to tenant index if specified
       if (runbook.metadata.tenantId) {
-        await this.redis.sadd(`runbooks:tenant:${runbook.metadata.tenantId}`, runbook.id);
+        await this.redis.sadd(
+          `runbooks:tenant:${runbook.metadata.tenantId}`,
+          runbook.id,
+        );
       }
 
       console.log(`Runbook registered: ${runbook.id} v${runbook.version}`);
-      prometheusConductorMetrics.recordOperationalEvent('runbook_registered', true);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'runbook_registered',
+        true,
+      );
 
       return signedRunbook.signature.hash;
     } catch (error) {
       console.error('Runbook registration failed:', error);
-      prometheusConductorMetrics.recordOperationalEvent('runbook_registration_error', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'runbook_registration_error',
+        false,
+      );
       throw error;
     }
   }
@@ -430,7 +494,11 @@ export class RunbookRegistry {
 
       if (!version) {
         // Get latest version
-        const versions = await this.redis.zrevrange(`runbook_versions:${id}`, 0, 0);
+        const versions = await this.redis.zrevrange(
+          `runbook_versions:${id}`,
+          0,
+          0,
+        );
         if (versions.length === 0) return null;
         targetVersion = versions[0];
       }
@@ -504,10 +572,16 @@ export class RunbookRegistry {
     } else {
       // Start execution immediately
       execution.status = 'running';
-      await this.redis.set(`execution:${executionId}`, JSON.stringify(execution));
+      await this.redis.set(
+        `execution:${executionId}`,
+        JSON.stringify(execution),
+      );
     }
 
-    prometheusConductorMetrics.recordOperationalEvent('runbook_execution_initiated', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'runbook_execution_initiated',
+      true,
+    );
     return executionId;
   }
 
@@ -593,7 +667,12 @@ export class RunbookRegistry {
     decision: 'approved' | 'rejected',
     comments?: string,
   ) {
-    return this.approvalEngine.processApproval(approvalId, approverId, decision, comments);
+    return this.approvalEngine.processApproval(
+      approvalId,
+      approverId,
+      decision,
+      comments,
+    );
   }
 
   /**
@@ -646,7 +725,10 @@ export class RunbookRegistry {
     ];
 
     workflows.forEach((workflow) => {
-      this.workflows.set(`${workflow.runbookCategory}:${workflow.severity}`, workflow);
+      this.workflows.set(
+        `${workflow.runbookCategory}:${workflow.severity}`,
+        workflow,
+      );
     });
   }
 

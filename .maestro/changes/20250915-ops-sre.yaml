@@ -1,16 +1,16 @@
 area: ops
 intent: enable
-objective: "OTEL/Prom telemetry; SLO dashboards; cost guard; one chaos drill."
+objective: 'OTEL/Prom telemetry; SLO dashboards; cost guard; one chaos drill.'
 work_items:
   - id: OP-1
-    story: "Instrument server/web/prov-ledger with traces+metrics"
+    story: 'Instrument server/web/prov-ledger with traces+metrics'
   - id: OP-2
-    story: "Cost guard (query budgeter + slow-query killer) + alerts"
+    story: 'Cost guard (query budgeter + slow-query killer) + alerts'
   - id: OP-3
-    story: "Dashboards for p95 graph latency + ingest E2E; chaos drill report"
+    story: 'Dashboards for p95 graph latency + ingest E2E; chaos drill report'
 acceptance:
-  - "SLOs: p95 graph < 1.5s; 10k-docs ingest < 5m; alerts wired"
+  - 'SLOs: p95 graph < 1.5s; 10k-docs ingest < 5m; alerts wired'
 definition_of_done:
-  - "Dashboards live; post-drill learnings filed"
-owners: { DRI: "eng-platform", support: ["sre","server"] }
-metrics: ["p95_graph_ms <= 1500", "ingestion_10k_docs_minutes <= 5"]
+  - 'Dashboards live; post-drill learnings filed'
+owners: { DRI: 'eng-platform', support: ['sre', 'server'] }
+metrics: ['p95_graph_ms <= 1500', 'ingestion_10k_docs_minutes <= 5']

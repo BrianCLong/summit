@@ -17,4 +17,3 @@ export function markSeen(id: string) {
   fs.mkdirSync(path.dirname(PATH), { recursive: true });
   fs.writeFileSync(PATH, JSON.stringify([...set]));
 }
-

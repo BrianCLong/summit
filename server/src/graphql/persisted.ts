@@ -4,7 +4,9 @@
 import { createHash } from 'crypto';
 
 // SHA-256 allowlist of approved queries (populated from build process)
-const queryAllowlist = new Set<string>(JSON.parse(process.env.GQL_SHA256_ALLOWLIST || '[]'));
+const queryAllowlist = new Set<string>(
+  JSON.parse(process.env.GQL_SHA256_ALLOWLIST || '[]'),
+);
 
 // Known conductor queries (will be populated by build process)
 const CONDUCTOR_QUERIES = {
@@ -77,9 +79,16 @@ export function checkIntrospectionAllowed(query: string): void {
     return;
   }
 
-  const introspectionKeywords = ['__schema', '__type', '__typename', 'IntrospectionQuery'];
+  const introspectionKeywords = [
+    '__schema',
+    '__type',
+    '__typename',
+    'IntrospectionQuery',
+  ];
 
-  const hasIntrospection = introspectionKeywords.some((keyword) => query.includes(keyword));
+  const hasIntrospection = introspectionKeywords.some((keyword) =>
+    query.includes(keyword),
+  );
 
   if (hasIntrospection) {
     console.warn('Blocked introspection query in production:', {
@@ -88,7 +97,9 @@ export function checkIntrospectionAllowed(query: string): void {
       source: 'introspection-guard',
     });
 
-    throw new Error('IntrospectionDisabled: Schema introspection disabled in production');
+    throw new Error(
+      'IntrospectionDisabled: Schema introspection disabled in production',
+    );
   }
 }
 

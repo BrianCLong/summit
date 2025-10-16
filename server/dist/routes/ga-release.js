@@ -110,7 +110,12 @@ router.get('/health', (req, res) => {
         status: 'healthy',
         service: 'ga-release',
         version: '1.0.0-ga',
-        features: ['release-info', 'deployment-validation', 'sbom-generation', 'preflight-checks'],
+        features: [
+            'release-info',
+            'deployment-validation',
+            'sbom-generation',
+            'preflight-checks',
+        ],
         timestamp: new Date().toISOString(),
     });
 });

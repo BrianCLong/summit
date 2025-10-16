@@ -41,12 +41,19 @@ const KNOWN_KINDS = [
 ];
 const KNOWN_SOURCES = ['graphrag', 'soar', 'connector', 'system'];
 
-export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: Props) {
+export default function ProvenanceFilterPanel({
+  onApply,
+  initial,
+  scope,
+  id,
+}: Props) {
   const [codes, setCodes] = useState<string[]>(initial?.reasonCodeIn || []);
   const [from, setFrom] = useState<string>(initial?.from || '');
   const [to, setTo] = useState<string>(initial?.to || '');
   const [kinds, setKinds] = useState<string[]>(initial?.kindIn || ([] as any));
-  const [sources, setSources] = useState<string[]>(initial?.sourceIn || ([] as any));
+  const [sources, setSources] = useState<string[]>(
+    initial?.sourceIn || ([] as any),
+  );
   const [contains, setContains] = useState<string>(initial?.contains || '');
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -77,8 +84,12 @@ export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: P
 
   const buildCurl = (scope?: 'incident' | 'investigation', id?: string) => {
     if (!scope || !id) return '';
-    const opName = scope === 'incident' ? 'ProvByIncident' : 'ProvByInvestigation';
-    const field = scope === 'incident' ? 'provenanceByIncident' : 'provenanceByInvestigation';
+    const opName =
+      scope === 'incident' ? 'ProvByIncident' : 'ProvByInvestigation';
+    const field =
+      scope === 'incident'
+        ? 'provenanceByIncident'
+        : 'provenanceByInvestigation';
     const query = `query ${opName}($id: ID!, $filter: ProvenanceFilter, $first: Int, $offset: Int) { ${field}(${scope}Id: $id, filter: $filter, first: $first, offset: $offset) { id kind createdAt metadata } }`;
     const filter: any = {};
     if (codes.length) filter.reasonCodeIn = codes;
@@ -101,7 +112,9 @@ export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: P
           <select
             multiple
             value={codes}
-            onChange={(e) => setCodes(Array.from(e.target.selectedOptions).map((o) => o.value))}
+            onChange={(e) =>
+              setCodes(Array.from(e.target.selectedOptions).map((o) => o.value))
+            }
             className="ml-2 border p-1"
           >
             {KNOWN_CODES.map((c) => (
@@ -116,7 +129,9 @@ export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: P
           <select
             multiple
             value={kinds}
-            onChange={(e) => setKinds(Array.from(e.target.selectedOptions).map((o) => o.value))}
+            onChange={(e) =>
+              setKinds(Array.from(e.target.selectedOptions).map((o) => o.value))
+            }
             className="ml-2 border p-1"
           >
             {KNOWN_KINDS.map((c) => (
@@ -131,7 +146,11 @@ export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: P
           <select
             multiple
             value={sources}
-            onChange={(e) => setSources(Array.from(e.target.selectedOptions).map((o) => o.value))}
+            onChange={(e) =>
+              setSources(
+                Array.from(e.target.selectedOptions).map((o) => o.value),
+              )
+            }
             className="ml-2 border p-1"
           >
             {KNOWN_SOURCES.map((c) => (
@@ -210,7 +229,8 @@ export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: P
                   if (sources.length) filter.sourceIn = sources;
                   if (from) filter.from = from;
                   if (to) filter.to = to;
-                  if (contains && contains.trim().length) filter.contains = contains.trim();
+                  if (contains && contains.trim().length)
+                    filter.contains = contains.trim();
                   const variables: any = { format: 'json' };
                   if (scope === 'incident') variables.incidentId = id;
                   else variables.investigationId = id;
@@ -239,7 +259,8 @@ export default function ProvenanceFilterPanel({ onApply, initial, scope, id }: P
                   if (sources.length) filter.sourceIn = sources;
                   if (from) filter.from = from;
                   if (to) filter.to = to;
-                  if (contains && contains.trim().length) filter.contains = contains.trim();
+                  if (contains && contains.trim().length)
+                    filter.contains = contains.trim();
                   const variables: any = { format: 'csv' };
                   if (scope === 'incident') variables.incidentId = id;
                   else variables.investigationId = id;

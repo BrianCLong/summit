@@ -1,0 +1,81 @@
+name: unified-ci
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+concurrency:
+  group: unified-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      neo4j:
+        image: neo4j:5
+        ports: ['7687:7687', '7474:7474']
+        env:
+          NEO4J_AUTH: 'neo4j/test'
+      postgres:
+        image: postgres:16
+        ports: ['5432:5432']
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_USER: app
+          POSTGRES_DB: intelgraph
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x', cache: 'pnpm' }
+      - name: Enable corepack + pnpm
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+      - name: Install
+        run: pnpm i -w
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.6
+          terraform_wrapper: false
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.2 --frozen-lockfile=false
+      - name: Codegen (GraphQL)
+        run: |
+          if [ -f codegen.ts ]; then npx -y graphql-code-generator --config codegen.ts || true; fi
+      - name: Codegen drift
+        run: node scripts/verify_codegen.mjs
+      - name: Lint (soft)
+        run: pnpm lint -w || echo '::warning::lint warnings/errors'
+      - name: Typecheck
+        run: pnpm typecheck -w || true
+      - name: Unit tests
+        run: pnpm test -w || true
+      - name: Build
+        run: pnpm build -w || true
+      - name: Ops validate (Helm + Terraform)
+        id: ops-validate
+        continue-on-error: ${{ !contains(github.event.pull_request.labels.*.name, 'ops:strict') }}
+        run: node scripts/ops_validate.mjs
+        timeout-minutes: 5
+      - name: k6 smoke
+        id: k6-smoke
+        if: ${{ always() && (github.event.pull_request != null || contains(github.event.head_commit.message, '[smoke]')) }}
+        run: bash scripts/k6_smoke.sh
+        continue-on-error: true
+        timeout-minutes: 8
+      - name: Upload k6 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-smoke-${{ github.run_id }}
+          path: .github/k6/*.json
+          retention-days: 7

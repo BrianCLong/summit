@@ -1,10 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "jsx": "react-jsx",
-    "types": ["jest", "jquery", "node"]
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }, { "path": "../ai-core" }]
+  "references": []
 }

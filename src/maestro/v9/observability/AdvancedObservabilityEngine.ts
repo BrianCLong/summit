@@ -33,7 +33,13 @@ export interface TelemetryConfig {
 
 export interface ExportEndpoint {
   name: string;
-  type: 'jaeger' | 'prometheus' | 'grafana' | 'datadog' | 'newrelic' | 'elastic';
+  type:
+    | 'jaeger'
+    | 'prometheus'
+    | 'grafana'
+    | 'datadog'
+    | 'newrelic'
+    | 'elastic';
   url: string;
   headers: Record<string, string>;
   format: 'otlp' | 'jaeger' | 'prometheus' | 'custom';
@@ -335,7 +341,7 @@ export interface DashboardPanel {
 
 export interface TimeRange {
   from: string; // e.g., 'now-1h', '2023-01-01T00:00:00Z'
-  to: string;   // e.g., 'now', '2023-01-02T00:00:00Z'
+  to: string; // e.g., 'now', '2023-01-02T00:00:00Z'
 }
 
 export interface DashboardVariable {
@@ -354,7 +360,7 @@ export interface Threshold {
 
 /**
  * Advanced Monitoring & Observability Engine for Maestro v9
- * 
+ *
  * Provides comprehensive observability with:
  * - Comprehensive telemetry and metrics collection
  * - Distributed tracing and performance profiling
@@ -381,13 +387,13 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   constructor(
     logger: Logger,
     metricsCollector: MetricsCollector,
-    config: TelemetryConfig
+    config: TelemetryConfig,
   ) {
     super();
     this.logger = logger;
     this.metricsCollector = metricsCollector;
     this.config = config;
-    
+
     this.telemetryProcessor = new TelemetryProcessor(logger, config);
     this.distributedTracer = new DistributedTracer(logger, config);
     this.performanceProfiler = new PerformanceProfiler(logger);
@@ -420,11 +426,16 @@ export class AdvancedObservabilityEngine extends EventEmitter {
       this.startBackgroundProcessing();
 
       this.isInitialized = true;
-      this.logger.info('Advanced Observability Engine v9 initialized successfully');
-      
+      this.logger.info(
+        'Advanced Observability Engine v9 initialized successfully',
+      );
+
       this.emit('initialized');
     } catch (error) {
-      this.logger.error('Failed to initialize Advanced Observability Engine:', error);
+      this.logger.error(
+        'Failed to initialize Advanced Observability Engine:',
+        error,
+      );
       throw error;
     }
   }
@@ -445,18 +456,22 @@ export class AdvancedObservabilityEngine extends EventEmitter {
       status: 'ok',
       tags: {},
       logs: [],
-      references: parentSpan ? [{
-        type: 'child_of',
-        traceId: parentSpan.traceId,
-        spanId: parentSpan.spanId
-      }] : [],
+      references: parentSpan
+        ? [
+            {
+              type: 'child_of',
+              traceId: parentSpan.traceId,
+              spanId: parentSpan.spanId,
+            },
+          ]
+        : [],
       process: {
         serviceName: this.getServiceName(),
         serviceVersion: this.getServiceVersion(),
         hostname: require('os').hostname(),
         pid: process.pid,
-        tags: {}
-      }
+        tags: {},
+      },
     };
 
     // Add to active traces
@@ -472,7 +487,10 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   /**
    * Finish a trace span
    */
-  finishSpan(span: TraceSpan, status: 'ok' | 'error' | 'timeout' | 'cancelled' = 'ok'): void {
+  finishSpan(
+    span: TraceSpan,
+    status: 'ok' | 'error' | 'timeout' | 'cancelled' = 'ok',
+  ): void {
     span.endTime = new Date();
     span.duration = span.endTime.getTime() - span.startTime.getTime();
     span.status = status;
@@ -499,7 +517,7 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   addSpanLog(span: TraceSpan, fields: Record<string, any>): void {
     span.logs.push({
       timestamp: new Date(),
-      fields
+      fields,
     });
   }
 
@@ -509,7 +527,7 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   recordMetric(metric: Omit<MetricPoint, 'timestamp'>): void {
     const point: MetricPoint = {
       ...metric,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Apply sampling
@@ -537,7 +555,7 @@ export class AdvancedObservabilityEngine extends EventEmitter {
       ...entry,
       timestamp: new Date(),
       serviceName: this.getServiceName(),
-      hostname: require('os').hostname()
+      hostname: require('os').hostname(),
     };
 
     // Apply sampling
@@ -572,7 +590,6 @@ export class AdvancedObservabilityEngine extends EventEmitter {
 
       this.logger.info(`SLO created successfully: ${slo.id}`);
       this.emit('sloCreated', slo);
-
     } catch (error) {
       this.logger.error(`Failed to create SLO ${slo.id}:`, error);
       throw error;
@@ -599,7 +616,7 @@ export class AdvancedObservabilityEngine extends EventEmitter {
       const status = await this.sloManager.getSLOStatus(sloId);
       return {
         slo,
-        ...status
+        ...status,
       };
     } catch (error) {
       this.logger.error(`Failed to get SLO status for ${sloId}:`, error);
@@ -625,7 +642,6 @@ export class AdvancedObservabilityEngine extends EventEmitter {
 
       this.logger.info(`Dashboard created successfully: ${dashboard.id}`);
       this.emit('dashboardCreated', dashboard);
-
     } catch (error) {
       this.logger.error(`Failed to create dashboard ${dashboard.id}:`, error);
       throw error;
@@ -635,7 +651,10 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   /**
    * Get dashboard data
    */
-  async getDashboardData(dashboardId: string, timeRange?: TimeRange): Promise<{
+  async getDashboardData(
+    dashboardId: string,
+    timeRange?: TimeRange,
+  ): Promise<{
     dashboard: DashboardConfig;
     data: Record<string, any>;
     lastUpdated: Date;
@@ -646,14 +665,20 @@ export class AdvancedObservabilityEngine extends EventEmitter {
     }
 
     try {
-      const data = await this.healthDashboard.getDashboardData(dashboardId, timeRange);
+      const data = await this.healthDashboard.getDashboardData(
+        dashboardId,
+        timeRange,
+      );
       return {
         dashboard,
         data,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
     } catch (error) {
-      this.logger.error(`Failed to get dashboard data for ${dashboardId}:`, error);
+      this.logger.error(
+        `Failed to get dashboard data for ${dashboardId}:`,
+        error,
+      );
       return null;
     }
   }
@@ -661,15 +686,22 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   /**
    * Start performance profiling for a service
    */
-  async startProfiling(serviceName: string, duration: number = 60000): Promise<string> {
-    this.logger.info(`Starting performance profiling for ${serviceName} (${duration}ms)`);
+  async startProfiling(
+    serviceName: string,
+    duration: number = 60000,
+  ): Promise<string> {
+    this.logger.info(
+      `Starting performance profiling for ${serviceName} (${duration}ms)`,
+    );
 
     try {
-      const profilingId = await this.performanceProfiler.startProfiling(serviceName, duration);
-      
+      const profilingId = await this.performanceProfiler.startProfiling(
+        serviceName,
+        duration,
+      );
+
       this.emit('profilingStarted', { serviceName, profilingId, duration });
       return profilingId;
-
     } catch (error) {
       this.logger.error(`Failed to start profiling for ${serviceName}:`, error);
       throw error;
@@ -679,18 +711,22 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   /**
    * Get performance profile results
    */
-  async getPerformanceProfile(profilingId: string): Promise<PerformanceProfile | null> {
+  async getPerformanceProfile(
+    profilingId: string,
+  ): Promise<PerformanceProfile | null> {
     try {
       const profile = await this.performanceProfiler.getProfile(profilingId);
-      
+
       if (profile) {
         this.emit('profileCompleted', profile);
       }
-      
-      return profile;
 
+      return profile;
     } catch (error) {
-      this.logger.error(`Failed to get performance profile ${profilingId}:`, error);
+      this.logger.error(
+        `Failed to get performance profile ${profilingId}:`,
+        error,
+      );
       return null;
     }
   }
@@ -712,7 +748,6 @@ export class AdvancedObservabilityEngine extends EventEmitter {
     try {
       const results = await this.distributedTracer.queryTraces(query);
       return results;
-
     } catch (error) {
       this.logger.error('Failed to query traces:', error);
       return [];
@@ -729,21 +764,25 @@ export class AdvancedObservabilityEngine extends EventEmitter {
     aggregation: 'sum' | 'avg' | 'min' | 'max' | 'count';
     groupBy?: string[];
     filters?: Record<string, string>;
-  }): Promise<{ timestamp: Date; value: number; tags?: Record<string, string> }[]> {
+  }): Promise<
+    { timestamp: Date; value: number; tags?: Record<string, string> }[]
+  > {
     try {
       const metricPoints = this.metrics.get(query.metric) || [];
-      
+
       // Filter by time range
-      const filtered = metricPoints.filter(point => 
-        point.timestamp >= query.startTime && point.timestamp <= query.endTime
+      const filtered = metricPoints.filter(
+        (point) =>
+          point.timestamp >= query.startTime &&
+          point.timestamp <= query.endTime,
       );
 
       // Apply tag filters
       let result = filtered;
       if (query.filters) {
-        result = filtered.filter(point => {
-          return Object.entries(query.filters!).every(([key, value]) => 
-            point.tags[key] === value
+        result = filtered.filter((point) => {
+          return Object.entries(query.filters!).every(
+            ([key, value]) => point.tags[key] === value,
           );
         });
       }
@@ -751,9 +790,11 @@ export class AdvancedObservabilityEngine extends EventEmitter {
       // Group and aggregate
       if (query.groupBy && query.groupBy.length > 0) {
         const groups = new Map<string, MetricPoint[]>();
-        
-        result.forEach(point => {
-          const groupKey = query.groupBy!.map(key => point.tags[key] || '').join('|');
+
+        result.forEach((point) => {
+          const groupKey = query
+            .groupBy!.map((key) => point.tags[key] || '')
+            .join('|');
           if (!groups.has(groupKey)) {
             groups.set(groupKey, []);
           }
@@ -762,34 +803,38 @@ export class AdvancedObservabilityEngine extends EventEmitter {
 
         return Array.from(groups.entries()).map(([groupKey, points]) => {
           const aggregatedValue = this.aggregateValues(
-            points.map(p => p.value),
-            query.aggregation
+            points.map((p) => p.value),
+            query.aggregation,
           );
-          
-          const groupTags = query.groupBy!.reduce((tags, key, index) => {
-            tags[key] = groupKey.split('|')[index];
-            return tags;
-          }, {} as Record<string, string>);
+
+          const groupTags = query.groupBy!.reduce(
+            (tags, key, index) => {
+              tags[key] = groupKey.split('|')[index];
+              return tags;
+            },
+            {} as Record<string, string>,
+          );
 
           return {
             timestamp: new Date(),
             value: aggregatedValue,
-            tags: groupTags
+            tags: groupTags,
           };
         });
       } else {
         // Simple aggregation without grouping
         const aggregatedValue = this.aggregateValues(
-          result.map(p => p.value),
-          query.aggregation
+          result.map((p) => p.value),
+          query.aggregation,
         );
 
-        return [{
-          timestamp: new Date(),
-          value: aggregatedValue
-        }];
+        return [
+          {
+            timestamp: new Date(),
+            value: aggregatedValue,
+          },
+        ];
       }
-
     } catch (error) {
       this.logger.error('Failed to query metrics:', error);
       return [];
@@ -817,7 +862,7 @@ export class AdvancedObservabilityEngine extends EventEmitter {
         slos: [],
         alerts: [],
         performance: { latency: 0, throughput: 0, errorRate: 1 },
-        resources: { cpu: 0, memory: 0, disk: 0 }
+        resources: { cpu: 0, memory: 0, disk: 0 },
       };
     }
   }
@@ -837,7 +882,7 @@ export class AdvancedObservabilityEngine extends EventEmitter {
       const exportData = {
         traces: Array.from(this.activeTraces.values()).flat(),
         metrics: Array.from(this.metrics.values()).flat(),
-        logs: this.logs
+        logs: this.logs,
       };
 
       // Export to each configured endpoint
@@ -850,7 +895,6 @@ export class AdvancedObservabilityEngine extends EventEmitter {
           this.logger.error(`Failed to export to ${endpoint.name}:`, error);
         }
       }
-
     } catch (error) {
       this.logger.error('Failed to export telemetry:', error);
     }
@@ -902,14 +946,14 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   private async collectSystemMetrics(): Promise<void> {
     try {
       const metrics = await this.performanceProfiler.getSystemMetrics();
-      
+
       // Record system metrics
       this.recordMetric({
         name: 'system.cpu.usage',
         value: metrics.cpu.usage,
         type: 'gauge',
         tags: { host: require('os').hostname() },
-        unit: 'percent'
+        unit: 'percent',
       });
 
       this.recordMetric({
@@ -917,11 +961,10 @@ export class AdvancedObservabilityEngine extends EventEmitter {
         value: metrics.memory.used / metrics.memory.total,
         type: 'gauge',
         tags: { host: require('os').hostname() },
-        unit: 'percent'
+        unit: 'percent',
       });
 
       // Record more metrics...
-
     } catch (error) {
       this.logger.error('Failed to collect system metrics:', error);
     }
@@ -929,10 +972,10 @@ export class AdvancedObservabilityEngine extends EventEmitter {
 
   private cleanupCompletedTrace(traceId: string): void {
     const spans = this.activeTraces.get(traceId) || [];
-    
+
     // Check if all spans are completed
-    const allCompleted = spans.every(span => span.endTime !== undefined);
-    
+    const allCompleted = spans.every((span) => span.endTime !== undefined);
+
     if (allCompleted) {
       // Move to completed traces or export
       this.telemetryProcessor.processCompletedTrace(traceId, spans);
@@ -941,13 +984,15 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   }
 
   private cleanupOldTraces(): void {
-    const cutoffTime = new Date(Date.now() - (this.config.retention.traces * 24 * 60 * 60 * 1000));
-    
+    const cutoffTime = new Date(
+      Date.now() - this.config.retention.traces * 24 * 60 * 60 * 1000,
+    );
+
     for (const [traceId, spans] of this.activeTraces.entries()) {
-      const oldestSpan = spans.reduce((oldest, span) => 
-        span.startTime < oldest.startTime ? span : oldest
+      const oldestSpan = spans.reduce((oldest, span) =>
+        span.startTime < oldest.startTime ? span : oldest,
       );
-      
+
       if (oldestSpan.startTime < cutoffTime) {
         this.activeTraces.delete(traceId);
       }
@@ -955,17 +1000,23 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   }
 
   private cleanupOldMetrics(): void {
-    const cutoffTime = new Date(Date.now() - (this.config.retention.metrics * 24 * 60 * 60 * 1000));
-    
+    const cutoffTime = new Date(
+      Date.now() - this.config.retention.metrics * 24 * 60 * 60 * 1000,
+    );
+
     for (const [metricName, points] of this.metrics.entries()) {
-      const filteredPoints = points.filter(point => point.timestamp >= cutoffTime);
+      const filteredPoints = points.filter(
+        (point) => point.timestamp >= cutoffTime,
+      );
       this.metrics.set(metricName, filteredPoints);
     }
   }
 
   private cleanupOldLogs(): void {
-    const cutoffTime = new Date(Date.now() - (this.config.retention.logs * 24 * 60 * 60 * 1000));
-    this.logs = this.logs.filter(log => log.timestamp >= cutoffTime);
+    const cutoffTime = new Date(
+      Date.now() - this.config.retention.logs * 24 * 60 * 60 * 1000,
+    );
+    this.logs = this.logs.filter((log) => log.timestamp >= cutoffTime);
   }
 
   private async monitorSLOs(): Promise<void> {
@@ -1082,12 +1133,18 @@ export class AdvancedObservabilityEngine extends EventEmitter {
   } {
     return {
       activeTraces: this.activeTraces.size,
-      totalSpans: Array.from(this.activeTraces.values()).reduce((sum, spans) => sum + spans.length, 0),
-      metricsCount: Array.from(this.metrics.values()).reduce((sum, points) => sum + points.length, 0),
+      totalSpans: Array.from(this.activeTraces.values()).reduce(
+        (sum, spans) => sum + spans.length,
+        0,
+      ),
+      metricsCount: Array.from(this.metrics.values()).reduce(
+        (sum, points) => sum + points.length,
+        0,
+      ),
       logsCount: this.logs.length,
       slosCount: this.slos.size,
       dashboardsCount: this.dashboards.size,
-      exportEndpoints: this.config.export.endpoints.length
+      exportEndpoints: this.config.export.endpoints.length,
     };
   }
 
@@ -1096,7 +1153,7 @@ export class AdvancedObservabilityEngine extends EventEmitter {
    */
   async updateConfig(config: Partial<TelemetryConfig>): Promise<void> {
     this.config = { ...this.config, ...config };
-    
+
     // Update sub-components
     await this.telemetryProcessor.updateConfig(this.config);
     await this.distributedTracer.updateConfig(this.config);

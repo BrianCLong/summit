@@ -1,35 +1,31 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.rollout.activeService }}
-  labels:
-    {{- include "docling-svc.labels" . | nindent 4 }}
+  name: { { .Values.rollout.activeService } }
+  labels: { { - include "docling-svc.labels" . | nindent 4 } }
 spec:
-  type: {{ .Values.service.type }}
-  selector:
-    {{- include "docling-svc.selectorLabels" . | nindent 4 }}
+  type: { { .Values.service.type } }
+  selector: { { - include "docling-svc.selectorLabels" . | nindent 4 } }
   ports:
     - name: http
-      port: {{ .Values.service.port }}
+      port: { { .Values.service.port } }
       targetPort: http
     - name: metrics
-      port: {{ .Values.service.metricsPort }}
+      port: { { .Values.service.metricsPort } }
       targetPort: metrics
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.rollout.previewService }}
-  labels:
-    {{- include "docling-svc.labels" . | nindent 4 }}
+  name: { { .Values.rollout.previewService } }
+  labels: { { - include "docling-svc.labels" . | nindent 4 } }
 spec:
-  type: {{ .Values.service.type }}
-  selector:
-    {{- include "docling-svc.selectorLabels" . | nindent 4 }}
+  type: { { .Values.service.type } }
+  selector: { { - include "docling-svc.selectorLabels" . | nindent 4 } }
   ports:
     - name: http
-      port: {{ .Values.service.port }}
+      port: { { .Values.service.port } }
       targetPort: http
     - name: metrics
-      port: {{ .Values.service.metricsPort }}
+      port: { { .Values.service.metricsPort } }
       targetPort: metrics

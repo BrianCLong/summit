@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
@@ -28,7 +28,7 @@ def test_check_reports_policy_and_role_issues(tmp_path, capsys):
         allow {
             input.resource == "*"
         }
-        """.strip()
+        """.strip(),
     )
 
     roles_path = write_file(
@@ -87,7 +87,7 @@ def test_check_fix_normalizes_roles(tmp_path):
         allow {
             true
         }
-        """.strip()
+        """.strip(),
     )
     write_file(
         policies_dir / "rule_test.rego",
@@ -97,7 +97,7 @@ def test_check_fix_normalizes_roles(tmp_path):
         test_allow {
             allow
         }
-        """.strip()
+        """.strip(),
     )
 
     roles_content = {

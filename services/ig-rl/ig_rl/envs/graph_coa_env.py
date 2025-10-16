@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -27,7 +28,7 @@ class CoaState:
     terminal: bool
 
 
-class GraphCoaEnv((gym.Env if gym else object)):  # type: ignore[misc]
+class GraphCoaEnv(gym.Env if gym else object):  # type: ignore[misc]
     """Policy-aware environment with action masking."""
 
     metadata = {"render.modes": []}
@@ -46,13 +47,15 @@ class GraphCoaEnv((gym.Env if gym else object)):  # type: ignore[misc]
         self._reward_hub = reward_hub
         self._max_steps = max_steps
         self._reward_name = reward_name
-        self._state: Optional[CoaState] = None
-        self._action_map: List[str] = []
+        self._state: CoaState | None = None
+        self._action_map: list[str] = []
 
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(256,), dtype=np.float32) if spaces else None
+        self.observation_space = (
+            spaces.Box(low=-np.inf, high=np.inf, shape=(256,), dtype=np.float32) if spaces else None
+        )
         self.action_space = spaces.Discrete(512) if spaces else None
 
-    async def reset(self, *, seed: Optional[int] = None, options: Optional[Dict[str, Any]] = None):
+    async def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None):
         if seed is not None:  # pragma: no cover - gym compatibility only
             np.random.seed(seed)
         options = options or {}
@@ -73,7 +76,7 @@ class GraphCoaEnv((gym.Env if gym else object)):  # type: ignore[misc]
         )
         return observation, {"mask": self._mask()}
 
-    async def step(self, action_idx: int) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
+    async def step(self, action_idx: int) -> tuple[np.ndarray, float, bool, dict[str, Any]]:
         if self._state is None:
             raise RuntimeError("Environment must be reset before stepping")
         if action_idx >= len(self._action_map):
@@ -85,7 +88,9 @@ class GraphCoaEnv((gym.Env if gym else object)):  # type: ignore[misc]
         reward_obs = self._reward_hub.evaluate(self._reward_name, transition.get("metrics", {}))
 
         terminal = bool(transition.get("terminal")) or self._state.step_idx + 1 >= self._max_steps
-        allowed = await self._policy.allowed_actions(self._state.case_id, transition.get("candidateSteps", []))
+        allowed = await self._policy.allowed_actions(
+            self._state.case_id, transition.get("candidateSteps", [])
+        )
         self._action_map = list(allowed)
         self._state = CoaState(
             case_id=self._state.case_id,
@@ -98,7 +103,7 @@ class GraphCoaEnv((gym.Env if gym else object)):  # type: ignore[misc]
         info = {"mask": self._mask(), "reward_components": reward_obs.components}
         return observation, float(reward_obs.reward), terminal, info
 
-    def _embed(self, snapshot: Dict[str, Any]) -> np.ndarray:
+    def _embed(self, snapshot: dict[str, Any]) -> np.ndarray:
         features = snapshot.get("features") or snapshot.get("state") or []
         array = np.zeros(256, dtype=np.float32)
         upto = min(len(features), 256)

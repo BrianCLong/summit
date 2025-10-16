@@ -8,4 +8,3 @@
 
 > To use an attached JSON instead of the minimal one here, overwrite
 > `observability/grafana/dashboards/ga_core_dashboard.json` with your file.
-

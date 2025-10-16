@@ -6,7 +6,8 @@ import argon2 from 'argon2';
 
 const { Pool } = pkg;
 const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
+  process.env.DATABASE_URL ||
+  'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
 
 const pool = new Pool({ connectionString: DATABASE_URL });
 

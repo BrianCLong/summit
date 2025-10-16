@@ -9,7 +9,9 @@ const gotoWebTab = async (page: any) => {
 };
 
 test.describe('Maestro — Policy gate & elevation', () => {
-  test('Attach-to-Case denial shows banner and elevation flow works', async ({ page }) => {
+  test('Attach-to-Case denial shows banner and elevation flow works', async ({
+    page,
+  }) => {
     await gotoWebTab(page);
 
     // Select first interface and run orchestrator
@@ -18,20 +20,26 @@ test.describe('Maestro — Policy gate & elevation', () => {
     await page.getByRole('button', { name: 'Run' }).click();
 
     // Wait for Synthesized section
-    await expect(page.getByRole('heading', { name: 'Synthesized' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Synthesized' }),
+    ).toBeVisible();
 
     // Attempt attach to case → PolicyButton checks '/policy/check' and MSW denies
     await page.getByRole('button', { name: 'Attach to Case' }).click();
 
     // Denial banner visible
     await expect(page.getByText('Action blocked')).toBeVisible();
-    await expect(page.getByText('Attach restricted to Gold tier')).toBeVisible();
+    await expect(
+      page.getByText('Attach restricted to Gold tier'),
+    ).toBeVisible();
 
     // Open elevation dialog
     await page.getByRole('button', { name: 'Request elevation' }).click();
 
     // Fill and submit
-    await page.getByRole('textbox').fill('Investigative case requires attachment for audit.');
+    await page
+      .getByRole('textbox')
+      .fill('Investigative case requires attachment for audit.');
     await page.getByRole('button', { name: 'Submit' }).click();
 
     // Ticket confirmation

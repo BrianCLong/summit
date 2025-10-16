@@ -1,7 +1,10 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { getNeo4jDriver, getPostgresPool } = require('../config/database');
-const { ensureAuthenticated, requirePermission } = require('../middleware/auth');
+const {
+  ensureAuthenticated,
+  requirePermission,
+} = require('../middleware/auth');
 const sanitize = require('../middleware/sanitize').default;
 
 const router = express.Router();
@@ -68,8 +71,12 @@ router.get('/:id', async (req, res) => {
   const driver = getNeo4jDriver();
   const session = driver.session();
   try {
-    const result = await session.run('MATCH (e:Entity {uuid: $id}) RETURN e LIMIT 1', { id });
-    if (result.records.length === 0) return res.status(404).json({ error: 'Not found' });
+    const result = await session.run(
+      'MATCH (e:Entity {uuid: $id}) RETURN e LIMIT 1',
+      { id },
+    );
+    if (result.records.length === 0)
+      return res.status(404).json({ error: 'Not found' });
     const entity = result.records[0].get('e').properties;
     await logAudit(req, 'VIEW', id, null);
     res.json(entity);
@@ -81,7 +88,13 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', requirePermission('entity:create'), async (req, res) => {
-  const { type = 'CUSTOM', label, description = '', properties = {}, position } = req.body || {};
+  const {
+    type = 'CUSTOM',
+    label,
+    description = '',
+    properties = {},
+    position,
+  } = req.body || {};
   if (!label) return res.status(400).json({ error: 'label required' });
   const id = uuidv4();
   const now = new Date().toISOString();
@@ -131,7 +144,8 @@ router.patch('/:id', requirePermission('entity:update'), async (req, res) => {
        RETURN e`,
       { id, label, description, properties, position, verified, now },
     );
-    if (result.records.length === 0) return res.status(404).json({ error: 'Not found' });
+    if (result.records.length === 0)
+      return res.status(404).json({ error: 'Not found' });
     const entity = result.records[0].get('e').properties;
     await logAudit(req, 'UPDATE', id, { label, description });
     res.json(entity);

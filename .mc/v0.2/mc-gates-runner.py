@@ -4,11 +4,12 @@ MC Platform Gates Runner
 Executes canary deployment gates with comprehensive validation
 """
 
-import json
-import time
 import argparse
-from datetime import datetime
+import json
 import os
+import time
+from datetime import datetime
+
 
 def simulate_canary_deployment(stage, strict_mode=False):
     """Simulate canary deployment with appropriate delays and validations"""
@@ -29,10 +30,12 @@ def simulate_canary_deployment(stage, strict_mode=False):
             "graphql_p95_latency_ms": 142,
             "error_rate_percent": 0.1,
             "availability_percent": 99.99,
-            "budget_guard_response_ms": 45.2
+            "budget_guard_response_ms": 45.2,
         }
 
-        print(f"  • GraphQL P95 Latency: {slo_results['graphql_p95_latency_ms']}ms (target: <350ms)")
+        print(
+            f"  • GraphQL P95 Latency: {slo_results['graphql_p95_latency_ms']}ms (target: <350ms)"
+        )
         print(f"  • Error Rate: {slo_results['error_rate_percent']}% (target: <1%)")
         print(f"  • Availability: {slo_results['availability_percent']}% (target: >99.9%)")
         print(f"  • Budget Guard: {slo_results['budget_guard_response_ms']}ms (target: <120s)")
@@ -49,10 +52,12 @@ def simulate_canary_deployment(stage, strict_mode=False):
             "error_rate_percent": 0.08,
             "availability_percent": 99.98,
             "provenance_query_ms": 0.128,
-            "differential_privacy_budget": 0.23
+            "differential_privacy_budget": 0.23,
         }
 
-        print(f"  • GraphQL P95 Latency: {slo_results['graphql_p95_latency_ms']}ms (target: <350ms)")
+        print(
+            f"  • GraphQL P95 Latency: {slo_results['graphql_p95_latency_ms']}ms (target: <350ms)"
+        )
         print(f"  • Error Rate: {slo_results['error_rate_percent']}% (target: <1%)")
         print(f"  • Provenance Query: {slo_results['provenance_query_ms']}ms (target: <200ms)")
         print(f"  • DP Budget Usage: {slo_results['differential_privacy_budget']} (target: <0.5)")
@@ -69,14 +74,18 @@ def simulate_canary_deployment(stage, strict_mode=False):
             "error_rate_percent": 0.12,
             "availability_percent": 99.97,
             "autonomy_safety_score": 0.932,
-            "config_drift_detected": False
+            "config_drift_detected": False,
         }
 
-        print(f"  • GraphQL P95 Latency: {slo_results['graphql_p95_latency_ms']}ms (target: <350ms)")
+        print(
+            f"  • GraphQL P95 Latency: {slo_results['graphql_p95_latency_ms']}ms (target: <350ms)"
+        )
         print(f"  • Error Rate: {slo_results['error_rate_percent']}% (target: <1%)")
         print(f"  • Availability: {slo_results['availability_percent']}% (target: >99.9%)")
         print(f"  • Autonomy Safety: {slo_results['autonomy_safety_score']} (target: >0.9)")
-        print(f"  • Config Integrity: {'LOCKED' if not slo_results['config_drift_detected'] else 'DRIFT'}")
+        print(
+            f"  • Config Integrity: {'LOCKED' if not slo_results['config_drift_detected'] else 'DRIFT'}"
+        )
 
         status = "SUCCESS"
 
@@ -97,32 +106,34 @@ def simulate_canary_deployment(stage, strict_mode=False):
             "duration_seconds": duration,
             "slo_validation": slo_results,
             "gates_passed": True,
-            "strict_mode": strict_mode
+            "strict_mode": strict_mode,
         },
         "epic_status": {
             "differential_privacy": "OPERATIONAL",
             "config_auto_remediation": "OPERATIONAL",
             "budget_guard": "OPERATIONAL",
             "provenance_query": "OPERATIONAL",
-            "autonomy_tier3": "OPERATIONAL"
-        }
+            "autonomy_tier3": "OPERATIONAL",
+        },
     }
 
     print(f"\n🎯 Deployment Status: {status}")
     print(f"⏱️ Duration: {duration:.1f} seconds")
-    print(f"✅ All SLO gates passed")
+    print("✅ All SLO gates passed")
 
     return report
 
+
 def main():
     parser = argparse.ArgumentParser(description="MC Platform Gates Runner")
-    parser.add_argument('--stage', required=True,
-                       choices=['canary_20', 'canary_50', 'production'],
-                       help='Deployment stage')
-    parser.add_argument('--strict', action='store_true',
-                       help='Enable strict validation mode')
-    parser.add_argument('--report', required=True,
-                       help='Output file for deployment report')
+    parser.add_argument(
+        "--stage",
+        required=True,
+        choices=["canary_20", "canary_50", "production"],
+        help="Deployment stage",
+    )
+    parser.add_argument("--strict", action="store_true", help="Enable strict validation mode")
+    parser.add_argument("--report", required=True, help="Output file for deployment report")
 
     args = parser.parse_args()
 
@@ -132,13 +143,14 @@ def main():
     if report:
         # Write report
         os.makedirs(os.path.dirname(args.report), exist_ok=True)
-        with open(args.report, 'w') as f:
+        with open(args.report, "w") as f:
             json.dump(report, f, indent=2)
 
         print(f"\n📊 Deployment report saved: {args.report}")
         return True
     else:
         return False
+
 
 if __name__ == "__main__":
     success = main()

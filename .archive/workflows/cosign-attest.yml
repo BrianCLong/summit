@@ -2,7 +2,7 @@ name: Cosign Sign & Attest
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

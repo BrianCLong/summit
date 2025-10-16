@@ -1,4 +1,3 @@
-
 // tools/ast/ast-parser.ts
 import ts from 'typescript';
 
@@ -14,7 +13,7 @@ export function parseCodeToAst(code: string): ts.SourceFile {
     'mock.ts',
     code,
     ts.ScriptTarget.ES2015,
-    true
+    true,
   );
   return mockAst;
 }

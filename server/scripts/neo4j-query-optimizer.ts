@@ -10,18 +10,21 @@ const NEO4J_URI = process.env.NEO4J_URI || 'bolt://localhost:7687';
 const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
 
-const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD));
+const driver = neo4j.driver(
+  NEO4J_URI,
+  neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+);
 
 async function analyzeQuery(query: string, params: any = {}) {
   const session = driver.session();
   try {
     // Use EXPLAIN to get the query plan without executing
     const explainResult = await session.run(`EXPLAIN ${query}`, params);
-    const plan = explainResult.records.map(record => record.toObject());
+    const plan = explainResult.records.map((record) => record.toObject());
 
     // Use PROFILE to get execution statistics
     const profileResult = await session.run(`PROFILE ${query}`, params);
-    const profile = profileResult.records.map(record => record.toObject());
+    const profile = profileResult.records.map((record) => record.toObject());
 
     // Extract relevant metrics (e.g., db hits, rows)
     // This part would require parsing the PROFILE output, which is complex

@@ -1,18 +1,81 @@
 [
- {"name":"area:graph","color":"1f77b4"},
- {"name":"area:ingest","color":"2ca02c"},
- {"name":"area:er","color":"17becf"},
- {"name":"area:analytics","color":"9467bd"},
- {"name":"area:copilot","color":"ff7f0e"},
- {"name":"area:governance","color":"8c564b"},
- {"name":"area:prov-ledger","color":"e377c2"},
- {"name":"area:ops","color":"7f7f7f"},
- {"name":"area:ui","color":"bcbd22"},
- {"name":"area:docs","color":"17a2b8"},
- {"name":"prio:P0","color":"d62728"},
- {"name":"prio:P1","color":"ff9896"},
- {"name":"prio:P2","color":"c7c7c7"},
- {"name":"risk:high","color":"d62728"},
- {"name":"good first issue","color":"6cc644"},
- {"name":"area:fuzzer","color":"#ff00ff"}
+  {
+    "name": "area:graph",
+    "color": "1f77b4"
+  },
+  {
+    "name": "area:ingest",
+    "color": "2ca02c"
+  },
+  {
+    "name": "area:er",
+    "color": "17becf"
+  },
+  {
+    "name": "area:analytics",
+    "color": "9467bd"
+  },
+  {
+    "name": "area:copilot",
+    "color": "ff7f0e"
+  },
+  {
+    "name": "area:governance",
+    "color": "8c564b"
+  },
+  {
+    "name": "area:prov-ledger",
+    "color": "e377c2"
+  },
+  {
+    "name": "area:ops",
+    "color": "7f7f7f"
+  },
+  {
+    "name": "area:ui",
+    "color": "bcbd22"
+  },
+  {
+    "name": "area:docs",
+    "color": "17a2b8"
+  },
+  {
+    "name": "prio:P0",
+    "color": "d62728"
+  },
+  {
+    "name": "prio:P1",
+    "color": "ff9896"
+  },
+  {
+    "name": "prio:P2",
+    "color": "c7c7c7"
+  },
+  {
+    "name": "risk:high",
+    "color": "d62728"
+  },
+  {
+    "name": "good first issue",
+    "color": "6cc644"
+  },
+  {
+    "name": "area:fuzzer",
+    "color": "#ff00ff"
+  },
+  {
+    "name": "ui:smoke",
+    "color": "1f6feb",
+    "description": "Trigger UI/API smoke in CI"
+  },
+  {
+    "name": "ops:strict",
+    "color": "8a2be2",
+    "description": "Hard gate: ops.validate"
+  },
+  {
+    "name": "perf:strict",
+    "color": "b60205",
+    "description": "Hard gate: k6 smoke"
+  }
 ]

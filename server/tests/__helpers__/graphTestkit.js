@@ -6,7 +6,10 @@ export async function withGraphServer(run) {
       const contextValue = await createContext({ req: {}, res: {} });
       return server.executeOperation(
         {
-          query: typeof query === 'string' ? query : (query.loc?.source.body ?? query),
+          query:
+            typeof query === 'string'
+              ? query
+              : (query.loc?.source.body ?? query),
           variables,
         },
         { contextValue },

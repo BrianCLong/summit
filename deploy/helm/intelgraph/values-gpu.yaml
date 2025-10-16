@@ -2,55 +2,55 @@
 ml:
   image:
     repository: intelgraph/ml
-    tag: "latest-gpu"
+    tag: 'latest-gpu'
     pullPolicy: IfNotPresent
-  
+
   replicaCount: 1
-  
+
   resources:
     requests:
-      memory: "2Gi"
-      cpu: "1"
+      memory: '2Gi'
+      cpu: '1'
       nvidia.com/gpu: 1
     limits:
-      memory: "8Gi"
-      cpu: "4"
+      memory: '8Gi'
+      cpu: '4'
       nvidia.com/gpu: 1
-  
+
   nodeSelector:
     accelerator: nvidia-tesla-k80
-  
+
   tolerations:
     - key: nvidia.com/gpu
       operator: Exists
       effect: NoSchedule
-  
+
   env:
-    USE_SPACY: "true"
-    UVICORN_HOST: "0.0.0.0"
-    UVICORN_PORT: "8081"
+    USE_SPACY: 'true'
+    UVICORN_HOST: '0.0.0.0'
+    UVICORN_PORT: '8081'
 
 mlWorker:
   image:
     repository: intelgraph/ml
-    tag: "latest-gpu"
+    tag: 'latest-gpu'
     pullPolicy: IfNotPresent
-  
+
   replicaCount: 2
-  
+
   resources:
     requests:
-      memory: "1Gi"
-      cpu: "0.5"
+      memory: '1Gi'
+      cpu: '0.5'
       nvidia.com/gpu: 1
     limits:
-      memory: "4Gi"
-      cpu: "2"
+      memory: '4Gi'
+      cpu: '2'
       nvidia.com/gpu: 1
-  
+
   nodeSelector:
     accelerator: nvidia-tesla-k80
-  
+
   tolerations:
     - key: nvidia.com/gpu
       operator: Exists
@@ -60,34 +60,34 @@ mlWorker:
 redis:
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "0.5"
+      memory: '512Mi'
+      cpu: '0.5'
     limits:
-      memory: "2Gi"
-      cpu: "1"
+      memory: '2Gi'
+      cpu: '1'
 
 neo4j:
   resources:
     requests:
-      memory: "2Gi"
-      cpu: "1"
+      memory: '2Gi'
+      cpu: '1'
     limits:
-      memory: "8Gi"
-      cpu: "4"
-  
+      memory: '8Gi'
+      cpu: '4'
+
   config:
-    dbms.memory.heap.initial_size: "2G"
-    dbms.memory.heap.max_size: "6G"
-    dbms.memory.pagecache.size: "2G"
+    dbms.memory.heap.initial_size: '2G'
+    dbms.memory.heap.max_size: '6G'
+    dbms.memory.pagecache.size: '2G'
 
 postgres:
   resources:
     requests:
-      memory: "1Gi"
-      cpu: "0.5"
+      memory: '1Gi'
+      cpu: '0.5'
     limits:
-      memory: "4Gi"
-      cpu: "2"
+      memory: '4Gi'
+      cpu: '2'
 
 # Autoscaling for ML services
 autoscaling:

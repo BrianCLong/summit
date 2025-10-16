@@ -1,6 +1,6 @@
-import React from "react";
-import ExplainabilityPanel from "../../ui/components/ExplainabilityPanel";
-import type { WhyPath } from "../../ui/graph/overlays/WhyPathsOverlay";
+import React from 'react';
+import ExplainabilityPanel from '../../ui/components/ExplainabilityPanel';
+import type { WhyPath } from '../../ui/graph/overlays/WhyPathsOverlay';
 
 interface Props {
   paths: WhyPath[];

@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from ig_rl.envs.graph_coa_env import GraphCoaEnv
 from ig_rl.reward.hub import RewardHub
 

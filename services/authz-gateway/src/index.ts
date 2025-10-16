@@ -79,7 +79,9 @@ export async function createApp() {
       const subjectId = req.body?.subject?.id;
       const action = req.body?.action;
       if (!subjectId || !action) {
-        return res.status(400).json({ error: 'subject_id_and_action_required' });
+        return res
+          .status(400)
+          .json({ error: 'subject_id_and_action_required' });
       }
       const subject = await attributeService.getSubjectAttributes(subjectId);
       let resource: ResourceAttributes;
@@ -124,7 +126,11 @@ export async function createApp() {
           String(req.body?.context?.currentAcr || 'loa1'),
         ),
       });
-      res.json({ allow: decision.allowed, reason: decision.reason, obligations: decision.obligations });
+      res.json({
+        allow: decision.allowed,
+        reason: decision.reason,
+        obligations: decision.obligations,
+      });
     } catch (error) {
       res.status(400).json({ error: (error as Error).message });
     }
@@ -132,7 +138,10 @@ export async function createApp() {
 
   app.post(
     '/auth/webauthn/challenge',
-    requireAuth(attributeService, { action: 'step-up:challenge', skipAuthorization: true }),
+    requireAuth(attributeService, {
+      action: 'step-up:challenge',
+      skipAuthorization: true,
+    }),
     (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
@@ -146,7 +155,10 @@ export async function createApp() {
 
   app.post(
     '/auth/step-up',
-    requireAuth(attributeService, { action: 'step-up:verify', skipAuthorization: true }),
+    requireAuth(attributeService, {
+      action: 'step-up:verify',
+      skipAuthorization: true,
+    }),
     async (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
@@ -154,7 +166,11 @@ export async function createApp() {
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
-        stepUpManager.verifyResponse(userId, { credentialId, signature, challenge });
+        stepUpManager.verifyResponse(userId, {
+          credentialId,
+          signature,
+          challenge,
+        });
         const { SignJWT } = await import('jose');
         const token = await new SignJWT({
           ...req.user,
@@ -174,7 +190,10 @@ export async function createApp() {
   const upstream = process.env.UPSTREAM || 'http://localhost:4001';
   app.use(
     '/protected',
-    requireAuth(attributeService, { action: 'dataset:read', resourceIdHeader: 'x-resource-id' }),
+    requireAuth(attributeService, {
+      action: 'dataset:read',
+      resourceIdHeader: 'x-resource-id',
+    }),
     createProxyMiddleware({
       target: upstream,
       changeOrigin: true,

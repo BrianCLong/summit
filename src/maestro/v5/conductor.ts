@@ -42,7 +42,10 @@ export class MaestroConductorV5 {
     this.propertyTesting = new PropertyBasedTesting();
   }
 
-  async processAutonomousDelivery(prId: string, changes: any[]): Promise<{
+  async processAutonomousDelivery(
+    prId: string,
+    changes: any[],
+  ): Promise<{
     success: boolean;
     evalScore: number;
     specGenerated: boolean;
@@ -52,23 +55,24 @@ export class MaestroConductorV5 {
     try {
       // 1. Generate spec first
       const spec = await this.specSynth.generateSpec(changes);
-      
+
       // 2. Run evaluation harness
       const evalResult = await this.evalHarness.evaluateChanges(changes, spec);
-      
+
       if (evalResult.score < this.config.evalThreshold) {
         return {
           success: false,
           evalScore: evalResult.score,
           specGenerated: true,
           deployed: false,
-          canarySuccess: false
+          canarySuccess: false,
         };
       }
 
       // 3. AST-aware refactoring if needed
-      const refactorResult = await this.refactorSurgeon.analyzeAndRefactor(changes);
-      
+      const refactorResult =
+        await this.refactorSurgeon.analyzeAndRefactor(changes);
+
       // 4. Strengthen tests
       await this.mutationTesting.runMutationTests(changes);
       await this.propertyTesting.generatePropertyTests(changes);
@@ -77,7 +81,7 @@ export class MaestroConductorV5 {
       const deployResult = await this.progressiveDelivery.deploy(prId, {
         evalScore: evalResult.score,
         riskLevel: refactorResult.riskLevel,
-        testStrength: evalResult.testStrength
+        testStrength: evalResult.testStrength,
       });
 
       return {
@@ -85,16 +89,15 @@ export class MaestroConductorV5 {
         evalScore: evalResult.score,
         specGenerated: true,
         deployed: deployResult.success,
-        canarySuccess: deployResult.canarySuccess
+        canarySuccess: deployResult.canarySuccess,
       };
-
     } catch (error) {
       return {
         success: false,
         evalScore: 0,
         specGenerated: false,
         deployed: false,
-        canarySuccess: false
+        canarySuccess: false,
       };
     }
   }
@@ -107,8 +110,8 @@ export class MaestroConductorV5 {
       codeGraph: await this.codeGraph.getStats(),
       testStrength: {
         mutation: await this.mutationTesting.getStats(),
-        propertyBased: await this.propertyTesting.getStats()
-      }
+        propertyBased: await this.propertyTesting.getStats(),
+      },
     };
   }
 }

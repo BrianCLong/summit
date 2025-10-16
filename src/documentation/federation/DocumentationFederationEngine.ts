@@ -111,7 +111,9 @@ export class DocumentationFederationEngine extends EventEmitter {
   /**
    * Register a single repository with the federation
    */
-  private async registerRepository(repo: FederatedRepository): Promise<RegistrationResult> {
+  private async registerRepository(
+    repo: FederatedRepository,
+  ): Promise<RegistrationResult> {
     // Validate repository access
     await this.validateRepositoryAccess(repo);
 
@@ -127,7 +129,7 @@ export class DocumentationFederationEngine extends EventEmitter {
       content,
       manifest,
       lastSync: new Date(),
-      status: 'active'
+      status: 'active',
     });
 
     // Setup routing entries
@@ -137,7 +139,7 @@ export class DocumentationFederationEngine extends EventEmitter {
       success: true,
       repositoryId: repo.id,
       contentItems: content.length,
-      routingEntries: content.length
+      routingEntries: content.length,
     };
   }
 
@@ -150,14 +152,14 @@ export class DocumentationFederationEngine extends EventEmitter {
       contentTypes: new Map(),
       tags: new Map(),
       teams: new Map(),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     for (const [repoId, federatedContent] of this.federatedContent) {
       catalog.repositories.set(repoId, {
         repository: federatedContent.repository,
         contentCount: federatedContent.content.length,
-        lastSync: federatedContent.lastSync
+        lastSync: federatedContent.lastSync,
       });
 
       // Index by content type
@@ -166,7 +168,7 @@ export class DocumentationFederationEngine extends EventEmitter {
         typeEntries.push({
           repositoryId: repoId,
           path: item.path,
-          metadata: item.metadata
+          metadata: item.metadata,
         });
         catalog.contentTypes.set(item.type, typeEntries);
 
@@ -176,7 +178,7 @@ export class DocumentationFederationEngine extends EventEmitter {
           tagEntries.push({
             repositoryId: repoId,
             path: item.path,
-            type: item.type
+            type: item.type,
           });
           catalog.tags.set(tag, tagEntries);
         }
@@ -189,10 +191,10 @@ export class DocumentationFederationEngine extends EventEmitter {
       catalog.teams.set(team, teamRepos);
     }
 
-    this.emit('catalog:built', { 
+    this.emit('catalog:built', {
       repositories: catalog.repositories.size,
       contentTypes: catalog.contentTypes.size,
-      tags: catalog.tags.size
+      tags: catalog.tags.size,
     });
 
     return catalog;
@@ -207,7 +209,10 @@ export class DocumentationFederationEngine extends EventEmitter {
 
     // Build routing entries for each repository
     for (const [repoId, federatedContent] of this.federatedContent) {
-      await this.setupRepositoryRouting(federatedContent.repository, federatedContent.content);
+      await this.setupRepositoryRouting(
+        federatedContent.repository,
+        federatedContent.content,
+      );
     }
 
     // Setup subdomain routing
@@ -225,7 +230,10 @@ export class DocumentationFederationEngine extends EventEmitter {
   /**
    * Setup repository-specific routing
    */
-  private async setupRepositoryRouting(repo: FederatedRepository, content: ContentItem[]): Promise<void> {
+  private async setupRepositoryRouting(
+    repo: FederatedRepository,
+    content: ContentItem[],
+  ): Promise<void> {
     for (const item of content) {
       const routingEntry: RoutingEntry = {
         path: this.generateRoutePath(repo, item),
@@ -235,7 +243,7 @@ export class DocumentationFederationEngine extends EventEmitter {
         team: repo.team,
         namespace: repo.namespace,
         metadata: item.metadata,
-        cacheStrategy: this.determineCacheStrategy(item)
+        cacheStrategy: this.determineCacheStrategy(item),
       };
 
       this.routingTable.set(routingEntry.path, routingEntry);
@@ -245,11 +253,14 @@ export class DocumentationFederationEngine extends EventEmitter {
   /**
    * Generate intelligent route paths
    */
-  private generateRoutePath(repo: FederatedRepository, item: ContentItem): string {
+  private generateRoutePath(
+    repo: FederatedRepository,
+    item: ContentItem,
+  ): string {
     const namespace = repo.namespace;
     const team = repo.team;
     const type = item.type;
-    
+
     // Generate path based on content type and repository structure
     switch (type) {
       case 'api':
@@ -284,19 +295,24 @@ export class DocumentationFederationEngine extends EventEmitter {
   /**
    * Initialize synchronization for a repository
    */
-  private async initializeRepositorySync(repo: FederatedRepository): Promise<void> {
+  private async initializeRepositorySync(
+    repo: FederatedRepository,
+  ): Promise<void> {
     const syncStatus: SyncStatus = {
       repositoryId: repo.id,
       lastSync: new Date(),
       status: 'active',
       conflicts: [],
-      errors: []
+      errors: [],
     };
 
     this.syncState.set(repo.id, syncStatus);
 
     // Setup webhooks for real-time sync
-    if (repo.sync.strategy === 'push' || repo.sync.strategy === 'bidirectional') {
+    if (
+      repo.sync.strategy === 'push' ||
+      repo.sync.strategy === 'bidirectional'
+    ) {
       await this.setupWebhook(repo);
     }
   }
@@ -305,16 +321,19 @@ export class DocumentationFederationEngine extends EventEmitter {
    * Perform scheduled synchronization
    */
   private async performScheduledSync(): Promise<void> {
-    const syncPromises = Array.from(this.federatedContent.keys()).map(repoId => 
-      this.syncRepository(repoId)
+    const syncPromises = Array.from(this.federatedContent.keys()).map(
+      (repoId) => this.syncRepository(repoId),
     );
 
     const results = await Promise.allSettled(syncPromises);
-    
+
     results.forEach((result, index) => {
       const repoId = Array.from(this.federatedContent.keys())[index];
       if (result.status === 'rejected') {
-        this.emit('sync:failed', { repositoryId: repoId, error: result.reason });
+        this.emit('sync:failed', {
+          repositoryId: repoId,
+          error: result.reason,
+        });
       }
     });
   }
@@ -336,19 +355,25 @@ export class DocumentationFederationEngine extends EventEmitter {
       const latestContent = await this.fetchLatestContent(repo);
 
       // Detect changes
-      const changes = this.detectContentChanges(federatedContent.content, latestContent);
+      const changes = this.detectContentChanges(
+        federatedContent.content,
+        latestContent,
+      );
 
       // Apply conflict resolution if needed
-      const resolvedChanges = await this.resolveConflicts(changes, syncStatus.conflicts);
+      const resolvedChanges = await this.resolveConflicts(
+        changes,
+        syncStatus.conflicts,
+      );
 
       // Update federated content
       if (resolvedChanges.length > 0) {
         federatedContent.content = latestContent;
         federatedContent.lastSync = new Date();
-        
+
         // Update routing table
         await this.updateRepositoryRouting(repo, latestContent);
-        
+
         // Trigger hooks
         await this.executeSyncHooks(repo, resolvedChanges);
       }
@@ -360,21 +385,20 @@ export class DocumentationFederationEngine extends EventEmitter {
       this.emit('repository:synced', {
         repositoryId,
         changes: resolvedChanges.length,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return {
         repositoryId,
         success: true,
         changesApplied: resolvedChanges.length,
-        conflicts: syncStatus.conflicts.length
+        conflicts: syncStatus.conflicts.length,
       };
-
     } catch (error) {
       syncStatus.status = 'error';
       syncStatus.errors.push({
         timestamp: new Date(),
-        error: error.message
+        error: error.message,
       });
 
       this.emit('sync:error', { repositoryId, error });
@@ -389,7 +413,11 @@ export class DocumentationFederationEngine extends EventEmitter {
     const results: SearchResult[] = [];
 
     for (const [repoId, federatedContent] of this.federatedContent) {
-      const repoResults = await this.searchRepositoryContent(repoId, federatedContent, query);
+      const repoResults = await this.searchRepositoryContent(
+        repoId,
+        federatedContent,
+        query,
+      );
       results.push(...repoResults);
     }
 
@@ -404,21 +432,24 @@ export class DocumentationFederationEngine extends EventEmitter {
    * Search content within a specific repository
    */
   private async searchRepositoryContent(
-    repoId: string, 
-    federatedContent: FederatedContent, 
-    query: SearchQuery
+    repoId: string,
+    federatedContent: FederatedContent,
+    query: SearchQuery,
   ): Promise<SearchResult[]> {
     const results: SearchResult[] = [];
 
     for (const item of federatedContent.content) {
       // Apply filters
       if (query.type && item.type !== query.type) continue;
-      if (query.tags && !query.tags.some(tag => item.tags.includes(tag))) continue;
-      if (query.team && federatedContent.repository.team !== query.team) continue;
+      if (query.tags && !query.tags.some((tag) => item.tags.includes(tag)))
+        continue;
+      if (query.team && federatedContent.repository.team !== query.team)
+        continue;
 
       // Calculate relevance score
       const score = this.calculateRelevanceScore(item, query);
-      if (score > 0.1) { // Minimum threshold
+      if (score > 0.1) {
+        // Minimum threshold
         results.push({
           repositoryId: repoId,
           path: item.path,
@@ -428,7 +459,7 @@ export class DocumentationFederationEngine extends EventEmitter {
           score,
           tags: item.tags,
           team: federatedContent.repository.team,
-          lastModified: item.metadata.lastModified
+          lastModified: item.metadata.lastModified,
         });
       }
     }
@@ -449,8 +480,8 @@ export class DocumentationFederationEngine extends EventEmitter {
         totalRepositories: this.federatedContent.size,
         totalRoutes: this.routingTable.size,
         contentTypes: this.getUniqueContentTypes(),
-        teams: this.getUniqueTeams()
-      }
+        teams: this.getUniqueTeams(),
+      },
     };
 
     // Add repository entries
@@ -461,7 +492,7 @@ export class DocumentationFederationEngine extends EventEmitter {
         team: federatedContent.repository.team,
         namespace: federatedContent.repository.namespace,
         contentCount: federatedContent.content.length,
-        lastSync: federatedContent.lastSync
+        lastSync: federatedContent.lastSync,
       });
     }
 
@@ -473,7 +504,7 @@ export class DocumentationFederationEngine extends EventEmitter {
         type: routingEntry.type,
         team: routingEntry.team,
         priority: this.calculateRoutePriority(routingEntry),
-        changeFreq: this.determineChangeFrequency(routingEntry)
+        changeFreq: this.determineChangeFrequency(routingEntry),
       });
     }
 
@@ -500,8 +531,8 @@ export class DocumentationFederationEngine extends EventEmitter {
       warnings: warnings.length,
       details: {
         violations,
-        warnings
-      }
+        warnings,
+      },
     };
 
     this.emit('policies:enforced', enforcementResult);
@@ -518,32 +549,36 @@ export class DocumentationFederationEngine extends EventEmitter {
         totalRepositories: this.federatedContent.size,
         totalContent: this.getTotalContentItems(),
         totalRoutes: this.routingTable.size,
-        activeTeams: this.getUniqueTeams().length
+        activeTeams: this.getUniqueTeams().length,
       },
       contentDistribution: this.getContentDistribution(),
       teamActivity: this.getTeamActivity(),
       syncHealth: this.getSyncHealth(),
-      performance: await this.getPerformanceMetrics()
+      performance: await this.getPerformanceMetrics(),
     };
 
     return analytics;
   }
 
   // Utility methods
-  private async validateRepositoryAccess(repo: FederatedRepository): Promise<void> {
+  private async validateRepositoryAccess(
+    repo: FederatedRepository,
+  ): Promise<void> {
     try {
       await this.octokit.repos.get({
         owner: repo.url.split('/')[3],
-        repo: repo.url.split('/')[4]
+        repo: repo.url.split('/')[4],
       });
     } catch (error) {
       throw new Error(`Cannot access repository ${repo.url}: ${error.message}`);
     }
   }
 
-  private async discoverContent(repo: FederatedRepository): Promise<ContentItem[]> {
+  private async discoverContent(
+    repo: FederatedRepository,
+  ): Promise<ContentItem[]> {
     const content: ContentItem[] = [];
-    
+
     for (const contentPath of repo.contentPaths) {
       const items = await this.scanContentPath(repo, contentPath);
       content.push(...items);
@@ -552,49 +587,61 @@ export class DocumentationFederationEngine extends EventEmitter {
     return content;
   }
 
-  private async scanContentPath(repo: FederatedRepository, contentPath: ContentPath): Promise<ContentItem[]> {
+  private async scanContentPath(
+    repo: FederatedRepository,
+    contentPath: ContentPath,
+  ): Promise<ContentItem[]> {
     const items: ContentItem[] = [];
-    
+
     try {
       const { data } = await this.octokit.repos.getContent({
         owner: repo.url.split('/')[3],
         repo: repo.url.split('/')[4],
         path: contentPath.path,
-        ref: repo.branch
+        ref: repo.branch,
       });
 
       if (Array.isArray(data)) {
         for (const item of data) {
           if (item.type === 'file' && item.name.match(/\.(md|mdx)$/)) {
-            const contentItem = await this.parseContentItem(repo, contentPath, item);
+            const contentItem = await this.parseContentItem(
+              repo,
+              contentPath,
+              item,
+            );
             items.push(contentItem);
           }
         }
       }
     } catch (error) {
-      console.warn(`Failed to scan content path ${contentPath.path}: ${error.message}`);
+      console.warn(
+        `Failed to scan content path ${contentPath.path}: ${error.message}`,
+      );
     }
 
     return items;
   }
 
-  private generateFederationManifest(repo: FederatedRepository, content: ContentItem[]): FederationManifest {
+  private generateFederationManifest(
+    repo: FederatedRepository,
+    content: ContentItem[],
+  ): FederationManifest {
     return {
       version: '1.0',
       repository: {
         id: repo.id,
         name: repo.name,
         team: repo.team,
-        namespace: repo.namespace
+        namespace: repo.namespace,
       },
-      content: content.map(item => ({
+      content: content.map((item) => ({
         path: item.path,
         type: item.type,
         tags: item.tags,
-        checksum: item.checksum
+        checksum: item.checksum,
       })),
-      routes: content.map(item => this.generateRoutePath(repo, item)),
-      lastUpdated: new Date()
+      routes: content.map((item) => this.generateRoutePath(repo, item)),
+      lastUpdated: new Date(),
     };
   }
 
@@ -612,20 +659,23 @@ export class DocumentationFederationEngine extends EventEmitter {
     }
   }
 
-  private calculateRelevanceScore(item: ContentItem, query: SearchQuery): number {
+  private calculateRelevanceScore(
+    item: ContentItem,
+    query: SearchQuery,
+  ): number {
     let score = 0;
-    
+
     // Title match
     if (item.metadata.title?.toLowerCase().includes(query.text.toLowerCase())) {
       score += 1.0;
     }
-    
+
     // Tag match
     if (query.tags) {
-      const matchingTags = item.tags.filter(tag => query.tags!.includes(tag));
+      const matchingTags = item.tags.filter((tag) => query.tags!.includes(tag));
       score += matchingTags.length * 0.5;
     }
-    
+
     // Content type boost
     if (query.type === item.type) {
       score += 0.3;
@@ -639,25 +689,27 @@ export class DocumentationFederationEngine extends EventEmitter {
     const content = item.content || '';
     const queryText = query.text.toLowerCase();
     const index = content.toLowerCase().indexOf(queryText);
-    
+
     if (index !== -1) {
       const start = Math.max(0, index - 100);
       const end = Math.min(content.length, index + query.text.length + 100);
       return '...' + content.substring(start, end) + '...';
     }
-    
+
     return content.substring(0, 200) + '...';
   }
 
   private getTotalContentItems(): number {
-    return Array.from(this.federatedContent.values())
-      .reduce((total, fed) => total + fed.content.length, 0);
+    return Array.from(this.federatedContent.values()).reduce(
+      (total, fed) => total + fed.content.length,
+      0,
+    );
   }
 
   private getUniqueContentTypes(): string[] {
     const types = new Set<string>();
     for (const fed of this.federatedContent.values()) {
-      fed.content.forEach(item => types.add(item.type));
+      fed.content.forEach((item) => types.add(item.type));
     }
     return Array.from(types);
   }

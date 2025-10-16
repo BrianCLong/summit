@@ -1,4 +1,3 @@
-
 export type StageKind = 'sequential' | 'parallel' | 'conditional';
 
 export interface GateDefinition {

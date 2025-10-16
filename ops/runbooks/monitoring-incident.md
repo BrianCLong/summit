@@ -56,11 +56,11 @@ If a remediation fails repeatedly within five minutes, the associated counter `s
 
 ## Escalation Matrix
 
-| Severity | Trigger | Action |
-| --- | --- | --- |
-| P1 | Persistent SLO breach (`severity=page`) | Incident commander + platform + on-call for owning service |
-| P2 | Revenue or signup anomalies (`severity=ticket`) | Create Jira incident, notify Finance/Growth |
-| P3 | Capacity forecast warnings | Create capacity planning issue, track in weekly Ops review |
+| Severity | Trigger                                         | Action                                                     |
+| -------- | ----------------------------------------------- | ---------------------------------------------------------- |
+| P1       | Persistent SLO breach (`severity=page`)         | Incident commander + platform + on-call for owning service |
+| P2       | Revenue or signup anomalies (`severity=ticket`) | Create Jira incident, notify Finance/Growth                |
+| P3       | Capacity forecast warnings                      | Create capacity planning issue, track in weekly Ops review |
 
 ## Post-Incident
 

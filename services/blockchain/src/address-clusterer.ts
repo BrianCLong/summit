@@ -9,8 +9,21 @@ import crypto from 'crypto';
 export interface BlockchainAddress {
   id: string;
   address: string;
-  blockchain: 'bitcoin' | 'ethereum' | 'polygon' | 'arbitrum' | 'optimism' | 'bsc';
-  addressType: 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2wsh' | 'eoa' | 'contract' | 'multisig';
+  blockchain:
+    | 'bitcoin'
+    | 'ethereum'
+    | 'polygon'
+    | 'arbitrum'
+    | 'optimism'
+    | 'bsc';
+  addressType:
+    | 'p2pkh'
+    | 'p2sh'
+    | 'p2wpkh'
+    | 'p2wsh'
+    | 'eoa'
+    | 'contract'
+    | 'multisig';
   metadata: {
     firstSeen: Date;
     lastSeen: Date;
@@ -36,7 +49,14 @@ export interface BlockchainAddress {
     highRiskJurisdiction: boolean;
   };
   analysis: {
-    behaviorPattern: 'normal' | 'mixer' | 'exchange' | 'merchant' | 'mining' | 'gambling' | 'suspicious';
+    behaviorPattern:
+      | 'normal'
+      | 'mixer'
+      | 'exchange'
+      | 'merchant'
+      | 'mining'
+      | 'gambling'
+      | 'suspicious';
     privacyScore: number;
     activityScore: number;
     riskScore: number;
@@ -48,10 +68,22 @@ export interface AddressCluster {
   name?: string;
   addresses: string[];
   blockchain: string;
-  clusterType: 'exchange' | 'service' | 'individual' | 'entity' | 'mixer' | 'bridge' | 'unknown';
+  clusterType:
+    | 'exchange'
+    | 'service'
+    | 'individual'
+    | 'entity'
+    | 'mixer'
+    | 'bridge'
+    | 'unknown';
   confidence: number;
   heuristics: Array<{
-    type: 'common_input' | 'change_address' | 'temporal_clustering' | 'behavioral_pattern' | 'external_label';
+    type:
+      | 'common_input'
+      | 'change_address'
+      | 'temporal_clustering'
+      | 'behavioral_pattern'
+      | 'external_label';
     strength: number;
     evidence: Array<{
       txHash: string;
@@ -150,7 +182,12 @@ export interface ClusteringJob {
     maxIterations: number;
   };
   progress: {
-    phase: 'initialization' | 'graph_building' | 'clustering' | 'validation' | 'finalization';
+    phase:
+      | 'initialization'
+      | 'graph_building'
+      | 'clustering'
+      | 'validation'
+      | 'finalization';
     addressesProcessed: number;
     transactionsProcessed: number;
     clustersFound: number;
@@ -223,7 +260,10 @@ export class AddressClusterer extends EventEmitter {
 
   // Graph structure for clustering
   private addressGraph = new Map<string, Set<string>>();
-  private transactionGraph = new Map<string, Array<{ to: string; weight: number; evidence: any }>>();
+  private transactionGraph = new Map<
+    string,
+    Array<{ to: string; weight: number; evidence: any }>
+  >();
 
   constructor() {
     super();
@@ -233,7 +273,7 @@ export class AddressClusterer extends EventEmitter {
    * Ingest blockchain address with metadata
    */
   async ingestAddress(
-    address: Omit<BlockchainAddress, 'id' | 'analysis'>
+    address: Omit<BlockchainAddress, 'id' | 'analysis'>,
   ): Promise<BlockchainAddress> {
     const fullAddress: BlockchainAddress = {
       ...address,
@@ -242,8 +282,8 @@ export class AddressClusterer extends EventEmitter {
         behaviorPattern: await this.analyzeBehaviorPattern(address),
         privacyScore: await this.calculatePrivacyScore(address),
         activityScore: await this.calculateActivityScore(address),
-        riskScore: await this.calculateRiskScore(address)
-      }
+        riskScore: await this.calculateRiskScore(address),
+      },
     };
 
     this.addresses.set(fullAddress.address, fullAddress);
@@ -256,12 +296,12 @@ export class AddressClusterer extends EventEmitter {
    * Ingest transaction for clustering analysis
    */
   async ingestTransaction(
-    transaction: Omit<Transaction, 'id' | 'analysis'>
+    transaction: Omit<Transaction, 'id' | 'analysis'>,
   ): Promise<Transaction> {
     const fullTransaction: Transaction = {
       ...transaction,
       id: crypto.randomUUID(),
-      analysis: await this.analyzeTransaction(transaction)
+      analysis: await this.analyzeTransaction(transaction),
     };
 
     this.transactions.set(fullTransaction.hash, fullTransaction);
@@ -280,7 +320,7 @@ export class AddressClusterer extends EventEmitter {
   async executeClusteringJob(
     blockchain: string,
     scope: ClusteringJob['scope'],
-    config: Partial<ClusteringJob['config']> = {}
+    config: Partial<ClusteringJob['config']> = {},
   ): Promise<ClusteringJob> {
     const job: ClusteringJob = {
       id: crypto.randomUUID(),
@@ -290,35 +330,50 @@ export class AddressClusterer extends EventEmitter {
       config: {
         heuristics: [
           { type: 'common_input', enabled: true, weight: 0.8, threshold: 0.7 },
-          { type: 'change_address', enabled: true, weight: 0.7, threshold: 0.6 },
-          { type: 'temporal_clustering', enabled: true, weight: 0.5, threshold: 0.5 },
-          { type: 'behavioral_pattern', enabled: true, weight: 0.6, threshold: 0.6 }
+          {
+            type: 'change_address',
+            enabled: true,
+            weight: 0.7,
+            threshold: 0.6,
+          },
+          {
+            type: 'temporal_clustering',
+            enabled: true,
+            weight: 0.5,
+            threshold: 0.5,
+          },
+          {
+            type: 'behavioral_pattern',
+            enabled: true,
+            weight: 0.6,
+            threshold: 0.6,
+          },
         ],
         minClusterSize: 2,
         confidenceThreshold: 0.7,
         maxIterations: 100,
-        ...config
+        ...config,
       },
       progress: {
         phase: 'initialization',
         addressesProcessed: 0,
         transactionsProcessed: 0,
-        clustersFound: 0
+        clustersFound: 0,
       },
       timing: {
-        startTime: new Date()
+        startTime: new Date(),
       },
       performance: {
         memoryUsed: 0,
         cpuTime: 0,
-        networkRequests: 0
-      }
+        networkRequests: 0,
+      },
     };
 
     this.clusteringJobs.set(job.id, job);
 
     // Execute clustering asynchronously
-    this.executeClusteringAsync(job).catch(error => {
+    this.executeClusteringAsync(job).catch((error) => {
       job.status = 'failed';
       job.timing.endTime = new Date();
       this.clusteringJobs.set(job.id, job);
@@ -336,7 +391,7 @@ export class AddressClusterer extends EventEmitter {
     targetAddress: string | undefined,
     maxHops: number = 4,
     maxAmount?: number,
-    timeWindow?: { start: Date; end: Date }
+    timeWindow?: { start: Date; end: Date },
   ): Promise<FlowAnalysis> {
     const analysis: FlowAnalysis = {
       id: crypto.randomUUID(),
@@ -353,36 +408,49 @@ export class AddressClusterer extends EventEmitter {
         averageHops: 0,
         riskDistribution: {},
         mixingDetected: false,
-        sanctionsExposure: false
+        sanctionsExposure: false,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     // Find paths using BFS with constraints
-    const paths = await this.findPaths(sourceAddress, targetAddress, maxHops, maxAmount, timeWindow);
+    const paths = await this.findPaths(
+      sourceAddress,
+      targetAddress,
+      maxHops,
+      maxAmount,
+      timeWindow,
+    );
 
-    analysis.paths = paths.map(path => ({
+    analysis.paths = paths.map((path) => ({
       id: crypto.randomUUID(),
       hops: path.hops,
       totalAmount: path.hops.reduce((sum, hop) => sum + hop.amount, 0),
-      totalTime: path.hops.length > 0
-        ? path.hops[path.hops.length - 1].timestamp.getTime() - path.hops[0].timestamp.getTime()
-        : 0,
+      totalTime:
+        path.hops.length > 0
+          ? path.hops[path.hops.length - 1].timestamp.getTime() -
+            path.hops[0].timestamp.getTime()
+          : 0,
       riskScore: await this.calculatePathRiskScore(path.hops),
       mixingEvents: await this.countMixingEvents(path.hops),
-      suspiciousHops: await this.identifySuspiciousHops(path.hops)
+      suspiciousHops: await this.identifySuspiciousHops(path.hops),
     }));
 
     // Calculate summary statistics
     analysis.summary = {
       totalPaths: analysis.paths.length,
-      totalAmount: analysis.paths.reduce((sum, path) => sum + path.totalAmount, 0),
-      averageHops: analysis.paths.length > 0
-        ? analysis.paths.reduce((sum, path) => sum + path.hops.length, 0) / analysis.paths.length
-        : 0,
+      totalAmount: analysis.paths.reduce(
+        (sum, path) => sum + path.totalAmount,
+        0,
+      ),
+      averageHops:
+        analysis.paths.length > 0
+          ? analysis.paths.reduce((sum, path) => sum + path.hops.length, 0) /
+            analysis.paths.length
+          : 0,
       riskDistribution: this.calculateRiskDistribution(analysis.paths),
-      mixingDetected: analysis.paths.some(path => path.mixingEvents > 0),
-      sanctionsExposure: await this.checkSanctionsExposure(analysis.paths)
+      mixingDetected: analysis.paths.some((path) => path.mixingEvents > 0),
+      sanctionsExposure: await this.checkSanctionsExposure(analysis.paths),
     };
 
     this.flowAnalyses.set(analysis.id, analysis);
@@ -396,7 +464,7 @@ export class AddressClusterer extends EventEmitter {
    */
   async detectMixerUsage(
     address: string,
-    timeWindow?: { start: Date; end: Date }
+    timeWindow?: { start: Date; end: Date },
   ): Promise<{
     mixerEvents: Array<{
       mixer: string;
@@ -422,18 +490,23 @@ export class AddressClusterer extends EventEmitter {
     }> = [];
 
     // Get transactions for the address
-    const addressTransactions = Array.from(this.transactions.values()).filter(tx => {
-      const hasAddress = tx.inputs.some(inp => inp.address === address) ||
-                         tx.outputs.some(out => out.address === address);
+    const addressTransactions = Array.from(this.transactions.values()).filter(
+      (tx) => {
+        const hasAddress =
+          tx.inputs.some((inp) => inp.address === address) ||
+          tx.outputs.some((out) => out.address === address);
 
-      if (!hasAddress) return false;
+        if (!hasAddress) return false;
 
-      if (timeWindow) {
-        return tx.timestamp >= timeWindow.start && tx.timestamp <= timeWindow.end;
-      }
+        if (timeWindow) {
+          return (
+            tx.timestamp >= timeWindow.start && tx.timestamp <= timeWindow.end
+          );
+        }
 
-      return true;
-    });
+        return true;
+      },
+    );
 
     // Analyze each transaction for mixer patterns
     for (const tx of addressTransactions) {
@@ -447,20 +520,26 @@ export class AddressClusterer extends EventEmitter {
           outputAmount: mixerIndicators.outputAmount,
           timestamp: tx.timestamp,
           confidence: mixerIndicators.confidence,
-          technique: mixerIndicators.technique
+          technique: mixerIndicators.technique,
         });
       }
     }
 
-    const totalMixed = mixerEvents.reduce((sum, event) => sum + event.inputAmount, 0);
+    const totalMixed = mixerEvents.reduce(
+      (sum, event) => sum + event.inputAmount,
+      0,
+    );
     const timeSpan = timeWindow
       ? timeWindow.end.getTime() - timeWindow.start.getTime()
       : addressTransactions.length > 0
-      ? Math.max(...addressTransactions.map(tx => tx.timestamp.getTime())) -
-        Math.min(...addressTransactions.map(tx => tx.timestamp.getTime()))
-      : 0;
+        ? Math.max(...addressTransactions.map((tx) => tx.timestamp.getTime())) -
+          Math.min(...addressTransactions.map((tx) => tx.timestamp.getTime()))
+        : 0;
 
-    const mixingFrequency = timeSpan > 0 ? mixerEvents.length / (timeSpan / (1000 * 60 * 60 * 24)) : 0;
+    const mixingFrequency =
+      timeSpan > 0
+        ? mixerEvents.length / (timeSpan / (1000 * 60 * 60 * 24))
+        : 0;
 
     let suspicionLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
     if (mixingFrequency > 5) suspicionLevel = 'critical';
@@ -471,7 +550,7 @@ export class AddressClusterer extends EventEmitter {
       mixerEvents,
       totalMixed,
       mixingFrequency,
-      suspicionLevel
+      suspicionLevel,
     };
   }
 
@@ -479,9 +558,11 @@ export class AddressClusterer extends EventEmitter {
    * Get cluster by address
    */
   getClusterByAddress(address: string): AddressCluster | null {
-    return Array.from(this.clusters.values()).find(cluster =>
-      cluster.addresses.includes(address)
-    ) || null;
+    return (
+      Array.from(this.clusters.values()).find((cluster) =>
+        cluster.addresses.includes(address),
+      ) || null
+    );
   }
 
   /**
@@ -499,18 +580,27 @@ export class AddressClusterer extends EventEmitter {
     const totalAddresses = this.addresses.size;
     const totalClusters = this.clusters.size;
 
-    const clusteredAddresses = Array.from(this.clusters.values())
-      .reduce((sum, cluster) => sum + cluster.addresses.length, 0);
+    const clusteredAddresses = Array.from(this.clusters.values()).reduce(
+      (sum, cluster) => sum + cluster.addresses.length,
+      0,
+    );
 
-    const clusterSizes = Array.from(this.clusters.values()).map(c => c.addresses.length);
-    const averageClusterSize = clusterSizes.length > 0
-      ? clusterSizes.reduce((a, b) => a + b, 0) / clusterSizes.length
-      : 0;
+    const clusterSizes = Array.from(this.clusters.values()).map(
+      (c) => c.addresses.length,
+    );
+    const averageClusterSize =
+      clusterSizes.length > 0
+        ? clusterSizes.reduce((a, b) => a + b, 0) / clusterSizes.length
+        : 0;
 
-    const largestCluster = clusterSizes.length > 0 ? Math.max(...clusterSizes) : 0;
-    const clusteringRatio = totalAddresses > 0 ? clusteredAddresses / totalAddresses : 0;
+    const largestCluster =
+      clusterSizes.length > 0 ? Math.max(...clusterSizes) : 0;
+    const clusteringRatio =
+      totalAddresses > 0 ? clusteredAddresses / totalAddresses : 0;
 
-    const confidences = Array.from(this.clusters.values()).map(c => c.confidence);
+    const confidences = Array.from(this.clusters.values()).map(
+      (c) => c.confidence,
+    );
     const confidenceDistribution = this.calculateDistribution(confidences, 0.1);
 
     return {
@@ -520,7 +610,7 @@ export class AddressClusterer extends EventEmitter {
       averageClusterSize,
       largestCluster,
       clusteringRatio,
-      confidenceDistribution
+      confidenceDistribution,
     };
   }
 
@@ -532,8 +622,14 @@ export class AddressClusterer extends EventEmitter {
 
       // Phase 1: Initialization
       job.progress.phase = 'initialization';
-      const addresses = await this.getScopedAddresses(job.scope, job.blockchain);
-      const transactions = await this.getScopedTransactions(job.scope, job.blockchain);
+      const addresses = await this.getScopedAddresses(
+        job.scope,
+        job.blockchain,
+      );
+      const transactions = await this.getScopedTransactions(
+        job.scope,
+        job.blockchain,
+      );
 
       // Phase 2: Graph building
       job.progress.phase = 'graph_building';
@@ -556,23 +652,31 @@ export class AddressClusterer extends EventEmitter {
       job.timing.duration = Date.now() - startTime;
 
       job.results = {
-        clustersCreated: validatedClusters.map(c => c.id),
-        addressesClustered: validatedClusters.reduce((sum, c) => sum + c.addresses.length, 0),
+        clustersCreated: validatedClusters.map((c) => c.id),
+        addressesClustered: validatedClusters.reduce(
+          (sum, c) => sum + c.addresses.length,
+          0,
+        ),
         totalClusters: validatedClusters.length,
-        averageClusterSize: validatedClusters.length > 0
-          ? validatedClusters.reduce((sum, c) => sum + c.addresses.length, 0) / validatedClusters.length
-          : 0,
-        maxClusterSize: validatedClusters.length > 0
-          ? Math.max(...validatedClusters.map(c => c.addresses.length))
-          : 0,
+        averageClusterSize:
+          validatedClusters.length > 0
+            ? validatedClusters.reduce(
+                (sum, c) => sum + c.addresses.length,
+                0,
+              ) / validatedClusters.length
+            : 0,
+        maxClusterSize:
+          validatedClusters.length > 0
+            ? Math.max(...validatedClusters.map((c) => c.addresses.length))
+            : 0,
         confidenceDistribution: this.calculateDistribution(
-          validatedClusters.map(c => c.confidence), 0.1
-        )
+          validatedClusters.map((c) => c.confidence),
+          0.1,
+        ),
       };
 
       this.clusteringJobs.set(job.id, job);
       this.emit('clustering_completed', job);
-
     } catch (error) {
       job.status = 'failed';
       job.timing.endTime = new Date();
@@ -583,19 +687,23 @@ export class AddressClusterer extends EventEmitter {
 
   private async getScopedAddresses(
     scope: ClusteringJob['scope'],
-    blockchain: string
+    blockchain: string,
   ): Promise<BlockchainAddress[]> {
-    let addresses = Array.from(this.addresses.values())
-      .filter(addr => addr.blockchain === blockchain);
+    let addresses = Array.from(this.addresses.values()).filter(
+      (addr) => addr.blockchain === blockchain,
+    );
 
     if (scope.addresses) {
-      addresses = addresses.filter(addr => scope.addresses!.includes(addr.address));
+      addresses = addresses.filter((addr) =>
+        scope.addresses!.includes(addr.address),
+      );
     }
 
     if (scope.dateRange) {
-      addresses = addresses.filter(addr =>
-        addr.metadata.firstSeen >= scope.dateRange!.start &&
-        addr.metadata.lastSeen <= scope.dateRange!.end
+      addresses = addresses.filter(
+        (addr) =>
+          addr.metadata.firstSeen >= scope.dateRange!.start &&
+          addr.metadata.lastSeen <= scope.dateRange!.end,
       );
     }
 
@@ -604,19 +712,23 @@ export class AddressClusterer extends EventEmitter {
 
   private async getScopedTransactions(
     scope: ClusteringJob['scope'],
-    blockchain: string
+    blockchain: string,
   ): Promise<Transaction[]> {
-    let transactions = Array.from(this.transactions.values())
-      .filter(tx => tx.blockchain === blockchain);
+    let transactions = Array.from(this.transactions.values()).filter(
+      (tx) => tx.blockchain === blockchain,
+    );
 
     if (scope.transactions) {
-      transactions = transactions.filter(tx => scope.transactions!.includes(tx.hash));
+      transactions = transactions.filter((tx) =>
+        scope.transactions!.includes(tx.hash),
+      );
     }
 
     if (scope.dateRange) {
-      transactions = transactions.filter(tx =>
-        tx.timestamp >= scope.dateRange!.start &&
-        tx.timestamp <= scope.dateRange!.end
+      transactions = transactions.filter(
+        (tx) =>
+          tx.timestamp >= scope.dateRange!.start &&
+          tx.timestamp <= scope.dateRange!.end,
       );
     }
 
@@ -626,7 +738,7 @@ export class AddressClusterer extends EventEmitter {
   private async buildClusteringGraph(
     addresses: BlockchainAddress[],
     transactions: Transaction[],
-    job: ClusteringJob
+    job: ClusteringJob,
   ): Promise<void> {
     // Build graph based on transaction relationships
     for (const tx of transactions) {
@@ -638,7 +750,7 @@ export class AddressClusterer extends EventEmitter {
               tx.inputs[i].address,
               tx.inputs[j].address,
               0.8, // High confidence for common input
-              { type: 'common_input', transaction: tx.hash }
+              { type: 'common_input', transaction: tx.hash },
             );
           }
         }
@@ -646,13 +758,13 @@ export class AddressClusterer extends EventEmitter {
 
       // Change address heuristic
       if (tx.outputs.length === 2 && tx.inputs.length === 1) {
-        const changeOutput = tx.outputs.find(out => out.isChange);
+        const changeOutput = tx.outputs.find((out) => out.isChange);
         if (changeOutput) {
           this.addGraphEdge(
             tx.inputs[0].address,
             changeOutput.address,
             0.7, // Medium-high confidence for change address
-            { type: 'change_address', transaction: tx.hash }
+            { type: 'change_address', transaction: tx.hash },
           );
         }
       }
@@ -663,13 +775,18 @@ export class AddressClusterer extends EventEmitter {
     job.progress.addressesProcessed = addresses.length;
   }
 
-  private addGraphEdge(from: string, to: string, weight: number, evidence: any): void {
+  private addGraphEdge(
+    from: string,
+    to: string,
+    weight: number,
+    evidence: any,
+  ): void {
     if (!this.transactionGraph.has(from)) {
       this.transactionGraph.set(from, []);
     }
 
     const edges = this.transactionGraph.get(from)!;
-    const existingEdge = edges.find(edge => edge.to === to);
+    const existingEdge = edges.find((edge) => edge.to === to);
 
     if (existingEdge) {
       // Strengthen existing edge
@@ -682,7 +799,9 @@ export class AddressClusterer extends EventEmitter {
     }
   }
 
-  private async performClustering(job: ClusteringJob): Promise<AddressCluster[]> {
+  private async performClustering(
+    job: ClusteringJob,
+  ): Promise<AddressCluster[]> {
     const clusters: AddressCluster[] = [];
     const visited = new Set<string>();
 
@@ -742,30 +861,39 @@ export class AddressClusterer extends EventEmitter {
     return clusters;
   }
 
-  private async createCluster(addresses: string[], job: ClusteringJob): Promise<AddressCluster> {
+  private async createCluster(
+    addresses: string[],
+    job: ClusteringJob,
+  ): Promise<AddressCluster> {
     const clusterId = crypto.randomUUID();
 
     // Analyze cluster characteristics
-    const transactions = Array.from(this.transactions.values()).filter(tx =>
-      tx.inputs.some(inp => addresses.includes(inp.address)) ||
-      tx.outputs.some(out => addresses.includes(out.address))
+    const transactions = Array.from(this.transactions.values()).filter(
+      (tx) =>
+        tx.inputs.some((inp) => addresses.includes(inp.address)) ||
+        tx.outputs.some((out) => addresses.includes(out.address)),
     );
 
-    const totalVolume = transactions.reduce((sum, tx) =>
-      sum + tx.inputs.reduce((inputSum, inp) => inputSum + inp.value, 0), 0);
+    const totalVolume = transactions.reduce(
+      (sum, tx) =>
+        sum + tx.inputs.reduce((inputSum, inp) => inputSum + inp.value, 0),
+      0,
+    );
 
     const uniqueCounterparties = new Set<string>();
-    transactions.forEach(tx => {
-      tx.inputs.forEach(inp => {
-        if (!addresses.includes(inp.address)) uniqueCounterparties.add(inp.address);
+    transactions.forEach((tx) => {
+      tx.inputs.forEach((inp) => {
+        if (!addresses.includes(inp.address))
+          uniqueCounterparties.add(inp.address);
       });
-      tx.outputs.forEach(out => {
-        if (!addresses.includes(out.address)) uniqueCounterparties.add(out.address);
+      tx.outputs.forEach((out) => {
+        if (!addresses.includes(out.address))
+          uniqueCounterparties.add(out.address);
       });
     });
 
-    const amounts = transactions.map(tx =>
-      tx.inputs.reduce((sum, inp) => sum + inp.value, 0)
+    const amounts = transactions.map((tx) =>
+      tx.inputs.reduce((sum, inp) => sum + inp.value, 0),
     );
 
     const cluster: AddressCluster = {
@@ -779,23 +907,39 @@ export class AddressClusterer extends EventEmitter {
         totalTransactions: transactions.length,
         totalVolume,
         uniqueCounterparties: uniqueCounterparties.size,
-        averageTransactionSize: amounts.length > 0 ? amounts.reduce((a, b) => a + b, 0) / amounts.length : 0,
+        averageTransactionSize:
+          amounts.length > 0
+            ? amounts.reduce((a, b) => a + b, 0) / amounts.length
+            : 0,
         medianTransactionSize: this.calculateMedian(amounts),
         timespan: {
-          start: transactions.length > 0 ? new Date(Math.min(...transactions.map(tx => tx.timestamp.getTime()))) : new Date(),
-          end: transactions.length > 0 ? new Date(Math.max(...transactions.map(tx => tx.timestamp.getTime()))) : new Date()
-        }
+          start:
+            transactions.length > 0
+              ? new Date(
+                  Math.min(...transactions.map((tx) => tx.timestamp.getTime())),
+                )
+              : new Date(),
+          end:
+            transactions.length > 0
+              ? new Date(
+                  Math.max(...transactions.map((tx) => tx.timestamp.getTime())),
+                )
+              : new Date(),
+        },
       },
       tags: await this.generateClusterTags(addresses, transactions),
       lastUpdated: new Date(),
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.clusters.set(clusterId, cluster);
     return cluster;
   }
 
-  private async validateClusters(clusters: AddressCluster[], job: ClusteringJob): Promise<AddressCluster[]> {
+  private async validateClusters(
+    clusters: AddressCluster[],
+    job: ClusteringJob,
+  ): Promise<AddressCluster[]> {
     const validatedClusters: AddressCluster[] = [];
 
     for (const cluster of clusters) {
@@ -806,8 +950,9 @@ export class AddressClusterer extends EventEmitter {
       const labelConsistency = await this.validateLabelConsistency(cluster);
 
       // Validate size and confidence
-      const meetsThresholds = cluster.addresses.length >= job.config.minClusterSize &&
-                              cluster.confidence >= job.config.confidenceThreshold;
+      const meetsThresholds =
+        cluster.addresses.length >= job.config.minClusterSize &&
+        cluster.confidence >= job.config.confidenceThreshold;
 
       if (coherenceScore > 0.6 && labelConsistency > 0.7 && meetsThresholds) {
         validatedClusters.push(cluster);
@@ -817,7 +962,10 @@ export class AddressClusterer extends EventEmitter {
     return validatedClusters;
   }
 
-  private async finalizeClusters(clusters: AddressCluster[], job: ClusteringJob): Promise<void> {
+  private async finalizeClusters(
+    clusters: AddressCluster[],
+    job: ClusteringJob,
+  ): Promise<void> {
     for (const cluster of clusters) {
       // Update address metadata with cluster assignment
       for (const address of cluster.addresses) {
@@ -827,7 +975,7 @@ export class AddressClusterer extends EventEmitter {
             source: 'clustering',
             label: `cluster:${cluster.id}`,
             confidence: cluster.confidence,
-            assignedAt: new Date()
+            assignedAt: new Date(),
           });
           this.addresses.set(address, addressObj);
         }
@@ -842,19 +990,44 @@ export class AddressClusterer extends EventEmitter {
     targetAddress: string | undefined,
     maxHops: number,
     maxAmount?: number,
-    timeWindow?: { start: Date; end: Date }
-  ): Promise<Array<{ hops: Array<{ fromAddress: string; toAddress: string; transaction: string; amount: number; timestamp: Date }> }>> {
-    const paths: Array<{ hops: Array<{ fromAddress: string; toAddress: string; transaction: string; amount: number; timestamp: Date }> }> = [];
+    timeWindow?: { start: Date; end: Date },
+  ): Promise<
+    Array<{
+      hops: Array<{
+        fromAddress: string;
+        toAddress: string;
+        transaction: string;
+        amount: number;
+        timestamp: Date;
+      }>;
+    }>
+  > {
+    const paths: Array<{
+      hops: Array<{
+        fromAddress: string;
+        toAddress: string;
+        transaction: string;
+        amount: number;
+        timestamp: Date;
+      }>;
+    }> = [];
     const visited = new Set<string>();
 
     // BFS to find paths
     const queue: Array<{
       currentAddress: string;
-      path: Array<{ fromAddress: string; toAddress: string; transaction: string; amount: number; timestamp: Date }>;
+      path: Array<{
+        fromAddress: string;
+        toAddress: string;
+        transaction: string;
+        amount: number;
+        timestamp: Date;
+      }>;
       totalAmount: number;
     }> = [{ currentAddress: sourceAddress, path: [], totalAmount: 0 }];
 
-    while (queue.length > 0 && paths.length < 1000) { // Limit to prevent infinite loops
+    while (queue.length > 0 && paths.length < 1000) {
+      // Limit to prevent infinite loops
       const { currentAddress, path, totalAmount } = queue.shift()!;
 
       if (path.length >= maxHops) continue;
@@ -864,27 +1037,40 @@ export class AddressClusterer extends EventEmitter {
       visited.add(currentAddress);
 
       // If we have a target and reached it, add the path
-      if (targetAddress && currentAddress === targetAddress && path.length > 0) {
+      if (
+        targetAddress &&
+        currentAddress === targetAddress &&
+        path.length > 0
+      ) {
         paths.push({ hops: [...path] });
         continue;
       }
 
       // Find outgoing transactions from current address
-      const outgoingTxs = Array.from(this.transactions.values()).filter(tx => {
-        const hasOutput = tx.inputs.some(inp => inp.address === currentAddress);
-        if (!hasOutput) return false;
+      const outgoingTxs = Array.from(this.transactions.values()).filter(
+        (tx) => {
+          const hasOutput = tx.inputs.some(
+            (inp) => inp.address === currentAddress,
+          );
+          if (!hasOutput) return false;
 
-        if (timeWindow) {
-          return tx.timestamp >= timeWindow.start && tx.timestamp <= timeWindow.end;
-        }
+          if (timeWindow) {
+            return (
+              tx.timestamp >= timeWindow.start && tx.timestamp <= timeWindow.end
+            );
+          }
 
-        return true;
-      });
+          return true;
+        },
+      );
 
       // Add next hops to queue
       for (const tx of outgoingTxs) {
         for (const output of tx.outputs) {
-          if (output.address !== currentAddress && !visited.has(output.address)) {
+          if (
+            output.address !== currentAddress &&
+            !visited.has(output.address)
+          ) {
             const newPath = [
               ...path,
               {
@@ -892,14 +1078,14 @@ export class AddressClusterer extends EventEmitter {
                 toAddress: output.address,
                 transaction: tx.hash,
                 amount: output.value,
-                timestamp: tx.timestamp
-              }
+                timestamp: tx.timestamp,
+              },
             ];
 
             queue.push({
               currentAddress: output.address,
               path: newPath,
-              totalAmount: totalAmount + output.value
+              totalAmount: totalAmount + output.value,
             });
           }
         }
@@ -909,8 +1095,8 @@ export class AddressClusterer extends EventEmitter {
     // If no target specified, return all discovered paths
     if (!targetAddress) {
       return queue
-        .filter(item => item.path.length > 0)
-        .map(item => ({ hops: item.path }))
+        .filter((item) => item.path.length > 0)
+        .map((item) => ({ hops: item.path }))
         .slice(0, 100); // Limit results
     }
 
@@ -918,7 +1104,7 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private async analyzeBehaviorPattern(
-    address: Omit<BlockchainAddress, 'id' | 'analysis'>
+    address: Omit<BlockchainAddress, 'id' | 'analysis'>,
   ): Promise<BlockchainAddress['analysis']['behaviorPattern']> {
     // Analyze transaction patterns to determine behavior
     const riskScore = this.calculateRiskScore(address);
@@ -932,14 +1118,15 @@ export class AddressClusterer extends EventEmitter {
     const avgTxSize = address.metadata.totalReceived / Math.max(txCount, 1);
 
     if (txCount > 1000 && avgTxSize > 10) return 'exchange';
-    if (address.metadata.totalReceived > address.metadata.totalSent * 10) return 'mining';
+    if (address.metadata.totalReceived > address.metadata.totalSent * 10)
+      return 'mining';
     if (riskScore > 0.8) return 'suspicious';
 
     return 'normal';
   }
 
   private async calculatePrivacyScore(
-    address: Omit<BlockchainAddress, 'id' | 'analysis'>
+    address: Omit<BlockchainAddress, 'id' | 'analysis'>,
   ): Promise<number> {
     let score = 0;
 
@@ -956,22 +1143,23 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private async calculateActivityScore(
-    address: Omit<BlockchainAddress, 'id' | 'analysis'>
+    address: Omit<BlockchainAddress, 'id' | 'analysis'>,
   ): Promise<number> {
     const txCount = address.metadata.transactionCount;
-    const totalVolume = address.metadata.totalReceived + address.metadata.totalSent;
+    const totalVolume =
+      address.metadata.totalReceived + address.metadata.totalSent;
 
     // Normalize activity score based on transaction count and volume
     const activityScore = Math.min(
       (txCount / 1000) * 0.5 + (Math.log10(totalVolume + 1) / 10) * 0.5,
-      1.0
+      1.0,
     );
 
     return activityScore;
   }
 
   private calculateRiskScore(
-    address: Omit<BlockchainAddress, 'id' | 'analysis'>
+    address: Omit<BlockchainAddress, 'id' | 'analysis'>,
   ): number {
     let riskScore = 0;
 
@@ -988,7 +1176,7 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private async analyzeTransaction(
-    transaction: Omit<Transaction, 'id' | 'analysis'>
+    transaction: Omit<Transaction, 'id' | 'analysis'>,
   ): Promise<Transaction['analysis']> {
     const analysis: Transaction['analysis'] = {
       mixing: false,
@@ -997,7 +1185,7 @@ export class AddressClusterer extends EventEmitter {
       splitting: false,
       roundAmount: false,
       privacyEnhancing: false,
-      suspiciousPatterns: []
+      suspiciousPatterns: [],
     };
 
     // Detect mixing patterns
@@ -1008,7 +1196,7 @@ export class AddressClusterer extends EventEmitter {
 
     // Detect peeling chains
     if (transaction.outputs.length === 2 && transaction.inputs.length === 1) {
-      const amounts = transaction.outputs.map(out => out.value);
+      const amounts = transaction.outputs.map((out) => out.value);
       const ratio = Math.min(...amounts) / Math.max(...amounts);
       if (ratio < 0.1) {
         analysis.peeling = true;
@@ -1026,8 +1214,12 @@ export class AddressClusterer extends EventEmitter {
     }
 
     // Detect round amounts
-    const totalInput = transaction.inputs.reduce((sum, inp) => sum + inp.value, 0);
-    if (totalInput % 1 === 0 && totalInput % 1000000 === 0) { // Round numbers
+    const totalInput = transaction.inputs.reduce(
+      (sum, inp) => sum + inp.value,
+      0,
+    );
+    if (totalInput % 1 === 0 && totalInput % 1000000 === 0) {
+      // Round numbers
       analysis.roundAmount = true;
     }
 
@@ -1058,7 +1250,13 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private async calculatePathRiskScore(
-    hops: Array<{ fromAddress: string; toAddress: string; transaction: string; amount: number; timestamp: Date }>
+    hops: Array<{
+      fromAddress: string;
+      toAddress: string;
+      transaction: string;
+      amount: number;
+      timestamp: Date;
+    }>,
   ): Promise<number> {
     let riskScore = 0;
 
@@ -1066,8 +1264,10 @@ export class AddressClusterer extends EventEmitter {
       const fromAddr = this.addresses.get(hop.fromAddress);
       const toAddr = this.addresses.get(hop.toAddress);
 
-      if (fromAddr?.analysis.riskScore) riskScore += fromAddr.analysis.riskScore * 0.3;
-      if (toAddr?.analysis.riskScore) riskScore += toAddr.analysis.riskScore * 0.3;
+      if (fromAddr?.analysis.riskScore)
+        riskScore += fromAddr.analysis.riskScore * 0.3;
+      if (toAddr?.analysis.riskScore)
+        riskScore += toAddr.analysis.riskScore * 0.3;
 
       // Check transaction for suspicious patterns
       const tx = this.transactions.get(hop.transaction);
@@ -1080,7 +1280,13 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private async countMixingEvents(
-    hops: Array<{ fromAddress: string; toAddress: string; transaction: string; amount: number; timestamp: Date }>
+    hops: Array<{
+      fromAddress: string;
+      toAddress: string;
+      transaction: string;
+      amount: number;
+      timestamp: Date;
+    }>,
   ): Promise<number> {
     let mixingEvents = 0;
 
@@ -1102,19 +1308,38 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private async identifySuspiciousHops(
-    hops: Array<{ fromAddress: string; toAddress: string; transaction: string; amount: number; timestamp: Date }>
-  ): Promise<Array<{ hopIndex: number; reason: string; severity: 'low' | 'medium' | 'high' }>> {
-    const suspiciousHops: Array<{ hopIndex: number; reason: string; severity: 'low' | 'medium' | 'high' }> = [];
+    hops: Array<{
+      fromAddress: string;
+      toAddress: string;
+      transaction: string;
+      amount: number;
+      timestamp: Date;
+    }>,
+  ): Promise<
+    Array<{
+      hopIndex: number;
+      reason: string;
+      severity: 'low' | 'medium' | 'high';
+    }>
+  > {
+    const suspiciousHops: Array<{
+      hopIndex: number;
+      reason: string;
+      severity: 'low' | 'medium' | 'high';
+    }> = [];
 
     hops.forEach((hop, index) => {
       const fromAddr = this.addresses.get(hop.fromAddress);
       const toAddr = this.addresses.get(hop.toAddress);
 
-      if (fromAddr?.riskIndicators.sanctionsHit || toAddr?.riskIndicators.sanctionsHit) {
+      if (
+        fromAddr?.riskIndicators.sanctionsHit ||
+        toAddr?.riskIndicators.sanctionsHit
+      ) {
         suspiciousHops.push({
           hopIndex: index,
           reason: 'Sanctions hit',
-          severity: 'high'
+          severity: 'high',
         });
       }
 
@@ -1122,15 +1347,18 @@ export class AddressClusterer extends EventEmitter {
         suspiciousHops.push({
           hopIndex: index,
           reason: 'Mixer usage',
-          severity: 'medium'
+          severity: 'medium',
         });
       }
 
-      if (fromAddr?.riskIndicators.darknetMarket || toAddr?.riskIndicators.darknetMarket) {
+      if (
+        fromAddr?.riskIndicators.darknetMarket ||
+        toAddr?.riskIndicators.darknetMarket
+      ) {
         suspiciousHops.push({
           hopIndex: index,
           reason: 'Darknet market',
-          severity: 'high'
+          severity: 'high',
         });
       }
     });
@@ -1139,11 +1367,11 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private calculateRiskDistribution(
-    paths: Array<{ riskScore: number }>
+    paths: Array<{ riskScore: number }>,
   ): Record<string, number> {
     const distribution = { low: 0, medium: 0, high: 0, critical: 0 };
 
-    paths.forEach(path => {
+    paths.forEach((path) => {
       if (path.riskScore >= 0.8) distribution.critical++;
       else if (path.riskScore >= 0.6) distribution.high++;
       else if (path.riskScore >= 0.3) distribution.medium++;
@@ -1154,14 +1382,17 @@ export class AddressClusterer extends EventEmitter {
   }
 
   private async checkSanctionsExposure(
-    paths: Array<{ hops: Array<{ fromAddress: string; toAddress: string }> }>
+    paths: Array<{ hops: Array<{ fromAddress: string; toAddress: string }> }>,
   ): Promise<boolean> {
     for (const path of paths) {
       for (const hop of path.hops) {
         const fromAddr = this.addresses.get(hop.fromAddress);
         const toAddr = this.addresses.get(hop.toAddress);
 
-        if (fromAddr?.riskIndicators.sanctionsHit || toAddr?.riskIndicators.sanctionsHit) {
+        if (
+          fromAddr?.riskIndicators.sanctionsHit ||
+          toAddr?.riskIndicators.sanctionsHit
+        ) {
           return true;
         }
       }
@@ -1172,7 +1403,7 @@ export class AddressClusterer extends EventEmitter {
 
   private async analyzeMixerIndicators(
     tx: Transaction,
-    address: string
+    address: string,
   ): Promise<{
     mixer: string;
     type: 'centralized' | 'decentralized' | 'coin_join' | 'tumbler';
@@ -1182,14 +1413,17 @@ export class AddressClusterer extends EventEmitter {
     technique: string;
   }> {
     // Mock mixer detection logic
-    const inputAmount = tx.inputs.filter(inp => inp.address === address)
+    const inputAmount = tx.inputs
+      .filter((inp) => inp.address === address)
       .reduce((sum, inp) => sum + inp.value, 0);
 
-    const outputAmount = tx.outputs.filter(out => out.address === address)
+    const outputAmount = tx.outputs
+      .filter((out) => out.address === address)
       .reduce((sum, out) => sum + out.value, 0);
 
     let confidence = 0;
-    let mixerType: 'centralized' | 'decentralized' | 'coin_join' | 'tumbler' = 'centralized';
+    let mixerType: 'centralized' | 'decentralized' | 'coin_join' | 'tumbler' =
+      'centralized';
     let technique = 'unknown';
 
     // Detect mixing patterns
@@ -1210,20 +1444,20 @@ export class AddressClusterer extends EventEmitter {
       inputAmount,
       outputAmount,
       confidence: Math.min(confidence, 1.0),
-      technique
+      technique,
     };
   }
 
   private async determineClusterType(
     addresses: string[],
-    transactions: Transaction[]
+    transactions: Transaction[],
   ): Promise<AddressCluster['clusterType']> {
     // Analyze cluster characteristics to determine type
-    const hasExchangePatterns = transactions.some(tx =>
-      tx.inputs.length > 5 || tx.outputs.length > 5
+    const hasExchangePatterns = transactions.some(
+      (tx) => tx.inputs.length > 5 || tx.outputs.length > 5,
     );
 
-    const hasMixerPatterns = transactions.some(tx => tx.analysis.mixing);
+    const hasMixerPatterns = transactions.some((tx) => tx.analysis.mixing);
 
     if (hasMixerPatterns) return 'mixer';
     if (hasExchangePatterns) return 'exchange';
@@ -1237,7 +1471,7 @@ export class AddressClusterer extends EventEmitter {
 
   private async calculateClusterConfidence(
     addresses: string[],
-    job: ClusteringJob
+    job: ClusteringJob,
   ): Promise<number> {
     // Calculate confidence based on heuristic strengths
     let totalWeight = 0;
@@ -1253,39 +1487,45 @@ export class AddressClusterer extends EventEmitter {
     return totalWeight > 0 ? totalScore / totalWeight : 0;
   }
 
-  private async getClusterHeuristics(addresses: string[]): Promise<AddressCluster['heuristics']> {
+  private async getClusterHeuristics(
+    addresses: string[],
+  ): Promise<AddressCluster['heuristics']> {
     // Analyze which heuristics were used to create this cluster
     return [
       {
         type: 'common_input',
         strength: 0.8,
-        evidence: []
+        evidence: [],
       },
       {
         type: 'change_address',
         strength: 0.7,
-        evidence: []
-      }
+        evidence: [],
+      },
     ];
   }
 
   private async generateClusterTags(
     addresses: string[],
-    transactions: Transaction[]
+    transactions: Transaction[],
   ): Promise<AddressCluster['tags']> {
     const tags: AddressCluster['tags'] = [];
 
     // Analyze cluster characteristics
-    const hasMixing = transactions.some(tx => tx.analysis.mixing);
-    const hasHighVolume = transactions.reduce((sum, tx) =>
-      sum + tx.inputs.reduce((inputSum, inp) => inputSum + inp.value, 0), 0) > 1000;
+    const hasMixing = transactions.some((tx) => tx.analysis.mixing);
+    const hasHighVolume =
+      transactions.reduce(
+        (sum, tx) =>
+          sum + tx.inputs.reduce((inputSum, inp) => inputSum + inp.value, 0),
+        0,
+      ) > 1000;
 
     if (hasMixing) {
       tags.push({
         category: 'risk',
         tag: 'mixing_activity',
         confidence: 0.8,
-        source: 'transaction_analysis'
+        source: 'transaction_analysis',
       });
     }
 
@@ -1294,22 +1534,28 @@ export class AddressClusterer extends EventEmitter {
         category: 'behavioral',
         tag: 'high_volume',
         confidence: 0.9,
-        source: 'volume_analysis'
+        source: 'volume_analysis',
       });
     }
 
     return tags;
   }
 
-  private async calculateClusterCoherence(cluster: AddressCluster): Promise<number> {
+  private async calculateClusterCoherence(
+    cluster: AddressCluster,
+  ): Promise<number> {
     // Calculate how coherent/consistent the cluster is
     const addressCount = cluster.addresses.length;
-    const heuristicStrength = cluster.heuristics.reduce((sum, h) => sum + h.strength, 0) / cluster.heuristics.length;
+    const heuristicStrength =
+      cluster.heuristics.reduce((sum, h) => sum + h.strength, 0) /
+      cluster.heuristics.length;
 
     return Math.min(heuristicStrength * (Math.log(addressCount) / 10), 1.0);
   }
 
-  private async validateLabelConsistency(cluster: AddressCluster): Promise<number> {
+  private async validateLabelConsistency(
+    cluster: AddressCluster,
+  ): Promise<number> {
     // Check if addresses in cluster have consistent labels
     let consistentLabels = 0;
     let totalLabels = 0;
@@ -1337,10 +1583,13 @@ export class AddressClusterer extends EventEmitter {
     return sorted[middle];
   }
 
-  private calculateDistribution(values: number[], bucketSize: number): Record<string, number> {
+  private calculateDistribution(
+    values: number[],
+    bucketSize: number,
+  ): Record<string, number> {
     const distribution: Record<string, number> = {};
 
-    values.forEach(value => {
+    values.forEach((value) => {
       const bucket = Math.floor(value / bucketSize) * bucketSize;
       const key = `${bucket}-${bucket + bucketSize}`;
       distribution[key] = (distribution[key] || 0) + 1;

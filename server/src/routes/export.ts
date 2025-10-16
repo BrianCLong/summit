@@ -39,7 +39,9 @@ exportRouter.get('/provenance', async (req, res) => {
     const headerTenant = String((req as any).tenantId || '');
     const from = req.query.from ? String(req.query.from) : undefined;
     const to = req.query.to ? String(req.query.to) : undefined;
-    const contains = req.query.contains ? String(req.query.contains) : undefined;
+    const contains = req.query.contains
+      ? String(req.query.contains)
+      : undefined;
 
     if (!['incident', 'investigation'].includes(scope) || !id) {
       return res.status(400).json({ error: 'invalid_scope_or_id' });
@@ -54,7 +56,10 @@ exportRouter.get('/provenance', async (req, res) => {
         const rk = `rate:export:${tenant}:${Math.floor(Date.now() / 60000)}`;
         const c = await redis.incr(rk);
         if (c === 1) await redis.expire(rk, 60);
-        if (c > 5) return res.status(429).json({ error: 'rate_limited', reasonCode: 'RATE_LIMIT' });
+        if (c > 5)
+          return res
+            .status(429)
+            .json({ error: 'rate_limited', reasonCode: 'RATE_LIMIT' });
       } catch {}
     }
 
@@ -80,7 +85,8 @@ exportRouter.get('/provenance', async (req, res) => {
     const pg = getPostgresPool();
     const repo = new ProvenanceRepo(pg);
     const filter: ProvenanceFilter = {};
-    if (reasonCodeIn) filter.reasonCodeIn = reasonCodeIn.split(',').filter(Boolean);
+    if (reasonCodeIn)
+      filter.reasonCodeIn = reasonCodeIn.split(',').filter(Boolean);
     if (kindIn) filter.kindIn = kindIn.split(',').filter(Boolean);
     if (sourceIn) filter.sourceIn = sourceIn.split(',').filter(Boolean);
     if (from) filter.from = from;
@@ -109,7 +115,8 @@ exportRouter.get('/provenance', async (req, res) => {
       res.write('id,kind,createdAt,reasonCode\n');
       for (const r of rows) {
         const line = `${r.id || ''},${r.kind || ''},${new Date(r.createdAt || Date.now()).toISOString()},${
-          (r.metadata && (r.metadata.reasonCode || r.metadata.reason_code)) || ''
+          (r.metadata && (r.metadata.reasonCode || r.metadata.reason_code)) ||
+          ''
         }\n`;
         res.write(line);
       }

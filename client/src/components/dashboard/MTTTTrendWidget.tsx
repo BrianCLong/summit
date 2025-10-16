@@ -206,10 +206,12 @@ export default function MTTTTrendWidget({
   const renderChart = () => {
     if (!data?.mtttMetrics?.timeSeries) return null;
 
-    const timeSeriesData = data.mtttMetrics.timeSeries.map((point: MTTTData) => ({
-      ...point,
-      timestamp: new Date(point.timestamp).toLocaleTimeString(),
-    }));
+    const timeSeriesData = data.mtttMetrics.timeSeries.map(
+      (point: MTTTData) => ({
+        ...point,
+        timestamp: new Date(point.timestamp).toLocaleTimeString(),
+      }),
+    );
 
     const targetMTTT = data.mtttMetrics.summary.targetMTTT || 15; // Default 15 minutes
 
@@ -345,7 +347,14 @@ export default function MTTTTrendWidget({
           <Typography variant="h6" gutterBottom>
             Mean Time to Triage (MTTT)
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '70%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '70%',
+            }}
+          >
             <LinearProgress sx={{ width: '50%' }} />
           </Box>
         </CardContent>
@@ -374,12 +383,19 @@ export default function MTTTTrendWidget({
     <Card sx={{ height }}>
       <CardContent>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+          }}
+        >
           <Box>
             <Typography variant="h6">Mean Time to Triage (MTTT)</Typography>
             <Typography variant="body2" color="text.secondary">
-              Current P50: {formatTime(summary?.currentMTTT?.p50 || 0)} • 
-              SLA Compliance: {((summary?.slaCompliance || 0) * 100).toFixed(1)}%
+              Current P50: {formatTime(summary?.currentMTTT?.p50 || 0)} • SLA
+              Compliance: {((summary?.slaCompliance || 0) * 100).toFixed(1)}%
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -424,13 +440,22 @@ export default function MTTTTrendWidget({
                 {formatTime(summary?.currentMTTT?.p50 || 0)}
               </Typography>
               <Typography variant="caption">P50 MTTT</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 0.5 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mt: 0.5,
+                }}
+              >
                 {getTrendIcon(summary?.trend)}
                 <Typography
                   variant="caption"
                   sx={{ color: getTrendColor(summary?.trend), ml: 0.5 }}
                 >
-                  {summary?.improvement ? `${(summary.improvement * 100).toFixed(1)}%` : '--'}
+                  {summary?.improvement
+                    ? `${(summary.improvement * 100).toFixed(1)}%`
+                    : '--'}
                 </Typography>
               </Box>
             </Box>
@@ -455,7 +480,9 @@ export default function MTTTTrendWidget({
             <Box sx={{ textAlign: 'center' }}>
               <Typography
                 variant="h4"
-                color={summary?.slaCompliance >= 0.8 ? 'success.main' : 'error.main'}
+                color={
+                  summary?.slaCompliance >= 0.8 ? 'success.main' : 'error.main'
+                }
               >
                 {((summary?.slaCompliance || 0) * 100).toFixed(0)}%
               </Typography>
@@ -519,7 +546,11 @@ export default function MTTTTrendWidget({
           </Box>
         )}
 
-        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
           <MenuItem onClick={handleExport}>
             <FileDownload sx={{ mr: 1 }} />
             Export Data

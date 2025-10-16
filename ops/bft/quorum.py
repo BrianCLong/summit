@@ -14,11 +14,10 @@ import json
 import random
 import time
 import uuid
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
 
 
 class RegionStatus(Enum):
@@ -31,6 +30,7 @@ class RegionStatus(Enum):
 @dataclass
 class EpochVote:
     """Vote for epoch confirmation in BFT committee"""
+
     epoch_id: str
     voter_region: str
     vote_type: str  # "commit", "abort", "extend"
@@ -42,6 +42,7 @@ class EpochVote:
 @dataclass
 class WriteOperation:
     """Write operation requiring BFT consensus"""
+
     write_id: str
     tenant_id: str
     operation_type: str
@@ -54,19 +55,20 @@ class WriteOperation:
 @dataclass
 class EpochState:
     """Current epoch state in BFT system"""
+
     epoch_id: str
     sequence_number: int
-    committee: List[str]  # Region identifiers
+    committee: list[str]  # Region identifiers
     start_time: str
-    votes: List[EpochVote]
+    votes: list[EpochVote]
     confirmed: bool
-    arbitration_log: List[str]
+    arbitration_log: list[str]
 
 
 class BFTWriteFencing:
     """Byzantine-fault-tolerant write fencing system"""
 
-    def __init__(self, region_id: str, all_regions: List[str], f: int = 1):
+    def __init__(self, region_id: str, all_regions: list[str], f: int = 1):
         self.region_id = region_id
         self.all_regions = all_regions
         self.f = f  # Maximum Byzantine failures
@@ -77,10 +79,10 @@ class BFTWriteFencing:
         self.evidence_dir.mkdir(parents=True, exist_ok=True)
 
         # Current state
-        self.current_epoch: Optional[EpochState] = None
-        self.pending_writes: Dict[str, WriteOperation] = {}
-        self.confirmed_writes: Set[str] = set()
-        self.region_status: Dict[str, RegionStatus] = {
+        self.current_epoch: EpochState | None = None
+        self.pending_writes: dict[str, WriteOperation] = {}
+        self.confirmed_writes: set[str] = set()
+        self.region_status: dict[str, RegionStatus] = {
             region: RegionStatus.HEALTHY for region in all_regions
         }
 
@@ -88,11 +90,11 @@ class BFTWriteFencing:
         self.signing_key = f"bft-{region_id}-key".encode()
 
         # Performance tracking
-        self.write_latencies: List[float] = []
+        self.write_latencies: list[float] = []
 
-    def _sign_vote(self, vote_data: Dict[str, any]) -> str:
+    def _sign_vote(self, vote_data: dict[str, any]) -> str:
         """Sign vote with region's private key"""
-        canonical = json.dumps(vote_data, sort_keys=True, separators=(',', ':'))
+        canonical = json.dumps(vote_data, sort_keys=True, separators=(",", ":"))
         signature = hmac.new(self.signing_key, canonical.encode(), hashlib.sha256).hexdigest()
         return f"bft-{self.region_id}:{signature}"
 
@@ -102,20 +104,23 @@ class BFTWriteFencing:
             "epoch_id": vote.epoch_id,
             "voter_region": vote.voter_region,
             "vote_type": vote.vote_type,
-            "timestamp": vote.timestamp
+            "timestamp": vote.timestamp,
         }
 
-        canonical = json.dumps(vote_data, sort_keys=True, separators=(',', ':'))
-        expected_sig = hmac.new(f"bft-{voter_region}-key".encode(), canonical.encode(), hashlib.sha256).hexdigest()
+        canonical = json.dumps(vote_data, sort_keys=True, separators=(",", ":"))
+        expected_sig = hmac.new(
+            f"bft-{voter_region}-key".encode(), canonical.encode(), hashlib.sha256
+        ).hexdigest()
         expected_full = f"bft-{voter_region}:{expected_sig}"
 
         return vote.signature == expected_full
 
-    def _select_committee(self) -> List[str]:
+    def _select_committee(self) -> list[str]:
         """Select BFT committee for current epoch"""
         # In production: use verifiable random function (VRF)
         healthy_regions = [
-            region for region, status in self.region_status.items()
+            region
+            for region, status in self.region_status.items()
             if status in [RegionStatus.HEALTHY, RegionStatus.DEGRADED]
         ]
 
@@ -125,8 +130,10 @@ class BFTWriteFencing:
 
         # Select committee based on region hash (deterministic)
         epoch_seed = int(time.time()) // 300  # 5-minute epochs
-        committee = sorted(healthy_regions, key=lambda r: hashlib.sha256(f"{r}-{epoch_seed}".encode()).hexdigest())
-        return committee[:self.committee_size]
+        committee = sorted(
+            healthy_regions, key=lambda r: hashlib.sha256(f"{r}-{epoch_seed}".encode()).hexdigest()
+        )
+        return committee[: self.committee_size]
 
     async def start_new_epoch(self) -> EpochState:
         """Start new BFT epoch with committee selection"""
@@ -140,7 +147,7 @@ class BFTWriteFencing:
             start_time=datetime.now(timezone.utc).isoformat(),
             votes=[],
             confirmed=False,
-            arbitration_log=[]
+            arbitration_log=[],
         )
 
         self.current_epoch = epoch
@@ -168,7 +175,7 @@ class BFTWriteFencing:
             "voter_region": self.region_id,
             "vote_type": "commit",
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "write_id": operation.write_id
+            "write_id": operation.write_id,
         }
 
         signature = self._sign_vote(vote_data)
@@ -178,7 +185,7 @@ class BFTWriteFencing:
             voter_region=self.region_id,
             vote_type="commit",
             timestamp=vote_data["timestamp"],
-            signature=signature
+            signature=signature,
         )
 
         # Add own vote
@@ -204,10 +211,14 @@ class BFTWriteFencing:
                 f"Write {operation.write_id} confirmed with {len(commit_votes)} votes"
             )
 
-            print(f"✅ Write {operation.write_id} confirmed by quorum ({len(commit_votes)}/{self.committee_size})")
+            print(
+                f"✅ Write {operation.write_id} confirmed by quorum ({len(commit_votes)}/{self.committee_size})"
+            )
             return True
         else:
-            print(f"❌ Write {operation.write_id} failed quorum ({len(commit_votes)}/{self.quorum_size})")
+            print(
+                f"❌ Write {operation.write_id} failed quorum ({len(commit_votes)}/{self.quorum_size})"
+            )
             return False
 
     async def _simulate_committee_votes(self, operation: WriteOperation):
@@ -236,20 +247,22 @@ class BFTWriteFencing:
                 "epoch_id": self.current_epoch.epoch_id,
                 "voter_region": region,
                 "vote_type": vote_type,
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             # Simulate signing with region's key
-            signature = hmac.new(f"bft-{region}-key".encode(),
-                               json.dumps(vote_data, sort_keys=True).encode(),
-                               hashlib.sha256).hexdigest()
+            signature = hmac.new(
+                f"bft-{region}-key".encode(),
+                json.dumps(vote_data, sort_keys=True).encode(),
+                hashlib.sha256,
+            ).hexdigest()
 
             vote = EpochVote(
                 epoch_id=self.current_epoch.epoch_id,
                 voter_region=region,
                 vote_type=vote_type,
                 timestamp=vote_data["timestamp"],
-                signature=f"bft-{region}:{signature}"
+                signature=f"bft-{region}:{signature}",
             )
 
             self.current_epoch.votes.append(vote)
@@ -262,7 +275,8 @@ class BFTWriteFencing:
 
         # Check if current committee is still viable
         healthy_committee = [
-            region for region in self.current_epoch.committee
+            region
+            for region in self.current_epoch.committee
             if self.region_status[region] != RegionStatus.FAILED
         ]
 
@@ -270,7 +284,7 @@ class BFTWriteFencing:
             print("⚠️ Committee no longer viable - starting emergency reconfiguration")
             await self.start_new_epoch()
 
-    async def simulate_chaos(self, duration_seconds: int = 60) -> Dict[str, Any]:
+    async def simulate_chaos(self, duration_seconds: int = 60) -> dict[str, Any]:
         """Simulate network partitions and region failures"""
         print(f"🔥 Starting {duration_seconds}s chaos simulation...")
 
@@ -301,7 +315,7 @@ class BFTWriteFencing:
                 data_hash=hashlib.sha256(f"chaos-{time.time()}".encode()).hexdigest()[:16],
                 residency_zone="us-east-1",
                 timestamp=datetime.now(timezone.utc).isoformat(),
-                proposer_region=self.region_id
+                proposer_region=self.region_id,
             )
 
             success = await self.propose_write(write_op)
@@ -316,12 +330,12 @@ class BFTWriteFencing:
             "writes_confirmed": len(self.confirmed_writes),
             "success_rate": len(self.confirmed_writes) / max(len(self.write_latencies), 1),
             "final_region_status": {k: v.value for k, v in self.region_status.items()},
-            "epochs_created": self.current_epoch.sequence_number if self.current_epoch else 0
+            "epochs_created": self.current_epoch.sequence_number if self.current_epoch else 0,
         }
 
         return report
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get BFT write performance metrics"""
         if not self.write_latencies:
             return {"p95_ms": 0, "p50_ms": 0, "count": 0, "overhead_percent": 0}
@@ -342,7 +356,7 @@ class BFTWriteFencing:
             "overhead_percent": overhead_percent,
             "sla_met": overhead_percent <= 8.0,  # ≤+8% requirement
             "confirmed_writes": len(self.confirmed_writes),
-            "success_rate": len(self.confirmed_writes) / max(count, 1)
+            "success_rate": len(self.confirmed_writes) / max(count, 1),
         }
 
     async def save_epoch_evidence(self):
@@ -353,7 +367,7 @@ class BFTWriteFencing:
         epoch_file = self.evidence_dir / f"epoch-{self.current_epoch.epoch_id}.json"
         epoch_data = asdict(self.current_epoch)
 
-        with open(epoch_file, 'w') as f:
+        with open(epoch_file, "w") as f:
             json.dump(epoch_data, f, indent=2)
 
 
@@ -379,7 +393,7 @@ async def main():
             data_hash=hashlib.sha256(f"test-data-{i}".encode()).hexdigest()[:16],
             residency_zone="us-east-1",
             timestamp=datetime.now(timezone.utc).isoformat(),
-            proposer_region="us-east-1"
+            proposer_region="us-east-1",
         )
 
         success = await bft.propose_write(write_op)
@@ -388,14 +402,14 @@ async def main():
     # Test chaos scenario
     chaos_report = await bft.simulate_chaos(10)  # 10 seconds
 
-    print(f"\n🔥 Chaos test results:")
+    print("\n🔥 Chaos test results:")
     print(f"   Events: {len(chaos_report['chaos_events'])}")
     print(f"   Success rate: {chaos_report['success_rate']:.2%}")
     print(f"   Writes confirmed: {chaos_report['writes_confirmed']}")
 
     # Show performance metrics
     metrics = bft.get_performance_metrics()
-    print(f"\n📊 Performance metrics:")
+    print("\n📊 Performance metrics:")
     print(f"   P95 latency: {metrics['p95_ms']:.1f}ms")
     print(f"   Overhead: {metrics['overhead_percent']:.1f}%")
     print(f"   SLA met (≤8%): {metrics['sla_met']}")
@@ -406,7 +420,7 @@ async def main():
 
     # Save chaos report
     chaos_file = bft.evidence_dir / "chaos-report.json"
-    with open(chaos_file, 'w') as f:
+    with open(chaos_file, "w") as f:
         json.dump(chaos_report, f, indent=2)
 
 

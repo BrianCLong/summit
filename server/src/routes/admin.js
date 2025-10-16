@@ -1,21 +1,21 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const {
   ensureAuthenticated,
   requirePermission,
-} = require("../middleware/auth");
-const { getPostgresPool } = require("../config/database");
+} = require('../middleware/auth');
+const { getPostgresPool } = require('../config/database');
 
 const router = express.Router();
 
-router.use(ensureAuthenticated, requirePermission("admin:access"));
+router.use(ensureAuthenticated, requirePermission('admin:access'));
 
-router.get("/users", async (req, res) => {
+router.get('/users', async (req, res) => {
   try {
     const pool = getPostgresPool();
     const { rows } = await pool.query(
-      "SELECT id, email, username, first_name, last_name, role, is_active, last_login FROM users ORDER BY created_at DESC LIMIT 200",
+      'SELECT id, email, username, first_name, last_name, role, is_active, last_login FROM users ORDER BY created_at DESC LIMIT 200',
     );
     res.json(
       rows.map((r) => ({
@@ -34,15 +34,15 @@ router.get("/users", async (req, res) => {
   }
 });
 
-router.patch("/users/:id/role", async (req, res) => {
+router.patch('/users/:id/role', async (req, res) => {
   try {
     const { role } = req.body || {};
-    if (!role || !["ADMIN", "ANALYST", "VIEWER", "EDITOR"].includes(role)) {
-      return res.status(400).json({ error: "invalid role" });
+    if (!role || !['ADMIN', 'ANALYST', 'VIEWER', 'EDITOR'].includes(role)) {
+      return res.status(400).json({ error: 'invalid role' });
     }
     const id = req.params.id;
     const pool = getPostgresPool();
-    await pool.query("UPDATE users SET role = $1 WHERE id = $2", [role, id]);
+    await pool.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -52,12 +52,12 @@ router.patch("/users/:id/role", async (req, res) => {
 // OSINT feed ranking configuration
 const cfgPath = path.join(
   process.cwd(),
-  "server/config/osint-feed-config.json",
+  'server/config/osint-feed-config.json',
 );
 
-router.get("/osint-feed-config", (req, res) => {
+router.get('/osint-feed-config', (req, res) => {
   try {
-    const txt = fs.readFileSync(cfgPath, "utf8");
+    const txt = fs.readFileSync(cfgPath, 'utf8');
     res.json(JSON.parse(txt));
   } catch (e) {
     res.json({
@@ -68,7 +68,7 @@ router.get("/osint-feed-config", (req, res) => {
   }
 });
 
-router.post("/osint-feed-config", (req, res) => {
+router.post('/osint-feed-config', (req, res) => {
   try {
     const { qualityWeight, recencyWeight, semanticDensityWeight } =
       req.body || {};
@@ -85,10 +85,10 @@ router.post("/osint-feed-config", (req, res) => {
 });
 
 // Policy simulation endpoint (PBAC/OPA preview)
-router.post("/policy/preview", async (req, res) => {
+router.post('/policy/preview', async (req, res) => {
   try {
     const { action, user, resource, env } = req.body || {};
-    const { evaluate } = require("../services/AccessControl");
+    const { evaluate } = require('../services/AccessControl');
     const decision = await evaluate(
       action,
       user || req.user,

@@ -21,17 +21,17 @@ export class QpgClient {
   private readonly fetcher: typeof fetch;
 
   constructor(baseUrl: string, fetcher?: typeof fetch) {
-    this.baseUrl = baseUrl.replace(/\/+$/, "");
+    this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.fetcher = fetcher ?? globalThis.fetch;
     if (!this.fetcher) {
-      throw new Error("fetch is not available; provide a fetch implementation");
+      throw new Error('fetch is not available; provide a fetch implementation');
     }
   }
 
   async tokenize(request: TokenizeRequest): Promise<TokenizeResponse> {
     const response = await this.fetcher(`${this.baseUrl}/tokenize`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });
     if (!response.ok) {
@@ -42,8 +42,8 @@ export class QpgClient {
 
   async reveal(request: RevealRequest): Promise<string> {
     const response = await this.fetcher(`${this.baseUrl}/reveal`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });
     if (!response.ok) {

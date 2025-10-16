@@ -6,7 +6,10 @@ import reducer from '../../../store/slices/graphInteractionSlice';
 import AIInsightsPanel from '../AIInsightsPanel';
 
 function makeStore(preloadedState) {
-  return configureStore({ reducer: { graphInteraction: reducer }, preloadedState });
+  return configureStore({
+    reducer: { graphInteraction: reducer },
+    preloadedState,
+  });
 }
 
 test('renders placeholder when nothing selected', () => {
@@ -14,8 +17,7 @@ test('renders placeholder when nothing selected', () => {
   render(
     <Provider store={store}>
       <AIInsightsPanel open={true} onClose={() => {}} />
-    </Provider>
+    </Provider>,
   );
   expect(screen.getByText(/Select a node or edge/i)).toBeInTheDocument();
 });
-

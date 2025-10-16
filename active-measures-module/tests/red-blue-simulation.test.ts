@@ -1,4 +1,8 @@
-import { runRedBlueSimulation, RedAction, BlueControl } from '../src/ai/red-blue-simulation';
+import {
+  runRedBlueSimulation,
+  RedAction,
+  BlueControl,
+} from '../src/ai/red-blue-simulation';
 
 describe('runRedBlueSimulation', () => {
   test('detects attack when control covers tactic', () => {

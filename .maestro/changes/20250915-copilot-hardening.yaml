@@ -1,17 +1,17 @@
 area: ai-copilot
 intent: harden
 window: { start: 2025-09-15, end: 2025-09-29 }
-objective: "≥95% syntactic validity for NL→Cypher; rollback/undo; 200-prompt regression."
+objective: '≥95% syntactic validity for NL→Cypher; rollback/undo; 200-prompt regression.'
 work_items:
   - id: CP-1
-    story: "Prompt→Cypher preview with cost/row estimates; sandbox diff"
+    story: 'Prompt→Cypher preview with cost/row estimates; sandbox diff'
   - id: CP-2
-    story: "Rollback/undo for applied queries"
+    story: 'Rollback/undo for applied queries'
   - id: CP-3
-    story: "Regression suite (200 prompts) + CI gate"
+    story: 'Regression suite (200 prompts) + CI gate'
 acceptance:
-  - "Validity ≥95% on suite; failed prompts logged with repair hints"
+  - 'Validity ≥95% on suite; failed prompts logged with repair hints'
 definition_of_done:
-  - "CI gate blocks <95%; UX note committed"
-owners: { DRI: "ai-copilot", support: ["server","web-ux","sre"] }
-metrics: ["nl_cypher_valid_pct >= 95", "p95_graph_ms <= 1500"]
+  - 'CI gate blocks <95%; UX note committed'
+owners: { DRI: 'ai-copilot', support: ['server', 'web-ux', 'sre'] }
+metrics: ['nl_cypher_valid_pct >= 95', 'p95_graph_ms <= 1500']

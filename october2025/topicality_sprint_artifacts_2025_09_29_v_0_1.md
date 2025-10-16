@@ -1,13 +1,16 @@
-# Topicality — Sprint Artifacts **2025‑09‑29**  
+# Topicality — Sprint Artifacts **2025‑09‑29**
+
 **Slug:** `topicality-sprint-artifacts-2025-09-29-v0-1`  
-**Version:** v0.1.0  
+**Version:** v0.1.0
 
 > Drop these files into the repo at the indicated paths. All files are idempotent scaffolds and safe to commit on a feature branch.
 
 ---
 
 ## 1) Maestro ChangeSpec
+
 **Path:** `.maestro/changes/20250929-sprint-prov-ledger-copilot-connectors.yaml`
+
 ```yaml
 area: multi
 intent: release
@@ -97,7 +100,9 @@ checks:
 ---
 
 ## 2) Release Gate Workflow
+
 **Path:** `.github/workflows/release-gate.yml`
+
 ```yaml
 name: Release Gate
 on:
@@ -137,7 +142,9 @@ jobs:
 ---
 
 ## 3) Canary/Argo Rollouts Annotations
+
 **Path:** `deploy/overlays/staging/rollout.yaml` (excerpt)
+
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
@@ -170,12 +177,14 @@ spec:
 ---
 
 ## 4) Connector Certification Workflow
+
 **Path:** `.github/workflows/connector-cert.yml`
+
 ```yaml
 name: connector-cert
 on:
   push:
-    paths: ["connectors/**"]
+    paths: ['connectors/**']
   workflow_dispatch: {}
 
 jobs:
@@ -200,7 +209,9 @@ jobs:
 ---
 
 ## 5) Issue Template
+
 **Path:** `.github/ISSUE_TEMPLATE/sprint_story.yml`
+
 ```yaml
 name: Sprint Story
 description: Slice of work tied to sprint objectives and KPIs.
@@ -230,7 +241,9 @@ body:
 ---
 
 ## 6) OPA ABAC Policy (starter)
+
 **Path:** `policy/abac.rego`
+
 ```rego
 package access
 import future.keywords.if
@@ -250,18 +263,21 @@ sensitive_violation if {
 ```
 
 **Path:** `policy/input.sample.json`
+
 ```json
 {
-  "user": {"mfa": true, "step_up_auth": false},
-  "request": {"purpose": "demo"},
-  "resource": {"sensitivity": "low"}
+  "user": { "mfa": true, "step_up_auth": false },
+  "request": { "purpose": "demo" },
+  "resource": { "sensitivity": "low" }
 }
 ```
 
 ---
 
 ## 7) Makefile Targets
+
 **Path:** `Makefile` (append)
+
 ```makefile
 connector-cert-all: connector-cert-slack connector-cert-gmail connector-cert-drive connector-cert-jira connector-cert-github
 
@@ -280,7 +296,9 @@ copilot-validity:
 ---
 
 ## 8) Tools — Prov‑Ledger Verifier (CLI)
+
 **Path:** `tools/prov_ledger_verify.py`
+
 ```python
 #!/usr/bin/env python3
 import argparse, json, hashlib, sys, pathlib
@@ -330,6 +348,7 @@ if __name__ == "__main__":
 ```
 
 **Path:** `tools/run_golden_tests.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -342,26 +361,39 @@ done
 ```
 
 **Path:** `tools/golden/assert.js`
+
 ```javascript
 #!/usr/bin/env node
 const fs = require('fs');
 const path = process.argv[2];
-if (!path) { console.error('Usage: assert.js <golden.json>'); process.exit(2); }
+if (!path) {
+  console.error('Usage: assert.js <golden.json>');
+  process.exit(2);
+}
 const spec = JSON.parse(fs.readFileSync(path, 'utf8'));
 // Minimal placeholder: ensure required fields exist
-['name','input','expected'].forEach(k=>{ if(!(k in spec)) { console.error(`Missing ${k}`); process.exit(2); }});
+['name', 'input', 'expected'].forEach((k) => {
+  if (!(k in spec)) {
+    console.error(`Missing ${k}`);
+    process.exit(2);
+  }
+});
 process.exit(0);
 ```
 
 ---
 
 ## 9) UI Badge Hook (apps/web)
+
 **Path:** `apps/web/components/ExportBadge.tsx`
+
 ```tsx
 import React from 'react';
 export default function ExportBadge({ verified }: { verified: boolean }) {
   return (
-    <span className={`inline-flex items-center rounded-2xl px-2 py-1 text-xs ${verified? 'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}`}>
+    <span
+      className={`inline-flex items-center rounded-2xl px-2 py-1 text-xs ${verified ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
+    >
       {verified ? 'Verified Manifest' : 'Unverified'}
     </span>
   );
@@ -371,14 +403,36 @@ export default function ExportBadge({ verified }: { verified: boolean }) {
 ---
 
 ## 10) Observability — SLO Dashboard (starter)
+
 **Path:** `observability/dashboards/intelgraph-slo.json`
+
 ```json
 {
   "title": "IntelGraph SLOs",
   "panels": [
-    {"type": "stat", "title": "Latency p95 (ms)", "targets": [{"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"}]},
-    {"type": "stat", "title": "Error Rate (%)", "targets": [{"expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100"}]},
-    {"type": "stat", "title": "Cost per req (USD)", "targets": [{"expr": "avg(cost_per_req_usd)"}]}
+    {
+      "type": "stat",
+      "title": "Latency p95 (ms)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate (%)",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{code=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Cost per req (USD)",
+      "targets": [{ "expr": "avg(cost_per_req_usd)" }]
+    }
   ]
 }
 ```
@@ -386,11 +440,14 @@ export default function ExportBadge({ verified }: { verified: boolean }) {
 ---
 
 ## 11) Disclosure Pack Structure
+
 **Path:** `.evidence/releases/v0.1.0-rc2/README.md`
+
 ```markdown
 # Disclosure Pack — v0.1.0-rc2
 
 Contents
+
 - `sbom.json`
 - `slsa-provenance.intoto.jsonl`
 - `risk_assessment.md`
@@ -402,7 +459,9 @@ Contents
 ---
 
 ## 12) Connector Scaffolds
+
 **Paths:**
+
 ```
 connectors/slack/{mapping.yaml,policy.yaml,golden/example.json,fixtures/sample.json}
 connectors/gmail/{mapping.yaml,policy.yaml,golden/example.json,fixtures/sample.json}
@@ -412,6 +471,7 @@ connectors/github/{mapping.yaml,policy.yaml,golden/example.json,fixtures/sample.
 ```
 
 **Example content:** `connectors/slack/policy.yaml`
+
 ```yaml
 rate_limits:
   rpm: 50
@@ -420,10 +480,11 @@ scopes:
   - channels:history
   - users:read
 error_budget:
-  availability: ">=99.0%"
+  availability: '>=99.0%'
 ```
 
 **Example content:** `connectors/slack/mapping.yaml`
+
 ```yaml
 entity: message
 fields:
@@ -434,18 +495,31 @@ fields:
 ```
 
 **Example content:** `connectors/slack/golden/example.json`
+
 ```json
 {
   "name": "slack-message-basic",
-  "input": {"ts": "1727578123.000100", "user": "U123", "text": "hello", "channel": "C123"},
-  "expected": {"id": "1727578123.000100", "user": "U123", "text": "hello", "channel": "C123"}
+  "input": {
+    "ts": "1727578123.000100",
+    "user": "U123",
+    "text": "hello",
+    "channel": "C123"
+  },
+  "expected": {
+    "id": "1727578123.000100",
+    "user": "U123",
+    "text": "hello",
+    "channel": "C123"
+  }
 }
 ```
 
 ---
 
 ## 13) Copilot Validity Test Harness (starter)
+
 **Path:** `apps/copilot/test/validity.spec.ts`
+
 ```ts
 import { generateCypher, validateCypher } from '../../src';
 import cases from './cases.json';
@@ -464,24 +538,28 @@ describe('NL→Cypher validity', () => {
 ```
 
 **Path:** `apps/copilot/test/cases.json` (placeholder)
+
 ```json
-[
-  {"prompt": "find all emails sent by alice last week"}
-]
+[{ "prompt": "find all emails sent by alice last week" }]
 ```
 
 ---
 
 ## 14) Rollback Plan Template
+
 **Path:** `.evidence/releases/v0.1.0-rc2/rollback_plan.md`
+
 ```markdown
 # Rollback Plan — v0.1.0-rc2
+
 ## Triggers
+
 - Error rate > 1% for 2 consecutive windows
 - p95 latency > 300ms for 2 windows
 - Cost/req > $0.01 for 2 windows
 
 ## Actions
+
 1. Argo Rollouts abort current canary.
 2. Scale down canary to 0; scale stable to 100%.
 3. Create incident record with metrics snapshot.
@@ -490,9 +568,12 @@ describe('NL→Cypher validity', () => {
 ---
 
 ## 15) Decision Memo Template
+
 **Path:** `.evidence/releases/v0.1.0-rc2/decision_memo.md`
+
 ```markdown
 # Decision Memo — v0.1.0-rc2
+
 **Context:** Release of Prov-Ledger beta + Copilot hardening + connectors.
 **Options:** Proceed / Delay / Partial.
 **Decision:** Proceed to 10% canary.
@@ -505,4 +586,3 @@ describe('NL→Cypher validity', () => {
 ---
 
 **END OF ARTIFACTS**
-

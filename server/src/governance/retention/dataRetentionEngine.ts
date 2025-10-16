@@ -10,10 +10,18 @@ import {
   DatasetMetadata,
   LegalHold,
   RetentionRecord,
-  RetentionSchedule
+  RetentionSchedule,
 } from './types.js';
-import { POLICY_TEMPLATE_LIBRARY, selectTemplateForDataset, getPolicyTemplateById, resolveClassification } from './policyTemplates.js';
-import { PinoRetentionAuditLogger, RetentionAuditLogger } from './auditLogger.js';
+import {
+  POLICY_TEMPLATE_LIBRARY,
+  selectTemplateForDataset,
+  getPolicyTemplateById,
+  resolveClassification,
+} from './policyTemplates.js';
+import {
+  PinoRetentionAuditLogger,
+  RetentionAuditLogger,
+} from './auditLogger.js';
 
 export interface DataRetentionEngineOptions {
   pool: Pool;
@@ -50,11 +58,15 @@ export class DataRetentionEngine {
   private readonly repository: DataRetentionRepository;
   private readonly scheduler: RetentionScheduler;
   private readonly auditLogger: RetentionAuditLogger;
-  private readonly cypherRunner: (cypher: string, params?: Record<string, any>) => Promise<any>;
+  private readonly cypherRunner: (
+    cypher: string,
+    params?: Record<string, any>,
+  ) => Promise<any>;
 
   constructor(options: DataRetentionEngineOptions) {
     this.pool = options.pool;
-    this.repository = options.repository ?? new DataRetentionRepository(options.pool);
+    this.repository =
+      options.repository ?? new DataRetentionRepository(options.pool);
     this.scheduler = options.scheduler ?? new RetentionScheduler();
     this.auditLogger = options.auditLogger ?? new PinoRetentionAuditLogger();
     this.cypherRunner = options.runCypher ?? runCypher;
@@ -74,11 +86,14 @@ export class DataRetentionEngine {
     return {
       level,
       recommendedTemplateId: templateSelection.template.id,
-      rationale
+      rationale,
     };
   }
 
-  async registerDataset(metadata: DatasetMetadata, appliedBy: string): Promise<RetentionRecord> {
+  async registerDataset(
+    metadata: DatasetMetadata,
+    appliedBy: string,
+  ): Promise<RetentionRecord> {
     const { template, rationale } = selectTemplateForDataset(metadata);
     const policy: AppliedRetentionPolicy = {
       datasetId: metadata.datasetId,
@@ -90,7 +105,7 @@ export class DataRetentionEngine {
       classificationLevel: template.classificationLevel,
       safeguards: template.defaultSafeguards,
       appliedAt: new Date(),
-      appliedBy
+      appliedBy,
     };
 
     const record: RetentionRecord = {
@@ -99,7 +114,7 @@ export class DataRetentionEngine {
       legalHold: undefined,
       schedule: undefined,
       archiveHistory: [],
-      lastEvaluatedAt: new Date()
+      lastEvaluatedAt: new Date(),
     };
 
     await this.repository.upsertRecord(record);
@@ -111,19 +126,24 @@ export class DataRetentionEngine {
       severity: 'info',
       message: `Applied template ${template.id} (${template.name})`,
       metadata: { rationale, appliedBy },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return record;
   }
 
-  async applyCustomPolicy(datasetId: string, overrides: Partial<AppliedRetentionPolicy>): Promise<AppliedRetentionPolicy> {
+  async applyCustomPolicy(
+    datasetId: string,
+    overrides: Partial<AppliedRetentionPolicy>,
+  ): Promise<AppliedRetentionPolicy> {
     const record = this.repository.getRecord(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
     }
 
-    const template = getPolicyTemplateById(overrides.templateId ?? record.policy.templateId);
+    const template = getPolicyTemplateById(
+      overrides.templateId ?? record.policy.templateId,
+    );
     if (!template) {
       throw new Error(`Unknown retention template ${overrides.templateId}`);
     }
@@ -136,10 +156,11 @@ export class DataRetentionEngine {
       purgeGraceDays: overrides.purgeGraceDays ?? template.purgeGraceDays,
       legalHoldAllowed: overrides.legalHoldAllowed ?? template.legalHoldAllowed,
       storageTargets: overrides.storageTargets ?? template.storageTargets,
-      classificationLevel: overrides.classificationLevel ?? template.classificationLevel,
+      classificationLevel:
+        overrides.classificationLevel ?? template.classificationLevel,
       safeguards: overrides.safeguards ?? template.defaultSafeguards,
       appliedAt: new Date(),
-      appliedBy: overrides.appliedBy ?? record.policy.appliedBy
+      appliedBy: overrides.appliedBy ?? record.policy.appliedBy,
     };
 
     await this.repository.updatePolicy(datasetId, policy);
@@ -151,13 +172,16 @@ export class DataRetentionEngine {
       severity: 'info',
       message: 'Retention policy updated',
       metadata: { overrides },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return policy;
   }
 
-  async schedulePurge(datasetId: string, intervalMs: number): Promise<RetentionSchedule> {
+  async schedulePurge(
+    datasetId: string,
+    intervalMs: number,
+  ): Promise<RetentionSchedule> {
     const record = this.repository.getRecord(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
@@ -169,7 +193,7 @@ export class DataRetentionEngine {
       intervalMs,
       nextRun,
       lastRun: record.schedule?.lastRun,
-      policyId: record.policy.templateId
+      policyId: record.policy.templateId,
     };
 
     this.scheduler.register(schedule, async () => {
@@ -190,13 +214,16 @@ export class DataRetentionEngine {
       severity: 'info',
       message: `Scheduled purge every ${intervalMs / 1000} seconds`,
       metadata: { intervalMs },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return schedule;
   }
 
-  async purgeDataset(datasetId: string, trigger: 'manual' | 'scheduler' | 'compliance' = 'manual'): Promise<void> {
+  async purgeDataset(
+    datasetId: string,
+    trigger: 'manual' | 'scheduler' | 'compliance' = 'manual',
+  ): Promise<void> {
     const record = this.repository.getRecord(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
@@ -212,7 +239,7 @@ export class DataRetentionEngine {
           severity: 'warn',
           message: 'Purge skipped due to active legal hold',
           metadata: { trigger, legalHold: record.legalHold },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
         return;
       }
@@ -230,7 +257,7 @@ export class DataRetentionEngine {
       severity: 'info',
       message: `Dataset purged via ${trigger}`,
       metadata: { trigger },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -253,7 +280,7 @@ export class DataRetentionEngine {
       severity: 'warn',
       message: 'Legal hold applied to dataset',
       metadata: { legalHold },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -272,11 +299,15 @@ export class DataRetentionEngine {
       severity: 'info',
       message: 'Legal hold released',
       metadata: { releasedBy },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
-  async archiveDataset(datasetId: string, initiatedBy: string, targetLocation: string): Promise<ArchivalWorkflow> {
+  async archiveDataset(
+    datasetId: string,
+    initiatedBy: string,
+    targetLocation: string,
+  ): Promise<ArchivalWorkflow> {
     const record = this.repository.getRecord(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
@@ -287,7 +318,7 @@ export class DataRetentionEngine {
       initiatedBy,
       initiatedAt: new Date(),
       targetLocation,
-      status: 'in-progress'
+      status: 'in-progress',
     };
 
     await this.repository.appendArchivalEvent(datasetId, workflow);
@@ -310,7 +341,7 @@ export class DataRetentionEngine {
       severity: workflow.status === 'completed' ? 'info' : 'error',
       message: `Archival workflow ${workflow.status}`,
       metadata: { targetLocation, initiatedBy },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return workflow;
@@ -318,23 +349,29 @@ export class DataRetentionEngine {
 
   generateComplianceReport(start: Date, end: Date): ComplianceReportSummary {
     const records = this.repository.getAllRecords();
-    const rows: ComplianceReportRow[] = records.map(record => {
+    const rows: ComplianceReportRow[] = records.map((record) => {
       const schedule = record.schedule;
-      const archivedCount = record.archiveHistory.filter(entry => entry.initiatedAt >= start && entry.initiatedAt <= end).length;
+      const archivedCount = record.archiveHistory.filter(
+        (entry) => entry.initiatedAt >= start && entry.initiatedAt <= end,
+      ).length;
       return {
         datasetId: record.metadata.datasetId,
         datasetName: record.metadata.name,
         classification: record.policy.classificationLevel,
         policyId: record.policy.templateId,
         retentionDays: record.policy.retentionDays,
-        onLegalHold: Boolean(record.legalHold && (!record.legalHold.expiresAt || record.legalHold.expiresAt > new Date())),
+        onLegalHold: Boolean(
+          record.legalHold &&
+            (!record.legalHold.expiresAt ||
+              record.legalHold.expiresAt > new Date()),
+        ),
         nextPurge: schedule?.nextRun,
         lastRun: schedule?.lastRun,
-        archivedCount
+        archivedCount,
       };
     });
 
-    const overdueDatasets = rows.filter(row => {
+    const overdueDatasets = rows.filter((row) => {
       if (!row.nextPurge) {
         return false;
       }
@@ -344,10 +381,13 @@ export class DataRetentionEngine {
     const report: ComplianceReportSummary = {
       generatedAt: new Date(),
       totalDatasets: rows.length,
-      datasetsOnLegalHold: rows.filter(row => row.onLegalHold).length,
+      datasetsOnLegalHold: rows.filter((row) => row.onLegalHold).length,
       overdueDatasets,
-      archivedInPeriod: rows.reduce((count, row) => count + row.archivedCount, 0),
-      details: rows
+      archivedInPeriod: rows.reduce(
+        (count, row) => count + row.archivedCount,
+        0,
+      ),
+      details: rows,
     };
 
     return report;
@@ -358,20 +398,25 @@ export class DataRetentionEngine {
       return;
     }
 
-    const tableTags = record.metadata.tags.filter(tag => tag.startsWith('postgres:table:'));
+    const tableTags = record.metadata.tags.filter((tag) =>
+      tag.startsWith('postgres:table:'),
+    );
     const tables = tableTags
-      .map(tag => tag.replace('postgres:table:', ''))
-      .filter(table => /^[a-zA-Z0-9_]+$/.test(table));
+      .map((tag) => tag.replace('postgres:table:', ''))
+      .filter((table) => /^[a-zA-Z0-9_]+$/.test(table));
 
     for (const table of tables) {
       try {
         await this.pool.query(
           `DELETE FROM ${table} WHERE dataset_id = $1 AND (retention_expires_at IS NULL OR retention_expires_at < now())`,
-          [record.metadata.datasetId]
+          [record.metadata.datasetId],
         );
       } catch (error: any) {
         if (error.code === '42P01') {
-          this.logger.warn({ table }, 'Postgres purge skipped because table is missing.');
+          this.logger.warn(
+            { table },
+            'Postgres purge skipped because table is missing.',
+          );
           continue;
         }
         throw error;
@@ -384,22 +429,27 @@ export class DataRetentionEngine {
       return;
     }
 
-    const labelTags = record.metadata.tags.filter(tag => tag.startsWith('neo4j:label:'));
+    const labelTags = record.metadata.tags.filter((tag) =>
+      tag.startsWith('neo4j:label:'),
+    );
     const labels = labelTags
-      .map(tag => tag.replace('neo4j:label:', ''))
-      .filter(label => /^[A-Za-z0-9_]+$/.test(label));
+      .map((tag) => tag.replace('neo4j:label:', ''))
+      .filter((label) => /^[A-Za-z0-9_]+$/.test(label));
 
     for (const label of labels) {
       await this.cypherRunner(
         `MATCH (n:${label} { datasetId: $datasetId })
          WHERE coalesce(n.retentionExpiresAt, datetime()) <= datetime()
          DETACH DELETE n`,
-        { datasetId: record.metadata.datasetId }
+        { datasetId: record.metadata.datasetId },
       );
     }
   }
 
-  private async performArchival(record: RetentionRecord, targetLocation: string): Promise<void> {
+  private async performArchival(
+    record: RetentionRecord,
+    targetLocation: string,
+  ): Promise<void> {
     if (record.policy.storageTargets.includes('postgres')) {
       try {
         await this.pool.query(
@@ -408,8 +458,11 @@ export class DataRetentionEngine {
            WHERE dataset_id = $1`,
           [
             record.metadata.datasetId,
-            JSON.stringify({ targetLocation, archivedAt: new Date().toISOString() })
-          ]
+            JSON.stringify({
+              targetLocation,
+              archivedAt: new Date().toISOString(),
+            }),
+          ],
         );
       } catch (error: any) {
         if (error.code !== '42P01') {
@@ -422,7 +475,7 @@ export class DataRetentionEngine {
       await this.cypherRunner(
         `MATCH (n { datasetId: $datasetId })
          SET n.storageTier = 'archive', n.archivedAt = datetime()`,
-        { datasetId: record.metadata.datasetId }
+        { datasetId: record.metadata.datasetId },
       );
     }
   }

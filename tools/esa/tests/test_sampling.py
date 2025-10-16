@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from esa.evaluation import population_stats
 from esa.sampling import SamplingPlan
 from esa.utils import group_by, load_dataset

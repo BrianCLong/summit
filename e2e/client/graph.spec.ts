@@ -5,7 +5,9 @@ test.describe('IntelGraph Canvas', () => {
     await page.goto('/graph/new-canvas');
 
     // Expect the graph container to be visible
-    const graphContainer = page.locator('div[style*="width: 100%"][style*="height: 100%"][style*="border: 1px solid rgb(204, 204, 204)"]');
+    const graphContainer = page.locator(
+      'div[style*="width: 100%"][style*="height: 100%"][style*="border: 1px solid rgb(204, 204, 204)"]',
+    );
     await expect(graphContainer).toBeVisible();
 
     // Expect the panels to be visible

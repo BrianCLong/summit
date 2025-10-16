@@ -1,15 +1,15 @@
-const fs = require("fs");
-const path = require("path");
-const ExternalAPIService = require("./ExternalAPIService");
-const KeyVaultService = require("./KeyVaultService");
-const MultimodalSentimentService = require("./MultimodalSentimentService");
-const logger = require("../utils/logger");
+const fs = require('fs');
+const path = require('path');
+const ExternalAPIService = require('./ExternalAPIService');
+const KeyVaultService = require('./KeyVaultService');
+const MultimodalSentimentService = require('./MultimodalSentimentService');
+const logger = require('../utils/logger');
 class OSINTFeedService {
     constructor({ sourcesFile, configFile } = {}) {
         this.sourcesFile =
-            sourcesFile || path.join(process.cwd(), "osint-sources.md");
+            sourcesFile || path.join(process.cwd(), 'osint-sources.md');
         this.configFile =
-            configFile || path.join(__dirname, "../../config/osint-feed-config.json");
+            configFile || path.join(__dirname, '../../config/osint-feed-config.json');
         this.externalApi = new ExternalAPIService(logger);
         this.keyVault = new KeyVaultService();
         this.sentiment = new MultimodalSentimentService();
@@ -18,11 +18,11 @@ class OSINTFeedService {
     }
     loadConfig() {
         try {
-            const txt = fs.readFileSync(this.configFile, "utf8");
+            const txt = fs.readFileSync(this.configFile, 'utf8');
             return JSON.parse(txt);
         }
         catch (err) {
-            logger.warn("Failed to load OSINT feed config", err);
+            logger.warn('Failed to load OSINT feed config', err);
             return {
                 qualityWeight: 0.4,
                 recencyWeight: 0.3,
@@ -34,7 +34,7 @@ class OSINTFeedService {
         if (this._sources)
             return this._sources;
         try {
-            const md = fs.readFileSync(this.sourcesFile, "utf8");
+            const md = fs.readFileSync(this.sourcesFile, 'utf8');
             const match = md.match(/```json\n([\s\S]*?)```/);
             if (!match)
                 return [];
@@ -42,7 +42,7 @@ class OSINTFeedService {
             return this._sources;
         }
         catch (err) {
-            logger.warn("Failed to load sources", err);
+            logger.warn('Failed to load sources', err);
             return [];
         }
     }
@@ -64,15 +64,15 @@ class OSINTFeedService {
     }
     calculateSourceWeights(subject) {
         const base = this.loadSources().map((s) => ({ ...s }));
-        const sentiment = this.sentiment.analyzeText(subject || "");
+        const sentiment = this.sentiment.analyzeText(subject || '');
         this.config = this.loadConfig();
         const cfg = this.config || {};
         const results = base.map((s) => {
-            const quality = typeof s.quality === "number" ? s.quality : 0.5;
+            const quality = typeof s.quality === 'number' ? s.quality : 0.5;
             const recency = s.lastUpdated
                 ? 1 / (1 + (Date.now() - new Date(s.lastUpdated).getTime()) / 86400000)
                 : 0.5;
-            const density = typeof s.semanticDensity === "number" ? s.semanticDensity : 0.5;
+            const density = typeof s.semanticDensity === 'number' ? s.semanticDensity : 0.5;
             let weight = quality * (cfg.qualityWeight || 0) +
                 recency * (cfg.recencyWeight || 0) +
                 density * (cfg.semanticDensityWeight || 0);

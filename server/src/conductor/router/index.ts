@@ -31,7 +31,8 @@ export class MoERouter {
         maxTokens: 8000,
         supportedModalities: ['text', 'reasoning'],
         securityLevel: 'medium',
-        description: 'Powerful language model with MoE architecture for complex tasks',
+        description:
+          'Powerful language model with MoE architecture for complex tasks',
       },
       GRAPH_TOOL: {
         type: 'GRAPH_TOOL',
@@ -302,12 +303,18 @@ export class MoERouter {
       const capability = this.expertCapabilities[candidate];
 
       // Check latency constraints
-      if (capability.avgLatencyMs && capability.avgLatencyMs > features.maxLatencyMs) {
+      if (
+        capability.avgLatencyMs &&
+        capability.avgLatencyMs > features.maxLatencyMs
+      ) {
         continue;
       }
 
       // Check security constraints
-      if (features.sensitivityLevel === 'secret' && capability.securityLevel === 'low') {
+      if (
+        features.sensitivityLevel === 'secret' &&
+        capability.securityLevel === 'low'
+      ) {
         continue;
       }
 
@@ -333,7 +340,10 @@ export class MoERouter {
   /**
    * Calculate confidence score for expert selection
    */
-  private calculateConfidence(expert: ExpertType, features: RoutingFeatures): number {
+  private calculateConfidence(
+    expert: ExpertType,
+    features: RoutingFeatures,
+  ): number {
     let confidence = 0.5; // Base confidence
 
     switch (expert) {
@@ -368,21 +378,27 @@ export class MoERouter {
   /**
    * Generate human-readable reasoning
    */
-  private generateReason(expert: ExpertType, features: RoutingFeatures): string {
+  private generateReason(
+    expert: ExpertType,
+    features: RoutingFeatures,
+  ): string {
     const reasons: string[] = [];
 
     switch (expert) {
       case 'GRAPH_TOOL':
-        if (features.hasGraphKeywords) reasons.push('graph-related keywords detected');
+        if (features.hasGraphKeywords)
+          reasons.push('graph-related keywords detected');
         break;
       case 'FILES_TOOL':
         if (features.hasFileKeywords) reasons.push('file operations required');
         break;
       case 'OSINT_TOOL':
-        if (features.hasOSINTKeywords) reasons.push('OSINT/web research needed');
+        if (features.hasOSINTKeywords)
+          reasons.push('OSINT/web research needed');
         break;
       case 'EXPORT_TOOL':
-        if (features.hasExportKeywords) reasons.push('export/report generation requested');
+        if (features.hasExportKeywords)
+          reasons.push('export/report generation requested');
         break;
       case 'LLM_HEAVY':
         if (features.complexityScore >= 5) reasons.push('high complexity task');
@@ -393,7 +409,8 @@ export class MoERouter {
         if (features.complexityScore <= 2) reasons.push('simple query');
         break;
       case 'RAG_TOOL':
-        if (features.investigationContext) reasons.push('investigation context available');
+        if (features.investigationContext)
+          reasons.push('investigation context available');
         reasons.push('general knowledge retrieval');
         break;
     }
@@ -429,7 +446,8 @@ export class MoERouter {
     return {
       totalDecisions: decisions.length,
       expertDistribution: expertCounts as Record<ExpertType, number>,
-      avgConfidence: decisions.length > 0 ? totalConfidence / decisions.length : 0,
+      avgConfidence:
+        decisions.length > 0 ? totalConfidence / decisions.length : 0,
     };
   }
 }

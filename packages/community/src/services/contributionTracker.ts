@@ -19,7 +19,7 @@ export class ContributionTracker {
       reactionsReceived: 0,
       badgesEarned: [],
       points: 0,
-      streakLength: 0
+      streakLength: 0,
     };
     this.store.upsertContribution(summary);
     return summary;
@@ -30,7 +30,7 @@ export class ContributionTracker {
     const updated = {
       ...current,
       threadsCreated: current.threadsCreated + 1,
-      streakLength: current.streakLength + 1
+      streakLength: current.streakLength + 1,
     };
     this.store.upsertContribution(updated);
     return updated;
@@ -41,8 +41,10 @@ export class ContributionTracker {
     const updated = {
       ...current,
       postsCreated: current.postsCreated + 1,
-      repliesAuthored: isReply ? current.repliesAuthored + 1 : current.repliesAuthored,
-      streakLength: current.streakLength + 1
+      repliesAuthored: isReply
+        ? current.repliesAuthored + 1
+        : current.repliesAuthored,
+      streakLength: current.streakLength + 1,
     };
     this.store.upsertContribution(updated);
     return updated;
@@ -52,13 +54,17 @@ export class ContributionTracker {
     const current = this.bootstrap(userId);
     const updated = {
       ...current,
-      reactionsReceived: current.reactionsReceived + 1
+      reactionsReceived: current.reactionsReceived + 1,
     };
     this.store.upsertContribution(updated);
     return updated;
   }
 
-  public addBadge(userId: string, badgeId: string, points: number): ContributionSummary {
+  public addBadge(
+    userId: string,
+    badgeId: string,
+    points: number,
+  ): ContributionSummary {
     const current = this.bootstrap(userId);
     if (current.badgesEarned.includes(badgeId)) {
       return current;
@@ -67,7 +73,7 @@ export class ContributionTracker {
     const updated: ContributionSummary = {
       ...current,
       badgesEarned: [...current.badgesEarned, badgeId],
-      points: current.points + points
+      points: current.points + points,
     };
     this.store.upsertContribution(updated);
     return updated;
@@ -77,7 +83,7 @@ export class ContributionTracker {
     const current = this.bootstrap(userId);
     const updated = {
       ...current,
-      points: current.points + points
+      points: current.points + points,
     };
     this.store.upsertContribution(updated);
     return updated;
@@ -87,7 +93,7 @@ export class ContributionTracker {
     const current = this.bootstrap(userId);
     const updated = {
       ...current,
-      streakLength: 0
+      streakLength: 0,
     };
     this.store.upsertContribution(updated);
     return updated;

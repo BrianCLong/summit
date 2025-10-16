@@ -236,7 +236,11 @@ export class TelemetryManager {
     this.exportSpan(span);
   }
 
-  addSpanEvent(spanId: string, name: string, attributes?: Record<string, unknown>): void {
+  addSpanEvent(
+    spanId: string,
+    name: string,
+    attributes?: Record<string, unknown>,
+  ): void {
     const span = this.spans.get(spanId);
     if (!span) {
       console.warn(`Span ${spanId} not found`);
@@ -362,7 +366,9 @@ export class TelemetryManager {
       };
     };
 
-    return rootSpans.sort((a, b) => a.startTime - b.startTime).map((span) => buildNode(span));
+    return rootSpans
+      .sort((a, b) => a.startTime - b.startTime)
+      .map((span) => buildNode(span));
   }
 
   calculateTraceMetrics(spans: SpanData[]): {
@@ -387,13 +393,22 @@ export class TelemetryManager {
     const sortedSpans = spans.sort((a, b) => a.startTime - b.startTime);
     const firstSpan = sortedSpans[0];
     const lastSpan = sortedSpans.reduce((latest, span) =>
-      (span.endTime || span.startTime) > (latest.endTime || latest.startTime) ? span : latest,
+      (span.endTime || span.startTime) > (latest.endTime || latest.startTime)
+        ? span
+        : latest,
     );
 
-    const totalDuration = (lastSpan.endTime || lastSpan.startTime) - firstSpan.startTime;
-    const errorCount = spans.filter((s) => s.status === SpanStatus.ERROR).length;
+    const totalDuration =
+      (lastSpan.endTime || lastSpan.startTime) - firstSpan.startTime;
+    const errorCount = spans.filter(
+      (s) => s.status === SpanStatus.ERROR,
+    ).length;
     const services = [
-      ...new Set(spans.map((s) => s.resource.attributes['service.name']).filter(Boolean) as string[]),
+      ...new Set(
+        spans
+          .map((s) => s.resource.attributes['service.name'])
+          .filter(Boolean) as string[],
+      ),
     ];
 
     // Calculate critical path (longest path through the trace)
@@ -423,7 +438,10 @@ export class TelemetryManager {
 
       if (children.length === 0) {
         // Leaf node - calculate total duration
-        const pathDuration = newPath.reduce((sum, s) => sum + (s.duration || 0), 0);
+        const pathDuration = newPath.reduce(
+          (sum, s) => sum + (s.duration || 0),
+          0,
+        );
         if (pathDuration > maxDuration) {
           maxDuration = pathDuration;
           longestPath = newPath;
@@ -516,17 +534,23 @@ export const useTelemetry = () => {
     });
   }, []);
 
-  const recordEvent = React.useCallback((spanId: string, name: string, attributes?: object) => {
-    telemetry.addSpanEvent(spanId, name, attributes);
-  }, []);
+  const recordEvent = React.useCallback(
+    (spanId: string, name: string, attributes?: object) => {
+      telemetry.addSpanEvent(spanId, name, attributes);
+    },
+    [],
+  );
 
   const recordError = React.useCallback((spanId: string, error: Error) => {
     telemetry.recordException(spanId, error);
   }, []);
 
-  const setAttribute = React.useCallback((spanId: string, key: string, value: unknown) => {
-    telemetry.setSpanAttribute(spanId, key, value);
-  }, []);
+  const setAttribute = React.useCallback(
+    (spanId: string, key: string, value: unknown) => {
+      telemetry.setSpanAttribute(spanId, key, value);
+    },
+    [],
+  );
 
   return {
     activeSpans: Array.from(activeSpans),
@@ -542,7 +566,11 @@ export const useTelemetry = () => {
 
 // Decorator for automatic span creation
 export function traced(name?: string) {
-  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
     const spanName = name || `${target.constructor.name}.${propertyKey}`;
 
@@ -571,7 +599,10 @@ export function traced(name?: string) {
 }
 
 // Performance monitoring utilities
-export const measurePerformance = (name: string, fn: () => Promise<unknown> | unknown) => {
+export const measurePerformance = (
+  name: string,
+  fn: () => Promise<unknown> | unknown,
+) => {
   const spanId = telemetry.startSpan(`performance.${name}`, {
     kind: SpanKind.INTERNAL,
     attributes: { 'performance.measure': true },

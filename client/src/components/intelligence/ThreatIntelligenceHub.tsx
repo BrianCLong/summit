@@ -71,10 +71,11 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
   refreshInterval = 300000, // 5 minutes
   className = '',
 }) => {
-  const [activeView, setActiveView] = useState<'indicators' | 'campaigns' | 'actors' | 'feeds'>(
-    'indicators',
-  );
-  const [selectedIndicator, setSelectedIndicator] = useState<ThreatIndicator | null>(null);
+  const [activeView, setActiveView] = useState<
+    'indicators' | 'campaigns' | 'actors' | 'feeds'
+  >('indicators');
+  const [selectedIndicator, setSelectedIndicator] =
+    useState<ThreatIndicator | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
@@ -126,7 +127,8 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
       {
         id: 'ind-003',
         type: 'hash',
-        value: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        value:
+          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         confidence: 92,
         severity: 'high',
         source: 'MISP',
@@ -150,7 +152,8 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
       {
         id: 'camp-001',
         name: 'Operation Winter Storm',
-        description: 'Large-scale phishing campaign targeting financial institutions',
+        description:
+          'Large-scale phishing campaign targeting financial institutions',
         actors: ['APT29', 'APT28'],
         ttps: ['T1566.001', 'T1204.002', 'T1071.001'],
         indicators: ['ind-001', 'ind-002'],
@@ -192,9 +195,12 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
       const matchesSearch =
         searchQuery === '' ||
         indicator.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        indicator.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        indicator.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
 
-      const matchesSeverity = filterSeverity === 'all' || indicator.severity === filterSeverity;
+      const matchesSeverity =
+        filterSeverity === 'all' || indicator.severity === filterSeverity;
       const matchesType = filterType === 'all' || indicator.type === filterType;
 
       return matchesSearch && matchesSeverity && matchesType;
@@ -298,8 +304,16 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
           }}
         >
           {[
-            { key: 'indicators', label: '🎯 Indicators', count: filteredIndicators.length },
-            { key: 'campaigns', label: '📋 Campaigns', count: mockCampaigns.length },
+            {
+              key: 'indicators',
+              label: '🎯 Indicators',
+              count: filteredIndicators.length,
+            },
+            {
+              key: 'campaigns',
+              label: '📋 Campaigns',
+              count: mockCampaigns.length,
+            },
             { key: 'actors', label: '🕵️ Actors', count: mockActors.length },
             { key: 'feeds', label: '📡 Feeds', count: 3 },
           ].map((tab) => (
@@ -311,7 +325,9 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                 backgroundColor: 'transparent',
                 border: 'none',
                 borderBottom:
-                  activeView === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                  activeView === tab.key
+                    ? '2px solid #1a73e8'
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: activeView === tab.key ? '600' : '400',
@@ -324,7 +340,14 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
         </div>
 
         {/* Search and Filters */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
           <input
             type="text"
             placeholder="Search indicators, tags, or IOCs..."
@@ -389,7 +412,11 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
           >
             {/* Indicators List */}
             <div
-              style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+              style={{
+                overflow: 'auto',
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
             >
               <div
                 style={{
@@ -413,7 +440,9 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                       borderBottom: '1px solid #f0f0f0',
                       cursor: 'pointer',
                       backgroundColor:
-                        selectedIndicator?.id === indicator.id ? '#e3f2fd' : 'transparent',
+                        selectedIndicator?.id === indicator.id
+                          ? '#e3f2fd'
+                          : 'transparent',
                       transition: 'background-color 0.2s',
                     }}
                     onMouseEnter={(e) => {
@@ -435,8 +464,16 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                         marginBottom: '8px',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px' }}>{getTypeIcon(indicator.type)}</span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <span style={{ fontSize: '16px' }}>
+                          {getTypeIcon(indicator.type)}
+                        </span>
                         <code
                           style={{
                             fontSize: '13px',
@@ -450,13 +487,21 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                         </code>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
                         <span
                           style={{
                             fontSize: '11px',
                             padding: '2px 6px',
                             borderRadius: '12px',
-                            backgroundColor: getSeverityColor(indicator.severity),
+                            backgroundColor: getSeverityColor(
+                              indicator.severity,
+                            ),
                             color: 'white',
                             fontWeight: '600',
                           }}
@@ -470,7 +515,12 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                     </div>
 
                     <div
-                      style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
+                        marginBottom: '8px',
+                      }}
                     >
                       {indicator.tags.slice(0, 3).map((tag) => (
                         <span
@@ -495,7 +545,9 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
 
                     <div style={{ fontSize: '12px', color: '#666' }}>
                       <div>Source: {indicator.source}</div>
-                      <div>Last seen: {indicator.lastSeen.toLocaleDateString()}</div>
+                      <div>
+                        Last seen: {indicator.lastSeen.toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -518,7 +570,9 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                     backgroundColor: '#f8f9fa',
                   }}
                 >
-                  <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>
+                  <h4
+                    style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}
+                  >
                     Indicator Details
                   </h4>
                 </div>
@@ -560,7 +614,8 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                         <strong>Type:</strong> {selectedIndicator.type}
                       </div>
                       <div>
-                        <strong>Confidence:</strong> {selectedIndicator.confidence}%
+                        <strong>Confidence:</strong>{' '}
+                        {selectedIndicator.confidence}%
                       </div>
                       <div>
                         <strong>Severity:</strong>
@@ -576,14 +631,22 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                       </div>
                       <div>
                         <strong>Status:</strong>{' '}
-                        {selectedIndicator.isActive ? '🟢 Active' : '🔴 Inactive'}
+                        {selectedIndicator.isActive
+                          ? '🟢 Active'
+                          : '🔴 Inactive'}
                       </div>
                     </div>
                   </div>
 
                   {selectedIndicator.context && (
                     <div style={{ marginBottom: '24px' }}>
-                      <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                      <h5
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          marginBottom: '8px',
+                        }}
+                      >
                         Context
                       </h5>
                       <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
@@ -595,17 +658,20 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                         )}
                         {selectedIndicator.context.campaign && (
                           <div>
-                            <strong>Campaign:</strong> {selectedIndicator.context.campaign}
+                            <strong>Campaign:</strong>{' '}
+                            {selectedIndicator.context.campaign}
                           </div>
                         )}
                         {selectedIndicator.context.actor && (
                           <div>
-                            <strong>Actor:</strong> {selectedIndicator.context.actor}
+                            <strong>Actor:</strong>{' '}
+                            {selectedIndicator.context.actor}
                           </div>
                         )}
                         {selectedIndicator.context.ttps && (
                           <div>
-                            <strong>TTPs:</strong> {selectedIndicator.context.ttps.join(', ')}
+                            <strong>TTPs:</strong>{' '}
+                            {selectedIndicator.context.ttps.join(', ')}
                           </div>
                         )}
                       </div>
@@ -613,10 +679,18 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                   )}
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h5
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Tags
                     </h5>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    <div
+                      style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}
+                    >
                       {selectedIndicator.tags.map((tag) => (
                         <span
                           key={tag}
@@ -639,13 +713,16 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                       <strong>Source:</strong> {selectedIndicator.source}
                     </div>
                     <div>
-                      <strong>First Seen:</strong> {selectedIndicator.firstSeen.toLocaleString()}
+                      <strong>First Seen:</strong>{' '}
+                      {selectedIndicator.firstSeen.toLocaleString()}
                     </div>
                     <div>
-                      <strong>Last Seen:</strong> {selectedIndicator.lastSeen.toLocaleString()}
+                      <strong>Last Seen:</strong>{' '}
+                      {selectedIndicator.lastSeen.toLocaleString()}
                     </div>
                     <div>
-                      <strong>Verified:</strong> {selectedIndicator.verified ? '✅ Yes' : '❌ No'}
+                      <strong>Verified:</strong>{' '}
+                      {selectedIndicator.verified ? '✅ Yes' : '❌ No'}
                     </div>
                   </div>
                 </div>
@@ -656,9 +733,19 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
 
         {activeView === 'campaigns' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Threat Campaigns
             </h4>
 
@@ -682,7 +769,9 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                     marginBottom: '8px',
                   }}
                 >
-                  <h5 style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>
+                  <h5
+                    style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}
+                  >
                     {campaign.name}
                   </h5>
                   <span
@@ -718,7 +807,8 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                     <strong>Status:</strong> {campaign.status}
                   </div>
                   <div>
-                    <strong>Last Activity:</strong> {campaign.lastActivity.toLocaleDateString()}
+                    <strong>Last Activity:</strong>{' '}
+                    {campaign.lastActivity.toLocaleDateString()}
                   </div>
                 </div>
               </div>
@@ -728,9 +818,19 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
 
         {activeView === 'actors' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Threat Actors
             </h4>
 
@@ -754,7 +854,11 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                     marginBottom: '8px',
                   }}
                 >
-                  <h5 style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>{actor.name}</h5>
+                  <h5
+                    style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}
+                  >
+                    {actor.name}
+                  </h5>
                   <span
                     style={{
                       fontSize: '11px',
@@ -780,10 +884,12 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                     <strong>Geography:</strong> {actor.geography.join(', ')}
                   </div>
                   <div>
-                    <strong>Status:</strong> {actor.isActive ? '🟢 Active' : '🔴 Inactive'}
+                    <strong>Status:</strong>{' '}
+                    {actor.isActive ? '🟢 Active' : '🔴 Inactive'}
                   </div>
                   <div>
-                    <strong>Last Activity:</strong> {actor.lastActivity.toLocaleDateString()}
+                    <strong>Last Activity:</strong>{' '}
+                    {actor.lastActivity.toLocaleDateString()}
                   </div>
                 </div>
               </div>
@@ -793,15 +899,30 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
 
         {activeView === 'feeds' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Intelligence Feeds
             </h4>
 
             <div style={{ display: 'grid', gap: '16px' }}>
               {[
-                { name: 'VirusTotal', status: 'active', lastSync: new Date(), indicators: 1247 },
+                {
+                  name: 'VirusTotal',
+                  status: 'active',
+                  lastSync: new Date(),
+                  indicators: 1247,
+                },
                 {
                   name: 'Recorded Future',
                   status: 'active',
@@ -827,11 +948,18 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                   }}
                 >
                   <div>
-                    <h5 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                    <h5
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        margin: '0 0 4px 0',
+                      }}
+                    >
                       {feed.name}
                     </h5>
                     <div style={{ fontSize: '12px', color: '#666' }}>
-                      {feed.indicators} indicators • Last sync: {feed.lastSync.toLocaleTimeString()}
+                      {feed.indicators} indicators • Last sync:{' '}
+                      {feed.lastSync.toLocaleTimeString()}
                     </div>
                   </div>
 
@@ -841,7 +969,8 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
                         fontSize: '11px',
                         padding: '2px 6px',
                         borderRadius: '12px',
-                        backgroundColor: feed.status === 'active' ? '#28a745' : '#ffc107',
+                        backgroundColor:
+                          feed.status === 'active' ? '#28a745' : '#ffc107',
                         color: 'white',
                       }}
                     >

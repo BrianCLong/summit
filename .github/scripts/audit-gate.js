@@ -14,7 +14,11 @@ const path = require('path');
 
 // Configuration
 const AUDIT_FILE = process.argv[2] || 'audit.json';
-const ALLOWLIST_FILE = path.join(process.cwd(), '.github', 'audit-allowlist.json');
+const ALLOWLIST_FILE = path.join(
+  process.cwd(),
+  '.github',
+  'audit-allowlist.json',
+);
 const MAX_SEVERITY_ALLOWED = process.env.MAX_AUDIT_SEVERITY || 'moderate';
 
 const SEVERITY_LEVELS = {
@@ -22,7 +26,7 @@ const SEVERITY_LEVELS = {
   low: 1,
   moderate: 2,
   high: 3,
-  critical: 4
+  critical: 4,
 };
 
 class AuditGate {
@@ -44,7 +48,7 @@ class AuditGate {
       advisories: [],
       packages: [],
       paths: [],
-      expires: {}
+      expires: {},
     };
   }
 
@@ -72,12 +76,14 @@ class AuditGate {
       blocked: [],
       allowed: [],
       expired: [],
-      summary: {}
+      summary: {},
     };
 
     // Count by severity
     for (const severity of Object.keys(SEVERITY_LEVELS)) {
-      results.summary[severity] = vulnerabilities.filter(v => v.severity === severity).length;
+      results.summary[severity] = vulnerabilities.filter(
+        (v) => v.severity === severity,
+      ).length;
     }
 
     // Analyze each vulnerability
@@ -111,12 +117,14 @@ class AuditGate {
           patched_versions: advisory.patched_versions,
           overview: advisory.overview,
           url: advisory.url,
-          findings: advisory.findings || []
+          findings: advisory.findings || [],
         });
       }
     } else if (auditData.vulnerabilities) {
       // npm audit v7+ format
-      for (const [packageName, vulnData] of Object.entries(auditData.vulnerabilities)) {
+      for (const [packageName, vulnData] of Object.entries(
+        auditData.vulnerabilities,
+      )) {
         if (vulnData.via && Array.isArray(vulnData.via)) {
           for (const via of vulnData.via) {
             if (typeof via === 'object' && via.title) {
@@ -129,7 +137,7 @@ class AuditGate {
                 patched_versions: 'See advisory',
                 overview: via.title,
                 url: via.url,
-                findings: []
+                findings: [],
               });
             }
           }
@@ -146,15 +154,18 @@ class AuditGate {
     // Check if vulnerability is in allowlist
     const allowlistEntry = this.checkAllowlist(vuln);
     if (allowlistEntry) {
-      if (allowlistEntry.expires && new Date(allowlistEntry.expires) < new Date()) {
+      if (
+        allowlistEntry.expires &&
+        new Date(allowlistEntry.expires) < new Date()
+      ) {
         return {
           action: 'expired',
-          reason: `Allowlist entry expired on ${allowlistEntry.expires}`
+          reason: `Allowlist entry expired on ${allowlistEntry.expires}`,
         };
       }
       return {
         action: 'allow',
-        reason: `Allowlisted: ${allowlistEntry.reason}`
+        reason: `Allowlisted: ${allowlistEntry.reason}`,
       };
     }
 
@@ -162,29 +173,35 @@ class AuditGate {
     if (severityLevel > this.maxSeverityLevel) {
       return {
         action: 'block',
-        reason: `Severity ${vuln.severity} exceeds maximum allowed (${MAX_SEVERITY_ALLOWED})`
+        reason: `Severity ${vuln.severity} exceeds maximum allowed (${MAX_SEVERITY_ALLOWED})`,
       };
     }
 
     return {
       action: 'allow',
-      reason: `Severity ${vuln.severity} is within acceptable range`
+      reason: `Severity ${vuln.severity} is within acceptable range`,
     };
   }
 
   checkAllowlist(vuln) {
     // Check by advisory ID
-    const advisoryMatch = this.allowlist.advisories.find(a => a.id === vuln.id);
+    const advisoryMatch = this.allowlist.advisories.find(
+      (a) => a.id === vuln.id,
+    );
     if (advisoryMatch) return advisoryMatch;
 
     // Check by package name
-    const packageMatch = this.allowlist.packages.find(p => p.name === vuln.module_name);
+    const packageMatch = this.allowlist.packages.find(
+      (p) => p.name === vuln.module_name,
+    );
     if (packageMatch) return packageMatch;
 
     // Check by path patterns
-    const pathMatch = this.allowlist.paths.find(p => {
+    const pathMatch = this.allowlist.paths.find((p) => {
       const regex = new RegExp(p.pattern);
-      return vuln.findings.some(finding => regex.test(finding.paths?.[0] || ''));
+      return vuln.findings.some((finding) =>
+        regex.test(finding.paths?.[0] || ''),
+      );
     });
     if (pathMatch) return pathMatch;
 
@@ -223,7 +240,9 @@ class AuditGate {
     if (results.allowed.length > 0) {
       console.log('\n✅ Allowed Vulnerabilities:');
       results.allowed.forEach((vuln, i) => {
-        console.log(`  ${i + 1}. ${vuln.title} (${vuln.severity}) - ${vuln.reason}`);
+        console.log(
+          `  ${i + 1}. ${vuln.title} (${vuln.severity}) - ${vuln.reason}`,
+        );
       });
     }
 
@@ -234,7 +253,10 @@ class AuditGate {
       });
     }
 
-    console.log('\n📋 Gate Decision:', results.blocked.length === 0 ? '✅ PASS' : '❌ FAIL');
+    console.log(
+      '\n📋 Gate Decision:',
+      results.blocked.length === 0 ? '✅ PASS' : '❌ FAIL',
+    );
 
     return results.blocked.length === 0;
   }
@@ -245,43 +267,47 @@ class AuditGate {
       high: '🟠',
       moderate: '🟡',
       low: '🔵',
-      info: '⚪'
+      info: '⚪',
     };
     return emojis[severity] || '❓';
   }
 
   async generateAllowlistTemplate() {
     const template = {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "title": "NPM Audit Allowlist",
-      "description": "Temporary exceptions for npm audit vulnerabilities",
-      "advisories": [
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      title: 'NPM Audit Allowlist',
+      description: 'Temporary exceptions for npm audit vulnerabilities',
+      advisories: [
         {
-          "id": 1234,
-          "reason": "No fix available, mitigated by network controls",
-          "expires": "2024-12-31T23:59:59Z",
-          "approved_by": "security-team",
-          "tracking_issue": "https://github.com/owner/repo/issues/123"
-        }
+          id: 1234,
+          reason: 'No fix available, mitigated by network controls',
+          expires: '2024-12-31T23:59:59Z',
+          approved_by: 'security-team',
+          tracking_issue: 'https://github.com/owner/repo/issues/123',
+        },
       ],
-      "packages": [
+      packages: [
         {
-          "name": "vulnerable-package",
-          "reason": "Indirect dependency, fix in progress upstream",
-          "expires": "2024-06-30T23:59:59Z",
-          "approved_by": "platform-team"
-        }
+          name: 'vulnerable-package',
+          reason: 'Indirect dependency, fix in progress upstream',
+          expires: '2024-06-30T23:59:59Z',
+          approved_by: 'platform-team',
+        },
       ],
-      "paths": [
+      paths: [
         {
-          "pattern": "node_modules/dev-only-package/.*",
-          "reason": "Development dependency, not in production",
-          "approved_by": "development-team"
-        }
-      ]
+          pattern: 'node_modules/dev-only-package/.*',
+          reason: 'Development dependency, not in production',
+          approved_by: 'development-team',
+        },
+      ],
     };
 
-    const templatePath = path.join(process.cwd(), '.github', 'audit-allowlist.template.json');
+    const templatePath = path.join(
+      process.cwd(),
+      '.github',
+      'audit-allowlist.template.json',
+    );
     fs.writeFileSync(templatePath, JSON.stringify(template, null, 2));
     console.log(`📝 Allowlist template created: ${templatePath}`);
   }
@@ -301,8 +327,12 @@ async function main() {
     const passed = gate.generateReport(results);
 
     if (!passed) {
-      console.error('\n❌ Audit gate failed due to unacceptable vulnerabilities');
-      console.error('   Add exceptions to .github/audit-allowlist.json if needed');
+      console.error(
+        '\n❌ Audit gate failed due to unacceptable vulnerabilities',
+      );
+      console.error(
+        '   Add exceptions to .github/audit-allowlist.json if needed',
+      );
       process.exit(1);
     }
 

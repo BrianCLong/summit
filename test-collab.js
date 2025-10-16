@@ -10,7 +10,7 @@ ws.on('open', function open() {
     commentId: 'test-comment-1',
     userId: 'test-user',
     tenantId: 'test-tenant',
-    text: 'This is a test comment.'
+    text: 'This is a test comment.',
   };
   ws.send(JSON.stringify(msg));
   console.log('Sent message:', msg);
@@ -22,5 +22,5 @@ ws.on('message', function message(data) {
 });
 
 ws.on('error', function error(err) {
-    console.error('WebSocket error:', err);
+  console.error('WebSocket error:', err);
 });

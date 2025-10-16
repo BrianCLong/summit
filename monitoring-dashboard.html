@@ -1,387 +1,501 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>IntelGraph Monitoring Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }
-        .header h1 { margin: 0; font-size: 28px; }
-        .header p { margin: 10px 0 0 0; opacity: 0.9; }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 4px solid #667eea; }
-        .card h3 { margin: 0 0 15px 0; color: #333; font-size: 18px; }
-        .metric { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; }
-        .metric-value { font-size: 24px; font-weight: bold; color: #28a745; }
-        .metric-label { color: #666; font-size: 14px; }
-        .status-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .status-healthy { background: #28a745; }
-        .status-warning { background: #ffc107; }
-        .status-error { background: #dc3545; }
-        .chart-container { height: 300px; position: relative; }
-        .activity-log { max-height: 200px; overflow-y: auto; font-size: 12px; }
-        .log-entry { padding: 5px 0; border-bottom: 1px solid #eee; }
-        .log-timestamp { color: #666; font-weight: bold; }
-        .log-level-info { color: #007bff; }
-        .log-level-warn { color: #ffc107; }
-        .log-level-error { color: #dc3545; }
-        .real-time { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-        .grid-2 { grid-column: span 2; }
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+      }
+      .header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+      }
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #667eea;
+      }
+      .card h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 18px;
+      }
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+      .metric-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #28a745;
+      }
+      .metric-label {
+        color: #666;
+        font-size: 14px;
+      }
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+      }
+      .status-healthy {
+        background: #28a745;
+      }
+      .status-warning {
+        background: #ffc107;
+      }
+      .status-error {
+        background: #dc3545;
+      }
+      .chart-container {
+        height: 300px;
+        position: relative;
+      }
+      .activity-log {
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 12px;
+      }
+      .log-entry {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .log-timestamp {
+        color: #666;
+        font-weight: bold;
+      }
+      .log-level-info {
+        color: #007bff;
+      }
+      .log-level-warn {
+        color: #ffc107;
+      }
+      .log-level-error {
+        color: #dc3545;
+      }
+      .real-time {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .grid-2 {
+        grid-column: span 2;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="header">
-        <h1>📊 IntelGraph Monitoring Dashboard</h1>
-        <p>Real-time system health, performance metrics, and operational intelligence</p>
-        <div class="real-time">🔴 LIVE</div>
+      <h1>📊 IntelGraph Monitoring Dashboard</h1>
+      <p>
+        Real-time system health, performance metrics, and operational
+        intelligence
+      </p>
+      <div class="real-time">🔴 LIVE</div>
     </div>
 
     <div class="dashboard">
-        <!-- System Health Card -->
-        <div class="card">
-            <h3>🏥 System Health</h3>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">PostgreSQL</div>
-                    <div><span class="status-indicator status-healthy"></span>Healthy</div>
-                </div>
-                <div class="metric-value">✅</div>
+      <!-- System Health Card -->
+      <div class="card">
+        <h3>🏥 System Health</h3>
+        <div class="metric">
+          <div>
+            <div class="metric-label">PostgreSQL</div>
+            <div>
+              <span class="status-indicator status-healthy"></span>Healthy
             </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Neo4j</div>
-                    <div><span class="status-indicator status-healthy"></span>Connected</div>
-                </div>
-                <div class="metric-value">✅</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Redis</div>
-                    <div><span class="status-indicator status-healthy"></span>Responding</div>
-                </div>
-                <div class="metric-value">✅</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">GraphQL API</div>
-                    <div><span class="status-indicator status-healthy"></span>Operational</div>
-                </div>
-                <div class="metric-value">✅</div>
-            </div>
+          </div>
+          <div class="metric-value">✅</div>
         </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Neo4j</div>
+            <div>
+              <span class="status-indicator status-healthy"></span>Connected
+            </div>
+          </div>
+          <div class="metric-value">✅</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Redis</div>
+            <div>
+              <span class="status-indicator status-healthy"></span>Responding
+            </div>
+          </div>
+          <div class="metric-value">✅</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">GraphQL API</div>
+            <div>
+              <span class="status-indicator status-healthy"></span>Operational
+            </div>
+          </div>
+          <div class="metric-value">✅</div>
+        </div>
+      </div>
 
-        <!-- Performance Metrics Card -->
-        <div class="card">
-            <h3>⚡ Performance Metrics</h3>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Response Time</div>
-                    <div>Average GraphQL query time</div>
-                </div>
-                <div class="metric-value" id="response-time">42ms</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Queries/Second</div>
-                    <div>Current request rate</div>
-                </div>
-                <div class="metric-value" id="qps">156</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Memory Usage</div>
-                    <div>Server memory consumption</div>
-                </div>
-                <div class="metric-value" id="memory">512MB</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">CPU Usage</div>
-                    <div>Current CPU utilization</div>
-                </div>
-                <div class="metric-value" id="cpu">18%</div>
-            </div>
+      <!-- Performance Metrics Card -->
+      <div class="card">
+        <h3>⚡ Performance Metrics</h3>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Response Time</div>
+            <div>Average GraphQL query time</div>
+          </div>
+          <div class="metric-value" id="response-time">42ms</div>
         </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Queries/Second</div>
+            <div>Current request rate</div>
+          </div>
+          <div class="metric-value" id="qps">156</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Memory Usage</div>
+            <div>Server memory consumption</div>
+          </div>
+          <div class="metric-value" id="memory">512MB</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">CPU Usage</div>
+            <div>Current CPU utilization</div>
+          </div>
+          <div class="metric-value" id="cpu">18%</div>
+        </div>
+      </div>
 
-        <!-- Database Statistics Card -->
-        <div class="card">
-            <h3>🗄️ Database Statistics</h3>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Entities</div>
-                    <div>Total entities in graph</div>
-                </div>
-                <div class="metric-value" id="entity-count">2,847</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Relationships</div>
-                    <div>Total relationships mapped</div>
-                </div>
-                <div class="metric-value" id="relationship-count">5,923</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Investigations</div>
-                    <div>Active investigations</div>
-                </div>
-                <div class="metric-value" id="investigation-count">27</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Storage</div>
-                    <div>Database size</div>
-                </div>
-                <div class="metric-value" id="storage">1.2GB</div>
-            </div>
+      <!-- Database Statistics Card -->
+      <div class="card">
+        <h3>🗄️ Database Statistics</h3>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Entities</div>
+            <div>Total entities in graph</div>
+          </div>
+          <div class="metric-value" id="entity-count">2,847</div>
         </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Relationships</div>
+            <div>Total relationships mapped</div>
+          </div>
+          <div class="metric-value" id="relationship-count">5,923</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Investigations</div>
+            <div>Active investigations</div>
+          </div>
+          <div class="metric-value" id="investigation-count">27</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Storage</div>
+            <div>Database size</div>
+          </div>
+          <div class="metric-value" id="storage">1.2GB</div>
+        </div>
+      </div>
 
-        <!-- Security Metrics Card -->
-        <div class="card">
-            <h3>🛡️ Security Status</h3>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Authentication</div>
-                    <div>JWT validation active</div>
-                </div>
-                <div class="metric-value">🔒</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Rate Limiting</div>
-                    <div>500 req/15min limit</div>
-                </div>
-                <div class="metric-value">📈</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">CORS Policy</div>
-                    <div>Strict origin validation</div>
-                </div>
-                <div class="metric-value">🌐</div>
-            </div>
-            <div class="metric">
-                <div>
-                    <div class="metric-label">Failed Logins</div>
-                    <div>Last 24 hours</div>
-                </div>
-                <div class="metric-value" id="failed-logins">3</div>
-            </div>
+      <!-- Security Metrics Card -->
+      <div class="card">
+        <h3>🛡️ Security Status</h3>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Authentication</div>
+            <div>JWT validation active</div>
+          </div>
+          <div class="metric-value">🔒</div>
         </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Rate Limiting</div>
+            <div>500 req/15min limit</div>
+          </div>
+          <div class="metric-value">📈</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">CORS Policy</div>
+            <div>Strict origin validation</div>
+          </div>
+          <div class="metric-value">🌐</div>
+        </div>
+        <div class="metric">
+          <div>
+            <div class="metric-label">Failed Logins</div>
+            <div>Last 24 hours</div>
+          </div>
+          <div class="metric-value" id="failed-logins">3</div>
+        </div>
+      </div>
 
-        <!-- Request Volume Chart -->
-        <div class="card grid-2">
-            <h3>📈 Request Volume (Last 24 Hours)</h3>
-            <div class="chart-container">
-                <canvas id="requestChart"></canvas>
-            </div>
+      <!-- Request Volume Chart -->
+      <div class="card grid-2">
+        <h3>📈 Request Volume (Last 24 Hours)</h3>
+        <div class="chart-container">
+          <canvas id="requestChart"></canvas>
         </div>
+      </div>
 
-        <!-- Response Time Chart -->
-        <div class="card">
-            <h3>⏱️ Response Times</h3>
-            <div class="chart-container">
-                <canvas id="responseChart"></canvas>
-            </div>
+      <!-- Response Time Chart -->
+      <div class="card">
+        <h3>⏱️ Response Times</h3>
+        <div class="chart-container">
+          <canvas id="responseChart"></canvas>
         </div>
+      </div>
 
-        <!-- Error Rate Chart -->
-        <div class="card">
-            <h3>🚨 Error Rates</h3>
-            <div class="chart-container">
-                <canvas id="errorChart"></canvas>
-            </div>
+      <!-- Error Rate Chart -->
+      <div class="card">
+        <h3>🚨 Error Rates</h3>
+        <div class="chart-container">
+          <canvas id="errorChart"></canvas>
         </div>
+      </div>
 
-        <!-- Activity Log -->
-        <div class="card grid-2">
-            <h3>📋 System Activity Log</h3>
-            <div class="activity-log" id="activity-log">
-                <div class="log-entry">
-                    <span class="log-timestamp">15:45:32</span>
-                    <span class="log-level-info">[INFO]</span>
-                    GraphQL schema compilation completed successfully
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:45:28</span>
-                    <span class="log-level-info">[INFO]</span>
-                    Database migrations applied: 4 successful, 0 failed
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:45:25</span>
-                    <span class="log-level-info">[INFO]</span>
-                    Neo4j connection pool initialized (5 connections)
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:45:22</span>
-                    <span class="log-level-info">[INFO]</span>
-                    PostgreSQL health check passed
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:45:20</span>
-                    <span class="log-level-info">[INFO]</span>
-                    Redis cache connection established
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:45:18</span>
-                    <span class="log-level-info">[INFO]</span>
-                    Production security policies activated
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:45:15</span>
-                    <span class="log-level-info">[INFO]</span>
-                    IntelGraph server started on port 4001
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:44:58</span>
-                    <span class="log-level-info">[INFO]</span>
-                    System validation completed: 36 passed, 6 failed (86% success rate)
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:44:45</span>
-                    <span class="log-level-info">[INFO]</span>
-                    Docker containers health check: All services operational
-                </div>
-                <div class="log-entry">
-                    <span class="log-timestamp">15:44:30</span>
-                    <span class="log-level-info">[INFO]</span>
-                    Production deployment demonstration initiated
-                </div>
-            </div>
+      <!-- Activity Log -->
+      <div class="card grid-2">
+        <h3>📋 System Activity Log</h3>
+        <div class="activity-log" id="activity-log">
+          <div class="log-entry">
+            <span class="log-timestamp">15:45:32</span>
+            <span class="log-level-info">[INFO]</span>
+            GraphQL schema compilation completed successfully
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:45:28</span>
+            <span class="log-level-info">[INFO]</span>
+            Database migrations applied: 4 successful, 0 failed
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:45:25</span>
+            <span class="log-level-info">[INFO]</span>
+            Neo4j connection pool initialized (5 connections)
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:45:22</span>
+            <span class="log-level-info">[INFO]</span>
+            PostgreSQL health check passed
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:45:20</span>
+            <span class="log-level-info">[INFO]</span>
+            Redis cache connection established
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:45:18</span>
+            <span class="log-level-info">[INFO]</span>
+            Production security policies activated
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:45:15</span>
+            <span class="log-level-info">[INFO]</span>
+            IntelGraph server started on port 4001
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:44:58</span>
+            <span class="log-level-info">[INFO]</span>
+            System validation completed: 36 passed, 6 failed (86% success rate)
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:44:45</span>
+            <span class="log-level-info">[INFO]</span>
+            Docker containers health check: All services operational
+          </div>
+          <div class="log-entry">
+            <span class="log-timestamp">15:44:30</span>
+            <span class="log-level-info">[INFO]</span>
+            Production deployment demonstration initiated
+          </div>
         </div>
+      </div>
     </div>
 
     <script>
-        // Initialize Charts
-        const ctx1 = document.getElementById('requestChart').getContext('2d');
-        const ctx2 = document.getElementById('responseChart').getContext('2d');
-        const ctx3 = document.getElementById('errorChart').getContext('2d');
+      // Initialize Charts
+      const ctx1 = document.getElementById('requestChart').getContext('2d');
+      const ctx2 = document.getElementById('responseChart').getContext('2d');
+      const ctx3 = document.getElementById('errorChart').getContext('2d');
 
-        // Request Volume Chart
-        new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
-                datasets: [{
-                    label: 'Requests/Hour',
-                    data: [120, 85, 180, 320, 280, 150],
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
+      // Request Volume Chart
+      new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+          datasets: [
+            {
+              label: 'Requests/Hour',
+              data: [120, 85, 180, 320, 280, 150],
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              fill: true,
+              tension: 0.4,
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
 
-        // Response Time Chart
-        new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: ['<50ms', '50-100ms', '100-200ms', '200ms+'],
-                datasets: [{
-                    label: 'Request Count',
-                    data: [85, 12, 3, 0],
-                    backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
-                }]
+      // Response Time Chart
+      new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: ['<50ms', '50-100ms', '100-200ms', '200ms+'],
+          datasets: [
+            {
+              label: 'Request Count',
+              data: [85, 12, 3, 0],
+              backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#dc3545'],
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+          },
+        },
+      });
 
-        // Error Rate Chart
-        new Chart(ctx3, {
-            type: 'doughnut',
-            data: {
-                labels: ['Successful', '4xx Errors', '5xx Errors'],
-                datasets: [{
-                    data: [97.5, 2.1, 0.4],
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545']
-                }]
+      // Error Rate Chart
+      new Chart(ctx3, {
+        type: 'doughnut',
+        data: {
+          labels: ['Successful', '4xx Errors', '5xx Errors'],
+          datasets: [
+            {
+              data: [97.5, 2.1, 0.4],
+              backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        },
+      });
 
-        // Simulate real-time updates
-        function updateMetrics() {
-            // Update performance metrics with random variations
-            const responseTime = 35 + Math.floor(Math.random() * 20);
-            const qps = 140 + Math.floor(Math.random() * 30);
-            const memory = 480 + Math.floor(Math.random() * 100);
-            const cpu = 15 + Math.floor(Math.random() * 10);
-            
-            document.getElementById('response-time').textContent = responseTime + 'ms';
-            document.getElementById('qps').textContent = qps;
-            document.getElementById('memory').textContent = memory + 'MB';
-            document.getElementById('cpu').textContent = cpu + '%';
-            
-            // Update database stats
-            const entities = 2800 + Math.floor(Math.random() * 100);
-            const relationships = 5900 + Math.floor(Math.random() * 50);
-            
-            document.getElementById('entity-count').textContent = entities.toLocaleString();
-            document.getElementById('relationship-count').textContent = relationships.toLocaleString();
-        }
+      // Simulate real-time updates
+      function updateMetrics() {
+        // Update performance metrics with random variations
+        const responseTime = 35 + Math.floor(Math.random() * 20);
+        const qps = 140 + Math.floor(Math.random() * 30);
+        const memory = 480 + Math.floor(Math.random() * 100);
+        const cpu = 15 + Math.floor(Math.random() * 10);
 
-        function addLogEntry() {
-            const logMessages = [
-                '[INFO] GraphQL query executed successfully',
-                '[INFO] Entity relationship discovered',
-                '[INFO] Investigation created: INV-' + Math.floor(Math.random() * 1000),
-                '[INFO] Copilot analysis completed',
-                '[INFO] Database backup completed',
-                '[INFO] Security scan passed'
-            ];
-            
-            const now = new Date();
-            const timestamp = now.toTimeString().slice(0, 8);
-            const message = logMessages[Math.floor(Math.random() * logMessages.length)];
-            
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            logEntry.innerHTML = `
+        document.getElementById('response-time').textContent =
+          responseTime + 'ms';
+        document.getElementById('qps').textContent = qps;
+        document.getElementById('memory').textContent = memory + 'MB';
+        document.getElementById('cpu').textContent = cpu + '%';
+
+        // Update database stats
+        const entities = 2800 + Math.floor(Math.random() * 100);
+        const relationships = 5900 + Math.floor(Math.random() * 50);
+
+        document.getElementById('entity-count').textContent =
+          entities.toLocaleString();
+        document.getElementById('relationship-count').textContent =
+          relationships.toLocaleString();
+      }
+
+      function addLogEntry() {
+        const logMessages = [
+          '[INFO] GraphQL query executed successfully',
+          '[INFO] Entity relationship discovered',
+          '[INFO] Investigation created: INV-' +
+            Math.floor(Math.random() * 1000),
+          '[INFO] Copilot analysis completed',
+          '[INFO] Database backup completed',
+          '[INFO] Security scan passed',
+        ];
+
+        const now = new Date();
+        const timestamp = now.toTimeString().slice(0, 8);
+        const message =
+          logMessages[Math.floor(Math.random() * logMessages.length)];
+
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = `
                 <span class="log-timestamp">${timestamp}</span>
                 <span class="log-level-info">[INFO]</span>
                 ${message}
             `;
-            
-            const logContainer = document.getElementById('activity-log');
-            logContainer.insertBefore(logEntry, logContainer.firstChild);
-            
-            // Keep only last 20 entries
-            while (logContainer.children.length > 20) {
-                logContainer.removeChild(logContainer.lastChild);
-            }
-        }
 
-        // Update metrics every 3 seconds
-        setInterval(updateMetrics, 3000);
-        
-        // Add log entries every 5 seconds
-        setInterval(addLogEntry, 5000);
-        
-        // Initial updates
-        updateMetrics();
-        
-        console.log(`
+        const logContainer = document.getElementById('activity-log');
+        logContainer.insertBefore(logEntry, logContainer.firstChild);
+
+        // Keep only last 20 entries
+        while (logContainer.children.length > 20) {
+          logContainer.removeChild(logContainer.lastChild);
+        }
+      }
+
+      // Update metrics every 3 seconds
+      setInterval(updateMetrics, 3000);
+
+      // Add log entries every 5 seconds
+      setInterval(addLogEntry, 5000);
+
+      // Initial updates
+      updateMetrics();
+
+      console.log(`
 📊 IntelGraph Monitoring Dashboard Active
 
 Real-time monitoring includes:
@@ -395,5 +509,5 @@ Real-time monitoring includes:
 All systems operational! 🚀
         `);
     </script>
-</body>
+  </body>
 </html>

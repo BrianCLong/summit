@@ -10,8 +10,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High GraphQL latency (p95 > 500ms)"
-          description: "p95 latency exceeded 500ms for 10m. Investigate query cost and depth."
+          summary: 'High GraphQL latency (p95 > 500ms)'
+          description: 'p95 latency exceeded 500ms for 10m. Investigate query cost and depth.'
 
       - alert: QueryCostGuardBudgetExceeded
         expr: increase(policy_evaluation_error_total[15m]) > 0 or increase(prov_ledger_bundle_verify_fail_total[15m]) > 0
@@ -19,6 +19,5 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Budget exceeded (policy or provenance failures)"
-          description: "Policy evaluation errors or provenance verify failures exceeded thresholds."
-
+          summary: 'Budget exceeded (policy or provenance failures)'
+          description: 'Policy evaluation errors or provenance verify failures exceeded thresholds.'

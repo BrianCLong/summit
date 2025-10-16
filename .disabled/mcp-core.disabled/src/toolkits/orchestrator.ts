@@ -6,11 +6,17 @@ const operatorOnly = (tenant: TenantContext): boolean =>
   tenant.roles.includes('operator') || tenant.roles.includes('admin');
 
 type OrchestratorDeps = {
-  runJob: (tenantId: string, jobId: string, params?: unknown) => Promise<{ runId: string }>;
+  runJob: (
+    tenantId: string,
+    jobId: string,
+    params?: unknown,
+  ) => Promise<{ runId: string }>;
   jobStatus: (tenantId: string, runId: string) => Promise<{ status: string }>;
 };
 
-export function orchestratorToolkit(deps: OrchestratorDeps): { tools: ToolDefinition[] } {
+export function orchestratorToolkit(deps: OrchestratorDeps): {
+  tools: ToolDefinition[];
+} {
   const runTool: ToolDefinition = {
     name: 'orchestrator.run',
     config: {
@@ -18,8 +24,8 @@ export function orchestratorToolkit(deps: OrchestratorDeps): { tools: ToolDefini
       description: 'Trigger an orchestration job for the current tenant.',
       inputSchema: {
         jobId: z.string(),
-        params: z.record(z.any()).optional()
-      }
+        params: z.record(z.any()).optional(),
+      },
     },
     handler: async (rawArgs, context) => {
       const args = (rawArgs ?? {}) as { jobId: string; params?: unknown };
@@ -29,12 +35,12 @@ export function orchestratorToolkit(deps: OrchestratorDeps): { tools: ToolDefini
         content: [
           {
             type: 'text',
-            text: JSON.stringify(result)
-          }
-        ]
+            text: JSON.stringify(result),
+          },
+        ],
       };
     },
-    policy: operatorOnly
+    policy: operatorOnly,
   };
 
   const statusTool: ToolDefinition = {
@@ -43,8 +49,8 @@ export function orchestratorToolkit(deps: OrchestratorDeps): { tools: ToolDefini
       title: 'Check Maestro job status',
       description: 'Fetch the current status of a Maestro job run.',
       inputSchema: {
-        runId: z.string()
-      }
+        runId: z.string(),
+      },
     },
     handler: async (rawArgs, context) => {
       const args = (rawArgs ?? {}) as { runId: string };
@@ -54,12 +60,12 @@ export function orchestratorToolkit(deps: OrchestratorDeps): { tools: ToolDefini
         content: [
           {
             type: 'text',
-            text: JSON.stringify(status)
-          }
-        ]
+            text: JSON.stringify(status),
+          },
+        ],
       };
     },
-    policy: operatorOnly
+    policy: operatorOnly,
   };
 
   return { tools: [runTool, statusTool] };

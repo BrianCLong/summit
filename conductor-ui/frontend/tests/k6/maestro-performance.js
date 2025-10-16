@@ -55,7 +55,8 @@ export default function () {
         check(response, {
           'runs API status 200': (r) => r.status === 200,
           'runs API responds within 800ms': (r) => responseTime < 800,
-          'runs API returns JSON': (r) => r.headers['Content-Type']?.includes('application/json'),
+          'runs API returns JSON': (r) =>
+            r.headers['Content-Type']?.includes('application/json'),
         });
 
         apiResponseTime.add(responseTime);
@@ -144,7 +145,8 @@ export default function () {
 
       check(cssResponse, {
         'CSS loads successfully': (r) => r.status === 200,
-        'CSS has caching headers': (r) => r.headers['Cache-Control'] !== undefined,
+        'CSS has caching headers': (r) =>
+          r.headers['Cache-Control'] !== undefined,
       });
 
       // Test JS bundle loading
@@ -154,7 +156,8 @@ export default function () {
 
       check(jsResponse, {
         'JS loads successfully': (r) => r.status === 200,
-        'JS has caching headers': (r) => r.headers['Cache-Control'] !== undefined,
+        'JS has caching headers': (r) =>
+          r.headers['Cache-Control'] !== undefined,
         'JS bundle size reasonable': (r) => r.body.length < 500000, // 500KB limit
       });
     });
@@ -167,12 +170,15 @@ export default function () {
         ['GET', `${BASE_URL}${API_BASE}/providers`],
       ];
 
-      const responses = http.batch(requests.map(([method, url]) => [method, url]));
+      const responses = http.batch(
+        requests.map(([method, url]) => [method, url]),
+      );
 
       responses.forEach((response, index) => {
         const endpoint = requests[index][1];
         check(response, {
-          [`${endpoint} responds successfully`]: (r) => r.status >= 200 && r.status < 400,
+          [`${endpoint} responds successfully`]: (r) =>
+            r.status >= 200 && r.status < 400,
           [`${endpoint} responds quickly`]: (r) => r.timings.duration < 1000,
         });
 
@@ -215,14 +221,16 @@ function textSummary(data, options = {}) {
   }
 
   // Add custom metrics
-  ['api_response_time', 'page_load_time', 'route_change_time'].forEach((metric) => {
-    const metricData = data.metrics[metric];
-    if (metricData) {
-      summary += `${indent}${metric}:\n`;
-      summary += `${indent}  Average: ${metricData.values.avg.toFixed(2)}ms\n`;
-      summary += `${indent}  P95: ${metricData.values['p(95)'].toFixed(2)}ms\n\n`;
-    }
-  });
+  ['api_response_time', 'page_load_time', 'route_change_time'].forEach(
+    (metric) => {
+      const metricData = data.metrics[metric];
+      if (metricData) {
+        summary += `${indent}${metric}:\n`;
+        summary += `${indent}  Average: ${metricData.values.avg.toFixed(2)}ms\n`;
+        summary += `${indent}  P95: ${metricData.values['p(95)'].toFixed(2)}ms\n\n`;
+      }
+    },
+  );
 
   return summary;
 }

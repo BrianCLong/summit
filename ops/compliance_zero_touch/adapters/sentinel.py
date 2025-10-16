@@ -41,7 +41,9 @@ class SentinelAdapter(PolicyAdapter):
             )
 
         coverage = 0.9
-        return PolicyEvaluationResult(adapter=self.name, findings=findings, metrics=metrics, coverage=coverage)
+        return PolicyEvaluationResult(
+            adapter=self.name, findings=findings, metrics=metrics, coverage=coverage
+        )
 
     def regulatory_alignment(self) -> dict[str, list[RegulatoryRequirement]]:
         return {

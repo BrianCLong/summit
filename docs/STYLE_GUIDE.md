@@ -1,4 +1,5 @@
 # Documentation Style Guide
+
 - Voice: clear, concise, friendly; avoid jargon or define it.
 - Structure: Diátaxis (Tutorials / How-tos / Reference / Concepts).
 - Formatting: short paragraphs; code fences runnable; callouts for warnings.

@@ -27,8 +27,16 @@ from analytics_layer import (
 def sample_data():
     base_time = datetime(2024, 1, 1, 12, 0, 0)
     external = [
-        ExternalMeasurement(domain="example.com", timestamp=base_time, reach=0.8, amplification=0.7, sentiment=0.1),
-        ExternalMeasurement(domain="example.com", timestamp=base_time + timedelta(minutes=5), reach=0.9, amplification=0.6, sentiment=0.05),
+        ExternalMeasurement(
+            domain="example.com", timestamp=base_time, reach=0.8, amplification=0.7, sentiment=0.1
+        ),
+        ExternalMeasurement(
+            domain="example.com",
+            timestamp=base_time + timedelta(minutes=5),
+            reach=0.9,
+            amplification=0.6,
+            sentiment=0.05,
+        ),
     ]
     internal = [
         InternalSignal(
@@ -40,7 +48,12 @@ def sample_data():
         ),
     ]
     events = [
-        WorldEventTrigger(domain="example.com", timestamp=base_time + timedelta(minutes=3), severity=0.9, relevance=0.8)
+        WorldEventTrigger(
+            domain="example.com",
+            timestamp=base_time + timedelta(minutes=3),
+            severity=0.9,
+            relevance=0.8,
+        )
     ]
     return external, internal, events
 
@@ -66,7 +79,15 @@ def test_metrics_engine_tracks_history(sample_data):
     metrics_first = engine.compute(first_snapshot)
 
     follow_up = pipeline.fuse(
-        [ExternalMeasurement(domain="example.com", timestamp=external[-1].timestamp + timedelta(minutes=10), reach=0.95, amplification=0.75, sentiment=0.0)],
+        [
+            ExternalMeasurement(
+                domain="example.com",
+                timestamp=external[-1].timestamp + timedelta(minutes=10),
+                reach=0.95,
+                amplification=0.75,
+                sentiment=0.0,
+            )
+        ],
         internal,
         events,
     )
@@ -91,7 +112,15 @@ def test_threat_index_updates(sample_data):
     assert 0 <= state.confidence <= 1
 
     snapshot2 = pipeline.fuse(
-        [ExternalMeasurement(domain="example.com", timestamp=snapshot.timestamp + timedelta(minutes=10), reach=0.6, amplification=0.5, sentiment=-0.1)],
+        [
+            ExternalMeasurement(
+                domain="example.com",
+                timestamp=snapshot.timestamp + timedelta(minutes=10),
+                reach=0.6,
+                amplification=0.5,
+                sentiment=-0.1,
+            )
+        ],
         internal,
         events,
     )
@@ -141,7 +170,12 @@ def test_service_returns_serializable_payload(sample_data):
     response = service.compute_from_payload(payload)
 
     assert 0 <= response.threat_index <= 100
-    assert set(response.metrics.keys()) == {"influence_velocity", "anomaly_clustering", "behavioral_drift", "event_pressure"}
+    assert set(response.metrics.keys()) == {
+        "influence_velocity",
+        "anomaly_clustering",
+        "behavioral_drift",
+        "event_pressure",
+    }
 
 
 def test_http_api_round_trip(sample_data):
@@ -187,7 +221,12 @@ def test_http_api_round_trip(sample_data):
 
     try:
         connection = HTTPConnection(host, port, timeout=5)
-        connection.request("POST", "/threat-index", body=json.dumps(payload), headers={"Content-Type": "application/json"})
+        connection.request(
+            "POST",
+            "/threat-index",
+            body=json.dumps(payload),
+            headers={"Content-Type": "application/json"},
+        )
         response = connection.getresponse()
         body = response.read().decode("utf-8")
         assert response.status == 200

@@ -32,7 +32,7 @@ export class DiscussionForumService {
     private readonly activity: ActivityFeedService,
     private readonly contributions: ContributionTracker,
     private readonly gamification: GamificationService,
-    private readonly notifications: NotificationService
+    private readonly notifications: NotificationService,
   ) {}
 
   public createCategory(input: CreateCategoryInput): ForumCategory {
@@ -40,7 +40,7 @@ export class DiscussionForumService {
       id: createId('cat'),
       name: input.name.trim(),
       description: input.description.trim(),
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     this.store.upsertCategory(category);
     return category;
@@ -63,14 +63,14 @@ export class DiscussionForumService {
       createdAt: now,
       updatedAt: now,
       lastActivityAt: now,
-      viewCount: 0
+      viewCount: 0,
     };
     this.store.upsertThread(thread);
     this.activity.record({
       userId: input.authorId,
       type: 'thread_created',
       summary: `Thread created: ${thread.title}`,
-      metadata: { threadId: thread.id, categoryId: thread.categoryId }
+      metadata: { threadId: thread.id, categoryId: thread.categoryId },
     });
     this.contributions.incrementThreads(input.authorId);
     this.gamification.awardPoints(input.authorId, 10);
@@ -78,7 +78,7 @@ export class DiscussionForumService {
     this.createPost({
       threadId: thread.id,
       authorId: input.authorId,
-      content: input.body
+      content: input.body,
     });
 
     return this.store.getThread(thread.id)!;
@@ -92,7 +92,7 @@ export class DiscussionForumService {
     const updated: DiscussionThread = {
       ...thread,
       viewCount: thread.viewCount + 1,
-      lastActivityAt: new Date()
+      lastActivityAt: new Date(),
     };
     this.store.upsertThread(updated);
     return updated;
@@ -119,7 +119,7 @@ export class DiscussionForumService {
       reactionCount: 0,
       flaggedBy: [],
       isRemoved: false,
-      moderationNotes: []
+      moderationNotes: [],
     };
 
     this.store.upsertPost(post);
@@ -127,16 +127,19 @@ export class DiscussionForumService {
       ...thread,
       postIds: [...thread.postIds, post.id],
       updatedAt: now,
-      lastActivityAt: now
+      lastActivityAt: now,
     });
 
     this.activity.record({
       userId: input.authorId,
       type: post.parentPostId ? 'post_replied' : 'post_created',
       summary: `Post added to ${thread.title}`,
-      metadata: { threadId: thread.id, postId: post.id }
+      metadata: { threadId: thread.id, postId: post.id },
     });
-    this.contributions.incrementPosts(input.authorId, Boolean(post.parentPostId));
+    this.contributions.incrementPosts(
+      input.authorId,
+      Boolean(post.parentPostId),
+    );
     this.gamification.awardPoints(input.authorId, 5);
 
     if (post.parentPostId) {
@@ -146,7 +149,7 @@ export class DiscussionForumService {
           userId: parent.authorId,
           message: 'Someone replied to your post',
           link: `/threads/${thread.id}#${post.id}`,
-          metadata: { threadId: thread.id, postId: post.id }
+          metadata: { threadId: thread.id, postId: post.id },
         });
       }
     }
@@ -156,7 +159,7 @@ export class DiscussionForumService {
         userId: thread.authorId,
         message: 'Your thread received a new post',
         link: `/threads/${thread.id}#${post.id}`,
-        metadata: { threadId: thread.id, postId: post.id }
+        metadata: { threadId: thread.id, postId: post.id },
       });
     }
 
@@ -178,7 +181,7 @@ export class DiscussionForumService {
       this.notifications.notify({
         userId: post.authorId,
         message: 'Your contribution received appreciation',
-        metadata: { postId: post.id }
+        metadata: { postId: post.id },
       });
     }
     return updated;
@@ -189,13 +192,17 @@ export class DiscussionForumService {
     if (!thread) {
       throw new Error(`Unknown thread ${threadId}`);
     }
-    const updated: DiscussionThread = { ...thread, isLocked: true, updatedAt: new Date() };
+    const updated: DiscussionThread = {
+      ...thread,
+      isLocked: true,
+      updatedAt: new Date(),
+    };
     this.store.upsertThread(updated);
     this.activity.record({
       userId: moderatorId,
       type: 'thread_locked',
       summary: `Thread locked: ${thread.title}`,
-      metadata: { threadId: thread.id }
+      metadata: { threadId: thread.id },
     });
     return updated;
   }
@@ -205,13 +212,17 @@ export class DiscussionForumService {
     if (!thread) {
       throw new Error(`Unknown thread ${threadId}`);
     }
-    const updated: DiscussionThread = { ...thread, isLocked: false, updatedAt: new Date() };
+    const updated: DiscussionThread = {
+      ...thread,
+      isLocked: false,
+      updatedAt: new Date(),
+    };
     this.store.upsertThread(updated);
     this.activity.record({
       userId: moderatorId,
       type: 'thread_unlocked',
       summary: `Thread unlocked: ${thread.title}`,
-      metadata: { threadId: thread.id }
+      metadata: { threadId: thread.id },
     });
     return updated;
   }

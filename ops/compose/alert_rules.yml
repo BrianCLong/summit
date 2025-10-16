@@ -7,8 +7,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Neo4j HTTP is down"
-          description: "Blackbox probe failed for Neo4j at {{ $labels.instance }}"
+          summary: 'Neo4j HTTP is down'
+          description: 'Blackbox probe failed for Neo4j at {{ $labels.instance }}'
 
       - alert: APIHealthFailing
         expr: probe_success{instance="http://api:18080/health"} == 0
@@ -16,5 +16,5 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "API health failing"
-          description: "API health endpoint failing at {{ $labels.instance }}"
+          summary: 'API health failing'
+          description: 'API health endpoint failing at {{ $labels.instance }}'

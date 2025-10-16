@@ -1,4 +1,8 @@
-import { BaseConnector, createEmitter, ConnectorContext } from '@intelgraph/connector-js';
+import {
+  BaseConnector,
+  createEmitter,
+  ConnectorContext,
+} from '@intelgraph/connector-js';
 
 // Placeholder connector illustrating how an S3 source could be implemented.
 class S3Connector extends BaseConnector {

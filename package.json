@@ -10,6 +10,7 @@
     "apps/*",
     "packages/*",
     "services/*",
+    "contracts/*",
     "packages/prov-ledger",
     "packages/lac",
     "packages/prov-ledger-client",
@@ -17,8 +18,8 @@
     "packages/hit-protocol",
     "packages/canary-lattice",
     "packages/mcp-core",
-    "apps/server",
-    "packages/afl-store"
+    "packages/afl-store",
+    "apps/server"
   ],
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
@@ -90,7 +91,10 @@
     "prov:dev": "ts-node packages/prov-ledger/src/server.ts",
     "lac:compile": "ts-node packages/lac/src/compiler.ts",
     "kpw:dev": "node packages/kpw-media/dist/server.js",
-    "extract": "npm run --workspace=packages/influence-mining extract --"
+    "extract": "npm run --workspace=packages/influence-mining extract --",
+    "preinstall": "corepack enable || true",
+    "build:all": "pnpm -w -r run build",
+    "ci": "pnpm run lint && pnpm run typecheck && pnpm run test"
   },
   "keywords": [
     "intelligence-analysis",
@@ -108,10 +112,29 @@
     "node": ">=18.18",
     "npm": ">=8.0.0"
   },
+  "pnpm": {
+    "overrides": {
+      "typescript": "^5.3.3",
+      "@opentelemetry/api": "1.7.0",
+      "@opentelemetry/sdk-node": "0.48.0",
+      "@opentelemetry/sdk-trace-base": "1.19.0",
+      "@opentelemetry/sdk-metrics": "1.19.0",
+      "@opentelemetry/resources": "1.19.0",
+      "@opentelemetry/propagator-b3": "1.19.0",
+      "@opentelemetry/propagator-jaeger": "1.19.0",
+      "@opentelemetry/exporter-trace-otlp-http": "0.48.0",
+      "@opentelemetry/exporter-metrics-otlp-http": "0.48.0",
+      "@opentelemetry/auto-instrumentations-node": "0.48.0",
+      "graphql-redis-subscriptions": "^3.6.0"
+    }
+  },
   "devDependencies": {
+    "@apollo/client": "^4.0.7",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.33.0",
+    "@mui/icons-material": "^7.3.4",
+    "@mui/material": "^7.3.4",
     "@playwright/test": "^1.54.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "10.0.1",
@@ -135,7 +158,11 @@
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.46.1"
+    "typescript-eslint": "^8.46.1",
+    "ts-node": "^10.9.2",
+    "rimraf": "^5.0.7",
+    "eslint": "^9.12.0",
+    "@types/node": "^20.11.30"
   },
   "husky": {
     "hooks": {
@@ -198,5 +225,7 @@
     "redis": "^5.8.1",
     "ws": "^8.18.3"
   },
-  "private": true
+  "private": true,
+  "packageManager": "pnpm@9.12.3",
+  "type": "module"
 }

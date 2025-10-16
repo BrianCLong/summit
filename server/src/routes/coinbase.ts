@@ -13,7 +13,10 @@ router.post(
   async (req: any, res) => {
     const secret = process.env.COINBASE_WEBHOOK_SECRET;
     if (!secret) return res.status(503).send('webhook disabled');
-    const h = crypto.createHmac('sha256', secret).update(req.body as Buffer).digest('hex');
+    const h = crypto
+      .createHmac('sha256', secret)
+      .update(req.body as Buffer)
+      .digest('hex');
     const sig = (req.header('X-CC-Webhook-Signature') || '').toLowerCase();
     if (h !== sig) return res.status(401).send('bad signature');
     return res.sendStatus(200);
@@ -21,4 +24,3 @@ router.post(
 );
 
 export default router;
-

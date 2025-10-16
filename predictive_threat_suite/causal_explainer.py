@@ -1,9 +1,9 @@
-
 # predictive_threat_suite/causal_explainer.py
 
-from typing import Dict, Any, List
+from typing import Any
 
-def get_causal_explanation(event: Dict[str, Any], context: Dict[str, Any]) -> List[Dict[str, Any]]:
+
+def get_causal_explanation(event: dict[str, Any], context: dict[str, Any]) -> list[dict[str, Any]]:
     """
     Stub for providing causal explanations for events.
     """
@@ -11,5 +11,5 @@ def get_causal_explanation(event: Dict[str, Any], context: Dict[str, Any]) -> Li
     # Simulate causal factors
     return [
         {"factor": "previous_action", "impact": "high"},
-        {"factor": "environmental_condition", "impact": "medium"}
+        {"factor": "environmental_condition", "impact": "medium"},
     ]

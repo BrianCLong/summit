@@ -68,7 +68,8 @@ model_list:
     litellm_params: { model: vllm/Meta-Llama-3.1-70B-Instruct }
 router:
   strategy: multi_objective
-  objectives: [quality, p95_latency_ms, cost_per_1k_tokens, reliability, sovereignty]
+  objectives:
+    [quality, p95_latency_ms, cost_per_1k_tokens, reliability, sovereignty]
   fallbacks:
     - primary: gpt-4o
       on_error: [sonnet-3.7, ig-local-70b]
@@ -199,7 +200,11 @@ spec:
           - name: vllm_gateway
             rayActorOptions: { num_gpus: 1, num_cpus: 4 }
             autoscalingConfig:
-              { minReplicas: 1, maxReplicas: 8, targetNumOngoingRequestsPerReplica: 8 }
+              {
+                minReplicas: 1,
+                maxReplicas: 8,
+                targetNumOngoingRequestsPerReplica: 8,
+              }
 ```
 
 **Stories**
@@ -477,7 +482,8 @@ exporters:
   otlphttp/grafana: { endpoint: http://grafana-agent:4318 }
 service:
   pipelines:
-    traces: { receivers: [otlp], processors: [batch], exporters: [otlphttp/grafana] }
+    traces:
+      { receivers: [otlp], processors: [batch], exporters: [otlphttp/grafana] }
     metrics: { receivers: [otlp], processors: [batch], exporters: [prometheus] }
     logs: { receivers: [otlp], processors: [batch], exporters: [loki] }
 ```

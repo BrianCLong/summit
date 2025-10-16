@@ -32,7 +32,11 @@ interface RouterDecisionPanelProps {
   className?: string
 }
 
-export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDecisionPanelProps) {
+export function RouterDecisionPanel({
+  runId,
+  nodeId,
+  className = '',
+}: RouterDecisionPanelProps) {
   const [decision, setDecision] = useState<RouterDecision | null>(null)
   const [loading, setLoading] = useState(true)
   const [showOverrideDialog, setShowOverrideDialog] = useState(false)
@@ -46,7 +50,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
   const fetchRouterDecision = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/maestro/v1/runs/${runId}/nodes/${nodeId}/routing`)
+      const response = await fetch(
+        `/api/maestro/v1/runs/${runId}/nodes/${nodeId}/routing`
+      )
       const data = await response.json()
       setDecision(data)
     } catch (error) {
@@ -60,14 +66,17 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
     if (!selectedOverrideModel || !overrideReason.trim()) return
 
     try {
-      const response = await fetch(`/api/maestro/v1/runs/${runId}/nodes/${nodeId}/override-routing`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: selectedOverrideModel,
-          reason: overrideReason,
-        }),
-      })
+      const response = await fetch(
+        `/api/maestro/v1/runs/${runId}/nodes/${nodeId}/override-routing`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: selectedOverrideModel,
+            reason: overrideReason,
+          }),
+        }
+      )
 
       if (response.ok) {
         await fetchRouterDecision() // Refresh data
@@ -82,7 +91,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
 
   const exportToAudit = async () => {
     try {
-      const response = await fetch(`/api/maestro/v1/audit/router-decisions/${decision?.id}/export`)
+      const response = await fetch(
+        `/api/maestro/v1/audit/router-decisions/${decision?.id}/export`
+      )
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -99,7 +110,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-lg border border-gray-200 p-4 ${className}`}>
+      <div
+        className={`bg-white rounded-lg border border-gray-200 p-4 ${className}`}
+      >
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="space-y-3">
@@ -114,7 +127,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
 
   if (!decision) {
     return (
-      <div className={`bg-white rounded-lg border border-gray-200 p-4 ${className}`}>
+      <div
+        className={`bg-white rounded-lg border border-gray-200 p-4 ${className}`}
+      >
         <div className="text-center text-gray-500">
           <ExclamationTriangleIcon className="h-8 w-8 mx-auto mb-2" />
           No router decision available
@@ -124,12 +139,16 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
   }
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 p-6 ${className}`}>
+    <div
+      className={`bg-white rounded-lg border border-gray-200 p-6 ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <ChartBarIcon className="h-6 w-6 text-blue-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Router Decision</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Router Decision
+          </h3>
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -155,7 +174,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
           <CheckCircleIcon className="h-5 w-5 text-green-600" />
           <span className="font-medium text-green-800">Selected Model</span>
         </div>
-        <div className="text-lg font-semibold text-green-900">{decision.selectedModel}</div>
+        <div className="text-lg font-semibold text-green-900">
+          {decision.selectedModel}
+        </div>
         {decision.overrideReason && (
           <div className="mt-2 text-sm text-orange-700 bg-orange-100 p-2 rounded">
             <strong>Override:</strong> {decision.overrideReason}
@@ -174,7 +195,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
 
       {/* Candidates */}
       <div className="mb-4">
-        <h4 className="font-medium text-gray-900 mb-3">Model Candidates & Scores</h4>
+        <h4 className="font-medium text-gray-900 mb-3">
+          Model Candidates & Scores
+        </h4>
         <div className="space-y-3">
           {decision.candidates.map((candidate, index) => (
             <div
@@ -186,7 +209,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="font-medium text-gray-900">{candidate.model}</div>
+                <div className="font-medium text-gray-900">
+                  {candidate.model}
+                </div>
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
                     <div className="text-lg font-semibold text-gray-900">
@@ -200,18 +225,22 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
                 </div>
               </div>
 
-              <div className="text-sm text-gray-600 mb-2">{candidate.reason}</div>
+              <div className="text-sm text-gray-600 mb-2">
+                {candidate.reason}
+              </div>
 
               {/* Additional metrics */}
               <div className="flex space-x-4 text-xs text-gray-500">
                 {candidate.cost_estimate !== undefined && (
                   <div>
-                    <span className="font-medium">Cost:</span> ${candidate.cost_estimate.toFixed(4)}
+                    <span className="font-medium">Cost:</span> $
+                    {candidate.cost_estimate.toFixed(4)}
                   </div>
                 )}
                 {candidate.latency_p95 !== undefined && (
                   <div>
-                    <span className="font-medium">P95:</span> {candidate.latency_p95}ms
+                    <span className="font-medium">P95:</span>{' '}
+                    {candidate.latency_p95}ms
                   </div>
                 )}
               </div>
@@ -220,7 +249,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
               <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full ${
-                    candidate.model === decision.selectedModel ? 'bg-green-600' : 'bg-blue-500'
+                    candidate.model === decision.selectedModel
+                      ? 'bg-green-600'
+                      : 'bg-blue-500'
                   }`}
                   style={{ width: `${Math.min(candidate.score * 100, 100)}%` }}
                 ></div>
@@ -239,7 +270,9 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
       {showOverrideDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Override Router Decision</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Override Router Decision
+            </h3>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -247,11 +280,11 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
               </label>
               <select
                 value={selectedOverrideModel}
-                onChange={(e) => setSelectedOverrideModel(e.target.value)}
+                onChange={e => setSelectedOverrideModel(e.target.value)}
                 className="w-full border border-gray-300 rounded px-3 py-2"
               >
                 <option value="">Choose a model...</option>
-                {decision.candidates.map((candidate) => (
+                {decision.candidates.map(candidate => (
                   <option key={candidate.model} value={candidate.model}>
                     {candidate.model}
                   </option>
@@ -265,7 +298,7 @@ export function RouterDecisionPanel({ runId, nodeId, className = '' }: RouterDec
               </label>
               <textarea
                 value={overrideReason}
-                onChange={(e) => setOverrideReason(e.target.value)}
+                onChange={e => setOverrideReason(e.target.value)}
                 placeholder="Explain why you're overriding the router decision..."
                 className="w-full border border-gray-300 rounded px-3 py-2 h-20"
               />

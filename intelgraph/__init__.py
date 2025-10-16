@@ -1,4 +1,3 @@
-
 """IntelGraph Python utilities exposed for external use."""
 
 from .graph_analytics.core_analytics import (

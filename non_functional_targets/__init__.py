@@ -1,9 +1,9 @@
 """Utility modules for non-functional testing targets."""
 
 from .chaos_runner import (
-    ChaosRunner,
     ChaosExperimentResult,
     ChaosExperimentSpec,
+    ChaosRunner,
     ChaosSuite,
     run_broker_kill_chaos_test,
     run_pod_kill_chaos_test,

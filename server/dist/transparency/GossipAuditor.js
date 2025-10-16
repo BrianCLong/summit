@@ -1,4 +1,6 @@
 export class GossipAuditor {
+    fetcher;
+    log;
     constructor(fetcher, log) {
         this.fetcher = fetcher;
         this.log = log;

@@ -119,9 +119,14 @@ export function NeighborhoodStreaming({
 
       {isStreaming && progress && (
         <Box sx={{ mb: 2 }}>
-          <LinearProgress variant="determinate" value={progress.percentage} sx={{ mb: 1 }} />
+          <LinearProgress
+            variant="determinate"
+            value={progress.percentage}
+            sx={{ mb: 1 }}
+          />
           <Typography variant="caption" color="text.secondary">
-            {progress.processed} / {progress.total} processed ({progress.percentage.toFixed(1)}%)
+            {progress.processed} / {progress.total} processed (
+            {progress.percentage.toFixed(1)}%)
             {progress.eta && ` • ETA: ${Math.ceil(progress.eta / 1000)}s`}
           </Typography>
         </Box>
@@ -136,8 +141,16 @@ export function NeighborhoodStreaming({
           )}
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Chip size="small" label={`${streamStats.nodesReceived} nodes`} color="primary" />
-            <Chip size="small" label={`${streamStats.edgesReceived} edges`} color="secondary" />
+            <Chip
+              size="small"
+              label={`${streamStats.nodesReceived} nodes`}
+              color="primary"
+            />
+            <Chip
+              size="small"
+              label={`${streamStats.edgesReceived} edges`}
+              color="secondary"
+            />
             <Chip
               size="small"
               label={`${streamStats.batchesProcessed} batches`}
@@ -145,8 +158,13 @@ export function NeighborhoodStreaming({
             />
           </Box>
 
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            Streaming neighbors in batches of {batchLimit} to maintain UI responsiveness
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 1, display: 'block' }}
+          >
+            Streaming neighbors in batches of {batchLimit} to maintain UI
+            responsiveness
           </Typography>
         </Box>
       </Collapse>

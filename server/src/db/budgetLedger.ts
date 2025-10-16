@@ -98,13 +98,13 @@ export class BudgetLedgerManager {
    * Check if tenant can afford an operation
    */
   async checkTenantBudget(
-    tenantId: string, 
-    estimatedUsd: number
+    tenantId: string,
+    estimatedUsd: number,
   ): Promise<BudgetCheckResult> {
     try {
       const result = await this.pool.query(
         'SELECT * FROM check_tenant_budget($1, $2)',
-        [tenantId, estimatedUsd]
+        [tenantId, estimatedUsd],
       );
 
       if (result.rows.length === 0) {
@@ -113,7 +113,7 @@ export class BudgetLedgerManager {
           currentSpend: 0,
           budgetLimit: 0,
           utilizationPct: 0,
-          reason: 'Tenant not found'
+          reason: 'Tenant not found',
         };
       }
 
@@ -122,16 +122,20 @@ export class BudgetLedgerManager {
         currentSpend: parseFloat(result.rows[0].current_spend),
         budgetLimit: parseFloat(result.rows[0].budget_limit),
         utilizationPct: parseFloat(result.rows[0].utilization_pct),
-        reason: result.rows[0].reason
+        reason: result.rows[0].reason,
       };
     } catch (error) {
-      logger.error('Failed to check tenant budget', { error, tenantId, estimatedUsd });
+      logger.error('Failed to check tenant budget', {
+        error,
+        tenantId,
+        estimatedUsd,
+      });
       return {
         canAfford: false,
         currentSpend: 0,
         budgetLimit: 0,
         utilizationPct: 0,
-        reason: 'Database error'
+        reason: 'Database error',
       };
     }
   }
@@ -167,17 +171,17 @@ export class BudgetLedgerManager {
           entry.estPromptTokens,
           entry.estCompletionTokens,
           entry.estTotalUsd,
-          entry.estimationMethod || 'heuristic'
-        ]
+          entry.estimationMethod || 'heuristic',
+        ],
       );
 
       const ledgerId = result.rows[0].record_spending;
-      
+
       logger.debug('Spending recorded in budget ledger', {
         ledgerId,
         tenantId: entry.tenantId,
         correlationId: entry.correlationId,
-        estimatedUsd: entry.estTotalUsd
+        estimatedUsd: entry.estTotalUsd,
       });
 
       return ledgerId;
@@ -196,7 +200,7 @@ export class BudgetLedgerManager {
       promptTokens: number;
       completionTokens: number;
       totalUsd: number;
-    }
+    },
   ): Promise<boolean> {
     try {
       const result = await this.pool.query(
@@ -205,26 +209,33 @@ export class BudgetLedgerManager {
           ledgerId,
           actualTokens.promptTokens,
           actualTokens.completionTokens,
-          actualTokens.totalUsd
-        ]
+          actualTokens.totalUsd,
+        ],
       );
 
       const success = result.rows[0].reconcile_spending;
-      
+
       if (success) {
         logger.debug('Spending reconciled in budget ledger', {
           ledgerId,
-          actualUsd: actualTokens.totalUsd
+          actualUsd: actualTokens.totalUsd,
         });
       } else {
-        logger.warn('Failed to reconcile spending - entry not found or already reconciled', {
-          ledgerId
-        });
+        logger.warn(
+          'Failed to reconcile spending - entry not found or already reconciled',
+          {
+            ledgerId,
+          },
+        );
       }
 
       return success;
     } catch (error) {
-      logger.error('Failed to reconcile spending', { error, ledgerId, actualTokens });
+      logger.error('Failed to reconcile spending', {
+        error,
+        ledgerId,
+        actualTokens,
+      });
       return false;
     }
   }
@@ -233,21 +244,25 @@ export class BudgetLedgerManager {
    * Mark spending as failed/rolled back
    */
   async markSpendingFailed(
-    ledgerId: string, 
+    ledgerId: string,
     reason: string,
-    status: 'failed' | 'rolled_back' = 'failed'
+    status: 'failed' | 'rolled_back' = 'failed',
   ): Promise<boolean> {
     try {
       const result = await this.pool.query(
         `UPDATE budget_ledger 
          SET status = $2, failed_reason = $3, updated_at = NOW()
          WHERE id = $1 AND status = 'estimated'`,
-        [ledgerId, status, reason]
+        [ledgerId, status, reason],
       );
 
       return result.rowCount > 0;
     } catch (error) {
-      logger.error('Failed to mark spending as failed', { error, ledgerId, reason });
+      logger.error('Failed to mark spending as failed', {
+        error,
+        ledgerId,
+        reason,
+      });
       return false;
     }
   }
@@ -263,7 +278,7 @@ export class BudgetLedgerManager {
                 updated_at, created_at, created_by, notes
          FROM tenant_budget 
          WHERE tenant_id = $1 AND deleted_at IS NULL`,
-        [tenantId]
+        [tenantId],
       );
 
       if (result.rows.length === 0) {
@@ -274,7 +289,9 @@ export class BudgetLedgerManager {
       return {
         tenantId: row.tenant_id,
         monthlyUsdLimit: parseFloat(row.monthly_usd_limit),
-        dailyUsdLimit: row.daily_usd_limit ? parseFloat(row.daily_usd_limit) : undefined,
+        dailyUsdLimit: row.daily_usd_limit
+          ? parseFloat(row.daily_usd_limit)
+          : undefined,
         hardCap: row.hard_cap,
         notificationThreshold: parseFloat(row.notification_threshold),
         emergencyContact: row.emergency_contact,
@@ -282,7 +299,7 @@ export class BudgetLedgerManager {
         updatedAt: row.updated_at,
         createdAt: row.created_at,
         createdBy: row.created_by,
-        notes: row.notes
+        notes: row.notes,
       };
     } catch (error) {
       logger.error('Failed to get tenant budget', { error, tenantId });
@@ -303,10 +320,10 @@ export class BudgetLedgerManager {
       emergencyContact?: string;
       notes?: string;
     },
-    updatedBy: string
+    updatedBy: string,
   ): Promise<boolean> {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query('BEGIN');
 
@@ -318,27 +335,27 @@ export class BudgetLedgerManager {
         setClauses.push(`monthly_usd_limit = $${paramIndex++}`);
         values.push(updates.monthlyUsdLimit);
       }
-      
+
       if (updates.dailyUsdLimit !== undefined) {
         setClauses.push(`daily_usd_limit = $${paramIndex++}`);
         values.push(updates.dailyUsdLimit);
       }
-      
+
       if (updates.hardCap !== undefined) {
         setClauses.push(`hard_cap = $${paramIndex++}`);
         values.push(updates.hardCap);
       }
-      
+
       if (updates.notificationThreshold !== undefined) {
         setClauses.push(`notification_threshold = $${paramIndex++}`);
         values.push(updates.notificationThreshold);
       }
-      
+
       if (updates.emergencyContact !== undefined) {
         setClauses.push(`emergency_contact = $${paramIndex++}`);
         values.push(updates.emergencyContact);
       }
-      
+
       if (updates.notes !== undefined) {
         setClauses.push(`notes = $${paramIndex++}`);
         values.push(updates.notes);
@@ -347,7 +364,8 @@ export class BudgetLedgerManager {
       setClauses.push(`updated_by = $${paramIndex++}`);
       values.push(updatedBy);
 
-      if (setClauses.length === 1) { // Only updated_by was set
+      if (setClauses.length === 1) {
+        // Only updated_by was set
         await client.query('ROLLBACK');
         return false;
       }
@@ -356,22 +374,26 @@ export class BudgetLedgerManager {
         `UPDATE tenant_budget 
          SET ${setClauses.join(', ')}, updated_at = NOW()
          WHERE tenant_id = $1 AND deleted_at IS NULL`,
-        values
+        values,
       );
 
       await client.query('COMMIT');
-      
+
       logger.info('Tenant budget updated', {
         tenantId,
         updates,
         updatedBy,
-        rowsAffected: result.rowCount
+        rowsAffected: result.rowCount,
       });
 
       return result.rowCount > 0;
     } catch (error) {
       await client.query('ROLLBACK');
-      logger.error('Failed to update tenant budget', { error, tenantId, updates });
+      logger.error('Failed to update tenant budget', {
+        error,
+        tenantId,
+        updates,
+      });
       return false;
     } finally {
       client.release();
@@ -381,11 +403,13 @@ export class BudgetLedgerManager {
   /**
    * Get budget utilization for tenant
    */
-  async getBudgetUtilization(tenantId: string): Promise<BudgetUtilization | null> {
+  async getBudgetUtilization(
+    tenantId: string,
+  ): Promise<BudgetUtilization | null> {
     try {
       const result = await this.pool.query(
         'SELECT * FROM budget_utilization WHERE tenant_id = $1',
-        [tenantId]
+        [tenantId],
       );
 
       if (result.rows.length === 0) {
@@ -396,7 +420,9 @@ export class BudgetLedgerManager {
       return {
         tenantId: row.tenant_id,
         monthlyUsdLimit: parseFloat(row.monthly_usd_limit),
-        dailyUsdLimit: row.daily_usd_limit ? parseFloat(row.daily_usd_limit) : undefined,
+        dailyUsdLimit: row.daily_usd_limit
+          ? parseFloat(row.daily_usd_limit)
+          : undefined,
         hardCap: row.hard_cap,
         notificationThreshold: parseFloat(row.notification_threshold),
         emergencyContact: row.emergency_contact,
@@ -407,7 +433,7 @@ export class BudgetLedgerManager {
         currentMonthSpend: parseFloat(row.current_month_spend || 0),
         utilizationPct: parseFloat(row.utilization_pct || 0),
         status: row.status,
-        remainingBudget: parseFloat(row.remaining_budget || 0)
+        remainingBudget: parseFloat(row.remaining_budget || 0),
       };
     } catch (error) {
       logger.error('Failed to get budget utilization', { error, tenantId });
@@ -419,25 +445,26 @@ export class BudgetLedgerManager {
    * Get spending summary for tenant
    */
   async getSpendingSummary(
-    tenantId: string, 
-    startDate?: Date, 
-    endDate?: Date
+    tenantId: string,
+    startDate?: Date,
+    endDate?: Date,
   ): Promise<SpendingSummary> {
     try {
       let dateFilter = '';
       const params = [tenantId];
-      
+
       if (startDate) {
         dateFilter += ' AND created_at >= $2';
         params.push(startDate);
       }
-      
+
       if (endDate) {
         dateFilter += ` AND created_at <= $${params.length + 1}`;
         params.push(endDate);
       }
 
-      const result = await this.pool.query(`
+      const result = await this.pool.query(
+        `
         SELECT 
           tenant_id,
           COUNT(*) as total_operations,
@@ -448,14 +475,16 @@ export class BudgetLedgerManager {
         FROM budget_ledger 
         WHERE tenant_id = $1 AND status IN ('estimated', 'reconciled')${dateFilter}
         GROUP BY tenant_id
-      `, params);
+      `,
+        params,
+      );
 
       if (result.rows.length === 0) {
         return {
           tenantId,
           totalOperations: 0,
           estimatedUsd: 0,
-          totalUsd: 0
+          totalUsd: 0,
         };
       }
 
@@ -466,15 +495,22 @@ export class BudgetLedgerManager {
         estimatedUsd: parseFloat(row.estimated_usd),
         actualUsd: row.actual_usd ? parseFloat(row.actual_usd) : undefined,
         totalUsd: parseFloat(row.total_usd),
-        avgAccuracyRatio: row.avg_accuracy_ratio ? parseFloat(row.avg_accuracy_ratio) : undefined
+        avgAccuracyRatio: row.avg_accuracy_ratio
+          ? parseFloat(row.avg_accuracy_ratio)
+          : undefined,
       };
     } catch (error) {
-      logger.error('Failed to get spending summary', { error, tenantId, startDate, endDate });
+      logger.error('Failed to get spending summary', {
+        error,
+        tenantId,
+        startDate,
+        endDate,
+      });
       return {
         tenantId,
         totalOperations: 0,
         estimatedUsd: 0,
-        totalUsd: 0
+        totalUsd: 0,
       };
     }
   }
@@ -493,7 +529,7 @@ export class BudgetLedgerManager {
       endDate?: Date;
     } = {},
     limit: number = 100,
-    offset: number = 0
+    offset: number = 0,
   ): Promise<BudgetLedgerEntry[]> {
     try {
       const whereClauses = ['1=1'];
@@ -537,14 +573,17 @@ export class BudgetLedgerManager {
 
       params.push(limit, offset);
 
-      const result = await this.pool.query(`
+      const result = await this.pool.query(
+        `
         SELECT * FROM budget_ledger
         WHERE ${whereClauses.join(' AND ')}
         ORDER BY created_at DESC
         LIMIT $${paramIndex++} OFFSET $${paramIndex++}
-      `, params);
+      `,
+        params,
+      );
 
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         id: row.id,
         tenantId: row.tenant_id,
         correlationId: row.correlation_id,
@@ -557,19 +596,32 @@ export class BudgetLedgerManager {
         estPromptTokens: parseInt(row.est_prompt_tokens),
         estCompletionTokens: parseInt(row.est_completion_tokens),
         estTotalUsd: parseFloat(row.est_total_usd),
-        actualPromptTokens: row.actual_prompt_tokens ? parseInt(row.actual_prompt_tokens) : undefined,
-        actualCompletionTokens: row.actual_completion_tokens ? parseInt(row.actual_completion_tokens) : undefined,
-        actualTotalUsd: row.actual_total_usd ? parseFloat(row.actual_total_usd) : undefined,
+        actualPromptTokens: row.actual_prompt_tokens
+          ? parseInt(row.actual_prompt_tokens)
+          : undefined,
+        actualCompletionTokens: row.actual_completion_tokens
+          ? parseInt(row.actual_completion_tokens)
+          : undefined,
+        actualTotalUsd: row.actual_total_usd
+          ? parseFloat(row.actual_total_usd)
+          : undefined,
         estimationMethod: row.estimation_method,
-        accuracyRatio: row.accuracy_ratio ? parseFloat(row.accuracy_ratio) : undefined,
+        accuracyRatio: row.accuracy_ratio
+          ? parseFloat(row.accuracy_ratio)
+          : undefined,
         status: row.status,
         reconciledAt: row.reconciled_at,
         failedReason: row.failed_reason,
         createdAt: row.created_at,
-        updatedAt: row.updated_at
+        updatedAt: row.updated_at,
       }));
     } catch (error) {
-      logger.error('Failed to get spending entries', { error, filters, limit, offset });
+      logger.error('Failed to get spending entries', {
+        error,
+        filters,
+        limit,
+        offset,
+      });
       return [];
     }
   }

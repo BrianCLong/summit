@@ -19,7 +19,15 @@ export interface EntityProfile {
       confidence: number;
     }>;
     identifiers: Array<{
-      type: 'ssn' | 'tin' | 'passport' | 'license' | 'lei' | 'swift' | 'imo' | 'custom';
+      type:
+        | 'ssn'
+        | 'tin'
+        | 'passport'
+        | 'license'
+        | 'lei'
+        | 'swift'
+        | 'imo'
+        | 'custom';
       value: string;
       country?: string;
       issuedDate?: Date;
@@ -37,7 +45,12 @@ export interface EntityProfile {
       confidence: number;
     }>;
     dates: Array<{
-      type: 'birth' | 'incorporation' | 'registration' | 'death' | 'dissolution';
+      type:
+        | 'birth'
+        | 'incorporation'
+        | 'registration'
+        | 'death'
+        | 'dissolution';
       date: Date;
       precision: 'day' | 'month' | 'year';
       confidence: number;
@@ -63,7 +76,13 @@ export interface EntityProfile {
   };
   relationships: Array<{
     entityId: string;
-    type: 'owns' | 'controls' | 'manages' | 'related' | 'same_address' | 'correspondent';
+    type:
+      | 'owns'
+      | 'controls'
+      | 'manages'
+      | 'related'
+      | 'same_address'
+      | 'correspondent';
     strength: number;
     evidence: string[];
   }>;
@@ -74,13 +93,23 @@ export interface ResolutionCluster {
   entityIds: string[];
   confidence: number;
   resolution: {
-    method: 'deterministic' | 'probabilistic' | 'ml_supervised' | 'ml_unsupervised' | 'hybrid';
+    method:
+      | 'deterministic'
+      | 'probabilistic'
+      | 'ml_supervised'
+      | 'ml_unsupervised'
+      | 'hybrid';
     algorithm: string;
     features: string[];
     threshold: number;
   };
   evidence: Array<{
-    type: 'name_match' | 'identifier_match' | 'address_match' | 'network_pattern' | 'temporal_pattern';
+    type:
+      | 'name_match'
+      | 'identifier_match'
+      | 'address_match'
+      | 'network_pattern'
+      | 'temporal_pattern';
     strength: number;
     details: Record<string, any>;
   }>;
@@ -106,7 +135,13 @@ export interface MatchingRule {
   entityTypes: EntityProfile['type'][];
   conditions: Array<{
     attribute: string;
-    comparator: 'exact' | 'fuzzy' | 'phonetic' | 'semantic' | 'pattern' | 'range';
+    comparator:
+      | 'exact'
+      | 'fuzzy'
+      | 'phonetic'
+      | 'semantic'
+      | 'pattern'
+      | 'range';
     threshold: number;
     weight: number;
     required: boolean;
@@ -191,10 +226,12 @@ export class EntityResolver extends EventEmitter {
   /**
    * Register entity profile for resolution
    */
-  async registerEntity(entity: Omit<EntityProfile, 'id'>): Promise<EntityProfile> {
+  async registerEntity(
+    entity: Omit<EntityProfile, 'id'>,
+  ): Promise<EntityProfile> {
     const fullEntity: EntityProfile = {
       ...entity,
-      id: crypto.randomUUID()
+      id: crypto.randomUUID(),
     };
 
     // Validate entity data
@@ -217,7 +254,7 @@ export class EntityResolver extends EventEmitter {
    */
   async executeResolution(
     scope: ResolutionJob['scope'] = {},
-    configuration: Partial<ResolutionJob['configuration']> = {}
+    configuration: Partial<ResolutionJob['configuration']> = {},
   ): Promise<ResolutionJob> {
     const job: ResolutionJob = {
       id: crypto.randomUUID(),
@@ -226,38 +263,42 @@ export class EntityResolver extends EventEmitter {
       scope,
       configuration: {
         rules: configuration.rules || Array.from(this.rules.keys()),
-        algorithms: configuration.algorithms || ['deterministic', 'probabilistic', 'ml_supervised'],
+        algorithms: configuration.algorithms || [
+          'deterministic',
+          'probabilistic',
+          'ml_supervised',
+        ],
         confidence: configuration.confidence || 0.85,
         autoApprove: configuration.autoApprove || false,
-        batchSize: configuration.batchSize || 1000
+        batchSize: configuration.batchSize || 1000,
       },
       progress: {
         total: 0,
         processed: 0,
         clustered: 0,
         flagged: 0,
-        errors: 0
+        errors: 0,
       },
       results: {
         clusters: [],
         conflicts: [],
         newEntities: [],
-        mergedEntities: []
+        mergedEntities: [],
       },
       timing: {
-        startTime: new Date()
+        startTime: new Date(),
       },
       performance: {
         entitiesPerSecond: 0,
         peakMemoryMB: 0,
-        cpuUtilization: 0
-      }
+        cpuUtilization: 0,
+      },
     };
 
     this.jobs.set(job.id, job);
 
     // Execute asynchronously
-    this.executeResolutionJob(job).catch(error => {
+    this.executeResolutionJob(job).catch((error) => {
       job.status = 'failed';
       job.timing.endTime = new Date();
       this.jobs.set(job.id, job);
@@ -272,12 +313,14 @@ export class EntityResolver extends EventEmitter {
    */
   async findMatches(
     entityId: string,
-    confidence = 0.8
-  ): Promise<Array<{
-    entityId: string;
-    confidence: number;
-    evidence: Array<{ type: string; strength: number; details: any }>;
-  }>> {
+    confidence = 0.8,
+  ): Promise<
+    Array<{
+      entityId: string;
+      confidence: number;
+      evidence: Array<{ type: string; strength: number; details: any }>;
+    }>
+  > {
     const entity = this.entities.get(entityId);
     if (!entity) {
       throw new Error('Entity not found');
@@ -301,16 +344,19 @@ export class EntityResolver extends EventEmitter {
         const match = await this.evaluateMatch(entity, candidate, rule);
 
         if (match.confidence >= confidence) {
-          const existing = matches.find(m => m.entityId === candidate.id);
+          const existing = matches.find((m) => m.entityId === candidate.id);
           if (existing) {
             // Combine evidence from multiple rules
-            existing.confidence = Math.max(existing.confidence, match.confidence);
+            existing.confidence = Math.max(
+              existing.confidence,
+              match.confidence,
+            );
             existing.evidence.push(...match.evidence);
           } else {
             matches.push({
               entityId: candidate.id,
               confidence: match.confidence,
-              evidence: match.evidence
+              evidence: match.evidence,
             });
           }
         }
@@ -327,13 +373,15 @@ export class EntityResolver extends EventEmitter {
     entityIds: string[],
     method: ResolutionCluster['resolution']['method'],
     confidence: number,
-    evidence: ResolutionCluster['evidence']
+    evidence: ResolutionCluster['evidence'],
   ): Promise<ResolutionCluster> {
     if (entityIds.length < 2) {
       throw new Error('Cluster requires at least 2 entities');
     }
 
-    const entities = entityIds.map(id => this.entities.get(id)).filter(Boolean) as EntityProfile[];
+    const entities = entityIds
+      .map((id) => this.entities.get(id))
+      .filter(Boolean) as EntityProfile[];
     if (entities.length !== entityIds.length) {
       throw new Error('Some entities not found');
     }
@@ -352,7 +400,7 @@ export class EntityResolver extends EventEmitter {
         method,
         algorithm: this.getAlgorithmName(method),
         features: await this.extractFeatures(entities),
-        threshold: confidence
+        threshold: confidence,
       },
       evidence,
       conflicts,
@@ -360,8 +408,8 @@ export class EntityResolver extends EventEmitter {
       audit: {
         createdAt: new Date(),
         lastUpdated: new Date(),
-        version: 1
-      }
+        version: 1,
+      },
     };
 
     this.clusters.set(cluster.id, cluster);
@@ -377,7 +425,7 @@ export class EntityResolver extends EventEmitter {
     clusterId: string,
     reviewer: string,
     decision: 'approve' | 'reject' | 'modify',
-    modifications?: Partial<ResolutionCluster>
+    modifications?: Partial<ResolutionCluster>,
   ): Promise<ResolutionCluster> {
     const cluster = this.clusters.get(clusterId);
     if (!cluster) {
@@ -415,7 +463,9 @@ export class EntityResolver extends EventEmitter {
   /**
    * Add custom matching rule
    */
-  async addMatchingRule(rule: Omit<MatchingRule, 'id' | 'statistics'>): Promise<MatchingRule> {
+  async addMatchingRule(
+    rule: Omit<MatchingRule, 'id' | 'statistics'>,
+  ): Promise<MatchingRule> {
     const fullRule: MatchingRule = {
       ...rule,
       id: crypto.randomUUID(),
@@ -424,8 +474,8 @@ export class EntityResolver extends EventEmitter {
         falsePositives: 0,
         falseNegatives: 0,
         precision: 0,
-        recall: 0
-      }
+        recall: 0,
+      },
     };
 
     this.rules.set(fullRule.id, fullRule);
@@ -448,23 +498,35 @@ export class EntityResolver extends EventEmitter {
     const entities = this.entities.size;
     const clusters = this.clusters.size;
 
-    const clusterSizes = Array.from(this.clusters.values()).map(c => c.entityIds.length);
-    const avgClusterSize = clusterSizes.length > 0
-      ? clusterSizes.reduce((a, b) => a + b, 0) / clusterSizes.length
-      : 0;
+    const clusterSizes = Array.from(this.clusters.values()).map(
+      (c) => c.entityIds.length,
+    );
+    const avgClusterSize =
+      clusterSizes.length > 0
+        ? clusterSizes.reduce((a, b) => a + b, 0) / clusterSizes.length
+        : 0;
 
-    const confidences = Array.from(this.clusters.values()).map(c => c.confidence);
-    const confidence = confidences.length > 0 ? {
-      avg: confidences.reduce((a, b) => a + b, 0) / confidences.length,
-      min: Math.min(...confidences),
-      max: Math.max(...confidences)
-    } : { avg: 0, min: 0, max: 0 };
+    const confidences = Array.from(this.clusters.values()).map(
+      (c) => c.confidence,
+    );
+    const confidence =
+      confidences.length > 0
+        ? {
+            avg: confidences.reduce((a, b) => a + b, 0) / confidences.length,
+            min: Math.min(...confidences),
+            max: Math.max(...confidences),
+          }
+        : { avg: 0, min: 0, max: 0 };
 
-    const conflicts = Array.from(this.clusters.values())
-      .reduce((total, c) => total + c.conflicts.length, 0);
+    const conflicts = Array.from(this.clusters.values()).reduce(
+      (total, c) => total + c.conflicts.length,
+      0,
+    );
 
-    const resolvedEntities = Array.from(this.clusters.values())
-      .reduce((total, c) => total + c.entityIds.length, 0);
+    const resolvedEntities = Array.from(this.clusters.values()).reduce(
+      (total, c) => total + c.entityIds.length,
+      0,
+    );
 
     return {
       entities,
@@ -472,7 +534,7 @@ export class EntityResolver extends EventEmitter {
       avgClusterSize,
       resolutionRate: entities > 0 ? resolvedEntities / entities : 0,
       confidence,
-      conflicts
+      conflicts,
     };
   }
 
@@ -487,22 +549,31 @@ export class EntityResolver extends EventEmitter {
       const startTime = Date.now();
 
       // Process in batches
-      for (let i = 0; i < scopedEntities.length; i += job.configuration.batchSize) {
+      for (
+        let i = 0;
+        i < scopedEntities.length;
+        i += job.configuration.batchSize
+      ) {
         const batch = scopedEntities.slice(i, i + job.configuration.batchSize);
 
         for (const entity of batch) {
           try {
-            const matches = await this.findMatches(entity.id, job.configuration.confidence);
+            const matches = await this.findMatches(
+              entity.id,
+              job.configuration.confidence,
+            );
 
             if (matches.length > 0) {
-              const evidence = matches.flatMap(m => m.evidence);
-              const avgConfidence = matches.reduce((sum, m) => sum + m.confidence, 0) / matches.length;
+              const evidence = matches.flatMap((m) => m.evidence);
+              const avgConfidence =
+                matches.reduce((sum, m) => sum + m.confidence, 0) /
+                matches.length;
 
               const cluster = await this.createCluster(
-                [entity.id, ...matches.map(m => m.entityId)],
+                [entity.id, ...matches.map((m) => m.entityId)],
                 'hybrid',
                 avgConfidence,
-                evidence
+                evidence,
               );
 
               job.results.clusters.push(cluster.id);
@@ -515,7 +586,6 @@ export class EntityResolver extends EventEmitter {
             }
 
             job.progress.processed++;
-
           } catch (error) {
             job.progress.errors++;
           }
@@ -528,10 +598,10 @@ export class EntityResolver extends EventEmitter {
 
       job.status = 'completed';
       job.timing.endTime = new Date();
-      job.timing.duration = job.timing.endTime.getTime() - job.timing.startTime.getTime();
+      job.timing.duration =
+        job.timing.endTime.getTime() - job.timing.startTime.getTime();
 
       this.emit('resolution_completed', job);
-
     } catch (error) {
       job.status = 'failed';
       job.timing.endTime = new Date();
@@ -541,32 +611,40 @@ export class EntityResolver extends EventEmitter {
     }
   }
 
-  private async getScopedEntities(scope: ResolutionJob['scope']): Promise<EntityProfile[]> {
+  private async getScopedEntities(
+    scope: ResolutionJob['scope'],
+  ): Promise<EntityProfile[]> {
     let entities = Array.from(this.entities.values());
 
     if (scope.entityTypes) {
-      entities = entities.filter(e => scope.entityTypes!.includes(e.type));
+      entities = entities.filter((e) => scope.entityTypes!.includes(e.type));
     }
 
     if (scope.sourceSystems) {
-      entities = entities.filter(e => scope.sourceSystems!.includes(e.sourceSystem));
+      entities = entities.filter((e) =>
+        scope.sourceSystems!.includes(e.sourceSystem),
+      );
     }
 
     if (scope.entityIds) {
-      entities = entities.filter(e => scope.entityIds!.includes(e.id));
+      entities = entities.filter((e) => scope.entityIds!.includes(e.id));
     }
 
     if (scope.timeRange) {
-      entities = entities.filter(e =>
-        e.metadata.lastUpdated >= scope.timeRange!.start &&
-        e.metadata.lastUpdated <= scope.timeRange!.end
+      entities = entities.filter(
+        (e) =>
+          e.metadata.lastUpdated >= scope.timeRange!.start &&
+          e.metadata.lastUpdated <= scope.timeRange!.end,
       );
     }
 
     return entities;
   }
 
-  private async findCandidates(entity: EntityProfile, rule: MatchingRule): Promise<EntityProfile[]> {
+  private async findCandidates(
+    entity: EntityProfile,
+    rule: MatchingRule,
+  ): Promise<EntityProfile[]> {
     const candidates: EntityProfile[] = [];
 
     for (const candidate of this.entities.values()) {
@@ -594,14 +672,15 @@ export class EntityResolver extends EventEmitter {
   private async evaluateMatch(
     entity1: EntityProfile,
     entity2: EntityProfile,
-    rule: MatchingRule
+    rule: MatchingRule,
   ): Promise<{
     confidence: number;
     evidence: Array<{ type: string; strength: number; details: any }>;
   }> {
     let totalScore = 0;
     let totalWeight = 0;
-    const evidence: Array<{ type: string; strength: number; details: any }> = [];
+    const evidence: Array<{ type: string; strength: number; details: any }> =
+      [];
 
     for (const condition of rule.conditions) {
       const score = await this.evaluateCondition(entity1, entity2, condition);
@@ -615,8 +694,8 @@ export class EntityResolver extends EventEmitter {
           details: {
             comparator: condition.comparator,
             threshold: condition.threshold,
-            weight: condition.weight
-          }
+            weight: condition.weight,
+          },
         });
       } else if (condition.required) {
         return { confidence: 0, evidence: [] };
@@ -630,7 +709,7 @@ export class EntityResolver extends EventEmitter {
   private async evaluateCondition(
     entity1: EntityProfile,
     entity2: EntityProfile,
-    condition: MatchingRule['conditions'][0]
+    condition: MatchingRule['conditions'][0],
   ): Promise<number> {
     const values1 = this.extractAttributeValues(entity1, condition.attribute);
     const values2 = this.extractAttributeValues(entity2, condition.attribute);
@@ -639,7 +718,11 @@ export class EntityResolver extends EventEmitter {
 
     for (const val1 of values1) {
       for (const val2 of values2) {
-        const score = await this.compareValues(val1, val2, condition.comparator);
+        const score = await this.compareValues(
+          val1,
+          val2,
+          condition.comparator,
+        );
         maxScore = Math.max(maxScore, score);
       }
     }
@@ -647,14 +730,19 @@ export class EntityResolver extends EventEmitter {
     return maxScore;
   }
 
-  private extractAttributeValues(entity: EntityProfile, attribute: string): any[] {
+  private extractAttributeValues(
+    entity: EntityProfile,
+    attribute: string,
+  ): any[] {
     switch (attribute) {
       case 'names':
-        return entity.attributes.names.map(n => n.value);
+        return entity.attributes.names.map((n) => n.value);
       case 'identifiers':
-        return entity.attributes.identifiers.map(i => i.value);
+        return entity.attributes.identifiers.map((i) => i.value);
       case 'addresses':
-        return entity.attributes.addresses.map(a => `${a.street} ${a.city} ${a.country}`);
+        return entity.attributes.addresses.map(
+          (a) => `${a.street} ${a.city} ${a.country}`,
+        );
       default:
         return [];
     }
@@ -663,7 +751,7 @@ export class EntityResolver extends EventEmitter {
   private async compareValues(
     val1: any,
     val2: any,
-    comparator: MatchingRule['conditions'][0]['comparator']
+    comparator: MatchingRule['conditions'][0]['comparator'],
   ): Promise<number> {
     if (val1 === val2) return 1.0;
 
@@ -690,12 +778,17 @@ export class EntityResolver extends EventEmitter {
     const maxLen = Math.max(str1.length, str2.length);
     if (maxLen === 0) return 1.0;
 
-    const distance = this.levenshteinDistance(str1.toLowerCase(), str2.toLowerCase());
-    return 1.0 - (distance / maxLen);
+    const distance = this.levenshteinDistance(
+      str1.toLowerCase(),
+      str2.toLowerCase(),
+    );
+    return 1.0 - distance / maxLen;
   }
 
   private levenshteinDistance(str1: string, str2: string): number {
-    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+    const matrix = Array(str2.length + 1)
+      .fill(null)
+      .map(() => Array(str1.length + 1).fill(null));
 
     for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
     for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
@@ -706,7 +799,7 @@ export class EntityResolver extends EventEmitter {
         matrix[j][i] = Math.min(
           matrix[j][i - 1] + 1,
           matrix[j - 1][i] + 1,
-          matrix[j - 1][i - 1] + indicator
+          matrix[j - 1][i - 1] + indicator,
         );
       }
     }
@@ -748,7 +841,7 @@ export class EntityResolver extends EventEmitter {
   private getStringEmbedding(str: string): number[] {
     // Mock embedding generation
     const hash = crypto.createHash('sha256').update(str).digest();
-    return Array.from(hash.slice(0, 16)).map(b => (b - 128) / 128);
+    return Array.from(hash.slice(0, 16)).map((b) => (b - 128) / 128);
   }
 
   private cosineSimilarity(vec1: number[], vec2: number[]): number {
@@ -761,13 +854,17 @@ export class EntityResolver extends EventEmitter {
   private evaluateBlocker(
     entity1: EntityProfile,
     entity2: EntityProfile,
-    blocker: MatchingRule['blockers'][0]
+    blocker: MatchingRule['blockers'][0],
   ): boolean {
     // Evaluate if entities should be blocked from comparison
     const values1 = this.extractAttributeValues(entity1, blocker.attribute);
     const values2 = this.extractAttributeValues(entity2, blocker.attribute);
 
-    return values1.some(v1 => values2.some(v2 => blocker.values.includes(v1) || blocker.values.includes(v2)));
+    return values1.some((v1) =>
+      values2.some(
+        (v2) => blocker.values.includes(v1) || blocker.values.includes(v2),
+      ),
+    );
   }
 
   private async validateEntityProfile(entity: EntityProfile): Promise<void> {
@@ -780,14 +877,16 @@ export class EntityResolver extends EventEmitter {
     }
   }
 
-  private async normalizeEntityAttributes(entity: EntityProfile): Promise<void> {
+  private async normalizeEntityAttributes(
+    entity: EntityProfile,
+  ): Promise<void> {
     // Normalize names
-    entity.attributes.names.forEach(name => {
+    entity.attributes.names.forEach((name) => {
       name.value = name.value.trim().toUpperCase();
     });
 
     // Normalize addresses
-    entity.attributes.addresses.forEach(addr => {
+    entity.attributes.addresses.forEach((addr) => {
       if (addr.country) addr.country = addr.country.toUpperCase();
       if (addr.state) addr.state = addr.state.toUpperCase();
     });
@@ -802,34 +901,42 @@ export class EntityResolver extends EventEmitter {
           this.emit('potential_matches_found', { entityId, matches });
         }
       } catch (error) {
-        this.emit('incremental_resolution_error', { entityId, error: error.message });
+        this.emit('incremental_resolution_error', {
+          entityId,
+          error: error.message,
+        });
       }
     });
   }
 
-  private async mergeEntityProfiles(entities: EntityProfile[]): Promise<EntityProfile> {
+  private async mergeEntityProfiles(
+    entities: EntityProfile[],
+  ): Promise<EntityProfile> {
     // Create canonical entity by merging all attributes
     const canonical = { ...entities[0] };
     canonical.id = crypto.randomUUID();
 
     // Merge names
-    const allNames = entities.flatMap(e => e.attributes.names);
+    const allNames = entities.flatMap((e) => e.attributes.names);
     canonical.attributes.names = this.deduplicateNames(allNames);
 
     // Merge identifiers
-    const allIdentifiers = entities.flatMap(e => e.attributes.identifiers);
-    canonical.attributes.identifiers = this.deduplicateIdentifiers(allIdentifiers);
+    const allIdentifiers = entities.flatMap((e) => e.attributes.identifiers);
+    canonical.attributes.identifiers =
+      this.deduplicateIdentifiers(allIdentifiers);
 
     // Merge addresses
-    const allAddresses = entities.flatMap(e => e.attributes.addresses);
+    const allAddresses = entities.flatMap((e) => e.attributes.addresses);
     canonical.attributes.addresses = this.deduplicateAddresses(allAddresses);
 
     return canonical;
   }
 
-  private deduplicateNames(names: EntityProfile['attributes']['names']): EntityProfile['attributes']['names'] {
+  private deduplicateNames(
+    names: EntityProfile['attributes']['names'],
+  ): EntityProfile['attributes']['names'] {
     const seen = new Set<string>();
-    return names.filter(name => {
+    return names.filter((name) => {
       const key = `${name.value}:${name.type}`;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -837,9 +944,11 @@ export class EntityResolver extends EventEmitter {
     });
   }
 
-  private deduplicateIdentifiers(identifiers: EntityProfile['attributes']['identifiers']): EntityProfile['attributes']['identifiers'] {
+  private deduplicateIdentifiers(
+    identifiers: EntityProfile['attributes']['identifiers'],
+  ): EntityProfile['attributes']['identifiers'] {
     const seen = new Set<string>();
-    return identifiers.filter(id => {
+    return identifiers.filter((id) => {
       const key = `${id.type}:${id.value}`;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -847,9 +956,11 @@ export class EntityResolver extends EventEmitter {
     });
   }
 
-  private deduplicateAddresses(addresses: EntityProfile['attributes']['addresses']): EntityProfile['attributes']['addresses'] {
+  private deduplicateAddresses(
+    addresses: EntityProfile['attributes']['addresses'],
+  ): EntityProfile['attributes']['addresses'] {
     const seen = new Set<string>();
-    return addresses.filter(addr => {
+    return addresses.filter((addr) => {
       const key = `${addr.street}:${addr.city}:${addr.country}`;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -857,21 +968,30 @@ export class EntityResolver extends EventEmitter {
     });
   }
 
-  private async detectAttributeConflicts(entities: EntityProfile[]): Promise<ResolutionCluster['conflicts']> {
+  private async detectAttributeConflicts(
+    entities: EntityProfile[],
+  ): Promise<ResolutionCluster['conflicts']> {
     const conflicts: ResolutionCluster['conflicts'] = [];
 
     // Check for date conflicts
-    const birthDates = entities.flatMap(e =>
+    const birthDates = entities.flatMap((e) =>
       e.attributes.dates
-        .filter(d => d.type === 'birth')
-        .map(d => ({ entityId: e.id, value: d.date, confidence: d.confidence }))
+        .filter((d) => d.type === 'birth')
+        .map((d) => ({
+          entityId: e.id,
+          value: d.date,
+          confidence: d.confidence,
+        })),
     );
 
-    if (birthDates.length > 1 && !this.datesCompatible(birthDates.map(d => d.value))) {
+    if (
+      birthDates.length > 1 &&
+      !this.datesCompatible(birthDates.map((d) => d.value))
+    ) {
       conflicts.push({
         attribute: 'birth_date',
         values: birthDates,
-        resolution: 'manual_review'
+        resolution: 'manual_review',
       });
     }
 
@@ -880,32 +1000,46 @@ export class EntityResolver extends EventEmitter {
 
   private datesCompatible(dates: Date[]): boolean {
     // Check if dates are within reasonable range (e.g., 1 year)
-    const timestamps = dates.map(d => d.getTime());
+    const timestamps = dates.map((d) => d.getTime());
     const min = Math.min(...timestamps);
     const max = Math.max(...timestamps);
-    return (max - min) <= (365 * 24 * 60 * 60 * 1000); // 1 year
+    return max - min <= 365 * 24 * 60 * 60 * 1000; // 1 year
   }
 
   private async extractFeatures(entities: EntityProfile[]): Promise<string[]> {
     const features = new Set<string>();
 
-    entities.forEach(entity => {
-      entity.attributes.names.forEach(name => features.add(`name:${name.type}`));
-      entity.attributes.identifiers.forEach(id => features.add(`id:${id.type}`));
-      entity.attributes.addresses.forEach(addr => features.add(`addr:${addr.type}`));
+    entities.forEach((entity) => {
+      entity.attributes.names.forEach((name) =>
+        features.add(`name:${name.type}`),
+      );
+      entity.attributes.identifiers.forEach((id) =>
+        features.add(`id:${id.type}`),
+      );
+      entity.attributes.addresses.forEach((addr) =>
+        features.add(`addr:${addr.type}`),
+      );
     });
 
     return Array.from(features);
   }
 
-  private getAlgorithmName(method: ResolutionCluster['resolution']['method']): string {
+  private getAlgorithmName(
+    method: ResolutionCluster['resolution']['method'],
+  ): string {
     switch (method) {
-      case 'deterministic': return 'rule_based_exact';
-      case 'probabilistic': return 'fellegi_sunter';
-      case 'ml_supervised': return 'gradient_boosting_classifier';
-      case 'ml_unsupervised': return 'clustering_ensemble';
-      case 'hybrid': return 'multi_stage_pipeline';
-      default: return 'unknown';
+      case 'deterministic':
+        return 'rule_based_exact';
+      case 'probabilistic':
+        return 'fellegi_sunter';
+      case 'ml_supervised':
+        return 'gradient_boosting_classifier';
+      case 'ml_unsupervised':
+        return 'clustering_ensemble';
+      case 'hybrid':
+        return 'multi_stage_pipeline';
+      default:
+        return 'unknown';
     }
   }
 
@@ -921,24 +1055,24 @@ export class EntityResolver extends EventEmitter {
           comparator: 'fuzzy',
           threshold: 0.95,
           weight: 0.6,
-          required: true
+          required: true,
         },
         {
           attribute: 'identifiers',
           comparator: 'exact',
           threshold: 1.0,
           weight: 0.4,
-          required: true
-        }
+          required: true,
+        },
       ],
       actions: [
         {
           type: 'cluster',
           confidence: 0.95,
-          parameters: { autoApprove: true }
-        }
+          parameters: { autoApprove: true },
+        },
       ],
-      enabled: true
+      enabled: true,
     });
 
     // Address-based corporate linkage
@@ -952,24 +1086,24 @@ export class EntityResolver extends EventEmitter {
           comparator: 'fuzzy',
           threshold: 0.8,
           weight: 0.4,
-          required: false
+          required: false,
         },
         {
           attribute: 'addresses',
           comparator: 'fuzzy',
           threshold: 0.9,
           weight: 0.6,
-          required: true
-        }
+          required: true,
+        },
       ],
       actions: [
         {
           type: 'flag',
           confidence: 0.8,
-          parameters: { reviewRequired: true }
-        }
+          parameters: { reviewRequired: true },
+        },
       ],
-      enabled: true
+      enabled: true,
     });
   }
 }

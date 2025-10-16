@@ -41,10 +41,25 @@ export interface Control {
   controlFamily: string;
   controlType: 'preventive' | 'detective' | 'corrective' | 'directive';
   implementation: 'manual' | 'automated' | 'hybrid';
-  frequency: 'continuous' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annually' | 'ad-hoc';
+  frequency:
+    | 'continuous'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'quarterly'
+    | 'annually'
+    | 'ad-hoc';
   owner: string;
-  status: 'implemented' | 'not-implemented' | 'partially-implemented' | 'not-applicable';
-  effectiveness: 'effective' | 'ineffective' | 'needs-improvement' | 'not-tested';
+  status:
+    | 'implemented'
+    | 'not-implemented'
+    | 'partially-implemented'
+    | 'not-applicable';
+  effectiveness:
+    | 'effective'
+    | 'ineffective'
+    | 'needs-improvement'
+    | 'not-tested';
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
   lastTested?: Date;
   nextTest?: Date;
@@ -64,7 +79,11 @@ export interface Requirement {
   controls: string[];
   evidence: Evidence[];
   assessmentHistory: Assessment[];
-  complianceStatus: 'compliant' | 'non-compliant' | 'partially-compliant' | 'not-assessed';
+  complianceStatus:
+    | 'compliant'
+    | 'non-compliant'
+    | 'partially-compliant'
+    | 'not-assessed';
   lastAssessed?: Date;
   nextAssessment?: Date;
 }
@@ -72,7 +91,12 @@ export interface Requirement {
 export interface Assessment {
   id: string;
   frameworkId: string;
-  type: 'self-assessment' | 'internal-audit' | 'external-audit' | 'penetration-test' | 'vulnerability-scan';
+  type:
+    | 'self-assessment'
+    | 'internal-audit'
+    | 'external-audit'
+    | 'penetration-test'
+    | 'vulnerability-scan';
   name: string;
   description: string;
   scope: string[];
@@ -96,7 +120,11 @@ export interface Finding {
   title: string;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  category: 'control-deficiency' | 'policy-violation' | 'technical-vulnerability' | 'process-gap';
+  category:
+    | 'control-deficiency'
+    | 'policy-violation'
+    | 'technical-vulnerability'
+    | 'process-gap';
   status: 'open' | 'in-progress' | 'resolved' | 'accepted' | 'deferred';
   discoveredDate: Date;
   targetDate?: Date;
@@ -113,7 +141,14 @@ export interface Evidence {
   id: string;
   name: string;
   description: string;
-  type: 'document' | 'screenshot' | 'log' | 'configuration' | 'policy' | 'procedure' | 'certificate';
+  type:
+    | 'document'
+    | 'screenshot'
+    | 'log'
+    | 'configuration'
+    | 'policy'
+    | 'procedure'
+    | 'certificate';
   url?: string;
   hash: string;
   size: number;
@@ -196,14 +231,23 @@ export interface RiskFactor {
   likelihood: number;
   impact: number;
   score: number;
-  category: 'operational' | 'strategic' | 'financial' | 'compliance' | 'reputational';
+  category:
+    | 'operational'
+    | 'strategic'
+    | 'financial'
+    | 'compliance'
+    | 'reputational';
   mitigations: string[];
 }
 
 export interface ComplianceReport {
   id: string;
   name: string;
-  type: 'dashboard' | 'executive-summary' | 'detailed-report' | 'certification-letter';
+  type:
+    | 'dashboard'
+    | 'executive-summary'
+    | 'detailed-report'
+    | 'certification-letter';
   framework: string;
   period: {
     start: Date;
@@ -283,7 +327,7 @@ export class GRCConnector extends EventEmitter {
       completedAssessments: 0,
       overallComplianceScore: 0,
       averageRiskScore: 0,
-      trendsOverTime: {}
+      trendsOverTime: {},
     };
   }
 
@@ -295,13 +339,13 @@ export class GRCConnector extends EventEmitter {
 
       this.emit('connected', {
         platform: this.config.platform,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (error) {
       this.emit('connection_failed', {
         platform: this.config.platform,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
@@ -357,12 +401,17 @@ export class GRCConnector extends EventEmitter {
     // Implementation would depend on Workiva API
   }
 
-  async createFramework(framework: Omit<ComplianceFramework, 'controls' | 'requirements' | 'assessments'>): Promise<ComplianceFramework> {
+  async createFramework(
+    framework: Omit<
+      ComplianceFramework,
+      'controls' | 'requirements' | 'assessments'
+    >,
+  ): Promise<ComplianceFramework> {
     const newFramework: ComplianceFramework = {
       ...framework,
       controls: [],
       requirements: [],
-      assessments: []
+      assessments: [],
     };
 
     this.frameworks.set(framework.id, newFramework);
@@ -376,13 +425,16 @@ export class GRCConnector extends EventEmitter {
       frameworkId: framework.id,
       name: framework.name,
       type: framework.type,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newFramework;
   }
 
-  async addControl(frameworkId: string, control: Omit<Control, 'evidence' | 'findings'>): Promise<Control> {
+  async addControl(
+    frameworkId: string,
+    control: Omit<Control, 'evidence' | 'findings'>,
+  ): Promise<Control> {
     const framework = this.frameworks.get(frameworkId);
     if (!framework) {
       throw new Error(`Framework ${frameworkId} not found`);
@@ -391,7 +443,7 @@ export class GRCConnector extends EventEmitter {
     const newControl: Control = {
       ...control,
       evidence: [],
-      findings: []
+      findings: [],
     };
 
     framework.controls.push(newControl);
@@ -410,18 +462,20 @@ export class GRCConnector extends EventEmitter {
       controlId: control.id,
       name: control.name,
       type: control.controlType,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newControl;
   }
 
-  async createAssessment(assessment: Omit<Assessment, 'findings' | 'recommendations' | 'evidence'>): Promise<Assessment> {
+  async createAssessment(
+    assessment: Omit<Assessment, 'findings' | 'recommendations' | 'evidence'>,
+  ): Promise<Assessment> {
     const newAssessment: Assessment = {
       ...assessment,
       findings: [],
       recommendations: [],
-      evidence: []
+      evidence: [],
     };
 
     this.assessments.set(assessment.id, newAssessment);
@@ -436,7 +490,7 @@ export class GRCConnector extends EventEmitter {
       name: assessment.name,
       type: assessment.type,
       frameworkId: assessment.frameworkId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newAssessment;
@@ -445,7 +499,7 @@ export class GRCConnector extends EventEmitter {
   async addFinding(finding: Omit<Finding, 'evidence'>): Promise<Finding> {
     const newFinding: Finding = {
       ...finding,
-      evidence: []
+      evidence: [],
     };
 
     this.findings.set(finding.id, newFinding);
@@ -470,18 +524,23 @@ export class GRCConnector extends EventEmitter {
       assessmentId: finding.assessmentId,
       title: finding.title,
       severity: finding.severity,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newFinding;
   }
 
-  async uploadEvidence(evidence: Omit<Evidence, 'id' | 'hash' | 'uploadedDate'>): Promise<Evidence> {
+  async uploadEvidence(
+    evidence: Omit<Evidence, 'id' | 'hash' | 'uploadedDate'>,
+  ): Promise<Evidence> {
     const newEvidence: Evidence = {
       ...evidence,
       id: crypto.randomUUID(),
-      hash: crypto.createHash('sha256').update(evidence.name + evidence.uploadedBy).digest('hex'),
-      uploadedDate: new Date()
+      hash: crypto
+        .createHash('sha256')
+        .update(evidence.name + evidence.uploadedBy)
+        .digest('hex'),
+      uploadedDate: new Date(),
     };
 
     this.evidence.set(newEvidence.id, newEvidence);
@@ -491,16 +550,18 @@ export class GRCConnector extends EventEmitter {
       name: newEvidence.name,
       type: newEvidence.type,
       uploadedBy: newEvidence.uploadedBy,
-      timestamp: newEvidence.uploadedDate
+      timestamp: newEvidence.uploadedDate,
     });
 
     return newEvidence;
   }
 
-  async createRemediationPlan(plan: Omit<RemediationPlan, 'milestones'>): Promise<RemediationPlan> {
+  async createRemediationPlan(
+    plan: Omit<RemediationPlan, 'milestones'>,
+  ): Promise<RemediationPlan> {
     const newPlan: RemediationPlan = {
       ...plan,
-      milestones: []
+      milestones: [],
     };
 
     const finding = this.findings.get(plan.findingId);
@@ -513,27 +574,32 @@ export class GRCConnector extends EventEmitter {
       findingId: plan.findingId,
       title: plan.title,
       priority: plan.priority,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newPlan;
   }
 
-  async conductRiskAssessment(assessment: RiskAssessment): Promise<RiskAssessment> {
+  async conductRiskAssessment(
+    assessment: RiskAssessment,
+  ): Promise<RiskAssessment> {
     // Calculate overall risk score
-    const riskScore = assessment.riskFactors.reduce((sum, factor) => sum + factor.score, 0) / assessment.riskFactors.length;
+    const riskScore =
+      assessment.riskFactors.reduce((sum, factor) => sum + factor.score, 0) /
+      assessment.riskFactors.length;
     assessment.inherentRisk = riskScore;
 
     // Apply control effectiveness to calculate residual risk
     const controlEffectiveness = 0.7; // This would be calculated based on actual controls
-    assessment.residualRisk = assessment.inherentRisk * (1 - controlEffectiveness);
+    assessment.residualRisk =
+      assessment.inherentRisk * (1 - controlEffectiveness);
 
     this.emit('risk_assessment_completed', {
       assessmentId: assessment.id,
       inherentRisk: assessment.inherentRisk,
       residualRisk: assessment.residualRisk,
       riskFactorCount: assessment.riskFactors.length,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return assessment;
@@ -543,7 +609,7 @@ export class GRCConnector extends EventEmitter {
     frameworkId: string,
     reportType: ComplianceReport['type'],
     period: { start: Date; end: Date },
-    generatedBy: string
+    generatedBy: string,
   ): Promise<ComplianceReport> {
     const framework = this.frameworks.get(frameworkId);
     if (!framework) {
@@ -561,22 +627,34 @@ export class GRCConnector extends EventEmitter {
       recipients: [],
       sections: [],
       status: 'draft',
-      format: 'pdf'
+      format: 'pdf',
     };
 
     // Generate report sections based on type
     switch (reportType) {
       case 'dashboard':
-        report.sections = await this.generateDashboardSections(framework, period);
+        report.sections = await this.generateDashboardSections(
+          framework,
+          period,
+        );
         break;
       case 'executive-summary':
-        report.sections = await this.generateExecutiveSummarySections(framework, period);
+        report.sections = await this.generateExecutiveSummarySections(
+          framework,
+          period,
+        );
         break;
       case 'detailed-report':
-        report.sections = await this.generateDetailedReportSections(framework, period);
+        report.sections = await this.generateDetailedReportSections(
+          framework,
+          period,
+        );
         break;
       case 'certification-letter':
-        report.sections = await this.generateCertificationSections(framework, period);
+        report.sections = await this.generateCertificationSections(
+          framework,
+          period,
+        );
         break;
     }
 
@@ -587,13 +665,16 @@ export class GRCConnector extends EventEmitter {
       name: report.name,
       type: report.type,
       frameworkId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return report;
   }
 
-  private async generateDashboardSections(framework: ComplianceFramework, period: { start: Date; end: Date }): Promise<ReportSection[]> {
+  private async generateDashboardSections(
+    framework: ComplianceFramework,
+    period: { start: Date; end: Date },
+  ): Promise<ReportSection[]> {
     return [
       {
         id: 'overview',
@@ -605,16 +686,16 @@ export class GRCConnector extends EventEmitter {
             type: 'donut',
             title: 'Control Implementation Status',
             data: this.getControlStatusData(framework),
-            options: {}
+            options: {},
           },
           {
             type: 'bar',
             title: 'Findings by Severity',
             data: this.getFindingsSeverityData(framework),
-            options: {}
-          }
+            options: {},
+          },
         ],
-        tables: []
+        tables: [],
       },
       {
         id: 'trends',
@@ -626,15 +707,18 @@ export class GRCConnector extends EventEmitter {
             type: 'line',
             title: 'Compliance Score Trend',
             data: this.getComplianceTrendData(framework, period),
-            options: {}
-          }
+            options: {},
+          },
         ],
-        tables: []
-      }
+        tables: [],
+      },
     ];
   }
 
-  private async generateExecutiveSummarySections(framework: ComplianceFramework, period: { start: Date; end: Date }): Promise<ReportSection[]> {
+  private async generateExecutiveSummarySections(
+    framework: ComplianceFramework,
+    period: { start: Date; end: Date },
+  ): Promise<ReportSection[]> {
     return [
       {
         id: 'executive-summary',
@@ -642,7 +726,7 @@ export class GRCConnector extends EventEmitter {
         content: this.generateExecutiveSummaryContent(framework),
         data: {},
         charts: [],
-        tables: []
+        tables: [],
       },
       {
         id: 'key-metrics',
@@ -654,14 +738,17 @@ export class GRCConnector extends EventEmitter {
           {
             title: 'Compliance Scorecard',
             headers: ['Metric', 'Value', 'Target', 'Status'],
-            rows: this.generateScorecardRows(framework)
-          }
-        ]
-      }
+            rows: this.generateScorecardRows(framework),
+          },
+        ],
+      },
     ];
   }
 
-  private async generateDetailedReportSections(framework: ComplianceFramework, period: { start: Date; end: Date }): Promise<ReportSection[]> {
+  private async generateDetailedReportSections(
+    framework: ComplianceFramework,
+    period: { start: Date; end: Date },
+  ): Promise<ReportSection[]> {
     return [
       {
         id: 'framework-overview',
@@ -669,7 +756,7 @@ export class GRCConnector extends EventEmitter {
         content: framework.description,
         data: framework,
         charts: [],
-        tables: []
+        tables: [],
       },
       {
         id: 'control-assessment',
@@ -680,10 +767,17 @@ export class GRCConnector extends EventEmitter {
         tables: [
           {
             title: 'Control Assessment Summary',
-            headers: ['Control ID', 'Name', 'Status', 'Effectiveness', 'Last Tested', 'Findings'],
-            rows: this.generateControlAssessmentRows(framework)
-          }
-        ]
+            headers: [
+              'Control ID',
+              'Name',
+              'Status',
+              'Effectiveness',
+              'Last Tested',
+              'Findings',
+            ],
+            rows: this.generateControlAssessmentRows(framework),
+          },
+        ],
       },
       {
         id: 'findings',
@@ -694,15 +788,25 @@ export class GRCConnector extends EventEmitter {
         tables: [
           {
             title: 'Open Findings',
-            headers: ['Finding ID', 'Title', 'Severity', 'Status', 'Owner', 'Target Date'],
-            rows: this.generateFindingsRows(framework)
-          }
-        ]
-      }
+            headers: [
+              'Finding ID',
+              'Title',
+              'Severity',
+              'Status',
+              'Owner',
+              'Target Date',
+            ],
+            rows: this.generateFindingsRows(framework),
+          },
+        ],
+      },
     ];
   }
 
-  private async generateCertificationSections(framework: ComplianceFramework, period: { start: Date; end: Date }): Promise<ReportSection[]> {
+  private async generateCertificationSections(
+    framework: ComplianceFramework,
+    period: { start: Date; end: Date },
+  ): Promise<ReportSection[]> {
     return [
       {
         id: 'certification-statement',
@@ -710,60 +814,82 @@ export class GRCConnector extends EventEmitter {
         content: this.generateCertificationStatement(framework, period),
         data: {},
         charts: [],
-        tables: []
-      }
+        tables: [],
+      },
     ];
   }
 
   private calculateComplianceMetrics(framework: ComplianceFramework): any {
-    const implementedControls = framework.controls.filter(c => c.status === 'implemented').length;
-    const effectiveControls = framework.controls.filter(c => c.effectiveness === 'effective').length;
+    const implementedControls = framework.controls.filter(
+      (c) => c.status === 'implemented',
+    ).length;
+    const effectiveControls = framework.controls.filter(
+      (c) => c.effectiveness === 'effective',
+    ).length;
     const totalControls = framework.controls.length;
 
     return {
-      implementationRate: totalControls > 0 ? (implementedControls / totalControls) * 100 : 0,
-      effectivenessRate: totalControls > 0 ? (effectiveControls / totalControls) * 100 : 0,
-      overallScore: totalControls > 0 ? ((implementedControls * 0.6) + (effectiveControls * 0.4)) / totalControls * 100 : 0
+      implementationRate:
+        totalControls > 0 ? (implementedControls / totalControls) * 100 : 0,
+      effectivenessRate:
+        totalControls > 0 ? (effectiveControls / totalControls) * 100 : 0,
+      overallScore:
+        totalControls > 0
+          ? ((implementedControls * 0.6 + effectiveControls * 0.4) /
+              totalControls) *
+            100
+          : 0,
     };
   }
 
   private getControlStatusData(framework: ComplianceFramework): any[] {
-    const statusCounts = framework.controls.reduce((acc, control) => {
-      acc[control.status] = (acc[control.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const statusCounts = framework.controls.reduce(
+      (acc, control) => {
+        acc[control.status] = (acc[control.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return Object.entries(statusCounts).map(([status, count]) => ({
       label: status,
-      value: count
+      value: count,
     }));
   }
 
   private getFindingsSeverityData(framework: ComplianceFramework): any[] {
-    const allFindings = framework.assessments.flatMap(a => a.findings);
-    const severityCounts = allFindings.reduce((acc, finding) => {
-      acc[finding.severity] = (acc[finding.severity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const allFindings = framework.assessments.flatMap((a) => a.findings);
+    const severityCounts = allFindings.reduce(
+      (acc, finding) => {
+        acc[finding.severity] = (acc[finding.severity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return Object.entries(severityCounts).map(([severity, count]) => ({
       label: severity,
-      value: count
+      value: count,
     }));
   }
 
-  private getComplianceTrendData(framework: ComplianceFramework, period: { start: Date; end: Date }): any[] {
+  private getComplianceTrendData(
+    framework: ComplianceFramework,
+    period: { start: Date; end: Date },
+  ): any[] {
     // This would typically pull historical data
     // For now, return mock trend data
     return [
       { date: '2024-01', score: 75 },
       { date: '2024-02', score: 78 },
       { date: '2024-03', score: 82 },
-      { date: '2024-04', score: 85 }
+      { date: '2024-04', score: 85 },
     ];
   }
 
-  private generateExecutiveSummaryContent(framework: ComplianceFramework): string {
+  private generateExecutiveSummaryContent(
+    framework: ComplianceFramework,
+  ): string {
     const metrics = this.calculateComplianceMetrics(framework);
     return `This report provides an executive overview of compliance with ${framework.name}.
             Current compliance score is ${metrics.overallScore.toFixed(1)}%, with ${metrics.implementationRate.toFixed(1)}%
@@ -773,38 +899,58 @@ export class GRCConnector extends EventEmitter {
   private generateScorecardRows(framework: ComplianceFramework): any[][] {
     const metrics = this.calculateComplianceMetrics(framework);
     return [
-      ['Control Implementation', `${metrics.implementationRate.toFixed(1)}%`, '100%', metrics.implementationRate >= 90 ? 'Green' : 'Yellow'],
-      ['Control Effectiveness', `${metrics.effectivenessRate.toFixed(1)}%`, '95%', metrics.effectivenessRate >= 90 ? 'Green' : 'Red'],
-      ['Overall Compliance', `${metrics.overallScore.toFixed(1)}%`, '90%', metrics.overallScore >= 85 ? 'Green' : 'Yellow']
+      [
+        'Control Implementation',
+        `${metrics.implementationRate.toFixed(1)}%`,
+        '100%',
+        metrics.implementationRate >= 90 ? 'Green' : 'Yellow',
+      ],
+      [
+        'Control Effectiveness',
+        `${metrics.effectivenessRate.toFixed(1)}%`,
+        '95%',
+        metrics.effectivenessRate >= 90 ? 'Green' : 'Red',
+      ],
+      [
+        'Overall Compliance',
+        `${metrics.overallScore.toFixed(1)}%`,
+        '90%',
+        metrics.overallScore >= 85 ? 'Green' : 'Yellow',
+      ],
     ];
   }
 
-  private generateControlAssessmentRows(framework: ComplianceFramework): any[][] {
-    return framework.controls.map(control => [
+  private generateControlAssessmentRows(
+    framework: ComplianceFramework,
+  ): any[][] {
+    return framework.controls.map((control) => [
       control.id,
       control.name,
       control.status,
       control.effectiveness,
       control.lastTested?.toISOString().split('T')[0] || 'Not tested',
-      control.findings.length.toString()
+      control.findings.length.toString(),
     ]);
   }
 
   private generateFindingsRows(framework: ComplianceFramework): any[][] {
-    const allFindings = framework.assessments.flatMap(a => a.findings);
-    const openFindings = allFindings.filter(f => f.status === 'open');
+    const allFindings = framework.assessments.flatMap((a) => a.findings);
+    const openFindings = allFindings.filter((f) => f.status === 'open');
 
-    return openFindings.map(finding => [
+    return openFindings.map((finding) => [
       finding.id,
       finding.title,
       finding.severity,
       finding.status,
       finding.owner,
-      finding.targetDate?.toISOString().split('T')[0] || 'Not set'
+      finding.targetDate?.toISOString().split('T')[0] || 'Not set',
     ]);
   }
 
-  private generateCertificationStatement(framework: ComplianceFramework, period: { start: Date; end: Date }): string {
+  private generateCertificationStatement(
+    framework: ComplianceFramework,
+    period: { start: Date; end: Date },
+  ): string {
     const metrics = this.calculateComplianceMetrics(framework);
     return `I hereby certify that for the period ${period.start.toDateString()} to ${period.end.toDateString()},
             the organization has maintained compliance with ${framework.name} with an overall compliance score of
@@ -826,12 +972,12 @@ export class GRCConnector extends EventEmitter {
 
       this.emit('sync_completed', {
         timestamp: new Date(),
-        metrics: this.getMetrics()
+        metrics: this.getMetrics(),
       });
     } catch (error) {
       this.emit('sync_failed', {
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
@@ -850,24 +996,42 @@ export class GRCConnector extends EventEmitter {
 
   private updateMetrics(): void {
     this.metrics.totalFrameworks = this.frameworks.size;
-    this.metrics.activeFrameworks = Array.from(this.frameworks.values()).filter(f => f.status === 'active').length;
+    this.metrics.activeFrameworks = Array.from(this.frameworks.values()).filter(
+      (f) => f.status === 'active',
+    ).length;
 
-    const allControls = Array.from(this.frameworks.values()).flatMap(f => f.controls);
+    const allControls = Array.from(this.frameworks.values()).flatMap(
+      (f) => f.controls,
+    );
     this.metrics.totalControls = allControls.length;
-    this.metrics.implementedControls = allControls.filter(c => c.status === 'implemented').length;
-    this.metrics.effectiveControls = allControls.filter(c => c.effectiveness === 'effective').length;
+    this.metrics.implementedControls = allControls.filter(
+      (c) => c.status === 'implemented',
+    ).length;
+    this.metrics.effectiveControls = allControls.filter(
+      (c) => c.effectiveness === 'effective',
+    ).length;
 
     const allFindings = Array.from(this.findings.values());
     this.metrics.totalFindings = allFindings.length;
-    this.metrics.openFindings = allFindings.filter(f => f.status === 'open').length;
-    this.metrics.criticalFindings = allFindings.filter(f => f.severity === 'critical' || f.severity === 'high').length;
+    this.metrics.openFindings = allFindings.filter(
+      (f) => f.status === 'open',
+    ).length;
+    this.metrics.criticalFindings = allFindings.filter(
+      (f) => f.severity === 'critical' || f.severity === 'high',
+    ).length;
 
     this.metrics.totalAssessments = this.assessments.size;
-    this.metrics.completedAssessments = Array.from(this.assessments.values()).filter(a => a.status === 'completed').length;
+    this.metrics.completedAssessments = Array.from(
+      this.assessments.values(),
+    ).filter((a) => a.status === 'completed').length;
 
-    this.metrics.overallComplianceScore = this.metrics.totalControls > 0
-      ? ((this.metrics.implementedControls * 0.6) + (this.metrics.effectiveControls * 0.4)) / this.metrics.totalControls * 100
-      : 0;
+    this.metrics.overallComplianceScore =
+      this.metrics.totalControls > 0
+        ? ((this.metrics.implementedControls * 0.6 +
+            this.metrics.effectiveControls * 0.4) /
+            this.metrics.totalControls) *
+          100
+        : 0;
   }
 
   private startPeriodicSync(): void {
@@ -919,7 +1083,7 @@ export class GRCConnector extends EventEmitter {
 
     this.emit('disconnected', {
       platform: this.config.platform,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -931,7 +1095,7 @@ export class GRCConnector extends EventEmitter {
       this.emit('connection_tested', {
         success: true,
         platform: this.config.platform,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return true;
@@ -940,7 +1104,7 @@ export class GRCConnector extends EventEmitter {
         success: false,
         platform: this.config.platform,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return false;

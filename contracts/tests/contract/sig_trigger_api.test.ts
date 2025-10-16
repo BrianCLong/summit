@@ -12,7 +12,9 @@ describe('Runbooks trigger API (allow‑listed)', () => {
       .post('/runbooks/trigger')
       .reply(403, { error: 'runbook not allow‑listed' });
 
-    const res = await fetch(`${MAESTRO_BASE}/runbooks/trigger`, { method: 'POST' });
+    const res = await fetch(`${MAESTRO_BASE}/runbooks/trigger`, {
+      method: 'POST',
+    });
     expect(res.status).toBe(403);
     scope.done();
   });

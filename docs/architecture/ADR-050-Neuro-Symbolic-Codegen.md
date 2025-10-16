@@ -1,4 +1,3 @@
-
 # ADR-050: Neuro-Symbolic Codegen
 
 **Status:** Proposed

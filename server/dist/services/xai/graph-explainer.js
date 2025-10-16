@@ -7,6 +7,9 @@ import crypto from 'crypto';
 import { insertAnalyticsTrace } from '../../db/timescale.js';
 import logger from '../../utils/logger.js';
 export class GraphXAIExplainer {
+    static instance;
+    explanationCache = new Map();
+    modelCards = new Map();
     static getInstance() {
         if (!GraphXAIExplainer.instance) {
             GraphXAIExplainer.instance = new GraphXAIExplainer();
@@ -14,8 +17,6 @@ export class GraphXAIExplainer {
         return GraphXAIExplainer.instance;
     }
     constructor() {
-        this.explanationCache = new Map();
-        this.modelCards = new Map();
         this.initializeModelCards();
     }
     // Committee requirement: Model cards for explainability
@@ -87,7 +88,10 @@ export class GraphXAIExplainer {
             }))
                 .sort((a, b) => `${a.source}-${a.target}`.localeCompare(`${b.source}-${b.target}`)),
         };
-        return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
+        return crypto
+            .createHash('md5')
+            .update(JSON.stringify(normalized))
+            .digest('hex');
     }
     // Committee requirement: XAI caching and determinism
     async getCachedExplanation(requestHash) {
@@ -149,7 +153,8 @@ export class GraphXAIExplainer {
                 processing_time_ms: processingTime,
                 graph_complexity: this.calculateGraphComplexity(request.graph_data),
                 explanation_coverage: this.calculateExplanationCoverage(explanations, request.graph_data),
-                model_confidence: modelCard.accuracy_metrics[`${request.explanation_type}_accuracy`] || 0.85,
+                model_confidence: modelCard.accuracy_metrics[`${request.explanation_type}_accuracy`] ||
+                    0.85,
             },
             created_at: new Date(),
             cached: false,
@@ -289,7 +294,8 @@ export class GraphXAIExplainer {
     // Helper methods for graph analysis
     calculateNodeDegree(nodeId, graphData) {
         const edges = graphData.edges || [];
-        return edges.filter((e) => e.source === nodeId || e.target === nodeId).length;
+        return edges.filter((e) => e.source === nodeId || e.target === nodeId)
+            .length;
     }
     calculateCentrality(nodeId, graphData) {
         // Simplified centrality calculation
@@ -315,8 +321,10 @@ export class GraphXAIExplainer {
     calculateOverallConfidence(explanations) {
         if (explanations.length === 0)
             return 0;
-        const avgImportance = explanations.reduce((sum, exp) => sum + exp.importance_score, 0) / explanations.length;
-        const avgUncertainty = explanations.reduce((sum, exp) => sum + exp.uncertainty, 0) / explanations.length;
+        const avgImportance = explanations.reduce((sum, exp) => sum + exp.importance_score, 0) /
+            explanations.length;
+        const avgUncertainty = explanations.reduce((sum, exp) => sum + exp.uncertainty, 0) /
+            explanations.length;
         return Math.max(0, avgImportance * (1 - avgUncertainty));
     }
     identifySubgraphClusters(graphData) {
@@ -325,7 +333,11 @@ export class GraphXAIExplainer {
             {
                 id: 'cluster-1',
                 reasoning: 'high-activity communication network',
-                evidence: ['Dense interconnections', 'High message frequency', 'Temporal clustering'],
+                evidence: [
+                    'Dense interconnections',
+                    'High message frequency',
+                    'Temporal clustering',
+                ],
                 uncertainty: 0.12,
             },
         ];

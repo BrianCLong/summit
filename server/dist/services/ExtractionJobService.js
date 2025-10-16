@@ -13,6 +13,18 @@ import EmbeddingService from '../ai/services/EmbeddingService.js';
 import path from 'path';
 const logger = pino({ name: 'ExtractionJobService' });
 export class ExtractionJobService {
+    db;
+    redis;
+    extractionQueue;
+    extractionWorker;
+    queueEvents;
+    extractionEngine;
+    ocrEngine;
+    objectDetectionEngine;
+    speechToTextEngine;
+    faceDetectionEngine;
+    textAnalysisEngine;
+    embeddingService;
     constructor(db, redisConfig) {
         this.db = db;
         this.redis = new IORedis(redisConfig);
@@ -23,7 +35,7 @@ export class ExtractionJobService {
             tempPath: process.env.AI_TEMP_PATH || '/tmp/intelgraph',
             enableGPU: process.env.AI_ENABLE_GPU === 'true',
             maxConcurrentJobs: parseInt(process.env.AI_MAX_CONCURRENT_JOBS || '5'),
-            batchSize: parseInt(process.env.AI_BATCH_SIZE || '32')
+            batchSize: parseInt(process.env.AI_BATCH_SIZE || '32'),
         };
         this.extractionEngine = new ExtractionEngine(engineConfig);
         this.ocrEngine = new OCREngine(engineConfig);
@@ -41,9 +53,9 @@ export class ExtractionJobService {
                 attempts: 3, // Retry up to 3 times
                 backoff: {
                     type: 'exponential',
-                    delay: 5000
-                }
-            }
+                    delay: 5000,
+                },
+            },
         });
         // Initialize worker for processing extraction jobs
         this.extractionWorker = new Worker('multimodal-extraction', this.processExtractionJob.bind(this), {
@@ -51,12 +63,12 @@ export class ExtractionJobService {
             concurrency: 5, // Process up to 5 jobs concurrently
             limiter: {
                 max: 10, // Maximum 10 jobs
-                duration: 60000 // per minute
-            }
+                duration: 60000, // per minute
+            },
         });
         // Initialize queue events for monitoring
         this.queueEvents = new QueueEvents('multimodal-extraction', {
-            connection: this.redis
+            connection: this.redis,
         });
         this.setupEventListeners();
     }
@@ -90,7 +102,7 @@ export class ExtractionJobService {
                 JSON.stringify({}),
                 userId,
                 now,
-                now
+                now,
             ];
             const result = await this.db.query(query, values);
             const job = this.mapRowToExtractionJob(result.rows[0]);
@@ -100,12 +112,12 @@ export class ExtractionJobService {
                 investigationId: input.investigationId,
                 mediaSourceId: input.mediaSourceId,
                 extractionMethods: input.extractionMethods,
-                options: input.options || {}
+                options: input.options || {},
             }, {
                 jobId, // Use our UUID as Bull job ID
                 priority: this.calculateJobPriority(input.extractionMethods),
                 delay: 0,
-                attempts: 3
+                attempts: 3,
             });
             logger.info(`Started extraction job: ${jobId}, methods: ${input.extractionMethods.join(', ')}`);
             return job;
@@ -122,7 +134,9 @@ export class ExtractionJobService {
         try {
             const query = 'SELECT * FROM extraction_jobs WHERE id = $1';
             const result = await this.db.query(query, [id]);
-            return result.rows.length > 0 ? this.mapRowToExtractionJob(result.rows[0]) : null;
+            return result.rows.length > 0
+                ? this.mapRowToExtractionJob(result.rows[0])
+                : null;
         }
         catch (error) {
             logger.error(`Failed to get extraction job ${id}:`, error);
@@ -151,7 +165,7 @@ export class ExtractionJobService {
                 values.push(filters.offset);
             }
             const result = await this.db.query(query, values);
-            return result.rows.map(row => this.mapRowToExtractionJob(row));
+            return result.rows.map((row) => this.mapRowToExtractionJob(row));
         }
         catch (error) {
             logger.error(`Failed to get extraction jobs for investigation ${investigationId}:`, error);
@@ -165,7 +179,7 @@ export class ExtractionJobService {
         try {
             // Remove from queue if still pending
             const bullJob = await this.extractionQueue.getJob(id);
-            if (bullJob && await bullJob.isWaiting()) {
+            if (bullJob && (await bullJob.isWaiting())) {
                 await bullJob.remove();
             }
             // Update database status
@@ -179,7 +193,7 @@ export class ExtractionJobService {
                 ProcessingStatus.CANCELLED,
                 id,
                 ProcessingStatus.PENDING,
-                ProcessingStatus.IN_PROGRESS
+                ProcessingStatus.IN_PROGRESS,
             ]);
             if (result.rows.length === 0) {
                 throw new Error(`Extraction job ${id} not found or cannot be cancelled`);
@@ -218,10 +232,10 @@ export class ExtractionJobService {
                 investigationId: job.investigationId,
                 mediaSourceId: job.mediaSourceId,
                 extractionMethods: job.extractionMethods,
-                options: job.jobOptions
+                options: job.jobOptions,
             }, {
                 jobId: id,
-                priority: this.calculateJobPriority(job.extractionMethods)
+                priority: this.calculateJobPriority(job.extractionMethods),
             });
             logger.info(`Retried extraction job: ${id}`);
             return this.mapRowToExtractionJob(result.rows[0]);
@@ -235,7 +249,7 @@ export class ExtractionJobService {
      * Process extraction job (worker function)
      */
     async processExtractionJob(job) {
-        const { jobId, investigationId, mediaSourceId, extractionMethods, options } = job.data;
+        const { jobId, investigationId, mediaSourceId, extractionMethods, options, } = job.data;
         const startTime = Date.now();
         logger.info(`Processing extraction job: ${jobId}, methods: ${extractionMethods.join(', ')}`);
         try {
@@ -266,7 +280,8 @@ export class ExtractionJobService {
                         method,
                         executionTime: methodDuration,
                         entitiesFound: result.entities.length,
-                        averageConfidence: result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length || 0
+                        averageConfidence: result.entities.reduce((sum, e) => sum + e.confidence, 0) /
+                            result.entities.length || 0,
                     });
                     logger.info(`Completed extraction method ${method}: ${result.entities.length} entities, ${methodDuration}ms`);
                 }
@@ -286,7 +301,7 @@ export class ExtractionJobService {
                 processingTime: totalDuration,
                 entitiesExtracted: savedCount,
                 confidenceDistribution,
-                methodPerformance: methodMetrics
+                methodPerformance: methodMetrics,
             };
             // Update job as completed
             await this.updateJobStatus(jobId, ProcessingStatus.COMPLETED, 1.0, new Date(), new Date(), totalDuration, savedCount, allErrors, metrics);
@@ -309,25 +324,29 @@ export class ExtractionJobService {
         try {
             switch (method) {
                 case 'ocr':
-                    if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'DOCUMENT') {
+                    if (mediaSource.media_type === 'IMAGE' ||
+                        mediaSource.media_type === 'DOCUMENT') {
                         const ocrResults = await this.runOCRExtraction(mediaSource.file_path, options);
                         entities.push(...ocrResults);
                     }
                     break;
                 case 'object_detection':
-                    if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+                    if (mediaSource.media_type === 'IMAGE' ||
+                        mediaSource.media_type === 'VIDEO') {
                         const detectionResults = await this.runObjectDetection(mediaSource.file_path, options);
                         entities.push(...detectionResults);
                     }
                     break;
                 case 'face_detection':
-                    if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+                    if (mediaSource.media_type === 'IMAGE' ||
+                        mediaSource.media_type === 'VIDEO') {
                         const faceResults = await this.runFaceDetection(mediaSource.file_path, options);
                         entities.push(...faceResults);
                     }
                     break;
                 case 'speech_to_text':
-                    if (mediaSource.media_type === 'AUDIO' || mediaSource.media_type === 'VIDEO') {
+                    if (mediaSource.media_type === 'AUDIO' ||
+                        mediaSource.media_type === 'VIDEO') {
                         const speechResults = await this.runSpeechToText(mediaSource.file_path, options);
                         entities.push(...speechResults);
                     }
@@ -343,25 +362,29 @@ export class ExtractionJobService {
                     entities.push(...embeddingResults);
                     break;
                 case 'object_detection':
-                    if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+                    if (mediaSource.media_type === 'IMAGE' ||
+                        mediaSource.media_type === 'VIDEO') {
                         const detectionResults = await this.runObjectDetection(mediaSource.file_path, options);
                         entities.push(...detectionResults);
                     }
                     break;
                 case 'speech_to_text':
-                    if (mediaSource.media_type === 'AUDIO' || mediaSource.media_type === 'VIDEO') {
+                    if (mediaSource.media_type === 'AUDIO' ||
+                        mediaSource.media_type === 'VIDEO') {
                         const transcriptionResults = await this.runSpeechToText(mediaSource.file_path, options);
                         entities.push(...transcriptionResults);
                     }
                     break;
                 case 'face_detection':
-                    if (mediaSource.media_type === 'IMAGE' || mediaSource.media_type === 'VIDEO') {
+                    if (mediaSource.media_type === 'IMAGE' ||
+                        mediaSource.media_type === 'VIDEO') {
                         const faceResults = await this.runFaceDetection(mediaSource.file_path, options);
                         entities.push(...faceResults);
                     }
                     break;
                 case 'text_analysis':
-                    if (mediaSource.media_type === 'TEXT' || mediaSource.media_type === 'DOCUMENT') {
+                    if (mediaSource.media_type === 'TEXT' ||
+                        mediaSource.media_type === 'DOCUMENT') {
                         const textResults = await this.runTextAnalysis(mediaSource.file_path, options);
                         entities.push(...textResults);
                     }
@@ -376,8 +399,9 @@ export class ExtractionJobService {
                     method,
                     processingTime,
                     entitiesFound: entities.length,
-                    averageConfidence: entities.reduce((sum, e) => sum + e.confidence, 0) / entities.length || 0
-                }
+                    averageConfidence: entities.reduce((sum, e) => sum + e.confidence, 0) /
+                        entities.length || 0,
+                },
             };
         }
         catch (error) {
@@ -395,7 +419,7 @@ export class ExtractionJobService {
                 enhanceImage: options.enhanceImage !== false,
                 confidenceThreshold: options.confidenceThreshold || 0.6,
                 preserveWhitespace: options.preserveWhitespace || false,
-                enableStructureAnalysis: options.enableStructureAnalysis !== false
+                enableStructureAnalysis: options.enableStructureAnalysis !== false,
             };
             const results = await this.ocrEngine.extractText(filePath, ocrOptions);
             const entities = [];
@@ -408,7 +432,7 @@ export class ExtractionJobService {
                         y: result.boundingBox.y,
                         width: result.boundingBox.width,
                         height: result.boundingBox.height,
-                        confidence: result.boundingBox.confidence
+                        confidence: result.boundingBox.confidence,
                     },
                     confidence: result.confidence,
                     extractionMethod: 'ocr',
@@ -418,8 +442,8 @@ export class ExtractionJobService {
                         ocrEngine: result.engine,
                         wordCount: result.text.split(' ').length,
                         structureType: result.metadata?.structureType,
-                        readingOrder: result.metadata?.readingOrder
-                    }
+                        readingOrder: result.metadata?.readingOrder,
+                    },
                 });
             }
             return entities;
@@ -439,7 +463,7 @@ export class ExtractionJobService {
                 confidenceThreshold: options.confidenceThreshold || 0.5,
                 nmsThreshold: options.nmsThreshold || 0.4,
                 enableTracking: options.enableTracking || false,
-                targetClasses: options.targetClasses || []
+                targetClasses: options.targetClasses || [],
             };
             const results = await this.objectDetectionEngine.detectObjects(filePath, detectionOptions);
             const entities = [];
@@ -451,7 +475,7 @@ export class ExtractionJobService {
                         y: detection.bbox.y,
                         width: detection.bbox.width,
                         height: detection.bbox.height,
-                        confidence: detection.confidence
+                        confidence: detection.confidence,
                     },
                     confidence: detection.confidence,
                     extractionMethod: 'object_detection',
@@ -460,8 +484,8 @@ export class ExtractionJobService {
                         model: detection.model,
                         classId: detection.class_id,
                         area: detection.bbox.width * detection.bbox.height,
-                        trackingId: detection.tracking_id
-                    }
+                        trackingId: detection.tracking_id,
+                    },
                 });
             }
             return entities;
@@ -480,9 +504,12 @@ export class ExtractionJobService {
             const pythonScript = path.join(__dirname, '../ai/models/whisper_transcription.py');
             const args = [
                 pythonScript,
-                '--audio', filePath,
-                '--model', options.model || 'base',
-                '--output-format', 'json'
+                '--audio',
+                filePath,
+                '--model',
+                options.model || 'base',
+                '--output-format',
+                'json',
             ];
             if (options.language && options.language !== 'auto') {
                 args.push('--language', options.language);
@@ -511,7 +538,7 @@ export class ExtractionJobService {
                                 temporalRange: {
                                     startTime: segment.start,
                                     endTime: segment.end,
-                                    confidence: segment.confidence
+                                    confidence: segment.confidence,
                                 },
                                 confidence: segment.confidence,
                                 extractionMethod: 'speech_to_text',
@@ -520,8 +547,8 @@ export class ExtractionJobService {
                                     language: result.language || 'unknown',
                                     model: 'whisper',
                                     wordCount: segment.text.split(' ').length,
-                                    words: segment.words || []
-                                }
+                                    words: segment.words || [],
+                                },
                             });
                         }
                         resolve(entities);
@@ -548,9 +575,12 @@ export class ExtractionJobService {
             const pythonScript = path.join(__dirname, '../ai/models/mtcnn_detection.py');
             const args = [
                 pythonScript,
-                '--image', filePath,
-                '--min-face-size', (options.minFaceSize || 20).toString(),
-                '--confidence', (options.confidenceThreshold || 0.7).toString()
+                '--image',
+                filePath,
+                '--min-face-size',
+                (options.minFaceSize || 20).toString(),
+                '--confidence',
+                (options.confidenceThreshold || 0.7).toString(),
             ];
             const python = spawn('python3', args);
             let output = '';
@@ -574,7 +604,7 @@ export class ExtractionJobService {
                                     y: face.bbox[1],
                                     width: face.bbox[2],
                                     height: face.bbox[3],
-                                    confidence: face.confidence
+                                    confidence: face.confidence,
                                 },
                                 confidence: face.confidence,
                                 extractionMethod: 'face_detection',
@@ -584,8 +614,8 @@ export class ExtractionJobService {
                                     age: face.estimated_age,
                                     gender: face.estimated_gender,
                                     emotion: face.dominant_emotion,
-                                    model: 'mtcnn'
-                                }
+                                    model: 'mtcnn',
+                                },
                             });
                         }
                         resolve(entities);
@@ -622,8 +652,10 @@ export class ExtractionJobService {
             }
             const args = [
                 pythonScript,
-                '--text', textContent,
-                '--language', options.language || 'en'
+                '--text',
+                textContent,
+                '--language',
+                options.language || 'en',
             ];
             const python = spawn('python3', args);
             let output = '';
@@ -651,8 +683,8 @@ export class ExtractionJobService {
                                     startOffset: entity.start,
                                     endOffset: entity.end,
                                     entityLabel: entity.label,
-                                    description: entity.description
-                                }
+                                    description: entity.description,
+                                },
                             });
                         }
                         // Add sentiment as entity
@@ -665,8 +697,8 @@ export class ExtractionJobService {
                                 extractionVersion: '2.0.0',
                                 metadata: {
                                     sentimentScore: result.sentiment.score,
-                                    sentimentLabel: result.sentiment.label
-                                }
+                                    sentimentLabel: result.sentiment.label,
+                                },
                             });
                         }
                         resolve(entities);
@@ -723,7 +755,7 @@ export class ExtractionJobService {
                     false,
                     JSON.stringify(entity.metadata),
                     new Date(),
-                    new Date()
+                    new Date(),
                 ];
                 await this.db.query(query, values);
                 savedCount++;
@@ -742,15 +774,17 @@ export class ExtractionJobService {
         if (total === 0)
             return [];
         const counts = {
-            'LOW': entities.filter(e => e.confidence < 0.5).length,
-            'MEDIUM': entities.filter(e => e.confidence >= 0.5 && e.confidence < 0.7).length,
-            'HIGH': entities.filter(e => e.confidence >= 0.7 && e.confidence < 0.9).length,
-            'VERY_HIGH': entities.filter(e => e.confidence >= 0.9).length
+            LOW: entities.filter((e) => e.confidence < 0.5).length,
+            MEDIUM: entities.filter((e) => e.confidence >= 0.5 && e.confidence < 0.7)
+                .length,
+            HIGH: entities.filter((e) => e.confidence >= 0.7 && e.confidence < 0.9)
+                .length,
+            VERY_HIGH: entities.filter((e) => e.confidence >= 0.9).length,
         };
         return Object.entries(counts).map(([level, count]) => ({
             level,
             count,
-            percentage: (count / total) * 100
+            percentage: (count / total) * 100,
         }));
     }
     /**
@@ -759,11 +793,11 @@ export class ExtractionJobService {
     calculateJobPriority(methods) {
         // Higher priority for simpler, faster methods
         const priorities = {
-            'ocr': 3,
-            'face_detection': 2,
-            'object_detection': 1,
-            'speech_to_text': 1,
-            'video_analysis': 0
+            ocr: 3,
+            face_detection: 2,
+            object_detection: 1,
+            speech_to_text: 1,
+            video_analysis: 0,
         };
         const avgPriority = methods.reduce((sum, method) => {
             return sum + (priorities[method] || 1);
@@ -863,7 +897,7 @@ export class ExtractionJobService {
             processingMetrics: row.processing_metrics || {},
             createdBy: row.created_by,
             createdAt: row.created_at,
-            updatedAt: row.updated_at
+            updatedAt: row.updated_at,
         };
     }
     /**

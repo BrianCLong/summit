@@ -16,7 +16,8 @@ import { trace } from '@opentelemetry/api';
 
 const PORT = process.env.PORT || 4000;
 const PERSISTED_ONLY =
-  process.env.NODE_ENV === 'production' && process.env.ALLOW_PERSISTED === 'true'
+  process.env.NODE_ENV === 'production' &&
+  process.env.ALLOW_PERSISTED === 'true'
     ? false
     : process.env.NODE_ENV === 'production';
 
@@ -27,7 +28,12 @@ const subgraphConfig = yaml.parse(
 class HeaderForwardingDataSource extends RemoteGraphQLDataSource {
   willSendRequest({ request, context }: any) {
     const headers = context?.headers as IncomingHttpHeaders;
-    const forwardHeaders = ['x-request-id', 'x-tenant-id', 'x-authority-id', 'traceparent'];
+    const forwardHeaders = [
+      'x-request-id',
+      'x-tenant-id',
+      'x-authority-id',
+      'traceparent',
+    ];
     forwardHeaders.forEach((h) => {
       const value = headers?.[h];
       if (value) {
@@ -38,10 +44,12 @@ class HeaderForwardingDataSource extends RemoteGraphQLDataSource {
 }
 
 const gateway = new ApolloGateway({
-  serviceList: Object.entries(subgraphConfig.subgraphs).map(([name, { url }]: any) => ({
-    name,
-    url,
-  })),
+  serviceList: Object.entries(subgraphConfig.subgraphs).map(
+    ([name, { url }]: any) => ({
+      name,
+      url,
+    }),
+  ),
   buildService({ url }) {
     return new HeaderForwardingDataSource({ url });
   },
@@ -52,7 +60,8 @@ export const server = new ApolloServer({
   validationRules: [
     depthLimit(10),
     createComplexityLimitRule(1000, {
-      createError: (type: unknown) => new Error(`Query is too complex: ${type}`),
+      createError: (type: unknown) =>
+        new Error(`Query is too complex: ${type}`),
     }),
   ],
 });

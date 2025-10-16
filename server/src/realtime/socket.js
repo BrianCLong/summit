@@ -11,7 +11,10 @@ let ioInstance = null;
 function initSocket(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.CORS_ORIGIN || process.env.CLIENT_URL || 'http://localhost:3000',
+      origin:
+        process.env.CORS_ORIGIN ||
+        process.env.CLIENT_URL ||
+        'http://localhost:3000',
       credentials: true,
     },
   });
@@ -21,12 +24,16 @@ function initSocket(httpServer) {
   const auth = new AuthService();
   ns.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.replace('Bearer ', '');
+      const token =
+        socket.handshake.auth?.token ||
+        socket.handshake.headers?.authorization?.replace('Bearer ', '');
       const user = await auth.verifyToken(token);
       if (!user) return next(new Error('Unauthorized'));
       socket.user = user;
       next();
-    } catch (e) { next(new Error('Unauthorized')); }
+    } catch (e) {
+      next(new Error('Unauthorized'));
+    }
   });
 
   ns.on('connection', (socket) => {
@@ -38,7 +45,11 @@ function initSocket(httpServer) {
     }
     if (!presenceDisabled) {
       // announce join
-      ns.emit('presence:join', { userId: socket.user?.id, sid: socket.id, ts: Date.now() });
+      ns.emit('presence:join', {
+        userId: socket.user?.id,
+        sid: socket.id,
+        ts: Date.now(),
+      });
     }
     socket.on('join_ai_entity', ({ entityId }) => {
       // add any RBAC validation here if required
@@ -56,7 +67,11 @@ function initSocket(httpServer) {
         ns.emit('presence_enabled', { reason: 'load_normalized' });
       }
       if (!presenceDisabled) {
-        ns.emit('presence:leave', { userId: socket.user?.id, sid: socket.id, ts: Date.now() });
+        ns.emit('presence:leave', {
+          userId: socket.user?.id,
+          sid: socket.id,
+          ts: Date.now(),
+        });
       }
       logger.info(`Realtime disconnect ${socket.id}`);
     });
@@ -66,6 +81,8 @@ function initSocket(httpServer) {
   return io;
 }
 
-function getIO() { return ioInstance; }
+function getIO() {
+  return ioInstance;
+}
 
 module.exports = { initSocket, getIO };

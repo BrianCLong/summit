@@ -7,9 +7,15 @@ const port = Number(process.env.PORT || 3000);
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 app.get('/livez', (_req, res) => res.json({ ok: true }));
 
-if (process.env.NODE_ENV !== 'test' && process.env.POLICY_AUTO_START !== 'false') {
-  try { startPolicyManager(); } catch (e) { console.warn('policy manager start failed', (e as Error).message); }
+if (
+  process.env.NODE_ENV !== 'test' &&
+  process.env.POLICY_AUTO_START !== 'false'
+) {
+  try {
+    startPolicyManager();
+  } catch (e) {
+    console.warn('policy manager start failed', (e as Error).message);
+  }
 }
 
 app.listen(port, () => console.log(`[companyos] listening on :${port}`));
-

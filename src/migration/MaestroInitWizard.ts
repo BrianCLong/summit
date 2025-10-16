@@ -112,22 +112,27 @@ export class MaestroInitWizard extends EventEmitter {
       rootPath,
       buildSystem: 'unknown',
       primaryLanguages: [],
-      testFrameworks: []
+      testFrameworks: [],
     };
 
     try {
       const files = await fs.readdir(rootPath);
-      
+
       // Detect build system
       if (files.includes('WORKSPACE') || files.includes('BUILD')) {
         config.buildSystem = 'bazel';
       } else if (files.includes('package.json')) {
         config.buildSystem = 'npm';
-        const packageJson = JSON.parse(await fs.readFile(path.join(rootPath, 'package.json'), 'utf8'));
+        const packageJson = JSON.parse(
+          await fs.readFile(path.join(rootPath, 'package.json'), 'utf8'),
+        );
         if (packageJson.workspaces || files.includes('lerna.json')) {
           config.monorepoType = files.includes('lerna.json') ? 'lerna' : 'nx';
         }
-      } else if (files.includes('build.gradle') || files.includes('build.gradle.kts')) {
+      } else if (
+        files.includes('build.gradle') ||
+        files.includes('build.gradle.kts')
+      ) {
         config.buildSystem = 'gradle';
       } else if (files.includes('pom.xml')) {
         config.buildSystem = 'maven';
@@ -137,7 +142,7 @@ export class MaestroInitWizard extends EventEmitter {
 
       // Detect languages
       config.primaryLanguages = await this.detectLanguages(rootPath);
-      
+
       // Detect test frameworks
       config.testFrameworks = await this.detectTestFrameworks(rootPath);
 
@@ -146,15 +151,20 @@ export class MaestroInitWizard extends EventEmitter {
 
       this.config = config;
       this.emit('discovered', config);
-      
+
       return config;
     } catch (error) {
-      this.emit('error', `Repository discovery failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.emit(
+        'error',
+        `Repository discovery failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     }
   }
 
-  async generateMigrationPlan(config: RepositoryConfig): Promise<MigrationPlan> {
+  async generateMigrationPlan(
+    config: RepositoryConfig,
+  ): Promise<MigrationPlan> {
     this.emit('status', 'Generating migration plan...');
 
     const steps: MigrationStep[] = [];
@@ -170,7 +180,7 @@ export class MaestroInitWizard extends EventEmitter {
       estimatedDuration: 300,
       prerequisites: [],
       validations: ['maestro.yml exists', 'build targets configured'],
-      rollbackCommands: ['rm -f maestro.yml', 'git checkout HEAD -- .maestro/']
+      rollbackCommands: ['rm -f maestro.yml', 'git checkout HEAD -- .maestro/'],
     });
 
     steps.push({
@@ -180,8 +190,12 @@ export class MaestroInitWizard extends EventEmitter {
       command: 'maestro build --shadow --baseline',
       estimatedDuration: 1800,
       prerequisites: ['setup-maestro'],
-      validations: ['shadow build success', 'artifacts match', 'determinism > 95%'],
-      rollbackCommands: ['maestro clean --shadow']
+      validations: [
+        'shadow build success',
+        'artifacts match',
+        'determinism > 95%',
+      ],
+      rollbackCommands: ['maestro clean --shadow'],
     });
 
     // Phase 2: Gradual Migration
@@ -194,7 +208,7 @@ export class MaestroInitWizard extends EventEmitter {
         estimatedDuration: 3600,
         prerequisites: ['shadow-baseline'],
         validations: ['core targets build', 'tests pass', 'no regressions'],
-        rollbackCommands: ['git checkout HEAD -- BUILD', 'bazel clean']
+        rollbackCommands: ['git checkout HEAD -- BUILD', 'bazel clean'],
       });
       riskLevel = 'medium';
     }
@@ -206,15 +220,25 @@ export class MaestroInitWizard extends EventEmitter {
       description: 'Run full test suite and performance benchmarks',
       command: 'maestro validate --comprehensive',
       estimatedDuration: 2400,
-      prerequisites: steps.map(s => s.id),
-      validations: ['all tests pass', 'performance within 10%', 'no flaky tests'],
-      rollbackCommands: ['maestro rollback --full']
+      prerequisites: steps.map((s) => s.id),
+      validations: [
+        'all tests pass',
+        'performance within 10%',
+        'no flaky tests',
+      ],
+      rollbackCommands: ['maestro rollback --full'],
     });
 
-    totalDuration = steps.reduce((sum, step) => sum + step.estimatedDuration, 0);
+    totalDuration = steps.reduce(
+      (sum, step) => sum + step.estimatedDuration,
+      0,
+    );
 
     // Adjust risk based on repository complexity
-    if (config.primaryLanguages.length > 3 || config.buildSystem === 'unknown') {
+    if (
+      config.primaryLanguages.length > 3 ||
+      config.buildSystem === 'unknown'
+    ) {
       riskLevel = 'high';
     }
 
@@ -227,17 +251,20 @@ export class MaestroInitWizard extends EventEmitter {
         'maestro rollback --full',
         'git reset --hard HEAD~1',
         'rm -rf .maestro/',
-        'restore original CI configuration'
-      ]
+        'restore original CI configuration',
+      ],
     };
 
     this.migrationPlan = plan;
     this.emit('plan-ready', plan);
-    
+
     return plan;
   }
 
-  async executeMigration(plan: MigrationPlan, options: { dryRun?: boolean; skipShadow?: boolean } = {}): Promise<void> {
+  async executeMigration(
+    plan: MigrationPlan,
+    options: { dryRun?: boolean; skipShadow?: boolean } = {},
+  ): Promise<void> {
     if (!this.config) {
       throw new Error('Repository must be discovered before migration');
     }
@@ -249,9 +276,11 @@ export class MaestroInitWizard extends EventEmitter {
       completedSteps: 0,
       totalSteps: plan.steps.length,
       startTime,
-      estimatedCompletion: new Date(startTime.getTime() + plan.estimatedDuration * 1000),
+      estimatedCompletion: new Date(
+        startTime.getTime() + plan.estimatedDuration * 1000,
+      ),
       shadowBuilds: [],
-      issues: []
+      issues: [],
     };
 
     this.emit('migration-start', this.progress);
@@ -263,7 +292,7 @@ export class MaestroInitWizard extends EventEmitter {
 
         if (options.dryRun) {
           this.emit('status', `[DRY RUN] Would execute: ${step.command}`);
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate execution
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate execution
         } else {
           await this.executeStep(step);
         }
@@ -279,7 +308,7 @@ export class MaestroInitWizard extends EventEmitter {
               description: `Validation failed: ${validation}`,
               suggestion: result.suggestion || 'Manual intervention required',
               autoFixable: result.autoFixable || false,
-              relatedFiles: result.relatedFiles || []
+              relatedFiles: result.relatedFiles || [],
             };
             this.progress.issues.push(issue);
             this.emit('issue', issue);
@@ -299,10 +328,9 @@ export class MaestroInitWizard extends EventEmitter {
 
       this.progress.currentPhase = 'validation';
       this.emit('migration-complete', this.progress);
-
     } catch (error) {
       this.emit('migration-error', error);
-      
+
       // Attempt automatic rollback
       this.emit('status', 'Migration failed, attempting rollback...');
       try {
@@ -311,32 +339,35 @@ export class MaestroInitWizard extends EventEmitter {
       } catch (rollbackError) {
         this.emit('rollback-failed', rollbackError);
       }
-      
+
       throw error;
     }
   }
 
-  async generateParityReport(originalBuild: string, maestroBuild: string): Promise<ParityReport> {
+  async generateParityReport(
+    originalBuild: string,
+    maestroBuild: string,
+  ): Promise<ParityReport> {
     this.emit('status', 'Generating parity report...');
 
     const report: ParityReport = {
       artifactParity: {
         matching: [],
         different: [],
-        missing: []
+        missing: [],
       },
       testParity: {
         passingInBoth: 0,
         failingInBoth: 0,
         passingOnlyInOriginal: 0,
-        passingOnlyInMaestro: 0
+        passingOnlyInMaestro: 0,
       },
       performanceParity: {
         buildTimeRatio: 1.0,
         testTimeRatio: 1.0,
-        cacheHitRate: 0.0
+        cacheHitRate: 0.0,
       },
-      determinismScore: 0.0
+      determinismScore: 0.0,
     };
 
     try {
@@ -346,9 +377,13 @@ export class MaestroInitWizard extends EventEmitter {
 
       for (const artifact of originalArtifacts) {
         if (maestroArtifacts.includes(artifact)) {
-          const originalHash = await this.hashArtifact(path.join(originalBuild, artifact));
-          const maestroHash = await this.hashArtifact(path.join(maestroBuild, artifact));
-          
+          const originalHash = await this.hashArtifact(
+            path.join(originalBuild, artifact),
+          );
+          const maestroHash = await this.hashArtifact(
+            path.join(maestroBuild, artifact),
+          );
+
           if (originalHash === maestroHash) {
             report.artifactParity.matching.push(artifact);
           } else {
@@ -362,13 +397,16 @@ export class MaestroInitWizard extends EventEmitter {
       // Calculate determinism score
       const totalArtifacts = originalArtifacts.length;
       const matchingArtifacts = report.artifactParity.matching.length;
-      report.determinismScore = totalArtifacts > 0 ? matchingArtifacts / totalArtifacts : 0;
+      report.determinismScore =
+        totalArtifacts > 0 ? matchingArtifacts / totalArtifacts : 0;
 
       this.emit('parity-report', report);
       return report;
-
     } catch (error) {
-      this.emit('error', `Parity report generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.emit(
+        'error',
+        `Parity report generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     }
   }
@@ -385,7 +423,7 @@ export class MaestroInitWizard extends EventEmitter {
       '.cpp': 'cpp',
       '.c': 'c',
       '.rb': 'ruby',
-      '.php': 'php'
+      '.php': 'php',
     };
 
     try {
@@ -401,7 +439,10 @@ export class MaestroInitWizard extends EventEmitter {
       }
 
       // Return languages with significant presence (>5% of total files)
-      const totalFiles = Object.values(langCounts).reduce((sum, count) => sum + count, 0);
+      const totalFiles = Object.values(langCounts).reduce(
+        (sum, count) => sum + count,
+        0,
+      );
       for (const [lang, count] of Object.entries(langCounts)) {
         if (count / totalFiles > 0.05) {
           languages.push(lang);
@@ -420,8 +461,13 @@ export class MaestroInitWizard extends EventEmitter {
     try {
       const packageJsonPath = path.join(rootPath, 'package.json');
       if (await this.fileExists(packageJsonPath)) {
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
-        const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+        const packageJson = JSON.parse(
+          await fs.readFile(packageJsonPath, 'utf8'),
+        );
+        const deps = {
+          ...packageJson.dependencies,
+          ...packageJson.devDependencies,
+        };
 
         if (deps.jest) frameworks.push('jest');
         if (deps.mocha) frameworks.push('mocha');
@@ -431,8 +477,10 @@ export class MaestroInitWizard extends EventEmitter {
       }
 
       // Check for other framework indicators
-      if (await this.fileExists(path.join(rootPath, 'pytest.ini'))) frameworks.push('pytest');
-      if (await this.fileExists(path.join(rootPath, 'phpunit.xml'))) frameworks.push('phpunit');
+      if (await this.fileExists(path.join(rootPath, 'pytest.ini')))
+        frameworks.push('pytest');
+      if (await this.fileExists(path.join(rootPath, 'phpunit.xml')))
+        frameworks.push('phpunit');
 
       return frameworks;
     } catch {
@@ -440,12 +488,19 @@ export class MaestroInitWizard extends EventEmitter {
     }
   }
 
-  private async detectCIProvider(rootPath: string): Promise<'github' | 'gitlab' | 'jenkins' | 'azure' | 'circle' | undefined> {
-    if (await this.fileExists(path.join(rootPath, '.github/workflows'))) return 'github';
-    if (await this.fileExists(path.join(rootPath, '.gitlab-ci.yml'))) return 'gitlab';
-    if (await this.fileExists(path.join(rootPath, 'Jenkinsfile'))) return 'jenkins';
-    if (await this.fileExists(path.join(rootPath, 'azure-pipelines.yml'))) return 'azure';
-    if (await this.fileExists(path.join(rootPath, '.circleci/config.yml'))) return 'circle';
+  private async detectCIProvider(
+    rootPath: string,
+  ): Promise<'github' | 'gitlab' | 'jenkins' | 'azure' | 'circle' | undefined> {
+    if (await this.fileExists(path.join(rootPath, '.github/workflows')))
+      return 'github';
+    if (await this.fileExists(path.join(rootPath, '.gitlab-ci.yml')))
+      return 'gitlab';
+    if (await this.fileExists(path.join(rootPath, 'Jenkinsfile')))
+      return 'jenkins';
+    if (await this.fileExists(path.join(rootPath, 'azure-pipelines.yml')))
+      return 'azure';
+    if (await this.fileExists(path.join(rootPath, '.circleci/config.yml')))
+      return 'circle';
     return undefined;
   }
 
@@ -453,7 +508,7 @@ export class MaestroInitWizard extends EventEmitter {
     return new Promise((resolve, reject) => {
       const child = spawn('sh', ['-c', step.command], {
         cwd: this.config?.rootPath,
-        stdio: ['pipe', 'pipe', 'pipe']
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
 
       let stdout = '';
@@ -473,19 +528,29 @@ export class MaestroInitWizard extends EventEmitter {
         if (code === 0) {
           resolve();
         } else {
-          reject(new Error(`Step ${step.id} failed with code ${code}: ${stderr}`));
+          reject(
+            new Error(`Step ${step.id} failed with code ${code}: ${stderr}`),
+          );
         }
       });
 
       // Timeout after step duration + buffer
-      setTimeout(() => {
-        child.kill();
-        reject(new Error(`Step ${step.id} timed out`));
-      }, (step.estimatedDuration + 300) * 1000);
+      setTimeout(
+        () => {
+          child.kill();
+          reject(new Error(`Step ${step.id} timed out`));
+        },
+        (step.estimatedDuration + 300) * 1000,
+      );
     });
   }
 
-  private async runValidation(validation: string): Promise<{ passed: boolean; suggestion?: string; autoFixable?: boolean; relatedFiles?: string[] }> {
+  private async runValidation(validation: string): Promise<{
+    passed: boolean;
+    suggestion?: string;
+    autoFixable?: boolean;
+    relatedFiles?: string[];
+  }> {
     // Simulate validation logic
     const mockValidations: { [key: string]: any } = {
       'maestro.yml exists': { passed: true },
@@ -493,14 +558,16 @@ export class MaestroInitWizard extends EventEmitter {
       'artifacts match': { passed: Math.random() > 0.1 },
       'determinism > 95%': { passed: Math.random() > 0.2 },
       'all tests pass': { passed: Math.random() > 0.15 },
-      'performance within 10%': { passed: Math.random() > 0.25 }
+      'performance within 10%': { passed: Math.random() > 0.25 },
     };
 
-    return mockValidations[validation] || { 
-      passed: false, 
-      suggestion: 'Unknown validation', 
-      autoFixable: false 
-    };
+    return (
+      mockValidations[validation] || {
+        passed: false,
+        suggestion: 'Unknown validation',
+        autoFixable: false,
+      }
+    );
   }
 
   private async runShadowBuild(): Promise<ShadowBuildResult> {
@@ -508,7 +575,7 @@ export class MaestroInitWizard extends EventEmitter {
     const startTime = Date.now();
 
     // Simulate shadow build
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const duration = Date.now() - startTime;
     const success = Math.random() > 0.1;
@@ -518,33 +585,35 @@ export class MaestroInitWizard extends EventEmitter {
       status: success ? 'success' : 'failure',
       duration,
       artifacts: ['app.js', 'styles.css', 'index.html'],
-      testResults: [{
-        suite: 'unit-tests',
-        passed: 42,
-        failed: success ? 0 : 2,
-        skipped: 1,
-        duration: duration / 2,
-        failures: []
-      }],
+      testResults: [
+        {
+          suite: 'unit-tests',
+          passed: 42,
+          failed: success ? 0 : 2,
+          skipped: 1,
+          duration: duration / 2,
+          failures: [],
+        },
+      ],
       parityReport: {
         artifactParity: {
           matching: success ? ['app.js', 'styles.css'] : ['app.js'],
           different: success ? [] : ['styles.css'],
-          missing: []
+          missing: [],
         },
         testParity: {
           passingInBoth: 42,
           failingInBoth: 0,
           passingOnlyInOriginal: 0,
-          passingOnlyInMaestro: 0
+          passingOnlyInMaestro: 0,
         },
         performanceParity: {
           buildTimeRatio: 0.85,
           testTimeRatio: 0.92,
-          cacheHitRate: 0.73
+          cacheHitRate: 0.73,
         },
-        determinismScore: success ? 0.98 : 0.87
-      }
+        determinismScore: success ? 0.98 : 0.87,
+      },
     };
   }
 
@@ -563,8 +632,11 @@ export class MaestroInitWizard extends EventEmitter {
 
   private async listArtifacts(buildPath: string): Promise<string[]> {
     try {
-      const files = await this.globFiles(buildPath, '**/*.{js,css,html,jar,war,exe}');
-      return files.map(f => path.relative(buildPath, f));
+      const files = await this.globFiles(
+        buildPath,
+        '**/*.{js,css,html,jar,war,exe}',
+      );
+      return files.map((f) => path.relative(buildPath, f));
     } catch {
       return [];
     }
@@ -589,7 +661,10 @@ export class MaestroInitWizard extends EventEmitter {
     }
   }
 
-  private async globFiles(rootPath: string, pattern: string): Promise<string[]> {
+  private async globFiles(
+    rootPath: string,
+    pattern: string,
+  ): Promise<string[]> {
     // Simplified glob implementation
     try {
       const glob = await import('glob');

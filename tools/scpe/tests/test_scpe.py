@@ -11,7 +11,6 @@ if str(SRC) not in sys.path:
 from scpe.receipt import build_receipt, verify_receipt, write_receipt
 from scpe.validator import Validator
 
-
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
 
 
@@ -20,8 +19,12 @@ def test_validator_and_receipt(tmp_path: Path) -> None:
     validator = Validator(config_path)
     verification = validator.run()
 
-    receipt_a = build_receipt(config_path=config_path, config=validator.config, verification=verification)
-    receipt_b = build_receipt(config_path=config_path, config=validator.config, verification=verification)
+    receipt_a = build_receipt(
+        config_path=config_path, config=validator.config, verification=verification
+    )
+    receipt_b = build_receipt(
+        config_path=config_path, config=validator.config, verification=verification
+    )
     assert receipt_a == receipt_b
 
     receipt_path = tmp_path / "receipt.json"

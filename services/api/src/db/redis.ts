@@ -119,7 +119,11 @@ class RedisConnection {
     }
   }
 
-  async set<T = any>(key: string, value: T, ttlSeconds?: number): Promise<boolean> {
+  async set<T = any>(
+    key: string,
+    value: T,
+    ttlSeconds?: number,
+  ): Promise<boolean> {
     if (!this.client) {
       throw new Error('Redis client not initialized');
     }
@@ -296,7 +300,9 @@ class RedisConnection {
     }
 
     try {
-      await this.subscriber.subscribe(...(Array.isArray(channels) ? channels : [channels]));
+      await this.subscriber.subscribe(
+        ...(Array.isArray(channels) ? channels : [channels]),
+      );
 
       this.subscriber.on('message', (channel: string, message: string) => {
         try {
@@ -328,7 +334,9 @@ class RedisConnection {
 
     try {
       if (channels) {
-        await this.subscriber.unsubscribe(...(Array.isArray(channels) ? channels : [channels]));
+        await this.subscriber.unsubscribe(
+          ...(Array.isArray(channels) ? channels : [channels]),
+        );
       } else {
         await this.subscriber.unsubscribe();
       }
@@ -373,7 +381,13 @@ class RedisConnection {
 
     while (Date.now() < endTime) {
       try {
-        const result = await this.client.set(lockKey, lockId, 'PX', ttlSeconds * 1000, 'NX');
+        const result = await this.client.set(
+          lockKey,
+          lockId,
+          'PX',
+          ttlSeconds * 1000,
+          'NX',
+        );
         if (result === 'OK') {
           return lockId;
         }

@@ -16,4 +16,7 @@ groups:
         for: 10m
         labels: { severity: page, service: maestro }
         annotations:
-          { summary: 'p95 TTFB > 1.5s (10m)', runbook_url: 'https://…/prod-readiness-runbook.md' }
+          {
+            summary: 'p95 TTFB > 1.5s (10m)',
+            runbook_url: 'https://…/prod-readiness-runbook.md',
+          }

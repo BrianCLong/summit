@@ -15,14 +15,14 @@ class AuthService {
 
   async register(userData) {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query('BEGIN');
 
       // Check if user already exists
       const existingUser = await client.query(
         'SELECT id FROM users WHERE email = $1 OR username = $2',
-        [userData.email, userData.username]
+        [userData.email, userData.username],
       );
 
       if (existingUser.rows.length > 0) {
@@ -33,18 +33,21 @@ class AuthService {
       const passwordHash = await argon2.hash(userData.password);
 
       // Create user
-      const userResult = await client.query(`
+      const userResult = await client.query(
+        `
         INSERT INTO users (email, username, password_hash, first_name, last_name, role)
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id, email, username, first_name, last_name, role, is_active, created_at
-      `, [
-        userData.email,
-        userData.username,
-        passwordHash,
-        userData.firstName,
-        userData.lastName,
-        userData.role || 'ANALYST'
-      ]);
+      `,
+        [
+          userData.email,
+          userData.username,
+          passwordHash,
+          userData.firstName,
+          userData.lastName,
+          userData.role || 'ANALYST',
+        ],
+      );
 
       const user = userResult.rows[0];
 
@@ -54,13 +57,20 @@ class AuthService {
       await client.query('COMMIT');
 
       // Log audit event
-      await this.logAuditEvent(user.id, 'USER_REGISTERED', 'users', user.id, null, client);
+      await this.logAuditEvent(
+        user.id,
+        'USER_REGISTERED',
+        'users',
+        user.id,
+        null,
+        client,
+      );
 
       return {
         user: this.formatUser(user),
         token,
         refreshToken,
-        expiresIn: 24 * 60 * 60 // 24 hours
+        expiresIn: 24 * 60 * 60, // 24 hours
       };
     } catch (error) {
       await client.query('ROLLBACK');
@@ -73,12 +83,12 @@ class AuthService {
 
   async login(email, password, ipAddress, userAgent) {
     const client = await this.pool.connect();
-    
+
     try {
       // Get user
       const userResult = await client.query(
         'SELECT * FROM users WHERE email = $1 AND is_active = true',
-        [email]
+        [email],
       );
 
       if (userResult.rows.length === 0) {
@@ -96,23 +106,30 @@ class AuthService {
       // Update last login
       await client.query(
         'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-        [user.id]
+        [user.id],
       );
 
       // Generate tokens
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       // Log audit event
-      await this.logAuditEvent(user.id, 'USER_LOGIN', 'users', user.id, {
-        ipAddress,
-        userAgent
-      }, client);
+      await this.logAuditEvent(
+        user.id,
+        'USER_LOGIN',
+        'users',
+        user.id,
+        {
+          ipAddress,
+          userAgent,
+        },
+        client,
+      );
 
       return {
         user: this.formatUser(user),
         token,
         refreshToken,
-        expiresIn: 24 * 60 * 60
+        expiresIn: 24 * 60 * 60,
       };
     } catch (error) {
       logger.error('Error logging in user:', error);
@@ -124,14 +141,17 @@ class AuthService {
 
   async refreshToken(refreshTokenValue) {
     const client = await this.pool.connect();
-    
+
     try {
       // Verify refresh token
-      const sessionResult = await client.query(`
+      const sessionResult = await client.query(
+        `
         SELECT s.*, u.* FROM user_sessions s
         JOIN users u ON s.user_id = u.id
         WHERE s.refresh_token = $1 AND s.expires_at > CURRENT_TIMESTAMP AND u.is_active = true
-      `, [refreshTokenValue]);
+      `,
+        [refreshTokenValue],
+      );
 
       if (sessionResult.rows.length === 0) {
         throw new Error('Invalid or expired refresh token');
@@ -145,14 +165,14 @@ class AuthService {
       // Update session
       await client.query(
         'UPDATE user_sessions SET last_used = CURRENT_TIMESTAMP WHERE refresh_token = $1',
-        [refreshTokenValue]
+        [refreshTokenValue],
       );
 
       return {
         user: this.formatUser(user),
         token,
         refreshToken,
-        expiresIn: 24 * 60 * 60
+        expiresIn: 24 * 60 * 60,
       };
     } catch (error) {
       logger.error('Error refreshing token:', error);
@@ -164,12 +184,11 @@ class AuthService {
 
   async logout(refreshTokenValue) {
     const client = await this.pool.connect();
-    
+
     try {
-      await client.query(
-        'DELETE FROM user_sessions WHERE refresh_token = $1',
-        [refreshTokenValue]
-      );
+      await client.query('DELETE FROM user_sessions WHERE refresh_token = $1', [
+        refreshTokenValue,
+      ]);
       return true;
     } catch (error) {
       logger.error('Error logging out user:', error);
@@ -184,11 +203,11 @@ class AuthService {
     const tokenPayload = {
       userId: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
     };
 
     const token = jwt.sign(tokenPayload, config.jwt.secret, {
-      expiresIn: config.jwt.expiresIn
+      expiresIn: config.jwt.expiresIn,
     });
 
     // Generate refresh token
@@ -197,10 +216,13 @@ class AuthService {
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
     // Store refresh token
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO user_sessions (user_id, refresh_token, expires_at)
       VALUES ($1, $2, $3)
-    `, [user.id, refreshToken, expiresAt]);
+    `,
+      [user.id, refreshToken, expiresAt],
+    );
 
     return { token, refreshToken };
   }
@@ -210,12 +232,12 @@ class AuthService {
       if (!token) return null;
 
       const decoded = jwt.verify(token, config.jwt.secret);
-      
+
       // Get user from database to ensure they're still active
       const client = await this.pool.connect();
       const userResult = await client.query(
         'SELECT * FROM users WHERE id = $1 AND is_active = true',
-        [decoded.userId]
+        [decoded.userId],
       );
       client.release();
 
@@ -230,12 +252,22 @@ class AuthService {
     }
   }
 
-  async logAuditEvent(userId, action, resourceType, resourceId, details, client) {
+  async logAuditEvent(
+    userId,
+    action,
+    resourceType,
+    resourceId,
+    details,
+    client,
+  ) {
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details)
         VALUES ($1, $2, $3, $4, $5)
-      `, [userId, action, resourceType, resourceId, JSON.stringify(details)]);
+      `,
+        [userId, action, resourceType, resourceId, JSON.stringify(details)],
+      );
     } catch (error) {
       logger.error('Error logging audit event:', error);
     }
@@ -253,7 +285,7 @@ class AuthService {
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,
-      updatedAt: user.updated_at
+      updatedAt: user.updated_at,
     };
   }
 }
@@ -274,7 +306,7 @@ class InvestigationService {
 
   async createInvestigation(investigationData, userId) {
     const session = this.driver.session();
-    
+
     try {
       const investigationId = uuidv4();
       const now = new Date().toISOString();
@@ -315,11 +347,11 @@ class InvestigationService {
         tags: investigationData.tags || [],
         metadata: investigationData.metadata || {},
         assignedTo: investigationData.assignedTo || [],
-        createdAt: now
+        createdAt: now,
       };
 
       const result = await session.run(query, params);
-      
+
       if (result.records.length === 0) {
         throw new Error('Failed to create investigation');
       }
@@ -335,7 +367,7 @@ class InvestigationService {
 
   async getInvestigationById(investigationId) {
     const session = this.driver.session();
-    
+
     try {
       const query = `
         MATCH (i:Investigation {id: $investigationId})
@@ -351,7 +383,7 @@ class InvestigationService {
       `;
 
       const result = await session.run(query, { investigationId });
-      
+
       if (result.records.length === 0) {
         throw new Error('Investigation not found');
       }
@@ -367,19 +399,19 @@ class InvestigationService {
 
   async getInvestigations(filters = {}, pagination = {}) {
     const session = this.driver.session();
-    
+
     try {
       const { page = 1, limit = 10 } = pagination;
       const skip = (page - 1) * limit;
-      
+
       let whereClause = '';
       const params = { skip, limit };
-      
+
       if (filters.status) {
         whereClause += ' AND i.status = $status';
         params.status = filters.status;
       }
-      
+
       if (filters.priority) {
         whereClause += ' AND i.priority = $priority';
         params.priority = filters.priority;
@@ -404,8 +436,10 @@ class InvestigationService {
       `;
 
       const result = await session.run(query, params);
-      
-      return result.records.map(record => this.formatInvestigationResult(record));
+
+      return result.records.map((record) =>
+        this.formatInvestigationResult(record),
+      );
     } catch (error) {
       logger.error('Error getting investigations:', error);
       throw error;
@@ -416,7 +450,7 @@ class InvestigationService {
 
   async updateInvestigation(investigationId, updateData, userId) {
     const session = this.driver.session();
-    
+
     try {
       const now = new Date().toISOString();
       const setClauses = [];
@@ -457,7 +491,7 @@ class InvestigationService {
       `;
 
       const result = await session.run(query, params);
-      
+
       if (result.records.length === 0) {
         throw new Error('Investigation not found');
       }
@@ -473,7 +507,7 @@ class InvestigationService {
 
   async deleteInvestigation(investigationId, userId) {
     const session = this.driver.session();
-    
+
     try {
       const query = `
         MATCH (i:Investigation {id: $investigationId})
@@ -497,7 +531,7 @@ class InvestigationService {
       `;
 
       const result = await session.run(query, { investigationId, userId });
-      
+
       return result.records[0].get('deletedCount').toNumber() > 0;
     } catch (error) {
       logger.error('Error deleting investigation:', error);
@@ -510,14 +544,19 @@ class InvestigationService {
   formatInvestigationResult(record) {
     const investigation = record.get('i').properties;
     const creator = record.get('creator').properties;
-    const assignees = record.get('assignees').map(assignee => 
-      assignee ? {
-        id: assignee.properties.id,
-        username: assignee.properties.username,
-        firstName: assignee.properties.firstName,
-        lastName: assignee.properties.lastName
-      } : null
-    ).filter(Boolean);
+    const assignees = record
+      .get('assignees')
+      .map((assignee) =>
+        assignee
+          ? {
+              id: assignee.properties.id,
+              username: assignee.properties.username,
+              firstName: assignee.properties.firstName,
+              lastName: assignee.properties.lastName,
+            }
+          : null,
+      )
+      .filter(Boolean);
     const entityCount = record.get('entityCount').toNumber();
     const relationshipCount = record.get('relationshipCount').toNumber();
 
@@ -535,11 +574,11 @@ class InvestigationService {
         id: creator.id,
         username: creator.username,
         firstName: creator.firstName,
-        lastName: creator.lastName
+        lastName: creator.lastName,
       },
       assignedTo: assignees,
       createdAt: investigation.createdAt,
-      updatedAt: investigation.updatedAt
+      updatedAt: investigation.updatedAt,
     };
   }
 }
@@ -592,12 +631,15 @@ const resolvers = {
     // Investigations
     investigations: async (_, { page, limit, status, priority }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const filters = {};
       if (status) filters.status = status;
       if (priority) filters.priority = priority;
-      
-      return await investigationService.getInvestigations(filters, { page, limit });
+
+      return await investigationService.getInvestigations(filters, {
+        page,
+        limit,
+      });
     },
 
     investigation: async (_, { id }, { user }) => {
@@ -614,7 +656,11 @@ const resolvers = {
     // Entities
     entities: async (_, { investigationId, filter, page, limit }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      return await entityService.getEntitiesByInvestigation(investigationId, filter, { page, limit });
+      return await entityService.getEntitiesByInvestigation(
+        investigationId,
+        filter,
+        { page, limit },
+      );
     },
 
     entity: async (_, { id }, { user }) => {
@@ -631,10 +677,11 @@ const resolvers = {
     // Graph Data
     graphData: async (_, { investigationId }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
-      const entities = await entityService.getEntitiesByInvestigation(investigationId);
+
+      const entities =
+        await entityService.getEntitiesByInvestigation(investigationId);
       // Convert entities to graph format
-      const nodes = entities.map(entity => ({
+      const nodes = entities.map((entity) => ({
         id: entity.id,
         label: entity.label,
         type: entity.type,
@@ -642,7 +689,7 @@ const resolvers = {
         position: entity.position,
         size: 30 + (entity.confidence || 0) * 20,
         color: getNodeColor(entity.type),
-        verified: entity.verified
+        verified: entity.verified,
       }));
 
       // Get relationships (implementation needed)
@@ -654,8 +701,8 @@ const resolvers = {
         metadata: {
           nodeCount: nodes.length,
           edgeCount: edges.length,
-          lastUpdated: new Date().toISOString()
-        }
+          lastUpdated: new Date().toISOString(),
+        },
       };
     },
 
@@ -678,15 +725,15 @@ const resolvers = {
     // Search
     search: async (_, { query, limit }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const entities = await entityService.searchEntities(query, null, limit);
-      
+
       return {
         entities,
         investigations: [], // Would implement investigation search
-        totalCount: entities.length
+        totalCount: entities.length,
       };
-    }
+    },
   },
 
   Mutation: {
@@ -695,7 +742,7 @@ const resolvers = {
       const { email, password } = input;
       const ipAddress = req.ip;
       const userAgent = req.get('User-Agent');
-      
+
       return await authService.login(email, password, ipAddress, userAgent);
     },
 
@@ -717,26 +764,35 @@ const resolvers = {
     // Investigations
     createInvestigation: async (_, { input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
-      const investigation = await investigationService.createInvestigation(input, user.id);
-      
+
+      const investigation = await investigationService.createInvestigation(
+        input,
+        user.id,
+      );
+
       // Publish to subscribers
-      pubsub.publish('INVESTIGATION_CREATED', { investigationCreated: investigation });
-      
+      pubsub.publish('INVESTIGATION_CREATED', {
+        investigationCreated: investigation,
+      });
+
       return investigation;
     },
 
     updateInvestigation: async (_, { id, input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
-      const investigation = await investigationService.updateInvestigation(id, input, user.id);
-      
+
+      const investigation = await investigationService.updateInvestigation(
+        id,
+        input,
+        user.id,
+      );
+
       // Publish to subscribers
-      pubsub.publish('INVESTIGATION_UPDATED', { 
+      pubsub.publish('INVESTIGATION_UPDATED', {
         investigationUpdated: investigation,
-        investigationId: id 
+        investigationId: id,
       });
-      
+
       return investigation;
     },
 
@@ -748,57 +804,58 @@ const resolvers = {
     // Entities
     createEntity: async (_, { input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const entity = await entityService.createEntity(input, user.id);
-      
+
       // Publish to subscribers
-      pubsub.publish('ENTITY_ADDED', { 
+      pubsub.publish('ENTITY_ADDED', {
         entityAdded: entity,
-        investigationId: input.investigationId 
+        investigationId: input.investigationId,
       });
-      
+
       return entity;
     },
 
     updateEntity: async (_, { id, input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const entity = await entityService.updateEntity(id, input, user.id);
-      
+
       // Publish to subscribers
-      pubsub.publish('ENTITY_UPDATED', { 
+      pubsub.publish('ENTITY_UPDATED', {
         entityUpdated: entity,
-        investigationId: entity.investigationId 
+        investigationId: entity.investigationId,
       });
-      
+
       return entity;
     },
 
     deleteEntity: async (_, { id }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const deleted = await entityService.deleteEntity(id, user.id);
-      
+
       if (deleted) {
         // Publish to subscribers
-        pubsub.publish('ENTITY_DELETED', { 
+        pubsub.publish('ENTITY_DELETED', {
           entityDeleted: id,
-          investigationId: 'unknown' // Would need to track this
+          investigationId: 'unknown', // Would need to track this
         });
       }
-      
+
       return deleted;
     },
 
     // AI Analysis
     runGraphAnalysis: async (_, { input }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const { investigationId, algorithms } = input;
       const results = [];
-      
+
       if (algorithms.includes('metrics')) {
-        const metrics = await graphAnalysisService.calculateGraphMetrics(investigationId);
+        const metrics =
+          await graphAnalysisService.calculateGraphMetrics(investigationId);
         results.push({
           id: require('uuid').v4(),
           investigationId,
@@ -807,12 +864,13 @@ const resolvers = {
           results: metrics,
           confidenceScore: 0.95,
           createdBy: user,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         });
       }
-      
+
       if (algorithms.includes('link_prediction')) {
-        const predictions = await graphAnalysisService.predictLinks(investigationId);
+        const predictions =
+          await graphAnalysisService.predictLinks(investigationId);
         results.push({
           id: require('uuid').v4(),
           investigationId,
@@ -821,10 +879,10 @@ const resolvers = {
           results: { predictions },
           confidenceScore: 0.75,
           createdBy: user,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         });
       }
-      
+
       return results;
     },
 
@@ -840,24 +898,32 @@ const resolvers = {
 
     importEntitiesFromText: async (_, { investigationId, text }, { user }) => {
       if (!user) throw new Error('Not authenticated');
-      
-      const extractedEntities = await graphAnalysisService.extractEntitiesFromText(text);
+
+      const extractedEntities =
+        await graphAnalysisService.extractEntitiesFromText(text);
       const createdEntities = [];
-      
+
       for (const entityData of extractedEntities) {
         try {
-          const entity = await entityService.createEntity({
-            ...entityData,
-            investigationId
-          }, user.id);
+          const entity = await entityService.createEntity(
+            {
+              ...entityData,
+              investigationId,
+            },
+            user.id,
+          );
           createdEntities.push(entity);
         } catch (error) {
-          console.warn('Failed to create entity:', entityData.label, error.message);
+          console.warn(
+            'Failed to create entity:',
+            entityData.label,
+            error.message,
+          );
         }
       }
-      
+
       return createdEntities;
-    }
+    },
   },
 
   Subscription: {
@@ -866,8 +932,8 @@ const resolvers = {
         () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        }
-      )
+        },
+      ),
     },
 
     entityAdded: {
@@ -875,8 +941,8 @@ const resolvers = {
         () => pubsub.asyncIterator(['ENTITY_ADDED']),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        }
-      )
+        },
+      ),
     },
 
     entityUpdated: {
@@ -884,8 +950,8 @@ const resolvers = {
         () => pubsub.asyncIterator(['ENTITY_UPDATED']),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        }
-      )
+        },
+      ),
     },
 
     entityDeleted: {
@@ -893,25 +959,25 @@ const resolvers = {
         () => pubsub.asyncIterator(['ENTITY_DELETED']),
         (payload, variables) => {
           return payload.investigationId === variables.investigationId;
-        }
-      )
-    }
+        },
+      ),
+    },
   },
 
   // Type resolvers
   User: {
-    fullName: (user) => `${user.firstName} ${user.lastName}`
+    fullName: (user) => `${user.firstName} ${user.lastName}`,
   },
 
   Investigation: {
     entities: async (investigation) => {
       return await entityService.getEntitiesByInvestigation(investigation.id);
     },
-    
+
     relationships: async (investigation) => {
       // Would implement relationship service
       return [];
-    }
+    },
   },
 
   Entity: {
@@ -919,12 +985,12 @@ const resolvers = {
       // Would implement reverse lookup
       return [];
     },
-    
+
     relationships: async (entity) => {
       // Would implement relationship lookup
       return [];
-    }
-  }
+    },
+  },
 };
 
 // Helper function
@@ -942,7 +1008,7 @@ function getNodeColor(type) {
     VEHICLE: '#8bc34a',
     ACCOUNT: '#e91e63',
     DEVICE: '#673ab7',
-    CUSTOM: '#9e9e9e'
+    CUSTOM: '#9e9e9e',
   };
   return colors[type] || '#9e9e9e';
 }
@@ -968,20 +1034,21 @@ const authMiddleware = {
   requireAuth: (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
-    
+
     if (!token) {
       return res.status(401).json({ error: 'Access token required' });
     }
 
-    authService.verifyToken(token)
-      .then(user => {
+    authService
+      .verifyToken(token)
+      .then((user) => {
         if (!user) {
           return res.status(401).json({ error: 'Invalid token' });
         }
         req.user = user;
         next();
       })
-      .catch(error => {
+      .catch((error) => {
         return res.status(401).json({ error: 'Token verification failed' });
       });
   },
@@ -998,7 +1065,7 @@ const authMiddleware = {
 
       next();
     };
-  }
+  },
 };
 
 module.exports = authMiddleware;
@@ -1019,11 +1086,11 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const config = require('./src/config');
 const logger = require('./src/utils/logger');
-const { 
-  connectNeo4j, 
-  connectPostgres, 
+const {
+  connectNeo4j,
+  connectPostgres,
   connectRedis,
-  closeConnections 
+  closeConnections,
 } = require('./src/config/database');
 
 // GraphQL setup
@@ -1038,13 +1105,13 @@ async function startServer() {
     // Create Express app
     const app = express();
     const httpServer = createServer(app);
-    
+
     // Initialize Socket.IO
     const io = new Server(httpServer, {
       cors: {
         origin: config.cors.origin,
-        methods: ['GET', 'POST']
-      }
+        methods: ['GET', 'POST'],
+      },
     });
 
     // Connect to all databases
@@ -1055,40 +1122,46 @@ async function startServer() {
     logger.info('✅ All databases connected');
 
     // Security middleware
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", "data:", "https:"]
-        }
-      }
-    }));
-    
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+          },
+        },
+      }),
+    );
+
     // CORS configuration
-    app.use(cors({
-      origin: config.cors.origin,
-      credentials: true
-    }));
-    
+    app.use(
+      cors({
+        origin: config.cors.origin,
+        credentials: true,
+      }),
+    );
+
     // Rate limiting
     const limiter = rateLimit({
       windowMs: config.rateLimit.windowMs,
       max: config.rateLimit.maxRequests,
-      message: 'Too many requests from this IP'
+      message: 'Too many requests from this IP',
     });
     app.use(limiter);
-    
+
     // Request parsing
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-    
+
     // Logging
-    app.use(morgan('combined', { 
-      stream: { write: message => logger.info(message.trim()) }
-    }));
-    
+    app.use(
+      morgan('combined', {
+        stream: { write: (message) => logger.info(message.trim()) },
+      }),
+    );
+
     // Health check endpoint
     app.get('/health', (req, res) => {
       res.status(200).json({
@@ -1099,11 +1172,11 @@ async function startServer() {
         services: {
           neo4j: 'connected',
           postgres: 'connected',
-          redis: 'connected'
-        }
+          redis: 'connected',
+        },
       });
     });
-    
+
     // Apollo GraphQL Server
     const apolloServer = new ApolloServer({
       typeDefs,
@@ -1113,91 +1186,98 @@ async function startServer() {
           // WebSocket connection for subscriptions
           return connection.context;
         }
-        
+
         // HTTP request
         const token = req.headers.authorization?.replace('Bearer ', '');
         let user = null;
-        
+
         if (token) {
           const authService = new AuthService();
           user = await authService.verifyToken(token);
         }
-        
+
         return {
           user,
           req,
-          logger
+          logger,
         };
       },
       subscriptions: {
         onConnect: async (connectionParams) => {
           const token = connectionParams.authorization?.replace('Bearer ', '');
           let user = null;
-          
+
           if (token) {
             const authService = new AuthService();
             user = await authService.verifyToken(token);
           }
-          
+
           return { user };
-        }
+        },
       },
       plugins: [
         {
           requestDidStart() {
             return {
               didResolveOperation(requestContext) {
-                logger.info(`GraphQL Operation: ${requestContext.request.operationName}`);
+                logger.info(
+                  `GraphQL Operation: ${requestContext.request.operationName}`,
+                );
               },
               didEncounterErrors(requestContext) {
                 logger.error('GraphQL Error:', requestContext.errors);
-              }
+              },
             };
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
-    
+
     await apolloServer.start();
-    apolloServer.applyMiddleware({ 
-      app, 
+    apolloServer.applyMiddleware({
+      app,
       path: '/graphql',
-      cors: false // Handled by express cors middleware
+      cors: false, // Handled by express cors middleware
     });
 
     // Socket.IO for real-time features
     io.on('connection', (socket) => {
       logger.info(`Client connected: ${socket.id}`);
-      
+
       socket.on('join_investigation', (investigationId) => {
         socket.join(`investigation_${investigationId}`);
-        logger.info(`Client ${socket.id} joined investigation ${investigationId}`);
+        logger.info(
+          `Client ${socket.id} joined investigation ${investigationId}`,
+        );
       });
-      
+
       socket.on('leave_investigation', (investigationId) => {
         socket.leave(`investigation_${investigationId}`);
-        logger.info(`Client ${socket.id} left investigation ${investigationId}`);
+        logger.info(
+          `Client ${socket.id} left investigation ${investigationId}`,
+        );
       });
-      
+
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
       });
     });
-    
+
     // Error handling
     app.use((err, req, res, next) => {
       logger.error(`Unhandled error: ${err.message}`, err);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal Server Error',
-        message: config.env === 'development' ? err.message : 'Something went wrong'
+        message:
+          config.env === 'development' ? err.message : 'Something went wrong',
       });
     });
-    
+
     // 404 handler
     app.use('*', (req, res) => {
       res.status(404).json({ error: 'Endpoint not found' });
     });
-    
+
     // Start server
     const PORT = config.port;
     httpServer.listen(PORT, () => {
@@ -1207,7 +1287,7 @@ async function startServer() {
       logger.info(`🌍 Environment: ${config.env}`);
       logger.info(`🤖 AI features enabled`);
     });
-    
+
     // Graceful shutdown
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
@@ -1218,7 +1298,6 @@ async function startServer() {
         process.exit(0);
       });
     });
-    
   } catch (error) {
     logger.error(`Failed to start server: ${error.message}`, error);
     process.exit(1);

@@ -44,7 +44,9 @@ function App() {
     if (next && forecastEdges.length === 0) {
       const entityId = graphData.nodes[0]?.data.id;
       if (!entityId) return;
-      fetch(`/api/forecast/graph?entity_id=${entityId}&past_days=14&future_days=30`)
+      fetch(
+        `/api/forecast/graph?entity_id=${entityId}&past_days=14&future_days=30`,
+      )
         .then((res) => res.json())
         .then((data) => {
           const formatted = data.edges.map((e, idx) => ({
@@ -63,7 +65,9 @@ function App() {
     }
   };
 
-  const displayedForecastEdges = showForecast ? forecastEdges.slice(0, forecastIndex + 1) : [];
+  const displayedForecastEdges = showForecast
+    ? forecastEdges.slice(0, forecastIndex + 1)
+    : [];
   const combinedEdges = graphData.edges.concat(displayedForecastEdges);
 
   return (
@@ -73,7 +77,9 @@ function App() {
         <button onClick={() => setNeighborhoodMode((m) => !m)}>
           {neighborhoodMode ? 'Show Full Graph' : 'Neighborhood Mode'}
         </button>
-        <button onClick={toggleForecast}>{showForecast ? 'Hide Forecast' : 'Forecast View'}</button>
+        <button onClick={toggleForecast}>
+          {showForecast ? 'Hide Forecast' : 'Forecast View'}
+        </button>
       </header>
       <main>
         <Graph

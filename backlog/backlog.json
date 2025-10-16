@@ -87,9 +87,7 @@
           "id": "S-010-02",
           "title": "Deterministic sandboxing and attestation",
           "owner": "Runtime Guild",
-          "depends_on": [
-            "S-010-01"
-          ],
+          "depends_on": ["S-010-01"],
           "acceptance_criteria": [
             "Given a tool bundle, the platform verifies SBOM signature before execution",
             "When a worker boots, snapshot hashes and random seeds are captured",
@@ -161,9 +159,7 @@
           "id": "S-011-02",
           "title": "Deterministic replay engine v1",
           "owner": "Observability Guild",
-          "depends_on": [
-            "S-011-01"
-          ],
+          "depends_on": ["S-011-01"],
           "acceptance_criteria": [
             "Given recorded MCP traffic, replay reproduces \u226595% sessions without divergence",
             "When external calls occur, stubs capture and rehydrate responses deterministically",
@@ -273,10 +269,7 @@
           "id": "S-013-01",
           "title": "Provenance ledger and retention workflows",
           "owner": "Trust Guild",
-          "depends_on": [
-            "S-010-02",
-            "S-011-02"
-          ],
+          "depends_on": ["S-010-02", "S-011-02"],
           "acceptance_criteria": [
             "Given session recordings, immutable ledger stores hashes, signatures, and retention tier",
             "When RTBF requests arrive, workflows purge or sequester data within SLA",
@@ -308,10 +301,7 @@
           "id": "S-013-02",
           "title": "Public benchmark shootout",
           "owner": "Performance Guild",
-          "depends_on": [
-            "S-010-01",
-            "S-011-01"
-          ],
+          "depends_on": ["S-010-01", "S-011-01"],
           "acceptance_criteria": [
             "Given flagship servers (GitHub, Playwright, Exa, Cloudflare, Firecrawl), harness runs on Metorial and IntelGraph platforms",
             "When benchmarks complete, we publish p50/p95/p99 latency, error burn, and cost/1k calls",

@@ -1,11 +1,11 @@
+import importlib.util
 import json
 import os
 import sys
 import types
-import importlib.util
 import unittest
-from io import BytesIO
 from functools import lru_cache
+from io import BytesIO
 
 from fastavro import schemaless_writer
 
@@ -59,11 +59,7 @@ class TestKafkaConsumerAvro(unittest.TestCase):
         return buf.getvalue()
 
     def test_valid_payload(self):
-        schema = {
-            "name": "Test",
-            "type": "record",
-            "fields": [{"name": "name", "type": "string"}]
-        }
+        schema = {"name": "Test", "type": "record", "fields": [{"name": "name", "type": "string"}]}
         record = {"name": "alice"}
         self._set_registry({1: schema})
         payload = self._encode(schema, record, 1)
@@ -71,11 +67,7 @@ class TestKafkaConsumerAvro(unittest.TestCase):
         self.assertEqual(result, record)
 
     def test_unknown_schema_id(self):
-        schema = {
-            "name": "Test",
-            "type": "record",
-            "fields": [{"name": "name", "type": "string"}]
-        }
+        schema = {"name": "Test", "type": "record", "fields": [{"name": "name", "type": "string"}]}
         record = {"name": "bob"}
         self._set_registry({})
         payload = self._encode(schema, record, 99)
@@ -83,11 +75,7 @@ class TestKafkaConsumerAvro(unittest.TestCase):
         self.assertEqual(result, payload)
 
     def test_bad_magic_byte(self):
-        schema = {
-            "name": "Test",
-            "type": "record",
-            "fields": [{"name": "name", "type": "string"}]
-        }
+        schema = {"name": "Test", "type": "record", "fields": [{"name": "name", "type": "string"}]}
         record = {"name": "carol"}
         self._set_registry({1: schema})
         payload = self._encode(schema, record, 1, magic=b"\x01")

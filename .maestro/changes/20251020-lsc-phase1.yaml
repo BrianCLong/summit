@@ -1,21 +1,20 @@
-
 area: multi
 intent: feature
 release_tag: v2.1.0-alpha1
 window: { start: 2025-10-20, end: 2025-10-31 }
-objective: "Implement the core data pipeline and UI for Live Safety Case (LSC) v1."
+objective: 'Implement the core data pipeline and UI for Live Safety Case (LSC) v1.'
 work_items:
   - id: LSC-1
-    story: "Create lsc-service to ingest CI evidence and build GSN graphs."
+    story: 'Create lsc-service to ingest CI evidence and build GSN graphs.'
     acceptance:
-      - "Service exposes a POST /events endpoint."
-      - "Service exposes a GET /case/:id endpoint that returns a GSN graph."
+      - 'Service exposes a POST /events endpoint.'
+      - 'Service exposes a GET /case/:id endpoint that returns a GSN graph.'
   - id: LSC-2
-    story: "Update CI workflow to post evidence to lsc-service."
+    story: 'Update CI workflow to post evidence to lsc-service.'
     acceptance:
-      - "CI posts test reports, scan results, and policy outcomes to /events."
+      - 'CI posts test reports, scan results, and policy outcomes to /events.'
   - id: LSC-3
-    story: "Update SafetyCaseViewer to fetch and render live LSC data."
+    story: 'Update SafetyCaseViewer to fetch and render live LSC data.'
     acceptance:
-      - "Viewer fetches data from /case/:id instead of using mock data."
-owners: { DRI: "platform-core", support: ["security", "web-ux"] }
+      - 'Viewer fetches data from /case/:id instead of using mock data.'
+owners: { DRI: 'platform-core', support: ['security', 'web-ux'] }

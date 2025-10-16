@@ -1,4 +1,3 @@
-
 # intelgraph/schema/canonical_types.py
 
 CANONICAL_ENTITY_TYPES = [
@@ -22,7 +21,7 @@ CANONICAL_ENTITY_TYPES = [
     "Sensor",
     "Runbook",
     "Authority",
-    "License"
+    "License",
 ]
 
 # You can also define canonical relationship types here if needed
@@ -38,5 +37,5 @@ CANONICAL_RELATIONSHIP_TYPES = [
     "AFFECTS",
     "CONTROLS",
     "USES",
-    "ASSOCIATED_WITH"
+    "ASSOCIATED_WITH",
 ]

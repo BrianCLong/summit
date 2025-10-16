@@ -115,7 +115,9 @@ export class BusinessIntelligenceEngine extends EventEmitter {
   /**
    * Process and prepare a data source
    */
-  private async processDataSource(source: DataSource): Promise<ProcessedDataSource> {
+  private async processDataSource(
+    source: DataSource,
+  ): Promise<ProcessedDataSource> {
     // Validate connection
     await this.validateConnection(source);
 
@@ -134,8 +136,8 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       metrics: {
         totalRecords: 0,
         errorCount: 0,
-        avgResponseTime: 0
-      }
+        avgResponseTime: 0,
+      },
     };
   }
 
@@ -157,7 +159,9 @@ export class BusinessIntelligenceEngine extends EventEmitter {
   /**
    * Process dashboard configuration
    */
-  private async processDashboard(dashboard: Dashboard): Promise<ProcessedDashboard> {
+  private async processDashboard(
+    dashboard: Dashboard,
+  ): Promise<ProcessedDashboard> {
     const processedWidgets: ProcessedWidget[] = [];
 
     for (const widget of dashboard.widgets) {
@@ -171,7 +175,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       lastRefresh: new Date(),
       status: 'active',
       viewCount: 0,
-      avgLoadTime: 0
+      avgLoadTime: 0,
     };
   }
 
@@ -188,14 +192,17 @@ export class BusinessIntelligenceEngine extends EventEmitter {
     const data = await this.executeQuery(dataSource, widget.query);
 
     // Apply visualizations
-    const visualizedData = await this.applyVisualization(data, widget.visualization);
+    const visualizedData = await this.applyVisualization(
+      data,
+      widget.visualization,
+    );
 
     return {
       widget,
       data: visualizedData,
       lastUpdate: new Date(),
       status: 'loaded',
-      loadTime: 0
+      loadTime: 0,
     };
   }
 
@@ -211,7 +218,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       content: await this.generateContentMetrics(),
       user: await this.generateUserMetrics(),
       quality: await this.generateQualityMetrics(),
-      trends: await this.generateTrendAnalysis()
+      trends: await this.generateTrendAnalysis(),
     };
 
     this.emit('analytics:generated', analytics);
@@ -230,7 +237,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       bounceRate: await this.getMetric('docs.bounce.rate'),
       searchQueries: await this.getMetric('docs.search.queries.total'),
       feedbackScore: await this.getMetric('docs.feedback.score.avg'),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -242,14 +249,14 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       pageViews: {
         total: await this.getMetric('docs.pageviews.total'),
         unique: await this.getMetric('docs.pageviews.unique'),
-        returning: await this.getMetric('docs.pageviews.returning')
+        returning: await this.getMetric('docs.pageviews.returning'),
       },
       topPages: await this.getTopPages(),
       searchTerms: await this.getTopSearchTerms(),
       downloadCount: await this.getMetric('docs.downloads.total'),
       socialShares: await this.getSocialShares(),
       comments: await this.getMetric('docs.comments.total'),
-      ratings: await this.getRatingsDistribution()
+      ratings: await this.getRatingsDistribution(),
     };
   }
 
@@ -262,19 +269,19 @@ export class BusinessIntelligenceEngine extends EventEmitter {
         avg: await this.getMetric('docs.loadtime.avg'),
         p50: await this.getMetric('docs.loadtime.p50'),
         p90: await this.getMetric('docs.loadtime.p90'),
-        p95: await this.getMetric('docs.loadtime.p95')
+        p95: await this.getMetric('docs.loadtime.p95'),
       },
       searchPerformance: {
         avgResponseTime: await this.getMetric('docs.search.response.avg'),
-        successRate: await this.getMetric('docs.search.success.rate')
+        successRate: await this.getMetric('docs.search.success.rate'),
       },
       errors: {
         count: await this.getMetric('docs.errors.total'),
         rate: await this.getMetric('docs.errors.rate'),
-        topErrors: await this.getTopErrors()
+        topErrors: await this.getTopErrors(),
       },
       cacheHitRate: await this.getMetric('docs.cache.hit.rate'),
-      cdnMetrics: await this.getCDNMetrics()
+      cdnMetrics: await this.getCDNMetrics(),
     };
   }
 
@@ -286,23 +293,23 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       freshness: {
         avgAge: await this.getContentAge(),
         stalePages: await this.getStalePages(),
-        recentUpdates: await this.getRecentUpdates()
+        recentUpdates: await this.getRecentUpdates(),
       },
       completeness: {
         missingTitles: await this.getMissingTitles(),
         missingDescriptions: await this.getMissingDescriptions(),
         brokenLinks: await this.getBrokenLinks(),
-        missingImages: await this.getMissingImages()
+        missingImages: await this.getMissingImages(),
       },
       consistency: {
         styleScore: await this.getStyleConsistencyScore(),
         terminologyScore: await this.getTerminologyScore(),
-        structureScore: await this.getStructureScore()
+        structureScore: await this.getStructureScore(),
       },
       accessibility: {
         score: await this.getAccessibilityScore(),
-        issues: await this.getAccessibilityIssues()
-      }
+        issues: await this.getAccessibilityIssues(),
+      },
     };
   }
 
@@ -317,7 +324,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       maintenanceNeeds: await this.predictMaintenanceNeeds(),
       searchTrends: await this.predictSearchTrends(),
       performanceIssues: await this.predictPerformanceIssues(),
-      confidenceScores: await this.calculateConfidenceScores()
+      confidenceScores: await this.calculateConfidenceScores(),
     };
 
     this.emit('insights:generated', insights);
@@ -327,7 +334,9 @@ export class BusinessIntelligenceEngine extends EventEmitter {
   /**
    * Create custom dashboard
    */
-  async createCustomDashboard(config: CustomDashboardConfig): Promise<Dashboard> {
+  async createCustomDashboard(
+    config: CustomDashboardConfig,
+  ): Promise<Dashboard> {
     const dashboard: Dashboard = {
       id: `custom-${Date.now()}`,
       name: config.name,
@@ -337,7 +346,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       filters: config.filters || [],
       permissions: config.permissions || [],
       autoRefresh: config.autoRefresh || false,
-      refreshInterval: config.refreshInterval || 300000
+      refreshInterval: config.refreshInterval || 300000,
     };
 
     const processedDashboard = await this.processDashboard(dashboard);
@@ -362,7 +371,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
         contentEngagement: analytics.engagement.pageViews.total,
         userSatisfaction: analytics.overview.feedbackScore,
         contentQuality: analytics.quality.completeness,
-        systemPerformance: analytics.performance.loadTimes.avg
+        systemPerformance: analytics.performance.loadTimes.avg,
       },
       highlights: await this.generateHighlights(analytics),
       concerns: await this.generateConcerns(analytics),
@@ -370,9 +379,9 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       trends: {
         userGrowth: await this.calculateUserGrowthTrend(),
         contentGrowth: await this.calculateContentGrowthTrend(),
-        engagementTrend: await this.calculateEngagementTrend()
+        engagementTrend: await this.calculateEngagementTrend(),
       },
-      actionItems: await this.generateActionItems(analytics, insights)
+      actionItems: await this.generateActionItems(analytics, insights),
     };
   }
 
@@ -398,14 +407,17 @@ export class BusinessIntelligenceEngine extends EventEmitter {
   /**
    * Export report in multiple formats
    */
-  async exportReport(reportId: string, format: ExportFormat): Promise<ExportResult> {
-    const report = this.config.reports.find(r => r.id === reportId);
+  async exportReport(
+    reportId: string,
+    format: ExportFormat,
+  ): Promise<ExportResult> {
+    const report = this.config.reports.find((r) => r.id === reportId);
     if (!report) {
       throw new Error(`Report ${reportId} not found`);
     }
 
     const data = await this.generateReportData(report);
-    
+
     switch (format.type) {
       case 'pdf':
         return this.exportToPDF(data, format);
@@ -429,17 +441,23 @@ export class BusinessIntelligenceEngine extends EventEmitter {
     return values[values.length - 1].value;
   }
 
-  private async executeQuery(dataSource: ProcessedDataSource, query: AnalyticsQuery): Promise<any[]> {
+  private async executeQuery(
+    dataSource: ProcessedDataSource,
+    query: AnalyticsQuery,
+  ): Promise<any[]> {
     // Execute query against data source
     return dataSource.pipeline.execute(query);
   }
 
-  private async applyVisualization(data: any[], config: VisualizationConfig): Promise<any> {
+  private async applyVisualization(
+    data: any[],
+    config: VisualizationConfig,
+  ): Promise<any> {
     // Apply visualization transformations
     return {
       type: config.type,
       data: data,
-      config: config
+      config: config,
     };
   }
 
@@ -460,7 +478,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       transform: async (data: any[]) => {
         // Apply transformations
         return data;
-      }
+      },
     };
   }
 
@@ -469,7 +487,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       columns: 12,
       rows: 'auto',
       gap: 16,
-      responsive: true
+      responsive: true,
     };
   }
 
@@ -482,7 +500,7 @@ export class BusinessIntelligenceEngine extends EventEmitter {
       query: { metric },
       visualization: { type: 'number' },
       dimensions: { width: 3, height: 2 },
-      interactions: []
+      interactions: [],
     }));
   }
 }

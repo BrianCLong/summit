@@ -91,16 +91,16 @@ jobs:
         env:
           GRAPHQL_URL: ${{ github.event.inputs.graphQLUrl }}
           SLACK_WEBHOOK_URL: ${{ secrets[github.event.inputs.slack] }}
-          GATE_ATTESTOR_OK: "true"
-          GATE_CONTAINMENT: "true"
-          GATE_SCOPE: "true"
-          GATE_PQ: "true"
-          GATE_CSE: "true"
-          GATE_FAIRNESS: "true"
-          GATE_BUDGET: "true"
-          GATE_PODR: "true"
-          GATE_RESIDENCY: "true"
-          GATE_AUDIT: "true"
+          GATE_ATTESTOR_OK: 'true'
+          GATE_CONTAINMENT: 'true'
+          GATE_SCOPE: 'true'
+          GATE_PQ: 'true'
+          GATE_CSE: 'true'
+          GATE_FAIRNESS: 'true'
+          GATE_BUDGET: 'true'
+          GATE_PODR: 'true'
+          GATE_RESIDENCY: 'true'
+          GATE_AUDIT: 'true'
         run: |
           echo "🚀 Starting v0.4.1 Sovereign Safeguards Go-Live..."
           bash scripts/execute-v041-go-live.sh

@@ -29,18 +29,24 @@ class MaestroInitCLI {
       console.log(`   Build System: ${config.buildSystem}`);
       console.log(`   Languages: ${config.primaryLanguages.join(', ')}`);
       console.log(`   Test Frameworks: ${config.testFrameworks.join(', ')}`);
-      if (config.ciProvider) console.log(`   CI Provider: ${config.ciProvider}`);
-      if (config.monorepoType) console.log(`   Monorepo: ${config.monorepoType}`);
+      if (config.ciProvider)
+        console.log(`   CI Provider: ${config.ciProvider}`);
+      if (config.monorepoType)
+        console.log(`   Monorepo: ${config.monorepoType}`);
     });
 
     this.wizard.on('plan-ready', (plan) => {
       console.log(`\n📋 Migration Plan Generated:`);
       console.log(`   Phases: ${plan.steps.length} steps`);
-      console.log(`   Estimated Duration: ${Math.round(plan.estimatedDuration / 60)} minutes`);
+      console.log(
+        `   Estimated Duration: ${Math.round(plan.estimatedDuration / 60)} minutes`,
+      );
       console.log(`   Risk Level: ${plan.riskLevel.toUpperCase()}`);
       console.log(`\n   Steps:`);
       plan.steps.forEach((step, i) => {
-        console.log(`   ${i + 1}. ${step.name} (~${Math.round(step.estimatedDuration / 60)}min)`);
+        console.log(
+          `   ${i + 1}. ${step.name} (~${Math.round(step.estimatedDuration / 60)}min)`,
+        );
         console.log(`      ${step.description}`);
       });
     });
@@ -48,7 +54,9 @@ class MaestroInitCLI {
     this.wizard.on('migration-start', (progress) => {
       console.log(`\n🚀 Migration Started`);
       console.log(`   Total Steps: ${progress.totalSteps}`);
-      console.log(`   Estimated Completion: ${progress.estimatedCompletion.toLocaleTimeString()}`);
+      console.log(
+        `   Estimated Completion: ${progress.estimatedCompletion.toLocaleTimeString()}`,
+      );
     });
 
     this.wizard.on('step-start', (step) => {
@@ -63,14 +71,17 @@ class MaestroInitCLI {
 
     this.wizard.on('step-output', (output) => {
       // Only show important output lines to avoid spam
-      const lines = output.split('\n').filter(line => 
-        line.includes('ERROR') || 
-        line.includes('SUCCESS') || 
-        line.includes('WARN') ||
-        line.includes('Built') ||
-        line.includes('Test')
-      );
-      lines.forEach(line => {
+      const lines = output
+        .split('\n')
+        .filter(
+          (line) =>
+            line.includes('ERROR') ||
+            line.includes('SUCCESS') ||
+            line.includes('WARN') ||
+            line.includes('Built') ||
+            line.includes('Test'),
+        );
+      lines.forEach((line) => {
         if (line.trim()) console.log(`      ${line.trim()}`);
       });
     });
@@ -80,16 +91,27 @@ class MaestroInitCLI {
       console.log(`      Status: ${result.status}`);
       console.log(`      Duration: ${Math.round(result.duration / 1000)}s`);
       console.log(`      Artifacts: ${result.artifacts.length}`);
-      console.log(`      Determinism: ${Math.round(result.parityReport.determinismScore * 100)}%`);
-      
+      console.log(
+        `      Determinism: ${Math.round(result.parityReport.determinismScore * 100)}%`,
+      );
+
       if (result.parityReport.artifactParity.different.length > 0) {
-        console.log(`      ⚠️  Different artifacts: ${result.parityReport.artifactParity.different.join(', ')}`);
+        console.log(
+          `      ⚠️  Different artifacts: ${result.parityReport.artifactParity.different.join(', ')}`,
+        );
       }
     });
 
     this.wizard.on('issue', (issue) => {
-      const icon = issue.severity === 'critical' ? '🚨' : issue.severity === 'major' ? '⚠️' : 'ℹ️';
-      console.log(`\n   ${icon} ${issue.severity.toUpperCase()}: ${issue.description}`);
+      const icon =
+        issue.severity === 'critical'
+          ? '🚨'
+          : issue.severity === 'major'
+            ? '⚠️'
+            : 'ℹ️';
+      console.log(
+        `\n   ${icon} ${issue.severity.toUpperCase()}: ${issue.description}`,
+      );
       console.log(`      Suggestion: ${issue.suggestion}`);
       if (issue.autoFixable) {
         console.log(`      🔧 Auto-fixable`);
@@ -98,14 +120,22 @@ class MaestroInitCLI {
 
     this.wizard.on('migration-complete', (progress) => {
       console.log(`\n🎉 Migration Complete!`);
-      console.log(`   Completed: ${progress.completedSteps}/${progress.totalSteps} steps`);
+      console.log(
+        `   Completed: ${progress.completedSteps}/${progress.totalSteps} steps`,
+      );
       console.log(`   Shadow Builds: ${progress.shadowBuilds.length}`);
       console.log(`   Issues: ${progress.issues.length}`);
-      
+
       if (progress.issues.length > 0) {
-        const critical = progress.issues.filter(i => i.severity === 'critical').length;
-        const major = progress.issues.filter(i => i.severity === 'major').length;
-        console.log(`   Issues Breakdown: ${critical} critical, ${major} major`);
+        const critical = progress.issues.filter(
+          (i) => i.severity === 'critical',
+        ).length;
+        const major = progress.issues.filter(
+          (i) => i.severity === 'major',
+        ).length;
+        console.log(
+          `   Issues Breakdown: ${critical} critical, ${major} major`,
+        );
       }
     });
 
@@ -118,7 +148,9 @@ class MaestroInitCLI {
     });
 
     this.wizard.on('rollback-complete', () => {
-      console.log(`\n🔄 Rollback Complete - Repository restored to original state`);
+      console.log(
+        `\n🔄 Rollback Complete - Repository restored to original state`,
+      );
     });
   }
 
@@ -144,7 +176,7 @@ class MaestroInitCLI {
         case 'migrate':
           await this.runMigrate(args[1] || process.cwd(), {
             dryRun: args.includes('--dry-run'),
-            skipShadow: args.includes('--skip-shadow')
+            skipShadow: args.includes('--skip-shadow'),
           });
           break;
         case 'parity':
@@ -154,7 +186,9 @@ class MaestroInitCLI {
           this.showHelp();
       }
     } catch (error) {
-      console.error(`\n💥 Fatal Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(
+        `\n💥 Fatal Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       process.exit(1);
     }
   }
@@ -165,12 +199,14 @@ class MaestroInitCLI {
 
     // Step 1: Discovery
     const config = await this.wizard.discoverRepository(rootPath);
-    
+
     // Step 2: Generate Plan
     const plan = await this.wizard.generateMigrationPlan(config);
 
     // Step 3: Confirm with user
-    const shouldProceed = await this.askYesNo(`\nProceed with migration? (y/n): `);
+    const shouldProceed = await this.askYesNo(
+      `\nProceed with migration? (y/n): `,
+    );
     if (!shouldProceed) {
       console.log('Migration cancelled.');
       return;
@@ -182,7 +218,9 @@ class MaestroInitCLI {
     await this.wizard.executeMigration(plan, { dryRun });
 
     if (dryRun) {
-      const runForReal = await this.askYesNo(`\nDry run complete. Execute for real? (y/n): `);
+      const runForReal = await this.askYesNo(
+        `\nDry run complete. Execute for real? (y/n): `,
+      );
       if (runForReal) {
         await this.wizard.executeMigration(plan, { dryRun: false });
       }
@@ -191,7 +229,7 @@ class MaestroInitCLI {
 
   async runAnalyze(rootPath) {
     console.log(`🔍 Analyzing repository at: ${rootPath}\n`);
-    
+
     const config = await this.wizard.discoverRepository(rootPath);
     const plan = await this.wizard.generateMigrationPlan(config);
 
@@ -224,7 +262,9 @@ class MaestroInitCLI {
 
   async runParityReport(originalBuild, maestroBuild) {
     if (!originalBuild || !maestroBuild) {
-      console.error('Usage: maestro-init parity <original-build-path> <maestro-build-path>');
+      console.error(
+        'Usage: maestro-init parity <original-build-path> <maestro-build-path>',
+      );
       return;
     }
 
@@ -232,20 +272,31 @@ class MaestroInitCLI {
     console.log(`   Original: ${originalBuild}`);
     console.log(`   Maestro:  ${maestroBuild}`);
 
-    const report = await this.wizard.generateParityReport(originalBuild, maestroBuild);
+    const report = await this.wizard.generateParityReport(
+      originalBuild,
+      maestroBuild,
+    );
 
     console.log(`\n📋 Parity Report:`);
     console.log(`   Artifact Parity:`);
     console.log(`     Matching: ${report.artifactParity.matching.length}`);
     console.log(`     Different: ${report.artifactParity.different.length}`);
     console.log(`     Missing: ${report.artifactParity.missing.length}`);
-    
+
     console.log(`   Performance Parity:`);
-    console.log(`     Build Time Ratio: ${report.performanceParity.buildTimeRatio.toFixed(2)}`);
-    console.log(`     Test Time Ratio: ${report.performanceParity.testTimeRatio.toFixed(2)}`);
-    console.log(`     Cache Hit Rate: ${(report.performanceParity.cacheHitRate * 100).toFixed(1)}%`);
-    
-    console.log(`   Determinism Score: ${(report.determinismScore * 100).toFixed(1)}%`);
+    console.log(
+      `     Build Time Ratio: ${report.performanceParity.buildTimeRatio.toFixed(2)}`,
+    );
+    console.log(
+      `     Test Time Ratio: ${report.performanceParity.testTimeRatio.toFixed(2)}`,
+    );
+    console.log(
+      `     Cache Hit Rate: ${(report.performanceParity.cacheHitRate * 100).toFixed(1)}%`,
+    );
+
+    console.log(
+      `   Determinism Score: ${(report.determinismScore * 100).toFixed(1)}%`,
+    );
 
     // Save report
     const reportPath = path.join(process.cwd(), 'maestro-parity-report.json');
@@ -257,7 +308,7 @@ class MaestroInitCLI {
     const readline = await import('readline');
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     });
 
     return new Promise((resolve) => {

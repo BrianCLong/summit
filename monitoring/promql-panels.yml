@@ -5,72 +5,72 @@ panels:
   # =====================================================================================
   # BUDGET DENIAL MONITORING
   # =====================================================================================
-  
+
   budget_denials_rate:
-    title: "Budget Denials (Rate per 5min)"
-    description: "Rate of budget denials by reason and tenant"
-    type: "stat"
+    title: 'Budget Denials (Rate per 5min)'
+    description: 'Rate of budget denials by reason and tenant'
+    type: 'stat'
     query: |
       sum by (reason, tenant) (
         rate(budget_denials_total[5m])
       )
-    legend: "{{tenant}} - {{reason}}"
+    legend: '{{tenant}} - {{reason}}'
     thresholds:
       - color: green
         value: 0
-      - color: yellow  
+      - color: yellow
         value: 0.1
       - color: red
         value: 0.5
-    
+
   budget_denials_by_reason:
-    title: "Budget Denials by Reason (Last 24h)"
-    description: "Breakdown of budget denial reasons"
-    type: "piechart"
+    title: 'Budget Denials by Reason (Last 24h)'
+    description: 'Breakdown of budget denial reasons'
+    type: 'piechart'
     query: |
       sum by (reason) (
         increase(budget_denials_total[24h])
       )
-    legend: "{{reason}}"
+    legend: '{{reason}}'
 
   budget_denials_by_tenant:
-    title: "Budget Denials by Tenant (Rate)"
-    description: "Which tenants are hitting budget limits most"
-    type: "table"
+    title: 'Budget Denials by Tenant (Rate)'
+    description: 'Which tenants are hitting budget limits most'
+    type: 'table'
     query: |
       sum by (tenant) (
         rate(budget_denials_total[1h])
       ) * 3600
-    legend: "Denials/Hour"
+    legend: 'Denials/Hour'
 
   # =====================================================================================
   # TOKEN ESTIMATION ACCURACY
   # =====================================================================================
 
   token_estimation_accuracy:
-    title: "Token Estimation Accuracy Distribution" 
-    description: "Distribution of actual vs estimated token ratios"
-    type: "histogram"
+    title: 'Token Estimation Accuracy Distribution'
+    description: 'Distribution of actual vs estimated token ratios'
+    type: 'histogram'
     query: |
       histogram_quantile(0.50, sum(rate(token_estimation_error_ratio_bucket[5m])) by (le)) and
       histogram_quantile(0.95, sum(rate(token_estimation_error_ratio_bucket[5m])) by (le)) and
       histogram_quantile(0.99, sum(rate(token_estimation_error_ratio_bucket[5m])) by (le))
-    legend: "P{{quantile}}"
+    legend: 'P{{quantile}}'
 
   estimation_accuracy_by_provider:
-    title: "Estimation Accuracy by Provider"
-    description: "How accurate are our token estimates per provider"
-    type: "stat"
+    title: 'Estimation Accuracy by Provider'
+    description: 'How accurate are our token estimates per provider'
+    type: 'stat'
     query: |
       avg by (provider) (
         token_estimation_error_ratio
       )
-    legend: "{{provider}}"
+    legend: '{{provider}}'
     thresholds:
       - color: red
         value: 0.7
       - color: yellow
-        value: 0.9  
+        value: 0.9
       - color: green
         value: 1.1
       - color: yellow
@@ -83,22 +83,22 @@ panels:
   # =====================================================================================
 
   rollback_events_rate:
-    title: "Rollback Events (Rate per 5min)"
-    description: "Rate of rollback events by reason and type"
-    type: "graph"
+    title: 'Rollback Events (Rate per 5min)'
+    description: 'Rate of rollback events by reason and type'
+    type: 'graph'
     query: |
       sum by (reason, type) (
         rate(rollback_events_total[5m])
       )
-    legend: "{{reason}} - {{type}}"
+    legend: '{{reason}} - {{type}}'
 
   rollback_storm_alert:
-    title: "Rollback Storm Detection"
-    description: "Alert when rollback rate is too high"
-    type: "singlestat"
+    title: 'Rollback Storm Detection'
+    description: 'Alert when rollback rate is too high'
+    type: 'singlestat'
     query: |
       sum(rate(rollback_events_total[5m])) > 2
-    legend: "Rollback Storm"
+    legend: 'Rollback Storm'
     thresholds:
       - color: green
         value: 0
@@ -110,23 +110,23 @@ panels:
   # =====================================================================================
 
   mutation_latency_p95:
-    title: "Mutation Latency P95 by Field"
-    description: "95th percentile mutation latency by GraphQL field"
-    type: "graph"
+    title: 'Mutation Latency P95 by Field'
+    description: '95th percentile mutation latency by GraphQL field'
+    type: 'graph'
     query: |
       histogram_quantile(0.95, 
         sum(rate(mutation_latency_ms_bucket[5m])) by (le, mutation)
       )
-    legend: "{{mutation}}"
+    legend: '{{mutation}}'
 
   mutation_success_rate:
-    title: "Mutation Success Rate"
-    description: "Success rate of mutations over time"
-    type: "stat"
+    title: 'Mutation Success Rate'
+    description: 'Success rate of mutations over time'
+    type: 'stat'
     query: |
       sum(rate(mutation_latency_ms_bucket{success="true"}[5m])) /
       sum(rate(mutation_latency_ms_bucket[5m]))
-    legend: "Success Rate"
+    legend: 'Success Rate'
     thresholds:
       - color: red
         value: 0.8
@@ -136,66 +136,66 @@ panels:
         value: 0.99
 
   slowest_mutations:
-    title: "Slowest Mutations (Top 10)"
-    description: "Which mutations are taking the longest"
-    type: "table" 
+    title: 'Slowest Mutations (Top 10)'
+    description: 'Which mutations are taking the longest'
+    type: 'table'
     query: |
       topk(10,
         histogram_quantile(0.95,
           sum(rate(mutation_latency_ms_bucket[1h])) by (le, mutation)
         )
       )
-    legend: "P95 Latency (ms)"
+    legend: 'P95 Latency (ms)'
 
   # =====================================================================================
   # RATE LIMITING
   # =====================================================================================
 
   rate_limit_hits_rate:
-    title: "Rate Limit Hits (Rate per 5min)"
-    description: "Rate limiting activity by tenant and operation"
-    type: "graph"
+    title: 'Rate Limit Hits (Rate per 5min)'
+    description: 'Rate limiting activity by tenant and operation'
+    type: 'graph'
     query: |
       sum by (tenant, operation, bucket_type) (
         rate(rate_limit_hits_total[5m])
       )
-    legend: "{{tenant}} - {{operation}} - {{bucket_type}}"
+    legend: '{{tenant}} - {{operation}} - {{bucket_type}}'
 
   active_token_buckets:
-    title: "Active Token Buckets"
-    description: "Number of active rate limiting buckets"
-    type: "singlestat"
+    title: 'Active Token Buckets'
+    description: 'Number of active rate limiting buckets'
+    type: 'singlestat'
     query: |
       sum by (bucket_type) (
         active_token_buckets_total
       )
-    legend: "{{bucket_type}}"
+    legend: '{{bucket_type}}'
 
   # =====================================================================================
   # COMPENSATION LOG HEALTH
   # =====================================================================================
 
   compensation_log_size:
-    title: "Compensation Log Size"
-    description: "Number of entries in compensation log by status" 
-    type: "stat"
+    title: 'Compensation Log Size'
+    description: 'Number of entries in compensation log by status'
+    type: 'stat'
     query: |
       sum by (status) (
         compensation_log_size
       )
-    legend: "{{status}}"
+    legend: '{{status}}'
 
   # =====================================================================================
   # TOKEN CACHE PERFORMANCE
   # =====================================================================================
 
   token_cache_hit_rate:
-    title: "Token Cache Hit Rate"
-    description: "How often token counting hits cache"
-    type: "stat"
+    title: 'Token Cache Hit Rate'
+    description: 'How often token counting hits cache'
+    type: 'stat'
     query: |
       histogram_quantile(0.95, sum(rate(token_cache_hit_rate_bucket[5m])) by (le))
-    legend: "Cache Hit Rate"
+    legend: 'Cache Hit Rate'
     thresholds:
       - color: red
         value: 0.5
@@ -209,35 +209,35 @@ panels:
   # =====================================================================================
 
   budget_usage_by_tenant:
-    title: "Budget Usage by Tenant"
-    description: "Current budget utilization per tenant"
-    type: "bargraph"
+    title: 'Budget Usage by Tenant'
+    description: 'Current budget utilization per tenant'
+    type: 'bargraph'
     query: |
       histogram_quantile(0.50, 
         sum(rate(budget_usage_ratio_bucket[1h])) by (le, tenant)
       )
-    legend: "{{tenant}}"
+    legend: '{{tenant}}'
 
   budget_approaching_limit:
-    title: "Tenants Approaching Budget Limit"
-    description: "Tenants using >80% of monthly budget"
-    type: "table"
+    title: 'Tenants Approaching Budget Limit'
+    description: 'Tenants using >80% of monthly budget'
+    type: 'table'
     query: |
       (
         histogram_quantile(0.95,
           sum(rate(budget_usage_ratio_bucket[1h])) by (le, tenant)
         ) > 0.8
       ) * 100
-    legend: "Budget Used %"
+    legend: 'Budget Used %'
 
   # =====================================================================================
   # SYSTEM HEALTH OVERVIEW
   # =====================================================================================
 
   safe_mutations_health_score:
-    title: "Safe Mutations Health Score"
-    description: "Overall system health (0-100)"
-    type: "gauge"
+    title: 'Safe Mutations Health Score'
+    description: 'Overall system health (0-100)'
+    type: 'gauge'
     query: |
       (
         (1 - (rate(budget_denials_total[5m]) / 10)) * 0.25 +
@@ -245,7 +245,7 @@ panels:
         (histogram_quantile(0.95, sum(rate(mutation_latency_ms_bucket[5m])) by (le)) < 2000) * 0.25 +
         (histogram_quantile(0.95, sum(rate(token_cache_hit_rate_bucket[5m])) by (le))) * 0.25
       ) * 100
-    legend: "Health Score"
+    legend: 'Health Score'
     min: 0
     max: 100
     thresholds:
@@ -261,9 +261,9 @@ panels:
   # =====================================================================================
 
   error_rate_by_type:
-    title: "Error Rate by Type"
-    description: "Different types of errors in the system"
-    type: "graph"
+    title: 'Error Rate by Type'
+    description: 'Different types of errors in the system'
+    type: 'graph'
     query: |
       sum by (error_type) (
         rate(http_requests_total{status=~"4.."}[5m])
@@ -274,29 +274,29 @@ panels:
       sum by (error_type) (
         rate(rollback_events_total[5m])
       )
-    legend: "{{error_type}}"
+    legend: '{{error_type}}'
 
   # =====================================================================================
   # RESOURCE UTILIZATION
   # =====================================================================================
 
   redis_operations_rate:
-    title: "Redis Operations Rate"
-    description: "Rate of Redis operations for rate limiting"
-    type: "graph"
+    title: 'Redis Operations Rate'
+    description: 'Rate of Redis operations for rate limiting'
+    type: 'graph'
     query: |
       sum(rate(redis_commands_total[5m])) by (command)
-    legend: "{{command}}"
+    legend: '{{command}}'
 
   neo4j_query_duration:
-    title: "Neo4j Query Duration P95"
-    description: "95th percentile Neo4j query duration"
-    type: "stat"
+    title: 'Neo4j Query Duration P95'
+    description: '95th percentile Neo4j query duration'
+    type: 'stat'
     query: |
       histogram_quantile(0.95,
         sum(rate(neo4j_query_duration_seconds_bucket[5m])) by (le)
       )
-    legend: "P95 Duration (s)"
+    legend: 'P95 Duration (s)'
     thresholds:
       - color: green
         value: 0.1
@@ -310,60 +310,60 @@ panels:
 # =====================================================================================
 
 alerting_rules:
-  - name: "intelgraph-safe-mutations"
+  - name: 'intelgraph-safe-mutations'
     rules:
-      - alert: "BudgetDenialsSpike" 
-        expr: "sum(rate(budget_denials_total[10m])) by (tenant) > 0.5"
-        for: "10m"
+      - alert: 'BudgetDenialsSpike'
+        expr: 'sum(rate(budget_denials_total[10m])) by (tenant) > 0.5'
+        for: '10m'
         labels:
-          severity: "warning"
+          severity: 'warning'
         annotations:
-          summary: "Budget denials elevated for {{ $labels.tenant }}"
-          description: "Tenant {{ $labels.tenant }} has {{ $value }} budget denials per second"
-          runbook_url: "https://runbooks.intelgraph.com/budget-denials"
+          summary: 'Budget denials elevated for {{ $labels.tenant }}'
+          description: 'Tenant {{ $labels.tenant }} has {{ $value }} budget denials per second'
+          runbook_url: 'https://runbooks.intelgraph.com/budget-denials'
 
-      - alert: "RollbackStorm"
-        expr: "sum(rate(rollback_events_total[5m])) > 0.3"
-        for: "5m" 
+      - alert: 'RollbackStorm'
+        expr: 'sum(rate(rollback_events_total[5m])) > 0.3'
+        for: '5m'
         labels:
-          severity: "critical"
+          severity: 'critical'
         annotations:
-          summary: "Rollback events spiking"
-          description: "{{ $value }} rollback events per second detected"
-          runbook_url: "https://runbooks.intelgraph.com/rollback-storm"
+          summary: 'Rollback events spiking'
+          description: '{{ $value }} rollback events per second detected'
+          runbook_url: 'https://runbooks.intelgraph.com/rollback-storm'
 
-      - alert: "MutationLatencyDegraded"
-        expr: "histogram_quantile(0.95, sum(rate(mutation_latency_ms_bucket[10m])) by (le)) > 2000"
-        for: "15m"
+      - alert: 'MutationLatencyDegraded'
+        expr: 'histogram_quantile(0.95, sum(rate(mutation_latency_ms_bucket[10m])) by (le)) > 2000'
+        for: '15m'
         labels:
-          severity: "warning" 
+          severity: 'warning'
         annotations:
-          summary: "Mutation latency degraded"
-          description: "P95 mutation latency is {{ $value }}ms"
+          summary: 'Mutation latency degraded'
+          description: 'P95 mutation latency is {{ $value }}ms'
 
-      - alert: "TokenEstimationAccuracyPoor"
-        expr: "avg(token_estimation_error_ratio) < 0.7 OR avg(token_estimation_error_ratio) > 1.5"
-        for: "20m"
+      - alert: 'TokenEstimationAccuracyPoor'
+        expr: 'avg(token_estimation_error_ratio) < 0.7 OR avg(token_estimation_error_ratio) > 1.5'
+        for: '20m'
         labels:
-          severity: "warning"
+          severity: 'warning'
         annotations:
-          summary: "Token estimation accuracy degraded"
-          description: "Average estimation ratio is {{ $value }}"
+          summary: 'Token estimation accuracy degraded'
+          description: 'Average estimation ratio is {{ $value }}'
 
-      - alert: "CacheHitRateLow"
-        expr: "histogram_quantile(0.95, sum(rate(token_cache_hit_rate_bucket[5m])) by (le)) < 0.7"
-        for: "15m"
+      - alert: 'CacheHitRateLow'
+        expr: 'histogram_quantile(0.95, sum(rate(token_cache_hit_rate_bucket[5m])) by (le)) < 0.7'
+        for: '15m'
         labels:
-          severity: "info"
+          severity: 'info'
         annotations:
-          summary: "Token cache hit rate low"
-          description: "Cache hit rate is {{ $value }}"
+          summary: 'Token cache hit rate low'
+          description: 'Cache hit rate is {{ $value }}'
 
-      - alert: "BudgetApproachingLimit"
-        expr: "histogram_quantile(0.95, sum(rate(budget_usage_ratio_bucket[1h])) by (le, tenant)) > 0.9"
-        for: "1h"
+      - alert: 'BudgetApproachingLimit'
+        expr: 'histogram_quantile(0.95, sum(rate(budget_usage_ratio_bucket[1h])) by (le, tenant)) > 0.9'
+        for: '1h'
         labels:
-          severity: "info"
+          severity: 'info'
         annotations:
-          summary: "Tenant {{ $labels.tenant }} approaching budget limit"
-          description: "Budget utilization is {{ $value }}%"
+          summary: 'Tenant {{ $labels.tenant }} approaching budget limit'
+          description: 'Budget utilization is {{ $value }}%'

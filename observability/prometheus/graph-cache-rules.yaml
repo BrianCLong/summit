@@ -1,13 +1,13 @@
 groups:
-- name: graph-sli
-  rules:
-    - record: neo4j:bolt_latency_ms:p95
-      expr: histogram_quantile(0.95, sum(rate(neo4j_bolt_message_processing_time_seconds_bucket[5m])) by (le)) * 1000
-    - alert: Neo4jBoltLatencyHigh
-      expr: neo4j:bolt_latency_ms:p95 > 200
-      for: 10m
-      labels: { severity: warning }
-- name: cache-sli
-  rules:
-    - record: redis:ops_per_s:rate1m
-      expr: rate(redis_commands_processed_total[1m])
+  - name: graph-sli
+    rules:
+      - record: neo4j:bolt_latency_ms:p95
+        expr: histogram_quantile(0.95, sum(rate(neo4j_bolt_message_processing_time_seconds_bucket[5m])) by (le)) * 1000
+      - alert: Neo4jBoltLatencyHigh
+        expr: neo4j:bolt_latency_ms:p95 > 200
+        for: 10m
+        labels: { severity: warning }
+  - name: cache-sli
+    rules:
+      - record: redis:ops_per_s:rate1m
+        expr: rate(redis_commands_processed_total[1m])

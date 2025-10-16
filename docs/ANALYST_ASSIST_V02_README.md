@@ -14,12 +14,14 @@ Analyst Assist v0.2 provides intelligence analysts with a policy-aware interface
 ### 1. Query Builder UX (`QueryBuilder.tsx`)
 
 Interactive query builder with:
+
 - Multi-condition queries (field, operator, value)
 - Dynamic condition management (add/remove)
 - Real-time policy preview
 - Export policy checking
 
 **Features**:
+
 - Field options: Entity Type, Classification, Relationship Type, Timestamp, Confidence
 - Operators: Equals, Contains, Greater Than, Less Than
 - Policy preview before export
@@ -28,6 +30,7 @@ Interactive query builder with:
 ### 2. Explainability Panel (`ExplainabilityPanel.tsx`)
 
 "Why blocked?" explanations with:
+
 - Policy outcome display (allow/deny)
 - Rule ID and evidence
 - Remediation instructions
@@ -35,6 +38,7 @@ Interactive query builder with:
 - Expandable detail views
 
 **Features**:
+
 - Clear blocked/allowed indicators
 - Evidence list with context
 - Remediation steps
@@ -44,6 +48,7 @@ Interactive query builder with:
 ### 3. Export Request (`ExportRequest.tsx`)
 
 Policy-aware export interface with:
+
 - Multiple export formats (JSON, CSV, GraphML, PDF)
 - Provenance and metadata options
 - Pre-export policy check
@@ -51,6 +56,7 @@ Policy-aware export interface with:
 - Policy impact preview
 
 **Features**:
+
 - Format selection with preview
 - Policy check before export
 - Step-up authentication integration
@@ -60,6 +66,7 @@ Policy-aware export interface with:
 ### 4. Main Component (`AnalystAssist.tsx`)
 
 Integrated interface with:
+
 - Tabbed navigation (Query, Export, Help)
 - Comprehensive help documentation
 - Acceptance criteria verification
@@ -68,11 +75,13 @@ Integrated interface with:
 ### 5. Backend Endpoints (`policy-preview.js`)
 
 API routes supporting:
+
 - `/api/policy/preview-export` - Preview query export policy
 - `/api/export/policy-check` - Check export permissions
 - `/api/policy/explain` - Generate AI explanations
 
 **Features**:
+
 - OPA integration for policy evaluation
 - Step-up token validation
 - DLP violation detection
@@ -81,6 +90,7 @@ API routes supporting:
 ### 6. E2E Tests (`analyst-assist-demo.spec.js`)
 
 Comprehensive test suite covering:
+
 - Blocked export flow
 - Allowed export with step-up
 - Policy explanations
@@ -89,6 +99,7 @@ Comprehensive test suite covering:
 ## Acceptance Criteria
 
 ### ✅ 1. Query Builder UX
+
 - [x] Multi-condition query builder
 - [x] Field/operator/value selectors
 - [x] Add/remove conditions
@@ -96,6 +107,7 @@ Comprehensive test suite covering:
 - [x] Policy preview button
 
 ### ✅ 2. "Why Blocked?" Explanations Wired to Policy Outcomes
+
 - [x] Policy decision display (allow/deny)
 - [x] Reason and rule ID shown
 - [x] Evidence list displayed
@@ -103,6 +115,7 @@ Comprehensive test suite covering:
 - [x] AI-powered plain language explanations
 
 ### ✅ 3. Export Request Previews Policy Impact
+
 - [x] Pre-export policy check
 - [x] Format selection (JSON, CSV, GraphML, PDF)
 - [x] Provenance/metadata options
@@ -110,6 +123,7 @@ Comprehensive test suite covering:
 - [x] Step-up authentication trigger
 
 ### ✅ 4. Demo Walkthrough: Assist → Explain → Export
+
 - [x] Build query in Query Builder
 - [x] Preview policy outcome
 - [x] View explanations
@@ -117,6 +131,7 @@ Comprehensive test suite covering:
 - [x] Handle blocked/allowed per policy
 
 ### ✅ 5. Blocked/Allowed Decisions Shown Per Policy
+
 - [x] Clear visual indicators (✅/🚫)
 - [x] Policy-specific reasons
 - [x] Evidence and context
@@ -190,6 +205,7 @@ stepup_required {
 ### API Flow
 
 1. **Policy Preview**:
+
    ```
    POST /api/policy/preview-export
    → OPA evaluation
@@ -197,6 +213,7 @@ stepup_required {
    ```
 
 2. **Export Policy Check**:
+
    ```
    POST /api/export/policy-check
    → OPA evaluation with step-up token

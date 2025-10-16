@@ -1,10 +1,46 @@
 {
   "name": "integration/slack-notify",
   "nodes": [
-    { "parameters": { "path": "integration/slack-notify", "options": {} }, "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 300], "name": "Webhook" },
-    { "parameters": { "httpMethod": "POST", "url": "={{$json[\"slackWebhookUrl\"]}}", "jsonParameters": true, "options": {}, "bodyParametersJson": "{\n  \"text\": \"Run {{$json.runId}}: {{$json.payload.message}}\"\n}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [450, 300], "name": "Slack HTTP" },
-    { "parameters": { "httpMethod": "POST", "url": "={{$json[\"maestroCallbackUrl\"]}}", "jsonParameters": true, "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" }, "bodyParametersJson": "={{$json[\"maestroBody\"]}}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [700, 300], "name": "Maestro Callback" }
+    {
+      "parameters": { "path": "integration/slack-notify", "options": {} },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "={{$json[\"slackWebhookUrl\"]}}",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "{\n  \"text\": \"Run {{$json.runId}}: {{$json.payload.message}}\"\n}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "name": "Slack HTTP"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "={{$json[\"maestroCallbackUrl\"]}}",
+        "jsonParameters": true,
+        "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" },
+        "bodyParametersJson": "={{$json[\"maestroBody\"]}}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "name": "Maestro Callback"
+    }
   ],
-  "connections": { "Webhook": { "main": [[{"node": "Slack HTTP", "type": "main", "index": 0}]] }, "Slack HTTP": { "main": [[{"node": "Maestro Callback", "type": "main", "index": 0}]] } }
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Slack HTTP", "type": "main", "index": 0 }]]
+    },
+    "Slack HTTP": {
+      "main": [[{ "node": "Maestro Callback", "type": "main", "index": 0 }]]
+    }
+  }
 }
-

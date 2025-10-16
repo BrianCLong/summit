@@ -1,8 +1,8 @@
 area: server
 intent: feature
 budgets:
-  p95_ms: 350        # GraphQL read target (aligns with org default)
-  err_rate_pct: 0.1  # Error budget for API tier
+  p95_ms: 350 # GraphQL read target (aligns with org default)
+  err_rate_pct: 0.1 # Error budget for API tier
 data:
   residency: US
   pii: false
@@ -40,7 +40,7 @@ observability:
 rollout_plan:
   branch: feature/v24-global-coherence
   target: staging → prod (standard biweekly)
-  
+
 raci:
   driver: brianlong
   reviewers: []

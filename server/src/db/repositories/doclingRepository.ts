@@ -188,7 +188,7 @@ class DoclingRepository {
     requestId: string,
     sourceType: string,
     fragments: DocFragmentInput[],
-    sourceUri?: string
+    sourceUri?: string,
   ): Promise<DocFragmentRecord[]> {
     await this.ensureSchema();
     const rows: DocFragmentRecord[] = [];
@@ -380,7 +380,10 @@ class DoclingRepository {
     return rows;
   }
 
-  async findSummaryByRequestId(tenantId: string, requestId: string): Promise<DocSummaryRecord | null> {
+  async findSummaryByRequestId(
+    tenantId: string,
+    requestId: string,
+  ): Promise<DocSummaryRecord | null> {
     await this.ensureSchema();
     const result = await this.getPool().query(
       `SELECT id, tenant_id, request_id, scope, focus, text, highlights, quality_signals, created_at

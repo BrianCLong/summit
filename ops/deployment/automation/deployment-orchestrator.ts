@@ -439,7 +439,12 @@ export interface UserRoutingConfig {
 export interface ValidationStep {
   id: string;
   name: string;
-  type: 'health-check' | 'smoke-test' | 'integration-test' | 'performance-test' | 'security-scan';
+  type:
+    | 'health-check'
+    | 'smoke-test'
+    | 'integration-test'
+    | 'performance-test'
+    | 'security-scan';
   configuration: ValidationConfig;
   timeout: number;
   retryPolicy: RetryPolicy;
@@ -520,7 +525,12 @@ export interface NotificationChannel {
 }
 
 export interface NotificationEvent {
-  type: 'deployment-started' | 'deployment-completed' | 'deployment-failed' | 'rollback-started' | 'approval-required';
+  type:
+    | 'deployment-started'
+    | 'deployment-completed'
+    | 'deployment-failed'
+    | 'rollback-started'
+    | 'approval-required';
   environments: string[];
   severity: 'info' | 'warning' | 'error';
 }
@@ -662,7 +672,13 @@ export interface Deployment {
   environment: string;
   version: string;
   strategy: string;
-  status: 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled' | 'rolling-back';
+  status:
+    | 'pending'
+    | 'running'
+    | 'succeeded'
+    | 'failed'
+    | 'cancelled'
+    | 'rolling-back';
   startTime: Date;
   endTime?: Date;
   deployedBy: string;
@@ -775,8 +791,10 @@ export class DeploymentOrchestrator extends EventEmitter {
     this.config = config;
 
     // Initialize maps
-    config.environments.forEach(env => this.environments.set(env.id, env));
-    config.pipelines.forEach(pipeline => this.pipelines.set(pipeline.id, pipeline));
+    config.environments.forEach((env) => this.environments.set(env.id, env));
+    config.pipelines.forEach((pipeline) =>
+      this.pipelines.set(pipeline.id, pipeline),
+    );
 
     this.metrics = {
       totalDeployments: 0,
@@ -787,7 +805,7 @@ export class DeploymentOrchestrator extends EventEmitter {
       changeFailureRate: 0,
       meanTimeToRecovery: 0,
       leadTimeForChanges: 0,
-      rollbackRate: 0
+      rollbackRate: 0,
     };
   }
 
@@ -827,9 +845,14 @@ export class DeploymentOrchestrator extends EventEmitter {
         duration: 0,
         artifactSize: 0,
         resourceUtilization: { cpu: 0, memory: 0, storage: 0, network: 0 },
-        performance: { throughput: 0, latency: 0, errorRate: 0, availability: 0 },
-        reliability: { successRate: 0, mttr: 0, mtbf: 0, slaCompliance: 0 }
-      }
+        performance: {
+          throughput: 0,
+          latency: 0,
+          errorRate: 0,
+          availability: 0,
+        },
+        reliability: { successRate: 0, mttr: 0, mtbf: 0, slaCompliance: 0 },
+      },
     };
 
     this.deployments.set(deployment.id, deployment);
@@ -840,18 +863,22 @@ export class DeploymentOrchestrator extends EventEmitter {
       pipelineId: request.pipelineId,
       environment: request.environment,
       version: request.version,
-      timestamp: deployment.startTime
+      timestamp: deployment.startTime,
     });
 
     // Execute deployment pipeline
-    this.executeDeploymentPipeline(deployment, pipeline, request.parameters || {});
+    this.executeDeploymentPipeline(
+      deployment,
+      pipeline,
+      request.parameters || {},
+    );
 
     return deployment;
   }
 
   private async validateDeploymentRequest(
     request: { pipelineId: string; environment: string; version: string },
-    environment: Environment
+    environment: Environment,
   ): Promise<void> {
     // Check approval requirements
     if (environment.approvalRequired && !request.approver) {
@@ -864,12 +891,16 @@ export class DeploymentOrchestrator extends EventEmitter {
     }
 
     // Check for concurrent deployments
-    const activeDeployments = Array.from(this.deployments.values())
-      .filter(d => d.environment === request.environment &&
-                   (d.status === 'running' || d.status === 'pending'));
+    const activeDeployments = Array.from(this.deployments.values()).filter(
+      (d) =>
+        d.environment === request.environment &&
+        (d.status === 'running' || d.status === 'pending'),
+    );
 
     if (activeDeployments.length > 0) {
-      throw new Error('Another deployment is already in progress for this environment');
+      throw new Error(
+        'Another deployment is already in progress for this environment',
+      );
     }
   }
 
@@ -883,7 +914,7 @@ export class DeploymentOrchestrator extends EventEmitter {
     const currentTime = now.toLocaleTimeString('en-US', { hour12: false });
 
     // This is a simplified check - real implementation would handle timezones properly
-    return environment.maintenanceWindows.some(window => {
+    return environment.maintenanceWindows.some((window) => {
       // Check if current time falls within any maintenance window
       return true; // Placeholder
     });
@@ -892,7 +923,7 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeDeploymentPipeline(
     deployment: Deployment,
     pipeline: Pipeline,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     try {
       deployment.status = 'running';
@@ -901,7 +932,10 @@ export class DeploymentOrchestrator extends EventEmitter {
       for (const stage of pipeline.stages) {
         await this.executeStage(deployment, stage, parameters);
 
-        if (deployment.status === 'failed' || deployment.status === 'cancelled') {
+        if (
+          deployment.status === 'failed' ||
+          deployment.status === 'cancelled'
+        ) {
           break;
         }
       }
@@ -915,11 +949,11 @@ export class DeploymentOrchestrator extends EventEmitter {
         this.emit('deployment_completed', {
           deploymentId: deployment.id,
           status: deployment.status,
-          duration: deployment.endTime.getTime() - deployment.startTime.getTime(),
-          timestamp: deployment.endTime
+          duration:
+            deployment.endTime.getTime() - deployment.startTime.getTime(),
+          timestamp: deployment.endTime,
         });
       }
-
     } catch (error) {
       deployment.status = 'failed';
       deployment.endTime = new Date();
@@ -928,12 +962,16 @@ export class DeploymentOrchestrator extends EventEmitter {
       this.emit('deployment_failed', {
         deploymentId: deployment.id,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: deployment.endTime
+        timestamp: deployment.endTime,
       });
 
       // Check if automatic rollback is configured
       if (this.config.rollback.automatic) {
-        await this.triggerRollback(deployment, 'automatic', 'deployment-failed');
+        await this.triggerRollback(
+          deployment,
+          'automatic',
+          'deployment-failed',
+        );
       }
     }
   }
@@ -941,7 +979,7 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeStage(
     deployment: Deployment,
     stage: PipelineStage,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     const deploymentStage: DeploymentStage = {
       id: stage.id,
@@ -950,7 +988,7 @@ export class DeploymentOrchestrator extends EventEmitter {
       startTime: new Date(),
       logs: [],
       artifacts: [],
-      metrics: {}
+      metrics: {},
     };
 
     deployment.stages.push(deploymentStage);
@@ -959,7 +997,7 @@ export class DeploymentOrchestrator extends EventEmitter {
       deploymentId: deployment.id,
       stageId: stage.id,
       stageName: stage.name,
-      timestamp: deploymentStage.startTime
+      timestamp: deploymentStage.startTime,
     });
 
     try {
@@ -971,10 +1009,19 @@ export class DeploymentOrchestrator extends EventEmitter {
           await this.executeTestStage(deploymentStage, stage, parameters);
           break;
         case 'security-scan':
-          await this.executeSecurityScanStage(deploymentStage, stage, parameters);
+          await this.executeSecurityScanStage(
+            deploymentStage,
+            stage,
+            parameters,
+          );
           break;
         case 'deploy':
-          await this.executeDeployStage(deployment, deploymentStage, stage, parameters);
+          await this.executeDeployStage(
+            deployment,
+            deploymentStage,
+            stage,
+            parameters,
+          );
           break;
         case 'approval':
           await this.executeApprovalStage(deploymentStage, stage, parameters);
@@ -991,9 +1038,8 @@ export class DeploymentOrchestrator extends EventEmitter {
         stageId: stage.id,
         stageName: stage.name,
         status: deploymentStage.status,
-        timestamp: deploymentStage.endTime
+        timestamp: deploymentStage.endTime,
       });
-
     } catch (error) {
       deploymentStage.status = 'failed';
       deploymentStage.endTime = new Date();
@@ -1004,7 +1050,7 @@ export class DeploymentOrchestrator extends EventEmitter {
         stageId: stage.id,
         stageName: stage.name,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: deploymentStage.endTime
+        timestamp: deploymentStage.endTime,
       });
 
       throw error;
@@ -1014,7 +1060,7 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeBuildStage(
     stage: DeploymentStage,
     config: PipelineStage,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     // Implementation would build artifacts
     stage.logs.push('Building application artifacts...');
@@ -1033,13 +1079,13 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeTestStage(
     stage: DeploymentStage,
     config: PipelineStage,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     // Implementation would run tests
     stage.logs.push('Running test suite...');
 
     // Simulate test execution
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     stage.logs.push('All tests passed');
   }
@@ -1047,7 +1093,7 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeSecurityScanStage(
     stage: DeploymentStage,
     config: PipelineStage,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     // Implementation would run security scans
     stage.logs.push('Running security scans...');
@@ -1069,15 +1115,22 @@ export class DeploymentOrchestrator extends EventEmitter {
     deployment: Deployment,
     stage: DeploymentStage,
     config: PipelineStage,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     stage.logs.push('Starting deployment...');
 
     const environment = this.environments.get(deployment.environment)!;
-    const strategy = this.config.strategies.find(s => s.id === deployment.strategy);
+    const strategy = this.config.strategies.find(
+      (s) => s.id === deployment.strategy,
+    );
 
     if (strategy) {
-      await this.executeDeploymentStrategy(deployment, stage, strategy, environment);
+      await this.executeDeploymentStrategy(
+        deployment,
+        stage,
+        strategy,
+        environment,
+      );
     } else {
       // Default deployment
       await this.executeDefaultDeployment(deployment, stage, environment);
@@ -1089,13 +1142,13 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeApprovalStage(
     stage: DeploymentStage,
     config: PipelineStage,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     stage.logs.push('Waiting for approval...');
 
     // Implementation would wait for manual approval
     // For now, we'll simulate auto-approval
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     stage.logs.push('Approval granted');
   }
@@ -1103,7 +1156,7 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeCustomStage(
     stage: DeploymentStage,
     config: PipelineStage,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<void> {
     stage.logs.push(`Executing custom stage: ${config.name}`);
 
@@ -1116,12 +1169,18 @@ export class DeploymentOrchestrator extends EventEmitter {
     stage.logs.push('Custom stage completed');
   }
 
-  private async executeCommand(command: Command, parameters: Record<string, any>): Promise<void> {
+  private async executeCommand(
+    command: Command,
+    parameters: Record<string, any>,
+  ): Promise<void> {
     // Implementation would execute shell commands safely
     // This is a placeholder
   }
 
-  private async executeSecurityScan(scanner: SecurityScanner, parameters: Record<string, any>): Promise<void> {
+  private async executeSecurityScan(
+    scanner: SecurityScanner,
+    parameters: Record<string, any>,
+  ): Promise<void> {
     // Implementation would execute security scans
     // This is a placeholder
   }
@@ -1130,17 +1189,32 @@ export class DeploymentOrchestrator extends EventEmitter {
     deployment: Deployment,
     stage: DeploymentStage,
     strategy: DeploymentStrategy,
-    environment: Environment
+    environment: Environment,
   ): Promise<void> {
     switch (strategy.type) {
       case 'blue-green':
-        await this.executeBlueGreenDeployment(deployment, stage, strategy, environment);
+        await this.executeBlueGreenDeployment(
+          deployment,
+          stage,
+          strategy,
+          environment,
+        );
         break;
       case 'canary':
-        await this.executeCanaryDeployment(deployment, stage, strategy, environment);
+        await this.executeCanaryDeployment(
+          deployment,
+          stage,
+          strategy,
+          environment,
+        );
         break;
       case 'rolling':
-        await this.executeRollingDeployment(deployment, stage, strategy, environment);
+        await this.executeRollingDeployment(
+          deployment,
+          stage,
+          strategy,
+          environment,
+        );
         break;
       default:
         await this.executeDefaultDeployment(deployment, stage, environment);
@@ -1151,7 +1225,7 @@ export class DeploymentOrchestrator extends EventEmitter {
     deployment: Deployment,
     stage: DeploymentStage,
     strategy: DeploymentStrategy,
-    environment: Environment
+    environment: Environment,
   ): Promise<void> {
     stage.logs.push('Executing blue-green deployment...');
 
@@ -1176,7 +1250,7 @@ export class DeploymentOrchestrator extends EventEmitter {
     deployment: Deployment,
     stage: DeploymentStage,
     strategy: DeploymentStrategy,
-    environment: Environment
+    environment: Environment,
   ): Promise<void> {
     stage.logs.push('Executing canary deployment...');
 
@@ -1189,11 +1263,14 @@ export class DeploymentOrchestrator extends EventEmitter {
       await this.deployCanaryVersion(deployment, step.weight, environment);
 
       // Wait for step duration
-      await new Promise(resolve => setTimeout(resolve, step.duration * 1000));
+      await new Promise((resolve) => setTimeout(resolve, step.duration * 1000));
 
       // Run analysis if configured
       if (step.analysis) {
-        const analysisResult = await this.runAnalysis(step.analysis, deployment);
+        const analysisResult = await this.runAnalysis(
+          step.analysis,
+          deployment,
+        );
         if (!analysisResult.success) {
           throw new Error('Canary analysis failed, rolling back');
         }
@@ -1211,7 +1288,7 @@ export class DeploymentOrchestrator extends EventEmitter {
     deployment: Deployment,
     stage: DeploymentStage,
     strategy: DeploymentStrategy,
-    environment: Environment
+    environment: Environment,
   ): Promise<void> {
     stage.logs.push('Executing rolling deployment...');
 
@@ -1227,7 +1304,7 @@ export class DeploymentOrchestrator extends EventEmitter {
   private async executeDefaultDeployment(
     deployment: Deployment,
     stage: DeploymentStage,
-    environment: Environment
+    environment: Environment,
   ): Promise<void> {
     stage.logs.push('Executing default deployment...');
 
@@ -1237,31 +1314,49 @@ export class DeploymentOrchestrator extends EventEmitter {
     stage.logs.push('Default deployment completed');
   }
 
-  private async deployToEnvironment(deployment: Deployment, slot: string, environment: Environment): Promise<void> {
+  private async deployToEnvironment(
+    deployment: Deployment,
+    slot: string,
+    environment: Environment,
+  ): Promise<void> {
     // Implementation would deploy to specific environment/slot
   }
 
-  private async switchTraffic(from: string, to: string, environment: Environment): Promise<void> {
+  private async switchTraffic(
+    from: string,
+    to: string,
+    environment: Environment,
+  ): Promise<void> {
     // Implementation would switch traffic between environments
   }
 
-  private async deployCanaryVersion(deployment: Deployment, weight: number, environment: Environment): Promise<void> {
+  private async deployCanaryVersion(
+    deployment: Deployment,
+    weight: number,
+    environment: Environment,
+  ): Promise<void> {
     // Implementation would deploy canary version with specified traffic weight
   }
 
-  private async promoteCanary(deployment: Deployment, environment: Environment): Promise<void> {
+  private async promoteCanary(
+    deployment: Deployment,
+    environment: Environment,
+  ): Promise<void> {
     // Implementation would promote canary to full traffic
   }
 
   private async performRollingUpdate(
     deployment: Deployment,
     config: RollingConfig,
-    environment: Environment
+    environment: Environment,
   ): Promise<void> {
     // Implementation would perform rolling update with specified constraints
   }
 
-  private async runValidationSteps(deployment: Deployment, steps: ValidationStep[]): Promise<void> {
+  private async runValidationSteps(
+    deployment: Deployment,
+    steps: ValidationStep[],
+  ): Promise<void> {
     for (const step of steps) {
       const result = await this.executeValidationStep(step, deployment);
       deployment.validations.push(result);
@@ -1272,39 +1367,58 @@ export class DeploymentOrchestrator extends EventEmitter {
     }
   }
 
-  private async executeValidationStep(step: ValidationStep, deployment: Deployment): Promise<ValidationResult> {
+  private async executeValidationStep(
+    step: ValidationStep,
+    deployment: Deployment,
+  ): Promise<ValidationResult> {
     const result: ValidationResult = {
       stepId: step.id,
       name: step.name,
       status: 'running',
       startTime: new Date(),
       results: [],
-      summary: ''
+      summary: '',
     };
 
     try {
       switch (step.type) {
         case 'health-check':
-          result.results = await this.runHealthChecks(step.configuration, deployment);
+          result.results = await this.runHealthChecks(
+            step.configuration,
+            deployment,
+          );
           break;
         case 'smoke-test':
-          result.results = await this.runSmokeTests(step.configuration, deployment);
+          result.results = await this.runSmokeTests(
+            step.configuration,
+            deployment,
+          );
           break;
         case 'integration-test':
-          result.results = await this.runIntegrationTests(step.configuration, deployment);
+          result.results = await this.runIntegrationTests(
+            step.configuration,
+            deployment,
+          );
           break;
         case 'performance-test':
-          result.results = await this.runPerformanceTests(step.configuration, deployment);
+          result.results = await this.runPerformanceTests(
+            step.configuration,
+            deployment,
+          );
           break;
         case 'security-scan':
-          result.results = await this.runSecurityTests(step.configuration, deployment);
+          result.results = await this.runSecurityTests(
+            step.configuration,
+            deployment,
+          );
           break;
       }
 
-      result.status = result.results.every(r => r.status === 'passed') ? 'passed' : 'failed';
+      result.status = result.results.every((r) => r.status === 'passed')
+        ? 'passed'
+        : 'failed';
       result.endTime = new Date();
-      result.summary = `${result.results.filter(r => r.status === 'passed').length}/${result.results.length} checks passed`;
-
+      result.summary = `${result.results.filter((r) => r.status === 'passed').length}/${result.results.length} checks passed`;
     } catch (error) {
       result.status = 'failed';
       result.endTime = new Date();
@@ -1314,7 +1428,10 @@ export class DeploymentOrchestrator extends EventEmitter {
     return result;
   }
 
-  private async runHealthChecks(config: ValidationConfig, deployment: Deployment): Promise<ValidationStepResult[]> {
+  private async runHealthChecks(
+    config: ValidationConfig,
+    deployment: Deployment,
+  ): Promise<ValidationStepResult[]> {
     const results: ValidationStepResult[] = [];
 
     if (config.endpoints) {
@@ -1327,12 +1444,14 @@ export class DeploymentOrchestrator extends EventEmitter {
     return results;
   }
 
-  private async checkEndpoint(endpoint: EndpointCheck): Promise<ValidationStepResult> {
+  private async checkEndpoint(
+    endpoint: EndpointCheck,
+  ): Promise<ValidationStepResult> {
     try {
       const response = await fetch(endpoint.url, {
         method: endpoint.method,
         headers: endpoint.headers,
-        body: endpoint.body
+        body: endpoint.body,
       });
 
       const success = response.status === endpoint.expectedStatus;
@@ -1341,13 +1460,15 @@ export class DeploymentOrchestrator extends EventEmitter {
         type: 'endpoint-check',
         name: `${endpoint.method} ${endpoint.url}`,
         status: success ? 'passed' : 'failed',
-        message: success ? 'Endpoint responded correctly' : `Expected status ${endpoint.expectedStatus}, got ${response.status}`,
+        message: success
+          ? 'Endpoint responded correctly'
+          : `Expected status ${endpoint.expectedStatus}, got ${response.status}`,
         details: {
           url: endpoint.url,
           method: endpoint.method,
           expectedStatus: endpoint.expectedStatus,
-          actualStatus: response.status
-        }
+          actualStatus: response.status,
+        },
       };
     } catch (error) {
       return {
@@ -1355,44 +1476,63 @@ export class DeploymentOrchestrator extends EventEmitter {
         name: `${endpoint.method} ${endpoint.url}`,
         status: 'failed',
         message: error instanceof Error ? error.message : 'Unknown error',
-        details: { error: true }
+        details: { error: true },
       };
     }
   }
 
-  private async runSmokeTests(config: ValidationConfig, deployment: Deployment): Promise<ValidationStepResult[]> {
+  private async runSmokeTests(
+    config: ValidationConfig,
+    deployment: Deployment,
+  ): Promise<ValidationStepResult[]> {
     // Implementation would run smoke tests
     return [];
   }
 
-  private async runIntegrationTests(config: ValidationConfig, deployment: Deployment): Promise<ValidationStepResult[]> {
+  private async runIntegrationTests(
+    config: ValidationConfig,
+    deployment: Deployment,
+  ): Promise<ValidationStepResult[]> {
     // Implementation would run integration tests
     return [];
   }
 
-  private async runPerformanceTests(config: ValidationConfig, deployment: Deployment): Promise<ValidationStepResult[]> {
+  private async runPerformanceTests(
+    config: ValidationConfig,
+    deployment: Deployment,
+  ): Promise<ValidationStepResult[]> {
     // Implementation would run performance tests
     return [];
   }
 
-  private async runSecurityTests(config: ValidationConfig, deployment: Deployment): Promise<ValidationStepResult[]> {
+  private async runSecurityTests(
+    config: ValidationConfig,
+    deployment: Deployment,
+  ): Promise<ValidationStepResult[]> {
     // Implementation would run security tests
     return [];
   }
 
-  private async runAnalysis(config: AnalysisConfig, deployment: Deployment): Promise<{ success: boolean; metrics: Record<string, number> }> {
+  private async runAnalysis(
+    config: AnalysisConfig,
+    deployment: Deployment,
+  ): Promise<{ success: boolean; metrics: Record<string, number> }> {
     // Implementation would run analysis against configured metrics
     return { success: true, metrics: {} };
   }
 
-  private async triggerRollback(deployment: Deployment, triggerType: string, reason: string): Promise<void> {
+  private async triggerRollback(
+    deployment: Deployment,
+    triggerType: string,
+    reason: string,
+  ): Promise<void> {
     deployment.rollback = {
       triggered: true,
       reason,
       triggerType,
       startTime: new Date(),
       previousVersion: 'previous', // Would be determined from deployment history
-      status: 'running'
+      status: 'running',
     };
 
     deployment.status = 'rolling-back';
@@ -1401,7 +1541,7 @@ export class DeploymentOrchestrator extends EventEmitter {
       deploymentId: deployment.id,
       reason,
       triggerType,
-      timestamp: deployment.rollback.startTime
+      timestamp: deployment.rollback.startTime,
     });
 
     try {
@@ -1414,9 +1554,8 @@ export class DeploymentOrchestrator extends EventEmitter {
 
       this.emit('rollback_completed', {
         deploymentId: deployment.id,
-        timestamp: deployment.rollback.endTime
+        timestamp: deployment.rollback.endTime,
       });
-
     } catch (error) {
       deployment.rollback.status = 'failed';
       deployment.rollback.endTime = new Date();
@@ -1424,7 +1563,7 @@ export class DeploymentOrchestrator extends EventEmitter {
       this.emit('rollback_failed', {
         deploymentId: deployment.id,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: deployment.rollback.endTime
+        timestamp: deployment.rollback.endTime,
       });
     }
   }
@@ -1439,11 +1578,14 @@ export class DeploymentOrchestrator extends EventEmitter {
   }
 
   private updateMetrics(deployment: Deployment): void {
-    const duration = deployment.endTime!.getTime() - deployment.startTime.getTime();
-    this.metrics.averageDeploymentTime = (this.metrics.averageDeploymentTime + duration) / 2;
+    const duration =
+      deployment.endTime!.getTime() - deployment.startTime.getTime();
+    this.metrics.averageDeploymentTime =
+      (this.metrics.averageDeploymentTime + duration) / 2;
 
     if (deployment.rollback?.triggered) {
-      this.metrics.rollbackRate = (this.metrics.rollbackRate + 1) / this.metrics.totalDeployments;
+      this.metrics.rollbackRate =
+        (this.metrics.rollbackRate + 1) / this.metrics.totalDeployments;
     }
 
     // Update other metrics based on deployment data
@@ -1462,17 +1604,23 @@ export class DeploymentOrchestrator extends EventEmitter {
 
     if (filters) {
       if (filters.environment) {
-        deployments = deployments.filter(d => d.environment === filters.environment);
+        deployments = deployments.filter(
+          (d) => d.environment === filters.environment,
+        );
       }
       if (filters.status) {
-        deployments = deployments.filter(d => d.status === filters.status);
+        deployments = deployments.filter((d) => d.status === filters.status);
       }
       if (filters.pipelineId) {
-        deployments = deployments.filter(d => d.pipelineId === filters.pipelineId);
+        deployments = deployments.filter(
+          (d) => d.pipelineId === filters.pipelineId,
+        );
       }
     }
 
-    return deployments.sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
+    return deployments.sort(
+      (a, b) => b.startTime.getTime() - a.startTime.getTime(),
+    );
   }
 
   getMetrics(): DeploymentMetricsOverall {
@@ -1495,7 +1643,7 @@ export class DeploymentOrchestrator extends EventEmitter {
     this.emit('deployment_cancelled', {
       deploymentId,
       reason,
-      timestamp: deployment.endTime
+      timestamp: deployment.endTime,
     });
   }
 }

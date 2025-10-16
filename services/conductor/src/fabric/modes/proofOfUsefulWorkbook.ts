@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
 export interface WorkbookStep {
   name: string;
@@ -8,7 +8,7 @@ export interface WorkbookStep {
 
 export interface WorkbookReceipt {
   step: string;
-  status: "pass" | "fail";
+  status: 'pass' | 'fail';
   timestamp: string;
 }
 
@@ -18,15 +18,19 @@ export interface WorkbookBundle {
   digest: string;
 }
 
-export function issueProofOfUsefulWorkbook(specId: string, steps: WorkbookStep[], runs: (step: WorkbookStep) => "pass" | "fail"): WorkbookBundle {
+export function issueProofOfUsefulWorkbook(
+  specId: string,
+  steps: WorkbookStep[],
+  runs: (step: WorkbookStep) => 'pass' | 'fail',
+): WorkbookBundle {
   const receipts: WorkbookReceipt[] = steps.map((step) => ({
     step: step.name,
     status: runs(step),
     timestamp: new Date().toISOString(),
   }));
-  const digest = createHash("sha256")
+  const digest = createHash('sha256')
     .update(specId + JSON.stringify(steps) + JSON.stringify(receipts))
-    .digest("hex");
+    .digest('hex');
   return {
     workbook: { steps },
     receipts,

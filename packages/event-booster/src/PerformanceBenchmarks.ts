@@ -53,7 +53,10 @@ export const runPatternBenchmark = (
   config: BenchmarkConfig = {},
 ): BenchmarkResult => {
   const iterations = ensureIterations(config.iterations);
-  const warmupIterations = Math.max(0, Math.floor(config.warmupIterations ?? Math.min(2, iterations)));
+  const warmupIterations = Math.max(
+    0,
+    Math.floor(config.warmupIterations ?? Math.min(2, iterations)),
+  );
   const now = config.now ?? (() => performance.now());
   const options = config.patternOptions ?? {};
 
@@ -76,7 +79,8 @@ export const runPatternBenchmark = (
   const minMs = durations.length > 0 ? Math.min(...durations) : 0;
   const maxMs = durations.length > 0 ? Math.max(...durations) : 0;
   const p95Ms = computePercentile(durations, 95);
-  const throughputPerSecond = averageMs > 0 ? (events.length * 1000) / averageMs : 0;
+  const throughputPerSecond =
+    averageMs > 0 ? (events.length * 1000) / averageMs : 0;
 
   return {
     patternName,
@@ -99,5 +103,7 @@ export const benchmarkPatterns = (
   patternNames: readonly string[],
   config: BenchmarkConfig = {},
 ): BenchmarkResult[] => {
-  return patternNames.map((patternName) => runPatternBenchmark(booster, patternName, events, config));
+  return patternNames.map((patternName) =>
+    runPatternBenchmark(booster, patternName, events, config),
+  );
 };

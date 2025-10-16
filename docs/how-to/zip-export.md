@@ -12,6 +12,7 @@ ZIP Export & Certification provides a secure way to bundle IntelGraph data, repo
 ## Format Specification
 
 ### Archive Structure
+
 ```
 export-2025-09-08-abc123.zip
 ├── manifest.json          # Signed manifest with metadata
@@ -31,6 +32,7 @@ export-2025-09-08-abc123.zip
 ```
 
 ### Manifest Format
+
 ```json
 {
   "version": "1.0",
@@ -56,6 +58,7 @@ export-2025-09-08-abc123.zip
 ## Creating ZIP Exports
 
 ### Using the Web Interface
+
 1. Navigate to **Data Export** → **Create Archive**
 2. Select data scope and date range
 3. Choose certification level (public, confidential, secret)
@@ -63,6 +66,7 @@ export-2025-09-08-abc123.zip
 5. Download when processing completes
 
 ### Using the API
+
 ```bash
 curl -X POST https://api.intelgraph.com/v2/exports \
   -H "Authorization: Bearer $TOKEN" \
@@ -80,6 +84,7 @@ curl -X POST https://api.intelgraph.com/v2/exports \
 ```
 
 ### Using the CLI
+
 ```bash
 # Create export
 intelgraph export create \
@@ -123,7 +128,7 @@ Here's a minimal sample export structure:
 ```
 
 ```json
-// data/sample-entities.json  
+// data/sample-entities.json
 {
   "entities": [
     {
@@ -145,6 +150,7 @@ Here's a minimal sample export structure:
 ## Verification Flow
 
 ### Automatic Verification
+
 The system automatically verifies exports during creation and download:
 
 ```mermaid
@@ -157,7 +163,7 @@ flowchart TD
   E --> F[Create ZIP archive]
   F --> G[Store with metadata]
   G --> I[Return download link]
-  
+
   J[User downloads ZIP] --> K[Verify signatures]
   K --> L{Signatures valid?}
   L -->|Yes| M[Extract & use]
@@ -167,6 +173,7 @@ flowchart TD
 ### Manual Verification
 
 #### Verify Manifest Signature
+
 ```bash
 # Extract manifest and signature
 unzip -j export.zip manifest.json signatures/manifest.sig
@@ -177,6 +184,7 @@ openssl dgst -sha256 -verify signing-cert.pem \
 ```
 
 #### Verify File Checksums
+
 ```bash
 # Check each file's checksum against manifest
 while read -r path size checksum; do
@@ -192,6 +200,7 @@ done < <(jq -r '.files[] | "\(.path) \(.size) \(.checksum)"' manifest.json)
 ```
 
 #### Certificate Chain Validation
+
 ```bash
 # Verify certificate chain
 openssl verify -CAfile ca-chain.pem signing-cert.pem
@@ -201,6 +210,7 @@ openssl x509 -in signing-cert.pem -noout -dates
 ```
 
 ### Verification API
+
 ```bash
 # Verify export programmatically
 curl -X POST https://api.intelgraph.com/v2/exports/verify \
@@ -212,17 +222,18 @@ curl -X POST https://api.intelgraph.com/v2/exports/verify \
 
 ## Certification Levels
 
-| Level | Description | Use Case | Signature Requirements |
-|-------|-------------|----------|----------------------|
-| **Public** | Non-sensitive data | Open research, demos | Standard RSA-2048 |
-| **Confidential** | Sensitive data | Internal analysis | RSA-4096 + timestamp |
-| **Secret** | Classified data | Government/military | Hardware HSM required |
+| Level            | Description        | Use Case             | Signature Requirements |
+| ---------------- | ------------------ | -------------------- | ---------------------- |
+| **Public**       | Non-sensitive data | Open research, demos | Standard RSA-2048      |
+| **Confidential** | Sensitive data     | Internal analysis    | RSA-4096 + timestamp   |
+| **Secret**       | Classified data    | Government/military  | Hardware HSM required  |
 
 ## Troubleshooting
 
 ### Common Issues
 
 **Signature Verification Failed**
+
 ```bash
 # Check certificate validity
 openssl x509 -in certificates/signing-cert.pem -noout -dates
@@ -232,16 +243,19 @@ openssl verify -CAfile certificates/ca-chain.pem certificates/signing-cert.pem
 ```
 
 **Checksum Mismatch**
+
 - Archive may be corrupted during transfer
 - Re-download the export
 - Check network integrity
 
 **Permission Denied**
+
 - Verify user has export permissions for requested data
 - Check certification level authorization
 - Confirm API token validity
 
 ### Support Resources
+
 - [Certificate Management](../security/certificate-management.md)
 - [Export API Reference](../reference/api/export-endpoints.md)
 - [Troubleshooting Guide](../support/troubleshooting.md)

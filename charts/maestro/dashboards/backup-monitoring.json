@@ -431,7 +431,7 @@
         },
         {
           "name": "Drill Failures",
-          "datasource": "prometheus", 
+          "datasource": "prometheus",
           "expr": "changes(backup_drill_failures_total[1h]) > 0",
           "titleFormat": "Drill Failed: {{drill_type}}",
           "textFormat": "Environment: {{environment}}, Error: {{error_type}}",

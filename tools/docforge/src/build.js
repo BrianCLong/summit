@@ -5,7 +5,11 @@ const { extractPythonDocs } = require('./extractors/python');
 const { extractGoDocs } = require('./extractors/go');
 const { collectAdrDocs } = require('./collect-adr');
 const { ensureDir, walkFiles, writeFileAtomic } = require('./fs-utils');
-const { renderIndexPage, renderModulePage, renderAdrPage } = require('./templates');
+const {
+  renderIndexPage,
+  renderModulePage,
+  renderAdrPage,
+} = require('./templates');
 const { createSearchIndex } = require('./search');
 const { createSitemap } = require('./sitemap');
 const { sanitizeId } = require('./sanitizers');
@@ -40,18 +44,54 @@ async function buildSite({ rootDir, outDir, version }) {
 
   const jsFiles = await walkFiles(rootDir, {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
-    includeDirectories: ['src', 'server', 'client', 'packages', 'services', 'tools', 'apps'],
-    ignore: ['node_modules', 'dist', 'build', 'coverage', 'docs/site', 'docs/generated']
+    includeDirectories: [
+      'src',
+      'server',
+      'client',
+      'packages',
+      'services',
+      'tools',
+      'apps',
+    ],
+    ignore: [
+      'node_modules',
+      'dist',
+      'build',
+      'coverage',
+      'docs/site',
+      'docs/generated',
+    ],
   });
   const pyFiles = await walkFiles(rootDir, {
     extensions: ['.py'],
-    includeDirectories: ['src', 'server', 'tools', 'apps', 'packages', 'services'],
-    ignore: ['node_modules', '__pycache__', '.venv', 'dist', 'build', 'coverage']
+    includeDirectories: [
+      'src',
+      'server',
+      'tools',
+      'apps',
+      'packages',
+      'services',
+    ],
+    ignore: [
+      'node_modules',
+      '__pycache__',
+      '.venv',
+      'dist',
+      'build',
+      'coverage',
+    ],
   });
   const goFiles = await walkFiles(rootDir, {
     extensions: ['.go'],
-    includeDirectories: ['src', 'server', 'apps', 'packages', 'services', 'pcbo'],
-    ignore: ['node_modules', 'dist', 'build', 'coverage', 'vendor']
+    includeDirectories: [
+      'src',
+      'server',
+      'apps',
+      'packages',
+      'services',
+      'pcbo',
+    ],
+    ignore: ['node_modules', 'dist', 'build', 'coverage', 'vendor'],
   });
 
   const modules = [];
@@ -67,7 +107,7 @@ async function buildSite({ rootDir, outDir, version }) {
       id: sanitizeId(file),
       path: file,
       language: 'JavaScript',
-      entries
+      entries,
     });
   }
 
@@ -82,7 +122,7 @@ async function buildSite({ rootDir, outDir, version }) {
       id: sanitizeId(file),
       path: file,
       language: 'Python',
-      entries
+      entries,
     });
   }
 
@@ -97,7 +137,7 @@ async function buildSite({ rootDir, outDir, version }) {
       id: sanitizeId(file),
       path: file,
       language: 'Go',
-      entries
+      entries,
     });
   }
 
@@ -115,7 +155,11 @@ async function buildSite({ rootDir, outDir, version }) {
 
   for (const module of modules) {
     const html = renderModulePage(module, resolvedVersion);
-    const relativePath = path.join(resolvedVersion, 'modules', `${module.id}.html`);
+    const relativePath = path.join(
+      resolvedVersion,
+      'modules',
+      `${module.id}.html`,
+    );
     const absolutePath = path.join(outDir, relativePath);
     await writeFileAtomic(absolutePath, html);
     modulePages.push({ module, relativePath });
@@ -134,7 +178,7 @@ async function buildSite({ rootDir, outDir, version }) {
     version: resolvedVersion,
     modules,
     adrs,
-    versionScoped: true
+    versionScoped: true,
   });
   await writeFileAtomic(path.join(versionDir, 'index.html'), versionIndexHtml);
 
@@ -152,12 +196,12 @@ async function buildSite({ rootDir, outDir, version }) {
 
   const normalizedVersions = uniqueBy(
     [...versions, { version: resolvedVersion }],
-    (item) => item.version
+    (item) => item.version,
   ).sort((a, b) => a.version.localeCompare(b.version));
 
   await writeFileAtomic(
     versionsManifestPath,
-    JSON.stringify(normalizedVersions, null, 2) + '\n'
+    JSON.stringify(normalizedVersions, null, 2) + '\n',
   );
 
   const rootIndexHtml = renderIndexPage({
@@ -165,7 +209,7 @@ async function buildSite({ rootDir, outDir, version }) {
     modules,
     adrs,
     versionScoped: false,
-    versions: normalizedVersions
+    versions: normalizedVersions,
   });
   await writeFileAtomic(path.join(outDir, 'index.html'), rootIndexHtml);
 
@@ -174,28 +218,28 @@ async function buildSite({ rootDir, outDir, version }) {
     modules,
     adrs,
     modulePages,
-    adrPages
+    adrPages,
   });
   await writeFileAtomic(
     path.join(versionDir, 'search-index.json'),
-    JSON.stringify(searchIndex, null, 2) + '\n'
+    JSON.stringify(searchIndex, null, 2) + '\n',
   );
 
   const sitemap = createSitemap({
     outDir,
     version: resolvedVersion,
     modulePages,
-    adrPages
+    adrPages,
   });
   await writeFileAtomic(path.join(outDir, 'sitemap.xml'), sitemap);
 
   return {
     version: resolvedVersion,
     moduleCount: modules.length,
-    adrCount: adrs.length
+    adrCount: adrs.length,
   };
 }
 
 module.exports = {
-  buildSite
+  buildSite,
 };

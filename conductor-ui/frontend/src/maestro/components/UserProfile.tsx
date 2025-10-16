@@ -23,7 +23,9 @@ const UserProfile: React.FC = () => {
           </span>
         </div>
         <div className="text-left hidden md:block">
-          <div className="font-medium text-slate-900">{user.email.split('@')[0]}</div>
+          <div className="font-medium text-slate-900">
+            {user.email.split('@')[0]}
+          </div>
           <div className="text-xs text-slate-500">{currentTenant}</div>
         </div>
         <svg
@@ -32,7 +34,12 @@ const UserProfile: React.FC = () => {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -47,7 +54,9 @@ const UserProfile: React.FC = () => {
                 </span>
               </div>
               <div>
-                <div className="font-medium text-slate-900">{user.name || user.email.split('@')[0]}</div>
+                <div className="font-medium text-slate-900">
+                  {user.name || user.email.split('@')[0]}
+                </div>
                 <div className="text-sm text-slate-600">{user.email}</div>
                 <div className="text-xs text-slate-500">via OIDC</div>
               </div>
@@ -57,11 +66,17 @@ const UserProfile: React.FC = () => {
           {/* Current Tenant */}
           <div className="px-4 py-3 border-b border-slate-100">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-700">Current Tenant</span>
+              <span className="text-sm font-medium text-slate-700">
+                Current Tenant
+              </span>
             </div>
-            <div className="text-sm text-slate-900 font-mono">{currentTenant}</div>
+            <div className="text-sm text-slate-900 font-mono">
+              {currentTenant}
+            </div>
             {tenant?.tier && (
-              <div className="text-xs text-slate-500 mt-1">Tier: {tenant.tier}</div>
+              <div className="text-xs text-slate-500 mt-1">
+                Tier: {tenant.tier}
+              </div>
             )}
           </div>
 

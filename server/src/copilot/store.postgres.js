@@ -1,6 +1,6 @@
 /**
  * IntelGraph Copilot Postgres Data Access Layer
- * 
+ *
  * Provides durable persistence for Copilot runs, tasks, and events
  * with resume capability and proper idempotency handling.
  */
@@ -41,7 +41,7 @@ class CopilotPostgresStore {
       run.status,
       JSON.stringify(run.plan || {}),
       JSON.stringify(run.metadata || {}),
-      run.createdAt || new Date().toISOString()
+      run.createdAt || new Date().toISOString(),
     ];
 
     try {
@@ -117,7 +117,7 @@ class CopilotPostgresStore {
       JSON.stringify(run.plan || {}),
       JSON.stringify(run.metadata || {}),
       run.startedAt || null,
-      run.finishedAt || null
+      run.finishedAt || null,
     ];
 
     try {
@@ -174,7 +174,7 @@ class CopilotPostgresStore {
       task.status,
       task.errorMessage || task.error || null,
       task.startedAt || null,
-      task.finishedAt || null
+      task.finishedAt || null,
     ];
 
     try {
@@ -220,7 +220,7 @@ class CopilotPostgresStore {
 
     try {
       const result = await this.pg.query(query, [runId]);
-      const mapped = result.rows.map(row => this.mapTaskFromDb(row));
+      const mapped = result.rows.map((row) => this.mapTaskFromDb(row));
       this.memory.tasks.set(runId, mapped);
       return mapped;
     } catch (error) {
@@ -251,7 +251,7 @@ class CopilotPostgresStore {
       JSON.stringify(task.outputData || task.output || {}),
       task.errorMessage || task.error || null,
       task.startedAt || null,
-      task.finishedAt || null
+      task.finishedAt || null,
     ];
 
     try {
@@ -286,7 +286,7 @@ class CopilotPostgresStore {
       (event.level || 'info').toLowerCase(),
       event.message,
       JSON.stringify(event.payload || {}),
-      event.ts || new Date().toISOString()
+      event.ts || new Date().toISOString(),
     ];
 
     try {
@@ -316,12 +316,12 @@ class CopilotPostgresStore {
    */
   async listEvents(runId, options = {}) {
     const { afterId, limit = 50, level } = options;
-    
+
     let query = `
       SELECT * FROM copilot_events 
       WHERE run_id = $1
     `;
-    
+
     const params = [runId];
     let paramIndex = 2;
 
@@ -342,7 +342,7 @@ class CopilotPostgresStore {
 
     try {
       const result = await this.pg.query(query, params);
-      const mapped = result.rows.map(row => this.mapEventFromDb(row));
+      const mapped = result.rows.map((row) => this.mapEventFromDb(row));
       this.memory.events.set(runId, mapped);
       return mapped;
     } catch (error) {
@@ -366,7 +366,7 @@ class CopilotPostgresStore {
       SELECT * FROM copilot_runs 
       WHERE status IN ('failed', 'paused')
     `;
-    
+
     const params = [];
     if (investigationId) {
       query += ` AND investigation_id = $1`;
@@ -377,7 +377,7 @@ class CopilotPostgresStore {
 
     try {
       const result = await this.pg.query(query, params);
-      const mapped = result.rows.map(row => this.mapRunFromDb(row));
+      const mapped = result.rows.map((row) => this.mapRunFromDb(row));
       mapped.forEach((run) => this.memory.runs.set(run.id, run));
       return mapped;
     } catch (error) {
@@ -385,7 +385,8 @@ class CopilotPostgresStore {
       const runs = Array.from(this.memory.runs.values());
       return runs.filter((run) => {
         if (!['failed', 'paused'].includes(run.status)) return false;
-        if (investigationId && run.investigationId !== investigationId) return false;
+        if (investigationId && run.investigationId !== investigationId)
+          return false;
         return true;
       });
     }
@@ -422,18 +423,25 @@ class CopilotPostgresStore {
           const rangeMs = this.parseTimeRangeToMs(timeRange);
           if (rangeMs && now - created > rangeMs) return;
         }
-        const entry = stats.get(run.status) || { status: run.status, count: 0, totalDuration: 0 };
+        const entry = stats.get(run.status) || {
+          status: run.status,
+          count: 0,
+          totalDuration: 0,
+        };
         entry.count += 1;
         if (run.startedAt && run.finishedAt) {
           entry.totalDuration +=
-            (new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime()) / 1000;
+            (new Date(run.finishedAt).getTime() -
+              new Date(run.startedAt).getTime()) /
+            1000;
         }
         stats.set(run.status, entry);
       });
       return Array.from(stats.values()).map((entry) => ({
         status: entry.status,
         count: entry.count,
-        avg_duration_seconds: entry.count > 0 ? entry.totalDuration / entry.count : null,
+        avg_duration_seconds:
+          entry.count > 0 ? entry.totalDuration / entry.count : null,
       }));
     }
   }
@@ -456,7 +464,9 @@ class CopilotPostgresStore {
       const events = this.memory.events;
       let removed = 0;
       events.forEach((list, runId) => {
-        const filtered = list.filter((event) => new Date(event.ts || event.createdAt).getTime() >= cutoff);
+        const filtered = list.filter(
+          (event) => new Date(event.ts || event.createdAt).getTime() >= cutoff,
+        );
         removed += list.length - filtered.length;
         events.set(runId, filtered);
       });
@@ -474,7 +484,9 @@ class CopilotPostgresStore {
 
   upsertTask(task) {
     const tasks = this.memory.tasks.get(task.runId) || [];
-    const existingIndex = tasks.findIndex((t) => t.id === task.id || t.sequenceNumber === task.sequenceNumber);
+    const existingIndex = tasks.findIndex(
+      (t) => t.id === task.id || t.sequenceNumber === task.sequenceNumber,
+    );
     if (existingIndex >= 0) {
       tasks[existingIndex] = { ...tasks[existingIndex], ...task };
     } else {
@@ -507,7 +519,9 @@ class CopilotPostgresStore {
 
   parseTimeRangeToMs(range) {
     if (!range) return null;
-    const match = /^\s*(\d+)\s*(day|days|hour|hours|minute|minutes)\s*$/i.exec(range);
+    const match = /^\s*(\d+)\s*(day|days|hour|hours|minute|minutes)\s*$/i.exec(
+      range,
+    );
     if (!match) return null;
     const value = Number(match[1]);
     const unit = match[2].toLowerCase();
@@ -535,11 +549,14 @@ class CopilotPostgresStore {
       investigationId: row.investigation_id,
       status: row.status,
       plan: typeof row.plan === 'string' ? JSON.parse(row.plan) : row.plan,
-      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+      metadata:
+        typeof row.metadata === 'string'
+          ? JSON.parse(row.metadata)
+          : row.metadata,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       startedAt: row.started_at,
-      finishedAt: row.finished_at
+      finishedAt: row.finished_at,
     };
   }
 
@@ -553,16 +570,28 @@ class CopilotPostgresStore {
       seq: row.sequence_number, // backwards compatibility
       taskType: row.task_type,
       kind: row.task_type, // backwards compatibility
-      inputParams: typeof row.input_params === 'string' ? JSON.parse(row.input_params) : row.input_params,
-      input: typeof row.input_params === 'string' ? JSON.parse(row.input_params) : row.input_params, // backwards compatibility
-      outputData: typeof row.output_data === 'string' ? JSON.parse(row.output_data) : row.output_data,
-      output: typeof row.output_data === 'string' ? JSON.parse(row.output_data) : row.output_data, // backwards compatibility
+      inputParams:
+        typeof row.input_params === 'string'
+          ? JSON.parse(row.input_params)
+          : row.input_params,
+      input:
+        typeof row.input_params === 'string'
+          ? JSON.parse(row.input_params)
+          : row.input_params, // backwards compatibility
+      outputData:
+        typeof row.output_data === 'string'
+          ? JSON.parse(row.output_data)
+          : row.output_data,
+      output:
+        typeof row.output_data === 'string'
+          ? JSON.parse(row.output_data)
+          : row.output_data, // backwards compatibility
       status: row.status,
       errorMessage: row.error_message,
       error: row.error_message, // backwards compatibility
       createdAt: row.created_at,
       startedAt: row.started_at,
-      finishedAt: row.finished_at
+      finishedAt: row.finished_at,
     };
   }
 
@@ -575,9 +604,10 @@ class CopilotPostgresStore {
       taskId: row.task_id,
       level: row.event_level,
       message: row.message,
-      payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload,
+      payload:
+        typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload,
       ts: row.created_at,
-      createdAt: row.created_at
+      createdAt: row.created_at,
     };
   }
 }

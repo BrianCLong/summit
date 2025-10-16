@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import random
 import time
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Callable, Iterable, Protocol
+from typing import Protocol
 
 import requests
 
@@ -15,8 +16,7 @@ from .measurements import Measurement
 class Probe(Protocol):
     """A probe collects measurements for a given secret or scenario."""
 
-    def invoke(self, secret: str, rng: random.Random) -> Measurement:
-        ...
+    def invoke(self, secret: str, rng: random.Random) -> Measurement: ...
 
 
 @dataclass
@@ -39,7 +39,9 @@ class HttpProbe:
         try:
             request_kwargs = self.build_request(secret, rng) if self.build_request else {}
             start = time.perf_counter()
-            response = session.request(self.method, self.url, timeout=self.timeout, **request_kwargs)
+            response = session.request(
+                self.method, self.url, timeout=self.timeout, **request_kwargs
+            )
             elapsed_ms = (time.perf_counter() - start) * 1000.0
             cache_header = response.headers.get("X-Cache", "0")
             cache_hint = 1.0 if cache_header.lower().startswith("hit") else 0.0

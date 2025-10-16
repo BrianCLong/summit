@@ -3,6 +3,7 @@
 > As Chair, I present the findings of the IntelGraph Advisory Committee on Sprint 3: deception-scoring calibration, explainability overlays, and governance hardening for the PsyOps Console. Consensus is noted where unanimous; dissents are highlighted.
 
 ### Consensus Summary
+
 **Unanimous View:** Mature the **read‑only intelligence surface** by (1) calibrating deception/burst/cadence scores with uncertainty, (2) shipping **Graph‑XAI overlays** (path rationales, counterfactuals), and (3) enforcing provenance/gov‑tech (model cards, audit logs, export policy).  
 **Dissents:** **🟥 Starkey** warns that public‑corpus calibration invites adversarial gaming; **🟥 Foster** flags bias/PII risk in training and mandates an ethics gate with automatic denials.
 
@@ -11,26 +12,32 @@
 ### Individual Commentaries
 
 ### 🪄 Elara Voss
+
 - “By the runes of Scrum: lock scope to **Scoring v0.3 + XAI overlay + Governance pack**. Definition of Done includes golden‑path e2e, perf P95, and export policy checks.”
 - Deliver **two UX affordances** only: saved views (restore on load) and **Explain this view** side‑panel with trace IDs.
 
 ### 🛰 Starkey
+
 - Reality check: **single scores get gamed**. Use multi‑signal validators (cadence entropy + coordination motifs + geo jitter). Show uncertainty bands prominently.
 - Mirror scoring on a **read‑replica** and alert on divergence >5% as a tamper signal.
 
 ### 🛡 Foster
+
 - Operational vectors indicate **[RESTRICTED]**: deny any route that touches audience creation or content injection. Log denials with human‑readable rationale and reviewer badge.
 - Ship **Model Cards** (purpose, data, risks, intended use) and run a light **fairness/PII audit** pre‑release.
 
 ### ⚔ Oppie (11‑persona consensus)
+
 - We decree unanimously: enrich XAI with **counterfactual snippets** ("remove node X → score drops 31%").
-- Dissent: *Beria* demands active counter‑ops; the Committee rejects—**observe, hypothesize, defend** only.
+- Dissent: _Beria_ demands active counter‑ops; the Committee rejects—**observe, hypothesize, defend** only.
 
 ### 📊 Magruder
+
 - For executive traction: add KPI tiles (time‑to‑hypothesis, evidence completeness, confidence spread). Tie to export‑pack quality (citations present, licenses valid).
 - Ensure **compute budgets** (FE render <150ms P95; scoring service <100ms P95) and publish SLOs.
 
 ### 🧬 Stribol
+
 - Cross‑source analysis reveals lift from a **fusion ensemble**: cadenceEntropy ⊕ narrativeBurst ⊕ botLikely ⊕ coordinationPath.
 - Propose a **black‑swan detector** (unsupervised novelty score) gated to “Advisory” only, never decisive.
 
@@ -39,43 +46,48 @@
 ### Chair Synthesis
 
 #### Sprint Objectives (2 weeks)
-1) **Calibrate Scoring v0.3** with uncertainty and feature attributions.  
-2) **Ship Graph‑XAI overlay**: path rationale, top‑k contributors, counterfactual deltas.  
-3) **Governance Pack**: model cards, provenance badges, export policy checks, audit log.
+
+1. **Calibrate Scoring v0.3** with uncertainty and feature attributions.
+2. **Ship Graph‑XAI overlay**: path rationale, top‑k contributors, counterfactual deltas.
+3. **Governance Pack**: model cards, provenance badges, export policy checks, audit log.
 
 #### Scope & Backlog (Must‑Have)
+
 - **Scoring Service** (read‑only): `POST /score:narrative` (internal), returns `{ deceptionScore, burstScore, cadenceEntropy, uncertainty, attributions[] }`.
 - **Calibration Pipeline**: hold‑out set, isotonic/Platt scaling, reliability diagrams persisted to `/modelcards`.
 - **XAI Overlay**: right‑drawer with (a) path rationale, (b) counterfactual delta (% change if node/edge removed), (c) uncertainty band, (d) provenance snippet.
 - **Governance**: model card YAML + signed export manifest + policy denials (HTTP 451) rendered in‑UI with reason codes.
 - **Observability**: emit metrics (TTH, evidence completeness) and drift monitors (population, performance, prediction drift).
 
-**Stretch**  
-- **Offline cache** (IndexedDB snapshots + delta replay).  
+**Stretch**
+
+- **Offline cache** (IndexedDB snapshots + delta replay).
 - **Replica fan‑out** for scoring consistency checks.
 
 #### Acceptance Criteria
-- A1: Reliability curve ECE ≤ 0.05 on hold‑out; AUC not degraded >1.5% from v0.2.  
-- A2: Every Explain panel shows ≥3 attributions and 1 counterfactual delta with traceId linkage.  
-- A3: Export packs include license badges and pass policy pre‑flight.  
-- A4: Any attempt to perform write/influence routes is denied with HTTP 451 and human‑readable rationale.  
+
+- A1: Reliability curve ECE ≤ 0.05 on hold‑out; AUC not degraded >1.5% from v0.2.
+- A2: Every Explain panel shows ≥3 attributions and 1 counterfactual delta with traceId linkage.
+- A3: Export packs include license badges and pass policy pre‑flight.
+- A4: Any attempt to perform write/influence routes is denied with HTTP 451 and human‑readable rationale.
 - A5: P95 latency—scoring ≤100ms, overlay render ≤150ms—on baseline dataset.
 
 #### Risk Matrix
 
-| Risk | Severity | Likelihood | Mitigation |
-|---|---:|---:|---:|
-| Adversarial calibration gaming | High | Medium | Private eval set; randomization; multi‑signal fusion; divergence alerts |
-| Dataset bias / PII leakage | Critical | Low | PII scrub, fairness checks, model cards, redaction in exports |
-| Over‑confidence from single metric | High | Medium | Uncertainty bands; attributions; cap confidence in UI |
-| Export policy failures | Medium | Low | Pre‑flight policy engine; signed manifest; deny on fail |
-| Drift (data/population/performance) | Medium | Medium | Drift monitors + alerts; shadow scoring on replica |
+| Risk                                | Severity | Likelihood |                                                              Mitigation |
+| ----------------------------------- | -------: | ---------: | ----------------------------------------------------------------------: |
+| Adversarial calibration gaming      |     High |     Medium | Private eval set; randomization; multi‑signal fusion; divergence alerts |
+| Dataset bias / PII leakage          | Critical |        Low |           PII scrub, fairness checks, model cards, redaction in exports |
+| Over‑confidence from single metric  |     High |     Medium |                   Uncertainty bands; attributions; cap confidence in UI |
+| Export policy failures              |   Medium |        Low |                 Pre‑flight policy engine; signed manifest; deny on fail |
+| Drift (data/population/performance) |   Medium |     Medium |                      Drift monitors + alerts; shadow scoring on replica |
 
 ---
 
 ### Code & Specs (Guy IG)
 
 #### 1) Cadence Entropy & Burst Scoring (Python)
+
 ```python
 from __future__ import annotations
 import numpy as np
@@ -111,32 +123,57 @@ if __name__ == "__main__":
 ```
 
 #### 2) Scoring API (TypeScript, Express + Zod)
+
 ```ts
 // apps/server/src/routes/score.ts
 import { Router } from 'express';
 import { z } from 'zod';
 
-const ScoreReq = z.object({ narrativeId: z.string(), timestamps: z.array(z.number()).min(3), perMinute: z.array(z.number()).min(10) });
-const ScoreRes = z.object({ deceptionScore: z.number(), burstScore: z.number(), cadenceEntropy: z.number(), uncertainty: z.number(), attributions: z.array(z.object({ feature: z.string(), weight: z.number(), snippet: z.string() })) });
+const ScoreReq = z.object({
+  narrativeId: z.string(),
+  timestamps: z.array(z.number()).min(3),
+  perMinute: z.array(z.number()).min(10),
+});
+const ScoreRes = z.object({
+  deceptionScore: z.number(),
+  burstScore: z.number(),
+  cadenceEntropy: z.number(),
+  uncertainty: z.number(),
+  attributions: z.array(
+    z.object({ feature: z.string(), weight: z.number(), snippet: z.string() }),
+  ),
+});
 
 export const scoreRouter = Router().post('/score:narrative', (req, res) => {
   const parse = ScoreReq.safeParse(req.body);
   if (!parse.success) return res.status(400).json({ error: 'bad_request' });
   const { timestamps, perMinute } = parse.data;
   // call to Python service or WASM port here (omitted for brevity)
-  const burstScore = 0.71, cadenceEntropy = 2.9;
+  const burstScore = 0.71,
+    cadenceEntropy = 2.9;
   const deceptionScore = 0.78; // from fusion ensemble
-  const uncertainty = 0.22;    // calibrated via isotonic
+  const uncertainty = 0.22; // calibrated via isotonic
   const attributions = [
-    { feature: 'cadenceEntropy', weight: 0.42, snippet: 'irregular inter‑arrivals' },
-    { feature: 'burstScore', weight: 0.31, snippet: '3 spikes in 5m' }
+    {
+      feature: 'cadenceEntropy',
+      weight: 0.42,
+      snippet: 'irregular inter‑arrivals',
+    },
+    { feature: 'burstScore', weight: 0.31, snippet: '3 spikes in 5m' },
   ];
-  const body = { deceptionScore, burstScore, cadenceEntropy, uncertainty, attributions };
+  const body = {
+    deceptionScore,
+    burstScore,
+    cadenceEntropy,
+    uncertainty,
+    attributions,
+  };
   return res.json(ScoreRes.parse(body));
 });
 ```
 
 #### 3) XAI Overlay (React)
+
 ```tsx
 // apps/web/src/features/psyops/ExplainDrawer.tsx
 import { useState } from 'react';
@@ -175,6 +212,7 @@ export default function ExplainDrawer({ open, onClose, data }: { open: boolean; 
 ```
 
 #### 4) Model Card (YAML)
+
 ```yaml
 model: deception_scoring_v0_3
 owner: intelgraph/psyops
@@ -198,14 +236,19 @@ changelog:
 ```
 
 #### 5) Export Manifest (signed)
+
 ```json
 {
   "packageId": "exp_01H...",
   "createdAt": "2025-09-11T17:00:00Z",
-  "policy": {"licenseOk": true, "ethicsOk": true, "redactions": ["pii.email"]},
+  "policy": {
+    "licenseOk": true,
+    "ethicsOk": true,
+    "redactions": ["pii.email"]
+  },
   "manifest": [
-    {"sha256": "f2ab...", "path": "items/0001.json"},
-    {"sha256": "91cd...", "path": "items/0002.json"}
+    { "sha256": "f2ab...", "path": "items/0001.json" },
+    { "sha256": "91cd...", "path": "items/0002.json" }
   ],
   "signature": "BASE64_ED25519_SIG"
 }
@@ -214,16 +257,18 @@ changelog:
 ---
 
 ### Tickets (ready for grooming)
-- **SCORE‑201**: Implement Python cadenceEntropy + burstScore; expose via gRPC/REST.  
-- **SCORE‑202**: Fusion ensemble + isotonic calibration; persist reliability diagram.  
-- **XAI‑210**: Explain drawer with attributions + counterfactual delta; wire traceId.  
-- **GOV‑230**: Model cards + export policy pre‑flight; HTTP 451 denials with reason codes.  
-- **OBS‑240**: Drift monitors (data/perf/prediction) + divergence alerts (>5%).  
+
+- **SCORE‑201**: Implement Python cadenceEntropy + burstScore; expose via gRPC/REST.
+- **SCORE‑202**: Fusion ensemble + isotonic calibration; persist reliability diagram.
+- **XAI‑210**: Explain drawer with attributions + counterfactual delta; wire traceId.
+- **GOV‑230**: Model cards + export policy pre‑flight; HTTP 451 denials with reason codes.
+- **OBS‑240**: Drift monitors (data/perf/prediction) + divergence alerts (>5%).
 - **PERF‑250**: Optimize overlay render to ≤150ms P95; virtualize lists.
 
 ### OKRs (Sprint 2)
-- KR1: WS demo stable for 30‑minute run (0 disconnects P95).  
-- KR2: ≥95% responses include traceId + provenance link.  
+
+- KR1: WS demo stable for 30‑minute run (0 disconnects P95).
+- KR2: ≥95% responses include traceId + provenance link.
 - KR3: 0 policy violations; 100% denials carry human‑readable reasons.
 
 ---

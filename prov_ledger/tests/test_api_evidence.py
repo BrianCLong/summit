@@ -1,6 +1,3 @@
-from fixtures import client
-
-
 def test_register_evidence(client):
     resp = client.post(
         "/evidence/register",

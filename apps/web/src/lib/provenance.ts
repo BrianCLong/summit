@@ -41,7 +41,9 @@ export interface ArtifactRecord {
   evidence: ArtifactEvidence
 }
 
-export async function sha256Hex(payload: string | ArrayBuffer): Promise<string> {
+export async function sha256Hex(
+  payload: string | ArrayBuffer
+): Promise<string> {
   const buffer =
     typeof payload === 'string' ? new TextEncoder().encode(payload) : payload
   const digest = await crypto.subtle.digest('SHA-256', buffer)
@@ -59,20 +61,22 @@ export function useHashVerifier() {
     async (
       step: ProvenanceStep,
       materials: StepMaterial,
-      direction: 'input' | 'output',
+      direction: 'input' | 'output'
     ) => {
       setVerifying(`${step.id}-${direction}`)
       setError(null)
       setVerifiedStep(null)
       try {
-        const expectedHash = direction === 'input' ? step.inputHash : step.outputHash
-        const material = direction === 'input' ? materials.input : materials.output
+        const expectedHash =
+          direction === 'input' ? step.inputHash : step.outputHash
+        const material =
+          direction === 'input' ? materials.input : materials.output
         const hash = await sha256Hex(material)
         if (hash === expectedHash) {
           setVerifiedStep(step.id)
         } else {
           setError(
-            `Hash mismatch. Expected ${expectedHash.substring(0, 12)}…, got ${hash.substring(0, 12)}…`,
+            `Hash mismatch. Expected ${expectedHash.substring(0, 12)}…, got ${hash.substring(0, 12)}…`
           )
         }
       } catch (err) {
@@ -81,7 +85,7 @@ export function useHashVerifier() {
         setVerifying(null)
       }
     },
-    [],
+    []
   )
 
   return { verifying, verifiedStep, error, verify }

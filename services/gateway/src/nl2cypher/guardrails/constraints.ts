@@ -44,7 +44,7 @@ const readOnlyConstraint: CypherConstraint = {
       /\b(CREATE|MERGE|SET|DELETE|REMOVE|DETACH)\b/i,
       /\bCALL\s+\w+\.(create|update|delete|remove)/i,
       /\bCALL\s+apoc\.periodic\./i,
-      /\bCALL\s+dbms\./i
+      /\bCALL\s+dbms\./i,
     ];
 
     for (const pattern of mutationPatterns) {
@@ -53,13 +53,14 @@ const readOnlyConstraint: CypherConstraint = {
           allowed: false,
           reason: 'Mutation operations require privileged access',
           explainPath: '/docs/security/webauthn-step-up',
-          suggestedFix: 'Complete WebAuthn step-up authentication for write operations'
+          suggestedFix:
+            'Complete WebAuthn step-up authentication for write operations',
         };
       }
     }
 
     return { allowed: true };
-  }
+  },
 };
 
 /**
@@ -76,7 +77,7 @@ const complexityConstraint: CypherConstraint = {
       /\(\*\)/g, // Variable length relationships
       /\bALL\s+SHORTEST\s+PATH/i,
       /\bSHORTEST\s+PATH/i,
-      /\bCALL\s+\{\s*.*\s*\}\s*IN\s+TRANSACTIONS/i
+      /\bCALL\s+\{\s*.*\s*\}\s*IN\s+TRANSACTIONS/i,
     ];
 
     let complexityScore = 0;
@@ -98,12 +99,13 @@ const complexityConstraint: CypherConstraint = {
         allowed: false,
         reason: `Query complexity score (${complexityScore}) exceeds limit (${maxComplexity})`,
         explainPath: '/docs/cypher/complexity-limits',
-        suggestedFix: 'Simplify query by reducing MATCH clauses or avoiding variable-length paths'
+        suggestedFix:
+          'Simplify query by reducing MATCH clauses or avoiding variable-length paths',
       };
     }
 
     return { allowed: true };
-  }
+  },
 };
 
 /**
@@ -118,7 +120,7 @@ const exportConstraint: CypherConstraint = {
     const exportPatterns = [
       /\bRETURN\s+\*\b/i,
       /\bLIMIT\s+([1-9]\d{4,})/i, // LIMIT > 10,000
-      /\bCOLLECT\s*\(/i
+      /\bCOLLECT\s*\(/i,
     ];
 
     for (const pattern of exportPatterns) {
@@ -128,14 +130,15 @@ const exportConstraint: CypherConstraint = {
             allowed: false,
             reason: 'Large data exports require privileged access',
             explainPath: '/docs/security/data-export-policies',
-            suggestedFix: 'Use pagination or request elevated privileges for bulk export'
+            suggestedFix:
+              'Use pagination or request elevated privileges for bulk export',
           };
         }
       }
     }
 
     return { allowed: true };
-  }
+  },
 };
 
 /**
@@ -147,7 +150,8 @@ const tenantIsolationConstraint: CypherConstraint = {
   severity: 'error',
   check: (cypher: string, context: QueryContext): ConstraintResult => {
     // Check if query includes tenant filtering
-    const hasTenantFilter = /\b(tenantId|tenant_id)\s*[=:]\s*['"]?\$?tenantId/i.test(cypher);
+    const hasTenantFilter =
+      /\b(tenantId|tenant_id)\s*[=:]\s*['"]?\$?tenantId/i.test(cypher);
     const hasGlobalAccess = context.roles.includes('global-admin');
 
     if (!hasTenantFilter && !hasGlobalAccess) {
@@ -155,12 +159,12 @@ const tenantIsolationConstraint: CypherConstraint = {
         allowed: false,
         reason: 'Queries must include tenant isolation filters',
         explainPath: '/docs/security/tenant-isolation',
-        suggestedFix: `Add WHERE clause: WHERE n.tenantId = $tenantId (current: ${context.tenantId})`
+        suggestedFix: `Add WHERE clause: WHERE n.tenantId = $tenantId (current: ${context.tenantId})`,
       };
     }
 
     return { allowed: true };
-  }
+  },
 };
 
 /**
@@ -178,22 +182,25 @@ const timeBasedConstraint: CypherConstraint = {
     const sensitivePatterns = [
       /\bDELETE\b/i,
       /\bDETACH\s+DELETE\b/i,
-      /\bDROP\b/i
+      /\bDROP\b/i,
     ];
 
-    const hasSensitiveOp = sensitivePatterns.some(pattern => pattern.test(cypher));
+    const hasSensitiveOp = sensitivePatterns.some((pattern) =>
+      pattern.test(cypher),
+    );
 
     if (hasSensitiveOp && !isBusinessHours && !context.isPrivileged) {
       return {
         allowed: false,
-        reason: 'Sensitive operations restricted to business hours (8 AM - 6 PM)',
+        reason:
+          'Sensitive operations restricted to business hours (8 AM - 6 PM)',
         explainPath: '/docs/security/business-hours-policy',
-        suggestedFix: 'Wait for business hours or request emergency access'
+        suggestedFix: 'Wait for business hours or request emergency access',
       };
     }
 
     return { allowed: true };
-  }
+  },
 };
 
 /**
@@ -204,7 +211,7 @@ export const defaultConstraints: CypherConstraint[] = [
   complexityConstraint,
   exportConstraint,
   tenantIsolationConstraint,
-  timeBasedConstraint
+  timeBasedConstraint,
 ];
 
 /**
@@ -217,7 +224,10 @@ export class CypherGuardrails {
     this.constraints = constraints;
   }
 
-  evaluate(cypher: string, context: QueryContext): {
+  evaluate(
+    cypher: string,
+    context: QueryContext,
+  ): {
     allowed: boolean;
     violations: Array<{
       constraint: string;
@@ -239,7 +249,7 @@ export class CypherGuardrails {
           severity: constraint.severity,
           reason: result.reason || 'Constraint violation',
           explainPath: result.explainPath,
-          suggestedFix: result.suggestedFix
+          suggestedFix: result.suggestedFix,
         });
 
         if (constraint.severity === 'error') {
@@ -255,7 +265,7 @@ export class CypherGuardrails {
    * Get human-readable explanation for a constraint violation
    */
   explain(constraintName: string): string {
-    const constraint = this.constraints.find(c => c.name === constraintName);
+    const constraint = this.constraints.find((c) => c.name === constraintName);
     return constraint?.description || 'Unknown constraint';
   }
 
@@ -270,7 +280,7 @@ export class CypherGuardrails {
    * Remove constraint by name
    */
   removeConstraint(name: string): void {
-    this.constraints = this.constraints.filter(c => c.name !== name);
+    this.constraints = this.constraints.filter((c) => c.name !== name);
   }
 }
 
@@ -295,7 +305,7 @@ export const guardrailsMiddleware = (req: any, res: any, next: any) => {
     isPrivileged: req.user?.isPrivileged || false,
     tenantId: req.user?.tenantId || req.headers['x-tenant-id'],
     source: req.path.startsWith('/api') ? 'api' : 'ui',
-    timestamp: new Date()
+    timestamp: new Date(),
   };
 
   const evaluation = cypherGuardrails.evaluate(cypher, context);
@@ -304,12 +314,14 @@ export const guardrailsMiddleware = (req: any, res: any, next: any) => {
     return res.status(403).json({
       error: 'Query violates security constraints',
       violations: evaluation.violations,
-      explainUrl: '/docs/security/cypher-guardrails'
+      explainUrl: '/docs/security/cypher-guardrails',
     });
   }
 
   // Log warnings
-  const warnings = evaluation.violations.filter(v => v.severity === 'warning');
+  const warnings = evaluation.violations.filter(
+    (v) => v.severity === 'warning',
+  );
   if (warnings.length > 0) {
     console.warn('Cypher guardrail warnings:', warnings);
   }

@@ -9,7 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
+  process.env.DATABASE_URL ||
+  'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
 
 class MigrationRunner {
   constructor(dbUrl) {
@@ -71,7 +72,10 @@ class MigrationRunner {
       await this.client.query(sql);
 
       // Record migration
-      await this.client.query('INSERT INTO schema_migrations (version) VALUES ($1)', [filename]);
+      await this.client.query(
+        'INSERT INTO schema_migrations (version) VALUES ($1)',
+        [filename],
+      );
 
       // Commit transaction
       await this.client.query('COMMIT');
@@ -93,7 +97,9 @@ class MigrationRunner {
       const executedMigrations = await this.getExecutedMigrations();
       const migrationFiles = await this.getMigrationFiles();
 
-      const pendingMigrations = migrationFiles.filter((file) => !executedMigrations.includes(file));
+      const pendingMigrations = migrationFiles.filter(
+        (file) => !executedMigrations.includes(file),
+      );
 
       if (pendingMigrations.length === 0) {
         console.log('No pending migrations');
@@ -133,7 +139,10 @@ class MigrationRunner {
 
           await this.client.query('BEGIN');
           await this.client.query(rollbackSql);
-          await this.client.query('DELETE FROM schema_migrations WHERE version = $1', [migration]);
+          await this.client.query(
+            'DELETE FROM schema_migrations WHERE version = $1',
+            [migration],
+          );
           await this.client.query('COMMIT');
 
           console.log(`✓ Rolled back ${migration}`);

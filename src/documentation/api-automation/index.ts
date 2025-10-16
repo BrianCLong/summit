@@ -1,6 +1,6 @@
 /**
  * API Documentation Automation Module
- * 
+ *
  * Exports all API documentation automation components
  */
 
@@ -9,11 +9,11 @@ export {
   APIEndpointDiscovery,
   type APIDocumentationConfig,
   type APIEndpoint,
-  type ContentMetrics
+  type ContentMetrics,
 } from './OpenAPIGenerator.js';
 
 export {
   DocumentationPipeline,
   type PipelineConfig,
-  type PipelineResult
+  type PipelineResult,
 } from './DocumentationPipeline.js';

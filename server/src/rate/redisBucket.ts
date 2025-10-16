@@ -7,10 +7,10 @@ import Redis from 'ioredis';
 import logger from '../utils/logger';
 
 interface TokenBucketConfig {
-  capacity: number;        // Maximum tokens in bucket
-  refillRate: number;      // Tokens per second to add
+  capacity: number; // Maximum tokens in bucket
+  refillRate: number; // Tokens per second to add
   refillIntervalMs: number; // How often to refill (milliseconds)
-  keyPrefix?: string;      // Redis key prefix
+  keyPrefix?: string; // Redis key prefix
 }
 
 interface TakeTokensResult {
@@ -152,12 +152,12 @@ export class RedisBucket {
       url: redisUrl || process.env.REDIS_URL || 'redis://localhost:6379',
       socket: {
         connectTimeout: 5000,
-        commandTimeout: 2000
+        commandTimeout: 2000,
       },
       retry: {
         retries: 3,
-        factor: 2
-      }
+        factor: 2,
+      },
     });
 
     this.client.on('error', (error) => {
@@ -188,7 +188,7 @@ export class RedisBucket {
       // Load Lua scripts for atomic operations
       this.luaScriptSha = await this.client.scriptLoad(TAKE_TOKENS_LUA);
       this.batchScriptSha = await this.client.scriptLoad(BATCH_TAKE_TOKENS_LUA);
-      
+
       this.connected = true;
       logger.info('RedisBucket initialized successfully');
     } catch (error) {
@@ -204,7 +204,7 @@ export class RedisBucket {
     tenant: string,
     operation: string,
     tokensRequested: number = 1,
-    config: Partial<TokenBucketConfig> = {}
+    config: Partial<TokenBucketConfig> = {},
   ): Promise<TakeTokensResult> {
     await this.ensureConnected();
 
@@ -212,16 +212,15 @@ export class RedisBucket {
       capacity = 100,
       refillRate = 10,
       refillIntervalMs = 1000,
-      keyPrefix = 'bucket'
+      keyPrefix = 'bucket',
     } = config;
 
     const key = `${keyPrefix}:${tenant}:${operation}`;
     const now = Date.now();
 
     try {
-      const result: [number, number, number, number, number] = await this.client.evalSha(
-        this.luaScriptSha!,
-        {
+      const result: [number, number, number, number, number] =
+        (await this.client.evalSha(this.luaScriptSha!, {
           keys: [key],
           arguments: [
             now.toString(),
@@ -229,12 +228,12 @@ export class RedisBucket {
             refillRate.toString(),
             refillIntervalMs.toString(),
             tokensRequested.toString(),
-            '1' // minTokens
-          ]
-        }
-      ) as any;
+            '1', // minTokens
+          ],
+        })) as any;
 
-      const [allowed, remaining, bucketCapacity, lastRefill, resetTime] = result;
+      const [allowed, remaining, bucketCapacity, lastRefill, resetTime] =
+        result;
 
       return {
         allowed: allowed === 1,
@@ -243,12 +242,16 @@ export class RedisBucket {
         bucketState: {
           capacity: bucketCapacity,
           tokens: remaining,
-          lastRefill
-        }
+          lastRefill,
+        },
       };
     } catch (error) {
-      logger.error('Failed to take tokens from bucket:', { tenant, operation, error });
-      
+      logger.error('Failed to take tokens from bucket:', {
+        tenant,
+        operation,
+        error,
+      });
+
       // Fallback: allow request but log the failure
       return {
         allowed: true,
@@ -256,8 +259,8 @@ export class RedisBucket {
         bucketState: {
           capacity,
           tokens: capacity,
-          lastRefill: now
-        }
+          lastRefill: now,
+        },
       };
     }
   }
@@ -268,7 +271,7 @@ export class RedisBucket {
   async takeTokensBatch(
     tenant: string,
     requests: Array<{ operation: string; tokens: number }>,
-    config: Partial<TokenBucketConfig> = {}
+    config: Partial<TokenBucketConfig> = {},
   ): Promise<{
     allowed: boolean;
     results: Array<{ operation: string; tokens: number; approved: boolean }>;
@@ -280,7 +283,7 @@ export class RedisBucket {
       capacity = 100,
       refillRate = 10,
       refillIntervalMs = 1000,
-      keyPrefix = 'bucket'
+      keyPrefix = 'bucket',
     } = config;
 
     const key = `${keyPrefix}:${tenant}:batch`;
@@ -291,7 +294,7 @@ export class RedisBucket {
       now.toString(),
       capacity.toString(),
       refillRate.toString(),
-      refillIntervalMs.toString()
+      refillIntervalMs.toString(),
     ];
 
     for (const req of requests) {
@@ -299,12 +302,16 @@ export class RedisBucket {
     }
 
     try {
-      const result: any[] = await this.client.evalSha(
-        this.batchScriptSha!,
-        { keys: [key], arguments: args }
-      ) as any;
+      const result: any[] = (await this.client.evalSha(this.batchScriptSha!, {
+        keys: [key],
+        arguments: args,
+      })) as any;
 
-      const results: Array<{ operation: string; tokens: number; approved: boolean }> = [];
+      const results: Array<{
+        operation: string;
+        tokens: number;
+        approved: boolean;
+      }> = [];
       const remaining = result[result.length - 1];
       let allApproved = true;
 
@@ -313,7 +320,7 @@ export class RedisBucket {
         const approved = result[i] === 1;
         const tokens = result[i + 1];
         const operation = result[i + 2];
-        
+
         results.push({ operation, tokens, approved });
         if (!approved) allApproved = false;
       }
@@ -321,16 +328,20 @@ export class RedisBucket {
       return {
         allowed: allApproved,
         results,
-        remaining
+        remaining,
       };
     } catch (error) {
-      logger.error('Failed to take tokens in batch:', { tenant, requests, error });
-      
+      logger.error('Failed to take tokens in batch:', {
+        tenant,
+        requests,
+        error,
+      });
+
       // Fallback: approve all requests
       return {
         allowed: true,
-        results: requests.map(req => ({ ...req, approved: true })),
-        remaining: capacity
+        results: requests.map((req) => ({ ...req, approved: true })),
+        remaining: capacity,
       };
     }
   }
@@ -341,7 +352,7 @@ export class RedisBucket {
   async getBucketStatus(
     tenant: string,
     operation: string,
-    config: Partial<TokenBucketConfig> = {}
+    config: Partial<TokenBucketConfig> = {},
   ): Promise<{
     tokens: number;
     capacity: number;
@@ -354,7 +365,11 @@ export class RedisBucket {
     const key = `${keyPrefix}:${tenant}:${operation}`;
 
     try {
-      const bucketData = await this.client.hmGet(key, ['tokens', 'lastRefill', 'capacity']);
+      const bucketData = await this.client.hmGet(key, [
+        'tokens',
+        'lastRefill',
+        'capacity',
+      ]);
       const tokens = parseInt(bucketData[0] || '0');
       const lastRefill = parseInt(bucketData[1] || Date.now().toString());
       const capacity = parseInt(bucketData[2] || '100');
@@ -363,15 +378,19 @@ export class RedisBucket {
         tokens,
         capacity,
         lastRefill,
-        nextRefill: lastRefill + refillIntervalMs
+        nextRefill: lastRefill + refillIntervalMs,
       };
     } catch (error) {
-      logger.error('Failed to get bucket status:', { tenant, operation, error });
+      logger.error('Failed to get bucket status:', {
+        tenant,
+        operation,
+        error,
+      });
       return {
         tokens: 0,
         capacity: 100,
         lastRefill: Date.now(),
-        nextRefill: Date.now() + refillIntervalMs
+        nextRefill: Date.now() + refillIntervalMs,
       };
     }
   }
@@ -382,7 +401,7 @@ export class RedisBucket {
   async resetBucket(
     tenant: string,
     operation: string,
-    config: Partial<TokenBucketConfig> = {}
+    config: Partial<TokenBucketConfig> = {},
   ): Promise<void> {
     await this.ensureConnected();
 
@@ -394,10 +413,10 @@ export class RedisBucket {
       await this.client.hSet(key, {
         tokens: capacity.toString(),
         lastRefill: now.toString(),
-        capacity: capacity.toString()
+        capacity: capacity.toString(),
       });
       await this.client.expire(key, 3600);
-      
+
       logger.info('Bucket reset successfully', { tenant, operation, capacity });
     } catch (error) {
       logger.error('Failed to reset bucket:', { tenant, operation, error });
@@ -417,7 +436,7 @@ export class RedisBucket {
     try {
       const keys = await this.client.keys('bucket:*');
       const info = await this.client.info('memory');
-      
+
       // Extract memory usage (simplified)
       const memoryMatch = info.match(/used_memory:(\d+)/);
       const memoryUsage = memoryMatch ? parseInt(memoryMatch[1]) : 0;
@@ -425,14 +444,14 @@ export class RedisBucket {
       return {
         totalBuckets: keys.length,
         activeBuckets: keys.length, // Simplified - could check TTL
-        memoryUsage
+        memoryUsage,
       };
     } catch (error) {
       logger.error('Failed to get global stats:', error);
       return {
         totalBuckets: 0,
         activeBuckets: 0,
-        memoryUsage: 0
+        memoryUsage: 0,
       };
     }
   }
@@ -449,14 +468,19 @@ export class RedisBucket {
 
       for (const key of keys) {
         const ttl = await this.client.ttl(key);
-        if (ttl === -1) { // No TTL set
+        if (ttl === -1) {
+          // No TTL set
           await this.client.expire(key, 3600);
-        } else if (ttl === -2) { // Key doesn't exist
+        } else if (ttl === -2) {
+          // Key doesn't exist
           cleaned++;
         }
       }
 
-      logger.info('Bucket cleanup completed', { totalKeys: keys.length, cleaned });
+      logger.info('Bucket cleanup completed', {
+        totalKeys: keys.length,
+        cleaned,
+      });
       return cleaned;
     } catch (error) {
       logger.error('Failed to cleanup expired buckets:', error);
@@ -510,22 +534,26 @@ export function createBucketMiddleware(config: {
 
   return async (req: any, res: any, next: any) => {
     try {
-      const getKey = config.getKey || ((req) => ({
-        tenant: req.user?.tenantId || 'default',
-        operation: `${req.method}:${req.route?.path || req.path}`
-      }));
+      const getKey =
+        config.getKey ||
+        ((req) => ({
+          tenant: req.user?.tenantId || 'default',
+          operation: `${req.method}:${req.route?.path || req.path}`,
+        }));
 
       const { tenant, operation } = getKey(req);
       const result = await bucket.takeTokens(tenant, operation, 1, config);
 
       if (!result.allowed) {
-        const onDenied = config.onDenied || ((req, res, resetTime) => {
-          res.status(429).json({
-            error: 'Rate limit exceeded',
-            resetTime,
-            remaining: result.remaining
+        const onDenied =
+          config.onDenied ||
+          ((req, res, resetTime) => {
+            res.status(429).json({
+              error: 'Rate limit exceeded',
+              resetTime,
+              remaining: result.remaining,
+            });
           });
-        });
 
         return onDenied(req, res, result.resetTime);
       }
@@ -533,7 +561,7 @@ export function createBucketMiddleware(config: {
       // Add rate limit headers
       res.setHeader('X-RateLimit-Limit', result.bucketState.capacity);
       res.setHeader('X-RateLimit-Remaining', result.remaining);
-      
+
       next();
     } catch (error) {
       logger.error('Rate limiting middleware error:', error);

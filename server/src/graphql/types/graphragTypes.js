@@ -158,7 +158,9 @@ const graphragTypes = gql`
     """
     Find entities similar to a given entity using semantic embeddings
     """
-    findSimilarEntities(input: FindSimilarEntitiesInput!): SimilarEntitiesResponse!
+    findSimilarEntities(
+      input: FindSimilarEntitiesInput!
+    ): SimilarEntitiesResponse!
   }
 
   # Extend root Mutation type
@@ -166,7 +168,9 @@ const graphragTypes = gql`
     """
     Generate embeddings for entities in an investigation
     """
-    generateEntityEmbeddings(input: GenerateEmbeddingsInput!): GenerateEmbeddingsResponse!
+    generateEntityEmbeddings(
+      input: GenerateEmbeddingsInput!
+    ): GenerateEmbeddingsResponse!
 
     """
     Test GraphRAG services (embedding and LLM)
@@ -184,7 +188,9 @@ const graphragTypes = gql`
     """
     Subscribe to embedding generation progress
     """
-    embeddingGenerationProgress(investigationId: String!): GenerateEmbeddingsResponse!
+    embeddingGenerationProgress(
+      investigationId: String!
+    ): GenerateEmbeddingsResponse!
   }
 `;
 

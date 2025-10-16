@@ -1,1 +1,10 @@
-mutation canaryPromote($tenant: Tenant!) { canaryPromote(tenant: $tenant) { ok audit { evidenceId ts actor } } }
+mutation canaryPromote($tenant: Tenant!) {
+  canaryPromote(tenant: $tenant) {
+    ok
+    audit {
+      evidenceId
+      ts
+      actor
+    }
+  }
+}

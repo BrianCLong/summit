@@ -1,4 +1,3 @@
-
 # Feedback Process & Guidelines
 
 This document outlines how we collect, process, and act on user feedback.

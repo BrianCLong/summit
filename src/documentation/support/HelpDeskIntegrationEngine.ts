@@ -20,7 +20,14 @@ export interface SupportConfig {
 export interface SupportIntegration {
   id: string;
   name: string;
-  type: 'zendesk' | 'freshdesk' | 'servicenow' | 'jira' | 'slack' | 'teams' | 'custom';
+  type:
+    | 'zendesk'
+    | 'freshdesk'
+    | 'servicenow'
+    | 'jira'
+    | 'slack'
+    | 'teams'
+    | 'custom';
   configuration: IntegrationConfig;
   authentication: AuthConfig;
   syncEnabled: boolean;
@@ -96,7 +103,10 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
         this.integrations.set(integration.id, activeIntegration);
         this.emit('integration:activated', { integrationId: integration.id });
       } catch (error) {
-        this.emit('integration:failed', { integrationId: integration.id, error });
+        this.emit('integration:failed', {
+          integrationId: integration.id,
+          error,
+        });
       }
     }
   }
@@ -104,7 +114,9 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
   /**
    * Activate a specific integration
    */
-  private async activateIntegration(integration: SupportIntegration): Promise<ActiveIntegration> {
+  private async activateIntegration(
+    integration: SupportIntegration,
+  ): Promise<ActiveIntegration> {
     // Create integration handler
     const handler = this.createIntegrationHandler(integration);
 
@@ -130,15 +142,17 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
         ticketsCreated: 0,
         ticketsResolved: 0,
         avgResponseTime: 0,
-        errorCount: 0
-      }
+        errorCount: 0,
+      },
     };
   }
 
   /**
    * Create integration handler based on type
    */
-  private createIntegrationHandler(integration: SupportIntegration): IntegrationHandler {
+  private createIntegrationHandler(
+    integration: SupportIntegration,
+  ): IntegrationHandler {
     switch (integration.type) {
       case 'zendesk':
         return new ZendeskHandler(integration);
@@ -164,7 +178,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
     await this.knowledgeBase.syncWithDocumentation();
     await this.knowledgeBase.buildSearchIndex();
     await this.knowledgeBase.setupAutoSuggestions();
-    
+
     if (this.config.knowledgeBase.contentGeneration.enabled) {
       await this.knowledgeBase.enableContentGeneration();
     }
@@ -181,7 +195,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
     const chatBot = new IntelligentChatBot({
       config: this.config.chatBot,
       knowledgeBase: this.knowledgeBase,
-      ticketingSystem: this
+      ticketingSystem: this,
     });
 
     await chatBot.initialize();
@@ -209,15 +223,17 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
         sourceUrl: issue.sourceUrl,
         pageTitle: issue.pageTitle,
         userAgent: issue.userAgent,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
       sla: this.calculateSLA(issue),
-      timeline: [{
-        timestamp: new Date(),
-        action: 'created',
-        actor: 'system',
-        details: 'Ticket created from documentation feedback'
-      }]
+      timeline: [
+        {
+          timestamp: new Date(),
+          action: 'created',
+          actor: 'system',
+          details: 'Ticket created from documentation feedback',
+        },
+      ],
     };
 
     this.tickets.set(ticket.id, ticket);
@@ -235,9 +251,12 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
   /**
    * Handle support chat session
    */
-  async handleChatSession(sessionId: string, message: ChatMessage): Promise<ChatResponse> {
+  async handleChatSession(
+    sessionId: string,
+    message: ChatMessage,
+  ): Promise<ChatResponse> {
     let session = this.chatSessions.get(sessionId);
-    
+
     if (!session) {
       session = await this.createChatSession(sessionId, message.user);
     }
@@ -254,7 +273,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       content: response.content,
       timestamp: new Date(),
       user: { id: 'bot', name: 'Documentation Assistant', type: 'bot' },
-      type: 'response'
+      type: 'response',
     });
 
     session.lastActivity = new Date();
@@ -272,7 +291,10 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
   /**
    * Generate intelligent chat response
    */
-  private async generateChatResponse(session: ChatSession, message: ChatMessage): Promise<ChatResponse> {
+  private async generateChatResponse(
+    session: ChatSession,
+    message: ChatMessage,
+  ): Promise<ChatResponse> {
     // Search knowledge base
     const kbResults = await this.knowledgeBase.search(message.content);
 
@@ -290,7 +312,8 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
           response = this.generateAnswerFromKB(kbResults, message.content);
           suggestedActions = this.generateSuggestionsFromKB(kbResults);
         } else {
-          response = "I couldn't find a specific answer to your question. Let me connect you with a human expert.";
+          response =
+            "I couldn't find a specific answer to your question. Let me connect you with a human expert.";
           shouldEscalate = true;
         }
         break;
@@ -298,29 +321,44 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       case 'bug_report':
         response = this.generateBugReportResponse();
         suggestedActions = [
-          { type: 'create_ticket', label: 'Create Bug Report', data: { type: 'bug' } },
-          { type: 'view_known_issues', label: 'View Known Issues' }
+          {
+            type: 'create_ticket',
+            label: 'Create Bug Report',
+            data: { type: 'bug' },
+          },
+          { type: 'view_known_issues', label: 'View Known Issues' },
         ];
         break;
 
       case 'feature_request':
         response = this.generateFeatureRequestResponse();
         suggestedActions = [
-          { type: 'create_ticket', label: 'Submit Feature Request', data: { type: 'feature' } },
-          { type: 'view_roadmap', label: 'View Roadmap' }
+          {
+            type: 'create_ticket',
+            label: 'Submit Feature Request',
+            data: { type: 'feature' },
+          },
+          { type: 'view_roadmap', label: 'View Roadmap' },
         ];
         break;
 
       case 'documentation_feedback':
         response = this.generateDocumentationFeedbackResponse();
         suggestedActions = [
-          { type: 'improve_docs', label: 'Suggest Improvement', data: { page: session.context?.currentPage } },
-          { type: 'rate_content', label: 'Rate This Page' }
+          {
+            type: 'improve_docs',
+            label: 'Suggest Improvement',
+            data: { page: session.context?.currentPage },
+          },
+          { type: 'rate_content', label: 'Rate This Page' },
         ];
         break;
 
       default:
-        response = await this.generateGenericResponse(message.content, session.context);
+        response = await this.generateGenericResponse(
+          message.content,
+          session.context,
+        );
         suggestedActions = await this.generateContextualSuggestions(session);
     }
 
@@ -329,14 +367,19 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       suggestedActions,
       shouldEscalate,
       confidence: intent.confidence,
-      sources: kbResults.slice(0, 3).map(r => ({ title: r.title, url: r.url }))
+      sources: kbResults
+        .slice(0, 3)
+        .map((r) => ({ title: r.title, url: r.url })),
     };
   }
 
   /**
    * Escalate issue based on rules
    */
-  async escalateIssue(ticketId: string, reason: EscalationReason): Promise<EscalationResult> {
+  async escalateIssue(
+    ticketId: string,
+    reason: EscalationReason,
+  ): Promise<EscalationResult> {
     const ticket = this.tickets.get(ticketId);
     if (!ticket) {
       throw new Error(`Ticket ${ticketId} not found`);
@@ -344,7 +387,10 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
 
     const escalationRule = this.findApplicableEscalationRule(ticket, reason);
     if (!escalationRule) {
-      return { escalated: false, reason: 'No applicable escalation rule found' };
+      return {
+        escalated: false,
+        reason: 'No applicable escalation rule found',
+      };
     }
 
     // Update ticket
@@ -357,7 +403,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       timestamp: new Date(),
       action: 'escalated',
       actor: reason.actor || 'system',
-      details: `Escalated due to: ${reason.description}`
+      details: `Escalated due to: ${reason.description}`,
     });
 
     // Send notifications
@@ -372,7 +418,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       escalated: true,
       rule: escalationRule.id,
       newAssignee: ticket.assignee,
-      newPriority: ticket.priority
+      newPriority: ticket.priority,
     };
   }
 
@@ -387,7 +433,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       chat: await this.generateChatAnalytics(),
       knowledge: await this.generateKnowledgeBaseAnalytics(),
       performance: await this.generatePerformanceMetrics(),
-      satisfaction: await this.generateSatisfactionMetrics()
+      satisfaction: await this.generateSatisfactionMetrics(),
     };
 
     this.emit('analytics:generated', analytics);
@@ -397,7 +443,9 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
   /**
    * Generate support performance report
    */
-  async generatePerformanceReport(period: 'daily' | 'weekly' | 'monthly'): Promise<SupportPerformanceReport> {
+  async generatePerformanceReport(
+    period: 'daily' | 'weekly' | 'monthly',
+  ): Promise<SupportPerformanceReport> {
     const report: SupportPerformanceReport = {
       period,
       timestamp: new Date(),
@@ -407,12 +455,12 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
         avgResolutionTime: await this.getAvgResolutionTime(period),
         firstResponseTime: await this.getAvgFirstResponseTime(period),
         customerSatisfaction: await this.getAvgSatisfactionScore(period),
-        escalationRate: await this.getEscalationRate(period)
+        escalationRate: await this.getEscalationRate(period),
       },
       trends: await this.generateTrendAnalysis(period),
       topIssues: await this.getTopIssues(period),
       agentPerformance: await this.getAgentPerformance(period),
-      recommendations: await this.generateRecommendations(period)
+      recommendations: await this.generateRecommendations(period),
     };
 
     return report;
@@ -422,17 +470,23 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
    * Sync ticket with all active integrations
    */
   private async syncTicketWithIntegrations(ticket: Ticket): Promise<void> {
-    const syncPromises = Array.from(this.integrations.values()).map(async (integration) => {
-      if (integration.integration.syncEnabled) {
-        try {
-          await integration.handler.syncTicket(ticket);
-          integration.metrics.ticketsCreated++;
-        } catch (error) {
-          integration.metrics.errorCount++;
-          this.emit('sync:error', { integrationId: integration.integration.id, ticketId: ticket.id, error });
+    const syncPromises = Array.from(this.integrations.values()).map(
+      async (integration) => {
+        if (integration.integration.syncEnabled) {
+          try {
+            await integration.handler.syncTicket(ticket);
+            integration.metrics.ticketsCreated++;
+          } catch (error) {
+            integration.metrics.errorCount++;
+            this.emit('sync:error', {
+              integrationId: integration.integration.id,
+              ticketId: ticket.id,
+              error,
+            });
+          }
         }
-      }
-    });
+      },
+    );
 
     await Promise.allSettled(syncPromises);
   }
@@ -442,12 +496,20 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
    */
   private categorizeIssue(issue: DocumentationIssue): string {
     const content = (issue.title + ' ' + issue.description).toLowerCase();
-    
-    if (content.includes('bug') || content.includes('error') || content.includes('broken')) {
+
+    if (
+      content.includes('bug') ||
+      content.includes('error') ||
+      content.includes('broken')
+    ) {
       return 'bug';
     } else if (content.includes('feature') || content.includes('enhancement')) {
       return 'feature_request';
-    } else if (content.includes('doc') || content.includes('unclear') || content.includes('confusing')) {
+    } else if (
+      content.includes('doc') ||
+      content.includes('unclear') ||
+      content.includes('confusing')
+    ) {
       return 'documentation';
     } else if (content.includes('performance') || content.includes('slow')) {
       return 'performance';
@@ -473,7 +535,11 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
     if (issue.reporter?.type === 'premium') score += 1;
 
     // Page impact
-    if (issue.sourceUrl?.includes('/api/') || issue.sourceUrl?.includes('/getting-started')) score += 2;
+    if (
+      issue.sourceUrl?.includes('/api/') ||
+      issue.sourceUrl?.includes('/getting-started')
+    )
+      score += 2;
 
     // Determine priority
     if (score >= 4) return 'critical';
@@ -499,7 +565,10 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
   /**
    * Create new chat session
    */
-  private async createChatSession(sessionId: string, user: ChatUser): Promise<ChatSession> {
+  private async createChatSession(
+    sessionId: string,
+    user: ChatUser,
+  ): Promise<ChatSession> {
     const session: ChatSession = {
       id: sessionId,
       user,
@@ -508,7 +577,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       lastActivity: new Date(),
       status: 'active',
       context: await this.gatherUserContext(user),
-      metadata: {}
+      metadata: {},
     };
 
     return session;
@@ -524,25 +593,43 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
       referrer: user.referrer,
       sessionDuration: 0,
       previousInteractions: await this.getPreviousInteractions(user.id),
-      preferences: await this.getUserPreferences(user.id)
+      preferences: await this.getUserPreferences(user.id),
     };
   }
 
   // Utility methods
-  private async detectUserIntent(message: string): Promise<{ type: string; confidence: number }> {
+  private async detectUserIntent(
+    message: string,
+  ): Promise<{ type: string; confidence: number }> {
     // Implement NLP-based intent detection
     const content = message.toLowerCase();
-    
-    if (content.includes('bug') || content.includes('error') || content.includes('not working')) {
+
+    if (
+      content.includes('bug') ||
+      content.includes('error') ||
+      content.includes('not working')
+    ) {
       return { type: 'bug_report', confidence: 0.8 };
-    } else if (content.includes('feature') || content.includes('add') || content.includes('wish')) {
+    } else if (
+      content.includes('feature') ||
+      content.includes('add') ||
+      content.includes('wish')
+    ) {
       return { type: 'feature_request', confidence: 0.7 };
-    } else if (content.includes('doc') || content.includes('unclear') || content.includes('explain')) {
+    } else if (
+      content.includes('doc') ||
+      content.includes('unclear') ||
+      content.includes('explain')
+    ) {
       return { type: 'documentation_feedback', confidence: 0.6 };
-    } else if (content.includes('?') || content.includes('how') || content.includes('what')) {
+    } else if (
+      content.includes('?') ||
+      content.includes('how') ||
+      content.includes('what')
+    ) {
       return { type: 'question', confidence: 0.9 };
     }
-    
+
     return { type: 'general', confidence: 0.5 };
   }
 }
@@ -550,7 +637,7 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
 // Base integration handler
 abstract class IntegrationHandler {
   constructor(protected integration: SupportIntegration) {}
-  
+
   abstract testConnection(): Promise<void>;
   abstract setupWebhooks(): Promise<void>;
   abstract initializeSync(): Promise<void>;
@@ -903,7 +990,12 @@ export interface SupportAnalyticsConfig {
 }
 
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
-export type TicketStatus = 'open' | 'pending' | 'resolved' | 'closed' | 'escalated';
+export type TicketStatus =
+  | 'open'
+  | 'pending'
+  | 'resolved'
+  | 'closed'
+  | 'escalated';
 
 export interface User {
   id: string;

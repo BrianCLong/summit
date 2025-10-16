@@ -22,7 +22,8 @@ describe('PrivacyIncidentDrillEngine', () => {
     expect(report.integrations.IDTL.totalArtifacts).toBeGreaterThan(0);
 
     const totalArtifacts =
-      report.integrations.IAB.totalArtifacts + report.integrations.IDTL.totalArtifacts;
+      report.integrations.IAB.totalArtifacts +
+      report.integrations.IDTL.totalArtifacts;
 
     expect(report.metrics.evidenceRequests).toBe(totalArtifacts);
     expect(report.metrics.averageTimeToEvidenceHours).toBeGreaterThan(0);
@@ -36,7 +37,9 @@ describe('PrivacyIncidentDrillEngine', () => {
 
     for (const breach of report.slaBreaches) {
       expect(breach.recommendedAction).toMatch(/\d+(\.\d+)?h/);
-      const matchingTimeline = report.timeline.find((entry) => entry.eventId === breach.eventId);
+      const matchingTimeline = report.timeline.find(
+        (entry) => entry.eventId === breach.eventId,
+      );
       expect(matchingTimeline?.status).toBe('breached');
     }
   });

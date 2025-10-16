@@ -80,4 +80,3 @@ describe('RCSI snapshot compatibility', () => {
     expect(() => validateProof(proof, snapshot)).toThrow();
   });
 });
-

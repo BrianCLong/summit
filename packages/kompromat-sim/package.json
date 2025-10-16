@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
-  "bin": { "komp-sim": "dist/cli.js" },
+  "bin": {
+    "komp-sim": "dist/cli.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/cli.js"
@@ -12,5 +14,13 @@
   "devDependencies": {
     "typescript": "^5.6.2",
     "@types/node": "^22.7.4"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   }
 }

@@ -12,10 +12,17 @@ async function promQuery(expr: string): Promise<number> {
   return Number(v || 0);
 }
 
-export async function runCanaryGuard(runId: string, thresholds: { errorRatePct: number; p95LatencyMs: number }) {
+export async function runCanaryGuard(
+  runId: string,
+  thresholds: { errorRatePct: number; p95LatencyMs: number },
+) {
   const fetchMetrics = async () => {
-    const errorRate = await promQuery(`sum(rate(conductor_run_errors_total{run_id="${runId}"}[5m]))`);
-    const p95 = await promQuery(`histogram_quantile(0.95, sum(rate(conductor_step_latency_ms_bucket{run_id="${runId}"}[5m])) by (le))`);
+    const errorRate = await promQuery(
+      `sum(rate(conductor_run_errors_total{run_id="${runId}"}[5m]))`,
+    );
+    const p95 = await promQuery(
+      `histogram_quantile(0.95, sum(rate(conductor_step_latency_ms_bucket{run_id="${runId}"}[5m])) by (le))`,
+    );
     return { errorRate, p95 };
   };
   const rollback = async () => {
@@ -25,4 +32,3 @@ export async function runCanaryGuard(runId: string, thresholds: { errorRatePct: 
   };
   return evaluateCanary(runId, thresholds, fetchMetrics, rollback);
 }
-

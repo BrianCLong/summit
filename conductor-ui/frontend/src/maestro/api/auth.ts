@@ -35,7 +35,9 @@ export const exchangeCodeForTokens = async (
   return response.json();
 };
 
-export const initiateLogin = async (provider: string): Promise<{ authorizeUrl: string }> => {
+export const initiateLogin = async (
+  provider: string,
+): Promise<{ authorizeUrl: string }> => {
   const response = await fetch(`${API_BASE_URL}/oidc/authorize/${provider}`, {
     method: 'GET',
   });

@@ -47,7 +47,7 @@
 ## Findings (selected)
 
 - **High – Secrets Hygiene:** .env contains secret-like variables (dev defaults) → _Remove .env from repo history; use environment-specific secret stores (Vault/KMS/SSM). Rotate all demo creds._
-- **Medium – Python Module Layout:** api/gnn.py imports gnn_predictor from repo root; not a package → _Move gnn_predictor.py under api/ (or package), or adjust PYTHONPATH/imports; add unit test to import module._
+- **Medium – Python Module Layout:** api/gnn.py imports gnn*predictor from repo root; not a package → \_Move gnn_predictor.py under api/ (or package), or adjust PYTHONPATH/imports; add unit test to import module.*
 - **Low – Code Quality:** Duplicate import statements detected in api/main.py → _Run ruff/black and enable CI lint blocking; clean duplicates._
 - **Low – Runtime:** docker-compose uses ts-node for server → _Ensure production uses precompiled JS (Dockerfile already does). Keep ts-node confined to local dev only._
 

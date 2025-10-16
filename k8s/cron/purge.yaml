@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: retention-purge, namespace: prod }
 spec:
-  schedule: "0 1 * * *"
+  schedule: '0 1 * * *'
   jobTemplate:
     spec:
       template:
@@ -12,9 +12,9 @@ spec:
             - name: purge
               image: ghcr.io/<org>/<repo>/dbtools:latest
               envFrom: [{ secretRef: { name: db-credentials } }]
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
-                - | 
+                - |
                   psql "$DB_DSN" -c "\
                     DO $$ DECLARE r record; BEGIN 
                       FOR r IN SELECT * FROM retention_policy LOOP 

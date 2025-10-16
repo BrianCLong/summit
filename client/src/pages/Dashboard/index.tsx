@@ -9,7 +9,10 @@ import ErrorPanels from '../../components/dashboard/ErrorPanels';
 import ResolverTop5 from '../../components/dashboard/ResolverTop5';
 import GrafanaLinkCard from '../../components/dashboard/GrafanaLinkCard';
 import LiveActivityFeed from '../../components/dashboard/LiveActivityFeed';
-import { useDashboardPrefetch, useIntelligentPrefetch } from '../../hooks/usePrefetch';
+import {
+  useDashboardPrefetch,
+  useIntelligentPrefetch,
+} from '../../hooks/usePrefetch';
 
 export default function Dashboard() {
   // Prefetch critical dashboard data to eliminate panel pop-in

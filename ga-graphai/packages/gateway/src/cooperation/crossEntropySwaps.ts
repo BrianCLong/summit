@@ -8,7 +8,10 @@ function crossEntropy(scores: number[]): number {
   if (scores.length === 0) {
     return Number.POSITIVE_INFINITY;
   }
-  const sum = scores.reduce((acc, score) => acc + Math.log(Math.max(score, epsilon)), 0);
+  const sum = scores.reduce(
+    (acc, score) => acc + Math.log(Math.max(score, epsilon)),
+    0,
+  );
   return -sum / scores.length;
 }
 
@@ -59,12 +62,21 @@ export class CrossEntropySwapCoordinator {
         })
       : [];
 
-    const entropyA = crossEntropy((critiqueBonA ?? []).map((score) => score.score));
-    const entropyB = crossEntropy((critiqueAonB ?? []).map((score) => score.score));
+    const entropyA = crossEntropy(
+      (critiqueBonA ?? []).map((score) => score.score),
+    );
+    const entropyB = crossEntropy(
+      (critiqueAonB ?? []).map((score) => score.score),
+    );
 
     const chosenOutput = entropyA <= entropyB ? outputA : outputB;
     const chosen = entropyA <= entropyB ? 'A' : 'B';
-    const { artifact } = this.guard.enforce('cross-entropy-swaps', chosenOutput.content, [], chosenOutput.evidence ?? []);
+    const { artifact } = this.guard.enforce(
+      'cross-entropy-swaps',
+      chosenOutput.content,
+      [],
+      chosenOutput.evidence ?? [],
+    );
 
     return { artifact, chosen, entropyA, entropyB };
   }

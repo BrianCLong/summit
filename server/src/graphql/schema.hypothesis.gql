@@ -187,7 +187,9 @@ extend type Mutation {
   updateEvidence(id: ID!, input: UpdateEvidenceInput!): Evidence!
   removeEvidence(id: ID!): Boolean!
 
-  createCompetingHypothesisSet(input: CreateCompetingHypothesisSetInput!): CompetingHypothesisSet!
+  createCompetingHypothesisSet(
+    input: CreateCompetingHypothesisSetInput!
+  ): CompetingHypothesisSet!
 
   # Rebalance weights in a competing hypothesis set
   rebalanceHypothesisWeights(

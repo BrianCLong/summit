@@ -9,9 +9,9 @@ features:
     default: false
     owners: [data]
     guardrails:
-      requires: ["db_migration_2025_09_gate"]
+      requires: ['db_migration_2025_09_gate']
   dual_write_orders: { default: false, owners: [data] }
-  read_new_orders:   { default: false, owners: [api] }
+  read_new_orders: { default: false, owners: [api] }
   ranker_v1: { default: true, owners: [search] }
   ranker_v2: { default: false, owners: [search] }
   ranker_guardrail: { default: true, owners: [search] }
@@ -20,4 +20,4 @@ features:
     owners: [dev]
     expires: 2025-12-31
   search_synonyms: { default: false, owners: [search] }
-  search_fuzzy:    { default: false, owners: [search] }
+  search_fuzzy: { default: false, owners: [search] }

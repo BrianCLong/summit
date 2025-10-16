@@ -40,7 +40,7 @@ class WarRoomSyncService {
       settings: {
         maxLatency: 300, // ms
         batchSize: 10,
-        conflictStrategy: "last-write-wins-with-merge",
+        conflictStrategy: 'last-write-wins-with-merge',
       },
     };
 
@@ -79,7 +79,7 @@ class WarRoomSyncService {
     socket.join(roomId);
 
     // Send initial graph state
-    socket.emit("war_room_sync_state", {
+    socket.emit('war_room_sync_state', {
       roomId,
       graphState: room.graphState,
       version: room.version,
@@ -91,10 +91,10 @@ class WarRoomSyncService {
       })),
     });
 
-    this.recordAudit(room, userId, "join", { userInfo });
+    this.recordAudit(room, userId, 'join', { userInfo });
 
     // Notify other participants
-    socket.to(roomId).emit("war_room_participant_joined", {
+    socket.to(roomId).emit('war_room_participant_joined', {
       participant: {
         id: participant.id,
         name: participant.name,
@@ -120,7 +120,7 @@ class WarRoomSyncService {
       if (lock.userId === userId) {
         room.locks.delete(nodeId);
         // Notify others that node is unlocked
-        socket.to(roomId).emit("war_room_node_unlocked", { nodeId, userId });
+        socket.to(roomId).emit('war_room_node_unlocked', { nodeId, userId });
       }
     }
 
@@ -128,9 +128,9 @@ class WarRoomSyncService {
     socket.leave(roomId);
 
     // Notify other participants
-    socket.to(roomId).emit("war_room_participant_left", { userId });
+    socket.to(roomId).emit('war_room_participant_left', { userId });
 
-    this.recordAudit(room, userId, "leave");
+    this.recordAudit(room, userId, 'leave');
 
     // Clean up empty rooms
     if (room.participants.size === 0) {
@@ -149,13 +149,13 @@ class WarRoomSyncService {
     try {
       const room = this.warRooms.get(roomId);
       if (!room) {
-        socket.emit("war_room_error", { error: "War room not found" });
+        socket.emit('war_room_error', { error: 'War room not found' });
         return;
       }
 
       const participant = room.participants.get(userId);
       if (!participant) {
-        socket.emit("war_room_error", { error: "User not in war room" });
+        socket.emit('war_room_error', { error: 'User not in war room' });
         return;
       }
 
@@ -166,7 +166,7 @@ class WarRoomSyncService {
         userId,
       );
       if (!validationResult.valid) {
-        socket.emit("war_room_operation_rejected", {
+        socket.emit('war_room_operation_rejected', {
           operationId: operation.id,
           reason: validationResult.reason,
         });
@@ -200,7 +200,7 @@ class WarRoomSyncService {
           version: room.version,
         });
 
-        this.recordAudit(room, userId, "operation", {
+        this.recordAudit(room, userId, 'operation', {
           operation: transformedOperation,
         });
 
@@ -211,7 +211,7 @@ class WarRoomSyncService {
         const latency = Date.now() - startTime;
         this.updateMetrics(latency);
 
-        socket.emit("war_room_operation_applied", {
+        socket.emit('war_room_operation_applied', {
           operationId: operation.id,
           version: room.version,
           latency,
@@ -222,15 +222,15 @@ class WarRoomSyncService {
           await this.saveGraphState(roomId, room.graphState);
         }
       } else {
-        socket.emit("war_room_operation_failed", {
+        socket.emit('war_room_operation_failed', {
           operationId: operation.id,
           error: result.error,
         });
       }
     } catch (error) {
-      console.error("Error handling graph operation:", error);
+      console.error('Error handling graph operation:', error);
       this.metrics.syncErrors++;
-      socket.emit("war_room_error", { error: "Internal sync error" });
+      socket.emit('war_room_error', { error: 'Internal sync error' });
     }
   }
 
@@ -241,12 +241,12 @@ class WarRoomSyncService {
     // Check user permissions
     const participant = room.participants.get(userId);
     if (!this.hasPermission(participant, operation)) {
-      return { valid: false, reason: "Insufficient permissions" };
+      return { valid: false, reason: 'Insufficient permissions' };
     }
 
     // Check operation format
     if (!this.isValidOperationFormat(operation)) {
-      return { valid: false, reason: "Invalid operation format" };
+      return { valid: false, reason: 'Invalid operation format' };
     }
 
     // Check node/edge locks
@@ -284,7 +284,7 @@ class WarRoomSyncService {
 
       if (intersection.length > 0) {
         conflicts.push({
-          type: "concurrent_modification",
+          type: 'concurrent_modification',
           operation: recentOp,
           affectedNodes: intersection,
         });
@@ -292,11 +292,11 @@ class WarRoomSyncService {
     }
 
     // Check for semantic conflicts
-    if (operation.type === "delete_node") {
+    if (operation.type === 'delete_node') {
       const node = room.graphState.nodes.find((n) => n.id === operation.nodeId);
       if (node && node.edges && node.edges.length > 0) {
         conflicts.push({
-          type: "orphaned_edges",
+          type: 'orphaned_edges',
           nodeId: operation.nodeId,
           edgeCount: node.edges.length,
         });
@@ -316,13 +316,13 @@ class WarRoomSyncService {
     const strategy = room.settings.conflictStrategy;
 
     switch (strategy) {
-      case "last-write-wins":
+      case 'last-write-wins':
         // Simply proceed with the new operation
         break;
 
-      case "last-write-wins-with-merge":
+      case 'last-write-wins-with-merge':
         // Try to merge properties where possible
-        if (operation.type === "update_node") {
+        if (operation.type === 'update_node') {
           operation = await this.mergeNodeProperties(
             room,
             operation,
@@ -331,14 +331,14 @@ class WarRoomSyncService {
         }
         break;
 
-      case "manual-resolution":
+      case 'manual-resolution':
         // Queue for manual resolution
         room.conflictQueue.push({
           operation,
           conflicts: conflictCheck.conflicts,
           timestamp: Date.now(),
         });
-        throw new Error("Manual conflict resolution required");
+        throw new Error('Manual conflict resolution required');
 
       default:
         throw new Error(`Unknown conflict resolution strategy: ${strategy}`);
@@ -353,25 +353,25 @@ class WarRoomSyncService {
   async applyOperation(room, operation, userId) {
     try {
       switch (operation.type) {
-        case "add_node":
+        case 'add_node':
           return this.addNode(room, operation);
 
-        case "update_node":
+        case 'update_node':
           return this.updateNode(room, operation);
 
-        case "delete_node":
+        case 'delete_node':
           return this.deleteNode(room, operation);
 
-        case "add_edge":
+        case 'add_edge':
           return this.addEdge(room, operation);
 
-        case "update_edge":
+        case 'update_edge':
           return this.updateEdge(room, operation);
 
-        case "delete_edge":
+        case 'delete_edge':
           return this.deleteEdge(room, operation);
 
-        case "bulk_update":
+        case 'bulk_update':
           return this.bulkUpdate(room, operation);
 
         default:
@@ -391,7 +391,7 @@ class WarRoomSyncService {
     // Check if node already exists
     const existingNode = room.graphState.nodes.find((n) => n.id === nodeId);
     if (existingNode) {
-      return { success: false, error: "Node already exists" };
+      return { success: false, error: 'Node already exists' };
     }
 
     const newNode = {
@@ -415,7 +415,7 @@ class WarRoomSyncService {
 
     const node = room.graphState.nodes.find((n) => n.id === nodeId);
     if (!node) {
-      return { success: false, error: "Node not found" };
+      return { success: false, error: 'Node not found' };
     }
 
     // Merge properties
@@ -435,7 +435,7 @@ class WarRoomSyncService {
 
     const nodeIndex = room.graphState.nodes.findIndex((n) => n.id === nodeId);
     if (nodeIndex === -1) {
-      return { success: false, error: "Node not found" };
+      return { success: false, error: 'Node not found' };
     }
 
     // Remove associated edges
@@ -460,7 +460,7 @@ class WarRoomSyncService {
     const targetNode = room.graphState.nodes.find((n) => n.id === target);
 
     if (!sourceNode || !targetNode) {
-      return { success: false, error: "Source or target node not found" };
+      return { success: false, error: 'Source or target node not found' };
     }
 
     const newEdge = {
@@ -501,7 +501,7 @@ class WarRoomSyncService {
 
     for (const [userId, participant] of room.participants) {
       if (userId !== excludeUserId) {
-        participant.socket.emit("war_room_operation_broadcast", broadcastData);
+        participant.socket.emit('war_room_operation_broadcast', broadcastData);
       }
     }
   }
@@ -528,7 +528,7 @@ class WarRoomSyncService {
 
       for (const [otherUserId, otherParticipant] of room.participants) {
         if (otherUserId !== userId) {
-          otherParticipant.socket.emit("war_room_cursor_update", {
+          otherParticipant.socket.emit('war_room_cursor_update', {
             userId,
             cursor,
             userName: participant.name,
@@ -559,7 +559,7 @@ class WarRoomSyncService {
     // Broadcast lock
     for (const [otherUserId, participant] of room.participants) {
       if (otherUserId !== userId) {
-        participant.socket.emit("war_room_node_locked", {
+        participant.socket.emit('war_room_node_locked', {
           nodeId,
           userId,
           userName: room.participants.get(userId).name,
@@ -585,7 +585,7 @@ class WarRoomSyncService {
       // Broadcast unlock
       for (const [otherUserId, participant] of room.participants) {
         if (otherUserId !== userId) {
-          participant.socket.emit("war_room_node_unlocked", { nodeId, userId });
+          participant.socket.emit('war_room_node_unlocked', { nodeId, userId });
         }
       }
     }
@@ -645,7 +645,7 @@ class WarRoomSyncService {
       const nodeIds = new Set();
 
       result.records.forEach((record) => {
-        const node = record.get("n");
+        const node = record.get('n');
         if (node && !nodeIds.has(node.identity.toNumber())) {
           nodes.push({
             id: node.identity.toNumber(),
@@ -654,8 +654,8 @@ class WarRoomSyncService {
           nodeIds.add(node.identity.toNumber());
         }
 
-        const edge = record.get("r");
-        const target = record.get("m");
+        const edge = record.get('r');
+        const target = record.get('m');
         if (edge && target) {
           edges.push({
             id: edge.identity.toNumber(),
@@ -669,7 +669,7 @@ class WarRoomSyncService {
 
       return { nodes, edges };
     } catch (error) {
-      console.error("Error loading graph state:", error);
+      console.error('Error loading graph state:', error);
       return { nodes: [], edges: [] };
     }
   }
@@ -685,7 +685,7 @@ class WarRoomSyncService {
       );
       // Implementation would batch update the Neo4j database
     } catch (error) {
-      console.error("Error saving graph state:", error);
+      console.error('Error saving graph state:', error);
     }
   }
 
@@ -694,15 +694,15 @@ class WarRoomSyncService {
    */
   getAffectedNodes(operation) {
     switch (operation.type) {
-      case "add_node":
-      case "update_node":
-      case "delete_node":
+      case 'add_node':
+      case 'update_node':
+      case 'delete_node':
         return [operation.data.nodeId];
-      case "add_edge":
-      case "update_edge":
-      case "delete_edge":
+      case 'add_edge':
+      case 'update_edge':
+      case 'delete_edge':
         return [operation.data.source, operation.data.target];
-      case "bulk_update":
+      case 'bulk_update':
         return operation.data.nodeIds || [];
       default:
         return [];
@@ -711,9 +711,9 @@ class WarRoomSyncService {
 
   hasPermission(participant, operation) {
     // Simple role-based permission check
-    const adminOperations = ["delete_node", "delete_edge", "bulk_update"];
+    const adminOperations = ['delete_node', 'delete_edge', 'bulk_update'];
     return (
-      participant.role === "admin" || !adminOperations.includes(operation.type)
+      participant.role === 'admin' || !adminOperations.includes(operation.type)
     );
   }
 
@@ -776,8 +776,8 @@ class OperationalTransform {
   transformAgainst(operation, previousOperation) {
     // Simple transformation rules
     if (
-      operation.type === "update_node" &&
-      previousOperation.type === "update_node" &&
+      operation.type === 'update_node' &&
+      previousOperation.type === 'update_node' &&
       operation.data.nodeId === previousOperation.data.nodeId
     ) {
       // Merge properties
@@ -799,13 +799,13 @@ class OperationalTransform {
 
   getAffectedEntities(operation) {
     switch (operation.type) {
-      case "add_node":
-      case "update_node":
-      case "delete_node":
+      case 'add_node':
+      case 'update_node':
+      case 'delete_node':
         return [operation.data.nodeId];
-      case "add_edge":
-      case "update_edge":
-      case "delete_edge":
+      case 'add_edge':
+      case 'update_edge':
+      case 'delete_edge':
         return [
           operation.data.source,
           operation.data.target,
@@ -835,13 +835,13 @@ class OperationalTransform {
  * Conflict Resolution Strategies
  */
 class ConflictResolver {
-  resolve(conflict, strategy = "last-write-wins") {
+  resolve(conflict, strategy = 'last-write-wins') {
     switch (strategy) {
-      case "last-write-wins":
+      case 'last-write-wins':
         return this.lastWriteWins(conflict);
-      case "merge-properties":
+      case 'merge-properties':
         return this.mergeProperties(conflict);
-      case "user-priority":
+      case 'user-priority':
         return this.userPriority(conflict);
       default:
         return this.lastWriteWins(conflict);
@@ -853,7 +853,7 @@ class ConflictResolver {
   }
 
   mergeProperties(conflict) {
-    if (conflict.type !== "property_conflict") {
+    if (conflict.type !== 'property_conflict') {
       return this.lastWriteWins(conflict);
     }
 
@@ -873,10 +873,10 @@ class ConflictResolver {
 
   userPriority(conflict) {
     // Resolve based on user role priority
-    const priorityOrder = ["admin", "lead", "analyst", "viewer"];
+    const priorityOrder = ['admin', 'lead', 'analyst', 'viewer'];
     const sortedOps = conflict.operations.sort((a, b) => {
-      const roleA = a.userRole || "viewer";
-      const roleB = b.userRole || "viewer";
+      const roleA = a.userRole || 'viewer';
+      const roleB = b.userRole || 'viewer';
       return priorityOrder.indexOf(roleA) - priorityOrder.indexOf(roleB);
     });
     return sortedOps[0];

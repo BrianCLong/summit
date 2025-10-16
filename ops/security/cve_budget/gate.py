@@ -7,10 +7,10 @@ import argparse
 import json
 import sys
 from collections import Counter, defaultdict
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta, timezone, date
+from collections.abc import Iterable
+from dataclasses import asdict, dataclass
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
 
 import yaml
 
@@ -39,7 +39,7 @@ class Waiver:
     def severity_key(self) -> str:
         return SEVERITY_ALIAS.get(self.severity.upper(), self.severity.upper())
 
-    def to_summary(self, status: str, now: datetime) -> Dict[str, object]:
+    def to_summary(self, status: str, now: datetime) -> dict[str, object]:
         delta = (self.expires_on - now).total_seconds()
         return {
             "service": self.service,
@@ -60,24 +60,24 @@ class ArtifactStatus:
     signed: bool
     attestations_verified: bool
     sbom_present: bool
-    attestation_errors: List[str]
+    attestation_errors: list[str]
 
 
 @dataclass
 class ServiceReport:
     name: str
-    owner: Optional[str]
-    budgets: Dict[str, int]
-    severity_counts: Dict[str, int]
-    effective_counts: Dict[str, int]
-    waived: List[Dict[str, object]]
-    expired_waivers: List[Dict[str, object]]
-    expiring_soon: List[Dict[str, object]]
-    violations: List[str]
-    attestation_failures: List[str]
-    artifacts: List[ArtifactStatus]
+    owner: str | None
+    budgets: dict[str, int]
+    severity_counts: dict[str, int]
+    effective_counts: dict[str, int]
+    waived: list[dict[str, object]]
+    expired_waivers: list[dict[str, object]]
+    expiring_soon: list[dict[str, object]]
+    violations: list[str]
+    attestation_failures: list[str]
+    artifacts: list[ArtifactStatus]
 
-    def to_summary(self) -> Dict[str, object]:
+    def to_summary(self) -> dict[str, object]:
         return {
             "name": self.name,
             "owner": self.owner,
@@ -118,12 +118,12 @@ def parse_datetime(raw: str) -> datetime:
     return dt.astimezone(timezone.utc)
 
 
-def load_config(path: Path) -> Tuple[Dict[str, Dict[str, object]], List[Waiver]]:
+def load_config(path: Path) -> tuple[dict[str, dict[str, object]], list[Waiver]]:
     config = yaml.safe_load(path.read_text())
     if not config:
         raise ValueError("Config is empty")
 
-    services_cfg: Dict[str, Dict[str, object]] = {}
+    services_cfg: dict[str, dict[str, object]] = {}
     for service, spec in config.get("services", {}).items():
         budgets = spec.get("budgets") or {}
         normalized = {SEVERITY_ALIAS.get(k.upper(), k.upper()): int(v) for k, v in budgets.items()}
@@ -132,13 +132,15 @@ def load_config(path: Path) -> Tuple[Dict[str, Dict[str, object]], List[Waiver]]
             "budgets": normalized,
         }
 
-    waivers: List[Waiver] = []
+    waivers: list[Waiver] = []
     for raw in config.get("waivers", []):
         expires_raw = raw["expires_on"]
         if isinstance(expires_raw, str):
             expires_on = datetime.strptime(expires_raw, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         elif isinstance(expires_raw, date):
-            expires_on = datetime.combine(expires_raw, datetime.min.time()).replace(tzinfo=timezone.utc)
+            expires_on = datetime.combine(expires_raw, datetime.min.time()).replace(
+                tzinfo=timezone.utc
+            )
         else:
             raise TypeError(f"Unsupported expiry type for waiver {raw}")
         waivers.append(
@@ -154,8 +156,8 @@ def load_config(path: Path) -> Tuple[Dict[str, Dict[str, object]], List[Waiver]]
     return services_cfg, waivers
 
 
-def load_sboms(paths: Iterable[str]) -> Dict[str, Dict[str, object]]:
-    sboms: Dict[str, Dict[str, object]] = {}
+def load_sboms(paths: Iterable[str]) -> dict[str, dict[str, object]]:
+    sboms: dict[str, dict[str, object]] = {}
     for path_str in paths:
         path = Path(path_str)
         data = json.loads(path.read_text())
@@ -175,8 +177,8 @@ def load_sboms(paths: Iterable[str]) -> Dict[str, Dict[str, object]]:
     return sboms
 
 
-def index_waivers(waivers: Iterable[Waiver]) -> Dict[Tuple[str, str], List[Waiver]]:
-    index: Dict[Tuple[str, str], List[Waiver]] = defaultdict(list)
+def index_waivers(waivers: Iterable[Waiver]) -> dict[tuple[str, str], list[Waiver]]:
+    index: dict[tuple[str, str], list[Waiver]] = defaultdict(list)
     for waiver in waivers:
         index[(waiver.service, waiver.cve)].append(waiver)
     return index
@@ -187,28 +189,32 @@ def normalise_severity(value: str) -> str:
 
 
 def evaluate(
-    services_cfg: Dict[str, Dict[str, object]],
-    waivers: List[Waiver],
-    sboms: Dict[str, Dict[str, object]],
-    vuln_report: Dict[str, object],
-) -> Tuple[List[ServiceReport], Dict[str, object], int]:
-    now = parse_datetime(vuln_report.get("generated_at", datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()))
+    services_cfg: dict[str, dict[str, object]],
+    waivers: list[Waiver],
+    sboms: dict[str, dict[str, object]],
+    vuln_report: dict[str, object],
+) -> tuple[list[ServiceReport], dict[str, object], int]:
+    now = parse_datetime(
+        vuln_report.get("generated_at", datetime.utcnow().replace(tzinfo=timezone.utc).isoformat())
+    )
     waiver_index = index_waivers(waivers)
-    reports: List[ServiceReport] = []
+    reports: list[ServiceReport] = []
 
     total_artifacts = 0
     signed_artifacts = 0
     attested_artifacts = 0
     sbom_covered = 0
 
-    global_violations: List[str] = []
-    global_attestation_failures: List[str] = []
+    global_violations: list[str] = []
+    global_attestation_failures: list[str] = []
 
     services_in_report = {svc.get("name") for svc in vuln_report.get("services", [])}
     missing_services = [s for s in services_cfg.keys() if s not in services_in_report]
 
     for missing in missing_services:
-        global_violations.append(f"Service '{missing}' has a configured budget but no vulnerability report entry")
+        global_violations.append(
+            f"Service '{missing}' has a configured budget but no vulnerability report entry"
+        )
 
     exit_code = 0
 
@@ -220,12 +226,12 @@ def evaluate(
 
         severity_counts = Counter()
         effective_counts = Counter()
-        waived_records: List[Dict[str, object]] = []
-        expired_records: List[Dict[str, object]] = []
-        expiring_soon: List[Dict[str, object]] = []
-        violations: List[str] = []
-        attestation_failures: List[str] = []
-        artifacts: List[ArtifactStatus] = []
+        waived_records: list[dict[str, object]] = []
+        expired_records: list[dict[str, object]] = []
+        expiring_soon: list[dict[str, object]] = []
+        violations: list[str] = []
+        attestation_failures: list[str] = []
+        artifacts: list[ArtifactStatus] = []
 
         sbom = sboms.get(service_name)
         if sbom is None:
@@ -238,7 +244,9 @@ def evaluate(
             total_artifacts += 1
             signed = bool(artifact.get("signed"))
             attestations = artifact.get("attestations", []) or []
-            attestations_verified = bool(attestations) and all(a.get("verified") for a in attestations)
+            attestations_verified = bool(attestations) and all(
+                a.get("verified") for a in attestations
+            )
             sbom_present = bool(artifact.get("sbom"))
 
             if signed:
@@ -251,9 +259,14 @@ def evaluate(
             if attestations_verified:
                 attested_artifacts += 1
             else:
-                reason = ", ".join(
-                    a.get("reason") or "attestation invalid" for a in attestations if not a.get("verified")
-                ) or "attestation missing"
+                reason = (
+                    ", ".join(
+                        a.get("reason") or "attestation invalid"
+                        for a in attestations
+                        if not a.get("verified")
+                    )
+                    or "attestation missing"
+                )
                 attestation_failures.append(
                     f"Service '{service_name}' image {artifact.get('image')} attestation check failed: {reason}"
                 )
@@ -269,7 +282,9 @@ def evaluate(
                 signed=signed,
                 attestations_verified=attestations_verified,
                 sbom_present=sbom_present,
-                attestation_errors=[msg for msg in attestation_failures if artifact.get("image") in msg],
+                attestation_errors=[
+                    msg for msg in attestation_failures if artifact.get("image") in msg
+                ],
             )
             artifacts.append(artifact_status)
 
@@ -296,7 +311,11 @@ def evaluate(
                     continue
                 effective_counts[severity] += 1
 
-                if sbom and vuln.get("package") and vuln.get("package") not in sbom.get("packages", set()):
+                if (
+                    sbom
+                    and vuln.get("package")
+                    and vuln.get("package") not in sbom.get("packages", set())
+                ):
                     violations.append(
                         f"Service '{service_name}' vulnerability {vuln.get('id')} targets package {vuln.get('package')} missing from SBOM"
                     )
@@ -304,9 +323,7 @@ def evaluate(
         for severity, limit in budgets.items():
             actual = effective_counts.get(severity, 0)
             if actual > limit:
-                msg = (
-                    f"Policy violation for service '{service_name}': severity {severity} count {actual} exceeds budget {limit}"
-                )
+                msg = f"Policy violation for service '{service_name}': severity {severity} count {actual} exceeds budget {limit}"
                 violations.append(msg)
 
         if violations or attestation_failures:
@@ -357,12 +374,12 @@ def evaluate(
     return reports, summary, exit_code
 
 
-def write_json(path: Path, data: Dict[str, object]) -> None:
+def write_json(path: Path, data: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True))
 
 
-def render_table(headers: List[str], rows: List[List[str]]) -> List[str]:
+def render_table(headers: list[str], rows: list[list[str]]) -> list[str]:
     lines = ["| " + " | ".join(headers) + " |"]
     lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
     for row in rows:
@@ -372,12 +389,12 @@ def render_table(headers: List[str], rows: List[List[str]]) -> List[str]:
     return lines
 
 
-def generate_weekly_report(path: Path, summary: Dict[str, object]) -> None:
+def generate_weekly_report(path: Path, summary: dict[str, object]) -> None:
     now = parse_datetime(summary["generated_at"]).date()
     services = summary.get("services", [])
     totals = summary.get("totals", {})
 
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append(f"# Supply Chain Risk Weekly Report — {now.isoformat()}")
     lines.append("")
 
@@ -390,7 +407,7 @@ def generate_weekly_report(path: Path, summary: Dict[str, object]) -> None:
         "Medium",
         "Low",
     ]
-    rows: List[List[str]] = []
+    rows: list[list[str]] = []
     for svc in services:
         counts = svc.get("effective_counts", {})
         budgets = svc.get("budgets", {})
@@ -410,7 +427,7 @@ def generate_weekly_report(path: Path, summary: Dict[str, object]) -> None:
     # Open waivers table
     lines.append("## Open Waivers")
     lines.append("")
-    waiver_rows: List[List[str]] = []
+    waiver_rows: list[list[str]] = []
     for svc in services:
         for waiver in svc.get("waived", []):
             waiver_rows.append(

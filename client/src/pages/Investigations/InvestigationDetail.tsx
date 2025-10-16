@@ -105,7 +105,12 @@ interface Entity {
 
 interface TimelineEvent {
   id: string;
-  type: 'CREATED' | 'EVIDENCE_ADDED' | 'NOTE_ADDED' | 'STATUS_CHANGED' | 'ASSIGNED';
+  type:
+    | 'CREATED'
+    | 'EVIDENCE_ADDED'
+    | 'NOTE_ADDED'
+    | 'STATUS_CHANGED'
+    | 'ASSIGNED';
   description: string;
   actor: string;
   timestamp: string;
@@ -142,7 +147,9 @@ function TabPanel({ children, value, index }: TabPanelProps) {
   );
 }
 
-const getStatusColor = (status: Investigation['status']): ChipProps['color'] => {
+const getStatusColor = (
+  status: Investigation['status'],
+): ChipProps['color'] => {
   switch (status) {
     case 'OPEN':
       return 'info';
@@ -159,7 +166,9 @@ const getStatusColor = (status: Investigation['status']): ChipProps['color'] => 
   }
 };
 
-const getPriorityColor = (priority: Investigation['priority']): ChipProps['color'] => {
+const getPriorityColor = (
+  priority: Investigation['priority'],
+): ChipProps['color'] => {
   switch (priority) {
     case 'CRITICAL':
       return 'error';
@@ -174,7 +183,9 @@ const getPriorityColor = (priority: Investigation['priority']): ChipProps['color
   }
 };
 
-const getClassificationColor = (classification: Investigation['classification']) => {
+const getClassificationColor = (
+  classification: Investigation['classification'],
+) => {
   switch (classification) {
     case 'TOP_SECRET':
       return '#FF0000';
@@ -274,7 +285,13 @@ export default function InvestigationDetail() {
         },
       ],
       entities: [
-        { id: 'P001', name: 'Robert Chen', type: 'PERSON', risk: 85, connections: 12 },
+        {
+          id: 'P001',
+          name: 'Robert Chen',
+          type: 'PERSON',
+          risk: 85,
+          connections: 12,
+        },
         {
           id: 'O001',
           name: 'Offshore Holdings LLC',
@@ -289,7 +306,13 @@ export default function InvestigationDetail() {
           risk: 45,
           connections: 24,
         },
-        { id: 'L001', name: 'Cayman Islands Office', type: 'LOCATION', risk: 70, connections: 6 },
+        {
+          id: 'L001',
+          name: 'Cayman Islands Office',
+          type: 'LOCATION',
+          risk: 70,
+          connections: 6,
+        },
       ],
       timeline: [
         {
@@ -364,9 +387,18 @@ export default function InvestigationDetail() {
       {/* Investigation Header */}
       <Card sx={{ mb: 3, borderRadius: 3 }}>
         <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="flex-start"
+          >
             <Box sx={{ flex: 1 }}>
-              <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={2}
+                sx={{ mb: 2 }}
+              >
                 <Gavel sx={{ fontSize: 32, color: 'primary.main' }} />
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
@@ -392,7 +424,9 @@ export default function InvestigationDetail() {
                 <Chip
                   label={investigation.classification}
                   sx={{
-                    backgroundColor: getClassificationColor(investigation.classification),
+                    backgroundColor: getClassificationColor(
+                      investigation.classification,
+                    ),
                     color: 'white',
                     fontWeight: 'bold',
                   }}
@@ -431,7 +465,9 @@ export default function InvestigationDetail() {
                       value={investigation.progress}
                       sx={{ width: 100, height: 8, borderRadius: 4 }}
                     />
-                    <Typography variant="body2">{investigation.progress}%</Typography>
+                    <Typography variant="body2">
+                      {investigation.progress}%
+                    </Typography>
                   </Box>
                 </Box>
               </Stack>
@@ -493,10 +529,19 @@ export default function InvestigationDetail() {
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab icon={<AttachFile />} label={`Evidence (${investigation.evidence.length})`} />
-          <Tab icon={<Group />} label={`Entities (${investigation.entities.length})`} />
+          <Tab
+            icon={<AttachFile />}
+            label={`Evidence (${investigation.evidence.length})`}
+          />
+          <Tab
+            icon={<Group />}
+            label={`Entities (${investigation.entities.length})`}
+          />
           <Tab icon={<TimelineIcon />} label="Timeline" />
-          <Tab icon={<Comment />} label={`Notes (${investigation.notes.length})`} />
+          <Tab
+            icon={<Comment />}
+            label={`Notes (${investigation.notes.length})`}
+          />
           <Tab icon={<AccountTree />} label="Relationships" />
           <Tab icon={<Assessment />} label="Analysis" />
         </Tabs>
@@ -525,17 +570,35 @@ export default function InvestigationDetail() {
                 <Grid item xs={12} key={evidence.id}>
                   <Card variant="outlined" sx={{ borderRadius: 2 }}>
                     <CardContent>
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                      >
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" alignItems="center" spacing={2}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={2}
+                          >
                             <AttachFile color="primary" />
                             <Box>
-                              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                              <Typography
+                                variant="subtitle1"
+                                sx={{ fontWeight: 'bold' }}
+                              >
                                 {evidence.name}
                               </Typography>
                               <Stack direction="row" spacing={2}>
-                                <Chip label={evidence.type} size="small" variant="outlined" />
-                                <Typography variant="caption" color="text.secondary">
+                                <Chip
+                                  label={evidence.type}
+                                  size="small"
+                                  variant="outlined"
+                                />
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
                                   {evidence.size} • Added by {evidence.addedBy}
                                 </Typography>
                               </Stack>
@@ -544,7 +607,11 @@ export default function InvestigationDetail() {
 
                           <Typography
                             variant="caption"
-                            sx={{ fontFamily: 'monospace', mt: 1, display: 'block' }}
+                            sx={{
+                              fontFamily: 'monospace',
+                              mt: 1,
+                              display: 'block',
+                            }}
                           >
                             Hash: {evidence.hash}
                           </Typography>
@@ -552,7 +619,8 @@ export default function InvestigationDetail() {
                           <Accordion sx={{ mt: 2 }}>
                             <AccordionSummary expandIcon={<ExpandMore />}>
                               <Typography variant="body2">
-                                Chain of Custody ({evidence.chain.length} entries)
+                                Chain of Custody ({evidence.chain.length}{' '}
+                                entries)
                               </Typography>
                             </AccordionSummary>
                             <AccordionDetails>
@@ -561,18 +629,33 @@ export default function InvestigationDetail() {
                                   <TimelineItem key={index}>
                                     <TimelineSeparator>
                                       <TimelineDot color="primary" />
-                                      {index < evidence.chain.length - 1 && <TimelineConnector />}
+                                      {index < evidence.chain.length - 1 && (
+                                        <TimelineConnector />
+                                      )}
                                     </TimelineSeparator>
                                     <TimelineContent>
-                                      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ fontWeight: 'bold' }}
+                                      >
                                         {entry.action}
                                       </Typography>
-                                      <Typography variant="caption" color="text.secondary">
-                                        {entry.actor} • {new Date(entry.timestamp).toLocaleString()}
-                                        {entry.location && ` • ${entry.location}`}
+                                      <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                      >
+                                        {entry.actor} •{' '}
+                                        {new Date(
+                                          entry.timestamp,
+                                        ).toLocaleString()}
+                                        {entry.location &&
+                                          ` • ${entry.location}`}
                                       </Typography>
                                       {entry.notes && (
-                                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                        <Typography
+                                          variant="body2"
+                                          sx={{ mt: 0.5 }}
+                                        >
                                           {entry.notes}
                                         </Typography>
                                       )}
@@ -637,14 +720,29 @@ export default function InvestigationDetail() {
                           )}
                         </Avatar>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: 'bold' }}
+                          >
                             {entity.name}
                           </Typography>
                           <Stack direction="row" justifyContent="space-between">
-                            <Chip label={entity.type} size="small" variant="outlined" />
-                            <Stack direction="row" alignItems="center" spacing={1}>
-                              <Typography variant="caption">Risk: {entity.risk}%</Typography>
-                              <Typography variant="caption">Links: {entity.connections}</Typography>
+                            <Chip
+                              label={entity.type}
+                              size="small"
+                              variant="outlined"
+                            />
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing={1}
+                            >
+                              <Typography variant="caption">
+                                Risk: {entity.risk}%
+                              </Typography>
+                              <Typography variant="caption">
+                                Links: {entity.connections}
+                              </Typography>
                             </Stack>
                           </Stack>
                         </Box>
@@ -690,7 +788,9 @@ export default function InvestigationDetail() {
                       {event.type === 'ASSIGNED' && <Person />}
                       {event.type === 'NOTE_ADDED' && <Comment />}
                     </TimelineDot>
-                    {index < investigation.timeline.length - 1 && <TimelineConnector />}
+                    {index < investigation.timeline.length - 1 && (
+                      <TimelineConnector />
+                    )}
                   </TimelineSeparator>
                   <TimelineContent>
                     <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
@@ -716,7 +816,11 @@ export default function InvestigationDetail() {
               sx={{ mb: 3 }}
             >
               <Typography variant="h6">Investigation Notes</Typography>
-              <Button variant="contained" startIcon={<Add />} onClick={() => setAddNoteOpen(true)}>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setAddNoteOpen(true)}
+              >
                 Add Note
               </Button>
             </Stack>
@@ -725,9 +829,18 @@ export default function InvestigationDetail() {
               {investigation.notes.map((note) => (
                 <Card key={note.id} variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
-                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                    >
                       <Box sx={{ flex: 1 }}>
-                        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={2}
+                          sx={{ mb: 1 }}
+                        >
                           <Avatar sx={{ width: 32, height: 32 }}>
                             {note.author
                               .split(' ')
@@ -735,8 +848,13 @@ export default function InvestigationDetail() {
                               .join('')}
                           </Avatar>
                           <Box>
-                            <Typography variant="subtitle2">{note.author}</Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography variant="subtitle2">
+                              {note.author}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {new Date(note.timestamp).toLocaleString()}
                             </Typography>
                           </Box>
@@ -769,8 +887,8 @@ export default function InvestigationDetail() {
               Entity Relationships
             </Typography>
             <Alert severity="info" sx={{ mb: 3 }}>
-              Interactive relationship graph showing connections between entities in this
-              investigation.
+              Interactive relationship graph showing connections between
+              entities in this investigation.
             </Alert>
 
             <Paper
@@ -813,8 +931,14 @@ export default function InvestigationDetail() {
                     <Stack spacing={2}>
                       <Box>
                         <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="body2">Overall Risk Level</Typography>
-                          <Typography variant="body2" color="error.main" fontWeight="bold">
+                          <Typography variant="body2">
+                            Overall Risk Level
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="error.main"
+                            fontWeight="bold"
+                          >
                             HIGH
                           </Typography>
                         </Stack>
@@ -827,8 +951,14 @@ export default function InvestigationDetail() {
                       </Box>
                       <Box>
                         <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="body2">Evidence Strength</Typography>
-                          <Typography variant="body2" color="warning.main" fontWeight="bold">
+                          <Typography variant="body2">
+                            Evidence Strength
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="warning.main"
+                            fontWeight="bold"
+                          >
                             MEDIUM
                           </Typography>
                         </Stack>
@@ -920,7 +1050,12 @@ export default function InvestigationDetail() {
       </Dialog>
 
       {/* Add Note Dialog */}
-      <Dialog open={addNoteOpen} onClose={() => setAddNoteOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={addNoteOpen}
+        onClose={() => setAddNoteOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Add Investigation Note</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>

@@ -10,24 +10,24 @@ describe('Federal Pack Integration Tests', () => {
   let dualNotary: DualNotaryService;
   let hsmEnforcement: HSMEnforcement;
   let auditLogger: FederalAuditLogger;
-  
+
   beforeAll(async () => {
     // Initialize services with test configuration
     process.env.FEDERAL_ENABLED = 'true';
     process.env.FIPS_MODE = 'true';
     process.env.HSM_ENABLED = 'false'; // Use mock for tests
     process.env.TSA_ENABLED = 'false';
-    
+
     dualNotary = new DualNotaryService({
       hsmEnabled: false, // Use mock for CI
       tsaEnabled: false,
     });
-    
+
     hsmEnforcement = new HSMEnforcement({
       enforceHSM: false, // Use mock for CI
       allowedMechanisms: ['AES-256-GCM', 'ECDSA-P384', 'RSA-PSS-4096'],
     });
-    
+
     auditLogger = new FederalAuditLogger({
       auditBucket: 'test-audit-bucket',
       classification: 'UNCLASSIFIED',
@@ -73,7 +73,7 @@ describe('Federal Pack Integration Tests', () => {
     it.skip('should notarize Merkle root with HSM signature', async () => {
       const testRoot = crypto.randomBytes(32).toString('hex');
       const notarized = await dualNotary.notarizeRoot(testRoot);
-      
+
       expect(notarized.rootHex).toBe(testRoot);
       expect(notarized.hsmSignature).toBeTruthy();
       expect(notarized.notarizedBy).toContain('HSM');
@@ -83,40 +83,52 @@ describe('Federal Pack Integration Tests', () => {
 
   describe('SLSA-3 Supply Chain Verification', () => {
     const mockProvenance = {
-      _type: "https://in-toto.io/Statement/v0.1",
-      predicateType: "https://slsa.dev/provenance/v0.2",
+      _type: 'https://in-toto.io/Statement/v0.1',
+      predicateType: 'https://slsa.dev/provenance/v0.2',
       subject: [
         {
-          name: "intelgraph-federal.tar.gz",
-          digest: { sha256: "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234" }
-        }
+          name: 'intelgraph-federal.tar.gz',
+          digest: {
+            sha256:
+              'abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234',
+          },
+        },
       ],
       predicate: {
-        builder: { id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v1.9.0" },
-        buildType: "https://github.com/slsa-framework/slsa-github-generator/generic@v1",
+        builder: {
+          id: 'https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v1.9.0',
+        },
+        buildType:
+          'https://github.com/slsa-framework/slsa-github-generator/generic@v1',
         invocation: {
           configSource: {
-            uri: "git+https://github.com/intelgraph/platform@refs/heads/main",
-            digest: { sha1: "example-commit-hash" },
-            entryPoint: ".github/workflows/build.yml"
-          }
+            uri: 'git+https://github.com/intelgraph/platform@refs/heads/main',
+            digest: { sha1: 'example-commit-hash' },
+            entryPoint: '.github/workflows/build.yml',
+          },
         },
         metadata: {
-          buildInvocationId: "example-build-id",
-          buildStartedOn: "2024-01-01T00:00:00Z",
-          buildFinishedOn: "2024-01-01T01:00:00Z",
-          completeness: { parameters: true, environment: false, materials: true },
-          reproducible: true
+          buildInvocationId: 'example-build-id',
+          buildStartedOn: '2024-01-01T00:00:00Z',
+          buildFinishedOn: '2024-01-01T01:00:00Z',
+          completeness: {
+            parameters: true,
+            environment: false,
+            materials: true,
+          },
+          reproducible: true,
         },
         materials: [],
-        buildConfig: {}
-      }
+        buildConfig: {},
+      },
     };
 
     it('should validate SLSA-3 provenance format', async () => {
       const result = await slsa3Verifier.verifyProvenance(mockProvenance, {
         expectedSubject: 'intelgraph-federal.tar.gz',
-        trustedBuilders: ['https://github.com/slsa-framework/slsa-github-generator'],
+        trustedBuilders: [
+          'https://github.com/slsa-framework/slsa-github-generator',
+        ],
         requireHermetic: false, // Relaxed for test
       });
 
@@ -127,10 +139,12 @@ describe('Federal Pack Integration Tests', () => {
 
     it('should detect invalid provenance', async () => {
       const invalidProvenance = { ...mockProvenance, _type: 'invalid' };
-      
+
       const result = await slsa3Verifier.verifyProvenance(invalidProvenance, {
         expectedSubject: 'intelgraph-federal.tar.gz',
-        trustedBuilders: ['https://github.com/slsa-framework/slsa-github-generator'],
+        trustedBuilders: [
+          'https://github.com/slsa-framework/slsa-github-generator',
+        ],
       });
 
       expect(result.valid).toBe(false);
@@ -163,7 +177,7 @@ describe('Federal Pack Integration Tests', () => {
   describe('Air-Gap Environment Simulation', () => {
     it('should detect air-gap mode configuration', () => {
       process.env.AIRGAP_ENABLED = 'true';
-      
+
       const isAirgapped = process.env.AIRGAP_ENABLED === 'true';
       expect(isAirgapped).toBe(true);
     });
@@ -183,24 +197,29 @@ describe('Federal Pack Integration Tests', () => {
   describe('Classification Controls', () => {
     it('should enforce data classification tagging', () => {
       const data = { content: 'test data', classification: 'UNCLASSIFIED' };
-      const isValidClassification = ['UNCLASSIFIED', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET']
-        .includes(data.classification);
-      
+      const isValidClassification = [
+        'UNCLASSIFIED',
+        'CONFIDENTIAL',
+        'SECRET',
+        'TOP_SECRET',
+      ].includes(data.classification);
+
       expect(isValidClassification).toBe(true);
     });
 
     it('should validate clearance-based access controls', () => {
       const userClearance = 'CONFIDENTIAL';
       const dataClassification = 'UNCLASSIFIED';
-      
+
       const clearanceLevels = {
-        'UNCLASSIFIED': 0,
-        'CONFIDENTIAL': 1,
-        'SECRET': 2,
-        'TOP_SECRET': 3,
+        UNCLASSIFIED: 0,
+        CONFIDENTIAL: 1,
+        SECRET: 2,
+        TOP_SECRET: 3,
       };
-      
-      const hasAccess = clearanceLevels[userClearance] >= clearanceLevels[dataClassification];
+
+      const hasAccess =
+        clearanceLevels[userClearance] >= clearanceLevels[dataClassification];
       expect(hasAccess).toBe(true);
     });
   });
@@ -215,10 +234,10 @@ describe('Federal Pack Integration Tests', () => {
         'slsa3_supply_chain',
         'gatekeeper_policies',
         'prometheus_alerts',
-        'documentation'
+        'documentation',
       ];
 
-      evidenceComponents.forEach(component => {
+      evidenceComponents.forEach((component) => {
         expect(component).toMatch(/^[a-z_]+$/);
       });
     });

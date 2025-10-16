@@ -3,7 +3,7 @@ name: auto-refactor
 permissions:
   contents: read
 on:
-  schedule: [{ cron: "0 4 * * 1" }]
+  schedule: [{ cron: '0 4 * * 1' }]
   workflow_dispatch: {}
 jobs:
   codemods:
@@ -18,7 +18,7 @@ jobs:
       - run: pnpm turbo run build test --filter=...[HEAD^]
       - uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: "refactor: automated codemods (imports + await guards)"
-          title: "refactor: automated codemods"
+          commit-message: 'refactor: automated codemods (imports + await guards)'
+          title: 'refactor: automated codemods'
           branch: chore/auto-refactor
-          labels: "refactor, automerge"
+          labels: 'refactor, automerge'

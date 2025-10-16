@@ -13,7 +13,7 @@ async function collectAdrDocs(rootDir) {
     const discovered = await walkFiles(rootDir, {
       extensions: ['.md', '.markdown'],
       includeDirectories: [dir],
-      ignore: ['node_modules', 'dist', 'build']
+      ignore: ['node_modules', 'dist', 'build'],
     });
     for (const file of discovered) {
       files.add(file);
@@ -31,7 +31,7 @@ async function collectAdrDocs(rootDir) {
         .replace(/```[\s\S]*?```/g, '')
         .split('\n')
         .map((line) => line.trim())
-        .filter((line) => line && !line.startsWith('#'))[0] || ''
+        .filter((line) => line && !line.startsWith('#'))[0] || '',
     );
     const html = markdownToHtml(raw);
     const slugSource = titleMatch ? title : file;
@@ -40,7 +40,7 @@ async function collectAdrDocs(rootDir) {
       path: file,
       title,
       summary,
-      html
+      html,
     });
   }
 
@@ -48,5 +48,5 @@ async function collectAdrDocs(rootDir) {
 }
 
 module.exports = {
-  collectAdrDocs
+  collectAdrDocs,
 };

@@ -1,5 +1,5 @@
-export type BuildStatus = "success" | "pending" | "failed" | "running";
-export type TestStatus = "pass" | "fail" | "pending";
+export type BuildStatus = 'success' | 'pending' | 'failed' | 'running';
+export type TestStatus = 'pass' | 'fail' | 'pending';
 
 export interface BuildEventTests {
   unit?: TestStatus;
@@ -19,7 +19,7 @@ export interface BuildEvent {
   preview?: string;
   sbomUrl?: string;
   signed?: boolean;
-  policy?: "pass" | "warn" | "fail";
+  policy?: 'pass' | 'warn' | 'fail';
   timestamp: string;
   author?: string;
   title?: string;

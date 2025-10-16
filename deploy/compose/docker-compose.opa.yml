@@ -2,9 +2,8 @@ version: '3.9'
 services:
   opa:
     image: openpolicyagent/opa:latest-debug
-    command: ["run", "--server", "/policies"]
+    command: ['run', '--server', '/policies']
     ports:
-      - "8181:8181"
+      - '8181:8181'
     volumes:
       - ./server/policies:/policies:ro
-

@@ -29,7 +29,10 @@ export const useActionSafetyStatus = (actionId: string) => {
           appealUrl: 'https://example.com/appeal',
         });
       } else {
-        setStatus({ status: 'Safe', reason: `No specific threats detected for ${actionId}` });
+        setStatus({
+          status: 'Safe',
+          reason: `No specific threats detected for ${actionId}`,
+        });
       }
       setLoading(false);
     }, 1000);

@@ -9,7 +9,7 @@ export class CertificateValidator {
   private readonly trustAnchors = new Map<string, crypto.X509Certificate>();
 
   constructor(anchors: string[] = []) {
-    anchors.forEach(anchor => this.addTrustAnchor(anchor));
+    anchors.forEach((anchor) => this.addTrustAnchor(anchor));
   }
 
   addTrustAnchor(pem: string): void {
@@ -22,7 +22,8 @@ export class CertificateValidator {
     if (!chain.length) {
       return {
         valid: this.trustAnchors.size === 0,
-        errors: this.trustAnchors.size === 0 ? [] : ['No certificates supplied'],
+        errors:
+          this.trustAnchors.size === 0 ? [] : ['No certificates supplied'],
         depth: 0,
       };
     }
@@ -72,7 +73,9 @@ export class CertificateValidator {
           errors.push(`Signature validation failed for ${cert.subject}`);
         }
       } catch (error: any) {
-        errors.push(`Certificate verification error for ${cert.subject}: ${error.message}`);
+        errors.push(
+          `Certificate verification error for ${cert.subject}: ${error.message}`,
+        );
       }
     }
 
@@ -86,7 +89,9 @@ export class CertificateValidator {
     }
 
     try {
-      rootSubject = (issuer ?? new crypto.X509Certificate(chain[chain.length - 1])).subject;
+      rootSubject = (
+        issuer ?? new crypto.X509Certificate(chain[chain.length - 1])
+      ).subject;
     } catch {
       rootSubject = issuer?.subject;
     }

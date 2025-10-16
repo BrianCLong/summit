@@ -22,15 +22,18 @@ export function getRedisClient(): Redis {
         connectTimeout: 5000,
         lazyConnect: true,
       });
-      
+
       redisClient.on('connect', () => logger.info('Redis client connected.'));
       redisClient.on('error', (err) => {
-        logger.warn(`Redis connection failed - using mock responses. Error: ${err.message}`);
+        logger.warn(
+          `Redis connection failed - using mock responses. Error: ${err.message}`,
+        );
         redisClient = createMockRedisClient() as any;
       });
-      
     } catch (error) {
-      logger.warn(`Redis initialization failed - using development mode. Error: ${(error as Error).message}`);
+      logger.warn(
+        `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,
+      );
       redisClient = createMockRedisClient() as any;
     }
   }
@@ -61,7 +64,7 @@ function createMockRedisClient() {
     },
     quit: async () => {},
     on: () => {},
-    connect: async () => {}
+    connect: async () => {},
   };
 }
 

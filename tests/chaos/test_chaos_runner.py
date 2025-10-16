@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -103,7 +102,7 @@ def test_run_suite_filters_by_name(tmp_path: Path) -> None:
 
 
 def test_legacy_pod_kill_helper_aggregates(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls: List[str] = []
+    calls: list[str] = []
 
     def _pod_kill(pod_name: str, **_: object) -> chaos_hooks.HookExecutionResult:
         calls.append(pod_name)

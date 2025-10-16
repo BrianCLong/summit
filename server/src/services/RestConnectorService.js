@@ -13,7 +13,7 @@ class RestConnectorService {
       retryAttempts: config.retryAttempts || 3,
       retryDelay: config.retryDelay || 1000,
       userAgent: config.userAgent || 'IntelGraph-RestConnector/1.0',
-      ...config
+      ...config,
     };
 
     this.logger = logger;
@@ -22,7 +22,7 @@ class RestConnectorService {
       successfulRequests: 0,
       failedRequests: 0,
       averageResponseTime: 0,
-      rateLimitHits: 0
+      rateLimitHits: 0,
     };
   }
 
@@ -37,7 +37,7 @@ class RestConnectorService {
       body,
       auth,
       timeout = this.config.timeout,
-      retries = this.config.retryAttempts
+      retries = this.config.retryAttempts,
     } = options;
 
     const startTime = Date.now();
@@ -49,10 +49,10 @@ class RestConnectorService {
           method: method.toUpperCase(),
           headers: {
             'User-Agent': this.config.userAgent,
-            'Accept': 'application/json',
-            ...headers
+            Accept: 'application/json',
+            ...headers,
           },
-          signal: AbortSignal.timeout(timeout)
+          signal: AbortSignal.timeout(timeout),
         };
 
         // Add authentication
@@ -62,7 +62,8 @@ class RestConnectorService {
 
         // Add body for POST/PUT/PATCH requests
         if (body && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
-          requestOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+          requestOptions.body =
+            typeof body === 'string' ? body : JSON.stringify(body);
           requestOptions.headers['Content-Type'] = 'application/json';
         }
 
@@ -70,7 +71,7 @@ class RestConnectorService {
           url,
           method,
           attempt: attempt + 1,
-          headers: this.sanitizeHeaders(requestOptions.headers)
+          headers: this.sanitizeHeaders(requestOptions.headers),
         });
 
         const response = await fetch(url, requestOptions);
@@ -91,7 +92,7 @@ class RestConnectorService {
           this.logger.debug('REST request successful', {
             url,
             status: response.status,
-            responseTime
+            responseTime,
           });
 
           return {
@@ -99,19 +100,21 @@ class RestConnectorService {
             status: response.status,
             headers: Object.fromEntries(response.headers.entries()),
             data,
-            responseTime
+            responseTime,
           };
         } else {
           // Handle rate limiting
           if (response.status === 429) {
             this.metrics.rateLimitHits++;
             const retryAfter = response.headers.get('retry-after');
-            const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * this.config.retryDelay;
-            
+            const delay = retryAfter
+              ? parseInt(retryAfter) * 1000
+              : Math.pow(2, attempt) * this.config.retryDelay;
+
             this.logger.warn('Rate limited, waiting before retry', {
               url,
               attempt: attempt + 1,
-              retryAfter: delay
+              retryAfter: delay,
             });
 
             if (attempt < retries) {
@@ -123,17 +126,16 @@ class RestConnectorService {
           const errorText = await response.text();
           lastError = new Error(`HTTP ${response.status}: ${errorText}`);
         }
-
       } catch (error) {
         lastError = error;
-        
+
         if (attempt < retries) {
           const delay = Math.pow(2, attempt) * this.config.retryDelay;
           this.logger.warn('Request failed, retrying', {
             url,
             attempt: attempt + 1,
             error: error.message,
-            delay
+            delay,
           });
           await this.sleep(delay);
         }
@@ -146,12 +148,12 @@ class RestConnectorService {
     this.logger.error('REST request failed after retries', {
       url,
       method,
-      error: lastError.message
+      error: lastError.message,
     });
 
     return {
       success: false,
-      error: lastError.message
+      error: lastError.message,
     };
   }
 
@@ -162,7 +164,7 @@ class RestConnectorService {
     return this.request({
       url,
       method: 'GET',
-      ...options
+      ...options,
     });
   }
 
@@ -174,7 +176,7 @@ class RestConnectorService {
       url,
       method: 'POST',
       body: data,
-      ...options
+      ...options,
     });
   }
 
@@ -186,7 +188,7 @@ class RestConnectorService {
       url,
       method: 'PUT',
       body: data,
-      ...options
+      ...options,
     });
   }
 
@@ -197,7 +199,7 @@ class RestConnectorService {
     return this.request({
       url,
       method: 'DELETE',
-      ...options
+      ...options,
     });
   }
 
@@ -212,7 +214,7 @@ class RestConnectorService {
       maxPages = 10,
       auth,
       headers,
-      queryParams = {}
+      queryParams = {},
     } = config;
 
     const allData = [];
@@ -227,7 +229,7 @@ class RestConnectorService {
           currentPage,
           pageSize,
           nextCursor,
-          queryParams
+          queryParams,
         });
 
         const response = await this.get(url, { auth, headers });
@@ -236,17 +238,25 @@ class RestConnectorService {
           this.logger.error('Paginated request failed', {
             url,
             page: currentPage,
-            error: response.error
+            error: response.error,
           });
           break;
         }
 
-        const { data, pagination } = this.extractPaginationData(response.data, paginationType);
-        
+        const { data, pagination } = this.extractPaginationData(
+          response.data,
+          paginationType,
+        );
+
         allData.push(...data);
 
         // Determine if there are more pages
-        hasMore = this.hasMorePages(pagination, paginationType, currentPage, maxPages);
+        hasMore = this.hasMorePages(
+          pagination,
+          paginationType,
+          currentPage,
+          maxPages,
+        );
         nextCursor = pagination?.nextCursor || null;
         currentPage++;
 
@@ -254,18 +264,17 @@ class RestConnectorService {
           page: currentPage - 1,
           itemCount: data.length,
           totalFetched: allData.length,
-          hasMore
+          hasMore,
         });
 
         // Rate limiting between requests
         if (hasMore) {
           await this.sleep(100); // 100ms between requests
         }
-
       } catch (error) {
         this.logger.error('Pagination error', {
           page: currentPage,
-          error: error.message
+          error: error.message,
         });
         break;
       }
@@ -275,7 +284,7 @@ class RestConnectorService {
       success: true,
       data: allData,
       totalItems: allData.length,
-      pagesFetched: currentPage - 1
+      pagesFetched: currentPage - 1,
     };
   }
 
@@ -289,23 +298,26 @@ class RestConnectorService {
       events = [],
       secret,
       auth,
-      headers
+      headers,
     } = config;
 
     const webhookPayload = {
       url: targetUrl,
       events: events,
       active: true,
-      ...(secret && { secret })
+      ...(secret && { secret }),
     };
 
-    const response = await this.post(webhookUrl, webhookPayload, { auth, headers });
+    const response = await this.post(webhookUrl, webhookPayload, {
+      auth,
+      headers,
+    });
 
     if (response.success) {
       this.logger.info('Webhook created successfully', {
         webhookUrl,
         targetUrl,
-        events
+        events,
       });
     }
 
@@ -319,7 +331,7 @@ class RestConnectorService {
     const {
       concurrency = 5,
       batchSize = 10,
-      delayBetweenBatches = 1000
+      delayBetweenBatches = 1000,
     } = options;
 
     const results = [];
@@ -327,15 +339,18 @@ class RestConnectorService {
 
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
-      
+
       this.logger.debug('Processing batch', {
         batchIndex: i + 1,
         totalBatches: batches.length,
-        batchSize: batch.length
+        batchSize: batch.length,
       });
 
-      const batchPromises = batch.map(request => 
-        this.request(request).catch(error => ({ success: false, error: error.message }))
+      const batchPromises = batch.map((request) =>
+        this.request(request).catch((error) => ({
+          success: false,
+          error: error.message,
+        })),
       );
 
       const batchResults = await Promise.all(batchPromises);
@@ -351,8 +366,8 @@ class RestConnectorService {
       success: true,
       results,
       totalRequests: requests.length,
-      successfulRequests: results.filter(r => r.success).length,
-      failedRequests: results.filter(r => !r.success).length
+      successfulRequests: results.filter((r) => r.success).length,
+      failedRequests: results.filter((r) => !r.success).length,
     };
   }
 
@@ -365,7 +380,9 @@ class RestConnectorService {
         requestOptions.headers['Authorization'] = `Bearer ${auth.token}`;
         break;
       case 'basic':
-        const credentials = Buffer.from(`${auth.username}:${auth.password}`).toString('base64');
+        const credentials = Buffer.from(
+          `${auth.username}:${auth.password}`,
+        ).toString('base64');
         requestOptions.headers['Authorization'] = `Basic ${credentials}`;
         break;
       case 'apikey':
@@ -384,7 +401,8 @@ class RestConnectorService {
   }
 
   buildPaginatedUrl(baseUrl, config) {
-    const { paginationType, currentPage, pageSize, nextCursor, queryParams } = config;
+    const { paginationType, currentPage, pageSize, nextCursor, queryParams } =
+      config;
     const url = new URL(baseUrl);
 
     // Add base query params
@@ -395,7 +413,10 @@ class RestConnectorService {
     switch (paginationType) {
       case 'offset':
         url.searchParams.set('limit', pageSize.toString());
-        url.searchParams.set('offset', ((currentPage - 1) * pageSize).toString());
+        url.searchParams.set(
+          'offset',
+          ((currentPage - 1) * pageSize).toString(),
+        );
         break;
       case 'page':
         url.searchParams.set('per_page', pageSize.toString());
@@ -417,7 +438,7 @@ class RestConnectorService {
     if (Array.isArray(responseData)) {
       return {
         data: responseData,
-        pagination: { hasMore: responseData.length > 0 }
+        pagination: { hasMore: responseData.length > 0 },
       };
     }
 
@@ -425,20 +446,20 @@ class RestConnectorService {
     if (responseData.data && Array.isArray(responseData.data)) {
       return {
         data: responseData.data,
-        pagination: responseData.pagination || responseData.meta || {}
+        pagination: responseData.pagination || responseData.meta || {},
       };
     }
 
     if (responseData.results && Array.isArray(responseData.results)) {
       return {
         data: responseData.results,
-        pagination: responseData
+        pagination: responseData,
       };
     }
 
     return {
       data: responseData.items || [],
-      pagination: responseData
+      pagination: responseData,
     };
   }
 
@@ -449,9 +470,16 @@ class RestConnectorService {
       case 'cursor':
         return !!pagination.nextCursor || !!pagination.next_cursor;
       case 'offset':
-        return pagination.hasMore || (pagination.total && (currentPage * pagination.limit) < pagination.total);
+        return (
+          pagination.hasMore ||
+          (pagination.total &&
+            currentPage * pagination.limit < pagination.total)
+        );
       case 'page':
-        return pagination.hasNextPage || (pagination.totalPages && currentPage < pagination.totalPages);
+        return (
+          pagination.hasNextPage ||
+          (pagination.totalPages && currentPage < pagination.totalPages)
+        );
       default:
         return false;
     }
@@ -468,18 +496,21 @@ class RestConnectorService {
   sanitizeHeaders(headers) {
     const sanitized = { ...headers };
     if (sanitized.Authorization) {
-      sanitized.Authorization = sanitized.Authorization.replace(/Bearer\s+(.+)/, 'Bearer ***');
+      sanitized.Authorization = sanitized.Authorization.replace(
+        /Bearer\s+(.+)/,
+        'Bearer ***',
+      );
     }
     return sanitized;
   }
 
   sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   updateMetrics(responseTime, success) {
     this.metrics.totalRequests++;
-    
+
     if (success) {
       this.metrics.successfulRequests++;
     } else {
@@ -496,9 +527,13 @@ class RestConnectorService {
    * Health check and metrics
    */
   getHealth() {
-    const successRate = this.metrics.totalRequests > 0
-      ? (this.metrics.successfulRequests / this.metrics.totalRequests * 100).toFixed(1) + '%'
-      : '100%';
+    const successRate =
+      this.metrics.totalRequests > 0
+        ? (
+            (this.metrics.successfulRequests / this.metrics.totalRequests) *
+            100
+          ).toFixed(1) + '%'
+        : '100%';
 
     return {
       status: 'healthy',
@@ -508,14 +543,14 @@ class RestConnectorService {
         failedRequests: this.metrics.failedRequests,
         successRate,
         averageResponseTime: Math.round(this.metrics.averageResponseTime),
-        rateLimitHits: this.metrics.rateLimitHits
+        rateLimitHits: this.metrics.rateLimitHits,
       },
       config: {
         timeout: this.config.timeout,
         retryAttempts: this.config.retryAttempts,
         retryDelay: this.config.retryDelay,
-        userAgent: this.config.userAgent
-      }
+        userAgent: this.config.userAgent,
+      },
     };
   }
 }

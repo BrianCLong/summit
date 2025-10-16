@@ -44,12 +44,14 @@ export class SpiffeAuthService {
     this.config = SpiffeConfigSchema.parse({
       ...config,
       trustDomain: process.env.SPIRE_TRUST_DOMAIN || config?.trustDomain,
-      socketPath: process.env.SPIFFE_ENDPOINT_SOCKET?.replace('unix://', '') || config?.socketPath,
+      socketPath:
+        process.env.SPIFFE_ENDPOINT_SOCKET?.replace('unix://', '') ||
+        config?.socketPath,
       enabled: process.env.ZERO_TRUST_ENABLED === 'true',
     });
-    
+
     this.agentSocket = this.config.socketPath;
-    
+
     if (this.config.enabled) {
       this.initializeSpiffeAuth();
     }
@@ -59,16 +61,18 @@ export class SpiffeAuthService {
     try {
       // Fetch initial SVID
       await this.fetchSVID();
-      
+
       // Start SVID refresh timer (refresh at 50% of lifetime)
       this.startSVIDRefresh();
-      
+
       console.log('SPIFFE authentication initialized successfully');
     } catch (error) {
       console.error('Failed to initialize SPIFFE authentication:', error);
-      
+
       if (this.config.requireVerification) {
-        throw new Error('SPIFFE authentication required but initialization failed');
+        throw new Error(
+          'SPIFFE authentication required but initialization failed',
+        );
       }
     }
   }
@@ -77,9 +81,13 @@ export class SpiffeAuthService {
    * Express middleware for SPIFFE-based authentication
    */
   middleware() {
-    return async (req: Request & { spiffe?: SpiffeContext }, res: Response, next: NextFunction) => {
+    return async (
+      req: Request & { spiffe?: SpiffeContext },
+      res: Response,
+      next: NextFunction,
+    ) => {
       const span = otelService.createSpan('spiffe-auth.verify');
-      
+
       try {
         if (!this.config.enabled) {
           req.spiffe = { verified: false };
@@ -88,27 +96,32 @@ export class SpiffeAuthService {
 
         // Extract SPIFFE ID from mTLS certificate
         const spiffeId = await this.extractSpiffeIdFromRequest(req);
-        
+
         if (!spiffeId) {
           if (this.config.requireVerification) {
-            span.setStatus({ code: 2, message: 'No SPIFFE ID found in request' });
-            return res.status(401).json({ 
-              error: 'Unauthorized', 
-              message: 'Valid SPIFFE ID required' 
+            span.setStatus({
+              code: 2,
+              message: 'No SPIFFE ID found in request',
+            });
+            return res.status(401).json({
+              error: 'Unauthorized',
+              message: 'Valid SPIFFE ID required',
             });
           }
-          
+
           req.spiffe = { verified: false };
           return next();
         }
 
         // Verify SPIFFE ID is from allowed trust domain
-        const trustDomainAllowed = this.isTrustDomainAllowed(spiffeId.trustDomain);
+        const trustDomainAllowed = this.isTrustDomainAllowed(
+          spiffeId.trustDomain,
+        );
         if (!trustDomainAllowed) {
           span.setStatus({ code: 2, message: 'Untrusted SPIFFE trust domain' });
-          return res.status(403).json({ 
-            error: 'Forbidden', 
-            message: `Trust domain '${spiffeId.trustDomain}' not allowed` 
+          return res.status(403).json({
+            error: 'Forbidden',
+            message: `Trust domain '${spiffeId.trustDomain}' not allowed`,
           });
         }
 
@@ -130,14 +143,14 @@ export class SpiffeAuthService {
         console.error('SPIFFE authentication failed:', error);
         otelService.recordException(error);
         span.setStatus({ code: 2, message: error.message });
-        
+
         if (this.config.requireVerification) {
-          return res.status(500).json({ 
-            error: 'Authentication error', 
-            message: 'SPIFFE verification failed' 
+          return res.status(500).json({
+            error: 'Authentication error',
+            message: 'SPIFFE verification failed',
           });
         }
-        
+
         req.spiffe = { verified: false };
         next();
       } finally {
@@ -172,7 +185,7 @@ export class SpiffeAuthService {
 
       const svid = this.parseSVIDResponse(response);
       this.localSVID = svid;
-      
+
       return svid;
     } catch (error) {
       console.error('Failed to fetch SVID:', error);
@@ -183,11 +196,11 @@ export class SpiffeAuthService {
   private async readSocketResponse(socket: any): Promise<any> {
     return new Promise((resolve, reject) => {
       let data = '';
-      
+
       socket.on('data', (chunk: Buffer) => {
         data += chunk.toString();
       });
-      
+
       socket.on('end', () => {
         try {
           const response = JSON.parse(data);
@@ -196,11 +209,11 @@ export class SpiffeAuthService {
           reject(new Error('Invalid JSON response from SPIRE Agent'));
         }
       });
-      
+
       socket.on('error', (error: Error) => {
         reject(error);
       });
-      
+
       setTimeout(() => {
         reject(new Error('SPIRE Agent response timeout'));
       }, 5000);
@@ -239,10 +252,12 @@ export class SpiffeAuthService {
     };
   }
 
-  private async extractSpiffeIdFromRequest(req: Request): Promise<SpiffeId | null> {
+  private async extractSpiffeIdFromRequest(
+    req: Request,
+  ): Promise<SpiffeId | null> {
     // Extract SPIFFE ID from mTLS client certificate
     const clientCert = (req as any).connection?.getPeerCertificate?.();
-    
+
     if (!clientCert || !clientCert.subject) {
       return null;
     }
@@ -250,7 +265,7 @@ export class SpiffeAuthService {
     // Look for SPIFFE ID in certificate SAN (Subject Alternative Names)
     if (clientCert.subjectaltname) {
       const sanEntries = clientCert.subjectaltname.split(', ');
-      
+
       for (const entry of sanEntries) {
         if (entry.startsWith('URI:spiffe://')) {
           const spiffeId = entry.substring(4); // Remove 'URI:' prefix
@@ -299,7 +314,10 @@ export class SpiffeAuthService {
       } catch (error) {
         console.error('SVID refresh failed:', error);
         // Retry in 1 minute
-        this.svidRefreshTimer = setTimeout(() => this.startSVIDRefresh(), 60000);
+        this.svidRefreshTimer = setTimeout(
+          () => this.startSVIDRefresh(),
+          60000,
+        );
       }
     }, refreshIn);
   }
@@ -337,10 +355,14 @@ export class SpiffeAuthService {
 
     return {
       agent,
-      get: (url: string, options: any = {}) => fetch(url, { ...options, agent }),
-      post: (url: string, options: any = {}) => fetch(url, { ...options, agent, method: 'POST' }),
-      put: (url: string, options: any = {}) => fetch(url, { ...options, agent, method: 'PUT' }),
-      delete: (url: string, options: any = {}) => fetch(url, { ...options, agent, method: 'DELETE' }),
+      get: (url: string, options: any = {}) =>
+        fetch(url, { ...options, agent }),
+      post: (url: string, options: any = {}) =>
+        fetch(url, { ...options, agent, method: 'POST' }),
+      put: (url: string, options: any = {}) =>
+        fetch(url, { ...options, agent, method: 'PUT' }),
+      delete: (url: string, options: any = {}) =>
+        fetch(url, { ...options, agent, method: 'DELETE' }),
     };
   }
 
@@ -348,15 +370,19 @@ export class SpiffeAuthService {
    * Verify SPIFFE peer identity for specific operations
    */
   requireSpiffeId(requiredPath: string | RegExp) {
-    return (req: Request & { spiffe?: SpiffeContext }, res: Response, next: NextFunction) => {
+    return (
+      req: Request & { spiffe?: SpiffeContext },
+      res: Response,
+      next: NextFunction,
+    ) => {
       if (!this.config.enabled) {
         return next();
       }
 
       if (!req.spiffe?.verified || !req.spiffe?.spiffeId) {
-        return res.status(401).json({ 
+        return res.status(401).json({
           error: 'SPIFFE authentication required',
-          message: 'Valid SPIFFE ID required for this operation' 
+          message: 'Valid SPIFFE ID required for this operation',
         });
       }
 
@@ -370,7 +396,7 @@ export class SpiffeAuthService {
       }
 
       if (!pathMatches) {
-        return res.status(403).json({ 
+        return res.status(403).json({
           error: 'Insufficient SPIFFE authorization',
           message: `Required SPIFFE path not met: ${requiredPath}`,
           yourSpiffeId: req.spiffe.spiffeId.full,
@@ -421,12 +447,12 @@ export class SpiffeAuthService {
     if (this.localSVID) {
       const now = new Date().getTime();
       const expiresAt = this.localSVID.expiresAt.getTime();
-      
+
       svidValid = expiresAt > now;
       expiresIn = Math.max(0, Math.floor((expiresAt - now) / 1000));
     }
 
-    const status = (agentConnected && svidValid) ? 'healthy' : 'unhealthy';
+    const status = agentConnected && svidValid ? 'healthy' : 'unhealthy';
 
     return {
       status,
@@ -459,7 +485,8 @@ export const spiffeAuthMiddleware = spiffeAuth.middleware();
 export const requireSpiffeId = spiffeAuth.requireSpiffeId.bind(spiffeAuth);
 
 // Export authenticated client factory
-export const createAuthenticatedClient = spiffeAuth.createAuthenticatedClient.bind(spiffeAuth);
+export const createAuthenticatedClient =
+  spiffeAuth.createAuthenticatedClient.bind(spiffeAuth);
 
 // Export health check
 export const spiffeHealthCheck = spiffeAuth.healthCheck.bind(spiffeAuth);

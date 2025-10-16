@@ -3,7 +3,7 @@
 from .prover import Proof, TenantIsolationProver, TipResult
 
 __all__ = [
-  "Proof",
-  "TenantIsolationProver",
-  "TipResult",
+    "Proof",
+    "TenantIsolationProver",
+    "TipResult",
 ]

@@ -126,7 +126,10 @@ export class GraphXAIExplainer {
       context: request.context || {},
     };
 
-    const content = JSON.stringify(normalizedRequest, Object.keys(normalizedRequest).sort());
+    const content = JSON.stringify(
+      normalizedRequest,
+      Object.keys(normalizedRequest).sort(),
+    );
     return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
   }
 
@@ -152,15 +155,21 @@ export class GraphXAIExplainer {
         ),
     };
 
-    return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
+    return crypto
+      .createHash('md5')
+      .update(JSON.stringify(normalized))
+      .digest('hex');
   }
 
   // Committee requirement: XAI caching and determinism
-  private async getCachedExplanation(requestHash: string): Promise<ExplanationResult | null> {
+  private async getCachedExplanation(
+    requestHash: string,
+  ): Promise<ExplanationResult | null> {
     const cached = this.explanationCache.get(requestHash);
 
     if (cached) {
-      const ageMinutes = (Date.now() - cached.created_at.getTime()) / (1000 * 60);
+      const ageMinutes =
+        (Date.now() - cached.created_at.getTime()) / (1000 * 60);
 
       // Cache expires after 24 hours for determinism
       if (ageMinutes < 24 * 60) {
@@ -182,7 +191,9 @@ export class GraphXAIExplainer {
   }
 
   // Main XAI explanation generation
-  async generateExplanation(request: ExplanationRequest): Promise<ExplanationResult> {
+  async generateExplanation(
+    request: ExplanationRequest,
+  ): Promise<ExplanationResult> {
     const startTime = Date.now();
     const requestHash = this.generateRequestHash(request);
     const traceId = crypto.randomUUID();
@@ -229,9 +240,13 @@ export class GraphXAIExplainer {
       performance_metrics: {
         processing_time_ms: processingTime,
         graph_complexity: this.calculateGraphComplexity(request.graph_data),
-        explanation_coverage: this.calculateExplanationCoverage(explanations, request.graph_data),
+        explanation_coverage: this.calculateExplanationCoverage(
+          explanations,
+          request.graph_data,
+        ),
         model_confidence:
-          modelCard.accuracy_metrics[`${request.explanation_type}_accuracy`] || 0.85,
+          modelCard.accuracy_metrics[`${request.explanation_type}_accuracy`] ||
+          0.85,
       },
       created_at: new Date(),
       cached: false,
@@ -274,11 +289,15 @@ export class GraphXAIExplainer {
 
     switch (type) {
       case 'node_importance':
-        explanations.push(...(await this.explainNodeImportance(graphData, query)));
+        explanations.push(
+          ...(await this.explainNodeImportance(graphData, query)),
+        );
         break;
 
       case 'edge_importance':
-        explanations.push(...(await this.explainEdgeImportance(graphData, query)));
+        explanations.push(
+          ...(await this.explainEdgeImportance(graphData, query)),
+        );
         break;
 
       case 'path_explanation':
@@ -286,7 +305,9 @@ export class GraphXAIExplainer {
         break;
 
       case 'subgraph_reasoning':
-        explanations.push(...(await this.explainSubgraphReasoning(graphData, query, context)));
+        explanations.push(
+          ...(await this.explainSubgraphReasoning(graphData, query, context)),
+        );
         break;
 
       default:
@@ -296,7 +317,10 @@ export class GraphXAIExplainer {
     return explanations;
   }
 
-  private async explainNodeImportance(graphData: any, query: string): Promise<Explanation[]> {
+  private async explainNodeImportance(
+    graphData: any,
+    query: string,
+  ): Promise<Explanation[]> {
     const nodes = graphData.nodes || [];
     const explanations: Explanation[] = [];
 
@@ -327,7 +351,10 @@ export class GraphXAIExplainer {
     return explanations.sort((a, b) => b.importance_score - a.importance_score);
   }
 
-  private async explainEdgeImportance(graphData: any, query: string): Promise<Explanation[]> {
+  private async explainEdgeImportance(
+    graphData: any,
+    query: string,
+  ): Promise<Explanation[]> {
     const edges = graphData.edges || [];
     const explanations: Explanation[] = [];
 
@@ -355,7 +382,10 @@ export class GraphXAIExplainer {
     return explanations.sort((a, b) => b.importance_score - a.importance_score);
   }
 
-  private async explainPaths(graphData: any, query: string): Promise<Explanation[]> {
+  private async explainPaths(
+    graphData: any,
+    query: string,
+  ): Promise<Explanation[]> {
     // Simplified path explanation - would use actual graph algorithms
     const explanations: Explanation[] = [];
     const nodes = graphData.nodes || [];
@@ -390,7 +420,10 @@ export class GraphXAIExplainer {
     const clusters = this.identifySubgraphClusters(graphData);
 
     for (const cluster of clusters.slice(0, 5)) {
-      const clusterImportance = this.calculateClusterImportance(cluster, graphData);
+      const clusterImportance = this.calculateClusterImportance(
+        cluster,
+        graphData,
+      );
 
       explanations.push({
         element_id: `cluster-${cluster.id}`,
@@ -408,7 +441,8 @@ export class GraphXAIExplainer {
   // Helper methods for graph analysis
   private calculateNodeDegree(nodeId: string, graphData: any): number {
     const edges = graphData.edges || [];
-    return edges.filter((e: any) => e.source === nodeId || e.target === nodeId).length;
+    return edges.filter((e: any) => e.source === nodeId || e.target === nodeId)
+      .length;
   }
 
   private calculateCentrality(nodeId: string, graphData: any): number {
@@ -431,17 +465,23 @@ export class GraphXAIExplainer {
     return nodeCount + edgeCount * 0.5;
   }
 
-  private calculateExplanationCoverage(explanations: Explanation[], graphData: any): number {
-    const totalElements = (graphData.nodes || []).length + (graphData.edges || []).length;
+  private calculateExplanationCoverage(
+    explanations: Explanation[],
+    graphData: any,
+  ): number {
+    const totalElements =
+      (graphData.nodes || []).length + (graphData.edges || []).length;
     return totalElements > 0 ? explanations.length / totalElements : 0;
   }
 
   private calculateOverallConfidence(explanations: Explanation[]): number {
     if (explanations.length === 0) return 0;
     const avgImportance =
-      explanations.reduce((sum, exp) => sum + exp.importance_score, 0) / explanations.length;
+      explanations.reduce((sum, exp) => sum + exp.importance_score, 0) /
+      explanations.length;
     const avgUncertainty =
-      explanations.reduce((sum, exp) => sum + exp.uncertainty, 0) / explanations.length;
+      explanations.reduce((sum, exp) => sum + exp.uncertainty, 0) /
+      explanations.length;
     return Math.max(0, avgImportance * (1 - avgUncertainty));
   }
 
@@ -451,7 +491,11 @@ export class GraphXAIExplainer {
       {
         id: 'cluster-1',
         reasoning: 'high-activity communication network',
-        evidence: ['Dense interconnections', 'High message frequency', 'Temporal clustering'],
+        evidence: [
+          'Dense interconnections',
+          'High message frequency',
+          'Temporal clustering',
+        ],
         uncertainty: 0.12,
       },
     ];

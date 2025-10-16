@@ -1,12 +1,12 @@
 groups:
-- name: api-slo-burn
-  rules:
-  - alert: APIErrorBudgetBurn
-    expr: |
-      (sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) > 0.001
-    for: 10m
-    labels:
-      severity: page
-    annotations:
-      summary: "API error budget burn > 0.1%"
-      description: "Investigate GraphQL 5xx spikes and recent deploys."
+  - name: api-slo-burn
+    rules:
+      - alert: APIErrorBudgetBurn
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) > 0.001
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: 'API error budget burn > 0.1%'
+          description: 'Investigate GraphQL 5xx spikes and recent deploys.'

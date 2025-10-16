@@ -31,10 +31,14 @@ test.describe('Analyst Assist v0.2 - Demo Walkthrough', () => {
     const alert = await page.textContent('[role="alert"]');
     expect(alert).toContain('Export Blocked');
 
-    console.log('✅ Blocked flow completed: assist → explain → export (denied)');
+    console.log(
+      '✅ Blocked flow completed: assist → explain → export (denied)',
+    );
   });
 
-  test('AC: assist → explain → export (allowed with step-up)', async ({ page }) => {
+  test('AC: assist → explain → export (allowed with step-up)', async ({
+    page,
+  }) => {
     // Navigate to Analyst Assist
     await page.goto('/analyst-assist');
 
@@ -47,7 +51,9 @@ test.describe('Analyst Assist v0.2 - Demo Walkthrough', () => {
     await page.click('text=Preview Export Policy');
 
     // Check if step-up is required
-    const stepUpRequired = await page.isVisible('text=🔐 Authenticate to Export');
+    const stepUpRequired = await page.isVisible(
+      'text=🔐 Authenticate to Export',
+    );
 
     if (stepUpRequired) {
       // Complete step-up authentication (mock)
@@ -78,10 +84,14 @@ test.describe('Analyst Assist v0.2 - Demo Walkthrough', () => {
 
     expect(download.suggestedFilename()).toContain('.json');
 
-    console.log('✅ Allowed flow completed: assist → explain → export (allowed)');
+    console.log(
+      '✅ Allowed flow completed: assist → explain → export (allowed)',
+    );
   });
 
-  test('AC: Policy explanations show evidence and remediation', async ({ page }) => {
+  test('AC: Policy explanations show evidence and remediation', async ({
+    page,
+  }) => {
     await page.goto('/analyst-assist');
 
     // Trigger a policy denial
@@ -101,7 +111,9 @@ test.describe('Analyst Assist v0.2 - Demo Walkthrough', () => {
     // Verify AI explanation is present
     await expect(page.locator('.bg-blue-50')).toBeVisible();
 
-    console.log('✅ Policy explanations verified with evidence and remediation');
+    console.log(
+      '✅ Policy explanations verified with evidence and remediation',
+    );
   });
 });
 
@@ -118,7 +130,9 @@ test.describe('Analyst Assist v0.2 - Acceptance Criteria', () => {
     await expect(page.locator('text=Execute Query')).toBeVisible();
   });
 
-  test('✅ "Why blocked?" explanations wired to policy outcomes', async ({ page }) => {
+  test('✅ "Why blocked?" explanations wired to policy outcomes', async ({
+    page,
+  }) => {
     await page.goto('/analyst-assist');
 
     await page.fill('[placeholder="Value..."]', 'RESTRICTED');

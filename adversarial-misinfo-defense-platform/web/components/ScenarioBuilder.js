@@ -28,7 +28,7 @@ const Title = styled.h1`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.primary ? '#3498db' : '#95a5a6'};
+  background-color: ${(props) => (props.primary ? '#3498db' : '#95a5a6')};
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -38,11 +38,11 @@ const Button = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  
+
   &:hover {
     opacity: 0.9;
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -52,7 +52,7 @@ const Button = styled.button`
 const FormSection = styled.div`
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 `;
@@ -74,7 +74,7 @@ const Input = styled(Field)`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  
+
   &:focus {
     outline: none;
     border-color: #3498db;
@@ -89,7 +89,7 @@ const Select = styled(Field)`
   border-radius: 4px;
   font-size: 1rem;
   background-color: white;
-  
+
   &:focus {
     outline: none;
     border-color: #3498db;
@@ -105,7 +105,7 @@ const TextArea = styled.textarea`
   font-size: 1rem;
   min-height: 100px;
   resize: vertical;
-  
+
   &:focus {
     outline: none;
     border-color: #3498db;
@@ -126,7 +126,7 @@ const ListItem = styled.div`
   align-items: center;
   padding: 0.5rem;
   border-bottom: 1px solid #eee;
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -138,7 +138,7 @@ const IconButton = styled.button`
   color: #e74c3c;
   cursor: pointer;
   padding: 0.25rem;
-  
+
   &:hover {
     color: #c0392b;
   }
@@ -150,11 +150,17 @@ const scenarioSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   exercise_type: Yup.string().required('Exercise type is required'),
   difficulty: Yup.string().required('Difficulty level is required'),
-  objectives: Yup.array().of(Yup.string().required('Objective cannot be empty')).min(1, 'At least one objective is required'),
+  objectives: Yup.array()
+    .of(Yup.string().required('Objective cannot be empty'))
+    .min(1, 'At least one objective is required'),
   constraints: Yup.array().of(Yup.string()),
   success_criteria: Yup.array().of(Yup.string()),
-  estimated_duration: Yup.number().min(1, 'Duration must be at least 1 minute').required('Estimated duration is required'),
-  team_roles: Yup.array().of(Yup.string()).min(1, 'At least one team role is required'),
+  estimated_duration: Yup.number()
+    .min(1, 'Duration must be at least 1 minute')
+    .required('Estimated duration is required'),
+  team_roles: Yup.array()
+    .of(Yup.string())
+    .min(1, 'At least one team role is required'),
   threat_actors_involved: Yup.array().of(Yup.string()),
   detection_methods_to_test: Yup.array().of(Yup.string()),
   mitigation_strategies: Yup.array().of(Yup.string()),
@@ -168,7 +174,7 @@ const exerciseTypes = [
   { value: 'narrative_control', label: 'Narrative Control' },
   { value: 'coordination_disruption', label: 'Coordination Disruption' },
   { value: 'information_warfare', label: 'Information Warfare' },
-  { value: 'psychological_operations', label: 'Psychological Operations' }
+  { value: 'psychological_operations', label: 'Psychological Operations' },
 ];
 
 // Difficulty levels
@@ -177,7 +183,7 @@ const difficultyLevels = [
   { value: 'intermediate', label: 'Intermediate' },
   { value: 'advanced', label: 'Advanced' },
   { value: 'expert', label: 'Expert' },
-  { value: 'custom', label: 'Custom' }
+  { value: 'custom', label: 'Custom' },
 ];
 
 // Team roles
@@ -185,19 +191,19 @@ const teamRoles = [
   { value: 'red_team_attacker', label: 'Red Team Attacker' },
   { value: 'blue_team_defender', label: 'Blue Team Defender' },
   { value: 'white_team_observer', label: 'White Team Observer' },
-  { value: 'gray_team_moderator', label: 'Gray Team Moderator' }
+  { value: 'gray_team_moderator', label: 'Gray Team Moderator' },
 ];
 
 // Scenario Builder component
 const ScenarioBuilder = () => {
   const [scenarios, setScenarios] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     // Load existing scenarios
     loadScenarios();
   }, []);
-  
+
   const loadScenarios = async () => {
     try {
       setLoading(true);
@@ -208,15 +214,16 @@ const ScenarioBuilder = () => {
           name: 'Basic Social Engineering Test',
           description: 'Test defenses against basic social engineering tactics',
           exercise_type: 'social_engineering',
-          difficulty: 'beginner'
+          difficulty: 'beginner',
         },
         {
           scenario_id: '2',
           name: 'Intermediate Meme Campaign Simulation',
-          description: 'Simulate a coordinated meme-based misinformation campaign',
+          description:
+            'Simulate a coordinated meme-based misinformation campaign',
           exercise_type: 'meme_campaign',
-          difficulty: 'intermediate'
-        }
+          difficulty: 'intermediate',
+        },
       ];
       setScenarios(mockScenarios);
     } catch (error) {
@@ -225,7 +232,7 @@ const ScenarioBuilder = () => {
       setLoading(false);
     }
   };
-  
+
   const initialValues = {
     name: '',
     description: '',
@@ -239,9 +246,9 @@ const ScenarioBuilder = () => {
     threat_actors_involved: [''],
     detection_methods_to_test: [''],
     mitigation_strategies: [''],
-    created_by: 'Web UI User'
+    created_by: 'Web UI User',
   };
-  
+
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       // In a real implementation, this would POST to the API
@@ -255,7 +262,7 @@ const ScenarioBuilder = () => {
       setSubmitting(false);
     }
   };
-  
+
   return (
     <Container>
       <Header>
@@ -264,7 +271,7 @@ const ScenarioBuilder = () => {
           <FiPlus /> Load Template
         </Button>
       </Header>
-      
+
       <Formik
         initialValues={initialValues}
         validationSchema={scenarioSchema}
@@ -274,7 +281,7 @@ const ScenarioBuilder = () => {
           <Form>
             <FormSection>
               <h2>Basic Information</h2>
-              
+
               <FormGroup>
                 <Label htmlFor="name">Scenario Name *</Label>
                 <Input
@@ -284,10 +291,12 @@ const ScenarioBuilder = () => {
                   placeholder="Enter a descriptive name for your scenario"
                 />
                 {errors.name && touched.name && (
-                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>{errors.name}</div>
+                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                    {errors.name}
+                  </div>
                 )}
               </FormGroup>
-              
+
               <FormGroup>
                 <Label htmlFor="description">Description *</Label>
                 <TextArea
@@ -296,49 +305,53 @@ const ScenarioBuilder = () => {
                   placeholder="Provide a detailed description of the scenario"
                 />
                 {errors.description && touched.description && (
-                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>{errors.description}</div>
+                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                    {errors.description}
+                  </div>
                 )}
               </FormGroup>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '1rem',
+                }}
+              >
                 <FormGroup>
                   <Label htmlFor="exercise_type">Exercise Type *</Label>
-                  <Select
-                    id="exercise_type"
-                    name="exercise_type"
-                    as="select"
-                  >
-                    {exerciseTypes.map(type => (
+                  <Select id="exercise_type" name="exercise_type" as="select">
+                    {exerciseTypes.map((type) => (
                       <option key={type.value} value={type.value}>
                         {type.label}
                       </option>
                     ))}
                   </Select>
                   {errors.exercise_type && touched.exercise_type && (
-                    <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>{errors.exercise_type}</div>
+                    <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                      {errors.exercise_type}
+                    </div>
                   )}
                 </FormGroup>
-                
+
                 <FormGroup>
                   <Label htmlFor="difficulty">Difficulty *</Label>
-                  <Select
-                    id="difficulty"
-                    name="difficulty"
-                    as="select"
-                  >
-                    {difficultyLevels.map(level => (
+                  <Select id="difficulty" name="difficulty" as="select">
+                    {difficultyLevels.map((level) => (
                       <option key={level.value} value={level.value}>
                         {level.label}
                       </option>
                     ))}
                   </Select>
                   {errors.difficulty && touched.difficulty && (
-                    <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>{errors.difficulty}</div>
+                    <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                      {errors.difficulty}
+                    </div>
                   )}
                 </FormGroup>
               </div>
             </FormSection>
-            
+
             <FormSection>
               <h2>Objectives</h2>
               <FieldArray name="objectives">
@@ -346,23 +359,35 @@ const ScenarioBuilder = () => {
                   <div>
                     {values.objectives.map((_, index) => (
                       <FormGroup key={index}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                          }}
+                        >
                           <Input
                             name={`objectives.${index}`}
                             type="text"
                             placeholder={`Objective ${index + 1}`}
                           />
                           {values.objectives.length > 1 && (
-                            <IconButton type="button" onClick={() => remove(index)}>
+                            <IconButton
+                              type="button"
+                              onClick={() => remove(index)}
+                            >
                               <FiTrash2 />
                             </IconButton>
                           )}
                         </div>
-                        {errors.objectives?.[index] && touched.objectives?.[index] && (
-                          <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
-                            {errors.objectives[index]}
-                          </div>
-                        )}
+                        {errors.objectives?.[index] &&
+                          touched.objectives?.[index] && (
+                            <div
+                              style={{ color: '#e74c3c', marginTop: '0.25rem' }}
+                            >
+                              {errors.objectives[index]}
+                            </div>
+                          )}
                       </FormGroup>
                     ))}
                     <Button type="button" onClick={() => push('')}>
@@ -372,7 +397,7 @@ const ScenarioBuilder = () => {
                 )}
               </FieldArray>
             </FormSection>
-            
+
             <FormSection>
               <h2>Constraints</h2>
               <FieldArray name="constraints">
@@ -380,14 +405,23 @@ const ScenarioBuilder = () => {
                   <div>
                     {values.constraints.map((_, index) => (
                       <FormGroup key={index}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                          }}
+                        >
                           <Input
                             name={`constraints.${index}`}
                             type="text"
                             placeholder={`Constraint ${index + 1}`}
                           />
                           {values.constraints.length > 1 && (
-                            <IconButton type="button" onClick={() => remove(index)}>
+                            <IconButton
+                              type="button"
+                              onClick={() => remove(index)}
+                            >
                               <FiTrash2 />
                             </IconButton>
                           )}
@@ -401,7 +435,7 @@ const ScenarioBuilder = () => {
                 )}
               </FieldArray>
             </FormSection>
-            
+
             <FormSection>
               <h2>Success Criteria</h2>
               <FieldArray name="success_criteria">
@@ -409,14 +443,23 @@ const ScenarioBuilder = () => {
                   <div>
                     {values.success_criteria.map((_, index) => (
                       <FormGroup key={index}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                          }}
+                        >
                           <Input
                             name={`success_criteria.${index}`}
                             type="text"
                             placeholder={`Success Criterion ${index + 1}`}
                           />
                           {values.success_criteria.length > 1 && (
-                            <IconButton type="button" onClick={() => remove(index)}>
+                            <IconButton
+                              type="button"
+                              onClick={() => remove(index)}
+                            >
                               <FiTrash2 />
                             </IconButton>
                           )}
@@ -430,12 +473,14 @@ const ScenarioBuilder = () => {
                 )}
               </FieldArray>
             </FormSection>
-            
+
             <FormSection>
               <h2>Team Configuration</h2>
-              
+
               <FormGroup>
-                <Label htmlFor="estimated_duration">Estimated Duration (minutes) *</Label>
+                <Label htmlFor="estimated_duration">
+                  Estimated Duration (minutes) *
+                </Label>
                 <Input
                   id="estimated_duration"
                   name="estimated_duration"
@@ -444,40 +489,46 @@ const ScenarioBuilder = () => {
                   placeholder="60"
                 />
                 {errors.estimated_duration && touched.estimated_duration && (
-                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>{errors.estimated_duration}</div>
+                  <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                    {errors.estimated_duration}
+                  </div>
                 )}
               </FormGroup>
-              
+
               <FormGroup>
                 <Label>Team Roles *</Label>
                 <FieldArray name="team_roles">
                   {({ push, remove }) => (
                     <div>
-                      {teamRoles.map(role => (
-                        <div key={role.value} style={{ marginBottom: '0.5rem' }}>
+                      {teamRoles.map((role) => (
+                        <div
+                          key={role.value}
+                          style={{ marginBottom: '0.5rem' }}
+                        >
                           <label>
                             <Field
                               type="checkbox"
                               name="team_roles"
                               value={role.value}
-                            />
-                            {' '}
+                            />{' '}
                             {role.label}
                           </label>
                         </div>
                       ))}
                       {errors.team_roles && touched.team_roles && (
-                        <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>{errors.team_roles}</div>
+                        <div style={{ color: '#e74c3c', marginTop: '0.25rem' }}>
+                          {errors.team_roles}
+                        </div>
                       )}
                     </div>
                   )}
                 </FieldArray>
               </FormGroup>
             </FormSection>
-            
+
             <FormSection>
               <h2>Advanced Configuration</h2>
-              
+
               <FormGroup>
                 <Label>Threat Actors Involved</Label>
                 <FieldArray name="threat_actors_involved">
@@ -485,14 +536,23 @@ const ScenarioBuilder = () => {
                     <div>
                       {values.threat_actors_involved.map((_, index) => (
                         <FormGroup key={index}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                            }}
+                          >
                             <Input
                               name={`threat_actors_involved.${index}`}
                               type="text"
                               placeholder={`Threat Actor ${index + 1}`}
                             />
                             {values.threat_actors_involved.length > 1 && (
-                              <IconButton type="button" onClick={() => remove(index)}>
+                              <IconButton
+                                type="button"
+                                onClick={() => remove(index)}
+                              >
                                 <FiTrash2 />
                               </IconButton>
                             )}
@@ -506,7 +566,7 @@ const ScenarioBuilder = () => {
                   )}
                 </FieldArray>
               </FormGroup>
-              
+
               <FormGroup>
                 <Label>Detection Methods to Test</Label>
                 <FieldArray name="detection_methods_to_test">
@@ -514,14 +574,23 @@ const ScenarioBuilder = () => {
                     <div>
                       {values.detection_methods_to_test.map((_, index) => (
                         <FormGroup key={index}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                            }}
+                          >
                             <Input
                               name={`detection_methods_to_test.${index}`}
                               type="text"
                               placeholder={`Detection Method ${index + 1}`}
                             />
                             {values.detection_methods_to_test.length > 1 && (
-                              <IconButton type="button" onClick={() => remove(index)}>
+                              <IconButton
+                                type="button"
+                                onClick={() => remove(index)}
+                              >
                                 <FiTrash2 />
                               </IconButton>
                             )}
@@ -535,7 +604,7 @@ const ScenarioBuilder = () => {
                   )}
                 </FieldArray>
               </FormGroup>
-              
+
               <FormGroup>
                 <Label>Mitigation Strategies</Label>
                 <FieldArray name="mitigation_strategies">
@@ -543,14 +612,23 @@ const ScenarioBuilder = () => {
                     <div>
                       {values.mitigation_strategies.map((_, index) => (
                         <FormGroup key={index}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                            }}
+                          >
                             <Input
                               name={`mitigation_strategies.${index}`}
                               type="text"
                               placeholder={`Mitigation Strategy ${index + 1}`}
                             />
                             {values.mitigation_strategies.length > 1 && (
-                              <IconButton type="button" onClick={() => remove(index)}>
+                              <IconButton
+                                type="button"
+                                onClick={() => remove(index)}
+                              >
                                 <FiTrash2 />
                               </IconButton>
                             )}
@@ -565,8 +643,14 @@ const ScenarioBuilder = () => {
                 </FieldArray>
               </FormGroup>
             </FormSection>
-            
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+
+            <div
+              style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end',
+              }}
+            >
               <Button type="submit" disabled={isSubmitting || !isValid} primary>
                 <FiSave /> {isSubmitting ? 'Saving...' : 'Save Scenario'}
               </Button>
@@ -577,14 +661,14 @@ const ScenarioBuilder = () => {
           </Form>
         )}
       </Formik>
-      
+
       <FormSection>
         <h2>Existing Scenarios</h2>
         {loading ? (
           <p>Loading scenarios...</p>
         ) : scenarios.length > 0 ? (
           <ListContainer>
-            {scenarios.map(scenario => (
+            {scenarios.map((scenario) => (
               <ListItem key={scenario.scenario_id}>
                 <div>
                   <strong>{scenario.name}</strong>
@@ -593,22 +677,26 @@ const ScenarioBuilder = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <span style={{ 
-                    backgroundColor: '#3498db', 
-                    color: 'white', 
-                    padding: '0.25rem 0.5rem', 
-                    borderRadius: '4px',
-                    fontSize: '0.8rem'
-                  }}>
+                  <span
+                    style={{
+                      backgroundColor: '#3498db',
+                      color: 'white',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.8rem',
+                    }}
+                  >
                     {scenario.exercise_type.replace('_', ' ')}
                   </span>
-                  <span style={{ 
-                    backgroundColor: '#2ecc71', 
-                    color: 'white', 
-                    padding: '0.25rem 0.5rem', 
-                    borderRadius: '4px',
-                    fontSize: '0.8rem'
-                  }}>
+                  <span
+                    style={{
+                      backgroundColor: '#2ecc71',
+                      color: 'white',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.8rem',
+                    }}
+                  >
                     {scenario.difficulty}
                   </span>
                 </div>

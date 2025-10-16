@@ -31,7 +31,11 @@ async function enqueueAIRequest({ entityId, requester }, { traceId } = {}) {
         }
         await client.query('INSERT INTO copilot_ai_requests(id, entity_id, requester, status) VALUES ($1,$2,$3,$4)', [id, entityId, requester, 'PENDING']);
         await client.query('COMMIT');
-        await aiQueue.add('analyze', { requestId: id, entityId, requester, traceId, idemKey }, { jobId: idemKey, attempts: 3, backoff: { type: 'exponential', delay: 1000 } });
+        await aiQueue.add('analyze', { requestId: id, entityId, requester, traceId, idemKey }, {
+            jobId: idemKey,
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 1000 },
+        });
         return id;
     }
     catch (e) {

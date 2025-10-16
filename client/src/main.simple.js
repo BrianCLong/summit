@@ -1,6 +1,6 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.simple.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.simple.jsx';
 
 console.log('🎯 Starting SIMPLE IntelGraph App...');
 
@@ -16,29 +16,32 @@ console.log('📍 Root element:', root);
 
 if (!root) {
   console.error('❌ CRITICAL: Root element not found!');
-  document.body.innerHTML = '<h1 style="color: red;">❌ Root element not found!</h1>';
+  document.body.innerHTML =
+    '<h1 style="color: red;">❌ Root element not found!</h1>';
 } else {
   console.log('✅ Root element found:', root.outerHTML);
-  
+
   try {
     console.log('📍 Creating React root...');
     const reactRoot = ReactDOM.createRoot(root);
     console.log('✅ React root created:', reactRoot);
-    
+
     console.log('📍 Rendering App component...');
     reactRoot.render(<App />);
     console.log('✅ App component rendered!');
-    
+
     // Verify content was added
     setTimeout(() => {
-      console.log('📍 Post-render check - Root innerHTML length:', root.innerHTML.length);
+      console.log(
+        '📍 Post-render check - Root innerHTML length:',
+        root.innerHTML.length,
+      );
       if (root.innerHTML.length > 0) {
         console.log('✅ SUCCESS: Content was rendered to the DOM!');
       } else {
         console.error('❌ FAILURE: No content in root element after render');
       }
     }, 100);
-    
   } catch (error) {
     console.error('❌ CRITICAL ERROR during render:', error);
     root.innerHTML = `

@@ -18,12 +18,16 @@ const JIRA_BASE_URL = process.env.JIRA_BASE_URL || '';
 const JIRA_EMAIL = process.env.JIRA_EMAIL || '';
 const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN || '';
 
-const MAESTRO_BASE = process.env.MAESTRO_BASE_URL || 'https://maestro.dev.topicality.co';
+const MAESTRO_BASE =
+  process.env.MAESTRO_BASE_URL || 'https://maestro.dev.topicality.co';
 const MAESTRO_GRAPHQL = process.env.MAESTRO_GRAPHQL_PATH || '/api/graphql';
 
 async function verifyGitHub() {
   console.log('→ Verifying GitHub App auth…');
-  assert(GH_APP_ID && GH_INSTALLATION_ID && GH_PRIVATE_KEY, 'Missing GitHub envs');
+  assert(
+    GH_APP_ID && GH_INSTALLATION_ID && GH_PRIVATE_KEY,
+    'Missing GitHub envs',
+  );
   const octokit = new Octokit({
     authStrategy: createAppAuth,
     auth: {
@@ -40,8 +44,15 @@ async function verifyGitHub() {
 async function verifyWebhookSignatureSample() {
   console.log('→ Self-test GitHub webhook HMAC (local sample)…');
   assert(GH_WEBHOOK_SECRET, 'Missing GITHUB_WEBHOOK_SECRET');
-  const fakeBody = Buffer.from(JSON.stringify({ zen: 'Keep it logically awesome.' }));
-  const mac = 'sha256=' + crypto.createHmac('sha256', GH_WEBHOOK_SECRET).update(fakeBody).digest('hex');
+  const fakeBody = Buffer.from(
+    JSON.stringify({ zen: 'Keep it logically awesome.' }),
+  );
+  const mac =
+    'sha256=' +
+    crypto
+      .createHmac('sha256', GH_WEBHOOK_SECRET)
+      .update(fakeBody)
+      .digest('hex');
   const ok = crypto.timingSafeEqual(Buffer.from(mac), Buffer.from(mac));
   console.log(`✔ HMAC sample OK = ${ok}`);
   return ok;
@@ -50,7 +61,9 @@ async function verifyWebhookSignatureSample() {
 async function verifyJira() {
   console.log('→ Verifying Jira API token…');
   assert(JIRA_BASE_URL && JIRA_EMAIL && JIRA_API_TOKEN, 'Missing Jira envs');
-  const auth = Buffer.from(`${JIRA_EMAIL}:${JIRA_API_TOKEN}`).toString('base64');
+  const auth = Buffer.from(`${JIRA_EMAIL}:${JIRA_API_TOKEN}`).toString(
+    'base64',
+  );
   const me = await fetch(`${JIRA_BASE_URL}/rest/api/3/myself`, {
     headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' },
   });
@@ -61,7 +74,9 @@ async function verifyJira() {
   assert(pj.ok, `Jira /project/search failed: ${pj.status}`);
   const data: any = await pj.json();
   const keys = (data.values || []).map((x: any) => x.key).slice(0, 10);
-  console.log(`✔ Jira OK — sample project keys: ${keys.join(', ') || '(none visible)'}`);
+  console.log(
+    `✔ Jira OK — sample project keys: ${keys.join(', ') || '(none visible)'}`,
+  );
   return true;
 }
 
@@ -89,13 +104,20 @@ async function verifyMaestro() {
   });
   if (!g.ok) throw new Error(`GraphQL failed: ${g.status}`);
   const gj = await g.json();
-  console.log('✔ startRun(dryRun) response:', JSON.stringify(gj.data, null, 2));
+  console.log(
+    '✔ startRun(dryRun) response:',
+    JSON.stringify(gj.data, null, 2),
+  );
 
   // 2) Tickets REST
-  const t = await fetch(`${MAESTRO_BASE}/api/tickets`, { headers: { Accept: 'application/json' } });
+  const t = await fetch(`${MAESTRO_BASE}/api/tickets`, {
+    headers: { Accept: 'application/json' },
+  });
   if (!t.ok) throw new Error(`Tickets failed: ${t.status}`);
   const tj = await t.json();
-  console.log(`✔ Tickets API OK (${Array.isArray(tj.items) ? tj.items.length : 0} items)`);
+  console.log(
+    `✔ Tickets API OK (${Array.isArray(tj.items) ? tj.items.length : 0} items)`,
+  );
   return true;
 }
 
@@ -114,4 +136,3 @@ const task = process.argv[2];
     process.exit(1);
   }
 })();
-

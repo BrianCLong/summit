@@ -239,18 +239,18 @@ curl -s http://localhost:4000/graphql -H "Content-Type: application/json" -d '{"
 
 **Technical Approval:**
 
-- [ ] Technical Lead: ********\_******** Date: ****\_****
-- [ ] DevOps Engineer: ********\_******** Date: ****\_****
-- [ ] Security Engineer: ********\_******** Date: ****\_****
+- [ ] Technical Lead: **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
+- [ ] DevOps Engineer: **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
+- [ ] Security Engineer: **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
 
 **Business Approval:**
 
-- [ ] Product Owner: ********\_******** Date: ****\_****
-- [ ] Business Stakeholder: ********\_******** Date: ****\_****
+- [ ] Product Owner: **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
+- [ ] Business Stakeholder: **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
 
 **Go-Live Authorization:**
 
-- [ ] Final Approval: ********\_******** Date: ****\_****
+- [ ] Final Approval: **\*\*\*\***\_**\*\*\*\*** Date: \***\*\_\*\***
 
 ---
 

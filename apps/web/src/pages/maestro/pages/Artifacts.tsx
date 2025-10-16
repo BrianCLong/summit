@@ -10,22 +10,21 @@ import {
 } from '@heroicons/react/24/outline'
 
 import { SAMPLE_ARTIFACTS } from '../../../data/sampleProvenance'
-import {
-  formatStepType,
-  useHashVerifier,
-} from '../../../lib/provenance'
+import { formatStepType, useHashVerifier } from '../../../lib/provenance'
 
 export default function Artifacts() {
   const artifacts = useMemo(() => SAMPLE_ARTIFACTS, [])
   const [selectedArtifactId, setSelectedArtifactId] = useState(
-    artifacts[0]?.id ?? '',
+    artifacts[0]?.id ?? ''
   )
   const [selectedStepId, setSelectedStepId] = useState(
-    artifacts[0]?.manifest.steps[0]?.id ?? '',
+    artifacts[0]?.manifest.steps[0]?.id ?? ''
   )
   const { verifying, verifiedStep, error, verify } = useHashVerifier()
 
-  const selectedArtifact = artifacts.find(artifact => artifact.id === selectedArtifactId)
+  const selectedArtifact = artifacts.find(
+    artifact => artifact.id === selectedArtifactId
+  )
   const steps = selectedArtifact?.manifest.steps ?? []
   const activeStep =
     steps.find(step => step.id === selectedStepId) ?? steps[0] ?? null
@@ -123,8 +122,8 @@ export default function Artifacts() {
                 Provenance Chain
               </h2>
               <p className="text-sm text-gray-600">
-                Each step includes canonical input/output hashes for reproducible
-                verification.
+                Each step includes canonical input/output hashes for
+                reproducible verification.
               </p>
             </div>
             <div className="divide-y divide-gray-100">
@@ -144,11 +143,14 @@ export default function Artifacts() {
                         {formatStepType(step.type)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {step.tool} • {new Date(step.timestamp).toLocaleString()}
+                        {step.tool} •{' '}
+                        {new Date(step.timestamp).toLocaleString()}
                       </p>
                     </div>
                     <div className="text-right text-xs text-gray-500">
-                      <p className="font-mono">{step.outputHash.slice(0, 12)}…</p>
+                      <p className="font-mono">
+                        {step.outputHash.slice(0, 12)}…
+                      </p>
                       <p>Hash</p>
                     </div>
                   </button>
@@ -187,7 +189,9 @@ export default function Artifacts() {
                     className="mt-3 inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                     disabled={verifying !== null}
                   >
-                    {verifying === `${activeStep.id}-input` ? 'Verifying…' : 'Verify input hash'}
+                    {verifying === `${activeStep.id}-input`
+                      ? 'Verifying…'
+                      : 'Verify input hash'}
                   </button>
                 </div>
                 <div>
@@ -203,7 +207,9 @@ export default function Artifacts() {
                     className="mt-3 inline-flex items-center rounded-md border border-blue-500 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
                     disabled={verifying !== null}
                   >
-                    {verifying === `${activeStep.id}-output` ? 'Verifying…' : 'Verify output hash'}
+                    {verifying === `${activeStep.id}-output`
+                      ? 'Verifying…'
+                      : 'Verify output hash'}
                   </button>
                 </div>
               </div>

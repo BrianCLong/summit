@@ -10,7 +10,7 @@ const meta: Meta<typeof EntityDrawer> = {
     layout: 'fullscreen',
   },
   decorators: [
-    (Story) => (
+    Story => (
       <TooltipProvider>
         <div className="h-screen">
           <Story />
@@ -31,7 +31,7 @@ export const Default: Story = {
     open: true,
     onOpenChange: () => {},
     selectedEntityId: 'ent-001',
-    onSelect: (entity) => console.log('Selected entity:', entity),
+    onSelect: entity => console.log('Selected entity:', entity),
     onAction: (action, payload) => console.log('Action:', action, payload),
   },
 }
@@ -43,7 +43,7 @@ export const PersonEntity: Story = {
     open: true,
     onOpenChange: () => {},
     selectedEntityId: 'ent-001', // John Anderson
-    onSelect: (entity) => console.log('Selected entity:', entity),
+    onSelect: entity => console.log('Selected entity:', entity),
     onAction: (action, payload) => console.log('Action:', action, payload),
   },
 }
@@ -55,7 +55,7 @@ export const IPAddressEntity: Story = {
     open: true,
     onOpenChange: () => {},
     selectedEntityId: 'ent-002', // IP Address
-    onSelect: (entity) => console.log('Selected entity:', entity),
+    onSelect: entity => console.log('Selected entity:', entity),
     onAction: (action, payload) => console.log('Action:', action, payload),
   },
 }
@@ -67,7 +67,7 @@ export const MalwareEntity: Story = {
     open: true,
     onOpenChange: () => {},
     selectedEntityId: 'ent-004', // Malware file
-    onSelect: (entity) => console.log('Selected entity:', entity),
+    onSelect: entity => console.log('Selected entity:', entity),
     onAction: (action, payload) => console.log('Action:', action, payload),
   },
 }
@@ -79,7 +79,7 @@ export const NoSelection: Story = {
     open: true,
     onOpenChange: () => {},
     selectedEntityId: undefined,
-    onSelect: (entity) => console.log('Selected entity:', entity),
+    onSelect: entity => console.log('Selected entity:', entity),
     onAction: (action, payload) => console.log('Action:', action, payload),
   },
 }

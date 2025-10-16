@@ -2,9 +2,9 @@
 
 Below is a ready‑to‑`git am` patch series that:
 
-1) Adds Wave‑2 scaffolding (MAIL/VEC, TS‑RAG, VCC, FJ‑PSU, RBP) to `/impl/`, experiments, and integration hooks.
-2) Adds full `/ip` drafts (`draft_spec_wave2.md`, `claims_wave2.md`, `prior_art.csv`, `fto_wave2.md`).
-3) Updates `README.md` with Wave‑2 docs and badges.
+1. Adds Wave‑2 scaffolding (MAIL/VEC, TS‑RAG, VCC, FJ‑PSU, RBP) to `/impl/`, experiments, and integration hooks.
+2. Adds full `/ip` drafts (`draft_spec_wave2.md`, `claims_wave2.md`, `prior_art.csv`, `fto_wave2.md`).
+3. Updates `README.md` with Wave‑2 docs and badges.
 
 > Apply with:
 >
@@ -366,6 +366,7 @@ Expose certificate fingerprints in your Evidence Cards UI.
 ## File Contents (for manual copy)
 
 ### `impl/mail/ir.py`
+
 ```python
 from dataclasses import dataclass, field
 from typing import Literal, List, Dict, Any
@@ -401,6 +402,7 @@ class MailProgram:
 ```
 
 ### `impl/mail/compiler.py`
+
 ```python
 from .ir import MailProgram, MailOp, Constraint
 from typing import Dict, Any, List
@@ -416,6 +418,7 @@ class MailCompiler:
 ```
 
 ### `impl/mail/verifier.py`
+
 ```python
 from .ir import MailProgram
 from typing import Any, List
@@ -427,6 +430,7 @@ def verify_and_certify(mp: MailProgram, contexts: List[Any], tool_calls: List[An
 ```
 
 ### `impl/tsrag/decay_mask.py`
+
 ```python
 import numpy as np, time
 
@@ -443,6 +447,7 @@ def temporal_decay_mask(token_ids, token_to_source_ts, now_ts=None, half_life_s=
 ```
 
 ### `impl/tsrag/delta_manifest.py`
+
 ```python
 from dataclasses import dataclass
 from typing import List
@@ -458,6 +463,7 @@ def delta_manifest(items: List[DeltaItem]):
 ```
 
 ### `impl/tsrag/fresh_index.py`
+
 ```python
 from typing import List, Dict
 
@@ -471,6 +477,7 @@ class FreshIndex:
 ```
 
 ### `impl/vcc/selector.py`
+
 ```python
 from typing import List
 
@@ -491,11 +498,13 @@ def select_context(candidates: List[Candidate], q_embed, budget_tokens: int):
 ```
 
 ### `impl/vcc/mi_trainer.py`
+
 ```python
 # Stub trainer: maximize contrastive score under budget
 ```
 
 ### `impl/vcc/budgeter.py`
+
 ```python
 class Budgeter:
     def __init__(self, tokens:int): self.tokens=tokens
@@ -503,6 +512,7 @@ class Budgeter:
 ```
 
 ### `impl/fjpsu/match_card.py`
+
 ```python
 from dataclasses import dataclass
 import time
@@ -517,16 +527,19 @@ class MatchCard:
 ```
 
 ### `impl/fjpsu/psu_ops.py`
+
 ```python
 # Placeholder for PSU primitives; integrate with existing libs in production
 ```
 
 ### `impl/fjpsu/sketch.py`
+
 ```python
 # Count-distinct sketches placeholder
 ```
 
 ### `impl/fjpsu/gateway.py`
+
 ```python
 from .match_card import MatchCard
 
@@ -536,6 +549,7 @@ def match(req, partners) -> MatchCard:
 ```
 
 ### `impl/rbp/ledger.py`
+
 ```python
 class RiskLedger:
     def __init__(self, budget: float, alpha: float=0.95):
@@ -546,6 +560,7 @@ class RiskLedger:
 ```
 
 ### `impl/rbp/planner.py`
+
 ```python
 from .ledger import RiskLedger
 
@@ -559,41 +574,50 @@ def plan(ir, budget: float):
 ```
 
 ### `impl/rbp/rollback.py`
+
 ```python
 # Rollback helpers for failed plans
 ```
 
 ### `experiments/temporal_bench.py`
+
 ```python
 # Evaluate temporal accuracy & p95 latency; placeholder harness
 ```
 
 ### `experiments/context_ib.py`
+
 ```python
 # Evaluate MI-based context selection vs TF-IDF; placeholder harness
 ```
 
 ### `integration/maestro_mail_adapter.py`
+
 ```python
 # Adapter glue for Maestro Conductor; placeholder to register MAIL compilers
 ```
 
 ### `integration/intelgraph_ts_hooks.md`
+
 ```md
 # IntelGraph Time-Sieve Hooks
+
 - Freshness indexer wiring
 - Decode loop mask injection
 ```
 
 ### `ip/draft_spec_wave2.md`
-*(Full content included within the patch above; edit there.)*
+
+_(Full content included within the patch above; edit there.)_
 
 ### `ip/claims_wave2.md`
-*(Full content included within the patch above; edit there.)*
+
+_(Full content included within the patch above; edit there.)_
 
 ### `ip/prior_art.csv`
-*(Seed rows included; expand with quotes and DOIs during filing.)*
+
+_(Seed rows included; expand with quotes and DOIs during filing.)_
 
 ### `ip/fto_wave2.md`
-*(Full content included within the patch above.)*
 
+_(Full content included within the patch above.)_

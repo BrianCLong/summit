@@ -3,7 +3,15 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 interface DashboardWidget {
   id: string;
   title: string;
-  type: 'metric' | 'chart' | 'table' | 'map' | 'timeline' | 'network' | 'list' | 'gauge';
+  type:
+    | 'metric'
+    | 'chart'
+    | 'table'
+    | 'map'
+    | 'timeline'
+    | 'network'
+    | 'list'
+    | 'gauge';
   size: 'small' | 'medium' | 'large' | 'xlarge';
   position: { row: number; col: number; width: number; height: number };
   data: any;
@@ -23,14 +31,36 @@ interface ReportTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'executive' | 'operational' | 'compliance' | 'investigation' | 'security';
-  audience: 'board' | 'management' | 'analysts' | 'compliance' | 'investigators';
-  frequency: 'realtime' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'ondemand';
+  category:
+    | 'executive'
+    | 'operational'
+    | 'compliance'
+    | 'investigation'
+    | 'security';
+  audience:
+    | 'board'
+    | 'management'
+    | 'analysts'
+    | 'compliance'
+    | 'investigators';
+  frequency:
+    | 'realtime'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'quarterly'
+    | 'ondemand';
   format: 'pdf' | 'excel' | 'powerpoint' | 'html' | 'json';
   sections: {
     id: string;
     title: string;
-    type: 'executive_summary' | 'metrics' | 'charts' | 'tables' | 'narrative' | 'appendix';
+    type:
+      | 'executive_summary'
+      | 'metrics'
+      | 'charts'
+      | 'tables'
+      | 'narrative'
+      | 'appendix';
     content: any;
     pageBreak: boolean;
   }[];
@@ -119,16 +149,20 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
   onReportSchedule,
   className = '',
 }) => {
-  const [activeView, setActiveView] = useState<'dashboard' | 'reports' | 'analytics' | 'settings'>(
-    'dashboard',
-  );
+  const [activeView, setActiveView] = useState<
+    'dashboard' | 'reports' | 'analytics' | 'settings'
+  >('dashboard');
   const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
   const [reportTemplates, setReportTemplates] = useState<ReportTemplate[]>([]);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState<string>('7d');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<ReportTemplate | null>(null);
-  const [reportParameters, setReportParameters] = useState<{ [key: string]: any }>({});
+  const [selectedReport, setSelectedReport] = useState<ReportTemplate | null>(
+    null,
+  );
+  const [reportParameters, setReportParameters] = useState<{
+    [key: string]: any;
+  }>({});
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   // Mock dashboard metrics
@@ -145,7 +179,10 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
         detected: 234,
         mitigated: 189,
         critical: 12,
-        trendsLast30Days: Array.from({ length: 30 }, () => Math.floor(Math.random() * 50) + 10),
+        trendsLast30Days: Array.from(
+          { length: 30 },
+          () => Math.floor(Math.random() * 50) + 10,
+        ),
       },
       compliance: {
         adherenceRate: 97.8,
@@ -181,8 +218,15 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
         type: 'metric',
         size: 'small',
         position: { row: 0, col: 0, width: 1, height: 1 },
-        data: { value: mockMetrics.investigations.active, trend: 12, unit: 'cases' },
-        configuration: { refreshInterval: 300000, thresholds: { warning: 40, critical: 60 } },
+        data: {
+          value: mockMetrics.investigations.active,
+          trend: 12,
+          unit: 'cases',
+        },
+        configuration: {
+          refreshInterval: 300000,
+          thresholds: { warning: 40, critical: 60 },
+        },
         isVisible: true,
         isLoading: false,
         lastUpdated: new Date(),
@@ -208,7 +252,11 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
         type: 'gauge',
         size: 'medium',
         position: { row: 1, col: 0, width: 1, height: 1 },
-        data: { value: mockMetrics.compliance.adherenceRate, max: 100, unit: '%' },
+        data: {
+          value: mockMetrics.compliance.adherenceRate,
+          max: 100,
+          unit: '%',
+        },
         configuration: { thresholds: { warning: 85, critical: 70 } },
         isVisible: true,
         isLoading: false,
@@ -220,8 +268,15 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
         type: 'metric',
         size: 'small',
         position: { row: 1, col: 1, width: 1, height: 1 },
-        data: { value: mockMetrics.performance.systemUptime, unit: '%', trend: 0.1 },
-        configuration: { refreshInterval: 60000, thresholds: { warning: 95, critical: 90 } },
+        data: {
+          value: mockMetrics.performance.systemUptime,
+          unit: '%',
+          trend: 0.1,
+        },
+        configuration: {
+          refreshInterval: 60000,
+          thresholds: { warning: 95, critical: 90 },
+        },
         isVisible: true,
         isLoading: false,
         lastUpdated: new Date(),
@@ -251,7 +306,14 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
               'M. Johnson',
               '4 hours ago',
             ],
-            ['INV-2024-003', 'Compliance Violation', 'Medium', 'Pending', 'S. Davis', '1 day ago'],
+            [
+              'INV-2024-003',
+              'Compliance Violation',
+              'Medium',
+              'Pending',
+              'S. Davis',
+              '1 day ago',
+            ],
             [
               'INV-2024-004',
               'Threat Intelligence Analysis',
@@ -260,7 +322,14 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
               'R. Wilson',
               '3 hours ago',
             ],
-            ['INV-2024-005', 'OSINT Investigation', 'Low', 'Completed', 'A. Brown', '2 days ago'],
+            [
+              'INV-2024-005',
+              'OSINT Investigation',
+              'Low',
+              'Completed',
+              'A. Brown',
+              '2 days ago',
+            ],
           ],
         },
         configuration: { refreshInterval: 900000 },
@@ -278,7 +347,8 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
       {
         id: 'template-001',
         name: 'Executive Security Dashboard',
-        description: 'High-level security metrics and KPIs for executive leadership',
+        description:
+          'High-level security metrics and KPIs for executive leadership',
         category: 'executive',
         audience: 'board',
         frequency: 'weekly',
@@ -307,8 +377,18 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
           },
         ],
         parameters: [
-          { name: 'report_period', type: 'date', required: true, defaultValue: new Date() },
-          { name: 'include_financial', type: 'boolean', required: false, defaultValue: true },
+          {
+            name: 'report_period',
+            type: 'date',
+            required: true,
+            defaultValue: new Date(),
+          },
+          {
+            name: 'include_financial',
+            type: 'boolean',
+            required: false,
+            defaultValue: true,
+          },
         ],
         schedule: {
           enabled: true,
@@ -380,7 +460,8 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
       {
         id: 'template-003',
         name: 'Compliance Audit Report',
-        description: 'Comprehensive compliance status and audit readiness report',
+        description:
+          'Comprehensive compliance status and audit readiness report',
         category: 'compliance',
         audience: 'compliance',
         frequency: 'monthly',
@@ -422,7 +503,12 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
             required: false,
             options: ['All', 'GDPR', 'SOX', 'HIPAA', 'PCI-DSS'],
           },
-          { name: 'include_remediation', type: 'boolean', required: false, defaultValue: true },
+          {
+            name: 'include_remediation',
+            type: 'boolean',
+            required: false,
+            defaultValue: true,
+          },
         ],
         isActive: true,
         createdBy: 'compliance_officer',
@@ -449,7 +535,10 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
             ...widget.data,
             value:
               widget.type === 'metric'
-                ? Math.max(0, widget.data.value + Math.floor((Math.random() - 0.5) * 10))
+                ? Math.max(
+                    0,
+                    widget.data.value + Math.floor((Math.random() - 0.5) * 10),
+                  )
                 : widget.data.value,
           },
         })),
@@ -534,7 +623,12 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
   const visibleWidgets = useMemo(() => {
     return widgets.filter((widget) => {
       if (userRole === 'executive') {
-        return ['widget-001', 'widget-002', 'widget-003', 'widget-004'].includes(widget.id);
+        return [
+          'widget-001',
+          'widget-002',
+          'widget-003',
+          'widget-004',
+        ].includes(widget.id);
       }
       return widget.isVisible;
     });
@@ -556,12 +650,18 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
           }}
         >
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '600', margin: '0 0 4px 0' }}>
+            <h3
+              style={{
+                fontSize: '1.2rem',
+                fontWeight: '600',
+                margin: '0 0 4px 0',
+              }}
+            >
               📊 Enterprise Dashboard
             </h3>
             <div style={{ fontSize: '13px', color: '#666' }}>
-              {userRole.charAt(0).toUpperCase() + userRole.slice(1)} View • Last updated:{' '}
-              {new Date().toLocaleTimeString()}
+              {userRole.charAt(0).toUpperCase() + userRole.slice(1)} View • Last
+              updated: {new Date().toLocaleTimeString()}
             </div>
           </div>
 
@@ -602,7 +702,9 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
         </div>
 
         {/* View Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--hairline)' }}>
+        <div
+          style={{ display: 'flex', borderBottom: '1px solid var(--hairline)' }}
+        >
           {[
             { key: 'dashboard', label: '📊 Dashboard' },
             { key: 'reports', label: '📋 Reports' },
@@ -619,7 +721,9 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                   backgroundColor: 'transparent',
                   border: 'none',
                   borderBottom:
-                    activeView === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                    activeView === tab.key
+                      ? '2px solid #1a73e8'
+                      : '2px solid transparent',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: activeView === tab.key ? '600' : '400',
@@ -664,7 +768,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                   >
                     {formatCurrency(metrics.financial.costSavings)}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
                     Annual Cost Savings
                   </div>
                   <div style={{ fontSize: '12px', color: '#28a745' }}>
@@ -690,7 +800,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                   >
                     {metrics.investigations.successRate}%
                   </div>
-                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
                     Investigation Success Rate
                   </div>
                   <div style={{ fontSize: '12px', color: '#666' }}>
@@ -716,13 +832,22 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                   >
                     {metrics.compliance.adherenceRate}%
                   </div>
-                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
                     Compliance Adherence
                   </div>
                   <div
                     style={{
                       fontSize: '12px',
-                      color: metrics.compliance.violations > 0 ? '#dc3545' : '#28a745',
+                      color:
+                        metrics.compliance.violations > 0
+                          ? '#dc3545'
+                          : '#28a745',
                     }}
                   >
                     {metrics.compliance.violations} active violation
@@ -748,13 +873,20 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                   >
                     {metrics.threats.detected}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
                     Threats Detected
                   </div>
                   <div
                     style={{
                       fontSize: '12px',
-                      color: metrics.threats.critical > 0 ? '#dc3545' : '#28a745',
+                      color:
+                        metrics.threats.critical > 0 ? '#dc3545' : '#28a745',
                     }}
                   >
                     {metrics.threats.critical} critical threat
@@ -777,7 +909,9 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                 <div
                   key={widget.id}
                   style={{
-                    border: isEditMode ? '2px dashed #1a73e8' : '1px solid var(--hairline)',
+                    border: isEditMode
+                      ? '2px dashed #1a73e8'
+                      : '1px solid var(--hairline)',
                     borderRadius: '8px',
                     backgroundColor: 'white',
                     position: 'relative',
@@ -802,12 +936,22 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                       alignItems: 'center',
                     }}
                   >
-                    <h5 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>
+                    <h5
+                      style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}
+                    >
                       {widget.title}
                     </h5>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
                       {widget.isLoading && (
-                        <span style={{ fontSize: '12px', color: '#666' }}>⏳</span>
+                        <span style={{ fontSize: '12px', color: '#666' }}>
+                          ⏳
+                        </span>
                       )}
                       <span style={{ fontSize: '11px', color: '#999' }}>
                         {widget.lastUpdated.toLocaleTimeString()}
@@ -839,7 +983,8 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                             fontSize: '28px',
                             fontWeight: '600',
                             color:
-                              widget.data.value > (widget.configuration.thresholds?.warning || 0)
+                              widget.data.value >
+                              (widget.configuration.thresholds?.warning || 0)
                                 ? '#dc3545'
                                 : '#28a745',
                             marginBottom: '8px',
@@ -847,7 +992,9 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                         >
                           {widget.data.value}
                           {widget.data.unit && (
-                            <span style={{ fontSize: '16px', marginLeft: '4px' }}>
+                            <span
+                              style={{ fontSize: '16px', marginLeft: '4px' }}
+                            >
                               {widget.data.unit}
                             </span>
                           )}
@@ -915,69 +1062,81 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                           gap: '2px',
                         }}
                       >
-                        {widget.data.series.slice(-20).map((value: number, index: number) => (
-                          <div
-                            key={index}
-                            style={{
-                              flex: 1,
-                              height: `${(value / Math.max(...widget.data.series)) * 100}%`,
-                              backgroundColor: '#1a73e8',
-                              borderRadius: '2px 2px 0 0',
-                              minHeight: '4px',
-                            }}
-                          />
-                        ))}
+                        {widget.data.series
+                          .slice(-20)
+                          .map((value: number, index: number) => (
+                            <div
+                              key={index}
+                              style={{
+                                flex: 1,
+                                height: `${(value / Math.max(...widget.data.series)) * 100}%`,
+                                backgroundColor: '#1a73e8',
+                                borderRadius: '2px 2px 0 0',
+                                minHeight: '4px',
+                              }}
+                            />
+                          ))}
                       </div>
                     )}
 
                     {widget.type === 'table' && (
                       <div style={{ overflow: 'auto', maxHeight: '250px' }}>
                         <table
-                          style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}
+                          style={{
+                            width: '100%',
+                            fontSize: '12px',
+                            borderCollapse: 'collapse',
+                          }}
                         >
                           <thead>
                             <tr>
-                              {widget.data.headers.map((header: string, index: number) => (
-                                <th
-                                  key={index}
-                                  style={{
-                                    padding: '4px 6px',
-                                    textAlign: 'left',
-                                    borderBottom: '1px solid #e9ecef',
-                                    fontSize: '11px',
-                                    fontWeight: '600',
-                                    color: '#666',
-                                  }}
-                                >
-                                  {header}
-                                </th>
-                              ))}
+                              {widget.data.headers.map(
+                                (header: string, index: number) => (
+                                  <th
+                                    key={index}
+                                    style={{
+                                      padding: '4px 6px',
+                                      textAlign: 'left',
+                                      borderBottom: '1px solid #e9ecef',
+                                      fontSize: '11px',
+                                      fontWeight: '600',
+                                      color: '#666',
+                                    }}
+                                  >
+                                    {header}
+                                  </th>
+                                ),
+                              )}
                             </tr>
                           </thead>
                           <tbody>
-                            {widget.data.rows.slice(0, 5).map((row: any[], rowIndex: number) => (
-                              <tr key={rowIndex}>
-                                {row.map((cell: any, cellIndex: number) => (
-                                  <td
-                                    key={cellIndex}
-                                    style={{
-                                      padding: '4px 6px',
-                                      borderBottom: '1px solid #f8f9fa',
-                                      color:
-                                        cellIndex === 2
-                                          ? getPriorityColor(cell)
-                                          : cellIndex === 3
-                                            ? getStatusColor(cell)
-                                            : 'inherit',
-                                      fontWeight:
-                                        cellIndex === 2 || cellIndex === 3 ? '500' : 'normal',
-                                    }}
-                                  >
-                                    {cell}
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
+                            {widget.data.rows
+                              .slice(0, 5)
+                              .map((row: any[], rowIndex: number) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell: any, cellIndex: number) => (
+                                    <td
+                                      key={cellIndex}
+                                      style={{
+                                        padding: '4px 6px',
+                                        borderBottom: '1px solid #f8f9fa',
+                                        color:
+                                          cellIndex === 2
+                                            ? getPriorityColor(cell)
+                                            : cellIndex === 3
+                                              ? getStatusColor(cell)
+                                              : 'inherit',
+                                        fontWeight:
+                                          cellIndex === 2 || cellIndex === 3
+                                            ? '500'
+                                            : 'normal',
+                                      }}
+                                    >
+                                      {cell}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
                           </tbody>
                         </table>
                       </div>
@@ -993,7 +1152,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
           <div>
             {/* Report Templates List */}
             <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '16px',
+                }}
+              >
                 Report Templates
               </h4>
 
@@ -1009,7 +1174,9 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                     userRole === 'executive'
                       ? ['executive', 'compliance'].includes(template.category)
                       : userRole === 'compliance'
-                        ? ['compliance', 'operational'].includes(template.category)
+                        ? ['compliance', 'operational'].includes(
+                            template.category,
+                          )
                         : true,
                   )
                   .map((template) => (
@@ -1030,21 +1197,36 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                         }}
                       >
                         <div>
-                          <h5 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                          <h5
+                            style={{
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              margin: '0 0 4px 0',
+                            }}
+                          >
                             {template.name}
                           </h5>
                           <div style={{ fontSize: '12px', color: '#666' }}>
-                            {template.category} • {template.audience} • {template.frequency}
+                            {template.category} • {template.audience} •{' '}
+                            {template.frequency}
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
                           <span
                             style={{
                               fontSize: '11px',
                               padding: '2px 6px',
                               borderRadius: '12px',
-                              backgroundColor: template.isActive ? '#28a745' : '#6c757d',
+                              backgroundColor: template.isActive
+                                ? '#28a745'
+                                : '#6c757d',
                               color: 'white',
                               fontWeight: '600',
                             }}
@@ -1067,7 +1249,8 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
 
                       <div style={{ fontSize: '12px', marginBottom: '12px' }}>
                         <div>
-                          <strong>Format:</strong> {template.format.toUpperCase()}
+                          <strong>Format:</strong>{' '}
+                          {template.format.toUpperCase()}
                         </div>
                         <div>
                           <strong>Sections:</strong> {template.sections.length}
@@ -1099,7 +1282,9 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
 
                         {template.schedule?.enabled && (
                           <button
-                            onClick={() => onReportSchedule?.(template.id, template.schedule)}
+                            onClick={() =>
+                              onReportSchedule?.(template.id, template.schedule)
+                            }
                             style={{
                               padding: '6px 12px',
                               fontSize: '12px',
@@ -1146,7 +1331,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                     overflow: 'auto',
                   }}
                 >
-                  <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+                  <h4
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      marginBottom: '16px',
+                    }}
+                  >
                     Generate Report: {selectedReport.name}
                   </h4>
 
@@ -1161,13 +1352,21 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                             display: 'block',
                           }}
                         >
-                          {param.name.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
-                          {param.required && <span style={{ color: '#dc3545' }}>*</span>}
+                          {param.name
+                            .replace('_', ' ')
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
+                          {param.required && (
+                            <span style={{ color: '#dc3545' }}>*</span>
+                          )}
                         </label>
 
                         {param.type === 'select' ? (
                           <select
-                            value={reportParameters[param.name] || param.defaultValue || ''}
+                            value={
+                              reportParameters[param.name] ||
+                              param.defaultValue ||
+                              ''
+                            }
                             onChange={(e) =>
                               setReportParameters((prev) => ({
                                 ...prev,
@@ -1189,10 +1388,20 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                             ))}
                           </select>
                         ) : param.type === 'boolean' ? (
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <label
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                            }}
+                          >
                             <input
                               type="checkbox"
-                              checked={reportParameters[param.name] || param.defaultValue || false}
+                              checked={
+                                reportParameters[param.name] ||
+                                param.defaultValue ||
+                                false
+                              }
                               onChange={(e) =>
                                 setReportParameters((prev) => ({
                                   ...prev,
@@ -1200,12 +1409,18 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                                 }))
                               }
                             />
-                            <span style={{ fontSize: '13px' }}>Include in report</span>
+                            <span style={{ fontSize: '13px' }}>
+                              Include in report
+                            </span>
                           </label>
                         ) : (
                           <input
                             type={param.type}
-                            value={reportParameters[param.name] || param.defaultValue || ''}
+                            value={
+                              reportParameters[param.name] ||
+                              param.defaultValue ||
+                              ''
+                            }
                             onChange={(e) =>
                               setReportParameters((prev) => ({
                                 ...prev,
@@ -1225,7 +1440,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                     ))}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '8px',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
                     <button
                       onClick={() => setSelectedReport(null)}
                       style={{
@@ -1247,14 +1468,18 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                       style={{
                         padding: '8px 16px',
                         fontSize: '13px',
-                        backgroundColor: isGeneratingReport ? '#6c757d' : '#1a73e8',
+                        backgroundColor: isGeneratingReport
+                          ? '#6c757d'
+                          : '#1a73e8',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
                         cursor: isGeneratingReport ? 'not-allowed' : 'pointer',
                       }}
                     >
-                      {isGeneratingReport ? '⏳ Generating...' : '📄 Generate Report'}
+                      {isGeneratingReport
+                        ? '⏳ Generating...'
+                        : '📄 Generate Report'}
                     </button>
                   </div>
                 </div>
@@ -1273,11 +1498,24 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
             }}
           >
             <div style={{ padding: '40px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '16px',
+                }}
+              >
                 📈 Advanced Analytics
               </h4>
-              <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px' }}>
-                Deep dive analytics with predictive modeling and advanced visualizations.
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginBottom: '24px',
+                }}
+              >
+                Deep dive analytics with predictive modeling and advanced
+                visualizations.
               </p>
               <div
                 style={{
@@ -1289,7 +1527,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
                 }}
               >
                 🚧 Advanced analytics coming soon - will include:
-                <ul style={{ textAlign: 'left', marginTop: '12px', marginLeft: '20px' }}>
+                <ul
+                  style={{
+                    textAlign: 'left',
+                    marginTop: '12px',
+                    marginLeft: '20px',
+                  }}
+                >
                   <li>Predictive investigation outcome modeling</li>
                   <li>Resource optimization analytics</li>
                   <li>Cross-investigation pattern analysis</li>
@@ -1303,9 +1547,19 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
 
         {activeView === 'settings' && userRole !== 'analyst' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Dashboard Settings
             </h4>
 
@@ -1317,7 +1571,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
               }}
             >
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <h5
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '12px',
+                  }}
+                >
                   Display Options
                 </h5>
                 <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
@@ -1358,7 +1618,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
               </div>
 
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <h5
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '12px',
+                  }}
+                >
                   Notifications
                 </h5>
                 <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
@@ -1399,7 +1665,13 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
               </div>
 
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <h5
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '12px',
+                  }}
+                >
                   Report Scheduling
                 </h5>
                 <div style={{ fontSize: '13px', lineHeight: '1.6' }}>

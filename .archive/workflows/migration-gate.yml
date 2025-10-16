@@ -26,5 +26,5 @@ jobs:
       - run: node scripts/check-migration-plan.js
         env:
           PR_TITLE: ${{ steps.ctx.outputs.title }}
-          PR_BODY:  ${{ steps.ctx.outputs.body }}
+          PR_BODY: ${{ steps.ctx.outputs.body }}
           CHANGED_FILES: ${{ env.CHANGED_FILES }}

@@ -51,7 +51,7 @@ class RBACManager {
         admin: {
           name: 'admin',
           description: 'Full administrative access',
-          permissions: ['*']
+          permissions: ['*'],
         },
         operator: {
           name: 'operator',
@@ -70,8 +70,8 @@ class RBACManager {
             'evidence:create',
             'policies:read',
             'serving:read',
-            'serving:execute'
-          ]
+            'serving:execute',
+          ],
         },
         analyst: {
           name: 'analyst',
@@ -86,8 +86,8 @@ class RBACManager {
             'evidence:create',
             'policies:read',
             'serving:read',
-            'serving:execute'
-          ]
+            'serving:execute',
+          ],
         },
         viewer: {
           name: 'viewer',
@@ -98,10 +98,10 @@ class RBACManager {
             'metrics:read',
             'evidence:read',
             'policies:read',
-            'serving:read'
-          ]
-        }
-      }
+            'serving:read',
+          ],
+        },
+      },
     };
 
     this.loadConfigFromEnvironment();
@@ -115,14 +115,17 @@ class RBACManager {
         this.config = { ...this.config, ...envConfig };
       }
     } catch (error) {
-      logger.warn('⚠️ Failed to parse RBAC_CONFIG from environment, using defaults', { error: error.message });
+      logger.warn(
+        '⚠️ Failed to parse RBAC_CONFIG from environment, using defaults',
+        { error: error.message },
+      );
     }
   }
 
   private buildPermissionCache(): void {
     for (const [roleName, role] of Object.entries(this.config.roles)) {
       const permissions = new Set<string>();
-      
+
       for (const permission of role.permissions) {
         if (permission === '*') {
           // Wildcard permission grants all
@@ -131,13 +134,13 @@ class RBACManager {
           permissions.add(permission.toLowerCase());
         }
       }
-      
+
       this.permissionCache.set(roleName, permissions);
     }
 
     logger.info('🔐 RBAC permission cache built', {
       roles: Object.keys(this.config.roles),
-      enabled: this.config.enabled
+      enabled: this.config.enabled,
     });
   }
 
@@ -146,17 +149,19 @@ class RBACManager {
       return ['admin']; // Default to admin when RBAC disabled
     }
 
-    const rolesFromClaim = user[this.config.rolesClaim as keyof AuthenticatedUser] as string[] || [];
+    const rolesFromClaim =
+      (user[this.config.rolesClaim as keyof AuthenticatedUser] as string[]) ||
+      [];
     const rolesFromUser = user.roles || [];
-    
+
     const allRoles = [...new Set([...rolesFromClaim, ...rolesFromUser])];
-    
+
     // If no roles found, assign default role
     if (allRoles.length === 0) {
       return [this.config.defaultRole];
     }
 
-    return allRoles.filter(role => this.config.roles[role]);
+    return allRoles.filter((role) => this.config.roles[role]);
   }
 
   getUserPermissions(user: AuthenticatedUser): Set<string> {
@@ -169,7 +174,9 @@ class RBACManager {
         if (rolePermissions.has('*')) {
           return new Set(['*']); // Wildcard grants all permissions
         }
-        rolePermissions.forEach(permission => userPermissions.add(permission));
+        rolePermissions.forEach((permission) =>
+          userPermissions.add(permission),
+        );
       }
     }
 
@@ -182,13 +189,13 @@ class RBACManager {
     }
 
     const userPermissions = this.getUserPermissions(user);
-    
+
     if (userPermissions.has('*')) {
       return true; // Wildcard permission
     }
 
     const normalizedPermission = requiredPermission.toLowerCase();
-    
+
     // Check exact permission match
     if (userPermissions.has(normalizedPermission)) {
       return true;
@@ -213,14 +220,23 @@ export const rbacManager = new RBACManager();
 /**
  * Authentication middleware - extracts user from JWT or OAuth proxy headers
  */
-export function authenticateUser(req: Request, res: Response, next: NextFunction): void {
+export function authenticateUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
   try {
     let user: AuthenticatedUser | null = null;
 
     // Try OAuth2 Proxy headers first (production)
-    if (req.headers['x-auth-request-user'] && req.headers['x-auth-request-email']) {
+    if (
+      req.headers['x-auth-request-user'] &&
+      req.headers['x-auth-request-email']
+    ) {
       const groups = req.headers['x-auth-request-groups']
-        ? (req.headers['x-auth-request-groups'] as string).split(',').map(g => g.trim())
+        ? (req.headers['x-auth-request-groups'] as string)
+            .split(',')
+            .map((g) => g.trim())
         : [];
 
       user = {
@@ -230,43 +246,51 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
         name: req.headers['x-auth-request-preferred-username'] as string,
         groups,
         roles: groups,
-        tenantId: req.headers['x-tenant-id'] as string || 'default'
+        tenantId: (req.headers['x-tenant-id'] as string) || 'default',
       };
     }
     // Try Authorization Bearer token (development/API)
     else if (req.headers.authorization) {
       const token = req.headers.authorization.replace('Bearer ', '');
-      
-      jwtRotationManager.verifyToken(token).then(payload => {
-        if (typeof payload === 'object' && payload.sub) {
-          user = {
-            userId: payload.sub,
-            sub: payload.sub,
-            email: payload.email || '',
-            name: payload.name,
-            groups: payload.groups || [],
-            roles: payload.roles || payload.groups || [],
-            tenantId: payload.tenantId || 'default'
-          };
 
-          (req as AuthenticatedRequest).user = user;
-          logger.debug('👤 User authenticated via JWT', {
-            userId: user.userId,
-            roles: rbacManager.getUserRoles(user)
+      jwtRotationManager
+        .verifyToken(token)
+        .then((payload) => {
+          if (typeof payload === 'object' && payload.sub) {
+            user = {
+              userId: payload.sub,
+              sub: payload.sub,
+              email: payload.email || '',
+              name: payload.name,
+              groups: payload.groups || [],
+              roles: payload.roles || payload.groups || [],
+              tenantId: payload.tenantId || 'default',
+            };
+
+            (req as AuthenticatedRequest).user = user;
+            logger.debug('👤 User authenticated via JWT', {
+              userId: user.userId,
+              roles: rbacManager.getUserRoles(user),
+            });
+
+            next();
+          } else {
+            res.status(401).json({ error: 'Invalid token payload' });
+          }
+        })
+        .catch((error) => {
+          logger.warn('🚫 JWT token verification failed', {
+            error: error.message,
           });
-
-          next();
-        } else {
-          res.status(401).json({ error: 'Invalid token payload' });
-        }
-      }).catch(error => {
-        logger.warn('🚫 JWT token verification failed', { error: error.message });
-        res.status(401).json({ error: 'Invalid token' });
-      });
+          res.status(401).json({ error: 'Invalid token' });
+        });
       return;
     }
     // Development bypass
-    else if (process.env.NODE_ENV === 'development' || process.env.AUTH_BYPASS === 'true') {
+    else if (
+      process.env.NODE_ENV === 'development' ||
+      process.env.AUTH_BYPASS === 'true'
+    ) {
       user = {
         userId: 'dev-user',
         sub: 'dev-user',
@@ -274,7 +298,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
         name: 'Development User',
         groups: ['admin'],
         roles: ['admin'],
-        tenantId: 'development'
+        tenantId: 'development',
       };
     }
 
@@ -282,22 +306,24 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
       logger.warn('🚫 Authentication required but no valid credentials found');
       return res.status(401).json({
         error: 'Authentication required',
-        message: 'Please provide valid JWT token or OAuth proxy headers'
+        message: 'Please provide valid JWT token or OAuth proxy headers',
       });
     }
 
     (req as AuthenticatedRequest).user = user;
-    
+
     logger.debug('👤 User authenticated', {
       userId: user.userId,
       email: user.email,
       roles: rbacManager.getUserRoles(user),
-      method: req.headers['x-auth-request-user'] ? 'oauth-proxy' : 'jwt'
+      method: req.headers['x-auth-request-user'] ? 'oauth-proxy' : 'jwt',
     });
 
     next();
   } catch (error) {
-    logger.error('❌ Authentication middleware error', { error: error.message });
+    logger.error('❌ Authentication middleware error', {
+      error: error.message,
+    });
     res.status(500).json({ error: 'Authentication service error' });
   }
 }
@@ -309,7 +335,7 @@ export function requirePermission(permission: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const user = (req as AuthenticatedRequest).user;
-      
+
       if (!user) {
         logger.warn('🚫 Authorization check failed - no authenticated user');
         return res.status(401).json({ error: 'Authentication required' });
@@ -317,32 +343,37 @@ export function requirePermission(permission: string) {
 
       if (!rbacManager.hasPermission(user, permission)) {
         const userRoles = rbacManager.getUserRoles(user);
-        const userPermissions = Array.from(rbacManager.getUserPermissions(user));
-        
+        const userPermissions = Array.from(
+          rbacManager.getUserPermissions(user),
+        );
+
         logger.warn('🚫 Authorization denied', {
           userId: user.userId,
           requiredPermission: permission,
           userRoles,
-          userPermissions
+          userPermissions,
         });
 
         return res.status(403).json({
           error: 'Insufficient permissions',
           required: permission,
           userRoles,
-          userPermissions: userPermissions.slice(0, 10) // Limit for security
+          userPermissions: userPermissions.slice(0, 10), // Limit for security
         });
       }
 
       logger.debug('✅ Authorization granted', {
         userId: user.userId,
         permission,
-        roles: rbacManager.getUserRoles(user)
+        roles: rbacManager.getUserRoles(user),
       });
 
       next();
     } catch (error) {
-      logger.error('❌ Authorization middleware error', { error: error.message, permission });
+      logger.error('❌ Authorization middleware error', {
+        error: error.message,
+        permission,
+      });
       res.status(500).json({ error: 'Authorization service error' });
     }
   };
@@ -355,32 +386,34 @@ export function requireAnyPermission(...permissions: string[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const user = (req as AuthenticatedRequest).user;
-      
+
       if (!user) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      const hasAnyPermission = permissions.some(permission => 
-        rbacManager.hasPermission(user, permission)
+      const hasAnyPermission = permissions.some((permission) =>
+        rbacManager.hasPermission(user, permission),
       );
 
       if (!hasAnyPermission) {
         logger.warn('🚫 Authorization denied - no matching permissions', {
           userId: user.userId,
           requiredPermissions: permissions,
-          userRoles: rbacManager.getUserRoles(user)
+          userRoles: rbacManager.getUserRoles(user),
         });
 
         return res.status(403).json({
           error: 'Insufficient permissions',
           required: permissions,
-          userRoles: rbacManager.getUserRoles(user)
+          userRoles: rbacManager.getUserRoles(user),
         });
       }
 
       next();
     } catch (error) {
-      logger.error('❌ Multi-permission authorization error', { error: error.message });
+      logger.error('❌ Multi-permission authorization error', {
+        error: error.message,
+      });
       res.status(500).json({ error: 'Authorization service error' });
     }
   };
@@ -392,7 +425,7 @@ export function requireAnyPermission(...permissions: string[]) {
 export function getUserInfo(req: Request, res: Response): void {
   try {
     const user = (req as AuthenticatedRequest).user;
-    
+
     if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -405,16 +438,16 @@ export function getUserInfo(req: Request, res: Response): void {
         userId: user.userId,
         email: user.email,
         name: user.name,
-        tenantId: user.tenantId
+        tenantId: user.tenantId,
       },
       authorization: {
         roles: userRoles,
         permissions: userPermissions,
         config: {
           rbacEnabled: rbacManager.getConfig().enabled,
-          defaultRole: rbacManager.getConfig().defaultRole
-        }
-      }
+          defaultRole: rbacManager.getConfig().defaultRole,
+        },
+      },
     });
   } catch (error) {
     logger.error('❌ Get user info error', { error: error.message });

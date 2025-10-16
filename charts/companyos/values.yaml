@@ -11,5 +11,4 @@ resources:
 image:
   repository: companyos-app
   pullPolicy: IfNotPresent
-  digest: "sha256:REPLACE_ME"
-
+  digest: 'sha256:REPLACE_ME'

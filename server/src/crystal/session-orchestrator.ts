@@ -39,10 +39,14 @@ class RunLogEmitter extends EventEmitter {
 }
 
 function clone<T>(value: T): T {
-  return structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+  return structuredClone
+    ? structuredClone(value)
+    : JSON.parse(JSON.stringify(value));
 }
 
-function buildPanels(presets?: CreateSessionInput['panelPresets']): CrystalPanel[] {
+function buildPanels(
+  presets?: CreateSessionInput['panelPresets'],
+): CrystalPanel[] {
   const items = presets?.length
     ? presets
     : [
@@ -67,7 +71,9 @@ function buildPanels(presets?: CreateSessionInput['panelPresets']): CrystalPanel
   }));
 }
 
-function buildRunScripts(defs?: CreateSessionInput['runScripts']): RunScriptDefinition[] {
+function buildRunScripts(
+  defs?: CreateSessionInput['runScripts'],
+): RunScriptDefinition[] {
   return (defs || []).map((def) => ({
     id: randomUUID(),
     name: def.name,
@@ -178,7 +184,9 @@ export class CrystalSessionOrchestrator {
       theme: input.theme || 'light',
       createdAt: now,
       updatedAt: now,
-      purposeTags: input.purposeTags?.length ? input.purposeTags : ['investigation'],
+      purposeTags: input.purposeTags?.length
+        ? input.purposeTags
+        : ['investigation'],
       retention: input.retention || 'standard-365d',
       worktree,
       panels,
@@ -201,7 +209,9 @@ export class CrystalSessionOrchestrator {
 
   async startRun(input: StartRunInput): Promise<RunExecution> {
     const session = this.requireSession(input.sessionId);
-    const definition = session.runScripts.find((script) => script.id === input.runDefinitionId);
+    const definition = session.runScripts.find(
+      (script) => script.id === input.runDefinitionId,
+    );
     if (!definition) {
       throw new Error(`Unknown run script ${input.runDefinitionId}`);
     }
@@ -211,7 +221,8 @@ export class CrystalSessionOrchestrator {
       ...definition.environment,
       ...input.overrides?.environment,
     };
-    const timeoutMs = input.overrides?.timeoutMs ?? definition.timeoutMs ?? 5 * 60 * 1000;
+    const timeoutMs =
+      input.overrides?.timeoutMs ?? definition.timeoutMs ?? 5 * 60 * 1000;
 
     const runId = randomUUID();
     const startedAt = new Date().toISOString();
@@ -275,7 +286,9 @@ export class CrystalSessionOrchestrator {
 
   async recordMessage(input: RecordMessageInput): Promise<AssistantMessage> {
     const session = this.requireSession(input.sessionId);
-    const agent = session.agents.find((candidate) => candidate.id === input.agentId);
+    const agent = session.agents.find(
+      (candidate) => candidate.id === input.agentId,
+    );
     if (!agent) {
       throw new Error(`Unknown agent ${input.agentId}`);
     }
@@ -323,12 +336,12 @@ export class CrystalSessionOrchestrator {
   updatePanels(input: UpdatePanelsInput): CrystalSession {
     const session = this.requireSession(input.sessionId);
     const layoutMap = new Map<string, PanelLayout>(
-      input.panels.map((panel) => [panel.panelId, panel.layout])
+      input.panels.map((panel) => [panel.panelId, panel.layout]),
     );
     session.panels = session.panels.map((panel) =>
       layoutMap.has(panel.id)
         ? { ...panel, layout: layoutMap.get(panel.id)! }
-        : panel
+        : panel,
     );
     this.touch(session);
     provenanceLedger.record('crystal', 'panel-layout-updated', {
@@ -345,14 +358,16 @@ export class CrystalSessionOrchestrator {
     await this.deps.worktreeEngine.deleteQueued(session.worktree.id);
     session.status = 'closed';
     this.touch(session);
-    provenanceLedger.record('crystal', 'session-closed', { sessionId: session.id });
+    provenanceLedger.record('crystal', 'session-closed', {
+      sessionId: session.id,
+    });
     return clone(session);
   }
 
   subscribeToRunLogs(
     sessionId: string,
     runId: string,
-    listener: (event: RunLogEvent) => void
+    listener: (event: RunLogEvent) => void,
   ): () => void {
     const emitter = this.getEmitter(sessionId, runId);
     return emitter.onLog(listener);

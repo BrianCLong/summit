@@ -22,18 +22,20 @@ export class NotificationService {
       createdAt: new Date(),
       readAt: null,
       priority: input.priority ?? 'medium',
-      metadata: { ...(input.metadata ?? {}) }
+      metadata: { ...(input.metadata ?? {}) },
     };
     this.store.appendNotification(notification);
     return notification;
   }
 
   public markRead(userId: string, notificationId: string): Notification[] {
-    const queue = this.store.listNotifications(userId).map((entry) =>
-      entry.id === notificationId && entry.readAt === null
-        ? { ...entry, readAt: new Date() }
-        : entry
-    );
+    const queue = this.store
+      .listNotifications(userId)
+      .map((entry) =>
+        entry.id === notificationId && entry.readAt === null
+          ? { ...entry, readAt: new Date() }
+          : entry,
+      );
     this.store.replaceNotifications(userId, queue);
     return queue;
   }

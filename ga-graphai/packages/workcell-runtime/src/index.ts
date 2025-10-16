@@ -10,7 +10,7 @@ import type {
   WorkTaskStatus,
   WorkcellAgentDefinition,
   WorkcellToolDefinition,
-  WorkcellToolHandlerContext
+  WorkcellToolHandlerContext,
 } from 'common-types';
 import { PolicyEngine } from 'policy';
 import { ProvenanceLedger } from 'prov-ledger';
@@ -22,7 +22,9 @@ export interface WorkcellRuntimeOptions {
   agents?: WorkcellAgentDefinition[];
 }
 
-function normaliseOutput(output: Record<string, unknown> | undefined): Record<string, unknown> {
+function normaliseOutput(
+  output: Record<string, unknown> | undefined,
+): Record<string, unknown> {
   if (output && typeof output === 'object') {
     return output;
   }
@@ -34,11 +36,11 @@ function deriveOrderStatus(results: WorkTaskResult[]): WorkOrderStatus {
     return 'completed';
   }
 
-  const statuses = results.map(result => result.status);
-  if (statuses.every(status => status === 'success')) {
+  const statuses = results.map((result) => result.status);
+  if (statuses.every((status) => status === 'success')) {
     return 'completed';
   }
-  if (statuses.every(status => status === 'rejected')) {
+  if (statuses.every((status) => status === 'rejected')) {
     return 'rejected';
   }
   return 'partial';
@@ -103,8 +105,8 @@ export class WorkcellRuntime {
           userId: order.userId,
           roles: order.roles,
           region: order.region,
-          attributes: order.attributes
-        }
+          attributes: order.attributes,
+        },
       });
 
       reasons.push(...evaluation.reasons);
@@ -128,7 +130,7 @@ export class WorkcellRuntime {
       finishedAt: finishedAt.toISOString(),
       tasks: taskResults,
       obligations,
-      reasons
+      reasons,
     };
 
     this.appendLedger({
@@ -141,10 +143,13 @@ export class WorkcellRuntime {
         orderId: order.orderId,
         tenantId: order.tenantId,
         status,
-        tasks: taskResults.map(result => ({ taskId: result.taskId, status: result.status })),
+        tasks: taskResults.map((result) => ({
+          taskId: result.taskId,
+          status: result.status,
+        })),
         obligations,
-        reasons
-      }
+        reasons,
+      },
     });
 
     this.orders.push(summary);
@@ -155,14 +160,16 @@ export class WorkcellRuntime {
     order: WorkOrderSubmission,
     agent: WorkcellAgentDefinition,
     task: WorkTaskInput,
-    evaluation: PolicyEvaluationResult
+    evaluation: PolicyEvaluationResult,
   ): Promise<WorkTaskResult> {
     const logs: string[] = [];
     let status: WorkTaskStatus = 'rejected';
     let output: Record<string, unknown> = {};
 
     if (!evaluation.allowed) {
-      logs.push(`policy denied task ${task.taskId}: ${evaluation.reasons.join('; ')}`);
+      logs.push(
+        `policy denied task ${task.taskId}: ${evaluation.reasons.join('; ')}`,
+      );
       this.appendTaskLedger(order, task, 'rejected', logs, evaluation, output);
       return { taskId: task.taskId, status: 'rejected', logs, output };
     }
@@ -180,7 +187,8 @@ export class WorkcellRuntime {
       return { taskId: task.taskId, status: 'rejected', logs, output };
     }
 
-    const requiredAuthority = task.requiredAuthority ?? tool.minimumAuthority ?? 0;
+    const requiredAuthority =
+      task.requiredAuthority ?? tool.minimumAuthority ?? 0;
     if (agent.authority < requiredAuthority) {
       logs.push(`agent ${agent.name} lacks authority for ${task.tool}`);
       this.appendTaskLedger(order, task, 'rejected', logs, evaluation, output);
@@ -194,10 +202,12 @@ export class WorkcellRuntime {
         tenantId: order.tenantId,
         userId: order.userId,
         agentName: agent.name,
-        metadata: order.metadata
+        metadata: order.metadata,
       };
       const handlerOutput = await Promise.resolve(tool.handler(task, context));
-      output = normaliseOutput(handlerOutput as Record<string, unknown> | undefined);
+      output = normaliseOutput(
+        handlerOutput as Record<string, unknown> | undefined,
+      );
       status = 'success';
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -216,7 +226,7 @@ export class WorkcellRuntime {
     status: WorkTaskStatus,
     logs: string[],
     evaluation: PolicyEvaluationResult,
-    output: Record<string, unknown>
+    output: Record<string, unknown>,
   ) {
     const entry: LedgerFactInput = {
       id: `${order.orderId}:${task.taskId}:${Date.now()}`,
@@ -233,9 +243,9 @@ export class WorkcellRuntime {
         policy: {
           allowed: evaluation.allowed,
           reasons: evaluation.reasons,
-          obligations: evaluation.obligations
-        }
-      }
+          obligations: evaluation.obligations,
+        },
+      },
     };
     this.appendLedger(entry);
   }
@@ -251,5 +261,5 @@ export type {
   WorkTaskInput,
   WorkTaskResult,
   WorkcellAgentDefinition,
-  WorkcellToolDefinition
+  WorkcellToolDefinition,
 } from 'common-types';

@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: dr-restore-verify }
 spec:
-  schedule: "0 3 * * 1" # weekly Monday 03:00
+  schedule: '0 3 * * 1' # weekly Monday 03:00
   jobTemplate:
     spec:
       template:
@@ -11,7 +11,7 @@ spec:
           containers:
             - name: restore
               image: alpine:latest
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   echo "Restoring snapshot to scratch namespace...";

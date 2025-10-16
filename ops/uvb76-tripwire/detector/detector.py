@@ -7,7 +7,6 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Dict
 
 import soundfile as sf
 
@@ -18,7 +17,9 @@ else:  # pragma: no branch - import for package execution
     from . import utils
 
 
-def process_file(wav_path: Path, cfg: Dict, clip_dir: Path, spec_dir: Path, events_file: Path) -> None:
+def process_file(
+    wav_path: Path, cfg: dict, clip_dir: Path, spec_dir: Path, events_file: Path
+) -> None:
     audio, fs = utils.load_audio(wav_path)
     filtered = utils.bandpass(audio, fs)
 
@@ -78,7 +79,7 @@ def main() -> None:
     for directory in (cap_dir, clip_dir, spec_dir, events_file.parent):
         directory.mkdir(parents=True, exist_ok=True)
 
-    processed: Dict[str, float] = {}
+    processed: dict[str, float] = {}
 
     while True:
         for wav_path in sorted(cap_dir.glob("*.wav")):

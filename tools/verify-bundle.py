@@ -14,12 +14,8 @@ import hashlib
 import json
 import os
 import sys
-import time
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Tuple, Any
-import subprocess
-import tempfile
+from typing import Any
 
 
 class BundleVerifier:
@@ -37,8 +33,8 @@ class BundleVerifier:
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
+        self.errors: list[str] = []
+        self.warnings: list[str] = []
         self.verified_files = 0
         self.total_files = 0
 
@@ -47,7 +43,7 @@ class BundleVerifier:
         manifest_path: str,
         evidence_dir: str = "./evidence",
         verify_signatures: bool = False,
-        check_policy: bool = True
+        check_policy: bool = True,
     ) -> bool:
         """
         Main verification function.
@@ -86,13 +82,9 @@ class BundleVerifier:
             self._generate_verification_report(manifest, evidence_dir)
 
             # Determine overall result
-            overall_result = all([
-                hash_result,
-                signature_result,
-                sbom_result,
-                test_result,
-                policy_result
-            ])
+            overall_result = all(
+                [hash_result, signature_result, sbom_result, test_result, policy_result]
+            )
 
             if overall_result:
                 self.log("✅ Bundle verification PASSED")
@@ -106,14 +98,14 @@ class BundleVerifier:
             self.error(f"Verification failed with exception: {e}")
             return False
 
-    def _load_manifest(self, manifest_path: str) -> Dict[str, Any]:
+    def _load_manifest(self, manifest_path: str) -> dict[str, Any]:
         """Load and validate manifest structure."""
         try:
-            with open(manifest_path, 'r') as f:
+            with open(manifest_path) as f:
                 manifest = json.load(f)
 
             # Validate required sections
-            required_sections = ['metadata', 'manifest', 'build', 'tests']
+            required_sections = ["metadata", "manifest", "build", "tests"]
             for section in required_sections:
                 if section not in manifest:
                     self.error(f"Missing required manifest section: {section}")
@@ -129,11 +121,11 @@ class BundleVerifier:
             self.error(f"Invalid JSON in manifest: {e}")
             return None
 
-    def _verify_file_hashes(self, manifest: Dict[str, Any], evidence_dir: str) -> bool:
+    def _verify_file_hashes(self, manifest: dict[str, Any], evidence_dir: str) -> bool:
         """Verify SHA-256 hashes for all tracked files."""
         self.log("🔐 Verifying file hashes...")
 
-        files = manifest.get('manifest', {}).get('files', [])
+        files = manifest.get("manifest", {}).get("files", [])
         self.total_files = len(files)
 
         if self.total_files == 0:
@@ -141,16 +133,16 @@ class BundleVerifier:
             return True
 
         for file_info in files:
-            file_path = file_info.get('path', '')
-            expected_hash = file_info.get('hash', '')
+            file_path = file_info.get("path", "")
+            expected_hash = file_info.get("hash", "")
 
             if not file_path or not expected_hash:
                 self.error(f"Invalid file entry in manifest: {file_info}")
                 continue
 
             # Construct full file path
-            if file_path.startswith('evidence/'):
-                full_path = os.path.join(evidence_dir, file_path.replace('evidence/', ''))
+            if file_path.startswith("evidence/"):
+                full_path = os.path.join(evidence_dir, file_path.replace("evidence/", ""))
             else:
                 full_path = file_path
 
@@ -168,8 +160,12 @@ class BundleVerifier:
                 self.error(f"  Expected: {expected_hash}")
                 self.error(f"  Actual:   {actual_hash}")
 
-        success_rate = (self.verified_files / self.total_files) * 100 if self.total_files > 0 else 100
-        self.log(f"📊 Hash verification: {self.verified_files}/{self.total_files} files ({success_rate:.1f}%)")
+        success_rate = (
+            (self.verified_files / self.total_files) * 100 if self.total_files > 0 else 100
+        )
+        self.log(
+            f"📊 Hash verification: {self.verified_files}/{self.total_files} files ({success_rate:.1f}%)"
+        )
 
         return self.verified_files == self.total_files
 
@@ -183,11 +179,11 @@ class BundleVerifier:
             return False
 
         try:
-            with open(signature_path, 'r') as f:
+            with open(signature_path) as f:
                 signature_data = json.load(f)
 
             # Validate signature structure
-            required_fields = ['algorithm', 'keyid', 'signature', 'timestamp']
+            required_fields = ["algorithm", "keyid", "signature", "timestamp"]
             for field in required_fields:
                 if field not in signature_data:
                     self.error(f"Missing signature field: {field}")
@@ -198,7 +194,7 @@ class BundleVerifier:
 
             # Simulate signature verification (in production, use proper crypto)
             expected_signature = self._calculate_file_hash(f"{manifest_hash}-signature")
-            actual_signature = signature_data['signature']
+            actual_signature = signature_data["signature"]
 
             if expected_signature == actual_signature:
                 self.log(f"✓ Signature verified (key: {signature_data['keyid']})")
@@ -211,16 +207,16 @@ class BundleVerifier:
             self.error(f"Signature verification error: {e}")
             return False
 
-    def _verify_sbom(self, manifest: Dict[str, Any]) -> bool:
+    def _verify_sbom(self, manifest: dict[str, Any]) -> bool:
         """Verify SBOM (Software Bill of Materials) integrity."""
         self.log("📦 Verifying SBOM components...")
 
-        sbom = manifest.get('build', {}).get('sbom', {})
+        sbom = manifest.get("build", {}).get("sbom", {})
         if not sbom:
             self.warning("No SBOM found in manifest")
             return True
 
-        components = sbom.get('components', [])
+        components = sbom.get("components", [])
         if not components:
             self.warning("No components found in SBOM")
             return True
@@ -232,32 +228,34 @@ class BundleVerifier:
                 valid_components += 1
 
         component_ratio = (valid_components / len(components)) * 100
-        self.log(f"📋 SBOM validation: {valid_components}/{len(components)} components ({component_ratio:.1f}%)")
+        self.log(
+            f"📋 SBOM validation: {valid_components}/{len(components)} components ({component_ratio:.1f}%)"
+        )
 
         # Require at least 90% of components to be valid
         return component_ratio >= 90.0
 
-    def _validate_sbom_component(self, component: Dict[str, Any]) -> bool:
+    def _validate_sbom_component(self, component: dict[str, Any]) -> bool:
         """Validate individual SBOM component."""
-        required_fields = ['type', 'name', 'version']
+        required_fields = ["type", "name", "version"]
         for field in required_fields:
             if field not in component:
                 self.warning(f"SBOM component missing field: {field}")
                 return False
 
         # Validate component type
-        valid_types = ['application', 'library', 'framework', 'operating-system']
-        if component['type'] not in valid_types:
+        valid_types = ["application", "library", "framework", "operating-system"]
+        if component["type"] not in valid_types:
             self.warning(f"Invalid component type: {component['type']}")
             return False
 
         return True
 
-    def _verify_test_results(self, manifest: Dict[str, Any]) -> bool:
+    def _verify_test_results(self, manifest: dict[str, Any]) -> bool:
         """Verify test results and coverage."""
         self.log("🧪 Verifying test results...")
 
-        tests = manifest.get('tests', {})
+        tests = manifest.get("tests", {})
         if not tests:
             self.warning("No test results found in manifest")
             return True
@@ -267,9 +265,9 @@ class BundleVerifier:
         passed_tests = 0
 
         for test_suite, results in tests.items():
-            if isinstance(results, dict) and 'total' in results and 'passed' in results:
-                total_tests += results['total']
-                passed_tests += results['passed']
+            if isinstance(results, dict) and "total" in results and "passed" in results:
+                total_tests += results["total"]
+                passed_tests += results["passed"]
 
         if total_tests == 0:
             self.warning("No valid test results found")
@@ -281,39 +279,39 @@ class BundleVerifier:
         # Require at least 85% test success rate
         return success_rate >= 85.0
 
-    def _verify_policy_compliance(self, manifest: Dict[str, Any]) -> bool:
+    def _verify_policy_compliance(self, manifest: dict[str, Any]) -> bool:
         """Verify policy compliance and security requirements."""
         self.log("🛡️ Verifying policy compliance...")
 
-        policy = manifest.get('policy', {})
+        policy = manifest.get("policy", {})
         if not policy:
             self.warning("No policy compliance data found")
             return True
 
         # Check OPA evaluations
-        opa_evaluations = policy.get('opa_evaluations', {})
+        opa_evaluations = policy.get("opa_evaluations", {})
         if opa_evaluations:
-            summary = opa_evaluations.get('summary', {})
-            violations = summary.get('total_violations', 0)
+            summary = opa_evaluations.get("summary", {})
+            violations = summary.get("total_violations", 0)
 
             if violations > 0:
                 self.error(f"Policy violations detected: {violations}")
                 return False
 
         # Check security scan results
-        security_scan = policy.get('security_scan', {})
+        security_scan = policy.get("security_scan", {})
         if security_scan:
-            vulnerabilities = security_scan.get('vulnerabilities', {})
-            critical_vulns = vulnerabilities.get('critical', 0)
+            vulnerabilities = security_scan.get("vulnerabilities", {})
+            critical_vulns = vulnerabilities.get("critical", 0)
 
             if critical_vulns > 0:
                 self.error(f"Critical vulnerabilities detected: {critical_vulns}")
                 return False
 
         # Check compliance report
-        compliance = policy.get('compliance_report', {})
+        compliance = policy.get("compliance_report", {})
         if compliance:
-            compliance_score = compliance.get('compliance_score', 0)
+            compliance_score = compliance.get("compliance_score", 0)
 
             if compliance_score < 95.0:
                 self.error(f"Compliance score below threshold: {compliance_score}%")
@@ -322,30 +320,32 @@ class BundleVerifier:
         self.log("✓ Policy compliance verified")
         return True
 
-    def _generate_verification_report(self, manifest: Dict[str, Any], evidence_dir: str) -> None:
+    def _generate_verification_report(self, manifest: dict[str, Any], evidence_dir: str) -> None:
         """Generate detailed verification report."""
         report_path = "bundle-verification-report.json"
 
         report = {
             "verification_timestamp": datetime.utcnow().isoformat() + "Z",
-            "manifest_metadata": manifest.get('metadata', {}),
+            "manifest_metadata": manifest.get("metadata", {}),
             "verification_results": {
                 "files_verified": self.verified_files,
                 "total_files": self.total_files,
-                "hash_verification_rate": (self.verified_files / self.total_files) * 100 if self.total_files > 0 else 100,
+                "hash_verification_rate": (
+                    (self.verified_files / self.total_files) * 100 if self.total_files > 0 else 100
+                ),
                 "errors": self.errors,
-                "warnings": self.warnings
+                "warnings": self.warnings,
             },
             "bundle_integrity": len(self.errors) == 0,
-            "recommendations": self._generate_recommendations()
+            "recommendations": self._generate_recommendations(),
         }
 
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
 
         self.log(f"📋 Verification report saved: {report_path}")
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate recommendations based on verification results."""
         recommendations = []
 
@@ -411,38 +411,28 @@ Examples:
   python verify-bundle.py --manifest provenance/export-manifest.json
   python verify-bundle.py --manifest provenance/export-manifest.json --verify-signatures
   python verify-bundle.py --manifest provenance/export-manifest.json --evidence-dir ./evidence --verbose
-        """
+        """,
     )
 
-    parser.add_argument(
-        "--manifest",
-        required=True,
-        help="Path to the signed manifest JSON file"
-    )
+    parser.add_argument("--manifest", required=True, help="Path to the signed manifest JSON file")
 
     parser.add_argument(
         "--evidence-dir",
         default="./evidence",
-        help="Directory containing evidence files (default: ./evidence)"
+        help="Directory containing evidence files (default: ./evidence)",
     )
 
     parser.add_argument(
         "--verify-signatures",
         action="store_true",
-        help="Verify digital signatures for manifest integrity"
+        help="Verify digital signatures for manifest integrity",
     )
 
     parser.add_argument(
-        "--skip-policy",
-        action="store_true",
-        help="Skip policy compliance verification"
+        "--skip-policy", action="store_true", help="Skip policy compliance verification"
     )
 
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 
     args = parser.parse_args()
 
@@ -454,7 +444,7 @@ Examples:
         manifest_path=args.manifest,
         evidence_dir=args.evidence_dir,
         verify_signatures=args.verify_signatures,
-        check_policy=not args.skip_policy
+        check_policy=not args.skip_policy,
     )
 
     # Exit with appropriate code

@@ -63,30 +63,33 @@ interface TenantRecord {
 }
 
 class TenantContextService {
-  private tenantCache: Map<string, { data: TenantContext; expiresAt: number }> = new Map();
+  private tenantCache: Map<string, { data: TenantContext; expiresAt: number }> =
+    new Map();
   private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
   async resolveTenantContext(
     tenantId: string,
-    currentRegion: string = process.env.CURRENT_REGION || 'us-east-1'
+    currentRegion: string = process.env.CURRENT_REGION || 'us-east-1',
   ): Promise<TenantContext> {
-    return tracer.startActiveSpan('tenant_context.resolve', async (span: Span) => {
-      span.setAttributes({
-        'tenant_id': tenantId,
-        'current_region': currentRegion
-      });
+    return tracer.startActiveSpan(
+      'tenant_context.resolve',
+      async (span: Span) => {
+        span.setAttributes({
+          tenant_id: tenantId,
+          current_region: currentRegion,
+        });
 
-      try {
-        // Check cache first
-        const cached = this.tenantCache.get(tenantId);
-        if (cached && Date.now() < cached.expiresAt) {
-          span.setAttributes({ 'cache_hit': true });
-          return cached.data;
-        }
+        try {
+          // Check cache first
+          const cached = this.tenantCache.get(tenantId);
+          if (cached && Date.now() < cached.expiresAt) {
+            span.setAttributes({ cache_hit: true });
+            return cached.data;
+          }
 
-        // Query tenant information from database
-        const tenantRecord = await pg.oneOrNone<TenantRecord>(
-          `SELECT 
+          // Query tenant information from database
+          const tenantRecord = await pg.oneOrNone<TenantRecord>(
+            `SELECT 
              tenant_id,
              region_tag,
              residency_region,
@@ -105,153 +108,187 @@ class TenantContextService {
              updated_at
            FROM tenants 
            WHERE tenant_id = $1`,
-          [tenantId],
-          { tenantId }
-        );
+            [tenantId],
+            { tenantId },
+          );
 
-        if (!tenantRecord) {
-          span.setAttributes({ 'tenant_found': false });
-          throw new GraphQLError('Tenant not found', {
-            extensions: {
-              code: 'TENANT_NOT_FOUND',
-              tenantId
-            }
-          });
-        }
-
-        if (!tenantRecord.is_active) {
-          span.setAttributes({ 'tenant_active': false });
-          throw new GraphQLError('Tenant is inactive', {
-            extensions: {
-              code: 'TENANT_INACTIVE',
-              tenantId
-            }
-          });
-        }
-
-        // Build tenant context
-        const tenantContext: TenantContext = {
-          tenantId: tenantRecord.tenant_id,
-          userId: '', // Will be set by caller
-          roles: [], // Will be set by caller
-          permissions: [], // Will be calculated by caller
-          regionTag: tenantRecord.region_tag || this.getDefaultRegion(),
-          residency: {
-            region: tenantRecord.residency_region || tenantRecord.region_tag || this.getDefaultRegion(),
-            class: tenantRecord.residency_class || 'standard',
-            dataClassification: tenantRecord.residency_data_classification || [],
-            allowedRegions: tenantRecord.residency_allowed_regions || [tenantRecord.region_tag || this.getDefaultRegion()],
-            exportRestrictions: {
-              requiresApproval: tenantRecord.export_requires_approval || false,
-              allowedDestinations: tenantRecord.export_allowed_destinations || [],
-              retentionDays: tenantRecord.export_retention_days || 365
-            }
-          },
-          isActive: tenantRecord.is_active,
-          features: tenantRecord.features || [],
-          quotas: {
-            apiCallsPerHour: tenantRecord.quota_api_calls_per_hour || 10000,
-            storageGB: tenantRecord.quota_storage_gb || 100,
-            exportCallsPerDay: tenantRecord.quota_export_calls_per_day || 10
+          if (!tenantRecord) {
+            span.setAttributes({ tenant_found: false });
+            throw new GraphQLError('Tenant not found', {
+              extensions: {
+                code: 'TENANT_NOT_FOUND',
+                tenantId,
+              },
+            });
           }
-        };
 
-        // Cache the result
-        this.tenantCache.set(tenantId, {
-          data: tenantContext,
-          expiresAt: Date.now() + this.CACHE_TTL_MS
-        });
+          if (!tenantRecord.is_active) {
+            span.setAttributes({ tenant_active: false });
+            throw new GraphQLError('Tenant is inactive', {
+              extensions: {
+                code: 'TENANT_INACTIVE',
+                tenantId,
+              },
+            });
+          }
 
-        span.setAttributes({
-          'tenant_found': true,
-          'tenant_active': true,
-          'region_tag': tenantContext.regionTag,
-          'residency_class': tenantContext.residency.class,
-          'cache_hit': false
-        });
+          // Build tenant context
+          const tenantContext: TenantContext = {
+            tenantId: tenantRecord.tenant_id,
+            userId: '', // Will be set by caller
+            roles: [], // Will be set by caller
+            permissions: [], // Will be calculated by caller
+            regionTag: tenantRecord.region_tag || this.getDefaultRegion(),
+            residency: {
+              region:
+                tenantRecord.residency_region ||
+                tenantRecord.region_tag ||
+                this.getDefaultRegion(),
+              class: tenantRecord.residency_class || 'standard',
+              dataClassification:
+                tenantRecord.residency_data_classification || [],
+              allowedRegions: tenantRecord.residency_allowed_regions || [
+                tenantRecord.region_tag || this.getDefaultRegion(),
+              ],
+              exportRestrictions: {
+                requiresApproval:
+                  tenantRecord.export_requires_approval || false,
+                allowedDestinations:
+                  tenantRecord.export_allowed_destinations || [],
+                retentionDays: tenantRecord.export_retention_days || 365,
+              },
+            },
+            isActive: tenantRecord.is_active,
+            features: tenantRecord.features || [],
+            quotas: {
+              apiCallsPerHour: tenantRecord.quota_api_calls_per_hour || 10000,
+              storageGB: tenantRecord.quota_storage_gb || 100,
+              exportCallsPerDay: tenantRecord.quota_export_calls_per_day || 10,
+            },
+          };
 
-        return tenantContext;
+          // Cache the result
+          this.tenantCache.set(tenantId, {
+            data: tenantContext,
+            expiresAt: Date.now() + this.CACHE_TTL_MS,
+          });
 
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+          span.setAttributes({
+            tenant_found: true,
+            tenant_active: true,
+            region_tag: tenantContext.regionTag,
+            residency_class: tenantContext.residency.class,
+            cache_hit: false,
+          });
+
+          return tenantContext;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setStatus({ code: 2, message: (error as Error).message });
+          throw error;
+        } finally {
+          span.end();
+        }
+      },
+    );
   }
 
   validateRegionAccess(
     tenantContext: TenantContext,
     targetRegion: string,
     operation: 'read' | 'write' | 'export',
-    hasExportToken: boolean = false
+    hasExportToken: boolean = false,
   ): boolean {
-    return tracer.startActiveSpan('tenant_context.validate_region_access', (span: Span) => {
-      span.setAttributes({
-        'tenant_id': tenantContext.tenantId,
-        'target_region': targetRegion,
-        'tenant_region': tenantContext.regionTag,
-        'operation': operation,
-        'has_export_token': hasExportToken,
-        'residency_class': tenantContext.residency.class
-      });
+    return tracer.startActiveSpan(
+      'tenant_context.validate_region_access',
+      (span: Span) => {
+        span.setAttributes({
+          tenant_id: tenantContext.tenantId,
+          target_region: targetRegion,
+          tenant_region: tenantContext.regionTag,
+          operation: operation,
+          has_export_token: hasExportToken,
+          residency_class: tenantContext.residency.class,
+        });
 
-      try {
-        // Same region - always allowed
-        if (targetRegion === tenantContext.regionTag) {
-          span.setAttributes({ 'access_granted': true, 'reason': 'same_region' });
+        try {
+          // Same region - always allowed
+          if (targetRegion === tenantContext.regionTag) {
+            span.setAttributes({ access_granted: true, reason: 'same_region' });
+            return true;
+          }
+
+          // Check if target region is in allowed regions for this tenant
+          if (!tenantContext.residency.allowedRegions.includes(targetRegion)) {
+            span.setAttributes({
+              access_granted: false,
+              reason: 'region_not_allowed',
+            });
+            return false;
+          }
+
+          // Write operations require same region unless export token
+          if (operation === 'write' && !hasExportToken) {
+            span.setAttributes({
+              access_granted: false,
+              reason: 'write_requires_same_region',
+            });
+            return false;
+          }
+
+          // Export operations require export token or approval
+          if (operation === 'export') {
+            if (
+              tenantContext.residency.exportRestrictions?.requiresApproval &&
+              !hasExportToken
+            ) {
+              span.setAttributes({
+                access_granted: false,
+                reason: 'export_requires_approval',
+              });
+              return false;
+            }
+          }
+
+          // Sovereign tenants have strict restrictions
+          if (tenantContext.residency.class === 'sovereign') {
+            if (operation !== 'read' || !hasExportToken) {
+              span.setAttributes({
+                access_granted: false,
+                reason: 'sovereign_restrictions',
+              });
+              return false;
+            }
+          }
+
+          // Restricted tenants need export token for cross-region access
+          if (
+            tenantContext.residency.class === 'restricted' &&
+            !hasExportToken
+          ) {
+            span.setAttributes({
+              access_granted: false,
+              reason: 'restricted_requires_token',
+            });
+            return false;
+          }
+
+          span.setAttributes({
+            access_granted: true,
+            reason: 'validation_passed',
+          });
           return true;
+        } finally {
+          span.end();
         }
-
-        // Check if target region is in allowed regions for this tenant
-        if (!tenantContext.residency.allowedRegions.includes(targetRegion)) {
-          span.setAttributes({ 'access_granted': false, 'reason': 'region_not_allowed' });
-          return false;
-        }
-
-        // Write operations require same region unless export token
-        if (operation === 'write' && !hasExportToken) {
-          span.setAttributes({ 'access_granted': false, 'reason': 'write_requires_same_region' });
-          return false;
-        }
-
-        // Export operations require export token or approval
-        if (operation === 'export') {
-          if (tenantContext.residency.exportRestrictions?.requiresApproval && !hasExportToken) {
-            span.setAttributes({ 'access_granted': false, 'reason': 'export_requires_approval' });
-            return false;
-          }
-        }
-
-        // Sovereign tenants have strict restrictions
-        if (tenantContext.residency.class === 'sovereign') {
-          if (operation !== 'read' || !hasExportToken) {
-            span.setAttributes({ 'access_granted': false, 'reason': 'sovereign_restrictions' });
-            return false;
-          }
-        }
-
-        // Restricted tenants need export token for cross-region access
-        if (tenantContext.residency.class === 'restricted' && !hasExportToken) {
-          span.setAttributes({ 'access_granted': false, 'reason': 'restricted_requires_token' });
-          return false;
-        }
-
-        span.setAttributes({ 'access_granted': true, 'reason': 'validation_passed' });
-        return true;
-
-      } finally {
-        span.end();
-      }
-    });
+      },
+    );
   }
 
   validateDataClassification(
     tenantContext: TenantContext,
     dataClassifications: string[],
-    operation: 'read' | 'write' | 'export'
+    operation: 'read' | 'write' | 'export',
   ): boolean {
     if (!dataClassifications.length) {
       return true; // No classification restrictions
@@ -259,10 +296,13 @@ class TenantContextService {
 
     // Check if tenant's data classification allows access to requested data
     const tenantClassifications = tenantContext.residency.dataClassification;
-    
+
     // If tenant has no specific classifications, default to standard access
     if (!tenantClassifications.length) {
-      return !dataClassifications.includes('restricted') && !dataClassifications.includes('secret');
+      return (
+        !dataClassifications.includes('restricted') &&
+        !dataClassifications.includes('secret')
+      );
     }
 
     // Check access based on classification levels
@@ -283,7 +323,7 @@ class TenantContextService {
   static async validateTenantAccess(
     context: any,
     resourceTenantId?: string,
-    options: TenantValidationOptions = {}
+    options: TenantValidationOptions = {},
   ): Promise<TenantContext> {
     const service = new TenantContextService();
     const {
@@ -291,41 +331,52 @@ class TenantContextService {
       allowSystemAccess = false,
       validateOwnership = true,
       allowCrossRegion = false,
-      requireResidencyCompliance = true
+      requireResidencyCompliance = true,
     } = options;
 
     // Extract user context from request
     const userTenantId = context.user?.tenantId;
     const userId = context.user?.id;
     const roles = context.user?.roles || [];
-    const currentRegion = context.headers?.['x-ig-region'] || process.env.CURRENT_REGION || 'us-east-1';
+    const currentRegion =
+      context.headers?.['x-ig-region'] ||
+      process.env.CURRENT_REGION ||
+      'us-east-1';
     const hasExportToken = !!context.headers?.['x-export-token'];
 
     // System-level access check
-    if (allowSystemAccess && (roles.includes('SYSTEM') || roles.includes('SUPER_ADMIN'))) {
+    if (
+      allowSystemAccess &&
+      (roles.includes('SYSTEM') || roles.includes('SUPER_ADMIN'))
+    ) {
       logger.info(`System-level access granted for user ${userId}`);
-      
+
       // Even system users need tenant context for region compliance
       const effectiveTenantId = resourceTenantId || userTenantId;
       if (effectiveTenantId) {
-        const tenantContext = await service.resolveTenantContext(effectiveTenantId, currentRegion);
+        const tenantContext = await service.resolveTenantContext(
+          effectiveTenantId,
+          currentRegion,
+        );
         return {
           ...tenantContext,
           userId,
           roles,
-          permissions: ['*']
+          permissions: ['*'],
         };
       }
     }
 
     // Validate user has tenant context
     if (requireExplicitTenant && !userTenantId) {
-      logger.error(`Tenant isolation violation: User ${userId} lacks tenant context`);
+      logger.error(
+        `Tenant isolation violation: User ${userId} lacks tenant context`,
+      );
       throw new GraphQLError('Tenant context required', {
         extensions: {
           code: 'TENANT_REQUIRED',
-          userId
-        }
+          userId,
+        },
       });
     }
 
@@ -333,25 +384,32 @@ class TenantContextService {
     if (!effectiveTenantId) {
       throw new GraphQLError('Unable to determine tenant context', {
         extensions: {
-          code: 'TENANT_CONTEXT_INVALID'
-        }
+          code: 'TENANT_CONTEXT_INVALID',
+        },
       });
     }
 
     // Resolve tenant context with region information
-    const tenantContext = await service.resolveTenantContext(effectiveTenantId, currentRegion);
+    const tenantContext = await service.resolveTenantContext(
+      effectiveTenantId,
+      currentRegion,
+    );
 
     // Cross-tenant access validation
-    if (validateOwnership && resourceTenantId && resourceTenantId !== userTenantId) {
+    if (
+      validateOwnership &&
+      resourceTenantId &&
+      resourceTenantId !== userTenantId
+    ) {
       logger.error(
-        `Cross-tenant access denied: User ${userId} (tenant: ${userTenantId}) attempted to access resource (tenant: ${resourceTenantId})`
+        `Cross-tenant access denied: User ${userId} (tenant: ${userTenantId}) attempted to access resource (tenant: ${resourceTenantId})`,
       );
       throw new GraphQLError('Cross-tenant access denied', {
         extensions: {
           code: 'CROSS_TENANT_ACCESS_DENIED',
           userTenant: userTenantId,
-          resourceTenant: resourceTenantId
-        }
+          resourceTenant: resourceTenantId,
+        },
       });
     }
 
@@ -362,12 +420,12 @@ class TenantContextService {
         tenantContext,
         currentRegion,
         operation,
-        hasExportToken
+        hasExportToken,
       );
 
       if (!regionAccessValid) {
         logger.error(
-          `Region access denied: Tenant ${effectiveTenantId} attempted ${operation} in region ${currentRegion}`
+          `Region access denied: Tenant ${effectiveTenantId} attempted ${operation} in region ${currentRegion}`,
         );
         throw new GraphQLError('Region access denied', {
           extensions: {
@@ -375,8 +433,8 @@ class TenantContextService {
             tenantId: effectiveTenantId,
             currentRegion,
             tenantRegion: tenantContext.regionTag,
-            operation
-          }
+            operation,
+          },
         });
       }
     }
@@ -386,7 +444,9 @@ class TenantContextService {
     tenantContext.roles = roles;
     tenantContext.permissions = service.calculatePermissions(roles);
 
-    logger.debug(`Tenant access validated for user ${userId}, tenant ${effectiveTenantId}, region ${currentRegion}`);
+    logger.debug(
+      `Tenant access validated for user ${userId}, tenant ${effectiveTenantId}, region ${currentRegion}`,
+    );
 
     return tenantContext;
   }

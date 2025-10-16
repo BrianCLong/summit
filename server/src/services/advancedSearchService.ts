@@ -4,7 +4,13 @@ import { RedisCache } from '../cache/redis';
 interface SearchQuery {
   id: string;
   query: string;
-  type: 'simple' | 'advanced' | 'semantic' | 'graph' | 'temporal' | 'geospatial';
+  type:
+    | 'simple'
+    | 'advanced'
+    | 'semantic'
+    | 'graph'
+    | 'temporal'
+    | 'geospatial';
   filters: SearchFilter[];
   sort: SortCriteria[];
   pagination: {
@@ -55,7 +61,14 @@ interface SortCriteria {
 
 interface SearchResult {
   id: string;
-  type: 'entity' | 'relationship' | 'investigation' | 'evidence' | 'finding' | 'document' | 'user';
+  type:
+    | 'entity'
+    | 'relationship'
+    | 'investigation'
+    | 'evidence'
+    | 'finding'
+    | 'document'
+    | 'user';
   score: number;
   source: string;
   data: any;
@@ -558,15 +571,25 @@ export class AdvancedSearchService extends EventEmitter {
     }
   }
 
-  private async executeSimpleSearch(query: SearchQuery): Promise<SearchResult[]> {
+  private async executeSimpleSearch(
+    query: SearchQuery,
+  ): Promise<SearchResult[]> {
     // Mock simple search - would integrate with actual search engine
     const mockResults: SearchResult[] = [];
     const terms = query.query.toLowerCase().split(' ');
 
     // Generate mock results based on query terms
     for (let i = 0; i < Math.min(200, Math.random() * 300 + 50); i++) {
-      const types = ['entity', 'investigation', 'evidence', 'threat', 'document'];
-      const type = types[Math.floor(Math.random() * types.length)] as SearchResult['type'];
+      const types = [
+        'entity',
+        'investigation',
+        'evidence',
+        'threat',
+        'document',
+      ];
+      const type = types[
+        Math.floor(Math.random() * types.length)
+      ] as SearchResult['type'];
 
       mockResults.push({
         id: `${type}_${i}`,
@@ -590,7 +613,9 @@ export class AdvancedSearchService extends EventEmitter {
     return mockResults.sort((a, b) => b.score - a.score);
   }
 
-  private async executeAdvancedSearch(query: SearchQuery): Promise<SearchResult[]> {
+  private async executeAdvancedSearch(
+    query: SearchQuery,
+  ): Promise<SearchResult[]> {
     // Parse advanced query syntax (field:value, operators, etc.)
     const parsedQuery = this.parseAdvancedQuery(query.query);
 
@@ -620,7 +645,9 @@ export class AdvancedSearchService extends EventEmitter {
     return mockResults.sort((a, b) => b.score - a.score);
   }
 
-  private async executeSemanticSearch(query: SearchQuery): Promise<SearchResult[]> {
+  private async executeSemanticSearch(
+    query: SearchQuery,
+  ): Promise<SearchResult[]> {
     // Mock semantic search using vector similarity
     const mockResults: SearchResult[] = [];
 
@@ -647,7 +674,9 @@ export class AdvancedSearchService extends EventEmitter {
     return mockResults.sort((a, b) => b.score - a.score);
   }
 
-  private async executeGraphSearch(query: SearchQuery): Promise<SearchResult[]> {
+  private async executeGraphSearch(
+    query: SearchQuery,
+  ): Promise<SearchResult[]> {
     // Mock graph traversal search
     const mockResults: SearchResult[] = [];
 
@@ -675,7 +704,9 @@ export class AdvancedSearchService extends EventEmitter {
     return mockResults;
   }
 
-  private async executeTemporalSearch(query: SearchQuery): Promise<SearchResult[]> {
+  private async executeTemporalSearch(
+    query: SearchQuery,
+  ): Promise<SearchResult[]> {
     const mockResults: SearchResult[] = [];
 
     if (!query.timeRange) return mockResults;
@@ -683,7 +714,8 @@ export class AdvancedSearchService extends EventEmitter {
     for (let i = 0; i < Math.min(120, Math.random() * 180 + 25); i++) {
       const timestamp = new Date(
         query.timeRange.start.getTime() +
-          Math.random() * (query.timeRange.end.getTime() - query.timeRange.start.getTime()),
+          Math.random() *
+            (query.timeRange.end.getTime() - query.timeRange.start.getTime()),
       );
 
       mockResults.push({
@@ -713,7 +745,9 @@ export class AdvancedSearchService extends EventEmitter {
     return mockResults.sort((a, b) => b.data.timestamp - a.data.timestamp);
   }
 
-  private async executeGeospatialSearch(query: SearchQuery): Promise<SearchResult[]> {
+  private async executeGeospatialSearch(
+    query: SearchQuery,
+  ): Promise<SearchResult[]> {
     const mockResults: SearchResult[] = [];
 
     if (!query.geoLocation) return mockResults;
@@ -727,12 +761,15 @@ export class AdvancedSearchService extends EventEmitter {
         type: 'entity',
         score:
           Math.random() * 10 +
-          ((query.geoLocation.radius - distance) / query.geoLocation.radius) * 5,
+          ((query.geoLocation.radius - distance) / query.geoLocation.radius) *
+            5,
         source: 'geo_index',
         data: {
           ...this.generateMockData('entity', []),
           location: {
-            lat: query.geoLocation.lat + (distance * Math.cos((bearing * Math.PI) / 180)) / 111,
+            lat:
+              query.geoLocation.lat +
+              (distance * Math.cos((bearing * Math.PI) / 180)) / 111,
             lng:
               query.geoLocation.lng +
               (distance * Math.sin((bearing * Math.PI) / 180)) /
@@ -755,10 +792,15 @@ export class AdvancedSearchService extends EventEmitter {
       });
     }
 
-    return mockResults.sort((a, b) => a.data.location.distance - b.data.location.distance);
+    return mockResults.sort(
+      (a, b) => a.data.location.distance - b.data.location.distance,
+    );
   }
 
-  private applyFilters(results: SearchResult[], filters: SearchFilter[]): SearchResult[] {
+  private applyFilters(
+    results: SearchResult[],
+    filters: SearchFilter[],
+  ): SearchResult[] {
     return results.filter((result) => {
       return filters.every((filter) => {
         const fieldValue = this.getFieldValue(result.data, filter.field);
@@ -767,7 +809,10 @@ export class AdvancedSearchService extends EventEmitter {
     });
   }
 
-  private applySorting(results: SearchResult[], sort: SortCriteria[]): SearchResult[] {
+  private applySorting(
+    results: SearchResult[],
+    sort: SortCriteria[],
+  ): SearchResult[] {
     if (sort.length === 0) return results;
 
     return results.sort((a, b) => {
@@ -784,7 +829,10 @@ export class AdvancedSearchService extends EventEmitter {
     });
   }
 
-  private generateFacets(results: SearchResult[], query: SearchQuery): SearchFacet[] {
+  private generateFacets(
+    results: SearchResult[],
+    query: SearchQuery,
+  ): SearchFacet[] {
     const facets: SearchFacet[] = [];
 
     // Type facet
@@ -810,7 +858,11 @@ export class AdvancedSearchService extends EventEmitter {
       field: 'score',
       type: 'range',
       buckets: [
-        { key: '9-10', count: results.filter((r) => r.score >= 9).length, selected: false },
+        {
+          key: '9-10',
+          count: results.filter((r) => r.score >= 9).length,
+          selected: false,
+        },
         {
           key: '7-9',
           count: results.filter((r) => r.score >= 7 && r.score < 9).length,
@@ -821,7 +873,11 @@ export class AdvancedSearchService extends EventEmitter {
           count: results.filter((r) => r.score >= 5 && r.score < 7).length,
           selected: false,
         },
-        { key: '0-5', count: results.filter((r) => r.score < 5).length, selected: false },
+        {
+          key: '0-5',
+          count: results.filter((r) => r.score < 5).length,
+          selected: false,
+        },
       ],
     });
 
@@ -833,7 +889,11 @@ export class AdvancedSearchService extends EventEmitter {
 
     // Add popular queries that are similar
     const popularMatches = this.popularQueries
-      .filter((pq) => pq.query.toLowerCase().includes(query.toLowerCase()) && pq.query !== query)
+      .filter(
+        (pq) =>
+          pq.query.toLowerCase().includes(query.toLowerCase()) &&
+          pq.query !== query,
+      )
       .slice(0, 3)
       .map((pq) => pq.query);
 
@@ -876,7 +936,9 @@ export class AdvancedSearchService extends EventEmitter {
         return {
           ...baseData,
           name: this.generateEntityName(terms),
-          type: ['person', 'organization', 'location', 'event'][Math.floor(Math.random() * 4)],
+          type: ['person', 'organization', 'location', 'event'][
+            Math.floor(Math.random() * 4)
+          ],
           description: this.generateDescription(terms),
           confidence: Math.random(),
           tags: this.generateTags(),
@@ -885,8 +947,12 @@ export class AdvancedSearchService extends EventEmitter {
         return {
           ...baseData,
           title: this.generateInvestigationTitle(terms),
-          status: ['active', 'closed', 'pending', 'suspended'][Math.floor(Math.random() * 4)],
-          priority: ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)],
+          status: ['active', 'closed', 'pending', 'suspended'][
+            Math.floor(Math.random() * 4)
+          ],
+          priority: ['low', 'medium', 'high', 'critical'][
+            Math.floor(Math.random() * 4)
+          ],
           assigned_to: `user_${Math.floor(Math.random() * 10) + 1}`,
         };
       default:
@@ -898,7 +964,13 @@ export class AdvancedSearchService extends EventEmitter {
     if (terms.length > 0 && Math.random() > 0.5) {
       return `Entity containing ${terms[0]}`;
     }
-    const names = ['Alpha Corp', 'John Smith', 'Beta Industries', 'Jane Doe', 'Gamma Technologies'];
+    const names = [
+      'Alpha Corp',
+      'John Smith',
+      'Beta Industries',
+      'Jane Doe',
+      'Gamma Technologies',
+    ];
     return names[Math.floor(Math.random() * names.length)];
   }
 
@@ -952,7 +1024,9 @@ export class AdvancedSearchService extends EventEmitter {
     return parsed;
   }
 
-  private getTypeFromQuery(parsedQuery: Record<string, any>): SearchResult['type'] {
+  private getTypeFromQuery(
+    parsedQuery: Record<string, any>,
+  ): SearchResult['type'] {
     if (parsedQuery.type) {
       return parsedQuery.type as SearchResult['type'];
     }
@@ -968,7 +1042,9 @@ export class AdvancedSearchService extends EventEmitter {
     };
   }
 
-  private generateAdvancedHighlights(parsedQuery: Record<string, any>): Record<string, string[]> {
+  private generateAdvancedHighlights(
+    parsedQuery: Record<string, any>,
+  ): Record<string, string[]> {
     const highlights: Record<string, string[]> = {};
     Object.keys(parsedQuery).forEach((field) => {
       highlights[field] = [`<em>${parsedQuery[field]}</em>`];
@@ -1029,7 +1105,9 @@ export class AdvancedSearchService extends EventEmitter {
       case '<':
         return value < filter.value;
       case 'contains':
-        return String(value).toLowerCase().includes(String(filter.value).toLowerCase());
+        return String(value)
+          .toLowerCase()
+          .includes(String(filter.value).toLowerCase());
       default:
         return true;
     }
@@ -1045,7 +1123,10 @@ export class AdvancedSearchService extends EventEmitter {
 
   // Public API methods
   public async saveSearch(
-    searchData: Omit<SavedSearch, 'id' | 'createdAt' | 'executionCount' | 'avgExecutionTime'>,
+    searchData: Omit<
+      SavedSearch,
+      'id' | 'createdAt' | 'executionCount' | 'avgExecutionTime'
+    >,
   ): Promise<SavedSearch> {
     const savedSearch: SavedSearch = {
       ...searchData,
@@ -1056,7 +1137,11 @@ export class AdvancedSearchService extends EventEmitter {
     };
 
     this.savedSearches.set(savedSearch.id, savedSearch);
-    await this.cache.set(`saved_search:${savedSearch.id}`, JSON.stringify(savedSearch), 86400);
+    await this.cache.set(
+      `saved_search:${savedSearch.id}`,
+      JSON.stringify(savedSearch),
+      86400,
+    );
 
     this.emit('search-saved', savedSearch);
     return savedSearch;
@@ -1077,11 +1162,16 @@ export class AdvancedSearchService extends EventEmitter {
     return Array.from(this.searchIndices.values());
   }
 
-  public getPopularQueries(limit: number = 10): Array<{ query: string; count: number }> {
+  public getPopularQueries(
+    limit: number = 10,
+  ): Array<{ query: string; count: number }> {
     return this.popularQueries.slice(0, limit);
   }
 
-  public async buildAutoComplete(prefix: string, index?: string): Promise<string[]> {
+  public async buildAutoComplete(
+    prefix: string,
+    index?: string,
+  ): Promise<string[]> {
     // Mock autocomplete suggestions
     const suggestions = [
       `${prefix} entity`,

@@ -9,7 +9,16 @@
         },
         "kind": {
           "type": "string",
-          "enum": ["Person", "Org", "Location", "Event", "Document", "Indicator", "Case", "Claim"]
+          "enum": [
+            "Person",
+            "Org",
+            "Location",
+            "Event",
+            "Document",
+            "Indicator",
+            "Case",
+            "Claim"
+          ]
         },
         "payload": {
           "type": "object",

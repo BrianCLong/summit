@@ -36,10 +36,10 @@ async function testVideoExtraction() {
       },
       {
         headers: {
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
 
     const { jobId, message } = submitResponse.data;
@@ -53,14 +53,14 @@ async function testVideoExtraction() {
     let error: any = null;
 
     while (jobStatus !== 'completed' && jobStatus !== 'failed') {
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5 seconds
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Poll every 5 seconds
       const statusResponse = await axios.get(
         `${API_BASE_URL}/job-status/${jobId}`,
         {
           headers: {
-            'Authorization': `Bearer ${AUTH_TOKEN}`,
+            Authorization: `Bearer ${AUTH_TOKEN}`,
           },
-        }
+        },
       );
       const data = statusResponse.data;
       jobStatus = data.status;
@@ -73,7 +73,10 @@ async function testVideoExtraction() {
 
     if (jobStatus === 'completed') {
       console.log('\n--- Job Completed Successfully ---');
-      console.log('Extracted Entities Count:', result?.results?.[0]?.entities?.length || 0);
+      console.log(
+        'Extracted Entities Count:',
+        result?.results?.[0]?.entities?.length || 0,
+      );
       // console.log('Full Result:', JSON.stringify(result, null, 2)); // Uncomment for full result
     } else {
       console.error('\n--- Job Failed ---');

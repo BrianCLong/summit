@@ -29,7 +29,10 @@ router.get('/graph', async (req, res) => {
 
     // Generate sample graph data for UI development
     const nodes = generateSampleNodes(Math.min(parseInt(limit), 50));
-    const edges = generateSampleEdges(nodes, Math.min(parseInt(limit) * 0.8, 40));
+    const edges = generateSampleEdges(
+      nodes,
+      Math.min(parseInt(limit) * 0.8, 40),
+    );
 
     const response = {
       nodes,
@@ -167,7 +170,8 @@ function generateSyntheticActions(count) {
   ];
 
   for (let i = 0; i < count; i++) {
-    const actionType = actionTypes[Math.floor(Math.random() * actionTypes.length)];
+    const actionType =
+      actionTypes[Math.floor(Math.random() * actionTypes.length)];
     const result = results[Math.floor(Math.random() * results.length)];
 
     actions.push({
@@ -191,7 +195,13 @@ function generateSyntheticActions(count) {
 function generateSampleNodes(count) {
   const nodeTypes = ['Person', 'Organization', 'Location', 'Document', 'Event'];
   const sampleNames = {
-    Person: ['John Doe', 'Jane Smith', 'Robert Johnson', 'Maria Garcia', 'David Wilson'],
+    Person: [
+      'John Doe',
+      'Jane Smith',
+      'Robert Johnson',
+      'Maria Garcia',
+      'David Wilson',
+    ],
     Organization: [
       'Acme Corp',
       'Global Industries',
@@ -233,7 +243,9 @@ function generateSampleNodes(count) {
         deception_score: Math.random() * 0.3 + 0.1, // Low to medium deception scores
         tenantId: 'demo',
         type: nodeType,
-        created: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        created: new Date(
+          Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
       },
     });
   }
@@ -273,7 +285,9 @@ function generateSampleEdges(nodes, count) {
       type: edgeType,
       properties: {
         confidence: Math.random() * 0.4 + 0.6,
-        created: new Date(Date.now() - Math.random() * 20 * 24 * 60 * 60 * 1000).toISOString(),
+        created: new Date(
+          Date.now() - Math.random() * 20 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
       },
     });
   }

@@ -1,10 +1,12 @@
 # Batch merge report
+
 Branch: merge/all-to-main-20250915-022508
 Base: origin/main
 
 Merging 62 branches...
 
 ## Results
+
 - Trying origin/chore/compat/seed-baselines...
   - ❌ conflict on origin/chore/compat/seed-baselines (skipped)
 - Trying origin/chore/graphql-namespace-sweep...
@@ -133,6 +135,7 @@ Merging 62 branches...
 Summary: 36 merged, 26 skipped due to conflicts.
 
 ## PR head merges (from forks)
+
 - Trying origin/pr/1000...
   - ❌ conflict on origin/pr/1000 (skipped)
 - Trying origin/pr/1001...

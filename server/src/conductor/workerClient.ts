@@ -17,7 +17,10 @@ function pickTarget(): TargetState | null {
   return healthy[rr];
 }
 
-export async function executeOnWorker(step: { id: string; type: string; inputs?: any }, runId: string): Promise<any> {
+export async function executeOnWorker(
+  step: { id: string; type: string; inputs?: any },
+  runId: string,
+): Promise<any> {
   if (inflight >= MAX_INFLIGHT) {
     await new Promise((r) => setTimeout(r, 50));
   }
@@ -28,7 +31,10 @@ export async function executeOnWorker(step: { id: string; type: string; inputs?:
     // Lazy import generated client at runtime (placeholder path)
     const { StepRunnerClient } = await import('./gen/runner_grpc_pb');
     const { StepRequest } = await import('./gen/runner_pb');
-    const client = new (StepRunnerClient as any)(t.addr, grpc.credentials.createInsecure());
+    const client = new (StepRunnerClient as any)(
+      t.addr,
+      grpc.credentials.createInsecure(),
+    );
     const req = new (StepRequest as any)();
     req.setRunId(runId);
     req.setStepId(step.id);
@@ -68,4 +74,3 @@ export function startWorkerHealthLoop() {
     }
   }, 5000);
 }
-

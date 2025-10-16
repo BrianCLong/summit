@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Iterable, List, Sequence, Tuple
+from collections.abc import Sequence
 
 
 def difference_of_means(sample_a: Sequence[float], sample_b: Sequence[float]) -> float:
@@ -23,7 +23,9 @@ def variance(values: Sequence[float]) -> float:
 
 
 def pooled_standard_error(sample_a: Sequence[float], sample_b: Sequence[float]) -> float:
-    return math.sqrt(variance(sample_a) / max(len(sample_a), 1) + variance(sample_b) / max(len(sample_b), 1))
+    return math.sqrt(
+        variance(sample_a) / max(len(sample_a), 1) + variance(sample_b) / max(len(sample_b), 1)
+    )
 
 
 def welch_t(sample_a: Sequence[float], sample_b: Sequence[float]) -> float:
@@ -64,7 +66,9 @@ def welch_p_value(sample_a: Sequence[float], sample_b: Sequence[float]) -> float
     return permutation_test(sample_a, sample_b, iterations=2000)
 
 
-def permutation_test(sample_a: Sequence[float], sample_b: Sequence[float], iterations: int = 1000) -> float:
+def permutation_test(
+    sample_a: Sequence[float], sample_b: Sequence[float], iterations: int = 1000
+) -> float:
     combined = list(sample_a) + list(sample_b)
     observed = abs(difference_of_means(sample_a, sample_b))
     count = 0

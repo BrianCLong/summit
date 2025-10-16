@@ -30,7 +30,7 @@ import {
   AccordionDetails,
   Paper,
   Switch,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
 import {
   History,
@@ -58,19 +58,19 @@ import {
   Warning,
   Info,
   Backup,
-  CloudDownload
+  CloudDownload,
 } from '@mui/icons-material';
 import { formatDistanceToNow, format } from 'date-fns';
 
-function GraphVersionHistory({ 
-  graphId, 
-  currentVersion, 
-  onVersionSelect, 
+function GraphVersionHistory({
+  graphId,
+  currentVersion,
+  onVersionSelect,
   onVersionRestore,
   onVersionCompare,
   onCreateSnapshot,
   onDeleteVersion,
-  onVersionTag
+  onVersionTag,
 }) {
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -95,7 +95,8 @@ function GraphVersionHistory({
         {
           id: 'v1.0.0',
           name: 'Initial Investigation Setup',
-          description: 'Created base graph with initial entities and relationships',
+          description:
+            'Created base graph with initial entities and relationships',
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), // 7 days ago
           author: 'John Analyst',
           authorId: 'user1',
@@ -106,21 +107,22 @@ function GraphVersionHistory({
           stats: {
             nodes: 45,
             edges: 67,
-            changes: 112
+            changes: 112,
           },
           changes: [
             { type: 'add', entity: 'Person', count: 15 },
             { type: 'add', entity: 'Organization', count: 8 },
             { type: 'add', entity: 'Location', count: 12 },
-            { type: 'add', entity: 'Connection', count: 67 }
+            { type: 'add', entity: 'Connection', count: 67 },
           ],
           size: '2.4 MB',
-          commitHash: 'a1b2c3d4'
+          commitHash: 'a1b2c3d4',
         },
         {
           id: 'v1.1.0',
           name: 'Added Financial Entities',
-          description: 'Integrated financial records and bank account information',
+          description:
+            'Integrated financial records and bank account information',
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
           author: 'Sarah Detective',
           authorId: 'user2',
@@ -131,22 +133,23 @@ function GraphVersionHistory({
           stats: {
             nodes: 67,
             edges: 89,
-            changes: 44
+            changes: 44,
           },
           changes: [
             { type: 'add', entity: 'Bank Account', count: 12 },
             { type: 'add', entity: 'Transaction', count: 22 },
             { type: 'edit', entity: 'Person', count: 5 },
-            { type: 'add', entity: 'Connection', count: 22 }
+            { type: 'add', entity: 'Connection', count: 22 },
           ],
           size: '3.1 MB',
           commitHash: 'e5f6g7h8',
-          parentVersion: 'v1.0.0'
+          parentVersion: 'v1.0.0',
         },
         {
           id: 'v1.2.0',
           name: 'Geographic Analysis Update',
-          description: 'Added location clustering and geographic relationship mapping',
+          description:
+            'Added location clustering and geographic relationship mapping',
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
           author: 'Mike Operative',
           authorId: 'user3',
@@ -157,16 +160,16 @@ function GraphVersionHistory({
           stats: {
             nodes: 89,
             edges: 134,
-            changes: 67
+            changes: 67,
           },
           changes: [
             { type: 'add', entity: 'Location Cluster', count: 8 },
             { type: 'edit', entity: 'Location', count: 14 },
-            { type: 'add', entity: 'Geographic Link', count: 45 }
+            { type: 'add', entity: 'Geographic Link', count: 45 },
           ],
           size: '4.7 MB',
           commitHash: 'i9j0k1l2',
-          parentVersion: 'v1.1.0'
+          parentVersion: 'v1.1.0',
         },
         {
           id: 'v1.3.0',
@@ -182,17 +185,17 @@ function GraphVersionHistory({
           stats: {
             nodes: 112,
             edges: 178,
-            changes: 44
+            changes: 44,
           },
           changes: [
             { type: 'add', entity: 'Communication', count: 23 },
             { type: 'edit', entity: 'Person', count: 12 },
-            { type: 'add', entity: 'Sentiment Link', count: 44 }
+            { type: 'add', entity: 'Sentiment Link', count: 44 },
           ],
           size: '6.2 MB',
           commitHash: 'm3n4o5p6',
-          parentVersion: 'v1.2.0'
-        }
+          parentVersion: 'v1.2.0',
+        },
       ]);
       setLoading(false);
     }, 1000);
@@ -222,7 +225,7 @@ function GraphVersionHistory({
     if (onCreateSnapshot) {
       onCreateSnapshot({
         name: newVersionName,
-        description: newVersionDescription
+        description: newVersionDescription,
       });
       setCreateDialog(false);
       setNewVersionName('');
@@ -243,33 +246,48 @@ function GraphVersionHistory({
     event.preventDefault();
     setContextMenu({
       mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4
+      mouseY: event.clientY - 4,
     });
     setSelectedVersion(version);
   };
 
   const getChangeTypeIcon = (type) => {
     switch (type) {
-      case 'add': return <Add color="success" />;
-      case 'remove': return <Remove color="error" />;
-      case 'edit': return <Edit color="warning" />;
-      default: return <Changes />;
+      case 'add':
+        return <Add color="success" />;
+      case 'remove':
+        return <Remove color="error" />;
+      case 'edit':
+        return <Edit color="warning" />;
+      default:
+        return <Changes />;
     }
   };
 
   const getChangeTypeColor = (type) => {
     switch (type) {
-      case 'add': return 'success';
-      case 'remove': return 'error';
-      case 'edit': return 'warning';
-      default: return 'default';
+      case 'add':
+        return 'success';
+      case 'remove':
+        return 'error';
+      case 'edit':
+        return 'warning';
+      default:
+        return 'default';
     }
   };
 
   const VersionItem = ({ version }) => {
     const ItemContent = (
       <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 1,
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
               {version.name}
@@ -346,7 +364,9 @@ function GraphVersionHistory({
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
                           <Chip
                             label={change.type}
                             size="small"
@@ -390,9 +410,11 @@ function GraphVersionHistory({
             startIcon={<Compare />}
             onClick={() => {
               if (selectedVersions.includes(version)) {
-                setSelectedVersions(prev => prev.filter(v => v.id !== version.id));
+                setSelectedVersions((prev) =>
+                  prev.filter((v) => v.id !== version.id),
+                );
               } else if (selectedVersions.length < 2) {
-                setSelectedVersions(prev => [...prev, version]);
+                setSelectedVersions((prev) => [...prev, version]);
               }
             }}
             color={selectedVersions.includes(version) ? 'primary' : 'inherit'}
@@ -404,10 +426,14 @@ function GraphVersionHistory({
     );
 
     return (
-      <Card sx={{ mb: 2, border: version.isCurrent ? 2 : 1, borderColor: version.isCurrent ? 'primary.main' : 'divider' }}>
-        <CardContent>
-          {ItemContent}
-        </CardContent>
+      <Card
+        sx={{
+          mb: 2,
+          border: version.isCurrent ? 2 : 1,
+          borderColor: version.isCurrent ? 'primary.main' : 'divider',
+        }}
+      >
+        <CardContent>{ItemContent}</CardContent>
       </Card>
     );
   };
@@ -415,7 +441,14 @@ function GraphVersionHistory({
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
           Version History
         </Typography>
@@ -485,11 +518,20 @@ function GraphVersionHistory({
           <Label sx={{ mr: 1 }} />
           Add Tag
         </MenuItem>
-        <MenuItem onClick={() => {
-          setSelectedVersion(prev => ({ ...prev, isStarred: !prev.isStarred }));
-          setContextMenu(null);
-        }}>
-          {selectedVersion?.isStarred ? <StarBorder sx={{ mr: 1 }} /> : <Star sx={{ mr: 1 }} />}
+        <MenuItem
+          onClick={() => {
+            setSelectedVersion((prev) => ({
+              ...prev,
+              isStarred: !prev.isStarred,
+            }));
+            setContextMenu(null);
+          }}
+        >
+          {selectedVersion?.isStarred ? (
+            <StarBorder sx={{ mr: 1 }} />
+          ) : (
+            <Star sx={{ mr: 1 }} />
+          )}
           {selectedVersion?.isStarred ? 'Unstar' : 'Star'}
         </MenuItem>
         <MenuItem>
@@ -508,16 +550,23 @@ function GraphVersionHistory({
       </Menu>
 
       {/* Compare Dialog */}
-      <Dialog open={compareDialog} onClose={() => setCompareDialog(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={compareDialog}
+        onClose={() => setCompareDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Compare Versions</DialogTitle>
         <DialogContent>
           {selectedVersions.length === 2 && (
             <Box>
               <Typography variant="h6" gutterBottom>
-                Comparing: {selectedVersions[0].name} vs {selectedVersions[1].name}
+                Comparing: {selectedVersions[0].name} vs{' '}
+                {selectedVersions[1].name}
               </Typography>
               <Alert severity="info">
-                This will open a side-by-side comparison view showing the differences between these two versions.
+                This will open a side-by-side comparison view showing the
+                differences between these two versions.
               </Alert>
             </Box>
           )}
@@ -531,7 +580,12 @@ function GraphVersionHistory({
       </Dialog>
 
       {/* Create Snapshot Dialog */}
-      <Dialog open={createDialog} onClose={() => setCreateDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={createDialog}
+        onClose={() => setCreateDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Create Version Snapshot</DialogTitle>
         <DialogContent>
           <TextField
@@ -554,8 +608,8 @@ function GraphVersionHistory({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleCreateSnapshot}
             disabled={!newVersionName.trim()}
           >
@@ -565,7 +619,12 @@ function GraphVersionHistory({
       </Dialog>
 
       {/* Tag Dialog */}
-      <Dialog open={tagDialog} onClose={() => setTagDialog(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={tagDialog}
+        onClose={() => setTagDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>Add Tag</DialogTitle>
         <DialogContent>
           <TextField
@@ -579,8 +638,8 @@ function GraphVersionHistory({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTagDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleAddTag}
             disabled={!newTag.trim()}
           >

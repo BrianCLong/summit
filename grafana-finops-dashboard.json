@@ -1,4 +1,3 @@
-
 {
   "__inputs": [
     {
@@ -63,7 +62,10 @@
       "type": "piechart",
       "datasource": "${DS_BUILD_LAKE}",
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
-      "options": { "displayLabels": ["name", "percent"], "legend": { "displayMode": "list", "placement": "right"} }
+      "options": {
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "list", "placement": "right" }
+      }
     },
     {
       "id": 3,
@@ -71,10 +73,21 @@
       "type": "stat",
       "datasource": "${DS_BUILD_LAKE}",
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 8 },
-      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto" },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
       "fieldConfig": {
         "defaults": {
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 0 }, { "color": "red", "value": 10 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0 },
+              { "color": "red", "value": 10 }
+            ]
+          }
         }
       }
     },
@@ -91,7 +104,10 @@
       "type": "timeseries",
       "datasource": "${DS_BUILD_LAKE}",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "stacking": { "mode": "normal" } }
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "stacking": { "mode": "normal" }
+      }
     },
     {
       "id": 6,

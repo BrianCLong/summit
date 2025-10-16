@@ -69,7 +69,12 @@ export class SBOMPlugin implements StepPlugin {
     }
 
     // Validate format
-    const supportedFormats = ['spdx-json', 'spdx-tag', 'cyclonedx-json', 'cyclonedx-xml'];
+    const supportedFormats = [
+      'spdx-json',
+      'spdx-tag',
+      'cyclonedx-json',
+      'cyclonedx-xml',
+    ];
     if (!supportedFormats.includes(stepConfig.format)) {
       throw new Error(
         `Unsupported SBOM format: ${stepConfig.format}. Supported: ${supportedFormats.join(', ')}`,
@@ -84,7 +89,10 @@ export class SBOMPlugin implements StepPlugin {
     }
 
     // Validate target exists
-    if (!this.isImageReference(stepConfig.target) && !existsSync(stepConfig.target)) {
+    if (
+      !this.isImageReference(stepConfig.target) &&
+      !existsSync(stepConfig.target)
+    ) {
       throw new Error(`Target not found: ${stepConfig.target}`);
     }
   }
@@ -112,7 +120,12 @@ export class SBOMPlugin implements StepPlugin {
       // Store SBOM artifact
       let artifactPath: string | undefined;
       if (stepConfig.upload_to_artifact_store) {
-        artifactPath = await this.storeArtifact(context, execution, sbomData, stepConfig.format);
+        artifactPath = await this.storeArtifact(
+          context,
+          execution,
+          sbomData,
+          stepConfig.format,
+        );
       }
 
       // Save to local file if specified
@@ -122,7 +135,11 @@ export class SBOMPlugin implements StepPlugin {
 
       // Attach to image if specified
       if (stepConfig.attach_to_image) {
-        await this.attachToImage(stepConfig.attach_to_image, sbomData, stepConfig);
+        await this.attachToImage(
+          stepConfig.attach_to_image,
+          sbomData,
+          stepConfig,
+        );
       }
 
       const duration = Date.now() - startTime;
@@ -289,8 +306,14 @@ export class SBOMPlugin implements StepPlugin {
           '2.14',
         ],
       },
-      { name: 'jackson', versions: ['2.9.0', '2.9.1', '2.9.2', '2.9.3', '2.9.4', '2.9.5'] },
-      { name: 'spring-core', versions: ['5.3.0', '5.3.1', '5.3.2', '5.3.3', '5.3.4', '5.3.5'] },
+      {
+        name: 'jackson',
+        versions: ['2.9.0', '2.9.1', '2.9.2', '2.9.3', '2.9.4', '2.9.5'],
+      },
+      {
+        name: 'spring-core',
+        versions: ['5.3.0', '5.3.1', '5.3.2', '5.3.3', '5.3.4', '5.3.5'],
+      },
     ];
 
     for (const pattern of vulnerablePatterns) {
@@ -343,7 +366,9 @@ export class SBOMPlugin implements StepPlugin {
       // Clean up
       execSync(`rm -f "${tempFile}"`);
     } catch (error) {
-      throw new Error(`Failed to attach SBOM to image: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to attach SBOM to image: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -358,7 +383,9 @@ export class SBOMPlugin implements StepPlugin {
 
   private async getSyftVersion(): Promise<string> {
     try {
-      const version = execSync(`"${this.syftPath}" version`, { encoding: 'utf8' });
+      const version = execSync(`"${this.syftPath}" version`, {
+        encoding: 'utf8',
+      });
       return version.split('\n')[0] || 'unknown';
     } catch {
       return 'unknown';
@@ -398,7 +425,9 @@ export class SBOMPlugin implements StepPlugin {
         target.includes('ghcr.io/') ||
         target.includes('gcr.io/') ||
         target.includes('registry') ||
-        target.match(/^[a-z0-9]+([._-][a-z0-9]+)*\/[a-z0-9]+([._-][a-z0-9]+)*:[a-z0-9._-]+$/i))
+        target.match(
+          /^[a-z0-9]+([._-][a-z0-9]+)*\/[a-z0-9]+([._-][a-z0-9]+)*:[a-z0-9._-]+$/i,
+        ))
     );
   }
 

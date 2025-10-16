@@ -48,20 +48,24 @@ export function useOptimisticState<T>(initialData: T, serverVersion?: number) {
     };
   }, []);
 
-  const commitOptimistic = useCallback((serverData: T, serverVersion: number) => {
-    const current = stateRef.current;
+  const commitOptimistic = useCallback(
+    (serverData: T, serverVersion: number) => {
+      const current = stateRef.current;
 
-    // Conflict detection: server version advanced more than expected
-    const hasConflict = current.isOptimistic && serverVersion > current.version + 1;
+      // Conflict detection: server version advanced more than expected
+      const hasConflict =
+        current.isOptimistic && serverVersion > current.version + 1;
 
-    stateRef.current = {
-      version: serverVersion,
-      data: serverData,
-      isOptimistic: false,
-    };
+      stateRef.current = {
+        version: serverVersion,
+        data: serverData,
+        isOptimistic: false,
+      };
 
-    return { hasConflict, data: serverData };
-  }, []);
+      return { hasConflict, data: serverData };
+    },
+    [],
+  );
 
   const rollbackOptimistic = useCallback(() => {
     if (stateRef.current.isOptimistic) {

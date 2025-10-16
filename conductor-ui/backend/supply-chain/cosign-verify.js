@@ -9,7 +9,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export class CosignVerifier {
   constructor(options = {}) {
     this.cosignBinary = options.cosignBinary || 'cosign';
-    this.publicKeyPath = options.publicKeyPath || process.env.COSIGN_PUBLIC_KEY_PATH;
+    this.publicKeyPath =
+      options.publicKeyPath || process.env.COSIGN_PUBLIC_KEY_PATH;
     this.rekorUrl = options.rekorUrl || 'https://rekor.sigstore.dev';
     this.fulcioUrl = options.fulcioUrl || 'https://fulcio.sigstore.dev';
     this.oidcIssuer = options.oidcIssuer || 'https://oauth2.sigstore.dev/auth';
@@ -167,7 +168,15 @@ export class CosignVerifier {
 
   async generateSBOM(imageRef, format = 'spdx-json') {
     try {
-      const args = ['download', 'sbom', '--output-file', '-', '--format', format, imageRef];
+      const args = [
+        'download',
+        'sbom',
+        '--output-file',
+        '-',
+        '--format',
+        format,
+        imageRef,
+      ];
       const result = await this.executeCosign(args, { encoding: 'utf8' });
 
       return {
@@ -190,7 +199,13 @@ export class CosignVerifier {
 
   async downloadAttestation(imageRef, predicateType) {
     try {
-      const args = ['download', 'attestation', '--predicate-type', predicateType, imageRef];
+      const args = [
+        'download',
+        'attestation',
+        '--predicate-type',
+        predicateType,
+        imageRef,
+      ];
       const result = await this.executeCosign(args, { encoding: 'utf8' });
 
       const attestations = result
@@ -254,7 +269,9 @@ export class CosignVerifier {
       args.push(imageRef);
 
       const result = await this.executeCosign(args, {
-        env: passphrase ? { ...process.env, COSIGN_PASSWORD: passphrase } : process.env,
+        env: passphrase
+          ? { ...process.env, COSIGN_PASSWORD: passphrase }
+          : process.env,
       });
 
       return {
@@ -385,7 +402,9 @@ export class CosignVerifier {
             resolve(stdout.trim());
           }
         } else {
-          reject(new Error(`Cosign command failed (exit code ${code}): ${stderr}`));
+          reject(
+            new Error(`Cosign command failed (exit code ${code}): ${stderr}`),
+          );
         }
       });
 
@@ -525,9 +544,11 @@ export const supplyChainMiddleware = (options = {}) => {
     // Add supply chain verification methods to request
     req.supplyChain = {
       verify: (imageRef, opts) => verifier.verifyImage(imageRef, opts),
-      verifyAttestation: (imageRef, type, opts) => verifier.verifyAttestation(imageRef, type, opts),
+      verifyAttestation: (imageRef, type, opts) =>
+        verifier.verifyAttestation(imageRef, type, opts),
       getSBOM: (imageRef, format) => verifier.generateSBOM(imageRef, format),
-      getAttestation: (imageRef, predicate) => verifier.downloadAttestation(imageRef, predicate),
+      getAttestation: (imageRef, predicate) =>
+        verifier.downloadAttestation(imageRef, predicate),
     };
 
     next();

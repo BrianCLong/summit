@@ -1,6 +1,6 @@
+import json
 import os
 import tempfile
-import json
 
 from intelgraph_py.connectors.social.listener import fetch_rss, fetch_twitter
 from intelgraph_py.provenance.fabric_client import generate_hash, submit_receipt, verify_receipt

@@ -5,23 +5,23 @@
  * Comprehensive health checks for the Maestro application
  */
 
-import fetch from 'node-fetch'
-import { writeFileSync, existsSync, mkdirSync } from 'fs'
-import { join } from 'path'
+import fetch from 'node-fetch';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 class HealthChecker {
   constructor(baseUrl = 'http://localhost:5173') {
-    this.baseUrl = baseUrl.replace(/\/$/, '')
-    this.results = []
-    this.reportDir = 'health-reports'
-    this.timeout = 10000 // 10 second timeout
+    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.results = [];
+    this.reportDir = 'health-reports';
+    this.timeout = 10000; // 10 second timeout
   }
 
   async setup() {
-    console.log('🏥 Setting up health checker...')
-    
+    console.log('🏥 Setting up health checker...');
+
     if (!existsSync(this.reportDir)) {
-      mkdirSync(this.reportDir, { recursive: true })
+      mkdirSync(this.reportDir, { recursive: true });
     }
   }
 
@@ -31,32 +31,33 @@ class HealthChecker {
       headers = {},
       method = 'GET',
       body = null,
-      contentType = null
-    } = options
+      contentType = null,
+    } = options;
 
-    const url = `${this.baseUrl}${path}`
-    const startTime = Date.now()
-    
+    const url = `${this.baseUrl}${path}`;
+    const startTime = Date.now();
+
     try {
       const fetchOptions = {
         method,
         headers: {
           'User-Agent': 'Maestro-Health-Checker/1.0',
-          ...headers
+          ...headers,
         },
-        timeout
-      }
+        timeout,
+      };
 
       if (body) {
-        fetchOptions.body = typeof body === 'object' ? JSON.stringify(body) : body
+        fetchOptions.body =
+          typeof body === 'object' ? JSON.stringify(body) : body;
         if (contentType) {
-          fetchOptions.headers['Content-Type'] = contentType
+          fetchOptions.headers['Content-Type'] = contentType;
         }
       }
 
-      const response = await fetch(url, fetchOptions)
-      const duration = Date.now() - startTime
-      
+      const response = await fetch(url, fetchOptions);
+      const duration = Date.now() - startTime;
+
       const result = {
         name,
         url,
@@ -67,31 +68,30 @@ class HealthChecker {
         timestamp: new Date().toISOString(),
         passed: response.status === expectedStatus,
         headers: Object.fromEntries(response.headers.entries()),
-        size: parseInt(response.headers.get('content-length') || '0')
-      }
+        size: parseInt(response.headers.get('content-length') || '0'),
+      };
 
       // Try to get response body for analysis
       try {
-        const contentType = response.headers.get('content-type')
+        const contentType = response.headers.get('content-type');
         if (contentType?.includes('application/json')) {
-          result.responseBody = await response.json()
+          result.responseBody = await response.json();
         } else if (contentType?.includes('text/')) {
-          result.responseText = await response.text()
-          result.responseLength = result.responseText.length
+          result.responseText = await response.text();
+          result.responseLength = result.responseText.length;
         }
       } catch (bodyError) {
-        result.bodyError = bodyError.message
+        result.bodyError = bodyError.message;
       }
 
-      this.results.push(result)
-      
-      const statusIcon = result.passed ? '✅' : '❌'
-      console.log(`  ${statusIcon} ${name}: ${result.status} (${duration}ms)`)
-      
-      return result
+      this.results.push(result);
 
+      const statusIcon = result.passed ? '✅' : '❌';
+      console.log(`  ${statusIcon} ${name}: ${result.status} (${duration}ms)`);
+
+      return result;
     } catch (error) {
-      const duration = Date.now() - startTime
+      const duration = Date.now() - startTime;
       const result = {
         name,
         url,
@@ -101,192 +101,250 @@ class HealthChecker {
         timestamp: new Date().toISOString(),
         passed: false,
         error: error.message,
-        errorType: error.name
-      }
+        errorType: error.name,
+      };
 
-      this.results.push(result)
-      console.log(`  ❌ ${name}: ${error.message} (${duration}ms)`)
-      
-      return result
+      this.results.push(result);
+      console.log(`  ❌ ${name}: ${error.message} (${duration}ms)`);
+
+      return result;
     }
   }
 
   async checkFrontendRoutes() {
-    console.log('🌐 Checking frontend routes...')
+    console.log('🌐 Checking frontend routes...');
 
     const routes = [
       { name: 'Root Redirect', path: '/', expectedStatus: 200 },
       { name: 'Maestro App', path: '/maestro', expectedStatus: 200 },
       { name: 'Login Page', path: '/maestro/login', expectedStatus: 200 },
-      { name: 'Auth Callback', path: '/maestro/auth/callback', expectedStatus: 200 },
+      {
+        name: 'Auth Callback',
+        path: '/maestro/auth/callback',
+        expectedStatus: 200,
+      },
       { name: 'Dashboard', path: '/maestro/', expectedStatus: 200 },
       { name: 'Runs List', path: '/maestro/runs', expectedStatus: 200 },
-      { name: 'Observability', path: '/maestro/observability', expectedStatus: 200 },
+      {
+        name: 'Observability',
+        path: '/maestro/observability',
+        expectedStatus: 200,
+      },
       { name: 'Routing Studio', path: '/maestro/routing', expectedStatus: 200 },
       { name: 'Secrets', path: '/maestro/secrets', expectedStatus: 200 },
-      { name: 'Admin', path: '/maestro/admin', expectedStatus: 200 }
-    ]
+      { name: 'Admin', path: '/maestro/admin', expectedStatus: 200 },
+    ];
 
     for (const route of routes) {
-      await this.checkEndpoint(route.name, route.path, route.expectedStatus)
+      await this.checkEndpoint(route.name, route.path, route.expectedStatus);
     }
   }
 
   async checkStaticAssets() {
-    console.log('📦 Checking static assets...')
+    console.log('📦 Checking static assets...');
 
     const assets = [
-      { name: 'Main CSS', path: '/maestro/assets/index.css', expectedStatus: 200 },
-      { name: 'Main JS Bundle', path: '/maestro/assets/index.js', expectedStatus: 200 },
+      {
+        name: 'Main CSS',
+        path: '/maestro/assets/index.css',
+        expectedStatus: 200,
+      },
+      {
+        name: 'Main JS Bundle',
+        path: '/maestro/assets/index.js',
+        expectedStatus: 200,
+      },
       { name: 'Favicon', path: '/favicon.ico', expectedStatus: 200 },
-      { name: 'Build Manifest', path: '/maestro/build-manifest.json', expectedStatus: 200 }
-    ]
+      {
+        name: 'Build Manifest',
+        path: '/maestro/build-manifest.json',
+        expectedStatus: 200,
+      },
+    ];
 
     for (const asset of assets) {
-      await this.checkEndpoint(asset.name, asset.path, asset.expectedStatus)
+      await this.checkEndpoint(asset.name, asset.path, asset.expectedStatus);
     }
   }
 
   async checkAPIEndpoints() {
-    console.log('🔌 Checking API endpoints...')
+    console.log('🔌 Checking API endpoints...');
 
-    const apiBase = this.baseUrl.replace('5173', '3001') // Assume API on port 3001
-    
+    const apiBase = this.baseUrl.replace('5173', '3001'); // Assume API on port 3001
+
     const endpoints = [
-      { name: 'API Health', path: '/api/maestro/v1/health', expectedStatus: 200 },
-      { name: 'API Summary', path: '/api/maestro/v1/summary', expectedStatus: 200 },
+      {
+        name: 'API Health',
+        path: '/api/maestro/v1/health',
+        expectedStatus: 200,
+      },
+      {
+        name: 'API Summary',
+        path: '/api/maestro/v1/summary',
+        expectedStatus: 200,
+      },
       { name: 'API Runs', path: '/api/maestro/v1/runs', expectedStatus: 200 },
-      { name: 'API Pipelines', path: '/api/maestro/v1/pipelines', expectedStatus: 200 },
-      { name: 'GraphQL Endpoint', path: '/api/graphql', expectedStatus: 200, 
+      {
+        name: 'API Pipelines',
+        path: '/api/maestro/v1/pipelines',
+        expectedStatus: 200,
+      },
+      {
+        name: 'GraphQL Endpoint',
+        path: '/api/graphql',
+        expectedStatus: 200,
         options: {
           method: 'POST',
           body: { query: '{ __schema { queryType { name } } }' },
-          contentType: 'application/json'
-        }
-      }
-    ]
+          contentType: 'application/json',
+        },
+      },
+    ];
 
     for (const endpoint of endpoints) {
-      const url = endpoint.path.startsWith('/api') ? 
-        `${apiBase}${endpoint.path}` : 
-        `${this.baseUrl}${endpoint.path}`
-      
+      const url = endpoint.path.startsWith('/api')
+        ? `${apiBase}${endpoint.path}`
+        : `${this.baseUrl}${endpoint.path}`;
+
       await this.checkEndpoint(
-        endpoint.name, 
-        endpoint.path, 
+        endpoint.name,
+        endpoint.path,
         endpoint.expectedStatus,
         {
           ...endpoint.options,
-          timeout: 5000 // Shorter timeout for API calls
-        }
-      )
+          timeout: 5000, // Shorter timeout for API calls
+        },
+      );
     }
   }
 
   async checkSecurity() {
-    console.log('🔒 Checking security headers...')
+    console.log('🔒 Checking security headers...');
 
     const securityChecks = [
-      { 
-        name: 'Security Headers', 
+      {
+        name: 'Security Headers',
         path: '/maestro',
         checker: (result) => {
-          const headers = result.headers
-          const issues = []
+          const headers = result.headers;
+          const issues = [];
 
           if (!headers['strict-transport-security']) {
-            issues.push('Missing HSTS header')
+            issues.push('Missing HSTS header');
           }
-          if (!headers['x-frame-options'] && !headers['content-security-policy']) {
-            issues.push('Missing clickjacking protection')
+          if (
+            !headers['x-frame-options'] &&
+            !headers['content-security-policy']
+          ) {
+            issues.push('Missing clickjacking protection');
           }
           if (!headers['x-content-type-options']) {
-            issues.push('Missing X-Content-Type-Options header')
+            issues.push('Missing X-Content-Type-Options header');
           }
           if (!headers['referrer-policy']) {
-            issues.push('Missing Referrer-Policy header')
+            issues.push('Missing Referrer-Policy header');
           }
 
           return {
             passed: issues.length === 0,
             issues,
-            score: Math.max(0, 100 - (issues.length * 25))
-          }
-        }
-      }
-    ]
+            score: Math.max(0, 100 - issues.length * 25),
+          };
+        },
+      },
+    ];
 
     for (const check of securityChecks) {
-      const result = await this.checkEndpoint(check.name, check.path)
+      const result = await this.checkEndpoint(check.name, check.path);
       if (result && check.checker) {
-        const securityResult = check.checker(result)
-        result.security = securityResult
-        
+        const securityResult = check.checker(result);
+        result.security = securityResult;
+
         if (securityResult.issues.length > 0) {
-          console.log(`    ⚠️  Security issues found:`)
-          securityResult.issues.forEach(issue => {
-            console.log(`      - ${issue}`)
-          })
+          console.log(`    ⚠️  Security issues found:`);
+          securityResult.issues.forEach((issue) => {
+            console.log(`      - ${issue}`);
+          });
         }
       }
     }
   }
 
   async checkPerformanceBasics() {
-    console.log('⚡ Checking basic performance metrics...')
+    console.log('⚡ Checking basic performance metrics...');
 
     const checks = [
       { name: 'Page Load Speed', path: '/maestro', maxDuration: 3000 },
-      { name: 'API Response Time', path: '/api/maestro/v1/health', maxDuration: 1000 },
-      { name: 'Asset Load Speed', path: '/maestro/assets/index.js', maxDuration: 2000 }
-    ]
+      {
+        name: 'API Response Time',
+        path: '/api/maestro/v1/health',
+        maxDuration: 1000,
+      },
+      {
+        name: 'Asset Load Speed',
+        path: '/maestro/assets/index.js',
+        maxDuration: 2000,
+      },
+    ];
 
     for (const check of checks) {
-      const result = await this.checkEndpoint(check.name, check.path)
+      const result = await this.checkEndpoint(check.name, check.path);
       if (result) {
         result.performanceCheck = {
           passed: result.duration <= check.maxDuration,
           maxDuration: check.maxDuration,
           actualDuration: result.duration,
-          score: Math.max(0, 100 - Math.floor((result.duration / check.maxDuration) * 100))
-        }
+          score: Math.max(
+            0,
+            100 - Math.floor((result.duration / check.maxDuration) * 100),
+          ),
+        };
 
         if (result.duration > check.maxDuration) {
-          console.log(`    ⚠️  Slow response: ${result.duration}ms (max: ${check.maxDuration}ms)`)
+          console.log(
+            `    ⚠️  Slow response: ${result.duration}ms (max: ${check.maxDuration}ms)`,
+          );
         }
       }
     }
   }
 
   async checkDependencies() {
-    console.log('🔗 Checking external dependencies...')
+    console.log('🔗 Checking external dependencies...');
 
     const dependencies = [
-      { name: 'CDN Health', url: 'https://cdn.jsdelivr.net/npm/react@18/package.json' },
-      { name: 'Google Fonts', url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' },
+      {
+        name: 'CDN Health',
+        url: 'https://cdn.jsdelivr.net/npm/react@18/package.json',
+      },
+      {
+        name: 'Google Fonts',
+        url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+      },
       // Add other external dependencies as needed
-    ]
+    ];
 
     for (const dep of dependencies) {
-      const startTime = Date.now()
+      const startTime = Date.now();
       try {
-        const response = await fetch(dep.url, { timeout: 5000 })
-        const duration = Date.now() - startTime
-        
+        const response = await fetch(dep.url, { timeout: 5000 });
+        const duration = Date.now() - startTime;
+
         const result = {
           name: dep.name,
           url: dep.url,
           status: response.status,
           duration,
           timestamp: new Date().toISOString(),
-          passed: response.ok
-        }
+          passed: response.ok,
+        };
 
-        this.results.push(result)
-        console.log(`  ${response.ok ? '✅' : '❌'} ${dep.name}: ${response.status} (${duration}ms)`)
-
+        this.results.push(result);
+        console.log(
+          `  ${response.ok ? '✅' : '❌'} ${dep.name}: ${response.status} (${duration}ms)`,
+        );
       } catch (error) {
-        const duration = Date.now() - startTime
+        const duration = Date.now() - startTime;
         const result = {
           name: dep.name,
           url: dep.url,
@@ -294,107 +352,110 @@ class HealthChecker {
           duration,
           timestamp: new Date().toISOString(),
           passed: false,
-          error: error.message
-        }
+          error: error.message,
+        };
 
-        this.results.push(result)
-        console.log(`  ❌ ${dep.name}: ${error.message} (${duration}ms)`)
+        this.results.push(result);
+        console.log(`  ❌ ${dep.name}: ${error.message} (${duration}ms)`);
       }
     }
   }
 
   calculateHealthScore() {
-    const totalChecks = this.results.length
-    const passedChecks = this.results.filter(r => r.passed).length
-    const baseScore = Math.round((passedChecks / totalChecks) * 100)
+    const totalChecks = this.results.length;
+    const passedChecks = this.results.filter((r) => r.passed).length;
+    const baseScore = Math.round((passedChecks / totalChecks) * 100);
 
     // Adjust score based on critical failures
-    let adjustedScore = baseScore
-    const criticalEndpoints = ['Maestro App', 'API Health']
-    const failedCritical = this.results.filter(r => 
-      criticalEndpoints.includes(r.name) && !r.passed
-    ).length
+    let adjustedScore = baseScore;
+    const criticalEndpoints = ['Maestro App', 'API Health'];
+    const failedCritical = this.results.filter(
+      (r) => criticalEndpoints.includes(r.name) && !r.passed,
+    ).length;
 
     if (failedCritical > 0) {
-      adjustedScore = Math.max(0, adjustedScore - (failedCritical * 30))
+      adjustedScore = Math.max(0, adjustedScore - failedCritical * 30);
     }
 
-    return adjustedScore
+    return adjustedScore;
   }
 
   generateReport() {
-    console.log('📄 Generating health report...')
+    console.log('📄 Generating health report...');
 
-    const healthScore = this.calculateHealthScore()
+    const healthScore = this.calculateHealthScore();
     const summary = {
       total: this.results.length,
-      passed: this.results.filter(r => r.passed).length,
-      failed: this.results.filter(r => !r.passed).length,
+      passed: this.results.filter((r) => r.passed).length,
+      failed: this.results.filter((r) => !r.passed).length,
       averageResponseTime: Math.round(
-        this.results.reduce((sum, r) => sum + r.duration, 0) / this.results.length
-      )
-    }
+        this.results.reduce((sum, r) => sum + r.duration, 0) /
+          this.results.length,
+      ),
+    };
 
     const report = {
       timestamp: new Date().toISOString(),
       healthScore,
       summary,
       results: this.results,
-      recommendations: this.generateRecommendations()
-    }
+      recommendations: this.generateRecommendations(),
+    };
 
     // Write JSON report
-    const jsonPath = join(this.reportDir, 'health-report.json')
-    writeFileSync(jsonPath, JSON.stringify(report, null, 2))
+    const jsonPath = join(this.reportDir, 'health-report.json');
+    writeFileSync(jsonPath, JSON.stringify(report, null, 2));
 
     // Write HTML report
-    const htmlPath = join(this.reportDir, 'health-report.html')
-    writeFileSync(htmlPath, this.generateHTMLReport(report))
+    const htmlPath = join(this.reportDir, 'health-report.html');
+    writeFileSync(htmlPath, this.generateHTMLReport(report));
 
-    return report
+    return report;
   }
 
   generateRecommendations() {
-    const recommendations = []
-    const failedResults = this.results.filter(r => !r.passed)
+    const recommendations = [];
+    const failedResults = this.results.filter((r) => !r.passed);
 
     // Critical endpoint failures
-    const criticalFailures = failedResults.filter(r => 
-      ['Maestro App', 'API Health', 'Main JS Bundle'].includes(r.name)
-    )
+    const criticalFailures = failedResults.filter((r) =>
+      ['Maestro App', 'API Health', 'Main JS Bundle'].includes(r.name),
+    );
     if (criticalFailures.length > 0) {
       recommendations.push({
         type: 'Critical',
         severity: 'high',
-        message: `Critical endpoints are failing: ${criticalFailures.map(r => r.name).join(', ')}`,
-        action: 'Investigate server configuration and deployment status'
-      })
+        message: `Critical endpoints are failing: ${criticalFailures.map((r) => r.name).join(', ')}`,
+        action: 'Investigate server configuration and deployment status',
+      });
     }
 
     // Performance issues
-    const slowResponses = this.results.filter(r => r.duration > 3000)
+    const slowResponses = this.results.filter((r) => r.duration > 3000);
     if (slowResponses.length > 0) {
       recommendations.push({
         type: 'Performance',
         severity: 'medium',
         message: `${slowResponses.length} endpoints have slow response times`,
-        action: 'Optimize server performance and consider CDN implementation'
-      })
+        action: 'Optimize server performance and consider CDN implementation',
+      });
     }
 
     // Security issues
-    const securityIssues = this.results.filter(r => r.security?.issues?.length > 0)
+    const securityIssues = this.results.filter(
+      (r) => r.security?.issues?.length > 0,
+    );
     if (securityIssues.length > 0) {
-      const allIssues = securityIssues.flatMap(r => r.security.issues)
+      const allIssues = securityIssues.flatMap((r) => r.security.issues);
       recommendations.push({
         type: 'Security',
         severity: 'high',
         message: `Security headers missing: ${[...new Set(allIssues)].join(', ')}`,
-        action: 'Configure proper security headers in web server'
-      })
+        action: 'Configure proper security headers in web server',
+      });
     }
 
-    return recommendations
+    return recommendations;
   }
 
   generateHTMLReport(report) {
@@ -467,17 +528,25 @@ class HealthChecker {
             </div>
         </div>
 
-        ${report.recommendations.length > 0 ? `
+        ${
+          report.recommendations.length > 0
+            ? `
             <div class="recommendations">
                 <h3>⚠️ Recommendations</h3>
-                ${report.recommendations.map(rec => `
+                ${report.recommendations
+                  .map(
+                    (rec) => `
                     <div class="recommendation severity-${rec.severity}">
                         <strong>${rec.type}:</strong> ${rec.message}<br>
                         <small><strong>Action:</strong> ${rec.action}</small>
                     </div>
-                `).join('')}
+                `,
+                  )
+                  .join('')}
             </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <table class="results-table">
             <thead>
@@ -489,7 +558,9 @@ class HealthChecker {
                 </tr>
             </thead>
             <tbody>
-                ${report.results.map(result => `
+                ${report.results
+                  .map(
+                    (result) => `
                     <tr>
                         <td>${result.name}</td>
                         <td class="${result.passed ? 'status-passed' : 'status-failed'}">
@@ -502,67 +573,86 @@ class HealthChecker {
                             ${result.security?.issues?.length > 0 ? `<br><small>Security issues: ${result.security.issues.length}</small>` : ''}
                         </td>
                     </tr>
-                `).join('')}
+                `,
+                  )
+                  .join('')}
             </tbody>
         </table>
     </div>
 </body>
 </html>
-    `
+    `;
   }
 
   async runHealthCheck() {
     try {
-      await this.setup()
+      await this.setup();
 
-      console.log('🏥 Starting comprehensive health check...\n')
+      console.log('🏥 Starting comprehensive health check...\n');
 
-      await this.checkFrontendRoutes()
-      await this.checkStaticAssets()
-      await this.checkAPIEndpoints()
-      await this.checkSecurity()
-      await this.checkPerformanceBasics()
-      await this.checkDependencies()
+      await this.checkFrontendRoutes();
+      await this.checkStaticAssets();
+      await this.checkAPIEndpoints();
+      await this.checkSecurity();
+      await this.checkPerformanceBasics();
+      await this.checkDependencies();
 
-      const report = this.generateReport()
+      const report = this.generateReport();
 
-      console.log('\n📋 Health Check Summary:')
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-      console.log(`  Overall Health:     ${report.healthScore}/100`)
-      console.log(`  Checks Passed:      ${report.summary.passed}/${report.summary.total}`)
-      console.log(`  Avg Response Time:  ${report.summary.averageResponseTime}ms`)
-      console.log(`  Critical Issues:    ${report.recommendations.filter(r => r.severity === 'high').length}`)
-      
+      console.log('\n📋 Health Check Summary:');
+      console.log(
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+      );
+      console.log(`  Overall Health:     ${report.healthScore}/100`);
+      console.log(
+        `  Checks Passed:      ${report.summary.passed}/${report.summary.total}`,
+      );
+      console.log(
+        `  Avg Response Time:  ${report.summary.averageResponseTime}ms`,
+      );
+      console.log(
+        `  Critical Issues:    ${report.recommendations.filter((r) => r.severity === 'high').length}`,
+      );
+
       if (report.recommendations.length > 0) {
-        console.log('\n⚠️ Issues Found:')
-        report.recommendations.forEach(rec => {
-          const icon = rec.severity === 'high' ? '🔴' : rec.severity === 'medium' ? '🟡' : '🟢'
-          console.log(`  ${icon} ${rec.type}: ${rec.message}`)
-        })
+        console.log('\n⚠️ Issues Found:');
+        report.recommendations.forEach((rec) => {
+          const icon =
+            rec.severity === 'high'
+              ? '🔴'
+              : rec.severity === 'medium'
+                ? '🟡'
+                : '🟢';
+          console.log(`  ${icon} ${rec.type}: ${rec.message}`);
+        });
       }
 
-      console.log(`\n📄 Full report: ${join(this.reportDir, 'health-report.html')}`)
+      console.log(
+        `\n📄 Full report: ${join(this.reportDir, 'health-report.html')}`,
+      );
 
-      return report
-
+      return report;
     } catch (error) {
-      console.error('❌ Health check failed:', error)
-      throw error
+      console.error('❌ Health check failed:', error);
+      throw error;
     }
   }
 }
 
 // CLI interface
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const args = process.argv.slice(2)
-  const baseUrl = args.find(arg => arg.startsWith('--base-url='))?.split('=')[1] || 'http://localhost:5173'
+  const args = process.argv.slice(2);
+  const baseUrl =
+    args.find((arg) => arg.startsWith('--base-url='))?.split('=')[1] ||
+    'http://localhost:5173';
 
-  const checker = new HealthChecker(baseUrl)
-  checker.runHealthCheck()
-    .then(report => {
-      process.exit(report.healthScore < 70 ? 1 : 0)
+  const checker = new HealthChecker(baseUrl);
+  checker
+    .runHealthCheck()
+    .then((report) => {
+      process.exit(report.healthScore < 70 ? 1 : 0);
     })
-    .catch(console.error)
+    .catch(console.error);
 }
 
-export default HealthChecker
+export default HealthChecker;

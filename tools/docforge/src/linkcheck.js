@@ -19,7 +19,11 @@ async function collectFiles(rootDir) {
 }
 
 function isExternalLink(href) {
-  return /^(https?:)?\/\//i.test(href) || href.startsWith('mailto:') || href.startsWith('tel:');
+  return (
+    /^(https?:)?\/\//i.test(href) ||
+    href.startsWith('mailto:') ||
+    href.startsWith('tel:')
+  );
 }
 
 function normalizeTarget(sourceFile, href) {
@@ -40,7 +44,9 @@ async function linkCheck({ rootDir }) {
   const existing = new Set(allFiles);
   const broken = [];
 
-  for (const file of allFiles.filter((filePath) => filePath.endsWith('.html'))) {
+  for (const file of allFiles.filter((filePath) =>
+    filePath.endsWith('.html'),
+  )) {
     const absolute = path.join(rootDir, file);
     const content = await fs.readFile(absolute, 'utf8');
     const linkPattern = /<a\s[^>]*href="([^"]+)"[^>]*>/gi;
@@ -74,5 +80,5 @@ async function linkCheck({ rootDir }) {
 }
 
 module.exports = {
-  linkCheck
+  linkCheck,
 };

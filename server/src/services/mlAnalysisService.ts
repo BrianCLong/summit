@@ -1,4 +1,8 @@
-import { persistenceService, GraphEntity, GraphRelationship } from './persistenceService';
+import {
+  persistenceService,
+  GraphEntity,
+  GraphRelationship,
+} from './persistenceService';
 import { cacheService } from './cacheService';
 
 interface MLPrediction {
@@ -57,10 +61,13 @@ export class MLAnalysisService {
       return clusters;
     }
 
-    console.log(`[ML] Computing entity clusters for investigation: ${investigationId}`);
+    console.log(
+      `[ML] Computing entity clusters for investigation: ${investigationId}`,
+    );
 
     const entities = await persistenceService.getEntities(investigationId);
-    const relationships = await persistenceService.getRelationships(investigationId);
+    const relationships =
+      await persistenceService.getRelationships(investigationId);
 
     // Simulate advanced clustering algorithm
     clusters = await this.performEntityClustering(entities, relationships);
@@ -83,7 +90,9 @@ export class MLAnalysisService {
       return anomalies;
     }
 
-    console.log(`[ML] Detecting anomalies for investigation: ${investigationId}`);
+    console.log(
+      `[ML] Detecting anomalies for investigation: ${investigationId}`,
+    );
 
     const entities = await persistenceService.getEntities(investigationId);
     anomalies = await this.performAnomalyDetection(entities);
@@ -125,7 +134,10 @@ export class MLAnalysisService {
     // Simulate ML-based relationship prediction
     predictions = candidateIds.map((candidateId) => ({
       target_entity: candidateId,
-      predicted_relationship: this.predictRelationshipType(sourceEntity, candidateId),
+      predicted_relationship: this.predictRelationshipType(
+        sourceEntity,
+        candidateId,
+      ),
       confidence: 0.7 + Math.random() * 0.25, // 70-95% confidence
       reasoning: [
         'Similar behavioral patterns detected',
@@ -161,7 +173,10 @@ export class MLAnalysisService {
     const ttpWeight = entity.attack_ttps ? entity.attack_ttps.length * 0.1 : 0;
     const confidenceWeight = entity.confidence * 0.3;
 
-    const riskScore = Math.min(0.95, baseScore + ttpWeight + confidenceWeight * 0.2);
+    const riskScore = Math.min(
+      0.95,
+      baseScore + ttpWeight + confidenceWeight * 0.2,
+    );
 
     prediction = {
       confidence: riskScore,
@@ -197,10 +212,13 @@ export class MLAnalysisService {
       return metrics;
     }
 
-    console.log(`[ML] Computing graph metrics for investigation: ${investigationId}`);
+    console.log(
+      `[ML] Computing graph metrics for investigation: ${investigationId}`,
+    );
 
     const entities = await persistenceService.getEntities(investigationId);
-    const relationships = await persistenceService.getRelationships(investigationId);
+    const relationships =
+      await persistenceService.getRelationships(investigationId);
 
     // Simulate advanced graph analysis
     const centralityScores: Record<string, number> = {};
@@ -211,9 +229,14 @@ export class MLAnalysisService {
       centralityScores[entity.id] = Math.random() * 0.8 + 0.1; // 0.1-0.9
 
       // Simulate influence score based on connections and TTP sophistication
-      const ttpInfluence = entity.attack_ttps ? entity.attack_ttps.length * 0.15 : 0;
+      const ttpInfluence = entity.attack_ttps
+        ? entity.attack_ttps.length * 0.15
+        : 0;
       const confidenceInfluence = entity.confidence * 0.4;
-      influenceScores[entity.id] = Math.min(1.0, ttpInfluence + confidenceInfluence);
+      influenceScores[entity.id] = Math.min(
+        1.0,
+        ttpInfluence + confidenceInfluence,
+      );
     });
 
     metrics = {
@@ -221,7 +244,9 @@ export class MLAnalysisService {
       clustering_coefficient: 0.67 + Math.random() * 0.2, // 0.67-0.87
       average_path_length: 2.3 + Math.random() * 0.8, // 2.3-3.1
       network_density:
-        entities.length > 0 ? relationships.length / (entities.length * (entities.length - 1)) : 0,
+        entities.length > 0
+          ? relationships.length / (entities.length * (entities.length - 1))
+          : 0,
       community_modularity: 0.45 + Math.random() * 0.3, // 0.45-0.75
       influence_scores: influenceScores,
     };
@@ -277,7 +302,8 @@ export class MLAnalysisService {
     ];
 
     const behavioralScore =
-      patterns.reduce((sum, p) => sum + p.confidence * p.frequency, 0) / patterns.length;
+      patterns.reduce((sum, p) => sum + p.confidence * p.frequency, 0) /
+      patterns.length;
     const patternStability = 0.85 + Math.random() * 0.1; // 85-95% stability
 
     return {
@@ -341,7 +367,9 @@ export class MLAnalysisService {
     return clusters;
   }
 
-  private async performAnomalyDetection(entities: GraphEntity[]): Promise<AnomalyDetection[]> {
+  private async performAnomalyDetection(
+    entities: GraphEntity[],
+  ): Promise<AnomalyDetection[]> {
     const anomalies: AnomalyDetection[] = [];
 
     entities.forEach((entity) => {
@@ -369,7 +397,8 @@ export class MLAnalysisService {
           entity_id: entity.id,
           anomaly_type: 'BEHAVIORAL',
           severity: 0.78,
-          description: 'Entity exhibits unusually diverse MITRE ATT&CK technique portfolio',
+          description:
+            'Entity exhibits unusually diverse MITRE ATT&CK technique portfolio',
           baseline_deviation: 1.9,
           contributing_factors: [
             'TTP diversity exceeds typical threat actor profile',
@@ -384,7 +413,10 @@ export class MLAnalysisService {
     return anomalies;
   }
 
-  private predictRelationshipType(sourceEntity: GraphEntity, targetId: string): string {
+  private predictRelationshipType(
+    sourceEntity: GraphEntity,
+    targetId: string,
+  ): string {
     // Simple heuristic for relationship prediction
     const relationshipTypes = [
       'COMMUNICATES_WITH',

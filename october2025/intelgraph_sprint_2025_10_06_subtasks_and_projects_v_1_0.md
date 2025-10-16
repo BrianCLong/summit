@@ -5,13 +5,15 @@
 **Scope:** Import‑ready **Subtasks CSV**, **Projects (GitHub) JSON + gh script**, **Jira board swimlanes/JQL**, **automation rules**.
 
 > **How to use**
-> 1) Import the **Jira Subtasks CSV** *after* the parent Stories exist. Fill the `Parent Key` column with real keys (e.g., `IG‑123`).  
-> 2) For GitHub, run the **gh** script to create a Projects (v2) board with fields, views, and filters aligned to the sprint.  
-> 3) Optional: use the lightweight **Automation Rules** to mirror status across repos.
+>
+> 1. Import the **Jira Subtasks CSV** _after_ the parent Stories exist. Fill the `Parent Key` column with real keys (e.g., `IG‑123`).
+> 2. For GitHub, run the **gh** script to create a Projects (v2) board with fields, views, and filters aligned to the sprint.
+> 3. Optional: use the lightweight **Automation Rules** to mirror status across repos.
 
 ---
 
 ## 1) Jira CSV — Subtasks (per Story)
+
 - Standardized subtasks for **tests**, **docs**, **telemetry/SLO**, **security/privacy**, **UX copy**, **demo script**, **observability**, **release notes**.
 - Replace `TBD-*` assignees and dates as needed.
 
@@ -36,6 +38,7 @@ Sub-task,IG,Release Notes,"Draft entry for 2025.10.r1 (scope, toggles, known iss
 ## 2) Jira Board Swimlanes & Quick Filters (JQL)
 
 ### 2.1 Swimlanes (by Epic)
+
 ```text
 EPIC-PCA-ALPHA: "Epic Link" = EPIC-PCA-ALPHA
 EPIC-LAC-BETA:  "Epic Link" = EPIC-LAC-BETA
@@ -45,6 +48,7 @@ EPIC-COPILOT-GLUE: "Epic Link" = EPIC-COPILOT-GLUE
 ```
 
 ### 2.2 Quick Filters
+
 ```text
 Blocked: statusCategory = "In Progress" AND flag is not EMPTY
 Needs Review: status = "In Review" OR status = "Code Review"
@@ -56,13 +60,26 @@ Today Due: due <= endOfDay()
 ---
 
 ## 3) GitHub Projects (v2) — JSON & `gh` Script
+
 Creates **fields**, **views**, and **filters** matching the sprint.
 
 ### 3.1 Project Fields (JSON)
+
 ```json
 {
   "fields": [
-    { "name": "Status", "type": "single_select", "options": ["Backlog", "Ready", "In Progress", "In Review", "Blocked", "Done"] },
+    {
+      "name": "Status",
+      "type": "single_select",
+      "options": [
+        "Backlog",
+        "Ready",
+        "In Progress",
+        "In Review",
+        "Blocked",
+        "Done"
+      ]
+    },
     { "name": "Sprint", "type": "text" },
     { "name": "Epic", "type": "text" },
     { "name": "Story Points", "type": "number" },
@@ -72,14 +89,30 @@ Creates **fields**, **views**, and **filters** matching the sprint.
     { "name": "Due Date", "type": "date" }
   ],
   "views": [
-    { "name": "Sprint 18 Board", "layout": "board", "group_by": "Status", "filter": "Sprint:'Sprint 18 (Oct 6–17, 2025)'" },
-    { "name": "By Epic", "layout": "table", "fields": ["Title", "Epic", "Status", "Story Points", "Due Date"], "filter": "Sprint:'Sprint 18 (Oct 6–17, 2025)'" },
-    { "name": "Blocked", "layout": "board", "group_by": "Epic", "filter": "Status:'Blocked'" }
+    {
+      "name": "Sprint 18 Board",
+      "layout": "board",
+      "group_by": "Status",
+      "filter": "Sprint:'Sprint 18 (Oct 6–17, 2025)'"
+    },
+    {
+      "name": "By Epic",
+      "layout": "table",
+      "fields": ["Title", "Epic", "Status", "Story Points", "Due Date"],
+      "filter": "Sprint:'Sprint 18 (Oct 6–17, 2025)'"
+    },
+    {
+      "name": "Blocked",
+      "layout": "board",
+      "group_by": "Epic",
+      "filter": "Status:'Blocked'"
+    }
   ]
 }
 ```
 
 ### 3.2 Bootstrap Script (`scripts/bootstrap_project.sh`)
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -119,9 +152,11 @@ echo "Fields created. Configure views in UI (API limited); apply filter: Sprint:
 ---
 
 ## 4) GitHub Actions — Lightweight Automation
+
 - Auto‑label PRs by directory; sync Project fields from PR/issue labels.
 
 ### 4.1 `.github/workflows/project-sync.yml`
+
 ```yaml
 name: Project Sync
 on:
@@ -148,6 +183,7 @@ jobs:
 ---
 
 ## 5) Automation Rules (Jira) — Status Hygiene
+
 ```text
 Rule: When PR merged (flag 'merged' on issue), transition Story → In Review
 Rule: When all Subtasks = Done, transition parent Story → Ready for Review
@@ -157,5 +193,5 @@ Rule: When label = policy-compiler added, add Component = gov-ops and assign Gov
 ---
 
 ## 6) Versioning & Change Log
-- **v1.0 (2025‑09‑29):** Initial subtasks CSV, Projects bootstrap script, board JQL, and automations.
 
+- **v1.0 (2025‑09‑29):** Initial subtasks CSV, Projects bootstrap script, board JQL, and automations.

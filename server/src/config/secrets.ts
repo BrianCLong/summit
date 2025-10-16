@@ -9,21 +9,28 @@ import crypto from 'crypto';
 // Environment validation schema
 const EnvSchema = z.object({
   // Application
-  NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'test', 'staging', 'production'])
+    .default('development'),
   PORT: z.coerce.number().min(1024).max(65535).default(8080),
 
   // Database URLs (with validation)
   DATABASE_URL: z
     .string()
     .url()
-    .refine((url) => url.startsWith('postgresql://') || url.startsWith('postgres://'), {
-      message: 'DATABASE_URL must be a valid PostgreSQL connection string',
-    }),
+    .refine(
+      (url) => url.startsWith('postgresql://') || url.startsWith('postgres://'),
+      {
+        message: 'DATABASE_URL must be a valid PostgreSQL connection string',
+      },
+    ),
 
   // Neo4j Configuration
   NEO4J_URI: z.string().default('bolt://localhost:7687'),
   NEO4J_USER: z.string().default('neo4j'),
-  NEO4J_PASSWORD: z.string().min(6, 'Neo4j password must be at least 6 characters'),
+  NEO4J_PASSWORD: z
+    .string()
+    .min(6, 'Neo4j password must be at least 6 characters'),
 
   // Redis Configuration
   REDIS_HOST: z.string().default('localhost'),
@@ -32,7 +39,9 @@ const EnvSchema = z.object({
 
   // Security - JWT Secrets
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
-  JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
+  JWT_REFRESH_SECRET: z
+    .string()
+    .min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
   JWT_EXPIRES_IN: z.string().default('24h'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
@@ -67,7 +76,9 @@ const EnvSchema = z.object({
   TLS_CERT_PATH: z.string().optional(),
 
   // Session Configuration
-  SESSION_SECRET: z.string().min(32, 'SESSION_SECRET must be at least 32 characters'),
+  SESSION_SECRET: z
+    .string()
+    .min(32, 'SESSION_SECRET must be at least 32 characters'),
 
   // Encryption
   ENCRYPTION_KEY: z
@@ -133,7 +144,10 @@ function validateProductionSecurity(config: EnvConfig) {
   }
 
   // Check database security
-  if (config.DATABASE_URL.includes('@localhost') || config.DATABASE_URL.includes('password')) {
+  if (
+    config.DATABASE_URL.includes('@localhost') ||
+    config.DATABASE_URL.includes('password')
+  ) {
     issues.push('DATABASE_URL appears to contain development credentials');
   }
 
@@ -143,14 +157,20 @@ function validateProductionSecurity(config: EnvConfig) {
   }
 
   // Check OIDC configuration in production
-  if (!config.OIDC_ISSUER || !config.OIDC_CLIENT_ID || !config.OIDC_CLIENT_SECRET) {
+  if (
+    !config.OIDC_ISSUER ||
+    !config.OIDC_CLIENT_ID ||
+    !config.OIDC_CLIENT_SECRET
+  ) {
     issues.push('OIDC configuration is incomplete (required in production)');
   }
 
   if (issues.length > 0) {
     console.error('Production security validation failed:');
     issues.forEach((issue) => console.error(`  - ${issue}`));
-    console.error('\nRefusing to start with insecure configuration in production.');
+    console.error(
+      '\nRefusing to start with insecure configuration in production.',
+    );
     process.exit(1);
   }
 }
@@ -170,7 +190,9 @@ export function generateSecrets(): Record<string, string> {
 /**
  * Create development .env file with secure defaults
  */
-export function createDevelopmentEnv(overrides: Record<string, string> = {}): string {
+export function createDevelopmentEnv(
+  overrides: Record<string, string> = {},
+): string {
   const secrets = generateSecrets();
 
   const envTemplate = `# IntelGraph Server - Development Environment

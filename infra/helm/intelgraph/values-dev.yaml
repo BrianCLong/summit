@@ -9,7 +9,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/brianclong/intelgraph
   pullPolicy: Always
-  tag: "latest"
+  tag: 'latest'
 
 securityContext:
   runAsNonRoot: true
@@ -18,11 +18,11 @@ securityContext:
 
 resources:
   requests:
-    cpu: "100m"
-    memory: "128Mi"
+    cpu: '100m'
+    memory: '128Mi'
   limits:
-    cpu: "500m"
-    memory: "512Mi"
+    cpu: '500m'
+    memory: '512Mi'
 
 # External services for development
 postgresql:
@@ -57,7 +57,7 @@ ingress:
   enabled: true
   className: nginx
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
   hosts:
     - host: dev.intelgraph.local
       paths:

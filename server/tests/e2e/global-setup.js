@@ -29,10 +29,12 @@ async function waitForServices() {
       console.log(`⏳ Waiting for services... (${waited}ms/${maxWait}ms)`);
       // Check if client is ready
       const clientResponse = await fetch(baseUrl);
-      if (!clientResponse.ok) throw new Error(`Client not ready: ${clientResponse.status}`);
+      if (!clientResponse.ok)
+        throw new Error(`Client not ready: ${clientResponse.status}`);
       // Check if server is ready
       const serverResponse = await fetch(`${apiUrl}/health`);
-      if (!serverResponse.ok) throw new Error(`Server not ready: ${serverResponse.status}`);
+      if (!serverResponse.ok)
+        throw new Error(`Server not ready: ${serverResponse.status}`);
       console.log('✅ All services are ready for E2E tests');
       return;
     } catch (error) {

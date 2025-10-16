@@ -38,10 +38,10 @@ async function getTraces(): Promise<string> {
       {
         operationName: 'database.query',
         tags: {
-          'db.statement': 'SELECT * FROM users WHERE tenant_id = ?'
+          'db.statement': 'SELECT * FROM users WHERE tenant_id = ?',
           // Note: db.statement.parameters should be scrubbed
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
 }

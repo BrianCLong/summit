@@ -5,59 +5,62 @@
  * Facilitates team collaboration, code reviews, and project coordination
  */
 
-import { spawn, exec } from 'child_process'
-import { promisify } from 'util'
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
-import { join, resolve } from 'path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
+import { spawn, exec } from 'child_process';
+import { promisify } from 'util';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
+import { join, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const execAsync = promisify(exec)
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const root = resolve(__dirname, '..')
+const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const root = resolve(__dirname, '..');
 
 class CollaborationHub {
   constructor() {
-    this.reportDir = join(root, 'test-results', 'collaboration')
-    this.configDir = join(root, '.collaboration')
-    this.startTime = Date.now()
+    this.reportDir = join(root, 'test-results', 'collaboration');
+    this.configDir = join(root, '.collaboration');
+    this.startTime = Date.now();
     this.teamData = {
       members: [],
       contributions: [],
       codeReviews: [],
       issues: [],
-      milestones: []
-    }
+      milestones: [],
+    };
   }
 
   async setup() {
-    console.log('🤝 Setting up Collaboration Hub...')
-    
-    // Create directories
-    [this.reportDir, this.configDir].forEach(dir => {
-      if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true })
-      }
-    })
+    console
+      .log('🤝 Setting up Collaboration Hub...')
+
+      [
+        // Create directories
+        (this.reportDir, this.configDir)
+      ].forEach((dir) => {
+        if (!existsSync(dir)) {
+          mkdirSync(dir, { recursive: true });
+        }
+      });
   }
 
   async createGitHooks() {
-    console.log('🪝 Creating Git collaboration hooks...')
-    
-    const hooksDir = join(root, '.git', 'hooks')
-    
+    console.log('🪝 Creating Git collaboration hooks...');
+
+    const hooksDir = join(root, '.git', 'hooks');
+
     const hooks = {
       'pre-commit': this.generatePreCommitHook(),
       'commit-msg': this.generateCommitMsgHook(),
       'pre-push': this.generatePrePushHook(),
-      'post-merge': this.generatePostMergeHook()
-    }
+      'post-merge': this.generatePostMergeHook(),
+    };
 
     for (const [hookName, hookContent] of Object.entries(hooks)) {
-      const hookPath = join(hooksDir, hookName)
-      writeFileSync(hookPath, hookContent, { mode: 0o755 })
-      console.log(`  ✅ Created ${hookName} hook`)
+      const hookPath = join(hooksDir, hookName);
+      writeFileSync(hookPath, hookContent, { mode: 0o755 });
+      console.log(`  ✅ Created ${hookName} hook`);
     }
   }
 
@@ -117,7 +120,7 @@ if [ -n "$CONSOLE_LOGS" ]; then
 fi
 
 echo "✅ Pre-commit checks passed!"
-`
+`;
   }
 
   generateCommitMsgHook() {
@@ -156,7 +159,7 @@ if ! grep -qE "$commit_regex" "$1"; then
 fi
 
 echo "✅ Commit message format is valid"
-`
+`;
   }
 
   generatePrePushHook() {
@@ -190,7 +193,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ Pre-push validation passed!"
-`
+`;
   }
 
   generatePostMergeHook() {
@@ -219,29 +222,29 @@ if git diff-tree -r --name-only --no-commit-id HEAD~1 HEAD | grep -qE "\\.(ts|ts
 fi
 
 echo "✅ Post-merge tasks completed"
-`
+`;
   }
 
   async createPullRequestTemplates() {
-    console.log('📋 Creating pull request templates...')
-    
-    const githubDir = join(root, '.github')
-    const templatesDir = join(githubDir, 'pull_request_template')
-    
+    console.log('📋 Creating pull request templates...');
+
+    const githubDir = join(root, '.github');
+    const templatesDir = join(githubDir, 'pull_request_template');
+
     if (!existsSync(templatesDir)) {
-      mkdirSync(templatesDir, { recursive: true })
+      mkdirSync(templatesDir, { recursive: true });
     }
 
     const templates = {
       'default.md': this.generateDefaultPRTemplate(),
       'feature.md': this.generateFeaturePRTemplate(),
       'bugfix.md': this.generateBugfixPRTemplate(),
-      'hotfix.md': this.generateHotfixPRTemplate()
-    }
+      'hotfix.md': this.generateHotfixPRTemplate(),
+    };
 
     for (const [filename, content] of Object.entries(templates)) {
-      writeFileSync(join(templatesDir, filename), content)
-      console.log(`  ✅ Created ${filename} template`)
+      writeFileSync(join(templatesDir, filename), content);
+      console.log(`  ✅ Created ${filename} template`);
     }
   }
 
@@ -289,7 +292,7 @@ Describe how this change was tested:
 ## Additional Notes
 
 Any additional information that reviewers should know.
-`
+`;
   }
 
   generateFeaturePRTemplate() {
@@ -368,7 +371,7 @@ Include screenshots or GIFs demonstrating the new feature.
 ## Related Issues
 
 Closes #issue_number
-`
+`;
   }
 
   generateBugfixPRTemplate() {
@@ -456,7 +459,7 @@ What can be done to prevent similar bugs in the future?
 ## Related Issues
 
 Fixes #issue_number
-`
+`;
   }
 
   generateHotfixPRTemplate() {
@@ -555,28 +558,28 @@ If this is a temporary fix, describe the follow-up work needed:
 ---
 
 ⚠️ **HOTFIX DEPLOYMENT** - Expedited review and deployment approved due to critical nature.
-`
+`;
   }
 
   async createIssueTemplates() {
-    console.log('🐛 Creating issue templates...')
-    
-    const issueTemplatesDir = join(root, '.github', 'ISSUE_TEMPLATE')
-    
+    console.log('🐛 Creating issue templates...');
+
+    const issueTemplatesDir = join(root, '.github', 'ISSUE_TEMPLATE');
+
     if (!existsSync(issueTemplatesDir)) {
-      mkdirSync(issueTemplatesDir, { recursive: true })
+      mkdirSync(issueTemplatesDir, { recursive: true });
     }
 
     const templates = {
       'bug_report.yml': this.generateBugReportTemplate(),
       'feature_request.yml': this.generateFeatureRequestTemplate(),
       'performance_issue.yml': this.generatePerformanceIssueTemplate(),
-      'security_report.yml': this.generateSecurityReportTemplate()
-    }
+      'security_report.yml': this.generateSecurityReportTemplate(),
+    };
 
     for (const [filename, content] of Object.entries(templates)) {
-      writeFileSync(join(issueTemplatesDir, filename), content)
-      console.log(`  ✅ Created ${filename} template`)
+      writeFileSync(join(issueTemplatesDir, filename), content);
+      console.log(`  ✅ Created ${filename} template`);
     }
   }
 
@@ -673,7 +676,7 @@ body:
       label: Additional Context
       description: Add any other context about the problem here
       placeholder: Any additional information that might be helpful...
-`
+`;
   }
 
   generateFeatureRequestTemplate() {
@@ -755,7 +758,7 @@ body:
       label: Additional Context
       description: Add any other context, mockups, or examples
       placeholder: Any additional information...
-`
+`;
   }
 
   generatePerformanceIssueTemplate() {
@@ -851,7 +854,7 @@ body:
       label: Additional Context
       description: Any other context, screenshots, or profiling data
       placeholder: Additional information...
-`
+`;
   }
 
   generateSecurityReportTemplate() {
@@ -976,39 +979,43 @@ body:
       label: Additional Context
       description: Any other relevant information
       placeholder: Additional context...
-`
+`;
   }
 
   async generateTeamMetrics() {
-    console.log('📊 Generating team collaboration metrics...')
-    
+    console.log('📊 Generating team collaboration metrics...');
+
     try {
       // Get Git statistics
-      const gitStats = await this.collectGitStatistics()
-      
+      const gitStats = await this.collectGitStatistics();
+
       // Analyze code review patterns
-      const reviewMetrics = await this.analyzeCodeReviews()
-      
+      const reviewMetrics = await this.analyzeCodeReviews();
+
       // Generate team report
       const teamReport = {
         timestamp: new Date().toISOString(),
         period: '30 days',
         gitStats,
         reviewMetrics,
-        recommendations: this.generateCollaborationRecommendations(gitStats, reviewMetrics)
-      }
-      
+        recommendations: this.generateCollaborationRecommendations(
+          gitStats,
+          reviewMetrics,
+        ),
+      };
+
       // Write team metrics report
       writeFileSync(
         join(this.reportDir, 'team-metrics.json'),
-        JSON.stringify(teamReport, null, 2)
-      )
-      
-      return teamReport
-      
+        JSON.stringify(teamReport, null, 2),
+      );
+
+      return teamReport;
     } catch (error) {
-      console.log(`  ⚠️ Could not generate complete team metrics: ${error.message}`)
-      return null
+      console.log(
+        `  ⚠️ Could not generate complete team metrics: ${error.message}`,
+      );
+      return null;
     }
   }
 
@@ -1018,51 +1025,55 @@ body:
       contributors: [],
       branchActivity: {},
       commitFrequency: {},
-      fileChanges: {}
-    }
-    
+      fileChanges: {},
+    };
+
     try {
       // Get commit count
-      const { stdout: commitCount } = await execAsync('git rev-list --count HEAD')
-      stats.totalCommits = parseInt(commitCount.trim())
-      
+      const { stdout: commitCount } = await execAsync(
+        'git rev-list --count HEAD',
+      );
+      stats.totalCommits = parseInt(commitCount.trim());
+
       // Get contributor statistics
       const { stdout: contributors } = await execAsync(
-        'git shortlog -sn --since="30 days ago"'
-      )
-      
+        'git shortlog -sn --since="30 days ago"',
+      );
+
       stats.contributors = contributors
         .split('\n')
-        .filter(line => line.trim())
-        .map(line => {
-          const [commits, ...nameParts] = line.trim().split('\t')[1]?.split(' ') || []
+        .filter((line) => line.trim())
+        .map((line) => {
+          const [commits, ...nameParts] =
+            line.trim().split('\t')[1]?.split(' ') || [];
           return {
             name: line.trim().split('\t')[1] || 'Unknown',
-            commits: parseInt(line.trim().split('\t')[0]) || 0
-          }
+            commits: parseInt(line.trim().split('\t')[0]) || 0,
+          };
         })
-        .filter(c => c.commits > 0)
-      
+        .filter((c) => c.commits > 0);
+
       // Get recent activity
       const { stdout: recentCommits } = await execAsync(
-        'git log --oneline --since="7 days ago" --pretty=format:"%ad %s" --date=short'
-      )
-      
-      const commitsByDay = {}
-      recentCommits.split('\n').forEach(line => {
+        'git log --oneline --since="7 days ago" --pretty=format:"%ad %s" --date=short',
+      );
+
+      const commitsByDay = {};
+      recentCommits.split('\n').forEach((line) => {
         if (line.trim()) {
-          const date = line.split(' ')[0]
-          commitsByDay[date] = (commitsByDay[date] || 0) + 1
+          const date = line.split(' ')[0];
+          commitsByDay[date] = (commitsByDay[date] || 0) + 1;
         }
-      })
-      
-      stats.commitFrequency = commitsByDay
-      
+      });
+
+      stats.commitFrequency = commitsByDay;
     } catch (error) {
-      console.log(`  ⚠️ Git statistics collection incomplete: ${error.message}`)
+      console.log(
+        `  ⚠️ Git statistics collection incomplete: ${error.message}`,
+      );
     }
-    
-    return stats
+
+    return stats;
   }
 
   async analyzeCodeReviews() {
@@ -1070,98 +1081,111 @@ body:
       averageReviewTime: 0,
       reviewParticipation: 0,
       commonFeedback: [],
-      reviewTrends: {}
-    }
-    
+      reviewTrends: {},
+    };
+
     try {
       // This would integrate with GitHub API or other code review tools
       // For now, we'll provide a placeholder structure
-      metrics.reviewParticipation = 85 // Placeholder percentage
-      metrics.averageReviewTime = 24 // Placeholder hours
-      
+      metrics.reviewParticipation = 85; // Placeholder percentage
+      metrics.averageReviewTime = 24; // Placeholder hours
     } catch (error) {
-      console.log(`  ⚠️ Code review analysis limited: ${error.message}`)
+      console.log(`  ⚠️ Code review analysis limited: ${error.message}`);
     }
-    
-    return metrics
+
+    return metrics;
   }
 
   generateCollaborationRecommendations(gitStats, reviewMetrics) {
-    const recommendations = []
-    
+    const recommendations = [];
+
     // Analyze git statistics
     if (gitStats.contributors.length > 0) {
-      const topContributor = gitStats.contributors[0]
-      const totalCommits = gitStats.contributors.reduce((acc, c) => acc + c.commits, 0)
-      const contributionBalance = topContributor.commits / totalCommits
-      
+      const topContributor = gitStats.contributors[0];
+      const totalCommits = gitStats.contributors.reduce(
+        (acc, c) => acc + c.commits,
+        0,
+      );
+      const contributionBalance = topContributor.commits / totalCommits;
+
       if (contributionBalance > 0.7) {
         recommendations.push({
           type: 'knowledge_sharing',
           priority: 'high',
-          message: 'Code contributions are heavily concentrated. Consider pair programming and knowledge sharing sessions.',
-          data: { balance: (contributionBalance * 100).toFixed(1) + '%' }
-        })
+          message:
+            'Code contributions are heavily concentrated. Consider pair programming and knowledge sharing sessions.',
+          data: { balance: (contributionBalance * 100).toFixed(1) + '%' },
+        });
       }
     }
-    
+
     // Analyze commit frequency
-    const commitDays = Object.keys(gitStats.commitFrequency).length
+    const commitDays = Object.keys(gitStats.commitFrequency).length;
     if (commitDays < 3) {
       recommendations.push({
         type: 'commit_frequency',
         priority: 'medium',
-        message: 'Low commit frequency detected. Consider smaller, more frequent commits.',
-        data: { activeDays: commitDays }
-      })
+        message:
+          'Low commit frequency detected. Consider smaller, more frequent commits.',
+        data: { activeDays: commitDays },
+      });
     }
-    
+
     // Review-related recommendations
     if (reviewMetrics.averageReviewTime > 48) {
       recommendations.push({
         type: 'review_speed',
         priority: 'medium',
-        message: 'Code reviews are taking longer than optimal. Consider review time SLAs.',
-        data: { averageHours: reviewMetrics.averageReviewTime }
-      })
+        message:
+          'Code reviews are taking longer than optimal. Consider review time SLAs.',
+        data: { averageHours: reviewMetrics.averageReviewTime },
+      });
     }
-    
-    return recommendations
+
+    return recommendations;
   }
 
   async generateCollaborationReport() {
-    console.log('📄 Generating collaboration report...')
+    console.log('📄 Generating collaboration report...');
 
-    const totalDuration = Date.now() - this.startTime
-    const teamMetrics = await this.generateTeamMetrics()
-    
+    const totalDuration = Date.now() - this.startTime;
+    const teamMetrics = await this.generateTeamMetrics();
+
     const report = {
       timestamp: new Date().toISOString(),
       duration: totalDuration,
       toolsCreated: {
         gitHooks: ['pre-commit', 'commit-msg', 'pre-push', 'post-merge'],
         prTemplates: ['default', 'feature', 'bugfix', 'hotfix'],
-        issueTemplates: ['bug_report', 'feature_request', 'performance_issue', 'security_report']
+        issueTemplates: [
+          'bug_report',
+          'feature_request',
+          'performance_issue',
+          'security_report',
+        ],
       },
       teamMetrics,
       collaborationSetup: {
         hooksInstalled: true,
         templatesCreated: true,
-        metricsEnabled: !!teamMetrics
-      }
-    }
+        metricsEnabled: !!teamMetrics,
+      },
+    };
 
     // Write JSON report
     writeFileSync(
       join(this.reportDir, 'collaboration-setup-report.json'),
-      JSON.stringify(report, null, 2)
-    )
+      JSON.stringify(report, null, 2),
+    );
 
     // Write HTML report
-    const htmlReport = this.generateHTMLReport(report)
-    writeFileSync(join(this.reportDir, 'collaboration-setup-report.html'), htmlReport)
+    const htmlReport = this.generateHTMLReport(report);
+    writeFileSync(
+      join(this.reportDir, 'collaboration-setup-report.html'),
+      htmlReport,
+    );
 
-    return report
+    return report;
   }
 
   generateHTMLReport(report) {
@@ -1208,7 +1232,7 @@ body:
                 <h3>🪝 Git Hooks</h3>
                 <p>Automated quality checks and workflow enforcement</p>
                 <ul class="tool-list">
-                    ${report.toolsCreated.gitHooks.map(hook => `<li>✅ ${hook}</li>`).join('')}
+                    ${report.toolsCreated.gitHooks.map((hook) => `<li>✅ ${hook}</li>`).join('')}
                 </ul>
             </div>
             
@@ -1216,7 +1240,7 @@ body:
                 <h3>📋 Pull Request Templates</h3>
                 <p>Standardized PR structure and checklists</p>
                 <ul class="tool-list">
-                    ${report.toolsCreated.prTemplates.map(template => `<li>✅ ${template}.md</li>`).join('')}
+                    ${report.toolsCreated.prTemplates.map((template) => `<li>✅ ${template}.md</li>`).join('')}
                 </ul>
             </div>
             
@@ -1224,12 +1248,14 @@ body:
                 <h3>🐛 Issue Templates</h3>
                 <p>Structured issue reporting and tracking</p>
                 <ul class="tool-list">
-                    ${report.toolsCreated.issueTemplates.map(template => `<li>✅ ${template}.yml</li>`).join('')}
+                    ${report.toolsCreated.issueTemplates.map((template) => `<li>✅ ${template}.yml</li>`).join('')}
                 </ul>
             </div>
         </div>
         
-        ${report.teamMetrics ? `
+        ${
+          report.teamMetrics
+            ? `
             <h2>📊 Team Collaboration Metrics</h2>
             <div class="metrics">
                 <div class="metric">
@@ -1250,19 +1276,29 @@ body:
                 </div>
             </div>
             
-            ${report.teamMetrics.recommendations.length > 0 ? `
+            ${
+              report.teamMetrics.recommendations.length > 0
+                ? `
                 <h3>💡 Collaboration Recommendations</h3>
                 <div class="recommendations">
-                    ${report.teamMetrics.recommendations.map(rec => `
+                    ${report.teamMetrics.recommendations
+                      .map(
+                        (rec) => `
                         <div class="recommendation ${rec.priority}">
                             <h4>${rec.type.replace(/_/g, ' ').toUpperCase()}</h4>
                             <p>${rec.message}</p>
                             ${rec.data ? `<small>Data: ${JSON.stringify(rec.data)}</small>` : ''}
                         </div>
-                    `).join('')}
+                    `,
+                      )
+                      .join('')}
                 </div>
-            ` : ''}
-        ` : ''}
+            `
+                : ''
+            }
+        `
+            : ''
+        }
         
         <h2>🚀 Next Steps</h2>
         <div class="tool-category">
@@ -1278,7 +1314,7 @@ body:
     </div>
 </body>
 </html>
-    `
+    `;
   }
 
   async run(options = {}) {
@@ -1286,80 +1322,104 @@ body:
       createHooks = true,
       createTemplates = true,
       generateMetrics = true,
-      generateReport = true
-    } = options
+      generateReport = true,
+    } = options;
 
     try {
-      await this.setup()
-      
-      console.log('🤝 Setting up collaboration infrastructure...\n')
-      
+      await this.setup();
+
+      console.log('🤝 Setting up collaboration infrastructure...\n');
+
       if (createHooks) {
-        await this.createGitHooks()
+        await this.createGitHooks();
       }
-      
+
       if (createTemplates) {
-        await this.createPullRequestTemplates()
-        await this.createIssueTemplates()
+        await this.createPullRequestTemplates();
+        await this.createIssueTemplates();
       }
-      
+
       if (generateMetrics) {
-        await this.generateTeamMetrics()
+        await this.generateTeamMetrics();
       }
-      
+
       if (generateReport) {
-        const report = await this.generateCollaborationReport()
-        
-        console.log('\n🎯 Collaboration Hub Setup Summary:')
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-        console.log(`  Git Hooks Installed:      ${report.toolsCreated.gitHooks.length}`)
-        console.log(`  PR Templates Created:     ${report.toolsCreated.prTemplates.length}`)
-        console.log(`  Issue Templates Created:  ${report.toolsCreated.issueTemplates.length}`)
-        
+        const report = await this.generateCollaborationReport();
+
+        console.log('\n🎯 Collaboration Hub Setup Summary:');
+        console.log(
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        );
+        console.log(
+          `  Git Hooks Installed:      ${report.toolsCreated.gitHooks.length}`,
+        );
+        console.log(
+          `  PR Templates Created:     ${report.toolsCreated.prTemplates.length}`,
+        );
+        console.log(
+          `  Issue Templates Created:  ${report.toolsCreated.issueTemplates.length}`,
+        );
+
         if (report.teamMetrics) {
-          console.log(`  Team Contributors:        ${report.teamMetrics.gitStats.contributors.length}`)
-          console.log(`  Total Commits:            ${report.teamMetrics.gitStats.totalCommits}`)
-          console.log(`  Recommendations:          ${report.teamMetrics.recommendations.length}`)
+          console.log(
+            `  Team Contributors:        ${report.teamMetrics.gitStats.contributors.length}`,
+          );
+          console.log(
+            `  Total Commits:            ${report.teamMetrics.gitStats.totalCommits}`,
+          );
+          console.log(
+            `  Recommendations:          ${report.teamMetrics.recommendations.length}`,
+          );
         }
-        
-        console.log(`  Setup Duration:           ${(report.duration / 1000).toFixed(2)} seconds`)
-        
-        console.log('\n🛠️ Tools Created:')
-        console.log('  📝 Git hooks for quality enforcement')
-        console.log('  📋 Structured PR and issue templates')
-        console.log('  📊 Team collaboration metrics')
-        console.log('  🤝 Workflow standardization')
-        
-        console.log(`\n📄 Detailed report: ${join('test-results', 'collaboration', 'collaboration-setup-report.html')}`)
-        
-        return true
+
+        console.log(
+          `  Setup Duration:           ${(report.duration / 1000).toFixed(2)} seconds`,
+        );
+
+        console.log('\n🛠️ Tools Created:');
+        console.log('  📝 Git hooks for quality enforcement');
+        console.log('  📋 Structured PR and issue templates');
+        console.log('  📊 Team collaboration metrics');
+        console.log('  🤝 Workflow standardization');
+
+        console.log(
+          `\n📄 Detailed report: ${join('test-results', 'collaboration', 'collaboration-setup-report.html')}`,
+        );
+
+        return true;
       }
-      
     } catch (error) {
-      console.error('❌ Collaboration Hub setup failed:', error)
-      return false
+      console.error('❌ Collaboration Hub setup failed:', error);
+      return false;
     }
   }
 }
 
 // CLI interface
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const args = process.argv.slice(2)
+  const args = process.argv.slice(2);
   const options = {
     createHooks: !args.includes('--skip-hooks'),
     createTemplates: !args.includes('--skip-templates'),
     generateMetrics: !args.includes('--skip-metrics'),
-    generateReport: !args.includes('--no-report')
-  }
+    generateReport: !args.includes('--no-report'),
+  };
 
-  const hub = new CollaborationHub()
-  hub.run(options).then(success => {
-    console.log(success ? '✅ Collaboration Hub setup completed successfully!' : '❌ Collaboration Hub setup failed!')
-    process.exit(success ? 0 : 1)
-  }).catch(error => {
-    console.error('Collaboration Hub failed:', error)
-    process.exit(1)
-  })
+  const hub = new CollaborationHub();
+  hub
+    .run(options)
+    .then((success) => {
+      console.log(
+        success
+          ? '✅ Collaboration Hub setup completed successfully!'
+          : '❌ Collaboration Hub setup failed!',
+      );
+      process.exit(success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Collaboration Hub failed:', error);
+      process.exit(1);
+    });
 }
 
-export default CollaborationHub
+export default CollaborationHub;

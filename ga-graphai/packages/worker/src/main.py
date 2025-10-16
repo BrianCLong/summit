@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Set
+from typing import Any
 
 from automation import (
     AutomationOrchestrator,
@@ -139,7 +140,7 @@ execute_ticket = Command(_execute_ticket_payload)
 @dataclass(frozen=True)
 class ToolCapability:
     name: str
-    handler: Callable[[Dict[str, Any]], Dict[str, Any]]
+    handler: Callable[[dict[str, Any]], dict[str, Any]]
     minimum_authority: int = 0
 
 
@@ -147,15 +148,15 @@ class ToolCapability:
 class AgentProfile:
     name: str
     authority: int
-    allowed_tools: List[str] = field(default_factory=list)
+    allowed_tools: list[str] = field(default_factory=list)
 
 
 @dataclass
 class TaskSpec:
     task_id: str
     tool: str
-    payload: Dict[str, Any]
-    required_authority: Optional[int] = None
+    payload: dict[str, Any]
+    required_authority: int | None = None
     action: str = "execute"
     resource: str = ""
 
@@ -164,8 +165,8 @@ class TaskSpec:
 class TaskResult:
     task_id: str
     status: str
-    output: Dict[str, Any]
-    logs: List[str]
+    output: dict[str, Any]
+    logs: list[str]
 
 
 @dataclass
@@ -174,8 +175,8 @@ class ExecutionReport:
     submitted_by: str
     started_at: datetime
     finished_at: datetime
-    results: List[TaskResult]
-    provenance: List[Dict[str, Any]]
+    results: list[TaskResult]
+    provenance: list[dict[str, Any]]
 
 
 class PolicyViolation(Exception):
@@ -186,10 +187,10 @@ class WorkcellOrchestrator:
     """Coordinates agent work while enforcing basic guardrails."""
 
     def __init__(self) -> None:
-        self._tools: Dict[str, ToolCapability] = {}
-        self._agents: Dict[str, AgentProfile] = {}
-        self._policy_hooks: List[Callable[[TaskSpec, AgentProfile], Iterable[str]]] = []
-        self._provenance_log: List[Dict[str, Any]] = []
+        self._tools: dict[str, ToolCapability] = {}
+        self._agents: dict[str, AgentProfile] = {}
+        self._policy_hooks: list[Callable[[TaskSpec, AgentProfile], Iterable[str]]] = []
+        self._provenance_log: list[dict[str, Any]] = []
 
     def register_tool(self, tool: ToolCapability) -> None:
         self._tools[tool.name] = tool
@@ -197,9 +198,7 @@ class WorkcellOrchestrator:
     def register_agent(self, agent: AgentProfile) -> None:
         self._agents[agent.name] = agent
 
-    def register_policy_hook(
-        self, hook: Callable[[TaskSpec, AgentProfile], Iterable[str]]
-    ) -> None:
+    def register_policy_hook(self, hook: Callable[[TaskSpec, AgentProfile], Iterable[str]]) -> None:
         self._policy_hooks.append(hook)
 
     def execute_task_for_agent(self, agent_name: str, task: TaskSpec) -> TaskResult:
@@ -216,18 +215,14 @@ class WorkcellOrchestrator:
         return self._execute_task(task, agent)
 
     def submit(
-        self,
-        order_id: str,
-        submitted_by: str,
-        agent_name: str,
-        tasks: List[TaskSpec]
+        self, order_id: str, submitted_by: str, agent_name: str, tasks: list[TaskSpec]
     ) -> ExecutionReport:
         if agent_name not in self._agents:
             raise PolicyViolation(f"unknown agent {agent_name}")
 
         agent = self._agents[agent_name]
         started_at = datetime.now(timezone.utc)
-        results: List[TaskResult] = []
+        results: list[TaskResult] = []
 
         for task in tasks:
             result = self._execute_task(task, agent)
@@ -240,11 +235,11 @@ class WorkcellOrchestrator:
             started_at=started_at,
             finished_at=finished_at,
             results=results,
-            provenance=list(self._provenance_log)
+            provenance=list(self._provenance_log),
         )
 
     def _execute_task(self, task: TaskSpec, agent: AgentProfile) -> TaskResult:
-        logs: List[str] = []
+        logs: list[str] = []
         tool = self._tools.get(task.tool)
         if tool is None:
             message = f"tool {task.tool} is not registered"
@@ -271,7 +266,7 @@ class WorkcellOrchestrator:
             )
             return TaskResult(task.task_id, "rejected", {}, logs)
 
-        policy_messages: List[str] = []
+        policy_messages: list[str] = []
         for hook in self._policy_hooks:
             violations = list(hook(task, agent))
             if violations:
@@ -305,15 +300,15 @@ class WorkcellOrchestrator:
         agent: AgentProfile,
         status: str,
         *,
-        reason: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        record: Dict[str, Any] = {
+        reason: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        record: dict[str, Any] = {
             "task_id": task.task_id,
             "tool": task.tool,
             "status": status,
             "agent": agent.name,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         if reason:
             record["reason"] = reason
@@ -322,7 +317,7 @@ class WorkcellOrchestrator:
         return record
 
     @property
-    def provenance(self) -> List[Dict[str, Any]]:
+    def provenance(self) -> list[dict[str, Any]]:
         return list(self._provenance_log)
 
 
@@ -364,10 +359,8 @@ class _MissionAgentState:
 
 class _DependencyTracker:
     def __init__(self, tasks: Sequence[MissionTask]) -> None:
-        self._tasks: Dict[str, MissionTask] = {
-            task.spec.task_id: task for task in tasks
-        }
-        self._graph: Dict[str, frozenset[str]] = {}
+        self._tasks: dict[str, MissionTask] = {task.spec.task_id: task for task in tasks}
+        self._graph: dict[str, frozenset[str]] = {}
         for task in tasks:
             missing = task.dependencies - self._tasks.keys()
             if missing:
@@ -378,20 +371,20 @@ class _DependencyTracker:
             self._graph[task.spec.task_id] = task.dependencies
         self._ensure_acyclic()
 
-    def ready(self, completed: Set[str]) -> List[str]:
-        ready_ids: List[str] = []
+    def ready(self, completed: set[str]) -> list[str]:
+        ready_ids: list[str] = []
         for task_id, dependencies in self._graph.items():
             if dependencies.issubset(completed):
                 ready_ids.append(task_id)
         return ready_ids
 
-    def missing_dependencies(self, task_id: str, completed: Set[str]) -> List[str]:
+    def missing_dependencies(self, task_id: str, completed: set[str]) -> list[str]:
         dependencies = self._graph.get(task_id, frozenset())
         return [dep for dep in dependencies if dep not in completed]
 
     def _ensure_acyclic(self) -> None:
-        visited: Set[str] = set()
-        stack: Set[str] = set()
+        visited: set[str] = set()
+        stack: set[str] = set()
 
         def visit(node: str) -> None:
             if node in stack:
@@ -413,14 +406,12 @@ class MissionControlOrchestrator:
 
     def __init__(self, base: WorkcellOrchestrator | None = None) -> None:
         self._base = base or WorkcellOrchestrator()
-        self._agents: Dict[str, _MissionAgentState] = {}
+        self._agents: dict[str, _MissionAgentState] = {}
 
     def register_tool(self, tool: ToolCapability) -> None:
         self._base.register_tool(tool)
 
-    def register_policy_hook(
-        self, hook: Callable[[TaskSpec, AgentProfile], Iterable[str]]
-    ) -> None:
+    def register_policy_hook(self, hook: Callable[[TaskSpec, AgentProfile], Iterable[str]]) -> None:
         self._base.register_policy_hook(hook)
 
     def register_agent(
@@ -456,22 +447,16 @@ class MissionControlOrchestrator:
             )
 
         tracker = _DependencyTracker(tasks)
-        pending: Dict[str, MissionTask] = {
-            task.spec.task_id: task for task in tasks
-        }
-        successful: Set[str] = set()
-        status_by_id: Dict[str, str] = {}
-        results: List[TaskResult] = []
-        extra_provenance: List[Dict[str, Any]] = []
+        pending: dict[str, MissionTask] = {task.spec.task_id: task for task in tasks}
+        successful: set[str] = set()
+        status_by_id: dict[str, str] = {}
+        results: list[TaskResult] = []
+        extra_provenance: list[dict[str, Any]] = []
         started_at = datetime.now(timezone.utc)
         baseline = len(self._base.provenance)
 
         while pending:
-            ready_ids = [
-                task_id
-                for task_id in tracker.ready(successful)
-                if task_id in pending
-            ]
+            ready_ids = [task_id for task_id in tracker.ready(successful) if task_id in pending]
             ready_tasks = sorted(
                 (pending[task_id] for task_id in ready_ids),
                 key=lambda task: (-task.priority, task.spec.task_id),
@@ -486,9 +471,7 @@ class MissionControlOrchestrator:
                 if agent is None:
                     continue
                 agent.current_load += 1
-                result = self._base.execute_task_for_agent(
-                    agent.profile.name, task.spec
-                )
+                result = self._base.execute_task_for_agent(agent.profile.name, task.spec)
                 agent.current_load -= 1
                 results.append(result)
                 status_by_id[result.task_id] = result.status
@@ -570,11 +553,7 @@ class MissionControlOrchestrator:
         )
 
     def _select_agent(self, task: MissionTask) -> _MissionAgentState | None:
-        eligible = [
-            agent
-            for agent in self._agents.values()
-            if agent.can_accept(task)
-        ]
+        eligible = [agent for agent in self._agents.values() if agent.can_accept(task)]
         if not eligible:
             return None
         return min(
@@ -587,7 +566,7 @@ class MissionControlOrchestrator:
         )
 
     def _build_unassigned_message(self, task: MissionTask) -> str:
-        parts: List[str] = [f"tool {task.spec.tool}"]
+        parts: list[str] = [f"tool {task.spec.tool}"]
         if task.spec.required_authority:
             parts.append(f"authority >= {task.spec.required_authority}")
         if task.required_capabilities:

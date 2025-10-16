@@ -37,7 +37,11 @@ export class PipelinesRepo {
     `);
     this.initialized = true;
   }
-  async create(name: string, spec: any, tenantId: string): Promise<PipelineRecord> {
+  async create(
+    name: string,
+    spec: any,
+    tenantId: string,
+  ): Promise<PipelineRecord> {
     await this.ensureTable();
     const { rows } = await this.getPool().query(
       `INSERT INTO pipelines (name, spec, tenant_id) VALUES ($1, $2, $3)
@@ -62,7 +66,11 @@ export class PipelinesRepo {
     );
     return rows[0] || null;
   }
-  async update(id: string, patch: { name?: string; spec?: any }, tenantId: string): Promise<PipelineRecord | null> {
+  async update(
+    id: string,
+    patch: { name?: string; spec?: any },
+    tenantId: string,
+  ): Promise<PipelineRecord | null> {
     await this.ensureTable();
     const sets: string[] = [];
     const vals: any[] = [];
@@ -87,7 +95,10 @@ export class PipelinesRepo {
   }
   async delete(id: string, tenantId: string): Promise<boolean> {
     await this.ensureTable();
-    const { rowCount } = await this.getPool().query(`DELETE FROM pipelines WHERE id=$1 AND tenant_id = $2`, [id, tenantId]);
+    const { rowCount } = await this.getPool().query(
+      `DELETE FROM pipelines WHERE id=$1 AND tenant_id = $2`,
+      [id, tenantId],
+    );
     return rowCount > 0;
   }
 }
@@ -103,7 +114,11 @@ export const pipelinesRepo = {
   },
 
   // Proxy methods for backward compatibility
-  async create(name: string, spec: any, tenantId: string): Promise<PipelineRecord> {
+  async create(
+    name: string,
+    spec: any,
+    tenantId: string,
+  ): Promise<PipelineRecord> {
     return this.instance.create(name, spec, tenantId);
   },
 
@@ -115,7 +130,11 @@ export const pipelinesRepo = {
     return this.instance.get(id, tenantId);
   },
 
-  async update(id: string, patch: { name?: string; spec?: any }, tenantId: string): Promise<PipelineRecord | null> {
+  async update(
+    id: string,
+    patch: { name?: string; spec?: any },
+    tenantId: string,
+  ): Promise<PipelineRecord | null> {
     return this.instance.update(id, patch, tenantId);
   },
 

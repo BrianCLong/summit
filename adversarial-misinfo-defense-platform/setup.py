@@ -1,10 +1,24 @@
-from setuptools import setup, find_packages
+"""
+Setup script for Adversarial Misinformation Defense Platform
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+This script sets up the package for installation and distribution.
+"""
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+from pathlib import Path
+
+from setuptools import find_packages, setup
+
+# Read the README file
+README_PATH = Path(__file__).parent / "README.md"
+LONG_DESCRIPTION = README_PATH.read_text(encoding="utf-8") if README_PATH.exists() else ""
+
+# Read requirements
+REQUIREMENTS_PATH = Path(__file__).parent / "requirements.txt"
+REQUIREMENTS = []
+if REQUIREMENTS_PATH.exists():
+    REQUIREMENTS = REQUIREMENTS_PATH.read_text(encoding="utf-8").splitlines()
+    REQUIREMENTS = [req.strip() for req in REQUIREMENTS if req.strip() and not req.startswith("#")]
+
 
 setup(
     name="adversarial-misinfo-defense",
@@ -12,10 +26,11 @@ setup(
     author="Summit Team",
     author_email="summit-team@example.com",
     description="A comprehensive platform for detecting and defending against adversarial misinformation",
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/summit-team/adversarial-misinfo-defense",
-    packages=find_packages(),
+    packages=find_packages(where="."),
+    package_dir={"": "."},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -31,7 +46,7 @@ setup(
         "Programming Language :: Python :: 3.10",
     ],
     python_requires=">=3.8",
-    install_requires=requirements,
+    install_requires=REQUIREMENTS,
     extras_require={
         "dev": [
             "black>=21.0",
@@ -46,9 +61,12 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "amdp-validate=adversarial_misinfo_defense.cli:validate",
-            "amdp-train=adversarial_misinfo_defense.cli:train",
-            "amdp-exercise=adversarial_misinfo_defense.cli:exercise",
+            "amd=adversarial_misinfo_defense.main:main",
+            "amd-validate=adversarial_misinfo_defense.validation_suite:run_validation_cli",
+            "amd-train=adversarial_misinfo_defense.adversarial_training:run_training_cli",
+            "amd-exercise=adversarial_misinfo_defense.red_blue_team:run_exercise_cli",
         ],
     },
+    include_package_data=True,
+    zip_safe=False,
 )

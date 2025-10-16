@@ -13,7 +13,10 @@ interface KeyboardShortcutsProps {
   enabled?: boolean;
 }
 
-const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ shortcuts, enabled = true }) => {
+const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
+  shortcuts,
+  enabled = true,
+}) => {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!enabled) return;
@@ -32,7 +35,9 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ shortcuts, enable
 
       // Find matching shortcut
       const matchingShortcut = shortcuts.find((shortcut) =>
-        shortcut.keys.some((keyCombo) => keyCombo.toLowerCase() === pressedKeyString),
+        shortcut.keys.some(
+          (keyCombo) => keyCombo.toLowerCase() === pressedKeyString,
+        ),
       );
 
       if (matchingShortcut) {
@@ -73,7 +78,10 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ shortcuts, enable
 };
 
 // Hook for managing keyboard shortcuts
-export const useKeyboardShortcuts = (shortcuts: ShortcutAction[], enabled = true) => {
+export const useKeyboardShortcuts = (
+  shortcuts: ShortcutAction[],
+  enabled = true,
+) => {
   useEffect(() => {
     if (!enabled) return;
 
@@ -91,7 +99,9 @@ export const useKeyboardShortcuts = (shortcuts: ShortcutAction[], enabled = true
       const pressedKeyString = pressedKeys.join('+');
 
       const matchingShortcut = shortcuts.find((shortcut) =>
-        shortcut.keys.some((keyCombo) => keyCombo.toLowerCase() === pressedKeyString),
+        shortcut.keys.some(
+          (keyCombo) => keyCombo.toLowerCase() === pressedKeyString,
+        ),
       );
 
       if (matchingShortcut) {
@@ -162,7 +172,11 @@ interface ShortcutsHelpProps {
   onClose: () => void;
 }
 
-export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({ shortcuts, isVisible, onClose }) => {
+export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
+  shortcuts,
+  isVisible,
+  onClose,
+}) => {
   // Group shortcuts by category
   const groupedShortcuts = shortcuts.reduce(
     (acc, shortcut) => {
@@ -181,40 +195,53 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({ shortcuts, isVisib
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-80vh overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-semibold">Keyboard Shortcuts</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             ✕
           </button>
         </div>
 
         <div className="p-4 overflow-y-auto max-h-96">
-          {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
-            <div key={category} className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">{category}</h3>
-              <div className="space-y-2">
-                {categoryShortcuts.map((shortcut, index) => (
-                  <div key={index} className="flex items-center justify-between py-2">
-                    <span className="text-gray-700">{shortcut.description}</span>
-                    <div className="flex gap-1">
-                      {shortcut.keys.map((keyCombo, keyIndex) => (
-                        <kbd
-                          key={keyIndex}
-                          className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono"
-                        >
-                          {formatKeyCombo(keyCombo)}
-                        </kbd>
-                      ))}
+          {Object.entries(groupedShortcuts).map(
+            ([category, categoryShortcuts]) => (
+              <div key={category} className="mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">
+                  {category}
+                </h3>
+                <div className="space-y-2">
+                  {categoryShortcuts.map((shortcut, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between py-2"
+                    >
+                      <span className="text-gray-700">
+                        {shortcut.description}
+                      </span>
+                      <div className="flex gap-1">
+                        {shortcut.keys.map((keyCombo, keyIndex) => (
+                          <kbd
+                            key={keyIndex}
+                            className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono"
+                          >
+                            {formatKeyCombo(keyCombo)}
+                          </kbd>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
 
         <div className="px-4 py-3 bg-gray-50 border-t">
           <p className="text-sm text-gray-600">
-            Press <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">?</kbd> to toggle this
-            help
+            Press{' '}
+            <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">?</kbd> to
+            toggle this help
           </p>
         </div>
       </div>

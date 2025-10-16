@@ -39,8 +39,16 @@ export class PrometheusMetrics {
     this.counterDefinitions.set(name, { name, help, labelNames });
   }
 
-  createHistogram(name: string, help: string, options: { buckets?: number[] } = {}): void {
-    this.histogramDefinitions.set(name, { name, help, buckets: options.buckets });
+  createHistogram(
+    name: string,
+    help: string,
+    options: { buckets?: number[] } = {},
+  ): void {
+    this.histogramDefinitions.set(name, {
+      name,
+      help,
+      buckets: options.buckets,
+    });
   }
 
   setGauge(name: string, value: number, labels: MetricLabels = {}): void {
@@ -54,7 +62,11 @@ export class PrometheusMetrics {
     this.counters.set(key, current + value);
   }
 
-  observeHistogram(name: string, value: number, labels: MetricLabels = {}): void {
+  observeHistogram(
+    name: string,
+    value: number,
+    labels: MetricLabels = {},
+  ): void {
     const key = this.metricKey(name, labels);
     const values = this.histograms.get(key) ?? [];
     values.push(value);
@@ -69,6 +81,8 @@ export class PrometheusMetrics {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, value]) => `${key}=${value}`)
       .join('|');
-    return labelEntries ? `${this.namespace}:${name}:{${labelEntries}}` : `${this.namespace}:${name}`;
+    return labelEntries
+      ? `${this.namespace}:${name}:{${labelEntries}}`
+      : `${this.namespace}:${name}`;
   }
 }

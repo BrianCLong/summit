@@ -53,7 +53,8 @@ export default function CaseDetail() {
         <ul>
           {(data?.caseItems || []).map((it: any) => (
             <li key={it.id}>
-              {it.kind}: {it.refId} {it.tags?.length ? `[${it.tags.join(',')}]` : ''}
+              {it.kind}: {it.refId}{' '}
+              {it.tags?.length ? `[${it.tags.join(',')}]` : ''}
             </li>
           ))}
         </ul>

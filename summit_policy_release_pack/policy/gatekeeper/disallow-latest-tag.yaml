@@ -2,5 +2,5 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sContainerImageTag
 metadata: { name: disallow-latest-tag }
 spec:
-  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }
-  parameters: { tag: "latest" }
+  match: { kinds: [{ apiGroups: [''], kinds: ['Pod'] }] }
+  parameters: { tag: 'latest' }

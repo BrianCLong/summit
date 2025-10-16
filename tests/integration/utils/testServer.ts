@@ -4,7 +4,10 @@ import { URL } from 'url';
 // Create a simple HTTP server that mimics Express API for testing purposes
 export async function createTestApp() {
   // In-memory storage for flows
-  const flows: Record<string, { id: string; kind: string; state: 'queued' | 'running' | 'complete' }> = {};
+  const flows: Record<
+    string,
+    { id: string; kind: string; state: 'queued' | 'running' | 'complete' }
+  > = {};
   let seq = 0;
 
   const server = http.createServer((req, res) => {
@@ -15,7 +18,10 @@ export async function createTestApp() {
     // Enable CORS and set content type
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS',
+    );
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     // Handle preflight requests
@@ -26,14 +32,17 @@ export async function createTestApp() {
     }
 
     let body = '';
-    req.on('data', chunk => {
+    req.on('data', (chunk) => {
       body += chunk;
     });
 
     req.on('end', () => {
       try {
         let parsedBody: any = {};
-        if (body && (req.headers['content-type'] || '').includes('application/json')) {
+        if (
+          body &&
+          (req.headers['content-type'] || '').includes('application/json')
+        ) {
           parsedBody = JSON.parse(body);
         }
 
@@ -43,7 +52,7 @@ export async function createTestApp() {
           const kind = parsedBody?.kind ?? 'maestro';
           const rec = { id, kind, state: 'queued' as const };
           flows[id] = rec;
-          
+
           res.writeHead(202);
           res.end(JSON.stringify(rec));
           return;
@@ -65,13 +74,13 @@ export async function createTestApp() {
         if (method === 'GET' && path.startsWith('/api/flows/')) {
           const id = path.split('/').pop() || ''; // Get the last part which should be the ID
           const rec = flows[id];
-          
+
           if (!rec) {
             res.writeHead(404);
             res.end(JSON.stringify({ error: 'not_found' }));
             return;
           }
-          
+
           res.writeHead(200);
           res.end(JSON.stringify(rec));
           return;

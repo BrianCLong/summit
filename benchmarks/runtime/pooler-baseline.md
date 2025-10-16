@@ -1,10 +1,12 @@
 # MCP Runtime Benchmark Harness — Pooler Baseline
 
 ## Scope
+
 - Measure cold start, warm start, and platform overhead for Firecracker micro-VM pooler.
 - Compare against legacy container runtime and Metorial reference deployment.
 
 ## Methodology
+
 1. Provision benchmark environment with identical hardware profiles (c6i.large) across IntelGraph and Metorial platforms.
 2. Deploy instrumentation agent emitting OpenTelemetry spans (`benchmark_id=pooler-baseline-2025-09`).
 3. Execute workload mix:
@@ -21,16 +23,19 @@
 6. Store raw traces in `s3://intelgraph-benchmarks/mcp-runtime/pooler-baseline/YYYY-MM-DD/` and summarize in `results.json`.
 
 ## Acceptance Targets
+
 - Cold start p95 ≤ 300 ms.
 - Warm start p95 ≤ 30 ms.
 - Platform overhead p95 ≤ 150 ms.
 - Warm hit ratio ≥ 85%.
 
 ## Evidence Artifacts
+
 - `benchmarks/runtime/artifacts/pooler-baseline-traces.tar.zst` (OpenTelemetry export).
 - `benchmarks/runtime/artifacts/pooler-baseline-summary.csv`.
 - Grafana dashboard snapshot ID: `runtime-bench-2025-09-30`.
 
 ## Next Steps
+
 - Integrate harness into nightly CI once Firecracker pooler is feature complete.
 - Extend harness to stress burst traffic (autoscale-to-zero scenarios).

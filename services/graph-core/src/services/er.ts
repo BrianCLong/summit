@@ -8,7 +8,9 @@ export interface CandidateScore {
 }
 
 function levenshtein(a: string, b: string): number {
-  const matrix = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  const matrix = Array.from({ length: a.length + 1 }, () =>
+    new Array(b.length + 1).fill(0),
+  );
   for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
   for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
@@ -36,16 +38,32 @@ const weights = { name: 0.6, email: 0.4 };
 export function scoreEntities(a: Entity, b: Entity): CandidateScore {
   const breakdown: Record<string, number> = {};
   let score = 0;
-  const nameSim = fuzzySimilarity(a.attributes.name as string, b.attributes.name as string);
+  const nameSim = fuzzySimilarity(
+    a.attributes.name as string,
+    b.attributes.name as string,
+  );
   breakdown.name = Number((nameSim * weights.name).toFixed(2));
   score += breakdown.name;
-  const emailSim = fuzzySimilarity(a.attributes.email as string, b.attributes.email as string);
+  const emailSim = fuzzySimilarity(
+    a.attributes.email as string,
+    b.attributes.email as string,
+  );
   breakdown.email = Number((emailSim * weights.email).toFixed(2));
   score += breakdown.email;
-  return { id: `${a.id}|${b.id}`, score: Number(score.toFixed(2)), breakdown, weights };
+  return {
+    id: `${a.id}|${b.id}`,
+    score: Number(score.toFixed(2)),
+    breakdown,
+    weights,
+  };
 }
 
-type Decision = { candidateId: string; approved: boolean; by: string; at: string };
+type Decision = {
+  candidateId: string;
+  approved: boolean;
+  by: string;
+  at: string;
+};
 const decisions = new Map<string, Decision>();
 const explanations = new Map<string, CandidateScore>();
 
@@ -54,7 +72,12 @@ export function enqueueCandidate(score: CandidateScore) {
 }
 
 export function decide(candidateId: string, approved: boolean, user: string) {
-  decisions.set(candidateId, { candidateId, approved, by: user, at: new Date().toISOString() });
+  decisions.set(candidateId, {
+    candidateId,
+    approved,
+    by: user,
+    at: new Date().toISOString(),
+  });
 }
 
 export function getDecision(id: string) {

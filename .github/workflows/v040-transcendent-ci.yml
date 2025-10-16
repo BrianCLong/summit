@@ -288,7 +288,12 @@ jobs:
   build-container:
     name: Build Container Image
     runs-on: ubuntu-latest
-    needs: [validate-graphql-schema, validate-opa-policies, test-transcendent-resolvers]
+    needs:
+      [
+        validate-graphql-schema,
+        validate-opa-policies,
+        test-transcendent-resolvers,
+      ]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code

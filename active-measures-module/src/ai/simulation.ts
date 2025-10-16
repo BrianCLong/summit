@@ -420,7 +420,8 @@ export class AdvancedSimulationEngine {
 
       result.status = SimulationStatus.COMPLETED;
       result.endTime = new Date();
-      result.computationTime = result.endTime.getTime() - result.startTime.getTime();
+      result.computationTime =
+        result.endTime.getTime() - result.startTime.getTime();
     } catch (error) {
       result.status = SimulationStatus.FAILED;
       result.errors.push(error.message);
@@ -439,7 +440,11 @@ export class AdvancedSimulationEngine {
   ): Promise<void> {
     const agents = this.initializeAgents(config.networkStructure);
 
-    for (let iteration = 0; iteration < config.parameters.iterations; iteration++) {
+    for (
+      let iteration = 0;
+      iteration < config.parameters.iterations;
+      iteration++
+    ) {
       // Update agent states
       for (const agent of agents) {
         this.updateAgentState(agent, config, iteration);
@@ -485,7 +490,10 @@ export class AdvancedSimulationEngine {
       }
     }
 
-    result.outcomes = this.generateOutcomesFromDiffusion(currentState, config.scenarios);
+    result.outcomes = this.generateOutcomesFromDiffusion(
+      currentState,
+      config.scenarios,
+    );
   }
 
   /**
@@ -495,14 +503,21 @@ export class AdvancedSimulationEngine {
     config: SimulationConfig,
     result: SimulationResult,
   ): Promise<void> {
-    const players = this.initializePlayers(config.networkStructure, config.adversaryModels);
+    const players = this.initializePlayers(
+      config.networkStructure,
+      config.adversaryModels,
+    );
     const strategies = this.generateStrategies(config);
 
     // Find Nash equilibria
     const equilibria = this.findNashEquilibria(players, strategies);
 
     // Simulate evolutionary dynamics
-    for (let iteration = 0; iteration < config.parameters.iterations; iteration++) {
+    for (
+      let iteration = 0;
+      iteration < config.parameters.iterations;
+      iteration++
+    ) {
       this.updatePlayerStrategies(players, strategies, equilibria);
 
       if (iteration % 100 === 0) {
@@ -529,7 +544,10 @@ export class AdvancedSimulationEngine {
       universeConfig.scenarios = [scenario];
 
       // Run simulation for this universe
-      const universeResult = await this.runUniverseSimulation(universeConfig, scenario);
+      const universeResult = await this.runUniverseSimulation(
+        universeConfig,
+        scenario,
+      );
       return universeResult;
     });
 
@@ -554,11 +572,22 @@ export class AdvancedSimulationEngine {
     const macroResults = await this.runMacroSimulation(config, microResults);
 
     // Apply game theory for strategic interactions
-    const strategicResults = await this.runStrategicSimulation(config, macroResults);
+    const strategicResults = await this.runStrategicSimulation(
+      config,
+      macroResults,
+    );
 
     // Combine results
-    result.outcomes = this.combineHybridResults([microResults, macroResults, strategicResults]);
-    result.metrics = this.calculateHybridMetrics([microResults, macroResults, strategicResults]);
+    result.outcomes = this.combineHybridResults([
+      microResults,
+      macroResults,
+      strategicResults,
+    ]);
+    result.metrics = this.calculateHybridMetrics([
+      microResults,
+      macroResults,
+      strategicResults,
+    ]);
   }
 
   /**
@@ -617,18 +646,27 @@ export class AdvancedSimulationEngine {
     }
 
     result.adversaryResponse = {
-      probability: this.calculateResponseProbability(config.adversaryModels, result),
+      probability: this.calculateResponseProbability(
+        config.adversaryModels,
+        result,
+      ),
       responses,
       effectiveness: totalEffectiveness,
       timeline: this.estimateResponseTimeline(config.adversaryModels),
-      confidence: this.calculateAdversaryConfidence(config.adversaryModels, result),
+      confidence: this.calculateAdversaryConfidence(
+        config.adversaryModels,
+        result,
+      ),
     };
   }
 
   /**
    * Validate simulation results
    */
-  private async validateResults(config: SimulationConfig, result: SimulationResult): Promise<void> {
+  private async validateResults(
+    config: SimulationConfig,
+    result: SimulationResult,
+  ): Promise<void> {
     result.validation = {
       historicalAccuracy: this.validateAgainstHistoricalData(result),
       crossValidation: this.performCrossValidation(config, result),
@@ -645,17 +683,26 @@ export class AdvancedSimulationEngine {
       id: node.id,
       type: node.type,
       state: { ...node.properties },
-      connections: network.edges.filter((e) => e.source === node.id || e.target === node.id),
+      connections: network.edges.filter(
+        (e) => e.source === node.id || e.target === node.id,
+      ),
     }));
   }
 
-  private updateAgentState(agent: any, config: SimulationConfig, iteration: number): void {
+  private updateAgentState(
+    agent: any,
+    config: SimulationConfig,
+    iteration: number,
+  ): void {
     // Simplified agent update logic
     agent.state.activation = Math.random() * agent.state.influence || 0.5;
     agent.state.lastUpdate = iteration;
   }
 
-  private processAgentInteractions(agents: any[], network: NetworkStructure): void {
+  private processAgentInteractions(
+    agents: any[],
+    network: NetworkStructure,
+  ): void {
     // Simplified interaction processing
     network.edges.forEach((edge) => {
       const source = agents.find((a) => a.id === edge.source);
@@ -668,10 +715,17 @@ export class AdvancedSimulationEngine {
     });
   }
 
-  private captureNetworkSnapshot(agents: any[], iteration: number): NetworkSnapshot {
+  private captureNetworkSnapshot(
+    agents: any[],
+    iteration: number,
+  ): NetworkSnapshot {
     return {
       timestamp: iteration,
-      nodes: agents.map((a) => ({ id: a.id, type: a.type, properties: a.state })),
+      nodes: agents.map((a) => ({
+        id: a.id,
+        type: a.type,
+        properties: a.state,
+      })),
       edges: [],
       centralities: this.calculateCentralities(agents),
       communities: [],
@@ -693,13 +747,18 @@ export class AdvancedSimulationEngine {
     return centralities;
   }
 
-  private generateOutcomesFromAgents(agents: any[], scenarios: Scenario[]): SimulationOutcome[] {
+  private generateOutcomesFromAgents(
+    agents: any[],
+    scenarios: Scenario[],
+  ): SimulationOutcome[] {
     return scenarios.map((scenario) => ({
       scenarioId: scenario.id,
       probability: scenario.probability,
       metrics: {
         totalActivation: agents.reduce((sum, a) => sum + a.state.activation, 0),
-        averageActivation: agents.reduce((sum, a) => sum + a.state.activation, 0) / agents.length,
+        averageActivation:
+          agents.reduce((sum, a) => sum + a.state.activation, 0) /
+          agents.length,
       },
       timeline: [],
       cascadeEffects: [],
@@ -710,7 +769,9 @@ export class AdvancedSimulationEngine {
     return [
       {
         name: 'network_activation',
-        value: agents.reduce((sum, a) => sum + a.state.activation, 0) / agents.length,
+        value:
+          agents.reduce((sum, a) => sum + a.state.activation, 0) /
+          agents.length,
         confidence: 0.8,
         trend: 0.05,
         volatility: 0.1,
@@ -728,12 +789,19 @@ export class AdvancedSimulationEngine {
     return network.nodes.map(() => Math.random());
   }
 
-  private applyDiffusion(state: number[], matrix: Matrix, config: SimulationConfig): number[] {
+  private applyDiffusion(
+    state: number[],
+    matrix: Matrix,
+    config: SimulationConfig,
+  ): number[] {
     // Simplified diffusion equation
     return state.map((value, i) => Math.min(1, value * 1.01));
   }
 
-  private createSnapshotFromState(state: number[], time: number): NetworkSnapshot {
+  private createSnapshotFromState(
+    state: number[],
+    time: number,
+  ): NetworkSnapshot {
     return {
       timestamp: time,
       nodes: [],
@@ -757,7 +825,10 @@ export class AdvancedSimulationEngine {
     return [];
   }
 
-  private initializePlayers(network: NetworkStructure, adversaries: AdversaryModel[]): any[] {
+  private initializePlayers(
+    network: NetworkStructure,
+    adversaries: AdversaryModel[],
+  ): any[] {
     return [];
   }
 
@@ -769,11 +840,18 @@ export class AdvancedSimulationEngine {
     return [];
   }
 
-  private updatePlayerStrategies(players: any[], strategies: any[], equilibria: any[]): void {
+  private updatePlayerStrategies(
+    players: any[],
+    strategies: any[],
+    equilibria: any[],
+  ): void {
     // Implementation
   }
 
-  private captureGameSnapshot(players: any[], iteration: number): NetworkSnapshot {
+  private captureGameSnapshot(
+    players: any[],
+    iteration: number,
+  ): NetworkSnapshot {
     return {
       timestamp: iteration,
       nodes: [],
@@ -790,7 +868,10 @@ export class AdvancedSimulationEngine {
     };
   }
 
-  private generateOutcomesFromGame(players: any[], scenarios: Scenario[]): SimulationOutcome[] {
+  private generateOutcomesFromGame(
+    players: any[],
+    scenarios: Scenario[],
+  ): SimulationOutcome[] {
     return [];
   }
 
@@ -807,7 +888,9 @@ export class AdvancedSimulationEngine {
     };
   }
 
-  private analyzeMultiversePatterns(results: SimulationOutcome[]): SimulationMetric[] {
+  private analyzeMultiversePatterns(
+    results: SimulationOutcome[],
+  ): SimulationMetric[] {
     return [];
   }
 
@@ -815,11 +898,17 @@ export class AdvancedSimulationEngine {
     return {};
   }
 
-  private async runMacroSimulation(config: SimulationConfig, microResults: any): Promise<any> {
+  private async runMacroSimulation(
+    config: SimulationConfig,
+    microResults: any,
+  ): Promise<any> {
     return {};
   }
 
-  private async runStrategicSimulation(config: SimulationConfig, macroResults: any): Promise<any> {
+  private async runStrategicSimulation(
+    config: SimulationConfig,
+    macroResults: any,
+  ): Promise<any> {
     return {};
   }
 
@@ -832,11 +921,15 @@ export class AdvancedSimulationEngine {
   }
 
   // Analysis methods
-  private discoverCausalRelationships(result: SimulationResult): CausalRelationship[] {
+  private discoverCausalRelationships(
+    result: SimulationResult,
+  ): CausalRelationship[] {
     return [];
   }
 
-  private analyzeInterventionEffects(result: SimulationResult): InterventionEffect[] {
+  private analyzeInterventionEffects(
+    result: SimulationResult,
+  ): InterventionEffect[] {
     return [];
   }
 
@@ -844,7 +937,9 @@ export class AdvancedSimulationEngine {
     return [];
   }
 
-  private identifyCausalMechanisms(result: SimulationResult): CausalMechanism[] {
+  private identifyCausalMechanisms(
+    result: SimulationResult,
+  ): CausalMechanism[] {
     return [];
   }
 
@@ -886,12 +981,15 @@ export class AdvancedSimulationEngine {
     result: SimulationResult,
   ): number {
     return (
-      adversaries.reduce((prob, adv) => prob + adv.behavior.reactivity, 0) / adversaries.length
+      adversaries.reduce((prob, adv) => prob + adv.behavior.reactivity, 0) /
+      adversaries.length
     );
   }
 
   private estimateResponseTimeline(adversaries: AdversaryModel[]): number {
-    return Math.min(...adversaries.map((adv) => 30 / adv.behavior.adaptability));
+    return Math.min(
+      ...adversaries.map((adv) => 30 / adv.behavior.adaptability),
+    );
   }
 
   private calculateAdversaryConfidence(
@@ -906,7 +1004,10 @@ export class AdvancedSimulationEngine {
     return 0.8; // Simplified
   }
 
-  private performCrossValidation(config: SimulationConfig, result: SimulationResult): number {
+  private performCrossValidation(
+    config: SimulationConfig,
+    result: SimulationResult,
+  ): number {
     return 0.75; // Simplified
   }
 
@@ -914,11 +1015,20 @@ export class AdvancedSimulationEngine {
     return 0.85; // Simplified
   }
 
-  private identifyLimitations(config: SimulationConfig, result: SimulationResult): string[] {
-    return ['Limited historical data', 'Simplified agent behaviors', 'Computational constraints'];
+  private identifyLimitations(
+    config: SimulationConfig,
+    result: SimulationResult,
+  ): string[] {
+    return [
+      'Limited historical data',
+      'Simplified agent behaviors',
+      'Computational constraints',
+    ];
   }
 
-  private calculateConfidenceMetrics(result: SimulationResult): ConfidenceMetrics {
+  private calculateConfidenceMetrics(
+    result: SimulationResult,
+  ): ConfidenceMetrics {
     return {
       overall: 0.8,
       byMetric: {},

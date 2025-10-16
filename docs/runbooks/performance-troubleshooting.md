@@ -4,10 +4,10 @@ Diagnose and resolve **graph query latency** and **ingest backlog** within **30 
 
 ### Signals
 
-* p95 GraphQL latency > 1.5s (5m)
-* Neo4j page cache misses rising
-* Postgres CPU > 80% sustained
-* Redis hit ratio < 0.9
+- p95 GraphQL latency > 1.5s (5m)
+- Neo4j page cache misses rising
+- Postgres CPU > 80% sustained
+- Redis hit ratio < 0.9
 
 ### Steps
 

@@ -5,11 +5,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@apollo/client';
 import { START_RUN } from '../../graphql/copilot.gql';
 import { copilotActions } from '../../store/copilotSlice';
-import { Box, Card, CardContent, Button, Typography, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Button,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+} from '@mui/material';
 
 export default function CopilotRunPanel({ goalId }) {
   const dispatch = useDispatch();
-  const { currentRun, events } = useSelector(s => s.copilot);
+  const { currentRun, events } = useSelector((s) => s.copilot);
   const [startRun, { loading }] = useMutation(START_RUN);
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
@@ -17,9 +26,15 @@ export default function CopilotRunPanel({ goalId }) {
   useEffect(() => {
     // jQuery-powered Socket.IO init
     socketRef.current = io('/', { path: '/realtime', autoConnect: true });
-    $(socketRef.current).on('connect', function () { setConnected(true); });
-    socketRef.current.on('copilot:event', (ev) => dispatch(copilotActions.eventReceived(ev)));
-    return () => { socketRef.current && socketRef.current.disconnect(); };
+    $(socketRef.current).on('connect', function () {
+      setConnected(true);
+    });
+    socketRef.current.on('copilot:event', (ev) =>
+      dispatch(copilotActions.eventReceived(ev)),
+    );
+    return () => {
+      socketRef.current && socketRef.current.disconnect();
+    };
   }, [dispatch]);
 
   const handleStart = async () => {
@@ -38,7 +53,11 @@ export default function CopilotRunPanel({ goalId }) {
           <Typography variant="body2" color="text.secondary">
             Socket: {connected ? 'connected' : 'disconnected'}
           </Typography>
-          <Button variant="contained" onClick={handleStart} disabled={loading || !goalId}>
+          <Button
+            variant="contained"
+            onClick={handleStart}
+            disabled={loading || !goalId}
+          >
             {loading ? 'Starting…' : 'Run Copilot'}
           </Button>
         </CardContent>
@@ -49,14 +68,16 @@ export default function CopilotRunPanel({ goalId }) {
           <CardContent>
             <Typography variant="subtitle1">Plan</Typography>
             <List dense>
-              {currentRun.plan.steps.map(s => (
+              {currentRun.plan.steps.map((s) => (
                 <ListItem key={s.id}>
                   <ListItemText primary={s.kind} secondary={s.status} />
                 </ListItem>
               ))}
             </List>
 
-            <Typography variant="subtitle1" sx={{ mt: 2 }}>Live Events</Typography>
+            <Typography variant="subtitle1" sx={{ mt: 2 }}>
+              Live Events
+            </Typography>
             <List dense aria-live="polite">
               {events.map((e, i) => (
                 <ListItem key={i}>

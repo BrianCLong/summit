@@ -51,22 +51,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run bulk import for batch ${{ matrix.batch }}
         env:
           GH_TOKEN: ${{ secrets.PAT_PROJECT }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
-          PROJECT_ID: "PVT_kwHOAGG3w84BEh1S"
+          PROJECT_ID: 'PVT_kwHOAGG3w84BEh1S'
           BATCH_NUMBER: ${{ matrix.batch }}
           SLEEP_MS: ${{ github.event.inputs.sleep_ms }}
         run: |
@@ -78,7 +78,7 @@ jobs:
             echo "Please ensure the import script exists in the repository"
             exit 1
           fi
-      
+
       - name: Upload batch results
         if: always()
         uses: actions/upload-artifact@v4

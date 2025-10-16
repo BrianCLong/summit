@@ -54,7 +54,10 @@ export async function searchAll(input: SearchInput) {
          RETURN c.id as id, collect({ ioc: i.value, type: i.type })[0..20] as iocs`,
         { ids },
       );
-      graph = res.records.map((r) => ({ id: r.get('id'), iocs: r.get('iocs') }));
+      graph = res.records.map((r) => ({
+        id: r.get('id'),
+        iocs: r.get('iocs'),
+      }));
     } finally {
       await session.close();
     }

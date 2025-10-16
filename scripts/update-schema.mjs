@@ -6,8 +6,13 @@ const OUT = 'client/schema.graphql';
 
 function sh(cmd, args) {
   return new Promise((res, rej) => {
-    const p = spawn(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32' });
-    p.on('exit', (code) => (code === 0 ? res() : rej(new Error(cmd + ' failed'))));
+    const p = spawn(cmd, args, {
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+    });
+    p.on('exit', (code) =>
+      code === 0 ? res() : rej(new Error(cmd + ' failed')),
+    );
   });
 }
 
@@ -21,7 +26,9 @@ try {
   );
   // Fallback: capture stdout and write via node
   const { spawnSync } = await import('node:child_process');
-  const r = spawnSync('npx', ['--yes', 'get-graphql-schema@^2.1.2', API], { encoding: 'utf8' });
+  const r = spawnSync('npx', ['--yes', 'get-graphql-schema@^2.1.2', API], {
+    encoding: 'utf8',
+  });
   if (r.status !== 0) throw new Error('get-graphql-schema failed');
   await fs.writeFile(OUT, r.stdout, 'utf8');
 }

@@ -81,11 +81,15 @@ let seq = 1;
 
 export const legacyResolvers = {
   Mutation: {
-    login: async (_: any, { input }: { input: LoginInput }, { req }: Context) => {
+    login: async (
+      _: any,
+      { input }: { input: LoginInput },
+      { req }: Context,
+    ) => {
       const { email, password } = input;
       const ipAddress = req?.ip;
       const userAgent = req?.get('User-Agent');
-      
+
       return await authService.login(email, password, ipAddress, userAgent);
     },
 
@@ -93,7 +97,10 @@ export const legacyResolvers = {
       return await authService.register(input);
     },
 
-    createCopilotGoal: async (_: any, { text, investigationId }: CreateCopilotGoalArgs) => {
+    createCopilotGoal: async (
+      _: any,
+      { text, investigationId }: CreateCopilotGoalArgs,
+    ) => {
       if (!text || !text.trim()) {
         throw new Error('Goal text is required');
       }
@@ -111,16 +118,20 @@ export const legacyResolvers = {
       return true;
     },
 
-    createInvestigation: async (_: any, { input }: { input: CreateInvestigationInput }, { user }: Context) => {
+    createInvestigation: async (
+      _: any,
+      { input }: { input: CreateInvestigationInput },
+      { user }: Context,
+    ) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const driver = getNeo4jDriver();
       const session = driver.session();
-      
+
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
-        
+
         const result = await session.run(
           `CREATE (i:Investigation {
              id: $id,
@@ -145,34 +156,38 @@ export const legacyResolvers = {
             tags: JSON.stringify(input.tags || []),
             metadata: JSON.stringify(input.metadata || {}),
             createdBy: user.id,
-            now
-          }
+            now,
+          },
         );
-        
+
         const investigation = result.records[0].get('i').properties;
-        
+
         logger.info(`Investigation created: ${id} by user ${user.id}`);
         return {
           ...investigation,
           createdBy: user,
-          assignedTo: []
+          assignedTo: [],
         };
       } finally {
         await session.close();
       }
     },
 
-    createEntity: async (_: any, { input }: { input: CreateEntityInput }, { user }: Context) => {
+    createEntity: async (
+      _: any,
+      { input }: { input: CreateEntityInput },
+      { user }: Context,
+    ) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       const driver = getNeo4jDriver();
       const session = driver.session();
       const pgPool = getPostgresPool();
-      
+
       try {
         const id = uuidv4();
         const now = new Date().toISOString();
-        
+
         const result = await session.run(
           `CREATE (e:Entity {
              id: $id,
@@ -198,23 +213,32 @@ export const legacyResolvers = {
             source: input.source || 'user_input',
             investigationId: input.investigationId,
             createdBy: user.id,
-            now
-          }
+            now,
+          },
         );
-        
+
         const entity = result.records[0].get('e').properties;
-        
+
         // Audit log
-        const payloadHash = crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
-        const auditLogQuery = 'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash) VALUES ($1, $2, $3, $4)';
-        await pgPool.query(auditLogQuery, [user.id, now, 'Evidence', payloadHash]);
+        const payloadHash = crypto
+          .createHash('sha256')
+          .update(JSON.stringify(input))
+          .digest('hex');
+        const auditLogQuery =
+          'INSERT INTO "AuditLog" (user_id, timestamp, entity_type, payload_hash) VALUES ($1, $2, $3, $4)';
+        await pgPool.query(auditLogQuery, [
+          user.id,
+          now,
+          'Evidence',
+          payloadHash,
+        ]);
 
         // Publish subscription
         pubsub.publish('ENTITY_CREATED', {
           entityCreated: entity,
-          investigationId: input.investigationId
+          investigationId: input.investigationId,
         });
-        
+
         logger.info(`Entity created: ${id} by user ${user.id}`);
         return entity;
       } finally {
@@ -222,17 +246,23 @@ export const legacyResolvers = {
       }
     },
 
-    importEntitiesFromText: async (_: any, { investigationId, text }: ImportEntitiesArgs, { user }: Context) => {
+    importEntitiesFromText: async (
+      _: any,
+      { investigationId, text }: ImportEntitiesArgs,
+      { user }: Context,
+    ) => {
       if (!user) throw new Error('Not authenticated');
-      
+
       // Simple entity extraction
-      const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-      const phonePattern = /\b(?:\+?1[-.\ s]?)\(?[2-9][0-8][0-9]\)?[-.\ s]?[2-9][0-9]{2}[-.\ s]?[0-9]{4}\b/g;
-      
+      const emailPattern =
+        /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+      const phonePattern =
+        /\b(?:\+?1[-.\ s]?)\(?[2-9][0-8][0-9]\)?[-.\ s]?[2-9][0-9]{2}[-.\ s]?[0-9]{4}\b/g;
+
       const entities: any[] = [];
-      
+
       const emails = text.match(emailPattern) || [];
-      emails.forEach(email => {
+      emails.forEach((email) => {
         entities.push({
           id: uuidv4(),
           uuid: uuidv4(),
@@ -245,12 +275,12 @@ export const legacyResolvers = {
           verified: false,
           createdBy: user,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
       });
-      
+
       const phones = text.match(phonePattern) || [];
-      phones.forEach(phone => {
+      phones.forEach((phone) => {
         entities.push({
           id: uuidv4(),
           uuid: uuidv4(),
@@ -263,10 +293,10 @@ export const legacyResolvers = {
           verified: false,
           createdBy: user,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
       });
-      
+
       return entities;
     },
 

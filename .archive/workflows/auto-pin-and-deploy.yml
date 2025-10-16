@@ -93,4 +93,3 @@ jobs:
               ref: context.ref.replace('refs/heads/', ''),
               inputs: {}
             })
-

@@ -29,22 +29,27 @@ chmod +x scripts/*.sh
 ## Safety Features
 
 ### 🛡️ CI Failure Protection
+
 - Detects failing CI checks across all PRs
 - **Halts immediately** with non-zero exit code if any failures found
 - Writes detailed reports before stopping
 
-### 🏷️ Smart Filtering  
+### 🏷️ Smart Filtering
+
 Automatically skips PRs with:
+
 - Draft status
 - Excluded labels: `do-not-merge`, `blocked`, `WIP`, `hold`, `logical`, `workflow`, `contextual`
 - `CHANGES_REQUESTED` review status
 
 ### 📊 Comprehensive Reporting
+
 - Markdown reports for human review
 - CSV data for programmatic analysis
 - Detailed action logs with rationale
 
 ### 🔒 Non-Destructive Operations
+
 - Uses GitHub's auto-merge feature (respects branch protections)
 - Never force-pushes to main
 - Creates draft PRs for integration trains
@@ -71,6 +76,7 @@ DRY_RUN=1
 ```
 
 ### Report Directory
+
 ```bash
 # Reports location (default: reports/)
 REPORT_DIR="custom/path"
@@ -79,6 +85,7 @@ REPORT_DIR="custom/path"
 ## Usage Examples
 
 ### Dry Run (Recommended First)
+
 ```bash
 # Preview actions without making changes
 DRY_RUN=1 ./scripts/batch-automerge.sh
@@ -86,12 +93,14 @@ DRY_RUN=1 ./scripts/integration-train.sh
 ```
 
 ### Custom Configuration
+
 ```bash
 # Use rebase strategy with custom exclusions
 AUTO_MERGE_STRATEGY=rebase EXCLUDE_LABELS="wip,blocked" ./scripts/batch-automerge.sh
 ```
 
 ### Different Repository
+
 ```bash
 # Target different repo
 REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
@@ -104,6 +113,7 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 **Purpose**: Queue clean PRs for auto-merge via GitHub's merge queue
 
 **Logic**:
+
 1. Fetch all open PRs targeting default branch
 2. Check CI status for ALL PRs
 3. **HALT if any CI failures detected**
@@ -113,6 +123,7 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 5. Queue clean PRs using `gh pr merge --auto`
 
 **Output**:
+
 - `reports/merge-plan-YYYYMMDD.md` - Human-readable plan
 - `reports/merge-plan-YYYYMMDD.csv` - Machine-readable data
 - Summary: `queued=N, conflicted=M, skipped=K, ci_fail=0/1`
@@ -122,6 +133,7 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 **Purpose**: Create integration branch for conflicted PRs
 
 **Logic**:
+
 1. Read train candidates from previous step's CSV
 2. Create `integration/batch-YYYYMMDD` branch from main
 3. Attempt to merge each PR branch
@@ -132,6 +144,7 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 5. Open draft PR for successful integration branch
 
 **Output**:
+
 - `reports/integration-train-YYYYMMDD.md` - Integration report
 - Draft PR: "Integration Batch YYYYMMDD"
 - Summary: `merged=X, conflicts=Y`
@@ -141,6 +154,7 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 **Purpose**: Surface orphaned branches as PRs for triage
 
 **Logic**:
+
 1. Find remote branches ahead of main
 2. Check if PR already exists
 3. Create auto-labeled PR: "[Auto] branch → main"
@@ -149,13 +163,17 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 ## GitHub Actions Integration
 
 ### Nightly Automation
+
 `.github/workflows/batch-merge.yml` runs daily at 03:17 UTC:
+
 - Executes batch planning and integration train
 - Uploads reports as artifacts
 - Non-destructive (leaves actual merging to auto-merge gates)
 
 ### Release on Main
+
 `.github/workflows/release-on-main.yml`:
+
 - Triggers on any push to main
 - Creates date-stamped release: `v2025.08.20.1425`
 - Generates release notes automatically
@@ -163,6 +181,7 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 ## Safety Guarantees
 
 ### ✅ What These Scripts Do
+
 - Respect branch protection rules
 - Use GitHub's native auto-merge (waits for checks)
 - Create detailed audit trails
@@ -170,6 +189,7 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 - Skip problematic PRs safely
 
 ### ❌ What These Scripts Never Do
+
 - Force-push to main or protected branches
 - Bypass required reviews or status checks
 - Merge PRs with failing CI
@@ -179,25 +199,29 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 ## Troubleshooting
 
 ### CI Failures Block Everything
+
 **Symptom**: Script exits with "CI failures detected"
 **Solution**: Fix failing checks before running batch merge
 
 ### No PRs Found
+
 **Symptom**: "queued=0, conflicted=0, skipped=0"
 **Solution**: Check if PRs exist and aren't excluded by filters
 
 ### Integration Train Conflicts
+
 **Symptom**: High conflict count in integration report
 **Solution**: PRs need rebase on latest main (authors notified)
 
 ### Permission Errors
+
 **Symptom**: `gh` commands fail with 403
 **Solution**: Ensure `GITHUB_TOKEN` has `contents: write` and `pull-requests: write`
 
 ## Dependencies
 
 - `gh` (GitHub CLI) - PR management
-- `git` - Repository operations  
+- `git` - Repository operations
 - `jq` - JSON parsing
 - `awk` - CSV processing
 - Standard POSIX shell utilities
@@ -205,15 +229,17 @@ REPO="myorg/myrepo" DEFAULT_BRANCH="develop" ./scripts/batch-automerge.sh
 ## Reports Format
 
 ### CSV Schema
+
 ```csv
 number,title,state,reviewDecision,mergeStateStatus,action,notes
 724,"PR Title",open,REVIEW_REQUIRED,BLOCKED,halt,ci-failure-detected
 ```
 
 ### Actions
+
 - `auto-merge` - Queued for GitHub auto-merge
 - `train` - Added to integration train
-- `skip` - Excluded by filters  
+- `skip` - Excluded by filters
 - `halt` - CI failure detected
 
 ## Best Practices

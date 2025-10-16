@@ -5,11 +5,13 @@ Twelve PRs to cut infra cost, make GPU workloads efficient, and implement sustai
 ---
 
 ## PR 119 — Karpenter spot‑friendly autoscaling with interruption handling
+
 **Purpose:** Replace static node groups; prefer spot where safe; drain gracefully on interruption.
 
 **Files**
 
 **`infra/karpenter/values.yaml`** (excerpt)
+
 ```yaml
 settings:
   aws:
@@ -28,8 +30,8 @@ provisioners:
         values: [spot, on-demand]
       - key: node.kubernetes.io/instance-type
         operator: In
-        values: [m7g.large,m7g.xlarge,c7g.large,c7g.xlarge]
-    limits: { resources: { cpu: "200", memory: "800Gi" } }
+        values: [m7g.large, m7g.xlarge, c7g.large, c7g.xlarge]
+    limits: { resources: { cpu: '200', memory: '800Gi' } }
     ttlSecondsAfterEmpty: 120
     consolidationPolicy: WhenUnderutilized
     labels: { pool: general }
@@ -40,8 +42,8 @@ provisioners:
         values: [on-demand, spot]
       - key: node.kubernetes.io/instance-type
         operator: In
-        values: [g5.xlarge,g5.2xlarge,l4g.xlarge]
-    taints: [{ key: gpu, value: "true", effect: NoSchedule }]
+        values: [g5.xlarge, g5.2xlarge, l4g.xlarge]
+    taints: [{ key: gpu, value: 'true', effect: NoSchedule }]
 ```
 
 **`k8s/karpenter/interruption-handler.yaml`** (optional sqs‑drainer)
@@ -51,11 +53,13 @@ provisioners:
 ---
 
 ## PR 120 — Node pools, taints, and PriorityClasses (system/web/batch/gpu)
+
 **Purpose:** Keep critical paths fast; push best‑effort/batch to cheaper nodes.
 
 **Files**
 
 **`k8s/priorityclasses.yaml`**
+
 ```yaml
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
@@ -75,6 +79,7 @@ value: 10
 ```
 
 **`charts/app/values.yaml`** (excerpt)
+
 ```yaml
 priorityClassName: web-med
 nodeSelector: { pool: general }
@@ -86,6 +91,7 @@ tolerations: []
 ---
 
 ## PR 121 — NVIDIA device plugin + time‑slicing/MIG
+
 **Purpose:** Increase GPU utilization; isolate workloads safely.
 
 **Files**
@@ -93,6 +99,7 @@ tolerations: []
 **`k8s/gpu/nvidia-plugin.yaml`** — official DaemonSet install.
 
 **`k8s/gpu/time-slicing-config.yaml`**
+
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -105,6 +112,7 @@ data:
 ```
 
 **`charts/inference/values.yaml`**
+
 ```yaml
 resources:
   limits: { nvidia.com/gpu: 0.25 }
@@ -118,6 +126,7 @@ tolerations: [{ key: gpu, operator: Exists, effect: NoSchedule }]
 ---
 
 ## PR 122 — Kueue (or Volcano) GPU batch queue + team quotas
+
 **Purpose:** Fair share for GPU training/batch; keep inference responsive.
 
 **Files**
@@ -125,6 +134,7 @@ tolerations: [{ key: gpu, operator: Exists, effect: NoSchedule }]
 **`k8s/kueue/manager.yaml`** (install)
 
 **`k8s/kueue/cluster-queue.yaml`**
+
 ```yaml
 apiVersion: kueue.x-k8s.io/v1beta1
 kind: ClusterQueue
@@ -132,7 +142,7 @@ metadata: { name: gpu-queue }
 spec:
   namespaceSelector: {}
   resources:
-    - name: "nvidia.com/gpu"
+    - name: 'nvidia.com/gpu'
       flavors:
         - name: g5
           quota:
@@ -145,6 +155,7 @@ spec:
 ---
 
 ## PR 123 — VPA + Goldilocks + LimitRanges
+
 **Purpose:** Right‑size pods automatically; prevent over‑requests.
 
 **Files**
@@ -152,6 +163,7 @@ spec:
 **`k8s/vpa/crds.yaml`** — Vertical Pod Autoscaler.
 
 **`k8s/limits/limitrange.yaml`**
+
 ```yaml
 apiVersion: v1
 kind: LimitRange
@@ -170,11 +182,13 @@ spec:
 ---
 
 ## PR 124 — Preview TTL sweeper & idle resource reaper
+
 **Purpose:** Kill forgotten namespaces/pods to cut costs.
 
 **Files**
 
 **`.github/workflows/preview-gc.yml`**
+
 ```yaml
 name: preview-gc
 on: [schedule]
@@ -194,11 +208,13 @@ jobs:
 ---
 
 ## PR 125 — Storage tiering & lifecycle (S3/Logs/Backups/Thanos)
+
 **Purpose:** Move cold data to Glacier; downsample metrics; trim retention.
 
 **Files**
 
 **`infra/storage/s3-logs-lifecycle.tf`**
+
 ```hcl
 resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
@@ -219,11 +235,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 ---
 
 ## PR 126 — Postgres partitioning + automatic retention (pg_partman)
+
 **Purpose:** Fast deletes & scans; keep only hot data online.
 
 **Files**
 
 **`db/migrations/2025090707_partman.sql`**
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS pg_partman;
 SELECT partman.create_parent('public.event_logs','created_at','partman','native','daily');
@@ -238,11 +256,13 @@ SELECT partman.set_config_option('public.event_logs','retention','90 days');
 ---
 
 ## PR 127 — Archive pipeline → Parquet/Iceberg (Athena/Trino)
+
 **Purpose:** Keep historical analytics cheap; free OLTP storage.
 
 **Files**
 
 **`workers/archive/export_events.ts`**
+
 ```ts
 // Incrementally export old partitions to Parquet in S3: s3://intelgraph-archive/events/dt=YYYY-MM-DD
 ```
@@ -254,11 +274,13 @@ SELECT partman.set_config_option('public.event_logs','retention','90 days');
 ---
 
 ## PR 128 — Cost anomaly detection + budgets + Kubecost guardrails
+
 **Purpose:** Catch spend spikes; fail PRs that exceed budget deltas.
 
 **Files**
 
 **`.github/workflows/cost-anomaly.yml`**
+
 ```yaml
 name: cost-anomaly
 on:
@@ -281,6 +303,7 @@ jobs:
 ---
 
 ## PR 129 — Ephemeral GitHub runners (autoscaling, spot)
+
 **Purpose:** Cut CI cost/queue; isolate builds.
 
 **Files**
@@ -294,11 +317,13 @@ jobs:
 ---
 
 ## PR 130 — WORM audit logs (S3 Object Lock) + legal hold + purge attestations
+
 **Purpose:** Immutable audit retention; provable deletions.
 
 **Files**
 
 **`infra/storage/object-lock.tf`**
+
 ```hcl
 resource "aws_s3_bucket" "audit" { bucket = "intelgraph-audit" object_lock_enabled = true }
 resource "aws_s3_bucket_object_lock_configuration" "audit" {
@@ -308,6 +333,7 @@ resource "aws_s3_bucket_object_lock_configuration" "audit" {
 ```
 
 **`scripts/purge_attest.ts`**
+
 ```ts
 // Emits signed attestations (cosign) for data purges; stores in audit bucket
 ```
@@ -317,6 +343,7 @@ resource "aws_s3_bucket_object_lock_configuration" "audit" {
 ---
 
 ## PR 131 — Rightsizing dashboard & weekly FinOps review issue
+
 **Purpose:** Make savings opportunities visible and track follow‑ups.
 
 **Files**
@@ -324,6 +351,7 @@ resource "aws_s3_bucket_object_lock_configuration" "audit" {
 **`observability/grafana/dashboards/finops.json`** — idle nodes, underutilized pods, top spenders.
 
 **`.github/workflows/finops-review.yml`**
+
 ```yaml
 name: finops-review
 on: { schedule: [{ cron: '0 13 * * 1' }] }
@@ -333,7 +361,7 @@ jobs:
     steps:
       - uses: peter-evans/create-issue-from-file@v5
         with:
-          title: "Weekly FinOps Review"
+          title: 'Weekly FinOps Review'
           content-file: reports/finops.md
           labels: [finops]
 ```
@@ -343,19 +371,21 @@ jobs:
 ---
 
 # Cutover (half day)
-1) Install **Karpenter** with conservative settings; validate interruption handling.
-2) Apply **PriorityClasses**, **taints**, and **GPU device plugin**; migrate inference first, then batch to **Kueue**.
-3) Enable **VPA/LimitRanges** and deploy **Goldilocks**; apply recommendations to top 5 services.
-4) Turn on **preview GC**; set 7‑day TTL.
-5) Apply **S3/Thanos lifecycle**; confirm retrieval for Glacier; tighten Prom retention.
-6) Partition **event_logs** with **pg_partman**; schedule maintenance; verify queries.
-7) Start **archive exporter** on oldest partitions; validate Athena/Trino reads.
-8) Enable **cost anomaly** checks and **budgets**; set initial thresholds.
-9) Roll out **ephemeral runners** for heavy jobs; monitor queue times + cost.
-10) Enable **WORM audit** bucket for new objects; integrate **purge attestation**.
-11) Publish **FinOps dashboard**; create first weekly review issue.
+
+1. Install **Karpenter** with conservative settings; validate interruption handling.
+2. Apply **PriorityClasses**, **taints**, and **GPU device plugin**; migrate inference first, then batch to **Kueue**.
+3. Enable **VPA/LimitRanges** and deploy **Goldilocks**; apply recommendations to top 5 services.
+4. Turn on **preview GC**; set 7‑day TTL.
+5. Apply **S3/Thanos lifecycle**; confirm retrieval for Glacier; tighten Prom retention.
+6. Partition **event_logs** with **pg_partman**; schedule maintenance; verify queries.
+7. Start **archive exporter** on oldest partitions; validate Athena/Trino reads.
+8. Enable **cost anomaly** checks and **budgets**; set initial thresholds.
+9. Roll out **ephemeral runners** for heavy jobs; monitor queue times + cost.
+10. Enable **WORM audit** bucket for new objects; integrate **purge attestation**.
+11. Publish **FinOps dashboard**; create first weekly review issue.
 
 # Rollback
+
 - Set Karpenter to on‑demand only or disable.
 - Remove taints/priority if preemption is too aggressive.
 - Pause VPA and revert resource changes using last good values.
@@ -364,8 +394,8 @@ jobs:
 - Switch CI back to hosted runners.
 
 # Ownership
+
 - **Platform/Infra:** PR 119–121, 123–125, 129–131
 - **Data:** PR 126–127, 130
 - **FinOps:** PR 128, 131
 - **ML/Platform:** PR 122
-

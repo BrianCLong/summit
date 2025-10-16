@@ -89,7 +89,11 @@ export class DetectorService {
     try {
       // Run each requested detection type
       for (const detectionType of request.detection_types) {
-        const detections = await this.runDetectionByType(detectionType, request, traceId);
+        const detections = await this.runDetectionByType(
+          detectionType,
+          request,
+          traceId,
+        );
         allDetections.push(...detections);
       }
 
@@ -98,7 +102,10 @@ export class DetectorService {
 
       // Create summary
       const processingTime = Date.now() - startTime;
-      const summary = this.createDetectionSummary(allDetections, processingTime);
+      const summary = this.createDetectionSummary(
+        allDetections,
+        processingTime,
+      );
 
       // Record analytics trace
       await insertAnalyticsTrace({
@@ -197,13 +204,20 @@ export class DetectorService {
   }
 
   // Anomaly Detection
-  private async detectAnomalies(request: DetectionRequest): Promise<DetectionResult[]> {
+  private async detectAnomalies(
+    request: DetectionRequest,
+  ): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
     const nodes = request.graph_data?.nodes || [];
 
     // Statistical anomaly detection
-    const degreeDistribution = this.calculateDegreeDistribution(request.graph_data);
-    const threshold = this.calculateAnomalyThreshold(degreeDistribution, request.sensitivity_level);
+    const degreeDistribution = this.calculateDegreeDistribution(
+      request.graph_data,
+    );
+    const threshold = this.calculateAnomalyThreshold(
+      degreeDistribution,
+      request.sensitivity_level,
+    );
 
     for (const node of nodes) {
       const degree = this.calculateNodeDegree(node.id, request.graph_data);
@@ -242,7 +256,9 @@ export class DetectorService {
   }
 
   // Pattern Detection
-  private async detectPatterns(request: DetectionRequest): Promise<DetectionResult[]> {
+  private async detectPatterns(
+    request: DetectionRequest,
+  ): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
 
     // Known threat patterns
@@ -252,7 +268,11 @@ export class DetectorService {
         description: 'Central node with many connections',
         min_degree: 10,
       },
-      { pattern: 'clique_formation', description: 'Dense interconnected group', min_density: 0.8 },
+      {
+        pattern: 'clique_formation',
+        description: 'Dense interconnected group',
+        min_density: 0.8,
+      },
       {
         pattern: 'bridge_node',
         description: 'Node connecting separate clusters',
@@ -261,7 +281,10 @@ export class DetectorService {
     ];
 
     for (const pattern of threatPatterns) {
-      const matches = await this.findPatternMatches(pattern, request.graph_data);
+      const matches = await this.findPatternMatches(
+        pattern,
+        request.graph_data,
+      );
 
       for (const match of matches) {
         detections.push({
@@ -274,7 +297,10 @@ export class DetectorService {
           evidence: [
             {
               evidence_type: 'pattern_match',
-              evidence_data: { pattern: pattern.pattern, match_score: match.confidence },
+              evidence_data: {
+                pattern: pattern.pattern,
+                match_score: match.confidence,
+              },
               confidence: match.confidence,
               source: 'pattern_matcher',
             },
@@ -293,7 +319,9 @@ export class DetectorService {
   }
 
   // Threat Detection
-  private async detectThreats(request: DetectionRequest): Promise<DetectionResult[]> {
+  private async detectThreats(
+    request: DetectionRequest,
+  ): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
 
     // Threat indicators
@@ -318,7 +346,9 @@ export class DetectorService {
   }
 
   // Behavioral Analysis
-  private async analyzeBehavior(request: DetectionRequest): Promise<DetectionResult[]> {
+  private async analyzeBehavior(
+    request: DetectionRequest,
+  ): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
 
     if (!request.time_window) {
@@ -331,7 +361,10 @@ export class DetectorService {
     for (const entityId of entities.slice(0, 20)) {
       // Limit for performance
       try {
-        const patterns = await queryTemporalPatterns(entityId, request.time_window);
+        const patterns = await queryTemporalPatterns(
+          entityId,
+          request.time_window,
+        );
 
         if (patterns.rows.length > 0) {
           const behaviorChange = this.detectBehaviorChange(patterns.rows);
@@ -374,11 +407,16 @@ export class DetectorService {
   }
 
   // Temporal Clustering
-  private async detectTemporalClusters(request: DetectionRequest): Promise<DetectionResult[]> {
+  private async detectTemporalClusters(
+    request: DetectionRequest,
+  ): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
 
     // Implement temporal clustering logic
-    const clusters = this.identifyTemporalClusters(request.graph_data, request.time_window);
+    const clusters = this.identifyTemporalClusters(
+      request.graph_data,
+      request.time_window,
+    );
 
     for (const cluster of clusters) {
       if (cluster.significance > 0.6) {
@@ -412,7 +450,9 @@ export class DetectorService {
   }
 
   // Network Analysis
-  private async analyzeNetworkStructure(request: DetectionRequest): Promise<DetectionResult[]> {
+  private async analyzeNetworkStructure(
+    request: DetectionRequest,
+  ): Promise<DetectionResult[]> {
     const detections: DetectionResult[] = [];
 
     // Network topology analysis
@@ -425,7 +465,8 @@ export class DetectorService {
         detection_type: 'network_analysis',
         confidence: 0.8,
         severity: 'MEDIUM',
-        description: 'Low network clustering suggests vulnerability to disruption',
+        description:
+          'Low network clustering suggests vulnerability to disruption',
         affected_entities: [], // Network-wide
         evidence: [
           {
@@ -452,7 +493,9 @@ export class DetectorService {
     detections: DetectionResult[],
     request: DetectionRequest,
   ): Promise<void> {
-    const highConfidenceDetections = detections.filter((d) => d.confidence > 0.7);
+    const highConfidenceDetections = detections.filter(
+      (d) => d.confidence > 0.7,
+    );
 
     for (const detection of highConfidenceDetections) {
       try {
@@ -485,18 +528,26 @@ export class DetectorService {
   // Helper methods
   private calculateNodeDegree(nodeId: string, graphData: any): number {
     const edges = graphData.edges || [];
-    return edges.filter((e: any) => e.source === nodeId || e.target === nodeId).length;
+    return edges.filter((e: any) => e.source === nodeId || e.target === nodeId)
+      .length;
   }
 
   private calculateDegreeDistribution(graphData: any): number[] {
     const nodes = graphData.nodes || [];
-    return nodes.map((node: any) => this.calculateNodeDegree(node.id, graphData));
+    return nodes.map((node: any) =>
+      this.calculateNodeDegree(node.id, graphData),
+    );
   }
 
-  private calculateAnomalyThreshold(distribution: number[], sensitivity: number): number {
-    const mean = distribution.reduce((sum, val) => sum + val, 0) / distribution.length;
+  private calculateAnomalyThreshold(
+    distribution: number[],
+    sensitivity: number,
+  ): number {
+    const mean =
+      distribution.reduce((sum, val) => sum + val, 0) / distribution.length;
     const variance =
-      distribution.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / distribution.length;
+      distribution.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      distribution.length;
     const stdDev = Math.sqrt(variance);
 
     // Adjust threshold based on sensitivity (0.1 = very sensitive, 0.9 = less sensitive)
@@ -509,7 +560,10 @@ export class DetectorService {
     return Math.min(0.5 + (excess / threshold) * 0.4, 0.95);
   }
 
-  private async findPatternMatches(pattern: any, graphData: any): Promise<any[]> {
+  private async findPatternMatches(
+    pattern: any,
+    graphData: any,
+  ): Promise<any[]> {
     // Simplified pattern matching - would implement actual graph pattern matching
     const matches = [];
 
@@ -567,7 +621,10 @@ export class DetectorService {
     return {
       node_count: nodes.length,
       edge_count: edges.length,
-      density: nodes.length > 1 ? (2 * edges.length) / (nodes.length * (nodes.length - 1)) : 0,
+      density:
+        nodes.length > 1
+          ? (2 * edges.length) / (nodes.length * (nodes.length - 1))
+          : 0,
       clustering_coefficient: 0.3, // Simplified calculation
     };
   }
@@ -580,8 +637,10 @@ export class DetectorService {
     const bySeverity: Record<string, number> = {};
 
     for (const detection of detections) {
-      byType[detection.detection_type] = (byType[detection.detection_type] || 0) + 1;
-      bySeverity[detection.severity] = (bySeverity[detection.severity] || 0) + 1;
+      byType[detection.detection_type] =
+        (byType[detection.detection_type] || 0) + 1;
+      bySeverity[detection.severity] =
+        (bySeverity[detection.severity] || 0) + 1;
     }
 
     return {
@@ -635,7 +694,10 @@ export class DetectorService {
       graph_hash: this.calculateGraphHash(request.graph_data),
     };
 
-    return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
+    return crypto
+      .createHash('md5')
+      .update(JSON.stringify(normalized))
+      .digest('hex');
   }
 
   private calculateGraphHash(graphData: any): string {

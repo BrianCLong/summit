@@ -62,9 +62,18 @@ async function main(): Promise<void> {
   ];
 
   fs.mkdirSync('seed-data', { recursive: true });
-  fs.writeFileSync('seed-data/graph.json', JSON.stringify({ nodes, edges }, null, 2));
-  fs.writeFileSync('seed-data/playbooks.json', JSON.stringify(playbooks, null, 2));
-  fs.writeFileSync('seed-data/insights.json', JSON.stringify(insights, null, 2));
+  fs.writeFileSync(
+    'seed-data/graph.json',
+    JSON.stringify({ nodes, edges }, null, 2),
+  );
+  fs.writeFileSync(
+    'seed-data/playbooks.json',
+    JSON.stringify(playbooks, null, 2),
+  );
+  fs.writeFileSync(
+    'seed-data/insights.json',
+    JSON.stringify(insights, null, 2),
+  );
   console.log('Seed data written to seed-data/*.json');
 }
 

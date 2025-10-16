@@ -22,7 +22,9 @@ class PolicyEvaluator {
     try {
       return execSync('which opa', { encoding: 'utf8' }).trim();
     } catch (error) {
-      throw new Error('OPA binary not found. Please install OPA: https://www.openpolicyagent.org/docs/latest/get-started/');
+      throw new Error(
+        'OPA binary not found. Please install OPA: https://www.openpolicyagent.org/docs/latest/get-started/',
+      );
     }
   }
 
@@ -43,19 +45,19 @@ class PolicyEvaluator {
         draft: prData.draft,
         mergeable: prData.mergeable,
         mergeable_state: prData.mergeable_state,
-        labels: prData.labels?.map(l => l.name) || [],
+        labels: prData.labels?.map((l) => l.name) || [],
         approvals: await this.countApprovals(),
         changes_requested: await this.hasChangesRequested(),
         codeowner_approved: await this.hasCodeOwnerApproval(),
-        owner_approved: await this.hasOwnerApproval()
+        owner_approved: await this.hasOwnerApproval(),
       },
       changed_files: changedFiles,
       quality_gates: qualityGates,
       max_allowed_risk: process.env.MAX_ALLOWED_RISK || 'HIGH',
       emergency_approval: process.env.EMERGENCY_APPROVAL === 'true',
       migration_review: {
-        approved: await this.hasMigrationReview()
-      }
+        approved: await this.hasMigrationReview(),
+      },
     };
 
     // Write input file for OPA
@@ -68,22 +70,28 @@ class PolicyEvaluator {
 
   async fetchPRData() {
     const cmd = `gh api "/repos/$GITHUB_REPOSITORY/pulls/${this.prNumber}"`;
-    const output = execSync(cmd, { encoding: 'utf8', env: { ...process.env, GH_TOKEN: this.githubToken } });
+    const output = execSync(cmd, {
+      encoding: 'utf8',
+      env: { ...process.env, GH_TOKEN: this.githubToken },
+    });
     return JSON.parse(output);
   }
 
   async fetchChangedFiles() {
     const cmd = `gh api "/repos/$GITHUB_REPOSITORY/pulls/${this.prNumber}/files"`;
-    const output = execSync(cmd, { encoding: 'utf8', env: { ...process.env, GH_TOKEN: this.githubToken } });
+    const output = execSync(cmd, {
+      encoding: 'utf8',
+      env: { ...process.env, GH_TOKEN: this.githubToken },
+    });
     const files = JSON.parse(output);
 
-    return files.map(file => ({
+    return files.map((file) => ({
       path: file.filename,
       status: file.status,
       additions: file.additions,
       deletions: file.deletions,
       changes: file.changes,
-      patch: file.patch
+      patch: file.patch,
     }));
   }
 
@@ -114,14 +122,17 @@ class PolicyEvaluator {
       contract_tests: false,
       migration_plan: false,
       performance_smoke: false,
-      dependency_audit: true
+      dependency_audit: true,
     };
   }
 
   async countApprovals() {
     try {
       const cmd = `gh api "/repos/$GITHUB_REPOSITORY/pulls/${this.prNumber}/reviews" --jq '[.[] | select(.state == "APPROVED")] | length'`;
-      const output = execSync(cmd, { encoding: 'utf8', env: { ...process.env, GH_TOKEN: this.githubToken } });
+      const output = execSync(cmd, {
+        encoding: 'utf8',
+        env: { ...process.env, GH_TOKEN: this.githubToken },
+      });
       return parseInt(output.trim()) || 0;
     } catch (error) {
       return 0;
@@ -131,7 +142,10 @@ class PolicyEvaluator {
   async hasChangesRequested() {
     try {
       const cmd = `gh api "/repos/$GITHUB_REPOSITORY/pulls/${this.prNumber}/reviews" --jq '[.[] | select(.state == "CHANGES_REQUESTED")] | length'`;
-      const output = execSync(cmd, { encoding: 'utf8', env: { ...process.env, GH_TOKEN: this.githubToken } });
+      const output = execSync(cmd, {
+        encoding: 'utf8',
+        env: { ...process.env, GH_TOKEN: this.githubToken },
+      });
       return parseInt(output.trim()) > 0;
     } catch (error) {
       return false;
@@ -147,7 +161,10 @@ class PolicyEvaluator {
   async hasOwnerApproval() {
     try {
       const cmd = `gh api "/repos/$GITHUB_REPOSITORY/pulls/${this.prNumber}/reviews" --jq '[.[] | select(.state == "APPROVED" and .author_association == "OWNER")] | length'`;
-      const output = execSync(cmd, { encoding: 'utf8', env: { ...process.env, GH_TOKEN: this.githubToken } });
+      const output = execSync(cmd, {
+        encoding: 'utf8',
+        env: { ...process.env, GH_TOKEN: this.githubToken },
+      });
       return parseInt(output.trim()) > 0;
     } catch (error) {
       return false;
@@ -158,7 +175,9 @@ class PolicyEvaluator {
     // Check if PR has migration review label or comment
     try {
       const prData = await this.fetchPRData();
-      return prData.labels?.some(l => l.name === 'migration-reviewed') || false;
+      return (
+        prData.labels?.some((l) => l.name === 'migration-reviewed') || false
+      );
     } catch (error) {
       return false;
     }
@@ -186,7 +205,14 @@ class PolicyEvaluator {
     console.log('\n⚖️ Policy Evaluation Report');
     console.log('===========================');
 
-    const { allowed, risk_level, violations, warnings, requirements, confidence } = decision;
+    const {
+      allowed,
+      risk_level,
+      violations,
+      warnings,
+      requirements,
+      confidence,
+    } = decision;
 
     console.log(`\n📊 Decision: ${allowed ? '✅ APPROVED' : '❌ BLOCKED'}`);
     console.log(`📈 Risk Level: ${risk_level}`);
@@ -223,12 +249,19 @@ class PolicyEvaluator {
       warnings: warnings || [],
       requirements: requirements || [],
       riskLevel: risk_level,
-      confidence
+      confidence,
     };
   }
 
   async generatePRComment(report) {
-    const { approved, violations, warnings, requirements, riskLevel, confidence } = report;
+    const {
+      approved,
+      violations,
+      warnings,
+      requirements,
+      riskLevel,
+      confidence,
+    } = report;
 
     let comment = `## ⚖️ Policy Evaluation Results
 
@@ -241,9 +274,13 @@ class PolicyEvaluator {
     if (violations.length > 0) {
       comment += `### 🚨 Policy Violations
 
-${violations.map((v, i) => `${i + 1}. **${v.type}** (${v.severity})
+${violations
+  .map(
+    (v, i) => `${i + 1}. **${v.type}** (${v.severity})
    - ${v.message}
-   - **Fix**: ${v.remediation}`).join('\n\n')}
+   - **Fix**: ${v.remediation}`,
+  )
+  .join('\n\n')}
 
 `;
     }
@@ -296,7 +333,7 @@ Please address the violations above before requesting review:
 
     try {
       execSync(`gh pr comment ${this.prNumber} --body-file ${commentFile}`, {
-        env: { ...process.env, GH_TOKEN: this.githubToken }
+        env: { ...process.env, GH_TOKEN: this.githubToken },
       });
       console.log('✅ Policy evaluation comment posted to PR');
     } catch (error) {
@@ -321,7 +358,7 @@ Please address the violations above before requesting review:
           `policy_approved=${report.approved}`,
           `risk_level=${report.riskLevel}`,
           `violation_count=${report.violations.length}`,
-          `confidence=${report.confidence}`
+          `confidence=${report.confidence}`,
         ];
         fs.appendFileSync(process.env.GITHUB_OUTPUT, outputs.join('\n') + '\n');
       }
@@ -354,7 +391,9 @@ async function main() {
     const evaluator = new PolicyEvaluator(prNumber, githubToken);
     const approved = await evaluator.run();
 
-    console.log(`\n${approved ? '✅' : '❌'} Policy evaluation ${approved ? 'passed' : 'failed'}`);
+    console.log(
+      `\n${approved ? '✅' : '❌'} Policy evaluation ${approved ? 'passed' : 'failed'}`,
+    );
     process.exit(approved ? 0 : 1);
   } catch (error) {
     console.error('Policy evaluation error:', error.message);

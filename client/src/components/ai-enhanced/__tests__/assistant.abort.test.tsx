@@ -16,7 +16,13 @@ test('aborts first stream when a new prompt is sent', async () => {
     { mode: 'timer', spacingMs: 5 },
   );
 
-  render(<EnhancedAIAssistant transport={transport} typingDelayMs={0} debounceMs={0} />);
+  render(
+    <EnhancedAIAssistant
+      transport={transport}
+      typingDelayMs={0}
+      debounceMs={0}
+    />,
+  );
 
   const input = screen.getByRole('textbox', { name: /assistant-input/i });
   await userEvent.type(input, 'first{enter}');
@@ -30,11 +36,16 @@ test('aborts first stream when a new prompt is sent', async () => {
 
   // Easiest: re-render with a new transport dedicated to second response
   const transport2 = makeFakeTransport(
-    [{ type: 'token', value: 'Second ' }, { type: 'token', value: 'ok' }, { type: 'done' }],
+    [
+      { type: 'token', value: 'Second ' },
+      { type: 'token', value: 'ok' },
+      { type: 'done' },
+    ],
     { mode: 'microtask' },
   );
   // eslint-disable-next-line testing-library/no-node-access
-  (screen.getByRole('region', { name: /ai assistant/i }) as any).ownerDocument.defaultView; // noop, keeps TS quiet
+  (screen.getByRole('region', { name: /ai assistant/i }) as any).ownerDocument
+    .defaultView; // noop, keeps TS quiet
 
   // Ideally your component keeps the same transport; if not, adapt this to your real wiring.
   // The key assertion: last assistant message is for the SECOND prompt only.

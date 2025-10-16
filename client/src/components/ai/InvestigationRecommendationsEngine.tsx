@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 
 interface RecommendationContext {
   investigationId: string;
@@ -102,7 +108,9 @@ interface InvestigationRecommendationsEngineProps {
   className?: string;
 }
 
-const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsEngineProps> = ({
+const InvestigationRecommendationsEngine: React.FC<
+  InvestigationRecommendationsEngineProps
+> = ({
   investigationId,
   context,
   onRecommendationAccept,
@@ -114,12 +122,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
   const [activeView, setActiveView] = useState<
     'recommendations' | 'strategies' | 'similar_cases' | 'insights'
   >('recommendations');
-  const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<AIRecommendation[]>(
+    [],
+  );
   const [strategies, setStrategies] = useState<InvestigationStrategy[]>([]);
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
-  const [selectedRecommendation, setSelectedRecommendation] = useState<AIRecommendation | null>(
-    null,
-  );
+  const [selectedRecommendation, setSelectedRecommendation] =
+    useState<AIRecommendation | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -139,7 +148,12 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
       priority: 'high',
       timeConstraint: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       budget: 50000,
-      availableResources: ['data-analyst', 'investigator', 'ai-tools', 'external-apis'],
+      availableResources: [
+        'data-analyst',
+        'investigator',
+        'ai-tools',
+        'external-apis',
+      ],
       complianceRequirements: ['kyc', 'aml', 'gdpr', 'sox'],
       ...context,
     }),
@@ -165,7 +179,10 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           complexity: 'medium',
           resources: ['data-analyst', 'ai-tools'],
         },
-        prerequisites: ['Access to corporate registry data', 'Enhanced due diligence clearance'],
+        prerequisites: [
+          'Access to corporate registry data',
+          'Enhanced due diligence clearance',
+        ],
         potentialImpact:
           'Could reveal 5-8 additional entities and uncover the full money laundering network',
         relatedRecommendations: ['rec-003', 'rec-005'],
@@ -185,7 +202,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           },
           {
             id: 'action-003',
-            description: 'Analyze transaction patterns between discovered entities',
+            description:
+              'Analyze transaction patterns between discovered entities',
             completed: false,
             estimatedTime: '8 hours',
           },
@@ -211,7 +229,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
         id: 'rec-002',
         type: 'data_enrichment',
         title: 'Enrich with Social Media Intelligence',
-        description: 'Supplement investigation with social media analysis of key individuals',
+        description:
+          'Supplement investigation with social media analysis of key individuals',
         rationale:
           'OSINT analysis shows high correlation between social media activity and financial misconduct timing',
         confidence: 76,
@@ -242,7 +261,11 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
         ],
         metadata: {
           mlModelUsed: 'OSINT Correlation Engine v1.8',
-          dataSourcesAnalyzed: ['Social Media APIs', 'Public Records', 'News Sources'],
+          dataSourcesAnalyzed: [
+            'Social Media APIs',
+            'Public Records',
+            'News Sources',
+          ],
           similarCasesFound: 342,
           confidenceFactors: [
             { factor: 'Data Availability', weight: 0.5, confidence: 82 },
@@ -256,7 +279,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
         id: 'rec-003',
         type: 'tool_suggestion',
         title: 'Deploy Advanced Graph Analytics',
-        description: 'Use Palantir Gotham or similar platform for complex relationship mapping',
+        description:
+          'Use Palantir Gotham or similar platform for complex relationship mapping',
         rationale:
           'Investigation complexity score (8.7/10) suggests manual analysis insufficient for optimal results',
         confidence: 94,
@@ -267,7 +291,11 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           complexity: 'high',
           resources: ['graph-analyst', 'palantir-license', 'data-engineer'],
         },
-        prerequisites: ['Platform license', 'Data ingestion setup', 'Analyst training'],
+        prerequisites: [
+          'Platform license',
+          'Data ingestion setup',
+          'Analyst training',
+        ],
         potentialImpact:
           'Could increase investigation efficiency by 300% and discover hidden patterns',
         relatedRecommendations: ['rec-001'],
@@ -293,7 +321,11 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
         ],
         metadata: {
           mlModelUsed: 'Investigation Complexity Analyzer v3.1',
-          dataSourcesAnalyzed: ['Investigation Metadata', 'Tool Performance DB', 'Case History'],
+          dataSourcesAnalyzed: [
+            'Investigation Metadata',
+            'Tool Performance DB',
+            'Case History',
+          ],
           similarCasesFound: 156,
           confidenceFactors: [
             { factor: 'Complexity Match', weight: 0.6, confidence: 96 },
@@ -319,8 +351,12 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           complexity: 'medium',
           resources: ['temporal-analyst', 'timeline-tools'],
         },
-        prerequisites: ['Synchronized data timestamps', 'Timeline analysis tools'],
-        potentialImpact: 'May identify coordinated activities and reveal investigation timeline',
+        prerequisites: [
+          'Synchronized data timestamps',
+          'Timeline analysis tools',
+        ],
+        potentialImpact:
+          'May identify coordinated activities and reveal investigation timeline',
         relatedRecommendations: ['rec-002'],
         actionItems: [
           {
@@ -344,7 +380,11 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
         ],
         metadata: {
           mlModelUsed: 'Temporal Pattern Recognition v2.1',
-          dataSourcesAnalyzed: ['Transaction Logs', 'Communication Records', 'Event Timeline'],
+          dataSourcesAnalyzed: [
+            'Transaction Logs',
+            'Communication Records',
+            'Event Timeline',
+          ],
           similarCasesFound: 278,
           confidenceFactors: [
             { factor: 'Method Effectiveness', weight: 0.7, confidence: 75 },
@@ -363,7 +403,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
       {
         id: 'strategy-001',
         name: 'Financial Fraud Deep Dive',
-        description: 'Comprehensive methodology for investigating complex financial fraud cases',
+        description:
+          'Comprehensive methodology for investigating complex financial fraud cases',
         phases: [
           {
             name: 'Initial Assessment',
@@ -401,7 +442,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           },
           {
             name: 'Analysis & Investigation',
-            description: 'Deep analysis of collected data to identify patterns and build evidence',
+            description:
+              'Deep analysis of collected data to identify patterns and build evidence',
             estimatedDuration: '2-4 weeks',
             tasks: [
               'Transaction pattern analysis',
@@ -417,7 +459,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           },
           {
             name: 'Documentation & Reporting',
-            description: 'Compile findings into comprehensive investigation report',
+            description:
+              'Compile findings into comprehensive investigation report',
             estimatedDuration: '1 week',
             tasks: [
               'Draft investigation report',
@@ -466,7 +509,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
       {
         id: 'case-001',
         title: 'Multi-Jurisdictional Money Laundering Scheme',
-        description: 'Complex financial fraud involving shell companies across 8 jurisdictions',
+        description:
+          'Complex financial fraud involving shell companies across 8 jurisdictions',
         outcome: 'successful',
         similarity: 94,
         investigationType: 'financial',
@@ -497,7 +541,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
       {
         id: 'case-002',
         title: 'Cryptocurrency Mixing Service Investigation',
-        description: 'Investigation of decentralized money laundering through mixing services',
+        description:
+          'Investigation of decentralized money laundering through mixing services',
         outcome: 'partial',
         similarity: 78,
         investigationType: 'financial',
@@ -544,7 +589,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           id: `rec-${Date.now()}`,
           type: 'data_enrichment',
           title: 'Real-time Intelligence Update',
-          description: 'New data source identified that may be relevant to investigation',
+          description:
+            'New data source identified that may be relevant to investigation',
           rationale:
             'Machine learning algorithms detected pattern match with high-confidence indicators',
           confidence: Math.floor(Math.random() * 30) + 70,
@@ -556,7 +602,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
             resources: ['data-analyst'],
           },
           prerequisites: ['API access verification'],
-          potentialImpact: 'May provide additional context for current analysis',
+          potentialImpact:
+            'May provide additional context for current analysis',
           relatedRecommendations: [],
           actionItems: [
             {
@@ -588,14 +635,21 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [mockRecommendations, mockStrategies, mockSimilarCases, enableRealTimeUpdates]);
+  }, [
+    mockRecommendations,
+    mockStrategies,
+    mockSimilarCases,
+    enableRealTimeUpdates,
+  ]);
 
   // Filtered and sorted recommendations
   const filteredRecommendations = useMemo(() => {
     const filtered = recommendations.filter((rec) => {
       if (showAcceptedOnly && !rec.feedback?.helpful) return false;
-      if (filterPriority !== 'all' && rec.priority !== filterPriority) return false;
-      if (filterCategory !== 'all' && rec.category !== filterCategory) return false;
+      if (filterPriority !== 'all' && rec.priority !== filterPriority)
+        return false;
+      if (filterCategory !== 'all' && rec.category !== filterCategory)
+        return false;
       return true;
     });
 
@@ -612,7 +666,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           return 0;
       }
     });
-  }, [recommendations, filterPriority, filterCategory, sortBy, showAcceptedOnly]);
+  }, [
+    recommendations,
+    filterPriority,
+    filterCategory,
+    sortBy,
+    showAcceptedOnly,
+  ]);
 
   const generateNewRecommendations = useCallback(async () => {
     setIsGenerating(true);
@@ -625,7 +685,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
         ...mockRecommendations[0],
         id: `rec-gen-${Date.now()}`,
         title: 'AI-Generated: Enhanced Pattern Analysis',
-        description: 'Advanced ML analysis suggests investigating additional entity clusters',
+        description:
+          'Advanced ML analysis suggests investigating additional entity clusters',
         confidence: Math.floor(Math.random() * 20) + 80,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -641,7 +702,14 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
       setRecommendations((prev) =>
         prev.map((rec) =>
           rec.id === recId
-            ? { ...rec, feedback: { helpful, rating: rating as any, comments: comments || '' } }
+            ? {
+                ...rec,
+                feedback: {
+                  helpful,
+                  rating: rating as any,
+                  comments: comments || '',
+                },
+              }
             : rec,
         ),
       );
@@ -725,8 +793,9 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           }}
         >
           <div style={{ fontSize: '13px', color: '#666' }}>
-            <strong>Investigation Context:</strong> {mockContext.investigationType} • Priority:{' '}
-            {mockContext.priority} •{mockContext.currentEntities.length} entities •{' '}
+            <strong>Investigation Context:</strong>{' '}
+            {mockContext.investigationType} • Priority: {mockContext.priority} •
+            {mockContext.currentEntities.length} entities •{' '}
             {mockContext.currentRelationships.length} relationships • Tags:{' '}
             {mockContext.investigationTags.slice(0, 2).join(', ')}
             {mockContext.investigationTags.length > 2 &&
@@ -748,8 +817,16 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
               label: '🎯 Recommendations',
               count: filteredRecommendations.length,
             },
-            { key: 'strategies', label: '📋 Strategies', count: strategies.length },
-            { key: 'similar_cases', label: '📚 Similar Cases', count: similarCases.length },
+            {
+              key: 'strategies',
+              label: '📋 Strategies',
+              count: strategies.length,
+            },
+            {
+              key: 'similar_cases',
+              label: '📚 Similar Cases',
+              count: similarCases.length,
+            },
             { key: 'insights', label: '💡 Insights', count: 0 },
           ].map((tab) => (
             <button
@@ -760,7 +837,9 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                 backgroundColor: 'transparent',
                 border: 'none',
                 borderBottom:
-                  activeView === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                  activeView === tab.key
+                    ? '2px solid #1a73e8'
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: activeView === tab.key ? '600' : '400',
@@ -774,7 +853,14 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
 
         {/* Filters */}
         {activeView === 'recommendations' && (
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <select
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value)}
@@ -824,7 +910,14 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
               <option value="created">Sort by Created</option>
             </select>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '13px',
+              }}
+            >
               <input
                 type="checkbox"
                 checked={showAcceptedOnly}
@@ -849,7 +942,11 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
           >
             {/* Recommendations List */}
             <div
-              style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+              style={{
+                overflow: 'auto',
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
             >
               <div
                 style={{
@@ -873,7 +970,9 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                       borderBottom: '1px solid #f0f0f0',
                       cursor: 'pointer',
                       backgroundColor:
-                        selectedRecommendation?.id === rec.id ? '#e3f2fd' : 'transparent',
+                        selectedRecommendation?.id === rec.id
+                          ? '#e3f2fd'
+                          : 'transparent',
                       transition: 'background-color 0.2s',
                     }}
                     onMouseEnter={(e) => {
@@ -896,11 +995,24 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                       }}
                     >
                       <div>
-                        <h5 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                        <h5
+                          style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            margin: '0 0 4px 0',
+                          }}
+                        >
                           {rec.title}
                         </h5>
-                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                          {rec.type.replace('_', ' ')} • {rec.category} • {rec.estimatedEffort.time}
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            color: '#666',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          {rec.type.replace('_', ' ')} • {rec.category} •{' '}
+                          {rec.estimatedEffort.time}
                         </div>
                       </div>
 
@@ -917,7 +1029,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                         >
                           {rec.priority.toUpperCase()}
                         </span>
-                        <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            color: '#666',
+                            marginTop: '2px',
+                          }}
+                        >
                           {rec.confidence}% confidence
                         </div>
                       </div>
@@ -947,7 +1065,9 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                           style={{
                             padding: '2px 6px',
                             borderRadius: '12px',
-                            backgroundColor: getComplexityColor(rec.estimatedEffort.complexity),
+                            backgroundColor: getComplexityColor(
+                              rec.estimatedEffort.complexity,
+                            ),
                             color: 'white',
                             fontSize: '10px',
                             fontWeight: '500',
@@ -958,7 +1078,8 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                       </div>
 
                       <div style={{ color: '#666' }}>
-                        {rec.actionItems.length} action{rec.actionItems.length !== 1 ? 's' : ''}
+                        {rec.actionItems.length} action
+                        {rec.actionItems.length !== 1 ? 's' : ''}
                       </div>
                     </div>
 
@@ -967,13 +1088,15 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                         style={{
                           marginTop: '8px',
                           padding: '4px 8px',
-                          backgroundColor: rec.feedback.helpful ? '#d4edda' : '#f8d7da',
+                          backgroundColor: rec.feedback.helpful
+                            ? '#d4edda'
+                            : '#f8d7da',
                           borderRadius: '4px',
                           fontSize: '11px',
                         }}
                       >
-                        {rec.feedback.helpful ? '✅ Accepted' : '❌ Rejected'} • Rating:{' '}
-                        {rec.feedback.rating}/5
+                        {rec.feedback.helpful ? '✅ Accepted' : '❌ Rejected'} •
+                        Rating: {rec.feedback.rating}/5
                       </div>
                     )}
                   </div>
@@ -997,22 +1120,42 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                     backgroundColor: '#f8f9fa',
                   }}
                 >
-                  <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>
+                  <h4
+                    style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}
+                  >
                     Recommendation Details
                   </h4>
                 </div>
 
                 <div style={{ padding: '16px' }}>
                   <div style={{ marginBottom: '24px' }}>
-                    <h5 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h5
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       {selectedRecommendation.title}
                     </h5>
-                    <div style={{ fontSize: '12px', color: '#666', marginBottom: '12px' }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: '#666',
+                        marginBottom: '12px',
+                      }}
+                    >
                       {selectedRecommendation.type.replace('_', ' ')} • Created:{' '}
                       {selectedRecommendation.createdAt.toLocaleDateString()}
                     </div>
 
-                    <p style={{ fontSize: '14px', marginBottom: '12px', lineHeight: '1.4' }}>
+                    <p
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '12px',
+                        lineHeight: '1.4',
+                      }}
+                    >
                       {selectedRecommendation.description}
                     </p>
 
@@ -1024,7 +1167,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                         borderRadius: '6px',
                       }}
                     >
-                      <div style={{ fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          marginBottom: '4px',
+                        }}
+                      >
                         AI Rationale:
                       </div>
                       <div style={{ fontSize: '12px', color: '#666' }}>
@@ -1034,7 +1183,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '12px',
+                      }}
+                    >
                       Action Items
                     </h6>
                     <div>
@@ -1047,7 +1202,9 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                             gap: '8px',
                             padding: '8px',
                             marginBottom: '8px',
-                            backgroundColor: action.completed ? '#d4edda' : '#f8f9fa',
+                            backgroundColor: action.completed
+                              ? '#d4edda'
+                              : '#f8f9fa',
                             borderRadius: '4px',
                           }}
                         >
@@ -1060,7 +1217,9 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                             style={{ marginTop: '2px' }}
                           />
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '13px', fontWeight: '500' }}>
+                            <div
+                              style={{ fontSize: '13px', fontWeight: '500' }}
+                            >
                               {action.description}
                             </div>
                             <div style={{ fontSize: '11px', color: '#666' }}>
@@ -1073,7 +1232,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Confidence Analysis
                     </h6>
                     <div style={{ marginBottom: '12px' }}>
@@ -1084,7 +1249,9 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                           marginBottom: '4px',
                         }}
                       >
-                        <span style={{ fontSize: '12px' }}>Overall Confidence</span>
+                        <span style={{ fontSize: '12px' }}>
+                          Overall Confidence
+                        </span>
                         <span style={{ fontSize: '12px', fontWeight: '600' }}>
                           {selectedRecommendation.confidence}%
                         </span>
@@ -1113,22 +1280,35 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                     </div>
 
                     <div style={{ fontSize: '12px' }}>
-                      {selectedRecommendation.metadata.confidenceFactors.map((factor) => (
-                        <div key={factor.factor} style={{ marginBottom: '4px' }}>
-                          <strong>{factor.factor}:</strong> {factor.confidence}% (weight:{' '}
-                          {(factor.weight * 100).toFixed(0)}%)
-                        </div>
-                      ))}
+                      {selectedRecommendation.metadata.confidenceFactors.map(
+                        (factor) => (
+                          <div
+                            key={factor.factor}
+                            style={{ marginBottom: '4px' }}
+                          >
+                            <strong>{factor.factor}:</strong>{' '}
+                            {factor.confidence}% (weight:{' '}
+                            {(factor.weight * 100).toFixed(0)}%)
+                          </div>
+                        ),
+                      )}
                     </div>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Metadata
                     </h6>
                     <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
                       <div>
-                        <strong>ML Model:</strong> {selectedRecommendation.metadata.mlModelUsed}
+                        <strong>ML Model:</strong>{' '}
+                        {selectedRecommendation.metadata.mlModelUsed}
                       </div>
                       <div>
                         <strong>Similar Cases:</strong>{' '}
@@ -1136,21 +1316,38 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                       </div>
                       <div>
                         <strong>Data Sources:</strong>{' '}
-                        {selectedRecommendation.metadata.dataSourcesAnalyzed.join(', ')}
+                        {selectedRecommendation.metadata.dataSourcesAnalyzed.join(
+                          ', ',
+                        )}
                       </div>
                       <div>
-                        <strong>Potential Impact:</strong> {selectedRecommendation.potentialImpact}
+                        <strong>Potential Impact:</strong>{' '}
+                        {selectedRecommendation.potentialImpact}
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Actions
                     </h6>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '8px',
+                        marginBottom: '16px',
+                      }}
+                    >
                       <button
-                        onClick={() => onRecommendationAccept?.(selectedRecommendation)}
+                        onClick={() =>
+                          onRecommendationAccept?.(selectedRecommendation)
+                        }
                         style={{
                           padding: '8px 16px',
                           fontSize: '12px',
@@ -1166,7 +1363,10 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
 
                       <button
                         onClick={() =>
-                          onRecommendationReject?.(selectedRecommendation.id, 'Not relevant')
+                          onRecommendationReject?.(
+                            selectedRecommendation.id,
+                            'Not relevant',
+                          )
                         }
                         style={{
                           padding: '8px 16px',
@@ -1198,7 +1398,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
 
                     {!selectedRecommendation.feedback && (
                       <div>
-                        <div style={{ fontSize: '12px', marginBottom: '8px', fontWeight: '600' }}>
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            marginBottom: '8px',
+                            fontWeight: '600',
+                          }}
+                        >
                           Rate this recommendation:
                         </div>
                         <div style={{ display: 'flex', gap: '4px' }}>
@@ -1236,9 +1442,19 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
 
         {activeView === 'strategies' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Investigation Strategies
             </h4>
 
@@ -1261,7 +1477,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                   }}
                 >
                   <div>
-                    <h5 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                    <h5
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        margin: '0 0 4px 0',
+                      }}
+                    >
                       {strategy.name}
                     </h5>
                     <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
@@ -1286,21 +1508,41 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
-                  <h6 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px' }}>
+                  <h6
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      marginBottom: '8px',
+                    }}
+                  >
                     Implementation Phases:
                   </h6>
                   <div>
                     {strategy.phases.map((phase, index) => (
                       <div key={index} style={{ marginBottom: '12px' }}>
-                        <div style={{ fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            marginBottom: '4px',
+                          }}
+                        >
                           {index + 1}. {phase.name} ({phase.estimatedDuration})
                         </div>
-                        <div style={{ fontSize: '11px', color: '#666', marginBottom: '4px' }}>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            color: '#666',
+                            marginBottom: '4px',
+                          }}
+                        >
                           {phase.description}
                         </div>
                         <div style={{ fontSize: '11px', color: '#666' }}>
-                          <strong>Tasks:</strong> {phase.tasks.slice(0, 2).join(', ')}
-                          {phase.tasks.length > 2 && ` +${phase.tasks.length - 2} more`}
+                          <strong>Tasks:</strong>{' '}
+                          {phase.tasks.slice(0, 2).join(', ')}
+                          {phase.tasks.length > 2 &&
+                            ` +${phase.tasks.length - 2} more`}
                         </div>
                       </div>
                     ))}
@@ -1316,12 +1558,18 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>Required Skills:</div>
-                    <div style={{ color: '#666' }}>{strategy.requiredSkills.join(', ')}</div>
+                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                      Required Skills:
+                    </div>
+                    <div style={{ color: '#666' }}>
+                      {strategy.requiredSkills.join(', ')}
+                    </div>
                   </div>
 
                   <div>
-                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>Recommended Tools:</div>
+                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                      Recommended Tools:
+                    </div>
                     <div style={{ color: '#666' }}>
                       {strategy.recommendedTools.slice(0, 2).join(', ')}
                     </div>
@@ -1334,9 +1582,19 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
 
         {activeView === 'similar_cases' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Similar Cases ({similarCases.length})
             </h4>
 
@@ -1358,11 +1616,19 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                     marginBottom: '8px',
                   }}
                 >
-                  <h5 style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>
+                  <h5
+                    style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}
+                  >
                     {case_item.title}
                   </h5>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#1a73e8' }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: '#1a73e8',
+                      }}
+                    >
                       {case_item.similarity}% similar
                     </div>
                     <span
@@ -1385,21 +1651,35 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                   </div>
                 </div>
 
-                <p style={{ fontSize: '13px', color: '#666', marginBottom: '12px' }}>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: '#666',
+                    marginBottom: '12px',
+                  }}
+                >
                   {case_item.description}
                 </p>
 
                 <div style={{ fontSize: '12px', marginBottom: '12px' }}>
-                  <strong>Resolution time:</strong> {case_item.timeToResolution} days
+                  <strong>Resolution time:</strong> {case_item.timeToResolution}{' '}
+                  days
                 </div>
 
                 <details>
-                  <summary style={{ cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>
+                  <summary
+                    style={{
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                    }}
+                  >
                     Key Findings & Applicable Insights
                   </summary>
                   <div style={{ marginTop: '8px', fontSize: '11px' }}>
                     <div style={{ marginBottom: '8px' }}>
-                      <strong>Methods Used:</strong> {case_item.methodsUsed.join(', ')}
+                      <strong>Methods Used:</strong>{' '}
+                      {case_item.methodsUsed.join(', ')}
                     </div>
                     <div>
                       <strong>Applicable Insights:</strong>
@@ -1426,11 +1706,24 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
             }}
           >
             <div style={{ padding: '40px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '16px',
+                }}
+              >
                 💡 Advanced Investigation Insights
               </h4>
-              <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px' }}>
-                Deep analytical insights and predictive intelligence for investigation optimization.
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginBottom: '24px',
+                }}
+              >
+                Deep analytical insights and predictive intelligence for
+                investigation optimization.
               </p>
               <div
                 style={{
@@ -1442,7 +1735,13 @@ const InvestigationRecommendationsEngine: React.FC<InvestigationRecommendationsE
                 }}
               >
                 🚧 Advanced insights engine coming soon - will include:
-                <ul style={{ textAlign: 'left', marginTop: '12px', marginLeft: '20px' }}>
+                <ul
+                  style={{
+                    textAlign: 'left',
+                    marginTop: '12px',
+                    marginLeft: '20px',
+                  }}
+                >
                   <li>Predictive case outcome modeling</li>
                   <li>Resource optimization recommendations</li>
                   <li>Investigation path optimization</li>

@@ -11,7 +11,15 @@ import {
   Tooltip,
   Icon,
 } from '@mui/material';
-import { CheckCircle, Error, Warning, Refresh, Storage, Cloud, Speed } from '@mui/icons-material';
+import {
+  CheckCircle,
+  Error,
+  Warning,
+  Refresh,
+  Storage,
+  Cloud,
+  Speed,
+} from '@mui/icons-material';
 import { useQuery } from '@apollo/client';
 import { GET_SERVER_STATS, GET_HEALTH } from '../../graphql/serverStats.gql';
 
@@ -94,14 +102,27 @@ const ConnectionStatus = () => {
   return (
     <Card sx={{ mb: 2 }}>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+          >
             <Speed /> Real-time Connection Status
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Chip
               icon={getStatusIcon(connectionState)}
-              label={connectionState.charAt(0).toUpperCase() + connectionState.slice(1)}
+              label={
+                connectionState.charAt(0).toUpperCase() +
+                connectionState.slice(1)
+              }
               color={getStatusColor(connectionState)}
               size="small"
               onClick={handleRefresh}
@@ -126,7 +147,9 @@ const ConnectionStatus = () => {
           <Alert severity="error" sx={{ mb: 2 }}>
             Connection failed: {statsError.message}
             <br />
-            <Typography variant="caption">Make sure the server is running on port 4001</Typography>
+            <Typography variant="caption">
+              Make sure the server is running on port 4001
+            </Typography>
           </Alert>
         )}
 
@@ -140,7 +163,13 @@ const ConnectionStatus = () => {
                     <Cloud sx={{ verticalAlign: 'middle', mr: 1 }} />
                     Server Health
                   </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      mb: 1,
+                    }}
+                  >
                     <Typography variant="body2">Status:</Typography>
                     <Chip
                       label={healthData?.health ? 'Healthy' : 'Unknown'}
@@ -148,7 +177,13 @@ const ConnectionStatus = () => {
                       size="small"
                     />
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      mb: 1,
+                    }}
+                  >
                     <Typography variant="body2">Uptime:</Typography>
                     <Typography variant="body2" color="primary">
                       {formatUptime(statsData.serverStats?.uptime)}
@@ -177,8 +212,16 @@ const ConnectionStatus = () => {
                         }}
                       >
                         <Typography variant="body2">Redis:</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {getDatabaseStatusIcon(statsData.serverStats.databaseStatus.redis)}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                          }}
+                        >
+                          {getDatabaseStatusIcon(
+                            statsData.serverStats.databaseStatus.redis,
+                          )}
                           <Typography variant="caption">
                             {statsData.serverStats.databaseStatus.redis}
                           </Typography>
@@ -193,8 +236,16 @@ const ConnectionStatus = () => {
                         }}
                       >
                         <Typography variant="body2">PostgreSQL:</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {getDatabaseStatusIcon(statsData.serverStats.databaseStatus.postgres)}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                          }}
+                        >
+                          {getDatabaseStatusIcon(
+                            statsData.serverStats.databaseStatus.postgres,
+                          )}
                           <Typography variant="caption">
                             {statsData.serverStats.databaseStatus.postgres}
                           </Typography>
@@ -208,8 +259,16 @@ const ConnectionStatus = () => {
                         }}
                       >
                         <Typography variant="body2">Neo4j:</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {getDatabaseStatusIcon(statsData.serverStats.databaseStatus.neo4j)}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                          }}
+                        >
+                          {getDatabaseStatusIcon(
+                            statsData.serverStats.databaseStatus.neo4j,
+                          )}
                           <Typography variant="caption">
                             {statsData.serverStats.databaseStatus.neo4j}
                           </Typography>
@@ -234,7 +293,9 @@ const ConnectionStatus = () => {
                         <Typography variant="h4" color="primary">
                           {statsData.serverStats?.totalInvestigations || 0}
                         </Typography>
-                        <Typography variant="caption">Investigations</Typography>
+                        <Typography variant="caption">
+                          Investigations
+                        </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={6} sm={3}>

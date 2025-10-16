@@ -14,7 +14,9 @@ test.describe('Graph Operations', () => {
     // Check that graph container is visible
     await expect(page.locator('[data-testid="graph-container"]')).toBeVisible();
     // Check that no entities are displayed initially
-    const entityCount = await page.locator('[data-testid="graph-node"]').count();
+    const entityCount = await page
+      .locator('[data-testid="graph-node"]')
+      .count();
     expect(entityCount).toBe(0);
   });
   test('should create a new entity', async ({ page }) => {
@@ -23,16 +25,23 @@ test.describe('Graph Operations', () => {
     // Fill out the entity form
     await page.fill('[data-testid="entity-type-input"]', 'Person');
     await page.fill('[data-testid="entity-label-input"]', 'John Doe');
-    await page.fill('[data-testid="entity-description-input"]', 'Test person entity');
+    await page.fill(
+      '[data-testid="entity-description-input"]',
+      'Test person entity',
+    );
     // Submit the form
     await page.click('[data-testid="save-entity-button"]');
     // Wait for the entity to appear in the graph
     await page.waitForSelector('[data-testid="graph-node"]');
     // Verify the entity was created
-    const entityCount = await page.locator('[data-testid="graph-node"]').count();
+    const entityCount = await page
+      .locator('[data-testid="graph-node"]')
+      .count();
     expect(entityCount).toBe(1);
     // Check that the entity has the correct label
-    await expect(page.locator('[data-testid="graph-node"]').first()).toContainText('John Doe');
+    await expect(
+      page.locator('[data-testid="graph-node"]').first(),
+    ).toContainText('John Doe');
   });
   test('should create a relationship between entities', async ({ page }) => {
     // First create two entities
@@ -46,20 +55,35 @@ test.describe('Graph Operations', () => {
     await page.click('[data-testid="graph-node"]:has-text("Bob")');
     // Fill out relationship form
     await page.fill('[data-testid="relationship-type-input"]', 'KNOWS');
-    await page.fill('[data-testid="relationship-description-input"]', 'Alice knows Bob');
+    await page.fill(
+      '[data-testid="relationship-description-input"]',
+      'Alice knows Bob',
+    );
     // Submit the relationship
     await page.click('[data-testid="save-relationship-button"]');
     // Wait for the relationship to appear
     await page.waitForSelector('[data-testid="graph-edge"]');
     // Verify the relationship was created
-    const relationshipCount = await page.locator('[data-testid="graph-edge"]').count();
+    const relationshipCount = await page
+      .locator('[data-testid="graph-edge"]')
+      .count();
     expect(relationshipCount).toBe(1);
   });
   test('should search entities', async ({ page }) => {
     // Create some test entities
-    await createTestEntity(page, 'Person', 'Alice Johnson', 'Software Engineer');
+    await createTestEntity(
+      page,
+      'Person',
+      'Alice Johnson',
+      'Software Engineer',
+    );
     await createTestEntity(page, 'Person', 'Bob Smith', 'Data Scientist');
-    await createTestEntity(page, 'Organization', 'TechCorp', 'Technology Company');
+    await createTestEntity(
+      page,
+      'Organization',
+      'TechCorp',
+      'Technology Company',
+    );
     // Use the search functionality
     await page.fill('[data-testid="search-input"]', 'Alice');
     await page.press('[data-testid="search-input"]', 'Enter');
@@ -73,7 +97,12 @@ test.describe('Graph Operations', () => {
   test('should filter entities by type', async ({ page }) => {
     // Create entities of different types
     await createTestEntity(page, 'Person', 'John Doe', 'Person entity');
-    await createTestEntity(page, 'Organization', 'ACME Corp', 'Organization entity');
+    await createTestEntity(
+      page,
+      'Organization',
+      'ACME Corp',
+      'Organization entity',
+    );
     await createTestEntity(page, 'Location', 'New York', 'Location entity');
     // Apply filter for Person entities only
     await page.click('[data-testid="filter-dropdown"]');
@@ -87,7 +116,12 @@ test.describe('Graph Operations', () => {
   });
   test('should export graph data', async ({ page }) => {
     // Create some test data
-    await createTestEntity(page, 'Person', 'Export Test', 'Test entity for export');
+    await createTestEntity(
+      page,
+      'Person',
+      'Export Test',
+      'Test entity for export',
+    );
     // Click export button
     await page.click('[data-testid="export-button"]');
     // Select JSON format

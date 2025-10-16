@@ -3,6 +3,7 @@
 > Mailbox-format patches to ship the revenue/growth & zero‑touch ops work: CLI Release workflow + README badge/snippet, Grafana datasource provisioning, Billing/Metering stubs, Product analytics beacon, Pricing docs, KPI rollups. Save and apply in order.
 
 ## How to apply
+
 ```bash
 mkdir -p patches && cd patches
 # Save files below as 0013-*.patch ... 0019-*.patch
@@ -20,7 +21,8 @@ git am 0013-ci-release-cli-and-readme-badge.patch \
 ---
 
 ## 0013-ci-release-cli-and-readme-badge.patch
-```
+
+````
 From a1a1a1a100000000000000000000000000000013 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
 Date: Wed, 1 Oct 2025 14:40:00 -0600
@@ -79,11 +81,12 @@ index 2222222..3333333 100644
 +node cli/intelgraphctl/dist/index.js install --org BrianCLong/intelgraph --chart intelgraph --version 1.0.0 && \
 +TENANT=pilot node bootstrap/seed-tenant.ts
 +```
-```
+````
 
 ---
 
 ## 0014-ops-grafana-datasource-provisioning.patch
+
 ```
 From b2b2b2b200000000000000000000000000000014 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -109,6 +112,7 @@ index 4444444..5555555 100755
 ---
 
 ## 0015-feat-billing-service-and-metrics-emit.patch
+
 ```
 From c3c3c3c300000000000000000000000000000015 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -126,6 +130,7 @@ Subject: [PATCH] feat(billing): Stripe webhook/meter endpoints + gateway usage e
 ---
 
 ## 0016-feat-product-analytics-beacon-endpoint.patch
+
 ```
 From d4d4d4d400000000000000000000000000000016 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -142,6 +147,7 @@ Subject: [PATCH] feat(analytics): Beacon endpoint for product analytics events
 ---
 
 ## 0017-docs-pricing-and-legal-templates.patch
+
 ```
 From e5e5e5e500000000000000000000000000000017 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -160,6 +166,7 @@ Subject: [PATCH] docs: pricing, SLA & DPA templates, sales kit stubs
 ---
 
 ## 0018-ops-kpi-rollup-workflow.patch
+
 ```
 From f6f6f6f600000000000000000000000000000018 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -175,6 +182,7 @@ Subject: [PATCH] ops(kpi): metrics rollup workflow scaffold
 ---
 
 ## 0019-docs-readme-landing-updates.patch
+
 ```
 From a7a7a7a700000000000000000000000000000019 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -189,7 +197,7 @@ Subject: [PATCH] docs(readme): positioning bullets and contact
 ---
 
 ## Notes
+
 - Replace Stripe keys and set `BILLING_URL` env to expose metering.
 - Grafana script assumes `prometheus.observability` and `jaeger-query.observability` service names; tweak if different.
 - KPI workflow expects a `tools/metrics/rollup.js` (stub acceptable initially).
-

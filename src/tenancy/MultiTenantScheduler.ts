@@ -114,7 +114,7 @@ export class MultiTenantScheduler extends EventEmitter {
   private fairShareState: Map<string, FairShareState> = new Map();
   private resourcePool: ResourcePool;
   private schedulingInterval: NodeJS.Timeout | null = null;
-  
+
   constructor(private config: SchedulerConfig) {
     super();
     this.resourcePool = {
@@ -123,15 +123,15 @@ export class MultiTenantScheduler extends EventEmitter {
       totalDiskGB: config.totalDiskGB || 50000,
       availableCpuCores: config.totalCpuCores || 1000,
       availableMemoryGB: config.totalMemoryGB || 4000,
-      availableDiskGB: config.totalDiskGB || 50000
+      availableDiskGB: config.totalDiskGB || 50000,
     };
-    
+
     this.startSchedulingLoop();
   }
 
   async addTenant(tenant: Tenant): Promise<void> {
     this.tenants.set(tenant.id, tenant);
-    
+
     // Initialize fair share state
     this.fairShareState.set(tenant.id, {
       tenantId: tenant.id,
@@ -139,13 +139,16 @@ export class MultiTenantScheduler extends EventEmitter {
       actualUsage: 0,
       debt: 0,
       priority: tenant.priority,
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
     });
 
     this.emit('tenant-added', tenant);
   }
 
-  async updateTenant(tenantId: string, updates: Partial<Tenant>): Promise<void> {
+  async updateTenant(
+    tenantId: string,
+    updates: Partial<Tenant>,
+  ): Promise<void> {
     const tenant = this.tenants.get(tenantId);
     if (!tenant) {
       throw new Error(`Tenant not found: ${tenantId}`);
@@ -174,7 +177,7 @@ export class MultiTenantScheduler extends EventEmitter {
         tenantId: request.tenantId,
         action: 'reject',
         reason: 'Unknown tenant',
-        priority: 0
+        priority: 0,
       };
     }
 
@@ -186,7 +189,7 @@ export class MultiTenantScheduler extends EventEmitter {
         tenantId: request.tenantId,
         action: 'reject',
         reason: quotaCheck.reason,
-        priority: 0
+        priority: 0,
       };
     }
 
@@ -198,7 +201,7 @@ export class MultiTenantScheduler extends EventEmitter {
         tenantId: request.tenantId,
         action: 'reject',
         reason: budgetCheck.reason,
-        priority: 0
+        priority: 0,
       };
     }
 
@@ -210,14 +213,15 @@ export class MultiTenantScheduler extends EventEmitter {
     this.buildQueue.push(request);
     this.sortQueue();
 
-    const queuePosition = this.buildQueue.findIndex(r => r.id === request.id) + 1;
+    const queuePosition =
+      this.buildQueue.findIndex((r) => r.id === request.id) + 1;
     const estimatedStart = this.estimateStartTime(queuePosition, request);
 
     this.emit('build-queued', {
       requestId: request.id,
       tenantId: request.tenantId,
       queuePosition,
-      estimatedStart
+      estimatedStart,
     });
 
     return {
@@ -228,7 +232,7 @@ export class MultiTenantScheduler extends EventEmitter {
       scheduledAt: new Date(),
       estimatedStart,
       queuePosition,
-      priority: priorityScore
+      priority: priorityScore,
     };
   }
 
@@ -236,20 +240,39 @@ export class MultiTenantScheduler extends EventEmitter {
     const metrics: QueueMetrics[] = [];
 
     for (const tenant of this.tenants.values()) {
-      const tenantRequests = this.buildQueue.filter(r => r.tenantId === tenant.id);
-      const waitTimes = tenantRequests.map(r => Date.now() - r.submittedAt.getTime());
-      
+      const tenantRequests = this.buildQueue.filter(
+        (r) => r.tenantId === tenant.id,
+      );
+      const waitTimes = tenantRequests.map(
+        (r) => Date.now() - r.submittedAt.getTime(),
+      );
+
       waitTimes.sort((a, b) => a - b);
 
       metrics.push({
         tenantId: tenant.id,
         queueLength: tenantRequests.length,
-        averageWaitTime: waitTimes.length > 0 ? waitTimes.reduce((sum, time) => sum + time, 0) / waitTimes.length / 1000 / 60 : 0,
-        p50WaitTime: waitTimes.length > 0 ? waitTimes[Math.floor(waitTimes.length * 0.5)] / 1000 / 60 : 0,
-        p95WaitTime: waitTimes.length > 0 ? waitTimes[Math.floor(waitTimes.length * 0.95)] / 1000 / 60 : 0,
-        p99WaitTime: waitTimes.length > 0 ? waitTimes[Math.floor(waitTimes.length * 0.99)] / 1000 / 60 : 0,
+        averageWaitTime:
+          waitTimes.length > 0
+            ? waitTimes.reduce((sum, time) => sum + time, 0) /
+              waitTimes.length /
+              1000 /
+              60
+            : 0,
+        p50WaitTime:
+          waitTimes.length > 0
+            ? waitTimes[Math.floor(waitTimes.length * 0.5)] / 1000 / 60
+            : 0,
+        p95WaitTime:
+          waitTimes.length > 0
+            ? waitTimes[Math.floor(waitTimes.length * 0.95)] / 1000 / 60
+            : 0,
+        p99WaitTime:
+          waitTimes.length > 0
+            ? waitTimes[Math.floor(waitTimes.length * 0.99)] / 1000 / 60
+            : 0,
         throughput: this.calculateThroughput(tenant.id),
-        priority: tenant.priority
+        priority: tenant.priority,
       });
     }
 
@@ -258,13 +281,13 @@ export class MultiTenantScheduler extends EventEmitter {
 
   async getFairShareReport(): Promise<FairShareReport> {
     const states = Array.from(this.fairShareState.values());
-    
+
     return {
       timestamp: new Date(),
       totalResources: this.resourcePool,
       tenantStates: states,
       inequityScore: this.calculateInequityScore(states),
-      recommendations: this.generateFairShareRecommendations(states)
+      recommendations: this.generateFairShareRecommendations(states),
     };
   }
 
@@ -272,23 +295,29 @@ export class MultiTenantScheduler extends EventEmitter {
     this.emit('rebalance-start');
 
     const states = Array.from(this.fairShareState.values());
-    const totalPriority = states.reduce((sum, state) => sum + state.priority, 0);
+    const totalPriority = states.reduce(
+      (sum, state) => sum + state.priority,
+      0,
+    );
 
     // Recalculate allocations based on current priorities and usage
     for (const state of states) {
       const targetShare = state.priority / totalPriority;
       const usageDelta = state.actualUsage - state.allocatedShare;
-      
+
       // Update debt (simplified fair share algorithm)
-      state.debt = (state.debt * 0.9) + (usageDelta * 0.1);
-      
+      state.debt = state.debt * 0.9 + usageDelta * 0.1;
+
       // Adjust allocation to account for debt
-      state.allocatedShare = Math.max(0.01, targetShare - (state.debt * 0.5));
+      state.allocatedShare = Math.max(0.01, targetShare - state.debt * 0.5);
       state.lastUpdate = new Date();
     }
 
     // Normalize allocations to sum to 1.0
-    const totalAllocation = states.reduce((sum, state) => sum + state.allocatedShare, 0);
+    const totalAllocation = states.reduce(
+      (sum, state) => sum + state.allocatedShare,
+      0,
+    );
     for (const state of states) {
       state.allocatedShare = state.allocatedShare / totalAllocation;
     }
@@ -296,12 +325,15 @@ export class MultiTenantScheduler extends EventEmitter {
     this.emit('rebalance-complete', states);
   }
 
-  async triggerBudgetAlert(tenantId: string, spendPercentage: number): Promise<void> {
+  async triggerBudgetAlert(
+    tenantId: string,
+    spendPercentage: number,
+  ): Promise<void> {
     const tenant = this.tenants.get(tenantId);
     if (!tenant) return;
 
     const relevantThresholds = tenant.budgets.alertThresholds.filter(
-      threshold => spendPercentage >= threshold.percentage
+      (threshold) => spendPercentage >= threshold.percentage,
     );
 
     for (const threshold of relevantThresholds) {
@@ -311,7 +343,7 @@ export class MultiTenantScheduler extends EventEmitter {
     this.emit('budget-alert-sent', {
       tenantId,
       spendPercentage,
-      thresholds: relevantThresholds.length
+      thresholds: relevantThresholds.length,
     });
   }
 
@@ -325,37 +357,43 @@ export class MultiTenantScheduler extends EventEmitter {
     const sortedQueue = this.appleFairQueueing();
 
     for (const request of sortedQueue) {
-      const allocation = this.calculateResourceAllocation(request, availableResources);
-      
+      const allocation = this.calculateResourceAllocation(
+        request,
+        availableResources,
+      );
+
       if (allocation && this.canSchedule(allocation, availableResources)) {
         scheduledBuilds.push(request);
         this.allocateResources(allocation, availableResources);
-        
+
         // Update fair share usage
         const fairShare = this.fairShareState.get(request.tenantId);
         if (fairShare) {
-          const resourceUsage = allocation.cpuCores / this.resourcePool.totalCpuCores;
-          fairShare.actualUsage = (fairShare.actualUsage * 0.9) + (resourceUsage * 0.1);
+          const resourceUsage =
+            allocation.cpuCores / this.resourcePool.totalCpuCores;
+          fairShare.actualUsage =
+            fairShare.actualUsage * 0.9 + resourceUsage * 0.1;
         }
 
         this.emit('build-scheduled', {
           requestId: request.id,
           tenantId: request.tenantId,
-          allocation
+          allocation,
         });
       }
     }
 
     // Remove scheduled builds from queue
     this.buildQueue = this.buildQueue.filter(
-      request => !scheduledBuilds.some(scheduled => scheduled.id === request.id)
+      (request) =>
+        !scheduledBuilds.some((scheduled) => scheduled.id === request.id),
     );
   }
 
   private appleFairQueueing(): BuildRequest[] {
     // Implement weighted fair queuing based on tenant priorities and fair share state
     const queueByTenant = new Map<string, BuildRequest[]>();
-    
+
     // Group requests by tenant
     for (const request of this.buildQueue) {
       if (!queueByTenant.has(request.tenantId)) {
@@ -369,7 +407,7 @@ export class MultiTenantScheduler extends EventEmitter {
     for (const [tenantId, requests] of queueByTenant) {
       const fairShare = this.fairShareState.get(tenantId);
       const weight = fairShare ? fairShare.allocatedShare : 0.1;
-      
+
       // Virtual time increases inversely with weight (higher weight = slower virtual time)
       const virtualTime = Date.now() / (weight * 1000);
       tenantVirtualTimes.set(tenantId, virtualTime);
@@ -381,7 +419,7 @@ export class MultiTenantScheduler extends EventEmitter {
       // Find tenant with minimum virtual time
       let minTenant = '';
       let minTime = Infinity;
-      
+
       for (const [tenantId] of queueByTenant) {
         const virtualTime = tenantVirtualTimes.get(tenantId) || 0;
         if (virtualTime < minTime) {
@@ -398,7 +436,8 @@ export class MultiTenantScheduler extends EventEmitter {
       // Update virtual time
       const fairShare = this.fairShareState.get(minTenant);
       const weight = fairShare ? fairShare.allocatedShare : 0.1;
-      const newVirtualTime = minTime + (nextRequest.estimatedDurationMinutes / weight);
+      const newVirtualTime =
+        minTime + nextRequest.estimatedDurationMinutes / weight;
       tenantVirtualTimes.set(minTenant, newVirtualTime);
 
       // Remove tenant if queue is empty
@@ -410,13 +449,16 @@ export class MultiTenantScheduler extends EventEmitter {
     return result;
   }
 
-  private calculatePriorityScore(tenant: Tenant, request: BuildRequest): number {
+  private calculatePriorityScore(
+    tenant: Tenant,
+    request: BuildRequest,
+  ): number {
     let score = tenant.priority * 10; // Base score from tenant priority
 
     // Boost for deadlines
     if (request.deadline) {
       const timeToDeadline = request.deadline.getTime() - Date.now();
-      const urgencyBoost = Math.max(0, 50 - (timeToDeadline / 60000)); // Up to 50 points for urgent
+      const urgencyBoost = Math.max(0, 50 - timeToDeadline / 60000); // Up to 50 points for urgent
       score += urgencyBoost;
     }
 
@@ -433,44 +475,71 @@ export class MultiTenantScheduler extends EventEmitter {
     return Math.round(score);
   }
 
-  private async checkTenantQuotas(tenant: Tenant, request: BuildRequest): Promise<{ allowed: boolean; reason: string }> {
+  private async checkTenantQuotas(
+    tenant: Tenant,
+    request: BuildRequest,
+  ): Promise<{ allowed: boolean; reason: string }> {
     // Check concurrent builds
     const activeBuildCount = await this.getActiveBuildCount(tenant.id);
     if (activeBuildCount >= tenant.quotas.concurrentBuilds) {
-      return { allowed: false, reason: `Concurrent build limit reached (${tenant.quotas.concurrentBuilds})` };
+      return {
+        allowed: false,
+        reason: `Concurrent build limit reached (${tenant.quotas.concurrentBuilds})`,
+      };
     }
 
     // Check daily build limit
     const todayBuildCount = await this.getTodayBuildCount(tenant.id);
     if (todayBuildCount >= tenant.quotas.buildsPerDay) {
-      return { allowed: false, reason: `Daily build limit reached (${tenant.quotas.buildsPerDay})` };
+      return {
+        allowed: false,
+        reason: `Daily build limit reached (${tenant.quotas.buildsPerDay})`,
+      };
     }
 
     // Check resource quotas
     if (request.estimatedCpuHours > tenant.quotas.cpuCoresPerHour) {
-      return { allowed: false, reason: `CPU quota exceeded (${tenant.quotas.cpuCoresPerHour} cores/hour)` };
+      return {
+        allowed: false,
+        reason: `CPU quota exceeded (${tenant.quotas.cpuCoresPerHour} cores/hour)`,
+      };
     }
 
     if (request.estimatedMemoryGB > tenant.quotas.memoryGBPerHour) {
-      return { allowed: false, reason: `Memory quota exceeded (${tenant.quotas.memoryGBPerHour} GB/hour)` };
+      return {
+        allowed: false,
+        reason: `Memory quota exceeded (${tenant.quotas.memoryGBPerHour} GB/hour)`,
+      };
     }
 
     return { allowed: true, reason: 'Quotas OK' };
   }
 
-  private async checkBudgetLimits(tenant: Tenant, request: BuildRequest): Promise<{ allowed: boolean; reason: string }> {
+  private async checkBudgetLimits(
+    tenant: Tenant,
+    request: BuildRequest,
+  ): Promise<{ allowed: boolean; reason: string }> {
     const estimatedCost = this.estimateBuildCost(request);
-    
+
     // Check hard budget limits
     if (tenant.budgets.hardLimits) {
-      const dailyRemaining = tenant.budgets.dailyBudgetUSD - (tenant.budgets.currentSpendUSD % tenant.budgets.dailyBudgetUSD);
+      const dailyRemaining =
+        tenant.budgets.dailyBudgetUSD -
+        (tenant.budgets.currentSpendUSD % tenant.budgets.dailyBudgetUSD);
       if (estimatedCost > dailyRemaining) {
-        return { allowed: false, reason: `Daily budget limit would be exceeded ($${dailyRemaining.toFixed(2)} remaining)` };
+        return {
+          allowed: false,
+          reason: `Daily budget limit would be exceeded ($${dailyRemaining.toFixed(2)} remaining)`,
+        };
       }
 
-      const monthlyRemaining = tenant.budgets.monthlyBudgetUSD - tenant.budgets.currentSpendUSD;
+      const monthlyRemaining =
+        tenant.budgets.monthlyBudgetUSD - tenant.budgets.currentSpendUSD;
       if (estimatedCost > monthlyRemaining) {
-        return { allowed: false, reason: `Monthly budget limit would be exceeded ($${monthlyRemaining.toFixed(2)} remaining)` };
+        return {
+          allowed: false,
+          reason: `Monthly budget limit would be exceeded ($${monthlyRemaining.toFixed(2)} remaining)`,
+        };
       }
     }
 
@@ -480,7 +549,10 @@ export class MultiTenantScheduler extends EventEmitter {
   private estimateBuildCost(request: BuildRequest): number {
     // Simplified cost calculation: $0.05 per CPU-hour, $0.01 per GB-hour
     const cpuCost = request.estimatedCpuHours * 0.05;
-    const memoryCost = request.estimatedMemoryGB * (request.estimatedDurationMinutes / 60) * 0.01;
+    const memoryCost =
+      request.estimatedMemoryGB *
+      (request.estimatedDurationMinutes / 60) *
+      0.01;
     return cpuCost + memoryCost;
   }
 
@@ -495,7 +567,10 @@ export class MultiTenantScheduler extends EventEmitter {
     this.buildQueue.sort((a, b) => b.priority - a.priority);
   }
 
-  private estimateStartTime(queuePosition: number, request: BuildRequest): Date {
+  private estimateStartTime(
+    queuePosition: number,
+    request: BuildRequest,
+  ): Date {
     // Simplified estimation based on queue position and average build time
     const avgBuildTimeMinutes = 15;
     const estimatedMinutes = queuePosition * avgBuildTimeMinutes;
@@ -511,10 +586,19 @@ export class MultiTenantScheduler extends EventEmitter {
     return { ...this.resourcePool };
   }
 
-  private calculateResourceAllocation(request: BuildRequest, available: ResourcePool): ResourceAllocation | null {
-    const cpuCores = Math.min(request.estimatedCpuHours, available.availableCpuCores);
-    const memoryGB = Math.min(request.estimatedMemoryGB, available.availableMemoryGB);
-    
+  private calculateResourceAllocation(
+    request: BuildRequest,
+    available: ResourcePool,
+  ): ResourceAllocation | null {
+    const cpuCores = Math.min(
+      request.estimatedCpuHours,
+      available.availableCpuCores,
+    );
+    const memoryGB = Math.min(
+      request.estimatedMemoryGB,
+      available.availableMemoryGB,
+    );
+
     if (cpuCores < 1 || memoryGB < 1) return null;
 
     return {
@@ -524,17 +608,25 @@ export class MultiTenantScheduler extends EventEmitter {
       networkMbps: 1000, // Default 1Gbps
       region: 'us-east-1', // Default region
       nodeType: 'standard',
-      estimatedCostUSD: this.estimateBuildCost(request)
+      estimatedCostUSD: this.estimateBuildCost(request),
     };
   }
 
-  private canSchedule(allocation: ResourceAllocation, available: ResourcePool): boolean {
-    return allocation.cpuCores <= available.availableCpuCores &&
-           allocation.memoryGB <= available.availableMemoryGB &&
-           allocation.diskGB <= available.availableDiskGB;
+  private canSchedule(
+    allocation: ResourceAllocation,
+    available: ResourcePool,
+  ): boolean {
+    return (
+      allocation.cpuCores <= available.availableCpuCores &&
+      allocation.memoryGB <= available.availableMemoryGB &&
+      allocation.diskGB <= available.availableDiskGB
+    );
   }
 
-  private allocateResources(allocation: ResourceAllocation, available: ResourcePool): void {
+  private allocateResources(
+    allocation: ResourceAllocation,
+    available: ResourcePool,
+  ): void {
     available.availableCpuCores -= allocation.cpuCores;
     available.availableMemoryGB -= allocation.memoryGB;
     available.availableDiskGB -= allocation.diskGB;
@@ -542,49 +634,63 @@ export class MultiTenantScheduler extends EventEmitter {
 
   private calculateInequityScore(states: FairShareState[]): number {
     // Calculate Gini coefficient for resource distribution
-    const usages = states.map(s => s.actualUsage).sort((a, b) => a - b);
+    const usages = states.map((s) => s.actualUsage).sort((a, b) => a - b);
     const n = usages.length;
     let sum = 0;
-    
+
     for (let i = 0; i < n; i++) {
       sum += (2 * (i + 1) - n - 1) * usages[i];
     }
-    
+
     const mean = usages.reduce((sum, usage) => sum + usage, 0) / n;
     return sum / (n * n * mean);
   }
 
   private generateFairShareRecommendations(states: FairShareState[]): string[] {
     const recommendations = [];
-    const maxDebt = Math.max(...states.map(s => Math.abs(s.debt)));
-    
+    const maxDebt = Math.max(...states.map((s) => Math.abs(s.debt)));
+
     if (maxDebt > 0.2) {
-      recommendations.push('Consider rebalancing resource allocations - high debt detected');
+      recommendations.push(
+        'Consider rebalancing resource allocations - high debt detected',
+      );
     }
-    
-    const underutilized = states.filter(s => s.actualUsage < s.allocatedShare * 0.5);
+
+    const underutilized = states.filter(
+      (s) => s.actualUsage < s.allocatedShare * 0.5,
+    );
     if (underutilized.length > 0) {
-      recommendations.push(`${underutilized.length} tenant(s) significantly underutilizing resources`);
+      recommendations.push(
+        `${underutilized.length} tenant(s) significantly underutilizing resources`,
+      );
     }
-    
-    const overutilized = states.filter(s => s.actualUsage > s.allocatedShare * 1.5);
+
+    const overutilized = states.filter(
+      (s) => s.actualUsage > s.allocatedShare * 1.5,
+    );
     if (overutilized.length > 0) {
-      recommendations.push(`${overutilized.length} tenant(s) significantly overutilizing resources`);
+      recommendations.push(
+        `${overutilized.length} tenant(s) significantly overutilizing resources`,
+      );
     }
-    
+
     return recommendations;
   }
 
-  private async sendBudgetAlert(tenant: Tenant, threshold: AlertThreshold, spendPercentage: number): Promise<void> {
+  private async sendBudgetAlert(
+    tenant: Tenant,
+    threshold: AlertThreshold,
+    spendPercentage: number,
+  ): Promise<void> {
     const message = `Budget alert: ${tenant.name} has spent ${spendPercentage.toFixed(1)}% of monthly budget ($${tenant.budgets.currentSpendUSD.toFixed(2)} of $${tenant.budgets.monthlyBudgetUSD})`;
-    
+
     // Simulate sending alerts via various channels
     for (const channel of threshold.channels) {
       this.emit('alert-sent', {
         tenantId: tenant.id,
         channel,
         message,
-        escalation: threshold.escalation
+        escalation: threshold.escalation,
       });
     }
   }
@@ -605,7 +711,10 @@ export class MultiTenantScheduler extends EventEmitter {
         await this.scheduleNextBuilds();
         await this.rebalanceFairShare();
       } catch (error) {
-        this.emit('scheduling-error', error instanceof Error ? error.message : 'Unknown error');
+        this.emit(
+          'scheduling-error',
+          error instanceof Error ? error.message : 'Unknown error',
+        );
       }
     }, 10000); // Every 10 seconds
   }

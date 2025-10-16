@@ -1,10 +1,49 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Maestro ChatOps</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>#dock{position:fixed;right:16px;bottom:16px;width:420px;border:1px solid #ddd;border-radius:12px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.1)} #log{height:220px;overflow:auto;padding:8px}</style></head>
-<body>
-<div id=dock><div id=log></div><div><input id=q placeholder="ask: cost of PR#512?"/><button id=go>Go</button></div></div>
-<script>
-$(function(){ function say(t){ $('#log').append('<div>'+t+'</div>'); $('#log').scrollTop(1e6); } 
-  $('#go').on('click', function(){ var q=$('#q').val(); $.getJSON('/api/chatops',{q:q}, function(r){ say(r.answer); }); });
-});
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Maestro ChatOps</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      #dock {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        width: 420px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      }
+      #log {
+        height: 220px;
+        overflow: auto;
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dock">
+      <div id="log"></div>
+      <div>
+        <input id="q" placeholder="ask: cost of PR#512?" /><button id="go">
+          Go
+        </button>
+      </div>
+    </div>
+    <script>
+      $(function () {
+        function say(t) {
+          $('#log').append('<div>' + t + '</div>');
+          $('#log').scrollTop(1e6);
+        }
+        $('#go').on('click', function () {
+          var q = $('#q').val();
+          $.getJSON('/api/chatops', { q: q }, function (r) {
+            say(r.answer);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

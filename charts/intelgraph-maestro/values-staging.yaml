@@ -25,9 +25,9 @@ api:
   # Near-production SLO targets
   slo:
     availability: 99.5
-    latencyP95: 400  # ms
-    latencyP99: 1000  # ms
-    writeLatencyP95: 800  # ms
+    latencyP95: 400 # ms
+    latencyP99: 1000 # ms
+    writeLatencyP95: 800 # ms
 
 client:
   replicaCount: 2
@@ -95,9 +95,9 @@ neo4j:
         memory: 6Gi
 
   config:
-    dbms.memory.heap.initial_size: "3G"
-    dbms.memory.heap.max_size: "6G"
-    dbms.memory.pagecache.size: "3G"
+    dbms.memory.heap.initial_size: '3G'
+    dbms.memory.heap.max_size: '6G'
+    dbms.memory.pagecache.size: '3G'
 
 redis:
   architecture: replication
@@ -157,7 +157,7 @@ ingress:
 # Production-like observability
 prometheus:
   server:
-    retention: "15d"
+    retention: '15d'
     persistentVolume:
       size: 50Gi
     resources:
@@ -185,7 +185,7 @@ featureFlags:
     coherence: true
     multiRegion: false
     advancedPolicy: true
-    chaosEngineering: true  # Enable chaos testing in staging
+    chaosEngineering: true # Enable chaos testing in staging
 
   experimental:
     aiAssistant: true
@@ -210,11 +210,11 @@ multiTenant:
 costManagement:
   budgetAlerts:
     enabled: true
-    monthlyBudget: 5000  # USD - Lower budget for staging
+    monthlyBudget: 5000 # USD - Lower budget for staging
     alertThresholds: [70, 85, 95]
 
   resourceQuotas:
     enabled: true
-    cpu: "20000m"  # 20 cores
-    memory: "80Gi"
-    persistentVolumeClaims: "20"
+    cpu: '20000m' # 20 cores
+    memory: '80Gi'
+    persistentVolumeClaims: '20'

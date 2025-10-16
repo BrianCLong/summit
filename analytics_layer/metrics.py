@@ -1,10 +1,10 @@
 """Explainable metrics engine for the threat analytics layer."""
+
 from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass
 from statistics import mean, pstdev
-from typing import Deque, Dict
 
 from .data_models import FusedSnapshot
 
@@ -16,7 +16,7 @@ class MetricBreakdown:
     behavioral_drift: float
     event_pressure: float
 
-    def as_dict(self) -> Dict[str, float]:
+    def as_dict(self) -> dict[str, float]:
         return {
             "influence_velocity": self.influence_velocity,
             "anomaly_clustering": self.anomaly_clustering,
@@ -31,7 +31,7 @@ class ExplainableMetricsEngine:
     def __init__(self, history_window: int = 50) -> None:
         if history_window < 2:
             raise ValueError("history_window must be at least 2")
-        self._history: Deque[FusedSnapshot] = deque(maxlen=history_window)
+        self._history: deque[FusedSnapshot] = deque(maxlen=history_window)
 
     def compute(self, snapshot: FusedSnapshot) -> MetricBreakdown:
         influence_velocity = self._compute_influence_velocity(snapshot)
@@ -75,5 +75,5 @@ class ExplainableMetricsEngine:
         return max(-1.0, min(1.0, drift * stabilization + snapshot.behavior_shift * 0.1))
 
     @property
-    def history(self) -> Deque[FusedSnapshot]:
+    def history(self) -> deque[FusedSnapshot]:
         return self._history

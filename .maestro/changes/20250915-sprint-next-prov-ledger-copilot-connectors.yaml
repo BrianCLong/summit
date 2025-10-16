@@ -1,10 +1,9 @@
-
 area: multi # server, prov-ledger, apps/web, ingestion/connectors, ops
 intent: release
 release_tag: v0.1.0-rc1
 window:
   start: 2025-09-15
-  end:   2025-09-29
+  end: 2025-09-29
 objective: >
   Ship Prov-Ledger beta with verifiable export manifests, raise NL→Cypher validity to ≥95%,
   certify 5 priority connectors with golden IO tests, and stand up SLO dashboards + cost guards.
@@ -18,60 +17,67 @@ rationale:
   - Collaboration/export flows validate via manifest verifier.
 
 budgets:
-  p95_ms_graph_read: 1500   # p95 graph query < 1.5s target (3 hops, 50k nodes).
+  p95_ms_graph_read: 1500 # p95 graph query < 1.5s target (3 hops, 50k nodes).
   ingestion_10k_docs_minutes: 5
-  ci_hard_cap_usd: 25        # conform to .maestro/pipeline.yaml budgets
-  daily_infra_usd: 50        # mirrors .orchestra.env baseline
+  ci_hard_cap_usd: 25 # conform to .maestro/pipeline.yaml budgets
+  daily_infra_usd: 50 # mirrors .orchestra.env baseline
 
 work_items:
   - epic: Provenance & Claim Ledger (beta)
     repo: prov-ledger/*
     stories:
-      - "Implement export manifest (hash tree + transform chain) and external verifier CLI."
-      - "Expose /export/prov and /claims/* endpoints behind auth; add /healthz,/readyz,/metrics."
-      - "Wire disclosure bundles in apps/web to attach manifest on export."
+      - 'Implement export manifest (hash tree + transform chain) and external verifier CLI.'
+      - 'Expose /export/prov and /claims/* endpoints behind auth; add /healthz,/readyz,/metrics.'
+      - 'Wire disclosure bundles in apps/web to attach manifest on export.'
     acceptance:
-      - "Export produces verifiable manifest (hash tree, transform chain) and passes external verifier."
-      - "Disclosure exports validate via manifest verifier in UI flow."
-      - "API surface documented and probed in CI (healthz/readyz/metrics present)."
+      - 'Export produces verifiable manifest (hash tree, transform chain) and passes external verifier.'
+      - 'Disclosure exports validate via manifest verifier in UI flow.'
+      - 'API surface documented and probed in CI (healthz/readyz/metrics present).'
 
   - epic: NL→Cypher Copilot hardening (apps/web + server)
     stories:
-      - "Improve prompt→generated Cypher preview; add cost/row estimate panel and sandbox exec diff vs manual."
-      - "Add rollback/undo and regression suite of 200 prompts."
+      - 'Improve prompt→generated Cypher preview; add cost/row estimate panel and sandbox exec diff vs manual.'
+      - 'Add rollback/undo and regression suite of 200 prompts.'
     acceptance:
-      - "≥95% syntactic validity on test prompts; rollback/undo supported."
+      - '≥95% syntactic validity on test prompts; rollback/undo supported.'
 
   - epic: Connector Pack v1 (5 connectors)
-    connectors: [stix_taxii_connector, splunk_connector, sentinel_connector, csv_connector, elasticsearch_connector]
+    connectors:
+      [
+        stix_taxii_connector,
+        splunk_connector,
+        sentinel_connector,
+        csv_connector,
+        elasticsearch_connector,
+      ]
     stories:
-      - "Each ships manifest+mapping, rate-limit policy, sample dataset, golden IO tests."
-      - "Docs include Hello World and mapping examples."
+      - 'Each ships manifest+mapping, rate-limit policy, sample dataset, golden IO tests.'
+      - 'Docs include Hello World and mapping examples.'
     acceptance:
-      - "All 5 connectors meet connector acceptance incl. golden IO tests."
+      - 'All 5 connectors meet connector acceptance incl. golden IO tests.'
       - "Integration conformance tests + 'hello world' flows documented."
 
   - epic: Ops & SRE Enablement (SLOs + Cost Guard + Telemetry)
     stories:
-      - "Instrument OTEL traces + Prom metrics across web/server/prov-ledger."
-      - "Implement cost guard (query budgeter + slow-query killer) with alerting."
-      - "Publish SLO dashboards (p95 graph query, ingest E2E) and run one chaos drill."
+      - 'Instrument OTEL traces + Prom metrics across web/server/prov-ledger.'
+      - 'Implement cost guard (query budgeter + slow-query killer) with alerting.'
+      - 'Publish SLO dashboards (p95 graph query, ingest E2E) and run one chaos drill.'
     acceptance:
-      - "SLOs: p95 graph query <1.5s; ingest 10k docs in <5m; dashboards live."
-      - "Cost guard active with budgets + alerts; one chaos drill executed with report."
+      - 'SLOs: p95 graph query <1.5s; ingest 10k docs in <5m; dashboards live.'
+      - 'Cost guard active with budgets + alerts; one chaos drill executed with report.'
 
   - epic: Runbook into Prod (R2 Phishing Cluster Discovery)
     stories:
-      - "Automate steps: parse headers → SPF/DKIM → CT logs/DNS clustering → entity consolidation → disclosure pack."
-      - "Attach provenance manifests to evidence bundle."
+      - 'Automate steps: parse headers → SPF/DKIM → CT logs/DNS clustering → entity consolidation → disclosure pack.'
+      - 'Attach provenance manifests to evidence bundle.'
     acceptance:
-      - "R2 runbook executes E2E; outputs disclosure pack with manifests."
+      - 'R2 runbook executes E2E; outputs disclosure pack with manifests.'
 
   - epic: Governance & Security touchpoints
     stories:
-      - "Enforce ABAC/RBAC via OPA; log reason-for-access; step-up auth where needed."
+      - 'Enforce ABAC/RBAC via OPA; log reason-for-access; step-up auth where needed.'
     acceptance:
-      - "STRIDE controls mapped; no criticals outstanding before release."
+      - 'STRIDE controls mapped; no criticals outstanding before release.'
 
 definition_of_done:
   - Unit/contract tests for connectors & GraphQL schema; Cypher tests w/ ephemeral Neo4j.
@@ -93,9 +99,9 @@ owner_map:
   - Support: web-ux, sre, docs
 
 risks:
-  - "Cypher validity plateau <95%" : "Expand prompt set + add syntax repair stage."
-  - "Connector rate limiting blocks tests" : "Use sample datasets + local stubs."
-  - "SLO target misses" : "Scope back to 3 hops/50k nodes & cache tuning per plan."
+  - 'Cypher validity plateau <95%': 'Expand prompt set + add syntax repair stage.'
+  - 'Connector rate limiting blocks tests': 'Use sample datasets + local stubs.'
+  - 'SLO target misses': 'Scope back to 3 hops/50k nodes & cache tuning per plan.'
 
 freeze & rollout:
   - code_freeze: 2025-09-27T17:00:00-06:00

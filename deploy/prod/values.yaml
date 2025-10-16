@@ -3,7 +3,7 @@
 
 image:
   repository: ghcr.io/brianlong/intelgraph/core
-  tag: "v2.5.0"
+  tag: 'v2.5.0'
   pullPolicy: IfNotPresent
 
 replicaCount: 3
@@ -27,11 +27,11 @@ rollouts:
 
 resources:
   requests:
-    cpu: "500m"
-    memory: "1Gi"
+    cpu: '500m'
+    memory: '1Gi'
   limits:
-    cpu: "2"
-    memory: "4Gi"
+    cpu: '2'
+    memory: '4Gi'
 
 autoscaling:
   enabled: true
@@ -49,11 +49,11 @@ service:
 # Ingress with SSL termination
 ingress:
   enabled: true
-  className: "nginx"
+  className: 'nginx'
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
   hosts:
     - host: api.intelgraph.ai
       paths:
@@ -82,7 +82,7 @@ config:
   provenance:
     verificationEnabled: true
     merkleTreeDepth: 16
-    anchorRegistry: "internal"
+    anchorRegistry: 'internal'
 
 # OPA Policy configuration
 opa:
@@ -91,11 +91,11 @@ opa:
   replicaCount: 2
   resources:
     requests:
-      cpu: "100m"
-      memory: "128Mi"
+      cpu: '100m'
+      memory: '128Mi'
     limits:
-      cpu: "500m"
-      memory: "512Mi"
+      cpu: '500m'
+      memory: '512Mi'
 
 # Redis configuration
 redis:
@@ -104,11 +104,11 @@ redis:
   master:
     resources:
       requests:
-        cpu: "100m"
-        memory: "128Mi"
+        cpu: '100m'
+        memory: '128Mi'
       limits:
-        cpu: "1"
-        memory: "1Gi"
+        cpu: '1'
+        memory: '1Gi'
     persistence:
       enabled: true
       size: 8Gi
@@ -121,12 +121,12 @@ neo4j:
   readReplica:
     numberOfServers: 2
   resources:
-    cpu: "2"
-    memory: "4Gi"
+    cpu: '2'
+    memory: '4Gi'
   neo4jconf:
-    dbms.memory.heap.initial_size: "2G"
-    dbms.memory.heap.max_size: "4G"
-    dbms.memory.pagecache.size: "2G"
+    dbms.memory.heap.initial_size: '2G'
+    dbms.memory.heap.max_size: '4G'
+    dbms.memory.pagecache.size: '2G'
 
 # PostgreSQL configuration
 postgresql:
@@ -135,11 +135,11 @@ postgresql:
   primary:
     resources:
       requests:
-        cpu: "500m"
-        memory: "1Gi"
+        cpu: '500m'
+        memory: '1Gi'
       limits:
-        cpu: "2"
-        memory: "4Gi"
+        cpu: '2'
+        memory: '4Gi'
   readReplicas:
     replicaCount: 2
 
@@ -193,12 +193,12 @@ networkPolicy:
   enabled: true
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
       ports:
-      - protocol: TCP
-        port: 4000
+        - protocol: TCP
+          port: 4000
 
 # Pod disruption budget
 podDisruptionBudget:
@@ -208,24 +208,24 @@ podDisruptionBudget:
 # Node affinity for high availability
 nodeAffinity:
   preferredDuringSchedulingIgnoredDuringExecution:
-  - weight: 100
-    preference:
-      matchExpressions:
-      - key: node-type
-        operator: In
-        values:
-        - compute-optimized
+    - weight: 100
+      preference:
+        matchExpressions:
+          - key: node-type
+            operator: In
+            values:
+              - compute-optimized
 
 # Tolerations for dedicated nodes
 tolerations:
-- key: "dedicated"
-  operator: "Equal"
-  value: "intelgraph"
-  effect: "NoSchedule"
+  - key: 'dedicated'
+    operator: 'Equal'
+    value: 'intelgraph'
+    effect: 'NoSchedule'
 
 # Environment-specific overrides
 env:
-  NODE_ENV: "production"
-  LOG_LEVEL: "info"
-  METRICS_ENABLED: "true"
-  PROM_METRICS_PORT: "9090"
+  NODE_ENV: 'production'
+  LOG_LEVEL: 'info'
+  METRICS_ENABLED: 'true'
+  PROM_METRICS_PORT: '9090'

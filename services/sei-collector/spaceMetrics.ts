@@ -1,5 +1,5 @@
-import { Octokit } from "@octokit/rest";
-import { logger } from "../../server/utils/logger";
+import { Octokit } from '@octokit/rest';
+import { logger } from '../../server/utils/logger';
 
 // SPACE Framework: Satisfaction, Performance, Activity, Communication, Efficiency
 export interface SPACEMetrics {
@@ -43,17 +43,17 @@ export class SPACEMetricsCollector {
         additions: pr.additions,
         deletions: pr.deletions,
         files: pr.changed_files,
-      }
+      },
     });
 
-    if (action === "closed" && pr.merged) {
+    if (action === 'closed' && pr.merged) {
       // Track performance metrics
       await this.trackPRPerformance(pr, repository);
     }
   }
 
   async processPushEvent(ref: string, repository: any, commits: any[]) {
-    if (ref === "refs/heads/main" || ref === "refs/heads/master") {
+    if (ref === 'refs/heads/main' || ref === 'refs/heads/master') {
       for (const commit of commits) {
         const author = commit.author?.username || commit.committer?.username;
         if (author) {
@@ -64,7 +64,7 @@ export class SPACEMetricsCollector {
             metadata: {
               sha: commit.id,
               message: commit.message,
-            }
+            },
           });
         }
       }
@@ -80,23 +80,29 @@ export class SPACEMetricsCollector {
         timestamp: new Date(workflow.updated_at),
         value: workflow.conclusion === 'success' ? 1 : 0,
         metadata: {
-          duration: new Date(workflow.updated_at).getTime() - new Date(workflow.created_at).getTime(),
+          duration:
+            new Date(workflow.updated_at).getTime() -
+            new Date(workflow.created_at).getTime(),
           actor: workflow.actor?.login,
-        }
+        },
       });
     }
   }
 
-  async getSPACEMetrics(repo: string, timeframe: string): Promise<SPACEMetrics> {
+  async getSPACEMetrics(
+    repo: string,
+    timeframe: string,
+  ): Promise<SPACEMetrics> {
     const now = new Date();
     const timeframeMs = this.parseTimeframe(timeframe);
     const since = new Date(now.getTime() - timeframeMs);
 
     // Filter activity by timeframe and repo
-    const activities = Array.from(this.developerActivity.values()).flatMap(dev => 
-      dev.activities.filter(a => 
-        a.timestamp >= since && (repo === "all" || a.repo === repo)
-      )
+    const activities = Array.from(this.developerActivity.values()).flatMap(
+      (dev) =>
+        dev.activities.filter(
+          (a) => a.timestamp >= since && (repo === 'all' || a.repo === repo),
+        ),
     );
 
     const metrics: SPACEMetrics = {
@@ -107,34 +113,40 @@ export class SPACEMetricsCollector {
       efficiency: await this.calculateEfficiency(activities),
     };
 
-    logger.info("SPACE metrics calculated", { repo, timeframe, metrics });
+    logger.info('SPACE metrics calculated', { repo, timeframe, metrics });
     return metrics;
   }
 
   private async calculateSatisfaction(activities: Activity[]): Promise<number> {
     // Simplified satisfaction calculation based on PR review sentiment
-    const prEvents = activities.filter(a => a.type.startsWith('pr_'));
-    
+    const prEvents = activities.filter((a) => a.type.startsWith('pr_'));
+
     // In a real implementation, this would analyze:
     // - Review comment sentiment
     // - Time to first review
     // - Number of review iterations
     // - Developer survey responses
-    
+
     // Mock calculation: higher activity = higher satisfaction (simplified)
     const avgPRsPerWeek = prEvents.length / 52; // assuming yearly data
     return Math.min(100, Math.max(0, avgPRsPerWeek * 10));
   }
 
-  private async calculatePerformance(activities: Activity[], timeframeMs: number): Promise<SPACEMetrics['performance']> {
+  private async calculatePerformance(
+    activities: Activity[],
+    timeframeMs: number,
+  ): Promise<SPACEMetrics['performance']> {
     const weeks = timeframeMs / (1000 * 60 * 60 * 24 * 7);
-    const mergedPRs = activities.filter(a => a.type === 'pr_closed').length;
-    const commits = activities.filter(a => a.type === 'commit').length;
+    const mergedPRs = activities.filter((a) => a.type === 'pr_closed').length;
+    const commits = activities.filter((a) => a.type === 'commit').length;
 
     // Quality score based on workflow success rate
-    const workflows = this.teamMetrics.filter(m => m.type === 'workflow');
-    const successRate = workflows.length > 0 ? 
-      workflows.filter(w => w.value === 1).length / workflows.length * 100 : 100;
+    const workflows = this.teamMetrics.filter((m) => m.type === 'workflow');
+    const successRate =
+      workflows.length > 0
+        ? (workflows.filter((w) => w.value === 1).length / workflows.length) *
+          100
+        : 100;
 
     return {
       throughput: mergedPRs / weeks,
@@ -143,24 +155,28 @@ export class SPACEMetricsCollector {
     };
   }
 
-  private async calculateActivity(activities: Activity[], timeframeMs: number): Promise<SPACEMetrics['activity']> {
+  private async calculateActivity(
+    activities: Activity[],
+    timeframeMs: number,
+  ): Promise<SPACEMetrics['activity']> {
     const weeks = timeframeMs / (1000 * 60 * 60 * 24 * 7);
-    const uniqueDevs = new Set(
-      Array.from(this.developerActivity.keys())
-    ).size || 1;
+    const uniqueDevs =
+      new Set(Array.from(this.developerActivity.keys())).size || 1;
 
-    const commits = activities.filter(a => a.type === 'commit').length;
-    const prs = activities.filter(a => a.type === 'pr_opened').length;
-    const reviews = activities.filter(a => a.type === 'pr_review').length;
+    const commits = activities.filter((a) => a.type === 'commit').length;
+    const prs = activities.filter((a) => a.type === 'pr_opened').length;
+    const reviews = activities.filter((a) => a.type === 'pr_review').length;
 
     return {
-      commitsPerDev: (commits / uniqueDevs) / weeks,
+      commitsPerDev: commits / uniqueDevs / weeks,
       prActivity: prs / weeks,
       codeReviews: reviews / weeks,
     };
   }
 
-  private async calculateCommunication(activities: Activity[]): Promise<SPACEMetrics['communication']> {
+  private async calculateCommunication(
+    activities: Activity[],
+  ): Promise<SPACEMetrics['communication']> {
     // Mock communication metrics
     // In reality, would analyze:
     // - Time between PR creation and first review
@@ -168,7 +184,7 @@ export class SPACEMetricsCollector {
     // - Discussion thread lengths
     // - Response times in issues/PRs
 
-    const prEvents = activities.filter(a => a.type.startsWith('pr_'));
+    const prEvents = activities.filter((a) => a.type.startsWith('pr_'));
     const avgResponseTime = 4; // Mock: 4 hours average response time
     const collaborationScore = Math.min(100, prEvents.length * 2); // Simple proxy
 
@@ -178,7 +194,9 @@ export class SPACEMetricsCollector {
     };
   }
 
-  private async calculateEfficiency(activities: Activity[]): Promise<SPACEMetrics['efficiency']> {
+  private async calculateEfficiency(
+    activities: Activity[],
+  ): Promise<SPACEMetrics['efficiency']> {
     // Mock efficiency calculation
     // Real implementation would track:
     // - Time from first commit to merge
@@ -186,9 +204,13 @@ export class SPACEMetricsCollector {
     // - Deep work periods
     // - Meeting vs coding time ratio
 
-    const workflows = this.teamMetrics.filter(m => m.type === 'workflow');
-    const avgWorkflowTime = workflows.length > 0 ?
-      workflows.reduce((sum, w) => sum + (w.metadata?.duration || 0), 0) / workflows.length / (1000 * 60 * 60) : 2; // hours
+    const workflows = this.teamMetrics.filter((m) => m.type === 'workflow');
+    const avgWorkflowTime =
+      workflows.length > 0
+        ? workflows.reduce((sum, w) => sum + (w.metadata?.duration || 0), 0) /
+          workflows.length /
+          (1000 * 60 * 60)
+        : 2; // hours
 
     return {
       flowTime: avgWorkflowTime,
@@ -211,7 +233,7 @@ export class SPACEMetricsCollector {
         author: pr.user.login,
         additions: pr.additions,
         deletions: pr.deletions,
-      }
+      },
     });
   }
 
@@ -251,25 +273,36 @@ export class SPACEMetricsCollector {
     const unit = match[2];
 
     switch (unit) {
-      case "d": return value * 24 * 60 * 60 * 1000;
-      case "w": return value * 7 * 24 * 60 * 60 * 1000;
-      case "m": return value * 30 * 24 * 60 * 60 * 1000;
-      default: return 7 * 24 * 60 * 60 * 1000;
+      case 'd':
+        return value * 24 * 60 * 60 * 1000;
+      case 'w':
+        return value * 7 * 24 * 60 * 60 * 1000;
+      case 'm':
+        return value * 30 * 24 * 60 * 60 * 1000;
+      default:
+        return 7 * 24 * 60 * 60 * 1000;
     }
   }
 
   // Get individual developer metrics
-  getDeveloperMetrics(developer: string, timeframe: string = "30d"): DeveloperMetrics | null {
+  getDeveloperMetrics(
+    developer: string,
+    timeframe: string = '30d',
+  ): DeveloperMetrics | null {
     const activity = this.developerActivity.get(developer);
     if (!activity) return null;
 
     const timeframeMs = this.parseTimeframe(timeframe);
     const since = new Date(Date.now() - timeframeMs);
-    const recentActivities = activity.activities.filter(a => a.timestamp >= since);
+    const recentActivities = activity.activities.filter(
+      (a) => a.timestamp >= since,
+    );
 
-    const commits = recentActivities.filter(a => a.type === 'commit').length;
-    const prs = recentActivities.filter(a => a.type === 'pr_opened').length;
-    const reviews = recentActivities.filter(a => a.type === 'pr_review').length;
+    const commits = recentActivities.filter((a) => a.type === 'commit').length;
+    const prs = recentActivities.filter((a) => a.type === 'pr_opened').length;
+    const reviews = recentActivities.filter(
+      (a) => a.type === 'pr_review',
+    ).length;
 
     const weeks = timeframeMs / (1000 * 60 * 60 * 24 * 7);
 
@@ -285,7 +318,7 @@ export class SPACEMetricsCollector {
   }
 
   // Get team collaboration patterns
-  getCollaborationPattern(timeframe: string = "30d"): CollaborationPattern {
+  getCollaborationPattern(timeframe: string = '30d'): CollaborationPattern {
     const timeframeMs = this.parseTimeframe(timeframe);
     const since = new Date(Date.now() - timeframeMs);
 
@@ -294,8 +327,8 @@ export class SPACEMetricsCollector {
 
     // Simple collaboration tracking based on PR reviews
     // In reality, would track actual review interactions
-    developers.forEach(dev => {
-      developers.forEach(other => {
+    developers.forEach((dev) => {
+      developers.forEach((other) => {
         if (dev !== other) {
           const key = [dev, other].sort().join('-');
           collaborations[key] = (collaborations[key] || 0) + 1;
@@ -307,7 +340,9 @@ export class SPACEMetricsCollector {
       timeframe,
       totalDevelopers: developers.length,
       collaborationPairs: Object.keys(collaborations).length,
-      averageCollaborations: Object.values(collaborations).reduce((a, b) => a + b, 0) / developers.length,
+      averageCollaborations:
+        Object.values(collaborations).reduce((a, b) => a + b, 0) /
+        developers.length,
       topCollaborators: Object.entries(collaborations)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 5)

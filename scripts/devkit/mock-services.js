@@ -6,7 +6,14 @@ const path = require('path');
 const url = require('url');
 
 const port = parseInt(process.env.MOCK_SERVICE_PORT || '4010', 10);
-const fixtureRoot = path.resolve(__dirname, '..', '..', 'ops', 'devkit', 'fixtures');
+const fixtureRoot = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  'ops',
+  'devkit',
+  'fixtures',
+);
 const datasetPath = path.join(fixtureRoot, 'datasets.json');
 const graphPath = path.join(fixtureRoot, 'graph.json');
 
@@ -19,19 +26,25 @@ function loadJson(filePath) {
   }
 }
 
-const datasets = loadJson(datasetPath) || { datasets: [], personas: [], cases: [] };
+const datasets = loadJson(datasetPath) || {
+  datasets: [],
+  personas: [],
+  cases: [],
+};
 const graph = loadJson(graphPath) || { nodes: [], relationships: [] };
 
 function sendJson(res, status, body) {
   res.writeHead(status, {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-store'
+    'Cache-Control': 'no-store',
   });
   res.end(JSON.stringify(body));
 }
 
 function findDataset(name) {
-  return datasets.datasets?.find((entry) => entry.slug === name || entry.name === name);
+  return datasets.datasets?.find(
+    (entry) => entry.slug === name || entry.name === name,
+  );
 }
 
 const server = http.createServer((req, res) => {
@@ -46,7 +59,7 @@ const server = http.createServer((req, res) => {
       cases: datasets.cases?.length || 0,
       graphNodes: graph.nodes?.length || 0,
       graphRelationships: graph.relationships?.length || 0,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
     return;
   }
@@ -88,4 +101,3 @@ const server = http.createServer((req, res) => {
 server.listen(port, () => {
   console.log(`Mock services listening on http://localhost:${port}`);
 });
-

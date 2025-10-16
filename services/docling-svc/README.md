@@ -21,13 +21,13 @@ npm run dev
 
 Environment variables are validated via `zod`. Key options:
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `PORT` | HTTP listen port | `7100` |
-| `GRANITE_DOCLING_ENDPOINT` | Optional upstream Granite REST endpoint | unset (heuristic mode) |
-| `GRANITE_DOCLING_API_KEY` | Bearer token for upstream calls | unset |
-| `GRANITE_DOCLING_PRICE_PER_1K_CHARS` | Cost accounting rate | `0.04` |
-| `MTLS_ENABLED` | Require mTLS (requires cert/key paths) | `false` |
+| Variable                             | Description                             | Default                |
+| ------------------------------------ | --------------------------------------- | ---------------------- |
+| `PORT`                               | HTTP listen port                        | `7100`                 |
+| `GRANITE_DOCLING_ENDPOINT`           | Optional upstream Granite REST endpoint | unset (heuristic mode) |
+| `GRANITE_DOCLING_API_KEY`            | Bearer token for upstream calls         | unset                  |
+| `GRANITE_DOCLING_PRICE_PER_1K_CHARS` | Cost accounting rate                    | `0.04`                 |
+| `MTLS_ENABLED`                       | Require mTLS (requires cert/key paths)  | `false`                |
 
 ## Testing
 

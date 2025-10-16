@@ -2,7 +2,7 @@
 export const graphData = {
   nodes: [],
   edges: [],
-  defaultData: true
+  defaultData: true,
 };
 
 export default graphData;

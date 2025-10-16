@@ -1,4 +1,3 @@
-
 # Sprint Review: v0.5-guarded-rail
 
 **Status:** ✅ Completed

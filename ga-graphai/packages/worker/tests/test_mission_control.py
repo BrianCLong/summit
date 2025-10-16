@@ -1,7 +1,6 @@
 import pathlib
 import sys
 
-
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
 from main import (  # type: ignore
@@ -72,9 +71,7 @@ def test_failed_dependency_blocks_downstream():
     )
 
     tasks = [
-        MissionTask(
-            TaskSpec(task_id="t1", tool="analysis", payload={"fail": True})
-        ),
+        MissionTask(TaskSpec(task_id="t1", tool="analysis", payload={"fail": True})),
         MissionTask(
             TaskSpec(task_id="t2", tool="analysis", payload={}),
             dependencies=frozenset({"t1"}),

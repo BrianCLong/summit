@@ -3,7 +3,10 @@ export function verifyStripeSig(payload, header, secret) {
     const parts = header.split(',');
     const t = parts[0].split('=')[1];
     const v1 = parts[1].split('=')[1];
-    const sig = crypto.createHmac('sha256', secret).update(`${t}.${payload}`).digest('hex');
+    const sig = crypto
+        .createHmac('sha256', secret)
+        .update(`${t}.${payload}`)
+        .digest('hex');
     if (sig !== v1)
         throw new Error('stripe_sig_invalid');
     return { ts: Number(t), ok: true };

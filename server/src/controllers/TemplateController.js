@@ -7,7 +7,7 @@ class TemplateController {
     try {
       const { name, data, scope } = req.body;
       if (!name || !data) {
-        return res.status(400).json({ error: "Name and data are required" });
+        return res.status(400).json({ error: 'Name and data are required' });
       }
       const ownerId = req.user.id;
       const template = this.templates.createTemplate({
@@ -18,8 +18,8 @@ class TemplateController {
       });
       res.status(201).json(template);
     } catch (err) {
-      console.error("Error creating template", err);
-      res.status(500).json({ error: "Failed to create template" });
+      console.error('Error creating template', err);
+      res.status(500).json({ error: 'Failed to create template' });
     }
   }
 
@@ -30,8 +30,8 @@ class TemplateController {
       const templates = this.templates.listTemplates({ scope, userId });
       res.json({ templates });
     } catch (err) {
-      console.error("Error listing templates", err);
-      res.status(500).json({ error: "Failed to list templates" });
+      console.error('Error listing templates', err);
+      res.status(500).json({ error: 'Failed to list templates' });
     }
   }
 
@@ -39,11 +39,11 @@ class TemplateController {
     try {
       const template = this.templates.getTemplate(req.params.id);
       if (!template)
-        return res.status(404).json({ error: "Template not found" });
+        return res.status(404).json({ error: 'Template not found' });
       res.json(template);
     } catch (err) {
-      console.error("Error getting template", err);
-      res.status(500).json({ error: "Failed to get template" });
+      console.error('Error getting template', err);
+      res.status(500).json({ error: 'Failed to get template' });
     }
   }
 
@@ -51,22 +51,22 @@ class TemplateController {
     try {
       const updated = this.templates.updateTemplate(req.params.id, req.body);
       if (!updated)
-        return res.status(404).json({ error: "Template not found" });
+        return res.status(404).json({ error: 'Template not found' });
       res.json(updated);
     } catch (err) {
-      console.error("Error updating template", err);
-      res.status(500).json({ error: "Failed to update template" });
+      console.error('Error updating template', err);
+      res.status(500).json({ error: 'Failed to update template' });
     }
   }
 
   async delete(req, res) {
     try {
       const ok = this.templates.deleteTemplate(req.params.id);
-      if (!ok) return res.status(404).json({ error: "Template not found" });
+      if (!ok) return res.status(404).json({ error: 'Template not found' });
       res.json({ success: true });
     } catch (err) {
-      console.error("Error deleting template", err);
-      res.status(500).json({ error: "Failed to delete template" });
+      console.error('Error deleting template', err);
+      res.status(500).json({ error: 'Failed to delete template' });
     }
   }
 }

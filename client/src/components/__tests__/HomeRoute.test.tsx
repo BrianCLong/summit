@@ -17,7 +17,9 @@ jest.mock('../../components/AdvancedSearch', () => {
     return (
       <div data-testid="advanced-search">
         <input placeholder="Search entities, investigations, actions, or upload data..." />
-        <button onClick={() => onResultSelect({ id: 'test' })}>Search Mock</button>
+        <button onClick={() => onResultSelect({ id: 'test' })}>
+          Search Mock
+        </button>
       </div>
     );
   };
@@ -27,7 +29,9 @@ jest.mock('../../components/GraphPreview', () => {
   return function MockGraphPreview({ onNodeClick }: any) {
     return (
       <div data-testid="graph-preview">
-        <div onClick={() => onNodeClick({ id: 'node1' })}>Graph Preview Mock</div>
+        <div onClick={() => onNodeClick({ id: 'node1' })}>
+          Graph Preview Mock
+        </div>
       </div>
     );
   };
@@ -37,7 +41,9 @@ jest.mock('../../components/DataExport', () => {
   return function MockDataExport({ onExportComplete }: any) {
     return (
       <div data-testid="data-export">
-        <button onClick={() => onExportComplete({ success: true })}>Export Mock</button>
+        <button onClick={() => onExportComplete({ success: true })}>
+          Export Mock
+        </button>
       </div>
     );
   };
@@ -47,7 +53,9 @@ jest.mock('../../components/InvestigationManager', () => {
   return function MockInvestigationManager({ onInvestigationSelect }: any) {
     return (
       <div data-testid="investigation-manager">
-        <button onClick={() => onInvestigationSelect({ id: 'inv1', name: 'Test' })}>
+        <button
+          onClick={() => onInvestigationSelect({ id: 'inv1', name: 'Test' })}
+        >
           Investigation Manager Mock
         </button>
       </div>
@@ -66,7 +74,10 @@ const createMockStore = (initialState = {}) => {
   return createStore((state = initialState) => state);
 };
 
-const renderWithProviders = (component: React.ReactElement, initialState = {}) => {
+const renderWithProviders = (
+  component: React.ReactElement,
+  initialState = {},
+) => {
   const store = createMockStore({
     graph: {
       graphStats: {
@@ -163,7 +174,11 @@ describe('HomeRoute', () => {
     expect(goButton).not.toBeDisabled();
 
     // Test Enter key
-    fireEvent.keyPress(actionInput, { key: 'Enter', code: 'Enter', charCode: 13 });
+    fireEvent.keyPress(actionInput, {
+      key: 'Enter',
+      code: 'Enter',
+      charCode: 13,
+    });
     // Navigation would happen in real app, but we can't test that easily in unit test
   });
 

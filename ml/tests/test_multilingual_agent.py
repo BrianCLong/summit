@@ -32,4 +32,3 @@ def test_fallback_ner(monkeypatch):
     agent = multilingual_agent.MultilingualIntelAgent()
     entities = agent.extract_entities("IntelGraph Builds AI")
     assert "IntelGraph" in entities
-

@@ -70,7 +70,11 @@ export interface StepPlugin {
     cost_usd?: number;
     metadata?: Record<string, any>;
   }>;
-  compensate?(context: RunContext, step: WorkflowStep, execution: StepExecution): Promise<void>;
+  compensate?(
+    context: RunContext,
+    step: WorkflowStep,
+    execution: StepExecution,
+  ): Promise<void>;
 }
 
 export class MaestroEngine extends EventEmitter {
@@ -95,11 +99,15 @@ export class MaestroEngine extends EventEmitter {
     this.validateWorkflow(context.workflow);
 
     // Check policy permissions
-    const permitted = await this.policyEngine.check('workflow:execute', context.tenant_id, {
-      workflow: context.workflow.name,
-      environment: context.environment,
-      budget: context.budget,
-    });
+    const permitted = await this.policyEngine.check(
+      'workflow:execute',
+      context.tenant_id,
+      {
+        workflow: context.workflow.name,
+        environment: context.environment,
+        budget: context.budget,
+      },
+    );
 
     if (!permitted.allowed) {
       throw new Error(`Policy denied: ${permitted.reason}`);
@@ -155,7 +163,10 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
-  private async executeStepWithRetry(context: RunContext, step: WorkflowStep): Promise<void> {
+  private async executeStepWithRetry(
+    context: RunContext,
+    step: WorkflowStep,
+  ): Promise<void> {
     const plugin = this.plugins.get(step.plugin);
     if (!plugin) {
       throw new Error(`Plugin not found: ${step.plugin}`);
@@ -194,7 +205,10 @@ export class MaestroEngine extends EventEmitter {
         execution.metadata = { ...execution.metadata, ...result.metadata };
 
         await this.stateStore.updateStepExecution(execution);
-        this.emit('step:completed', { run_id: context.run_id, step_id: step.id });
+        this.emit('step:completed', {
+          run_id: context.run_id,
+          step_id: step.id,
+        });
         return;
       } catch (error) {
         // Failure
@@ -222,7 +236,9 @@ export class MaestroEngine extends EventEmitter {
 
         // Retry with backoff
         const backoffMs = step.retry?.backoff_ms ?? 1000;
-        const delay = step.retry?.exponential ? backoffMs * Math.pow(2, attempt - 1) : backoffMs;
+        const delay = step.retry?.exponential
+          ? backoffMs * Math.pow(2, attempt - 1)
+          : backoffMs;
 
         await new Promise((resolve) => setTimeout(resolve, delay));
         attempt++;
@@ -319,7 +335,10 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
-  private async areDepenciesSatisfied(runId: string, step: WorkflowStep): Promise<boolean> {
+  private async areDepenciesSatisfied(
+    runId: string,
+    step: WorkflowStep,
+  ): Promise<boolean> {
     if (!step.depends_on || step.depends_on.length === 0) {
       return true;
     }
@@ -340,8 +359,15 @@ export class MaestroEngine extends EventEmitter {
     this.emit('run:completed', { run_id: context.run_id });
   }
 
-  private async handleRunFailure(context: RunContext, error: Error): Promise<void> {
-    await this.stateStore.updateRunStatus(context.run_id, 'failed', error.message);
+  private async handleRunFailure(
+    context: RunContext,
+    error: Error,
+  ): Promise<void> {
+    await this.stateStore.updateRunStatus(
+      context.run_id,
+      'failed',
+      error.message,
+    );
     this.activeRuns.delete(context.run_id);
     this.emit('run:failed', { run_id: context.run_id, error: error.message });
   }
@@ -365,11 +391,19 @@ export interface StateStore {
   getRunDetails(runId: string): Promise<any>;
   createStepExecution(execution: StepExecution): Promise<void>;
   updateStepExecution(execution: StepExecution): Promise<void>;
-  getStepExecution(runId: string, stepId: string): Promise<StepExecution | null>;
+  getStepExecution(
+    runId: string,
+    stepId: string,
+  ): Promise<StepExecution | null>;
 }
 
 export interface ArtifactStore {
-  store(runId: string, stepId: string, name: string, data: Buffer): Promise<string>;
+  store(
+    runId: string,
+    stepId: string,
+    name: string,
+    data: Buffer,
+  ): Promise<string>;
   retrieve(runId: string, stepId: string, name: string): Promise<Buffer>;
   list(runId: string): Promise<string[]>;
 }

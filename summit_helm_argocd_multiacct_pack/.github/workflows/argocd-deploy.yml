@@ -2,8 +2,14 @@ name: Deploy via ArgoCD CLI
 on:
   workflow_dispatch:
     inputs:
-      env:      { description: "dev|staging|prod", required: true, default: "staging" }
-      revision: { description: "git revision (branch/SHA)", required: true, default: "main" }
+      env:
+        { description: 'dev|staging|prod', required: true, default: 'staging' }
+      revision:
+        {
+          description: 'git revision (branch/SHA)',
+          required: true,
+          default: 'main',
+        }
 jobs:
   deploy:
     runs-on: ubuntu-latest

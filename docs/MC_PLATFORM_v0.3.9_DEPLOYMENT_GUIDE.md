@@ -64,6 +64,7 @@ Run the comprehensive validation suite:
 ```
 
 This validates:
+
 - All quantum-ready modules compile successfully
 - Dependencies are available
 - Performance targets are achievable
@@ -157,19 +158,19 @@ kind: Namespace
 metadata:
   name: mc-platform
   labels:
-    security.compliance/level: "high"
-    observability.prometheus.io/scrape: "true"
+    security.compliance/level: 'high'
+    observability.prometheus.io/scrape: 'true'
 ```
 
 #### Resource Limits
 
-| Service | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|---------|-------------|-----------|----------------|--------------|
-| GraphQL API | 200m | 1000m | 512Mi | 1Gi |
-| OPA Server | 100m | 500m | 256Mi | 512Mi |
-| PQA Service | 100m | 500m | 256Mi | 512Mi |
-| ZKFSA Service | 200m | 1000m | 512Mi | 1Gi |
-| PoDR Service | 100m | 500m | 256Mi | 512Mi |
+| Service       | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| ------------- | ----------- | --------- | -------------- | ------------ |
+| GraphQL API   | 200m        | 1000m     | 512Mi          | 1Gi          |
+| OPA Server    | 100m        | 500m      | 256Mi          | 512Mi        |
+| PQA Service   | 100m        | 500m      | 256Mi          | 512Mi        |
+| ZKFSA Service | 200m        | 1000m     | 512Mi          | 1Gi          |
+| PoDR Service  | 100m        | 500m      | 256Mi          | 512Mi        |
 
 ## Client SDK Usage
 
@@ -187,7 +188,7 @@ import { McAdminClient } from 'mc-admin-client';
 const mc = new McAdminClient('https://api.mc-platform.com/graphql', {
   'x-actor-id': 'ops-admin-001',
   'x-actor-role': 'platform-admin',
-  'x-actor-tenant': 'ALL'
+  'x-actor-tenant': 'ALL',
 });
 ```
 
@@ -201,8 +202,8 @@ await mc.setFeatureFlags({
   flags: {
     quantumReadyMode: true,
     enhancedAuditing: true,
-    zkPrivacyMode: false
-  }
+    zkPrivacyMode: false,
+  },
 });
 ```
 
@@ -216,8 +217,8 @@ await mc.setSloThresholds({
     jwsFail: 0.001,
     budgetNoise: 0.05,
     graphqlP95: 350,
-    aaLag: 120
-  }
+    aaLag: 120,
+  },
 });
 ```
 
@@ -225,7 +226,7 @@ await mc.setSloThresholds({
 
 ```typescript
 const evidence = await mc.evidencePack({
-  version: 'v0.3.9'
+  version: 'v0.3.9',
 });
 
 console.log('Evidence artifacts:', evidence.artifacts.length);
@@ -236,7 +237,7 @@ console.log('Cryptographic signature:', evidence.signature);
 
 ```typescript
 const drResult = await mc.podrRun({
-  tenant: 'TENANT_001'
+  tenant: 'TENANT_001',
 });
 
 console.log('DR drill result:', drResult.success);
@@ -280,8 +281,8 @@ histogram_quantile(0.95, rate(podr_drill_duration_seconds_bucket[5m]))
   labels:
     severity: critical
   annotations:
-    summary: "MC Platform experiencing high error rate"
-    runbook_url: "https://docs.mc-platform.com/runbooks/high-error-rate"
+    summary: 'MC Platform experiencing high error rate'
+    runbook_url: 'https://docs.mc-platform.com/runbooks/high-error-rate'
 
 - alert: QuantumReadinessCompromised
   expr: rate(pqa_verification_failures_total[5m]) > 0.05
@@ -289,7 +290,7 @@ histogram_quantile(0.95, rate(podr_drill_duration_seconds_bucket[5m]))
   labels:
     severity: warning
   annotations:
-    summary: "Post-quantum attestation verification failures detected"
+    summary: 'Post-quantum attestation verification failures detected'
 ```
 
 ### Grafana Dashboards
@@ -301,6 +302,7 @@ kubectl apply -f observability/grafana/dashboards/v0.3.9/mc-v039-sovereign-conso
 ```
 
 Dashboard includes:
+
 - **Platform Overview**: Health, SLA compliance, resource utilization
 - **Quantum-Ready Metrics**: PQA, ZKFSA, PoDR performance
 - **API Performance**: GraphQL latency, throughput, error rates
@@ -320,12 +322,12 @@ metadata:
   namespace: mc-platform
   name: mc-platform-operator
 rules:
-- apiGroups: [""]
-  resources: ["pods", "services", "configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "list", "watch", "patch"]
+  - apiGroups: ['']
+    resources: ['pods', 'services', 'configmaps']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['apps']
+    resources: ['deployments']
+    verbs: ['get', 'list', 'watch', 'patch']
 ```
 
 #### OPA Policy Examples
@@ -368,22 +370,22 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: ingress-system
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-system
   egress:
-  - to:
-    - podSelector: {}
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 53
-    - protocol: UDP
-      port: 53
+    - to:
+        - podSelector: {}
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
 ```
 
 ### Compliance
@@ -391,6 +393,7 @@ spec:
 #### Evidence Collection
 
 Evidence is automatically collected for:
+
 - **Administrative Operations**: All GraphQL mutations
 - **Policy Decisions**: OPA authorization results
 - **Quantum Operations**: PQA signatures, ZKFSA audits
@@ -433,6 +436,7 @@ Evidence is automatically collected for:
 **Symptom**: GraphQL mutations return "policy_denied" errors
 
 **Resolution**:
+
 ```bash
 # Check OPA logs
 kubectl logs -n mc-platform deployment/opa-server
@@ -449,6 +453,7 @@ kubectl exec -n mc-platform deployment/opa-server -- opa eval -d /policies "data
 **Symptom**: PQA/ZKFSA/PoDR endpoints returning errors
 
 **Resolution**:
+
 ```bash
 # Check service logs
 kubectl logs -n mc-platform deployment/pqa-service
@@ -466,6 +471,7 @@ python3 -m py_compile ./ops/podr/tracer.py
 **Symptom**: Services cannot communicate with each other
 
 **Resolution**:
+
 ```bash
 # Check network policies
 kubectl get networkpolicy -n mc-platform
@@ -482,11 +488,13 @@ kubectl exec -n mc-platform deployment/mc-graphql-api -- nslookup opa-server
 #### High Latency
 
 1. **Check resource utilization**:
+
    ```bash
    kubectl top pods -n mc-platform
    ```
 
 2. **Analyze GraphQL query complexity**:
+
    ```bash
    kubectl logs -n mc-platform deployment/mc-graphql-api | grep "query_complexity"
    ```
@@ -499,6 +507,7 @@ kubectl exec -n mc-platform deployment/mc-graphql-api -- nslookup opa-server
 #### Memory Issues
 
 1. **Increase resource limits**:
+
    ```bash
    kubectl patch deployment mc-graphql-api -n mc-platform -p '{"spec":{"template":{"spec":{"containers":[{"name":"graphql","resources":{"limits":{"memory":"2Gi"}}}]}}}}'
    ```
@@ -537,11 +546,13 @@ kubectl get configmap opa-policies -n mc-platform -o yaml > opa-policies-backup.
 #### Complete Platform Recovery
 
 1. **Restore Kubernetes resources**:
+
    ```bash
    kubectl apply -f mc-platform-backup.yaml
    ```
 
 2. **Restore evidence archive**:
+
    ```bash
    kubectl cp ./evidence-backup.tar.gz mc-platform/mc-graphql-api-pod:/tmp/
    kubectl exec -n mc-platform deployment/mc-graphql-api -- tar xzf /tmp/evidence-backup.tar.gz -C /
@@ -614,6 +625,7 @@ kubectl get configmap opa-policies -n mc-platform -o yaml > opa-policies-backup.
 ### Emergency Contacts
 
 For production issues:
+
 1. **Platform Team**: platform-team@company.com
 2. **Security Team**: security-team@company.com
 3. **On-Call**: PagerDuty service `mc-platform-prod`

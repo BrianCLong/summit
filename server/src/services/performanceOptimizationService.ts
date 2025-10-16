@@ -117,7 +117,10 @@ export class PerformanceOptimizationService extends EventEmitter {
       this.cacheStrategies.set(strategy.id, strategy);
     });
 
-    console.log('[PERFORMANCE] Initialized cache strategies:', strategies.length);
+    console.log(
+      '[PERFORMANCE] Initialized cache strategies:',
+      strategies.length,
+    );
   }
 
   private initializeConnectionPools(): void {
@@ -170,7 +173,9 @@ export class PerformanceOptimizationService extends EventEmitter {
       timestamp: new Date(),
       endpoint,
       responseTime,
-      memoryUsage: (process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) * 100,
+      memoryUsage:
+        (process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) *
+        100,
       cpuUsage: process.cpuUsage().user / 1000000, // Convert to seconds
       cacheHitRate: this.calculateCacheHitRate(),
       concurrentUsers: this.getCurrentConcurrentUsers(),
@@ -225,11 +230,15 @@ export class PerformanceOptimizationService extends EventEmitter {
     if (recentMetrics.length === 0) return;
 
     const avgResponseTime =
-      recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) / recentMetrics.length;
+      recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
+      recentMetrics.length;
     const errorRate =
-      (recentMetrics.filter((m) => m.status === 'error').length / recentMetrics.length) * 100;
+      (recentMetrics.filter((m) => m.status === 'error').length /
+        recentMetrics.length) *
+      100;
     const avgMemoryUsage =
-      recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) / recentMetrics.length;
+      recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) /
+      recentMetrics.length;
 
     const analysis = {
       avgResponseTime,
@@ -300,7 +309,10 @@ export class PerformanceOptimizationService extends EventEmitter {
     // Basic query optimization rules
     if (queryType === 'cypher') {
       // Add LIMIT clauses where missing
-      if (!query.toLowerCase().includes('limit') && query.toLowerCase().includes('return')) {
+      if (
+        !query.toLowerCase().includes('limit') &&
+        query.toLowerCase().includes('return')
+      ) {
         optimizedQuery = query + ' LIMIT 1000';
         indexRecommendations.push('Consider adding explicit LIMIT clause');
       }
@@ -309,7 +321,9 @@ export class PerformanceOptimizationService extends EventEmitter {
       const whereMatches = query.match(/WHERE\s+(\w+)\.(\w+)/gi);
       if (whereMatches) {
         whereMatches.forEach((match) => {
-          indexRecommendations.push(`Consider index on ${match.replace('WHERE ', '')}`);
+          indexRecommendations.push(
+            `Consider index on ${match.replace('WHERE ', '')}`,
+          );
         });
       }
     } else if (queryType === 'sql') {
@@ -346,14 +360,16 @@ export class PerformanceOptimizationService extends EventEmitter {
       .filter((metric) => Date.now() - metric.timestamp.getTime() < 3600000) // Last hour
       .slice(-100);
 
-    const cacheStats = Array.from(this.cacheStrategies.values()).map((strategy) => ({
-      name: strategy.name,
-      pattern: strategy.pattern,
-      ttl: strategy.ttl,
-      priority: strategy.priority,
-      compressionEnabled: strategy.compressionEnabled,
-      prefetchEnabled: strategy.prefetchEnabled,
-    }));
+    const cacheStats = Array.from(this.cacheStrategies.values()).map(
+      (strategy) => ({
+        name: strategy.name,
+        pattern: strategy.pattern,
+        ttl: strategy.ttl,
+        priority: strategy.priority,
+        compressionEnabled: strategy.compressionEnabled,
+        prefetchEnabled: strategy.prefetchEnabled,
+      }),
+    );
 
     const connectionPoolStats = Array.from(this.connectionPools.values());
 
@@ -367,11 +383,13 @@ export class PerformanceOptimizationService extends EventEmitter {
         totalRequests: recentMetrics.length,
         avgResponseTime:
           recentMetrics.length > 0
-            ? recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) / recentMetrics.length
+            ? recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
+              recentMetrics.length
             : 0,
         errorRate:
           recentMetrics.length > 0
-            ? (recentMetrics.filter((m) => m.status === 'error').length / recentMetrics.length) *
+            ? (recentMetrics.filter((m) => m.status === 'error').length /
+                recentMetrics.length) *
               100
             : 0,
         cacheHitRate: this.calculateCacheHitRate(),
@@ -415,9 +433,9 @@ export class PerformanceOptimizationService extends EventEmitter {
     console.log('[PERFORMANCE] Implementing data compression...');
 
     // Enable compression for high-priority cache strategies
-    const highPriorityStrategies = Array.from(this.cacheStrategies.values()).filter(
-      (s) => s.priority === 'high' && s.compressionEnabled,
-    );
+    const highPriorityStrategies = Array.from(
+      this.cacheStrategies.values(),
+    ).filter((s) => s.priority === 'high' && s.compressionEnabled);
 
     for (const strategy of highPriorityStrategies) {
       try {
@@ -435,7 +453,10 @@ export class PerformanceOptimizationService extends EventEmitter {
           }
         }
 
-        this.emit('data-compressed', { strategy: strategy.id, itemsCompressed: compressed });
+        this.emit('data-compressed', {
+          strategy: strategy.id,
+          itemsCompressed: compressed,
+        });
       } catch (error) {
         console.error('[PERFORMANCE] Data compression error:', error);
       }

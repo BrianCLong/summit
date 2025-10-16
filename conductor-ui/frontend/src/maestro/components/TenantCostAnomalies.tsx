@@ -6,11 +6,16 @@ export default function TenantCostAnomalies({ tenant }: { tenant: string }) {
   const [z, setZ] = useState<number>(3.0);
   const [data, setData] = useState<any>(null);
   useEffect(() => {
-    getTenantCostAnomalies(tenant, 24 * 3600 * 1000, 60 * 60 * 1000, z).then(setData);
+    getTenantCostAnomalies(tenant, 24 * 3600 * 1000, 60 * 60 * 1000, z).then(
+      setData,
+    );
   }, [tenant, z]);
   const anomalies = data?.anomalies || [];
   return (
-    <section className="space-y-3 rounded-2xl border p-4" aria-label="Cost anomalies">
+    <section
+      className="space-y-3 rounded-2xl border p-4"
+      aria-label="Cost anomalies"
+    >
       <div className="flex items-center gap-3">
         <h2 className="font-medium">Anomalies</h2>
         <label className="flex items-center gap-2 text-sm">

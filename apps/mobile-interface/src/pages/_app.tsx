@@ -50,7 +50,11 @@ function MyApp({ Component, pageProps }: AppProps) {
         <div className="text-center">
           <div className="mb-8">
             <div className="w-16 h-16 mx-auto bg-primary-600 rounded-xl flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-8 h-8 text-white"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" />
               </svg>
             </div>

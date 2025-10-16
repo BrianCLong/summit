@@ -54,7 +54,11 @@ export class RelationshipDetector {
       const author = post.author.toLowerCase();
       const timestamp = post.timestamp;
 
-      const mentions = post.mentions ?? [...post.text.matchAll(mentionRegex)].map((match) => match[1].toLowerCase());
+      const mentions =
+        post.mentions ??
+        [...post.text.matchAll(mentionRegex)].map((match) =>
+          match[1].toLowerCase(),
+        );
       for (const mention of mentions) {
         if (mention === author) {
           continue;
@@ -101,10 +105,13 @@ export class RelationshipDetector {
       if (existing) {
         existing.weight += rel.weight;
         existing.metadata = {
-          occurrences: (existing.metadata?.occurrences as number | undefined ?? 1) + 1,
+          occurrences:
+            ((existing.metadata?.occurrences as number | undefined) ?? 1) + 1,
           sources: [
-            ...(existing.metadata?.sources as string[] | undefined ?? []),
-            rel.metadata?.postId ? `post:${rel.metadata.postId}` : rel.metadata?.source,
+            ...((existing.metadata?.sources as string[] | undefined) ?? []),
+            rel.metadata?.postId
+              ? `post:${rel.metadata.postId}`
+              : rel.metadata?.source,
           ].filter(Boolean),
         };
         merged.set(key, existing);

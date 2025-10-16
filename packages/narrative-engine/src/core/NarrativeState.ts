@@ -46,10 +46,10 @@ export class NarrativeState {
         config.type === 'ally'
           ? 'ally'
           : config.type === 'rival'
-          ? 'rival'
-          : config.type === 'family'
-          ? 'family'
-          : 'neutral',
+            ? 'rival'
+            : config.type === 'family'
+              ? 'family'
+              : 'neutral',
       intensity: config.intensity,
       trust: config.trust,
     });

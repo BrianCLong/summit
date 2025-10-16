@@ -548,7 +548,10 @@ describe('GraphQL API Integration Tests', () => {
       const requests = Array(10)
         .fill(null)
         .map(() =>
-          request(app).post('/graphql').set('Authorization', `Bearer ${authToken}`).send({ query }),
+          request(app)
+            .post('/graphql')
+            .set('Authorization', `Bearer ${authToken}`)
+            .send({ query }),
         );
 
       const startTime = Date.now();

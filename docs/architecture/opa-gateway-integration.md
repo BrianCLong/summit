@@ -1,4 +1,3 @@
-
 # OPA Gateway Integration Architecture
 
 This document outlines the integration pattern for enforcing OPA policies within the Apollo GraphQL Gateway.

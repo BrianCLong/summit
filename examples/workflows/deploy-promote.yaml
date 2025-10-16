@@ -12,4 +12,7 @@ spec:
     - id: notify
       uses: tasks/notify.slack@0.1.0
       needs: [gate]
-      with: { text: 'Promoting ${params.service} from ${params.from} to ${params.to}' }
+      with:
+        {
+          text: 'Promoting ${params.service} from ${params.from} to ${params.to}',
+        }

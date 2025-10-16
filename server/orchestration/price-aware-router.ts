@@ -1,13 +1,12 @@
-
 // server/orchestration/price-aware-router.ts
 import { fetchPriceSignals } from './price-signal-ingestor';
 
 // Mock resource types
-type Resource = { id: string; type: 'compute' | 'llm'; costPerUnit: number; };
+type Resource = { id: string; type: 'compute' | 'llm'; costPerUnit: number };
 
 // Mock available resources
 const mockResources: Resource[] = [
-  { id: 'compute-us-east', type: 'compute', costPerUnit: 0.10 },
+  { id: 'compute-us-east', type: 'compute', costPerUnit: 0.1 },
   { id: 'compute-eu-west', type: 'compute', costPerUnit: 0.12 },
   { id: 'llm-provider-a', type: 'llm', costPerUnit: 0.000015 },
   { id: 'llm-provider-b', type: 'llm', costPerUnit: 0.000018 },
@@ -18,9 +17,11 @@ const mockResources: Resource[] = [
  * @param resourceType The type of resource to select.
  * @returns The cheapest resource.
  */
-export async function selectCheapestResource(resourceType: 'compute' | 'llm'): Promise<Resource | null> {
+export async function selectCheapestResource(
+  resourceType: 'compute' | 'llm',
+): Promise<Resource | null> {
   const prices = await fetchPriceSignals();
-  
+
   let cheapestResource: Resource | null = null;
   let minEffectiveCost = Infinity;
 
@@ -40,7 +41,11 @@ export async function selectCheapestResource(resourceType: 'compute' | 'llm'): P
     }
   }
 
-  console.log(`Selected cheapest ${resourceType} resource:`, cheapestResource?.id, `(Effective Cost: ${minEffectiveCost.toFixed(6)})`);
+  console.log(
+    `Selected cheapest ${resourceType} resource:`,
+    cheapestResource?.id,
+    `(Effective Cost: ${minEffectiveCost.toFixed(6)})`,
+  );
   return cheapestResource;
 }
 

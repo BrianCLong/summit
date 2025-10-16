@@ -7,6 +7,7 @@ This runbook provides operational procedures for managing the IntelGraph Autonom
 ## System Components
 
 ### Core Services
+
 - **Orchestration Service**: Main orchestration engine
 - **Premium Model Router**: Thompson sampling-based model selection
 - **Compliance Gate**: Policy enforcement and validation
@@ -15,6 +16,7 @@ This runbook provides operational procedures for managing the IntelGraph Autonom
 - **Audit Logger**: Comprehensive compliance logging
 
 ### Dependencies
+
 - **Redis**: Session storage, rate limiting, pub/sub
 - **Neo4j**: Graph database for knowledge storage
 - **PostgreSQL**: User management, audit logs, job scheduling
@@ -26,6 +28,7 @@ This runbook provides operational procedures for managing the IntelGraph Autonom
 ### Key Metrics to Monitor
 
 #### System Health Metrics
+
 ```prometheus
 # Orchestration success rate
 maestro_orchestration_success_rate{tenant_id="*"}
@@ -44,6 +47,7 @@ maestro_rate_limit_rejections{tenant_id="*"}
 ```
 
 #### Business Metrics
+
 ```prometheus
 # Cost optimization effectiveness
 maestro_cost_savings_percentage{optimization_type="*"}
@@ -60,55 +64,60 @@ maestro_user_satisfaction_score{purpose="*"}
 #### Critical Alerts
 
 **Orchestration Failure Rate High**
+
 ```yaml
 alert: MaestroOrchestrationFailureRateHigh
 expr: rate(maestro_orchestration_error[5m]) > 0.1
 for: 2m
 severity: critical
-description: "Maestro orchestration failure rate is above 10% for 2 minutes"
-runbook: "https://docs.intelgraph.ai/runbooks/orchestration-failures"
+description: 'Maestro orchestration failure rate is above 10% for 2 minutes'
+runbook: 'https://docs.intelgraph.ai/runbooks/orchestration-failures'
 ```
 
 **Premium Router Unavailable**
+
 ```yaml
 alert: MaestroPremiumRouterDown
 expr: up{job="maestro-premium-router"} == 0
 for: 1m
 severity: critical
-description: "Premium model router is unavailable"
-runbook: "https://docs.intelgraph.ai/runbooks/premium-router-down"
+description: 'Premium model router is unavailable'
+runbook: 'https://docs.intelgraph.ai/runbooks/premium-router-down'
 ```
 
 **Compliance Gate Failures**
+
 ```yaml
 alert: MaestroComplianceGateFailures
 expr: rate(maestro_compliance_validation_failures[5m]) > 0.05
 for: 3m
 severity: critical
-description: "Compliance gate validation failures above 5% for 3 minutes"
-runbook: "https://docs.intelgraph.ai/runbooks/compliance-failures"
+description: 'Compliance gate validation failures above 5% for 3 minutes'
+runbook: 'https://docs.intelgraph.ai/runbooks/compliance-failures'
 ```
 
 #### Warning Alerts
 
 **High Orchestration Latency**
+
 ```yaml
 alert: MaestroHighLatency
 expr: histogram_quantile(0.95, maestro_orchestration_latency_bucket) > 30000
 for: 5m
 severity: warning
-description: "95th percentile orchestration latency above 30 seconds"
-runbook: "https://docs.intelgraph.ai/runbooks/performance-degradation"
+description: '95th percentile orchestration latency above 30 seconds'
+runbook: 'https://docs.intelgraph.ai/runbooks/performance-degradation'
 ```
 
 **Budget Overrun Risk**
+
 ```yaml
 alert: MaestroBudgetOverrunRisk
 expr: maestro_daily_cost_burn_rate > maestro_daily_budget_limit * 0.8
 for: 10m
 severity: warning
-description: "Daily cost burn rate approaching budget limit"
-runbook: "https://docs.intelgraph.ai/runbooks/budget-management"
+description: 'Daily cost burn rate approaching budget limit'
+runbook: 'https://docs.intelgraph.ai/runbooks/budget-management'
 ```
 
 ## Operational Procedures
@@ -116,6 +125,7 @@ runbook: "https://docs.intelgraph.ai/runbooks/budget-management"
 ### Daily Operations
 
 #### Morning Health Check
+
 ```bash
 #!/bin/bash
 # Daily health check script
@@ -147,6 +157,7 @@ echo "=== Health Check Complete ==="
 ```
 
 #### Capacity Planning Check
+
 ```bash
 #!/bin/bash
 # Weekly capacity planning review
@@ -173,6 +184,7 @@ echo "=== Capacity Planning Review Complete ==="
 #### High Orchestration Failure Rate
 
 **Symptoms:**
+
 - Orchestration success rate drops below 90%
 - User complaints about failed requests
 - Error rate alerts firing
@@ -180,26 +192,29 @@ echo "=== Capacity Planning Review Complete ==="
 **Investigation Steps:**
 
 1. **Check System Components**
+
    ```bash
    # Check all service health
    kubectl get pods -n intelgraph-maestro
    kubectl logs -n intelgraph-maestro deployment/maestro-orchestrator --tail=100
-   
+
    # Check dependencies
    kubectl get pods -n intelgraph-core | grep -E "(redis|neo4j|postgres)"
    ```
 
 2. **Examine Recent Orchestrations**
+
    ```bash
    # Get recent failed orchestrations
    curl -s "http://localhost:4001/v1/orchestrations?status=failed&limit=10" | jq '.data[] | {id: .orchestrationId, error: .error, timestamp: .createdAt}'
    ```
 
 3. **Check Resource Utilization**
+
    ```bash
    # Check CPU and memory usage
    kubectl top pods -n intelgraph-maestro
-   
+
    # Check Redis memory usage
    kubectl exec -n intelgraph-core redis-0 -- redis-cli info memory | grep used_memory_human
    ```
@@ -207,12 +222,14 @@ echo "=== Capacity Planning Review Complete ==="
 **Mitigation Steps:**
 
 1. **Scale Up Services** (if resource constrained)
+
    ```bash
    kubectl scale deployment maestro-orchestrator --replicas=5 -n intelgraph-maestro
    kubectl scale deployment maestro-premium-router --replicas=3 -n intelgraph-maestro
    ```
 
 2. **Enable Circuit Breaker** (if external dependencies failing)
+
    ```bash
    # Update configuration to enable circuit breaker
    kubectl patch configmap maestro-config -n intelgraph-maestro --patch '{"data":{"CIRCUIT_BREAKER_ENABLED":"true"}}'
@@ -229,6 +246,7 @@ echo "=== Capacity Planning Review Complete ==="
 #### Premium Router Unavailability
 
 **Symptoms:**
+
 - All orchestrations falling back to basic models
 - Premium router health check failures
 - High cost optimization alerts
@@ -236,12 +254,14 @@ echo "=== Capacity Planning Review Complete ==="
 **Investigation Steps:**
 
 1. **Check Router Service Status**
+
    ```bash
    kubectl get pods -n intelgraph-maestro -l app=maestro-premium-router
    kubectl logs -n intelgraph-maestro deployment/maestro-premium-router --tail=50
    ```
 
 2. **Verify Model Availability**
+
    ```bash
    # Test external model APIs
    curl -H "Authorization: Bearer ${OPENAI_API_KEY}" "https://api.openai.com/v1/models" | jq '.data[0].id'
@@ -257,6 +277,7 @@ echo "=== Capacity Planning Review Complete ==="
 **Mitigation Steps:**
 
 1. **Restart Router Service**
+
    ```bash
    kubectl rollout restart deployment/maestro-premium-router -n intelgraph-maestro
    ```
@@ -269,6 +290,7 @@ echo "=== Capacity Planning Review Complete ==="
 #### Compliance Violations
 
 **Symptoms:**
+
 - Compliance gate rejection rate increases
 - Audit alerts firing
 - Regulatory compliance dashboard shows violations
@@ -276,11 +298,13 @@ echo "=== Capacity Planning Review Complete ==="
 **Investigation Steps:**
 
 1. **Review Recent Violations**
+
    ```bash
    curl -s "http://localhost:4001/v1/audit/logs?action=compliance_violation&limit=20" | jq '.data[] | {timestamp: .timestamp, policy: .details.policy, resource: .resource}'
    ```
 
 2. **Check Policy Configuration**
+
    ```bash
    kubectl get configmap maestro-compliance-policies -n intelgraph-maestro -o yaml
    ```
@@ -294,6 +318,7 @@ echo "=== Capacity Planning Review Complete ==="
 **Mitigation Steps:**
 
 1. **Update Policy Configuration**
+
    ```bash
    # Update compliance policies if needed
    kubectl apply -f ./config/compliance/updated-policies.yaml
@@ -310,6 +335,7 @@ echo "=== Capacity Planning Review Complete ==="
 #### Weekly Maintenance
 
 **Performance Optimization**
+
 ```bash
 #!/bin/bash
 # Weekly performance optimization
@@ -338,6 +364,7 @@ echo "=== Weekly Maintenance Complete ==="
 #### Monthly Maintenance
 
 **Model Performance Review**
+
 ```bash
 #!/bin/bash
 # Monthly model performance analysis
@@ -366,29 +393,32 @@ echo "=== Monthly Review Complete ==="
 **If complete system failure occurs:**
 
 1. **Activate Emergency Response Team**
+
    ```bash
    # Page on-call engineers
    pagerduty trigger --service-key=MAESTRO_SERVICE_KEY --incident-key=maestro-system-down --description="Maestro system-wide failure"
    ```
 
 2. **Implement Emergency Failover**
+
    ```bash
    # Switch to disaster recovery cluster
    kubectl config use-context dr-cluster
    kubectl apply -f ./deploy/emergency/
-   
+
    # Update DNS to point to DR cluster
    aws route53 change-resource-record-sets --hosted-zone-id Z123456789 --change-batch file://dns-failover.json
    ```
 
 3. **Communication Plan**
+
    ```bash
    # Send status page update
    curl -X POST https://api.statuspage.io/v1/pages/PAGE_ID/incidents \
      -H "Authorization: OAuth TOKEN" \
      -d "incident[name]=System Maintenance" \
      -d "incident[status]=investigating"
-   
+
    # Notify customers via email
    python scripts/send_maintenance_notification.py
    ```
@@ -398,18 +428,20 @@ echo "=== Monthly Review Complete ==="
 **If data corruption or loss occurs:**
 
 1. **Stop All Services**
+
    ```bash
    kubectl scale deployment --all --replicas=0 -n intelgraph-maestro
    ```
 
 2. **Restore from Backup**
+
    ```bash
    # Restore PostgreSQL from backup
    kubectl exec -n intelgraph-core postgres-0 -- pg_restore -U maestro -d maestro /backups/maestro_$(date +%Y%m%d).sql
-   
+
    # Restore Redis state
    kubectl exec -n intelgraph-core redis-0 -- redis-cli --rdb /backups/redis_$(date +%Y%m%d).rdb
-   
+
    # Restore Neo4j graph data
    kubectl exec -n intelgraph-core neo4j-0 -- neo4j-admin load --from=/backups/neo4j_$(date +%Y%m%d).dump
    ```
@@ -424,6 +456,7 @@ echo "=== Monthly Review Complete ==="
 ### Orchestration Optimization
 
 **Configuration Parameters:**
+
 ```yaml
 # maestro-config.yaml
 orchestration:
@@ -440,21 +473,22 @@ premiumRouter:
 compliance:
   validationTimeout: 5000
   policyRefreshInterval: 3600
-  auditLogRetention: 2592000  # 30 days
+  auditLogRetention: 2592000 # 30 days
 
 rateLimiting:
-  globalRateLimit: 1000  # per hour
-  tenantRateLimit: 100   # per hour
+  globalRateLimit: 1000 # per hour
+  tenantRateLimit: 100 # per hour
   burstAllowance: 10
 ```
 
 **Database Optimization:**
+
 ```sql
 -- PostgreSQL performance tuning
 ALTER TABLE orchestration_logs SET (autovacuum_vacuum_scale_factor = 0.1);
-CREATE INDEX CONCURRENTLY idx_orchestration_logs_tenant_created 
+CREATE INDEX CONCURRENTLY idx_orchestration_logs_tenant_created
   ON orchestration_logs(tenant_id, created_at DESC);
-CREATE INDEX CONCURRENTLY idx_model_performance_updated 
+CREATE INDEX CONCURRENTLY idx_model_performance_updated
   ON model_performance(last_updated DESC);
 
 -- Redis configuration
@@ -466,6 +500,7 @@ CONFIG SET save "900 1 300 10 60 10000"
 ### Monitoring Query Optimization
 
 **Efficient Prometheus Queries:**
+
 ```prometheus
 # Use recording rules for frequently queried metrics
 groups:
@@ -484,6 +519,7 @@ groups:
 ### Access Control
 
 **Service Account Permissions:**
+
 ```yaml
 # maestro-rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -492,17 +528,18 @@ metadata:
   name: maestro-operator
   namespace: intelgraph-maestro
 rules:
-- apiGroups: [""]
-  resources: ["configmaps", "secrets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "list", "patch"]
+  - apiGroups: ['']
+    resources: ['configmaps', 'secrets']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['apps']
+    resources: ['deployments']
+    verbs: ['get', 'list', 'patch']
 ```
 
 ### Audit Logging
 
 **Required Audit Events:**
+
 - All orchestration requests and responses
 - Premium model routing decisions
 - Compliance policy evaluations
@@ -513,6 +550,7 @@ rules:
 ### Data Protection
 
 **Encryption Requirements:**
+
 - All API communications use TLS 1.3
 - Database connections encrypted with SSL
 - Sensitive configuration stored in sealed secrets
@@ -523,6 +561,7 @@ rules:
 ### Backup Schedule
 
 **Daily Backups:**
+
 ```bash
 #!/bin/bash
 # Daily backup script
@@ -546,6 +585,7 @@ aws s3 cp /backups/ s3://intelgraph-backups/maestro/ --recursive --include "*${D
 ### Recovery Testing
 
 **Monthly Recovery Test:**
+
 ```bash
 #!/bin/bash
 # Monthly disaster recovery test
@@ -572,14 +612,17 @@ echo "=== Recovery Test Complete ==="
 ### Escalation Matrix
 
 **Level 1: On-Call Engineer**
+
 - Response Time: 15 minutes
 - Responsible for initial triage and basic troubleshooting
 
-**Level 2: Senior Platform Engineer** 
+**Level 2: Senior Platform Engineer**
+
 - Response Time: 30 minutes
 - Complex system issues and architecture decisions
 
 **Level 3: Principal Architect**
+
 - Response Time: 1 hour
 - System design issues and major incidents
 

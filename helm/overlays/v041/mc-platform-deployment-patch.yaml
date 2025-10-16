@@ -6,16 +6,16 @@ spec:
   template:
     metadata:
       annotations:
-        mc-platform.io/sovereign-safeguards: "enabled"
-        mc-platform.io/version: "v0.4.1"
-        config.kubernetes.io/depends-on: "mc-platform-v041/sovereign-safeguards-service,mc-platform-v041/verification-service"
+        mc-platform.io/sovereign-safeguards: 'enabled'
+        mc-platform.io/version: 'v0.4.1'
+        config.kubernetes.io/depends-on: 'mc-platform-v041/sovereign-safeguards-service,mc-platform-v041/verification-service'
     spec:
       containers:
         - name: mc-platform
           env:
             # v0.4.1 Sovereign Safeguards Configuration
             - name: MC_PLATFORM_VERSION
-              value: "v0.4.1"
+              value: 'v0.4.1'
             - name: SOVEREIGN_SAFEGUARDS_ENABLED
               valueFrom:
                 configMapKeyRef:
@@ -63,14 +63,14 @@ spec:
                   key: SNAPSHOT_FREQUENCY_SECONDS
             # Service endpoints
             - name: SOVEREIGN_SAFEGUARDS_SERVICE_URL
-              value: "http://sovereign-safeguards-service.mc-platform-v041.svc.cluster.local:8080"
+              value: 'http://sovereign-safeguards-service.mc-platform-v041.svc.cluster.local:8080'
             - name: VERIFICATION_SERVICE_URL
-              value: "http://verification-service.mc-platform-v041.svc.cluster.local:8081"
+              value: 'http://verification-service.mc-platform-v041.svc.cluster.local:8081'
             # GraphQL v0.4.1 resolvers
             - name: GRAPHQL_V041_RESOLVERS_ENABLED
-              value: "true"
+              value: 'true'
             - name: SOVEREIGN_RESOLVERS_ENABLED
-              value: "true"
+              value: 'true'
           # Additional health checks for sovereign safeguards
           livenessProbe:
             httpGet:

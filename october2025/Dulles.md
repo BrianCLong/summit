@@ -202,7 +202,7 @@ A curated collection of ready-to-deploy operational templates for GC / CLO funct
 
 ## 4) Legal Memorandum Template (Strategic Analysis)
 
-**To:** [Client/Board/CEO]  | **From:** [Counsel] | **Date:** YYYY-MM-DD | **Re:** [Question]
+**To:** [Client/Board/CEO] | **From:** [Counsel] | **Date:** YYYY-MM-DD | **Re:** [Question]
 
 ### Questions Presented
 
@@ -371,5 +371,4 @@ A curated collection of ready-to-deploy operational templates for GC / CLO funct
 
 ---
 
-*If you want any single template expanded into an editable Word/PDF/Google Doc, a fillable form, or converted into a Board-ready slide, say which one and I’ll generate it.*
-
+_If you want any single template expanded into an editable Word/PDF/Google Doc, a fillable form, or converted into a Board-ready slide, say which one and I’ll generate it._

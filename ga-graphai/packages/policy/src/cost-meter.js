@@ -26,7 +26,7 @@ export class CostMeter {
     const previous = this.snapshot(key);
     const next = {
       usd: Number((previous.usd + (delta.usd ?? 0)).toFixed(6)),
-      tokens: previous.tokens + (delta.tokens ?? 0)
+      tokens: previous.tokens + (delta.tokens ?? 0),
     };
     this.usage.set(key, next);
     return next;
@@ -43,7 +43,7 @@ export class CostMeter {
     const current = this.snapshot(key);
     const projected = {
       usd: Number((current.usd + (delta.usd ?? 0)).toFixed(6)),
-      tokens: current.tokens + (delta.tokens ?? 0)
+      tokens: current.tokens + (delta.tokens ?? 0),
     };
 
     if (caps.tokenCap > 0 && projected.tokens > caps.tokenCap) {
@@ -75,4 +75,3 @@ export class CostMeter {
     return this.record(key, delta);
   }
 }
-

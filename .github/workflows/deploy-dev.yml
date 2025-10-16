@@ -3,7 +3,7 @@ name: Deploy Dev (AWS)
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   id-token: write
@@ -53,8 +53,8 @@ jobs:
           kubectl -n intelgraph-dev create secret generic redis-uri --from-literal=uri="${REDIS_URI}" --dry-run=client -o yaml | kubectl apply -f -
         env:
           NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
-          POSTGRES_URI:  ${{ secrets.POSTGRES_URI }}
-          REDIS_URI:     ${{ secrets.REDIS_URI }}
+          POSTGRES_URI: ${{ secrets.POSTGRES_URI }}
+          REDIS_URI: ${{ secrets.REDIS_URI }}
       - name: Helm upgrade
         run: |
           helm upgrade --install intelgraph ./helm/intelgraph \

@@ -3,7 +3,12 @@
  */
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FiAlertTriangle, FiCheckCircle, FiActivity, FiBarChart2 } from 'react-icons/fi';
+import {
+  FiAlertTriangle,
+  FiCheckCircle,
+  FiActivity,
+  FiBarChart2,
+} from 'react-icons/fi';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -22,7 +27,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 // Styled components
@@ -36,19 +41,21 @@ const DashboardContainer = styled.div`
 const Card = styled.div`
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
 `;
 
 const StatCard = styled(Card)`
   text-align: center;
-  background: ${props => props.color || '#3498db'};
+  background: ${(props) => props.color || '#3498db'};
   color: white;
 `;
 
@@ -67,7 +74,7 @@ const ChartContainer = styled.div`
   grid-column: 1 / -1;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
 `;
 
@@ -77,11 +84,11 @@ const Dashboard = () => {
     total_scenarios: 0,
     active_exercises: 0,
     misinfo_detected: 0,
-    accuracy_rate: 0.0
+    accuracy_rate: 0.0,
   });
-  
+
   const [chartData, setChartData] = useState(null);
-  
+
   useEffect(() => {
     // Simulate loading data
     const loadData = async () => {
@@ -90,9 +97,9 @@ const Dashboard = () => {
         total_scenarios: 24,
         active_exercises: 3,
         misinfo_detected: 142,
-        accuracy_rate: 0.87
+        accuracy_rate: 0.87,
       });
-      
+
       // Set up chart data
       setChartData({
         labels: ['Text', 'Image', 'Audio', 'Video', 'Meme', 'Deepfake'],
@@ -110,14 +117,14 @@ const Dashboard = () => {
             backgroundColor: 'rgba(255, 99, 132, 0.6)',
             borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1,
-          }
+          },
         ],
       });
     };
-    
+
     loadData();
   }, []);
-  
+
   const chartOptions = {
     responsive: true,
     plugins: {
@@ -130,7 +137,7 @@ const Dashboard = () => {
       },
     },
   };
-  
+
   return (
     <DashboardContainer>
       <StatCard color="#3498db">
@@ -138,51 +145,69 @@ const Dashboard = () => {
         <StatValue>{stats.total_scenarios}</StatValue>
         <StatLabel>Total Scenarios</StatLabel>
       </StatCard>
-      
+
       <StatCard color="#2ecc71">
         <FiActivity size={32} />
         <StatValue>{stats.active_exercises}</StatValue>
         <StatLabel>Active Exercises</StatLabel>
       </StatCard>
-      
+
       <StatCard color="#e74c3c">
         <FiAlertTriangle size={32} />
         <StatValue>{stats.misinfo_detected}</StatValue>
         <StatLabel>Misinfo Detected</StatLabel>
       </StatCard>
-      
+
       <StatCard color="#9b59b6">
         <FiCheckCircle size={32} />
         <StatValue>{(stats.accuracy_rate * 100).toFixed(1)}%</StatValue>
         <StatLabel>Accuracy Rate</StatLabel>
       </StatCard>
-      
+
       {chartData && (
         <ChartContainer>
           <Bar data={chartData} options={chartOptions} />
         </ChartContainer>
       )}
-      
+
       <Card>
         <h2>Recent Activity</h2>
         <ul>
-          <li>Exercise "Social Media Influence Campaign" completed with 87% accuracy</li>
+          <li>
+            Exercise "Social Media Influence Campaign" completed with 87%
+            accuracy
+          </li>
           <li>New scenario "Deepfake Audio Detection" added</li>
           <li>Tactic library updated with 12 new patterns</li>
           <li>Validation benchmark run - all modules passing</li>
         </ul>
       </Card>
-      
+
       <Card>
         <h2>System Status</h2>
         <ul>
-          <li>Text Detection: <span style={{color: 'green'}}>Operational</span></li>
-          <li>Image Detection: <span style={{color: 'green'}}>Operational</span></li>
-          <li>Audio Detection: <span style={{color: 'green'}}>Operational</span></li>
-          <li>Video Detection: <span style={{color: 'green'}}>Operational</span></li>
-          <li>Meme Detection: <span style={{color: 'green'}}>Operational</span></li>
-          <li>Deepfake Detection: <span style={{color: 'green'}}>Operational</span></li>
-          <li>Training Engine: <span style={{color: 'orange'}}>Paused</span></li>
+          <li>
+            Text Detection: <span style={{ color: 'green' }}>Operational</span>
+          </li>
+          <li>
+            Image Detection: <span style={{ color: 'green' }}>Operational</span>
+          </li>
+          <li>
+            Audio Detection: <span style={{ color: 'green' }}>Operational</span>
+          </li>
+          <li>
+            Video Detection: <span style={{ color: 'green' }}>Operational</span>
+          </li>
+          <li>
+            Meme Detection: <span style={{ color: 'green' }}>Operational</span>
+          </li>
+          <li>
+            Deepfake Detection:{' '}
+            <span style={{ color: 'green' }}>Operational</span>
+          </li>
+          <li>
+            Training Engine: <span style={{ color: 'orange' }}>Paused</span>
+          </li>
         </ul>
       </Card>
     </DashboardContainer>

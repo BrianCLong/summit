@@ -59,7 +59,10 @@ const HomePage: NextPage = () => {
     <>
       <Head>
         <title>IntelGraph Mobile - Intelligence Dashboard</title>
-        <meta name="description" content="Mobile intelligence analysis platform" />
+        <meta
+          name="description"
+          content="Mobile intelligence analysis platform"
+        />
       </Head>
 
       <MobileLayout>
@@ -108,7 +111,10 @@ const HomePage: NextPage = () => {
 
           {/* Alerts Panel */}
           <motion.div variants={itemVariants}>
-            <AlertsPanel alerts={dashboardData?.alerts || []} isLoading={isLoading} />
+            <AlertsPanel
+              alerts={dashboardData?.alerts || []}
+              isLoading={isLoading}
+            />
           </motion.div>
 
           {/* Quick Actions */}
@@ -177,21 +183,32 @@ const HomePage: NextPage = () => {
           </motion.div>
 
           {/* Statistics Grid */}
-          <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+          <motion.div
+            variants={itemVariants}
+            className="grid grid-cols-2 gap-4"
+          >
             <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-4 text-white">
-              <div className="text-2xl font-bold">{dashboardData?.stats?.activeCases || '0'}</div>
+              <div className="text-2xl font-bold">
+                {dashboardData?.stats?.activeCases || '0'}
+              </div>
               <div className="text-primary-100 text-sm">Active Cases</div>
             </div>
             <div className="bg-gradient-to-r from-success-500 to-success-600 rounded-xl p-4 text-white">
-              <div className="text-2xl font-bold">{dashboardData?.stats?.resolvedCases || '0'}</div>
+              <div className="text-2xl font-bold">
+                {dashboardData?.stats?.resolvedCases || '0'}
+              </div>
               <div className="text-success-100 text-sm">Resolved Cases</div>
             </div>
             <div className="bg-gradient-to-r from-warning-500 to-warning-600 rounded-xl p-4 text-white">
-              <div className="text-2xl font-bold">{dashboardData?.stats?.pendingAlerts || '0'}</div>
+              <div className="text-2xl font-bold">
+                {dashboardData?.stats?.pendingAlerts || '0'}
+              </div>
               <div className="text-warning-100 text-sm">Pending Alerts</div>
             </div>
             <div className="bg-gradient-to-r from-intel-500 to-intel-600 rounded-xl p-4 text-white">
-              <div className="text-2xl font-bold">{dashboardData?.stats?.totalEntities || '0'}</div>
+              <div className="text-2xl font-bold">
+                {dashboardData?.stats?.totalEntities || '0'}
+              </div>
               <div className="text-intel-100 text-sm">Total Entities</div>
             </div>
           </motion.div>

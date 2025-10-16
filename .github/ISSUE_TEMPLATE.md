@@ -1,4 +1,5 @@
 ## Definition of Ready
+
 - Scope
 - Risks
 - Tests

@@ -40,7 +40,7 @@ export class FeatureFlagService {
   private constructor() {
     this.environment = process.env.NODE_ENV || 'development';
     this.loadFlags();
-    
+
     // Watch for flag file changes in development
     if (this.environment === 'development') {
       this.watchFlagChanges();
@@ -67,7 +67,7 @@ export class FeatureFlagService {
 
   private watchFlagChanges(): void {
     const flagsPath = path.join(process.cwd(), 'feature-flags', 'flags.yaml');
-    
+
     try {
       fs.watchFile(flagsPath, (curr, prev) => {
         if (curr.mtime !== prev.mtime) {
@@ -83,9 +83,13 @@ export class FeatureFlagService {
   /**
    * Check if a feature flag is enabled for the current context
    */
-  public isEnabled(flagName: string, userId?: string, context?: Record<string, any>): boolean {
+  public isEnabled(
+    flagName: string,
+    userId?: string,
+    context?: Record<string, any>,
+  ): boolean {
     const flag = this.flags.features[flagName];
-    
+
     if (!flag) {
       console.warn(`Feature flag '${flagName}' not found, defaulting to false`);
       return false;
@@ -103,11 +107,11 @@ export class FeatureFlagService {
 
     // Check rollout percentage for current environment
     const rolloutPercentage = this.getRolloutPercentage(flag);
-    
+
     if (rolloutPercentage === 0) {
       return false;
     }
-    
+
     if (rolloutPercentage === 100) {
       return true;
     }
@@ -116,25 +120,29 @@ export class FeatureFlagService {
     const hashInput = `${flagName}:${userId || 'anonymous'}`;
     const hash = this.simpleHash(hashInput);
     const userPercentile = hash % 100;
-    
+
     return userPercentile < rolloutPercentage;
   }
 
   /**
    * Get feature flag value with additional metadata
    */
-  public getFlag(flagName: string, userId?: string, context?: Record<string, any>): {
+  public getFlag(
+    flagName: string,
+    userId?: string,
+    context?: Record<string, any>,
+  ): {
     enabled: boolean;
     flag: FeatureFlag | null;
     reason: string;
   } {
     const flag = this.flags.features[flagName];
-    
+
     if (!flag) {
       return {
         enabled: false,
         flag: null,
-        reason: 'Flag not found'
+        reason: 'Flag not found',
       };
     }
 
@@ -144,7 +152,7 @@ export class FeatureFlagService {
       return {
         enabled: false,
         flag,
-        reason: 'Guardrails not satisfied'
+        reason: 'Guardrails not satisfied',
       };
     }
 
@@ -152,25 +160,25 @@ export class FeatureFlagService {
       return {
         enabled: false,
         flag,
-        reason: 'Globally disabled'
+        reason: 'Globally disabled',
       };
     }
 
     const rolloutPercentage = this.getRolloutPercentage(flag);
-    
+
     if (rolloutPercentage === 0) {
       return {
         enabled: false,
         flag,
-        reason: `Rollout disabled for ${this.environment}`
+        reason: `Rollout disabled for ${this.environment}`,
       };
     }
-    
+
     if (rolloutPercentage === 100) {
       return {
         enabled: true,
         flag,
-        reason: `Full rollout in ${this.environment}`
+        reason: `Full rollout in ${this.environment}`,
       };
     }
 
@@ -178,13 +186,13 @@ export class FeatureFlagService {
     const hash = this.simpleHash(hashInput);
     const userPercentile = hash % 100;
     const enabled = userPercentile < rolloutPercentage;
-    
+
     return {
       enabled,
       flag,
-      reason: enabled 
+      reason: enabled
         ? `User in rollout (${userPercentile} < ${rolloutPercentage})`
-        : `User not in rollout (${userPercentile} >= ${rolloutPercentage})`
+        : `User not in rollout (${userPercentile} >= ${rolloutPercentage})`,
     };
   }
 
@@ -200,7 +208,9 @@ export class FeatureFlagService {
     if (flag.guardrails.requires) {
       for (const requiredFlag of flag.guardrails.requires) {
         if (!this.isEnabled(requiredFlag)) {
-          console.warn(`Feature flag '${flagName}' requires '${requiredFlag}' to be enabled`);
+          console.warn(
+            `Feature flag '${flagName}' requires '${requiredFlag}' to be enabled`,
+          );
           return false;
         }
       }
@@ -218,9 +228,9 @@ export class FeatureFlagService {
     }
 
     const envMap = {
-      'development': 'dev',
-      'staging': 'staging',
-      'production': 'prod'
+      development: 'dev',
+      staging: 'staging',
+      production: 'prod',
     };
 
     const envKey = envMap[this.environment as keyof typeof envMap] || 'dev';
@@ -234,7 +244,7 @@ export class FeatureFlagService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -243,13 +253,16 @@ export class FeatureFlagService {
   /**
    * Get all enabled flags for a user
    */
-  public getEnabledFlags(userId?: string, context?: Record<string, any>): Record<string, boolean> {
+  public getEnabledFlags(
+    userId?: string,
+    context?: Record<string, any>,
+  ): Record<string, boolean> {
     const enabledFlags: Record<string, boolean> = {};
-    
-    Object.keys(this.flags.features).forEach(flagName => {
+
+    Object.keys(this.flags.features).forEach((flagName) => {
       enabledFlags[flagName] = this.isEnabled(flagName, userId, context);
     });
-    
+
     return enabledFlags;
   }
 
@@ -278,13 +291,15 @@ export class FeatureFlagService {
    * Emergency kill switch - disable all non-immutable flags
    */
   public emergencyKillSwitch(): void {
-    console.warn('🚨 EMERGENCY KILL SWITCH ACTIVATED - Disabling all mutable feature flags');
-    
+    console.warn(
+      '🚨 EMERGENCY KILL SWITCH ACTIVATED - Disabling all mutable feature flags',
+    );
+
     Object.entries(this.flags.features).forEach(([name, flag]) => {
       if (!flag.immutable) {
         flag.default = false;
         if (flag.rollout) {
-          Object.keys(flag.rollout).forEach(env => {
+          Object.keys(flag.rollout).forEach((env) => {
             (flag.rollout as any)[env] = 0;
           });
         }
@@ -298,10 +313,18 @@ export class FeatureFlagService {
 export const featureFlags = FeatureFlagService.getInstance();
 
 // Convenience functions
-export const isFeatureEnabled = (flagName: string, userId?: string, context?: Record<string, any>): boolean => {
+export const isFeatureEnabled = (
+  flagName: string,
+  userId?: string,
+  context?: Record<string, any>,
+): boolean => {
   return featureFlags.isEnabled(flagName, userId, context);
 };
 
-export const getFeatureFlag = (flagName: string, userId?: string, context?: Record<string, any>) => {
+export const getFeatureFlag = (
+  flagName: string,
+  userId?: string,
+  context?: Record<string, any>,
+) => {
   return featureFlags.getFlag(flagName, userId, context);
 };

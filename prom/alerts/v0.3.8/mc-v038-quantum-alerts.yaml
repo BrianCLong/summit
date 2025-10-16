@@ -11,7 +11,7 @@ groups:
           service: agent-workbench
           slo: pqa-coverage
         annotations:
-          summary: "Post-Quantum attestation coverage below 99.9%"
+          summary: 'Post-Quantum attestation coverage below 99.9%'
           description: |
             Post-quantum attestation coverage is {{ $value | printf "%.2f" }}% (<99.9%).
             Some operations lack quantum-ready cryptographic protection.
@@ -27,7 +27,7 @@ groups:
           service: agent-workbench
           slo: pqa-performance
         annotations:
-          summary: "PQA verification P95 above 5ms"
+          summary: 'PQA verification P95 above 5ms'
           description: |
             Post-quantum attestation verification P95 latency is {{ $value | printf "%.1f" }}ms (>5ms SLA).
             Dual signature verification is degraded. Check classical and quantum signature performance.
@@ -42,7 +42,7 @@ groups:
           service: agent-workbench
           slo: pqa-quantum-integrity
         annotations:
-          summary: "PQA quantum signature success rate below 99%"
+          summary: 'PQA quantum signature success rate below 99%'
           description: |
             Post-quantum signature verification success rate is {{ $value | printf "%.2%%%" }} (<99%).
             CRITICAL: Quantum-readiness compromised. Future quantum attacks may succeed.
@@ -59,7 +59,7 @@ groups:
           service: agent-workbench
           slo: zkfsa-health
         annotations:
-          summary: "ZKFSA composite health below 95%"
+          summary: 'ZKFSA composite health below 95%'
           description: |
             zk-Fairness & Safety Audits health score is {{ $value | printf "%.3f" }} (<0.95).
             CRITICAL: AI fairness or safety compliance degraded with privacy preservation.
@@ -75,7 +75,7 @@ groups:
           service: agent-workbench
           slo: zkfsa-fairness
         annotations:
-          summary: "ZKFSA fairness score below 80%"
+          summary: 'ZKFSA fairness score below 80%'
           description: |
             zk-Fairness audit score is {{ $value | printf "%.3f" }} (<0.8).
             CRITICAL: AI fairness violations detected. Bias mitigation required.
@@ -91,7 +91,7 @@ groups:
           service: agent-workbench
           slo: zkfsa-safety
         annotations:
-          summary: "ZKFSA safety score below 95%"
+          summary: 'ZKFSA safety score below 95%'
           description: |
             zk-Safety audit score is {{ $value | printf "%.3f" }} (<0.95).
             CRITICAL: AI safety violations detected. Harm prevention compromised.
@@ -107,7 +107,7 @@ groups:
           service: agent-workbench
           slo: zkfsa-privacy
         annotations:
-          summary: "ZKFSA privacy preservation below 99.5%"
+          summary: 'ZKFSA privacy preservation below 99.5%'
           description: |
             zk-Fairness & Safety audit privacy preservation is {{ $value | printf "%.3%%%" }} (<99.5%).
             CRITICAL: Sensitive tenant data may be exposed during audits.
@@ -124,7 +124,7 @@ groups:
           service: agent-workbench
           slo: podr-freshness
         annotations:
-          summary: "PoDR drill overdue (>72h)"
+          summary: 'PoDR drill overdue (>72h)'
           description: |
             Last disaster recovery drill was {{ $value | printf "%.1f" }} hours ago (>72h).
             CRITICAL: DR capabilities not validated. Business continuity at risk.
@@ -140,7 +140,7 @@ groups:
           service: agent-workbench
           slo: podr-success
         annotations:
-          summary: "PoDR successful drill overdue (>168h)"
+          summary: 'PoDR successful drill overdue (>168h)'
           description: |
             Last successful disaster recovery drill was {{ $value | printf "%.1f" }} hours ago (>7d).
             CRITICAL: No validated DR capability in over a week. Emergency escalation required.
@@ -156,7 +156,7 @@ groups:
           service: agent-workbench
           slo: podr-compliance
         annotations:
-          summary: "PoDR drill compliance score below 80%"
+          summary: 'PoDR drill compliance score below 80%'
           description: |
             Proof-of-DR drill compliance score is {{ $value | printf "%.3f" }} (<0.8).
             DR drill quality degraded. RTO/RPO targets not consistently met.
@@ -173,7 +173,7 @@ groups:
           service: agent-workbench
           slo: rge-reliability
         annotations:
-          summary: "RGE export success rate below 98%"
+          summary: 'RGE export success rate below 98%'
           description: |
             Regulator-Grade Export success rate is {{ $value | printf "%.2%%%" }} (<98%).
             CRITICAL: Compliance export capability degraded. Regulatory reporting at risk.
@@ -189,7 +189,7 @@ groups:
           service: agent-workbench
           slo: rge-performance
         annotations:
-          summary: "RGE export generation exceeds 120s SLA"
+          summary: 'RGE export generation exceeds 120s SLA'
           description: |
             Regulator-Grade Export generation P95 time is {{ $value | printf "%.1f" }}s (>120s SLA).
             Export generation degraded. Check evidence collection and cryptographic operations.
@@ -208,7 +208,7 @@ groups:
           service: agent-workbench
           slo: rge-compliance
         annotations:
-          summary: "RGE compliance framework not at 100%"
+          summary: 'RGE compliance framework not at 100%'
           description: |
             Regulatory compliance framework coverage degraded:
             GDPR: {{ printf "%.1f%%" .Labels.gdpr_compliance }}
@@ -228,7 +228,7 @@ groups:
           service: agent-workbench
           slo: bft-eco-reliability
         annotations:
-          summary: "BFT-Eco quorum reliability below 99%"
+          summary: 'BFT-Eco quorum reliability below 99%'
           description: |
             BFT-Eco quorum reliability score is {{ $value | printf "%.3f" }} (<99%).
             CRITICAL: Byzantine fault tolerant consensus reliability degraded.
@@ -244,7 +244,7 @@ groups:
           service: agent-workbench
           slo: bft-eco-carbon
         annotations:
-          summary: "BFT-Eco carbon reduction below 10%"
+          summary: 'BFT-Eco carbon reduction below 10%'
           description: |
             BFT-Eco carbon footprint reduction is {{ $value | printf "%.1f" }}% (<10% target).
             Environmental optimization not meeting sustainability goals.
@@ -260,7 +260,7 @@ groups:
           service: agent-workbench
           slo: bft-eco-performance
         annotations:
-          summary: "BFT-Eco consensus P95 above 1000ms"
+          summary: 'BFT-Eco consensus P95 above 1000ms'
           description: |
             BFT-Eco consensus P95 latency is {{ $value | printf "%.1f" }}ms (>1000ms SLA).
             Carbon-aware optimization may be impacting consensus performance.
@@ -277,7 +277,7 @@ groups:
           service: agent-workbench
           slo: quantum-ready-equilibrium
         annotations:
-          summary: "Quantum-Ready Equilibrium score degraded"
+          summary: 'Quantum-Ready Equilibrium score degraded'
           description: |
             Overall Quantum-Ready Equilibrium score is {{ $value | printf "%.3f" }} (<0.9).
             CRITICAL: Beyond-mythic capabilities degraded across multiple systems.
@@ -293,7 +293,7 @@ groups:
           service: agent-workbench
           slo: quantum-ready-sla
         annotations:
-          summary: "Quantum-Ready SLA violation detected"
+          summary: 'Quantum-Ready SLA violation detected'
           description: |
             One or more quantum-ready systems violating SLA targets:
             PQA verification, ZKFSA audits, RGE exports, or BFT-Eco consensus
@@ -309,7 +309,7 @@ groups:
           service: agent-workbench
           slo: quantum-ready-security
         annotations:
-          summary: "Quantum-Ready security posture degraded"
+          summary: 'Quantum-Ready security posture degraded'
           description: |
             Quantum-Ready security posture score is {{ $value | printf "%.3f" }} (<0.95).
             CRITICAL: Cryptographic strength, privacy preservation, or DR readiness compromised.

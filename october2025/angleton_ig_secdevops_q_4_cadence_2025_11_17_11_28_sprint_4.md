@@ -12,6 +12,7 @@
 **Objective:** Move from “provable ops” to **“continuous compliance & attack‑path reduction”**. Automate risk scoring from SBOM/OSV, enforce egress and data‑handling policy at code and cluster levels, shrink IAM blast radius, and ship graph‑based attack‑path views with actionable gates. Include a tabletop + chaos‑security exercise to validate resilience.
 
 **DoD:**
+
 - CI/CD blocks releases with **Critical** vulns (OSV/CVE) lacking allowlisted justifications; license policy enforced.
 - Cluster egress defaults to **deny**; only approved DNS/SNI allowed via egress policy or proxy; audit logs present.
 - IAM roles down‑scoped to least privilege; all GitHub Actions cloud access via OIDC with session binding; no static cloud keys.
@@ -23,17 +24,20 @@
 ## 2) Backlog (ranked)
 
 ### P0 — Must land
-1. **SBOM → OSV Risk Gate**: OSV scan + score; fail on Critical; allowlist file with expiry and issue link.  
-2. **Egress Control Baseline**: Kubernetes `NetworkPolicy` egress deny by default + DNS/SNI allow rules; Cloudflare Tunnel proxy option for external APIs.  
-3. **IAM Down‑scoping & Insights**: IAM Access Analyzer diff; shorten session TTLs; boundary roles for GH OIDC; no static keys in org.  
+
+1. **SBOM → OSV Risk Gate**: OSV scan + score; fail on Critical; allowlist file with expiry and issue link.
+2. **Egress Control Baseline**: Kubernetes `NetworkPolicy` egress deny by default + DNS/SNI allow rules; Cloudflare Tunnel proxy option for external APIs.
+3. **IAM Down‑scoping & Insights**: IAM Access Analyzer diff; shorten session TTLs; boundary roles for GH OIDC; no static keys in org.
 4. **Attack‑Path Graph**: Neo4j model (assets, trust edges, controls) rendered per release; include top 3 risky paths & fixes.
 
 ### P1 — Strongly desired
-5. **Data‑Handling Policies**: OPA checks for data classification labels on endpoints/routes; DLP redaction middleware for logs.  
+
+5. **Data‑Handling Policies**: OPA checks for data classification labels on endpoints/routes; DLP redaction middleware for logs.
 6. **Chaos‑Security Game Day**: Inject faults (token revocation, egress cut, OPA deny spike), observe alerts, MTTR, rollback.
 
 ### P2 — Stretch
-7. **SLSA Build L3 Prep**: Harden reusable builders; hermetic installs; provenance completeness check.  
+
+7. **SLSA Build L3 Prep**: Harden reusable builders; hermetic installs; provenance completeness check.
 8. **Policy Federation**: Bundle version pinning across repos via `policy-bundle` Git submodule + Renovate rules.
 
 ---
@@ -45,6 +49,7 @@
 ### 3.1 OSV risk gate
 
 **NEW:** `.github/workflows/osv.risk.yml`
+
 ```yaml
 name: osv.risk
 on: [pull_request, workflow_dispatch]
@@ -86,11 +91,16 @@ jobs:
 ```
 
 **NEW:** `security/allowlist.osv.json`
+
 ```json
 {
   "expires": "2026-01-31",
   "items": [
-    { "id": "OSV-YYYY-XXXX", "reason": "transitive devDep; unused in prod", "ticket": "SEC-1234" }
+    {
+      "id": "OSV-YYYY-XXXX",
+      "reason": "transitive devDep; unused in prod",
+      "ticket": "SEC-1234"
+    }
   ]
 }
 ```
@@ -100,24 +110,26 @@ jobs:
 ### 3.2 Egress deny‑by‑default
 
 **NEW:** `deploy/network/egress-default-deny.yaml`
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata: { name: default-deny-egress, namespace: switchboard }
 spec:
   podSelector: {}
-  policyTypes: [ Egress ]
+  policyTypes: [Egress]
   egress: []
 ```
 
 **NEW:** `deploy/network/egress-allowlist.yaml`
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata: { name: allow-egress-apis, namespace: switchboard }
 spec:
   podSelector: { matchLabels: { app: switchboard } }
-  policyTypes: [ Egress ]
+  policyTypes: [Egress]
   egress:
     - to: [{ namespaceSelector: { matchLabels: { name: observability } } }]
       ports: [{ port: 9090 }]
@@ -127,6 +139,7 @@ spec:
 ```
 
 **NEW (optional proxy):** `deploy/network/egress-proxy.md`
+
 ```md
 Use Cloudflare Tunnel or egress proxy with SNI allowlist for external APIs. Log SNI + DNS queries; alert on new domains.
 ```
@@ -134,6 +147,7 @@ Use Cloudflare Tunnel or egress proxy with SNI allowlist for external APIs. Log 
 ### 3.3 IAM down‑scoping
 
 **NEW:** `infra/iam/gh-oidc-boundary.json`
+
 ```json
 {
   "Version": "2012-10-17",
@@ -156,6 +170,7 @@ Use Cloudflare Tunnel or egress proxy with SNI allowlist for external APIs. Log 
 ```
 
 **NEW:** `.github/workflows/iam.audit.yml`
+
 ```yaml
 name: iam.audit
 on: [workflow_dispatch, schedule]
@@ -174,6 +189,7 @@ jobs:
 ### 3.4 Attack‑path graph (Neo4j)
 
 **NEW:** `ops/graph/model.cypher`
+
 ```cypher
 // Nodes
 MERGE (:Asset {name:'Switchboard', type:'app'})
@@ -191,6 +207,7 @@ MATCH (c:Control{name:'Cosign Verify'}),(a:Asset{name:'Switchboard'}) MERGE (c)-
 ```
 
 **NEW:** `.github/workflows/attack.graph.yml`
+
 ```yaml
 name: attack.graph
 on: [workflow_dispatch, push]
@@ -210,6 +227,7 @@ jobs:
 ### 3.5 Data‑handling policies (OPA + middleware)
 
 **NEW:** `policies/datahandling.rego`
+
 ```rego
 package datahandling
 
@@ -223,69 +241,81 @@ violation[msg] {
 ```
 
 **NEW:** `apps/web/src/middleware/redact.ts`
+
 ```ts
-export function redactLog(line: string){
+export function redactLog(line: string) {
   return line
-    .replace(/(api[_-]?key\s*[:=]\s*)['\"]?[A-Za-z0-9_\-]{16,}/ig, '$1***')
-    .replace(/(email: )([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/ig, '$1<redacted>');
+    .replace(/(api[_-]?key\s*[:=]\s*)['\"]?[A-Za-z0-9_\-]{16,}/gi, '$1***')
+    .replace(
+      /(email: )([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/gi,
+      '$1<redacted>',
+    );
 }
 ```
 
 ### 3.6 Chaos‑security game day
 
 **NEW:** `ops/chaos/security-gameday.md`
+
 ```md
 Scenarios:
-1) Revoke GH OIDC role mid-deploy → verify deploy.verify fails, rollback path works.
-2) Block egress to OSV API → observe `osv.risk` fails; alert triage.
-3) Inject deny spike in OPA → Alert fires; MTTR < 15m.
-Artifacts: timeline, alerts, decisions, rollback timings.
+
+1. Revoke GH OIDC role mid-deploy → verify deploy.verify fails, rollback path works.
+2. Block egress to OSV API → observe `osv.risk` fails; alert triage.
+3. Inject deny spike in OPA → Alert fires; MTTR < 15m.
+   Artifacts: timeline, alerts, decisions, rollback timings.
 ```
 
 ---
 
 ## 4) Observability & Evidence
-- **Evidence Pack additions**: `osv.json`, `sbom.json` diff, `attack-graph` artifact, IAM findings, egress policy manifests.  
-- **Dashboards**: Risk score trend, blocked release count, deny‑rate, egress anomalies, IAM findings backlog.  
+
+- **Evidence Pack additions**: `osv.json`, `sbom.json` diff, `attack-graph` artifact, IAM findings, egress policy manifests.
+- **Dashboards**: Risk score trend, blocked release count, deny‑rate, egress anomalies, IAM findings backlog.
 - **Alerts**: Critical OSV found on PR; egress to new domain; IAM finding ACTIVE; deny spike.
 
 ---
 
 ## 5) Tests & Verification
-- **OSV gate**: Introduce synthetic Critical → release.gate blocks; allowlist with expiry allows temporarily.  
-- **Egress**: Pod without allowlist cannot reach internet; with allowlist/proxy it can reach approved APIs.  
-- **IAM**: Access Analyzer findings trend to 0; no static keys found in secret scan.  
-- **Attack‑path**: Graph artifact generated; top 3 paths reviewed with owners.  
-- **Data‑handling**: OPA `violation` empty for all routes; redaction middleware unit tests pass.  
+
+- **OSV gate**: Introduce synthetic Critical → release.gate blocks; allowlist with expiry allows temporarily.
+- **Egress**: Pod without allowlist cannot reach internet; with allowlist/proxy it can reach approved APIs.
+- **IAM**: Access Analyzer findings trend to 0; no static keys found in secret scan.
+- **Attack‑path**: Graph artifact generated; top 3 paths reviewed with owners.
+- **Data‑handling**: OPA `violation` empty for all routes; redaction middleware unit tests pass.
 - **Chaos day**: All scenarios executed; MTTR and rollback meet SLOs.
 
-**Success Criteria**  
-- Two blocked PRs due to Critical vulns with tickets opened; one allowed via time‑boxed allowlist.  
-- Egress default‑deny live in `switchboard` namespace with documented exceptions.  
-- IAM analyzer shows only informational findings.  
-- Evidence Pack contains risk score diff and graph.  
+**Success Criteria**
+
+- Two blocked PRs due to Critical vulns with tickets opened; one allowed via time‑boxed allowlist.
+- Egress default‑deny live in `switchboard` namespace with documented exceptions.
+- IAM analyzer shows only informational findings.
+- Evidence Pack contains risk score diff and graph.
 - Chaos day report attached with learnings + actions.
 
 ---
 
 ## 6) Ownership & Approvals
-- **Owners:** SecDevOps (Angleton IG), Platform/Infra (NetworkPolicy/IAM), App Eng (redaction), SRE (alerts/dashboards).  
+
+- **Owners:** SecDevOps (Angleton IG), Platform/Infra (NetworkPolicy/IAM), App Eng (redaction), SRE (alerts/dashboards).
 - **Approvals:** Platform lead (egress/IAM), Security lead (OSV gate), App Eng lead (middleware), SRE lead (chaos day).
 
 ---
 
 ## 7) Timeline
-- **Days 1–2:** OSV risk gate + allowlist; Evidence Pack integration.  
-- **Days 3–4:** Egress default‑deny + allowlist/proxy; alerts.  
-- **Days 5–6:** IAM audit + boundary roles + TTL tighten.  
-- **Day 7:** Attack‑path graph wiring + review.  
-- **Day 8:** Data‑handling policy + redaction middleware.  
-- **Day 9:** Chaos‑security game day + report.  
+
+- **Days 1–2:** OSV risk gate + allowlist; Evidence Pack integration.
+- **Days 3–4:** Egress default‑deny + allowlist/proxy; alerts.
+- **Days 5–6:** IAM audit + boundary roles + TTL tighten.
+- **Day 7:** Attack‑path graph wiring + review.
+- **Day 8:** Data‑handling policy + redaction middleware.
+- **Day 9:** Chaos‑security game day + report.
 - **Day 10:** Buffer + docs + approvals.
 
 ---
 
 ## 8) PR Template Additions
+
 ```
 - [ ] OSV results attached; Critical=0 or allowlist with expiry & ticket
 - [ ] Egress NetworkPolicies applied; exceptions documented
@@ -298,55 +328,57 @@ Artifacts: timeline, alerts, decisions, rollback timings.
 ---
 
 ## 9) Artifacts Index
-- OSV gate: `.github/workflows/osv.risk.yml`, `security/allowlist.osv.json`  
-- Egress: `deploy/network/egress-*.yaml`, `deploy/network/egress-proxy.md`  
-- IAM: `infra/iam/gh-oidc-boundary.json`, `.github/workflows/iam.audit.yml`  
-- Graph: `ops/graph/model.cypher`, `.github/workflows/attack.graph.yml`  
-- Data handling: `policies/datahandling.rego`, `apps/web/src/middleware/redact.ts`  
+
+- OSV gate: `.github/workflows/osv.risk.yml`, `security/allowlist.osv.json`
+- Egress: `deploy/network/egress-*.yaml`, `deploy/network/egress-proxy.md`
+- IAM: `infra/iam/gh-oidc-boundary.json`, `.github/workflows/iam.audit.yml`
+- Graph: `ops/graph/model.cypher`, `.github/workflows/attack.graph.yml`
+- Data handling: `policies/datahandling.rego`, `apps/web/src/middleware/redact.ts`
 - Chaos: `ops/chaos/security-gameday.md`
 
 ---
 
 ## 10) Structured Output (for exec/PM traceability)
+
 summary: Enforce continuous compliance with OSV risk gating, default‑deny egress, least‑privilege IAM, and data‑handling policies; add attack‑path graphs and a chaos‑security game day; integrate results into Evidence Packs and dashboards.  
 risk_score: 44  
 confidence: high  
 key_findings:
-  - id: vuln-gate-missing
-    evidence: [ lack of OSV gate and risk scoring ]
-    impact: Critical vulns can ship unnoticed.
-  - id: unrestricted-egress
-    evidence: [ no default‑deny egress policy ]
-    impact: Exfil/command‑and‑control risk; opaque third‑party calls.
-  - id: iam-overbreadth
-    evidence: [ long TTLs, wide roles ]
-    impact: Elevated blast radius if tokens leaked.
-  - id: data-handling-implicit
-    evidence: [ routes not labeled; redaction ad‑hoc ]
-    impact: PII leakage in logs; policy blind spots.
-recommended_actions:
-  - title: Add OSV risk gate and allowlist with expiry
-    change_type: PR
-    effort: S
-    prereqs: None
-  - title: Apply egress default‑deny with allowlists/proxy
-    change_type: Infra
-    effort: M
-    prereqs: Cluster NetworkPolicy support
-  - title: Down‑scope IAM and enforce OIDC session binding
-    change_type: Infra
-    effort: M
-    prereqs: AWS org access
-  - title: Implement data‑handling policy and redaction
-    change_type: PR
-    effort: S
-    prereqs: Route inventory
-verification:
-  - checks: [ osv-critical-block, egress-enforced, iam-findings-zero, data-policy-clean, chaos-day-complete ]
-  - success_criteria: Gates block as designed; evidence/dashboards updated; MTTR within SLO.
-owners_notified: [ SecDevOps, Platform, App Eng, SRE ]
-links:
+
+- id: vuln-gate-missing
+  evidence: [ lack of OSV gate and risk scoring ]
+  impact: Critical vulns can ship unnoticed.
+- id: unrestricted-egress
+  evidence: [ no default‑deny egress policy ]
+  impact: Exfil/command‑and‑control risk; opaque third‑party calls.
+- id: iam-overbreadth
+  evidence: [ long TTLs, wide roles ]
+  impact: Elevated blast radius if tokens leaked.
+- id: data-handling-implicit
+  evidence: [ routes not labeled; redaction ad‑hoc ]
+  impact: PII leakage in logs; policy blind spots.
+  recommended_actions:
+- title: Add OSV risk gate and allowlist with expiry
+  change_type: PR
+  effort: S
+  prereqs: None
+- title: Apply egress default‑deny with allowlists/proxy
+  change_type: Infra
+  effort: M
+  prereqs: Cluster NetworkPolicy support
+- title: Down‑scope IAM and enforce OIDC session binding
+  change_type: Infra
+  effort: M
+  prereqs: AWS org access
+- title: Implement data‑handling policy and redaction
+  change_type: PR
+  effort: S
+  prereqs: Route inventory
+  verification:
+- checks: [ osv-critical-block, egress-enforced, iam-findings-zero, data-policy-clean, chaos-day-complete ]
+- success_criteria: Gates block as designed; evidence/dashboards updated; MTTR within SLO.
+  owners_notified: [ SecDevOps, Platform, App Eng, SRE ]
+  links:
   pr:
   runbook: See `ops/chaos/security-gameday.md` and prior sprints’ runbooks
   dashboards: Risk, Egress, IAM, Policy
-

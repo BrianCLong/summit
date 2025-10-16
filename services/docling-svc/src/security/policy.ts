@@ -18,7 +18,7 @@ const PURPOSE_MATRIX: Record<Purpose, RetentionTier[]> = {
   't&s': ['short'],
   benchmarking: ['short', 'standard'],
   release_notes: ['standard'],
-  compliance: ['standard']
+  compliance: ['standard'],
 };
 
 const LICENSE_ALLOW_LIST = new Set([
@@ -28,7 +28,7 @@ const LICENSE_ALLOW_LIST = new Set([
   'BSD-2-Clause',
   'ISC',
   'CC-BY-4.0',
-  'Unlicense'
+  'Unlicense',
 ]);
 
 export const evaluatePurposePolicy = (input: PolicyInput): PolicyDecision => {
@@ -40,18 +40,16 @@ export const evaluatePurposePolicy = (input: PolicyInput): PolicyDecision => {
     return {
       allow: false,
       reason: 'retention_not_allowed',
-      tags: [`purpose:${input.purpose}`, `retention:${input.retention}`]
+      tags: [`purpose:${input.purpose}`, `retention:${input.retention}`],
     };
   }
   return {
     allow: true,
-    tags: [`purpose:${input.purpose}`, `retention:${input.retention}`]
+    tags: [`purpose:${input.purpose}`, `retention:${input.retention}`],
   };
 };
 
-export const evaluateLicensePolicy = (
-  signal: PolicySignal
-): PolicyDecision => {
+export const evaluateLicensePolicy = (signal: PolicySignal): PolicyDecision => {
   if (!signal.value) {
     return { allow: true, tags: ['license:unknown'] };
   }
@@ -64,6 +62,6 @@ export const evaluateLicensePolicy = (
   return {
     allow: false,
     reason: 'license_not_permitted',
-    tags: [`license:${normalized}`]
+    tags: [`license:${normalized}`],
   };
 };

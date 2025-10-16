@@ -2,11 +2,11 @@ sweet — here’s a tight, high-leverage set of **AURELIUS conversation starter
 
 # Quick-Start Macros
 
-* “**[SCOUT]** Map SOTA and leapfrog angles for `{problem}`. Timebox `{7}` days. Output: prior-art table, gap analysis, novelty matrix, top-3 attack vectors.”
-* “**[ARCHITECT]** Design a patentable method for `{goal}` under `{constraints}`. Target products: `{Summit|IntelGraph|MC}`. Output: spec+pseudocode, interfaces, complexity, integration plan.”
-* “**[EXPERIMENTALIST]** Run a pilot proving `{metric} > {baseline}+{delta}` on `{dataset}`. Grid: `{hparams}`. Output: plots, ablations, seeds, repro script.”
-* “**[PATENT-COUNSEL]** Draft IP for `{invention}`. Output: 2 independent + 10 dependent claims, drawings list, FTO notes, PCT plan.”
-* “**[COMMERCIALIZER]** Package `{artifact}` into licensable SKUs. Output: pricing, partner list, SSO hooks, claim-chart seeds.”
+- “**[SCOUT]** Map SOTA and leapfrog angles for `{problem}`. Timebox `{7}` days. Output: prior-art table, gap analysis, novelty matrix, top-3 attack vectors.”
+- “**[ARCHITECT]** Design a patentable method for `{goal}` under `{constraints}`. Target products: `{Summit|IntelGraph|MC}`. Output: spec+pseudocode, interfaces, complexity, integration plan.”
+- “**[EXPERIMENTALIST]** Run a pilot proving `{metric} > {baseline}+{delta}` on `{dataset}`. Grid: `{hparams}`. Output: plots, ablations, seeds, repro script.”
+- “**[PATENT-COUNSEL]** Draft IP for `{invention}`. Output: 2 independent + 10 dependent claims, drawings list, FTO notes, PCT plan.”
+- “**[COMMERCIALIZER]** Package `{artifact}` into licensable SKUs. Output: pricing, partner list, SSO hooks, claim-chart seeds.”
 
 # JSON Kickoff Template
 
@@ -14,10 +14,10 @@ sweet — here’s a tight, high-leverage set of **AURELIUS conversation starter
 {
   "mission": "Achieve {goal} via {approach}",
   "constraints": ["latency<{ms}", "privacy:{P0}", "license:Apache-2.0"],
-  "target_products": ["Summit","IntelGraph","Maestro Conductor"],
+  "target_products": ["Summit", "IntelGraph", "Maestro Conductor"],
   "repos": ["github.com/{org}/{repo}"],
   "success_metrics": [">{delta}% over {baseline} on {benchmark}", "p95<{ms}"],
-  "deliverable_emphasis": ["patent","runtime","benchmark"],
+  "deliverable_emphasis": ["patent", "runtime", "benchmark"],
   "timebox_days": 7
 }
 ```
@@ -86,13 +86,12 @@ sweet — here’s a tight, high-leverage set of **AURELIUS conversation starter
 # “Fill & Fire” Kickoffs
 
 ```yaml
-mission: "Reduce hallucinations via retrieval-calibrated decoding"
-constraints: ["p95<120ms", "no GPL", "edge ready"]
-target_products: ["IntelGraph","Summit"]
-success_metrics: [">=5pt factuality gain on {bench}", "cost/query ≤ ${x}"]
-deliverable_emphasis: ["patent","benchmark","runtime"]
+mission: 'Reduce hallucinations via retrieval-calibrated decoding'
+constraints: ['p95<120ms', 'no GPL', 'edge ready']
+target_products: ['IntelGraph', 'Summit']
+success_metrics: ['>=5pt factuality gain on {bench}', 'cost/query ≤ ${x}']
+deliverable_emphasis: ['patent', 'benchmark', 'runtime']
 timebox_days: 7
 ```
 
 If you want, I can drop these into a canvas as a **Prompt Palette** with buttons (SCOUT/ARCHITECT/…); say the word and I’ll ship it.
-

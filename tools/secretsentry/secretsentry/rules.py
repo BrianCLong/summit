@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Pattern
+from re import Pattern
 
 
 @dataclass(frozen=True)
@@ -59,9 +59,7 @@ PATTERN_RULES: tuple[PatternRule, ...] = (
     PatternRule(
         name="JWT",
         description="JSON Web Token",
-        regex=re.compile(
-            r"\beyJ[0-9A-Za-z_-]+\.[0-9A-Za-z_-]+\.[0-9A-Za-z_-]{10,}\b"
-        ),
+        regex=re.compile(r"\beyJ[0-9A-Za-z_-]+\.[0-9A-Za-z_-]+\.[0-9A-Za-z_-]{10,}\b"),
         severity="medium",
     ),
 )

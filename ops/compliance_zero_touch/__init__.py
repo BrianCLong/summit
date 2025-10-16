@@ -1,6 +1,6 @@
 """Zero-touch compliance automation package for Summit."""
 
-from .engine import ZeroTouchComplianceEngine, ComplianceOrchestrator
+from .engine import ComplianceOrchestrator, ZeroTouchComplianceEngine
 
 __all__ = [
     "ZeroTouchComplianceEngine",

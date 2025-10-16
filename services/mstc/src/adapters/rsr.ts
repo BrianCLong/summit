@@ -11,12 +11,14 @@ export interface RsrRegulatoryDigest {
   confidence: number;
 }
 
-export const toRegulatoryDigest = (canon: LocaleCanonMap): RsrRegulatoryDigest[] => {
+export const toRegulatoryDigest = (
+  canon: LocaleCanonMap,
+): RsrRegulatoryDigest[] => {
   const entries: RsrRegulatoryDigest[] = [];
   for (const [locale, terms] of Object.entries(canon)) {
     for (const term of terms) {
-      const regulators = term.regulatorNotes.map(note => note.regulator);
-      const notes = term.regulatorNotes.map(note => note.note);
+      const regulators = term.regulatorNotes.map((note) => note.regulator);
+      const notes = term.regulatorNotes.map((note) => note.note);
       entries.push({
         locale,
         vertical: term.vertical,
@@ -24,9 +26,9 @@ export const toRegulatoryDigest = (canon: LocaleCanonMap): RsrRegulatoryDigest[]
         canonical: term.canonical,
         regulators,
         notes,
-        confidence: term.confidence
+        confidence: term.confidence,
       });
     }
   }
-  return sortBy(entries, entry => `${entry.locale}:${entry.tag}`);
+  return sortBy(entries, (entry) => `${entry.locale}:${entry.tag}`);
 };

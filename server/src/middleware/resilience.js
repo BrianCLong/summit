@@ -14,7 +14,11 @@ class RetryPolicy {
     this.maxDelay = options.maxDelay || 30000;
     this.backoffMultiplier = options.backoffMultiplier || 2;
     this.jitterFactor = options.jitterFactor || 0.1;
-    this.retryableErrors = options.retryableErrors || ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND'];
+    this.retryableErrors = options.retryableErrors || [
+      'ECONNRESET',
+      'ETIMEDOUT',
+      'ENOTFOUND',
+    ];
   }
 
   /**
@@ -22,43 +26,49 @@ class RetryPolicy {
    */
   async execute(fn, ...args) {
     let lastError;
-    
+
     for (let attempt = 1; attempt <= this.maxAttempts; attempt++) {
       try {
         return await fn(...args);
       } catch (error) {
         lastError = error;
-        
+
         if (!this.shouldRetry(error, attempt)) {
           break;
         }
-        
+
         if (attempt < this.maxAttempts) {
           const delay = this.calculateDelay(attempt);
-          logger.warn(`Retry attempt ${attempt}/${this.maxAttempts} in ${delay}ms`, {
-            error: error.message,
-            attempt
-          });
+          logger.warn(
+            `Retry attempt ${attempt}/${this.maxAttempts} in ${delay}ms`,
+            {
+              error: error.message,
+              attempt,
+            },
+          );
           await this.delay(delay);
         }
       }
     }
-    
+
     throw lastError;
   }
 
   shouldRetry(error, attempt) {
     if (attempt >= this.maxAttempts) return false;
-    
+
     // Don't retry client errors (4xx)
     if (error.status && error.status >= 400 && error.status < 500) {
       return false;
     }
-    
+
     // Check for retryable error codes
-    return this.retryableErrors.some(retryableError => {
+    return this.retryableErrors.some((retryableError) => {
       if (typeof retryableError === 'string') {
-        return error.code === retryableError || error.message.includes(retryableError);
+        return (
+          error.code === retryableError ||
+          error.message.includes(retryableError)
+        );
       }
       if (retryableError instanceof RegExp) {
         return retryableError.test(error.message);
@@ -71,16 +81,16 @@ class RetryPolicy {
     // Exponential backoff with jitter
     const exponentialDelay = Math.min(
       this.baseDelay * Math.pow(this.backoffMultiplier, attempt - 1),
-      this.maxDelay
+      this.maxDelay,
     );
-    
+
     // Add jitter to prevent thundering herd
     const jitter = exponentialDelay * this.jitterFactor * Math.random();
     return Math.floor(exponentialDelay + jitter);
   }
 
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -90,7 +100,7 @@ class BulkheadIsolation {
     this.maxConcurrent = options.maxConcurrent || 10;
     this.queueSize = options.queueSize || 100;
     this.timeoutMs = options.timeoutMs || 30000;
-    
+
     this.activeRequests = 0;
     this.queue = [];
     this.metrics = {
@@ -98,7 +108,7 @@ class BulkheadIsolation {
       completedRequests: 0,
       rejectedRequests: 0,
       queuedRequests: 0,
-      timeoutRequests: 0
+      timeoutRequests: 0,
     };
   }
 
@@ -107,12 +117,12 @@ class BulkheadIsolation {
    */
   async execute(fn, ...args) {
     this.metrics.totalRequests++;
-    
+
     // Check if we can execute immediately
     if (this.activeRequests < this.maxConcurrent) {
       return this.executeNow(fn, ...args);
     }
-    
+
     // Check if queue is full
     if (this.queue.length >= this.queueSize) {
       this.metrics.rejectedRequests++;
@@ -120,7 +130,7 @@ class BulkheadIsolation {
       error.code = 'BULKHEAD_QUEUE_FULL';
       throw error;
     }
-    
+
     // Add to queue
     return this.addToQueue(fn, ...args);
   }
@@ -128,7 +138,7 @@ class BulkheadIsolation {
   async executeNow(fn, ...args) {
     this.activeRequests++;
     const startTime = Date.now();
-    
+
     try {
       const result = await this.executeWithTimeout(fn, args);
       this.metrics.completedRequests++;
@@ -136,11 +146,11 @@ class BulkheadIsolation {
     } finally {
       this.activeRequests--;
       this.processQueue();
-      
+
       logger.debug(`Bulkhead '${this.name}' execution completed`, {
         activeRequests: this.activeRequests,
         queueLength: this.queue.length,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       });
     }
   }
@@ -165,18 +175,18 @@ class BulkheadIsolation {
 
   addToQueue(fn, ...args) {
     this.metrics.queuedRequests++;
-    
+
     return new Promise((resolve, reject) => {
       const queueItem = {
         fn,
         args,
         resolve,
         reject,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       this.queue.push(queueItem);
-      
+
       // Set timeout for queued item
       setTimeout(() => {
         const index = this.queue.indexOf(queueItem);
@@ -210,7 +220,7 @@ class BulkheadIsolation {
       queueLength: this.queue.length,
       maxConcurrent: this.maxConcurrent,
       queueSize: this.queueSize,
-      metrics: { ...this.metrics }
+      metrics: { ...this.metrics },
     };
   }
 }
@@ -247,24 +257,24 @@ class ResilienceManager {
     this.bulkheads = new Map();
     this.retryPolicies = new Map();
     this.timeoutManager = new TimeoutManager();
-    
+
     // Default configurations
     this.defaultCircuitBreakerConfig = {
       failureThreshold: 5,
       recoveryTimeout: 60000,
-      monitoringWindow: 300000
+      monitoringWindow: 300000,
     };
-    
+
     this.defaultRetryConfig = {
       maxAttempts: 3,
       baseDelay: 1000,
-      maxDelay: 30000
+      maxDelay: 30000,
     };
-    
+
     this.defaultBulkheadConfig = {
       maxConcurrent: 10,
       queueSize: 100,
-      timeoutMs: 30000
+      timeoutMs: 30000,
     };
   }
 
@@ -276,7 +286,7 @@ class ResilienceManager {
       const circuitBreaker = new CircuitBreaker({
         name,
         ...this.defaultCircuitBreakerConfig,
-        ...config
+        ...config,
       });
       this.circuitBreakers.set(name, circuitBreaker);
     }
@@ -291,7 +301,7 @@ class ResilienceManager {
       const bulkhead = new BulkheadIsolation({
         name,
         ...this.defaultBulkheadConfig,
-        ...config
+        ...config,
       });
       this.bulkheads.set(name, bulkhead);
     }
@@ -305,7 +315,7 @@ class ResilienceManager {
     if (!this.retryPolicies.has(name)) {
       const retryPolicy = new RetryPolicy({
         ...this.defaultRetryConfig,
-        ...config
+        ...config,
       });
       this.retryPolicies.set(name, retryPolicy);
     }
@@ -324,7 +334,7 @@ class ResilienceManager {
       enableCircuitBreaker = true,
       enableRetry = true,
       enableBulkhead = true,
-      enableTimeout = true
+      enableTimeout = true,
     } = options;
 
     let wrappedFn = fn;
@@ -374,7 +384,7 @@ class ResilienceManager {
     const status = {
       circuitBreakers: {},
       bulkheads: {},
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // Circuit breaker status
@@ -410,8 +420,10 @@ class ResilienceManager {
       metrics[`bulkhead_active_requests_${name}`] = status.activeRequests;
       metrics[`bulkhead_queue_length_${name}`] = status.queueLength;
       metrics[`bulkhead_total_requests_${name}`] = status.metrics.totalRequests;
-      metrics[`bulkhead_completed_requests_${name}`] = status.metrics.completedRequests;
-      metrics[`bulkhead_rejected_requests_${name}`] = status.metrics.rejectedRequests;
+      metrics[`bulkhead_completed_requests_${name}`] =
+        status.metrics.completedRequests;
+      metrics[`bulkhead_rejected_requests_${name}`] =
+        status.metrics.rejectedRequests;
     }
 
     return metrics;
@@ -439,5 +451,5 @@ module.exports = {
   BulkheadIsolation,
   TimeoutManager,
   ResilienceManager,
-  resilienceManager
+  resilienceManager,
 };

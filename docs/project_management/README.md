@@ -1,16 +1,15 @@
-
 # Project Management
 
 This directory contains the project management materials for the IntelGraph project. These materials are designed to provide a clear and comprehensive overview of the project's goals, progress, and processes.
 
 ## Documents
 
-*   **[Epics and Tasks](01_epics_and_tasks.md):** A detailed breakdown of the project's epics, user stories, and tasks.
-*   **[Sprint Plan](02_sprint_plan.md):** A suggested plan for the first three sprints, based on the project's priorities.
-*   **[Roadmap](03_roadmap.md):** A high-level roadmap for the project, organized by quarter.
-*   **[RACI Matrix](04_raci_matrix.md):** A RACI matrix outlining the roles and responsibilities for the project.
-*   **[GitHub Project Boards](github_project_boards/):** A directory containing markdown templates for creating GitHub project boards for each epic.
-*   **[Jira Import File](jira_import.csv):** A CSV file that you can use to import the entire project plan into Jira.
+- **[Epics and Tasks](01_epics_and_tasks.md):** A detailed breakdown of the project's epics, user stories, and tasks.
+- **[Sprint Plan](02_sprint_plan.md):** A suggested plan for the first three sprints, based on the project's priorities.
+- **[Roadmap](03_roadmap.md):** A high-level roadmap for the project, organized by quarter.
+- **[RACI Matrix](04_raci_matrix.md):** A RACI matrix outlining the roles and responsibilities for the project.
+- **[GitHub Project Boards](github_project_boards/):** A directory containing markdown templates for creating GitHub project boards for each epic.
+- **[Jira Import File](jira_import.csv):** A CSV file that you can use to import the entire project plan into Jira.
 
 ## Development Process
 

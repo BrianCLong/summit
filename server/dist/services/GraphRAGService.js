@@ -8,15 +8,15 @@
  * - Redis caching with subgraph-hash keys
  * - Explainable why_paths and citations
  */
-import { z } from "zod";
-import { createHash } from "crypto";
-import pino from "pino";
-import { CircuitBreaker } from "../utils/CircuitBreaker.js"; // Import CircuitBreaker
-import { rankPaths } from "./PathRankingService.js";
-import { graphragSchemaFailuresTotal, graphragCacheHitRatio, } from "../monitoring/metrics.js";
-import { mapGraphRAGError, UserFacingError } from "../lib/errors.js";
-import graphragConfig from "../config/graphrag.js";
-const logger = pino({ name: "GraphRAGService" });
+import { z } from 'zod';
+import { createHash } from 'crypto';
+import pino from 'pino';
+import { CircuitBreaker } from '../utils/CircuitBreaker.js'; // Import CircuitBreaker
+import { rankPaths } from './PathRankingService.js';
+import { graphragSchemaFailuresTotal, graphragCacheHitRatio, } from '../monitoring/metrics.js';
+import { mapGraphRAGError, UserFacingError } from '../lib/errors.js';
+import graphragConfig from '../config/graphrag.js';
+const logger = pino({ name: 'GraphRAGService' });
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
     investigationId: z.string().min(1),
@@ -25,8 +25,8 @@ const GraphRAGRequestSchema = z.object({
     maxHops: z.number().int().min(1).max(3).optional(),
     temperature: z.number().min(0).max(1).optional(),
     maxTokens: z.number().int().min(100).max(2000).optional(),
-    useCase: z.string().optional().default("default"),
-    rankingStrategy: z.enum(["v1", "v2"]).optional(),
+    useCase: z.string().optional().default('default'),
+    rankingStrategy: z.enum(['v1', 'v2']).optional(),
 });
 const EntitySchema = z.object({
     id: z.string(),
@@ -69,13 +69,20 @@ const GraphRAGResponseSchema = z.object({
     why_paths: z.array(WhyPathSchema),
 });
 export class GraphRAGService {
+    neo4j;
+    redis;
+    llmService;
+    embeddingService;
+    config;
+    cacheStats = { hits: 0, total: 0 };
+    circuitBreaker; // Declare circuit breaker instance
     constructor(neo4jDriver, llmService, embeddingService, redisClient) {
-        this.cacheStats = { hits: 0, total: 0 };
         this.neo4j = neo4jDriver;
         this.redis = redisClient || null;
         this.llmService = llmService;
         this.embeddingService = embeddingService;
         this.circuitBreaker = new CircuitBreaker({
+            // Initialize circuit breaker
             failureThreshold: 5,
             successThreshold: 3,
             resetTimeout: 30000, // 30 seconds
@@ -89,8 +96,8 @@ export class GraphRAGService {
             cacheTTL: 300,
             maxCacheTTL: 3600,
             cacheFreqWindow: 600,
-            llmModel: "gpt-4",
-            embeddingModel: "text-embedding-3-small",
+            llmModel: 'gpt-4',
+            embeddingModel: 'text-embedding-3-small',
         };
     }
     /**
@@ -98,13 +105,14 @@ export class GraphRAGService {
      */
     async answer(request) {
         return this.circuitBreaker.execute(async () => {
+            // Wrap with circuit breaker
             const validated = GraphRAGRequestSchema.parse(request);
             const useCase = validated.useCase;
             const useCaseConfig = graphragConfig.useCases[useCase] || graphragConfig.useCases.default;
             useCaseConfig.promptSchema.parse({ question: validated.question });
             if (validated.maxTokens &&
                 validated.maxTokens > useCaseConfig.tokenBudget) {
-                throw new UserFacingError(`Token budget exceeded: requested ${validated.maxTokens}, budget ${useCaseConfig.tokenBudget}`, "TOKEN_BUDGET_EXCEEDED");
+                throw new UserFacingError(`Token budget exceeded: requested ${validated.maxTokens}, budget ${useCaseConfig.tokenBudget}`, 'TOKEN_BUDGET_EXCEEDED');
             }
             const startTime = Date.now();
             try {
@@ -121,7 +129,7 @@ export class GraphRAGService {
                 logger.info(`GraphRAG query completed. Investigation ID: ${validated.investigationId}, Response Time: ${responseTime}, Entities Retrieved: ${subgraphContext.entities.length}, Relationships Retrieved: ${subgraphContext.relationships.length}, Confidence: ${response.confidence}`);
                 // Cache the final response
                 if (this.redis && subgraphContext.subgraphHash) {
-                    const responseCacheKey = `graphrag:response:${subgraphContext.subgraphHash}:${createHash("sha256").update(validated.question).digest("hex").substring(0, 16)}`;
+                    const responseCacheKey = `graphrag:response:${subgraphContext.subgraphHash}:${createHash('sha256').update(validated.question).digest('hex').substring(0, 16)}`;
                     try {
                         await this.redis.setex(responseCacheKey, subgraphContext.ttl, JSON.stringify(response));
                         logger.debug(`Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`);
@@ -135,13 +143,13 @@ export class GraphRAGService {
             catch (error) {
                 logger.error({
                     investigationId: validated.investigationId,
-                    error: error instanceof Error ? error.message : "Unknown error",
+                    error: error instanceof Error ? error.message : 'Unknown error',
                     traceId: error.traceId,
-                }, "GraphRAG query failed");
+                }, 'GraphRAG query failed');
                 if (error instanceof UserFacingError) {
                     throw error;
                 }
-                throw new Error(`GraphRAG query failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+                throw new Error(`GraphRAG query failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         }); // End of circuitBreaker.execute
     }
@@ -197,7 +205,7 @@ export class GraphRAGService {
             const freqKey = `graphrag:freq:${cacheKey}`;
             const count = await this.redis.incr(freqKey);
             await this.redis.expire(freqKey, this.config.cacheFreqWindow);
-            await this.redis.zincrby("graphrag:popular_subgraphs", 1, cacheKey);
+            await this.redis.zincrby('graphrag:popular_subgraphs', 1, cacheKey);
             const ttl = Math.min(this.config.maxCacheTTL, Math.round(this.config.cacheTTL * Math.log2(count + 1)));
             return ttl;
         }
@@ -256,8 +264,8 @@ export class GraphRAGService {
                 return { entities: [], relationships: [] };
             }
             const record = result.records[0];
-            const entities = this.parseEntities(record.get("nodes") || []);
-            const relationships = this.parseRelationships(record.get("relationships") || []);
+            const entities = this.parseEntities(record.get('nodes') || []);
+            const relationships = this.parseRelationships(record.get('relationships') || []);
             return { entities, relationships };
         }
         finally {
@@ -283,14 +291,14 @@ export class GraphRAGService {
                 model: request.temperature !== undefined ? this.config.llmModel : undefined,
                 maxTokens: request.maxTokens || 1000,
                 temperature: temp,
-                responseFormat: "json",
+                responseFormat: 'json',
             });
             let parsedResponse;
             try {
                 parsedResponse = JSON.parse(rawResponse);
             }
             catch (error) {
-                throw new Error("LLM returned invalid JSON");
+                throw new Error('LLM returned invalid JSON');
             }
             const validatedResponse = schema.parse(parsedResponse);
             this.validateCitations(validatedResponse.citations, context);
@@ -303,7 +311,7 @@ export class GraphRAGService {
         catch (error) {
             if (error instanceof z.ZodError ||
                 (error instanceof Error &&
-                    error.message.includes("LLM returned invalid JSON"))) {
+                    error.message.includes('LLM returned invalid JSON'))) {
                 graphragSchemaFailuresTotal.inc();
                 const summary = error instanceof z.ZodError
                     ? this.summarizeZodIssues(error)
@@ -311,7 +319,7 @@ export class GraphRAGService {
                 logger.warn(`LLM schema violation or invalid JSON; retrying with temperature=0`, { issues: summary });
                 try {
                     const retryResponse = await callLLMAndValidate(0); // Second attempt with stricter prompt/temperature=0
-                    logger.info("LLM response validated on retry.");
+                    logger.info('LLM response validated on retry.');
                     return retryResponse;
                 }
                 catch (retryError) {
@@ -321,8 +329,8 @@ export class GraphRAGService {
                         ? this.summarizeZodIssues(retryError)
                         : retryError instanceof Error
                             ? retryError.message
-                            : "Unknown error";
-                    logger.error("LLM schema invalid after retry", {
+                            : 'Unknown error';
+                    logger.error('LLM schema invalid after retry', {
                         traceId: mapped.traceId,
                         issues: retrySummary,
                     });
@@ -337,11 +345,11 @@ export class GraphRAGService {
      */
     buildContextPrompt(question, context) {
         const entityContext = context.entities
-            .map((e) => `Entity ${e.id}: ${e.label} (${e.type}) - ${e.description || "No description"}`)
-            .join("\n");
+            .map((e) => `Entity ${e.id}: ${e.label} (${e.type}) - ${e.description || 'No description'}`)
+            .join('\n');
         const relationshipContext = context.relationships
             .map((r) => `Relationship ${r.id}: ${r.fromEntityId} --[${r.type}]--> ${r.toEntityId}`)
-            .join("\n");
+            .join('\n');
         return `You are an intelligence analyst with access to a knowledge graph. Answer the user's question based ONLY on the provided context.
 
 CONTEXT ENTITIES:
@@ -374,7 +382,7 @@ Respond with JSON only:`;
         const availableEntityIds = new Set(context.entities.map((e) => e.id));
         const invalidCitations = citations.entityIds.filter((id) => !availableEntityIds.has(id));
         if (invalidCitations.length > 0) {
-            throw new Error(`Invalid entity citations: ${invalidCitations.join(", ")}`);
+            throw new Error(`Invalid entity citations: ${invalidCitations.join(', ')}`);
         }
     }
     /**
@@ -385,7 +393,7 @@ Respond with JSON only:`;
         const invalidPaths = whyPaths.filter((path) => !availableRelIds.has(path.relId));
         if (invalidPaths.length > 0) {
             const invalidIds = invalidPaths.map((p) => p.relId);
-            throw new Error(`Invalid relationship IDs in why_paths: ${invalidIds.join(", ")}`);
+            throw new Error(`Invalid relationship IDs in why_paths: ${invalidIds.join(', ')}`);
         }
     }
     /**
@@ -394,16 +402,14 @@ Respond with JSON only:`;
     createSubgraphCacheKey(request) {
         const { investigationId, focusEntityIds = [], maxHops = 2 } = request;
         const sortedAnchors = [...focusEntityIds].sort();
-        const keyData = `${investigationId}:${sortedAnchors.join(",")}:${maxHops}`;
-        return `graphrag:subgraph:${createHash("sha256").update(keyData).digest("hex").substring(0, 16)}`;
+        const keyData = `${investigationId}:${sortedAnchors.join(',')}:${maxHops}`;
+        return `graphrag:subgraph:${createHash('sha256').update(keyData).digest('hex').substring(0, 16)}`;
     }
-    rankWhyPaths(paths, context, strategy = "v2") {
+    rankWhyPaths(paths, context, strategy = 'v2') {
         const centrality = {};
         for (const rel of context.relationships) {
-            centrality[rel.fromEntityId] =
-                (centrality[rel.fromEntityId] || 0) + 1;
-            centrality[rel.toEntityId] =
-                (centrality[rel.toEntityId] || 0) + 1;
+            centrality[rel.fromEntityId] = (centrality[rel.fromEntityId] || 0) + 1;
+            centrality[rel.toEntityId] = (centrality[rel.toEntityId] || 0) + 1;
         }
         const ranked = rankPaths(paths, {
             nodeCentrality: centrality,
@@ -423,7 +429,7 @@ Respond with JSON only:`;
             entities: subgraph.entities.map((e) => e.id).sort(),
             relationships: subgraph.relationships.map((r) => r.id).sort(),
         });
-        return createHash("sha256").update(content).digest("hex").substring(0, 16);
+        return createHash('sha256').update(content).digest('hex').substring(0, 16);
     }
     /**
      * Parse Neo4j entities into typed Entity objects
@@ -462,18 +468,18 @@ Respond with JSON only:`;
      * Health check method
      */
     async getHealth() {
-        let cacheStatus = "disabled";
+        let cacheStatus = 'disabled';
         if (this.redis) {
             try {
                 await this.redis.ping();
-                cacheStatus = "healthy";
+                cacheStatus = 'healthy';
             }
             catch (error) {
-                cacheStatus = "unhealthy";
+                cacheStatus = 'unhealthy';
             }
         }
         return {
-            status: "healthy",
+            status: 'healthy',
             cacheStatus,
             config: this.config,
             circuitBreaker: this.circuitBreaker.getMetrics(), // Expose circuit breaker metrics

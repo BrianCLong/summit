@@ -8,7 +8,7 @@
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "cd server && npm run dev",
-    "client:dev": "cd client && npm run dev", 
+    "client:dev": "cd client && npm run dev",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:prod": "docker-compose up",
     "test": "npm run test:server && npm run test:client",
@@ -32,7 +32,7 @@
   },
   "keywords": [
     "intelligence-analysis",
-    "graph-analytics", 
+    "graph-analytics",
     "neo4j",
     "react",
     "graphql",
@@ -60,7 +60,12 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{json,md,yml,yaml}": ["prettier --write"]
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

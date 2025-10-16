@@ -13,7 +13,10 @@ export type Decision = {
   reasons: Array<{ model: string; reason: string }>; // for Explain Route
 };
 
-export function decide(policy: any, req: { task: string; loa: number; risk?: string }): Decision {
+export function decide(
+  policy: any,
+  req: { task: string; loa: number; risk?: string },
+): Decision {
   if (!validate(policy)) {
     return { allow: false, denial: 'policy_invalid', reasons: [] };
   }
@@ -28,17 +31,27 @@ export function decide(policy: any, req: { task: string; loa: number; risk?: str
   );
   if (!rule) return { allow: false, denial: 'no_matching_rule', reasons: [] };
   const { pickModel } = require('./scheduler');
-  const { chosen, denied } = pickModel(candidates, rule.route.prefer, rule.route.fallback);
+  const { chosen, denied } = pickModel(
+    candidates,
+    rule.route.prefer,
+    rule.route.fallback,
+  );
   if (!chosen) {
     return {
       allow: false,
       denial: 'no_model_available',
-      reasons: Object.entries(denied).map(([model, reason]) => ({ model, reason })),
+      reasons: Object.entries(denied).map(([model, reason]) => ({
+        model,
+        reason,
+      })),
     };
   }
   return {
     allow: true,
     model: chosen.name,
-    reasons: Object.entries(denied).map(([model, reason]) => ({ model, reason })),
+    reasons: Object.entries(denied).map(([model, reason]) => ({
+      model,
+      reason,
+    })),
   };
 }

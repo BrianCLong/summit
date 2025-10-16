@@ -1,23 +1,59 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Safety Case</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>#dock{position:fixed;right:16px;top:16px;width:420px;border:1px solid #ddd;border-radius:12px;padding:10px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08)}.k{opacity:.7}</style></head>
-<body>
-<div id=dock>
-  <div><b>Live Safety Case</b></div>
-  <div id=goal class=k>Goal: This PR is safe to merge</div>
-  <div id=claims></div>
-  <div>
-    <button id=sim>Run Twin</button>
-    <button id=alt>Try Alt Arm</button>
-    <button id=merge>Request Merge</button>
-  </div>
-</div>
-<script>
-$(function(){
-  var lsc={claims:[{id:'CL1',text:'Spec≥0.95 ✔'},{id:'CL2',text:'Policy denies==0 ✔'},{id:'CL3',text:'Mutation≥0.75 ✔'}]};
-  $('#claims').html(lsc.claims.map(c=>'<div>'+c.text+'</div>').join(''));
-  $('#sim').on('click',()=>$.post('/api/twin/run',{pr:location.search.slice(1)}));
-  $('#alt').on('click',()=>$.post('/api/decision/alt',{arm:'impl@medium'}));
-  $('#merge').on('click',()=>$.post('/api/merge/request',{pr:location.search.slice(1)}));
-});
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Safety Case</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      #dock {
+        position: fixed;
+        right: 16px;
+        top: 16px;
+        width: 420px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      }
+      .k {
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dock">
+      <div><b>Live Safety Case</b></div>
+      <div id="goal" class="k">Goal: This PR is safe to merge</div>
+      <div id="claims"></div>
+      <div>
+        <button id="sim">Run Twin</button>
+        <button id="alt">Try Alt Arm</button>
+        <button id="merge">Request Merge</button>
+      </div>
+    </div>
+    <script>
+      $(function () {
+        var lsc = {
+          claims: [
+            { id: 'CL1', text: 'Spec≥0.95 ✔' },
+            { id: 'CL2', text: 'Policy denies==0 ✔' },
+            { id: 'CL3', text: 'Mutation≥0.75 ✔' },
+          ],
+        };
+        $('#claims').html(
+          lsc.claims.map((c) => '<div>' + c.text + '</div>').join(''),
+        );
+        $('#sim').on('click', () =>
+          $.post('/api/twin/run', { pr: location.search.slice(1) }),
+        );
+        $('#alt').on('click', () =>
+          $.post('/api/decision/alt', { arm: 'impl@medium' }),
+        );
+        $('#merge').on('click', () =>
+          $.post('/api/merge/request', { pr: location.search.slice(1) }),
+        );
+      });
+    </script>
+  </body>
+</html>

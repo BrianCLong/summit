@@ -60,15 +60,20 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
   const [createOrSelect, setCreateOrSelect] = useState('select'); // 'select' or 'create'
 
   const { loading, error, data, refetch } = useQuery(GET_CASES);
-  const [addToCase, { loading: adding, error: addError }] = useMutation(ADD_TO_CASE_MUTATION);
-  const [createCase, { loading: creating, error: createError }] = useMutation(CREATE_CASE_MUTATION);
+  const [addToCase, { loading: adding, error: addError }] =
+    useMutation(ADD_TO_CASE_MUTATION);
+  const [createCase, { loading: creating, error: createError }] =
+    useMutation(CREATE_CASE_MUTATION);
 
   const handleAddToCase = async () => {
     try {
       let caseIdToUse = selectedCase;
       if (createOrSelect === 'create') {
         if (!newCaseName) {
-          $(document).trigger('intelgraph:toast', ['New case name is required.', 'error']);
+          $(document).trigger('intelgraph:toast', [
+            'New case name is required.',
+            'error',
+          ]);
           return;
         }
         const { data: newCaseData } = await createCase({
@@ -81,8 +86,13 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
         ]);
       }
 
-      await addToCase({ variables: { caseId: caseIdToUse, kind: itemKind, refId: itemRefId } });
-      $(document).trigger('intelgraph:toast', [`Item added to case successfully!`, 'success']);
+      await addToCase({
+        variables: { caseId: caseIdToUse, kind: itemKind, refId: itemRefId },
+      });
+      $(document).trigger('intelgraph:toast', [
+        `Item added to case successfully!`,
+        'success',
+      ]);
       handleClose();
     } catch (e) {
       $(document).trigger('intelgraph:toast', [
@@ -194,7 +204,9 @@ function AddCaseModal({ open, handleClose, itemKind, itemRefId }) {
           }
           sx={{ mt: 2 }}
         >
-          {createOrSelect === 'select' ? 'Add to Selected Case' : 'Create Case and Add'}
+          {createOrSelect === 'select'
+            ? 'Add to Selected Case'
+            : 'Create Case and Add'}
         </Button>
       </Box>
     </Modal>

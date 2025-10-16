@@ -1,25 +1,25 @@
 export default {
   meta: {
-    type: "problem",
+    type: 'problem',
     docs: {
       description:
-        "ensure GraphQL resolvers are wrapped with policy enforcement",
+        'ensure GraphQL resolvers are wrapped with policy enforcement',
     },
     schema: [],
   },
   create(context) {
     return {
-      "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator"(
+      'ExportNamedDeclaration > VariableDeclaration > VariableDeclarator'(
         node,
       ) {
-        if (node.id && node.id.name && node.id.name.endsWith("Resolvers")) {
+        if (node.id && node.id.name && node.id.name.endsWith('Resolvers')) {
           if (
-            node.init.type !== "CallExpression" ||
-            node.init.callee.name !== "wrapResolversWithPolicy"
+            node.init.type !== 'CallExpression' ||
+            node.init.callee.name !== 'wrapResolversWithPolicy'
           ) {
             context.report({
               node: node.init,
-              message: "Resolvers must be wrapped with wrapResolversWithPolicy",
+              message: 'Resolvers must be wrapped with wrapResolversWithPolicy',
             });
           }
         }

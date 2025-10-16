@@ -5,7 +5,8 @@ const config: CodegenConfig = {
   documents: 'src/**/*.graphql', // Path to your GraphQL operations
   ignoreNoDocuments: true, // Ignore if no GraphQL documents are found
   generates: {
-    './src/generated/': { // Output directory for generated files
+    './src/generated/': {
+      // Output directory for generated files
       preset: 'client',
       plugins: [],
       presetConfig: {

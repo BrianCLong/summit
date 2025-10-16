@@ -64,7 +64,9 @@ export abstract class BaseConnector {
    * Graceful shutdown
    */
   async shutdown(): Promise<void> {
-    this.logger.info('Shutting down connector', { connector: this.config.name });
+    this.logger.info('Shutting down connector', {
+      connector: this.config.name,
+    });
     // Override in subclasses for cleanup
   }
 }

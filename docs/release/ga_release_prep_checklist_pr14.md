@@ -7,6 +7,7 @@
 - Notes: release notes draft and upgrade guide
 
 ## Toggles & Scripts
+
 - Slow query logger: set `SLOW_QUERY_MS=500` (ms) to warn on slow GraphQL requests
 - RC tag: `scripts/release/rc_tag.sh v1.0.0-rc.1`
 - SBOM: `scripts/release/generate_sbom.sh sbom.json`

@@ -8,5 +8,8 @@
   },
   "include": ["src"],
   "exclude": ["node_modules"],
-  "references": [{ "path": "../../packages/types" }, { "path": "../../packages/ai-core" }]
+  "references": [
+    { "path": "../../packages/types" },
+    { "path": "../../packages/ai-core" }
+  ]
 }

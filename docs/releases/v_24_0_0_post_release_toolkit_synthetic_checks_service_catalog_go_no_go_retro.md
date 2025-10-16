@@ -1,4 +1,5 @@
 # 1) Scheduled Synthetic — Persisted Query Health
+
 **File:** `.github/workflows/synthetic-pq.yml`
 
 Runs every 5 minutes against staging/prod, calling your persisted **tenantCoherence** query via hash. Fails fast, uploads logs, and (optional) posts to Slack.
@@ -42,6 +43,7 @@ jobs:
 ---
 
 # 2) Backstage Service Catalog Entry
+
 **File:** `catalog-info.yaml`
 
 Registers the service with SLOs, on-call, runbooks, and dashboards.
@@ -56,10 +58,10 @@ metadata:
   annotations:
     pagerduty.com/service-id: intelgraph-server
     grafana/dashboard-url: https://grafana.example.com/d/v24
-    slo/read-p95-ms: "350"
-    slo/write-p95-ms: "700"
-    slo/sub-fanout-p95-ms: "250"
-    slo/error-rate-pct: "0.1"
+    slo/read-p95-ms: '350'
+    slo/write-p95-ms: '700'
+    slo/sub-fanout-p95-ms: '250'
+    slo/error-rate-pct: '0.1'
 spec:
   type: service
   lifecycle: production
@@ -71,6 +73,7 @@ spec:
 ---
 
 # 3) On‑Call Runbook (Quick Triage)
+
 **File:** `runbooks/v24-coherence.md`
 
 - **Alert:** GraphQL p95 > 350ms (10m) or error‑rate > 0.1% (10m)
@@ -85,21 +88,26 @@ spec:
 ---
 
 # 4) Go/No‑Go Sign‑off Pack
+
 **File:** `release/go-no-go.md`
 
 ```md
 # v24.0.0 Go/No-Go — Sign‑offs
+
 Date: [Awaiting Input: Date of release]
 Time (America/Denver): [Awaiting Input: Time of release]
 
 ## Approvals
+
 - Eng Lead v24: [Signature Required]
 - SRE On‑Call: [Signature Required]
 - Security: [Signature Required]
 - Platform Arch: [Signature Required]
 
 ## Gates
+
 <!-- This checklist should be completed by the release manager -->
+
 - [ ] CI green (tests, OPA, SBOM, vuln)
 - [ ] k6 SLO suite within budgets
 - [ ] Persisted queries frozen & deployed
@@ -107,6 +115,7 @@ Time (America/Denver): [Awaiting Input: Time of release]
 - [ ] Secrets validated in prod
 
 ## Risk Notes & Backout
+
 - Canary plan: 10%→50%→100%
 - Rollback: feature flag off + Helm rollback
 ```
@@ -114,27 +123,32 @@ Time (America/Denver): [Awaiting Input: Time of release]
 ---
 
 # 5) Post‑Release Retro Template
+
 **File:** `postmortems/v24-retro-template.md`
 
 ```md
 # v24.0.0 Release Retrospective
+
 Date Range: [Awaiting Input: Date range of the release]
 Facilitator: [Awaiting Input: Name of the facilitator]
 Participants: [Awaiting Input: List of participants]
 
 ## What went well
+
 - [Awaiting Input: Things that went well]
 
 ## What we can improve
+
 - [Awaiting Input: Things to improve]
 
 ## DORA Metrics
+
 - Deployment Frequency: [Awaiting Input: Deployment frequency]
 - Lead Time for Changes: [Awaiting Input: Lead time for changes]
 - Change Failure Rate: [Awaiting Input: Change failure rate]
 - MTTR: [Awaiting Input: Mean time to recovery]
 
 ## Actions (with owners & due dates)
+
 - [ ] [Awaiting Input: Action item] (Owner, YYYY‑MM‑DD)
 ```
-

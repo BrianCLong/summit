@@ -40,7 +40,10 @@ export default function CompareRun() {
         </div>
       </div>
       <div className="text-sm">
-        <Link className="text-indigo-700 hover:underline" to={`/maestro/runs/${id}`}>
+        <Link
+          className="text-indigo-700 hover:underline"
+          to={`/maestro/runs/${id}`}
+        >
           Back to run
         </Link>
       </div>
@@ -66,7 +69,9 @@ export default function CompareRun() {
                 />
               </section>
               <section className="rounded border bg-white p-3">
-                <div className="mb-2 text-sm font-semibold text-slate-700">Current</div>
+                <div className="mb-2 text-sm font-semibold text-slate-700">
+                  Current
+                </div>
                 <DAG
                   nodes={(data.current?.nodes || []).map((n: any) => ({
                     id: n.id,
@@ -88,7 +93,9 @@ export default function CompareRun() {
           )}
           {mode === 'overlay' && (
             <section className="rounded border bg-white p-3">
-              <div className="mb-2 text-sm font-semibold text-slate-700">Overlay</div>
+              <div className="mb-2 text-sm font-semibold text-slate-700">
+                Overlay
+              </div>
               <DAG
                 nodes={(data.current?.nodes || []).map((n: any) => ({
                   id: n.id,

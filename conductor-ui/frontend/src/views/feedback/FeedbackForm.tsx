@@ -1,11 +1,13 @@
-
 // conductor-ui/frontend/src/views/feedback/FeedbackForm.tsx
 import React, { useState } from 'react';
 
 // Mock API
-const submitFeedback = async (feedback: { message: string; category: string }): Promise<{ id: string }> => {
+const submitFeedback = async (feedback: {
+  message: string;
+  category: string;
+}): Promise<{ id: string }> => {
   console.log('Submitting feedback:', feedback);
-  await new Promise(res => setTimeout(res, 800));
+  await new Promise((res) => setTimeout(res, 800));
   return { id: `fb-${Math.random()}` };
 };
 
@@ -43,14 +45,18 @@ export const FeedbackForm = () => {
             <textarea
               id="feedback-message"
               value={message}
-              onChange={e => setMessage(e.target.value)}
+              onChange={(e) => setMessage(e.target.value)}
               rows={5}
               required
             ></textarea>
           </div>
           <div>
             <label htmlFor="feedback-category">Category:</label>
-            <select id="feedback-category" value={category} onChange={e => setCategory(e.target.value)}>
+            <select
+              id="feedback-category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
               <option value="bug">Bug Report</option>
               <option value="feature">Feature Request</option>
               <option value="general">General Feedback</option>

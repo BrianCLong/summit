@@ -15,7 +15,9 @@ const resolvers = {
   Query: {
     ok: () => 'OK',
     boom: () => {
-      throw Object.assign(new Error('nope'), { extensions: { code: 'FORBIDDEN' } });
+      throw Object.assign(new Error('nope'), {
+        extensions: { code: 'FORBIDDEN' },
+      });
     },
   },
 };
@@ -28,15 +30,22 @@ test('apollo metrics record totals, errors, durations', async () => {
   await server.start();
 
   await server.executeOperation({ query: '{ ok }', operationName: 'OkQuery' });
-  await server.executeOperation({ query: '{ boom }', operationName: 'BoomQuery' });
+  await server.executeOperation({
+    query: '{ boom }',
+    operationName: 'BoomQuery',
+  });
 
   const metrics = await register.getMetricsAsJSON();
   const total = metrics.find((m) => m.name === 'apollo_request_total')!;
   const errors = metrics.find((m) => m.name === 'apollo_request_errors_total')!;
-  const durHist = metrics.find((m) => m.name === 'apollo_request_duration_seconds')!;
+  const durHist = metrics.find(
+    (m) => m.name === 'apollo_request_duration_seconds',
+  )!;
 
   expect(total).toBeTruthy();
   expect(errors).toBeTruthy();
-  const countSample = durHist.values.find((v) => v.metricName.endsWith('_count'))!;
+  const countSample = durHist.values.find((v) =>
+    v.metricName.endsWith('_count'),
+  )!;
   expect(countSample.value).toBeGreaterThan(0);
 });

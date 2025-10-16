@@ -16,9 +16,11 @@ interface PolicyPreview {
 
 export const QueryBuilder: React.FC = () => {
   const [conditions, setConditions] = useState<QueryCondition[]>([
-    { field: '', operator: '', value: '' }
+    { field: '', operator: '', value: '' },
   ]);
-  const [policyPreview, setPolicyPreview] = useState<PolicyPreview | null>(null);
+  const [policyPreview, setPolicyPreview] = useState<PolicyPreview | null>(
+    null,
+  );
   const [isPreviewingExport, setIsPreviewingExport] = useState(false);
 
   const fieldOptions = [
@@ -44,7 +46,11 @@ export const QueryBuilder: React.FC = () => {
     setConditions(conditions.filter((_, i) => i !== index));
   };
 
-  const updateCondition = (index: number, field: keyof QueryCondition, value: string) => {
+  const updateCondition = (
+    index: number,
+    field: keyof QueryCondition,
+    value: string,
+  ) => {
     const newConditions = [...conditions];
     newConditions[index][field] = value;
     setConditions(newConditions);
@@ -61,8 +67,8 @@ export const QueryBuilder: React.FC = () => {
         body: JSON.stringify({
           query: conditions,
           action: 'export',
-          stepUpToken: localStorage.getItem('stepUpToken')
-        })
+          stepUpToken: localStorage.getItem('stepUpToken'),
+        }),
       });
 
       const result = await response.json();
@@ -71,7 +77,7 @@ export const QueryBuilder: React.FC = () => {
       setPolicyPreview({
         allowed: false,
         reason: 'Error checking policy: ' + error,
-        requiredStepUp: false
+        requiredStepUp: false,
       });
     } finally {
       setIsPreviewingExport(false);
@@ -83,7 +89,7 @@ export const QueryBuilder: React.FC = () => {
     const response = await fetch('/api/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conditions })
+      body: JSON.stringify({ conditions }),
     });
 
     const results = await response.json();
@@ -103,19 +109,25 @@ export const QueryBuilder: React.FC = () => {
               className="flex-1 p-2 border rounded"
             >
               <option value="">Select field...</option>
-              {fieldOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              {fieldOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
 
             <select
               value={condition.operator}
-              onChange={(e) => updateCondition(index, 'operator', e.target.value)}
+              onChange={(e) =>
+                updateCondition(index, 'operator', e.target.value)
+              }
               className="flex-1 p-2 border rounded"
             >
               <option value="">Select operator...</option>
-              {operatorOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              {operatorOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
 
@@ -164,11 +176,17 @@ export const QueryBuilder: React.FC = () => {
       </div>
 
       {policyPreview && (
-        <Alert className={policyPreview.allowed ? 'border-green-500' : 'border-red-500'}>
+        <Alert
+          className={
+            policyPreview.allowed ? 'border-green-500' : 'border-red-500'
+          }
+        >
           <AlertDescription>
             <div className="space-y-2">
               <div className="font-bold">
-                {policyPreview.allowed ? '✅ Export Allowed' : '🚫 Export Blocked'}
+                {policyPreview.allowed
+                  ? '✅ Export Allowed'
+                  : '🚫 Export Blocked'}
               </div>
               <div className="text-sm">
                 <strong>Reason:</strong> {policyPreview.reason}
@@ -178,16 +196,17 @@ export const QueryBuilder: React.FC = () => {
                   ⚠️ Step-up authentication required for this export
                 </div>
               )}
-              {policyPreview.dlpViolations && policyPreview.dlpViolations.length > 0 && (
-                <div className="text-sm">
-                  <strong>DLP Violations:</strong>
-                  <ul className="list-disc list-inside">
-                    {policyPreview.dlpViolations.map((v, i) => (
-                      <li key={i}>{v}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {policyPreview.dlpViolations &&
+                policyPreview.dlpViolations.length > 0 && (
+                  <div className="text-sm">
+                    <strong>DLP Violations:</strong>
+                    <ul className="list-disc list-inside">
+                      {policyPreview.dlpViolations.map((v, i) => (
+                        <li key={i}>{v}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
             </div>
           </AlertDescription>
         </Alert>

@@ -15,26 +15,26 @@ const tracer = trace.getTracer('contract-testing', '24.3.0');
 const contractTests = new Counter({
   name: 'contract_tests_total',
   help: 'Total contract tests executed',
-  labelNames: ['tenant_id', 'contract_type', 'test_type', 'result']
+  labelNames: ['tenant_id', 'contract_type', 'test_type', 'result'],
 });
 
 const contractTestDuration = new Histogram({
   name: 'contract_test_duration_seconds',
   help: 'Contract test execution time',
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 5, 10, 30],
-  labelNames: ['contract_type', 'test_type']
+  labelNames: ['contract_type', 'test_type'],
 });
 
 const contractViolations = new Counter({
   name: 'contract_violations_total',
   help: 'Total contract violations detected',
-  labelNames: ['tenant_id', 'contract_type', 'violation_type', 'severity']
+  labelNames: ['tenant_id', 'contract_type', 'violation_type', 'severity'],
 });
 
 const activeContractTests = new Gauge({
   name: 'active_contract_tests',
   help: 'Currently running contract tests',
-  labelNames: ['tenant_id']
+  labelNames: ['tenant_id'],
 });
 
 export type ContractType = 'api' | 'database' | 'event' | 'integration';
@@ -134,137 +134,148 @@ export class ContractTestingFramework extends EventEmitter {
   registerContract(contract: Contract): void {
     // Validate contract schema
     this.validateContractDefinition(contract);
-    
+
     // Store contract
     this.contracts.set(contract.id, contract);
-    
+
     // Compile JSON schemas if present
     if (contract.schema) {
       try {
         this.ajv.compile(contract.schema);
       } catch (error) {
-        throw new Error(`Invalid JSON schema in contract ${contract.id}: ${(error as Error).message}`);
+        throw new Error(
+          `Invalid JSON schema in contract ${contract.id}: ${(error as Error).message}`,
+        );
       }
     }
 
     this.emit('contractRegistered', contract);
   }
 
-  async testContract(contractId: string, tenantId: string, context?: any): Promise<ContractTestResult> {
-    return tracer.startActiveSpan('contract_testing.test_contract', async (span: Span) => {
-      span.setAttributes({
-        'tenant_id': tenantId,
-        'contract_id': contractId
-      });
-
-      activeContractTests.inc({ tenant_id: tenantId });
-      const startTime = Date.now();
-
-      try {
-        const contract = this.contracts.get(contractId);
-        if (!contract) {
-          throw new Error(`Contract not found: ${contractId}`);
-        }
-
-        const result: ContractTestResult = {
-          contractId,
-          tenantId,
-          passed: 0,
-          failed: 0,
-          errors: 0,
-          skipped: 0,
-          violations: [],
-          executionTime: 0,
-          summary: { critical: 0, high: 0, medium: 0, low: 0 }
-        };
-
-        // Execute each rule
-        for (const rule of contract.rules) {
-          try {
-            const testResult = await this.executeRule(contract, rule, tenantId, context);
-            this.testHistory.push(testResult);
-
-            if (testResult.result === 'pass') {
-              result.passed++;
-            } else if (testResult.result === 'fail') {
-              result.failed++;
-              
-              // Create violation
-              const violation: ContractViolation = {
-                id: `violation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                contractId,
-                ruleId: rule.id,
-                tenantId,
-                severity: rule.severity,
-                description: `Rule '${rule.name}' failed: ${testResult.error || 'Assertion failed'}`,
-                detectedAt: new Date(),
-                actualValue: testResult.actualResult,
-                expectedValue: testResult.expectedResult,
-                metadata: testResult.metadata
-              };
-              
-              result.violations.push(violation);
-              result.summary[rule.severity]++;
-
-              contractViolations.inc({
-                tenant_id: tenantId,
-                contract_type: contract.type,
-                violation_type: rule.type,
-                severity: rule.severity
-              });
-
-            } else if (testResult.result === 'error') {
-              result.errors++;
-            } else {
-              result.skipped++;
-            }
-
-            contractTests.inc({
-              tenant_id: tenantId,
-              contract_type: contract.type,
-              test_type: rule.type,
-              result: testResult.result
-            });
-
-          } catch (error) {
-            result.errors++;
-            console.error(`Error executing rule ${rule.id}:`, error);
-          }
-        }
-
-        result.executionTime = Date.now() - startTime;
-
-        contractTestDuration.observe(
-          { contract_type: contract.type, test_type: 'full' },
-          result.executionTime / 1000
-        );
-
+  async testContract(
+    contractId: string,
+    tenantId: string,
+    context?: any,
+  ): Promise<ContractTestResult> {
+    return tracer.startActiveSpan(
+      'contract_testing.test_contract',
+      async (span: Span) => {
         span.setAttributes({
-          'tests_passed': result.passed,
-          'tests_failed': result.failed,
-          'violations_critical': result.summary.critical,
-          'execution_time_ms': result.executionTime
+          tenant_id: tenantId,
+          contract_id: contractId,
         });
 
-        this.emit('contractTestCompleted', result);
-        return result;
+        activeContractTests.inc({ tenant_id: tenantId });
+        const startTime = Date.now();
 
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        activeContractTests.dec({ tenant_id: tenantId });
-        span.end();
-      }
-    });
+        try {
+          const contract = this.contracts.get(contractId);
+          if (!contract) {
+            throw new Error(`Contract not found: ${contractId}`);
+          }
+
+          const result: ContractTestResult = {
+            contractId,
+            tenantId,
+            passed: 0,
+            failed: 0,
+            errors: 0,
+            skipped: 0,
+            violations: [],
+            executionTime: 0,
+            summary: { critical: 0, high: 0, medium: 0, low: 0 },
+          };
+
+          // Execute each rule
+          for (const rule of contract.rules) {
+            try {
+              const testResult = await this.executeRule(
+                contract,
+                rule,
+                tenantId,
+                context,
+              );
+              this.testHistory.push(testResult);
+
+              if (testResult.result === 'pass') {
+                result.passed++;
+              } else if (testResult.result === 'fail') {
+                result.failed++;
+
+                // Create violation
+                const violation: ContractViolation = {
+                  id: `violation_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                  contractId,
+                  ruleId: rule.id,
+                  tenantId,
+                  severity: rule.severity,
+                  description: `Rule '${rule.name}' failed: ${testResult.error || 'Assertion failed'}`,
+                  detectedAt: new Date(),
+                  actualValue: testResult.actualResult,
+                  expectedValue: testResult.expectedResult,
+                  metadata: testResult.metadata,
+                };
+
+                result.violations.push(violation);
+                result.summary[rule.severity]++;
+
+                contractViolations.inc({
+                  tenant_id: tenantId,
+                  contract_type: contract.type,
+                  violation_type: rule.type,
+                  severity: rule.severity,
+                });
+              } else if (testResult.result === 'error') {
+                result.errors++;
+              } else {
+                result.skipped++;
+              }
+
+              contractTests.inc({
+                tenant_id: tenantId,
+                contract_type: contract.type,
+                test_type: rule.type,
+                result: testResult.result,
+              });
+            } catch (error) {
+              result.errors++;
+              console.error(`Error executing rule ${rule.id}:`, error);
+            }
+          }
+
+          result.executionTime = Date.now() - startTime;
+
+          contractTestDuration.observe(
+            { contract_type: contract.type, test_type: 'full' },
+            result.executionTime / 1000,
+          );
+
+          span.setAttributes({
+            tests_passed: result.passed,
+            tests_failed: result.failed,
+            violations_critical: result.summary.critical,
+            execution_time_ms: result.executionTime,
+          });
+
+          this.emit('contractTestCompleted', result);
+          return result;
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setStatus({ code: 2, message: (error as Error).message });
+          throw error;
+        } finally {
+          activeContractTests.dec({ tenant_id: tenantId });
+          span.end();
+        }
+      },
+    );
   }
 
   private async executeRule(
     contract: Contract,
     rule: ContractRule,
     tenantId: string,
-    context?: any
+    context?: any,
   ): Promise<ContractTest> {
     const startTime = Date.now();
     const test: ContractTest = {
@@ -273,7 +284,7 @@ export class ContractTestingFramework extends EventEmitter {
       tenantId,
       executedAt: new Date(),
       result: 'error',
-      executionTime: 0
+      executionTime: 0,
     };
 
     try {
@@ -282,18 +293,35 @@ export class ContractTestingFramework extends EventEmitter {
           await this.executeSchemaTest(contract, rule, test, context);
           break;
         case 'behavior':
-          await this.executeBehaviorTest(contract, rule, test, tenantId, context);
+          await this.executeBehaviorTest(
+            contract,
+            rule,
+            test,
+            tenantId,
+            context,
+          );
           break;
         case 'compatibility':
-          await this.executeCompatibilityTest(contract, rule, test, tenantId, context);
+          await this.executeCompatibilityTest(
+            contract,
+            rule,
+            test,
+            tenantId,
+            context,
+          );
           break;
         case 'performance':
-          await this.executePerformanceTest(contract, rule, test, tenantId, context);
+          await this.executePerformanceTest(
+            contract,
+            rule,
+            test,
+            tenantId,
+            context,
+          );
           break;
         default:
           throw new Error(`Unsupported rule type: ${rule.type}`);
       }
-
     } catch (error) {
       test.result = 'error';
       test.error = (error as Error).message;
@@ -307,7 +335,7 @@ export class ContractTestingFramework extends EventEmitter {
     contract: Contract,
     rule: ContractRule,
     test: ContractTest,
-    context?: any
+    context?: any,
   ): Promise<void> {
     if (!contract.schema) {
       throw new Error('Schema contract requires schema definition');
@@ -332,7 +360,7 @@ export class ContractTestingFramework extends EventEmitter {
     rule: ContractRule,
     test: ContractTest,
     tenantId: string,
-    context?: any
+    context?: any,
   ): Promise<void> {
     // Execute database query or API call to verify behavior
     let actualResult: any;
@@ -343,11 +371,13 @@ export class ContractTestingFramework extends EventEmitter {
           // PostgreSQL query
           const result = await pool.query(rule.actualQuery);
           actualResult = result.rows;
-        } else if (rule.actualQuery.toLowerCase().startsWith('match') || 
-                   rule.actualQuery.toLowerCase().startsWith('return')) {
+        } else if (
+          rule.actualQuery.toLowerCase().startsWith('match') ||
+          rule.actualQuery.toLowerCase().startsWith('return')
+        ) {
           // Neo4j query
           const result = await neo.run(rule.actualQuery, {}, { tenantId });
-          actualResult = result.records.map(record => record.toObject());
+          actualResult = result.records.map((record) => record.toObject());
         }
       } else if (contract.type === 'api') {
         // Would make HTTP request here
@@ -362,7 +392,9 @@ export class ContractTestingFramework extends EventEmitter {
     test.expectedResult = rule.expectedResult;
 
     // Compare results
-    if (this.compareResults(actualResult, rule.expectedResult, rule.condition)) {
+    if (
+      this.compareResults(actualResult, rule.expectedResult, rule.condition)
+    ) {
       test.result = 'pass';
     } else {
       test.result = 'fail';
@@ -375,7 +407,7 @@ export class ContractTestingFramework extends EventEmitter {
     rule: ContractRule,
     test: ContractTest,
     tenantId: string,
-    context?: any
+    context?: any,
   ): Promise<void> {
     // Test backward compatibility by running queries/operations from previous versions
     if (rule.actualQuery) {
@@ -386,13 +418,15 @@ export class ContractTestingFramework extends EventEmitter {
             test.actualResult = { success: true, rowCount: result.rowCount };
           } else {
             const result = await neo.run(rule.actualQuery, {}, { tenantId });
-            test.actualResult = { success: true, recordCount: result.records.length };
+            test.actualResult = {
+              success: true,
+              recordCount: result.records.length,
+            };
           }
         }
 
         test.expectedResult = { success: true };
         test.result = 'pass';
-
       } catch (error) {
         test.actualResult = { success: false, error: (error as Error).message };
         test.expectedResult = { success: true };
@@ -409,7 +443,7 @@ export class ContractTestingFramework extends EventEmitter {
     rule: ContractRule,
     test: ContractTest,
     tenantId: string,
-    context?: any
+    context?: any,
   ): Promise<void> {
     if (!rule.actualQuery) {
       throw new Error('Performance test requires query');
@@ -428,7 +462,6 @@ export class ContractTestingFramework extends EventEmitter {
       }
 
       executionTime = Date.now() - startTime;
-      
     } catch (error) {
       test.result = 'error';
       test.error = (error as Error).message;
@@ -439,7 +472,8 @@ export class ContractTestingFramework extends EventEmitter {
     test.expectedResult = rule.expectedResult;
 
     // Check if execution time meets performance requirements
-    const maxTime = rule.expectedResult.maxExecutionTime || rule.timeout || 5000;
+    const maxTime =
+      rule.expectedResult.maxExecutionTime || rule.timeout || 5000;
     if (executionTime <= maxTime) {
       test.result = 'pass';
     } else {
@@ -448,7 +482,11 @@ export class ContractTestingFramework extends EventEmitter {
     }
   }
 
-  private compareResults(actual: any, expected: any, condition: string): boolean {
+  private compareResults(
+    actual: any,
+    expected: any,
+    condition: string,
+  ): boolean {
     try {
       // Simple comparison logic - could be extended with more sophisticated comparison
       switch (condition) {
@@ -458,17 +496,25 @@ export class ContractTestingFramework extends EventEmitter {
           return JSON.stringify(actual) !== JSON.stringify(expected);
         case 'contains':
           if (Array.isArray(actual)) {
-            return actual.some(item => JSON.stringify(item).includes(JSON.stringify(expected)));
+            return actual.some((item) =>
+              JSON.stringify(item).includes(JSON.stringify(expected)),
+            );
           }
           return JSON.stringify(actual).includes(JSON.stringify(expected));
         case 'count':
-          const actualCount = Array.isArray(actual) ? actual.length : (actual?.length || 0);
+          const actualCount = Array.isArray(actual)
+            ? actual.length
+            : actual?.length || 0;
           return actualCount === expected;
         case 'min_count':
-          const actualMinCount = Array.isArray(actual) ? actual.length : (actual?.length || 0);
+          const actualMinCount = Array.isArray(actual)
+            ? actual.length
+            : actual?.length || 0;
           return actualMinCount >= expected;
         case 'max_count':
-          const actualMaxCount = Array.isArray(actual) ? actual.length : (actual?.length || 0);
+          const actualMaxCount = Array.isArray(actual)
+            ? actual.length
+            : actual?.length || 0;
           return actualMaxCount <= expected;
         case 'exists':
           return actual !== null && actual !== undefined;
@@ -496,16 +542,20 @@ export class ContractTestingFramework extends EventEmitter {
       if (!rule.id) throw new Error(`Rule missing ID`);
       if (!rule.name) throw new Error(`Rule missing name: ${rule.id}`);
       if (!rule.type) throw new Error(`Rule missing type: ${rule.id}`);
-      if (!rule.condition) throw new Error(`Rule missing condition: ${rule.id}`);
+      if (!rule.condition)
+        throw new Error(`Rule missing condition: ${rule.id}`);
       if (rule.expectedResult === undefined) {
         throw new Error(`Rule missing expectedResult: ${rule.id}`);
       }
     }
   }
 
-  async testAllContracts(tenantId: string, contractType?: ContractType): Promise<ContractTestResult[]> {
+  async testAllContracts(
+    tenantId: string,
+    contractType?: ContractType,
+  ): Promise<ContractTestResult[]> {
     const results: ContractTestResult[] = [];
-    
+
     for (const contract of this.contracts.values()) {
       if (contractType && contract.type !== contractType) {
         continue;
@@ -528,10 +578,13 @@ export class ContractTestingFramework extends EventEmitter {
 
   listContracts(type?: ContractType): Contract[] {
     const contracts = Array.from(this.contracts.values());
-    return type ? contracts.filter(c => c.type === type) : contracts;
+    return type ? contracts.filter((c) => c.type === type) : contracts;
   }
 
-  getViolations(tenantId?: string, severity?: ViolationSeverity): ContractViolation[] {
+  getViolations(
+    tenantId?: string,
+    severity?: ViolationSeverity,
+  ): ContractViolation[] {
     // In a real implementation, this would query a persistent store
     return []; // Placeholder
   }
@@ -540,7 +593,12 @@ export class ContractTestingFramework extends EventEmitter {
     totalContracts: number;
     totalTests: number;
     passRate: number;
-    violationSummary: { critical: number; high: number; medium: number; low: number };
+    violationSummary: {
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    };
     executionTime: number;
     contractSummary: Array<{
       contractId: string;
@@ -551,24 +609,31 @@ export class ContractTestingFramework extends EventEmitter {
     }>;
   } {
     const totalContracts = results.length;
-    const totalTests = results.reduce((sum, r) => sum + r.passed + r.failed + r.errors + r.skipped, 0);
+    const totalTests = results.reduce(
+      (sum, r) => sum + r.passed + r.failed + r.errors + r.skipped,
+      0,
+    );
     const totalPassed = results.reduce((sum, r) => sum + r.passed, 0);
     const passRate = totalTests > 0 ? (totalPassed / totalTests) * 100 : 0;
     const executionTime = results.reduce((sum, r) => sum + r.executionTime, 0);
 
-    const violationSummary = results.reduce((sum, r) => ({
-      critical: sum.critical + r.summary.critical,
-      high: sum.high + r.summary.high,
-      medium: sum.medium + r.summary.medium,
-      low: sum.low + r.summary.low
-    }), { critical: 0, high: 0, medium: 0, low: 0 });
+    const violationSummary = results.reduce(
+      (sum, r) => ({
+        critical: sum.critical + r.summary.critical,
+        high: sum.high + r.summary.high,
+        medium: sum.medium + r.summary.medium,
+        low: sum.low + r.summary.low,
+      }),
+      { critical: 0, high: 0, medium: 0, low: 0 },
+    );
 
-    const contractSummary = results.map(r => ({
+    const contractSummary = results.map((r) => ({
       contractId: r.contractId,
       passed: r.passed,
       failed: r.failed,
-      passRate: r.passed + r.failed > 0 ? (r.passed / (r.passed + r.failed)) * 100 : 0,
-      violations: r.violations.length
+      passRate:
+        r.passed + r.failed > 0 ? (r.passed / (r.passed + r.failed)) * 100 : 0,
+      violations: r.violations.length,
     }));
 
     return {
@@ -577,7 +642,7 @@ export class ContractTestingFramework extends EventEmitter {
       passRate,
       violationSummary,
       executionTime,
-      contractSummary
+      contractSummary,
     };
   }
 
@@ -599,23 +664,27 @@ export class ContractTestingFramework extends EventEmitter {
           description: 'Validate request/response schema',
           condition: 'equals',
           expectedResult: { valid: true },
-          retryable: false
-        }
+          retryable: false,
+        },
       ],
       metadata: {
         createdAt: new Date(),
         updatedAt: new Date(),
         author: 'system',
-        tags: ['api', 'schema']
+        tags: ['api', 'schema'],
       },
       constraints: {
         maxExecutionTime: 5000,
-        maxRetries: 3
-      }
+        maxRetries: 3,
+      },
     };
   }
 
-  createDatabaseContract(id: string, name: string, checkQuery: string): Contract {
+  createDatabaseContract(
+    id: string,
+    name: string,
+    checkQuery: string,
+  ): Contract {
     return {
       id,
       name,
@@ -632,19 +701,19 @@ export class ContractTestingFramework extends EventEmitter {
           condition: 'exists',
           expectedResult: true,
           actualQuery: checkQuery,
-          retryable: true
-        }
+          retryable: true,
+        },
       ],
       metadata: {
         createdAt: new Date(),
         updatedAt: new Date(),
         author: 'system',
-        tags: ['database', 'structure']
+        tags: ['database', 'structure'],
       },
       constraints: {
         maxExecutionTime: 10000,
-        maxRetries: 2
-      }
+        maxRetries: 2,
+      },
     };
   }
 }

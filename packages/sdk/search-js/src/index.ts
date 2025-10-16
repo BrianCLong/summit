@@ -30,7 +30,10 @@ export class SearchClient {
     return res.json();
   }
 
-  async index(label: string, action: 'start' | 'stop'): Promise<Record<string, string>> {
+  async index(
+    label: string,
+    action: 'start' | 'stop',
+  ): Promise<Record<string, string>> {
     const res = await fetch(`${this.baseUrl}/search/index`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

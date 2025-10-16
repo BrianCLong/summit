@@ -30,13 +30,17 @@ export default class InvestigativeThreadQualityAgent {
     this.weights = this.loadWeights();
   }
 
-  private loadWeights(): { coherence: number; evidence: number; redundancy: number } {
+  private loadWeights(): {
+    coherence: number;
+    evidence: number;
+    redundancy: number;
+  } {
     try {
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = path.dirname(__filename);
       const refPath = path.resolve(
         __dirname,
-        '../../../AUTOMATE_SCORING_OF_RESPONSE_QUALITY_COMPLETED.md'
+        '../../../AUTOMATE_SCORING_OF_RESPONSE_QUALITY_COMPLETED.md',
       );
       // Read reference file from previous scoring pipeline
       fs.readFileSync(refPath, 'utf-8');
@@ -50,7 +54,7 @@ export default class InvestigativeThreadQualityAgent {
   private jaccard(a: string, b: string): number {
     const setA = new Set(a.toLowerCase().split(/\W+/).filter(Boolean));
     const setB = new Set(b.toLowerCase().split(/\W+/).filter(Boolean));
-    const intersection = new Set([...setA].filter(x => setB.has(x)));
+    const intersection = new Set([...setA].filter((x) => setB.has(x)));
     const union = new Set([...setA, ...setB]);
     return union.size ? intersection.size / union.size : 0;
   }
@@ -69,14 +73,15 @@ export default class InvestigativeThreadQualityAgent {
   private scoreEvidence(messages: ThreadMessage[]): number {
     if (!messages.length) return 0;
     const supported = messages.filter(
-      m => (m.evidence && m.evidence.length > 0) || /\bhttps?:\/\//.test(m.text)
+      (m) =>
+        (m.evidence && m.evidence.length > 0) || /\bhttps?:\/\//.test(m.text),
     ).length;
     return supported / messages.length;
   }
 
   private scoreRedundancy(messages: ThreadMessage[]): number {
     if (!messages.length) return 0;
-    const texts = messages.map(m => m.text.trim().toLowerCase());
+    const texts = messages.map((m) => m.text.trim().toLowerCase());
     const unique = new Set(texts);
     return 1 - unique.size / texts.length;
   }
@@ -94,7 +99,7 @@ export default class InvestigativeThreadQualityAgent {
 
   public async updateGraphMetadata(
     thread: ThreadInput,
-    scores: ThreadQualityScores
+    scores: ThreadQualityScores,
   ): Promise<void> {
     const session = this.neo4j.session();
     try {
@@ -109,10 +114,11 @@ export default class InvestigativeThreadQualityAgent {
     }
   }
 
-  public async scoreAndUpdate(thread: ThreadInput): Promise<ThreadQualityScores> {
+  public async scoreAndUpdate(
+    thread: ThreadInput,
+  ): Promise<ThreadQualityScores> {
     const scores = this.scoreThread(thread);
     await this.updateGraphMetadata(thread, scores);
     return scores;
   }
 }
-

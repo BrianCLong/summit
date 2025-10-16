@@ -76,7 +76,7 @@ export class SLOMetrics {
   private gatewayWrite = new PercentileTracker();
   private subscription = new PercentileTracker();
   private graph = new PercentileTracker();
-  private budgets: Record<EnvironmentKey, { limit: number; spend: number }>; 
+  private budgets: Record<EnvironmentKey, { limit: number; spend: number }>;
 
   constructor() {
     this.budgets = {
@@ -87,7 +87,10 @@ export class SLOMetrics {
     };
   }
 
-  observeGateway(operation: 'read' | 'write' | 'subscription', durationMs: number) {
+  observeGateway(
+    operation: 'read' | 'write' | 'subscription',
+    durationMs: number,
+  ) {
     gatewayHistogram.observe({ operation, method: operation }, durationMs);
     if (operation === 'read') this.gatewayRead.record(durationMs);
     else if (operation === 'write') this.gatewayWrite.record(durationMs);
@@ -122,7 +125,9 @@ export class SLOMetrics {
   }
 
   getCostSnapshot(): CostSnapshot {
-    const budgets: BudgetSnapshot[] = (Object.keys(this.budgets) as EnvironmentKey[]).map((env) => {
+    const budgets: BudgetSnapshot[] = (
+      Object.keys(this.budgets) as EnvironmentKey[]
+    ).map((env) => {
       const { limit, spend } = this.budgets[env];
       return {
         environment: env,

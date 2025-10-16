@@ -3,10 +3,10 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-schedule: "*/15 * * * *"   # as a CronJob by default
-planFile: "apps/mc-orchestrator/plans/bootstrap_company.yaml"
+schedule: '*/15 * * * *' # as a CronJob by default
+planFile: 'apps/mc-orchestrator/plans/bootstrap_company.yaml'
 
 serviceAccount:
   create: true
-  name: ""
+  name: ''
   annotations: {} # eks.amazonaws.com/role-arn: arn:aws:iam::<ACC>:role/companyos-mc-irsa

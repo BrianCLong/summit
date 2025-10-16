@@ -18,7 +18,9 @@ export interface Relationship {
 }
 
 export interface GraphStore {
-  getEntities(filters: Partial<{ type: string; q: string; limit: number }>): Promise<Entity[]>;
+  getEntities(
+    filters: Partial<{ type: string; q: string; limit: number }>,
+  ): Promise<Entity[]>;
   getRelationships(entityId: string): Promise<Relationship[]>;
   upsertEntity(e: Entity): Promise<Entity>;
   upsertRelationship(r: Relationship): Promise<Relationship>;
@@ -48,7 +50,9 @@ function relToRelationship(rel: Neo4jRelationship): Relationship {
   };
 }
 
-export function createGraphStore(driver: Driver = getNeo4jDriver()): GraphStore {
+export function createGraphStore(
+  driver: Driver = getNeo4jDriver(),
+): GraphStore {
   return {
     async getEntities(filters = {}) {
       const session = driver.session();

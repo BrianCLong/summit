@@ -1,6 +1,7 @@
 # ADR-007: Granite Docling 258M for Build Artifact Intelligence
 
 ## Status
+
 Accepted – 2025-09-02
 
 ## Context

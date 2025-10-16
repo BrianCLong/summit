@@ -4,34 +4,35 @@ MC Platform v0.3.4 - Autonomy Tier-3 Expansion
 Multi-tenant autonomy with comprehensive safety validation for TENANT_004/005
 """
 
-import json
-import time
 import asyncio
-import uuid
-import hashlib
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any, Optional, Set, Tuple, Union
-from dataclasses import dataclass, asdict
-from enum import Enum
+import json
 import logging
-from pathlib import Path
 import sqlite3
 import threading
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from pathlib import Path
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class AutonomyTier(Enum):
     TIER_1 = "tier_1"  # Alert only
     TIER_2 = "tier_2"  # Throttle + automated response
     TIER_3 = "tier_3"  # Full autonomy with safety validation
 
+
 class SafetyStatus(Enum):
     SAFE = "safe"
     WARNING = "warning"
     CRITICAL = "critical"
     BLOCKED = "blocked"
+
 
 class ActionType(Enum):
     QUERY_OPTIMIZATION = "query_optimization"
@@ -41,54 +42,63 @@ class ActionType(Enum):
     ALERT_RESPONSE = "alert_response"
     BUDGET_ADJUSTMENT = "budget_adjustment"
 
+
 @dataclass
 class SafetyCheck:
     """Safety validation check result"""
+
     check_id: str
     check_type: str
     status: SafetyStatus
     score: float  # 0.0 to 1.0, higher is safer
     reasoning: str
     timestamp: datetime
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
+
 
 @dataclass
 class AutonomousAction:
     """Autonomous action with safety validation"""
+
     action_id: str
     tenant_id: str
     action_type: ActionType
     description: str
-    proposed_changes: Dict[str, Any]
-    safety_checks: List[SafetyCheck]
+    proposed_changes: dict[str, Any]
+    safety_checks: list[SafetyCheck]
     overall_safety_score: float
     status: str  # pending, approved, executed, rejected
     timestamp: datetime
-    execution_time: Optional[datetime] = None
-    rollback_plan: Optional[Dict[str, Any]] = None
+    execution_time: datetime | None = None
+    rollback_plan: dict[str, Any] | None = None
+
 
 @dataclass
 class AutonomyConfiguration:
     """Tenant autonomy configuration"""
+
     tenant_id: str
     tier: AutonomyTier
     enabled: bool
     safety_threshold: float  # Minimum safety score required
-    allowed_actions: Set[ActionType]
+    allowed_actions: set[ActionType]
     max_actions_per_hour: int
     compensation_rate_threshold: float  # Maximum acceptable compensation rate
     last_updated: datetime
 
+
 @dataclass
 class TenantMetrics:
     """Tenant performance and safety metrics"""
+
     tenant_id: str
     success_rate: float
     compensation_rate: float
     avg_response_time_ms: float
     safety_incidents: int
     autonomous_actions_24h: int
-    last_incident: Optional[datetime]
+    last_incident: datetime | None
+
 
 class AutonomyTier3Service:
     """Tier-3 autonomy service with comprehensive safety validation"""
@@ -96,8 +106,8 @@ class AutonomyTier3Service:
     def __init__(self, db_path: str = "services/autonomy/autonomy.db"):
         self.db_path = db_path
         self.db_lock = threading.RLock()
-        self.tenant_configs: Dict[str, AutonomyConfiguration] = {}
-        self.active_actions: Dict[str, AutonomousAction] = {}
+        self.tenant_configs: dict[str, AutonomyConfiguration] = {}
+        self.active_actions: dict[str, AutonomousAction] = {}
         self.safety_validators = {}
 
         # Initialize database and configurations
@@ -112,7 +122,8 @@ class AutonomyTier3Service:
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS tenant_configs (
                     tenant_id TEXT PRIMARY KEY,
                     tier TEXT NOT NULL,
@@ -123,9 +134,11 @@ class AutonomyTier3Service:
                     compensation_rate_threshold REAL NOT NULL,
                     last_updated TEXT NOT NULL
                 )
-            """)
+            """
+            )
 
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS autonomous_actions (
                     action_id TEXT PRIMARY KEY,
                     tenant_id TEXT NOT NULL,
@@ -139,9 +152,11 @@ class AutonomyTier3Service:
                     execution_time TEXT,
                     rollback_plan TEXT
                 )
-            """)
+            """
+            )
 
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS safety_incidents (
                     incident_id TEXT PRIMARY KEY,
                     tenant_id TEXT NOT NULL,
@@ -152,11 +167,16 @@ class AutonomyTier3Service:
                     timestamp TEXT NOT NULL,
                     resolved BOOLEAN NOT NULL DEFAULT FALSE
                 )
-            """)
+            """
+            )
 
             # Create indexes for performance
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_actions_tenant ON autonomous_actions (tenant_id, timestamp)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_incidents_tenant ON safety_incidents (tenant_id, timestamp)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_actions_tenant ON autonomous_actions (tenant_id, timestamp)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_incidents_tenant ON safety_incidents (tenant_id, timestamp)"
+            )
 
             conn.commit()
 
@@ -171,45 +191,45 @@ class AutonomyTier3Service:
                 allowed_actions={
                     ActionType.QUERY_OPTIMIZATION,
                     ActionType.CACHE_MANAGEMENT,
-                    ActionType.LOAD_BALANCING
+                    ActionType.LOAD_BALANCING,
                 },
                 max_actions_per_hour=5,
                 compensation_rate_threshold=0.005,  # 0.5% max compensation
-                last_updated=datetime.now(timezone.utc)
+                last_updated=datetime.now(timezone.utc),
             ),
             "TENANT_005": AutonomyConfiguration(
                 tenant_id="TENANT_005",
                 tier=AutonomyTier.TIER_3,
                 enabled=True,
                 safety_threshold=0.85,  # Even higher safety requirement
-                allowed_actions={
-                    ActionType.CACHE_MANAGEMENT,
-                    ActionType.ALERT_RESPONSE
-                },
+                allowed_actions={ActionType.CACHE_MANAGEMENT, ActionType.ALERT_RESPONSE},
                 max_actions_per_hour=3,
                 compensation_rate_threshold=0.003,  # 0.3% max compensation
-                last_updated=datetime.now(timezone.utc)
-            )
+                last_updated=datetime.now(timezone.utc),
+            ),
         }
 
         # Save to database
         with sqlite3.connect(self.db_path) as conn:
             for config in configs.values():
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT OR REPLACE INTO tenant_configs
                     (tenant_id, tier, enabled, safety_threshold, allowed_actions,
                      max_actions_per_hour, compensation_rate_threshold, last_updated)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    config.tenant_id,
-                    config.tier.value,
-                    config.enabled,
-                    config.safety_threshold,
-                    json.dumps([action.value for action in config.allowed_actions]),
-                    config.max_actions_per_hour,
-                    config.compensation_rate_threshold,
-                    config.last_updated.isoformat()
-                ))
+                """,
+                    (
+                        config.tenant_id,
+                        config.tier.value,
+                        config.enabled,
+                        config.safety_threshold,
+                        json.dumps([action.value for action in config.allowed_actions]),
+                        config.max_actions_per_hour,
+                        config.compensation_rate_threshold,
+                        config.last_updated.isoformat(),
+                    ),
+                )
             conn.commit()
 
         self.tenant_configs = configs
@@ -222,11 +242,16 @@ class AutonomyTier3Service:
             "tenant_isolation": self._validate_tenant_isolation,
             "rollback_feasibility": self._validate_rollback_feasibility,
             "compliance_check": self._validate_compliance,
-            "performance_impact": self._validate_performance_impact
+            "performance_impact": self._validate_performance_impact,
         }
 
-    async def propose_autonomous_action(self, tenant_id: str, action_type: ActionType,
-                                      description: str, proposed_changes: Dict[str, Any]) -> str:
+    async def propose_autonomous_action(
+        self,
+        tenant_id: str,
+        action_type: ActionType,
+        description: str,
+        proposed_changes: dict[str, Any],
+    ) -> str:
         """Propose an autonomous action with safety validation"""
 
         if tenant_id not in self.tenant_configs:
@@ -267,16 +292,20 @@ class AutonomyTier3Service:
             overall_safety_score=overall_safety_score,
             status="pending",
             timestamp=datetime.now(timezone.utc),
-            rollback_plan=rollback_plan
+            rollback_plan=rollback_plan,
         )
 
         # Auto-approve if safety score meets threshold
         if overall_safety_score >= config.safety_threshold:
             action.status = "approved"
-            logger.info(f"Auto-approved action {action_id} for {tenant_id} (safety: {overall_safety_score:.3f})")
+            logger.info(
+                f"Auto-approved action {action_id} for {tenant_id} (safety: {overall_safety_score:.3f})"
+            )
         else:
             action.status = "rejected"
-            logger.warning(f"Rejected action {action_id} for {tenant_id} (safety: {overall_safety_score:.3f})")
+            logger.warning(
+                f"Rejected action {action_id} for {tenant_id} (safety: {overall_safety_score:.3f})"
+            )
 
         # Save to database
         await self._save_action(action)
@@ -284,8 +313,9 @@ class AutonomyTier3Service:
 
         return action_id
 
-    async def _perform_safety_validation(self, tenant_id: str, action_type: ActionType,
-                                       proposed_changes: Dict[str, Any]) -> List[SafetyCheck]:
+    async def _perform_safety_validation(
+        self, tenant_id: str, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> list[SafetyCheck]:
         """Perform comprehensive safety validation"""
         checks = []
 
@@ -295,8 +325,9 @@ class AutonomyTier3Service:
 
         return checks
 
-    async def _validate_impact(self, tenant_id: str, action_type: ActionType,
-                             proposed_changes: Dict[str, Any]) -> SafetyCheck:
+    async def _validate_impact(
+        self, tenant_id: str, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> SafetyCheck:
         """Validate potential impact of the action"""
 
         # Simulate impact assessment
@@ -306,7 +337,7 @@ class AutonomyTier3Service:
             ActionType.LOAD_BALANCING: 0.15,
             ActionType.RESOURCE_SCALING: 0.3,
             ActionType.ALERT_RESPONSE: 0.02,
-            ActionType.BUDGET_ADJUSTMENT: 0.2
+            ActionType.BUDGET_ADJUSTMENT: 0.2,
         }
 
         base_impact = impact_factors.get(action_type, 0.1)
@@ -314,7 +345,11 @@ class AutonomyTier3Service:
         total_impact = min(1.0, base_impact + change_magnitude)
 
         safety_score = 1.0 - total_impact
-        status = SafetyStatus.SAFE if safety_score > 0.8 else SafetyStatus.WARNING if safety_score > 0.6 else SafetyStatus.CRITICAL
+        status = (
+            SafetyStatus.SAFE
+            if safety_score > 0.8
+            else SafetyStatus.WARNING if safety_score > 0.6 else SafetyStatus.CRITICAL
+        )
 
         return SafetyCheck(
             check_id=f"impact_{int(time.time() * 1000)}",
@@ -323,11 +358,12 @@ class AutonomyTier3Service:
             score=safety_score,
             reasoning=f"Estimated impact level: {total_impact:.3f}, complexity: {change_magnitude:.3f}",
             timestamp=datetime.now(timezone.utc),
-            metadata={"impact_level": total_impact, "change_complexity": change_magnitude}
+            metadata={"impact_level": total_impact, "change_complexity": change_magnitude},
         )
 
-    async def _validate_resource_safety(self, tenant_id: str, action_type: ActionType,
-                                      proposed_changes: Dict[str, Any]) -> SafetyCheck:
+    async def _validate_resource_safety(
+        self, tenant_id: str, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> SafetyCheck:
         """Validate resource safety constraints"""
 
         # Check resource bounds
@@ -356,11 +392,12 @@ class AutonomyTier3Service:
             score=safety_score,
             reasoning=reasoning,
             timestamp=datetime.now(timezone.utc),
-            metadata={"resource_bounds_ok": resource_safe}
+            metadata={"resource_bounds_ok": resource_safe},
         )
 
-    async def _validate_tenant_isolation(self, tenant_id: str, action_type: ActionType,
-                                        proposed_changes: Dict[str, Any]) -> SafetyCheck:
+    async def _validate_tenant_isolation(
+        self, tenant_id: str, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> SafetyCheck:
         """Validate tenant isolation is maintained"""
 
         # Check for cross-tenant impact
@@ -385,11 +422,12 @@ class AutonomyTier3Service:
             score=safety_score,
             reasoning=reasoning,
             timestamp=datetime.now(timezone.utc),
-            metadata={"cross_tenant_risk": action_type in cross_tenant_actions}
+            metadata={"cross_tenant_risk": action_type in cross_tenant_actions},
         )
 
-    async def _validate_rollback_feasibility(self, tenant_id: str, action_type: ActionType,
-                                           proposed_changes: Dict[str, Any]) -> SafetyCheck:
+    async def _validate_rollback_feasibility(
+        self, tenant_id: str, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> SafetyCheck:
         """Validate that the action can be rolled back"""
 
         # Check rollback feasibility
@@ -397,7 +435,7 @@ class AutonomyTier3Service:
             ActionType.QUERY_OPTIMIZATION,
             ActionType.CACHE_MANAGEMENT,
             ActionType.LOAD_BALANCING,
-            ActionType.BUDGET_ADJUSTMENT
+            ActionType.BUDGET_ADJUSTMENT,
         }
 
         is_rollbackable = action_type in rollbackable_actions
@@ -419,11 +457,12 @@ class AutonomyTier3Service:
             score=safety_score,
             reasoning=reasoning,
             timestamp=datetime.now(timezone.utc),
-            metadata={"rollbackable": rollback_safe, "irreversible_detected": has_irreversible}
+            metadata={"rollbackable": rollback_safe, "irreversible_detected": has_irreversible},
         )
 
-    async def _validate_compliance(self, tenant_id: str, action_type: ActionType,
-                                 proposed_changes: Dict[str, Any]) -> SafetyCheck:
+    async def _validate_compliance(
+        self, tenant_id: str, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> SafetyCheck:
         """Validate compliance requirements"""
 
         # Check compliance constraints
@@ -444,7 +483,11 @@ class AutonomyTier3Service:
         safety_score = 1.0 if compliance_safe else 0.1
         status = SafetyStatus.SAFE if compliance_safe else SafetyStatus.CRITICAL
 
-        reasoning = "All compliance checks passed" if compliance_safe else f"Violations: {', '.join(compliance_violations)}"
+        reasoning = (
+            "All compliance checks passed"
+            if compliance_safe
+            else f"Violations: {', '.join(compliance_violations)}"
+        )
 
         return SafetyCheck(
             check_id=f"compliance_{int(time.time() * 1000)}",
@@ -453,11 +496,12 @@ class AutonomyTier3Service:
             score=safety_score,
             reasoning=reasoning,
             timestamp=datetime.now(timezone.utc),
-            metadata={"violations": compliance_violations}
+            metadata={"violations": compliance_violations},
         )
 
-    async def _validate_performance_impact(self, tenant_id: str, action_type: ActionType,
-                                         proposed_changes: Dict[str, Any]) -> SafetyCheck:
+    async def _validate_performance_impact(
+        self, tenant_id: str, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> SafetyCheck:
         """Validate performance impact"""
 
         # Estimate performance impact
@@ -484,7 +528,7 @@ class AutonomyTier3Service:
             score=safety_score,
             reasoning=reasoning,
             timestamp=datetime.now(timezone.utc),
-            metadata={"performance_impact": performance_impact}
+            metadata={"performance_impact": performance_impact},
         )
 
     async def _check_rate_limits(self, tenant_id: str) -> bool:
@@ -496,22 +540,26 @@ class AutonomyTier3Service:
             cursor = conn.cursor()
             one_hour_ago = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*) FROM autonomous_actions
                 WHERE tenant_id = ? AND timestamp > ?
-            """, (tenant_id, one_hour_ago))
+            """,
+                (tenant_id, one_hour_ago),
+            )
 
             action_count = cursor.fetchone()[0]
 
         return action_count < config.max_actions_per_hour
 
-    def _generate_rollback_plan(self, action_type: ActionType,
-                              proposed_changes: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_rollback_plan(
+        self, action_type: ActionType, proposed_changes: dict[str, Any]
+    ) -> dict[str, Any]:
         """Generate rollback plan for the action"""
         rollback_plan = {
             "action_type": "rollback",
             "original_action": action_type.value,
-            "rollback_steps": []
+            "rollback_steps": [],
         }
 
         # Generate specific rollback steps based on action type
@@ -519,18 +567,18 @@ class AutonomyTier3Service:
             rollback_plan["rollback_steps"] = [
                 "Restore original query execution plan",
                 "Clear optimized query cache",
-                "Reset query statistics"
+                "Reset query statistics",
             ]
         elif action_type == ActionType.CACHE_MANAGEMENT:
             rollback_plan["rollback_steps"] = [
                 "Restore previous cache configuration",
-                "Rebuild cache with original settings"
+                "Rebuild cache with original settings",
             ]
         elif action_type == ActionType.LOAD_BALANCING:
             rollback_plan["rollback_steps"] = [
                 "Restore original load balancing weights",
                 "Drain connections gradually",
-                "Validate service health"
+                "Validate service health",
             ]
 
         # Store original values for rollback
@@ -577,25 +625,28 @@ class AutonomyTier3Service:
     async def _save_action(self, action: AutonomousAction):
         """Save action to database"""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR REPLACE INTO autonomous_actions
                 (action_id, tenant_id, action_type, description, proposed_changes,
                  safety_checks, overall_safety_score, status, timestamp,
                  execution_time, rollback_plan)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                action.action_id,
-                action.tenant_id,
-                action.action_type.value,
-                action.description,
-                json.dumps(action.proposed_changes),
-                json.dumps([asdict(check) for check in action.safety_checks], default=str),
-                action.overall_safety_score,
-                action.status,
-                action.timestamp.isoformat(),
-                action.execution_time.isoformat() if action.execution_time else None,
-                json.dumps(action.rollback_plan) if action.rollback_plan else None
-            ))
+            """,
+                (
+                    action.action_id,
+                    action.tenant_id,
+                    action.action_type.value,
+                    action.description,
+                    json.dumps(action.proposed_changes),
+                    json.dumps([asdict(check) for check in action.safety_checks], default=str),
+                    action.overall_safety_score,
+                    action.status,
+                    action.timestamp.isoformat(),
+                    action.execution_time.isoformat() if action.execution_time else None,
+                    json.dumps(action.rollback_plan) if action.rollback_plan else None,
+                ),
+            )
             conn.commit()
 
     def get_tenant_metrics(self, tenant_id: str) -> TenantMetrics:
@@ -604,17 +655,23 @@ class AutonomyTier3Service:
             cursor = conn.cursor()
 
             # Count recent actions
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*) FROM autonomous_actions
                 WHERE tenant_id = ? AND timestamp > ?
-            """, (tenant_id, (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()))
+            """,
+                (tenant_id, (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()),
+            )
             actions_24h = cursor.fetchone()[0]
 
             # Count safety incidents
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*) FROM safety_incidents
                 WHERE tenant_id = ? AND resolved = FALSE
-            """, (tenant_id,))
+            """,
+                (tenant_id,),
+            )
             safety_incidents = cursor.fetchone()[0]
 
         # Simulate other metrics
@@ -625,25 +682,29 @@ class AutonomyTier3Service:
             avg_response_time_ms=85.0 if tenant_id == "TENANT_004" else 92.0,
             safety_incidents=safety_incidents,
             autonomous_actions_24h=actions_24h,
-            last_incident=None  # No recent incidents in demo
+            last_incident=None,  # No recent incidents in demo
         )
 
-    def get_autonomy_report(self) -> Dict[str, Any]:
+    def get_autonomy_report(self) -> dict[str, Any]:
         """Generate comprehensive autonomy report"""
         report = {
             "report_metadata": {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "platform_version": "v0.3.4-mc",
-                "report_type": "autonomy_tier3"
+                "report_type": "autonomy_tier3",
             },
             "tenant_configs": {},
             "tenant_metrics": {},
             "safety_summary": {
                 "total_actions": len(self.active_actions),
-                "approved_actions": len([a for a in self.active_actions.values() if a.status == "approved"]),
-                "executed_actions": len([a for a in self.active_actions.values() if a.status == "executed"]),
-                "avg_safety_score": 0.0
-            }
+                "approved_actions": len(
+                    [a for a in self.active_actions.values() if a.status == "approved"]
+                ),
+                "executed_actions": len(
+                    [a for a in self.active_actions.values() if a.status == "executed"]
+                ),
+                "avg_safety_score": 0.0,
+            },
         }
 
         # Get metrics for each configured tenant
@@ -652,8 +713,10 @@ class AutonomyTier3Service:
                 "tier": self.tenant_configs[tenant_id].tier.value,
                 "enabled": self.tenant_configs[tenant_id].enabled,
                 "safety_threshold": self.tenant_configs[tenant_id].safety_threshold,
-                "allowed_actions": [action.value for action in self.tenant_configs[tenant_id].allowed_actions],
-                "max_actions_per_hour": self.tenant_configs[tenant_id].max_actions_per_hour
+                "allowed_actions": [
+                    action.value for action in self.tenant_configs[tenant_id].allowed_actions
+                ],
+                "max_actions_per_hour": self.tenant_configs[tenant_id].max_actions_per_hour,
             }
 
             metrics = self.get_tenant_metrics(tenant_id)
@@ -661,10 +724,13 @@ class AutonomyTier3Service:
 
         # Calculate average safety score
         if self.active_actions:
-            total_safety = sum(action.overall_safety_score for action in self.active_actions.values())
+            total_safety = sum(
+                action.overall_safety_score for action in self.active_actions.values()
+            )
             report["safety_summary"]["avg_safety_score"] = total_safety / len(self.active_actions)
 
         return report
+
 
 async def main():
     """Test the autonomy tier-3 service"""
@@ -682,8 +748,8 @@ async def main():
             "changes": {
                 "query_plan": "index_scan",
                 "cache_strategy": "aggressive",
-                "timeout_ms": 30000
-            }
+                "timeout_ms": 30000,
+            },
         },
         {
             "tenant_id": "TENANT_004",
@@ -692,18 +758,14 @@ async def main():
             "changes": {
                 "cache_operation": "selective_clear",
                 "max_age_hours": 24,
-                "preserve_hot_keys": True
-            }
+                "preserve_hot_keys": True,
+            },
         },
         {
             "tenant_id": "TENANT_005",
             "action_type": ActionType.CACHE_MANAGEMENT,
             "description": "Optimize cache configuration",
-            "changes": {
-                "cache_size_mb": 512,
-                "eviction_policy": "lru",
-                "ttl_seconds": 3600
-            }
+            "changes": {"cache_size_mb": 512, "eviction_policy": "lru", "ttl_seconds": 3600},
         },
         {
             "tenant_id": "TENANT_005",
@@ -712,9 +774,9 @@ async def main():
             "changes": {
                 "response_action": "scale_out",
                 "scale_factor": 1.2,
-                "cooldown_minutes": 15
-            }
-        }
+                "cooldown_minutes": 15,
+            },
+        },
     ]
 
     action_ids = []
@@ -728,7 +790,7 @@ async def main():
                 tenant_id=scenario["tenant_id"],
                 action_type=scenario["action_type"],
                 description=scenario["description"],
-                proposed_changes=scenario["changes"]
+                proposed_changes=scenario["changes"],
             )
 
             action = service.active_actions[action_id]
@@ -748,7 +810,7 @@ async def main():
             print(f"  ❌ Error: {e}")
 
     # Test safety validation
-    print(f"\n🛡️ Safety Validation Summary:")
+    print("\n🛡️ Safety Validation Summary:")
     for action_id in action_ids:
         if action_id in service.active_actions:
             action = service.active_actions[action_id]
@@ -757,7 +819,7 @@ async def main():
                 print(f"    - {check.check_type}: {check.score:.3f} ({check.status.value})")
 
     # Test tenant metrics
-    print(f"\n📊 Tenant Metrics:")
+    print("\n📊 Tenant Metrics:")
     for tenant_id in ["TENANT_004", "TENANT_005"]:
         metrics = service.get_tenant_metrics(tenant_id)
         print(f"  {tenant_id}:")
@@ -767,16 +829,17 @@ async def main():
         print(f"    Safety Incidents: {metrics.safety_incidents}")
 
     # Generate comprehensive report
-    print(f"\n📋 Autonomy Report:")
+    print("\n📋 Autonomy Report:")
     report = service.get_autonomy_report()
     print(json.dumps(report, indent=2, default=str))
 
     # Save evidence
     evidence_path = "evidence/v0.3.4/autonomy/tier3-expansion-test.json"
     Path(evidence_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(evidence_path, 'w') as f:
+    with open(evidence_path, "w") as f:
         json.dump(report, f, indent=2, default=str)
     print(f"\n✅ Evidence saved: {evidence_path}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

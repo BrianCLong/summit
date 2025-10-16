@@ -31,11 +31,11 @@ const requestSchema = {
       password: { type: 'string' },
       key: { type: 'string' },
       header: { type: 'string' },
-      accessToken: { type: 'string' }
-    }
+      accessToken: { type: 'string' },
+    },
   },
   timeout: { type: 'number', min: 1000, max: 60000 },
-  retries: { type: 'number', min: 0, max: 5 }
+  retries: { type: 'number', min: 0, max: 5 },
 };
 
 const paginatedRequestSchema = {
@@ -52,11 +52,11 @@ const paginatedRequestSchema = {
       password: { type: 'string' },
       key: { type: 'string' },
       header: { type: 'string' },
-      accessToken: { type: 'string' }
-    }
+      accessToken: { type: 'string' },
+    },
   },
   headers: { type: 'object' },
-  queryParams: { type: 'object' }
+  queryParams: { type: 'object' },
 };
 
 const webhookSchema = {
@@ -73,9 +73,9 @@ const webhookSchema = {
       password: { type: 'string' },
       key: { type: 'string' },
       header: { type: 'string' },
-      accessToken: { type: 'string' }
-    }
-  }
+      accessToken: { type: 'string' },
+    },
+  },
 };
 
 /**
@@ -152,19 +152,19 @@ router.post('/request', validateRequest(requestSchema), async (req, res) => {
       userId: req.user?.id,
       url: req.body.url,
       method: req.body.method || 'GET',
-      success: result.success
+      success: result.success,
     });
 
     res.json(result);
   } catch (error) {
     logger.error('REST connector request failed', {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -209,31 +209,35 @@ router.post('/request', validateRequest(requestSchema), async (req, res) => {
  *       200:
  *         description: Paginated data fetched successfully
  */
-router.post('/paginated', validateRequest(paginatedRequestSchema), async (req, res) => {
-  try {
-    const connector = new RestConnectorService();
-    const result = await connector.fetchPaginated(req.body);
+router.post(
+  '/paginated',
+  validateRequest(paginatedRequestSchema),
+  async (req, res) => {
+    try {
+      const connector = new RestConnectorService();
+      const result = await connector.fetchPaginated(req.body);
 
-    logger.info('Paginated data fetch', {
-      userId: req.user?.id,
-      baseUrl: req.body.baseUrl,
-      totalItems: result.totalItems,
-      pagesFetched: result.pagesFetched
-    });
+      logger.info('Paginated data fetch', {
+        userId: req.user?.id,
+        baseUrl: req.body.baseUrl,
+        totalItems: result.totalItems,
+        pagesFetched: result.pagesFetched,
+      });
 
-    res.json(result);
-  } catch (error) {
-    logger.error('Paginated fetch failed', {
-      userId: req.user?.id,
-      error: error.message
-    });
+      res.json(result);
+    } catch (error) {
+      logger.error('Paginated fetch failed', {
+        userId: req.user?.id,
+        error: error.message,
+      });
 
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+);
 
 /**
  * @swagger
@@ -275,9 +279,10 @@ router.post('/paginated', validateRequest(paginatedRequestSchema), async (req, r
  *       200:
  *         description: Webhook setup successful
  */
-router.post('/webhook', 
+router.post(
+  '/webhook',
   requirePermission('connector:manage'),
-  validateRequest(webhookSchema), 
+  validateRequest(webhookSchema),
   async (req, res) => {
     try {
       const connector = new RestConnectorService();
@@ -287,22 +292,22 @@ router.post('/webhook',
         userId: req.user?.id,
         webhookUrl: req.body.webhookUrl,
         targetUrl: req.body.targetUrl,
-        success: result.success
+        success: result.success,
       });
 
       res.json(result);
     } catch (error) {
       logger.error('Webhook setup failed', {
         userId: req.user?.id,
-        error: error.message
+        error: error.message,
       });
 
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
-  }
+  },
 );
 
 /**
@@ -348,8 +353,9 @@ router.post('/webhook',
  *       200:
  *         description: Batch requests completed
  */
-router.post('/batch', 
-  requirePermission('connector:manage'), 
+router.post(
+  '/batch',
+  requirePermission('connector:manage'),
   async (req, res) => {
     try {
       const { requests, ...options } = req.body;
@@ -357,7 +363,7 @@ router.post('/batch',
       if (!Array.isArray(requests) || requests.length === 0) {
         return res.status(400).json({
           success: false,
-          error: 'requests array is required'
+          error: 'requests array is required',
         });
       }
 
@@ -368,22 +374,22 @@ router.post('/batch',
         userId: req.user?.id,
         totalRequests: result.totalRequests,
         successfulRequests: result.successfulRequests,
-        failedRequests: result.failedRequests
+        failedRequests: result.failedRequests,
       });
 
       res.json(result);
     } catch (error) {
       logger.error('Batch requests failed', {
         userId: req.user?.id,
-        error: error.message
+        error: error.message,
       });
 
       res.status(500).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
-  }
+  },
 );
 
 /**
@@ -407,14 +413,14 @@ router.get('/health', async (req, res) => {
       status: 'healthy',
       service: 'rest-connector',
       ...health,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       status: 'unhealthy',
       service: 'rest-connector',
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -464,32 +470,32 @@ router.get('/github/:owner/:repo/issues', async (req, res) => {
       maxPages: 5,
       auth: token ? { type: 'bearer', token } : undefined,
       headers: {
-        'Accept': 'application/vnd.github.v3+json'
+        Accept: 'application/vnd.github.v3+json',
       },
       queryParams: {
         state: 'all',
         sort: 'updated',
-        direction: 'desc'
-      }
+        direction: 'desc',
+      },
     });
 
     logger.info('GitHub issues fetched', {
       userId: req.user?.id,
       owner,
       repo,
-      totalIssues: result.totalItems
+      totalIssues: result.totalItems,
     });
 
     res.json(result);
   } catch (error) {
     logger.error('GitHub issues fetch failed', {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -519,7 +525,7 @@ router.get('/slack/channels', async (req, res) => {
     if (!token) {
       return res.status(400).json({
         success: false,
-        error: 'Slack token required in X-Slack-Token header'
+        error: 'Slack token required in X-Slack-Token header',
       });
     }
 
@@ -531,25 +537,25 @@ router.get('/slack/channels', async (req, res) => {
       maxPages: 10,
       auth: { type: 'bearer', token },
       queryParams: {
-        types: 'public_channel,private_channel'
-      }
+        types: 'public_channel,private_channel',
+      },
     });
 
     logger.info('Slack channels fetched', {
       userId: req.user?.id,
-      totalChannels: result.totalItems
+      totalChannels: result.totalItems,
     });
 
     res.json(result);
   } catch (error) {
     logger.error('Slack channels fetch failed', {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });

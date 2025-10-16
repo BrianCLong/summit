@@ -1,4 +1,3 @@
-
 // conductor-ui/frontend/src/components/graph/SloHintBadge.tsx
 import React from 'react';
 

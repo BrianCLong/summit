@@ -7,6 +7,7 @@ version: latest
 ---
 
 # Objectives
+
 - **Zero‑drama deploys**: Blue/green with health checks + instant rollback.
 - **Always preview**: Per‑PR ephemeral docs environments with bot comments.
 - **Resilient delivery**: Dual‑CDN (primary/secondary) with synthetics + header parity checks.
@@ -18,7 +19,9 @@ version: latest
 # Track A — PR Preview Environments
 
 ## A1) Build & publish preview per PR
+
 **`.github/workflows/docs-preview.yml`**
+
 ```yaml
 name: Docs PR Preview
 on: [pull_request]
@@ -46,6 +49,7 @@ jobs:
 ```
 
 ## A2) Gate with checks
+
 - Run pa11y, Lighthouse CI, link check against the preview URL before merge (reuse existing jobs but target preview).
 
 ---
@@ -53,20 +57,42 @@ jobs:
 # Track B — Blue/Green Deploys with Health Gates
 
 ## B1) Artifact hashing & manifest
+
 **`scripts/deploy/hash-manifest.js`**
+
 ```js
-const fs=require('fs');
-const path=require('path');
-const crypto=require('crypto');
-const root='docs-site/build';
-const files=[]; (function walk(d){ for(const f of fs.readdirSync(d)){ const p=path.join(d,f), s=fs.statSync(p); s.isDirectory()?walk(p):files.push(p);} }) (root);
-const manifest=files.map(p=>({ path: p.replace(/^docs-site\/build\//,''), sha256: crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'), bytes: fs.statSync(p).size }));
-fs.writeFileSync('deploy-manifest.json', JSON.stringify({ created: new Date().toISOString(), files: manifest }, null, 2));
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const root = 'docs-site/build';
+const files = [];
+(function walk(d) {
+  for (const f of fs.readdirSync(d)) {
+    const p = path.join(d, f),
+      s = fs.statSync(p);
+    s.isDirectory() ? walk(p) : files.push(p);
+  }
+})(root);
+const manifest = files.map((p) => ({
+  path: p.replace(/^docs-site\/build\//, ''),
+  sha256: crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),
+  bytes: fs.statSync(p).size,
+}));
+fs.writeFileSync(
+  'deploy-manifest.json',
+  JSON.stringify(
+    { created: new Date().toISOString(), files: manifest },
+    null,
+    2,
+  ),
+);
 console.log('Wrote deploy-manifest.json with', manifest.length, 'files');
 ```
 
 ## B2) Blue/green switch (stub)
+
 **`.github/workflows/docs-bluegreen.yml`**
+
 ```yaml
 name: Docs Blue/Green
 on: [workflow_dispatch]
@@ -96,7 +122,9 @@ jobs:
 # Track C — Multi‑CDN Failover (Primary + Secondary)
 
 ## C1) Header parity & gzip/brotli checks
+
 **`scripts/cdn/header-parity.sh`**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -110,7 +138,9 @@ done
 ```
 
 ## C2) Synthetic parity probe
+
 **`.github/workflows/cdn-parity.yml`**
+
 ```yaml
 name: CDN Parity Probe
 on:
@@ -134,24 +164,37 @@ jobs:
 # Track D — Index Coverage: Sitemaps, Robots, & Search Console Stub
 
 ## D1) Versioned sitemaps
+
 **`scripts/search/gen-sitemaps.js`**
+
 ```js
-const fs=require('fs');
-const path=require('path');
-const base='https://docs.intelgraph.example';
-function pages(dir){
-  const out=[]; (function walk(d){ for(const f of fs.readdirSync(d)){ const p=path.join(d,f), s=fs.statSync(p); s.isDirectory()?walk(p):/\.mdx?$/.test(f)&&out.push(p);} })(dir);
-  return out.map(p=> '/' + p.replace(/^docs\//,'').replace(/\.mdx?$/,''));
+const fs = require('fs');
+const path = require('path');
+const base = 'https://docs.intelgraph.example';
+function pages(dir) {
+  const out = [];
+  (function walk(d) {
+    for (const f of fs.readdirSync(d)) {
+      const p = path.join(d, f),
+        s = fs.statSync(p);
+      s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && out.push(p);
+    }
+  })(dir);
+  return out.map((p) => '/' + p.replace(/^docs\//, '').replace(/\.mdx?$/, ''));
 }
-function xml(urls){ return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(u=>`<url><loc>${base}${u}</loc></url>`).join('')}</urlset>` }
-const urls=pages('docs');
+function xml(urls) {
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${base}${u}</loc></url>`).join('')}</urlset>`;
+}
+const urls = pages('docs');
 fs.mkdirSync('docs-site/static', { recursive: true });
 fs.writeFileSync('docs-site/static/sitemap.xml', xml(urls));
 console.log('Sitemap URLs:', urls.length);
 ```
 
 ## D2) robots.txt
+
 **`docs-site/static/robots.txt`**
+
 ```
 User-agent: *
 Allow: /
@@ -159,23 +202,35 @@ Sitemap: https://docs.intelgraph.example/sitemap.xml
 ```
 
 ## D3) Index coverage report (stub)
+
 **`scripts/search/index-coverage.js`**
+
 ```js
-const fs=require('fs');
+const fs = require('fs');
 // Placeholder: read last production sitemap and compare to built routes
-const prodCount=Number(process.env.PROD_INDEXED||0);
-const built=fs.readFileSync('docs-site/static/sitemap.xml','utf8').match(/<url>/g)?.length||0;
-fs.writeFileSync('docs/ops/search/coverage.json', JSON.stringify({ built, prodIndexed: prodCount, gap: Math.max(0,built-prodCount) }, null, 2));
+const prodCount = Number(process.env.PROD_INDEXED || 0);
+const built =
+  fs.readFileSync('docs-site/static/sitemap.xml', 'utf8').match(/<url>/g)
+    ?.length || 0;
+fs.writeFileSync(
+  'docs/ops/search/coverage.json',
+  JSON.stringify(
+    { built, prodIndexed: prodCount, gap: Math.max(0, built - prodCount) },
+    null,
+    2,
+  ),
+);
 ```
 
 **Workflow** `.github/workflows/search-coverage.yml` (append to build):
+
 ```yaml
-      - name: Generate sitemap & coverage
-        run: |
-          node scripts/search/gen-sitemaps.js
-          node scripts/search/index-coverage.js
-      - uses: actions/upload-artifact@v4
-        with: { name: search-coverage, path: docs/ops/search/coverage.json }
+- name: Generate sitemap & coverage
+  run: |
+    node scripts/search/gen-sitemaps.js
+    node scripts/search/index-coverage.js
+- uses: actions/upload-artifact@v4
+  with: { name: search-coverage, path: docs/ops/search/coverage.json }
 ```
 
 ---
@@ -183,30 +238,72 @@ fs.writeFileSync('docs/ops/search/coverage.json', JSON.stringify({ built, prodIn
 # Track E — Cost & Carbon Budgets
 
 ## E1) CDN log parser → bytes & requests
+
 **`scripts/finops/cdn-report.js`**
+
 ```js
-const fs=require('fs');
+const fs = require('fs');
 // Expect newline-delimited log lines or CSV at logs/cdn.csv: ts, path, bytes
-const lines=(fs.existsSync('logs/cdn.csv')?fs.readFileSync('logs/cdn.csv','utf8').trim().split(/\n/):[]).slice(1);
-let bytes=0, reqs=0; for(const l of lines){ const parts=l.split(','); bytes+=Number(parts[2]||0); reqs++; }
-fs.mkdirSync('docs/ops/finops',{recursive:true});
-fs.writeFileSync('docs/ops/finops/usage.json', JSON.stringify({ bytes, reqs, period: new Date().toISOString().slice(0,10) }, null, 2));
+const lines = (
+  fs.existsSync('logs/cdn.csv')
+    ? fs.readFileSync('logs/cdn.csv', 'utf8').trim().split(/\n/)
+    : []
+).slice(1);
+let bytes = 0,
+  reqs = 0;
+for (const l of lines) {
+  const parts = l.split(',');
+  bytes += Number(parts[2] || 0);
+  reqs++;
+}
+fs.mkdirSync('docs/ops/finops', { recursive: true });
+fs.writeFileSync(
+  'docs/ops/finops/usage.json',
+  JSON.stringify(
+    { bytes, reqs, period: new Date().toISOString().slice(0, 10) },
+    null,
+    2,
+  ),
+);
 ```
 
 ## E2) Carbon estimate & budget check
+
 **`scripts/finops/carbon-budget.js`**
+
 ```js
-const fs=require('fs');
-const u=JSON.parse(fs.readFileSync('docs/ops/finops/usage.json','utf8'));
+const fs = require('fs');
+const u = JSON.parse(fs.readFileSync('docs/ops/finops/usage.json', 'utf8'));
 // simplistic: 0.5 kWh/GB data transfer; 400 gCO2e/kWh (region dependent)
-const gb=u.bytes/1e9; const kwh=gb*0.5; const co2=kwh*400; const budget=50000; // gCO2e/week
+const gb = u.bytes / 1e9;
+const kwh = gb * 0.5;
+const co2 = kwh * 400;
+const budget = 50000; // gCO2e/week
 const ok = co2 <= budget;
-fs.writeFileSync('docs/ops/finops/carbon.json', JSON.stringify({ gb: Number(gb.toFixed(3)), kwh: Number(kwh.toFixed(2)), gCO2e: Math.round(co2), budget, ok }, null, 2));
-if (!ok) { console.error('Carbon budget exceeded'); process.exit(1); }
+fs.writeFileSync(
+  'docs/ops/finops/carbon.json',
+  JSON.stringify(
+    {
+      gb: Number(gb.toFixed(3)),
+      kwh: Number(kwh.toFixed(2)),
+      gCO2e: Math.round(co2),
+      budget,
+      ok,
+    },
+    null,
+    2,
+  ),
+);
+if (!ok) {
+  console.error('Carbon budget exceeded');
+  process.exit(1);
+}
 ```
 
 ## E3) Weekly report workflow
+
 **`.github/workflows/finops.yml`**
+
 ```yaml
 name: Docs FinOps/Carbon
 on:
@@ -234,6 +331,7 @@ jobs:
 ---
 
 # Execution Plan (4–6 days)
+
 1. Enable **PR previews** with bot comments; target previews in LHCI/pa11y.
 2. Land **blue/green** workflow with health checks and manual switch step.
 3. Add **multi‑CDN parity** synthetics; track header parity and content hashes.
@@ -243,9 +341,9 @@ jobs:
 ---
 
 # Acceptance Criteria
+
 - Every PR posts a **Preview URL**; CI validates the preview before merge.
 - Blue/green deploy succeeds only after **health checks**, with easy rollback.
 - Parity probe shows two CDNs in sync; header parity script passes.
 - Versioned **sitemap.xml** and **robots.txt** ship; `coverage.json` uploaded.
 - Weekly **FinOps** artifact with bytes/requests; carbon budget triggers an issue when exceeded.
-

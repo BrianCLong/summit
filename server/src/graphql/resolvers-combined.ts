@@ -5,7 +5,7 @@ const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
 import { v040Resolvers } from './resolvers/v040/index';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 interface User {
   id: string;
@@ -66,9 +66,9 @@ export const resolvers = {
     },
     copilotGoals: async (_: any, { investigationId }: CopilotGoalsArgs) => {
       return investigationId
-        ? goals.filter(g => g.investigationId === String(investigationId))
+        ? goals.filter((g) => g.investigationId === String(investigationId))
         : goals;
-    }
+    },
   },
 
   Mutation: {
@@ -77,11 +77,15 @@ export const resolvers = {
     ...(aiResolvers.Mutation || {}),
     ...(annotationsResolvers.Mutation || {}),
     ...(v040Resolvers.Mutation || {}),
-    login: async (_: any, { input }: { input: LoginInput }, { req }: Context) => {
+    login: async (
+      _: any,
+      { input }: { input: LoginInput },
+      { req }: Context,
+    ) => {
       const { email, password } = input;
       const ipAddress = req?.ip;
       const userAgent = req?.get('User-Agent');
-      
+
       return await authService.login(email, password, ipAddress, userAgent);
     },
 
@@ -89,7 +93,10 @@ export const resolvers = {
       return await authService.register(input);
     },
 
-    createCopilotGoal: async (_: any, { text, investigationId }: CreateCopilotGoalArgs) => {
+    createCopilotGoal: async (
+      _: any,
+      { text, investigationId }: CreateCopilotGoalArgs,
+    ) => {
       if (!text || !text.trim()) {
         throw new Error('Goal text is required');
       }
@@ -105,7 +112,7 @@ export const resolvers = {
 
     logout: async () => {
       return true;
-    }
+    },
   },
 
   Subscription: {
@@ -113,16 +120,16 @@ export const resolvers = {
     ...(aiResolvers.Subscription || {}),
     ...(annotationsResolvers.Subscription || {}),
     investigationUpdated: {
-      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
+      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
     },
-    
+
     entityAdded: {
-      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
-    }
+      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED']),
+    },
   },
 
   User: {
-    fullName: (user: User) => `${user.firstName} ${user.lastName}`
+    fullName: (user: User) => `${user.firstName} ${user.lastName}`,
   },
 
   Entity: {

@@ -220,7 +220,9 @@ devCommand
       console.log(chalk.gray(`  Name: ${workflow.name}`));
       console.log(chalk.gray(`  Version: ${workflow.version}`));
       console.log(
-        chalk.gray(`  Steps: ${workflow.stages?.flatMap((s: any) => s.steps || []).length || 0}`),
+        chalk.gray(
+          `  Steps: ${workflow.stages?.flatMap((s: any) => s.steps || []).length || 0}`,
+        ),
       );
     } catch (error) {
       console.error(chalk.red('✗'), 'Workflow validation failed:');
@@ -232,7 +234,11 @@ devCommand
 devCommand
   .command('generate')
   .description('Generate workflow scaffolding')
-  .option('-t, --type <type>', 'Workflow type (api|scraping|build|test)', 'build')
+  .option(
+    '-t, --type <type>',
+    'Workflow type (api|scraping|build|test)',
+    'build',
+  )
   .option('-o, --output <path>', 'Output file path', 'maestro.yaml')
   .action(async (options) => {
     const templates = {
@@ -306,14 +312,22 @@ devCommand
     const yamlContent = yaml.dump(template, { indent: 2 });
     writeFileSync(options.output, yamlContent);
 
-    console.log(chalk.green('✓'), `Generated ${options.type} workflow: ${options.output}`);
+    console.log(
+      chalk.green('✓'),
+      `Generated ${options.type} workflow: ${options.output}`,
+    );
   });
 
 program.addCommand(devCommand);
 
 // Global error handler
 process.on('unhandledRejection', (reason, promise) => {
-  console.error(chalk.red('Unhandled Rejection at:'), promise, chalk.red('reason:'), reason);
+  console.error(
+    chalk.red('Unhandled Rejection at:'),
+    promise,
+    chalk.red('reason:'),
+    reason,
+  );
   process.exit(1);
 });
 
@@ -325,7 +339,10 @@ process.on('uncaughtException', (error) => {
 // Helper functions
 function getVersion(): string {
   try {
-    const packageJson = readFileSync(resolve(__dirname, '../package.json'), 'utf8');
+    const packageJson = readFileSync(
+      resolve(__dirname, '../package.json'),
+      'utf8',
+    );
     return JSON.parse(packageJson).version;
   } catch {
     return '1.0.0';
@@ -353,7 +370,9 @@ async function checkForUpdates() {
         console.log(chalk.yellow('\n📦 New version available!'));
         console.log(chalk.gray(`   Current: ${currentVersion}`));
         console.log(chalk.gray(`   Latest:  ${latestVersion}`));
-        console.log(chalk.gray(`   Run: npm install -g @intelgraph/maestro@latest\n`));
+        console.log(
+          chalk.gray(`   Run: npm install -g @intelgraph/maestro@latest\n`),
+        );
       }
     });
   } catch {
@@ -364,7 +383,11 @@ async function checkForUpdates() {
 // Main execution
 async function main() {
   // Show banner for help command or when no arguments
-  if (process.argv.length === 2 || process.argv.includes('--help') || process.argv.includes('-h')) {
+  if (
+    process.argv.length === 2 ||
+    process.argv.includes('--help') ||
+    process.argv.includes('-h')
+  ) {
     console.log(chalk.blue(banner));
     console.log(chalk.gray('Build orchestration that just works\n'));
   }

@@ -1,6 +1,7 @@
 # Maestro Conductor Operations Guide
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Monitoring](#monitoring)
@@ -15,6 +16,7 @@
 Maestro Conductor vNext is a distributed workflow orchestration platform designed for enterprise-scale operations. This guide covers operational aspects including monitoring, alerting, troubleshooting, and performance optimization.
 
 ### Key Components
+
 - **API Gateway**: GraphQL and REST endpoints
 - **Workflow Engine**: Core orchestration engine
 - **Executor Pool**: Distributed task execution
@@ -54,6 +56,7 @@ Maestro Conductor vNext is a distributed workflow orchestration platform designe
 ### Key Metrics
 
 #### System Metrics
+
 ```yaml
 # CPU & Memory
 - maestro_cpu_usage_percent
@@ -68,6 +71,7 @@ Maestro Conductor vNext is a distributed workflow orchestration platform designe
 ```
 
 #### Application Metrics
+
 ```yaml
 # Workflow Metrics
 - maestro_workflows_total
@@ -90,6 +94,7 @@ Maestro Conductor vNext is a distributed workflow orchestration platform designe
 ```
 
 #### Business Metrics
+
 ```yaml
 # Usage Metrics
 - maestro_api_calls_per_customer
@@ -112,7 +117,7 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - "maestro_alerts.yml"
+  - 'maestro_alerts.yml'
 
 scrape_configs:
   - job_name: 'maestro-api'
@@ -141,6 +146,7 @@ scrape_configs:
 ### Grafana Dashboards
 
 #### Main Dashboard Panels
+
 1. **System Overview**
    - CPU usage across all nodes
    - Memory utilization
@@ -180,8 +186,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Maestro API is down"
-          description: "The Maestro API has been down for more than 1 minute"
+          summary: 'Maestro API is down'
+          description: 'The Maestro API has been down for more than 1 minute'
 
       - alert: HighWorkflowFailureRate
         expr: rate(maestro_workflow_failures_total[5m]) / rate(maestro_workflow_runs_total[5m]) > 0.1
@@ -189,8 +195,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "High workflow failure rate"
-          description: "Workflow failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+          summary: 'High workflow failure rate'
+          description: 'Workflow failure rate is {{ $value | humanizePercentage }} over the last 5 minutes'
 
       - alert: DatabaseConnectionsExhausted
         expr: pg_stat_activity_count / pg_settings_max_connections > 0.9
@@ -198,8 +204,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Database connections nearly exhausted"
-          description: "Database is using {{ $value | humanizePercentage }} of available connections"
+          summary: 'Database connections nearly exhausted'
+          description: 'Database is using {{ $value | humanizePercentage }} of available connections'
 
       - alert: ExecutorPoolSaturated
         expr: maestro_executor_queue_length > 1000
@@ -207,41 +213,41 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Executor pool is saturated"
-          description: "Executor queue length is {{ $value }}, indicating overload"
+          summary: 'Executor pool is saturated'
+          description: 'Executor queue length is {{ $value }}, indicating overload'
 ```
 
 ### Warning Alerts
 
 ```yaml
-  - name: maestro_warnings
-    rules:
-      - alert: HighAPILatency
-        expr: histogram_quantile(0.95, rate(maestro_http_request_duration_seconds_bucket[5m])) > 2
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High API latency"
-          description: "95th percentile latency is {{ $value }}s"
+- name: maestro_warnings
+  rules:
+    - alert: HighAPILatency
+      expr: histogram_quantile(0.95, rate(maestro_http_request_duration_seconds_bucket[5m])) > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: 'High API latency'
+        description: '95th percentile latency is {{ $value }}s'
 
-      - alert: MemoryUsageHigh
-        expr: maestro_memory_usage_percent > 80
-        for: 10m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High memory usage"
-          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+    - alert: MemoryUsageHigh
+      expr: maestro_memory_usage_percent > 80
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: 'High memory usage'
+        description: 'Memory usage is {{ $value }}% on {{ $labels.instance }}'
 
-      - alert: DiskSpaceLow
-        expr: (1 - maestro_disk_free_bytes / maestro_disk_total_bytes) > 0.85
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Low disk space"
-          description: "Disk usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+    - alert: DiskSpaceLow
+      expr: (1 - maestro_disk_free_bytes / maestro_disk_total_bytes) > 0.85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: 'Low disk space'
+        description: 'Disk usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}'
 ```
 
 ### PagerDuty Integration
@@ -286,11 +292,13 @@ receivers:
 #### 1. High Workflow Failure Rate
 
 **Symptoms:**
+
 - Increased error rates in monitoring
 - User reports of failed workflows
 - Growing queue of retries
 
 **Diagnosis:**
+
 ```bash
 # Check recent workflow failures
 kubectl logs -l app=maestro-api --since=1h | grep "workflow_failed"
@@ -312,6 +320,7 @@ psql -h postgres -d maestro -c "
 ```
 
 **Resolution:**
+
 1. Scale up executor pool if resource constrained
 2. Check for code issues in failing workflows
 3. Verify external service dependencies
@@ -320,11 +329,13 @@ psql -h postgres -d maestro -c "
 #### 2. API Performance Degradation
 
 **Symptoms:**
+
 - Increased response times
 - Timeout errors
 - High CPU usage on API servers
 
 **Diagnosis:**
+
 ```bash
 # Check API server logs
 kubectl logs -l app=maestro-api --since=30m | grep -E "(slow|timeout|error)"
@@ -342,6 +353,7 @@ redis-cli --latency-history -h redis
 ```
 
 **Resolution:**
+
 1. Scale out API servers horizontally
 2. Optimize slow database queries
 3. Implement caching for frequent queries
@@ -350,11 +362,13 @@ redis-cli --latency-history -h redis
 #### 3. Database Connection Issues
 
 **Symptoms:**
+
 - "Too many connections" errors
 - Connection timeouts
 - Application startup failures
 
 **Diagnosis:**
+
 ```bash
 # Check current connections
 psql -h postgres -d maestro -c "
@@ -372,6 +386,7 @@ kubectl logs -l app=maestro-api | grep -i "connection"
 ```
 
 **Resolution:**
+
 1. Increase PostgreSQL max_connections
 2. Implement connection pooling (PgBouncer)
 3. Fix connection leaks in application code
@@ -380,6 +395,7 @@ kubectl logs -l app=maestro-api | grep -i "connection"
 ### Debugging Tools
 
 #### Log Analysis
+
 ```bash
 # Centralized logging with ELK stack
 curl -X GET "elasticsearch:9200/maestro-logs-*/_search" -H 'Content-Type: application/json' -d'
@@ -403,6 +419,7 @@ kubectl logs -l app=maestro-executor --since=1h --tail=500 | grep FATAL
 ```
 
 #### Performance Profiling
+
 ```bash
 # Enable Go pprof endpoint
 curl http://api:3000/debug/pprof/profile?seconds=30 > cpu.prof
@@ -418,6 +435,7 @@ go tool pprof goroutine.prof
 ```
 
 #### Database Analysis
+
 ```sql
 -- Check slow queries
 SELECT query, mean_time, calls, total_time
@@ -452,6 +470,7 @@ ORDER BY n_distinct DESC;
 ### Database Optimization
 
 #### PostgreSQL Configuration
+
 ```ini
 # postgresql.conf
 shared_buffers = 4GB                    # 25% of system RAM
@@ -476,6 +495,7 @@ log_disconnections = on
 ```
 
 #### Index Optimization
+
 ```sql
 -- Create indexes for common queries
 CREATE INDEX CONCURRENTLY idx_workflow_runs_status_created
@@ -500,6 +520,7 @@ ON workflow_runs (user_id, status, created_at DESC);
 ### Application Performance
 
 #### Connection Pooling
+
 ```yaml
 # PgBouncer configuration
 [databases]
@@ -519,6 +540,7 @@ server_round_robin = 1
 ```
 
 #### Redis Optimization
+
 ```yaml
 # redis.conf
 maxmemory 8gb
@@ -536,6 +558,7 @@ cluster-node-timeout 15000
 ```
 
 #### Caching Strategy
+
 ```typescript
 // Application-level caching
 import Redis from 'ioredis';
@@ -548,7 +571,7 @@ class CacheManager {
       host: 'redis',
       port: 6379,
       retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3
+      maxRetriesPerRequest: 3,
     });
   }
 
@@ -575,6 +598,7 @@ class CacheManager {
 ### Scaling Strategies
 
 #### Horizontal Scaling
+
 ```yaml
 # Kubernetes Horizontal Pod Autoscaler
 apiVersion: autoscaling/v2
@@ -617,31 +641,32 @@ spec:
 ```
 
 #### Load Balancing
+
 ```yaml
 # HAProxy configuration
 global
-  daemon
-  maxconn 4096
+daemon
+maxconn 4096
 
 defaults
-  mode http
-  timeout connect 5000ms
-  timeout client 50000ms
-  timeout server 50000ms
-  option httplog
+mode http
+timeout connect 5000ms
+timeout client 50000ms
+timeout server 50000ms
+option httplog
 
 frontend maestro_frontend
-  bind *:80
-  bind *:443 ssl crt /etc/ssl/certs/maestro.pem
-  redirect scheme https if !{ ssl_fc }
-  default_backend maestro_api
+bind *:80
+bind *:443 ssl crt /etc/ssl/certs/maestro.pem
+redirect scheme https if !{ ssl_fc }
+default_backend maestro_api
 
 backend maestro_api
-  balance roundrobin
-  option httpchk GET /health
-  server api1 maestro-api-1:3000 check
-  server api2 maestro-api-2:3000 check
-  server api3 maestro-api-3:3000 check
+balance roundrobin
+option httpchk GET /health
+server api1 maestro-api-1:3000 check
+server api2 maestro-api-2:3000 check
+server api3 maestro-api-3:3000 check
 ```
 
 ## Backup & Recovery
@@ -649,6 +674,7 @@ backend maestro_api
 ### Database Backup Strategy
 
 #### Automated Backups
+
 ```bash
 #!/bin/bash
 # backup-maestro.sh
@@ -684,6 +710,7 @@ echo "Backup completed: maestro_full_$DATE.backup"
 ```
 
 #### Point-in-Time Recovery
+
 ```bash
 # Enable WAL archiving in PostgreSQL
 archive_mode = on
@@ -727,6 +754,7 @@ echo "Recovery initiated to $RECOVERY_TARGET_TIME"
 ### Application State Backup
 
 #### Workflow Definitions
+
 ```bash
 #!/bin/bash
 # backup-workflows.sh
@@ -757,12 +785,14 @@ echo "Workflow backup completed"
 ### Disaster Recovery Plan
 
 #### RTO/RPO Targets
+
 - **Recovery Time Objective (RTO)**: 4 hours
 - **Recovery Point Objective (RPO)**: 15 minutes
 
 #### Recovery Procedures
 
 1. **Database Recovery**
+
    ```bash
    # Restore from latest backup
    ./restore-maestro.sh /backups/maestro_full_latest.backup
@@ -772,6 +802,7 @@ echo "Workflow backup completed"
    ```
 
 2. **Application Recovery**
+
    ```bash
    # Deploy application from last known good image
    kubectl set image deployment/maestro-api \
@@ -785,6 +816,7 @@ echo "Workflow backup completed"
    ```
 
 3. **Verification**
+
    ```bash
    # Health checks
    curl -f http://api.maestro.com/health
@@ -803,6 +835,7 @@ echo "Workflow backup completed"
 ### Security Monitoring
 
 #### Failed Authentication Attempts
+
 ```bash
 # Monitor auth failures
 kubectl logs -l app=maestro-api | grep "authentication_failed" | \
@@ -810,6 +843,7 @@ kubectl logs -l app=maestro-api | grep "authentication_failed" | \
 ```
 
 #### Unusual API Usage
+
 ```sql
 -- Detect unusual API patterns
 SELECT
@@ -833,28 +867,29 @@ kind: CronJob
 metadata:
   name: security-scan
 spec:
-  schedule: "0 2 * * *"  # Daily at 2 AM
+  schedule: '0 2 * * *' # Daily at 2 AM
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: trivy
-            image: aquasec/trivy:latest
-            command:
-            - trivy
-            - image
-            - --exit-code
-            - "1"
-            - --severity
-            - "HIGH,CRITICAL"
-            - maestro/api:latest
+            - name: trivy
+              image: aquasec/trivy:latest
+              command:
+                - trivy
+                - image
+                - --exit-code
+                - '1'
+                - --severity
+                - 'HIGH,CRITICAL'
+                - maestro/api:latest
           restartPolicy: OnFailure
 ```
 
 ### Access Control
 
 #### RBAC Configuration
+
 ```yaml
 # Kubernetes RBAC
 apiVersion: rbac.authorization.k8s.io/v1
@@ -862,12 +897,12 @@ kind: Role
 metadata:
   name: maestro-operator
 rules:
-- apiGroups: [""]
-  resources: ["pods", "services", "configmaps"]
-  verbs: ["get", "list", "watch", "create", "update", "patch"]
-- apiGroups: ["apps"]
-  resources: ["deployments", "replicasets"]
-  verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ['']
+    resources: ['pods', 'services', 'configmaps']
+    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
+  - apiGroups: ['apps']
+    resources: ['deployments', 'replicasets']
+    verbs: ['get', 'list', 'watch', 'create', 'update', 'patch']
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -875,9 +910,9 @@ kind: RoleBinding
 metadata:
   name: maestro-operator-binding
 subjects:
-- kind: ServiceAccount
-  name: maestro-operator
-  namespace: maestro
+  - kind: ServiceAccount
+    name: maestro-operator
+    namespace: maestro
 roleRef:
   kind: Role
   name: maestro-operator

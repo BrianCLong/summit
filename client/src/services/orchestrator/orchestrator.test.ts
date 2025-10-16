@@ -125,10 +125,7 @@ describe('LaunchableOrchestrator', () => {
 
     const record = await orchestrator.dispatchTask(task);
     expect(record.status).toBe('completed');
-    expect(events).toEqual([
-      `started:${task.id}`,
-      `completed:${task.id}`,
-    ]);
+    expect(events).toEqual([`started:${task.id}`, `completed:${task.id}`]);
   });
 
   it('validates mission presets against the orchestrator catalog', async () => {

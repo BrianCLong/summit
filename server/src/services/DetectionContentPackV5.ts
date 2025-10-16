@@ -5,7 +5,11 @@ export interface DetectionRule {
   id: string;
   name: string;
   description: string;
-  category: 'credential_access' | 'lateral_movement' | 'persistence' | 'defense_evasion';
+  category:
+    | 'credential_access'
+    | 'lateral_movement'
+    | 'persistence'
+    | 'defense_evasion';
   mitre_techniques: string[]; // ATT&CK technique IDs
   severity: 'critical' | 'high' | 'medium' | 'low';
   query: string; // Detection logic (KQL, SPL, etc.)
@@ -59,7 +63,8 @@ export class DetectionContentPackV5 {
     const credentialAccessRules: Partial<DetectionRule>[] = [
       {
         name: 'Suspicious LSASS Memory Access',
-        description: 'Detects potential credential dumping via LSASS memory access',
+        description:
+          'Detects potential credential dumping via LSASS memory access',
         category: 'credential_access',
         mitre_techniques: ['T1003.001'], // LSASS Memory
         severity: 'high',
@@ -81,32 +86,33 @@ export class DetectionContentPackV5 {
             description: 'Should not trigger on legitimate system processes',
             test_data: {
               ProcessCommandLine: 'wmiprvse.exe accessing lsass',
-              InitiatingProcessFileName: 'wmiprvse.exe'
+              InitiatingProcessFileName: 'wmiprvse.exe',
             },
             expected_result: 'no_match',
             status: 'passing',
-            last_run: new Date()
+            last_run: new Date(),
           },
           {
             name: 'Malicious LSASS dump via procdump',
             description: 'Should trigger on procdump targeting lsass',
             test_data: {
               ProcessCommandLine: 'procdump.exe -ma lsass.exe dump.dmp',
-              InitiatingProcessFileName: 'cmd.exe'
+              InitiatingProcessFileName: 'cmd.exe',
             },
             expected_result: 'match',
             status: 'passing',
-            last_run: new Date()
-          }
+            last_run: new Date(),
+          },
         ],
         references: [
           'https://attack.mitre.org/techniques/T1003/001/',
-          'https://docs.microsoft.com/en-us/sysinternals/downloads/procdump'
-        ]
+          'https://docs.microsoft.com/en-us/sysinternals/downloads/procdump',
+        ],
       },
       {
         name: 'DCSync Attack Detection',
-        description: 'Detects DCSync attacks using Directory Replication Service',
+        description:
+          'Detects DCSync attacks using Directory Replication Service',
         category: 'credential_access',
         mitre_techniques: ['T1003.006'], // DCSync
         severity: 'critical',
@@ -129,28 +135,28 @@ export class DetectionContentPackV5 {
             description: 'Should not trigger on legitimate DC replication',
             test_data: {
               SubjectUserName: 'DC01$',
-              Properties: '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+              Properties: '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2',
             },
             expected_result: 'no_match',
             status: 'passing',
-            last_run: new Date()
+            last_run: new Date(),
           },
           {
             name: 'DCSync attack by user account',
             description: 'Should trigger on user account performing DCSync',
             test_data: {
               SubjectUserName: 'attacker',
-              Properties: '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+              Properties: '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2',
             },
             expected_result: 'match',
             status: 'passing',
-            last_run: new Date()
-          }
+            last_run: new Date(),
+          },
         ],
         references: [
           'https://attack.mitre.org/techniques/T1003/006/',
-          'https://adsecurity.org/?p=1729'
-        ]
+          'https://adsecurity.org/?p=1729',
+        ],
       },
       {
         name: 'Kerberoasting Detection',
@@ -178,20 +184,19 @@ export class DetectionContentPackV5 {
             description: 'Should not trigger on normal service authentication',
             test_data: {
               RequestCount: 2,
-              TicketEncryptionType: '0x12'
+              TicketEncryptionType: '0x12',
             },
             expected_result: 'no_match',
             status: 'passing',
-            last_run: new Date()
-          }
+            last_run: new Date(),
+          },
         ],
-        references: [
-          'https://attack.mitre.org/techniques/T1558/003/'
-        ]
+        references: ['https://attack.mitre.org/techniques/T1558/003/'],
       },
       {
         name: 'Password Spraying Detection',
-        description: 'Detects password spraying attacks across multiple accounts',
+        description:
+          'Detects password spraying attacks across multiple accounts',
         category: 'credential_access',
         mitre_techniques: ['T1110.003'], // Password Spraying
         severity: 'medium',
@@ -214,17 +219,15 @@ export class DetectionContentPackV5 {
             description: 'Should not trigger on single user account lockouts',
             test_data: {
               FailedAccounts: 1,
-              AttemptedUsers: ['user1']
+              AttemptedUsers: ['user1'],
             },
             expected_result: 'no_match',
             status: 'passing',
-            last_run: new Date()
-          }
+            last_run: new Date(),
+          },
         ],
-        references: [
-          'https://attack.mitre.org/techniques/T1110/003/'
-        ]
-      }
+        references: ['https://attack.mitre.org/techniques/T1110/003/'],
+      },
     ];
 
     const deployedRules: DetectionRule[] = [];
@@ -236,7 +239,7 @@ export class DetectionContentPackV5 {
 
     this.logger.info('Credential access rules deployed', {
       count: deployedRules.length,
-      version: this.PACK_VERSION
+      version: this.PACK_VERSION,
     });
 
     return deployedRules;
@@ -264,9 +267,9 @@ export class DetectionContentPackV5 {
           excludeSourceHosts: ['admin-workstation', 'jump-server'],
           // Increase threshold to reduce noise
           minConnections: 5,
-          timeWindow: '15m'
+          timeWindow: '15m',
         },
-        expectedNoiseReduction: 0.25
+        expectedNoiseReduction: 0.25,
       },
       {
         ruleId: 'lateral_movement_wmi',
@@ -275,9 +278,9 @@ export class DetectionContentPackV5 {
           // Filter out legitimate management activities
           excludeNamespaces: ['root\\Microsoft\\Windows\\ManagementTools'],
           requireSuspiciousClass: true,
-          minTargetCount: 3
+          minTargetCount: 3,
         },
-        expectedNoiseReduction: 0.30
+        expectedNoiseReduction: 0.3,
       },
       {
         ruleId: 'lateral_movement_rdp',
@@ -286,55 +289,62 @@ export class DetectionContentPackV5 {
           // Account for legitimate RDP usage patterns
           excludeKnownAdminSessions: true,
           requireRapidMovement: true,
-          minSessionDuration: '30s'
+          minSessionDuration: '30s',
         },
-        expectedNoiseReduction: 0.20
-      }
+        expectedNoiseReduction: 0.2,
+      },
     ];
 
     const tuningResults = [];
 
     for (const tuning of lateralMovementTuning) {
-      const result = await this.applyRuleTuning(tuning.ruleId, tuning.improvements);
+      const result = await this.applyRuleTuning(
+        tuning.ruleId,
+        tuning.improvements,
+      );
       tuningResults.push({
         rule: tuning.name,
         noiseReduction: result.noiseReduction,
-        falsePositiveRate: result.newFpRate
+        falsePositiveRate: result.newFpRate,
       });
 
       this.logger.info('Lateral movement rule tuned', {
         ruleId: tuning.ruleId,
         noiseReduction: result.noiseReduction,
-        newFpRate: result.newFpRate
+        newFpRate: result.newFpRate,
       });
     }
 
     // Get post-tuning metrics
-    const postTuningMetrics = await this.getPostTuningMetrics('lateral_movement');
+    const postTuningMetrics =
+      await this.getPostTuningMetrics('lateral_movement');
 
-    const overallImprovement = this.calculateImprovement(baselineMetrics, postTuningMetrics);
+    const overallImprovement = this.calculateImprovement(
+      baselineMetrics,
+      postTuningMetrics,
+    );
 
     const report = {
       before: {
         totalAlerts: baselineMetrics.totalAlerts,
         falsePositives: baselineMetrics.falsePositives,
         fpRate: baselineMetrics.fpRate,
-        averageInvestigationTime: baselineMetrics.avgInvestigationTime
+        averageInvestigationTime: baselineMetrics.avgInvestigationTime,
       },
       after: {
         totalAlerts: postTuningMetrics.totalAlerts,
         falsePositives: postTuningMetrics.falsePositives,
         fpRate: postTuningMetrics.fpRate,
-        averageInvestigationTime: postTuningMetrics.avgInvestigationTime
+        averageInvestigationTime: postTuningMetrics.avgInvestigationTime,
       },
       improvement: overallImprovement,
-      detailsByRule: tuningResults
+      detailsByRule: tuningResults,
     };
 
     this.logger.info('Lateral movement rules tuning completed', {
       noiseReduction: overallImprovement,
-      targetReduction: 0.20,
-      success: overallImprovement >= 0.20
+      targetReduction: 0.2,
+      success: overallImprovement >= 0.2,
     });
 
     return report;
@@ -350,11 +360,13 @@ export class DetectionContentPackV5 {
         technique_id: 'T1053.005',
         technique_name: 'Scheduled Task/Job: Scheduled Task',
         tactic: 'Persistence',
-        description: 'Detection of suspicious scheduled task creation and modification',
+        description:
+          'Detection of suspicious scheduled task creation and modification',
         rules: [
           {
             name: 'Suspicious Scheduled Task Creation',
-            description: 'Detects creation of scheduled tasks with suspicious characteristics',
+            description:
+              'Detects creation of scheduled tasks with suspicious characteristics',
             query: `
               DeviceEvents
               | where ActionType == "ScheduledTaskCreated"
@@ -363,19 +375,22 @@ export class DetectionContentPackV5 {
               | project TimeGenerated, DeviceName, FileName, FolderPath, InitiatingProcessFileName
             `,
             severity: 'medium',
-            data_sources: ['microsoft_defender', 'windows_events']
-          }
-        ]
+            data_sources: ['microsoft_defender', 'windows_events'],
+          },
+        ],
       },
       {
         technique_id: 'T1547.001',
-        technique_name: 'Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder',
+        technique_name:
+          'Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder',
         tactic: 'Persistence',
-        description: 'Detection of persistence via registry run keys and startup folders',
+        description:
+          'Detection of persistence via registry run keys and startup folders',
         rules: [
           {
             name: 'Registry Run Key Persistence',
-            description: 'Detects modifications to registry run keys for persistence',
+            description:
+              'Detects modifications to registry run keys for persistence',
             query: `
               DeviceRegistryEvents
               | where RegistryKey has_any ("\\Run", "\\RunOnce", "\\RunOnceEx")
@@ -384,19 +399,22 @@ export class DetectionContentPackV5 {
               | project TimeGenerated, DeviceName, RegistryKey, RegistryValueName, RegistryValueData
             `,
             severity: 'medium',
-            data_sources: ['microsoft_defender', 'windows_registry_events']
-          }
-        ]
+            data_sources: ['microsoft_defender', 'windows_registry_events'],
+          },
+        ],
       },
       {
         technique_id: 'T1574.011',
-        technique_name: 'Hijack Execution Flow: Services Registry Permissions Weakness',
+        technique_name:
+          'Hijack Execution Flow: Services Registry Permissions Weakness',
         tactic: 'Persistence',
-        description: 'Detection of service registry manipulation for persistence',
+        description:
+          'Detection of service registry manipulation for persistence',
         rules: [
           {
             name: 'Service Registry Manipulation',
-            description: 'Detects suspicious modifications to service registry entries',
+            description:
+              'Detects suspicious modifications to service registry entries',
             query: `
               DeviceRegistryEvents
               | where RegistryKey has "\\services\\"
@@ -405,9 +423,9 @@ export class DetectionContentPackV5 {
               | project TimeGenerated, DeviceName, RegistryKey, RegistryValueName, RegistryValueData
             `,
             severity: 'high',
-            data_sources: ['microsoft_defender', 'windows_registry_events']
-          }
-        ]
+            data_sources: ['microsoft_defender', 'windows_registry_events'],
+          },
+        ],
       },
       {
         technique_id: 'T1136.001',
@@ -417,7 +435,8 @@ export class DetectionContentPackV5 {
         rules: [
           {
             name: 'Suspicious Local Account Creation',
-            description: 'Detects creation of local accounts outside normal processes',
+            description:
+              'Detects creation of local accounts outside normal processes',
             query: `
               SecurityEvent
               | where EventID == 4720
@@ -426,10 +445,10 @@ export class DetectionContentPackV5 {
               | project TimeGenerated, Computer, SubjectUserName, TargetUserName, SubjectDomainName
             `,
             severity: 'medium',
-            data_sources: ['windows_security_events']
-          }
-        ]
-      }
+            data_sources: ['windows_security_events'],
+          },
+        ],
+      },
     ];
 
     const deployedTechniques: MitreTechnique[] = [];
@@ -451,13 +470,18 @@ export class DetectionContentPackV5 {
           enabled: true,
           version: '1.0',
           test_cases: [],
-          references: [`https://attack.mitre.org/techniques/${technique.technique_id}/`]
+          references: [
+            `https://attack.mitre.org/techniques/${technique.technique_id}/`,
+          ],
         });
         deployedRules.push(deployedRule);
       }
 
       // Calculate detection coverage
-      const coverage = this.calculateDetectionCoverage(technique.technique_id, deployedRules);
+      const coverage = this.calculateDetectionCoverage(
+        technique.technique_id,
+        deployedRules,
+      );
 
       const deployedTechnique: MitreTechnique = {
         technique_id: technique.technique_id,
@@ -465,7 +489,7 @@ export class DetectionContentPackV5 {
         tactic: technique.tactic,
         description: technique.description,
         detection_coverage: coverage,
-        rules_count: deployedRules.length
+        rules_count: deployedRules.length,
       };
 
       deployedTechniques.push(deployedTechnique);
@@ -476,7 +500,7 @@ export class DetectionContentPackV5 {
       this.logger.info('Persistence technique added', {
         techniqueId: technique.technique_id,
         rulesCount: deployedRules.length,
-        coverage
+        coverage,
       });
     }
 
@@ -511,7 +535,7 @@ export class DetectionContentPackV5 {
             ruleId: rule.id,
             testCaseId: testCase.id,
             passed: result.passed,
-            details: result.details
+            details: result.details,
           });
         } catch (error) {
           failed++;
@@ -519,7 +543,7 @@ export class DetectionContentPackV5 {
             ruleId: rule.id,
             testCaseId: testCase.id,
             passed: false,
-            error: error.message
+            error: error.message,
           });
         }
       }
@@ -529,7 +553,7 @@ export class DetectionContentPackV5 {
       totalTests: passed + failed,
       passed,
       failed,
-      successRate: passed / (passed + failed)
+      successRate: passed / (passed + failed),
     });
 
     return { passed, failed, results };
@@ -553,30 +577,33 @@ export class DetectionContentPackV5 {
         alerts: metrics.totalAlerts,
         falsePositives: metrics.falsePositives,
         fpRate: metrics.fpRate,
-        truePositives: metrics.truePositives
+        truePositives: metrics.truePositives,
       });
 
       totalAlerts += metrics.totalAlerts;
       totalFalsePositives += metrics.falsePositives;
     }
 
-    const overallFpRate = totalAlerts > 0 ? totalFalsePositives / totalAlerts : 0;
+    const overallFpRate =
+      totalAlerts > 0 ? totalFalsePositives / totalAlerts : 0;
 
     return {
       overallFpRate,
-      ruleMetrics
+      ruleMetrics,
     };
   }
 
   // Private helper methods
 
-  private async deployDetectionRule(rule: Partial<DetectionRule>): Promise<DetectionRule> {
+  private async deployDetectionRule(
+    rule: Partial<DetectionRule>,
+  ): Promise<DetectionRule> {
     const detectionRule: DetectionRule = {
       id: `dr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       created_by: 'detection_pack_v5',
       created_at: new Date(),
       updated_at: new Date(),
-      ...rule
+      ...rule,
     } as DetectionRule;
 
     // Store in database
@@ -584,14 +611,14 @@ export class DetectionContentPackV5 {
       data: {
         ...detectionRule,
         test_cases: JSON.stringify(detectionRule.test_cases),
-        references: JSON.stringify(detectionRule.references)
-      }
+        references: JSON.stringify(detectionRule.references),
+      },
     });
 
     this.logger.debug('Detection rule deployed', {
       ruleId: detectionRule.id,
       name: detectionRule.name,
-      techniques: detectionRule.mitre_techniques
+      techniques: detectionRule.mitre_techniques,
     });
 
     return detectionRule;
@@ -603,7 +630,7 @@ export class DetectionContentPackV5 {
       totalAlerts: 10000,
       falsePositives: 2500,
       fpRate: 0.25,
-      avgInvestigationTime: 45 // minutes
+      avgInvestigationTime: 45, // minutes
     };
   }
 
@@ -612,12 +639,15 @@ export class DetectionContentPackV5 {
     return {
       totalAlerts: 8000,
       falsePositives: 1600,
-      fpRate: 0.20,
-      avgInvestigationTime: 35 // minutes
+      fpRate: 0.2,
+      avgInvestigationTime: 35, // minutes
     };
   }
 
-  private async applyRuleTuning(ruleId: string, improvements: any): Promise<any> {
+  private async applyRuleTuning(
+    ruleId: string,
+    improvements: any,
+  ): Promise<any> {
     // Mock tuning application - would update rule logic
     const noiseReduction = Math.random() * 0.2 + 0.2; // 20-40% reduction
     const newFpRate = Math.max(0.01, Math.random() * 0.03); // 1-3% FP rate
@@ -626,32 +656,40 @@ export class DetectionContentPackV5 {
       ruleId,
       improvements,
       noiseReduction,
-      newFpRate
+      newFpRate,
     });
 
     return {
       noiseReduction,
-      newFpRate
+      newFpRate,
     };
   }
 
   private calculateImprovement(baseline: any, postTuning: any): number {
-    const alertReduction = (baseline.totalAlerts - postTuning.totalAlerts) / baseline.totalAlerts;
-    const fpReduction = (baseline.falsePositives - postTuning.falsePositives) / baseline.falsePositives;
-    
+    const alertReduction =
+      (baseline.totalAlerts - postTuning.totalAlerts) / baseline.totalAlerts;
+    const fpReduction =
+      (baseline.falsePositives - postTuning.falsePositives) /
+      baseline.falsePositives;
+
     // Average improvement across metrics
     return (alertReduction + fpReduction) / 2;
   }
 
-  private calculateDetectionCoverage(techniqueId: string, rules: DetectionRule[]): number {
+  private calculateDetectionCoverage(
+    techniqueId: string,
+    rules: DetectionRule[],
+  ): number {
     // Mock coverage calculation - would analyze rule effectiveness
     const baseCoverage = 0.6; // 60% base coverage
     const ruleBonus = Math.min(0.3, rules.length * 0.1); // Up to 30% bonus for multiple rules
-    
+
     return Math.min(0.95, baseCoverage + ruleBonus); // Cap at 95%
   }
 
-  private async updateTechniqueDocumentation(technique: MitreTechnique): Promise<void> {
+  private async updateTechniqueDocumentation(
+    technique: MitreTechnique,
+  ): Promise<void> {
     const documentation = {
       technique_id: technique.technique_id,
       name: technique.technique_name,
@@ -662,36 +700,40 @@ export class DetectionContentPackV5 {
       last_updated: new Date(),
       references: [
         `https://attack.mitre.org/techniques/${technique.technique_id}/`,
-        'IntelGraph Detection Content Pack v5.0'
-      ]
+        'IntelGraph Detection Content Pack v5.0',
+      ],
     };
 
     // Store documentation
     await this.prisma.techniqueDocumentation.upsert({
       where: { technique_id: technique.technique_id },
       update: documentation,
-      create: documentation
+      create: documentation,
     });
 
     this.logger.debug('Technique documentation updated', {
       techniqueId: technique.technique_id,
-      coverage: technique.detection_coverage
+      coverage: technique.detection_coverage,
     });
   }
 
-  private async generateCoverageReport(techniques: MitreTechnique[]): Promise<void> {
+  private async generateCoverageReport(
+    techniques: MitreTechnique[],
+  ): Promise<void> {
     const report = {
       pack_version: this.PACK_VERSION,
       generated_at: new Date(),
       total_techniques: techniques.length,
-      average_coverage: techniques.reduce((sum, t) => sum + t.detection_coverage, 0) / techniques.length,
-      techniques: techniques.map(t => ({
+      average_coverage:
+        techniques.reduce((sum, t) => sum + t.detection_coverage, 0) /
+        techniques.length,
+      techniques: techniques.map((t) => ({
         id: t.technique_id,
         name: t.technique_name,
         coverage: Math.round(t.detection_coverage * 100),
-        rules: t.rules_count
+        rules: t.rules_count,
       })),
-      coverage_by_tactic: this.groupCoverageByTactic(techniques)
+      coverage_by_tactic: this.groupCoverageByTactic(techniques),
     };
 
     // Store coverage report
@@ -699,58 +741,66 @@ export class DetectionContentPackV5 {
       data: {
         pack_version: this.PACK_VERSION,
         report_data: JSON.stringify(report),
-        created_at: new Date()
-      }
+        created_at: new Date(),
+      },
     });
 
     this.logger.info('Coverage report generated', {
       totalTechniques: report.total_techniques,
-      averageCoverage: Math.round(report.average_coverage * 100)
+      averageCoverage: Math.round(report.average_coverage * 100),
     });
   }
 
   private groupCoverageByTactic(techniques: MitreTechnique[]): any {
     const tactics: Record<string, any> = {};
-    
-    techniques.forEach(technique => {
+
+    techniques.forEach((technique) => {
       if (!tactics[technique.tactic]) {
         tactics[technique.tactic] = {
           technique_count: 0,
           average_coverage: 0,
-          total_coverage: 0
+          total_coverage: 0,
         };
       }
-      
+
       tactics[technique.tactic].technique_count++;
       tactics[technique.tactic].total_coverage += technique.detection_coverage;
     });
 
     // Calculate averages
-    Object.keys(tactics).forEach(tactic => {
-      tactics[tactic].average_coverage = 
+    Object.keys(tactics).forEach((tactic) => {
+      tactics[tactic].average_coverage =
         tactics[tactic].total_coverage / tactics[tactic].technique_count;
     });
 
     return tactics;
   }
 
-  private async runTestCase(rule: DetectionRule, testCase: DetectionTestCase): Promise<any> {
+  private async runTestCase(
+    rule: DetectionRule,
+    testCase: DetectionTestCase,
+  ): Promise<any> {
     // Mock test case execution - would run against test data
     const passed = Math.random() > 0.1; // 90% pass rate for demo
-    
+
     return {
       passed,
-      details: passed ? 'Test passed successfully' : 'Test failed - rule logic needs adjustment'
+      details: passed
+        ? 'Test passed successfully'
+        : 'Test failed - rule logic needs adjustment',
     };
   }
 
-  private async getRuleMetrics(ruleId: string, environment: string): Promise<any> {
+  private async getRuleMetrics(
+    ruleId: string,
+    environment: string,
+  ): Promise<any> {
     // Mock metrics - would query actual monitoring data
     return {
       totalAlerts: Math.floor(Math.random() * 1000) + 100,
       falsePositives: Math.floor(Math.random() * 50) + 5,
       truePositives: Math.floor(Math.random() * 200) + 50,
-      fpRate: Math.random() * 0.05 // 0-5% FP rate
+      fpRate: Math.random() * 0.05, // 0-5% FP rate
     };
   }
 }

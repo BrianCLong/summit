@@ -15,7 +15,9 @@ const config = {
   intervalMs: parseInt(process.env.OUTBOX_INTERVAL_MS || '2000'),
   maxRetries: parseInt(process.env.OUTBOX_MAX_RETRIES || '10'),
   backoffMultiplier: parseFloat(process.env.OUTBOX_BACKOFF_MULTIPLIER || '2'),
-  cleanupIntervalMs: parseInt(process.env.OUTBOX_CLEANUP_INTERVAL_MS || '3600000'), // 1 hour
+  cleanupIntervalMs: parseInt(
+    process.env.OUTBOX_CLEANUP_INTERVAL_MS || '3600000',
+  ), // 1 hour
   cleanupOlderThanDays: parseInt(process.env.OUTBOX_CLEANUP_DAYS || '7'),
 };
 
@@ -136,7 +138,9 @@ function setupHealthCheck() {
   const server = http.createServer(async (req, res) => {
     if (req.url === '/health') {
       try {
-        const stats = worker ? await worker.getStats() : { pending: 0, failed: 0, processed: 0 };
+        const stats = worker
+          ? await worker.getStats()
+          : { pending: 0, failed: 0, processed: 0 };
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(
           JSON.stringify({

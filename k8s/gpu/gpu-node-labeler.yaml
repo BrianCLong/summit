@@ -20,9 +20,9 @@ spec:
       containers:
         - name: gpu-node-labeler
           image: k8s.gcr.io/gpu-node-labeller:1.11
-          command: ["/bin/bash"]
+          command: ['/bin/bash']
           args:
-            - "-c"
+            - '-c'
             - |
               /usr/bin/nvidia-smi -L > /dev/null 2>&1
               if [ $? -eq 0 ]; then

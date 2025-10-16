@@ -33,7 +33,10 @@ function indexByName(arr = []) {
 }
 
 function getTypeMap(introspection) {
-  const types = introspection?.data?.__schema?.types || introspection?.__schema?.types || [];
+  const types =
+    introspection?.data?.__schema?.types ||
+    introspection?.__schema?.types ||
+    [];
   return indexByName(types);
 }
 
@@ -77,7 +80,9 @@ function compareBaseline(baseline, current) {
         const bNamed = unwrapType(bField.type);
         const cNamed = unwrapType(cField.type);
         if (bNamed?.name && cNamed?.name && bNamed.name !== cNamed.name) {
-          out.breaking.push(`Field type changed: ${typeName}.${fieldName} ${bNamed.name} -> ${cNamed.name}`);
+          out.breaking.push(
+            `Field type changed: ${typeName}.${fieldName} ${bNamed.name} -> ${cNamed.name}`,
+          );
         }
       }
     }
@@ -86,7 +91,8 @@ function compareBaseline(baseline, current) {
       const bVals = enumValueSet(bType);
       const cVals = enumValueSet(cType);
       for (const v of bVals) {
-        if (!cVals.has(v)) out.breaking.push(`Enum value removed: ${typeName}.${v}`);
+        if (!cVals.has(v))
+          out.breaking.push(`Enum value removed: ${typeName}.${v}`);
       }
     }
   }
@@ -96,14 +102,20 @@ function compareBaseline(baseline, current) {
 
 function main() {
   if (!fs.existsSync(currentPath)) {
-    console.log(`[compat] Current introspection not found at ${currentPath}. Run: cd server && npm run codegen`);
+    console.log(
+      `[compat] Current introspection not found at ${currentPath}. Run: cd server && npm run codegen`,
+    );
     process.exit(0);
   }
   const current = loadJson(currentPath);
   const missing = baselineFiles.filter((p) => !fs.existsSync(p));
   if (missing.length > 0) {
-    console.log(`[compat] Baselines missing (${missing.map((p) => path.basename(p)).join(', ')}). Skipping compatibility check.`);
-    console.log(`[compat] To enable N-2 checks, add baseline files under docs/generated/compat/`);
+    console.log(
+      `[compat] Baselines missing (${missing.map((p) => path.basename(p)).join(', ')}). Skipping compatibility check.`,
+    );
+    console.log(
+      `[compat] To enable N-2 checks, add baseline files under docs/generated/compat/`,
+    );
     process.exit(0);
   }
 
@@ -125,7 +137,7 @@ function main() {
       r.breaking.length ? `- Breaking: ${r.breaking.length}` : '- Breaking: 0',
       r.breaking.length ? r.breaking.map((x) => `  - ${x}`).join('\n') : '',
       r.warnings.length ? `- Warnings: ${r.warnings.length}` : '- Warnings: 0',
-      ''
+      '',
     ]),
   ].join('\n');
 
@@ -134,11 +146,12 @@ function main() {
   fs.writeFileSync(path.join(outDir, 'report.md'), reportMd);
 
   if (breakingCount > 0) {
-    console.error(`[compat] Breaking changes detected. See docs/generated/compat/report.md`);
+    console.error(
+      `[compat] Breaking changes detected. See docs/generated/compat/report.md`,
+    );
     process.exit(1);
   }
   console.log('[compat] No breaking changes detected.');
 }
 
 main();
-

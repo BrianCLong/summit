@@ -14,7 +14,12 @@ export interface CompensationEntry {
   operation: string;
   entityType: string;
   entityId?: string;
-  compensationType: 'DELETE' | 'CREATE' | 'UPDATE' | 'RELATIONSHIP_DELETE' | 'RELATIONSHIP_CREATE';
+  compensationType:
+    | 'DELETE'
+    | 'CREATE'
+    | 'UPDATE'
+    | 'RELATIONSHIP_DELETE'
+    | 'RELATIONSHIP_CREATE';
   compensationData: any;
   executedAt?: string;
   success?: boolean;
@@ -46,7 +51,7 @@ export type CompensationFunction = (tx: Transaction) => Promise<void>;
  */
 export class CompensationManager {
   private driver: Driver;
-  
+
   constructor(driver?: Driver) {
     this.driver = driver || getNeo4jDriver();
   }
@@ -58,19 +63,19 @@ export class CompensationManager {
     operation: string,
     userId: string,
     tenantId: string,
-    mutationFn: (context: SafeMutationContext) => Promise<T>
+    mutationFn: (context: SafeMutationContext) => Promise<T>,
   ): Promise<SafeTransactionResult<T>> {
     const correlationId = uuid();
     const timestamp = new Date().toISOString();
     const session = this.driver.session();
-    
+
     const context: MutationContext = {
       correlationId,
       userId,
       tenantId,
       timestamp,
       operation,
-      compensators: []
+      compensators: [],
     };
 
     try {
@@ -80,18 +85,18 @@ export class CompensationManager {
         userId,
         tenantId,
         timestamp,
-        status: 'STARTED'
+        status: 'STARTED',
       });
 
       const result = await session.executeWrite(async (tx) => {
         const safeContext = new SafeMutationContext(tx, context, this);
-        
+
         try {
           const mutationResult = await mutationFn(safeContext);
-          
+
           // Log all compensators
           await this.logCompensators(correlationId, context.compensators);
-          
+
           return mutationResult;
         } catch (error) {
           // Execute compensations in reverse order
@@ -106,15 +111,15 @@ export class CompensationManager {
       return {
         result,
         compensationId: correlationId,
-        rollback: () => this.manualRollback(correlationId)
+        rollback: () => this.manualRollback(correlationId),
       };
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      await this.updateCompensationLog(correlationId, { 
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      await this.updateCompensationLog(correlationId, {
         status: 'FAILED',
-        error: errorMessage
+        error: errorMessage,
       });
 
       logger.error('Safe mutation failed', {
@@ -122,7 +127,7 @@ export class CompensationManager {
         operation,
         userId,
         tenantId,
-        error: errorMessage
+        error: errorMessage,
       });
 
       throw error;
@@ -136,27 +141,27 @@ export class CompensationManager {
    */
   async manualRollback(correlationId: string): Promise<void> {
     const session = this.driver.session();
-    
+
     try {
       await session.executeWrite(async (tx) => {
         // Get compensation entries
         const compensators = await this.getCompensators(correlationId);
-        
+
         // Execute compensations in reverse order
         await this.executeCompensations(tx, compensators.reverse());
-        
+
         // Mark as rolled back
-        await this.updateCompensationLog(correlationId, { 
+        await this.updateCompensationLog(correlationId, {
           status: 'ROLLED_BACK',
-          rolledBackAt: new Date().toISOString()
+          rolledBackAt: new Date().toISOString(),
         });
       });
 
       logger.info('Manual rollback completed', { correlationId });
     } catch (error) {
-      logger.error('Manual rollback failed', { 
-        correlationId, 
-        error: error instanceof Error ? error.message : String(error)
+      logger.error('Manual rollback failed', {
+        correlationId,
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     } finally {
@@ -167,11 +172,15 @@ export class CompensationManager {
   /**
    * Create main compensation log entry
    */
-  private async createCompensationLog(correlationId: string, data: any): Promise<void> {
+  private async createCompensationLog(
+    correlationId: string,
+    data: any,
+  ): Promise<void> {
     const session = this.driver.session();
-    
+
     try {
-      await session.run(`
+      await session.run(
+        `
         CREATE (log:CompensationLog {
           id: $correlationId,
           operation: $operation,
@@ -181,7 +190,9 @@ export class CompensationManager {
           status: $status,
           createdAt: datetime()
         })
-      `, { correlationId, ...data });
+      `,
+        { correlationId, ...data },
+      );
     } finally {
       await session.close();
     }
@@ -190,18 +201,24 @@ export class CompensationManager {
   /**
    * Update compensation log status
    */
-  private async updateCompensationLog(correlationId: string, updates: any): Promise<void> {
+  private async updateCompensationLog(
+    correlationId: string,
+    updates: any,
+  ): Promise<void> {
     const session = this.driver.session();
-    
+
     try {
       const setClause = Object.keys(updates)
-        .map(key => `log.${key} = $${key}`)
+        .map((key) => `log.${key} = $${key}`)
         .join(', ');
-      
-      await session.run(`
+
+      await session.run(
+        `
         MATCH (log:CompensationLog {id: $correlationId})
         SET ${setClause}, log.updatedAt = datetime()
-      `, { correlationId, ...updates });
+      `,
+        { correlationId, ...updates },
+      );
     } finally {
       await session.close();
     }
@@ -210,13 +227,17 @@ export class CompensationManager {
   /**
    * Log individual compensators
    */
-  private async logCompensators(correlationId: string, compensators: CompensationEntry[]): Promise<void> {
+  private async logCompensators(
+    correlationId: string,
+    compensators: CompensationEntry[],
+  ): Promise<void> {
     if (compensators.length === 0) return;
 
     const session = this.driver.session();
-    
+
     try {
-      await session.run(`
+      await session.run(
+        `
         MATCH (log:CompensationLog {id: $correlationId})
         UNWIND $compensators AS comp
         CREATE (log)-[:HAS_COMPENSATOR]->(c:Compensator {
@@ -228,10 +249,15 @@ export class CompensationManager {
           compensationData: comp.compensationData,
           createdAt: datetime()
         })
-      `, { correlationId, compensators: compensators.map(c => ({
-        ...c,
-        compensationData: JSON.stringify(c.compensationData)
-      }))});
+      `,
+        {
+          correlationId,
+          compensators: compensators.map((c) => ({
+            ...c,
+            compensationData: JSON.stringify(c.compensationData),
+          })),
+        },
+      );
     } finally {
       await session.close();
     }
@@ -240,17 +266,22 @@ export class CompensationManager {
   /**
    * Get compensators for a correlation ID
    */
-  private async getCompensators(correlationId: string): Promise<CompensationEntry[]> {
+  private async getCompensators(
+    correlationId: string,
+  ): Promise<CompensationEntry[]> {
     const session = this.driver.session();
-    
+
     try {
-      const result = await session.run(`
+      const result = await session.run(
+        `
         MATCH (log:CompensationLog {id: $correlationId})-[:HAS_COMPENSATOR]->(c:Compensator)
         RETURN c
         ORDER BY c.createdAt ASC
-      `, { correlationId });
+      `,
+        { correlationId },
+      );
 
-      return result.records.map(record => {
+      return result.records.map((record) => {
         const comp = record.get('c').properties;
         return {
           id: comp.id,
@@ -259,7 +290,7 @@ export class CompensationManager {
           entityType: comp.entityType,
           entityId: comp.entityId,
           compensationType: comp.compensationType,
-          compensationData: JSON.parse(comp.compensationData)
+          compensationData: JSON.parse(comp.compensationData),
         };
       });
     } finally {
@@ -270,31 +301,34 @@ export class CompensationManager {
   /**
    * Execute compensation functions
    */
-  private async executeCompensations(tx: Transaction, compensators: CompensationEntry[]): Promise<void> {
+  private async executeCompensations(
+    tx: Transaction,
+    compensators: CompensationEntry[],
+  ): Promise<void> {
     for (const comp of compensators) {
       try {
         await this.executeCompensation(tx, comp);
-        
+
         // Mark as executed
         comp.executedAt = new Date().toISOString();
         comp.success = true;
-        
+
         logger.debug('Compensation executed successfully', {
           compensationId: comp.id,
           type: comp.compensationType,
           entityType: comp.entityType,
-          entityId: comp.entityId
+          entityId: comp.entityId,
         });
       } catch (error) {
         comp.success = false;
         comp.error = error instanceof Error ? error.message : String(error);
-        
+
         logger.error('Compensation execution failed', {
           compensationId: comp.id,
           type: comp.compensationType,
-          error: comp.error
+          error: comp.error,
         });
-        
+
         // Continue with other compensations even if one fails
       }
     }
@@ -303,54 +337,72 @@ export class CompensationManager {
   /**
    * Execute individual compensation
    */
-  private async executeCompensation(tx: Transaction, comp: CompensationEntry): Promise<void> {
+  private async executeCompensation(
+    tx: Transaction,
+    comp: CompensationEntry,
+  ): Promise<void> {
     const { compensationType, entityType, entityId, compensationData } = comp;
 
     switch (compensationType) {
       case 'DELETE':
-        await tx.run(`
+        await tx.run(
+          `
           MATCH (n:${entityType} {id: $entityId})
           DELETE n
-        `, { entityId });
+        `,
+          { entityId },
+        );
         break;
 
       case 'CREATE':
         const labels = compensationData.labels || [entityType];
         const labelsStr = labels.map((l: string) => `:${l}`).join('');
-        
-        await tx.run(`
+
+        await tx.run(
+          `
           CREATE (n${labelsStr})
           SET n = $properties
-        `, { properties: compensationData.properties });
+        `,
+          { properties: compensationData.properties },
+        );
         break;
 
       case 'UPDATE':
-        await tx.run(`
+        await tx.run(
+          `
           MATCH (n:${entityType} {id: $entityId})
           SET n = $originalProperties
-        `, { 
-          entityId, 
-          originalProperties: compensationData.originalProperties 
-        });
+        `,
+          {
+            entityId,
+            originalProperties: compensationData.originalProperties,
+          },
+        );
         break;
 
       case 'RELATIONSHIP_DELETE':
-        await tx.run(`
+        await tx.run(
+          `
           MATCH ()-[r:${compensationData.type} {id: $relationshipId}]->()
           DELETE r
-        `, { relationshipId: compensationData.relationshipId });
+        `,
+          { relationshipId: compensationData.relationshipId },
+        );
         break;
 
       case 'RELATIONSHIP_CREATE':
-        await tx.run(`
+        await tx.run(
+          `
           MATCH (from {id: $fromId}), (to {id: $toId})
           CREATE (from)-[r:${compensationData.type}]->(to)
           SET r = $properties
-        `, {
-          fromId: compensationData.fromId,
-          toId: compensationData.toId,
-          properties: compensationData.properties
-        });
+        `,
+          {
+            fromId: compensationData.fromId,
+            toId: compensationData.toId,
+            properties: compensationData.properties,
+          },
+        );
         break;
 
       default:
@@ -370,10 +422,10 @@ export class CompensationManager {
       fromDate?: string;
       toDate?: string;
     } = {},
-    limit: number = 100
+    limit: number = 100,
   ): Promise<any[]> {
     const session = this.driver.session();
-    
+
     try {
       let whereClause = 'WHERE true';
       const params: any = { limit };
@@ -408,18 +460,21 @@ export class CompensationManager {
         params.toDate = filters.toDate;
       }
 
-      const result = await session.run(`
+      const result = await session.run(
+        `
         MATCH (log:CompensationLog)
         ${whereClause}
         OPTIONAL MATCH (log)-[:HAS_COMPENSATOR]->(c:Compensator)
         RETURN log, collect(c) as compensators
         ORDER BY log.timestamp DESC
         LIMIT $limit
-      `, params);
+      `,
+        params,
+      );
 
-      return result.records.map(record => ({
+      return result.records.map((record) => ({
         ...record.get('log').properties,
-        compensators: record.get('compensators').map((c: any) => c.properties)
+        compensators: record.get('compensators').map((c: any) => c.properties),
       }));
     } finally {
       await session.close();
@@ -434,7 +489,7 @@ export class SafeMutationContext {
   constructor(
     public tx: Transaction,
     public context: MutationContext,
-    private manager: CompensationManager
+    private manager: CompensationManager,
   ) {}
 
   /**
@@ -448,14 +503,18 @@ export class SafeMutationContext {
       entityType,
       entityId,
       compensationType: 'DELETE',
-      compensationData: { entityId }
+      compensationData: { entityId },
     });
   }
 
   /**
    * Register a compensation for entity update
    */
-  compensateEntityUpdate(entityType: string, entityId: string, originalProperties: any): void {
+  compensateEntityUpdate(
+    entityType: string,
+    entityId: string,
+    originalProperties: any,
+  ): void {
     this.context.compensators.push({
       id: uuid(),
       correlationId: this.context.correlationId,
@@ -463,41 +522,48 @@ export class SafeMutationContext {
       entityType,
       entityId,
       compensationType: 'UPDATE',
-      compensationData: { originalProperties }
+      compensationData: { originalProperties },
     });
   }
 
   /**
    * Register a compensation for entity deletion
    */
-  compensateEntityDeletion(entityType: string, entityProperties: any, labels: string[]): void {
+  compensateEntityDeletion(
+    entityType: string,
+    entityProperties: any,
+    labels: string[],
+  ): void {
     this.context.compensators.push({
       id: uuid(),
       correlationId: this.context.correlationId,
       operation: this.context.operation,
       entityType,
       compensationType: 'CREATE',
-      compensationData: { 
+      compensationData: {
         properties: entityProperties,
-        labels 
-      }
+        labels,
+      },
     });
   }
 
   /**
    * Register a compensation for relationship creation
    */
-  compensateRelationshipCreation(relationshipType: string, relationshipId: string): void {
+  compensateRelationshipCreation(
+    relationshipType: string,
+    relationshipId: string,
+  ): void {
     this.context.compensators.push({
       id: uuid(),
       correlationId: this.context.correlationId,
       operation: this.context.operation,
       entityType: 'Relationship',
       compensationType: 'RELATIONSHIP_DELETE',
-      compensationData: { 
+      compensationData: {
         type: relationshipType,
-        relationshipId 
-      }
+        relationshipId,
+      },
     });
   }
 
@@ -505,10 +571,10 @@ export class SafeMutationContext {
    * Register a compensation for relationship deletion
    */
   compensateRelationshipDeletion(
-    relationshipType: string, 
-    fromId: string, 
-    toId: string, 
-    properties: any
+    relationshipType: string,
+    fromId: string,
+    toId: string,
+    properties: any,
   ): void {
     this.context.compensators.push({
       id: uuid(),
@@ -520,8 +586,8 @@ export class SafeMutationContext {
         type: relationshipType,
         fromId,
         toId,
-        properties
-      }
+        properties,
+      },
     });
   }
 
@@ -531,7 +597,7 @@ export class SafeMutationContext {
   async runWithCompensation<T>(
     query: string,
     parameters: any,
-    compensationFn: () => void
+    compensationFn: () => void,
   ): Promise<T> {
     const result = await this.tx.run(query, parameters);
     compensationFn();

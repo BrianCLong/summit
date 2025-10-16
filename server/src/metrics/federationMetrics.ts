@@ -35,4 +35,3 @@ export const poolHeartbeats = new Counter({
   labelNames: ['pool'] as const,
   registers: [registry],
 });
-

@@ -3,18 +3,20 @@ import { v4 as uuidv4 } from 'uuid';
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8001';
 const PYTHON_API_KEY = process.env.PYTHON_API_KEY || 'default-api-key';
 export class WargameResolver {
-    constructor() {
-        this.driver = getNeo4jDriver();
-    }
-    async getCrisisTelemetry(_parent, { scenarioId, limit, offset }, _context) {
+    driver = getNeo4jDriver();
+    async getCrisisTelemetry(_parent, { scenarioId, limit, offset, }, _context) {
         // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
         // Ethics Compliance: Data is simulated and anonymized for training purposes.
         console.log('Fetching telemetry for scenario:', scenarioId, 'from Neo4j');
         const session = this.driver.session();
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_TELEMETRY]->(t:SocialMediaPost) RETURN t SKIP $offset LIMIT $limit';
-            const result = await session.run(query, { scenarioId, offset: offset || 0, limit: limit || 1000 });
-            return result.records.map(record => record.get('t').properties);
+            const result = await session.run(query, {
+                scenarioId,
+                offset: offset || 0,
+                limit: limit || 1000,
+            });
+            return result.records.map((record) => record.get('t').properties);
         }
         finally {
             await session.close();
@@ -28,7 +30,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_INTENT_ESTIMATE]->(i:AdversaryIntent) RETURN i';
             const result = await session.run(query, { scenarioId });
-            return result.records.map(record => record.get('i').properties);
+            return result.records.map((record) => record.get('i').properties);
         }
         finally {
             await session.close();
@@ -42,7 +44,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_HEATMAP_DATA]->(h:NarrativeHeatmap) RETURN h';
             const result = await session.run(query, { scenarioId });
-            return result.records.map(record => record.get('h').properties);
+            return result.records.map((record) => record.get('h').properties);
         }
         finally {
             await session.close();
@@ -56,7 +58,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_PLAYBOOK]->(p:StrategicPlaybook) RETURN p';
             const result = await session.run(query, { scenarioId });
-            return result.records.map(record => record.get('p').properties);
+            return result.records.map((record) => record.get('p').properties);
         }
         finally {
             await session.close();
@@ -85,7 +87,7 @@ export class WargameResolver {
         try {
             const query = 'MATCH (s:CrisisScenario) RETURN s ORDER BY s.createdAt DESC';
             const result = await session.run(query);
-            return result.records.map(record => record.get('s').properties);
+            return result.records.map((record) => record.get('s').properties);
         }
         finally {
             await session.close();
@@ -113,7 +115,8 @@ export class WargameResolver {
                 updatedAt,
                 simulationParameters: input.simulationParameters,
             });
-            const newScenario = createScenarioResult.records[0].get('s').properties;
+            const newScenario = createScenarioResult.records[0].get('s')
+                .properties;
             return newScenario;
         }
         finally {

@@ -8,7 +8,8 @@ export async function postDriftAlert(stepId: string, diffs: string[]) {
   await fetch(hook, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ text: `⚠️ Drift in ${stepId}\n${diffs.slice(0, 10).join('\n')}` }),
+    body: JSON.stringify({
+      text: `⚠️ Drift in ${stepId}\n${diffs.slice(0, 10).join('\n')}`,
+    }),
   });
 }
-

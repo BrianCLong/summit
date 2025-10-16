@@ -6,7 +6,9 @@ export type RiskInputs = {
   simulator: { deny: number; requireHuman: number };
 };
 
-function clamp(x:number, a:number, b:number){ return Math.max(a, Math.min(b, x)); }
+function clamp(x: number, a: number, b: number) {
+  return Math.max(a, Math.min(b, x));
+}
 
 export function riskScore(r: RiskInputs) {
   let s = 0;
@@ -17,9 +19,21 @@ export function riskScore(r: RiskInputs) {
   return Math.min(1, s);
 }
 
-export function admissionDecision(score: number, t:{warn:number;requireHuman:number;deny:number}) {
-  if (score >= t.deny) return { action: 'deny', reason: `risk=${score.toFixed(2)} >= ${t.deny}` } as const;
-  if (score >= t.requireHuman) return { action: 'require-human', reason: `risk=${score.toFixed(2)}` } as const;
-  if (score >= t.warn) return { action: 'warn', reason: `risk=${score.toFixed(2)}` } as const;
+export function admissionDecision(
+  score: number,
+  t: { warn: number; requireHuman: number; deny: number },
+) {
+  if (score >= t.deny)
+    return {
+      action: 'deny',
+      reason: `risk=${score.toFixed(2)} >= ${t.deny}`,
+    } as const;
+  if (score >= t.requireHuman)
+    return {
+      action: 'require-human',
+      reason: `risk=${score.toFixed(2)}`,
+    } as const;
+  if (score >= t.warn)
+    return { action: 'warn', reason: `risk=${score.toFixed(2)}` } as const;
   return { action: 'allow' } as const;
 }

@@ -42,15 +42,15 @@ You can also trigger Release Captain via GitHub Actions:
 
 ### 🛡️ **Quality Gates**
 
-| Gate | Description | Auto-Fix |
-|------|-------------|----------|
-| **Build** | TypeScript compilation and bundling | ❌ |
-| **TypeCheck** | Type safety validation | ❌ |
-| **Lint** | ESLint code quality rules | ✅ |
-| **Tests** | Unit test suite with coverage | ❌ |
-| **Security** | Vulnerability and secret scanning | ❌ |
-| **Helm** | Chart validation for infrastructure | ❌ |
-| **E2E** | End-to-end tests for high-risk changes | ❌ |
+| Gate          | Description                            | Auto-Fix |
+| ------------- | -------------------------------------- | -------- |
+| **Build**     | TypeScript compilation and bundling    | ❌       |
+| **TypeCheck** | Type safety validation                 | ❌       |
+| **Lint**      | ESLint code quality rules              | ✅       |
+| **Tests**     | Unit test suite with coverage          | ❌       |
+| **Security**  | Vulnerability and secret scanning      | ❌       |
+| **Helm**      | Chart validation for infrastructure    | ❌       |
+| **E2E**       | End-to-end tests for high-risk changes | ❌       |
 
 ### 🤖 **Auto-Fix Capabilities**
 
@@ -65,14 +65,17 @@ Release Captain can automatically fix common issues:
 ### 📊 **Risk-Based Validation**
 
 **LOW Risk** (≤8 complexity):
+
 - Standard quality gates
 - Quick merge path
 
 **MEDIUM Risk** (9-14 complexity):
+
 - Extended validation
 - Manual review recommended
 
 **HIGH Risk** (≥15 complexity):
+
 - Full test suite including E2E
 - Mandatory manual review
 - Post-merge monitoring
@@ -84,11 +87,13 @@ Release Captain can automatically fix common issues:
 **Syntax**: `/merge-pr [PR_NUMBER] [OPTIONS]`
 
 **Options**:
+
 - `--dry-run` - Analyze and report without merging
 - `--force-fixes` - Apply auto-fixes before validation
 - `--skip TYPE` - Skip specific test types (e.g., `e2e`, `unit`)
 
 **Examples**:
+
 ```bash
 /merge-pr 123                    # Standard review and merge
 /merge-pr 123 --dry-run         # Review only
@@ -121,6 +126,7 @@ Release Captain integrates with automatic PR validation:
 ### CODEOWNERS Integration
 
 Respects repository CODEOWNERS for:
+
 - Critical path changes (charts/, RUNBOOKS/, tools/)
 - Security-sensitive files
 - Database migrations
@@ -175,21 +181,25 @@ auto_fixes:
 ### Common Issues
 
 **❌ "Quality gates failing"**
+
 - Check specific gate failures in PR comments
 - Run auto-fixes: `/merge-pr --force-fixes`
 - Address specific issues mentioned in reports
 
 **❌ "Access denied"**
+
 - Verify you have repository write access
 - Check if you're in authorized teams
 - Contact @BrianCLong for permission issues
 
 **❌ "PR has merge conflicts"**
+
 - Resolve conflicts locally
 - Push updated branch
 - Re-run Release Captain
 
 **❌ "High risk changes detected"**
+
 - Review breaking changes carefully
 - Consider feature flags for safer deployment
 - Ensure E2E tests pass
@@ -277,4 +287,4 @@ View metrics in the **Actions** tab and Prometheus/Grafana dashboards.
 
 ---
 
-*🚢 Release Captain - Maintaining quality at velocity*
+_🚢 Release Captain - Maintaining quality at velocity_

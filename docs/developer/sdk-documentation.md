@@ -31,7 +31,7 @@ const client = new IntelGraphClient({
   retryDelay: 1000,
 });
 
-// Maestro orchestration client  
+// Maestro orchestration client
 const maestro = new MaestroClient({
   apiUrl: 'https://maestro.intelgraph.ai/v1',
   apiKey: process.env.INTELGRAPH_API_KEY,
@@ -47,13 +47,13 @@ const maestro = new MaestroClient({
 // Using API key (recommended for server-side)
 const client = new IntelGraphClient({
   apiUrl: 'https://api.intelgraph.ai/v2',
-  apiKey: 'your-api-key-here'
+  apiKey: 'your-api-key-here',
 });
 
 // Using JWT token (for user-based authentication)
 const client = new IntelGraphClient({
   apiUrl: 'https://api.intelgraph.ai/v2',
-  token: 'your-jwt-token-here'
+  token: 'your-jwt-token-here',
 });
 
 // Refreshing tokens automatically
@@ -62,10 +62,10 @@ client.onTokenRefresh(async (client) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${client.getRefreshToken()}`
-    }
+      Authorization: `Bearer ${client.getRefreshToken()}`,
+    },
   });
-  
+
   const { token, refreshToken } = await response.json();
   client.setToken(token, refreshToken);
 });
@@ -86,8 +86,8 @@ const graph = await client.graphs.create({
   configuration: {
     layout: 'force-directed',
     theme: 'dark',
-    autoSave: true
-  }
+    autoSave: true,
+  },
 });
 
 console.log(`Created graph: ${graph.id}`);
@@ -97,7 +97,7 @@ const graphs = await client.graphs.list({
   search: 'threat',
   tags: ['q4-2024'],
   page: 1,
-  limit: 20
+  limit: 20,
 });
 
 // Get specific graph
@@ -106,7 +106,7 @@ const graphDetails = await client.graphs.get(graph.id);
 // Update graph
 const updatedGraph = await client.graphs.update(graph.id, {
   name: 'Updated Threat Analysis',
-  tags: [...graphDetails.tags, 'updated']
+  tags: [...graphDetails.tags, 'updated'],
 });
 
 // Delete graph
@@ -122,13 +122,13 @@ const entity = await client.entities.create(graph.id, {
   properties: {
     name: 'John Doe',
     email: 'john.doe@example.com',
-    department: 'Engineering'
+    department: 'Engineering',
   },
   metadata: {
     source: 'OSINT',
     confidence: 0.85,
-    lastVerified: new Date()
-  }
+    lastVerified: new Date(),
+  },
 });
 
 // List entities with filtering
@@ -136,15 +136,15 @@ const entities = await client.entities.list(graph.id, {
   type: 'Person',
   search: 'john',
   page: 1,
-  limit: 50
+  limit: 50,
 });
 
 // Update entity
 const updatedEntity = await client.entities.update(entity.id, {
   properties: {
     ...entity.properties,
-    title: 'Senior Engineer'
-  }
+    title: 'Senior Engineer',
+  },
 });
 
 // Delete entity
@@ -162,26 +162,26 @@ const relationship = await client.relationships.create({
   properties: {
     relationship_type: 'colleague',
     since: '2020-01-15',
-    projects: ['project-alpha', 'project-beta']
+    projects: ['project-alpha', 'project-beta'],
   },
   metadata: {
     source: 'HR_SYSTEM',
-    confidence: 0.95
-  }
+    confidence: 0.95,
+  },
 });
 
 // List relationships
 const relationships = await client.relationships.list(graph.id, {
   type: 'WORKS_WITH',
-  sourceId: entity1.id
+  sourceId: entity1.id,
 });
 
 // Update relationship
 await client.relationships.update(relationship.id, {
   properties: {
     ...relationship.properties,
-    projects: [...relationship.properties.projects, 'project-gamma']
-  }
+    projects: [...relationship.properties.projects, 'project-gamma'],
+  },
 });
 ```
 
@@ -198,9 +198,9 @@ const queryResult = await client.graphs.query(graph.id, {
   `,
   parameters: {
     department: 'Engineering',
-    limit: 10
+    limit: 10,
   },
-  includeMetrics: true
+  includeMetrics: true,
 });
 
 console.log('Query results:', queryResult.data);
@@ -214,7 +214,7 @@ const analysisResult = await client.graphs.query(graph.id, {
     RETURN gds.util.asNode(nodeId).name as name, score
     ORDER BY score DESC
     LIMIT 20
-  `
+  `,
 });
 ```
 
@@ -228,8 +228,8 @@ const analysisJob = await client.ai.analyze({
   parameters: {
     algorithm: 'louvain',
     resolution: 1.0,
-    includeMetrics: true
-  }
+    includeMetrics: true,
+  },
 });
 
 // Check analysis status
@@ -244,14 +244,14 @@ if (status.status === 'completed') {
 // Wait for analysis completion
 const finalResult = await client.ai.waitForCompletion(analysisJob.jobId, {
   maxWaitTime: 300000, // 5 minutes
-  pollInterval: 5000   // Check every 5 seconds
+  pollInterval: 5000, // Check every 5 seconds
 });
 
 // Entity enhancement
 const enhancedEntity = await client.ai.enhanceEntity(entity.id, {
   provider: 'openai',
   includeRelatedEntities: true,
-  confidenceThreshold: 0.8
+  confidenceThreshold: 0.8,
 });
 ```
 
@@ -262,7 +262,8 @@ const enhancedEntity = await client.ai.enhanceEntity(entity.id, {
 ```typescript
 // Execute orchestration request
 const orchestration = await maestro.orchestrate({
-  query: 'Analyze the threat landscape for financial services sector in Q4 2024',
+  query:
+    'Analyze the threat landscape for financial services sector in Q4 2024',
   context: {
     userId: 'user-123',
     tenantId: 'tenant-456',
@@ -272,7 +273,7 @@ const orchestration = await maestro.orchestrate({
     qualityThreshold: 0.85,
     expectedOutputLength: 2000,
     requiredSources: 15,
-    synthesisStrategy: 'comprehensive'
+    synthesisStrategy: 'comprehensive',
   },
   constraints: {
     maxLatency: 45000,
@@ -280,8 +281,8 @@ const orchestration = await maestro.orchestrate({
     requireCitations: true,
     confidenceThreshold: 0.7,
     allowedDomains: ['reuters.com', 'bloomberg.com', 'ft.com'],
-    blockedDomains: ['unreliable-news.com']
-  }
+    blockedDomains: ['unreliable-news.com'],
+  },
 });
 
 // Check if orchestration is complete
@@ -293,7 +294,9 @@ if ('answer' in orchestration) {
   console.log('Total cost:', orchestration.metadata.totalCost);
 } else {
   // Asynchronous response - poll for status
-  const result = await maestro.waitForOrchestration(orchestration.orchestrationId);
+  const result = await maestro.waitForOrchestration(
+    orchestration.orchestrationId,
+  );
   console.log('Final result:', result);
 }
 ```
@@ -303,7 +306,7 @@ if ('answer' in orchestration) {
 ```typescript
 // List available workflows
 const workflows = await maestro.workflows.list({
-  category: 'data-ingestion'
+  category: 'data-ingestion',
 });
 
 // Get workflow details
@@ -314,13 +317,15 @@ const execution = await maestro.workflows.execute(workflow.id, {
   parameters: {
     source_bucket: 'intel-data-staging',
     caseId: 'CASE-2024-001',
-    outputFormat: 'json'
+    outputFormat: 'json',
   },
-  dryRun: false
+  dryRun: false,
 });
 
 // Monitor execution
-const executionStatus = await maestro.workflows.getExecutionStatus(execution.executionId);
+const executionStatus = await maestro.workflows.getExecutionStatus(
+  execution.executionId,
+);
 
 // Cancel execution if needed
 if (executionStatus.status === 'running') {
@@ -334,7 +339,7 @@ if (executionStatus.status === 'running') {
 // List runbooks
 const runbooks = await maestro.runbooks.list({
   owner: 'sre@summit',
-  approved: true
+  approved: true,
 });
 
 // Execute runbook (requires approval for some runbooks)
@@ -343,11 +348,11 @@ try {
     inputs: {
       since: '2024-01-01T00:00:00Z',
       until: '2024-01-31T23:59:59Z',
-      batchSize: 1000
+      batchSize: 1000,
     },
-    approvalToken: 'approval-token-from-approver' // If required
+    approvalToken: 'approval-token-from-approver', // If required
   });
-  
+
   console.log('Runbook execution started:', execution.executionId);
 } catch (error) {
   if (error.code === 'APPROVAL_REQUIRED') {
@@ -362,7 +367,10 @@ try {
 ```typescript
 // Get available models
 const models = await maestro.router.getModels();
-console.log('Available models:', models.map(m => `${m.name} (${m.provider})`));
+console.log(
+  'Available models:',
+  models.map((m) => `${m.name} (${m.provider})`),
+);
 
 // Get optimal model recommendation
 const recommendation = await maestro.router.optimize({
@@ -372,13 +380,13 @@ const recommendation = await maestro.router.optimize({
     budget: 10.0,
     urgency: 'high',
     qualityRequirement: 0.9,
-    expectedOutputLength: 1500
+    expectedOutputLength: 1500,
   },
   constraints: {
     maxCost: 8.0,
     maxLatency: 15000,
-    requiredCapabilities: ['reasoning', 'analysis']
-  }
+    requiredCapabilities: ['reasoning', 'analysis'],
+  },
 });
 
 console.log('Recommended model:', recommendation.selectedModel.name);
@@ -423,7 +431,11 @@ ws.disconnect();
 ### Error Handling
 
 ```typescript
-import { IntelGraphError, ValidationError, AuthenticationError } from '@intelgraph/sdk';
+import {
+  IntelGraphError,
+  ValidationError,
+  AuthenticationError,
+} from '@intelgraph/sdk';
 
 try {
   const graph = await client.graphs.create(invalidData);
@@ -457,41 +469,43 @@ client.onError((error) => {
 const client = new IntelGraphClient({
   apiUrl: 'https://api.intelgraph.ai/v2',
   apiKey: process.env.INTELGRAPH_API_KEY,
-  
+
   // HTTP configuration
   timeout: 30000,
   retries: 3,
   retryDelay: 1000,
   retryCondition: (error) => error.response?.status >= 500,
-  
+
   // Request/response interceptors
   requestInterceptors: [
     (config) => {
       config.headers['X-Request-ID'] = generateRequestId();
       return config;
-    }
+    },
   ],
-  
+
   responseInterceptors: [
     (response) => {
-      console.log(`Request ${response.config.headers['X-Request-ID']} completed`);
+      console.log(
+        `Request ${response.config.headers['X-Request-ID']} completed`,
+      );
       return response;
-    }
+    },
   ],
-  
+
   // Rate limiting
   rateLimitHeaders: {
     limit: 'X-RateLimit-Limit',
     remaining: 'X-RateLimit-Remaining',
-    reset: 'X-RateLimit-Reset'
+    reset: 'X-RateLimit-Reset',
   },
-  
+
   // Caching
   cache: {
     enabled: true,
     ttl: 300000, // 5 minutes
-    exclude: ['/graphs/*/query'] // Don't cache query results
-  }
+    exclude: ['/graphs/*/query'], // Don't cache query results
+  },
 });
 ```
 
@@ -537,16 +551,16 @@ async def main():
         api_url='https://api.intelgraph.ai/v2',
         api_key=os.environ['INTELGRAPH_API_KEY']
     )
-    
+
     # Create a graph
     graph = await client.graphs.create(CreateGraphInput(
         name='Python SDK Test Graph',
         description='Testing the Python SDK',
         tags=['sdk', 'test', 'python']
     ))
-    
+
     print(f"Created graph: {graph.id}")
-    
+
     # Add entities
     person1 = await client.entities.create(graph.id, CreateEntityInput(
         type='Person',
@@ -561,16 +575,16 @@ async def main():
             'last_verified': datetime.now()
         }
     ))
-    
+
     person2 = await client.entities.create(graph.id, CreateEntityInput(
         type='Person',
         properties={
             'name': 'Bob Smith',
-            'email': 'bob@example.com', 
+            'email': 'bob@example.com',
             'department': 'Engineering'
         }
     ))
-    
+
     # Create relationship
     relationship = await client.relationships.create(CreateRelationshipInput(
         type='WORKS_WITH',
@@ -581,9 +595,9 @@ async def main():
             'since': '2022-01-15'
         }
     ))
-    
+
     print(f"Created relationship: {relationship.id}")
-    
+
     # Query the graph
     result = await client.graphs.query(graph.id, {
         'query': '''
@@ -592,7 +606,7 @@ async def main():
         ''',
         'parameters': {}
     })
-    
+
     print("Query results:")
     for record in result.data:
         print(f"  {record}")
@@ -609,7 +623,7 @@ import asyncio
 
 async def run_analysis():
     client = IntelGraphClient(api_key=os.environ['INTELGRAPH_API_KEY'])
-    
+
     # Start analysis
     job = await client.ai.analyze(
         graph_id='graph-id',
@@ -620,16 +634,16 @@ async def run_analysis():
             'min_community_size': 5
         }
     )
-    
+
     print(f"Analysis started: {job.job_id}")
-    
+
     # Wait for completion
     result = await client.ai.wait_for_completion(
         job.job_id,
         max_wait_time=300,  # 5 minutes
         poll_interval=5     # Check every 5 seconds
     )
-    
+
     if result.status == 'completed':
         print(f"Found {len(result.results['communities'])} communities")
         for insight in result.insights:
@@ -647,7 +661,7 @@ from intelgraph.maestro import OrchestrationRequest, OrchestrationContext
 
 async def orchestrate_intelligence():
     maestro = MaestroClient(api_key=os.environ['INTELGRAPH_API_KEY'])
-    
+
     request = OrchestrationRequest(
         query='What are the latest cybersecurity threats targeting healthcare organizations?',
         context=OrchestrationContext(
@@ -664,17 +678,17 @@ async def orchestrate_intelligence():
             'confidence_threshold': 0.75
         }
     )
-    
+
     # Execute orchestration
     result = await maestro.orchestrate(request)
-    
+
     if hasattr(result, 'answer'):
         # Synchronous result
         print(f"Answer: {result.answer}")
         print(f"Confidence: {result.confidence}")
         print(f"Sources: {result.metadata.sources_used}")
         print(f"Cost: ${result.metadata.total_cost}")
-        
+
         for citation in result.citations:
             print(f"Source: {citation.title} ({citation.url})")
     else:
@@ -694,38 +708,38 @@ from intelgraph.processors import EntityResolver, GraphBuilder
 
 async def process_intelligence_data():
     client = IntelGraphClient(api_key=os.environ['INTELGRAPH_API_KEY'])
-    
+
     # Create graph for processed data
     graph = await client.graphs.create({
         'name': 'Intelligence Data Pipeline',
         'description': 'Processed intelligence from multiple sources'
     })
-    
+
     # Load data from CSV
     csv_connector = CSVConnector()
     csv_data = csv_connector.load('threat_indicators.csv')
-    
+
     # Load STIX data
     stix_connector = STIXConnector()
     stix_data = stix_connector.load('threat_feed.json')
-    
+
     # Process and resolve entities
     entity_resolver = EntityResolver(confidence_threshold=0.8)
     resolved_entities = entity_resolver.resolve([csv_data, stix_data])
-    
+
     # Build graph structure
     graph_builder = GraphBuilder(client)
     await graph_builder.build_from_data(graph.id, resolved_entities)
-    
+
     print(f"Processed {len(resolved_entities)} entities into graph {graph.id}")
-    
+
     # Run analysis
     analysis = await client.ai.analyze(
         graph.id,
         'threat_assessment',
         parameters={'include_predictions': True}
     )
-    
+
     return analysis
 
 # Run pipeline
@@ -741,18 +755,18 @@ from intelgraph.ml import GraphNeuralNetwork, EmbeddingGenerator
 
 async def advanced_ml_analysis():
     client = IntelGraphClient(api_key=os.environ['INTELGRAPH_API_KEY'])
-    
+
     # Fetch graph data
     graph = await client.graphs.get_with_data('graph-id')
-    
+
     # Convert to NetworkX for analysis
     nx_graph = nx.Graph()
     for entity in graph.entities:
         nx_graph.add_node(entity.id, **entity.properties)
-    
+
     for rel in graph.relationships:
         nx_graph.add_edge(rel.source_id, rel.target_id, **rel.properties)
-    
+
     # Generate embeddings
     embedding_gen = EmbeddingGenerator(
         model='node2vec',
@@ -760,9 +774,9 @@ async def advanced_ml_analysis():
         walk_length=80,
         num_walks=10
     )
-    
+
     embeddings = embedding_gen.fit_transform(nx_graph)
-    
+
     # Train GNN model
     gnn = GraphNeuralNetwork(
         input_dim=128,
@@ -770,17 +784,17 @@ async def advanced_ml_analysis():
         output_dim=32,
         num_layers=3
     )
-    
+
     # Convert to PyTorch tensors
     node_features = torch.tensor(embeddings, dtype=torch.float32)
     edge_index = torch.tensor([
         [rel.source_id, rel.target_id] for rel in graph.relationships
     ]).t().contiguous()
-    
+
     # Forward pass
     with torch.no_grad():
         node_representations = gnn(node_features, edge_index)
-    
+
     # Update entities with learned representations
     for i, entity in enumerate(graph.entities):
         await client.entities.update(entity.id, {
@@ -789,7 +803,7 @@ async def advanced_ml_analysis():
                 'ml_embedding': node_representations[i].tolist()
             }
         })
-    
+
     print(f"Updated {len(graph.entities)} entities with ML embeddings")
 
 asyncio.run(advanced_ml_analysis())
@@ -800,7 +814,7 @@ asyncio.run(advanced_ml_analysis())
 ```python
 import logging
 from intelgraph.exceptions import (
-    IntelGraphError, 
+    IntelGraphError,
     ValidationError,
     AuthenticationError,
     RateLimitError
@@ -812,31 +826,31 @@ logger = logging.getLogger(__name__)
 
 async def robust_graph_operation():
     client = IntelGraphClient(api_key=os.environ['INTELGRAPH_API_KEY'])
-    
+
     try:
         # Attempt operation
         graph = await client.graphs.create({
             'name': 'Test Graph',
             'invalid_field': 'this will cause validation error'
         })
-        
+
     except ValidationError as e:
         logger.error(f"Validation error: {e.validation_errors}")
         # Handle validation errors
-        
+
     except AuthenticationError as e:
         logger.error(f"Authentication failed: {e}")
         # Refresh token or re-authenticate
-        
+
     except RateLimitError as e:
         logger.warning(f"Rate limited. Retry after: {e.retry_after} seconds")
         await asyncio.sleep(e.retry_after)
         # Retry operation
-        
+
     except IntelGraphError as e:
         logger.error(f"API error: {e.message} (code: {e.code}, status: {e.status})")
         # Handle API errors
-        
+
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
         # Handle unexpected errors
@@ -853,21 +867,21 @@ import { BatchProcessor } from '@intelgraph/sdk/utils';
 const batchProcessor = new BatchProcessor(client, {
   batchSize: 100,
   maxConcurrency: 5,
-  retryFailedBatches: true
+  retryFailedBatches: true,
 });
 
 // Batch create entities
 const entities = Array.from({ length: 1000 }, (_, i) => ({
   type: 'Person',
-  properties: { name: `Person ${i}`, id: i }
+  properties: { name: `Person ${i}`, id: i },
 }));
 
 const createdEntities = await batchProcessor.createEntities(graph.id, entities);
 
-// Batch update entities  
-const updates = createdEntities.map(entity => ({
+// Batch update entities
+const updates = createdEntities.map((entity) => ({
   id: entity.id,
-  data: { properties: { ...entity.properties, updated: true } }
+  data: { properties: { ...entity.properties, updated: true } },
 }));
 
 await batchProcessor.updateEntities(updates);
@@ -881,18 +895,18 @@ import asyncio
 async def batch_operations():
     client = IntelGraphClient(api_key=os.environ['INTELGRAPH_API_KEY'])
     processor = BatchProcessor(client, batch_size=50, max_concurrency=3)
-    
+
     # Batch create entities
     entities_data = [
         {'type': 'Person', 'properties': {'name': f'Person {i}'}}
         for i in range(500)
     ]
-    
+
     created_entities = await processor.create_entities_batch(
         'graph-id',
         entities_data
     )
-    
+
     print(f"Created {len(created_entities)} entities in batches")
 
 asyncio.run(batch_operations())
@@ -905,7 +919,7 @@ asyncio.run(batch_operations())
 const exporter = client.export.createExporter({
   format: 'json', // json, csv, neo4j, graphml
   includeMetadata: true,
-  compression: 'gzip'
+  compression: 'gzip',
 });
 
 const exportData = await exporter.exportGraph(graph.id);
@@ -918,7 +932,7 @@ fs.writeFileSync('graph-export.json.gz', exportData);
 const importer = client.import.createImporter({
   format: 'json',
   mergeStrategy: 'upsert', // create, upsert, replace
-  validateSchema: true
+  validateSchema: true,
 });
 
 const importedGraph = await importer.importGraph(exportData);
@@ -936,14 +950,14 @@ const client = new IntelGraphClient({
     endpoint: 'https://telemetry.intelgraph.ai',
     sampleRate: 0.1, // Sample 10% of requests
     includeRequestBodies: false, // For privacy
-  }
+  },
 });
 
 // Custom metrics
 client.metrics.recordCustomMetric('graph_processing_time', 1250, {
   graph_id: graph.id,
   operation: 'entity_creation',
-  batch_size: 100
+  batch_size: 100,
 });
 
 // Performance monitoring
@@ -966,18 +980,18 @@ try {
 async function processLargeGraph(graphId: string) {
   let page = 1;
   const pageSize = 1000;
-  
+
   while (true) {
     const entities = await client.entities.list(graphId, {
       page,
-      limit: pageSize
+      limit: pageSize,
     });
-    
+
     if (entities.data.length === 0) break;
-    
+
     // Process batch
     await processBatch(entities.data);
-    
+
     if (!entities.pagination.hasNext) break;
     page++;
   }
@@ -990,8 +1004,8 @@ const client = new IntelGraphClient({
   connectionPool: {
     maxConnections: 20,
     keepAlive: true,
-    timeout: 30000
-  }
+    timeout: 30000,
+  },
 });
 ```
 
@@ -1005,9 +1019,9 @@ const secretManager = new SecretManager();
 
 async function getSecureApiKey() {
   const [version] = await secretManager.accessSecretVersion({
-    name: 'projects/project-id/secrets/intelgraph-api-key/versions/latest'
+    name: 'projects/project-id/secrets/intelgraph-api-key/versions/latest',
   });
-  
+
   return version.payload?.data?.toString();
 }
 
@@ -1018,8 +1032,8 @@ const client = new IntelGraphClient({
   requestSigning: {
     enabled: true,
     algorithm: 'HMAC-SHA256',
-    secretKey: process.env.SIGNING_SECRET
-  }
+    secretKey: process.env.SIGNING_SECRET,
+  },
 });
 ```
 
@@ -1033,7 +1047,7 @@ const backoff = new ExponentialBackoff({
   initialDelay: 1000,
   maxDelay: 30000,
   multiplier: 2,
-  maxAttempts: 5
+  maxAttempts: 5,
 });
 
 async function resilientOperation() {
@@ -1058,23 +1072,23 @@ async function resilientOperation() {
 // v1.x (deprecated)
 const client = new IntelGraph({
   endpoint: 'https://api.intelgraph.ai/v1',
-  token: 'your-token'
+  token: 'your-token',
 });
 
 const graph = await client.createGraph({
   title: 'My Graph',
-  desc: 'Description'
+  desc: 'Description',
 });
 
 // v2.x (current)
 const client = new IntelGraphClient({
   apiUrl: 'https://api.intelgraph.ai/v2',
-  apiKey: 'your-api-key'
+  apiKey: 'your-api-key',
 });
 
 const graph = await client.graphs.create({
   name: 'My Graph', // Changed from 'title'
-  description: 'Description' // Changed from 'desc'
+  description: 'Description', // Changed from 'desc'
 });
 ```
 
@@ -1089,16 +1103,19 @@ const graph = await client.graphs.create({
 ## Support and Resources
 
 ### API Reference
+
 - [TypeScript SDK API Reference](https://docs.intelgraph.ai/sdk/typescript)
 - [Python SDK API Reference](https://docs.intelgraph.ai/sdk/python)
 - [REST API Documentation](../../openapi/)
 
 ### Examples and Tutorials
+
 - [SDK Examples Repository](https://github.com/BrianCLong/intelgraph-sdk-examples)
 - [Video Tutorials](https://www.youtube.com/intelgraph)
 - [Interactive Playground](https://playground.intelgraph.ai)
 
 ### Community and Support
+
 - **Documentation**: [docs.intelgraph.ai](https://docs.intelgraph.ai)
 - **Discord Community**: [discord.gg/intelgraph](https://discord.gg/intelgraph)
 - **GitHub Issues**: [github.com/BrianCLong/intelgraph/issues](https://github.com/BrianCLong/intelgraph/issues)

@@ -1,6 +1,6 @@
 packages:
-  - "services/*"
-  - "packages/*"
-  - "tools/*"
-  - "benchmarks/*"
-  - "shootout-ui"
+  - 'services/*'
+  - 'packages/*'
+  - 'tools/*'
+  - 'benchmarks/*'
+  - 'shootout-ui'

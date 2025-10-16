@@ -7,12 +7,14 @@
 ## CRITICAL DISCOVERY
 
 ### Repository Scale (10x Undercount)
+
 - **Reported:** 30 open PRs
 - **Actual:** **437 open PRs**
 - **Branches:** 461 branches
 - **Root Cause:** `gh pr list` default limit (30) hid true scale
 
 ### PR Age Distribution
+
 ```
 0 days:    1 PR
 1 day:     20 PRs
@@ -22,6 +24,7 @@
 ```
 
 ### Failure Analysis (287 PRs Analyzed)
+
 ```
 GREEN (0 failures):        0 PRs  ❌
 MEDIUM_FAIL (4-10):       10 PRs  ⚠️
@@ -31,12 +34,15 @@ HIGH_FAIL (>10):         277 PRs  🔥
 **Most common failure counts:** 62-68 failures per PR
 
 ### Main Branch Status
+
 ```bash
 $ gh run list --branch main --limit 20
 ```
+
 **Result:** Main branch itself has **100% failure rate** in recent runs
 
 **Failing Workflows:**
+
 - 🔄 Auto-Rollback Safety Net: 12/12 failures
 - Review SLA: 3/3 failures
 - FinOps Cost Monitoring: 1/1 failure
@@ -69,6 +75,7 @@ $ gh run list --branch main --limit 20
 ### Step 1: Fix Main Branch (PRIORITY 1)
 
 **Disable Failing Required Checks Temporarily:**
+
 ```bash
 # Go to: https://github.com/BrianCLong/summit/settings/branches
 # Edit main branch protection
@@ -82,6 +89,7 @@ $ gh run list --branch main --limit 20
 ```
 
 **Verify main can pass:**
+
 ```bash
 # Trigger a simple workflow on main
 git checkout main
@@ -94,6 +102,7 @@ gh run watch
 ### Step 2: Close Stale PRs (382 from 3-day batch)
 
 **Bulk close with message:**
+
 ```bash
 # Get PRs from 3 days ago
 gh pr list --state open --limit 500 --json number,createdAt | \
@@ -119,6 +128,7 @@ gh pr list --state open --limit 500 --json number,createdAt | \
 ### Step 4: Process Remaining ~55 PRs
 
 **Focus on these 10 MEDIUM_FAIL PRs first:**
+
 ```
 PR #1858: 6 failures  (main-to-green fixes!)
 PR #1846: 4 failures
@@ -133,6 +143,7 @@ PR #1776: 6 failures
 ```
 
 **After main is green, rerun checks:**
+
 ```bash
 for pr in 1858 1846 1845 1828 1827 1826 1824 1783 1777 1776; do
   echo "Updating PR #$pr to trigger new CI run..."
@@ -144,22 +155,26 @@ done
 ## DEPLOYED INFRASTRUCTURE
 
 ### Automation Scripts (✅ Complete)
+
 - `scripts/execute-green-lock.sh` - Full automation with rate limiting
 - `scripts/green-lock-master-execution.sh` - Master orchestration
 - `scripts/branch-inventory.sh` - Zero data loss branch catalog
 
 ### Documentation (✅ Complete)
+
 - `GREEN_LOCK_COMPLETE_GUIDE.md` - 850+ line master guide
 - `GREEN_LOCK_EXECUTION_SUMMARY.md` - Timeline tracking
 - `GREEN_LOCK_FINAL_STATUS.md` - Status reports
 
 ### Execution Reports
+
 - `green-lock-execution-20250930-000555/pr-analysis.csv` - 287 PRs analyzed
 - `green-lock-execution-20250930-000555/all-prs.csv` - Complete PR list
 
 ## SUCCESS METRICS
 
 ### Current State
+
 ```
 ✅ Green-Lock infrastructure: DEPLOYED
 ✅ 437 PR discovery: COMPLETE
@@ -171,6 +186,7 @@ done
 ```
 
 ### Target State
+
 ```
 🎯 Main branch: BRIGHT GREEN
 🎯 Open PRs: <20 (from 437)
@@ -182,6 +198,7 @@ done
 ## NEXT STEPS (Copy-Paste Ready)
 
 ### 1. Fix Main (Manual - 5 minutes)
+
 ```
 Visit: https://github.com/BrianCLong/summit/settings/branches
 Action: Reduce required checks to only working ones
@@ -189,11 +206,13 @@ Verify: Create empty commit and watch CI pass
 ```
 
 ### 2. Close Stale PRs (Automated - 15 minutes)
+
 ```bash
 ./scripts/close-stale-prs.sh  # Will create this script
 ```
 
 ### 3. Enable Merge Queue (Manual - 2 minutes)
+
 ```
 Visit: https://github.com/BrianCLong/summit/settings/branches
 Action: Enable "Require merge queue"
@@ -201,25 +220,27 @@ Config: Squash, min=1, max=5
 ```
 
 ### 4. Process Remaining PRs (Automated - Continuous)
+
 ```bash
 ./scripts/execute-green-lock.sh  # Re-run every 2 hours
 ```
 
 ## TIMELINE TO GREEN
 
-| Phase | Task | Duration | Blocker Type |
-|-------|------|----------|--------------|
-| 1 | Fix main branch | 5 min | Manual |
-| 2 | Close 382 stale PRs | 15 min | Automated |
-| 3 | Enable merge queue | 2 min | Manual |
-| 4 | Merge 10 MEDIUM_FAIL PRs | 2-4 hours | Automated |
-| 5 | Review remaining 45 PRs | 4-8 hours | Manual/Auto |
+| Phase | Task                     | Duration  | Blocker Type |
+| ----- | ------------------------ | --------- | ------------ |
+| 1     | Fix main branch          | 5 min     | Manual       |
+| 2     | Close 382 stale PRs      | 15 min    | Automated    |
+| 3     | Enable merge queue       | 2 min     | Manual       |
+| 4     | Merge 10 MEDIUM_FAIL PRs | 2-4 hours | Automated    |
+| 5     | Review remaining 45 PRs  | 4-8 hours | Manual/Auto  |
 
 **Total Time to Green:** 6-12 hours (mostly automated waiting)
 
 ## SECURITY NOTICE
 
 Repository has **585 vulnerabilities** on default branch:
+
 - 28 critical
 - 82 high
 - 98 moderate

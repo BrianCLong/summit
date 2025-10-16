@@ -7,7 +7,7 @@ import binascii
 import hashlib
 import hmac
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
@@ -19,7 +19,7 @@ from .errors import ConfigError, VerificationError
 
 def verify_signature(
     artifact_name: str,
-    signature_spec: Dict[str, Any],
+    signature_spec: dict[str, Any],
     payload: bytes,
     *,
     base_path: Path,
@@ -32,10 +32,14 @@ def verify_signature(
     sig_type = signature_spec.get("type")
     if sig_type == "ed25519":
         public_key_bytes, key_format = _load_public_key(signature_spec.get("public_key"), base_path)
-        signature_bytes = _load_signature_bytes(signature_spec, base_path, default_encoding="base64")
+        signature_bytes = _load_signature_bytes(
+            signature_spec, base_path, default_encoding="base64"
+        )
         _verify_ed25519(artifact_name, public_key_bytes, key_format, signature_bytes, payload)
     elif sig_type == "hmac-sha256":
-        signature_bytes = _load_signature_bytes(signature_spec, base_path, default_encoding="base64")
+        signature_bytes = _load_signature_bytes(
+            signature_spec, base_path, default_encoding="base64"
+        )
         secret_bytes = _load_secret(signature_spec, base_path)
         expected = hmac.new(secret_bytes, payload, hashlib.sha256).digest()
         if not hmac.compare_digest(signature_bytes, expected):
@@ -77,7 +81,7 @@ def _verify_ed25519(
         ) from exc
 
 
-def _load_public_key(public_key_spec: Any, base_path: Path) -> Tuple[bytes, str]:
+def _load_public_key(public_key_spec: Any, base_path: Path) -> tuple[bytes, str]:
     if public_key_spec is None:
         raise ConfigError("Signature specification must provide a public key")
 
@@ -106,7 +110,7 @@ def _load_public_key(public_key_spec: Any, base_path: Path) -> Tuple[bytes, str]
     raise ConfigError("Unable to load public key from signature specification")
 
 
-def _load_secret(signature_spec: Dict[str, Any], base_path: Path) -> bytes:
+def _load_secret(signature_spec: dict[str, Any], base_path: Path) -> bytes:
     secret_spec = signature_spec.get("secret")
     if secret_spec is None:
         raise ConfigError("HMAC signature requires a secret specification")
@@ -136,7 +140,7 @@ def _load_secret(signature_spec: Dict[str, Any], base_path: Path) -> bytes:
 
 
 def _load_signature_bytes(
-    signature_spec: Dict[str, Any],
+    signature_spec: dict[str, Any],
     base_path: Path,
     *,
     default_encoding: str,

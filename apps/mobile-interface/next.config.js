@@ -43,7 +43,12 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['@heroicons/react', '@headlessui/react', 'framer-motion', 'recharts'],
+    optimizePackageImports: [
+      '@heroicons/react',
+      '@headlessui/react',
+      'framer-motion',
+      'recharts',
+    ],
   },
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
@@ -86,7 +91,8 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: (process.env.API_BASE_URL || 'http://localhost:4000') + '/api/:path*',
+        destination:
+          (process.env.API_BASE_URL || 'http://localhost:4000') + '/api/:path*',
       },
     ];
   },

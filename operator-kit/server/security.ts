@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 
-export function securityMiddleware(req: Request, res: Response, next: NextFunction) {
+export function securityMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   //
   // Strip Authorization on cross-origin redirects (precaution):
   //
@@ -18,7 +22,9 @@ export function securityMiddleware(req: Request, res: Response, next: NextFuncti
 
 export function cspDirectives() {
   const self = ["'self'"];
-  const scripts = ["'self'"].concat((process.env.CSP_SCRIPT_SRC || '').split(',').filter(Boolean));
+  const scripts = ["'self'"].concat(
+    (process.env.CSP_SCRIPT_SRC || '').split(',').filter(Boolean),
+  );
   const styles = ["'self'", "'unsafe-inline'"]; // Mermaid needs inline styles
   const connects = [
     "'self'",

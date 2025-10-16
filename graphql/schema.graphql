@@ -6,7 +6,15 @@ type Runbook {
   createdAt: DateTime!
 }
 
-enum RunState { QUEUED LEASED RUNNING SUCCEEDED FAILED TIMED_OUT ABORTED }
+enum RunState {
+  QUEUED
+  LEASED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  TIMED_OUT
+  ABORTED
+}
 
 type Run {
   id: ID!
@@ -22,7 +30,11 @@ type Query {
   run(id: ID!): Run
 }
 
-input LaunchRunInput { runbookId: ID!, tenantId: String!, params: JSON }
+input LaunchRunInput {
+  runbookId: ID!
+  tenantId: String!
+  params: JSON
+}
 type Mutation {
   launchRun(input: LaunchRunInput!): Run!
   abortRun(id: ID!): Run!

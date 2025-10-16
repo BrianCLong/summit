@@ -73,5 +73,9 @@ test('federates across subgraphs', async () => {
 
 test('health endpoint aggregates subgraphs', async () => {
   const res = await request(app).get('/health/federation').expect(200);
-  expect(res.body).toMatchObject({ accounts: true, products: true, reviews: true });
+  expect(res.body).toMatchObject({
+    accounts: true,
+    products: true,
+    reviews: true,
+  });
 });

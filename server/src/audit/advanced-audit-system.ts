@@ -12,19 +12,42 @@ import { z } from 'zod';
 import { sign, verify } from 'jsonwebtoken';
 
 // Core audit event types
-export type AuditEventType = 
-  | 'system_start' | 'system_stop' | 'config_change'
-  | 'user_login' | 'user_logout' | 'user_action'
-  | 'resource_access' | 'resource_modify' | 'resource_delete'
-  | 'policy_decision' | 'policy_violation' | 'approval_request' | 'approval_decision'
-  | 'orchestration_start' | 'orchestration_complete' | 'orchestration_fail'
-  | 'task_execute' | 'task_complete' | 'task_fail'
-  | 'data_export' | 'data_import' | 'data_breach'
-  | 'security_alert' | 'compliance_violation' | 'anomaly_detected';
+export type AuditEventType =
+  | 'system_start'
+  | 'system_stop'
+  | 'config_change'
+  | 'user_login'
+  | 'user_logout'
+  | 'user_action'
+  | 'resource_access'
+  | 'resource_modify'
+  | 'resource_delete'
+  | 'policy_decision'
+  | 'policy_violation'
+  | 'approval_request'
+  | 'approval_decision'
+  | 'orchestration_start'
+  | 'orchestration_complete'
+  | 'orchestration_fail'
+  | 'task_execute'
+  | 'task_complete'
+  | 'task_fail'
+  | 'data_export'
+  | 'data_import'
+  | 'data_breach'
+  | 'security_alert'
+  | 'compliance_violation'
+  | 'anomaly_detected';
 
 export type AuditLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';
 
-export type ComplianceFramework = 'SOX' | 'GDPR' | 'HIPAA' | 'SOC2' | 'NIST' | 'ISO27001';
+export type ComplianceFramework =
+  | 'SOX'
+  | 'GDPR'
+  | 'HIPAA'
+  | 'SOC2'
+  | 'NIST'
+  | 'ISO27001';
 
 export interface AuditEvent {
   // Core identification
@@ -32,39 +55,39 @@ export interface AuditEvent {
   eventType: AuditEventType;
   level: AuditLevel;
   timestamp: Date;
-  
+
   // Context
   correlationId: string;
   sessionId?: string;
   requestId?: string;
-  
+
   // Actors
   userId?: string;
   tenantId: string;
   serviceId: string;
-  
+
   // Resources
   resourceType?: string;
   resourceId?: string;
   resourcePath?: string;
-  
+
   // Action details
   action: string;
   outcome: 'success' | 'failure' | 'partial';
-  
+
   // Content
   message: string;
   details: Record<string, any>;
-  
+
   // Security
   ipAddress?: string;
   userAgent?: string;
-  
+
   // Compliance
   complianceRelevant: boolean;
   complianceFrameworks: ComplianceFramework[];
   dataClassification?: 'public' | 'internal' | 'confidential' | 'restricted';
-  
+
   // Integrity
   hash?: string;
   signature?: string;
@@ -140,7 +163,7 @@ const AuditEventSchema = z.object({
   message: z.string(),
   details: z.record(z.any()),
   complianceRelevant: z.boolean(),
-  complianceFrameworks: z.array(z.string())
+  complianceFrameworks: z.array(z.string()),
 });
 
 export class AdvancedAuditSystem extends EventEmitter {
@@ -150,44 +173,50 @@ export class AdvancedAuditSystem extends EventEmitter {
   private signingKey: string;
   private encryptionKey: string;
   private lastEventHash: string = '';
-  
+
   // Configuration
   private retentionPeriodDays: number = 2555; // 7 years for compliance
   private batchSize: number = 100;
   private compressionEnabled: boolean = true;
   private realTimeAlerting: boolean = true;
-  
+
   // Caching
   private eventBuffer: AuditEvent[] = [];
   private flushInterval: NodeJS.Timeout;
-  
+
   constructor(
     db: Pool,
     redis: Redis,
     logger: Logger,
     signingKey: string,
-    encryptionKey: string
+    encryptionKey: string,
   ) {
     super();
-    
+
     this.db = db;
     this.redis = redis;
     this.logger = logger;
     this.signingKey = signingKey;
     this.encryptionKey = encryptionKey;
-    
+
     // Initialize schema
-    this.initializeSchema().catch(err => {
-      this.logger.error({ error: err.message }, 'Failed to initialize audit schema');
+    this.initializeSchema().catch((err) => {
+      this.logger.error(
+        { error: err.message },
+        'Failed to initialize audit schema',
+      );
     });
-    
+
     // Start periodic flush
     this.flushInterval = setInterval(() => {
-      this.flushEventBuffer().catch(err => {
-        this.logger.error({ error: err.message }, 'Failed to flush audit events');
+      this.flushEventBuffer().catch((err) => {
+        this.logger.error(
+          { error: err.message },
+          'Failed to flush audit events',
+        );
       });
     }, 5000); // Every 5 seconds
-    
+
     // Cleanup on exit
     process.on('SIGTERM', () => this.gracefulShutdown());
     process.on('SIGINT', () => this.gracefulShutdown());
@@ -217,7 +246,7 @@ export class AdvancedAuditSystem extends EventEmitter {
         ipAddress: eventData.ipAddress,
         userAgent: eventData.userAgent,
         dataClassification: eventData.dataClassification,
-        ...validation.data
+        ...validation.data,
       } as AuditEvent;
 
       // Calculate integrity hash
@@ -244,19 +273,24 @@ export class AdvancedAuditSystem extends EventEmitter {
       // Emit event for subscribers
       this.emit('eventRecorded', event);
 
-      this.logger.debug({
-        eventId: event.id,
-        eventType: event.eventType,
-        level: event.level
-      }, 'Audit event recorded');
+      this.logger.debug(
+        {
+          eventId: event.id,
+          eventType: event.eventType,
+          level: event.level,
+        },
+        'Audit event recorded',
+      );
 
       return event.id;
-
     } catch (error) {
-      this.logger.error({ 
-        error: error.message,
-        eventData 
-      }, 'Failed to record audit event');
+      this.logger.error(
+        {
+          error: error.message,
+          eventData,
+        },
+        'Failed to record audit event',
+      );
       throw error;
     }
   }
@@ -321,7 +355,7 @@ export class AdvancedAuditSystem extends EventEmitter {
 
       // Ordering and pagination
       sql += ` ORDER BY timestamp DESC`;
-      
+
       if (query.limit) {
         sql += ` LIMIT $${paramIndex++}`;
         params.push(query.limit);
@@ -333,13 +367,15 @@ export class AdvancedAuditSystem extends EventEmitter {
       }
 
       const result = await this.db.query(sql, params);
-      return result.rows.map(row => this.deserializeEvent(row));
-
+      return result.rows.map((row) => this.deserializeEvent(row));
     } catch (error) {
-      this.logger.error({ 
-        error: error.message,
-        query 
-      }, 'Failed to query audit events');
+      this.logger.error(
+        {
+          error: error.message,
+          query,
+        },
+        'Failed to query audit events',
+      );
       throw error;
     }
   }
@@ -350,56 +386,68 @@ export class AdvancedAuditSystem extends EventEmitter {
   async generateComplianceReport(
     framework: ComplianceFramework,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<ComplianceReport> {
     try {
       // Query relevant events
       const events = await this.queryEvents({
         startTime: startDate,
         endTime: endDate,
-        complianceFrameworks: [framework]
+        complianceFrameworks: [framework],
       });
 
       // Analyze violations
       const violations = this.analyzeComplianceViolations(events, framework);
-      
+
       // Calculate compliance score
-      const complianceScore = this.calculateComplianceScore(events, violations, framework);
-      
+      const complianceScore = this.calculateComplianceScore(
+        events,
+        violations,
+        framework,
+      );
+
       // Generate recommendations
-      const recommendations = this.generateComplianceRecommendations(violations, framework);
+      const recommendations = this.generateComplianceRecommendations(
+        violations,
+        framework,
+      );
 
       const report: ComplianceReport = {
         framework,
         period: { start: startDate, end: endDate },
         summary: {
           totalEvents: events.length,
-          criticalEvents: events.filter(e => e.level === 'critical').length,
+          criticalEvents: events.filter((e) => e.level === 'critical').length,
           violations: violations.length,
-          complianceScore
+          complianceScore,
         },
         violations,
-        recommendations
+        recommendations,
       };
 
       // Store report
       await this.storeComplianceReport(report);
 
-      this.logger.info({
-        framework,
-        period: { start: startDate, end: endDate },
-        score: complianceScore,
-        violations: violations.length
-      }, 'Compliance report generated');
+      this.logger.info(
+        {
+          framework,
+          period: { start: startDate, end: endDate },
+          score: complianceScore,
+          violations: violations.length,
+        },
+        'Compliance report generated',
+      );
 
       return report;
-
     } catch (error) {
-      this.logger.error({ 
-        error: error.message,
-        framework,
-        period: { start: startDate, end: endDate }
-      }, 'Failed to generate compliance report');
+      this.logger.error(
+        {
+          error: error.message,
+          framework,
+          period: { start: startDate, end: endDate },
+        },
+        'Failed to generate compliance report',
+      );
       throw error;
     }
   }
@@ -407,11 +455,13 @@ export class AdvancedAuditSystem extends EventEmitter {
   /**
    * Perform forensic analysis on a correlation ID
    */
-  async performForensicAnalysis(correlationId: string): Promise<ForensicAnalysis> {
+  async performForensicAnalysis(
+    correlationId: string,
+  ): Promise<ForensicAnalysis> {
     try {
       // Get all events for correlation ID
       const events = await this.queryEvents({
-        correlationIds: [correlationId]
+        correlationIds: [correlationId],
       });
 
       if (events.length === 0) {
@@ -419,10 +469,16 @@ export class AdvancedAuditSystem extends EventEmitter {
       }
 
       // Analyze actors
-      const actorMap = new Map<string, { actions: number; events: AuditEvent[] }>();
+      const actorMap = new Map<
+        string,
+        { actions: number; events: AuditEvent[] }
+      >();
       for (const event of events) {
         if (event.userId) {
-          const existing = actorMap.get(event.userId) || { actions: 0, events: [] };
+          const existing = actorMap.get(event.userId) || {
+            actions: 0,
+            events: [],
+          };
           existing.actions++;
           existing.events.push(event);
           actorMap.set(event.userId, existing);
@@ -432,14 +488,20 @@ export class AdvancedAuditSystem extends EventEmitter {
       const actors = Array.from(actorMap.entries()).map(([userId, data]) => ({
         userId,
         actions: data.actions,
-        riskScore: this.calculateActorRiskScore(data.events)
+        riskScore: this.calculateActorRiskScore(data.events),
       }));
 
       // Analyze resources
-      const resourceMap = new Map<string, { accessCount: number; lastAccessed: Date }>();
+      const resourceMap = new Map<
+        string,
+        { accessCount: number; lastAccessed: Date }
+      >();
       for (const event of events) {
         if (event.resourceId) {
-          const existing = resourceMap.get(event.resourceId) || { accessCount: 0, lastAccessed: new Date(0) };
+          const existing = resourceMap.get(event.resourceId) || {
+            accessCount: 0,
+            lastAccessed: new Date(0),
+          };
           existing.accessCount++;
           if (event.timestamp > existing.lastAccessed) {
             existing.lastAccessed = event.timestamp;
@@ -448,41 +510,50 @@ export class AdvancedAuditSystem extends EventEmitter {
         }
       }
 
-      const resources = Array.from(resourceMap.entries()).map(([resourceId, data]) => ({
-        resourceId,
-        accessCount: data.accessCount,
-        lastAccessed: data.lastAccessed
-      }));
+      const resources = Array.from(resourceMap.entries()).map(
+        ([resourceId, data]) => ({
+          resourceId,
+          accessCount: data.accessCount,
+          lastAccessed: data.lastAccessed,
+        }),
+      );
 
       // Detect anomalies
       const anomalies = await this.detectAnomalies(events);
 
       const analysis: ForensicAnalysis = {
         correlationId,
-        timeline: events.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()),
+        timeline: events.sort(
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+        ),
         actors,
         resources,
-        anomalies
+        anomalies,
       };
 
       // Store analysis
       await this.storeForensicAnalysis(analysis);
 
-      this.logger.info({
-        correlationId,
-        eventCount: events.length,
-        actorCount: actors.length,
-        resourceCount: resources.length,
-        anomalyCount: anomalies.length
-      }, 'Forensic analysis completed');
+      this.logger.info(
+        {
+          correlationId,
+          eventCount: events.length,
+          actorCount: actors.length,
+          resourceCount: resources.length,
+          anomalyCount: anomalies.length,
+        },
+        'Forensic analysis completed',
+      );
 
       return analysis;
-
     } catch (error) {
-      this.logger.error({ 
-        error: error.message,
-        correlationId 
-      }, 'Failed to perform forensic analysis');
+      this.logger.error(
+        {
+          error: error.message,
+          correlationId,
+        },
+        'Failed to perform forensic analysis',
+      );
       throw error;
     }
   }
@@ -490,7 +561,10 @@ export class AdvancedAuditSystem extends EventEmitter {
   /**
    * Verify audit trail integrity
    */
-  async verifyIntegrity(startDate?: Date, endDate?: Date): Promise<{
+  async verifyIntegrity(
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
     valid: boolean;
     totalEvents: number;
     validEvents: number;
@@ -502,7 +576,7 @@ export class AdvancedAuditSystem extends EventEmitter {
     try {
       const events = await this.queryEvents({
         startTime: startDate,
-        endTime: endDate
+        endTime: endDate,
       });
 
       let validEvents = 0;
@@ -515,7 +589,7 @@ export class AdvancedAuditSystem extends EventEmitter {
         if (event.hash !== calculatedHash) {
           invalidEvents.push({
             eventId: event.id,
-            issue: 'Hash mismatch - possible tampering'
+            issue: 'Hash mismatch - possible tampering',
           });
           continue;
         }
@@ -524,16 +598,19 @@ export class AdvancedAuditSystem extends EventEmitter {
         if (!this.verifyEventSignature(event)) {
           invalidEvents.push({
             eventId: event.id,
-            issue: 'Invalid signature'
+            issue: 'Invalid signature',
           });
           continue;
         }
 
         // Verify chain integrity
-        if (expectedPreviousHash && event.previousEventHash !== expectedPreviousHash) {
+        if (
+          expectedPreviousHash &&
+          event.previousEventHash !== expectedPreviousHash
+        ) {
           invalidEvents.push({
             eventId: event.id,
-            issue: 'Chain integrity violation'
+            issue: 'Chain integrity violation',
           });
         }
 
@@ -545,15 +622,17 @@ export class AdvancedAuditSystem extends EventEmitter {
         valid: invalidEvents.length === 0,
         totalEvents: events.length,
         validEvents,
-        invalidEvents
+        invalidEvents,
       };
 
       this.logger.info(result, 'Audit trail integrity verification completed');
 
       return result;
-
     } catch (error) {
-      this.logger.error({ error: error.message }, 'Failed to verify audit trail integrity');
+      this.logger.error(
+        { error: error.message },
+        'Failed to verify audit trail integrity',
+      );
       throw error;
     }
   }
@@ -627,7 +706,7 @@ export class AdvancedAuditSystem extends EventEmitter {
 
     try {
       // Batch insert
-      const values = eventsToFlush.map(event => [
+      const values = eventsToFlush.map((event) => [
         event.id,
         event.eventType,
         event.level,
@@ -652,16 +731,19 @@ export class AdvancedAuditSystem extends EventEmitter {
         event.dataClassification,
         event.hash,
         event.signature,
-        event.previousEventHash
+        event.previousEventHash,
       ]);
 
-      const placeholders = values.map((_, i) => 
-        `($${i * 25 + 1}, $${i * 25 + 2}, $${i * 25 + 3}, $${i * 25 + 4}, $${i * 25 + 5}, 
+      const placeholders = values
+        .map(
+          (_, i) =>
+            `($${i * 25 + 1}, $${i * 25 + 2}, $${i * 25 + 3}, $${i * 25 + 4}, $${i * 25 + 5}, 
          $${i * 25 + 6}, $${i * 25 + 7}, $${i * 25 + 8}, $${i * 25 + 9}, $${i * 25 + 10},
          $${i * 25 + 11}, $${i * 25 + 12}, $${i * 25 + 13}, $${i * 25 + 14}, $${i * 25 + 15},
          $${i * 25 + 16}, $${i * 25 + 17}, $${i * 25 + 18}, $${i * 25 + 19}, $${i * 25 + 20},
-         $${i * 25 + 21}, $${i * 25 + 22}, $${i * 25 + 23}, $${i * 25 + 24}, $${i * 25 + 25})`
-      ).join(', ');
+         $${i * 25 + 21}, $${i * 25 + 22}, $${i * 25 + 23}, $${i * 25 + 24}, $${i * 25 + 25})`,
+        )
+        .join(', ');
 
       const query = `
         INSERT INTO audit_events (
@@ -674,10 +756,12 @@ export class AdvancedAuditSystem extends EventEmitter {
 
       await this.db.query(query, values.flat());
 
-      this.logger.debug({
-        flushedEvents: eventsToFlush.length
-      }, 'Audit events flushed to database');
-
+      this.logger.debug(
+        {
+          flushedEvents: eventsToFlush.length,
+        },
+        'Audit events flushed to database',
+      );
     } catch (error) {
       // Re-add events to buffer if flush fails
       this.eventBuffer.unshift(...eventsToFlush);
@@ -695,7 +779,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       serviceId: event.serviceId,
       action: event.action,
       message: event.message,
-      details: event.details
+      details: event.details,
     };
 
     return createHash('sha256')
@@ -708,10 +792,10 @@ export class AdvancedAuditSystem extends EventEmitter {
       {
         id: event.id,
         hash: event.hash,
-        timestamp: event.timestamp.toISOString()
+        timestamp: event.timestamp.toISOString(),
       },
       this.signingKey,
-      { algorithm: 'HS256' }
+      { algorithm: 'HS256' },
     );
   }
 
@@ -750,13 +834,13 @@ export class AdvancedAuditSystem extends EventEmitter {
       dataClassification: row.data_classification,
       hash: row.hash,
       signature: row.signature,
-      previousEventHash: row.previous_event_hash
+      previousEventHash: row.previous_event_hash,
     };
   }
 
   private analyzeComplianceViolations(
-    events: AuditEvent[], 
-    framework: ComplianceFramework
+    events: AuditEvent[],
+    framework: ComplianceFramework,
   ): ComplianceReport['violations'] {
     const violations: ComplianceReport['violations'] = [];
 
@@ -777,13 +861,14 @@ export class AdvancedAuditSystem extends EventEmitter {
     return violations;
   }
 
-  private detectSoxViolations(events: AuditEvent[]): ComplianceReport['violations'] {
+  private detectSoxViolations(
+    events: AuditEvent[],
+  ): ComplianceReport['violations'] {
     const violations: ComplianceReport['violations'] = [];
 
     // Example: Detect unauthorized access to financial data
-    const financialAccess = events.filter(e => 
-      e.resourceType === 'financial_data' && 
-      e.outcome === 'failure'
+    const financialAccess = events.filter(
+      (e) => e.resourceType === 'financial_data' && e.outcome === 'failure',
     );
 
     for (const event of financialAccess) {
@@ -792,20 +877,23 @@ export class AdvancedAuditSystem extends EventEmitter {
         violationType: 'unauthorized_financial_access',
         severity: 'high',
         description: 'Unauthorized access attempt to financial data',
-        remediation: 'Review user permissions and implement additional access controls'
+        remediation:
+          'Review user permissions and implement additional access controls',
       });
     }
 
     return violations;
   }
 
-  private detectGdprViolations(events: AuditEvent[]): ComplianceReport['violations'] {
+  private detectGdprViolations(
+    events: AuditEvent[],
+  ): ComplianceReport['violations'] {
     const violations: ComplianceReport['violations'] = [];
 
     // Example: Detect data export without proper approval
-    const dataExports = events.filter(e => 
-      e.eventType === 'data_export' && 
-      e.dataClassification === 'restricted'
+    const dataExports = events.filter(
+      (e) =>
+        e.eventType === 'data_export' && e.dataClassification === 'restricted',
     );
 
     for (const event of dataExports) {
@@ -813,53 +901,72 @@ export class AdvancedAuditSystem extends EventEmitter {
         eventId: event.id,
         violationType: 'unauthorized_data_export',
         severity: 'critical',
-        description: 'Export of restricted personal data without proper approval',
-        remediation: 'Implement data export approval workflow and review data handling procedures'
+        description:
+          'Export of restricted personal data without proper approval',
+        remediation:
+          'Implement data export approval workflow and review data handling procedures',
       });
     }
 
     return violations;
   }
 
-  private detectSoc2Violations(events: AuditEvent[]): ComplianceReport['violations'] {
+  private detectSoc2Violations(
+    events: AuditEvent[],
+  ): ComplianceReport['violations'] {
     // Similar implementation for SOC2
     return [];
   }
 
   private calculateComplianceScore(
-    events: AuditEvent[], 
+    events: AuditEvent[],
     violations: ComplianceReport['violations'],
-    framework: ComplianceFramework
+    framework: ComplianceFramework,
   ): number {
     if (events.length === 0) return 100;
 
-    const criticalViolations = violations.filter(v => v.severity === 'critical').length;
-    const highViolations = violations.filter(v => v.severity === 'high').length;
-    const mediumViolations = violations.filter(v => v.severity === 'medium').length;
-    const lowViolations = violations.filter(v => v.severity === 'low').length;
+    const criticalViolations = violations.filter(
+      (v) => v.severity === 'critical',
+    ).length;
+    const highViolations = violations.filter(
+      (v) => v.severity === 'high',
+    ).length;
+    const mediumViolations = violations.filter(
+      (v) => v.severity === 'medium',
+    ).length;
+    const lowViolations = violations.filter((v) => v.severity === 'low').length;
 
     // Weighted scoring
-    const totalPenalty = (criticalViolations * 20) + (highViolations * 10) + 
-                        (mediumViolations * 5) + (lowViolations * 1);
+    const totalPenalty =
+      criticalViolations * 20 +
+      highViolations * 10 +
+      mediumViolations * 5 +
+      lowViolations * 1;
 
-    const score = Math.max(0, 100 - (totalPenalty / events.length * 100));
+    const score = Math.max(0, 100 - (totalPenalty / events.length) * 100);
     return Math.round(score * 100) / 100;
   }
 
   private generateComplianceRecommendations(
     violations: ComplianceReport['violations'],
-    framework: ComplianceFramework
+    framework: ComplianceFramework,
   ): string[] {
     const recommendations: string[] = [];
 
-    const criticalCount = violations.filter(v => v.severity === 'critical').length;
+    const criticalCount = violations.filter(
+      (v) => v.severity === 'critical',
+    ).length;
     if (criticalCount > 0) {
-      recommendations.push(`Address ${criticalCount} critical violations immediately`);
+      recommendations.push(
+        `Address ${criticalCount} critical violations immediately`,
+      );
     }
 
-    const highCount = violations.filter(v => v.severity === 'high').length;
+    const highCount = violations.filter((v) => v.severity === 'high').length;
     if (highCount > 0) {
-      recommendations.push(`Review and remediate ${highCount} high-severity violations`);
+      recommendations.push(
+        `Review and remediate ${highCount} high-severity violations`,
+      );
     }
 
     // Framework-specific recommendations
@@ -881,62 +988,74 @@ export class AdvancedAuditSystem extends EventEmitter {
     let riskScore = 0;
 
     // Failed actions increase risk
-    const failures = events.filter(e => e.outcome === 'failure').length;
+    const failures = events.filter((e) => e.outcome === 'failure').length;
     riskScore += failures * 10;
 
     // After-hours activity increases risk
-    const afterHours = events.filter(e => {
+    const afterHours = events.filter((e) => {
       const hour = e.timestamp.getHours();
       return hour < 8 || hour > 18;
     }).length;
     riskScore += afterHours * 5;
 
     // High-sensitivity resource access increases risk
-    const sensitiveAccess = events.filter(e => 
-      e.dataClassification === 'restricted' || e.dataClassification === 'confidential'
+    const sensitiveAccess = events.filter(
+      (e) =>
+        e.dataClassification === 'restricted' ||
+        e.dataClassification === 'confidential',
     ).length;
     riskScore += sensitiveAccess * 15;
 
     return Math.min(100, riskScore);
   }
 
-  private async detectAnomalies(events: AuditEvent[]): Promise<ForensicAnalysis['anomalies']> {
+  private async detectAnomalies(
+    events: AuditEvent[],
+  ): Promise<ForensicAnalysis['anomalies']> {
     const anomalies: ForensicAnalysis['anomalies'] = [];
 
     // Detect unusual activity patterns
-    const timeSpan = events.length > 0 ? 
-      events[events.length - 1].timestamp.getTime() - events[0].timestamp.getTime() : 0;
+    const timeSpan =
+      events.length > 0
+        ? events[events.length - 1].timestamp.getTime() -
+          events[0].timestamp.getTime()
+        : 0;
 
     if (timeSpan > 0) {
       const avgInterval = timeSpan / events.length;
-      
+
       // Detect burst activity
       let burstCount = 0;
       for (let i = 1; i < events.length; i++) {
-        const interval = events[i].timestamp.getTime() - events[i-1].timestamp.getTime();
-        if (interval < avgInterval * 0.1) { // Much faster than average
+        const interval =
+          events[i].timestamp.getTime() - events[i - 1].timestamp.getTime();
+        if (interval < avgInterval * 0.1) {
+          // Much faster than average
           burstCount++;
         }
       }
 
-      if (burstCount > events.length * 0.3) { // More than 30% burst activity
+      if (burstCount > events.length * 0.3) {
+        // More than 30% burst activity
         anomalies.push({
           type: 'burst_activity',
           description: 'Unusual burst of rapid consecutive actions detected',
           severity: 70,
-          events: events.map(e => e.id)
+          events: events.map((e) => e.id),
         });
       }
     }
 
     // Detect repeated failures
-    const failures = events.filter(e => e.outcome === 'failure');
-    if (failures.length > events.length * 0.5) { // More than 50% failures
+    const failures = events.filter((e) => e.outcome === 'failure');
+    if (failures.length > events.length * 0.5) {
+      // More than 50% failures
       anomalies.push({
         type: 'repeated_failures',
-        description: 'High rate of failed operations indicating possible attack',
+        description:
+          'High rate of failed operations indicating possible attack',
         severity: 85,
-        events: failures.map(e => e.id)
+        events: failures.map((e) => e.id),
       });
     }
 
@@ -955,25 +1074,38 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   private async storeComplianceReport(report: ComplianceReport): Promise<void> {
-    await this.db.query(`
+    await this.db.query(
+      `
       INSERT INTO compliance_reports (framework, period_start, period_end, report_data)
       VALUES ($1, $2, $3, $4)
-    `, [report.framework, report.period.start, report.period.end, JSON.stringify(report)]);
+    `,
+      [
+        report.framework,
+        report.period.start,
+        report.period.end,
+        JSON.stringify(report),
+      ],
+    );
   }
 
-  private async storeForensicAnalysis(analysis: ForensicAnalysis): Promise<void> {
-    await this.db.query(`
+  private async storeForensicAnalysis(
+    analysis: ForensicAnalysis,
+  ): Promise<void> {
+    await this.db.query(
+      `
       INSERT INTO forensic_analyses (correlation_id, analysis_data)
       VALUES ($1, $2)
-    `, [analysis.correlationId, JSON.stringify(analysis)]);
+    `,
+      [analysis.correlationId, JSON.stringify(analysis)],
+    );
   }
 
   private async gracefulShutdown(): Promise<void> {
     this.logger.info('Shutting down audit system gracefully');
-    
+
     clearInterval(this.flushInterval);
     await this.flushEventBuffer();
-    
+
     this.logger.info('Audit system shutdown complete');
   }
 }

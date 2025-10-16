@@ -17,11 +17,16 @@ export default function ApprovalsPanel() {
         const r = await fetch('/api/conductor/v1/approvals');
         const j = await r.json();
         if (alive) setTasks(j.items || []);
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error(e);
+      }
     };
     load();
     const iv = setInterval(load, 5000);
-    return () => { alive = false; clearInterval(iv); };
+    return () => {
+      alive = false;
+      clearInterval(iv);
+    };
   }, []);
 
   useEffect(() => {
@@ -37,17 +42,47 @@ export default function ApprovalsPanel() {
   }, []);
 
   return (
-    <div style={{ padding: 16, borderRadius: 12, boxShadow: '0 1px 6px rgba(0,0,0,0.1)' }}>
+    <div
+      style={{
+        padding: 16,
+        borderRadius: 12,
+        boxShadow: '0 1px 6px rgba(0,0,0,0.1)',
+      }}
+    >
       <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
         <h3 style={{ margin: 0 }}>Approvals</h3>
-        <input id="approval-filter" style={{ border: '1px solid #ddd', borderRadius: 6, padding: '4px 8px' }} placeholder="filter…" />
+        <input
+          id="approval-filter"
+          style={{
+            border: '1px solid #ddd',
+            borderRadius: 6,
+            padding: '4px 8px',
+          }}
+          placeholder="filter…"
+        />
       </div>
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {tasks.map((t) => (
-          <li key={t.runId + t.stepId} className="approval-row" style={{ display: 'flex', gap: 8, padding: '6px 0' }}>
-            <div style={{ flexGrow: 1 }}>Run {t.runId} • Step {t.stepId} • {(t.labels || []).join(', ')}</div>
-            <button onClick={() => approve(t, true)} style={{ padding: '4px 8px', borderRadius: 16 }}>Approve</button>
-            <button onClick={() => approve(t, false)} style={{ padding: '4px 8px', borderRadius: 16 }}>Decline</button>
+          <li
+            key={t.runId + t.stepId}
+            className="approval-row"
+            style={{ display: 'flex', gap: 8, padding: '6px 0' }}
+          >
+            <div style={{ flexGrow: 1 }}>
+              Run {t.runId} • Step {t.stepId} • {(t.labels || []).join(', ')}
+            </div>
+            <button
+              onClick={() => approve(t, true)}
+              style={{ padding: '4px 8px', borderRadius: 16 }}
+            >
+              Approve
+            </button>
+            <button
+              onClick={() => approve(t, false)}
+              style={{ padding: '4px 8px', borderRadius: 16 }}
+            >
+              Decline
+            </button>
           </li>
         ))}
       </ul>
@@ -55,12 +90,23 @@ export default function ApprovalsPanel() {
   );
 
   async function approve(t: ApprovalTask, ok: boolean) {
-    const justification = window.prompt(ok ? 'Approval justification' : 'Decline justification');
+    const justification = window.prompt(
+      ok ? 'Approval justification' : 'Decline justification',
+    );
     if (!justification) return;
     const m = ok ? 'approveStep' : 'declineStep';
     const q = `mutation($runId:ID!,$stepId:ID!,$j:String!){ ${m}(runId:$runId, stepId:$stepId, justification:$j) }`;
     try {
-      await fetch('/graphql', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ query: q, variables: { runId: t.runId, stepId: t.stepId, j: justification } }) });
-    } catch (e) { console.error(e); }
+      await fetch('/graphql', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          query: q,
+          variables: { runId: t.runId, stepId: t.stepId, j: justification },
+        }),
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 }

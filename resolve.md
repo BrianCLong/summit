@@ -4,7 +4,7 @@
 
 Here is an intelligent and comprehensive prompt to resolve all conflicts and concerns across all PRs and branches in the BrianCLong/summit GitHub repo to ensure all merge green successfully:
 
-***
+---
 
 ### Conflict Resolution Prompt for BrianCLong/summit Repo — All PRs \& Branches Merge Green
 
@@ -19,40 +19,37 @@ Automate and/or semi-automate resolution of all merge conflicts in every active 
 **Steps:**
 
 1. **Analyze each conflict:**
-    - Use conflict markers (<<<<<<<, =======, >>>>>>>) to locate conflicting changes.
-    - Identify the source branches of conflicting changes (e.g., base vs PR head).
-    - For each conflict, categorize if changes are:
-        - Directly overlapping line edits.
-    - Non-overlapping changes on different lines.
-    - Structural conflicts that require architectural design decisions.
+   - Use conflict markers (<<<<<<<, =======, >>>>>>>) to locate conflicting changes.
+   - Identify the source branches of conflicting changes (e.g., base vs PR head).
+   - For each conflict, categorize if changes are:
+     - Directly overlapping line edits.
+   - Non-overlapping changes on different lines.
+   - Structural conflicts that require architectural design decisions.
 2. **Merge strategy per conflict:**
-    - For **non-overlapping** changes, combine both sets of changes to preserve work on all branches.
-    - For **overlapping but complementary** changes, manually or AI-assisted merge to combine intents.
-    - For **overlapping contradictory** changes, consult author or team for prioritization, falling back to latest valid business logic or test verified outcome.
-    - For **complex conflicts** outside simple textual merge, escalate to domain expert for resolution.
+   - For **non-overlapping** changes, combine both sets of changes to preserve work on all branches.
+   - For **overlapping but complementary** changes, manually or AI-assisted merge to combine intents.
+   - For **overlapping contradictory** changes, consult author or team for prioritization, falling back to latest valid business logic or test verified outcome.
+   - For **complex conflicts** outside simple textual merge, escalate to domain expert for resolution.
 3. **Automated tooling:**
-    - Run AI-assisted tools such as GitKraken Merge Tool or equivalent to suggest context-aware merges.
-    - Use `git mergetool` or editor-based merge tools with side-by-side diff to manually verify and resolve remaining conflicts.
-    - Prefer incorporating all non-conflicting changes from all PRs and branches.
-4. **Testing \& Validation:**
-    - After conflict resolution, stage all resolved files and commit with clear message:
-`"Resolve merge conflicts by incorporating all PRs and branches changes for green merge"`
-    - Run full unit, integration, and system tests in CI environment to validate no regressions introduced.
-    - Address any test failures iteratively via fixes or revert if inconsistent.
+   - Run AI-assisted tools such as GitKraken Merge Tool or equivalent to suggest context-aware merges.
+   - Use `git mergetool` or editor-based merge tools with side-by-side diff to manually verify and resolve remaining conflicts.
+   - Prefer incorporating all non-conflicting changes from all PRs and branches.
+4. **Testing \& Validation:** - After conflict resolution, stage all resolved files and commit with clear message:
+   `"Resolve merge conflicts by incorporating all PRs and branches changes for green merge"` - Run full unit, integration, and system tests in CI environment to validate no regressions introduced. - Address any test failures iteratively via fixes or revert if inconsistent.
 5. **Merge sequencing \& coordination:**
-    - Create a merge queue or linear merging order prioritizing PRs by criticality or dependency.
-    - Rebase later PRs onto resolved branch continuously to reduce subsequent conflicts.
-    - Communicate clearly with contributors on changes.
+   - Create a merge queue or linear merging order prioritizing PRs by criticality or dependency.
+   - Rebase later PRs onto resolved branch continuously to reduce subsequent conflicts.
+   - Communicate clearly with contributors on changes.
 6. **Provenance \& Documentation:**
-    - Maintain detailed commit logs describing rationale and decisions for each conflict resolution.
-    - Reference linked issues or PR IDs in commit messages for auditability.
-    - Update relevant documentation if conflict resolution involves feature or behavior changes.
+   - Maintain detailed commit logs describing rationale and decisions for each conflict resolution.
+   - Reference linked issues or PR IDs in commit messages for auditability.
+   - Update relevant documentation if conflict resolution involves feature or behavior changes.
 
-***
+---
 
 This prompt prioritizes systematically capturing all changes from all PRs and branches, intelligently combining them with AI-assisted fusion where possible, escalating complex cases, running stringent test validation, and documenting all decisions for compliance and audit.
 
-***
+---
 
 **Usage example for local command line:**
 
@@ -78,12 +75,11 @@ git commit -m "Resolve merge conflict incorporating PR#123 and main branch chang
 git push origin pr/123
 ```
 
-
-***
+---
 
 If desired, automation with batch scripts or CI pipelines invoking AI conflict resolution and stepwise merge queue management can be implemented to scale this process.
 
-***
+---
 
 Let me know if an actionable backlog and orchestration plan for this task or full implementation scaffolds and test suites should be produced next.
 
@@ -134,4 +130,3 @@ GitKraken AI Merge Tool Overview[^5]
 [^19]: https://nf-co.re/docs/tutorials/sync/merging_automated_prs
 
 [^20]: https://www.arcadsoftware.com/discover/resources/blog/resolve-git-merge-conflicts-faster-with-artificial-intelligence-ai/
-

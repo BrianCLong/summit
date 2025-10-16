@@ -11,7 +11,9 @@
       "title": "CPU Utilization",
       "datasource": "Prometheus",
       "targets": [
-        { "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"intelgraph\"}[5m]))" }
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"intelgraph\"}[5m]))"
+        }
       ]
     },
     {
@@ -19,7 +21,9 @@
       "title": "Memory Usage",
       "datasource": "Prometheus",
       "targets": [
-        { "expr": "sum(container_memory_usage_bytes{namespace=\"intelgraph\"})" }
+        {
+          "expr": "sum(container_memory_usage_bytes{namespace=\"intelgraph\"})"
+        }
       ]
     },
     {

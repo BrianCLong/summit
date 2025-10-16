@@ -55,7 +55,13 @@ export interface MPCSession {
   circuitId: string;
   parties: string[];
   coordinator: string;
-  status: 'setup' | 'input-sharing' | 'computation' | 'output-reconstruction' | 'completed' | 'failed';
+  status:
+    | 'setup'
+    | 'input-sharing'
+    | 'computation'
+    | 'output-reconstruction'
+    | 'completed'
+    | 'failed';
   currentRound: number;
   totalRounds: number;
   shares: Map<string, SecretShare[]>;
@@ -125,7 +131,7 @@ export class MPCProtocol extends EventEmitter {
     const fullParty: MPCParty = {
       ...party,
       isOnline: false,
-      lastSeen: new Date()
+      lastSeen: new Date(),
     };
 
     this.parties.set(party.id, fullParty);
@@ -142,7 +148,7 @@ export class MPCProtocol extends EventEmitter {
       ...circuit,
       id: crypto.randomUUID(),
       estimatedCost: cost,
-      precomputeRequirements: this.calculatePrecomputeNeeds(circuit, cost)
+      precomputeRequirements: this.calculatePrecomputeNeeds(circuit, cost),
     };
 
     this.circuits.set(fullCircuit.id, fullCircuit);
@@ -157,7 +163,7 @@ export class MPCProtocol extends EventEmitter {
   async startSession(
     circuitId: string,
     parties: string[],
-    inputData: Map<string, any>
+    inputData: Map<string, any>,
   ): Promise<MPCSession> {
     const circuit = this.circuits.get(circuitId);
     if (!circuit) {
@@ -186,8 +192,8 @@ export class MPCProtocol extends EventEmitter {
       audit: {
         inputCommitments: new Map(),
         roundTranscripts: [],
-        verificationProofs: []
-      }
+        verificationProofs: [],
+      },
     };
 
     this.sessions.set(session.id, session);
@@ -204,7 +210,6 @@ export class MPCProtocol extends EventEmitter {
 
       session.status = 'completed';
       session.endTime = new Date();
-
     } catch (error) {
       session.status = 'failed';
       session.error = error.message;
@@ -226,35 +231,44 @@ export class MPCProtocol extends EventEmitter {
       field?: string;
       filter?: (item: any) => boolean;
       differentialPrivacy?: { epsilon: number; delta: number };
-    } = {}
+    } = {},
   ): Promise<MPCResult> {
     const circuit = this.createCircuit({
       name: 'private-count',
       operation: 'count',
-      inputs: Array.from(datasets.keys()).map(partyId => ({
+      inputs: Array.from(datasets.keys()).map((partyId) => ({
         partyId,
         datasetId: `dataset-${partyId}`,
         fieldName: options.field || '*',
-        dataType: 'int'
+        dataType: 'int',
       })),
       parameters: {
         filter: options.filter?.toString(),
-        differentialPrivacy: options.differentialPrivacy
-      }
+        differentialPrivacy: options.differentialPrivacy,
+      },
     });
 
     const inputData = new Map();
     for (const [partyId, data] of datasets) {
-      const count = options.filter ? data.filter(options.filter).length : data.length;
+      const count = options.filter
+        ? data.filter(options.filter).length
+        : data.length;
       inputData.set(partyId, count);
     }
 
-    const session = await this.startSession(circuit.id, participants, inputData);
+    const session = await this.startSession(
+      circuit.id,
+      participants,
+      inputData,
+    );
 
     // Add differential privacy noise if requested
     let result = session.finalResult;
     if (options.differentialPrivacy) {
-      result = this.addDifferentialPrivacyNoise(result, options.differentialPrivacy);
+      result = this.addDifferentialPrivacyNoise(
+        result,
+        options.differentialPrivacy,
+      );
     }
 
     return this.formatMPCResult(session, result);
@@ -270,22 +284,22 @@ export class MPCProtocol extends EventEmitter {
     field: string,
     options: {
       differentialPrivacy?: { epsilon: number; delta: number };
-    } = {}
+    } = {},
   ): Promise<MPCResult> {
     const circuit = this.createCircuit({
       name: 'private-topk',
       operation: 'topk',
-      inputs: Array.from(datasets.keys()).map(partyId => ({
+      inputs: Array.from(datasets.keys()).map((partyId) => ({
         partyId,
         datasetId: `dataset-${partyId}`,
         fieldName: field,
-        dataType: 'string'
+        dataType: 'string',
       })),
       parameters: {
         k,
         field,
-        differentialPrivacy: options.differentialPrivacy
-      }
+        differentialPrivacy: options.differentialPrivacy,
+      },
     });
 
     // Aggregate counts across parties
@@ -317,7 +331,11 @@ export class MPCProtocol extends EventEmitter {
     if (options.differentialPrivacy) {
       result = result.map(([key, count]) => [
         key,
-        Math.max(0, count + this.generateLaplaceNoise(options.differentialPrivacy!.epsilon))
+        Math.max(
+          0,
+          count +
+            this.generateLaplaceNoise(options.differentialPrivacy!.epsilon),
+        ),
       ]);
     }
 
@@ -338,8 +356,8 @@ export class MPCProtocol extends EventEmitter {
       audit: {
         inputCommitments: new Map(),
         roundTranscripts: [],
-        verificationProofs: []
-      }
+        verificationProofs: [],
+      },
     };
 
     return this.formatMPCResult(session, result);
@@ -354,13 +372,15 @@ export class MPCProtocol extends EventEmitter {
     field: string,
     options: {
       differentialPrivacy?: { epsilon: number; delta: number };
-    } = {}
+    } = {},
   ): Promise<MPCResult> {
     // Use HyperLogLog sketches for scalable distinct counting
     const sketches = new Map<string, Set<string>>();
 
     for (const [partyId, data] of datasets) {
-      const distinctValues = new Set(data.map(item => String(item[field])).filter(Boolean));
+      const distinctValues = new Set(
+        data.map((item) => String(item[field])).filter(Boolean),
+      );
       sketches.set(partyId, distinctValues);
     }
 
@@ -376,22 +396,25 @@ export class MPCProtocol extends EventEmitter {
 
     // Add differential privacy noise if requested
     if (options.differentialPrivacy) {
-      result = Math.max(0, result + this.generateLaplaceNoise(options.differentialPrivacy.epsilon));
+      result = Math.max(
+        0,
+        result + this.generateLaplaceNoise(options.differentialPrivacy.epsilon),
+      );
     }
 
     const circuit = this.createCircuit({
       name: 'private-distinct',
       operation: 'distinct',
-      inputs: Array.from(datasets.keys()).map(partyId => ({
+      inputs: Array.from(datasets.keys()).map((partyId) => ({
         partyId,
         datasetId: `dataset-${partyId}`,
         fieldName: field,
-        dataType: 'string'
+        dataType: 'string',
       })),
       parameters: {
         field,
-        differentialPrivacy: options.differentialPrivacy
-      }
+        differentialPrivacy: options.differentialPrivacy,
+      },
     });
 
     const session: MPCSession = {
@@ -410,8 +433,8 @@ export class MPCProtocol extends EventEmitter {
       audit: {
         inputCommitments: new Map(),
         roundTranscripts: [],
-        verificationProofs: []
-      }
+        verificationProofs: [],
+      },
     };
 
     return this.formatMPCResult(session, result);
@@ -420,7 +443,10 @@ export class MPCProtocol extends EventEmitter {
   /**
    * Precompute Beaver triples for multiplication
    */
-  async precomputeBeaverTriples(count: number, parties: string[]): Promise<BeaverTriple[]> {
+  async precomputeBeaverTriples(
+    count: number,
+    parties: string[],
+  ): Promise<BeaverTriple[]> {
     const triples: BeaverTriple[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -439,7 +465,7 @@ export class MPCProtocol extends EventEmitter {
         c: cShares,
         partyShares: new Map(),
         used: false,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       // Distribute shares to parties
@@ -448,7 +474,7 @@ export class MPCProtocol extends EventEmitter {
         triple.partyShares.set(partyId, {
           a: aShares[j].shareValue,
           b: bShares[j].shareValue,
-          c: cShares[j].shareValue
+          c: cShares[j].shareValue,
         });
       }
 
@@ -460,12 +486,16 @@ export class MPCProtocol extends EventEmitter {
     return triples;
   }
 
-  private async setupPhase(session: MPCSession, inputData: Map<string, any>): Promise<void> {
+  private async setupPhase(
+    session: MPCSession,
+    inputData: Map<string, any>,
+  ): Promise<void> {
     session.status = 'input-sharing';
 
     // Create input commitments
     for (const [partyId, data] of inputData) {
-      const commitment = crypto.createHash('sha256')
+      const commitment = crypto
+        .createHash('sha256')
         .update(JSON.stringify(data))
         .digest('hex');
       session.audit.inputCommitments.set(partyId, commitment);
@@ -543,7 +573,11 @@ export class MPCProtocol extends EventEmitter {
     session.intermediateResults.set(session.currentRound, []);
   }
 
-  private createAdditiveShares(data: any[], parties: string[], field: string): SecretShare[] {
+  private createAdditiveShares(
+    data: any[],
+    parties: string[],
+    field: string,
+  ): SecretShare[] {
     // Count occurrences of field values
     const counts = new Map<string, number>();
     for (const item of data) {
@@ -556,7 +590,10 @@ export class MPCProtocol extends EventEmitter {
     return this.createAdditiveSharesFromValue(totalCount, parties);
   }
 
-  private createAdditiveSharesFromValue(value: number, parties: string[]): SecretShare[] {
+  private createAdditiveSharesFromValue(
+    value: number,
+    parties: string[],
+  ): SecretShare[] {
     const shares: SecretShare[] = [];
     let sum = 0;
 
@@ -573,8 +610,8 @@ export class MPCProtocol extends EventEmitter {
         totalShares: parties.length,
         metadata: {
           algorithm: 'additive',
-          fieldSize: 32
-        }
+          fieldSize: 32,
+        },
       });
     }
 
@@ -588,14 +625,17 @@ export class MPCProtocol extends EventEmitter {
       totalShares: parties.length,
       metadata: {
         algorithm: 'additive',
-        fieldSize: 32
-      }
+        fieldSize: 32,
+      },
     });
 
     return shares;
   }
 
-  private addShares(shares1: SecretShare[], shares2: SecretShare[]): SecretShare[] {
+  private addShares(
+    shares1: SecretShare[],
+    shares2: SecretShare[],
+  ): SecretShare[] {
     const result: SecretShare[] = [];
 
     for (let i = 0; i < shares1.length; i++) {
@@ -605,7 +645,7 @@ export class MPCProtocol extends EventEmitter {
 
       result.push({
         ...shares1[i],
-        shareValue: Buffer.from([sum])
+        shareValue: Buffer.from([sum]),
       });
     }
 
@@ -623,7 +663,9 @@ export class MPCProtocol extends EventEmitter {
     return sum;
   }
 
-  private estimateCircuitCost(circuit: Omit<MPCCircuit, 'id' | 'estimatedCost'>): MPCCircuit['estimatedCost'] {
+  private estimateCircuitCost(
+    circuit: Omit<MPCCircuit, 'id' | 'estimatedCost'>,
+  ): MPCCircuit['estimatedCost'] {
     const parties = circuit.inputs.length;
     const baseRounds = 2; // Setup + computation
 
@@ -633,27 +675,27 @@ export class MPCProtocol extends EventEmitter {
         return {
           rounds: baseRounds,
           bandwidthMB: parties * 0.1,
-          computeTimeMs: parties * 100
+          computeTimeMs: parties * 100,
         };
       case 'topk':
         const k = circuit.parameters.k || 10;
         return {
           rounds: baseRounds + Math.log2(k),
           bandwidthMB: parties * 0.5 * k,
-          computeTimeMs: parties * 500 * k
+          computeTimeMs: parties * 500 * k,
         };
       default:
         return {
           rounds: baseRounds,
           bandwidthMB: parties * 0.2,
-          computeTimeMs: parties * 200
+          computeTimeMs: parties * 200,
         };
     }
   }
 
   private calculatePrecomputeNeeds(
     circuit: Omit<MPCCircuit, 'id' | 'estimatedCost'>,
-    cost: MPCCircuit['estimatedCost']
+    cost: MPCCircuit['estimatedCost'],
   ): MPCCircuit['precomputeRequirements'] {
     const parties = circuit.inputs.length;
 
@@ -661,19 +703,19 @@ export class MPCProtocol extends EventEmitter {
       case 'topk':
         return {
           beaverTriples: parties * (circuit.parameters.k || 10),
-          randomValues: parties * 100
+          randomValues: parties * 100,
         };
       default:
         return {
           beaverTriples: parties * 10,
-          randomValues: parties * 50
+          randomValues: parties * 50,
         };
     }
   }
 
   private addDifferentialPrivacyNoise(
     value: number,
-    params: { epsilon: number; delta: number }
+    params: { epsilon: number; delta: number },
   ): number {
     const noise = this.generateLaplaceNoise(params.epsilon);
     return Math.max(0, Math.round(value + noise));
@@ -683,7 +725,10 @@ export class MPCProtocol extends EventEmitter {
     // Generate Laplace noise for differential privacy
     const u1 = Math.random();
     const u2 = Math.random();
-    const noise = (1 / epsilon) * Math.sign(u1 - 0.5) * Math.log(1 - 2 * Math.abs(u1 - 0.5));
+    const noise =
+      (1 / epsilon) *
+      Math.sign(u1 - 0.5) *
+      Math.log(1 - 2 * Math.abs(u1 - 0.5));
     return noise;
   }
 
@@ -698,19 +743,23 @@ export class MPCProtocol extends EventEmitter {
       privacy: {
         noRawDataExposed: true,
         differentialPrivacy: circuit.parameters.differentialPrivacy,
-        kAnonymity: circuit.parameters.kAnonymity
+        kAnonymity: circuit.parameters.kAnonymity,
       },
       verification: {
-        commitmentHash: this.calculateCommitmentHash(session.audit.inputCommitments),
+        commitmentHash: this.calculateCommitmentHash(
+          session.audit.inputCommitments,
+        ),
         participantSignatures: new Map(),
-        transcriptHash: this.calculateTranscriptHash(session.audit.roundTranscripts)
+        transcriptHash: this.calculateTranscriptHash(
+          session.audit.roundTranscripts,
+        ),
       },
       metadata: {
         computeTime: session.endTime!.getTime() - session.startTime.getTime(),
         roundsExecuted: session.currentRound,
         bandwidthUsed: circuit.estimatedCost.bandwidthMB,
-        errorRate: 0
-      }
+        errorRate: 0,
+      },
     };
   }
 

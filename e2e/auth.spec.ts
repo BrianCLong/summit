@@ -6,7 +6,9 @@ test.describe('Authentication and Authorization', () => {
     await page.goto('/maestro/runs');
   });
 
-  test('should allow user to log in and access protected content', async ({ page }) => {
+  test('should allow user to log in and access protected content', async ({
+    page,
+  }) => {
     // Expect to be on the login page
     await expect(page.getByText('Sign In to Maestro')).toBeVisible();
 
@@ -37,18 +39,26 @@ test.describe('Authentication and Authorization', () => {
     // Simulate login as a user with only 'viewer' role
     // This requires a way to control the mock user's roles in the test environment
     // For now, we'll assume the login above results in a 'viewer' user for this specific test run
-    await page.goto('/maestro/auth/callback?code=mock_code_viewer&state=mock_state');
+    await page.goto(
+      '/maestro/auth/callback?code=mock_code_viewer&state=mock_state',
+    );
     await page.goto('/maestro/autonomy'); // This route requires 'operator' role
 
     await expect(page.getByText('Access Denied')).toBeVisible();
     await expect(
-      page.getByText(/You don't have the required role\(s\) to access this resource./i),
+      page.getByText(
+        /You don't have the required role\(s\) to access this resource./i,
+      ),
     ).toBeVisible();
   });
 
-  test('should show tenant access required for unauthorized tenant', async ({ page }) => {
+  test('should show tenant access required for unauthorized tenant', async ({
+    page,
+  }) => {
     // Simulate login as a user with access only to 'tenantA'
-    await page.goto('/maestro/auth/callback?code=mock_code_tenantA&state=mock_state');
+    await page.goto(
+      '/maestro/auth/callback?code=mock_code_tenantA&state=mock_state',
+    );
     // Assuming a route like /maestro/tenants/tenantB that requires access to tenantB
     // This would need a specific route in App.tsx that uses the tenant prop on ProtectedRoute
     // For demonstration, let's assume /maestro/tenants/costs is configured to require a specific tenant
@@ -76,7 +86,9 @@ test.describe('Authentication and Authorization', () => {
 
   test('should log out after idle timeout', async ({ page }) => {
     // Simulate successful login
-    await page.goto('/maestro/auth/callback?code=mock_code_idle&state=mock_state');
+    await page.goto(
+      '/maestro/auth/callback?code=mock_code_idle&state=mock_state',
+    );
     await expect(page.url()).toContain('/maestro');
 
     // Mock Date.now() to control time for idle timeout
@@ -93,14 +105,20 @@ test.describe('Authentication and Authorization', () => {
     });
 
     // Advance time by 14 minutes (just before timeout)
-    await page.evaluate((ms) => (window as any).advanceTime(ms), 14 * 60 * 1000);
+    await page.evaluate(
+      (ms) => (window as any).advanceTime(ms),
+      14 * 60 * 1000,
+    );
     await page.waitForTimeout(100); // Give React a moment to re-render
 
     // Expect to still be authenticated
     await expect(page.url()).toContain('/maestro');
 
     // Advance time past 15 minutes timeout
-    await page.evaluate((ms) => (window as any).advanceTime(ms), 1 * 60 * 1000 + 1000); // 1 minute + 1 second
+    await page.evaluate(
+      (ms) => (window as any).advanceTime(ms),
+      1 * 60 * 1000 + 1000,
+    ); // 1 minute + 1 second
     await page.waitForTimeout(100); // Give React a moment to re-render
 
     // Expect to be redirected to login page due to idle timeout

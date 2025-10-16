@@ -7,7 +7,7 @@ metadata:
     policies.kyverno.io/category: Supply Chain Security
     policies.kyverno.io/severity: high
 spec:
-  validationFailureAction: Enforce   # use Audit to monitor before enforcing
+  validationFailureAction: Enforce # use Audit to monitor before enforcing
   background: true
   webhookTimeoutSeconds: 15
   rules:
@@ -15,8 +15,8 @@ spec:
       match:
         any:
           - resources:
-              kinds: ["Pod"]
-              namespaces: ["companyos"]
+              kinds: ['Pod']
+              namespaces: ['companyos']
       exclude:
         any:
           - resources:
@@ -28,33 +28,38 @@ spec:
                 - external-dns
                 - argocd
       verifyImages:
-        - image: "*dkr.ecr.*.amazonaws.com/summit-company/*"
+        - image: '*dkr.ecr.*.amazonaws.com/summit-company/*'
           # Require keyless signatures issued by GitHub OIDC
           keyless:
-            issuer: "https://token.actions.githubusercontent.com"
-            subject: "https://github.com/*/*"
+            issuer: 'https://token.actions.githubusercontent.com'
+            subject: 'https://github.com/*/*'
           # Require a SLSA provenance attestation (cosign attest)
           attestations:
             - type: slsaprovenance
               conditions:
                 all:
                   # Predicate must be SLSA v1
-                  - key: "{{ payload.predicate.buildType }}"
+                  - key: '{{ payload.predicate.buildType }}'
                     operator: Equals
-                    value: "https://slsa.dev/provenance/v1"
+                    value: 'https://slsa.dev/provenance/v1'
 
                   # Built by GitHub Actions runner (cosign's default predicate)
-                  - key: "{{ payload.predicate.builder.id }}"
+                  - key: '{{ payload.predicate.builder.id }}'
                     operator: Equals
-                    value: "https://github.com/actions/runner"
+                    value: 'https://github.com/actions/runner'
 
                   # (Optional but recommended) Gate on your workflow name / path
                   # Adjust to match your repo (e.g., build-and-push.yml or release-prod.yml)
-                  - key: "{{ payload.predicate.invocation.parameters.workflow }}"
+                  - key: '{{ payload.predicate.invocation.parameters.workflow }}'
                     operator: In
-                    value: ["build-and-push.yml","release-prod.yml","attest-provenance.yml"]
+                    value:
+                      [
+                        'build-and-push.yml',
+                        'release-prod.yml',
+                        'attest-provenance.yml',
+                      ]
 
                   # Sanity: ensure the subject refers to your images
-                  - key: "{{ payload.subject[0].name }}"
+                  - key: '{{ payload.subject[0].name }}'
                     operator: Contains
-                    value: "summit-company"
+                    value: 'summit-company'

@@ -17,7 +17,7 @@ const createTestClient = (config) => {
         errors: undefined,
         extensions: {},
       };
-    }
+    },
   };
 };
 

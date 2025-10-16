@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from .evaluation import Evaluation
 
 
 def render_markdown(
     evaluation: Evaluation,
-    plan_path: Optional[Path] = None,
-    dataset_path: Optional[Path] = None,
+    plan_path: Path | None = None,
+    dataset_path: Path | None = None,
     title: str = "Sampling Audit Report",
 ) -> str:
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -61,8 +60,8 @@ def render_markdown(
 def write_markdown(
     evaluation: Evaluation,
     output_path: Path,
-    plan_path: Optional[Path] = None,
-    dataset_path: Optional[Path] = None,
+    plan_path: Path | None = None,
+    dataset_path: Path | None = None,
     title: str = "Sampling Audit Report",
 ) -> None:
     markdown = render_markdown(

@@ -5,6 +5,7 @@ owner: docs
 ---
 
 ## Top 5 tasks
+
 - View dashboards
 - Search for entities
 - Create reports
@@ -12,9 +13,11 @@ owner: docs
 - Manage alerts
 
 ## Troubleshooting
+
 - Common login issues
 - Data loading problems
 
 ## Contact/support paths
+
 - In-app chat
 - Support portal

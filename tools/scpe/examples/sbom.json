@@ -15,7 +15,10 @@
       "name": "training-dataset",
       "version": "2025.02.16",
       "hashes": [
-        { "alg": "SHA-256", "content": "b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170" }
+        {
+          "alg": "SHA-256",
+          "content": "b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170"
+        }
       ]
     },
     {
@@ -23,7 +26,10 @@
       "name": "trainer-wheel",
       "version": "1.0.0",
       "hashes": [
-        { "alg": "SHA-256", "content": "8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154" }
+        {
+          "alg": "SHA-256",
+          "content": "8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154"
+        }
       ]
     },
     {
@@ -31,7 +37,10 @@
       "name": "inference-container",
       "version": "sha256",
       "hashes": [
-        { "alg": "SHA-256", "content": "2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734" }
+        {
+          "alg": "SHA-256",
+          "content": "2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734"
+        }
       ]
     },
     {
@@ -39,7 +48,10 @@
       "name": "training-manifest",
       "version": "1.0.0",
       "hashes": [
-        { "alg": "SHA-256", "content": "09ad0cf7723f40026f59baa3cb12a513416fda8ac18433601fccd3150dd4f249" }
+        {
+          "alg": "SHA-256",
+          "content": "09ad0cf7723f40026f59baa3cb12a513416fda8ac18433601fccd3150dd4f249"
+        }
       ]
     }
   ]

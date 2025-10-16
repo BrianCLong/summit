@@ -21,13 +21,25 @@ describe('DocForge build pipeline', () => {
     const comparisons = [
       ['index.html', path.join(outDir, 'index.html')],
       ['version-index.html', path.join(outDir, '2.3.4', 'index.html')],
-      ['module-src__analytics_js.html', path.join(outDir, '2.3.4', 'modules', 'src__analytics_js.html')],
-      ['module-tools__report_py.html', path.join(outDir, '2.3.4', 'modules', 'tools__report_py.html')],
-      ['module-pcbo__engine_go.html', path.join(outDir, '2.3.4', 'modules', 'pcbo__engine_go.html')],
-      ['adr-adr-0001-adopt-docforge.html', path.join(outDir, '2.3.4', 'adrs', 'adr-0001-adopt-docforge.html')],
+      [
+        'module-src__analytics_js.html',
+        path.join(outDir, '2.3.4', 'modules', 'src__analytics_js.html'),
+      ],
+      [
+        'module-tools__report_py.html',
+        path.join(outDir, '2.3.4', 'modules', 'tools__report_py.html'),
+      ],
+      [
+        'module-pcbo__engine_go.html',
+        path.join(outDir, '2.3.4', 'modules', 'pcbo__engine_go.html'),
+      ],
+      [
+        'adr-adr-0001-adopt-docforge.html',
+        path.join(outDir, '2.3.4', 'adrs', 'adr-0001-adopt-docforge.html'),
+      ],
       ['versions.json', path.join(outDir, 'versions.json')],
       ['search-index.json', path.join(outDir, '2.3.4', 'search-index.json')],
-      ['sitemap.xml', path.join(outDir, 'sitemap.xml')]
+      ['sitemap.xml', path.join(outDir, 'sitemap.xml')],
     ];
 
     for (const [goldenName, actualPath] of comparisons) {

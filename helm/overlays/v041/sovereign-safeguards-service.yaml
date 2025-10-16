@@ -16,9 +16,9 @@ spec:
         app.kubernetes.io/name: sovereign-safeguards-service
         app.kubernetes.io/component: sovereign-safeguards
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/metrics'
     spec:
       serviceAccountName: sovereign-safeguards
       securityContext:
@@ -38,17 +38,17 @@ spec:
               protocol: TCP
           env:
             - name: PORT
-              value: "8080"
+              value: '8080'
             - name: METRICS_PORT
-              value: "9090"
+              value: '9090'
             - name: NODE_ENV
-              value: "production"
+              value: 'production'
             - name: LOG_LEVEL
-              value: "info"
+              value: 'info'
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://jaeger-collector.monitoring.svc.cluster.local:4317"
+              value: 'http://jaeger-collector.monitoring.svc.cluster.local:4317'
             - name: PROMETHEUS_METRICS_ENABLED
-              value: "true"
+              value: 'true'
           envFrom:
             - configMapRef:
                 name: sovereign-safeguards-config
@@ -72,11 +72,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: '256Mi'
+              cpu: '100m'
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: '512Mi'
+              cpu: '500m'
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

@@ -193,7 +193,9 @@ class Neo4jConnection {
     maxDepth: number = 6,
     relationshipTypes?: string[],
   ): Promise<any[]> {
-    const relationshipFilter = relationshipTypes ? `:${relationshipTypes.join('|:')}` : '';
+    const relationshipFilter = relationshipTypes
+      ? `:${relationshipTypes.join('|:')}`
+      : '';
 
     const query = `
       MATCH (source:Entity {id: $sourceId, tenantId: $tenantId}),

@@ -25,20 +25,20 @@ Public evidence links several vendors and contractors to state-run PSYOPS progra
 
 - Army special operations units and contractors have openly demonstrated use of “Ghost Machine,” a deepfake and drone platform for information warfare training, confirming sophisticated tech vendors support active measures and cognitive campaigns for military clients.[7]
 
-***
+---
 
 ### Direct Evidence Summary Table
 
-| Vendor/Group           | Linked Evidence/Program                              | Source Citation           |
-|------------------------|------------------------------------------------------|---------------------------|
-| Cambridge Analytica/SCL| Behavioral psyops, DoD, UK Foreign Office           | [1][2]          |
-| Google, Anthropic, OpenAI, xAI | DoD AI contracts, Grok for Government                | [3][4]          |
-| TurbineOne             | Army battlefield AI contract                        | [5]                  |
-| Ghost Machine (deepfake) | SOF info warfare training tool                      | [7]                  |
-| Social Media/Stanford/Meta | Leaked vendor-run covert campaigns                 | [6][2]          |
-| Sandia National Labs   | SCL Group psyops/behavior study collaborations      | [1]                  |
+| Vendor/Group                   | Linked Evidence/Program                        | Source Citation |
+| ------------------------------ | ---------------------------------------------- | --------------- |
+| Cambridge Analytica/SCL        | Behavioral psyops, DoD, UK Foreign Office      | [1][2]          |
+| Google, Anthropic, OpenAI, xAI | DoD AI contracts, Grok for Government          | [3][4]          |
+| TurbineOne                     | Army battlefield AI contract                   | [5]             |
+| Ghost Machine (deepfake)       | SOF info warfare training tool                 | [7]             |
+| Social Media/Stanford/Meta     | Leaked vendor-run covert campaigns             | [6][2]          |
+| Sandia National Labs           | SCL Group psyops/behavior study collaborations | [1]             |
 
-***
+---
 
 These sources provide strong public evidence that both traditional military contractors and leading tech/AI firms are directly involved in developing and executing state-run psychological operations, both overt and covert, through contract data, leaked internal documents, and program announcements.[6][2][4][7][5][3][1]
 
@@ -47,7 +47,7 @@ These sources provide strong public evidence that both traditional military cont
 [3](https://www.defensenews.com/pentagon/2025/07/15/pentagon-taps-four-commercial-tech-firms-to-expand-military-use-of-ai/)
 [4](https://www.stripes.com/theaters/us/2025-07-23/ai-military-influence-operations-18525031.html)
 [5](https://www.wsj.com/tech/ai/us-military-ai-contract-turbineone-c2a146b1)
-[6](https://en.wikipedia.org/wiki/Psychological_operations_(United_States))
+[6](<https://en.wikipedia.org/wiki/Psychological_operations_(United_States)>)
 [7](https://www.defenseone.com/technology/2024/04/how-army-special-operators-use-deepfakes-and-drones-train-information-warfare/395852/)
 [8](https://www.usar.army.mil/News/News-Display/Article/2709701/393rd-psychological-operations-company-trains-at-fort-mccoy/)
 [9](https://www.businessinsider.com/10-counterinsurgncy-tactics-your-local-fracking-corp-will-use-against-you-2011-11)

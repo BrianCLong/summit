@@ -1,5 +1,4 @@
-
 area: workflows
 intent: refactor
 budgets: { p95_ms: 0, err_rate_pct: 0 }
-test_impact: ["none"]
+test_impact: ['none']

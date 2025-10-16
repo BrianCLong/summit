@@ -1,11 +1,11 @@
-import { v4 as uuid } from "uuid";
-import LLMService from "./LLMService.js";
+import { v4 as uuid } from 'uuid';
+import LLMService from './LLMService.js';
 
 export interface GeneratedProduct {
   id: string;
-  type: "summary" | "report" | "investigation";
+  type: 'summary' | 'report' | 'investigation';
   content: string;
-  status: "PENDING" | "APPROVED";
+  status: 'PENDING' | 'APPROVED';
   createdAt: string;
 }
 
@@ -25,7 +25,7 @@ export class LLMAnalystService {
   }
 
   private async generate(
-    type: GeneratedProduct["type"],
+    type: GeneratedProduct['type'],
     prompt: string,
   ): Promise<GeneratedProduct> {
     const content = await this.llm.complete({
@@ -38,7 +38,7 @@ export class LLMAnalystService {
       id: uuid(),
       type,
       content,
-      status: "PENDING",
+      status: 'PENDING',
       createdAt: new Date().toISOString(),
     };
 
@@ -52,7 +52,7 @@ export class LLMAnalystService {
   async summarizeIntelligence(graphState: any, threatModel: any) {
     const prompt = `You are an intelligence analyst assistant. Summarize key insights from the following graph state and threat model in 3-4 bullet points.\n\nGraph State:\n${JSON.stringify(graphState)}\n\nThreat Model:\n${JSON.stringify(threatModel)}\n\nSummary:`;
 
-    return this.generate("summary", prompt);
+    return this.generate('summary', prompt);
   }
 
   /**
@@ -61,7 +61,7 @@ export class LLMAnalystService {
   async generateReport(graphState: any, threatModel: any) {
     const prompt = `You are an intelligence analyst assistant. Create a concise analytical report based on the graph state and threat model. Include findings and potential actions.\n\nGraph State:\n${JSON.stringify(graphState)}\n\nThreat Model:\n${JSON.stringify(threatModel)}\n\nReport:`;
 
-    return this.generate("report", prompt);
+    return this.generate('report', prompt);
   }
 
   /**
@@ -70,7 +70,7 @@ export class LLMAnalystService {
   async recommendInvestigationPaths(graphState: any, threatModel: any) {
     const prompt = `You are assisting investigators. Using the graph state and threat model, suggest the next best investigation paths with brief rationale.\n\nGraph State:\n${JSON.stringify(graphState)}\n\nThreat Model:\n${JSON.stringify(threatModel)}\n\nRecommendations:`;
 
-    return this.generate("investigation", prompt);
+    return this.generate('investigation', prompt);
   }
 
   /**
@@ -78,8 +78,8 @@ export class LLMAnalystService {
    */
   approveProduct(id: string) {
     const product = this.products.get(id);
-    if (!product) throw new Error("Product not found");
-    product.status = "APPROVED";
+    if (!product) throw new Error('Product not found');
+    product.status = 'APPROVED';
     this.products.set(id, product);
     return product;
   }
@@ -89,7 +89,7 @@ export class LLMAnalystService {
    */
   listPending() {
     return Array.from(this.products.values()).filter(
-      (p) => p.status === "PENDING",
+      (p) => p.status === 'PENDING',
     );
   }
 }

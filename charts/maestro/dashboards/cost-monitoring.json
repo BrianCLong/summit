@@ -27,7 +27,7 @@
         },
         {
           "name": "service",
-          "type": "query", 
+          "type": "query",
           "query": "label_values(compute_costs_usd_total, service)",
           "refresh": 1,
           "includeAll": true,

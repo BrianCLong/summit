@@ -45,7 +45,11 @@ class MetricsExporter {
     }
 
     this.incrementCounter(`${name}_count`, labels);
-    this.setGauge(`${name}_sum`, labels, (this.metrics.get(this.getMetricKey(`${name}_sum`, labels)) || 0) + value);
+    this.setGauge(
+      `${name}_sum`,
+      labels,
+      (this.metrics.get(this.getMetricKey(`${name}_sum`, labels)) || 0) + value,
+    );
   }
 
   getMetricKey(name, labels) {
@@ -68,7 +72,7 @@ class MetricsExporter {
         const labels = {
           conclusion: run.conclusion || 'unknown',
           event: run.event || 'unknown',
-          branch: run.head_branch || 'unknown'
+          branch: run.head_branch || 'unknown',
         };
 
         this.incrementCounter('rc_workflow_runs_total', labels);
@@ -81,8 +85,13 @@ class MetricsExporter {
 
         // Record timing
         if (run.created_at && run.updated_at) {
-          const duration = (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
-          this.recordHistogram('rc_workflow_duration_seconds', labels, duration);
+          const duration =
+            (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
+          this.recordHistogram(
+            'rc_workflow_duration_seconds',
+            labels,
+            duration,
+          );
         }
       }
 
@@ -106,7 +115,7 @@ class MetricsExporter {
         const labels = {
           risk: riskLevel.toLowerCase(),
           state: pr.state,
-          draft: pr.draft.toString()
+          draft: pr.draft.toString(),
         };
 
         this.incrementCounter('rc_pr_analyzed_total', labels);
@@ -115,8 +124,13 @@ class MetricsExporter {
           this.incrementCounter('rc_pr_merged_total', labels);
 
           // Time to merge
-          const timeToMerge = (new Date(pr.merged_at) - new Date(pr.created_at)) / 1000;
-          this.recordHistogram('rc_pr_time_to_merge_seconds', labels, timeToMerge);
+          const timeToMerge =
+            (new Date(pr.merged_at) - new Date(pr.created_at)) / 1000;
+          this.recordHistogram(
+            'rc_pr_time_to_merge_seconds',
+            labels,
+            timeToMerge,
+          );
         }
       }
 
@@ -146,7 +160,7 @@ class MetricsExporter {
             this.incrementCounter('rc_gate_total', {
               gate: gate,
               result: gateResult,
-              pr: run.pull_requests?.[0]?.number?.toString() || 'unknown'
+              pr: run.pull_requests?.[0]?.number?.toString() || 'unknown',
             });
           }
         }
@@ -172,7 +186,7 @@ class MetricsExporter {
         for (const fixType of fixTypes) {
           this.incrementCounter('rc_autofix_applied_total', {
             type: fixType,
-            author: commit.author?.login || 'unknown'
+            author: commit.author?.login || 'unknown',
           });
         }
       }
@@ -192,7 +206,7 @@ class MetricsExporter {
       const endpoints = [
         { name: 'api', url: 'https://api.summit.dev/health' },
         { name: 'web', url: 'https://summit.dev/health' },
-        { name: 'gateway', url: 'https://gateway.summit.dev/health' }
+        { name: 'gateway', url: 'https://gateway.summit.dev/health' },
       ];
 
       for (const endpoint of endpoints) {
@@ -205,24 +219,40 @@ class MetricsExporter {
           // Simulate health status
           const isHealthy = Math.random() > 0.05; // 95% uptime simulation
 
-          this.setGauge('rc_deploy_health_ratio', {
-            service: endpoint.name
-          }, isHealthy ? 1 : 0);
+          this.setGauge(
+            'rc_deploy_health_ratio',
+            {
+              service: endpoint.name,
+            },
+            isHealthy ? 1 : 0,
+          );
 
-          this.recordHistogram('rc_health_check_duration_seconds', {
-            service: endpoint.name
-          }, responseTime);
-
+          this.recordHistogram(
+            'rc_health_check_duration_seconds',
+            {
+              service: endpoint.name,
+            },
+            responseTime,
+          );
         } catch (error) {
-          this.setGauge('rc_deploy_health_ratio', {
-            service: endpoint.name
-          }, 0);
+          this.setGauge(
+            'rc_deploy_health_ratio',
+            {
+              service: endpoint.name,
+            },
+            0,
+          );
         }
       }
 
-      console.log(`✅ Processed health metrics for ${endpoints.length} services`);
+      console.log(
+        `✅ Processed health metrics for ${endpoints.length} services`,
+      );
     } catch (error) {
-      console.warn('Failed to collect deployment health metrics:', error.message);
+      console.warn(
+        'Failed to collect deployment health metrics:',
+        error.message,
+      );
     }
   }
 
@@ -237,32 +267,37 @@ class MetricsExporter {
       let recentDeployments = 0;
 
       try {
-        const statusOutput = execSync('node .github/scripts/safety-circuit.cjs status', {
-          encoding: 'utf8',
-          timeout: 5000
-        });
+        const statusOutput = execSync(
+          'node .github/scripts/safety-circuit.cjs status',
+          {
+            encoding: 'utf8',
+            timeout: 5000,
+          },
+        );
 
         const status = JSON.parse(statusOutput);
         circuitState = status.circuit?.toLowerCase() || 'unknown';
         failureCount = status.failureCount || 0;
         recentDeployments = status.recentDeployments || 0;
-
       } catch (error) {
         console.warn('Could not get circuit status:', error.message);
       }
 
       // Map circuit states to numeric values
-      const circuitStateValue = {
-        'closed': 0,
-        'half_open': 1,
-        'open': 2
-      }[circuitState] || -1;
+      const circuitStateValue =
+        {
+          closed: 0,
+          half_open: 1,
+          open: 2,
+        }[circuitState] || -1;
 
       this.setGauge('rc_circuit_state', {}, circuitStateValue);
       this.setGauge('rc_circuit_failure_count', {}, failureCount);
       this.setGauge('rc_recent_deployments', {}, recentDeployments);
 
-      console.log(`✅ Circuit state: ${circuitState}, failures: ${failureCount}`);
+      console.log(
+        `✅ Circuit state: ${circuitState}, failures: ${failureCount}`,
+      );
     } catch (error) {
       console.warn('Failed to collect circuit breaker metrics:', error.message);
     }
@@ -279,14 +314,19 @@ class MetricsExporter {
       for (const run of runs) {
         const labels = {
           success: run.conclusion === 'success' ? 'true' : 'false',
-          trigger: run.event || 'unknown'
+          trigger: run.event || 'unknown',
         };
 
         this.incrementCounter('rc_rollback_total', labels);
 
         if (run.created_at && run.updated_at) {
-          const duration = (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
-          this.recordHistogram('rc_rollback_duration_seconds', labels, duration);
+          const duration =
+            (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
+          this.recordHistogram(
+            'rc_rollback_duration_seconds',
+            labels,
+            duration,
+          );
         }
       }
 
@@ -299,23 +339,32 @@ class MetricsExporter {
   // Helper methods
   async getWorkflowRuns(workflowFile, limit = 50) {
     try {
-      const output = execSync(`gh run list --workflow=${workflowFile} --limit=${limit} --json status,conclusion,createdAt,updatedAt,event,headBranch,pullRequests`, {
-        encoding: 'utf8',
-        timeout: 10000
-      });
+      const output = execSync(
+        `gh run list --workflow=${workflowFile} --limit=${limit} --json status,conclusion,createdAt,updatedAt,event,headBranch,pullRequests`,
+        {
+          encoding: 'utf8',
+          timeout: 10000,
+        },
+      );
       return JSON.parse(output);
     } catch (error) {
-      console.warn(`Failed to get workflow runs for ${workflowFile}:`, error.message);
+      console.warn(
+        `Failed to get workflow runs for ${workflowFile}:`,
+        error.message,
+      );
       return [];
     }
   }
 
   async getRecentPRs(limit = 50) {
     try {
-      const output = execSync(`gh pr list --state all --limit=${limit} --json number,state,createdAt,mergedAt,draft,title,additions,deletions`, {
-        encoding: 'utf8',
-        timeout: 10000
-      });
+      const output = execSync(
+        `gh pr list --state all --limit=${limit} --json number,state,createdAt,mergedAt,draft,title,additions,deletions`,
+        {
+          encoding: 'utf8',
+          timeout: 10000,
+        },
+      );
       return JSON.parse(output);
     } catch (error) {
       console.warn('Failed to get recent PRs:', error.message);
@@ -325,11 +374,19 @@ class MetricsExporter {
 
   async getAutoFixCommits() {
     try {
-      const output = execSync('gh api "/repos/{owner}/{repo}/commits?author=release-captain[bot]&per_page=50" --jq ".[].commit | {message: .message, author: .author}"', {
-        encoding: 'utf8',
-        timeout: 10000
-      });
-      return JSON.parse(`[${output.split('\n').filter(line => line.trim()).join(',')}]`);
+      const output = execSync(
+        'gh api "/repos/{owner}/{repo}/commits?author=release-captain[bot]&per_page=50" --jq ".[].commit | {message: .message, author: .author}"',
+        {
+          encoding: 'utf8',
+          timeout: 10000,
+        },
+      );
+      return JSON.parse(
+        `[${output
+          .split('\n')
+          .filter((line) => line.trim())
+          .join(',')}]`,
+      );
     } catch (error) {
       console.warn('Failed to get auto-fix commits:', error.message);
       return [];
@@ -381,7 +438,10 @@ class MetricsExporter {
 
       if (metricName.includes('_total') || metricName.includes('_count')) {
         output += `# TYPE ${metricName} counter\n`;
-      } else if (metricName.includes('_bucket') || metricName.includes('_sum')) {
+      } else if (
+        metricName.includes('_bucket') ||
+        metricName.includes('_sum')
+      ) {
         output += `# TYPE ${metricName} histogram\n`;
       } else {
         output += `# TYPE ${metricName} gauge\n`;

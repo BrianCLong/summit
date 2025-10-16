@@ -28,4 +28,3 @@ router.get('/stats', async (_req, res) => {
 });
 
 export default router;
-

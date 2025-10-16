@@ -31,6 +31,7 @@ This guide covers deployment of the October 2025 IntelGraph release to pilot cus
 ### Infrastructure Requirements
 
 **Kubernetes Cluster**:
+
 - Version: 1.28+
 - Nodes: 3+ (HA deployment)
 - CPU: 16 vCPUs minimum per node
@@ -38,12 +39,14 @@ This guide covers deployment of the October 2025 IntelGraph release to pilot cus
 - Storage: 500 GB SSD (persistent volumes)
 
 **Network Requirements**:
+
 - Ingress controller (NGINX or Traefik)
 - TLS certificates (Let's Encrypt or custom CA)
 - Public IP for ingress (or LoadBalancer service)
 - DNS record for ingress domain
 
 **External Services**:
+
 - PostgreSQL 15+ (for metadata storage)
 - Neo4j 5+ Community or Enterprise (for graph storage)
 - Kafka 3+ (for event streaming)
@@ -52,6 +55,7 @@ This guide covers deployment of the October 2025 IntelGraph release to pilot cus
 - OPA 0.60+ (for policy enforcement)
 
 **Optional**:
+
 - Tempo (for distributed tracing)
 - Alertmanager (for SLO alerts)
 - Pushgateway (for metrics)
@@ -61,6 +65,7 @@ This guide covers deployment of the October 2025 IntelGraph release to pilot cus
 ### Access Requirements
 
 **Required Credentials**:
+
 - Kubernetes cluster admin access
 - GitHub personal access token (for pulling container images)
 - Cloud provider credentials (AWS/GCP/Azure)
@@ -68,6 +73,7 @@ This guide covers deployment of the October 2025 IntelGraph release to pilot cus
 - TLS certificate management access
 
 **Required Permissions**:
+
 - Create/update Kubernetes resources (deployments, services, secrets, configmaps)
 - Create persistent volumes
 - Configure ingress rules
@@ -172,7 +178,7 @@ app:
     - name: LOG_LEVEL
       value: info
     - name: ENABLE_STEP_UP_AUTH
-      value: "true"
+      value: 'true'
     - name: OPA_URL
       value: http://opa:8181
 
@@ -232,8 +238,8 @@ ingress:
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
   hosts:
     - host: pilot.intelgraph.example.com
       paths:
@@ -262,7 +268,7 @@ security:
     rpName: IntelGraph Pilot
     rpOrigin: https://pilot.intelgraph.example.com
 
-  stepUpTimeout: 300  # 5 minutes
+  stepUpTimeout: 300 # 5 minutes
 
   policies:
     releaseGate: true
@@ -667,11 +673,13 @@ kubectl get ingress -n intelgraph-pilot grafana-ingress -o jsonpath='{.spec.rule
 ```
 
 **Key Dashboards**:
+
 - **SLO Core Dashboards**: Monitor API latency, OPA latency, queue lag, ingest failures, golden flow pass rate
 - **SLO Dashboards with Trace Exemplars**: Click data points to view traces
 - **Security Control Effectiveness**: Monitor release gate blocks, step-up auth success rate, vulnerability detection
 
 **Key Metrics to Watch**:
+
 - API p95 latency: <1.5s (SLO)
 - OPA p95 latency: <500ms (SLO)
 - Golden flow success rate: >99% (SLO)
@@ -683,16 +691,19 @@ kubectl get ingress -n intelgraph-pilot grafana-ingress -o jsonpath='{.spec.rule
 ### Support Channels
 
 **Slack Channels**:
+
 - `#intelgraph-pilot`: General pilot discussion
 - `#intelgraph-pilot-support`: Support requests
 - `#intelgraph-alerts`: SLO violation alerts (internal)
 
 **Escalation Path**:
+
 - L1: Customer Success (Slack: #intelgraph-pilot-support, Email: pilot-support@example.com)
 - L2: SRE (Slack: #sre, PagerDuty: `pd schedule show sre-oncall`)
 - L3: Engineering Lead (Slack: @engineering-lead)
 
 **Response SLAs**:
+
 - Critical (service down): 15 minutes
 - High (major feature broken): 2 hours
 - Medium (minor issue): 8 hours
@@ -703,6 +714,7 @@ kubectl get ingress -n intelgraph-pilot grafana-ingress -o jsonpath='{.spec.rule
 ### Pilot Feedback Collection
 
 **Weekly Check-ins**:
+
 - Schedule: Every Friday at 2 PM ET
 - Format: 30-minute video call
 - Agenda: Usage stats, issues encountered, feature requests, UX feedback
@@ -716,6 +728,7 @@ kubectl get ingress -n intelgraph-pilot grafana-ingress -o jsonpath='{.spec.rule
 **Date**: {{DATE}}
 
 ## Usage Stats
+
 - Active Users: {{ACTIVE_USERS}}
 - Entities Ingested: {{ENTITY_COUNT}}
 - Queries Executed: {{QUERY_COUNT}}
@@ -723,6 +736,7 @@ kubectl get ingress -n intelgraph-pilot grafana-ingress -o jsonpath='{.spec.rule
 - Step-Up Authentications: {{STEPUP_COUNT}}
 
 ## Feature Feedback
+
 1. **WebAuthn Step-Up**:
    - Ease of Use (1-5): {{RATING}}
    - Comments: {{COMMENTS}}
@@ -736,10 +750,12 @@ kubectl get ingress -n intelgraph-pilot grafana-ingress -o jsonpath='{.spec.rule
    - Comments: {{COMMENTS}}
 
 ## Issues Encountered
+
 - {{ISSUE_1}}
 - {{ISSUE_2}}
 
 ## Feature Requests
+
 - {{REQUEST_1}}
 - {{REQUEST_2}}
 
@@ -747,6 +763,7 @@ kubectl get ingress -n intelgraph-pilot grafana-ingress -o jsonpath='{.spec.rule
 ```
 
 **Submit feedback**:
+
 - Form: https://forms.intelgraph.example.com/pilot-feedback
 - Email: pilot-feedback@example.com
 - Slack: #intelgraph-pilot
@@ -809,12 +826,14 @@ Dear Pilot Participants,
 We have rolled back the IntelGraph pilot environment to the previous version due to [ISSUE_DESCRIPTION].
 
 **Details**:
+
 - Rollback Time: {{TIMESTAMP}}
 - Previous Version: {{PREVIOUS_VERSION}}
 - Current Version: {{CURRENT_VERSION}}
 - Impact: {{IMPACT_DESCRIPTION}}
 
 **Next Steps**:
+
 - Engineering team is investigating the issue
 - Fix ETA: {{FIX_ETA}}
 - We will notify you when the fix is deployed
@@ -842,6 +861,7 @@ The IntelGraph Team
 - [ ] **Support**: <5% of requests escalated to L3
 
 **Pilot results will inform**:
+
 - General availability (GA) readiness decision
 - Feature refinements for GA release
 - Documentation improvements

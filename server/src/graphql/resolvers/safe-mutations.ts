@@ -30,7 +30,7 @@ export const SafeMutationsResolvers = {
       _parent: unknown,
       args: { input: CreateRunDraftInput },
       ctx: any,
-      _info: GraphQLResolveInfo
+      _info: GraphQLResolveInfo,
     ) {
       const { input } = args;
       const tracer = trace.getTracer('maestro');
@@ -53,7 +53,7 @@ export const SafeMutationsResolvers = {
       _parent: unknown,
       args: { input: StartRunInput },
       ctx: any,
-      _info: GraphQLResolveInfo
+      _info: GraphQLResolveInfo,
     ) {
       const { input } = args;
       const tracer = trace.getTracer('maestro');
@@ -94,34 +94,49 @@ export const SafeMutationsResolvers = {
 
     async registerUATCheckpoint(
       _parent: unknown,
-      args: { runId: string; checkpoint: string; evidenceURIs?: string[]; verdict: string; meta: SafeMeta },
+      args: {
+        runId: string;
+        checkpoint: string;
+        evidenceURIs?: string[];
+        verdict: string;
+        meta: SafeMeta;
+      },
       _ctx: any,
-      _info: GraphQLResolveInfo
+      _info: GraphQLResolveInfo,
     ) {
       const tracer = trace.getTracer('maestro');
-      return await tracer.startActiveSpan('registerUATCheckpoint', async (span) => {
-        try {
-          const auditId = `audit-${Date.now()}`;
+      return await tracer.startActiveSpan(
+        'registerUATCheckpoint',
+        async (span) => {
           try {
-            const { addUATCheckpoint } = await import('../../db/repositories/uat.js');
-            await addUATCheckpoint({
-              run_id: args.runId,
-              checkpoint: args.checkpoint,
-              verdict: args.verdict,
-              evidence_uris: args.evidenceURIs,
-              actor: undefined,
-            });
-          } catch {}
-          return {
-            status: 'RECORDED',
-            warnings: [],
-            diff: { runId: args.runId, checkpoint: args.checkpoint, verdict: args.verdict },
-            auditId,
-          };
-        } finally {
-          span.end();
-        }
-      });
+            const auditId = `audit-${Date.now()}`;
+            try {
+              const { addUATCheckpoint } = await import(
+                '../../db/repositories/uat.js'
+              );
+              await addUATCheckpoint({
+                run_id: args.runId,
+                checkpoint: args.checkpoint,
+                verdict: args.verdict,
+                evidence_uris: args.evidenceURIs,
+                actor: undefined,
+              });
+            } catch {}
+            return {
+              status: 'RECORDED',
+              warnings: [],
+              diff: {
+                runId: args.runId,
+                checkpoint: args.checkpoint,
+                verdict: args.verdict,
+              },
+              auditId,
+            };
+          } finally {
+            span.end();
+          }
+        },
+      );
     },
   },
 };

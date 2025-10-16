@@ -1,7 +1,10 @@
 import React from 'react';
 
 export function RightRail({ view }: { view: string }) {
-  const explainers: Record<string, { title: string; body: string; items: string[] }> = {
+  const explainers: Record<
+    string,
+    { title: string; body: string; items: string[] }
+  > = {
     dashboard: {
       title: 'Pipeline Health Overview',
       body: 'Metrics combine persisted queries and streaming deltas. Values are debiased for queued retries.',
@@ -35,12 +38,17 @@ export function RightRail({ view }: { view: string }) {
 
   return (
     <aside className="hidden w-80 shrink-0 border-l border-slate-800/80 bg-slate-950/40 p-4 text-slate-200 xl:block">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">Explain this view</h3>
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+        Explain this view
+      </h3>
       <p className="mt-2 text-sm text-slate-300">{content.body}</p>
       <ul className="mt-4 space-y-3 text-sm text-slate-300">
         {content.items.map((item) => (
           <li key={item} className="flex items-start gap-2">
-            <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-emerald-400" aria-hidden />
+            <span
+              className="mt-1 inline-flex h-2 w-2 rounded-full bg-emerald-400"
+              aria-hidden
+            />
             <span>{item}</span>
           </li>
         ))}
@@ -48,9 +56,10 @@ export function RightRail({ view }: { view: string }) {
       <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-xs text-slate-400">
         <p className="font-semibold text-slate-200">Provenance</p>
         <p className="mt-1">
-          Data stitched from persisted GraphQL queries (<code className="font-mono text-emerald-400">pipelineSummary</code>,
-          <code className="font-mono text-emerald-400">runLogs</code>) with SSE deltas. Last refresh:{' '}
-          {new Date().toLocaleTimeString()}.
+          Data stitched from persisted GraphQL queries (
+          <code className="font-mono text-emerald-400">pipelineSummary</code>,
+          <code className="font-mono text-emerald-400">runLogs</code>) with SSE
+          deltas. Last refresh: {new Date().toLocaleTimeString()}.
         </p>
       </div>
     </aside>

@@ -2,13 +2,13 @@ from __future__ import annotations
 
 """Caching utilities for graph analytics using Redis."""
 
-import json
 import hashlib
-import os
+import json
 import logging
-from typing import Any, Dict, Iterable, Tuple
+import os
+from collections.abc import Iterable
+from typing import Any
 
-import asyncio
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
 
@@ -22,19 +22,16 @@ _CACHE_PREFIX = "community:"
 
 _redis_client: Redis | None = None
 
+
 async def get_client() -> Redis:
     """Get or create the Redis client."""
     global _redis_client
     if _redis_client is None:
-        _redis_client = Redis.from_url(
-            REDIS_URL, encoding="utf-8", decode_responses=True
-        )
+        _redis_client = Redis.from_url(REDIS_URL, encoding="utf-8", decode_responses=True)
     return _redis_client
 
 
-def fingerprint_graph(
-    edges: Iterable[Tuple[Any, Any]], algorithm: str, resolution: float
-) -> str:
+def fingerprint_graph(edges: Iterable[tuple[Any, Any]], algorithm: str, resolution: float) -> str:
     """Create a stable fingerprint for a graph."""
     edge_strings = [f"{min(u, v)}-{max(u, v)}" for u, v in edges]
     edge_strings.sort()
@@ -42,7 +39,7 @@ def fingerprint_graph(
     return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
 
-async def get_cached_communities(fingerprint: str) -> Dict[str, Any] | None:
+async def get_cached_communities(fingerprint: str) -> dict[str, Any] | None:
     """Fetch cached community detection result if available."""
     try:
         client = await get_client()
@@ -57,13 +54,11 @@ async def get_cached_communities(fingerprint: str) -> Dict[str, Any] | None:
     return None
 
 
-async def set_cached_communities(fingerprint: str, value: Dict[str, Any]) -> None:
+async def set_cached_communities(fingerprint: str, value: dict[str, Any]) -> None:
     """Store community detection result in cache."""
     try:
         client = await get_client()
-        await client.set(
-            _CACHE_PREFIX + fingerprint, json.dumps(value), ex=CACHE_TTL
-        )
+        await client.set(_CACHE_PREFIX + fingerprint, json.dumps(value), ex=CACHE_TTL)
     except RedisError as exc:
         logger.warning("Redis error during cache store: %s", exc)
         track_error("cache", type(exc).__name__)

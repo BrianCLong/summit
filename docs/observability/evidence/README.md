@@ -3,6 +3,7 @@
 Store screenshots, alert drill logs, and synthetic test outputs that demonstrate SLO compliance.
 
 Expected artifacts:
+
 - Dashboard screenshots exported from Grafana (PNG/JPEG).
 - PagerDuty alert drill transcripts (PDF/JSON).
 - Synthetic probe run logs (NDJSON/CSV).

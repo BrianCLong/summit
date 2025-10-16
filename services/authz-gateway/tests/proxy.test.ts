@@ -12,7 +12,11 @@ let upstreamServer: Server;
 let opaServer: Server;
 
 function signChallenge(challenge: string) {
-  const privateKeyPath = path.join(__dirname, 'fixtures', 'webauthn-private.pem');
+  const privateKeyPath = path.join(
+    __dirname,
+    'fixtures',
+    'webauthn-private.pem',
+  );
   const privateKey = readFileSync(privateKeyPath, 'utf8');
   const signer = crypto.createSign('SHA256');
   signer.update(Buffer.from(challenge, 'utf8'));
@@ -53,7 +57,11 @@ beforeAll((done) => {
       }
       if (subject.residency !== resource.residency) {
         return res.json({
-          result: { allow: false, reason: 'residency_mismatch', obligations: [] },
+          result: {
+            allow: false,
+            reason: 'residency_mismatch',
+            obligations: [],
+          },
         });
       }
       const requiresStepUp = resource.classification !== 'public';
@@ -68,7 +76,9 @@ beforeAll((done) => {
           },
         });
       }
-      return res.json({ result: { allow: true, reason: 'allow', obligations: [] } });
+      return res.json({
+        result: { allow: true, reason: 'allow', obligations: [] },
+      });
     });
     opaServer = opa.listen(0, () => {
       const opaPort = (opaServer.address() as AddressInfo).port;

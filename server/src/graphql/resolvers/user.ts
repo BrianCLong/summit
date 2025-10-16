@@ -15,17 +15,35 @@ const userResolvers = {
         createdAt: new Date().toISOString(),
       };
     },
-    users: async (_: any, { limit, offset }: { limit: number, offset: number }) => {
-      logger.info(`Fetching users (placeholder) limit: ${limit}, offset: ${offset}`);
+    users: async (
+      _: any,
+      { limit, offset }: { limit: number; offset: number },
+    ) => {
+      logger.info(
+        `Fetching users (placeholder) limit: ${limit}, offset: ${offset}`,
+      );
       // Placeholder: In a real implementation, fetch users from PostgreSQL with pagination
       return [
-        { id: '1', email: 'user-1@example.com', username: 'user1', createdAt: new Date().toISOString() },
-        { id: '2', email: 'user-2@example.com', username: 'user2', createdAt: new Date().toISOString() },
+        {
+          id: '1',
+          email: 'user-1@example.com',
+          username: 'user1',
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          email: 'user-2@example.com',
+          username: 'user2',
+          createdAt: new Date().toISOString(),
+        },
       ];
     },
   },
   Mutation: {
-    createUser: async (_: any, { input }: { input: { email: string, username: string } }) => {
+    createUser: async (
+      _: any,
+      { input }: { input: { email: string; username: string } },
+    ) => {
       logger.info(`Creating user: ${input.email} (placeholder)`);
       // Placeholder: In a real implementation, create user in PostgreSQL
       recordUserSignup({
@@ -40,8 +58,16 @@ const userResolvers = {
         createdAt: new Date().toISOString(),
       };
     },
-    updateUser: async (_: any, { id, input }: { id: string, input: { email?: string, username?: string } }) => {
-      logger.info(`Updating user ${id}: ${JSON.stringify(input)} (placeholder)`);
+    updateUser: async (
+      _: any,
+      {
+        id,
+        input,
+      }: { id: string; input: { email?: string; username?: string } },
+    ) => {
+      logger.info(
+        `Updating user ${id}: ${JSON.stringify(input)} (placeholder)`,
+      );
       // Placeholder: In a real implementation, update user in PostgreSQL
       return {
         id: id,

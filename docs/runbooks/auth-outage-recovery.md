@@ -5,6 +5,7 @@
 **Escalation:** Immediate (P0 incident)
 
 ## 🔍 Symptoms
+
 - Users unable to login to web interface
 - API returning 401 Unauthorized errors
 - JWT validation failures in application logs
@@ -13,6 +14,7 @@
 ## ⚡ Immediate Response (0-2 minutes)
 
 ### 1. Verify Outage Scope
+
 ```bash
 # Check authentication service status
 kubectl get pods -n intelgraph-prod -l app=auth-service
@@ -25,6 +27,7 @@ curl -f https://auth.intelgraph.ai/.well-known/jwks.json || echo "JWKS ENDPOINT 
 ```
 
 ### 2. Enable Emergency Bypass (Break-Glass)
+
 ```bash
 # Activate emergency authentication bypass
 kubectl patch configmap intelgraph-config -n intelgraph-prod --patch='
@@ -41,6 +44,7 @@ kubectl rollout restart deployment/intelgraph -n intelgraph-prod
 ```
 
 ### 3. Create Emergency Admin Access
+
 ```bash
 # Generate temporary admin token (valid for 2 hours)
 EMERGENCY_TOKEN=$(kubectl exec -n intelgraph-prod deployment/intelgraph -- \
@@ -67,6 +71,7 @@ echo "🚨 EMERGENCY TOKEN (2h expiry): $EMERGENCY_TOKEN"
 ### External Identity Provider Issues
 
 #### 1. Check Provider Status
+
 ```bash
 # Verify external OAuth providers (Okta, Auth0, etc.)
 curl -f https://your-tenant.okta.com/.well-known/openid_configuration
@@ -78,6 +83,7 @@ nslookup your-domain.auth0.com
 ```
 
 #### 2. Fallback to Local Authentication
+
 ```bash
 # Switch to local authentication mode
 kubectl patch configmap intelgraph-config -n intelgraph-prod --patch='
@@ -109,6 +115,7 @@ VALUES (
 ### Internal Authentication Service Issues
 
 #### 1. Service Recovery
+
 ```bash
 # Check auth service logs
 kubectl logs -n intelgraph-prod deployment/auth-service --tail=50
@@ -121,6 +128,7 @@ kubectl wait --for=condition=available --timeout=120s deployment/auth-service -n
 ```
 
 #### 2. JWT Secret Recovery
+
 ```bash
 # Check if JWT secrets are accessible
 kubectl get secret -n intelgraph-prod jwt-secrets -o yaml
@@ -137,6 +145,7 @@ kubectl rollout restart deployment/auth-service -n intelgraph-prod
 ### Database Authentication Issues
 
 #### 1. User Database Recovery
+
 ```bash
 # Check user table accessibility
 kubectl exec -n intelgraph-prod deployment/postgres -- psql -U postgres -d intelgraph -c "
@@ -152,6 +161,7 @@ VACUUM user_sessions;
 ```
 
 #### 2. Permission Recovery
+
 ```bash
 # Reset user permissions to known good state
 kubectl exec -n intelgraph-prod deployment/postgres -- psql -U postgres -d intelgraph -c "
@@ -203,6 +213,7 @@ curl -X POST https://status.intelgraph.ai/api/incidents \
 ### 2-User Break-Glass Process
 
 #### User 1: Emergency Admin
+
 ```bash
 # Create with 2-hour time-boxed access
 kubectl exec -n intelgraph-prod deployment/postgres -- psql -U postgres -d intelgraph -c "
@@ -219,6 +230,7 @@ INSERT INTO emergency_access (
 ```
 
 #### User 2: Emergency Operator
+
 ```bash
 # Create with read-only + restart permissions
 kubectl exec -n intelgraph-prod deployment/postgres -- psql -U postgres -d intelgraph -c "
@@ -235,6 +247,7 @@ INSERT INTO emergency_access (
 ```
 
 ### Auto-Revocation
+
 ```bash
 # Set up automatic access revocation
 kubectl create job emergency-access-cleanup --from=cronjob/hourly-cleanup -n intelgraph-prod

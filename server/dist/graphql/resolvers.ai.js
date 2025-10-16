@@ -1,4 +1,4 @@
-const { getNeo4jDriver, getRedisClient, getPostgresPool } = require('../config/database');
+const { getNeo4jDriver, getRedisClient, getPostgresPool, } = require('../config/database');
 import logger from '../utils/logger.js';
 const { PubSub } = require('graphql-subscriptions');
 const GNNService = require('../services/GNNService');
@@ -92,16 +92,18 @@ const aiResolvers = {
                 catch (_) { }
                 // Kick off GNN link prediction in background (best-effort)
                 try {
-                    const candidateEdges = recs.map(r => [r.from, r.to]);
-                    gnnService.predictLinks({
+                    const candidateEdges = recs.map((r) => [r.from, r.to]);
+                    gnnService
+                        .predictLinks({
                         investigationId: null,
                         graphData: null, // service can pull graph via its own source if configured; kept null to enqueue
                         nodeFeatures: {},
                         candidateEdges,
                         modelName: 'default_link_predictor',
                         taskMode: 'predict',
-                        options: { focusEntityId: entityId }
-                    }).catch(() => { });
+                        options: { focusEntityId: entityId },
+                    })
+                        .catch(() => { });
                 }
                 catch (_) { }
                 return recs;
@@ -152,7 +154,10 @@ const aiResolvers = {
                 }));
             }
             catch (e) {
-                logger.error('detectAnomalies failed', { investigationId, err: e.message });
+                logger.error('detectAnomalies failed', {
+                    investigationId,
+                    err: e.message,
+                });
                 return [];
             }
             finally {
@@ -224,7 +229,7 @@ const aiResolvers = {
            RETURN node.id AS id, score
            ORDER BY score DESC
            LIMIT $limit`, params);
-                const fulltextScores = new Map(ftRes.records.map(r => [r.get('id'), Number(r.get('score'))]));
+                const fulltextScores = new Map(ftRes.records.map((r) => [r.get('id'), Number(r.get('score'))]));
                 // 2) Vector similarity from Postgres (if installed)
                 let vectorScores = new Map();
                 try {
@@ -240,7 +245,7 @@ const aiResolvers = {
             ORDER BY e.embedding <#> (SELECT qv FROM query)
             LIMIT $2`;
                     const { rows } = await pg.query(sql, [q, limit]);
-                    vectorScores = new Map(rows.map(r => [r.entity_id, Number(r.sim)]));
+                    vectorScores = new Map(rows.map((r) => [r.entity_id, Number(r.sim)]));
                 }
                 catch (err) {
                     logger.warn('pgvector hybrid search unavailable, falling back to full-text', { err: err.message });
@@ -250,14 +255,14 @@ const aiResolvers = {
                 // Normalize scores to [0,1] naively by dividing by max
                 const ftMax = Math.max(1e-6, ...fulltextScores.values());
                 const vsMax = Math.max(1e-6, ...vectorScores.values());
-                const combined = Array.from(ids).map(id => {
+                const combined = Array.from(ids).map((id) => {
                     const ft = (fulltextScores.get(id) || 0) / ftMax;
                     const vs = (vectorScores.get(id) || 0) / vsMax;
                     const score = 0.6 * ft + 0.4 * vs;
                     return { id, score };
                 });
                 combined.sort((a, b) => b.score - a.score);
-                const topIds = combined.slice(0, limit).map(x => x.id);
+                const topIds = combined.slice(0, limit).map((x) => x.id);
                 const entities = await loadEntitiesByIds(topIds);
                 const order = new Map(topIds.map((id, idx) => [id, idx]));
                 entities.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
@@ -288,7 +293,11 @@ const aiResolvers = {
              updatedAt: datetime().toString(),
              createdBy: $createdBy,
              enclave: 'UNCLASSIFIED'
-           })-[:ANNOTATES]->(e)`, { entityId, reason: reason || 'Anomaly detected', createdBy: user.id });
+           })-[:ANNOTATES]->(e)`, {
+                    entityId,
+                    reason: reason || 'Anomaly detected',
+                    createdBy: user.id,
+                });
             }
             catch (e) {
                 logger.error('recordAnomaly failed', { entityId, err: e.message });
@@ -302,7 +311,7 @@ const aiResolvers = {
     Subscription: {
         aiSuggestions: {
             subscribe: (_, { entityId }) => pubsub.asyncIterator([`AI_SUGG_${entityId}`]),
-            resolve: (event) => event.payload
+            resolve: (event) => event.payload,
         },
     },
 };

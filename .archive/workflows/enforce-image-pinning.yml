@@ -6,7 +6,7 @@ permissions:
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   check-images:
@@ -24,4 +24,3 @@ jobs:
       - name: Enforce digest pinning and block :latest
         run: |
           bash scripts/ci/check-image-pinning.sh
-

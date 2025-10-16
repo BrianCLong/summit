@@ -11,12 +11,18 @@ declare global {
   }
 }
 
-export function maestroAuthzMiddleware(req: Request, res: Response, next: NextFunction) {
+export function maestroAuthzMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const requestContext = req.context as RequestContext; // Assert req.context is present
 
   if (!requestContext) {
     logger.error('Maestro authorization middleware: Request context not found');
-    return res.status(500).json({ error: 'Internal server error: Missing request context' });
+    return res
+      .status(500)
+      .json({ error: 'Internal server error: Missing request context' });
   }
 
   // Map HTTP method to action for OPA policy
@@ -48,8 +54,9 @@ export function maestroAuthzMiddleware(req: Request, res: Response, next: NextFu
     },
   };
 
-  opaPolicyEngine.evaluatePolicy('maestro/authz', policyContext)
-    .then(decision => {
+  opaPolicyEngine
+    .evaluatePolicy('maestro/authz', policyContext)
+    .then((decision) => {
       if (!decision.allow) {
         logger.warn('Maestro authorization denied by OPA', {
           tenantId: requestContext.tenantId,
@@ -68,8 +75,13 @@ export function maestroAuthzMiddleware(req: Request, res: Response, next: NextFu
       (req as any).policyDecision = decision;
       next();
     })
-    .catch(error => {
-      logger.error('Error evaluating Maestro authorization policy', { error: error.message, policyContext });
-      res.status(500).json({ error: 'Internal server error: Policy evaluation failed' });
+    .catch((error) => {
+      logger.error('Error evaluating Maestro authorization policy', {
+        error: error.message,
+        policyContext,
+      });
+      res
+        .status(500)
+        .json({ error: 'Internal server error: Policy evaluation failed' });
     });
 }

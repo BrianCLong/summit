@@ -13,7 +13,9 @@ const redisClient = new Redis({
 });
 
 redisClient.on('connect', () => logger.info('Rate Limit Redis connected'));
-redisClient.on('error', (err) => logger.error({ err }, 'Rate Limit Redis Client Error'));
+redisClient.on('error', (err) =>
+  logger.error({ err }, 'Rate Limit Redis Client Error'),
+);
 
 interface RateLimitOptions {
   windowMs: number; // Window size in milliseconds
@@ -34,7 +36,9 @@ const defaultRateLimitOptions: RateLimitOptions = {
 };
 
 // Function to create a rate limit middleware
-export const createRateLimitMiddleware = (options?: Partial<RateLimitOptions>) => {
+export const createRateLimitMiddleware = (
+  options?: Partial<RateLimitOptions>,
+) => {
   return rateLimit({
     store: new RedisStore({
       // @ts-expect-error - Known issue with RedisStore types
@@ -56,7 +60,9 @@ export const createRateLimitMiddleware = (options?: Partial<RateLimitOptions>) =
       return req.ip;
     },
     handler: (req, res, next, options) => {
-      logger.warn(`Rate limit exceeded for ${options.keyGenerator(req)} on ${req.path}`);
+      logger.warn(
+        `Rate limit exceeded for ${options.keyGenerator(req)} on ${req.path}`,
+      );
       res.status(options.statusCode).send(options.message);
     },
   });

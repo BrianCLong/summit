@@ -3,8 +3,19 @@ type Mutation {
   declineStep(runId: ID!, stepId: ID!, justification: String!): Boolean!
 }
 
-type Budget { tenant: String!, month: String!, limitUsd: Float!, spentUsd: Float!, softPct: Float!, hardPct: Float! }
-type SimResult { drainMinutes: Int!, estCostUsd: Float!, maxParallel: Int! }
+type Budget {
+  tenant: String!
+  month: String!
+  limitUsd: Float!
+  spentUsd: Float!
+  softPct: Float!
+  hardPct: Float!
+}
+type SimResult {
+  drainMinutes: Int!
+  estCostUsd: Float!
+  maxParallel: Int!
+}
 
 extend type Query {
   budget(tenant: String!): Budget!
@@ -12,5 +23,11 @@ extend type Query {
 }
 
 extend type Mutation {
-  setBudget(tenant: String!, month: String!, limitUsd: Float!, softPct: Float, hardPct: Float): Boolean!
+  setBudget(
+    tenant: String!
+    month: String!
+    limitUsd: Float!
+    softPct: Float
+    hardPct: Float
+  ): Boolean!
 }

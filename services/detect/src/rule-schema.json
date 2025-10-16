@@ -35,10 +35,7 @@
                 "additionalProperties": false
               }
             },
-            "anyOf": [
-              { "required": ["cypher"] },
-              { "required": ["stream"] }
-            ],
+            "anyOf": [{ "required": ["cypher"] }, { "required": ["stream"] }],
             "additionalProperties": false
           }
         }

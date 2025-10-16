@@ -10,7 +10,12 @@
     "group": "prod-us",
     "class": "deployment",
     "custom_details": {
-      "slo": { "read_p95_ms": 350, "write_p95_ms": 700, "error_rate_pct": 0.1, "sub_fanout_p95_ms": 250 },
+      "slo": {
+        "read_p95_ms": 350,
+        "write_p95_ms": 700,
+        "error_rate_pct": 0.1,
+        "sub_fanout_p95_ms": 250
+      },
       "feature_flag": "v24.coherence",
       "image": "ghcr.io/<org>/intelgraph-server:v24.0.0",
       "persisted_queries": true,
@@ -18,7 +23,13 @@
     }
   },
   "links": [
-    { "href": "https://github.com/<org>/<repo>/releases/tag/v24.0.0", "text": "GitHub Release" },
-    { "href": "https://grafana.<yourdomain>/d/<uid>", "text": "Grafana Dashboard" }
+    {
+      "href": "https://github.com/<org>/<repo>/releases/tag/v24.0.0",
+      "text": "GitHub Release"
+    },
+    {
+      "href": "https://grafana.<yourdomain>/d/<uid>",
+      "text": "Grafana Dashboard"
+    }
   ]
 }

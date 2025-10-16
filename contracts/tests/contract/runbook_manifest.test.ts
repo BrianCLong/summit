@@ -9,7 +9,10 @@ const schema = JSON.parse(fs.readFileSync('runbook.schema.json', 'utf8'));
 describe('Runbook manifest schema', () => {
   it('validates example runbook', () => {
     const rb = JSON.parse(
-      fs.readFileSync('../examples/runbooks/backfill-entity-resolver.json', 'utf8'),
+      fs.readFileSync(
+        '../examples/runbooks/backfill-entity-resolver.json',
+        'utf8',
+      ),
     );
     const validate = ajv.compile(schema);
     expect(validate(rb)).toBe(true);

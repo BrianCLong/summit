@@ -15,7 +15,7 @@ class ChaosExperimentsValidator {
       tests: [],
       passed: 0,
       failed: 0,
-      evidence: []
+      evidence: [],
     };
   }
 
@@ -35,7 +35,9 @@ class ChaosExperimentsValidator {
       await this.validateSchedulingConfiguration();
       await this.generateEvidence();
 
-      console.log(`✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`);
+      console.log(
+        `✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`,
+      );
       return this.results.failed === 0;
     } catch (error) {
       console.error('❌ Validation failed:', error.message);
@@ -51,7 +53,10 @@ class ChaosExperimentsValidator {
 
     try {
       // Check deployment script
-      const deployScriptPath = path.join(process.cwd(), 'scripts/deploy-chaos-experiments.sh');
+      const deployScriptPath = path.join(
+        process.cwd(),
+        'scripts/deploy-chaos-experiments.sh',
+      );
 
       if (!fs.existsSync(deployScriptPath)) {
         throw new Error('Chaos deployment script not found');
@@ -64,7 +69,7 @@ class ChaosExperimentsValidator {
         'install_litmus',
         'deploy_chaos_experiments',
         'validate_deployment',
-        'LITMUS_VERSION'
+        'LITMUS_VERSION',
       ];
 
       let deployFeaturesFound = 0;
@@ -84,8 +89,9 @@ class ChaosExperimentsValidator {
         throw new Error('Chaos experiments directory not found');
       }
 
-      const chaosFiles = fs.readdirSync(chaosDir, { recursive: true })
-        .filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
+      const chaosFiles = fs
+        .readdirSync(chaosDir, { recursive: true })
+        .filter((file) => file.endsWith('.yaml') || file.endsWith('.yml'));
 
       if (chaosFiles.length === 0) {
         throw new Error('No chaos experiment YAML files found');
@@ -97,8 +103,9 @@ class ChaosExperimentsValidator {
 
       if (fs.existsSync(dashboardPath)) {
         const dashboardContent = fs.readFileSync(dashboardPath, 'utf8');
-        dashboardFound = dashboardContent.includes('ConfigMap') &&
-                        dashboardContent.includes('PrometheusRule');
+        dashboardFound =
+          dashboardContent.includes('ConfigMap') &&
+          dashboardContent.includes('PrometheusRule');
       }
 
       test.status = 'passed';
@@ -109,7 +116,7 @@ class ChaosExperimentsValidator {
         deployment_script: deployScriptPath,
         chaos_files: chaosFiles.length,
         dashboard_configured: dashboardFound,
-        deploy_features: deployFeaturesFound
+        deploy_features: deployFeaturesFound,
       });
 
       this.results.passed++;
@@ -147,7 +154,9 @@ class ChaosExperimentsValidator {
       }
 
       if (experimentFiles.length < requiredExperiments.length) {
-        throw new Error(`Only ${experimentFiles.length}/${requiredExperiments.length} required experiments found`);
+        throw new Error(
+          `Only ${experimentFiles.length}/${requiredExperiments.length} required experiments found`,
+        );
       }
 
       // Validate experiment configurations
@@ -159,7 +168,8 @@ class ChaosExperimentsValidator {
         const expContent = fs.readFileSync(expFile, 'utf8');
 
         // Count ChaosEngine instances
-        const chaosEngines = (expContent.match(/kind:\s*ChaosEngine/g) || []).length;
+        const chaosEngines = (expContent.match(/kind:\s*ChaosEngine/g) || [])
+          .length;
         totalExperiments += chaosEngines;
 
         // Count health probes
@@ -167,7 +177,8 @@ class ChaosExperimentsValidator {
         totalProbes += probes;
 
         // Count scheduled experiments
-        const schedules = (expContent.match(/kind:\s*ChaosSchedule/g) || []).length;
+        const schedules = (expContent.match(/kind:\s*ChaosSchedule/g) || [])
+          .length;
         scheduledExperiments += schedules;
 
         // Validate specific experiment requirements
@@ -176,7 +187,7 @@ class ChaosExperimentsValidator {
             'pod-delete',
             'PODS_AFFECTED_PERC',
             'FORCE.*false', // Graceful termination
-            'chaosServiceAccount'
+            'chaosServiceAccount',
           ];
 
           let podKillerFeatures = 0;
@@ -197,7 +208,7 @@ class ChaosExperimentsValidator {
             'pod-network-latency',
             'NETWORK_LATENCY',
             'JITTER',
-            'NETWORK_INTERFACE'
+            'NETWORK_INTERFACE',
           ];
 
           let networkFeatures = 0;
@@ -208,7 +219,9 @@ class ChaosExperimentsValidator {
           }
 
           if (networkFeatures < 3) {
-            throw new Error('Network latency experiment missing required features');
+            throw new Error(
+              'Network latency experiment missing required features',
+            );
           }
         }
       }
@@ -221,7 +234,7 @@ class ChaosExperimentsValidator {
         total_experiments: totalExperiments,
         total_probes: totalProbes,
         scheduled_experiments: scheduledExperiments,
-        experiment_files: experimentFiles
+        experiment_files: experimentFiles,
       });
 
       this.results.passed++;
@@ -242,14 +255,16 @@ class ChaosExperimentsValidator {
 
     try {
       const experimentsDir = path.join(process.cwd(), 'chaos/experiments');
-      const experimentFiles = fs.readdirSync(experimentsDir).filter(f => f.endsWith('.yaml'));
+      const experimentFiles = fs
+        .readdirSync(experimentsDir)
+        .filter((f) => f.endsWith('.yaml'));
 
       let guardrailChecks = {
         namespace_scoped: 0,
         impact_limited: 0,
         graceful_termination: 0,
         health_probes: 0,
-        time_bounded: 0
+        time_bounded: 0,
       };
 
       for (const expFile of experimentFiles) {
@@ -257,18 +272,26 @@ class ChaosExperimentsValidator {
         const expContent = fs.readFileSync(expPath, 'utf8');
 
         // Check namespace scoping
-        if (expContent.includes('intelgraph-staging') || expContent.includes('namespace:')) {
+        if (
+          expContent.includes('intelgraph-staging') ||
+          expContent.includes('namespace:')
+        ) {
           guardrailChecks.namespace_scoped++;
         }
 
         // Check impact limitation (≤25% pods affected)
-        const impactMatch = expContent.match(/PODS_AFFECTED_PERC.*["\']?(\d+)["\']?/);
+        const impactMatch = expContent.match(
+          /PODS_AFFECTED_PERC.*["\']?(\d+)["\']?/,
+        );
         if (impactMatch && parseInt(impactMatch[1]) <= 25) {
           guardrailChecks.impact_limited++;
         }
 
         // Check graceful termination
-        if (expContent.includes('FORCE.*false') || expContent.includes('"false"')) {
+        if (
+          expContent.includes('FORCE.*false') ||
+          expContent.includes('"false"')
+        ) {
           guardrailChecks.graceful_termination++;
         }
 
@@ -278,8 +301,11 @@ class ChaosExperimentsValidator {
         }
 
         // Check time boundaries
-        const durationMatch = expContent.match(/TOTAL_CHAOS_DURATION.*["\']?(\d+)["\']?/);
-        if (durationMatch && parseInt(durationMatch[1]) <= 600) { // ≤10 minutes
+        const durationMatch = expContent.match(
+          /TOTAL_CHAOS_DURATION.*["\']?(\d+)["\']?/,
+        );
+        if (durationMatch && parseInt(durationMatch[1]) <= 600) {
+          // ≤10 minutes
           guardrailChecks.time_bounded++;
         }
       }
@@ -290,9 +316,11 @@ class ChaosExperimentsValidator {
         const expPath = path.join(experimentsDir, expFile);
         const expContent = fs.readFileSync(expPath, 'utf8');
 
-        if (expContent.includes('ServiceAccount') &&
-            expContent.includes('Role') &&
-            expContent.includes('RoleBinding')) {
+        if (
+          expContent.includes('ServiceAccount') &&
+          expContent.includes('Role') &&
+          expContent.includes('RoleBinding')
+        ) {
           rbacConfigured = true;
           break;
         }
@@ -307,7 +335,7 @@ class ChaosExperimentsValidator {
         const safetyChecks = [
           'safety-level',
           'scope.*scoped',
-          'experiment-type'
+          'experiment-type',
         ];
 
         for (const check of safetyChecks) {
@@ -319,7 +347,10 @@ class ChaosExperimentsValidator {
         }
       }
 
-      const totalSafetyChecks = Object.values(guardrailChecks).reduce((a, b) => a + b, 0);
+      const totalSafetyChecks = Object.values(guardrailChecks).reduce(
+        (a, b) => a + b,
+        0,
+      );
 
       if (totalSafetyChecks < experimentFiles.length * 3) {
         throw new Error('Insufficient safety guardrails across experiments');
@@ -333,7 +364,7 @@ class ChaosExperimentsValidator {
         guardrail_checks: guardrailChecks,
         rbac_configured: rbacConfigured,
         safety_annotations: safetyAnnotations,
-        total_safety_score: totalSafetyChecks
+        total_safety_score: totalSafetyChecks,
       });
 
       this.results.passed++;
@@ -354,7 +385,10 @@ class ChaosExperimentsValidator {
 
     try {
       // Check chaos dashboard configuration
-      const dashboardPath = path.join(process.cwd(), 'chaos/chaos-dashboard.yaml');
+      const dashboardPath = path.join(
+        process.cwd(),
+        'chaos/chaos-dashboard.yaml',
+      );
 
       if (!fs.existsSync(dashboardPath)) {
         throw new Error('Chaos monitoring dashboard not found');
@@ -367,7 +401,7 @@ class ChaosExperimentsValidator {
         'ConfigMap',
         'PrometheusRule',
         'ServiceMonitor',
-        'CronJob'
+        'CronJob',
       ];
 
       let componentsFound = 0;
@@ -386,7 +420,7 @@ class ChaosExperimentsValidator {
         'ErrorBudgetBurnRateCritical',
         'ChaosExperimentFailed',
         'SystemNotRecoveringFromChaos',
-        'ChaosImpactTooHigh'
+        'ChaosImpactTooHigh',
       ];
 
       let rulesFound = 0;
@@ -401,7 +435,7 @@ class ChaosExperimentsValidator {
         'Chaos Experiments Status',
         'System Availability During Chaos',
         'Response Time During Network Chaos',
-        'Error Rate During Chaos'
+        'Error Rate During Chaos',
       ];
 
       let panelsFound = 0;
@@ -415,7 +449,7 @@ class ChaosExperimentsValidator {
       const metricsFeatures = [
         'litmuschaos_experiments_total',
         'litmuschaos_experiment_status',
-        'chaos:experiment:duration_seconds'
+        'chaos:experiment:duration_seconds',
       ];
 
       let metricsFound = 0;
@@ -433,7 +467,7 @@ class ChaosExperimentsValidator {
         dashboard_components: componentsFound,
         prometheus_rules: rulesFound,
         grafana_panels: panelsFound,
-        metrics_collection: metricsFound
+        metrics_collection: metricsFound,
       });
 
       this.results.passed++;
@@ -466,31 +500,31 @@ class ChaosExperimentsValidator {
           {
             timestamp: new Date(Date.now() - 180000).toISOString(),
             event: 'experiment_started',
-            target: 'intelgraph-server-pod-1'
+            target: 'intelgraph-server-pod-1',
           },
           {
             timestamp: new Date(Date.now() - 150000).toISOString(),
             event: 'pod_terminated',
             target: 'intelgraph-server-pod-1',
-            method: 'graceful'
+            method: 'graceful',
           },
           {
             timestamp: new Date(Date.now() - 120000).toISOString(),
             event: 'pod_restarted',
-            target: 'intelgraph-server-pod-1'
+            target: 'intelgraph-server-pod-1',
           },
           {
             timestamp: new Date(Date.now() - 60000).toISOString(),
             event: 'experiment_completed',
-            result: 'passed'
-          }
+            result: 'passed',
+          },
         ],
         slo_impact: {
           availability: 0.987, // 98.7% during chaos
           p95_latency: 420, // Slight increase
-          error_rate: 0.008 // Within bounds
+          error_rate: 0.008, // Within bounds
         },
-        recovery_time: 45 // seconds
+        recovery_time: 45, // seconds
       };
 
       // Simulate network latency experiment
@@ -503,29 +537,32 @@ class ChaosExperimentsValidator {
         slo_impact: {
           availability: 0.995, // Minimal impact
           p95_latency: 380, // Expected increase
-          error_rate: 0.005
+          error_rate: 0.005,
         },
         probe_results: {
           health_probe: 'passed',
           graphql_probe: 'passed',
-          database_connectivity: 'passed'
-        }
+          database_connectivity: 'passed',
+        },
       };
 
       // Validate simulation results against SLO thresholds
       const sloThresholds = {
         availability: 0.99,
         p95_latency: 500, // ms
-        error_rate: 0.01
+        error_rate: 0.01,
       };
 
       const podKillerSLOPass =
-        podKillerSimulation.slo_impact.availability >= sloThresholds.availability &&
-        podKillerSimulation.slo_impact.p95_latency <= sloThresholds.p95_latency &&
+        podKillerSimulation.slo_impact.availability >=
+          sloThresholds.availability &&
+        podKillerSimulation.slo_impact.p95_latency <=
+          sloThresholds.p95_latency &&
         podKillerSimulation.slo_impact.error_rate <= sloThresholds.error_rate;
 
       const networkSLOPass =
-        networkSimulation.slo_impact.availability >= sloThresholds.availability &&
+        networkSimulation.slo_impact.availability >=
+          sloThresholds.availability &&
         networkSimulation.slo_impact.p95_latency <= sloThresholds.p95_latency &&
         networkSimulation.slo_impact.error_rate <= sloThresholds.error_rate;
 
@@ -538,14 +575,17 @@ class ChaosExperimentsValidator {
       test.simulations = {
         pod_killer: podKillerSimulation,
         network_latency: networkSimulation,
-        slo_compliance: { pod_killer: podKillerSLOPass, network: networkSLOPass }
+        slo_compliance: {
+          pod_killer: podKillerSLOPass,
+          network: networkSLOPass,
+        },
       };
 
       this.results.evidence.push({
         type: 'chaos_execution_simulation',
         experiments_simulated: 2,
         slo_compliance: true,
-        simulations: test.simulations
+        simulations: test.simulations,
       });
 
       this.results.passed++;
@@ -567,13 +607,15 @@ class ChaosExperimentsValidator {
     try {
       // Check for abort hooks in experiment configurations
       const experimentsDir = path.join(process.cwd(), 'chaos/experiments');
-      const experimentFiles = fs.readdirSync(experimentsDir).filter(f => f.endsWith('.yaml'));
+      const experimentFiles = fs
+        .readdirSync(experimentsDir)
+        .filter((f) => f.endsWith('.yaml'));
 
       let abortFeatures = {
         health_probes: 0,
         timeout_configuration: 0,
         failure_thresholds: 0,
-        manual_abort: 0
+        manual_abort: 0,
       };
 
       for (const expFile of experimentFiles) {
@@ -586,7 +628,10 @@ class ChaosExperimentsValidator {
         }
 
         // Check for timeout configuration
-        if (expContent.includes('TOTAL_CHAOS_DURATION') || expContent.includes('timeout')) {
+        if (
+          expContent.includes('TOTAL_CHAOS_DURATION') ||
+          expContent.includes('timeout')
+        ) {
           abortFeatures.timeout_configuration++;
         }
 
@@ -596,7 +641,10 @@ class ChaosExperimentsValidator {
         }
 
         // Check for manual abort capability
-        if (expContent.includes('jobCleanUpPolicy') || expContent.includes('abort')) {
+        if (
+          expContent.includes('jobCleanUpPolicy') ||
+          expContent.includes('abort')
+        ) {
           abortFeatures.manual_abort++;
         }
       }
@@ -612,16 +660,19 @@ class ChaosExperimentsValidator {
           'terminate_chaos_injection',
           'restore_normal_operations',
           'update_experiment_status',
-          'alert_operators'
+          'alert_operators',
         ],
         system_recovery: {
           availability_restored: true,
           recovery_time: '30s',
-          no_lingering_effects: true
-        }
+          no_lingering_effects: true,
+        },
       };
 
-      const totalAbortFeatures = Object.values(abortFeatures).reduce((a, b) => a + b, 0);
+      const totalAbortFeatures = Object.values(abortFeatures).reduce(
+        (a, b) => a + b,
+        0,
+      );
 
       if (totalAbortFeatures < experimentFiles.length * 2) {
         throw new Error('Insufficient abort mechanisms configured');
@@ -635,7 +686,7 @@ class ChaosExperimentsValidator {
         type: 'abort_mechanisms',
         abort_features: abortFeatures,
         total_features: totalAbortFeatures,
-        abort_simulation: abortSimulation
+        abort_simulation: abortSimulation,
       });
 
       this.results.passed++;
@@ -656,13 +707,15 @@ class ChaosExperimentsValidator {
 
     try {
       const experimentsDir = path.join(process.cwd(), 'chaos/experiments');
-      const experimentFiles = fs.readdirSync(experimentsDir).filter(f => f.endsWith('.yaml'));
+      const experimentFiles = fs
+        .readdirSync(experimentsDir)
+        .filter((f) => f.endsWith('.yaml'));
 
       let scheduleFeatures = {
         scheduled_experiments: 0,
         time_boundaries: 0,
         interval_configuration: 0,
-        weekday_constraints: 0
+        weekday_constraints: 0,
       };
 
       for (const expFile of experimentFiles) {
@@ -675,17 +728,26 @@ class ChaosExperimentsValidator {
         }
 
         // Check for time boundaries (off-peak hours)
-        if (expContent.includes('startTime') && expContent.includes('endTime')) {
+        if (
+          expContent.includes('startTime') &&
+          expContent.includes('endTime')
+        ) {
           scheduleFeatures.time_boundaries++;
         }
 
         // Check for interval configuration
-        if (expContent.includes('minChaosInterval') || expContent.includes('repeat:')) {
+        if (
+          expContent.includes('minChaosInterval') ||
+          expContent.includes('repeat:')
+        ) {
           scheduleFeatures.interval_configuration++;
         }
 
         // Check for weekday constraints
-        if (expContent.includes('includedDays') || expContent.includes('excludedDays')) {
+        if (
+          expContent.includes('includedDays') ||
+          expContent.includes('excludedDays')
+        ) {
           scheduleFeatures.weekday_constraints++;
         }
       }
@@ -693,9 +755,9 @@ class ChaosExperimentsValidator {
       // Validate scheduling safety
       const schedulingSafety = {
         off_peak_hours: true, // Should be scheduled during off-peak
-        weekdays_only: true,  // Should avoid weekends for some experiments
+        weekdays_only: true, // Should avoid weekends for some experiments
         minimum_intervals: true, // Should have minimum intervals between runs
-        environment_scoped: true // Should be scoped to non-production
+        environment_scoped: true, // Should be scoped to non-production
       };
 
       // Check specific scheduling examples
@@ -706,16 +768,25 @@ class ChaosExperimentsValidator {
         const expPath = path.join(experimentsDir, expFile);
         const expContent = fs.readFileSync(expPath, 'utf8');
 
-        if (expFile.includes('pod-killer') && expContent.includes('nightly-pod-chaos')) {
+        if (
+          expFile.includes('pod-killer') &&
+          expContent.includes('nightly-pod-chaos')
+        ) {
           podKillerSchedule = true;
         }
 
-        if (expFile.includes('network-latency') && expContent.includes('weekly-network-chaos')) {
+        if (
+          expFile.includes('network-latency') &&
+          expContent.includes('weekly-network-chaos')
+        ) {
           networkLatencySchedule = true;
         }
       }
 
-      const totalScheduleFeatures = Object.values(scheduleFeatures).reduce((a, b) => a + b, 0);
+      const totalScheduleFeatures = Object.values(scheduleFeatures).reduce(
+        (a, b) => a + b,
+        0,
+      );
 
       if (totalScheduleFeatures < 4) {
         throw new Error('Insufficient scheduling configuration');
@@ -730,8 +801,8 @@ class ChaosExperimentsValidator {
         scheduling_safety: schedulingSafety,
         specific_schedules: {
           pod_killer: podKillerSchedule,
-          network_latency: networkLatencySchedule
-        }
+          network_latency: networkLatencySchedule,
+        },
       });
 
       this.results.passed++;
@@ -754,11 +825,17 @@ class ChaosExperimentsValidator {
     }
 
     // Generate validation report
-    const reportPath = path.join(evidenceDir, 'chaos-experiments-validation.json');
+    const reportPath = path.join(
+      evidenceDir,
+      'chaos-experiments-validation.json',
+    );
     fs.writeFileSync(reportPath, JSON.stringify(this.results, null, 2));
 
     // Generate Litmus results simulation
-    const litmusResultsPath = path.join(evidenceDir, 'litmus-results-simulation.json');
+    const litmusResultsPath = path.join(
+      evidenceDir,
+      'litmus-results-simulation.json',
+    );
     const litmusResults = {
       timestamp: new Date().toISOString(),
       experiments: [
@@ -774,8 +851,8 @@ class ChaosExperimentsValidator {
           slo_impact: {
             availability: 98.7,
             latency_increase: 15.2,
-            error_rate: 0.8
-          }
+            error_rate: 0.8,
+          },
         },
         {
           name: 'network-latency-staging',
@@ -788,23 +865,26 @@ class ChaosExperimentsValidator {
           slo_impact: {
             availability: 99.5,
             latency_increase: 28.8,
-            error_rate: 0.5
-          }
-        }
+            error_rate: 0.5,
+          },
+        },
       ],
       summary: {
         total_experiments: 2,
         passed: 2,
         failed: 0,
         success_rate: 100,
-        average_recovery_time: 42.5
-      }
+        average_recovery_time: 42.5,
+      },
     };
 
     fs.writeFileSync(litmusResultsPath, JSON.stringify(litmusResults, null, 2));
 
     // Generate Grafana panels simulation
-    const grafanaPanelsPath = path.join(evidenceDir, 'chaos-grafana-panels.json');
+    const grafanaPanelsPath = path.join(
+      evidenceDir,
+      'chaos-grafana-panels.json',
+    );
     const grafanaPanels = {
       timestamp: new Date().toISOString(),
       dashboard_url: 'https://grafana.intelgraph.com/d/chaos-engineering',
@@ -813,30 +893,30 @@ class ChaosExperimentsValidator {
           title: 'Chaos Experiments Status',
           current_value: 2,
           status: 'healthy',
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
         },
         {
           title: 'System Availability During Chaos',
           current_value: 98.7,
           threshold: 95,
           status: 'within_bounds',
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
         },
         {
           title: 'Response Time During Network Chaos',
           p95_latency: 380,
           threshold: 500,
           status: 'within_bounds',
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
         },
         {
           title: 'Error Rate During Chaos',
           current_rate: 0.8,
           threshold: 1.0,
           status: 'within_bounds',
-          last_updated: new Date().toISOString()
-        }
-      ]
+          last_updated: new Date().toISOString(),
+        },
+      ],
     };
 
     fs.writeFileSync(grafanaPanelsPath, JSON.stringify(grafanaPanels, null, 2));
@@ -851,12 +931,15 @@ class ChaosExperimentsValidator {
 // CLI execution
 if (require.main === module) {
   const validator = new ChaosExperimentsValidator();
-  validator.validate().then(success => {
-    process.exit(success ? 0 : 1);
-  }).catch(error => {
-    console.error('Fatal validation error:', error);
-    process.exit(1);
-  });
+  validator
+    .validate()
+    .then((success) => {
+      process.exit(success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Fatal validation error:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = ChaosExperimentsValidator;

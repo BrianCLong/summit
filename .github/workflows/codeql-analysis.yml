@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Mondays
+    - cron: '0 2 * * 1' # Weekly on Mondays
 
 # Prevent concurrent CodeQL runs
 concurrency:
@@ -27,32 +27,32 @@ jobs:
       matrix:
         language: ['javascript', 'typescript']
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-        queries: +security-and-quality
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.11.1'
-        cache: 'pnpm'
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: latest
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-    - name: Build project
-      run: pnpm build
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: "/language:${{matrix.language}}"
-        output: sarif-results
-        upload: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build project
+        run: pnpm build
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{matrix.language}}'
+          output: sarif-results
+          upload: true
     # CodeQL automatically uploads SARIF and this already has built-in fork protection
 
   eslint-sarif:
@@ -61,34 +61,34 @@ jobs:
     timeout-minutes: 15
     if: github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request'
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.11.1'
-        cache: 'pnpm'
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: latest
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-    - name: Run ESLint SARIF
-      run: |
-        pnpm eslint . \
-          --format @microsoft/eslint-formatter-sarif \
-          --output-file eslint-results.sarif \
-        || true
-    - name: Upload ESLint SARIF (fork-safe guard)
-      if: >
-        always() &&
-        github.event.pull_request.head.repo.fork == false &&
-        hashFiles('**/*.sarif') != ''
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: eslint-results.sarif
-        category: eslint
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run ESLint SARIF
+        run: |
+          pnpm eslint . \
+            --format @microsoft/eslint-formatter-sarif \
+            --output-file eslint-results.sarif \
+          || true
+      - name: Upload ESLint SARIF (fork-safe guard)
+        if: >
+          always() &&
+          github.event.pull_request.head.repo.fork == false &&
+          hashFiles('**/*.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+          category: eslint
 
   typescript-sarif:
     name: TypeScript SARIF Analysis
@@ -96,30 +96,30 @@ jobs:
     timeout-minutes: 15
     if: github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request'
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.11.1'
-        cache: 'pnpm'
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: latest
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-    - name: Generate TypeScript SARIF
-      run: |
-        # Convert TypeScript diagnostics to SARIF format
-        npx tsc --noEmit --pretty false 2>&1 | \
-        npx @microsoft/sarif-multitool convert --tool typescript --output typescript-results.sarif || true
-    - name: Upload TypeScript SARIF (fork-safe guard)
-      if: >
-        always() &&
-        github.event.pull_request.head.repo.fork == false &&
-        hashFiles('**/*.sarif') != ''
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: typescript-results.sarif
-        category: typescript
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.1'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate TypeScript SARIF
+        run: |
+          # Convert TypeScript diagnostics to SARIF format
+          npx tsc --noEmit --pretty false 2>&1 | \
+          npx @microsoft/sarif-multitool convert --tool typescript --output typescript-results.sarif || true
+      - name: Upload TypeScript SARIF (fork-safe guard)
+        if: >
+          always() &&
+          github.event.pull_request.head.repo.fork == false &&
+          hashFiles('**/*.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: typescript-results.sarif
+          category: typescript

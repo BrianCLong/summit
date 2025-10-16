@@ -4,7 +4,9 @@
     {
       "type": "timeseries",
       "title": "Processed",
-      "targets": [{ "expr": "sum by (status) (rate(retractions_processed_total[5m]))" }]
+      "targets": [
+        { "expr": "sum by (status) (rate(retractions_processed_total[5m]))" }
+      ]
     },
     {
       "type": "timeseries",

@@ -2,6 +2,7 @@
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 # CI Status
+
 <p>
   <a href="https://github.com/BrianCLong/summit/actions/workflows/lane-fast.yml">
     <img alt="Fast Lane" src="https://github.com/BrianCLong/summit/actions/workflows/lane-fast.yml/badge.svg">
@@ -33,9 +34,9 @@ make up        # Core services only (minimal hardware)
 make smoke
 ```
 
-* Client: [http://localhost:3000](http://localhost:3000)
-* GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
+- Client: [http://localhost:3000](http://localhost:3000)
+- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
 
 ### Optional AI/Kafka Services
 
@@ -59,6 +60,7 @@ Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com) [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen.svg)](https://nodejs.org) [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org) [![GraphQL](https://img.shields.io/badge/GraphQL-API-E10098.svg)](https://graphql.org)
 
 ### Automations
+
 [![Copilot Context Refresh](https://github.com/BrianCLong/summit/actions/workflows/copilot-refresh.yml/badge.svg)](.github/workflows/copilot-refresh.yml)
 [![Weekly Copilot Adoption Report](https://github.com/BrianCLong/summit/actions/workflows/copilot-adoption-report.yml/badge.svg)](.github/workflows/copilot-adoption-report.yml)
 
@@ -171,15 +173,15 @@ The simulation engine keeps evolving story arcs in lockstep with injected events
 
 ### REST API Surface
 
-| Method | Path | Description |
-| --- | --- | --- |
-| `POST` | `/api/narrative-sim/simulations` | Create a simulation (rule-based or LLM-driven) from entity/parameter definitions. |
-| `GET` | `/api/narrative-sim/simulations` | List active simulations with tick metadata. |
-| `GET` | `/api/narrative-sim/simulations/:id` | Fetch the full narrative state (entities, arcs, parameters, recent events). |
-| `POST` | `/api/narrative-sim/simulations/:id/events` | Queue time-stepped events or parameter perturbations. |
-| `POST` | `/api/narrative-sim/simulations/:id/actions` | Inject actor actions that auto-expand into events. |
-| `POST` | `/api/narrative-sim/simulations/:id/tick` | Advance the clock by one or more ticks and recalculate story arcs. |
-| `DELETE` | `/api/narrative-sim/simulations/:id` | Tear down a running simulation. |
+| Method   | Path                                         | Description                                                                       |
+| -------- | -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `POST`   | `/api/narrative-sim/simulations`             | Create a simulation (rule-based or LLM-driven) from entity/parameter definitions. |
+| `GET`    | `/api/narrative-sim/simulations`             | List active simulations with tick metadata.                                       |
+| `GET`    | `/api/narrative-sim/simulations/:id`         | Fetch the full narrative state (entities, arcs, parameters, recent events).       |
+| `POST`   | `/api/narrative-sim/simulations/:id/events`  | Queue time-stepped events or parameter perturbations.                             |
+| `POST`   | `/api/narrative-sim/simulations/:id/actions` | Inject actor actions that auto-expand into events.                                |
+| `POST`   | `/api/narrative-sim/simulations/:id/tick`    | Advance the clock by one or more ticks and recalculate story arcs.                |
+| `DELETE` | `/api/narrative-sim/simulations/:id`         | Tear down a running simulation.                                                   |
 
 ### Quickstart Example
 
@@ -260,7 +262,7 @@ This executes focused Jest suites for the engine core and REST endpoints while k
 │ • Real-time UI  │    │ • Subscriptions │    │ • Analytics     │
 │ • Material-UI   │    │ • Rate Limiting │    │ • Constraints   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-                                
+
                        ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
                        │  PostgreSQL DB  │    │   TimescaleDB   │    │    Redis Cache  │
                        │                 │    │                 │    │                 │
@@ -519,7 +521,7 @@ make bootstrap && make up
 # With AI capabilities
 make up-ai
 
-# With Kafka streaming  
+# With Kafka streaming
 make up-kafka
 
 # Full deployment (AI + Kafka)

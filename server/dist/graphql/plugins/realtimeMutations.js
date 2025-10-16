@@ -34,13 +34,14 @@ function realtimeMutationsPlugin() {
                                     logger.error(`Failed to parse cached result for opId ${opId}: ${e.message}`);
                                     // If parsing fails, treat as if no cache hit and let the original mutation proceed (or error)
                                 }
-                            }
+                            },
                         };
                     }
                     // Store the result after the mutation is executed
                     return {
                         async willSendResponse(requestContext) {
-                            if (requestContext.response.data && !requestContext.response.errors) {
+                            if (requestContext.response.data &&
+                                !requestContext.response.errors) {
                                 try {
                                     // Cache for 1 hour (3600 seconds)
                                     await redis.set(idempotencyKey, JSON.stringify(requestContext.response.data), 'EX', 3600);
@@ -49,7 +50,7 @@ function realtimeMutationsPlugin() {
                                     logger.error(`Failed to cache result for opId ${opId}: ${e.message}`);
                                 }
                             }
-                        }
+                        },
                     };
                 }
             }

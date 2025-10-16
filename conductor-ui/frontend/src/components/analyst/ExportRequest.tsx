@@ -20,7 +20,7 @@ export const ExportRequest: React.FC = () => {
   const [exportFormat, setExportFormat] = useState<ExportFormat>({
     format: 'json',
     includeProvenance: true,
-    includeMetadata: true
+    includeMetadata: true,
   });
   const [policyCheck, setPolicyCheck] = useState<PolicyOutcome | null>(null);
   const [isChecking, setIsChecking] = useState(false);
@@ -37,8 +37,8 @@ export const ExportRequest: React.FC = () => {
         body: JSON.stringify({
           format: exportFormat.format,
           includeProvenance: exportFormat.includeProvenance,
-          stepUpToken: localStorage.getItem('stepUpToken')
-        })
+          stepUpToken: localStorage.getItem('stepUpToken'),
+        }),
       });
 
       const result = await response.json();
@@ -48,7 +48,7 @@ export const ExportRequest: React.FC = () => {
       setPolicyCheck({
         decision: 'deny',
         reason: 'Error checking export policy: ' + error,
-        rule_id: 'error'
+        rule_id: 'error',
       });
     } finally {
       setIsChecking(false);
@@ -57,14 +57,18 @@ export const ExportRequest: React.FC = () => {
 
   const requestStepUp = async () => {
     // Trigger step-up authentication
-    window.dispatchEvent(new CustomEvent('request-stepup', {
-      detail: { reason: 'Export requires additional authentication' }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('request-stepup', {
+        detail: { reason: 'Export requires additional authentication' },
+      }),
+    );
   };
 
   const executeExport = async () => {
     if (policyCheck?.decision !== 'allow') {
-      alert('Export is not allowed by policy. Please check the policy outcome.');
+      alert(
+        'Export is not allowed by policy. Please check the policy outcome.',
+      );
       return;
     }
 
@@ -75,9 +79,9 @@ export const ExportRequest: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Step-Up-Token': localStorage.getItem('stepUpToken') || ''
+          'X-Step-Up-Token': localStorage.getItem('stepUpToken') || '',
         },
-        body: JSON.stringify(exportFormat)
+        body: JSON.stringify(exportFormat),
       });
 
       if (!response.ok) {
@@ -108,10 +112,17 @@ export const ExportRequest: React.FC = () => {
 
       <div className="format-options space-y-3">
         <div>
-          <label className="block text-sm font-medium mb-1">Export Format</label>
+          <label className="block text-sm font-medium mb-1">
+            Export Format
+          </label>
           <select
             value={exportFormat.format}
-            onChange={(e) => setExportFormat({ ...exportFormat, format: e.target.value as any })}
+            onChange={(e) =>
+              setExportFormat({
+                ...exportFormat,
+                format: e.target.value as any,
+              })
+            }
             className="w-full p-2 border rounded"
           >
             <option value="json">JSON</option>
@@ -126,7 +137,12 @@ export const ExportRequest: React.FC = () => {
             <input
               type="checkbox"
               checked={exportFormat.includeProvenance}
-              onChange={(e) => setExportFormat({ ...exportFormat, includeProvenance: e.target.checked })}
+              onChange={(e) =>
+                setExportFormat({
+                  ...exportFormat,
+                  includeProvenance: e.target.checked,
+                })
+              }
             />
             <span className="text-sm">Include Provenance</span>
           </label>
@@ -135,7 +151,12 @@ export const ExportRequest: React.FC = () => {
             <input
               type="checkbox"
               checked={exportFormat.includeMetadata}
-              onChange={(e) => setExportFormat({ ...exportFormat, includeMetadata: e.target.checked })}
+              onChange={(e) =>
+                setExportFormat({
+                  ...exportFormat,
+                  includeMetadata: e.target.checked,
+                })
+              }
             />
             <span className="text-sm">Include Metadata</span>
           </label>
@@ -179,7 +200,9 @@ export const ExportRequest: React.FC = () => {
       )}
 
       <div className="info-box mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-        <h4 className="font-semibold text-sm text-blue-800 mb-2">Export Policy Preview</h4>
+        <h4 className="font-semibold text-sm text-blue-800 mb-2">
+          Export Policy Preview
+        </h4>
         <div className="text-sm text-blue-700 space-y-1">
           <p>• Exports are subject to OPA policy evaluation</p>
           <p>• High-classification data may require step-up authentication</p>

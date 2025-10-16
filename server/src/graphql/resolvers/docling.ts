@@ -29,7 +29,8 @@ const ReleaseNotesZ = z.object({
 });
 
 const requireTenant = (ctx: any): string => {
-  const tenantId = ctx?.user?.tenantId || ctx?.tenantId || ctx?.req?.headers?.['x-tenant-id'];
+  const tenantId =
+    ctx?.user?.tenantId || ctx?.tenantId || ctx?.req?.headers?.['x-tenant-id'];
   if (!tenantId) {
     throw new Error('Missing tenant scope');
   }
@@ -41,9 +42,16 @@ const mapRetention = (value: 'SHORT' | 'STANDARD'): 'short' | 'standard' =>
 
 export const doclingResolvers = {
   Query: {
-    async doclingSummary(_parent: unknown, args: { requestId: string }, ctx: any) {
+    async doclingSummary(
+      _parent: unknown,
+      args: { requestId: string },
+      ctx: any,
+    ) {
       const tenantId = requireTenant(ctx);
-      const record = await doclingRepository.findSummaryByRequestId(tenantId, args.requestId);
+      const record = await doclingRepository.findSummaryByRequestId(
+        tenantId,
+        args.requestId,
+      );
       if (!record) return null;
       return {
         id: record.id,
@@ -55,7 +63,11 @@ export const doclingResolvers = {
     },
   },
   Mutation: {
-    async summarizeBuildFailure(_parent: unknown, args: { input: any }, ctx: any) {
+    async summarizeBuildFailure(
+      _parent: unknown,
+      args: { input: any },
+      ctx: any,
+    ) {
       const tenantId = requireTenant(ctx);
       const parsed = SummarizeBuildFailureZ.safeParse(args.input || {});
       if (!parsed.success) {
@@ -96,7 +108,8 @@ export const doclingResolvers = {
           purpose: signal.purpose,
           retention: signal.retention === 'short' ? 'SHORT' : 'STANDARD',
           fragmentId: signal.fragmentId,
-          qualitySignals: signal.metadata?.qualitySignals || signal.qualitySignals,
+          qualitySignals:
+            signal.metadata?.qualitySignals || signal.qualitySignals,
         })),
       };
     },
@@ -134,12 +147,17 @@ export const doclingResolvers = {
           purpose: signal.purpose,
           retention: signal.retention === 'short' ? 'SHORT' : 'STANDARD',
           fragmentId: signal.fragmentId,
-          qualitySignals: signal.metadata?.qualitySignals || signal.qualitySignals,
+          qualitySignals:
+            signal.metadata?.qualitySignals || signal.qualitySignals,
         })),
       };
     },
 
-    async generateReleaseNotes(_parent: unknown, args: { input: any }, ctx: any) {
+    async generateReleaseNotes(
+      _parent: unknown,
+      args: { input: any },
+      ctx: any,
+    ) {
       const tenantId = requireTenant(ctx);
       const parsed = ReleaseNotesZ.safeParse(args.input || {});
       if (!parsed.success) {

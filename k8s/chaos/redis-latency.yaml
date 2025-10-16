@@ -8,6 +8,9 @@ spec:
       containers:
         - name: netem
           image: alpine
-          securityContext: { capabilities: { add: ["NET_ADMIN"] } }
-          command: ["/bin/sh","-c"]
-          args: ["apk add tc && tc qdisc add dev eth0 root netem delay 200ms && sleep 300 && tc qdisc del dev eth0 root netem"]
+          securityContext: { capabilities: { add: ['NET_ADMIN'] } }
+          command: ['/bin/sh', '-c']
+          args:
+            [
+              'apk add tc && tc qdisc add dev eth0 root netem delay 200ms && sleep 300 && tc qdisc del dev eth0 root netem',
+            ]

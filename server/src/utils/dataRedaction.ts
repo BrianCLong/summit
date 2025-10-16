@@ -78,14 +78,21 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
         const fullPath = currentPath.join('.');
 
         for (const piiType in PII_DEFINITIONS) {
-          const piiPaths = PII_DEFINITIONS[piiType as keyof typeof PII_DEFINITIONS];
+          const piiPaths =
+            PII_DEFINITIONS[piiType as keyof typeof PII_DEFINITIONS];
           if (piiPaths.includes(fullPath)) {
             const strategy = policy[piiType as keyof typeof policy];
             if (strategy) {
-              obj[key] = applyStrategy(obj[key], piiType as keyof typeof PII_DEFINITIONS, strategy);
+              obj[key] = applyStrategy(
+                obj[key],
+                piiType as keyof typeof PII_DEFINITIONS,
+                strategy,
+              );
               piiRedactedCount++;
               piiFieldsRedacted.push(fullPath);
-              logger.debug(`Redacted PII field: ${fullPath} with strategy: ${strategy}`);
+              logger.debug(
+                `Redacted PII field: ${fullPath} with strategy: ${strategy}`,
+              );
             }
           }
         }
@@ -100,14 +107,20 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
 
   applyRedaction(redactedData, []);
 
-  logger.info(`Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`);
+  logger.info(
+    `Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`,
+  );
   // You might want to audit this redaction event
   // auditService.logRedaction(user.id, userRole, piiFieldsRedacted, sensitivity);
 
   return redactedData;
 }
 
-function applyStrategy(value: any, piiType: keyof typeof PII_DEFINITIONS, strategy: RedactionStrategy): any {
+function applyStrategy(
+  value: any,
+  piiType: keyof typeof PII_DEFINITIONS,
+  strategy: RedactionStrategy,
+): any {
   if (value === undefined || value === null) return value;
 
   switch (strategy) {
@@ -124,7 +137,10 @@ function applyStrategy(value: any, piiType: keyof typeof PII_DEFINITIONS, strate
   }
 }
 
-function maskPartial(value: string, piiType: keyof typeof PII_DEFINITIONS): string {
+function maskPartial(
+  value: string,
+  piiType: keyof typeof PII_DEFINITIONS,
+): string {
   switch (piiType) {
     case 'EMAIL':
       const atIndex = value.indexOf('@');

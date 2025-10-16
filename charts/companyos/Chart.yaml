@@ -6,10 +6,10 @@ version: 0.1.0
 dependencies:
   - name: intelgraph-api
     version: 0.1.0
-    repository: "file://../intelgraph-api"
+    repository: 'file://../intelgraph-api'
   - name: companyos-console
     version: 0.1.0
-    repository: "file://../companyos-console"
+    repository: 'file://../companyos-console'
   - name: mc-runner
     version: 0.1.0
-    repository: "file://../mc-runner"
+    repository: 'file://../mc-runner'

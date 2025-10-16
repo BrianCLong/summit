@@ -11,19 +11,19 @@ const tracer = trace.getTracer('retention-job', '24.2.0');
 const retentionJobRuns = new Counter({
   name: 'retention_job_runs_total',
   help: 'Total retention job runs',
-  labelNames: ['mode', 'status']
+  labelNames: ['mode', 'status'],
 });
 
 const retentionRecordsProcessed = new Counter({
   name: 'retention_records_processed_total',
   help: 'Total records processed by retention job',
-  labelNames: ['table', 'action', 'policy']
+  labelNames: ['table', 'action', 'policy'],
 });
 
 const retentionJobDuration = new Gauge({
   name: 'retention_job_duration_seconds',
   help: 'Duration of last retention job run',
-  labelNames: ['mode']
+  labelNames: ['mode'],
 });
 
 interface RetentionPolicy {
@@ -50,7 +50,7 @@ const DEFAULT_POLICIES: RetentionPolicy[] = [
     tableName: 'coherence_scores',
     timestampColumn: 'updated_at',
     retentionDays: 365, // standard-365d
-    tenantColumn: 'tenant_id'
+    tenantColumn: 'tenant_id',
   },
   {
     name: 'audit-logs-short',
@@ -61,9 +61,9 @@ const DEFAULT_POLICIES: RetentionPolicy[] = [
     labelColumn: 'retention_label',
     labelOverrides: {
       'short-30d': 30,
-      'standard-365d': 365
-    }
-  }
+      'standard-365d': 365,
+    },
+  },
 ];
 
 class RetentionJobRunner {
@@ -76,39 +76,45 @@ class RetentionJobRunner {
   async run(): Promise<void> {
     return tracer.startActiveSpan('retention.job_run', async (span: Span) => {
       const startTime = Date.now();
-      
+
       span.setAttributes({
-        'dry_run': this.config.dryRun,
-        'batch_size': this.config.batchSize,
-        'policies_count': this.config.policies.length
+        dry_run: this.config.dryRun,
+        batch_size: this.config.batchSize,
+        policies_count: this.config.policies.length,
       });
 
       try {
-        console.log(`🗑️  Starting retention job (${this.config.dryRun ? 'DRY RUN' : 'DELETE MODE'})`);
-        
+        console.log(
+          `🗑️  Starting retention job (${this.config.dryRun ? 'DRY RUN' : 'DELETE MODE'})`,
+        );
+
         for (const policy of this.config.policies) {
           await this.processPolicy(policy);
         }
 
         const duration = (Date.now() - startTime) / 1000;
-        retentionJobDuration.set({ mode: this.config.dryRun ? 'dry_run' : 'delete' }, duration);
-        
-        retentionJobRuns.inc({ 
-          mode: this.config.dryRun ? 'dry_run' : 'delete', 
-          status: 'success' 
+        retentionJobDuration.set(
+          { mode: this.config.dryRun ? 'dry_run' : 'delete' },
+          duration,
+        );
+
+        retentionJobRuns.inc({
+          mode: this.config.dryRun ? 'dry_run' : 'delete',
+          status: 'success',
         });
 
-        console.log(`✅ Retention job completed successfully in ${duration.toFixed(2)}s`);
-
+        console.log(
+          `✅ Retention job completed successfully in ${duration.toFixed(2)}s`,
+        );
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        
-        retentionJobRuns.inc({ 
-          mode: this.config.dryRun ? 'dry_run' : 'delete', 
-          status: 'error' 
+
+        retentionJobRuns.inc({
+          mode: this.config.dryRun ? 'dry_run' : 'delete',
+          status: 'error',
         });
-        
+
         console.error('❌ Retention job failed:', error);
         throw error;
       } finally {
@@ -118,29 +124,35 @@ class RetentionJobRunner {
   }
 
   private async processPolicy(policy: RetentionPolicy): Promise<void> {
-    return tracer.startActiveSpan('retention.process_policy', async (span: Span) => {
-      span.setAttributes({
-        'policy_name': policy.name,
-        'table': policy.tableName,
-        'retention_days': policy.retentionDays
-      });
+    return tracer.startActiveSpan(
+      'retention.process_policy',
+      async (span: Span) => {
+        span.setAttributes({
+          policy_name: policy.name,
+          table: policy.tableName,
+          retention_days: policy.retentionDays,
+        });
 
-      console.log(`📋 Processing policy: ${policy.name}`);
+        console.log(`📋 Processing policy: ${policy.name}`);
 
-      try {
-        if (policy.tableName.startsWith('coherence_') || policy.tableName === 'audit_logs') {
-          await this.processPostgresPolicy(policy);
-        } else if (policy.name.includes('signals')) {
-          await this.processNeo4jPolicy(policy);
+        try {
+          if (
+            policy.tableName.startsWith('coherence_') ||
+            policy.tableName === 'audit_logs'
+          ) {
+            await this.processPostgresPolicy(policy);
+          } else if (policy.name.includes('signals')) {
+            await this.processNeo4jPolicy(policy);
+          }
+        } catch (error) {
+          span.recordException(error as Error);
+          span.setStatus({ code: 2, message: (error as Error).message });
+          throw error;
+        } finally {
+          span.end();
         }
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      },
+    );
   }
 
   private async processPostgresPolicy(policy: RetentionPolicy): Promise<void> {
@@ -154,7 +166,7 @@ class RetentionJobRunner {
       for (const [label, days] of Object.entries(policy.labelOverrides)) {
         const labelCutoff = new Date();
         labelCutoff.setDate(labelCutoff.getDate() - days);
-        
+
         await this.processPostgresWithLabel(policy, labelCutoff, label);
       }
     } else {
@@ -162,7 +174,10 @@ class RetentionJobRunner {
     }
   }
 
-  private async processPostgresStandard(policy: RetentionPolicy, cutoffDate: Date): Promise<void> {
+  private async processPostgresStandard(
+    policy: RetentionPolicy,
+    cutoffDate: Date,
+  ): Promise<void> {
     // Count records to be affected
     const countQuery = `
       SELECT COUNT(*) as count 
@@ -170,11 +185,13 @@ class RetentionJobRunner {
       WHERE ${policy.timestampColumn} < $1
       ${policy.tenantColumn ? `AND ${policy.tenantColumn} IS NOT NULL` : ''}
     `;
-    
+
     const countResult = await pg.oneOrNone(countQuery, [cutoffDate]);
     const recordCount = parseInt(countResult?.count || '0');
 
-    console.log(`  📊 Found ${recordCount} records older than ${cutoffDate.toISOString()}`);
+    console.log(
+      `  📊 Found ${recordCount} records older than ${cutoffDate.toISOString()}`,
+    );
 
     if (recordCount === 0) {
       console.log('  ✅ No records to process');
@@ -182,16 +199,21 @@ class RetentionJobRunner {
     }
 
     if (recordCount > this.config.maxDeletes) {
-      throw new Error(`Record count ${recordCount} exceeds max deletes limit ${this.config.maxDeletes}`);
+      throw new Error(
+        `Record count ${recordCount} exceeds max deletes limit ${this.config.maxDeletes}`,
+      );
     }
 
     if (this.config.dryRun) {
       console.log(`  🔍 DRY RUN: Would delete ${recordCount} records`);
-      retentionRecordsProcessed.inc({ 
-        table: policy.tableName, 
-        action: 'dry_run', 
-        policy: policy.name 
-      }, recordCount);
+      retentionRecordsProcessed.inc(
+        {
+          table: policy.tableName,
+          action: 'dry_run',
+          policy: policy.name,
+        },
+        recordCount,
+      );
       return;
     }
 
@@ -209,53 +231,74 @@ class RetentionJobRunner {
         )
       `;
 
-      const result = await pg.oneOrNone(batchDeleteQuery, [cutoffDate, this.config.batchSize]);
+      const result = await pg.oneOrNone(batchDeleteQuery, [
+        cutoffDate,
+        this.config.batchSize,
+      ]);
       const deletedInBatch = result?.rowCount || 0;
-      
+
       deletedTotal += deletedInBatch;
       batchCount++;
 
-      console.log(`  🗑️  Batch ${batchCount}: Deleted ${deletedInBatch} records (Total: ${deletedTotal})`);
+      console.log(
+        `  🗑️  Batch ${batchCount}: Deleted ${deletedInBatch} records (Total: ${deletedTotal})`,
+      );
 
       if (deletedInBatch === 0) {
         break; // No more records to delete
       }
 
       // Brief pause between batches to avoid overwhelming the database
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    retentionRecordsProcessed.inc({ 
-      table: policy.tableName, 
-      action: 'delete', 
-      policy: policy.name 
-    }, deletedTotal);
+    retentionRecordsProcessed.inc(
+      {
+        table: policy.tableName,
+        action: 'delete',
+        policy: policy.name,
+      },
+      deletedTotal,
+    );
 
-    console.log(`  ✅ Deleted ${deletedTotal} records from ${policy.tableName}`);
+    console.log(
+      `  ✅ Deleted ${deletedTotal} records from ${policy.tableName}`,
+    );
   }
 
-  private async processPostgresWithLabel(policy: RetentionPolicy, cutoffDate: Date, label: string): Promise<void> {
+  private async processPostgresWithLabel(
+    policy: RetentionPolicy,
+    cutoffDate: Date,
+    label: string,
+  ): Promise<void> {
     const countQuery = `
       SELECT COUNT(*) as count 
       FROM ${policy.tableName} 
       WHERE ${policy.timestampColumn} < $1 
         AND ${policy.labelColumn} = $2
     `;
-    
+
     const countResult = await pg.oneOrNone(countQuery, [cutoffDate, label]);
     const recordCount = parseInt(countResult?.count || '0');
 
-    console.log(`  📊 Found ${recordCount} records with label '${label}' older than ${cutoffDate.toISOString()}`);
+    console.log(
+      `  📊 Found ${recordCount} records with label '${label}' older than ${cutoffDate.toISOString()}`,
+    );
 
     if (recordCount === 0) return;
 
     if (this.config.dryRun) {
-      console.log(`  🔍 DRY RUN: Would delete ${recordCount} records with label '${label}'`);
-      retentionRecordsProcessed.inc({ 
-        table: policy.tableName, 
-        action: 'dry_run', 
-        policy: `${policy.name}-${label}` 
-      }, recordCount);
+      console.log(
+        `  🔍 DRY RUN: Would delete ${recordCount} records with label '${label}'`,
+      );
+      retentionRecordsProcessed.inc(
+        {
+          table: policy.tableName,
+          action: 'dry_run',
+          policy: `${policy.name}-${label}`,
+        },
+        recordCount,
+      );
       return;
     }
 
@@ -266,11 +309,14 @@ class RetentionJobRunner {
 
     await pg.oneOrNone(deleteQuery, [cutoffDate, label]);
 
-    retentionRecordsProcessed.inc({ 
-      table: policy.tableName, 
-      action: 'delete', 
-      policy: `${policy.name}-${label}` 
-    }, recordCount);
+    retentionRecordsProcessed.inc(
+      {
+        table: policy.tableName,
+        action: 'delete',
+        policy: `${policy.name}-${label}`,
+      },
+      recordCount,
+    );
 
     console.log(`  ✅ Deleted ${recordCount} records with label '${label}'`);
   }
@@ -288,10 +334,14 @@ class RetentionJobRunner {
       RETURN count(n) as count
     `;
 
-    const countResult = await neo.run(countQuery, { cutoffDate: cutoffDate.toISOString() });
+    const countResult = await neo.run(countQuery, {
+      cutoffDate: cutoffDate.toISOString(),
+    });
     const recordCount = countResult.records[0]?.get('count')?.toNumber() || 0;
 
-    console.log(`  📊 Found ${recordCount} Signal nodes older than ${cutoffDate.toISOString()}`);
+    console.log(
+      `  📊 Found ${recordCount} Signal nodes older than ${cutoffDate.toISOString()}`,
+    );
 
     if (recordCount === 0) {
       console.log('  ✅ No Signal nodes to process');
@@ -300,11 +350,14 @@ class RetentionJobRunner {
 
     if (this.config.dryRun) {
       console.log(`  🔍 DRY RUN: Would delete ${recordCount} Signal nodes`);
-      retentionRecordsProcessed.inc({ 
-        table: 'neo4j_signals', 
-        action: 'dry_run', 
-        policy: policy.name 
-      }, recordCount);
+      retentionRecordsProcessed.inc(
+        {
+          table: 'neo4j_signals',
+          action: 'dry_run',
+          policy: policy.name,
+        },
+        recordCount,
+      );
       return;
     }
 
@@ -321,27 +374,33 @@ class RetentionJobRunner {
     let batchCount = 0;
 
     while (totalDeleted < recordCount) {
-      const deleteResult = await neo.run(deleteQuery, { 
+      const deleteResult = await neo.run(deleteQuery, {
         cutoffDate: cutoffDate.toISOString(),
-        batchSize: this.config.batchSize 
+        batchSize: this.config.batchSize,
       });
-      
-      const deletedInBatch = deleteResult.records[0]?.get('deleted')?.toNumber() || 0;
+
+      const deletedInBatch =
+        deleteResult.records[0]?.get('deleted')?.toNumber() || 0;
       totalDeleted += deletedInBatch;
       batchCount++;
 
-      console.log(`  🗑️  Neo4j Batch ${batchCount}: Deleted ${deletedInBatch} nodes (Total: ${totalDeleted})`);
+      console.log(
+        `  🗑️  Neo4j Batch ${batchCount}: Deleted ${deletedInBatch} nodes (Total: ${totalDeleted})`,
+      );
 
       if (deletedInBatch === 0) break;
 
-      await new Promise(resolve => setTimeout(resolve, 500)); // Longer pause for Neo4j
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Longer pause for Neo4j
     }
 
-    retentionRecordsProcessed.inc({ 
-      table: 'neo4j_signals', 
-      action: 'delete', 
-      policy: policy.name 
-    }, totalDeleted);
+    retentionRecordsProcessed.inc(
+      {
+        table: 'neo4j_signals',
+        action: 'delete',
+        policy: policy.name,
+      },
+      totalDeleted,
+    );
 
     console.log(`  ✅ Deleted ${totalDeleted} Signal nodes from Neo4j`);
   }
@@ -351,18 +410,24 @@ class RetentionJobRunner {
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
-  const batchSize = parseInt(args.find(arg => arg.startsWith('--batch-size='))?.split('=')[1] || '1000');
-  const maxDeletes = parseInt(args.find(arg => arg.startsWith('--max-deletes='))?.split('=')[1] || '100000');
+  const batchSize = parseInt(
+    args.find((arg) => arg.startsWith('--batch-size='))?.split('=')[1] ||
+      '1000',
+  );
+  const maxDeletes = parseInt(
+    args.find((arg) => arg.startsWith('--max-deletes='))?.split('=')[1] ||
+      '100000',
+  );
 
   const config: RetentionConfig = {
     dryRun,
     batchSize,
     maxDeletes,
-    policies: DEFAULT_POLICIES
+    policies: DEFAULT_POLICIES,
   };
 
   const runner = new RetentionJobRunner(config);
-  
+
   try {
     await runner.run();
     process.exit(0);

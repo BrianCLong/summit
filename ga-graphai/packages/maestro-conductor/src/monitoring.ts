@@ -21,7 +21,7 @@ export class HealthMonitor {
       assetId: signal.assetId,
       lastUpdated: signal.timestamp,
       metrics,
-      annotations: [...new Set(annotations)]
+      annotations: [...new Set(annotations)],
     };
 
     this.snapshots.set(signal.assetId, snapshot);
@@ -35,7 +35,7 @@ export class HealthMonitor {
 
   listSnapshots(): HealthSnapshot[] {
     return [...this.snapshots.values()].sort((a, b) =>
-      a.assetId.localeCompare(b.assetId)
+      a.assetId.localeCompare(b.assetId),
     );
   }
 

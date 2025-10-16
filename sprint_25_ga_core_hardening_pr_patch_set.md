@@ -5,6 +5,7 @@
 ---
 
 ## Repo additions (tree)
+
 ```
 .github/workflows/policy-ci.yml
 policies/export.rego                      # from Day‑1 attachment
@@ -23,6 +24,7 @@ README-Sprint25.md                        # operator notes
 ---
 
 ## One‑shot apply script
+
 Save as `scripts/apply_sprint25_day1.sh`, make executable, and run from the repo root:
 
 ```bash
@@ -313,6 +315,7 @@ printf "\nDone. Review the branch %s and merge when green.\n" "$BRANCH"
 ---
 
 ## Notes
+
 - **Simulate-first:** `/export/simulate` returns full decision payload (`allow`, `reasons`, `redactions`, `step_up`). Switch callers to `/export` after two days when confidence is high.
 - **WebAuthn step‑up:** enforce via your existing auth middleware; the route expects `X-Step-Up-Verified: true` once the user completes step‑up.
 - **Grafana:** the provisioning file assumes dashboards are mounted to `/etc/grafana/dashboards`. Adjust your Helm/sidecar accordingly.
@@ -321,17 +324,27 @@ printf "\nDone. Review the branch %s and merge when green.\n" "$BRANCH"
 ---
 
 ## Manual diff (for reviewers)
+
 > Key new files are shown below for code review convenience.
 
 ### `.github/workflows/policy-ci.yml`
+
 ```yaml
 name: Policy & Bundle CI
 on:
   pull_request:
-    paths: ['policies/**','server/**','services/**','grafana/**','tools/verify-bundle/**','project/pm/**']
+    paths:
+      [
+        'policies/**',
+        'server/**',
+        'services/**',
+        'grafana/**',
+        'tools/verify-bundle/**',
+        'project/pm/**',
+      ]
   push:
-    branches: [ main ]
-    paths: ['policies/**','tools/verify-bundle/**']
+    branches: [main]
+    paths: ['policies/**', 'tools/verify-bundle/**']
 jobs:
   opa-tests:
     runs-on: ubuntu-latest
@@ -358,16 +371,19 @@ jobs:
 ```
 
 ### `services/policy/opa.ts`
+
 ```ts
 // See script section for full file content
 ```
 
 ### `server/routes/export.ts`
+
 ```ts
 // See script section for full file content
 ```
 
 ### `grafana/provisioning/dashboards/intelgraph.yaml`
+
 ```yaml
 apiVersion: 1
 providers:
@@ -382,6 +398,7 @@ providers:
 ```
 
 ### `tools/verify-bundle/cli.py`
+
 ```python
 # See script section for full file content
 ```
@@ -389,6 +406,7 @@ providers:
 ---
 
 ## How to run locally (smoke tests)
+
 ```bash
 # OPA sidecar (example)
 docker run --rm -p 8181:8181 -v "$PWD/policies":/policy openpolicyagent/opa:latest run --server --set=decision_logs.console=true --log-level=debug
@@ -402,4 +420,3 @@ curl -s "http://localhost:3000/export/simulate" -H 'content-type: application/js
 ---
 
 **End of Patch Set**
-

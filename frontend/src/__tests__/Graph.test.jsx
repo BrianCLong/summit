@@ -17,8 +17,12 @@ describe('Graph', () => {
       destroy: vi.fn(),
     });
 
-    render(<Graph elements={{ nodes: [], edges: [] }} neighborhoodMode={false} />);
-    const style = cytoscape.mock.calls[0][0].style.find((s) => s.selector === 'node');
+    render(
+      <Graph elements={{ nodes: [], edges: [] }} neighborhoodMode={false} />,
+    );
+    const style = cytoscape.mock.calls[0][0].style.find(
+      (s) => s.selector === 'node',
+    );
     expect(style.style['background-color']).toContain('deception_score');
   });
 
@@ -34,8 +38,12 @@ describe('Graph', () => {
       destroy: vi.fn(),
     });
 
-    render(<Graph elements={{ nodes: [], edges: [] }} neighborhoodMode={false} />);
-    const style = cytoscape.mock.calls[0][0].style.find((s) => s.selector === '.forecast');
+    render(
+      <Graph elements={{ nodes: [], edges: [] }} neighborhoodMode={false} />,
+    );
+    const style = cytoscape.mock.calls[0][0].style.find(
+      (s) => s.selector === '.forecast',
+    );
     expect(style.style['line-style']).toBe('dashed');
   });
 });

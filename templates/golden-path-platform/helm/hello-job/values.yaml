@@ -1,11 +1,11 @@
 image:
   registry: ghcr.io/example
   repository: golden-path-hello-job
-  tag: "latest"
-  fullRef: ""
+  tag: 'latest'
+  fullRef: ''
   pullPolicy: IfNotPresent
 
-schedule: "*/1 * * * *"
+schedule: '*/1 * * * *'
 
 resources:
   requests:
@@ -23,13 +23,13 @@ podSecurityContext:
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
-    drop: ["ALL"]
+    drop: ['ALL']
   readOnlyRootFilesystem: true
 
 env:
   - name: SCHEDULE
-    value: "@every 1m"
+    value: '@every 1m'
 
 serviceAccount:
   create: true
-  name: ""
+  name: ''

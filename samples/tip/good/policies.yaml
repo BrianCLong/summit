@@ -26,7 +26,7 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ["networking.k8s.io"]
-        kinds: ["NetworkPolicy"]
+      - apiGroups: ['networking.k8s.io']
+        kinds: ['NetworkPolicy']
   parameters:
     enforcement: strict

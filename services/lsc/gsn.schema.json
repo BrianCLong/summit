@@ -1,15 +1,17 @@
 {
-  "goal": {"id":"G1","text":"This PR is safe to merge"},
-  "strategy": {"id":"S1","text":"Decompose by risk dimensions"},
+  "goal": { "id": "G1", "text": "This PR is safe to merge" },
+  "strategy": { "id": "S1", "text": "Decompose by risk dimensions" },
   "contexts": [
-    {"id":"C1","text":"Repo: intelgraph"},
-    {"id":"C2","text":"PR: #8421"}
+    { "id": "C1", "text": "Repo: intelgraph" },
+    { "id": "C2", "text": "PR: #8421" }
   ],
   "solutions": [
-    {"id":"E1","text":"Spec coverage ≥0.95","evidence":"proofs/pcpr.json"},
-    {"id":"E2","text":"Policy denies==0","evidence":"proofs/opa.json"}
+    {
+      "id": "E1",
+      "text": "Spec coverage ≥0.95",
+      "evidence": "proofs/pcpr.json"
+    },
+    { "id": "E2", "text": "Policy denies==0", "evidence": "proofs/opa.json" }
   ],
-  "claims": [
-    {"id":"CL1","goal":"G1","supportedBy":["E1","E2"]}
-  ]
+  "claims": [{ "id": "CL1", "goal": "G1", "supportedBy": ["E1", "E2"] }]
 }

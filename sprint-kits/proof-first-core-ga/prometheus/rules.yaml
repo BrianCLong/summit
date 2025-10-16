@@ -1,17 +1,17 @@
 groups:
-- name: graph-slo
-  rules:
-  - alert: GraphP95LatencyHigh
-    expr: histogram_quantile(0.95, sum by (le) (rate(graph_query_latency_ms_bucket[5m]))) > 1.5
-    for: 10m
-    labels:
-      severity: page
-    annotations:
-      summary: p95 graph latency above SLO
-  - alert: CostGuardKillsSpike
-    expr: rate(cost_guard_kills_total[5m]) > 0
-    for: 1m
-    labels:
-      severity: warn
-    annotations:
-      summary: Cost Guard killed a query
+  - name: graph-slo
+    rules:
+      - alert: GraphP95LatencyHigh
+        expr: histogram_quantile(0.95, sum by (le) (rate(graph_query_latency_ms_bucket[5m]))) > 1.5
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: p95 graph latency above SLO
+      - alert: CostGuardKillsSpike
+        expr: rate(cost_guard_kills_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warn
+        annotations:
+          summary: Cost Guard killed a query

@@ -43,7 +43,9 @@ function asArray(value, fallback = []) {
 }
 
 function printUsage() {
-  console.log(`Data Spine CLI\n\nCommands:\n  init <name> [--classification=PII] [--regions=us-east-1] [--default-region=us-east-1] [--type=json] [--field-policy=email:tokenize]\n  validate [name] [--version=1.0.0] [--all] [--output=path]\n  bump <name> --level=patch|minor|major\n  compat <name> [--from=1.0.0] [--to=1.1.0]\n  audit residency [--output=path]\n`);
+  console.log(
+    `Data Spine CLI\n\nCommands:\n  init <name> [--classification=PII] [--regions=us-east-1] [--default-region=us-east-1] [--type=json] [--field-policy=email:tokenize]\n  validate [name] [--version=1.0.0] [--all] [--output=path]\n  bump <name> --level=patch|minor|major\n  compat <name> [--from=1.0.0] [--to=1.1.0]\n  audit residency [--output=path]\n`,
+  );
 }
 
 async function run(argv) {
@@ -65,16 +67,18 @@ async function run(argv) {
     const regions = asArray(options.regions, ['us-east-1']);
     const defaultRegion = options['default-region'] || regions[0];
     const schemaType = options.type || 'json';
-    const fieldPolicies = asArray(options['field-policy'], ['id:pass']).map((value) => {
-      const [field, action = 'redact'] = String(value).split(':');
-      return { field, action };
-    });
+    const fieldPolicies = asArray(options['field-policy'], ['id:pass']).map(
+      (value) => {
+        const [field, action = 'redact'] = String(value).split(':');
+        return { field, action };
+      },
+    );
     const { schemaPath, metadata } = registry.initContract(name, {
       classification,
       regions,
       defaultRegion,
       schemaType,
-      fieldPolicies
+      fieldPolicies,
     });
     console.log(`Initialized ${name} at ${schemaPath}`);
     console.log(JSON.stringify(metadata, null, 2));
@@ -86,7 +90,9 @@ async function run(argv) {
       registry.listContracts().forEach((contract) => {
         const results = registry.validateContract(contract);
         results.forEach((result) => {
-          console.log(`Validated ${contract}@${result.version} -> ${result.valid ? 'ok' : 'failed'}`);
+          console.log(
+            `Validated ${contract}@${result.version} -> ${result.valid ? 'ok' : 'failed'}`,
+          );
         });
       });
     } else {
@@ -96,7 +102,9 @@ async function run(argv) {
       }
       const results = registry.validateContract(name, options.version);
       results.forEach((result) => {
-        console.log(`Validated ${name}@${result.version} -> ${result.valid ? 'ok' : 'failed'}`);
+        console.log(
+          `Validated ${name}@${result.version} -> ${result.valid ? 'ok' : 'failed'}`,
+        );
       });
     }
     if (options.output) {
@@ -132,13 +140,17 @@ async function run(argv) {
     }
     const result = registry.checkCompatibility(name, {
       fromVersion: options.from,
-      toVersion: options.to
+      toVersion: options.to,
     });
     const from = result.fromVersion || 'N/A';
     const to = result.toVersion || 'N/A';
     if (!result.ok) {
-      result.messages.forEach((message) => console.error(`BREAKING: ${message}`));
-      throw new Error(`Compatibility check failed for ${name} (${from} -> ${to})`);
+      result.messages.forEach((message) =>
+        console.error(`BREAKING: ${message}`),
+      );
+      throw new Error(
+        `Compatibility check failed for ${name} (${from} -> ${to})`,
+      );
     }
     console.log(`Compatibility check passed for ${name} (${from} -> ${to})`);
     return;

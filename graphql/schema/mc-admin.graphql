@@ -3,7 +3,6 @@ MC Admin GraphQL API (v0.3.9)
 - All mutations are persisted-only (IDs in persisted-manifest.json)
 - ABAC/OPA enforced; every mutation emits audit evidence id.
 """
-
 scalar JSON
 scalar DateTime
 
@@ -46,10 +45,10 @@ input CanaryWeightsInput {
 
 input SloThresholdsInput {
   composite: Float!
-  jwsFail: Float!    # ratio (e.g., 0.001 = 0.1%)
+  jwsFail: Float! # ratio (e.g., 0.001 = 0.1%)
   budgetNoise: Float! # ratio (e.g., 0.05 = 5%)
-  graphqlP95: Int!    # ms
-  aaLag: Int!         # seconds
+  graphqlP95: Int! # ms
+  aaLag: Int! # seconds
 }
 
 enum RemediationType {
@@ -79,7 +78,7 @@ type EvidenceResult {
 
 type ExportResult {
   ok: Boolean!
-  url: String!      # pre-signed URL or artifact path
+  url: String! # pre-signed URL or artifact path
   sizeBytes: Int!
   audit: AuditInfo!
 }
@@ -93,9 +92,19 @@ type Query {
 
 type Mutation {
   setFeatureFlags(tenant: Tenant!, flags: FeatureFlagsInput!): MutationResult!
-  setCanaryWeights(tenant: Tenant!, weights: CanaryWeightsInput!): MutationResult!
-  setSloThresholds(tenant: Tenant!, thresholds: SloThresholdsInput!): MutationResult!
-  proposeRemediation(tenant: Tenant!, type: RemediationType!, hitl: Boolean!): MutationResult!
+  setCanaryWeights(
+    tenant: Tenant!
+    weights: CanaryWeightsInput!
+  ): MutationResult!
+  setSloThresholds(
+    tenant: Tenant!
+    thresholds: SloThresholdsInput!
+  ): MutationResult!
+  proposeRemediation(
+    tenant: Tenant!
+    type: RemediationType!
+    hitl: Boolean!
+  ): MutationResult!
   canaryPromote(tenant: Tenant!): MutationResult!
   canaryHold(tenant: Tenant!): MutationResult!
   evidencePack(version: String!): EvidenceResult!

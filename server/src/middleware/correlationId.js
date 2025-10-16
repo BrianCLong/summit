@@ -24,13 +24,13 @@ function correlationIdMiddleware(options = {}) {
     headerName = CORRELATION_HEADER_NAME,
     generator = uuidv4,
     setResponseHeader = true,
-    includeInLogs = true
+    includeInLogs = true,
   } = options;
 
   return (req, res, next) => {
     // Extract or generate correlation ID
     let correlationId = req.headers[headerName.toLowerCase()];
-    
+
     if (!correlationId) {
       correlationId = generator();
     }
@@ -52,7 +52,7 @@ function correlationIdMiddleware(options = {}) {
       url: req.url,
       ip: req.ip || req.connection.remoteAddress,
       userAgent: req.get('User-Agent'),
-      sessionId: req.sessionId
+      sessionId: req.sessionId,
     };
 
     // Set response headers
@@ -79,15 +79,15 @@ function correlationIdMiddleware(options = {}) {
           method: req.method,
           url: req.url,
           ip: context.ip,
-          userId
+          userId,
         });
 
         // Override response.json to log responses
         const originalJson = res.json;
-        res.json = function(data) {
+        res.json = function (data) {
           const statusCode = res.statusCode;
           const isError = statusCode >= 400;
-          
+
           logger[isError ? 'error' : 'info']('Request completed', {
             correlationId,
             traceId,
@@ -96,7 +96,7 @@ function correlationIdMiddleware(options = {}) {
             url: req.url,
             statusCode,
             responseTime: Date.now() - new Date(context.timestamp).getTime(),
-            userId
+            userId,
           });
 
           return originalJson.call(this, data);
@@ -104,10 +104,10 @@ function correlationIdMiddleware(options = {}) {
 
         // Override response.send for non-JSON responses
         const originalSend = res.send;
-        res.send = function(data) {
+        res.send = function (data) {
           const statusCode = res.statusCode;
           const isError = statusCode >= 400;
-          
+
           logger[isError ? 'error' : 'info']('Request completed', {
             correlationId,
             traceId,
@@ -116,7 +116,7 @@ function correlationIdMiddleware(options = {}) {
             url: req.url,
             statusCode,
             responseTime: Date.now() - new Date(context.timestamp).getTime(),
-            userId
+            userId,
           });
 
           return originalSend.call(this, data);
@@ -165,7 +165,7 @@ function getSpanId() {
 function createChildSpan(operationName, parentSpanId = null) {
   const context = getCorrelationContext();
   const childSpanId = uuidv4();
-  
+
   return {
     spanId: childSpanId,
     parentSpanId: parentSpanId || context.spanId,
@@ -173,7 +173,7 @@ function createChildSpan(operationName, parentSpanId = null) {
     correlationId: context.correlationId,
     operationName,
     startTime: Date.now(),
-    
+
     // Helper method to log span completion
     finish(additionalData = {}) {
       const duration = Date.now() - this.startTime;
@@ -184,7 +184,7 @@ function createChildSpan(operationName, parentSpanId = null) {
         parentSpanId: this.parentSpanId,
         operationName: this.operationName,
         duration,
-        ...additionalData
+        ...additionalData,
       });
     },
 
@@ -200,9 +200,9 @@ function createChildSpan(operationName, parentSpanId = null) {
         duration,
         error: error.message,
         stack: error.stack,
-        ...additionalData
+        ...additionalData,
       });
-    }
+    },
   };
 }
 
@@ -216,23 +216,26 @@ function withCorrelationContext(context, fn) {
 /**
  * Execute an async operation with span tracking
  */
-async function traceAsyncOperation(operationName, asyncFn, additionalData = {}) {
+async function traceAsyncOperation(
+  operationName,
+  asyncFn,
+  additionalData = {},
+) {
   const span = createChildSpan(operationName);
-  
+
   try {
     logger.info('Starting async operation', {
       correlationId: span.correlationId,
       traceId: span.traceId,
       spanId: span.spanId,
       operationName,
-      ...additionalData
+      ...additionalData,
     });
 
     const result = await asyncFn(span);
-    
+
     span.finish({ success: true, ...additionalData });
     return result;
-    
   } catch (error) {
     span.error(error, additionalData);
     throw error;
@@ -245,24 +248,23 @@ async function traceAsyncOperation(operationName, asyncFn, additionalData = {}) 
 function traceDbQuery(queryName, query, parameters = []) {
   return traceAsyncOperation(`db:${queryName}`, async (span) => {
     const startTime = Date.now();
-    
+
     try {
       // Execute query (this would be your actual DB call)
       const result = await query(parameters);
-      
+
       const duration = Date.now() - startTime;
-      
+
       logger.debug('Database query executed', {
         correlationId: span.correlationId,
         traceId: span.traceId,
         spanId: span.spanId,
         queryName,
         duration,
-        rowCount: result?.rows?.length || result?.length || 0
+        rowCount: result?.rows?.length || result?.length || 0,
       });
-      
+
       return result;
-      
     } catch (error) {
       logger.error('Database query failed', {
         correlationId: span.correlationId,
@@ -270,9 +272,9 @@ function traceDbQuery(queryName, query, parameters = []) {
         spanId: span.spanId,
         queryName,
         error: error.message,
-        parameters: parameters.length
+        parameters: parameters.length,
       });
-      
+
       throw error;
     }
   });
@@ -284,21 +286,24 @@ function traceDbQuery(queryName, query, parameters = []) {
 function traceHttpRequest(serviceName, method, url, options = {}) {
   return traceAsyncOperation(`http:${serviceName}`, async (span) => {
     const startTime = Date.now();
-    
+
     // Add correlation headers to outgoing request
     const headers = {
       ...options.headers,
       [CORRELATION_HEADER_NAME]: span.correlationId,
       [TRACE_HEADER_NAME]: span.traceId,
-      [SPAN_HEADER_NAME]: span.spanId
+      [SPAN_HEADER_NAME]: span.spanId,
     };
-    
+
     try {
       // This would be your actual HTTP client call
-      const response = await makeHttpRequest(method, url, { ...options, headers });
-      
+      const response = await makeHttpRequest(method, url, {
+        ...options,
+        headers,
+      });
+
       const duration = Date.now() - startTime;
-      
+
       logger.info('HTTP request completed', {
         correlationId: span.correlationId,
         traceId: span.traceId,
@@ -307,11 +312,10 @@ function traceHttpRequest(serviceName, method, url, options = {}) {
         method,
         url,
         statusCode: response.status,
-        duration
+        duration,
       });
-      
+
       return response;
-      
     } catch (error) {
       logger.error('HTTP request failed', {
         correlationId: span.correlationId,
@@ -321,9 +325,9 @@ function traceHttpRequest(serviceName, method, url, options = {}) {
         method,
         url,
         error: error.message,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       });
-      
+
       throw error;
     }
   });
@@ -336,7 +340,7 @@ function traceGraphQLResolver(resolverName) {
   return (originalResolver) => {
     return async (parent, args, context, info) => {
       const span = createChildSpan(`graphql:${resolverName}`);
-      
+
       try {
         logger.debug('GraphQL resolver started', {
           correlationId: span.correlationId,
@@ -344,26 +348,25 @@ function traceGraphQLResolver(resolverName) {
           spanId: span.spanId,
           resolverName,
           fieldName: info.fieldName,
-          parentType: info.parentType.name
+          parentType: info.parentType.name,
         });
 
         const result = await originalResolver(parent, args, context, info);
-        
+
         span.finish({
           resolverName,
           fieldName: info.fieldName,
-          success: true
+          success: true,
         });
-        
+
         return result;
-        
       } catch (error) {
         span.error(error, {
           resolverName,
           fieldName: info.fieldName,
-          args: JSON.stringify(args)
+          args: JSON.stringify(args),
         });
-        
+
         throw error;
       }
     };
@@ -378,10 +381,10 @@ function enrichLoggerWithContext(loggerInstance) {
     debug: loggerInstance.debug.bind(loggerInstance),
     info: loggerInstance.info.bind(loggerInstance),
     warn: loggerInstance.warn.bind(loggerInstance),
-    error: loggerInstance.error.bind(loggerInstance)
+    error: loggerInstance.error.bind(loggerInstance),
   };
 
-  ['debug', 'info', 'warn', 'error'].forEach(level => {
+  ['debug', 'info', 'warn', 'error'].forEach((level) => {
     loggerInstance[level] = (message, meta = {}) => {
       const context = getCorrelationContext();
       const enrichedMeta = {
@@ -389,7 +392,7 @@ function enrichLoggerWithContext(loggerInstance) {
         correlationId: context.correlationId,
         traceId: context.traceId,
         spanId: context.spanId,
-        userId: context.userId
+        userId: context.userId,
       };
 
       return originalMethods[level](message, enrichedMeta);
@@ -424,10 +427,10 @@ module.exports = {
   traceHttpRequest,
   traceGraphQLResolver,
   enrichLoggerWithContext,
-  
+
   // Constants
   CORRELATION_HEADER_NAME,
   TRACE_HEADER_NAME,
   SPAN_HEADER_NAME,
-  USER_HEADER_NAME
+  USER_HEADER_NAME,
 };

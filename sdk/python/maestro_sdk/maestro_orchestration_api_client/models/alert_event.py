@@ -31,7 +31,7 @@ class AlertEvent:
     severity: str
     title: str
     ts: float
-    body: Union[Unset, str] = UNSET
+    body: Unset | str = UNSET
     meta: Union[Unset, "AlertEventMeta"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -48,7 +48,7 @@ class AlertEvent:
 
         body = self.body
 
-        meta: Union[Unset, dict[str, Any]] = UNSET
+        meta: Unset | dict[str, Any] = UNSET
         if not isinstance(self.meta, Unset):
             meta = self.meta.to_dict()
 
@@ -88,7 +88,7 @@ class AlertEvent:
         body = d.pop("body", UNSET)
 
         _meta = d.pop("meta", UNSET)
-        meta: Union[Unset, AlertEventMeta]
+        meta: Unset | AlertEventMeta
         if isinstance(_meta, Unset):
             meta = UNSET
         else:

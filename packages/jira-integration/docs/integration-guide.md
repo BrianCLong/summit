@@ -23,16 +23,16 @@ npm run --workspace=@summit/jira-integration build
 
 ## 3. Configuration Checklist
 
-| Setting | Description | Example |
-| --- | --- | --- |
-| `baseUrl` | Jira site base URL | `https://example.atlassian.net` |
-| `email` | Service account email | `perftrace-bot@example.com` |
-| `apiToken` | Jira API token | Inject from secrets manager |
-| `projectKey` | PerfTrace project key | `PERF` |
-| `issueTypeId` | Custom PerfTrace issue type | `10057` |
-| `customFieldMap` | Field map for environment, owners, metrics | `customfield_10201` |
-| `priorityMapping` | Severity-to-priority translation | `critical -> P1` |
-| `workflowTransitions` | Status-to-transition mapping | `Triaged -> In Progress` |
+| Setting               | Description                                | Example                         |
+| --------------------- | ------------------------------------------ | ------------------------------- |
+| `baseUrl`             | Jira site base URL                         | `https://example.atlassian.net` |
+| `email`               | Service account email                      | `perftrace-bot@example.com`     |
+| `apiToken`            | Jira API token                             | Inject from secrets manager     |
+| `projectKey`          | PerfTrace project key                      | `PERF`                          |
+| `issueTypeId`         | Custom PerfTrace issue type                | `10057`                         |
+| `customFieldMap`      | Field map for environment, owners, metrics | `customfield_10201`             |
+| `priorityMapping`     | Severity-to-priority translation           | `critical -> P1`                |
+| `workflowTransitions` | Status-to-transition mapping               | `Triaged -> In Progress`        |
 
 ## 4. CI/CD Integration
 
@@ -72,12 +72,12 @@ npm run --workspace=@summit/jira-integration build
 
 ## 9. Troubleshooting
 
-| Symptom | Resolution |
-| --- | --- |
-| 401 Unauthorized | Verify email/token combo and Basic Auth header configuration. |
-| 415 Unsupported Media Type | Ensure attachments use multipart/form-data. |
-| Missing severity field | Confirm `priorityMapping` severity field IDs are correct. |
-| Tickets not transitioning | Check `workflowTransitions` for the source status name. |
+| Symptom                    | Resolution                                                    |
+| -------------------------- | ------------------------------------------------------------- |
+| 401 Unauthorized           | Verify email/token combo and Basic Auth header configuration. |
+| 415 Unsupported Media Type | Ensure attachments use multipart/form-data.                   |
+| Missing severity field     | Confirm `priorityMapping` severity field IDs are correct.     |
+| Tickets not transitioning  | Check `workflowTransitions` for the source status name.       |
 
 ## 10. Further Reading
 

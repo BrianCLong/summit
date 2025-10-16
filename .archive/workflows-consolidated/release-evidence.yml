@@ -2,7 +2,14 @@ name: Verify Phase-3 Evidence & Policy
 on:
   push: { tags: ['v3.*'] }
   pull_request:
-    paths: ['docs/releases/phase-3-ga/**', 'policy/**', 'apps/gateway/**', 'deploy/**', 'tests/**']
+    paths:
+      [
+        'docs/releases/phase-3-ga/**',
+        'policy/**',
+        'apps/gateway/**',
+        'deploy/**',
+        'tests/**',
+      ]
 jobs:
   verify:
     runs-on: ubuntu-latest

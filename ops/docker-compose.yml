@@ -23,7 +23,16 @@ services:
       - neo4j-data:/data
       - neo4j-logs:/logs
     healthcheck:
-      test: ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', '${NEO4J_PASS:-pass}', 'RETURN 1']
+      test:
+        [
+          'CMD',
+          'cypher-shell',
+          '-u',
+          'neo4j',
+          '-p',
+          '${NEO4J_PASS:-pass}',
+          'RETURN 1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 10

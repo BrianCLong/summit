@@ -4,8 +4,13 @@ import { join } from 'path';
 import { execSync } from 'child_process';
 
 const root = process.cwd();
-const files = execSync(`git ls-files | grep -E '(^|/)package.json$'`, { stdio: 'pipe' })
-  .toString().trim().split('\n').filter(Boolean);
+const files = execSync(`git ls-files | grep -E '(^|/)package.json$'`, {
+  stdio: 'pipe',
+})
+  .toString()
+  .trim()
+  .split('\n')
+  .filter(Boolean);
 
 const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
 let fixed = 0;
@@ -22,4 +27,3 @@ for (const f of files) {
   }
 }
 console.log(`Fixed ${fixed} package.json version field(s).`);
-

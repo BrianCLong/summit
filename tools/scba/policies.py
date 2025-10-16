@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Dict, Mapping, Optional
 
 
 @dataclass
@@ -14,7 +14,7 @@ class LeakBudget:
     payload_bytes: float
     cache_hint: float
 
-    def as_dict(self) -> Dict[str, float]:
+    def as_dict(self) -> dict[str, float]:
         return {
             "latency_ms": self.latency_ms,
             "payload_bytes": self.payload_bytes,
@@ -28,7 +28,7 @@ class EndpointPolicy:
 
     endpoint: str
     budget: LeakBudget
-    mitigation_toggles: Dict[str, bool] | None = None
+    mitigation_toggles: dict[str, bool] | None = None
 
     def is_toggle_enabled(self, name: str) -> bool:
         if not self.mitigation_toggles:
@@ -45,7 +45,7 @@ class PolicyStore:
     def register(self, policy: EndpointPolicy) -> None:
         self._policies[policy.endpoint] = policy
 
-    def get(self, endpoint: str) -> Optional[EndpointPolicy]:
+    def get(self, endpoint: str) -> EndpointPolicy | None:
         return self._policies.get(endpoint)
 
     def __iter__(self):

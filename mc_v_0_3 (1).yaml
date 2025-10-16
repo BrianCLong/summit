@@ -11,10 +11,10 @@ content: |
   - All mutations are persisted-only (IDs in persisted-manifest.json)
   - ABAC/OPA enforced; every mutation emits audit evidence id.
   """
-  
+
   scalar JSON
   scalar DateTime
-  
+
   enum Tenant {
     ALL
     TENANT_001
@@ -23,18 +23,18 @@ content: |
     TENANT_004
     TENANT_005
   }
-  
+
   type AuditInfo {
     evidenceId: ID!
     ts: DateTime!
     actor: ID!
   }
-  
+
   type Health {
     ok: Boolean!
     message: String
   }
-  
+
   input FeatureFlagsInput {
     attestJWS: Boolean!
     attestPQ: Boolean!
@@ -44,14 +44,14 @@ content: |
     zkProofs: Boolean!
     cse: Boolean!
   }
-  
+
   input CanaryWeightsInput {
     p95: Float!
     error: Float!
     cost: Float!
     p99: Float!
   }
-  
+
   input SloThresholdsInput {
     composite: Float!
     jwsFail: Float!    # ratio (e.g., 0.001 = 0.1%)
@@ -59,7 +59,7 @@ content: |
     graphqlP95: Int!    # ms
     aaLag: Int!         # seconds
   }
-  
+
   enum RemediationType {
     rotate_jwks
     force_attest_required
@@ -70,13 +70,13 @@ content: |
     tighten_hpa
     disable_autotune
   }
-  
+
   type MutationResult {
     ok: Boolean!
     audit: AuditInfo!
     warnings: [String!]
   }
-  
+
   type EvidenceResult {
     ok: Boolean!
     evidenceId: ID!
@@ -84,21 +84,21 @@ content: |
     sizeBytes: Int!
     audit: AuditInfo!
   }
-  
+
   type ExportResult {
     ok: Boolean!
     url: String!      # pre-signed URL or artifact path
     sizeBytes: Int!
     audit: AuditInfo!
   }
-  
+
   type Query {
     health: Health!
     getFeatureFlags(tenant: Tenant!): FeatureFlagsInput!
     getCanaryWeights(tenant: Tenant!): CanaryWeightsInput!
     getSloThresholds(tenant: Tenant!): SloThresholdsInput!
   }
-  
+
   type Mutation {
     setFeatureFlags(tenant: Tenant!, flags: FeatureFlagsInput!): MutationResult!
     setCanaryWeights(tenant: Tenant!, weights: CanaryWeightsInput!): MutationResult!
@@ -207,50 +207,50 @@ kind: file
 name: policy/mc-admin.rego
 content: |
   package mc.admin
-  
+
   default allow = false
-  
+
   # Input contract (GraphQL) expected:
   # input.operation.name, input.operation.variables, input.actor (oidc), input.tenant, input.context (ip, region, purpose)
-  
+
   # ABAC: only platform-admins can mutate ALL tenant; otherwise must match tenant claim
   allow {
     input.operation.isMutation
     input.actor.role == "platform-admin"
   }
-  
+
   allow {
     input.operation.isMutation
     input.actor.role == "tenant-admin"
     input.tenant == input.actor.tenant
   }
-  
+
   # Residency & purpose enforcement example for regulatorExport
   deny[msg] {
     input.operation.name == "regulatorExport"
     not input.context.purpose == "audit"
     msg := "purpose_mismatch"
   }
-  
+
   deny[msg] {
     input.operation.name == "setSloThresholds"
     input.operation.variables.thresholds.graphqlP95 > 500
     msg := "graphql_p95_threshold_too_high"
   }
-  
+
   deny[msg] {
     input.operation.name == "setFeatureFlags"
     input.operation.variables.flags.attestJWS == false
     msg := "attestation_required"
   }
-  
+
   # Residency: disallow non-US region for US-only tenants (example)
   deny[msg] {
     input.actor.region == "US"
     input.context.region != "US"
     msg := "residency_violation"
   }
-  
+
   # Final decision
   decision = {"allow": allow, "deny": deny}
 ---
@@ -258,14 +258,14 @@ kind: file
 name: policy/tests/mc-admin_test.rego
 content: |
   package mc.admin
-  
+
   test_platform_admin_can_mutate_all {
     allow with input as {
       "operation": {"isMutation": true},
       "actor": {"role": "platform-admin"}
     }
   }
-  
+
   test_tenant_admin_must_match_tenant_denied_when_mismatch {
     not allow with input as {
       "operation": {"isMutation": true},
@@ -278,7 +278,7 @@ kind: file
 name: tests/e2e/admin-console.spec.ts
 content: |
   import { test, expect } from '@playwright/test';
-  
+
   test.describe('MC Sovereign Console v0.3.9', () => {
     test('toggles flags with persisted-only & audit headers', async ({ page }) => {
       await page.goto('/');
@@ -292,7 +292,7 @@ content: |
       expect(req.headers()['x-persisted-only']).toBe('true');
       expect(req.headers()['x-provenance-capture']).toBe('true');
     });
-  
+
     test('composite weights saved via persisted mutation', async ({ page }) => {
       await page.goto('/');
       const save = page.getByRole('button', { name: 'Save Weights' });
@@ -356,19 +356,19 @@ kind: file
 name: docs/contracts/README.md
 content: |
   # MC v0.3.9 Contracts
-  
+
   ## GraphQL
   - SDL: `graphql/schema/mc-admin.graphql`
   - Persisted-only: hashes in `graphql/persisted/*.graphql`, manifest resolved during CI.
-  
+
   ## OPA Policies
   - `policy/mc-admin.rego` + tests in `policy/tests`.
-  
+
   ## Gateway
   - `gateway/persisted-query-resolver.json` enforces persisted-only & audit headers.
-  
+
   ## E2E
   - `tests/e2e/admin-console.spec.ts` validates UI → API invariants (persisted-only, provenance headers).
-  
+
   ## CI
   - `.github/workflows/contract-verify.yml` lints SDL, rebuilds manifest, runs OPA tests, lints Prom rules, and runs Playwright smoke.

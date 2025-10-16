@@ -5,23 +5,23 @@ import {
   WorkcellRuntime,
   type WorkOrderSubmission,
   type WorkcellAgentDefinition,
-  type WorkcellToolDefinition
+  type WorkcellToolDefinition,
 } from '../src/index';
 
 describe('WorkcellRuntime', () => {
   const analysisTool: WorkcellToolDefinition = {
     name: 'analysis',
     minimumAuthority: 1,
-    handler: task => ({
-      summary: `analysed ${(task.payload as { intent?: string }).intent ?? 'unknown'}`
-    })
+    handler: (task) => ({
+      summary: `analysed ${(task.payload as { intent?: string }).intent ?? 'unknown'}`,
+    }),
   };
 
   const agent: WorkcellAgentDefinition = {
     name: 'agent-a',
     authority: 2,
     allowedTools: ['analysis'],
-    roles: ['developer']
+    roles: ['developer'],
   };
 
   const baseOrder: WorkOrderSubmission = {
@@ -38,9 +38,9 @@ describe('WorkcellRuntime', () => {
         tool: 'analysis',
         action: 'workcell:execute',
         resource: 'analysis',
-        payload: { intent: 'ship feature' }
-      }
-    ]
+        payload: { intent: 'ship feature' },
+      },
+    ],
   };
 
   it('executes work orders and records ledger entries', async () => {
@@ -54,12 +54,17 @@ describe('WorkcellRuntime', () => {
         resources: ['analysis'],
         conditions: [
           { attribute: 'roles', operator: 'includes', value: ['developer'] },
-          { attribute: 'region', operator: 'eq', value: 'allowed-region' }
-        ]
-      }
+          { attribute: 'region', operator: 'eq', value: 'allowed-region' },
+        ],
+      },
     ]);
 
-    const runtime = new WorkcellRuntime({ policy, ledger, tools: [analysisTool], agents: [agent] });
+    const runtime = new WorkcellRuntime({
+      policy,
+      ledger,
+      tools: [analysisTool],
+      agents: [agent],
+    });
     const result = await runtime.submitOrder(baseOrder);
 
     expect(result.status).toBe('completed');
@@ -80,11 +85,16 @@ describe('WorkcellRuntime', () => {
         effect: 'deny',
         actions: ['workcell:execute'],
         resources: ['analysis'],
-        conditions: [{ attribute: 'risk', operator: 'eq', value: 'high' }]
-      }
+        conditions: [{ attribute: 'risk', operator: 'eq', value: 'high' }],
+      },
     ]);
 
-    const runtime = new WorkcellRuntime({ policy, ledger, tools: [analysisTool], agents: [agent] });
+    const runtime = new WorkcellRuntime({
+      policy,
+      ledger,
+      tools: [analysisTool],
+      agents: [agent],
+    });
     const result = await runtime.submitOrder({
       ...baseOrder,
       orderId: 'order-2',
@@ -94,14 +104,16 @@ describe('WorkcellRuntime', () => {
           tool: 'analysis',
           action: 'workcell:execute',
           resource: 'analysis',
-          payload: { intent: 'ship feature' }
-        }
+          payload: { intent: 'ship feature' },
+        },
       ],
-      attributes: { risk: 'high' }
+      attributes: { risk: 'high' },
     });
 
     expect(result.status).toBe('rejected');
     expect(result.tasks[0].status).toBe('rejected');
-    expect(ledger.list({ category: 'workcell-task' })[0].action).toBe('task.rejected');
+    expect(ledger.list({ category: 'workcell-task' })[0].action).toBe(
+      'task.rejected',
+    );
   });
 });

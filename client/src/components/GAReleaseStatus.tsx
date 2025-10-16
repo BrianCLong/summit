@@ -13,7 +13,14 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import { CheckCircle, Error, Warning, Info, Rocket, Build } from '@mui/icons-material';
+import {
+  CheckCircle,
+  Error,
+  Warning,
+  Info,
+  Rocket,
+  Build,
+} from '@mui/icons-material';
 
 interface ReleaseInfo {
   version: string;
@@ -40,7 +47,8 @@ interface DeploymentStatus {
 
 const GAReleaseStatus: React.FC = () => {
   const [releaseInfo, setReleaseInfo] = useState<ReleaseInfo | null>(null);
-  const [deploymentStatus, setDeploymentStatus] = useState<DeploymentStatus | null>(null);
+  const [deploymentStatus, setDeploymentStatus] =
+    useState<DeploymentStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -104,7 +112,12 @@ const GAReleaseStatus: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
         <CircularProgress />
       </Box>
     );
@@ -145,15 +158,19 @@ const GAReleaseStatus: React.FC = () => {
                     <strong>Environment:</strong> {releaseInfo.environment}
                   </Typography>
                   <Typography>
-                    <strong>Commit:</strong> {releaseInfo.commitHash.substring(0, 8)}
+                    <strong>Commit:</strong>{' '}
+                    {releaseInfo.commitHash.substring(0, 8)}
                   </Typography>
                   <Typography>
-                    <strong>Build Date:</strong> {new Date(releaseInfo.buildDate).toLocaleString()}
+                    <strong>Build Date:</strong>{' '}
+                    {new Date(releaseInfo.buildDate).toLocaleString()}
                   </Typography>
 
                   <Box mt={2}>
                     <Chip
-                      label={releaseInfo.ready ? 'Ready for Deployment' : 'Not Ready'}
+                      label={
+                        releaseInfo.ready ? 'Ready for Deployment' : 'Not Ready'
+                      }
                       color={releaseInfo.ready ? 'success' : 'warning'}
                       icon={releaseInfo.ready ? <CheckCircle /> : <Warning />}
                     />
@@ -165,7 +182,12 @@ const GAReleaseStatus: React.FC = () => {
                     </Typography>
                     <Box display="flex" flexWrap="wrap" gap={1}>
                       {releaseInfo.features.map((feature) => (
-                        <Chip key={feature} label={feature} size="small" variant="outlined" />
+                        <Chip
+                          key={feature}
+                          label={feature}
+                          size="small"
+                          variant="outlined"
+                        />
                       ))}
                     </Box>
                   </Box>
@@ -186,7 +208,11 @@ const GAReleaseStatus: React.FC = () => {
                 <Box>
                   <Box mb={2}>
                     <Chip
-                      label={deploymentStatus.ready ? 'Validation Passed' : 'Validation Issues'}
+                      label={
+                        deploymentStatus.ready
+                          ? 'Validation Passed'
+                          : 'Validation Issues'
+                      }
                       color={deploymentStatus.ready ? 'success' : 'error'}
                     />
                   </Box>
@@ -202,7 +228,9 @@ const GAReleaseStatus: React.FC = () => {
                     <Grid item xs={6}>
                       <Chip
                         label={`SBOM: ${deploymentStatus.sbomGenerated ? 'Generated' : 'Missing'}`}
-                        color={deploymentStatus.sbomGenerated ? 'success' : 'warning'}
+                        color={
+                          deploymentStatus.sbomGenerated ? 'success' : 'warning'
+                        }
                         size="small"
                       />
                     </Grid>
@@ -223,7 +251,9 @@ const GAReleaseStatus: React.FC = () => {
                   <List dense>
                     {deploymentStatus.validations.map((validation, index) => (
                       <ListItem key={index}>
-                        <ListItemIcon>{getStatusIcon(validation.status)}</ListItemIcon>
+                        <ListItemIcon>
+                          {getStatusIcon(validation.status)}
+                        </ListItemIcon>
                         <ListItemText
                           primary={validation.component}
                           secondary={validation.message}

@@ -4,7 +4,7 @@ metadata:
   name: summit-stable
 spec:
   selector: { app: summit-app }
-  ports: [ { port: 80, targetPort: 8080 } ]
+  ports: [{ port: 80, targetPort: 8080 }]
 ---
 apiVersion: v1
 kind: Service
@@ -12,4 +12,4 @@ metadata:
   name: summit-canary
 spec:
   selector: { app: summit-app }
-  ports: [ { port: 80, targetPort: 8080 } ]
+  ports: [{ port: 80, targetPort: 8080 }]

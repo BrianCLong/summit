@@ -73,64 +73,62 @@ export var Role;
     Role["EDITOR"] = "editor";
     Role["INVESTIGATOR"] = "investigator";
     Role["ADMIN"] = "admin";
-    Role["SUPER_ADMIN"] = "super_admin"; // Cross-tenant admin
+    Role["SUPER_ADMIN"] = "super_admin";
 })(Role || (Role = {}));
 export class MVP1RBACService {
-    constructor() {
-        this.postgresClient = getPostgresClient();
-        this.neo4jDriver = getNeo4jDriver();
-        // Role-based permission mapping
-        this.rolePermissions = {
-            [Role.VIEWER]: [
-                Permission.ENTITY_READ,
-                Permission.INVESTIGATION_READ,
-                Permission.RELATIONSHIP_READ,
-                Permission.ANALYTICS_READ,
-                Permission.EXPORT_CSV
-            ],
-            [Role.ANALYST]: [
-                ...this.rolePermissions[Role.VIEWER],
-                Permission.ANALYTICS_RUN,
-                Permission.ANALYTICS_EXPORT,
-                Permission.AI_QUERY,
-                Permission.EXPORT_JSON
-            ],
-            [Role.EDITOR]: [
-                ...this.rolePermissions[Role.ANALYST],
-                Permission.ENTITY_CREATE,
-                Permission.ENTITY_UPDATE,
-                Permission.RELATIONSHIP_CREATE,
-                Permission.RELATIONSHIP_UPDATE,
-                Permission.INVESTIGATION_CREATE,
-                Permission.INVESTIGATION_UPDATE,
-                Permission.AI_SUGGEST
-            ],
-            [Role.INVESTIGATOR]: [
-                ...this.rolePermissions[Role.EDITOR],
-                Permission.ENTITY_DELETE,
-                Permission.RELATIONSHIP_DELETE,
-                Permission.INVESTIGATION_DELETE,
-                Permission.INVESTIGATION_SHARE,
-                Permission.INVESTIGATION_ARCHIVE,
-                Permission.ENTITY_BULK_IMPORT,
-                Permission.EXPORT_PDF,
-                Permission.AI_ADMIN
-            ],
-            [Role.ADMIN]: [
-                ...this.rolePermissions[Role.INVESTIGATOR],
-                Permission.USER_READ,
-                Permission.USER_CREATE,
-                Permission.USER_UPDATE,
-                Permission.TENANT_READ,
-                Permission.TENANT_UPDATE,
-                Permission.AUDIT_READ,
-                Permission.SYSTEM_MONITOR
-            ],
-            [Role.SUPER_ADMIN]: [
-                ...Object.values(Permission) // All permissions
-            ]
-        };
-    }
+    postgresClient = getPostgresClient();
+    neo4jDriver = getNeo4jDriver();
+    // Role-based permission mapping
+    rolePermissions = {
+        [Role.VIEWER]: [
+            Permission.ENTITY_READ,
+            Permission.INVESTIGATION_READ,
+            Permission.RELATIONSHIP_READ,
+            Permission.ANALYTICS_READ,
+            Permission.EXPORT_CSV,
+        ],
+        [Role.ANALYST]: [
+            ...this.rolePermissions[Role.VIEWER],
+            Permission.ANALYTICS_RUN,
+            Permission.ANALYTICS_EXPORT,
+            Permission.AI_QUERY,
+            Permission.EXPORT_JSON,
+        ],
+        [Role.EDITOR]: [
+            ...this.rolePermissions[Role.ANALYST],
+            Permission.ENTITY_CREATE,
+            Permission.ENTITY_UPDATE,
+            Permission.RELATIONSHIP_CREATE,
+            Permission.RELATIONSHIP_UPDATE,
+            Permission.INVESTIGATION_CREATE,
+            Permission.INVESTIGATION_UPDATE,
+            Permission.AI_SUGGEST,
+        ],
+        [Role.INVESTIGATOR]: [
+            ...this.rolePermissions[Role.EDITOR],
+            Permission.ENTITY_DELETE,
+            Permission.RELATIONSHIP_DELETE,
+            Permission.INVESTIGATION_DELETE,
+            Permission.INVESTIGATION_SHARE,
+            Permission.INVESTIGATION_ARCHIVE,
+            Permission.ENTITY_BULK_IMPORT,
+            Permission.EXPORT_PDF,
+            Permission.AI_ADMIN,
+        ],
+        [Role.ADMIN]: [
+            ...this.rolePermissions[Role.INVESTIGATOR],
+            Permission.USER_READ,
+            Permission.USER_CREATE,
+            Permission.USER_UPDATE,
+            Permission.TENANT_READ,
+            Permission.TENANT_UPDATE,
+            Permission.AUDIT_READ,
+            Permission.SYSTEM_MONITOR,
+        ],
+        [Role.SUPER_ADMIN]: [
+            ...Object.values(Permission), // All permissions
+        ],
+    };
     /**
      * Check if user has permission for a specific action on a resource
      */
@@ -182,7 +180,9 @@ export class MVP1RBACService {
         if (!resource)
             return true;
         // Tenant isolation check (except for super admin)
-        if (user.role !== Role.SUPER_ADMIN && resource.tenantId && resource.tenantId !== user.tenantId) {
+        if (user.role !== Role.SUPER_ADMIN &&
+            resource.tenantId &&
+            resource.tenantId !== user.tenantId) {
             return false;
         }
         // Resource ownership checks
@@ -213,7 +213,10 @@ export class MVP1RBACService {
         FROM investigations 
         WHERE id = $1 AND tenant_id = $2
       `;
-            const result = await this.postgresClient.query(query, [resource.id, user.tenantId]);
+            const result = await this.postgresClient.query(query, [
+                resource.id,
+                user.tenantId,
+            ]);
             if (result.rows.length === 0) {
                 return false; // Investigation not found or not in user's tenant
             }
@@ -225,12 +228,19 @@ export class MVP1RBACService {
             // Assigned users have edit access
             const assignedUsers = investigation.assigned_to || [];
             if (assignedUsers.includes(user.id)) {
-                return ![Permission.INVESTIGATION_DELETE, Permission.INVESTIGATION_ARCHIVE].includes(action);
+                return ![
+                    Permission.INVESTIGATION_DELETE,
+                    Permission.INVESTIGATION_ARCHIVE,
+                ].includes(action);
             }
             // Shared users have read access only
             const sharedUsers = investigation.shared_with || [];
             if (sharedUsers.includes(user.id)) {
-                return [Permission.INVESTIGATION_READ, Permission.ENTITY_READ, Permission.RELATIONSHIP_READ].includes(action);
+                return [
+                    Permission.INVESTIGATION_READ,
+                    Permission.ENTITY_READ,
+                    Permission.RELATIONSHIP_READ,
+                ].includes(action);
             }
             // Admins can access all investigations in their tenant
             return [Role.ADMIN, Role.SUPER_ADMIN].includes(user.role);
@@ -249,7 +259,7 @@ export class MVP1RBACService {
             return await this.checkInvestigationPermission(user, {
                 type: ResourceType.INVESTIGATION,
                 id: resource.investigationId,
-                tenantId: resource.tenantId
+                tenantId: resource.tenantId,
             }, action);
         }
         return true;
@@ -279,7 +289,7 @@ export class MVP1RBACService {
         try {
             const auditEvent = {
                 ...event,
-                timestamp: new Date()
+                timestamp: new Date(),
             };
             // Store in PostgreSQL (primary audit store)
             await this.storeAuditEventPostgres(auditEvent);
@@ -318,7 +328,7 @@ export class MVP1RBACService {
             event.userAgent,
             event.investigationId,
             event.sessionId,
-            event.timestamp
+            event.timestamp,
         ]);
     }
     /**
@@ -357,7 +367,7 @@ export class MVP1RBACService {
                 resourceId: event.resourceId,
                 success: event.success,
                 timestamp: event.timestamp.toISOString(),
-                investigationId: event.investigationId
+                investigationId: event.investigationId,
             });
         }
         finally {
@@ -424,7 +434,7 @@ export class MVP1RBACService {
             results[key] = await this.hasPermission({
                 user,
                 action: perm.action,
-                resource: perm.resource
+                resource: perm.resource,
             });
         }
         return results;

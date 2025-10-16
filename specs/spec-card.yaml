@@ -1,8 +1,8 @@
 id: SPEC-xxx
-title: "Example Spec Card"
-given: "User is logged in"
-when: "User performs action Y"
-then: "System behaves as Z"
+title: 'Example Spec Card'
+given: 'User is logged in'
+when: 'User performs action Y'
+then: 'System behaves as Z'
 acceptance:
-  - "Test case 1 passes"
-  - "Test case 2 passes"
+  - 'Test case 1 passes'
+  - 'Test case 2 passes'

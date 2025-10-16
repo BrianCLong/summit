@@ -41,7 +41,7 @@ class EntityModelService {
                     totalEntities: 0,
                     entityTypes: [],
                     avgConfidence: 0,
-                    avgRelationshipsPerEntity: 0
+                    avgRelationshipsPerEntity: 0,
                 };
             }
             const record = result.records[0];
@@ -52,7 +52,7 @@ class EntityModelService {
                 oldestEntity: record.get('oldestEntity'),
                 newestEntity: record.get('newestEntity'),
                 avgRelationshipsPerEntity: record.get('avgRelationshipsPerEntity'),
-                typeStats: record.get('typeStats')
+                typeStats: record.get('typeStats'),
             };
         }
         finally {
@@ -83,18 +83,18 @@ class EntityModelService {
           apoc.text.sorensenDiceSimilarity(toLower(e1.label), toLower(e2.label)) as similarity
         ORDER BY similarity DESC
       `, { investigationId, threshold });
-            return result.records.map(record => ({
+            return result.records.map((record) => ({
                 entity1: {
                     id: record.get('entity1Id'),
                     label: record.get('entity1Label'),
-                    type: record.get('entityType')
+                    type: record.get('entityType'),
                 },
                 entity2: {
                     id: record.get('entity2Id'),
                     label: record.get('entity2Label'),
-                    type: record.get('entityType')
+                    type: record.get('entityType'),
                 },
-                similarity: record.get('similarity')
+                similarity: record.get('similarity'),
             }));
         }
         finally {
@@ -124,13 +124,13 @@ class EntityModelService {
           size(connectedTypes) as typesDiversity
         ORDER BY connectionCount DESC, typesDiversity DESC
       `, { investigationId, minConnections });
-            return result.records.map(record => ({
+            return result.records.map((record) => ({
                 entityId: record.get('entityId'),
                 label: record.get('label'),
                 type: record.get('type'),
                 connectionCount: record.get('connectionCount').toNumber(),
                 connectedTypes: record.get('connectedTypes'),
-                typesDiversity: record.get('typesDiversity').toNumber()
+                typesDiversity: record.get('typesDiversity').toNumber(),
             }));
         }
         finally {
@@ -167,7 +167,7 @@ class EntityModelService {
             return {
                 pathLength: record.get('pathLength').toNumber(),
                 nodes: record.get('pathNodes'),
-                relationships: record.get('pathRelationships')
+                relationships: record.get('pathRelationships'),
             };
         }
         finally {
@@ -199,10 +199,10 @@ class EntityModelService {
           count(*) as size
         ORDER BY size DESC
       `, { investigationId });
-            return result.records.map(record => ({
+            return result.records.map((record) => ({
                 communityId: record.get('community').toNumber(),
                 entities: record.get('entities'),
-                size: record.get('size').toNumber()
+                size: record.get('size').toNumber(),
             }));
         }
         catch (error) {
@@ -241,10 +241,10 @@ class EntityModelService {
           count(*) as size
         ORDER BY size DESC
       `, { investigationId });
-            return result.records.map(record => ({
+            return result.records.map((record) => ({
                 communityId: record.get('cluster'),
                 entities: record.get('entities'),
-                size: record.get('size').toNumber()
+                size: record.get('size').toNumber(),
             }));
         }
         finally {
@@ -259,7 +259,9 @@ class EntityModelService {
     async validateModelIntegrity(investigationId = null) {
         const session = this.driver.session();
         try {
-            const whereClause = investigationId ? '{investigationId: $investigationId}' : '';
+            const whereClause = investigationId
+                ? '{investigationId: $investigationId}'
+                : '';
             const params = investigationId ? { investigationId } : {};
             const result = await session.run(`
         // Check for orphaned relationships
@@ -297,9 +299,9 @@ class EntityModelService {
                     orphanedRelationships: record.get('orphanedRelationships').toNumber(),
                     invalidEntities: record.get('invalidEntities').toNumber(),
                     duplicateIds: record.get('duplicateIds').toNumber(),
-                    invalidEmails: record.get('invalidEmails').toNumber()
+                    invalidEmails: record.get('invalidEmails').toNumber(),
                 },
-                totalIssues: record.get('totalIssues').toNumber()
+                totalIssues: record.get('totalIssues').toNumber(),
             };
         }
         finally {
@@ -317,16 +319,16 @@ class EntityModelService {
             const queries = [
                 {
                     name: 'entity_by_type',
-                    query: 'MATCH (e:Entity {investigationId: $investigationId, type: "PERSON"}) RETURN count(e)'
+                    query: 'MATCH (e:Entity {investigationId: $investigationId, type: "PERSON"}) RETURN count(e)',
                 },
                 {
                     name: 'entity_relationships',
-                    query: 'MATCH (e:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]-() RETURN count(r)'
+                    query: 'MATCH (e:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]-() RETURN count(r)',
                 },
                 {
                     name: 'high_confidence_entities',
-                    query: 'MATCH (e:Entity {investigationId: $investigationId}) WHERE e.confidence >= 0.8 RETURN count(e)'
-                }
+                    query: 'MATCH (e:Entity {investigationId: $investigationId}) WHERE e.confidence >= 0.8 RETURN count(e)',
+                },
             ];
             const results = [];
             for (const queryInfo of queries) {
@@ -336,13 +338,13 @@ class EntityModelService {
                 results.push({
                     queryName: queryInfo.name,
                     executionTimeMs: executionTime,
-                    resultCount: result.records[0].get(0).toNumber()
+                    resultCount: result.records[0].get(0).toNumber(),
                 });
             }
             return {
                 investigationId,
                 timestamp: new Date().toISOString(),
-                queryStats: results
+                queryStats: results,
             };
         }
         finally {
@@ -354,6 +356,6 @@ class EntityModelService {
 const entityModelService = new EntityModelService();
 module.exports = {
     EntityModelService,
-    entityModelService
+    entityModelService,
 };
 //# sourceMappingURL=EntityModelService.js.map

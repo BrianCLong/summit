@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import List
-
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
@@ -34,9 +32,9 @@ class LeadModel(BaseModel):
 
 class InvestigationRequest(BaseModel):
     case_id: str
-    objectives: List[ObjectiveModel]
-    leads: List[LeadModel]
-    resources: List[str] = Field(default_factory=list)
+    objectives: list[ObjectiveModel]
+    leads: list[LeadModel]
+    resources: list[str] = Field(default_factory=list)
     risk_appetite: float = Field(ge=0, le=1, default=0.5)
 
 
@@ -46,7 +44,7 @@ class HypothesisModel(BaseModel):
     probability: float
     novelty_score: float
     expected_impact: float
-    supporting_signals: List[str]
+    supporting_signals: list[str]
     counterfactual_penalty: float
 
 
@@ -55,18 +53,18 @@ class TaskModel(BaseModel):
     title: str
     action: str
     owning_agent: str
-    dependencies: List[str] = Field(default_factory=list)
-    innovation_vectors: List[str] = Field(default_factory=list)
+    dependencies: list[str] = Field(default_factory=list)
+    innovation_vectors: list[str] = Field(default_factory=list)
     estimated_hours: float
     verification_metric: str
 
 
 class InvestigationResponse(BaseModel):
     case_id: str
-    hypotheses: List[HypothesisModel]
-    tasks: List[TaskModel]
-    differentiation_factors: List[str]
-    counterfactual_branches: List[str]
+    hypotheses: list[HypothesisModel]
+    tasks: list[TaskModel]
+    differentiation_factors: list[str]
+    counterfactual_branches: list[str]
     assurance_score: float
 
 

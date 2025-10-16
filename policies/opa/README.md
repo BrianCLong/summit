@@ -8,6 +8,7 @@ These Rego modules are minimal, production-lean starters. They expect inputs sha
 - `policy_shadow.rego`: evaluate policies in **shadow** vs **enforce** and emit decision diffs
 
 ### Quick eval
+
 ```bash
 opa eval -I -d . -i ./sample-inputs/promotion.json 'data.composer.decision'
 ```
@@ -18,4 +19,3 @@ opa eval -I -d . -i ./sample-inputs/promotion.json 'data.composer.decision'
 # Create a bundle tar for distribution
 opa build -b . -o composer-policy-bundle.tar.gz
 ```
-

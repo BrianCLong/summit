@@ -1,14 +1,14 @@
 name: Build & Push to AWS ECR (OIDC)
 on:
-  push: { branches: ["main"] }
+  push: { branches: ['main'] }
   pull_request: {}
 permissions:
   contents: read
   id-token: write
   packages: read
 env:
-  AWS_REGION: us-east-1                 # CHANGE
-  ECR_REPO: summit                      # CHANGE
+  AWS_REGION: us-east-1 # CHANGE
+  ECR_REPO: summit # CHANGE
 jobs:
   build-push:
     runs-on: ubuntu-latest

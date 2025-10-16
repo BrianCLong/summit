@@ -55,20 +55,23 @@ export class HistoricalDataService {
 
   async initialize(): Promise<void> {
     this.logger.info('Initializing Historical Data Service...');
-    
+
     // Create necessary database tables/collections
     await this.setupDatabase();
-    
+
     // Initialize time series analyzer
     await this.timeSeriesAnalyzer.initialize();
-    
+
     this.logger.info('Historical Data Service initialized');
   }
 
   /**
    * Get historical deployments for a service
    */
-  async getServiceHistory(serviceId: string, limit = 100): Promise<HistoricalDeployment[]> {
+  async getServiceHistory(
+    serviceId: string,
+    limit = 100,
+  ): Promise<HistoricalDeployment[]> {
     const cacheKey = `service_history_${serviceId}_${limit}`;
     const cached = this.getCachedData(cacheKey);
     if (cached) return cached;
@@ -80,10 +83,12 @@ export class HistoricalDataService {
         ORDER BY timestamp DESC 
         LIMIT $2
       `;
-      
+
       const result = await this.database.query(query, [serviceId, limit]);
-      const deployments = result.rows.map(row => this.mapRowToDeployment(row));
-      
+      const deployments = result.rows.map((row) =>
+        this.mapRowToDeployment(row),
+      );
+
       this.setCachedData(cacheKey, deployments);
       return deployments;
     } catch (error) {
@@ -95,14 +100,20 @@ export class HistoricalDataService {
   /**
    * Get trend data for a specific metric and service
    */
-  async getTrend(metric: string, serviceId: string, days = 30): Promise<number> {
+  async getTrend(
+    metric: string,
+    serviceId: string,
+    days = 30,
+  ): Promise<number> {
     const cacheKey = `trend_${metric}_${serviceId}_${days}`;
     const cached = this.getCachedData(cacheKey);
     if (cached !== undefined) return cached;
 
     try {
       const endDate = new Date();
-      const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000));
+      const startDate = new Date(
+        endDate.getTime() - days * 24 * 60 * 60 * 1000,
+      );
 
       const query = `
         SELECT timestamp, ${metric} as value
@@ -112,20 +123,24 @@ export class HistoricalDataService {
         ORDER BY timestamp ASC
       `;
 
-      const result = await this.database.query(query, [serviceId, startDate, endDate]);
-      
+      const result = await this.database.query(query, [
+        serviceId,
+        startDate,
+        endDate,
+      ]);
+
       if (result.rows.length < 5) {
         return 0; // Not enough data for trend analysis
       }
 
-      const values = result.rows.map(row => ({
+      const values = result.rows.map((row) => ({
         timestamp: new Date(row.timestamp),
-        value: parseFloat(row.value) || 0
+        value: parseFloat(row.value) || 0,
       }));
 
       const trend = await this.timeSeriesAnalyzer.calculateTrend(values);
       this.setCachedData(cacheKey, trend);
-      
+
       return trend;
     } catch (error) {
       this.logger.error(`Failed to get trend for ${metric}:`, error);
@@ -163,7 +178,7 @@ export class HistoricalDataService {
       `;
 
       const result = await this.database.query(query, [limit]);
-      const trainingData = result.rows.map(row => ({
+      const trainingData = result.rows.map((row) => ({
         deploymentId: row.id,
         complexity: parseFloat(row.complexity) || 0,
         linesChanged: parseInt(row.lines_changed) || 0,
@@ -175,7 +190,7 @@ export class HistoricalDataService {
         dayOfWeek: parseInt(row.day_of_week) || 0,
         isHotfix: row.is_hotfix === 1,
         rollbackRequired: row.rollback_required === 1,
-        deploymentFailed: row.deployment_failed === 1
+        deploymentFailed: row.deployment_failed === 1,
       }));
 
       this.setCachedData(cacheKey, trainingData);
@@ -206,22 +221,24 @@ export class HistoricalDataService {
       `;
 
       const result = await this.database.query(query, [serviceId]);
-      
+
       if (!result.rows[0] || result.rows[0].avg_availability === null) {
         return 0.7; // Default moderate health if no data
       }
 
       const row = result.rows[0];
-      const health = (
+      const health =
         parseFloat(row.avg_availability) * 0.4 +
         parseFloat(row.avg_reliability) * 0.4 +
-        parseFloat(row.latency_score) * 0.2
-      );
+        parseFloat(row.latency_score) * 0.2;
 
       this.setCachedData(cacheKey, health);
       return Math.min(Math.max(health, 0), 1);
     } catch (error) {
-      this.logger.error(`Failed to get dependency health for ${serviceId}:`, error);
+      this.logger.error(
+        `Failed to get dependency health for ${serviceId}:`,
+        error,
+      );
       return 0.7; // Default moderate health
     }
   }
@@ -255,7 +272,7 @@ export class HistoricalDataService {
         deployment.errorRate,
         deployment.latency,
         deployment.throughput,
-        deployment.changeType
+        deployment.changeType,
       ]);
 
       // Store metrics separately
@@ -263,7 +280,6 @@ export class HistoricalDataService {
 
       // Clear related caches
       this.clearCachesForService(deployment.serviceId);
-
     } catch (error) {
       this.logger.error('Failed to store deployment:', error);
       throw error;
@@ -273,7 +289,10 @@ export class HistoricalDataService {
   /**
    * Store deployment metrics
    */
-  private async storeDeploymentMetrics(deploymentId: string, deployment: HistoricalDeployment): Promise<void> {
+  private async storeDeploymentMetrics(
+    deploymentId: string,
+    deployment: HistoricalDeployment,
+  ): Promise<void> {
     const query = `
       INSERT INTO deployment_metrics (
         deployment_id, complexity, lines_changed, test_coverage,
@@ -288,8 +307,10 @@ export class HistoricalDataService {
         custom_metrics = EXCLUDED.custom_metrics
     `;
 
-    const dependencyRisk = deployment.dependencies.length > 0 ? 
-      await this.calculateAverageDependencyRisk(deployment.dependencies) : 0;
+    const dependencyRisk =
+      deployment.dependencies.length > 0
+        ? await this.calculateAverageDependencyRisk(deployment.dependencies)
+        : 0;
 
     await this.database.query(query, [
       deploymentId,
@@ -298,14 +319,17 @@ export class HistoricalDataService {
       deployment.testCoverage,
       dependencyRisk,
       this.calculateEnvironmentRisk(deployment.environment),
-      JSON.stringify(deployment.metrics)
+      JSON.stringify(deployment.metrics),
     ]);
   }
 
   /**
    * Update service health data
    */
-  async updateServiceHealth(serviceId: string, health: Omit<DependencyHealth, 'serviceId' | 'lastUpdated'>): Promise<void> {
+  async updateServiceHealth(
+    serviceId: string,
+    health: Omit<DependencyHealth, 'serviceId' | 'lastUpdated'>,
+  ): Promise<void> {
     try {
       const query = `
         INSERT INTO service_health (
@@ -322,12 +346,11 @@ export class HistoricalDataService {
         serviceId,
         health.availability,
         health.errorRate,
-        health.latency
+        health.latency,
       ]);
 
       // Clear related caches
       this.cache.delete(`dependency_health_${serviceId}`);
-
     } catch (error) {
       this.logger.error('Failed to update service health:', error);
       throw error;
@@ -349,19 +372,20 @@ export class HistoricalDataService {
 
     try {
       const deployments = await this.getServiceHistory(serviceId, 500);
-      
+
       if (deployments.length < 10) {
         return {
           frequentFailurePatterns: [],
           successPatterns: [],
           timePatterns: [],
-          riskFactorCorrelations: []
+          riskFactorCorrelations: [],
         };
       }
 
-      const patterns = await this.timeSeriesAnalyzer.analyzePatterns(deployments);
+      const patterns =
+        await this.timeSeriesAnalyzer.analyzePatterns(deployments);
       this.setCachedData(cacheKey, patterns);
-      
+
       return patterns;
     } catch (error) {
       this.logger.error('Failed to get deployment patterns:', error);
@@ -369,7 +393,7 @@ export class HistoricalDataService {
         frequentFailurePatterns: [],
         successPatterns: [],
         timePatterns: [],
-        riskFactorCorrelations: []
+        riskFactorCorrelations: [],
       };
     }
   }
@@ -377,17 +401,27 @@ export class HistoricalDataService {
   /**
    * Get anomaly detection results
    */
-  async detectAnomalies(serviceId: string, metric: string): Promise<{
-    anomalies: { timestamp: Date; value: number; severity: 'low' | 'medium' | 'high' }[];
+  async detectAnomalies(
+    serviceId: string,
+    metric: string,
+  ): Promise<{
+    anomalies: {
+      timestamp: Date;
+      value: number;
+      severity: 'low' | 'medium' | 'high';
+    }[];
     baseline: number;
     threshold: number;
   }> {
     try {
       const trend = await this.getTrend(metric, serviceId, 30);
       const history = await this.getServiceHistory(serviceId, 100);
-      
-      const anomalies = await this.timeSeriesAnalyzer.detectAnomalies(history, metric);
-      
+
+      const anomalies = await this.timeSeriesAnalyzer.detectAnomalies(
+        history,
+        metric,
+      );
+
       return anomalies;
     } catch (error) {
       this.logger.error('Failed to detect anomalies:', error);
@@ -444,7 +478,7 @@ export class HistoricalDataService {
       `
         CREATE INDEX IF NOT EXISTS idx_service_health_updated 
         ON service_health(last_updated DESC)
-      `
+      `,
     ];
 
     for (const query of queries) {
@@ -476,20 +510,22 @@ export class HistoricalDataService {
       testCoverage: parseFloat(row.test_coverage) || 0,
       changeType: row.change_type || 'unknown',
       dependencies: [], // Would need to be populated from a separate query
-      metrics: row.custom_metrics ? JSON.parse(row.custom_metrics) : {}
+      metrics: row.custom_metrics ? JSON.parse(row.custom_metrics) : {},
     };
   }
 
   /**
    * Calculate average dependency risk
    */
-  private async calculateAverageDependencyRisk(dependencies: string[]): Promise<number> {
+  private async calculateAverageDependencyRisk(
+    dependencies: string[],
+  ): Promise<number> {
     if (dependencies.length === 0) return 0;
 
     let totalRisk = 0;
     for (const dep of dependencies) {
       const health = await this.getDependencyHealth(dep);
-      totalRisk += (1 - health);
+      totalRisk += 1 - health;
     }
 
     return totalRisk / dependencies.length;
@@ -500,10 +536,10 @@ export class HistoricalDataService {
    */
   private calculateEnvironmentRisk(environment: string): number {
     const envRiskMap: Record<string, number> = {
-      'production': 0.8,
-      'staging': 0.4,
-      'development': 0.1,
-      'test': 0.2
+      production: 0.8,
+      staging: 0.4,
+      development: 0.1,
+      test: 0.2,
     };
 
     return envRiskMap[environment.toLowerCase()] || 0.5;
@@ -523,15 +559,15 @@ export class HistoricalDataService {
   private setCachedData(key: string, data: any): void {
     this.cache.set(key, {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
   private clearCachesForService(serviceId: string): void {
-    const keysToDelete = Array.from(this.cache.keys()).filter(key => 
-      key.includes(serviceId)
+    const keysToDelete = Array.from(this.cache.keys()).filter((key) =>
+      key.includes(serviceId),
     );
-    keysToDelete.forEach(key => this.cache.delete(key));
+    keysToDelete.forEach((key) => this.cache.delete(key));
   }
 
   /**
@@ -540,7 +576,7 @@ export class HistoricalDataService {
   getCacheStats(): { size: number; hitRate: number } {
     return {
       size: this.cache.size,
-      hitRate: 0.85 // This would be calculated from actual hit/miss tracking
+      hitRate: 0.85, // This would be calculated from actual hit/miss tracking
     };
   }
 

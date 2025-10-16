@@ -1,16 +1,16 @@
-import pino from "pino";
-import OrderedPubSub from "./ordered-pubsub";
-import { requireTenant } from "../middleware/withTenant.js";
+import pino from 'pino';
+import OrderedPubSub from './ordered-pubsub';
+import { requireTenant } from '../middleware/withTenant.js';
 
 const logger = pino();
 export const pubsub = new OrderedPubSub();
 
-export const ENTITY_CREATED = "ENTITY_CREATED";
-export const ENTITY_UPDATED = "ENTITY_UPDATED";
-export const ENTITY_DELETED = "ENTITY_DELETED";
-export const RELATIONSHIP_CREATED = "RELATIONSHIP_CREATED";
-export const RELATIONSHIP_UPDATED = "RELATIONSHIP_UPDATED";
-export const RELATIONSHIP_DELETED = "RELATIONSHIP_DELETED";
+export const ENTITY_CREATED = 'ENTITY_CREATED';
+export const ENTITY_UPDATED = 'ENTITY_UPDATED';
+export const ENTITY_DELETED = 'ENTITY_DELETED';
+export const RELATIONSHIP_CREATED = 'RELATIONSHIP_CREATED';
+export const RELATIONSHIP_UPDATED = 'RELATIONSHIP_UPDATED';
+export const RELATIONSHIP_DELETED = 'RELATIONSHIP_DELETED';
 
 export const tenantEvent = (base: string, tenantId: string): string =>
   `${base}_${tenantId}`;
@@ -24,7 +24,7 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving entityCreated subscription");
+        logger.info({ payload }, 'Resolving entityCreated subscription');
         return payload;
       },
     },
@@ -35,7 +35,7 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving entityUpdated subscription");
+        logger.info({ payload }, 'Resolving entityUpdated subscription');
         return payload;
       },
     },
@@ -46,7 +46,7 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving entityDeleted subscription");
+        logger.info({ payload }, 'Resolving entityDeleted subscription');
         return payload;
       },
     },
@@ -59,7 +59,7 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving relationshipCreated subscription");
+        logger.info({ payload }, 'Resolving relationshipCreated subscription');
         return payload;
       },
     },
@@ -72,7 +72,7 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving relationshipUpdated subscription");
+        logger.info({ payload }, 'Resolving relationshipUpdated subscription');
         return payload;
       },
     },
@@ -85,18 +85,18 @@ const subscriptionResolvers = {
       },
       resolve: (event: any) => {
         const { payload } = event;
-        logger.info({ payload }, "Resolving relationshipDeleted subscription");
+        logger.info({ payload }, 'Resolving relationshipDeleted subscription');
         return payload;
       },
     },
     // Placeholder for aiRecommendationUpdated
     aiRecommendationUpdated: {
-      subscribe: () => pubsub.asyncIterator(["AI_RECOMMENDATION_UPDATED"]),
+      subscribe: () => pubsub.asyncIterator(['AI_RECOMMENDATION_UPDATED']),
       resolve: (event: any) => {
         const { payload } = event;
         logger.info(
           { payload },
-          "Resolving aiRecommendationUpdated subscription",
+          'Resolving aiRecommendationUpdated subscription',
         );
         return payload;
       },

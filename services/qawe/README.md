@@ -1,4 +1,3 @@
-
 # Quorum Approval Workflow Engine (QAWE)
 
 QAWE is an Ed25519-signed quorum workflow service written in Go with a companion
@@ -35,13 +34,13 @@ Environment variables:
 
 ## HTTP API
 
-| Method | Path                                | Description |
-| ------ | ----------------------------------- | ----------- |
-| POST   | `/api/workflows`                    | Register a workflow definition (policy included). |
-| POST   | `/api/instances`                    | Start a workflow instance with context. |
-| GET    | `/api/instances/{id}`               | Retrieve instance state. |
-| POST   | `/api/instances/{id}/approvals`     | Submit a signed approval payload. |
-| GET    | `/api/info`                         | Return server public key for bundle verification. |
+| Method | Path                            | Description                                       |
+| ------ | ------------------------------- | ------------------------------------------------- |
+| POST   | `/api/workflows`                | Register a workflow definition (policy included). |
+| POST   | `/api/instances`                | Start a workflow instance with context.           |
+| GET    | `/api/instances/{id}`           | Retrieve instance state.                          |
+| POST   | `/api/instances/{id}/approvals` | Submit a signed approval payload.                 |
+| GET    | `/api/info`                     | Return server public key for bundle verification. |
 
 Approval payloads must be signed using the canonical message format:
 

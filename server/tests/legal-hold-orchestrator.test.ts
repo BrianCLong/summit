@@ -1,4 +1,7 @@
-import { LegalHoldOrchestrator, InMemoryLegalHoldRepository } from '../src/cases/legal-hold/orchestrator';
+import {
+  LegalHoldOrchestrator,
+  InMemoryLegalHoldRepository,
+} from '../src/cases/legal-hold/orchestrator';
 import {
   ChainOfCustodyAdapter,
   LegalHoldInitiationInput,
@@ -49,8 +52,14 @@ describe('LegalHoldOrchestrator', () => {
   beforeEach(() => {
     repository = new InMemoryLegalHoldRepository();
     connectors = [
-      new FakeConnector('s3-archive', { supportsVerification: true, supportsExport: true }),
-      new FakeConnector('o365', { supportsVerification: true, supportsExport: true }),
+      new FakeConnector('s3-archive', {
+        supportsVerification: true,
+        supportsExport: true,
+      }),
+      new FakeConnector('o365', {
+        supportsVerification: true,
+        supportsExport: true,
+      }),
     ];
     notificationDispatcher = new MockNotificationDispatcher();
     chainOfCustody = new MockChainOfCustody();
@@ -84,7 +93,9 @@ describe('LegalHoldOrchestrator', () => {
     expect(chainOfCustody.appended).toBe(1);
 
     const auditPackage = await orchestrator.generateAuditPackage(hold.holdId);
-    expect(auditPackage.auditTrail.map((entry) => entry.action)).toContain('LEGAL_HOLD_INITIATED');
+    expect(auditPackage.auditTrail.map((entry) => entry.action)).toContain(
+      'LEGAL_HOLD_INITIATED',
+    );
     expect(auditPackage.auditTrail.map((entry) => entry.action)).toContain(
       'LEGAL_HOLD_PRESERVATION_COMPLETE',
     );
@@ -123,16 +134,24 @@ describe('LegalHoldOrchestrator', () => {
     });
 
     expect(exports).toHaveLength(2);
-    expect(exports.every((ex) => ex.exportPath.includes(hold.holdId))).toBe(true);
+    expect(exports.every((ex) => ex.exportPath.includes(hold.holdId))).toBe(
+      true,
+    );
   });
 
   it('releases legal hold and updates statuses', async () => {
     const hold = await orchestrator.initiateHold(baseInput);
-    await orchestrator.releaseHold(hold.holdId, { id: 'user-legal', role: 'legal_admin' }, 'Case closed');
+    await orchestrator.releaseHold(
+      hold.holdId,
+      { id: 'user-legal', role: 'legal_admin' },
+      'Case closed',
+    );
 
     const released = await repository.getById(hold.holdId);
     expect(released?.status).toBe('RELEASED');
-    expect(connectors.every((connector) => connector.releaseHoldCalls === 1)).toBe(true);
+    expect(
+      connectors.every((connector) => connector.releaseHoldCalls === 1),
+    ).toBe(true);
   });
 });
 
@@ -154,7 +173,9 @@ class FakeConnector implements PreservationConnector {
     this.supportsExport = options.supportsExport ?? true;
   }
 
-  async applyHold(input: PreservationHoldInput): Promise<PreservationHoldResult> {
+  async applyHold(
+    input: PreservationHoldInput,
+  ): Promise<PreservationHoldResult> {
     this.applyHoldCalls += 1;
     return {
       connectorId: this.id,
@@ -201,7 +222,10 @@ class FakeConnector implements PreservationConnector {
 class MockNotificationDispatcher implements LegalHoldNotificationDispatcher {
   sent = 0;
 
-  async sendNotification(): Promise<{ id: string; status: 'queued' | 'sent' | 'failed' }> {
+  async sendNotification(): Promise<{
+    id: string;
+    status: 'queued' | 'sent' | 'failed';
+  }> {
     this.sent += 1;
     return { id: `notif-${this.sent}`, status: 'sent' };
   }

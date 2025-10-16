@@ -17,27 +17,27 @@ namespace:
 # File patterns to validate
 input:
   # Dockerfile validation
-  - dockerfile: "**/Dockerfile*"
-  - dockerfile: "**/*.dockerfile"
+  - dockerfile: '**/Dockerfile*'
+  - dockerfile: '**/*.dockerfile'
 
   # Kubernetes manifest validation
-  - kubernetes: "**/*.yaml"
-  - kubernetes: "**/*.yml"
-  - kubernetes: "k8s/**/*"
-  - kubernetes: "charts/**/templates/**"
+  - kubernetes: '**/*.yaml'
+  - kubernetes: '**/*.yml'
+  - kubernetes: 'k8s/**/*'
+  - kubernetes: 'charts/**/templates/**'
 
   # Supply chain validation (SBOM, attestations)
-  - supply_chain: "**/sbom-*.json"
-  - supply_chain: "**/attestation-*.json"
-  - supply_chain: "**/evidence-bundle.json"
+  - supply_chain: '**/sbom-*.json'
+  - supply_chain: '**/attestation-*.json'
+  - supply_chain: '**/evidence-bundle.json'
 
 # Exclusions
 exclude:
-  - "test/**"
-  - "tests/**"
-  - "examples/**"
-  - "docs/**"
-  - ".git/**"
+  - 'test/**'
+  - 'tests/**'
+  - 'examples/**'
+  - 'docs/**'
+  - '.git/**'
 
 # Fail on policy violations
 fail-on-warn: false

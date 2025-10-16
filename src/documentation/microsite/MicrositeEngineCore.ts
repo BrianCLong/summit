@@ -84,7 +84,9 @@ export class MicrositeEngineCore extends EventEmitter {
   constructor(config: MicrositeConfig) {
     super();
     this.config = config;
-    this.federationRegistry = new FederationRegistry(config.federation.registry);
+    this.federationRegistry = new FederationRegistry(
+      config.federation.registry,
+    );
     this.initializeMicrositeEngine();
   }
 
@@ -106,7 +108,7 @@ export class MicrositeEngineCore extends EventEmitter {
    */
   async createMicrosite(config: CreateMicrositeRequest): Promise<Microsite> {
     const micrositeId = this.generateMicrositeId(config.name);
-    
+
     // Validate template exists
     const template = this.templates.get(config.templateId);
     if (!template) {
@@ -133,19 +135,23 @@ export class MicrositeEngineCore extends EventEmitter {
       theme: config.themeId,
       version: '1.0.0',
       status: 'creating',
-      configuration: await this.generateMicrositeConfiguration(config, template, theme),
+      configuration: await this.generateMicrositeConfiguration(
+        config,
+        template,
+        theme,
+      ),
       content: await this.initializeContent(config, template),
       deployment: {
         status: 'pending',
         environments: [],
-        history: []
+        history: [],
       },
       metadata: {
         createdAt: new Date(),
         lastModified: new Date(),
         tags: config.tags || [],
-        customData: config.customData || {}
-      }
+        customData: config.customData || {},
+      },
     };
 
     this.microsites.set(micrositeId, microsite);
@@ -165,7 +171,11 @@ export class MicrositeEngineCore extends EventEmitter {
   /**
    * Deploy microsite to specified environment
    */
-  async deployMicrosite(micrositeId: string, environment: string, options?: DeploymentOptions): Promise<DeploymentResult> {
+  async deployMicrosite(
+    micrositeId: string,
+    environment: string,
+    options?: DeploymentOptions,
+  ): Promise<DeploymentResult> {
     const microsite = this.microsites.get(micrositeId);
     if (!microsite) {
       throw new Error(`Microsite ${micrositeId} not found`);
@@ -179,7 +189,7 @@ export class MicrositeEngineCore extends EventEmitter {
       options: options || {},
       status: 'queued',
       startTime: new Date(),
-      steps: []
+      steps: [],
     };
 
     this.emit('deployment:started', { deploymentId, micrositeId, environment });
@@ -192,7 +202,7 @@ export class MicrositeEngineCore extends EventEmitter {
         status: 'completed',
         startTime: new Date(),
         endTime: new Date(),
-        result: buildResult
+        result: buildResult,
       });
 
       // Deploy static assets to CDN
@@ -202,7 +212,7 @@ export class MicrositeEngineCore extends EventEmitter {
         status: 'completed',
         startTime: new Date(),
         endTime: new Date(),
-        result: cdnResult
+        result: cdnResult,
       });
 
       // Configure routing
@@ -212,7 +222,7 @@ export class MicrositeEngineCore extends EventEmitter {
         status: 'completed',
         startTime: new Date(),
         endTime: new Date(),
-        result: routingResult
+        result: routingResult,
       });
 
       // Update DNS
@@ -222,17 +232,20 @@ export class MicrositeEngineCore extends EventEmitter {
         status: 'completed',
         startTime: new Date(),
         endTime: new Date(),
-        result: dnsResult
+        result: dnsResult,
       });
 
       // Verify deployment
-      const verificationResult = await this.verifyDeployment(microsite, environment);
+      const verificationResult = await this.verifyDeployment(
+        microsite,
+        environment,
+      );
       deployment.steps.push({
         name: 'verification',
         status: 'completed',
         startTime: new Date(),
         endTime: new Date(),
-        result: verificationResult
+        result: verificationResult,
       });
 
       deployment.status = 'completed';
@@ -244,7 +257,7 @@ export class MicrositeEngineCore extends EventEmitter {
         name: environment,
         url: routingResult.url,
         deployedAt: new Date(),
-        version: microsite.version
+        version: microsite.version,
       });
 
       microsite.deployment.history.push({
@@ -253,10 +266,15 @@ export class MicrositeEngineCore extends EventEmitter {
         version: microsite.version,
         deployedAt: new Date(),
         deployedBy: options?.deployedBy || 'system',
-        status: 'success'
+        status: 'success',
       });
 
-      this.emit('deployment:completed', { deploymentId, micrositeId, environment, url: routingResult.url });
+      this.emit('deployment:completed', {
+        deploymentId,
+        micrositeId,
+        environment,
+        url: routingResult.url,
+      });
 
       return {
         deploymentId,
@@ -264,9 +282,8 @@ export class MicrositeEngineCore extends EventEmitter {
         url: routingResult.url,
         environment,
         deployedAt: deployment.endTime,
-        steps: deployment.steps
+        steps: deployment.steps,
       };
-
     } catch (error) {
       deployment.status = 'failed';
       deployment.endTime = new Date();
@@ -279,10 +296,15 @@ export class MicrositeEngineCore extends EventEmitter {
         deployedAt: new Date(),
         deployedBy: options?.deployedBy || 'system',
         status: 'failed',
-        error: error.message
+        error: error.message,
       });
 
-      this.emit('deployment:failed', { deploymentId, micrositeId, environment, error });
+      this.emit('deployment:failed', {
+        deploymentId,
+        micrositeId,
+        environment,
+        error,
+      });
       throw error;
     }
   }
@@ -290,7 +312,10 @@ export class MicrositeEngineCore extends EventEmitter {
   /**
    * Update microsite content
    */
-  async updateMicrositeContent(micrositeId: string, contentUpdate: ContentUpdate): Promise<void> {
+  async updateMicrositeContent(
+    micrositeId: string,
+    contentUpdate: ContentUpdate,
+  ): Promise<void> {
     const microsite = this.microsites.get(micrositeId);
     if (!microsite) {
       throw new Error(`Microsite ${micrositeId} not found`);
@@ -302,7 +327,7 @@ export class MicrositeEngineCore extends EventEmitter {
         microsite.content.pages[pageId] = {
           ...microsite.content.pages[pageId],
           ...pageContent,
-          lastModified: new Date()
+          lastModified: new Date(),
         };
       }
     }
@@ -310,14 +335,14 @@ export class MicrositeEngineCore extends EventEmitter {
     if (contentUpdate.navigation) {
       microsite.content.navigation = {
         ...microsite.content.navigation,
-        ...contentUpdate.navigation
+        ...contentUpdate.navigation,
       };
     }
 
     if (contentUpdate.assets) {
       microsite.content.assets = {
         ...microsite.content.assets,
-        ...contentUpdate.assets
+        ...contentUpdate.assets,
       };
     }
 
@@ -336,7 +361,11 @@ export class MicrositeEngineCore extends EventEmitter {
   /**
    * Manage microsite themes
    */
-  async applyTheme(micrositeId: string, themeId: string, customization?: ThemeCustomization): Promise<void> {
+  async applyTheme(
+    micrositeId: string,
+    themeId: string,
+    customization?: ThemeCustomization,
+  ): Promise<void> {
     const microsite = this.microsites.get(micrositeId);
     if (!microsite) {
       throw new Error(`Microsite ${micrositeId} not found`);
@@ -352,7 +381,7 @@ export class MicrositeEngineCore extends EventEmitter {
     microsite.configuration.theme = {
       id: themeId,
       customization: customization || {},
-      appliedAt: new Date()
+      appliedAt: new Date(),
     };
 
     // Update metadata
@@ -392,15 +421,15 @@ export class MicrositeEngineCore extends EventEmitter {
         syncResults.push({
           micrositeId: federated.id,
           status: 'error',
-          error: error.message
+          error: error.message,
         });
       }
     }
 
     const syncResult: FederationSyncResult = {
-      synced: syncResults.filter(r => r.status === 'success').length,
-      errors: syncResults.filter(r => r.status === 'error').length,
-      results: syncResults
+      synced: syncResults.filter((r) => r.status === 'success').length,
+      errors: syncResults.filter((r) => r.status === 'error').length,
+      results: syncResults,
     };
 
     this.emit('federation:synced', syncResult);
@@ -410,7 +439,10 @@ export class MicrositeEngineCore extends EventEmitter {
   /**
    * Get microsite analytics
    */
-  async getMicrositeAnalytics(micrositeId: string, period?: AnalyticsPeriod): Promise<MicrositeAnalytics> {
+  async getMicrositeAnalytics(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<MicrositeAnalytics> {
     const microsite = this.microsites.get(micrositeId);
     if (!microsite) {
       throw new Error(`Microsite ${micrositeId} not found`);
@@ -423,14 +455,17 @@ export class MicrositeEngineCore extends EventEmitter {
         pageViews: await this.getPageViews(micrositeId, period),
         uniqueVisitors: await this.getUniqueVisitors(micrositeId, period),
         bounceRate: await this.getBounceRate(micrositeId, period),
-        avgSessionDuration: await this.getAvgSessionDuration(micrositeId, period),
+        avgSessionDuration: await this.getAvgSessionDuration(
+          micrositeId,
+          period,
+        ),
         topPages: await this.getTopPages(micrositeId, period),
         searchQueries: await this.getSearchQueries(micrositeId, period),
         userFlow: await this.getUserFlow(micrositeId, period),
-        performance: await this.getPerformanceMetrics(micrositeId, period)
+        performance: await this.getPerformanceMetrics(micrositeId, period),
       },
       trends: await this.getTrends(micrositeId, period),
-      comparisons: await this.getComparisons(micrositeId, period)
+      comparisons: await this.getComparisons(micrositeId, period),
     };
 
     return analytics;
@@ -448,7 +483,7 @@ export class MicrositeEngineCore extends EventEmitter {
     const sitemap: MicrositeSitemap = {
       micrositeId,
       lastModified: new Date(),
-      urls: []
+      urls: [],
     };
 
     // Add pages to sitemap
@@ -457,7 +492,7 @@ export class MicrositeEngineCore extends EventEmitter {
         url: this.buildPageUrl(microsite, pageId),
         lastModified: page.lastModified,
         changeFrequency: this.getChangeFrequency(page),
-        priority: this.getPagePriority(page)
+        priority: this.getPagePriority(page),
       });
     }
 
@@ -470,14 +505,21 @@ export class MicrositeEngineCore extends EventEmitter {
   /**
    * Export microsite
    */
-  async exportMicrosite(micrositeId: string, format: ExportFormat): Promise<ExportResult> {
+  async exportMicrosite(
+    micrositeId: string,
+    format: ExportFormat,
+  ): Promise<ExportResult> {
     const microsite = this.microsites.get(micrositeId);
     if (!microsite) {
       throw new Error(`Microsite ${micrositeId} not found`);
     }
 
     const exportId = this.generateExportId();
-    const exportPath = path.join(process.cwd(), 'exports', `${micrositeId}-${exportId}`);
+    const exportPath = path.join(
+      process.cwd(),
+      'exports',
+      `${micrositeId}-${exportId}`,
+    );
 
     // Create export directory
     fs.mkdirSync(exportPath, { recursive: true });
@@ -498,14 +540,21 @@ export class MicrositeEngineCore extends EventEmitter {
         throw new Error(`Unsupported export format: ${format.type}`);
     }
 
-    this.emit('export:completed', { micrositeId, exportId, format: format.type });
+    this.emit('export:completed', {
+      micrositeId,
+      exportId,
+      format: format.type,
+    });
     return result;
   }
 
   /**
    * Clone microsite
    */
-  async cloneMicrosite(sourceMicrositeId: string, config: CloneMicrositeRequest): Promise<Microsite> {
+  async cloneMicrosite(
+    sourceMicrositeId: string,
+    config: CloneMicrositeRequest,
+  ): Promise<Microsite> {
     const sourceMicrosite = this.microsites.get(sourceMicrositeId);
     if (!sourceMicrosite) {
       throw new Error(`Source microsite ${sourceMicrositeId} not found`);
@@ -526,23 +575,23 @@ export class MicrositeEngineCore extends EventEmitter {
       deployment: {
         status: 'pending',
         environments: [],
-        history: []
+        history: [],
       },
       metadata: {
         createdAt: new Date(),
         lastModified: new Date(),
         tags: config.tags || sourceMicrosite.metadata.tags,
         customData: config.customData || sourceMicrosite.metadata.customData,
-        clonedFrom: sourceMicrositeId
-      }
+        clonedFrom: sourceMicrositeId,
+      },
     };
 
     this.microsites.set(clonedMicrosite.id, clonedMicrosite);
 
-    this.emit('microsite:cloned', { 
-      sourceMicrositeId, 
-      clonedMicrositeId: clonedMicrosite.id, 
-      name: config.name 
+    this.emit('microsite:cloned', {
+      sourceMicrositeId,
+      clonedMicrositeId: clonedMicrosite.id,
+      name: config.name,
     });
 
     return clonedMicrosite;
@@ -551,7 +600,10 @@ export class MicrositeEngineCore extends EventEmitter {
   /**
    * Delete microsite
    */
-  async deleteMicrosite(micrositeId: string, options?: DeleteOptions): Promise<void> {
+  async deleteMicrosite(
+    micrositeId: string,
+    options?: DeleteOptions,
+  ): Promise<void> {
     const microsite = this.microsites.get(micrositeId);
     if (!microsite) {
       throw new Error(`Microsite ${micrositeId} not found`);
@@ -577,7 +629,10 @@ export class MicrositeEngineCore extends EventEmitter {
       this.microsites.delete(micrositeId);
     }
 
-    this.emit('microsite:deleted', { micrositeId, permanent: options?.permanent });
+    this.emit('microsite:deleted', {
+      micrositeId,
+      permanent: options?.permanent,
+    });
   }
 
   // Private utility methods
@@ -648,30 +703,30 @@ export class MicrositeEngineCore extends EventEmitter {
   private async generateMicrositeConfiguration(
     config: CreateMicrositeRequest,
     template: MicrositeTemplate,
-    theme: MicrositeTheme
+    theme: MicrositeTheme,
   ): Promise<MicrositeConfiguration> {
     return {
       template: {
         id: template.id,
         version: template.version,
-        configuration: template.configuration
+        configuration: template.configuration,
       },
       theme: {
         id: theme.id,
         customization: config.themeCustomization || {},
-        appliedAt: new Date()
+        appliedAt: new Date(),
       },
       features: config.features || {},
       plugins: config.plugins || [],
       seo: config.seo || {},
       analytics: config.analytics || {},
-      performance: config.performance || {}
+      performance: config.performance || {},
     };
   }
 
   private async initializeContent(
     config: CreateMicrositeRequest,
-    template: MicrositeTemplate
+    template: MicrositeTemplate,
   ): Promise<ContentConfiguration> {
     return {
       pages: this.generateInitialPages(template),
@@ -681,14 +736,16 @@ export class MicrositeEngineCore extends EventEmitter {
         title: config.name,
         description: config.description,
         keywords: config.tags || [],
-        author: config.owner
-      }
+        author: config.owner,
+      },
     };
   }
 
-  private generateInitialPages(template: MicrositeTemplate): Record<string, PageContent> {
+  private generateInitialPages(
+    template: MicrositeTemplate,
+  ): Record<string, PageContent> {
     const pages: Record<string, PageContent> = {};
-    
+
     for (const component of template.components) {
       if (component.type === 'page') {
         pages[component.id] = {
@@ -697,7 +754,7 @@ export class MicrositeEngineCore extends EventEmitter {
           content: component.content || '',
           layout: component.layout || 'default',
           metadata: component.metadata || {},
-          lastModified: new Date()
+          lastModified: new Date(),
         };
       }
     }
@@ -705,12 +762,14 @@ export class MicrositeEngineCore extends EventEmitter {
     return pages;
   }
 
-  private generateInitialNavigation(template: MicrositeTemplate): NavigationConfiguration {
+  private generateInitialNavigation(
+    template: MicrositeTemplate,
+  ): NavigationConfiguration {
     return {
       primary: template.structure.navigation?.primary || [],
       secondary: template.structure.navigation?.secondary || [],
       footer: template.structure.navigation?.footer || [],
-      breadcrumbs: template.structure.navigation?.breadcrumbs || false
+      breadcrumbs: template.structure.navigation?.breadcrumbs || false,
     };
   }
 
@@ -719,60 +778,102 @@ export class MicrositeEngineCore extends EventEmitter {
     return { outputPath: '/tmp/build', assets: [], size: 1024 };
   }
 
-  private async deployCDNAssets(microsite: Microsite, buildResult: BuildResult): Promise<CDNResult> {
+  private async deployCDNAssets(
+    microsite: Microsite,
+    buildResult: BuildResult,
+  ): Promise<CDNResult> {
     return { urls: [], totalSize: buildResult.size };
   }
 
-  private async configureRouting(microsite: Microsite, environment: string): Promise<RoutingResult> {
+  private async configureRouting(
+    microsite: Microsite,
+    environment: string,
+  ): Promise<RoutingResult> {
     return { url: `https://${microsite.domain}` };
   }
 
-  private async updateDNS(microsite: Microsite, environment: string): Promise<DNSResult> {
+  private async updateDNS(
+    microsite: Microsite,
+    environment: string,
+  ): Promise<DNSResult> {
     return { records: [], propagated: true };
   }
 
-  private async verifyDeployment(microsite: Microsite, environment: string): Promise<VerificationResult> {
+  private async verifyDeployment(
+    microsite: Microsite,
+    environment: string,
+  ): Promise<VerificationResult> {
     return { healthy: true, checks: [] };
   }
 
   // Placeholder analytics methods
-  private async getPageViews(micrositeId: string, period?: AnalyticsPeriod): Promise<number> {
+  private async getPageViews(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<number> {
     return 1000;
   }
 
-  private async getUniqueVisitors(micrositeId: string, period?: AnalyticsPeriod): Promise<number> {
+  private async getUniqueVisitors(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<number> {
     return 500;
   }
 
-  private async getBounceRate(micrositeId: string, period?: AnalyticsPeriod): Promise<number> {
+  private async getBounceRate(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<number> {
     return 0.3;
   }
 
-  private async getAvgSessionDuration(micrositeId: string, period?: AnalyticsPeriod): Promise<number> {
+  private async getAvgSessionDuration(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<number> {
     return 300;
   }
 
-  private async getTopPages(micrositeId: string, period?: AnalyticsPeriod): Promise<PageMetric[]> {
+  private async getTopPages(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<PageMetric[]> {
     return [];
   }
 
-  private async getSearchQueries(micrositeId: string, period?: AnalyticsPeriod): Promise<SearchMetric[]> {
+  private async getSearchQueries(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<SearchMetric[]> {
     return [];
   }
 
-  private async getUserFlow(micrositeId: string, period?: AnalyticsPeriod): Promise<UserFlowMetric[]> {
+  private async getUserFlow(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<UserFlowMetric[]> {
     return [];
   }
 
-  private async getPerformanceMetrics(micrositeId: string, period?: AnalyticsPeriod): Promise<PerformanceMetric[]> {
+  private async getPerformanceMetrics(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<PerformanceMetric[]> {
     return [];
   }
 
-  private async getTrends(micrositeId: string, period?: AnalyticsPeriod): Promise<TrendMetric[]> {
+  private async getTrends(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<TrendMetric[]> {
     return [];
   }
 
-  private async getComparisons(micrositeId: string, period?: AnalyticsPeriod): Promise<ComparisonMetric[]> {
+  private async getComparisons(
+    micrositeId: string,
+    period?: AnalyticsPeriod,
+  ): Promise<ComparisonMetric[]> {
     return [];
   }
 }
@@ -804,8 +905,19 @@ class FederationRegistry {
 }
 
 // Type definitions
-export type MicrositeStatus = 'creating' | 'active' | 'inactive' | 'deploying' | 'failed' | 'deleted';
-export type AnalyticsPeriod = 'last24hours' | 'last7days' | 'last30days' | 'last90days' | 'lastyear';
+export type MicrositeStatus =
+  | 'creating'
+  | 'active'
+  | 'inactive'
+  | 'deploying'
+  | 'failed'
+  | 'deleted';
+export type AnalyticsPeriod =
+  | 'last24hours'
+  | 'last7days'
+  | 'last30days'
+  | 'last90days'
+  | 'lastyear';
 
 export interface CreateMicrositeRequest {
   name: string;

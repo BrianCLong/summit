@@ -1,25 +1,26 @@
-import "dotenv/config";
-import express from "express";
-import { ApolloServer } from "@apollo/server";
-import { expressMiddleware } from "@as-integrations/express4";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import pino from "pino";
-import { pinoHttp } from "pino-http";
-import { auditLogger } from "./middleware/audit-logger.js";
-import monitoringRouter from "./routes/monitoring.js";
-import aiRouter from "./routes/ai.js";
-import disclosuresRouter from "./routes/disclosures.js";
-import { register } from "./monitoring/metrics.js";
-import rbacRouter from "./routes/rbacRoutes.js";
-import { typeDefs } from "./graphql/schema.js";
-import resolvers from "./graphql/resolvers/index.js";
-import { getContext } from "./lib/auth.js";
-import { getNeo4jDriver } from "./db/neo4j.js";
-import path from "path";
-import { fileURLToPath } from "url";
+import 'dotenv/config';
+import express from 'express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@as-integrations/express4';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import pino from 'pino';
+import pinoHttp from 'pino-http';
+import { auditLogger } from './middleware/audit-logger.js';
+import monitoringRouter from './routes/monitoring.js';
+import aiRouter from './routes/ai.js';
+import disclosuresRouter from './routes/disclosures.js';
+import narrativeSimulationRouter from './routes/narrative-sim.js';
+import { register } from './monitoring/metrics.js';
+import rbacRouter from './routes/rbacRoutes.js';
+import { typeDefs } from './graphql/schema.js';
+import resolvers from './graphql/resolvers/index.js';
+import { getContext } from './lib/auth.js';
+import { getNeo4jDriver } from './db/neo4j.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 export const createApp = async () => {
@@ -29,26 +30,28 @@ export const createApp = async () => {
     const logger = pino();
     app.use(helmet());
     app.use(cors({
-        origin: process.env.CORS_ORIGIN?.split(",") ?? ["http://localhost:3000"],
+        origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'],
         credentials: true,
     }));
-    app.use(pinoHttp({ logger, redact: ["req.headers.authorization"] }));
+    app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }));
+    app.use(express.json({ limit: '1mb' }));
     app.use(auditLogger);
     // Rate limiting (exempt monitoring endpoints)
-    app.use("/monitoring", monitoringRouter);
-    app.use("/api/ai", aiRouter);
-    app.use("/disclosures", disclosuresRouter);
-    app.use("/rbac", rbacRouter);
-    app.get("/metrics", async (_req, res) => {
-        res.set("Content-Type", register.contentType);
+    app.use('/monitoring', monitoringRouter);
+    app.use('/api/ai', aiRouter);
+    app.use('/api/narrative-sim', narrativeSimulationRouter);
+    app.use('/disclosures', disclosuresRouter);
+    app.use('/rbac', rbacRouter);
+    app.get('/metrics', async (_req, res) => {
+        res.set('Content-Type', register.contentType);
         res.end(await register.metrics());
     });
     app.use(rateLimit({
-        windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60000),
+        windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
         max: Number(process.env.RATE_LIMIT_MAX || 600),
-        message: { error: "Too many requests, please try again later" },
+        message: { error: 'Too many requests, please try again later' },
     }));
-    app.get("/search/evidence", async (req, res) => {
+    app.get('/search/evidence', async (req, res) => {
         const { q, skip = 0, limit = 10 } = req.query;
         if (!q) {
             return res.status(400).send({ error: "Query parameter 'q' is required" });
@@ -75,10 +78,10 @@ export const createApp = async () => {
                 session.run(countQuery, { query: q }),
             ]);
             const evidence = searchResult.records.map((record) => ({
-                node: record.get("node").properties,
-                score: record.get("score"),
+                node: record.get('node').properties,
+                score: record.get('score'),
             }));
-            const total = countResult.records[0].get("total").toNumber();
+            const total = countResult.records[0].get('total').toNumber();
             res.send({
                 data: evidence,
                 metadata: {
@@ -91,20 +94,23 @@ export const createApp = async () => {
             });
         }
         catch (error) {
-            logger.error(`Error in search/evidence: ${error instanceof Error ? error.message : "Unknown error"}`);
-            res.status(500).send({ error: "Internal server error" });
+            logger.error(`Error in search/evidence: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            res.status(500).send({ error: 'Internal server error' });
         }
         finally {
             await session.close();
         }
     });
-    const schema = makeExecutableSchema({ typeDefs, resolvers });
+    const schema = makeExecutableSchema({
+        typeDefs: typeDefs,
+        resolvers: resolvers,
+    });
     // GraphQL over HTTP
-    const { persistedQueriesPlugin } = await import("./graphql/plugins/persistedQueries.js");
-    const { default: pbacPlugin } = await import("./graphql/plugins/pbac.js");
-    const { default: resolverMetricsPlugin } = await import("./graphql/plugins/resolverMetrics.js");
-    const { default: auditLoggerPlugin } = await import("./graphql/plugins/auditLogger.js");
-    const { depthLimit } = await import("./graphql/validation/depthLimit.js");
+    const { persistedQueriesPlugin } = await import('./graphql/plugins/persistedQueries.js');
+    const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
+    const { default: resolverMetricsPlugin } = await import('./graphql/plugins/resolverMetrics.js');
+    const { default: auditLoggerPlugin } = await import('./graphql/plugins/auditLogger.js');
+    const { depthLimit } = await import('./graphql/validation/depthLimit.js');
     const apollo = new ApolloServer({
         schema,
         // Security plugins - Order matters for execution lifecycle
@@ -113,10 +119,10 @@ export const createApp = async () => {
             resolverMetricsPlugin,
             auditLoggerPlugin,
             // Enable PBAC in production
-            ...(process.env.NODE_ENV === 'production' ? [pbacPlugin()] : [])
+            ...(process.env.NODE_ENV === 'production' ? [pbacPlugin()] : []),
         ],
         // Security configuration based on environment
-        introspection: process.env.NODE_ENV !== "production",
+        introspection: process.env.NODE_ENV !== 'production',
         // Enhanced query validation rules
         validationRules: [
             depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
@@ -125,7 +131,7 @@ export const createApp = async () => {
         formatError: (err) => {
             // Don't expose internal errors in production
             if (process.env.NODE_ENV === 'production') {
-                logger.error(`GraphQL Error: ${err.message}`, { stack: err.stack });
+                logger.error({ err, stack: err.stack }, `GraphQL Error: ${err.message}`);
                 return new Error('Internal server error');
             }
             return err;
@@ -133,7 +139,7 @@ export const createApp = async () => {
     });
     await apollo.start();
     // Production Authentication - Use proper JWT validation
-    const { productionAuthMiddleware, applyProductionSecurity, graphqlSecurityConfig } = await import('./config/production-security.js');
+    const { productionAuthMiddleware, applyProductionSecurity, graphqlSecurityConfig, } = await import('./config/production-security.js');
     // Apply security middleware based on environment
     if (process.env.NODE_ENV === 'production') {
         applyProductionSecurity(app);
@@ -142,15 +148,19 @@ export const createApp = async () => {
         ? productionAuthMiddleware
         : (req, res, next) => {
             // Development mode - relaxed auth for easier testing
-            const authHeader = req.headers["authorization"];
-            const token = authHeader && authHeader.split(" ")[1];
+            const authHeader = req.headers['authorization'];
+            const token = authHeader && authHeader.split(' ')[1];
             if (!token) {
-                console.warn("Development: No token provided, allowing request");
-                req.user = { sub: 'dev-user', email: 'dev@intelgraph.local', role: 'admin' };
+                console.warn('Development: No token provided, allowing request');
+                req.user = {
+                    sub: 'dev-user',
+                    email: 'dev@intelgraph.local',
+                    role: 'admin',
+                };
             }
             next();
         };
-    app.use("/graphql", express.json(), authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    app.use('/graphql', express.json(), authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     expressMiddleware(apollo, { context: getContext }));
     // Start background trust worker if enabled
     startTrustWorker();

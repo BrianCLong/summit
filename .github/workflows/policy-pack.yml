@@ -82,4 +82,3 @@ jobs:
           git add "$BUNDLE_JSON" "$MANIFEST"
           git commit -m "ci(policy-pack): update digest + cosign bundle" || true
           git push || true
-

@@ -10,43 +10,16 @@ import { createHash } from 'crypto';
 import pino from 'pino';
 const logger = pino({ name: 'persistedQueries' });
 export class PersistedQueriesMiddleware {
+    manifests = new Map();
+    config;
+    isProduction;
     constructor(config = {}) {
-        this.manifests = new Map();
-        /**
-         * Express middleware for persisted query enforcement
-         */
-        this.middleware = () => {
-            return (req, res, next) => {
-                // Skip non-GraphQL requests
-                if (!this.isGraphQLRequest(req)) {
-                    return next();
-                }
-                // Development mode - allow all queries but log warnings
-                if (!this.isProduction && !this.config.enforceInProduction) {
-                    this.handleDevelopmentMode(req);
-                    return next();
-                }
-                // Production mode - enforce allowlist
-                try {
-                    this.enforcePersistedQueries(req, res, next);
-                }
-                catch (error) {
-                    logger.error(`Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`);
-                    res.status(500).json({
-                        errors: [{
-                                message: 'Internal server error',
-                                extensions: { code: 'INTERNAL_ERROR' }
-                            }]
-                    });
-                }
-            };
-        };
         this.isProduction = process.env.NODE_ENV === 'production';
         this.config = {
             manifestDirectory: config.manifestDirectory || join(process.cwd(), 'persisted-operations'),
             enforceInProduction: config.enforceInProduction ?? true,
             allowIntrospection: config.allowIntrospection ?? !this.isProduction,
-            allowPlayground: config.allowPlayground ?? !this.isProduction
+            allowPlayground: config.allowPlayground ?? !this.isProduction,
         };
     }
     /**
@@ -62,7 +35,10 @@ export class PersistedQueriesMiddleware {
                 const content = readFileSync(path, 'utf8');
                 const manifest = JSON.parse(content);
                 this.manifests.set(tenantId, manifest);
-                logger.info(`Persisted queries manifest loaded`, { tenantId, operations: Object.keys(manifest).length });
+                logger.info(`Persisted queries manifest loaded`, {
+                    tenantId,
+                    operations: Object.keys(manifest).length,
+                });
                 return manifest;
             }
             logger.warn(`Persisted queries manifest not found`, { tenantId });
@@ -70,11 +46,45 @@ export class PersistedQueriesMiddleware {
             return {};
         }
         catch (error) {
-            logger.error(`Failed to load persisted queries manifest`, { tenantId, error: error instanceof Error ? error.message : 'Unknown error' });
+            logger.error(`Failed to load persisted queries manifest`, {
+                tenantId,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
             this.manifests.set(tenantId, {});
             return {};
         }
     }
+    /**
+     * Express middleware for persisted query enforcement
+     */
+    middleware = () => {
+        return (req, res, next) => {
+            // Skip non-GraphQL requests
+            if (!this.isGraphQLRequest(req)) {
+                return next();
+            }
+            // Development mode - allow all queries but log warnings
+            if (!this.isProduction && !this.config.enforceInProduction) {
+                this.handleDevelopmentMode(req);
+                return next();
+            }
+            // Production mode - enforce allowlist
+            try {
+                this.enforcePersistedQueries(req, res, next);
+            }
+            catch (error) {
+                logger.error(`Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`);
+                res.status(500).json({
+                    errors: [
+                        {
+                            message: 'Internal server error',
+                            extensions: { code: 'INTERNAL_ERROR' },
+                        },
+                    ],
+                });
+            }
+        };
+    };
     /**
      * Check if request is a GraphQL request
      */
@@ -119,7 +129,10 @@ export class PersistedQueriesMiddleware {
                 req.body = { ...body, query: manifest[hash] };
                 return next();
             }
-            return this.rejectRequest(res, 'Persisted query not found', { hash, tenantId });
+            return this.rejectRequest(res, 'Persisted query not found', {
+                hash,
+                tenantId,
+            });
         }
         // Handle direct query ID
         if (body.id && manifest[body.id]) {
@@ -135,7 +148,7 @@ export class PersistedQueriesMiddleware {
             return this.rejectRequest(res, 'Query not in persisted operations allowlist', {
                 operationName: body.operationName,
                 queryHash: queryHash.substring(0, 8),
-                tenantId
+                tenantId,
             });
         }
         // No valid query found
@@ -168,13 +181,15 @@ export class PersistedQueriesMiddleware {
     rejectRequest(res, message, metadata) {
         logger.warn(`Persisted query request rejected. Message: ${message}, Metadata: ${JSON.stringify(metadata)}`);
         res.status(403).json({
-            errors: [{
+            errors: [
+                {
                     message,
                     extensions: {
                         code: 'PERSISTED_QUERY_NOT_FOUND',
-                        ...metadata
-                    }
-                }]
+                        ...metadata,
+                    },
+                },
+            ],
         });
     }
     /**
@@ -186,7 +201,7 @@ export class PersistedQueriesMiddleware {
             manifestLoaded: this.manifests.size > 0,
             operationCount,
             isProduction: this.isProduction,
-            enforcing: this.isProduction && this.config.enforceInProduction
+            enforcing: this.isProduction && this.config.enforceInProduction,
         };
     }
     /**

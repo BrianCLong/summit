@@ -15,7 +15,11 @@ export default function SearchBar() {
   };
   return (
     <div className="p-2 flex gap-2">
-      <input className="border" value={q} onChange={(e) => setQ(e.target.value)} />
+      <input
+        className="border"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+      />
       <button onClick={onSearch}>Search</button>
     </div>
   );

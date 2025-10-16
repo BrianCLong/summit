@@ -33,12 +33,29 @@ interface TelemetryDisplayProps {
 }
 
 const columns: GridColDef[] = [
-  { field: 'timestamp', headerName: 'Time', width: 180, valueFormatter: (params) => new Date(params.value).toLocaleString() },
+  {
+    field: 'timestamp',
+    headerName: 'Time',
+    width: 180,
+    valueFormatter: (params) => new Date(params.value).toLocaleString(),
+  },
   { field: 'platform', headerName: 'Platform', width: 100 },
   { field: 'author', headerName: 'Author', width: 150 },
   { field: 'content', headerName: 'Content', flex: 1 },
-  { field: 'sentiment', headerName: 'Sentiment', width: 100, type: 'number', renderCell: (params) => params.value.toFixed(2) },
-  { field: 'viralityScore', headerName: 'Virality', width: 100, type: 'number', renderCell: (params) => params.value.toFixed(1) },
+  {
+    field: 'sentiment',
+    headerName: 'Sentiment',
+    width: 100,
+    type: 'number',
+    renderCell: (params) => params.value.toFixed(2),
+  },
+  {
+    field: 'viralityScore',
+    headerName: 'Virality',
+    width: 100,
+    type: 'number',
+    renderCell: (params) => params.value.toFixed(1),
+  },
   { field: 'volume', headerName: 'Volume', width: 80, type: 'number' },
   { field: 'narrativeDetected', headerName: 'Narrative', width: 150 },
 ];
@@ -50,13 +67,24 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
   });
 
   if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">Error loading telemetry: {error.message}</Alert>;
+  if (error)
+    return (
+      <Alert severity="error">Error loading telemetry: {error.message}</Alert>
+    );
 
   const telemetry = data?.getCrisisTelemetry || [];
 
   const totalVolume = telemetry.reduce((sum, item) => sum + item.volume, 0);
-  const avgSentiment = telemetry.length > 0 ? telemetry.reduce((sum, item) => sum + item.sentiment, 0) / telemetry.length : 0;
-  const avgVirality = telemetry.length > 0 ? telemetry.reduce((sum, item) => sum + item.viralityScore, 0) / telemetry.length : 0;
+  const avgSentiment =
+    telemetry.length > 0
+      ? telemetry.reduce((sum, item) => sum + item.sentiment, 0) /
+        telemetry.length
+      : 0;
+  const avgVirality =
+    telemetry.length > 0
+      ? telemetry.reduce((sum, item) => sum + item.viralityScore, 0) /
+        telemetry.length
+      : 0;
 
   return (
     <Box>
@@ -64,7 +92,8 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
         Live Social Media Telemetry
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Data displayed here is simulated and for decision support only.
+        WAR-GAMED SIMULATION - Data displayed here is simulated and for decision
+        support only.
       </Alert>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -72,7 +101,9 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
           <Card>
             <CardContent>
               <Typography variant="h6">Total Volume</Typography>
-              <Typography variant="h4">{totalVolume.toLocaleString()}</Typography>
+              <Typography variant="h4">
+                {totalVolume.toLocaleString()}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>

@@ -1,55 +1,64 @@
-catalog_version: "1.0"
+catalog_version: '1.0'
 models:
 - id: zhipu-glm-4-5-suite
-    vendor: "Zhipu AI (Z.ai)"
-    family: "GLM / ChatGLM"
-    last_verified: "2025-09-25"
-    labels: ["llm","vlm","reasoning","coding","agentic"]
+    vendor: 'Zhipu AI (Z.ai)'
+    family: 'GLM / ChatGLM'
+    last_verified: '2025-09-25'
+    labels: ['llm', 'vlm', 'reasoning', 'coding', 'agentic']
     models:
-      - name: "GLM-4.5"
-        class: "flagship LLM (reasoning/coding/agents)"
-        context: "128k"
-        modes: ["thinking","fast"]
-        best_for: ["complex reasoning","artifact-codegen","agents"]
-        pricing_ref: "BigModel portal"
-        notes: "MoE; 2025-07-28 launch; agent-first"
-      - name: "GLM-4.5-Air"
-        class: "latency/cost-optimized LLM"
-        role: "default agent brain when cost/latency matter"
-      - name: "GLM-4.5V"
-        class: "VLM (image+text)"
-        context: "~66k multimodal (provider-dependent)"
-        providers: ["SiliconFlow"]
-      - name: "GLM-4 (family legacy)"
-        variants: ["GLM-4","GLM-4-Air","GLM-4-9B"]
-        purpose: "stable API docs & comparisons"
+      - name: 'GLM-4.5'
+        class: 'flagship LLM (reasoning/coding/agents)'
+        context: '128k'
+        modes: ['thinking', 'fast']
+        best_for: ['complex reasoning', 'artifact-codegen', 'agents']
+        pricing_ref: 'BigModel portal'
+        notes: 'MoE; 2025-07-28 launch; agent-first'
+      - name: 'GLM-4.5-Air'
+        class: 'latency/cost-optimized LLM'
+        role: 'default agent brain when cost/latency matter'
+      - name: 'GLM-4.5V'
+        class: 'VLM (image+text)'
+        context: '~66k multimodal (provider-dependent)'
+        providers: ['SiliconFlow']
+      - name: 'GLM-4 (family legacy)'
+        variants: ['GLM-4', 'GLM-4-Air', 'GLM-4-9B']
+        purpose: 'stable API docs & comparisons'
     open_weights:
-      - name: "GLM-4-9B-Chat"
-        license: "vendor license on HF"
-        capability: "competitive 9B; 1M ctx variant exists"
-        runtimes: ["chatglm.cpp"]
+      - name: 'GLM-4-9B-Chat'
+        license: 'vendor license on HF'
+        capability: 'competitive 9B; 1M ctx variant exists'
+        runtimes: ['chatglm.cpp']
     access_and_pricing:
-      primary_portal: "BigModel (official)"
-      mirrors: ["CometAPI","OpenRouter","SiliconFlow (VLM)"]
-      migration_note: "2025-09 Claude→GLM switch offer"
+      primary_portal: 'BigModel (official)'
+      mirrors: ['CometAPI', 'OpenRouter', 'SiliconFlow (VLM)']
+      migration_note: '2025-09 Claude→GLM switch offer'
     capability_highlights:
-      - "dual-mode execution (deep vs fast)"
-      - "long context + artifact-level code gen (HTML/SVG/Python)"
-      - "4.5V for grounded image understanding"
-      - "local/open path with 9B"
+      - 'dual-mode execution (deep vs fast)'
+      - 'long context + artifact-level code gen (HTML/SVG/Python)'
+      - '4.5V for grounded image understanding'
+      - 'local/open path with 9B'
     defaults:
       choose:
-        - "Max-IQ: GLM-4.5; fallback 4.5-Air for latency/cost"
-        - "Multimodal: GLM-4.5V"
-        - "On-prem/local: GLM-4-9B-Chat via chatglm.cpp"
+        - 'Max-IQ: GLM-4.5; fallback 4.5-Air for latency/cost'
+        - 'Multimodal: GLM-4.5V'
+        - 'On-prem/local: GLM-4-9B-Chat via chatglm.cpp'
     risk_notes:
-      - "Always verify BigModel pricing before quoting"
-      - "Provider features vary; pin per env"
-      - "Policy/geography can affect access; keep fallback"
+      - 'Always verify BigModel pricing before quoting'
+      - 'Provider features vary; pin per env'
+      - 'Policy/geography can affect access; keep fallback'
     policy:
-      license_class: "Restricted-TOS"
-      purpose_tags: ["investigation","threat-intel","fraud-risk","t&s","benchmarking","training","demo"]
-      retention: "standard-365d"
+      license_class: 'Restricted-TOS'
+      purpose_tags:
+        [
+          'investigation',
+          'threat-intel',
+          'fraud-risk',
+          't&s',
+          'benchmarking',
+          'training',
+          'demo',
+        ]
+      retention: 'standard-365d'
     slo:
       api:
         reads_p95_ms: 350
@@ -59,7 +68,7 @@ models:
         dev_monthly_usd: 1000
         prod_monthly_usd: 18000
     sources:
-      - "Reuters/Z.ai launch & blog"
-      - "BigModel pricing console"
-      - "SiliconFlow model page"
-      - "HF model cards"
+      - 'Reuters/Z.ai launch & blog'
+      - 'BigModel pricing console'
+      - 'SiliconFlow model page'
+      - 'HF model cards'

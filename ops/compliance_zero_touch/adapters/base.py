@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List
 
 from ..models.base import PolicyEvaluationResult
 
@@ -21,10 +21,10 @@ class PolicyAdapter(ABC):
     def evaluate(self, workspace: Path) -> PolicyEvaluationResult:
         """Run the adapter on provided workspace material."""
 
-    def discover_material(self, workspace: Path, patterns: Iterable[str]) -> List[Path]:
+    def discover_material(self, workspace: Path, patterns: Iterable[str]) -> list[Path]:
         """Locate files within a workspace matching provided glob patterns."""
 
-        matches: List[Path] = []
+        matches: list[Path] = []
         for pattern in patterns:
             matches.extend(workspace.rglob(pattern))
         return matches

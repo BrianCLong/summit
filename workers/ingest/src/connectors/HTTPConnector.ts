@@ -2,7 +2,11 @@ import { trace, context } from '@opentelemetry/api';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { z } from 'zod';
 import { BaseConnector } from './BaseConnector';
-import type { ConnectorConfig, IngestRecord, ProvenanceMetadata } from '../types';
+import type {
+  ConnectorConfig,
+  IngestRecord,
+  ProvenanceMetadata,
+} from '../types';
 
 const tracer = trace.getTracer('intelgraph-http-connector');
 
@@ -106,7 +110,6 @@ export class HTTPConnector extends BaseConnector {
           hasMore = this.hasMorePages(response.data, records.length);
 
           requestSpan.setStatus({ code: 1 }); // OK
-
         } catch (error) {
           requestSpan.recordException(error as Error);
           requestSpan.setStatus({ code: 2, message: (error as Error).message });
@@ -126,7 +129,6 @@ export class HTTPConnector extends BaseConnector {
         'ingest.total_records': totalRecords,
       });
       span.setStatus({ code: 1 }); // OK
-
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
@@ -148,7 +150,7 @@ export class HTTPConnector extends BaseConnector {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     this.httpClient.interceptors.response.use(
@@ -171,7 +173,7 @@ export class HTTPConnector extends BaseConnector {
           });
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -255,15 +257,24 @@ export class HTTPConnector extends BaseConnector {
   }
 
   private extractId(record: any): string {
-    return record.insight_id || record.ioc_id || record.id || `http-${Date.now()}-${Math.random()}`;
+    return (
+      record.insight_id ||
+      record.ioc_id ||
+      record.id ||
+      `http-${Date.now()}-${Math.random()}`
+    );
   }
 
   private extractType(record: any): string {
-    return record.insight_type || record.indicator_type || record.type || 'unknown';
+    return (
+      record.insight_type || record.indicator_type || record.type || 'unknown'
+    );
   }
 
   private extractName(record: any): string {
-    return record.name || record.title || record.ioc_value || record.insight_id || '';
+    return (
+      record.name || record.title || record.ioc_value || record.insight_id || ''
+    );
   }
 
   private detectPII(record: any): Record<string, boolean> {
@@ -286,8 +297,12 @@ export class HTTPConnector extends BaseConnector {
 
   private createProvenance(response: AxiosResponse): ProvenanceMetadata {
     return {
-      source_system: this.config.name === 'topicality' ? 'topicality-insights' : 'threat-intel-feed',
-      collection_method: this.config.name === 'topicality' ? 'streaming_api' : 'http_polling',
+      source_system:
+        this.config.name === 'topicality'
+          ? 'topicality-insights'
+          : 'threat-intel-feed',
+      collection_method:
+        this.config.name === 'topicality' ? 'streaming_api' : 'http_polling',
       source_url: response.config.url || this.config.url,
       collected_at: new Date().toISOString(),
       response_headers: {
@@ -300,7 +315,8 @@ export class HTTPConnector extends BaseConnector {
   private hasMorePages(data: any, recordsCount: number): boolean {
     // Check various pagination indicators
     if (data.has_more !== undefined) return data.has_more;
-    if (data.pagination?.has_next !== undefined) return data.pagination.has_next;
+    if (data.pagination?.has_next !== undefined)
+      return data.pagination.has_next;
 
     // For streaming APIs, continue if we got records
     if (this.config.name === 'topicality') {
@@ -326,7 +342,7 @@ export class HTTPConnector extends BaseConnector {
     if (this.requestCount >= this.config.rate_limiting.requests_per_minute) {
       const sleepTime = windowDuration - (now - this.windowStart);
       this.logger.info('Rate limit reached, sleeping', { sleep_ms: sleepTime });
-      await new Promise(resolve => setTimeout(resolve, sleepTime));
+      await new Promise((resolve) => setTimeout(resolve, sleepTime));
       this.requestCount = 0;
       this.windowStart = Date.now();
     }
@@ -337,24 +353,29 @@ export class HTTPConnector extends BaseConnector {
   private isRetryableError(error: any): boolean {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
-      return status === 429 || status === 502 || status === 503 || status === 504;
+      return (
+        status === 429 || status === 502 || status === 503 || status === 504
+      );
     }
     return false;
   }
 
   private async backoff(): Promise<void> {
-    const strategy = this.config.rate_limiting?.backoff_strategy || 'exponential';
+    const strategy =
+      this.config.rate_limiting?.backoff_strategy || 'exponential';
     const baseDelay = 1000;
 
     if (strategy === 'exponential') {
       const delay = baseDelay * Math.pow(2, Math.min(this.requestCount, 6));
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     } else {
-      await new Promise(resolve => setTimeout(resolve, baseDelay));
+      await new Promise((resolve) => setTimeout(resolve, baseDelay));
     }
   }
 
-  private resolveHeaders(headers: Record<string, string>): Record<string, string> {
+  private resolveHeaders(
+    headers: Record<string, string>,
+  ): Record<string, string> {
     const resolved: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(headers)) {

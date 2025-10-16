@@ -2,7 +2,12 @@
 // Provides endpoints for CRDT synchronization and offline operation management
 
 import express from 'express';
-import { crdtSyncEngine, CRDTNode, SyncRequest, SyncResponse } from './crdt-sync';
+import {
+  crdtSyncEngine,
+  CRDTNode,
+  SyncRequest,
+  SyncResponse,
+} from './crdt-sync';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import crypto from 'crypto';
 
@@ -42,7 +47,11 @@ syncRouter.post('/nodes/register', async (req, res) => {
     const registration: NodeRegistration = req.body;
     const nodeId = (req.headers['x-node-id'] as string) || crypto.randomUUID();
 
-    if (!registration.instanceId || !registration.location || !registration.version) {
+    if (
+      !registration.instanceId ||
+      !registration.location ||
+      !registration.version
+    ) {
       return res.status(400).json({
         success: false,
         message: 'instanceId, location, and version are required',
@@ -68,7 +77,10 @@ syncRouter.post('/nodes/register', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('edge_node_registered', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_node_registered',
+      true,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_registration_time',
       response.processingTime,
@@ -78,7 +90,10 @@ syncRouter.post('/nodes/register', async (req, res) => {
   } catch (error) {
     console.error('Node registration error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('edge_registration_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_registration_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -107,7 +122,11 @@ syncRouter.post('/operations/apply', async (req, res) => {
     }
 
     // Validation
-    if (!operationRequest.operation || !operationRequest.entityType || !operationRequest.entityId) {
+    if (
+      !operationRequest.operation ||
+      !operationRequest.entityType ||
+      !operationRequest.entityId
+    ) {
       return res.status(400).json({
         success: false,
         message: 'operation, entityType, and entityId are required',
@@ -131,7 +150,10 @@ syncRouter.post('/operations/apply', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('edge_operation_applied', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_operation_applied',
+      true,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_operation_time',
       response.processingTime,
@@ -141,7 +163,10 @@ syncRouter.post('/operations/apply', async (req, res) => {
   } catch (error) {
     console.error('Operation application error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('edge_operation_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_operation_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -188,8 +213,14 @@ syncRouter.post('/sync/initiate', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('edge_sync_initiated', true);
-    prometheusConductorMetrics.recordOperationalMetric('edge_sync_time', response.processingTime);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_sync_initiated',
+      true,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'edge_sync_time',
+      response.processingTime,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_sync_operations',
       syncResponse.operations.length,
@@ -249,18 +280,27 @@ syncRouter.post('/sync/receive', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('edge_operations_received', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_operations_received',
+      true,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_receive_time',
       response.processingTime,
     );
-    prometheusConductorMetrics.recordOperationalMetric('edge_receive_conflicts', conflicts.length);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'edge_receive_conflicts',
+      conflicts.length,
+    );
 
     res.json(response);
   } catch (error) {
     console.error('Operation receive error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('edge_receive_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_receive_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -313,12 +353,16 @@ syncRouter.get('/nodes', async (req, res) => {
 
     // Filter by location if specified
     if (location) {
-      nodes = nodes.filter((node) => node.location.includes(location as string));
+      nodes = nodes.filter((node) =>
+        node.location.includes(location as string),
+      );
     }
 
     // Filter by capability if specified
     if (capability) {
-      nodes = nodes.filter((node) => node.capabilities.includes(capability as string));
+      nodes = nodes.filter((node) =>
+        node.capabilities.includes(capability as string),
+      );
     }
 
     res.json({
@@ -377,7 +421,10 @@ syncRouter.post('/sync/all', async (req, res) => {
       // Parallel sync with all nodes
       const syncPromises = targetNodes.map(async (node) => {
         try {
-          const syncResponse = await crdtSyncEngine.syncWithNode(node.nodeId, maxOperationsPerNode);
+          const syncResponse = await crdtSyncEngine.syncWithNode(
+            node.nodeId,
+            maxOperationsPerNode,
+          );
           return {
             nodeId: node.nodeId,
             success: true,
@@ -410,7 +457,10 @@ syncRouter.post('/sync/all', async (req, res) => {
       // Sequential sync with each node
       for (const node of targetNodes) {
         try {
-          const syncResponse = await crdtSyncEngine.syncWithNode(node.nodeId, maxOperationsPerNode);
+          const syncResponse = await crdtSyncEngine.syncWithNode(
+            node.nodeId,
+            maxOperationsPerNode,
+          );
           syncResults.push({
             nodeId: node.nodeId,
             success: true,
@@ -427,8 +477,13 @@ syncRouter.post('/sync/all', async (req, res) => {
       }
     }
 
-    const totalOperationsSent = syncResults.reduce((sum, result) => sum + result.operationsSent, 0);
-    const successfulSyncs = syncResults.filter((result) => result.success).length;
+    const totalOperationsSent = syncResults.reduce(
+      (sum, result) => sum + result.operationsSent,
+      0,
+    );
+    const successfulSyncs = syncResults.filter(
+      (result) => result.success,
+    ).length;
 
     const response = {
       success: successfulSyncs > 0,
@@ -441,7 +496,10 @@ syncRouter.post('/sync/all', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('edge_sync_all_completed', response.success);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_sync_all_completed',
+      response.success,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'edge_sync_all_time',
       response.processingTime,
@@ -455,7 +513,10 @@ syncRouter.post('/sync/all', async (req, res) => {
   } catch (error) {
     console.error('Sync all error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('edge_sync_all_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_sync_all_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -495,13 +556,19 @@ syncRouter.post('/conflicts/resolve', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('edge_conflict_resolved', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_conflict_resolved',
+      true,
+    );
 
     res.json(response);
   } catch (error) {
     console.error('Conflict resolution error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('edge_conflict_resolution_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'edge_conflict_resolution_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -554,7 +621,8 @@ syncRouter.get('/stats/offline', async (req, res) => {
 syncRouter.get('/health', async (req, res) => {
   try {
     const status = await crdtSyncEngine.getSyncStatus();
-    const isHealthy = status.activeNodes.length > 0 && status.pendingOperations < 10000;
+    const isHealthy =
+      status.activeNodes.length > 0 && status.pendingOperations < 10000;
 
     res.status(isHealthy ? 200 : 503).json({
       success: true,
@@ -582,9 +650,14 @@ syncRouter.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`Sync API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    console.log(
+      `Sync API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`,
+    );
 
-    prometheusConductorMetrics.recordOperationalMetric('edge_api_request_duration', duration);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'edge_api_request_duration',
+      duration,
+    );
     prometheusConductorMetrics.recordOperationalEvent(
       `edge_api_${req.method.toLowerCase()}`,
       res.statusCode < 400,

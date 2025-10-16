@@ -5,8 +5,16 @@ class ReportController {
     }
     async generate(req, res) {
         try {
-            const { investigationId, title, findings, evidence, metadata, format, zip } = req.body || {};
-            const result = await this.svc.generate({ investigationId, title, findings, evidence, metadata, format, zip });
+            const { investigationId, title, findings, evidence, metadata, format, zip, } = req.body || {};
+            const result = await this.svc.generate({
+                investigationId,
+                title,
+                findings,
+                evidence,
+                metadata,
+                format,
+                zip,
+            });
             res.status(201).json({ success: true, ...result });
         }
         catch (e) {

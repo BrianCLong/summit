@@ -70,7 +70,7 @@ export class AnalystDashboardService {
   private logger: Logger;
   private readonly CACHE_TTL = 300; // 5 minutes
   private readonly BASELINE_MTTT_TARGET = 900; // 15 minutes in seconds
-  
+
   constructor(prisma: PrismaClient, redis: Redis, logger: Logger) {
     this.prisma = prisma;
     this.redis = redis;
@@ -85,10 +85,10 @@ export class AnalystDashboardService {
     timeRange: '1h' | '24h' | '7d' | '30d' | 'custom',
     startDate?: Date,
     endDate?: Date,
-    groupBy?: 'severity' | 'analyst' | 'rule'
+    groupBy?: 'severity' | 'analyst' | 'rule',
   ): Promise<MTTTMetrics> {
     const cacheKey = `mttt:${timeRange}:${startDate?.getTime()}:${endDate?.getTime()}:${groupBy}`;
-    
+
     try {
       // Check cache first
       const cached = await this.redis.get(cacheKey);
@@ -96,7 +96,11 @@ export class AnalystDashboardService {
         return JSON.parse(cached);
       }
 
-      const { start, end } = this.getTimeRangeBounds(timeRange, startDate, endDate);
+      const { start, end } = this.getTimeRangeBounds(
+        timeRange,
+        startDate,
+        endDate,
+      );
 
       // Query triage completion times
       const triageData = await this.prisma.$queryRaw`
@@ -121,18 +125,21 @@ export class AnalystDashboardService {
       }
 
       // Calculate percentiles
-      const sortedTimes = triageData.map(row => row.triage_time_seconds).sort((a, b) => a - b);
+      const sortedTimes = triageData
+        .map((row) => row.triage_time_seconds)
+        .sort((a, b) => a - b);
       const metrics: MTTTMetrics = {
         p50_seconds: this.calculatePercentile(sortedTimes, 0.5),
         p90_seconds: this.calculatePercentile(sortedTimes, 0.9),
         p95_seconds: this.calculatePercentile(sortedTimes, 0.95),
         p99_seconds: this.calculatePercentile(sortedTimes, 0.99),
-        average_seconds: sortedTimes.reduce((sum, time) => sum + time, 0) / sortedTimes.length,
+        average_seconds:
+          sortedTimes.reduce((sum, time) => sum + time, 0) / sortedTimes.length,
         total_alerts: triageData.length,
         period_start: start,
         period_end: end,
         trend_direction: 'stable',
-        trend_percentage: 0
+        trend_percentage: 0,
       };
 
       // Add grouping if requested
@@ -143,13 +150,17 @@ export class AnalystDashboardService {
       }
 
       // Calculate trend
-      const previousPeriodMetrics = await this.getPreviousPeriodMTTT(start, end);
+      const previousPeriodMetrics = await this.getPreviousPeriodMTTT(
+        start,
+        end,
+      );
       if (previousPeriodMetrics) {
         const currentAvg = metrics.average_seconds;
         const previousAvg = previousPeriodMetrics.average_seconds;
-        
-        metrics.trend_percentage = ((currentAvg - previousAvg) / previousAvg) * 100;
-        
+
+        metrics.trend_percentage =
+          ((currentAvg - previousAvg) / previousAvg) * 100;
+
         if (Math.abs(metrics.trend_percentage) < 5) {
           metrics.trend_direction = 'stable';
         } else if (metrics.trend_percentage < 0) {
@@ -167,15 +178,14 @@ export class AnalystDashboardService {
         totalAlerts: metrics.total_alerts,
         p50: metrics.p50_seconds,
         p90: metrics.p90_seconds,
-        trend: metrics.trend_direction
+        trend: metrics.trend_direction,
       });
 
       return metrics;
-
     } catch (error) {
       this.logger.error('Failed to calculate MTTT metrics', {
         timeRange,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -188,17 +198,21 @@ export class AnalystDashboardService {
     timeRange: '1h' | '24h' | '7d' | '30d' | 'custom',
     startDate?: Date,
     endDate?: Date,
-    groupBy?: 'rule' | 'category' | 'analyst'
+    groupBy?: 'rule' | 'category' | 'analyst',
   ): Promise<FalsePositiveMetrics> {
     const cacheKey = `fp:${timeRange}:${startDate?.getTime()}:${endDate?.getTime()}:${groupBy}`;
-    
+
     try {
       const cached = await this.redis.get(cacheKey);
       if (cached) {
         return JSON.parse(cached);
       }
 
-      const { start, end } = this.getTimeRangeBounds(timeRange, startDate, endDate);
+      const { start, end } = this.getTimeRangeBounds(
+        timeRange,
+        startDate,
+        endDate,
+      );
 
       // Query alert classifications
       const classificationData = await this.prisma.$queryRaw`
@@ -221,11 +235,11 @@ export class AnalystDashboardService {
 
       // Calculate FP metrics
       const totalAlerts = classificationData.length;
-      const falsePositives = classificationData.filter(row => 
-        row.classification === 'false_positive'
+      const falsePositives = classificationData.filter(
+        (row) => row.classification === 'false_positive',
       ).length;
-      const truePositives = classificationData.filter(row => 
-        row.classification === 'true_positive'
+      const truePositives = classificationData.filter(
+        (row) => row.classification === 'true_positive',
       ).length;
       const unclassified = totalAlerts - falsePositives - truePositives;
 
@@ -238,7 +252,7 @@ export class AnalystDashboardService {
         period_start: start,
         period_end: end,
         trend_direction: 'stable',
-        trend_percentage: 0
+        trend_percentage: 0,
       };
 
       // Add grouping if requested
@@ -253,10 +267,11 @@ export class AnalystDashboardService {
       if (previousPeriodMetrics) {
         const currentRate = metrics.fp_rate;
         const previousRate = previousPeriodMetrics.fp_rate;
-        
+
         if (previousRate > 0) {
-          metrics.trend_percentage = ((currentRate - previousRate) / previousRate) * 100;
-          
+          metrics.trend_percentage =
+            ((currentRate - previousRate) / previousRate) * 100;
+
           if (Math.abs(metrics.trend_percentage) < 5) {
             metrics.trend_direction = 'stable';
           } else if (metrics.trend_percentage < 0) {
@@ -274,15 +289,14 @@ export class AnalystDashboardService {
         timeRange,
         totalAlerts: metrics.total_alerts,
         fpRate: metrics.fp_rate,
-        trend: metrics.trend_direction
+        trend: metrics.trend_direction,
       });
 
       return metrics;
-
     } catch (error) {
       this.logger.error('Failed to calculate FP metrics', {
         timeRange,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -294,9 +308,13 @@ export class AnalystDashboardService {
   async getAnalystPerformanceMetrics(
     timeRange: '24h' | '7d' | '30d',
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
   ): Promise<AnalystPerformanceMetrics[]> {
-    const { start, end } = this.getTimeRangeBounds(timeRange, startDate, endDate);
+    const { start, end } = this.getTimeRangeBounds(
+      timeRange,
+      startDate,
+      endDate,
+    );
 
     const performanceData = await this.prisma.$queryRaw`
       SELECT 
@@ -318,16 +336,17 @@ export class AnalystDashboardService {
       ORDER BY avg_triage_time_seconds ASC
     `;
 
-    return performanceData.map(row => ({
+    return performanceData.map((row) => ({
       analyst_id: row.analyst_id,
       analyst_name: row.analyst_name || 'Unknown',
       alerts_triaged: row.alerts_triaged,
       avg_triage_time_seconds: Math.round(row.avg_triage_time_seconds || 0),
       accuracy_rate: Math.round((row.accuracy_rate || 0) * 100) / 100,
       escalation_rate: Math.round((row.escalation_rate || 0) * 100) / 100,
-      false_positive_rate: Math.round((row.false_positive_rate || 0) * 100) / 100,
+      false_positive_rate:
+        Math.round((row.false_positive_rate || 0) * 100) / 100,
       period_start: start,
-      period_end: end
+      period_end: end,
     }));
   }
 
@@ -337,9 +356,13 @@ export class AnalystDashboardService {
   async getAlertVolumeMetrics(
     timeRange: '24h' | '7d' | '30d',
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
   ): Promise<AlertVolumeMetrics> {
-    const { start, end } = this.getTimeRangeBounds(timeRange, startDate, endDate);
+    const { start, end } = this.getTimeRangeBounds(
+      timeRange,
+      startDate,
+      endDate,
+    );
 
     const volumeData = await this.prisma.$queryRaw`
       SELECT 
@@ -355,17 +378,20 @@ export class AnalystDashboardService {
     `;
 
     const metrics: AlertVolumeMetrics = {
-      total_alerts: volumeData.reduce((sum, row) => sum + parseInt(row.total_alerts), 0),
+      total_alerts: volumeData.reduce(
+        (sum, row) => sum + parseInt(row.total_alerts),
+        0,
+      ),
       by_hour: {},
       by_day: {},
       by_severity: {},
       by_source: {},
       period_start: start,
-      period_end: end
+      period_end: end,
     };
 
     // Group by hour, day, severity, source
-    volumeData.forEach(row => {
+    volumeData.forEach((row) => {
       const hour = row.hour?.toString() || '0';
       const day = this.getDayName(row.day_of_week);
       const severity = row.severity || 'unknown';
@@ -374,7 +400,8 @@ export class AnalystDashboardService {
 
       metrics.by_hour[hour] = (metrics.by_hour[hour] || 0) + count;
       metrics.by_day[day] = (metrics.by_day[day] || 0) + count;
-      metrics.by_severity[severity] = (metrics.by_severity[severity] || 0) + count;
+      metrics.by_severity[severity] =
+        (metrics.by_severity[severity] || 0) + count;
       metrics.by_source[source] = (metrics.by_source[source] || 0) + count;
     });
 
@@ -388,31 +415,47 @@ export class AnalystDashboardService {
     metricType: 'mttt' | 'fp' | 'analyst_performance' | 'alert_volume',
     timeRange: string,
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
   ): Promise<string> {
     let csvData = '';
 
     switch (metricType) {
       case 'mttt':
-        const mtttMetrics = await this.getMTTTMetrics(timeRange as any, startDate, endDate);
+        const mtttMetrics = await this.getMTTTMetrics(
+          timeRange as any,
+          startDate,
+          endDate,
+        );
         csvData = this.formatMTTTForCSV(mtttMetrics);
         break;
-      
+
       case 'fp':
-        const fpMetrics = await this.getFalsePositiveMetrics(timeRange as any, startDate, endDate);
+        const fpMetrics = await this.getFalsePositiveMetrics(
+          timeRange as any,
+          startDate,
+          endDate,
+        );
         csvData = this.formatFPForCSV(fpMetrics);
         break;
-      
+
       case 'analyst_performance':
-        const analystMetrics = await this.getAnalystPerformanceMetrics(timeRange as any, startDate, endDate);
+        const analystMetrics = await this.getAnalystPerformanceMetrics(
+          timeRange as any,
+          startDate,
+          endDate,
+        );
         csvData = this.formatAnalystPerformanceForCSV(analystMetrics);
         break;
-      
+
       case 'alert_volume':
-        const volumeMetrics = await this.getAlertVolumeMetrics(timeRange as any, startDate, endDate);
+        const volumeMetrics = await this.getAlertVolumeMetrics(
+          timeRange as any,
+          startDate,
+          endDate,
+        );
         csvData = this.formatAlertVolumeForCSV(volumeMetrics);
         break;
-      
+
       default:
         throw new Error(`Unsupported metric type: ${metricType}`);
     }
@@ -420,7 +463,7 @@ export class AnalystDashboardService {
     this.logger.info('Metrics exported to CSV', {
       metricType,
       timeRange,
-      dataSize: csvData.length
+      dataSize: csvData.length,
     });
 
     return csvData;
@@ -433,7 +476,7 @@ export class AnalystDashboardService {
     title: string,
     type: DashboardWidget['type'],
     config: any,
-    userId: string
+    userId: string,
   ): Promise<DashboardWidget> {
     const widget: DashboardWidget = {
       id: `widget_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -443,7 +486,7 @@ export class AnalystDashboardService {
       data: {},
       last_updated: new Date(),
       refresh_interval_seconds: config.refresh_interval || 300, // Default 5 minutes
-      enabled: true
+      enabled: true,
     };
 
     // Get initial data for widget
@@ -460,15 +503,15 @@ export class AnalystDashboardService {
         refresh_interval_seconds: widget.refresh_interval_seconds,
         enabled: widget.enabled,
         created_at: new Date(),
-        updated_at: new Date()
-      }
+        updated_at: new Date(),
+      },
     });
 
     this.logger.info('Dashboard widget created', {
       widgetId: widget.id,
       title: widget.title,
       type: widget.type,
-      userId
+      userId,
     });
 
     return widget;
@@ -478,18 +521,21 @@ export class AnalystDashboardService {
    * D2 - Feature flag & beta cohort
    * AC: allowlist; kill-switch
    */
-  async enableBetaCohort(userIds: string[], featureFlags: string[]): Promise<void> {
+  async enableBetaCohort(
+    userIds: string[],
+    featureFlags: string[],
+  ): Promise<void> {
     for (const userId of userIds) {
       for (const flag of featureFlags) {
         await this.redis.setex(
-          `beta:${flag}:${userId}`, 
+          `beta:${flag}:${userId}`,
           86400 * 30, // 30 days
-          'enabled'
+          'enabled',
         );
-        
+
         this.logger.info('Beta feature enabled for user', {
           userId,
-          feature: flag
+          feature: flag,
         });
       }
     }
@@ -502,14 +548,14 @@ export class AnalystDashboardService {
         user_ids: JSON.stringify(userIds),
         feature_flags: JSON.stringify(featureFlags),
         enabled: true,
-        created_at: new Date()
-      }
+        created_at: new Date(),
+      },
     });
   }
 
   async disableBetaCohort(cohortId: string): Promise<void> {
     const cohort = await this.prisma.betaCohort.findUnique({
-      where: { id: cohortId }
+      where: { id: cohortId },
     });
 
     if (!cohort) {
@@ -529,13 +575,16 @@ export class AnalystDashboardService {
     // Disable cohort
     await this.prisma.betaCohort.update({
       where: { id: cohortId },
-      data: { enabled: false, updated_at: new Date() }
+      data: { enabled: false, updated_at: new Date() },
     });
 
     this.logger.info('Beta cohort disabled', { cohortId });
   }
 
-  async isBetaFeatureEnabled(userId: string, feature: string): Promise<boolean> {
+  async isBetaFeatureEnabled(
+    userId: string,
+    feature: string,
+  ): Promise<boolean> {
     try {
       const enabled = await this.redis.get(`beta:${feature}:${userId}`);
       return enabled === 'enabled';
@@ -547,7 +596,7 @@ export class AnalystDashboardService {
   async killSwitchFeature(feature: string): Promise<void> {
     // Global kill switch
     await this.redis.setex(`killswitch:${feature}`, 3600, 'disabled'); // 1 hour
-    
+
     this.logger.warn('Feature kill switch activated', { feature });
   }
 
@@ -563,9 +612,9 @@ export class AnalystDashboardService {
   // Private helper methods
 
   private getTimeRangeBounds(
-    timeRange: string, 
-    startDate?: Date, 
-    endDate?: Date
+    timeRange: string,
+    startDate?: Date,
+    endDate?: Date,
   ): { start: Date; end: Date } {
     const now = new Date();
     let start: Date;
@@ -579,9 +628,9 @@ export class AnalystDashboardService {
         '1h': 60 * 60 * 1000,
         '24h': 24 * 60 * 60 * 1000,
         '7d': 7 * 24 * 60 * 60 * 1000,
-        '30d': 30 * 24 * 60 * 60 * 1000
+        '30d': 30 * 24 * 60 * 60 * 1000,
       };
-      
+
       const rangeMs = ranges[timeRange] || ranges['24h'];
       start = new Date(now.getTime() - rangeMs);
     }
@@ -589,8 +638,11 @@ export class AnalystDashboardService {
     return { start, end };
   }
 
-  private calculatePercentile(sortedValues: number[], percentile: number): number {
-    const index = (percentile * (sortedValues.length - 1));
+  private calculatePercentile(
+    sortedValues: number[],
+    percentile: number,
+  ): number {
+    const index = percentile * (sortedValues.length - 1);
     const lower = Math.floor(index);
     const upper = Math.ceil(index);
     const weight = index % 1;
@@ -613,7 +665,7 @@ export class AnalystDashboardService {
       period_start: start,
       period_end: end,
       trend_direction: 'stable',
-      trend_percentage: 0
+      trend_percentage: 0,
     };
   }
 
@@ -627,14 +679,14 @@ export class AnalystDashboardService {
       period_start: start,
       period_end: end,
       trend_direction: 'stable',
-      trend_percentage: 0
+      trend_percentage: 0,
     };
   }
 
   private groupMetricsBySeverity(triageData: any[]): Record<string, number> {
     const grouped: Record<string, number[]> = {};
-    
-    triageData.forEach(row => {
+
+    triageData.forEach((row) => {
       const severity = row.severity || 'unknown';
       if (!grouped[severity]) {
         grouped[severity] = [];
@@ -643,9 +695,10 @@ export class AnalystDashboardService {
     });
 
     const result: Record<string, number> = {};
-    Object.keys(grouped).forEach(severity => {
+    Object.keys(grouped).forEach((severity) => {
       const times = grouped[severity];
-      result[severity] = times.reduce((sum, time) => sum + time, 0) / times.length;
+      result[severity] =
+        times.reduce((sum, time) => sum + time, 0) / times.length;
     });
 
     return result;
@@ -653,8 +706,8 @@ export class AnalystDashboardService {
 
   private groupMetricsByAnalyst(triageData: any[]): Record<string, number> {
     const grouped: Record<string, number[]> = {};
-    
-    triageData.forEach(row => {
+
+    triageData.forEach((row) => {
       const analyst = row.analyst_id || 'unassigned';
       if (!grouped[analyst]) {
         grouped[analyst] = [];
@@ -663,18 +716,21 @@ export class AnalystDashboardService {
     });
 
     const result: Record<string, number> = {};
-    Object.keys(grouped).forEach(analyst => {
+    Object.keys(grouped).forEach((analyst) => {
       const times = grouped[analyst];
-      result[analyst] = times.reduce((sum, time) => sum + time, 0) / times.length;
+      result[analyst] =
+        times.reduce((sum, time) => sum + time, 0) / times.length;
     });
 
     return result;
   }
 
-  private groupFPMetricsByRule(classificationData: any[]): Record<string, number> {
+  private groupFPMetricsByRule(
+    classificationData: any[],
+  ): Record<string, number> {
     const grouped: Record<string, { total: number; fp: number }> = {};
-    
-    classificationData.forEach(row => {
+
+    classificationData.forEach((row) => {
       const rule = row.rule_id || 'unknown';
       if (!grouped[rule]) {
         grouped[rule] = { total: 0, fp: 0 };
@@ -686,7 +742,7 @@ export class AnalystDashboardService {
     });
 
     const result: Record<string, number> = {};
-    Object.keys(grouped).forEach(rule => {
+    Object.keys(grouped).forEach((rule) => {
       const data = grouped[rule];
       result[rule] = data.total > 0 ? data.fp / data.total : 0;
     });
@@ -694,10 +750,12 @@ export class AnalystDashboardService {
     return result;
   }
 
-  private groupFPMetricsByCategory(classificationData: any[]): Record<string, number> {
+  private groupFPMetricsByCategory(
+    classificationData: any[],
+  ): Record<string, number> {
     const grouped: Record<string, { total: number; fp: number }> = {};
-    
-    classificationData.forEach(row => {
+
+    classificationData.forEach((row) => {
       const category = row.category || 'unknown';
       if (!grouped[category]) {
         grouped[category] = { total: 0, fp: 0 };
@@ -709,7 +767,7 @@ export class AnalystDashboardService {
     });
 
     const result: Record<string, number> = {};
-    Object.keys(grouped).forEach(category => {
+    Object.keys(grouped).forEach((category) => {
       const data = grouped[category];
       result[category] = data.total > 0 ? data.fp / data.total : 0;
     });
@@ -717,7 +775,10 @@ export class AnalystDashboardService {
     return result;
   }
 
-  private async getPreviousPeriodMTTT(start: Date, end: Date): Promise<MTTTMetrics | null> {
+  private async getPreviousPeriodMTTT(
+    start: Date,
+    end: Date,
+  ): Promise<MTTTMetrics | null> {
     // Calculate previous period of same duration
     const duration = end.getTime() - start.getTime();
     const prevStart = new Date(start.getTime() - duration);
@@ -730,7 +791,10 @@ export class AnalystDashboardService {
     }
   }
 
-  private async getPreviousPeriodFP(start: Date, end: Date): Promise<FalsePositiveMetrics | null> {
+  private async getPreviousPeriodFP(
+    start: Date,
+    end: Date,
+  ): Promise<FalsePositiveMetrics | null> {
     const duration = end.getTime() - start.getTime();
     const prevStart = new Date(start.getTime() - duration);
     const prevEnd = new Date(start);
@@ -743,7 +807,15 @@ export class AnalystDashboardService {
   }
 
   private getDayName(dayOfWeek: number): string {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
     return days[dayOfWeek] || 'Unknown';
   }
 
@@ -752,11 +824,17 @@ export class AnalystDashboardService {
       case 'mttt':
         return await this.getMTTTMetrics(widget.config.timeRange || '24h');
       case 'false_positive_rate':
-        return await this.getFalsePositiveMetrics(widget.config.timeRange || '24h');
+        return await this.getFalsePositiveMetrics(
+          widget.config.timeRange || '24h',
+        );
       case 'analyst_performance':
-        return await this.getAnalystPerformanceMetrics(widget.config.timeRange || '7d');
+        return await this.getAnalystPerformanceMetrics(
+          widget.config.timeRange || '7d',
+        );
       case 'alert_volume':
-        return await this.getAlertVolumeMetrics(widget.config.timeRange || '24h');
+        return await this.getAlertVolumeMetrics(
+          widget.config.timeRange || '24h',
+        );
       default:
         return {};
     }
@@ -774,14 +852,14 @@ export class AnalystDashboardService {
     csv += `Total Alerts,${metrics.total_alerts},count\n`;
     csv += `Trend,${metrics.trend_direction},direction\n`;
     csv += `Trend Percentage,${metrics.trend_percentage},%\n`;
-    
+
     if (metrics.by_severity) {
       csv += '\nSeverity,Average MTTT (seconds)\n';
       Object.entries(metrics.by_severity).forEach(([severity, time]) => {
         csv += `${severity},${time}\n`;
       });
     }
-    
+
     return csv;
   }
 
@@ -793,34 +871,37 @@ export class AnalystDashboardService {
     csv += `True Positives,${metrics.true_positives}\n`;
     csv += `Unclassified,${metrics.unclassified}\n`;
     csv += `Trend,${metrics.trend_direction}\n`;
-    
+
     return csv;
   }
 
-  private formatAnalystPerformanceForCSV(metrics: AnalystPerformanceMetrics[]): string {
-    let csv = 'Analyst,Alerts Triaged,Avg Triage Time (seconds),Accuracy Rate,Escalation Rate,FP Rate\n';
-    
-    metrics.forEach(analyst => {
+  private formatAnalystPerformanceForCSV(
+    metrics: AnalystPerformanceMetrics[],
+  ): string {
+    let csv =
+      'Analyst,Alerts Triaged,Avg Triage Time (seconds),Accuracy Rate,Escalation Rate,FP Rate\n';
+
+    metrics.forEach((analyst) => {
       csv += `${analyst.analyst_name},${analyst.alerts_triaged},${analyst.avg_triage_time_seconds},${analyst.accuracy_rate},${analyst.escalation_rate},${analyst.false_positive_rate}\n`;
     });
-    
+
     return csv;
   }
 
   private formatAlertVolumeForCSV(metrics: AlertVolumeMetrics): string {
     let csv = 'Total Alerts,Period Start,Period End\n';
     csv += `${metrics.total_alerts},${metrics.period_start.toISOString()},${metrics.period_end.toISOString()}\n\n`;
-    
+
     csv += 'Hour,Alert Count\n';
     Object.entries(metrics.by_hour).forEach(([hour, count]) => {
       csv += `${hour},${count}\n`;
     });
-    
+
     csv += '\nSeverity,Alert Count\n';
     Object.entries(metrics.by_severity).forEach(([severity, count]) => {
       csv += `${severity},${count}\n`;
     });
-    
+
     return csv;
   }
 }

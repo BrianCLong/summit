@@ -1,7 +1,7 @@
-import React from "react";
-import { gql, useQuery } from "@apollo/client";
-import { Drawer, List, ListItem, ListItemText } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { gql, useQuery } from '@apollo/client';
+import { Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const SIMILAR_QUERY = gql`
   query SimilarEntities($entityId: ID!, $topK: Int!) {

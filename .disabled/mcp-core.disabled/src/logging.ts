@@ -4,5 +4,5 @@ export const createLogger = (name: string) => ({
   },
   error(message: string) {
     process.stderr.write(`[${name}] ERROR ${message}\n`);
-  }
+  },
 });

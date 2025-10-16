@@ -200,6 +200,7 @@ jobs:
     uses: actions/dependency-review-action/.github/workflows/dependency-review.yml@v4/**
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: .github/PULL_REQUEST_TEMPLATE.md
@@ -588,7 +589,7 @@ git checkout -b feature/ingest-wizard-connectors && git add -A && git commit -m 
 
 ## 5) Post‑merge next actions
 
-* Wire docker‑compose with Neo4j + OPA + Kafka; add integration tests for `shortestPath` query.
-* Add persisted query ID header enforcement at API gateway/edge.
-* Extend STIX/TAXII to 2.1 Collections (JSON, pagination, auth).
-* Add golden datasets for ER service and integrate ingest → ER pipeline topic.
+- Wire docker‑compose with Neo4j + OPA + Kafka; add integration tests for `shortestPath` query.
+- Add persisted query ID header enforcement at API gateway/edge.
+- Extend STIX/TAXII to 2.1 Collections (JSON, pagination, auth).
+- Add golden datasets for ER service and integrate ingest → ER pipeline topic.

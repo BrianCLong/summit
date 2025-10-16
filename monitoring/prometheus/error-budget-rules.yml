@@ -16,8 +16,8 @@ groups:
             sum(rate(http_requests_total{job="intelgraph-server"}[5m]))
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "availability"
+          service: 'intelgraph-server'
+          sli_type: 'availability'
 
       - record: sli:availability:rate30m
         expr: |
@@ -26,8 +26,8 @@ groups:
             sum(rate(http_requests_total{job="intelgraph-server"}[30m]))
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "availability"
+          service: 'intelgraph-server'
+          sli_type: 'availability'
 
       - record: sli:availability:rate1h
         expr: |
@@ -36,8 +36,8 @@ groups:
             sum(rate(http_requests_total{job="intelgraph-server"}[1h]))
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "availability"
+          service: 'intelgraph-server'
+          sli_type: 'availability'
 
       - record: sli:availability:rate6h
         expr: |
@@ -46,8 +46,8 @@ groups:
             sum(rate(http_requests_total{job="intelgraph-server"}[6h]))
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "availability"
+          service: 'intelgraph-server'
+          sli_type: 'availability'
 
       # Calculate latency SLI (p95 < 200ms)
       - record: sli:latency:rate5m
@@ -56,8 +56,8 @@ groups:
             histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le)) < 0.2
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "latency"
+          service: 'intelgraph-server'
+          sli_type: 'latency'
 
       - record: sli:latency:rate30m
         expr: |
@@ -65,8 +65,8 @@ groups:
             histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[30m])) by (le)) < 0.2
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "latency"
+          service: 'intelgraph-server'
+          sli_type: 'latency'
 
       - record: sli:latency:rate1h
         expr: |
@@ -74,8 +74,8 @@ groups:
             histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[1h])) by (le)) < 0.2
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "latency"
+          service: 'intelgraph-server'
+          sli_type: 'latency'
 
       - record: sli:latency:rate6h
         expr: |
@@ -83,8 +83,8 @@ groups:
             histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[6h])) by (le)) < 0.2
           )
         labels:
-          service: "intelgraph-server"
-          sli_type: "latency"
+          service: 'intelgraph-server'
+          sli_type: 'latency'
 
       # =======================
       # ERROR BUDGET CALCULATIONS
@@ -98,8 +98,8 @@ groups:
             (1 - 0.999)
           )
         labels:
-          service: "intelgraph-server"
-          slo: "99.9"
+          service: 'intelgraph-server'
+          slo: '99.9'
 
       # Error budget burn rate (how fast we're consuming error budget)
       - record: error_budget:burn_rate:5m
@@ -109,8 +109,8 @@ groups:
             (1 - 0.999)
           )
         labels:
-          service: "intelgraph-server"
-          window: "5m"
+          service: 'intelgraph-server'
+          window: '5m'
 
       - record: error_budget:burn_rate:1h
         expr: |
@@ -119,8 +119,8 @@ groups:
             (1 - 0.999)
           )
         labels:
-          service: "intelgraph-server"
-          window: "1h"
+          service: 'intelgraph-server'
+          window: '1h'
 
       # =======================
       # MULTI-WINDOW BURN RATE ALERTS
@@ -138,11 +138,11 @@ groups:
         for: 2m
         labels:
           severity: critical
-          service: "{{ $labels.service }}"
-          alert_type: "error_budget"
-          action_required: "immediate"
+          service: '{{ $labels.service }}'
+          alert_type: 'error_budget'
+          action_required: 'immediate'
         annotations:
-          summary: "Critical error budget burn rate detected"
+          summary: 'Critical error budget burn rate detected'
           description: |
             Service {{ $labels.service }} is burning error budget at {{ printf "%.2f" $value }}x
             the normal rate. At this rate, the monthly error budget will be exhausted in
@@ -152,8 +152,8 @@ groups:
             Time to budget exhaustion: {{ printf "%.1f" (div 720 $value) }} hours
 
             IMMEDIATE ACTION REQUIRED: Check for incidents, traffic spikes, or deployment issues.
-          runbook_url: "https://docs.intelgraph.com/runbooks/error-budget-burn"
-          dashboard_url: "https://grafana.intelgraph.com/d/error-budgets"
+          runbook_url: 'https://docs.intelgraph.com/runbooks/error-budget-burn'
+          dashboard_url: 'https://grafana.intelgraph.com/d/error-budgets'
 
       # HIGH: 5% budget burn in 6 hours (would exhaust budget in ~6 days)
       - alert: ErrorBudgetBurnRateHigh
@@ -165,18 +165,18 @@ groups:
         for: 15m
         labels:
           severity: high
-          service: "{{ $labels.service }}"
-          alert_type: "error_budget"
-          action_required: "soon"
+          service: '{{ $labels.service }}'
+          alert_type: 'error_budget'
+          action_required: 'soon'
         annotations:
-          summary: "High error budget burn rate detected"
+          summary: 'High error budget burn rate detected'
           description: |
             Service {{ $labels.service }} is burning error budget at {{ printf "%.2f" $value }}x
             the sustainable rate. Monitor closely and investigate if pattern continues.
 
             Current burn rate: {{ printf "%.2f" $value }}x
             Time to budget exhaustion: {{ printf "%.1f" (div 720 $value) }} hours
-          runbook_url: "https://docs.intelgraph.com/runbooks/error-budget-burn"
+          runbook_url: 'https://docs.intelgraph.com/runbooks/error-budget-burn'
 
       # MEDIUM: 10% budget burn in 3 days
       - alert: ErrorBudgetBurnRateMedium
@@ -188,11 +188,11 @@ groups:
         for: 1h
         labels:
           severity: medium
-          service: "{{ $labels.service }}"
-          alert_type: "error_budget"
-          action_required: "investigate"
+          service: '{{ $labels.service }}'
+          alert_type: 'error_budget'
+          action_required: 'investigate'
         annotations:
-          summary: "Elevated error budget consumption"
+          summary: 'Elevated error budget consumption'
           description: |
             Service {{ $labels.service }} is consuming error budget faster than sustainable.
             Review recent changes and monitor trends.
@@ -208,18 +208,18 @@ groups:
         for: 5m
         labels:
           severity: critical
-          service: "{{ $labels.service }}"
-          alert_type: "slo_breach"
-          slo_type: "availability"
-          auto_rollback: "true"
+          service: '{{ $labels.service }}'
+          alert_type: 'slo_breach'
+          slo_type: 'availability'
+          auto_rollback: 'true'
         annotations:
-          summary: "Availability SLO breach detected"
+          summary: 'Availability SLO breach detected'
           description: |
             Service {{ $labels.service }} availability has fallen below 99.9% SLO.
             Current availability: {{ printf "%.3f" (mul $value 100) }}%
 
             This will trigger auto-rollback if in canary deployment.
-          runbook_url: "https://docs.intelgraph.com/runbooks/slo-breach"
+          runbook_url: 'https://docs.intelgraph.com/runbooks/slo-breach'
 
       # Latency SLO breach
       - alert: SLOLatencyBreach
@@ -228,18 +228,18 @@ groups:
         for: 5m
         labels:
           severity: critical
-          service: "{{ $labels.service }}"
-          alert_type: "slo_breach"
-          slo_type: "latency"
-          auto_rollback: "true"
+          service: '{{ $labels.service }}'
+          alert_type: 'slo_breach'
+          slo_type: 'latency'
+          auto_rollback: 'true'
         annotations:
-          summary: "Latency SLO breach detected"
+          summary: 'Latency SLO breach detected'
           description: |
             Service {{ $labels.service }} p95 latency has exceeded 200ms SLO.
             Current p95 latency: {{ printf "%.0f" (mul $value 1000) }}ms
 
             This will trigger auto-rollback if in canary deployment.
-          runbook_url: "https://docs.intelgraph.com/runbooks/slo-breach"
+          runbook_url: 'https://docs.intelgraph.com/runbooks/slo-breach'
 
       # =======================
       # QUEUE PERFORMANCE ALERTS
@@ -251,9 +251,9 @@ groups:
         for: 10m
         labels:
           severity: high
-          alert_type: "queue_performance"
+          alert_type: 'queue_performance'
         annotations:
-          summary: "GitHub merge queue backup detected"
+          summary: 'GitHub merge queue backup detected'
           description: |
             Merge queue has {{ $value }} entries waiting longer than expected.
             Review CI performance and queue configuration.
@@ -264,9 +264,9 @@ groups:
         for: 15m
         labels:
           severity: medium
-          alert_type: "ci_performance"
+          alert_type: 'ci_performance'
         annotations:
-          summary: "CI pipeline performance degradation"
+          summary: 'CI pipeline performance degradation'
           description: |
             CI pipeline p95 duration has exceeded 8 minutes.
             Current p95 duration: {{ printf "%.1f" (div $value 60) }} minutes
@@ -281,11 +281,11 @@ groups:
         for: 5m
         labels:
           severity: critical
-          service: "{{ $labels.service }}"
-          alert_type: "error_budget_exhausted"
-          action_required: "immediate"
+          service: '{{ $labels.service }}'
+          alert_type: 'error_budget_exhausted'
+          action_required: 'immediate'
         annotations:
-          summary: "Monthly error budget exhausted"
+          summary: 'Monthly error budget exhausted'
           description: |
             Service {{ $labels.service }} has exhausted its monthly error budget.
 
@@ -295,7 +295,7 @@ groups:
             3. Post-incident review is completed
 
             This indicates significant reliability issues requiring immediate attention.
-          runbook_url: "https://docs.intelgraph.com/runbooks/error-budget-exhausted"
+          runbook_url: 'https://docs.intelgraph.com/runbooks/error-budget-exhausted'
 
       - alert: ErrorBudgetLow
         expr: |
@@ -303,14 +303,14 @@ groups:
         for: 15m
         labels:
           severity: high
-          service: "{{ $labels.service }}"
-          alert_type: "error_budget_low"
+          service: '{{ $labels.service }}'
+          alert_type: 'error_budget_low'
         annotations:
-          summary: "Error budget running low"
+          summary: 'Error budget running low'
           description: |
             Service {{ $labels.service }} has less than 10% of monthly error budget remaining.
 
             Remaining budget: {{ printf "%.1f" (mul $value 100) }}%
 
             Consider reducing deployment frequency and increasing change review rigor.
-          runbook_url: "https://docs.intelgraph.com/runbooks/error-budget-low"
+          runbook_url: 'https://docs.intelgraph.com/runbooks/error-budget-low'

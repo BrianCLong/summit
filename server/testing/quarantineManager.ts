@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { logger } from "../utils/logger";
-import { FlakeAnalysis } from "./flakeRadar";
+import { logger } from '../utils/logger';
+import { FlakeAnalysis } from './flakeRadar';
 
 export interface QuarantineEntry {
   testKey: string;
@@ -27,27 +27,28 @@ export class QuarantineManager {
     try {
       const content = await fs.readFile(this.quarantineFile, 'utf-8');
       const entries: QuarantineEntry[] = JSON.parse(content);
-      
+
       this.quarantineEntries.clear();
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         // Convert string dates back to Date objects
         entry.quarantinedAt = new Date(entry.quarantinedAt);
         if (entry.reviewDeadline) {
           entry.reviewDeadline = new Date(entry.reviewDeadline);
         }
-        
+
         this.quarantineEntries.set(entry.testKey, entry);
       });
 
-      logger.info("Quarantine list loaded", { 
-        count: this.quarantineEntries.size 
+      logger.info('Quarantine list loaded', {
+        count: this.quarantineEntries.size,
       });
-
     } catch (error: any) {
       if (error.code === 'ENOENT') {
-        logger.info("No existing quarantine file found, starting fresh");
+        logger.info('No existing quarantine file found, starting fresh');
       } else {
-        logger.error("Failed to load quarantine list", { error: error.message });
+        logger.error('Failed to load quarantine list', {
+          error: error.message,
+        });
       }
     }
   }
@@ -55,36 +56,33 @@ export class QuarantineManager {
   async saveQuarantineList(): Promise<void> {
     try {
       const entries = Array.from(this.quarantineEntries.values());
-      await fs.writeFile(
-        this.quarantineFile, 
-        JSON.stringify(entries, null, 2)
-      );
-      
-      logger.debug("Quarantine list saved", { count: entries.length });
+      await fs.writeFile(this.quarantineFile, JSON.stringify(entries, null, 2));
+
+      logger.debug('Quarantine list saved', { count: entries.length });
     } catch (error: any) {
-      logger.error("Failed to save quarantine list", { error: error.message });
+      logger.error('Failed to save quarantine list', { error: error.message });
     }
   }
 
   async quarantineTest(
-    testKey: string, 
-    reason: string, 
+    testKey: string,
+    reason: string,
     options: {
       owner?: string;
       analysis?: FlakeAnalysis;
       issueUrl?: string;
       autoQuarantined?: boolean;
       reviewDays?: number;
-    } = {}
+    } = {},
   ): Promise<void> {
     if (this.quarantineEntries.has(testKey)) {
-      logger.warn("Test already quarantined", { testKey });
+      logger.warn('Test already quarantined', { testKey });
       return;
     }
 
-    const reviewDeadline = options.reviewDays ? 
-      new Date(Date.now() + options.reviewDays * 24 * 60 * 60 * 1000) : 
-      undefined;
+    const reviewDeadline = options.reviewDays
+      ? new Date(Date.now() + options.reviewDays * 24 * 60 * 60 * 1000)
+      : undefined;
 
     const entry: QuarantineEntry = {
       testKey,
@@ -100,7 +98,7 @@ export class QuarantineManager {
     this.quarantineEntries.set(testKey, entry);
     await this.saveQuarantineList();
 
-    logger.info("Test quarantined", {
+    logger.info('Test quarantined', {
       testKey,
       reason,
       owner: options.owner,
@@ -111,16 +109,19 @@ export class QuarantineManager {
     await this.updateCIConfig();
   }
 
-  async releaseFromQuarantine(testKey: string, reason: string): Promise<boolean> {
+  async releaseFromQuarantine(
+    testKey: string,
+    reason: string,
+  ): Promise<boolean> {
     if (!this.quarantineEntries.has(testKey)) {
-      logger.warn("Test not in quarantine", { testKey });
+      logger.warn('Test not in quarantine', { testKey });
       return false;
     }
 
     this.quarantineEntries.delete(testKey);
     await this.saveQuarantineList();
 
-    logger.info("Test released from quarantine", { testKey, reason });
+    logger.info('Test released from quarantine', { testKey, reason });
 
     // Generate CI config update
     await this.updateCIConfig();
@@ -141,8 +142,8 @@ export class QuarantineManager {
 
   getTestsAwaitingReview(): QuarantineEntry[] {
     const now = new Date();
-    return this.getAllQuarantinedTests().filter(entry => 
-      entry.reviewDeadline && entry.reviewDeadline <= now
+    return this.getAllQuarantinedTests().filter(
+      (entry) => entry.reviewDeadline && entry.reviewDeadline <= now,
     );
   }
 
@@ -153,14 +154,17 @@ export class QuarantineManager {
     byOwner: Record<string, number>;
   } {
     const entries = this.getAllQuarantinedTests();
-    const autoQuarantined = entries.filter(e => e.autoQuarantined).length;
+    const autoQuarantined = entries.filter((e) => e.autoQuarantined).length;
     const awaitingReview = this.getTestsAwaitingReview().length;
-    
-    const byOwner = entries.reduce((acc, entry) => {
-      const owner = entry.owner || 'unassigned';
-      acc[owner] = (acc[owner] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+
+    const byOwner = entries.reduce(
+      (acc, entry) => {
+        const owner = entry.owner || 'unassigned';
+        acc[owner] = (acc[owner] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return {
       totalQuarantined: entries.length,
@@ -173,20 +177,20 @@ export class QuarantineManager {
   private async updateCIConfig(): Promise<void> {
     // Generate Jest/Mocha/etc. configuration to skip quarantined tests
     const quarantinedTests = Array.from(this.quarantineEntries.keys());
-    
+
     const jestConfig = {
-      testPathIgnorePatterns: quarantinedTests.map(testKey => {
+      testPathIgnorePatterns: quarantinedTests.map((testKey) => {
         // Convert test key to file pattern
         const [suite, testName] = testKey.split('::');
         return `.*${suite}.*`;
       }),
-      setupFilesAfterEnv: ['<rootDir>/jest.quarantine.setup.js']
+      setupFilesAfterEnv: ['<rootDir>/jest.quarantine.setup.js'],
     };
 
     // Write Jest configuration
     await fs.writeFile(
       path.join(process.cwd(), 'jest.quarantine.config.json'),
-      JSON.stringify(jestConfig, null, 2)
+      JSON.stringify(jestConfig, null, 2),
     );
 
     // Generate setup file for runtime skipping
@@ -213,7 +217,7 @@ beforeEach(() => {
 
     await fs.writeFile(
       path.join(process.cwd(), 'jest.quarantine.setup.js'),
-      setupContent
+      setupContent,
     );
 
     // Generate GitHub Actions workflow file snippet
@@ -227,11 +231,11 @@ beforeEach(() => {
 
     await fs.writeFile(
       path.join(process.cwd(), '.github', 'quarantine-workflow-snippet.yml'),
-      workflowSnippet
+      workflowSnippet,
     );
 
-    logger.info("CI configuration updated", { 
-      quarantinedCount: quarantinedTests.length 
+    logger.info('CI configuration updated', {
+      quarantinedCount: quarantinedTests.length,
     });
   }
 
@@ -249,30 +253,37 @@ beforeEach(() => {
 
 ## By Owner
 ${Object.entries(stats.byOwner)
-  .sort(([,a], [,b]) => b - a)
+  .sort(([, a], [, b]) => b - a)
   .map(([owner, count]) => `- **${owner}:** ${count} test(s)`)
   .join('\n')}
 
 ## Tests Awaiting Review (Past Deadline)
-${awaitingReview.length > 0 ? 
-  awaitingReview.map(entry => 
-    `- \`${entry.testKey}\` (${entry.owner || 'unassigned'}) - quarantined ${this.formatDate(entry.quarantinedAt)}`
-  ).join('\n') :
-  '*No tests awaiting review*'
+${
+  awaitingReview.length > 0
+    ? awaitingReview
+        .map(
+          (entry) =>
+            `- \`${entry.testKey}\` (${entry.owner || 'unassigned'}) - quarantined ${this.formatDate(entry.quarantinedAt)}`,
+        )
+        .join('\n')
+    : '*No tests awaiting review*'
 }
 
 ## Oldest Quarantined Tests
 ${entries
   .sort((a, b) => a.quarantinedAt.getTime() - b.quarantinedAt.getTime())
   .slice(0, 5)
-  .map(entry => 
-    `- \`${entry.testKey}\` - ${this.formatDate(entry.quarantinedAt)} (${entry.reason})`
-  ).join('\n')}
+  .map(
+    (entry) =>
+      `- \`${entry.testKey}\` - ${this.formatDate(entry.quarantinedAt)} (${entry.reason})`,
+  )
+  .join('\n')}
 
 ## Actions Required
-${awaitingReview.length > 0 ? 
-  '🚨 Review overdue quarantined tests and either fix or extend review deadline.' :
-  '✅ All quarantined tests are within review timeline.'
+${
+  awaitingReview.length > 0
+    ? '🚨 Review overdue quarantined tests and either fix or extend review deadline.'
+    : '✅ All quarantined tests are within review timeline.'
 }
 
 ---
@@ -281,8 +292,10 @@ ${awaitingReview.length > 0 ?
 
   private formatDate(date: Date): string {
     const now = new Date();
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const diffDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
     if (diffDays === 0) return 'today';
     if (diffDays === 1) return 'yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
@@ -291,22 +304,26 @@ ${awaitingReview.length > 0 ?
   }
 
   // Batch operations
-  async bulkQuarantine(testKeys: string[], reason: string, owner?: string): Promise<void> {
+  async bulkQuarantine(
+    testKeys: string[],
+    reason: string,
+    owner?: string,
+  ): Promise<void> {
     for (const testKey of testKeys) {
-      await this.quarantineTest(testKey, reason, { 
-        owner, 
+      await this.quarantineTest(testKey, reason, {
+        owner,
         autoQuarantined: true,
         reviewDays: 14,
       });
     }
-    logger.info("Bulk quarantine completed", { count: testKeys.length });
+    logger.info('Bulk quarantine completed', { count: testKeys.length });
   }
 
   async bulkRelease(testKeys: string[], reason: string): Promise<void> {
     for (const testKey of testKeys) {
       await this.releaseFromQuarantine(testKey, reason);
     }
-    logger.info("Bulk release completed", { count: testKeys.length });
+    logger.info('Bulk release completed', { count: testKeys.length });
   }
 
   // Cleanup old entries
@@ -324,11 +341,11 @@ ${awaitingReview.length > 0 ?
       for (const testKey of toRemove) {
         this.quarantineEntries.delete(testKey);
       }
-      
+
       await this.saveQuarantineList();
       await this.updateCIConfig();
 
-      logger.info("Cleaned up expired quarantine entries", { 
+      logger.info('Cleaned up expired quarantine entries', {
         removed: toRemove.length,
         maxAgeDays,
       });

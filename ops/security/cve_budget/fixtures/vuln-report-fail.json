@@ -12,12 +12,34 @@
           "sbom": "ops/security/cve_budget/fixtures/sbom-conductor-api.json",
           "signed": true,
           "attestations": [
-            {"type": "cosign", "predicateType": "https://slsa.dev/provenance/v1", "verified": true}
+            {
+              "type": "cosign",
+              "predicateType": "https://slsa.dev/provenance/v1",
+              "verified": true
+            }
           ],
           "vulnerabilities": [
-            {"id": "CVE-2024-9999", "package": "lodash", "severity": "HIGH", "cvss": 7.2, "fix_available": true},
-            {"id": "CVE-2023-7777", "package": "pg", "severity": "HIGH", "cvss": 8.1, "fix_available": true},
-            {"id": "CVE-2022-8888", "package": "express", "severity": "HIGH", "cvss": 7.8, "fix_available": false}
+            {
+              "id": "CVE-2024-9999",
+              "package": "lodash",
+              "severity": "HIGH",
+              "cvss": 7.2,
+              "fix_available": true
+            },
+            {
+              "id": "CVE-2023-7777",
+              "package": "pg",
+              "severity": "HIGH",
+              "cvss": 8.1,
+              "fix_available": true
+            },
+            {
+              "id": "CVE-2022-8888",
+              "package": "express",
+              "severity": "HIGH",
+              "cvss": 7.8,
+              "fix_available": false
+            }
           ]
         }
       ]
@@ -32,10 +54,21 @@
           "sbom": "ops/security/cve_budget/fixtures/sbom-inference-worker.json",
           "signed": false,
           "attestations": [
-            {"type": "cosign", "predicateType": "https://slsa.dev/provenance/v1", "verified": false, "reason": "signature missing"}
+            {
+              "type": "cosign",
+              "predicateType": "https://slsa.dev/provenance/v1",
+              "verified": false,
+              "reason": "signature missing"
+            }
           ],
           "vulnerabilities": [
-            {"id": "CVE-2024-55555", "package": "numpy", "severity": "MEDIUM", "cvss": 6.1, "fix_available": true}
+            {
+              "id": "CVE-2024-55555",
+              "package": "numpy",
+              "severity": "MEDIUM",
+              "cvss": 6.1,
+              "fix_available": true
+            }
           ]
         }
       ]

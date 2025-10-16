@@ -1,6 +1,5 @@
-
 area: services
 intent: perf
 budgets: { p95_ms: 350, err_rate_pct: 0.5 }
-test_impact: ["unit", "contract", "e2e"]
+test_impact: ['unit', 'contract', 'e2e']
 data: { residency: GLOBAL, pii: false }

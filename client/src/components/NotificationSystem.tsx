@@ -52,9 +52,12 @@ function NotificationSystem({
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Subscribe to real-time notifications
-  const { data: subscriptionData } = useSubscription(NOTIFICATION_SUBSCRIPTION, {
-    errorPolicy: 'all',
-  });
+  const { data: subscriptionData } = useSubscription(
+    NOTIFICATION_SUBSCRIPTION,
+    {
+      errorPolicy: 'all',
+    },
+  );
 
   // Handle new notifications from subscription
   useEffect(() => {
@@ -68,13 +71,18 @@ function NotificationSystem({
     setNotifications((prev) => {
       // Remove expired notifications
       const now = new Date();
-      const active = prev.filter((n) => !n.expiresAt || new Date(n.expiresAt) > now);
+      const active = prev.filter(
+        (n) => !n.expiresAt || new Date(n.expiresAt) > now,
+      );
 
       // Add new notification at the beginning
       const updated = [notification, ...active].slice(0, maxNotifications);
 
       // Play sound for important notifications
-      if (notification.severity === 'error' || notification.severity === 'warning') {
+      if (
+        notification.severity === 'error' ||
+        notification.severity === 'warning'
+      ) {
         playNotificationSound();
       }
 
@@ -98,7 +106,8 @@ function NotificationSystem({
   const playNotificationSound = () => {
     // Create a subtle notification sound using Web Audio API
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
 
@@ -107,7 +116,10 @@ function NotificationSystem({
 
       oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
       gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      gain.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.3,
+      );
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
@@ -174,7 +186,8 @@ function NotificationSystem({
         id: 'demo-2',
         type: 'investigation_update' as const,
         title: 'Investigation Updated',
-        message: 'New entities discovered in investigation sample-investigation',
+        message:
+          'New entities discovered in investigation sample-investigation',
         severity: 'info' as const,
         timestamp: new Date().toISOString(),
         investigationId: 'sample-investigation',
@@ -273,7 +286,13 @@ function NotificationSystem({
             </div>
 
             {notifications.length === 0 ? (
-              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#666' }}>
+              <div
+                style={{
+                  padding: '40px 20px',
+                  textAlign: 'center',
+                  color: '#666',
+                }}
+              >
                 <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔔</div>
                 <div>No notifications</div>
                 <div style={{ fontSize: '12px', marginTop: '4px' }}>
@@ -290,9 +309,18 @@ function NotificationSystem({
                     position: 'relative',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                    }}
+                  >
                     <div style={{ fontSize: '18px', marginTop: '2px' }}>
-                      {getNotificationIcon(notification.type, notification.severity)}
+                      {getNotificationIcon(
+                        notification.type,
+                        notification.severity,
+                      )}
                     </div>
 
                     <div style={{ flex: 1 }}>
@@ -349,8 +377,13 @@ function NotificationSystem({
                           color: '#999',
                         }}
                       >
-                        <span>{new Date(notification.timestamp).toLocaleTimeString()}</span>
-                        {(notification.actionId || notification.investigationId) && (
+                        <span>
+                          {new Date(
+                            notification.timestamp,
+                          ).toLocaleTimeString()}
+                        </span>
+                        {(notification.actionId ||
+                          notification.investigationId) && (
                           <span
                             style={{
                               backgroundColor: '#f3f4f6',
@@ -359,7 +392,8 @@ function NotificationSystem({
                               fontSize: '10px',
                             }}
                           >
-                            {notification.actionId || notification.investigationId}
+                            {notification.actionId ||
+                              notification.investigationId}
                           </span>
                         )}
                       </div>
@@ -394,7 +428,9 @@ function NotificationSystem({
               animation: 'slideIn 0.3s ease-out',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}
+            >
               <div style={{ fontSize: '16px' }}>
                 {getNotificationIcon(notification.type, notification.severity)}
               </div>

@@ -11,7 +11,13 @@ import {
 
 export interface GenerationInput {
   task: TaskSpec;
-  strand?: 'spec' | 'risks' | 'tests' | 'implementation' | 'counterfactual' | 'challenge';
+  strand?:
+    | 'spec'
+    | 'risks'
+    | 'tests'
+    | 'implementation'
+    | 'counterfactual'
+    | 'challenge';
   prompt: string;
   context?: Record<string, unknown>;
 }
@@ -26,10 +32,18 @@ export interface GenerationOutput {
 export interface ResourceAdapter {
   profile: CapabilityProfile;
   bid(task: TaskSpec): RouterBid;
-  generate(input: GenerationInput): Promise<GenerationOutput> | GenerationOutput;
-  critique?(artifact: CooperationArtifact): Promise<EvaluatorScore[]> | EvaluatorScore[];
-  evaluate?(artifact: CooperationArtifact): Promise<EvaluatorScore[]> | EvaluatorScore[];
-  runWorkbook?(commands: WorkbookCommand[]): Promise<WorkbookReceipt> | WorkbookReceipt;
+  generate(
+    input: GenerationInput,
+  ): Promise<GenerationOutput> | GenerationOutput;
+  critique?(
+    artifact: CooperationArtifact,
+  ): Promise<EvaluatorScore[]> | EvaluatorScore[];
+  evaluate?(
+    artifact: CooperationArtifact,
+  ): Promise<EvaluatorScore[]> | EvaluatorScore[];
+  runWorkbook?(
+    commands: WorkbookCommand[],
+  ): Promise<WorkbookReceipt> | WorkbookReceipt;
 }
 
 export class CapabilityRegistry {
@@ -52,11 +66,20 @@ export class CapabilityRegistry {
   }
 
   eligible(policy: PolicyMetadata): ResourceAdapter[] {
-    return this.list().filter((resource) => this.satisfiesPolicy(resource.profile, policy));
+    return this.list().filter((resource) =>
+      this.satisfiesPolicy(resource.profile, policy),
+    );
   }
 
-  private satisfiesPolicy(profile: CapabilityProfile, policy: PolicyMetadata): boolean {
-    if (policy.residency && profile.residency !== 'global' && profile.residency !== policy.residency) {
+  private satisfiesPolicy(
+    profile: CapabilityProfile,
+    policy: PolicyMetadata,
+  ): boolean {
+    if (
+      policy.residency &&
+      profile.residency !== 'global' &&
+      profile.residency !== policy.residency
+    ) {
       return false;
     }
     if (policy.pii && profile.safety === 'low') {

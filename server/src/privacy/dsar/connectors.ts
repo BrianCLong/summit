@@ -19,7 +19,8 @@ const clone = <T>(value: T): T => {
   return JSON.parse(JSON.stringify(value)) as T;
 };
 
-const cloneRows = (rows: PostgresRow[]): PostgresRow[] => rows.map((row) => ({ ...row, data: clone(row.data) }));
+const cloneRows = (rows: PostgresRow[]): PostgresRow[] =>
+  rows.map((row) => ({ ...row, data: clone(row.data) }));
 
 export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   public readonly name = 'postgres';
@@ -38,13 +39,19 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
     return cloneRows(
       this.rows
         .slice()
-        .sort((a, b) => `${a.subjectId}:${a.table}`.localeCompare(`${b.subjectId}:${b.table}`)),
+        .sort((a, b) =>
+          `${a.subjectId}:${a.table}`.localeCompare(
+            `${b.subjectId}:${b.table}`,
+          ),
+        ),
     );
   }
 
   async collect(subjectId: string, tenantId: string): Promise<PostgresRow[]> {
     this.calls.collect += 1;
-    return this.orderedRows().filter((row) => row.subjectId === subjectId && row.tenantId === tenantId);
+    return this.orderedRows().filter(
+      (row) => row.subjectId === subjectId && row.tenantId === tenantId,
+    );
   }
 
   async rectify(
@@ -55,7 +62,10 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
     this.calls.rectify += 1;
     Object.entries(patch).forEach(([table, value]) => {
       const target = this.rows.find(
-        (row) => row.subjectId === subjectId && row.tenantId === tenantId && row.table === table,
+        (row) =>
+          row.subjectId === subjectId &&
+          row.tenantId === tenantId &&
+          row.table === table,
       );
       if (target) {
         target.data = { ...target.data, ...(value as Record<string, unknown>) };
@@ -72,7 +82,9 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
 
   async delete(subjectId: string, tenantId: string): Promise<void> {
     this.calls.delete += 1;
-    this.rows = this.rows.filter((row) => !(row.subjectId === subjectId && row.tenantId === tenantId));
+    this.rows = this.rows.filter(
+      (row) => !(row.subjectId === subjectId && row.tenantId === tenantId),
+    );
   }
 
   async snapshot(): Promise<ConnectorSnapshot<PostgresRow[]>> {
@@ -83,7 +95,11 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   }
 
   getRows(subjectId: string, tenantId: string): PostgresRow[] {
-    return cloneRows(this.rows.filter((row) => row.subjectId === subjectId && row.tenantId === tenantId));
+    return cloneRows(
+      this.rows.filter(
+        (row) => row.subjectId === subjectId && row.tenantId === tenantId,
+      ),
+    );
   }
 }
 
@@ -95,10 +111,14 @@ export interface ElasticsearchDocument {
   body: Record<string, unknown>;
 }
 
-const cloneDocuments = (documents: ElasticsearchDocument[]): ElasticsearchDocument[] =>
+const cloneDocuments = (
+  documents: ElasticsearchDocument[],
+): ElasticsearchDocument[] =>
   documents.map((doc) => ({ ...doc, body: clone(doc.body) }));
 
-export class InMemoryElasticsearchConnector implements DSARConnector<ElasticsearchDocument[]> {
+export class InMemoryElasticsearchConnector
+  implements DSARConnector<ElasticsearchDocument[]>
+{
   public readonly name = 'elasticsearch';
   private documents: ElasticsearchDocument[];
   public readonly calls = { collect: 0, rectify: 0, delete: 0 };
@@ -108,20 +128,31 @@ export class InMemoryElasticsearchConnector implements DSARConnector<Elasticsear
   }
 
   private subjects(): string[] {
-    return Array.from(new Set(this.documents.map((doc) => doc.subjectId))).sort();
+    return Array.from(
+      new Set(this.documents.map((doc) => doc.subjectId)),
+    ).sort();
   }
 
   private orderedDocuments(): ElasticsearchDocument[] {
     return cloneDocuments(
       this.documents
         .slice()
-        .sort((a, b) => `${a.subjectId}:${a.index}:${a.id}`.localeCompare(`${b.subjectId}:${b.index}:${b.id}`)),
+        .sort((a, b) =>
+          `${a.subjectId}:${a.index}:${a.id}`.localeCompare(
+            `${b.subjectId}:${b.index}:${b.id}`,
+          ),
+        ),
     );
   }
 
-  async collect(subjectId: string, tenantId: string): Promise<ElasticsearchDocument[]> {
+  async collect(
+    subjectId: string,
+    tenantId: string,
+  ): Promise<ElasticsearchDocument[]> {
     this.calls.collect += 1;
-    return this.orderedDocuments().filter((doc) => doc.subjectId === subjectId && doc.tenantId === tenantId);
+    return this.orderedDocuments().filter(
+      (doc) => doc.subjectId === subjectId && doc.tenantId === tenantId,
+    );
   }
 
   async rectify(
@@ -132,7 +163,12 @@ export class InMemoryElasticsearchConnector implements DSARConnector<Elasticsear
     this.calls.rectify += 1;
     Object.entries(patch).forEach(([index, value]) => {
       this.documents
-        .filter((doc) => doc.subjectId === subjectId && doc.tenantId === tenantId && doc.index === index)
+        .filter(
+          (doc) =>
+            doc.subjectId === subjectId &&
+            doc.tenantId === tenantId &&
+            doc.index === index,
+        )
         .forEach((doc) => {
           doc.body = { ...doc.body, ...(value as Record<string, unknown>) };
         });
@@ -154,14 +190,21 @@ export class InMemoryElasticsearchConnector implements DSARConnector<Elasticsear
   }
 
   getDocuments(subjectId: string, tenantId: string): ElasticsearchDocument[] {
-    return cloneDocuments(this.documents.filter((doc) => doc.subjectId === subjectId && doc.tenantId === tenantId));
+    return cloneDocuments(
+      this.documents.filter(
+        (doc) => doc.subjectId === subjectId && doc.tenantId === tenantId,
+      ),
+    );
   }
 }
 
 export class InMemoryKafkaEventLog implements KafkaEventLog {
   private events: Record<string, unknown>[] = [];
 
-  async publish(topic: string, message: Record<string, unknown>): Promise<void> {
+  async publish(
+    topic: string,
+    message: Record<string, unknown>,
+  ): Promise<void> {
     this.events.push({ topic, ...clone(message) });
   }
 

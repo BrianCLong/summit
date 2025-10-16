@@ -51,25 +51,39 @@ export class EntityResolutionService {
     console.log('EntityResolutionService initialized');
   }
 
-  async findDuplicates(entityId: string, limit: number = 10, threshold: number = 0.8): Promise<EntityMatch[]> {
+  async findDuplicates(
+    entityId: string,
+    limit: number = 10,
+    threshold: number = 0.8,
+  ): Promise<EntityMatch[]> {
     // Mock implementation - in a real service this would use ML models
     return [];
   }
 
-  async bulkResolution(entityIds: string[], threshold: number = 0.8, maxClusters: number = 100): Promise<string[][]> {
+  async bulkResolution(
+    entityIds: string[],
+    threshold: number = 0.8,
+    maxClusters: number = 100,
+  ): Promise<string[][]> {
     // Mock implementation - returns clusters of similar entities
-    return entityIds.map(id => [id]);
+    return entityIds.map((id) => [id]);
   }
 
-  async trainFromFeedback(positiveExamples: any[], negativeExamples: any[]): Promise<TrainingResult> {
+  async trainFromFeedback(
+    positiveExamples: any[],
+    negativeExamples: any[],
+  ): Promise<TrainingResult> {
     return {
       success: true,
       modelVersion: '1.0.0',
-      accuracy: 0.85
+      accuracy: 0.85,
     };
   }
 
-  async calculateSimilarity(entity1Id: string, entity2Id: string): Promise<number> {
+  async calculateSimilarity(
+    entity1Id: string,
+    entity2Id: string,
+  ): Promise<number> {
     // Mock similarity calculation
     return Math.random();
   }
@@ -79,8 +93,8 @@ export class EntityResolutionService {
       accuracy: 0.85,
       precision: 0.82,
       recall: 0.78,
-      f1Score: 0.80,
-      processingTime: 150
+      f1Score: 0.8,
+      processingTime: 150,
     };
   }
 
@@ -89,21 +103,36 @@ export class EntityResolutionService {
     console.log('Feedback recorded:', feedback);
   }
 
-  async getSemanticEmbeddings(texts: string[], modelName: string = 'all-MiniLM-L6-v2'): Promise<number[][]> {
+  async getSemanticEmbeddings(
+    texts: string[],
+    modelName: string = 'all-MiniLM-L6-v2',
+  ): Promise<number[][]> {
     // Mock embeddings - in real implementation would call embedding service
-    return texts.map(() => Array(384).fill(0).map(() => Math.random()));
+    return texts.map(() =>
+      Array(384)
+        .fill(0)
+        .map(() => Math.random()),
+    );
   }
 
-  async calculateSemanticSimilarity(text1: string, text2: string, modelName: string = 'all-MiniLM-L6-v2'): Promise<number> {
+  async calculateSemanticSimilarity(
+    text1: string,
+    text2: string,
+    modelName: string = 'all-MiniLM-L6-v2',
+  ): Promise<number> {
     // Mock semantic similarity
     return Math.random();
   }
 
-  async processBatch(batchId: string, entities: any[], config?: any): Promise<void> {
+  async processBatch(
+    batchId: string,
+    entities: any[],
+    config?: any,
+  ): Promise<void> {
     this.batches.set(batchId, {
       status: 'processing',
       progress: 0,
-      total: entities.length
+      total: entities.length,
     });
 
     // Mock processing
@@ -112,17 +141,19 @@ export class EntityResolutionService {
         status: 'completed',
         progress: entities.length,
         total: entities.length,
-        results: entities.map(e => ({ ...e, processed: true }))
+        results: entities.map((e) => ({ ...e, processed: true })),
       });
     }, 1000);
   }
 
   async getBatchStatus(batchId: string): Promise<BatchStatus> {
-    return this.batches.get(batchId) || {
-      status: 'pending',
-      progress: 0,
-      total: 0
-    };
+    return (
+      this.batches.get(batchId) || {
+        status: 'pending',
+        progress: 0,
+        total: 0,
+      }
+    );
   }
 
   async getAvailableModels(): Promise<ModelInfo[]> {
@@ -131,14 +162,14 @@ export class EntityResolutionService {
         name: 'all-MiniLM-L6-v2',
         version: '1.0.0',
         loaded: this.loadedModels.has('all-MiniLM-L6-v2'),
-        type: 'sentence-transformer'
+        type: 'sentence-transformer',
       },
       {
         name: 'entity-resolution-base',
         version: '1.0.0',
         loaded: this.loadedModels.has('entity-resolution-base'),
-        type: 'classification'
-      }
+        type: 'classification',
+      },
     ];
   }
 

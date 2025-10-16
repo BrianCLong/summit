@@ -5,7 +5,14 @@ const path = require('path');
 const { Client } = require('pg');
 const neo4j = require('neo4j-driver');
 
-const fixtureRoot = path.resolve(__dirname, '..', '..', 'ops', 'devkit', 'fixtures');
+const fixtureRoot = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  'ops',
+  'devkit',
+  'fixtures',
+);
 const datasetPath = path.join(fixtureRoot, 'datasets.json');
 const graphPath = path.join(fixtureRoot, 'graph.json');
 
@@ -24,7 +31,7 @@ async function seedPostgres(fixtures) {
     port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
     user: process.env.POSTGRES_USER || 'intelgraph',
     password: process.env.POSTGRES_PASSWORD || 'dev_password',
-    database: process.env.POSTGRES_DB || 'intelgraph_dev'
+    database: process.env.POSTGRES_DB || 'intelgraph_dev',
   });
 
   await client.connect();
@@ -60,8 +67,8 @@ async function seedPostgres(fixtures) {
         entry.category,
         entry.summary,
         entry.ownerTeam || 'unknown',
-        JSON.stringify(entry.sample)
-      ]
+        JSON.stringify(entry.sample),
+      ],
     );
   }
 
@@ -78,22 +85,26 @@ async function seedNeo4j(graph) {
   const session = driver.session();
 
   try {
-    await session.run(`CREATE CONSTRAINT devkit_dataset IF NOT EXISTS FOR (d:DevkitDataset) REQUIRE d.slug IS UNIQUE`);
-    await session.run(`CREATE CONSTRAINT devkit_persona IF NOT EXISTS FOR (p:DevkitPersona) REQUIRE p.slug IS UNIQUE`);
+    await session.run(
+      `CREATE CONSTRAINT devkit_dataset IF NOT EXISTS FOR (d:DevkitDataset) REQUIRE d.slug IS UNIQUE`,
+    );
+    await session.run(
+      `CREATE CONSTRAINT devkit_persona IF NOT EXISTS FOR (p:DevkitPersona) REQUIRE p.slug IS UNIQUE`,
+    );
 
     for (const node of graph.nodes || []) {
       if (node.labels?.includes('DevkitDataset')) {
         await session.run(
           `MERGE (d:DevkitDataset { slug: $slug })
            SET d += $props`,
-          { slug: node.properties.slug, props: node.properties }
+          { slug: node.properties.slug, props: node.properties },
         );
       }
       if (node.labels?.includes('DevkitPersona')) {
         await session.run(
           `MERGE (p:DevkitPersona { slug: $slug })
            SET p += $props`,
-          { slug: node.properties.slug, props: node.properties }
+          { slug: node.properties.slug, props: node.properties },
         );
       }
     }
@@ -103,7 +114,7 @@ async function seedNeo4j(graph) {
         `MATCH (a { slug: $from }), (b { slug: $to })
          MERGE (a)-[r:${rel.type}]->(b)
          SET r += $props`,
-        { from: rel.from, to: rel.to, props: rel.properties || {} }
+        { from: rel.from, to: rel.to, props: rel.properties || {} },
       );
     }
 
@@ -124,7 +135,7 @@ async function seedOpa(fixtures) {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ value: fixtures }),
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -140,7 +151,11 @@ async function seedOpa(fixtures) {
 }
 
 async function main() {
-  const fixtures = readJson(datasetPath, { datasets: [], personas: [], cases: [] });
+  const fixtures = readJson(datasetPath, {
+    datasets: [],
+    personas: [],
+    cases: [],
+  });
   const graph = readJson(graphPath, { nodes: [], relationships: [] });
 
   await seedPostgres(fixtures);
@@ -154,4 +169,3 @@ main().catch((error) => {
   console.error('[devkit] Fixture seeding failed:', error);
   process.exit(1);
 });
-

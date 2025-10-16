@@ -3,7 +3,13 @@ import { logger } from '../utils/logger';
 import { GraphNode, GraphEdge, GraphSubnet } from './GraphAnalyticsService';
 
 export interface VisualizationLayout {
-  type: 'force' | 'hierarchical' | 'circular' | 'grid' | 'concentric' | 'breadthfirst';
+  type:
+    | 'force'
+    | 'hierarchical'
+    | 'circular'
+    | 'grid'
+    | 'concentric'
+    | 'breadthfirst';
   options: Record<string, any>;
 }
 
@@ -65,7 +71,10 @@ export interface NetworkVisualization {
   description?: string;
   config: VisualizationConfig;
   data: {
-    nodes: (GraphNode & { style: NodeStyle; position?: { x: number; y: number } })[];
+    nodes: (GraphNode & {
+      style: NodeStyle;
+      position?: { x: number; y: number };
+    })[];
     edges: (GraphEdge & { style: EdgeStyle })[];
   };
   metadata: {
@@ -140,7 +149,9 @@ export class NetworkVisualizationService {
               segment.start,
               segment.end,
             ]);
-            const pathRels = value.segments.map((segment: any) => segment.relationship);
+            const pathRels = value.segments.map(
+              (segment: any) => segment.relationship,
+            );
 
             pathNodes.forEach((nodeValue: any) => {
               const node = this.extractNode(nodeValue);
@@ -170,7 +181,11 @@ export class NetworkVisualizationService {
       if (nodeArray.length > config.performance.maxNodes) {
         if (config.performance.simplifyBeyondThreshold) {
           // Keep high-degree nodes and cluster others
-          visibleNodes = this.simplifyNetwork(nodeArray, edgeArray, config.performance.maxNodes);
+          visibleNodes = this.simplifyNetwork(
+            nodeArray,
+            edgeArray,
+            config.performance.maxNodes,
+          );
         } else {
           // Just truncate
           visibleNodes = nodeArray.slice(0, config.performance.maxNodes);
@@ -180,7 +195,8 @@ export class NetworkVisualizationService {
       // Filter edges to only include those between visible nodes
       const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
       visibleEdges = edgeArray.filter(
-        (edge) => visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target),
+        (edge) =>
+          visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target),
       );
 
       // Apply edge limit
@@ -281,7 +297,10 @@ export class NetworkVisualizationService {
     config: Partial<VisualizationConfig> = {},
   ): Promise<NetworkVisualization> {
     const defaultConfig: VisualizationConfig = {
-      layout: { type: 'force', options: { nodeRepulsion: 500, edgeLength: 100 } },
+      layout: {
+        type: 'force',
+        options: { nodeRepulsion: 500, edgeLength: 100 },
+      },
       nodeStyles: {},
       edgeStyles: {},
       filters: {},
@@ -346,7 +365,13 @@ export class NetworkVisualizationService {
         },
       },
       edgeStyles: {
-        path: { width: 3, color: '#FF9800', style: 'solid', arrow: true, curvature: 0.1 },
+        path: {
+          width: 3,
+          color: '#FF9800',
+          style: 'solid',
+          arrow: true,
+          curvature: 0.1,
+        },
       },
       filters: {},
       rendering: {
@@ -379,7 +404,11 @@ export class NetworkVisualizationService {
         LIMIT 10
         `;
 
-    return this.generateVisualization(query, { sourceId, targetId }, finalConfig);
+    return this.generateVisualization(
+      query,
+      { sourceId, targetId },
+      finalConfig,
+    );
   }
 
   async generateTimelineVisualization(
@@ -430,7 +459,10 @@ export class NetworkVisualizationService {
 
   private extractNode(nodeValue: any): GraphNode {
     return {
-      id: nodeValue.identity?.toString() || nodeValue.properties?.id || Math.random().toString(),
+      id:
+        nodeValue.identity?.toString() ||
+        nodeValue.properties?.id ||
+        Math.random().toString(),
       labels: nodeValue.labels || [],
       properties: nodeValue.properties || {},
     };
@@ -447,7 +479,10 @@ export class NetworkVisualizationService {
     };
   }
 
-  private shouldIncludeNode(node: GraphNode, filters: VisualizationConfig['filters']): boolean {
+  private shouldIncludeNode(
+    node: GraphNode,
+    filters: VisualizationConfig['filters'],
+  ): boolean {
     // Apply node label filters
     if (filters.nodeLabels && filters.nodeLabels.length > 0) {
       if (!node.labels.some((label) => filters.nodeLabels!.includes(label))) {
@@ -459,7 +494,9 @@ export class NetworkVisualizationService {
     if (filters.propertyFilters) {
       for (const filter of filters.propertyFilters) {
         const value = node.properties[filter.property];
-        if (!this.evaluatePropertyFilter(value, filter.operator, filter.value)) {
+        if (
+          !this.evaluatePropertyFilter(value, filter.operator, filter.value)
+        ) {
           return false;
         }
       }
@@ -468,7 +505,10 @@ export class NetworkVisualizationService {
     return true;
   }
 
-  private shouldIncludeEdge(edge: GraphEdge, filters: VisualizationConfig['filters']): boolean {
+  private shouldIncludeEdge(
+    edge: GraphEdge,
+    filters: VisualizationConfig['filters'],
+  ): boolean {
     // Apply relationship type filters
     if (filters.relationshipTypes && filters.relationshipTypes.length > 0) {
       if (!filters.relationshipTypes.includes(edge.type)) {
@@ -479,7 +519,11 @@ export class NetworkVisualizationService {
     return true;
   }
 
-  private evaluatePropertyFilter(value: any, operator: string, filterValue: any): boolean {
+  private evaluatePropertyFilter(
+    value: any,
+    operator: string,
+    filterValue: any,
+  ): boolean {
     switch (operator) {
       case 'eq':
         return value === filterValue;
@@ -506,7 +550,11 @@ export class NetworkVisualizationService {
     }
   }
 
-  private simplifyNetwork(nodes: GraphNode[], edges: GraphEdge[], maxNodes: number): GraphNode[] {
+  private simplifyNetwork(
+    nodes: GraphNode[],
+    edges: GraphEdge[],
+    maxNodes: number,
+  ): GraphNode[] {
     // Calculate node degrees
     const degrees = new Map<string, number>();
     nodes.forEach((node) => degrees.set(node.id, 0));
@@ -522,7 +570,10 @@ export class NetworkVisualizationService {
       .slice(0, maxNodes);
   }
 
-  private getNodeStyle(node: GraphNode, nodeStyles: Record<string, NodeStyle>): NodeStyle {
+  private getNodeStyle(
+    node: GraphNode,
+    nodeStyles: Record<string, NodeStyle>,
+  ): NodeStyle {
     // Find matching style based on node labels
     for (const label of node.labels) {
       if (nodeStyles[label]) {
@@ -538,7 +589,10 @@ export class NetworkVisualizationService {
     return this.getDefaultNodeStyle();
   }
 
-  private getEdgeStyle(edge: GraphEdge, edgeStyles: Record<string, EdgeStyle>): EdgeStyle {
+  private getEdgeStyle(
+    edge: GraphEdge,
+    edgeStyles: Record<string, EdgeStyle>,
+  ): EdgeStyle {
     if (edgeStyles[edge.type]) {
       return { ...this.getDefaultEdgeStyle(), ...edgeStyles[edge.type] };
     }
@@ -656,7 +710,10 @@ export class NetworkVisualizationService {
   private exportToGephi(visualization: NetworkVisualization): string {
     // Gephi GEXF format
     const nodes = visualization.data.nodes
-      .map((node) => `    <node id="${node.id}" label="${node.properties.name || node.id}"/>`)
+      .map(
+        (node) =>
+          `    <node id="${node.id}" label="${node.properties.name || node.id}"/>`,
+      )
       .join('\n');
 
     const edges = visualization.data.edges

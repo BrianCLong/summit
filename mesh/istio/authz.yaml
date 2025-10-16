@@ -15,7 +15,7 @@ spec:
   selector: { matchLabels: { app.kubernetes.io/name: web } }
   action: ALLOW
   rules:
-    - from: [{ source: { principals: ["cluster.local/ns/prod/sa/api"] } }]
+    - from: [{ source: { principals: ['cluster.local/ns/prod/sa/api'] } }]
       when:
         - key: request.auth.claims[scope]
-          values: ["read:web"]
+          values: ['read:web']

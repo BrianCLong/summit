@@ -37,9 +37,17 @@ const resolvers = {
     previewRouting: (_p, { input }) => {
       const t = String(input.task || '').toLowerCase();
       if (/(cypher|graph|pagerank|betweenness|neighbors|neo4j)/.test(t))
-        return { expert: 'G  PH_TOOL', reason: 'graph keywords', confidence: 0.92 };
+        return {
+          expert: 'G  PH_TOOL',
+          reason: 'graph keywords',
+          confidence: 0.92,
+        };
       if (input.maxLatencyMs < 1500)
-        return { expert: 'LLM_LIGHT', reason: 'tight latency', confidence: 0.78 };
+        return {
+          expert: 'LLM_LIGHT',
+          reason: 'tight latency',
+          confidence: 0.78,
+        };
       return { expert: 'RAG_TOOL', reason: 'default', confidence: 0.6 };
     },
   },

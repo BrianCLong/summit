@@ -8,21 +8,30 @@ import {
   numberSlot,
   stringSlot,
   type SlotValues,
-  type TestHarness
+  type TestHarness,
 } from '../src/index.js';
 
 function buildTemplate() {
   return createPromptTemplate({
     name: 'policy-brief',
     description: 'Generate policy briefs with strict slot validation.',
-    template: 'Policy for {{audience}} on {{topic}} with {{count}} actions. Mode={{mode}} Include summary={{includeSummary}}',
+    template:
+      'Policy for {{audience}} on {{topic}} with {{count}} actions. Mode={{mode}} Include summary={{includeSummary}}',
     slots: {
-      audience: stringSlot({ constraints: { minLength: 4, maxLength: 32 }, example: 'mission planners' }),
-      topic: stringSlot({ constraints: { minLength: 6, pattern: /^[A-Za-z\s]+$/ }, example: 'Resilience drills' }),
+      audience: stringSlot({
+        constraints: { minLength: 4, maxLength: 32 },
+        example: 'mission planners',
+      }),
+      topic: stringSlot({
+        constraints: { minLength: 6, pattern: /^[A-Za-z\s]+$/ },
+        example: 'Resilience drills',
+      }),
       count: numberSlot({ constraints: { min: 2, max: 4 }, example: 2 }),
-      mode: enumSlot(['strategic', 'tactical'] as const, { defaultValue: 'strategic' }),
-      includeSummary: booleanSlot({ defaultValue: true })
-    }
+      mode: enumSlot(['strategic', 'tactical'] as const, {
+        defaultValue: 'strategic',
+      }),
+      includeSummary: booleanSlot({ defaultValue: true }),
+    },
   });
 }
 
@@ -34,8 +43,8 @@ describe('generated test suites', () => {
       topic: 'Resilience drills',
       count: 3,
       mode: 'strategic',
-      includeSummary: true
-    }
+      includeSummary: true,
+    },
   });
 
   it('passes when template enforces constraints', () => {
@@ -48,13 +57,16 @@ describe('generated test suites', () => {
       ...template,
       validate(values) {
         const slots = Object.fromEntries(
-          Object.keys(template.slots).map((slot) => [slot, { valid: true, value: (values as Record<string, unknown>)[slot] }])
+          Object.keys(template.slots).map((slot) => [
+            slot,
+            { valid: true, value: (values as Record<string, unknown>)[slot] },
+          ]),
         ) as PromptValidationResult<typeof template.slots>['slots'];
         return {
           valid: true,
           slots,
           errors: [],
-          value: values as SlotValues<typeof template.slots>
+          value: values as SlotValues<typeof template.slots>,
         } satisfies PromptValidationResult<typeof template.slots>;
       },
       compile(values) {
@@ -62,18 +74,24 @@ describe('generated test suites', () => {
           name: template.name,
           description: template.description,
           template: template.template,
-          rendered: template.template.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_, key: string) => {
-            const resolved = (values as Record<string, unknown>)[key];
-            return resolved === undefined || resolved === null ? '' : String(resolved);
-          }),
+          rendered: template.template.replace(
+            /{{\s*([a-zA-Z0-9_]+)\s*}}/g,
+            (_, key: string) => {
+              const resolved = (values as Record<string, unknown>)[key];
+              return resolved === undefined || resolved === null
+                ? ''
+                : String(resolved);
+            },
+          ),
           slots: template.slots,
           values: values as SlotValues<typeof template.slots>,
-          metadata: template.metadata
+          metadata: template.metadata,
         };
       },
       render(values) {
-        return this.compile(values as SlotValues<typeof template.slots>).rendered;
-      }
+        return this.compile(values as SlotValues<typeof template.slots>)
+          .rendered;
+      },
     };
 
     const results = suite.run(broken);
@@ -92,7 +110,7 @@ describe('generated test suites', () => {
         calls.push(`it:${name}`);
         fn();
       },
-      expect
+      expect,
     };
 
     suite.register(harness);

@@ -1,10 +1,10 @@
-import Redis from "ioredis";
+import Redis from 'ioredis';
 import {
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,
-} from "../monitoring/metrics.js";
-import { getNeo4jDriver } from "../config/database.js";
-import { expandNeighborhood } from "./GraphOpsService.js";
+} from '../monitoring/metrics.js';
+import { getNeo4jDriver } from '../config/database.js';
+import { expandNeighborhood } from './GraphOpsService.js';
 
 export interface Graph {
   nodes: Array<{ id: string }>;
@@ -24,18 +24,18 @@ export class NeighborhoodCache {
   }
 
   private startBackgroundSync(): void {
-    import("node-cron")
+    import('node-cron')
       .then((cron) => {
-        cron.schedule("0 * * * *", async () => {
+        cron.schedule('0 * * * *', async () => {
           const driver = getNeo4jDriver();
           const session = driver.session();
           try {
             const ctxRes = await session.run(
-              "MATCH (n:Entity) RETURN DISTINCT n.tenantId AS tenantId, n.investigationId AS investigationId",
+              'MATCH (n:Entity) RETURN DISTINCT n.tenantId AS tenantId, n.investigationId AS investigationId',
             );
             for (const record of ctxRes.records) {
-              const tenantId = record.get("tenantId");
-              const investigationId = record.get("investigationId");
+              const tenantId = record.get('tenantId');
+              const investigationId = record.get('investigationId');
               if (!tenantId || !investigationId) continue;
               const topRes = await session.run(
                 `MATCH (e:Entity {tenantId: $tenantId, investigationId: $investigationId})-[r]-(m:Entity {tenantId: $tenantId, investigationId: $investigationId})
@@ -45,7 +45,7 @@ export class NeighborhoodCache {
                 { tenantId, investigationId },
               );
               for (const rec of topRes.records) {
-                const entityId = rec.get("id");
+                const entityId = rec.get('id');
                 const graph = await expandNeighborhood(entityId, 2, {
                   tenantId,
                   investigationId,
@@ -54,7 +54,7 @@ export class NeighborhoodCache {
               }
             }
           } catch (err) {
-            console.error("Neighborhood cache prewarm failed", err);
+            console.error('Neighborhood cache prewarm failed', err);
           } finally {
             await session.close();
           }
@@ -62,7 +62,7 @@ export class NeighborhoodCache {
       })
       .catch((err) => {
         console.error(
-          "node-cron not available, skipping neighborhood prewarm",
+          'node-cron not available, skipping neighborhood prewarm',
           err,
         );
       });
@@ -113,7 +113,7 @@ export class NeighborhoodCache {
     data: Graph,
   ): Promise<void> {
     const key = this.key(tenantId, investigationId, entityId, radius);
-    await this.redis.set(key, JSON.stringify(data), "EX", this.ttl);
+    await this.redis.set(key, JSON.stringify(data), 'EX', this.ttl);
     const ids = new Set<string>([entityId, ...data.nodes.map((n) => n.id)]);
     for (const id of ids) {
       await this.redis.sadd(this.tagKey(tenantId, investigationId, id), key);

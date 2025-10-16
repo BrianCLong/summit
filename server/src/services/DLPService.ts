@@ -1,6 +1,6 @@
 /**
  * Data Loss Prevention (DLP) Service
- * 
+ *
  * Implements automated DLP policies for the IntelGraph Maestro platform
  * including PII detection, data classification, and access controls.
  */
@@ -23,7 +23,12 @@ export interface DLPPolicy {
 }
 
 export interface DLPCondition {
-  type: 'content_match' | 'field_match' | 'metadata_match' | 'user_role' | 'tenant_id';
+  type:
+    | 'content_match'
+    | 'field_match'
+    | 'metadata_match'
+    | 'user_role'
+    | 'tenant_id';
   field?: string;
   pattern?: string;
   operator: 'contains' | 'matches' | 'equals' | 'starts_with' | 'ends_with';
@@ -68,13 +73,14 @@ class DLPService {
   private policies: Map<string, DLPPolicy> = new Map();
   private circuitBreaker: CircuitBreaker;
   private readonly cachePrefix = 'dlp:';
-  
+
   // Pre-defined PII patterns
   private readonly piiPatterns = {
     ssn: /\b\d{3}-?\d{2}-?\d{4}\b/g,
     creditCard: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
     email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-    phone: /\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
+    phone:
+      /\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
     ipAddress: /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g,
     passport: /\b[A-Z]{1,2}[0-9]{6,9}\b/g,
     driverLicense: /\b[A-Z]{1,2}[0-9]{6,12}\b/g,
@@ -92,7 +98,7 @@ class DLPService {
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 5,
       recoveryTimeout: 30000,
-      monitoringPeriod: 60000
+      monitoringPeriod: 60000,
     });
 
     this.initializeDefaultPolicies();
@@ -114,8 +120,8 @@ class DLPService {
           type: 'content_match',
           pattern: 'pii_combined',
           operator: 'matches',
-          value: this.createCombinedPIIRegex()
-        }
+          value: this.createCombinedPIIRegex(),
+        },
       ],
       actions: [
         {
@@ -123,17 +129,17 @@ class DLPService {
           severity: 'high',
           notification: {
             channels: ['slack', 'email'],
-            recipients: ['security@intelgraph.ai', 'compliance@intelgraph.ai']
-          }
+            recipients: ['security@intelgraph.ai', 'compliance@intelgraph.ai'],
+          },
         },
         {
           type: 'audit',
-          severity: 'high'
-        }
+          severity: 'high',
+        },
       ],
       exemptions: ['system', 'admin'],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     // Credentials Detection Policy
@@ -148,8 +154,9 @@ class DLPService {
           type: 'content_match',
           pattern: 'credentials',
           operator: 'matches',
-          value: /(?:api[_-]?key|secret[_-]?key|access[_-]?token|bearer[_-]?token|password)["\s]*[:=]["\s]*[A-Za-z0-9\-_=+\/]{20,}/gi
-        }
+          value:
+            /(?:api[_-]?key|secret[_-]?key|access[_-]?token|bearer[_-]?token|password)["\s]*[:=]["\s]*[A-Za-z0-9\-_=+\/]{20,}/gi,
+        },
       ],
       actions: [
         {
@@ -157,20 +164,21 @@ class DLPService {
           severity: 'critical',
           notification: {
             channels: ['slack', 'webhook'],
-            recipients: ['security-alerts@intelgraph.ai']
-          }
-        }
+            recipients: ['security-alerts@intelgraph.ai'],
+          },
+        },
       ],
       exemptions: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     // Financial Data Policy
     this.addPolicy({
       id: 'financial-data',
       name: 'Financial Data Protection',
-      description: 'Protect credit cards, bank accounts, and financial information',
+      description:
+        'Protect credit cards, bank accounts, and financial information',
       enabled: true,
       priority: 2,
       conditions: [
@@ -178,28 +186,28 @@ class DLPService {
           type: 'content_match',
           pattern: 'financial',
           operator: 'matches',
-          value: this.piiPatterns.creditCard
+          value: this.piiPatterns.creditCard,
         },
         {
           type: 'content_match',
           pattern: 'banking',
           operator: 'matches',
-          value: this.piiPatterns.bankAccount
-        }
+          value: this.piiPatterns.bankAccount,
+        },
       ],
       actions: [
         {
           type: 'encrypt',
-          severity: 'high'
+          severity: 'high',
         },
         {
           type: 'audit',
-          severity: 'high'
-        }
+          severity: 'high',
+        },
       ],
       exemptions: ['finance-team', 'compliance-officer'],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     // Healthcare Data Policy (HIPAA)
@@ -214,14 +222,14 @@ class DLPService {
           type: 'content_match',
           pattern: 'medical',
           operator: 'matches',
-          value: this.piiPatterns.medicalRecord
+          value: this.piiPatterns.medicalRecord,
         },
         {
           type: 'metadata_match',
           field: 'contentType',
           operator: 'contains',
-          value: 'medical'
-        }
+          value: 'medical',
+        },
       ],
       actions: [
         {
@@ -229,18 +237,18 @@ class DLPService {
           severity: 'critical',
           notification: {
             channels: ['email', 'slack'],
-            recipients: ['hipaa-compliance@intelgraph.ai']
-          }
-        }
+            recipients: ['hipaa-compliance@intelgraph.ai'],
+          },
+        },
       ],
       exemptions: ['healthcare-provider'],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     logger.info('DLP default policies initialized', {
       component: 'DLPService',
-      policyCount: this.policies.size
+      policyCount: this.policies.size,
     });
   }
 
@@ -249,31 +257,32 @@ class DLPService {
    */
   async scanContent(
     content: string | Record<string, any>,
-    context: DLPContext
+    context: DLPContext,
   ): Promise<DLPScanResult[]> {
     const startTime = Date.now();
-    
+
     try {
       return await this.circuitBreaker.execute(async () => {
         const results: DLPScanResult[] = [];
-        const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
-        
+        const contentStr =
+          typeof content === 'string' ? content : JSON.stringify(content);
+
         // Check cache first
         const cacheKey = `${this.cachePrefix}scan:${this.hashContent(contentStr)}:${context.tenantId}`;
         const cachedResult = await this.getCachedResult(cacheKey);
-        
+
         if (cachedResult) {
-          logger.debug('DLP scan cache hit', { 
+          logger.debug('DLP scan cache hit', {
             component: 'DLPService',
             contentSize: contentStr.length,
-            tenantId: context.tenantId
+            tenantId: context.tenantId,
           });
           return cachedResult;
         }
 
         // Apply policies in priority order
         const sortedPolicies = Array.from(this.policies.values())
-          .filter(policy => policy.enabled)
+          .filter((policy) => policy.enabled)
           .sort((a, b) => a.priority - b.priority);
 
         for (const policy of sortedPolicies) {
@@ -287,7 +296,7 @@ class DLPService {
             results.push(result);
 
             // If this is a blocking policy, stop further evaluation
-            if (policy.actions.some(action => action.type === 'block')) {
+            if (policy.actions.some((action) => action.type === 'block')) {
               break;
             }
           }
@@ -295,9 +304,9 @@ class DLPService {
 
         // Cache results for 5 minutes
         await this.cacheResult(cacheKey, results, 300);
-        
+
         const scanDuration = Date.now() - startTime;
-        
+
         // Log scan results
         logger.info('DLP content scan completed', {
           component: 'DLPService',
@@ -306,9 +315,11 @@ class DLPService {
           scanDuration,
           contentSize: contentStr.length,
           violationCount: results.length,
-          highSeverityViolations: results.filter(r => 
-            r.recommendedActions.some(a => a.severity === 'high' || a.severity === 'critical')
-          ).length
+          highSeverityViolations: results.filter((r) =>
+            r.recommendedActions.some(
+              (a) => a.severity === 'high' || a.severity === 'critical',
+            ),
+          ).length,
         });
 
         return results;
@@ -318,7 +329,7 @@ class DLPService {
         component: 'DLPService',
         error: error.message,
         tenantId: context.tenantId,
-        userId: context.userId
+        userId: context.userId,
       });
       throw error;
     }
@@ -330,7 +341,7 @@ class DLPService {
   async applyActions(
     content: string | Record<string, any>,
     scanResults: DLPScanResult[],
-    context: DLPContext
+    context: DLPContext,
   ): Promise<{
     processedContent: string | Record<string, any>;
     actionsApplied: string[];
@@ -351,12 +362,18 @@ class DLPService {
               break;
 
             case 'redact':
-              processedContent = await this.redactContent(processedContent, result);
+              processedContent = await this.redactContent(
+                processedContent,
+                result,
+              );
               actionsApplied.push('redacted');
               break;
 
             case 'encrypt':
-              processedContent = await this.encryptSensitiveData(processedContent, result);
+              processedContent = await this.encryptSensitiveData(
+                processedContent,
+                result,
+              );
               actionsApplied.push('encrypted');
               break;
 
@@ -381,7 +398,7 @@ class DLPService {
             action: action.type,
             error: error.message,
             policyId: result.policyId,
-            tenantId: context.tenantId
+            tenantId: context.tenantId,
           });
         }
       }
@@ -390,7 +407,7 @@ class DLPService {
     return {
       processedContent,
       actionsApplied,
-      blocked
+      blocked,
     };
   }
 
@@ -403,16 +420,16 @@ class DLPService {
       ...policy,
       id: policyId,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.policies.set(policyId, fullPolicy);
-    
+
     logger.info('DLP policy added', {
       component: 'DLPService',
       policyId,
       name: policy.name,
-      enabled: policy.enabled
+      enabled: policy.enabled,
     });
   }
 
@@ -443,15 +460,15 @@ class DLPService {
       ...policy,
       ...updates,
       id: policyId, // Ensure ID doesn't change
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.policies.set(policyId, updatedPolicy);
-    
+
     logger.info('DLP policy updated', {
       component: 'DLPService',
       policyId,
-      changes: Object.keys(updates)
+      changes: Object.keys(updates),
     });
 
     return true;
@@ -462,11 +479,11 @@ class DLPService {
    */
   deletePolicy(policyId: string): boolean {
     const deleted = this.policies.delete(policyId);
-    
+
     if (deleted) {
       logger.info('DLP policy deleted', {
         component: 'DLPService',
-        policyId
+        policyId,
       });
     }
 
@@ -477,7 +494,7 @@ class DLPService {
 
   private createCombinedPIIRegex(): RegExp {
     const patterns = Object.values(this.piiPatterns)
-      .map(pattern => pattern.source)
+      .map((pattern) => pattern.source)
       .join('|');
     return new RegExp(patterns, 'gi');
   }
@@ -485,7 +502,7 @@ class DLPService {
   private async evaluatePolicy(
     policy: DLPPolicy,
     content: string,
-    context: DLPContext
+    context: DLPContext,
   ): Promise<DLPScanResult> {
     const startTime = Date.now();
     const matchedConditions: DLPCondition[] = [];
@@ -499,7 +516,9 @@ class DLPService {
     }
 
     const matched = matchedConditions.length > 0;
-    const detectedEntities = matched ? this.extractDetectedEntities(content) : [];
+    const detectedEntities = matched
+      ? this.extractDetectedEntities(content)
+      : [];
 
     return {
       policyId: policy.id,
@@ -511,15 +530,15 @@ class DLPService {
         scannedAt: new Date(),
         scanDuration: Date.now() - startTime,
         contentSize: content.length,
-        detectedEntities
-      }
+        detectedEntities,
+      },
     };
   }
 
   private async evaluateCondition(
     condition: DLPCondition,
     content: string,
-    context: DLPContext
+    context: DLPContext,
   ): Promise<boolean> {
     switch (condition.type) {
       case 'content_match':
@@ -537,9 +556,18 @@ class DLPService {
     }
   }
 
-  private evaluateContentMatch(condition: DLPCondition, content: string): boolean {
-    const pattern = condition.value instanceof RegExp ? condition.value : new RegExp(condition.value as string, condition.caseSensitive ? 'g' : 'gi');
-    
+  private evaluateContentMatch(
+    condition: DLPCondition,
+    content: string,
+  ): boolean {
+    const pattern =
+      condition.value instanceof RegExp
+        ? condition.value
+        : new RegExp(
+            condition.value as string,
+            condition.caseSensitive ? 'g' : 'gi',
+          );
+
     switch (condition.operator) {
       case 'contains':
         return content.includes(condition.value as string);
@@ -556,37 +584,48 @@ class DLPService {
     }
   }
 
-  private evaluateFieldMatch(condition: DLPCondition, content: string): boolean {
+  private evaluateFieldMatch(
+    condition: DLPCondition,
+    content: string,
+  ): boolean {
     try {
       const data = JSON.parse(content);
       const fieldValue = condition.field ? data[condition.field] : content;
-      return this.evaluateContentMatch({ ...condition, type: 'content_match' }, fieldValue);
+      return this.evaluateContentMatch(
+        { ...condition, type: 'content_match' },
+        fieldValue,
+      );
     } catch {
       return false;
     }
   }
 
-  private evaluateMetadataMatch(condition: DLPCondition, context: DLPContext): boolean {
+  private evaluateMetadataMatch(
+    condition: DLPCondition,
+    context: DLPContext,
+  ): boolean {
     if (!condition.field || !context.metadata) {
       return false;
     }
-    
+
     const metadataValue = context.metadata[condition.field];
     return this.evaluateContentMatch(
       { ...condition, type: 'content_match' },
-      String(metadataValue || '')
+      String(metadataValue || ''),
     );
   }
 
   private isExempted(policy: DLPPolicy, context: DLPContext): boolean {
-    return policy.exemptions.includes(context.userRole) ||
-           policy.exemptions.includes(context.userId) ||
-           policy.exemptions.includes(context.tenantId);
+    return (
+      policy.exemptions.includes(context.userRole) ||
+      policy.exemptions.includes(context.userId) ||
+      policy.exemptions.includes(context.tenantId)
+    );
   }
 
   private extractDetectedEntities(content: string): string[] {
     const entities: string[] = [];
-    
+
     for (const [entityType, pattern] of Object.entries(this.piiPatterns)) {
       if (pattern.test(content)) {
         entities.push(entityType);
@@ -598,19 +637,20 @@ class DLPService {
 
   private async redactContent(
     content: string | Record<string, any>,
-    result: DLPScanResult
+    result: DLPScanResult,
   ): Promise<string | Record<string, any>> {
     if (typeof content === 'string') {
       let redacted = content;
-      
+
       // Apply redaction patterns based on detected entities
       for (const entityType of result.metadata.detectedEntities) {
-        const pattern = this.piiPatterns[entityType as keyof typeof this.piiPatterns];
+        const pattern =
+          this.piiPatterns[entityType as keyof typeof this.piiPatterns];
         if (pattern) {
           redacted = redacted.replace(pattern, '[REDACTED]');
         }
       }
-      
+
       return redacted;
     }
 
@@ -618,16 +658,19 @@ class DLPService {
     const redactedObject = { ...content };
     for (const [key, value] of Object.entries(redactedObject)) {
       if (typeof value === 'string') {
-        redactedObject[key] = await this.redactContent(value, result) as string;
+        redactedObject[key] = (await this.redactContent(
+          value,
+          result,
+        )) as string;
       }
     }
-    
+
     return redactedObject;
   }
 
   private async encryptSensitiveData(
     content: string | Record<string, any>,
-    result: DLPScanResult
+    result: DLPScanResult,
   ): Promise<string | Record<string, any>> {
     // Simplified encryption - in production, use proper encryption service
     const encrypted = Buffer.from(JSON.stringify(content)).toString('base64');
@@ -637,30 +680,34 @@ class DLPService {
   private async quarantineContent(
     content: string | Record<string, any>,
     result: DLPScanResult,
-    context: DLPContext
+    context: DLPContext,
   ): Promise<void> {
     const quarantineKey = `${this.cachePrefix}quarantine:${context.tenantId}:${Date.now()}`;
-    
-    await redisClient.setex(quarantineKey, 86400 * 7, JSON.stringify({
-      content,
-      scanResult: result,
-      context,
-      quarantinedAt: new Date()
-    }));
+
+    await redisClient.setex(
+      quarantineKey,
+      86400 * 7,
+      JSON.stringify({
+        content,
+        scanResult: result,
+        context,
+        quarantinedAt: new Date(),
+      }),
+    );
 
     logger.warn('Content quarantined due to DLP violation', {
       component: 'DLPService',
       quarantineKey,
       policyId: result.policyId,
       tenantId: context.tenantId,
-      userId: context.userId
+      userId: context.userId,
     });
   }
 
   private async sendNotification(
     action: DLPAction,
     result: DLPScanResult,
-    context: DLPContext
+    context: DLPContext,
   ): Promise<void> {
     if (!action.notification) return;
 
@@ -672,8 +719,8 @@ class DLPService {
         tenantId: context.tenantId,
         userId: context.userId,
         detectedEntities: result.metadata.detectedEntities,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     };
 
     // Send to configured channels
@@ -694,7 +741,7 @@ class DLPService {
         logger.error('Failed to send DLP notification', {
           component: 'DLPService',
           channel,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -703,14 +750,14 @@ class DLPService {
   private async sendAlert(
     action: DLPAction,
     result: DLPScanResult,
-    context: DLPContext
+    context: DLPContext,
   ): Promise<void> {
     await this.sendNotification(action, result, context);
   }
 
   private async auditViolation(
     result: DLPScanResult,
-    context: DLPContext
+    context: DLPContext,
   ): Promise<void> {
     const auditEntry = {
       timestamp: new Date(),
@@ -721,12 +768,12 @@ class DLPService {
       operationType: context.operationType,
       policyId: result.policyId,
       detectedEntities: result.metadata.detectedEntities,
-      confidence: result.confidence
+      confidence: result.confidence,
     };
 
     logger.warn('DLP violation audit entry', {
       component: 'DLPService',
-      ...auditEntry
+      ...auditEntry,
     });
 
     // Store in audit log database/system
@@ -747,16 +794,16 @@ class DLPService {
   }
 
   private async cacheResult(
-    key: string, 
-    results: DLPScanResult[], 
-    ttl: number
+    key: string,
+    results: DLPScanResult[],
+    ttl: number,
   ): Promise<void> {
     try {
       await redisClient.setex(key, ttl, JSON.stringify(results));
     } catch (error) {
       logger.warn('Failed to cache DLP results', {
         component: 'DLPService',
-        error: error.message
+        error: error.message,
       });
     }
   }

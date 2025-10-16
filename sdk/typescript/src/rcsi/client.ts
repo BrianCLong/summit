@@ -1,10 +1,4 @@
-import type {
-  DocumentInput,
-  IndexSnapshot,
-  Proof,
-  ReconcileReport,
-  RedactionEvent,
-} from './types';
+import type { DocumentInput, IndexSnapshot, Proof, ReconcileReport, RedactionEvent } from './types';
 import { validateProof } from './proof';
 
 export interface ClientOptions {
@@ -74,7 +68,11 @@ export class RCSIClient {
     validateProof(proof, snap);
   }
 
-  async validateTermProof(term: string, documentId: string, snapshot?: IndexSnapshot): Promise<void> {
+  async validateTermProof(
+    term: string,
+    documentId: string,
+    snapshot?: IndexSnapshot,
+  ): Promise<void> {
     const proof = await this.getTermProof(term, documentId);
     const snap = snapshot ?? (await this.snapshot());
     validateProof(proof, snap);
@@ -103,4 +101,3 @@ export class RCSIClient {
     return `${this.baseUrl}${path}`;
   }
 }
-

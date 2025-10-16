@@ -76,7 +76,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       forceRefresh?: boolean;
       timeout?: number;
       maxMemoryMB?: number;
-    } = {}
+    } = {},
   ): Promise<{
     result: Result;
     metrics: QueryMetrics;
@@ -89,14 +89,17 @@ export class Neo4jQueryOptimizer extends EventEmitter {
 
     try {
       // Step 1: Check for materialized view opportunity
-      const materializedResult = await this.checkMaterializedViews(query, parameters);
+      const materializedResult = await this.checkMaterializedViews(
+        query,
+        parameters,
+      );
       if (materializedResult) {
         optimizations.push('materialized_view');
         return {
           result: materializedResult.result,
           metrics: materializedResult.metrics,
           cacheHit: true,
-          optimizationApplied: optimizations
+          optimizationApplied: optimizations,
         };
       }
 
@@ -110,7 +113,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
             result: this.deserializeResult(cachedResult.result),
             metrics: cachedResult.metrics,
             cacheHit: true,
-            optimizationApplied: optimizations
+            optimizationApplied: optimizations,
           };
         }
       }
@@ -120,7 +123,11 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       optimizations.push('complexity_analysis');
 
       // Step 4: Apply query optimizations
-      const optimizedQuery = await this.optimizeQuery(query, parameters, complexity);
+      const optimizedQuery = await this.optimizeQuery(
+        query,
+        parameters,
+        complexity,
+      );
       if (optimizedQuery !== query) {
         optimizations.push('query_rewrite');
       }
@@ -128,23 +135,34 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       // Step 5: Execute with appropriate timeouts and limits
       const session = this.driver.session({
         defaultAccessMode: this.getAccessMode(query),
-        database: 'neo4j'
+        database: 'neo4j',
       });
 
       const timeout = options.timeout || complexity.timeoutMs;
       const result = await Promise.race([
         session.run(optimizedQuery, parameters),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout exceeded')), timeout)
-        )
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Query timeout exceeded')),
+            timeout,
+          ),
+        ),
       ]);
 
       const executionTime = Date.now() - startTime;
-      const metrics = await this.extractMetrics(result, executionTime, complexity);
+      const metrics = await this.extractMetrics(
+        result,
+        executionTime,
+        complexity,
+      );
 
       // Step 6: Cache the result if appropriate
-      if (options.useCache !== false && this.shouldCacheQuery(complexity, metrics)) {
-        const ttl = options.cacheTtl || this.calculateCacheTtl(complexity, metrics);
+      if (
+        options.useCache !== false &&
+        this.shouldCacheQuery(complexity, metrics)
+      ) {
+        const ttl =
+          options.cacheTtl || this.calculateCacheTtl(complexity, metrics);
         await this.cacheResult(queryHash, result, metrics, complexity, ttl);
         optimizations.push('result_caching');
       }
@@ -158,21 +176,20 @@ export class Neo4jQueryOptimizer extends EventEmitter {
         queryHash,
         executionTime,
         optimizations,
-        complexity: complexity.score
+        complexity: complexity.score,
       });
 
       return {
         result,
         metrics,
         cacheHit: false,
-        optimizationApplied: optimizations
+        optimizationApplied: optimizations,
       };
-
     } catch (error) {
       this.emit('queryError', {
         queryHash,
         error: error.message,
-        executionTime: Date.now() - startTime
+        executionTime: Date.now() - startTime,
       });
       throw error;
     }
@@ -183,7 +200,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
    */
   private async analyzeQueryComplexity(
     query: string,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<QueryComplexity> {
     const factors = {
       nodeTraversals: 0,
@@ -191,18 +208,24 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       aggregations: 0,
       sorting: 0,
       filtering: 0,
-      textSearch: 0
+      textSearch: 0,
     };
 
     const queryLower = query.toLowerCase();
 
     // Analyze query patterns
     factors.nodeTraversals = (queryLower.match(/match\s*\(/g) || []).length;
-    factors.relationshipTraversals = (queryLower.match(/-\[.*?\]-/g) || []).length;
-    factors.aggregations = (queryLower.match(/\b(count|sum|avg|min|max|collect)\s*\(/g) || []).length;
+    factors.relationshipTraversals = (
+      queryLower.match(/-\[.*?\]-/g) || []
+    ).length;
+    factors.aggregations = (
+      queryLower.match(/\b(count|sum|avg|min|max|collect)\s*\(/g) || []
+    ).length;
     factors.sorting = (queryLower.match(/\border\s+by\b/g) || []).length;
     factors.filtering = (queryLower.match(/\bwhere\b/g) || []).length;
-    factors.textSearch = (queryLower.match(/\b(contains|starts\s+with|ends\s+with|=~)\b/g) || []).length;
+    factors.textSearch = (
+      queryLower.match(/\b(contains|starts\s+with|ends\s+with|=~)\b/g) || []
+    ).length;
 
     // Calculate complexity score (0-1 scale)
     let score = 0;
@@ -236,7 +259,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       factors,
       estimatedCost,
       timeoutMs,
-      memoryMB
+      memoryMB,
     };
   }
 
@@ -246,7 +269,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   private async optimizeQuery(
     query: string,
     parameters: Record<string, any>,
-    complexity: QueryComplexity
+    complexity: QueryComplexity,
   ): Promise<string> {
     let optimizedQuery = query;
 
@@ -288,7 +311,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
         refreshIntervalMinutes: 15,
         lastRefresh: 0,
         dependencies: ['Entity', 'RELATIONSHIP'],
-        parameters: {}
+        parameters: {},
       },
       {
         name: 'investigation_entity_counts',
@@ -301,7 +324,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
         refreshIntervalMinutes: 5,
         lastRefresh: 0,
         dependencies: ['Investigation', 'Entity', 'CONTAINS'],
-        parameters: {}
+        parameters: {},
       },
       {
         name: 'recent_high_value_entities',
@@ -317,11 +340,11 @@ export class Neo4jQueryOptimizer extends EventEmitter {
         refreshIntervalMinutes: 2,
         lastRefresh: 0,
         dependencies: ['Entity', 'RELATIONSHIP'],
-        parameters: {}
-      }
+        parameters: {},
+      },
     ];
 
-    commonViews.forEach(view => {
+    commonViews.forEach((view) => {
       this.materializedViews.set(view.name, view);
     });
 
@@ -344,14 +367,17 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     }
   }
 
-  private async refreshMaterializedView(name: string, view: MaterializedView): Promise<void> {
+  private async refreshMaterializedView(
+    name: string,
+    view: MaterializedView,
+  ): Promise<void> {
     const session = this.driver.session();
     const startTime = Date.now();
 
     try {
       const result = await session.run(view.query, view.parameters);
-      const records = result.records.map(record => record.toObject());
-      
+      const records = result.records.map((record) => record.toObject());
+
       // Cache the materialized view result
       const cacheKey = `${this.MATERIALIZED_VIEW_PREFIX}${name}`;
       if (this.redis) {
@@ -361,18 +387,17 @@ export class Neo4jQueryOptimizer extends EventEmitter {
           JSON.stringify({
             records,
             refreshedAt: Date.now(),
-            executionTimeMs: Date.now() - startTime
-          })
+            executionTimeMs: Date.now() - startTime,
+          }),
         );
       }
 
       view.lastRefresh = Date.now();
-      
+
       logger.info(`Refreshed materialized view ${name}`, {
         recordCount: records.length,
-        executionTimeMs: Date.now() - startTime
+        executionTimeMs: Date.now() - startTime,
       });
-
     } finally {
       await session.close();
     }
@@ -380,23 +405,37 @@ export class Neo4jQueryOptimizer extends EventEmitter {
 
   private async checkMaterializedViews(
     query: string,
-    parameters: Record<string, any>
+    parameters: Record<string, any>,
   ): Promise<{ result: any; metrics: QueryMetrics } | null> {
     // Simplified pattern matching for materialized views
     const queryLower = query.toLowerCase().replace(/\s+/g, ' ').trim();
 
     // Check for entity centrality queries
-    if (queryLower.includes('size') && queryLower.includes('relationship') && queryLower.includes('order by')) {
+    if (
+      queryLower.includes('size') &&
+      queryLower.includes('relationship') &&
+      queryLower.includes('order by')
+    ) {
       return await this.getMaterializedViewResult('entity_degree_centrality');
     }
 
     // Check for investigation summary queries
-    if (queryLower.includes('investigation') && queryLower.includes('count') && queryLower.includes('entity')) {
-      return await this.getMaterializedViewResult('investigation_entity_counts');
+    if (
+      queryLower.includes('investigation') &&
+      queryLower.includes('count') &&
+      queryLower.includes('entity')
+    ) {
+      return await this.getMaterializedViewResult(
+        'investigation_entity_counts',
+      );
     }
 
     // Check for recent high-value entity queries
-    if (queryLower.includes('createdat') && queryLower.includes('duration') && queryLower.includes('relationship')) {
+    if (
+      queryLower.includes('createdat') &&
+      queryLower.includes('duration') &&
+      queryLower.includes('relationship')
+    ) {
       return await this.getMaterializedViewResult('recent_high_value_entities');
     }
 
@@ -404,7 +443,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   }
 
   private async getMaterializedViewResult(
-    viewName: string
+    viewName: string,
   ): Promise<{ result: any; metrics: QueryMetrics } | null> {
     if (!this.redis) return null;
 
@@ -423,8 +462,8 @@ export class Neo4jQueryOptimizer extends EventEmitter {
         dbHits: 0,
         allocatedBytes: 0,
         pageCacheHits: 100,
-        pageCacheMisses: 0
-      }
+        pageCacheMisses: 0,
+      },
     };
   }
 
@@ -434,11 +473,14 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   private addIndexHints(query: string): string {
     // Add USING INDEX hints for known high-cardinality properties
     let optimized = query;
-    
+
     const indexHints = [
       { pattern: /WHERE\s+e\.id\s*=/, hint: ' USING INDEX e:Entity(id) ' },
       { pattern: /WHERE\s+u\.email\s*=/, hint: ' USING INDEX u:User(email) ' },
-      { pattern: /WHERE\s+i\.id\s*=/, hint: ' USING INDEX i:Investigation(id) ' }
+      {
+        pattern: /WHERE\s+i\.id\s*=/,
+        hint: ' USING INDEX i:Investigation(id) ',
+      },
     ];
 
     indexHints.forEach(({ pattern, hint }) => {
@@ -480,7 +522,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     const baseTimeout = 5000; // 5 seconds
     const maxTimeout = 120000; // 2 minutes
 
-    return Math.min(baseTimeout + (complexityScore * 60000), maxTimeout);
+    return Math.min(baseTimeout + complexityScore * 60000, maxTimeout);
   }
 
   private calculateMemoryRequirement(score: number, factors: any): number {
@@ -496,20 +538,27 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   /**
    * 🚀 Caching utilities
    */
-  private generateQueryHash(query: string, parameters: Record<string, any>): string {
+  private generateQueryHash(
+    query: string,
+    parameters: Record<string, any>,
+  ): string {
     const normalized = query.toLowerCase().replace(/\s+/g, ' ').trim();
     const paramStr = JSON.stringify(parameters, Object.keys(parameters).sort());
-    return createHash('md5').update(normalized + paramStr).digest('hex');
+    return createHash('md5')
+      .update(normalized + paramStr)
+      .digest('hex');
   }
 
-  private async getCachedResult(queryHash: string): Promise<CachedQueryResult | null> {
+  private async getCachedResult(
+    queryHash: string,
+  ): Promise<CachedQueryResult | null> {
     if (!this.redis) return null;
 
     const cached = await this.redis.get(`${this.CACHE_PREFIX}${queryHash}`);
     if (!cached) return null;
 
     const result: CachedQueryResult = JSON.parse(cached);
-    
+
     // Check if cache entry is still valid
     const age = Date.now() - result.timestamp;
     if (age > result.ttlSeconds * 1000) {
@@ -525,7 +574,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     result: Result,
     metrics: QueryMetrics,
     complexity: QueryComplexity,
-    ttlSeconds: number
+    ttlSeconds: number,
   ): Promise<void> {
     if (!this.redis) return;
 
@@ -535,30 +584,37 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       metrics,
       timestamp: Date.now(),
       ttlSeconds,
-      complexity
+      complexity,
     };
 
     await this.redis.setex(
       `${this.CACHE_PREFIX}${queryHash}`,
       ttlSeconds,
-      JSON.stringify(cachedData)
+      JSON.stringify(cachedData),
     );
   }
 
-  private shouldCacheQuery(complexity: QueryComplexity, metrics: QueryMetrics): boolean {
+  private shouldCacheQuery(
+    complexity: QueryComplexity,
+    metrics: QueryMetrics,
+  ): boolean {
     // Cache expensive queries that took longer than 1 second
     if (metrics.executionTimeMs > 1000) return true;
-    
+
     // Cache complex queries regardless of execution time
     if (complexity.score > 0.5) return true;
-    
+
     // Cache queries that return many results
-    if (metrics.nodesReturned + metrics.relationshipsReturned > 100) return true;
-    
+    if (metrics.nodesReturned + metrics.relationshipsReturned > 100)
+      return true;
+
     return false;
   }
 
-  private calculateCacheTtl(complexity: QueryComplexity, metrics: QueryMetrics): number {
+  private calculateCacheTtl(
+    complexity: QueryComplexity,
+    metrics: QueryMetrics,
+  ): number {
     let ttl = 300; // 5 minutes base
 
     // Longer TTL for expensive queries
@@ -579,7 +635,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   private async extractMetrics(
     result: Result,
     executionTime: number,
-    complexity: QueryComplexity
+    complexity: QueryComplexity,
   ): Promise<QueryMetrics> {
     const summary = result.summary;
     const profile = summary.profile;
@@ -592,23 +648,26 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       dbHits: profile?.dbHits || 0,
       allocatedBytes: 0, // Neo4j doesn't expose this in summary
       pageCacheHits: profile?.pageCacheHits || 0,
-      pageCacheMisses: profile?.pageCacheMisses || 0
+      pageCacheMisses: profile?.pageCacheMisses || 0,
     };
   }
 
-  private async updateQueryStats(queryHash: string, metrics: QueryMetrics): Promise<void> {
+  private async updateQueryStats(
+    queryHash: string,
+    metrics: QueryMetrics,
+  ): Promise<void> {
     if (!this.redis) return;
 
     const statsKey = `${this.QUERY_STATS_PREFIX}${queryHash}`;
     const stats = this.queryStats.get(queryHash) || [];
-    
+
     stats.push(metrics);
-    
+
     // Keep only last 100 executions
     if (stats.length > 100) {
       stats.shift();
     }
-    
+
     this.queryStats.set(queryHash, stats);
 
     // Also store aggregated stats in Redis
@@ -619,17 +678,18 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   private aggregateStats(stats: QueryMetrics[]): any {
     if (stats.length === 0) return null;
 
-    const executionTimes = stats.map(s => s.executionTimeMs);
-    const dbHits = stats.map(s => s.dbHits);
-    
+    const executionTimes = stats.map((s) => s.executionTimeMs);
+    const dbHits = stats.map((s) => s.dbHits);
+
     return {
       count: stats.length,
-      avgExecutionTime: executionTimes.reduce((a, b) => a + b, 0) / stats.length,
+      avgExecutionTime:
+        executionTimes.reduce((a, b) => a + b, 0) / stats.length,
       minExecutionTime: Math.min(...executionTimes),
       maxExecutionTime: Math.max(...executionTimes),
       p95ExecutionTime: this.percentile(executionTimes, 0.95),
       avgDbHits: dbHits.reduce((a, b) => a + b, 0) / stats.length,
-      lastExecuted: Date.now()
+      lastExecuted: Date.now(),
     };
   }
 
@@ -644,16 +704,16 @@ export class Neo4jQueryOptimizer extends EventEmitter {
    */
   private serializeResult(result: Result): any {
     return {
-      records: result.records.map(record => ({
+      records: result.records.map((record) => ({
         keys: record.keys,
-        _fields: record._fields.map(field => this.serializeValue(field))
+        _fields: record._fields.map((field) => this.serializeValue(field)),
       })),
       summary: {
         queryType: result.summary.queryType,
         counters: result.summary.counters,
         resultAvailableAfter: result.summary.resultAvailableAfter,
-        resultConsumedAfter: result.summary.resultConsumedAfter
-      }
+        resultConsumedAfter: result.summary.resultConsumedAfter,
+      },
     };
   }
 
@@ -675,9 +735,9 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   private getAccessMode(query: string): string {
     const writeKeywords = ['create', 'merge', 'set', 'delete', 'remove'];
     const queryLower = query.toLowerCase();
-    
-    return writeKeywords.some(keyword => queryLower.includes(keyword)) 
-      ? 'WRITE' 
+
+    return writeKeywords.some((keyword) => queryLower.includes(keyword))
+      ? 'WRITE'
       : 'READ';
   }
 
@@ -694,25 +754,26 @@ export class Neo4jQueryOptimizer extends EventEmitter {
 
   async getPerformanceStats(): Promise<any> {
     const allStats = Array.from(this.queryStats.values()).flat();
-    
+
     if (allStats.length === 0) {
       return {
         totalQueries: 0,
         avgExecutionTime: 0,
         cacheHitRate: 0,
-        materializedViewsCount: this.materializedViews.size
+        materializedViewsCount: this.materializedViews.size,
       };
     }
 
-    const executionTimes = allStats.map(s => s.executionTimeMs);
-    
+    const executionTimes = allStats.map((s) => s.executionTimeMs);
+
     return {
       totalQueries: allStats.length,
-      avgExecutionTime: executionTimes.reduce((a, b) => a + b, 0) / allStats.length,
+      avgExecutionTime:
+        executionTimes.reduce((a, b) => a + b, 0) / allStats.length,
       p95ExecutionTime: this.percentile(executionTimes, 0.95),
       p99ExecutionTime: this.percentile(executionTimes, 0.99),
       materializedViewsCount: this.materializedViews.size,
-      activeCacheEntries: this.redis ? await this.redis.dbsize() : 0
+      activeCacheEntries: this.redis ? await this.redis.dbsize() : 0,
     };
   }
 
@@ -722,12 +783,16 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   async clearCache(pattern?: string): Promise<void> {
     if (!this.redis) return;
 
-    const searchPattern = pattern ? `${this.CACHE_PREFIX}*${pattern}*` : `${this.CACHE_PREFIX}*`;
+    const searchPattern = pattern
+      ? `${this.CACHE_PREFIX}*${pattern}*`
+      : `${this.CACHE_PREFIX}*`;
     const keys = await this.redis.keys(searchPattern);
-    
+
     if (keys.length > 0) {
       await this.redis.del(...keys);
-      logger.info(`Cleared ${keys.length} cache entries matching pattern: ${searchPattern}`);
+      logger.info(
+        `Cleared ${keys.length} cache entries matching pattern: ${searchPattern}`,
+      );
     }
   }
 
@@ -742,15 +807,15 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       available: true,
       queryCache: {
         entries: queryKeys.length,
-        memoryUsage: await this.estimateCacheMemoryUsage(queryKeys)
+        memoryUsage: await this.estimateCacheMemoryUsage(queryKeys),
       },
       materializedViews: {
         entries: viewKeys.length,
-        memoryUsage: await this.estimateCacheMemoryUsage(viewKeys)
+        memoryUsage: await this.estimateCacheMemoryUsage(viewKeys),
       },
       queryStats: {
-        entries: statsKeys.length
-      }
+        entries: statsKeys.length,
+      },
     };
   }
 
@@ -770,6 +835,6 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     }
 
     const avgSize = totalSize / sampleSize;
-    return Math.round((avgSize * keys.length) / 1024 / 1024 * 100) / 100; // MB
+    return Math.round(((avgSize * keys.length) / 1024 / 1024) * 100) / 100; // MB
   }
 }

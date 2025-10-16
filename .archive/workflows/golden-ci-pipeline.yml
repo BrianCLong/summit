@@ -503,7 +503,14 @@ jobs:
     name: '📢 Notify & Cleanup'
     permissions:
       deployments: write
-    needs: [quality-gates, build-sign-sbom, deploy-dev, deploy-uat, deploy-production]
+    needs:
+      [
+        quality-gates,
+        build-sign-sbom,
+        deploy-dev,
+        deploy-uat,
+        deploy-production,
+      ]
     if: always()
     runs-on: ubuntu-latest
 

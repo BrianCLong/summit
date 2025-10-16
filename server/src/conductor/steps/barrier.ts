@@ -4,4 +4,3 @@ export async function barrierStep(ctx: any, step: any) {
   await ctx.waitForSteps(deps);
   ctx.log?.('info', `barrier passed for deps: ${deps.join(',')}`);
 }
-

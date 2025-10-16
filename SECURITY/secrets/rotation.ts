@@ -8,7 +8,12 @@ import { EventEmitter } from 'events';
 
 export interface SecretConfig {
   name: string;
-  type: 'api_key' | 'certificate' | 'password' | 'signing_key' | 'encryption_key';
+  type:
+    | 'api_key'
+    | 'certificate'
+    | 'password'
+    | 'signing_key'
+    | 'encryption_key';
   rotationInterval: number; // seconds
   gracePeriod: number; // seconds for dual-key overlap
   autoRotate: boolean;
@@ -67,7 +72,11 @@ export class SecretsManager extends EventEmitter {
   /**
    * Create initial secret version
    */
-  createSecret(secretName: string, value: string, metadata: Record<string, any> = {}): SecretVersion {
+  createSecret(
+    secretName: string,
+    value: string,
+    metadata: Record<string, any> = {},
+  ): SecretVersion {
     const config = this.secrets.get(secretName);
     if (!config) {
       throw new Error(`Secret ${secretName} not registered`);
@@ -80,7 +89,7 @@ export class SecretsManager extends EventEmitter {
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + config.rotationInterval * 1000),
       status: 'active',
-      metadata
+      metadata,
     };
 
     versions.push(version);
@@ -93,14 +102,17 @@ export class SecretsManager extends EventEmitter {
   /**
    * Rotate a secret with zero-downtime strategy
    */
-  async rotateSecret(secretName: string, force = false): Promise<RotationResult> {
+  async rotateSecret(
+    secretName: string,
+    force = false,
+  ): Promise<RotationResult> {
     const config = this.secrets.get(secretName);
     if (!config) {
       throw new Error(`Secret ${secretName} not registered`);
     }
 
     const versions = this.versions.get(secretName) || [];
-    const currentVersion = versions.find(v => v.status === 'active');
+    const currentVersion = versions.find((v) => v.status === 'active');
 
     if (!currentVersion) {
       throw new Error(`No active version found for secret ${secretName}`);
@@ -115,12 +127,15 @@ export class SecretsManager extends EventEmitter {
         success: false,
         affectedServices: [],
         rollbackAvailable: false,
-        errors: ['Rotation not needed - secret not expired']
+        errors: ['Rotation not needed - secret not expired'],
       };
     }
 
     try {
-      this.emit('rotation_started', { secretName, currentVersion: currentVersion.version });
+      this.emit('rotation_started', {
+        secretName,
+        currentVersion: currentVersion.version,
+      });
 
       // Generate new secret
       const newSecret = this.generateSecret(config.type);
@@ -130,7 +145,7 @@ export class SecretsManager extends EventEmitter {
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + config.rotationInterval * 1000),
         status: 'pending',
-        metadata: { rotatedFrom: currentVersion.version }
+        metadata: { rotatedFrom: currentVersion.version },
       };
 
       versions.push(newVersion);
@@ -139,7 +154,11 @@ export class SecretsManager extends EventEmitter {
       await this.deploySecret(secretName, newVersion, config.destinations);
 
       // Update service configurations
-      await this.updateServiceConfigurations(secretName, newVersion, config.dependencies);
+      await this.updateServiceConfigurations(
+        secretName,
+        newVersion,
+        config.dependencies,
+      );
 
       // Activate new version
       newVersion.status = 'active';
@@ -156,17 +175,16 @@ export class SecretsManager extends EventEmitter {
         newVersion: newVersion.version,
         success: true,
         affectedServices: config.dependencies,
-        rollbackAvailable: true
+        rollbackAvailable: true,
       };
 
       this.emit('rotation_completed', result);
       return result;
-
     } catch (error) {
       this.emit('rotation_failed', {
         secretName,
         error: error.message,
-        version: currentVersion.version
+        version: currentVersion.version,
       });
 
       return {
@@ -176,7 +194,7 @@ export class SecretsManager extends EventEmitter {
         success: false,
         affectedServices: [],
         rollbackAvailable: true,
-        errors: [error.message]
+        errors: [error.message],
       };
     }
   }
@@ -194,23 +212,27 @@ export class SecretsManager extends EventEmitter {
 
     // Revoke specific version or all active versions
     const versionsToRevoke = version
-      ? versions.filter(v => v.version === version)
-      : versions.filter(v => v.status === 'active' || v.status === 'pending');
+      ? versions.filter((v) => v.version === version)
+      : versions.filter((v) => v.status === 'active' || v.status === 'pending');
 
     for (const versionToRevoke of versionsToRevoke) {
       versionToRevoke.status = 'revoked';
-      await this.removeFromDestinations(secretName, versionToRevoke, config.destinations);
+      await this.removeFromDestinations(
+        secretName,
+        versionToRevoke,
+        config.destinations,
+      );
     }
 
     // Force immediate rotation if no active versions remain
-    const hasActiveVersion = versions.some(v => v.status === 'active');
+    const hasActiveVersion = versions.some((v) => v.status === 'active');
     if (!hasActiveVersion) {
       await this.rotateSecret(secretName, true);
     }
 
     this.emit('secret_revoked', {
       secretName,
-      revokedVersions: versionsToRevoke.map(v => v.version)
+      revokedVersions: versionsToRevoke.map((v) => v.version),
     });
   }
 
@@ -219,7 +241,7 @@ export class SecretsManager extends EventEmitter {
    */
   getActiveSecret(secretName: string): SecretVersion | null {
     const versions = this.versions.get(secretName) || [];
-    return versions.find(v => v.status === 'active') || null;
+    return versions.find((v) => v.status === 'active') || null;
   }
 
   /**
@@ -227,7 +249,7 @@ export class SecretsManager extends EventEmitter {
    */
   getSecretVersion(secretName: string, version: number): SecretVersion | null {
     const versions = this.versions.get(secretName) || [];
-    return versions.find(v => v.version === version) || null;
+    return versions.find((v) => v.version === version) || null;
   }
 
   /**
@@ -244,7 +266,7 @@ export class SecretsManager extends EventEmitter {
 
     for (const [name, config] of this.secrets.entries()) {
       const versions = this.versions.get(name) || [];
-      const activeVersion = versions.find(v => v.status === 'active');
+      const activeVersion = versions.find((v) => v.status === 'active');
 
       let status: 'healthy' | 'expiring' | 'expired' | 'error' = 'healthy';
       let nextRotation: Date | undefined;
@@ -269,7 +291,7 @@ export class SecretsManager extends EventEmitter {
         config,
         activeVersion: activeVersion?.version,
         nextRotation,
-        status
+        status,
       });
     }
 
@@ -286,8 +308,8 @@ export class SecretsManager extends EventEmitter {
     }
 
     const versions = this.versions.get(secretName) || [];
-    const currentVersion = versions.find(v => v.status === 'active');
-    const previousVersion = versions.find(v => v.status === 'deprecated');
+    const currentVersion = versions.find((v) => v.status === 'active');
+    const previousVersion = versions.find((v) => v.status === 'deprecated');
 
     if (!previousVersion) {
       throw new Error('No previous version available for rollback');
@@ -301,7 +323,11 @@ export class SecretsManager extends EventEmitter {
       }
 
       // Update service configurations
-      await this.updateServiceConfigurations(secretName, previousVersion, config.dependencies);
+      await this.updateServiceConfigurations(
+        secretName,
+        previousVersion,
+        config.dependencies,
+      );
 
       const result: RotationResult = {
         secretName,
@@ -309,16 +335,15 @@ export class SecretsManager extends EventEmitter {
         newVersion: previousVersion.version,
         success: true,
         affectedServices: config.dependencies,
-        rollbackAvailable: false
+        rollbackAvailable: false,
       };
 
       this.emit('rollback_completed', result);
       return result;
-
     } catch (error) {
       this.emit('rollback_failed', {
         secretName,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -330,7 +355,8 @@ export class SecretsManager extends EventEmitter {
         return 'ak_' + crypto.randomBytes(32).toString('hex');
 
       case 'password':
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        const chars =
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
         let password = '';
         for (let i = 0; i < 32; i++) {
           password += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -361,13 +387,16 @@ ${crypto.randomBytes(64).toString('base64')}
   private async deploySecret(
     secretName: string,
     version: SecretVersion,
-    destinations: string[]
+    destinations: string[],
   ): Promise<void> {
     for (const destination of destinations) {
       try {
         await this.deployToDestination(secretName, version, destination);
       } catch (error) {
-        console.error(`Failed to deploy secret ${secretName} to ${destination}:`, error);
+        console.error(
+          `Failed to deploy secret ${secretName} to ${destination}:`,
+          error,
+        );
         throw error;
       }
     }
@@ -376,7 +405,7 @@ ${crypto.randomBytes(64).toString('base64')}
   private async deployToDestination(
     secretName: string,
     version: SecretVersion,
-    destination: string
+    destination: string,
   ): Promise<void> {
     // Implement deployment logic based on destination type
     switch (destination) {
@@ -397,25 +426,36 @@ ${crypto.randomBytes(64).toString('base64')}
     }
   }
 
-  private async deployToKubernetes(secretName: string, version: SecretVersion): Promise<void> {
+  private async deployToKubernetes(
+    secretName: string,
+    version: SecretVersion,
+  ): Promise<void> {
     // Implement Kubernetes secret deployment
     console.log(`Deploying ${secretName} v${version.version} to Kubernetes`);
   }
 
-  private async deployToVault(secretName: string, version: SecretVersion): Promise<void> {
+  private async deployToVault(
+    secretName: string,
+    version: SecretVersion,
+  ): Promise<void> {
     // Implement HashiCorp Vault deployment
     console.log(`Deploying ${secretName} v${version.version} to Vault`);
   }
 
-  private async deployToAWSSecretsManager(secretName: string, version: SecretVersion): Promise<void> {
+  private async deployToAWSSecretsManager(
+    secretName: string,
+    version: SecretVersion,
+  ): Promise<void> {
     // Implement AWS Secrets Manager deployment
-    console.log(`Deploying ${secretName} v${version.version} to AWS Secrets Manager`);
+    console.log(
+      `Deploying ${secretName} v${version.version} to AWS Secrets Manager`,
+    );
   }
 
   private async updateServiceConfigurations(
     secretName: string,
     version: SecretVersion,
-    dependencies: string[]
+    dependencies: string[],
   ): Promise<void> {
     for (const service of dependencies) {
       try {
@@ -430,16 +470,18 @@ ${crypto.randomBytes(64).toString('base64')}
   private async updateServiceConfiguration(
     service: string,
     secretName: string,
-    version: SecretVersion
+    version: SecretVersion,
   ): Promise<void> {
     // Implement service-specific configuration updates
-    console.log(`Updating ${service} configuration for ${secretName} v${version.version}`);
+    console.log(
+      `Updating ${service} configuration for ${secretName} v${version.version}`,
+    );
   }
 
   private async removeFromDestinations(
     secretName: string,
     version: SecretVersion,
-    destinations: string[]
+    destinations: string[],
   ): Promise<void> {
     for (const destination of destinations) {
       try {
@@ -453,15 +495,17 @@ ${crypto.randomBytes(64).toString('base64')}
   private async removeFromDestination(
     secretName: string,
     version: SecretVersion,
-    destination: string
+    destination: string,
   ): Promise<void> {
     // Implement removal logic based on destination type
-    console.log(`Removing ${secretName} v${version.version} from ${destination}`);
+    console.log(
+      `Removing ${secretName} v${version.version} from ${destination}`,
+    );
   }
 
   private cleanupOldVersion(secretName: string, version: number): void {
     const versions = this.versions.get(secretName) || [];
-    const versionToCleanup = versions.find(v => v.version === version);
+    const versionToCleanup = versions.find((v) => v.version === version);
 
     if (versionToCleanup && versionToCleanup.status === 'deprecated') {
       versionToCleanup.status = 'revoked';
@@ -504,7 +548,7 @@ ${crypto.randomBytes(64).toString('base64')}
         const rotationThreshold = config.rotationInterval * 0.1 * 1000; // Rotate at 10% remaining
 
         if (timeToExpiry <= rotationThreshold) {
-          this.rotateSecret(secretName).catch(error => {
+          this.rotateSecret(secretName).catch((error) => {
             console.error(`Auto-rotation failed for ${secretName}:`, error);
           });
         }
@@ -523,14 +567,17 @@ ${crypto.randomBytes(64).toString('base64')}
     recentRotations: number;
   } {
     const secrets = this.listSecrets();
-    const expiredSecrets = secrets.filter(s => s.status === 'expired').length;
-    const expiringSecrets = secrets.filter(s => s.status === 'expiring').length;
+    const expiredSecrets = secrets.filter((s) => s.status === 'expired').length;
+    const expiringSecrets = secrets.filter(
+      (s) => s.status === 'expiring',
+    ).length;
 
     // Count rotations in last 24 hours
     const recentRotations = Array.from(this.versions.values())
       .flat()
-      .filter(v => {
-        const ageHours = (Date.now() - v.createdAt.getTime()) / (1000 * 60 * 60);
+      .filter((v) => {
+        const ageHours =
+          (Date.now() - v.createdAt.getTime()) / (1000 * 60 * 60);
         return ageHours <= 24;
       }).length;
 
@@ -539,7 +586,7 @@ ${crypto.randomBytes(64).toString('base64')}
       totalSecrets: secrets.length,
       expiredSecrets,
       expiringSecrets,
-      recentRotations
+      recentRotations,
     };
   }
 

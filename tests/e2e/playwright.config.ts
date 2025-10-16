@@ -1,6 +1,6 @@
 /**
  * Playwright Configuration for IntelGraph Cross-Browser Testing
- * 
+ *
  * Comprehensive browser testing setup supporting Chrome, Firefox, Safari, and Edge
  * with accessibility testing, performance monitoring, and security validation.
  */
@@ -28,7 +28,7 @@ export default defineConfig({
     ['junit', { outputFile: 'test-results/junit.xml' }],
     ['allure-playwright', { outputFolder: 'allure-results' }],
     // Custom reporter for IntelGraph metrics
-    ['./reporters/intelgraph-reporter.ts']
+    ['./reporters/intelgraph-reporter.ts'],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -37,57 +37,57 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    
+
     /* Screenshots on failure */
     screenshot: 'only-on-failure',
-    
+
     /* Video recording */
     video: 'retain-on-failure',
-    
+
     /* Accept downloads */
     acceptDownloads: true,
-    
+
     /* Ignore HTTPS errors */
     ignoreHTTPSErrors: true,
-    
+
     /* Custom test timeout */
     actionTimeout: 30000,
     navigationTimeout: 60000,
-    
+
     /* Extra HTTP headers */
     extraHTTPHeaders: {
       'X-Test-Environment': process.env.NODE_ENV || 'test',
-      'X-Test-Suite': 'playwright-e2e'
-    }
+      'X-Test-Suite': 'playwright-e2e',
+    },
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
         // Enable performance monitoring
         launchOptions: {
-          args: ['--enable-precise-memory-info', '--enable-automation']
-        }
+          args: ['--enable-precise-memory-info', '--enable-automation'],
+        },
       },
     },
 
     {
       name: 'firefox-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
-        viewport: { width: 1920, height: 1080 }
+        viewport: { width: 1920, height: 1080 },
       },
     },
 
     {
       name: 'webkit-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
-        viewport: { width: 1920, height: 1080 }
+        viewport: { width: 1920, height: 1080 },
       },
     },
 
@@ -118,8 +118,8 @@ export default defineConfig({
       name: 'chromium-4k',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 3840, height: 2160 }
-      }
+        viewport: { width: 3840, height: 2160 },
+      },
     },
 
     // Security testing with specific flags
@@ -131,10 +131,10 @@ export default defineConfig({
           args: [
             '--disable-web-security',
             '--disable-features=VizDisplayCompositor',
-            '--enable-precise-memory-info'
-          ]
-        }
-      }
+            '--enable-precise-memory-info',
+          ],
+        },
+      },
     },
 
     // Accessibility testing
@@ -142,9 +142,9 @@ export default defineConfig({
       name: 'chromium-a11y',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
       },
-      testMatch: '**/*accessibility*.spec.ts'
+      testMatch: '**/*accessibility*.spec.ts',
     },
 
     // Performance testing
@@ -158,12 +158,12 @@ export default defineConfig({
             '--enable-automation',
             '--disable-background-timer-throttling',
             '--disable-backgrounding-occluded-windows',
-            '--disable-renderer-backgrounding'
-          ]
-        }
+            '--disable-renderer-backgrounding',
+          ],
+        },
       },
-      testMatch: '**/*performance*.spec.ts'
-    }
+      testMatch: '**/*performance*.spec.ts',
+    },
   ],
 
   /* Global setup and teardown */
@@ -171,12 +171,14 @@ export default defineConfig({
   globalTeardown: require.resolve('./global-teardown'),
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.CI ? undefined : {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: 'npm run dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+      },
 
   /* Test output directory */
   outputDir: 'test-results/',
@@ -189,6 +191,6 @@ export default defineConfig({
     timeout: 10000,
     // Custom screenshot comparison threshold
     toHaveScreenshot: { threshold: 0.2 },
-    toMatchSnapshot: { threshold: 0.3 }
-  }
+    toMatchSnapshot: { threshold: 0.3 },
+  },
 });

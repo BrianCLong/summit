@@ -24,4 +24,3 @@ def doubly_robust(policy_probs, logging_probs, rewards, q_hat, v_hat):
         "ips_ci95": 1.96 * float(np.std(ips, ddof=1) / np.sqrt(n)),
         "dr_ci95": 1.96 * float(np.std(dr, ddof=1) / np.sqrt(n)),
     }
-

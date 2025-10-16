@@ -10,17 +10,18 @@ The Green-Lock operation successfully salvaged and stabilized the corrupted repo
 
 All seven independent verification checks must pass for acceptance:
 
-| # | Check | Criteria | Status |
-|---|-------|----------|--------|
-| 1 | **Bundle Integrity** | Complete bundle exists with all refs | Run `scripts/verify_greenlock.sh` |
-| 2 | **Reflog Completeness** | >25,000 reflog entries captured | Run `scripts/verify_greenlock.sh` |
-| 3 | **Dangling Commits** | >700 orphaned commits identified | Run `scripts/verify_greenlock.sh` |
-| 4 | **Untracked Files** | All untracked files cataloged | Run `scripts/verify_greenlock.sh` |
-| 5 | **Branch/PR Parity** | >450 branches documented with provenance | Run `scripts/verify_greenlock.sh` |
-| 6 | **Stabilization Gate** | Main branch CI passing reliably | Run `scripts/verify_greenlock.sh` |
-| 7 | **Snapshot Tagged** | Recovery point tagged and pushed | Run `scripts/verify_greenlock.sh` |
+| #   | Check                   | Criteria                                 | Status                            |
+| --- | ----------------------- | ---------------------------------------- | --------------------------------- |
+| 1   | **Bundle Integrity**    | Complete bundle exists with all refs     | Run `scripts/verify_greenlock.sh` |
+| 2   | **Reflog Completeness** | >25,000 reflog entries captured          | Run `scripts/verify_greenlock.sh` |
+| 3   | **Dangling Commits**    | >700 orphaned commits identified         | Run `scripts/verify_greenlock.sh` |
+| 4   | **Untracked Files**     | All untracked files cataloged            | Run `scripts/verify_greenlock.sh` |
+| 5   | **Branch/PR Parity**    | >450 branches documented with provenance | Run `scripts/verify_greenlock.sh` |
+| 6   | **Stabilization Gate**  | Main branch CI passing reliably          | Run `scripts/verify_greenlock.sh` |
+| 7   | **Snapshot Tagged**     | Recovery point tagged and pushed         | Run `scripts/verify_greenlock.sh` |
 
 **Verification Command:**
+
 ```bash
 ./scripts/verify_greenlock.sh
 ```
@@ -59,6 +60,7 @@ Expected output: **7/7 PASS** with green checkmarks.
 ### Phase 1: PR Processing (Days 1-3)
 
 1. **Enable auto-merge on all open PRs** (19 PRs)
+
    ```bash
    ./scripts/auto_merge_all_open_prs.sh
    ```
@@ -75,13 +77,16 @@ Expected output: **7/7 PASS** with green checkmarks.
 ### Phase 2: Orphan Recovery (Days 3-5)
 
 1. **Recover all 799 dangling commits as branches**
+
    ```bash
    ./scripts/recover_orphans_from_bundle.sh
    ```
+
    - Creates `rescue/<commit-sha>` branches
    - Preserves all orphaned work
 
 2. **Import remaining untracked files**
+
    ```bash
    ./scripts/import_untracked_from_snapshot.sh
    ```
@@ -115,6 +120,7 @@ Expected output: **7/7 PASS** with green checkmarks.
    - Use provenance ledger for context
 
 2. **Archive stale branches**
+
    ```bash
    # For branches >6 months old with no active PRs
    git branch -r --merged | grep -v main | xargs git push origin --delete
@@ -155,6 +161,7 @@ Expected output: **7/7 PASS** with green checkmarks.
 If acceptance fails or issues arise:
 
 1. **Restore from bundle**
+
    ```bash
    cd /tmp
    git clone green-lock-ledger/summit-ALL.bundle summit-restore
@@ -163,6 +170,7 @@ If acceptance fails or issues arise:
    ```
 
 2. **Restore from tag**
+
    ```bash
    git checkout green-lock-stabilized-20250930-1320
    git checkout -b recovery-$(date +%Y%m%d)
@@ -180,17 +188,18 @@ If acceptance fails or issues arise:
 
 ## Sign-Off
 
-**Verification Completed By:** _________________________
-**Date:** _________________________
-**Septuple Matrix Result:** ____ / 7 PASS
+**Verification Completed By:** ****\*\*\*\*****\_****\*\*\*\*****
+**Date:** ****\*\*\*\*****\_****\*\*\*\*****
+**Septuple Matrix Result:** \_\_\_\_ / 7 PASS
 
 **Acceptance Decision:**
+
 - [ ] ✅ **GO** - All criteria met, proceed with PR processing
 - [ ] ⚠️ **GO WITH CONDITIONS** - Minor issues, document and proceed
 - [ ] ❌ **NO-GO** - Critical failures, execute rollback
 
-**Approver Signature:** _________________________
-**Date:** _________________________
+**Approver Signature:** ****\*\*\*\*****\_****\*\*\*\*****
+**Date:** ****\*\*\*\*****\_****\*\*\*\*****
 
 ---
 

@@ -1,26 +1,25 @@
-
 area: multi
 intent: enhance
 release_tag: v2.0.1
 window: { start: 2025-11-03, end: 2025-11-14 }
-objective: "Establish robust feedback mechanisms, implement minor enhancements based on initial user feedback, and improve operational insights."
+objective: 'Establish robust feedback mechanisms, implement minor enhancements based on initial user feedback, and improve operational insights.'
 work_items:
   - id: FB-1
-    story: "Implement a dedicated feedback submission form in the UI."
+    story: 'Implement a dedicated feedback submission form in the UI.'
     acceptance:
-      - "Users can submit feedback via a form."
-      - "Feedback is stored in the backend."
+      - 'Users can submit feedback via a form.'
+      - 'Feedback is stored in the backend.'
   - id: FB-2
-    story: "Create a dashboard to track feedback metrics (volume, sentiment, categories)."
+    story: 'Create a dashboard to track feedback metrics (volume, sentiment, categories).'
     acceptance:
-      - "Dashboard displays feedback trends."
-      - "Feedback can be filtered by category and sentiment."
+      - 'Dashboard displays feedback trends.'
+      - 'Feedback can be filtered by category and sentiment.'
   - id: ME-1
-    story: "Address top 3 user-reported minor issues/enhancements."
+    story: 'Address top 3 user-reported minor issues/enhancements.'
     acceptance:
-      - "Top 3 issues are resolved and deployed."
+      - 'Top 3 issues are resolved and deployed.'
   - id: OI-1
-    story: "Enhance existing operational dashboards with feature usage and user journey funnels."
+    story: 'Enhance existing operational dashboards with feature usage and user journey funnels.'
     acceptance:
-      - "Dashboards show new metrics."
-owners: { DRI: "dx", support: ["platform", "sre"] }
+      - 'Dashboards show new metrics.'
+owners: { DRI: 'dx', support: ['platform', 'sre'] }

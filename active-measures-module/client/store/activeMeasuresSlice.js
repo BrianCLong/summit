@@ -4,8 +4,12 @@ const activeMeasuresSlice = createSlice({
   name: 'activeMeasures',
   initialState: { portfolio: [], tuners: { proportionality: 0.5 } },
   reducers: {
-    updateTuners: (state, action) => { state.tuners = action.payload; },
-    setPortfolio: (state, action) => { state.portfolio = action.payload; },
+    updateTuners: (state, action) => {
+      state.tuners = action.payload;
+    },
+    setPortfolio: (state, action) => {
+      state.portfolio = action.payload;
+    },
   },
 });
 

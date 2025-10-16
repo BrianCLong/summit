@@ -23,7 +23,12 @@ export interface HermeticTask {
 }
 
 export interface HermeticityViolation {
-  type: 'undeclared_read' | 'undeclared_write' | 'network_access' | 'env_var_access' | 'toolchain_mismatch';
+  type:
+    | 'undeclared_read'
+    | 'undeclared_write'
+    | 'network_access'
+    | 'env_var_access'
+    | 'toolchain_mismatch';
   resource: string;
   timestamp: number;
   stackTrace?: string;
@@ -68,7 +73,7 @@ export class HermeticityGate extends EventEmitter {
   private warnMode: boolean = false;
   private networkDetector: NetworkDetector;
   private fileSystemMonitor: FileSystemMonitor;
-  
+
   private violations: Map<string, HermeticityViolation[]> = new Map();
   private stats = {
     tasksExecuted: 0,
@@ -76,26 +81,30 @@ export class HermeticityGate extends EventEmitter {
     violationsDetected: 0,
     networkViolations: 0,
     fileSystemViolations: 0,
-    autoRemediations: 0
+    autoRemediations: 0,
   };
 
-  constructor(private config: {
-    warnMode?: boolean;
-    allowNetworkInWarnMode?: boolean;
-    toolchainVerificationEnabled?: boolean;
-    maxExecutionTime?: number;
-    sandboxEnabled?: boolean;
-  } = {}) {
+  constructor(
+    private config: {
+      warnMode?: boolean;
+      allowNetworkInWarnMode?: boolean;
+      toolchainVerificationEnabled?: boolean;
+      maxExecutionTime?: number;
+      sandboxEnabled?: boolean;
+    } = {},
+  ) {
     super();
-    
+
     this.warnMode = config.warnMode || false;
     this.networkDetector = new NetworkDetector(this);
     this.fileSystemMonitor = new FileSystemMonitor(this);
-    
+
     this.initializeNetworkRules();
     this.initializeAllowlist();
-    
-    console.log(`🔒 Hermeticity Gate initialized (${this.warnMode ? 'WARN' : 'ENFORCE'} mode)`);
+
+    console.log(
+      `🔒 Hermeticity Gate initialized (${this.warnMode ? 'WARN' : 'ENFORCE'} mode)`,
+    );
   }
 
   /**
@@ -103,10 +112,10 @@ export class HermeticityGate extends EventEmitter {
    */
   async executeHermetic(task: HermeticTask): Promise<HermeticityResult> {
     console.log(`🔒 Executing hermetic task: ${task.id}`);
-    
+
     const startTime = Date.now();
     this.stats.tasksExecuted++;
-    
+
     // Validate toolchain if specified
     if (task.toolchainHash && this.config.toolchainVerificationEnabled) {
       const toolchainValid = await this.verifyToolchain(task.toolchainHash);
@@ -114,79 +123,87 @@ export class HermeticityGate extends EventEmitter {
         throw new Error(`Toolchain hash mismatch for task ${task.id}`);
       }
     }
-    
+
     // Prepare sandbox environment
     const sandbox = await this.prepareSandbox(task);
-    
+
     // Start monitoring
     const monitoringSession = await this.startMonitoring(task);
-    
+
     let result: HermeticityResult;
-    
+
     try {
       // Execute the task in the controlled environment
       const executionResult = await this.executeInSandbox(task, sandbox);
-      
+
       // Stop monitoring and collect violations
       const violations = await this.stopMonitoring(monitoringSession);
-      
+
       // Validate declared inputs/outputs
       const ioViolations = await this.validateInputsOutputs(task, sandbox);
       violations.push(...ioViolations);
-      
+
       result = {
         taskId: task.id,
-        success: violations.filter(v => v.severity === 'error').length === 0,
+        success: violations.filter((v) => v.severity === 'error').length === 0,
         violations,
         actualInputs: sandbox.actualInputs,
         actualOutputs: sandbox.actualOutputs,
         networkAccesses: monitoringSession.networkAccesses,
         duration: Date.now() - startTime,
-        toolchainHashMatch: task.toolchainHash ? await this.verifyToolchain(task.toolchainHash) : true,
+        toolchainHashMatch: task.toolchainHash
+          ? await this.verifyToolchain(task.toolchainHash)
+          : true,
         exitCode: executionResult.exitCode,
         stdout: executionResult.stdout,
-        stderr: executionResult.stderr
+        stderr: executionResult.stderr,
       };
-      
     } catch (error) {
       result = {
         taskId: task.id,
         success: false,
-        violations: [{
-          type: 'undeclared_read',
-          resource: 'execution_error',
-          timestamp: Date.now(),
-          remediation: `Task execution failed: ${error}`,
-          severity: 'error'
-        }],
+        violations: [
+          {
+            type: 'undeclared_read',
+            resource: 'execution_error',
+            timestamp: Date.now(),
+            remediation: `Task execution failed: ${error}`,
+            severity: 'error',
+          },
+        ],
         actualInputs: [],
         actualOutputs: [],
         networkAccesses: [],
         duration: Date.now() - startTime,
         toolchainHashMatch: false,
-        exitCode: 1
+        exitCode: 1,
       };
     } finally {
       await this.cleanupSandbox(sandbox);
     }
-    
+
     this.updateStats(result);
     this.violations.set(task.id, result.violations);
-    
+
     // Auto-remediation for common violations
     if (result.violations.length > 0) {
-      const remediatedCount = await this.attemptAutoRemediation(task, result.violations);
+      const remediatedCount = await this.attemptAutoRemediation(
+        task,
+        result.violations,
+      );
       this.stats.autoRemediations += remediatedCount;
     }
-    
+
     this.emit('task_completed', result);
-    
-    console.log(`🔒 Hermetic task completed: ${task.id} (${result.violations.length} violations)`);
-    
+
+    console.log(
+      `🔒 Hermetic task completed: ${task.id} (${result.violations.length} violations)`,
+    );
+
     if (!this.warnMode && !result.success) {
       throw new Error(`Hermeticity violations detected in task ${task.id}`);
     }
-    
+
     return result;
   }
 
@@ -195,7 +212,9 @@ export class HermeticityGate extends EventEmitter {
    */
   addNetworkRule(rule: NetworkRule): void {
     this.networkRules.push(rule);
-    console.log(`🌐 Added network rule: ${rule.pattern} (${rule.allowed ? 'ALLOW' : 'DENY'})`);
+    console.log(
+      `🌐 Added network rule: ${rule.pattern} (${rule.allowed ? 'ALLOW' : 'DENY'})`,
+    );
   }
 
   /**
@@ -211,14 +230,18 @@ export class HermeticityGate extends EventEmitter {
   /**
    * Register a toolchain with its hash
    */
-  async registerToolchain(toolchain: Omit<ToolchainInfo, 'lastVerified'>): Promise<void> {
+  async registerToolchain(
+    toolchain: Omit<ToolchainInfo, 'lastVerified'>,
+  ): Promise<void> {
     const info: ToolchainInfo = {
       ...toolchain,
-      lastVerified: Date.now()
+      lastVerified: Date.now(),
     };
-    
+
     this.toolchainCache.set(toolchain.hash, info);
-    console.log(`🔧 Registered toolchain: ${toolchain.name}@${toolchain.version} (${toolchain.hash.slice(0, 8)})`);
+    console.log(
+      `🔧 Registered toolchain: ${toolchain.name}@${toolchain.version} (${toolchain.hash.slice(0, 8)})`,
+    );
   }
 
   /**
@@ -229,40 +252,49 @@ export class HermeticityGate extends EventEmitter {
     violationRate: number;
     commonViolations: Array<{ type: string; count: number }>;
   } {
-    const passRate = this.stats.tasksExecuted > 0 ? (this.stats.tasksPassed / this.stats.tasksExecuted) * 100 : 0;
-    const violationRate = this.stats.tasksExecuted > 0 ? (this.stats.violationsDetected / this.stats.tasksExecuted) * 100 : 0;
-    
+    const passRate =
+      this.stats.tasksExecuted > 0
+        ? (this.stats.tasksPassed / this.stats.tasksExecuted) * 100
+        : 0;
+    const violationRate =
+      this.stats.tasksExecuted > 0
+        ? (this.stats.violationsDetected / this.stats.tasksExecuted) * 100
+        : 0;
+
     // Calculate common violation types
     const violationCounts = new Map<string, number>();
     for (const violations of this.violations.values()) {
       for (const violation of violations) {
-        violationCounts.set(violation.type, (violationCounts.get(violation.type) || 0) + 1);
+        violationCounts.set(
+          violation.type,
+          (violationCounts.get(violation.type) || 0) + 1,
+        );
       }
     }
-    
+
     const commonViolations = Array.from(violationCounts.entries())
       .map(([type, count]) => ({ type, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
-    
+
     return {
       ...this.stats,
       passRate,
       violationRate,
-      commonViolations
+      commonViolations,
     };
   }
 
   private async prepareSandbox(task: HermeticTask): Promise<Sandbox> {
     const sandboxDir = `/tmp/hermetic_${task.id}_${Date.now()}`;
     await fs.mkdir(sandboxDir, { recursive: true });
-    
+
     // Copy declared inputs to sandbox
     const actualInputs: string[] = [];
     for (const input of task.declaredInputs) {
       const inputPath = path.resolve(task.workingDir, input);
       const sandboxPath = path.join(sandboxDir, input);
-      
+
       try {
         await fs.mkdir(path.dirname(sandboxPath), { recursive: true });
         await fs.copyFile(inputPath, sandboxPath);
@@ -271,57 +303,57 @@ export class HermeticityGate extends EventEmitter {
         console.warn(`⚠️ Could not copy input ${input}:`, error);
       }
     }
-    
+
     return {
       id: task.id,
       directory: sandboxDir,
       actualInputs,
       actualOutputs: [],
-      startTime: Date.now()
+      startTime: Date.now(),
     };
   }
 
   private async executeInSandbox(
     task: HermeticTask,
-    sandbox: Sandbox
+    sandbox: Sandbox,
   ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
     const { spawn } = await import('child_process');
     const { promisify } = await import('util');
-    
+
     return new Promise((resolve) => {
       const [command, ...args] = task.command.split(' ');
-      
+
       const child = spawn(command, args, {
         cwd: sandbox.directory,
         env: this.buildSandboxEnvironment(task),
         stdio: ['pipe', 'pipe', 'pipe'],
-        timeout: task.timeout || 300000 // 5 min default
+        timeout: task.timeout || 300000, // 5 min default
       });
-      
+
       let stdout = '';
       let stderr = '';
-      
+
       child.stdout?.on('data', (data) => {
         stdout += data.toString();
       });
-      
+
       child.stderr?.on('data', (data) => {
         stderr += data.toString();
       });
-      
+
       child.on('close', (code) => {
         resolve({
           exitCode: code || 0,
           stdout,
-          stderr
+          stderr,
         });
       });
-      
+
       child.on('error', (error) => {
         resolve({
           exitCode: 1,
           stdout,
-          stderr: stderr + error.message
+          stderr: stderr + error.message,
         });
       });
     });
@@ -331,9 +363,9 @@ export class HermeticityGate extends EventEmitter {
     const baseEnv = {
       PATH: '/usr/local/bin:/usr/bin:/bin',
       HOME: '/tmp',
-      HERMETIC: 'true'
+      HERMETIC: 'true',
     };
-    
+
     // Add allowed environment variables
     if (task.allowedEnvVars) {
       for (const envVar of task.allowedEnvVars) {
@@ -343,42 +375,49 @@ export class HermeticityGate extends EventEmitter {
         }
       }
     }
-    
+
     return baseEnv;
   }
 
-  private async startMonitoring(task: HermeticTask): Promise<MonitoringSession> {
+  private async startMonitoring(
+    task: HermeticTask,
+  ): Promise<MonitoringSession> {
     const session: MonitoringSession = {
       taskId: task.id,
       startTime: Date.now(),
       networkAccesses: [],
       fileAccesses: [],
-      violations: []
+      violations: [],
     };
-    
+
     // Start network monitoring
     await this.networkDetector.startMonitoring(session);
-    
+
     // Start filesystem monitoring
     await this.fileSystemMonitor.startMonitoring(session, task);
-    
+
     return session;
   }
 
-  private async stopMonitoring(session: MonitoringSession): Promise<HermeticityViolation[]> {
+  private async stopMonitoring(
+    session: MonitoringSession,
+  ): Promise<HermeticityViolation[]> {
     await this.networkDetector.stopMonitoring(session.taskId);
     await this.fileSystemMonitor.stopMonitoring(session.taskId);
-    
+
     return session.violations;
   }
 
-  private async validateInputsOutputs(task: HermeticTask, sandbox: Sandbox): Promise<HermeticityViolation[]> {
+  private async validateInputsOutputs(
+    task: HermeticTask,
+    sandbox: Sandbox,
+  ): Promise<HermeticityViolation[]> {
     const violations: HermeticityViolation[] = [];
-    
+
     // Check that all declared outputs were created
     for (const declaredOutput of task.declaredOutputs) {
       const outputPath = path.join(sandbox.directory, declaredOutput);
-      
+
       try {
         await fs.access(outputPath);
         sandbox.actualOutputs.push(declaredOutput);
@@ -388,42 +427,45 @@ export class HermeticityGate extends EventEmitter {
           resource: declaredOutput,
           timestamp: Date.now(),
           remediation: `Declared output not created: ${declaredOutput}. Ensure your build command produces this file.`,
-          severity: 'warning'
+          severity: 'warning',
         });
       }
     }
-    
+
     // Scan for undeclared outputs
     const allFiles = await this.scanSandboxFiles(sandbox.directory);
     const declaredOutputSet = new Set(task.declaredOutputs);
-    
+
     for (const file of allFiles) {
       const relativePath = path.relative(sandbox.directory, file);
-      if (!declaredOutputSet.has(relativePath) && !this.isExpectedSystemFile(relativePath)) {
+      if (
+        !declaredOutputSet.has(relativePath) &&
+        !this.isExpectedSystemFile(relativePath)
+      ) {
         violations.push({
           type: 'undeclared_write',
           resource: relativePath,
           timestamp: Date.now(),
           remediation: `Add '${relativePath}' to declaredOutputs or remove unexpected file creation.`,
-          severity: 'error'
+          severity: 'error',
         });
       }
     }
-    
+
     return violations;
   }
 
   private async scanSandboxFiles(dir: string): Promise<string[]> {
     const files: string[] = [];
-    
+
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-        
+
         if (entry.isDirectory()) {
-          files.push(...await this.scanSandboxFiles(fullPath));
+          files.push(...(await this.scanSandboxFiles(fullPath)));
         } else {
           files.push(fullPath);
         }
@@ -431,7 +473,7 @@ export class HermeticityGate extends EventEmitter {
     } catch (error) {
       // Ignore errors (directory may not exist)
     }
-    
+
     return files;
   }
 
@@ -443,10 +485,10 @@ export class HermeticityGate extends EventEmitter {
       /^node_modules/,
       /^\.npm/,
       /^\.cache/,
-      /tmp/
+      /tmp/,
     ];
-    
-    return systemPatterns.some(pattern => pattern.test(filePath));
+
+    return systemPatterns.some((pattern) => pattern.test(filePath));
   }
 
   private async verifyToolchain(expectedHash: string): Promise<boolean> {
@@ -455,16 +497,16 @@ export class HermeticityGate extends EventEmitter {
       console.warn(`⚠️ Unknown toolchain hash: ${expectedHash}`);
       return false;
     }
-    
+
     // Verify the toolchain binary still matches
     try {
       const currentHash = await this.calculateToolchainHash(toolchain.binary);
       const matches = currentHash === expectedHash;
-      
+
       if (matches) {
         toolchain.lastVerified = Date.now();
       }
-      
+
       return matches;
     } catch (error) {
       console.error(`❌ Failed to verify toolchain ${toolchain.name}:`, error);
@@ -483,10 +525,10 @@ export class HermeticityGate extends EventEmitter {
 
   private async attemptAutoRemediation(
     task: HermeticTask,
-    violations: HermeticityViolation[]
+    violations: HermeticityViolation[],
   ): Promise<number> {
     let remediatedCount = 0;
-    
+
     for (const violation of violations) {
       try {
         switch (violation.type) {
@@ -497,12 +539,12 @@ export class HermeticityGate extends EventEmitter {
                 pattern: violation.resource,
                 allowed: true,
                 reason: 'Auto-remediated common build dependency',
-                expiry: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
+                expiry: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
               });
               remediatedCount++;
             }
             break;
-            
+
           case 'undeclared_read':
             // Auto-add commonly read files to allowlist
             if (this.isCommonBuildFile(violation.resource)) {
@@ -512,10 +554,13 @@ export class HermeticityGate extends EventEmitter {
             break;
         }
       } catch (error) {
-        console.warn(`Failed to auto-remediate violation ${violation.type}:`, error);
+        console.warn(
+          `Failed to auto-remediate violation ${violation.type}:`,
+          error,
+        );
       }
     }
-    
+
     return remediatedCount;
   }
 
@@ -526,9 +571,9 @@ export class HermeticityGate extends EventEmitter {
       'api.github.com',
       'cdn.jsdelivr.net',
       'unpkg.com',
-      'registry.yarnpkg.com'
+      'registry.yarnpkg.com',
     ];
-    
+
     return commonHosts.includes(host);
   }
 
@@ -539,21 +584,23 @@ export class HermeticityGate extends EventEmitter {
       'package-lock.json',
       'tsconfig.json',
       '.gitignore',
-      'README.md'
+      'README.md',
     ];
-    
-    return commonFiles.some(file => filePath.endsWith(file));
+
+    return commonFiles.some((file) => filePath.endsWith(file));
   }
 
   private updateStats(result: HermeticityResult): void {
     if (result.success) {
       this.stats.tasksPassed++;
     }
-    
+
     this.stats.violationsDetected += result.violations.length;
-    this.stats.networkViolations += result.violations.filter(v => v.type === 'network_access').length;
-    this.stats.fileSystemViolations += result.violations.filter(v => 
-      v.type === 'undeclared_read' || v.type === 'undeclared_write'
+    this.stats.networkViolations += result.violations.filter(
+      (v) => v.type === 'network_access',
+    ).length;
+    this.stats.fileSystemViolations += result.violations.filter(
+      (v) => v.type === 'undeclared_read' || v.type === 'undeclared_write',
     ).length;
   }
 
@@ -571,8 +618,8 @@ export class HermeticityGate extends EventEmitter {
       {
         pattern: '*',
         allowed: false,
-        reason: 'Default deny-all policy'
-      }
+        reason: 'Default deny-all policy',
+      },
     ];
   }
 
@@ -584,9 +631,9 @@ export class HermeticityGate extends EventEmitter {
       '/etc/hostname',
       '/proc/version',
       '/usr/lib/**/*',
-      '/usr/share/**/*'
+      '/usr/share/**/*',
     ];
-    
+
     this.addToAllowlist(commonFiles);
   }
 
@@ -595,15 +642,17 @@ export class HermeticityGate extends EventEmitter {
    */
   setWarnMode(enabled: boolean): void {
     this.warnMode = enabled;
-    console.log(`🔒 Hermeticity Gate ${enabled ? 'warn' : 'enforce'} mode enabled`);
+    console.log(
+      `🔒 Hermeticity Gate ${enabled ? 'warn' : 'enforce'} mode enabled`,
+    );
   }
 
   async shutdown(): Promise<void> {
     console.log('🛑 Shutting down hermeticity gate...');
-    
+
     await this.networkDetector.shutdown();
     await this.fileSystemMonitor.shutdown();
-    
+
     console.log('✅ Hermeticity gate shut down');
   }
 }
@@ -635,7 +684,10 @@ class FileSystemMonitor {
 
   constructor(private gate: HermeticityGate) {}
 
-  async startMonitoring(session: MonitoringSession, task: HermeticTask): Promise<void> {
+  async startMonitoring(
+    session: MonitoringSession,
+    task: HermeticTask,
+  ): Promise<void> {
     this.activeSessions.set(session.taskId, session);
     // In a real implementation, this would hook into filesystem syscalls
     console.log(`📁 Started filesystem monitoring for task ${session.taskId}`);

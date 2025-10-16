@@ -12,7 +12,7 @@ export type {
   QueryComplexity,
   QueryMetrics,
   CachedQueryResult,
-  MaterializedView
+  MaterializedView,
 } from './neo4j-query-optimizer.js';
 
 export type {
@@ -20,7 +20,7 @@ export type {
   IndexRecommendation,
   ConnectionPoolMetrics,
   SlowQueryLog,
-  MaintenanceTask
+  MaintenanceTask,
 } from './postgres-performance-optimizer.js';
 
 export type {
@@ -28,7 +28,7 @@ export type {
   CircuitBreakerConfig,
   BulkheadConfig,
   RouteMetrics,
-  CostMetrics
+  CostMetrics,
 } from './api-gateway-optimizer.js';
 
 export type {
@@ -37,7 +37,7 @@ export type {
   CostPrediction,
   BudgetTracker,
   OptimizationRecommendation,
-  UsageAnalytics
+  UsageAnalytics,
 } from './cost-efficiency-optimizer.js';
 
 export type {
@@ -48,5 +48,5 @@ export type {
   PerformanceAlert,
   SLODefinition,
   SLOStatus,
-  PerformanceDashboard
+  PerformanceDashboard,
 } from './performance-monitoring-system.js';

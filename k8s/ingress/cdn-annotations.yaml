@@ -1,5 +1,5 @@
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/cache-enable: "true"
-    nginx.ingress.kubernetes.io/cache-key: "$host$request_uri$http_x_tenant_id"
-    nginx.ingress.kubernetes.io/cache-zone: "api-cache"
+    nginx.ingress.kubernetes.io/cache-enable: 'true'
+    nginx.ingress.kubernetes.io/cache-key: '$host$request_uri$http_x_tenant_id'
+    nginx.ingress.kubernetes.io/cache-zone: 'api-cache'

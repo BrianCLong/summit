@@ -29,12 +29,15 @@ export class MetricsRecorder {
     return {
       p50Latency: percentile(this.latencies, 0.5),
       p95Latency: percentile(this.latencies, 0.95),
-      avgCost: this.costs.length === 0 ? 0 : this.costs.reduce((a, b) => a + b, 0) / this.costs.length,
+      avgCost:
+        this.costs.length === 0
+          ? 0
+          : this.costs.reduce((a, b) => a + b, 0) / this.costs.length,
       avgQuality:
         this.qualities.length === 0
           ? 0
           : this.qualities.reduce((a, b) => a + b, 0) / this.qualities.length,
-      cacheHitRate: this.total === 0 ? 0 : this.cacheHits / this.total
+      cacheHitRate: this.total === 0 ? 0 : this.cacheHits / this.total,
     };
   }
 }

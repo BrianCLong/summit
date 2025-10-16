@@ -6,12 +6,12 @@ import {
   type ExecutionAdapter,
   type PricingFeed,
   type StageExecutionRequest,
-  type StageExecutionResult
+  type StageExecutionResult,
 } from '../src/index.js';
 import type {
   CloudProviderDescriptor,
   PipelineStageDefinition,
-  PricingSignal
+  PricingSignal,
 } from '@ga-graphai/common-types';
 
 class MockPricingFeed implements PricingFeed {
@@ -29,7 +29,10 @@ class MockPricingFeed implements PricingFeed {
 class ScriptedExecutionAdapter implements ExecutionAdapter {
   private readonly script = new Map<string, StageExecutionResult[]>();
 
-  setResponse(provider: string, result: StageExecutionResult | StageExecutionResult[]): void {
+  setResponse(
+    provider: string,
+    result: StageExecutionResult | StageExecutionResult[],
+  ): void {
     const values = Array.isArray(result) ? result : [result];
     this.script.set(provider, values);
   }
@@ -42,7 +45,7 @@ class ScriptedExecutionAdapter implements ExecutionAdapter {
         throughputPerMinute: request.stage.minThroughputPerMinute,
         cost: request.decision.expectedCost,
         errorRate: 0.01,
-        logs: ['default-success']
+        logs: ['default-success'],
       };
     }
     const result = entries.shift();
@@ -73,7 +76,7 @@ describe('MetaOrchestrator', () => {
         securityCertifications: ['fedramp', 'pci'],
         maxThroughputPerMinute: 140,
         baseLatencyMs: 70,
-        policyTags: ['fedramp', 'pci']
+        policyTags: ['fedramp', 'pci'],
       },
       {
         name: 'azure',
@@ -84,7 +87,7 @@ describe('MetaOrchestrator', () => {
         securityCertifications: ['fedramp', 'hipaa'],
         maxThroughputPerMinute: 120,
         baseLatencyMs: 65,
-        policyTags: ['fedramp', 'hipaa']
+        policyTags: ['fedramp', 'hipaa'],
       },
       {
         name: 'oci',
@@ -95,8 +98,8 @@ describe('MetaOrchestrator', () => {
         securityCertifications: ['iso'],
         maxThroughputPerMinute: 130,
         baseLatencyMs: 80,
-        policyTags: ['iso']
-      }
+        policyTags: ['iso'],
+      },
     ];
 
     stage = {
@@ -108,11 +111,11 @@ describe('MetaOrchestrator', () => {
       slaSeconds: 600,
       guardrail: {
         maxErrorRate: 0.05,
-        recoveryTimeoutSeconds: 120
+        recoveryTimeoutSeconds: 120,
       },
       fallbackStrategies: [
-        { provider: 'aws', region: 'us-east-1', trigger: 'execution-failure' }
-      ]
+        { provider: 'aws', region: 'us-east-1', trigger: 'execution-failure' },
+      ],
     };
 
     pricing = [
@@ -123,7 +126,7 @@ describe('MetaOrchestrator', () => {
         pricePerUnit: 1.1,
         currency: 'USD',
         unit: 'per-minute',
-        effectiveAt: new Date().toISOString()
+        effectiveAt: new Date().toISOString(),
       },
       {
         provider: 'azure',
@@ -132,8 +135,8 @@ describe('MetaOrchestrator', () => {
         pricePerUnit: 0.9,
         currency: 'USD',
         unit: 'per-minute',
-        effectiveAt: new Date().toISOString()
-      }
+        effectiveAt: new Date().toISOString(),
+      },
     ];
 
     pricingFeed = new MockPricingFeed(pricing);
@@ -148,18 +151,18 @@ describe('MetaOrchestrator', () => {
       pricingFeed,
       execution,
       auditSink: {
-        record: entry => {
+        record: (entry) => {
           auditTrail.push(entry);
-        }
+        },
       },
-      reasoningModel: new TemplateReasoningModel()
+      reasoningModel: new TemplateReasoningModel(),
     });
 
     const plan = await orchestrator.createPlan([stage]);
     expect(plan.steps[0].primary.provider).toBe('azure');
     expect(plan.steps[0].fallbacks[0].provider).toBe('aws');
     expect(plan.steps[0].explanation.narrative).toContain('Secure Build');
-    expect(auditTrail.some(entry => entry.category === 'plan')).toBe(true);
+    expect(auditTrail.some((entry) => entry.category === 'plan')).toBe(true);
   });
 
   it('responds to pricing changes by switching providers', async () => {
@@ -169,7 +172,7 @@ describe('MetaOrchestrator', () => {
       pricingFeed,
       execution,
       auditSink: { record: () => undefined },
-      reasoningModel: new TemplateReasoningModel()
+      reasoningModel: new TemplateReasoningModel(),
     });
 
     const initialPlan = await orchestrator.createPlan([stage]);
@@ -183,7 +186,7 @@ describe('MetaOrchestrator', () => {
         pricePerUnit: 0.6,
         currency: 'USD',
         unit: 'per-minute',
-        effectiveAt: new Date().toISOString()
+        effectiveAt: new Date().toISOString(),
       },
       {
         provider: 'azure',
@@ -192,8 +195,8 @@ describe('MetaOrchestrator', () => {
         pricePerUnit: 1.9,
         currency: 'USD',
         unit: 'per-minute',
-        effectiveAt: new Date().toISOString()
-      }
+        effectiveAt: new Date().toISOString(),
+      },
     ]);
 
     const updatedPlan = await orchestrator.createPlan([stage]);
@@ -207,8 +210,8 @@ describe('MetaOrchestrator', () => {
         throughputPerMinute: 40,
         cost: 120,
         errorRate: 0.2,
-        logs: ['azure failure']
-      }
+        logs: ['azure failure'],
+      },
     ]);
     execution.setResponse('aws', [
       {
@@ -216,8 +219,8 @@ describe('MetaOrchestrator', () => {
         throughputPerMinute: 130,
         cost: 80,
         errorRate: 0.01,
-        logs: ['aws recovery']
-      }
+        logs: ['aws recovery'],
+      },
     ]);
 
     const orchestrator = new MetaOrchestrator({
@@ -226,20 +229,26 @@ describe('MetaOrchestrator', () => {
       pricingFeed,
       execution,
       auditSink: {
-        record: entry => {
+        record: (entry) => {
           auditTrail.push(entry);
-        }
+        },
       },
-      reasoningModel: new TemplateReasoningModel()
+      reasoningModel: new TemplateReasoningModel(),
     });
 
-    const outcome = await orchestrator.executePlan([stage], { commit: 'abc123' });
+    const outcome = await orchestrator.executePlan([stage], {
+      commit: 'abc123',
+    });
     expect(outcome.trace[0].status).toBe('recovered');
     expect(outcome.trace[0].provider).toBe('aws');
     expect(outcome.rewards[0].recovered).toBe(true);
     expect(outcome.rewards[0].observedThroughput).toBe(130);
-    expect(auditTrail.some(entry => entry.category === 'fallback')).toBe(true);
-    expect(auditTrail.some(entry => entry.category === 'reward-update')).toBe(true);
+    expect(auditTrail.some((entry) => entry.category === 'fallback')).toBe(
+      true,
+    );
+    expect(auditTrail.some((entry) => entry.category === 'reward-update')).toBe(
+      true,
+    );
 
     const telemetry = orchestrator.deriveTelemetry(outcome);
     expect(telemetry.throughputPerMinute).toBe(130);

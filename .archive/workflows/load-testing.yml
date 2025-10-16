@@ -37,7 +37,7 @@ jobs:
     name: Smoke Test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.test_type == 'smoke')
-    
+
     services:
       postgres:
         image: postgres:14
@@ -52,7 +52,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -62,23 +62,23 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: server/pnpm-lock.yaml
-      
+
       - name: Install dependencies
         run: |
           cd server
           pnpm install --frozen-lockfile
-      
+
       - name: Start Maestro server
         run: |
           cd server
@@ -87,13 +87,13 @@ jobs:
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
           pnpm start &
-          
+
           # Wait for server to be ready
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
           CONDUCTOR_ENABLED: 'false'
-      
+
       - name: Install k6
         run: |
           sudo gpg -k
@@ -101,7 +101,7 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
-      
+
       - name: Run smoke test
         run: |
           cd tests/load
@@ -113,7 +113,7 @@ jobs:
     name: Load Test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.test_type == 'load')
-    
+
     services:
       postgres:
         image: postgres:14
@@ -128,7 +128,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -138,23 +138,23 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: server/pnpm-lock.yaml
-      
+
       - name: Install dependencies
         run: |
           cd server
           pnpm install --frozen-lockfile
-      
+
       - name: Start Maestro server
         run: |
           cd server
@@ -163,12 +163,12 @@ jobs:
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
           pnpm start &
-          
+
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
           CONDUCTOR_ENABLED: 'false'
-      
+
       - name: Install k6
         run: |
           sudo gpg -k
@@ -176,7 +176,7 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
-      
+
       - name: Run load test
         run: |
           cd tests/load
@@ -185,7 +185,7 @@ jobs:
           k6 run --vus "$VUS" --duration "$DURATION" maestro-load-test.js
         env:
           BASE_URL: http://localhost:4000
-      
+
       - name: Upload load test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -200,7 +200,7 @@ jobs:
     name: Capacity Planning Test
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.test_type == 'capacity')
-    
+
     services:
       postgres:
         image: postgres:14
@@ -215,7 +215,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -225,23 +225,23 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: server/pnpm-lock.yaml
-      
+
       - name: Install dependencies
         run: |
           cd server
           pnpm install --frozen-lockfile
-      
+
       - name: Start Maestro server
         run: |
           cd server
@@ -250,12 +250,12 @@ jobs:
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
           pnpm start &
-          
+
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
           CONDUCTOR_ENABLED: 'false'
-      
+
       - name: Install k6
         run: |
           sudo gpg -k
@@ -263,14 +263,14 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
-      
+
       - name: Run capacity planning test
         run: |
           cd tests/load
           k6 run capacity-planning.js --out json=capacity-results.json
         env:
           BASE_URL: http://localhost:4000
-      
+
       - name: Upload capacity test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -279,7 +279,7 @@ jobs:
           path: |
             tests/load/capacity-results.json
           retention-days: 90
-      
+
       - name: Generate capacity report
         run: |
           cd tests/load
@@ -294,7 +294,7 @@ jobs:
           echo "" >> capacity-report.md
           echo "## Results Analysis" >> capacity-report.md
           echo "Review the uploaded capacity-results.json for detailed metrics." >> capacity-report.md
-      
+
       - name: Upload capacity report
         uses: actions/upload-artifact@v4
         with:
@@ -306,8 +306,8 @@ jobs:
     name: Soak Test (4 hours)
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.test_type == 'soak'
-    timeout-minutes: 300  # 5 hours to account for setup/teardown
-    
+    timeout-minutes: 300 # 5 hours to account for setup/teardown
+
     services:
       postgres:
         image: postgres:14
@@ -322,7 +322,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -332,28 +332,28 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: server/pnpm-lock.yaml
-      
+
       - name: Install dependencies
         run: |
           cd server
           pnpm install --frozen-lockfile
-      
+
       - name: Start Maestro server with monitoring
         run: |
           cd server
           npm run build
-          
+
           # Start with memory monitoring
           DATABASE_URL="postgresql://test-user:test-password@localhost:5432/maestro_test" \
           REDIS_URL="redis://localhost:6379" \
@@ -361,9 +361,9 @@ jobs:
           npm start &
           SERVER_PID=$!
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-          
+
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
-          
+
           # Start memory monitoring in background
           (while true; do
             echo "$(date): Memory usage:"
@@ -373,7 +373,7 @@ jobs:
         env:
           JWT_SECRET: test-secret-key-for-ci
           CONDUCTOR_ENABLED: 'false'
-      
+
       - name: Install k6
         run: |
           sudo gpg -k
@@ -381,14 +381,14 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
-      
+
       - name: Run soak test (4 hours)
         run: |
           cd tests/load
           k6 run --duration 14400s soak-test.js --out json=soak-results.json
         env:
           BASE_URL: http://localhost:4000
-      
+
       - name: Generate soak test report
         run: |
           cd tests/load
@@ -406,7 +406,7 @@ jobs:
             tail -20 ../memory-monitor.log >> soak-report.md
             echo '```' >> soak-report.md
           fi
-      
+
       - name: Upload soak test results
         uses: actions/upload-artifact@v4
         if: always()

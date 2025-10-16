@@ -106,7 +106,7 @@ export class MultiArmedBanditOptimizer {
   async selectArm(
     availableArms: string[],
     strategy: string = 'ucb',
-    contextType: string = 'default'
+    contextType: string = 'default',
   ): Promise<{
     selectedArm: string;
     confidence: number;
@@ -115,8 +115,9 @@ export class MultiArmedBanditOptimizer {
     regretBound: number;
     algorithm: string;
   }> {
-    const filteredArms = Array.from(this.arms.values()).filter(arm => 
-      availableArms.includes(arm.armId) && arm.contextType === contextType
+    const filteredArms = Array.from(this.arms.values()).filter(
+      (arm) =>
+        availableArms.includes(arm.armId) && arm.contextType === contextType,
     );
 
     if (filteredArms.length === 0) {
@@ -132,7 +133,10 @@ export class MultiArmedBanditOptimizer {
     switch (strategy) {
       case 'ucb':
         selectedArm = this.selectUCB(filteredArms, totalPulls);
-        explorationFactor = this.calculateUCBExploration(selectedArm, totalPulls);
+        explorationFactor = this.calculateUCBExploration(
+          selectedArm,
+          totalPulls,
+        );
         break;
 
       case 'thompson_sampling':
@@ -157,7 +161,11 @@ export class MultiArmedBanditOptimizer {
         break;
 
       case 'adaptive':
-        const adaptiveResult = this.selectAdaptive(filteredArms, totalPulls, contextType);
+        const adaptiveResult = this.selectAdaptive(
+          filteredArms,
+          totalPulls,
+          contextType,
+        );
         selectedArm = adaptiveResult.arm;
         explorationFactor = adaptiveResult.explorationFactor;
         algorithm = adaptiveResult.algorithm;
@@ -184,14 +192,14 @@ export class MultiArmedBanditOptimizer {
         arm_id: selectedArm.armId,
         model_id: selectedArm.modelId,
         algorithm,
-        context_type: contextType
-      }
+        context_type: contextType,
+      },
     );
 
     prometheusConductorMetrics.recordOperationalMetric(
       'bandit_exploration_factor',
       explorationFactor,
-      { algorithm, context_type: contextType }
+      { algorithm, context_type: contextType },
     );
 
     logger.info('Bandit arm selected', {
@@ -201,7 +209,7 @@ export class MultiArmedBanditOptimizer {
       explorationFactor,
       expectedReward,
       pulls: selectedArm.pulls,
-      contextType
+      contextType,
     });
 
     return {
@@ -210,7 +218,7 @@ export class MultiArmedBanditOptimizer {
       explorationFactor,
       expectedReward,
       regretBound,
-      algorithm
+      algorithm,
     };
   }
 
@@ -220,7 +228,7 @@ export class MultiArmedBanditOptimizer {
   async updateArm(
     armId: string,
     reward: BanditReward,
-    contextType: string = 'default'
+    contextType: string = 'default',
   ): Promise<void> {
     const arm = this.arms.get(armId);
     if (!arm || arm.contextType !== contextType) {
@@ -232,7 +240,7 @@ export class MultiArmedBanditOptimizer {
       // Update reward history
       arm.rewards.push(reward.totalReward);
       arm.cumulativeReward += reward.totalReward;
-      
+
       // Calculate running statistics
       arm.averageReward = arm.cumulativeReward / arm.pulls;
       arm.variance = this.calculateVariance(arm.rewards);
@@ -240,31 +248,33 @@ export class MultiArmedBanditOptimizer {
 
       // Update quality metrics
       arm.qualityMetrics.accuracyScore = this.updateMetric(
-        arm.qualityMetrics.accuracyScore, 
+        arm.qualityMetrics.accuracyScore,
         reward.baseReward,
-        this.ALPHA
+        this.ALPHA,
       );
 
       // Update cost metrics
       arm.costMetrics.totalCost = this.updateMetric(
         arm.costMetrics.totalCost,
         Math.abs(reward.costPenalty),
-        this.ALPHA
+        this.ALPHA,
       );
 
-      arm.costMetrics.costPerQualityPoint = arm.costMetrics.totalCost / 
+      arm.costMetrics.costPerQualityPoint =
+        arm.costMetrics.totalCost /
         Math.max(arm.qualityMetrics.accuracyScore, 0.01);
 
       // Update performance metrics
       arm.performanceMetrics.latency = this.updateMetric(
         arm.performanceMetrics.latency,
         Math.abs(reward.latencyPenalty) * 1000, // Convert to ms
-        this.ALPHA
+        this.ALPHA,
       );
 
       // Calculate regret
       if (this.optimalArm) {
-        const optimalReward = this.arms.get(this.optimalArm)?.averageReward || 0;
+        const optimalReward =
+          this.arms.get(this.optimalArm)?.averageReward || 0;
         arm.regret += Math.max(0, optimalReward - reward.totalReward);
         this.totalRegret += Math.max(0, optimalReward - reward.totalReward);
       }
@@ -292,19 +302,19 @@ export class MultiArmedBanditOptimizer {
       prometheusConductorMetrics.recordOperationalMetric(
         'bandit_reward_received',
         reward.totalReward,
-        { arm_id: armId, model_id: arm.modelId, context_type: contextType }
+        { arm_id: armId, model_id: arm.modelId, context_type: contextType },
       );
 
       prometheusConductorMetrics.recordOperationalMetric(
         'bandit_arm_regret',
         arm.regret,
-        { arm_id: armId, model_id: arm.modelId }
+        { arm_id: armId, model_id: arm.modelId },
       );
 
       prometheusConductorMetrics.recordOperationalMetric(
         'bandit_total_regret',
         this.totalRegret,
-        { context_type: contextType }
+        { context_type: contextType },
       );
 
       logger.info('Bandit arm updated', {
@@ -313,14 +323,13 @@ export class MultiArmedBanditOptimizer {
         averageReward: arm.averageReward,
         pulls: arm.pulls,
         regret: arm.regret,
-        confidence: arm.confidence
+        confidence: arm.confidence,
       });
-
     } catch (error) {
       logger.error('Failed to update bandit arm', {
         error: error.message,
         armId,
-        contextType
+        contextType,
       });
     }
   }
@@ -337,8 +346,11 @@ export class MultiArmedBanditOptimizer {
         return arm; // Always try untested arms first
       }
 
-      const confidenceBound = Math.sqrt((this.C * Math.log(totalPulls)) / arm.pulls);
-      const ucbValue = arm.averageReward + confidenceBound + (arm.explorationBias * 0.1);
+      const confidenceBound = Math.sqrt(
+        (this.C * Math.log(totalPulls)) / arm.pulls,
+      );
+      const ucbValue =
+        arm.averageReward + confidenceBound + arm.explorationBias * 0.1;
 
       if (ucbValue > bestUCB) {
         bestUCB = ucbValue;
@@ -375,10 +387,11 @@ export class MultiArmedBanditOptimizer {
    * Epsilon-Greedy selection
    */
   private selectEpsilonGreedy(
-    arms: BanditArm[], 
-    totalPulls: number
+    arms: BanditArm[],
+    totalPulls: number,
   ): { arm: BanditArm; isExploration: boolean } {
-    const epsilon = this.EPSILON * Math.pow(this.DECAY_FACTOR, totalPulls / 1000);
+    const epsilon =
+      this.EPSILON * Math.pow(this.DECAY_FACTOR, totalPulls / 1000);
 
     if (Math.random() < epsilon) {
       // Exploration: random selection
@@ -386,8 +399,8 @@ export class MultiArmedBanditOptimizer {
       return { arm: arms[randomIndex], isExploration: true };
     } else {
       // Exploitation: greedy selection
-      const bestArm = arms.reduce((best, current) => 
-        current.averageReward > best.averageReward ? current : best
+      const bestArm = arms.reduce((best, current) =>
+        current.averageReward > best.averageReward ? current : best,
       );
       return { arm: bestArm, isExploration: false };
     }
@@ -421,16 +434,19 @@ export class MultiArmedBanditOptimizer {
    * EXP3 algorithm for adversarial settings
    */
   private selectExp3(arms: BanditArm[]): BanditArm {
-    const gamma = Math.min(1, Math.sqrt((5 * Math.log(arms.length)) / arms.length));
-    
+    const gamma = Math.min(
+      1,
+      Math.sqrt((5 * Math.log(arms.length)) / arms.length),
+    );
+
     // Calculate weights
-    const weights = arms.map(arm => {
+    const weights = arms.map((arm) => {
       const estimatedReward = arm.pulls > 0 ? arm.averageReward : 0;
-      return Math.exp(gamma * estimatedReward / arms.length);
+      return Math.exp((gamma * estimatedReward) / arms.length);
     });
 
     const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-    const probabilities = weights.map(w => w / totalWeight);
+    const probabilities = weights.map((w) => w / totalWeight);
 
     // Select arm based on probability distribution
     const random = Math.random();
@@ -450,13 +466,13 @@ export class MultiArmedBanditOptimizer {
    * Adaptive strategy selection based on current performance
    */
   private selectAdaptive(
-    arms: BanditArm[], 
-    totalPulls: number, 
-    contextType: string
+    arms: BanditArm[],
+    totalPulls: number,
+    contextType: string,
   ): { arm: BanditArm; explorationFactor: number; algorithm: string } {
     // Determine best strategy based on current state
     let strategy = 'ucb';
-    
+
     if (totalPulls < 50) {
       // Early exploration phase
       strategy = 'thompson_sampling';
@@ -522,7 +538,8 @@ export class MultiArmedBanditOptimizer {
 
   // Context analysis methods
   private isHighVarianceContext(arms: BanditArm[]): boolean {
-    const avgVariance = arms.reduce((sum, arm) => sum + arm.variance, 0) / arms.length;
+    const avgVariance =
+      arms.reduce((sum, arm) => sum + arm.variance, 0) / arms.length;
     return avgVariance > 0.1; // Threshold for high variance
   }
 
@@ -534,39 +551,47 @@ export class MultiArmedBanditOptimizer {
 
   private getContextWeight(contextType: string): number {
     const weights: Record<string, number> = {
-      'critical_analysis': 1.2,
-      'creative_writing': 0.9,
-      'code_generation': 1.1,
-      'translation': 1.0,
-      'summarization': 0.8,
-      'default': 1.0
+      critical_analysis: 1.2,
+      creative_writing: 0.9,
+      code_generation: 1.1,
+      translation: 1.0,
+      summarization: 0.8,
+      default: 1.0,
     };
     return weights[contextType] || 1.0;
   }
 
   private getRecentRegret(contextType: string): number {
     // Calculate recent regret for context type
-    const contextArms = Array.from(this.arms.values())
-      .filter(arm => arm.contextType === contextType);
-    
+    const contextArms = Array.from(this.arms.values()).filter(
+      (arm) => arm.contextType === contextType,
+    );
+
     if (contextArms.length === 0) return 0;
-    
-    const recentRegrets = contextArms.map(arm => {
+
+    const recentRegrets = contextArms.map((arm) => {
       const recentRewards = arm.rewards.slice(-10); // Last 10 rewards
-      return recentRewards.length > 0 ? 
-        Math.max(0, arm.averageReward - recentRewards.reduce((a, b) => a + b) / recentRewards.length) : 
-        0;
+      return recentRewards.length > 0
+        ? Math.max(
+            0,
+            arm.averageReward -
+              recentRewards.reduce((a, b) => a + b) / recentRewards.length,
+          )
+        : 0;
     });
-    
-    return recentRegrets.reduce((sum, regret) => sum + regret, 0) / recentRegrets.length;
+
+    return (
+      recentRegrets.reduce((sum, regret) => sum + regret, 0) /
+      recentRegrets.length
+    );
   }
 
   // Statistical utility methods
   private calculateVariance(rewards: number[]): number {
     if (rewards.length < 2) return 0;
-    
+
     const mean = rewards.reduce((sum, r) => sum + r, 0) / rewards.length;
-    const squaredDiffs = rewards.map(r => Math.pow(r - mean, 2));
+    const squaredDiffs = rewards.map((r) => Math.pow(r - mean, 2));
     return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / rewards.length;
   }
 
@@ -574,9 +599,15 @@ export class MultiArmedBanditOptimizer {
     // Combine historical average with quality and cost adjustments
     const qualityAdjustment = arm.qualityMetrics.accuracyScore * 0.2;
     const costAdjustment = -arm.costMetrics.costPerQualityPoint * 0.1;
-    const performanceAdjustment = (1 - arm.performanceMetrics.latency / 5000) * 0.1;
-    
-    return arm.averageReward + qualityAdjustment + costAdjustment + performanceAdjustment;
+    const performanceAdjustment =
+      (1 - arm.performanceMetrics.latency / 5000) * 0.1;
+
+    return (
+      arm.averageReward +
+      qualityAdjustment +
+      costAdjustment +
+      performanceAdjustment
+    );
   }
 
   private calculateRegretBound(arm: BanditArm, totalPulls: number): number {
@@ -589,17 +620,22 @@ export class MultiArmedBanditOptimizer {
     const varianceBias = Math.min(arm.variance, 0.2) / 0.2;
     const confidenceBias = 1 - arm.confidence;
     const recencyBias = this.calculateRecencyBias(arm);
-    
-    return (varianceBias * 0.4) + (confidenceBias * 0.4) + (recencyBias * 0.2);
+
+    return varianceBias * 0.4 + confidenceBias * 0.4 + recencyBias * 0.2;
   }
 
   private calculateRecencyBias(arm: BanditArm): number {
-    const daysSinceLastPull = (Date.now() - arm.lastPull.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceLastPull =
+      (Date.now() - arm.lastPull.getTime()) / (1000 * 60 * 60 * 24);
     return Math.min(daysSinceLastPull / 7, 1); // Increase bias if not pulled in last week
   }
 
-  private updateMetric(currentValue: number, newValue: number, learningRate: number): number {
-    return (currentValue * (1 - learningRate)) + (newValue * learningRate);
+  private updateMetric(
+    currentValue: number,
+    newValue: number,
+    learningRate: number,
+  ): number {
+    return currentValue * (1 - learningRate) + newValue * learningRate;
   }
 
   private sampleBeta(alpha: number, beta: number): number {
@@ -621,7 +657,7 @@ export class MultiArmedBanditOptimizer {
       confidenceThreshold: 0.95,
       regretBound: 0.1,
       adaptiveLearning: true,
-      contextualWeighting: false
+      contextualWeighting: false,
     });
 
     this.strategies.set('thompson_sampling', {
@@ -630,7 +666,7 @@ export class MultiArmedBanditOptimizer {
       confidenceThreshold: 0.9,
       regretBound: 0.15,
       adaptiveLearning: true,
-      contextualWeighting: true
+      contextualWeighting: true,
     });
 
     this.strategies.set('epsilon_greedy', {
@@ -639,7 +675,7 @@ export class MultiArmedBanditOptimizer {
       confidenceThreshold: 0.85,
       regretBound: 0.2,
       adaptiveLearning: false,
-      contextualWeighting: false
+      contextualWeighting: false,
     });
 
     this.strategies.set('linucb', {
@@ -648,7 +684,7 @@ export class MultiArmedBanditOptimizer {
       confidenceThreshold: 0.95,
       regretBound: 0.1,
       adaptiveLearning: true,
-      contextualWeighting: true
+      contextualWeighting: true,
     });
   }
 
@@ -678,9 +714,11 @@ export class MultiArmedBanditOptimizer {
           regret: parseFloat(row.regret),
           lastPull: row.last_pull,
           explorationBias: parseFloat(row.exploration_bias),
-          qualityMetrics: row.quality_metrics || this.getDefaultQualityMetrics(),
+          qualityMetrics:
+            row.quality_metrics || this.getDefaultQualityMetrics(),
           costMetrics: row.cost_metrics || this.getDefaultCostMetrics(),
-          performanceMetrics: row.performance_metrics || this.getDefaultPerformanceMetrics()
+          performanceMetrics:
+            row.performance_metrics || this.getDefaultPerformanceMetrics(),
         };
 
         this.arms.set(arm.armId, arm);
@@ -695,7 +733,8 @@ export class MultiArmedBanditOptimizer {
   private async updateArmInDatabase(arm: BanditArm): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO bandit_arms (
           arm_id, model_id, context_type, pulls, cumulative_reward, average_reward,
           confidence, variance, regret, last_pull, exploration_bias,
@@ -707,12 +746,24 @@ export class MultiArmedBanditOptimizer {
           confidence = $7, variance = $8, regret = $9, last_pull = $10,
           exploration_bias = $11, quality_metrics = $12, cost_metrics = $13,
           performance_metrics = $14
-      `, [
-        arm.armId, arm.modelId, arm.contextType, arm.pulls, arm.cumulativeReward,
-        arm.averageReward, arm.confidence, arm.variance, arm.regret, arm.lastPull,
-        arm.explorationBias, JSON.stringify(arm.qualityMetrics), 
-        JSON.stringify(arm.costMetrics), JSON.stringify(arm.performanceMetrics)
-      ]);
+      `,
+        [
+          arm.armId,
+          arm.modelId,
+          arm.contextType,
+          arm.pulls,
+          arm.cumulativeReward,
+          arm.averageReward,
+          arm.confidence,
+          arm.variance,
+          arm.regret,
+          arm.lastPull,
+          arm.explorationBias,
+          JSON.stringify(arm.qualityMetrics),
+          JSON.stringify(arm.costMetrics),
+          JSON.stringify(arm.performanceMetrics),
+        ],
+      );
     } finally {
       client.release();
     }
@@ -746,7 +797,7 @@ export class MultiArmedBanditOptimizer {
       relevanceScore: 0.5,
       completenessScore: 0.5,
       userSatisfaction: 0.5,
-      expertValidation: 0.5
+      expertValidation: 0.5,
     };
   }
 
@@ -757,7 +808,7 @@ export class MultiArmedBanditOptimizer {
       latencyCost: 0,
       opportunityCost: 0,
       totalCost: 0,
-      costPerQualityPoint: 0
+      costPerQualityPoint: 0,
     };
   }
 
@@ -768,7 +819,7 @@ export class MultiArmedBanditOptimizer {
       reliability: 0.95,
       availability: 0.99,
       errorRate: 0.01,
-      resourceUtilization: 0.5
+      resourceUtilization: 0.5,
     };
   }
 }

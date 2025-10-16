@@ -1,20 +1,54 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, TextField, List, ListItemButton, ListItemText, Typography } from '@mui/material';
+import {
+  Dialog,
+  DialogContent,
+  TextField,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 type Command = { id: string; title: string; hint?: string; action: () => void };
 
-export function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CommandPalette({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
   const commands: Command[] = useMemo(
     () => [
-      { id: 'runbooks', title: 'Open Runbooks', action: () => navigate('/conductor') },
-      { id: 'rollouts', title: 'View Rollouts', action: () => navigate('/conductor') },
-      { id: 'slo', title: 'Open SLO Dashboard', action: () => navigate('/conductor') },
-      { id: 'entities', title: 'Search Entities', action: () => navigate('/search') },
-      { id: 'graph', title: 'Open Graph Explorer', action: () => navigate('/graph') },
+      {
+        id: 'runbooks',
+        title: 'Open Runbooks',
+        action: () => navigate('/conductor'),
+      },
+      {
+        id: 'rollouts',
+        title: 'View Rollouts',
+        action: () => navigate('/conductor'),
+      },
+      {
+        id: 'slo',
+        title: 'Open SLO Dashboard',
+        action: () => navigate('/conductor'),
+      },
+      {
+        id: 'entities',
+        title: 'Search Entities',
+        action: () => navigate('/search'),
+      },
+      {
+        id: 'graph',
+        title: 'Open Graph Explorer',
+        action: () => navigate('/graph'),
+      },
     ],
     [navigate],
   );
@@ -66,4 +100,3 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
     </Dialog>
   );
 }
-

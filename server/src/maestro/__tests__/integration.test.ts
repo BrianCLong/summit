@@ -11,12 +11,12 @@ describe('Maestro Integration Tests', () => {
     // Setup test database
     const pool = getPostgresPool();
     await pool.query('BEGIN');
-    
+
     // Create test run
     const result = await pool.query(
       `INSERT INTO run (id, runbook, status, started_at) 
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
-       RETURNING id`
+       RETURNING id`,
     );
     testRunId = result.rows[0].id;
 
@@ -37,10 +37,21 @@ describe('Maestro Integration Tests', () => {
       await pool.query(
         `INSERT INTO router_decisions (id, run_id, node_id, selected_model, candidates, policy_applied)
          VALUES (gen_random_uuid(), $1, 'test-node', 'gpt-4', $2, 'cost-optimization')`,
-        [testRunId, JSON.stringify([
-          { model: 'gpt-4', score: 0.95, reason: 'Highest quality for complex task' },
-          { model: 'gpt-3.5-turbo', score: 0.80, reason: 'Cost effective alternative' }
-        ])]
+        [
+          testRunId,
+          JSON.stringify([
+            {
+              model: 'gpt-4',
+              score: 0.95,
+              reason: 'Highest quality for complex task',
+            },
+            {
+              model: 'gpt-3.5-turbo',
+              score: 0.8,
+              reason: 'Cost effective alternative',
+            },
+          ]),
+        ],
       );
     });
 
@@ -57,11 +68,13 @@ describe('Maestro Integration Tests', () => {
 
     test('should handle override request', async () => {
       const response = await request(app)
-        .post(`/api/maestro/v1/runs/${testRunId}/nodes/test-node/override-routing`)
+        .post(
+          `/api/maestro/v1/runs/${testRunId}/nodes/test-node/override-routing`,
+        )
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           model: 'gpt-3.5-turbo',
-          reason: 'Cost optimization for testing'
+          reason: 'Cost optimization for testing',
         })
         .expect(200);
 
@@ -73,7 +86,7 @@ describe('Maestro Integration Tests', () => {
       const getResponse = await request(app)
         .get(`/api/maestro/v1/runs/${testRunId}/nodes/test-node/routing`)
         .set('Authorization', `Bearer ${authToken}`);
-      
+
       const decisionId = getResponse.body.id;
 
       const response = await request(app)
@@ -95,10 +108,12 @@ describe('Maestro Integration Tests', () => {
         metadata: { format: 'cycloneDX' },
       };
 
-      const artifactId = await evidenceProvenanceService.storeEvidence(artifact);
+      const artifactId =
+        await evidenceProvenanceService.storeEvidence(artifact);
       expect(artifactId).toBeDefined();
 
-      const verification = await evidenceProvenanceService.verifyEvidence(artifactId);
+      const verification =
+        await evidenceProvenanceService.verifyEvidence(artifactId);
       expect(verification.valid).toBe(true);
       expect(verification.integrity).toBe(true);
       expect(verification.provenance).toBe(true);
@@ -110,11 +125,15 @@ describe('Maestro Integration Tests', () => {
         { name: 'postgres', version: '14.0', licenses: ['PostgreSQL'] },
       ];
 
-      const artifactId = await evidenceProvenanceService.generateSBOMEvidence(testRunId, dependencies);
+      const artifactId = await evidenceProvenanceService.generateSBOMEvidence(
+        testRunId,
+        dependencies,
+      );
       expect(artifactId).toBeDefined();
 
-      const artifacts = await evidenceProvenanceService.listEvidenceForRun(testRunId);
-      const sbomArtifact = artifacts.find(a => a.artifact_type === 'sbom');
+      const artifacts =
+        await evidenceProvenanceService.listEvidenceForRun(testRunId);
+      const sbomArtifact = artifacts.find((a) => a.artifact_type === 'sbom');
       expect(sbomArtifact).toBeDefined();
     });
   });
@@ -126,12 +145,15 @@ describe('Maestro Integration Tests', () => {
       await pool.query(
         `INSERT INTO run_step (run_id, step_id, status) 
          VALUES ($1, 'approval-step', 'BLOCKED')`,
-        [testRunId]
+        [testRunId],
       );
       await pool.query(
         `INSERT INTO run_event (run_id, kind, payload)
          VALUES ($1, 'approval.created', $2)`,
-        [testRunId, { stepId: 'approval-step', labels: ['production', 'high-cost'] }]
+        [
+          testRunId,
+          { stepId: 'approval-step', labels: ['production', 'high-cost'] },
+        ],
       );
     });
 
@@ -145,7 +167,7 @@ describe('Maestro Integration Tests', () => {
         expect.objectContaining({
           runId: testRunId,
           stepId: 'approval-step',
-        })
+        }),
       );
     });
 
@@ -164,8 +186,8 @@ describe('Maestro Integration Tests', () => {
           variables: {
             runId: testRunId,
             stepId: 'approval-step',
-            justification: 'Approved for testing purposes'
-          }
+            justification: 'Approved for testing purposes',
+          },
         })
         .expect(200);
 
@@ -231,7 +253,7 @@ describe('Maestro Integration Tests', () => {
   describe('Error Handling', () => {
     test('should handle 404 for non-existent run', async () => {
       const fakeRunId = '00000000-0000-0000-0000-000000000000';
-      
+
       await request(app)
         .get(`/api/maestro/v1/runs/${fakeRunId}/nodes/test-node/routing`)
         .set('Authorization', `Bearer ${authToken}`)
@@ -240,19 +262,19 @@ describe('Maestro Integration Tests', () => {
 
     test('should validate input parameters', async () => {
       await request(app)
-        .post(`/api/maestro/v1/runs/${testRunId}/nodes/test-node/override-routing`)
+        .post(
+          `/api/maestro/v1/runs/${testRunId}/nodes/test-node/override-routing`,
+        )
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           model: '', // Invalid empty model
-          reason: 'test'
+          reason: 'test',
         })
         .expect(400);
     });
 
     test('should require authentication', async () => {
-      await request(app)
-        .get('/api/maestro/v1/dashboard/summary')
-        .expect(401);
+      await request(app).get('/api/maestro/v1/dashboard/summary').expect(401);
     });
   });
 
@@ -261,12 +283,14 @@ describe('Maestro Integration Tests', () => {
       const promises = Array.from({ length: 10 }, (_, i) =>
         request(app)
           .get(`/api/maestro/v1/runs/${testRunId}/nodes/test-node-${i}/routing`)
-          .set('Authorization', `Bearer ${authToken}`)
+          .set('Authorization', `Bearer ${authToken}`),
       );
 
       const responses = await Promise.allSettled(promises);
-      const successfulResponses = responses.filter(r => r.status === 'fulfilled').length;
-      
+      const successfulResponses = responses.filter(
+        (r) => r.status === 'fulfilled',
+      ).length;
+
       // Should handle most requests successfully
       expect(successfulResponses).toBeGreaterThan(5);
     });
@@ -289,7 +313,7 @@ export function createTestRun(runbook: string = 'test-runbook') {
     `INSERT INTO run (id, runbook, status, started_at) 
      VALUES (gen_random_uuid(), $1, 'RUNNING', now()) 
      RETURNING id`,
-    [runbook]
+    [runbook],
   );
 }
 
@@ -297,9 +321,13 @@ export function createTestRouterDecision(runId: string, nodeId: string) {
   return getPostgresPool().query(
     `INSERT INTO router_decisions (id, run_id, node_id, selected_model, candidates)
      VALUES (gen_random_uuid(), $1, $2, 'gpt-4', $3)`,
-    [runId, nodeId, JSON.stringify([
-      { model: 'gpt-4', score: 0.95, reason: 'Best quality' },
-      { model: 'gpt-3.5-turbo', score: 0.80, reason: 'Cost effective' }
-    ])]
+    [
+      runId,
+      nodeId,
+      JSON.stringify([
+        { model: 'gpt-4', score: 0.95, reason: 'Best quality' },
+        { model: 'gpt-3.5-turbo', score: 0.8, reason: 'Cost effective' },
+      ]),
+    ],
   );
 }

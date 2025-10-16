@@ -82,7 +82,11 @@ export class EntityRepo {
       await client.query(
         `INSERT INTO outbox_events (id, topic, payload)
          VALUES ($1, $2, $3)`,
-        [uuidv4(), 'entity.upsert', JSON.stringify({ id: entity.id, tenantId: entity.tenant_id })],
+        [
+          uuidv4(),
+          'entity.upsert',
+          JSON.stringify({ id: entity.id, tenantId: entity.tenant_id }),
+        ],
       );
 
       await client.query('COMMIT');
@@ -157,7 +161,11 @@ export class EntityRepo {
       await client.query(
         `INSERT INTO outbox_events (id, topic, payload)
          VALUES ($1, $2, $3)`,
-        [uuidv4(), 'entity.upsert', JSON.stringify({ id: entity.id, tenantId: entity.tenant_id })],
+        [
+          uuidv4(),
+          'entity.upsert',
+          JSON.stringify({ id: entity.id, tenantId: entity.tenant_id }),
+        ],
       );
 
       await client.query('COMMIT');
@@ -196,7 +204,10 @@ export class EntityRepo {
     try {
       await client.query('BEGIN');
 
-      const { rowCount } = await client.query(`DELETE FROM entities WHERE id = $1`, [id]);
+      const { rowCount } = await client.query(
+        `DELETE FROM entities WHERE id = $1`,
+        [id],
+      );
 
       if (rowCount && rowCount > 0) {
         // Outbox event for Neo4j cleanup
@@ -289,7 +300,10 @@ export class EntityRepo {
   /**
    * Batch load entities by IDs (for DataLoader)
    */
-  async batchByIds(ids: readonly string[], tenantId?: string): Promise<(Entity | null)[]> {
+  async batchByIds(
+    ids: readonly string[],
+    tenantId?: string,
+  ): Promise<(Entity | null)[]> {
     if (ids.length === 0) return [];
 
     const params = [ids];

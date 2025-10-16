@@ -42,11 +42,19 @@ describe('WargameResolver', () => {
     describe('Query Resolvers', () => {
         it('should fetch all crisis scenarios', async () => {
             const mockScenarios = [
-                { id: 'scenario1', crisisType: 'geo', createdAt: '2023-01-01T00:00:00Z' },
-                { id: 'scenario2', crisisType: 'cyber', createdAt: '2023-01-02T00:00:00Z' },
+                {
+                    id: 'scenario1',
+                    crisisType: 'geo',
+                    createdAt: '2023-01-01T00:00:00Z',
+                },
+                {
+                    id: 'scenario2',
+                    crisisType: 'cyber',
+                    createdAt: '2023-01-02T00:00:00Z',
+                },
             ];
             mockSessionRun.mockResolvedValueOnce({
-                records: mockScenarios.map(s => createMockRecord(s, 's')),
+                records: mockScenarios.map((s) => createMockRecord(s, 's')),
             });
             const result = await resolver.getAllCrisisScenarios({}, {}, {});
             expect(result).toEqual(mockScenarios);
@@ -69,7 +77,7 @@ describe('WargameResolver', () => {
         it('should fetch crisis telemetry', async () => {
             const mockTelemetry = [{ id: 'tele1', platform: 'X', content: 'test' }];
             mockSessionRun.mockResolvedValueOnce({
-                records: mockTelemetry.map(t => createMockRecord(t, 't')),
+                records: mockTelemetry.map((t) => createMockRecord(t, 't')),
             });
             const result = await resolver.getCrisisTelemetry({}, { scenarioId: 'scenario1' }, {});
             expect(result).toEqual(mockTelemetry);
@@ -78,7 +86,7 @@ describe('WargameResolver', () => {
         it('should fetch adversary intent estimates', async () => {
             const mockIntent = [{ id: 'intent1', estimatedIntent: 'disinfo' }];
             mockSessionRun.mockResolvedValueOnce({
-                records: mockIntent.map(i => createMockRecord(i, 'i')),
+                records: mockIntent.map((i) => createMockRecord(i, 'i')),
             });
             const result = await resolver.getAdversaryIntentEstimates({}, { scenarioId: 'scenario1' }, {});
             expect(result).toEqual(mockIntent);
@@ -87,7 +95,7 @@ describe('WargameResolver', () => {
         it('should fetch narrative heatmap data', async () => {
             const mockHeatmap = [{ id: 'heatmap1', narrative: 'narrativeA' }];
             mockSessionRun.mockResolvedValueOnce({
-                records: mockHeatmap.map(h => createMockRecord(h, 'h')),
+                records: mockHeatmap.map((h) => createMockRecord(h, 'h')),
             });
             const result = await resolver.getNarrativeHeatmapData({}, { scenarioId: 'scenario1' }, {});
             expect(result).toEqual(mockHeatmap);
@@ -96,7 +104,7 @@ describe('WargameResolver', () => {
         it('should fetch strategic response playbooks', async () => {
             const mockPlaybook = [{ id: 'playbook1', name: 'Playbook A' }];
             mockSessionRun.mockResolvedValueOnce({
-                records: mockPlaybook.map(p => createMockRecord(p, 'p')),
+                records: mockPlaybook.map((p) => createMockRecord(p, 'p')),
             });
             const result = await resolver.getStrategicResponsePlaybooks({}, { scenarioId: 'scenario1' }, {});
             expect(result).toEqual(mockPlaybook);
@@ -112,20 +120,52 @@ describe('WargameResolver', () => {
                 adversaryProfiles: ['state_actor_X'],
                 simulationParameters: { duration: 7 },
             };
-            mockSessionRun.mockResolvedValueOnce({
-                records: [createMockRecord({ id: 'mock-uuid', ...mockScenarioInput, createdAt: 'now', updatedAt: 'now' }, 's')],
-            }).mockResolvedValue({
+            mockSessionRun
+                .mockResolvedValueOnce({
+                // For CREATE CrisisScenario
+                records: [
+                    createMockRecord({
+                        id: 'mock-uuid',
+                        ...mockScenarioInput,
+                        createdAt: 'now',
+                        updatedAt: 'now',
+                    }, 's'),
+                ],
+            })
+                .mockResolvedValue({
+                // For subsequent MERGE operations
                 records: [],
             });
             mockAxiosPost.mockImplementation((url) => {
                 if (url.includes('/analyze-telemetry')) {
-                    return Promise.resolve({ data: { entities: [], sentiment: 0.5, narratives: ['disinformation'] } });
+                    return Promise.resolve({
+                        data: {
+                            entities: [],
+                            sentiment: 0.5,
+                            narratives: ['disinformation'],
+                        },
+                    });
                 }
                 if (url.includes('/estimate-intent')) {
-                    return Promise.resolve({ data: { estimated_intent: 'high', likelihood: 0.9, reasoning: 'test' } });
+                    return Promise.resolve({
+                        data: {
+                            estimated_intent: 'high',
+                            likelihood: 0.9,
+                            reasoning: 'test',
+                        },
+                    });
                 }
                 if (url.includes('/generate-playbook')) {
-                    return Promise.resolve({ data: { name: 'Playbook', doctrine_reference: 'JP', description: 'desc', steps: [], metrics_of_effectiveness: [], metrics_of_performance: [] } });
+                    return Promise.resolve({
+                        data: {
+                            name: 'Playbook',
+                            doctrine_reference: 'JP',
+                            description: 'desc',
+                            steps: [],
+                            metrics_of_effectiveness: [],
+                            metrics_of_performance: [],
+                        },
+                    });
                 }
                 return Promise.reject(new Error('Unknown API call'));
             });
@@ -145,12 +185,19 @@ describe('WargameResolver', () => {
                 adversaryProfiles: ['non_state_actor_Y'],
                 simulationParameters: { duration: 10 },
             };
-            const updatedScenario = { id: 'scenario1', ...mockScenarioInput, updatedAt: 'now' };
+            const updatedScenario = {
+                id: 'scenario1',
+                ...mockScenarioInput,
+                updatedAt: 'now',
+            };
             mockSessionRun.mockResolvedValueOnce({
                 records: [createMockRecord(updatedScenario, 's')],
             });
             const result = await resolver.updateCrisisScenario({}, { id: 'scenario1', input: mockScenarioInput }, {});
-            expect(result).toEqual(expect.objectContaining({ id: 'scenario1', crisisType: 'updated_conflict' }));
+            expect(result).toEqual(expect.objectContaining({
+                id: 'scenario1',
+                crisisType: 'updated_conflict',
+            }));
             expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $id}) SET s.crisisType = $crisisType'), expect.any(Object));
         });
         it('should delete a crisis scenario', async () => {

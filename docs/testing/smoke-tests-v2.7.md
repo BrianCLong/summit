@@ -202,7 +202,7 @@ Comprehensive smoke test validation for v2.7 features including advanced search,
 
 **Data Validation:**
 
-- Investigation ID: ******\_\_\_******
+- Investigation ID: **\*\***\_\_\_**\*\***
 - All fields saved correctly: Pass/Fail
 - Status color coding accurate: Pass/Fail
 
@@ -330,9 +330,9 @@ Review browser console for any errors:
 
 ---
 
-**Test Completed By:** ******\_\_\_******  
-**Date/Time:** ******\_\_\_******  
-**Environment:** ******\_\_\_******  
+**Test Completed By:** **\*\***\_\_\_**\*\***  
+**Date/Time:** **\*\***\_\_\_**\*\***  
+**Environment:** **\*\***\_\_\_**\*\***  
 **Overall Result:** PASS / FAIL
 
 **Notes:**

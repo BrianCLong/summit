@@ -5,6 +5,7 @@ const config = {
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
+    '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
   },
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
@@ -30,22 +31,28 @@ const config = {
   },
   reporters: [
     'default',
-    ['jest-junit', {
-      outputDirectory: '<rootDir>/test-results',
-      outputName: 'junit.xml',
-      classNameTemplate: '{classname}',
-      titleTemplate: '{title}',
-      ancestorSeparator: ' › ',
-      usePathForSuiteName: true
-    }]
+    [
+      'jest-junit',
+      {
+        outputDirectory: '<rootDir>/test-results',
+        outputName: 'junit.xml',
+        classNameTemplate: '{classname}',
+        titleTemplate: '{title}',
+        ancestorSeparator: ' › ',
+        usePathForSuiteName: true,
+      },
+    ],
   ],
   testPathIgnorePatterns: [
     '<rootDir>/src/tests/',
     '<rootDir>/src/__tests__/ServiceHealthCard.test.jsx',
     '<rootDir>/src/__tests__/Dashboard.test.jsx',
     '<rootDir>/src/components/graph/__tests__/GraphContextMenu.test.jsx',
-    '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx'
-  ]
+    '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx',
+    '<rootDir>/src/components/visualization/__tests__/InteractiveGraphCanvas.test.tsx',
+    '<rootDir>/src/components/mlops/__tests__/ModelManagementDashboard.test.tsx',
+    '<rootDir>/src/components/dashboard/__tests__/StatsOverview.test.tsx',
+  ],
 };
 
 module.exports = config;

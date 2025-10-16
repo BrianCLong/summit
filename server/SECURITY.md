@@ -148,12 +148,12 @@ IntelGraph now ships with a production-ready cryptographic pipeline that provide
 
 ### Supported algorithms
 
-| Identifier | Description |
-| --- | --- |
-| `RSA_SHA256` | RSA-PSS/RSA-SHA256 using PKCS#1/PKCS#8 PEM material |
-| `ECDSA_P256_SHA256` | ECDSA on P-256 with IEEE-P1363 signatures |
-| `ECDSA_P384_SHA384` | ECDSA on P-384 with IEEE-P1363 signatures |
-| `EdDSA_ED25519` | Ed25519 signing/verification |
+| Identifier          | Description                                         |
+| ------------------- | --------------------------------------------------- |
+| `RSA_SHA256`        | RSA-PSS/RSA-SHA256 using PKCS#1/PKCS#8 PEM material |
+| `ECDSA_P256_SHA256` | ECDSA on P-256 with IEEE-P1363 signatures           |
+| `ECDSA_P384_SHA384` | ECDSA on P-384 with IEEE-P1363 signatures           |
+| `EdDSA_ED25519`     | Ed25519 signing/verification                        |
 
 ### Key provisioning (`CRYPTO_SIGNING_KEYS`)
 

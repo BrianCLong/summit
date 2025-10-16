@@ -117,7 +117,7 @@ function RunsTable() {
 
   // Filter runs based on search and status
   useEffect(() => {
-    let filtered = runs.filter(run => {
+    const filtered = runs.filter(run => {
       const matchesSearch =
         run.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         run.runbook.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -71,19 +71,23 @@ export interface OPAResponse {
 
 export class OPAClient {
   private client: AxiosInstance;
-  private decisionCache = new Map<string, { decision: OPADecision; timestamp: number }>();
+  private decisionCache = new Map<
+    string,
+    { decision: OPADecision; timestamp: number }
+  >();
   private readonly cacheTimeout = 5000; // 5 seconds
 
   constructor(
-    private readonly baseURL: string = process.env.OPA_URL || 'http://localhost:8181',
-    private readonly timeout: number = 3000
+    private readonly baseURL: string = process.env.OPA_URL ||
+      'http://localhost:8181',
+    private readonly timeout: number = 3000,
   ) {
     this.client = axios.create({
       baseURL,
       timeout,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     // Add request/response interceptors for logging
@@ -95,7 +99,7 @@ export class OPAClient {
       (error) => {
         logger.error({ error }, 'OPA request error');
         return Promise.reject(error);
-      }
+      },
     );
 
     this.client.interceptors.response.use(
@@ -104,9 +108,9 @@ export class OPAClient {
           {
             url: response.config.url,
             status: response.status,
-            duration: response.headers['x-response-time']
+            duration: response.headers['x-response-time'],
           },
-          'OPA response'
+          'OPA response',
         );
         return response;
       },
@@ -115,12 +119,12 @@ export class OPAClient {
           {
             url: error.config?.url,
             status: error.response?.status,
-            message: error.message
+            message: error.message,
           },
-          'OPA response error'
+          'OPA response error',
         );
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -130,15 +134,18 @@ export class OPAClient {
 
     // Check cache first
     const cached = this.decisionCache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp) < this.cacheTimeout) {
-      logger.debug({ cacheKey, age: Date.now() - cached.timestamp }, 'OPA cache hit');
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      logger.debug(
+        { cacheKey, age: Date.now() - cached.timestamp },
+        'OPA cache hit',
+      );
       return cached.decision;
     }
 
     try {
       const response = await this.client.post<OPAResponse>(
         '/v1/data/intelgraph/policy/export/enhanced/decision',
-        { input }
+        { input },
       );
 
       const decision = response.data.result.decision;
@@ -146,27 +153,33 @@ export class OPAClient {
       // Cache the decision
       this.decisionCache.set(cacheKey, {
         decision,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       const duration = Date.now() - startTime;
-      logger.info({
-        action: decision.action,
-        allow: decision.allow,
-        violationsCount: decision.violations.length,
-        riskLevel: decision.risk_assessment.level,
-        durationMs: duration,
-        cached: false
-      }, 'OPA export policy evaluation completed');
+      logger.info(
+        {
+          action: decision.action,
+          allow: decision.allow,
+          violationsCount: decision.violations.length,
+          riskLevel: decision.risk_assessment.level,
+          durationMs: duration,
+          cached: false,
+        },
+        'OPA export policy evaluation completed',
+      );
 
       return decision;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        durationMs: duration,
-        input: this.sanitizeInputForLogging(input)
-      }, 'OPA export policy evaluation failed');
+      logger.error(
+        {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          durationMs: duration,
+          input: this.sanitizeInputForLogging(input),
+        },
+        'OPA export policy evaluation failed',
+      );
 
       // Return fail-safe decision on error
       return this.failSafeDecision(error);
@@ -187,24 +200,33 @@ export class OPAClient {
     userId: string,
     tenantId: string,
     resource: string,
-    action: string
+    action: string,
   ): Promise<boolean> {
     const input = {
       user: { id: userId, tenant: tenantId },
       resource,
-      action
+      action,
     };
 
     try {
-      const result = await this.evaluateQuery('intelgraph/policy/authz/allow', input);
+      const result = await this.evaluateQuery(
+        'intelgraph/policy/authz/allow',
+        input,
+      );
       return result === true;
     } catch (error) {
-      logger.error({ userId, tenantId, resource, action, error }, 'Data access check failed');
+      logger.error(
+        { userId, tenantId, resource, action, error },
+        'Data access check failed',
+      );
       return false; // Fail closed
     }
   }
 
-  async simulatePolicy(input: OPAInput, policyChanges: Record<string, any>): Promise<{
+  async simulatePolicy(
+    input: OPAInput,
+    policyChanges: Record<string, any>,
+  ): Promise<{
     current: OPADecision;
     simulated: OPADecision;
     impact: {
@@ -223,24 +245,30 @@ export class OPAClient {
 
     const impact = {
       decision_changed: current.action !== simulated.action,
-      violations_added: simulated.violations.filter(v =>
-        !current.violations.some(cv => cv.code === v.code)
+      violations_added: simulated.violations.filter(
+        (v) => !current.violations.some((cv) => cv.code === v.code),
       ),
-      violations_removed: current.violations.filter(v =>
-        !simulated.violations.some(sv => sv.code === v.code)
-      )
+      violations_removed: current.violations.filter(
+        (v) => !simulated.violations.some((sv) => sv.code === v.code),
+      ),
     };
 
-    logger.info({
-      decisionChanged: impact.decision_changed,
-      violationsAdded: impact.violations_added.length,
-      violationsRemoved: impact.violations_removed.length
-    }, 'Policy simulation completed');
+    logger.info(
+      {
+        decisionChanged: impact.decision_changed,
+        violationsAdded: impact.violations_added.length,
+        violationsRemoved: impact.violations_removed.length,
+      },
+      'Policy simulation completed',
+    );
 
     return { current, simulated, impact };
   }
 
-  private applyPolicySimulation(input: OPAInput, changes: Record<string, any>): OPAInput {
+  private applyPolicySimulation(
+    input: OPAInput,
+    changes: Record<string, any>,
+  ): OPAInput {
     // Deep clone input and apply simulated changes
     const simulated = JSON.parse(JSON.stringify(input));
 
@@ -261,11 +289,11 @@ export class OPAClient {
     // Generate a stable cache key from input
     const key = {
       action: input.action,
-      licenses: input.dataset.sources.map(s => s.license).sort(),
+      licenses: input.dataset.sources.map((s) => s.license).sort(),
       userId: input.context.user_id,
       purpose: input.context.purpose,
       exportType: input.context.export_type,
-      stepUpVerified: input.context.step_up_verified
+      stepUpVerified: input.context.step_up_verified,
     };
 
     return Buffer.from(JSON.stringify(key)).toString('base64');
@@ -276,10 +304,10 @@ export class OPAClient {
     return {
       action: input.action,
       sourceCount: input.dataset.sources.length,
-      licenses: [...new Set(input.dataset.sources.map(s => s.license))],
+      licenses: [...new Set(input.dataset.sources.map((s) => s.license))],
       userRole: input.context.user_role,
       purpose: input.context.purpose,
-      exportType: input.context.export_type
+      exportType: input.context.export_type,
     };
   }
 
@@ -290,27 +318,30 @@ export class OPAClient {
     return {
       action: 'deny',
       allow: false,
-      violations: [{
-        code: 'OPA_UNAVAILABLE',
-        message: 'Policy evaluation service unavailable - export denied for safety',
-        source: null,
-        appeal_code: 'SYS001',
-        appeal_url: 'https://compliance.intelgraph.io/appeal/SYS001',
-        severity: 'blocking'
-      }],
+      violations: [
+        {
+          code: 'OPA_UNAVAILABLE',
+          message:
+            'Policy evaluation service unavailable - export denied for safety',
+          source: null,
+          appeal_code: 'SYS001',
+          appeal_url: 'https://compliance.intelgraph.io/appeal/SYS001',
+          severity: 'blocking',
+        },
+      ],
       risk_assessment: {
         level: 'high',
         factors: ['Policy evaluation service unavailable'],
         requires_approval: true,
         requires_dual_control: true,
-        requires_step_up: true
+        requires_step_up: true,
       },
       required_approvals: ['system-admin', 'compliance-officer'],
       appeal_available: true,
       next_steps: [
         'Contact system administrator about policy service availability',
-        'Submit appeal for manual review'
-      ]
+        'Submit appeal for manual review',
+      ],
     };
   }
 
@@ -328,12 +359,12 @@ export class OPAClient {
       await this.client.get('/health');
       return {
         healthy: true,
-        response_time_ms: Date.now() - startTime
+        response_time_ms: Date.now() - startTime,
       };
     } catch (error) {
       return {
         healthy: false,
-        response_time_ms: Date.now() - startTime
+        response_time_ms: Date.now() - startTime,
       };
     }
   }

@@ -19,7 +19,13 @@ const routeRequestSchema = z.object({
 
 const rewardRequestSchema = z.object({
   taskId: z.string().uuid(),
-  signal: z.enum(['success_at_k', 'human_thumbs', 'incident_free', 'cost_efficiency', 'latency']),
+  signal: z.enum([
+    'success_at_k',
+    'human_thumbs',
+    'incident_free',
+    'cost_efficiency',
+    'latency',
+  ]),
   value: z.number().min(0).max(1),
   timestamp: z.number().optional(),
 });
@@ -58,15 +64,25 @@ router.post('/route', async (req, res) => {
       const approvalReason = req.headers['x-approval-reason'];
 
       if (!approvalToken || !approverId || !approvalReason) {
-        logger.warn('Dual-control required but approval headers missing', { taskId, tenantId, sensitivity: requestContext.sensitivity });
+        logger.warn('Dual-control required but approval headers missing', {
+          taskId,
+          tenantId,
+          sensitivity: requestContext.sensitivity,
+        });
         return res.status(403).json({
           error: 'Forbidden',
-          message: 'Dual-control approval required for high-sensitivity tasks. Missing X-Approval-Token, X-Approver-Id, or X-Approval-Reason headers.',
+          message:
+            'Dual-control approval required for high-sensitivity tasks. Missing X-Approval-Token, X-Approver-Id, or X-Approval-Reason headers.',
         });
       }
       // In a real system, you would validate the approvalToken here (e.g., against a secure token store)
       // For this exercise, we'll assume its presence is sufficient for demonstration.
-      logger.info('Dual-control approval received', { taskId, tenantId, approverId, approvalReason });
+      logger.info('Dual-control approval received', {
+        taskId,
+        tenantId,
+        approverId,
+        approvalReason,
+      });
     }
 
     // Route the task
@@ -82,8 +98,14 @@ router.post('/route', async (req, res) => {
     const responseTime = Date.now() - startTime;
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('router_api_request', true);
-    prometheusConductorMetrics.recordOperationalMetric('router_api_latency', responseTime);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'router_api_request',
+      true,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'router_api_latency',
+      responseTime,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'router_confidence',
       routingResponse.confidence,
@@ -98,12 +120,13 @@ router.post('/route', async (req, res) => {
       responseTime,
       user: req.user?.id,
       // Add approval details to audit log if present
-      ...(requestContext && requestContext.sensitivity === 'high' && {
-        approval: {
-          approverId: req.headers['x-approver-id'],
-          approvalReason: req.headers['x-approval-reason'],
-        },
-      }),
+      ...(requestContext &&
+        requestContext.sensitivity === 'high' && {
+          approval: {
+            approverId: req.headers['x-approver-id'],
+            approvalReason: req.headers['x-approval-reason'],
+          },
+        }),
     });
 
     res.json({
@@ -119,7 +142,10 @@ router.post('/route', async (req, res) => {
     });
   } catch (error) {
     logger.error('Router API error', { error, body: req.body });
-    prometheusConductorMetrics.recordOperationalEvent('router_api_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'router_api_error',
+      false,
+    );
 
     res.status(500).json({
       error: 'Internal routing error',
@@ -191,7 +217,8 @@ router.get('/health', async (req, res) => {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       metrics: {
-        totalDecisions: adaptiveExpertRouter.getMetrics?.()?.totalDecisions || 0,
+        totalDecisions:
+          adaptiveExpertRouter.getMetrics?.()?.totalDecisions || 0,
         avgConfidence: adaptiveExpertRouter.getMetrics?.()?.avgConfidence || 0,
       },
     };

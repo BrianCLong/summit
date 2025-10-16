@@ -17,30 +17,38 @@ export const DataSourceConfigSchema = z.object({
   source_type: z.enum(['csv', 'json', 'elasticsearch', 'esri', 'api']),
   source_config: z.record(z.any()),
   license_template: z.string().optional(),
-  custom_license: z.object({
-    name: z.string(),
-    type: z.enum(['commercial', 'open_source', 'proprietary', 'restricted']),
-    restrictions: z.object({
-      commercial_use: z.boolean(),
-      export_allowed: z.boolean(),
-      research_only: z.boolean(),
-      attribution_required: z.boolean(),
-      share_alike: z.boolean()
+  custom_license: z
+    .object({
+      name: z.string(),
+      type: z.enum(['commercial', 'open_source', 'proprietary', 'restricted']),
+      restrictions: z.object({
+        commercial_use: z.boolean(),
+        export_allowed: z.boolean(),
+        research_only: z.boolean(),
+        attribution_required: z.boolean(),
+        share_alike: z.boolean(),
+      }),
     })
-  }).optional(),
+    .optional(),
   tos_accepted: z.boolean(),
   retention_period: z.number().min(1).max(2555), // max 7 years
-  geographic_restrictions: z.array(z.string())
+  geographic_restrictions: z.array(z.string()),
 });
 
 export const DPIAFormSchema = z.object({
-  processing_purpose: z.string().min(10, 'Please provide detailed processing purpose'),
-  data_categories: z.array(z.string()).min(1, 'Select at least one data category'),
-  retention_justification: z.string().min(10, 'Retention justification required'),
+  processing_purpose: z
+    .string()
+    .min(10, 'Please provide detailed processing purpose'),
+  data_categories: z
+    .array(z.string())
+    .min(1, 'Select at least one data category'),
+  retention_justification: z
+    .string()
+    .min(10, 'Retention justification required'),
   security_measures: z.array(z.string()).min(1, 'Select security measures'),
   third_party_sharing: z.boolean(),
   automated_decision_making: z.boolean(),
-  pii_classification: z.enum(['none', 'low', 'medium', 'high', 'critical'])
+  pii_classification: z.enum(['none', 'low', 'medium', 'high', 'critical']),
 });
 
 export type DataSourceConfig = z.infer<typeof DataSourceConfigSchema>;
@@ -56,7 +64,7 @@ interface StepIndicatorProps {
 export const StepIndicator: React.FC<StepIndicatorProps> = ({
   currentStep,
   totalSteps,
-  steps
+  steps,
 }) => {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6">
@@ -69,22 +77,22 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
                 index < currentStep
                   ? 'bg-green-500 text-white'
                   : index === currentStep
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-500'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-500',
               )}
             >
               {index < currentStep ? '✓' : index + 1}
             </div>
-            <div className="text-xs mt-2 text-center max-w-20">
-              {step}
-            </div>
+            <div className="text-xs mt-2 text-center max-w-20">{step}</div>
           </div>
         ))}
       </div>
       <Progress.Root className="relative overflow-hidden bg-gray-200 rounded-full w-full h-2 mt-4">
         <Progress.Indicator
           className="bg-blue-500 w-full h-full transition-transform duration-300 ease-out"
-          style={{ transform: `translateX(-${100 - (currentStep / totalSteps) * 100}%)` }}
+          style={{
+            transform: `translateX(-${100 - (currentStep / totalSteps) * 100}%)`,
+          }}
         />
       </Progress.Root>
     </div>
@@ -101,30 +109,36 @@ interface DataSourceStepProps {
 export const DataSourceStep: React.FC<DataSourceStepProps> = ({
   config,
   onChange,
-  onNext
+  onNext,
 }) => {
   const [licenseTemplates] = useState([
     { id: 'cc-by-4.0', name: 'Creative Commons Attribution 4.0' },
-    { id: 'commercial-restricted', name: 'Commercial License - Export Restricted' },
+    {
+      id: 'commercial-restricted',
+      name: 'Commercial License - Export Restricted',
+    },
     { id: 'research-only', name: 'Academic Research Only' },
-    { id: 'custom', name: 'Custom License' }
+    { id: 'custom', name: 'Custom License' },
   ]);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      // Validate current step
-      const stepSchema = DataSourceConfigSchema.pick({
-        name: true,
-        source_type: true,
-        license_template: true
-      });
-      stepSchema.parse(config);
-      onNext();
-    } catch (error) {
-      console.error('Validation failed:', error);
-    }
-  }, [config, onNext]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        // Validate current step
+        const stepSchema = DataSourceConfigSchema.pick({
+          name: true,
+          source_type: true,
+          license_template: true,
+        });
+        stepSchema.parse(config);
+        onNext();
+      } catch (error) {
+        console.error('Validation failed:', error);
+      }
+    },
+    [config, onNext],
+  );
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -144,7 +158,10 @@ export const DataSourceStep: React.FC<DataSourceStepProps> = ({
               placeholder="Enter descriptive name for data source"
             />
           </Form.Control>
-          <Form.Message className="text-red-500 text-sm mt-1" match="valueMissing">
+          <Form.Message
+            className="text-red-500 text-sm mt-1"
+            match="valueMissing"
+          >
             Please enter a data source name
           </Form.Message>
         </Form.Field>
@@ -155,7 +172,9 @@ export const DataSourceStep: React.FC<DataSourceStepProps> = ({
           </Form.Label>
           <Select.Root
             value={config.source_type || ''}
-            onValueChange={(value) => onChange({ ...config, source_type: value as any })}
+            onValueChange={(value) =>
+              onChange({ ...config, source_type: value as any })
+            }
           >
             <Select.Trigger className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
               <Select.Value placeholder="Select source type" />
@@ -191,7 +210,9 @@ export const DataSourceStep: React.FC<DataSourceStepProps> = ({
           </Form.Label>
           <Select.Root
             value={config.license_template || ''}
-            onValueChange={(value) => onChange({ ...config, license_template: value })}
+            onValueChange={(value) =>
+              onChange({ ...config, license_template: value })
+            }
           >
             <Select.Trigger className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
               <Select.Value placeholder="Select license template" />
@@ -236,7 +257,7 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
   assessment,
   onChange,
   onNext,
-  onBack
+  onBack,
 }) => {
   const dataCategories = [
     'Personal identifiers',
@@ -246,7 +267,7 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
     'Biometric data',
     'Location data',
     'Behavioral data',
-    'Professional information'
+    'Professional information',
   ];
 
   const securityMeasures = [
@@ -257,22 +278,27 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
     'Data anonymization',
     'Regular security assessments',
     'Staff training',
-    'Incident response plan'
+    'Incident response plan',
   ];
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      DPIAFormSchema.parse(assessment);
-      onNext();
-    } catch (error) {
-      console.error('DPIA validation failed:', error);
-    }
-  }, [assessment, onNext]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        DPIAFormSchema.parse(assessment);
+        onNext();
+      } catch (error) {
+        console.error('DPIA validation failed:', error);
+      }
+    },
+    [assessment, onNext],
+  );
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Data Protection Impact Assessment</h2>
+      <h2 className="text-2xl font-bold mb-6">
+        Data Protection Impact Assessment
+      </h2>
 
       <Form.Root onSubmit={handleSubmit}>
         <Form.Field name="processing_purpose" className="mb-4">
@@ -284,7 +310,9 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               rows={3}
               value={assessment.processing_purpose || ''}
-              onChange={(e) => onChange({ ...assessment, processing_purpose: e.target.value })}
+              onChange={(e) =>
+                onChange({ ...assessment, processing_purpose: e.target.value })
+              }
               placeholder="Describe the purpose and legal basis for processing this data"
             />
           </Form.Control>
@@ -299,16 +327,20 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
               <div key={category} className="flex items-center space-x-2">
                 <Checkbox.Root
                   className="w-4 h-4 border border-gray-300 rounded"
-                  checked={assessment.data_categories?.includes(category) || false}
+                  checked={
+                    assessment.data_categories?.includes(category) || false
+                  }
                   onCheckedChange={(checked) => {
                     const current = assessment.data_categories || [];
                     const updated = checked
                       ? [...current, category]
-                      : current.filter(c => c !== category);
+                      : current.filter((c) => c !== category);
                     onChange({ ...assessment, data_categories: updated });
                   }}
                 >
-                  <Checkbox.Indicator className="text-blue-500">✓</Checkbox.Indicator>
+                  <Checkbox.Indicator className="text-blue-500">
+                    ✓
+                  </Checkbox.Indicator>
                 </Checkbox.Root>
                 <label className="text-sm">{category}</label>
               </div>
@@ -322,7 +354,9 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
           </Form.Label>
           <Select.Root
             value={assessment.pii_classification || ''}
-            onValueChange={(value) => onChange({ ...assessment, pii_classification: value as any })}
+            onValueChange={(value) =>
+              onChange({ ...assessment, pii_classification: value as any })
+            }
           >
             <Select.Trigger className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
               <Select.Value placeholder="Select risk level" />
@@ -340,10 +374,14 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
                     <Select.ItemText>Medium - Contact info</Select.ItemText>
                   </Select.Item>
                   <Select.Item value="high">
-                    <Select.ItemText>High - Financial/health data</Select.ItemText>
+                    <Select.ItemText>
+                      High - Financial/health data
+                    </Select.ItemText>
                   </Select.Item>
                   <Select.Item value="critical">
-                    <Select.ItemText>Critical - Biometric/sensitive</Select.ItemText>
+                    <Select.ItemText>
+                      Critical - Biometric/sensitive
+                    </Select.ItemText>
                   </Select.Item>
                 </Select.Viewport>
               </Select.Content>
@@ -360,16 +398,20 @@ export const DPIAStep: React.FC<DPIAStepProps> = ({
               <div key={measure} className="flex items-center space-x-2">
                 <Checkbox.Root
                   className="w-4 h-4 border border-gray-300 rounded"
-                  checked={assessment.security_measures?.includes(measure) || false}
+                  checked={
+                    assessment.security_measures?.includes(measure) || false
+                  }
                   onCheckedChange={(checked) => {
                     const current = assessment.security_measures || [];
                     const updated = checked
                       ? [...current, measure]
-                      : current.filter(m => m !== measure);
+                      : current.filter((m) => m !== measure);
                     onChange({ ...assessment, security_measures: updated });
                   }}
                 >
-                  <Checkbox.Indicator className="text-blue-500">✓</Checkbox.Indicator>
+                  <Checkbox.Indicator className="text-blue-500">
+                    ✓
+                  </Checkbox.Indicator>
                 </Checkbox.Root>
                 <label className="text-sm">{measure}</label>
               </div>
@@ -407,20 +449,22 @@ interface IngestWizardProps {
 
 export const IngestWizard: React.FC<IngestWizardProps> = ({
   onComplete,
-  onCancel
+  onCancel,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [dataSourceConfig, setDataSourceConfig] = useState<Partial<DataSourceConfig>>({});
+  const [dataSourceConfig, setDataSourceConfig] = useState<
+    Partial<DataSourceConfig>
+  >({});
   const [dpiaAssessment, setDPIAAssessment] = useState<Partial<DPIAForm>>({});
 
   const steps = ['Data Source', 'DPIA Assessment', 'Review'];
 
   const handleNext = useCallback(() => {
-    setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   }, [steps.length]);
 
   const handleBack = useCallback(() => {
-    setCurrentStep(prev => Math.max(prev - 1, 0));
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
   }, []);
 
   const handleComplete = useCallback(() => {
@@ -466,18 +510,33 @@ export const IngestWizard: React.FC<IngestWizardProps> = ({
             <div className="bg-white p-6 rounded-lg shadow mb-6">
               <h3 className="font-semibold mb-4">Data Source Configuration</h3>
               <div className="space-y-2 text-sm">
-                <div><strong>Name:</strong> {dataSourceConfig.name}</div>
-                <div><strong>Type:</strong> {dataSourceConfig.source_type}</div>
-                <div><strong>License:</strong> {dataSourceConfig.license_template}</div>
+                <div>
+                  <strong>Name:</strong> {dataSourceConfig.name}
+                </div>
+                <div>
+                  <strong>Type:</strong> {dataSourceConfig.source_type}
+                </div>
+                <div>
+                  <strong>License:</strong> {dataSourceConfig.license_template}
+                </div>
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow mb-6">
               <h3 className="font-semibold mb-4">DPIA Assessment</h3>
               <div className="space-y-2 text-sm">
-                <div><strong>PII Classification:</strong> {dpiaAssessment.pii_classification}</div>
-                <div><strong>Data Categories:</strong> {dpiaAssessment.data_categories?.join(', ')}</div>
-                <div><strong>Security Measures:</strong> {dpiaAssessment.security_measures?.length} selected</div>
+                <div>
+                  <strong>PII Classification:</strong>{' '}
+                  {dpiaAssessment.pii_classification}
+                </div>
+                <div>
+                  <strong>Data Categories:</strong>{' '}
+                  {dpiaAssessment.data_categories?.join(', ')}
+                </div>
+                <div>
+                  <strong>Security Measures:</strong>{' '}
+                  {dpiaAssessment.security_measures?.length} selected
+                </div>
               </div>
             </div>
 
@@ -517,18 +576,22 @@ export const IngestWizard: React.FC<IngestWizardProps> = ({
 
 // Utility functions
 export const createLicenseEnforcementClient = (baseUrl: string) => ({
-  async checkCompliance(operation: string, dataSourceIds: string[], purpose: string) {
+  async checkCompliance(
+    operation: string,
+    dataSourceIds: string[],
+    purpose: string,
+  ) {
     const response = await fetch(`${baseUrl}/compliance/check`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         operation,
         data_source_ids: dataSourceIds,
-        purpose
-      })
+        purpose,
+      }),
     });
     return response.json();
-  }
+  },
 });
 
 export const createDataSourceRegistration = (baseUrl: string) => ({
@@ -536,7 +599,7 @@ export const createDataSourceRegistration = (baseUrl: string) => ({
     const response = await fetch(`${baseUrl}/data-sources`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config)
+      body: JSON.stringify(config),
     });
     return response.json();
   },
@@ -547,9 +610,9 @@ export const createDataSourceRegistration = (baseUrl: string) => ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...assessment,
-        data_source_id: dataSourceId
-      })
+        data_source_id: dataSourceId,
+      }),
     });
     return response.json();
-  }
+  },
 });

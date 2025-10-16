@@ -51,4 +51,3 @@ export const evidenceTypeDefs = gql`
 `;
 
 export default evidenceTypeDefs;
-

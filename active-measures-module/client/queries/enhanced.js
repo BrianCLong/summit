@@ -2,7 +2,10 @@ import { gql } from '@apollo/client';
 
 // Active Measures Portfolio Queries
 export const GET_ACTIVE_MEASURES_PORTFOLIO = gql`
-  query GetActiveMeasuresPortfolio($filters: PortfolioFiltersInput, $tuners: TunersInput) {
+  query GetActiveMeasuresPortfolio(
+    $filters: PortfolioFiltersInput
+    $tuners: TunersInput
+  ) {
     activeMeasuresPortfolio(filters: $filters, tuners: $tuners) {
       id
       totalCount

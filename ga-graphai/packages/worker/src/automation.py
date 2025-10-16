@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Protocol
+from typing import Any, Protocol
 from urllib import request as urllib_request
 from urllib.error import URLError
 from urllib.parse import urlencode
@@ -76,7 +77,9 @@ class ManualController(Protocol):
 class NullManualController:
     """Default controller that performs no blocking and runs fully automated."""
 
-    def await_confirmation(self, stage: str, parcel: WorkParcel) -> None:  # pragma: no cover - trivial
+    def await_confirmation(
+        self, stage: str, parcel: WorkParcel
+    ) -> None:  # pragma: no cover - trivial
         return
 
 
@@ -94,7 +97,9 @@ class HttpClient:
         try:
             with urllib_request.urlopen(req, timeout=navigation.timeout) as response:
                 body = response.read().decode("utf-8", errors="replace")
-                return NavigationResult(status=response.status, body=body, metadata=dict(response.headers))
+                return NavigationResult(
+                    status=response.status, body=body, metadata=dict(response.headers)
+                )
         except URLError as error:  # pragma: no cover - network errors will be simulated in tests
             raise RuntimeError(f"Failed to navigate to {navigation.url}: {error}") from error
 
@@ -170,7 +175,9 @@ class AutomationOrchestrator:
             self._controller.await_confirmation("prompt", parcel)
 
         prompt_payload = engineer.build_payload(parcel.ticket.prompt, parcel.ticket.context)
-        llm_result = self._prompter.submit(parcel.ticket.llm_endpoint, prompt_payload, parcel.prompt_tuning)
+        llm_result = self._prompter.submit(
+            parcel.ticket.llm_endpoint, prompt_payload, parcel.prompt_tuning
+        )
         engineer.validate_response(llm_result.response)
 
         if parcel.manual_control.pause_before_capture:

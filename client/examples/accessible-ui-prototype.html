@@ -59,7 +59,9 @@
         <input id="searchInput" type="text" />
         <button type="submit">Search</button>
       </form>
-      <p id="assistiveHint" role="status" aria-live="polite" hidden>Hint: try "cyber threat"</p>
+      <p id="assistiveHint" role="status" aria-live="polite" hidden>
+        Hint: try "cyber threat"
+      </p>
       <ul id="results" role="list"></ul>
     </main>
 
@@ -83,7 +85,9 @@
           const li = document.createElement('li');
           const btn = document.createElement('button');
           btn.textContent = item.title;
-          btn.addEventListener('click', () => logEvent('select_item', { id: item.id }));
+          btn.addEventListener('click', () =>
+            logEvent('select_item', { id: item.id }),
+          );
           li.appendChild(btn);
           resultsEl.appendChild(li);
         });
@@ -108,9 +112,15 @@
         logEvent('variant_change', { variant: mode });
       }
 
-      document.getElementById('minimalBtn').addEventListener('click', () => setMode('minimal'));
-      document.getElementById('copilotBtn').addEventListener('click', () => setMode('copilot'));
-      document.getElementById('powerBtn').addEventListener('click', () => setMode('power'));
+      document
+        .getElementById('minimalBtn')
+        .addEventListener('click', () => setMode('minimal'));
+      document
+        .getElementById('copilotBtn')
+        .addEventListener('click', () => setMode('copilot'));
+      document
+        .getElementById('powerBtn')
+        .addEventListener('click', () => setMode('power'));
 
       window.addEventListener('keydown', (e) => {
         if (mode === 'power' && e.key === '/') {

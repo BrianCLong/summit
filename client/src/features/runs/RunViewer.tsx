@@ -28,7 +28,10 @@ export default function RunViewer() {
 
   const traceId = (data as any)?.traceId || (data as any)?.otelTraceId;
   const tempo = (import.meta as any).env.VITE_OBS_TEMPO_URL || '';
-  const tracesLink = traceId && tempo ? `${tempo}/search?traceID=${encodeURIComponent(traceId)}` : undefined;
+  const tracesLink =
+    traceId && tempo
+      ? `${tempo}/search?traceID=${encodeURIComponent(traceId)}`
+      : undefined;
 
   return (
     <div style={{ padding: 24 }}>
@@ -37,7 +40,16 @@ export default function RunViewer() {
       {!data && !err && <p>Loading…</p>}
       {data && (
         <>
-          <pre aria-label="run-json" style={{ background: '#111', color: '#ccc', padding: 12, overflow: 'auto', maxHeight: 300 }}>
+          <pre
+            aria-label="run-json"
+            style={{
+              background: '#111',
+              color: '#ccc',
+              padding: 12,
+              overflow: 'auto',
+              maxHeight: 300,
+            }}
+          >
             {JSON.stringify(data, null, 2)}
           </pre>
           <div style={{ marginBottom: 8 }}>

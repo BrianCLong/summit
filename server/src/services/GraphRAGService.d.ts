@@ -1,8 +1,8 @@
 // server/src/services/GraphRAGService.d.ts
-import { JSONSchemaType } from "ajv"; // Assuming ajv is correctly typed
-import { Driver } from "neo4j-driver"; // Assuming neo4j-driver is correctly typed
-import { Redis } from "ioredis"; // Assuming ioredis is correctly typed
-import pino from "pino"; // Assuming pino is correctly typed
+import { JSONSchemaType } from 'ajv'; // Assuming ajv is correctly typed
+import { Driver } from 'neo4j-driver'; // Assuming neo4j-driver is correctly typed
+import { Redis } from 'ioredis'; // Assuming ioredis is correctly typed
+import pino from 'pino'; // Assuming pino is correctly typed
 
 // Re-declare types from GraphRAGService.ts
 export type ScoreBreakdown = {

@@ -184,13 +184,22 @@ export interface LegalHoldRepository {
     status: CustodianStatus,
     metadata?: Partial<LegalHoldCustodian>,
   ): Promise<void>;
-  recordConnectorAction(holdId: string, result: PreservationHoldResult): Promise<void>;
+  recordConnectorAction(
+    holdId: string,
+    result: PreservationHoldResult,
+  ): Promise<void>;
   recordVerification(
     holdId: string,
     verification: PreservationVerificationResult,
   ): Promise<void>;
-  recordCompliance(holdId: string, checkpoint: ComplianceCheckpoint): Promise<void>;
-  recordNotification(holdId: string, notification: LegalHoldNotificationRecord): Promise<void>;
+  recordCompliance(
+    holdId: string,
+    checkpoint: ComplianceCheckpoint,
+  ): Promise<void>;
+  recordNotification(
+    holdId: string,
+    notification: LegalHoldNotificationRecord,
+  ): Promise<void>;
   appendAudit(entry: AuditTrailEntry): Promise<void>;
   listAudit(holdId: string): Promise<AuditTrailEntry[]>;
 }
@@ -214,7 +223,9 @@ export interface ChainOfCustodyAdapter {
     payload?: Record<string, any>;
   }): Promise<string | null>;
   verify(caseId: string): Promise<boolean>;
-  getSigningKeys?(): { privateKey: KeyObject; publicKey: KeyObject } | undefined;
+  getSigningKeys?():
+    | { privateKey: KeyObject; publicKey: KeyObject }
+    | undefined;
 }
 
 export interface LegalHoldOrchestratorOptions {

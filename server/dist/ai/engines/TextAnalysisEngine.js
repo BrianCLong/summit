@@ -3,9 +3,10 @@ import path from 'path';
 import pino from 'pino';
 const logger = pino({ name: 'TextAnalysisEngine' });
 export class TextAnalysisEngine {
+    config;
+    isInitialized = false;
+    models = new Map();
     constructor(config) {
-        this.isInitialized = false;
-        this.models = new Map();
         this.config = config;
     }
     /**
@@ -32,7 +33,7 @@ export class TextAnalysisEngine {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        const { extractEntities = true, performSentiment = true, extractTopics = false, detectLanguage = true, extractKeyPhrases = true, generateSummary = false, analyzeReadability = true, detectIntentions = false, enableCoreference = false, enableDependencyParsing = false } = options;
+        const { extractEntities = true, performSentiment = true, extractTopics = false, detectLanguage = true, extractKeyPhrases = true, generateSummary = false, analyzeReadability = true, detectIntentions = false, enableCoreference = false, enableDependencyParsing = false, } = options;
         logger.info(`Starting text analysis for ${text.length} characters`);
         try {
             // Basic text statistics
@@ -93,7 +94,7 @@ export class TextAnalysisEngine {
                 summary,
                 readabilityScore,
                 intentions,
-                statistics
+                statistics,
             };
             logger.info(`Text analysis completed: ${entities.length} entities, sentiment: ${sentiment?.label || 'N/A'}`);
             return result;
@@ -111,7 +112,8 @@ export class TextAnalysisEngine {
             const pythonScript = path.join(this.config.modelsPath, 'language_detection.py');
             const args = [
                 pythonScript,
-                '--text', text.substring(0, 1000) // Use first 1000 chars for detection
+                '--text',
+                text.substring(0, 1000), // Use first 1000 chars for detection
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -129,7 +131,7 @@ export class TextAnalysisEngine {
                         resolve({
                             language: result.language || 'en',
                             confidence: result.confidence || 0.8,
-                            alternateLanguages: result.alternatives || []
+                            alternateLanguages: result.alternatives || [],
                         });
                     }
                     catch (parseError) {
@@ -153,9 +155,12 @@ export class TextAnalysisEngine {
             const pythonScript = path.join(this.config.modelsPath, 'named_entity_recognition.py');
             const args = [
                 pythonScript,
-                '--text', text,
-                '--language', language,
-                '--model', this.getModelForLanguage(language, 'ner')
+                '--text',
+                text,
+                '--language',
+                language,
+                '--model',
+                this.getModelForLanguage(language, 'ner'),
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -194,9 +199,11 @@ export class TextAnalysisEngine {
             const pythonScript = path.join(this.config.modelsPath, 'sentiment_analysis.py');
             const args = [
                 pythonScript,
-                '--text', text,
-                '--language', language,
-                '--enable-aspects'
+                '--text',
+                text,
+                '--language',
+                language,
+                '--enable-aspects',
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -215,7 +222,7 @@ export class TextAnalysisEngine {
                             label: result.sentiment || 'neutral',
                             score: result.score || 0,
                             confidence: result.confidence || 0.8,
-                            aspects: result.aspects || []
+                            aspects: result.aspects || [],
                         });
                     }
                     catch (parseError) {
@@ -239,10 +246,14 @@ export class TextAnalysisEngine {
             const pythonScript = path.join(this.config.modelsPath, 'topic_modeling.py');
             const args = [
                 pythonScript,
-                '--text', text,
-                '--language', language,
-                '--num-topics', '5',
-                '--algorithm', 'lda'
+                '--text',
+                text,
+                '--language',
+                language,
+                '--num-topics',
+                '5',
+                '--algorithm',
+                'lda',
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -282,9 +293,12 @@ export class TextAnalysisEngine {
             const pythonScript = path.join(this.config.modelsPath, 'keyphrase_extraction.py');
             const args = [
                 pythonScript,
-                '--text', text,
-                '--language', language,
-                '--algorithm', 'textrank'
+                '--text',
+                text,
+                '--language',
+                language,
+                '--algorithm',
+                'textrank',
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -324,10 +338,13 @@ export class TextAnalysisEngine {
             const pythonScript = path.join(this.config.modelsPath, 'text_summarization.py');
             const args = [
                 pythonScript,
-                '--text', text,
-                '--language', language,
-                '--extractive-sentences', '3',
-                '--enable-abstractive'
+                '--text',
+                text,
+                '--language',
+                language,
+                '--extractive-sentences',
+                '3',
+                '--enable-abstractive',
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -346,7 +363,7 @@ export class TextAnalysisEngine {
                             extractive: result.extractive_summary || [],
                             abstractive: result.abstractive_summary,
                             keyPoints: result.key_points || [],
-                            compressionRatio: (result.summary_length || text.length) / text.length
+                            compressionRatio: (result.summary_length || text.length) / text.length,
                         });
                     }
                     catch (parseError) {
@@ -368,11 +385,7 @@ export class TextAnalysisEngine {
     async detectIntentions(text, language) {
         return new Promise((resolve, reject) => {
             const pythonScript = path.join(this.config.modelsPath, 'intention_detection.py');
-            const args = [
-                pythonScript,
-                '--text', text,
-                '--language', language
-            ];
+            const args = [pythonScript, '--text', text, '--language', language];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
             let errorOutput = '';
@@ -427,11 +440,11 @@ export class TextAnalysisEngine {
      */
     calculateTextStatistics(text) {
         const characterCount = text.length;
-        const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+        const words = (text.toLowerCase().match(/\b\w+\b/g) || []);
         const wordCount = words.length;
-        const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+        const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
         const sentenceCount = sentences.length;
-        const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+        const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
         const paragraphCount = paragraphs.length;
         const averageWordsPerSentence = sentenceCount > 0 ? wordCount / sentenceCount : 0;
         const averageSentencesPerParagraph = paragraphCount > 0 ? sentenceCount / paragraphCount : 0;
@@ -439,8 +452,11 @@ export class TextAnalysisEngine {
         const uniqueWords = new Set(words);
         const vocabularyDiversity = wordCount > 0 ? uniqueWords.size / wordCount : 0;
         // Simple complexity score based on various factors
-        const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / wordCount || 0;
-        const complexityScore = (averageWordsPerSentence * 0.4) + (avgWordLength * 0.3) + ((1 - vocabularyDiversity) * 0.3);
+        const avgWordLength = (words.reduce((sum, word) => sum + word.length, 0) /
+            (wordCount || 1)) || 0;
+        const complexityScore = averageWordsPerSentence * 0.4 +
+            avgWordLength * 0.3 +
+            (1 - vocabularyDiversity) * 0.3;
         return {
             characterCount,
             wordCount,
@@ -449,7 +465,7 @@ export class TextAnalysisEngine {
             averageWordsPerSentence,
             averageSentencesPerParagraph,
             vocabularyDiversity,
-            complexityScore
+            complexityScore,
         };
     }
     /**
@@ -462,7 +478,9 @@ export class TextAnalysisEngine {
         // Count syllables (simplified approach)
         const syllableCount = this.countSyllables(text);
         // Flesch Reading Ease formula
-        const score = 206.835 - (1.015 * (wordCount / sentenceCount)) - (84.6 * (syllableCount / wordCount));
+        const score = 206.835 -
+            1.015 * (wordCount / sentenceCount) -
+            84.6 * (syllableCount / wordCount);
         return Math.max(0, Math.min(100, score));
     }
     /**
@@ -496,7 +514,7 @@ export class TextAnalysisEngine {
      * Parse named entities from Python output
      */
     parseNamedEntities(entities) {
-        return entities.map(entity => ({
+        return entities.map((entity) => ({
             text: entity.text,
             label: entity.label,
             start: entity.start,
@@ -504,7 +522,7 @@ export class TextAnalysisEngine {
             confidence: entity.confidence || 0.8,
             description: entity.description,
             canonicalForm: entity.canonical_form,
-            entityId: entity.entity_id
+            entityId: entity.entity_id,
         }));
     }
     /**
@@ -516,26 +534,28 @@ export class TextAnalysisEngine {
             keywords: topic.keywords || [],
             coherence: topic.coherence || 0.5,
             documents: topic.documents,
-            representative_text: topic.representative_text
+            representative_text: topic.representative_text,
         }));
     }
     /**
      * Parse key phrases from Python output
      */
     parseKeyPhrases(phrases, text) {
-        return phrases.map(phrase => {
+        return phrases.map((phrase) => {
             // Find positions of the phrase in text
             const positions = [];
             let index = text.toLowerCase().indexOf(phrase.phrase.toLowerCase());
             while (index !== -1) {
                 positions.push(index);
-                index = text.toLowerCase().indexOf(phrase.phrase.toLowerCase(), index + 1);
+                index = text
+                    .toLowerCase()
+                    .indexOf(phrase.phrase.toLowerCase(), index + 1);
             }
             return {
                 phrase: phrase.phrase,
                 relevance: phrase.relevance || 0.5,
                 frequency: positions.length,
-                positions
+                positions,
             };
         });
     }
@@ -544,24 +564,24 @@ export class TextAnalysisEngine {
      */
     getModelForLanguage(language, task) {
         const modelMap = {
-            'en': {
-                'ner': 'en_core_web_lg',
-                'sentiment': 'en_core_web_lg'
+            en: {
+                ner: 'en_core_web_lg',
+                sentiment: 'en_core_web_lg',
             },
-            'es': {
-                'ner': 'es_core_news_lg',
-                'sentiment': 'es_core_news_lg'
+            es: {
+                ner: 'es_core_news_lg',
+                sentiment: 'es_core_news_lg',
             },
-            'fr': {
-                'ner': 'fr_core_news_lg',
-                'sentiment': 'fr_core_news_lg'
+            fr: {
+                ner: 'fr_core_news_lg',
+                sentiment: 'fr_core_news_lg',
             },
-            'de': {
-                'ner': 'de_core_news_lg',
-                'sentiment': 'de_core_news_lg'
-            }
+            de: {
+                ner: 'de_core_news_lg',
+                sentiment: 'de_core_news_lg',
+            },
         };
-        return modelMap[language]?.[task] || modelMap['en'][task] || 'en_core_web_lg';
+        return (modelMap[language]?.[task] || modelMap['en'][task] || 'en_core_web_lg');
     }
     /**
      * Verify dependencies
@@ -570,7 +590,7 @@ export class TextAnalysisEngine {
         return new Promise((resolve, reject) => {
             const python = spawn(this.config.pythonPath, [
                 '-c',
-                'import spacy, transformers, sklearn, nltk; print("Dependencies OK")'
+                'import spacy, transformers, sklearn, nltk; print("Dependencies OK")',
             ]);
             python.on('close', (code) => {
                 if (code === 0) {

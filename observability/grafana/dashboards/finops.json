@@ -1,7 +1,15 @@
 {
   "title": "FinOps Dashboard",
   "panels": [
-    { "type": "timeseries", "title": "Daily Cost", "targets": [{ "expr": "sum(cost_total_daily)" }] },
-    { "type": "timeseries", "title": "Cost per Tenant", "targets": [{ "expr": "sum by (tenant) (cost_total_daily)" }] }
+    {
+      "type": "timeseries",
+      "title": "Daily Cost",
+      "targets": [{ "expr": "sum(cost_total_daily)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cost per Tenant",
+      "targets": [{ "expr": "sum by (tenant) (cost_total_daily)" }]
+    }
   ]
 }

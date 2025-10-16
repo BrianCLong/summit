@@ -88,23 +88,23 @@ export class OPABundleManager extends EventEmitter {
     version: string,
     policies: Array<{ path: string; content: string }>,
     data: Array<{ path: string; content: any }> = [],
-    metadata: Partial<BundleManifest['metadata']> = {}
+    metadata: Partial<BundleManifest['metadata']> = {},
   ): Promise<PolicyBundle> {
     // Validate policy syntax
     await this.validatePolicies(policies);
 
     // Create policy files with hashes
-    const policyFiles: PolicyFile[] = policies.map(p => ({
+    const policyFiles: PolicyFile[] = policies.map((p) => ({
       path: p.path,
       content: p.content,
-      hash: this.calculateHash(p.content)
+      hash: this.calculateHash(p.content),
     }));
 
     // Create data files with hashes
-    const dataFiles: DataFile[] = data.map(d => ({
+    const dataFiles: DataFile[] = data.map((d) => ({
       path: d.path,
       content: d.content,
-      hash: this.calculateHash(JSON.stringify(d.content))
+      hash: this.calculateHash(JSON.stringify(d.content)),
     }));
 
     // Create manifest
@@ -115,18 +115,18 @@ export class OPABundleManager extends EventEmitter {
         description: metadata.description || `Policy bundle ${name}`,
         author: metadata.author || 'system',
         created: new Date().toISOString(),
-        ...metadata
+        ...metadata,
       },
-      policies: policyFiles.map(p => ({
+      policies: policyFiles.map((p) => ({
         path: p.path,
         hash: p.hash,
-        entrypoint: this.isEntrypoint(p.path) ? p.path : undefined
+        entrypoint: this.isEntrypoint(p.path) ? p.path : undefined,
       })),
-      data: dataFiles.map(d => ({
+      data: dataFiles.map((d) => ({
         path: d.path,
-        hash: d.hash
+        hash: d.hash,
       })),
-      roots: this.extractRoots(policyFiles)
+      roots: this.extractRoots(policyFiles),
     };
 
     const bundle: PolicyBundle = {
@@ -135,7 +135,7 @@ export class OPABundleManager extends EventEmitter {
       policies: policyFiles,
       data: dataFiles,
       manifest,
-      created: new Date()
+      created: new Date(),
     };
 
     // Sign bundle if signing config provided
@@ -150,7 +150,7 @@ export class OPABundleManager extends EventEmitter {
       version,
       policiesCount: policies.length,
       dataFilesCount: data.length,
-      signed: !!bundle.signature
+      signed: !!bundle.signature,
     });
 
     return bundle;
@@ -168,7 +168,10 @@ export class OPABundleManager extends EventEmitter {
 
       // Write manifest
       const manifestPath = path.join(tempDir, '.manifest');
-      await fs.writeFile(manifestPath, JSON.stringify(bundle.manifest, null, 2));
+      await fs.writeFile(
+        manifestPath,
+        JSON.stringify(bundle.manifest, null, 2),
+      );
 
       // Write policies
       for (const policy of bundle.policies) {
@@ -188,10 +191,12 @@ export class OPABundleManager extends EventEmitter {
       if (bundle.signature) {
         const signaturePath = path.join(tempDir, '.signatures.json');
         const signatures = {
-          signatures: [{
-            keyid: this.signingConfig?.keyId || 'default',
-            sig: bundle.signature
-          }]
+          signatures: [
+            {
+              keyid: this.signingConfig?.keyId || 'default',
+              sig: bundle.signature,
+            },
+          ],
         };
         await fs.writeFile(signaturePath, JSON.stringify(signatures, null, 2));
       }
@@ -201,18 +206,17 @@ export class OPABundleManager extends EventEmitter {
         {
           gzip: true,
           file: outputPath,
-          cwd: tempDir
+          cwd: tempDir,
         },
-        ['.']
+        ['.'],
       );
 
       this.emit('bundle_packaged', {
         name: bundle.name,
         version: bundle.version,
         outputPath,
-        size: (await fs.stat(outputPath)).size
+        size: (await fs.stat(outputPath)).size,
       });
-
     } finally {
       // Cleanup temp directory
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -229,7 +233,7 @@ export class OPABundleManager extends EventEmitter {
       // Extract bundle
       await tar.extract({
         file: bundlePath,
-        cwd: tempDir
+        cwd: tempDir,
       });
 
       // Load manifest
@@ -247,7 +251,7 @@ export class OPABundleManager extends EventEmitter {
         policies.push({
           path: policyInfo.path,
           content,
-          hash
+          hash,
         });
       }
 
@@ -261,7 +265,7 @@ export class OPABundleManager extends EventEmitter {
         data.push({
           path: dataInfo.path,
           content,
-          hash
+          hash,
         });
       }
 
@@ -271,7 +275,7 @@ export class OPABundleManager extends EventEmitter {
         policies,
         data,
         manifest,
-        created: new Date(manifest.metadata.created)
+        created: new Date(manifest.metadata.created),
       };
 
       // Load and verify signature if present
@@ -304,7 +308,7 @@ export class OPABundleManager extends EventEmitter {
         bundle,
         signatureValid,
         manifestValid,
-        policiesValid
+        policiesValid,
       };
 
       if (!signatureValid) result.errors.push('Invalid or missing signature');
@@ -316,12 +320,11 @@ export class OPABundleManager extends EventEmitter {
         this.emit('bundle_loaded', {
           name: bundle.name,
           version: bundle.version,
-          verified: true
+          verified: true,
         });
       }
 
       return result;
-
     } finally {
       // Cleanup temp directory
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -338,12 +341,17 @@ export class OPABundleManager extends EventEmitter {
   /**
    * List all available bundles
    */
-  listBundles(): Array<{ name: string; version: string; signed: boolean; created: Date }> {
-    return Array.from(this.bundles.values()).map(bundle => ({
+  listBundles(): Array<{
+    name: string;
+    version: string;
+    signed: boolean;
+    created: Date;
+  }> {
+    return Array.from(this.bundles.values()).map((bundle) => ({
       name: bundle.name,
       version: bundle.version,
       signed: !!bundle.signature,
-      created: bundle.created
+      created: bundle.created,
     }));
   }
 
@@ -354,11 +362,11 @@ export class OPABundleManager extends EventEmitter {
     name: string,
     newVersion: string,
     policies?: Array<{ path: string; content: string }>,
-    data?: Array<{ path: string; content: any }>
+    data?: Array<{ path: string; content: any }>,
   ): Promise<PolicyBundle> {
     // Find latest version of the bundle
     const existingBundles = Array.from(this.bundles.values())
-      .filter(b => b.name === name)
+      .filter((b) => b.name === name)
       .sort((a, b) => b.created.getTime() - a.created.getTime());
 
     const latestBundle = existingBundles[0];
@@ -367,26 +375,32 @@ export class OPABundleManager extends EventEmitter {
     }
 
     // Use existing policies/data if not provided
-    const updatedPolicies = policies || latestBundle.policies.map(p => ({
-      path: p.path,
-      content: p.content
-    }));
+    const updatedPolicies =
+      policies ||
+      latestBundle.policies.map((p) => ({
+        path: p.path,
+        content: p.content,
+      }));
 
-    const updatedData = data || latestBundle.data.map(d => ({
-      path: d.path,
-      content: d.content
-    }));
+    const updatedData =
+      data ||
+      latestBundle.data.map((d) => ({
+        path: d.path,
+        content: d.content,
+      }));
 
     return this.createBundle(
       name,
       newVersion,
       updatedPolicies,
       updatedData,
-      latestBundle.manifest.metadata
+      latestBundle.manifest.metadata,
     );
   }
 
-  private async validatePolicies(policies: Array<{ path: string; content: string }>): Promise<void> {
+  private async validatePolicies(
+    policies: Array<{ path: string; content: string }>,
+  ): Promise<void> {
     for (const policy of policies) {
       // Basic Rego syntax validation
       if (!policy.content.includes('package ')) {
@@ -410,10 +424,12 @@ export class OPABundleManager extends EventEmitter {
         }
 
         // Validate syntax
-        await this.validatePolicies([{
-          path: policy.path,
-          content: policy.content
-        }]);
+        await this.validatePolicies([
+          {
+            path: policy.path,
+            content: policy.content,
+          },
+        ]);
       }
       return true;
     } catch (error) {
@@ -424,7 +440,7 @@ export class OPABundleManager extends EventEmitter {
   private async verifyManifest(bundle: PolicyBundle): Promise<boolean> {
     // Verify all policy hashes
     for (const policyInfo of bundle.manifest.policies) {
-      const policy = bundle.policies.find(p => p.path === policyInfo.path);
+      const policy = bundle.policies.find((p) => p.path === policyInfo.path);
       if (!policy || policy.hash !== policyInfo.hash) {
         return false;
       }
@@ -432,7 +448,7 @@ export class OPABundleManager extends EventEmitter {
 
     // Verify all data hashes
     for (const dataInfo of bundle.manifest.data) {
-      const dataFile = bundle.data.find(d => d.path === dataInfo.path);
+      const dataFile = bundle.data.find((d) => d.path === dataInfo.path);
       if (!dataFile || dataFile.hash !== dataInfo.hash) {
         return false;
       }
@@ -452,16 +468,25 @@ export class OPABundleManager extends EventEmitter {
 
     switch (this.signingConfig.algorithm) {
       case 'RS256':
-        return crypto.sign('sha256', Buffer.from(data), this.signingConfig.privateKey).toString('base64');
+        return crypto
+          .sign('sha256', Buffer.from(data), this.signingConfig.privateKey)
+          .toString('base64');
 
       case 'ES256':
-        return crypto.sign('sha256', Buffer.from(data), this.signingConfig.privateKey).toString('base64');
+        return crypto
+          .sign('sha256', Buffer.from(data), this.signingConfig.privateKey)
+          .toString('base64');
 
       case 'HS256':
-        return crypto.createHmac('sha256', this.signingConfig.privateKey).update(data).digest('base64');
+        return crypto
+          .createHmac('sha256', this.signingConfig.privateKey)
+          .update(data)
+          .digest('base64');
 
       default:
-        throw new Error(`Unsupported signing algorithm: ${this.signingConfig.algorithm}`);
+        throw new Error(
+          `Unsupported signing algorithm: ${this.signingConfig.algorithm}`,
+        );
     }
   }
 
@@ -478,10 +503,16 @@ export class OPABundleManager extends EventEmitter {
       switch (this.signingConfig.algorithm) {
         case 'RS256':
         case 'ES256':
-          return crypto.verify('sha256', Buffer.from(data), this.signingConfig.publicKey, signature);
+          return crypto.verify(
+            'sha256',
+            Buffer.from(data),
+            this.signingConfig.publicKey,
+            signature,
+          );
 
         case 'HS256':
-          const expectedSignature = crypto.createHmac('sha256', this.signingConfig.privateKey)
+          const expectedSignature = crypto
+            .createHmac('sha256', this.signingConfig.privateKey)
             .update(data)
             .digest('base64');
           return bundle.signature === expectedSignature;
@@ -501,15 +532,17 @@ export class OPABundleManager extends EventEmitter {
       version: bundle.version,
       manifest: {
         ...bundle.manifest,
-        policies: bundle.manifest.policies.sort((a, b) => a.path.localeCompare(b.path)),
-        data: bundle.manifest.data.sort((a, b) => a.path.localeCompare(b.path))
+        policies: bundle.manifest.policies.sort((a, b) =>
+          a.path.localeCompare(b.path),
+        ),
+        data: bundle.manifest.data.sort((a, b) => a.path.localeCompare(b.path)),
       },
       policies: bundle.policies
         .sort((a, b) => a.path.localeCompare(b.path))
-        .map(p => ({ path: p.path, hash: p.hash })),
+        .map((p) => ({ path: p.path, hash: p.hash })),
       data: bundle.data
         .sort((a, b) => a.path.localeCompare(b.path))
-        .map(d => ({ path: d.path, hash: d.hash }))
+        .map((d) => ({ path: d.path, hash: d.hash })),
     };
   }
 
@@ -519,8 +552,10 @@ export class OPABundleManager extends EventEmitter {
 
   private isEntrypoint(policyPath: string): boolean {
     // Consider main.rego or policies in root as entrypoints
-    return policyPath === 'main.rego' ||
-           (!policyPath.includes('/') && policyPath.endsWith('.rego'));
+    return (
+      policyPath === 'main.rego' ||
+      (!policyPath.includes('/') && policyPath.endsWith('.rego'))
+    );
   }
 
   private extractRoots(policies: PolicyFile[]): string[] {
@@ -528,7 +563,9 @@ export class OPABundleManager extends EventEmitter {
 
     for (const policy of policies) {
       // Extract package name from policy content
-      const packageMatch = policy.content.match(/package\s+([a-zA-Z_][a-zA-Z0-9_.]*)/);
+      const packageMatch = policy.content.match(
+        /package\s+([a-zA-Z_][a-zA-Z0-9_.]*)/,
+      );
       if (packageMatch) {
         const packageName = packageMatch[1];
         const rootPart = packageName.split('.')[0];
@@ -632,5 +669,5 @@ role_permissions := {
     "admin": ["read", "write", "admin"],
     "super_admin": ["read", "write", "admin", "super_admin"]
 }
-`
+`,
 };

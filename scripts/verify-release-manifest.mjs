@@ -5,12 +5,16 @@ import { resolve } from 'path';
 
 // Parse command-line arguments
 const argv = process.argv.slice(2);
-const tag = argv.find(a => a.startsWith('--tag='))?.split('=')[1];
+const tag = argv.find((a) => a.startsWith('--tag='))?.split('=')[1];
 const strict = argv.includes('--strict');
-const expectSha = argv.find(a => a.startsWith('--expect-sha='))?.split('=')[1];
+const expectSha = argv
+  .find((a) => a.startsWith('--expect-sha='))
+  ?.split('=')[1];
 
 if (!tag) {
-  console.error('Usage: node verify-release-manifest.mjs --tag=TAG [--strict] [--expect-sha=SHA]');
+  console.error(
+    'Usage: node verify-release-manifest.mjs --tag=TAG [--strict] [--expect-sha=SHA]',
+  );
   process.exit(1);
 }
 
@@ -18,7 +22,9 @@ if (!tag) {
 const currentSha = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
 
 // Get tag SHA
-const tagSha = execSync(`git rev-list -n 1 ${tag}`, { encoding: 'utf8' }).trim();
+const tagSha = execSync(`git rev-list -n 1 ${tag}`, {
+  encoding: 'utf8',
+}).trim();
 
 // Try to read manifest file (e.g., release-manifest.json)
 let manifestSha = null;
@@ -34,18 +40,24 @@ if (existsSync(manifestPath)) {
 
 // Verify against expected SHA
 if (expectSha && manifestSha && manifestSha !== expectSha) {
-  console.error(`❌ Manifest commit does not match --expect-sha:\n  Manifest: ${manifestSha}\n  Expected: ${expectSha}`);
+  console.error(
+    `❌ Manifest commit does not match --expect-sha:\n  Manifest: ${manifestSha}\n  Expected: ${expectSha}`,
+  );
   process.exit(2);
 }
 
 // Check if manifest SHA matches current SHA
 if (manifestSha && currentSha !== manifestSha) {
-  console.warn(`⚠️  Commit SHA mismatch:\n  Manifest: ${manifestSha}\n  Current:  ${currentSha}`);
+  console.warn(
+    `⚠️  Commit SHA mismatch:\n  Manifest: ${manifestSha}\n  Current:  ${currentSha}`,
+  );
 }
 
 // Strict mode: HEAD must be at the tag commit
 if (strict && tagSha && currentSha !== tagSha) {
-  console.error(`❌ --strict: HEAD is not at the tag commit.\n  Tag ${tag} -> ${tagSha}\n  HEAD      -> ${currentSha}`);
+  console.error(
+    `❌ --strict: HEAD is not at the tag commit.\n  Tag ${tag} -> ${tagSha}\n  HEAD      -> ${currentSha}`,
+  );
   process.exit(3);
 }
 
@@ -53,9 +65,11 @@ if (strict && tagSha && currentSha !== tagSha) {
 if (tagSha && currentSha === tagSha) {
   console.log(`🔒 Verified at tag ${tag} (${tagSha})`);
 } else if (tag) {
-  console.log(`ℹ️  Verified manifest for ${tag}; HEAD is different (use --strict to enforce).`);
+  console.log(
+    `ℹ️  Verified manifest for ${tag}; HEAD is different (use --strict to enforce).`,
+  );
 } else {
   console.log(`ℹ️  Verified manifest (no tag provided).`);
 }
 
-process. Exit(0);
+process.Exit(0);

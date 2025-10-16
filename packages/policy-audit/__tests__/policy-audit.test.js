@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const { PolicyAudit, verifyAuditChain, verifyAuditChainDetailed } = require('..');
+const {
+  PolicyAudit,
+  verifyAuditChain,
+  verifyAuditChainDetailed,
+} = require('..');
 
 const policyDir = path.join(__dirname, '../../../contracts/policy');
 const auditDir = path.join(__dirname, '../../../tmp-audit');
@@ -99,9 +103,9 @@ test('tamper detection', async () => {
 
 test('audit requires all fields', async () => {
   const pa = new PolicyAudit({ policyDir, auditDir });
-  await expect(pa.audit({ decision: 'allow', reason: 'x', subject: {} })).rejects.toThrow(
-    'decision, reason, subject, and resource required',
-  );
+  await expect(
+    pa.audit({ decision: 'allow', reason: 'x', subject: {} }),
+  ).rejects.toThrow('decision, reason, subject, and resource required');
 });
 
 test('evaluateAndAudit convenience', async () => {

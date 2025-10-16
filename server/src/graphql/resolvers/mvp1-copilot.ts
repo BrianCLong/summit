@@ -1,5 +1,9 @@
 import { CopilotIntegrationService } from '../../services/CopilotIntegrationService';
-import { AuthenticationError, ForbiddenError, UserInputError } from 'apollo-server-express';
+import {
+  AuthenticationError,
+  ForbiddenError,
+  UserInputError,
+} from 'apollo-server-express';
 import { isFeatureEnabled } from '../../config/mvp1-features';
 
 const copilotService = new CopilotIntegrationService();
@@ -8,7 +12,13 @@ interface AuthContext {
   user?: {
     id: string;
     email: string;
-    role: 'viewer' | 'analyst' | 'editor' | 'investigator' | 'admin' | 'super_admin';
+    role:
+      | 'viewer'
+      | 'analyst'
+      | 'editor'
+      | 'investigator'
+      | 'admin'
+      | 'super_admin';
     tenantId: string;
   };
   tenantId?: string;
@@ -30,7 +40,7 @@ const mvp1CopilotResolvers = {
           available: health.available,
           responseTimeMs: health.response_time_ms,
           version: health.version,
-          modelsLoaded: health.models_loaded
+          modelsLoaded: health.models_loaded,
         };
       } catch (error: any) {
         throw new Error(`Failed to check Copilot health: ${error.message}`);
@@ -44,29 +54,51 @@ const mvp1CopilotResolvers = {
       }
 
       const capabilities = {
-        nerExtraction: ['viewer', 'analyst', 'editor', 'investigator', 'admin', 'super_admin'].includes(context.user.role),
-        linkSuggestions: ['analyst', 'editor', 'investigator', 'admin', 'super_admin'].includes(context.user.role),
-        bulkProcessing: ['editor', 'investigator', 'admin', 'super_admin'].includes(context.user.role),
-        adminFeatures: ['admin', 'super_admin'].includes(context.user.role)
+        nerExtraction: [
+          'viewer',
+          'analyst',
+          'editor',
+          'investigator',
+          'admin',
+          'super_admin',
+        ].includes(context.user.role),
+        linkSuggestions: [
+          'analyst',
+          'editor',
+          'investigator',
+          'admin',
+          'super_admin',
+        ].includes(context.user.role),
+        bulkProcessing: [
+          'editor',
+          'investigator',
+          'admin',
+          'super_admin',
+        ].includes(context.user.role),
+        adminFeatures: ['admin', 'super_admin'].includes(context.user.role),
       };
 
       return capabilities;
-    }
+    },
   },
 
   Mutation: {
     // Extract named entities from text
-    extractEntities: async (_: any, { 
-      input 
-    }: { 
-      input: {
-        text: string;
-        investigationId?: string;
-        precisionThreshold?: number;
-        enableCaching?: boolean;
-        autoCreateEntities?: boolean;
-      }
-    }, context: AuthContext) => {
+    extractEntities: async (
+      _: any,
+      {
+        input,
+      }: {
+        input: {
+          text: string;
+          investigationId?: string;
+          precisionThreshold?: number;
+          enableCaching?: boolean;
+          autoCreateEntities?: boolean;
+        };
+      },
+      context: AuthContext,
+    ) => {
       // Feature flag check
       if (!isFeatureEnabled('COPILOT_SERVICE')) {
         throw new Error('Copilot service is not enabled');
@@ -81,7 +113,9 @@ const mvp1CopilotResolvers = {
       }
 
       if (input.text.length > 50000) {
-        throw new UserInputError('Text exceeds maximum length of 50,000 characters');
+        throw new UserInputError(
+          'Text exceeds maximum length of 50,000 characters',
+        );
       }
 
       try {
@@ -91,23 +125,27 @@ const mvp1CopilotResolvers = {
             id: context.user.id,
             email: context.user.email,
             role: context.user.role,
-            tenantId: context.user.tenantId
+            tenantId: context.user.tenantId,
           },
           {
             investigationId: input.investigationId,
             precisionThreshold: input.precisionThreshold,
-            enableCaching: input.enableCaching
-          }
+            enableCaching: input.enableCaching,
+          },
         );
 
         // Optionally auto-create entities in the graph
-        let createdEntities: any[] = [];
-        if (input.autoCreateEntities && input.investigationId && result.entities.length > 0) {
+        const createdEntities: any[] = [];
+        if (
+          input.autoCreateEntities &&
+          input.investigationId &&
+          result.entities.length > 0
+        ) {
           const intelGraphEntities = copilotService.convertToIntelGraphEntities(
             result.entities,
             input.investigationId,
             context.user.tenantId,
-            context.user.id
+            context.user.id,
           );
 
           // TODO: Integrate with entity creation service
@@ -116,14 +154,14 @@ const mvp1CopilotResolvers = {
 
         return {
           success: true,
-          entities: result.entities.map(entity => ({
+          entities: result.entities.map((entity) => ({
             type: entity.type,
             label: entity.label,
             startIndex: entity.start_index,
             endIndex: entity.end_index,
             confidence: entity.confidence,
             context: entity.context,
-            suggestedProperties: entity.suggested_properties
+            suggestedProperties: entity.suggested_properties,
           })),
           confidence: result.confidence,
           processingTimeMs: result.processing_time_ms,
@@ -133,34 +171,39 @@ const mvp1CopilotResolvers = {
           metadata: {
             textLength: input.text.length,
             entitiesFound: result.entities.length,
-            highConfidenceEntities: result.entities.filter(e => e.confidence >= 0.9).length
-          }
+            highConfidenceEntities: result.entities.filter(
+              (e) => e.confidence >= 0.9,
+            ).length,
+          },
         };
-
       } catch (error: any) {
         throw new Error(`Entity extraction failed: ${error.message}`);
       }
     },
 
     // Generate relationship suggestions
-    suggestRelationships: async (_: any, {
-      input
-    }: {
-      input: {
-        entities: Array<{
-          type: string;
-          label: string;
-          startIndex: number;
-          endIndex: number;
-          confidence: number;
-          context: string;
-          suggestedProperties?: any;
-        }>;
-        investigationId: string;
-        maxSuggestions?: number;
-        confidenceThreshold?: number;
-      }
-    }, context: AuthContext) => {
+    suggestRelationships: async (
+      _: any,
+      {
+        input,
+      }: {
+        input: {
+          entities: Array<{
+            type: string;
+            label: string;
+            startIndex: number;
+            endIndex: number;
+            confidence: number;
+            context: string;
+            suggestedProperties?: any;
+          }>;
+          investigationId: string;
+          maxSuggestions?: number;
+          confidenceThreshold?: number;
+        };
+      },
+      context: AuthContext,
+    ) => {
       // Feature flag check
       if (!isFeatureEnabled('COPILOT_SERVICE')) {
         throw new Error('Copilot service is not enabled');
@@ -171,23 +214,27 @@ const mvp1CopilotResolvers = {
       }
 
       if (!input.entities || input.entities.length === 0) {
-        throw new UserInputError('At least one entity is required for relationship suggestions');
+        throw new UserInputError(
+          'At least one entity is required for relationship suggestions',
+        );
       }
 
       if (!input.investigationId) {
-        throw new UserInputError('Investigation ID is required for relationship suggestions');
+        throw new UserInputError(
+          'Investigation ID is required for relationship suggestions',
+        );
       }
 
       try {
         // Convert input entities to Copilot format
-        const copilotEntities = input.entities.map(entity => ({
+        const copilotEntities = input.entities.map((entity) => ({
           type: entity.type,
           label: entity.label,
           start_index: entity.startIndex,
           end_index: entity.endIndex,
           confidence: entity.confidence,
           context: entity.context,
-          suggested_properties: entity.suggestedProperties
+          suggested_properties: entity.suggestedProperties,
         }));
 
         const result = await copilotService.suggestRelationships(
@@ -196,50 +243,55 @@ const mvp1CopilotResolvers = {
             id: context.user.id,
             email: context.user.email,
             role: context.user.role,
-            tenantId: context.user.tenantId
+            tenantId: context.user.tenantId,
           },
           input.investigationId,
           {
             maxSuggestions: input.maxSuggestions,
-            confidenceThreshold: input.confidenceThreshold
-          }
+            confidenceThreshold: input.confidenceThreshold,
+          },
         );
 
         return {
           success: true,
-          suggestions: result.suggestions.map(suggestion => ({
+          suggestions: result.suggestions.map((suggestion) => ({
             sourceEntity: suggestion.source_entity,
             targetEntity: suggestion.target_entity,
             relationshipType: suggestion.relationship_type,
             confidence: suggestion.confidence,
             reasoning: suggestion.reasoning,
-            evidence: suggestion.evidence
+            evidence: suggestion.evidence,
           })),
           processingTimeMs: result.processing_time_ms,
           graphEntitiesAnalyzed: result.graph_entities_analyzed,
           metadata: {
             inputEntities: input.entities.length,
             suggestionsGenerated: result.suggestions.length,
-            highConfidenceSuggestions: result.suggestions.filter(s => s.confidence >= 0.9).length
-          }
+            highConfidenceSuggestions: result.suggestions.filter(
+              (s) => s.confidence >= 0.9,
+            ).length,
+          },
         };
-
       } catch (error: any) {
         throw new Error(`Relationship suggestion failed: ${error.message}`);
       }
     },
 
     // Bulk process multiple texts
-    bulkExtractEntities: async (_: any, {
-      input
-    }: {
-      input: {
-        texts: string[];
-        investigationId: string;
-        precisionThreshold?: number;
-        maxConcurrency?: number;
-      }
-    }, context: AuthContext) => {
+    bulkExtractEntities: async (
+      _: any,
+      {
+        input,
+      }: {
+        input: {
+          texts: string[];
+          investigationId: string;
+          precisionThreshold?: number;
+          maxConcurrency?: number;
+        };
+      },
+      context: AuthContext,
+    ) => {
       // Feature flag check
       if (!isFeatureEnabled('COPILOT_SERVICE')) {
         throw new Error('Copilot service is not enabled');
@@ -250,20 +302,32 @@ const mvp1CopilotResolvers = {
       }
 
       // Require elevated permissions for bulk processing
-      if (!['editor', 'investigator', 'admin', 'super_admin'].includes(context.user.role)) {
-        throw new ForbiddenError('Bulk processing requires Editor role or higher');
+      if (
+        !['editor', 'investigator', 'admin', 'super_admin'].includes(
+          context.user.role,
+        )
+      ) {
+        throw new ForbiddenError(
+          'Bulk processing requires Editor role or higher',
+        );
       }
 
       if (!input.texts || input.texts.length === 0) {
-        throw new UserInputError('At least one text is required for bulk processing');
+        throw new UserInputError(
+          'At least one text is required for bulk processing',
+        );
       }
 
       if (input.texts.length > 50) {
-        throw new UserInputError('Maximum 50 texts allowed for bulk processing');
+        throw new UserInputError(
+          'Maximum 50 texts allowed for bulk processing',
+        );
       }
 
       if (!input.investigationId) {
-        throw new UserInputError('Investigation ID is required for bulk processing');
+        throw new UserInputError(
+          'Investigation ID is required for bulk processing',
+        );
       }
 
       try {
@@ -273,48 +337,57 @@ const mvp1CopilotResolvers = {
             id: context.user.id,
             email: context.user.email,
             role: context.user.role,
-            tenantId: context.user.tenantId
+            tenantId: context.user.tenantId,
           },
           input.investigationId,
           {
             precisionThreshold: input.precisionThreshold,
-            maxConcurrency: input.maxConcurrency
-          }
+            maxConcurrency: input.maxConcurrency,
+          },
         );
 
-        const successful = results.filter(r => r.result !== null);
-        const failed = results.filter(r => r.result === null);
+        const successful = results.filter((r) => r.result !== null);
+        const failed = results.filter((r) => r.result === null);
 
         return {
           success: failed.length === 0,
-          results: results.map(result => ({
-            text: result.text.substring(0, 100) + (result.text.length > 100 ? '...' : ''),
+          results: results.map((result) => ({
+            text:
+              result.text.substring(0, 100) +
+              (result.text.length > 100 ? '...' : ''),
             success: result.result !== null,
-            entities: result.result?.entities.map(entity => ({
-              type: entity.type,
-              label: entity.label,
-              confidence: entity.confidence
-            })) || [],
+            entities:
+              result.result?.entities.map((entity) => ({
+                type: entity.type,
+                label: entity.label,
+                confidence: entity.confidence,
+              })) || [],
             confidence: result.result?.confidence || 0,
             processingTimeMs: result.result?.processing_time_ms || 0,
-            error: result.error
+            error: result.error,
           })),
           summary: {
             totalTexts: input.texts.length,
             successful: successful.length,
             failed: failed.length,
-            totalEntities: successful.reduce((sum, r) => sum + (r.result?.entities.length || 0), 0),
-            averageConfidence: successful.length > 0 
-              ? successful.reduce((sum, r) => sum + (r.result?.confidence || 0), 0) / successful.length 
-              : 0
-          }
+            totalEntities: successful.reduce(
+              (sum, r) => sum + (r.result?.entities.length || 0),
+              0,
+            ),
+            averageConfidence:
+              successful.length > 0
+                ? successful.reduce(
+                    (sum, r) => sum + (r.result?.confidence || 0),
+                    0,
+                  ) / successful.length
+                : 0,
+          },
         };
-
       } catch (error: any) {
         throw new Error(`Bulk entity extraction failed: ${error.message}`);
       }
-    }
-  }
+    },
+  },
 };
 
 export default mvp1CopilotResolvers;

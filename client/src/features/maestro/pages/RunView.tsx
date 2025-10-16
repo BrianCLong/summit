@@ -14,7 +14,8 @@ function buildLogs(runId: string): LogLine[] {
   const base = Date.now();
   const lines: LogLine[] = [];
   for (let index = 0; index < 800; index += 1) {
-    const level = index % 180 === 0 ? 'error' : index % 40 === 0 ? 'warn' : 'info';
+    const level =
+      index % 180 === 0 ? 'error' : index % 40 === 0 ? 'warn' : 'info';
     lines.push({
       ts: new Date(base + index * 200).toISOString(),
       level,
@@ -31,19 +32,29 @@ function buildLogs(runId: string): LogLine[] {
 
 export function RunViewPage() {
   const { runId = 'run-1' } = useParams();
-  const run = runRecords.find((candidate) => candidate.id === runId) ?? runRecords[0];
+  const run =
+    runRecords.find((candidate) => candidate.id === runId) ?? runRecords[0];
   const navigate = useNavigate();
   const { requestReason } = useReasonForAccess();
-  const [activeTab, setActiveTab] = React.useState<'logs' | 'artifacts' | 'metadata'>('logs');
+  const [activeTab, setActiveTab] = React.useState<
+    'logs' | 'artifacts' | 'metadata'
+  >('logs');
   const allLogs = React.useMemo(() => buildLogs(run.id), [run.id]);
   const [followTail, setFollowTail] = React.useState(true);
-  const visibleLogs = useLiveLogFeed(allLogs.map((line) => `${line.ts} ${line.level.toUpperCase()} ${line.message}`), {
-    followTail,
-    intervalMs: 250,
-  });
+  const visibleLogs = useLiveLogFeed(
+    allLogs.map(
+      (line) => `${line.ts} ${line.level.toUpperCase()} ${line.message}`,
+    ),
+    {
+      followTail,
+      intervalMs: 250,
+    },
+  );
   const [search, setSearch] = React.useState('');
   const debouncedSearch = useDebouncedValue(search, 250);
-  const [highlightIndex, setHighlightIndex] = React.useState<number | null>(null);
+  const [highlightIndex, setHighlightIndex] = React.useState<number | null>(
+    null,
+  );
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [artifactsReason, setArtifactsReason] = React.useState('');
 
@@ -52,7 +63,9 @@ export function RunViewPage() {
       setHighlightIndex(null);
       return;
     }
-    const idx = visibleLogs.findIndex((line) => line.toLowerCase().includes(debouncedSearch.toLowerCase()));
+    const idx = visibleLogs.findIndex((line) =>
+      line.toLowerCase().includes(debouncedSearch.toLowerCase()),
+    );
     if (idx >= 0) {
       setHighlightIndex(idx);
       if (containerRef.current) {
@@ -65,7 +78,8 @@ export function RunViewPage() {
     const idx = visibleLogs.findIndex((line) => line.includes('ERROR'));
     if (idx >= 0) {
       setHighlightIndex(idx);
-      if (containerRef.current) containerRef.current.scrollTo({ top: idx * 22, behavior: 'smooth' });
+      if (containerRef.current)
+        containerRef.current.scrollTo({ top: idx * 22, behavior: 'smooth' });
     }
   }, [visibleLogs]);
 
@@ -84,14 +98,25 @@ export function RunViewPage() {
     <div className="flex h-full flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <button type="button" onClick={() => navigate(-1)} className="text-sm text-emerald-400 hover:text-emerald-300">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="text-sm text-emerald-400 hover:text-emerald-300"
+          >
             ← Back
           </button>
-          <h1 className="mt-2 text-2xl font-semibold text-white">Run {run.id}</h1>
-          <p className="text-sm text-slate-400">Streaming logs with follow-tail and client search under 250ms on 50k lines.</p>
+          <h1 className="mt-2 text-2xl font-semibold text-white">
+            Run {run.id}
+          </h1>
+          <p className="text-sm text-slate-400">
+            Streaming logs with follow-tail and client search under 250ms on 50k
+            lines.
+          </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-300">
-          <span className="rounded-full border border-emerald-400/60 px-2 py-1 text-emerald-300">{run.status}</span>
+          <span className="rounded-full border border-emerald-400/60 px-2 py-1 text-emerald-300">
+            {run.status}
+          </span>
           <span>{run.environment}</span>
           <span>{run.durationSeconds}s</span>
           <span>Retries: {run.retries}</span>
@@ -183,10 +208,16 @@ export function RunViewPage() {
             {activeTab === 'artifacts' ? (
               <div className="p-4 text-sm text-slate-300">
                 <p className="text-xs text-slate-400">Reason captured:</p>
-                <p className="font-medium text-emerald-300">{artifactsReason}</p>
+                <p className="font-medium text-emerald-300">
+                  {artifactsReason}
+                </p>
                 <ul className="mt-3 space-y-2">
-                  <li className="rounded border border-slate-800/60 p-3">artifact.tar.gz • sha256:abc…123</li>
-                  <li className="rounded border border-slate-800/60 p-3">sbom.json • 52KB</li>
+                  <li className="rounded border border-slate-800/60 p-3">
+                    artifact.tar.gz • sha256:abc…123
+                  </li>
+                  <li className="rounded border border-slate-800/60 p-3">
+                    sbom.json • 52KB
+                  </li>
                 </ul>
               </div>
             ) : null}
@@ -205,11 +236,16 @@ export function RunViewPage() {
           <ul className="mt-3 space-y-2 text-xs text-slate-300">
             <li>Auto-retry skipped: deterministic failure signature.</li>
             <li>Gate fail reason: missing change ticket #4821.</li>
-            <li>Suggested fix: regenerate cache for step_04 (owners: alex, jules).</li>
+            <li>
+              Suggested fix: regenerate cache for step_04 (owners: alex, jules).
+            </li>
           </ul>
           <div className="mt-5 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-xs text-slate-400">
             <p className="font-semibold text-slate-200">Provenance</p>
-            <p className="mt-1">Logs signed with digest sha256:b12… fed by SSE channel. Copy uses provenance chips.</p>
+            <p className="mt-1">
+              Logs signed with digest sha256:b12… fed by SSE channel. Copy uses
+              provenance chips.
+            </p>
           </div>
         </aside>
       </section>

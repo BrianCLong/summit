@@ -1,15 +1,15 @@
-import http from "http";
-import { useServer } from "graphql-ws/lib/use/ws";
-import { WebSocketServer } from "ws";
-import pino from "pino";
-import { getContext } from "./lib/auth.js";
-import path from "path";
-import { fileURLToPath } from "url";
+import http from 'http';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { WebSocketServer } from 'ws';
+import pino from 'pino';
+import { getContext } from './lib/auth.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
-import { createApp } from "./app.js";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { typeDefs } from "./graphql/schema.js";
-import resolvers from "./graphql/resolvers/index.js";
+import { createApp } from './app.js';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { typeDefs } from './graphql/schema.js';
+import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +19,8 @@ const startServer = async () => {
     // Optional Kafka consumer import - only when AI services enabled
     let startKafkaConsumer = null;
     let stopKafkaConsumer = null;
-    if (process.env.AI_ENABLED === 'true' || process.env.KAFKA_ENABLED === 'true') {
+    if (process.env.AI_ENABLED === 'true' ||
+        process.env.KAFKA_ENABLED === 'true') {
         try {
             const kafkaModule = await import('./realtime/kafkaConsumer.js');
             startKafkaConsumer = kafkaModule.startKafkaConsumer;
@@ -35,7 +36,7 @@ const startServer = async () => {
     // Subscriptions with Persisted Query validation
     const wss = new WebSocketServer({
         server: httpServer,
-        path: "/graphql",
+        path: '/graphql',
     });
     // const wsPersistedQueries = new WSPersistedQueriesMiddleware();
     // const wsMiddleware = wsPersistedQueries.createMiddleware();
@@ -44,14 +45,14 @@ const startServer = async () => {
         context: getContext,
         // ...wsMiddleware,
     }, wss);
-    if (process.env.NODE_ENV === "production") {
-        const clientDistPath = path.resolve(__dirname, "../../client/dist");
+    if (process.env.NODE_ENV === 'production') {
+        const clientDistPath = path.resolve(__dirname, '../../client/dist');
         app.use(express.static(clientDistPath));
-        app.get("*", (_req, res) => {
-            res.sendFile(path.join(clientDistPath, "index.html"));
+        app.get('*', (_req, res) => {
+            res.sendFile(path.join(clientDistPath, 'index.html'));
         });
     }
-    const { initSocket, getIO } = await import("./realtime/socket.ts"); // JWT auth
+    const { initSocket, getIO } = await import('./realtime/socket.ts'); // JWT auth
     const port = Number(process.env.PORT || 4000);
     httpServer.listen(port, async () => {
         logger.info(`Server listening on port ${port}`);
@@ -62,23 +63,23 @@ const startServer = async () => {
         // WAR-GAMED SIMULATION - Start Kafka Consumer
         await startKafkaConsumer();
         // Create sample data for development
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV === 'development') {
             setTimeout(async () => {
                 try {
-                    const { createSampleData } = await import("./utils/sampleData.js");
+                    const { createSampleData } = await import('./utils/sampleData.js');
                     await createSampleData();
                 }
                 catch (error) {
-                    logger.warn("Failed to create sample data, continuing without it");
+                    logger.warn('Failed to create sample data, continuing without it');
                 }
             }, 2000); // Wait 2 seconds for connections to be established
         }
     });
     // Initialize Socket.IO
     const io = initSocket(httpServer);
-    const { closeNeo4jDriver } = await import("./db/neo4j.js");
-    const { closePostgresPool } = await import("./db/postgres.js");
-    const { closeRedisClient } = await import("./db/redis.js");
+    const { closeNeo4jDriver } = await import('./db/neo4j.js');
+    const { closePostgresPool } = await import('./db/postgres.js');
+    const { closeRedisClient } = await import('./db/redis.js');
     // Graceful shutdown
     const shutdown = async (sig) => {
         logger.info(`Shutting down. Signal: ${sig}`);
@@ -93,14 +94,14 @@ const startServer = async () => {
         ]);
         httpServer.close((err) => {
             if (err) {
-                logger.error(`Error during shutdown: ${err instanceof Error ? err.message : "Unknown error"}`);
+                logger.error(`Error during shutdown: ${err instanceof Error ? err.message : 'Unknown error'}`);
                 process.exitCode = 1;
             }
             process.exit();
         });
     };
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
 };
 startServer();
 //# sourceMappingURL=index.js.map

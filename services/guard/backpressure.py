@@ -5,22 +5,24 @@ Persisted-only backpressure enforcement with intelligent throttling
 """
 
 import asyncio
-import time
+import hashlib
 import json
-from typing import Dict, List, Any, Optional
+import logging
+import time
+from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
-import logging
-from collections import deque
-import hashlib
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class QueryRequest:
     """GraphQL query request with metadata"""
+
     query_id: str
     tenant_id: str
     query_hash: str
@@ -29,9 +31,11 @@ class QueryRequest:
     timestamp: datetime
     estimated_cost: float
 
+
 @dataclass
 class BackpressureConfig:
     """Backpressure configuration"""
+
     enabled: bool = True
     persisted_only_mode: bool = True
     max_queue_size: int = 1000
@@ -39,19 +43,20 @@ class BackpressureConfig:
     priority_levels: int = 3
     cost_threshold: float = 100.0
 
+
 class BackpressureHook:
     """Intelligent backpressure enforcement for budget protection"""
 
-    def __init__(self, config: Optional[BackpressureConfig] = None):
+    def __init__(self, config: BackpressureConfig | None = None):
         self.config = config or BackpressureConfig()
         self.request_queue: deque = deque(maxlen=self.config.max_queue_size)
-        self.throttled_tenants: Dict[str, float] = {}  # tenant_id -> throttle_until_timestamp
-        self.persisted_queries: Dict[str, str] = {}  # query_hash -> persisted_id
+        self.throttled_tenants: dict[str, float] = {}  # tenant_id -> throttle_until_timestamp
+        self.persisted_queries: dict[str, str] = {}  # query_hash -> persisted_id
         self.metrics = {
             "total_requests": 0,
             "throttled_requests": 0,
             "blocked_requests": 0,
-            "queue_overflows": 0
+            "queue_overflows": 0,
         }
 
         logger.info("Backpressure hook initialized")
@@ -67,7 +72,7 @@ class BackpressureHook:
 
     def calculate_query_hash(self, query: str) -> str:
         """Calculate hash for GraphQL query"""
-        normalized_query = ''.join(query.split())  # Remove whitespace
+        normalized_query = "".join(query.split())  # Remove whitespace
         return hashlib.sha256(normalized_query.encode()).hexdigest()[:16]
 
     def estimate_query_cost(self, query: str, tenant_id: str) -> float:
@@ -78,7 +83,7 @@ class BackpressureHook:
             "mutation": 2.0,
             "subscription": 3.0,
             "analytics": 5.0,
-            "aggregation": 4.0
+            "aggregation": 4.0,
         }
 
         base_cost = 10.0  # Base cost per query
@@ -96,7 +101,7 @@ class BackpressureHook:
             "TENANT_002": 1.0,  # Standard rate
             "TENANT_003": 0.7,  # Enterprise discount
             "TENANT_004": 1.2,  # Starter premium
-            "TENANT_005": 1.2   # Starter premium
+            "TENANT_005": 1.2,  # Starter premium
         }
 
         multiplier = tenant_multipliers.get(tenant_id, 1.0)
@@ -131,8 +136,9 @@ class BackpressureHook:
         self.metrics["throttled_requests"] += 1
         logger.warning(f"Applied throttling to {tenant_id} for {duration_seconds}s")
 
-    async def process_query_request(self, query: str, tenant_id: str,
-                                  variables: Optional[Dict] = None) -> Dict[str, Any]:
+    async def process_query_request(
+        self, query: str, tenant_id: str, variables: dict | None = None
+    ) -> dict[str, Any]:
         """Process GraphQL query through backpressure system"""
         self.metrics["total_requests"] += 1
         start_time = time.time()
@@ -153,14 +159,16 @@ class BackpressureHook:
                 is_persisted=is_persisted,
                 priority=self._calculate_priority(tenant_id, is_persisted, estimated_cost),
                 timestamp=datetime.now(timezone.utc),
-                estimated_cost=estimated_cost
+                estimated_cost=estimated_cost,
             )
 
             # Apply backpressure logic
             if self.config.enabled:
                 # Persisted-only mode: block non-persisted queries under pressure
                 if self.config.persisted_only_mode and not is_persisted:
-                    should_throttle, reason = self.should_apply_backpressure(tenant_id, estimated_cost)
+                    should_throttle, reason = self.should_apply_backpressure(
+                        tenant_id, estimated_cost
+                    )
                     if should_throttle:
                         self.metrics["blocked_requests"] += 1
                         return {
@@ -168,7 +176,7 @@ class BackpressureHook:
                             "error": "non_persisted_query_blocked",
                             "message": f"Non-persisted queries blocked due to {reason}",
                             "estimated_cost": estimated_cost,
-                            "persisted_query_required": True
+                            "persisted_query_required": True,
                         }
 
                 # Check for general backpressure
@@ -180,7 +188,7 @@ class BackpressureHook:
                             "success": False,
                             "error": "tenant_throttled",
                             "message": f"Tenant throttled for {throttle_remaining:.1f}s",
-                            "retry_after": throttle_remaining
+                            "retry_after": throttle_remaining,
                         }
                     elif reason == "queue_pressure":
                         # Apply dynamic throttling based on queue pressure
@@ -189,8 +197,8 @@ class BackpressureHook:
                         return {
                             "success": False,
                             "error": "queue_pressure",
-                            "message": f"High queue pressure, throttling applied",
-                            "retry_after": throttle_duration
+                            "message": "High queue pressure, throttling applied",
+                            "retry_after": throttle_duration,
                         }
                     elif reason == "high_cost":
                         # High-cost queries get special handling
@@ -200,7 +208,7 @@ class BackpressureHook:
                             "error": "high_cost_query",
                             "message": f"Query cost ${estimated_cost:.2f} exceeds threshold",
                             "estimated_cost": estimated_cost,
-                            "optimization_suggested": True
+                            "optimization_suggested": True,
                         }
 
             # Add to processing queue
@@ -224,16 +232,12 @@ class BackpressureHook:
                 "processing_time_ms": processing_time * 1000,
                 "total_duration_ms": processing_duration * 1000,
                 "queue_position": len(self.request_queue),
-                "priority": request.priority
+                "priority": request.priority,
             }
 
         except Exception as e:
             logger.error(f"Backpressure processing error: {e}")
-            return {
-                "success": False,
-                "error": "processing_error",
-                "message": str(e)
-            }
+            return {"success": False, "error": "processing_error", "message": str(e)}
 
     def _calculate_priority(self, tenant_id: str, is_persisted: bool, estimated_cost: float) -> int:
         """Calculate request priority for queue management"""
@@ -273,7 +277,7 @@ class BackpressureHook:
 
         return processing_time
 
-    def get_backpressure_metrics(self) -> Dict[str, Any]:
+    def get_backpressure_metrics(self) -> dict[str, Any]:
         """Get current backpressure metrics"""
         current_time = time.time()
         active_throttles = sum(1 for t in self.throttled_tenants.values() if t > current_time)
@@ -283,23 +287,24 @@ class BackpressureHook:
                 "enabled": self.config.enabled,
                 "persisted_only_mode": self.config.persisted_only_mode,
                 "max_queue_size": self.config.max_queue_size,
-                "throttle_factor": self.config.throttle_factor
+                "throttle_factor": self.config.throttle_factor,
             },
             "queue_status": {
                 "current_depth": len(self.request_queue),
                 "max_depth": self.config.max_queue_size,
-                "utilization_percent": (len(self.request_queue) / self.config.max_queue_size) * 100
+                "utilization_percent": (len(self.request_queue) / self.config.max_queue_size) * 100,
             },
             "throttling_status": {
                 "active_throttles": active_throttles,
-                "total_throttled_tenants": len(self.throttled_tenants)
+                "total_throttled_tenants": len(self.throttled_tenants),
             },
             "persisted_queries": {
                 "registered_count": len(self.persisted_queries),
-                "hit_rate_estimate": 85.0  # Simulated
+                "hit_rate_estimate": 85.0,  # Simulated
             },
-            "performance_metrics": self.metrics.copy()
+            "performance_metrics": self.metrics.copy(),
         }
+
 
 def main():
     """Test the backpressure hook"""
@@ -317,9 +322,13 @@ def main():
             # (query, tenant_id, description)
             ("query getUsers { users { id name } }", "TENANT_001", "Persisted query"),
             ("query getAnalytics { analytics { count } }", "TENANT_002", "Non-persisted query"),
-            ("query expensiveAnalytics { aggregateData { sum count avg } }", "TENANT_003", "High-cost query"),
+            (
+                "query expensiveAnalytics { aggregateData { sum count avg } }",
+                "TENANT_003",
+                "High-cost query",
+            ),
             ("mutation createUser { createUser(input: {}) { id } }", "TENANT_004", "Mutation"),
-            ("query getUsers { users { id name } }", "TENANT_005", "Persisted query")
+            ("query getUsers { users { id name } }", "TENANT_005", "Persisted query"),
         ]
 
         print("🔄 Testing Backpressure Hook")
@@ -340,20 +349,22 @@ def main():
                 print(f"     Reason: {result['message']}")
 
         # Show final metrics
-        print(f"\n📊 Final Metrics:")
+        print("\n📊 Final Metrics:")
         metrics = hook.get_backpressure_metrics()
         print(json.dumps(metrics, indent=2))
 
         # Save evidence
         evidence_path = "evidence/v0.3.4/budgets/backpressure-test.json"
         from pathlib import Path
+
         Path(evidence_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(evidence_path, 'w') as f:
+        with open(evidence_path, "w") as f:
             json.dump(metrics, f, indent=2)
         print(f"\n✅ Evidence saved: {evidence_path}")
 
     # Run the test
     asyncio.run(test_backpressure())
+
 
 if __name__ == "__main__":
     main()

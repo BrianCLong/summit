@@ -43,7 +43,8 @@ describe('InfluenceNetworkExtractor', () => {
     const network = extractor.extract(dataset);
 
     const mentionRel = network.relationships.find(
-      (rel) => rel.type === 'mention' && rel.from === 'alice' && rel.to === 'bob',
+      (rel) =>
+        rel.type === 'mention' && rel.from === 'alice' && rel.to === 'bob',
     );
     expect(mentionRel?.weight).toBe(2);
 
@@ -53,11 +54,14 @@ describe('InfluenceNetworkExtractor', () => {
     expect(replyRel).toBeDefined();
 
     const shareRel = network.relationships.find(
-      (rel) => rel.type === 'share' && rel.from === 'carol' && rel.to === 'alice',
+      (rel) =>
+        rel.type === 'share' && rel.from === 'carol' && rel.to === 'alice',
     );
     expect(shareRel).toBeDefined();
 
-    const aliceEdges = network.graph.edges.filter((edge) => edge.from === 'alice');
+    const aliceEdges = network.graph.edges.filter(
+      (edge) => edge.from === 'alice',
+    );
     expect(aliceEdges[0]?.weight).toBeGreaterThanOrEqual(2);
   });
 
@@ -66,14 +70,60 @@ describe('InfluenceNetworkExtractor', () => {
       {
         kind: 'social',
         posts: [
-          { id: 'b1', author: 'bot1', text: 'Boost @target', timestamp: '2024-01-02T00:00:00Z', sharedFrom: 'target' },
-          { id: 'b2', author: 'bot1', text: 'Boost again @target', timestamp: '2024-01-02T00:05:00Z', sharedFrom: 'target' },
-          { id: 'b3', author: 'bot2', text: 'Boost @target', timestamp: '2024-01-02T00:01:00Z', sharedFrom: 'target' },
-          { id: 'b4', author: 'bot2', text: 'Boost again', timestamp: '2024-01-02T00:06:00Z', sharedFrom: 'target' },
-          { id: 'b5', author: 'bot3', text: 'Boost', timestamp: '2024-01-02T00:02:00Z', sharedFrom: 'target' },
-          { id: 'b6', author: 'bot3', text: 'Boost again', timestamp: '2024-01-02T00:07:00Z', sharedFrom: 'target' },
-          { id: 'c1', author: 'analyst1', text: '@target interesting', timestamp: '2024-01-02T00:03:00Z' },
-          { id: 'c2', author: 'analyst2', text: '@target insights', timestamp: '2024-01-02T00:04:00Z' },
+          {
+            id: 'b1',
+            author: 'bot1',
+            text: 'Boost @target',
+            timestamp: '2024-01-02T00:00:00Z',
+            sharedFrom: 'target',
+          },
+          {
+            id: 'b2',
+            author: 'bot1',
+            text: 'Boost again @target',
+            timestamp: '2024-01-02T00:05:00Z',
+            sharedFrom: 'target',
+          },
+          {
+            id: 'b3',
+            author: 'bot2',
+            text: 'Boost @target',
+            timestamp: '2024-01-02T00:01:00Z',
+            sharedFrom: 'target',
+          },
+          {
+            id: 'b4',
+            author: 'bot2',
+            text: 'Boost again',
+            timestamp: '2024-01-02T00:06:00Z',
+            sharedFrom: 'target',
+          },
+          {
+            id: 'b5',
+            author: 'bot3',
+            text: 'Boost',
+            timestamp: '2024-01-02T00:02:00Z',
+            sharedFrom: 'target',
+          },
+          {
+            id: 'b6',
+            author: 'bot3',
+            text: 'Boost again',
+            timestamp: '2024-01-02T00:07:00Z',
+            sharedFrom: 'target',
+          },
+          {
+            id: 'c1',
+            author: 'analyst1',
+            text: '@target interesting',
+            timestamp: '2024-01-02T00:03:00Z',
+          },
+          {
+            id: 'c2',
+            author: 'analyst2',
+            text: '@target insights',
+            timestamp: '2024-01-02T00:04:00Z',
+          },
         ],
       },
     ];
@@ -83,7 +133,9 @@ describe('InfluenceNetworkExtractor', () => {
 
     expect(enriched.motifs.botNetworks.length).toBeGreaterThan(0);
     expect(enriched.motifs.amplifierClusters[0]?.nodes).toContain('bot1');
-    expect(enriched.motifs.coordinatedBehaviors.length).toBeGreaterThanOrEqual(0);
+    expect(enriched.motifs.coordinatedBehaviors.length).toBeGreaterThanOrEqual(
+      0,
+    );
   });
 
   it('ranks nodes by weighted influence', () => {
@@ -118,7 +170,11 @@ describe('InfluenceNetworkExtractor', () => {
     const extractor = buildExtractor();
     const ranked = extractor.rankNodes(extractor.extract(dataset));
 
-    expect(ranked.rankings[0]?.score).toBeGreaterThanOrEqual(ranked.rankings[1]?.score ?? 0);
-    expect(ranked.rankings.find((item) => item.entity.id === 'leader')).toBeDefined();
+    expect(ranked.rankings[0]?.score).toBeGreaterThanOrEqual(
+      ranked.rankings[1]?.score ?? 0,
+    );
+    expect(
+      ranked.rankings.find((item) => item.entity.id === 'leader'),
+    ).toBeDefined();
   });
 });

@@ -1,4 +1,3 @@
-
 // conductor-ui/frontend/src/views/IncidentDetailView.tsx
 import React from 'react';
 

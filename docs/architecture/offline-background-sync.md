@@ -1,4 +1,3 @@
-
 # ADR-027: Offline Hardening with Background Sync
 
 **Status:** Proposed

@@ -1,13 +1,49 @@
 /**
- * Comprehensive Metrics Collection for IntelGraph Maestro
- * Production-ready metrics using OpenTelemetry and Prometheus
+ * No-op Metrics Collection for IntelGraph Maestro (OTel disabled)
+ * Preserves API compatibility without external dependencies.
  */
-import { metrics } from '@opentelemetry/api';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+import logger from '../utils/logger.js';
 /**
  * IntelGraph Metrics Manager
  */
 export class IntelGraphMetrics {
+    static instance;
+    meter;
+    // Core Application Metrics
+    orchestrationRequests;
+    orchestrationDuration;
+    orchestrationErrors;
+    activeConnections;
+    activeSessions;
+    // AI Model Metrics
+    aiModelRequests;
+    aiModelDuration;
+    aiModelErrors;
+    aiModelCosts;
+    thompsonSamplingRewards;
+    // Graph Database Metrics
+    graphOperations;
+    graphQueryDuration;
+    graphConnections;
+    graphEntities;
+    graphRelations;
+    // Premium Routing Metrics
+    premiumRoutingDecisions;
+    premiumBudgetUtilization;
+    premiumCostSavings;
+    // Security Metrics
+    securityEvents;
+    complianceGateDecisions;
+    authenticationAttempts;
+    authorizationDecisions;
+    // Business Metrics
+    investigationsCreated;
+    dataSourcesActive;
+    webScrapingRequests;
+    synthesisOperations;
+    // System Metrics
+    memoryUsage;
+    cpuUsage;
     constructor() {
         this.setupMetrics();
     }
@@ -18,18 +54,23 @@ export class IntelGraphMetrics {
         return IntelGraphMetrics.instance;
     }
     setupMetrics() {
-        // Setup Prometheus exporter
-        this.prometheusExporter = new PrometheusExporter({
-            port: 9464,
-            endpoint: '/metrics',
-        }, () => {
-            console.log('✅ Prometheus metrics server started on port 9464');
-        });
-        // Get meter
-        this.meter = metrics.getMeter('intelgraph-maestro', '2.0.0');
+        // No-op meter factory
+        const noopInstrument = {
+            add: (_v, _attrs) => { },
+            record: (_v, _attrs) => { },
+            set: (_v, _attrs) => { },
+        };
+        const noopObservable = { addCallback: (_cb) => { } };
+        this.meter = {
+            createCounter: (_, __) => ({ ...noopInstrument }),
+            createHistogram: (_, __) => ({ ...noopInstrument }),
+            createGauge: (_, __) => ({ ...noopInstrument }),
+            createUpDownCounter: (_, __) => ({ ...noopInstrument }),
+            createObservableGauge: (_, __) => ({ ...noopObservable }),
+        };
         this.initializeMetrics();
         this.setupSystemMetrics();
-        console.log('✅ IntelGraph metrics collection initialized');
+        logger.info('Metrics disabled (no-op).');
     }
     initializeMetrics() {
         // Orchestration Metrics
@@ -126,36 +167,17 @@ export class IntelGraphMetrics {
         this.memoryUsage = this.meter.createObservableGauge('maestro_memory_usage_bytes', {
             description: 'Memory usage in bytes',
         });
-        this.memoryUsage.addCallback((result) => {
-            const used = process.memoryUsage();
-            result.observe(used.rss, { type: 'rss' });
-            result.observe(used.heapUsed, { type: 'heap_used' });
-            result.observe(used.heapTotal, { type: 'heap_total' });
-            result.observe(used.external, { type: 'external' });
-        });
+        // no-op
         // CPU usage
         this.cpuUsage = this.meter.createObservableGauge('maestro_cpu_usage_percent', {
             description: 'CPU usage percentage',
         });
-        let lastCpuUsage = process.cpuUsage();
-        this.cpuUsage.addCallback((result) => {
-            const currentCpuUsage = process.cpuUsage(lastCpuUsage);
-            const totalTime = currentCpuUsage.user + currentCpuUsage.system;
-            const usage = (totalTime / 1000000) * 100;
-            result.observe(usage);
-            lastCpuUsage = process.cpuUsage();
-        });
+        // no-op
         // Event loop lag
         const eventLoopLag = this.meter.createObservableGauge('maestro_event_loop_lag_seconds', {
             description: 'Event loop lag in seconds',
         });
-        let lastCheck = process.hrtime.bigint();
-        eventLoopLag.addCallback((result) => {
-            const now = process.hrtime.bigint();
-            const lag = Number(now - lastCheck) / 1e9;
-            result.observe(lag);
-            lastCheck = now;
-        });
+        // no-op
     }
     // Public API Methods
     recordOrchestrationRequest(method, endpoint, status) {
@@ -238,7 +260,7 @@ export class IntelGraphMetrics {
         this.activeSessions.add(delta, { type: sessionType });
     }
     async shutdown() {
-        console.log('🔄 IntelGraph metrics collection shutdown complete');
+        /* no-op */
     }
 }
 const metricsInstance = IntelGraphMetrics.getInstance();

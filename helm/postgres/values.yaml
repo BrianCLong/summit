@@ -18,7 +18,7 @@ resources:
 persistence:
   enabled: true
   size: 20Gi
-  storageClass: ""
+  storageClass: ''
 
 env:
   - name: POSTGRES_DB
@@ -42,4 +42,3 @@ initdb:
 
 serviceMonitor:
   enabled: false
-

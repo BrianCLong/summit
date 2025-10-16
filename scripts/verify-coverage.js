@@ -20,7 +20,7 @@ function findCoverageFiles() {
     'coverage/lcov-report/coverage-summary.json',
     'server/coverage/coverage-summary.json',
     'client/coverage/coverage-summary.json',
-    'coverage.json'
+    'coverage.json',
   ];
 
   const foundFiles = [];
@@ -43,7 +43,7 @@ function parseCoverageSummary(filePath) {
         lines: data.total.lines,
         statements: data.total.statements,
         functions: data.total.functions,
-        branches: data.total.branches
+        branches: data.total.branches,
       };
     } else {
       // Handle other formats
@@ -99,18 +99,23 @@ function calculateOverallCoverage(coverageFiles) {
       lines: coverage.lines ? coverage.lines.pct : 0,
       statements: coverage.statements ? coverage.statements.pct : 0,
       functions: coverage.functions ? coverage.functions.pct : 0,
-      branches: coverage.branches ? coverage.branches.pct : 0
+      branches: coverage.branches ? coverage.branches.pct : 0,
     });
   }
 
   return {
     overall: {
       lines: totalLines > 0 ? (totalCoveredLines / totalLines) * 100 : 0,
-      statements: totalStatements > 0 ? (totalCoveredStatements / totalStatements) * 100 : 0,
-      functions: totalFunctions > 0 ? (totalCoveredFunctions / totalFunctions) * 100 : 0,
-      branches: totalBranches > 0 ? (totalCoveredBranches / totalBranches) * 100 : 0
+      statements:
+        totalStatements > 0
+          ? (totalCoveredStatements / totalStatements) * 100
+          : 0,
+      functions:
+        totalFunctions > 0 ? (totalCoveredFunctions / totalFunctions) * 100 : 0,
+      branches:
+        totalBranches > 0 ? (totalCoveredBranches / totalBranches) * 100 : 0,
     },
-    components: componentCoverage
+    components: componentCoverage,
   };
 }
 
@@ -130,9 +135,11 @@ function generateCoverageReport(coverageData, threshold) {
   // Component breakdown
   if (components.length > 1) {
     console.log('\n📦 Component Coverage:');
-    components.forEach(comp => {
+    components.forEach((comp) => {
       const status = comp.lines >= threshold ? '✅' : '❌';
-      console.log(`   ${status} ${comp.component}: ${comp.lines.toFixed(1)}% lines`);
+      console.log(
+        `   ${status} ${comp.component}: ${comp.lines.toFixed(1)}% lines`,
+      );
     });
   }
 
@@ -141,15 +148,21 @@ function generateCoverageReport(coverageData, threshold) {
   const primaryMetric = overall.lines;
 
   if (primaryMetric >= threshold) {
-    console.log(`✅ Coverage PASSED: ${primaryMetric.toFixed(2)}% >= ${threshold}%`);
+    console.log(
+      `✅ Coverage PASSED: ${primaryMetric.toFixed(2)}% >= ${threshold}%`,
+    );
     return true;
   } else {
-    console.log(`❌ Coverage FAILED: ${primaryMetric.toFixed(2)}% < ${threshold}%`);
+    console.log(
+      `❌ Coverage FAILED: ${primaryMetric.toFixed(2)}% < ${threshold}%`,
+    );
 
     // Provide actionable feedback
     const deficit = threshold - primaryMetric;
     console.log(`\n💡 To reach ${threshold}% coverage:`);
-    console.log(`   - Need to improve coverage by ${deficit.toFixed(2)} percentage points`);
+    console.log(
+      `   - Need to improve coverage by ${deficit.toFixed(2)} percentage points`,
+    );
     console.log(`   - Focus on untested areas with high impact`);
     console.log(`   - Add tests for critical business logic first`);
 
@@ -178,20 +191,28 @@ function generateGitHubSummary(coverageData, threshold, passed) {
 **Result**: ${passed ? '✅ PASSED' : '❌ FAILED'}
 **Primary Metric**: ${overall.lines.toFixed(2)}% lines
 
-${components.length > 1 ? `
+${
+  components.length > 1
+    ? `
 ## Component Breakdown
 | Component | Lines | Status |
 |-----------|-------|--------|
-${components.map(c => `| ${c.component} | ${c.lines.toFixed(1)}% | ${c.lines >= threshold ? '✅' : '❌'} |`).join('\n')}
-` : ''}
+${components.map((c) => `| ${c.component} | ${c.lines.toFixed(1)}% | ${c.lines >= threshold ? '✅' : '❌'} |`).join('\n')}
+`
+    : ''
+}
 
-${!passed ? `
+${
+  !passed
+    ? `
 ## 💡 Improvement Suggestions
 - Increase coverage by ${(threshold - overall.lines).toFixed(1)} percentage points
 - Focus on business logic and critical paths
 - Add integration tests for API endpoints
 - Consider property-based testing for complex algorithms
-` : ''}
+`
+    : ''
+}
 `;
 
   try {
@@ -287,5 +308,5 @@ module.exports = {
   parseCoverageSummary,
   calculateOverallCoverage,
   generateCoverageReport,
-  DEFAULT_THRESHOLD
+  DEFAULT_THRESHOLD,
 };

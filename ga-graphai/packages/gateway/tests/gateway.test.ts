@@ -22,9 +22,9 @@ const gateway = new GatewayRuntime({
       actor: 'ci-bot',
       action: 'promote',
       resource: 'api',
-      payload: { version: '1.0.0' }
-    }
-  ]
+      payload: { version: '1.0.0' },
+    },
+  ],
 });
 
 describe('GatewayRuntime', () => {
@@ -37,11 +37,12 @@ describe('GatewayRuntime', () => {
           actor
         }
       }`,
-      { category: 'deployment' }
+      { category: 'deployment' },
     );
 
     expect(result.errors).toBeUndefined();
-    const entries = (result.data as { ledgerEntries: Array<{ id: string }> }).ledgerEntries;
+    const entries = (result.data as { ledgerEntries: Array<{ id: string }> })
+      .ledgerEntries;
     expect(entries.length).toBeGreaterThan(0);
     expect(entries[0].id).toBe('seed-1');
   });
@@ -61,13 +62,15 @@ describe('GatewayRuntime', () => {
           actor: 'compliance',
           action: 'approve',
           resource: 'llm',
-          payload: { ticket: 'SEC-1' }
-        }
-      }
+          payload: { ticket: 'SEC-1' },
+        },
+      },
     );
 
     expect(result.errors).toBeUndefined();
-    const data = result.data as { appendLedgerEntry: { id: string; hash: string } };
+    const data = result.data as {
+      appendLedgerEntry: { id: string; hash: string };
+    };
     expect(data.appendLedgerEntry.id).toBe('change-1');
     expect(data.appendLedgerEntry.hash).toBeTruthy();
   });
@@ -88,14 +91,18 @@ describe('GatewayRuntime', () => {
           tenantId: 'tenant-1',
           userId: 'user-1',
           roles: ['product-manager'],
-          region: 'allowed-region'
-        }
-      }
+          region: 'allowed-region',
+        },
+      },
     );
 
     expect(result.errors).toBeUndefined();
     const data = result.data as {
-      simulatePolicy: { allowed: boolean; effect: string; matchedRules: string[] };
+      simulatePolicy: {
+        allowed: boolean;
+        effect: string;
+        matchedRules: string[];
+      };
     };
     expect(data.simulatePolicy.allowed).toBe(true);
     expect(data.simulatePolicy.effect).toBe('ALLOW');
@@ -109,20 +116,20 @@ describe('GatewayRuntime', () => {
           {
             name: 'analysis',
             minimumAuthority: 1,
-            handler: task => ({
-              summary: `analysis for ${(task.payload as { intent?: string }).intent ?? 'unknown'}`
-            })
-          }
+            handler: (task) => ({
+              summary: `analysis for ${(task.payload as { intent?: string }).intent ?? 'unknown'}`,
+            }),
+          },
         ],
         agents: [
           {
             name: 'agent-a',
             authority: 2,
             allowedTools: ['analysis'],
-            roles: ['developer']
-          }
-        ]
-      }
+            roles: ['developer'],
+          },
+        ],
+      },
     });
 
     const submitResult = await runtime.execute(
@@ -151,23 +158,33 @@ describe('GatewayRuntime', () => {
               tool: 'analysis',
               action: 'workcell:execute',
               resource: 'analysis',
-              payload: { intent: 'ship feature' }
-            }
-          ]
-        }
-      }
+              payload: { intent: 'ship feature' },
+            },
+          ],
+        },
+      },
     );
 
     expect(submitResult.errors).toBeUndefined();
     const submission = submitResult.data as {
-      submitWorkOrder: { orderId: string; status: string; tasks: Array<{ taskId: string; status: string }> };
+      submitWorkOrder: {
+        orderId: string;
+        status: string;
+        tasks: Array<{ taskId: string; status: string }>;
+      };
     };
     expect(submission.submitWorkOrder.status).toBe('COMPLETED');
     expect(submission.submitWorkOrder.tasks[0].status).toBe('SUCCESS');
 
-    const ordersResult = await runtime.execute(`{ workOrders { orderId status } }`);
+    const ordersResult = await runtime.execute(
+      `{ workOrders { orderId status } }`,
+    );
     expect(ordersResult.errors).toBeUndefined();
-    const orders = (ordersResult.data as { workOrders: Array<{ orderId: string; status: string }> }).workOrders;
+    const orders = (
+      ordersResult.data as {
+        workOrders: Array<{ orderId: string; status: string }>;
+      }
+    ).workOrders;
     expect(orders.length).toBeGreaterThan(0);
     expect(orders[0].orderId).toBe('order-1');
   });
@@ -181,25 +198,25 @@ describe('GatewayRuntime', () => {
           effect: 'deny',
           actions: ['workcell:execute'],
           resources: ['analysis'],
-          conditions: [{ attribute: 'risk', operator: 'eq', value: 'high' }]
-        }
+          conditions: [{ attribute: 'risk', operator: 'eq', value: 'high' }],
+        },
       ],
       workcell: {
         tools: [
           {
             name: 'analysis',
-            handler: () => ({ complete: true })
-          }
+            handler: () => ({ complete: true }),
+          },
         ],
         agents: [
           {
             name: 'agent-a',
             authority: 2,
             allowedTools: ['analysis'],
-            roles: ['developer']
-          }
-        ]
-      }
+            roles: ['developer'],
+          },
+        ],
+      },
     });
 
     const submitResult = await runtime.execute(
@@ -225,11 +242,11 @@ describe('GatewayRuntime', () => {
               tool: 'analysis',
               action: 'workcell:execute',
               resource: 'analysis',
-              payload: { intent: 'ship feature' }
-            }
-          ]
-        }
-      }
+              payload: { intent: 'ship feature' },
+            },
+          ],
+        },
+      },
     );
 
     expect(submitResult.errors).toBeUndefined();
@@ -261,7 +278,11 @@ function createNormalizer(): TicketNormalizer {
   });
 }
 
-function createMockProfile(id: string, skills: string[], overrides: Partial<CapabilityProfile> = {}): CapabilityProfile {
+function createMockProfile(
+  id: string,
+  skills: string[],
+  overrides: Partial<CapabilityProfile> = {},
+): CapabilityProfile {
   return {
     id,
     displayName: id,
@@ -286,7 +307,12 @@ function registerMockResource(
   skills: string[],
   handler: GenerateHandler,
   options: {
-    bid?: { quality: number; latencyMs: number; costUSD: number; fitTags?: string[] };
+    bid?: {
+      quality: number;
+      latencyMs: number;
+      costUSD: number;
+      fitTags?: string[];
+    };
     evaluate?: (content: CooperationArtifact) => number;
     critique?: (content: CooperationArtifact) => number;
     workbook?: () => CooperationArtifact['supportingEvidence'];
@@ -310,7 +336,9 @@ function registerMockResource(
     async generate({ prompt }) {
       return {
         content: handler(prompt),
-        evidence: [{ id: `${id}-evidence`, description: 'mock', uri: `memory://${id}` }],
+        evidence: [
+          { id: `${id}-evidence`, description: 'mock', uri: `memory://${id}` },
+        ],
       };
     },
     critique: options.critique
@@ -351,7 +379,8 @@ describe('Ticket normalizer', () => {
       ticketId: 'T-1',
       tenantId: 'tenant',
       title: 'Improve latency',
-      body: `Goal: Reduce API latency.\n\nP95 must be <= 350 ms.\nBudget: $2 USD.\nRisk: rollout regression.\nEvidence: https://intelgraph.example/report.\n` +
+      body:
+        `Goal: Reduce API latency.\n\nP95 must be <= 350 ms.\nBudget: $2 USD.\nRisk: rollout regression.\nEvidence: https://intelgraph.example/report.\n` +
         `Out of scope: UI work.\nAcceptance: Ensure AC-1 passes.\n` +
         `Maybe adjust caches later.`,
     });
@@ -365,12 +394,34 @@ describe('Ticket normalizer', () => {
 describe('Policy router', () => {
   it('selects value dense resources and chooses cooperation mode', () => {
     const registry = new CapabilityRegistry();
-    registerMockResource(registry, 'model-a', ['engineering', 'typescript'], () => 'Spec draft', {
-      bid: { quality: 0.92, latencyMs: 300, costUSD: 0.3, fitTags: ['engineering'] },
-    });
-    registerMockResource(registry, 'model-b', ['risk', 'testing'], () => 'Test draft', {
-      bid: { quality: 0.88, latencyMs: 400, costUSD: 0.1, fitTags: ['testing'] },
-    });
+    registerMockResource(
+      registry,
+      'model-a',
+      ['engineering', 'typescript'],
+      () => 'Spec draft',
+      {
+        bid: {
+          quality: 0.92,
+          latencyMs: 300,
+          costUSD: 0.3,
+          fitTags: ['engineering'],
+        },
+      },
+    );
+    registerMockResource(
+      registry,
+      'model-b',
+      ['risk', 'testing'],
+      () => 'Test draft',
+      {
+        bid: {
+          quality: 0.88,
+          latencyMs: 400,
+          costUSD: 0.1,
+          fitTags: ['testing'],
+        },
+      },
+    );
 
     const normalizer = createNormalizer();
     const { taskSpec } = normalizer.normalize({
@@ -390,9 +441,24 @@ describe('Policy router', () => {
 describe('Cooperation orchestrator', () => {
   it('executes semantic braid with strand consistency checks', async () => {
     const registry = new CapabilityRegistry();
-    registerMockResource(registry, 'spec-model', ['spec'], () => '`getMetrics` returns JSON');
-    registerMockResource(registry, 'test-model', ['tests'], () => 'API:getMetrics happy-path');
-    registerMockResource(registry, 'risk-model', ['risk'], () => 'Latency regression risk');
+    registerMockResource(
+      registry,
+      'spec-model',
+      ['spec'],
+      () => '`getMetrics` returns JSON',
+    );
+    registerMockResource(
+      registry,
+      'test-model',
+      ['tests'],
+      () => 'API:getMetrics happy-path',
+    );
+    registerMockResource(
+      registry,
+      'risk-model',
+      ['risk'],
+      () => 'Latency regression risk',
+    );
 
     const normalizer = createNormalizer();
     const normalized = normalizer.normalize({
@@ -420,11 +486,27 @@ describe('Cooperation orchestrator', () => {
 
   it('merges counterfactual improvements and records coverage', async () => {
     const registry = new CapabilityRegistry();
-    registerMockResource(registry, 'primary-model', ['impl'], () => 'Plan covers AC-1');
-    registerMockResource(registry, 'shadow-model', ['analysis'], () => 'Shadow focuses on AC-2 risk');
-    registerMockResource(registry, 'adjudicator-model', ['audit'], () => 'Adjudicate', {
-      evaluate: () => 0.95,
-    });
+    registerMockResource(
+      registry,
+      'primary-model',
+      ['impl'],
+      () => 'Plan covers AC-1',
+    );
+    registerMockResource(
+      registry,
+      'shadow-model',
+      ['analysis'],
+      () => 'Shadow focuses on AC-2 risk',
+    );
+    registerMockResource(
+      registry,
+      'adjudicator-model',
+      ['audit'],
+      () => 'Adjudicate',
+      {
+        evaluate: () => 0.95,
+      },
+    );
 
     const task: TaskSpec = {
       taskId: 'task-shadow',
@@ -436,13 +518,29 @@ describe('Cooperation orchestrator', () => {
       constraints: defaultConstraints,
       policy: defaultPolicy,
       acceptanceCriteria: [
-        { id: 'AC-1', statement: 'Primary coverage', verify: 'test', metric: 'pass', threshold: '1.0' },
-        { id: 'AC-2', statement: 'Shadow coverage', verify: 'test', metric: 'pass', threshold: '1.0' },
+        {
+          id: 'AC-1',
+          statement: 'Primary coverage',
+          verify: 'test',
+          metric: 'pass',
+          threshold: '1.0',
+        },
+        {
+          id: 'AC-2',
+          statement: 'Shadow coverage',
+          verify: 'test',
+          metric: 'pass',
+          threshold: '1.0',
+        },
       ],
       risks: [],
       raci: { owner: 'owner', reviewers: ['reviewer'] },
       sla: { due: new Date().toISOString() },
-      policyTags: ['purpose:engineering', 'retention:standard-365d', 'pii:absent'],
+      policyTags: [
+        'purpose:engineering',
+        'retention:standard-365d',
+        'pii:absent',
+      ],
       language: 'en',
     };
 

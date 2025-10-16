@@ -8,7 +8,11 @@ const KEY = crypto
   .digest();
 
 function deriveIv(aad: Record<string, string>): Buffer {
-  return crypto.createHash('sha256').update(JSON.stringify(aad)).digest().subarray(0, 16);
+  return crypto
+    .createHash('sha256')
+    .update(JSON.stringify(aad))
+    .digest()
+    .subarray(0, 16);
 }
 
 export function tokenize(value: string, aad: Record<string, string>): string {

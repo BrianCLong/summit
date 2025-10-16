@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { runsRepo } from './runs-repo.js';
 import { ensureAuthenticated } from '../../middleware/auth.js';
 import { requirePermission } from '../../middleware/rbac.js';
-import { BudgetAdmissionController, createBudgetController } from '../../conductor/admission/budget-control.js'; // Import BudgetAdmissionController
+import {
+  BudgetAdmissionController,
+  createBudgetController,
+} from '../../conductor/admission/budget-control.js'; // Import BudgetAdmissionController
 import { RequestContext } from '../../middleware/context-binding.js'; // Import RequestContext
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
 
@@ -24,7 +27,9 @@ const RunCreateSchema = z.object({
 });
 
 const RunUpdateSchema = z.object({
-  status: z.enum(['queued', 'running', 'succeeded', 'failed', 'cancelled']).optional(),
+  status: z
+    .enum(['queued', 'running', 'succeeded', 'failed', 'cancelled'])
+    .optional(),
   started_at: z.coerce.date().optional(),
   completed_at: z.coerce.date().optional(),
   duration_ms: z.number().int().min(0).optional(),
@@ -73,10 +78,15 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
     const estimatedCostUsd = 0.01; // Placeholder for estimated cost of a new run
 
     // Perform budget admission check
-    const admissionDecision = await budgetController.admit('LLM_LIGHT', estimatedCostUsd, { // Use a default expert type for admission
-      tenantId: tenantId,
-      userId: (req as any).user?.id, // Assuming user ID is available
-    });
+    const admissionDecision = await budgetController.admit(
+      'LLM_LIGHT',
+      estimatedCostUsd,
+      {
+        // Use a default expert type for admission
+        tenantId: tenantId,
+        userId: (req as any).user?.id, // Assuming user ID is available
+      },
+    );
 
     if (!admissionDecision.admit) {
       return res.status(402).json({
@@ -88,7 +98,10 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
       });
     }
 
-    const run = await runsRepo.create({ ...validation.data, tenant_id: tenantId }); // Pass tenantId
+    const run = await runsRepo.create({
+      ...validation.data,
+      tenant_id: tenantId,
+    }); // Pass tenantId
 
     // Format response
     const formattedRun = {
@@ -138,7 +151,8 @@ router.put('/runs/:id', requirePermission('run:update'), async (req, res) => {
     // Calculate duration if both start and end times provided
     if (validation.data.started_at && validation.data.completed_at) {
       validation.data.duration_ms =
-        validation.data.completed_at.getTime() - validation.data.started_at.getTime();
+        validation.data.completed_at.getTime() -
+        validation.data.started_at.getTime();
     }
 
     const run = await runsRepo.update(req.params.id, validation.data, tenantId); // Pass tenantId
@@ -154,37 +168,45 @@ router.put('/runs/:id', requirePermission('run:update'), async (req, res) => {
 });
 
 // DELETE /runs/:id - Delete a run
-router.delete('/runs/:id', requirePermission('run:update'), async (req, res) => {
-  try {
-    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
-    const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId
-    res.status(deleted ? 204 : 404).send();
-  } catch (error) {
-    console.error('Error deleting run:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+router.delete(
+  '/runs/:id',
+  requirePermission('run:update'),
+  async (req, res) => {
+    try {
+      const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+      const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId
+      res.status(deleted ? 204 : 404).send();
+    } catch (error) {
+      console.error('Error deleting run:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+);
 
 // GET /pipelines/:id/runs - Get runs for a specific pipeline
-router.get('/pipelines/:id/runs', requirePermission('run:read'), async (req, res) => {
-  try {
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
-    const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
-    const runs = await runsRepo.getByPipeline(req.params.id, tenantId, limit); // Pass tenantId
+router.get(
+  '/pipelines/:id/runs',
+  requirePermission('run:read'),
+  async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+      const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+      const runs = await runsRepo.getByPipeline(req.params.id, tenantId, limit); // Pass tenantId
 
-    const formattedRuns = runs.map((run) => ({
-      id: run.id,
-      pipeline: run.pipeline,
-      status: run.status,
-      durationMs: run.duration_ms || 0,
-      cost: run.cost,
-    }));
+      const formattedRuns = runs.map((run) => ({
+        id: run.id,
+        pipeline: run.pipeline,
+        status: run.status,
+        durationMs: run.duration_ms || 0,
+        cost: run.cost,
+      }));
 
-    res.json({ items: formattedRuns });
-  } catch (error) {
-    console.error('Error fetching pipeline runs:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      res.json({ items: formattedRuns });
+    } catch (error) {
+      console.error('Error fetching pipeline runs:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+);
 
 export default router;

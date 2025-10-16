@@ -3,12 +3,11 @@ from __future__ import annotations
 import json
 from typing import List
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 
 from .audit import log_audit
 from .config import get_settings
 from .ethics import check_request
-from .observability import track
 from .schemas import ExplainRequest, ExplainResponse, Importance, PathExplanation
 from .security import check_api_key, require_role, enforce_limits
 from .utils.graph_io import to_networkx

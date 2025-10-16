@@ -15,7 +15,10 @@ export const config = {
       user: process.env.POSTGRES_USER || 'intelgraph',
       password: process.env.POSTGRES_PASSWORD || 'password',
       database: process.env.POSTGRES_DB || 'intelgraph',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     },
 
     neo4j: {
@@ -33,8 +36,12 @@ export const config = {
   },
 
   workflow: {
-    maxConcurrentExecutions: parseInt(process.env.MAX_CONCURRENT_EXECUTIONS || '100'),
-    defaultExecutionTimeout: parseInt(process.env.DEFAULT_EXECUTION_TIMEOUT || '3600000'), // 1 hour
+    maxConcurrentExecutions: parseInt(
+      process.env.MAX_CONCURRENT_EXECUTIONS || '100',
+    ),
+    defaultExecutionTimeout: parseInt(
+      process.env.DEFAULT_EXECUTION_TIMEOUT || '3600000',
+    ), // 1 hour
     maxStepsPerWorkflow: parseInt(process.env.MAX_STEPS_PER_WORKFLOW || '100'),
     maxRetryAttempts: parseInt(process.env.MAX_RETRY_ATTEMPTS || '3'),
     retryDelayMs: parseInt(process.env.RETRY_DELAY_MS || '5000'),
@@ -42,7 +49,9 @@ export const config = {
 
   humanTasks: {
     defaultDueDays: parseInt(process.env.DEFAULT_DUE_DAYS || '7'),
-    reminderIntervalHours: parseInt(process.env.REMINDER_INTERVAL_HOURS || '24'),
+    reminderIntervalHours: parseInt(
+      process.env.REMINDER_INTERVAL_HOURS || '24',
+    ),
     escalationDays: parseInt(process.env.ESCALATION_DAYS || '3'),
   },
 
@@ -50,7 +59,8 @@ export const config = {
     enableScheduledTriggers: process.env.ENABLE_SCHEDULED_TRIGGERS !== 'false',
     enableWebhookTriggers: process.env.ENABLE_WEBHOOK_TRIGGERS !== 'false',
     enableEventTriggers: process.env.ENABLE_EVENT_TRIGGERS !== 'false',
-    webhookSecretKey: process.env.WEBHOOK_SECRET_KEY || 'workflow-webhook-secret',
+    webhookSecretKey:
+      process.env.WEBHOOK_SECRET_KEY || 'workflow-webhook-secret',
   },
 
   integrations: {
@@ -63,7 +73,11 @@ export const config = {
       url: process.env.JIRA_URL,
       username: process.env.JIRA_USERNAME,
       apiToken: process.env.JIRA_API_TOKEN,
-      enabled: !!(process.env.JIRA_URL && process.env.JIRA_USERNAME && process.env.JIRA_API_TOKEN),
+      enabled: !!(
+        process.env.JIRA_URL &&
+        process.env.JIRA_USERNAME &&
+        process.env.JIRA_API_TOKEN
+      ),
     },
     email: {
       smtpHost: process.env.SMTP_HOST,

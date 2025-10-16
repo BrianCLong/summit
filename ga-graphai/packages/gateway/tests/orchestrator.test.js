@@ -16,7 +16,7 @@ const baselineCandidate = {
   safetyTier: SAFETY_TIERS.B,
   licenseClass: LICENSE_CLASSES.MIT_OK,
   residency: 'us-west',
-  constraints: { pii: false }
+  constraints: { pii: false },
 };
 
 const source = {
@@ -34,7 +34,7 @@ const source = {
         safetyTier: SAFETY_TIERS.A,
         licenseClass: LICENSE_CLASSES.MIT_OK,
         residency: 'us-west',
-        constraints: { pii: false }
+        constraints: { pii: false },
       },
       {
         id: 'res-fast',
@@ -47,7 +47,7 @@ const source = {
         safetyTier: SAFETY_TIERS.A,
         licenseClass: LICENSE_CLASSES.OPEN_DATA_OK,
         residency: 'us-west',
-        constraints: { pii: false }
+        constraints: { pii: false },
       },
       {
         id: 'res-eu',
@@ -60,10 +60,10 @@ const source = {
         safetyTier: SAFETY_TIERS.A,
         licenseClass: LICENSE_CLASSES.OPEN_DATA_OK,
         residency: 'eu-central',
-        constraints: { pii: false }
-      }
+        constraints: { pii: false },
+      },
     ];
-  }
+  },
 };
 
 test('orchestrator routes traffic while staying budget neutral', async () => {
@@ -73,7 +73,7 @@ test('orchestrator routes traffic while staying budget neutral', async () => {
     baselineCandidate,
     policyEngine,
     discoverySources: [source],
-    budget: { baselineMonthlyUSD: 100, alertThreshold: 0.8 }
+    budget: { baselineMonthlyUSD: 100, alertThreshold: 0.8 },
   });
   await orchestrator.bootstrap();
   assert.ok(orchestrator.discovery.all().length >= 3);
@@ -86,7 +86,7 @@ test('orchestrator routes traffic while staying budget neutral', async () => {
       payload: { summary: 'summarize release notes' },
       promptHash: 'hash-1',
       policyVersion: 'v1',
-      tokens: 3000
+      tokens: 3000,
     },
     {
       id: 'task-2',
@@ -95,7 +95,7 @@ test('orchestrator routes traffic while staying budget neutral', async () => {
       payload: { summary: 'fix types' },
       promptHash: 'hash-2',
       policyVersion: 'v1',
-      tokens: 1500
+      tokens: 1500,
     },
     {
       id: 'task-3',
@@ -104,8 +104,8 @@ test('orchestrator routes traffic while staying budget neutral', async () => {
       payload: { summary: 'triage logs' },
       promptHash: 'hash-3',
       policyVersion: 'v1',
-      tokens: 5000
-    }
+      tokens: 5000,
+    },
   ];
 
   await Promise.all(tasks.map((task) => orchestrator.runTask(task)));
@@ -126,13 +126,19 @@ test('orchestrator routes traffic while staying budget neutral', async () => {
     payload: { summary: 'cached task', password: 'secret' },
     promptHash: 'hash-cache',
     policyVersion: 'v1',
-    tokens: 2000
+    tokens: 2000,
   };
   await orchestrator.runTask(cacheTask);
-  const cacheHitEntry = await orchestrator.runTask({ ...cacheTask, id: 'task-cache-b' });
+  const cacheHitEntry = await orchestrator.runTask({
+    ...cacheTask,
+    id: 'task-cache-b',
+  });
   assert.equal(cacheHitEntry.decision.chosen, 'cache');
 
   const ledgerSummary = orchestrator.ledger.summary();
   assert.ok(ledgerSummary.count >= 5);
-  assert.ok(ledgerSummary.totalBudgetDeltaUSD <= tasks.length * baselineCandidate.cost.estimate);
+  assert.ok(
+    ledgerSummary.totalBudgetDeltaUSD <=
+      tasks.length * baselineCandidate.cost.estimate,
+  );
 });

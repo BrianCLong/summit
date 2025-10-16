@@ -12,7 +12,10 @@ export default defineTask<In, { valid: true }>({
     const ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
     const validate = ajv.compile(payload.schema as any);
-    if (!ok) throw new Error('Schema validation failed: ' + JSON.stringify(validate.errors));
+    if (!ok)
+      throw new Error(
+        'Schema validation failed: ' + JSON.stringify(validate.errors),
+      );
     return { payload: { valid: true } };
   },
 });

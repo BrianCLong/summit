@@ -14,4 +14,3 @@ test('shows enrichment panel when node selected (smoke)', async ({ page }) => {
   // Check that "Enrichment" text appears somewhere
   await expect(page.getByText(/Enrichment/i)).toBeVisible({ timeout: 2000 });
 });
-

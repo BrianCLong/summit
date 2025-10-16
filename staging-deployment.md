@@ -10,6 +10,7 @@
 ## Pre-Deployment Validation
 
 ### Sprint 0 Acceptance Criteria ✅ ALL PASSED
+
 - **e2e_slice_operational**: ✅ batch_ingest_graph_query_ui functional
 - **slo_compliance**: ✅ API p95 285ms ≤350ms, path p95 890ms ≤1200ms, ingest 65MB/s ≥50MB/s
 - **security_posture**: ✅ OPA ABAC policies, US-only residency, container signing
@@ -20,6 +21,7 @@
 ## Staging Deployment Commands
 
 ### 1. Infrastructure Provisioning
+
 ```bash
 # Set environment
 export AWS_REGION="us-west-2"
@@ -31,6 +33,7 @@ export TAG="v0.1.0"
 ```
 
 ### 2. Canary Deployment Strategy
+
 ```bash
 # Phase 1: 10% traffic
 kubectl patch deployment intelgraph-gateway -p '{"spec":{"replicas":1}}'
@@ -47,13 +50,15 @@ kubectl patch deployment intelgraph-gateway -p '{"spec":{"replicas":5}}'
 ```
 
 ### 3. Auto-Rollback Conditions
-- **SLO Breach**: API p95 >350ms * 1.2 = 420ms for 15+ minutes
+
+- **SLO Breach**: API p95 >350ms \* 1.2 = 420ms for 15+ minutes
 - **Error Rate**: >2% for 10+ minutes
-- **Path Performance**: 3-hop p95 >1200ms * 1.2 = 1440ms for 15+ minutes
+- **Path Performance**: 3-hop p95 >1200ms \* 1.2 = 1440ms for 15+ minutes
 
 ## Post-Deploy Validation
 
 ### 1. K6 Performance Tests
+
 ```bash
 # API performance validation
 k6 run tests/k6/api-performance.js --env STAGING_URL=https://staging-api.intelgraph.topicality.co
@@ -65,6 +70,7 @@ k6 run tests/k6/api-performance.js --env STAGING_URL=https://staging-api.intelgr
 ```
 
 ### 2. OPA Policy Validation
+
 ```bash
 # Residency enforcement test
 curl -H "Authorization: Bearer non-us-token" https://staging-api.intelgraph.topicality.co/graphql
@@ -84,6 +90,7 @@ curl -H "Authorization: Bearer limited-scope-token" \
 ```
 
 ### 3. Observability Validation
+
 ```bash
 # Traces visible: Web→Gateway→Service→Database
 curl https://staging-jaeger.intelgraph.topicality.co/api/traces?service=intelgraph-gateway
@@ -98,6 +105,7 @@ curl https://staging-prometheus.intelgraph.topicality.co/api/v1/rules
 ## Evidence Artifacts to Attach
 
 ### Required Artifacts
+
 1. **CI Run URLs**: GitHub Actions workflow run links
 2. **Image Digests**: Container image SHA256 hashes with Cosign signatures
 3. **SBOMs**: CycloneDX and SPDX software bill of materials
@@ -107,6 +115,7 @@ curl https://staging-prometheus.intelgraph.topicality.co/api/v1/rules
 7. **Cosign Verify**: Container signature validation outputs
 
 ### Evidence Generation
+
 ```bash
 # Generate complete evidence bundle
 node scripts/generate-evidence-bundle.js --environment staging --tag v0.1.0
@@ -118,24 +127,28 @@ gh release upload v0.1.0 evidence-bundle/*.{json,html,txt}
 ## Success Criteria
 
 ### ✅ Deployment Success
+
 - [ ] All services healthy in staging environment
 - [ ] Canary deployment completed without rollback
 - [ ] No SLO breaches during deployment window
 - [ ] All validation tests passing
 
 ### ✅ Observability Operational
+
 - [ ] Distributed traces visible Web→Gateway→Service→DB
 - [ ] Grafana dashboards displaying real-time metrics
 - [ ] Prometheus alerts configured and firing correctly
 - [ ] Jaeger traces searchable with proper metadata
 
 ### ✅ Security Compliance
+
 - [ ] US-only residency enforcement verified
 - [ ] Cross-tenant isolation confirmed
 - [ ] PII redaction operational
 - [ ] Container signatures valid and verified
 
 ### ✅ Performance Validated
+
 - [ ] API p95 <350ms sustained load
 - [ ] 3-hop path p95 <1200ms sustained load
 - [ ] Ingest throughput ≥50MB/s verified

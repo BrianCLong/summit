@@ -546,16 +546,23 @@ export class ApprovalEngine {
       description: requestDetails.description || '',
       justification: requestDetails.justification || '',
       urgency: requestDetails.urgency || UrgencyLevel.NORMAL,
-      classification: requestDetails.classification || ClassificationLevel.CONFIDENTIAL,
+      classification:
+        requestDetails.classification || ClassificationLevel.CONFIDENTIAL,
 
-      operationType: requestDetails.operationType || OperationType.INFORMATION_OPERATION,
-      targetProfile: requestDetails.targetProfile || this.createDefaultTargetProfile(),
+      operationType:
+        requestDetails.operationType || OperationType.INFORMATION_OPERATION,
+      targetProfile:
+        requestDetails.targetProfile || this.createDefaultTargetProfile(),
       proposedMeasures: requestDetails.proposedMeasures || [],
-      estimatedImpact: requestDetails.estimatedImpact || this.createDefaultImpactAssessment(),
-      riskAssessment: requestDetails.riskAssessment || this.createDefaultRiskAssessment(),
+      estimatedImpact:
+        requestDetails.estimatedImpact || this.createDefaultImpactAssessment(),
+      riskAssessment:
+        requestDetails.riskAssessment || this.createDefaultRiskAssessment(),
 
-      legalReview: requestDetails.legalReview || this.createDefaultLegalReview(),
-      ethicalReview: requestDetails.ethicalReview || this.createDefaultEthicalReview(),
+      legalReview:
+        requestDetails.legalReview || this.createDefaultLegalReview(),
+      ethicalReview:
+        requestDetails.ethicalReview || this.createDefaultEthicalReview(),
       complianceChecks: requestDetails.complianceChecks || [],
 
       approvalChain: this.generateApprovalChain(requestDetails),
@@ -633,7 +640,9 @@ export class ApprovalEngine {
     }
 
     if (request.status !== ApprovalStatus.UNDER_REVIEW) {
-      throw new Error(`Cannot process decision for request in status: ${request.status}`);
+      throw new Error(
+        `Cannot process decision for request in status: ${request.status}`,
+      );
     }
 
     const currentStage = request.approvalChain[request.currentStage];
@@ -659,7 +668,10 @@ export class ApprovalEngine {
       informationReviewed: [],
       consultationsHeld: [],
       authenticationMethod: authMethod,
-      cryptographicSignature: await this.generateCryptographicSignature(decision, approverId),
+      cryptographicSignature: await this.generateCryptographicSignature(
+        decision,
+        approverId,
+      ),
     };
 
     // Add decision to current stage
@@ -783,7 +795,10 @@ export class ApprovalEngine {
       throw new Error('Only the requester can withdraw the approval request');
     }
 
-    if (request.status === ApprovalStatus.APPROVED || request.status === ApprovalStatus.REJECTED) {
+    if (
+      request.status === ApprovalStatus.APPROVED ||
+      request.status === ApprovalStatus.REJECTED
+    ) {
       throw new Error('Cannot withdraw completed approval request');
     }
 
@@ -898,30 +913,45 @@ export class ApprovalEngine {
 
     if (timeRange) {
       requests = requests.filter(
-        (r) => r.submittedAt >= timeRange.start && r.submittedAt <= timeRange.end,
+        (r) =>
+          r.submittedAt >= timeRange.start && r.submittedAt <= timeRange.end,
       );
     }
 
     const totalRequests = requests.length;
-    const approved = requests.filter((r) => r.status === ApprovalStatus.APPROVED).length;
-    const rejected = requests.filter((r) => r.status === ApprovalStatus.REJECTED).length;
-    const pending = requests.filter((r) => r.status === ApprovalStatus.UNDER_REVIEW).length;
+    const approved = requests.filter(
+      (r) => r.status === ApprovalStatus.APPROVED,
+    ).length;
+    const rejected = requests.filter(
+      (r) => r.status === ApprovalStatus.REJECTED,
+    ).length;
+    const pending = requests.filter(
+      (r) => r.status === ApprovalStatus.UNDER_REVIEW,
+    ).length;
 
     // Calculate average approval time
     const completedRequests = requests.filter(
-      (r) => r.status === ApprovalStatus.APPROVED || r.status === ApprovalStatus.REJECTED,
+      (r) =>
+        r.status === ApprovalStatus.APPROVED ||
+        r.status === ApprovalStatus.REJECTED,
     );
 
     const totalApprovalTime = completedRequests.reduce((sum, request) => {
       const completedStage = request.approvalChain.find((s) => s.completedAt);
       if (completedStage) {
-        return sum + (completedStage.completedAt!.getTime() - request.submittedAt.getTime());
+        return (
+          sum +
+          (completedStage.completedAt!.getTime() -
+            request.submittedAt.getTime())
+        );
       }
       return sum;
     }, 0);
 
     const averageApprovalTime =
-      completedRequests.length > 0 ? totalApprovalTime / completedRequests.length / (1000 * 60) : 0; // minutes
+      completedRequests.length > 0
+        ? totalApprovalTime / completedRequests.length / (1000 * 60)
+        : 0; // minutes
 
     const approvalRate = totalRequests > 0 ? approved / totalRequests : 0;
 
@@ -1035,7 +1065,9 @@ export class ApprovalEngine {
 
   private validateApprovalRequest(request: ApprovalRequest): void {
     if (!request.title || !request.description || !request.justification) {
-      throw new Error('Missing required fields: title, description, or justification');
+      throw new Error(
+        'Missing required fields: title, description, or justification',
+      );
     }
 
     if (request.proposedMeasures.length === 0) {
@@ -1047,7 +1079,9 @@ export class ApprovalEngine {
     }
   }
 
-  private generateApprovalChain(requestDetails: Partial<ApprovalRequest>): ApprovalStage[] {
+  private generateApprovalChain(
+    requestDetails: Partial<ApprovalRequest>,
+  ): ApprovalStage[] {
     // Use standard workflow template by default
     const template = this.workflowTemplates.get('standard')!;
 
@@ -1216,13 +1250,18 @@ export class ApprovalEngine {
     // In a real implementation, this would check against user database
     // For now, we'll do basic validation
 
-    if (stage.specificApprovers && !stage.specificApprovers.includes(approverId)) {
+    if (
+      stage.specificApprovers &&
+      !stage.specificApprovers.includes(approverId)
+    ) {
       throw new Error('Approver not authorized for this stage');
     }
 
     // Check for unique approver requirement
     if (stage.requireUniqueApprover) {
-      const existingDecision = stage.decisions.find((d) => d.approverId === approverId);
+      const existingDecision = stage.decisions.find(
+        (d) => d.approverId === approverId,
+      );
       if (existingDecision) {
         throw new Error('Approver has already made a decision for this stage');
       }
@@ -1246,8 +1285,12 @@ export class ApprovalEngine {
     approved: boolean;
     reason: string;
   }> {
-    const approvals = stage.decisions.filter((d) => d.decision === DecisionType.APPROVE).length;
-    const rejections = stage.decisions.filter((d) => d.decision === DecisionType.REJECT).length;
+    const approvals = stage.decisions.filter(
+      (d) => d.decision === DecisionType.APPROVE,
+    ).length;
+    const rejections = stage.decisions.filter(
+      (d) => d.decision === DecisionType.REJECT,
+    ).length;
 
     // Check if minimum approvals met
     if (approvals >= stage.minimumApprovers) {
@@ -1312,12 +1355,18 @@ export class ApprovalEngine {
     clearance?: ClassificationLevel,
   ): boolean {
     // Check specific approvers
-    if (stage.specificApprovers && !stage.specificApprovers.includes(approverId)) {
+    if (
+      stage.specificApprovers &&
+      !stage.specificApprovers.includes(approverId)
+    ) {
       return false;
     }
 
     // Check alternate approvers
-    if (stage.alternateApprovers && !stage.alternateApprovers.includes(approverId)) {
+    if (
+      stage.alternateApprovers &&
+      !stage.alternateApprovers.includes(approverId)
+    ) {
       return false;
     }
 
@@ -1353,16 +1402,27 @@ export class ApprovalEngine {
     averageTime: number;
     rejectionRate: number;
   }> {
-    const stageStats = new Map<string, { totalTime: number; count: number; rejections: number }>();
+    const stageStats = new Map<
+      string,
+      { totalTime: number; count: number; rejections: number }
+    >();
 
     requests.forEach((request) => {
       request.approvalChain.forEach((stage) => {
-        if (stage.status === StageStatus.COMPLETED || stage.status === StageStatus.FAILED) {
+        if (
+          stage.status === StageStatus.COMPLETED ||
+          stage.status === StageStatus.FAILED
+        ) {
           const key = stage.name;
-          const existing = stageStats.get(key) || { totalTime: 0, count: 0, rejections: 0 };
+          const existing = stageStats.get(key) || {
+            totalTime: 0,
+            count: 0,
+            rejections: 0,
+          };
 
           if (stage.startedAt && stage.completedAt) {
-            existing.totalTime += stage.completedAt.getTime() - stage.startedAt.getTime();
+            existing.totalTime +=
+              stage.completedAt.getTime() - stage.startedAt.getTime();
             existing.count++;
 
             if (stage.status === StageStatus.FAILED) {
@@ -1377,7 +1437,8 @@ export class ApprovalEngine {
 
     return Array.from(stageStats.entries()).map(([stage, stats]) => ({
       stage,
-      averageTime: stats.count > 0 ? stats.totalTime / stats.count / (1000 * 60) : 0, // minutes
+      averageTime:
+        stats.count > 0 ? stats.totalTime / stats.count / (1000 * 60) : 0, // minutes
       rejectionRate: stats.count > 0 ? stats.rejections / stats.count : 0,
     }));
   }

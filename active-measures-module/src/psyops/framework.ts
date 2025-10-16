@@ -68,7 +68,8 @@ export function generatePlaybook(tuners: any): PsyOpsFramework {
 
   const strategic: StrategicLevel = {
     objectives: getStrategicObjectives(intensity, doctrineAlignment),
-    timeHorizon: intensity > 0.7 ? 'Long-term (6+ months)' : 'Medium-term (1-6 months)',
+    timeHorizon:
+      intensity > 0.7 ? 'Long-term (6+ months)' : 'Medium-term (1-6 months)',
     targetAudience: 'Multi-demographic with psychographic segmentation',
     narrativeThemes: getNarrativeThemes(doctrineAlignment),
     doctrineAlignment,
@@ -341,7 +342,8 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
     {
       method: 'Organic Content Creation',
       whenToUse: 'Long-term narrative building',
-      howToImplement: 'Create authentic, engaging content aligned with target values',
+      howToImplement:
+        'Create authentic, engaging content aligned with target values',
       riskLevel: 0.2,
       effectivenessScore: 0.7,
       prerequisites: ['Content creation capability', 'Distribution channels'],
@@ -349,7 +351,8 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
     {
       method: 'Influencer Partnerships',
       whenToUse: 'Rapid reach to specific demographics',
-      howToImplement: 'Identify and engage authentic influencers with target audience overlap',
+      howToImplement:
+        'Identify and engage authentic influencers with target audience overlap',
       riskLevel: 0.3,
       effectivenessScore: 0.8,
       prerequisites: ['Influencer network', 'Relationship management'],
@@ -365,7 +368,8 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
     {
       method: 'Data-Driven Targeting',
       whenToUse: 'Precision messaging to specific segments',
-      howToImplement: 'Use behavioral and demographic data for targeted campaigns',
+      howToImplement:
+        'Use behavioral and demographic data for targeted campaigns',
       riskLevel: 0.4,
       effectivenessScore: 0.9,
       prerequisites: ['Data access', 'Analytics capability', 'Targeting tools'],
@@ -380,15 +384,24 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
         howToImplement: 'Deploy coordinated response across multiple platforms',
         riskLevel: 0.5,
         effectivenessScore: 0.8,
-        prerequisites: ['24/7 monitoring', 'Response team', 'Pre-approved messages'],
+        prerequisites: [
+          '24/7 monitoring',
+          'Response team',
+          'Pre-approved messages',
+        ],
       },
       {
         method: 'Cross-Platform Coordination',
         whenToUse: 'Amplifying key messages',
-        howToImplement: 'Synchronize messaging across different platforms and audiences',
+        howToImplement:
+          'Synchronize messaging across different platforms and audiences',
         riskLevel: 0.6,
         effectivenessScore: 0.9,
-        prerequisites: ['Multi-platform access', 'Coordination tools', 'Timing analysis'],
+        prerequisites: [
+          'Multi-platform access',
+          'Coordination tools',
+          'Timing analysis',
+        ],
       },
     );
   }
@@ -398,10 +411,15 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
       {
         method: 'Advanced Behavioral Manipulation',
         whenToUse: 'High-stakes influence operations',
-        howToImplement: 'Deploy sophisticated psychological techniques with AI support',
+        howToImplement:
+          'Deploy sophisticated psychological techniques with AI support',
         riskLevel: 0.8,
         effectivenessScore: 0.95,
-        prerequisites: ['Advanced AI', 'Psychological expertise', 'Ethical oversight'],
+        prerequisites: [
+          'Advanced AI',
+          'Psychological expertise',
+          'Ethical oversight',
+        ],
       },
       {
         method: 'Synthetic Media Operations',
@@ -409,7 +427,11 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
         howToImplement: 'Generate AI-created content that appears authentic',
         riskLevel: 0.9,
         effectivenessScore: 0.9,
-        prerequisites: ['AI generation tools', 'Detection avoidance', 'Distribution channels'],
+        prerequisites: [
+          'AI generation tools',
+          'Detection avoidance',
+          'Distribution channels',
+        ],
       },
     );
   }
@@ -420,7 +442,10 @@ function generateDecisionMatrix(intensity: number): DecisionMatrix[] {
 /**
  * Validate PsyOps operation against ethical and legal constraints
  */
-export function validateOperation(operation: any, constraints: any): ValidationResult {
+export function validateOperation(
+  operation: any,
+  constraints: any,
+): ValidationResult {
   const issues: string[] = [];
   const warnings: string[] = [];
 
@@ -439,7 +464,9 @@ export function validateOperation(operation: any, constraints: any): ValidationR
     operation.unattributabilityRequirement > 0.8 &&
     operation.techniques.some((t: any) => t.attribution > 0.5)
   ) {
-    warnings.push('High attribution techniques may compromise unattributability requirement');
+    warnings.push(
+      'High attribution techniques may compromise unattributability requirement',
+    );
   }
 
   // Resource validation
@@ -487,8 +514,10 @@ function calculateOperationCost(operation: any): number {
 function calculateRiskAssessment(operation: any): RiskAssessment {
   const intensity = operation.intensity || 0.5;
   const attribution =
-    operation.techniques?.reduce((avg: number, t: any) => avg + t.attribution, 0) /
-      (operation.techniques?.length || 1) || 0.3;
+    operation.techniques?.reduce(
+      (avg: number, t: any) => avg + t.attribution,
+      0,
+    ) / (operation.techniques?.length || 1) || 0.3;
 
   const overallRisk =
     intensity > 0.8 || attribution > 0.7
@@ -502,7 +531,8 @@ function calculateRiskAssessment(operation: any): RiskAssessment {
     categories: [
       {
         name: 'Attribution Risk',
-        level: attribution > 0.7 ? 'HIGH' : attribution > 0.4 ? 'MODERATE' : 'LOW',
+        level:
+          attribution > 0.7 ? 'HIGH' : attribution > 0.4 ? 'MODERATE' : 'LOW',
         probability: attribution,
         impact: 0.8,
       },

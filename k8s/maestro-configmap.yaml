@@ -4,5 +4,5 @@ metadata:
   name: maestro-config
   namespace: intelgraph-prod
 data:
-  LOG_LEVEL: "info"
-  FEATURE_FLAGS: "studio,blackbox_canary"
+  LOG_LEVEL: 'info'
+  FEATURE_FLAGS: 'studio,blackbox_canary'

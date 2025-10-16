@@ -6,13 +6,13 @@ permissions:
 on:
   # Trigger after successful client builds
   workflow_run:
-    workflows: ["Client Build", "E2E Tests"]
-    types: 
+    workflows: ['Client Build', 'E2E Tests']
+    types:
       - completed
     branches:
       - main
       - develop
-  
+
   # Manual trigger for emergency sync
   workflow_dispatch:
     inputs:
@@ -43,30 +43,30 @@ jobs:
   sync-hashes:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
-    
+
     strategy:
       matrix:
-        environment: 
+        environment:
           - staging
           - production
-      
+
     environment: ${{ matrix.environment }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'pnpm'
-          
+
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
           pnpm install redis@^4.6.0 # Ensure Redis client is available
-          
+
       - name: Download PQ hash artifacts
         if: github.event_name == 'workflow_run'
         uses: actions/download-artifact@v4
@@ -74,7 +74,7 @@ jobs:
           name: persisted-queries
           path: ./artifacts
           run-id: ${{ github.event.workflow_run.id }}
-          
+
       - name: Verify hash file integrity
         if: github.event_name == 'workflow_run'
         run: |
@@ -89,7 +89,7 @@ jobs:
             echo "❌ Hash file not found in artifacts"
             exit 1
           fi
-          
+
       - name: Sync hashes to staging
         if: matrix.environment == 'staging'
         env:
@@ -103,17 +103,17 @@ jobs:
           else
             SOURCE_ARGS="--source=${{ inputs.source }}"
           fi
-          
+
           DRY_RUN_FLAG=""
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             DRY_RUN_FLAG="--dryRun=true"
           fi
-          
+
           node scripts/sync-pq-hashes.js \
             --env=staging \
             $SOURCE_ARGS \
             $DRY_RUN_FLAG
-            
+
       - name: Sync hashes to production
         if: matrix.environment == 'production' && github.ref == 'refs/heads/main'
         env:
@@ -123,7 +123,7 @@ jobs:
         run: |
           # Production requires additional safety checks
           echo "🔒 Production sync - performing safety checks..."
-          
+
           # Only sync from artifacts on main branch
           if [ "${{ github.event_name }}" == "workflow_run" ]; then
             SOURCE_ARGS="--source=file --file=./artifacts/persisted-queries.json"
@@ -146,17 +146,17 @@ jobs:
           else
             SOURCE_ARGS="--source=${{ inputs.source }}"
           fi
-          
+
           DRY_RUN_FLAG=""
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             DRY_RUN_FLAG="--dryRun=true"
           fi
-          
+
           node scripts/sync-pq-hashes.js \
             --env=production \
             $SOURCE_ARGS \
             $DRY_RUN_FLAG
-            
+
       - name: Verify sync results
         if: ${{ !inputs.dry_run }}
         env:
@@ -175,7 +175,7 @@ jobs:
               await redis.quit();
             })();
           "
-          
+
       - name: Post-sync health check
         if: ${{ !inputs.dry_run }}
         env:
@@ -186,9 +186,9 @@ jobs:
             echo "❌ Post-sync health check failed"
             exit 1
           }
-          
+
           echo "✅ Post-sync health check passed"
-          
+
       - name: Notify success
         if: success() && !inputs.dry_run
         uses: 8398a7/action-slack@v3
@@ -202,7 +202,7 @@ jobs:
             Ref: ${{ github.ref }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          
+
       - name: Notify failure
         if: failure()
         uses: 8398a7/action-slack@v3
@@ -214,7 +214,7 @@ jobs:
             Environment: ${{ matrix.environment }}
             Trigger: ${{ github.event_name }}
             Ref: ${{ github.ref }}
-            
+
             Check workflow logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

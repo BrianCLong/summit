@@ -7,15 +7,20 @@ function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      minHeight: '60vh',
-      textAlign: 'center'
-    }}>
-      <Typography variant="h1" sx={{ fontSize: '6rem', fontWeight: 'bold', color: 'primary.main' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '60vh',
+        textAlign: 'center',
+      }}
+    >
+      <Typography
+        variant="h1"
+        sx={{ fontSize: '6rem', fontWeight: 'bold', color: 'primary.main' }}
+      >
         404
       </Typography>
       <Typography variant="h4" gutterBottom>

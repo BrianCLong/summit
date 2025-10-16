@@ -1,10 +1,47 @@
 {
   "name": "integration/jira-comment",
   "nodes": [
-    { "parameters": { "path": "integration/jira-comment" }, "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 300], "name": "Webhook" },
-    { "parameters": { "authentication": "predefinedCredentialType", "nodeCredentialType": "jiraSoftwareCloudApi", "operation": "create", "resource": "comment", "issueId": "={{$json.payload.issueKey}}", "additionalFields": { "body": "={{$json.payload.comment}}" } }, "type": "n8n-nodes-base.jiraSoftwareCloud", "typeVersion": 2, "position": [450, 300], "name": "Jira Comment" },
-    { "parameters": { "httpMethod": "POST", "url": "={{$json[\"maestroCallbackUrl\"]}}", "jsonParameters": true, "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" }, "bodyParametersJson": "={{$json[\"maestroBody\"]}}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [700, 300], "name": "Maestro Callback" }
+    {
+      "parameters": { "path": "integration/jira-comment" },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "operation": "create",
+        "resource": "comment",
+        "issueId": "={{$json.payload.issueKey}}",
+        "additionalFields": { "body": "={{$json.payload.comment}}" }
+      },
+      "type": "n8n-nodes-base.jiraSoftwareCloud",
+      "typeVersion": 2,
+      "position": [450, 300],
+      "name": "Jira Comment"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "={{$json[\"maestroCallbackUrl\"]}}",
+        "jsonParameters": true,
+        "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" },
+        "bodyParametersJson": "={{$json[\"maestroBody\"]}}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "name": "Maestro Callback"
+    }
   ],
-  "connections": { "Webhook": { "main": [[{"node": "Jira Comment", "type": "main", "index": 0}]] }, "Jira Comment": { "main": [[{"node": "Maestro Callback", "type": "main", "index": 0}]] } }
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Jira Comment", "type": "main", "index": 0 }]]
+    },
+    "Jira Comment": {
+      "main": [[{ "node": "Maestro Callback", "type": "main", "index": 0 }]]
+    }
+  }
 }
-

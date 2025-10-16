@@ -1,6 +1,7 @@
 # P0 - Critical Issues (Crashes/Blocks Functionality)
 
 ## Template
+
 ```
 **Issue ID**: P0-001
 **Component**: [UI/API/Backend/Integration]
@@ -20,5 +21,5 @@
 ```
 
 ## Issues Found
-<!-- Add P0 issues below -->
 
+<!-- Add P0 issues below -->

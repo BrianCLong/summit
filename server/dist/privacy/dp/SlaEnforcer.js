@@ -1,5 +1,6 @@
 import { withinErrorBound } from './ErrorMonitor';
 export class SlaEnforcer {
+    deps;
     constructor(deps) {
         this.deps = deps;
     }

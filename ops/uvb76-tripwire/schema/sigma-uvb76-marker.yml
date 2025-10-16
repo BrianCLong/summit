@@ -10,11 +10,11 @@ logsource:
   category: application
 detection:
   selection_voice:
-    type: "voice"
+    type: 'voice'
   selection_marker:
-    type: "marker"
+    type: 'marker'
   selection_burst:
-    type: "burst"
+    type: 'burst'
   condition: selection_voice or selection_marker or selection_burst
 fields:
   - utc

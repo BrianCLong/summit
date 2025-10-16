@@ -429,4 +429,3 @@ Accessibility: contrast ≥4.5:1, keyboard navigation, aria-labels; live regions
 7. Budgets: bars + countdown.
 8. CI/Chaos: proxy actions.
 9. GitHub/Tickets: create issue and PMI sync.
-

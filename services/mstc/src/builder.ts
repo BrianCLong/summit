@@ -1,6 +1,16 @@
-import { MSTC_LOCALE_CANON, SUPPORTED_LOCALES, buildLocaleCanon } from './data/canon';
+import {
+  MSTC_LOCALE_CANON,
+  SUPPORTED_LOCALES,
+  buildLocaleCanon,
+} from './data/canon';
 import { normalize, sortBy, unique } from './utils';
-import type { CanonicalTerm, LocaleCanon, LocaleCanonMap, MatchedTerm, Vertical } from './types';
+import type {
+  CanonicalTerm,
+  LocaleCanon,
+  LocaleCanonMap,
+  MatchedTerm,
+  Vertical,
+} from './types';
 
 export class MSTCService {
   private canon: LocaleCanonMap;
@@ -14,7 +24,7 @@ export class MSTCService {
   }
 
   getLocales(): string[] {
-    return sortBy(Object.keys(this.canon), locale => locale);
+    return sortBy(Object.keys(this.canon), (locale) => locale);
   }
 
   hasLocale(locale: string): boolean {
@@ -26,11 +36,11 @@ export class MSTCService {
     if (!vertical) {
       return records;
     }
-    return records.filter(record => record.vertical === vertical);
+    return records.filter((record) => record.vertical === vertical);
   }
 
   getByTag(locale: string, tag: string): CanonicalTerm | undefined {
-    return this.canon[locale]?.find(entry => entry.tag === tag);
+    return this.canon[locale]?.find((entry) => entry.tag === tag);
   }
 
   match(locale: string, text: string, vertical?: Vertical): MatchedTerm[] {
@@ -44,7 +54,7 @@ export class MSTCService {
     for (const entry of canon) {
       const candidates = unique([
         entry.canonical,
-        ...entry.variants.map(variant => variant.value)
+        ...entry.variants.map((variant) => variant.value),
       ]);
       for (const candidate of candidates) {
         const normalizedCandidate = normalize(candidate);
@@ -58,7 +68,7 @@ export class MSTCService {
             canonical: entry.canonical,
             locale: entry.locale,
             vertical: entry.vertical,
-            confidence: entry.confidence
+            confidence: entry.confidence,
           });
           break;
         }

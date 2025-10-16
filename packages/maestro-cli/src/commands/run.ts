@@ -162,7 +162,12 @@ export class RunCommand {
       const clusterConfig = await this.getClusterConfig(options.env);
 
       // Submit workflow
-      const runId = await this.submitWorkflow(clusterConfig, workflow, parameters, options);
+      const runId = await this.submitWorkflow(
+        clusterConfig,
+        workflow,
+        parameters,
+        options,
+      );
 
       // Stream execution status
       await this.streamRemoteExecution(clusterConfig, runId);
@@ -182,20 +187,29 @@ export class RunCommand {
     const hasRemoteConfig = await this.hasRemoteConfiguration(options.env);
 
     if (hasRemoteConfig) {
-      console.log(chalk.yellow('🤖'), 'Auto-detected remote configuration, running remotely');
+      console.log(
+        chalk.yellow('🤖'),
+        'Auto-detected remote configuration, running remotely',
+      );
       await this.runRemote(workflow, parameters, options);
     } else {
-      console.log(chalk.yellow('🖥️'), 'No remote configuration found, running locally');
+      console.log(
+        chalk.yellow('🖥️'),
+        'No remote configuration found, running locally',
+      );
       await this.runLocal(workflow, parameters, options);
     }
   }
 
-  private async initializeLocalEngine(environment: string): Promise<MaestroEngine> {
+  private async initializeLocalEngine(
+    environment: string,
+  ): Promise<MaestroEngine> {
     // Initialize stores
     const { Pool } = require('pg');
     const pool = new Pool({
       connectionString:
-        process.env.MAESTRO_DATABASE_URL || 'postgresql://postgres:password@localhost:5432/maestro',
+        process.env.MAESTRO_DATABASE_URL ||
+        'postgresql://postgres:password@localhost:5432/maestro',
     });
 
     const stateStore = new PostgresStateStore(pool);
@@ -227,7 +241,9 @@ export class RunCommand {
     engine.registerPlugin(
       new OllamaPlugin({
         baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-        maxConcurrentRequests: parseInt(process.env.OLLAMA_MAX_CONCURRENT || '2'),
+        maxConcurrentRequests: parseInt(
+          process.env.OLLAMA_MAX_CONCURRENT || '2',
+        ),
         autoModelSelection: true,
       }),
     );
@@ -298,7 +314,10 @@ export class RunCommand {
     });
 
     engine.on('step:failed', (event) => {
-      console.log(chalk.red('❌'), `Step failed: ${event.step_id} - ${event.error}`);
+      console.log(
+        chalk.red('❌'),
+        `Step failed: ${event.step_id} - ${event.error}`,
+      );
     });
 
     engine.on('run:completed', (event) => {
@@ -306,11 +325,17 @@ export class RunCommand {
     });
 
     engine.on('run:failed', (event) => {
-      console.log(chalk.red('💥'), `Run failed: ${event.run_id} - ${event.error}`);
+      console.log(
+        chalk.red('💥'),
+        `Run failed: ${event.run_id} - ${event.error}`,
+      );
     });
   }
 
-  private async waitForCompletion(engine: MaestroEngine, runId: string): Promise<void> {
+  private async waitForCompletion(
+    engine: MaestroEngine,
+    runId: string,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const checkInterval = setInterval(async () => {
         try {
@@ -319,9 +344,16 @@ export class RunCommand {
           if (status.status === 'completed') {
             clearInterval(checkInterval);
             resolve();
-          } else if (status.status === 'failed' || status.status === 'cancelled') {
+          } else if (
+            status.status === 'failed' ||
+            status.status === 'cancelled'
+          ) {
             clearInterval(checkInterval);
-            reject(new Error(`Workflow ${status.status}: ${status.error || 'Unknown error'}`));
+            reject(
+              new Error(
+                `Workflow ${status.status}: ${status.error || 'Unknown error'}`,
+              ),
+            );
           }
         } catch (error) {
           clearInterval(checkInterval);
@@ -347,7 +379,9 @@ export class RunCommand {
     };
 
     if (!config.apiKey) {
-      throw new Error('MAESTRO_API_KEY environment variable is required for remote execution');
+      throw new Error(
+        'MAESTRO_API_KEY environment variable is required for remote execution',
+      );
     }
 
     return config;
@@ -381,10 +415,14 @@ export class RunCommand {
     return response.data.run_id;
   }
 
-  private async streamRemoteExecution(clusterConfig: any, runId: string): Promise<void> {
+  private async streamRemoteExecution(
+    clusterConfig: any,
+    runId: string,
+  ): Promise<void> {
     // Connect to WebSocket for real-time updates
     const wsUrl =
-      clusterConfig.apiUrl.replace(/^http/, 'ws') + `/api/v1/workflows/runs/${runId}/stream`;
+      clusterConfig.apiUrl.replace(/^http/, 'ws') +
+      `/api/v1/workflows/runs/${runId}/stream`;
 
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(wsUrl, {
@@ -432,10 +470,15 @@ export class RunCommand {
         console.log(chalk.green('✅'), `Step completed: ${event.step_id}`);
         break;
       case 'step:failed':
-        console.log(chalk.red('❌'), `Step failed: ${event.step_id} - ${event.error}`);
+        console.log(
+          chalk.red('❌'),
+          `Step failed: ${event.step_id} - ${event.error}`,
+        );
         break;
       case 'run:progress':
-        const progress = Math.round((event.completed_steps / event.total_steps) * 100);
+        const progress = Math.round(
+          (event.completed_steps / event.total_steps) * 100,
+        );
         console.log(
           chalk.blue('📊'),
           `Progress: ${progress}% (${event.completed_steps}/${event.total_steps})`,
@@ -460,7 +503,11 @@ export class RunCommand {
         const newOptions = { ...options, watch: false };
         await this.execute(newOptions);
       } catch (error) {
-        console.error(chalk.red('✗'), 'Re-run failed:', (error as Error).message);
+        console.error(
+          chalk.red('✗'),
+          'Re-run failed:',
+          (error as Error).message,
+        );
       }
     });
 

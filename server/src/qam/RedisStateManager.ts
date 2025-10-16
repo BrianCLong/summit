@@ -84,14 +84,16 @@ export class RedisStateManager extends EventEmitter {
     },
     keys: async (pattern: string) => {
       const regex = new RegExp(pattern.replace(/\*/g, '.*'));
-      return Array.from(this.mockStorage.keys()).filter(key => regex.test(key));
+      return Array.from(this.mockStorage.keys()).filter((key) =>
+        regex.test(key),
+      );
     },
-    exists: async (key: string) => this.mockStorage.has(key) ? 1 : 0,
+    exists: async (key: string) => (this.mockStorage.has(key) ? 1 : 0),
     ttl: async (key: string) => -1, // Mock: no expiration
     scan: async (cursor: number, options: any) => {
       const keys = Array.from(this.mockStorage.keys());
       return [0, keys]; // Mock scan result
-    }
+    },
   };
 
   // Mock storage for development
@@ -103,7 +105,7 @@ export class RedisStateManager extends EventEmitter {
       maxStateHistory: 100,
       compactionInterval: 60000, // 1 minute
       retentionDays: 30,
-      ...config
+      ...config,
     };
 
     // Initialize encryption key
@@ -115,7 +117,7 @@ export class RedisStateManager extends EventEmitter {
     if (this.config.compactionInterval! > 0) {
       this.compactionTimer = setInterval(
         () => this.performCompaction(),
-        this.config.compactionInterval!
+        this.config.compactionInterval!,
       );
     }
 
@@ -123,7 +125,7 @@ export class RedisStateManager extends EventEmitter {
       keyPrefix: this.config.keyPrefix,
       encryptionEnabled: this.config.encryptionEnabled,
       compressionEnabled: this.config.compressionEnabled,
-      merkleTreeEnabled: this.config.merkleTreeEnabled
+      merkleTreeEnabled: this.config.merkleTreeEnabled,
     });
   }
 
@@ -134,7 +136,7 @@ export class RedisStateManager extends EventEmitter {
     appId: string,
     tenantId: string,
     stateData: any,
-    tags: string[] = []
+    tags: string[] = [],
   ): Promise<StateSnapshot> {
     try {
       const id = this.generateStateId();
@@ -146,7 +148,9 @@ export class RedisStateManager extends EventEmitter {
       // Compress if enabled
       let compressed = false;
       if (this.config.compressionEnabled) {
-        const compressedBuffer = await compress(Buffer.from(serializedData, 'utf8'));
+        const compressedBuffer = await compress(
+          Buffer.from(serializedData, 'utf8'),
+        );
         serializedData = compressedBuffer.toString('base64');
         compressed = true;
       }
@@ -178,8 +182,10 @@ export class RedisStateManager extends EventEmitter {
         metadata: {
           size: serializedData.length,
           originalSize: JSON.stringify(stateData).length,
-          compressionRatio: compressed ? JSON.stringify(stateData).length / serializedData.length : 1
-        }
+          compressionRatio: compressed
+            ? JSON.stringify(stateData).length / serializedData.length
+            : 1,
+        },
       };
 
       // Store in Redis
@@ -194,7 +200,7 @@ export class RedisStateManager extends EventEmitter {
         encrypted,
         compressed,
         tags,
-        metadata: snapshot.metadata
+        metadata: snapshot.metadata,
       });
 
       await this.redisClient.set(redisKey, redisValue);
@@ -209,7 +215,7 @@ export class RedisStateManager extends EventEmitter {
         tenantId,
         size: serializedData.length,
         compressed,
-        encrypted
+        encrypted,
       });
 
       logger.debug('State saved successfully', {
@@ -219,7 +225,7 @@ export class RedisStateManager extends EventEmitter {
         size: serializedData.length,
         compressed,
         encrypted,
-        merkleRoot: merkleRoot.slice(0, 16) + '...'
+        merkleRoot: merkleRoot.slice(0, 16) + '...',
       });
 
       return snapshot;
@@ -236,7 +242,7 @@ export class RedisStateManager extends EventEmitter {
   async loadState(
     appId: string,
     tenantId: string,
-    stateId?: string
+    stateId?: string,
   ): Promise<StateSnapshot | null> {
     try {
       let redisKey: string;
@@ -280,14 +286,14 @@ export class RedisStateManager extends EventEmitter {
             tenantId,
             stateId: storedData.id,
             expected: storedData.merkleRoot,
-            computed: computedRoot
+            computed: computedRoot,
           });
           this.emit('integrity_violation', {
             appId,
             tenantId,
             stateId: storedData.id,
             expected: storedData.merkleRoot,
-            computed: computedRoot
+            computed: computedRoot,
           });
         }
       }
@@ -302,21 +308,21 @@ export class RedisStateManager extends EventEmitter {
         encrypted: storedData.encrypted,
         compressed: storedData.compressed,
         tags: storedData.tags,
-        metadata: storedData.metadata
+        metadata: storedData.metadata,
       };
 
       this.emit('state_loaded', {
         id: snapshot.id,
         appId,
         tenantId,
-        size: redisValue.length
+        size: redisValue.length,
       });
 
       logger.debug('State loaded successfully', {
         id: snapshot.id,
         appId,
         tenantId,
-        timestamp: snapshot.timestamp
+        timestamp: snapshot.timestamp,
       });
 
       return snapshot;
@@ -345,9 +351,15 @@ export class RedisStateManager extends EventEmitter {
           const storedData = JSON.parse(redisValue);
 
           // Apply filters
-          if (query.fromDate && new Date(storedData.timestamp) < query.fromDate) continue;
-          if (query.toDate && new Date(storedData.timestamp) > query.toDate) continue;
-          if (query.tags && !query.tags.every(tag => storedData.tags.includes(tag))) continue;
+          if (query.fromDate && new Date(storedData.timestamp) < query.fromDate)
+            continue;
+          if (query.toDate && new Date(storedData.timestamp) > query.toDate)
+            continue;
+          if (
+            query.tags &&
+            !query.tags.every((tag) => storedData.tags.includes(tag))
+          )
+            continue;
 
           // Create lightweight snapshot (without loading full data)
           const snapshot: StateSnapshot = {
@@ -360,7 +372,7 @@ export class RedisStateManager extends EventEmitter {
             encrypted: storedData.encrypted,
             compressed: storedData.compressed,
             tags: storedData.tags,
-            metadata: storedData.metadata
+            metadata: storedData.metadata,
           };
 
           snapshots.push(snapshot);
@@ -378,7 +390,7 @@ export class RedisStateManager extends EventEmitter {
       logger.debug('State query completed', {
         query,
         totalFound: snapshots.length,
-        returned: results.length
+        returned: results.length,
       });
 
       return results;
@@ -391,7 +403,11 @@ export class RedisStateManager extends EventEmitter {
   /**
    * Delete state
    */
-  async deleteState(appId: string, tenantId: string, stateId: string): Promise<boolean> {
+  async deleteState(
+    appId: string,
+    tenantId: string,
+    stateId: string,
+  ): Promise<boolean> {
     try {
       const redisKey = this.buildRedisKey(appId, tenantId, stateId);
       const result = await this.redisClient.del(redisKey);
@@ -408,7 +424,12 @@ export class RedisStateManager extends EventEmitter {
 
       return deleted;
     } catch (error) {
-      logger.error('Failed to delete state', { error, appId, tenantId, stateId });
+      logger.error('Failed to delete state', {
+        error,
+        appId,
+        tenantId,
+        stateId,
+      });
       throw error;
     }
   }
@@ -422,9 +443,11 @@ export class RedisStateManager extends EventEmitter {
       const beforeCount = await this.getStateCount();
 
       // Find old states to compact
-      const cutoffDate = new Date(Date.now() - this.config.retentionDays! * 24 * 60 * 60 * 1000);
+      const cutoffDate = new Date(
+        Date.now() - this.config.retentionDays! * 24 * 60 * 60 * 1000,
+      );
       const oldStates = await this.queryStates({
-        toDate: cutoffDate
+        toDate: cutoffDate,
       });
 
       let removedCount = 0;
@@ -432,7 +455,11 @@ export class RedisStateManager extends EventEmitter {
 
       for (const state of oldStates) {
         try {
-          const redisKey = this.buildRedisKey(state.appId, state.tenantId, state.id);
+          const redisKey = this.buildRedisKey(
+            state.appId,
+            state.tenantId,
+            state.id,
+          );
           const size = (await this.redisClient.get(redisKey))?.length || 0;
 
           await this.deleteState(state.appId, state.tenantId, state.id);
@@ -441,7 +468,7 @@ export class RedisStateManager extends EventEmitter {
         } catch (error) {
           logger.warn('Failed to delete old state during compaction', {
             error,
-            stateId: state.id
+            stateId: state.id,
           });
         }
       }
@@ -453,7 +480,7 @@ export class RedisStateManager extends EventEmitter {
         beforeCount,
         afterCount,
         spaceSaved,
-        duration
+        duration,
       };
 
       this.emit('compaction_completed', result);
@@ -482,7 +509,7 @@ export class RedisStateManager extends EventEmitter {
       // Get recent activity
       const recentStates = await this.queryStates({
         fromDate: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
-        limit: 100
+        limit: 100,
       });
 
       return {
@@ -491,17 +518,21 @@ export class RedisStateManager extends EventEmitter {
         tenantStats,
         recentActivity: {
           statesCreated: recentStates.length,
-          avgSize: recentStates.length > 0
-            ? recentStates.reduce((sum, s) => sum + (s.metadata.size || 0), 0) / recentStates.length
-            : 0
+          avgSize:
+            recentStates.length > 0
+              ? recentStates.reduce(
+                  (sum, s) => sum + (s.metadata.size || 0),
+                  0,
+                ) / recentStates.length
+              : 0,
         },
         configuration: {
           encryptionEnabled: this.config.encryptionEnabled,
           compressionEnabled: this.config.compressionEnabled,
           merkleTreeEnabled: this.config.merkleTreeEnabled,
           maxStateHistory: this.config.maxStateHistory,
-          retentionDays: this.config.retentionDays
-        }
+          retentionDays: this.config.retentionDays,
+        },
       };
     } catch (error) {
       logger.error('Failed to get statistics', { error });
@@ -515,7 +546,11 @@ export class RedisStateManager extends EventEmitter {
     return `state_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
   }
 
-  private buildRedisKey(appId: string, tenantId: string, stateId: string): string {
+  private buildRedisKey(
+    appId: string,
+    tenantId: string,
+    stateId: string,
+  ): string {
     return `${this.config.keyPrefix}:${tenantId}:${appId}:${stateId}`;
   }
 
@@ -553,7 +588,7 @@ export class RedisStateManager extends EventEmitter {
       return JSON.stringify({
         iv: iv.toString('hex'),
         data: encrypted,
-        authTag: authTag.toString('hex')
+        authTag: authTag.toString('hex'),
       });
     } catch (error) {
       logger.error('Encryption failed', { error });
@@ -599,20 +634,29 @@ export class RedisStateManager extends EventEmitter {
     const indexValue = JSON.stringify({
       stateId: snapshot.id,
       timestamp: snapshot.timestamp.toISOString(),
-      tags: snapshot.tags
+      tags: snapshot.tags,
     });
 
     // Store with expiration based on retention policy
     const ttl = this.config.retentionDays! * 24 * 60 * 60;
-    await this.redisClient.set(`${indexKey}:${snapshot.id}`, indexValue, { EX: ttl });
+    await this.redisClient.set(`${indexKey}:${snapshot.id}`, indexValue, {
+      EX: ttl,
+    });
   }
 
-  private async removeFromIndex(appId: string, tenantId: string, stateId: string): Promise<void> {
+  private async removeFromIndex(
+    appId: string,
+    tenantId: string,
+    stateId: string,
+  ): Promise<void> {
     const indexKey = `${this.config.keyPrefix}:index:${tenantId}:${appId}:${stateId}`;
     await this.redisClient.del(indexKey);
   }
 
-  private async getLatestStateId(appId: string, tenantId: string): Promise<string | null> {
+  private async getLatestStateId(
+    appId: string,
+    tenantId: string,
+  ): Promise<string | null> {
     const pattern = `${this.config.keyPrefix}:index:${tenantId}:${appId}:*`;
     const keys = await this.redisClient.keys(pattern);
 
@@ -623,13 +667,16 @@ export class RedisStateManager extends EventEmitter {
       keys.map(async (key) => {
         const value = await this.redisClient.get(key);
         return value ? JSON.parse(value) : null;
-      })
+      }),
     );
 
-    const validStates = states.filter(s => s !== null);
+    const validStates = states.filter((s) => s !== null);
     if (validStates.length === 0) return null;
 
-    validStates.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    validStates.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
     return validStates[0].stateId;
   }
 

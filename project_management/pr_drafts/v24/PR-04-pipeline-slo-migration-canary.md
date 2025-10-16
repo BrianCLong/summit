@@ -5,6 +5,7 @@ Title: feat(ci): add SLO burn, migration gate, and canary analysis to pipeline
 Why: Enforce error‑budget/SLO and safe deploys.
 
 Files changed:
+
 - .maestro/pipeline.yaml (mod)
 - Justfile (append)
 - scripts/slo_burn_check.py (new)
@@ -12,6 +13,7 @@ Files changed:
 - scripts/canary_analyze.sh (new)
 
 Patch (unified diff):
+
 ```diff
 *** a/.maestro/pipeline.yaml
 --- b/.maestro/pipeline.yaml
@@ -47,6 +49,7 @@ Patch (unified diff):
 ```
 
 Additions (append to `Justfile`):
+
 ```make
 sbom:
 	which syft >/dev/null || (echo "Install syft" && exit 1)

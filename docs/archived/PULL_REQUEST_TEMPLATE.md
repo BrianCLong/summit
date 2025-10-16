@@ -23,6 +23,7 @@ Fixes # (issue)
 - [ ] Manual tests
 
 ## Checklist:
+
 <!-- This checklist should be completed by the author of the pull request -->
 
 - [ ] My code follows the style guidelines of this project

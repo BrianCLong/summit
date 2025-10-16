@@ -12,8 +12,10 @@ tags: [area:<domain>, role:<user|admin|operator>, product:<maestro|intelgraph>]
 > **TL;DR:** <short elevator pitch>
 
 ## See also
+
 - [[Related Page 1]](../path)
 - [[Related Page 2]](../path)
 
 ## Next steps
+
 - <Do this next…>

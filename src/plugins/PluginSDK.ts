@@ -48,24 +48,28 @@ export interface PluginAPI {
   getBuildGraph(): Promise<BuildGraph>;
   executeBuild(targets: string[], options?: BuildOptions): Promise<BuildResult>;
   getTestResults(filter?: TestFilter): Promise<TestResult[]>;
-  
+
   // Cache operations
   getCacheStats(): Promise<CacheStats>;
   invalidateCache(pattern?: string): Promise<void>;
   prefetchArtifacts(keys: string[]): Promise<void>;
-  
+
   // Artifact management
   getArtifacts(buildId: string): Promise<Artifact[]>;
   publishArtifact(artifact: ArtifactSpec): Promise<string>;
-  
+
   // Registry operations
   queryRegistry(query: RegistryQuery): Promise<RegistryResult[]>;
   publishToRegistry(spec: PublishSpec): Promise<void>;
-  
+
   // Telemetry and metrics
-  recordMetric(name: string, value: number, tags?: { [key: string]: string }): void;
+  recordMetric(
+    name: string,
+    value: number,
+    tags?: { [key: string]: string },
+  ): void;
   recordEvent(event: PluginEvent): void;
-  
+
   // Configuration
   getConfig(key: string, defaultValue?: any): Promise<any>;
   setConfig(key: string, value: any): Promise<void>;
@@ -93,9 +97,17 @@ export interface PluginLifecycle {
   onLoad?(context: PluginContext): Promise<void>;
   onUnload?(context: PluginContext): Promise<void>;
   onBuildStart?(buildId: string, context: PluginContext): Promise<void>;
-  onBuildComplete?(buildId: string, result: BuildResult, context: PluginContext): Promise<void>;
+  onBuildComplete?(
+    buildId: string,
+    result: BuildResult,
+    context: PluginContext,
+  ): Promise<void>;
   onTestStart?(testId: string, context: PluginContext): Promise<void>;
-  onTestComplete?(testId: string, result: TestResult, context: PluginContext): Promise<void>;
+  onTestComplete?(
+    testId: string,
+    result: TestResult,
+    context: PluginContext,
+  ): Promise<void>;
 }
 
 // Supporting types
@@ -228,7 +240,7 @@ export class PluginSDK extends EventEmitter {
         module: pluginModule,
         context: this.createPluginContext(manifest, pluginPath, sandbox),
         loadedAt: new Date(),
-        active: true
+        active: true,
       };
 
       this.plugins.set(loadedPlugin.id, loadedPlugin);
@@ -243,15 +255,14 @@ export class PluginSDK extends EventEmitter {
         id: loadedPlugin.id,
         name: manifest.name,
         version: manifest.version,
-        permissions: manifest.permissions.length
+        permissions: manifest.permissions.length,
       });
 
       return loadedPlugin.id;
-
     } catch (error) {
       this.emit('plugin-load-error', {
         path: pluginPath,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
@@ -274,11 +285,10 @@ export class PluginSDK extends EventEmitter {
       this.sandboxes.delete(pluginId);
 
       this.emit('plugin-unloaded', { id: pluginId });
-
     } catch (error) {
       this.emit('plugin-unload-error', {
         id: pluginId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
@@ -290,7 +300,7 @@ export class PluginSDK extends EventEmitter {
   }
 
   getLoadedPlugins(): PluginInfo[] {
-    return Array.from(this.plugins.values()).map(plugin => ({
+    return Array.from(this.plugins.values()).map((plugin) => ({
       id: plugin.id,
       name: plugin.manifest.name,
       version: plugin.manifest.version,
@@ -299,7 +309,7 @@ export class PluginSDK extends EventEmitter {
       apiVersion: plugin.manifest.apiVersion,
       loadedAt: plugin.loadedAt,
       active: plugin.active,
-      permissions: plugin.manifest.permissions
+      permissions: plugin.manifest.permissions,
     }));
   }
 
@@ -311,7 +321,7 @@ export class PluginSDK extends EventEmitter {
         pluginId: id,
         valid: true,
         errors: [],
-        warnings: []
+        warnings: [],
       };
 
       try {
@@ -327,10 +337,11 @@ export class PluginSDK extends EventEmitter {
 
         // Check sandbox compliance
         this.validateSandboxCompliance(plugin);
-
       } catch (error) {
         report.valid = false;
-        report.errors.push(error instanceof Error ? error.message : 'Unknown error');
+        report.errors.push(
+          error instanceof Error ? error.message : 'Unknown error',
+        );
       }
 
       reports.push(report);
@@ -339,15 +350,20 @@ export class PluginSDK extends EventEmitter {
     return reports;
   }
 
-  async generatePluginSignature(pluginPath: string, privateKeyPath: string): Promise<PluginSignature> {
-    const manifest = JSON.parse(await fs.readFile(path.join(pluginPath, 'plugin.json'), 'utf8'));
-    
+  async generatePluginSignature(
+    pluginPath: string,
+    privateKeyPath: string,
+  ): Promise<PluginSignature> {
+    const manifest = JSON.parse(
+      await fs.readFile(path.join(pluginPath, 'plugin.json'), 'utf8'),
+    );
+
     // Create hash of plugin contents
     const pluginHash = await this.hashPluginContents(pluginPath);
-    
+
     // Load private key
     const privateKey = await fs.readFile(privateKeyPath, 'utf8');
-    
+
     // Create signature
     const sign = crypto.createSign('RSA-SHA256');
     sign.update(`${manifest.name}:${manifest.version}:${pluginHash}`);
@@ -357,7 +373,7 @@ export class PluginSDK extends EventEmitter {
       algorithm: 'RSA-SHA256',
       keyId: this.generateKeyId(privateKey),
       signature,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -391,18 +407,29 @@ export class PluginSDK extends EventEmitter {
     if (apiInfo.deprecated) {
       this.emit('plugin-warning', {
         message: `Plugin uses deprecated API version: ${manifest.apiVersion}`,
-        plugin: manifest.name
+        plugin: manifest.name,
       });
     }
 
     // Check Composer version compatibility
     const currentVersion = '1.24.0'; // Would be dynamic in production
-    if (!this.isVersionCompatible(currentVersion, manifest.minComposerVersion, manifest.maxComposerVersion)) {
-      throw new Error(`Incompatible Composer version. Required: ${manifest.minComposerVersion}${manifest.maxComposerVersion ? `-${manifest.maxComposerVersion}` : '+'}, Current: ${currentVersion}`);
+    if (
+      !this.isVersionCompatible(
+        currentVersion,
+        manifest.minComposerVersion,
+        manifest.maxComposerVersion,
+      )
+    ) {
+      throw new Error(
+        `Incompatible Composer version. Required: ${manifest.minComposerVersion}${manifest.maxComposerVersion ? `-${manifest.maxComposerVersion}` : '+'}, Current: ${currentVersion}`,
+      );
     }
   }
 
-  private async verifyPluginSignature(pluginPath: string, manifest: PluginManifest): Promise<void> {
+  private async verifyPluginSignature(
+    pluginPath: string,
+    manifest: PluginManifest,
+  ): Promise<void> {
     if (!manifest.signature) {
       throw new Error('Plugin signature required but not found');
     }
@@ -414,19 +441,23 @@ export class PluginSDK extends EventEmitter {
 
     // Create hash of plugin contents
     const pluginHash = await this.hashPluginContents(pluginPath);
-    
+
     // Verify signature
     const verify = crypto.createVerify(manifest.signature.algorithm);
     verify.update(`${manifest.name}:${manifest.version}:${pluginHash}`);
-    
-    const isValid = verify.verify(publicKey, manifest.signature.signature, 'base64');
+
+    const isValid = verify.verify(
+      publicKey,
+      manifest.signature.signature,
+      'base64',
+    );
     if (!isValid) {
       throw new Error('Plugin signature verification failed');
     }
 
     this.emit('plugin-signature-verified', {
       plugin: manifest.name,
-      keyId: manifest.signature.keyId
+      keyId: manifest.signature.keyId,
     });
   }
 
@@ -438,7 +469,7 @@ export class PluginSDK extends EventEmitter {
       environmentAccess: ['PATH', 'HOME'],
       maxMemoryMB: 256,
       maxCpuPercent: 25,
-      timeoutSeconds: 300
+      timeoutSeconds: 300,
     };
 
     // Configure sandbox based on permissions
@@ -462,12 +493,15 @@ export class PluginSDK extends EventEmitter {
     return sandbox;
   }
 
-  private async loadPluginModule(pluginPath: string, manifest: PluginManifest): Promise<any> {
+  private async loadPluginModule(
+    pluginPath: string,
+    manifest: PluginManifest,
+  ): Promise<any> {
     const entryPath = path.join(pluginPath, manifest.entryPoint);
-    
+
     // In production, this would use a secure module loader with sandbox enforcement
     const module = await import(entryPath);
-    
+
     // Validate that module implements required interface
     if (typeof module.default === 'function') {
       return module.default;
@@ -478,7 +512,11 @@ export class PluginSDK extends EventEmitter {
     }
   }
 
-  private createPluginContext(manifest: PluginManifest, pluginPath: string, sandbox: PluginSandbox): PluginContext {
+  private createPluginContext(
+    manifest: PluginManifest,
+    pluginPath: string,
+    sandbox: PluginSandbox,
+  ): PluginContext {
     return {
       name: manifest.name,
       version: manifest.version,
@@ -487,42 +525,72 @@ export class PluginSDK extends EventEmitter {
       configDirectory: path.join(pluginPath, 'config'),
       logger: this.createPluginLogger(manifest.name),
       api: this.createPluginAPI(manifest.name),
-      sandbox
+      sandbox,
     };
   }
 
   private createPluginLogger(pluginName: string): PluginLogger {
     return {
       debug: (message: string, ...args: any[]) => {
-        this.emit('plugin-log', { level: 'debug', plugin: pluginName, message, args });
+        this.emit('plugin-log', {
+          level: 'debug',
+          plugin: pluginName,
+          message,
+          args,
+        });
       },
       info: (message: string, ...args: any[]) => {
-        this.emit('plugin-log', { level: 'info', plugin: pluginName, message, args });
+        this.emit('plugin-log', {
+          level: 'info',
+          plugin: pluginName,
+          message,
+          args,
+        });
       },
       warn: (message: string, ...args: any[]) => {
-        this.emit('plugin-log', { level: 'warn', plugin: pluginName, message, args });
+        this.emit('plugin-log', {
+          level: 'warn',
+          plugin: pluginName,
+          message,
+          args,
+        });
       },
       error: (message: string, ...args: any[]) => {
-        this.emit('plugin-log', { level: 'error', plugin: pluginName, message, args });
-      }
+        this.emit('plugin-log', {
+          level: 'error',
+          plugin: pluginName,
+          message,
+          args,
+        });
+      },
     };
   }
 
   private createPluginAPI(pluginName: string): PluginAPI {
     return {
       getBuildTargets: async () => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'getBuildTargets' });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'getBuildTargets',
+        });
         // Implementation would call actual build system
         return [];
       },
-      
+
       getBuildGraph: async () => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'getBuildGraph' });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'getBuildGraph',
+        });
         return { nodes: [], edges: [] };
       },
-      
+
       executeBuild: async (targets: string[], options?: BuildOptions) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'executeBuild', targets });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'executeBuild',
+          targets,
+        });
         // Implementation would execute actual build
         return {
           buildId: `build-${Date.now()}`,
@@ -530,63 +598,102 @@ export class PluginSDK extends EventEmitter {
           duration: 1000,
           artifacts: [],
           logs: '',
-          metrics: {}
+          metrics: {},
         };
       },
-      
+
       getTestResults: async (filter?: TestFilter) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'getTestResults' });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'getTestResults',
+        });
         return [];
       },
-      
+
       getCacheStats: async () => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'getCacheStats' });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'getCacheStats',
+        });
         return { hitRate: 0.8, totalSize: 1024, entryCount: 100, evictions: 5 };
       },
-      
+
       invalidateCache: async (pattern?: string) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'invalidateCache', pattern });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'invalidateCache',
+          pattern,
+        });
       },
-      
+
       prefetchArtifacts: async (keys: string[]) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'prefetchArtifacts', keys });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'prefetchArtifacts',
+          keys,
+        });
       },
-      
+
       getArtifacts: async (buildId: string) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'getArtifacts', buildId });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'getArtifacts',
+          buildId,
+        });
         return [];
       },
-      
+
       publishArtifact: async (artifact: ArtifactSpec) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'publishArtifact' });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'publishArtifact',
+        });
         return `artifact-${Date.now()}`;
       },
-      
+
       queryRegistry: async (query: RegistryQuery) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'queryRegistry' });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'queryRegistry',
+        });
         return [];
       },
-      
+
       publishToRegistry: async (spec: PublishSpec) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'publishToRegistry' });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'publishToRegistry',
+        });
       },
-      
-      recordMetric: (name: string, value: number, tags?: { [key: string]: string }) => {
+
+      recordMetric: (
+        name: string,
+        value: number,
+        tags?: { [key: string]: string },
+      ) => {
         this.emit('plugin-metric', { plugin: pluginName, name, value, tags });
       },
-      
+
       recordEvent: (event: PluginEvent) => {
         this.emit('plugin-event', { plugin: pluginName, event });
       },
-      
+
       getConfig: async (key: string, defaultValue?: any) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'getConfig', key });
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'getConfig',
+          key,
+        });
         return defaultValue;
       },
-      
+
       setConfig: async (key: string, value: any) => {
-        this.emit('plugin-api-call', { plugin: pluginName, method: 'setConfig', key });
-      }
+        this.emit('plugin-api-call', {
+          plugin: pluginName,
+          method: 'setConfig',
+          key,
+        });
+      },
     };
   }
 
@@ -597,7 +704,9 @@ export class PluginSDK extends EventEmitter {
     }
 
     if (!permission.scope || permission.scope.length === 0) {
-      throw new Error(`Permission scope cannot be empty for type: ${permission.type}`);
+      throw new Error(
+        `Permission scope cannot be empty for type: ${permission.type}`,
+      );
     }
   }
 
@@ -609,14 +718,17 @@ export class PluginSDK extends EventEmitter {
 
     // In production, this would check actual resource usage, file access, etc.
     // For now, we simulate compliance checking
-    if (sandbox.networkAccess && !plugin.manifest.permissions.some(p => p.type === 'network')) {
+    if (
+      sandbox.networkAccess &&
+      !plugin.manifest.permissions.some((p) => p.type === 'network')
+    ) {
       throw new Error('Plugin using network without permission');
     }
   }
 
   private async hashPluginContents(pluginPath: string): Promise<string> {
     const hash = crypto.createHash('sha256');
-    
+
     // Hash all relevant files in the plugin directory
     const files = await this.getAllFiles(pluginPath);
     for (const file of files.sort()) {
@@ -625,15 +737,23 @@ export class PluginSDK extends EventEmitter {
         hash.update(content);
       }
     }
-    
+
     return hash.digest('hex');
   }
 
   private generateKeyId(publicKey: string): string {
-    return crypto.createHash('sha256').update(publicKey).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(publicKey)
+      .digest('hex')
+      .substring(0, 16);
   }
 
-  private isVersionCompatible(current: string, min: string, max?: string): boolean {
+  private isVersionCompatible(
+    current: string,
+    min: string,
+    max?: string,
+  ): boolean {
     // Simplified semver comparison
     const parseVersion = (v: string) => v.split('.').map(Number);
     const currentParts = parseVersion(current);
@@ -642,7 +762,10 @@ export class PluginSDK extends EventEmitter {
 
     // Check minimum version
     for (let i = 0; i < 3; i++) {
-      if (currentParts[i] > minParts[i]) return maxParts ? this.compareVersions(currentParts, maxParts) <= 0 : true;
+      if (currentParts[i] > minParts[i])
+        return maxParts
+          ? this.compareVersions(currentParts, maxParts) <= 0
+          : true;
       if (currentParts[i] < minParts[i]) return false;
     }
 
@@ -660,16 +783,16 @@ export class PluginSDK extends EventEmitter {
   private async getAllFiles(dir: string): Promise<string[]> {
     const files: string[] = [];
     const entries = await fs.readdir(dir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        files.push(...await this.getAllFiles(fullPath));
+        files.push(...(await this.getAllFiles(fullPath)));
       } else {
         files.push(fullPath);
       }
     }
-    
+
     return files;
   }
 
@@ -678,14 +801,14 @@ export class PluginSDK extends EventEmitter {
       version: '1.0.0',
       deprecated: false,
       supportedUntil: new Date('2025-12-31'),
-      breaking: false
+      breaking: false,
     });
-    
+
     this.apiVersions.set('0.9.0', {
       version: '0.9.0',
       deprecated: true,
       supportedUntil: new Date('2024-06-30'),
-      breaking: false
+      breaking: false,
     });
   }
 
@@ -694,7 +817,7 @@ export class PluginSDK extends EventEmitter {
     const examplePublicKey = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
 -----END PUBLIC KEY-----`;
-    
+
     this.signingKeys.set('example-key', examplePublicKey);
   }
 }

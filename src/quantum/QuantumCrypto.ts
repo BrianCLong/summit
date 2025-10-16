@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
  * IntelGraph Maestro Composer vNext+8: Quantum-Ready Cryptography & Advanced Security
- * 
+ *
  * Post-quantum cryptographic implementation with quantum-resistant algorithms,
  * hybrid cryptographic schemes, and advanced threat protection.
- * 
+ *
  * Objectives:
  * - Quantum Resistance: migration to post-quantum algorithms ≥80% complete
  * - Hybrid Security: classical + quantum-resistant dual protection ≥99.9% coverage
  * - Zero-Trust Architecture: comprehensive identity verification with ≤100ms latency
  * - Advanced Threat Protection: ML-powered threat detection ≥95% accuracy
  * - Cryptographic Agility: algorithm updates with ≤30min deployment time
- * 
+ *
  * @author IntelGraph Maestro Composer
  * @version 8.0.0
  */
@@ -25,14 +25,18 @@ import {
   type AssetRegistrationInput,
   type AssetStatus,
   type AssetCriticality,
-  type AssetUsageEvent
+  type AssetUsageEvent,
 } from '../../packages/shared/asset-manager';
 
 // Quantum-ready cryptographic interfaces
 interface PostQuantumAlgorithm {
   algorithmId: string;
   name: string;
-  type: 'key_encapsulation' | 'digital_signature' | 'hash_function' | 'symmetric';
+  type:
+    | 'key_encapsulation'
+    | 'digital_signature'
+    | 'hash_function'
+    | 'symmetric';
   nistStatus: 'standardized' | 'finalist' | 'alternate' | 'experimental';
   quantumSecurity: 'AES-128' | 'AES-192' | 'AES-256';
   keySize: number;
@@ -87,10 +91,19 @@ interface ZeroTrustPolicy {
 
 interface ThreatSignature {
   signatureId: string;
-  threatType: 'quantum_attack' | 'cryptographic_weakness' | 'post_quantum_transition' | 'key_compromise' | 'algorithm_break';
+  threatType:
+    | 'quantum_attack'
+    | 'cryptographic_weakness'
+    | 'post_quantum_transition'
+    | 'key_compromise'
+    | 'algorithm_break';
   severity: 'low' | 'medium' | 'high' | 'critical';
   indicators: Array<{
-    type: 'traffic_pattern' | 'computational_signature' | 'timing_attack' | 'side_channel';
+    type:
+      | 'traffic_pattern'
+      | 'computational_signature'
+      | 'timing_attack'
+      | 'side_channel';
     pattern: string;
     confidence: number;
   }>;
@@ -130,16 +143,16 @@ class QuantumCrypto extends EventEmitter {
   private zeroTrustPolicies: Map<string, ZeroTrustPolicy> = new Map();
   private threatSignatures: Map<string, ThreatSignature> = new Map();
   private cryptographicAssets: Map<string, CryptographicAsset> = new Map();
-  
+
   // Security configuration
   private config = {
-    quantumMigrationTarget: 0.80, // 80% migration target
+    quantumMigrationTarget: 0.8, // 80% migration target
     hybridCoverageTarget: 0.999, // 99.9% coverage target
     zeroTrustLatencyTarget: 100, // 100ms max latency
     threatDetectionAccuracy: 0.95, // 95% accuracy target
     algorithmUpdateSLA: 1800000, // 30 minutes max deployment
     keyRotationInterval: 86400000 * 30, // 30 days
-    quantumReadinessLevel: 5 // 1-5 scale
+    quantumReadinessLevel: 5, // 1-5 scale
   };
 
   // Performance tracking
@@ -156,12 +169,12 @@ class QuantumCrypto extends EventEmitter {
     detectionAccuracy: 0,
     algorithmUpdates: 0,
     averageUpdateTime: 0,
-    cryptographicIncidents: 0
+    cryptographicIncidents: 0,
   };
 
   private syncAllCryptographicAssets(): void {
-    const registrations = Array.from(this.cryptographicAssets.values()).map(asset =>
-      this.toAssetRegistration(asset)
+    const registrations = Array.from(this.cryptographicAssets.values()).map(
+      (asset) => this.toAssetRegistration(asset),
     );
     if (registrations.length > 0) {
       this.assetManager.bulkUpsert(registrations);
@@ -172,7 +185,9 @@ class QuantumCrypto extends EventEmitter {
     this.assetManager.registerAsset(this.toAssetRegistration(asset));
   }
 
-  private toAssetRegistration(asset: CryptographicAsset): AssetRegistrationInput<CryptographicAssetMetadata> {
+  private toAssetRegistration(
+    asset: CryptographicAsset,
+  ): AssetRegistrationInput<CryptographicAssetMetadata> {
     return {
       id: asset.assetId,
       name: this.formatAssetName(asset.assetId),
@@ -182,10 +197,13 @@ class QuantumCrypto extends EventEmitter {
       tags: [
         asset.assetType,
         asset.businessCriticality,
-        asset.quantumVulnerable ? 'quantum_vulnerable' : 'quantum_ready'
+        asset.quantumVulnerable ? 'quantum_vulnerable' : 'quantum_ready',
       ],
       criticality: this.mapAssetCriticality(asset.businessCriticality),
-      status: this.mapAssetStatus(asset.migrationStatus, asset.quantumVulnerable),
+      status: this.mapAssetStatus(
+        asset.migrationStatus,
+        asset.quantumVulnerable,
+      ),
       dependencies: asset.dependencies,
       healthScore: this.deriveAssetHealth(asset),
       metadata: {
@@ -196,12 +214,15 @@ class QuantumCrypto extends EventEmitter {
         owner: asset.owner,
         businessCriticality: asset.businessCriticality,
         dependencies: asset.dependencies,
-        lastUpdated: asset.lastUpdated
-      }
+        lastUpdated: asset.lastUpdated,
+      },
     };
   }
 
-  private mapAssetStatus(status: CryptographicAsset['migrationStatus'], quantumVulnerable: boolean): AssetStatus {
+  private mapAssetStatus(
+    status: CryptographicAsset['migrationStatus'],
+    quantumVulnerable: boolean,
+  ): AssetStatus {
     switch (status) {
       case 'completed':
         return quantumVulnerable ? 'degraded' : 'active';
@@ -216,7 +237,9 @@ class QuantumCrypto extends EventEmitter {
     }
   }
 
-  private mapAssetCriticality(criticality: CryptographicAsset['businessCriticality']): AssetCriticality {
+  private mapAssetCriticality(
+    criticality: CryptographicAsset['businessCriticality'],
+  ): AssetCriticality {
     switch (criticality) {
       case 'critical':
         return 'critical';
@@ -263,19 +286,28 @@ class QuantumCrypto extends EventEmitter {
     return id
       .split(/[-_]/g)
       .filter(Boolean)
-      .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
       .join(' ');
   }
 
-  private recordCryptographicAssetUsage(assetId: string, event: AssetUsageEvent): void {
+  private recordCryptographicAssetUsage(
+    assetId: string,
+    event: AssetUsageEvent,
+  ): void {
     this.assetManager.recordUsage(assetId, event);
   }
 
-  private captureThreatActivity(signature: ThreatSignature, actualThreat: boolean): void {
-    const affectedAssets = Array.from(this.cryptographicAssets.values()).filter(asset =>
-      signature.affectedAlgorithms.some(algorithm =>
-        asset.currentAlgorithm.toLowerCase().includes(algorithm.toLowerCase())
-      )
+  private captureThreatActivity(
+    signature: ThreatSignature,
+    actualThreat: boolean,
+  ): void {
+    const affectedAssets = Array.from(this.cryptographicAssets.values()).filter(
+      (asset) =>
+        signature.affectedAlgorithms.some((algorithm) =>
+          asset.currentAlgorithm
+            .toLowerCase()
+            .includes(algorithm.toLowerCase()),
+        ),
     );
 
     for (const asset of affectedAssets) {
@@ -285,19 +317,23 @@ class QuantumCrypto extends EventEmitter {
         details: {
           signatureId: signature.signatureId,
           severity: signature.severity,
-          threatType: signature.threatType
-        }
+          threatType: signature.threatType,
+        },
       });
     }
   }
 
   getAssetInventorySnapshot(limit = 10): {
-    summary: ReturnType<AssetManager<CryptographicAssetMetadata>['getDomainSummary']>;
+    summary: ReturnType<
+      AssetManager<CryptographicAssetMetadata>['getDomainSummary']
+    >;
     assets: ReturnType<AssetManager<CryptographicAssetMetadata>['listAssets']>;
   } {
     return {
       summary: this.assetManager.getDomainSummary('cryptography'),
-      assets: this.assetManager.listAssets({ domain: 'cryptography' }).slice(0, limit)
+      assets: this.assetManager
+        .listAssets({ domain: 'cryptography' })
+        .slice(0, limit),
     };
   }
 
@@ -305,7 +341,9 @@ class QuantumCrypto extends EventEmitter {
 
   constructor(assetManager?: AssetManager<CryptographicAssetMetadata>) {
     super();
-    this.assetManager = assetManager ?? new AssetManager<CryptographicAssetMetadata>({ usageHistoryLimit: 200 });
+    this.assetManager =
+      assetManager ??
+      new AssetManager<CryptographicAssetMetadata>({ usageHistoryLimit: 200 });
     this.initializePostQuantumAlgorithms();
     this.initializeHybridSchemes();
     this.initializeZeroTrustPolicies();
@@ -331,11 +369,11 @@ class QuantumCrypto extends EventEmitter {
           signTime: 0,
           verifyTime: 0,
           encryptTime: 0.18,
-          decryptTime: 0.22
+          decryptTime: 0.22,
         },
         memoryFootprint: 2.4,
         standardizedDate: '2024-08-13',
-        migratedComponents: []
+        migratedComponents: [],
       },
       {
         algorithmId: 'dilithium-3',
@@ -350,11 +388,11 @@ class QuantumCrypto extends EventEmitter {
           signTime: 1.2,
           verifyTime: 0.35,
           encryptTime: 0,
-          decryptTime: 0
+          decryptTime: 0,
         },
         memoryFootprint: 4.1,
         standardizedDate: '2024-08-13',
-        migratedComponents: []
+        migratedComponents: [],
       },
       {
         algorithmId: 'falcon-512',
@@ -369,11 +407,11 @@ class QuantumCrypto extends EventEmitter {
           signTime: 2.3,
           verifyTime: 0.18,
           encryptTime: 0,
-          decryptTime: 0
+          decryptTime: 0,
         },
         memoryFootprint: 2.8,
         standardizedDate: '2024-08-13',
-        migratedComponents: []
+        migratedComponents: [],
       },
       {
         algorithmId: 'sphincs-sha256-128s',
@@ -388,11 +426,11 @@ class QuantumCrypto extends EventEmitter {
           signTime: 450,
           verifyTime: 12,
           encryptTime: 0,
-          decryptTime: 0
+          decryptTime: 0,
         },
         memoryFootprint: 1.2,
         standardizedDate: '2024-08-13',
-        migratedComponents: []
+        migratedComponents: [],
       },
       {
         algorithmId: 'bike-l1',
@@ -406,20 +444,24 @@ class QuantumCrypto extends EventEmitter {
           signTime: 0,
           verifyTime: 0,
           encryptTime: 0.8,
-          decryptTime: 1.4
+          decryptTime: 1.4,
         },
         memoryFootprint: 3.2,
-        migratedComponents: []
-      }
+        migratedComponents: [],
+      },
     ];
 
     for (const algorithm of algorithms) {
       this.postQuantumAlgorithms.set(algorithm.algorithmId, algorithm);
     }
 
-    console.log(`🔐 Initialized ${algorithms.length} post-quantum cryptographic algorithms:`);
+    console.log(
+      `🔐 Initialized ${algorithms.length} post-quantum cryptographic algorithms:`,
+    );
     for (const algorithm of algorithms) {
-      console.log(`   • ${algorithm.name}: ${algorithm.nistStatus} (${algorithm.quantumSecurity} equivalent)`);
+      console.log(
+        `   • ${algorithm.name}: ${algorithm.nistStatus} (${algorithm.quantumSecurity} equivalent)`,
+      );
     }
   }
 
@@ -438,7 +480,7 @@ class QuantumCrypto extends EventEmitter {
         performanceOverhead: 15.2,
         backwardCompatible: true,
         deploymentStatus: 'active',
-        components: []
+        components: [],
       },
       {
         schemeId: 'ecdsa-dilithium-hybrid',
@@ -450,7 +492,7 @@ class QuantumCrypto extends EventEmitter {
         performanceOverhead: 22.7,
         backwardCompatible: true,
         deploymentStatus: 'active',
-        components: []
+        components: [],
       },
       {
         schemeId: 'aes-kyber-hybrid',
@@ -462,7 +504,7 @@ class QuantumCrypto extends EventEmitter {
         performanceOverhead: 8.3,
         backwardCompatible: true,
         deploymentStatus: 'active',
-        components: []
+        components: [],
       },
       {
         schemeId: 'ed25519-falcon-hybrid',
@@ -474,15 +516,17 @@ class QuantumCrypto extends EventEmitter {
         performanceOverhead: 18.9,
         backwardCompatible: true,
         deploymentStatus: 'testing',
-        components: []
-      }
+        components: [],
+      },
     ];
 
     for (const scheme of schemes) {
       this.hybridSchemes.set(scheme.schemeId, scheme);
     }
 
-    console.log(`🔄 Initialized ${schemes.length} hybrid cryptographic schemes`);
+    console.log(
+      `🔄 Initialized ${schemes.length} hybrid cryptographic schemes`,
+    );
   }
 
   /**
@@ -498,19 +542,19 @@ class QuantumCrypto extends EventEmitter {
           multiFactorRequired: true,
           biometricRequired: false,
           certificateRequired: true,
-          tokenLifetime: 3600000 // 1 hour
+          tokenLifetime: 3600000, // 1 hour
         },
         networkSecurity: {
           microsegmentation: true,
           encryptionRequired: true,
-          continuousMonitoring: true
+          continuousMonitoring: true,
         },
         accessControl: {
           principleOfLeastPrivilege: true,
           dynamicPermissions: true,
-          sessionTimeout: 1800000 // 30 minutes
+          sessionTimeout: 1800000, // 30 minutes
         },
-        complianceRequirements: ['SOC2', 'ISO27001', 'FIPS140-2']
+        complianceRequirements: ['SOC2', 'ISO27001', 'FIPS140-2'],
       },
       {
         policyId: 'admin-access-zt',
@@ -520,19 +564,19 @@ class QuantumCrypto extends EventEmitter {
           multiFactorRequired: true,
           biometricRequired: true,
           certificateRequired: true,
-          tokenLifetime: 1800000 // 30 minutes
+          tokenLifetime: 1800000, // 30 minutes
         },
         networkSecurity: {
           microsegmentation: true,
           encryptionRequired: true,
-          continuousMonitoring: true
+          continuousMonitoring: true,
         },
         accessControl: {
           principleOfLeastPrivilege: true,
           dynamicPermissions: true,
-          sessionTimeout: 900000 // 15 minutes
+          sessionTimeout: 900000, // 15 minutes
         },
-        complianceRequirements: ['SOC2', 'ISO27001', 'NIST-CSF']
+        complianceRequirements: ['SOC2', 'ISO27001', 'NIST-CSF'],
       },
       {
         policyId: 'developer-workflow-zt',
@@ -542,27 +586,29 @@ class QuantumCrypto extends EventEmitter {
           multiFactorRequired: true,
           biometricRequired: false,
           certificateRequired: false,
-          tokenLifetime: 28800000 // 8 hours
+          tokenLifetime: 28800000, // 8 hours
         },
         networkSecurity: {
           microsegmentation: false,
           encryptionRequired: true,
-          continuousMonitoring: true
+          continuousMonitoring: true,
         },
         accessControl: {
           principleOfLeastPrivilege: true,
           dynamicPermissions: false,
-          sessionTimeout: 14400000 // 4 hours
+          sessionTimeout: 14400000, // 4 hours
         },
-        complianceRequirements: ['SOC2']
-      }
+        complianceRequirements: ['SOC2'],
+      },
     ];
 
     for (const policy of policies) {
       this.zeroTrustPolicies.set(policy.policyId, policy);
     }
 
-    console.log(`🛡️  Initialized ${policies.length} zero-trust security policies`);
+    console.log(
+      `🛡️  Initialized ${policies.length} zero-trust security policies`,
+    );
   }
 
   /**
@@ -578,21 +624,21 @@ class QuantumCrypto extends EventEmitter {
           {
             type: 'computational_signature',
             pattern: 'large_integer_factorization_attempt',
-            confidence: 0.95
+            confidence: 0.95,
           },
           {
             type: 'traffic_pattern',
             pattern: 'rsa_key_extraction_pattern',
-            confidence: 0.89
-          }
+            confidence: 0.89,
+          },
         ],
         mitigationActions: [
           'immediate_rsa_key_rotation',
           'activate_post_quantum_backup',
-          'isolate_affected_systems'
+          'isolate_affected_systems',
         ],
         quantumReadiness: true,
-        affectedAlgorithms: ['RSA', 'ECDSA', 'DH', 'ECDH']
+        affectedAlgorithms: ['RSA', 'ECDSA', 'DH', 'ECDH'],
       },
       {
         signatureId: 'quantum-grover-attack',
@@ -602,21 +648,21 @@ class QuantumCrypto extends EventEmitter {
           {
             type: 'computational_signature',
             pattern: 'symmetric_key_search_acceleration',
-            confidence: 0.87
+            confidence: 0.87,
           },
           {
             type: 'timing_attack',
             pattern: 'aes_key_recovery_timing',
-            confidence: 0.82
-          }
+            confidence: 0.82,
+          },
         ],
         mitigationActions: [
           'increase_symmetric_key_length',
           'implement_key_stretching',
-          'activate_quantum_resistant_symmetric'
+          'activate_quantum_resistant_symmetric',
         ],
         quantumReadiness: true,
-        affectedAlgorithms: ['AES-128', '3DES', 'ChaCha20']
+        affectedAlgorithms: ['AES-128', '3DES', 'ChaCha20'],
       },
       {
         signatureId: 'post-quantum-downgrade',
@@ -626,21 +672,21 @@ class QuantumCrypto extends EventEmitter {
           {
             type: 'traffic_pattern',
             pattern: 'pq_algorithm_negotiation_failure',
-            confidence: 0.91
+            confidence: 0.91,
           },
           {
             type: 'traffic_pattern',
             pattern: 'classical_fallback_forced',
-            confidence: 0.78
-          }
+            confidence: 0.78,
+          },
         ],
         mitigationActions: [
           'enforce_post_quantum_only',
           'log_downgrade_attempts',
-          'alert_security_team'
+          'alert_security_team',
         ],
         quantumReadiness: true,
-        affectedAlgorithms: ['hybrid_schemes', 'negotiation_protocols']
+        affectedAlgorithms: ['hybrid_schemes', 'negotiation_protocols'],
       },
       {
         signatureId: 'cryptographic-side-channel',
@@ -650,29 +696,31 @@ class QuantumCrypto extends EventEmitter {
           {
             type: 'side_channel',
             pattern: 'timing_analysis_signature',
-            confidence: 0.84
+            confidence: 0.84,
           },
           {
             type: 'side_channel',
             pattern: 'power_consumption_analysis',
-            confidence: 0.76
-          }
+            confidence: 0.76,
+          },
         ],
         mitigationActions: [
           'implement_constant_time_algorithms',
           'add_randomization_countermeasures',
-          'increase_monitoring_sensitivity'
+          'increase_monitoring_sensitivity',
         ],
         quantumReadiness: false,
-        affectedAlgorithms: ['all_implementations']
-      }
+        affectedAlgorithms: ['all_implementations'],
+      },
     ];
 
     for (const signature of signatures) {
       this.threatSignatures.set(signature.signatureId, signature);
     }
 
-    console.log(`🔍 Initialized ${signatures.length} quantum threat signatures`);
+    console.log(
+      `🔍 Initialized ${signatures.length} quantum threat signatures`,
+    );
   }
 
   /**
@@ -687,11 +735,13 @@ class QuantumCrypto extends EventEmitter {
         quantumVulnerable: true,
         migrationStatus: 'in_progress',
         migrationTarget: 'rsa-kyber-hybrid',
-        migrationDeadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        migrationDeadline: new Date(
+          Date.now() + 90 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         businessCriticality: 'critical',
         dependencies: ['load-balancer', 'api-gateway'],
         owner: 'security-team',
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         assetId: 'code-signing-keys',
@@ -700,11 +750,13 @@ class QuantumCrypto extends EventEmitter {
         quantumVulnerable: true,
         migrationStatus: 'testing',
         migrationTarget: 'ecdsa-dilithium-hybrid',
-        migrationDeadline: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString(),
+        migrationDeadline: new Date(
+          Date.now() + 120 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         businessCriticality: 'critical',
         dependencies: ['build-pipeline', 'artifact-storage'],
         owner: 'devops-team',
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         assetId: 'database-encryption',
@@ -713,11 +765,13 @@ class QuantumCrypto extends EventEmitter {
         quantumVulnerable: false,
         migrationStatus: 'completed',
         migrationTarget: 'aes-kyber-hybrid',
-        migrationDeadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+        migrationDeadline: new Date(
+          Date.now() + 60 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         businessCriticality: 'critical',
         dependencies: ['database-cluster'],
         owner: 'data-team',
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         assetId: 'api-authentication',
@@ -726,11 +780,13 @@ class QuantumCrypto extends EventEmitter {
         quantumVulnerable: true,
         migrationStatus: 'not_started',
         migrationTarget: 'rsa-kyber-hybrid',
-        migrationDeadline: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+        migrationDeadline: new Date(
+          Date.now() + 180 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         businessCriticality: 'high',
         dependencies: ['api-gateway', 'user-service'],
         owner: 'backend-team',
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         assetId: 'vpn-tunnels',
@@ -739,12 +795,14 @@ class QuantumCrypto extends EventEmitter {
         quantumVulnerable: true,
         migrationStatus: 'in_progress',
         migrationTarget: 'rsa-kyber-hybrid',
-        migrationDeadline: new Date(Date.now() + 75 * 24 * 60 * 60 * 1000).toISOString(),
+        migrationDeadline: new Date(
+          Date.now() + 75 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         businessCriticality: 'high',
         dependencies: ['network-infrastructure'],
         owner: 'network-team',
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     ];
 
     for (const asset of assets) {
@@ -753,10 +811,18 @@ class QuantumCrypto extends EventEmitter {
 
     this.updateMigrationMetrics();
     this.syncAllCryptographicAssets();
-    console.log(`📊 Initialized cryptographic asset inventory with ${assets.length} assets`);
-    console.log(`   • Quantum vulnerable: ${Array.from(this.cryptographicAssets.values()).filter(a => a.quantumVulnerable).length}`);
-    console.log(`   • Migration in progress: ${Array.from(this.cryptographicAssets.values()).filter(a => a.migrationStatus === 'in_progress').length}`);
-    console.log(`   • Migration completed: ${Array.from(this.cryptographicAssets.values()).filter(a => a.migrationStatus === 'completed').length}`);
+    console.log(
+      `📊 Initialized cryptographic asset inventory with ${assets.length} assets`,
+    );
+    console.log(
+      `   • Quantum vulnerable: ${Array.from(this.cryptographicAssets.values()).filter((a) => a.quantumVulnerable).length}`,
+    );
+    console.log(
+      `   • Migration in progress: ${Array.from(this.cryptographicAssets.values()).filter((a) => a.migrationStatus === 'in_progress').length}`,
+    );
+    console.log(
+      `   • Migration completed: ${Array.from(this.cryptographicAssets.values()).filter((a) => a.migrationStatus === 'completed').length}`,
+    );
   }
 
   /**
@@ -794,34 +860,47 @@ class QuantumCrypto extends EventEmitter {
 
     for (const [signatureId, signature] of this.threatSignatures.entries()) {
       // Simulate threat detection based on signature confidence
-      const detectionProbability = signature.indicators.reduce((sum, ind) => sum + ind.confidence, 0) / signature.indicators.length;
-      
-      if (Math.random() < detectionProbability * 0.02) { // 2% base detection chance adjusted by confidence
+      const detectionProbability =
+        signature.indicators.reduce((sum, ind) => sum + ind.confidence, 0) /
+        signature.indicators.length;
+
+      if (Math.random() < detectionProbability * 0.02) {
+        // 2% base detection chance adjusted by confidence
         detectedThreats.push(signatureId);
-        
-        console.log(`🚨 QUANTUM THREAT DETECTED: ${signature.threatType.toUpperCase()}`);
+
+        console.log(
+          `🚨 QUANTUM THREAT DETECTED: ${signature.threatType.toUpperCase()}`,
+        );
         console.log(`   Signature: ${signatureId}`);
         console.log(`   Severity: ${signature.severity}`);
-        console.log(`   Affected Algorithms: ${signature.affectedAlgorithms.join(', ')}`);
-        
+        console.log(
+          `   Affected Algorithms: ${signature.affectedAlgorithms.join(', ')}`,
+        );
+
         // Execute mitigation actions
         await this.executeThreatMitigation(signature);
-        
+
         this.metrics.threatDetections++;
-        
+
         // Simulate detection accuracy
         const actualThreat = Math.random() < 0.95; // 95% accuracy
         if (actualThreat) {
           this.metrics.accurateDetections++;
         }
 
-        this.emit('quantum-threat-detected', { signatureId, signature, actualThreat });
+        this.emit('quantum-threat-detected', {
+          signatureId,
+          signature,
+          actualThreat,
+        });
         this.captureThreatActivity(signature, actualThreat);
       }
     }
 
     if (detectedThreats.length > 0) {
-      console.log(`🔍 Quantum threat scan completed - ${detectedThreats.length} threats detected and mitigated`);
+      console.log(
+        `🔍 Quantum threat scan completed - ${detectedThreats.length} threats detected and mitigated`,
+      );
     }
 
     this.updateDetectionAccuracy();
@@ -830,19 +909,23 @@ class QuantumCrypto extends EventEmitter {
   /**
    * Execute threat mitigation actions
    */
-  private async executeThreatMitigation(signature: ThreatSignature): Promise<void> {
+  private async executeThreatMitigation(
+    signature: ThreatSignature,
+  ): Promise<void> {
     console.log(`🛡️  Executing threat mitigation for ${signature.signatureId}`);
-    
+
     for (const action of signature.mitigationActions) {
       console.log(`   • ${action.replace(/_/g, ' ')}...`);
-      
+
       // Simulate mitigation execution
-      await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 800));
-      
+      await new Promise((resolve) =>
+        setTimeout(resolve, 200 + Math.random() * 800),
+      );
+
       const success = Math.random() > 0.05; // 95% success rate
       if (success) {
         console.log(`   ✅ ${action.replace(/_/g, ' ')} completed`);
-        
+
         // Apply specific mitigations
         if (action.includes('key_rotation')) {
           await this.emergencyKeyRotation(signature.affectedAlgorithms);
@@ -850,7 +933,9 @@ class QuantumCrypto extends EventEmitter {
           await this.activatePostQuantumBackup(signature.affectedAlgorithms);
         }
       } else {
-        console.log(`   ❌ ${action.replace(/_/g, ' ')} failed - manual intervention required`);
+        console.log(
+          `   ❌ ${action.replace(/_/g, ' ')} failed - manual intervention required`,
+        );
       }
     }
   }
@@ -858,19 +943,28 @@ class QuantumCrypto extends EventEmitter {
   /**
    * Emergency key rotation
    */
-  private async emergencyKeyRotation(affectedAlgorithms: string[]): Promise<void> {
-    console.log(`🔑 Emergency key rotation for algorithms: ${affectedAlgorithms.join(', ')}`);
-    
+  private async emergencyKeyRotation(
+    affectedAlgorithms: string[],
+  ): Promise<void> {
+    console.log(
+      `🔑 Emergency key rotation for algorithms: ${affectedAlgorithms.join(', ')}`,
+    );
+
     for (const algorithm of affectedAlgorithms) {
-      const affectedAssets = Array.from(this.cryptographicAssets.values())
-        .filter(asset => asset.currentAlgorithm.toLowerCase().includes(algorithm.toLowerCase()));
-      
+      const affectedAssets = Array.from(
+        this.cryptographicAssets.values(),
+      ).filter((asset) =>
+        asset.currentAlgorithm.toLowerCase().includes(algorithm.toLowerCase()),
+      );
+
       for (const asset of affectedAssets) {
         if (asset.quantumVulnerable) {
           console.log(`   🔄 Rotating keys for ${asset.assetId}...`);
-          
+
           // Simulate key rotation
-          await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 + Math.random() * 2000),
+          );
 
           asset.lastUpdated = new Date().toISOString();
           if (asset.migrationStatus === 'not_started') {
@@ -885,8 +979,8 @@ class QuantumCrypto extends EventEmitter {
             outcome: 'maintenance',
             details: {
               algorithm,
-              mitigation: 'key_rotation'
-            }
+              mitigation: 'key_rotation',
+            },
           });
         }
       }
@@ -896,23 +990,39 @@ class QuantumCrypto extends EventEmitter {
   /**
    * Activate post-quantum backup systems
    */
-  private async activatePostQuantumBackup(affectedAlgorithms: string[]): Promise<void> {
-    console.log(`🔐 Activating post-quantum backup for algorithms: ${affectedAlgorithms.join(', ')}`);
-    
+  private async activatePostQuantumBackup(
+    affectedAlgorithms: string[],
+  ): Promise<void> {
+    console.log(
+      `🔐 Activating post-quantum backup for algorithms: ${affectedAlgorithms.join(', ')}`,
+    );
+
     for (const algorithm of affectedAlgorithms) {
-      const hybridScheme = Array.from(this.hybridSchemes.values())
-        .find(scheme => scheme.classicalAlgorithm.toLowerCase().includes(algorithm.toLowerCase()));
-      
+      const hybridScheme = Array.from(this.hybridSchemes.values()).find(
+        (scheme) =>
+          scheme.classicalAlgorithm
+            .toLowerCase()
+            .includes(algorithm.toLowerCase()),
+      );
+
       if (hybridScheme) {
         console.log(`   🔄 Activating hybrid scheme: ${hybridScheme.name}`);
         hybridScheme.deploymentStatus = 'active';
-        
+
         // Update affected assets
-        const affectedAssets = Array.from(this.cryptographicAssets.values())
-          .filter(asset => asset.currentAlgorithm.toLowerCase().includes(algorithm.toLowerCase()));
-        
+        const affectedAssets = Array.from(
+          this.cryptographicAssets.values(),
+        ).filter((asset) =>
+          asset.currentAlgorithm
+            .toLowerCase()
+            .includes(algorithm.toLowerCase()),
+        );
+
         for (const asset of affectedAssets) {
-          if (asset.quantumVulnerable && asset.migrationStatus !== 'completed') {
+          if (
+            asset.quantumVulnerable &&
+            asset.migrationStatus !== 'completed'
+          ) {
             asset.migrationStatus = 'testing';
             this.cryptographicAssets.set(asset.assetId, asset);
             this.syncCryptographicAsset(asset);
@@ -921,13 +1031,15 @@ class QuantumCrypto extends EventEmitter {
               outcome: 'success',
               details: {
                 algorithm,
-                hybridScheme: hybridScheme.name
-              }
+                hybridScheme: hybridScheme.name,
+              },
             });
           }
         }
 
-        console.log(`   ✅ Post-quantum backup activated for ${hybridScheme.name}`);
+        console.log(
+          `   ✅ Post-quantum backup activated for ${hybridScheme.name}`,
+        );
       }
     }
   }
@@ -937,25 +1049,32 @@ class QuantumCrypto extends EventEmitter {
    */
   private monitorMigrationProgress(): void {
     this.updateMigrationMetrics();
-    
-    const inProgressMigrations = Array.from(this.cryptographicAssets.values())
-      .filter(asset => asset.migrationStatus === 'in_progress');
-    
+
+    const inProgressMigrations = Array.from(
+      this.cryptographicAssets.values(),
+    ).filter((asset) => asset.migrationStatus === 'in_progress');
+
     if (inProgressMigrations.length > 0) {
       console.log(`📊 Migration Progress Update:`);
-      console.log(`   • Overall progress: ${(this.metrics.migrationPercentage * 100).toFixed(1)}%`);
-      console.log(`   • Assets in progress: ${inProgressMigrations.length}`);
-      console.log(`   • Target: ${(this.config.quantumMigrationTarget * 100)}% by deadline`);
-      
-      // Check for overdue migrations
-      const overdueAssets = inProgressMigrations.filter(asset => 
-        new Date(asset.migrationDeadline).getTime() < Date.now()
+      console.log(
+        `   • Overall progress: ${(this.metrics.migrationPercentage * 100).toFixed(1)}%`,
       );
-      
+      console.log(`   • Assets in progress: ${inProgressMigrations.length}`);
+      console.log(
+        `   • Target: ${this.config.quantumMigrationTarget * 100}% by deadline`,
+      );
+
+      // Check for overdue migrations
+      const overdueAssets = inProgressMigrations.filter(
+        (asset) => new Date(asset.migrationDeadline).getTime() < Date.now(),
+      );
+
       if (overdueAssets.length > 0) {
         console.log(`   ⚠️  Overdue migrations: ${overdueAssets.length}`);
         for (const asset of overdueAssets.slice(0, 3)) {
-          console.log(`     • ${asset.assetId}: ${asset.currentAlgorithm} → ${asset.migrationTarget}`);
+          console.log(
+            `     • ${asset.assetId}: ${asset.currentAlgorithm} → ${asset.migrationTarget}`,
+          );
         }
       }
     }
@@ -967,23 +1086,30 @@ class QuantumCrypto extends EventEmitter {
   private updateMigrationMetrics(): void {
     const allAssets = Array.from(this.cryptographicAssets.values());
     this.metrics.totalAssets = allAssets.length;
-    
-    const migratedAssets = allAssets.filter(asset => 
-      asset.migrationStatus === 'completed' || !asset.quantumVulnerable
+
+    const migratedAssets = allAssets.filter(
+      (asset) =>
+        asset.migrationStatus === 'completed' || !asset.quantumVulnerable,
     );
     this.metrics.quantumMigratedAssets = migratedAssets.length;
-    
-    const hybridProtectedAssets = allAssets.filter(asset => 
-      asset.migrationTarget.includes('hybrid') && 
-      (asset.migrationStatus === 'testing' || asset.migrationStatus === 'completed')
+
+    const hybridProtectedAssets = allAssets.filter(
+      (asset) =>
+        asset.migrationTarget.includes('hybrid') &&
+        (asset.migrationStatus === 'testing' ||
+          asset.migrationStatus === 'completed'),
     );
     this.metrics.hybridProtectedAssets = hybridProtectedAssets.length;
-    
-    this.metrics.migrationPercentage = this.metrics.totalAssets > 0 ?
-      this.metrics.quantumMigratedAssets / this.metrics.totalAssets : 0;
 
-    this.metrics.hybridCoveragePercentage = this.metrics.totalAssets > 0 ?
-      this.metrics.hybridProtectedAssets / this.metrics.totalAssets : 0;
+    this.metrics.migrationPercentage =
+      this.metrics.totalAssets > 0
+        ? this.metrics.quantumMigratedAssets / this.metrics.totalAssets
+        : 0;
+
+    this.metrics.hybridCoveragePercentage =
+      this.metrics.totalAssets > 0
+        ? this.metrics.hybridProtectedAssets / this.metrics.totalAssets
+        : 0;
 
     this.syncAllCryptographicAssets();
   }
@@ -995,19 +1121,21 @@ class QuantumCrypto extends EventEmitter {
     for (const [policyId, policy] of this.zeroTrustPolicies.entries()) {
       // Simulate identity verification
       const verifications = Math.floor(Math.random() * 10 + 5); // 5-15 verifications per minute
-      
+
       for (let i = 0; i < verifications; i++) {
         const startTime = Date.now();
-        
+
         // Simulate verification process
         const verificationLatency = this.simulateZeroTrustVerification(policy);
-        
+
         this.metrics.zeroTrustVerifications++;
-        this.metrics.averageVerificationLatency = 
+        this.metrics.averageVerificationLatency =
           (this.metrics.averageVerificationLatency + verificationLatency) / 2;
-        
+
         if (verificationLatency > this.config.zeroTrustLatencyTarget) {
-          console.log(`⚠️  Zero-trust verification exceeded latency target: ${verificationLatency}ms > ${this.config.zeroTrustLatencyTarget}ms`);
+          console.log(
+            `⚠️  Zero-trust verification exceeded latency target: ${verificationLatency}ms > ${this.config.zeroTrustLatencyTarget}ms`,
+          );
         }
       }
     }
@@ -1018,17 +1146,17 @@ class QuantumCrypto extends EventEmitter {
    */
   private simulateZeroTrustVerification(policy: ZeroTrustPolicy): number {
     let latency = 20; // Base latency
-    
+
     if (policy.identityVerification.multiFactorRequired) latency += 30;
     if (policy.identityVerification.biometricRequired) latency += 25;
     if (policy.identityVerification.certificateRequired) latency += 15;
-    
+
     if (policy.networkSecurity.microsegmentation) latency += 10;
     if (policy.networkSecurity.encryptionRequired) latency += 5;
-    
+
     // Add random variation
     latency += Math.random() * 20;
-    
+
     return Math.round(latency);
   }
 
@@ -1037,16 +1165,17 @@ class QuantumCrypto extends EventEmitter {
    */
   private async testCryptographicAgility(): Promise<void> {
     console.log('🔄 Testing cryptographic agility...');
-    
+
     // Simulate algorithm update deployment
     const updateStartTime = Date.now();
-    
+
     // Select a random algorithm for testing
     const algorithms = Array.from(this.postQuantumAlgorithms.keys());
-    const testAlgorithm = algorithms[Math.floor(Math.random() * algorithms.length)];
-    
+    const testAlgorithm =
+      algorithms[Math.floor(Math.random() * algorithms.length)];
+
     console.log(`   • Testing update deployment for ${testAlgorithm}`);
-    
+
     // Simulate deployment steps
     const deploymentSteps = [
       'validate_algorithm_compatibility',
@@ -1056,25 +1185,32 @@ class QuantumCrypto extends EventEmitter {
       'deploy_to_staging',
       'validate_staging_deployment',
       'deploy_to_production',
-      'validate_production_deployment'
+      'validate_production_deployment',
     ];
-    
+
     for (const step of deploymentSteps) {
       console.log(`     • ${step.replace(/_/g, ' ')}...`);
-      await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 400));
+      await new Promise((resolve) =>
+        setTimeout(resolve, 100 + Math.random() * 400),
+      );
       console.log(`     ✅ ${step.replace(/_/g, ' ')} completed`);
     }
-    
+
     const updateTime = Date.now() - updateStartTime;
     this.metrics.algorithmUpdates++;
-    this.metrics.averageUpdateTime = (this.metrics.averageUpdateTime + updateTime) / 2;
-    
+    this.metrics.averageUpdateTime =
+      (this.metrics.averageUpdateTime + updateTime) / 2;
+
     const withinSLA = updateTime <= this.config.algorithmUpdateSLA;
-    
-    console.log(`   ${withinSLA ? '✅' : '❌'} Algorithm update ${withinSLA ? 'completed' : 'exceeded SLA'} in ${Math.round(updateTime / 1000)}s`);
-    
+
+    console.log(
+      `   ${withinSLA ? '✅' : '❌'} Algorithm update ${withinSLA ? 'completed' : 'exceeded SLA'} in ${Math.round(updateTime / 1000)}s`,
+    );
+
     if (withinSLA) {
-      console.log(`   🎯 Update time within ${this.config.algorithmUpdateSLA / 60000}min SLA`);
+      console.log(
+        `   🎯 Update time within ${this.config.algorithmUpdateSLA / 60000}min SLA`,
+      );
     }
   }
 
@@ -1082,14 +1218,18 @@ class QuantumCrypto extends EventEmitter {
    * Update detection accuracy metrics
    */
   private updateDetectionAccuracy(): void {
-    this.metrics.detectionAccuracy = this.metrics.threatDetections > 0 ? 
-      this.metrics.accurateDetections / this.metrics.threatDetections : 0;
+    this.metrics.detectionAccuracy =
+      this.metrics.threatDetections > 0
+        ? this.metrics.accurateDetections / this.metrics.threatDetections
+        : 0;
   }
 
   /**
    * Migrate cryptographic asset
    */
-  async migrateCryptographicAsset(assetId: string): Promise<{ success: boolean; duration: number }> {
+  async migrateCryptographicAsset(
+    assetId: string,
+  ): Promise<{ success: boolean; duration: number }> {
     const asset = this.cryptographicAssets.get(assetId);
     if (!asset) {
       throw new Error(`Asset ${assetId} not found`);
@@ -1100,7 +1240,7 @@ class QuantumCrypto extends EventEmitter {
     }
 
     const startTime = Date.now();
-    
+
     console.log(`🔄 Starting migration for ${assetId}:`);
     console.log(`   • From: ${asset.currentAlgorithm}`);
     console.log(`   • To: ${asset.migrationTarget}`);
@@ -1109,16 +1249,19 @@ class QuantumCrypto extends EventEmitter {
     try {
       // Migration steps based on asset type
       const migrationSteps = this.getMigrationSteps(asset);
-      
+
       for (const step of migrationSteps) {
         console.log(`   • ${step.replace(/_/g, ' ')}...`);
-        await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1500));
-        
+        await new Promise((resolve) =>
+          setTimeout(resolve, 500 + Math.random() * 1500),
+        );
+
         // Simulate potential failures
-        if (Math.random() < 0.05) { // 5% failure rate
+        if (Math.random() < 0.05) {
+          // 5% failure rate
           throw new Error(`Migration step failed: ${step}`);
         }
-        
+
         console.log(`   ✅ ${step.replace(/_/g, ' ')} completed`);
       }
 
@@ -1126,11 +1269,12 @@ class QuantumCrypto extends EventEmitter {
       asset.migrationStatus = 'completed';
       asset.currentAlgorithm = asset.migrationTarget;
       asset.lastUpdated = new Date().toISOString();
-      
+
       // Update hybrid scheme if applicable
       if (asset.migrationTarget.includes('hybrid')) {
-        const scheme = Array.from(this.hybridSchemes.values())
-          .find(s => s.schemeId === asset.migrationTarget);
+        const scheme = Array.from(this.hybridSchemes.values()).find(
+          (s) => s.schemeId === asset.migrationTarget,
+        );
         if (scheme) {
           scheme.components.push(assetId);
         }
@@ -1140,24 +1284,25 @@ class QuantumCrypto extends EventEmitter {
       this.updateMigrationMetrics();
 
       const duration = Date.now() - startTime;
-      
-      console.log(`   ✅ Migration completed successfully in ${Math.round(duration / 1000)}s`);
-      
-      this.emit('asset-migrated', { assetId, asset, duration });
-      
-      return { success: true, duration };
 
+      console.log(
+        `   ✅ Migration completed successfully in ${Math.round(duration / 1000)}s`,
+      );
+
+      this.emit('asset-migrated', { assetId, asset, duration });
+
+      return { success: true, duration };
     } catch (error) {
       console.log(`   ❌ Migration failed: ${error}`);
-      
+
       // Rollback
       console.log(`   🔄 Rolling back changes...`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log(`   ✅ Rollback completed`);
-      
+
       const duration = Date.now() - startTime;
       this.emit('asset-migration-failed', { assetId, asset, error, duration });
-      
+
       return { success: false, duration };
     }
   }
@@ -1169,42 +1314,44 @@ class QuantumCrypto extends EventEmitter {
     const baseSteps = [
       'backup_current_configuration',
       'validate_migration_target',
-      'prepare_hybrid_keys'
+      'prepare_hybrid_keys',
     ];
 
     const assetTypeSteps: Record<string, string[]> = {
-      'certificate': [
+      certificate: [
         'generate_new_certificate_request',
         'obtain_ca_signature',
         'deploy_certificate_chain',
         'update_certificate_stores',
-        'validate_certificate_chain'
+        'validate_certificate_chain',
       ],
-      'key': [
+      key: [
         'generate_hybrid_key_pair',
         'secure_key_storage',
         'distribute_public_keys',
         'update_key_references',
-        'test_key_operations'
+        'test_key_operations',
       ],
-      'algorithm_implementation': [
+      algorithm_implementation: [
         'update_cryptographic_library',
         'modify_algorithm_calls',
         'update_configuration_files',
         'run_compatibility_tests',
-        'performance_benchmark'
+        'performance_benchmark',
       ],
-      'protocol': [
+      protocol: [
         'update_protocol_specification',
         'modify_handshake_logic',
         'update_negotiation_parameters',
         'test_protocol_compatibility',
-        'validate_backward_compatibility'
-      ]
+        'validate_backward_compatibility',
+      ],
     };
 
-    const specificSteps = assetTypeSteps[asset.assetType] || ['perform_generic_migration'];
-    
+    const specificSteps = assetTypeSteps[asset.assetType] || [
+      'perform_generic_migration',
+    ];
+
     return [...baseSteps, ...specificSteps, 'validate_migration_success'];
   }
 
@@ -1214,46 +1361,66 @@ class QuantumCrypto extends EventEmitter {
   async generateQuantumSecurityReport(): Promise<any> {
     this.updateMigrationMetrics();
     this.updateDetectionAccuracy();
-    
+
     return {
       timestamp: new Date().toISOString(),
       quantumReadinessLevel: this.config.quantumReadinessLevel,
-      
+
       objectiveAchievements: {
         quantumResistance: {
           target: 'migration to post-quantum algorithms ≥80% complete',
           actual: `${(this.metrics.migrationPercentage * 100).toFixed(1)}% migration completed`,
-          achieved: this.metrics.migrationPercentage >= 0.80,
-          performance: this.metrics.migrationPercentage >= 0.80 ? '🟢 EXCELLENT' : 
-                      this.metrics.migrationPercentage >= 0.60 ? '🟡 GOOD' : '🔴 NEEDS IMPROVEMENT'
+          achieved: this.metrics.migrationPercentage >= 0.8,
+          performance:
+            this.metrics.migrationPercentage >= 0.8
+              ? '🟢 EXCELLENT'
+              : this.metrics.migrationPercentage >= 0.6
+                ? '🟡 GOOD'
+                : '🔴 NEEDS IMPROVEMENT',
         },
         hybridSecurity: {
-          target: 'classical + quantum-resistant dual protection ≥99.9% coverage',
+          target:
+            'classical + quantum-resistant dual protection ≥99.9% coverage',
           actual: `${(this.metrics.hybridCoveragePercentage * 100).toFixed(1)}% hybrid coverage`,
           achieved: this.metrics.hybridCoveragePercentage >= 0.999,
-          performance: this.metrics.hybridCoveragePercentage >= 0.999 ? '🟢 EXCELLENT' : 
-                      this.metrics.hybridCoveragePercentage >= 0.990 ? '🟡 GOOD' : '🔴 NEEDS IMPROVEMENT'
+          performance:
+            this.metrics.hybridCoveragePercentage >= 0.999
+              ? '🟢 EXCELLENT'
+              : this.metrics.hybridCoveragePercentage >= 0.99
+                ? '🟡 GOOD'
+                : '🔴 NEEDS IMPROVEMENT',
         },
         zeroTrustArchitecture: {
           target: 'comprehensive identity verification with ≤100ms latency',
           actual: `${Math.round(this.metrics.averageVerificationLatency)}ms average latency`,
           achieved: this.metrics.averageVerificationLatency <= 100,
-          performance: this.metrics.averageVerificationLatency <= 100 ? '🟢 EXCELLENT' : 
-                      this.metrics.averageVerificationLatency <= 150 ? '🟡 GOOD' : '🔴 NEEDS IMPROVEMENT'
+          performance:
+            this.metrics.averageVerificationLatency <= 100
+              ? '🟢 EXCELLENT'
+              : this.metrics.averageVerificationLatency <= 150
+                ? '🟡 GOOD'
+                : '🔴 NEEDS IMPROVEMENT',
         },
         advancedThreatProtection: {
           target: 'ML-powered threat detection ≥95% accuracy',
           actual: `${(this.metrics.detectionAccuracy * 100).toFixed(1)}% detection accuracy`,
           achieved: this.metrics.detectionAccuracy >= 0.95,
-          performance: this.metrics.detectionAccuracy >= 0.95 ? '🟢 EXCELLENT' : 
-                      this.metrics.detectionAccuracy >= 0.90 ? '🟡 GOOD' : '🔴 NEEDS IMPROVEMENT'
+          performance:
+            this.metrics.detectionAccuracy >= 0.95
+              ? '🟢 EXCELLENT'
+              : this.metrics.detectionAccuracy >= 0.9
+                ? '🟡 GOOD'
+                : '🔴 NEEDS IMPROVEMENT',
         },
         cryptographicAgility: {
           target: 'algorithm updates with ≤30min deployment time',
           actual: `${Math.round(this.metrics.averageUpdateTime / 60000)}min average deployment time`,
           achieved: this.metrics.averageUpdateTime <= 1800000,
-          performance: this.metrics.averageUpdateTime <= 1800000 ? '🟢 EXCELLENT' : '🟡 GOOD'
-        }
+          performance:
+            this.metrics.averageUpdateTime <= 1800000
+              ? '🟢 EXCELLENT'
+              : '🟡 GOOD',
+        },
       },
 
       quantumMetrics: {
@@ -1261,7 +1428,7 @@ class QuantumCrypto extends EventEmitter {
         quantumMigratedAssets: this.metrics.quantumMigratedAssets,
         migrationPercentage: `${(this.metrics.migrationPercentage * 100).toFixed(1)}%`,
         hybridProtectedAssets: this.metrics.hybridProtectedAssets,
-        hybridCoveragePercentage: `${(this.metrics.hybridCoveragePercentage * 100).toFixed(1)}%`
+        hybridCoveragePercentage: `${(this.metrics.hybridCoveragePercentage * 100).toFixed(1)}%`,
       },
 
       securityMetrics: {
@@ -1269,30 +1436,35 @@ class QuantumCrypto extends EventEmitter {
         averageVerificationLatency: `${Math.round(this.metrics.averageVerificationLatency)}ms`,
         threatDetections: this.metrics.threatDetections,
         detectionAccuracy: `${(this.metrics.detectionAccuracy * 100).toFixed(1)}%`,
-        cryptographicIncidents: this.metrics.cryptographicIncidents
+        cryptographicIncidents: this.metrics.cryptographicIncidents,
       },
 
       agilityMetrics: {
         algorithmUpdates: this.metrics.algorithmUpdates,
         averageUpdateTime: `${Math.round(this.metrics.averageUpdateTime / 60000)}min`,
         updateSLA: `${this.config.algorithmUpdateSLA / 60000}min`,
-        slaCompliance: this.metrics.averageUpdateTime <= this.config.algorithmUpdateSLA ? '✅' : '❌'
+        slaCompliance:
+          this.metrics.averageUpdateTime <= this.config.algorithmUpdateSLA
+            ? '✅'
+            : '❌',
       },
 
-      postQuantumAlgorithms: Array.from(this.postQuantumAlgorithms.values()).map(alg => ({
+      postQuantumAlgorithms: Array.from(
+        this.postQuantumAlgorithms.values(),
+      ).map((alg) => ({
         name: alg.name,
         type: alg.type,
         nistStatus: alg.nistStatus,
         quantumSecurity: alg.quantumSecurity,
-        migratedComponents: alg.migratedComponents.length
+        migratedComponents: alg.migratedComponents.length,
       })),
 
-      hybridSchemes: Array.from(this.hybridSchemes.values()).map(scheme => ({
+      hybridSchemes: Array.from(this.hybridSchemes.values()).map((scheme) => ({
         name: scheme.name,
         securityLevel: scheme.securityLevel,
         performanceOverhead: `${scheme.performanceOverhead}%`,
         deploymentStatus: scheme.deploymentStatus,
-        protectedComponents: scheme.components.length
+        protectedComponents: scheme.components.length,
       })),
 
       assetInventory: {
@@ -1301,27 +1473,34 @@ class QuantumCrypto extends EventEmitter {
           .listAssets({ domain: 'cryptography' })
           .sort((a, b) => (b.healthScore ?? 0) - (a.healthScore ?? 0))
           .slice(0, 10)
-          .map(asset => ({
+          .map((asset) => ({
             id: asset.id,
             name: asset.name,
             status: asset.status,
             criticality: asset.criticality,
             healthScore: asset.healthScore,
-            recentUsage: this.assetManager.getUsageHistory(asset.id, 3)
-          }))
+            recentUsage: this.assetManager.getUsageHistory(asset.id, 3),
+          })),
       },
 
-      migrationStatus: Array.from(this.cryptographicAssets.values()).map(asset => ({
-        assetId: asset.assetId,
-        assetType: asset.assetType,
-        currentAlgorithm: asset.currentAlgorithm,
-        migrationTarget: asset.migrationTarget,
-        migrationStatus: asset.migrationStatus,
-        quantumVulnerable: asset.quantumVulnerable,
-        businessCriticality: asset.businessCriticality
-      }))
+      migrationStatus: Array.from(this.cryptographicAssets.values()).map(
+        (asset) => ({
+          assetId: asset.assetId,
+          assetType: asset.assetType,
+          currentAlgorithm: asset.currentAlgorithm,
+          migrationTarget: asset.migrationTarget,
+          migrationStatus: asset.migrationStatus,
+          quantumVulnerable: asset.quantumVulnerable,
+          businessCriticality: asset.businessCriticality,
+        }),
+      ),
     };
   }
 }
 
-export { QuantumCrypto, type PostQuantumAlgorithm, type HybridCryptoScheme, type CryptographicAsset };
+export {
+  QuantumCrypto,
+  type PostQuantumAlgorithm,
+  type HybridCryptoScheme,
+  type CryptographicAsset,
+};

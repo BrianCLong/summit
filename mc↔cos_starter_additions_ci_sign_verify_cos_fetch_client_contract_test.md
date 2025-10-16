@@ -1,9 +1,10 @@
 # Repo Patch: CI build/sign for Policy Pack + COS fetch/verify client + Contract test
 
 > Drop these files into the repo at the indicated paths. They implement:
-> 1) CI packaging + signing for `contracts/policy-pack/v0`.
-> 2) A minimal COS-side client to fetch, verify, and load the pack.
-> 3) A basic contract test that verifies signatures and policy eval remains stable.
+>
+> 1. CI packaging + signing for `contracts/policy-pack/v0`.
+> 2. A minimal COS-side client to fetch, verify, and load the pack.
+> 3. A basic contract test that verifies signatures and policy eval remains stable.
 
 ---
 
@@ -24,8 +25,8 @@ jobs:
   package-sign-publish:
     runs-on: ubuntu-22.04
     permissions:
-      id-token: write   # for keyless signing with cosign (Fulcio)
-      contents: write   # to attach artifacts / commit manifest updates (optional)
+      id-token: write # for keyless signing with cosign (Fulcio)
+      contents: write # to attach artifacts / commit manifest updates (optional)
     env:
       PACK_DIR: contracts/policy-pack/v0
       OUT_DIR: dist/policy-pack/v0
@@ -96,6 +97,7 @@ jobs:
 ```
 
 **Notes**
+
 - Uses keyless signing via OIDC (Fulcio) and writes a **bundle** for offline verification.
 - Manifests are updated with the canonical `sha256` for reproducibility & audit.
 
@@ -144,11 +146,22 @@ import fs from 'node:fs';
 // inside router definition
 router.get('/policy/packs/:packId', async (req, res) => {
   const { packId } = req.params; // expect 'policy-pack-v0'
-  if (packId !== 'policy-pack-v0') return res.status(404).json({ error: 'unknown pack' });
-  const packTar = path.resolve(process.cwd(), 'dist/policy-pack/v0/policy-pack-v0.tar');
-  const bundleJson = path.resolve(process.cwd(), 'contracts/policy-pack/v0/signing/cosign.bundle.json');
-  const manifestPath = path.resolve(process.cwd(), 'contracts/policy-pack/v0/manifest.json');
-  if (!fs.existsSync(packTar)) return res.status(503).json({ error: 'pack not built yet' });
+  if (packId !== 'policy-pack-v0')
+    return res.status(404).json({ error: 'unknown pack' });
+  const packTar = path.resolve(
+    process.cwd(),
+    'dist/policy-pack/v0/policy-pack-v0.tar',
+  );
+  const bundleJson = path.resolve(
+    process.cwd(),
+    'contracts/policy-pack/v0/signing/cosign.bundle.json',
+  );
+  const manifestPath = path.resolve(
+    process.cwd(),
+    'contracts/policy-pack/v0/manifest.json',
+  );
+  if (!fs.existsSync(packTar))
+    return res.status(503).json({ error: 'pack not built yet' });
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   res.setHeader('Content-Type', 'application/vnd.intelgraph.policy+tar');
   res.setHeader('Digest', `sha-256=${manifest.manifest.digest.value}`);
@@ -218,10 +231,15 @@ import { spawn } from 'node:child_process';
 
 export type FetchOptions = { url: string; cosignPath?: string };
 
-function sh(cmd: string, args: string[], input?: string): Promise<{ code: number; stdout: string; stderr: string }> {
+function sh(
+  cmd: string,
+  args: string[],
+  input?: string,
+): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
     const p = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
-    let stdout = '', stderr = '';
+    let stdout = '',
+      stderr = '';
     p.stdout.on('data', (d) => (stdout += d.toString()));
     p.stderr.on('data', (d) => (stderr += d.toString()));
     p.on('close', (code) => resolve({ code: code ?? 1, stdout, stderr }));
@@ -229,27 +247,40 @@ function sh(cmd: string, args: string[], input?: string): Promise<{ code: number
   });
 }
 
-export async function fetchAndVerify({ url, cosignPath = 'cosign' }: FetchOptions): Promise<string> {
+export async function fetchAndVerify({
+  url,
+  cosignPath = 'cosign',
+}: FetchOptions): Promise<string> {
   const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), 'policy-pack-'));
   const tarPath = path.join(tmpdir, 'pack.tar');
   const { body, headers, statusCode } = await request(url, { method: 'GET' });
   if (statusCode !== 200) throw new Error(`HTTP ${statusCode}`);
   const digestHeader = headers['digest'];
   const bundleHeader = headers['x-cosign-bundle'];
-  if (!digestHeader || !bundleHeader) throw new Error('missing verification headers');
+  if (!digestHeader || !bundleHeader)
+    throw new Error('missing verification headers');
 
   const file = createWriteStream(tarPath);
-  await new Promise<void>((res, rej) => { body.pipe(file); body.on('error', rej); file.on('finish', () => res()); });
+  await new Promise<void>((res, rej) => {
+    body.pipe(file);
+    body.on('error', rej);
+    file.on('finish', () => res());
+  });
 
   // Verify SHA-256
   const { stdout: shaOut } = await sh('sha256sum', [tarPath]);
   const sha = shaOut.trim().split(' ')[0];
   const expected = String(digestHeader).replace('sha-256=', '').trim();
-  if (sha !== expected) throw new Error(`digest mismatch: ${sha} != ${expected}`);
+  if (sha !== expected)
+    throw new Error(`digest mismatch: ${sha} != ${expected}`);
 
   // Verify cosign bundle (offline)
   process.env.COSIGN_EXPERIMENTAL = '1';
-  const { code, stderr } = await sh(cosignPath, ['verify-blob', '--bundle', '-', tarPath], String(bundleHeader));
+  const { code, stderr } = await sh(
+    cosignPath,
+    ['verify-blob', '--bundle', '-', tarPath],
+    String(bundleHeader),
+  );
   if (code !== 0) throw new Error(`cosign verify failed: ${stderr}`);
 
   // Extract to a directory and return path
@@ -263,7 +294,10 @@ export async function fetchAndVerify({ url, cosignPath = 'cosign' }: FetchOption
 if (process.env.NODE_ENV !== 'test' && process.argv[2]) {
   fetchAndVerify({ url: process.argv[2] })
     .then((dir) => console.log('verified pack at:', dir))
-    .catch((e) => { console.error(e); process.exit(1); });
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    });
 }
 ```
 
@@ -291,9 +325,18 @@ import fs from 'node:fs';
 import { fetchAndVerify } from '../../clients/cos-policy-fetcher/src/index';
 import { spawnSync } from 'node:child_process';
 
-const PACK_TAR = path.resolve(process.cwd(), 'dist/policy-pack/v0/policy-pack-v0.tar');
-const BUNDLE_JSON = path.resolve(process.cwd(), 'contracts/policy-pack/v0/signing/cosign.bundle.json');
-const MANIFEST = path.resolve(process.cwd(), 'contracts/policy-pack/v0/manifest.json');
+const PACK_TAR = path.resolve(
+  process.cwd(),
+  'dist/policy-pack/v0/policy-pack-v0.tar',
+);
+const BUNDLE_JSON = path.resolve(
+  process.cwd(),
+  'contracts/policy-pack/v0/signing/cosign.bundle.json',
+);
+const MANIFEST = path.resolve(
+  process.cwd(),
+  'contracts/policy-pack/v0/manifest.json',
+);
 
 function startStubServer(): Promise<{ url: string; close: () => void }> {
   return new Promise((resolve) => {
@@ -304,21 +347,41 @@ function startStubServer(): Promise<{ url: string; close: () => void }> {
         res.setHeader('Digest', `sha-256=${manifest.manifest.digest.value}`);
         res.setHeader('X-Cosign-Bundle', fs.readFileSync(BUNDLE_JSON, 'utf8'));
         fs.createReadStream(PACK_TAR).pipe(res);
-      } else { res.statusCode = 404; res.end(); }
+      } else {
+        res.statusCode = 404;
+        res.end();
+      }
     });
     srv.listen(0, () => {
       const addr = srv.address();
       const port = typeof addr === 'object' && addr ? addr.port : 0;
-      resolve({ url: `http://127.0.0.1:${port}/v1/policy/packs/policy-pack-v0`, close: () => srv.close() });
+      resolve({
+        url: `http://127.0.0.1:${port}/v1/policy/packs/policy-pack-v0`,
+        close: () => srv.close(),
+      });
     });
   });
 }
 
 // Utility: opa eval via CLI to confirm policy semantics did not drift
 function opaEval(query: string, input: object, policyDir: string) {
-  const r = spawnSync('opa', ['eval', query, '--format', 'values', '--data', path.join(policyDir, 'opa'), '--input', '-'], {
-    input: JSON.stringify(input), encoding: 'utf8'
-  });
+  const r = spawnSync(
+    'opa',
+    [
+      'eval',
+      query,
+      '--format',
+      'values',
+      '--data',
+      path.join(policyDir, 'opa'),
+      '--input',
+      '-',
+    ],
+    {
+      input: JSON.stringify(input),
+      encoding: 'utf8',
+    },
+  );
   if (r.status !== 0) throw new Error(r.stderr.toString());
   return r.stdout.toString().trim();
 }
@@ -332,29 +395,42 @@ describe('Policy Pack contract', () => {
     const { url, close } = await startStubServer();
     try {
       const unpacked = await fetchAndVerify({ url });
-      const decision = opaEval('data.cos.abac.allow', {
-        subject: { tenant: 't1', purpose: 'investigation' },
-        resource: { tenant: 't1', retention_until: '2099-01-01T00:00:00Z' }
-      }, unpacked);
+      const decision = opaEval(
+        'data.cos.abac.allow',
+        {
+          subject: { tenant: 't1', purpose: 'investigation' },
+          resource: { tenant: 't1', retention_until: '2099-01-01T00:00:00Z' },
+        },
+        unpacked,
+      );
       expect(decision).toEqual('true');
-    } finally { close(); }
+    } finally {
+      close();
+    }
   });
 
   it('denies cross-tenant access', async () => {
     const { url, close } = await startStubServer();
     try {
       const unpacked = await fetchAndVerify({ url });
-      const decision = opaEval('data.cos.abac.allow', {
-        subject: { tenant: 'tA', purpose: 'investigation' },
-        resource: { tenant: 'tB', retention_until: '2099-01-01T00:00:00Z' }
-      }, unpacked);
+      const decision = opaEval(
+        'data.cos.abac.allow',
+        {
+          subject: { tenant: 'tA', purpose: 'investigation' },
+          resource: { tenant: 'tB', retention_until: '2099-01-01T00:00:00Z' },
+        },
+        unpacked,
+      );
       expect(decision).toEqual('false');
-    } finally { close(); }
+    } finally {
+      close();
+    }
   });
 });
 ```
 
 **How this test works**
+
 - Spins up a tiny HTTP server that mimics `GET /v1/policy/packs/policy-pack-v0` with the same headers your real route sets.
 - Uses the COS client to fetch + verify (digest + cosign bundle) **offline**.
 - Runs `opa eval` against the unpacked `cos.abac.rego` to assert canonical decisions.
@@ -467,5 +543,7 @@ contract-test:
 - Provide a `/v1/policy/packs/:id/attestation` endpoint so COS can fetch bundle separately if you choose to omit `X-Cosign-Bundle`.
 - Add an AnalysisTemplate in Argo that calls the Evidence GraphQL to gate canaries on latest SLO snapshot.
 - Swap shelling out to `cosign` for a library call when `sigstore-js` adds stable offline bundle verification APIs.
+
 ```
 
+```

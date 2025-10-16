@@ -1,1 +1,3 @@
-export function quantumResilience(config) { return { resilience: 'Quantum Resilience Placeholder' }; }
+export function quantumResilience(config) {
+  return { resilience: 'Quantum Resilience Placeholder' };
+}

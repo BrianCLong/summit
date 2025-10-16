@@ -1,13 +1,12 @@
 events:
   kafka:
     enabled: true
-    groupPrefix: "conductor"
-    topics: ["iocs.raw"]
+    groupPrefix: 'conductor'
+    topics: ['iocs.raw']
 webhooks:
   enabled: true
-  hmacSecretRef: "webhook-ioc-hmac"
+  hmacSecretRef: 'webhook-ioc-hmac'
 
 sandbox:
   enabled: true
   teardownOnComplete: true
-

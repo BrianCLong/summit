@@ -11,9 +11,9 @@ metadata:
     component: monitoring
     environment: production
   annotations:
-    description: "Production KPI baselines for SLO validation and evidence bundle generation"
-    last-updated: "{{ .Timestamp }}"
-    release-tag: "{{ .ReleaseTag }}"
+    description: 'Production KPI baselines for SLO validation and evidence bundle generation'
+    last-updated: '{{ .Timestamp }}'
+    release-tag: '{{ .ReleaseTag }}'
 
 data:
   # ====================================================================

@@ -4,7 +4,9 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Link from '@mui/material/Link';
 
 export default function ResolverTop5() {
-  const { data } = useSafeQuery<{ parent: string; field: string; avgMs: number }[]>({
+  const { data } = useSafeQuery<
+    { parent: string; field: string; avgMs: number }[]
+  >({
     queryKey: 'resolver_top5',
     mock: [
       { parent: 'Query', field: 'search', avgMs: 12.3 },
@@ -29,7 +31,12 @@ export default function ResolverTop5() {
         const lookback = (window as any).__JAEGER_LOOKBACK || '1h';
         const href = `${base}/search?service=${service}&operation=${op}&lookback=${lookback}`;
         return (
-          <Link href={href} target="_blank" rel="noreferrer" aria-label={`Open ${op} in Jaeger`}>
+          <Link
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Open ${op} in Jaeger`}
+          >
             {p.value}
           </Link>
         );

@@ -4,8 +4,6 @@
     "dockerfile": "Dockerfile"
   },
   "workspaceFolder": "/workspace",
-  "mounts": [
-    "source=${localWorkspaceFolder},target=/workspace,type=bind"
-  ],
+  "mounts": ["source=${localWorkspaceFolder},target=/workspace,type=bind"],
   "remoteUser": "node"
 }

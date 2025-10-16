@@ -38,9 +38,7 @@
 
 > Final decision gate for Product, Platform, Security, and SRE.
 
--
-
-**Quick Verify (local):**
+- **Quick Verify (local):**
 
 ```bash
 make release.verify
@@ -157,11 +155,11 @@ npm run release:verify     # Validate manifest hashes vs. artifacts
 
 ## 12) Sign‑Offs
 
-**Product Owner:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date: \_\_\_\_\_\_\_\_\_\_\
-**Platform Owner:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date: \_\_\_\_\_\_\_\_\_\_\
-**Security/Compliance:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date: \_\_\_\_\_\_\_\_\_\_\
-**SRE Lead:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date: \_\_\_\_\_\_\_\_\_\_\
-**Release Engineering:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date: \_\_\_\_\_\_\_\_\_\_
+**Product Owner:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date: \_\_\_\_\_\_\_\_\_\_\
+**Platform Owner:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date: \_\_\_\_\_\_\_\_\_\_\
+**Security/Compliance:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date: \_\_\_\_\_\_\_\_\_\_\
+**SRE Lead:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date: \_\_\_\_\_\_\_\_\_\_\
+**Release Engineering:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_ Date: \_\_\_\_\_\_\_\_\_\_
 
 ---
 
@@ -176,7 +174,7 @@ npm run release:verify     # Validate manifest hashes vs. artifacts
 
 - File: `./.github/workflows/nightly-verify.yml`
 - Schedule: **04:17 UTC** daily (**23:17 America/Chicago** while on DST).
-- Scope: Verifies **latest GA tag** with strict mode + SHA assertions; supports **workflow\_dispatch** for manual runs.
+- Scope: Verifies **latest GA tag** with strict mode + SHA assertions; supports **workflow_dispatch** for manual runs.
 
 ### 13.3 Tag Protection Ruleset
 
@@ -215,7 +213,7 @@ npm run release:verify     # Validate manifest hashes vs. artifacts
 
 ## 16) Support Contacts
 
-- **Primary:** Brian Long — [brianclong@gmail.com](mailto\:brianclong@gmail.com)
+- **Primary:** Brian Long — [brianclong@gmail.com](mailto:brianclong@gmail.com)
 - **Escalation:** Summit Release Council → Platform Leadership Team
 
 ---

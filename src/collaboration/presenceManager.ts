@@ -85,7 +85,7 @@ export class PresenceManager extends EventEmitter {
       maxPresenceHistory: 1000,
       enableActivityTracking: true,
       enableCursorSmoothing: true,
-      ...config
+      ...config,
     };
 
     this.setupCleanupTasks();
@@ -109,40 +109,40 @@ export class PresenceManager extends EventEmitter {
       cursor: {
         x: 0,
         y: 0,
-        viewport: 'main'
+        viewport: 'main',
       },
       selection: {
         nodes: [],
         edges: [],
         properties: [],
-        isMultiSelect: false
+        isMultiSelect: false,
       },
       viewport: {
         id: 'main',
         x: 0,
         y: 0,
         zoom: 1.0,
-        bounds: { left: 0, top: 0, right: 1920, bottom: 1080 }
+        bounds: { left: 0, top: 0, right: 1920, bottom: 1080 },
       },
       activity: {
         typing: false,
         speaking: false,
         sharing: false,
         editing: null,
-        tool: null
+        tool: null,
       },
       preferences: {
         color: this.generateUserColor(user.id),
         showCursor: true,
         showSelection: true,
         showViewport: false,
-        animateMovements: true
-      }
+        animateMovements: true,
+      },
     };
 
     this.presenceData.get(sessionId)!.set(user.id, presence);
     this.startHeartbeat(sessionId, user.id);
-    
+
     this.emit('presence_initialized', { sessionId, userId: user.id, presence });
     return presence;
   }
@@ -153,10 +153,10 @@ export class PresenceManager extends EventEmitter {
   updateCursor(
     sessionId: string,
     userId: string,
-    cursor: Partial<UserPresence['cursor']>
+    cursor: Partial<UserPresence['cursor']>,
   ): void {
     const throttleKey = `cursor-${sessionId}-${userId}`;
-    
+
     if (this.throttleTimers.has(throttleKey)) {
       return; // Throttled
     }
@@ -168,11 +168,11 @@ export class PresenceManager extends EventEmitter {
       ...presence,
       cursor: { ...presence.cursor, ...cursor },
       lastSeen: new Date(),
-      status: 'active' as const
+      status: 'active' as const,
     };
 
     this.presenceData.get(sessionId)!.set(userId, updatedPresence);
-    
+
     // Apply smoothing if enabled
     if (this.config.enableCursorSmoothing) {
       this.smoothCursorMovement(sessionId, userId, cursor);
@@ -183,15 +183,22 @@ export class PresenceManager extends EventEmitter {
       sessionId,
       timestamp: new Date(),
       type: 'cursor',
-      data: { cursor: updatedPresence.cursor }
+      data: { cursor: updatedPresence.cursor },
     });
 
-    this.emit('cursor_updated', { sessionId, userId, cursor: updatedPresence.cursor });
+    this.emit('cursor_updated', {
+      sessionId,
+      userId,
+      cursor: updatedPresence.cursor,
+    });
 
     // Set throttle timer
-    this.throttleTimers.set(throttleKey, setTimeout(() => {
-      this.throttleTimers.delete(throttleKey);
-    }, this.config.cursorUpdateThrottle));
+    this.throttleTimers.set(
+      throttleKey,
+      setTimeout(() => {
+        this.throttleTimers.delete(throttleKey);
+      }, this.config.cursorUpdateThrottle),
+    );
   }
 
   /**
@@ -200,10 +207,10 @@ export class PresenceManager extends EventEmitter {
   updateSelection(
     sessionId: string,
     userId: string,
-    selection: Partial<UserPresence['selection']>
+    selection: Partial<UserPresence['selection']>,
   ): void {
     const throttleKey = `selection-${sessionId}-${userId}`;
-    
+
     if (this.throttleTimers.has(throttleKey)) {
       return; // Throttled
     }
@@ -215,7 +222,7 @@ export class PresenceManager extends EventEmitter {
       ...presence,
       selection: { ...presence.selection, ...selection },
       lastSeen: new Date(),
-      status: 'active' as const
+      status: 'active' as const,
     };
 
     this.presenceData.get(sessionId)!.set(userId, updatedPresence);
@@ -225,15 +232,22 @@ export class PresenceManager extends EventEmitter {
       sessionId,
       timestamp: new Date(),
       type: 'selection',
-      data: { selection: updatedPresence.selection }
+      data: { selection: updatedPresence.selection },
     });
 
-    this.emit('selection_updated', { sessionId, userId, selection: updatedPresence.selection });
+    this.emit('selection_updated', {
+      sessionId,
+      userId,
+      selection: updatedPresence.selection,
+    });
 
     // Set throttle timer
-    this.throttleTimers.set(throttleKey, setTimeout(() => {
-      this.throttleTimers.delete(throttleKey);
-    }, this.config.selectionUpdateThrottle));
+    this.throttleTimers.set(
+      throttleKey,
+      setTimeout(() => {
+        this.throttleTimers.delete(throttleKey);
+      }, this.config.selectionUpdateThrottle),
+    );
   }
 
   /**
@@ -242,7 +256,7 @@ export class PresenceManager extends EventEmitter {
   updateViewport(
     sessionId: string,
     userId: string,
-    viewport: Partial<UserPresence['viewport']>
+    viewport: Partial<UserPresence['viewport']>,
   ): void {
     const presence = this.getPresence(sessionId, userId);
     if (!presence) return;
@@ -250,7 +264,7 @@ export class PresenceManager extends EventEmitter {
     const updatedPresence = {
       ...presence,
       viewport: { ...presence.viewport, ...viewport },
-      lastSeen: new Date()
+      lastSeen: new Date(),
     };
 
     this.presenceData.get(sessionId)!.set(userId, updatedPresence);
@@ -260,10 +274,14 @@ export class PresenceManager extends EventEmitter {
       sessionId,
       timestamp: new Date(),
       type: 'viewport',
-      data: { viewport: updatedPresence.viewport }
+      data: { viewport: updatedPresence.viewport },
     });
 
-    this.emit('viewport_updated', { sessionId, userId, viewport: updatedPresence.viewport });
+    this.emit('viewport_updated', {
+      sessionId,
+      userId,
+      viewport: updatedPresence.viewport,
+    });
   }
 
   /**
@@ -272,7 +290,7 @@ export class PresenceManager extends EventEmitter {
   updateActivity(
     sessionId: string,
     userId: string,
-    activity: Partial<UserPresence['activity']>
+    activity: Partial<UserPresence['activity']>,
   ): void {
     const presence = this.getPresence(sessionId, userId);
     if (!presence) return;
@@ -280,7 +298,7 @@ export class PresenceManager extends EventEmitter {
     const updatedPresence = {
       ...presence,
       activity: { ...presence.activity, ...activity },
-      lastSeen: new Date()
+      lastSeen: new Date(),
     };
 
     this.presenceData.get(sessionId)!.set(userId, updatedPresence);
@@ -290,10 +308,14 @@ export class PresenceManager extends EventEmitter {
       sessionId,
       timestamp: new Date(),
       type: 'activity',
-      data: { activity: updatedPresence.activity }
+      data: { activity: updatedPresence.activity },
     });
 
-    this.emit('activity_updated', { sessionId, userId, activity: updatedPresence.activity });
+    this.emit('activity_updated', {
+      sessionId,
+      userId,
+      activity: updatedPresence.activity,
+    });
 
     // Reset idle timer
     this.resetActivityTimer(sessionId, userId);
@@ -302,14 +324,18 @@ export class PresenceManager extends EventEmitter {
   /**
    * Update user status
    */
-  updateStatus(sessionId: string, userId: string, status: UserPresence['status']): void {
+  updateStatus(
+    sessionId: string,
+    userId: string,
+    status: UserPresence['status'],
+  ): void {
     const presence = this.getPresence(sessionId, userId);
     if (!presence) return;
 
     const updatedPresence = {
       ...presence,
       status,
-      lastSeen: new Date()
+      lastSeen: new Date(),
     };
 
     this.presenceData.get(sessionId)!.set(userId, updatedPresence);
@@ -319,7 +345,7 @@ export class PresenceManager extends EventEmitter {
       sessionId,
       timestamp: new Date(),
       type: 'activity',
-      data: { status }
+      data: { status },
     });
 
     this.emit('status_updated', { sessionId, userId, status });
@@ -335,7 +361,11 @@ export class PresenceManager extends EventEmitter {
   /**
    * Set user editing status
    */
-  setEditing(sessionId: string, userId: string, elementId: string | null): void {
+  setEditing(
+    sessionId: string,
+    userId: string,
+    elementId: string | null,
+  ): void {
     this.updateActivity(sessionId, userId, { editing: elementId });
   }
 
@@ -366,7 +396,7 @@ export class PresenceManager extends EventEmitter {
    * Get online users in session
    */
   getOnlineUsers(sessionId: string): UserPresence[] {
-    return this.getSessionPresence(sessionId).filter(p => p.isOnline);
+    return this.getSessionPresence(sessionId).filter((p) => p.isOnline);
   }
 
   /**
@@ -374,18 +404,21 @@ export class PresenceManager extends EventEmitter {
    */
   getPresenceStats(sessionId: string): any {
     const presence = this.getSessionPresence(sessionId);
-    const online = presence.filter(p => p.isOnline);
-    
-    const statusCounts = presence.reduce((acc, p) => {
-      acc[p.status] = (acc[p.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const online = presence.filter((p) => p.isOnline);
+
+    const statusCounts = presence.reduce(
+      (acc, p) => {
+        acc[p.status] = (acc[p.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     const activitiesCounts = {
-      typing: online.filter(p => p.activity.typing).length,
-      speaking: online.filter(p => p.activity.speaking).length,
-      sharing: online.filter(p => p.activity.sharing).length,
-      editing: online.filter(p => p.activity.editing !== null).length
+      typing: online.filter((p) => p.activity.typing).length,
+      speaking: online.filter((p) => p.activity.speaking).length,
+      sharing: online.filter((p) => p.activity.sharing).length,
+      editing: online.filter((p) => p.activity.editing !== null).length,
     };
 
     return {
@@ -394,8 +427,10 @@ export class PresenceManager extends EventEmitter {
       offline: presence.length - online.length,
       statusCounts,
       activitiesCounts,
-      avgViewportZoom: online.reduce((sum, p) => sum + p.viewport.zoom, 0) / online.length || 1,
-      selectionOverlap: this.calculateSelectionOverlap(online)
+      avgViewportZoom:
+        online.reduce((sum, p) => sum + p.viewport.zoom, 0) / online.length ||
+        1,
+      selectionOverlap: this.calculateSelectionOverlap(online),
     };
   }
 
@@ -435,7 +470,7 @@ export class PresenceManager extends EventEmitter {
    */
   private startHeartbeat(sessionId: string, userId: string): void {
     const key = `${sessionId}:${userId}`;
-    
+
     if (this.heartbeatTimers.has(key)) {
       clearInterval(this.heartbeatTimers.get(key)!);
     }
@@ -449,7 +484,7 @@ export class PresenceManager extends EventEmitter {
 
       // Check if user should be marked as offline
       const timeSinceLastSeen = Date.now() - presence.lastSeen.getTime();
-      
+
       if (timeSinceLastSeen > this.config.offlineTimeout) {
         this.updatePresenceStatus(sessionId, userId, false, 'offline');
       } else if (timeSinceLastSeen > this.config.awayTimeout) {
@@ -468,7 +503,7 @@ export class PresenceManager extends EventEmitter {
   private stopHeartbeat(sessionId: string, userId: string): void {
     const key = `${sessionId}:${userId}`;
     const timer = this.heartbeatTimers.get(key);
-    
+
     if (timer) {
       clearInterval(timer);
       this.heartbeatTimers.delete(key);
@@ -480,7 +515,7 @@ export class PresenceManager extends EventEmitter {
    */
   private resetActivityTimer(sessionId: string, userId: string): void {
     const key = `${sessionId}:${userId}`;
-    
+
     if (this.activityTimers.has(key)) {
       clearTimeout(this.activityTimers.get(key)!);
     }
@@ -500,7 +535,7 @@ export class PresenceManager extends EventEmitter {
   private clearActivityTimer(sessionId: string, userId: string): void {
     const key = `${sessionId}:${userId}`;
     const timer = this.activityTimers.get(key);
-    
+
     if (timer) {
       clearTimeout(timer);
       this.activityTimers.delete(key);
@@ -514,7 +549,7 @@ export class PresenceManager extends EventEmitter {
     sessionId: string,
     userId: string,
     isOnline: boolean,
-    status: UserPresence['status']
+    status: UserPresence['status'],
   ): void {
     const presence = this.getPresence(sessionId, userId);
     if (!presence) return;
@@ -525,18 +560,18 @@ export class PresenceManager extends EventEmitter {
     const updatedPresence = {
       ...presence,
       isOnline,
-      status
+      status,
     };
 
     this.presenceData.get(sessionId)!.set(userId, updatedPresence);
 
     if (wasOnline !== isOnline || wasStatus !== status) {
-      this.emit('presence_changed', { 
-        sessionId, 
-        userId, 
-        isOnline, 
-        status, 
-        previous: { isOnline: wasOnline, status: wasStatus }
+      this.emit('presence_changed', {
+        sessionId,
+        userId,
+        isOnline,
+        status,
+        previous: { isOnline: wasOnline, status: wasStatus },
       });
     }
   }
@@ -546,18 +581,30 @@ export class PresenceManager extends EventEmitter {
    */
   private generateUserColor(userId: string): string {
     const colors = [
-      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-      '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE'
+      '#FF6B6B',
+      '#4ECDC4',
+      '#45B7D1',
+      '#96CEB4',
+      '#FFEAA7',
+      '#DDA0DD',
+      '#98D8C8',
+      '#F7DC6F',
+      '#BB8FCE',
+      '#85C1E9',
+      '#F8C471',
+      '#82E0AA',
+      '#F1948A',
+      '#85C1E9',
+      '#D2B4DE',
     ];
-    
+
     // Use user ID hash to consistently assign colors
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
-      hash = ((hash << 5) - hash) + userId.charCodeAt(i);
+      hash = (hash << 5) - hash + userId.charCodeAt(i);
       hash = hash & hash; // Convert to 32-bit integer
     }
-    
+
     return colors[Math.abs(hash) % colors.length];
   }
 
@@ -567,7 +614,7 @@ export class PresenceManager extends EventEmitter {
   private smoothCursorMovement(
     sessionId: string,
     userId: string,
-    newCursor: Partial<UserPresence['cursor']>
+    newCursor: Partial<UserPresence['cursor']>,
   ): void {
     if (!this.config.enableCursorSmoothing) return;
 
@@ -576,8 +623,8 @@ export class PresenceManager extends EventEmitter {
 
     const oldCursor = presence.cursor;
     const distance = Math.sqrt(
-      Math.pow(newCursor.x! - oldCursor.x, 2) + 
-      Math.pow(newCursor.y! - oldCursor.y, 2)
+      Math.pow(newCursor.x! - oldCursor.x, 2) +
+        Math.pow(newCursor.y! - oldCursor.y, 2),
     );
 
     // If movement is large, emit intermediate positions
@@ -594,8 +641,8 @@ export class PresenceManager extends EventEmitter {
             cursor: {
               x: oldCursor.x + stepX * i,
               y: oldCursor.y + stepY * i,
-              viewport: newCursor.viewport || oldCursor.viewport
-            }
+              viewport: newCursor.viewport || oldCursor.viewport,
+            },
           });
         }, i * 10); // 10ms intervals
       }
@@ -615,14 +662,21 @@ export class PresenceManager extends EventEmitter {
       for (let j = i + 1; j < users.length; j++) {
         const user1 = users[i];
         const user2 = users[j];
-        
+
         const overlap = [
-          ...user1.selection.nodes.filter(n => user2.selection.nodes.includes(n)),
-          ...user1.selection.edges.filter(e => user2.selection.edges.includes(e))
+          ...user1.selection.nodes.filter((n) =>
+            user2.selection.nodes.includes(n),
+          ),
+          ...user1.selection.edges.filter((e) =>
+            user2.selection.edges.includes(e),
+          ),
         ].length;
 
-        const total = user1.selection.nodes.length + user1.selection.edges.length +
-                     user2.selection.nodes.length + user2.selection.edges.length;
+        const total =
+          user1.selection.nodes.length +
+          user1.selection.edges.length +
+          user2.selection.nodes.length +
+          user2.selection.edges.length;
 
         if (total > 0) {
           totalOverlap += (overlap * 2) / total;
@@ -637,7 +691,10 @@ export class PresenceManager extends EventEmitter {
   /**
    * Record presence update for history/analytics
    */
-  private recordPresenceUpdate(sessionId: string, update: PresenceUpdate): void {
+  private recordPresenceUpdate(
+    sessionId: string,
+    update: PresenceUpdate,
+  ): void {
     const history = this.presenceHistory.get(sessionId);
     if (!history) return;
 
@@ -667,7 +724,7 @@ export class PresenceManager extends EventEmitter {
 
     for (const [sessionId, sessionPresence] of this.presenceData.entries()) {
       const usersToRemove = [];
-      
+
       for (const [userId, presence] of sessionPresence.entries()) {
         if (!presence.isOnline && presence.lastSeen.getTime() < cutoff) {
           usersToRemove.push(userId);

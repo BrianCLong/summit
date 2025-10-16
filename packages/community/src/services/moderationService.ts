@@ -28,7 +28,7 @@ export class ModerationService {
   public constructor(
     private readonly store: CommunityStore,
     private readonly activity: ActivityFeedService,
-    private readonly notifications: NotificationService
+    private readonly notifications: NotificationService,
   ) {}
 
   public flagPost(input: FlagPostInput): Post {
@@ -42,14 +42,14 @@ export class ModerationService {
     const updated: Post = {
       ...post,
       flaggedBy: [...post.flaggedBy, input.userId],
-      moderationNotes: [...post.moderationNotes, `Flagged: ${input.reason}`]
+      moderationNotes: [...post.moderationNotes, `Flagged: ${input.reason}`],
     };
     this.store.upsertPost(updated);
     this.activity.record({
       userId: input.userId,
       type: 'moderation_event',
       summary: 'Content flagged for review',
-      metadata: { postId: post.id, reason: input.reason }
+      metadata: { postId: post.id, reason: input.reason },
     });
     return updated;
   }
@@ -62,7 +62,10 @@ export class ModerationService {
     const updated: Post = {
       ...post,
       isRemoved: input.action === 'remove',
-      moderationNotes: [...post.moderationNotes, `${input.action}: ${input.reason}`]
+      moderationNotes: [
+        ...post.moderationNotes,
+        `${input.action}: ${input.reason}`,
+      ],
     };
     this.store.upsertPost(updated);
 
@@ -72,21 +75,21 @@ export class ModerationService {
       targetPostId: post.id,
       action: input.action === 'remove' ? 'remove' : 'restore',
       reason: input.reason,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     this.store.recordModeration(record);
     this.activity.record({
       userId: input.moderatorId,
       type: 'moderation_event',
       summary: `Post ${input.action === 'remove' ? 'removed' : 'restored'}`,
-      metadata: { postId: post.id, reason: input.reason }
+      metadata: { postId: post.id, reason: input.reason },
     });
 
     if (post.authorId !== input.moderatorId) {
       this.notifications.notify({
         userId: post.authorId,
         message: `Your post was ${input.action === 'remove' ? 'removed' : 'restored'} by moderation`,
-        metadata: { postId: post.id, action: input.action }
+        metadata: { postId: post.id, action: input.action },
       });
     }
 
@@ -111,14 +114,14 @@ export class ModerationService {
       targetPostId: '',
       action: input.action === 'lock' ? 'lock-thread' : 'unlock-thread',
       reason: input.reason,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
     this.store.recordModeration(record);
     this.activity.record({
       userId: input.moderatorId,
       type: input.action === 'lock' ? 'thread_locked' : 'thread_unlocked',
       summary: `Thread ${input.action === 'lock' ? 'locked' : 'unlocked'}: ${thread.title}`,
-      metadata: { threadId: thread.id, reason: input.reason }
+      metadata: { threadId: thread.id, reason: input.reason },
     });
 
     return updated;

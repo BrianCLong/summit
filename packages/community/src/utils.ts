@@ -2,7 +2,11 @@ import { randomUUID } from 'node:crypto';
 
 export const createId = (prefix: string): string => `${prefix}_${randomUUID()}`;
 
-export const clamp = (value: number, minimum: number, maximum: number): number => {
+export const clamp = (
+  value: number,
+  minimum: number,
+  maximum: number,
+): number => {
   if (value < minimum) {
     return minimum;
   }

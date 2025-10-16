@@ -34,7 +34,9 @@ export default function RoutingStudio() {
     <div className="space-y-3">
       <h2 className="text-lg font-semibold">Routing Studio</h2>
       <section className="rounded border bg-white p-3">
-        <div className="mb-2 text-sm font-semibold text-slate-700">Dry-run simulation</div>
+        <div className="mb-2 text-sm font-semibold text-slate-700">
+          Dry-run simulation
+        </div>
         <div className="mb-2 flex items-center gap-2">
           <textarea
             className="h-24 w-full rounded border p-2"
@@ -87,8 +89,13 @@ export default function RoutingStudio() {
           </div>
         )}
       </section>
-      <section className="rounded border bg-white p-3" aria-label="Routing pins">
-        <div className="mb-2 text-sm font-semibold text-slate-700">Pin route to model</div>
+      <section
+        className="rounded border bg-white p-3"
+        aria-label="Routing pins"
+      >
+        <div className="mb-2 text-sm font-semibold text-slate-700">
+          Pin route to model
+        </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <input
             className="rounded border px-2 py-1"
@@ -192,7 +199,11 @@ function AutoRollbackSection({ apiFns }: { apiFns: any }) {
   const [route, setRoute] = React.useState('codegen');
   const [cfg, setCfg] = React.useState<any>({ enabled: false, routes: {} });
   const [events, setEvents] = React.useState<any[]>([]);
-  const cur = cfg.routes?.[route] || { enabled: false, maxCostZ: 2.0, maxDLQ10m: 10 };
+  const cur = cfg.routes?.[route] || {
+    enabled: false,
+    maxCostZ: 2.0,
+    maxDLQ10m: 10,
+  };
 
   const refresh = async () => {
     const c = await apiFns.getWatchdogConfigs();
@@ -205,7 +216,11 @@ function AutoRollbackSection({ apiFns }: { apiFns: any }) {
   }, []);
 
   async function save() {
-    const next = { ...cfg, enabled: cfg.enabled, routes: { ...(cfg.routes || {}), [route]: cur } };
+    const next = {
+      ...cfg,
+      enabled: cfg.enabled,
+      routes: { ...(cfg.routes || {}), [route]: cur },
+    };
     await apiFns.putWatchdogConfigs(next);
     await refresh();
   }
@@ -221,7 +236,9 @@ function AutoRollbackSection({ apiFns }: { apiFns: any }) {
         <input
           type="checkbox"
           checked={!!cfg.enabled}
-          onChange={(e) => setCfg((x: any) => ({ ...x, enabled: e.target.checked }))}
+          onChange={(e) =>
+            setCfg((x: any) => ({ ...x, enabled: e.target.checked }))
+          }
         />{' '}
         Enable watchdog
       </label>
@@ -269,7 +286,10 @@ function AutoRollbackSection({ apiFns }: { apiFns: any }) {
         </label>
       </div>
       <div className="flex gap-2">
-        <button className="rounded bg-blue-600 px-3 py-2 text-white" onClick={save}>
+        <button
+          className="rounded bg-blue-600 px-3 py-2 text-white"
+          onClick={save}
+        >
           Save
         </button>
         <button

@@ -3,10 +3,12 @@
 Title: feat(ci): enhance release-train with SLO gate & canary; add reusable slo-burn-check
 
 Files:
+
 - .github/workflows/release-train.yml (mod)
 - .github/workflows/reusable/slo-burn-check.yml (new)
 
 Patch:
+
 ```diff
 *** a/.github/workflows/release-train.yml
 --- b/.github/workflows/release-train.yml

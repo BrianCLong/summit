@@ -1,6 +1,6 @@
 /**
  * Enhanced Copilot Run Panel for IntelGraph
- * 
+ *
  * Features:
  * - Start, pause, resume Copilot runs
  * - Live event streaming via Socket.IO
@@ -35,7 +35,7 @@ import {
   Tooltip,
   Collapse,
   CircularProgress,
-  Badge
+  Badge,
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
@@ -49,7 +49,7 @@ import {
   Warning as WarningIcon,
   Schedule as ScheduleIcon,
   Timeline as TimelineIcon,
-  Code as CodeIcon
+  Code as CodeIcon,
 } from '@mui/icons-material';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { useSocket } from '../../hooks/useSocket';
@@ -61,7 +61,7 @@ import {
   PAUSE_COPILOT_RUN,
   RESUME_COPILOT_RUN,
   GET_COPILOT_RUN,
-  COPILOT_EVENTS_SUBSCRIPTION
+  COPILOT_EVENTS_SUBSCRIPTION,
 } from '../../graphql/copilot.gql';
 
 const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
@@ -70,11 +70,11 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
   const [goalText, setGoalText] = useState('');
   const [expandedSections, setExpandedSections] = useState({
     tasks: true,
-    events: true
+    events: true,
   });
   const [eventFilter, setEventFilter] = useState('all');
   const [notifications, setNotifications] = useState([]);
-  
+
   const eventsEndRef = useRef(null);
   const socket = useSocket();
 
@@ -84,30 +84,28 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
   const [resumeRun, { loading: resumingRun }] = useMutation(RESUME_COPILOT_RUN);
 
   // Query for run details
-  const { data: runData, loading: loadingRun, refetch: refetchRun } = useQuery(
-    GET_COPILOT_RUN,
-    {
-      variables: { id: selectedRun?.id },
-      skip: !selectedRun?.id,
-      pollInterval: selectedRun?.isActive ? 2000 : 0
-    }
-  );
+  const {
+    data: runData,
+    loading: loadingRun,
+    refetch: refetchRun,
+  } = useQuery(GET_COPILOT_RUN, {
+    variables: { id: selectedRun?.id },
+    skip: !selectedRun?.id,
+    pollInterval: selectedRun?.isActive ? 2000 : 0,
+  });
 
   // Subscribe to real-time events
-  const { data: eventData } = useSubscription(
-    COPILOT_EVENTS_SUBSCRIPTION,
-    {
-      variables: { runId: selectedRun?.id },
-      skip: !selectedRun?.id
-    }
-  );
+  const { data: eventData } = useSubscription(COPILOT_EVENTS_SUBSCRIPTION, {
+    variables: { runId: selectedRun?.id },
+    skip: !selectedRun?.id,
+  });
 
   // Handle real-time events
   useEffect(() => {
     if (eventData?.copilotEvents) {
       const event = eventData.copilotEvents;
       addNotification(event.level, event.message);
-      
+
       // Auto-scroll to latest event
       if (eventsEndRef.current) {
         eventsEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -138,9 +136,9 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
       id: Date.now(),
       level,
       message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    setNotifications(prev => [...prev.slice(-9), notification]);
+    setNotifications((prev) => [...prev.slice(-9), notification]);
   }, []);
 
   const handleStartRun = async () => {
@@ -150,15 +148,15 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
       const { data } = await startRun({
         variables: {
           goalText: goalText.trim(),
-          investigationId
-        }
+          investigationId,
+        },
       });
 
       const newRun = data.startCopilotRun;
       setSelectedRun(newRun);
       setGoalDialogOpen(false);
       setGoalText('');
-      
+
       if (onRunCreated) {
         onRunCreated(newRun);
       }
@@ -174,7 +172,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
 
     try {
       await pauseRun({
-        variables: { runId: selectedRun.id }
+        variables: { runId: selectedRun.id },
       });
       refetchRun();
       addNotification('info', 'Copilot run paused');
@@ -188,7 +186,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
 
     try {
       await resumeRun({
-        variables: { runId: selectedRun.id }
+        variables: { runId: selectedRun.id },
       });
       refetchRun();
       addNotification('info', 'Copilot run resumed');
@@ -199,46 +197,60 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'running': return 'primary';
-      case 'succeeded': return 'success';
-      case 'failed': return 'error';
-      case 'paused': return 'warning';
-      default: return 'default';
+      case 'running':
+        return 'primary';
+      case 'succeeded':
+        return 'success';
+      case 'failed':
+        return 'error';
+      case 'paused':
+        return 'warning';
+      default:
+        return 'default';
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
-      case 'running': return <CircularProgress size={16} />;
-      case 'succeeded': return <CheckIcon color="success" />;
-      case 'failed': return <ErrorIcon color="error" />;
-      case 'paused': return <PauseIcon color="warning" />;
-      default: return <ScheduleIcon />;
+      case 'running':
+        return <CircularProgress size={16} />;
+      case 'succeeded':
+        return <CheckIcon color="success" />;
+      case 'failed':
+        return <ErrorIcon color="error" />;
+      case 'paused':
+        return <PauseIcon color="warning" />;
+      default:
+        return <ScheduleIcon />;
     }
   };
 
   const getEventIcon = (level) => {
     switch (level?.toLowerCase()) {
-      case 'error': return <ErrorIcon color="error" />;
-      case 'warning': return <WarningIcon color="warning" />;
-      case 'progress': return <TimelineIcon color="primary" />;
-      default: return <InfoIcon color="info" />;
+      case 'error':
+        return <ErrorIcon color="error" />;
+      case 'warning':
+        return <WarningIcon color="warning" />;
+      case 'progress':
+        return <TimelineIcon color="primary" />;
+      default:
+        return <InfoIcon color="info" />;
     }
   };
 
   const filterEvents = (events) => {
     if (eventFilter === 'all') return events;
-    return events.filter(event => event.level === eventFilter);
+    return events.filter((event) => event.level === eventFilter);
   };
 
   const calculateProgress = () => {
     if (!runData?.copilotRun?.tasks) return 0;
-    
+
     const tasks = runData.copilotRun.tasks;
-    const completedTasks = tasks.filter(task => 
-      task.status === 'succeeded' || task.status === 'failed'
+    const completedTasks = tasks.filter(
+      (task) => task.status === 'succeeded' || task.status === 'failed',
     ).length;
-    
+
     return tasks.length > 0 ? (completedTasks / tasks.length) * 100 : 0;
   };
 
@@ -253,7 +265,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
             <Box display="flex" alignItems="center" gap={2}>
               <Typography variant="h6">Copilot Run</Typography>
               {currentRun && (
-                <Chip 
+                <Chip
                   icon={getStatusIcon(currentRun.status)}
                   label={currentRun.status}
                   color={getStatusColor(currentRun.status)}
@@ -273,7 +285,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
               >
                 New Run
               </Button>
-              
+
               {currentRun?.status === 'running' && (
                 <IconButton
                   onClick={handlePauseRun}
@@ -283,8 +295,9 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
                   <PauseIcon />
                 </IconButton>
               )}
-              
-              {(currentRun?.status === 'paused' || currentRun?.status === 'failed') && (
+
+              {(currentRun?.status === 'paused' ||
+                currentRun?.status === 'failed') && (
                 <IconButton
                   onClick={handleResumeRun}
                   disabled={resumingRun}
@@ -296,26 +309,30 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
             </Box>
           }
         />
-        
+
         {currentRun && (
           <CardContent>
             <Typography variant="body2" color="textSecondary" gutterBottom>
               Goal: {currentRun.goalText}
             </Typography>
-            
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={1}
+            >
               <Typography variant="caption">
                 Progress: {Math.round(calculateProgress())}%
               </Typography>
               <Typography variant="caption">
-                {currentRun.startedAt && 
-                  `Running for ${formatDistanceToNow(new Date(currentRun.startedAt))}`
-                }
+                {currentRun.startedAt &&
+                  `Running for ${formatDistanceToNow(new Date(currentRun.startedAt))}`}
               </Typography>
             </Box>
-            
-            <LinearProgress 
-              variant="determinate" 
+
+            <LinearProgress
+              variant="determinate"
               value={calculateProgress()}
               sx={{ height: 6, borderRadius: 3 }}
             />
@@ -332,32 +349,39 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
               title={
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography variant="subtitle1">Tasks</Typography>
-                  <Badge badgeContent={currentRun.tasks?.length || 0} color="primary">
+                  <Badge
+                    badgeContent={currentRun.tasks?.length || 0}
+                    color="primary"
+                  >
                     <CodeIcon />
                   </Badge>
                 </Box>
               }
               action={
                 <IconButton
-                  onClick={() => setExpandedSections(prev => ({
-                    ...prev,
-                    tasks: !prev.tasks
-                  }))}
+                  onClick={() =>
+                    setExpandedSections((prev) => ({
+                      ...prev,
+                      tasks: !prev.tasks,
+                    }))
+                  }
                   size="small"
                 >
-                  {expandedSections.tasks ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  {expandedSections.tasks ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
                 </IconButton>
               }
             />
-            
+
             <Collapse in={expandedSections.tasks}>
               <CardContent>
                 <List dense>
                   {currentRun.tasks?.map((task, index) => (
                     <ListItem key={task.id}>
-                      <ListItemIcon>
-                        {getStatusIcon(task.status)}
-                      </ListItemIcon>
+                      <ListItemIcon>{getStatusIcon(task.status)}</ListItemIcon>
                       <ListItemText
                         primary={`${index + 1}. ${task.taskType}`}
                         secondary={
@@ -367,11 +391,17 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
                             </Typography>
                             {task.startedAt && (
                               <Typography variant="caption" display="block">
-                                Started: {formatDistanceToNow(new Date(task.startedAt))} ago
+                                Started:{' '}
+                                {formatDistanceToNow(new Date(task.startedAt))}{' '}
+                                ago
                               </Typography>
                             )}
                             {task.errorMessage && (
-                              <Typography variant="caption" color="error" display="block">
+                              <Typography
+                                variant="caption"
+                                color="error"
+                                display="block"
+                              >
                                 Error: {task.errorMessage}
                               </Typography>
                             )}
@@ -391,7 +421,10 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
               title={
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography variant="subtitle1">Events</Typography>
-                  <Badge badgeContent={currentRun.events?.length || 0} color="secondary">
+                  <Badge
+                    badgeContent={currentRun.events?.length || 0}
+                    color="secondary"
+                  >
                     <TimelineIcon />
                   </Badge>
                 </Box>
@@ -411,28 +444,32 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
                     <option value="error">Errors</option>
                     <option value="progress">Progress</option>
                   </TextField>
-                  
+
                   <IconButton
-                    onClick={() => setExpandedSections(prev => ({
-                      ...prev,
-                      events: !prev.events
-                    }))}
+                    onClick={() =>
+                      setExpandedSections((prev) => ({
+                        ...prev,
+                        events: !prev.events,
+                      }))
+                    }
                     size="small"
                   >
-                    {expandedSections.events ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    {expandedSections.events ? (
+                      <ExpandLessIcon />
+                    ) : (
+                      <ExpandMoreIcon />
+                    )}
                   </IconButton>
                 </Box>
               }
             />
-            
+
             <Collapse in={expandedSections.events} sx={{ flex: 1 }}>
               <CardContent sx={{ flex: 1, overflow: 'auto', maxHeight: 300 }}>
                 <List dense>
                   {filterEvents(currentRun.events || []).map((event) => (
                     <ListItem key={event.id}>
-                      <ListItemIcon>
-                        {getEventIcon(event.level)}
-                      </ListItemIcon>
+                      <ListItemIcon>{getEventIcon(event.level)}</ListItemIcon>
                       <ListItemText
                         primary={event.message}
                         secondary={
@@ -452,7 +489,12 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
       )}
 
       {/* New Goal Dialog */}
-      <Dialog open={goalDialogOpen} onClose={() => setGoalDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={goalDialogOpen}
+        onClose={() => setGoalDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Start New Copilot Run</DialogTitle>
         <DialogContent>
           <TextField
@@ -470,7 +512,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setGoalDialogOpen(false)}>Cancel</Button>
-          <Button 
+          <Button
             onClick={handleStartRun}
             disabled={!goalText.trim() || startingRun}
             variant="contained"
@@ -486,12 +528,19 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
           {notifications.slice(-3).map((notification) => (
             <Alert
               key={notification.id}
-              severity={notification.level === 'error' ? 'error' : 
-                       notification.level === 'warning' ? 'warning' : 'info'}
+              severity={
+                notification.level === 'error'
+                  ? 'error'
+                  : notification.level === 'warning'
+                    ? 'warning'
+                    : 'info'
+              }
               sx={{ mb: 1, minWidth: 300 }}
-              onClose={() => setNotifications(prev => 
-                prev.filter(n => n.id !== notification.id)
-              )}
+              onClose={() =>
+                setNotifications((prev) =>
+                  prev.filter((n) => n.id !== notification.id),
+                )
+              }
             >
               {notification.message}
             </Alert>

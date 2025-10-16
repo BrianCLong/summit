@@ -42,11 +42,11 @@ export class MaestroConductor extends EventEmitter {
     if (this.config.features.multiAgentCooperation) {
       await this.initializeAgents();
     }
-    
+
     if (this.config.features.progressiveDelivery) {
       await this.initializeDeployment();
     }
-    
+
     if (this.config.features.cryptographicEvidence) {
       await this.initializeEvidence();
     }
@@ -58,12 +58,12 @@ export class MaestroConductor extends EventEmitter {
     // Multi-agent cooperation system (v0.4-v2.0 capabilities)
     const agentTypes = [
       'planner',
-      'implementer', 
+      'implementer',
       'critic',
       'fixer',
       'reviewer',
       'safety-verifier',
-      'performance-optimizer'
+      'performance-optimizer',
     ];
 
     for (const type of agentTypes) {
@@ -71,7 +71,7 @@ export class MaestroConductor extends EventEmitter {
         type,
         status: 'ready',
         capabilities: this.getAgentCapabilities(type),
-        lastActive: Date.now()
+        lastActive: Date.now(),
       });
     }
   }
@@ -82,7 +82,7 @@ export class MaestroConductor extends EventEmitter {
       type: 'canary',
       stages: [10, 25, 50, 75, 100],
       healthChecks: ['slo', 'error-rate', 'latency'],
-      autoRollback: true
+      autoRollback: true,
     });
   }
 
@@ -92,19 +92,23 @@ export class MaestroConductor extends EventEmitter {
       types: ['sbom', 'provenance', 'safety-case', 'risk-assessment'],
       signing: 'cosign',
       verification: 'tuf',
-      storage: 'transparency-log'
+      storage: 'transparency-log',
     });
   }
 
   private getAgentCapabilities(type: string): string[] {
     const capabilities = {
-      'planner': ['task-decomposition', 'dependency-analysis', 'risk-assessment'],
-      'implementer': ['code-generation', 'ast-manipulation', 'test-creation'],
-      'critic': ['static-analysis', 'security-review', 'performance-analysis'],
-      'fixer': ['bug-fixing', 'optimization', 'refactoring'],
-      'reviewer': ['code-review', 'approval', 'feedback'],
-      'safety-verifier': ['formal-verification', 'safety-cases', 'compliance-check'],
-      'performance-optimizer': ['profiling', 'optimization', 'caching']
+      planner: ['task-decomposition', 'dependency-analysis', 'risk-assessment'],
+      implementer: ['code-generation', 'ast-manipulation', 'test-creation'],
+      critic: ['static-analysis', 'security-review', 'performance-analysis'],
+      fixer: ['bug-fixing', 'optimization', 'refactoring'],
+      reviewer: ['code-review', 'approval', 'feedback'],
+      'safety-verifier': [
+        'formal-verification',
+        'safety-cases',
+        'compliance-check',
+      ],
+      'performance-optimizer': ['profiling', 'optimization', 'caching'],
     };
     return capabilities[type] || [];
   }
@@ -120,35 +124,34 @@ export class MaestroConductor extends EventEmitter {
     metrics: any;
   }> {
     const workflowId = `${request.type}-${Date.now()}`;
-    
+
     try {
       // 1. Planning phase (v0.4+)
       const plan = await this.planExecution(request);
-      
+
       // 2. Implementation phase (v0.5+)
       const implementation = await this.executeImplementation(plan);
-      
+
       // 3. Verification phase (v0.6+)
       const verification = await this.verifyImplementation(implementation);
-      
+
       // 4. Evidence generation (v1.0+)
       const evidence = await this.generateEvidence(verification);
-      
+
       // 5. Deployment (v1.5+)
       const deployment = await this.executeDeployment(evidence);
 
       return {
         success: deployment.success,
         evidence: evidence.bundle,
-        metrics: this.collectMetrics(workflowId)
+        metrics: this.collectMetrics(workflowId),
       };
-
     } catch (error) {
       this.emit('workflow:error', { workflowId, error });
       return {
         success: false,
         evidence: { error: error.message },
-        metrics: { error: true }
+        metrics: { error: true },
       };
     }
   }
@@ -161,10 +164,10 @@ export class MaestroConductor extends EventEmitter {
         { type: 'analyze', priority: 1 },
         { type: 'implement', priority: 2 },
         { type: 'test', priority: 3 },
-        { type: 'deploy', priority: 4 }
+        { type: 'deploy', priority: 4 },
       ],
       budget: this.config.limits.maxBudgetPerPR,
-      risk: 0.3 // calculated risk score
+      risk: 0.3, // calculated risk score
     };
   }
 
@@ -175,11 +178,11 @@ export class MaestroConductor extends EventEmitter {
 
     // Implementer -> Critic -> Fixer loop (v0.4 pattern)
     let result = { success: false, iterations: 0 };
-    
+
     while (!result.success && result.iterations < 3) {
       const implementation = await this.runImplementer(plan);
       const critique = await this.runCritic(implementation);
-      
+
       if (critique.passed) {
         result = { success: true, iterations: result.iterations + 1 };
       } else {
@@ -193,12 +196,12 @@ export class MaestroConductor extends EventEmitter {
 
   private async verifyImplementation(implementation: any): Promise<any> {
     const verifier = this.agents.get('safety-verifier');
-    
+
     return {
       securityScan: { passed: true, issues: [] },
       performanceTest: { passed: true, metrics: {} },
       complianceCheck: { passed: true, requirements: [] },
-      safetyCase: { verified: true, evidence: {} }
+      safetyCase: { verified: true, evidence: {} },
     };
   }
 
@@ -212,13 +215,21 @@ export class MaestroConductor extends EventEmitter {
         provenance: {
           source: 'maestro-conductor',
           integrity: 'sha256:abc123',
-          signature: 'cosign-signature'
+          signature: 'cosign-signature',
         },
         safetyCase: {
-          claims: ['security-verified', 'performance-tested', 'compliance-checked'],
-          evidence: ['static-analysis', 'dynamic-testing', 'formal-verification']
-        }
-      }
+          claims: [
+            'security-verified',
+            'performance-tested',
+            'compliance-checked',
+          ],
+          evidence: [
+            'static-analysis',
+            'dynamic-testing',
+            'formal-verification',
+          ],
+        },
+      },
     };
   }
 
@@ -228,7 +239,7 @@ export class MaestroConductor extends EventEmitter {
     }
 
     const canaryController = this.deployments.get('canary-controller');
-    
+
     // Progressive rollout (v0.5+ capability)
     for (const stage of canaryController.stages) {
       const stageResult = await this.deployStage(stage, evidence);
@@ -238,7 +249,11 @@ export class MaestroConductor extends EventEmitter {
       }
     }
 
-    return { success: true, type: 'progressive', stages: canaryController.stages };
+    return {
+      success: true,
+      type: 'progressive',
+      stages: canaryController.stages,
+    };
   }
 
   private async runImplementer(plan: any): Promise<any> {
@@ -246,7 +261,7 @@ export class MaestroConductor extends EventEmitter {
     return {
       code: '// Generated implementation',
       tests: '// Generated tests',
-      documentation: '// Generated docs'
+      documentation: '// Generated docs',
     };
   }
 
@@ -255,7 +270,7 @@ export class MaestroConductor extends EventEmitter {
     return {
       passed: Math.random() > 0.3, // 70% pass rate
       issues: Math.random() > 0.7 ? ['minor-issue'] : [],
-      score: 0.8
+      score: 0.8,
     };
   }
 
@@ -266,11 +281,11 @@ export class MaestroConductor extends EventEmitter {
 
   private async deployStage(percentage: number, evidence: any): Promise<any> {
     // Mock deployment stage
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return { 
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return {
       healthy: Math.random() > 0.1, // 90% success rate
       percentage,
-      metrics: { latency: 100, errors: 0.01 }
+      metrics: { latency: 100, errors: 0.01 },
     };
   }
 
@@ -284,7 +299,7 @@ export class MaestroConductor extends EventEmitter {
       duration: Math.floor(Math.random() * 300000), // 0-5 minutes
       cost: Math.random() * 2, // $0-2
       agents: this.agents.size,
-      success: true
+      success: true,
     };
   }
 
@@ -296,7 +311,7 @@ export class MaestroConductor extends EventEmitter {
       deployments: Array.from(this.deployments.values()),
       evidence: Array.from(this.evidence.values()),
       uptime: process.uptime(),
-      health: 'healthy'
+      health: 'healthy',
     };
   }
 
@@ -317,10 +332,19 @@ export function createConductor(version: string): MaestroConductor {
         progressiveDelivery: false,
         multiAgentCooperation: true,
         riskAwareRouting: true,
-        cryptographicEvidence: false
+        cryptographicEvidence: false,
       },
-      limits: { maxPRsPerWeek: 20, maxBudgetPerPR: 2.24, maxRiskThreshold: 0.7 },
-      integrations: { kubernetes: true, github: true, monitoring: true, security: true }
+      limits: {
+        maxPRsPerWeek: 20,
+        maxBudgetPerPR: 2.24,
+        maxRiskThreshold: 0.7,
+      },
+      integrations: {
+        kubernetes: true,
+        github: true,
+        monitoring: true,
+        security: true,
+      },
     },
     '1.0.0': {
       version: '1.0.0',
@@ -329,10 +353,19 @@ export function createConductor(version: string): MaestroConductor {
         progressiveDelivery: true,
         multiAgentCooperation: true,
         riskAwareRouting: true,
-        cryptographicEvidence: true
+        cryptographicEvidence: true,
       },
-      limits: { maxPRsPerWeek: 100, maxBudgetPerPR: 1.50, maxRiskThreshold: 0.6 },
-      integrations: { kubernetes: true, github: true, monitoring: true, security: true }
+      limits: {
+        maxPRsPerWeek: 100,
+        maxBudgetPerPR: 1.5,
+        maxRiskThreshold: 0.6,
+      },
+      integrations: {
+        kubernetes: true,
+        github: true,
+        monitoring: true,
+        security: true,
+      },
     },
     '2.0.0': {
       version: '2.0.0',
@@ -341,11 +374,20 @@ export function createConductor(version: string): MaestroConductor {
         progressiveDelivery: true,
         multiAgentCooperation: true,
         riskAwareRouting: true,
-        cryptographicEvidence: true
+        cryptographicEvidence: true,
       },
-      limits: { maxPRsPerWeek: 320, maxBudgetPerPR: 0.80, maxRiskThreshold: 0.4 },
-      integrations: { kubernetes: true, github: true, monitoring: true, security: true }
-    }
+      limits: {
+        maxPRsPerWeek: 320,
+        maxBudgetPerPR: 0.8,
+        maxRiskThreshold: 0.4,
+      },
+      integrations: {
+        kubernetes: true,
+        github: true,
+        monitoring: true,
+        security: true,
+      },
+    },
   };
 
   const config = configs[version] || configs['0.4.0'];

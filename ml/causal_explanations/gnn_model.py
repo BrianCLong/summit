@@ -1,4 +1,5 @@
 """Placeholder for loading a trained GNN model."""
+
 from typing import Any
 
 

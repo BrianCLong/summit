@@ -54,7 +54,9 @@ export class AuthService {
     const encoder = new TextEncoder();
     const data = encoder.encode(verifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
-    return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(digest))))
+    return btoa(
+      String.fromCharCode.apply(null, Array.from(new Uint8Array(digest))),
+    )
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=/g, '');
@@ -100,8 +102,8 @@ export class AuthService {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join(''),
       );
       return JSON.parse(jsonPayload);
     } catch (error) {
@@ -113,7 +115,7 @@ export class AuthService {
   private isTokenExpired(token: string): boolean {
     const payload = this.parseJWT(token);
     if (!payload || !payload.exp) return true;
-    
+
     const now = Math.floor(Date.now() / 1000);
     return payload.exp < now;
   }
@@ -123,10 +125,12 @@ export class AuthService {
     const codeVerifier = this.generateCodeVerifier();
     const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     const nonce = this.generateNonce();
-    const state = btoa(JSON.stringify({ 
-      timestamp: Date.now(),
-      returnUrl: window.location.pathname 
-    }));
+    const state = btoa(
+      JSON.stringify({
+        timestamp: Date.now(),
+        returnUrl: window.location.pathname,
+      }),
+    );
 
     // Store PKCE parameters
     this.setItem('code_verifier', codeVerifier);
@@ -155,14 +159,16 @@ export class AuthService {
   async handleCallback(callbackUrl: string): Promise<AuthState> {
     const url = new URL(callbackUrl);
     const urlParams = new URLSearchParams(url.search);
-    
+
     const code = urlParams.get('code');
     const state = urlParams.get('state');
     const error = urlParams.get('error');
     const errorDescription = urlParams.get('error_description');
 
     if (error) {
-      throw new Error(`Authentication failed: ${error}. ${errorDescription || ''}`);
+      throw new Error(
+        `Authentication failed: ${error}. ${errorDescription || ''}`,
+      );
     }
 
     if (!code || !state) {
@@ -185,9 +191,12 @@ export class AuthService {
     return this.processTokens(tokens);
   }
 
-  private async exchangeCodeForTokens(code: string, codeVerifier: string): Promise<TokenResponse> {
+  private async exchangeCodeForTokens(
+    code: string,
+    codeVerifier: string,
+  ): Promise<TokenResponse> {
     const tokenEndpoint = `${this.config.issuer}/token`;
-    
+
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
       client_id: this.config.clientId,
@@ -206,7 +215,9 @@ export class AuthService {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Token exchange failed: ${errorData.error || response.statusText}`);
+      throw new Error(
+        `Token exchange failed: ${errorData.error || response.statusText}`,
+      );
     }
 
     return response.json();
@@ -217,11 +228,11 @@ export class AuthService {
     if (tokens.id_token) {
       const idTokenPayload = this.parseJWT(tokens.id_token);
       const storedNonce = this.getItem('nonce');
-      
+
       if (idTokenPayload.nonce !== storedNonce) {
         throw new Error('Invalid nonce in ID token');
       }
-      
+
       if (this.isTokenExpired(tokens.id_token)) {
         throw new Error('ID token is expired');
       }
@@ -243,18 +254,20 @@ export class AuthService {
 
     // Fetch user profile
     const user = await this.fetchUserProfile(tokens.access_token);
-    
+
     return {
       isAuthenticated: true,
       isLoading: false,
       user,
-      tenant: user.tenant ? { 
-        id: user.tenant,
-        name: user.tenant,
-        tier: 'standard',
-        limits: {},
-        users: []
-      } : null,
+      tenant: user.tenant
+        ? {
+            id: user.tenant,
+            name: user.tenant,
+            tier: 'standard',
+            limits: {},
+            users: [],
+          }
+        : null,
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token || null,
       error: null,
@@ -263,10 +276,10 @@ export class AuthService {
 
   private async fetchUserProfile(accessToken: string): Promise<User> {
     const userInfoEndpoint = `${this.config.issuer}/userinfo`;
-    
+
     const response = await fetch(userInfoEndpoint, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -275,13 +288,14 @@ export class AuthService {
     }
 
     const userInfo = await response.json();
-    
+
     return {
       id: userInfo.sub,
       email: userInfo.email,
       name: userInfo.name || userInfo.preferred_username || userInfo.email,
       roles: userInfo.roles || userInfo['maestro:roles'] || ['user'],
-      permissions: userInfo.permissions || userInfo['maestro:permissions'] || [],
+      permissions:
+        userInfo.permissions || userInfo['maestro:permissions'] || [],
       tenant: userInfo.tenant || userInfo['maestro:tenant'] || 'default',
     };
   }
@@ -294,7 +308,7 @@ export class AuthService {
 
     try {
       const tokenEndpoint = `${this.config.issuer}/token`;
-      
+
       const body = new URLSearchParams({
         grant_type: 'refresh_token',
         client_id: this.config.clientId,
@@ -324,7 +338,7 @@ export class AuthService {
 
   async logout(): Promise<void> {
     const accessToken = this.getItem('access_token');
-    
+
     // Clear stored tokens
     this.removeItem('access_token');
     this.removeItem('refresh_token');
@@ -337,7 +351,7 @@ export class AuthService {
         await fetch(logoutEndpoint, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         });
       } catch (error) {
@@ -352,7 +366,7 @@ export class AuthService {
 
   getStoredAuthState(): AuthState | null {
     const accessToken = this.getItem('access_token');
-    
+
     if (!accessToken || this.isTokenExpired(accessToken)) {
       return null;
     }
@@ -362,23 +376,30 @@ export class AuthService {
       const user: User = {
         id: tokenPayload.sub,
         email: tokenPayload.email,
-        name: tokenPayload.name || tokenPayload.preferred_username || tokenPayload.email,
+        name:
+          tokenPayload.name ||
+          tokenPayload.preferred_username ||
+          tokenPayload.email,
         roles: tokenPayload.roles || tokenPayload['maestro:roles'] || ['user'],
-        permissions: tokenPayload.permissions || tokenPayload['maestro:permissions'] || [],
-        tenant: tokenPayload.tenant || tokenPayload['maestro:tenant'] || 'default',
+        permissions:
+          tokenPayload.permissions || tokenPayload['maestro:permissions'] || [],
+        tenant:
+          tokenPayload.tenant || tokenPayload['maestro:tenant'] || 'default',
       };
 
       return {
         isAuthenticated: true,
         isLoading: false,
         user,
-        tenant: user.tenant ? {
-          id: user.tenant,
-          name: user.tenant,
-          tier: 'standard',
-          limits: {},
-          users: []
-        } : null,
+        tenant: user.tenant
+          ? {
+              id: user.tenant,
+              name: user.tenant,
+              tier: 'standard',
+              limits: {},
+              users: [],
+            }
+          : null,
         accessToken,
         refreshToken: this.getItem('refresh_token'),
         error: null,

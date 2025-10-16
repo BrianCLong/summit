@@ -4,51 +4,53 @@ Adaptive Canary Controller for MC Platform v0.3.5
 Self-tuning canary deployments with composite scoring
 """
 
-import json
-import time
 import argparse
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-import statistics
+import json
 import random
+import statistics
+import time
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 
 @dataclass
 class MetricSource:
     """Configuration for a metric source"""
+
     name: str
     endpoint: str
     query: str
     weight: float
-    threshold: Dict[str, float]  # {promote: value, hold: value}
+    threshold: dict[str, float]  # {promote: value, hold: value}
     invert: bool = False  # True if lower values are better
 
 
 @dataclass
 class CanaryScore:
     """Canary deployment score"""
+
     timestamp: str
-    baseline_metrics: Dict[str, float]
-    candidate_metrics: Dict[str, float]
-    weighted_scores: Dict[str, float]
+    baseline_metrics: dict[str, float]
+    candidate_metrics: dict[str, float]
+    weighted_scores: dict[str, float]
     composite_score: float
     decision: str  # PROMOTE, HOLD, ROLLBACK
     confidence: float
-    reasons: List[str]
+    reasons: list[str]
 
 
 class AdaptiveCanaryController:
     """Self-tuning canary controller with composite scoring"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.metric_sources = self._parse_metric_sources(config.get("metrics", []))
         self.decision_history = []
         self.baseline_history = []
         self.adaptation_enabled = config.get("adaptation_enabled", True)
 
-    def _parse_metric_sources(self, metrics_config: List[Dict]) -> List[MetricSource]:
+    def _parse_metric_sources(self, metrics_config: list[dict]) -> list[MetricSource]:
         """Parse metric sources from configuration"""
         sources = []
 
@@ -58,29 +60,29 @@ class AdaptiveCanaryController:
                 "query": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))*1000",
                 "weight": 0.4,
                 "threshold": {"promote": 350.0, "hold": 500.0},
-                "invert": True
+                "invert": True,
             },
             {
                 "name": "error_rate",
-                "query": "rate(http_requests_total{code=~\"5..\"}[5m])*100",
+                "query": 'rate(http_requests_total{code=~"5.."}[5m])*100',
                 "weight": 0.3,
                 "threshold": {"promote": 1.0, "hold": 3.0},
-                "invert": True
+                "invert": True,
             },
             {
                 "name": "cost_per_1k",
                 "query": "sum(rate(mc_cost_total[5m]))*1000/sum(rate(http_requests_total[5m]))",
                 "weight": 0.2,
                 "threshold": {"promote": 0.5, "hold": 0.8},
-                "invert": True
+                "invert": True,
             },
             {
                 "name": "tail_p99",
                 "query": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))*1000",
                 "weight": 0.1,
                 "threshold": {"promote": 800.0, "hold": 1200.0},
-                "invert": True
-            }
+                "invert": True,
+            },
         ]
 
         # Use provided metrics or defaults
@@ -93,13 +95,13 @@ class AdaptiveCanaryController:
                 query=metric_config["query"],
                 weight=metric_config["weight"],
                 threshold=metric_config["threshold"],
-                invert=metric_config.get("invert", False)
+                invert=metric_config.get("invert", False),
             )
             sources.append(source)
 
         return sources
 
-    def fetch_metric(self, source: MetricSource, service_selector: str) -> Optional[float]:
+    def fetch_metric(self, source: MetricSource, service_selector: str) -> float | None:
         """Fetch metric value from Prometheus (simulated)"""
 
         # In production, this would make actual Prometheus requests
@@ -108,7 +110,7 @@ class AdaptiveCanaryController:
             "p95_latency": {"baseline": 142.5, "candidate": 138.2, "variance": 15.0},
             "error_rate": {"baseline": 0.12, "candidate": 0.09, "variance": 0.05},
             "cost_per_1k": {"baseline": 0.234, "candidate": 0.198, "variance": 0.05},
-            "tail_p99": {"baseline": 324.1, "candidate": 312.7, "variance": 25.0}
+            "tail_p99": {"baseline": 324.1, "candidate": 312.7, "variance": 25.0},
         }
 
         if source.name in metric_simulations:
@@ -125,8 +127,9 @@ class AdaptiveCanaryController:
         # Default fallback
         return random.uniform(0.1, 1.0)
 
-    def calculate_metric_score(self, baseline: float, candidate: float,
-                              threshold: Dict[str, float], invert: bool = False) -> float:
+    def calculate_metric_score(
+        self, baseline: float, candidate: float, threshold: dict[str, float], invert: bool = False
+    ) -> float:
         """Calculate normalized score for a metric comparison"""
 
         if invert:
@@ -183,15 +186,21 @@ class AdaptiveCanaryController:
 
             # Log metric details
             status_emoji = "✅" if metric_score > 0.7 else "⚠️" if metric_score > 0.3 else "❌"
-            print(f"  {status_emoji} {source.name}: {candidate_value:.3f} vs {baseline_value:.3f} "
-                  f"(score: {metric_score:.3f}, weight: {source.weight:.1f})")
+            print(
+                f"  {status_emoji} {source.name}: {candidate_value:.3f} vs {baseline_value:.3f} "
+                f"(score: {metric_score:.3f}, weight: {source.weight:.1f})"
+            )
 
             # Add reasoning
             if metric_score < 0.5:
                 if source.invert:
-                    reasons.append(f"{source.name} regression: {candidate_value:.3f} > {source.threshold['hold']}")
+                    reasons.append(
+                        f"{source.name} regression: {candidate_value:.3f} > {source.threshold['hold']}"
+                    )
                 else:
-                    reasons.append(f"{source.name} regression: {candidate_value:.3f} < {source.threshold['hold']}")
+                    reasons.append(
+                        f"{source.name} regression: {candidate_value:.3f} < {source.threshold['hold']}"
+                    )
 
         # Calculate composite score
         composite_score = sum(weighted_scores.values())
@@ -203,7 +212,9 @@ class AdaptiveCanaryController:
             reasons.append(f"Composite score {composite_score:.3f} exceeds promotion threshold")
         elif composite_score >= 0.5:
             decision = "HOLD"
-            reasons.append(f"Composite score {composite_score:.3f} in hold range - extending bake time")
+            reasons.append(
+                f"Composite score {composite_score:.3f} in hold range - extending bake time"
+            )
         else:
             decision = "ROLLBACK"
             reasons.append(f"Composite score {composite_score:.3f} below rollback threshold")
@@ -216,14 +227,16 @@ class AdaptiveCanaryController:
             composite_score=composite_score,
             decision=decision,
             confidence=confidence,
-            reasons=reasons
+            reasons=reasons,
         )
 
-        print(f"  🎯 Composite Score: {composite_score:.3f} → {decision} (confidence: {confidence:.3f})")
+        print(
+            f"  🎯 Composite Score: {composite_score:.3f} → {decision} (confidence: {confidence:.3f})"
+        )
 
         return score
 
-    def adapt_thresholds(self, recent_scores: List[CanaryScore]) -> None:
+    def adapt_thresholds(self, recent_scores: list[CanaryScore]) -> None:
         """Adapt thresholds based on recent performance"""
 
         if not self.adaptation_enabled or len(recent_scores) < 5:
@@ -247,18 +260,25 @@ class AdaptiveCanaryController:
                     # Relax promote threshold slightly if consistently good
                     if source.invert:
                         new_threshold = avg_value + (2 * std_value)
-                        source.threshold["promote"] = min(source.threshold["promote"] * 1.1, new_threshold)
+                        source.threshold["promote"] = min(
+                            source.threshold["promote"] * 1.1, new_threshold
+                        )
                     else:
                         new_threshold = avg_value - (2 * std_value)
-                        source.threshold["promote"] = max(source.threshold["promote"] * 0.9, new_threshold)
+                        source.threshold["promote"] = max(
+                            source.threshold["promote"] * 0.9, new_threshold
+                        )
 
-                    print(f"  📊 Adapted {source.name} promote threshold to {source.threshold['promote']:.3f}")
+                    print(
+                        f"  📊 Adapted {source.name} promote threshold to {source.threshold['promote']:.3f}"
+                    )
 
-    def run_evaluation(self, baseline_url: str, candidate_url: str,
-                       window_minutes: int = 10) -> Dict[str, Any]:
+    def run_evaluation(
+        self, baseline_url: str, candidate_url: str, window_minutes: int = 10
+    ) -> dict[str, Any]:
         """Run canary evaluation over specified window"""
 
-        print(f"🚀 MC Platform v0.3.5 - Adaptive Canary Evaluation")
+        print("🚀 MC Platform v0.3.5 - Adaptive Canary Evaluation")
         print(f"   Baseline: {baseline_url}")
         print(f"   Candidate: {candidate_url}")
         print(f"   Window: {window_minutes} minutes")
@@ -280,11 +300,11 @@ class AdaptiveCanaryController:
 
             # Check for early termination conditions
             if score.decision == "ROLLBACK":
-                print(f"🛑 Early termination: ROLLBACK decision")
+                print("🛑 Early termination: ROLLBACK decision")
                 break
 
             if len(scores) >= 3 and all(s.decision == "PROMOTE" for s in scores[-3:]):
-                print(f"🚀 Early termination: 3 consecutive PROMOTE decisions")
+                print("🚀 Early termination: 3 consecutive PROMOTE decisions")
                 break
 
             # Wait for next evaluation (simplified for demo)
@@ -306,17 +326,17 @@ class AdaptiveCanaryController:
                 "window_minutes": window_minutes,
                 "evaluations_completed": len(scores),
                 "start_time": datetime.fromtimestamp(start_time).isoformat() + "Z",
-                "end_time": datetime.utcnow().isoformat() + "Z"
+                "end_time": datetime.utcnow().isoformat() + "Z",
             },
             "decision_summary": {
                 "final_decision": final_score.decision if final_score else "NO_DATA",
                 "decision_counts": decision_counts,
                 "final_composite_score": final_score.composite_score if final_score else 0.0,
-                "confidence": final_score.confidence if final_score else 0.0
+                "confidence": final_score.confidence if final_score else 0.0,
             },
             "metric_analysis": self._analyze_metrics(scores),
             "threshold_adaptations": self._get_threshold_changes(),
-            "all_scores": [self._score_to_dict(score) for score in scores]
+            "all_scores": [self._score_to_dict(score) for score in scores],
         }
 
         print(f"\n🎯 Final Decision: {report['decision_summary']['final_decision']}")
@@ -325,7 +345,7 @@ class AdaptiveCanaryController:
 
         return report
 
-    def _analyze_metrics(self, scores: List[CanaryScore]) -> Dict[str, Any]:
+    def _analyze_metrics(self, scores: list[CanaryScore]) -> dict[str, Any]:
         """Analyze metric trends across evaluations"""
 
         if not scores:
@@ -341,14 +361,23 @@ class AdaptiveCanaryController:
                 analysis[source.name] = {
                     "candidate_avg": statistics.mean(candidate_values),
                     "baseline_avg": statistics.mean(baseline_values),
-                    "candidate_trend": "improving" if candidate_values[-1] < candidate_values[0] else "stable",
-                    "improvement_pct": ((statistics.mean(baseline_values) - statistics.mean(candidate_values)) /
-                                       statistics.mean(baseline_values) * 100) if source.invert else 0
+                    "candidate_trend": (
+                        "improving" if candidate_values[-1] < candidate_values[0] else "stable"
+                    ),
+                    "improvement_pct": (
+                        (
+                            (statistics.mean(baseline_values) - statistics.mean(candidate_values))
+                            / statistics.mean(baseline_values)
+                            * 100
+                        )
+                        if source.invert
+                        else 0
+                    ),
                 }
 
         return analysis
 
-    def _get_threshold_changes(self) -> Dict[str, Any]:
+    def _get_threshold_changes(self) -> dict[str, Any]:
         """Get summary of threshold adaptations"""
 
         changes = {}
@@ -356,12 +385,12 @@ class AdaptiveCanaryController:
             changes[source.name] = {
                 "current_promote": source.threshold["promote"],
                 "current_hold": source.threshold["hold"],
-                "adaptation_enabled": self.adaptation_enabled
+                "adaptation_enabled": self.adaptation_enabled,
             }
 
         return changes
 
-    def _score_to_dict(self, score: CanaryScore) -> Dict[str, Any]:
+    def _score_to_dict(self, score: CanaryScore) -> dict[str, Any]:
         """Convert CanaryScore to dictionary"""
 
         return {
@@ -372,31 +401,32 @@ class AdaptiveCanaryController:
             "composite_score": score.composite_score,
             "decision": score.decision,
             "confidence": score.confidence,
-            "reasons": score.reasons
+            "reasons": score.reasons,
         }
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Adaptive Canary Controller for MC Platform v0.3.5")
-    parser.add_argument('--baseline', required=True, help='Baseline service URL')
-    parser.add_argument('--candidate', required=True, help='Candidate service URL')
-    parser.add_argument('--window', type=int, default=10, help='Evaluation window in minutes')
-    parser.add_argument('--score-weights', help='Metric weights (format: p95=0.5,error=0.3,cost=0.2)')
-    parser.add_argument('--out', required=True, help='Output file for evaluation report')
+    parser = argparse.ArgumentParser(
+        description="Adaptive Canary Controller for MC Platform v0.3.5"
+    )
+    parser.add_argument("--baseline", required=True, help="Baseline service URL")
+    parser.add_argument("--candidate", required=True, help="Candidate service URL")
+    parser.add_argument("--window", type=int, default=10, help="Evaluation window in minutes")
+    parser.add_argument(
+        "--score-weights", help="Metric weights (format: p95=0.5,error=0.3,cost=0.2)"
+    )
+    parser.add_argument("--out", required=True, help="Output file for evaluation report")
 
     args = parser.parse_args()
 
     # Parse score weights if provided
-    config = {
-        "prometheus_url": "http://localhost:9090",
-        "adaptation_enabled": True
-    }
+    config = {"prometheus_url": "http://localhost:9090", "adaptation_enabled": True}
 
     if args.score_weights:
         # Parse weights like "p95=0.5,error=0.3,cost=0.2"
         weights = {}
-        for weight_spec in args.score_weights.split(','):
-            metric, weight = weight_spec.split('=')
+        for weight_spec in args.score_weights.split(","):
+            metric, weight = weight_spec.split("=")
             weights[metric.strip()] = float(weight)
 
         print(f"📊 Using custom metric weights: {weights}")
@@ -409,15 +439,16 @@ def main():
 
     # Save report
     import os
+
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
-    with open(args.out, 'w') as f:
+    with open(args.out, "w") as f:
         json.dump(report, f, indent=2)
 
     print(f"\n📄 Evaluation report saved: {args.out}")
 
     # Return decision for CI/CD integration
-    final_decision = report['decision_summary']['final_decision']
+    final_decision = report["decision_summary"]["final_decision"]
     print(f"🔗 Exit code: {'0' if final_decision == 'PROMOTE' else '1'}")
 
     return 0 if final_decision == "PROMOTE" else 1
@@ -425,36 +456,38 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
+
+
 # Prometheus metrics export for observability
 class PrometheusMetrics:
     """Export adaptive canary metrics to Prometheus"""
-    
+
     def __init__(self):
         self.metrics = {}
-    
+
     def export_composite_score(self, score: float, decision: str, timestamp: str):
         """Export composite score for Prometheus scraping"""
-        
+
         # Create metric output format that Prometheus can scrape
         metric_data = {
             "mc_canary_composite_score": score,
             "mc_canary_decision": 1 if decision == "PROMOTE" else 0,
-            "timestamp": timestamp
+            "timestamp": timestamp,
         }
-        
+
         # Write metrics to file for scraping (in production, use proper Prometheus client)
-        with open('/tmp/mc_canary_metrics.prom', 'w') as f:
-            f.write(f"# MC Platform v0.3.5 Adaptive Canary Metrics\n")
+        with open("/tmp/mc_canary_metrics.prom", "w") as f:
+            f.write("# MC Platform v0.3.5 Adaptive Canary Metrics\n")
             f.write(f"mc_canary_composite_score {score}\n")
             f.write(f"mc_canary_decision_promote {1 if decision == 'PROMOTE' else 0}\n")
             f.write(f"mc_canary_decision_hold {1 if decision == 'HOLD' else 0}\n")
             f.write(f"mc_canary_decision_rollback {1 if decision == 'ROLLBACK' else 0}\n")
-        
+
         print(f"📊 Exported composite score: {score} (decision: {decision})")
+
 
 # Add to main adaptive canary function
 def export_metrics_for_prometheus(score: CanaryScore):
     """Export metrics for Prometheus collection"""
     metrics = PrometheusMetrics()
     metrics.export_composite_score(score.composite_score, score.decision, score.timestamp)
-

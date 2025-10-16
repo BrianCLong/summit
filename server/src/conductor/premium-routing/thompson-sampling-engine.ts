@@ -6,37 +6,37 @@ import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 interface ContextFeatures {
-  queryComplexity: number;        // 0-1 complexity score
-  queryLength: number;            // Token count
+  queryComplexity: number; // 0-1 complexity score
+  queryLength: number; // Token count
   urgency: 'low' | 'medium' | 'high' | 'critical';
   taskType: string;
-  domainSpecialty?: string;       // Optional domain specialization
-  expectedOutputLength: number;   // Expected response tokens
-  qualityRequirement: number;     // 0-1 quality threshold
-  budgetConstraint: number;       // Available budget
-  timeConstraint?: number;        // Max latency in ms
+  domainSpecialty?: string; // Optional domain specialization
+  expectedOutputLength: number; // Expected response tokens
+  qualityRequirement: number; // 0-1 quality threshold
+  budgetConstraint: number; // Available budget
+  timeConstraint?: number; // Max latency in ms
 }
 
 interface ModelArm {
   modelId: string;
-  contextHash: string;           // Hash of context features
-  alpha: number;                 // Success count + 1 (Beta distribution)
-  beta: number;                  // Failure count + 1 (Beta distribution)
-  rewardSum: number;             // Cumulative reward
-  pullCount: number;             // Number of times selected
+  contextHash: string; // Hash of context features
+  alpha: number; // Success count + 1 (Beta distribution)
+  beta: number; // Failure count + 1 (Beta distribution)
+  rewardSum: number; // Cumulative reward
+  pullCount: number; // Number of times selected
   lastUpdated: Date;
-  qualityScore: number;          // Average quality score
-  costEfficiency: number;        // Reward per dollar spent
-  latencyScore: number;          // Speed performance
-  contextualReward: number;      // Context-specific reward
+  qualityScore: number; // Average quality score
+  costEfficiency: number; // Reward per dollar spent
+  latencyScore: number; // Speed performance
+  contextualReward: number; // Context-specific reward
 }
 
 interface BandidReward {
-  qualityScore: number;          // 0-1 quality rating
-  costEfficiency: number;        // Value per dollar
-  speedScore: number;            // Latency performance 0-1
-  successFlag: boolean;          // Binary success/failure
-  userFeedback?: number;         // Optional 1-5 user rating
+  qualityScore: number; // 0-1 quality rating
+  costEfficiency: number; // Value per dollar
+  speedScore: number; // Latency performance 0-1
+  successFlag: boolean; // Binary success/failure
+  userFeedback?: number; // Optional 1-5 user rating
   actualCost: number;
   actualLatency: number;
 }
@@ -55,7 +55,7 @@ export class ThompsonSamplingEngine {
   private redis: ReturnType<typeof createClient>;
   private contextualArms: Map<string, ModelArm[]> = new Map();
   private contextFeatureCache: Map<string, ContextFeatures> = new Map();
-  private explorationDecay = 0.95;  // Decay factor for exploration
+  private explorationDecay = 0.95; // Decay factor for exploration
   private minExplorationRate = 0.1; // Minimum exploration rate
   private contextSimilarityThreshold = 0.8;
 
@@ -76,7 +76,7 @@ export class ThompsonSamplingEngine {
   async selectModel(
     availableModels: string[],
     contextFeatures: ContextFeatures,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<ThompsonSamplingResult> {
     const contextHash = this.hashContextFeatures(contextFeatures);
     const startTime = Date.now();
@@ -85,62 +85,82 @@ export class ThompsonSamplingEngine {
       // Get or create contextual arms for this context
       let contextArms = this.contextualArms.get(contextHash);
       if (!contextArms) {
-        contextArms = await this.initializeContextualArms(availableModels, contextHash, contextFeatures);
+        contextArms = await this.initializeContextualArms(
+          availableModels,
+          contextHash,
+          contextFeatures,
+        );
         this.contextualArms.set(contextHash, contextArms);
       }
 
       // Filter arms for available models
-      const availableArms = contextArms.filter(arm => availableModels.includes(arm.modelId));
-      
+      const availableArms = contextArms.filter((arm) =>
+        availableModels.includes(arm.modelId),
+      );
+
       if (availableArms.length === 0) {
         throw new Error('No available models for contextual selection');
       }
 
       // Calculate exploration rate based on total pulls and time decay
-      const totalPulls = availableArms.reduce((sum, arm) => sum + arm.pullCount, 0);
+      const totalPulls = availableArms.reduce(
+        (sum, arm) => sum + arm.pullCount,
+        0,
+      );
       const explorationRate = Math.max(
         this.minExplorationRate,
-        1 / Math.sqrt(totalPulls + 1) * this.explorationDecay
+        (1 / Math.sqrt(totalPulls + 1)) * this.explorationDecay,
       );
 
       // Sample from posterior distributions for each arm
-      const sampledArms = availableArms.map(arm => ({
+      const sampledArms = availableArms.map((arm) => ({
         arm,
-        sampledReward: this.sampleFromPosterior(arm, contextFeatures, explorationRate),
-        contextualScore: this.calculateContextualScore(arm, contextFeatures)
+        sampledReward: this.sampleFromPosterior(
+          arm,
+          contextFeatures,
+          explorationRate,
+        ),
+        contextualScore: this.calculateContextualScore(arm, contextFeatures),
       }));
 
       // Apply Upper Confidence Bound (UCB) for exploration bonus
-      const ucbArms = sampledArms.map(({ arm, sampledReward, contextualScore }) => {
-        const ucbBonus = Math.sqrt((2 * Math.log(totalPulls + 1)) / (arm.pullCount + 1));
-        const explorationBonus = explorationRate * ucbBonus;
-        
-        return {
-          arm,
-          finalScore: sampledReward + contextualScore + explorationBonus,
-          sampledReward,
-          explorationBonus,
-          contextualScore
-        };
-      });
+      const ucbArms = sampledArms.map(
+        ({ arm, sampledReward, contextualScore }) => {
+          const ucbBonus = Math.sqrt(
+            (2 * Math.log(totalPulls + 1)) / (arm.pullCount + 1),
+          );
+          const explorationBonus = explorationRate * ucbBonus;
+
+          return {
+            arm,
+            finalScore: sampledReward + contextualScore + explorationBonus,
+            sampledReward,
+            explorationBonus,
+            contextualScore,
+          };
+        },
+      );
 
       // Select best arm with highest final score
       ucbArms.sort((a, b) => b.finalScore - a.finalScore);
       const selectedArm = ucbArms[0];
 
       // Calculate context confidence based on historical performance
-      const contextConfidence = this.calculateContextConfidence(selectedArm.arm, contextFeatures);
+      const contextConfidence = this.calculateContextConfidence(
+        selectedArm.arm,
+        contextFeatures,
+      );
 
       // Generate reasoning trace
       const reasoningTrace = this.generateReasoningTrace(
         selectedArm,
         contextFeatures,
         explorationRate,
-        totalPulls
+        totalPulls,
       );
 
       // Create fallback ranking
-      const fallbackRanking = ucbArms.slice(1, 4).map(arm => arm.arm.modelId);
+      const fallbackRanking = ucbArms.slice(1, 4).map((arm) => arm.arm.modelId);
 
       const result: ThompsonSamplingResult = {
         selectedModelId: selectedArm.arm.modelId,
@@ -148,7 +168,7 @@ export class ThompsonSamplingEngine {
         explorationFactor: explorationRate,
         contextConfidence,
         reasoningTrace,
-        fallbackRanking
+        fallbackRanking,
       };
 
       // Update pull count immediately
@@ -161,11 +181,11 @@ export class ThompsonSamplingEngine {
       prometheusConductorMetrics.recordOperationalMetric(
         'thompson_sampling_selection_time',
         selectionTime,
-        { 
+        {
           selected_model: selectedArm.arm.modelId,
           context_hash: contextHash.substring(0, 8),
-          exploration_rate: explorationRate.toFixed(3)
-        }
+          exploration_rate: explorationRate.toFixed(3),
+        },
       );
 
       prometheusConductorMetrics.recordOperationalEvent(
@@ -174,8 +194,8 @@ export class ThompsonSamplingEngine {
         {
           model_id: selectedArm.arm.modelId,
           context_confidence: contextConfidence.toFixed(2),
-          total_pulls: totalPulls.toString()
-        }
+          total_pulls: totalPulls.toString(),
+        },
       );
 
       logger.info('Thompson sampling selection completed', {
@@ -184,25 +204,24 @@ export class ThompsonSamplingEngine {
         explorationRate,
         contextConfidence,
         selectionTime,
-        sessionId
+        sessionId,
       });
 
       return result;
-
     } catch (error) {
       const selectionTime = Date.now() - startTime;
-      
+
       prometheusConductorMetrics.recordOperationalEvent(
         'thompson_sampling_error',
         false,
-        { error_type: error.name, context_hash: contextHash.substring(0, 8) }
+        { error_type: error.name, context_hash: contextHash.substring(0, 8) },
       );
 
       logger.error('Thompson sampling selection failed', {
         error: error.message,
         contextHash: contextHash.substring(0, 8),
         availableModels,
-        selectionTime
+        selectionTime,
       });
 
       throw error;
@@ -216,17 +235,20 @@ export class ThompsonSamplingEngine {
     modelId: string,
     contextFeatures: ContextFeatures,
     reward: BandidReward,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<void> {
     const contextHash = this.hashContextFeatures(contextFeatures);
     const contextArms = this.contextualArms.get(contextHash);
-    
+
     if (!contextArms) {
-      logger.warn('No contextual arms found for reward update', { modelId, contextHash });
+      logger.warn('No contextual arms found for reward update', {
+        modelId,
+        contextHash,
+      });
       return;
     }
 
-    const arm = contextArms.find(a => a.modelId === modelId);
+    const arm = contextArms.find((a) => a.modelId === modelId);
     if (!arm) {
       logger.warn('Arm not found for reward update', { modelId, contextHash });
       return;
@@ -234,25 +256,35 @@ export class ThompsonSamplingEngine {
 
     try {
       // Calculate composite reward score
-      const compositeReward = this.calculateCompositeReward(reward, contextFeatures);
-      
+      const compositeReward = this.calculateCompositeReward(
+        reward,
+        contextFeatures,
+      );
+
       // Update Beta distribution parameters
       if (reward.successFlag) {
         arm.alpha += compositeReward;
       } else {
-        arm.beta += (1 - compositeReward);
+        arm.beta += 1 - compositeReward;
       }
 
       // Update running averages with exponential moving average
       const learningRate = 0.1;
-      arm.qualityScore = (arm.qualityScore * (1 - learningRate)) + (reward.qualityScore * learningRate);
-      arm.costEfficiency = (arm.costEfficiency * (1 - learningRate)) + (reward.costEfficiency * learningRate);
-      arm.latencyScore = (arm.latencyScore * (1 - learningRate)) + 
-        ((1 - Math.min(reward.actualLatency / 10000, 1)) * learningRate); // Normalize latency to 0-1 scale
+      arm.qualityScore =
+        arm.qualityScore * (1 - learningRate) +
+        reward.qualityScore * learningRate;
+      arm.costEfficiency =
+        arm.costEfficiency * (1 - learningRate) +
+        reward.costEfficiency * learningRate;
+      arm.latencyScore =
+        arm.latencyScore * (1 - learningRate) +
+        (1 - Math.min(reward.actualLatency / 10000, 1)) * learningRate; // Normalize latency to 0-1 scale
 
       // Update contextual reward with context-specific weighting
       const contextWeight = this.calculateContextWeight(contextFeatures);
-      arm.contextualReward = (arm.contextualReward * (1 - contextWeight)) + (compositeReward * contextWeight);
+      arm.contextualReward =
+        arm.contextualReward * (1 - contextWeight) +
+        compositeReward * contextWeight;
 
       // Update cumulative metrics
       arm.rewardSum += compositeReward;
@@ -269,14 +301,14 @@ export class ThompsonSamplingEngine {
         {
           model_id: modelId,
           context_hash: contextHash.substring(0, 8),
-          success: reward.successFlag.toString()
-        }
+          success: reward.successFlag.toString(),
+        },
       );
 
       prometheusConductorMetrics.recordOperationalMetric(
         'model_quality_score',
         arm.qualityScore,
-        { model_id: modelId, context_hash: contextHash.substring(0, 8) }
+        { model_id: modelId, context_hash: contextHash.substring(0, 8) },
       );
 
       logger.info('Thompson sampling arm updated', {
@@ -286,14 +318,13 @@ export class ThompsonSamplingEngine {
         beta: arm.beta,
         qualityScore: arm.qualityScore,
         costEfficiency: arm.costEfficiency,
-        sessionId
+        sessionId,
       });
-
     } catch (error) {
       logger.error('Failed to update Thompson sampling arm', {
         error: error.message,
         modelId,
-        contextHash
+        contextHash,
       });
     }
   }
@@ -304,35 +335,42 @@ export class ThompsonSamplingEngine {
   private sampleFromPosterior(
     arm: ModelArm,
     contextFeatures: ContextFeatures,
-    explorationRate: number
+    explorationRate: number,
   ): number {
     // Sample from Beta distribution
     const betaSample = this.sampleBetaDistribution(arm.alpha, arm.beta);
-    
+
     // Apply contextual adjustments
     const contextualBonus = this.calculateContextualBonus(arm, contextFeatures);
-    
+
     // Apply exploration bonus for less-explored arms
-    const explorationBonus = explorationRate * (1 / Math.sqrt(arm.pullCount + 1));
-    
+    const explorationBonus =
+      explorationRate * (1 / Math.sqrt(arm.pullCount + 1));
+
     // Combine all factors
-    const adjustedSample = Math.min(1, betaSample + contextualBonus + explorationBonus);
-    
+    const adjustedSample = Math.min(
+      1,
+      betaSample + contextualBonus + explorationBonus,
+    );
+
     return adjustedSample;
   }
 
   /**
    * Calculate contextual score based on feature similarity
    */
-  private calculateContextualScore(arm: ModelArm, contextFeatures: ContextFeatures): number {
+  private calculateContextualScore(
+    arm: ModelArm,
+    contextFeatures: ContextFeatures,
+  ): number {
     // Weight different contextual factors
     const weights = {
       complexity: 0.25,
-      urgency: 0.20,
-      taskType: 0.20,
+      urgency: 0.2,
+      taskType: 0.2,
       quality: 0.15,
-      budget: 0.10,
-      latency: 0.10
+      budget: 0.1,
+      latency: 0.1,
     };
 
     let score = 0;
@@ -340,7 +378,10 @@ export class ThompsonSamplingEngine {
     // Complexity matching
     if (contextFeatures.queryComplexity > 0.7 && arm.qualityScore > 0.8) {
       score += weights.complexity * 0.8;
-    } else if (contextFeatures.queryComplexity < 0.3 && arm.costEfficiency > 0.7) {
+    } else if (
+      contextFeatures.queryComplexity < 0.3 &&
+      arm.costEfficiency > 0.7
+    ) {
       score += weights.complexity * 0.8;
     }
 
@@ -368,18 +409,23 @@ export class ThompsonSamplingEngine {
   /**
    * Calculate context confidence based on historical performance
    */
-  private calculateContextConfidence(arm: ModelArm, contextFeatures: ContextFeatures): number {
+  private calculateContextConfidence(
+    arm: ModelArm,
+    contextFeatures: ContextFeatures,
+  ): number {
     const pullCount = arm.pullCount;
     const successRate = arm.alpha / (arm.alpha + arm.beta);
-    
+
     // Confidence increases with more data points and higher success rate
     const dataConfidence = Math.min(1, pullCount / 50); // Normalize to 50 pulls for full confidence
     const performanceConfidence = successRate;
-    
+
     // Context-specific confidence adjustments
     const contextMatch = this.calculateContextualScore(arm, contextFeatures);
-    
-    return (dataConfidence * 0.4) + (performanceConfidence * 0.4) + (contextMatch * 0.2);
+
+    return (
+      dataConfidence * 0.4 + performanceConfidence * 0.4 + contextMatch * 0.2
+    );
   }
 
   /**
@@ -389,35 +435,40 @@ export class ThompsonSamplingEngine {
     selectedArm: any,
     contextFeatures: ContextFeatures,
     explorationRate: number,
-    totalPulls: number
+    totalPulls: number,
   ): string {
     const arm = selectedArm.arm;
-    const successRate = (arm.alpha / (arm.alpha + arm.beta) * 100).toFixed(1);
-    
-    return `Selected model ${arm.modelId} based on Thompson Sampling with contextual bandits. ` +
-           `Sampled reward: ${selectedArm.sampledReward.toFixed(3)}, ` +
-           `Historical success rate: ${successRate}%, ` +
-           `Pull count: ${arm.pullCount}, ` +
-           `Quality score: ${(arm.qualityScore * 100).toFixed(1)}%, ` +
-           `Cost efficiency: ${(arm.costEfficiency * 100).toFixed(1)}%, ` +
-           `Contextual match: ${(selectedArm.contextualScore * 100).toFixed(1)}%, ` +
-           `Exploration rate: ${(explorationRate * 100).toFixed(1)}%, ` +
-           `Total arms pulled: ${totalPulls}. ` +
-           `Context: ${contextFeatures.taskType}, urgency=${contextFeatures.urgency}, ` +
-           `complexity=${(contextFeatures.queryComplexity * 100).toFixed(0)}%.`;
+    const successRate = ((arm.alpha / (arm.alpha + arm.beta)) * 100).toFixed(1);
+
+    return (
+      `Selected model ${arm.modelId} based on Thompson Sampling with contextual bandits. ` +
+      `Sampled reward: ${selectedArm.sampledReward.toFixed(3)}, ` +
+      `Historical success rate: ${successRate}%, ` +
+      `Pull count: ${arm.pullCount}, ` +
+      `Quality score: ${(arm.qualityScore * 100).toFixed(1)}%, ` +
+      `Cost efficiency: ${(arm.costEfficiency * 100).toFixed(1)}%, ` +
+      `Contextual match: ${(selectedArm.contextualScore * 100).toFixed(1)}%, ` +
+      `Exploration rate: ${(explorationRate * 100).toFixed(1)}%, ` +
+      `Total arms pulled: ${totalPulls}. ` +
+      `Context: ${contextFeatures.taskType}, urgency=${contextFeatures.urgency}, ` +
+      `complexity=${(contextFeatures.queryComplexity * 100).toFixed(0)}%.`
+    );
   }
 
   /**
    * Calculate composite reward from multiple performance metrics
    */
-  private calculateCompositeReward(reward: BandidReward, contextFeatures: ContextFeatures): number {
+  private calculateCompositeReward(
+    reward: BandidReward,
+    contextFeatures: ContextFeatures,
+  ): number {
     // Dynamic weights based on context
     const weights = this.calculateRewardWeights(contextFeatures);
-    
-    const compositeReward = 
-      (reward.qualityScore * weights.quality) +
-      (reward.costEfficiency * weights.cost) +
-      (reward.speedScore * weights.speed) +
+
+    const compositeReward =
+      reward.qualityScore * weights.quality +
+      reward.costEfficiency * weights.cost +
+      reward.speedScore * weights.speed +
       (reward.successFlag ? 1 : 0) * weights.success +
       ((reward.userFeedback || 3) / 5) * weights.feedback;
 
@@ -429,13 +480,38 @@ export class ThompsonSamplingEngine {
    */
   private calculateRewardWeights(contextFeatures: ContextFeatures): any {
     const urgencyWeights = {
-      critical: { quality: 0.2, cost: 0.1, speed: 0.4, success: 0.2, feedback: 0.1 },
-      high: { quality: 0.3, cost: 0.15, speed: 0.3, success: 0.15, feedback: 0.1 },
-      medium: { quality: 0.35, cost: 0.25, speed: 0.2, success: 0.1, feedback: 0.1 },
-      low: { quality: 0.3, cost: 0.4, speed: 0.15, success: 0.05, feedback: 0.1 }
+      critical: {
+        quality: 0.2,
+        cost: 0.1,
+        speed: 0.4,
+        success: 0.2,
+        feedback: 0.1,
+      },
+      high: {
+        quality: 0.3,
+        cost: 0.15,
+        speed: 0.3,
+        success: 0.15,
+        feedback: 0.1,
+      },
+      medium: {
+        quality: 0.35,
+        cost: 0.25,
+        speed: 0.2,
+        success: 0.1,
+        feedback: 0.1,
+      },
+      low: {
+        quality: 0.3,
+        cost: 0.4,
+        speed: 0.15,
+        success: 0.05,
+        feedback: 0.1,
+      },
     };
 
-    let baseWeights = urgencyWeights[contextFeatures.urgency] || urgencyWeights.medium;
+    const baseWeights =
+      urgencyWeights[contextFeatures.urgency] || urgencyWeights.medium;
 
     // Adjust weights based on quality requirements
     if (contextFeatures.qualityRequirement > 0.8) {
@@ -455,7 +531,10 @@ export class ThompsonSamplingEngine {
   /**
    * Calculate contextual bonus for similar contexts
    */
-  private calculateContextualBonus(arm: ModelArm, contextFeatures: ContextFeatures): number {
+  private calculateContextualBonus(
+    arm: ModelArm,
+    contextFeatures: ContextFeatures,
+  ): number {
     // Find similar contexts and apply transfer learning
     const similarContexts = this.findSimilarContexts(contextFeatures);
     let bonusSum = 0;
@@ -463,8 +542,8 @@ export class ThompsonSamplingEngine {
 
     for (const [contextHash, similarity] of similarContexts) {
       const contextArms = this.contextualArms.get(contextHash);
-      const similarArm = contextArms?.find(a => a.modelId === arm.modelId);
-      
+      const similarArm = contextArms?.find((a) => a.modelId === arm.modelId);
+
       if (similarArm && similarity > this.contextSimilarityThreshold) {
         const transferReward = similarArm.contextualReward * similarity;
         bonusSum += transferReward;
@@ -478,12 +557,18 @@ export class ThompsonSamplingEngine {
   /**
    * Find similar contexts based on feature distance
    */
-  private findSimilarContexts(contextFeatures: ContextFeatures): Array<[string, number]> {
+  private findSimilarContexts(
+    contextFeatures: ContextFeatures,
+  ): Array<[string, number]> {
     const similarities: Array<[string, number]> = [];
 
     for (const [contextHash, cachedFeatures] of this.contextFeatureCache) {
-      const similarity = this.calculateContextSimilarity(contextFeatures, cachedFeatures);
-      if (similarity > 0.5) { // Only consider reasonably similar contexts
+      const similarity = this.calculateContextSimilarity(
+        contextFeatures,
+        cachedFeatures,
+      );
+      if (similarity > 0.5) {
+        // Only consider reasonably similar contexts
         similarities.push([contextHash, similarity]);
       }
     }
@@ -494,7 +579,10 @@ export class ThompsonSamplingEngine {
   /**
    * Calculate similarity between two contexts
    */
-  private calculateContextSimilarity(context1: ContextFeatures, context2: ContextFeatures): number {
+  private calculateContextSimilarity(
+    context1: ContextFeatures,
+    context2: ContextFeatures,
+  ): number {
     let similarity = 0;
     let factors = 0;
 
@@ -506,23 +594,30 @@ export class ThompsonSamplingEngine {
 
     // Urgency similarity
     const urgencyMap = { low: 0, medium: 1, high: 2, critical: 3 };
-    const urgencyDiff = Math.abs(urgencyMap[context1.urgency] - urgencyMap[context2.urgency]);
+    const urgencyDiff = Math.abs(
+      urgencyMap[context1.urgency] - urgencyMap[context2.urgency],
+    );
     similarity += (1 - urgencyDiff / 3) * 0.2;
     factors += 0.2;
 
     // Complexity similarity
-    const complexityDiff = Math.abs(context1.queryComplexity - context2.queryComplexity);
+    const complexityDiff = Math.abs(
+      context1.queryComplexity - context2.queryComplexity,
+    );
     similarity += (1 - complexityDiff) * 0.2;
     factors += 0.2;
 
     // Quality requirement similarity
-    const qualityDiff = Math.abs(context1.qualityRequirement - context2.qualityRequirement);
+    const qualityDiff = Math.abs(
+      context1.qualityRequirement - context2.qualityRequirement,
+    );
     similarity += (1 - qualityDiff) * 0.15;
     factors += 0.15;
 
     // Budget similarity (normalized)
-    const budgetDiff = Math.abs(context1.budgetConstraint - context2.budgetConstraint) / 
-                      Math.max(context1.budgetConstraint, context2.budgetConstraint, 1);
+    const budgetDiff =
+      Math.abs(context1.budgetConstraint - context2.budgetConstraint) /
+      Math.max(context1.budgetConstraint, context2.budgetConstraint, 1);
     similarity += (1 - budgetDiff) * 0.15;
     factors += 0.15;
 
@@ -538,12 +633,12 @@ export class ThompsonSamplingEngine {
   private calculateContextWeight(contextFeatures: ContextFeatures): number {
     // Higher weight for more specific/constrainted contexts
     let weight = 0.1; // Base weight
-    
+
     if (contextFeatures.qualityRequirement > 0.8) weight += 0.1;
     if (contextFeatures.urgency === 'critical') weight += 0.15;
     if (contextFeatures.queryComplexity > 0.7) weight += 0.1;
     if (contextFeatures.budgetConstraint < 10) weight += 0.05;
-    
+
     return Math.min(0.5, weight); // Max 50% contextual weighting
   }
 
@@ -551,7 +646,7 @@ export class ThompsonSamplingEngine {
     // Use Gamma distribution sampling to generate Beta samples
     const gammaA = this.sampleGammaDistribution(alpha, 1);
     const gammaB = this.sampleGammaDistribution(beta, 1);
-    
+
     return gammaA / (gammaA + gammaB);
   }
 
@@ -559,7 +654,10 @@ export class ThompsonSamplingEngine {
     // Simple Gamma distribution sampling using Marsaglia-Tsang method
     // For production, use a proper statistical library
     if (shape < 1) {
-      return this.sampleGammaDistribution(shape + 1, rate) * Math.pow(Math.random(), 1 / shape);
+      return (
+        this.sampleGammaDistribution(shape + 1, rate) *
+        Math.pow(Math.random(), 1 / shape)
+      );
     }
 
     const d = shape - 1 / 3;
@@ -578,11 +676,11 @@ export class ThompsonSamplingEngine {
       const u = Math.random();
 
       if (u < 1 - 0.0331 * x * x * x * x) {
-        return d * v / rate;
+        return (d * v) / rate;
       }
 
       if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
-        return d * v / rate;
+        return (d * v) / rate;
       }
     }
   }
@@ -599,7 +697,7 @@ export class ThompsonSamplingEngine {
   private async initializeContextualArms(
     modelIds: string[],
     contextHash: string,
-    contextFeatures: ContextFeatures
+    contextFeatures: ContextFeatures,
   ): Promise<ModelArm[]> {
     const arms: ModelArm[] = [];
 
@@ -615,7 +713,7 @@ export class ThompsonSamplingEngine {
         qualityScore: 0.5,
         costEfficiency: 0.5,
         latencyScore: 0.5,
-        contextualReward: 0.5
+        contextualReward: 0.5,
       };
 
       arms.push(arm);
@@ -648,7 +746,7 @@ export class ThompsonSamplingEngine {
           qualityScore: parseFloat(row.quality_score),
           costEfficiency: parseFloat(row.cost_efficiency),
           latencyScore: parseFloat(row.latency_score),
-          contextualReward: parseFloat(row.contextual_reward)
+          contextualReward: parseFloat(row.contextual_reward),
         };
 
         if (!this.contextualArms.has(contextHash)) {
@@ -657,7 +755,9 @@ export class ThompsonSamplingEngine {
         this.contextualArms.get(contextHash)!.push(arm);
       }
 
-      logger.info(`Loaded ${result.rows.length} Thompson sampling arms across ${this.contextualArms.size} contexts`);
+      logger.info(
+        `Loaded ${result.rows.length} Thompson sampling arms across ${this.contextualArms.size} contexts`,
+      );
     } finally {
       client.release();
     }
@@ -666,7 +766,8 @@ export class ThompsonSamplingEngine {
   private async updateArmInDatabase(arm: ModelArm): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO thompson_sampling_arms (
           model_id, context_hash, alpha, beta, reward_sum, pull_count,
           last_updated, quality_score, cost_efficiency, latency_score, contextual_reward
@@ -676,24 +777,37 @@ export class ThompsonSamplingEngine {
           alpha = $3, beta = $4, reward_sum = $5, pull_count = $6,
           last_updated = $7, quality_score = $8, cost_efficiency = $9,
           latency_score = $10, contextual_reward = $11
-      `, [
-        arm.modelId, arm.contextHash, arm.alpha, arm.beta, arm.rewardSum,
-        arm.pullCount, arm.lastUpdated, arm.qualityScore, arm.costEfficiency,
-        arm.latencyScore, arm.contextualReward
-      ]);
+      `,
+        [
+          arm.modelId,
+          arm.contextHash,
+          arm.alpha,
+          arm.beta,
+          arm.rewardSum,
+          arm.pullCount,
+          arm.lastUpdated,
+          arm.qualityScore,
+          arm.costEfficiency,
+          arm.latencyScore,
+          arm.contextualReward,
+        ],
+      );
     } finally {
       client.release();
     }
   }
 
-  private async cacheContextFeatures(contextHash: string, features: ContextFeatures): Promise<void> {
+  private async cacheContextFeatures(
+    contextHash: string,
+    features: ContextFeatures,
+  ): Promise<void> {
     this.contextFeatureCache.set(contextHash, features);
-    
+
     // Cache in Redis with TTL
     await this.redis.setex(
       `context_features:${contextHash}`,
       7 * 24 * 60 * 60, // 7 days TTL
-      JSON.stringify(features)
+      JSON.stringify(features),
     );
   }
 }

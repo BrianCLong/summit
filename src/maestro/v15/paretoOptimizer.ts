@@ -49,46 +49,57 @@ export class ParetoOptimizer extends EventEmitter {
    * Generate Pareto frontier of plans using NSGA-II algorithm
    */
   async generateParetoFrontier(
-    okrs: Array<{ id: string; target: number; current: number; weight: number }>,
+    okrs: Array<{
+      id: string;
+      target: number;
+      current: number;
+      weight: number;
+    }>,
     budgets: { usd: number; carbon: number; ci: number },
-    constraints: Array<{ type: string; value: any }>
+    constraints: Array<{ type: string; value: any }>,
   ): Promise<ParetoSolution[]> {
-    
     // Generate initial population
     const populationSize = 50;
-    this.population = await this.generateInitialPopulation(populationSize, okrs, budgets);
-    
+    this.population = await this.generateInitialPopulation(
+      populationSize,
+      okrs,
+      budgets,
+    );
+
     // Evaluate fitness for each solution
     for (const solution of this.population) {
       solution.fitness = await this.evaluateFitness(solution, okrs, budgets);
       solution.feasible = this.checkConstraints(solution, constraints);
     }
-    
+
     // Run NSGA-II for multiple generations
     const maxGenerations = 10;
     for (let gen = 0; gen < maxGenerations; gen++) {
       this.generation = gen;
       await this.evolvePopulation();
     }
-    
+
     // Extract Pareto frontier
     this.paretoFrontier = this.extractParetoFrontier();
     this.markKneePoint();
-    
-    this.emit('frontierGenerated', { solutions: this.paretoFrontier.length, generation: this.generation });
+
+    this.emit('frontierGenerated', {
+      solutions: this.paretoFrontier.length,
+      generation: this.generation,
+    });
     return this.paretoFrontier;
   }
 
   private async generateInitialPopulation(
     size: number,
     okrs: any[],
-    budgets: any
+    budgets: any,
   ): Promise<ParetoSolution[]> {
     const population: ParetoSolution[] = [];
-    
+
     for (let i = 0; i < size; i++) {
       const actions = Array.from({ length: okrs.length }, () => Math.random());
-      
+
       const solution: ParetoSolution = {
         id: `solution-${i}`,
         actions,
@@ -97,21 +108,20 @@ export class ParetoOptimizer extends EventEmitter {
         kneePoint: false,
         dominationCount: 0,
         dominatedSolutions: [],
-        rank: 0
+        rank: 0,
       };
-      
+
       population.push(solution);
     }
-    
+
     return population;
   }
 
   private async evaluateFitness(
     solution: ParetoSolution,
     okrs: any[],
-    budgets: any
+    budgets: any,
   ): Promise<Fitness> {
-    
     // Calculate OKR improvement
     let okrImprovement = 0;
     for (let i = 0; i < okrs.length; i++) {
@@ -120,35 +130,40 @@ export class ParetoOptimizer extends EventEmitter {
       const potentialGain = (okr.target - okr.current) / okr.target;
       okrImprovement += potentialGain * actionStrength * okr.weight;
     }
-    
+
     // Calculate cost (inverse - higher cost = lower fitness)
     let totalCost = 0;
     for (let i = 0; i < solution.actions.length; i++) {
       const actionCost = solution.actions[i] * 1000; // Base cost per action
       totalCost += actionCost;
     }
-    const costFitness = Math.max(0, 1 - (totalCost / budgets.usd));
-    
+    const costFitness = Math.max(0, 1 - totalCost / budgets.usd);
+
     // Calculate carbon efficiency (inverse - higher carbon = lower fitness)
     let totalCarbon = 0;
     for (let i = 0; i < solution.actions.length; i++) {
       const actionCarbon = solution.actions[i] * 50; // Base carbon per action
       totalCarbon += actionCarbon;
     }
-    const carbonFitness = Math.max(0, 1 - (totalCarbon / budgets.carbon));
-    
+    const carbonFitness = Math.max(0, 1 - totalCarbon / budgets.carbon);
+
     return {
       okr: Math.min(1, okrImprovement),
       cost: costFitness,
-      carbon: carbonFitness
+      carbon: carbonFitness,
     };
   }
 
-  private checkConstraints(solution: ParetoSolution, constraints: any[]): boolean {
+  private checkConstraints(
+    solution: ParetoSolution,
+    constraints: any[],
+  ): boolean {
     for (const constraint of constraints) {
       switch (constraint.type) {
         case 'max_actions':
-          if (solution.actions.filter(a => a > 0.5).length > constraint.value) {
+          if (
+            solution.actions.filter((a) => a > 0.5).length > constraint.value
+          ) {
             return false;
           }
           break;
@@ -170,24 +185,24 @@ export class ParetoOptimizer extends EventEmitter {
   private async evolvePopulation(): Promise<void> {
     // Fast non-dominated sorting
     this.fastNonDominatedSort();
-    
+
     // Calculate crowding distance
     this.calculateCrowdingDistance();
-    
+
     // Selection and reproduction
     const newPopulation = await this.selectionAndReproduction();
-    
+
     this.population = newPopulation;
   }
 
   private fastNonDominatedSort(): void {
     const fronts: ParetoSolution[][] = [[]];
-    
+
     // Initialize domination counts and dominated solutions
     for (const p of this.population) {
       p.dominationCount = 0;
       p.dominatedSolutions = [];
-      
+
       for (const q of this.population) {
         if (p.id !== q.id) {
           if (this.dominates(p.fitness, q.fitness)) {
@@ -197,30 +212,30 @@ export class ParetoOptimizer extends EventEmitter {
           }
         }
       }
-      
+
       if (p.dominationCount === 0) {
         p.rank = 0;
         fronts[0].push(p);
       }
     }
-    
+
     // Build subsequent fronts
     let frontIndex = 0;
     while (fronts[frontIndex].length > 0) {
       const nextFront: ParetoSolution[] = [];
-      
+
       for (const p of fronts[frontIndex]) {
         for (const qId of p.dominatedSolutions) {
-          const q = this.population.find(s => s.id === qId)!;
+          const q = this.population.find((s) => s.id === qId)!;
           q.dominationCount--;
-          
+
           if (q.dominationCount === 0) {
             q.rank = frontIndex + 1;
             nextFront.push(q);
           }
         }
       }
-      
+
       frontIndex++;
       fronts.push(nextFront);
     }
@@ -229,40 +244,45 @@ export class ParetoOptimizer extends EventEmitter {
   private dominates(fitnessA: Fitness, fitnessB: Fitness): boolean {
     const aValues = [fitnessA.okr, fitnessA.cost, fitnessA.carbon];
     const bValues = [fitnessB.okr, fitnessB.cost, fitnessB.carbon];
-    
+
     // A dominates B if A is >= B in all objectives and > B in at least one
     const allGreaterOrEqual = aValues.every((a, i) => a >= bValues[i]);
     const someGreater = aValues.some((a, i) => a > bValues[i]);
-    
+
     return allGreaterOrEqual && someGreater;
   }
 
   private calculateCrowdingDistance(): void {
     const objectives = ['okr', 'cost', 'carbon'];
-    
+
     for (const solution of this.population) {
       (solution as any).crowdingDistance = 0;
     }
-    
+
     for (const objective of objectives) {
       // Sort by objective value
-      const sortedPopulation = [...this.population].sort((a, b) => 
-        (b.fitness as any)[objective] - (a.fitness as any)[objective]
+      const sortedPopulation = [...this.population].sort(
+        (a, b) => (b.fitness as any)[objective] - (a.fitness as any)[objective],
       );
-      
+
       // Set boundary solutions to infinity
       (sortedPopulation[0] as any).crowdingDistance = Infinity;
-      (sortedPopulation[sortedPopulation.length - 1] as any).crowdingDistance = Infinity;
-      
+      (sortedPopulation[sortedPopulation.length - 1] as any).crowdingDistance =
+        Infinity;
+
       // Calculate distances for intermediate solutions
       const maxValue = (sortedPopulation[0].fitness as any)[objective];
-      const minValue = (sortedPopulation[sortedPopulation.length - 1].fitness as any)[objective];
+      const minValue = (
+        sortedPopulation[sortedPopulation.length - 1].fitness as any
+      )[objective];
       const range = maxValue - minValue;
-      
+
       if (range > 0) {
         for (let i = 1; i < sortedPopulation.length - 1; i++) {
-          const distance = ((sortedPopulation[i - 1].fitness as any)[objective] - 
-                          (sortedPopulation[i + 1].fitness as any)[objective]) / range;
+          const distance =
+            ((sortedPopulation[i - 1].fitness as any)[objective] -
+              (sortedPopulation[i + 1].fitness as any)[objective]) /
+            range;
           (sortedPopulation[i] as any).crowdingDistance += distance;
         }
       }
@@ -271,17 +291,19 @@ export class ParetoOptimizer extends EventEmitter {
 
   private async selectionAndReproduction(): Promise<ParetoSolution[]> {
     const newPopulation: ParetoSolution[] = [];
-    
+
     // Keep the best solutions (elitism)
     const sortedByRank = [...this.population].sort((a, b) => {
       if (a.rank !== b.rank) return a.rank - b.rank;
-      return ((b as any).crowdingDistance || 0) - ((a as any).crowdingDistance || 0);
+      return (
+        ((b as any).crowdingDistance || 0) - ((a as any).crowdingDistance || 0)
+      );
     });
-    
+
     // Add top 50% to new population
     const eliteCount = Math.floor(this.population.length * 0.5);
     newPopulation.push(...sortedByRank.slice(0, eliteCount));
-    
+
     // Generate offspring for the remaining slots
     while (newPopulation.length < this.population.length) {
       const parent1 = this.tournamentSelection();
@@ -290,26 +312,31 @@ export class ParetoOptimizer extends EventEmitter {
       await this.mutate(offspring);
       newPopulation.push(offspring);
     }
-    
+
     return newPopulation;
   }
 
   private tournamentSelection(): ParetoSolution {
     const tournamentSize = 3;
     const tournament: ParetoSolution[] = [];
-    
+
     for (let i = 0; i < tournamentSize; i++) {
       const randomIndex = Math.floor(Math.random() * this.population.length);
       tournament.push(this.population[randomIndex]);
     }
-    
+
     return tournament.sort((a, b) => {
       if (a.rank !== b.rank) return a.rank - b.rank;
-      return ((b as any).crowdingDistance || 0) - ((a as any).crowdingDistance || 0);
+      return (
+        ((b as any).crowdingDistance || 0) - ((a as any).crowdingDistance || 0)
+      );
     })[0];
   }
 
-  private async crossover(parent1: ParetoSolution, parent2: ParetoSolution): Promise<ParetoSolution> {
+  private async crossover(
+    parent1: ParetoSolution,
+    parent2: ParetoSolution,
+  ): Promise<ParetoSolution> {
     const offspring: ParetoSolution = {
       id: `offspring-${Date.now()}-${Math.random()}`,
       actions: [],
@@ -318,20 +345,21 @@ export class ParetoOptimizer extends EventEmitter {
       kneePoint: false,
       dominationCount: 0,
       dominatedSolutions: [],
-      rank: 0
+      rank: 0,
     };
-    
+
     // Uniform crossover
     for (let i = 0; i < parent1.actions.length; i++) {
-      offspring.actions[i] = Math.random() < 0.5 ? parent1.actions[i] : parent2.actions[i];
+      offspring.actions[i] =
+        Math.random() < 0.5 ? parent1.actions[i] : parent2.actions[i];
     }
-    
+
     return offspring;
   }
 
   private async mutate(solution: ParetoSolution): Promise<void> {
     const mutationRate = 0.1;
-    
+
     for (let i = 0; i < solution.actions.length; i++) {
       if (Math.random() < mutationRate) {
         solution.actions[i] = Math.random();
@@ -340,30 +368,31 @@ export class ParetoOptimizer extends EventEmitter {
   }
 
   private extractParetoFrontier(): ParetoSolution[] {
-    return this.population.filter(solution => solution.rank === 0 && solution.feasible);
+    return this.population.filter(
+      (solution) => solution.rank === 0 && solution.feasible,
+    );
   }
 
   private markKneePoint(): void {
     if (this.paretoFrontier.length === 0) return;
-    
+
     // Find knee point (solution with best compromise)
     let bestKnee: ParetoSolution | null = null;
     let bestUtility = -Infinity;
-    
+
     for (const solution of this.paretoFrontier) {
       // Calculate weighted utility
-      const utility = (
+      const utility =
         this.weights.okr * solution.fitness.okr +
         this.weights.cost * solution.fitness.cost +
-        this.weights.carbon * solution.fitness.carbon
-      );
-      
+        this.weights.carbon * solution.fitness.carbon;
+
       if (utility > bestUtility) {
         bestUtility = utility;
         bestKnee = solution;
       }
     }
-    
+
     if (bestKnee) {
       bestKnee.kneePoint = true;
     }
@@ -373,37 +402,42 @@ export class ParetoOptimizer extends EventEmitter {
    * Select the knee point solution (best compromise)
    */
   selectKneePoint(frontier: ParetoSolution[]): ParetoSolution {
-    const kneePoint = frontier.find(s => s.kneePoint);
+    const kneePoint = frontier.find((s) => s.kneePoint);
     return kneePoint || frontier[0]; // Fallback to first solution
   }
 
   /**
    * Optimize for a specific PR
    */
-  async optimizeForPR(prData: any): Promise<{ utility: number; tradeoffs: any[] }> {
+  async optimizeForPR(
+    prData: any,
+  ): Promise<{ utility: number; tradeoffs: any[] }> {
     // Simplified optimization for individual PR
     const actions = [Math.random(), Math.random(), Math.random()]; // Mock actions
     const fitness = await this.evaluateFitness(
-      { id: 'pr-temp', actions, fitness: { okr: 0, cost: 0, carbon: 0 } } as ParetoSolution,
+      {
+        id: 'pr-temp',
+        actions,
+        fitness: { okr: 0, cost: 0, carbon: 0 },
+      } as ParetoSolution,
       [
         { id: 'quality', target: 1, current: 0.8, weight: 0.4 },
         { id: 'speed', target: 1, current: 0.7, weight: 0.3 },
-        { id: 'reliability', target: 1, current: 0.9, weight: 0.3 }
+        { id: 'reliability', target: 1, current: 0.9, weight: 0.3 },
       ],
-      { usd: 1000, carbon: 100, ci: 60 }
+      { usd: 1000, carbon: 100, ci: 60 },
     );
-    
-    const utility = (
+
+    const utility =
       this.weights.okr * fitness.okr +
       this.weights.cost * fitness.cost +
-      this.weights.carbon * fitness.carbon
-    );
-    
+      this.weights.carbon * fitness.carbon;
+
     const tradeoffs = [
       { from: 'cost', to: 'okr', ratio: fitness.cost / fitness.okr },
-      { from: 'carbon', to: 'okr', ratio: fitness.carbon / fitness.okr }
+      { from: 'carbon', to: 'okr', ratio: fitness.carbon / fitness.okr },
     ];
-    
+
     return { utility, tradeoffs };
   }
 
@@ -415,26 +449,33 @@ export class ParetoOptimizer extends EventEmitter {
     kneePoint: ParetoSolution;
     tradeoffs: Array<{ from: string; to: string; ratio: number }>;
   }> {
-    const kneePoint = this.paretoFrontier.find(s => s.kneePoint) || this.paretoFrontier[0];
-    
+    const kneePoint =
+      this.paretoFrontier.find((s) => s.kneePoint) || this.paretoFrontier[0];
+
     // Calculate average tradeoff ratios across frontier
     const tradeoffs = [];
     if (this.paretoFrontier.length > 1) {
-      const avgCostOkr = this.paretoFrontier.reduce((sum, s) => 
-        sum + (s.fitness.cost / Math.max(0.001, s.fitness.okr)), 0) / this.paretoFrontier.length;
-      const avgCarbonOkr = this.paretoFrontier.reduce((sum, s) => 
-        sum + (s.fitness.carbon / Math.max(0.001, s.fitness.okr)), 0) / this.paretoFrontier.length;
-      
+      const avgCostOkr =
+        this.paretoFrontier.reduce(
+          (sum, s) => sum + s.fitness.cost / Math.max(0.001, s.fitness.okr),
+          0,
+        ) / this.paretoFrontier.length;
+      const avgCarbonOkr =
+        this.paretoFrontier.reduce(
+          (sum, s) => sum + s.fitness.carbon / Math.max(0.001, s.fitness.okr),
+          0,
+        ) / this.paretoFrontier.length;
+
       tradeoffs.push(
         { from: 'cost', to: 'okr', ratio: avgCostOkr },
-        { from: 'carbon', to: 'okr', ratio: avgCarbonOkr }
+        { from: 'carbon', to: 'okr', ratio: avgCarbonOkr },
       );
     }
-    
+
     return {
       frontier: this.paretoFrontier,
       kneePoint,
-      tradeoffs
+      tradeoffs,
     };
   }
 

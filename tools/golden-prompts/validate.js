@@ -35,9 +35,13 @@ let queries = [];
 if (nlPrompts && modelCmd) {
   const nl = fs.readFileSync(nlPrompts, 'utf8').trim().split(/\n+/);
   for (const line of nl) {
-    const out = spawnSync('bash', ['-lc', `${modelCmd} ${JSON.stringify(line)}`], {
-      encoding: 'utf8',
-    });
+    const out = spawnSync(
+      'bash',
+      ['-lc', `${modelCmd} ${JSON.stringify(line)}`],
+      {
+        encoding: 'utf8',
+      },
+    );
     if (out.status === 0 && out.stdout.trim()) queries.push(out.stdout.trim());
   }
 } else {
@@ -47,11 +51,16 @@ if (nlPrompts && modelCmd) {
   }
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.cql'));
   if (files.length < minCount) {
-    console.error(`[golden] insufficient prompts: have=${files.length} need>=${minCount}`);
+    console.error(
+      `[golden] insufficient prompts: have=${files.length} need>=${minCount}`,
+    );
     process.exit(3);
   }
   for (const f of files) {
-    const s = fs.readFileSync(path.join(dir, f), 'utf8').trim().replace(/;\s*$/, '');
+    const s = fs
+      .readFileSync(path.join(dir, f), 'utf8')
+      .trim()
+      .replace(/;\s*$/, '');
     queries.push(s);
   }
 }

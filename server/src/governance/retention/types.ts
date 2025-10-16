@@ -1,4 +1,10 @@
-export type StorageSystem = 'postgres' | 'neo4j' | 's3' | 'object-store' | 'elasticsearch' | 'blob';
+export type StorageSystem =
+  | 'postgres'
+  | 'neo4j'
+  | 's3'
+  | 'object-store'
+  | 'elasticsearch'
+  | 'blob';
 
 export type DataClassificationLevel =
   | 'public'
@@ -11,7 +17,13 @@ export interface DatasetMetadata {
   datasetId: string;
   name: string;
   description?: string;
-  dataType: 'audit' | 'analytics' | 'telemetry' | 'communications' | 'ml-training' | 'custom';
+  dataType:
+    | 'audit'
+    | 'analytics'
+    | 'telemetry'
+    | 'communications'
+    | 'ml-training'
+    | 'custom';
   containsPersonalData: boolean;
   containsFinancialData?: boolean;
   containsHealthData?: boolean;

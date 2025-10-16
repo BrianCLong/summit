@@ -11,7 +11,7 @@ async function main() {
   app.register(underPressure, {
     maxEventLoopDelay: 100,
     maxHeapUsedBytes: 1024 * 1024 * 1024,
-    retryAfter: 30
+    retryAfter: 30,
   });
 
   registerApi(app);

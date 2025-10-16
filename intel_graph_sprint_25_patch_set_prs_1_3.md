@@ -83,6 +83,7 @@ git push -u origin HEAD
 ## PR 1 — Policy bundle CI + simulate/enforce
 
 ### `.github/workflows/opa.yml`
+
 ```yaml
 name: OPA Policy CI
 on:
@@ -94,7 +95,7 @@ on:
       - 'scripts/**'
       - 'Makefile'
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'policies/**'
       - 'tests/**'
@@ -128,6 +129,7 @@ jobs:
 ```
 
 ### `Makefile`
+
 ```make
 .PHONY: test-policy verify-bundle
 
@@ -142,6 +144,7 @@ verify-bundle:
 ```
 
 ### `policies/export.rego` (placeholder to be replaced)
+
 ```rego
 # REPLACE_WITH_ATTACHMENT: export.rego from Day-1 deliverables
 # This placeholder ensures CI passes basic opa check; real policy should be committed by maintainers.
@@ -152,6 +155,7 @@ allow { true }
 ```
 
 ### `tests/export_policy_smoke_test.rego`
+
 ```rego
 package export
 
@@ -169,6 +173,7 @@ p_allow if {
 ```
 
 ### `tests/data/sample_export_request.json`
+
 ```json
 {
   "user": { "id": "u_123", "mfa": false, "assurance": "aal1" },
@@ -180,6 +185,7 @@ p_allow if {
 ```
 
 ### `api/openapi.yaml`
+
 ```yaml
 openapi: 3.0.3
 info:
@@ -228,23 +234,24 @@ components:
         action: { type: string }
         fields: { type: array, items: { type: string } }
         dlp: { type: object }
-      required: [ user, resource, action ]
+      required: [user, resource, action]
     DecisionPayload:
       type: object
       properties:
         allow: { type: boolean }
-        mode: { type: string, enum: [ simulate, enforce ] }
+        mode: { type: string, enum: [simulate, enforce] }
         reasons: { type: array, items: { type: string } }
         redactions: { type: array, items: { type: string } }
         step_up:
           type: object
           properties:
             required: { type: boolean }
-            method: { type: string, enum: [ WebAuthn ] }
+            method: { type: string, enum: [WebAuthn] }
             scope: { type: string }
 ```
 
 ### `scripts/verify-bundle.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -252,6 +259,7 @@ python3 tools/verify_bundle.py --manifest tools/artifacts.manifest.json "$@"
 ```
 
 ### `tools/verify_bundle.py`
+
 ```python
 #!/usr/bin/env python3
 import argparse, json, hashlib, os, sys, zipfile
@@ -311,6 +319,7 @@ if __name__=='__main__':
 ```
 
 ### `tools/artifacts.manifest.json` (fill in real checksums)
+
 ```json
 {
   "artifacts": {
@@ -327,6 +336,7 @@ if __name__=='__main__':
 ```
 
 ### `CODEOWNERS`
+
 ```text
 # Ownership for rapid reviews
 /policies/         @devsec-team
@@ -337,17 +347,22 @@ if __name__=='__main__':
 ```
 
 ### `README.md` (delta excerpt)
-```md
+
+````md
 ## Export guardrails — simulate → enforce
+
 - Default: **simulate for 2 days**, then enforce.
 - Endpoints: `POST /export/simulate`, `POST /export` (see `api/openapi.yaml`).
 - Decision payload includes: reasons, redactions, and WebAuthn step-up requirement.
 
 ## Verify bundle integrity
+
 ```sh
 make verify-bundle  # or: python3 tools/verify_bundle.py --manifest tools/artifacts.manifest.json
 ```
-```
+````
+
+````
 
 ---
 
@@ -378,9 +393,10 @@ jobs:
         run: |
           grep -q '"env"' grafana/dashboards/grafana_ga_core_dashboard.json
           grep -q '"tenant"' grafana/dashboards/grafana_ga_core_dashboard.json
-```
+````
 
 ### `grafana/provisioning/dashboards/dashboards.yaml`
+
 ```yaml
 apiVersion: 1
 providers:
@@ -395,8 +411,11 @@ providers:
 ```
 
 ### `grafana/dashboards/grafana_ga_core_dashboard.json` (placeholder)
+
 ```json
-{ "_comment": "REPLACE_WITH_ATTACHMENT: grafana_ga_core_dashboard.json from Day-1 deliverables" }
+{
+  "_comment": "REPLACE_WITH_ATTACHMENT: grafana_ga_core_dashboard.json from Day-1 deliverables"
+}
 ```
 
 ---
@@ -404,6 +423,7 @@ providers:
 ## PR 3 — PM CSV under `/project/pm`
 
 ### `project/pm/sprint25_jira.csv` (placeholder)
+
 ```csv
 # REPLACE_WITH_ATTACHMENT: sprint25_jira.csv from Day-1 deliverables
 ```
@@ -413,6 +433,7 @@ providers:
 ## Convenience script to import One‑Click Zip
 
 ### `scripts/import-day1-artifacts.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -433,36 +454,47 @@ python3 tools/verify_bundle.py --manifest tools/artifacts.manifest.json "$ZIP" |
 ## PR templates (drop in PR descriptions)
 
 ### PR 1 — Policy bundle CI
+
 **Title:** feat(policy): add export policy CI, simulate/enforce toggles, verify-bundle CLI
 
 **Summary**
+
 - Adds OPA CI (check + tests) and placeholder smoke tests.
 - Introduces `api/openapi.yaml` for `/export/simulate` and `/export` decision payloads.
 - Adds `verify-bundle` CLI with manifest to lock artifact hashes.
 - Default posture: **simulate** for first 2 days (toggle via deployment config), DLP masks `pii:*`, step‑up for **Sensitive/Restricted**.
 
 **Notes**
+
 - Replace placeholder `policies/export.rego` with attached Day‑1 policy.
 - Expand tests with real fixtures covering allow/deny/redacted + WebAuthn step‑up.
 
 ### PR 2 — Grafana-as-code
+
 **Title:** feat(grafana): provision GA Core hardening dashboard + CI lint
 
 **Summary**
+
 - Adds file‑provisioned dashboard under `IntelGraph/GA Core`.
 - CI validates JSON and required variables (`env`, `tenant`).
 
 **Notes**
+
 - Replace placeholder dashboard JSON with the attached file.
 - Set Prometheus datasource UID via environment or folder defaults.
 
 ### PR 3 — PM artifacts
+
 **Title:** chore(pm): add Sprint 25 Jira CSV under /project/pm
 
 **Summary**
+
 - Adds Jira CSV for import (Epics → Stories → Sub‑tasks), Sprint="Sprint 25".
 
 **Notes**
+
 - Import flow: Jira → System → External System Import → CSV → map Parent/Epic/External ID.
+
 ```
 
+```

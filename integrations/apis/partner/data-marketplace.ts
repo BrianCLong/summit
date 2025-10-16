@@ -49,7 +49,13 @@ export interface DataAsset {
   format: string[];
   size: number;
   recordCount: number;
-  updateFrequency: 'real-time' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'one-time';
+  updateFrequency:
+    | 'real-time'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'one-time';
   geography: string[];
   timeRange: {
     start: Date;
@@ -63,7 +69,13 @@ export interface DataAsset {
   privacy: PrivacyAttributes;
   compliance: ComplianceInfo;
   tags: string[];
-  status: 'draft' | 'pending' | 'approved' | 'active' | 'suspended' | 'archived';
+  status:
+    | 'draft'
+    | 'pending'
+    | 'approved'
+    | 'active'
+    | 'suspended'
+    | 'archived';
   listedAt: Date;
   lastUpdated: Date;
   views: number;
@@ -276,7 +288,13 @@ export interface Transaction {
   type: 'purchase' | 'subscription' | 'custom';
   amount: number;
   currency: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'disputed' | 'refunded';
+  status:
+    | 'pending'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'disputed'
+    | 'refunded';
   paymentMethod: string;
   escrowEnabled: boolean;
   escrowReleased?: boolean;
@@ -323,7 +341,11 @@ export interface MarketplaceAnalytics {
   topBuyers: { buyerId: string; transactions: number; volume: number }[];
   qualityTrends: { date: Date; avgQuality: number }[];
   priceTrends: { date: Date; avgPrice: number; category: string }[];
-  geographicDistribution: { region: string; assets: number; transactions: number }[];
+  geographicDistribution: {
+    region: string;
+    assets: number;
+    transactions: number;
+  }[];
 }
 
 export class DataMarketplace extends EventEmitter {
@@ -349,11 +371,25 @@ export class DataMarketplace extends EventEmitter {
       topBuyers: [],
       qualityTrends: [],
       priceTrends: [],
-      geographicDistribution: []
+      geographicDistribution: [],
     };
   }
 
-  async listDataAsset(sellerId: string, asset: Omit<DataAsset, 'id' | 'sellerId' | 'status' | 'listedAt' | 'lastUpdated' | 'views' | 'downloads' | 'rating' | 'reviewCount'>): Promise<DataAsset> {
+  async listDataAsset(
+    sellerId: string,
+    asset: Omit<
+      DataAsset,
+      | 'id'
+      | 'sellerId'
+      | 'status'
+      | 'listedAt'
+      | 'lastUpdated'
+      | 'views'
+      | 'downloads'
+      | 'rating'
+      | 'reviewCount'
+    >,
+  ): Promise<DataAsset> {
     const newAsset: DataAsset = {
       ...asset,
       id: crypto.randomUUID(),
@@ -364,7 +400,7 @@ export class DataMarketplace extends EventEmitter {
       views: 0,
       downloads: 0,
       rating: 0,
-      reviewCount: 0
+      reviewCount: 0,
     };
 
     // Validate asset quality if required
@@ -380,7 +416,7 @@ export class DataMarketplace extends EventEmitter {
       sellerId,
       title: newAsset.title,
       category: newAsset.category,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newAsset;
@@ -393,8 +429,13 @@ export class DataMarketplace extends EventEmitter {
 
     for (const metric of requiredMetrics) {
       const value = (currentMetrics as any)[metric];
-      if (value === undefined || value < this.config.qualityAssurance.minimumRating) {
-        throw new Error(`Asset does not meet minimum quality requirement for ${metric}`);
+      if (
+        value === undefined ||
+        value < this.config.qualityAssurance.minimumRating
+      ) {
+        throw new Error(
+          `Asset does not meet minimum quality requirement for ${metric}`,
+        );
       }
     }
 
@@ -403,7 +444,7 @@ export class DataMarketplace extends EventEmitter {
       this.emit('third_party_validation_required', {
         assetId: asset.id,
         sellerId: asset.sellerId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
@@ -417,7 +458,9 @@ export class DataMarketplace extends EventEmitter {
     asset.status = 'approved';
     asset.lastUpdated = new Date();
 
-    if (asset.qualityMetrics.overall >= this.config.qualityAssurance.minimumRating) {
+    if (
+      asset.qualityMetrics.overall >= this.config.qualityAssurance.minimumRating
+    ) {
       asset.status = 'active';
       this.analytics.activeAssets++;
     }
@@ -426,13 +469,17 @@ export class DataMarketplace extends EventEmitter {
       assetId,
       approverId,
       status: asset.status,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return asset;
   }
 
-  async updateAssetPricing(assetId: string, sellerId: string, pricing: PricingModel): Promise<DataAsset> {
+  async updateAssetPricing(
+    assetId: string,
+    sellerId: string,
+    pricing: PricingModel,
+  ): Promise<DataAsset> {
     const asset = this.assets.get(assetId);
     if (!asset) {
       throw new Error('Asset not found');
@@ -449,7 +496,7 @@ export class DataMarketplace extends EventEmitter {
       assetId,
       sellerId,
       newPricing: pricing,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return asset;
@@ -466,78 +513,93 @@ export class DataMarketplace extends EventEmitter {
     tags?: string[];
     text?: string;
   }): Promise<DataAsset[]> {
-    let results = Array.from(this.assets.values()).filter(asset => asset.status === 'active');
+    let results = Array.from(this.assets.values()).filter(
+      (asset) => asset.status === 'active',
+    );
 
     if (criteria.category) {
-      results = results.filter(asset => asset.category === criteria.category);
+      results = results.filter((asset) => asset.category === criteria.category);
     }
 
     if (criteria.dataType) {
-      results = results.filter(asset => asset.dataType === criteria.dataType);
+      results = results.filter((asset) => asset.dataType === criteria.dataType);
     }
 
     if (criteria.format) {
-      results = results.filter(asset =>
-        criteria.format!.some(format => asset.format.includes(format))
+      results = results.filter((asset) =>
+        criteria.format!.some((format) => asset.format.includes(format)),
       );
     }
 
     if (criteria.geography) {
-      results = results.filter(asset =>
-        criteria.geography!.some(geo => asset.geography.includes(geo))
+      results = results.filter((asset) =>
+        criteria.geography!.some((geo) => asset.geography.includes(geo)),
       );
     }
 
     if (criteria.priceRange) {
-      results = results.filter(asset => {
+      results = results.filter((asset) => {
         const price = asset.pricing.basePrice;
-        return price >= criteria.priceRange!.min && price <= criteria.priceRange!.max;
+        return (
+          price >= criteria.priceRange!.min && price <= criteria.priceRange!.max
+        );
       });
     }
 
     if (criteria.qualityScore) {
-      results = results.filter(asset => asset.qualityMetrics.overall >= criteria.qualityScore!);
+      results = results.filter(
+        (asset) => asset.qualityMetrics.overall >= criteria.qualityScore!,
+      );
     }
 
     if (criteria.updateFrequency) {
-      results = results.filter(asset => asset.updateFrequency === criteria.updateFrequency);
+      results = results.filter(
+        (asset) => asset.updateFrequency === criteria.updateFrequency,
+      );
     }
 
     if (criteria.tags) {
-      results = results.filter(asset =>
-        criteria.tags!.some(tag => asset.tags.includes(tag))
+      results = results.filter((asset) =>
+        criteria.tags!.some((tag) => asset.tags.includes(tag)),
       );
     }
 
     if (criteria.text) {
       const searchText = criteria.text.toLowerCase();
-      results = results.filter(asset =>
-        asset.title.toLowerCase().includes(searchText) ||
-        asset.description.toLowerCase().includes(searchText) ||
-        asset.tags.some(tag => tag.toLowerCase().includes(searchText))
+      results = results.filter(
+        (asset) =>
+          asset.title.toLowerCase().includes(searchText) ||
+          asset.description.toLowerCase().includes(searchText) ||
+          asset.tags.some((tag) => tag.toLowerCase().includes(searchText)),
       );
     }
 
     // Increment view counts
-    results.forEach(asset => asset.views++);
+    results.forEach((asset) => asset.views++);
 
     this.emit('assets_searched', {
       criteria,
       resultCount: results.length,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return results.sort((a, b) => b.rating - a.rating);
   }
 
-  async submitDataRequest(buyerId: string, request: Omit<DataRequest, 'id' | 'buyerId' | 'status' | 'createdAt' | 'responses'>): Promise<DataRequest> {
+  async submitDataRequest(
+    buyerId: string,
+    request: Omit<
+      DataRequest,
+      'id' | 'buyerId' | 'status' | 'createdAt' | 'responses'
+    >,
+  ): Promise<DataRequest> {
     const newRequest: DataRequest = {
       ...request,
       id: crypto.randomUUID(),
       buyerId,
       status: 'open',
       createdAt: new Date(),
-      responses: []
+      responses: [],
     };
 
     this.requests.set(newRequest.id, newRequest);
@@ -550,7 +612,7 @@ export class DataMarketplace extends EventEmitter {
       buyerId,
       title: newRequest.title,
       category: newRequest.category,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newRequest;
@@ -566,18 +628,25 @@ export class DataMarketplace extends EventEmitter {
       }
     }
 
-    relevantSellers.forEach(sellerId => {
+    relevantSellers.forEach((sellerId) => {
       this.emit('seller_notification', {
         sellerId,
         requestId: request.id,
         category: request.category,
         budget: request.budget,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     });
   }
 
-  async respondToRequest(requestId: string, sellerId: string, response: Omit<RequestResponse, 'id' | 'sellerId' | 'status' | 'submittedAt'>): Promise<RequestResponse> {
+  async respondToRequest(
+    requestId: string,
+    sellerId: string,
+    response: Omit<
+      RequestResponse,
+      'id' | 'sellerId' | 'status' | 'submittedAt'
+    >,
+  ): Promise<RequestResponse> {
     const request = this.requests.get(requestId);
     if (!request) {
       throw new Error('Request not found');
@@ -592,7 +661,7 @@ export class DataMarketplace extends EventEmitter {
       id: crypto.randomUUID(),
       sellerId,
       status: 'pending',
-      submittedAt: new Date()
+      submittedAt: new Date(),
     };
 
     request.responses.push(newResponse);
@@ -601,13 +670,17 @@ export class DataMarketplace extends EventEmitter {
       requestId,
       responseId: newResponse.id,
       sellerId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newResponse;
   }
 
-  async acceptRequestResponse(requestId: string, responseId: string, buyerId: string): Promise<Transaction> {
+  async acceptRequestResponse(
+    requestId: string,
+    responseId: string,
+    buyerId: string,
+  ): Promise<Transaction> {
     const request = this.requests.get(requestId);
     if (!request) {
       throw new Error('Request not found');
@@ -617,7 +690,7 @@ export class DataMarketplace extends EventEmitter {
       throw new Error('Unauthorized: Only request owner can accept responses');
     }
 
-    const response = request.responses.find(r => r.id === responseId);
+    const response = request.responses.find((r) => r.id === responseId);
     if (!response) {
       throw new Error('Response not found');
     }
@@ -637,8 +710,8 @@ export class DataMarketplace extends EventEmitter {
       delivery: {
         method: 'api',
         accessCount: 0,
-        acknowledged: false
-      }
+        acknowledged: false,
+      },
     });
 
     request.status = 'fulfilled';
@@ -646,7 +719,7 @@ export class DataMarketplace extends EventEmitter {
     response.status = 'accepted';
 
     // Reject other responses
-    request.responses.forEach(r => {
+    request.responses.forEach((r) => {
       if (r.id !== responseId && r.status === 'pending') {
         r.status = 'rejected';
       }
@@ -656,7 +729,7 @@ export class DataMarketplace extends EventEmitter {
       requestId,
       responseId,
       transactionId: transaction.id,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return transaction;
@@ -673,14 +746,18 @@ export class DataMarketplace extends EventEmitter {
       warrantiesCovered: ['data-quality', 'delivery-timeline'],
       refundPolicy: 'standard',
       disputeResolution: 'mediation',
-      customClauses: response.customTerms ? [response.customTerms] : []
+      customClauses: response.customTerms ? [response.customTerms] : [],
     };
   }
 
-  async purchaseAsset(assetId: string, buyerId: string, options?: {
-    paymentMethod?: string;
-    deliveryMethod?: 'download' | 'api' | 'streaming';
-  }): Promise<Transaction> {
+  async purchaseAsset(
+    assetId: string,
+    buyerId: string,
+    options?: {
+      paymentMethod?: string;
+      deliveryMethod?: 'download' | 'api' | 'streaming';
+    },
+  ): Promise<Transaction> {
     const asset = this.assets.get(assetId);
     if (!asset) {
       throw new Error('Asset not found');
@@ -709,13 +786,13 @@ export class DataMarketplace extends EventEmitter {
         warrantiesCovered: ['data-quality'],
         refundPolicy: 'standard',
         disputeResolution: 'mediation',
-        customClauses: []
+        customClauses: [],
       },
       delivery: {
         method: options?.deliveryMethod || 'download',
         accessCount: 0,
-        acknowledged: false
-      }
+        acknowledged: false,
+      },
     });
 
     asset.downloads++;
@@ -726,19 +803,21 @@ export class DataMarketplace extends EventEmitter {
       buyerId,
       sellerId: asset.sellerId,
       amount: transaction.amount,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return transaction;
   }
 
-  private async createTransaction(data: Omit<Transaction, 'id' | 'status' | 'createdAt' | 'metadata'>): Promise<Transaction> {
+  private async createTransaction(
+    data: Omit<Transaction, 'id' | 'status' | 'createdAt' | 'metadata'>,
+  ): Promise<Transaction> {
     const transaction: Transaction = {
       ...data,
       id: crypto.randomUUID(),
       status: 'pending',
       createdAt: new Date(),
-      metadata: {}
+      metadata: {},
     };
 
     this.transactions.set(transaction.id, transaction);
@@ -749,7 +828,7 @@ export class DataMarketplace extends EventEmitter {
       buyerId: transaction.buyerId,
       sellerId: transaction.sellerId,
       amount: transaction.amount,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Start payment processing
@@ -763,13 +842,14 @@ export class DataMarketplace extends EventEmitter {
       transaction.status = 'processing';
 
       // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       transaction.status = 'completed';
       transaction.completedAt = new Date();
 
       this.analytics.totalVolume += transaction.amount;
-      this.analytics.averagePrice = this.analytics.totalVolume / this.analytics.totalTransactions;
+      this.analytics.averagePrice =
+        this.analytics.totalVolume / this.analytics.totalTransactions;
 
       // Setup delivery
       await this.setupDelivery(transaction);
@@ -777,16 +857,15 @@ export class DataMarketplace extends EventEmitter {
       this.emit('payment_completed', {
         transactionId: transaction.id,
         amount: transaction.amount,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-
     } catch (error) {
       transaction.status = 'failed';
 
       this.emit('payment_failed', {
         transactionId: transaction.id,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
@@ -796,7 +875,9 @@ export class DataMarketplace extends EventEmitter {
 
     switch (delivery.method) {
       case 'download':
-        delivery.downloadUrls = [`https://marketplace.intelgraph.com/download/${transaction.id}`];
+        delivery.downloadUrls = [
+          `https://marketplace.intelgraph.com/download/${transaction.id}`,
+        ];
         delivery.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
         delivery.maxAccess = 10;
         break;
@@ -805,7 +886,7 @@ export class DataMarketplace extends EventEmitter {
         delivery.endpoint = `https://api.intelgraph.com/marketplace/data/${transaction.id}`;
         delivery.credentials = {
           apiKey: crypto.randomUUID(),
-          secret: crypto.randomUUID()
+          secret: crypto.randomUUID(),
         };
         delivery.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
         break;
@@ -813,7 +894,7 @@ export class DataMarketplace extends EventEmitter {
       case 'streaming':
         delivery.endpoint = `wss://stream.intelgraph.com/marketplace/${transaction.id}`;
         delivery.credentials = {
-          token: crypto.randomUUID()
+          token: crypto.randomUUID(),
         };
         break;
     }
@@ -824,16 +905,20 @@ export class DataMarketplace extends EventEmitter {
       transactionId: transaction.id,
       method: delivery.method,
       endpoint: delivery.endpoint,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
-  async submitReview(transactionId: string, reviewerId: string, review: {
-    rating: number;
-    title: string;
-    comment: string;
-    aspects: { name: string; rating: number }[];
-  }): Promise<Review> {
+  async submitReview(
+    transactionId: string,
+    reviewerId: string,
+    review: {
+      rating: number;
+      title: string;
+      comment: string;
+      aspects: { name: string; rating: number }[];
+    },
+  ): Promise<Review> {
     const transaction = this.transactions.get(transactionId);
     if (!transaction) {
       throw new Error('Transaction not found');
@@ -853,7 +938,7 @@ export class DataMarketplace extends EventEmitter {
       aspects: review.aspects,
       createdAt: new Date(),
       helpful: 0,
-      verified: true
+      verified: true,
     };
 
     this.reviews.set(newReview.id, newReview);
@@ -867,7 +952,7 @@ export class DataMarketplace extends EventEmitter {
       reviewId: newReview.id,
       transactionId,
       rating: review.rating,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newReview;
@@ -877,13 +962,16 @@ export class DataMarketplace extends EventEmitter {
     const asset = this.assets.get(assetId);
     if (!asset) return;
 
-    const assetReviews = Array.from(this.reviews.values()).filter(review => {
+    const assetReviews = Array.from(this.reviews.values()).filter((review) => {
       const transaction = this.transactions.get(review.transactionId);
       return transaction?.assetId === assetId;
     });
 
     if (assetReviews.length > 0) {
-      const totalRating = assetReviews.reduce((sum, review) => sum + review.rating, 0);
+      const totalRating = assetReviews.reduce(
+        (sum, review) => sum + review.rating,
+        0,
+      );
       asset.rating = totalRating / assetReviews.length;
       asset.reviewCount = assetReviews.length;
     }
@@ -901,17 +989,22 @@ export class DataMarketplace extends EventEmitter {
     return this.requests.get(requestId);
   }
 
-  async getTransaction(transactionId: string): Promise<Transaction | undefined> {
+  async getTransaction(
+    transactionId: string,
+  ): Promise<Transaction | undefined> {
     return this.transactions.get(transactionId);
   }
 
   async listUserAssets(sellerId: string): Promise<DataAsset[]> {
-    return Array.from(this.assets.values()).filter(asset => asset.sellerId === sellerId);
+    return Array.from(this.assets.values()).filter(
+      (asset) => asset.sellerId === sellerId,
+    );
   }
 
   async listUserTransactions(userId: string): Promise<Transaction[]> {
     return Array.from(this.transactions.values()).filter(
-      transaction => transaction.buyerId === userId || transaction.sellerId === userId
+      (transaction) =>
+        transaction.buyerId === userId || transaction.sellerId === userId,
     );
   }
 
@@ -925,21 +1018,29 @@ export class DataMarketplace extends EventEmitter {
     const transactions = Array.from(this.transactions.values());
 
     this.analytics.totalAssets = assets.length;
-    this.analytics.activeAssets = assets.filter(a => a.status === 'active').length;
+    this.analytics.activeAssets = assets.filter(
+      (a) => a.status === 'active',
+    ).length;
 
     // Update category analytics
     const categoryStats = new Map<string, { count: number; volume: number }>();
-    assets.forEach(asset => {
-      const current = categoryStats.get(asset.category) || { count: 0, volume: 0 };
+    assets.forEach((asset) => {
+      const current = categoryStats.get(asset.category) || {
+        count: 0,
+        volume: 0,
+      };
       current.count++;
       categoryStats.set(asset.category, current);
     });
 
-    transactions.forEach(transaction => {
+    transactions.forEach((transaction) => {
       if (transaction.assetId) {
         const asset = this.assets.get(transaction.assetId);
         if (asset) {
-          const current = categoryStats.get(asset.category) || { count: 0, volume: 0 };
+          const current = categoryStats.get(asset.category) || {
+            count: 0,
+            volume: 0,
+          };
           current.volume += transaction.amount;
           categoryStats.set(asset.category, current);
         }
@@ -952,9 +1053,15 @@ export class DataMarketplace extends EventEmitter {
       .slice(0, 10);
 
     // Update seller analytics
-    const sellerStats = new Map<string, { transactions: number; volume: number }>();
-    transactions.forEach(transaction => {
-      const current = sellerStats.get(transaction.sellerId) || { transactions: 0, volume: 0 };
+    const sellerStats = new Map<
+      string,
+      { transactions: number; volume: number }
+    >();
+    transactions.forEach((transaction) => {
+      const current = sellerStats.get(transaction.sellerId) || {
+        transactions: 0,
+        volume: 0,
+      };
       current.transactions++;
       current.volume += transaction.amount;
       sellerStats.set(transaction.sellerId, current);
@@ -966,9 +1073,15 @@ export class DataMarketplace extends EventEmitter {
       .slice(0, 10);
 
     // Update buyer analytics
-    const buyerStats = new Map<string, { transactions: number; volume: number }>();
-    transactions.forEach(transaction => {
-      const current = buyerStats.get(transaction.buyerId) || { transactions: 0, volume: 0 };
+    const buyerStats = new Map<
+      string,
+      { transactions: number; volume: number }
+    >();
+    transactions.forEach((transaction) => {
+      const current = buyerStats.get(transaction.buyerId) || {
+        transactions: 0,
+        volume: 0,
+      };
       current.transactions++;
       current.volume += transaction.amount;
       buyerStats.set(transaction.buyerId, current);

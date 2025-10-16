@@ -41,7 +41,11 @@ In your HTML bootstrap or before app mounts:
 <script>
   window.__MAESTRO_CFG__ = Object.assign(window.__MAESTRO_CFG__ || {}, {
     grafanaBase: 'http://localhost:3000',
-    grafanaDashboards: { slo: 'maestro-slo', overview: 'maestro-overview', cost: 'maestro-cost' },
+    grafanaDashboards: {
+      slo: 'maestro-slo',
+      overview: 'maestro-overview',
+      cost: 'maestro-cost',
+    },
     a11y: 'on', // remove or set 'off' to disable axe in dev
   });
 </script>

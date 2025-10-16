@@ -43,7 +43,10 @@ const InvestigationMutationSchema = z.object({
 });
 
 const BulkEntityMutationSchema = z.object({
-  entities: z.array(EntityMutationSchema).min(1, 'At least one entity required').max(1000, 'Maximum 1000 entities per batch'),
+  entities: z
+    .array(EntityMutationSchema)
+    .min(1, 'At least one entity required')
+    .max(1000, 'Maximum 1000 entities per batch'),
   validateSchema: z.boolean().default(true),
   skipDuplicates: z.boolean().default(false),
 });
@@ -115,36 +118,39 @@ async function createAuditLog(
   beforeState?: any,
   afterState?: any,
   success: boolean = true,
-  error?: string
+  error?: string,
 ): Promise<string> {
   const pgPool = getPostgresPool();
   const auditId = uuidv4();
-  
+
   try {
-    await pgPool.query(`
+    await pgPool.query(
+      `
       INSERT INTO audit_log (
         id, user_id, tenant_id, operation, entity_type, entity_id,
         before_state, after_state, metadata, timestamp, success, error
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    `, [
-      auditId,
-      context.user.id,
-      context.user.tenantId,
-      operation,
-      entityType,
-      entityId,
-      JSON.stringify(beforeState),
-      JSON.stringify(afterState),
-      JSON.stringify({
-        requestId: context.requestId,
-        source: context.source,
-        clientInfo: context.clientInfo,
-      }),
-      context.timestamp,
-      success,
-      error,
-    ]);
-    
+    `,
+      [
+        auditId,
+        context.user.id,
+        context.user.tenantId,
+        operation,
+        entityType,
+        entityId,
+        JSON.stringify(beforeState),
+        JSON.stringify(afterState),
+        JSON.stringify({
+          requestId: context.requestId,
+          source: context.source,
+          clientInfo: context.clientInfo,
+        }),
+        context.timestamp,
+        success,
+        error,
+      ],
+    );
+
     return auditId;
   } catch (auditError) {
     logger.error('Failed to create audit log:', auditError);
@@ -159,17 +165,20 @@ async function safeMutation<TInput, TOutput>(
   schema: z.ZodSchema<TInput>,
   input: unknown,
   context: MutationContext,
-  mutationFn: (validInput: TInput, context: MutationContext) => Promise<TOutput>,
+  mutationFn: (
+    validInput: TInput,
+    context: MutationContext,
+  ) => Promise<TOutput>,
   operation: string,
-  entityType: string
+  entityType: string,
 ): Promise<SafeMutationResult<TOutput>> {
   const startTime = Date.now();
   let auditLogId: string | undefined;
-  
+
   try {
     // Validate input
     const validInput = schema.parse(input);
-    
+
     // Pre-mutation audit log
     auditLogId = await createAuditLog(
       context,
@@ -178,12 +187,12 @@ async function safeMutation<TInput, TOutput>(
       undefined,
       undefined,
       validInput,
-      true
+      true,
     );
-    
+
     // Execute mutation
     const result = await mutationFn(validInput, context);
-    
+
     // Post-mutation audit log
     await createAuditLog(
       context,
@@ -192,9 +201,9 @@ async function safeMutation<TInput, TOutput>(
       (result as any)?.id,
       validInput,
       result,
-      true
+      true,
     );
-    
+
     logger.info(`Safe mutation completed: ${operation}`, {
       operation,
       entityType,
@@ -220,7 +229,7 @@ async function safeMutation<TInput, TOutput>(
         input,
         undefined,
         false,
-        error instanceof Error ? error.message : 'Unknown error'
+        error instanceof Error ? error.message : 'Unknown error',
       );
     }
 
@@ -260,7 +269,7 @@ export const IntelGraphSafeMutations = {
    */
   async createEntity(
     input: unknown,
-    context: MutationContext
+    context: MutationContext,
   ): Promise<SafeMutationResult> {
     return safeMutation(
       EntityMutationSchema,
@@ -269,22 +278,29 @@ export const IntelGraphSafeMutations = {
       async (entity: EntityMutation, ctx) => {
         const driver = getNeo4jDriver();
         const session = driver.session();
-        
+
         try {
           // Validate custom metadata if provided
           if (entity.customMetadata && entity.investigationId) {
-            await validateCustomMetadata(entity.investigationId, entity.customMetadata);
+            await validateCustomMetadata(
+              entity.investigationId,
+              entity.customMetadata,
+            );
           }
-          
+
           // Check for permissions
-          if (!ctx.user.permissions.includes('entity:create') && !ctx.user.permissions.includes('*')) {
+          if (
+            !ctx.user.permissions.includes('entity:create') &&
+            !ctx.user.permissions.includes('*')
+          ) {
             throw new Error('Insufficient permissions to create entity');
           }
-          
+
           const id = uuidv4();
           const now = new Date().toISOString();
-          
-          const result = await session.run(`
+
+          const result = await session.run(
+            `
             CREATE (e:Entity {
               id: $id,
               tenantId: $tenantId,
@@ -300,32 +316,34 @@ export const IntelGraphSafeMutations = {
               updatedAt: datetime($now)
             })
             RETURN e
-          `, {
-            id,
-            tenantId: entity.tenantId,
-            kind: entity.kind,
-            labels: entity.labels,
-            props: JSON.stringify(entity.props),
-            investigationId: entity.investigationId,
-            confidence: entity.confidence,
-            source: entity.source,
-            customMetadata: JSON.stringify(entity.customMetadata || {}),
-            createdBy: ctx.user.id,
-            now,
-          });
-          
+          `,
+            {
+              id,
+              tenantId: entity.tenantId,
+              kind: entity.kind,
+              labels: entity.labels,
+              props: JSON.stringify(entity.props),
+              investigationId: entity.investigationId,
+              confidence: entity.confidence,
+              source: entity.source,
+              customMetadata: JSON.stringify(entity.customMetadata || {}),
+              createdBy: ctx.user.id,
+              now,
+            },
+          );
+
           const createdEntity = result.records[0].get('e').properties;
-          
+
           // Invalidate caches
           // TODO: Implement cache invalidation
-          
+
           return createdEntity;
         } finally {
           await session.close();
         }
       },
       'CREATE_ENTITY',
-      'Entity'
+      'Entity',
     );
   },
 
@@ -334,7 +352,7 @@ export const IntelGraphSafeMutations = {
    */
   async createRelationship(
     input: unknown,
-    context: MutationContext
+    context: MutationContext,
   ): Promise<SafeMutationResult> {
     return safeMutation(
       RelationshipMutationSchema,
@@ -343,32 +361,39 @@ export const IntelGraphSafeMutations = {
       async (relationship: RelationshipMutation, ctx) => {
         const driver = getNeo4jDriver();
         const session = driver.session();
-        
+
         try {
           // Check for permissions
-          if (!ctx.user.permissions.includes('relationship:create') && !ctx.user.permissions.includes('*')) {
+          if (
+            !ctx.user.permissions.includes('relationship:create') &&
+            !ctx.user.permissions.includes('*')
+          ) {
             throw new Error('Insufficient permissions to create relationship');
           }
-          
+
           // Validate that source and destination entities exist
-          const entitiesCheck = await session.run(`
+          const entitiesCheck = await session.run(
+            `
             MATCH (src:Entity {id: $srcId, tenantId: $tenantId})
             MATCH (dst:Entity {id: $dstId, tenantId: $tenantId})
             RETURN src, dst
-          `, {
-            srcId: relationship.srcId,
-            dstId: relationship.dstId,
-            tenantId: relationship.tenantId,
-          });
-          
+          `,
+            {
+              srcId: relationship.srcId,
+              dstId: relationship.dstId,
+              tenantId: relationship.tenantId,
+            },
+          );
+
           if (entitiesCheck.records.length === 0) {
             throw new Error('Source or destination entity not found');
           }
-          
+
           const id = uuidv4();
           const now = new Date().toISOString();
-          
-          const result = await session.run(`
+
+          const result = await session.run(
+            `
             MATCH (src:Entity {id: $srcId, tenantId: $tenantId})
             MATCH (dst:Entity {id: $dstId, tenantId: $tenantId})
             CREATE (src)-[r:RELATIONSHIP {
@@ -385,35 +410,37 @@ export const IntelGraphSafeMutations = {
               updatedAt: datetime($now)
             }]->(dst)
             RETURN r, src, dst
-          `, {
-            id,
-            srcId: relationship.srcId,
-            dstId: relationship.dstId,
-            tenantId: relationship.tenantId,
-            type: relationship.type,
-            props: JSON.stringify(relationship.props),
-            investigationId: relationship.investigationId,
-            confidence: relationship.confidence,
-            source: relationship.source,
-            customMetadata: JSON.stringify(relationship.customMetadata || {}),
-            createdBy: ctx.user.id,
-            now,
-          });
-          
+          `,
+            {
+              id,
+              srcId: relationship.srcId,
+              dstId: relationship.dstId,
+              tenantId: relationship.tenantId,
+              type: relationship.type,
+              props: JSON.stringify(relationship.props),
+              investigationId: relationship.investigationId,
+              confidence: relationship.confidence,
+              source: relationship.source,
+              customMetadata: JSON.stringify(relationship.customMetadata || {}),
+              createdBy: ctx.user.id,
+              now,
+            },
+          );
+
           const record = result.records[0];
           const createdRelationship = {
             ...record.get('r').properties,
             source: record.get('src').properties,
             destination: record.get('dst').properties,
           };
-          
+
           return createdRelationship;
         } finally {
           await session.close();
         }
       },
       'CREATE_RELATIONSHIP',
-      'Relationship'
+      'Relationship',
     );
   },
 
@@ -422,7 +449,7 @@ export const IntelGraphSafeMutations = {
    */
   async createInvestigation(
     input: unknown,
-    context: MutationContext
+    context: MutationContext,
   ): Promise<SafeMutationResult> {
     return safeMutation(
       InvestigationMutationSchema,
@@ -431,17 +458,21 @@ export const IntelGraphSafeMutations = {
       async (investigation: InvestigationMutation, ctx) => {
         const driver = getNeo4jDriver();
         const session = driver.session();
-        
+
         try {
           // Check for permissions
-          if (!ctx.user.permissions.includes('investigation:create') && !ctx.user.permissions.includes('*')) {
+          if (
+            !ctx.user.permissions.includes('investigation:create') &&
+            !ctx.user.permissions.includes('*')
+          ) {
             throw new Error('Insufficient permissions to create investigation');
           }
-          
+
           const id = uuidv4();
           const now = new Date().toISOString();
-          
-          const result = await session.run(`
+
+          const result = await session.run(
+            `
             CREATE (i:Investigation {
               id: $id,
               tenantId: $tenantId,
@@ -454,32 +485,34 @@ export const IntelGraphSafeMutations = {
               updatedAt: datetime($now)
             })
             RETURN i
-          `, {
-            id,
-            tenantId: investigation.tenantId,
-            name: investigation.name,
-            description: investigation.description,
-            status: investigation.status,
-            props: JSON.stringify(investigation.props),
-            createdBy: ctx.user.id,
-            now,
-          });
-          
+          `,
+            {
+              id,
+              tenantId: investigation.tenantId,
+              name: investigation.name,
+              description: investigation.description,
+              status: investigation.status,
+              props: JSON.stringify(investigation.props),
+              createdBy: ctx.user.id,
+              now,
+            },
+          );
+
           const createdInvestigation = result.records[0].get('i').properties;
-          
+
           // Set custom schema if provided
           if (investigation.customSchema) {
             // TODO: Implement custom schema setting
             // await setCustomSchema(id, investigation.customSchema);
           }
-          
+
           return createdInvestigation;
         } finally {
           await session.close();
         }
       },
       'CREATE_INVESTIGATION',
-      'Investigation'
+      'Investigation',
     );
   },
 
@@ -488,7 +521,7 @@ export const IntelGraphSafeMutations = {
    */
   async createEntitiesBatch(
     input: unknown,
-    context: MutationContext
+    context: MutationContext,
   ): Promise<SafeMutationResult> {
     return safeMutation(
       BulkEntityMutationSchema,
@@ -499,39 +532,46 @@ export const IntelGraphSafeMutations = {
         const session = driver.session();
         const tx = session.beginTransaction();
         const created: any[] = [];
-        
+
         try {
           // Check for permissions
-          if (!ctx.user.permissions.includes('entity:create') && !ctx.user.permissions.includes('*')) {
+          if (
+            !ctx.user.permissions.includes('entity:create') &&
+            !ctx.user.permissions.includes('*')
+          ) {
             throw new Error('Insufficient permissions to create entities');
           }
-          
+
           for (const entity of batch.entities) {
             // Validate individual entity
             const validEntity = EntityMutationSchema.parse(entity);
-            
+
             // Skip duplicates if requested
             if (batch.skipDuplicates) {
-              const existingCheck = await tx.run(`
+              const existingCheck = await tx.run(
+                `
                 MATCH (e:Entity {tenantId: $tenantId, kind: $kind})
                 WHERE e.props CONTAINS $checkProps
                 RETURN e
                 LIMIT 1
-              `, {
-                tenantId: validEntity.tenantId,
-                kind: validEntity.kind,
-                checkProps: JSON.stringify(validEntity.props),
-              });
-              
+              `,
+                {
+                  tenantId: validEntity.tenantId,
+                  kind: validEntity.kind,
+                  checkProps: JSON.stringify(validEntity.props),
+                },
+              );
+
               if (existingCheck.records.length > 0) {
                 continue; // Skip this entity
               }
             }
-            
+
             const id = uuidv4();
             const now = new Date().toISOString();
-            
-            const result = await tx.run(`
+
+            const result = await tx.run(
+              `
               CREATE (e:Entity {
                 id: $id,
                 tenantId: $tenantId,
@@ -547,25 +587,29 @@ export const IntelGraphSafeMutations = {
                 updatedAt: datetime($now)
               })
               RETURN e
-            `, {
-              id,
-              tenantId: validEntity.tenantId,
-              kind: validEntity.kind,
-              labels: validEntity.labels,
-              props: JSON.stringify(validEntity.props),
-              investigationId: validEntity.investigationId,
-              confidence: validEntity.confidence,
-              source: validEntity.source,
-              customMetadata: JSON.stringify(validEntity.customMetadata || {}),
-              createdBy: ctx.user.id,
-              now,
-            });
-            
+            `,
+              {
+                id,
+                tenantId: validEntity.tenantId,
+                kind: validEntity.kind,
+                labels: validEntity.labels,
+                props: JSON.stringify(validEntity.props),
+                investigationId: validEntity.investigationId,
+                confidence: validEntity.confidence,
+                source: validEntity.source,
+                customMetadata: JSON.stringify(
+                  validEntity.customMetadata || {},
+                ),
+                createdBy: ctx.user.id,
+                now,
+              },
+            );
+
             created.push(result.records[0].get('e').properties);
           }
-          
+
           await tx.commit();
-          
+
           return {
             created,
             totalProcessed: batch.entities.length,
@@ -580,7 +624,7 @@ export const IntelGraphSafeMutations = {
         }
       },
       'CREATE_ENTITIES_BATCH',
-      'Entity'
+      'Entity',
     );
   },
 
@@ -589,7 +633,7 @@ export const IntelGraphSafeMutations = {
    */
   async traverseGraph(
     input: unknown,
-    context: MutationContext
+    context: MutationContext,
   ): Promise<SafeMutationResult> {
     return safeMutation(
       GraphTraversalSchema,
@@ -598,13 +642,16 @@ export const IntelGraphSafeMutations = {
       async (traversal: GraphTraversal, ctx) => {
         const driver = getNeo4jDriver();
         const session = driver.session();
-        
+
         try {
           // Check for permissions
-          if (!ctx.user.permissions.includes('entity:read') && !ctx.user.permissions.includes('*')) {
+          if (
+            !ctx.user.permissions.includes('entity:read') &&
+            !ctx.user.permissions.includes('*')
+          ) {
             throw new Error('Insufficient permissions to read entities');
           }
-          
+
           // Build dynamic query based on traversal parameters
           let whereClause = 'WHERE true';
           const params: any = {
@@ -613,17 +660,20 @@ export const IntelGraphSafeMutations = {
             maxDepth: traversal.maxDepth,
             limit: traversal.limit,
           };
-          
-          if (traversal.relationshipTypes && traversal.relationshipTypes.length > 0) {
+
+          if (
+            traversal.relationshipTypes &&
+            traversal.relationshipTypes.length > 0
+          ) {
             whereClause += ' AND type(r) IN $relationshipTypes';
             params.relationshipTypes = traversal.relationshipTypes;
           }
-          
+
           if (traversal.entityKinds && traversal.entityKinds.length > 0) {
             whereClause += ' AND n.kind IN $entityKinds';
             params.entityKinds = traversal.entityKinds;
           }
-          
+
           const query = `
             MATCH path = (start:Entity {id: $startId, tenantId: $tenantId})-[r*1..$maxDepth]-(n:Entity {tenantId: $tenantId})
             ${whereClause}
@@ -632,32 +682,32 @@ export const IntelGraphSafeMutations = {
             LIMIT $limit
             RETURN n, r, path
           `;
-          
+
           const result = await session.run(query, params);
-          
+
           const entities = new Map();
           const relationships = new Map();
           const paths: any[] = [];
-          
-          result.records.forEach(record => {
+
+          result.records.forEach((record) => {
             const entity = record.get('n').properties;
             const rels = record.get('r');
             const path = record.get('path');
-            
+
             entities.set(entity.id, entity);
-            
+
             if (Array.isArray(rels)) {
               rels.forEach((rel: any) => {
                 relationships.set(rel.properties.id, rel.properties);
               });
             }
-            
+
             paths.push({
               length: path.length,
               segments: path.segments.length,
             });
           });
-          
+
           return {
             startEntityId: traversal.startEntityId,
             entities: Array.from(entities.values()),
@@ -665,14 +715,14 @@ export const IntelGraphSafeMutations = {
             paths,
             totalEntities: entities.size,
             totalRelationships: relationships.size,
-            maxDepthReached: Math.max(...paths.map(p => p.length)),
+            maxDepthReached: Math.max(...paths.map((p) => p.length)),
           };
         } finally {
           await session.close();
         }
       },
       'TRAVERSE_GRAPH',
-      'Graph'
+      'Graph',
     );
   },
 };

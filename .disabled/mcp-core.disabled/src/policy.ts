@@ -4,7 +4,7 @@ import type { PolicyEvaluator } from './registry.js';
 export async function enforcePolicy(
   policy: PolicyEvaluator | undefined,
   tenant: TenantContext,
-  payload?: unknown
+  payload?: unknown,
 ): Promise<void> {
   if (!policy) {
     return;

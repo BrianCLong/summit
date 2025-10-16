@@ -8,7 +8,11 @@ function parseSemver(version) {
   if (!match) {
     return null;
   }
-  return { major: Number(match[1]), minor: Number(match[2]), patch: Number(match[3]) };
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+  };
 }
 
 function isValidSemver(version) {
@@ -63,28 +67,36 @@ function writeJson(filePath, data) {
   fs.writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 }
 
-function defaultMetadata(name, version, classification, regions, defaultRegion, piiHandling, fieldPolicies) {
+function defaultMetadata(
+  name,
+  version,
+  classification,
+  regions,
+  defaultRegion,
+  piiHandling,
+  fieldPolicies,
+) {
   return {
     version,
     contract: name,
     classification,
     residency: {
       allowedRegions: regions,
-      defaultRegion
+      defaultRegion,
     },
     policies: {
       lowerEnvironmentHandling: piiHandling,
       fieldPolicies,
       transformations: {
         deterministic: true,
-        reversible: piiHandling === 'tokenize'
-      }
+        reversible: piiHandling === 'tokenize',
+      },
     },
     provenance: {
       createdBy: 'data-spine-cli',
       createdAt: new Date().toISOString(),
-      checksum: null
-    }
+      checksum: null,
+    },
   };
 }
 
@@ -100,7 +112,7 @@ function buildJsonSchema(name, version, metadata, sampleProperties = {}) {
     properties: sampleProperties,
     required: Object.keys(sampleProperties),
     additionalProperties: false,
-    'x-data-spine': metadata
+    'x-data-spine': metadata,
   };
 
   metadata.provenance.checksum = crypto
@@ -120,7 +132,7 @@ function buildAvroSchema(name, version, metadata, fields = []) {
       .join(''),
     namespace: `data.spine.${name.replace(/[-_]/g, '')}`,
     fields,
-    'x-data-spine': metadata
+    'x-data-spine': metadata,
   };
 
   metadata.provenance.checksum = crypto
@@ -143,7 +155,9 @@ function listDirectories(dirPath) {
 }
 
 function latestVersion(dirPath) {
-  const versions = listDirectories(dirPath).filter((version) => isValidSemver(version));
+  const versions = listDirectories(dirPath).filter((version) =>
+    isValidSemver(version),
+  );
   if (versions.length === 0) {
     return null;
   }
@@ -184,7 +198,10 @@ function validateMetadata(metadata) {
   if (!isValidSemver(metadata.version)) {
     throw new Error(`Invalid semantic version: ${metadata.version}`);
   }
-  if (!Array.isArray(metadata.classification) || metadata.classification.length === 0) {
+  if (
+    !Array.isArray(metadata.classification) ||
+    metadata.classification.length === 0
+  ) {
     throw new Error('classification must be a non-empty array.');
   }
   metadata.classification.forEach((tag) => {
@@ -192,10 +209,21 @@ function validateMetadata(metadata) {
       throw new Error(`Unsupported classification tag: ${tag}`);
     }
   });
-  if (!metadata.residency || !Array.isArray(metadata.residency.allowedRegions) || metadata.residency.allowedRegions.length === 0) {
-    throw new Error('residency.allowedRegions must include at least one region.');
+  if (
+    !metadata.residency ||
+    !Array.isArray(metadata.residency.allowedRegions) ||
+    metadata.residency.allowedRegions.length === 0
+  ) {
+    throw new Error(
+      'residency.allowedRegions must include at least one region.',
+    );
   }
-  if (!metadata.residency.defaultRegion || !metadata.residency.allowedRegions.includes(metadata.residency.defaultRegion)) {
+  if (
+    !metadata.residency.defaultRegion ||
+    !metadata.residency.allowedRegions.includes(
+      metadata.residency.defaultRegion,
+    )
+  ) {
     throw new Error('residency.defaultRegion must be part of allowedRegions.');
   }
   if (!metadata.policies) {
@@ -204,18 +232,27 @@ function validateMetadata(metadata) {
   if (metadata.classification.includes('PII')) {
     const lowerHandling = metadata.policies.lowerEnvironmentHandling;
     if (!['tokenize', 'redact'].includes(lowerHandling)) {
-      throw new Error('PII contracts must set lowerEnvironmentHandling to tokenize or redact.');
+      throw new Error(
+        'PII contracts must set lowerEnvironmentHandling to tokenize or redact.',
+      );
     }
     const transformations = metadata.policies.transformations || {};
     if (!transformations.deterministic) {
-      throw new Error('PII contracts must declare deterministic transformations.');
+      throw new Error(
+        'PII contracts must declare deterministic transformations.',
+      );
     }
     if (!transformations.reversible) {
       throw new Error('PII contracts must declare reversible transformations.');
     }
   }
-  if (!metadata.policies.fieldPolicies || metadata.policies.fieldPolicies.length === 0) {
-    throw new Error('policies.fieldPolicies must describe at least one field rule.');
+  if (
+    !metadata.policies.fieldPolicies ||
+    metadata.policies.fieldPolicies.length === 0
+  ) {
+    throw new Error(
+      'policies.fieldPolicies must describe at least one field rule.',
+    );
   }
   metadata.policies.fieldPolicies.forEach((policy) => {
     if (!policy.field || !policy.action) {
@@ -239,11 +276,17 @@ function checkJsonCompatibility(previous, next) {
       messages.push(`Property ${key} removed.`);
       return;
     }
-    const prevType = Array.isArray(prevProps[key].type) ? prevProps[key].type.sort().join('|') : prevProps[key].type;
-    const nextType = Array.isArray(nextProps[key].type) ? nextProps[key].type.sort().join('|') : nextProps[key].type;
+    const prevType = Array.isArray(prevProps[key].type)
+      ? prevProps[key].type.sort().join('|')
+      : prevProps[key].type;
+    const nextType = Array.isArray(nextProps[key].type)
+      ? nextProps[key].type.sort().join('|')
+      : nextProps[key].type;
     if (prevType !== nextType) {
       ok = false;
-      messages.push(`Type of property ${key} changed from ${prevType} to ${nextType}.`);
+      messages.push(
+        `Type of property ${key} changed from ${prevType} to ${nextType}.`,
+      );
     }
   });
 
@@ -259,10 +302,11 @@ function checkJsonCompatibility(previous, next) {
   return { ok, messages };
 }
 
-
 function validateJsonSchemaStructure(schema) {
   if (schema.type && schema.type !== 'object') {
-    throw new Error('Only object schemas are supported for registry validation.');
+    throw new Error(
+      'Only object schemas are supported for registry validation.',
+    );
   }
   if (!schema.properties || typeof schema.properties !== 'object') {
     throw new Error('Schema must declare a properties object.');
@@ -313,11 +357,19 @@ class SchemaRegistry {
       defaultRegion = regions[0],
       piiHandling = 'tokenize',
       schemaType = 'json',
-      fieldPolicies = []
+      fieldPolicies = [],
     } = options;
 
     const version = options.version || '1.0.0';
-    const metadata = defaultMetadata(name, version, classification, regions, defaultRegion, piiHandling, fieldPolicies);
+    const metadata = defaultMetadata(
+      name,
+      version,
+      classification,
+      regions,
+      defaultRegion,
+      piiHandling,
+      fieldPolicies,
+    );
     const contractDir = this.getContractDir(name);
     const versionDir = path.join(contractDir, version);
 
@@ -331,12 +383,12 @@ class SchemaRegistry {
     let schemaPath;
     if (schemaType === 'json') {
       schema = buildJsonSchema(name, version, metadata, {
-        id: { type: 'string', description: 'Stable business identifier' }
+        id: { type: 'string', description: 'Stable business identifier' },
       });
       schemaPath = path.join(versionDir, 'schema.json');
     } else if (schemaType === 'avro') {
       schema = buildAvroSchema(name, version, metadata, [
-        { name: 'id', type: 'string', doc: 'Stable business identifier' }
+        { name: 'id', type: 'string', doc: 'Stable business identifier' },
       ]);
       schemaPath = path.join(versionDir, 'schema.avsc');
     } else {
@@ -352,7 +404,9 @@ class SchemaRegistry {
   }
 
   listVersions(name) {
-    return listDirectories(this.getContractDir(name)).filter((version) => isValidSemver(version));
+    return listDirectories(this.getContractDir(name)).filter((version) =>
+      isValidSemver(version),
+    );
   }
 
   loadSchema(name, version) {
@@ -376,8 +430,15 @@ class SchemaRegistry {
         try {
           validateJsonSchemaStructure(schema);
         } catch (error) {
-          results.push({ version: candidateVersion, schemaPath, valid: false, errors: [error.message] });
-          throw new Error(`Schema structure invalid for ${schemaPath}: ${error.message}`);
+          results.push({
+            version: candidateVersion,
+            schemaPath,
+            valid: false,
+            errors: [error.message],
+          });
+          throw new Error(
+            `Schema structure invalid for ${schemaPath}: ${error.message}`,
+          );
         }
       }
       results.push({ version: candidateVersion, schemaPath, valid: true });
@@ -397,7 +458,7 @@ class SchemaRegistry {
     metadata.provenance = {
       ...metadata.provenance,
       bumpedFrom: current,
-      bumpedAt: new Date().toISOString()
+      bumpedAt: new Date().toISOString(),
     };
     const versionDir = path.join(contractDir, next);
     ensureDir(versionDir);
@@ -421,7 +482,9 @@ class SchemaRegistry {
     const toVersion = options.toVersion || versions[versions.length - 1];
     const fromSchema = this.loadSchema(name, fromVersion).schema;
     const toSchema = this.loadSchema(name, toVersion).schema;
-    const checker = Array.isArray(fromSchema.fields) ? checkAvroCompatibility : checkJsonCompatibility;
+    const checker = Array.isArray(fromSchema.fields)
+      ? checkAvroCompatibility
+      : checkJsonCompatibility;
     const result = checker(fromSchema, toSchema);
     return { ...result, fromVersion, toVersion };
   }
@@ -431,7 +494,7 @@ class SchemaRegistry {
     const report = {
       generatedAt: new Date().toISOString(),
       contracts: [],
-      nonCompliant: []
+      nonCompliant: [],
     };
     contracts.forEach((name) => {
       const versions = this.listVersions(name);
@@ -445,12 +508,17 @@ class SchemaRegistry {
           classification: metadata.classification,
           residency: metadata.residency,
           lowerEnvironmentHandling: metadata.policies.lowerEnvironmentHandling,
-          deterministic: Boolean(metadata.policies.transformations?.deterministic),
-          reversible: Boolean(metadata.policies.transformations?.reversible)
+          deterministic: Boolean(
+            metadata.policies.transformations?.deterministic,
+          ),
+          reversible: Boolean(metadata.policies.transformations?.reversible),
         };
         const isCompliant =
-          metadata.residency.allowedRegions.includes(metadata.residency.defaultRegion) &&
-          (!metadata.classification.includes('PII') || metadata.policies.lowerEnvironmentHandling !== 'allow');
+          metadata.residency.allowedRegions.includes(
+            metadata.residency.defaultRegion,
+          ) &&
+          (!metadata.classification.includes('PII') ||
+            metadata.policies.lowerEnvironmentHandling !== 'allow');
         report.contracts.push(entry);
         if (!isCompliant) {
           report.nonCompliant.push(entry);
@@ -467,5 +535,5 @@ module.exports = {
   checkJsonCompatibility,
   checkAvroCompatibility,
   buildJsonSchema,
-  buildAvroSchema
+  buildAvroSchema,
 };

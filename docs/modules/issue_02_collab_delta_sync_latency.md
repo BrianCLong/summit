@@ -99,7 +99,9 @@ class CollaborationClient {
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
-      console.log(`Connected to collaboration server for graph ${this.graphId}`);
+      console.log(
+        `Connected to collaboration server for graph ${this.graphId}`,
+      );
     };
 
     this.ws.onmessage = (event) => {
@@ -115,7 +117,9 @@ class CollaborationClient {
     };
 
     this.ws.onclose = () => {
-      console.log('Disconnected from collaboration server. Reconnecting in 5s...');
+      console.log(
+        'Disconnected from collaboration server. Reconnecting in 5s...',
+      );
       setTimeout(() => this.connect(), 5000);
     };
 

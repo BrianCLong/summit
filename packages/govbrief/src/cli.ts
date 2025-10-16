@@ -6,7 +6,9 @@ import { runBrief, runFetch } from './pipeline.js';
 const program = new Command();
 program
   .name('govbrief')
-  .description('Ingest .gov research and generate proof-carrying strategy briefs');
+  .description(
+    'Ingest .gov research and generate proof-carrying strategy briefs',
+  );
 
 program
   .command('fetch')

@@ -2,7 +2,11 @@ import { randomUUID, createHash } from 'crypto';
 import { Recording, IOEvent } from './model';
 
 export class Recorder {
-  start(sessionId: string, seed: string, meta?: Record<string, unknown>): Recording {
+  start(
+    sessionId: string,
+    seed: string,
+    meta?: Record<string, unknown>,
+  ): Recording {
     return {
       id: `rec_${randomUUID()}`,
       sessionId,
@@ -10,14 +14,14 @@ export class Recorder {
       events: [],
       version: '1',
       meta,
-      startedAt: new Date().toISOString()
+      startedAt: new Date().toISOString(),
     };
   }
 
   push(rec: Recording, ev: Omit<IOEvent, 'hash'>): IOEvent {
     const hashed: IOEvent = {
       ...ev,
-      hash: hashPayload(ev.payload)
+      hash: hashPayload(ev.payload),
     };
     rec.events.push(hashed);
     return hashed;

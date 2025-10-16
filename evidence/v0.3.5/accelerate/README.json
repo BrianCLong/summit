@@ -1,1 +1,5 @@
-{"evidence_type": "performance_optimization", "version": "v0.3.5", "status": "initialized"}
+{
+  "evidence_type": "performance_optimization",
+  "version": "v0.3.5",
+  "status": "initialized"
+}

@@ -1,6 +1,15 @@
 {
   "version": "0.2",
   "language": "en",
-  "words": ["IntelGraph","Maestro","Neo4j","OpenTelemetry","Redoc","GraphRAG","idempotency","canary"],
-  "ignorePaths": ["**/node_modules/**","**/build/**","**/archive/**"]
+  "words": [
+    "IntelGraph",
+    "Maestro",
+    "Neo4j",
+    "OpenTelemetry",
+    "Redoc",
+    "GraphRAG",
+    "idempotency",
+    "canary"
+  ],
+  "ignorePaths": ["**/node_modules/**", "**/build/**", "**/archive/**"]
 }

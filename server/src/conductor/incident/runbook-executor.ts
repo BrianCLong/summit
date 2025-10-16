@@ -142,12 +142,18 @@ export class RunbookExecutor extends EventEmitter {
     this.addLog(execution, 'info', `Starting runbook: ${runbook.name}`);
 
     // Send start notifications
-    await this.sendNotifications(runbook.notifications.onStart, execution, runbook);
+    await this.sendNotifications(
+      runbook.notifications.onStart,
+      execution,
+      runbook,
+    );
 
     try {
       // Execute steps sequentially
       for (const step of runbook.steps) {
-        const stepExecution = execution.steps.find((s) => s.stepId === step.id)!;
+        const stepExecution = execution.steps.find(
+          (s) => s.stepId === step.id,
+        )!;
 
         // Check dependencies
         if (step.requires) {
@@ -168,20 +174,39 @@ export class RunbookExecutor extends EventEmitter {
         }
 
         // Check conditions
-        if (step.condition && !this.evaluateCondition(step.condition, execution.context)) {
-          this.addLog(execution, 'info', `Skipping step ${step.name}: condition not met`);
+        if (
+          step.condition &&
+          !this.evaluateCondition(step.condition, execution.context)
+        ) {
+          this.addLog(
+            execution,
+            'info',
+            `Skipping step ${step.name}: condition not met`,
+          );
           stepExecution.status = 'skipped';
           continue;
         }
 
         // Execute step with retries
-        const success = await this.executeStepWithRetries(execution, runbook, step);
+        const success = await this.executeStepWithRetries(
+          execution,
+          runbook,
+          step,
+        );
 
         if (!success) {
           if (step.onFailure === 'abort') {
             execution.status = 'failed';
-            this.addLog(execution, 'error', 'Runbook aborted due to step failure');
-            await this.sendNotifications(runbook.notifications.onFailure, execution, runbook);
+            this.addLog(
+              execution,
+              'error',
+              'Runbook aborted due to step failure',
+            );
+            await this.sendNotifications(
+              runbook.notifications.onFailure,
+              execution,
+              runbook,
+            );
             return;
           }
 
@@ -197,14 +222,22 @@ export class RunbookExecutor extends EventEmitter {
       execution.endTime = Date.now();
       this.addLog(execution, 'info', 'Runbook completed successfully');
 
-      await this.sendNotifications(runbook.notifications.onSuccess, execution, runbook);
+      await this.sendNotifications(
+        runbook.notifications.onSuccess,
+        execution,
+        runbook,
+      );
       this.emit('runbook:completed', execution);
     } catch (error) {
       execution.status = 'failed';
       execution.endTime = Date.now();
       this.addLog(execution, 'error', `Runbook failed: ${error.message}`);
 
-      await this.sendNotifications(runbook.notifications.onFailure, execution, runbook);
+      await this.sendNotifications(
+        runbook.notifications.onFailure,
+        execution,
+        runbook,
+      );
       this.emit('runbook:failed', execution);
     }
 
@@ -232,7 +265,11 @@ export class RunbookExecutor extends EventEmitter {
 
     for (let attempt = 0; attempt <= step.retries; attempt++) {
       if (attempt > 0) {
-        this.addLog(execution, 'info', `Retrying step ${step.name} (attempt ${attempt + 1})`);
+        this.addLog(
+          execution,
+          'info',
+          `Retrying step ${step.name} (attempt ${attempt + 1})`,
+        );
         stepExecution.retryCount++;
       }
 
@@ -252,7 +289,11 @@ export class RunbookExecutor extends EventEmitter {
         return true;
       } catch (error) {
         stepExecution.error = error.message;
-        this.addLog(execution, 'error', `Step failed: ${step.name} - ${error.message}`);
+        this.addLog(
+          execution,
+          'error',
+          `Step failed: ${step.name} - ${error.message}`,
+        );
 
         if (attempt === step.retries) {
           stepExecution.status = 'failed';
@@ -261,7 +302,9 @@ export class RunbookExecutor extends EventEmitter {
         }
 
         // Wait before retry
-        await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * (attempt + 1)),
+        );
       }
     }
 
@@ -472,16 +515,23 @@ export class RunbookExecutor extends EventEmitter {
    * Evaluate a simple boolean expression against the provided context.
    * Supports JS boolean operators and dot-path lookups from context only.
    */
-  private evaluateCondition(expr: string, context: Record<string, any>): boolean {
+  private evaluateCondition(
+    expr: string,
+    context: Record<string, any>,
+  ): boolean {
     // Basic guardrails against unsafe tokens
-    const forbidden = /(process|require|global|window|this|constructor|Function|eval)/i;
+    const forbidden =
+      /(process|require|global|window|this|constructor|Function|eval)/i;
     if (forbidden.test(expr)) throw new Error('Forbidden token in condition');
     // Expose context as a variable; no with(), no global access
-    const fn = new Function('context', `"use strict"; const get=(p)=>p.split('.').reduce((a,k)=>a?.[k], context);
-      const ctx=context; const $=get; return !!(${expr});`);
+    const fn = new Function(
+      'context',
+      `"use strict"; const get=(p)=>p.split('.').reduce((a,k)=>a?.[k], context);
+      const ctx=context; const $=get; return !!(${expr});`,
+    );
     try {
       return !!fn(context);
-    } catch (e:any) {
+    } catch (e: any) {
       throw new Error(`Condition eval error: ${e.message}`);
     }
   }
@@ -514,7 +564,8 @@ export class RunbookExecutor extends EventEmitter {
     this.registerRunbook({
       id: 'emergency_containment',
       name: 'Emergency System Containment',
-      description: 'Immediate containment procedures for critical security incidents',
+      description:
+        'Immediate containment procedures for critical security incidents',
       category: 'security',
       severity: 'critical',
       estimatedDuration: 10,
@@ -601,7 +652,8 @@ export class RunbookExecutor extends EventEmitter {
           id: 'check_dependencies',
           name: 'Verify Dependencies',
           type: 'validation',
-          instruction: 'context.neo4j_healthy && context.redis_healthy && context.postgres_healthy',
+          instruction:
+            'context.neo4j_healthy && context.redis_healthy && context.postgres_healthy',
           timeout: 30000,
           retries: 1,
           onFailure: 'abort',
@@ -684,25 +736,37 @@ export class RunbookExecutor extends EventEmitter {
    */
   abortExecution(executionId: string): void {
     const execution = this.executions.get(executionId);
-    if (execution && (execution.status === 'running' || execution.status === 'paused')) {
+    if (
+      execution &&
+      (execution.status === 'running' || execution.status === 'paused')
+    ) {
       execution.status = 'aborted';
       execution.endTime = Date.now();
       this.addLog(execution, 'warn', 'Execution aborted');
     }
   }
 
-  private interpolateTemplate(template: string, context: Record<string, any>): string {
+  private interpolateTemplate(
+    template: string,
+    context: Record<string, any>,
+  ): string {
     return template.replace(/\$\{([^}]+)\}/g, (match, key) => {
       const value = context[key] || process.env[key];
       return value !== undefined ? value.toString() : match;
     });
   }
 
-  private evaluateCondition(condition: string, context: Record<string, any>): boolean {
+  private evaluateCondition(
+    condition: string,
+    context: Record<string, any>,
+  ): boolean {
     try {
       // Create safe evaluation context
       const safeContext = { ...context, Date, Math };
-      const func = new Function(...Object.keys(safeContext), `return ${condition}`);
+      const func = new Function(
+        ...Object.keys(safeContext),
+        `return ${condition}`,
+      );
       return func(...Object.values(safeContext));
     } catch (error) {
       console.warn(`Condition evaluation failed: ${error.message}`);
@@ -741,9 +805,17 @@ export class RunbookExecutor extends EventEmitter {
     execution.status = 'failed';
     execution.endTime = Date.now();
 
-    this.addLog(execution, 'error', `Runbook escalated due to step failure: ${failedStep.name}`);
+    this.addLog(
+      execution,
+      'error',
+      `Runbook escalated due to step failure: ${failedStep.name}`,
+    );
 
-    await this.sendNotifications(runbook.notifications.onEscalation, execution, runbook);
+    await this.sendNotifications(
+      runbook.notifications.onEscalation,
+      execution,
+      runbook,
+    );
     this.emit('runbook:escalated', execution);
   }
 }

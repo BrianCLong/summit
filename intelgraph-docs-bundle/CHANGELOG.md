@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2025-08-14
+
 - Add comprehensive documentation suite (architecture, API, roadmap, project plan).
 - Add GitHub issue templates and PR template.
 - Add CI workflow (markdownlint + commitlint + Gitleaks).

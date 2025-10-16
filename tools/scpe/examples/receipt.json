@@ -1,1 +1,181 @@
-{"artifacts":[{"digest":{"algorithm":"sha256","value":"b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170"},"name":"training-dataset","path":"dataset.csv","provenance":{"builder_id":"gs://datasets/builder","materials":[{"digest":"b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170","uri":"https://git.example.com/datasets"}],"slsa_level":3,"source_uri":"https://git.example.com/datasets@main"},"signature":{"encoding":"base64","source":"KZSjaFme9gKcj7aLzk+CaggKpEkse+2YIkJS4uPLMVLSI4q5pVvJ4GmDpj2EZ5USylRqkSN2FnRlZyrPA1etAA==","type":"ed25519"},"type":"dataset"},{"digest":{"algorithm":"sha256","value":"8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154"},"name":"trainer-wheel","path":"trainer.whl","provenance":{"builder_id":"gh://summit/build-bot","materials":[{"digest":"8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154","uri":"https://git.example.com/pipelines"}],"slsa_level":3,"source_uri":"https://git.example.com/pipelines@v1.0.0"},"signature":{"encoding":"base64","source":"y4IRJi7DoClzRysUA7xN2fpjwAwkZ8l7+wBWU4gjah+x6HEnbKsLfJM4wb+gvVhdbVCrJsXIxkpPuLIrda/SAQ==","type":"ed25519"},"type":"python-wheel"},{"digest":{"algorithm":"sha256","value":"2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734"},"name":"inference-container","path":"inference-container.tar","provenance":{"builder_id":"gh://summit/container-fleet","materials":[{"digest":"2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734","uri":"https://git.example.com/containers"}],"slsa_level":4,"source_uri":"registry.example.com/inference@sha256:demo"},"signature":{"encoding":"base64","source":"+LLVV934tZsEr2V9FQv98LsI2yxz5ObsJhBe2gf9UmA4U7joXo75zAhCyvKELOCZ96PFbT9c/2aobhVelMcZDQ==","type":"ed25519"},"type":"container-image"},{"digest":{"algorithm":"sha256","value":"09ad0cf7723f40026f59baa3cb12a513416fda8ac18433601fccd3150dd4f249"},"name":"training-manifest","path":"training-manifest.json","provenance":{"builder_id":"gh://summit/build-bot","materials":[{"digest":"8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154","uri":"https://git.example.com/pipelines"}],"slsa_level":3,"source_uri":"https://git.example.com/pipelines@v1.0.0"},"signature":{"encoding":"base64","source":"dKYCoYV4jqAhFFYw8aMeBDFbxDOsrDbEG3iD6e5eIEddnROX9CThEUne6uKVE66FyiBuCXj5+3sTBCoyQ7XkDw==","type":"ed25519"},"type":"training-manifest"}],"build":{"build_type":"train-model","builder_id":"gh://summit/scpe-demo","run_id":"demo-001","timestamp":"2025-02-16T12:30:00+00:00"},"config":{"path":"tools/scpe/examples/scpe-config.yml","version":1},"integrity":{"algorithm":"sha256","value":"8a88c46d032237407bac9dd7afca8b8b8d72c4aaa11f603ab6e239a660dd1558"},"result":{"checks":[{"details":{"digest":"b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170","signature_type":"ed25519","slsa_level":3,"type":"dataset"},"name":"artifact:training-dataset","status":"passed"},{"details":{"digest":"8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154","signature_type":"ed25519","slsa_level":3,"type":"python-wheel"},"name":"artifact:trainer-wheel","status":"passed"},{"details":{"digest":"2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734","signature_type":"ed25519","slsa_level":4,"type":"container-image"},"name":"artifact:inference-container","status":"passed"},{"details":{"digest":"09ad0cf7723f40026f59baa3cb12a513416fda8ac18433601fccd3150dd4f249","signature_type":"ed25519","slsa_level":3,"type":"training-manifest"},"name":"artifact:training-manifest","status":"passed"},{"details":{"component_count":4,"digest":{"algorithm":"sha256","value":"6e4c9bc67ee676d12c23747c7594ef70a4530ce8372288015377a34faecb7204"}},"name":"sbom","status":"passed"}],"status":"passed"},"sbom":{"component_count":4,"digest":{"algorithm":"sha256","value":"6e4c9bc67ee676d12c23747c7594ef70a4530ce8372288015377a34faecb7204"},"format":"cyclonedx-json","path":"sbom.json"},"scpe":{"version":"0.1.0"}}
+{
+  "artifacts": [
+    {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170"
+      },
+      "name": "training-dataset",
+      "path": "dataset.csv",
+      "provenance": {
+        "builder_id": "gs://datasets/builder",
+        "materials": [
+          {
+            "digest": "b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170",
+            "uri": "https://git.example.com/datasets"
+          }
+        ],
+        "slsa_level": 3,
+        "source_uri": "https://git.example.com/datasets@main"
+      },
+      "signature": {
+        "encoding": "base64",
+        "source": "KZSjaFme9gKcj7aLzk+CaggKpEkse+2YIkJS4uPLMVLSI4q5pVvJ4GmDpj2EZ5USylRqkSN2FnRlZyrPA1etAA==",
+        "type": "ed25519"
+      },
+      "type": "dataset"
+    },
+    {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154"
+      },
+      "name": "trainer-wheel",
+      "path": "trainer.whl",
+      "provenance": {
+        "builder_id": "gh://summit/build-bot",
+        "materials": [
+          {
+            "digest": "8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154",
+            "uri": "https://git.example.com/pipelines"
+          }
+        ],
+        "slsa_level": 3,
+        "source_uri": "https://git.example.com/pipelines@v1.0.0"
+      },
+      "signature": {
+        "encoding": "base64",
+        "source": "y4IRJi7DoClzRysUA7xN2fpjwAwkZ8l7+wBWU4gjah+x6HEnbKsLfJM4wb+gvVhdbVCrJsXIxkpPuLIrda/SAQ==",
+        "type": "ed25519"
+      },
+      "type": "python-wheel"
+    },
+    {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734"
+      },
+      "name": "inference-container",
+      "path": "inference-container.tar",
+      "provenance": {
+        "builder_id": "gh://summit/container-fleet",
+        "materials": [
+          {
+            "digest": "2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734",
+            "uri": "https://git.example.com/containers"
+          }
+        ],
+        "slsa_level": 4,
+        "source_uri": "registry.example.com/inference@sha256:demo"
+      },
+      "signature": {
+        "encoding": "base64",
+        "source": "+LLVV934tZsEr2V9FQv98LsI2yxz5ObsJhBe2gf9UmA4U7joXo75zAhCyvKELOCZ96PFbT9c/2aobhVelMcZDQ==",
+        "type": "ed25519"
+      },
+      "type": "container-image"
+    },
+    {
+      "digest": {
+        "algorithm": "sha256",
+        "value": "09ad0cf7723f40026f59baa3cb12a513416fda8ac18433601fccd3150dd4f249"
+      },
+      "name": "training-manifest",
+      "path": "training-manifest.json",
+      "provenance": {
+        "builder_id": "gh://summit/build-bot",
+        "materials": [
+          {
+            "digest": "8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154",
+            "uri": "https://git.example.com/pipelines"
+          }
+        ],
+        "slsa_level": 3,
+        "source_uri": "https://git.example.com/pipelines@v1.0.0"
+      },
+      "signature": {
+        "encoding": "base64",
+        "source": "dKYCoYV4jqAhFFYw8aMeBDFbxDOsrDbEG3iD6e5eIEddnROX9CThEUne6uKVE66FyiBuCXj5+3sTBCoyQ7XkDw==",
+        "type": "ed25519"
+      },
+      "type": "training-manifest"
+    }
+  ],
+  "build": {
+    "build_type": "train-model",
+    "builder_id": "gh://summit/scpe-demo",
+    "run_id": "demo-001",
+    "timestamp": "2025-02-16T12:30:00+00:00"
+  },
+  "config": { "path": "tools/scpe/examples/scpe-config.yml", "version": 1 },
+  "integrity": {
+    "algorithm": "sha256",
+    "value": "8a88c46d032237407bac9dd7afca8b8b8d72c4aaa11f603ab6e239a660dd1558"
+  },
+  "result": {
+    "checks": [
+      {
+        "details": {
+          "digest": "b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170",
+          "signature_type": "ed25519",
+          "slsa_level": 3,
+          "type": "dataset"
+        },
+        "name": "artifact:training-dataset",
+        "status": "passed"
+      },
+      {
+        "details": {
+          "digest": "8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154",
+          "signature_type": "ed25519",
+          "slsa_level": 3,
+          "type": "python-wheel"
+        },
+        "name": "artifact:trainer-wheel",
+        "status": "passed"
+      },
+      {
+        "details": {
+          "digest": "2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734",
+          "signature_type": "ed25519",
+          "slsa_level": 4,
+          "type": "container-image"
+        },
+        "name": "artifact:inference-container",
+        "status": "passed"
+      },
+      {
+        "details": {
+          "digest": "09ad0cf7723f40026f59baa3cb12a513416fda8ac18433601fccd3150dd4f249",
+          "signature_type": "ed25519",
+          "slsa_level": 3,
+          "type": "training-manifest"
+        },
+        "name": "artifact:training-manifest",
+        "status": "passed"
+      },
+      {
+        "details": {
+          "component_count": 4,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "6e4c9bc67ee676d12c23747c7594ef70a4530ce8372288015377a34faecb7204"
+          }
+        },
+        "name": "sbom",
+        "status": "passed"
+      }
+    ],
+    "status": "passed"
+  },
+  "sbom": {
+    "component_count": 4,
+    "digest": {
+      "algorithm": "sha256",
+      "value": "6e4c9bc67ee676d12c23747c7594ef70a4530ce8372288015377a34faecb7204"
+    },
+    "format": "cyclonedx-json",
+    "path": "sbom.json"
+  },
+  "scpe": { "version": "0.1.0" }
+}

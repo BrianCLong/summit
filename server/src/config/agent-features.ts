@@ -3,7 +3,13 @@
  */
 
 export type AgentKey =
-  | 'SINGLAUB' | 'LEMAY' | 'ANGLETON' | 'BUDANOV' | 'WOLF' | 'HAREL' | 'GEHLEN';
+  | 'SINGLAUB'
+  | 'LEMAY'
+  | 'ANGLETON'
+  | 'BUDANOV'
+  | 'WOLF'
+  | 'HAREL'
+  | 'GEHLEN';
 
 const DEFAULT: Record<AgentKey, boolean> = {
   SINGLAUB: true,
@@ -28,7 +34,8 @@ export function setAgents(flags: Partial<Record<AgentKey, boolean>>): void {
   runtime = { ...runtime, ...flags } as any;
 }
 
-export function allAgents(): Record<AgentKey, boolean> { return { ...runtime }; }
+export function allAgents(): Record<AgentKey, boolean> {
+  return { ...runtime };
+}
 
 export default { isAgentEnabled, setAgents, allAgents };
-

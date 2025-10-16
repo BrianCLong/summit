@@ -1,5 +1,5 @@
 /**
- * Reproducible Container Builder - Composer vNext Sprint  
+ * Reproducible Container Builder - Composer vNext Sprint
  * BuildKit-based builds with deterministic outputs and base image pinning
  */
 
@@ -41,10 +41,12 @@ export class BuildKitBuilder {
    * Build container image with reproducible configuration
    */
   async build(config: BuildConfig): Promise<BuildResult> {
-    console.log(`🏗️  Building image with BuildKit: ${config.tags[0] || 'unnamed'}`);
-    
+    console.log(
+      `🏗️  Building image with BuildKit: ${config.tags[0] || 'unnamed'}`,
+    );
+
     const startTime = Date.now();
-    
+
     // Ensure reproducible environment
     if (config.reproducible) {
       await this.prepareReproducibleBuild(config);
@@ -52,70 +54,79 @@ export class BuildKitBuilder {
 
     // Generate Dockerfile with pinned base images
     const dockerfilePath = await this.generatePinnedDockerfile(config);
-    
+
     // Build with BuildKit
     const buildResult = await this.executeBuildKit(config, dockerfilePath);
-    
+
     // Cleanup temporary files
     if (dockerfilePath !== config.dockerfile) {
       await fs.unlink(dockerfilePath);
     }
-    
+
     const duration = Date.now() - startTime;
-    
+
     console.log(`✅ Build completed: ${buildResult.imageId} (${duration}ms)`);
-    
+
     return {
       ...buildResult,
-      duration
+      duration,
     };
   }
 
   /**
    * Verify build reproducibility
    */
-  async verifyReproducibility(config: BuildConfig, expectedDigest?: string): Promise<{
+  async verifyReproducibility(
+    config: BuildConfig,
+    expectedDigest?: string,
+  ): Promise<{
     reproducible: boolean;
     digest1: string;
     digest2: string;
     identical: boolean;
   }> {
     console.log('🔍 Verifying build reproducibility...');
-    
+
     // First build
     const result1 = await this.build(config);
-    
+
     // Clean build cache to ensure fresh build
     await this.cleanCache();
-    
+
     // Second build
     const result2 = await this.build(config);
-    
+
     const identical = result1.digest === result2.digest;
-    const reproducible = identical && (expectedDigest ? result1.digest === expectedDigest : true);
-    
+    const reproducible =
+      identical && (expectedDigest ? result1.digest === expectedDigest : true);
+
     console.log(identical ? '✅ Builds are identical' : '❌ Builds differ');
-    
+
     return {
       reproducible,
       digest1: result1.digest,
       digest2: result2.digest,
-      identical
+      identical,
     };
   }
 
   private async ensureBuilder(): Promise<void> {
     if (this.initialized) return;
-    
+
     try {
       // Check if builder exists
-      execSync(`docker buildx inspect ${this.builderName}`, { stdio: 'ignore' });
+      execSync(`docker buildx inspect ${this.builderName}`, {
+        stdio: 'ignore',
+      });
     } catch {
       // Create builder if it doesn't exist
       console.log('🔧 Creating BuildKit builder...');
-      execSync(`docker buildx create --name ${this.builderName} --driver docker-container --use`, { stdio: 'inherit' });
+      execSync(
+        `docker buildx create --name ${this.builderName} --driver docker-container --use`,
+        { stdio: 'inherit' },
+      );
     }
-    
+
     // Use the builder
     execSync(`docker buildx use ${this.builderName}`, { stdio: 'ignore' });
     this.initialized = true;
@@ -126,7 +137,9 @@ export class BuildKitBuilder {
     if (!config.sourceDate) {
       // Use git commit timestamp if available, otherwise current time
       try {
-        const gitTimestamp = execSync('git log -1 --format=%ct', { encoding: 'utf8' }).trim();
+        const gitTimestamp = execSync('git log -1 --format=%ct', {
+          encoding: 'utf8',
+        }).trim();
         config.buildArgs.SOURCE_DATE_EPOCH = gitTimestamp;
       } catch {
         // Fallback to fixed timestamp for reproducibility
@@ -139,37 +152,41 @@ export class BuildKitBuilder {
     // Set additional reproducible build args
     config.buildArgs.DEBIAN_FRONTEND = 'noninteractive';
     config.buildArgs.TZ = 'UTC';
-    
+
     // Add reproducibility labels
     config.labels['org.opencontainers.image.reproducible'] = 'true';
-    config.labels['org.opencontainers.image.source-date-epoch'] = config.buildArgs.SOURCE_DATE_EPOCH;
+    config.labels['org.opencontainers.image.source-date-epoch'] =
+      config.buildArgs.SOURCE_DATE_EPOCH;
   }
 
   private async generatePinnedDockerfile(config: BuildConfig): Promise<string> {
     let dockerfileContent = await fs.readFile(config.dockerfile, 'utf8');
-    
+
     // Pin base images to specific digests
     dockerfileContent = await this.pinBaseImages(dockerfileContent);
-    
+
     // Add reproducibility optimizations
     dockerfileContent = this.addReproducibilityDirectives(dockerfileContent);
-    
+
     // Write to temporary file
-    const tempDockerfile = path.join(path.dirname(config.dockerfile), '.Dockerfile.pinned');
+    const tempDockerfile = path.join(
+      path.dirname(config.dockerfile),
+      '.Dockerfile.pinned',
+    );
     await fs.writeFile(tempDockerfile, dockerfileContent);
-    
+
     return tempDockerfile;
   }
 
   private async pinBaseImages(dockerfileContent: string): Promise<string> {
     const lines = dockerfileContent.split('\n');
     const pinnedLines: string[] = [];
-    
+
     for (const line of lines) {
       if (line.trim().startsWith('FROM ') && !line.includes('@sha256:')) {
         const pinnedLine = await this.pinSingleImage(line);
         pinnedLines.push(pinnedLine);
-        
+
         if (pinnedLine !== line) {
           console.log(`📌 Pinned: ${line.trim()} -> ${pinnedLine.trim()}`);
         }
@@ -177,7 +194,7 @@ export class BuildKitBuilder {
         pinnedLines.push(line);
       }
     }
-    
+
     return pinnedLines.join('\n');
   }
 
@@ -186,26 +203,23 @@ export class BuildKitBuilder {
       // Extract image name and tag
       const match = fromLine.match(/FROM\s+([^\s]+)(?:\s+as\s+([^\s]+))?/i);
       if (!match) return fromLine;
-      
+
       const [, imageRef, alias] = match;
-      
+
       // Skip if already pinned or is a build stage
       if (imageRef.includes('@sha256:') || imageRef.includes('$')) {
         return fromLine;
       }
-      
+
       // Get digest for the image
       const digest = await this.getImageDigest(imageRef);
       if (!digest) return fromLine;
-      
+
       // Replace tag with digest
       const [image] = imageRef.split(':');
       const pinnedRef = `${image}@${digest}`;
-      
-      return alias 
-        ? `FROM ${pinnedRef} as ${alias}`
-        : `FROM ${pinnedRef}`;
-        
+
+      return alias ? `FROM ${pinnedRef} as ${alias}` : `FROM ${pinnedRef}`;
     } catch (error) {
       console.warn(`⚠️  Could not pin image: ${fromLine.trim()}`);
       return fromLine;
@@ -214,11 +228,14 @@ export class BuildKitBuilder {
 
   private async getImageDigest(imageRef: string): Promise<string | null> {
     try {
-      const output = execSync(`docker buildx imagetools inspect ${imageRef} --format '{{.Manifest.Digest}}'`, {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore']
-      });
-      
+      const output = execSync(
+        `docker buildx imagetools inspect ${imageRef} --format '{{.Manifest.Digest}}'`,
+        {
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'ignore'],
+        },
+      );
+
       return output.trim() || null;
     } catch {
       return null;
@@ -235,39 +252,40 @@ ARG TZ=UTC
 # Set timezone for reproducibility
 ENV TZ=UTC
 `;
-    
+
     // Insert after the first FROM statement
     const lines = dockerfileContent.split('\n');
     let insertIndex = 0;
-    
+
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].trim().startsWith('FROM ')) {
         insertIndex = i + 1;
         break;
       }
     }
-    
+
     lines.splice(insertIndex, 0, reproducibilityHeader);
-    
+
     return lines.join('\n');
   }
 
-  private async executeBuildKit(config: BuildConfig, dockerfilePath: string): Promise<Omit<BuildResult, 'duration'>> {
+  private async executeBuildKit(
+    config: BuildConfig,
+    dockerfilePath: string,
+  ): Promise<Omit<BuildResult, 'duration'>> {
     const buildArgs = Object.entries(config.buildArgs)
       .map(([key, value]) => `--build-arg=${key}=${value}`)
       .join(' ');
-    
+
     const labels = Object.entries(config.labels)
       .map(([key, value]) => `--label=${key}=${value}`)
       .join(' ');
-    
-    const tags = config.tags
-      .map(tag => `--tag=${tag}`)
-      .join(' ');
-    
+
+    const tags = config.tags.map((tag) => `--tag=${tag}`).join(' ');
+
     const targetFlag = config.target ? `--target=${config.target}` : '';
     const platformFlag = config.platform ? `--platform=${config.platform}` : '';
-    
+
     const buildCommand = [
       'docker buildx build',
       `--file=${dockerfilePath}`,
@@ -278,32 +296,33 @@ ENV TZ=UTC
       platformFlag,
       '--load', // Load image to local docker daemon
       '--progress=plain',
-      config.context
-    ].filter(Boolean).join(' ');
-    
+      config.context,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
     console.log(`🔨 Executing: ${buildCommand}`);
-    
+
     try {
       const output = execSync(buildCommand, {
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
-        maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+        maxBuffer: 1024 * 1024 * 10, // 10MB buffer
       });
-      
+
       // Parse output for image ID and warnings
       const imageId = this.extractImageId(output);
       const digest = await this.getBuiltImageDigest(config.tags[0]);
       const size = await this.getImageSize(config.tags[0]);
       const warnings = this.extractWarnings(output);
-      
+
       return {
         imageId,
         digest,
         size,
         reproducible: config.reproducible,
-        warnings
+        warnings,
       };
-      
     } catch (error) {
       throw new Error(`Build failed: ${error}`);
     }
@@ -317,9 +336,12 @@ ENV TZ=UTC
 
   private async getBuiltImageDigest(tag: string): Promise<string> {
     try {
-      const output = execSync(`docker images --digests ${tag} --format "{{.Digest}}"`, {
-        encoding: 'utf8'
-      });
+      const output = execSync(
+        `docker images --digests ${tag} --format "{{.Digest}}"`,
+        {
+          encoding: 'utf8',
+        },
+      );
       return output.trim() || 'unknown';
     } catch {
       return 'unknown';
@@ -329,16 +351,16 @@ ENV TZ=UTC
   private async getImageSize(tag: string): Promise<number> {
     try {
       const output = execSync(`docker images ${tag} --format "{{.Size}}"`, {
-        encoding: 'utf8'
+        encoding: 'utf8',
       });
-      
+
       const sizeStr = output.trim();
       if (sizeStr.includes('MB')) {
         return parseFloat(sizeStr.replace('MB', '')) * 1024 * 1024;
       } else if (sizeStr.includes('GB')) {
         return parseFloat(sizeStr.replace('GB', '')) * 1024 * 1024 * 1024;
       }
-      
+
       return 0;
     } catch {
       return 0;
@@ -348,19 +370,21 @@ ENV TZ=UTC
   private extractWarnings(buildOutput: string): string[] {
     const warnings: string[] = [];
     const lines = buildOutput.split('\n');
-    
+
     for (const line of lines) {
       if (line.includes('WARNING') || line.includes('WARN')) {
         warnings.push(line.trim());
       }
     }
-    
+
     return warnings;
   }
 
   private async cleanCache(): Promise<void> {
     try {
-      execSync(`docker buildx prune --builder=${this.builderName} -f`, { stdio: 'ignore' });
+      execSync(`docker buildx prune --builder=${this.builderName} -f`, {
+        stdio: 'ignore',
+      });
     } catch {
       // Cache cleanup failed, but this is non-critical
     }
@@ -368,7 +392,9 @@ ENV TZ=UTC
 }
 
 // Example usage and CLI
-export async function buildWithBuildKit(config: BuildConfig): Promise<BuildResult> {
+export async function buildWithBuildKit(
+  config: BuildConfig,
+): Promise<BuildResult> {
   const builder = new BuildKitBuilder();
   return builder.build(config);
 }
@@ -383,16 +409,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     },
     labels: {
       'org.opencontainers.image.title': 'maestro-build',
-      'org.opencontainers.image.version': '1.0.0'
+      'org.opencontainers.image.version': '1.0.0',
     },
     tags: ['maestro-test:latest'],
-    reproducible: true
+    reproducible: true,
   };
-  
-  buildWithBuildKit(config).then(result => {
-    console.log('Build result:', result);
-  }).catch(error => {
-    console.error('Build failed:', error);
-    process.exit(1);
-  });
+
+  buildWithBuildKit(config)
+    .then((result) => {
+      console.log('Build result:', result);
+    })
+    .catch((error) => {
+      console.error('Build failed:', error);
+      process.exit(1);
+    });
 }

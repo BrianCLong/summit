@@ -86,7 +86,9 @@ export const addTenantFilter = (
 ) => {
   // Add tenant filter to WHERE clause or create one
   const hasWhere = cypher.toLowerCase().includes('where');
-  const tenantFilter = hasWhere ? ' AND n.tenantId = $tenantId' : ' WHERE n.tenantId = $tenantId';
+  const tenantFilter = hasWhere
+    ? ' AND n.tenantId = $tenantId'
+    : ' WHERE n.tenantId = $tenantId';
 
   return {
     cypher: cypher + tenantFilter,

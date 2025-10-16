@@ -9,9 +9,9 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: '<rootDir>/tsconfig.json'
-      }
-    ]
+        tsconfig: '<rootDir>/tsconfig.json',
+      },
+    ],
   },
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
@@ -19,8 +19,8 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   clearMocks: true,
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
-  }
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
 };
 
 export default config;

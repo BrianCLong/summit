@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Summit has matured into a multi‑service platform with API, client apps, data pipelines, orchestration (Airflow), dashboards, connectors, security assets, and extensive CI/CD metadata. This doc gives a 360° view from a defensive, reliability, and delivery lens. It captures **current state** (as‑is), **gaps/risks**, and **concrete specs** for **MVP‑2** and **GA**—including success criteria, architecture deltas, test plans, controls, rollout, and backstops. Defaults emphasize *least privilege, provenance, and measurability*.
+Summit has matured into a multi‑service platform with API, client apps, data pipelines, orchestration (Airflow), dashboards, connectors, security assets, and extensive CI/CD metadata. This doc gives a 360° view from a defensive, reliability, and delivery lens. It captures **current state** (as‑is), **gaps/risks**, and **concrete specs** for **MVP‑2** and **GA**—including success criteria, architecture deltas, test plans, controls, rollout, and backstops. Defaults emphasize _least privilege, provenance, and measurability_.
 
 ---
 
@@ -17,6 +17,7 @@ Summit has matured into a multi‑service platform with API, client apps, data p
 **North Star**: A trustworthy, observable, and resilient platform for ingesting, enriching, and acting on operational intelligence (people, process, infra) with explainability and tight safety gates.
 
 **Guardrails**:
+
 - **Prime Directive**: Protect people, data, funds, infra, and brand. No collateral harm.
 - **Assume Breach**: Segment blast radius; enable forensics; graceful degradation.
 - **Evidence or It Didn’t Happen**: Decisions tied to artifacts (hashes, logs, attestations, PRs).
@@ -30,6 +31,7 @@ Summit has matured into a multi‑service platform with API, client apps, data p
 > Derived from visible repo structure and issue headers. This section is intentionally high‑level and focused on architecture & controls, not feature minutiae.
 
 ### Components
+
 - **Core Services & Apps**
   - `api/` — primary service surface, likely Node/TS or Python based on ecosystem files.
   - `client/`, `client-v039/`, `apps/`, `dashboard/`, `conductor-ui/` — frontends and ops consoles.
@@ -51,12 +53,14 @@ Summit has matured into a multi‑service platform with API, client apps, data p
   - `adr/` (architecture decisions), `contracts/`, `comms/templates`, `backlog/`.
 
 ### What’s Working (Signals)
+
 - Structured repos for security testing (ZAP), docs lint (Vale), and runbooks exist.
 - Helm charts + deployment assets imply Kubernetes (likely EKS) with room for ArgoCD/Helm promotion flows.
 - Evidence of chaos testing and micro‑canary planning.
 - Merge queue + flaky test triage culture.
 
 ### Likely Tech Assumptions
+
 - K8s (Helm charts present), GitHub Actions CI, containerized workloads, Postgres/Redis in stack, Cloudflare DNS/Tunnels feasible, OPA policy potential, CycloneDX/SBOM desirable.
 
 ---
@@ -65,13 +69,13 @@ Summit has matured into a multi‑service platform with API, client apps, data p
 
 > Scored by likelihood × impact; examples include technical, process, and counter‑influence.
 
-1. **Supply‑Chain Verifiability** — Attestations and signature verify gates not universally enforced across services; unsigned images or lax digest pinning risk.  
+1. **Supply‑Chain Verifiability** — Attestations and signature verify gates not universally enforced across services; unsigned images or lax digest pinning risk.
 2. **Secrets Hygiene** — Potential for long‑lived tokens, env var creep, and insufficient session binding in CI.
 3. **Policy Coverage** — OPA/ABAC likely partial; lack of centralized policy bundle across services.
-4. **SBOM/License Drift** — Inconsistent SBOM generation per artifact; no unified *fail‑the‑build* strategy for critical CVEs.
+4. **SBOM/License Drift** — Inconsistent SBOM generation per artifact; no unified _fail‑the‑build_ strategy for critical CVEs.
 5. **Test Flake & Release Risk** — Flaky tests quarantined ad hoc; micro‑canary planned but not automatically enforced across waves.
 6. **Runtime Segmentation** — NetworkPolicies and egress controls may be permissive; lateral movement risk in cluster.
-7. **Observability Gaps** — SLOs/SLIs for *security* (e.g., failed policy evals, gate adherence) not codified.
+7. **Observability Gaps** — SLOs/SLIs for _security_ (e.g., failed policy evals, gate adherence) not codified.
 8. **Data Lineage & DLP** — ETL/ML flows without end‑to‑end lineage attestations and redaction enforcement at sinks.
 9. **Human Workflow** — Merge outside freeze windows, review anomalies, or label churn risks (social engineering vectors).
 10. **Incident Evidence Chain** — Tamper‑evident logs & immutable audit stream may be partial.
@@ -81,6 +85,7 @@ Summit has matured into a multi‑service platform with API, client apps, data p
 ## Objectives & Key Results
 
 ### MVP‑2 (Horizon: 2–4 weeks)
+
 - **Ship a verifiable build pipeline**: SLSA‑aligned provenance + cosign keyless signing + verify gates.
 - **Operational micro‑canary**: 1% → 10% → 50% → 100% wave plan enforced by policy.
 - **Secrets to short‑lived**: OIDC‑based CI auth; eliminate static PATs.
@@ -88,6 +93,7 @@ Summit has matured into a multi‑service platform with API, client apps, data p
 - **Quarantine flake**: Automatic quarantine workflow + owner notifications + burn‑down KPI.
 
 ### GA (Horizon: 6–10 weeks)
+
 - **Policy‑as‑Code first**: Central OPA bundle (authZ, deploy gates, data access) with staged enforcement.
 - **Zero‑trust runtime**: Namespace isolation + NetworkPolicies + egress allow‑lists + pod identity.
 - **Data lineage + DLP**: Lineage attestations from source→sink; redaction filters; disclosure logging.
@@ -99,14 +105,17 @@ Summit has matured into a multi‑service platform with API, client apps, data p
 ## Product Scope — MVP‑2
 
 ### Problem to Solve
+
 Ensure every release is **provable**, **reversible**, and **low blast‑radius** while we stabilize features and reduce flaky noise that blocks true signal.
 
 ### Users & Personas
+
 - **Core Devs**: Want fast, safe merges; high‑signal failures.
 - **SRE/SecOps**: Need attestations, rollback levers, and reliable alerts.
 - **Leads/PM**: Need release burn‑down, canary status, and risk summaries.
 
 ### MVP‑2 Feature Set
+
 1. **Provenance & Signing**
    - SLSA provenance generation per build.
    - Container signing (cosign keyless via OIDC); verify in CI and at deploy.
@@ -123,9 +132,11 @@ Ensure every release is **provable**, **reversible**, and **low blast‑radius**
    - Flake quarantine bot: label + skip + owner ping; weekly burn‑down target (‑25%).
 
 ### Non‑Goals (MVP‑2)
+
 - Full zero‑trust mesh; deep PII reclassification; multi‑tenant controls beyond current scope.
 
 ### Acceptance Criteria (MVP‑2)
+
 - 100% of release images are signed; unsigned deploys rejected.
 - SBOM published to artifact store; builds fail on CRITICAL vulns unless explicitly waived.
 - Canary waves auto‑progress within 2 hours given SLO adherence; auto‑rollback on breach.
@@ -137,9 +148,11 @@ Ensure every release is **provable**, **reversible**, and **low blast‑radius**
 ## Product Scope — GA
 
 ### Problem to Solve
+
 Scale safely to broader usage while keeping trust high: stricter policies, stronger isolation, observable data flows, and a documented recovery path.
 
 ### GA Feature Set
+
 1. **Central OPA Policy Bundle**
    - ABAC for services + data access; admission control for K8s; deployment gates.
    - Policy test suite & contract tests per service.
@@ -158,6 +171,7 @@ Scale safely to broader usage while keeping trust high: stricter policies, stron
    - Error‑budget‑driven freeze; staged traffic restore 1%→10%→50%→100%.
 
 ### Acceptance Criteria (GA)
+
 - 95%+ policy coverage measured by policy tests; 100% coverage for deploy & auth gates.
 - 0 unsigned images admitted to cluster; 0 static creds in CI.
 - Mean time to rollback < 15 min; evidence packet auto‑generated within 5 min of incident start.
@@ -175,6 +189,7 @@ Runtime attest & monitor (Prom/Grafana; SLO gates) → Evidence stream (tamper�
 ```
 
 **Key Interfaces**
+
 - **Policy Bundle**: shared Rego package; exported `export.rego` for downstream tooling.
 - **Verify Gate**: reusable GH Action + admission controller check.
 - **Canary Controller**: metrics → policy; halts/rollbacks.
@@ -200,22 +215,27 @@ Runtime attest & monitor (Prom/Grafana; SLO gates) → Evidence stream (tamper�
 ## Security & Compliance Controls (MVP‑2 → GA)
 
 ### Supply Chain
+
 - **Build reproducibility** and provenance (SLSA L3 target).
 - **Signing**: cosign keyless; verify at CI and admission.
 - **SBOM**: CycloneDX JSON; Store + diff; CVE policy thresholds.
 
 ### Secrets & Identity
+
 - OIDC for CI→Cloud; eliminate static secrets; step‑up WebAuthn for sensitive actions.
 - Ephemeral tokens; boundary roles; rotation playbooks.
 
 ### Infra & Network
+
 - K8s namespaces per service; default‑deny NetworkPolicies; egress allow‑list; service mesh optional.
 - IAM least privilege; IRSA; audit on assume‑role.
 
 ### Data Safety
+
 - DLP/redaction in ETL sinks; masking in non‑prod; lineage records; access logs with purpose binding.
 
 ### Observability
+
 - Security SLIs: signature‑verify rate, policy‑eval success, secret‑leak MTTR, canary‑rollback MTTA.
 - Dashboards with error budgets & freeze automation.
 
@@ -226,11 +246,12 @@ Runtime attest & monitor (Prom/Grafana; SLO gates) → Evidence stream (tamper�
 > Drop‑in examples to seed PRs. Adjust paths/ids to match repo.
 
 ### 1) GitHub Actions: OIDC + Hard Permissions
+
 ```yaml
 # .github/workflows/build.yml (excerpt)
 permissions:
   contents: read
-  id-token: write  # for OIDC
+  id-token: write # for OIDC
   packages: write
   security-events: write
 
@@ -263,6 +284,7 @@ jobs:
 ```
 
 ### 2) OPA Policy Gate (CI)
+
 ```yaml
 # .github/workflows/policy-gate.yml (excerpt)
 jobs:
@@ -277,25 +299,27 @@ jobs:
 ```
 
 ### 3) Admission Control (K8s)
+
 ```yaml
 # Gatekeeper Constraint (reject unsigned)
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredAnnotations
 metadata: { name: require-signed-images }
 spec:
-  match: { kinds: [{ apiGroups: [""], kinds: ["Pod", "Deployment"] }] }
+  match: { kinds: [{ apiGroups: [''], kinds: ['Pod', 'Deployment'] }] }
   parameters:
-    message: "Unsigned images are not permitted"
+    message: 'Unsigned images are not permitted'
 ```
 
 ### 4) Micro‑Canary Promotion (Helm values)
+
 ```yaml
 # charts/service/values.yaml (excerpt)
 rollout:
   waves:
-    - { percentage: 1,  minDuration: 30m, slo: { errorRate: "<1%" } }
-    - { percentage: 10, minDuration: 1h,  slo: { errorRate: "<1%" } }
-    - { percentage: 50, minDuration: 2h,  slo: { errorRate: "<1%" } }
+    - { percentage: 1, minDuration: 30m, slo: { errorRate: '<1%' } }
+    - { percentage: 10, minDuration: 1h, slo: { errorRate: '<1%' } }
+    - { percentage: 50, minDuration: 2h, slo: { errorRate: '<1%' } }
     - { percentage: 100 }
 ```
 
@@ -318,6 +342,7 @@ rollout:
 **GA**: Enforce all gates; admission reject on unsigned/dirty; namespace isolation live; egress allow‑lists live. Error‑budget‑driven freeze automated.
 
 Rollback always available via Helm previous revision; evidence packet auto‑created with:
+
 - artifacts digests, SBOMs, policy results, SLO snapshots, runbook refs.
 
 ---
@@ -353,6 +378,7 @@ Rollback always available via Helm previous revision; evidence packet auto‑cre
 ## PR Templates & Checklists (snippets)
 
 **PR Body (delta)**
+
 - [ ] SBOM attached
 - [ ] Image digest + cosign attestation link
 - [ ] Policy tests added/updated
@@ -362,6 +388,7 @@ Rollback always available via Helm previous revision; evidence packet auto‑cre
 ---
 
 ## Runbooks (links to repo paths to be filled by owners)
+
 - **Containment (token leak)** — disable tokens → rotate → isolate workload (NP + scale‑to‑zero canary) → preserve forensics.
 - **Eradication** — patch/upgrade, policy tighten, artifact rebuild with provenance.
 - **Recovery** — staged traffic restore 1%→10%→50%→100%; guard with error budget.
@@ -370,6 +397,7 @@ Rollback always available via Helm previous revision; evidence packet auto‑cre
 ---
 
 ## Open Questions (to resolve async with owners)
+
 - Which services are most critical for micro‑canary prioritization? (name top 3)
 - Confirm cloud: EKS + IRSA? (adjust OIDC claims accordingly)
 - Confirm registry & policy engines (Gatekeeper vs. Kyverno) to finalize admission rules.
@@ -396,9 +424,7 @@ deny[msg] {
 
 ---
 
-*End of document.*
-
-
+_End of document._
 
 ## Angleton IG — Structured Output
 
@@ -409,6 +435,7 @@ deny[msg] {
 **confidence:** medium (repo is large; some assumptions pending owner confirmation)
 
 **key_findings:**
+
 - id: supply_chain_verifiability
   evidence: [".github/", "charts/", "docker/", "deploy/"]
   impact: "Unsigned or unverifiable artifacts could reach prod; provenance gaps"
@@ -427,53 +454,54 @@ deny[msg] {
   exploit_path: "ETL → sink without redaction"
 
 **recommended_actions:**
+
 - title: Enforce provenance+signature verify gates
   change_type: PR
   effort: M
   prereqs: ["OIDC to cloud", "cosign installer", "registry permissions"]
   diff_or_patch: |
-    Add cosign keyless signing to build workflow; add verify job and admission policy.
+  Add cosign keyless signing to build workflow; add verify job and admission policy.
 - title: Emit SBOMs and block on critical CVEs (with allowlist)
   change_type: PR
   effort: M
   prereqs: ["cdxgen/syft in build", "artifact store"]
   diff_or_patch: |
-    Add CycloneDX step; upload SBOM; conftest policy to fail build on criticals.
+  Add CycloneDX step; upload SBOM; conftest policy to fail build on criticals.
 - title: Centralize OPA policy bundle
   change_type: Policy
   effort: M
   prereqs: ["policy-bundle repo", "conftest in CI"]
   diff_or_patch: |
-    Create `policy-bundle` package; add CI job to evaluate per PR.
+  Create `policy-bundle` package; add CI job to evaluate per PR.
 - title: Implement micro‑canary controller
   change_type: Infra
   effort: M
   prereqs: ["metrics contracts", "Helm values wiring"]
   diff_or_patch: |
-    Add wave logic values; gate on SLOs; auto rollback on breach.
+  Add wave logic values; gate on SLOs; auto rollback on breach.
 - title: Namespace isolation + NetworkPolicies + egress allowlists
   change_type: Infra
   effort: M
   prereqs: ["service inventory", "cluster policy engine"]
   diff_or_patch: |
-    Add namespace templates; default‑deny NP; restrict egress to required hosts.
+  Add namespace templates; default‑deny NP; restrict egress to required hosts.
 - title: Evidence pipeline (tamper‑evident)
   change_type: Runbook
   effort: S
   prereqs: ["object store", "hashing lib"]
   diff_or_patch: |
-    Append hash‑chained JSONL of events; rotate manifests per deploy.
+  Append hash‑chained JSONL of events; rotate manifests per deploy.
 
 **verification:**
+
 - checks: ["cosign-verify-ci", "admission-reject-unsigned-e2e", "sbom-critical-block-unit", "policy-bundle-contract-tests", "canary-rollback-e2e", "secret-scan-ci"]
 - success_criteria: "0 unsigned images deployed; SBOM coverage 100%; policy tests ≥95% pass; rollback <15m; flake rate −25% in 30 days"
 
 **owners_notified:** ["SecEng", "SRE", "DevEx", "Service Owners", "PM"]
 
 **links:**
-  pr: "(to be added with first implementation PR)"
-  runbook: "RUNBOOKS/ (populate specific files)"
-  dashboards: ["Release Safety", "Supply Chain", "Security Hygiene", "Quality"]
+pr: "(to be added with first implementation PR)"
+runbook: "RUNBOOKS/ (populate specific files)"
+dashboards: ["Release Safety", "Supply Chain", "Security Hygiene", "Quality"]
 
 ---
-

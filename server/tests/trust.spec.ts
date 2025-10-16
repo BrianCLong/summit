@@ -1,15 +1,14 @@
-import { verifyTrustContract } from "../src/conductor/contracts/trust";
+import { verifyTrustContract } from '../src/conductor/contracts/trust';
 
-test("rejects expired contract", async () => {
+test('rejects expired contract', async () => {
   await expect(
     verifyTrustContract({
-      providerTenant: "a",
-      consumerTenant: "b",
+      providerTenant: 'a',
+      consumerTenant: 'b',
       scope: {},
-      residency: "EU",
-      expiresAt: "2000-01-01",
-      signature: "x",
+      residency: 'EU',
+      expiresAt: '2000-01-01',
+      signature: 'x',
     }),
   ).rejects.toBeTruthy();
 });
-

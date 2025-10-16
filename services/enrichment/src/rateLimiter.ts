@@ -23,7 +23,10 @@ export class TokenBucket {
     const now = Date.now();
     const elapsed = (now - this.lastRefill) / 1000;
     if (elapsed > 0) {
-      this.tokens = Math.min(this.capacity, this.tokens + elapsed * this.refillPerSecond);
+      this.tokens = Math.min(
+        this.capacity,
+        this.tokens + elapsed * this.refillPerSecond,
+      );
       this.lastRefill = now;
     }
   }

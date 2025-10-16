@@ -63,7 +63,10 @@ export interface TenantIsolationPolicy {
  */
 class OpaPolicyEngine {
   private opaBaseUrl: string;
-  private policyCache: Map<string, { decision: PolicyDecision; expiry: number }>;
+  private policyCache: Map<
+    string,
+    { decision: PolicyDecision; expiry: number }
+  >;
   private readonly CACHE_TTL = 300000; // 5 minutes
 
   constructor() {
@@ -74,7 +77,10 @@ class OpaPolicyEngine {
   /**
    * Evaluate policy decision
    */
-  async evaluatePolicy(policyName: string, context: PolicyContext): Promise<PolicyDecision> {
+  async evaluatePolicy(
+    policyName: string,
+    context: PolicyContext,
+  ): Promise<PolicyDecision> {
     const startTime = Date.now();
 
     try {
@@ -83,7 +89,10 @@ class OpaPolicyEngine {
       const cached = this.policyCache.get(cacheKey);
 
       if (cached && cached.expiry > Date.now()) {
-        prometheusConductorMetrics.recordOperationalEvent('opa_cache_hit', true);
+        prometheusConductorMetrics.recordOperationalEvent(
+          'opa_cache_hit',
+          true,
+        );
         return cached.decision;
       }
 
@@ -97,22 +106,29 @@ class OpaPolicyEngine {
       };
 
       // Call OPA
-      const response = await axios.post(`${this.opaBaseUrl}/v1/data/${policyName}`, opaInput, {
-        timeout: 5000,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Request-ID': crypto.randomUUID(),
+      const response = await axios.post(
+        `${this.opaBaseUrl}/v1/data/${policyName}`,
+        opaInput,
+        {
+          timeout: 5000,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Request-ID': crypto.randomUUID(),
+          },
         },
-      });
+      );
 
       const decision = this.parseOpaResponse(response.data);
 
       // Cache the decision
-      const ttl = decision.allow ? 60_000 /* 1m */ : 300_000 /* 5m */;
+      const ttl = decision.allow ? 60_000 /* 1m */ : 300_000; /* 5m */
       this.policyCache.set(cacheKey, { decision, expiry: Date.now() + ttl });
 
       // Record metrics
-      prometheusConductorMetrics.recordOperationalEvent('opa_policy_evaluation', decision.allow);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'opa_policy_evaluation',
+        decision.allow,
+      );
       prometheusConductorMetrics.recordOperationalMetric(
         'opa_evaluation_time',
         Date.now() - startTime,
@@ -122,7 +138,10 @@ class OpaPolicyEngine {
     } catch (error) {
       console.error('OPA policy evaluation failed:', error);
 
-      prometheusConductorMetrics.recordOperationalEvent('opa_evaluation_error', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'opa_evaluation_error',
+        false,
+      );
 
       // Fail-safe: deny by default
       return {
@@ -131,7 +150,9 @@ class OpaPolicyEngine {
         auditLog: {
           logLevel: 'error',
           message: 'OPA policy evaluation failure',
-          metadata: { error: error instanceof Error ? error.message : 'Unknown error' },
+          metadata: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
         },
       };
     }
@@ -140,7 +161,9 @@ class OpaPolicyEngine {
   /**
    * Evaluate tenant isolation policy
    */
-  async evaluateTenantIsolation(context: PolicyContext): Promise<PolicyDecision> {
+  async evaluateTenantIsolation(
+    context: PolicyContext,
+  ): Promise<PolicyDecision> {
     return this.evaluatePolicy('conductor/tenant_isolation', context);
   }
 
@@ -165,7 +188,9 @@ class OpaPolicyEngine {
   /**
    * Load tenant isolation configuration
    */
-  async loadTenantConfig(tenantId: string): Promise<TenantIsolationPolicy | null> {
+  async loadTenantConfig(
+    tenantId: string,
+  ): Promise<TenantIsolationPolicy | null> {
     try {
       const response = await axios.get(
         `${this.opaBaseUrl}/v1/data/conductor/tenant_config/${tenantId}`,
@@ -222,7 +247,10 @@ class OpaPolicyEngine {
       resource: context.resource,
     };
 
-    return crypto.createHash('sha256').update(JSON.stringify(keyData)).digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update(JSON.stringify(keyData))
+      .digest('hex');
   }
 
   /**
@@ -230,7 +258,10 @@ class OpaPolicyEngine {
    */
   clearCache(): void {
     this.policyCache.clear();
-    prometheusConductorMetrics.recordOperationalEvent('opa_cache_cleared', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'opa_cache_cleared',
+      true,
+    );
   }
 }
 
@@ -262,7 +293,10 @@ export class TagPropagationSystem {
 
       // Add data classification tags based on source
       for (const tag of sourceTags) {
-        if (tag.startsWith('classification:') || tag.startsWith('sensitivity:')) {
+        if (
+          tag.startsWith('classification:') ||
+          tag.startsWith('sensitivity:')
+        ) {
           targetTags.add(tag);
         }
       }
@@ -281,7 +315,10 @@ export class TagPropagationSystem {
       );
     } catch (error) {
       console.error('Tag propagation failed:', error);
-      prometheusConductorMetrics.recordOperationalEvent('tag_propagation_error', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'tag_propagation_error',
+        false,
+      );
     }
   }
 
@@ -315,7 +352,10 @@ export class TagPropagationSystem {
   /**
    * Validate cross-tenant access
    */
-  validateCrossTenantAccess(resourceId: string, requestingTenantId: string): boolean {
+  validateCrossTenantAccess(
+    resourceId: string,
+    requestingTenantId: string,
+  ): boolean {
     const tags = this.getResourceTags(resourceId);
 
     // Check if resource belongs to requesting tenant
@@ -324,7 +364,10 @@ export class TagPropagationSystem {
     }
 
     // Check for explicit cross-tenant sharing tags
-    return tags.some((tag) => tag.startsWith('shared_with:') && tag.includes(requestingTenantId));
+    return tags.some(
+      (tag) =>
+        tag.startsWith('shared_with:') && tag.includes(requestingTenantId),
+    );
   }
 }
 
@@ -373,7 +416,8 @@ export class TenantIsolationMiddleware {
         };
 
         // Evaluate tenant isolation policy
-        const decision = await this.opaPolicyEngine.evaluateTenantIsolation(context);
+        const decision =
+          await this.opaPolicyEngine.evaluateTenantIsolation(context);
 
         if (!decision.allow) {
           // Log policy violation
@@ -385,7 +429,10 @@ export class TenantIsolationMiddleware {
             reason: decision.reason,
           });
 
-          prometheusConductorMetrics.recordOperationalEvent('tenant_isolation_violation', false);
+          prometheusConductorMetrics.recordOperationalEvent(
+            'tenant_isolation_violation',
+            false,
+          );
 
           return res.status(403).json({
             success: false,
@@ -424,8 +471,13 @@ export class TenantIsolationMiddleware {
         return {
           willSendResponse(requestContext: any) {
             // Apply field masking based on tenant isolation policy
-            if (requestContext.request.http?.policyDecision?.dataFilters?.fieldMask) {
-              const fieldMask = requestContext.request.http.policyDecision.dataFilters.fieldMask;
+            if (
+              requestContext.request.http?.policyDecision?.dataFilters
+                ?.fieldMask
+            ) {
+              const fieldMask =
+                requestContext.request.http.policyDecision.dataFilters
+                  .fieldMask;
               requestContext.response.body = this.applyFieldMask(
                 requestContext.response.body,
                 fieldMask,
@@ -467,7 +519,12 @@ export class TenantIsolationMiddleware {
   }
 
   private extractTenantId(req: any): string | null {
-    return req.headers['x-tenant-id'] || req.user?.tenantId || req.query.tenantId || null;
+    return (
+      req.headers['x-tenant-id'] ||
+      req.user?.tenantId ||
+      req.query.tenantId ||
+      null
+    );
   }
 
   private mapHttpMethodToAction(method: string): string {

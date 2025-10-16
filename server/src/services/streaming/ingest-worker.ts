@@ -116,7 +116,9 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   // Main ingest endpoint
-  async ingestMessage(message: Omit<IngestMessage, 'message_id'>): Promise<string> {
+  async ingestMessage(
+    message: Omit<IngestMessage, 'message_id'>,
+  ): Promise<string> {
     const messageId = crypto.randomUUID();
     const fullMessage: IngestMessage = {
       message_id: messageId,
@@ -164,7 +166,10 @@ export class StreamingIngestWorker extends EventEmitter {
 
     try {
       // Take batch from queue
-      const batch = this.messageQueue.splice(0, Math.min(this.batchSize, this.messageQueue.length));
+      const batch = this.messageQueue.splice(
+        0,
+        Math.min(this.batchSize, this.messageQueue.length),
+      );
       this.metrics.queue_size = this.messageQueue.length;
 
       logger.info({
@@ -216,7 +221,9 @@ export class StreamingIngestWorker extends EventEmitter {
         successful: successCount,
         errors: errorCount,
         processing_time_ms: batchProcessingTime,
-        messages_per_second: Math.round((batch.length / batchProcessingTime) * 1000),
+        messages_per_second: Math.round(
+          (batch.length / batchProcessingTime) * 1000,
+        ),
       });
 
       // Update worker status
@@ -235,7 +242,9 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   // Individual message processing
-  private async processMessage(message: IngestMessage): Promise<ProcessedMessage> {
+  private async processMessage(
+    message: IngestMessage,
+  ): Promise<ProcessedMessage> {
     const processingStartTime = Date.now();
     const traceId = crypto.randomUUID();
 
@@ -321,9 +330,14 @@ export class StreamingIngestWorker extends EventEmitter {
       if (typeof obj === 'string') {
         let processedString = obj;
 
-        for (const [patternName, pattern] of Object.entries(this.piiConfig.redaction_patterns)) {
+        for (const [patternName, pattern] of Object.entries(
+          this.piiConfig.redaction_patterns,
+        )) {
           if (pattern.test(processedString)) {
-            processedString = processedString.replace(pattern, this.piiConfig.replacement_token);
+            processedString = processedString.replace(
+              pattern,
+              this.piiConfig.replacement_token,
+            );
             piiFieldsRemoved.push(`${path}.${patternName}`);
             redactionApplied = true;
           }
@@ -333,7 +347,9 @@ export class StreamingIngestWorker extends EventEmitter {
       }
 
       if (Array.isArray(obj)) {
-        return obj.map((item, index) => processObject(item, `${path}[${index}]`));
+        return obj.map((item, index) =>
+          processObject(item, `${path}[${index}]`),
+        );
       }
 
       if (obj && typeof obj === 'object') {
@@ -355,7 +371,9 @@ export class StreamingIngestWorker extends EventEmitter {
       logger.info({
         message: 'PII redaction applied',
         fields_redacted: piiFieldsRemoved.length,
-        patterns_matched: [...new Set(piiFieldsRemoved.map((f) => f.split('.').pop()))],
+        patterns_matched: [
+          ...new Set(piiFieldsRemoved.map((f) => f.split('.').pop())),
+        ],
       });
 
       this.metrics.pii_redactions_applied++;
@@ -432,7 +450,10 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   // Confidence calculation
-  private calculateConfidence(data: any, originalMessage: IngestMessage): number {
+  private calculateConfidence(
+    data: any,
+    originalMessage: IngestMessage,
+  ): number {
     let confidence = 0.5; // Base confidence
 
     // Source reliability
@@ -479,7 +500,9 @@ export class StreamingIngestWorker extends EventEmitter {
   }
 
   // Handle processed messages
-  private async handleProcessedMessage(processed: ProcessedMessage): Promise<void> {
+  private async handleProcessedMessage(
+    processed: ProcessedMessage,
+  ): Promise<void> {
     try {
       // Store as TimescaleDB event
       await insertEvent({
@@ -531,7 +554,10 @@ export class StreamingIngestWorker extends EventEmitter {
       timestamp: message.timestamp,
     };
 
-    return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
+    return crypto
+      .createHash('md5')
+      .update(JSON.stringify(normalized))
+      .digest('hex');
   }
 
   private updateMetrics(): void {
@@ -539,7 +565,9 @@ export class StreamingIngestWorker extends EventEmitter {
     const now = Date.now();
     if (this.metrics.messages_processed > 0) {
       // Simplified calculation - would maintain time windows for accuracy
-      this.metrics.messages_per_second = Math.round(this.metrics.messages_processed / 60);
+      this.metrics.messages_per_second = Math.round(
+        this.metrics.messages_processed / 60,
+      );
     }
 
     this.metrics.queue_size = this.messageQueue.length;
@@ -547,7 +575,10 @@ export class StreamingIngestWorker extends EventEmitter {
     // Update worker status
     if (this.metrics.errors_encountered > 10) {
       this.metrics.worker_status = 'unhealthy';
-    } else if (this.metrics.errors_encountered > 5 || this.metrics.queue_size > 500) {
+    } else if (
+      this.metrics.errors_encountered > 5 ||
+      this.metrics.queue_size > 500
+    ) {
       this.metrics.worker_status = 'degraded';
     } else {
       this.metrics.worker_status = 'healthy';

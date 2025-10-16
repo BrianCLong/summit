@@ -44,6 +44,7 @@ Confirm completion with a status summary and recommended follow-ups (e.g., run M
 ```
 
 ## Usage Notes
+
 - Apply this prompt in Maestro's agent registry (`@summit/canvas-orchestrator`).
 - Pair with automated evaluations covering pivot accuracy, explain panel fidelity, and collaboration event capture.
 - Reference the Link Analysis Canvas PRD for roadmap alignment and acceptance criteria.

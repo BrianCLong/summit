@@ -7,10 +7,10 @@ spec:
   background: true
   rules:
     - name: require-nonlatest
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "Using image tag :latest is not allowed."
+        message: 'Using image tag :latest is not allowed.'
         pattern:
           spec:
             containers:
-              - image: "!*:latest"
+              - image: '!*:latest'

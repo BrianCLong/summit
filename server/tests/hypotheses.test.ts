@@ -1,4 +1,10 @@
-import { bayesianUpdate, applyEvidence, addDissent, Hypothesis, Evidence } from '../src/hypotheses';
+import {
+  bayesianUpdate,
+  applyEvidence,
+  addDissent,
+  Hypothesis,
+  Evidence,
+} from '../src/hypotheses';
 
 describe('hypothesis updates', () => {
   const base: Hypothesis = {

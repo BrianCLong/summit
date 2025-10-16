@@ -1,0 +1,70 @@
+name: CI (green)
+
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+
+concurrency:
+  group: green-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      codechange: ${{ steps.paths.outputs.code }}
+      strict: ${{ steps.strict.outputs.strict }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: paths
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - '!**/*.md'
+              - '!docs/**'
+              - '!**/*.png'
+              - '!**/*.jpg'
+              - '!**/*.svg'
+              - '**/*'
+
+      - name: Detect strict label
+        id: strict
+        if: github.event_name == 'pull_request'
+        run: |
+          labels=$(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event) }}' || true)
+          if echo "$labels" | grep -q '^audit:strict$'; then
+            echo "strict=true" >> $GITHUB_OUTPUT
+          else
+            echo "strict=false" >> $GITHUB_OUTPUT
+          fi
+  green:
+    needs: detect
+    if: needs.detect.outputs.codechange == 'true'
+
+  green:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Node toolchain
+        uses: actions/setup-node@v4
+        with: { node-version: '20.14.x', cache: 'pnpm' }
+
+      - name: Green build
+        run: |
+          chmod +x scripts/green_build.sh || true
+          node --version
+          bash scripts/green_build.sh
+
+      - name: Workspace audit (soft or strict)
+        run: |
+          if [ "${{ needs.detect.outputs.strict }}" = "true" ]; then
+            echo "== strict audit =="
+            node scripts/audit_workspaces.mjs --strict
+          else
+            echo "== soft audit =="
+            node scripts/audit_workspaces.mjs || echo "::warning::Audit issues detected"
+          fi

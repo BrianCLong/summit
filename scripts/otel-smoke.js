@@ -20,7 +20,7 @@ async function otelSmokeTest() {
     span.setAttributes({
       'test.type': 'smoke',
       'test.component': 'otel-validation',
-      'intelgraph.test': true
+      'intelgraph.test': true,
     });
     span.end();
     console.log('✅ Test 1: Tracer creation and span generation - PASSED');
@@ -35,13 +35,13 @@ async function otelSmokeTest() {
     const meter = metrics.getMeter('otel-smoke-test', '1.0.0');
     const counter = meter.createCounter('smoke_test_counter', {
       description: 'Counter for OpenTelemetry smoke test',
-      unit: '1'
+      unit: '1',
     });
     counter.add(1, { 'test.run': 'smoke' });
 
     const histogram = meter.createHistogram('smoke_test_duration', {
       description: 'Duration histogram for smoke test',
-      unit: 'ms'
+      unit: 'ms',
     });
     histogram.record(42, { 'test.operation': 'validation' });
 
@@ -62,12 +62,16 @@ async function otelSmokeTest() {
             passed++;
             resolve();
           } else {
-            console.log(`⚠️  Test 3: HTTP endpoint returned ${res.statusCode} - SKIPPED`);
+            console.log(
+              `⚠️  Test 3: HTTP endpoint returned ${res.statusCode} - SKIPPED`,
+            );
             resolve();
           }
         });
         req.on('error', () => {
-          console.log('⚠️  Test 3: HTTP endpoint unreachable - SKIPPED (server not running)');
+          console.log(
+            '⚠️  Test 3: HTTP endpoint unreachable - SKIPPED (server not running)',
+          );
           resolve();
         });
         req.setTimeout(2000, () => {
@@ -85,21 +89,25 @@ async function otelSmokeTest() {
   const otelVars = [
     'OTEL_SERVICE_NAME',
     'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT',
-    'OTEL_EXPORTER_OTLP_METRICS_ENDPOINT'
+    'OTEL_EXPORTER_OTLP_METRICS_ENDPOINT',
   ];
 
   let envConfigured = 0;
-  otelVars.forEach(varName => {
+  otelVars.forEach((varName) => {
     if (process.env[varName]) {
       envConfigured++;
     }
   });
 
   if (envConfigured >= 1) {
-    console.log(`✅ Test 4: Environment configuration (${envConfigured}/${otelVars.length} vars) - PASSED`);
+    console.log(
+      `✅ Test 4: Environment configuration (${envConfigured}/${otelVars.length} vars) - PASSED`,
+    );
     passed++;
   } else {
-    console.log('⚠️  Test 4: No OTEL environment variables configured - SKIPPED');
+    console.log(
+      '⚠️  Test 4: No OTEL environment variables configured - SKIPPED',
+    );
   }
 
   // Results
@@ -109,7 +117,9 @@ async function otelSmokeTest() {
   console.log(`⚠️  Skipped: Tests may be skipped if server not running`);
 
   if (failed > 0) {
-    console.log('\n🚨 OTEL Smoke Test FAILED - Check OpenTelemetry configuration');
+    console.log(
+      '\n🚨 OTEL Smoke Test FAILED - Check OpenTelemetry configuration',
+    );
     process.exit(1);
   } else {
     console.log('\n🎉 OTEL Smoke Test PASSED - OpenTelemetry is functional');
@@ -119,7 +129,7 @@ async function otelSmokeTest() {
 
 // Run smoke test
 if (require.main === module) {
-  otelSmokeTest().catch(error => {
+  otelSmokeTest().catch((error) => {
     console.error('💥 Smoke test crashed:', error);
     process.exit(1);
   });

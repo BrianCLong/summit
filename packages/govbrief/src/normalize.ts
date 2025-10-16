@@ -25,7 +25,9 @@ function extractPublisher(documentRoot: HTMLElement): string {
       return value.trim();
     }
   }
-  const publisherMeta = documentRoot.querySelector('meta[name="dcterms.publisher"]');
+  const publisherMeta = documentRoot.querySelector(
+    'meta[name="dcterms.publisher"]',
+  );
   if (publisherMeta) {
     const value = publisherMeta.getAttribute('content');
     if (value) {
@@ -36,7 +38,9 @@ function extractPublisher(documentRoot: HTMLElement): string {
 }
 
 function extractDate(articleRoot: HTMLElement): string {
-  const dateField = articleRoot.querySelector('.field--name-field-date-published .field__item');
+  const dateField = articleRoot.querySelector(
+    '.field--name-field-date-published .field__item',
+  );
   if (dateField) {
     return dateField.text.trim();
   }
@@ -52,11 +56,15 @@ function extractDate(articleRoot: HTMLElement): string {
 }
 
 function extractAuthors(articleRoot: HTMLElement): string[] {
-  const authorFields = articleRoot.querySelectorAll('.field--name-field-ref-authors .field__item');
+  const authorFields = articleRoot.querySelectorAll(
+    '.field--name-field-ref-authors .field__item',
+  );
   if (authorFields.length > 0) {
     return authorFields.map((node) => node.text.trim()).filter(Boolean);
   }
-  const fallback = articleRoot.querySelectorAll('[rel="author"], .author, .byline a');
+  const fallback = articleRoot.querySelectorAll(
+    '[rel="author"], .author, .byline a',
+  );
   if (fallback.length > 0) {
     return fallback.map((node) => node.text.trim()).filter(Boolean);
   }
@@ -80,7 +88,11 @@ function gatherSectionText(nodes: Node[]): string {
     .join('\n\n');
 }
 
-export function extractArticleRecord(html: string, url: string, archiveUrl?: string): ArticleRecord {
+export function extractArticleRecord(
+  html: string,
+  url: string,
+  archiveUrl?: string,
+): ArticleRecord {
   const documentRoot = parse(html);
   const articleRoot = findArticleRoot(documentRoot);
   if (!articleRoot) {
@@ -110,7 +122,7 @@ export function extractArticleRecord(html: string, url: string, archiveUrl?: str
             id,
             title: currentHeading,
             text: sectionText,
-            startLine: lineCounter
+            startLine: lineCounter,
           });
           lineCounter += sectionText.split(/\n/).length;
         }
@@ -129,7 +141,7 @@ export function extractArticleRecord(html: string, url: string, archiveUrl?: str
       id,
       title: currentHeading,
       text: trailing,
-      startLine: lineCounter
+      startLine: lineCounter,
     });
   }
 
@@ -140,6 +152,6 @@ export function extractArticleRecord(html: string, url: string, archiveUrl?: str
     title,
     datePublished,
     authors,
-    sections
+    sections,
   };
 }

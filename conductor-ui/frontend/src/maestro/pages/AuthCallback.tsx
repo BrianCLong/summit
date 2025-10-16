@@ -24,7 +24,8 @@ const AuthCallback: React.FC = () => {
         });
 
         // Navigate to intended destination or home
-        const intendedPath = sessionStorage.getItem('auth_return_path') || '/maestro';
+        const intendedPath =
+          sessionStorage.getItem('auth_return_path') || '/maestro';
         sessionStorage.removeItem('auth_return_path');
         navigate(intendedPath, { replace: true });
       } catch (err) {
@@ -49,7 +50,9 @@ const AuthCallback: React.FC = () => {
           <div className="bg-red-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
             <span className="text-red-600 text-2xl">⚠️</span>
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Authentication Failed</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            Authentication Failed
+          </h2>
           <p className="text-slate-600 mb-6">{error}</p>
           <button
             onClick={() => navigate('/auth/login', { replace: true })}
@@ -66,7 +69,9 @@ const AuthCallback: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">Completing Authentication</h2>
+        <h2 className="text-xl font-semibold text-slate-900 mb-2">
+          Completing Authentication
+        </h2>
         <p className="text-slate-600">Please wait while we sign you in...</p>
       </div>
     </div>

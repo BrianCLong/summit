@@ -7,11 +7,15 @@ if (retry > 0 && global.jest) {
 
 // ---- No .only guard ---------------------------------------------------------
 const failFocus = (what) => {
-  throw new Error(`[no-only-tests] Detected ${what}. Remove '.only' to keep coverage honest.`);
+  throw new Error(
+    `[no-only-tests] Detected ${what}. Remove '.only' to keep coverage honest.`,
+  );
 };
 
 Object.defineProperty(global.it, 'only', { get: () => failFocus('it.only') });
-Object.defineProperty(global.describe, 'only', { get: () => failFocus('describe.only') });
+Object.defineProperty(global.describe, 'only', {
+  get: () => failFocus('describe.only'),
+});
 
 // ---- console.error guard ----------------------------------------------------
 const __origConsoleError = console.error;
@@ -19,7 +23,9 @@ const __origConsoleError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
     __origConsoleError(...args);
-    throw new Error('[console.error] used in tests — replace with assertions or throw');
+    throw new Error(
+      '[console.error] used in tests — replace with assertions or throw',
+    );
   };
 });
 

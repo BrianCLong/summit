@@ -80,7 +80,15 @@ interface EnhancedAIAssistantProps {
 const generateResponse = async (userMessage: string): Promise<Message> => {
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const queryKeywords = ['find', 'show', 'search', 'query', 'get', 'list', 'analyze'];
+  const queryKeywords = [
+    'find',
+    'show',
+    'search',
+    'query',
+    'get',
+    'list',
+    'analyze',
+  ];
   const containsQueryRequest = queryKeywords.some((keyword) =>
     userMessage.toLowerCase().includes(keyword),
   );
@@ -151,7 +159,9 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(enableVoice);
   const [isListening, setIsListening] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'thinking' | 'streaming' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'thinking' | 'streaming' | 'error'
+  >('idle');
   const [streamBuf, setStreamBuf] = useState('');
   // Ref to avoid TDZ/closure issues when callbacks reference handlers defined later
   const handleSendMessageRef = useRef<(text?: string) => void>(() => {});
@@ -160,9 +170,13 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const startVoice = useCallback(() => {
     if (!voiceEnabled) return;
     setIsListening(true);
-    if ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) {
+    if (
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition
+    ) {
       const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.onstart = () => setIsListening(true);
       recognition.onresult = (event: any) => {
@@ -177,9 +191,13 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const stopVoice = useCallback(() => {
     setIsListening(false);
     // Abort any ongoing recognition if needed
-    if ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) {
+    if (
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition
+    ) {
       const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition(); // Need to get the active instance if possible
       // For simplicity, we'll just stop the current listening state.
       // A more robust solution would involve storing the recognition instance.
@@ -395,7 +413,9 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
           )}
 
           {message.type === 'assistant' && (
-            <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box
+              sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}
+            >
               {/* Follow-up Actions */}
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
                 <Button
@@ -428,7 +448,10 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
                 </Typography>
 
                 <Stack direction="row" spacing={1}>
-                  <IconButton size="small" onClick={() => handleCopy(message.content)}>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleCopy(message.content)}
+                  >
                     <ContentCopy fontSize="small" />
                   </IconButton>
 
@@ -441,7 +464,10 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
                       >
                         <ThumbUp fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" onClick={() => alert('Feedback: Thumbs Down!')}>
+                      <IconButton
+                        size="small"
+                        onClick={() => alert('Feedback: Thumbs Down!')}
+                      >
                         <ThumbDown fontSize="small" />
                       </IconButton>
                     </>
@@ -459,7 +485,13 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <Paper elevation={1} sx={{ p: 2, borderRadius: '12px 12px 0 0' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar sx={{ bgcolor: 'secondary.main' }}>
               <SmartToy />
@@ -539,7 +571,10 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
                 <SmartToy fontSize="small" />
               </Avatar>
-              <Paper elevation={1} sx={{ p: 2, borderRadius: '16px 16px 16px 4px' }}>
+              <Paper
+                elevation={1}
+                sx={{ p: 2, borderRadius: '16px 16px 16px 4px' }}
+              >
                 <Typography variant="body2">{streamBuf}</Typography>
               </Paper>
             </Box>
@@ -551,7 +586,10 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
             <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
               <SmartToy fontSize="small" />
             </Avatar>
-            <Paper elevation={1} sx={{ p: 2, borderRadius: '16px 16px 16px 4px' }}>
+            <Paper
+              elevation={1}
+              sx={{ p: 2, borderRadius: '16px 16px 16px 4px' }}
+            >
               <Typography variant="body2">Typing...</Typography>
             </Paper>
           </Box>

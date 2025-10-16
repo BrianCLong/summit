@@ -66,14 +66,18 @@ export class GAReleaseService {
     validations.push({
       component: 'package-json',
       status: this.packageJson ? 'pass' : 'fail',
-      message: this.packageJson ? 'Package.json valid' : 'Package.json missing or invalid',
+      message: this.packageJson
+        ? 'Package.json valid'
+        : 'Package.json missing or invalid',
     });
 
     // Check node_modules
     validations.push({
       component: 'dependencies',
       status: this.checkNodeModules() ? 'pass' : 'fail',
-      message: this.checkNodeModules() ? 'Dependencies installed' : 'Missing dependencies',
+      message: this.checkNodeModules()
+        ? 'Dependencies installed'
+        : 'Missing dependencies',
     });
 
     // Check environment configuration
@@ -106,7 +110,11 @@ export class GAReleaseService {
   /**
    * Generate Software Bill of Materials (SBOM)
    */
-  async generateSBOM(): Promise<{ success: boolean; path?: string; error?: string }> {
+  async generateSBOM(): Promise<{
+    success: boolean;
+    path?: string;
+    error?: string;
+  }> {
     try {
       execSync('npx @cyclonedx/cyclonedx-npm --output-file sbom.json', {
         cwd: process.cwd(),
@@ -120,7 +128,8 @@ export class GAReleaseService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'SBOM generation failed',
+        error:
+          error instanceof Error ? error.message : 'SBOM generation failed',
       };
     }
   }
@@ -128,12 +137,20 @@ export class GAReleaseService {
   /**
    * Run preflight checks
    */
-  async runPreflight(): Promise<{ success: boolean; results: ValidationResult[] }> {
+  async runPreflight(): Promise<{
+    success: boolean;
+    results: ValidationResult[];
+  }> {
     const results: ValidationResult[] = [];
 
     try {
       // Check if preflight script exists
-      const preflightPath = path.join(process.cwd(), 'scripts', 'migrate', 'preflight_cli.ts');
+      const preflightPath = path.join(
+        process.cwd(),
+        'scripts',
+        'migrate',
+        'preflight_cli.ts',
+      );
       if (fs.existsSync(preflightPath)) {
         results.push({
           component: 'preflight-script',
@@ -217,19 +234,29 @@ export class GAReleaseService {
   }
 
   private checkNodeModules(): boolean {
-    const paths = ['node_modules', 'server/node_modules', 'client/node_modules'];
+    const paths = [
+      'node_modules',
+      'server/node_modules',
+      'client/node_modules',
+    ];
 
     return paths.every((p) => fs.existsSync(path.join(process.cwd(), p)));
   }
 
-  private checkEnvironment(): { status: 'pass' | 'warning' | 'fail'; message: string } {
+  private checkEnvironment(): {
+    status: 'pass' | 'warning' | 'fail';
+    message: string;
+  } {
     const envPath = path.join(process.cwd(), '.env');
     const envExamplePath = path.join(process.cwd(), '.env.example');
 
     if (fs.existsSync(envPath)) {
       return { status: 'pass', message: 'Environment configuration found' };
     } else if (fs.existsSync(envExamplePath)) {
-      return { status: 'warning', message: 'Using .env.example (should copy to .env)' };
+      return {
+        status: 'warning',
+        message: 'Using .env.example (should copy to .env)',
+      };
     } else {
       return { status: 'fail', message: 'No environment configuration found' };
     }

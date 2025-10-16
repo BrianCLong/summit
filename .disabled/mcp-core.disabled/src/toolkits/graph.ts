@@ -2,12 +2,16 @@ import { z } from 'zod';
 import type {
   ToolDefinition,
   ResourceDefinition,
-  PromptDefinition
+  PromptDefinition,
 } from '../registry.js';
 import type { TenantContext } from '../auth.js';
 
 type GraphToolkitDeps = {
-  cypher: (tenantId: string, cypher: string, params?: unknown) => Promise<unknown[]>;
+  cypher: (
+    tenantId: string,
+    cypher: string,
+    params?: unknown,
+  ) => Promise<unknown[]>;
   explain?: (cypher: string) => Promise<unknown>;
 };
 
@@ -23,12 +27,13 @@ export function graphToolkit(deps: GraphToolkitDeps): {
     name: 'graph.query',
     config: {
       title: 'Run graph query',
-      description: 'Execute a tenant-scoped Cypher query and return the resulting rows.',
+      description:
+        'Execute a tenant-scoped Cypher query and return the resulting rows.',
       inputSchema: {
         cypher: z.string(),
         params: z.record(z.any()).optional(),
-        limit: z.number().int().positive().optional()
-      }
+        limit: z.number().int().positive().optional(),
+      },
     },
     handler: async (rawArgs, context) => {
       const args = (rawArgs ?? {}) as {
@@ -43,12 +48,12 @@ export function graphToolkit(deps: GraphToolkitDeps): {
         content: [
           {
             type: 'text',
-            text: JSON.stringify({ rows: limited }, null, 2)
-          }
-        ]
+            text: JSON.stringify({ rows: limited }, null, 2),
+          },
+        ],
       };
     },
-    policy: analystOnly
+    policy: analystOnly,
   };
 
   const schemaResource: ResourceDefinition = {
@@ -56,7 +61,8 @@ export function graphToolkit(deps: GraphToolkitDeps): {
     uri: 'resource://graph/schema',
     metadata: {
       title: 'Graph schema',
-      description: 'Canonical entity and relationship schema for grounding analytical queries.'
+      description:
+        'Canonical entity and relationship schema for grounding analytical queries.',
     },
     read: async (uri, _context) => ({
       contents: [
@@ -65,15 +71,15 @@ export function graphToolkit(deps: GraphToolkitDeps): {
           text: JSON.stringify(
             {
               entities: ['Person', 'Org', 'Event'],
-              edges: ['RELATES_TO']
+              edges: ['RELATES_TO'],
             },
             null,
-            2
+            2,
           ),
-          mimeType: 'application/json'
-        }
-      ]
-    })
+          mimeType: 'application/json',
+        },
+      ],
+    }),
   };
 
   const promptDefinition: PromptDefinition = {
@@ -82,8 +88,8 @@ export function graphToolkit(deps: GraphToolkitDeps): {
       title: 'NL to Cypher',
       description: 'Prompt template that guides safe NL to Cypher translation.',
       argsSchema: {
-        question: z.string()
-      }
+        question: z.string(),
+      },
     },
     handler: async (args) => {
       const question = (args?.question as string) ?? '';
@@ -93,24 +99,24 @@ export function graphToolkit(deps: GraphToolkitDeps): {
             role: 'assistant',
             content: {
               type: 'text',
-              text: 'You are a graph assistant. Output parameterized, read-only Cypher queries.'
-            }
+              text: 'You are a graph assistant. Output parameterized, read-only Cypher queries.',
+            },
           },
           {
             role: 'user',
             content: {
               type: 'text',
-              text: `Question: ${question}\nReturn Cypher and a short rationale.`
-            }
-          }
-        ]
+              text: `Question: ${question}\nReturn Cypher and a short rationale.`,
+            },
+          },
+        ],
       };
-    }
+    },
   };
 
   return {
     tools: [queryTool],
     resources: [schemaResource],
-    prompts: [promptDefinition]
+    prompts: [promptDefinition],
   };
 }

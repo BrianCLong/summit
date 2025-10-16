@@ -15,7 +15,7 @@ services:
     image: intelgraph/server:secure
     container_name: intelgraph-app-secure
     restart: unless-stopped
-    
+
     # Security configurations
     security_opt:
       - no-new-privileges:true
@@ -25,8 +25,8 @@ services:
     cap_add:
       - NET_BIND_SERVICE
     read_only: true
-    user: "10001:10001"
-    
+    user: '10001:10001'
+
     # Resource limits for DoS protection
     deploy:
       resources:
@@ -37,14 +37,14 @@ services:
         reservations:
           memory: 512M
           cpus: '0.5'
-    
+
     # Network security
     networks:
       - frontend
       - backend
     ports:
-      - "127.0.0.1:4000:4000"  # Bind to localhost only
-    
+      - '127.0.0.1:4000:4000' # Bind to localhost only
+
     # Environment and secrets
     environment:
       - NODE_ENV=production
@@ -57,56 +57,62 @@ services:
       - HELMET_ENABLED=true
       - CORS_STRICT_MODE=true
       - RATE_LIMIT_ENABLED=true
-    
+
     env_file:
       - .env.secure
-    
+
     # Secure volume mounts
     volumes:
       - app_logs:/app/logs:rw,noexec,nosuid,nodev
       - app_uploads:/app/uploads:rw,noexec,nosuid,nodev
       - app_tmp:/app/tmp:rw,noexec,nosuid,nodev
-    
+
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=100m
-    
+
     # Service dependencies with health checks
     depends_on:
       neo4j:
         condition: service_healthy
       postgres:
-        condition: service_healthy  
+        condition: service_healthy
       redis:
         condition: service_healthy
-    
+
     # Advanced health check
     healthcheck:
-      test: ["CMD", "node", "-e", "const http=require('http'); const req=http.request({hostname:'localhost',port:4000,path:'/health',timeout:5000},(res)=>{process.exit(res.statusCode===200?0:1);}); req.on('error',()=>process.exit(1)); req.end();"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "const http=require('http'); const req=http.request({hostname:'localhost',port:4000,path:'/health',timeout:5000},(res)=>{process.exit(res.statusCode===200?0:1);}); req.on('error',()=>process.exit(1)); req.end();",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-    
+
     # Logging configuration
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
-        labels: "service,version"
-    
+        max-size: '10m'
+        max-file: '3'
+        labels: 'service,version'
+
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=frontend"
-      - "com.intelgraph.service=api"
-      - "com.intelgraph.security=hardened"
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=frontend'
+      - 'com.intelgraph.service=api'
+      - 'com.intelgraph.security=hardened'
 
   # ===== REVERSE PROXY & LOAD BALANCER =====
   nginx:
     image: nginxinc/nginx-unprivileged:1.25-alpine
     container_name: intelgraph-nginx-secure
     restart: unless-stopped
-    
+
     # Security configurations
     security_opt:
       - no-new-privileges:true
@@ -114,8 +120,8 @@ services:
     cap_drop:
       - ALL
     read_only: true
-    user: "101:101"  # nginx unprivileged user
-    
+    user: '101:101' # nginx unprivileged user
+
     # Resource limits
     deploy:
       resources:
@@ -125,35 +131,35 @@ services:
         reservations:
           memory: 64M
           cpus: '0.1'
-    
+
     networks:
       - frontend
     ports:
-      - "80:8080"   # Unprivileged ports
-      - "443:8443"
-    
+      - '80:8080' # Unprivileged ports
+      - '443:8443'
+
     volumes:
       - ./config/nginx/nginx-secure.conf:/etc/nginx/nginx.conf:ro,z
       - ./config/nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro,z
       - nginx_cache:/var/cache/nginx:rw,noexec,nosuid,nodev
       - nginx_logs:/var/log/nginx:rw,noexec,nosuid,nodev
       - ssl_certs:/etc/nginx/ssl:ro,z
-    
+
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=50m
       - /run:rw,noexec,nosuid,size=10m
-    
+
     environment:
       - TZ=UTC
       - NGINX_WORKER_PROCESSES=auto
       - NGINX_WORKER_CONNECTIONS=1024
-    
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
       interval: 30s
       timeout: 10s
       retries: 3
-    
+
     depends_on:
       - intelgraph-app
 
@@ -162,7 +168,7 @@ services:
     image: neo4j:5.15-enterprise
     container_name: intelgraph-neo4j-secure
     restart: unless-stopped
-    
+
     # Security configurations
     security_opt:
       - no-new-privileges:true
@@ -174,9 +180,9 @@ services:
       - FOWNER
       - SETGID
       - SETUID
-    read_only: false  # Neo4j requires write access
-    user: "7474:7474"
-    
+    read_only: false # Neo4j requires write access
+    user: '7474:7474'
+
     # Resource limits
     deploy:
       resources:
@@ -186,32 +192,32 @@ services:
         reservations:
           memory: 2G
           cpus: '1.0'
-    
+
     networks:
       - backend
     ports:
-      - "127.0.0.1:7474:7474"  # HTTP
-      - "127.0.0.1:7687:7687"  # Bolt
-    
+      - '127.0.0.1:7474:7474' # HTTP
+      - '127.0.0.1:7687:7687' # Bolt
+
     environment:
       # Authentication
       - NEO4J_AUTH=neo4j/$(cat /run/secrets/neo4j_password)
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
-      
+
       # Security settings
       - NEO4J_dbms_security_auth__minimum__password__length=12
       - NEO4J_dbms_security_auth__max__failed__attempts=5
       - NEO4J_dbms_security_auth__lock__time=300s
       - NEO4J_dbms_logs_security_level=INFO
       - NEO4J_dbms_logs_query_enabled=true
-      
+
       # Network security
       - NEO4J_dbms_connector_bolt_advertised__address=neo4j:7687
       - NEO4J_dbms_connector_bolt_listen__address=0.0.0.0:7687
       - NEO4J_dbms_connector_http_listen__address=0.0.0.0:7474
       - NEO4J_dbms_connector_https_enabled=true
       - NEO4J_dbms_ssl_policy_default_enabled=true
-      
+
       # Performance and reliability
       - NEO4J_dbms_memory_heap_initial__size=2G
       - NEO4J_dbms_memory_heap_max__size=3G
@@ -219,15 +225,15 @@ services:
       - NEO4J_dbms_default__database=intelgraph
       - NEO4J_dbms_backup_enabled=true
       - NEO4J_dbms_backup_listen__address=0.0.0.0:6362
-      
+
       # Plugins (restricted)
       - NEO4J_PLUGINS=["apoc-core"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.load.*,apoc.import.*
       - NEO4J_dbms_security_procedures_allowlist=apoc.*
-      
+
     secrets:
       - neo4j_password
-    
+
     volumes:
       - neo4j_data:/data:rw,noexec,nosuid,nodev
       - neo4j_logs:/logs:rw,noexec,nosuid,nodev
@@ -235,26 +241,30 @@ services:
       - neo4j_plugins:/plugins:ro,noexec,nosuid,nodev
       - ./backups/neo4j:/backups:rw,noexec,nosuid,nodev
       - ./config/neo4j/ssl:/ssl:ro,z
-    
+
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p $$(cat /run/secrets/neo4j_password) 'RETURN 1' || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          "cypher-shell -u neo4j -p $$(cat /run/secrets/neo4j_password) 'RETURN 1' || exit 1",
+        ]
       interval: 45s
       timeout: 15s
       retries: 5
       start_period: 120s
-    
+
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
   # ===== POSTGRESQL DATABASE =====
   postgres:
     image: postgres:15.5-alpine
     container_name: intelgraph-postgres-secure
     restart: unless-stopped
-    
+
     # Security configurations
     security_opt:
       - no-new-privileges:true
@@ -266,9 +276,9 @@ services:
       - FOWNER
       - SETGID
       - SETUID
-    read_only: false  # PostgreSQL requires write access
-    user: "70:70"     # postgres user
-    
+    read_only: false # PostgreSQL requires write access
+    user: '70:70' # postgres user
+
     # Resource limits
     deploy:
       resources:
@@ -278,12 +288,12 @@ services:
         reservations:
           memory: 512M
           cpus: '0.25'
-    
+
     networks:
       - backend
     ports:
-      - "127.0.0.1:5432:5432"
-    
+      - '127.0.0.1:5432:5432'
+
     environment:
       - POSTGRES_DB=intelgraph_prod
       - POSTGRES_USER=intelgraph
@@ -291,16 +301,16 @@ services:
       - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256
       - PGDATA=/var/lib/postgresql/data/pgdata
       - TZ=UTC
-    
+
     secrets:
       - postgres_password
-    
+
     volumes:
       - postgres_data:/var/lib/postgresql/data:rw,noexec,nosuid,nodev
       - ./config/postgresql/init:/docker-entrypoint-initdb.d:ro,z
       - ./backups/postgres:/backups:rw,noexec,nosuid,nodev
       - postgres_socket:/var/run/postgresql:rw,noexec,nosuid,nodev
-    
+
     # Secure PostgreSQL configuration
     command: |
       postgres
@@ -321,34 +331,34 @@ services:
       -c checkpoint_completion_target=0.9
       -c random_page_cost=1.1
       -c effective_io_concurrency=200
-    
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph_prod"]
+      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph_prod']
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 40s
-    
+
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
   # ===== REDIS CACHE =====
   redis:
     image: redis:7.2-alpine
     container_name: intelgraph-redis-secure
     restart: unless-stopped
-    
+
     # Security configurations
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     read_only: true
-    user: "999:999"  # redis user
-    
+    user: '999:999' # redis user
+
     # Resource limits
     deploy:
       resources:
@@ -358,12 +368,12 @@ services:
         reservations:
           memory: 128M
           cpus: '0.1'
-    
+
     networks:
       - backend
     ports:
-      - "127.0.0.1:6379:6379"
-    
+      - '127.0.0.1:6379:6379'
+
     # Secure Redis configuration
     command: |
       sh -c '
@@ -388,41 +398,47 @@ services:
         --rename-command DEBUG ""
         --rename-command CONFIG "CONFIG_a8f5d2e9b"
       '
-    
+
     secrets:
       - redis_password
-    
+
     volumes:
       - redis_data:/data:rw,noexec,nosuid,nodev
       - ./backups/redis:/backups:rw,noexec,nosuid,nodev
-    
+
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=50m
-    
+
     healthcheck:
-      test: ["CMD", "sh", "-c", "redis-cli -a $$(cat /run/secrets/redis_password) ping | grep PONG"]
+      test:
+        [
+          'CMD',
+          'sh',
+          '-c',
+          'redis-cli -a $$(cat /run/secrets/redis_password) ping | grep PONG',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
-    
+
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 
   # ===== SECURITY MONITORING =====
   security-monitor:
     image: falcosecurity/falco:0.36.2-slim
     container_name: intelgraph-security-monitor
     restart: unless-stopped
-    
+
     security_opt:
-      - apparmor:unconfined  # Falco needs broad access for monitoring
-    
-    privileged: true  # Required for kernel access
-    
+      - apparmor:unconfined # Falco needs broad access for monitoring
+
+    privileged: true # Required for kernel access
+
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock:ro
       - /proc:/host/proc:ro
@@ -431,17 +447,17 @@ services:
       - /usr:/host/usr:ro
       - /etc/falco:/etc/falco:ro
       - ./config/falco/rules:/etc/falco/rules.d:ro,z
-    
+
     environment:
       - FALCO_GRPC_ENABLED=true
       - FALCO_GRPC_BIND_ADDRESS=0.0.0.0:5060
       - FALCO_K8S_AUDIT_ENDPOINT=/k8s-audit
-    
+
     networks:
       - monitoring
-    
+
     healthcheck:
-      test: ["CMD", "pgrep", "falco"]
+      test: ['CMD', 'pgrep', 'falco']
       interval: 60s
       timeout: 10s
       retries: 3
@@ -451,30 +467,38 @@ services:
     image: grafana/loki:2.9.0
     container_name: intelgraph-loki
     restart: unless-stopped
-    
+
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     read_only: true
-    user: "10001:10001"
-    
+    user: '10001:10001'
+
     networks:
       - monitoring
     ports:
-      - "127.0.0.1:3100:3100"
-    
+      - '127.0.0.1:3100:3100'
+
     volumes:
       - ./config/loki/loki.yml:/etc/loki/local-config.yaml:ro,z
       - loki_data:/loki:rw,noexec,nosuid,nodev
-    
+
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=100m
-    
+
     command: -config.file=/etc/loki/local-config.yaml
-    
+
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3100/ready',
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -538,37 +562,37 @@ networks:
   frontend:
     driver: bridge
     driver_opts:
-      com.docker.network.enable_ipv6: "false"
-      com.docker.network.bridge.enable_icc: "false"
-      com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"
+      com.docker.network.enable_ipv6: 'false'
+      com.docker.network.bridge.enable_icc: 'false'
+      com.docker.network.bridge.host_binding_ipv4: '127.0.0.1'
     ipam:
       config:
         - subnet: 172.21.0.0/24
           gateway: 172.21.0.1
     labels:
-      - "com.intelgraph.network.tier=frontend"
-      
+      - 'com.intelgraph.network.tier=frontend'
+
   backend:
     driver: bridge
     driver_opts:
-      com.docker.network.enable_ipv6: "false"
-      com.docker.network.bridge.enable_icc: "true"
-    internal: true  # No external access
+      com.docker.network.enable_ipv6: 'false'
+      com.docker.network.bridge.enable_icc: 'true'
+    internal: true # No external access
     ipam:
       config:
         - subnet: 172.22.0.0/24
           gateway: 172.22.0.1
     labels:
-      - "com.intelgraph.network.tier=backend"
-      
+      - 'com.intelgraph.network.tier=backend'
+
   monitoring:
     driver: bridge
     driver_opts:
-      com.docker.network.enable_ipv6: "false"
+      com.docker.network.enable_ipv6: 'false'
     internal: true
     ipam:
       config:
         - subnet: 172.23.0.0/24
           gateway: 172.23.0.1
     labels:
-      - "com.intelgraph.network.tier=monitoring"
+      - 'com.intelgraph.network.tier=monitoring'

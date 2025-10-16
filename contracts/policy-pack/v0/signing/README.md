@@ -5,4 +5,3 @@ Policy Pack Signing (starter)
 - Verify: `cosign verify-blob --bundle signing/cosign.bundle.json --signature <sig> policy-pack.tgz`.
 
 Note: This starter provides a bundle path placeholder; wire actual CI later.
-

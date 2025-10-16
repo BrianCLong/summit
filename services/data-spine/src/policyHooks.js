@@ -12,7 +12,9 @@ function getMetadata(schema) {
 function enforceResidency(metadata, context) {
   const region = context.region || metadata.residency.defaultRegion;
   if (!metadata.residency.allowedRegions.includes(region)) {
-    throw new Error(`Region ${region} is not permitted for contract ${metadata.contract}.`);
+    throw new Error(
+      `Region ${region} is not permitted for contract ${metadata.contract}.`,
+    );
   }
   return { ...context, region };
 }
@@ -40,17 +42,30 @@ function applyPolicies(record, schema, context = {}) {
   const metadata = getMetadata(schema);
   enforceResidency(metadata, context);
   const result = { ...record };
-  const lowerEnvironment = LOWER_ENVIRONMENTS.includes((context.environment || '').toLowerCase());
+  const lowerEnvironment = LOWER_ENVIRONMENTS.includes(
+    (context.environment || '').toLowerCase(),
+  );
   metadata.policies.fieldPolicies.forEach((policy) => {
     if (!(policy.field in result)) {
       return;
     }
     if (metadata.classification.includes('PII') && lowerEnvironment) {
-      result[policy.field] = applyFieldPolicy(result[policy.field], policy, metadata);
+      result[policy.field] = applyFieldPolicy(
+        result[policy.field],
+        policy,
+        metadata,
+      );
       return;
     }
-    if (policy.environments && policy.environments.includes(context.environment)) {
-      result[policy.field] = applyFieldPolicy(result[policy.field], policy, metadata);
+    if (
+      policy.environments &&
+      policy.environments.includes(context.environment)
+    ) {
+      result[policy.field] = applyFieldPolicy(
+        result[policy.field],
+        policy,
+        metadata,
+      );
     }
   });
   return result;
@@ -64,7 +79,11 @@ function reversePolicies(record, schema, context = {}) {
       return;
     }
     if (policy.action === 'tokenize') {
-      result[policy.field] = reverseFieldPolicy(result[policy.field], policy, metadata);
+      result[policy.field] = reverseFieldPolicy(
+        result[policy.field],
+        policy,
+        metadata,
+      );
     }
   });
   return result;
@@ -74,5 +93,5 @@ module.exports = {
   getMetadata,
   enforceResidency,
   applyPolicies,
-  reversePolicies
+  reversePolicies,
 };

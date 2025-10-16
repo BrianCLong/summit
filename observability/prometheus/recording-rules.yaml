@@ -1,7 +1,7 @@
 groups:
-- name: web-sli
-  rules:
-    - record: job:http_request_error_rate:ratio5m
-      expr: sum(rate(http_requests_total{job="web",code=~"5.."}[5m])) / sum(rate(http_requests_total{job="web"}[5m]))
-    - record: job:http_request_duration_seconds:p95
-      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="web"}[5m])) by (le))
+  - name: web-sli
+    rules:
+      - record: job:http_request_error_rate:ratio5m
+        expr: sum(rate(http_requests_total{job="web",code=~"5.."}[5m])) / sum(rate(http_requests_total{job="web"}[5m]))
+      - record: job:http_request_duration_seconds:p95
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="web"}[5m])) by (le))

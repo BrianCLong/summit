@@ -8,7 +8,9 @@ test('Graph Workbench interactions', async ({ page }) => {
   const box = await canvas.boundingBox();
   if (box) {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { button: 'right' });
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {
+      button: 'right',
+    });
     await expect(page.getByText('Expand Neighbors')).toBeVisible();
   }
   // Shift-lasso drag

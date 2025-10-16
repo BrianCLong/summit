@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: grafana
     app.kubernetes.io/component: dashboards
     app.kubernetes.io/part-of: intelgraph
-    grafana_dashboard: "1"
+    grafana_dashboard: '1'
 data:
   # Main Maestro Conductor Dashboard
   maestro-conductor-overview.json: |
@@ -517,7 +517,7 @@ data:
       }
     }
 
-  # Infrastructure Dashboard  
+  # Infrastructure Dashboard
   infrastructure-dashboard.json: |
     {
       "dashboard": {

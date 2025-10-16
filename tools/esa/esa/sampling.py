@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import math
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence, Tuple
 
 from .utils import Record, SamplingProof, group_by, hash_rng_state
 
@@ -19,9 +19,9 @@ class SampledRecord:
 class SampleResult:
     plan_type: str
     seed: int
-    rng_state: Tuple
-    sampled: List[SampledRecord]
-    metadata: Dict[str, object] | None = None
+    rng_state: tuple
+    sampled: list[SampledRecord]
+    metadata: dict[str, object] | None = None
 
     def proof(self) -> SamplingProof:
         return SamplingProof(
@@ -36,7 +36,7 @@ class SampleResult:
 class SamplingPlan:
     plan_type: str
 
-    def __init__(self, seed: Optional[int] = None) -> None:
+    def __init__(self, seed: int | None = None) -> None:
         self.seed = seed if seed is not None else random.randrange(0, 2**32 - 1)
 
     def random(self) -> random.Random:
@@ -46,7 +46,7 @@ class SamplingPlan:
         raise NotImplementedError
 
     @staticmethod
-    def from_config(config: Dict) -> "SamplingPlan":
+    def from_config(config: dict) -> SamplingPlan:
         plan_type = config.get("type")
         if not plan_type:
             raise ValueError("Sampling plan must specify a 'type'")
@@ -81,7 +81,7 @@ class SamplingPlan:
 class UniformSamplingPlan(SamplingPlan):
     plan_type = "uniform"
 
-    def __init__(self, sample_size: Optional[int], fraction: Optional[float], seed: Optional[int]) -> None:
+    def __init__(self, sample_size: int | None, fraction: float | None, seed: int | None) -> None:
         super().__init__(seed)
         self.sample_size = sample_size
         self.fraction = fraction
@@ -124,10 +124,10 @@ class StratifiedSamplingPlan(SamplingPlan):
 
     def __init__(
         self,
-        sample_size: Optional[int],
+        sample_size: int | None,
         strata: Sequence[str],
-        allocations: Optional[Dict[str, int]],
-        seed: Optional[int],
+        allocations: dict[str, int] | None,
+        seed: int | None,
     ) -> None:
         super().__init__(seed)
         self.sample_size = sample_size
@@ -149,8 +149,8 @@ class StratifiedSamplingPlan(SamplingPlan):
                 for name, group in groups.items()
             }
         rng = self.random()
-        sampled: List[SampledRecord] = []
-        strata_metadata: Dict[str, Dict[str, int]] = {}
+        sampled: list[SampledRecord] = []
+        strata_metadata: dict[str, dict[str, int]] = {}
         for name, group in groups.items():
             group_size = len(group)
             desired = min(allocation.get(name, 0), group_size)
@@ -183,7 +183,7 @@ class StratifiedSamplingPlan(SamplingPlan):
 class PPSSamplingPlan(SamplingPlan):
     plan_type = "pps"
 
-    def __init__(self, sample_size: int, weight_column: str, seed: Optional[int]) -> None:
+    def __init__(self, sample_size: int, weight_column: str, seed: int | None) -> None:
         super().__init__(seed)
         if sample_size is None:
             raise ValueError("PPS plan requires 'sample_size'")
@@ -194,7 +194,7 @@ class PPSSamplingPlan(SamplingPlan):
 
     def execute(self, records: Sequence[Record]) -> SampleResult:
         population = list(records)
-        weights: List[float] = []
+        weights: list[float] = []
         for record in population:
             value = record.values.get(self.weight_column)
             if value is None:
@@ -204,9 +204,7 @@ class PPSSamplingPlan(SamplingPlan):
             try:
                 weight = float(value)
             except (TypeError, ValueError) as exc:
-                raise ValueError(
-                    f"Weight column '{self.weight_column}' must be numeric"
-                ) from exc
+                raise ValueError(f"Weight column '{self.weight_column}' must be numeric") from exc
             if weight < 0:
                 raise ValueError("Weight must be non-negative")
             weights.append(weight)
@@ -216,8 +214,10 @@ class PPSSamplingPlan(SamplingPlan):
 
         rng = self.random()
         probabilities = [w / total_weight for w in weights]
-        probability_map = {record.index: p for record, p in zip(population, probabilities)}
-        sampled: Dict[int, SampledRecord] = {}
+        probability_map = {
+            record.index: p for record, p in zip(population, probabilities, strict=False)
+        }
+        sampled: dict[int, SampledRecord] = {}
         for _ in range(self.sample_size):
             pick = rng.choices(population, weights=probabilities, k=1)[0]
             prob = probability_map[pick.index]
@@ -245,7 +245,7 @@ class PPSSamplingPlan(SamplingPlan):
 class ReservoirSamplingPlan(SamplingPlan):
     plan_type = "reservoir"
 
-    def __init__(self, sample_size: int, seed: Optional[int]) -> None:
+    def __init__(self, sample_size: int, seed: int | None) -> None:
         super().__init__(seed)
         if sample_size is None or sample_size <= 0:
             raise ValueError("Reservoir plan requires positive 'sample_size'")
@@ -256,7 +256,7 @@ class ReservoirSamplingPlan(SamplingPlan):
         if not population:
             raise ValueError("Population must contain at least one record")
         rng = self.random()
-        reservoir: List[Record] = []
+        reservoir: list[Record] = []
         for idx, record in enumerate(population):
             if idx < self.sample_size:
                 reservoir.append(record)

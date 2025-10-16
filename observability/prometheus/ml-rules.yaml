@@ -1,7 +1,7 @@
 groups:
-- name: ml-drift
-  rules:
-    - alert: FeatureDriftHigh
-      expr: ml_feature_psi > 0.2
-      for: 15m
-      labels: { severity: warning }
+  - name: ml-drift
+    rules:
+      - alert: FeatureDriftHigh
+        expr: ml_feature_psi > 0.2
+        for: 15m
+        labels: { severity: warning }

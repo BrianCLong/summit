@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 
 @dataclass(slots=True)
@@ -13,13 +12,13 @@ class KafkaConfig:
 
     bootstrap_servers: str = "localhost:9092"
     security_protocol: str = "PLAINTEXT"
-    sasl_mechanism: Optional[str] = None
-    sasl_username: Optional[str] = None
-    sasl_password: Optional[str] = None
-    input_topics: List[str] = field(
+    sasl_mechanism: str | None = None
+    sasl_username: str | None = None
+    sasl_password: str | None = None
+    input_topics: list[str] = field(
         default_factory=lambda: ["rl.events", "coa.sim", "policy"],
     )
-    output_topics: List[str] = field(
+    output_topics: list[str] = field(
         default_factory=lambda: ["rl.decisions", "rl.metrics"],
     )
 
@@ -29,7 +28,7 @@ class GraphQLConfig:
     """Settings for the IntelGraph GraphQL gateway."""
 
     endpoint: str = "http://localhost:4000/graphql"
-    api_key: Optional[str] = None
+    api_key: str | None = None
     timeout_seconds: int = 30
 
 
@@ -37,7 +36,7 @@ class GraphQLConfig:
 class RewardConfig:
     """Baseline KPI weights used by the reward hub."""
 
-    kpi_weights: Dict[str, float] = field(
+    kpi_weights: dict[str, float] = field(
         default_factory=lambda: {
             "time_to_insight": 0.5,
             "accuracy": 0.3,
@@ -59,7 +58,7 @@ class ServiceConfig:
     explainability_topic: str = "xai.cards"
 
     @classmethod
-    def from_env(cls) -> "ServiceConfig":
+    def from_env(cls) -> ServiceConfig:
         """Construct configuration by reading environment variables."""
 
         kafka = KafkaConfig(
@@ -99,6 +98,8 @@ class ServiceConfig:
             graphql=graphql,
             reward=reward,
             provenance_topic=os.getenv("IG_RL_PROVENANCE_TOPIC", "prov.ledger"),
-            policy_endpoint=os.getenv("IG_RL_POLICY_ENDPOINT", "http://localhost:8080/v1/data/intelgraph"),
+            policy_endpoint=os.getenv(
+                "IG_RL_POLICY_ENDPOINT", "http://localhost:8080/v1/data/intelgraph"
+            ),
             explainability_topic=os.getenv("IG_RL_XAI_TOPIC", "xai.cards"),
         )

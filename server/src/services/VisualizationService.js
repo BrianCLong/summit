@@ -1,7 +1,7 @@
-const EventEmitter = require("events");
-const { v4: uuidv4 } = require("uuid");
-const fs = require("fs").promises;
-const path = require("path");
+const EventEmitter = require('events');
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs').promises;
+const path = require('path');
 
 class VisualizationService extends EventEmitter {
   constructor(neo4jDriver, multimodalService, analyticsService, logger) {
@@ -10,7 +10,7 @@ class VisualizationService extends EventEmitter {
     if (
       !logger &&
       analyticsService &&
-      typeof analyticsService.error === "function"
+      typeof analyticsService.error === 'function'
     ) {
       logger = analyticsService;
       analyticsService = undefined;
@@ -46,545 +46,555 @@ class VisualizationService extends EventEmitter {
   }
 
   initializeVisualizationTypes() {
-    this.visualizationTypes.set("NETWORK_GRAPH", {
-      id: "NETWORK_GRAPH",
-      name: "Network Graph",
-      description: "Interactive network visualization with nodes and edges",
-      category: "NETWORK",
-      engines: ["CYTOSCAPE", "D3_FORCE", "SIGMA"],
-      layouts: ["FORCE_DIRECTED", "HIERARCHICAL", "CIRCULAR", "GRID"],
-      features: ["zoom", "pan", "select", "filter", "cluster", "animate"],
-      dataTypes: ["nodes", "edges", "clusters"],
-      renderModes: ["SVG", "CANVAS", "WEBGL"],
+    this.visualizationTypes.set('NETWORK_GRAPH', {
+      id: 'NETWORK_GRAPH',
+      name: 'Network Graph',
+      description: 'Interactive network visualization with nodes and edges',
+      category: 'NETWORK',
+      engines: ['CYTOSCAPE', 'D3_FORCE', 'SIGMA'],
+      layouts: ['FORCE_DIRECTED', 'HIERARCHICAL', 'CIRCULAR', 'GRID'],
+      features: ['zoom', 'pan', 'select', 'filter', 'cluster', 'animate'],
+      dataTypes: ['nodes', 'edges', 'clusters'],
+      renderModes: ['SVG', 'CANVAS', 'WEBGL'],
       interactionTypes: [
-        "node_click",
-        "edge_hover",
-        "selection_change",
-        "layout_complete",
+        'node_click',
+        'edge_hover',
+        'selection_change',
+        'layout_complete',
       ],
-      exportFormats: ["PNG", "SVG", "PDF", "GEXF", "GRAPHML"],
+      exportFormats: ['PNG', 'SVG', 'PDF', 'GEXF', 'GRAPHML'],
     });
 
-    this.visualizationTypes.set("TIMELINE", {
-      id: "TIMELINE",
-      name: "Timeline Visualization",
-      description: "Temporal data visualization with interactive timeline",
-      category: "TEMPORAL",
-      engines: ["VIS_TIMELINE", "D3_TIMELINE", "CUSTOM"],
-      layouts: ["LINEAR", "GROUPED", "STACKED"],
-      features: ["zoom", "pan", "select", "filter", "group", "animate"],
-      dataTypes: ["events", "periods", "milestones"],
-      renderModes: ["SVG", "HTML"],
-      interactionTypes: ["time_select", "event_click", "range_change"],
-      exportFormats: ["PNG", "SVG", "PDF", "CSV"],
+    this.visualizationTypes.set('TIMELINE', {
+      id: 'TIMELINE',
+      name: 'Timeline Visualization',
+      description: 'Temporal data visualization with interactive timeline',
+      category: 'TEMPORAL',
+      engines: ['VIS_TIMELINE', 'D3_TIMELINE', 'CUSTOM'],
+      layouts: ['LINEAR', 'GROUPED', 'STACKED'],
+      features: ['zoom', 'pan', 'select', 'filter', 'group', 'animate'],
+      dataTypes: ['events', 'periods', 'milestones'],
+      renderModes: ['SVG', 'HTML'],
+      interactionTypes: ['time_select', 'event_click', 'range_change'],
+      exportFormats: ['PNG', 'SVG', 'PDF', 'CSV'],
     });
 
-    this.visualizationTypes.set("GEOSPATIAL_MAP", {
-      id: "GEOSPATIAL_MAP",
-      name: "Geospatial Map",
+    this.visualizationTypes.set('GEOSPATIAL_MAP', {
+      id: 'GEOSPATIAL_MAP',
+      name: 'Geospatial Map',
       description:
-        "Geographic visualization with markers, heatmaps, and clusters",
-      category: "GEOSPATIAL",
-      engines: ["LEAFLET", "MAPBOX", "GOOGLE_MAPS"],
-      layouts: ["SATELLITE", "TERRAIN", "STREET", "DARK"],
-      features: ["zoom", "pan", "cluster", "heatmap", "filter", "animate"],
-      dataTypes: ["markers", "polygons", "heatmap_data", "routes"],
-      renderModes: ["TILES", "VECTOR"],
-      interactionTypes: ["marker_click", "area_select", "zoom_change"],
-      exportFormats: ["PNG", "PDF", "KML", "GEOJSON"],
+        'Geographic visualization with markers, heatmaps, and clusters',
+      category: 'GEOSPATIAL',
+      engines: ['LEAFLET', 'MAPBOX', 'GOOGLE_MAPS'],
+      layouts: ['SATELLITE', 'TERRAIN', 'STREET', 'DARK'],
+      features: ['zoom', 'pan', 'cluster', 'heatmap', 'filter', 'animate'],
+      dataTypes: ['markers', 'polygons', 'heatmap_data', 'routes'],
+      renderModes: ['TILES', 'VECTOR'],
+      interactionTypes: ['marker_click', 'area_select', 'zoom_change'],
+      exportFormats: ['PNG', 'PDF', 'KML', 'GEOJSON'],
     });
 
-    this.visualizationTypes.set("SANKEY_DIAGRAM", {
-      id: "SANKEY_DIAGRAM",
-      name: "Sankey Flow Diagram",
-      description: "Flow visualization showing relationships and quantities",
-      category: "FLOW",
-      engines: ["D3_SANKEY", "PLOTLY"],
-      layouts: ["HORIZONTAL", "VERTICAL"],
-      features: ["hover", "filter", "animate"],
-      dataTypes: ["nodes", "flows"],
-      renderModes: ["SVG", "CANVAS"],
-      interactionTypes: ["node_hover", "flow_click"],
-      exportFormats: ["PNG", "SVG", "PDF"],
+    this.visualizationTypes.set('SANKEY_DIAGRAM', {
+      id: 'SANKEY_DIAGRAM',
+      name: 'Sankey Flow Diagram',
+      description: 'Flow visualization showing relationships and quantities',
+      category: 'FLOW',
+      engines: ['D3_SANKEY', 'PLOTLY'],
+      layouts: ['HORIZONTAL', 'VERTICAL'],
+      features: ['hover', 'filter', 'animate'],
+      dataTypes: ['nodes', 'flows'],
+      renderModes: ['SVG', 'CANVAS'],
+      interactionTypes: ['node_hover', 'flow_click'],
+      exportFormats: ['PNG', 'SVG', 'PDF'],
     });
 
-    this.visualizationTypes.set("TREEMAP", {
-      id: "TREEMAP",
-      name: "Treemap Visualization",
-      description: "Hierarchical data visualization using nested rectangles",
-      category: "HIERARCHICAL",
-      engines: ["D3_TREEMAP", "PLOTLY"],
-      layouts: ["SQUARIFIED", "SLICE_DICE", "STRIP"],
-      features: ["drill_down", "hover", "filter", "animate"],
-      dataTypes: ["hierarchy", "values"],
-      renderModes: ["SVG", "CANVAS"],
-      interactionTypes: ["rectangle_click", "drill_down", "breadcrumb_nav"],
-      exportFormats: ["PNG", "SVG", "PDF"],
+    this.visualizationTypes.set('TREEMAP', {
+      id: 'TREEMAP',
+      name: 'Treemap Visualization',
+      description: 'Hierarchical data visualization using nested rectangles',
+      category: 'HIERARCHICAL',
+      engines: ['D3_TREEMAP', 'PLOTLY'],
+      layouts: ['SQUARIFIED', 'SLICE_DICE', 'STRIP'],
+      features: ['drill_down', 'hover', 'filter', 'animate'],
+      dataTypes: ['hierarchy', 'values'],
+      renderModes: ['SVG', 'CANVAS'],
+      interactionTypes: ['rectangle_click', 'drill_down', 'breadcrumb_nav'],
+      exportFormats: ['PNG', 'SVG', 'PDF'],
     });
 
-    this.visualizationTypes.set("CHORD_DIAGRAM", {
-      id: "CHORD_DIAGRAM",
-      name: "Chord Diagram",
+    this.visualizationTypes.set('CHORD_DIAGRAM', {
+      id: 'CHORD_DIAGRAM',
+      name: 'Chord Diagram',
       description:
-        "Circular visualization showing relationships between entities",
-      category: "RELATIONSHIP",
-      engines: ["D3_CHORD", "CIRCOS"],
-      layouts: ["CIRCULAR"],
-      features: ["hover", "filter", "group", "animate"],
-      dataTypes: ["matrix", "groups"],
-      renderModes: ["SVG"],
-      interactionTypes: ["chord_hover", "group_click"],
-      exportFormats: ["PNG", "SVG", "PDF"],
+        'Circular visualization showing relationships between entities',
+      category: 'RELATIONSHIP',
+      engines: ['D3_CHORD', 'CIRCOS'],
+      layouts: ['CIRCULAR'],
+      features: ['hover', 'filter', 'group', 'animate'],
+      dataTypes: ['matrix', 'groups'],
+      renderModes: ['SVG'],
+      interactionTypes: ['chord_hover', 'group_click'],
+      exportFormats: ['PNG', 'SVG', 'PDF'],
     });
 
-    this.visualizationTypes.set("PARALLEL_COORDINATES", {
-      id: "PARALLEL_COORDINATES",
-      name: "Parallel Coordinates",
-      description: "Multivariate data visualization with parallel axes",
-      category: "MULTIVARIATE",
-      engines: ["D3_PARALLEL", "PLOTLY"],
-      layouts: ["STANDARD", "ANGULAR"],
-      features: ["brush", "filter", "reorder", "animate"],
-      dataTypes: ["dimensions", "values"],
-      renderModes: ["SVG", "CANVAS"],
-      interactionTypes: ["axis_brush", "line_hover", "dimension_reorder"],
-      exportFormats: ["PNG", "SVG", "PDF", "CSV"],
+    this.visualizationTypes.set('PARALLEL_COORDINATES', {
+      id: 'PARALLEL_COORDINATES',
+      name: 'Parallel Coordinates',
+      description: 'Multivariate data visualization with parallel axes',
+      category: 'MULTIVARIATE',
+      engines: ['D3_PARALLEL', 'PLOTLY'],
+      layouts: ['STANDARD', 'ANGULAR'],
+      features: ['brush', 'filter', 'reorder', 'animate'],
+      dataTypes: ['dimensions', 'values'],
+      renderModes: ['SVG', 'CANVAS'],
+      interactionTypes: ['axis_brush', 'line_hover', 'dimension_reorder'],
+      exportFormats: ['PNG', 'SVG', 'PDF', 'CSV'],
     });
 
-    this.visualizationTypes.set("HEATMAP", {
-      id: "HEATMAP",
-      name: "Heatmap Visualization",
-      description: "Matrix visualization showing intensity patterns",
-      category: "MATRIX",
-      engines: ["D3_HEATMAP", "PLOTLY"],
-      layouts: ["MATRIX", "CLUSTERED"],
-      features: ["zoom", "hover", "filter", "cluster"],
-      dataTypes: ["matrix", "labels"],
-      renderModes: ["SVG", "CANVAS"],
-      interactionTypes: ["cell_hover", "row_select", "column_select"],
-      exportFormats: ["PNG", "SVG", "PDF", "CSV"],
+    this.visualizationTypes.set('HEATMAP', {
+      id: 'HEATMAP',
+      name: 'Heatmap Visualization',
+      description: 'Matrix visualization showing intensity patterns',
+      category: 'MATRIX',
+      engines: ['D3_HEATMAP', 'PLOTLY'],
+      layouts: ['MATRIX', 'CLUSTERED'],
+      features: ['zoom', 'hover', 'filter', 'cluster'],
+      dataTypes: ['matrix', 'labels'],
+      renderModes: ['SVG', 'CANVAS'],
+      interactionTypes: ['cell_hover', 'row_select', 'column_select'],
+      exportFormats: ['PNG', 'SVG', 'PDF', 'CSV'],
     });
 
-    this.visualizationTypes.set("3D_NETWORK", {
-      id: "3D_NETWORK",
-      name: "3D Network Visualization",
-      description: "Three-dimensional network visualization with WebGL",
-      category: "NETWORK_3D",
-      engines: ["THREE_JS", "FORCE_GRAPH_3D"],
-      layouts: ["FORCE_3D", "SPHERE", "CUBE"],
-      features: ["rotate", "zoom", "select", "fly_to", "animate"],
-      dataTypes: ["nodes", "edges"],
-      renderModes: ["WEBGL"],
-      interactionTypes: ["node_click", "camera_move", "selection_change"],
-      exportFormats: ["PNG", "GLTF"],
+    this.visualizationTypes.set('3D_NETWORK', {
+      id: '3D_NETWORK',
+      name: '3D Network Visualization',
+      description: 'Three-dimensional network visualization with WebGL',
+      category: 'NETWORK_3D',
+      engines: ['THREE_JS', 'FORCE_GRAPH_3D'],
+      layouts: ['FORCE_3D', 'SPHERE', 'CUBE'],
+      features: ['rotate', 'zoom', 'select', 'fly_to', 'animate'],
+      dataTypes: ['nodes', 'edges'],
+      renderModes: ['WEBGL'],
+      interactionTypes: ['node_click', 'camera_move', 'selection_change'],
+      exportFormats: ['PNG', 'GLTF'],
     });
 
-    this.visualizationTypes.set("DASHBOARD_GRID", {
-      id: "DASHBOARD_GRID",
-      name: "Dashboard Grid",
-      description: "Multi-widget dashboard with responsive grid layout",
-      category: "DASHBOARD",
-      engines: ["CUSTOM_GRID", "REACT_GRID"],
-      layouts: ["RESPONSIVE_GRID", "FIXED_GRID", "MASONRY"],
-      features: ["drag_drop", "resize", "filter", "refresh"],
-      dataTypes: ["widgets", "metrics"],
-      renderModes: ["HTML"],
-      interactionTypes: ["widget_resize", "widget_move", "refresh_widget"],
-      exportFormats: ["PNG", "PDF"],
+    this.visualizationTypes.set('DASHBOARD_GRID', {
+      id: 'DASHBOARD_GRID',
+      name: 'Dashboard Grid',
+      description: 'Multi-widget dashboard with responsive grid layout',
+      category: 'DASHBOARD',
+      engines: ['CUSTOM_GRID', 'REACT_GRID'],
+      layouts: ['RESPONSIVE_GRID', 'FIXED_GRID', 'MASONRY'],
+      features: ['drag_drop', 'resize', 'filter', 'refresh'],
+      dataTypes: ['widgets', 'metrics'],
+      renderModes: ['HTML'],
+      interactionTypes: ['widget_resize', 'widget_move', 'refresh_widget'],
+      exportFormats: ['PNG', 'PDF'],
     });
   }
 
   initializeRenderingEngines() {
-    this.renderingEngines.set("CYTOSCAPE", {
-      id: "CYTOSCAPE",
-      name: "Cytoscape.js",
-      description: "Graph theory library for network visualization",
-      capabilities: ["network_graphs", "layouts", "animations", "extensions"],
-      performance: "HIGH",
+    this.renderingEngines.set('CYTOSCAPE', {
+      id: 'CYTOSCAPE',
+      name: 'Cytoscape.js',
+      description: 'Graph theory library for network visualization',
+      capabilities: ['network_graphs', 'layouts', 'animations', 'extensions'],
+      performance: 'HIGH',
       maxNodes: 10000,
       renderer: this.renderCytoscape.bind(this),
     });
 
-    this.renderingEngines.set("D3_FORCE", {
-      id: "D3_FORCE",
-      name: "D3.js Force Simulation",
-      description: "Physics-based force simulation for networks",
-      capabilities: ["force_simulation", "custom_layouts", "animations"],
-      performance: "MEDIUM",
+    this.renderingEngines.set('D3_FORCE', {
+      id: 'D3_FORCE',
+      name: 'D3.js Force Simulation',
+      description: 'Physics-based force simulation for networks',
+      capabilities: ['force_simulation', 'custom_layouts', 'animations'],
+      performance: 'MEDIUM',
       maxNodes: 5000,
       renderer: this.renderD3Force.bind(this),
     });
 
-    this.renderingEngines.set("THREE_JS", {
-      id: "THREE_JS",
-      name: "Three.js WebGL",
-      description: "3D graphics library with WebGL acceleration",
-      capabilities: ["3d_visualization", "webgl", "animations", "vr_support"],
-      performance: "HIGH",
+    this.renderingEngines.set('THREE_JS', {
+      id: 'THREE_JS',
+      name: 'Three.js WebGL',
+      description: '3D graphics library with WebGL acceleration',
+      capabilities: ['3d_visualization', 'webgl', 'animations', 'vr_support'],
+      performance: 'HIGH',
       maxNodes: 50000,
       renderer: this.renderThreeJS.bind(this),
     });
 
-    this.renderingEngines.set("VIS_TIMELINE", {
-      id: "VIS_TIMELINE",
-      name: "Vis.js Timeline",
-      description: "Interactive timeline component",
-      capabilities: ["timeline", "gantt", "groups", "zoom"],
-      performance: "MEDIUM",
+    this.renderingEngines.set('VIS_TIMELINE', {
+      id: 'VIS_TIMELINE',
+      name: 'Vis.js Timeline',
+      description: 'Interactive timeline component',
+      capabilities: ['timeline', 'gantt', 'groups', 'zoom'],
+      performance: 'MEDIUM',
       maxItems: 10000,
       renderer: this.renderVisTimeline.bind(this),
     });
 
-    this.renderingEngines.set("LEAFLET", {
-      id: "LEAFLET",
-      name: "Leaflet Maps",
-      description: "Lightweight mapping library",
-      capabilities: ["maps", "markers", "clustering", "heatmaps"],
-      performance: "HIGH",
+    this.renderingEngines.set('LEAFLET', {
+      id: 'LEAFLET',
+      name: 'Leaflet Maps',
+      description: 'Lightweight mapping library',
+      capabilities: ['maps', 'markers', 'clustering', 'heatmaps'],
+      performance: 'HIGH',
       maxMarkers: 100000,
       renderer: this.renderLeaflet.bind(this),
     });
 
-    this.renderingEngines.set("PLOTLY", {
-      id: "PLOTLY",
-      name: "Plotly.js",
-      description: "Scientific charting library",
+    this.renderingEngines.set('PLOTLY', {
+      id: 'PLOTLY',
+      name: 'Plotly.js',
+      description: 'Scientific charting library',
       capabilities: [
-        "statistical_charts",
-        "3d_plots",
-        "animations",
-        "interactivity",
+        'statistical_charts',
+        '3d_plots',
+        'animations',
+        'interactivity',
       ],
-      performance: "MEDIUM",
+      performance: 'MEDIUM',
       maxDataPoints: 1000000,
       renderer: this.renderPlotly.bind(this),
     });
   }
 
   initializeLayoutAlgorithms() {
-    this.layoutAlgorithms.set("FORCE_DIRECTED", {
-      id: "FORCE_DIRECTED",
-      name: "Force-Directed Layout",
+    this.layoutAlgorithms.set('FORCE_DIRECTED', {
+      id: 'FORCE_DIRECTED',
+      name: 'Force-Directed Layout',
       description:
-        "Physics-based node positioning using attractive and repulsive forces",
-      category: "PHYSICS",
+        'Physics-based node positioning using attractive and repulsive forces',
+      category: 'PHYSICS',
       parameters: {
-        linkDistance: { type: "number", default: 100, min: 10, max: 500 },
-        linkStrength: { type: "number", default: 1, min: 0, max: 2 },
-        charge: { type: "number", default: -300, min: -1000, max: 0 },
-        gravity: { type: "number", default: 0.1, min: 0, max: 1 },
-        iterations: { type: "integer", default: 100, min: 10, max: 1000 },
+        linkDistance: { type: 'number', default: 100, min: 10, max: 500 },
+        linkStrength: { type: 'number', default: 1, min: 0, max: 2 },
+        charge: { type: 'number', default: -300, min: -1000, max: 0 },
+        gravity: { type: 'number', default: 0.1, min: 0, max: 1 },
+        iterations: { type: 'integer', default: 100, min: 10, max: 1000 },
       },
-      suitableFor: ["network_graphs", "small_to_medium_networks"],
-      calculator: this.calculateForceDirectedLayout ? this.calculateForceDirectedLayout.bind(this) : () => {},
+      suitableFor: ['network_graphs', 'small_to_medium_networks'],
+      calculator: this.calculateForceDirectedLayout
+        ? this.calculateForceDirectedLayout.bind(this)
+        : () => {},
     });
 
-    this.layoutAlgorithms.set("HIERARCHICAL", {
-      id: "HIERARCHICAL",
-      name: "Hierarchical Layout",
+    this.layoutAlgorithms.set('HIERARCHICAL', {
+      id: 'HIERARCHICAL',
+      name: 'Hierarchical Layout',
       description:
-        "Tree-like arrangement with clear parent-child relationships",
-      category: "TREE",
+        'Tree-like arrangement with clear parent-child relationships',
+      category: 'TREE',
       parameters: {
         direction: {
-          type: "enum",
-          options: ["UD", "DU", "LR", "RL"],
-          default: "UD",
+          type: 'enum',
+          options: ['UD', 'DU', 'LR', 'RL'],
+          default: 'UD',
         },
-        levelSeparation: { type: "number", default: 150, min: 50, max: 500 },
-        nodeSeparation: { type: "number", default: 100, min: 20, max: 300 },
-        treeSpacing: { type: "number", default: 200, min: 100, max: 500 },
+        levelSeparation: { type: 'number', default: 150, min: 50, max: 500 },
+        nodeSeparation: { type: 'number', default: 100, min: 20, max: 300 },
+        treeSpacing: { type: 'number', default: 200, min: 100, max: 500 },
       },
-      suitableFor: ["trees", "dags", "organizational_charts"],
-      calculator: this.calculateHierarchicalLayout ? this.calculateHierarchicalLayout.bind(this) : () => {},
+      suitableFor: ['trees', 'dags', 'organizational_charts'],
+      calculator: this.calculateHierarchicalLayout
+        ? this.calculateHierarchicalLayout.bind(this)
+        : () => {},
     });
 
-    this.layoutAlgorithms.set("CIRCULAR", {
-      id: "CIRCULAR",
-      name: "Circular Layout",
-      description: "Nodes arranged in concentric circles",
-      category: "GEOMETRIC",
+    this.layoutAlgorithms.set('CIRCULAR', {
+      id: 'CIRCULAR',
+      name: 'Circular Layout',
+      description: 'Nodes arranged in concentric circles',
+      category: 'GEOMETRIC',
       parameters: {
-        radius: { type: "number", default: 200, min: 50, max: 1000 },
-        startAngle: { type: "number", default: 0, min: 0, max: 360 },
-        sweep: { type: "number", default: 360, min: 90, max: 360 },
-        equidistant: { type: "boolean", default: true },
+        radius: { type: 'number', default: 200, min: 50, max: 1000 },
+        startAngle: { type: 'number', default: 0, min: 0, max: 360 },
+        sweep: { type: 'number', default: 360, min: 90, max: 360 },
+        equidistant: { type: 'boolean', default: true },
       },
-      suitableFor: ["small_networks", "showcase_layouts"],
-      calculator: this.calculateCircularLayout ? this.calculateCircularLayout.bind(this) : () => {},
+      suitableFor: ['small_networks', 'showcase_layouts'],
+      calculator: this.calculateCircularLayout
+        ? this.calculateCircularLayout.bind(this)
+        : () => {},
     });
 
-    this.layoutAlgorithms.set("GRID", {
-      id: "GRID",
-      name: "Grid Layout",
-      description: "Regular grid arrangement of nodes",
-      category: "GEOMETRIC",
+    this.layoutAlgorithms.set('GRID', {
+      id: 'GRID',
+      name: 'Grid Layout',
+      description: 'Regular grid arrangement of nodes',
+      category: 'GEOMETRIC',
       parameters: {
-        rows: { type: "integer", default: 0, min: 0, max: 100 },
-        columns: { type: "integer", default: 0, min: 0, max: 100 },
-        spacing: { type: "number", default: 100, min: 20, max: 200 },
+        rows: { type: 'integer', default: 0, min: 0, max: 100 },
+        columns: { type: 'integer', default: 0, min: 0, max: 100 },
+        spacing: { type: 'number', default: 100, min: 20, max: 200 },
       },
-      suitableFor: ["matrix_data", "regular_structures"],
-      calculator: this.calculateGridLayout ? this.calculateGridLayout.bind(this) : () => {},
+      suitableFor: ['matrix_data', 'regular_structures'],
+      calculator: this.calculateGridLayout
+        ? this.calculateGridLayout.bind(this)
+        : () => {},
     });
 
-    this.layoutAlgorithms.set("COMMUNITY_BASED", {
-      id: "COMMUNITY_BASED",
-      name: "Community-Based Layout",
-      description: "Layout based on detected community structure",
-      category: "ANALYTICAL",
+    this.layoutAlgorithms.set('COMMUNITY_BASED', {
+      id: 'COMMUNITY_BASED',
+      name: 'Community-Based Layout',
+      description: 'Layout based on detected community structure',
+      category: 'ANALYTICAL',
       parameters: {
-        communitySpacing: { type: "number", default: 300, min: 100, max: 800 },
-        internalSpacing: { type: "number", default: 50, min: 10, max: 200 },
+        communitySpacing: { type: 'number', default: 300, min: 100, max: 800 },
+        internalSpacing: { type: 'number', default: 50, min: 10, max: 200 },
         algorithm: {
-          type: "enum",
-          options: ["louvain", "leiden", "label_propagation"],
-          default: "louvain",
+          type: 'enum',
+          options: ['louvain', 'leiden', 'label_propagation'],
+          default: 'louvain',
         },
       },
-      suitableFor: ["social_networks", "clustered_data"],
-      calculator: this.calculateCommunityLayout ? this.calculateCommunityLayout.bind(this) : () => {},
+      suitableFor: ['social_networks', 'clustered_data'],
+      calculator: this.calculateCommunityLayout
+        ? this.calculateCommunityLayout.bind(this)
+        : () => {},
     });
   }
 
   initializeStyleThemes() {
-    this.styleThemes.set("PROFESSIONAL", {
-      id: "PROFESSIONAL",
-      name: "Professional Theme",
-      description: "Clean, business-appropriate styling",
+    this.styleThemes.set('PROFESSIONAL', {
+      id: 'PROFESSIONAL',
+      name: 'Professional Theme',
+      description: 'Clean, business-appropriate styling',
       nodeStyles: {
         default: {
-          backgroundColor: "#3498db",
-          borderColor: "#2980b9",
+          backgroundColor: '#3498db',
+          borderColor: '#2980b9',
           borderWidth: 2,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 12,
-          shape: "ellipse",
+          shape: 'ellipse',
         },
         highlighted: {
-          backgroundColor: "#e74c3c",
-          borderColor: "#c0392b",
+          backgroundColor: '#e74c3c',
+          borderColor: '#c0392b',
           borderWidth: 3,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 14,
         },
         selected: {
-          backgroundColor: "#f39c12",
-          borderColor: "#e67e22",
+          backgroundColor: '#f39c12',
+          borderColor: '#e67e22',
           borderWidth: 3,
-          color: "#ffffff",
+          color: '#ffffff',
         },
       },
       edgeStyles: {
         default: {
-          lineColor: "#7f8c8d",
+          lineColor: '#7f8c8d',
           width: 2,
-          targetArrowColor: "#7f8c8d",
-          targetArrowShape: "triangle",
+          targetArrowColor: '#7f8c8d',
+          targetArrowShape: 'triangle',
         },
         highlighted: {
-          lineColor: "#e74c3c",
+          lineColor: '#e74c3c',
           width: 3,
-          targetArrowColor: "#e74c3c",
+          targetArrowColor: '#e74c3c',
         },
       },
-      backgroundColor: "#ffffff",
-      gridColor: "#ecf0f1",
+      backgroundColor: '#ffffff',
+      gridColor: '#ecf0f1',
     });
 
-    this.styleThemes.set("DARK_MODE", {
-      id: "DARK_MODE",
-      name: "Dark Mode Theme",
-      description: "Dark theme for low-light environments",
+    this.styleThemes.set('DARK_MODE', {
+      id: 'DARK_MODE',
+      name: 'Dark Mode Theme',
+      description: 'Dark theme for low-light environments',
       nodeStyles: {
         default: {
-          backgroundColor: "#34495e",
-          borderColor: "#2c3e50",
+          backgroundColor: '#34495e',
+          borderColor: '#2c3e50',
           borderWidth: 2,
-          color: "#ecf0f1",
+          color: '#ecf0f1',
           fontSize: 12,
-          shape: "ellipse",
+          shape: 'ellipse',
         },
         highlighted: {
-          backgroundColor: "#e67e22",
-          borderColor: "#d35400",
+          backgroundColor: '#e67e22',
+          borderColor: '#d35400',
           borderWidth: 3,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 14,
         },
         selected: {
-          backgroundColor: "#9b59b6",
-          borderColor: "#8e44ad",
+          backgroundColor: '#9b59b6',
+          borderColor: '#8e44ad',
           borderWidth: 3,
-          color: "#ffffff",
+          color: '#ffffff',
         },
       },
       edgeStyles: {
         default: {
-          lineColor: "#95a5a6",
+          lineColor: '#95a5a6',
           width: 2,
-          targetArrowColor: "#95a5a6",
-          targetArrowShape: "triangle",
+          targetArrowColor: '#95a5a6',
+          targetArrowShape: 'triangle',
         },
         highlighted: {
-          lineColor: "#f39c12",
+          lineColor: '#f39c12',
           width: 3,
-          targetArrowColor: "#f39c12",
+          targetArrowColor: '#f39c12',
         },
       },
-      backgroundColor: "#2c3e50",
-      gridColor: "#34495e",
+      backgroundColor: '#2c3e50',
+      gridColor: '#34495e',
     });
 
-    this.styleThemes.set("SECURITY_FOCUSED", {
-      id: "SECURITY_FOCUSED",
-      name: "Security Analysis Theme",
-      description: "Theme optimized for security and threat analysis",
+    this.styleThemes.set('SECURITY_FOCUSED', {
+      id: 'SECURITY_FOCUSED',
+      name: 'Security Analysis Theme',
+      description: 'Theme optimized for security and threat analysis',
       nodeStyles: {
         default: {
-          backgroundColor: "#27ae60",
-          borderColor: "#229954",
+          backgroundColor: '#27ae60',
+          borderColor: '#229954',
           borderWidth: 2,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 11,
-          shape: "ellipse",
+          shape: 'ellipse',
         },
         suspicious: {
-          backgroundColor: "#f39c12",
-          borderColor: "#e67e22",
+          backgroundColor: '#f39c12',
+          borderColor: '#e67e22',
           borderWidth: 3,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 12,
         },
         threat: {
-          backgroundColor: "#e74c3c",
-          borderColor: "#c0392b",
+          backgroundColor: '#e74c3c',
+          borderColor: '#c0392b',
           borderWidth: 4,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 13,
         },
         critical: {
-          backgroundColor: "#8b0000",
-          borderColor: "#660000",
+          backgroundColor: '#8b0000',
+          borderColor: '#660000',
           borderWidth: 4,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 14,
         },
       },
       edgeStyles: {
         default: {
-          lineColor: "#95a5a6",
+          lineColor: '#95a5a6',
           width: 1,
-          targetArrowColor: "#95a5a6",
+          targetArrowColor: '#95a5a6',
         },
         suspicious: {
-          lineColor: "#f39c12",
+          lineColor: '#f39c12',
           width: 2,
-          targetArrowColor: "#f39c12",
-          lineStyle: "dashed",
+          targetArrowColor: '#f39c12',
+          lineStyle: 'dashed',
         },
         threat: {
-          lineColor: "#e74c3c",
+          lineColor: '#e74c3c',
           width: 3,
-          targetArrowColor: "#e74c3c",
+          targetArrowColor: '#e74c3c',
         },
       },
-      backgroundColor: "#fafafa",
-      gridColor: "#e8e8e8",
+      backgroundColor: '#fafafa',
+      gridColor: '#e8e8e8',
     });
 
-    this.styleThemes.set("TEMPORAL", {
-      id: "TEMPORAL",
-      name: "Temporal Analysis Theme",
-      description: "Color-coded theme for temporal data analysis",
+    this.styleThemes.set('TEMPORAL', {
+      id: 'TEMPORAL',
+      name: 'Temporal Analysis Theme',
+      description: 'Color-coded theme for temporal data analysis',
       nodeStyles: {
         default: {
-          backgroundColor: "#3498db",
-          borderColor: "#2980b9",
+          backgroundColor: '#3498db',
+          borderColor: '#2980b9',
           borderWidth: 2,
-          color: "#ffffff",
+          color: '#ffffff',
           fontSize: 11,
-          shape: "ellipse",
+          shape: 'ellipse',
         },
         recent: {
-          backgroundColor: "#2ecc71",
-          borderColor: "#27ae60",
+          backgroundColor: '#2ecc71',
+          borderColor: '#27ae60',
           borderWidth: 2,
         },
         old: {
-          backgroundColor: "#95a5a6",
-          borderColor: "#7f8c8d",
+          backgroundColor: '#95a5a6',
+          borderColor: '#7f8c8d',
           borderWidth: 2,
         },
         future: {
-          backgroundColor: "#9b59b6",
-          borderColor: "#8e44ad",
+          backgroundColor: '#9b59b6',
+          borderColor: '#8e44ad',
           borderWidth: 2,
-          lineStyle: "dashed",
+          lineStyle: 'dashed',
         },
       },
       timelineColors: {
-        gradient: ["#3498db", "#2ecc71", "#f39c12", "#e74c3c"],
-        background: "#ffffff",
-        axis: "#34495e",
-        grid: "#ecf0f1",
+        gradient: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c'],
+        background: '#ffffff',
+        axis: '#34495e',
+        grid: '#ecf0f1',
       },
     });
   }
 
   initializeInteractionHandlers() {
-    this.interactionHandlers.set("node_click", {
-      name: "Node Click Handler",
-      description: "Handles single clicks on nodes",
+    this.interactionHandlers.set('node_click', {
+      name: 'Node Click Handler',
+      description: 'Handles single clicks on nodes',
       handler: this.handleNodeClick.bind(this),
-      events: ["click", "tap"],
+      events: ['click', 'tap'],
     });
 
-    this.interactionHandlers.set("node_hover", {
-      name: "Node Hover Handler",
-      description: "Handles mouse hover over nodes",
+    this.interactionHandlers.set('node_hover', {
+      name: 'Node Hover Handler',
+      description: 'Handles mouse hover over nodes',
       handler: this.handleNodeHover.bind(this),
-      events: ["mouseover", "mouseout"],
+      events: ['mouseover', 'mouseout'],
     });
 
-    this.interactionHandlers.set("edge_select", {
-      name: "Edge Selection Handler",
-      description: "Handles edge selection events",
+    this.interactionHandlers.set('edge_select', {
+      name: 'Edge Selection Handler',
+      description: 'Handles edge selection events',
       handler: this.handleEdgeSelect.bind(this),
-      events: ["select", "unselect"],
+      events: ['select', 'unselect'],
     });
 
-    this.interactionHandlers.set("viewport_change", {
-      name: "Viewport Change Handler",
-      description: "Handles zoom and pan operations",
+    this.interactionHandlers.set('viewport_change', {
+      name: 'Viewport Change Handler',
+      description: 'Handles zoom and pan operations',
       handler: this.handleViewportChange.bind(this),
-      events: ["zoom", "pan", "viewport"],
+      events: ['zoom', 'pan', 'viewport'],
     });
 
-    this.interactionHandlers.set("selection_change", {
-      name: "Selection Change Handler",
-      description: "Handles multi-selection operations",
+    this.interactionHandlers.set('selection_change', {
+      name: 'Selection Change Handler',
+      description: 'Handles multi-selection operations',
       handler: this.handleSelectionChange.bind(this),
-      events: ["box_select", "lasso_select"],
+      events: ['box_select', 'lasso_select'],
     });
 
-    this.interactionHandlers.set("layout_complete", {
-      name: "Layout Completion Handler",
-      description: "Handles layout algorithm completion",
+    this.interactionHandlers.set('layout_complete', {
+      name: 'Layout Completion Handler',
+      description: 'Handles layout algorithm completion',
       handler: this.handleLayoutComplete.bind(this),
-      events: ["layout_stop", "layout_ready"],
+      events: ['layout_stop', 'layout_ready'],
     });
   }
 
   initializeTemplates() {
-    this.templates.set("INVESTIGATION_NETWORK", {
-      id: "INVESTIGATION_NETWORK",
-      name: "Investigation Network Template",
-      description: "Standard network visualization for investigations",
-      visualization_type: "NETWORK_GRAPH",
-      default_engine: "CYTOSCAPE",
-      default_layout: "FORCE_DIRECTED",
-      default_theme: "PROFESSIONAL",
+    this.templates.set('INVESTIGATION_NETWORK', {
+      id: 'INVESTIGATION_NETWORK',
+      name: 'Investigation Network Template',
+      description: 'Standard network visualization for investigations',
+      visualization_type: 'NETWORK_GRAPH',
+      default_engine: 'CYTOSCAPE',
+      default_layout: 'FORCE_DIRECTED',
+      default_theme: 'PROFESSIONAL',
       configuration: {
         physics: true,
         clustering: {
@@ -604,19 +614,19 @@ class VisualizationService extends EventEmitter {
       },
     });
 
-    this.templates.set("TEMPORAL_ANALYSIS", {
-      id: "TEMPORAL_ANALYSIS",
-      name: "Temporal Analysis Theme",
-      description: "Timeline visualization for temporal analysis",
-      visualization_type: "TIMELINE",
-      default_engine: "VIS_TIMELINE",
-      default_layout: "LINEAR",
-      default_theme: "TEMPORAL",
+    this.templates.set('TEMPORAL_ANALYSIS', {
+      id: 'TEMPORAL_ANALYSIS',
+      name: 'Temporal Analysis Theme',
+      description: 'Timeline visualization for temporal analysis',
+      visualization_type: 'TIMELINE',
+      default_engine: 'VIS_TIMELINE',
+      default_layout: 'LINEAR',
+      default_theme: 'TEMPORAL',
       configuration: {
         zoomable: true,
         grouping: {
           enabled: true,
-          field: "category",
+          field: 'category',
         },
         filtering: {
           dateRange: true,
@@ -625,14 +635,14 @@ class VisualizationService extends EventEmitter {
       },
     });
 
-    this.templates.set("GEOGRAPHIC_INTELLIGENCE", {
-      id: "GEOGRAPHIC_INTELLIGENCE",
-      name: "Geographic Intelligence Template",
-      description: "Map visualization for geographic analysis",
-      visualization_type: "GEOSPATIAL_MAP",
-      default_engine: "LEAFLET",
-      default_layout: "STREET",
-      default_theme: "PROFESSIONAL",
+    this.templates.set('GEOGRAPHIC_INTELLIGENCE', {
+      id: 'GEOGRAPHIC_INTELLIGENCE',
+      name: 'Geographic Intelligence Template',
+      description: 'Map visualization for geographic analysis',
+      visualization_type: 'GEOSPATIAL_MAP',
+      default_engine: 'LEAFLET',
+      default_layout: 'STREET',
+      default_theme: 'PROFESSIONAL',
       configuration: {
         clustering: {
           enabled: true,
@@ -650,20 +660,20 @@ class VisualizationService extends EventEmitter {
       },
     });
 
-    this.templates.set("RISK_DASHBOARD", {
-      id: "RISK_DASHBOARD",
-      name: "Risk Assessment Dashboard",
-      description: "Multi-widget dashboard for risk analysis",
-      visualization_type: "DASHBOARD_GRID",
-      default_engine: "CUSTOM_GRID",
-      default_layout: "RESPONSIVE_GRID",
-      default_theme: "SECURITY_FOCUSED",
+    this.templates.set('RISK_DASHBOARD', {
+      id: 'RISK_DASHBOARD',
+      name: 'Risk Assessment Dashboard',
+      description: 'Multi-widget dashboard for risk analysis',
+      visualization_type: 'DASHBOARD_GRID',
+      default_engine: 'CUSTOM_GRID',
+      default_layout: 'RESPONSIVE_GRID',
+      default_theme: 'SECURITY_FOCUSED',
       configuration: {
         widgets: [
-          { type: "risk_meter", position: { x: 0, y: 0, w: 2, h: 2 } },
-          { type: "threat_timeline", position: { x: 2, y: 0, w: 4, h: 2 } },
-          { type: "entity_network", position: { x: 0, y: 2, w: 6, h: 3 } },
-          { type: "alert_feed", position: { x: 6, y: 0, w: 2, h: 5 } },
+          { type: 'risk_meter', position: { x: 0, y: 0, w: 2, h: 2 } },
+          { type: 'threat_timeline', position: { x: 2, y: 0, w: 4, h: 2 } },
+          { type: 'entity_network', position: { x: 0, y: 2, w: 6, h: 3 } },
+          { type: 'alert_feed', position: { x: 6, y: 0, w: 2, h: 5 } },
         ],
         refreshInterval: 30000,
       },
@@ -674,16 +684,16 @@ class VisualizationService extends EventEmitter {
   getSupportedVisualizationTypes() {
     // Map internal types to expected IDs
     const mapped = [
-      { id: "NETWORK_GRAPH" },
-      { id: "TIMELINE_VIEW" },
-      { id: "GEOSPATIAL_MAP" },
-      { id: "HIERARCHICAL_TREE" },
-      { id: "MATRIX_VIEW" },
-      { id: "SANKEY_DIAGRAM" },
-      { id: "CHORD_DIAGRAM" },
-      { id: "FORCE_DIRECTED_3D" },
-      { id: "HEATMAP_OVERLAY" },
-      { id: "CUSTOM_DASHBOARD" },
+      { id: 'NETWORK_GRAPH' },
+      { id: 'TIMELINE_VIEW' },
+      { id: 'GEOSPATIAL_MAP' },
+      { id: 'HIERARCHICAL_TREE' },
+      { id: 'MATRIX_VIEW' },
+      { id: 'SANKEY_DIAGRAM' },
+      { id: 'CHORD_DIAGRAM' },
+      { id: 'FORCE_DIRECTED_3D' },
+      { id: 'HEATMAP_OVERLAY' },
+      { id: 'CUSTOM_DASHBOARD' },
     ];
     return mapped;
   }
@@ -692,54 +702,54 @@ class VisualizationService extends EventEmitter {
     const engines = [];
     // CYTOSCAPE
     engines.push({
-      id: "CYTOSCAPE",
-      capabilities: ["network_graphs", "interactive_layouts"],
+      id: 'CYTOSCAPE',
+      capabilities: ['network_graphs', 'interactive_layouts'],
     });
     // D3
     engines.push({
-      id: "D3",
-      capabilities: ["charts", "timelines", "force_simulation"],
+      id: 'D3',
+      capabilities: ['charts', 'timelines', 'force_simulation'],
     });
     // THREEJS
     engines.push({
-      id: "THREEJS",
-      capabilities: ["3d_visualization", "webgl"],
+      id: 'THREEJS',
+      capabilities: ['3d_visualization', 'webgl'],
     });
     // LEAFLET
     engines.push({
-      id: "LEAFLET",
-      capabilities: ["maps", "markers", "clusters"],
+      id: 'LEAFLET',
+      capabilities: ['maps', 'markers', 'clusters'],
     });
     // PLOTLY
     engines.push({
-      id: "PLOTLY",
+      id: 'PLOTLY',
       capabilities: [
-        "statistical_charts",
-        "3d_plots",
-        "animations",
-        "interactivity",
+        'statistical_charts',
+        '3d_plots',
+        'animations',
+        'interactivity',
       ],
-      performance: "MEDIUM",
+      performance: 'MEDIUM',
       maxDataPoints: 1000000,
       renderer: this.renderPlotly.bind(this),
     });
     // CANVAS (generic)
-    engines.push({ id: "CANVAS", capabilities: ["fast_rendering"] });
+    engines.push({ id: 'CANVAS', capabilities: ['fast_rendering'] });
     return engines;
   }
 
   getVisualizationType(typeId) {
     const compatibility = {
-      NETWORK_GRAPH: ["CYTOSCAPE", "D3"],
-      TIMELINE_VIEW: ["D3", "PLOTLY"],
-      GEOSPATIAL_MAP: ["LEAFLET"],
-      HIERARCHICAL_TREE: ["D3"],
-      MATRIX_VIEW: ["PLOTLY", "CANVAS"],
-      SANKEY_DIAGRAM: ["D3", "PLOTLY"],
-      CHORD_DIAGRAM: ["D3"],
-      FORCE_DIRECTED_3D: ["THREEJS"],
-      HEATMAP_OVERLAY: ["LEAFLET"],
-      CUSTOM_DASHBOARD: ["CANVAS"],
+      NETWORK_GRAPH: ['CYTOSCAPE', 'D3'],
+      TIMELINE_VIEW: ['D3', 'PLOTLY'],
+      GEOSPATIAL_MAP: ['LEAFLET'],
+      HIERARCHICAL_TREE: ['D3'],
+      MATRIX_VIEW: ['PLOTLY', 'CANVAS'],
+      SANKEY_DIAGRAM: ['D3', 'PLOTLY'],
+      CHORD_DIAGRAM: ['D3'],
+      FORCE_DIRECTED_3D: ['THREEJS'],
+      HEATMAP_OVERLAY: ['LEAFLET'],
+      CUSTOM_DASHBOARD: ['CANVAS'],
     };
     return {
       id: typeId,
@@ -750,7 +760,7 @@ class VisualizationService extends EventEmitter {
   // Interaction helpers (minimal implementations for tests)
   async selectNode(visualizationId, nodeId, userId) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     viz.selectedNode = nodeId;
     const edges = Array.isArray(viz.data?.edges) ? viz.data.edges : [];
     const neighbors = new Set([nodeId]);
@@ -764,12 +774,12 @@ class VisualizationService extends EventEmitter {
 
   async applyNodeFilter(visualizationId, filter) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     const nodes = Array.isArray(viz.data?.nodes) ? viz.data.nodes : [];
     const visible = nodes.filter((n) => {
       const typeOk = filter.type ? n.type === filter.type : true;
       const labelOk = filter.labelContains
-        ? (n.label || "").includes(filter.labelContains)
+        ? (n.label || '').includes(filter.labelContains)
         : true;
       return typeOk && labelOk;
     });
@@ -788,7 +798,7 @@ class VisualizationService extends EventEmitter {
 
   async changeLayout(visualizationId, layoutId, params = {}) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     viz.layout = layoutId;
     viz.configuration = { ...viz.configuration, ...params };
     // Ensure engine exists
@@ -804,7 +814,7 @@ class VisualizationService extends EventEmitter {
 
   async updateViewport(visualizationId, viewport) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     viz.configuration = viz.configuration || {};
     viz.configuration.viewport = {
       zoom: viewport.zoom,
@@ -817,7 +827,7 @@ class VisualizationService extends EventEmitter {
   // Realtime updates and performance helpers (minimal implementations for tests)
   async addNode(visualizationId, node) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     viz.data = viz.data || {};
     viz.data.nodes = Array.isArray(viz.data.nodes) ? viz.data.nodes : [];
     viz.data.nodes.push(node);
@@ -826,7 +836,7 @@ class VisualizationService extends EventEmitter {
 
   async addEdge(visualizationId, edge) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     viz.data = viz.data || {};
     viz.data.edges = Array.isArray(viz.data.edges) ? viz.data.edges : [];
     viz.data.edges.push(edge);
@@ -835,9 +845,9 @@ class VisualizationService extends EventEmitter {
 
   async updateNodeProperties(visualizationId, nodeId, props) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     const node = (viz.data?.nodes || []).find((n) => n.id === nodeId);
-    if (!node) throw new Error("Node not found");
+    if (!node) throw new Error('Node not found');
     Object.assign(node, props);
     return { success: true, node };
   }
@@ -888,7 +898,7 @@ class VisualizationService extends EventEmitter {
 
   async shareVisualization(vizId, ownerId, users, options = {}) {
     const viz = this.visualizations.get(vizId);
-    if (!viz) throw new Error("Visualization not found");
+    if (!viz) throw new Error('Visualization not found');
     return {
       success: true,
       shareId: uuidv4(),
@@ -955,15 +965,15 @@ class VisualizationService extends EventEmitter {
   async createVisualization(visualizationRequest) {
     const normalizeType = (t) =>
       ({
-        TIMELINE_VIEW: "TIMELINE",
-        HIERARCHICAL_TREE: "TREEMAP",
-        MATRIX_VIEW: "HEATMAP",
-        FORCE_DIRECTED_3D: "3D_NETWORK",
+        TIMELINE_VIEW: 'TIMELINE',
+        HIERARCHICAL_TREE: 'TREEMAP',
+        MATRIX_VIEW: 'HEATMAP',
+        FORCE_DIRECTED_3D: '3D_NETWORK',
       })[t] || t;
     const normalizeEngine = (e) =>
       ({
-        D3: "D3_FORCE",
-        THREEJS: "THREE_JS",
+        D3: 'D3_FORCE',
+        THREEJS: 'THREE_JS',
       })[e] || e;
 
     const normalizedType = normalizeType(visualizationRequest.type);
@@ -976,12 +986,12 @@ class VisualizationService extends EventEmitter {
       type: visualizationRequest.type,
       engine:
         visualizationRequest.engine || this.getDefaultEngine(normalizedType),
-      layout: visualizationRequest.layout || "FORCE_DIRECTED",
-      theme: visualizationRequest.theme || "PROFESSIONAL",
+      layout: visualizationRequest.layout || 'FORCE_DIRECTED',
+      theme: visualizationRequest.theme || 'PROFESSIONAL',
       template: visualizationRequest.template,
       configuration: visualizationRequest.configuration || {},
       data: {},
-      status: "INITIALIZING",
+      status: 'INITIALIZING',
       createdAt: new Date(),
       createdBy: visualizationRequest.userId,
       renderTime: 0,
@@ -993,7 +1003,7 @@ class VisualizationService extends EventEmitter {
 
     try {
       // Load and process data
-      visualization.status = "LOADING_DATA";
+      visualization.status = 'LOADING_DATA';
       visualization.data = await this.loadVisualizationData({
         ...visualizationRequest,
         type: normalizedType,
@@ -1005,15 +1015,15 @@ class VisualizationService extends EventEmitter {
       }
 
       // Generate visualization specification
-      visualization.status = "GENERATING";
+      visualization.status = 'GENERATING';
       visualization.specification =
         await this.generateVisualizationSpec(visualization);
 
       // Render visualization
-      visualization.status = "RENDERING";
+      visualization.status = 'RENDERING';
       visualization.rendered = await this.renderVisualization(visualization);
 
-      visualization.status = "COMPLETED";
+      visualization.status = 'COMPLETED';
       visualization.renderTime = Date.now() - startTime;
 
       // Mirror params to config for tests expecting config* keys
@@ -1035,12 +1045,12 @@ class VisualizationService extends EventEmitter {
         this.metrics.popularTypes.get(visualization.type) + 1,
       );
 
-      this.emit("visualizationCreated", visualization);
+      this.emit('visualizationCreated', visualization);
       return visualization;
     } catch (error) {
-      visualization.status = "FAILED";
+      visualization.status = 'FAILED';
       visualization.error = error.message;
-      this.logger.error("Visualization creation failed:", error);
+      this.logger.error('Visualization creation failed:', error);
       if (/^Invalid visualization type/i.test(error.message)) {
         throw error;
       }
@@ -1052,30 +1062,30 @@ class VisualizationService extends EventEmitter {
     const session = this.neo4jDriver.session();
     try {
       switch (request.type) {
-        case "NETWORK_GRAPH":
+        case 'NETWORK_GRAPH':
           return await this.loadNetworkData(request, session);
-        case "TIMELINE":
+        case 'TIMELINE':
           return await this.loadTimelineData(request, session);
-        case "GEOSPATIAL_MAP":
+        case 'GEOSPATIAL_MAP':
           return await this.loadGeospatialData(request, session);
-        case "SANKEY_DIAGRAM":
+        case 'SANKEY_DIAGRAM':
           return await this.loadFlowData(request, session);
-        case "TREEMAP":
+        case 'TREEMAP':
           return await this.loadHierarchicalData(request, session);
-        case "HEATMAP":
+        case 'HEATMAP':
           return await this.loadMatrixData(request, session);
-        case "3D_NETWORK":
+        case '3D_NETWORK':
           return await this.loadNetwork3DData(request, session);
-        case "DASHBOARD_GRID":
+        case 'DASHBOARD_GRID':
           return await this.loadDashboardData(request, session);
         // Aliases (handled defensively)
-        case "TIMELINE_VIEW":
+        case 'TIMELINE_VIEW':
           return await this.loadTimelineData(request, session);
-        case "HIERARCHICAL_TREE":
+        case 'HIERARCHICAL_TREE':
           return await this.loadHierarchicalData(request, session);
-        case "MATRIX_VIEW":
+        case 'MATRIX_VIEW':
           return await this.loadMatrixData(request, session);
-        case "FORCE_DIRECTED_3D":
+        case 'FORCE_DIRECTED_3D':
           return await this.loadNetwork3DData(request, session);
         default:
           throw new Error(`Invalid visualization type: ${request.type}`);
@@ -1092,17 +1102,17 @@ class VisualizationService extends EventEmitter {
       maxNodes = 1000,
     } = request.parameters || {};
 
-    let nodeFilter = "";
-    const edgeFilter = "";
+    let nodeFilter = '';
+    const edgeFilter = '';
     const queryParams = { investigationId, maxNodes };
 
     if (filters.nodeTypes && filters.nodeTypes.length > 0) {
-      nodeFilter += "AND n.type IN $nodeTypes";
+      nodeFilter += 'AND n.type IN $nodeTypes';
       queryParams.nodeTypes = filters.nodeTypes;
     }
 
     if (filters.dateRange) {
-      nodeFilter += "AND n.createdAt >= $startDate AND n.createdAt <= $endDate";
+      nodeFilter += 'AND n.createdAt >= $startDate AND n.createdAt <= $endDate';
       queryParams.startDate = filters.dateRange.start;
       queryParams.endDate = filters.dateRange.end;
     }
@@ -1117,7 +1127,7 @@ class VisualizationService extends EventEmitter {
 
     const nodeResult = await session.run(nodeQuery, queryParams);
     const nodes = nodeResult.records.map((record) => {
-      const node = record.get("n").properties;
+      const node = record.get('n').properties;
       return {
         id: node.id,
         label: node.label || node.id,
@@ -1144,11 +1154,11 @@ class VisualizationService extends EventEmitter {
     queryParams.nodeIds = nodeIds;
     const edgeResult = await session.run(edgeQuery, queryParams);
     const edges = edgeResult.records.map((record) => {
-      const src = record.get("source")?.properties?.id || record.get("source");
-      const tgt = record.get("target")?.properties?.id || record.get("target");
-      const relObj = record.get("r") || record.get("relationship") || {};
+      const src = record.get('source')?.properties?.id || record.get('source');
+      const tgt = record.get('target')?.properties?.id || record.get('target');
+      const relObj = record.get('r') || record.get('relationship') || {};
       const relationship = relObj.properties || relObj || {};
-      const type = relationship.type || "CONNECTED";
+      const type = relationship.type || 'CONNECTED';
       const weight = relationship.weight || 1;
       return {
         id: `${src}-${tgt}`,
@@ -1175,7 +1185,7 @@ class VisualizationService extends EventEmitter {
   }
 
   async loadTimelineData(request, session) {
-    const { investigationId, groupBy = "type" } = request.parameters || {};
+    const { investigationId, groupBy = 'type' } = request.parameters || {};
 
     const timelineQuery = `
       MATCH (e:MultimodalEntity)
@@ -1191,21 +1201,21 @@ class VisualizationService extends EventEmitter {
 
     const result = await session.run(timelineQuery, { investigationId });
     const items = result.records.map((record) => {
-      const idVal = record.get("id");
-      const labelVal = record.get("label");
-      const typeVal = record.get("type");
-      const tsVal = record.get("timestamp");
+      const idVal = record.get('id');
+      const labelVal = record.get('label');
+      const typeVal = record.get('type');
+      const tsVal = record.get('timestamp');
       const toProp = (v) =>
-        v && typeof v === "object" && v.properties ? v.properties : v;
+        v && typeof v === 'object' && v.properties ? v.properties : v;
       const id = toProp(idVal)?.id || idVal;
       const label = toProp(labelVal)?.label || labelVal;
-      const type = (toProp(typeVal)?.type || typeVal || "").toString();
+      const type = (toProp(typeVal)?.type || typeVal || '').toString();
       const ts = toProp(tsVal)?.timestamp || tsVal;
       return {
         id,
         content: label,
         start: new Date(ts),
-        type: "point",
+        type: 'point',
         group: record.get(groupBy),
         className: `timeline-${type.toLowerCase()}`,
         title: `${type}: ${label}`,
@@ -1215,11 +1225,11 @@ class VisualizationService extends EventEmitter {
     const groups = [...new Set(items.map((item) => item.group))].map(
       (group) => {
         const g =
-          typeof group === "string"
+          typeof group === 'string'
             ? group
             : group?.toString
               ? group.toString()
-              : "group";
+              : 'group';
         return {
           id: g,
           content: g,
@@ -1238,7 +1248,7 @@ class VisualizationService extends EventEmitter {
       groups,
       events,
       options: {
-        orientation: "top",
+        orientation: 'top',
         stack: true,
         zoomable: true,
         moveable: true,
@@ -1270,18 +1280,18 @@ class VisualizationService extends EventEmitter {
     const result = await session.run(geoQuery, { investigationId });
     const markers = result.records.map((record) => {
       // Support both field-based and node-like mocked records
-      const maybe = record.get("id");
+      const maybe = record.get('id');
       let p;
-      if (maybe && typeof maybe === "object" && maybe.properties) {
+      if (maybe && typeof maybe === 'object' && maybe.properties) {
         p = maybe.properties;
       } else {
         p = {
-          id: record.get("id"),
-          label: record.get("label"),
-          type: record.get("type"),
-          latitude: record.get("latitude"),
-          longitude: record.get("longitude"),
-          ...(record.get("properties") || {}),
+          id: record.get('id'),
+          label: record.get('label'),
+          type: record.get('type'),
+          latitude: record.get('latitude'),
+          longitude: record.get('longitude'),
+          ...(record.get('properties') || {}),
         };
       }
       return {
@@ -1316,7 +1326,7 @@ class VisualizationService extends EventEmitter {
 
   async generateVisualizationSpec(visualization) {
     const engineId =
-      { D3: "D3_FORCE", THREEJS: "THREE_JS" }[visualization.engine] ||
+      { D3: 'D3_FORCE', THREEJS: 'THREE_JS' }[visualization.engine] ||
       visualization.engine;
     const engine = this.renderingEngines.get(engineId);
     if (!engine) {
@@ -1339,7 +1349,7 @@ class VisualizationService extends EventEmitter {
         theme: visualization.theme,
         nodes: theme?.nodeStyles || {},
         edges: theme?.edgeStyles || {},
-        background: theme?.backgroundColor || "#ffffff",
+        background: theme?.backgroundColor || '#ffffff',
       },
       interactions: this.getInteractionSpec(visualization),
       features: this.getFeatureSpec(visualization),
@@ -1362,7 +1372,7 @@ class VisualizationService extends EventEmitter {
 
   async renderVisualization(visualization) {
     const engineId =
-      { D3: "D3_FORCE", THREEJS: "THREE_JS" }[visualization.engine] ||
+      { D3: 'D3_FORCE', THREEJS: 'THREE_JS' }[visualization.engine] ||
       visualization.engine;
     const engine = this.renderingEngines.get(engineId);
     if (!engine || !engine.renderer) {
@@ -1393,14 +1403,14 @@ class VisualizationService extends EventEmitter {
         })),
       ],
       style: this.generateCytoscapeStyles(spec.style),
-      layout: { name: "preset" }, // Use pre-calculated positions
+      layout: { name: 'preset' }, // Use pre-calculated positions
       userZoomingEnabled: true,
       userPanningEnabled: true,
       boxSelectionEnabled: true,
     };
 
     return {
-      type: "cytoscape",
+      type: 'cytoscape',
       config: cytoscapeConfig,
       interactions: spec.interactions,
     };
@@ -1441,7 +1451,7 @@ class VisualizationService extends EventEmitter {
     };
 
     return {
-      type: "d3-force",
+      type: 'd3-force',
       config: d3Config,
       interactions: spec.interactions,
     };
@@ -1460,7 +1470,7 @@ class VisualizationService extends EventEmitter {
       })),
       edges: edges.map((edge) => ({
         ...edge,
-        geometry: "line",
+        geometry: 'line',
         material: this.getEdgeMaterial(edge, spec.style.edges),
       })),
       camera: {
@@ -1483,7 +1493,7 @@ class VisualizationService extends EventEmitter {
     };
 
     return {
-      type: "three-js",
+      type: 'three-js',
       config: threeConfig,
       interactions: spec.interactions,
     };
@@ -1505,7 +1515,7 @@ class VisualizationService extends EventEmitter {
     };
 
     return {
-      type: "vis-timeline",
+      type: 'vis-timeline',
       config: timelineConfig,
       interactions: spec.interactions,
     };
@@ -1520,9 +1530,9 @@ class VisualizationService extends EventEmitter {
       zoom,
       layers: [
         {
-          type: "tile",
-          url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          attribution: "© OpenStreetMap contributors",
+          type: 'tile',
+          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          attribution: '© OpenStreetMap contributors',
         },
       ],
       markers: markers.map((marker) => ({
@@ -1548,7 +1558,7 @@ class VisualizationService extends EventEmitter {
     };
 
     return {
-      type: "leaflet",
+      type: 'leaflet',
       config: mapConfig,
       interactions: spec.interactions,
     };
@@ -1560,20 +1570,20 @@ class VisualizationService extends EventEmitter {
     const plotlyConfig = {
       data: this.transformDataForPlotly(visualization.data, visualization.type),
       layout: {
-        title: visualization.title || "Visualization",
+        title: visualization.title || 'Visualization',
         ...this.getPlotlyLayout(visualization.type, spec.style),
         ...visualization.configuration.layout,
       },
       config: {
         responsive: true,
         displayModeBar: true,
-        modeBarButtonsToRemove: ["pan2d", "lasso2d"],
+        modeBarButtonsToRemove: ['pan2d', 'lasso2d'],
         ...visualization.configuration.plotlyConfig,
       },
     };
 
     return {
-      type: "plotly",
+      type: 'plotly',
       config: plotlyConfig,
       interactions: spec.interactions,
     };
@@ -1692,7 +1702,7 @@ class VisualizationService extends EventEmitter {
   async handleNodeClick(event, visualization) {
     const { node, originalEvent } = event;
 
-    this.emit("nodeClick", {
+    this.emit('nodeClick', {
       visualizationId: visualization.id,
       nodeId: node.id,
       node: node,
@@ -1710,7 +1720,7 @@ class VisualizationService extends EventEmitter {
   async handleNodeHover(event, visualization) {
     const { node, eventType } = event;
 
-    this.emit("nodeHover", {
+    this.emit('nodeHover', {
       visualizationId: visualization.id,
       nodeId: node.id,
       node: node,
@@ -1721,7 +1731,7 @@ class VisualizationService extends EventEmitter {
   async handleEdgeSelect(event, visualization) {
     const { edge, selected } = event;
 
-    this.emit("edgeSelect", {
+    this.emit('edgeSelect', {
       visualizationId: visualization.id,
       edgeId: edge.id,
       edge: edge,
@@ -1732,7 +1742,7 @@ class VisualizationService extends EventEmitter {
   async handleViewportChange(event, visualization) {
     const { zoom, pan } = event;
 
-    this.emit("viewportChange", {
+    this.emit('viewportChange', {
       visualizationId: visualization.id,
       zoom: zoom,
       pan: pan,
@@ -1742,7 +1752,7 @@ class VisualizationService extends EventEmitter {
   async handleSelectionChange(event, visualization) {
     const { selected, unselected } = event;
 
-    this.emit("selectionChange", {
+    this.emit('selectionChange', {
       visualizationId: visualization.id,
       selected: selected,
       unselected: unselected,
@@ -1751,7 +1761,7 @@ class VisualizationService extends EventEmitter {
   }
 
   async handleLayoutComplete(event, visualization) {
-    this.emit("layoutComplete", {
+    this.emit('layoutComplete', {
       visualizationId: visualization.id,
       layout: visualization.layout,
       duration: event.duration,
@@ -1762,12 +1772,12 @@ class VisualizationService extends EventEmitter {
   async exportVisualization(visualizationId, opts = {}) {
     const visualization = this.visualizations.get(visualizationId);
     if (!visualization) {
-      throw new Error("Visualization not found");
+      throw new Error('Visualization not found');
     }
-    const format = (typeof opts === "string" ? opts : opts.format || "")
+    const format = (typeof opts === 'string' ? opts : opts.format || '')
       .toString()
       .toLowerCase();
-    const options = typeof opts === "object" ? opts : {};
+    const options = typeof opts === 'object' ? opts : {};
 
     const exportData = {
       id: uuidv4(),
@@ -1775,27 +1785,27 @@ class VisualizationService extends EventEmitter {
       format,
       options,
       createdAt: new Date(),
-      status: "PROCESSING",
+      status: 'PROCESSING',
     };
 
     try {
       switch (format) {
-        case "png": {
+        case 'png': {
           const canvas = this.createCanvas
             ? this.createCanvas(options.width, options.height)
             : null;
-          const buffer = canvas?.toBuffer ? canvas.toBuffer() : Buffer.from("");
+          const buffer = canvas?.toBuffer ? canvas.toBuffer() : Buffer.from('');
           exportData.buffer = buffer;
           exportData.width = options.width || 800;
           exportData.height = options.height || 600;
           break;
         }
-        case "svg": {
+        case 'svg': {
           exportData.svg =
             '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"></svg>';
           break;
         }
-        case "json": {
+        case 'json': {
           const jsonObj = {
             id: visualization.id,
             type: visualization.type,
@@ -1805,22 +1815,22 @@ class VisualizationService extends EventEmitter {
           exportData.json = JSON.stringify(jsonObj);
           break;
         }
-        case "html": {
+        case 'html': {
           exportData.html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Visualization</title></head><body><div id="app"></div><!-- d3.js --><script src="https://d3js.org/d3.v7.min.js"></script></body></html>`;
           break;
         }
-        case "pdf": {
-          exportData.buffer = Buffer.from("%PDF-1.4");
+        case 'pdf': {
+          exportData.buffer = Buffer.from('%PDF-1.4');
           break;
         }
         default:
           throw new Error(`Unsupported export format: ${format}`);
       }
 
-      exportData.status = "COMPLETED";
+      exportData.status = 'COMPLETED';
       this.metrics.exportedVisualizations++;
     } catch (error) {
-      exportData.status = "FAILED";
+      exportData.status = 'FAILED';
       exportData.error = error.message;
       throw error;
     }
@@ -1831,7 +1841,7 @@ class VisualizationService extends EventEmitter {
   // Helper methods
   getDefaultEngine(visualizationType) {
     const vizType = this.visualizationTypes.get(visualizationType);
-    return vizType?.engines[0] || "CYTOSCAPE";
+    return vizType?.engines[0] || 'CYTOSCAPE';
   }
 
   getInteractionSpec(visualization) {
@@ -1868,7 +1878,7 @@ class VisualizationService extends EventEmitter {
   }
 
   getNodeGroup(node) {
-    return node.type || "default";
+    return node.type || 'default';
   }
 
   calculateNodeSize(node) {
@@ -1879,23 +1889,23 @@ class VisualizationService extends EventEmitter {
 
   getNodeColor(nodeType) {
     const colorMap = {
-      PERSON: "#3498db",
-      ORGANIZATION: "#e74c3c",
-      LOCATION: "#2ecc71",
-      EVENT: "#f39c12",
-      DOCUMENT: "#9b59b6",
-      default: "#95a5a6",
+      PERSON: '#3498db',
+      ORGANIZATION: '#e74c3c',
+      LOCATION: '#2ecc71',
+      EVENT: '#f39c12',
+      DOCUMENT: '#9b59b6',
+      default: '#95a5a6',
     };
     return colorMap[nodeType] || colorMap.default;
   }
 
   getEdgeColor(edgeType) {
     const colorMap = {
-      KNOWS: "#3498db",
-      WORKS_FOR: "#e74c3c",
-      LOCATED_AT: "#2ecc71",
-      PARTICIPATED_IN: "#f39c12",
-      default: "#7f8c8d",
+      KNOWS: '#3498db',
+      WORKS_FOR: '#e74c3c',
+      LOCATED_AT: '#2ecc71',
+      PARTICIPATED_IN: '#f39c12',
+      default: '#7f8c8d',
     };
     return colorMap[edgeType] || colorMap.default;
   }
@@ -1947,8 +1957,12 @@ class VisualizationService extends EventEmitter {
   }
 
   // Placeholder methods for full implementation
-  async applyTemplate(visualization) { /* Intentionally empty */ }
-  async expandNode(visualizationId, nodeId) { /* Intentionally empty */ }
+  async applyTemplate(visualization) {
+    /* Intentionally empty */
+  }
+  async expandNode(visualizationId, nodeId) {
+    /* Intentionally empty */
+  }
   async loadFlowData(request, session) {
     return { nodes: [], flows: [] };
   }
@@ -1974,7 +1988,7 @@ class VisualizationService extends EventEmitter {
     return [];
   }
   getNodeGeometry(node) {
-    return "sphere";
+    return 'sphere';
   }
   getNodeMaterial(node, styles) {
     return { color: 0x3498db };
@@ -1983,7 +1997,7 @@ class VisualizationService extends EventEmitter {
     return { color: 0x7f8c8d };
   }
   getMapIcon(type) {
-    return "default";
+    return 'default';
   }
   calculateMapCenter(markers) {
     return [0, 0];
@@ -2004,13 +2018,13 @@ class VisualizationService extends EventEmitter {
     return { levels: {} };
   }
   async exportToPNG(viz, opts) {
-    return { path: "/tmp/viz.png" };
+    return { path: '/tmp/viz.png' };
   }
   async exportToSVG(viz, opts) {
-    return { path: "/tmp/viz.svg" };
+    return { path: '/tmp/viz.svg' };
   }
   async exportToPDF(viz, opts) {
-    return { path: "/tmp/viz.pdf" };
+    return { path: '/tmp/viz.pdf' };
   }
 }
 

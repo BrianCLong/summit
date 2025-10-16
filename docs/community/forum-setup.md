@@ -1,4 +1,3 @@
-
 # Community Forum Setup
 
 This document outlines the steps to set up and configure our community forum.

@@ -21,7 +21,10 @@ export class InMemoryKeyStore implements KeyStore {
     return result;
   }
 
-  async getKey(keyId: string, version: number): Promise<KeyVersion | undefined> {
+  async getKey(
+    keyId: string,
+    version: number,
+  ): Promise<KeyVersion | undefined> {
     return this.store.get(keyId)?.get(version);
   }
 
@@ -44,11 +47,14 @@ export class KeyManager {
   async getActiveKey(keyId: string): Promise<KeyVersion | undefined> {
     const keys = await this.store.listKeys(keyId);
     return keys
-      .filter(k => k.isActive)
+      .filter((k) => k.isActive)
       .sort((a, b) => b.version - a.version)[0];
   }
 
-  async getKey(keyId: string, version: number): Promise<KeyVersion | undefined> {
+  async getKey(
+    keyId: string,
+    version: number,
+  ): Promise<KeyVersion | undefined> {
     return this.store.getKey(keyId, version);
   }
 
@@ -59,13 +65,16 @@ export class KeyManager {
 
   async rotateKey(
     keyId: string,
-    nextKey: Omit<KeyVersion, 'createdAt' | 'rotatedAt' | 'isActive' | 'id' | 'version'> & {
+    nextKey: Omit<
+      KeyVersion,
+      'createdAt' | 'rotatedAt' | 'isActive' | 'id' | 'version'
+    > & {
       version?: number;
       createdAt?: Date;
-    }
+    },
   ): Promise<KeyVersion> {
     const existing = await this.store.listKeys(keyId);
-    const currentActive = existing.find(k => k.isActive);
+    const currentActive = existing.find((k) => k.isActive);
     if (currentActive) {
       currentActive.isActive = false;
       currentActive.rotatedAt = new Date();
@@ -73,7 +82,8 @@ export class KeyManager {
     }
 
     const nextVersion =
-      nextKey.version ?? (existing.length ? Math.max(...existing.map(k => k.version)) + 1 : 1);
+      nextKey.version ??
+      (existing.length ? Math.max(...existing.map((k) => k.version)) + 1 : 1);
 
     const version: KeyVersion = {
       ...nextKey,
@@ -90,7 +100,9 @@ export class KeyManager {
   async registerKeyVersion(key: KeyVersion): Promise<void> {
     const existing = await this.store.listKeys(key.id);
     if (key.isActive) {
-      for (const version of existing.filter(v => v.isActive && v.version !== key.version)) {
+      for (const version of existing.filter(
+        (v) => v.isActive && v.version !== key.version,
+      )) {
         version.isActive = false;
         version.rotatedAt = new Date();
         await this.store.updateKey(version);

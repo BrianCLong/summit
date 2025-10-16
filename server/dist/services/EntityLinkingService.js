@@ -1,6 +1,6 @@
-import { getNeo4jDriver } from "../config/database.js";
-import GNNService from "./GNNService";
-import logger from "../utils/logger.js";
+import { getNeo4jDriver } from '../config/database.js';
+import GNNService from './GNNService';
+import logger from '../utils/logger.js';
 /**
  * Entity Linking Service
  * Uses Neo4j embeddings and GNN link prediction to suggest likely links
@@ -16,7 +16,7 @@ class EntityLinkingService {
      * @param {string} [options.token] - Auth token for ML service.
      */
     static async suggestLinksForEntity(entityId, options = {}) {
-        const { limit = 5, investigationId = "realtime", token } = options;
+        const { limit = 5, investigationId = 'realtime', token } = options;
         const driver = getNeo4jDriver();
         const session = driver.session();
         try {
@@ -26,11 +26,11 @@ class EntityLinkingService {
          OPTIONAL MATCH (e)-[r]-(n:Entity)
          RETURN e.embedding AS embedding, collect({source: e.id, target: n.id}) AS edges`, { entityId });
             if (sourceResult.records.length === 0) {
-                logger.warn("No embedding found for entity", { entityId });
-                return { success: false, message: "Entity embedding not found" };
+                logger.warn('No embedding found for entity', { entityId });
+                return { success: false, message: 'Entity embedding not found' };
             }
-            const sourceEmbedding = sourceResult.records[0].get("embedding");
-            const existingEdges = sourceResult.records[0].get("edges");
+            const sourceEmbedding = sourceResult.records[0].get('embedding');
+            const existingEdges = sourceResult.records[0].get('edges');
             // Fetch candidate nodes by embedding similarity
             const candidateResult = await session.run(`MATCH (e:Entity {id: $entityId})
          WHERE exists(e.embedding)
@@ -40,11 +40,11 @@ class EntityLinkingService {
          ORDER BY score DESC LIMIT $limit
          RETURN candidate.id AS id, candidate.embedding AS embedding`, { entityId, limit: Number(limit) });
             const candidates = candidateResult.records.map((rec) => ({
-                id: rec.get("id"),
-                embedding: rec.get("embedding"),
+                id: rec.get('id'),
+                embedding: rec.get('embedding'),
             }));
             if (candidates.length === 0) {
-                return { success: false, message: "No candidate entities found" };
+                return { success: false, message: 'No candidate entities found' };
             }
             const nodeFeatures = { [entityId]: sourceEmbedding };
             candidates.forEach((c) => {
@@ -57,8 +57,8 @@ class EntityLinkingService {
                 graphData,
                 nodeFeatures,
                 candidateEdges,
-                modelName: "default_link_predictor",
-                taskMode: "predict",
+                modelName: 'default_link_predictor',
+                taskMode: 'predict',
                 options: { token, focusEntityId: entityId },
             });
             return {
@@ -67,7 +67,7 @@ class EntityLinkingService {
             };
         }
         catch (error) {
-            logger.error("Entity link suggestion failed", {
+            logger.error('Entity link suggestion failed', {
                 entityId,
                 error: error.message,
             });

@@ -62,6 +62,7 @@ docker-compose -f docker-compose.monitoring.yml ps
 Ensure your IntelGraph services expose metrics endpoints:
 
 **Server (Node.js)**:
+
 ```javascript
 // Add monitoring middleware
 const { httpMetricsMiddleware } = require('./src/monitoring/middleware');
@@ -73,6 +74,7 @@ app.use('/monitoring', monitoringRouter);
 ```
 
 **ML Service (Python)**:
+
 ```python
 # Metrics are automatically tracked via middleware
 # Health checks available at /health, /health/ready, /health/live
@@ -82,43 +84,43 @@ app.use('/monitoring', monitoringRouter);
 
 ### HTTP Metrics
 
-| Metric | Type | Description | Labels |
-|--------|------|-------------|--------|
-| `http_requests_total` | Counter | Total HTTP requests | method, route, status_code |
+| Metric                          | Type      | Description           | Labels                     |
+| ------------------------------- | --------- | --------------------- | -------------------------- |
+| `http_requests_total`           | Counter   | Total HTTP requests   | method, route, status_code |
 | `http_request_duration_seconds` | Histogram | HTTP request duration | method, route, status_code |
 
 ### GraphQL Metrics
 
-| Metric | Type | Description | Labels |
-|--------|------|-------------|--------|
-| `graphql_requests_total` | Counter | Total GraphQL requests | operation, operation_type, status |
-| `graphql_request_duration_seconds` | Histogram | GraphQL request duration | operation, operation_type |
-| `graphql_errors_total` | Counter | Total GraphQL errors | operation, error_type |
+| Metric                             | Type      | Description              | Labels                            |
+| ---------------------------------- | --------- | ------------------------ | --------------------------------- |
+| `graphql_requests_total`           | Counter   | Total GraphQL requests   | operation, operation_type, status |
+| `graphql_request_duration_seconds` | Histogram | GraphQL request duration | operation, operation_type         |
+| `graphql_errors_total`             | Counter   | Total GraphQL errors     | operation, error_type             |
 
 ### AI/ML Metrics
 
-| Metric | Type | Description | Labels |
-|--------|------|-------------|--------|
-| `ai_jobs_queued` | Gauge | AI jobs in queue | job_type |
-| `ai_jobs_processing` | Gauge | AI jobs processing | job_type |
-| `ai_job_duration_seconds` | Histogram | AI job duration | job_type, status |
-| `ml_model_predictions_total` | Counter | ML predictions made | model_type, status |
-| `entities_extracted_total` | Counter | Entities extracted | source, entity_type |
+| Metric                       | Type      | Description         | Labels              |
+| ---------------------------- | --------- | ------------------- | ------------------- |
+| `ai_jobs_queued`             | Gauge     | AI jobs in queue    | job_type            |
+| `ai_jobs_processing`         | Gauge     | AI jobs processing  | job_type            |
+| `ai_job_duration_seconds`    | Histogram | AI job duration     | job_type, status    |
+| `ml_model_predictions_total` | Counter   | ML predictions made | model_type, status  |
+| `entities_extracted_total`   | Counter   | Entities extracted  | source, entity_type |
 
 ### Database Metrics
 
-| Metric | Type | Description | Labels |
-|--------|------|-------------|--------|
-| `db_connections_active` | Gauge | Active DB connections | database |
-| `db_query_duration_seconds` | Histogram | DB query duration | database, operation |
-| `db_queries_total` | Counter | Total DB queries | database, operation, status |
+| Metric                      | Type      | Description           | Labels                      |
+| --------------------------- | --------- | --------------------- | --------------------------- |
+| `db_connections_active`     | Gauge     | Active DB connections | database                    |
+| `db_query_duration_seconds` | Histogram | DB query duration     | database, operation         |
+| `db_queries_total`          | Counter   | Total DB queries      | database, operation, status |
 
 ### Graph Metrics
 
-| Metric | Type | Description | Labels |
-|--------|------|-------------|--------|
-| `graph_nodes_total` | Gauge | Total graph nodes | investigation_id |
-| `graph_edges_total` | Gauge | Total graph edges | investigation_id |
+| Metric                             | Type      | Description              | Labels                      |
+| ---------------------------------- | --------- | ------------------------ | --------------------------- |
+| `graph_nodes_total`                | Gauge     | Total graph nodes        | investigation_id            |
+| `graph_edges_total`                | Gauge     | Total graph edges        | investigation_id            |
 | `graph_operation_duration_seconds` | Histogram | Graph operation duration | operation, investigation_id |
 
 ## Health Checks
@@ -127,24 +129,26 @@ app.use('/monitoring', monitoringRouter);
 
 All services expose standard health check endpoints:
 
-| Endpoint | Purpose | Kubernetes |
-|----------|---------|------------|
-| `/health` | Comprehensive health check | - |
-| `/health/quick` | Cached health status | - |
-| `/health/live` | Liveness probe | ✓ |
-| `/health/ready` | Readiness probe | ✓ |
-| `/health/info` | Service information | - |
+| Endpoint        | Purpose                    | Kubernetes |
+| --------------- | -------------------------- | ---------- |
+| `/health`       | Comprehensive health check | -          |
+| `/health/quick` | Cached health status       | -          |
+| `/health/live`  | Liveness probe             | ✓          |
+| `/health/ready` | Readiness probe            | ✓          |
+| `/health/info`  | Service information        | -          |
 
 ### Health Check Components
 
 **Server Health Checks**:
+
 - PostgreSQL connectivity
-- Neo4j connectivity  
+- Neo4j connectivity
 - Redis connectivity
 - ML service connectivity
 - System resources (CPU, memory)
 
 **ML Service Health Checks**:
+
 - Redis connectivity
 - Neo4j connectivity
 - Main API connectivity
@@ -171,6 +175,7 @@ Alerts are routed based on severity:
 ### Configuration
 
 Edit `alertmanager.yml` to configure:
+
 - Email settings
 - Slack webhooks
 - PagerDuty integration
@@ -191,6 +196,7 @@ Edit `alertmanager.yml` to configure:
 ### Custom Dashboards
 
 Create custom dashboards by:
+
 1. Accessing Grafana at http://localhost:3000
 2. Using the Prometheus datasource
 3. Building panels with PromQL queries
@@ -201,12 +207,14 @@ Create custom dashboards by:
 ### Request Tracing
 
 For distributed tracing, Jaeger is included:
+
 - **Jaeger UI**: http://localhost:16686
 - **Trace Collection**: Automatic via OpenTelemetry
 
 ### Performance Thresholds
 
 Default alert thresholds:
+
 - Response time P95 > 2 seconds
 - Error rate > 10%
 - CPU usage > 90%
@@ -218,6 +226,7 @@ Default alert thresholds:
 ### Log Rotation
 
 Prometheus retains metrics for 30 days by default. Configure retention with:
+
 ```yaml
 command:
   - '--storage.tsdb.retention.time=30d'
@@ -226,6 +235,7 @@ command:
 ### Backup
 
 Important data to backup:
+
 - Grafana dashboards: `/var/lib/grafana`
 - Prometheus data: `/prometheus`
 - Alert configuration: `alertmanager.yml`
@@ -233,6 +243,7 @@ Important data to backup:
 ### Updates
 
 Update monitoring stack:
+
 ```bash
 # Pull latest images
 docker-compose -f docker-compose.monitoring.yml pull
@@ -246,16 +257,19 @@ docker-compose -f docker-compose.monitoring.yml up -d
 ### Common Issues
 
 **Metrics not appearing**:
+
 1. Check service discovery in Prometheus targets
 2. Verify metrics endpoints are accessible
 3. Check for firewall/network issues
 
 **Alerts not firing**:
+
 1. Verify alert rules syntax with `promtool`
 2. Check Alertmanager configuration
 3. Verify notification channels
 
 **High memory usage**:
+
 1. Adjust Prometheus retention settings
 2. Configure recording rules for expensive queries
 3. Use remote storage for long-term retention
@@ -289,6 +303,7 @@ docker-compose -f docker-compose.monitoring.yml logs alertmanager
 ### Network Security
 
 In production:
+
 1. Use reverse proxy with authentication
 2. Enable TLS for all communications
 3. Restrict network access to monitoring services
@@ -297,6 +312,7 @@ In production:
 ### Secrets Management
 
 Store sensitive configuration in:
+
 - Environment variables
 - Docker secrets
 - External secret management systems
@@ -306,6 +322,7 @@ Store sensitive configuration in:
 ### High Availability
 
 For production deployment:
+
 1. Run multiple Prometheus instances
 2. Use external storage (e.g., Thanos, Cortex)
 3. Deploy Alertmanager in cluster mode
@@ -314,6 +331,7 @@ For production deployment:
 ### Scaling
 
 Scale monitoring for large deployments:
+
 1. Use federation for multiple Prometheus instances
 2. Implement recording rules for expensive queries
 3. Use remote storage for long-term retention
@@ -322,6 +340,7 @@ Scale monitoring for large deployments:
 ### Compliance
 
 For regulatory compliance:
+
 1. Enable audit logging
 2. Implement data retention policies
 3. Secure data transmission and storage

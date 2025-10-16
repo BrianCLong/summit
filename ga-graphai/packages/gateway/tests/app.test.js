@@ -21,7 +21,10 @@ test('GraphQL plan returns evidence-backed response', async () => {
     .post('/graphql')
     .set('x-tenant', 'acme-corp')
     .set('x-purpose', 'investigation')
-    .send({ query, variables: { input: { objective: 'Ship routing policy' } } });
+    .send({
+      query,
+      variables: { input: { objective: 'Ship routing policy' } },
+    });
   assert.equal(response.status, 200);
   assert.ok(response.body.data.plan.summary.includes('Ship routing policy'));
   assert.ok(response.body.data.plan.evidenceId);
@@ -44,9 +47,10 @@ test('REST generate falls back to llama when no budget is available', async () =
 test('REST generate escalates to paid model when cap allows', async () => {
   const { app } = createApp();
   const payload = {
-    objective: 'High diligence check for critical release readiness and compliance evidence synthesis',
+    objective:
+      'High diligence check for critical release readiness and compliance evidence synthesis',
     requiresMultimodal: false,
-    caps: { hardUsd: 0.5 }
+    caps: { hardUsd: 0.5 },
   };
   const response = await request(app)
     .post('/v1/generate')

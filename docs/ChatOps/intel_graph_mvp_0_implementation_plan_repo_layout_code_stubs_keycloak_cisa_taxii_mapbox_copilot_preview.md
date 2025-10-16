@@ -232,7 +232,12 @@ denied_by_label {
   "input": {
     "subject": { "sub": "dev", "roles": ["analyst"], "tenant": "dev" },
     "action": "read",
-    "resource": { "type": "graph", "tenant": "dev", "labels": ["PII"], "sensitivity": "internal" },
+    "resource": {
+      "type": "graph",
+      "tenant": "dev",
+      "labels": ["PII"],
+      "sensitivity": "internal"
+    },
     "purpose": "investigation:demo",
     "legal_basis": "legitimate_interest"
   }
@@ -246,7 +251,10 @@ denied_by_label {
 **File:** `packages/schema/src/typeDefs.graphql`
 
 ```graphql
-directive @authz(resource: String!, action: String!) on FIELD_DEFINITION | OBJECT
+directive @authz(
+  resource: String!
+  action: String!
+) on FIELD_DEFINITION | OBJECT
 
 interface Node {
   id: ID!
@@ -322,17 +330,30 @@ type Query {
   search(q: String!, limit: Int = 25): [Node!]!
   neighbors(id: ID!, hop: Int = 2, limit: Int = 200): [REL!]!
     @authz(resource: "graph", action: "read")
-  analyticsShortestPath(from: ID!, to: ID!): [ID!]! @authz(resource: "graph", action: "read")
-  analyticsCommunities(limit: Int = 10000): JSON @authz(resource: "graph", action: "read")
+  analyticsShortestPath(from: ID!, to: ID!): [ID!]!
+    @authz(resource: "graph", action: "read")
+  analyticsCommunities(limit: Int = 10000): JSON
+    @authz(resource: "graph", action: "read")
   erQueue(status: String = "PENDING", limit: Int = 50): [JSON!]!
 }
 
 type Mutation {
-  ingestCsv(bucket: String!, key: String!, mapping: [CsvMapping!]!, tenant: ID!): JSON
-    @authz(resource: "ingest", action: "write")
-  recordAudit(action: String!, resource: String!, resourceId: ID, attributes: JSON): Boolean
-  decideER(input: ERDecisionInput!): Boolean @authz(resource: "er", action: "write")
-  copilotPreview(nl: String!): JSON @authz(resource: "copilot", action: "execute")
+  ingestCsv(
+    bucket: String!
+    key: String!
+    mapping: [CsvMapping!]!
+    tenant: ID!
+  ): JSON @authz(resource: "ingest", action: "write")
+  recordAudit(
+    action: String!
+    resource: String!
+    resourceId: ID
+    attributes: JSON
+  ): Boolean
+  decideER(input: ERDecisionInput!): Boolean
+    @authz(resource: "er", action: "write")
+  copilotPreview(nl: String!): JSON
+    @authz(resource: "copilot", action: "execute")
 }
 ```
 
@@ -378,7 +399,11 @@ const pool = new pg.Pool({ connectionString: process.env.PG_CONN });
 async function opaEnforce(req: Request, res: Response, next: NextFunction) {
   try {
     // TODO: parse JWT (Keycloak). For dev, stub user
-    const user = { sub: 'dev', roles: ['analyst'], tenant: req.header('x-tenant') || 'dev' };
+    const user = {
+      sub: 'dev',
+      roles: ['analyst'],
+      tenant: req.header('x-tenant') || 'dev',
+    };
     (req as any).user = user;
     (req as any).tenant = user.tenant;
     // attach helpers
@@ -448,7 +473,9 @@ export const resolvers = {
     async person(_: any, { id }: { id: string }, ctx: any) {
       const s = (ctx.driver as Driver).session();
       try {
-        const rs = await s.run('MATCH (p:Person {id:$id}) RETURN p LIMIT 1', { id });
+        const rs = await s.run('MATCH (p:Person {id:$id}) RETURN p LIMIT 1', {
+          id,
+        });
         return rs.records[0]?.get('p').properties || null;
       } finally {
         await s.close();
@@ -542,10 +569,16 @@ export const resolvers = {
       if (!authorized) throw new Error('forbidden');
       // emit a Kafka message for ingest-processor
       // (In dev we can call the processor via REST; here we return an ack)
-      await recordAudit(ctx, 'ingest_csv', `s3://${bucket}/${key}`, { mapping });
+      await recordAudit(ctx, 'ingest_csv', `s3://${bucket}/${key}`, {
+        mapping,
+      });
       return { ok: true };
     },
-    async recordAudit(_: any, { action, resource, resourceId, attributes }: any, ctx: any) {
+    async recordAudit(
+      _: any,
+      { action, resource, resourceId, attributes }: any,
+      ctx: any,
+    ) {
       await recordAudit(ctx, action, resource, attributes, resourceId);
       return true;
     },
@@ -690,7 +723,10 @@ async function handleCsv(p: any) {
           legalBasis: 'legitimate_interest',
         },
       };
-      await session.run('MERGE (n:Person {id:$id}) SET n += $props', { id: props.id, props });
+      await session.run('MERGE (n:Person {id:$id}) SET n += $props', {
+        id: props.id,
+        props,
+      });
     }
   } finally {
     await session.close();
@@ -794,10 +830,21 @@ import { compareTwoStrings } from 'string-similarity';
 import type { Pool } from 'pg';
 
 export async function proposeER(pool: Pool, tenant: string, a: any, b: any) {
-  const nameScore = compareTwoStrings((a.name || '').toLowerCase(), (b.name || '').toLowerCase());
-  const emailMatch = (a.emails || []).some((e: string) => (b.emails || []).includes(e));
-  const phoneMatch = (a.phones || []).some((p: string) => (b.phones || []).includes(p));
-  const score = Math.max(nameScore, emailMatch ? 1 : 0.0, phoneMatch ? 0.9 : 0.0);
+  const nameScore = compareTwoStrings(
+    (a.name || '').toLowerCase(),
+    (b.name || '').toLowerCase(),
+  );
+  const emailMatch = (a.emails || []).some((e: string) =>
+    (b.emails || []).includes(e),
+  );
+  const phoneMatch = (a.phones || []).some((p: string) =>
+    (b.phones || []).includes(p),
+  );
+  const score = Math.max(
+    nameScore,
+    emailMatch ? 1 : 0.0,
+    phoneMatch ? 0.9 : 0.0,
+  );
   if (score >= 0.92) {
     await pool.query(
       'INSERT INTO er_candidates(tenant,left_id,right_id,algo,score,explanation) VALUES($1,$2,$3,$4,$5,$6)',
@@ -877,7 +924,10 @@ export default function GraphPane({
     $(ref.current).on('wheel', (e) => {
       e.preventDefault();
       const d = (e as any).originalEvent.deltaY;
-      cy.zoom({ level: cy.zoom() * (d > 0 ? 0.9 : 1.1), renderedPosition: cy.renderedCenter() });
+      cy.zoom({
+        level: cy.zoom() * (d > 0 ? 0.9 : 1.1),
+        renderedPosition: cy.renderedCenter(),
+      });
     });
     cy.on('tap', 'node', (evt) => onSelect(evt.target.id()));
     return () => cy.destroy();
@@ -925,7 +975,9 @@ export default function TimelinePane({ events }: { events: any[] }) {
     const $root = $(ref.current);
     $root.empty();
     const $ul = $("<ul class='p-2 overflow-auto h-full'></ul>");
-    events.forEach((e) => $ul.append(`<li class='py-1 text-sm'>${e.ts} — ${e.text}</li>`));
+    events.forEach((e) =>
+      $ul.append(`<li class='py-1 text-sm'>${e.ts} — ${e.text}</li>`),
+    );
     $root.append($ul);
   }, [events]);
   return <div className="w-full h-full bg-neutral-900" ref={ref} />;
@@ -938,7 +990,11 @@ export default function TimelinePane({ events }: { events: any[] }) {
 import React, { useEffect, useRef } from 'react';
 import $ from 'jquery';
 
-export default function CommandBar({ onRun }: { onRun: (cmd: string) => void }) {
+export default function CommandBar({
+  onRun,
+}: {
+  onRun: (cmd: string) => void;
+}) {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (ref.current) $(ref.current).focus();

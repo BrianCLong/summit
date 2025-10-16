@@ -1,6 +1,6 @@
 /**
  * Advanced Documentation Pipeline
- * 
+ *
  * Orchestrates the complete documentation generation process including:
  * - API discovery and documentation generation
  * - Content validation and quality checks
@@ -8,7 +8,11 @@
  * - Deployment and publishing automation
  */
 
-import { OpenAPIGenerator, APIDocumentationConfig, APIEndpointDiscovery } from './OpenAPIGenerator.js';
+import {
+  OpenAPIGenerator,
+  APIDocumentationConfig,
+  APIEndpointDiscovery,
+} from './OpenAPIGenerator.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
@@ -66,8 +70,8 @@ export class DocumentationPipeline {
       metrics: {
         endpointsFound: 0,
         schemasGenerated: 0,
-        processingTime: 0
-      }
+        processingTime: 0,
+      },
     };
 
     try {
@@ -77,7 +81,7 @@ export class DocumentationPipeline {
       console.log('🔍 Discovering API endpoints...');
       const endpoints = await this.discovery.discoverEndpoints();
       result.metrics.endpointsFound = endpoints.length;
-      
+
       if (endpoints.length === 0) {
         result.warnings.push('No API endpoints discovered');
       }
@@ -88,7 +92,10 @@ export class DocumentationPipeline {
       }
 
       // Step 3: Generate from GraphQL schema if available
-      const graphqlSchemaPath = path.join(this.config.sourceDir, 'graphql/schema.graphql');
+      const graphqlSchemaPath = path.join(
+        this.config.sourceDir,
+        'graphql/schema.graphql',
+      );
       try {
         await fs.access(graphqlSchemaPath);
         console.log('📊 Processing GraphQL schema...');
@@ -122,8 +129,9 @@ export class DocumentationPipeline {
 
       result.metrics.processingTime = Date.now() - startTime;
       result.success = true;
-      console.log(`✅ Pipeline completed in ${result.metrics.processingTime}ms`);
-
+      console.log(
+        `✅ Pipeline completed in ${result.metrics.processingTime}ms`,
+      );
     } catch (error) {
       result.validationErrors.push(`Pipeline error: ${error.message}`);
       console.error('❌ Pipeline failed:', error);
@@ -222,27 +230,37 @@ export class DocumentationPipeline {
   /**
    * Generate Postman collection
    */
-  private async generatePostmanCollection(result: PipelineResult): Promise<void> {
+  private async generatePostmanCollection(
+    result: PipelineResult,
+  ): Promise<void> {
     const spec = this.generator.generateSpec();
-    
+
     const postmanCollection = {
       info: {
         name: this.config.apiConfig.title,
         description: this.config.apiConfig.description,
-        schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
+        schema:
+          'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
       },
       variable: [
         {
           key: 'baseUrl',
           value: this.config.apiConfig.baseUrl,
-          type: 'string'
-        }
+          type: 'string',
+        },
       ],
-      item: this.convertOpenAPIToPostman(spec)
+      item: this.convertOpenAPIToPostman(spec),
     };
 
-    const collectionPath = path.join(this.config.outputDir, 'postman-collection.json');
-    await fs.writeFile(collectionPath, JSON.stringify(postmanCollection, null, 2), 'utf8');
+    const collectionPath = path.join(
+      this.config.outputDir,
+      'postman-collection.json',
+    );
+    await fs.writeFile(
+      collectionPath,
+      JSON.stringify(postmanCollection, null, 2),
+      'utf8',
+    );
     result.generatedFiles.push(collectionPath);
   }
 
@@ -266,17 +284,17 @@ export class DocumentationPipeline {
             header: [
               {
                 key: 'Content-Type',
-                value: 'application/json'
-              }
+                value: 'application/json',
+              },
             ],
             url: {
               raw: '{{baseUrl}}' + path,
               host: ['{{baseUrl}}'],
-              path: path.split('/').filter(p => p)
+              path: path.split('/').filter((p) => p),
             },
-            description: op.description
+            description: op.description,
           },
-          response: []
+          response: [],
         };
 
         // Add request body if present
@@ -285,12 +303,16 @@ export class DocumentationPipeline {
           if (content && content['application/json']) {
             item.request.body = {
               mode: 'raw',
-              raw: JSON.stringify(content['application/json'].example || {}, null, 2),
+              raw: JSON.stringify(
+                content['application/json'].example || {},
+                null,
+                2,
+              ),
               options: {
                 raw: {
-                  language: 'json'
-                }
-              }
+                  language: 'json',
+                },
+              },
             };
           }
         }
@@ -341,10 +363,10 @@ export class DocumentationPipeline {
    */
   public async watch(): Promise<void> {
     const chokidar = await import('chokidar');
-    
+
     const watcher = chokidar.watch(this.config.sourceDir, {
       ignored: /node_modules/,
-      persistent: true
+      persistent: true,
     });
 
     console.log('👀 Watching for changes...');

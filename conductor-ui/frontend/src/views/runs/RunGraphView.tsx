@@ -1,11 +1,13 @@
-
 // conductor-ui/frontend/src/views/runs/RunGraphView.tsx
 import React, { useEffect, useRef } from 'react';
 // Mocking cytoscape, in a real app you would install this dependency.
 const cytoscape = (options: any) => ({ destroy: () => {} });
 
 const mockGraphData = {
-  nodes: [{ data: { id: 'n1', name: 'Start' } }, { data: { id: 'n2', name: 'Build' } }],
+  nodes: [
+    { data: { id: 'n1', name: 'Start' } },
+    { data: { id: 'n2', name: 'Build' } },
+  ],
   edges: [{ data: { id: 'e1', source: 'n1', target: 'n2' } }],
 };
 
@@ -17,7 +19,7 @@ export const RunGraphView = ({ runId }: { runId: string }) => {
     const cy = cytoscape({
       container: cyRef.current,
       elements: mockGraphData,
-      style: [ { selector: 'node', style: { label: 'data(name)' } } ],
+      style: [{ selector: 'node', style: { label: 'data(name)' } }],
       layout: { name: 'cose' },
     });
     return () => cy.destroy();

@@ -1,6 +1,6 @@
 /**
  * Performance Optimization and CDN Integration System
- * 
+ *
  * Provides comprehensive performance optimization including:
  * - Content delivery network integration
  * - Image optimization and lazy loading
@@ -77,13 +77,13 @@ export interface PerformanceReport {
     lcp: number; // Largest Contentful Paint
     fid: number; // First Input Delay
     cls: number; // Cumulative Layout Shift
-    
+
     // Other vital metrics
     fcp: number; // First Contentful Paint
     ttfb: number; // Time to First Byte
     domContentLoaded: number;
     loadComplete: number;
-    
+
     // Custom metrics
     searchTime?: number;
     renderTime?: number;
@@ -107,7 +107,13 @@ export interface PerformanceOpportunity {
   description: string;
   impact: 'low' | 'medium' | 'high';
   effort: 'low' | 'medium' | 'high';
-  category: 'loading' | 'rendering' | 'caching' | 'images' | 'javascript' | 'css';
+  category:
+    | 'loading'
+    | 'rendering'
+    | 'caching'
+    | 'images'
+    | 'javascript'
+    | 'css';
   potentialSavings: number; // milliseconds
   automated: boolean;
   recommendation: string;
@@ -175,7 +181,7 @@ export class PerformanceOptimizer extends EventEmitter {
         this.imageOptimizer.initialize(),
         this.bundleOptimizer.initialize(),
         this.monitoringEngine.initialize(),
-        this.serviceWorkerManager.initialize()
+        this.serviceWorkerManager.initialize(),
       ]);
 
       // Set up performance monitoring
@@ -183,7 +189,6 @@ export class PerformanceOptimizer extends EventEmitter {
 
       console.log('✅ Performance optimization initialized');
       this.emit('initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize performance optimizer:', error);
       throw error;
@@ -193,7 +198,9 @@ export class PerformanceOptimizer extends EventEmitter {
   /**
    * Optimize documentation site
    */
-  public async optimizeSite(siteConfig: SiteOptimizationConfig): Promise<OptimizationResult> {
+  public async optimizeSite(
+    siteConfig: SiteOptimizationConfig,
+  ): Promise<OptimizationResult> {
     console.log('🚀 Starting site optimization...');
 
     const result: OptimizationResult = {
@@ -202,10 +209,10 @@ export class PerformanceOptimizer extends EventEmitter {
       failedTasks: [],
       metrics: {
         beforeOptimization: await this.measurePerformance(siteConfig.baseUrl),
-        afterOptimization: null
+        afterOptimization: null,
       },
       recommendations: [],
-      cacheManifest: null
+      cacheManifest: null,
     };
 
     try {
@@ -216,7 +223,7 @@ export class PerformanceOptimizer extends EventEmitter {
           task: 'image_optimization',
           duration: imageResult.duration,
           savings: imageResult.totalSavings,
-          details: imageResult
+          details: imageResult,
         });
       }
 
@@ -227,7 +234,7 @@ export class PerformanceOptimizer extends EventEmitter {
           task: 'bundle_optimization',
           duration: bundleResult.duration,
           savings: bundleResult.totalSavings,
-          details: bundleResult
+          details: bundleResult,
         });
       }
 
@@ -237,7 +244,7 @@ export class PerformanceOptimizer extends EventEmitter {
         result.completedTasks.push({
           task: 'cdn_configuration',
           duration: cdnResult.duration,
-          details: cdnResult
+          details: cdnResult,
         });
       }
 
@@ -247,7 +254,7 @@ export class PerformanceOptimizer extends EventEmitter {
         result.completedTasks.push({
           task: 'cache_configuration',
           duration: cacheResult.duration,
-          details: cacheResult
+          details: cacheResult,
         });
         result.cacheManifest = cacheResult.manifest;
       }
@@ -258,12 +265,14 @@ export class PerformanceOptimizer extends EventEmitter {
         result.completedTasks.push({
           task: 'service_worker_generation',
           duration: swResult.duration,
-          details: swResult
+          details: swResult,
         });
       }
 
       // Measure performance after optimization
-      result.metrics.afterOptimization = await this.measurePerformance(siteConfig.baseUrl);
+      result.metrics.afterOptimization = await this.measurePerformance(
+        siteConfig.baseUrl,
+      );
       result.endTime = Date.now();
 
       // Generate recommendations
@@ -271,7 +280,6 @@ export class PerformanceOptimizer extends EventEmitter {
 
       this.emit('site_optimized', result);
       return result;
-
     } catch (error) {
       console.error('❌ Site optimization failed:', error);
       throw error;
@@ -281,7 +289,10 @@ export class PerformanceOptimizer extends EventEmitter {
   /**
    * Measure site performance
    */
-  public async measurePerformance(url: string, options?: MeasurementOptions): Promise<PerformanceReport> {
+  public async measurePerformance(
+    url: string,
+    options?: MeasurementOptions,
+  ): Promise<PerformanceReport> {
     console.log(`📊 Measuring performance for ${url}...`);
 
     return await this.monitoringEngine.measure(url, options);
@@ -290,7 +301,9 @@ export class PerformanceOptimizer extends EventEmitter {
   /**
    * Optimize images
    */
-  public async optimizeImages(imagePaths: string[]): Promise<ImageOptimizationResult> {
+  public async optimizeImages(
+    imagePaths: string[],
+  ): Promise<ImageOptimizationResult> {
     console.log(`🖼️ Optimizing ${imagePaths.length} images...`);
 
     return await this.imageOptimizer.optimizeBatch(imagePaths);
@@ -299,7 +312,9 @@ export class PerformanceOptimizer extends EventEmitter {
   /**
    * Optimize bundles
    */
-  public async optimizeBundles(assetPaths: string[]): Promise<BundleOptimizationResult> {
+  public async optimizeBundles(
+    assetPaths: string[],
+  ): Promise<BundleOptimizationResult> {
     console.log(`📦 Optimizing ${assetPaths.length} bundles...`);
 
     return await this.bundleOptimizer.optimizeBatch(assetPaths);
@@ -319,12 +334,12 @@ export class PerformanceOptimizer extends EventEmitter {
    */
   public async generatePerformanceReport(
     urls: string[],
-    timeframe: 'day' | 'week' | 'month'
+    timeframe: 'day' | 'week' | 'month',
   ): Promise<AggregatedPerformanceReport> {
     console.log(`📈 Generating performance report for ${urls.length} URLs...`);
 
     const reports: PerformanceReport[] = [];
-    
+
     for (const url of urls) {
       try {
         const report = await this.measurePerformance(url);
@@ -340,22 +355,29 @@ export class PerformanceOptimizer extends EventEmitter {
   /**
    * Monitor Core Web Vitals
    */
-  public async monitorCoreWebVitals(urls: string[]): Promise<CoreWebVitalsReport> {
+  public async monitorCoreWebVitals(
+    urls: string[],
+  ): Promise<CoreWebVitalsReport> {
     console.log('🎯 Monitoring Core Web Vitals...');
 
     const vitals: { [url: string]: CoreWebVitals } = {};
 
     for (const url of urls) {
       try {
-        const report = await this.measurePerformance(url, { coreWebVitalsOnly: true });
+        const report = await this.measurePerformance(url, {
+          coreWebVitalsOnly: true,
+        });
         vitals[url] = {
           lcp: report.metrics.lcp,
           fid: report.metrics.fid,
           cls: report.metrics.cls,
-          rating: this.calculateWebVitalsRating(report.metrics)
+          rating: this.calculateWebVitalsRating(report.metrics),
         };
       } catch (error) {
-        console.warn(`⚠️ Failed to measure Core Web Vitals for ${url}:`, error.message);
+        console.warn(
+          `⚠️ Failed to measure Core Web Vitals for ${url}:`,
+          error.message,
+        );
       }
     }
 
@@ -363,14 +385,16 @@ export class PerformanceOptimizer extends EventEmitter {
       timestamp: new Date(),
       urls: vitals,
       summary: this.summarizeWebVitals(vitals),
-      recommendations: this.generateWebVitalsRecommendations(vitals)
+      recommendations: this.generateWebVitalsRecommendations(vitals),
     };
   }
 
   /**
    * Implement Progressive Web App features
    */
-  public async implementPWA(config: PWAImplementationConfig): Promise<PWAResult> {
+  public async implementPWA(
+    config: PWAImplementationConfig,
+  ): Promise<PWAResult> {
     console.log('📱 Implementing Progressive Web App features...');
 
     const result: PWAResult = {
@@ -379,7 +403,7 @@ export class PerformanceOptimizer extends EventEmitter {
       iconsSized: false,
       offlineSupport: false,
       pushNotifications: false,
-      installPrompt: false
+      installPrompt: false,
     };
 
     try {
@@ -420,7 +444,6 @@ export class PerformanceOptimizer extends EventEmitter {
       }
 
       return result;
-
     } catch (error) {
       console.error('❌ PWA implementation failed:', error);
       throw error;
@@ -437,19 +460,18 @@ export class PerformanceOptimizer extends EventEmitter {
     setInterval(async () => {
       try {
         const reports = await Promise.all(
-          config.urls.map(url => this.measurePerformance(url))
+          config.urls.map((url) => this.measurePerformance(url)),
         );
 
         // Check for performance regressions
         const regressions = this.detectRegressions(reports, config.thresholds);
-        
+
         if (regressions.length > 0) {
           this.emit('performance_regression', regressions);
         }
 
         // Store reports for trending
         await this.storePerformanceReports(reports);
-
       } catch (error) {
         console.error('❌ Continuous monitoring error:', error);
       }
@@ -477,11 +499,15 @@ export class PerformanceOptimizer extends EventEmitter {
     return await this.cacheManager.setup(config);
   }
 
-  private async generateServiceWorker(config: SiteOptimizationConfig): Promise<any> {
+  private async generateServiceWorker(
+    config: SiteOptimizationConfig,
+  ): Promise<any> {
     return await this.serviceWorkerManager.generate(config);
   }
 
-  private async generateRecommendations(result: OptimizationResult): Promise<string[]> {
+  private async generateRecommendations(
+    result: OptimizationResult,
+  ): Promise<string[]> {
     const recommendations: string[] = [];
 
     if (result.metrics.afterOptimization) {
@@ -489,30 +515,53 @@ export class PerformanceOptimizer extends EventEmitter {
       const after = result.metrics.afterOptimization;
 
       if (after.metrics.lcp > 2500) {
-        recommendations.push('Consider further image optimization or implement critical CSS');
+        recommendations.push(
+          'Consider further image optimization or implement critical CSS',
+        );
       }
 
       if (after.metrics.cls > 0.1) {
-        recommendations.push('Add size attributes to images and reserve space for dynamic content');
+        recommendations.push(
+          'Add size attributes to images and reserve space for dynamic content',
+        );
       }
 
       if (after.metrics.fid > 100) {
-        recommendations.push('Reduce JavaScript execution time and implement code splitting');
+        recommendations.push(
+          'Reduce JavaScript execution time and implement code splitting',
+        );
       }
     }
 
     return recommendations;
   }
 
-  private calculateWebVitalsRating(metrics: any): 'good' | 'needs-improvement' | 'poor' {
-    const lcpRating = metrics.lcp <= 2500 ? 'good' : metrics.lcp <= 4000 ? 'needs-improvement' : 'poor';
-    const fidRating = metrics.fid <= 100 ? 'good' : metrics.fid <= 300 ? 'needs-improvement' : 'poor';
-    const clsRating = metrics.cls <= 0.1 ? 'good' : metrics.cls <= 0.25 ? 'needs-improvement' : 'poor';
+  private calculateWebVitalsRating(
+    metrics: any,
+  ): 'good' | 'needs-improvement' | 'poor' {
+    const lcpRating =
+      metrics.lcp <= 2500
+        ? 'good'
+        : metrics.lcp <= 4000
+          ? 'needs-improvement'
+          : 'poor';
+    const fidRating =
+      metrics.fid <= 100
+        ? 'good'
+        : metrics.fid <= 300
+          ? 'needs-improvement'
+          : 'poor';
+    const clsRating =
+      metrics.cls <= 0.1
+        ? 'good'
+        : metrics.cls <= 0.25
+          ? 'needs-improvement'
+          : 'poor';
 
     const ratings = [lcpRating, fidRating, clsRating];
-    
-    if (ratings.every(r => r === 'good')) return 'good';
-    if (ratings.some(r => r === 'poor')) return 'poor';
+
+    if (ratings.every((r) => r === 'good')) return 'good';
+    if (ratings.some((r) => r === 'poor')) return 'poor';
     return 'needs-improvement';
   }
 
@@ -521,7 +570,9 @@ export class PerformanceOptimizer extends EventEmitter {
     return {};
   }
 
-  private generateWebVitalsRecommendations(vitals: { [url: string]: CoreWebVitals }): string[] {
+  private generateWebVitalsRecommendations(vitals: {
+    [url: string]: CoreWebVitals;
+  }): string[] {
     // Implementation for generating web vitals recommendations
     return [];
   }
@@ -550,12 +601,17 @@ export class PerformanceOptimizer extends EventEmitter {
     // Implementation for install prompt
   }
 
-  private detectRegressions(reports: PerformanceReport[], thresholds: any): any[] {
+  private detectRegressions(
+    reports: PerformanceReport[],
+    thresholds: any,
+  ): any[] {
     // Implementation for detecting performance regressions
     return [];
   }
 
-  private async storePerformanceReports(reports: PerformanceReport[]): Promise<void> {
+  private async storePerformanceReports(
+    reports: PerformanceReport[],
+  ): Promise<void> {
     // Implementation for storing performance reports
   }
 
@@ -569,7 +625,7 @@ export class PerformanceOptimizer extends EventEmitter {
 
   private aggregateReports(
     reports: PerformanceReport[],
-    timeframe: string
+    timeframe: string,
   ): AggregatedPerformanceReport {
     // Implementation for aggregating performance reports
     return {
@@ -577,7 +633,7 @@ export class PerformanceOptimizer extends EventEmitter {
       totalReports: reports.length,
       averageMetrics: {} as any,
       trends: [],
-      insights: []
+      insights: [],
     };
   }
 }
@@ -600,7 +656,7 @@ class CDNManager {
     return {
       success: true,
       purgedUrls: urls || [],
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -631,7 +687,7 @@ class ImageOptimizer {
       duration: 1000,
       totalSavings: 50000,
       optimizedImages: paths.length,
-      totalSizeReduction: 0.6
+      totalSizeReduction: 0.6,
     };
   }
 }
@@ -649,7 +705,7 @@ class BundleOptimizer {
       duration: 2000,
       totalSavings: 30000,
       bundlesOptimized: paths.length,
-      compressionRatio: 0.7
+      compressionRatio: 0.7,
     };
   }
 }
@@ -661,7 +717,10 @@ class PerformanceMonitoring {
     // Initialize performance monitoring
   }
 
-  async measure(url: string, options?: MeasurementOptions): Promise<PerformanceReport> {
+  async measure(
+    url: string,
+    options?: MeasurementOptions,
+  ): Promise<PerformanceReport> {
     // Measure performance
     return {} as PerformanceReport;
   }

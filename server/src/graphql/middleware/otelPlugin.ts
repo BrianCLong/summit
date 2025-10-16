@@ -8,7 +8,9 @@ export function otelApolloPlugin() {
         async executionDidStart() {
           return {
             willResolveField({ info }) {
-              const span = tracer.startSpan(`resolver ${info.parentType.name}.${info.fieldName}`);
+              const span = tracer.startSpan(
+                `resolver ${info.parentType.name}.${info.fieldName}`,
+              );
               const start = Date.now();
               return (err: unknown) => {
                 if (err) {

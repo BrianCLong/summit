@@ -9,55 +9,50 @@
 
 ### Merge Train Execution
 
-* **95** PRs successfully merged from the backlog
-* **~162** PRs auto‑updated with `main` branch baseline
-* **~148** PRs with conflicts identified and logged
-* Processed PRs across range **#10201 → #1639**
+- **95** PRs successfully merged from the backlog
+- **~162** PRs auto‑updated with `main` branch baseline
+- **~148** PRs with conflicts identified and logged
+- Processed PRs across range **#10201 → #1639**
 
 ### Automation & Tools Created
 
 1. `scripts/triage-conflicting-prs.sh`
-
-   * Identifies stale PRs (>90 days) with conflicts
-   * Auto‑labels with `needs-rebase`, `stale`
-   * Comments with rebase instructions
-   * 14‑day grace period before auto‑close
+   - Identifies stale PRs (>90 days) with conflicts
+   - Auto‑labels with `needs-rebase`, `stale`
+   - Comments with rebase instructions
+   - 14‑day grace period before auto‑close
 
 2. `scripts/conflict-hotspot-report.sh`
-
-   * Analyzes git history to find high‑contention files
-   * Generates CSV report with change frequency
-   * Helps identify **CODEOWNERS** candidates
+   - Analyzes git history to find high‑contention files
+   - Generates CSV report with change frequency
+   - Helps identify **CODEOWNERS** candidates
 
 3. `.github/workflows/auto-resolve-conflicts.yml`
-
-   * Automatically detects lockfile conflicts
-   * Regenerates `package-lock.json` / `pnpm-lock.yaml`
-   * Commits and pushes resolution
-   * Comments on PR with status
+   - Automatically detects lockfile conflicts
+   - Regenerates `package-lock.json` / `pnpm-lock.yaml`
+   - Commits and pushes resolution
+   - Comments on PR with status
 
 4. `docs/merge-train-runbook.md`
-
-   * Complete operational procedures
-   * Daily/weekly cycles documented
-   * Monitoring metrics and alerts
-   * Troubleshooting guide
+   - Complete operational procedures
+   - Daily/weekly cycles documented
+   - Monitoring metrics and alerts
+   - Troubleshooting guide
 
 5. `.github/CODEOWNERS` (updated)
-
-   * Added CI/CD workflow ownership
-   * Protected critical configuration files
-   * Documented hot file patterns
-   * Included merge train scripts
+   - Added CI/CD workflow ownership
+   - Protected critical configuration files
+   - Documented hot file patterns
+   - Included merge train scripts
 
 ---
 
 ## 📊 Current State
 
-* **343** PRs remain open (down from **409+**)
-* **57%** conflict rate among processed PRs
-* High CI failure rate on lint/test guards
-* Merge train operational but constrained by conflicts/failures
+- **343** PRs remain open (down from **409+**)
+- **57%** conflict rate among processed PRs
+- High CI failure rate on lint/test guards
+- Merge train operational but constrained by conflicts/failures
 
 ---
 
@@ -94,22 +89,22 @@ gh pr list --state open --draft --limit 500 --json number,createdAt \
 
 **2 weeks**
 
-* **343 → ~200** open PRs
-* **57% → 40%** conflict rate
-* **150+ merges/week** possible
+- **343 → ~200** open PRs
+- **57% → 40%** conflict rate
+- **150+ merges/week** possible
 
 **1 month**
 
-* < **150** open PRs steady state
-* < **30%** conflict rate
-* **30–50** autonomous merges/day
+- < **150** open PRs steady state
+- < **30%** conflict rate
+- **30–50** autonomous merges/day
 
 **3 months**
 
-* < **100** open PRs
-* < **20%** conflict rate
-* < **3 days** average time‑to‑merge
-* > **80%** automated merge rate
+- < **100** open PRs
+- < **20%** conflict rate
+- < **3 days** average time‑to‑merge
+- > **80%** automated merge rate
 
 ---
 
@@ -143,9 +138,9 @@ docs/
 
 ### PRs Merged (by range)
 
-* **#10143 - #10103**: 41 PRs (initial batch)
-* **#10102 - #10081**: 19 PRs (mid-range)
-* **#1672 - #1639**: 35 PRs (backlog)
+- **#10143 - #10103**: 41 PRs (initial batch)
+- **#10102 - #10081**: 19 PRs (mid-range)
+- **#1672 - #1639**: 35 PRs (backlog)
 
 **Total: 95 PRs**
 
@@ -153,8 +148,8 @@ docs/
 
 From `/tmp/all_updates.log` (259 PRs processed):
 
-* ✅ **111 PRs successfully updated** (43%)
-* ⚠️ **148 PRs with conflicts** (57%)
+- ✅ **111 PRs successfully updated** (43%)
+- ⚠️ **148 PRs with conflicts** (57%)
 
 ### Conflict Analysis
 
@@ -168,17 +163,17 @@ From `/tmp/all_updates.log` (259 PRs processed):
 
 Sample failures analyzed:
 
-* **PR #10091**: "feat: add immutable training capsules" - Fast lane FAILURE
-* **PR #10129**: "feat: add cross-database migration rollback" - Fast lane FAILURE
-* **PR #10127**: "feat: add Liquid Nano pilot bundle" - Fast lane FAILURE
-* **PR #10146**: "chore: remove sprint25 binary archives" - Fast lane FAILURE
+- **PR #10091**: "feat: add immutable training capsules" - Fast lane FAILURE
+- **PR #10129**: "feat: add cross-database migration rollback" - Fast lane FAILURE
+- **PR #10127**: "feat: add Liquid Nano pilot bundle" - Fast lane FAILURE
+- **PR #10146**: "chore: remove sprint25 binary archives" - Fast lane FAILURE
 
 **Common issues:**
 
-* Lint failures (`.only` in tests)
-* Test guard violations (`console.error` in prod)
-* Missing dependencies
-* Stale test snapshots
+- Lint failures (`.only` in tests)
+- Test guard violations (`console.error` in prod)
+- Missing dependencies
+- Stale test snapshots
 
 ---
 
@@ -248,20 +243,20 @@ gh pr list --state open --limit 500 --json createdAt | \
 
 ### Mitigation Strategies
 
-* **Prioritize express lane** (<100 LOC, green CI) for auto-merge
-* **Weekly triage sprints** to clear manual lane backlog
-* **Pre-merge linting** to catch common failures before CI
-* **PR limits per developer** (max 3 open) to reduce queue pressure
+- **Prioritize express lane** (<100 LOC, green CI) for auto-merge
+- **Weekly triage sprints** to clear manual lane backlog
+- **Pre-merge linting** to catch common failures before CI
+- **PR limits per developer** (max 3 open) to reduce queue pressure
 
 ---
 
 ## 📚 References
 
-* **Merge Train Runbook**: `docs/merge-train-runbook.md`
-* **CI Workflows**: `.github/workflows/_reusable-ci-fast.yml`
-* **Triage Script**: `scripts/triage-conflicting-prs.sh`
-* **Auto-Resolve Workflow**: `.github/workflows/auto-resolve-conflicts.yml`
-* **CODEOWNERS**: `.github/CODEOWNERS`
+- **Merge Train Runbook**: `docs/merge-train-runbook.md`
+- **CI Workflows**: `.github/workflows/_reusable-ci-fast.yml`
+- **Triage Script**: `scripts/triage-conflicting-prs.sh`
+- **Auto-Resolve Workflow**: `.github/workflows/auto-resolve-conflicts.yml`
+- **CODEOWNERS**: `.github/CODEOWNERS`
 
 ---
 
@@ -269,17 +264,17 @@ gh pr list --state open --limit 500 --json createdAt | \
 
 ### What Worked Well
 
-* ✅ Automated PR updates via GitHub API (`gh api -X PUT`)
-* ✅ Batch processing with sleep delays prevented rate limiting
-* ✅ Systematic logging (`/tmp/all_updates.log`) enabled analysis
-* ✅ Fast lane CI provides quick feedback for small PRs
+- ✅ Automated PR updates via GitHub API (`gh api -X PUT`)
+- ✅ Batch processing with sleep delays prevented rate limiting
+- ✅ Systematic logging (`/tmp/all_updates.log`) enabled analysis
+- ✅ Fast lane CI provides quick feedback for small PRs
 
 ### What Needs Improvement
 
-* ⚠️ Need pre-merge validation to catch lint/test issues earlier
-* ⚠️ Conflict resolution is manual and time-consuming
-* ⚠️ Hot files need ownership/edit queues to prevent contention
-* ⚠️ No metrics dashboard for monitoring merge train health
+- ⚠️ Need pre-merge validation to catch lint/test issues earlier
+- ⚠️ Conflict resolution is manual and time-consuming
+- ⚠️ Hot files need ownership/edit queues to prevent contention
+- ⚠️ No metrics dashboard for monitoring merge train health
 
 ### Recommendations for Future
 
@@ -310,6 +305,6 @@ gh pr list --state open --limit 500 --json createdAt | \
 
 ---
 
-*Prepared by: Claude Code Agent*
-*Repository: BrianCLong/summit*
-*Context: Merge train health restoration initiative*
+_Prepared by: Claude Code Agent_
+_Repository: BrianCLong/summit_
+_Context: Merge train health restoration initiative_

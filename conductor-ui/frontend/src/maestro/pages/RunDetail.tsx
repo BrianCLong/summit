@@ -8,7 +8,14 @@ import { getMaestroConfig } from '../config';
 import { useFocusTrap } from '../utils/useFocusTrap';
 import { useResilientStream } from '../utils/streamUtils';
 import { sanitizeLogs } from '../utils/secretUtils';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts';
 import PolicyExplainDialog from '../components/PolicyExplainDialog';
 
 function Tabs({
@@ -65,17 +72,20 @@ export default function RunDetail() {
 
   // Use resilient streaming for logs
   const streamUrl = `/api/maestro/v1/runs/${id}/logs?stream=true${selectedNode ? `&nodeId=${selectedNode}` : ''}`;
-  const { connection, connected, events, error, reconnect } = useResilientStream(streamUrl, {
-    maxRetries: 15,
-    initialRetryDelay: 500,
-    maxRetryDelay: 10000,
-    heartbeatInterval: 20000,
-  });
+  const { connection, connected, events, error, reconnect } =
+    useResilientStream(streamUrl, {
+      maxRetries: 15,
+      initialRetryDelay: 500,
+      maxRetryDelay: 10000,
+      heartbeatInterval: 20000,
+    });
 
   // Convert stream events to log lines and sanitize them
   const lines = React.useMemo(() => {
     return sanitizeLogs(
-      events.map((event) => event.data?.text || JSON.stringify(event.data)).filter(Boolean),
+      events
+        .map((event) => event.data?.text || JSON.stringify(event.data))
+        .filter(Boolean),
     );
   }, [events]);
 
@@ -97,7 +107,10 @@ export default function RunDetail() {
         setSc(s);
       } catch {}
       try {
-        const g = await checkGate({ runId: id, pipeline: 'intelgraph_pr_build' });
+        const g = await checkGate({
+          runId: id,
+          pipeline: 'intelgraph_pr_build',
+        });
         setGate(g);
       } catch {}
     })();
@@ -119,7 +132,9 @@ export default function RunDetail() {
             <h1 className="font-mono text-lg">{id}</h1>
             <div className="text-xs text-slate-500">
               Pipeline: {run?.pipeline} • Status:{' '}
-              <span className="rounded bg-slate-200 px-2 py-0.5 text-xs">{run?.status}</span>
+              <span className="rounded bg-slate-200 px-2 py-0.5 text-xs">
+                {run?.status}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -219,16 +234,22 @@ export default function RunDetail() {
         {tab === 'Overview' && (
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
             <section className="rounded border bg-white p-3 lg:col-span-2">
-              <h3 className="mb-2 text-sm font-semibold text-slate-700">Timeline</h3>
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">
+                Timeline
+              </h3>
               <div className="text-sm text-slate-600">
-                Started: {run?.startedAt} • Duration: {run?.durationMs} ms • Cost: ${run?.cost}
+                Started: {run?.startedAt} • Duration: {run?.durationMs} ms •
+                Cost: ${run?.cost}
               </div>
             </section>
             <section className="rounded border bg-white p-3">
-              <h3 className="mb-2 text-sm font-semibold text-slate-700">Autonomy & Budget</h3>
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">
+                Autonomy & Budget
+              </h3>
               <div className="text-sm text-slate-600">
-                Level L{run?.autonomyLevel} • Canary {Math.round((run?.canary ?? 0) * 100)}% •
-                Budget cap ${run?.budgetCap}
+                Level L{run?.autonomyLevel} • Canary{' '}
+                {Math.round((run?.canary ?? 0) * 100)}% • Budget cap $
+                {run?.budgetCap}
               </div>
             </section>
           </div>
@@ -236,9 +257,15 @@ export default function RunDetail() {
 
         {tab === 'DAG' && (
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px]">
-            <DAG nodes={nodes as DagNode[]} edges={edges as DagEdge[]} onSelect={setSelectedNode} />
+            <DAG
+              nodes={nodes as DagNode[]}
+              edges={edges as DagEdge[]}
+              onSelect={setSelectedNode}
+            />
             <section className="rounded border bg-white p-3">
-              <h3 className="mb-2 text-sm font-semibold text-slate-700">Node Inspector</h3>
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">
+                Node Inspector
+              </h3>
               {!selectedNode && (
                 <div className="text-sm text-slate-500">
                   Select a node to inspect inputs/outputs, metrics, and logs.
@@ -249,14 +276,17 @@ export default function RunDetail() {
                   <div className="text-slate-600">
                     Node: <span className="font-mono">{selectedNode}</span>
                   </div>
-                  <div className="text-slate-600">Retries: 0 • Duration: 320ms</div>
-                  <div className="text-xs text-slate-500">
-                    Metrics: cpu {metrics?.cpuPct ?? '—'}%, mem {metrics?.memMB ?? '—'}MB, tokens{' '}
-                    {metrics?.tokens ?? '—'}, cost ${metrics?.cost ?? '—'}
+                  <div className="text-slate-600">
+                    Retries: 0 • Duration: 320ms
                   </div>
                   <div className="text-xs text-slate-500">
-                    Evidence: {nodeEvidence?.artifacts?.[0]?.name || '—'}; traceId:{' '}
-                    {nodeEvidence?.traceId || '—'}
+                    Metrics: cpu {metrics?.cpuPct ?? '—'}%, mem{' '}
+                    {metrics?.memMB ?? '—'}MB, tokens {metrics?.tokens ?? '—'},
+                    cost ${metrics?.cost ?? '—'}
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Evidence: {nodeEvidence?.artifacts?.[0]?.name || '—'};
+                    traceId: {nodeEvidence?.traceId || '—'}
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -284,7 +314,11 @@ export default function RunDetail() {
                       Replay from here
                     </button>
                   </div>
-                  <RouterDecision runId={id} nodeId={selectedNode} fetcher={getRunNodeRouting} />
+                  <RouterDecision
+                    runId={id}
+                    nodeId={selectedNode}
+                    fetcher={getRunNodeRouting}
+                  />
                 </div>
               )}
             </section>
@@ -294,7 +328,9 @@ export default function RunDetail() {
         {tab === 'Logs' && (
           <section className="rounded border bg-white">
             <div className="flex items-center justify-between border-b p-2">
-              <div className="text-sm font-semibold text-slate-700">Live Logs</div>
+              <div className="text-sm font-semibold text-slate-700">
+                Live Logs
+              </div>
               <div className="flex items-center gap-2">
                 {run?.traceId && (
                   <button
@@ -328,11 +364,19 @@ export default function RunDetail() {
                 <div className="flex items-center gap-1">
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      connected ? 'bg-green-500' : error ? 'bg-red-500' : 'bg-yellow-500'
+                      connected
+                        ? 'bg-green-500'
+                        : error
+                          ? 'bg-red-500'
+                          : 'bg-yellow-500'
                     }`}
                   />
                   <span className="text-[11px] text-slate-500">
-                    {connected ? 'Connected' : error ? 'Disconnected' : 'Connecting...'}
+                    {connected
+                      ? 'Connected'
+                      : error
+                        ? 'Disconnected'
+                        : 'Connecting...'}
                   </span>
                 </div>
               </div>
@@ -342,7 +386,10 @@ export default function RunDetail() {
               <div className="bg-red-50 border-b border-red-200 p-2 text-sm text-red-800">
                 <div className="flex items-center justify-between">
                   <span>⚠️ Stream error: {error}</span>
-                  <button onClick={reconnect} className="text-red-600 hover:text-red-800 underline">
+                  <button
+                    onClick={reconnect}
+                    className="text-red-600 hover:text-red-800 underline"
+                  >
                     Retry
                   </button>
                 </div>
@@ -357,7 +404,9 @@ export default function RunDetail() {
               className="max-h-[50vh] overflow-auto p-2 font-mono text-xs"
             >
               {lines.length === 0 && connected && (
-                <div className="text-slate-500 italic">Waiting for log entries...</div>
+                <div className="text-slate-500 italic">
+                  Waiting for log entries...
+                </div>
               )}
               {lines
                 .filter(
@@ -379,11 +428,14 @@ export default function RunDetail() {
 
         {tab === 'Timeline' && (
           <section className="rounded border bg-white p-3">
-            <h3 className="mb-2 text-sm font-semibold text-slate-700">Timeline</h3>
+            <h3 className="mb-2 text-sm font-semibold text-slate-700">
+              Timeline
+            </h3>
             <ul className="text-sm text-slate-700">
               {(nodes || []).map((n: any, i: number) => (
                 <li key={n.id} className="border-b py-2 last:border-0">
-                  <span className="font-mono text-xs">T+{i * 250}ms</span> • {n.label} — {n.state}
+                  <span className="font-mono text-xs">T+{i * 250}ms</span> •{' '}
+                  {n.label} — {n.state}
                   {n?.retries ? ` (r${n.retries})` : ''}
                 </li>
               ))}
@@ -392,7 +444,11 @@ export default function RunDetail() {
         )}
 
         {tab === 'Scorecard' && (
-          <div role="tabpanel" aria-label="Eval scorecard" className="space-y-3">
+          <div
+            role="tabpanel"
+            aria-label="Eval scorecard"
+            className="space-y-3"
+          >
             {sc ? (
               <div className="rounded-2xl border p-4">
                 <div className="mb-2 flex items-center gap-2">
@@ -401,7 +457,9 @@ export default function RunDetail() {
                   >
                     {sc.overall}
                   </span>
-                  <div className="text-sm text-gray-600">pipeline: {sc.pipeline}</div>
+                  <div className="text-sm text-gray-600">
+                    pipeline: {sc.pipeline}
+                  </div>
                 </div>
                 <table className="w-full text-sm">
                   <thead>
@@ -436,7 +494,9 @@ export default function RunDetail() {
                   {gate.status}
                 </div>
                 {!!gate.failing?.length && (
-                  <div className="mt-2 text-sm">Failing: {gate.failing.join(', ')}</div>
+                  <div className="mt-2 text-sm">
+                    Failing: {gate.failing.join(', ')}
+                  </div>
                 )}
               </div>
             )}
@@ -447,7 +507,9 @@ export default function RunDetail() {
 
         {tab === 'Artifacts' && (
           <section className="rounded border bg-white">
-            <div className="border-b p-2 text-sm font-semibold text-slate-700">Artifacts</div>
+            <div className="border-b p-2 text-sm font-semibold text-slate-700">
+              Artifacts
+            </div>
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-slate-500">
                 <tr>
@@ -469,7 +531,9 @@ export default function RunDetail() {
           </section>
         )}
 
-        {tab === 'Evidence' && <RunEvidence runId={id} getRunEvidence={getRunEvidence} />}
+        {tab === 'Evidence' && (
+          <RunEvidence runId={id} getRunEvidence={getRunEvidence} />
+        )}
 
         {tab === 'Policies' && (
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -491,31 +555,40 @@ export default function RunDetail() {
                     <tr key={d.id} className="border-t">
                       <td className="px-3 py-2">{d.action}</td>
                       <td className="px-3 py-2">{d.allowed ? 'Yes' : 'No'}</td>
-                      <td className="px-3 py-2 text-xs">{d.reasons.join('; ')}</td>
+                      <td className="px-3 py-2 text-xs">
+                        {d.reasons.join('; ')}
+                      </td>
                       <td className="px-3 py-2 text-xs">{d.appealPath}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </section>
-            <PolicyExplain context={{ runId: id, nodeId: selectedNode, env: 'prod' }} />
+            <PolicyExplain
+              context={{ runId: id, nodeId: selectedNode, env: 'prod' }}
+            />
           </div>
         )}
 
         {tab === 'Approvals' && (
           <section className="rounded border bg-white p-3">
-            <h3 className="mb-2 text-sm font-semibold text-slate-700">Pending Approvals</h3>
+            <h3 className="mb-2 text-sm font-semibold text-slate-700">
+              Pending Approvals
+            </h3>
             <div className="text-sm text-slate-600">None</div>
           </section>
         )}
 
         {tab === 'Events' && (
           <section className="rounded border bg-white p-3">
-            <h3 className="mb-2 text-sm font-semibold text-slate-700">Events</h3>
+            <h3 className="mb-2 text-sm font-semibold text-slate-700">
+              Events
+            </h3>
             {cmp ? (
               <div className="text-sm text-slate-700">
                 <div>
-                  Duration delta: {cmp.durationDeltaMs}ms • Cost delta: ${cmp.costDelta}
+                  Duration delta: {cmp.durationDeltaMs}ms • Cost delta: $
+                  {cmp.costDelta}
                 </div>
                 <div className="mt-2">Changed nodes:</div>
                 <ul className="list-disc pl-5">
@@ -527,7 +600,9 @@ export default function RunDetail() {
                 </ul>
               </div>
             ) : (
-              <div className="text-sm text-slate-600">Run created → canary → promote</div>
+              <div className="text-sm text-slate-600">
+                Run created → canary → promote
+              </div>
             )}
           </section>
         )}
@@ -535,7 +610,9 @@ export default function RunDetail() {
         {tab === 'CI' && (
           <section className="rounded border bg-white">
             <div className="flex items-center justify-between border-b p-2">
-              <div className="text-sm font-semibold text-slate-700">CI Annotations</div>
+              <div className="text-sm font-semibold text-slate-700">
+                CI Annotations
+              </div>
               <button
                 className="rounded border px-2 py-1 text-xs"
                 onClick={async () => {
@@ -623,11 +700,17 @@ export default function RunDetail() {
                     // Best-effort call; ignore error if not available
                     const base = cfg.gatewayBase?.replace(/\/$/, '') || '';
                     if (base && selectedNode) {
-                      await fetch(`${base}/runs/${encodeURIComponent(id!)}/replay`, {
-                        method: 'POST',
-                        headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify({ nodeId: selectedNode, reason: replayReason }),
-                      });
+                      await fetch(
+                        `${base}/runs/${encodeURIComponent(id!)}/replay`,
+                        {
+                          method: 'POST',
+                          headers: { 'content-type': 'application/json' },
+                          body: JSON.stringify({
+                            nodeId: selectedNode,
+                            reason: replayReason,
+                          }),
+                        },
+                      );
                     }
                   } finally {
                     setReplayOpen(false);
@@ -666,20 +749,28 @@ function RouterDecision({
   if (!data) return null;
   return (
     <div className="mt-2 rounded border p-2">
-      <div className="mb-1 text-xs font-semibold text-slate-700">Router Decision</div>
+      <div className="mb-1 text-xs font-semibold text-slate-700">
+        Router Decision
+      </div>
       <div className="text-xs text-slate-600">
-        Selected: <span className="font-mono">{data.decision?.model}</span> • score{' '}
-        {data.decision?.score}
+        Selected: <span className="font-mono">{data.decision?.model}</span> •
+        score {data.decision?.score}
       </div>
       <div className="mt-1">
-        <button className="rounded border px-2 py-1 text-xs" onClick={() => setOpen(true)}>
+        <button
+          className="rounded border px-2 py-1 text-xs"
+          onClick={() => setOpen(true)}
+        >
           Explain policy
         </button>
       </div>
       <div className="mt-2" style={{ height: 140 }}>
         <ResponsiveContainer>
           <BarChart
-            data={(data.candidates || []).map((c: any) => ({ model: c.model, score: c.score }))}
+            data={(data.candidates || []).map((c: any) => ({
+              model: c.model,
+              score: c.score,
+            }))}
           >
             <XAxis dataKey="model" hide />
             <YAxis domain={[0, 1]} />
@@ -693,9 +784,15 @@ function RouterDecision({
         <span className="font-mono">{data.policy?.rulePath}</span>
       </div>
       {!!(data.policy?.reasons || []).length && (
-        <div className="text-[11px] text-slate-500">{data.policy.reasons.join('; ')}</div>
+        <div className="text-[11px] text-slate-500">
+          {data.policy.reasons.join('; ')}
+        </div>
       )}
-      <PolicyExplainDialog open={open} onClose={() => setOpen(false)} context={{ runId, nodeId }} />
+      <PolicyExplainDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        context={{ runId, nodeId }}
+      />
     </div>
   );
 }
@@ -725,16 +822,24 @@ function RunEvidence({
         <div className="space-y-2 text-sm">
           <Badges ev={ev} />
           <div className="flex flex-wrap items-center gap-2">
-            <button className="rounded border px-2 py-1 text-xs" onClick={handleVerifyNow}>
+            <button
+              className="rounded border px-2 py-1 text-xs"
+              onClick={handleVerifyNow}
+            >
               Verify now
             </button>
-            <button className="rounded border px-2 py-1 text-xs" onClick={handleSbomDiff}>
+            <button
+              className="rounded border px-2 py-1 text-xs"
+              onClick={handleSbomDiff}
+            >
               SBOM Diff
             </button>
             <button
               className="rounded border px-2 py-1 text-xs"
               onClick={() => {
-                const blob = new Blob([JSON.stringify(ev, null, 2)], { type: 'application/json' });
+                const blob = new Blob([JSON.stringify(ev, null, 2)], {
+                  type: 'application/json',
+                });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = `evidence-${runId}.json`;
@@ -757,7 +862,9 @@ function RunEvidence({
             {ev?.cosign?.verifyCmd && (
               <button
                 className="rounded border px-2 py-1 text-xs"
-                onClick={() => navigator.clipboard?.writeText(ev.cosign.verifyCmd)}
+                onClick={() =>
+                  navigator.clipboard?.writeText(ev.cosign.verifyCmd)
+                }
               >
                 Copy verify command
               </button>
@@ -781,7 +888,9 @@ function RunEvidence({
                 Added: {sbomDiff.summary.addedCount} (High Severity:{' '}
                 {sbomDiff.summary.highSeverityAdded})
               </p>
-              <p className="text-xs text-slate-600">Removed: {sbomDiff.summary.removedCount}</p>
+              <p className="text-xs text-slate-600">
+                Removed: {sbomDiff.summary.removedCount}
+              </p>
               <p className="text-xs text-slate-600">
                 Changed: {sbomDiff.summary.changedCount} (Medium Severity:{' '}
                 {sbomDiff.summary.mediumSeverityChanged})
@@ -795,7 +904,8 @@ function RunEvidence({
                   <ul className="list-disc pl-5 text-xs">
                     {sbomDiff.added.map((item: any, i: number) => (
                       <li key={i}>
-                        {item.component} (License: {item.license}, Severity: {item.severity})
+                        {item.component} (License: {item.license}, Severity:{' '}
+                        {item.severity})
                       </li>
                     ))}
                   </ul>
@@ -823,8 +933,8 @@ function RunEvidence({
                   <ul className="list-disc pl-5 text-xs">
                     {sbomDiff.changed.map((item: any, i: number) => (
                       <li key={i}>
-                        {item.component} (from {item.fromVersion} to {item.toVersion}, Severity:{' '}
-                        {item.severity})
+                        {item.component} (from {item.fromVersion} to{' '}
+                        {item.toVersion}, Severity: {item.severity})
                       </li>
                     ))}
                   </ul>
@@ -841,7 +951,10 @@ function RunEvidence({
               onChange={(e) => setIsQuarantined(e.target.checked)}
               className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
             />
-            <label htmlFor="quarantine-toggle" className="text-sm font-medium text-slate-700">
+            <label
+              htmlFor="quarantine-toggle"
+              className="text-sm font-medium text-slate-700"
+            >
               Quarantine Artifacts (Read-Only)
             </label>
             {isQuarantined && (

@@ -34,10 +34,10 @@ export class ConsoleAuditLogger implements AuditLogger {
 export const createAuditEntry = (
   action: string,
   status: AuditLogEntry['status'],
-  details: Omit<AuditLogEntry, 'action' | 'status' | 'timestamp'> = {}
+  details: Omit<AuditLogEntry, 'action' | 'status' | 'timestamp'> = {},
 ): AuditLogEntry => ({
   timestamp: new Date().toISOString(),
   action,
   status,
-  ...details
+  ...details,
 });

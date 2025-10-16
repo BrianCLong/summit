@@ -1,5 +1,5 @@
 id: OKR-Q3-LATENCY
-objective: "Reduce p95 API latency by 20%"
+objective: 'Reduce p95 API latency by 20%'
 key_results:
   - id: KR1
     metric: api_p95_ms

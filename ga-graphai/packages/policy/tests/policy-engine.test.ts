@@ -11,8 +11,12 @@ describe('PolicyEngine', () => {
       actions: ['intent:read'],
       resources: ['intent'],
       conditions: [
-        { attribute: 'roles', operator: 'includes', value: ['product-manager', 'architect'] }
-      ]
+        {
+          attribute: 'roles',
+          operator: 'includes',
+          value: ['product-manager', 'architect'],
+        },
+      ],
     },
     {
       id: 'deny-out-of-region',
@@ -20,8 +24,10 @@ describe('PolicyEngine', () => {
       effect: 'deny',
       actions: ['model:invoke'],
       resources: ['llm'],
-      conditions: [{ attribute: 'region', operator: 'neq', value: 'us-east-1' }]
-    }
+      conditions: [
+        { attribute: 'region', operator: 'neq', value: 'us-east-1' },
+      ],
+    },
   ];
 
   it('grants access when the allow rule matches', () => {
@@ -33,8 +39,8 @@ describe('PolicyEngine', () => {
         tenantId: 'tenant-1',
         userId: 'user-1',
         roles: ['product-manager'],
-        region: 'us-east-1'
-      }
+        region: 'us-east-1',
+      },
     };
 
     const result = engine.evaluate(request);
@@ -53,16 +59,18 @@ describe('PolicyEngine', () => {
         tenantId: 'tenant-1',
         userId: 'user-1',
         roles: ['ml-engineer'],
-        region: 'eu-west-1'
-      }
+        region: 'eu-west-1',
+      },
     };
 
     const result = engine.evaluate(request);
     expect(result.allowed).toBe(false);
     expect(result.effect).toBe('deny');
-    expect(result.reasons.some(reason => reason.includes('Denied by deny-out-of-region'))).toBe(
-      true
-    );
+    expect(
+      result.reasons.some((reason) =>
+        reason.includes('Denied by deny-out-of-region'),
+      ),
+    ).toBe(true);
   });
 
   it('captures condition failure reasons', () => {
@@ -74,13 +82,17 @@ describe('PolicyEngine', () => {
         tenantId: 'tenant-1',
         userId: 'user-1',
         roles: ['security-analyst'],
-        region: 'us-east-1'
-      }
+        region: 'us-east-1',
+      },
     };
 
     const result = engine.evaluate(request);
     expect(result.allowed).toBe(false);
-    expect(result.reasons.some(reason => reason.includes('condition roles includes'))).toBe(true);
+    expect(
+      result.reasons.some((reason) =>
+        reason.includes('condition roles includes'),
+      ),
+    ).toBe(true);
   });
 
   it('default policy engine allows authorised workcell execution', () => {
@@ -92,8 +104,8 @@ describe('PolicyEngine', () => {
         tenantId: 'tenant-1',
         userId: 'user-1',
         roles: ['developer'],
-        region: 'allowed-region'
-      }
+        region: 'allowed-region',
+      },
     });
 
     expect(result.allowed).toBe(true);
@@ -109,8 +121,8 @@ describe('PolicyEngine', () => {
         tenantId: 'tenant-1',
         userId: 'user-1',
         roles: ['developer'],
-        region: 'eu-west-1'
-      }
+        region: 'eu-west-1',
+      },
     });
 
     expect(result.allowed).toBe(false);

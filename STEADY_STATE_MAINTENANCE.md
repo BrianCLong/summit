@@ -7,18 +7,22 @@ The GREEN TRAIN release engineering mission has been successfully completed. All
 ## 📋 7-Day Stabilization Runbook
 
 ### **Day 0 (Completed)** ✅
+
 - [x] Tagged release: `release/green-train-20250921`
 - [x] Merge queue freeze activated (hotfixes only)
 - [x] Error budget monitoring enabled (GraphQL p95, ingest E2E, worker fail %)
 - [x] Renovate configuration updated for steady-state maintenance
 
 ### **Day 1-2 (Bug Bash Phase)**
+
 **Objectives:**
+
 - [ ] Bug bash across preview environments (UI + runbooks R1-R6)
 - [ ] Triage board setup: `P0 crash`, `P1 degraded`, `P2 papercuts`
 - [ ] Performance re-baseline: capture flamegraphs for top 10 resolvers, top 3 workers
 
 **Commands:**
+
 ```bash
 # Deploy preview environment for testing
 ./scripts/preview-local.sh up
@@ -34,12 +38,15 @@ npm run test:golden-path
 ```
 
 ### **Day 3-4 (Security & Cost Pass)**
+
 **Objectives:**
-- [ ] Security sweep: address *all* Trivy HIGH/CRITICAL or add allowlist entries with 30-day expiry
+
+- [ ] Security sweep: address _all_ Trivy HIGH/CRITICAL or add allowlist entries with 30-day expiry
 - [ ] Cost pass: CI minutes, preview env TTLs, egress
 - [ ] Set budget alerts
 
 **Commands:**
+
 ```bash
 # Security scan
 npm run security:scan
@@ -53,11 +60,14 @@ kubectl top pods --all-namespaces
 ```
 
 ### **Day 5-6 (Chaos & Observability)**
+
 **Objectives:**
+
 - [ ] Chaos drills (staging): kill pods/brokers; validate auto-recover + DLQ drainage
 - [ ] Observability audit: ensure spans/metrics for workers have cardinality guards and exemplars
 
 **Commands:**
+
 ```bash
 # Run chaos engineering drills
 ./scripts/chaos-drill.sh all-drills --namespace intelgraph-staging
@@ -71,7 +81,9 @@ kubectl logs -n intelgraph-staging -l component=worker --tail=100
 ```
 
 ### **Day 7 (Debrief & Unfreeze)**
+
 **Objectives:**
+
 - [ ] Debrief: write 1-page "Green Train Lessons" (what sped us up, what hurt)
 - [ ] Unfreeze features; announce "merge train cadence" (weekly)
 - [ ] Finalize steady-state procedures
@@ -79,6 +91,7 @@ kubectl logs -n intelgraph-staging -l component=worker --tail=100
 ## 🛡️ Guardrails (Active)
 
 ### **Merge Queue Required Checks** ✅
+
 - `typecheck` - TypeScript compilation
 - `lint` - Code style and quality
 - `e2e` - End-to-end testing
@@ -89,23 +102,28 @@ kubectl logs -n intelgraph-staging -l component=worker --tail=100
 - `terraform:plan` - Infrastructure change preview
 
 ### **Preview Environment Checklist** ✅
+
 Required reviewer checklist for every PR:
+
 - [ ] UI smoke test passes
 - [ ] Error console is empty
 - [ ] Traces flowing to observability stack
 - [ ] Performance metrics within budget (p95 < 1.5s)
 
 ### **Auto-Backport** ✅
+
 - Hotfixes automatically backported from `main` → `release/*` via CI
 - Security patches auto-merged after passing CI
 
 ### **Renovate Automation** ✅
+
 - Nightly dependency updates with `rangeStrategy: bump`
 - `separateMajorMinor` for safer upgrades
 - Preview environment deployed per Renovate PR
 - Auto-merge enabled for patch/minor TypeScript tooling
 
 ### **SBOM + Provenance** ✅
+
 - Attached to every release tag
 - Container image signing with cosign
 - Supply chain attestation
@@ -113,17 +131,19 @@ Required reviewer checklist for every PR:
 ## 📊 Live KPIs & Dashboards
 
 ### **Service Level Objectives**
-| Metric | Target | Current | Status |
-|--------|---------|---------|---------|
-| **GraphQL p95** | ≤ 1.5s | 1.2s | ✅ |
-| **GraphQL Error Rate** | < 0.5% | 0.3% | ✅ |
-| **Ingest E2E (10k docs)** | < 5m | 4m | ✅ |
-| **DLQ Rate** | < 0.1% | 0.05% | ✅ |
-| **Worker Fail Ratio** | < 1% | 0.3% | ✅ |
-| **CI Pass Rate** | > 95% | 97% | ✅ |
-| **Mean PR to Green** | < 25m | 22m | ✅ |
+
+| Metric                    | Target | Current | Status |
+| ------------------------- | ------ | ------- | ------ |
+| **GraphQL p95**           | ≤ 1.5s | 1.2s    | ✅     |
+| **GraphQL Error Rate**    | < 0.5% | 0.3%    | ✅     |
+| **Ingest E2E (10k docs)** | < 5m   | 4m      | ✅     |
+| **DLQ Rate**              | < 0.1% | 0.05%   | ✅     |
+| **Worker Fail Ratio**     | < 1%   | 0.3%    | ✅     |
+| **CI Pass Rate**          | > 95%  | 97%     | ✅     |
+| **Mean PR to Green**      | < 25m  | 22m     | ✅     |
 
 ### **Cost Metrics**
+
 - **CI Minutes/Week**: Target < 2000, Current: 1800
 - **Preview Env Lifetime**: Target < 8h, Current: 6h avg
 - **Container Registry**: 12GB storage, $45/month
@@ -131,6 +151,7 @@ Required reviewer checklist for every PR:
 ## 📚 Backlog (Next 2 Sprints)
 
 ### **Sprint 1: TypeScript & React Hardening**
+
 1. **TS Rehab Pass-2**: Eliminate remaining ~1800 errors
    - Enable `strictNullChecks` in more packages
    - Add `Result<T,E>` boundaries for error handling
@@ -142,6 +163,7 @@ Required reviewer checklist for every PR:
    - Update component patterns for concurrent features
 
 ### **Sprint 2: Contracts & Resilience**
+
 3. **GraphQL Contract Tests**:
    - Schema snapshot gates + resolver performance budgets
    - Breaking change detection in CI
@@ -223,18 +245,21 @@ KPIs to Maintain:
 ## 🎉 Success Metrics
 
 **Infrastructure Hardening:** ✅ Complete
+
 - Environmental alignment (Node 20.11.x + pnpm)
 - TypeScript rehabilitation (95+ error reduction)
 - OpenTelemetry v2 + BullMQ workers
 - Apollo v5 + React 19 compatibility
 
 **Release Engineering:** ✅ Complete
+
 - Merge queue + branch protection
 - Preview environments + canary deployments
 - Error budget monitoring + chaos drills
 - Automated dependency management
 
 **Value Delivered:**
+
 - 🚀 **Zero-downtime deployments** with canary + rollback
 - 🔍 **Comprehensive observability** with OTEL v2 + Prometheus
 - 🛡️ **Security by default** with SAST/SBOM + container signing

@@ -3,15 +3,15 @@ class TemplateService {
     this.templates = new Map();
   }
 
-  createTemplate({ name, data, scope = "org", ownerId }) {
+  createTemplate({ name, data, scope = 'org', ownerId }) {
     const id = `tmpl_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const now = new Date();
     const template = {
       id,
       name,
       data,
-      scope: scope === "personal" ? "personal" : "org",
-      ownerId: scope === "personal" ? ownerId : null,
+      scope: scope === 'personal' ? 'personal' : 'org',
+      ownerId: scope === 'personal' ? ownerId : null,
       createdAt: now,
       updatedAt: now,
     };
@@ -21,11 +21,11 @@ class TemplateService {
 
   listTemplates({ scope, userId } = {}) {
     let result = Array.from(this.templates.values());
-    if (scope === "org") {
-      result = result.filter((t) => t.scope === "org");
-    } else if (scope === "personal") {
+    if (scope === 'org') {
+      result = result.filter((t) => t.scope === 'org');
+    } else if (scope === 'personal') {
       result = result.filter(
-        (t) => t.scope === "personal" && t.ownerId === userId,
+        (t) => t.scope === 'personal' && t.ownerId === userId,
       );
     }
     return result;

@@ -53,20 +53,32 @@ export class FinOpsObservabilityService {
     });
   }
 
-  async getCostMetrics(tenantId?: string, timeframe: string = '24h'): Promise<CostMetrics> {
+  async getCostMetrics(
+    tenantId?: string,
+    timeframe: string = '24h',
+  ): Promise<CostMetrics> {
     const span = otelService.createSpan('finops.get_cost_metrics');
-    
+
     try {
       const pool = getPostgresPool();
-      
+
       // Build time filter
       let timeFilter = '';
       switch (timeframe) {
-        case '1h': timeFilter = "created_at >= NOW() - INTERVAL '1 hour'"; break;
-        case '24h': timeFilter = "created_at >= NOW() - INTERVAL '24 hours'"; break;
-        case '7d': timeFilter = "created_at >= NOW() - INTERVAL '7 days'"; break;
-        case '30d': timeFilter = "created_at >= NOW() - INTERVAL '30 days'"; break;
-        default: timeFilter = "created_at >= NOW() - INTERVAL '24 hours'";
+        case '1h':
+          timeFilter = "created_at >= NOW() - INTERVAL '1 hour'";
+          break;
+        case '24h':
+          timeFilter = "created_at >= NOW() - INTERVAL '24 hours'";
+          break;
+        case '7d':
+          timeFilter = "created_at >= NOW() - INTERVAL '7 days'";
+          break;
+        case '30d':
+          timeFilter = "created_at >= NOW() - INTERVAL '30 days'";
+          break;
+        default:
+          timeFilter = "created_at >= NOW() - INTERVAL '24 hours'";
       }
 
       const params: any[] = [];
@@ -83,27 +95,39 @@ export class FinOpsObservabilityService {
       };
 
       // Total spend
-      const totalSpendQuery = buildQuery(`
+      const totalSpendQuery = buildQuery(
+        `
         SELECT COALESCE(SUM(amount_usd), 0) as total_spend
         FROM budget_spend 
-        WHERE ${timeFilter}`, true);
+        WHERE ${timeFilter}`,
+        true,
+      );
       const { rows: totalRows } = await pool.query(totalSpendQuery, params);
 
       // Daily spend
-      const dailySpendQuery = buildQuery(`
+      const dailySpendQuery = buildQuery(
+        `
         SELECT COALESCE(SUM(amount_usd), 0) as daily_spend
         FROM budget_spend 
-        WHERE created_at >= CURRENT_DATE`, true);
+        WHERE created_at >= CURRENT_DATE`,
+        true,
+      );
       const { rows: dailyRows } = await pool.query(dailySpendQuery, params);
 
       // Spend by provider
-      const providerSpendQuery = buildQuery(`
+      const providerSpendQuery = buildQuery(
+        `
         SELECT expert_type as provider, SUM(amount_usd) as amount
         FROM budget_spend 
         WHERE ${timeFilter}
         GROUP BY expert_type
-        ORDER BY amount DESC`, true);
-      const { rows: providerRows } = await pool.query(providerSpendQuery, params);
+        ORDER BY amount DESC`,
+        true,
+      );
+      const { rows: providerRows } = await pool.query(
+        providerSpendQuery,
+        params,
+      );
 
       // Spend by tenant (if not tenant-specific)
       let tenantSpend: Record<string, number> = {};
@@ -115,27 +139,39 @@ export class FinOpsObservabilityService {
           GROUP BY tenant_id
           ORDER BY amount DESC
         `);
-        tenantSpend = Object.fromEntries(tenantRows.map(row => [row.tenant_id, parseFloat(row.amount)]));
+        tenantSpend = Object.fromEntries(
+          tenantRows.map((row) => [row.tenant_id, parseFloat(row.amount)]),
+        );
       }
 
       // Cost trend (last 7 days)
-      const costTrendQuery = buildQuery(`
+      const costTrendQuery = buildQuery(
+        `
         SELECT DATE(created_at) as date, SUM(amount_usd) as amount
         FROM budget_spend 
         WHERE created_at >= NOW() - INTERVAL '7 days'
         GROUP BY DATE(created_at)
-        ORDER BY date`, true);
+        ORDER BY date`,
+        true,
+      );
       const { rows: trendRows } = await pool.query(costTrendQuery, params);
 
       // Calculate projections and remaining budget
       const totalSpend = parseFloat(totalRows[0].total_spend || 0);
       const dailySpend = parseFloat(dailyRows[0].daily_spend || 0);
-      const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+      const daysInMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth() + 1,
+        0,
+      ).getDate();
       const projectedMonthlySpend = dailySpend * daysInMonth;
-      
+
       // Get budget limit from config (default $5000/month)
       const monthlyBudget = parseFloat(process.env.MONTHLY_BUDGET || '5000');
-      const budgetRemaining = Math.max(0, monthlyBudget - projectedMonthlySpend);
+      const budgetRemaining = Math.max(
+        0,
+        monthlyBudget - projectedMonthlySpend,
+      );
 
       // Cost per run
       const { rows: runCountRows } = await pool.query(`
@@ -157,10 +193,15 @@ export class FinOpsObservabilityService {
         dailySpend,
         projectedMonthlySpend,
         budgetRemaining,
-        spendByProvider: Object.fromEntries(providerRows.map(row => [row.provider, parseFloat(row.amount)])),
+        spendByProvider: Object.fromEntries(
+          providerRows.map((row) => [row.provider, parseFloat(row.amount)]),
+        ),
         spendByTenant: tenantSpend,
         costPerRun,
-        costTrend: trendRows.map(row => ({ date: row.date, amount: parseFloat(row.amount) })),
+        costTrend: trendRows.map((row) => ({
+          date: row.date,
+          amount: parseFloat(row.amount),
+        })),
       };
     } catch (error: any) {
       console.error('Cost metrics query failed:', error);
@@ -170,12 +211,14 @@ export class FinOpsObservabilityService {
     }
   }
 
-  async getPerformanceMetrics(timeframe: string = '1h'): Promise<PerformanceMetrics> {
+  async getPerformanceMetrics(
+    timeframe: string = '1h',
+  ): Promise<PerformanceMetrics> {
     const span = otelService.createSpan('finops.get_performance_metrics');
-    
+
     try {
       const pool = getPostgresPool();
-      
+
       // Get latency percentiles from serving metrics
       const { rows: latencyRows } = await pool.query(`
         SELECT 
@@ -229,7 +272,7 @@ export class FinOpsObservabilityService {
         throughputRps: parseFloat(throughputData.avg_throughput || 0),
         errorRate: parseFloat(errorData.error_rate || 0),
         successRate: Math.max(0, 100 - parseFloat(errorData.error_rate || 0)),
-        latencyHeatmap: heatmapRows.map(row => ({
+        latencyHeatmap: heatmapRows.map((row) => ({
           timestamp: row.timestamp,
           latency: parseFloat(row.latency),
           count: parseInt(row.count),
@@ -245,16 +288,21 @@ export class FinOpsObservabilityService {
 
   async getSLOMetrics(): Promise<SLOMetrics> {
     const span = otelService.createSpan('finops.get_slo_metrics');
-    
+
     try {
       // SLO targets (configurable)
-      const availabilityTarget = parseFloat(process.env.SLO_AVAILABILITY_TARGET || '99.9') / 100;
-      const latencyTarget = parseFloat(process.env.SLO_LATENCY_P95_TARGET || '1500'); // ms
-      const errorRateTarget = parseFloat(process.env.SLO_ERROR_RATE_TARGET || '1.0'); // %
+      const availabilityTarget =
+        parseFloat(process.env.SLO_AVAILABILITY_TARGET || '99.9') / 100;
+      const latencyTarget = parseFloat(
+        process.env.SLO_LATENCY_P95_TARGET || '1500',
+      ); // ms
+      const errorRateTarget = parseFloat(
+        process.env.SLO_ERROR_RATE_TARGET || '1.0',
+      ); // %
 
       // Get actual metrics for the last 30 days
       const pool = getPostgresPool();
-      
+
       // Availability calculation
       const { rows: availabilityRows } = await pool.query(`
         SELECT 
@@ -264,9 +312,11 @@ export class FinOpsObservabilityService {
         WHERE started_at >= NOW() - INTERVAL '30 days'
       `);
 
-      const actualAvailability = availabilityRows[0]?.total_runs > 0 
-        ? parseFloat(availabilityRows[0].successful_runs) / parseFloat(availabilityRows[0].total_runs)
-        : 1.0;
+      const actualAvailability =
+        availabilityRows[0]?.total_runs > 0
+          ? parseFloat(availabilityRows[0].successful_runs) /
+            parseFloat(availabilityRows[0].total_runs)
+          : 1.0;
 
       // P95 Latency
       const { rows: latencyRows } = await pool.query(`
@@ -275,7 +325,7 @@ export class FinOpsObservabilityService {
         WHERE metric_name = 'latency' 
         AND timestamp >= NOW() - INTERVAL '30 days'
       `);
-      
+
       const actualLatency = parseFloat(latencyRows[0]?.p95_latency || 0);
 
       // Error rate
@@ -285,21 +335,34 @@ export class FinOpsObservabilityService {
         FROM run_event 
         WHERE ts >= NOW() - INTERVAL '30 days'
       `);
-      
+
       const actualErrorRate = parseFloat(errorRows[0]?.error_rate || 0);
 
       // Calculate error budgets (amount of unreliability we can tolerate)
-      const availabilityBudget = Math.max(0, (availabilityTarget - actualAvailability) / (1 - availabilityTarget));
-      const latencyBudget = Math.max(0, (latencyTarget - actualLatency) / latencyTarget);
-      const errorBudget = Math.max(0, (errorRateTarget - actualErrorRate) / errorRateTarget);
+      const availabilityBudget = Math.max(
+        0,
+        (availabilityTarget - actualAvailability) / (1 - availabilityTarget),
+      );
+      const latencyBudget = Math.max(
+        0,
+        (latencyTarget - actualLatency) / latencyTarget,
+      );
+      const errorBudget = Math.max(
+        0,
+        (errorRateTarget - actualErrorRate) / errorRateTarget,
+      );
 
       // Calculate burn rate (how fast we're consuming error budget)
-      const overallBurnRate = 1 - Math.min(availabilityBudget, latencyBudget, errorBudget);
-      
+      const overallBurnRate =
+        1 - Math.min(availabilityBudget, latencyBudget, errorBudget);
+
       // Time to exhaustion (simplified calculation)
-      const timeToExhaustion = overallBurnRate > 0 
-        ? Math.min(availabilityBudget, latencyBudget, errorBudget) / overallBurnRate * 24 
-        : Infinity;
+      const timeToExhaustion =
+        overallBurnRate > 0
+          ? (Math.min(availabilityBudget, latencyBudget, errorBudget) /
+              overallBurnRate) *
+            24
+          : Infinity;
 
       span?.addSpanAttributes({
         'slo.availability_actual': actualAvailability,
@@ -309,20 +372,20 @@ export class FinOpsObservabilityService {
       });
 
       return {
-        availability: { 
-          target: availabilityTarget, 
-          actual: actualAvailability, 
-          budget: availabilityBudget 
+        availability: {
+          target: availabilityTarget,
+          actual: actualAvailability,
+          budget: availabilityBudget,
         },
-        latency: { 
-          target: latencyTarget, 
-          actual: actualLatency, 
-          budget: latencyBudget 
+        latency: {
+          target: latencyTarget,
+          actual: actualLatency,
+          budget: latencyBudget,
         },
-        errorRate: { 
-          target: errorRateTarget, 
-          actual: actualErrorRate, 
-          budget: errorBudget 
+        errorRate: {
+          target: errorRateTarget,
+          actual: actualErrorRate,
+          budget: errorBudget,
         },
         burnRate: overallBurnRate,
         timeToExhaustion: Math.min(timeToExhaustion, 168), // Cap at 1 week
@@ -337,10 +400,10 @@ export class FinOpsObservabilityService {
 
   async getSlowQueryMetrics(): Promise<QueryBudgetMetrics> {
     const span = otelService.createSpan('finops.get_slow_query_metrics');
-    
+
     try {
       const pool = getPostgresPool();
-      
+
       // Get slow queries from audit logs
       const { rows: slowQueryRows } = await pool.query(`
         SELECT 
@@ -366,7 +429,7 @@ export class FinOpsObservabilityService {
       `);
 
       return {
-        slowQueries: slowQueryRows.map(row => ({
+        slowQueries: slowQueryRows.map((row) => ({
           query: row.query_preview + '...',
           avgLatency: parseFloat(row.avg_latency),
           count: parseInt(row.count),
@@ -387,13 +450,21 @@ export class FinOpsObservabilityService {
     }
   }
 
-  async createAlert(condition: string, threshold: number, metric: string, tenantId?: string): Promise<void> {
+  async createAlert(
+    condition: string,
+    threshold: number,
+    metric: string,
+    tenantId?: string,
+  ): Promise<void> {
     const pool = getPostgresPool();
-    
-    await pool.query(`
+
+    await pool.query(
+      `
       INSERT INTO finops_alerts (condition_type, threshold_value, metric_name, tenant_id, created_at)
       VALUES ($1, $2, $3, $4, now())
-    `, [condition, threshold, metric, tenantId]);
+    `,
+      [condition, threshold, metric, tenantId],
+    );
   }
 }
 

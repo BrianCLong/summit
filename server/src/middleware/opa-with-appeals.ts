@@ -1,6 +1,6 @@
 /**
  * Enhanced OPA Middleware with Appeal System - GA Core Implementation
- * 
+ *
  * Features:
  * - Policy-by-default denials with structured appeal paths
  * - Appeal SLA tracking and escalation
@@ -23,7 +23,7 @@ const APPEAL_CONFIG = {
   defaultSlaHours: 24,
   escalationHours: 48,
   requiredRole: 'DATA_STEWARD',
-  maxAppealRequests: 3
+  maxAppealRequests: 3,
 };
 
 interface User {
@@ -98,7 +98,10 @@ interface AppealRequest {
 
 export class OPAWithAppealsMiddleware {
   private opaUrl: string;
-  private policyCache = new Map<string, { decision: PolicyDecisionWithAppeal; expires: number }>();
+  private policyCache = new Map<
+    string,
+    { decision: PolicyDecisionWithAppeal; expires: number }
+  >();
   private readonly cacheTtl = 300000; // 5 minutes
 
   constructor(opaUrl: string = process.env.OPA_URL || 'http://localhost:8181') {
@@ -112,7 +115,7 @@ export class OPAWithAppealsMiddleware {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
         const decision = await this.evaluatePolicy(req);
-        
+
         if (decision.allowed) {
           // Log successful authorization
           await this.auditDecision(req, decision, 'ALLOWED');
@@ -121,18 +124,20 @@ export class OPAWithAppealsMiddleware {
 
         // Policy denied - return structured response with appeal path
         await this.auditDecision(req, decision, 'DENIED');
-        
+
         return res.status(403).json({
           error: 'Access Denied',
           code: 'POLICY_VIOLATION',
           decision,
           // Include appeal information in response
-          appeal: decision.appeal
+          appeal: decision.appeal,
         });
-
       } catch (error) {
-        log.error({ error: error.message, path: req.path }, 'OPA evaluation failed');
-        
+        log.error(
+          { error: error.message, path: req.path },
+          'OPA evaluation failed',
+        );
+
         // Fail secure - deny access on policy evaluation errors
         const failSecureDecision: PolicyDecisionWithAppeal = {
           allowed: false,
@@ -140,7 +145,7 @@ export class OPAWithAppealsMiddleware {
           reason: 'Policy evaluation failed - access denied for security',
 decisionId: randomUUID(),
           timestamp: new Date().toISOString(),
-          appeal: this.createAppealPath('SYSTEM_ERROR')
+          appeal: this.createAppealPath('SYSTEM_ERROR'),
         };
 
         await this.auditDecision(req, failSecureDecision, 'ERROR');
@@ -148,7 +153,7 @@ decisionId: randomUUID(),
         return res.status(503).json({
           error: 'Policy Service Unavailable',
           code: 'POLICY_SERVICE_ERROR',
-          decision: failSecureDecision
+          decision: failSecureDecision,
         });
       }
     };
@@ -166,23 +171,27 @@ decisionId: randomUUID(),
           type: resourceType,
           field: info.fieldName,
           path: info.path,
-          args: args
+          args: args,
         },
         context: {
           tenantId: context.user?.tenantId,
           ip: context.req?.ip,
-          userAgent: context.req?.get('user-agent')
-        }
+          userAgent: context.req?.get('user-agent'),
+        },
       };
 
       const decision = await this.evaluatePolicy(policyInput);
 
       if (!decision.allowed) {
         await this.auditDecision(policyInput, decision, 'DENIED');
-        
-        throw new Error(`Access denied: ${decision.reason}${
-          decision.appeal?.available ? ` (Appeal ID: ${decision.appeal.appealId})` : ''
-        }`);
+
+        throw new Error(
+          `Access denied: ${decision.reason}${
+            decision.appeal?.available
+              ? ` (Appeal ID: ${decision.appeal.appealId})`
+              : ''
+          }`,
+        );
       }
 
       await this.auditDecision(policyInput, decision, 'ALLOWED');
@@ -194,7 +203,7 @@ decisionId: randomUUID(),
    * Evaluate policy with OPA and create appeal path if denied
    */
   private async evaluatePolicy(
-    input: Request | PolicyInput
+    input: Request | PolicyInput,
   ): Promise<PolicyDecisionWithAppeal> {
     let policyInput: PolicyInput;
 
@@ -215,12 +224,16 @@ decisionId: randomUUID(),
 
     try {
       // Evaluate policy with OPA
-      const response = await axios.post(`${this.opaUrl}/v1/data/intelgraph/allow`, {
-        input: policyInput
-      }, { timeout: 5000 });
+      const response = await axios.post(
+        `${this.opaUrl}/v1/data/intelgraph/allow`,
+        {
+          input: policyInput,
+        },
+        { timeout: 5000 },
+      );
 
       const opaResult = response.data.result;
-      
+
       const decision: PolicyDecisionWithAppeal = {
         allowed: opaResult.allow || false,
         policy: opaResult.policy || 'unknown',
@@ -228,7 +241,7 @@ decisionId: randomUUID(),
 decisionId: randomUUID(),
         timestamp: new Date().toISOString(),
         ttl: this.cacheTtl,
-        metadata: opaResult.metadata
+        metadata: opaResult.metadata,
       };
 
       // Add appeal path if access is denied
@@ -236,20 +249,22 @@ decisionId: randomUUID(),
         decision.appeal = this.createAppealPath(
           opaResult.policy,
           policyInput,
-          decision.decisionId
+          decision.decisionId,
         );
       }
 
       // Cache the decision
       this.policyCache.set(cacheKey, {
         decision,
-        expires: Date.now() + this.cacheTtl
+        expires: Date.now() + this.cacheTtl,
       });
 
       return decision;
-
     } catch (error) {
-      log.error({ error: error.message, input: policyInput }, 'OPA request failed');
+      log.error(
+        { error: error.message, input: policyInput },
+        'OPA request failed',
+      );
       throw error;
     }
   }
@@ -260,13 +275,14 @@ decisionId: randomUUID(),
   private createAppealPath(
     policy: string,
     policyInput?: PolicyInput,
-    decisionId?: string
+    decisionId?: string,
   ): AppealPath {
 const appealId = randomUUID();
-    
+
     // Determine if appeal is available based on policy type
-    const appealable = !policy.includes('security.critical') && 
-                      !policy.includes('compliance.mandatory');
+    const appealable =
+      !policy.includes('security.critical') &&
+      !policy.includes('compliance.mandatory');
 
     if (!appealable) {
       return {
@@ -274,8 +290,9 @@ const appealId = randomUUID();
         requiredRole: APPEAL_CONFIG.requiredRole,
         slaHours: 0,
         escalationHours: 0,
-        instructions: 'This policy violation cannot be appealed due to security or compliance requirements.',
-        submitUrl: ''
+        instructions:
+          'This policy violation cannot be appealed due to security or compliance requirements.',
+        submitUrl: '',
       };
     }
 
@@ -283,8 +300,10 @@ const appealId = randomUUID();
     let slaHours = APPEAL_CONFIG.defaultSlaHours;
     let escalationHours = APPEAL_CONFIG.escalationHours;
 
-    if (policyInput?.resource.type === 'sensitive_data' || 
-        policyInput?.context.investigationId) {
+    if (
+      policyInput?.resource.type === 'sensitive_data' ||
+      policyInput?.context.investigationId
+    ) {
       slaHours = 12; // Faster SLA for sensitive resources
       escalationHours = 24;
     }
@@ -297,7 +316,7 @@ const appealId = randomUUID();
       escalationHours,
       instructions: this.getAppealInstructions(policy),
       submitUrl: `/api/policy/appeals`,
-      statusUrl: `/api/policy/appeals/${appealId}/status`
+      statusUrl: `/api/policy/appeals/${appealId}/status`,
     };
   }
 
@@ -306,11 +325,16 @@ const appealId = randomUUID();
    */
   private getAppealInstructions(policy: string): string {
     const instructions = {
-      'data.access_denied': 'To appeal this data access denial, provide business justification and specify the minimum data needed.',
-      'export.volume_exceeded': 'To appeal this export limit, justify the business need for the full dataset and confirm data handling procedures.',
-      'query.complexity_exceeded': 'To appeal this query complexity limit, provide technical justification and confirm query optimization attempts.',
-      'time.outside_hours': 'To appeal this time restriction, provide urgency justification and manager approval.',
-      'default': 'To appeal this policy decision, provide detailed business justification and specify the duration needed.'
+      'data.access_denied':
+        'To appeal this data access denial, provide business justification and specify the minimum data needed.',
+      'export.volume_exceeded':
+        'To appeal this export limit, justify the business need for the full dataset and confirm data handling procedures.',
+      'query.complexity_exceeded':
+        'To appeal this query complexity limit, provide technical justification and confirm query optimization attempts.',
+      'time.outside_hours':
+        'To appeal this time restriction, provide urgency justification and manager approval.',
+      default:
+        'To appeal this policy decision, provide detailed business justification and specify the duration needed.',
     };
 
     return instructions[policy] || instructions.default;
@@ -325,10 +349,10 @@ const appealId = randomUUID();
     justification: string,
     businessNeed: string,
     urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
-    requestedDuration?: string
+    requestedDuration?: string,
   ): Promise<AppealRequest> {
     const pool = getPostgresPool();
-    
+
     const appealRequest: AppealRequest = {
 id: randomUUID(),
       decisionId,
@@ -338,26 +362,29 @@ id: randomUUID(),
       urgency,
       requestedDuration,
       status: 'PENDING',
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     try {
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO policy_appeals (
           id, decision_id, user_id, justification, business_need,
           urgency, requested_duration, status, created_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      `, [
-        appealRequest.id,
-        appealRequest.decisionId,
-        appealRequest.userId,
-        appealRequest.justification,
-        appealRequest.businessNeed,
-        appealRequest.urgency,
-        appealRequest.requestedDuration,
-        appealRequest.status,
-        appealRequest.createdAt
-      ]);
+      `,
+        [
+          appealRequest.id,
+          appealRequest.decisionId,
+          appealRequest.userId,
+          appealRequest.justification,
+          appealRequest.businessNeed,
+          appealRequest.urgency,
+          appealRequest.requestedDuration,
+          appealRequest.status,
+          appealRequest.createdAt,
+        ],
+      );
 
       // Create audit entry
       await writeAudit({
@@ -368,26 +395,31 @@ id: randomUUID(),
         details: {
           appealId: appealRequest.id,
           urgency: appealRequest.urgency,
-          justification: appealRequest.justification.substring(0, 100)
-        }
+          justification: appealRequest.justification.substring(0, 100),
+        },
       });
 
-      log.info({
-        appealId: appealRequest.id,
-        decisionId,
-        userId,
-        urgency
-      }, 'Policy appeal submitted');
+      log.info(
+        {
+          appealId: appealRequest.id,
+          decisionId,
+          userId,
+          urgency,
+        },
+        'Policy appeal submitted',
+      );
 
       return appealRequest;
-
     } catch (error) {
-      log.error({
-        error: error.message,
-        decisionId,
-        userId
-      }, 'Failed to submit policy appeal');
-      
+      log.error(
+        {
+          error: error.message,
+          decisionId,
+          userId,
+        },
+        'Failed to submit policy appeal',
+      );
+
       throw error;
     }
   }
@@ -400,22 +432,20 @@ id: randomUUID(),
     responderId: string,
     approved: boolean,
     reason: string,
-    grantedDuration?: string
+    grantedDuration?: string,
   ): Promise<AppealRequest> {
     const pool = getPostgresPool();
 
     try {
-      const result = await pool.query(`
+      const result = await pool.query(
+        `
         UPDATE policy_appeals 
         SET status = $1, responded_at = NOW(), responded_by = $2, response_reason = $3
         WHERE id = $4
         RETURNING *
-      `, [
-        approved ? 'APPROVED' : 'DENIED',
-        responderId,
-        reason,
-        appealId
-      ]);
+      `,
+        [approved ? 'APPROVED' : 'DENIED', responderId, reason, appealId],
+      );
 
       if (result.rows.length === 0) {
         throw new Error('Appeal not found');
@@ -429,7 +459,7 @@ id: randomUUID(),
           appeal.decision_id,
           appeal.user_id,
           grantedDuration || '24 hours',
-          responderId
+          responderId,
         );
       }
 
@@ -443,16 +473,19 @@ id: randomUUID(),
           originalUserId: appeal.user_id,
           decisionId: appeal.decision_id,
           reason,
-          grantedDuration: approved ? grantedDuration : null
-        }
+          grantedDuration: approved ? grantedDuration : null,
+        },
       });
 
-      log.info({
-        appealId,
-        approved,
-        responderId,
-        originalUserId: appeal.user_id
-      }, 'Policy appeal processed');
+      log.info(
+        {
+          appealId,
+          approved,
+          responderId,
+          originalUserId: appeal.user_id,
+        },
+        'Policy appeal processed',
+      );
 
       return {
         id: appeal.id,
@@ -466,16 +499,18 @@ id: randomUUID(),
         createdAt: appeal.created_at,
         respondedAt: appeal.responded_at,
         respondedBy: appeal.responded_by,
-        responseReason: appeal.response_reason
+        responseReason: appeal.response_reason,
       };
-
     } catch (error) {
-      log.error({
-        error: error.message,
-        appealId,
-        responderId
-      }, 'Failed to process appeal response');
-      
+      log.error(
+        {
+          error: error.message,
+          appealId,
+          responderId,
+        },
+        'Failed to process appeal response',
+      );
+
       throw error;
     }
   }
@@ -484,7 +519,7 @@ id: randomUUID(),
     decisionId: string,
     userId: string,
     duration: string,
-    approvedBy: string
+    approvedBy: string,
   ): Promise<void> {
     const pool = getPostgresPool();
 
@@ -493,24 +528,24 @@ id: randomUUID(),
     const hours = parseInt(duration.match(/(\d+)\s*hour/i)?.[1] || '24');
     expiresAt.setHours(expiresAt.getHours() + hours);
 
-    await pool.query(`
+    await pool.query(
+      `
       INSERT INTO policy_overrides (
         id, decision_id, user_id, approved_by, expires_at, created_at
       ) VALUES ($1, $2, $3, $4, $5, NOW())
-    `, [
-randomUUID(),
-      decisionId,
-      userId,
-      approvedBy,
-      expiresAt
-    ]);
+    `,
+[randomUUID(), decisionId, userId, approvedBy, expiresAt],
+    );
 
-    log.info({
-      decisionId,
-      userId,
-      approvedBy,
-      expiresAt
-    }, 'Policy override created');
+    log.info(
+      {
+        decisionId,
+        userId,
+        approvedBy,
+        expiresAt,
+      },
+      'Policy override created',
+    );
   }
 
   private buildPolicyInputFromRequest(req: Request): PolicyInput {
@@ -522,13 +557,13 @@ randomUUID(),
         path: req.path,
         method: req.method,
         params: req.params,
-        query: req.query
+        query: req.query,
       },
       context: {
         tenantId: (req as any).user?.tenantId,
         ip: req.ip,
-        userAgent: req.get('user-agent')
-      }
+        userAgent: req.get('user-agent'),
+      },
     };
   }
 
@@ -537,14 +572,14 @@ randomUUID(),
       user: input.user?.id,
       action: input.action,
       resource: input.resource,
-      tenant: input.context.tenantId
+      tenant: input.context.tenantId,
     });
   }
 
   private async auditDecision(
     input: Request | PolicyInput,
     decision: PolicyDecisionWithAppeal,
-    outcome: 'ALLOWED' | 'DENIED' | 'ERROR'
+    outcome: 'ALLOWED' | 'DENIED' | 'ERROR',
   ): Promise<void> {
     let userId: string | undefined;
     let resourceType: string;
@@ -570,8 +605,8 @@ randomUUID(),
         policy: decision.policy,
         reason: decision.reason,
         appealAvailable: decision.appeal?.available,
-        appealId: decision.appeal?.appealId
-      }
+        appealId: decision.appeal?.appealId,
+      },
     });
   }
 }

@@ -9,14 +9,14 @@ global:
     environment: 'demo'
 
 rule_files:
-  - "/etc/prometheus/rules/*.yml"
-  - "/etc/prometheus/rules/*.yaml"
+  - '/etc/prometheus/rules/*.yml'
+  - '/etc/prometheus/rules/*.yaml'
 
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
-          - alertmanager:9093
+            - alertmanager:9093
 
 scrape_configs:
   # Prometheus itself
@@ -111,7 +111,8 @@ scrape_configs:
       - source_labels: [__meta_docker_container_name]
         target_label: instance
       # Add service label
-      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+      - source_labels:
+          [__meta_docker_container_label_com_docker_compose_service]
         target_label: service
 
 # Storage configuration
@@ -120,7 +121,6 @@ storage:
     retention.time: 7d
     retention.size: 1GB
     wal-compression: true
-
 # Remote write configuration (optional)
 # remote_write:
 #   - url: "https://prometheus-remote-write-endpoint/api/v1/write"

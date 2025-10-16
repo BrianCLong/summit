@@ -32,7 +32,10 @@ class ComplianceReportGenerator {
       const complianceMetrics = this.calculateComplianceMetrics();
 
       // Generate HTML dashboard
-      const htmlReport = this.generateHTMLDashboard(complianceMetrics, detailedReports);
+      const htmlReport = this.generateHTMLDashboard(
+        complianceMetrics,
+        detailedReports,
+      );
 
       // Write report to file
       fs.writeFileSync(this.outputFile, htmlReport);
@@ -45,7 +48,9 @@ class ComplianceReportGenerator {
       );
 
       console.log(`✅ Compliance report generated: ${this.outputFile}`);
-      console.log(`📊 Overall compliance score: ${complianceMetrics.overallScore}%`);
+      console.log(
+        `📊 Overall compliance score: ${complianceMetrics.overallScore}%`,
+      );
 
       return complianceMetrics;
     } catch (error) {
@@ -71,7 +76,10 @@ class ComplianceReportGenerator {
     };
 
     const overallScore = Math.round(
-      Object.entries(scores).reduce((acc, [key, score]) => acc + score * weights[key], 0),
+      Object.entries(scores).reduce(
+        (acc, [key, score]) => acc + score * weights[key],
+        0,
+      ),
     );
 
     // Determine compliance level
@@ -80,19 +88,31 @@ class ComplianceReportGenerator {
     if (overallScore >= 90) {
       complianceLevel = 'EXCELLENT';
       riskLevel = 'LOW';
-      recommendedActions = ['Continue monitoring', 'Maintain current practices'];
+      recommendedActions = [
+        'Continue monitoring',
+        'Maintain current practices',
+      ];
     } else if (overallScore >= 85) {
       complianceLevel = 'COMPLIANT';
       riskLevel = 'LOW';
-      recommendedActions = ['Minor improvements recommended', 'Review identified gaps'];
+      recommendedActions = [
+        'Minor improvements recommended',
+        'Review identified gaps',
+      ];
     } else if (overallScore >= 70) {
       complianceLevel = 'PARTIAL';
       riskLevel = 'MEDIUM';
-      recommendedActions = ['Address compliance gaps', 'Implement remediation plan'];
+      recommendedActions = [
+        'Address compliance gaps',
+        'Implement remediation plan',
+      ];
     } else {
       complianceLevel = 'NON_COMPLIANT';
       riskLevel = 'HIGH';
-      recommendedActions = ['Immediate action required', 'Halt production deployment'];
+      recommendedActions = [
+        'Immediate action required',
+        'Halt production deployment',
+      ];
     }
 
     // Calculate specific compliance flags
@@ -108,7 +128,8 @@ class ComplianceReportGenerator {
     const requirements = {
       'SOC 2 Type II': overallScore >= 85 && this.securityScore >= 85,
       'GDPR Article 32': this.gdprCompliant && this.piiScore >= 80,
-      'ISO 27001': overallScore >= 80 && this.securityScore >= 85 && this.infraScore >= 80,
+      'ISO 27001':
+        overallScore >= 80 && this.securityScore >= 85 && this.infraScore >= 80,
       'NIST Cybersecurity Framework': overallScore >= 85,
       'Production Readiness': overallScore >= 85 && this.securityCritical === 0,
     };
@@ -148,7 +169,9 @@ class ComplianceReportGenerator {
           if (file.endsWith('.json')) {
             const filePath = path.join(securityReportsPath, file);
             try {
-              reports.security[file] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              reports.security[file] = JSON.parse(
+                fs.readFileSync(filePath, 'utf8'),
+              );
             } catch (error) {
               console.warn(`⚠️ Failed to parse security report: ${file}`);
             }
@@ -167,7 +190,9 @@ class ComplianceReportGenerator {
           if (file.endsWith('.json')) {
             const filePath = path.join(policyReportsPath, file);
             try {
-              reports.policy[file] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              reports.policy[file] = JSON.parse(
+                fs.readFileSync(filePath, 'utf8'),
+              );
             } catch (error) {
               console.warn(`⚠️ Failed to parse policy report: ${file}`);
             }
@@ -186,9 +211,13 @@ class ComplianceReportGenerator {
           if (file.endsWith('.json')) {
             const filePath = path.join(dataProtectionPath, file);
             try {
-              reports.dataProtection[file] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              reports.dataProtection[file] = JSON.parse(
+                fs.readFileSync(filePath, 'utf8'),
+              );
             } catch (error) {
-              console.warn(`⚠️ Failed to parse data protection report: ${file}`);
+              console.warn(
+                `⚠️ Failed to parse data protection report: ${file}`,
+              );
             }
           }
         });
@@ -205,7 +234,9 @@ class ComplianceReportGenerator {
           if (file.endsWith('.json')) {
             const filePath = path.join(infrastructurePath, file);
             try {
-              reports.infrastructure[file] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              reports.infrastructure[file] = JSON.parse(
+                fs.readFileSync(filePath, 'utf8'),
+              );
             } catch (error) {
               console.warn(`⚠️ Failed to parse infrastructure report: ${file}`);
             }
@@ -517,7 +548,8 @@ class ComplianceReportGenerator {
                 <div class="findings-section">
                     <div class="findings-title">🚨 Active Compliance Issues</div>
                     ${
-                      Object.entries(metrics.flags).filter(([, value]) => value).length === 0
+                      Object.entries(metrics.flags).filter(([, value]) => value)
+                        .length === 0
                         ? '<p style="color: #28a745; font-weight: bold;">✅ No critical compliance issues found</p>'
                         : Object.entries(metrics.flags)
                             .filter(([, value]) => value)
@@ -551,10 +583,14 @@ class ComplianceReportGenerator {
     const descriptions = {
       criticalSecurityFindings:
         'Critical security vulnerabilities detected that must be resolved before production deployment.',
-      policyComplianceBreach: 'Authorization policies do not meet minimum compliance thresholds.',
-      gdprComplianceIssue: 'GDPR data protection requirements are not fully satisfied.',
-      infrastructureRisks: 'Infrastructure security configuration has potential vulnerabilities.',
-      policyCoverageLow: 'Policy test coverage is below recommended threshold (80%).',
+      policyComplianceBreach:
+        'Authorization policies do not meet minimum compliance thresholds.',
+      gdprComplianceIssue:
+        'GDPR data protection requirements are not fully satisfied.',
+      infrastructureRisks:
+        'Infrastructure security configuration has potential vulnerabilities.',
+      policyCoverageLow:
+        'Policy test coverage is below recommended threshold (80%).',
     };
     return descriptions[flag] || 'Compliance issue requiring attention.';
   }
@@ -591,7 +627,9 @@ if (require.main === module) {
   const options = {};
 
   for (let i = 0; i < args.length; i += 2) {
-    const key = args[i].replace('--', '').replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    const key = args[i]
+      .replace('--', '')
+      .replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     const value = args[i + 1];
     options[key] = value;
   }

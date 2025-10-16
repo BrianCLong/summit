@@ -35,7 +35,9 @@ function opName(ctx) {
 }
 function opType(ctx) {
     const t = ctx.operation?.operation;
-    return t === 'query' || t === 'mutation' || t === 'subscription' ? t : 'unknown';
+    return t === 'query' || t === 'mutation' || t === 'subscription'
+        ? t
+        : 'unknown';
 }
 function tenantFromCtx(ctx) {
     try {
@@ -44,7 +46,8 @@ function tenantFromCtx(ctx) {
         if (fromCtx)
             return String(fromCtx);
         // Fallback to HTTP header commonly used for multitenancy
-        const hdr = ctx.request.http?.headers.get('x-tenant') || ctx.request.http?.headers.get('x-tenant-id');
+        const hdr = ctx.request.http?.headers.get('x-tenant') ||
+            ctx.request.http?.headers.get('x-tenant-id');
         if (hdr)
             return String(hdr);
     }
@@ -65,7 +68,9 @@ export function apolloPromPlugin() {
                             const rStart = process.hrtime.bigint();
                             return () => {
                                 const ns = Number(process.hrtime.bigint() - rStart);
-                                resDur.labels(info.parentType.name, info.fieldName).observe(ns / 1e9);
+                                resDur
+                                    .labels(info.parentType.name, info.fieldName)
+                                    .observe(ns / 1e9);
                             };
                         },
                     };

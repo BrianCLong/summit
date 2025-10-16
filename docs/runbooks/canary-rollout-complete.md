@@ -5,17 +5,20 @@
 The **IntelGraph Safe Mutations** system is now fully operationalized with enterprise-grade canary rollout capabilities:
 
 ### ✅ **Enforcement Layer**
+
 - **Build-time CI linter**: Fails builds without `@budget` directives
-- **Runtime Apollo plugin**: Blocks mutations missing budget declarations  
+- **Runtime Apollo plugin**: Blocks mutations missing budget declarations
 - **OPA policy engine**: Four-eyes approval for `>$5` operations + risk tags
 - **Persisted queries**: Two-phase rollout (log→enforce) with emergency bypass
 
-### ✅ **Budget Control Layer** 
+### ✅ **Budget Control Layer**
+
 - **Postgres budget ledger**: FinOps source of truth with daily/monthly limits
 - **Redis rate limiting**: Token buckets with tenant/operation isolation
 - **Real-time monitoring**: 80%/100% threshold alerts for canary tenants
 
 ### ✅ **Resilience Layer**
+
 - **Neo4j compensation logs**: Bulletproof rollbacks with audit correlation
 - **BullMQ reconciliation**: Post-hoc token usage accuracy
 - **Chaos engineering**: Injectable faults for Neo4j/Redis/LLM providers
@@ -25,6 +28,7 @@ The **IntelGraph Safe Mutations** system is now fully operationalized with enter
 ## 📋 **CANARY ROLLOUT CHECKLIST**
 
 ### **Phase 1: Infrastructure Setup** ✅
+
 ```bash
 # 1. Run database migrations
 psql -d intelgraph -f db/migrations/20250906_budget_ledger.sql
@@ -38,6 +42,7 @@ echo "npm run check:budget" >> .github/workflows/ci.yml
 ```
 
 ### **Phase 2: Policy & Security** ✅
+
 ```bash
 # 1. Deploy OPA policies
 opa test policies/
@@ -53,6 +58,7 @@ export PQ_INTROSPECTION=0
 ```
 
 ### **Phase 3: Observability & Alerts** ✅
+
 ```bash
 # 1. Deploy Prometheus rules
 kubectl apply -f monitoring/canary-budget-alerts.yml
@@ -65,6 +71,7 @@ curl -X POST grafana/api/dashboards/import -d @monitoring/promql-panels.yml
 ```
 
 ### **Phase 4: Workers & Automation** ✅
+
 ```bash
 # 1. Start reconciliation worker
 npm run worker:reconcile
@@ -84,13 +91,15 @@ curl http://localhost:4000/admin/workers/status
 ## 🎯 **CANARY TENANT CONFIGURATION**
 
 ### **Initial Limits** (Seeded)
-| Tenant | Daily Limit | Monthly Limit | Alert Threshold | Auto-Escalate |
-|--------|-------------|---------------|-----------------|---------------|
-| `test` | $25.00 | $750.00 | 80% | ✅ |
-| `demo` | $25.00 | $750.00 | 80% | ✅ |
-| `maestro-internal` | $25.00 | $750.00 | 80% | ✅ |
+
+| Tenant             | Daily Limit | Monthly Limit | Alert Threshold | Auto-Escalate |
+| ------------------ | ----------- | ------------- | --------------- | ------------- |
+| `test`             | $25.00      | $750.00       | 80%             | ✅            |
+| `demo`             | $25.00      | $750.00       | 80%             | ✅            |
+| `maestro-internal` | $25.00      | $750.00       | 80%             | ✅            |
 
 ### **Auto-Escalation Criteria**
+
 - **7 clean days**: No `CanaryDailyBudgetExceeded` alerts
 - **No rollback storms**: Zero rollback events in evaluation period
 - **Automatic promotion**: $25→$50 daily, $750→$1,500 monthly
@@ -98,20 +107,23 @@ curl http://localhost:4000/admin/workers/status
 
 ---
 
-## 🔒 **FOUR-EYES APPROVAL RULES** 
+## 🔒 **FOUR-EYES APPROVAL RULES**
 
 ### **Required for:**
+
 - **Risk tags**: `destructive`, `bulk_delete`, `merge_entities`, `purge`, `cross_tenant_move`, `bulk_update`, `schema_change`, `data_export`
 - **Cost threshold**: Any operation `>$5.00 USD`
 - **Cross-tenant**: Operations affecting multiple tenants
 - **Large tokens**: Operations `>50,000` tokens
 
 ### **Valid Approvers:**
+
 - **Admins**: `admin`, `finance_admin`, `security_admin`
 - **Senior staff**: `senior_analyst`
 - **Team leads**: For their own tenant only
 
 ### **Emergency Overrides:**
+
 - **Time-limited**: Max 24 hours
 - **Audit-logged**: All usage tracked
 - **Self-serve UI**: Available in admin panel
@@ -122,6 +134,7 @@ curl http://localhost:4000/admin/workers/status
 ## 🚨 **ALERT PLAYBOOKS**
 
 ### **CanaryDailyBudgetApproaching (80% Warning)**
+
 1. **Check Grafana dashboard** for usage patterns
 2. **Review recent mutations** in audit log
 3. **Normal for canaries** - monitor for unusual spikes
@@ -130,19 +143,22 @@ curl http://localhost:4000/admin/workers/status
 **Runbook**: https://runbooks.intelgraph.com/canary-budget-approaching
 
 ### **CanaryDailyBudgetExceeded (100% Critical)**
+
 🚨 **IMMEDIATE ACTION REQUIRED**
 
 1. **Check for runaway operations:**
+
    ```bash
    kubectl logs intelgraph-server | grep "Budget denial"
    curl "http://prometheus:9090/api/v1/query?query=budget_denials_total"
    ```
 
 2. **Review compensation log:**
+
    ```bash
    psql -d intelgraph -c "
-     SELECT * FROM budget_ledger 
-     WHERE tenant_id = 'TENANT' 
+     SELECT * FROM budget_ledger
+     WHERE tenant_id = 'TENANT'
      AND created_at > NOW() - INTERVAL '1 hour'
      ORDER BY created_at DESC;
    "
@@ -156,6 +172,7 @@ curl http://localhost:4000/admin/workers/status
 **Runbook**: https://runbooks.intelgraph.com/canary-budget-exceeded
 
 ### **BudgetEnforcementNotWorking**
+
 1. **Verify Apollo plugins** are loaded and active
 2. **Check OPA connectivity** and policy evaluation
 3. **Review CI enforcement** with `npm run check:budget`
@@ -166,6 +183,7 @@ curl http://localhost:4000/admin/workers/status
 ## 🔧 **OPERATIONAL COMMANDS**
 
 ### **Budget Management**
+
 ```bash
 # Check canary status
 curl -s http://localhost:4000/admin/budget/canary-status | jq
@@ -182,6 +200,7 @@ curl -X POST http://localhost:4000/admin/workers/canary-escalate \
 ```
 
 ### **Chaos Engineering**
+
 ```bash
 # Enable database chaos for resilience testing
 npm run chaos:enable
@@ -194,6 +213,7 @@ npm run chaos:disable
 ```
 
 ### **Persisted Queries**
+
 ```bash
 # Check current enforcement status
 curl http://localhost:4000/admin/persisted-queries
@@ -209,6 +229,7 @@ kubectl rollout restart deployment/intelgraph-server
 ```
 
 ### **Monitoring**
+
 ```bash
 # View budget utilization
 curl "http://prometheus:9090/api/v1/query?query=intelgraph:daily_utilization_ratio{canary=\"true\"}"
@@ -225,6 +246,7 @@ curl http://alertmanager:9093/api/v1/alerts | jq '.data[] | select(.labels.tenan
 ## 🔐 **ADMIN UI: SELF-SERVE OVERRIDES**
 
 ### **Override Creation Form**
+
 - **Tenant selection**: Dropdown of eligible tenants
 - **Override type**: Budget multiplier (1.5x, 2.0x, 3.0x)
 - **Duration**: 1h, 4h, 12h, 24h (max)
@@ -232,6 +254,7 @@ curl http://alertmanager:9093/api/v1/alerts | jq '.data[] | select(.labels.tenan
 - **Approval**: Auto-approved for `<2x`, manual approval for `>=2x`
 
 ### **Active Overrides Dashboard**
+
 - **Real-time view** of all active overrides
 - **Expiration countdown** with auto-refresh
 - **Extend/revoke** controls
@@ -239,6 +262,7 @@ curl http://alertmanager:9093/api/v1/alerts | jq '.data[] | select(.labels.tenan
 - **Audit log** with full change history
 
 ### **Canary Health Dashboard**
+
 - **Utilization widgets**: Daily/monthly spend vs limits
 - **Escalation status**: Days clean, eligible for promotion
 - **Recent operations**: Last 24h mutation activity
@@ -249,16 +273,19 @@ curl http://alertmanager:9093/api/v1/alerts | jq '.data[] | select(.labels.tenan
 ## 📊 **SUCCESS METRICS**
 
 ### **Week 1 (Log Phase)**
+
 - **Persisted query violations**: Should detect non-compliant queries
 - **Budget denials**: Should see appropriate enforcement
 - **System stability**: No rollback storms or outages
 
 ### **Week 2 (Enforce Phase)**
+
 - **Persisted query compliance**: 100% for canary tenants
-- **Four-eyes approvals**: Proper workflow for high-risk operations  
+- **Four-eyes approvals**: Proper workflow for high-risk operations
 - **Auto-escalation**: First tenants promoted to $50/day if clean
 
 ### **Week 4 (Full Production)**
+
 - **Cost predictability**: Budget overruns <5%
 - **Operation reliability**: Rollback rate <1%
 - **Performance**: P95 latency <2 seconds

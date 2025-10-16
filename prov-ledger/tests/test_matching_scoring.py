@@ -1,6 +1,3 @@
-from fixtures import client
-
-
 def create_claim(client):
     resp = client.post(
         "/claims/extract",

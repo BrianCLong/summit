@@ -217,12 +217,12 @@ export interface SSEEvent {
   traceId?: string;
 }
 
-export type RunEventType = 
-  | 'run_started' 
-  | 'run_progress' 
-  | 'run_completed' 
-  | 'step_started' 
-  | 'step_completed' 
+export type RunEventType =
+  | 'run_started'
+  | 'run_progress'
+  | 'run_completed'
+  | 'step_started'
+  | 'step_completed'
   | 'step_failed';
 
 export type PolicyEventType = 'policy_denied' | 'policy_approved';
@@ -364,11 +364,11 @@ export interface Tenant {
   users: User[];
 }
 
-export type PermissionAction = 
-  | 'read' 
-  | 'write' 
-  | 'delete' 
-  | 'execute' 
+export type PermissionAction =
+  | 'read'
+  | 'write'
+  | 'delete'
+  | 'execute'
   | 'admin';
 
 export interface Permission {

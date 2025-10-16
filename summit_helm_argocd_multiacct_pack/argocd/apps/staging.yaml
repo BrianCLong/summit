@@ -6,11 +6,11 @@ metadata:
 spec:
   project: summit
   source:
-    repoURL: https://github.com/BrianCLong/summit.git   # CHANGE
+    repoURL: https://github.com/BrianCLong/summit.git # CHANGE
     targetRevision: main
     path: helm/summit
     helm:
-      valueFiles: ["values-staging.yaml"]
+      valueFiles: ['values-staging.yaml']
   destination:
     server: https://kubernetes.default.svc
     namespace: summit-staging

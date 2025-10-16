@@ -89,7 +89,8 @@ const scenarios = [
   {
     name: 'files_ops',
     weight: 5,
-    query: 'Export the investigation results to PDF format with executive summary',
+    query:
+      'Export the investigation results to PDF format with executive summary',
     expectedExpert: 'FILES_TOOL',
   },
 
@@ -192,8 +193,14 @@ function testPreviewRouting(scenario) {
   // Track expert selection distribution
   try {
     const data = response.json();
-    if (data.data && data.data.previewRouting && data.data.previewRouting.expert) {
-      expertSelectionDistribution.add(1, { expert: data.data.previewRouting.expert });
+    if (
+      data.data &&
+      data.data.previewRouting &&
+      data.data.previewRouting.expert
+    ) {
+      expertSelectionDistribution.add(1, {
+        expert: data.data.previewRouting.expert,
+      });
 
       // Optional: Check if routing matches expectation (for debugging)
       const selectedExpert = data.data.previewRouting.expert;
@@ -284,10 +291,15 @@ export default function () {
 export function setup() {
   console.log('🚀 Starting Conductor load test...');
   console.log(`Target: ${SRV}`);
-  console.log('Scenarios:', scenarios.map((s) => `${s.name} (${s.weight}%)`).join(', '));
+  console.log(
+    'Scenarios:',
+    scenarios.map((s) => `${s.name} (${s.weight}%)`).join(', '),
+  );
 
   // Health check before starting
-  const healthCheck = http.get(`${SRV.replace('/graphql', '')}/health/conductor`);
+  const healthCheck = http.get(
+    `${SRV.replace('/graphql', '')}/health/conductor`,
+  );
   if (healthCheck.status !== 200) {
     throw new Error(`Health check failed: ${healthCheck.status}`);
   }

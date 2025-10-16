@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -19,8 +19,8 @@ def _get_kwargs() -> dict[str, Any]:
 
 
 def _parse_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[list["Pipeline"]]:
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> list["Pipeline"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -38,7 +38,7 @@ def _parse_response(
 
 
 def _build_response(
-    *, client: Union[AuthenticatedClient, Client], response: httpx.Response
+    *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[list["Pipeline"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -50,7 +50,7 @@ def _build_response(
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
 ) -> Response[list["Pipeline"]]:
     """List all Maestro pipelines
 
@@ -73,8 +73,8 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[list["Pipeline"]]:
+    client: AuthenticatedClient | Client,
+) -> list["Pipeline"] | None:
     """List all Maestro pipelines
 
     Raises:
@@ -92,7 +92,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
 ) -> Response[list["Pipeline"]]:
     """List all Maestro pipelines
 
@@ -113,8 +113,8 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[list["Pipeline"]]:
+    client: AuthenticatedClient | Client,
+) -> list["Pipeline"] | None:
     """List all Maestro pipelines
 
     Raises:

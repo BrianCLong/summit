@@ -16,7 +16,8 @@ const ingestStep: ProvenanceStep = {
   tool: 'connector.csv',
   params: { path: '/data/leads.csv' },
   inputHash: '9044d26420b889f8daae10acd9d5ac6582af8d365f1f30d59b8462f335bce558',
-  outputHash: '9044d26420b889f8daae10acd9d5ac6582af8d365f1f30d59b8462f335bce558',
+  outputHash:
+    '9044d26420b889f8daae10acd9d5ac6582af8d365f1f30d59b8462f335bce558',
   timestamp: '2024-02-01T12:05:12.000Z',
   note: 'Loaded CSV source and normalised column order',
 }
@@ -27,7 +28,8 @@ const transformStep: ProvenanceStep = {
   tool: 'connector.normalise',
   params: { columns: ['id', 'name', 'score'] },
   inputHash: ingestStep.outputHash,
-  outputHash: '60e9f26e6c64ae695f257f4943ea80ebad3c0b0960125f88efa037377f876805',
+  outputHash:
+    '60e9f26e6c64ae695f257f4943ea80ebad3c0b0960125f88efa037377f876805',
   timestamp: '2024-02-01T12:05:15.000Z',
   note: 'Converted records to canonical JSON ordering',
 }
@@ -38,7 +40,8 @@ const policyStep: ProvenanceStep = {
   tool: 'policy.row-threshold',
   params: { rule: 'row_threshold' },
   inputHash: transformStep.outputHash,
-  outputHash: 'abb30981befa9420ba4266ccaaee46f094a16781a93d9823f9b97b7940f3dc60',
+  outputHash:
+    'abb30981befa9420ba4266ccaaee46f094a16781a93d9823f9b97b7940f3dc60',
   timestamp: '2024-02-01T12:05:18.000Z',
   note: 'Validated dataset against policy thresholds',
 }

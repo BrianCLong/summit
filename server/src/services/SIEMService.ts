@@ -1,6 +1,6 @@
 /**
  * SIEM Integration Service
- * 
+ *
  * Integrates with Security Information and Event Management (SIEM) systems
  * including Splunk, Elastic Security, Microsoft Sentinel, and others.
  */
@@ -123,11 +123,11 @@ class SIEMService {
           timeout: 30000,
           retryAttempts: 3,
           enableSSL: true,
-          verifyCerts: true
+          verifyCerts: true,
         },
         credentials: {
           type: 'token',
-          token: process.env.SIEM_SPLUNK_TOKEN || ''
+          token: process.env.SIEM_SPLUNK_TOKEN || '',
         },
         fieldMapping: {
           timestamp: 'time',
@@ -137,21 +137,21 @@ class SIEMService {
           userId: 'user_id',
           tenantId: 'tenant_id',
           ipAddress: 'src_ip',
-          userAgent: 'user_agent'
+          userAgent: 'user_agent',
         },
         filters: [
           {
             field: 'severity',
             operator: 'equals',
             value: ['medium', 'high', 'critical'],
-            action: 'include'
-          }
+            action: 'include',
+          },
         ],
         rateLimits: {
           maxEventsPerSecond: 100,
           maxEventsPerBatch: 1000,
-          batchTimeoutMs: 5000
-        }
+          batchTimeoutMs: 5000,
+        },
       };
 
       // Elastic Security (ELK Stack)
@@ -161,15 +161,17 @@ class SIEMService {
         type: 'elastic',
         enabled: process.env.SIEM_ELASTIC_ENABLED === 'true',
         config: {
-          url: process.env.SIEM_ELASTIC_URL || 'https://elasticsearch.company.com:9200',
+          url:
+            process.env.SIEM_ELASTIC_URL ||
+            'https://elasticsearch.company.com:9200',
           index: process.env.SIEM_ELASTIC_INDEX || 'intelgraph-security',
           timeout: 30000,
-          retryAttempts: 3
+          retryAttempts: 3,
         },
         credentials: {
           type: 'basic',
           username: process.env.SIEM_ELASTIC_USERNAME || '',
-          password: process.env.SIEM_ELASTIC_PASSWORD || ''
+          password: process.env.SIEM_ELASTIC_PASSWORD || '',
         },
         fieldMapping: {
           timestamp: '@timestamp',
@@ -179,14 +181,14 @@ class SIEMService {
           userId: 'user.id',
           tenantId: 'organization.id',
           ipAddress: 'source.ip',
-          userAgent: 'user_agent.original'
+          userAgent: 'user_agent.original',
         },
         filters: [],
         rateLimits: {
           maxEventsPerSecond: 200,
           maxEventsPerBatch: 500,
-          batchTimeoutMs: 3000
-        }
+          batchTimeoutMs: 3000,
+        },
       };
 
       // Microsoft Sentinel
@@ -199,13 +201,13 @@ class SIEMService {
           url: process.env.SIEM_SENTINEL_URL || 'https://management.azure.com',
           workspace: process.env.SIEM_SENTINEL_WORKSPACE || '',
           timeout: 30000,
-          retryAttempts: 3
+          retryAttempts: 3,
         },
         credentials: {
           type: 'oauth',
           clientId: process.env.SIEM_SENTINEL_CLIENT_ID || '',
           clientSecret: process.env.SIEM_SENTINEL_CLIENT_SECRET || '',
-          tenantId: process.env.SIEM_SENTINEL_TENANT_ID || ''
+          tenantId: process.env.SIEM_SENTINEL_TENANT_ID || '',
         },
         fieldMapping: {
           timestamp: 'TimeGenerated',
@@ -215,14 +217,14 @@ class SIEMService {
           userId: 'UserId',
           tenantId: 'TenantId',
           ipAddress: 'SourceIP',
-          userAgent: 'UserAgent'
+          userAgent: 'UserAgent',
         },
         filters: [],
         rateLimits: {
           maxEventsPerSecond: 50,
           maxEventsPerBatch: 100,
-          batchTimeoutMs: 10000
-        }
+          batchTimeoutMs: 10000,
+        },
       };
 
       // IBM QRadar
@@ -234,11 +236,11 @@ class SIEMService {
         config: {
           url: process.env.SIEM_QRADAR_URL || 'https://qradar.company.com',
           timeout: 30000,
-          retryAttempts: 3
+          retryAttempts: 3,
         },
         credentials: {
           type: 'token',
-          token: process.env.SIEM_QRADAR_TOKEN || ''
+          token: process.env.SIEM_QRADAR_TOKEN || '',
         },
         fieldMapping: {
           timestamp: 'starttime',
@@ -246,14 +248,14 @@ class SIEMService {
           severity: 'severity',
           source: 'sourceip',
           userId: 'username',
-          ipAddress: 'sourceip'
+          ipAddress: 'sourceip',
         },
         filters: [],
         rateLimits: {
           maxEventsPerSecond: 25,
           maxEventsPerBatch: 50,
-          batchTimeoutMs: 15000
-        }
+          batchTimeoutMs: 15000,
+        },
       };
 
       // Register providers
@@ -265,11 +267,14 @@ class SIEMService {
       // Initialize circuit breakers
       for (const [id, provider] of this.providers.entries()) {
         if (provider.enabled) {
-          this.circuitBreakers.set(id, new CircuitBreaker({
-            failureThreshold: 5,
-            recoveryTimeout: 60000,
-            monitoringPeriod: 300000 // 5 minutes
-          }));
+          this.circuitBreakers.set(
+            id,
+            new CircuitBreaker({
+              failureThreshold: 5,
+              recoveryTimeout: 60000,
+              monitoringPeriod: 300000, // 5 minutes
+            }),
+          );
           this.eventBuffer.set(id, []);
         }
       }
@@ -277,14 +282,13 @@ class SIEMService {
       logger.info('SIEM providers initialized', {
         component: 'SIEMService',
         enabledProviders: Array.from(this.providers.values())
-          .filter(p => p.enabled)
-          .map(p => p.name)
+          .filter((p) => p.enabled)
+          .map((p) => p.name),
       });
-
     } catch (error) {
       logger.error('Failed to initialize SIEM providers', {
         component: 'SIEMService',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -293,12 +297,14 @@ class SIEMService {
    * Send event to SIEM systems
    */
   async sendEvent(event: SIEMEvent): Promise<void> {
-    const enabledProviders = Array.from(this.providers.values()).filter(p => p.enabled);
+    const enabledProviders = Array.from(this.providers.values()).filter(
+      (p) => p.enabled,
+    );
 
     if (enabledProviders.length === 0) {
       logger.debug('No SIEM providers enabled, skipping event', {
         component: 'SIEMService',
-        eventType: event.eventType
+        eventType: event.eventType,
       });
       return;
     }
@@ -333,7 +339,7 @@ class SIEMService {
   private shouldSendEvent(event: SIEMEvent, provider: SIEMProvider): boolean {
     for (const filter of provider.filters) {
       const fieldValue = this.getEventField(event, filter.field);
-      
+
       if (!this.matchesFilter(fieldValue, filter)) {
         return filter.action === 'exclude';
       }
@@ -367,11 +373,13 @@ class SIEMService {
   private matchesFilter(fieldValue: any, filter: SIEMFilter): boolean {
     switch (filter.operator) {
       case 'equals':
-        return Array.isArray(filter.value) ? 
-          filter.value.includes(fieldValue) : 
-          fieldValue === filter.value;
+        return Array.isArray(filter.value)
+          ? filter.value.includes(fieldValue)
+          : fieldValue === filter.value;
       case 'contains':
-        return String(fieldValue).toLowerCase().includes(String(filter.value).toLowerCase());
+        return String(fieldValue)
+          .toLowerCase()
+          .includes(String(filter.value).toLowerCase());
       case 'regex':
         return new RegExp(String(filter.value)).test(String(fieldValue));
       case 'range':
@@ -422,7 +430,7 @@ class SIEMService {
       events: [...buffer], // Copy events
       createdAt: new Date(),
       status: 'pending',
-      attempts: 0
+      attempts: 0,
     };
 
     await this.sendBatch(batch);
@@ -449,7 +457,7 @@ class SIEMService {
           providerId: batch.providerId,
           batchId: batch.id,
           eventCount: batch.events.length,
-          attempt: batch.attempts
+          attempt: batch.attempts,
         });
 
         switch (provider.type) {
@@ -470,15 +478,14 @@ class SIEMService {
         }
 
         batch.status = 'sent';
-        
+
         logger.info('SIEM batch sent successfully', {
           component: 'SIEMService',
           providerId: batch.providerId,
           batchId: batch.id,
-          eventCount: batch.events.length
+          eventCount: batch.events.length,
         });
       });
-
     } catch (error) {
       batch.status = 'failed';
       batch.error = error.message;
@@ -488,14 +495,17 @@ class SIEMService {
         providerId: batch.providerId,
         batchId: batch.id,
         error: error.message,
-        attempts: batch.attempts
+        attempts: batch.attempts,
       });
 
       // Retry logic
       if (batch.attempts < (provider.config.retryAttempts || 3)) {
-        setTimeout(async () => {
-          await this.sendBatch(batch);
-        }, Math.pow(2, batch.attempts) * 1000); // Exponential backoff
+        setTimeout(
+          async () => {
+            await this.sendBatch(batch);
+          },
+          Math.pow(2, batch.attempts) * 1000,
+        ); // Exponential backoff
       }
     }
   }
@@ -503,8 +513,11 @@ class SIEMService {
   /**
    * Send batch to Splunk
    */
-  private async sendToSplunk(provider: SIEMProvider, batch: SIEMBatch): Promise<void> {
-    const events = batch.events.map(event => ({
+  private async sendToSplunk(
+    provider: SIEMProvider,
+    batch: SIEMBatch,
+  ): Promise<void> {
+    const events = batch.events.map((event) => ({
       time: event.timestamp.getTime() / 1000,
       source: 'intelgraph',
       sourcetype: event.eventType,
@@ -519,40 +532,43 @@ class SIEMService {
         src_ip: event.ipAddress,
         user_agent: event.userAgent,
         tags: event.tags?.join(','),
-        raw_data: event.rawData
-      }
+        raw_data: event.rawData,
+      },
     }));
 
-    const payload = events.map(e => JSON.stringify(e)).join('\n');
+    const payload = events.map((e) => JSON.stringify(e)).join('\n');
 
     await axios.post(
       `${provider.config.url}/services/collector/event`,
       payload,
       {
         headers: {
-          'Authorization': `Splunk ${provider.credentials.token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Splunk ${provider.credentials.token}`,
+          'Content-Type': 'application/json',
         },
-        timeout: provider.config.timeout
-      }
+        timeout: provider.config.timeout,
+      },
     );
   }
 
   /**
    * Send batch to Elasticsearch
    */
-  private async sendToElastic(provider: SIEMProvider, batch: SIEMBatch): Promise<void> {
+  private async sendToElastic(
+    provider: SIEMProvider,
+    batch: SIEMBatch,
+  ): Promise<void> {
     const bulkBody = [];
-    
+
     for (const event of batch.events) {
       // Index metadata
       bulkBody.push({
         index: {
           _index: provider.config.index,
-          _type: '_doc'
-        }
+          _type: '_doc',
+        },
       });
-      
+
       // Document body
       bulkBody.push({
         '@timestamp': event.timestamp.toISOString(),
@@ -566,27 +582,30 @@ class SIEMService {
         'source.ip': event.ipAddress,
         'user_agent.original': event.userAgent,
         tags: event.tags || [],
-        raw_data: event.rawData
+        raw_data: event.rawData,
       });
     }
 
     await axios.post(
       `${provider.config.url}/_bulk`,
-      bulkBody.map(item => JSON.stringify(item)).join('\n') + '\n',
+      bulkBody.map((item) => JSON.stringify(item)).join('\n') + '\n',
       {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'Authorization': `Basic ${Buffer.from(`${provider.credentials.username}:${provider.credentials.password}`).toString('base64')}`
+          Authorization: `Basic ${Buffer.from(`${provider.credentials.username}:${provider.credentials.password}`).toString('base64')}`,
         },
-        timeout: provider.config.timeout
-      }
+        timeout: provider.config.timeout,
+      },
     );
   }
 
   /**
    * Send batch to Microsoft Sentinel
    */
-  private async sendToSentinel(provider: SIEMProvider, batch: SIEMBatch): Promise<void> {
+  private async sendToSentinel(
+    provider: SIEMProvider,
+    batch: SIEMBatch,
+  ): Promise<void> {
     // First, get access token
     const tokenResponse = await axios.post(
       `https://login.microsoftonline.com/${provider.credentials.tenantId}/oauth2/v2.0/token`,
@@ -594,19 +613,19 @@ class SIEMService {
         client_id: provider.credentials.clientId || '',
         client_secret: provider.credentials.clientSecret || '',
         scope: 'https://management.azure.com/.default',
-        grant_type: 'client_credentials'
+        grant_type: 'client_credentials',
       }),
       {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
     );
 
     const accessToken = tokenResponse.data.access_token;
 
     // Send events to Log Analytics workspace
-    const events = batch.events.map(event => ({
+    const events = batch.events.map((event) => ({
       TimeGenerated: event.timestamp.toISOString(),
       Type: 'IntelGraphEvent',
       SeverityLevel: this.mapSeverityToSentinel(event.severity),
@@ -618,7 +637,7 @@ class SIEMService {
       UserAgent: event.userAgent,
       EventType: event.eventType,
       Tags: event.tags?.join(';'),
-      RawData: JSON.stringify(event.rawData)
+      RawData: JSON.stringify(event.rawData),
     }));
 
     await axios.post(
@@ -626,19 +645,22 @@ class SIEMService {
       JSON.stringify(events),
       {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'Log-Type': 'IntelGraphEvent'
+          'Log-Type': 'IntelGraphEvent',
         },
-        timeout: provider.config.timeout
-      }
+        timeout: provider.config.timeout,
+      },
     );
   }
 
   /**
    * Send batch to IBM QRadar
    */
-  private async sendToQRadar(provider: SIEMProvider, batch: SIEMBatch): Promise<void> {
+  private async sendToQRadar(
+    provider: SIEMProvider,
+    batch: SIEMBatch,
+  ): Promise<void> {
     for (const event of batch.events) {
       const qradarEvent = {
         starttime: event.timestamp.getTime(),
@@ -653,77 +675,81 @@ class SIEMService {
           event_type: event.eventType,
           source: event.source,
           tags: event.tags?.join(','),
-          raw_data: JSON.stringify(event.rawData)
-        }
+          raw_data: JSON.stringify(event.rawData),
+        },
       };
 
-      await axios.post(
-        `${provider.config.url}/api/siem/events`,
-        qradarEvent,
-        {
-          headers: {
-            'SEC': provider.credentials.token,
-            'Content-Type': 'application/json'
-          },
-          timeout: provider.config.timeout
-        }
-      );
+      await axios.post(`${provider.config.url}/api/siem/events`, qradarEvent, {
+        headers: {
+          SEC: provider.credentials.token,
+          'Content-Type': 'application/json',
+        },
+        timeout: provider.config.timeout,
+      });
     }
   }
 
   /**
    * Send batch to generic SIEM
    */
-  private async sendToGeneric(provider: SIEMProvider, batch: SIEMBatch): Promise<void> {
+  private async sendToGeneric(
+    provider: SIEMProvider,
+    batch: SIEMBatch,
+  ): Promise<void> {
     const payload = {
       provider: provider.id,
       timestamp: new Date().toISOString(),
-      events: batch.events.map(event => this.mapEventFields(event, provider.fieldMapping))
+      events: batch.events.map((event) =>
+        this.mapEventFields(event, provider.fieldMapping),
+      ),
     };
 
-    await axios.post(
-      provider.config.url,
-      payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(provider.credentials.token ? { 'Authorization': `Bearer ${provider.credentials.token}` } : {})
-        },
-        timeout: provider.config.timeout
-      }
-    );
+    await axios.post(provider.config.url, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(provider.credentials.token
+          ? { Authorization: `Bearer ${provider.credentials.token}` }
+          : {}),
+      },
+      timeout: provider.config.timeout,
+    });
   }
 
   /**
    * Map event fields based on provider field mapping
    */
-  private mapEventFields(event: SIEMEvent, mapping: SIEMFieldMapping): Record<string, any> {
+  private mapEventFields(
+    event: SIEMEvent,
+    mapping: SIEMFieldMapping,
+  ): Record<string, any> {
     const mapped: Record<string, any> = {};
-    
+
     mapped[mapping.timestamp] = event.timestamp.toISOString();
     mapped[mapping.eventType] = event.eventType;
     mapped[mapping.severity] = event.severity;
     mapped[mapping.source] = event.source;
-    
+
     if (mapping.userId && event.userId) {
       mapped[mapping.userId] = event.userId;
     }
-    
+
     if (mapping.tenantId && event.tenantId) {
       mapped[mapping.tenantId] = event.tenantId;
     }
-    
+
     if (mapping.ipAddress && event.ipAddress) {
       mapped[mapping.ipAddress] = event.ipAddress;
     }
-    
+
     if (mapping.userAgent && event.userAgent) {
       mapped[mapping.userAgent] = event.userAgent;
     }
 
     // Add custom field mappings
     if (mapping.customFields) {
-      for (const [targetField, sourceField] of Object.entries(mapping.customFields)) {
+      for (const [targetField, sourceField] of Object.entries(
+        mapping.customFields,
+      )) {
         if (event.details[sourceField] !== undefined) {
           mapped[targetField] = event.details[sourceField];
         }
@@ -738,11 +764,16 @@ class SIEMService {
    */
   private mapSeverityToECS(severity: string): number {
     switch (severity) {
-      case 'low': return 1;
-      case 'medium': return 2;
-      case 'high': return 3;
-      case 'critical': return 4;
-      default: return 1;
+      case 'low':
+        return 1;
+      case 'medium':
+        return 2;
+      case 'high':
+        return 3;
+      case 'critical':
+        return 4;
+      default:
+        return 1;
     }
   }
 
@@ -751,11 +782,16 @@ class SIEMService {
    */
   private mapSeverityToSentinel(severity: string): string {
     switch (severity) {
-      case 'low': return 'Informational';
-      case 'medium': return 'Warning';
-      case 'high': return 'Error';
-      case 'critical': return 'Critical';
-      default: return 'Informational';
+      case 'low':
+        return 'Informational';
+      case 'medium':
+        return 'Warning';
+      case 'high':
+        return 'Error';
+      case 'critical':
+        return 'Critical';
+      default:
+        return 'Informational';
     }
   }
 
@@ -764,11 +800,16 @@ class SIEMService {
    */
   private mapSeverityToQRadar(severity: string): number {
     switch (severity) {
-      case 'low': return 3;
-      case 'medium': return 5;
-      case 'high': return 7;
-      case 'critical': return 9;
-      default: return 3;
+      case 'low':
+        return 3;
+      case 'medium':
+        return 5;
+      case 'high':
+        return 7;
+      case 'critical':
+        return 9;
+      default:
+        return 3;
     }
   }
 
@@ -778,15 +819,15 @@ class SIEMService {
   private getQRadarEventId(eventType: string): number {
     // Map event types to QRadar QIDs
     const qidMap: Record<string, number> = {
-      'authentication_failed': 4624,
-      'authentication_success': 4625,
-      'data_access': 4656,
-      'privilege_escalation': 4648,
-      'suspicious_activity': 1000,
-      'compliance_violation': 1001,
-      'dlp_violation': 1002
+      authentication_failed: 4624,
+      authentication_success: 4625,
+      data_access: 4656,
+      privilege_escalation: 4648,
+      suspicious_activity: 1000,
+      compliance_violation: 1001,
+      dlp_violation: 1002,
     };
-    
+
     return qidMap[eventType] || 1000;
   }
 
@@ -797,23 +838,27 @@ class SIEMService {
     const provider = this.providers.get(providerId);
     const circuitBreaker = this.circuitBreakers.get(providerId);
     const buffer = this.eventBuffer.get(providerId);
-    
+
     return {
-      provider: provider ? {
-        id: provider.id,
-        name: provider.name,
-        type: provider.type,
-        enabled: provider.enabled
-      } : null,
-      circuitBreaker: circuitBreaker ? {
-        state: circuitBreaker.getState(),
-        failureCount: circuitBreaker.getFailureCount(),
-        lastFailure: circuitBreaker.getLastFailureTime()
-      } : null,
+      provider: provider
+        ? {
+            id: provider.id,
+            name: provider.name,
+            type: provider.type,
+            enabled: provider.enabled,
+          }
+        : null,
+      circuitBreaker: circuitBreaker
+        ? {
+            state: circuitBreaker.getState(),
+            failureCount: circuitBreaker.getFailureCount(),
+            lastFailure: circuitBreaker.getLastFailureTime(),
+          }
+        : null,
       buffer: {
         size: buffer?.length || 0,
-        lastFlush: new Date() // Would track actual last flush time
-      }
+        lastFlush: new Date(), // Would track actual last flush time
+      },
     };
   }
 
@@ -837,7 +882,7 @@ class SIEMService {
     logger.info('SIEM provider updated', {
       component: 'SIEMService',
       providerId,
-      changes: Object.keys(updates)
+      changes: Object.keys(updates),
     });
 
     return true;
@@ -857,7 +902,7 @@ class SIEMService {
         severity: 'low',
         source: 'intelgraph_siem_service',
         message: 'SIEM connection test',
-        details: { test: true }
+        details: { test: true },
       };
 
       const batch: SIEMBatch = {
@@ -866,17 +911,16 @@ class SIEMService {
         events: [testEvent],
         createdAt: new Date(),
         status: 'pending',
-        attempts: 0
+        attempts: 0,
       };
 
       await this.sendBatch(batch);
       return true;
-
     } catch (error) {
       logger.error('SIEM provider test failed', {
         component: 'SIEMService',
         providerId,
-        error: error.message
+        error: error.message,
       });
       return false;
     }
@@ -887,7 +931,7 @@ class SIEMService {
    */
   async shutdown(): Promise<void> {
     logger.info('Shutting down SIEM service', {
-      component: 'SIEMService'
+      component: 'SIEMService',
     });
 
     if (this.batchInterval) {

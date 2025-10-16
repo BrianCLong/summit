@@ -91,7 +91,11 @@ class QueueManager {
 
     await Promise.all([
       // Add to sorted set for priority processing
-      this.redis.zadd(`${this.QUEUE_PREFIX}:${queueName}`, priorityScore, JSON.stringify(task)),
+      this.redis.zadd(
+        `${this.QUEUE_PREFIX}:${queueName}`,
+        priorityScore,
+        JSON.stringify(task),
+      ),
       // Track queue metrics
       this.redis.hincrby(`${this.METRICS_PREFIX}:${queueName}`, 'pending', 1),
       this.redis.hincrby(
@@ -101,7 +105,9 @@ class QueueManager {
       ),
     ]);
 
-    console.log(`Task ${context.requestId} queued in ${queueName} with priority ${priorityScore}`);
+    console.log(
+      `Task ${context.requestId} queued in ${queueName} with priority ${priorityScore}`,
+    );
   }
 
   /**
@@ -109,7 +115,11 @@ class QueueManager {
    */
   async dequeue(queueName: string): Promise<SchedulingContext | null> {
     // Get highest priority task (ZREVRANGE gets highest scores first)
-    const tasks = await this.redis.zrevrange(`${this.QUEUE_PREFIX}:${queueName}`, 0, 0);
+    const tasks = await this.redis.zrevrange(
+      `${this.QUEUE_PREFIX}:${queueName}`,
+      0,
+      0,
+    );
 
     if (tasks.length === 0) return null;
 
@@ -119,7 +129,11 @@ class QueueManager {
     await Promise.all([
       this.redis.zrem(`${this.QUEUE_PREFIX}:${queueName}`, tasks[0]),
       this.redis.hincrby(`${this.METRICS_PREFIX}:${queueName}`, 'pending', -1),
-      this.redis.hincrby(`${this.METRICS_PREFIX}:${queueName}`, 'processing', 1),
+      this.redis.hincrby(
+        `${this.METRICS_PREFIX}:${queueName}`,
+        'processing',
+        1,
+      ),
     ]);
 
     return task;
@@ -135,7 +149,11 @@ class QueueManager {
     processingTime: number,
   ): Promise<void> {
     await Promise.all([
-      this.redis.hincrby(`${this.METRICS_PREFIX}:${queueName}`, 'processing', -1),
+      this.redis.hincrby(
+        `${this.METRICS_PREFIX}:${queueName}`,
+        'processing',
+        -1,
+      ),
       this.redis.hincrby(`${this.METRICS_PREFIX}:${queueName}`, 'completed', 1),
       this.redis.hincrby(
         `${this.METRICS_PREFIX}:${queueName}`,
@@ -150,17 +168,34 @@ class QueueManager {
     ]);
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalMetric('scheduler_task_completed', 1);
-    prometheusConductorMetrics.recordOperationalMetric('scheduler_actual_cost', actualCost);
-    prometheusConductorMetrics.recordOperationalMetric('scheduler_processing_time', processingTime);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'scheduler_task_completed',
+      1,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'scheduler_actual_cost',
+      actualCost,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'scheduler_processing_time',
+      processingTime,
+    );
   }
 
   /**
    * Mark task as failed
    */
-  async markFailed(queueName: string, requestId: string, error: string): Promise<void> {
+  async markFailed(
+    queueName: string,
+    requestId: string,
+    error: string,
+  ): Promise<void> {
     await Promise.all([
-      this.redis.hincrby(`${this.METRICS_PREFIX}:${queueName}`, 'processing', -1),
+      this.redis.hincrby(
+        `${this.METRICS_PREFIX}:${queueName}`,
+        'processing',
+        -1,
+      ),
       this.redis.hincrby(`${this.METRICS_PREFIX}:${queueName}`, 'failed', 1),
       this.redis.lpush(
         `${this.QUEUE_PREFIX}:${queueName}:errors`,
@@ -172,14 +207,19 @@ class QueueManager {
       ),
     ]);
 
-    prometheusConductorMetrics.recordOperationalEvent('scheduler_task_failed', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'scheduler_task_failed',
+      false,
+    );
   }
 
   /**
    * Get queue metrics
    */
   async getQueueMetrics(queueName: string): Promise<QueueMetrics> {
-    const metrics = await this.redis.hgetall(`${this.METRICS_PREFIX}:${queueName}`);
+    const metrics = await this.redis.hgetall(
+      `${this.METRICS_PREFIX}:${queueName}`,
+    );
 
     const pending = parseInt(metrics.pending || '0');
     const processing = parseInt(metrics.processing || '0');
@@ -205,14 +245,20 @@ class QueueManager {
    */
   async getAllQueueMetrics(): Promise<QueueMetrics[]> {
     const queueKeys = await this.redis.keys(`${this.METRICS_PREFIX}:*`);
-    const queueNames = queueKeys.map((key) => key.replace(`${this.METRICS_PREFIX}:`, ''));
+    const queueNames = queueKeys.map((key) =>
+      key.replace(`${this.METRICS_PREFIX}:`, ''),
+    );
 
     return Promise.all(queueNames.map((name) => this.getQueueMetrics(name)));
   }
 
   private getQueueName(expertType: ExpertArm, priority: string): string {
     // Heavy experts get their own queues
-    const heavyExperts: ExpertArm[] = ['graph_ops', 'rag_retrieval', 'osint_analysis'];
+    const heavyExperts: ExpertArm[] = [
+      'graph_ops',
+      'rag_retrieval',
+      'osint_analysis',
+    ];
 
     if (heavyExperts.includes(expertType)) {
       return `${expertType}_${priority}`;
@@ -262,7 +308,9 @@ class BudgetManager {
    * Get budget configuration for tenant
    */
   async getBudgetConfig(tenantId: string): Promise<BudgetConfig | null> {
-    const configData = await this.redis.get(`${this.BUDGET_PREFIX}:${tenantId}`);
+    const configData = await this.redis.get(
+      `${this.BUDGET_PREFIX}:${tenantId}`,
+    );
     return configData ? JSON.parse(configData) : null;
   }
 
@@ -270,18 +318,29 @@ class BudgetManager {
    * Set budget configuration for tenant
    */
   async setBudgetConfig(config: BudgetConfig): Promise<void> {
-    await this.redis.set(`${this.BUDGET_PREFIX}:${config.tenantId}`, JSON.stringify(config));
+    await this.redis.set(
+      `${this.BUDGET_PREFIX}:${config.tenantId}`,
+      JSON.stringify(config),
+    );
   }
 
   /**
    * Record spending for tenant
    */
-  async recordSpending(tenantId: string, amount: number, metadata?: any): Promise<void> {
+  async recordSpending(
+    tenantId: string,
+    amount: number,
+    metadata?: any,
+  ): Promise<void> {
     const month = new Date().toISOString().slice(0, 7); // YYYY-MM
 
     await Promise.all([
       // Update monthly spend
-      this.redis.hincrbyfloat(`${this.BUDGET_PREFIX}:spend:${tenantId}`, month, amount),
+      this.redis.hincrbyfloat(
+        `${this.BUDGET_PREFIX}:spend:${tenantId}`,
+        month,
+        amount,
+      ),
       // Log spending transaction
       this.redis.lpush(
         `${this.BUDGET_PREFIX}:log:${tenantId}:${month}`,
@@ -358,7 +417,9 @@ class BudgetManager {
 
     // Apply priority multipliers for cost-based throttling
     const multiplier =
-      config.priorityMultipliers[priority as keyof typeof config.priorityMultipliers] || 1;
+      config.priorityMultipliers[
+        priority as keyof typeof config.priorityMultipliers
+      ] || 1;
     const adjustedCost = estimatedCost * multiplier;
 
     if (config.currentSpendUSD + adjustedCost > config.monthlyBudgetUSD) {
@@ -387,7 +448,11 @@ class BudgetManager {
   ): Promise<{
     totalSpend: number;
     dailyBreakdown: Array<{ date: string; amount: number }>;
-    topCostDrivers: Array<{ expertType: string; totalCost: number; requestCount: number }>;
+    topCostDrivers: Array<{
+      expertType: string;
+      totalCost: number;
+      requestCount: number;
+    }>;
   }> {
     const targetMonth = month || new Date().toISOString().slice(0, 7);
 
@@ -412,7 +477,10 @@ class BudgetManager {
       dailySpend.set(date, (dailySpend.get(date) || 0) + tx.amount);
 
       if (tx.metadata?.expertType) {
-        const current = expertSpend.get(tx.metadata.expertType) || { cost: 0, count: 0 };
+        const current = expertSpend.get(tx.metadata.expertType) || {
+          cost: 0,
+          count: 0,
+        };
         expertSpend.set(tx.metadata.expertType, {
           cost: current.cost + tx.amount,
           count: current.count + 1,
@@ -484,14 +552,19 @@ export class CostAwareScheduler {
       // Calculate estimated wait time
       const queueName = this.getQueueName(context.expertType, context.priority);
       const queueMetrics = await this.queueManager.getQueueMetrics(queueName);
-      const estimatedWaitTime = this.calculateEstimatedWaitTime(queueMetrics, context);
+      const estimatedWaitTime = this.calculateEstimatedWaitTime(
+        queueMetrics,
+        context,
+      );
 
       // Record budget impact
       const projectedUtilization =
         (budgetCheck.budgetUtilization *
-          (await this.budgetManager.getBudgetConfig(context.tenantId))!.monthlyBudgetUSD +
+          (await this.budgetManager.getBudgetConfig(context.tenantId))!
+            .monthlyBudgetUSD +
           context.estimatedCost) /
-        (await this.budgetManager.getBudgetConfig(context.tenantId))!.monthlyBudgetUSD;
+        (await this.budgetManager.getBudgetConfig(context.tenantId))!
+          .monthlyBudgetUSD;
 
       prometheusConductorMetrics.recordOperationalMetric(
         'scheduler_queue_wait_time',
@@ -548,7 +621,12 @@ export class CostAwareScheduler {
     tenantId: string,
   ): Promise<void> {
     await Promise.all([
-      this.queueManager.markCompleted(queueName, requestId, actualCost, processingTime),
+      this.queueManager.markCompleted(
+        queueName,
+        requestId,
+        actualCost,
+        processingTime,
+      ),
       this.budgetManager.recordSpending(tenantId, actualCost, {
         requestId,
         queueName,
@@ -560,7 +638,11 @@ export class CostAwareScheduler {
   /**
    * Fail task
    */
-  async failTask(queueName: string, requestId: string, error: string): Promise<void> {
+  async failTask(
+    queueName: string,
+    requestId: string,
+    error: string,
+  ): Promise<void> {
     await this.queueManager.markFailed(queueName, requestId, error);
   }
 
@@ -579,7 +661,8 @@ export class CostAwareScheduler {
       queues,
       totalPendingTasks: queues.reduce((sum, q) => sum + q.pending, 0),
       totalProcessingTasks: queues.reduce((sum, q) => sum + q.processing, 0),
-      avgSystemWaitTime: queues.reduce((sum, q) => sum + q.avgWaitTime, 0) / queues.length || 0,
+      avgSystemWaitTime:
+        queues.reduce((sum, q) => sum + q.avgWaitTime, 0) / queues.length || 0,
     };
   }
 
@@ -598,7 +681,11 @@ export class CostAwareScheduler {
   }
 
   private getQueueName(expertType: ExpertArm, priority: string): string {
-    const heavyExperts: ExpertArm[] = ['graph_ops', 'rag_retrieval', 'osint_analysis'];
+    const heavyExperts: ExpertArm[] = [
+      'graph_ops',
+      'rag_retrieval',
+      'osint_analysis',
+    ];
 
     if (heavyExperts.includes(expertType)) {
       return `${expertType}_${priority}`;
@@ -607,9 +694,14 @@ export class CostAwareScheduler {
     return `light_${priority}`;
   }
 
-  private calculateEstimatedWaitTime(metrics: QueueMetrics, context: SchedulingContext): number {
+  private calculateEstimatedWaitTime(
+    metrics: QueueMetrics,
+    context: SchedulingContext,
+  ): number {
     // Simple estimate: pending tasks * average processing time
-    return metrics.pending * (metrics.avgProcessingTime || context.estimatedDuration);
+    return (
+      metrics.pending * (metrics.avgProcessingTime || context.estimatedDuration)
+    );
   }
 
   private async generateFallbackOptions(context: SchedulingContext): Promise<
@@ -620,7 +712,11 @@ export class CostAwareScheduler {
     }>
   > {
     // Suggest cheaper alternatives
-    const fallbacks: Array<{ expertType: ExpertArm; estimatedCost: number; reason: string }> = [];
+    const fallbacks: Array<{
+      expertType: ExpertArm;
+      estimatedCost: number;
+      reason: string;
+    }> = [];
 
     // For expensive experts, suggest lighter alternatives
     if (context.expertType === 'graph_ops') {

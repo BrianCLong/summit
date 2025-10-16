@@ -4,14 +4,16 @@ Title: feat(runtime): unify base images to Node20 & Python3.12 (apps+clients)
 
 Why: Reduce CVEs, standardize toolchains, speed builds.
 
-Scope (this PR): apps/*, client/*, conductor-ui/*, copilot/*, cognitive-insights/infra/*
+Scope (this PR): apps/_, client/_, conductor-ui/_, copilot/_, cognitive-insights/infra/\*
 
 Changes:
+
 - Bump FROM node:18-alpine → node:20-alpine
 - Normalize node:${NODE_VERSION}-alpine → lock to node:20-alpine
 - Keep distroless/chainguard images as‑is for now.
 
 Files (examples):
+
 - apps/mobile-interface/Dockerfile
 - apps/search-engine/Dockerfile
 - client/Dockerfile.dev, client/Dockerfile.prod
@@ -19,6 +21,7 @@ Files (examples):
 - copilot/Dockerfile
 
 Patch (batchable via sed):
+
 ```bash
 # Run from repo root
 rg -l "^FROM\s+node:18" -n --glob "apps/**|client/**|conductor-ui/**|copilot/**|cognitive-insights/**" | while read f; do

@@ -16,7 +16,9 @@ export const ComposerGraphUI: React.FC<{
   telemetry: CostCarbonTelemetry;
   coverageMap: CoverageMapV25;
 }> = ({ federatedGraph, telemetry, coverageMap }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'graph' | 'costs' | 'quality'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'graph' | 'costs' | 'quality'
+  >('overview');
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
 
@@ -27,14 +29,14 @@ export const ComposerGraphUI: React.FC<{
       const [graphStats, telemetryStats, coverageStats] = await Promise.all([
         federatedGraph.getGlobalStats(),
         telemetry.getCurrentMetrics(),
-        coverageMap.getStats()
+        coverageMap.getStats(),
       ]);
 
       setDashboardData({
         graph: graphStats,
         telemetry: telemetryStats,
         coverage: coverageStats,
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
       });
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -55,36 +57,33 @@ export const ComposerGraphUI: React.FC<{
 
   return (
     <div className="composer-dashboard">
-      <DashboardHeader 
-        activeTab={activeTab} 
+      <DashboardHeader
+        activeTab={activeTab}
         onTabChange={setActiveTab}
         lastUpdated={dashboardData?.lastUpdated}
       />
-      
+
       <div className="dashboard-content">
         {activeTab === 'overview' && (
-          <OverviewTab 
-            data={dashboardData}
-            onRefresh={loadDashboardData}
-          />
+          <OverviewTab data={dashboardData} onRefresh={loadDashboardData} />
         )}
-        
+
         {activeTab === 'graph' && (
-          <GraphTab 
+          <GraphTab
             federatedGraph={federatedGraph}
             graphStats={dashboardData?.graph}
           />
         )}
-        
+
         {activeTab === 'costs' && (
-          <CostsTab 
+          <CostsTab
             telemetry={telemetry}
             telemetryStats={dashboardData?.telemetry}
           />
         )}
-        
+
         {activeTab === 'quality' && (
-          <QualityTab 
+          <QualityTab
             coverageMap={coverageMap}
             coverageStats={dashboardData?.coverage}
           />
@@ -108,7 +107,7 @@ const OverviewTab: React.FC<{
       { step: 'TypeScript Compilation', duration: 120000, parallel: true },
       { step: 'Test Execution', duration: 89000, parallel: true },
       { step: 'Container Build', duration: 156000, parallel: false },
-      { step: 'Deployment', duration: 67000, parallel: false }
+      { step: 'Deployment', duration: 67000, parallel: false },
     ]);
   }, []);
 
@@ -121,21 +120,21 @@ const OverviewTab: React.FC<{
           trend={+2.3}
           color="green"
         />
-        
+
         <MetricCard
           title="Cache Hit Rate"
           value={`${(data?.telemetry?.efficiency?.cacheHitRate * 100 || 0).toFixed(1)}%`}
           trend={+5.7}
           color="blue"
         />
-        
+
         <MetricCard
           title="Daily Cost"
           value={`$${data?.telemetry?.today?.costUsd?.toFixed(2) || '0.00'}`}
           trend={-12.4}
           color="orange"
         />
-        
+
         <MetricCard
           title="Carbon Footprint"
           value={`${data?.telemetry?.today?.carbonKg?.toFixed(2) || '0.00'}kg`}
@@ -145,32 +144,27 @@ const OverviewTab: React.FC<{
       </div>
 
       <div className="dashboard-sections">
-        <CriticalPathView 
+        <CriticalPathView
           path={criticalPath}
-          totalDuration={criticalPath.reduce((sum, step) => sum + step.duration, 0)}
+          totalDuration={criticalPath.reduce(
+            (sum, step) => sum + step.duration,
+            0,
+          )}
         />
-        
-        <RecentActivityFeed 
-          activities={getRecentActivities()}
-        />
-        
-        <AlertsPanel 
-          alerts={getActiveAlerts()}
-        />
+
+        <RecentActivityFeed activities={getRecentActivities()} />
+
+        <AlertsPanel alerts={getActiveAlerts()} />
       </div>
 
       <div className="quick-actions">
-        <QuickActionButton 
-          icon="🔄"
-          label="Refresh Data"
-          onClick={onRefresh}
-        />
-        <QuickActionButton 
+        <QuickActionButton icon="🔄" label="Refresh Data" onClick={onRefresh} />
+        <QuickActionButton
           icon="📊"
           label="Generate Report"
           onClick={() => console.log('Generate report')}
         />
-        <QuickActionButton 
+        <QuickActionButton
           icon="⚡"
           label="Optimize Builds"
           onClick={() => console.log('Optimize builds')}
@@ -191,7 +185,7 @@ const GraphTab: React.FC<{
 
   const executeQuery = useCallback(async () => {
     if (!query.trim()) return;
-    
+
     try {
       const result = await federatedGraph.query(query);
       setQueryResult(result);
@@ -206,21 +200,29 @@ const GraphTab: React.FC<{
       <div className="graph-header">
         <div className="repo-selector">
           <label>Repository:</label>
-          <select 
-            value={selectedRepo} 
+          <select
+            value={selectedRepo}
             onChange={(e) => setSelectedRepo(e.target.value)}
           >
             <option value="all">All Repositories</option>
-            {federatedGraph.listRepositories().map(repo => (
-              <option key={repo.id} value={repo.id}>{repo.name}</option>
+            {federatedGraph.listRepositories().map((repo) => (
+              <option key={repo.id} value={repo.id}>
+                {repo.name}
+              </option>
             ))}
           </select>
         </div>
 
         <div className="graph-stats">
           <StatBadge label="Total Nodes" value={graphStats?.totalNodes || 0} />
-          <StatBadge label="Cross-Repo Edges" value={graphStats?.crossRepoEdges || 0} />
-          <StatBadge label="Active Repos" value={graphStats?.activeRepos || 0} />
+          <StatBadge
+            label="Cross-Repo Edges"
+            value={graphStats?.crossRepoEdges || 0}
+          />
+          <StatBadge
+            label="Active Repos"
+            value={graphStats?.activeRepos || 0}
+          />
         </div>
       </div>
 
@@ -236,13 +238,11 @@ const GraphTab: React.FC<{
           <button onClick={executeQuery}>Query</button>
         </div>
 
-        {queryResult && (
-          <QueryResults result={queryResult} />
-        )}
+        {queryResult && <QueryResults result={queryResult} />}
       </div>
 
       <div className="graph-visualization">
-        <DependencyGraphVisualization 
+        <DependencyGraphVisualization
           nodes={queryResult?.nodes || []}
           edges={queryResult?.edges || []}
           selectedRepo={selectedRepo}
@@ -250,7 +250,7 @@ const GraphTab: React.FC<{
       </div>
 
       <div className="cross-repo-impact">
-        <CrossRepoImpactHeatmap 
+        <CrossRepoImpactHeatmap
           federatedGraph={federatedGraph}
           selectedRepo={selectedRepo}
         />
@@ -265,7 +265,9 @@ const CostsTab: React.FC<{
   telemetryStats: any;
 }> = ({ telemetry, telemetryStats }) => {
   const [costReport, setCostReport] = useState<any>(null);
-  const [reportPeriod, setReportPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [reportPeriod, setReportPeriod] = useState<
+    'daily' | 'weekly' | 'monthly'
+  >('weekly');
 
   useEffect(() => {
     const generateCostReport = async () => {
@@ -273,7 +275,7 @@ const CostsTab: React.FC<{
       const periodMs = {
         daily: 24 * 60 * 60 * 1000,
         weekly: 7 * 24 * 60 * 60 * 1000,
-        monthly: 30 * 24 * 60 * 60 * 1000
+        monthly: 30 * 24 * 60 * 60 * 1000,
       }[reportPeriod];
 
       try {
@@ -290,19 +292,19 @@ const CostsTab: React.FC<{
   return (
     <div className="costs-tab">
       <div className="period-selector">
-        <button 
+        <button
           className={reportPeriod === 'daily' ? 'active' : ''}
           onClick={() => setReportPeriod('daily')}
         >
           Daily
         </button>
-        <button 
+        <button
           className={reportPeriod === 'weekly' ? 'active' : ''}
           onClick={() => setReportPeriod('weekly')}
         >
           Weekly
         </button>
-        <button 
+        <button
           className={reportPeriod === 'monthly' ? 'active' : ''}
           onClick={() => setReportPeriod('monthly')}
         >
@@ -311,29 +313,29 @@ const CostsTab: React.FC<{
       </div>
 
       <div className="cost-overview">
-        <CostBreakdownChart 
+        <CostBreakdownChart
           data={costReport?.totalCost || {}}
           period={reportPeriod}
         />
-        
-        <CarbonFootprintChart 
+
+        <CarbonFootprintChart
           data={costReport?.totalCarbon || {}}
           period={reportPeriod}
         />
       </div>
 
       <div className="cost-breakdowns">
-        <CostBreakdownTable 
+        <CostBreakdownTable
           title="By Target"
           data={costReport?.breakdown?.byTarget || []}
         />
-        
-        <CostBreakdownTable 
+
+        <CostBreakdownTable
           title="By User"
           data={costReport?.breakdown?.byUser || []}
         />
-        
-        <CostBreakdownTable 
+
+        <CostBreakdownTable
           title="By Region"
           data={costReport?.breakdown?.byRegion || []}
         />
@@ -361,7 +363,7 @@ const QualityTab: React.FC<{
     const loadQualityData = async () => {
       const riskFiles = coverageMap.getHighRiskFiles(10);
       const trends = coverageMap.getCoverageTrends();
-      
+
       setHighRiskFiles(riskFiles);
       setCoverageTrends(trends);
     };
@@ -378,7 +380,7 @@ const QualityTab: React.FC<{
           target={85}
           color="green"
         />
-        
+
         <QualityMetric
           title="Risk Score"
           value={coverageStats?.avgRiskScore?.toFixed(2) || '0.00'}
@@ -386,7 +388,7 @@ const QualityTab: React.FC<{
           color="red"
           invert
         />
-        
+
         <QualityMetric
           title="High Risk Files"
           value={coverageStats?.highRiskFiles || 0}
@@ -397,26 +399,21 @@ const QualityTab: React.FC<{
       </div>
 
       <div className="quality-sections">
-        <CoverageTrendChart 
-          trends={coverageTrends}
-          title="Coverage Trends"
-        />
-        
-        <HighRiskFilesTable 
+        <CoverageTrendChart trends={coverageTrends} title="Coverage Trends" />
+
+        <HighRiskFilesTable
           files={highRiskFiles}
           onFileSelect={(file) => console.log('Selected file:', file)}
         />
-        
-        <FlakyTestHeatmap 
+
+        <FlakyTestHeatmap
           // Would get flaky test data from quarantine system
           tests={getMockFlakyTests()}
         />
       </div>
 
       <div className="policy-violations">
-        <PolicyViolationsPanel 
-          violations={getMockPolicyViolations()}
-        />
+        <PolicyViolationsPanel violations={getMockPolicyViolations()} />
       </div>
     </div>
   );
@@ -441,14 +438,14 @@ const DashboardHeader: React.FC<{
       <h1>🎯 Composer Graph UI</h1>
       <span className="subtitle">Federation & Foresight Dashboard</span>
     </div>
-    
+
     <nav className="tab-navigation">
       {[
         { id: 'overview', label: '📊 Overview', icon: '📊' },
         { id: 'graph', label: '🌐 Graph', icon: '🌐' },
         { id: 'costs', label: '💰 Costs', icon: '💰' },
-        { id: 'quality', label: '🎯 Quality', icon: '🎯' }
-      ].map(tab => (
+        { id: 'quality', label: '🎯 Quality', icon: '🎯' },
+      ].map((tab) => (
         <button
           key={tab.id}
           className={`tab ${activeTab === tab.id ? 'active' : ''}`}
@@ -458,7 +455,7 @@ const DashboardHeader: React.FC<{
         </button>
       ))}
     </nav>
-    
+
     {lastUpdated && (
       <div className="last-updated">
         Last updated: {new Date(lastUpdated).toLocaleTimeString()}
@@ -494,13 +491,15 @@ const CriticalPathView: React.FC<{
     <h3>🛤️ Critical Path Analysis</h3>
     <div className="path-timeline">
       {path.map((step, idx) => (
-        <div 
-          key={idx} 
+        <div
+          key={idx}
           className={`path-step ${step.parallel ? 'parallel' : 'sequential'}`}
           style={{ width: `${(step.duration / totalDuration) * 100}%` }}
         >
           <div className="step-name">{step.step}</div>
-          <div className="step-duration">{(step.duration / 1000).toFixed(1)}s</div>
+          <div className="step-duration">
+            {(step.duration / 1000).toFixed(1)}s
+          </div>
         </div>
       ))}
     </div>
@@ -512,11 +511,7 @@ const CriticalPathView: React.FC<{
 
 const QueryResults: React.FC<{ result: any }> = ({ result }) => {
   if (result.error) {
-    return (
-      <div className="query-error">
-        ❌ Query failed: {result.error}
-      </div>
-    );
+    return <div className="query-error">❌ Query failed: {result.error}</div>;
   }
 
   return (
@@ -527,13 +522,13 @@ const QueryResults: React.FC<{ result: any }> = ({ result }) => {
         <span>⏱️ {result.duration?.toFixed(1) || 0}ms</span>
         {result.cached && <span>📦 cached</span>}
       </div>
-      
+
       {result.crossRepoImpact && (
         <div className="cross-repo-summary">
           Affects {result.crossRepoImpact.affectedRepos.length} repositories
         </div>
       )}
-      
+
       <div className="result-nodes">
         {result.nodes?.slice(0, 10).map((node: any, idx: number) => (
           <div key={idx} className="result-node">
@@ -559,22 +554,17 @@ const DependencyGraphVisualization: React.FC<{
         {nodes.map((node, idx) => (
           <g key={idx}>
             <circle
-              cx={50 + (idx * 80)}
+              cx={50 + idx * 80}
               cy={200}
               r={20}
               fill={node.repoId === selectedRepo ? '#007acc' : '#ccc'}
             />
-            <text
-              x={50 + (idx * 80)}
-              y={205}
-              textAnchor="middle"
-              fontSize="10"
-            >
+            <text x={50 + idx * 80} y={205} textAnchor="middle" fontSize="10">
               {node.id.slice(0, 8)}
             </text>
           </g>
         ))}
-        
+
         {edges.map((edge, idx) => (
           <line
             key={idx}
@@ -587,7 +577,7 @@ const DependencyGraphVisualization: React.FC<{
             markerEnd="url(#arrowhead)"
           />
         ))}
-        
+
         <defs>
           <marker
             id="arrowhead"
@@ -607,32 +597,75 @@ const DependencyGraphVisualization: React.FC<{
 
 // Mock data functions (would be replaced with real data)
 const getRecentActivities = () => [
-  { time: '2 min ago', event: 'Build completed', target: 'api-service', status: 'success' },
-  { time: '5 min ago', event: 'Speculative task started', target: 'ui-components', status: 'running' },
-  { time: '8 min ago', event: 'Cache miss', target: 'database-migrations', status: 'warning' },
-  { time: '12 min ago', event: 'Policy violation', target: 'auth-service', status: 'error' }
+  {
+    time: '2 min ago',
+    event: 'Build completed',
+    target: 'api-service',
+    status: 'success',
+  },
+  {
+    time: '5 min ago',
+    event: 'Speculative task started',
+    target: 'ui-components',
+    status: 'running',
+  },
+  {
+    time: '8 min ago',
+    event: 'Cache miss',
+    target: 'database-migrations',
+    status: 'warning',
+  },
+  {
+    time: '12 min ago',
+    event: 'Policy violation',
+    target: 'auth-service',
+    status: 'error',
+  },
 ];
 
 const getActiveAlerts = () => [
-  { level: 'warning', message: 'Daily cost approaching budget limit ($87.50 of $100.00)' },
-  { level: 'info', message: 'Cache hit rate improved to 78.3% (+5.2% from yesterday)' },
-  { level: 'error', message: '3 flaky tests detected and quarantined' }
+  {
+    level: 'warning',
+    message: 'Daily cost approaching budget limit ($87.50 of $100.00)',
+  },
+  {
+    level: 'info',
+    message: 'Cache hit rate improved to 78.3% (+5.2% from yesterday)',
+  },
+  { level: 'error', message: '3 flaky tests detected and quarantined' },
 ];
 
 const getMockFlakyTests = () => [
   { test: 'auth.test.ts:42', flakeRate: 0.31, lastRun: Date.now() - 3600000 },
   { test: 'api.test.ts:156', flakeRate: 0.28, lastRun: Date.now() - 7200000 },
-  { test: 'ui.test.ts:89', flakeRate: 0.25, lastRun: Date.now() - 1800000 }
+  { test: 'ui.test.ts:89', flakeRate: 0.25, lastRun: Date.now() - 1800000 },
 ];
 
 const getMockPolicyViolations = () => [
-  { file: 'Dockerfile', rule: 'missing-health-check', severity: 'warning', autoFixed: true },
-  { file: 'package.json', rule: 'unpinned-dependency', severity: 'info', autoFixed: true },
-  { file: 'src/auth.ts', rule: 'hardcoded-secret', severity: 'error', autoFixed: false }
+  {
+    file: 'Dockerfile',
+    rule: 'missing-health-check',
+    severity: 'warning',
+    autoFixed: true,
+  },
+  {
+    file: 'package.json',
+    rule: 'unpinned-dependency',
+    severity: 'info',
+    autoFixed: true,
+  },
+  {
+    file: 'src/auth.ts',
+    rule: 'hardcoded-secret',
+    severity: 'error',
+    autoFixed: false,
+  },
 ];
 
 // Additional UI Components would be implemented here...
-const RecentActivityFeed: React.FC<{ activities: any[] }> = ({ activities }) => (
+const RecentActivityFeed: React.FC<{ activities: any[] }> = ({
+  activities,
+}) => (
   <div className="activity-feed">
     <h3>📈 Recent Activity</h3>
     {activities.map((activity, idx) => (
@@ -668,7 +701,10 @@ const QuickActionButton: React.FC<{
 );
 
 // More components would be implemented for complete functionality...
-const StatBadge: React.FC<{ label: string; value: number }> = ({ label, value }) => (
+const StatBadge: React.FC<{ label: string; value: number }> = ({
+  label,
+  value,
+}) => (
   <div className="stat-badge">
     <span className="stat-value">{value.toLocaleString()}</span>
     <span className="stat-label">{label}</span>
@@ -683,7 +719,10 @@ const CrossRepoImpactHeatmap: React.FC<{
     <h3>🌊 Cross-Repository Impact Heatmap</h3>
     <div className="heatmap-placeholder">
       {/* Would show visual heatmap of cross-repo dependencies */}
-      <p>Interactive heatmap showing dependency relationships between repositories</p>
+      <p>
+        Interactive heatmap showing dependency relationships between
+        repositories
+      </p>
     </div>
   </div>
 );
@@ -725,9 +764,7 @@ const CarbonFootprintChart: React.FC<{
       <div className="carbon-amount">
         {data.totalCarbonKg?.toFixed(2) || '0.00'} kg CO₂
       </div>
-      <div className="carbon-equivalent">
-        ≈ {data.equivalent || 'N/A'}
-      </div>
+      <div className="carbon-equivalent">≈ {data.equivalent || 'N/A'}</div>
     </div>
   </div>
 );
@@ -764,13 +801,15 @@ const RecommendationCard: React.FC<{
 }> = ({ recommendation }) => (
   <div className="recommendation-card">
     <div className="recommendation-type">{recommendation.type}</div>
-    <div className="recommendation-description">{recommendation.description}</div>
+    <div className="recommendation-description">
+      {recommendation.description}
+    </div>
     {recommendation.potentialSavings && (
       <div className="potential-savings">
-        Potential savings: 
-        {recommendation.potentialSavings.costUsd && 
+        Potential savings:
+        {recommendation.potentialSavings.costUsd &&
           ` $${recommendation.potentialSavings.costUsd.toFixed(2)}`}
-        {recommendation.potentialSavings.carbonKg && 
+        {recommendation.potentialSavings.carbonKg &&
           ` ${recommendation.potentialSavings.carbonKg.toFixed(2)}kg CO₂`}
       </div>
     )}
@@ -786,7 +825,7 @@ const QualityMetric: React.FC<{
 }> = ({ title, value, target, color, invert = false }) => {
   const numericValue = parseFloat(value);
   const isGood = invert ? numericValue < target : numericValue >= target;
-  
+
   return (
     <div className={`quality-metric ${color} ${isGood ? 'good' : 'bad'}`}>
       <div className="metric-title">{title}</div>
@@ -805,7 +844,8 @@ const CoverageTrendChart: React.FC<{
   <div className="coverage-trend-chart">
     <h3>{title}</h3>
     <div className="trend-info">
-      Direction: <span className={trends?.trendDirection}>{trends?.trendDirection}</span>
+      Direction:{' '}
+      <span className={trends?.trendDirection}>{trends?.trendDirection}</span>
       <br />
       Change Rate: {trends?.avgChangeRate?.toFixed(2)}%/day
     </div>
@@ -848,12 +888,12 @@ const FlakyTestHeatmap: React.FC<{
     <h3>🔥 Flaky Test Heatmap</h3>
     <div className="heatmap-grid">
       {tests.map((test, idx) => (
-        <div 
+        <div
           key={idx}
           className="heatmap-cell"
-          style={{ 
+          style={{
             backgroundColor: `rgba(255, 0, 0, ${test.flakeRate})`,
-            color: test.flakeRate > 0.5 ? 'white' : 'black'
+            color: test.flakeRate > 0.5 ? 'white' : 'black',
           }}
           title={`${test.test}: ${(test.flakeRate * 100).toFixed(1)}% flake rate`}
         >

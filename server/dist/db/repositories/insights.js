@@ -1,10 +1,18 @@
 export class InsightsRepo {
+    pool;
     constructor(pool) {
         this.pool = pool;
     }
     async insert(row) {
         const q = `INSERT INTO ai_insights (id, job_id, kind, payload, status, created_at) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`;
-        const v = [row.id, row.jobId, row.kind, row.payload, row.status, row.createdAt];
+        const v = [
+            row.id,
+            row.jobId,
+            row.kind,
+            row.payload,
+            row.status,
+            row.createdAt,
+        ];
         const { rows } = await this.pool.query(q, v);
         return rows[0];
     }

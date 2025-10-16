@@ -30,12 +30,17 @@ const resolvers = {
     // MC Platform v0.4.1 Sovereign Safeguards
     ...(v041Resolvers.Query || {}),
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-    getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
-    getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
-    getNarrativeHeatmapData: wargameResolver.getNarrativeHeatmapData.bind(wargameResolver),
-    getStrategicResponsePlaybooks: wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
+    getCrisisTelemetry:
+      wargameResolver.getCrisisTelemetry.bind(wargameResolver),
+    getAdversaryIntentEstimates:
+      wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
+    getNarrativeHeatmapData:
+      wargameResolver.getNarrativeHeatmapData.bind(wargameResolver),
+    getStrategicResponsePlaybooks:
+      wargameResolver.getStrategicResponsePlaybooks.bind(wargameResolver),
     getCrisisScenario: wargameResolver.getCrisisScenario.bind(wargameResolver),
-    getAllCrisisScenarios: wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
+    getAllCrisisScenarios:
+      wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
   },
   Mutation: {
     ...entityResolvers.Mutation,
@@ -50,9 +55,12 @@ const resolvers = {
     // MC Platform v0.4.1 Sovereign Safeguards
     ...(v041Resolvers.Mutation || {}),
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-    runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
-    updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),
-    deleteCrisisScenario: wargameResolver.deleteCrisisScenario.bind(wargameResolver),
+    runWarGameSimulation:
+      wargameResolver.runWarGameSimulation.bind(wargameResolver),
+    updateCrisisScenario:
+      wargameResolver.updateCrisisScenario.bind(wargameResolver),
+    deleteCrisisScenario:
+      wargameResolver.deleteCrisisScenario.bind(wargameResolver),
   },
 };
 

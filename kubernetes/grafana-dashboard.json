@@ -8,7 +8,9 @@
       "type": "timeseries",
       "title": "GraphQL p95 duration (s)",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))"
+        }
       ],
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
     },
@@ -16,7 +18,9 @@
       "type": "timeseries",
       "title": "GraphQL p99 duration (s)",
       "targets": [
-        { "expr": "histogram_quantile(0.99, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))" }
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(graphql_request_duration_seconds_bucket[$__rate_interval])) by (le))"
+        }
       ],
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
     },
@@ -24,7 +28,9 @@
       "type": "stat",
       "title": "Error rate % (5m)",
       "targets": [
-        { "expr": "sum(rate(graphql_requests_total{status=~\"5..\"}[5m])) / sum(rate(graphql_requests_total[5m])) * 100" }
+        {
+          "expr": "sum(rate(graphql_requests_total{status=~\"5..\"}[5m])) / sum(rate(graphql_requests_total[5m])) * 100"
+        }
       ],
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 8 }
     },
@@ -32,28 +38,40 @@
       "type": "timeseries",
       "title": "Subscription fan-out p95 (ms)",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[$__rate_interval])) by (le))" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[$__rate_interval])) by (le))"
+        }
       ],
       "gridPos": { "h": 6, "w": 16, "x": 8, "y": 8 }
     },
     {
       "type": "gauge",
       "title": "SLO — Read p95 threshold",
-      "targets": [ { "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le))" } ],
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le))"
+        }
+      ],
       "fieldConfig": { "defaults": { "max": 0.35 } },
       "gridPos": { "h": 6, "w": 8, "x": 0, "y": 14 }
     },
     {
       "type": "gauge",
       "title": "SLO — Sub fan-out p95 threshold",
-      "targets": [ { "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[5m])) by (le))" } ],
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[5m])) by (le))"
+        }
+      ],
       "fieldConfig": { "defaults": { "max": 250 } },
       "gridPos": { "h": 6, "w": 8, "x": 8, "y": 14 }
     },
     {
       "type": "stat",
       "title": "Requests per second",
-      "targets": [ { "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" } ],
+      "targets": [
+        { "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" }
+      ],
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 14 }
     }
   ],

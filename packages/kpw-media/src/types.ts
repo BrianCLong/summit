@@ -7,8 +7,8 @@ export interface Transform {
 }
 
 export interface MediaAttestation {
-  captureSig: string;       // device attestation signature (opaque)
-  exifHash: string;         // sha256(JSON(exif))
+  captureSig: string; // device attestation signature (opaque)
+  exifHash: string; // sha256(JSON(exif))
   sensorFingerprint?: string;
   transformChain: Transform[];
 }

@@ -1,4 +1,6 @@
 export class KmsSigner {
+    keyId;
+    client;
     constructor(keyId, client) {
         this.keyId = keyId;
         this.client = client;

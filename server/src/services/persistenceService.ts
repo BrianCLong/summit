@@ -185,13 +185,17 @@ class PersistenceService {
 
   // Entity operations
   async getEntities(investigationId?: string): Promise<GraphEntity[]> {
-    const cacheKey = investigationId ? `entities:investigation:${investigationId}` : 'entities:all';
+    const cacheKey = investigationId
+      ? `entities:investigation:${investigationId}`
+      : 'entities:all';
     let entities = await cacheService.get<GraphEntity[]>(cacheKey);
 
     if (!entities) {
       entities = Array.from(this.entities.values());
       if (investigationId) {
-        entities = entities.filter((e) => e.investigationId === investigationId);
+        entities = entities.filter(
+          (e) => e.investigationId === investigationId,
+        );
       }
       await cacheService.set(cacheKey, entities, 120); // Cache for 2 minutes
     }
@@ -213,7 +217,10 @@ class PersistenceService {
     return entity;
   }
 
-  async searchEntities(query: string, limit: number = 10): Promise<GraphEntity[]> {
+  async searchEntities(
+    query: string,
+    limit: number = 10,
+  ): Promise<GraphEntity[]> {
     const cacheKey = `search:entities:${query}:${limit}`;
     let results = await cacheService.get<GraphEntity[]>(cacheKey);
 
@@ -249,7 +256,9 @@ class PersistenceService {
     // Invalidate relevant caches
     await cacheService.delete('entities:all');
     if (newEntity.investigationId) {
-      await cacheService.delete(`entities:investigation:${newEntity.investigationId}`);
+      await cacheService.delete(
+        `entities:investigation:${newEntity.investigationId}`,
+      );
     }
 
     console.log(`[PERSISTENCE] Created entity: ${newEntity.id}`);
@@ -257,7 +266,9 @@ class PersistenceService {
   }
 
   // Relationship operations
-  async getRelationships(investigationId?: string): Promise<GraphRelationship[]> {
+  async getRelationships(
+    investigationId?: string,
+  ): Promise<GraphRelationship[]> {
     const cacheKey = investigationId
       ? `relationships:investigation:${investigationId}`
       : 'relationships:all';
@@ -266,7 +277,9 @@ class PersistenceService {
     if (!relationships) {
       relationships = Array.from(this.relationships.values());
       if (investigationId) {
-        relationships = relationships.filter((r) => r.investigationId === investigationId);
+        relationships = relationships.filter(
+          (r) => r.investigationId === investigationId,
+        );
       }
       await cacheService.set(cacheKey, relationships, 120); // Cache for 2 minutes
     }
@@ -279,10 +292,12 @@ class PersistenceService {
     const stats = {
       investigations: {
         total: this.investigations.size,
-        active: Array.from(this.investigations.values()).filter((i) => i.status === 'ACTIVE')
-          .length,
-        completed: Array.from(this.investigations.values()).filter((i) => i.status === 'COMPLETED')
-          .length,
+        active: Array.from(this.investigations.values()).filter(
+          (i) => i.status === 'ACTIVE',
+        ).length,
+        completed: Array.from(this.investigations.values()).filter(
+          (i) => i.status === 'COMPLETED',
+        ).length,
       },
       entities: {
         total: this.entities.size,

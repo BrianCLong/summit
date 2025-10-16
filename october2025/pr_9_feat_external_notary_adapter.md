@@ -326,20 +326,24 @@ index 0000000..abcd123
 **Title:** feat: external notary adapter with retries + proofs persisted in ledger
 
 **Summary**
+
 - Adds `HttpsNotarySink` with retry/backoff and optional bearer token
 - Persists external proof records and surfaces them under `/audit/query` as `anchor.proofs[]`
 - Compose wiring defaults to `mock-notary`; production can set `NOTARY_URL`, tokens, and mTLS
 
 **Config**
+
 - `NOTARY_ENABLED` (default `true`)
 - `NOTARY_URL` (e.g., `https://notary.example.com/anchor`)
 - `NOTARY_TOKEN` (optional)
 - `NOTARY_TIMEOUT_S`, `NOTARY_RETRIES`, `NOTARY_BACKOFF_MS`
 
 **Runbook**
+
 - External outage: service continues internal anchoring; proofs queued via retries; monitor `notary-chaos` CI
 
 **Testing**
+
 - Local: `docker compose up -d mock-notary ledger && make smoke`
 - CI: `notary-chaos.yml` exercises publish path
 
@@ -350,23 +354,26 @@ index 0000000..abcd123
 **Theme**: Complete privacy controls and ops resilience.
 
 ## Objectives & KPIs
+
 - **Selective Disclosure**: field‑level masks + tenant salts applied at emit; auditors can rehydrate with scoped token.
-  - *KPI*: 0 sensitive fields leak; redaction coverage report = 100%.
+  - _KPI_: 0 sensitive fields leak; redaction coverage report = 100%.
 - **Audit Rehydration**: API that reconstructs canonical inputs and shows proof trail end‑to‑end.
-  - *KPI*: rehydration ≤ 300ms p95; 100% success on suite.
+  - _KPI_: rehydration ≤ 300ms p95; 100% success on suite.
 - **Region Failover (Pilot)**: warm standby; failover drill scripted.
-  - *KPI*: RTO < 60s; no data loss (RPO=0) for anchors.
+  - _KPI_: RTO < 60s; no data loss (RPO=0) for anchors.
 
 ## Work Breakdown
+
 - **PR10**: `AnchorPolicy` with allowlist/denylist; salts per tenant; `/anchor/policy` endpoints + tests.
 - **PR11**: `/audit/rehydrate?op_id=…` that fetches receipts → canonical inputs (masked) + proofs; signed export bundle.
 - **PR12**: region sharding and replication of anchors; leader election or external notary as source of truth; failover scripts.
 
 ## CI
+
 - Redaction tests (diff input→masked); privacy lints for payload structs.
 - Rehydration e2e: emit op → query rehydrate → verify fields & proofs.
 - Region failover: spin two ledgers; kill primary; assert continued anchoring + later merge.
 
 ## DoD
-- Redaction policies merged; rehydration API live; failover drill green with runbook in repo.
 
+- Redaction policies merged; rehydration API live; failover drill green with runbook in repo.

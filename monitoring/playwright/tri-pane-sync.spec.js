@@ -12,7 +12,10 @@ test.describe('GA-Core UI Features - Tri-Pane & Overlays', () => {
       '[data-test=login-email]',
       process.env.TEST_USER_EMAIL || 'test@intelgraph.com',
     );
-    await page.fill('[data-test=login-pass]', process.env.TEST_USER_PASS || 'testpass123');
+    await page.fill(
+      '[data-test=login-pass]',
+      process.env.TEST_USER_PASS || 'testpass123',
+    );
     await page.click('[data-test=login-submit]');
 
     // Wait for dashboard to load
@@ -54,10 +57,14 @@ test.describe('GA-Core UI Features - Tri-Pane & Overlays', () => {
 
     // Verify graph selection updates
     await expect(page.locator('[data-test=graph-selection]')).toBeVisible();
-    await expect(page.locator('[data-test=selected-entities]')).toHaveCountGreaterThan(0);
+    await expect(
+      page.locator('[data-test=selected-entities]'),
+    ).toHaveCountGreaterThan(0);
 
     // Verify map pane also updates with selected entities
-    await expect(page.locator('[data-test=map-markers]')).toHaveCountGreaterThan(0);
+    await expect(
+      page.locator('[data-test=map-markers]'),
+    ).toHaveCountGreaterThan(0);
   });
 
   test('keyboard shortcuts and navigation', async ({ page }) => {
@@ -100,26 +107,36 @@ test.describe('GA-Core UI Features - Tri-Pane & Overlays', () => {
     // Verify 4-step demo progression
     // Step 1: Data ingestion
     await expect(page.locator('[data-test=demo-step-1]')).toBeVisible();
-    await page.waitForSelector('[data-test=demo-step-1-complete]', { timeout: 10000 });
+    await page.waitForSelector('[data-test=demo-step-1-complete]', {
+      timeout: 10000,
+    });
 
     // Step 2: XAI explanation
     await expect(page.locator('[data-test=demo-step-2]')).toBeVisible();
-    await page.waitForSelector('[data-test=demo-step-2-complete]', { timeout: 10000 });
+    await page.waitForSelector('[data-test=demo-step-2-complete]', {
+      timeout: 10000,
+    });
 
     // Step 3: Provenance verification
     await expect(page.locator('[data-test=demo-step-3]')).toBeVisible();
-    await page.waitForSelector('[data-test=demo-step-3-complete]', { timeout: 10000 });
+    await page.waitForSelector('[data-test=demo-step-3-complete]', {
+      timeout: 10000,
+    });
 
     // Step 4: Export with authority binding
     await expect(page.locator('[data-test=demo-step-4]')).toBeVisible();
-    await page.waitForSelector('[data-test=demo-step-4-complete]', { timeout: 10000 });
+    await page.waitForSelector('[data-test=demo-step-4-complete]', {
+      timeout: 10000,
+    });
 
     // Verify demo completion
     await expect(page.locator('[data-test=demo-complete]')).toBeVisible();
     await expect(page.getByText('Golden Path Demo Complete')).toBeVisible();
   });
 
-  test('real-time confidence scoring and source attribution', async ({ page }) => {
+  test('real-time confidence scoring and source attribution', async ({
+    page,
+  }) => {
     await page.getByText('Cases').click();
     await page.getByRole('row', { name: /CASE-123/ }).click();
 
@@ -128,10 +145,14 @@ test.describe('GA-Core UI Features - Tri-Pane & Overlays', () => {
     await page.waitForTimeout(1000);
 
     // Verify confidence indicators are present
-    await expect(page.locator('[data-test=confidence-indicator]')).toHaveCountGreaterThan(0);
+    await expect(
+      page.locator('[data-test=confidence-indicator]'),
+    ).toHaveCountGreaterThan(0);
 
     // Check confidence score values are within expected range (0-100)
-    const confidenceElements = await page.locator('[data-test=confidence-score]').all();
+    const confidenceElements = await page
+      .locator('[data-test=confidence-score]')
+      .all();
     for (const element of confidenceElements) {
       const score = await element.textContent();
       const scoreValue = parseInt(score?.replace('%', '') || '0');
@@ -140,7 +161,9 @@ test.describe('GA-Core UI Features - Tri-Pane & Overlays', () => {
     }
 
     // Verify source attribution
-    await expect(page.locator('[data-test=source-attribution]')).toHaveCountGreaterThan(0);
+    await expect(
+      page.locator('[data-test=source-attribution]'),
+    ).toHaveCountGreaterThan(0);
 
     // Click on an entity to see detailed attribution
     await page.locator('[data-test=graph-entity]').first().click();
@@ -161,7 +184,9 @@ test.describe('GA-Core UI Features - Tri-Pane & Overlays', () => {
     const accessDenied = page.locator('[data-test=access-denied]');
 
     // Either authority dialog or access denied should appear
-    await expect(authorityDialog.or(accessDenied)).toBeVisible({ timeout: 5000 });
+    await expect(authorityDialog.or(accessDenied)).toBeVisible({
+      timeout: 5000,
+    });
 
     // If authority dialog, verify it shows clearance requirements
     if (await authorityDialog.isVisible()) {

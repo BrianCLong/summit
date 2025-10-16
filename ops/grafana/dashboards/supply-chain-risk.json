@@ -13,7 +13,7 @@
         "name": "prom",
         "type": "datasource",
         "query": "prometheus",
-        "current": {"text": "Prometheus", "value": "PROM_DS"},
+        "current": { "text": "Prometheus", "value": "PROM_DS" },
         "options": []
       },
       {
@@ -30,7 +30,7 @@
     {
       "type": "timeSeries",
       "title": "CVE Burn-down vs Budget",
-      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -48,7 +48,7 @@
     {
       "type": "table",
       "title": "Open Waivers",
-      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
       "datasource": "PROM_DS",
       "transformations": [
         {
@@ -65,14 +65,14 @@
       "fieldConfig": {
         "defaults": {
           "unit": "h",
-          "custom": {"align": "center"}
+          "custom": { "align": "center" }
         }
       }
     },
     {
       "type": "stat",
       "title": "% Signed Artifacts",
-      "gridPos": {"x": 0, "y": 8, "w": 8, "h": 4},
+      "gridPos": { "x": 0, "y": 8, "w": 8, "h": 4 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -87,9 +87,9 @@
           "thresholds": {
             "mode": "percentage",
             "steps": [
-              {"value": null, "color": "red"},
-              {"value": 95, "color": "yellow"},
-              {"value": 99, "color": "green"}
+              { "value": null, "color": "red" },
+              { "value": 95, "color": "yellow" },
+              { "value": 99, "color": "green" }
             ]
           }
         }
@@ -98,7 +98,7 @@
     {
       "type": "stat",
       "title": "Attestation Coverage",
-      "gridPos": {"x": 8, "y": 8, "w": 8, "h": 4},
+      "gridPos": { "x": 8, "y": 8, "w": 8, "h": 4 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -113,9 +113,9 @@
           "thresholds": {
             "mode": "percentage",
             "steps": [
-              {"value": null, "color": "red"},
-              {"value": 95, "color": "yellow"},
-              {"value": 99, "color": "green"}
+              { "value": null, "color": "red" },
+              { "value": 95, "color": "yellow" },
+              { "value": 99, "color": "green" }
             ]
           }
         }
@@ -124,7 +124,7 @@
     {
       "type": "bargauge",
       "title": "Waivers expiring <24h",
-      "gridPos": {"x": 16, "y": 8, "w": 8, "h": 4},
+      "gridPos": { "x": 16, "y": 8, "w": 8, "h": 4 },
       "datasource": "PROM_DS",
       "targets": [
         {

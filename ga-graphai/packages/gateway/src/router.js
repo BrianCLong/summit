@@ -3,7 +3,7 @@ import {
   computeValueDensity,
   normalizeLatency,
   percentile,
-  updateEma
+  updateEma,
 } from 'common-types';
 
 function normalSample() {
@@ -56,7 +56,7 @@ function initHistory(candidate) {
     latencyEma: latency.p95 ?? 400,
     latencySamples: [],
     coverageEma: 0.8,
-    decisions: 0
+    decisions: 0,
   };
 }
 
@@ -68,7 +68,9 @@ export class ValueDensityRouter {
   }
 
   registerOutcome(candidateId, outcome) {
-    const record = this.history.get(candidateId) ?? initHistory({ latencyMs: { p95: outcome.lat } });
+    const record =
+      this.history.get(candidateId) ??
+      initHistory({ latencyMs: { p95: outcome.lat } });
     record.qualityAlpha += outcome.quality ?? 0;
     record.qualityBeta += Math.max(0, 1 - (outcome.quality ?? 0));
     record.costEma = updateEma(record.costEma, outcome.cost);
@@ -88,11 +90,16 @@ export class ValueDensityRouter {
 
   choose(task, candidates, budgetStatus) {
     const arms = [];
-    const latencyLimit = task?.policy?.latencyP95Max ?? task?.latencyP95Max ?? 350;
-    const costLimit = task?.policy?.unitCostMax ?? task?.unitCostMax ?? Infinity;
+    const latencyLimit =
+      task?.policy?.latencyP95Max ?? task?.latencyP95Max ?? 350;
+    const costLimit =
+      task?.policy?.unitCostMax ?? task?.unitCostMax ?? Infinity;
     for (const candidate of candidates) {
       const history = this.history.get(candidate.id) ?? initHistory(candidate);
-      const qualitySample = betaSample(history.qualityAlpha, history.qualityBeta);
+      const qualitySample = betaSample(
+        history.qualityAlpha,
+        history.qualityBeta,
+      );
       const coverage = this.estimateCoverage(task, candidate, history);
       const cost = this.estimateCost(candidate, history, budgetStatus);
       const latency = this.estimateLatency(candidate, history, budgetStatus);
@@ -100,7 +107,7 @@ export class ValueDensityRouter {
         quality: qualitySample,
         coverage,
         cost,
-        latency
+        latency,
       });
       if (latency > latencyLimit) {
         V = 0;
@@ -111,17 +118,17 @@ export class ValueDensityRouter {
       arms.push({
         id: candidate.id,
         V,
-        metrics: { quality: qualitySample, coverage, cost, latency }
+        metrics: { quality: qualitySample, coverage, cost, latency },
       });
     }
     arms.sort((a, b) => b.V - a.V);
     const best = arms[0];
     const fallback = arms.find((arm) => arm.id === this.baselineArmId);
-    const chosen = best && best.V > 0 ? best : fallback ?? best;
+    const chosen = best && best.V > 0 ? best : (fallback ?? best);
     return {
       chosen: chosen?.id,
       arms,
-      pred: chosen?.metrics ?? { quality: 0, coverage: 0, cost: 0, latency: 0 }
+      pred: chosen?.metrics ?? { quality: 0, coverage: 0, cost: 0, latency: 0 },
     };
   }
 
@@ -133,7 +140,7 @@ export class ValueDensityRouter {
     const coverage = aggregateCoverage([
       base,
       skillMatches > 0 ? 0.95 : 0.7,
-      history.coverageEma
+      history.coverageEma,
     ]);
     return coverage;
   }

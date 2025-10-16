@@ -1,7 +1,7 @@
 name: nightly-ops-delta
 on:
   schedule:
-    - cron: "10 2 * * *"   # 02:10 UTC
+    - cron: '10 2 * * *' # 02:10 UTC
   workflow_dispatch: {}
 jobs:
   daily:
@@ -16,12 +16,12 @@ jobs:
       # Run comprehensive operations delta generator
       - name: Generate daily ops delta
         env:
-          PROM_URL: ${{ secrets.PROM_URL }}                     # e.g., https://prom.example.com
+          PROM_URL: ${{ secrets.PROM_URL }} # e.g., https://prom.example.com
           NAMESPACE: intelgraph-prod
           SERVICE: agent-workbench
           TENANTS_CSV: TENANT_001,TENANT_002,TENANT_003,TENANT_004,TENANT_005
-          GRAFANA_URL: ${{ secrets.GRAFANA_DASH_URL }}          # optional dashboard link
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}   # posts summary if set
+          GRAFANA_URL: ${{ secrets.GRAFANA_DASH_URL }} # optional dashboard link
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # posts summary if set
         run: |
           chmod +x scripts/generate-operations-delta.sh
           ./scripts/generate-operations-delta.sh

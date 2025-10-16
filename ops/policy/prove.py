@@ -9,23 +9,24 @@ no violation paths exist. Blocks PRs with counterexamples.
 
 import json
 import os
+import re
 import subprocess
 import tempfile
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Set
-import re
+from typing import Any
 
 
 @dataclass
 class PolicyRule:
     """OPA policy rule representation"""
+
     name: str
     package: str
     rule_type: str  # "allow", "deny", "data"
-    conditions: List[str]
+    conditions: list[str]
     body: str
     file_path: str
     line_number: int
@@ -34,8 +35,9 @@ class PolicyRule:
 @dataclass
 class SMTConstraint:
     """SMT-LIB constraint representation"""
+
     name: str
-    variables: Set[str]
+    variables: set[str]
     constraint: str
     source_rule: str
 
@@ -43,26 +45,28 @@ class SMTConstraint:
 @dataclass
 class ProofResult:
     """Result of SMT proof attempt"""
+
     rule_name: str
     property: str
     result: str  # "UNSAT" (proven), "SAT" (counterexample), "UNKNOWN"
     solver_time_ms: float
-    counterexample: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
+    counterexample: dict[str, Any] | None = None
+    error: str | None = None
 
 
 @dataclass
 class PolicyProofReport:
     """Complete policy proof report"""
+
     timestamp: str
     commit_hash: str
     total_rules: int
     proven_safe: int
     counterexamples: int
     unknown_results: int
-    proof_results: List[ProofResult]
-    critical_violations: List[str]
-    smt_files_generated: List[str]
+    proof_results: list[ProofResult]
+    critical_violations: list[str]
+    smt_files_generated: list[str]
 
 
 class PolicyProofEngine:
@@ -80,24 +84,24 @@ class PolicyProofEngine:
             "persisted_only": "Only persisted queries are executed",
             "tenant_isolation": "No cross-tenant data access",
             "purpose_limitation": "Data used only for declared purposes",
-            "encryption_required": "All PII must be encrypted at rest"
+            "encryption_required": "All PII must be encrypted at rest",
         }
 
-    def parse_opa_policies(self) -> List[PolicyRule]:
+    def parse_opa_policies(self) -> list[PolicyRule]:
         """Parse OPA policies from .rego files"""
         rules = []
 
         for rego_file in self.opa_root.glob("**/*.rego"):
             try:
-                with open(rego_file, 'r') as f:
+                with open(rego_file) as f:
                     content = f.read()
 
                 # Extract package
-                package_match = re.search(r'package\s+([a-zA-Z0-9_.]+)', content)
+                package_match = re.search(r"package\s+([a-zA-Z0-9_.]+)", content)
                 package_name = package_match.group(1) if package_match else "unknown"
 
                 # Extract rules (simplified parsing)
-                rule_pattern = r'(\w+)\s*(:=|=)\s*\{([^}]*)\}'
+                rule_pattern = r"(\w+)\s*(:=|=)\s*\{([^}]*)\}"
                 for match in re.finditer(rule_pattern, content, re.MULTILINE | re.DOTALL):
                     rule_name = match.group(1)
                     rule_body = match.group(3).strip()
@@ -109,8 +113,11 @@ class PolicyProofEngine:
                         rule_type = "data"
 
                     # Extract conditions (simplified)
-                    conditions = [line.strip() for line in rule_body.split('\n')
-                                if line.strip() and not line.strip().startswith('#')]
+                    conditions = [
+                        line.strip()
+                        for line in rule_body.split("\n")
+                        if line.strip() and not line.strip().startswith("#")
+                    ]
 
                     rule = PolicyRule(
                         name=rule_name,
@@ -119,7 +126,7 @@ class PolicyProofEngine:
                         conditions=conditions,
                         body=rule_body,
                         file_path=str(rego_file),
-                        line_number=content[:match.start()].count('\n') + 1
+                        line_number=content[: match.start()].count("\n") + 1,
                     )
                     rules.append(rule)
 
@@ -128,7 +135,7 @@ class PolicyProofEngine:
 
         return rules
 
-    def translate_to_smt(self, rules: List[PolicyRule]) -> List[SMTConstraint]:
+    def translate_to_smt(self, rules: list[PolicyRule]) -> list[SMTConstraint]:
         """Translate OPA rules to SMT-LIB constraints"""
         constraints = []
 
@@ -142,7 +149,7 @@ class PolicyProofEngine:
 
         return constraints
 
-    def _rule_to_smt(self, rule: PolicyRule) -> Optional[SMTConstraint]:
+    def _rule_to_smt(self, rule: PolicyRule) -> SMTConstraint | None:
         """Convert single OPA rule to SMT constraint"""
         variables = set()
         smt_parts = []
@@ -160,7 +167,7 @@ class PolicyProofEngine:
                     name=f"no_violation_{rule.name}",
                     variables=variables,
                     constraint=smt_constraint,
-                    source_rule=f"{rule.package}.{rule.name}"
+                    source_rule=f"{rule.package}.{rule.name}",
                 )
 
         elif rule.rule_type == "deny":
@@ -173,46 +180,46 @@ class PolicyProofEngine:
                     name=f"always_deny_{rule.name}",
                     variables=variables,
                     constraint=smt_constraint,
-                    source_rule=f"{rule.package}.{rule.name}"
+                    source_rule=f"{rule.package}.{rule.name}",
                 )
 
         return None
 
-    def _translate_rule_body(self, body: str, variables: Set[str]) -> Optional[str]:
+    def _translate_rule_body(self, body: str, variables: set[str]) -> str | None:
         """Translate OPA rule body to SMT expression"""
         # Simplified translation - extend for full OPA support
         smt_parts = []
 
-        for condition in body.split('\n'):
+        for condition in body.split("\n"):
             condition = condition.strip()
-            if not condition or condition.startswith('#'):
+            if not condition or condition.startswith("#"):
                 continue
 
             # Handle common OPA patterns
-            if 'input.tenant_id' in condition:
-                variables.add('tenant_id')
-                if '!=' in condition:
+            if "input.tenant_id" in condition:
+                variables.add("tenant_id")
+                if "!=" in condition:
                     # tenant isolation check
                     smt_parts.append("(not (= tenant_id target_tenant))")
-                elif '==' in condition:
+                elif "==" in condition:
                     smt_parts.append("(= tenant_id target_tenant)")
 
-            elif 'input.data_residency' in condition:
-                variables.add('data_residency')
-                variables.add('required_residency')
+            elif "input.data_residency" in condition:
+                variables.add("data_residency")
+                variables.add("required_residency")
                 smt_parts.append("(= data_residency required_residency)")
 
-            elif 'persisted_queries' in condition:
-                variables.add('is_persisted')
+            elif "persisted_queries" in condition:
+                variables.add("is_persisted")
                 smt_parts.append("(= is_persisted true)")
 
-            elif 'purpose' in condition:
-                variables.add('data_purpose')
-                variables.add('declared_purpose')
+            elif "purpose" in condition:
+                variables.add("data_purpose")
+                variables.add("declared_purpose")
                 smt_parts.append("(= data_purpose declared_purpose)")
 
-            elif 'encrypted' in condition:
-                variables.add('is_encrypted')
+            elif "encrypted" in condition:
+                variables.add("is_encrypted")
                 smt_parts.append("(= is_encrypted true)")
 
         if smt_parts:
@@ -220,7 +227,7 @@ class PolicyProofEngine:
 
         return None
 
-    def generate_smt_file(self, constraints: List[SMTConstraint], property_name: str) -> str:
+    def generate_smt_file(self, constraints: list[SMTConstraint], property_name: str) -> str:
         """Generate complete SMT-LIB file for verification"""
         smt_content = [
             "; MC Platform v0.3.6 Policy Proof",
@@ -232,7 +239,7 @@ class PolicyProofEngine:
             "(declare-sort Residency)",
             "(declare-sort Purpose)",
             "",
-            "; Declare variables"
+            "; Declare variables",
         ]
 
         # Collect all variables
@@ -242,13 +249,13 @@ class PolicyProofEngine:
 
         # Declare variables
         for var in sorted(all_variables):
-            if var in ['tenant_id', 'target_tenant']:
+            if var in ["tenant_id", "target_tenant"]:
                 smt_content.append(f"(declare-const {var} Tenant)")
-            elif var in ['data_residency', 'required_residency']:
+            elif var in ["data_residency", "required_residency"]:
                 smt_content.append(f"(declare-const {var} Residency)")
-            elif var in ['data_purpose', 'declared_purpose']:
+            elif var in ["data_purpose", "declared_purpose"]:
                 smt_content.append(f"(declare-const {var} Purpose)")
-            elif var in ['is_persisted', 'is_encrypted']:
+            elif var in ["is_persisted", "is_encrypted"]:
                 smt_content.append(f"(declare-const {var} Bool)")
 
         smt_content.append("")
@@ -259,30 +266,25 @@ class PolicyProofEngine:
             smt_content.append(f"; From rule: {constraint.source_rule}")
             smt_content.append(constraint.constraint)
 
-        smt_content.extend([
-            "",
-            "; Check satisfiability",
-            "(check-sat)",
-            "(get-model)"
-        ])
+        smt_content.extend(["", "; Check satisfiability", "(check-sat)", "(get-model)"])
 
-        return '\n'.join(smt_content)
+        return "\n".join(smt_content)
 
     def run_smt_solver(self, smt_content: str, timeout: int = 30) -> ProofResult:
         """Run SMT solver on constraints"""
         start_time = time.time()
 
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.smt2', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".smt2", delete=False) as f:
                 f.write(smt_content)
                 smt_file = f.name
 
             # Run Z3 solver
             result = subprocess.run(
-                ['z3', '-T:' + str(timeout), smt_file],
+                ["z3", "-T:" + str(timeout), smt_file],
                 capture_output=True,
                 text=True,
-                timeout=timeout + 5
+                timeout=timeout + 5,
             )
 
             solver_time = (time.time() - start_time) * 1000
@@ -290,14 +292,14 @@ class PolicyProofEngine:
             if result.returncode == 0:
                 output = result.stdout.strip()
 
-                if output.startswith('unsat'):
+                if output.startswith("unsat"):
                     return ProofResult(
                         rule_name="combined",
                         property="formal_verification",
                         result="UNSAT",
-                        solver_time_ms=solver_time
+                        solver_time_ms=solver_time,
                     )
-                elif output.startswith('sat'):
+                elif output.startswith("sat"):
                     # Extract counterexample
                     counterexample = self._parse_counterexample(result.stdout)
                     return ProofResult(
@@ -305,7 +307,7 @@ class PolicyProofEngine:
                         property="formal_verification",
                         result="SAT",
                         solver_time_ms=solver_time,
-                        counterexample=counterexample
+                        counterexample=counterexample,
                     )
                 else:
                     return ProofResult(
@@ -313,7 +315,7 @@ class PolicyProofEngine:
                         property="formal_verification",
                         result="UNKNOWN",
                         solver_time_ms=solver_time,
-                        error=f"Unexpected output: {output}"
+                        error=f"Unexpected output: {output}",
                     )
             else:
                 return ProofResult(
@@ -321,7 +323,7 @@ class PolicyProofEngine:
                     property="formal_verification",
                     result="ERROR",
                     solver_time_ms=solver_time,
-                    error=result.stderr
+                    error=result.stderr,
                 )
 
         except subprocess.TimeoutExpired:
@@ -330,7 +332,7 @@ class PolicyProofEngine:
                 property="formal_verification",
                 result="TIMEOUT",
                 solver_time_ms=timeout * 1000,
-                error="Solver timeout"
+                error="Solver timeout",
             )
         except Exception as e:
             return ProofResult(
@@ -338,7 +340,7 @@ class PolicyProofEngine:
                 property="formal_verification",
                 result="ERROR",
                 solver_time_ms=(time.time() - start_time) * 1000,
-                error=str(e)
+                error=str(e),
             )
         finally:
             # Cleanup
@@ -347,19 +349,19 @@ class PolicyProofEngine:
             except:
                 pass
 
-    def _parse_counterexample(self, solver_output: str) -> Dict[str, Any]:
+    def _parse_counterexample(self, solver_output: str) -> dict[str, Any]:
         """Parse counterexample from solver output"""
         counterexample = {}
 
         # Simple parsing of Z3 model output
-        for line in solver_output.split('\n'):
+        for line in solver_output.split("\n"):
             line = line.strip()
-            if '(define-fun' in line and '()' in line:
+            if "(define-fun" in line and "()" in line:
                 # Extract variable assignments
                 parts = line.split()
                 if len(parts) >= 4:
                     var_name = parts[1]
-                    var_value = parts[-2] if parts[-1] == ')' else parts[-1]
+                    var_value = parts[-2] if parts[-1] == ")" else parts[-1]
                     counterexample[var_name] = var_value
 
         return counterexample
@@ -370,7 +372,7 @@ class PolicyProofEngine:
 
         # Get current commit hash
         try:
-            commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
+            commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
         except:
             commit_hash = "unknown"
 
@@ -393,7 +395,7 @@ class PolicyProofEngine:
             smt_content = self.generate_smt_file(constraints, property_name)
             smt_file = self.evidence_dir / f"{property_name}.smt2"
 
-            with open(smt_file, 'w') as f:
+            with open(smt_file, "w") as f:
                 f.write(smt_content)
 
             smt_files.append(str(smt_file))
@@ -421,7 +423,8 @@ class PolicyProofEngine:
         unknown_results = len(proof_results) - proven_safe - counterexamples
 
         critical_violations = [
-            r.property for r in proof_results
+            r.property
+            for r in proof_results
             if r.result == "SAT" and "residency" in r.rule_name.lower()
         ]
 
@@ -434,17 +437,17 @@ class PolicyProofEngine:
             unknown_results=unknown_results,
             proof_results=proof_results,
             critical_violations=critical_violations,
-            smt_files_generated=smt_files
+            smt_files_generated=smt_files,
         )
 
         # Save report
         if not output_file:
             output_file = self.evidence_dir / "proof-report.json"
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(asdict(report), f, indent=2)
 
-        print(f"\n📊 Proof Summary:")
+        print("\n📊 Proof Summary:")
         print(f"   Proven safe: {proven_safe}/{len(self.critical_properties)}")
         print(f"   Counterexamples: {counterexamples}")
         print(f"   Unknown: {unknown_results}")
@@ -473,7 +476,7 @@ def main():
         print("Fix policy violations before merging.")
         exit(1)
 
-    print(f"\n✅ All critical properties proven safe!")
+    print("\n✅ All critical properties proven safe!")
     exit(0)
 
 

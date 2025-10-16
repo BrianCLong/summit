@@ -36,7 +36,9 @@ interface AuthenticatedUser {
 
 // JWKS client for OIDC token verification
 const jwksClientInstance = jwksClient({
-  jwksUri: process.env.OIDC_JWKS_URI || 'https://auth.intelgraph.com/.well-known/jwks.json',
+  jwksUri:
+    process.env.OIDC_JWKS_URI ||
+    'https://auth.intelgraph.com/.well-known/jwks.json',
   cache: true,
   cacheMaxEntries: 5,
   cacheMaxAge: 600000, // 10 minutes
@@ -199,16 +201,26 @@ async function getUserFromDatabase(
 
 function mapClaimsToPermissions(payload: any): string[] {
   const out: string[] = [];
-  const scopes: string[] = (payload?.scope||'').split(' ').filter(Boolean);
-  const claimsPerms: string[] = Array.isArray(payload?.permissions) ? payload.permissions : [];
+  const scopes: string[] = (payload?.scope || '').split(' ').filter(Boolean);
+  const claimsPerms: string[] = Array.isArray(payload?.permissions)
+    ? payload.permissions
+    : [];
   const groups: string[] = Array.isArray(payload?.groups) ? payload.groups : [];
-  for(const s of scopes){ out.push(s); }
-  for(const p of claimsPerms){ out.push(p); }
-  if(groups.includes('admins')) out.push('*:*');
+  for (const s of scopes) {
+    out.push(s);
+  }
+  for (const p of claimsPerms) {
+    out.push(p);
+  }
+  if (groups.includes('admins')) out.push('*:*');
   return out;
 }
 
-async function getUserPermissions(userId: string, role: string, payload?: any): Promise<string[]> {
+async function getUserPermissions(
+  userId: string,
+  role: string,
+  payload?: any,
+): Promise<string[]> {
   try {
     // Get permissions from cache first
     const cacheKey = `user:permissions:${userId}`;
@@ -220,7 +232,12 @@ async function getUserPermissions(userId: string, role: string, payload?: any): 
 
     // Base permissions by role
     const basePermissions: Record<string, string[]> = {
-      viewer: ['entity:read', 'relationship:read', 'investigation:read', 'copilot:query'],
+      viewer: [
+        'entity:read',
+        'relationship:read',
+        'investigation:read',
+        'copilot:query',
+      ],
       analyst: [
         'entity:read',
         'entity:create',
@@ -275,8 +292,8 @@ async function getUserPermissions(userId: string, role: string, payload?: any): 
     };
 
     const permissions = basePermissions[role] || basePermissions['viewer'];
-    const extra = mapClaimsToPermissions(payload||{});
-    const merged = Array.from(new Set([ ...permissions, ...extra ]));
+    const extra = mapClaimsToPermissions(payload || {});
+    const merged = Array.from(new Set([...permissions, ...extra]));
 
     // Cache permissions for 15 minutes
     await redisClient.set(cacheKey, merged, 900);
@@ -297,7 +314,11 @@ async function getUserPermissions(userId: string, role: string, payload?: any): 
 
 async function updateUserLastActive(userId: string): Promise<void> {
   try {
-    await postgresPool.update('users', { last_active_at: new Date() }, { id: userId });
+    await postgresPool.update(
+      'users',
+      { last_active_at: new Date() },
+      { id: userId },
+    );
   } catch (error) {
     // Don't fail auth if we can't update last active time
     logger.warn({
@@ -322,11 +343,14 @@ export function requirePermission(permission: string) {
     }
 
     // Admin wildcard check
-    if (user.permissions.includes('*:*')) { auditLog(req,'authz.allow',{ permission }); return next(); }
+    if (user.permissions.includes('*:*')) {
+      auditLog(req, 'authz.allow', { permission });
+      return next();
+    }
 
     // Specific permission check
     if (user.permissions.includes(permission)) {
-      auditLog(req,'authz.allow',{ permission });
+      auditLog(req, 'authz.allow', { permission });
       return next();
     }
 
@@ -334,9 +358,12 @@ export function requirePermission(permission: string) {
     const [resource, action] = permission.split(':');
     const wildcardPermission = `${resource}:*`;
 
-    if (user.permissions.includes(wildcardPermission)) { auditLog(req,'authz.allow',{ permission }); return next(); }
+    if (user.permissions.includes(wildcardPermission)) {
+      auditLog(req, 'authz.allow', { permission });
+      return next();
+    }
 
-    auditLog(req,'authz.deny',{ permission });
+    auditLog(req, 'authz.deny', { permission });
     res.status(403).json({
       error: 'Insufficient permissions',
       code: 'AUTH_INSUFFICIENT_PERMISSIONS',
@@ -362,7 +389,10 @@ export async function revokeToken(req: Request, res: Response): Promise<void> {
     // Add token to blacklist with expiration matching token expiration
     const decoded = jwt.decode(token) as JWTPayload;
     const expirationTime = decoded.exp * 1000; // Convert to milliseconds
-    const ttlSeconds = Math.max(0, Math.floor((expirationTime - Date.now()) / 1000));
+    const ttlSeconds = Math.max(
+      0,
+      Math.floor((expirationTime - Date.now()) / 1000),
+    );
 
     await redisClient.set(`blacklist:${token}`, 'revoked', ttlSeconds);
 

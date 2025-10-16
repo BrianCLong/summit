@@ -33,13 +33,15 @@ const config = {
   apiKey: __ENV.API_KEY || '',
   prometheus: {
     enabled: __ENV.PROMETHEUS_ENABLED === 'true',
-    endpoint: __ENV.PROMETHEUS_GATEWAY || 'http://localhost:9091/metrics/job/k6-slo-trends',
+    endpoint:
+      __ENV.PROMETHEUS_GATEWAY ||
+      'http://localhost:9091/metrics/job/k6-slo-trends',
   },
   scenarios: {
     baseline: { vus: 10, duration: '2m' },
     stress: { vus: 50, duration: '3m' },
     spike: { vus: 100, duration: '1m' },
-  }
+  },
 };
 
 // Load test configuration
@@ -78,22 +80,22 @@ export const options = {
   // SLO thresholds
   thresholds: {
     // Primary SLO targets
-    'api_latency_p95': ['p(95)<200'],
-    'api_error_rate': ['rate<0.01'],
+    api_latency_p95: ['p(95)<200'],
+    api_error_rate: ['rate<0.01'],
     'http_req_duration{scenario:baseline}': ['p(95)<150'],
 
     // Health check SLOs
-    'health_check_latency': ['p(95)<50'],
+    health_check_latency: ['p(95)<50'],
 
     // GraphQL specific SLOs
-    'graphql_latency': ['p(95)<300'],
+    graphql_latency: ['p(95)<300'],
 
     // Business logic SLOs
-    'entity_retrieval_time': ['p(95)<500'],
-    'search_latency': ['p(95)<1000'],
+    entity_retrieval_time: ['p(95)<500'],
+    search_latency: ['p(95)<1000'],
 
     // Availability SLOs
-    'checks': ['rate>0.99'],
+    checks: ['rate>0.99'],
   },
 
   // Output configuration
@@ -101,14 +103,18 @@ export const options = {
 
   // External output (for CI/CD integration)
   ext: {
-    prometheus: config.prometheus.enabled ? {
-      addr: config.prometheus.endpoint,
-    } : undefined,
+    prometheus: config.prometheus.enabled
+      ? {
+          addr: config.prometheus.endpoint,
+        }
+      : undefined,
   },
 };
 
 console.log(`🎯 SLO Trend Monitoring targeting: ${config.target}`);
-console.log(`📊 Prometheus integration: ${config.prometheus.enabled ? 'enabled' : 'disabled'}`);
+console.log(
+  `📊 Prometheus integration: ${config.prometheus.enabled ? 'enabled' : 'disabled'}`,
+);
 
 // Request headers configuration
 function getHeaders() {
@@ -137,7 +143,7 @@ export default function () {
   const healthStart = Date.now();
   let response = http.get(`${config.target}/health`, {
     headers,
-    tags: { endpoint: 'health', scenario }
+    tags: { endpoint: 'health', scenario },
   });
 
   const healthDuration = Date.now() - healthStart;
@@ -156,7 +162,7 @@ export default function () {
   // 2. Ready check with detailed validation
   response = http.get(`${config.target}/health/ready`, {
     headers,
-    tags: { endpoint: 'ready', scenario }
+    tags: { endpoint: 'ready', scenario },
   });
 
   const readyOk = check(response, {
@@ -213,8 +219,8 @@ export default function () {
     JSON.stringify(graphqlQuery),
     {
       headers: { ...headers, 'Content-Type': 'application/json' },
-      tags: { endpoint: 'graphql', scenario, operation: 'introspection' }
-    }
+      tags: { endpoint: 'graphql', scenario, operation: 'introspection' },
+    },
   );
 
   const graphqlDuration = Date.now() - graphqlStart;
@@ -245,7 +251,7 @@ export default function () {
 
     response = http.get(`${config.target}/api/v1/entities/${entityId}`, {
       headers,
-      tags: { endpoint: 'entity', scenario, operation: 'get' }
+      tags: { endpoint: 'entity', scenario, operation: 'get' },
     });
 
     const entityDuration = Date.now() - entityStart;
@@ -254,7 +260,8 @@ export default function () {
 
     // Accept 404s as valid for non-existent entities
     const entityOk = check(response, {
-      '✅ Entity endpoint accessible': (r) => r.status === 200 || r.status === 404,
+      '✅ Entity endpoint accessible': (r) =>
+        r.status === 200 || r.status === 404,
       '⚡ Entity response time <500ms': (r) => r.timings.duration < 500,
     });
 
@@ -264,7 +271,8 @@ export default function () {
   }
 
   // 5. Simulated search operation
-  if (Math.random() < 0.3) { // 30% of requests include search
+  if (Math.random() < 0.3) {
+    // 30% of requests include search
     const searchStart = Date.now();
     const searchQuery = {
       query: 'test entity',
@@ -276,8 +284,8 @@ export default function () {
       JSON.stringify(searchQuery),
       {
         headers,
-        tags: { endpoint: 'search', scenario, operation: 'query' }
-      }
+        tags: { endpoint: 'search', scenario, operation: 'query' },
+      },
     );
 
     const searchDuration = Date.now() - searchStart;
@@ -285,7 +293,8 @@ export default function () {
     apiThroughput.add(1);
 
     const searchOk = check(response, {
-      '✅ Search endpoint responds': (r) => r.status === 200 || r.status === 400,
+      '✅ Search endpoint responds': (r) =>
+        r.status === 200 || r.status === 400,
       '⚡ Search response time <1000ms': (r) => r.timings.duration < 1000,
     });
 
@@ -328,17 +337,21 @@ export function setup() {
 export function teardown(data) {
   const duration = (new Date() - data.startTime) / 1000;
   console.log(`✅ SLO trend monitoring completed in ${duration.toFixed(1)}s`);
-  console.log('📈 Check output above for detailed SLO compliance and trend data');
+  console.log(
+    '📈 Check output above for detailed SLO compliance and trend data',
+  );
 
   if (config.prometheus.enabled) {
-    console.log(`📊 Metrics exported to Prometheus: ${config.prometheus.endpoint}`);
+    console.log(
+      `📊 Metrics exported to Prometheus: ${config.prometheus.endpoint}`,
+    );
   }
 }
 
 // Custom summary handler for trend analysis
 export function handleSummary(data) {
   const summary = {
-    'stdout': textSummary(data, { indent: '  ', enableColors: true })
+    stdout: textSummary(data, { indent: '  ', enableColors: true }),
   };
 
   // Generate JSON summary for CI/CD integration
@@ -361,10 +374,12 @@ export function handleSummary(data) {
         search_p95: data.metrics.search_latency?.values?.['p(95)'] || 0,
       },
       thresholds_passed: Object.keys(data.thresholds || {}).filter(
-        key => data.thresholds[key].ok
+        (key) => data.thresholds[key].ok,
       ).length,
       total_thresholds: Object.keys(data.thresholds || {}).length,
-      passed: Object.values(data.thresholds || {}).every(threshold => threshold.ok),
+      passed: Object.values(data.thresholds || {}).every(
+        (threshold) => threshold.ok,
+      ),
     });
   }
 
@@ -386,15 +401,21 @@ function generatePrometheusMetrics(data) {
 
   // Add main SLO metrics
   if (data.metrics.api_latency_p95?.values?.['p(95)']) {
-    metrics.push(`k6_slo_latency_p95{${labels}} ${data.metrics.api_latency_p95.values['p(95)']} ${timestamp}`);
+    metrics.push(
+      `k6_slo_latency_p95{${labels}} ${data.metrics.api_latency_p95.values['p(95)']} ${timestamp}`,
+    );
   }
 
   if (data.metrics.api_error_rate?.values?.rate !== undefined) {
-    metrics.push(`k6_slo_error_rate{${labels}} ${data.metrics.api_error_rate.values.rate} ${timestamp}`);
+    metrics.push(
+      `k6_slo_error_rate{${labels}} ${data.metrics.api_error_rate.values.rate} ${timestamp}`,
+    );
   }
 
   if (data.metrics.api_requests_total?.values?.count) {
-    metrics.push(`k6_slo_requests_total{${labels}} ${data.metrics.api_requests_total.values.count} ${timestamp}`);
+    metrics.push(
+      `k6_slo_requests_total{${labels}} ${data.metrics.api_requests_total.values.count} ${timestamp}`,
+    );
   }
 
   return metrics.join('\n') + '\n';
@@ -438,7 +459,7 @@ ${indent}🔍 GraphQL: ${data.metrics.graphql_latency?.values?.['p(95)']?.toFixe
 ${indent}📦 Entity Retrieval: ${data.metrics.entity_retrieval_time?.values?.['p(95)']?.toFixed(1) || 'N/A'}ms p95
 ${indent}🔍 Search: ${data.metrics.search_latency?.values?.['p(95)']?.toFixed(1) || 'N/A'}ms p95
 ${indent}
-${indent}Overall SLO Status: ${Object.values(sloStatus).every(s => s === '✅') ? '🎉 PASSED' : '🚨 FAILED'}
+${indent}Overall SLO Status: ${Object.values(sloStatus).every((s) => s === '✅') ? '🎉 PASSED' : '🚨 FAILED'}
 ${indent}Test Duration: ${data.state.testRunDurationMs / 1000}s
 ${indent}
 `;

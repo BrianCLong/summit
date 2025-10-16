@@ -36,12 +36,16 @@ function parseArgs(argv) {
 async function run() {
   const { command, options } = parseArgs(process.argv);
   if (!command || (command !== 'build' && command !== 'linkcheck')) {
-    console.error('Usage: docforge <build|linkcheck> [--out <dir>] [--root <dir>] [--version <value>]');
+    console.error(
+      'Usage: docforge <build|linkcheck> [--out <dir>] [--root <dir>] [--version <value>]',
+    );
     process.exitCode = 1;
     return;
   }
 
-  const rootDir = options.root ? path.resolve(process.cwd(), options.root) : process.cwd();
+  const rootDir = options.root
+    ? path.resolve(process.cwd(), options.root)
+    : process.cwd();
 
   try {
     if (command === 'build') {
@@ -49,12 +53,12 @@ async function run() {
       await buildSite({
         rootDir,
         outDir: path.resolve(process.cwd(), outDir),
-        version: options.version
+        version: options.version,
       });
     } else if (command === 'linkcheck') {
       const targetDir = options.root ? options.root : 'docs/site';
       const result = await linkCheck({
-        rootDir: path.resolve(process.cwd(), targetDir)
+        rootDir: path.resolve(process.cwd(), targetDir),
       });
       if (result.broken.length > 0) {
         console.error('Broken internal links detected:');

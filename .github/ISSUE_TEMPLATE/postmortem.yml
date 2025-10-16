@@ -1,4 +1,4 @@
-name: "🧾 Postmortem"
+name: '🧾 Postmortem'
 description: Blameless postmortem for a resolved incident
 labels: [postmortem]
 body:

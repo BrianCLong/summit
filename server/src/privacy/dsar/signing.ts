@@ -3,7 +3,10 @@ import type { ExportManifest, SignedExportPack } from './types';
 import { hashDeterministic } from './proofs';
 
 export class ExportPackSigner {
-  constructor(private readonly privateKeyPem: string, private readonly publicKeyPem: string) {}
+  constructor(
+    private readonly privateKeyPem: string,
+    private readonly publicKeyPem: string,
+  ) {}
 
   sign(payload: string, manifest: ExportManifest): SignedExportPack {
     const digest = crypto.createHash('sha256').update(payload).digest('hex');

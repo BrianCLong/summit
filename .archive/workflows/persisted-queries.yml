@@ -54,20 +54,20 @@ jobs:
           pnpm start &
           SERVER_PID=$!
           sleep 10
-          
+
           # Test that unknown queries are rejected
           RESPONSE=$(curl -s -o /dev/null -w "%{{http_code}}" \
             -X POST http://localhost:4000/graphql \
             -H "Content-Type: application/json" \
             -d '{{"query": "query {{ __typename }}"}}
           )
-          
+
           if [ "$RESPONSE" != "400" ]; then
             echo "❌ Server should reject unknown queries with 400, got $RESPONSE"
             kill $SERVER_PID
             exit 1
           fi
-          
+
           echo "✅ Persisted query enforcement working"
           kill $SERVER_PID
         env:

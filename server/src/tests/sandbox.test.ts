@@ -12,7 +12,9 @@ const dockerAvailable = (() => {
 
 describe('sandbox execution', () => {
   it('blocks mutating queries', async () => {
-    await expect(executeSandbox('CREATE (n:Test)')).rejects.toThrow('Mutations are not allowed');
+    await expect(executeSandbox('CREATE (n:Test)')).rejects.toThrow(
+      'Mutations are not allowed',
+    );
   });
 
   (dockerAvailable ? it : it.skip)('runs read-only queries', async () => {

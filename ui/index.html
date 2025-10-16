@@ -68,7 +68,8 @@
 
       // Utility functions
       const formatTime = (date) => new Date(date).toLocaleTimeString();
-      const formatPercent = (val, total) => (total > 0 ? Math.round((val / total) * 100) : 0);
+      const formatPercent = (val, total) =>
+        total > 0 ? Math.round((val / total) * 100) : 0;
 
       // Custom hooks
       const useInterval = (fn, delay) => {
@@ -84,9 +85,14 @@
       };
 
       const useCountdown = (targetDate) => {
-        const [remaining, setRemaining] = useState(targetDate.getTime() - Date.now());
+        const [remaining, setRemaining] = useState(
+          targetDate.getTime() - Date.now(),
+        );
         useEffect(() => {
-          const id = setInterval(() => setRemaining(targetDate.getTime() - Date.now()), 1000);
+          const id = setInterval(
+            () => setRemaining(targetDate.getTime() - Date.now()),
+            1000,
+          );
           return () => clearInterval(id);
         }, [targetDate]);
         const s = Math.max(0, Math.floor(remaining / 1000));
@@ -97,13 +103,19 @@
       const api = {
         async fetch(endpoint, options = {}) {
           const config = cfgFromEnv();
-          const url = endpoint.startsWith('/') ? `${config.PROXY_BASE}${endpoint}` : endpoint;
+          const url = endpoint.startsWith('/')
+            ? `${config.PROXY_BASE}${endpoint}`
+            : endpoint;
           try {
             const response = await fetch(url, {
-              headers: { 'Content-Type': 'application/json', ...options.headers },
+              headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+              },
               ...options,
             });
-            if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+            if (!response.ok)
+              throw new Error(`${response.status} ${response.statusText}`);
             return await response.json();
           } catch (error) {
             console.error('API Error:', error);
@@ -160,7 +172,8 @@
           }),
 
         // Logs and monitoring
-        getLogs: (tail = 100, filter = '') => api.fetch(`/logs?tail=${tail}&filter=${filter}`),
+        getLogs: (tail = 100, filter = '') =>
+          api.fetch(`/logs?tail=${tail}&filter=${filter}`),
         runCommand: (cmd) =>
           api.fetch('/run', {
             method: 'POST',
@@ -207,7 +220,9 @@
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                       <span className="text-2xl">🎼</span>
-                      <h1 className="text-xl font-bold text-gray-900">SYMPHONY</h1>
+                      <h1 className="text-xl font-bold text-gray-900">
+                        SYMPHONY
+                      </h1>
                       <span className="text-sm text-gray-500">
                         ▸ {tabs.find((t) => t.id === activeTab)?.name}
                       </span>
@@ -281,7 +296,8 @@
                 ></div>
                 <span className="text-gray-600">
                   {service.name}
-                  {service.count ? `: ${service.count}` : ''}: {service.status.toUpperCase()}
+                  {service.count ? `: ${service.count}` : ''}:{' '}
+                  {service.status.toUpperCase()}
                 </span>
               </div>
             ))}
@@ -294,7 +310,9 @@
         <div className={`glass-card rounded-xl shadow-lg ${className}`}>
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            {actions && <div className="flex items-center space-x-2">{actions}</div>}
+            {actions && (
+              <div className="flex items-center space-x-2">{actions}</div>
+            )}
           </div>
           <div className="p-4">{children}</div>
         </div>
@@ -305,8 +323,20 @@
         const [health, setHealth] = useState(null);
         const [budgets, setBudgets] = useState(null);
         const [recentRoutes] = useState([
-          { task: 'nl2cy', model: 'local/llama', loa: 1, cost: 0.0, tokens: 245 },
-          { task: 'rag', model: 'local/qwen-coder', loa: 1, cost: 0.0, tokens: 180 },
+          {
+            task: 'nl2cy',
+            model: 'local/llama',
+            loa: 1,
+            cost: 0.0,
+            tokens: 245,
+          },
+          {
+            task: 'rag',
+            model: 'local/qwen-coder',
+            loa: 1,
+            cost: 0.0,
+            tokens: 180,
+          },
         ]);
         const [recentLogs] = useState([
           '15:05 model=local/llama p95=120ms',
@@ -330,11 +360,15 @@
               <Card title="Health: GREEN" className="lg:col-span-2">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-4">
                   <div>
-                    <div className="text-2xl font-bold text-green-600">120ms</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      120ms
+                    </div>
                     <div className="text-sm text-gray-500">p50</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-green-600">480ms</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      480ms
+                    </div>
                     <div className="text-sm text-gray-500">p95</div>
                   </div>
                   <div>
@@ -347,7 +381,8 @@
                   </div>
                 </div>
                 <div className="p-3 bg-green-50 rounded-lg text-sm">
-                  <strong>[Budgets]</strong> OpenRouter: $0 / $10 (0%) reset 00:12:32
+                  <strong>[Budgets]</strong> OpenRouter: $0 / $10 (0%) reset
+                  00:12:32
                 </div>
               </Card>
 
@@ -385,13 +420,21 @@
                 </div>
               </Card>
 
-              <Card title="Burndown (last 60s / 1h / daily)" className="lg:col-span-2">
+              <Card
+                title="Burndown (last 60s / 1h / daily)"
+                className="lg:col-span-2"
+              >
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
-                      <div className="bg-blue-600 h-4 rounded-full" style={{ width: '35%' }}></div>
+                      <div
+                        className="bg-blue-600 h-4 rounded-full"
+                        style={{ width: '35%' }}
+                      ></div>
                     </div>
-                    <span className="text-sm text-gray-600">rpm cap... reset m:00</span>
+                    <span className="text-sm text-gray-600">
+                      rpm cap... reset m:00
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -419,7 +462,9 @@
                   {recentRoutes.map((route, index) => (
                     <div key={index} className="grid grid-cols-5 gap-2 text-sm">
                       <div className="font-mono">{route.task}</div>
-                      <div className="font-mono text-blue-600">…/{route.model.split('/')[1]}</div>
+                      <div className="font-mono text-blue-600">
+                        …/{route.model.split('/')[1]}
+                      </div>
                       <div>{route.loa}</div>
                       <div>${route.cost.toFixed(3)}</div>
                       <div>{route.tokens}</div>
@@ -465,7 +510,11 @@
 
         const executeNow = async () => {
           try {
-            const result = await api.routeExecute(task, { loa, tenant, costCap }, promptPreview);
+            const result = await api.routeExecute(
+              task,
+              { loa, tenant, costCap },
+              promptPreview,
+            );
             console.log('Execution result:', result);
           } catch (error) {
             console.error('Route execution failed:', error);
@@ -498,7 +547,9 @@
                 <h4 className="font-semibold mb-3">Task Meta</h4>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Task:</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Task:
+                    </label>
                     <select
                       value={task}
                       onChange={(e) => setTask(e.target.value)}
@@ -511,7 +562,9 @@
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">LOA:</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      LOA:
+                    </label>
                     <select
                       value={loa}
                       onChange={(e) => setLoa(e.target.value)}
@@ -523,7 +576,9 @@
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tenant:</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tenant:
+                    </label>
                     <select
                       value={tenant}
                       onChange={(e) => setTenant(e.target.value)}
@@ -554,7 +609,9 @@
                 <div className="space-y-2 font-mono text-sm">
                   <div>when env=prod → hosted:off</div>
                   <div>when task=nl2cypher → model…</div>
-                  <div className="text-gray-500">// Dynamic rules based on policy</div>
+                  <div className="text-gray-500">
+                    // Dynamic rules based on policy
+                  </div>
                 </div>
               </Card>
 
@@ -571,12 +628,13 @@
             <Card title="Model Candidates & Decision">
               <div className="space-y-4">
                 <div>
-                  <strong>Model Candidates:</strong> local/llama (p50 90ms), …/cpu (p50 180ms),
-                  openrouter/…
+                  <strong>Model Candidates:</strong> local/llama (p50 90ms),
+                  …/cpu (p50 180ms), openrouter/…
                 </div>
                 <div className="flex items-center space-x-4">
                   <div>
-                    <strong>Decision:</strong> {routeDecision?.model || 'local/llama'}
+                    <strong>Decision:</strong>{' '}
+                    {routeDecision?.model || 'local/llama'}
                   </div>
                   <div>
                     <strong>Confidence:</strong> 0.82
@@ -596,7 +654,10 @@
         const [query, setQuery] = useState('how do we run neo4j guard?');
         const [response, setResponse] = useState(null);
         const [loading, setLoading] = useState(false);
-        const [ragStats, setRagStats] = useState({ files: 4, updated: '10m ago' });
+        const [ragStats, setRagStats] = useState({
+          files: 4,
+          updated: '10m ago',
+        });
 
         const handleQuery = async () => {
           if (!query.trim()) return;
@@ -628,7 +689,9 @@
                 {/* Query Section */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Query</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Query
+                    </label>
                     <textarea
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
@@ -653,13 +716,16 @@
                 {/* Answer Section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Answer {response?.context?.length ? `(with [1][2] cites)` : ''}
+                    Answer{' '}
+                    {response?.context?.length ? `(with [1][2] cites)` : ''}
                   </label>
                   <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 min-h-[120px]">
                     {loading ? (
                       <div className="text-gray-500">Searching...</div>
                     ) : response?.answer ? (
-                      <div className="text-sm whitespace-pre-wrap">{response.answer}</div>
+                      <div className="text-sm whitespace-pre-wrap">
+                        {response.answer}
+                      </div>
                     ) : (
                       <div className="text-gray-500">No response yet</div>
                     )}
@@ -686,7 +752,9 @@
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-500">No context chunks available</div>
+                    <div className="text-gray-500">
+                      No context chunks available
+                    </div>
                   )}
                 </div>
               </Card>
@@ -701,7 +769,9 @@
                     ))
                   ) : (
                     <>
-                      <div className="font-mono text-blue-600">rag/corpus/neo4j_guard.txt</div>
+                      <div className="font-mono text-blue-600">
+                        rag/corpus/neo4j_guard.txt
+                      </div>
                       <div className="font-mono text-blue-600">docs/…</div>
                     </>
                   )}
@@ -728,7 +798,10 @@
 
           try {
             const result = await api.runNeo4jGuard(keepDb);
-            setOutput((prev) => prev + '\n' + (result.output || 'Guard completed successfully'));
+            setOutput(
+              (prev) =>
+                prev + '\n' + (result.output || 'Guard completed successfully'),
+            );
           } catch (error) {
             setOutput((prev) => prev + '\nError: ' + error.message);
           } finally {
@@ -742,7 +815,9 @@
               title="Neo4j Guard"
               actions={
                 <div className="flex items-center space-x-4">
-                  <div className="text-sm text-gray-600">MIG_DIR: db/migrations</div>
+                  <div className="text-sm text-gray-600">
+                    MIG_DIR: db/migrations
+                  </div>
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -771,7 +846,9 @@
                         >
                           {migration.status === 'completed' ? '✓' : ''}
                         </span>
-                        <span className="font-mono text-sm">{migration.name}</span>
+                        <span className="font-mono text-sm">
+                          {migration.name}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -830,31 +907,50 @@
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium w-32">local/llama</span>
+                    <span className="text-sm font-medium w-32">
+                      local/llama
+                    </span>
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
-                      <div className="bg-blue-600 h-4 rounded-full" style={{ width: '23%' }}></div>
+                      <div
+                        className="bg-blue-600 h-4 rounded-full"
+                        style={{ width: '23%' }}
+                      ></div>
                     </div>
-                    <span className="text-sm text-gray-500">14/60 rpm p50 90ms</span>
+                    <span className="text-sm text-gray-500">
+                      14/60 rpm p50 90ms
+                    </span>
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium w-32">local/llama-cpu</span>
+                    <span className="text-sm font-medium w-32">
+                      local/llama-cpu
+                    </span>
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
-                      <div className="bg-green-600 h-4 rounded-full" style={{ width: '17%' }}></div>
+                      <div
+                        className="bg-green-600 h-4 rounded-full"
+                        style={{ width: '17%' }}
+                      ></div>
                     </div>
-                    <span className="text-sm text-gray-500">10/60 rpm p50 180ms</span>
+                    <span className="text-sm text-gray-500">
+                      10/60 rpm p50 180ms
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Daily Budgets (matches wireframe) */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-3">Daily Budgets (reset 00:00Z)</h4>
+                <h4 className="font-medium text-gray-900 mb-3">
+                  Daily Budgets (reset 00:00Z)
+                </h4>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-4">
                     <span className="text-sm font-medium w-32">openrouter</span>
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
-                      <div className="bg-purple-600 h-4 rounded-full" style={{ width: '0%' }}></div>
+                      <div
+                        className="bg-purple-600 h-4 rounded-full"
+                        style={{ width: '0%' }}
+                      ></div>
                     </div>
                     <span className="text-sm text-gray-500">$0 / $10 (0%)</span>
                   </div>
@@ -988,9 +1084,21 @@ budgets:
             const result = await api.getLogs(200, filter);
             setLogs(
               result.logs || [
-                { ts: new Date().toISOString(), level: 'info', msg: 'Gateway up on :4000' },
-                { ts: new Date().toISOString(), level: 'info', msg: 'Ollama listening :11434' },
-                { ts: new Date().toISOString(), level: 'info', msg: 'RAG index ready (4 docs)' },
+                {
+                  ts: new Date().toISOString(),
+                  level: 'info',
+                  msg: 'Gateway up on :4000',
+                },
+                {
+                  ts: new Date().toISOString(),
+                  level: 'info',
+                  msg: 'Ollama listening :11434',
+                },
+                {
+                  ts: new Date().toISOString(),
+                  level: 'info',
+                  msg: 'RAG index ready (4 docs)',
+                },
               ],
             );
           } catch (error) {
@@ -1100,7 +1208,10 @@ budgets:
           setOutput('');
           try {
             const result = await api.runCommand(cmd);
-            setOutput(result.stdout + (result.stderr ? '\n[stderr]\n' + result.stderr : ''));
+            setOutput(
+              result.stdout +
+                (result.stderr ? '\n[stderr]\n' + result.stderr : ''),
+            );
           } catch (error) {
             setOutput('Error: ' + error.message);
           } finally {
@@ -1115,8 +1226,18 @@ budgets:
             cmd: 'just orchestra-validate',
             color: 'blue',
           },
-          { id: 'smoke', label: 'Smoke Test', cmd: 'just orchestra-smoke', color: 'green' },
-          { id: 'chaos', label: 'Chaos Drills', cmd: 'just chaos', color: 'red' },
+          {
+            id: 'smoke',
+            label: 'Smoke Test',
+            cmd: 'just orchestra-smoke',
+            color: 'green',
+          },
+          {
+            id: 'chaos',
+            label: 'Chaos Drills',
+            cmd: 'just chaos',
+            color: 'red',
+          },
         ];
 
         return (
@@ -1141,7 +1262,9 @@ budgets:
                       {action.id === 'smoke' && '🧪'}
                       {action.id === 'chaos' && '⚡'} {action.label}
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">{action.cmd}</div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {action.cmd}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -1153,7 +1276,9 @@ budgets:
                 ) : output ? (
                   <pre className="whitespace-pre-wrap">{output}</pre>
                 ) : (
-                  <div className="text-gray-500"># Select an action to run...</div>
+                  <div className="text-gray-500">
+                    # Select an action to run...
+                  </div>
                 )}
               </div>
             </Card>
@@ -1245,7 +1370,10 @@ budgets:
                   <ul className="space-y-2">
                     {section.items.map((item, itemIndex) => (
                       <li key={itemIndex}>
-                        <a href="#" className="text-blue-600 hover:text-blue-800 hover:underline">
+                        <a
+                          href="#"
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
                           {item}
                         </a>
                       </li>

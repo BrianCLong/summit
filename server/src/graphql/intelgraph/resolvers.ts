@@ -33,7 +33,7 @@ export const resolvers = {
     async entityById(
       _: unknown,
       { id }: { id: string },
-      context: ResolverContext
+      context: ResolverContext,
     ): Promise<Entity | null> {
       const span = tracer.startSpan('resolve-entity-by-id', {
         attributes: {
@@ -54,7 +54,10 @@ export const resolvers = {
           operation_type: 'query',
         };
 
-        const allowed = await context.opa.evaluate('intelgraph.abac.allow', policyInput);
+        const allowed = await context.opa.evaluate(
+          'intelgraph.abac.allow',
+          policyInput,
+        );
         if (!allowed) {
           throw new GraphQLError('Access denied by policy', {
             extensions: { code: 'FORBIDDEN' },
@@ -64,11 +67,14 @@ export const resolvers = {
         // Query Neo4j for entity
         const session = context.neo4j.session();
         try {
-          const result = await session.run(`
+          const result = await session.run(
+            `
             MATCH (e:Entity {id: $id})
             OPTIONAL MATCH (e)-[:FROM_SOURCE]->(s:Source)
             RETURN e, collect(s) as sources
-          `, { id });
+          `,
+            { id },
+          );
 
           if (result.records.length === 0) {
             return null;
@@ -92,11 +98,9 @@ export const resolvers = {
             sources,
             degree: await this.getEntityDegree(id, context),
           };
-
         } finally {
           await session.close();
         }
-
       } catch (error) {
         span.recordException?.(error as Error);
         span.setStatus?.({ message: (error as Error).message });
@@ -117,7 +121,7 @@ export const resolvers = {
         filter?: any;
         pagination?: { limit: number; offset: number };
       },
-      context: ResolverContext
+      context: ResolverContext,
     ): Promise<EntitySearchResult> {
       const span = tracer.startSpan('resolve-search-entities', {
         attributes: {
@@ -176,23 +180,32 @@ export const resolvers = {
         try {
           const [resultData, countResult] = await Promise.all([
             session.run(cypherQuery, params),
-            session.run(cypherQuery.replace('SKIP $offset LIMIT $limit', '').replace('ORDER BY e.updated_at DESC', '') + ' RETURN count(e) as total', params),
+            session.run(
+              cypherQuery
+                .replace('SKIP $offset LIMIT $limit', '')
+                .replace('ORDER BY e.updated_at DESC', '') +
+                ' RETURN count(e) as total',
+              params,
+            ),
           ]);
 
           const entities = await Promise.all(
             resultData.records.map(async (record) => {
               const entity = record.get('e').properties;
-              const sources = record.get('sources').map((s: any) => s.properties);
+              const sources = record
+                .get('sources')
+                .map((s: any) => s.properties);
 
               return {
-                ...await this.applyPIIRedaction(entity, context),
+                ...(await this.applyPIIRedaction(entity, context)),
                 sources,
                 degree: await this.getEntityDegree(entity.id, context),
               };
-            })
+            }),
           );
 
-          const totalCount = countResult.records[0]?.get('total')?.toNumber() || 0;
+          const totalCount =
+            countResult.records[0]?.get('total')?.toNumber() || 0;
 
           span.setAttributes?.({
             'search.results_count': entities.length,
@@ -203,15 +216,16 @@ export const resolvers = {
             entities,
             totalCount,
             hasMore: pagination.offset + entities.length < totalCount,
-            nextCursor: entities.length > 0 ?
-              Buffer.from((pagination.offset + pagination.limit).toString()).toString('base64') :
-              null,
+            nextCursor:
+              entities.length > 0
+                ? Buffer.from(
+                    (pagination.offset + pagination.limit).toString(),
+                  ).toString('base64')
+                : null,
           };
-
         } finally {
           await session.close();
         }
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
@@ -232,7 +246,7 @@ export const resolvers = {
         toId: string;
         maxHops: number;
       },
-      context: ResolverContext
+      context: ResolverContext,
     ): Promise<PathStep[]> {
       const span = tracer.startSpan('resolve-path-between', {
         attributes: {
@@ -252,7 +266,8 @@ export const resolvers = {
 
         const session = context.neo4j.session();
         try {
-          const result = await session.run(`
+          const result = await session.run(
+            `
             MATCH path = shortestPath((from:Entity {id: $fromId})-[*1..${maxHops}]-(to:Entity {id: $toId}))
             WHERE from.tenant = $tenant AND to.tenant = $tenant
             WITH path, relationships(path) as rels, nodes(path) as nodes
@@ -264,13 +279,15 @@ export const resolvers = {
               rels[i].weight as score,
               properties(rels[i]) as properties
             ORDER BY i
-          `, {
-            fromId,
-            toId,
-            tenant: context.user?.tenant || 'default',
-          });
+          `,
+            {
+              fromId,
+              toId,
+              tenant: context.user?.tenant || 'default',
+            },
+          );
 
-          const pathSteps: PathStep[] = result.records.map(record => ({
+          const pathSteps: PathStep[] = result.records.map((record) => ({
             from: record.get('fromId'),
             to: record.get('toId'),
             relType: record.get('relType'),
@@ -284,11 +301,9 @@ export const resolvers = {
           });
 
           return pathSteps;
-
         } finally {
           await session.close();
         }
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
@@ -309,7 +324,7 @@ export const resolvers = {
         depth: number;
         relationTypes?: string[];
       },
-      context: ResolverContext
+      context: ResolverContext,
     ): Promise<EntityGraph> {
       const span = tracer.startSpan('resolve-entity-graph', {
         attributes: {
@@ -322,12 +337,13 @@ export const resolvers = {
       try {
         let relationFilter = '';
         if (relationTypes && relationTypes.length > 0) {
-          relationFilter = `WHERE type(r) IN [${relationTypes.map(t => `'${t}'`).join(',')}]`;
+          relationFilter = `WHERE type(r) IN [${relationTypes.map((t) => `'${t}'`).join(',')}]`;
         }
 
         const session = context.neo4j.session();
         try {
-          const result = await session.run(`
+          const result = await session.run(
+            `
             MATCH path = (center:Entity {id: $centerEntityId})-[r*1..${depth}]-(connected:Entity)
             ${relationFilter}
             WHERE center.tenant = $tenant AND connected.tenant = $tenant
@@ -351,10 +367,12 @@ export const resolvers = {
                 type: type(rels[0]),
                 weight: coalesce(rels[0].weight, 1.0)
               }) as edges
-          `, {
-            centerEntityId,
-            tenant: context.user?.tenant || 'default',
-          });
+          `,
+            {
+              centerEntityId,
+              tenant: context.user?.tenant || 'default',
+            },
+          );
 
           if (result.records.length === 0) {
             return {
@@ -375,7 +393,8 @@ export const resolvers = {
           // Calculate graph statistics
           const nodeCount = nodes.length;
           const edgeCount = edges.length;
-          const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
+          const density =
+            nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
 
           span.setAttributes?.({
             'graph.nodes_count': nodeCount,
@@ -393,11 +412,9 @@ export const resolvers = {
               clustering: 0, // TODO: Calculate actual clustering coefficient
             },
           };
-
         } finally {
           await session.close();
         }
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
@@ -410,7 +427,7 @@ export const resolvers = {
     async health(
       _: unknown,
       __: unknown,
-      context: ResolverContext
+      context: ResolverContext,
     ): Promise<HealthStatus> {
       const startTime = Date.now();
 
@@ -435,10 +452,11 @@ export const resolvers = {
           metrics: {
             response_time_ms: responseTime,
             uptime_seconds: process.uptime(),
-            memory_usage_mb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+            memory_usage_mb: Math.round(
+              process.memoryUsage().heapUsed / 1024 / 1024,
+            ),
           },
         };
-
       } catch (error) {
         return {
           status: 'unhealthy',
@@ -468,7 +486,10 @@ export const resolvers = {
       },
     };
 
-    const redactedFields = await context.opa.evaluate('intelgraph.abac.pii_redact', policyInput);
+    const redactedFields = await context.opa.evaluate(
+      'intelgraph.abac.pii_redact',
+      policyInput,
+    );
 
     if (redactedFields && redactedFields.length > 0) {
       const redacted = { ...entity };
@@ -483,13 +504,19 @@ export const resolvers = {
     return entity;
   },
 
-  async getEntityDegree(entityId: string, context: ResolverContext): Promise<number> {
+  async getEntityDegree(
+    entityId: string,
+    context: ResolverContext,
+  ): Promise<number> {
     const session = context.neo4j.session();
     try {
-      const result = await session.run(`
+      const result = await session.run(
+        `
         MATCH (e:Entity {id: $entityId})-[r]-()
         RETURN count(r) as degree
-      `, { entityId });
+      `,
+        { entityId },
+      );
 
       return result.records[0]?.get('degree')?.toNumber() || 0;
     } finally {

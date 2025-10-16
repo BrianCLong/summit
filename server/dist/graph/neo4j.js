@@ -7,7 +7,9 @@ export function getDriver() {
     return driver;
 }
 export async function runCypher(cypher, params = {}) {
-    const session = getDriver().session({ defaultAccessMode: neo4j.session.WRITE });
+    const session = getDriver().session({
+        defaultAccessMode: neo4j.session.WRITE,
+    });
     try {
         const res = await session.run(cypher, params);
         return res.records.map((r) => r.toObject());

@@ -1,17 +1,20 @@
-
-import unittest
 import os
 import sys
-import datetime
-import json
+import unittest
 
 # Add the project root to sys.path to allow absolute imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.insert(0, project_root)
 
-from prov_ledger.claim_model import Claim, parse_claim, generate_contradiction_graph
-from prov_ledger.evidence_registry import register_evidence, get_evidence, generate_signed_hash, _EVIDENCE_STORE
+from prov_ledger.claim_model import Claim, generate_contradiction_graph, parse_claim
+from prov_ledger.evidence_registry import (
+    _EVIDENCE_STORE,
+    generate_signed_hash,
+    get_evidence,
+    register_evidence,
+)
 from prov_ledger.export_manifest import generate_export_manifest, verify_export_manifest
+
 
 class TestProvLedgerStubs(unittest.TestCase):
 
@@ -24,19 +27,38 @@ class TestProvLedgerStubs(unittest.TestCase):
         _EVIDENCE_STORE.clear()
 
     def test_claim_model(self):
-        raw_data = {"id": "claim1", "data": {"fact": "water is wet"}, "source": "sensor_a", "timestamp": "2023-01-01T00:00:00Z"}
+        raw_data = {
+            "id": "claim1",
+            "data": {"fact": "water is wet"},
+            "source": "sensor_a",
+            "timestamp": "2023-01-01T00:00:00Z",
+        }
         claim = parse_claim(raw_data)
         self.assertIsInstance(claim, Claim)
         self.assertEqual(claim.claim_id, "claim1")
         self.assertIn("fact", claim.content)
 
-        claims = [claim, parse_claim({"id": "claim2", "data": {"fact": "sky is blue"}, "source": "sensor_b", "timestamp": "2023-01-01T00:01:00Z"})]
+        claims = [
+            claim,
+            parse_claim(
+                {
+                    "id": "claim2",
+                    "data": {"fact": "sky is blue"},
+                    "source": "sensor_b",
+                    "timestamp": "2023-01-01T00:01:00Z",
+                }
+            ),
+        ]
         graph = generate_contradiction_graph(claims)
         self.assertIn("nodes", graph)
         self.assertIn("edges", graph)
 
     def test_evidence_registration_and_retrieval(self):
-        evidence_data_1 = {"type": "log", "content": "user login event", "timestamp": "2023-01-01T10:00:00Z"}
+        evidence_data_1 = {
+            "type": "log",
+            "content": "user login event",
+            "timestamp": "2023-01-01T10:00:00Z",
+        }
         evidence_id_1 = register_evidence(evidence_data_1)
         self.assertIn("evidence-", evidence_id_1)
         self.assertIn(evidence_id_1, _EVIDENCE_STORE)
@@ -46,9 +68,13 @@ class TestProvLedgerStubs(unittest.TestCase):
         self.assertEqual(retrieved_evidence_1, evidence_data_1)
 
         # Test with different data
-        evidence_data_2 = {"type": "alert", "content": "malware detected", "timestamp": "2023-01-01T11:00:00Z"}
+        evidence_data_2 = {
+            "type": "alert",
+            "content": "malware detected",
+            "timestamp": "2023-01-01T11:00:00Z",
+        }
         evidence_id_2 = register_evidence(evidence_data_2)
-        self.assertNotEqual(evidence_id_1, evidence_id_2) # Ensure different IDs for different data
+        self.assertNotEqual(evidence_id_1, evidence_id_2)  # Ensure different IDs for different data
         self.assertIn(evidence_id_2, _EVIDENCE_STORE)
         self.assertEqual(_EVIDENCE_STORE[evidence_id_2], evidence_data_2)
 
@@ -77,5 +103,6 @@ class TestProvLedgerStubs(unittest.TestCase):
 
         self.assertTrue(verify_export_manifest(manifest, "/usr/local/bin/verifier_cli"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

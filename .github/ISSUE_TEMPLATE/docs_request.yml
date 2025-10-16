@@ -4,10 +4,10 @@ labels: [docs]
 body:
   - type: input
     id: area
-    attributes: { label: Area/Feature, placeholder: "ZIP Export" }
+    attributes: { label: Area/Feature, placeholder: 'ZIP Export' }
   - type: textarea
     id: need
-    attributes: { label: Need/Gap, placeholder: "Users don’t know how to…" }
+    attributes: { label: Need/Gap, placeholder: 'Users don’t know how to…' }
   - type: checkboxes
     id: artifacts
     attributes:

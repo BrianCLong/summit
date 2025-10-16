@@ -5,7 +5,7 @@
 
 module.exports = {
   description: 'Add canonicalId to Entity nodes',
-  
+
   /**
    * Apply migration
    * @param {Session} session Neo4j session
@@ -21,7 +21,7 @@ module.exports = {
     `);
     console.log('✅ Added canonicalId to existing Entity nodes.');
   },
-  
+
   /**
    * Rollback migration (optional)
    * @param {Session} session Neo4j session
@@ -33,5 +33,5 @@ module.exports = {
       REMOVE e.canonicalId
     `);
     console.log('✅ Removed canonicalId from Entity nodes.');
-  }
+  },
 };

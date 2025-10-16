@@ -1,7 +1,10 @@
 export function formatDate(value, locale = navigator.language) {
   try {
     const d = typeof value === 'string' ? new Date(value) : value;
-    return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(d);
   } catch (_) {
     return String(value);
   }
@@ -14,4 +17,3 @@ export function formatNumber(value, locale = navigator.language, options = {}) {
     return String(value);
   }
 }
-

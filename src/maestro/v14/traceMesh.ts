@@ -82,13 +82,19 @@ export class TraceMesh extends EventEmitter {
       this.specRegistry.set(spec.id, spec);
     }
 
-    this.emit('specCardsGenerated', { prId: prData.id, count: specCards.length });
+    this.emit('specCardsGenerated', {
+      prId: prData.id,
+      count: specCards.length,
+    });
     return specCards;
   }
 
-  private async analyzeFileForSpecs(file: string, prData: any): Promise<SpecCard[]> {
+  private async analyzeFileForSpecs(
+    file: string,
+    prData: any,
+  ): Promise<SpecCard[]> {
     const specs: SpecCard[] = [];
-    
+
     // Generate specs based on file type and content
     if (file.includes('api/') || file.includes('service/')) {
       // API/Service specs
@@ -101,7 +107,7 @@ export class TraceMesh extends EventEmitter {
         linkedTests: [],
         evidenceLinks: [],
         prId: prData.id,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -116,7 +122,7 @@ export class TraceMesh extends EventEmitter {
         linkedTests: [],
         evidenceLinks: [],
         prId: prData.id,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -131,7 +137,7 @@ export class TraceMesh extends EventEmitter {
         linkedTests: [],
         evidenceLinks: [],
         prId: prData.id,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -146,7 +152,7 @@ export class TraceMesh extends EventEmitter {
         linkedTests: [],
         evidenceLinks: [],
         prId: prData.id,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -161,17 +167,23 @@ export class TraceMesh extends EventEmitter {
   /**
    * Verify spec coverage for changed files
    */
-  async verifySpecCoverage(files: string[], specCards: SpecCard[]): Promise<SpecCoverageResult> {
+  async verifySpecCoverage(
+    files: string[],
+    specCards: SpecCard[],
+  ): Promise<SpecCoverageResult> {
     const coverage = await this.calculateSpecCoverage(files, specCards);
     const missingSpecs = await this.findMissingSpecs(files, specCards);
     const orphanedTests = await this.findOrphanedTests(files);
-    const recommendations = this.generateCoverageRecommendations(missingSpecs, orphanedTests);
+    const recommendations = this.generateCoverageRecommendations(
+      missingSpecs,
+      orphanedTests,
+    );
 
     const result: SpecCoverageResult = {
       coverage,
       missingSpecs,
       orphanedTests,
-      recommendations
+      recommendations,
     };
 
     if (coverage < 0.95) {
@@ -181,33 +193,45 @@ export class TraceMesh extends EventEmitter {
     return result;
   }
 
-  private async calculateSpecCoverage(files: string[], specCards: SpecCard[]): Promise<number> {
+  private async calculateSpecCoverage(
+    files: string[],
+    specCards: SpecCard[],
+  ): Promise<number> {
     // Calculate coverage based on critical files vs spec cards
-    const criticalFiles = files.filter(f => 
-      f.includes('api/') || 
-      f.includes('service/') || 
-      f.includes('auth/') || 
-      f.includes('security/')
+    const criticalFiles = files.filter(
+      (f) =>
+        f.includes('api/') ||
+        f.includes('service/') ||
+        f.includes('auth/') ||
+        f.includes('security/'),
     );
 
     if (criticalFiles.length === 0) return 1.0; // No critical files = 100% coverage
 
     const specsPerFile = specCards.length / criticalFiles.length;
     const expectedSpecs = criticalFiles.length * 1.2; // Expect at least 1.2 specs per critical file
-    
+
     return Math.min(1.0, specCards.length / expectedSpecs);
   }
 
-  private async findMissingSpecs(files: string[], specCards: SpecCard[]): Promise<string[]> {
+  private async findMissingSpecs(
+    files: string[],
+    specCards: SpecCard[],
+  ): Promise<string[]> {
     const missingSpecs: string[] = [];
-    
+
     // Check for files that should have specs but don't
     for (const file of files) {
-      const relevantSpecs = specCards.filter(spec => 
-        spec.given.toLowerCase().includes(this.extractServiceName(file).toLowerCase()) ||
-        spec.when.toLowerCase().includes(this.extractServiceName(file).toLowerCase())
+      const relevantSpecs = specCards.filter(
+        (spec) =>
+          spec.given
+            .toLowerCase()
+            .includes(this.extractServiceName(file).toLowerCase()) ||
+          spec.when
+            .toLowerCase()
+            .includes(this.extractServiceName(file).toLowerCase()),
       );
-      
+
       if (this.isCriticalFile(file) && relevantSpecs.length === 0) {
         missingSpecs.push(`Missing spec for critical file: ${file}`);
       }
@@ -219,7 +243,7 @@ export class TraceMesh extends EventEmitter {
   private async findOrphanedTests(files: string[]): Promise<string[]> {
     // Mock implementation - in reality would scan test files for @spec annotations
     const orphanedTests: string[] = [];
-    
+
     for (const file of files) {
       if (file.includes('test') || file.includes('spec')) {
         // Check if test file has proper spec bindings
@@ -241,22 +265,31 @@ export class TraceMesh extends EventEmitter {
   }
 
   private isCriticalFile(file: string): boolean {
-    return file.includes('api/') || 
-           file.includes('service/') || 
-           file.includes('auth/') || 
-           file.includes('security/') ||
-           file.includes('policy/');
+    return (
+      file.includes('api/') ||
+      file.includes('service/') ||
+      file.includes('auth/') ||
+      file.includes('security/') ||
+      file.includes('policy/')
+    );
   }
 
-  private generateCoverageRecommendations(missingSpecs: string[], orphanedTests: string[]): string[] {
+  private generateCoverageRecommendations(
+    missingSpecs: string[],
+    orphanedTests: string[],
+  ): string[] {
     const recommendations: string[] = [];
 
     if (missingSpecs.length > 0) {
-      recommendations.push(`Generate ${missingSpecs.length} missing spec cards for critical functionality`);
+      recommendations.push(
+        `Generate ${missingSpecs.length} missing spec cards for critical functionality`,
+      );
     }
 
     if (orphanedTests.length > 0) {
-      recommendations.push(`Add @spec annotations to ${orphanedTests.length} test files`);
+      recommendations.push(
+        `Add @spec annotations to ${orphanedTests.length} test files`,
+      );
     }
 
     if (missingSpecs.length === 0 && orphanedTests.length === 0) {
@@ -271,7 +304,9 @@ export class TraceMesh extends EventEmitter {
    */
   async bindTestsToSpecs(prId: string): Promise<TestBinding[]> {
     const bindings: TestBinding[] = [];
-    const specs = Array.from(this.specRegistry.values()).filter(s => s.prId === prId);
+    const specs = Array.from(this.specRegistry.values()).filter(
+      (s) => s.prId === prId,
+    );
 
     for (const spec of specs) {
       const testBinding = await this.findTestsForSpec(spec);
@@ -291,7 +326,7 @@ export class TraceMesh extends EventEmitter {
   private async findTestsForSpec(spec: SpecCard): Promise<TestBinding | null> {
     // Mock implementation - would scan test files for spec references
     const serviceName = this.extractServiceFromSpec(spec);
-    
+
     return {
       testFile: `tests/${serviceName}.spec.ts`,
       testFunction: `test_${serviceName}_${spec.id.toLowerCase()}`,
@@ -300,15 +335,17 @@ export class TraceMesh extends EventEmitter {
         linesCovered: Math.floor(Math.random() * 100) + 50,
         totalLines: Math.floor(Math.random() * 50) + 100,
         branchesCovered: Math.floor(Math.random() * 20) + 10,
-        totalBranches: Math.floor(Math.random() * 10) + 20
-      }
+        totalBranches: Math.floor(Math.random() * 10) + 20,
+      },
     };
   }
 
   private extractServiceFromSpec(spec: SpecCard): string {
     // Extract service name from spec content
     const words = spec.given.toLowerCase().split(' ');
-    return words.find(w => w.includes('service') || w.includes('api')) || 'generic';
+    return (
+      words.find((w) => w.includes('service') || w.includes('api')) || 'generic'
+    );
   }
 
   private linkTestToSpec(specId: string, binding: TestBinding): void {
@@ -321,7 +358,10 @@ export class TraceMesh extends EventEmitter {
   /**
    * Generate evidence bundle for release
    */
-  async generateEvidenceBundle(prId: string, specCards: SpecCard[]): Promise<string[]> {
+  async generateEvidenceBundle(
+    prId: string,
+    specCards: SpecCard[],
+  ): Promise<string[]> {
     const bundle: EvidenceBundle = {
       id: `EB-${prId}-${Date.now()}`,
       prId,
@@ -332,7 +372,7 @@ export class TraceMesh extends EventEmitter {
       evaluationResults: [],
       invariantChecks: [],
       timestamp: Date.now(),
-      merkleRoot: ''
+      merkleRoot: '',
     };
 
     // Generate Merkle root for tamper-evident evidence
@@ -345,10 +385,14 @@ export class TraceMesh extends EventEmitter {
     const evidenceLinks = [
       `evidence/specs/${bundle.id}.json`,
       `evidence/tests/${bundle.id}.json`,
-      `evidence/merkle/${bundle.merkleRoot}`
+      `evidence/merkle/${bundle.merkleRoot}`,
     ];
 
-    this.emit('evidenceBundleGenerated', { prId, bundleId: bundle.id, links: evidenceLinks });
+    this.emit('evidenceBundleGenerated', {
+      prId,
+      bundleId: bundle.id,
+      links: evidenceLinks,
+    });
     return evidenceLinks;
   }
 
@@ -356,12 +400,14 @@ export class TraceMesh extends EventEmitter {
     // Simple hash-based Merkle root calculation
     const crypto = require('crypto');
     const hash = crypto.createHash('sha256');
-    
-    hash.update(JSON.stringify({
-      specCards: bundle.specCards.map(s => s.id),
-      testBindings: bundle.testBindings.map(t => t.specId),
-      timestamp: bundle.timestamp
-    }));
+
+    hash.update(
+      JSON.stringify({
+        specCards: bundle.specCards.map((s) => s.id),
+        testBindings: bundle.testBindings.map((t) => t.specId),
+        timestamp: bundle.timestamp,
+      }),
+    );
 
     return hash.digest('hex');
   }
@@ -369,7 +415,9 @@ export class TraceMesh extends EventEmitter {
   /**
    * Verify evidence bundle integrity
    */
-  async verifyEvidenceBundle(bundleId: string): Promise<{ valid: boolean; reason?: string }> {
+  async verifyEvidenceBundle(
+    bundleId: string,
+  ): Promise<{ valid: boolean; reason?: string }> {
     const bundle = this.evidenceBundles.get(bundleId);
     if (!bundle) {
       return { valid: false, reason: 'Bundle not found' };
@@ -378,7 +426,10 @@ export class TraceMesh extends EventEmitter {
     // Recalculate Merkle root
     const calculatedRoot = await this.generateMerkleRoot(bundle);
     if (calculatedRoot !== bundle.merkleRoot) {
-      return { valid: false, reason: 'Merkle root mismatch - evidence may be tampered' };
+      return {
+        valid: false,
+        reason: 'Merkle root mismatch - evidence may be tampered',
+      };
     }
 
     // Verify spec-test linkage
@@ -414,17 +465,24 @@ export class TraceMesh extends EventEmitter {
     dateRange?: { start: number; end: number };
   }): SpecCard[] {
     const specs = Array.from(this.specRegistry.values());
-    
-    return specs.filter(spec => {
+
+    return specs.filter((spec) => {
       if (criteria.prId && spec.prId !== criteria.prId) return false;
-      if (criteria.keyword && !this.specContainsKeyword(spec, criteria.keyword)) return false;
-      if (criteria.dateRange && (spec.timestamp < criteria.dateRange.start || spec.timestamp > criteria.dateRange.end)) return false;
+      if (criteria.keyword && !this.specContainsKeyword(spec, criteria.keyword))
+        return false;
+      if (
+        criteria.dateRange &&
+        (spec.timestamp < criteria.dateRange.start ||
+          spec.timestamp > criteria.dateRange.end)
+      )
+        return false;
       return true;
     });
   }
 
   private specContainsKeyword(spec: SpecCard, keyword: string): boolean {
-    const content = `${spec.given} ${spec.when} ${spec.then} ${spec.acceptance}`.toLowerCase();
+    const content =
+      `${spec.given} ${spec.when} ${spec.then} ${spec.acceptance}`.toLowerCase();
     return content.includes(keyword.toLowerCase());
   }
 }

@@ -41,8 +41,12 @@ export class CryptoPipeline {
   private readonly defaultKeyId?: string;
 
   constructor(options: CryptoPipelineOptions = {}) {
-    this.keyManager = new KeyManager(options.keyStore ?? new InMemoryKeyStore());
-    this.certificateValidator = new CertificateValidator(options.trustAnchors ?? []);
+    this.keyManager = new KeyManager(
+      options.keyStore ?? new InMemoryKeyStore(),
+    );
+    this.certificateValidator = new CertificateValidator(
+      options.trustAnchors ?? [],
+    );
     this.hsm = options.hsm ?? new SoftwareHSM();
     this.timestampingService = options.timestampingService;
     this.auditLogger = options.auditLogger;
@@ -55,10 +59,13 @@ export class CryptoPipeline {
 
   async rotateKey(
     keyId: string,
-    key: Omit<KeyVersion, 'id' | 'version' | 'createdAt' | 'rotatedAt' | 'isActive'> & {
+    key: Omit<
+      KeyVersion,
+      'id' | 'version' | 'createdAt' | 'rotatedAt' | 'isActive'
+    > & {
       version?: number;
       createdAt?: Date;
-    }
+    },
   ): Promise<KeyVersion> {
     const next = await this.keyManager.rotateKey(keyId, key);
     await this.logAudit({
@@ -72,7 +79,11 @@ export class CryptoPipeline {
     return next;
   }
 
-  async signPayload(payload: Buffer | string, keyId?: string, options: SignOptions = {}): Promise<SignatureBundle> {
+  async signPayload(
+    payload: Buffer | string,
+    keyId?: string,
+    options: SignOptions = {},
+  ): Promise<SignatureBundle> {
     const material = Buffer.isBuffer(payload) ? payload : Buffer.from(payload);
     const effectiveKeyId = keyId ?? this.defaultKeyId;
     if (!effectiveKeyId) {
@@ -87,7 +98,8 @@ export class CryptoPipeline {
     const signature = await this.hsm.sign(material, key);
     let timestampToken: string | undefined;
     if (options.includeTimestamp && this.timestampingService) {
-      timestampToken = await this.timestampingService.getTimestampToken(material);
+      timestampToken =
+        await this.timestampingService.getTimestampToken(material);
     }
 
     const bundle: SignatureBundle = {
@@ -115,16 +127,21 @@ export class CryptoPipeline {
   async verifySignature(
     payload: Buffer | string,
     bundle: SignatureBundle,
-    context: VerificationContext = {}
+    context: VerificationContext = {},
   ): Promise<VerificationResult> {
     const errors: string[] = [];
     const material = Buffer.isBuffer(payload) ? payload : Buffer.from(payload);
 
     if (context.expectedKeyId && context.expectedKeyId !== bundle.keyId) {
-      errors.push(`Unexpected key id ${bundle.keyId}, expected ${context.expectedKeyId}`);
+      errors.push(
+        `Unexpected key id ${bundle.keyId}, expected ${context.expectedKeyId}`,
+      );
     }
 
-    if (context.expectedAlgorithm && context.expectedAlgorithm !== bundle.algorithm) {
+    if (
+      context.expectedAlgorithm &&
+      context.expectedAlgorithm !== bundle.algorithm
+    ) {
       errors.push(`Unexpected algorithm ${bundle.algorithm}`);
     }
 
@@ -135,25 +152,37 @@ export class CryptoPipeline {
     let publicKeyPem = key?.publicKeyPem;
     let certificateResult: ChainValidationResult | undefined;
 
-    if (key && key.validTo && key.validTo.getTime() < Date.now() && !context.allowExpiredKeys) {
+    if (
+      key &&
+      key.validTo &&
+      key.validTo.getTime() < Date.now() &&
+      !context.allowExpiredKeys
+    ) {
       errors.push(`Key ${key.id} version ${key.version} is expired`);
     }
 
     if (!publicKeyPem) {
       if (bundle.certificateChain?.length) {
-        certificateResult = this.certificateValidator.validate(bundle.certificateChain);
+        certificateResult = this.certificateValidator.validate(
+          bundle.certificateChain,
+        );
         if (!certificateResult.valid) {
           errors.push(...certificateResult.errors);
         }
         try {
           const leaf = new crypto.X509Certificate(bundle.certificateChain[0]);
-          publicKeyPem = leaf.publicKey.export({ type: 'spki', format: 'pem' }).toString();
+          publicKeyPem = leaf.publicKey
+            .export({ type: 'spki', format: 'pem' })
+            .toString();
         } catch (error: any) {
-          errors.push(`Unable to extract public key from leaf certificate: ${error.message}`);
+          errors.push(
+            `Unable to extract public key from leaf certificate: ${error.message}`,
+          );
         }
       } else if (key?.privateKeyPem) {
         const privateKey = crypto.createPrivateKey(key.privateKeyPem);
-        publicKeyPem = crypto.createPublicKey(privateKey)
+        publicKeyPem = crypto
+          .createPublicKey(privateKey)
           .export({ type: 'spki', format: 'pem' })
           .toString();
       } else {
@@ -163,7 +192,12 @@ export class CryptoPipeline {
 
     let signatureValid = false;
     if (publicKeyPem) {
-      signatureValid = this.verifyWithAlgorithm(bundle.algorithm, material, Buffer.from(bundle.signature, 'base64'), publicKeyPem);
+      signatureValid = this.verifyWithAlgorithm(
+        bundle.algorithm,
+        material,
+        Buffer.from(bundle.signature, 'base64'),
+        publicKeyPem,
+      );
       if (!signatureValid) {
         errors.push('Signature verification failed');
       }
@@ -171,7 +205,10 @@ export class CryptoPipeline {
 
     let timestampValid: boolean | undefined;
     if (bundle.timestampToken && this.timestampingService?.verify) {
-      timestampValid = await this.timestampingService.verify(material, bundle.timestampToken);
+      timestampValid = await this.timestampingService.verify(
+        material,
+        bundle.timestampToken,
+      );
       if (!timestampValid) {
         errors.push('Timestamp token verification failed');
       }
@@ -204,7 +241,7 @@ export class CryptoPipeline {
     algorithm: SigningAlgorithm,
     payload: Buffer,
     signature: Buffer,
-    publicKey: string
+    publicKey: string,
   ): boolean {
     try {
       switch (algorithm) {
@@ -218,13 +255,19 @@ export class CryptoPipeline {
           const verifier = crypto.createVerify('SHA256');
           verifier.update(payload);
           verifier.end();
-          return verifier.verify({ key: publicKey, dsaEncoding: 'ieee-p1363' }, signature);
+          return verifier.verify(
+            { key: publicKey, dsaEncoding: 'ieee-p1363' },
+            signature,
+          );
         }
         case 'ECDSA_P384_SHA384': {
           const verifier = crypto.createVerify('SHA384');
           verifier.update(payload);
           verifier.end();
-          return verifier.verify({ key: publicKey, dsaEncoding: 'ieee-p1363' }, signature);
+          return verifier.verify(
+            { key: publicKey, dsaEncoding: 'ieee-p1363' },
+            signature,
+          );
         }
         case 'EdDSA_ED25519':
           return crypto.verify(null, payload, publicKey, signature);
@@ -237,7 +280,9 @@ export class CryptoPipeline {
     }
   }
 
-  private async logAudit(event: Parameters<AuditLogger['log']>[0]): Promise<void> {
+  private async logAudit(
+    event: Parameters<AuditLogger['log']>[0],
+  ): Promise<void> {
     if (!this.auditLogger) return;
     await this.auditLogger.log(event);
   }
@@ -261,7 +306,7 @@ export interface DefaultPipelineOptions {
 }
 
 export async function createDefaultCryptoPipeline(
-  options: DefaultPipelineOptions = {}
+  options: DefaultPipelineOptions = {},
 ): Promise<CryptoPipeline | null> {
   const raw = process.env.CRYPTO_SIGNING_KEYS;
   if (!raw) {
@@ -282,7 +327,9 @@ export async function createDefaultCryptoPipeline(
   }
 
   const keyStore = new InMemoryKeyStore();
-  const auditLogger = new DatabaseAuditLogger(options.auditSubsystem ?? 'crypto-pipeline');
+  const auditLogger = new DatabaseAuditLogger(
+    options.auditSubsystem ?? 'crypto-pipeline',
+  );
 
   const trustAnchors = options.trustAnchorsEnv
     ? process.env[options.trustAnchorsEnv]?.split(':::').filter(Boolean)

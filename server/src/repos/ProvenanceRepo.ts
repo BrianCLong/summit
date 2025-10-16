@@ -12,7 +12,11 @@ export type ProvenanceFilter = {
 export class ProvenanceRepo {
   constructor(private pg: Pool) {}
 
-  private buildWhere(scope: 'incident' | 'investigation', id: string, filter?: ProvenanceFilter) {
+  private buildWhere(
+    scope: 'incident' | 'investigation',
+    id: string,
+    filter?: ProvenanceFilter,
+  ) {
     const where: string[] = [];
     const params: any[] = [];
 
@@ -33,10 +37,14 @@ export class ProvenanceRepo {
     where.push(`(${targetChecks.join(' OR ')})`);
 
     if (filter?.from) {
-      where.push(`(COALESCE(created_at, timestamp) >= $${params.push(filter.from)})`);
+      where.push(
+        `(COALESCE(created_at, timestamp) >= $${params.push(filter.from)})`,
+      );
     }
     if (filter?.to) {
-      where.push(`(COALESCE(created_at, timestamp) <= $${params.push(filter.to)})`);
+      where.push(
+        `(COALESCE(created_at, timestamp) <= $${params.push(filter.to)})`,
+      );
     }
     if (filter?.contains && filter.contains.trim().length >= 3) {
       const c = filter.contains.trim();
@@ -62,10 +70,15 @@ export class ProvenanceRepo {
     }
     if (filter?.sourceIn?.length) {
       // provenance.source (if available)
-      where.push(`(COALESCE(source,'') = ANY($${params.push(filter.sourceIn)}))`);
+      where.push(
+        `(COALESCE(source,'') = ANY($${params.push(filter.sourceIn)}))`,
+      );
     }
 
-    return { where: where.length ? `WHERE ${where.join(' AND ')}` : '', params };
+    return {
+      where: where.length ? `WHERE ${where.join(' AND ')}` : '',
+      params,
+    };
   }
 
   private mapRow(r: any) {
@@ -82,7 +95,9 @@ export class ProvenanceRepo {
       id: r.id,
       kind,
       createdAt:
-        createdAt instanceof Date ? createdAt.toISOString() : new Date(createdAt).toISOString(),
+        createdAt instanceof Date
+          ? createdAt.toISOString()
+          : new Date(createdAt).toISOString(),
       metadata,
     };
   }

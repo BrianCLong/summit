@@ -5,7 +5,9 @@ import type { AuthorizationDecision, AuthorizationInput } from './types';
 const logger = pino({ name: 'authz-policy' });
 
 function opaUrl() {
-  return process.env.OPA_URL || 'http://localhost:8181/v1/data/summit/abac/decision';
+  return (
+    process.env.OPA_URL || 'http://localhost:8181/v1/data/summit/abac/decision'
+  );
 }
 
 export async function authorize(

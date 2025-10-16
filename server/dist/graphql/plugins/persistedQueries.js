@@ -28,7 +28,8 @@ export const persistedQueriesPlugin = {
         return {
             async didResolveOperation(ctx) {
                 // Enforce only in production or when explicitly enabled
-                if (process.env.PERSISTED_QUERIES !== '1' && process.env.NODE_ENV !== 'production') {
+                if (process.env.PERSISTED_QUERIES !== '1' &&
+                    process.env.NODE_ENV !== 'production') {
                     return;
                 }
                 const opId = ctx.request.http?.headers.get('x-apollo-operation-id');

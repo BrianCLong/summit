@@ -1,10 +1,48 @@
 {
   "name": "integration/github-issue-comment",
   "nodes": [
-    { "parameters": { "path": "integration/github-issue-comment" }, "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 300], "name": "Webhook" },
-    { "parameters": { "authentication": "oAuth2", "owner": "={{$json.payload.owner}}", "repository": "={{$json.payload.repo}}", "resource": "issue", "operation": "createComment", "issueNumber": "={{$json.payload.issueNumber}}", "body": "={{$json.payload.body}}" }, "type": "n8n-nodes-base.github", "typeVersion": 1, "position": [450, 300], "name": "GitHub Comment" },
-    { "parameters": { "httpMethod": "POST", "url": "={{$json[\"maestroCallbackUrl\"]}}", "jsonParameters": true, "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" }, "bodyParametersJson": "={{$json[\"maestroBody\"]}}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [700, 300], "name": "Maestro Callback" }
+    {
+      "parameters": { "path": "integration/github-issue-comment" },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": "={{$json.payload.owner}}",
+        "repository": "={{$json.payload.repo}}",
+        "resource": "issue",
+        "operation": "createComment",
+        "issueNumber": "={{$json.payload.issueNumber}}",
+        "body": "={{$json.payload.body}}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "name": "GitHub Comment"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "={{$json[\"maestroCallbackUrl\"]}}",
+        "jsonParameters": true,
+        "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" },
+        "bodyParametersJson": "={{$json[\"maestroBody\"]}}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "name": "Maestro Callback"
+    }
   ],
-  "connections": { "Webhook": { "main": [[{"node": "GitHub Comment", "type": "main", "index": 0}]] }, "GitHub Comment": { "main": [[{"node": "Maestro Callback", "type": "main", "index": 0}]] } }
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "GitHub Comment", "type": "main", "index": 0 }]]
+    },
+    "GitHub Comment": {
+      "main": [[{ "node": "Maestro Callback", "type": "main", "index": 0 }]]
+    }
+  }
 }
-

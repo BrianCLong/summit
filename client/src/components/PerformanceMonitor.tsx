@@ -32,8 +32,12 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     const memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // MB
 
     // Network requests (approximate)
-    const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-    const recentRequests = entries.filter((entry) => now - entry.startTime < sampleInterval).length;
+    const entries = performance.getEntriesByType(
+      'resource',
+    ) as PerformanceResourceTiming[];
+    const recentRequests = entries.filter(
+      (entry) => now - entry.startTime < sampleInterval,
+    ).length;
 
     // Error count from console (simplified tracking)
     const errorCount = (window as any).__performanceErrors || 0;
@@ -82,9 +86,13 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   const averageMetrics =
     metrics.length > 0
       ? {
-          renderTime: metrics.reduce((acc, m) => acc + m.renderTime, 0) / metrics.length,
-          memoryUsage: metrics.reduce((acc, m) => acc + m.memoryUsage, 0) / metrics.length,
-          networkRequests: metrics.reduce((acc, m) => acc + m.networkRequests, 0) / metrics.length,
+          renderTime:
+            metrics.reduce((acc, m) => acc + m.renderTime, 0) / metrics.length,
+          memoryUsage:
+            metrics.reduce((acc, m) => acc + m.memoryUsage, 0) / metrics.length,
+          networkRequests:
+            metrics.reduce((acc, m) => acc + m.networkRequests, 0) /
+            metrics.length,
           errorCount: metrics[metrics.length - 1]?.errorCount || 0,
         }
       : null;
@@ -159,19 +167,25 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 
               <div>
                 <div className="text-gray-600">Network Requests</div>
-                <div className="font-mono">{currentMetrics.networkRequests}</div>
+                <div className="font-mono">
+                  {currentMetrics.networkRequests}
+                </div>
               </div>
 
               <div>
                 <div className="text-gray-600">Errors</div>
-                <div className="font-mono text-red-600">{currentMetrics.errorCount}</div>
+                <div className="font-mono text-red-600">
+                  {currentMetrics.errorCount}
+                </div>
               </div>
             </div>
 
             {/* Mini chart */}
             {metrics.length > 1 && (
               <div className="mt-4">
-                <div className="text-gray-600 text-xs mb-2">Memory Usage Trend</div>
+                <div className="text-gray-600 text-xs mb-2">
+                  Memory Usage Trend
+                </div>
                 <div className="h-16 bg-gray-50 rounded relative overflow-hidden">
                   <svg width="100%" height="100%" className="absolute">
                     {metrics.slice(-20).map((metric, i, arr) => {
@@ -220,7 +234,8 @@ export const usePerformanceTracking = () => {
   }, []);
 
   const trackError = useCallback((error: Error) => {
-    (window as any).__performanceErrors = ((window as any).__performanceErrors || 0) + 1;
+    (window as any).__performanceErrors =
+      ((window as any).__performanceErrors || 0) + 1;
     console.error('[Performance] Error tracked:', error);
   }, []);
 

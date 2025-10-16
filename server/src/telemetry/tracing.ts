@@ -9,7 +9,10 @@ import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-otlp-http';
-import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
+import {
+  BatchSpanProcessor,
+  ConsoleSpanExporter,
+} from '@opentelemetry/sdk-trace-node';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -43,9 +46,12 @@ export class IntelGraphTracing {
     const resource = Resource.default().merge(
       new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: 'maestro-orchestrator',
-        [SemanticResourceAttributes.SERVICE_VERSION]: process.env.SERVICE_VERSION || '2.0.0',
-        [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: process.env.HOSTNAME || 'unknown',
-        [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
+        [SemanticResourceAttributes.SERVICE_VERSION]:
+          process.env.SERVICE_VERSION || '2.0.0',
+        [SemanticResourceAttributes.SERVICE_INSTANCE_ID]:
+          process.env.HOSTNAME || 'unknown',
+        [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
+          process.env.NODE_ENV || 'development',
         'intelgraph.cluster': process.env.CLUSTER_NAME || 'local',
         'intelgraph.region': process.env.AWS_REGION || 'us-west-2',
       }),
@@ -85,7 +91,8 @@ export class IntelGraphTracing {
     const exporters = [];
 
     // OTLP Exporter (primary - to OpenTelemetry Collector)
-    const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://otel-collector:4318';
+    const otlpEndpoint =
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://otel-collector:4318';
     exporters.push(
       new OTLPTraceExporter({
         url: `${otlpEndpoint}/v1/traces`,
@@ -134,7 +141,8 @@ export class IntelGraphTracing {
           },
           responseHook: (span, response) => {
             span.setAttributes({
-              'http.response.body.size': response.headers['content-length'] || 0,
+              'http.response.body.size':
+                response.headers['content-length'] || 0,
             });
           },
         }),
@@ -272,7 +280,9 @@ export class IntelGraphTracing {
   /**
    * Add custom attributes to current span
    */
-  public addAttributesToCurrentSpan(attributes: Record<string, string | number | boolean>): void {
+  public addAttributesToCurrentSpan(
+    attributes: Record<string, string | number | boolean>,
+  ): void {
     const currentSpan = trace.getActiveSpan();
     if (currentSpan) {
       currentSpan.setAttributes(attributes);
@@ -324,17 +334,26 @@ export class IntelGraphTracing {
  * Custom tracing decorators for common operations
  */
 export function Traced(operationName?: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
     const tracing = IntelGraphTracing.getInstance();
 
     descriptor.value = async function (...args: any[]) {
-      const spanName = operationName || `${target.constructor.name}.${propertyKey}`;
+      const spanName =
+        operationName || `${target.constructor.name}.${propertyKey}`;
 
-      return tracing.traceAsync(spanName, () => originalMethod.apply(this, args), {
-        'code.function': propertyKey,
-        'code.namespace': target.constructor.name,
-      });
+      return tracing.traceAsync(
+        spanName,
+        () => originalMethod.apply(this, args),
+        {
+          'code.function': propertyKey,
+          'code.namespace': target.constructor.name,
+        },
+      );
     };
 
     return descriptor;
@@ -363,7 +382,10 @@ export function tracingMiddleware() {
     });
 
     // Set response headers for trace propagation
-    res.setHeader('x-trace-id', trace.getActiveSpan()?.spanContext().traceId || 'unknown');
+    res.setHeader(
+      'x-trace-id',
+      trace.getActiveSpan()?.spanContext().traceId || 'unknown',
+    );
 
     next();
   };

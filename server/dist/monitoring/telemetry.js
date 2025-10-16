@@ -3,9 +3,9 @@
  * Provides distributed tracing, metrics, and logging
  */
 const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { getNodeAutoInstrumentations, } = require('@opentelemetry/auto-instrumentations-node');
 const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+const { SemanticResourceAttributes, } = require('@opentelemetry/semantic-conventions');
 const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
 const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
 const { PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
@@ -22,7 +22,7 @@ class TelemetryService {
             environment: process.env.NODE_ENV || 'development',
             jaegerEndpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
             prometheusPort: parseInt(process.env.PROMETHEUS_PORT) || 9464,
-            enabled: process.env.OTEL_ENABLED !== '0'
+            enabled: process.env.OTEL_ENABLED !== '0',
         };
         this.userPathCounter = null;
         this.clickCounter = null;
@@ -51,7 +51,7 @@ class TelemetryService {
             // Prometheus exporter for metrics
             const prometheusExporter = new PrometheusExporter({
                 port: this.config.prometheusPort,
-                preventServerStart: false
+                preventServerStart: false,
             });
             // Initialize SDK
             this.sdk = new NodeSDK({
@@ -59,7 +59,7 @@ class TelemetryService {
                 traceExporter: jaegerExporter,
                 metricReader: new PeriodicExportingMetricReader({
                     exporter: prometheusExporter,
-                    exportIntervalMillis: 10000
+                    exportIntervalMillis: 10000,
                 }),
                 instrumentations: [
                     getNodeAutoInstrumentations({
@@ -75,8 +75,8 @@ class TelemetryService {
                             enabled: true,
                             ignoreIncomingRequestHook: (req) => {
                                 // Ignore health checks and metrics endpoints
-                                return req.url?.includes('/health') || req.url?.includes('/metrics');
-                            }
+                                return (req.url?.includes('/health') || req.url?.includes('/metrics'));
+                            },
                         },
                         // Configure Express instrumentation
                         '@opentelemetry/instrumentation-express': {
@@ -86,12 +86,12 @@ class TelemetryService {
                         '@opentelemetry/instrumentation-graphql': {
                             enabled: true,
                             depth: 10,
-                            allowValues: process.env.NODE_ENV === 'development'
+                            allowValues: process.env.NODE_ENV === 'development',
                         },
                         // Configure database instrumentations
                         '@opentelemetry/instrumentation-redis': {
                             enabled: true,
-                        }
+                        },
                     }),
                 ],
             });
@@ -107,12 +107,12 @@ class TelemetryService {
                 serviceVersion: this.config.serviceVersion,
                 environment: this.config.environment,
                 jaegerEndpoint: this.config.jaegerEndpoint,
-                prometheusPort: this.config.prometheusPort
+                prometheusPort: this.config.prometheusPort,
             });
         }
         catch (error) {
             logger.error('Failed to initialize OpenTelemetry', {
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -127,7 +127,7 @@ class TelemetryService {
             }
             catch (error) {
                 logger.error('Error shutting down OpenTelemetry SDK', {
-                    error: error.message
+                    error: error.message,
                 });
             }
         }
@@ -142,7 +142,7 @@ class TelemetryService {
                 setStatus: () => { },
                 setAttributes: () => { },
                 addEvent: () => { },
-                recordException: () => { }
+                recordException: () => { },
             };
         }
         return this.tracer.startSpan(name, options);
@@ -163,7 +163,7 @@ class TelemetryService {
             span.recordException(error);
             span.setStatus({
                 code: SpanStatusCode.ERROR,
-                message: error.message
+                message: error.message,
             });
             throw error;
         }
@@ -187,7 +187,7 @@ class TelemetryService {
             span.recordException(error);
             span.setStatus({
                 code: SpanStatusCode.ERROR,
-                message: error.message
+                message: error.message,
             });
             throw error;
         }
@@ -210,8 +210,8 @@ class TelemetryService {
                     'http.url': req.url,
                     'http.route': req.route?.path,
                     'user.id': req.user?.id,
-                    'http.user_agent': req.get('User-Agent')
-                }
+                    'http.user_agent': req.get('User-Agent'),
+                },
             });
             // Store span in request for access in resolvers
             req.span = span;
@@ -219,12 +219,12 @@ class TelemetryService {
             res.end = function (...args) {
                 span.setAttributes({
                     'http.status_code': res.statusCode,
-                    'http.response_size': res.get('content-length')
+                    'http.response_size': res.get('content-length'),
                 });
                 if (res.statusCode >= 400) {
                     span.setStatus({
                         code: SpanStatusCode.ERROR,
-                        message: `HTTP ${res.statusCode}`
+                        message: `HTTP ${res.statusCode}`,
                     });
                 }
                 else {
@@ -253,19 +253,19 @@ class TelemetryService {
                         'graphql.operation.type': operationType,
                         'graphql.field.name': fieldName,
                         'graphql.operation.name': info.operation.name?.value,
-                        'user.id': context.user?.id
+                        'user.id': context.user?.id,
                     });
                     const result = await originalResolver(parent, args, context, info);
                     // Add result metadata if available
                     if (result && typeof result === 'object') {
                         if (Array.isArray(result)) {
                             span.setAttributes({
-                                'graphql.result.count': result.length
+                                'graphql.result.count': result.length,
                             });
                         }
                         else if (result.success !== undefined) {
                             span.setAttributes({
-                                'graphql.result.success': result.success
+                                'graphql.result.success': result.success,
                             });
                         }
                     }
@@ -282,7 +282,7 @@ class TelemetryService {
             span.setAttributes({
                 'db.operation': operationType,
                 'db.statement': typeof query === 'string' ? query : JSON.stringify(query),
-                'db.system': 'neo4j'
+                'db.system': 'neo4j',
             });
             // The actual database operation should be performed by the caller
             return { span };
@@ -298,7 +298,12 @@ class TelemetryService {
         this.dwellHistogram?.record(ms, { userId, nodeId });
     }
     recordAiInteraction(userId, model, confidence, overridden = false) {
-        this.aiInteractionCounter?.add(1, { userId, model, confidence, overridden });
+        this.aiInteractionCounter?.add(1, {
+            userId,
+            model,
+            confidence,
+            overridden,
+        });
     }
     /**
      * Create custom metrics
@@ -307,7 +312,7 @@ class TelemetryService {
         if (!this.initialized) {
             return {
                 add: () => { },
-                bind: () => ({ add: () => { } })
+                bind: () => ({ add: () => { } }),
             };
         }
         const { metrics } = require('@opentelemetry/api');
@@ -318,7 +323,7 @@ class TelemetryService {
         if (!this.initialized) {
             return {
                 record: () => { },
-                bind: () => ({ record: () => { } })
+                bind: () => ({ record: () => { } }),
             };
         }
         const { metrics } = require('@opentelemetry/api');
@@ -329,7 +334,7 @@ class TelemetryService {
         if (!this.initialized) {
             return {
                 record: () => { },
-                bind: () => ({ record: () => { } })
+                bind: () => ({ record: () => { } }),
             };
         }
         const { metrics } = require('@opentelemetry/api');
@@ -347,8 +352,8 @@ class TelemetryService {
                 serviceName: this.config.serviceName,
                 serviceVersion: this.config.serviceVersion,
                 environment: this.config.environment,
-                enabled: this.config.enabled
-            }
+                enabled: this.config.enabled,
+            },
         };
     }
 }

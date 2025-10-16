@@ -4,475 +4,475 @@
 runbooks:
   # Maestro Orchestrator Down
   maestro-orchestrator-down:
-    title: "Maestro Orchestrator Down"
-    description: "Maestro conductor orchestrator is not responding to health checks"
-    severity: "critical"
-    tags: ["orchestrator", "availability", "critical"]
-    
+    title: 'Maestro Orchestrator Down'
+    description: 'Maestro conductor orchestrator is not responding to health checks'
+    severity: 'critical'
+    tags: ['orchestrator', 'availability', 'critical']
+
     automation:
       enabled: true
       trigger_conditions:
         - "alert_name == 'MaestroOrchestratorDown'"
         - "alert_duration > '1m'"
-      
+
     steps:
       - step: 1
-        title: "Immediate Assessment"
-        type: "diagnostic"
+        title: 'Immediate Assessment'
+        type: 'diagnostic'
         automated: true
         actions:
-          - name: "check_pod_status"
-            command: "kubectl get pods -n intelgraph-prod -l app=maestro-conductor"
-            expected_output: "Running"
-            timeout: "30s"
-            
-          - name: "check_service_endpoints"
-            command: "kubectl get endpoints maestro-conductor -n intelgraph-prod"
-            timeout: "30s"
-            
-          - name: "check_recent_logs"
-            command: "kubectl logs -n intelgraph-prod -l app=maestro-conductor --tail=50"
-            timeout: "30s"
-            
+          - name: 'check_pod_status'
+            command: 'kubectl get pods -n intelgraph-prod -l app=maestro-conductor'
+            expected_output: 'Running'
+            timeout: '30s'
+
+          - name: 'check_service_endpoints'
+            command: 'kubectl get endpoints maestro-conductor -n intelgraph-prod'
+            timeout: '30s'
+
+          - name: 'check_recent_logs'
+            command: 'kubectl logs -n intelgraph-prod -l app=maestro-conductor --tail=50'
+            timeout: '30s'
+
       - step: 2
-        title: "Health Check Verification"
-        type: "verification"
+        title: 'Health Check Verification'
+        type: 'verification'
         automated: true
         actions:
-          - name: "internal_health_check"
-            type: "http_request"
-            url: "http://maestro-conductor.intelgraph-prod.svc.cluster.local:5000/health"
-            method: "GET"
-            timeout: "10s"
+          - name: 'internal_health_check'
+            type: 'http_request'
+            url: 'http://maestro-conductor.intelgraph-prod.svc.cluster.local:5000/health'
+            method: 'GET'
+            timeout: '10s'
             expected_status: 200
-            
-          - name: "database_connectivity"
-            type: "database_check"
-            connection: "postgres://postgres-conductor:5432/maestro_conductor_prod"
-            query: "SELECT 1"
-            timeout: "10s"
-            
-          - name: "redis_connectivity"
-            type: "redis_check"
-            connection: "redis://redis-conductor:6379"
-            command: "PING"
-            timeout: "10s"
-            
+
+          - name: 'database_connectivity'
+            type: 'database_check'
+            connection: 'postgres://postgres-conductor:5432/maestro_conductor_prod'
+            query: 'SELECT 1'
+            timeout: '10s'
+
+          - name: 'redis_connectivity'
+            type: 'redis_check'
+            connection: 'redis://redis-conductor:6379'
+            command: 'PING'
+            timeout: '10s'
+
       - step: 3
-        title: "Automated Recovery Attempt"
-        type: "remediation"
+        title: 'Automated Recovery Attempt'
+        type: 'remediation'
         automated: true
         conditions:
-          - "previous_step_failed"
+          - 'previous_step_failed'
         actions:
-          - name: "restart_pods"
-            command: "kubectl rollout restart deployment/maestro-conductor -n intelgraph-prod"
-            timeout: "60s"
-            
-          - name: "wait_for_ready"
-            command: "kubectl rollout status deployment/maestro-conductor -n intelgraph-prod"
-            timeout: "300s"
-            
-          - name: "verify_health"
-            type: "http_request"
-            url: "http://maestro-conductor.intelgraph-prod.svc.cluster.local:5000/health"
-            method: "GET"
-            timeout: "30s"
+          - name: 'restart_pods'
+            command: 'kubectl rollout restart deployment/maestro-conductor -n intelgraph-prod'
+            timeout: '60s'
+
+          - name: 'wait_for_ready'
+            command: 'kubectl rollout status deployment/maestro-conductor -n intelgraph-prod'
+            timeout: '300s'
+
+          - name: 'verify_health'
+            type: 'http_request'
+            url: 'http://maestro-conductor.intelgraph-prod.svc.cluster.local:5000/health'
+            method: 'GET'
+            timeout: '30s'
             retry_attempts: 3
-            retry_delay: "10s"
-            
+            retry_delay: '10s'
+
       - step: 4
-        title: "Manual Escalation"
-        type: "escalation"
+        title: 'Manual Escalation'
+        type: 'escalation'
         automated: false
         conditions:
-          - "automated_recovery_failed"
+          - 'automated_recovery_failed'
         actions:
-          - name: "create_incident"
-            type: "incident_management"
-            priority: "P1"
-            description: "Maestro orchestrator down - automated recovery failed"
-            assign_to: "on_call_engineer"
-            
-          - name: "gather_diagnostics"
-            type: "diagnostic_collection"
+          - name: 'create_incident'
+            type: 'incident_management'
+            priority: 'P1'
+            description: 'Maestro orchestrator down - automated recovery failed'
+            assign_to: 'on_call_engineer'
+
+          - name: 'gather_diagnostics'
+            type: 'diagnostic_collection'
             artifacts:
-              - "pod_describe"
-              - "service_describe"
-              - "logs_last_1h"
-              - "metrics_last_30m"
-              - "network_connectivity"
-              
+              - 'pod_describe'
+              - 'service_describe'
+              - 'logs_last_1h'
+              - 'metrics_last_30m'
+              - 'network_connectivity'
+
     recovery_verification:
-      - name: "health_check_passes"
-        type: "http_request"
-        url: "http://maestro-conductor.intelgraph-prod.svc.cluster.local:5000/health"
+      - name: 'health_check_passes'
+        type: 'http_request'
+        url: 'http://maestro-conductor.intelgraph-prod.svc.cluster.local:5000/health'
         expected_status: 200
-        
-      - name: "workflow_execution_test"
-        type: "workflow_test"
-        workflow: "hello-world-health-check"
-        timeout: "60s"
-        
-      - name: "metrics_collection_working"
-        type: "metrics_check"
+
+      - name: 'workflow_execution_test'
+        type: 'workflow_test'
+        workflow: 'hello-world-health-check'
+        timeout: '60s'
+
+      - name: 'metrics_collection_working'
+        type: 'metrics_check'
         metric: "up{job='maestro-conductor'}"
         expected_value: 1
-        
+
     success_actions:
-      - type: "notification"
-        channel: "#intelgraph-alerts"
-        message: "✅ Maestro orchestrator recovered automatically"
-        
-      - type: "metrics"
-        increment: "runbook_success_total"
+      - type: 'notification'
+        channel: '#intelgraph-alerts'
+        message: '✅ Maestro orchestrator recovered automatically'
+
+      - type: 'metrics'
+        increment: 'runbook_success_total'
         labels:
-          runbook: "maestro-orchestrator-down"
-          recovery_type: "automated"
+          runbook: 'maestro-orchestrator-down'
+          recovery_type: 'automated'
 
   # Workflow Success Rate Low
   maestro-workflow-failures:
-    title: "Maestro Workflow Success Rate Low"
-    description: "Workflow success rate has fallen below SLO threshold"
-    severity: "critical"
-    tags: ["workflow", "slo", "performance"]
-    
+    title: 'Maestro Workflow Success Rate Low'
+    description: 'Workflow success rate has fallen below SLO threshold'
+    severity: 'critical'
+    tags: ['workflow', 'slo', 'performance']
+
     automation:
       enabled: true
       trigger_conditions:
         - "alert_name == 'MaestroWorkflowSuccessRateLow'"
         - "alert_duration > '2m'"
-        
+
     steps:
       - step: 1
-        title: "Failure Pattern Analysis"
-        type: "analysis"
+        title: 'Failure Pattern Analysis'
+        type: 'analysis'
         automated: true
         actions:
-          - name: "get_failed_workflows"
-            type: "metrics_query"
+          - name: 'get_failed_workflows'
+            type: 'metrics_query'
             query: "rate(conductor_workflow_completed_total{status='FAILED'}[5m])"
-            timeout: "30s"
-            
-          - name: "analyze_failure_reasons"
-            type: "log_analysis"
+            timeout: '30s'
+
+          - name: 'analyze_failure_reasons'
+            type: 'log_analysis'
             query: 'namespace="intelgraph-prod" AND level="error" AND message CONTAINS "workflow"'
-            time_range: "10m"
-            
-          - name: "check_dependency_health"
-            type: "health_check"
-            services: ["postgres-conductor", "redis-conductor", "task-workers"]
-            
+            time_range: '10m'
+
+          - name: 'check_dependency_health'
+            type: 'health_check'
+            services: ['postgres-conductor', 'redis-conductor', 'task-workers']
+
       - step: 2
-        title: "Resource Utilization Check"
-        type: "diagnostic"
+        title: 'Resource Utilization Check'
+        type: 'diagnostic'
         automated: true
         actions:
-          - name: "check_cpu_usage"
-            type: "metrics_query"
+          - name: 'check_cpu_usage'
+            type: 'metrics_query'
             query: "rate(container_cpu_usage_seconds_total{pod=~'maestro-conductor.*'}[5m])"
-            
-          - name: "check_memory_usage"
-            type: "metrics_query"
+
+          - name: 'check_memory_usage'
+            type: 'metrics_query'
             query: "container_memory_usage_bytes{pod=~'maestro-conductor.*'}"
-            
-          - name: "check_queue_depths"
-            type: "redis_check"
-            connection: "redis://redis-conductor:6379"
-            command: "LLEN workflow_queue"
-            
+
+          - name: 'check_queue_depths'
+            type: 'redis_check'
+            connection: 'redis://redis-conductor:6379'
+            command: 'LLEN workflow_queue'
+
       - step: 3
-        title: "Automated Mitigation"
-        type: "remediation"
+        title: 'Automated Mitigation'
+        type: 'remediation'
         automated: true
         conditions:
-          - "high_resource_usage OR queue_backup"
+          - 'high_resource_usage OR queue_backup'
         actions:
-          - name: "scale_up_workers"
-            command: "kubectl scale deployment task-workers --replicas=10 -n intelgraph-prod"
-            timeout: "60s"
-            
-          - name: "increase_orchestrator_resources"
-            type: "resource_scaling"
-            deployment: "maestro-conductor"
-            cpu_limit: "2000m"
-            memory_limit: "4Gi"
-            
-          - name: "clear_dead_letter_queue"
-            type: "redis_operation"
-            connection: "redis://redis-conductor:6379"
-            command: "LTRIM conductor_dead_letter_queue 0 0"
-            
+          - name: 'scale_up_workers'
+            command: 'kubectl scale deployment task-workers --replicas=10 -n intelgraph-prod'
+            timeout: '60s'
+
+          - name: 'increase_orchestrator_resources'
+            type: 'resource_scaling'
+            deployment: 'maestro-conductor'
+            cpu_limit: '2000m'
+            memory_limit: '4Gi'
+
+          - name: 'clear_dead_letter_queue'
+            type: 'redis_operation'
+            connection: 'redis://redis-conductor:6379'
+            command: 'LTRIM conductor_dead_letter_queue 0 0'
+
       - step: 4
-        title: "Traffic Throttling"
-        type: "remediation"
+        title: 'Traffic Throttling'
+        type: 'remediation'
         automated: true
         conditions:
-          - "failure_rate > 20%"
+          - 'failure_rate > 20%'
         actions:
-          - name: "enable_circuit_breaker"
-            type: "configuration_update"
-            service: "maestro-conductor"
-            parameter: "circuit_breaker_enabled"
-            value: "true"
-            
-          - name: "reduce_concurrent_workflows"
-            type: "configuration_update"
-            service: "maestro-conductor"
-            parameter: "max_concurrent_workflows"
-            value: "50"
-            
+          - name: 'enable_circuit_breaker'
+            type: 'configuration_update'
+            service: 'maestro-conductor'
+            parameter: 'circuit_breaker_enabled'
+            value: 'true'
+
+          - name: 'reduce_concurrent_workflows'
+            type: 'configuration_update'
+            service: 'maestro-conductor'
+            parameter: 'max_concurrent_workflows'
+            value: '50'
+
     recovery_verification:
-      - name: "workflow_success_rate_improved"
-        type: "metrics_check"
+      - name: 'workflow_success_rate_improved'
+        type: 'metrics_check'
         query: "rate(conductor_workflow_completed_total{status='COMPLETED'}[5m]) / rate(conductor_workflow_completed_total[5m]) * 100"
-        threshold: "> 95"
-        
-      - name: "queue_depths_normal"
-        type: "redis_check"
-        command: "LLEN workflow_queue"
-        threshold: "< 100"
+        threshold: '> 95'
+
+      - name: 'queue_depths_normal'
+        type: 'redis_check'
+        command: 'LLEN workflow_queue'
+        threshold: '< 100'
 
   # Database Connectivity Issues
   postgres-recovery:
-    title: "PostgreSQL Database Recovery"
-    description: "PostgreSQL database connectivity or performance issues"
-    severity: "critical"
-    tags: ["database", "postgres", "connectivity"]
-    
+    title: 'PostgreSQL Database Recovery'
+    description: 'PostgreSQL database connectivity or performance issues'
+    severity: 'critical'
+    tags: ['database', 'postgres', 'connectivity']
+
     automation:
       enabled: true
       trigger_conditions:
         - "alert_name =~ 'MaestroDatabaseDown|PostgresDown'"
-        
+
     steps:
       - step: 1
-        title: "Database Health Assessment"
-        type: "diagnostic"
+        title: 'Database Health Assessment'
+        type: 'diagnostic'
         automated: true
         actions:
-          - name: "check_postgres_pods"
-            command: "kubectl get pods -n intelgraph-prod -l app=postgres-conductor"
-            
-          - name: "check_connection_count"
-            type: "database_query"
-            connection: "postgres://postgres-conductor:5432/maestro_conductor_prod"
-            query: "SELECT count(*) FROM pg_stat_activity;"
-            timeout: "10s"
-            
-          - name: "check_database_locks"
-            type: "database_query"
-            query: "SELECT count(*) FROM pg_locks WHERE NOT GRANTED;"
-            timeout: "10s"
-            
+          - name: 'check_postgres_pods'
+            command: 'kubectl get pods -n intelgraph-prod -l app=postgres-conductor'
+
+          - name: 'check_connection_count'
+            type: 'database_query'
+            connection: 'postgres://postgres-conductor:5432/maestro_conductor_prod'
+            query: 'SELECT count(*) FROM pg_stat_activity;'
+            timeout: '10s'
+
+          - name: 'check_database_locks'
+            type: 'database_query'
+            query: 'SELECT count(*) FROM pg_locks WHERE NOT GRANTED;'
+            timeout: '10s'
+
       - step: 2
-        title: "Performance Diagnosis"
-        type: "diagnostic"
+        title: 'Performance Diagnosis'
+        type: 'diagnostic'
         automated: true
         actions:
-          - name: "check_slow_queries"
-            type: "database_query"
-            query: "SELECT query, calls, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 5;"
-            
-          - name: "check_disk_usage"
-            type: "metrics_query"
+          - name: 'check_slow_queries'
+            type: 'database_query'
+            query: 'SELECT query, calls, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 5;'
+
+          - name: 'check_disk_usage'
+            type: 'metrics_query'
             query: "node_filesystem_avail_bytes{mountpoint='/var/lib/postgresql/data'}"
-            
-          - name: "check_connection_pool"
-            type: "application_check"
-            service: "maestro-conductor"
-            endpoint: "/health/database"
-            
+
+          - name: 'check_connection_pool'
+            type: 'application_check'
+            service: 'maestro-conductor'
+            endpoint: '/health/database'
+
       - step: 3
-        title: "Automated Recovery"
-        type: "remediation"
+        title: 'Automated Recovery'
+        type: 'remediation'
         automated: true
         conditions:
-          - "connection_count > 80% OR slow_queries_detected"
+          - 'connection_count > 80% OR slow_queries_detected'
         actions:
-          - name: "kill_long_running_queries"
-            type: "database_query"
+          - name: 'kill_long_running_queries'
+            type: 'database_query'
             query: "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'active' AND query_start < NOW() - INTERVAL '5 minutes';"
-            
-          - name: "refresh_connection_pools"
-            type: "application_restart"
-            service: "maestro-conductor"
-            graceful: true
-            
-          - name: "vacuum_analyze"
-            type: "database_maintenance" 
-            operation: "VACUUM ANALYZE"
-            tables: ["workflows", "tasks", "executions"]
 
-  # Redis Cache Recovery  
+          - name: 'refresh_connection_pools'
+            type: 'application_restart'
+            service: 'maestro-conductor'
+            graceful: true
+
+          - name: 'vacuum_analyze'
+            type: 'database_maintenance'
+            operation: 'VACUUM ANALYZE'
+            tables: ['workflows', 'tasks', 'executions']
+
+  # Redis Cache Recovery
   redis-recovery:
-    title: "Redis Cache Recovery"
-    description: "Redis cache connectivity or performance issues"
-    severity: "critical"
-    tags: ["redis", "cache", "queue"]
-    
+    title: 'Redis Cache Recovery'
+    description: 'Redis cache connectivity or performance issues'
+    severity: 'critical'
+    tags: ['redis', 'cache', 'queue']
+
     automation:
       enabled: true
       trigger_conditions:
         - "alert_name == 'MaestroRedisDown'"
-        
+
     steps:
       - step: 1
-        title: "Redis Health Check"
-        type: "diagnostic"
+        title: 'Redis Health Check'
+        type: 'diagnostic'
         automated: true
         actions:
-          - name: "check_redis_pods"
-            command: "kubectl get pods -n intelgraph-prod -l app=redis-conductor"
-            
-          - name: "redis_ping"
-            type: "redis_check"
-            connection: "redis://redis-conductor:6379"
-            command: "PING"
-            
-          - name: "check_memory_usage"
-            type: "redis_check"
-            command: "INFO memory"
-            
+          - name: 'check_redis_pods'
+            command: 'kubectl get pods -n intelgraph-prod -l app=redis-conductor'
+
+          - name: 'redis_ping'
+            type: 'redis_check'
+            connection: 'redis://redis-conductor:6379'
+            command: 'PING'
+
+          - name: 'check_memory_usage'
+            type: 'redis_check'
+            command: 'INFO memory'
+
       - step: 2
-        title: "Queue Analysis"
-        type: "diagnostic"
+        title: 'Queue Analysis'
+        type: 'diagnostic'
         automated: true
         actions:
-          - name: "check_queue_lengths"
-            type: "redis_check"
+          - name: 'check_queue_lengths'
+            type: 'redis_check'
             commands:
-              - "LLEN workflow_queue"
-              - "LLEN task_queue"
-              - "LLEN conductor_dead_letter_queue"
-              
-          - name: "check_key_expiration"
-            type: "redis_check"
-            command: "SCAN 0 COUNT 100"
-            
-      - step: 3  
-        title: "Cache Recovery"
-        type: "remediation"
+              - 'LLEN workflow_queue'
+              - 'LLEN task_queue'
+              - 'LLEN conductor_dead_letter_queue'
+
+          - name: 'check_key_expiration'
+            type: 'redis_check'
+            command: 'SCAN 0 COUNT 100'
+
+      - step: 3
+        title: 'Cache Recovery'
+        type: 'remediation'
         automated: true
         actions:
-          - name: "clear_expired_keys"
-            type: "redis_operation"
+          - name: 'clear_expired_keys'
+            type: 'redis_operation'
             script: |
               for key in $(redis-cli --scan --pattern "*:expired:*"); do
                 redis-cli DEL $key
               done
-              
-          - name: "optimize_memory"
-            type: "redis_operation"
-            command: "MEMORY PURGE"
-            
-          - name: "restart_redis_if_needed"
-            type: "conditional_restart"
-            condition: "memory_usage > 90%"
-            service: "redis-conductor"
+
+          - name: 'optimize_memory'
+            type: 'redis_operation'
+            command: 'MEMORY PURGE'
+
+          - name: 'restart_redis_if_needed'
+            type: 'conditional_restart'
+            condition: 'memory_usage > 90%'
+            service: 'redis-conductor'
 
   # Performance Issues
   maestro-performance:
-    title: "Maestro Performance Issues"
-    description: "Performance degradation in Maestro services"
-    severity: "warning"
-    tags: ["performance", "latency", "optimization"]
-    
+    title: 'Maestro Performance Issues'
+    description: 'Performance degradation in Maestro services'
+    severity: 'warning'
+    tags: ['performance', 'latency', 'optimization']
+
     automation:
       enabled: true
       trigger_conditions:
         - "alert_name =~ '.*Latency.*|.*Performance.*'"
-        
+
     steps:
       - step: 1
-        title: "Performance Baseline"
-        type: "analysis"
+        title: 'Performance Baseline'
+        type: 'analysis'
         automated: true
         actions:
-          - name: "get_current_latency"
-            type: "metrics_query"
-            query: "histogram_quantile(0.95, rate(conductor_workflow_execution_time_seconds_bucket[5m]))"
-            
-          - name: "get_throughput"
-            type: "metrics_query"
-            query: "rate(conductor_workflow_completed_total[5m])"
-            
-          - name: "get_error_rate"
-            type: "metrics_query"
+          - name: 'get_current_latency'
+            type: 'metrics_query'
+            query: 'histogram_quantile(0.95, rate(conductor_workflow_execution_time_seconds_bucket[5m]))'
+
+          - name: 'get_throughput'
+            type: 'metrics_query'
+            query: 'rate(conductor_workflow_completed_total[5m])'
+
+          - name: 'get_error_rate'
+            type: 'metrics_query'
             query: "rate(conductor_workflow_completed_total{status='FAILED'}[5m])"
-            
+
       - step: 2
-        title: "Resource Optimization"
-        type: "remediation"
+        title: 'Resource Optimization'
+        type: 'remediation'
         automated: true
         conditions:
-          - "latency_p95 > 30s OR throughput < 10_per_min"
+          - 'latency_p95 > 30s OR throughput < 10_per_min'
         actions:
-          - name: "enable_caching"
-            type: "feature_flag"
-            service: "maestro-conductor"
-            flag: "enable_result_caching"
+          - name: 'enable_caching'
+            type: 'feature_flag'
+            service: 'maestro-conductor'
+            flag: 'enable_result_caching'
             value: true
-            
-          - name: "optimize_database_queries"
-            type: "configuration_update"
-            service: "maestro-conductor"
+
+          - name: 'optimize_database_queries'
+            type: 'configuration_update'
+            service: 'maestro-conductor'
             parameters:
-              query_timeout: "15s"
+              query_timeout: '15s'
               connection_pool_size: 20
-              
-          - name: "scale_horizontally"
-            command: "kubectl scale deployment maestro-conductor --replicas=5 -n intelgraph-prod"
+
+          - name: 'scale_horizontally'
+            command: 'kubectl scale deployment maestro-conductor --replicas=5 -n intelgraph-prod'
 
 # Global automation configuration
 automation_config:
-  global_timeout: "300s"
+  global_timeout: '300s'
   max_concurrent_runbooks: 5
   retry_policy:
     max_attempts: 3
-    backoff: "exponential"
-    base_delay: "10s"
-    
+    backoff: 'exponential'
+    base_delay: '10s'
+
   notification_channels:
-    success: "#intelgraph-runbooks"
-    failure: "#intelgraph-critical" 
-    progress: "#intelgraph-ops"
-    
+    success: '#intelgraph-runbooks'
+    failure: '#intelgraph-critical'
+    progress: '#intelgraph-ops'
+
   approval_required:
-    - "database_operations"
-    - "service_restart"
-    - "configuration_changes"
-    
+    - 'database_operations'
+    - 'service_restart'
+    - 'configuration_changes'
+
   rollback_policy:
     enabled: true
-    timeout: "60s"
+    timeout: '60s'
     conditions:
-      - "health_check_failure"
-      - "error_rate_increase > 50%"
+      - 'health_check_failure'
+      - 'error_rate_increase > 50%'
 
 # Runbook execution tracking
 execution_tracking:
   metrics:
-    - "runbook_execution_total"
-    - "runbook_success_total" 
-    - "runbook_failure_total"
-    - "runbook_execution_duration_seconds"
-    
+    - 'runbook_execution_total'
+    - 'runbook_success_total'
+    - 'runbook_failure_total'
+    - 'runbook_execution_duration_seconds'
+
   logging:
-    level: "info"
+    level: 'info'
     structured: true
     fields:
-      - "runbook_name"
-      - "step_number"
-      - "action_name"
-      - "execution_time"
-      - "result"
-      
+      - 'runbook_name'
+      - 'step_number'
+      - 'action_name'
+      - 'execution_time'
+      - 'result'
+
   audit:
     enabled: true
-    retention: "90d"
+    retention: '90d'
     fields:
-      - "user_id"
-      - "alert_context"
-      - "actions_taken"
-      - "manual_overrides"
+      - 'user_id'
+      - 'alert_context'
+      - 'actions_taken'
+      - 'manual_overrides'

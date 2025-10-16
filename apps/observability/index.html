@@ -28,7 +28,9 @@
     <svg id="heatmap" width="300" height="300"></svg>
     <script>
       async function fetchMetric(name) {
-        const res = await fetch(`http://localhost:9090/api/v1/query?query=${name}`);
+        const res = await fetch(
+          `http://localhost:9090/api/v1/query?query=${name}`,
+        );
         const data = await res.json();
         return parseFloat(data.data.result[0]?.value[1] || 0);
       }
@@ -38,7 +40,10 @@
         const h = svg.getAttribute('height');
         const w = svg.getAttribute('width');
         const barHeight = (value / max) * h;
-        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        const rect = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'rect',
+        );
         rect.setAttribute('x', 0);
         rect.setAttribute('y', h - barHeight);
         rect.setAttribute('width', w);
@@ -61,7 +66,10 @@
         for (let x = 0; x < size; x++) {
           for (let y = 0; y < size; y++) {
             const latency = Math.random() * 200;
-            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            const rect = document.createElementNS(
+              'http://www.w3.org/2000/svg',
+              'rect',
+            );
             rect.setAttribute('x', x * cell);
             rect.setAttribute('y', y * cell);
             rect.setAttribute('width', cell);

@@ -1,6 +1,6 @@
-const { Queue, Worker } = require("bullmq");
-const config = require("../config");
-const SocialService = require("./SocialService");
+const { Queue, Worker } = require('bullmq');
+const config = require('../config');
+const SocialService = require('./SocialService');
 
 const connection = {
   host: config.redis.host,
@@ -9,11 +9,11 @@ const connection = {
   db: config.redis.db,
 };
 
-const socialQueue = new Queue("social:ingest", { connection });
+const socialQueue = new Queue('social:ingest', { connection });
 
 function startWorkers() {
   const worker = new Worker(
-    "social:ingest",
+    'social:ingest',
     async (job) => {
       const { provider, query, investigationId, host, limit } = job.data || {};
       const svc = new SocialService();
@@ -29,9 +29,9 @@ function startWorkers() {
 
 async function enqueueSocial(provider, query, investigationId, options = {}) {
   const job = await socialQueue.add(
-    "ingest",
+    'ingest',
     { provider, query, investigationId, ...options },
-    { attempts: 3, backoff: { type: "exponential", delay: 1000 } },
+    { attempts: 3, backoff: { type: 'exponential', delay: 1000 } },
   );
   return job.id;
 }

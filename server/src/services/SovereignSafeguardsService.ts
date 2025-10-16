@@ -26,7 +26,12 @@ export interface IndependentVerificationRequest {
 }
 
 export interface ContainmentTestConfig {
-  testType: 'EMERGENCY_STOP' | 'ROLLBACK_TEST' | 'ISOLATION_TEST' | 'HUMAN_OVERRIDE_TEST' | 'FULL_CONTAINMENT_DRILL';
+  testType:
+    | 'EMERGENCY_STOP'
+    | 'ROLLBACK_TEST'
+    | 'ISOLATION_TEST'
+    | 'HUMAN_OVERRIDE_TEST'
+    | 'FULL_CONTAINMENT_DRILL';
   tenant: string;
 }
 
@@ -84,7 +89,7 @@ export class SovereignSafeguardsService {
       containmentReadinessRequired: true,
       lawfulInteroperabilityRequired: true,
       reversibleAutonomyRequired: true,
-      enhancedAuditingEnabled: true
+      enhancedAuditingEnabled: true,
     };
 
     // Apply to all tenants by default
@@ -96,11 +101,15 @@ export class SovereignSafeguardsService {
    */
   async getSovereignSafeguardsStatus(tenant: string): Promise<any> {
     try {
-      const config = this.safeguardsConfig.get(tenant) || this.safeguardsConfig.get('default')!;
+      const config =
+        this.safeguardsConfig.get(tenant) ||
+        this.safeguardsConfig.get('default')!;
 
-      const independentVerification = await this.getIndependentVerificationStatus(tenant);
+      const independentVerification =
+        await this.getIndependentVerificationStatus(tenant);
       const containmentReadiness = await this.getContainmentReadiness(tenant);
-      const lawfulInteroperability = await this.getLawfulInteroperabilityStatus(tenant);
+      const lawfulInteroperability =
+        await this.getLawfulInteroperabilityStatus(tenant);
       const reversibleAutonomy = await this.getReversibleAutonomyStatus(tenant);
 
       // Calculate overall compliance score
@@ -108,7 +117,7 @@ export class SovereignSafeguardsService {
         independentVerification.verificationSuccessRate,
         containmentReadiness.testSuccessRate,
         lawfulInteroperability.complianceScore,
-        reversibleAutonomy.reversalSuccess
+        reversibleAutonomy.reversalSuccess,
       ]);
 
       return {
@@ -117,14 +126,19 @@ export class SovereignSafeguardsService {
           complianceScore,
           activeSafeguards: 4,
           vulnerabilities: 0,
-          riskLevel: complianceScore >= 0.95 ? 'LOW' : complianceScore >= 0.8 ? 'MEDIUM' : 'HIGH',
-          lastAssessment: new Date().toISOString()
+          riskLevel:
+            complianceScore >= 0.95
+              ? 'LOW'
+              : complianceScore >= 0.8
+                ? 'MEDIUM'
+                : 'HIGH',
+          lastAssessment: new Date().toISOString(),
         },
         independentVerification,
         containmentReadiness,
         lawfulInteroperability,
         reversibleAutonomy,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
     } catch (error) {
       logger.error('Failed to get sovereign safeguards status:', error);
@@ -135,9 +149,15 @@ export class SovereignSafeguardsService {
   /**
    * Configure sovereign safeguards for tenant
    */
-  async configureSovereignSafeguards(tenant: string, config: SovereignSafeguardsConfig): Promise<any> {
+  async configureSovereignSafeguards(
+    tenant: string,
+    config: SovereignSafeguardsConfig,
+  ): Promise<any> {
     try {
-      logger.info(`Configuring sovereign safeguards for tenant ${tenant}`, config);
+      logger.info(
+        `Configuring sovereign safeguards for tenant ${tenant}`,
+        config,
+      );
 
       // Validate configuration
       this.validateSafeguardsConfig(config);
@@ -153,7 +173,7 @@ export class SovereignSafeguardsService {
       return {
         ok: true,
         audit: `Sovereign safeguards configured for tenant ${tenant}`,
-        configuration: config
+        configuration: config,
       };
     } catch (error) {
       logger.error('Failed to configure sovereign safeguards:', error);
@@ -164,10 +184,15 @@ export class SovereignSafeguardsService {
   /**
    * Request independent verification
    */
-  async requestIndependentVerification(request: IndependentVerificationRequest): Promise<any> {
+  async requestIndependentVerification(
+    request: IndependentVerificationRequest,
+  ): Promise<any> {
     try {
       const requestId = randomUUID();
-      logger.info(`Requesting independent verification for operation ${request.operation}`, { requestId });
+      logger.info(
+        `Requesting independent verification for operation ${request.operation}`,
+        { requestId },
+      );
 
       // Validate verification sources
       if (request.verificationSources.length < 2) {
@@ -183,7 +208,9 @@ export class SovereignSafeguardsService {
         actor: request.actor,
         status: 'SUBMITTED',
         submittedAt: new Date().toISOString(),
-        estimatedCompletion: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+        estimatedCompletion: new Date(
+          Date.now() + 24 * 60 * 60 * 1000,
+        ).toISOString(), // 24 hours
       };
 
       this.verificationRequests.set(requestId, verificationRequest);
@@ -203,10 +230,16 @@ export class SovereignSafeguardsService {
   /**
    * Test containment readiness
    */
-  async testContainmentReadiness(tenant: string, testType: string): Promise<any> {
+  async testContainmentReadiness(
+    tenant: string,
+    testType: string,
+  ): Promise<any> {
     try {
       const testId = randomUUID();
-      logger.info(`Testing containment readiness for tenant ${tenant}`, { testType, testId });
+      logger.info(`Testing containment readiness for tenant ${tenant}`, {
+        testType,
+        testId,
+      });
 
       // Simulate containment test
       const testResult = await this.simulateContainmentTest(testType);
@@ -218,7 +251,7 @@ export class SovereignSafeguardsService {
         responseTime: testResult.responseTime,
         issues: testResult.issues,
         recommendations: testResult.recommendations,
-        testedAt: new Date().toISOString()
+        testedAt: new Date().toISOString(),
       };
 
       // Update containment status
@@ -234,12 +267,22 @@ export class SovereignSafeguardsService {
   /**
    * Verify lawful interoperability
    */
-  async verifyLawfulInteroperability(tenant: string, jurisdiction: string, operationType: string): Promise<any> {
+  async verifyLawfulInteroperability(
+    tenant: string,
+    jurisdiction: string,
+    operationType: string,
+  ): Promise<any> {
     try {
-      logger.info(`Verifying lawful interoperability for ${jurisdiction}`, { tenant, operationType });
+      logger.info(`Verifying lawful interoperability for ${jurisdiction}`, {
+        tenant,
+        operationType,
+      });
 
       // Simulate compliance check
-      const complianceResult = await this.simulateComplianceCheck(jurisdiction, operationType);
+      const complianceResult = await this.simulateComplianceCheck(
+        jurisdiction,
+        operationType,
+      );
 
       return {
         jurisdiction,
@@ -248,7 +291,7 @@ export class SovereignSafeguardsService {
         issues: complianceResult.issues,
         recommendations: complianceResult.recommendations,
         validUntil: complianceResult.validUntil,
-        verifiedAt: new Date().toISOString()
+        verifiedAt: new Date().toISOString(),
       };
     } catch (error) {
       logger.error('Failed to verify lawful interoperability:', error);
@@ -259,9 +302,15 @@ export class SovereignSafeguardsService {
   /**
    * Configure reversible autonomy
    */
-  async configureReversibleAutonomy(tenant: string, config: ReversibleAutonomyConfig): Promise<any> {
+  async configureReversibleAutonomy(
+    tenant: string,
+    config: ReversibleAutonomyConfig,
+  ): Promise<any> {
     try {
-      logger.info(`Configuring reversible autonomy for tenant ${tenant}`, config);
+      logger.info(
+        `Configuring reversible autonomy for tenant ${tenant}`,
+        config,
+      );
 
       // Validate configuration
       this.validateReversibleAutonomyConfig(config);
@@ -275,7 +324,7 @@ export class SovereignSafeguardsService {
       return {
         ok: true,
         audit: `Reversible autonomy configured for tenant ${tenant}`,
-        configuration: config
+        configuration: config,
       };
     } catch (error) {
       logger.error('Failed to configure reversible autonomy:', error);
@@ -286,20 +335,35 @@ export class SovereignSafeguardsService {
   /**
    * Emergency sovereign containment
    */
-  async emergencySovereignContainment(tenant: string, containmentType: string, reason: string): Promise<any> {
+  async emergencySovereignContainment(
+    tenant: string,
+    containmentType: string,
+    reason: string,
+  ): Promise<any> {
     try {
-      logger.warn(`Emergency sovereign containment activated for tenant ${tenant}`, { containmentType, reason });
+      logger.warn(
+        `Emergency sovereign containment activated for tenant ${tenant}`,
+        { containmentType, reason },
+      );
 
       // Execute containment based on type
-      const containmentResult = await this.executeContainment(tenant, containmentType);
+      const containmentResult = await this.executeContainment(
+        tenant,
+        containmentType,
+      );
 
       // Log emergency action
-      this.auditEmergencyAction(tenant, 'EMERGENCY_CONTAINMENT', containmentType, reason);
+      this.auditEmergencyAction(
+        tenant,
+        'EMERGENCY_CONTAINMENT',
+        containmentType,
+        reason,
+      );
 
       return {
         ok: true,
         audit: `Emergency sovereign containment executed: ${containmentType} for tenant ${tenant}`,
-        containmentResult
+        containmentResult,
       };
     } catch (error) {
       logger.error('Failed to execute emergency sovereign containment:', error);
@@ -310,13 +374,22 @@ export class SovereignSafeguardsService {
   /**
    * Request cross-border operation approval
    */
-  async requestCrossBorderApproval(tenant: string, request: CrossBorderApprovalRequest): Promise<any> {
+  async requestCrossBorderApproval(
+    tenant: string,
+    request: CrossBorderApprovalRequest,
+  ): Promise<any> {
     try {
       const requestId = randomUUID();
-      logger.info(`Requesting cross-border operation approval for tenant ${tenant}`, { requestId, request });
+      logger.info(
+        `Requesting cross-border operation approval for tenant ${tenant}`,
+        { requestId, request },
+      );
 
       // Validate jurisdictions
-      this.validateJurisdictions(request.sourceJurisdiction, request.targetJurisdiction);
+      this.validateJurisdictions(
+        request.sourceJurisdiction,
+        request.targetJurisdiction,
+      );
 
       // Create approval request
       const approvalRequest = {
@@ -325,9 +398,11 @@ export class SovereignSafeguardsService {
         sourceJurisdiction: request.sourceJurisdiction,
         targetJurisdiction: request.targetJurisdiction,
         status: 'SUBMITTED',
-        estimatedDecision: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+        estimatedDecision: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000,
+        ).toISOString(), // 7 days
         requirements: this.generateRequirements(request),
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
       };
 
       return approvalRequest;
@@ -340,7 +415,9 @@ export class SovereignSafeguardsService {
   // === PRIVATE HELPER METHODS ===
 
   private async getIndependentVerificationStatus(tenant: string): Promise<any> {
-    const config = this.safeguardsConfig.get(tenant) || this.safeguardsConfig.get('default')!;
+    const config =
+      this.safeguardsConfig.get(tenant) ||
+      this.safeguardsConfig.get('default')!;
 
     return {
       enabled: config.independentVerificationRequired,
@@ -353,7 +430,7 @@ export class SovereignSafeguardsService {
           status: 'ACTIVE',
           lastVerification: new Date().toISOString(),
           reliability: 0.98,
-          responseTime: 1200 // ms
+          responseTime: 1200, // ms
         },
         {
           sourceId: 'audit-001',
@@ -362,12 +439,12 @@ export class SovereignSafeguardsService {
           status: 'ACTIVE',
           lastVerification: new Date().toISOString(),
           reliability: 0.95,
-          responseTime: 800
-        }
+          responseTime: 800,
+        },
       ],
       lastVerification: new Date().toISOString(),
       averageVerificationTime: 1000,
-      verificationSuccessRate: 0.97
+      verificationSuccessRate: 0.97,
     };
   }
 
@@ -379,7 +456,7 @@ export class SovereignSafeguardsService {
       humanOverrideReady: true,
       responseTime: 95, // ms
       lastTest: new Date().toISOString(),
-      testSuccessRate: 0.99
+      testSuccessRate: 0.99,
     };
   }
 
@@ -391,7 +468,7 @@ export class SovereignSafeguardsService {
       crossBorderApprovalsValid: 2,
       regulatoryReportingActive: true,
       complianceScore: 0.96,
-      lastAssessment: new Date().toISOString()
+      lastAssessment: new Date().toISOString(),
     };
   }
 
@@ -404,7 +481,7 @@ export class SovereignSafeguardsService {
       maxReversalTime: 30, // seconds
       snapshotFrequency: 300, // seconds
       lastSnapshot: new Date().toISOString(),
-      reversalSuccess: 0.98
+      reversalSuccess: 0.98,
     };
   }
 
@@ -418,7 +495,9 @@ export class SovereignSafeguardsService {
     }
   }
 
-  private validateReversibleAutonomyConfig(config: ReversibleAutonomyConfig): void {
+  private validateReversibleAutonomyConfig(
+    config: ReversibleAutonomyConfig,
+  ): void {
     if (config.maxReversalTimeSeconds > 300) {
       throw new Error('Maximum reversal time cannot exceed 5 minutes');
     }
@@ -437,7 +516,9 @@ export class SovereignSafeguardsService {
     setTimeout(() => {
       request.status = 'COMPLETED';
       request.completedAt = new Date().toISOString();
-      logger.info(`Independent verification completed for request ${requestId}`);
+      logger.info(
+        `Independent verification completed for request ${requestId}`,
+      );
     }, 10000); // 10 second simulation
   }
 
@@ -447,46 +528,61 @@ export class SovereignSafeguardsService {
     const responseTime = 50 + Math.random() * 100; // 50-150ms
 
     const testResults = {
-      'EMERGENCY_STOP': {
+      EMERGENCY_STOP: {
         success,
         responseTime,
-        issues: success ? [] : ['Emergency stop response time exceeded threshold'],
-        recommendations: success ? [] : ['Optimize emergency stop circuit response time']
+        issues: success
+          ? []
+          : ['Emergency stop response time exceeded threshold'],
+        recommendations: success
+          ? []
+          : ['Optimize emergency stop circuit response time'],
       },
-      'ROLLBACK_TEST': {
+      ROLLBACK_TEST: {
         success,
         responseTime: responseTime * 2,
-        issues: success ? [] : ['Rollback mechanism failed to restore previous state'],
-        recommendations: success ? [] : ['Review rollback state management']
+        issues: success
+          ? []
+          : ['Rollback mechanism failed to restore previous state'],
+        recommendations: success ? [] : ['Review rollback state management'],
       },
-      'ISOLATION_TEST': {
+      ISOLATION_TEST: {
         success,
         responseTime,
         issues: success ? [] : ['Network isolation incomplete'],
-        recommendations: success ? [] : ['Review network segmentation configuration']
-      }
+        recommendations: success
+          ? []
+          : ['Review network segmentation configuration'],
+      },
     };
 
     return testResults[testType] || testResults['EMERGENCY_STOP'];
   }
 
-  private async simulateComplianceCheck(jurisdiction: string, operationType: string): Promise<any> {
+  private async simulateComplianceCheck(
+    jurisdiction: string,
+    operationType: string,
+  ): Promise<any> {
     const compliant = Math.random() > 0.1; // 90% compliance rate
 
     return {
       compliant,
-      issues: compliant ? [] : [
-        {
-          issueId: randomUUID(),
-          severity: 'MEDIUM',
-          description: `Data residency requirement not met for ${jurisdiction}`,
-          regulation: 'GDPR Article 44',
-          remediation: 'Implement data localization measures',
-          deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ],
+      issues: compliant
+        ? []
+        : [
+            {
+              issueId: randomUUID(),
+              severity: 'MEDIUM',
+              description: `Data residency requirement not met for ${jurisdiction}`,
+              regulation: 'GDPR Article 44',
+              remediation: 'Implement data localization measures',
+              deadline: new Date(
+                Date.now() + 30 * 24 * 60 * 60 * 1000,
+              ).toISOString(),
+            },
+          ],
       recommendations: ['Implement enhanced data sovereignty controls'],
-      validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+      validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     };
   }
 
@@ -495,17 +591,22 @@ export class SovereignSafeguardsService {
       lastTest: testResult.testedAt,
       lastTestType: testResult.testType,
       lastTestSuccess: testResult.success,
-      overallReadiness: testResult.success
+      overallReadiness: testResult.success,
     });
   }
 
-  private startSnapshotScheduler(tenant: string, frequencySeconds: number): void {
+  private startSnapshotScheduler(
+    tenant: string,
+    frequencySeconds: number,
+  ): void {
     // Start periodic snapshot creation
     setInterval(() => {
       this.createAutonomySnapshot(tenant);
     }, frequencySeconds * 1000);
 
-    logger.info(`Snapshot scheduler started for tenant ${tenant} with frequency ${frequencySeconds}s`);
+    logger.info(
+      `Snapshot scheduler started for tenant ${tenant} with frequency ${frequencySeconds}s`,
+    );
   }
 
   private startAutonomyMonitoring(tenant: string, config: any): void {
@@ -528,9 +629,9 @@ export class SovereignSafeguardsService {
         performanceMetrics: {
           responseTime: Math.random() * 100,
           errorRate: Math.random() * 0.01,
-          throughput: Math.random() * 1000
-        }
-      }
+          throughput: Math.random() * 1000,
+        },
+      },
     };
 
     const snapshots = this.autonomySnapshots.get(tenant) || [];
@@ -550,7 +651,7 @@ export class SovereignSafeguardsService {
       responseTime: Math.random() * 100,
       errorRate: Math.random() * 0.01,
       resourceUtilization: Math.random(),
-      anomalyScore: Math.random()
+      anomalyScore: Math.random(),
     };
 
     // Check thresholds
@@ -567,34 +668,47 @@ export class SovereignSafeguardsService {
     }
   }
 
-  private async executeContainment(tenant: string, containmentType: string): Promise<any> {
-    logger.warn(`Executing containment type ${containmentType} for tenant ${tenant}`);
+  private async executeContainment(
+    tenant: string,
+    containmentType: string,
+  ): Promise<any> {
+    logger.warn(
+      `Executing containment type ${containmentType} for tenant ${tenant}`,
+    );
 
     const containmentActions = {
-      'SOVEREIGN_ISOLATION': 'Isolated sovereign operations from external systems',
-      'JURISDICTIONAL_LIMIT': 'Limited operations to single jurisdiction',
-      'CROSS_BORDER_HALT': 'Halted all cross-border operations',
-      'AUTONOMOUS_FREEZE': 'Froze all autonomous operations',
-      'TRANSCENDENT_ROLLBACK': 'Rolled back transcendent intelligence to safe state',
-      'EMERGENCY_SHUTDOWN': 'Performed emergency shutdown of all systems'
+      SOVEREIGN_ISOLATION:
+        'Isolated sovereign operations from external systems',
+      JURISDICTIONAL_LIMIT: 'Limited operations to single jurisdiction',
+      CROSS_BORDER_HALT: 'Halted all cross-border operations',
+      AUTONOMOUS_FREEZE: 'Froze all autonomous operations',
+      TRANSCENDENT_ROLLBACK:
+        'Rolled back transcendent intelligence to safe state',
+      EMERGENCY_SHUTDOWN: 'Performed emergency shutdown of all systems',
     };
 
     return {
       containmentType,
-      action: containmentActions[containmentType] || 'Unknown containment action',
+      action:
+        containmentActions[containmentType] || 'Unknown containment action',
       executedAt: new Date().toISOString(),
-      success: true
+      success: true,
     };
   }
 
-  private auditEmergencyAction(tenant: string, action: string, details: string, reason: string): void {
+  private auditEmergencyAction(
+    tenant: string,
+    action: string,
+    details: string,
+    reason: string,
+  ): void {
     const auditEntry = {
       tenant,
       action,
       details,
       reason,
       timestamp: new Date().toISOString(),
-      severity: 'CRITICAL'
+      severity: 'CRITICAL',
     };
 
     logger.audit('Emergency sovereign action', auditEntry);
@@ -615,7 +729,7 @@ export class SovereignSafeguardsService {
     const requirements = [
       'Submit data protection impact assessment',
       'Provide evidence of adequate safeguards',
-      'Obtain explicit consent from data subjects'
+      'Obtain explicit consent from data subjects',
     ];
 
     // Add jurisdiction-specific requirements

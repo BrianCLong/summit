@@ -1,0 +1,20 @@
+name: Audit (strict, nightly)
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x' }
+      - name: Install + heal + strict audit
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm i --frozen-lockfile=false
+          node scripts/monorepo_heal.mjs || true
+          node scripts/audit_workspaces.mjs --strict

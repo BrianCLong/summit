@@ -15,15 +15,15 @@ const statusColors = {
   running: 'bg-blue-100 text-blue-800',
   succeeded: 'bg-green-100 text-green-800',
   failed: 'bg-red-100 text-red-800',
-  cancelled: 'bg-yellow-100 text-yellow-800'
+  cancelled: 'bg-yellow-100 text-yellow-800',
 };
 
 const statusIcons = {
   queued: '⏳',
-  running: '▶️', 
+  running: '▶️',
   succeeded: '✅',
   failed: '❌',
-  cancelled: '⏹️'
+  cancelled: '⏹️',
 };
 
 function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
@@ -41,8 +41,8 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
             {isExpanded ? '▼' : '▶'}
           </button>
           <div className="font-mono text-xs">
-            <Link 
-              className="text-indigo-700 hover:underline" 
+            <Link
+              className="text-indigo-700 hover:underline"
               to={`/maestro/runs/${run.id}`}
             >
               {run.id}
@@ -52,14 +52,16 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
         {isExpanded && !compact && (
           <div className="mt-2 ml-6 text-xs text-slate-600">
             <div>Started: {new Date(run.startedAt).toLocaleString()}</div>
-            {run.endedAt && <div>Ended: {new Date(run.endedAt).toLocaleString()}</div>}
+            {run.endedAt && (
+              <div>Ended: {new Date(run.endedAt).toLocaleString()}</div>
+            )}
             {run.traceId && <div>Trace: {run.traceId}</div>}
             <div>Artifacts: {run.artifacts?.length || 0}</div>
           </div>
         )}
       </td>
       <td className="px-3 py-2">
-        <Link 
+        <Link
           to={`/maestro/pipelines/${run.pipelineId}`}
           className="text-slate-900 hover:text-indigo-600"
         >
@@ -68,10 +70,14 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
       </td>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm">{statusIcons[run.status as keyof typeof statusIcons]}</span>
-          <span className={`rounded px-2 py-0.5 text-xs font-medium ${
-            statusColors[run.status as keyof typeof statusColors]
-          }`}>
+          <span className="text-sm">
+            {statusIcons[run.status as keyof typeof statusIcons]}
+          </span>
+          <span
+            className={`rounded px-2 py-0.5 text-xs font-medium ${
+              statusColors[run.status as keyof typeof statusColors]
+            }`}
+          >
             {run.status}
           </span>
           {run.status === 'running' && (
@@ -85,24 +91,33 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
         </div>
         {isExpanded && run.status === 'running' && (
           <div className="text-xs text-slate-500">
-            Running for {Math.round((Date.now() - new Date(run.startedAt).getTime()) / 1000)}s
+            Running for{' '}
+            {Math.round(
+              (Date.now() - new Date(run.startedAt).getTime()) / 1000,
+            )}
+            s
           </div>
         )}
       </td>
       <td className="px-3 py-2">
         <div className="text-sm">
-          {typeof run.cost === 'object' ? `$${run.cost.total || '0.00'}` : `$${run.cost || '0.00'}`}
+          {typeof run.cost === 'object'
+            ? `$${run.cost.total || '0.00'}`
+            : `$${run.cost || '0.00'}`}
         </div>
         {isExpanded && typeof run.cost === 'object' && (
           <div className="text-xs text-slate-500">
-            Compute: ${run.cost.compute || '0.00'} • Models: ${run.cost.models || '0.00'}
+            Compute: ${run.cost.compute || '0.00'} • Models: $
+            {run.cost.models || '0.00'}
           </div>
         )}
       </td>
       <td className="px-3 py-2">
         <div className="text-xs text-slate-600">{run.env}</div>
         {run.commit && (
-          <div className="text-xs font-mono text-slate-500">{run.commit.slice(0, 7)}</div>
+          <div className="text-xs font-mono text-slate-500">
+            {run.commit.slice(0, 7)}
+          </div>
         )}
       </td>
       {!compact && (
@@ -131,14 +146,17 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
   );
 }
 
-function RunsFilters({ filters, onChange }: { 
-  filters: RunFilters; 
+function RunsFilters({
+  filters,
+  onChange,
+}: {
+  filters: RunFilters;
   onChange: (filters: RunFilters) => void;
 }) {
   const [savedViews, setSavedViews] = useState([
     { name: 'Recent Failures', filters: { status: 'failed', limit: 20 } },
     { name: 'Long Running', filters: { status: 'running' } },
-    { name: 'High Cost', filters: { limit: 50 } }
+    { name: 'High Cost', filters: { limit: 50 } },
   ]);
 
   return (
@@ -149,13 +167,15 @@ function RunsFilters({ filters, onChange }: {
           Save View
         </button>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
         <div>
           <label className="block text-xs text-slate-600 mb-1">Status</label>
           <select
             value={filters.status || ''}
-            onChange={(e) => onChange({ ...filters, status: e.target.value || undefined })}
+            onChange={(e) =>
+              onChange({ ...filters, status: e.target.value || undefined })
+            }
             className="w-full rounded border px-2 py-1 text-sm"
           >
             <option value="">All statuses</option>
@@ -166,23 +186,29 @@ function RunsFilters({ filters, onChange }: {
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
-        
+
         <div>
           <label className="block text-xs text-slate-600 mb-1">Pipeline</label>
           <input
             type="text"
             value={filters.pipeline || ''}
-            onChange={(e) => onChange({ ...filters, pipeline: e.target.value || undefined })}
+            onChange={(e) =>
+              onChange({ ...filters, pipeline: e.target.value || undefined })
+            }
             placeholder="Filter by pipeline..."
             className="w-full rounded border px-2 py-1 text-sm"
           />
         </div>
-        
+
         <div>
-          <label className="block text-xs text-slate-600 mb-1">Environment</label>
+          <label className="block text-xs text-slate-600 mb-1">
+            Environment
+          </label>
           <select
             value={filters.env || ''}
-            onChange={(e) => onChange({ ...filters, env: e.target.value || undefined })}
+            onChange={(e) =>
+              onChange({ ...filters, env: e.target.value || undefined })
+            }
             className="w-full rounded border px-2 py-1 text-sm"
           >
             <option value="">All environments</option>
@@ -191,13 +217,15 @@ function RunsFilters({ filters, onChange }: {
             <option value="prod">Production</option>
           </select>
         </div>
-        
+
         <div>
           <label className="block text-xs text-slate-600 mb-1">Search</label>
           <input
             type="text"
             value={filters.q || ''}
-            onChange={(e) => onChange({ ...filters, q: e.target.value || undefined })}
+            onChange={(e) =>
+              onChange({ ...filters, q: e.target.value || undefined })
+            }
             placeholder="Search runs..."
             className="w-full rounded border px-2 py-1 text-sm"
           />
@@ -224,17 +252,17 @@ function RunsFilters({ filters, onChange }: {
   );
 }
 
-export default function RunsList({ 
-  filters: initialFilters = {}, 
-  showFilters = true, 
-  compact = false 
+export default function RunsList({
+  filters: initialFilters = {},
+  showFilters = true,
+  compact = false,
 }: RunsListProps) {
   const [filters, setFilters] = useState<RunFilters>(initialFilters);
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
   const [streamConnected, setStreamConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
-  
+
   const { useRuns } = api();
   const { data: initialRuns, refetch } = useRuns();
 
@@ -265,7 +293,9 @@ export default function RunsList({
         if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
           eventSourceRef.current = null;
           // Recursive call to re-establish connection
-          const retryEventSource = new EventSource(`${cfg.gatewayBase}/streams/runs`);
+          const retryEventSource = new EventSource(
+            `${cfg.gatewayBase}/streams/runs`,
+          );
           eventSourceRef.current = retryEventSource;
         }
       }, 5000);
@@ -274,23 +304,27 @@ export default function RunsList({
     eventSource.addEventListener('run_started', (event) => {
       const data: SSEEvent = JSON.parse(event.data);
       const newRun = data.payload as Run;
-      setRuns(prev => [newRun, ...prev.slice(0, 199)]); // Keep last 200 runs
+      setRuns((prev) => [newRun, ...prev.slice(0, 199)]); // Keep last 200 runs
     });
 
     eventSource.addEventListener('run_progress', (event) => {
       const data: SSEEvent = JSON.parse(event.data);
       const updatedRun = data.payload as Run;
-      setRuns(prev => prev.map(run => 
-        run.id === updatedRun.id ? { ...run, ...updatedRun } : run
-      ));
+      setRuns((prev) =>
+        prev.map((run) =>
+          run.id === updatedRun.id ? { ...run, ...updatedRun } : run,
+        ),
+      );
     });
 
     eventSource.addEventListener('run_completed', (event) => {
       const data: SSEEvent = JSON.parse(event.data);
       const completedRun = data.payload as Run;
-      setRuns(prev => prev.map(run => 
-        run.id === completedRun.id ? { ...run, ...completedRun } : run
-      ));
+      setRuns((prev) =>
+        prev.map((run) =>
+          run.id === completedRun.id ? { ...run, ...completedRun } : run,
+        ),
+      );
     });
 
     return () => {
@@ -302,20 +336,23 @@ export default function RunsList({
   }, []);
 
   // Filter runs based on current filters
-  const filteredRuns = runs.filter(run => {
-    if (filters.status && run.status !== filters.status) return false;
-    if (filters.pipeline && !run.pipelineId.includes(filters.pipeline)) return false;
-    if (filters.env && run.env !== filters.env) return false;
-    if (filters.q) {
-      const query = filters.q.toLowerCase();
-      return (
-        run.id.toLowerCase().includes(query) ||
-        run.pipelineId.toLowerCase().includes(query) ||
-        run.commit?.toLowerCase().includes(query)
-      );
-    }
-    return true;
-  }).slice(0, filters.limit || 50);
+  const filteredRuns = runs
+    .filter((run) => {
+      if (filters.status && run.status !== filters.status) return false;
+      if (filters.pipeline && !run.pipelineId.includes(filters.pipeline))
+        return false;
+      if (filters.env && run.env !== filters.env) return false;
+      if (filters.q) {
+        const query = filters.q.toLowerCase();
+        return (
+          run.id.toLowerCase().includes(query) ||
+          run.pipelineId.toLowerCase().includes(query) ||
+          run.commit?.toLowerCase().includes(query)
+        );
+      }
+      return true;
+    })
+    .slice(0, filters.limit || 50);
 
   if (loading) {
     return (
@@ -330,11 +367,15 @@ export default function RunsList({
       {/* Stream Status */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${
-            streamConnected ? 'bg-green-500' : 'bg-red-500'
-          }`} />
+          <div
+            className={`h-2 w-2 rounded-full ${
+              streamConnected ? 'bg-green-500' : 'bg-red-500'
+            }`}
+          />
           <span className="text-xs text-slate-500">
-            {streamConnected ? 'Live updates connected' : 'Connecting to live updates...'}
+            {streamConnected
+              ? 'Live updates connected'
+              : 'Connecting to live updates...'}
           </span>
         </div>
         <button
@@ -346,21 +387,22 @@ export default function RunsList({
       </div>
 
       {/* Filters */}
-      {showFilters && (
-        <RunsFilters filters={filters} onChange={setFilters} />
-      )}
+      {showFilters && <RunsFilters filters={filters} onChange={setFilters} />}
 
       {/* Results Summary */}
       <div className="flex items-center justify-between text-sm">
         <div className="text-slate-600">
-          Showing {filteredRuns.length} run{filteredRuns.length !== 1 ? 's' : ''}
+          Showing {filteredRuns.length} run
+          {filteredRuns.length !== 1 ? 's' : ''}
           {Object.keys(filters).length > 0 && ' (filtered)'}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-slate-500">Auto-refresh:</span>
-          <div className={`h-2 w-2 rounded-full ${
-            streamConnected ? 'bg-green-500 animate-pulse' : 'bg-slate-300'
-          }`} />
+          <div
+            className={`h-2 w-2 rounded-full ${
+              streamConnected ? 'bg-green-500 animate-pulse' : 'bg-slate-300'
+            }`}
+          />
         </div>
       </div>
 
@@ -379,12 +421,15 @@ export default function RunsList({
             </tr>
           </thead>
           <tbody>
-            {filteredRuns.map(run => (
+            {filteredRuns.map((run) => (
               <RunRow key={run.id} run={run} compact={compact} />
             ))}
             {filteredRuns.length === 0 && (
               <tr>
-                <td colSpan={compact ? 6 : 7} className="px-3 py-8 text-center text-slate-500">
+                <td
+                  colSpan={compact ? 6 : 7}
+                  className="px-3 py-8 text-center text-slate-500"
+                >
                   No runs found matching current filters.
                 </td>
               </tr>
@@ -397,7 +442,12 @@ export default function RunsList({
       {filteredRuns.length >= (filters.limit || 50) && (
         <div className="text-center">
           <button
-            onClick={() => setFilters(prev => ({ ...prev, limit: (prev.limit || 50) + 50 }))}
+            onClick={() =>
+              setFilters((prev) => ({
+                ...prev,
+                limit: (prev.limit || 50) + 50,
+              }))
+            }
             className="rounded border px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
             Load More Runs

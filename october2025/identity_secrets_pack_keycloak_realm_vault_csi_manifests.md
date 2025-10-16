@@ -5,6 +5,7 @@
 ---
 
 ## 0) Repo Layout
+
 ```
 intelgraph/
 ├─ keycloak/
@@ -22,6 +23,7 @@ intelgraph/
 ---
 
 ## 1) Keycloak Realm Export (production‑flavored)
+
 ```json
 // keycloak/realm-intelgraph.json
 {
@@ -51,22 +53,25 @@ intelgraph/
   },
   "roles": {
     "realm": [
-      {"name": "admin"},
-      {"name": "analyst"},
-      {"name": "auditor"},
-      {"name": "service"}
+      { "name": "admin" },
+      { "name": "analyst" },
+      { "name": "auditor" },
+      { "name": "service" }
     ]
   },
   "groups": [
-    {"name": "pilot", "attributes": {"tenant": ["pilot"]}},
-    {"name": "internal", "attributes": {"tenant": ["intelgraph"]}}
+    { "name": "pilot", "attributes": { "tenant": ["pilot"] } },
+    { "name": "internal", "attributes": { "tenant": ["intelgraph"] } }
   ],
   "clients": [
     {
       "clientId": "intelgraph-web",
       "protocol": "openid-connect",
       "publicClient": true,
-      "redirectUris": ["https://*.intelgraph.local/*", "http://localhost:5173/*"],
+      "redirectUris": [
+        "https://*.intelgraph.local/*",
+        "http://localhost:5173/*"
+      ],
       "webOrigins": ["+"]
     },
     {
@@ -110,7 +115,7 @@ intelgraph/
           "protocol": "openid-connect",
           "protocolMapper": "oidc-acr-mapper",
           "consentRequired": false,
-          "config": {"id.token.claim": "true", "access.token.claim": "true"}
+          "config": { "id.token.claim": "true", "access.token.claim": "true" }
         }
       ]
     }
@@ -124,8 +129,10 @@ intelgraph/
       "email": "lead@example.com",
       "firstName": "Lead",
       "lastName": "Analyst",
-      "attributes": {"tenant": ["pilot"]},
-      "credentials": [{"type": "password", "value": "ChangeMe!123", "temporary": true}],
+      "attributes": { "tenant": ["pilot"] },
+      "credentials": [
+        { "type": "password", "value": "ChangeMe!123", "temporary": true }
+      ],
       "realmRoles": ["analyst"]
     }
   ],
@@ -140,6 +147,7 @@ intelgraph/
 ---
 
 ## 2) Keycloak Import & Service Account Scripts
+
 ```bash
 # keycloak/import-realm.sh
 set -euo pipefail
@@ -177,6 +185,7 @@ kcadm.sh add-roles -r $REALM --uusername $(kcadm.sh get users/$SID -r $REALM | j
 ---
 
 ## 3) Gateway/Webapp Environment Wiring
+
 ```env
 # gateway .env (rendered by tools/config/render.ts)
 KEYCLOAK_ISSUER=https://keycloak/auth/realms/intelgraph
@@ -195,6 +204,7 @@ Webapp uses the **public** client `intelgraph-web`. Configure your SPA origin in
 ---
 
 ## 4) Vault CSI — SecretProviderClass & Pod Wiring
+
 ```yaml
 # deploy/vault-csi/secretproviderclass-intelgraph.yaml
 apiVersion: secrets-store.csi.x-k8s.io/v1
@@ -206,7 +216,7 @@ spec:
   provider: vault
   parameters:
     roleName: intelgraph-app
-    vaultAddress: "https://vault.vault.svc:8200"
+    vaultAddress: 'https://vault.vault.svc:8200'
     objects: |
       - objectName: neo4j-pass
         secretPath: secret/data/intelgraph/neo4j
@@ -253,9 +263,9 @@ metadata:
   name: intelgraph-secrets-reader
   namespace: intelgraph
 rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get"]
+  - apiGroups: ['']
+    resources: ['secrets']
+    verbs: ['get']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -263,9 +273,9 @@ metadata:
   name: intelgraph-secrets-reader
   namespace: intelgraph
 subjects:
-- kind: ServiceAccount
-  name: intelgraph-app
-  namespace: intelgraph
+  - kind: ServiceAccount
+    name: intelgraph-app
+    namespace: intelgraph
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -274,31 +284,34 @@ roleRef:
 
 ```md
 # deploy/vault-csi/examples-pod-annotations.md
+
 # Example (gateway) pod template fragment
+
 serviceAccountName: intelgraph-app
 volumes:
+
 - name: vault-secrets
   csi:
-    driver: secrets-store.csi.k8s.io
-    readOnly: true
-    volumeAttributes:
-      secretProviderClass: intelgraph-vault
-containers:
+  driver: secrets-store.csi.k8s.io
+  readOnly: true
+  volumeAttributes:
+  secretProviderClass: intelgraph-vault
+  containers:
 - name: gateway
   env:
   - name: NEO4J_PASS
     valueFrom:
-      secretKeyRef: { name: intelgraph-secrets, key: NEO4J_PASS }
+    secretKeyRef: { name: intelgraph-secrets, key: NEO4J_PASS }
   - name: POSTGRES_URL
     valueFrom:
-      secretKeyRef: { name: intelgraph-secrets, key: POSTGRES_URL }
+    secretKeyRef: { name: intelgraph-secrets, key: POSTGRES_URL }
   - name: S3_KEY
     valueFrom:
-      secretKeyRef: { name: intelgraph-secrets, key: S3_KEY }
+    secretKeyRef: { name: intelgraph-secrets, key: S3_KEY }
   - name: S3_SECRET
     valueFrom:
-      secretKeyRef: { name: intelgraph-secrets, key: S3_SECRET }
-  volumeMounts:
+    secretKeyRef: { name: intelgraph-secrets, key: S3_SECRET }
+    volumeMounts:
   - name: vault-secrets
     mountPath: /mnt/secrets
     readOnly: true
@@ -307,23 +320,25 @@ containers:
 ---
 
 ## 5) Vault Setup Guide (CLI)
+
 ```md
 # deploy/vault-csi/vault-auth-setup.md
-1) Enable k8s auth:
+
+1. Enable k8s auth:
    vault auth enable kubernetes
-2) Configure k8s auth with your cluster JWT & CA:
+2. Configure k8s auth with your cluster JWT & CA:
    vault write auth/kubernetes/config kubernetes_host="$K8S_HOST" kubernetes_ca_cert=@/path/ca.crt token_reviewer_jwt=@/var/run/secrets/kubernetes.io/serviceaccount/token
-3) Create policy:
+3. Create policy:
    cat > policy-intelgraph.hcl <<'HCL'
-   path "secret/data/intelgraph/*" { capabilities = ["read"] }
+   path "secret/data/intelgraph/\*" { capabilities = ["read"] }
    HCL
    vault policy write intelgraph policy-intelgraph.hcl
-4) Create role:
+4. Create role:
    vault write auth/kubernetes/role/intelgraph-app \
-     bound_service_account_names=intelgraph-app \
-     bound_service_account_namespaces=intelgraph \
-     policies=intelgraph ttl=24h
-5) Put secrets:
+    bound_service_account_names=intelgraph-app \
+    bound_service_account_namespaces=intelgraph \
+    policies=intelgraph ttl=24h
+5. Put secrets:
    vault kv put secret/intelgraph/neo4j password=REDACTED
    vault kv put secret/intelgraph/postgres url=postgres://user:pass@postgres:5432/intelgraph
    vault kv put secret/intelgraph/minio key=REDACTED secret=REDACTED
@@ -332,6 +347,7 @@ containers:
 ---
 
 ## 6) Helm Integration Snippets
+
 ```yaml
 # values.yaml additions
 serviceAccount:
@@ -341,13 +357,13 @@ csi:
 
 # deployment template patches (example)
 spec:
-  serviceAccountName: {{ .Values.serviceAccount.name }}
+  serviceAccountName: { { .Values.serviceAccount.name } }
   volumes:
     - name: vault-secrets
       csi:
         driver: secrets-store.csi.k8s.io
         volumeAttributes:
-          secretProviderClass: {{ .Values.csi.secretProviderClass }}
+          secretProviderClass: { { .Values.csi.secretProviderClass } }
   containers:
     - name: gateway
       envFrom:
@@ -361,6 +377,7 @@ spec:
 ---
 
 ## 7) Verification
+
 - **OIDC**: call `/.well-known/openid-configuration` at `${KEYCLOAK_ISSUER}`; ensure `jwks_uri` reachable from gateway.
 - **Token**: mint client‑credentials on `intelgraph-api` and hit `/graphql { __typename }` with `Authorization: Bearer`.
 - **CSI**: verify `intelgraph-secrets` generated and pods receive envs; rotate secrets in Vault and confirm hot reload via restart.
@@ -368,9 +385,12 @@ spec:
 ---
 
 ## 8) Notes & Defaults
+
 - Default password for user `lead` is temporary — Keycloak forces reset on first login.
 - WebAuthn requires HTTPS/origin; for local, use `localhost` with flags or dev certificates.
 - Adjust token lifespans per security posture; set `acr` requirements on EXPORT routes in gateway.
 - For multi‑tenant, prefer **group attributes** (`tenant`) over per‑user attributes to simplify management.
+
 ```
 
+```

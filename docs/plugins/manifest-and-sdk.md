@@ -17,7 +17,11 @@ Plugins declare metadata and capabilities in a `plugin.json` file. The schema is
 The SDK exposes helpers for calling the GraphQL API, registering UI panels, and emitting telemetry events.
 
 ```ts
-import { createGraphClient, registerPanel, emitTelemetry } from '../../plugins/sdk/ts';
+import {
+  createGraphClient,
+  registerPanel,
+  emitTelemetry,
+} from '../../plugins/sdk/ts';
 
 const client = createGraphClient('/graphql');
 

@@ -12,10 +12,12 @@ export interface AwardContext {
 export class GamificationService {
   public constructor(
     private readonly store: CommunityStore,
-    private readonly tracker: ContributionTracker
+    private readonly tracker: ContributionTracker,
   ) {}
 
-  public registerBadge(input: Omit<BadgeDefinition, 'id'> & { readonly id?: string }): BadgeDefinition {
+  public registerBadge(
+    input: Omit<BadgeDefinition, 'id'> & { readonly id?: string },
+  ): BadgeDefinition {
     const badge: BadgeDefinition = {
       id: input.id ?? createId('bdg'),
       label: input.label,
@@ -23,7 +25,7 @@ export class GamificationService {
       points: input.points,
       icon: input.icon,
       accessibilityLabel: input.accessibilityLabel,
-      criteria: { ...input.criteria }
+      criteria: { ...input.criteria },
     };
     this.store.upsertBadge(badge);
     return badge;

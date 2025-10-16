@@ -40,17 +40,25 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   // Global hotkey: Cmd/Ctrl + K
-  useHotkeys('meta+k, ctrl+k', (event) => {
-    event.preventDefault()
-    openSearch()
-  }, { enableOnContentEditable: true, enableOnFormTags: true })
+  useHotkeys(
+    'meta+k, ctrl+k',
+    event => {
+      event.preventDefault()
+      openSearch()
+    },
+    { enableOnContentEditable: true, enableOnFormTags: true }
+  )
 
   // ESC to close search
-  useHotkeys('esc', () => {
-    if (isOpen) {
-      closeSearch()
-    }
-  }, { enableOnContentEditable: true })
+  useHotkeys(
+    'esc',
+    () => {
+      if (isOpen) {
+        closeSearch()
+      }
+    },
+    { enableOnContentEditable: true }
+  )
 
   const value = {
     isOpen,
@@ -64,5 +72,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     setLoading,
   }
 
-  return <SearchContext.Provider value={value}>{children}</SearchContext.Provider>
+  return (
+    <SearchContext.Provider value={value}>{children}</SearchContext.Provider>
+  )
 }

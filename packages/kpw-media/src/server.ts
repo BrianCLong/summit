@@ -7,12 +7,16 @@ const app = express();
 app.use(bodyParser.json({ limit: '10mb' }));
 
 const PRIV = process.env.PRIVATE_KEY_PEM || '';
-const PUB  = process.env.PUBLIC_KEY_PEM   || '';
+const PUB = process.env.PUBLIC_KEY_PEM || '';
 
 if (!PRIV) console.warn('[KPW] PRIVATE_KEY_PEM not set (server will not sign)');
 
 app.post('/kpw/build', (req, res) => {
-  const { runId, caseId, steps } = req.body as { runId: string; caseId: string; steps: StepCommit[] };
+  const { runId, caseId, steps } = req.body as {
+    runId: string;
+    caseId: string;
+    steps: StepCommit[];
+  };
   const out = buildWallet(runId, caseId, steps, PRIV);
   res.json(out); // {manifest, steps, leaves}
 });

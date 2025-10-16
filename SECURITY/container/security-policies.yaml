@@ -65,7 +65,7 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-  - Ingress
+    - Ingress
 
 ---
 # Network Policy - Allow Ingress from Load Balancer
@@ -79,24 +79,24 @@ spec:
     matchLabels:
       app: intelgraph
   policyTypes:
-  - Ingress
+    - Ingress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: ingress-nginx
-    ports:
-    - protocol: TCP
-      port: 3000
-  - from:
-    - podSelector:
-        matchLabels:
-          app: intelgraph-frontend
-    ports:
-    - protocol: TCP
-      port: 3000
-    - protocol: TCP
-      port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+    - from:
+        - podSelector:
+            matchLabels:
+              app: intelgraph-frontend
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 8080
 
 ---
 # Network Policy - Allow Egress to Databases and External Services
@@ -110,54 +110,54 @@ spec:
     matchLabels:
       app: intelgraph
   policyTypes:
-  - Egress
+    - Egress
   egress:
-  # Allow DNS resolution
-  - to: []
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
-  # Allow connection to databases
-  - to:
-    - podSelector:
-        matchLabels:
-          app: neo4j
-    ports:
-    - protocol: TCP
-      port: 7687
-    - protocol: TCP
-      port: 7474
-  - to:
-    - podSelector:
-        matchLabels:
-          app: redis
-    ports:
-    - protocol: TCP
-      port: 6379
-  - to:
-    - podSelector:
-        matchLabels:
-          app: elasticsearch
-    ports:
-    - protocol: TCP
-      port: 9200
-    - protocol: TCP
-      port: 9300
-  # Allow HTTPS for external API calls
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443
-  # Allow Kafka communication
-  - to:
-    - podSelector:
-        matchLabels:
-          app: kafka
-    ports:
-    - protocol: TCP
-      port: 9092
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow connection to databases
+    - to:
+        - podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+        - protocol: TCP
+          port: 7474
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              app: elasticsearch
+      ports:
+        - protocol: TCP
+          port: 9200
+        - protocol: TCP
+          port: 9300
+    # Allow HTTPS for external API calls
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow Kafka communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
 
 ---
 # Service Account with minimal permissions
@@ -176,13 +176,13 @@ metadata:
   namespace: intelgraph
   name: intelgraph-role
 rules:
-- apiGroups: [""]
-  resources: ["configmaps", "secrets"]
-  verbs: ["get", "list"]
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list"]
-  resourceNames: ["intelgraph-*"]
+  - apiGroups: ['']
+    resources: ['configmaps', 'secrets']
+    verbs: ['get', 'list']
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['get', 'list']
+    resourceNames: ['intelgraph-*']
 
 ---
 # Role Binding
@@ -192,9 +192,9 @@ metadata:
   name: intelgraph-rolebinding
   namespace: intelgraph
 subjects:
-- kind: ServiceAccount
-  name: intelgraph-service-account
-  namespace: intelgraph
+  - kind: ServiceAccount
+    name: intelgraph-service-account
+    namespace: intelgraph
 roleRef:
   kind: Role
   name: intelgraph-role
@@ -218,11 +218,11 @@ defaultAddCapabilities: []
 fsGroup:
   type: MustRunAs
   ranges:
-  - min: 1
-    max: 65535
+    - min: 1
+      max: 65535
 readOnlyRootFilesystem: true
 requiredDropCapabilities:
-- ALL
+  - ALL
 runAsUser:
   type: MustRunAsNonRoot
 seLinuxContext:
@@ -230,15 +230,15 @@ seLinuxContext:
 supplementalGroups:
   type: MustRunAs
   ranges:
-  - min: 1
-    max: 65535
+    - min: 1
+      max: 65535
 volumes:
-- configMap
-- downwardAPI
-- emptyDir
-- persistentVolumeClaim
-- projected
-- secret
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
 
 ---
 # OPA Gatekeeper Constraint Template for Security Validation
@@ -298,9 +298,9 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ["apps"]
-        kinds: ["Deployment"]
-    namespaces: ["intelgraph"]
+      - apiGroups: ['apps']
+        kinds: ['Deployment']
+    namespaces: ['intelgraph']
   parameters:
     requiredSecurityContext:
       runAsNonRoot: true
@@ -386,15 +386,15 @@ metadata:
   namespace: intelgraph
 spec:
   hard:
-    requests.cpu: "4"
+    requests.cpu: '4'
     requests.memory: 8Gi
-    limits.cpu: "8"
+    limits.cpu: '8'
     limits.memory: 16Gi
-    pods: "20"
-    persistentvolumeclaims: "10"
-    services: "10"
-    secrets: "20"
-    configmaps: "20"
+    pods: '20'
+    persistentvolumeclaims: '10'
+    services: '10'
+    secrets: '20'
+    configmaps: '20'
 
 ---
 # Limit Range for default resource limits
@@ -405,20 +405,20 @@ metadata:
   namespace: intelgraph
 spec:
   limits:
-  - default:
-      cpu: 500m
-      memory: 512Mi
-    defaultRequest:
-      cpu: 100m
-      memory: 128Mi
-    type: Container
-  - max:
-      cpu: "2"
-      memory: 2Gi
-    min:
-      cpu: 10m
-      memory: 64Mi
-    type: Container
+    - default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      type: Container
+    - max:
+        cpu: '2'
+        memory: 2Gi
+      min:
+        cpu: 10m
+        memory: 64Mi
+      type: Container
 
 ---
 # Secret for storing sensitive security configurations
@@ -430,9 +430,9 @@ metadata:
 type: Opaque
 data:
   # Base64 encoded security configurations
-  api-key: "" # Replace with actual base64 encoded API key
-  jwt-secret: "" # Replace with actual base64 encoded JWT secret
-  encryption-key: "" # Replace with actual base64 encoded encryption key
+  api-key: '' # Replace with actual base64 encoded API key
+  jwt-secret: '' # Replace with actual base64 encoded JWT secret
+  encryption-key: '' # Replace with actual base64 encoded encryption key
 
 ---
 # ConfigMap for security monitoring configuration

@@ -5,7 +5,11 @@ export const options = { vus: 1, iterations: 5 };
 
 export default function () {
   // GraphQL health smoke
-  const gql = http.post('http://localhost:4000/graphql', JSON.stringify({ query: '{ __typename }' }), { headers: { 'content-type': 'application/json' } });
+  const gql = http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({ query: '{ __typename }' }),
+    { headers: { 'content-type': 'application/json' } },
+  );
   check(gql, { 'gql status 200': (r) => r.status === 200 });
 
   // Ingest list connectors
@@ -14,4 +18,3 @@ export default function () {
 
   sleep(0.5);
 }
-

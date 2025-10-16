@@ -1,14 +1,20 @@
 [
   {
-    "id":"risk-block-infra",
-    "when":{"==":[{"var":"kind"},"pull_request"]},
-    "if":"payload.labels.includes('risk:high') && payload.files.some(f => f.startsWith('charts/') || f.startsWith('.github/workflows/'))",
-    "then":[{"do":"label","with":{"labels":["needs:arch-review"]}},{"do":"comment","with":{"body":"High risk infra change — arch review required."}}]
+    "id": "risk-block-infra",
+    "when": { "==": [{ "var": "kind" }, "pull_request"] },
+    "if": "payload.labels.includes('risk:high') && payload.files.some(f => f.startsWith('charts/') || f.startsWith('.github/workflows/'))",
+    "then": [
+      { "do": "label", "with": { "labels": ["needs:arch-review"] } },
+      {
+        "do": "comment",
+        "with": { "body": "High risk infra change — arch review required." }
+      }
+    ]
   },
   {
-    "id":"low-risk-automerge",
-    "when":{"==":[{"var":"kind"},"pull_request"]},
-    "if":"payload.labels.includes('confidence:90') && !payload.labels.includes('risk:high')",
-    "then":[{"do":"label","with":{"labels":["automerge"]}}]
+    "id": "low-risk-automerge",
+    "when": { "==": [{ "var": "kind" }, "pull_request"] },
+    "if": "payload.labels.includes('confidence:90') && !payload.labels.includes('risk:high')",
+    "then": [{ "do": "label", "with": { "labels": ["automerge"] } }]
   }
 ]

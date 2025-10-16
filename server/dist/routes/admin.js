@@ -12,7 +12,9 @@ const memConfig = {
     MAESTRO_LANGCHAIN_ENABLED: process.env.MAESTRO_LANGCHAIN_ENABLED === 'true',
     MAESTRO_COMFY_ENABLED: process.env.MAESTRO_COMFY_ENABLED === 'true',
     MODEL_PROVIDER: process.env.MODEL_PROVIDER || 'openai',
-    MODEL_NAME: process.env.MODEL_NAME || process.env.MODEL_DEFAULT || 'gpt-4-turbo-preview',
+    MODEL_NAME: process.env.MODEL_NAME ||
+        process.env.MODEL_DEFAULT ||
+        'gpt-4-turbo-preview',
     TEMPERATURE: Number(process.env.TEMPERATURE ?? 0.2),
     TOP_P: Number(process.env.TOP_P ?? 1.0),
     MAX_TOKENS: Number(process.env.MAX_TOKENS || process.env.TOKEN_CEILING || 4096),
@@ -26,7 +28,8 @@ const VALID_PROVIDERS = ['openai', 'anthropic', 'gemini', 'oss', 'local'];
 // Validation functions
 function validateConfig(config) {
     const errors = [];
-    if (config.MODEL_PROVIDER && !VALID_PROVIDERS.includes(config.MODEL_PROVIDER)) {
+    if (config.MODEL_PROVIDER &&
+        !VALID_PROVIDERS.includes(config.MODEL_PROVIDER)) {
         errors.push(`Invalid MODEL_PROVIDER. Must be one of: ${VALID_PROVIDERS.join(', ')}`);
     }
     if (config.TEMPERATURE !== undefined) {
@@ -62,7 +65,9 @@ function validateConfig(config) {
 const router = express.Router();
 router.get('/admin/config', (req, res) => {
     const tenantId = req.query.tenantId || '';
-    if (tenantId && memConfig.TENANT_OVERRIDES && memConfig.TENANT_OVERRIDES[tenantId]) {
+    if (tenantId &&
+        memConfig.TENANT_OVERRIDES &&
+        memConfig.TENANT_OVERRIDES[tenantId]) {
         return res.json({ ...memConfig, ...memConfig.TENANT_OVERRIDES[tenantId] });
     }
     res.json(memConfig);
@@ -75,7 +80,7 @@ router.post('/admin/config', express.json(), (req, res) => {
     if (!validation.isValid) {
         return res.status(400).json({
             ok: false,
-            errors: validation.errors
+            errors: validation.errors,
         });
     }
     if (tenantId) {
@@ -91,7 +96,7 @@ router.post('/admin/config', express.json(), (req, res) => {
         return res.json({
             ok: true,
             config: { ...memConfig, ...cur },
-            message: `Configuration updated for tenant: ${tenantId}`
+            message: `Configuration updated for tenant: ${tenantId}`,
         });
     }
     else {
@@ -113,7 +118,7 @@ router.post('/admin/config', express.json(), (req, res) => {
         return res.json({
             ok: true,
             config: memConfig,
-            message: 'Global configuration updated'
+            message: 'Global configuration updated',
         });
     }
 });
@@ -123,27 +128,27 @@ router.post('/admin/tenant-defaults', express.json(), (req, res) => {
     if (!tenantId) {
         return res.status(400).json({
             ok: false,
-            error: 'tenantId is required'
+            error: 'tenantId is required',
         });
     }
     const validation = validateConfig(config);
     if (!validation.isValid) {
         return res.status(400).json({
             ok: false,
-            errors: validation.errors
+            errors: validation.errors,
         });
     }
     memConfig.TENANT_DEFAULTS[tenantId] = config;
     res.json({
         ok: true,
         message: `Tenant defaults updated for: ${tenantId}`,
-        tenantDefaults: memConfig.TENANT_DEFAULTS
+        tenantDefaults: memConfig.TENANT_DEFAULTS,
     });
 });
 // Get all tenant defaults
 router.get('/admin/tenant-defaults', (req, res) => {
     res.json({
-        tenantDefaults: memConfig.TENANT_DEFAULTS
+        tenantDefaults: memConfig.TENANT_DEFAULTS,
     });
 });
 export default router;
@@ -155,14 +160,24 @@ router.get('/admin/n8n-flows', (_req, res) => {
         return res.json(JSON.parse(raw));
     }
     catch {
-        return res.json({ allowedPrefixes: ['integration/'], deniedPrefixes: ['deploy/', 'db/'], allowedFlows: [] });
+        return res.json({
+            allowedPrefixes: ['integration/'],
+            deniedPrefixes: ['deploy/', 'db/'],
+            allowedFlows: [],
+        });
     }
 });
 router.post('/admin/n8n-flows', express.json(), (req, res) => {
     const body = req.body || {};
-    const allowedPrefixes = Array.isArray(body.allowedPrefixes) ? body.allowedPrefixes : ['integration/'];
-    const deniedPrefixes = Array.isArray(body.deniedPrefixes) ? body.deniedPrefixes : ['deploy/', 'db/'];
-    const allowedFlows = Array.isArray(body.allowedFlows) ? body.allowedFlows.filter((s) => typeof s === 'string') : [];
+    const allowedPrefixes = Array.isArray(body.allowedPrefixes)
+        ? body.allowedPrefixes
+        : ['integration/'];
+    const deniedPrefixes = Array.isArray(body.deniedPrefixes)
+        ? body.deniedPrefixes
+        : ['deploy/', 'db/'];
+    const allowedFlows = Array.isArray(body.allowedFlows)
+        ? body.allowedFlows.filter((s) => typeof s === 'string')
+        : [];
     const out = { allowedPrefixes, deniedPrefixes, allowedFlows };
     try {
         fs.mkdirSync(path.dirname(n8nCfgPath), { recursive: true });
@@ -170,7 +185,9 @@ router.post('/admin/n8n-flows', express.json(), (req, res) => {
         return res.json({ ok: true, config: out });
     }
     catch (e) {
-        return res.status(500).json({ ok: false, error: e?.message || 'failed to write config' });
+        return res
+            .status(500)
+            .json({ ok: false, error: e?.message || 'failed to write config' });
     }
 });
 // OPA admin utilities
@@ -178,13 +195,23 @@ router.get('/admin/opa/validate', async (_req, res) => {
     try {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
-            return res.status(200).json({ ok: false, message: 'OPA_BASE_URL not set' });
-        const health = await axios.get(`${base}/health`, { timeout: 3000 }).then((r) => r.status);
+            return res
+                .status(200)
+                .json({ ok: false, message: 'OPA_BASE_URL not set' });
+        const health = await axios
+            .get(`${base}/health`, { timeout: 3000 })
+            .then((r) => r.status);
         // Optional test eval against our n8n trigger package
         let evalOk = false;
         let evalReason = '';
         try {
-            const test = await axios.post(`${base}/v1/data/maestro/integrations/n8n/trigger`, { input: { tenantId: 'test', role: 'ADMIN', resource: 'integration/test' } }, { timeout: 3000 });
+            const test = await axios.post(`${base}/v1/data/maestro/integrations/n8n/trigger`, {
+                input: {
+                    tenantId: 'test',
+                    role: 'ADMIN',
+                    resource: 'integration/test',
+                },
+            }, { timeout: 3000 });
             evalOk = Boolean(test.data?.result?.allow ?? true);
             evalReason = String(test.data?.result?.reason ?? 'ok');
         }
@@ -195,12 +222,17 @@ router.get('/admin/opa/validate', async (_req, res) => {
         return res.json({ ok: health === 200, health, evalOk, evalReason });
     }
     catch (e) {
-        return res.status(200).json({ ok: false, message: e?.message || 'OPA unreachable' });
+        return res
+            .status(200)
+            .json({ ok: false, message: e?.message || 'OPA unreachable' });
     }
 });
 router.post('/admin/opa/reload', async (_req, res) => {
     // Stub: Typically OPA data reloads are handled via bundles; provide a no-op success
-    return res.json({ ok: true, message: 'Reload request acknowledged (bundle-managed in production)' });
+    return res.json({
+        ok: true,
+        message: 'Reload request acknowledged (bundle-managed in production)',
+    });
 });
 // OPA bundle source: attempt to read status plugin for bundle revision/version
 router.get('/admin/opa/bundle-source', async (_req, res) => {
@@ -224,13 +256,19 @@ router.get('/admin/opa/bundle-source', async (_req, res) => {
         const names = Object.keys(bundles);
         const info = names.slice(0, 3).map((n) => ({
             name: n,
-            revision: bundles[n]?.revision || bundles[n]?.active_revision || bundles[n]?.manifest?.revision,
-            last_success: bundles[n]?.last_successful_download?.time || bundles[n]?.last_successful_activation?.time,
+            revision: bundles[n]?.revision ||
+                bundles[n]?.active_revision ||
+                bundles[n]?.manifest?.revision,
+            last_success: bundles[n]?.last_successful_download?.time ||
+                bundles[n]?.last_successful_activation?.time,
         }));
         return res.json({ ok: true, bundleNames: names, info });
     }
     catch (e) {
-        return res.json({ ok: false, message: e?.message || 'bundle source read failed' });
+        return res.json({
+            ok: false,
+            message: e?.message || 'bundle source read failed',
+        });
     }
 });
 // OPA bundle status (checks whether data.maestro.n8n.allowed_flows exists)
@@ -239,10 +277,16 @@ router.get('/admin/opa/bundle-status', async (_req, res) => {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
             return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
-        const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, { timeout: 3000 });
+        const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, {
+            timeout: 3000,
+        });
         const flows = r.data?.result || {};
         const keys = Object.keys(flows || {});
-        return res.json({ ok: true, allowedFlowsCount: keys.length, sample: keys.slice(0, 10) });
+        return res.json({
+            ok: true,
+            allowedFlowsCount: keys.length,
+            sample: keys.slice(0, 10),
+        });
     }
     catch (e) {
         return res.json({ ok: false, message: e?.message || 'lookup failed' });
@@ -253,7 +297,9 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
     try {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
-            return res.status(200).json({ ok: false, message: 'OPA_BASE_URL not set' });
+            return res
+                .status(200)
+                .json({ ok: false, message: 'OPA_BASE_URL not set' });
         let cfg = { allowedFlows: [] };
         try {
             cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
@@ -262,11 +308,15 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
         const map = {};
         for (const f of cfg.allowedFlows || [])
             map[f] = true;
-        await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, { timeout: 5000 });
+        await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, {
+            timeout: 5000,
+        });
         return res.json({ ok: true, count: Object.keys(map).length });
     }
     catch (e) {
-        return res.status(200).json({ ok: false, message: e?.message || 'push failed' });
+        return res
+            .status(200)
+            .json({ ok: false, message: e?.message || 'push failed' });
     }
 });
 // Sync n8n allowed flows FROM OPA into local config file
@@ -274,11 +324,19 @@ router.post('/admin/opa/sync-n8n-flows', async (_req, res) => {
     try {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
-            return res.status(200).json({ ok: false, message: 'OPA_BASE_URL not set' });
-        const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, { timeout: 5000 });
+            return res
+                .status(200)
+                .json({ ok: false, message: 'OPA_BASE_URL not set' });
+        const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, {
+            timeout: 5000,
+        });
         const flows = r.data?.result || {};
         const allowedFlows = Object.keys(flows || {}).filter((k) => flows[k]);
-        let cfg = { allowedPrefixes: ['integration/'], deniedPrefixes: ['deploy/', 'db/'], allowedFlows: [] };
+        let cfg = {
+            allowedPrefixes: ['integration/'],
+            deniedPrefixes: ['deploy/', 'db/'],
+            allowedFlows: [],
+        };
         try {
             cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
         }
@@ -289,7 +347,9 @@ router.post('/admin/opa/sync-n8n-flows', async (_req, res) => {
         return res.json({ ok: true, count: allowedFlows.length, config: out });
     }
     catch (e) {
-        return res.status(200).json({ ok: false, message: e?.message || 'sync failed' });
+        return res
+            .status(200)
+            .json({ ok: false, message: e?.message || 'sync failed' });
     }
 });
 // Temporal runtime toggle
@@ -307,7 +367,9 @@ router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
         return res.json({ ok: true, enabled });
     }
     catch (e) {
-        return res.status(500).json({ ok: false, error: e?.message || 'temporal toggle failed' });
+        return res
+            .status(500)
+            .json({ ok: false, error: e?.message || 'temporal toggle failed' });
     }
 });
 // Push prefixes (allowed/denied) to OPA
@@ -315,18 +377,25 @@ router.post('/admin/opa/push-n8n-prefixes', async (_req, res) => {
     try {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
-            return res.status(200).json({ ok: false, message: 'OPA_BASE_URL not set' });
-        let cfg = { allowedPrefixes: ['integration/'], deniedPrefixes: ['deploy/', 'db/'] };
+            return res
+                .status(200)
+                .json({ ok: false, message: 'OPA_BASE_URL not set' });
+        let cfg = {
+            allowedPrefixes: ['integration/'],
+            deniedPrefixes: ['deploy/', 'db/'],
+        };
         try {
             cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
         }
         catch { }
-        await axios.put(`${base}/v1/data/maestro/n8n/allowed_prefixes`, (cfg.allowedPrefixes || []).reduce((m, p) => (m[p] = true, m), {}), { timeout: 5000 });
-        await axios.put(`${base}/v1/data/maestro/n8n/denied_prefixes`, (cfg.deniedPrefixes || []).reduce((m, p) => (m[p] = true, m), {}), { timeout: 5000 });
+        await axios.put(`${base}/v1/data/maestro/n8n/allowed_prefixes`, (cfg.allowedPrefixes || []).reduce((m, p) => ((m[p] = true), m), {}), { timeout: 5000 });
+        await axios.put(`${base}/v1/data/maestro/n8n/denied_prefixes`, (cfg.deniedPrefixes || []).reduce((m, p) => ((m[p] = true), m), {}), { timeout: 5000 });
         return res.json({ ok: true });
     }
     catch (e) {
-        return res.status(200).json({ ok: false, message: e?.message || 'push prefixes failed' });
+        return res
+            .status(200)
+            .json({ ok: false, message: e?.message || 'push prefixes failed' });
     }
 });
 // Sync prefixes FROM OPA
@@ -334,12 +403,22 @@ router.post('/admin/opa/sync-n8n-prefixes', async (_req, res) => {
     try {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
-            return res.status(200).json({ ok: false, message: 'OPA_BASE_URL not set' });
-        const ar = await axios.get(`${base}/v1/data/maestro/n8n/allowed_prefixes`, { timeout: 5000 });
-        const dr = await axios.get(`${base}/v1/data/maestro/n8n/denied_prefixes`, { timeout: 5000 });
+            return res
+                .status(200)
+                .json({ ok: false, message: 'OPA_BASE_URL not set' });
+        const ar = await axios.get(`${base}/v1/data/maestro/n8n/allowed_prefixes`, {
+            timeout: 5000,
+        });
+        const dr = await axios.get(`${base}/v1/data/maestro/n8n/denied_prefixes`, {
+            timeout: 5000,
+        });
         const allowedPrefixes = Object.keys(ar.data?.result || {});
         const deniedPrefixes = Object.keys(dr.data?.result || {});
-        let cfg = { allowedPrefixes: [], deniedPrefixes: [], allowedFlows: [] };
+        let cfg = {
+            allowedPrefixes: [],
+            deniedPrefixes: [],
+            allowedFlows: [],
+        };
         try {
             cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
         }
@@ -350,7 +429,9 @@ router.post('/admin/opa/sync-n8n-prefixes', async (_req, res) => {
         return res.json({ ok: true, config: out });
     }
     catch (e) {
-        return res.status(200).json({ ok: false, message: e?.message || 'sync prefixes failed' });
+        return res
+            .status(200)
+            .json({ ok: false, message: e?.message || 'sync prefixes failed' });
     }
 });
 // OPA bundle status (checks whether data.maestro.n8n.allowed_flows exists)
@@ -359,10 +440,16 @@ router.get('/admin/opa/bundle-status', async (_req, res) => {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
             return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
-        const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, { timeout: 3000 });
+        const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, {
+            timeout: 3000,
+        });
         const flows = r.data?.result || {};
         const keys = Object.keys(flows || {});
-        return res.json({ ok: true, allowedFlowsCount: keys.length, sample: keys.slice(0, 10) });
+        return res.json({
+            ok: true,
+            allowedFlowsCount: keys.length,
+            sample: keys.slice(0, 10),
+        });
     }
     catch (e) {
         return res.json({ ok: false, message: e?.message || 'lookup failed' });
@@ -373,7 +460,9 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
     try {
         const base = process.env.OPA_BASE_URL || '';
         if (!base)
-            return res.status(200).json({ ok: false, message: 'OPA_BASE_URL not set' });
+            return res
+                .status(200)
+                .json({ ok: false, message: 'OPA_BASE_URL not set' });
         let cfg = { allowedFlows: [] };
         try {
             cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
@@ -382,11 +471,15 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
         const map = {};
         for (const f of cfg.allowedFlows || [])
             map[f] = true;
-        await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, { timeout: 5000 });
+        await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, {
+            timeout: 5000,
+        });
         return res.json({ ok: true, count: Object.keys(map).length });
     }
     catch (e) {
-        return res.status(200).json({ ok: false, message: e?.message || 'push failed' });
+        return res
+            .status(200)
+            .json({ ok: false, message: e?.message || 'push failed' });
     }
 });
 // Temporal runtime toggle
@@ -404,7 +497,9 @@ router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
         return res.json({ ok: true, enabled });
     }
     catch (e) {
-        return res.status(500).json({ ok: false, error: e?.message || 'temporal toggle failed' });
+        return res
+            .status(500)
+            .json({ ok: false, error: e?.message || 'temporal toggle failed' });
     }
 });
 //# sourceMappingURL=admin.js.map

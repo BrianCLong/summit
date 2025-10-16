@@ -23,7 +23,7 @@ services:
     depends_on:
       - redis
     ports:
-      - "8081:8081"
+      - '8081:8081'
     networks:
       - intelgraph-gpu
 
@@ -32,7 +32,15 @@ services:
     build:
       context: ./ml
       dockerfile: Dockerfile.gpu
-    command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
+    command:
+      [
+        'celery',
+        '-A',
+        'app.celery_app',
+        'worker',
+        '--loglevel=INFO',
+        '--concurrency=1',
+      ]
     environment:
       - REDIS_URL=redis://:devpassword@redis:6379/0
       - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
@@ -59,7 +67,7 @@ services:
     volumes:
       - redis_gpu_data:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
       - intelgraph-gpu
 
@@ -73,8 +81,8 @@ services:
     volumes:
       - neo4j_gpu_data:/data
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     networks:
       - intelgraph-gpu
 
@@ -87,7 +95,7 @@ services:
     volumes:
       - postgres_gpu_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
     networks:
       - intelgraph-gpu
 

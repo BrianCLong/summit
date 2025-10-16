@@ -260,7 +260,10 @@ interface KeyProvider {
 
 // Tenant-aware key routing
 class TenantKeyManager {
-  async routeKeyOperation(tenantId: string, operation: CryptoOperation): Promise<CryptoResult> {
+  async routeKeyOperation(
+    tenantId: string,
+    operation: CryptoOperation,
+  ): Promise<CryptoResult> {
     const keyConfig = await this.getKeyConfig(tenantId);
     const provider = this.getProvider(keyConfig.provider);
 

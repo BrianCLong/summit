@@ -10,7 +10,7 @@ import {
   runLtdim,
   RunOptions,
   RunResult,
-  verifyImpactReportSignature
+  verifyImpactReportSignature,
 } from '../tools/legal/ltdim/index';
 
 function toSerializableDelta(delta: PolicyDelta) {
@@ -27,14 +27,17 @@ function toSerializableDelta(delta: PolicyDelta) {
     beforeState: delta.beforeState ?? null,
     afterState: delta.afterState ?? null,
     obligations: delta.obligations,
-    sloImpact: delta.sloImpact
+    sloImpact: delta.sloImpact,
   };
 }
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
 function loadFixture(name: string) {
-  return fs.readFileSync(path.join(currentDir, 'fixtures', 'ltdim', name), 'utf8');
+  return fs.readFileSync(
+    path.join(currentDir, 'fixtures', 'ltdim', name),
+    'utf8',
+  );
 }
 
 function loadJsonFixture<T>(name: string): T {
@@ -46,19 +49,27 @@ const baselineText = loadFixture('baseline.txt');
 const revisedText = loadFixture('revised.txt');
 
 const options: RunOptions = {
-  baselineDoc: { name: 'IntelGraph DPA', version: '2024.01', text: baselineText },
+  baselineDoc: {
+    name: 'IntelGraph DPA',
+    version: '2024.01',
+    text: baselineText,
+  },
   revisedDoc: { name: 'IntelGraph DPA', version: '2025.02', text: revisedText },
   catalog: DEFAULT_RULE_CATALOG,
-  timestamp: '2025-01-01T00:00:00.000Z'
+  timestamp: '2025-01-01T00:00:00.000Z',
 };
 
 const result: RunResult = runLtdim(options);
 
-const expectedPolicyDeltas = loadJsonFixture<Array<ReturnType<typeof toSerializableDelta>>>(
-  'expected-policy-deltas.json'
+const expectedPolicyDeltas = loadJsonFixture<
+  Array<ReturnType<typeof toSerializableDelta>>
+>('expected-policy-deltas.json');
+const expectedImpactSummary = loadJsonFixture<typeof result.impactSummary>(
+  'expected-impact-summary.json',
 );
-const expectedImpactSummary = loadJsonFixture<typeof result.impactSummary>('expected-impact-summary.json');
-const expectedPolicyPr = loadJsonFixture<typeof result.pullRequest>('expected-policy-pr.json');
+const expectedPolicyPr = loadJsonFixture<typeof result.pullRequest>(
+  'expected-policy-pr.json',
+);
 
 test('maps clause changes to deterministic policy deltas', () => {
   const actual = result.policyDeltas.map(toSerializableDelta);
@@ -75,11 +86,19 @@ test('generates a policy PR view with structured diffs', () => {
 
 test('produces a signed impact report that verifies offline', () => {
   const { canonicalPayload, signature, publicKey } = result.signedReport;
-  assert.ok(verifyImpactReportSignature(canonicalPayload, signature, publicKey));
+  assert.ok(
+    verifyImpactReportSignature(canonicalPayload, signature, publicKey),
+  );
 });
 
 test('is deterministic for seeded clause changes', () => {
   const rerun = runLtdim(options);
-  assert.strictEqual(rerun.signedReport.canonicalPayload, result.signedReport.canonicalPayload);
-  assert.deepStrictEqual(rerun.policyDeltas.map(toSerializableDelta), result.policyDeltas.map(toSerializableDelta));
+  assert.strictEqual(
+    rerun.signedReport.canonicalPayload,
+    result.signedReport.canonicalPayload,
+  );
+  assert.deepStrictEqual(
+    rerun.policyDeltas.map(toSerializableDelta),
+    result.policyDeltas.map(toSerializableDelta),
+  );
 });

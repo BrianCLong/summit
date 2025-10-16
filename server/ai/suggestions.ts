@@ -29,38 +29,66 @@ export function suggestOwnersForFile(filePath: string): ScoredSuggestion[] {
   const suggestions: ScoredSuggestion[] = [];
 
   // Rule 1: Infrastructure and CI/CD
-  if (filePath.startsWith('.github/') || filePath.includes('infra/') || filePath.includes('charts/')) {
-    suggestions.push({ user: 'sre-team', score: 0.9, reasoning: ['File is in an infrastructure or CI/CD path'] });
+  if (
+    filePath.startsWith('.github/') ||
+    filePath.includes('infra/') ||
+    filePath.includes('charts/')
+  ) {
+    suggestions.push({
+      user: 'sre-team',
+      score: 0.9,
+      reasoning: ['File is in an infrastructure or CI/CD path'],
+    });
   }
 
   // Rule 2: AI and ML services
   if (filePath.includes('server/ai') || filePath.includes('services/ml')) {
-    suggestions.push({ user: 'ai-copilot-dri', score: 0.95, reasoning: ['File is in a core AI/ML service path'] });
+    suggestions.push({
+      user: 'ai-copilot-dri',
+      score: 0.95,
+      reasoning: ['File is in a core AI/ML service path'],
+    });
   }
 
   // Rule 3: Frontend components
   if (filePath.startsWith('conductor-ui/frontend')) {
-    suggestions.push({ user: 'web-ux-lead', score: 0.8, reasoning: ['File is part of the main frontend application'] });
+    suggestions.push({
+      user: 'web-ux-lead',
+      score: 0.8,
+      reasoning: ['File is part of the main frontend application'],
+    });
     if (filePath.includes('/components/')) {
-        suggestions.push({ user: 'component-library-owner', score: 0.7, reasoning: ['Changes a shared component'] });
+      suggestions.push({
+        user: 'component-library-owner',
+        score: 0.7,
+        reasoning: ['Changes a shared component'],
+      });
     }
   }
 
   // Rule 4: Security and Policy
   if (filePath.startsWith('policies/')) {
-    suggestions.push({ user: 'security-dri', score: 1.0, reasoning: ['Directly modifies security policy'] });
+    suggestions.push({
+      user: 'security-dri',
+      score: 1.0,
+      reasoning: ['Directly modifies security policy'],
+    });
   }
 
   // Fallback / General ownership
   if (suggestions.length === 0) {
-      suggestions.push({ user: 'default-backend-owner', score: 0.3, reasoning: ['Default owner for backend services'] });
+    suggestions.push({
+      user: 'default-backend-owner',
+      score: 0.3,
+      reasoning: ['Default owner for backend services'],
+    });
   }
 
   // Deduplicate and return
   const uniqueUsers = new Set<string>();
-  return suggestions.filter(s => {
-      if (uniqueUsers.has(s.user)) return false;
-      uniqueUsers.add(s.user);
-      return true;
+  return suggestions.filter((s) => {
+    if (uniqueUsers.has(s.user)) return false;
+    uniqueUsers.add(s.user);
+    return true;
   });
 }

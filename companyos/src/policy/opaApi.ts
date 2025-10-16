@@ -17,4 +17,3 @@ export async function putData(path: string, data: unknown) {
   });
   if (res.statusCode >= 300) throw new Error(`OPA putData ${res.statusCode}`);
 }
-

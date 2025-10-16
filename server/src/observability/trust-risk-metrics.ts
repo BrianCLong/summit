@@ -16,10 +16,20 @@ export const riskSignalsTotal = new Counter({
 });
 
 export function recordTrustScore(subjectId: string, score: number) {
-  if (Number.isFinite(score)) trustScoreGauge.set({ subject: subjectId }, score);
+  if (Number.isFinite(score))
+    trustScoreGauge.set({ subject: subjectId }, score);
 }
 
-export function recordRiskSignal(opts: { tenantId: string; kind: string; severity: string; source: string }) {
-  riskSignalsTotal.inc({ tenant: opts.tenantId, kind: opts.kind, severity: opts.severity, source: opts.source });
+export function recordRiskSignal(opts: {
+  tenantId: string;
+  kind: string;
+  severity: string;
+  source: string;
+}) {
+  riskSignalsTotal.inc({
+    tenant: opts.tenantId,
+    kind: opts.kind,
+    severity: opts.severity,
+    source: opts.source,
+  });
 }
-

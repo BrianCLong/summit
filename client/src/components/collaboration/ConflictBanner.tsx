@@ -36,7 +36,12 @@ export function ConflictBanner({
       {message}
 
       <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-        <Button size="small" variant="outlined" startIcon={<Refresh />} onClick={onRefresh}>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<Refresh />}
+          onClick={onRefresh}
+        >
           Refresh Content
         </Button>
 

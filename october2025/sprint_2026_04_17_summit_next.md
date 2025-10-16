@@ -1,5 +1,6 @@
 ```markdown
 # Sprint Plan — Summit / IntelGraph / Maestro Conductor
+
 **Slug/Version:** `sprint-2026-04-17-intelgraph-summit-v1.13.0`
 **Dates:** Apr 17–May 1, 2026 (2 weeks)
 **Timezone:** America/Denver
@@ -9,6 +10,7 @@
 ---
 
 ## 0) North‑Star & Guardrails
+
 - **North‑Star:** 3 production tenants; 1 new pilot conversion committed; reference hub live with 2 stories.
 - **SLOs:** Availability ≥ 99.85%; Read P95 ≤ 220 ms; Policy P95 ≤ 8 ms; Ingest success ≥ 99.2% (24h).
 - **Security/Governance:** 0 criticals; SBOM on `v1.13.0`; quarterly access review evidence; schema approvals enforced; ER audit coverage ≥ 98%.
@@ -16,6 +18,7 @@
 ---
 
 ## 1) Objectives (Demo on May 1)
+
 1. **Production at Speed:** Day‑2 ops steady for tenants A/B; tenant C conversion signed & migration rehearsal complete.
 2. **Playbooks in the Field:** scheduled playbooks running at two tenants; alerting & exports used by supervisors.
 3. **ServiceNow GA Adoption:** two tenants pulling incidents; SLO panel shows healthy throughput; DLQ auto‑replay active.
@@ -27,6 +30,7 @@
 ---
 
 ## 2) Scope & Priority
+
 - **P0 (Must):** Tenant C conversion pack; playbook schedules live at 2 tenants; ServiceNow GA live at 2 tenants; TI suppression policies; reference hub & consent; Q2 roadmap & capacity; analytics v6.
 - **P1 (Should):** Audit export automation to S3/SFTP; connector SLOs per tenant; SDK snippet generator for playbooks.
 - **P2 (Could):** Map auto‑binning; lightweight fine‑tune hooks for retriever scorer.
@@ -35,6 +39,7 @@
 ---
 
 ## 3) Swimlanes & Owners
+
 - **Product/GTM (Felix):** Conversion C, reference hub, analyst kit, Q2 roadmap/priorities, capacity plan, ABM wave‑4.
 - **Frontend:** Playbooks scheduler UX polish, supervisor exports, analytics v6 dashboards, reference hub pages.
 - **Backend:** Tenant‑scoped suppression policies & budgets, audit export automation, ServiceNow throughput tuning, roadmap tagging hooks.
@@ -47,6 +52,7 @@
 ## 4) Backlog (Stories & Tasks)
 
 ### P0 — Conversion C & Production Steady State
+
 - **P0‑1** Migration Rehearsal C (owner: SRE/BE)
   - Dry‑run with tenant dataset; rollback steps; timing; sign‑off.
 - **P0‑2** SOW Execution C (owner: GTM/Legal)
@@ -55,18 +61,21 @@
   - On‑call, quotas/budgets, backup cadence; acceptance note filed.
 
 ### P0 — Playbooks in the Field
+
 - **P0‑4** Scheduler Rollout (owner: FE/BE)
   - Create two scheduled playbooks per tenant; alert routes; export destinations.
 - **P0‑5** Supervisor Export Flows (owner: FE)
   - One‑click annotated exports (PDF/MD) to S3/SFTP; respect redaction/branding.
 
 ### P0 — ServiceNow GA Adoption
+
 - **P0‑6** Tenant Config & Throttling (owner: BE/SRE)
   - OAuth secrets, rate limits, backoff; SLO panel per tenant; pager on breach.
 - **P0‑7** DLQ Auto‑replay Policy (owner: SRE)
   - Time windows, idempotency; alerts on consecutive failures.
 
 ### P0 — Threat Intel v6 (Policies & Costs)
+
 - **P0‑8** Suppression Policies (owner: BE/Data)
   - Rules by type/source/score; preview impact; audit of suppressed items.
 - **P0‑9** Per‑source Budgets (owner: BE/SRE)
@@ -75,6 +84,7 @@
   - Suppressed vs surfaced; confidence distribution; cost overlay.
 
 ### P0 — Reference Machine v1
+
 - **P0‑11** Reference Hub (owner: Product/FE)
   - `/docs/gtm/references/` index: case studies, quotes, 60‑sec clips, evidence pack links.
 - **P0‑12** Consent Workflow (owner: GTM/Legal)
@@ -83,6 +93,7 @@
   - One‑pager, deck addendum, briefing notes; demo script.
 
 ### P0 — Q2 Capacity & Roadmap
+
 - **P0‑14** Segment P&L & Win/Loss (owner: Product/Finance)
   - ARR, CAC payback, win rate, cycle time; insights.
 - **P0‑15** Roadmap with Revenue Tags (owner: Product/Eng)
@@ -91,6 +102,7 @@
   - Sprint capacity by team; hiring/contractor asks; deliverables per month.
 
 ### P0 — Analytics v6
+
 - **P0‑17** Dashboards (owner: FE/SRE)
   - Playbook adoption by persona; time‑to‑first‑insight; pilot→prod conversion; NPS trend.
 - **P1‑18** Audit Export Automation (owner: BE)
@@ -99,6 +111,7 @@
 ---
 
 ## 5) Acceptance Criteria & DoD
+
 - **Tenant C:** signed SOW; migration rehearsal passed; Day‑2 ops acceptance filed.
 - **Playbooks:** ≥ 2 scheduled playbooks per tenant (A & B) running; alerts delivered; exports landing in S3/SFTP; audit links present.
 - **ServiceNow:** two tenants live; per‑tenant SLO green; DLQ auto‑replay resolving ≥ 90% of retriable batches.
@@ -110,15 +123,17 @@
 ---
 
 ## 6) Cadence & Dates
-- **Standup:** 09:30 MT daily  
-- **Mid‑sprint demo:** Apr 24, 15:00 MT  
-- **Code freeze:** Apr 30, 12:00 MT  
-- **Review & demo:** May 1, 15:00 MT  
+
+- **Standup:** 09:30 MT daily
+- **Mid‑sprint demo:** Apr 24, 15:00 MT
+- **Code freeze:** Apr 30, 12:00 MT
+- **Review & demo:** May 1, 15:00 MT
 - **Retro:** May 1, 16:00 MT
 
 ---
 
 ## 7) Metrics
+
 - **Business:** ARR commit, pilots signed, conversions, references.
 - **Product:** playbook runs/exports, ServiceNow throughput & errors, TI suppression %, provider budget hits.
 - **Ops:** ingest success %, error budget burn, DLQ auto‑replay success, backup cadence adherence.
@@ -126,6 +141,7 @@
 ---
 
 ## 8) Deliverables (Repos & Docs)
+
 - `docs/contracts/{SOW_production_C_signed.md}` + `docs/ops/day2_signoffs/tenantC.md`
 - `client/src/features/playbooks/schedule/*` + `server/src/playbooks/scheduler_v2.ts`
 - `client/src/features/export/supervisor/*` + `server/src/export/destinations/{s3.ts,sftp.ts}`
@@ -139,6 +155,7 @@
 ---
 
 ## 9) Demo Script (May 1)
+
 1. Show tenant C conversion pack & migration rehearsal; Day‑2 sign‑off.
 2. Run scheduled playbooks; show alert & exports in S3/SFTP; open annotated PDF.
 3. Display ServiceNow SLO per tenant; trigger DLQ auto‑replay demo.
@@ -151,4 +168,3 @@
 **Owner:** Felix (The B.I.Z.) — VP Sales/BD/Growth  
 **Last Updated:** Oct 17, 2025 (v1.13.0 plan)
 ```
-

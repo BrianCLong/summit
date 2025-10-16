@@ -1,18 +1,18 @@
-import tsParser from "@typescript-eslint/parser";
-import globals from "globals";
-import resolverPolicy from "./eslint-rules/require-wrap-resolver-policy.js";
+import tsParser from '@typescript-eslint/parser';
+import globals from 'globals';
+import resolverPolicy from './eslint-rules/require-wrap-resolver-policy.js';
 
 export default [
   {
-    ignores: ["dist/**", "node_modules/**"],
+    ignores: ['dist/**', 'node_modules/**'],
   },
   {
-    files: ["**/*.{ts,js}"],
+    files: ['**/*.{ts,js}'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
+        ecmaVersion: 'latest',
+        sourceType: 'module',
       },
       globals: {
         ...globals.node,
@@ -20,17 +20,17 @@ export default [
       },
     },
     rules: {
-      "no-unused-vars": [
-        "warn",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      'no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      "no-console": "warn",
-      "prefer-const": "error",
-      "no-var": "error",
+      'no-console': 'warn',
+      'prefer-const': 'error',
+      'no-var': 'error',
     },
   },
   {
-    files: ["tests/**/*"],
+    files: ['tests/**/*'],
     languageOptions: {
       globals: {
         ...globals.jest,
@@ -38,16 +38,16 @@ export default [
     },
   },
   {
-    files: ["src/resolvers/**/*.{ts,js}"],
+    files: ['src/resolvers/**/*.{ts,js}'],
     plugins: {
-      "resolver-policy": {
+      'resolver-policy': {
         rules: {
           wrap: resolverPolicy,
         },
       },
     },
     rules: {
-      "resolver-policy/wrap": "error",
+      'resolver-policy/wrap': 'error',
     },
   },
 ];

@@ -5,7 +5,12 @@
  */
 
 import { EventEmitter } from 'events';
-import { Migration, MigrationPhaseDefinition, MigrationPhase, MigrationContext } from './MigrationManager.js';
+import {
+  Migration,
+  MigrationPhaseDefinition,
+  MigrationPhase,
+  MigrationContext,
+} from './MigrationManager.js';
 
 /**
  * Expand/Contract migration builder and executor
@@ -37,8 +42,8 @@ export class ExpandContractMigration extends EventEmitter {
       name: `Add column ${options.column}`,
       sql: migration.generateAddColumnSQL(options),
       validationQueries: [
-        `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`
-      ]
+        `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`,
+      ],
     });
 
     // Migrate phase: Populate new column
@@ -47,8 +52,8 @@ export class ExpandContractMigration extends EventEmitter {
         name: `Populate column ${options.column}`,
         sql: `UPDATE ${options.table} SET ${options.column} = ${migration.formatValue(options.defaultValue)} WHERE ${options.column} IS NULL`,
         validationQueries: [
-          `SELECT COUNT(*) as null_count FROM ${options.table} WHERE ${options.column} IS NULL`
-        ]
+          `SELECT COUNT(*) as null_count FROM ${options.table} WHERE ${options.column} IS NULL`,
+        ],
       });
     }
 
@@ -59,8 +64,8 @@ export class ExpandContractMigration extends EventEmitter {
         sql: `ALTER TABLE ${options.table} ALTER COLUMN ${options.column} SET NOT NULL`,
         rollbackSql: `ALTER TABLE ${options.table} ALTER COLUMN ${options.column} DROP NOT NULL`,
         validationQueries: [
-          `SELECT is_nullable FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`
-        ]
+          `SELECT is_nullable FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`,
+        ],
       });
     }
 
@@ -70,8 +75,8 @@ export class ExpandContractMigration extends EventEmitter {
         sql: `ALTER TABLE ${options.table} ADD CONSTRAINT ${options.table}_${options.column}_unique UNIQUE (${options.column})`,
         rollbackSql: `ALTER TABLE ${options.table} DROP CONSTRAINT ${options.table}_${options.column}_unique`,
         validationQueries: [
-          `SELECT constraint_name FROM information_schema.table_constraints WHERE table_name = '${options.table}' AND constraint_type = 'UNIQUE'`
-        ]
+          `SELECT constraint_name FROM information_schema.table_constraints WHERE table_name = '${options.table}' AND constraint_type = 'UNIQUE'`,
+        ],
       });
     }
 
@@ -81,8 +86,8 @@ export class ExpandContractMigration extends EventEmitter {
         sql: `CREATE INDEX CONCURRENTLY idx_${options.table}_${options.column} ON ${options.table} (${options.column})`,
         rollbackSql: `DROP INDEX CONCURRENTLY IF EXISTS idx_${options.table}_${options.column}`,
         validationQueries: [
-          `SELECT indexname FROM pg_indexes WHERE tablename = '${options.table}' AND indexname = 'idx_${options.table}_${options.column}'`
-        ]
+          `SELECT indexname FROM pg_indexes WHERE tablename = '${options.table}' AND indexname = 'idx_${options.table}_${options.column}'`,
+        ],
       });
     }
 
@@ -105,16 +110,16 @@ export class ExpandContractMigration extends EventEmitter {
         name: `Create backup column ${options.backupColumn}`,
         sql: `ALTER TABLE ${options.table} ADD COLUMN ${options.backupColumn} TEXT`,
         validationQueries: [
-          `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.backupColumn}'`
-        ]
+          `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.backupColumn}'`,
+        ],
       });
 
       migration.addMigratePhase({
         name: `Copy data to backup column`,
         sql: `UPDATE ${options.table} SET ${options.backupColumn} = ${options.column}::TEXT WHERE ${options.backupColumn} IS NULL`,
         validationQueries: [
-          `SELECT COUNT(*) as backup_count FROM ${options.table} WHERE ${options.backupColumn} IS NOT NULL`
-        ]
+          `SELECT COUNT(*) as backup_count FROM ${options.table} WHERE ${options.backupColumn} IS NOT NULL`,
+        ],
       });
     }
 
@@ -122,12 +127,12 @@ export class ExpandContractMigration extends EventEmitter {
     migration.addContractPhase({
       name: `Remove column ${options.column}`,
       sql: `ALTER TABLE ${options.table} DROP COLUMN ${options.column}`,
-      rollbackSql: options.backupColumn ? 
-        `ALTER TABLE ${options.table} ADD COLUMN ${options.column} TEXT; UPDATE ${options.table} SET ${options.column} = ${options.backupColumn}` : 
-        undefined,
+      rollbackSql: options.backupColumn
+        ? `ALTER TABLE ${options.table} ADD COLUMN ${options.column} TEXT; UPDATE ${options.table} SET ${options.column} = ${options.backupColumn}`
+        : undefined,
       validationQueries: [
-        `SELECT COUNT(*) as column_exists FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`
-      ]
+        `SELECT COUNT(*) as column_exists FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`,
+      ],
     });
 
     return migration;
@@ -149,8 +154,8 @@ export class ExpandContractMigration extends EventEmitter {
         name: `Create new table ${options.newName}`,
         sql: `CREATE TABLE ${options.newName} (LIKE ${options.oldName} INCLUDING ALL)`,
         validationQueries: [
-          `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.newName}'`
-        ]
+          `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.newName}'`,
+        ],
       });
 
       migration.addMigratePhase({
@@ -158,8 +163,8 @@ export class ExpandContractMigration extends EventEmitter {
         sql: `INSERT INTO ${options.newName} SELECT * FROM ${options.oldName}`,
         validationQueries: [
           `SELECT COUNT(*) as new_count FROM ${options.newName}`,
-          `SELECT COUNT(*) as old_count FROM ${options.oldName}`
-        ]
+          `SELECT COUNT(*) as old_count FROM ${options.oldName}`,
+        ],
       });
 
       migration.addMigratePhase({
@@ -167,8 +172,8 @@ export class ExpandContractMigration extends EventEmitter {
         sql: `CREATE VIEW ${options.oldName}_view AS SELECT * FROM ${options.newName}`,
         rollbackSql: `DROP VIEW IF EXISTS ${options.oldName}_view`,
         validationQueries: [
-          `SELECT table_name FROM information_schema.views WHERE table_name = '${options.oldName}_view'`
-        ]
+          `SELECT table_name FROM information_schema.views WHERE table_name = '${options.oldName}_view'`,
+        ],
       });
 
       // Contract phase: Drop old table and rename view
@@ -177,8 +182,8 @@ export class ExpandContractMigration extends EventEmitter {
         sql: `DROP TABLE ${options.oldName}; ALTER VIEW ${options.oldName}_view RENAME TO ${options.oldName}`,
         rollbackSql: `ALTER VIEW ${options.oldName} RENAME TO ${options.oldName}_view; CREATE TABLE ${options.oldName} (LIKE ${options.newName} INCLUDING ALL)`,
         validationQueries: [
-          `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.oldName}'`
-        ]
+          `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.oldName}'`,
+        ],
       });
     } else {
       // Simple rename (requires brief downtime)
@@ -187,8 +192,8 @@ export class ExpandContractMigration extends EventEmitter {
         sql: `ALTER TABLE ${options.oldName} RENAME TO ${options.newName}`,
         rollbackSql: `ALTER TABLE ${options.newName} RENAME TO ${options.oldName}`,
         validationQueries: [
-          `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.newName}'`
-        ]
+          `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.newName}'`,
+        ],
       });
     }
 
@@ -214,18 +219,19 @@ export class ExpandContractMigration extends EventEmitter {
       name: `Add temporary column ${tempCol}`,
       sql: `ALTER TABLE ${options.table} ADD COLUMN ${tempCol} ${options.newType}`,
       validationQueries: [
-        `SELECT data_type FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${tempCol}'`
-      ]
+        `SELECT data_type FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${tempCol}'`,
+      ],
     });
 
     // Migrate phase: Convert data to new column
-    const conversionExpr = options.conversionExpression || `${options.column}::${options.newType}`;
+    const conversionExpr =
+      options.conversionExpression || `${options.column}::${options.newType}`;
     migration.addMigratePhase({
       name: `Convert data to new type`,
       sql: `UPDATE ${options.table} SET ${tempCol} = ${conversionExpr} WHERE ${tempCol} IS NULL`,
       validationQueries: [
-        `SELECT COUNT(*) as converted_count FROM ${options.table} WHERE ${tempCol} IS NOT NULL`
-      ]
+        `SELECT COUNT(*) as converted_count FROM ${options.table} WHERE ${tempCol} IS NOT NULL`,
+      ],
     });
 
     // Contract phase: Replace old column with new one
@@ -234,8 +240,8 @@ export class ExpandContractMigration extends EventEmitter {
       sql: `ALTER TABLE ${options.table} DROP COLUMN ${options.column}; ALTER TABLE ${options.table} RENAME COLUMN ${tempCol} TO ${options.column}`,
       rollbackSql: `ALTER TABLE ${options.table} RENAME COLUMN ${options.column} TO ${tempCol}; ALTER TABLE ${options.table} ADD COLUMN ${options.column} ${options.oldType}`,
       validationQueries: [
-        `SELECT data_type FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`
-      ]
+        `SELECT data_type FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.column}'`,
+      ],
     });
 
     return migration;
@@ -253,7 +259,8 @@ export class ExpandContractMigration extends EventEmitter {
     concurrent?: boolean;
   }): ExpandContractMigration {
     const migration = new ExpandContractMigration();
-    const indexName = options.name || `idx_${options.table}_${options.columns.join('_')}`;
+    const indexName =
+      options.name || `idx_${options.table}_${options.columns.join('_')}`;
     const uniqueClause = options.unique ? 'UNIQUE ' : '';
     const concurrentClause = options.concurrent ? 'CONCURRENTLY ' : '';
     const partialClause = options.partial ? ` WHERE ${options.partial}` : '';
@@ -264,8 +271,8 @@ export class ExpandContractMigration extends EventEmitter {
       sql: `CREATE ${uniqueClause}INDEX ${concurrentClause}${indexName} ON ${options.table} (${options.columns.join(', ')})${partialClause}`,
       rollbackSql: `DROP INDEX ${concurrentClause}IF EXISTS ${indexName}`,
       validationQueries: [
-        `SELECT indexname FROM pg_indexes WHERE indexname = '${indexName}'`
-      ]
+        `SELECT indexname FROM pg_indexes WHERE indexname = '${indexName}'`,
+      ],
     });
 
     return migration;
@@ -284,22 +291,27 @@ export class ExpandContractMigration extends EventEmitter {
     onUpdate?: 'CASCADE' | 'SET NULL' | 'RESTRICT';
   }): ExpandContractMigration {
     const migration = new ExpandContractMigration();
-    const constraintName = options.name || `fk_${options.table}_${options.column}`;
+    const constraintName =
+      options.name || `fk_${options.table}_${options.column}`;
 
     // Expand phase: Validate existing data
     migration.addExpandPhase({
       name: `Validate foreign key data`,
-      sql: `SELECT 1`,  // Placeholder - would contain actual validation
+      sql: `SELECT 1`, // Placeholder - would contain actual validation
       validationQueries: [
         `SELECT COUNT(*) as invalid_refs FROM ${options.table} t 
          LEFT JOIN ${options.referencedTable} r ON t.${options.column} = r.${options.referencedColumn}
-         WHERE t.${options.column} IS NOT NULL AND r.${options.referencedColumn} IS NULL`
-      ]
+         WHERE t.${options.column} IS NOT NULL AND r.${options.referencedColumn} IS NULL`,
+      ],
     });
 
     // Contract phase: Add foreign key constraint
-    const onDeleteClause = options.onDelete ? ` ON DELETE ${options.onDelete}` : '';
-    const onUpdateClause = options.onUpdate ? ` ON UPDATE ${options.onUpdate}` : '';
+    const onDeleteClause = options.onDelete
+      ? ` ON DELETE ${options.onDelete}`
+      : '';
+    const onUpdateClause = options.onUpdate
+      ? ` ON UPDATE ${options.onUpdate}`
+      : '';
 
     migration.addContractPhase({
       name: `Add foreign key constraint`,
@@ -309,8 +321,8 @@ export class ExpandContractMigration extends EventEmitter {
       rollbackSql: `ALTER TABLE ${options.table} DROP CONSTRAINT ${constraintName}`,
       validationQueries: [
         `SELECT constraint_name FROM information_schema.table_constraints 
-         WHERE table_name = '${options.table}' AND constraint_name = '${constraintName}'`
-      ]
+         WHERE table_name = '${options.table}' AND constraint_name = '${constraintName}'`,
+      ],
     });
 
     return migration;
@@ -359,13 +371,18 @@ export class ExpandContractMigration extends EventEmitter {
     let order = 0;
 
     // Add phases in correct order: expand -> migrate -> contract -> cleanup
-    for (const phaseType of ['expand', 'migrate', 'contract', 'cleanup'] as MigrationPhase[]) {
+    for (const phaseType of [
+      'expand',
+      'migrate',
+      'contract',
+      'cleanup',
+    ] as MigrationPhase[]) {
       const phases = this.phases.get(phaseType) || [];
       for (const phase of phases) {
         allPhases.push({
           ...phase,
           phase: phaseType,
-          order: order++
+          order: order++,
         });
       }
     }
@@ -387,31 +404,33 @@ export class ExpandContractMigration extends EventEmitter {
             type: 'error_rate',
             threshold: 5, // 5% error rate
             window: 5, // 5 minutes
-            enabled: true
+            enabled: true,
           },
           {
             type: 'timeout',
             threshold: 30, // 30 minutes
             window: 1,
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         strategy: 'phased',
         preserveData: true,
         backupRequired: true,
-        rollbackPhases: this.generateRollbackPhases(allPhases)
+        rollbackPhases: this.generateRollbackPhases(allPhases),
       },
       validation: {
         pre_migration: [
           {
             name: 'Check table exists',
             query: `SELECT COUNT(*) as table_count FROM information_schema.tables 
-                    WHERE table_name IN (${migrationConfig.targetTables.map(t => `'${t}'`).join(', ')})`,
-            expected_result: { table_count: migrationConfig.targetTables.length },
+                    WHERE table_name IN (${migrationConfig.targetTables.map((t) => `'${t}'`).join(', ')})`,
+            expected_result: {
+              table_count: migrationConfig.targetTables.length,
+            },
             operator: 'equals',
             critical: true,
-            timeout: 30
-          }
+            timeout: 30,
+          },
         ],
         post_migration: [
           {
@@ -420,33 +439,36 @@ export class ExpandContractMigration extends EventEmitter {
             expected_result: { success: true },
             operator: 'equals',
             critical: true,
-            timeout: 60
-          }
+            timeout: 60,
+          },
         ],
         continuous: [],
-        data_integrity: migrationConfig.targetTables.map(table => ({
+        data_integrity: migrationConfig.targetTables.map((table) => ({
           name: `${table} integrity check`,
           table,
           checks: {
             row_count: { min: 0 },
-            foreign_key_integrity: true
-          }
-        }))
+            foreign_key_integrity: true,
+          },
+        })),
       },
       metadata: {
         author: migrationConfig.author,
         reviewedBy: [],
         approvedBy: '',
         createdAt: new Date(),
-        estimatedDuration: allPhases.reduce((sum, phase) => sum + phase.timeout, 0),
+        estimatedDuration: allPhases.reduce(
+          (sum, phase) => sum + phase.timeout,
+          0,
+        ),
         targetTables: migrationConfig.targetTables,
         affectedRows: 0,
-        requires_downtime: false
+        requires_downtime: false,
       },
       tenant_specific: false,
       environments: ['development', 'staging', 'production'],
       lifecycle: {
-        temporary: false
+        temporary: false,
       },
       analytics: {
         enabled: true,
@@ -455,14 +477,14 @@ export class ExpandContractMigration extends EventEmitter {
         cohortAnalysis: false,
         conversionTracking: {
           enabled: false,
-          goalEvents: []
+          goalEvents: [],
         },
         sampling: {
           enabled: false,
-          rate: 1.0
-        }
+          rate: 1.0,
+        },
       },
-      killSwitch: true
+      killSwitch: true,
     };
   }
 
@@ -477,9 +499,12 @@ export class ExpandContractMigration extends EventEmitter {
     this.phases.set('cleanup', []);
   }
 
-  private addPhase(phaseType: MigrationPhase, phase: Partial<MigrationPhaseDefinition>): this {
+  private addPhase(
+    phaseType: MigrationPhase,
+    phase: Partial<MigrationPhaseDefinition>,
+  ): this {
     const phases = this.phases.get(phaseType) || [];
-    
+
     const fullPhase: MigrationPhaseDefinition = {
       phase: phaseType,
       name: phase.name || `${phaseType} phase`,
@@ -491,7 +516,7 @@ export class ExpandContractMigration extends EventEmitter {
       timeout: phase.timeout || 30,
       retryable: phase.retryable || false,
       parallel: phase.parallel || false,
-      order: phases.length
+      order: phases.length,
     };
 
     phases.push(fullPhase);
@@ -508,11 +533,11 @@ export class ExpandContractMigration extends EventEmitter {
     defaultValue?: any;
   }): string {
     let sql = `ALTER TABLE ${options.table} ADD COLUMN ${options.column} ${options.type}`;
-    
+
     if (options.defaultValue !== undefined) {
       sql += ` DEFAULT ${this.formatValue(options.defaultValue)}`;
     }
-    
+
     if (options.nullable === false) {
       // Don't add NOT NULL immediately in expand phase - do it in contract phase
       // sql += ' NOT NULL';
@@ -543,14 +568,14 @@ export class ExpandContractMigration extends EventEmitter {
 
     for (let i = 0; i < reversedPhases.length; i++) {
       const phase = reversedPhases[i];
-      
+
       if (phase.rollbackSql) {
         rollbackPhases.push({
           order: i,
           name: `Rollback ${phase.name}`,
           sql: phase.rollbackSql,
           validation: phase.validationQueries,
-          timeout: phase.timeout
+          timeout: phase.timeout,
         });
       }
     }
@@ -563,7 +588,6 @@ export class ExpandContractMigration extends EventEmitter {
  * Expand/Contract migration examples and templates
  */
 export class ExpandContractMigrationTemplates {
-  
   /**
    * Template for adding a new required column with default value
    */
@@ -571,7 +595,7 @@ export class ExpandContractMigrationTemplates {
     table: string,
     column: string,
     type: string,
-    defaultValue: any
+    defaultValue: any,
   ): ExpandContractMigration {
     return ExpandContractMigration.addColumn({
       table,
@@ -579,7 +603,7 @@ export class ExpandContractMigrationTemplates {
       type,
       nullable: false,
       defaultValue,
-      index: true
+      index: true,
     });
   }
 
@@ -603,8 +627,8 @@ export class ExpandContractMigrationTemplates {
         name: `Add column ${targetCol.name}`,
         sql: `ALTER TABLE ${options.table} ADD COLUMN ${targetCol.name} ${targetCol.type}`,
         validationQueries: [
-          `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${targetCol.name}'`
-        ]
+          `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${targetCol.name}'`,
+        ],
       });
     }
 
@@ -614,8 +638,8 @@ export class ExpandContractMigrationTemplates {
         name: `Populate column ${targetCol.name}`,
         sql: `UPDATE ${options.table} SET ${targetCol.name} = ${targetCol.extractExpression} WHERE ${targetCol.name} IS NULL`,
         validationQueries: [
-          `SELECT COUNT(*) as populated_count FROM ${options.table} WHERE ${targetCol.name} IS NOT NULL`
-        ]
+          `SELECT COUNT(*) as populated_count FROM ${options.table} WHERE ${targetCol.name} IS NOT NULL`,
+        ],
       });
     }
 
@@ -624,8 +648,8 @@ export class ExpandContractMigrationTemplates {
       name: `Remove source column ${options.sourceColumn}`,
       sql: `ALTER TABLE ${options.table} DROP COLUMN ${options.sourceColumn}`,
       validationQueries: [
-        `SELECT COUNT(*) as column_exists FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.sourceColumn}'`
-      ]
+        `SELECT COUNT(*) as column_exists FROM information_schema.columns WHERE table_name = '${options.table}' AND column_name = '${options.sourceColumn}'`,
+      ],
     });
 
     return migration;
@@ -648,12 +672,12 @@ export class ExpandContractMigrationTemplates {
       name: `Create normalized table ${options.targetTable}`,
       sql: `CREATE TABLE ${options.targetTable} (
         id SERIAL PRIMARY KEY,
-        ${options.normalizedColumns.map(col => `${col} TEXT`).join(', ')},
+        ${options.normalizedColumns.map((col) => `${col} TEXT`).join(', ')},
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
       validationQueries: [
-        `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.targetTable}'`
-      ]
+        `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.targetTable}'`,
+      ],
     });
 
     // Migrate phase: Populate normalized table
@@ -664,8 +688,8 @@ export class ExpandContractMigrationTemplates {
             FROM ${options.sourceTable} 
             WHERE ${options.sourceColumn} IS NOT NULL`,
       validationQueries: [
-        `SELECT COUNT(*) as normalized_count FROM ${options.targetTable}`
-      ]
+        `SELECT COUNT(*) as normalized_count FROM ${options.targetTable}`,
+      ],
     });
 
     // Migrate phase: Add foreign key column to source table
@@ -673,8 +697,8 @@ export class ExpandContractMigrationTemplates {
       name: `Add foreign key column to source table`,
       sql: `ALTER TABLE ${options.sourceTable} ADD COLUMN ${options.foreignKeyColumn} INTEGER`,
       validationQueries: [
-        `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.sourceTable}' AND column_name = '${options.foreignKeyColumn}'`
-      ]
+        `SELECT column_name FROM information_schema.columns WHERE table_name = '${options.sourceTable}' AND column_name = '${options.foreignKeyColumn}'`,
+      ],
     });
 
     // Migrate phase: Populate foreign key column
@@ -683,10 +707,10 @@ export class ExpandContractMigrationTemplates {
       sql: `UPDATE ${options.sourceTable} s 
             SET ${options.foreignKeyColumn} = t.id 
             FROM ${options.targetTable} t 
-            WHERE ${options.normalizedColumns.map(col => `s.${col} = t.${col}`).join(' AND ')}`,
+            WHERE ${options.normalizedColumns.map((col) => `s.${col} = t.${col}`).join(' AND ')}`,
       validationQueries: [
-        `SELECT COUNT(*) as updated_refs FROM ${options.sourceTable} WHERE ${options.foreignKeyColumn} IS NOT NULL`
-      ]
+        `SELECT COUNT(*) as updated_refs FROM ${options.sourceTable} WHERE ${options.foreignKeyColumn} IS NOT NULL`,
+      ],
     });
 
     // Contract phase: Add foreign key constraint
@@ -697,8 +721,8 @@ export class ExpandContractMigrationTemplates {
             FOREIGN KEY (${options.foreignKeyColumn}) REFERENCES ${options.targetTable} (id)`,
       rollbackSql: `ALTER TABLE ${options.sourceTable} DROP CONSTRAINT fk_${options.sourceTable}_${options.foreignKeyColumn}`,
       validationQueries: [
-        `SELECT constraint_name FROM information_schema.table_constraints WHERE constraint_name = 'fk_${options.sourceTable}_${options.foreignKeyColumn}'`
-      ]
+        `SELECT constraint_name FROM information_schema.table_constraints WHERE constraint_name = 'fk_${options.sourceTable}_${options.foreignKeyColumn}'`,
+      ],
     });
 
     // Contract phase: Remove denormalized columns
@@ -707,8 +731,8 @@ export class ExpandContractMigrationTemplates {
         name: `Remove denormalized column ${col}`,
         sql: `ALTER TABLE ${options.sourceTable} DROP COLUMN ${col}`,
         validationQueries: [
-          `SELECT COUNT(*) as column_exists FROM information_schema.columns WHERE table_name = '${options.sourceTable}' AND column_name = '${col}'`
-        ]
+          `SELECT COUNT(*) as column_exists FROM information_schema.columns WHERE table_name = '${options.sourceTable}' AND column_name = '${col}'`,
+        ],
       });
     }
 
@@ -735,8 +759,8 @@ export class ExpandContractMigrationTemplates {
       sql: `CREATE TABLE ${options.table}_partitioned (LIKE ${options.table} INCLUDING ALL) 
             PARTITION BY ${options.partitionType.toUpperCase()} (${options.partitionColumn})`,
       validationQueries: [
-        `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.table}_partitioned'`
-      ]
+        `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.table}_partitioned'`,
+      ],
     });
 
     // Expand phase: Create partitions
@@ -745,8 +769,8 @@ export class ExpandContractMigrationTemplates {
         name: `Create partition ${partition.name}`,
         sql: `CREATE TABLE ${partition.name} PARTITION OF ${options.table}_partitioned FOR VALUES ${partition.condition}`,
         validationQueries: [
-          `SELECT schemaname, tablename FROM pg_tables WHERE tablename = '${partition.name}'`
-        ]
+          `SELECT schemaname, tablename FROM pg_tables WHERE tablename = '${partition.name}'`,
+        ],
       });
     }
 
@@ -756,8 +780,8 @@ export class ExpandContractMigrationTemplates {
       sql: `INSERT INTO ${options.table}_partitioned SELECT * FROM ${options.table}`,
       validationQueries: [
         `SELECT COUNT(*) as partitioned_count FROM ${options.table}_partitioned`,
-        `SELECT COUNT(*) as original_count FROM ${options.table}`
-      ]
+        `SELECT COUNT(*) as original_count FROM ${options.table}`,
+      ],
     });
 
     // Contract phase: Replace original table
@@ -766,8 +790,8 @@ export class ExpandContractMigrationTemplates {
       sql: `DROP TABLE ${options.table}; ALTER TABLE ${options.table}_partitioned RENAME TO ${options.table}`,
       rollbackSql: `ALTER TABLE ${options.table} RENAME TO ${options.table}_partitioned; CREATE TABLE ${options.table} (LIKE ${options.table}_partitioned INCLUDING ALL)`,
       validationQueries: [
-        `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.table}'`
-      ]
+        `SELECT table_name FROM information_schema.tables WHERE table_name = '${options.table}'`,
+      ],
     });
 
     return migration;

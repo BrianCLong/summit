@@ -39,7 +39,7 @@ describe('engagementCascade', () => {
     expect(plan.guardrails.minimumConfidence).toBeGreaterThan(0.7);
     expect(plan.guardrails.minimumConfidence).toBeLessThanOrEqual(1);
 
-    plan.speculativeCascade.tiers.forEach(tier => {
+    plan.speculativeCascade.tiers.forEach((tier) => {
       expect(tier.latencyMs).toBeGreaterThan(0);
       expect(tier.acceptanceThreshold).toBeGreaterThan(0);
       expect(tier.acceptanceThreshold).toBeLessThanOrEqual(1);

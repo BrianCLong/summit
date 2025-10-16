@@ -1,6 +1,6 @@
 /**
  * Documentation Versioning and Migration Strategies System
- * 
+ *
  * Provides comprehensive version management for documentation including:
  * - Semantic versioning for documentation releases
  * - Automated content migration between versions
@@ -138,7 +138,7 @@ export enum CompatibilityLevel {
   FULLY_COMPATIBLE = 'fully-compatible',
   COMPATIBLE_WITH_WARNINGS = 'compatible-with-warnings',
   BREAKING_CHANGES = 'breaking-changes',
-  INCOMPATIBLE = 'incompatible'
+  INCOMPATIBLE = 'incompatible',
 }
 
 export class VersionManager extends EventEmitter {
@@ -152,9 +152,9 @@ export class VersionManager extends EventEmitter {
     super();
     this.config = config;
     this.lockFile = path.join(config.baseDirectory, '.version-lock');
-    
+
     // Load migration rules
-    config.migrationRules.forEach(rule => {
+    config.migrationRules.forEach((rule) => {
       this.migrationRules.set(rule.id, rule);
     });
   }
@@ -177,7 +177,6 @@ export class VersionManager extends EventEmitter {
 
       console.log('✅ Version manager initialized');
       this.emit('initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize version manager:', error);
       throw error;
@@ -190,7 +189,7 @@ export class VersionManager extends EventEmitter {
   public async createVersion(
     versionNumber: string,
     metadata: DocumentVersion['metadata'],
-    sourceVersion?: string
+    sourceVersion?: string,
   ): Promise<DocumentVersion> {
     console.log(`📝 Creating version ${versionNumber}...`);
 
@@ -212,7 +211,7 @@ export class VersionManager extends EventEmitter {
       apiCompatibility: {},
       metadata,
       content: new Map(),
-      migrations: []
+      migrations: [],
     };
 
     // Copy content from source version if specified
@@ -241,7 +240,7 @@ export class VersionManager extends EventEmitter {
     try {
       // Run validations
       const validationResults = await this.validateVersion(version);
-      if (validationResults.some(r => !r.valid && r.errors.length > 0)) {
+      if (validationResults.some((r) => !r.valid && r.errors.length > 0)) {
         throw new Error('Version validation failed');
       }
 
@@ -262,7 +261,6 @@ export class VersionManager extends EventEmitter {
 
       await this.saveVersionMetadata(version);
       this.emit('version_published', versionNumber);
-
     } catch (error) {
       console.error(`❌ Failed to publish version ${versionNumber}:`, error);
       throw error;
@@ -275,7 +273,7 @@ export class VersionManager extends EventEmitter {
   public async migrateContent(
     fromVersion: string,
     toVersion: string,
-    contentPaths?: string[]
+    contentPaths?: string[],
   ): Promise<MigrationResult[]> {
     console.log(`🔄 Migrating content from ${fromVersion} to ${toVersion}...`);
 
@@ -296,7 +294,7 @@ export class VersionManager extends EventEmitter {
         rule,
         sourceVersion,
         targetVersion,
-        contentPaths
+        contentPaths,
       );
       results.push(result);
       targetVersion.migrations.push(result);
@@ -313,7 +311,7 @@ export class VersionManager extends EventEmitter {
    */
   public async detectBreakingChanges(
     fromVersion: string,
-    toVersion: string
+    toVersion: string,
   ): Promise<BreakingChange[]> {
     const source = this.versions.get(fromVersion);
     const target = this.versions.get(toVersion);
@@ -342,8 +340,12 @@ export class VersionManager extends EventEmitter {
   /**
    * Get version compatibility matrix
    */
-  public getCompatibilityMatrix(): { [fromVersion: string]: { [toVersion: string]: CompatibilityLevel } } {
-    const matrix: { [fromVersion: string]: { [toVersion: string]: CompatibilityLevel } } = {};
+  public getCompatibilityMatrix(): {
+    [fromVersion: string]: { [toVersion: string]: CompatibilityLevel };
+  } {
+    const matrix: {
+      [fromVersion: string]: { [toVersion: string]: CompatibilityLevel };
+    } = {};
 
     for (const [versionA] of this.versions) {
       matrix[versionA] = {};
@@ -351,7 +353,8 @@ export class VersionManager extends EventEmitter {
         if (versionA === versionB) {
           matrix[versionA][versionB] = CompatibilityLevel.FULLY_COMPATIBLE;
         } else {
-          matrix[versionA][versionB] = versionDataB.apiCompatibility[versionA] || 
+          matrix[versionA][versionB] =
+            versionDataB.apiCompatibility[versionA] ||
             this.calculateCompatibility(versionA, versionB);
         }
       }
@@ -374,7 +377,7 @@ export class VersionManager extends EventEmitter {
       return archivedVersions;
     }
 
-    const versionsToArchive = sortedVersions.slice(0, -(versionsToKeep));
+    const versionsToArchive = sortedVersions.slice(0, -versionsToKeep);
 
     for (const versionNumber of versionsToArchive) {
       const version = this.versions.get(versionNumber)!;
@@ -393,15 +396,17 @@ export class VersionManager extends EventEmitter {
    * Get version history
    */
   public getVersionHistory(): VersionHistoryEntry[] {
-    return this.getSortedVersions().map(versionNumber => {
+    return this.getSortedVersions().map((versionNumber) => {
       const version = this.versions.get(versionNumber)!;
       return {
         version: versionNumber,
         releaseDate: version.releaseDate,
         status: version.status,
         changelogSummary: this.summarizeChangelog(version.changelog),
-        breakingChanges: version.changelog.filter(entry => entry.breakingChange).length,
-        migrationsApplied: version.migrations.length
+        breakingChanges: version.changelog.filter(
+          (entry) => entry.breakingChange,
+        ).length,
+        migrationsApplied: version.migrations.length,
       };
     });
   }
@@ -411,29 +416,30 @@ export class VersionManager extends EventEmitter {
    */
   public async rollbackMigration(
     versionNumber: string,
-    migrationId: string
+    migrationId: string,
   ): Promise<boolean> {
     const version = this.versions.get(versionNumber);
     if (!version) {
       throw new Error(`Version ${versionNumber} not found`);
     }
 
-    const migration = version.migrations.find(m => m.ruleId === migrationId);
+    const migration = version.migrations.find((m) => m.ruleId === migrationId);
     if (!migration || !migration.rollbackData) {
       throw new Error('Migration not found or rollback not supported');
     }
 
     try {
       await this.performRollback(version, migration);
-      
+
       // Remove migration from history
-      version.migrations = version.migrations.filter(m => m.ruleId !== migrationId);
-      
+      version.migrations = version.migrations.filter(
+        (m) => m.ruleId !== migrationId,
+      );
+
       await this.saveVersionMetadata(version);
       this.emit('migration_rolled_back', versionNumber, migrationId);
-      
-      return true;
 
+      return true;
     } catch (error) {
       console.error('❌ Rollback failed:', error);
       return false;
@@ -443,23 +449,28 @@ export class VersionManager extends EventEmitter {
   // Private methods
   private async loadVersions(): Promise<void> {
     try {
-      const versionDirs = await fs.readdir(this.config.baseDirectory, { withFileTypes: true });
-      
+      const versionDirs = await fs.readdir(this.config.baseDirectory, {
+        withFileTypes: true,
+      });
+
       for (const dir of versionDirs) {
         if (dir.isDirectory() && this.isValidVersion(dir.name)) {
           const versionPath = path.join(this.config.baseDirectory, dir.name);
           const metadataPath = path.join(versionPath, 'metadata.json');
-          
+
           try {
             const metadataContent = await fs.readFile(metadataPath, 'utf8');
             const version: DocumentVersion = JSON.parse(metadataContent);
-            
+
             // Load content
             await this.loadVersionContent(version, versionPath);
-            
+
             this.versions.set(version.version, version);
           } catch (error) {
-            console.warn(`⚠️ Failed to load version ${dir.name}:`, error.message);
+            console.warn(
+              `⚠️ Failed to load version ${dir.name}:`,
+              error.message,
+            );
           }
         }
       }
@@ -469,23 +480,25 @@ export class VersionManager extends EventEmitter {
       if (sortedVersions.length > 0) {
         this.currentVersion = sortedVersions[sortedVersions.length - 1];
       }
-
     } catch (error) {
       console.warn('⚠️ No existing versions found');
     }
   }
 
-  private async loadVersionContent(version: DocumentVersion, versionPath: string): Promise<void> {
+  private async loadVersionContent(
+    version: DocumentVersion,
+    versionPath: string,
+  ): Promise<void> {
     const contentDir = path.join(versionPath, 'content');
-    
+
     try {
       const contentFiles = await this.getAllFiles(contentDir);
-      
+
       for (const filePath of contentFiles) {
         const relativePath = path.relative(contentDir, filePath);
         const content = await fs.readFile(filePath, 'utf8');
         const stats = await fs.stat(filePath);
-        
+
         const documentContent: DocumentContent = {
           id: this.generateContentId(relativePath),
           path: relativePath,
@@ -495,9 +508,9 @@ export class VersionManager extends EventEmitter {
           lastModified: stats.mtime,
           checksum: this.calculateChecksum(content),
           dependencies: this.extractDependencies(content),
-          deprecations: this.extractDeprecations(content)
+          deprecations: this.extractDeprecations(content),
         };
-        
+
         version.content.set(relativePath, documentContent);
       }
     } catch (error) {
@@ -508,16 +521,20 @@ export class VersionManager extends EventEmitter {
   private async saveVersionMetadata(version: DocumentVersion): Promise<void> {
     const versionDir = path.join(this.config.baseDirectory, version.version);
     const metadataPath = path.join(versionDir, 'metadata.json');
-    
+
     await fs.mkdir(versionDir, { recursive: true });
-    
+
     // Convert Map to Object for JSON serialization
     const serializable = {
       ...version,
-      content: Object.fromEntries(version.content)
+      content: Object.fromEntries(version.content),
     };
-    
-    await fs.writeFile(metadataPath, JSON.stringify(serializable, null, 2), 'utf8');
+
+    await fs.writeFile(
+      metadataPath,
+      JSON.stringify(serializable, null, 2),
+      'utf8',
+    );
   }
 
   private isValidVersion(version: string): boolean {
@@ -535,7 +552,7 @@ export class VersionManager extends EventEmitter {
 
   private getSortedVersions(): string[] {
     const versions = Array.from(this.versions.keys());
-    
+
     switch (this.config.versioningStrategy) {
       case 'semantic':
         return versions.sort(semver.compare);
@@ -551,7 +568,10 @@ export class VersionManager extends EventEmitter {
     return sorted[sorted.length - 1] === versionNumber;
   }
 
-  private async copyContentFromVersion(targetVersion: DocumentVersion, sourceVersionNumber: string): Promise<void> {
+  private async copyContentFromVersion(
+    targetVersion: DocumentVersion,
+    sourceVersionNumber: string,
+  ): Promise<void> {
     const sourceVersion = this.versions.get(sourceVersionNumber);
     if (!sourceVersion) {
       throw new Error(`Source version ${sourceVersionNumber} not found`);
@@ -562,9 +582,12 @@ export class VersionManager extends EventEmitter {
     }
   }
 
-  private findMigrationRules(fromVersion: string, toVersion: string): MigrationRule[] {
+  private findMigrationRules(
+    fromVersion: string,
+    toVersion: string,
+  ): MigrationRule[] {
     return Array.from(this.migrationRules.values())
-      .filter(rule => {
+      .filter((rule) => {
         const fromMatch = new RegExp(rule.fromVersionPattern).test(fromVersion);
         const toMatch = new RegExp(rule.toVersionPattern).test(toVersion);
         return fromMatch && toMatch;
@@ -576,7 +599,7 @@ export class VersionManager extends EventEmitter {
     rule: MigrationRule,
     sourceVersion: DocumentVersion,
     targetVersion: DocumentVersion,
-    contentPaths?: string[]
+    contentPaths?: string[],
   ): Promise<MigrationResult> {
     const startTime = Date.now();
     const result: MigrationResult = {
@@ -586,17 +609,22 @@ export class VersionManager extends EventEmitter {
       errors: [],
       warnings: [],
       changesCount: 0,
-      executionTime: 0
+      executionTime: 0,
     };
 
     try {
-      const contentToProcess = contentPaths 
-        ? Array.from(targetVersion.content.entries()).filter(([path]) => contentPaths.includes(path))
+      const contentToProcess = contentPaths
+        ? Array.from(targetVersion.content.entries()).filter(([path]) =>
+            contentPaths.includes(path),
+          )
         : Array.from(targetVersion.content.entries());
 
       for (const [path, content] of contentToProcess) {
-        const transformResult = await this.applyTransformations(content, rule.transformations);
-        
+        const transformResult = await this.applyTransformations(
+          content,
+          rule.transformations,
+        );
+
         if (transformResult.changed) {
           result.changesCount++;
           targetVersion.content.set(path, transformResult.content);
@@ -608,8 +636,11 @@ export class VersionManager extends EventEmitter {
       // Run validation rules
       for (const validationRule of rule.validationRules) {
         for (const [, content] of contentToProcess) {
-          const validationResult = validationRule.validator(content, { sourceVersion, targetVersion });
-          
+          const validationResult = validationRule.validator(content, {
+            sourceVersion,
+            targetVersion,
+          });
+
           if (!validationResult.valid) {
             if (validationRule.severity === 'error') {
               result.errors.push(...validationResult.errors);
@@ -623,7 +654,6 @@ export class VersionManager extends EventEmitter {
       result.applied = true;
       result.success = result.errors.length === 0;
       result.executionTime = Date.now() - startTime;
-
     } catch (error) {
       result.errors.push(`Migration rule execution failed: ${error.message}`);
       result.executionTime = Date.now() - startTime;
@@ -634,8 +664,12 @@ export class VersionManager extends EventEmitter {
 
   private async applyTransformations(
     content: DocumentContent,
-    transformations: ContentTransformation[]
-  ): Promise<{ content: DocumentContent; changed: boolean; warnings: string[] }> {
+    transformations: ContentTransformation[],
+  ): Promise<{
+    content: DocumentContent;
+    changed: boolean;
+    warnings: string[];
+  }> {
     let contentText = content.content;
     let changed = false;
     const warnings: string[] = [];
@@ -657,7 +691,7 @@ export class VersionManager extends EventEmitter {
       ...content,
       content: contentText,
       lastModified: new Date(),
-      checksum: this.calculateChecksum(contentText)
+      checksum: this.calculateChecksum(contentText),
     };
 
     return { content: updatedContent, changed, warnings };
@@ -665,7 +699,7 @@ export class VersionManager extends EventEmitter {
 
   private applyTransformation(
     content: string,
-    transformation: ContentTransformation
+    transformation: ContentTransformation,
   ): { content: string; changed: boolean; warnings: string[] } {
     const warnings: string[] = [];
     let result = content;
@@ -675,7 +709,10 @@ export class VersionManager extends EventEmitter {
       switch (transformation.type) {
         case 'replace':
           const regex = new RegExp(transformation.selector, 'g');
-          const newResult = result.replace(regex, transformation.newValue || '');
+          const newResult = result.replace(
+            regex,
+            transformation.newValue || '',
+          );
           changed = newResult !== result;
           result = newResult;
           break;
@@ -692,7 +729,9 @@ export class VersionManager extends EventEmitter {
           break;
 
         default:
-          warnings.push(`Unsupported transformation type: ${transformation.type}`);
+          warnings.push(
+            `Unsupported transformation type: ${transformation.type}`,
+          );
       }
     } catch (error) {
       warnings.push(`Transformation error: ${error.message}`);
@@ -706,7 +745,9 @@ export class VersionManager extends EventEmitter {
     // Implementation would depend on the specific requirements
   }
 
-  private async validateVersion(version: DocumentVersion): Promise<ValidationResult[]> {
+  private async validateVersion(
+    version: DocumentVersion,
+  ): Promise<ValidationResult[]> {
     // Implementation for version validation
     return [];
   }
@@ -715,42 +756,62 @@ export class VersionManager extends EventEmitter {
     // Implementation for changelog generation
   }
 
-  private async applyDeprecationPolicy(version: DocumentVersion): Promise<void> {
+  private async applyDeprecationPolicy(
+    version: DocumentVersion,
+  ): Promise<void> {
     // Implementation for deprecation policy application
   }
 
-  private calculateCompatibility(versionA: string, versionB: string): CompatibilityLevel {
+  private calculateCompatibility(
+    versionA: string,
+    versionB: string,
+  ): CompatibilityLevel {
     // Implementation for compatibility calculation
     return CompatibilityLevel.COMPATIBLE_WITH_WARNINGS;
   }
 
-  private async compareAPIVersions(source: DocumentVersion, target: DocumentVersion): Promise<BreakingChange[]> {
+  private async compareAPIVersions(
+    source: DocumentVersion,
+    target: DocumentVersion,
+  ): Promise<BreakingChange[]> {
     // Implementation for API comparison
     return [];
   }
 
-  private async compareContentStructure(source: DocumentVersion, target: DocumentVersion): Promise<BreakingChange[]> {
+  private async compareContentStructure(
+    source: DocumentVersion,
+    target: DocumentVersion,
+  ): Promise<BreakingChange[]> {
     // Implementation for content structure comparison
     return [];
   }
 
-  private async compareDependencies(source: DocumentVersion, target: DocumentVersion): Promise<BreakingChange[]> {
+  private async compareDependencies(
+    source: DocumentVersion,
+    target: DocumentVersion,
+  ): Promise<BreakingChange[]> {
     // Implementation for dependency comparison
     return [];
   }
 
   private summarizeChangelog(changelog: ChangelogEntry[]): string {
-    const counts = changelog.reduce((acc, entry) => {
-      acc[entry.type] = (acc[entry.type] || 0) + 1;
-      return acc;
-    }, {} as { [key: string]: number });
+    const counts = changelog.reduce(
+      (acc, entry) => {
+        acc[entry.type] = (acc[entry.type] || 0) + 1;
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
 
     return Object.entries(counts)
       .map(([type, count]) => `${count} ${type}`)
       .join(', ');
   }
 
-  private async performRollback(version: DocumentVersion, migration: MigrationResult): Promise<void> {
+  private async performRollback(
+    version: DocumentVersion,
+    migration: MigrationResult,
+  ): Promise<void> {
     // Implementation for migration rollback
   }
 
@@ -758,21 +819,23 @@ export class VersionManager extends EventEmitter {
   private async getAllFiles(dir: string): Promise<string[]> {
     const files: string[] = [];
     const entries = await fs.readdir(dir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        files.push(...await this.getAllFiles(fullPath));
+        files.push(...(await this.getAllFiles(fullPath)));
       } else {
         files.push(fullPath);
       }
     }
-    
+
     return files;
   }
 
   private generateContentId(path: string): string {
-    return Buffer.from(path).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    return Buffer.from(path)
+      .toString('base64')
+      .replace(/[^a-zA-Z0-9]/g, '');
   }
 
   private extractTitle(content: string): string {
@@ -780,12 +843,17 @@ export class VersionManager extends EventEmitter {
     return titleMatch ? titleMatch[1] : 'Untitled';
   }
 
-  private determineContentType(filePath: string): DocumentContent['contentType'] {
+  private determineContentType(
+    filePath: string,
+  ): DocumentContent['contentType'] {
     const ext = path.extname(filePath).toLowerCase();
     switch (ext) {
-      case '.md': return 'markdown';
-      case '.html': return 'html';
-      default: return 'markdown';
+      case '.md':
+        return 'markdown';
+      case '.html':
+        return 'html';
+      default:
+        return 'markdown';
     }
   }
 
@@ -794,7 +862,7 @@ export class VersionManager extends EventEmitter {
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString();
@@ -805,11 +873,11 @@ export class VersionManager extends EventEmitter {
     const dependencies: string[] = [];
     const linkRegex = /\[.*?\]\(([^)]+)\)/g;
     let match;
-    
+
     while ((match = linkRegex.exec(content)) !== null) {
       dependencies.push(match[1]);
     }
-    
+
     return dependencies;
   }
 
@@ -818,16 +886,16 @@ export class VersionManager extends EventEmitter {
     const deprecations: DeprecationInfo[] = [];
     const deprecationRegex = /<!-- DEPRECATED: (.*?) -->/g;
     let match;
-    
+
     while ((match = deprecationRegex.exec(content)) !== null) {
       deprecations.push({
         deprecatedAt: new Date(),
         reason: match[1],
         severity: 'warning',
-        status: 'deprecated'
+        status: 'deprecated',
       });
     }
-    
+
     return deprecations;
   }
 }

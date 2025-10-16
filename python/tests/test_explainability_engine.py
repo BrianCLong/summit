@@ -1,10 +1,9 @@
 import json
 import os
+from unittest.mock import AsyncMock, patch
 
 import openai
 import pytest
-from unittest.mock import AsyncMock, patch
-
 from intelgraph_py.analytics.explainability_engine import (
     ExplanationOutput,
     generate_explanation,
@@ -15,16 +14,23 @@ from intelgraph_py.cache import (
     set_cached_explanation,
 )
 
+
 @pytest.fixture(autouse=True)
 def clear_redis_cache():
     # Ensure Redis is clean before each test that uses caching
     # This assumes a local Redis instance for testing
     try:
         import redis
-        client = redis.StrictRedis(host=os.getenv("REDIS_HOST", "localhost"), port=int(os.getenv("REDIS_PORT", 6379)), db=int(os.getenv("REDIS_DB", 0)))
+
+        client = redis.StrictRedis(
+            host=os.getenv("REDIS_HOST", "localhost"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            db=int(os.getenv("REDIS_DB", 0)),
+        )
         client.flushdb()
     except Exception as e:
         print(f"Could not flush Redis for test setup: {e}")
+
 
 @pytest.mark.asyncio
 async def test_generate_explanation_success():
@@ -32,18 +38,18 @@ async def test_generate_explanation_success():
         "explanation_text": "Node X is part of community Y due to shared links.",
         "confidence_score": 0.95,
         "source_metadata": {"node_id": "X", "community_id": "Y"},
-        "semantic_summary": "Community membership explanation."
+        "semantic_summary": "Community membership explanation.",
     }
     mock_openai_response = AsyncMock()
     mock_openai_response.choices = [AsyncMock()]
     mock_openai_response.choices[0].message.content = json.dumps(mock_response_content)
     mock_openai_response.return_value = mock_openai_response
 
-    with patch('openai.ChatCompletion.acreate', return_value=mock_openai_response):
+    with patch("openai.ChatCompletion.acreate", return_value=mock_openai_response):
         insight_data = {
             "insight_type": "community_detection",
             "nodes": ["X", "A", "B"],
-            "community_id": "Y"
+            "community_id": "Y",
         }
         explanation = await generate_explanation(insight_data)
 
@@ -64,9 +70,7 @@ async def test_generate_explanation_obfuscates_for_external():
     }
     mock_openai_response = AsyncMock()
     mock_openai_response.choices = [AsyncMock()]
-    mock_openai_response.choices[0].message.content = json.dumps(
-        mock_response_content
-    )
+    mock_openai_response.choices[0].message.content = json.dumps(mock_response_content)
     mock_openai_response.return_value = mock_openai_response
 
     with patch("openai.ChatCompletion.acreate", return_value=mock_openai_response):
@@ -75,38 +79,36 @@ async def test_generate_explanation_obfuscates_for_external():
             "nodes": ["X", "A", "B"],
             "community_id": "Y",
         }
-        internal = await generate_explanation(
-            insight_data, authority="internal"
-        )
-        external = await generate_explanation(
-            insight_data, authority="external"
-        )
+        internal = await generate_explanation(insight_data, authority="internal")
+        external = await generate_explanation(insight_data, authority="external")
 
         assert "Node X" in internal.explanation_text
         assert "community Y" in internal.explanation_text
         assert "[redacted]" in external.explanation_text
         assert external.source_metadata == {}
 
+
 @pytest.mark.asyncio
 async def test_generate_explanation_from_cache():
     insight_data = {
         "insight_type": "community_detection",
         "nodes": ["CachedNode"],
-        "community_id": "CachedCommunity"
+        "community_id": "CachedCommunity",
     }
     llm_model = "gpt-4o"
     cache_key = generate_cache_key(insight_data, llm_model, authority="internal")
-    
+
     cached_explanation_data = {
         "explanation_text": "This is a cached explanation.",
         "confidence_score": 0.99,
         "source_metadata": insight_data,
-        "semantic_summary": "Cached summary."
+        "semantic_summary": "Cached summary.",
     }
     set_cached_explanation(cache_key, cached_explanation_data)
 
-    with patch('openai.ChatCompletion.acreate') as mock_openai_create, \
-         patch('langchain_community.chat_models.ollama.ChatOllama.ainvoke') as mock_ollama_ainvoke:
+    with patch("openai.ChatCompletion.acreate") as mock_openai_create, patch(
+        "langchain_community.chat_models.ollama.ChatOllama.ainvoke"
+    ) as mock_ollama_ainvoke:
         explanation = await generate_explanation(
             insight_data, llm_model=llm_model, authority="internal"
         )
@@ -118,13 +120,14 @@ async def test_generate_explanation_from_cache():
         assert explanation.explanation_text == "This is a cached explanation."
         assert explanation.confidence_score == 0.99
 
+
 @pytest.mark.asyncio
 async def test_generate_explanation_caches_new_explanation():
     mock_response_content = {
         "explanation_text": "Newly generated explanation.",
         "confidence_score": 0.90,
         "source_metadata": {"new_data": True},
-        "semantic_summary": "New summary."
+        "semantic_summary": "New summary.",
     }
     mock_openai_response = AsyncMock()
     mock_openai_response.choices = [AsyncMock()]
@@ -135,7 +138,7 @@ async def test_generate_explanation_caches_new_explanation():
     llm_model = "gpt-4o"
     cache_key = generate_cache_key(insight_data, llm_model, authority="internal")
 
-    with patch('openai.ChatCompletion.acreate', return_value=mock_openai_response):
+    with patch("openai.ChatCompletion.acreate", return_value=mock_openai_response):
         explanation = await generate_explanation(
             insight_data, llm_model=llm_model, authority="internal"
         )
@@ -148,23 +151,27 @@ async def test_generate_explanation_caches_new_explanation():
         assert cached_data is not None
         assert cached_data["explanation_text"] == "Newly generated explanation."
 
+
 @pytest.mark.asyncio
 async def test_generate_explanation_local_llm_success():
     mock_response_content = {
         "explanation_text": "Local LLM explanation for Node X in community Y.",
         "confidence_score": 0.85,
         "source_metadata": {"node_id": "X", "community_id": "Y"},
-        "semantic_summary": "Local LLM summary."
+        "semantic_summary": "Local LLM summary.",
     }
     mock_ollama_response = AsyncMock()
     mock_ollama_response.content = json.dumps(mock_response_content)
     mock_ollama_response.return_value = mock_ollama_response
 
-    with patch('langchain_community.chat_models.ollama.ChatOllama.ainvoke', return_value=mock_ollama_response):
+    with patch(
+        "langchain_community.chat_models.ollama.ChatOllama.ainvoke",
+        return_value=mock_ollama_response,
+    ):
         insight_data = {
             "insight_type": "community_detection",
             "nodes": ["X", "A", "B"],
-            "community_id": "Y"
+            "community_id": "Y",
         }
         explanation = await generate_explanation(insight_data, llm_model="llama3")
 
@@ -174,13 +181,11 @@ async def test_generate_explanation_local_llm_success():
         assert explanation.source_metadata == {"node_id": "X", "community_id": "Y"}
         assert explanation.semantic_summary == "Local LLM summary."
 
+
 @pytest.mark.asyncio
 async def test_generate_explanation_api_error():
-    with patch('openai.ChatCompletion.acreate', side_effect=Exception("OpenAI API error")):
-        insight_data = {
-            "insight_type": "centrality",
-            "central_node_id": "Z"
-        }
+    with patch("openai.ChatCompletion.acreate", side_effect=Exception("OpenAI API error")):
+        insight_data = {"insight_type": "centrality", "central_node_id": "Z"}
         explanation = await generate_explanation(insight_data)
 
         assert isinstance(explanation, ExplanationOutput)
@@ -189,12 +194,13 @@ async def test_generate_explanation_api_error():
         assert explanation.source_metadata == insight_data
         assert explanation.semantic_summary == "Error during explanation generation."
 
+
 @pytest.mark.asyncio
 async def test_generate_explanation_no_api_key():
     original_api_key = os.getenv("OPENAI_API_KEY")
     if original_api_key:
         del os.environ["OPENAI_API_KEY"]
-    openai.api_key = None # Ensure it's None for the test
+    openai.api_key = None  # Ensure it's None for the test
 
     with pytest.raises(ValueError, match="OPENAI_API_KEY environment variable not set."):
         await generate_explanation({"insight_type": "test"})

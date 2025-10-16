@@ -1,1 +1,3 @@
-export function integrityAssurance(config) { return { assurance: 'Integrity Assurance Placeholder' }; }
+export function integrityAssurance(config) {
+  return { assurance: 'Integrity Assurance Placeholder' };
+}

@@ -12,7 +12,13 @@ interface ActionRisk {
 
 interface SemanticGuardrail {
   id: string;
-  type: 'pii' | 'toxicity' | 'jailbreak' | 'prompt-injection' | 'bias' | 'misinformation';
+  type:
+    | 'pii'
+    | 'toxicity'
+    | 'jailbreak'
+    | 'prompt-injection'
+    | 'bias'
+    | 'misinformation';
   enabled: boolean;
   threshold: number;
   action: 'block' | 'warn' | 'log' | 'escalate';
@@ -37,18 +43,33 @@ const ActionRequestSchema = z.object({
   actionType: z.string(),
   inputText: z.string(),
   outputText: z.string().optional(),
-  dataClassification: z.enum(['public', 'internal', 'confidential', 'restricted', 'top-secret']),
+  dataClassification: z.enum([
+    'public',
+    'internal',
+    'confidential',
+    'restricted',
+    'top-secret',
+  ]),
   targetResources: z.array(z.string()),
-  metadata: z.object({
-    reversible: z.boolean().default(true),
-    external: z.boolean().default(false),
-    containsPII: z.boolean().default(false),
-    requiresCitation: z.boolean().default(true),
-  }).optional(),
+  metadata: z
+    .object({
+      reversible: z.boolean().default(true),
+      external: z.boolean().default(false),
+      containsPII: z.boolean().default(false),
+      requiresCitation: z.boolean().default(true),
+    })
+    .optional(),
 });
 
 const GuardrailConfigSchema = z.object({
-  type: z.enum(['pii', 'toxicity', 'jailbreak', 'prompt-injection', 'bias', 'misinformation']),
+  type: z.enum([
+    'pii',
+    'toxicity',
+    'jailbreak',
+    'prompt-injection',
+    'bias',
+    'misinformation',
+  ]),
   enabled: z.boolean(),
   threshold: z.number().min(0).max(1),
   action: z.enum(['block', 'warn', 'log', 'escalate']),
@@ -59,7 +80,12 @@ const GuardrailConfigSchema = z.object({
 export class SafetyV2Service {
   private watchlists: Map<string, Set<string>> = new Map();
   private guardrails: Map<string, SemanticGuardrail> = new Map();
-  private citationRequiredActions = new Set(['research', 'analysis', 'recommendation', 'decision']);
+  private citationRequiredActions = new Set([
+    'research',
+    'analysis',
+    'recommendation',
+    'decision',
+  ]);
 
   constructor() {
     this.initializeWatchlists();
@@ -82,7 +108,7 @@ export class SafetyV2Service {
       'roleplay as',
       'pretend you are',
     ];
-    
+
     this.watchlists.set('prompt-injection', new Set(promptInjectionPatterns));
 
     // PII patterns
@@ -99,24 +125,38 @@ export class SafetyV2Service {
       // Phone numbers
       '\\b\\(?\\d{3}\\)?[-.]?\\d{3}[-.]?\\d{4}\\b',
     ];
-    
+
     this.watchlists.set('pii', new Set(piiPatterns));
 
     // Toxicity keywords
     const toxicityPatterns = [
-      'hate', 'violence', 'harmful', 'offensive', 'discriminatory',
-      'racist', 'sexist', 'homophobic', 'xenophobic', 'threatening',
+      'hate',
+      'violence',
+      'harmful',
+      'offensive',
+      'discriminatory',
+      'racist',
+      'sexist',
+      'homophobic',
+      'xenophobic',
+      'threatening',
     ];
-    
+
     this.watchlists.set('toxicity', new Set(toxicityPatterns));
 
     // Bias indicators
     const biasPatterns = [
-      'all women', 'all men', 'typical', 'always', 'never',
-      'because of their race', 'because of their gender',
-      'inherently better', 'naturally superior',
+      'all women',
+      'all men',
+      'typical',
+      'always',
+      'never',
+      'because of their race',
+      'because of their gender',
+      'inherently better',
+      'naturally superior',
     ];
-    
+
     this.watchlists.set('bias', new Set(biasPatterns));
   }
 
@@ -144,7 +184,9 @@ export class SafetyV2Service {
         enabled: true,
         threshold: 0.95,
         action: 'block',
-        watchlistPatterns: Array.from(this.watchlists.get('prompt-injection') || []),
+        watchlistPatterns: Array.from(
+          this.watchlists.get('prompt-injection') || [],
+        ),
       },
       {
         id: 'bias-detection',
@@ -156,20 +198,23 @@ export class SafetyV2Service {
       },
     ];
 
-    defaultGuardrails.forEach(guardrail => {
+    defaultGuardrails.forEach((guardrail) => {
       this.guardrails.set(guardrail.id, guardrail);
     });
   }
 
   private startWatchlistUpdates() {
     // Update watchlists hourly per Chair's requirement
-    setInterval(async () => {
-      try {
-        await this.updateWatchlists();
-      } catch (error) {
-        console.error('Failed to update watchlists:', error);
-      }
-    }, 60 * 60 * 1000); // 1 hour
+    setInterval(
+      async () => {
+        try {
+          await this.updateWatchlists();
+        } catch (error) {
+          console.error('Failed to update watchlists:', error);
+        }
+      },
+      60 * 60 * 1000,
+    ); // 1 hour
   }
 
   /**
@@ -177,30 +222,30 @@ export class SafetyV2Service {
    */
   async evaluateActionSafety(request: any): Promise<SafetyEvaluation> {
     const span = otelService.createSpan('safety-v2.evaluate-action');
-    
+
     try {
       const validatedRequest = ActionRequestSchema.parse(request);
-      
+
       // Calculate action risk score
       const riskScore = await this.calculateActionRiskScore(validatedRequest);
-      
+
       // Run semantic guardrails
       const guardrailViolations = await this.runSemanticGuardrails(
         validatedRequest.inputText,
         validatedRequest.outputText || '',
-        validatedRequest.tenantId
+        validatedRequest.tenantId,
       );
-      
+
       // Check citation coverage
       const citationCoverage = await this.evaluateCitationCoverage(
         validatedRequest.inputText,
-        validatedRequest.outputText || ''
+        validatedRequest.outputText || '',
       );
-      
+
       // Apply OPA-style decision logic from Chair's policy
       let decision: SafetyEvaluation['decision'];
-      let reasoning: string[] = [];
-      
+      const reasoning: string[] = [];
+
       if (riskScore >= 0.7) {
         decision = 'deny';
         reasoning.push('High risk score exceeds maximum threshold');
@@ -208,23 +253,31 @@ export class SafetyV2Service {
         decision = 'require_approval';
         reasoning.push('Medium risk score requires approval');
         if (guardrailViolations.length > 0) {
-          reasoning.push(`Guardrail violations: ${guardrailViolations.join(', ')}`);
+          reasoning.push(
+            `Guardrail violations: ${guardrailViolations.join(', ')}`,
+          );
         }
       } else {
         decision = 'allow';
         reasoning.push('Low risk score within acceptable limits');
       }
-      
+
       // Citation requirement check
-      if (this.requiresCitation(validatedRequest.actionType) && citationCoverage < 0.5) {
+      if (
+        this.requiresCitation(validatedRequest.actionType) &&
+        citationCoverage < 0.5
+      ) {
         if (decision === 'allow') {
           decision = 'require_approval';
         }
         reasoning.push('Insufficient citation coverage for factual claims');
       }
-      
+
       // High-risk escalation for restricted data
-      if (validatedRequest.dataClassification === 'top-secret' && decision !== 'deny') {
+      if (
+        validatedRequest.dataClassification === 'top-secret' &&
+        decision !== 'deny'
+      ) {
         decision = 'escalate';
         reasoning.push('Top-secret data requires human escalation');
       }
@@ -234,7 +287,8 @@ export class SafetyV2Service {
         riskScore,
         guardrailViolations,
         citationCoverage,
-        approvalRequired: decision === 'require_approval' || decision === 'escalate',
+        approvalRequired:
+          decision === 'require_approval' || decision === 'escalate',
         decision,
         reasoning,
       };
@@ -268,33 +322,35 @@ export class SafetyV2Service {
   private async calculateActionRiskScore(request: any): Promise<number> {
     // Data sensitivity based on classification
     const sensitivityMap = {
-      'public': 0.1,
-      'internal': 0.3,
-      'confidential': 0.6,
-      'restricted': 0.8,
+      public: 0.1,
+      internal: 0.3,
+      confidential: 0.6,
+      restricted: 0.8,
       'top-secret': 1.0,
     };
-    
+
     const sensitivity = sensitivityMap[request.dataClassification] || 0.5;
 
     // Blast radius based on action type and target resources
     let blastRadius = 0.1; // Base blast radius
-    
+
     if (request.targetResources.length > 10) blastRadius += 0.2;
     if (request.targetResources.length > 100) blastRadius += 0.3;
-    
+
     if (request.metadata?.external) blastRadius += 0.3;
     if (request.metadata?.containsPII) blastRadius += 0.2;
-    
+
     // Action-specific blast radius
     const highBlastActions = ['delete', 'publish', 'execute', 'transfer'];
-    if (highBlastActions.some(action => request.actionType.includes(action))) {
+    if (
+      highBlastActions.some((action) => request.actionType.includes(action))
+    ) {
       blastRadius += 0.4;
     }
 
     // Reversibility (1 = irreversible, 0 = fully reversible)
     let reversibility = request.metadata?.reversible === false ? 0.8 : 0.2;
-    
+
     if (request.actionType.includes('delete')) reversibility += 0.3;
     if (request.actionType.includes('publish')) reversibility += 0.2;
     if (request.actionType.includes('transfer')) reversibility += 0.4;
@@ -303,15 +359,22 @@ export class SafetyV2Service {
     const tenantPosture = await this.getTenantSecurityPosture(request.tenantId);
 
     // Apply Chair's formula
-    const riskScore = Math.min(1.0, sensitivity * blastRadius * reversibility * tenantPosture);
-    
+    const riskScore = Math.min(
+      1.0,
+      sensitivity * blastRadius * reversibility * tenantPosture,
+    );
+
     return riskScore;
   }
 
   /**
    * Run semantic guardrails against input/output text
    */
-  private async runSemanticGuardrails(inputText: string, outputText: string, tenantId: string): Promise<string[]> {
+  private async runSemanticGuardrails(
+    inputText: string,
+    outputText: string,
+    tenantId: string,
+  ): Promise<string[]> {
     const violations: string[] = [];
     const allText = `${inputText} ${outputText}`.toLowerCase();
 
@@ -339,7 +402,7 @@ export class SafetyV2Service {
 
       if (violationScore >= guardrail.threshold) {
         violations.push(guardrail.id);
-        
+
         // Log guardrail violation
         await this.logGuardrailViolation(tenantId, guardrail.id, {
           violationScore,
@@ -356,14 +419,26 @@ export class SafetyV2Service {
   /**
    * Evaluate citation coverage for factual claims
    */
-  private async evaluateCitationCoverage(inputText: string, outputText: string): Promise<number> {
+  private async evaluateCitationCoverage(
+    inputText: string,
+    outputText: string,
+  ): Promise<number> {
     if (!outputText) return 1.0; // No output to evaluate
 
     // Simple citation coverage analysis
     const factualIndicators = [
-      'studies show', 'research indicates', 'according to', 'data shows',
-      'statistics reveal', 'evidence suggests', 'reported that', 'found that',
-      'analysis shows', 'survey found', 'study concluded', 'research found',
+      'studies show',
+      'research indicates',
+      'according to',
+      'data shows',
+      'statistics reveal',
+      'evidence suggests',
+      'reported that',
+      'found that',
+      'analysis shows',
+      'survey found',
+      'study concluded',
+      'research found',
     ];
 
     const citationPatterns = [
@@ -377,14 +452,14 @@ export class SafetyV2Service {
     let citations = 0;
 
     // Count factual claims
-    factualIndicators.forEach(indicator => {
+    factualIndicators.forEach((indicator) => {
       const regex = new RegExp(indicator, 'gi');
       const matches = outputText.match(regex);
       if (matches) factualClaims += matches.length;
     });
 
     // Count citations
-    citationPatterns.forEach(pattern => {
+    citationPatterns.forEach((pattern) => {
       const regex = new RegExp(pattern, 'gi');
       const matches = outputText.match(regex);
       if (matches) citations += matches.length;
@@ -396,7 +471,10 @@ export class SafetyV2Service {
     return coverage;
   }
 
-  private async getSemanticScore(text: string, guardrailType: SemanticGuardrail['type']): Promise<number> {
+  private async getSemanticScore(
+    text: string,
+    guardrailType: SemanticGuardrail['type'],
+  ): Promise<number> {
     // Simplified semantic analysis - in production, use ML models
     switch (guardrailType) {
       case 'toxicity':
@@ -418,32 +496,44 @@ export class SafetyV2Service {
 
   private analyzeToxicity(text: string): number {
     // Simple toxicity analysis
-    const toxicWords = ['hate', 'violence', 'harm', 'attack', 'kill', 'destroy'];
+    const toxicWords = [
+      'hate',
+      'violence',
+      'harm',
+      'attack',
+      'kill',
+      'destroy',
+    ];
     let score = 0;
-    
-    toxicWords.forEach(word => {
+
+    toxicWords.forEach((word) => {
       const regex = new RegExp(`\\b${word}\\b`, 'gi');
       const matches = text.match(regex);
       if (matches) score += matches.length * 0.2;
     });
-    
+
     return Math.min(1.0, score);
   }
 
   private analyzeBias(text: string): number {
     // Simple bias detection
     const biasIndicators = [
-      'all women', 'all men', 'typical for', 'naturally better',
-      'inherently superior', 'always true that', 'never the case',
+      'all women',
+      'all men',
+      'typical for',
+      'naturally better',
+      'inherently superior',
+      'always true that',
+      'never the case',
     ];
-    
+
     let score = 0;
-    biasIndicators.forEach(indicator => {
+    biasIndicators.forEach((indicator) => {
       const regex = new RegExp(indicator, 'gi');
       const matches = text.match(regex);
       if (matches) score += matches.length * 0.3;
     });
-    
+
     return Math.min(1.0, score);
   }
 
@@ -451,61 +541,70 @@ export class SafetyV2Service {
     // PII pattern matching
     const piiPatterns = this.watchlists.get('pii') || new Set();
     let score = 0;
-    
+
     for (const pattern of piiPatterns) {
       const regex = new RegExp(pattern, 'gi');
       const matches = text.match(regex);
       if (matches) score += matches.length * 0.4;
     }
-    
+
     return Math.min(1.0, score);
   }
 
   private analyzeJailbreak(text: string): number {
     // Jailbreak attempt detection
     const jailbreakPatterns = [
-      'ignore.*instructions', 'forget.*rules', 'new.*persona',
-      'roleplay.*as', 'pretend.*you.*are', 'simulate.*being',
+      'ignore.*instructions',
+      'forget.*rules',
+      'new.*persona',
+      'roleplay.*as',
+      'pretend.*you.*are',
+      'simulate.*being',
     ];
-    
+
     let score = 0;
-    jailbreakPatterns.forEach(pattern => {
+    jailbreakPatterns.forEach((pattern) => {
       const regex = new RegExp(pattern, 'gi');
       const matches = text.match(regex);
       if (matches) score += matches.length * 0.5;
     });
-    
+
     return Math.min(1.0, score);
   }
 
   private analyzePromptInjection(text: string): number {
     // Prompt injection detection
-    const injectionPatterns = this.watchlists.get('prompt-injection') || new Set();
+    const injectionPatterns =
+      this.watchlists.get('prompt-injection') || new Set();
     let score = 0;
-    
+
     for (const pattern of injectionPatterns) {
       const regex = new RegExp(pattern, 'gi');
       const matches = text.match(regex);
       if (matches) score += matches.length * 0.6;
     }
-    
+
     return Math.min(1.0, score);
   }
 
   private analyzeMisinformation(text: string): number {
     // Simple misinformation indicators
     const misinformationIndicators = [
-      'proven fact that', 'absolutely certain', 'never been wrong',
-      'scientists agree', 'everyone knows', 'obvious truth',
+      'proven fact that',
+      'absolutely certain',
+      'never been wrong',
+      'scientists agree',
+      'everyone knows',
+      'obvious truth',
     ];
-    
+
     let score = 0;
-    misinformationIndicators.forEach(indicator => {
+    misinformationIndicators.forEach((indicator) => {
       const regex = new RegExp(indicator, 'gi');
       const matches = text.match(regex);
       if (matches) score += matches.length * 0.3;
     });
-    
+
     return Math.min(1.0, score);
   }
 
@@ -516,13 +615,13 @@ export class SafetyV2Service {
   private async getTenantSecurityPosture(tenantId: string): Promise<number> {
     // Get tenant security posture score (simplified)
     const pool = getPostgresPool();
-    
+
     try {
       const result = await pool.query(
         'SELECT security_posture_score FROM tenant_config WHERE tenant_id = $1',
-        [tenantId]
+        [tenantId],
       );
-      
+
       return result.rows[0]?.security_posture_score || 1.0;
     } catch (error) {
       console.error('Failed to get tenant security posture:', error);
@@ -530,19 +629,21 @@ export class SafetyV2Service {
     }
   }
 
-  private async getTenantGuardrails(tenantId: string): Promise<Map<string, SemanticGuardrail>> {
+  private async getTenantGuardrails(
+    tenantId: string,
+  ): Promise<Map<string, SemanticGuardrail>> {
     // Get tenant-specific guardrail configuration
     const pool = getPostgresPool();
-    
+
     try {
       const result = await pool.query(
         'SELECT * FROM safety_guardrails WHERE tenant_id = $1 OR tenant_id IS NULL',
-        [tenantId]
+        [tenantId],
       );
-      
+
       const guardrails = new Map<string, SemanticGuardrail>();
-      
-      result.rows.forEach(row => {
+
+      result.rows.forEach((row) => {
         guardrails.set(row.id, {
           id: row.id,
           type: row.type,
@@ -553,14 +654,14 @@ export class SafetyV2Service {
           customRules: JSON.parse(row.custom_rules || '[]'),
         });
       });
-      
+
       // Merge with default guardrails
       for (const [id, guardrail] of this.guardrails) {
         if (!guardrails.has(id)) {
           guardrails.set(id, guardrail);
         }
       }
-      
+
       return guardrails;
     } catch (error) {
       console.error('Failed to get tenant guardrails:', error);
@@ -573,7 +674,7 @@ export class SafetyV2Service {
     try {
       // In production, fetch from threat intelligence APIs
       console.log('Updating safety watchlists...');
-      
+
       // Placeholder for watchlist updates
       // Would fetch latest patterns from security vendors, threat intel feeds, etc.
     } catch (error) {
@@ -581,9 +682,13 @@ export class SafetyV2Service {
     }
   }
 
-  private async logGuardrailViolation(tenantId: string, guardrailId: string, details: any): Promise<void> {
+  private async logGuardrailViolation(
+    tenantId: string,
+    guardrailId: string,
+    details: any,
+  ): Promise<void> {
     const pool = getPostgresPool();
-    
+
     await pool.query(
       `INSERT INTO safety_violations (
         tenant_id, guardrail_id, violation_score, match_count, 
@@ -596,13 +701,16 @@ export class SafetyV2Service {
         details.matchCount,
         details.action,
         JSON.stringify(details),
-      ]
+      ],
     );
   }
 
-  private async storeEvaluationAudit(request: any, evaluation: SafetyEvaluation): Promise<void> {
+  private async storeEvaluationAudit(
+    request: any,
+    evaluation: SafetyEvaluation,
+  ): Promise<void> {
     const pool = getPostgresPool();
-    
+
     await pool.query(
       `INSERT INTO safety_evaluations (
         action_id, tenant_id, user_id, action_type, data_classification,
@@ -619,7 +727,7 @@ export class SafetyV2Service {
         JSON.stringify(evaluation.reasoning),
         JSON.stringify(evaluation.guardrailViolations),
         evaluation.citationCoverage,
-      ]
+      ],
     );
   }
 
@@ -628,7 +736,7 @@ export class SafetyV2Service {
    */
   async configureGuardrail(tenantId: string, config: any): Promise<string> {
     const span = otelService.createSpan('safety-v2.configure-guardrail');
-    
+
     try {
       const validatedConfig = GuardrailConfigSchema.parse(config);
       const pool = getPostgresPool();
@@ -656,7 +764,7 @@ export class SafetyV2Service {
           validatedConfig.action,
           JSON.stringify(validatedConfig.watchlistPatterns),
           JSON.stringify(validatedConfig.customRules || []),
-        ]
+        ],
       );
 
       return guardrailId;

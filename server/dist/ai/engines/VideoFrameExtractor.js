@@ -2,9 +2,12 @@ import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
 import pino from 'pino';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 const logger = pino({ name: 'VideoFrameExtractor' });
 export class VideoFrameExtractor {
+    ffmpegPath;
+    ffprobePath;
+    tempDir;
     constructor(ffmpegPath, ffprobePath, tempDir) {
         this.ffmpegPath = ffmpegPath;
         this.ffprobePath = ffprobePath;
@@ -19,7 +22,7 @@ export class VideoFrameExtractor {
      * @returns An object containing extracted frames and audio (if requested).
      */
     async extract(videoPath, options = {}) {
-        const { frameRate, interval, outputDir = path.join(this.tempDir, `frames-${uuidv4()}`), outputFormat = 'png', startTime, endTime, extractAudio = false, } = options;
+        const { frameRate, interval, outputDir = path.join(this.tempDir, `frames-${randomUUID()}`), outputFormat = 'png', startTime, endTime, extractAudio = false, } = options;
         await fs.mkdir(outputDir, { recursive: true });
         logger.info(`Extracting frames to: ${outputDir}`);
         const frames = [];
@@ -48,7 +51,9 @@ export class VideoFrameExtractor {
                 .on('filenames', (filenames) => {
                 filenames.forEach((filename) => {
                     const timestampMatch = filename.match(/frame-(\d+(\.\d+)?)\./);
-                    const timestamp = timestampMatch ? parseFloat(timestampMatch[1]) : 0; // Extract timestamp from filename
+                    const timestamp = timestampMatch
+                        ? parseFloat(timestampMatch[1])
+                        : 0; // Extract timestamp from filename
                     frames.push({
                         framePath: path.join(outputDir, filename),
                         timestamp: timestamp,
@@ -86,7 +91,7 @@ export class VideoFrameExtractor {
      * @returns Path to the extracted audio file.
      */
     async extractAudioStream(videoPath, outputDir, startTime, endTime) {
-        const audioFileName = `audio-${uuidv4()}.mp3`;
+        const audioFileName = `audio-${randomUUID()}.mp3`;
         const audioPath = path.join(outputDir, audioFileName);
         return new Promise((resolve, reject) => {
             const command = ffmpeg(videoPath);

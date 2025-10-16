@@ -12,7 +12,7 @@ const IDEOLOGY_TAGS: Record<string, RegExp[]> = {
   'far-right': [/far[-\s]?right/i, /white suprem/i, /neo-?nazi/i],
   'far-left': [/far[-\s]?left/i, /left[-\s]?wing/i],
   islamist: [/islamist/i, /jihad/i],
-  'single-issue': [/single-issue/i, /anti-abortion/i, /environmental/i]
+  'single-issue': [/single-issue/i, /anti-abortion/i, /environmental/i],
 };
 
 function detectTags(text: string): string[] {
@@ -30,10 +30,16 @@ function scoreSentence(sentence: string): number {
   if (/\d/.test(sentence)) {
     score += 25;
   }
-  if (/(increase|decrease|trend|risk|factor|research|finding|evidence|study)/i.test(sentence)) {
+  if (
+    /(increase|decrease|trend|risk|factor|research|finding|evidence|study)/i.test(
+      sentence,
+    )
+  ) {
     score += 20;
   }
-  if (/(extremist|terror|violence|military|internet|white suprem)/i.test(sentence)) {
+  if (
+    /(extremist|terror|violence|military|internet|white suprem)/i.test(sentence)
+  ) {
     score += 15;
   }
   return score;
@@ -53,14 +59,18 @@ function collectCandidates(article: ArticleRecord): CandidateClaim[] {
         sentence: normalized,
         score,
         sectionId: section.id,
-        sectionTitle: section.title
+        sectionTitle: section.title,
       });
     }
   }
   return candidates;
 }
 
-export function generateClaims(article: ArticleRecord, contentHash: string, minimum = 10): ClaimRecord[] {
+export function generateClaims(
+  article: ArticleRecord,
+  contentHash: string,
+  minimum = 10,
+): ClaimRecord[] {
   const candidates = collectCandidates(article)
     .sort((a, b) => b.score - a.score)
     .slice(0, Math.max(minimum * 3, 40));
@@ -85,13 +95,16 @@ export function generateClaims(article: ArticleRecord, contentHash: string, mini
         section: candidate.sectionTitle,
         anchor: candidate.sectionId,
         url: article.archiveUrl ?? article.url,
-        contentHash
+        contentHash,
       },
       confidence: {
         value: 'medium',
-        rationale: 'Claim generated from NIJ article using deterministic heuristics.'
+        rationale:
+          'Claim generated from NIJ article using deterministic heuristics.',
       },
-      assumptions: ['Relies on NIJ-published synthesis without independent replication.']
+      assumptions: [
+        'Relies on NIJ-published synthesis without independent replication.',
+      ],
     };
     claims.push(record);
     seenTexts.add(candidate.sentence);

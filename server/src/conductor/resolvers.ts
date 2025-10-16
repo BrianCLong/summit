@@ -4,7 +4,11 @@
 import { conductor } from './index';
 import { ConductInput } from './types';
 import { OPAClient, SecurityContext } from './security/opa-client';
-import { governanceLimitEngine, estimateTaskCost, estimateTokenCount } from './governance/limits';
+import {
+  governanceLimitEngine,
+  estimateTaskCost,
+  estimateTokenCount,
+} from './governance/limits';
 import { createBudgetController } from './admission/budget-control';
 import Redis from 'ioredis';
 
@@ -13,7 +17,11 @@ export const conductorResolvers = {
     /**
      * Preview routing decision without executing the task
      */
-    previewRouting: async (_: any, { input }: { input: ConductInput }, context: any) => {
+    previewRouting: async (
+      _: any,
+      { input }: { input: ConductInput },
+      context: any,
+    ) => {
       if (!conductor) {
         throw new Error('Conductor not initialized');
       }
@@ -25,16 +33,23 @@ export const conductorResolvers = {
       });
 
       const opaClient = new OPAClient();
-      const policyResult = await opaClient.canPreviewRouting(securityContext, input.task);
+      const policyResult = await opaClient.canPreviewRouting(
+        securityContext,
+        input.task,
+      );
 
       if (!policyResult.allow) {
-        throw new Error(`Access denied: ${policyResult.reason || 'Policy violation'}`);
+        throw new Error(
+          `Access denied: ${policyResult.reason || 'Policy violation'}`,
+        );
       }
 
       // Check for PII and warn if detected
       const piiCheck = opaClient.detectPII(input.task);
       if (piiCheck.hasPII && policyResult.warnings.length === 0) {
-        policyResult.warnings.push(`PII detected: ${piiCheck.patterns.join(', ')}`);
+        policyResult.warnings.push(
+          `PII detected: ${piiCheck.patterns.join(', ')}`,
+        );
       }
 
       const decision = conductor.previewRouting(input);
@@ -55,7 +70,11 @@ export const conductorResolvers = {
     /**
      * Execute a task using the MoE Conductor system
      */
-    conduct: async (_: any, { input }: { input: ConductInput }, context: any) => {
+    conduct: async (
+      _: any,
+      { input }: { input: ConductInput },
+      context: any,
+    ) => {
       if (!conductor) {
         throw new Error('Conductor not initialized');
       }
@@ -70,7 +89,10 @@ export const conductorResolvers = {
       const routingDecision = conductor.previewRouting(input);
 
       // Check governance limits before security policy
-      const estimatedCost = estimateTaskCost(input.task, routingDecision.expert);
+      const estimatedCost = estimateTaskCost(
+        input.task,
+        routingDecision.expert,
+      );
       const estimatedTokens = estimateTokenCount(input.task);
 
       const governanceCheck = await governanceLimitEngine.checkLimits(
@@ -81,11 +103,15 @@ export const conductorResolvers = {
       );
 
       if (!governanceCheck.allowed) {
-        throw new Error(`Governance limit exceeded: ${governanceCheck.message}`);
+        throw new Error(
+          `Governance limit exceeded: ${governanceCheck.message}`,
+        );
       }
 
       // Budget admission control with graceful degradation
-      const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+      const redis = new Redis(
+        process.env.REDIS_URL || 'redis://localhost:6379',
+      );
       const budgetController = createBudgetController(redis);
 
       const budgetAdmission = await budgetController.admit(
@@ -100,7 +126,10 @@ export const conductorResolvers = {
       }
 
       // If budget is in degraded mode and expert was blocked, suggest alternatives
-      if (budgetAdmission.mode !== 'normal' && budgetAdmission.allowedExperts.length > 0) {
+      if (
+        budgetAdmission.mode !== 'normal' &&
+        budgetAdmission.allowedExperts.length > 0
+      ) {
         console.warn('Budget degradation active:', {
           mode: budgetAdmission.mode,
           allowedExperts: budgetAdmission.allowedExperts,
@@ -123,13 +152,17 @@ export const conductorResolvers = {
       if (!policyResult.allow) {
         // Decrement on failure
         governanceLimitEngine.decrementConcurrent(securityContext.userId);
-        throw new Error(`Access denied: ${policyResult.reason || 'Policy violation'}`);
+        throw new Error(
+          `Access denied: ${policyResult.reason || 'Policy violation'}`,
+        );
       }
 
       // Check for PII protection
       const piiCheck = opaClient.detectPII(input.task);
       if (piiCheck.hasPII && securityContext.clearanceLevel < 3) {
-        throw new Error('Access denied: PII detected and insufficient clearance level');
+        throw new Error(
+          'Access denied: PII detected and insufficient clearance level',
+        );
       }
 
       // Add user context from GraphQL context
@@ -201,7 +234,9 @@ export const conductorResolvers = {
 
         // Convert result to GraphQL format
         // Get approaching limits for warnings
-        const limits = governanceLimitEngine.getApproachingLimits(securityContext.userId);
+        const limits = governanceLimitEngine.getApproachingLimits(
+          securityContext.userId,
+        );
         const budgetWarnings = [];
 
         // Add budget mode warnings
@@ -232,7 +267,8 @@ export const conductorResolvers = {
           auditId: result.auditId,
           warnings: allWarnings,
           security_clearance_required: piiCheck.hasPII,
-          governance_limits_approaching: limits.warnings.length > 0 || limits.critical.length > 0,
+          governance_limits_approaching:
+            limits.warnings.length > 0 || limits.critical.length > 0,
         };
       } catch (error) {
         // Always decrement concurrent counter on error
@@ -276,15 +312,17 @@ export const conductorQueries = {
       activeTaskCount: stats.activeTaskCount,
       routingStats: {
         totalDecisions: stats.routingStats.totalDecisions,
-        expertDistribution: Object.entries(stats.routingStats.expertDistribution).map(
-          ([expert, count]) => ({ expert, count }),
-        ),
+        expertDistribution: Object.entries(
+          stats.routingStats.expertDistribution,
+        ).map(([expert, count]) => ({ expert, count })),
         avgConfidence: stats.routingStats.avgConfidence,
       },
-      mcpStatus: Object.entries(stats.mcpConnectionStatus).map(([server, connected]) => ({
-        server,
-        connected,
-      })),
+      mcpStatus: Object.entries(stats.mcpConnectionStatus).map(
+        ([server, connected]) => ({
+          server,
+          connected,
+        }),
+      ),
       config: stats.config,
     };
   },
@@ -334,7 +372,9 @@ export const conductorQueries = {
 
     return {
       status: overallHealthy ? 'healthy' : 'unhealthy',
-      message: overallHealthy ? 'All systems operational' : 'Some components unhealthy',
+      message: overallHealthy
+        ? 'All systems operational'
+        : 'Some components unhealthy',
       checks,
     };
   },

@@ -3,6 +3,7 @@
 ## 🛡️ Final Go/No-Go Gates (Pre-Launch Validation)
 
 ### DNS & Network
+
 - [ ] **DNS resolution**: `maestro.intelgraph.ai` → ALB target group healthy
 - [ ] **TTL validation**: DNS TTL ≤ 300s for fast failover
 - [ ] **ALB health checks**: Blue + canary target groups both healthy
@@ -15,6 +16,7 @@ aws elbv2 describe-target-health --target-group-arn $(aws elbv2 describe-target-
 ```
 
 ### TLS & Security
+
 - [ ] **cert-manager status**: `Ready=True` for all certificates
 - [ ] **HSTS enabled**: Security headers configured
 - [ ] **OCSP stapling**: Certificate validation optimized
@@ -27,6 +29,7 @@ curl -I https://maestro.intelgraph.ai | grep -E "(strict-transport-security|x-co
 ```
 
 ### OIDC Authentication
+
 - [ ] **External Secrets**: Prod client IDs/secrets loaded successfully
 - [ ] **JWKS rotation**: Auto-rotation window documented (24h)
 - [ ] **Token validation**: JWT signature verification working
@@ -39,6 +42,7 @@ curl -s "$(kubectl get configmap oidc-config -o jsonpath='{.data.jwks_uri}')" | 
 ```
 
 ### OPA Policy Engine
+
 - [ ] **Bundle hash pinned**: Policy version locked and verified
 - [ ] **Deny by default**: Unauthorized requests blocked
 - [ ] **Policy latency**: Decision latency p95 < 10ms
@@ -51,6 +55,7 @@ curl -s http://localhost:8181/v1/data/system/main | jq '.result'
 ```
 
 ### GraphQL API Hardening
+
 - [ ] **Persisted queries**: Non-persisted requests receive 4xx
 - [ ] **SDL versioned**: Schema Definition Language artifact tagged
 - [ ] **Operations manifest**: Query hash map versioned and signed
@@ -65,6 +70,7 @@ curl -X POST https://maestro.intelgraph.ai/graphql \
 ```
 
 ### Rate Limiting & Performance
+
 - [ ] **Hard caps enforced**: Rate limits active with Redis backoff
 - [ ] **Burst handling**: Tested at >= 2× expected peak load
 - [ ] **Circuit breakers**: Auto-recovery patterns validated
@@ -76,6 +82,7 @@ k6 run --vus 100 --duration 30s scripts/load-test/burst-test.js
 ```
 
 ### Data Platform Backups
+
 - [ ] **PostgreSQL PITR**: Point-in-time recovery checkpoint noted
 - [ ] **Neo4j backup**: Latest backup artifact path documented
 - [ ] **Redis persistence**: AOF/RDB backup strategy verified
@@ -88,6 +95,7 @@ kubectl logs -l app=neo4j-backup-cron -n intelgraph-maestro --tail=10
 ```
 
 ### Cost Guardrails
+
 - [ ] **Kubecost alerts**: Configured at 80% budget threshold
 - [ ] **Resource quotas**: GPU/compute node limits enforced
 - [ ] **Taints/tolerations**: Resource isolation validated
@@ -100,6 +108,7 @@ curl -s "http://kubecost:9090/model/allocation?window=7d" | jq '.data[0].totalCo
 ```
 
 ### Alerting & RBAC
+
 - [ ] **PagerDuty integration**: On-call rotation active
 - [ ] **Break-glass access**: Emergency procedures tested and logged
 - [ ] **Audit logging**: All admin actions captured
@@ -134,6 +143,7 @@ echo "✅ Canary deployed - 20% traffic routing active"
 ### Phase 2: Golden Transaction Validation
 
 **Required Golden Transactions:**
+
 1. **OIDC Login**: Full OAuth flow with JWT validation
 2. **Write Operation**: Entity creation with audit trail
 3. **3-hop Graph Query**: Complex relationship traversal
@@ -211,6 +221,7 @@ echo "✅ Evidence captured in ${EVIDENCE_DIR}"
 ### Automated Monitoring
 
 **Abort Thresholds:**
+
 - **5xx errors > 1%** for 10 consecutive minutes
 - **API p95 latency > 350ms** for 15 consecutive minutes
 - **Authentication errors > 0.5%** for 5 consecutive minutes
@@ -263,11 +274,13 @@ echo "🎉 120-minute watch period completed successfully"
 ## 🔥 72-Hour Bake Period
 
 ### Day 0-1: Burn Rate Monitoring
+
 - [ ] **Error budget burn**: 2× alert every 30min, 14× alert every 6h
 - [ ] **Kafka lag**: < 1,000 messages across all consumer groups
 - [ ] **Dead Letter Queue**: < 0.1% of total message volume
 
 ### Day 2: Chaos Engineering
+
 - [ ] **Pod deletion**: Delete 1 API pod, confirm no SLO breach
 - [ ] **Node drain**: Drain 1 worker node, validate auto-recovery
 - [ ] **Network partition**: Test circuit breaker behavior
@@ -279,6 +292,7 @@ kubectl drain $(kubectl get nodes -o name | head -1) --ignore-daemonsets --delet
 ```
 
 ### Day 3: Operational Validation
+
 - [ ] **Backup/restore drill**: Non-prod data recovery test
 - [ ] **RPO/RTO measurement**: Record recovery time objectives
 - [ ] **SBOM drift scan**: Check for new vulnerabilities
@@ -289,12 +303,14 @@ kubectl drain $(kubectl get nodes -o name | head -1) --ignore-daemonsets --delet
 ## 👥 Operations Handoff
 
 ### Runbooks (RACI Matrix)
+
 - **Deploy/Upgrade**: SRE Responsible, DevOps Accountable, Security Consulted
 - **On-call Triage**: SRE Responsible, Product Informed
 - **DB/Graph Health**: DBA Responsible, SRE Accountable
 - **Provenance Integrity**: Security Responsible, Compliance Accountable
 
 ### Critical Dashboards
+
 1. **API Health**: `https://grafana.intelgraph.ai/d/api-overview`
 2. **Graph Operations**: `https://grafana.intelgraph.ai/d/neo4j-cluster`
 3. **Kafka Streaming**: `https://grafana.intelgraph.ai/d/kafka-overview`
@@ -302,12 +318,14 @@ kubectl drain $(kubectl get nodes -o name | head -1) --ignore-daemonsets --delet
 5. **Cost Tracking**: `https://grafana.intelgraph.ai/d/cost-analysis`
 
 ### Alert Escalation
+
 - **P0 (Page immediately)**: API down, data corruption, security breach
 - **P1 (Page within 15min)**: SLO breach, auth failures, backup failures
 - **P2 (Business hours)**: Cost overage, certificate expiry warnings
 - **P3 (Weekly review)**: Performance degradation, capacity planning
 
 ### Access Control
+
 - **Admin roles**: Break-glass access logged and time-limited
 - **Read-only monitoring**: On-call engineers, management dashboards
 - **Service accounts**: Least-privilege, regularly rotated credentials
@@ -318,6 +336,7 @@ kubectl drain $(kubectl get nodes -o name | head -1) --ignore-daemonsets --delet
 ## 📋 Auditor-Grade Evidence Bundle
 
 ### Release Artifacts (Attached to Git Tag)
+
 1. **Image Verification**: Cosign verify logs + Rekor transparency UUIDs
 2. **SBOM Manifests**: SPDX/JSON format for all container images
 3. **Policy Bundle**: OPA SHA256 hash + versioned policy pack
@@ -327,6 +346,7 @@ kubectl drain $(kubectl get nodes -o name | head -1) --ignore-daemonsets --delet
 7. **Security Scan**: Container vulnerability reports + compliance matrix
 
 ### Compliance Documentation
+
 - **GO_LIVE_CHECKLIST.md**: All gates passed with timestamps
 - **DEPLOYMENT_EVIDENCE.json**: Structured evidence for audit trail
 - **RISK_ASSESSMENT.md**: Security and operational risk analysis
@@ -354,6 +374,7 @@ kubectl drain $(kubectl get nodes -o name | head -1) --ignore-daemonsets --delet
 ## 🔒 **FREEZE + TAG**
 
 ### Freeze Main Branch
+
 ```bash
 # Verify current state
 git status
@@ -391,6 +412,7 @@ gh release create v1.0.0-GA \
 ## 🚦 **STEP 2: CANARY DEPLOY (20% traffic)**
 
 ### AWS ALB Traffic Splitting Setup
+
 ```bash
 # Pre-deployment validation
 echo "🔍 Pre-deployment checks..."
@@ -425,6 +447,7 @@ kubectl -n intelgraph-system describe ingress intelgraph-maestro-ingress
 ```
 
 ### AWS-Specific Canary Configuration
+
 ```yaml
 # values-prod-canary.yaml override
 ingress:
@@ -474,6 +497,7 @@ ingress:
 ## 🏥 **STEP 3: HEALTH & POLICY GATES**
 
 ### Comprehensive Health Validation
+
 ```bash
 echo "🏥 Running comprehensive health checks..."
 
@@ -572,6 +596,7 @@ echo "✅ All health checks passed!"
 ## 🧪 **STEP 4: GOLDEN TRANSACTIONS (Synthetics)**
 
 ### SLO Validation Tests
+
 ```bash
 echo "🧪 Running golden transaction tests..."
 
@@ -713,6 +738,7 @@ echo "✅ Golden transactions completed within SLO targets!"
 ## 📈 **STEP 5: RAMP TO 100% + LOCK**
 
 ### Gradual Traffic Increase
+
 ```bash
 echo "📈 Ramping traffic to 100%..."
 
@@ -767,6 +793,7 @@ echo "🎉 100% traffic cutover complete!"
 ## ⚡ **STEP 6: FAST ROLLBACK PLAN (Pre-validated)**
 
 ### Data Safe-guards
+
 ```bash
 # Pre-rollback preparation
 echo "💾 Setting up rollback safe-guards..."
@@ -793,6 +820,7 @@ echo "📝 Current Helm revision: $CURRENT_REVISION"
 ```
 
 ### One-Command Rollback Procedures
+
 ```bash
 cat > EMERGENCY_ROLLBACK.sh << 'EOF'
 #!/bin/bash
@@ -895,6 +923,7 @@ echo "✅ Emergency rollback script ready: ./EMERGENCY_ROLLBACK.sh"
 ## 👀 **STEP 7: LAUNCH-DAY WATCH (First 2 Hours)**
 
 ### Critical Dashboards Setup
+
 ```bash
 echo "📊 Setting up launch-day monitoring dashboards..."
 
@@ -953,6 +982,7 @@ echo "✅ Key metrics monitoring script ready: ./monitor_key_metrics.sh"
 ```
 
 ### Alert Configuration
+
 ```bash
 echo "🚨 Setting up burn-rate alerts..."
 
@@ -1024,6 +1054,7 @@ echo "✅ Burn-rate alerts configured"
 ## 📋 **STEP 8: 72-HOUR BAKE CHECKLIST**
 
 ### Automated Bake Period Validation
+
 ```bash
 cat > bake_period_validation.sh << 'EOF'
 #!/bin/bash
@@ -1300,6 +1331,7 @@ All systems are **GO** for production cutover:
 ✅ **Team Aligned**: War room and communication plan
 
 ### **🚀 EXECUTE CUTOVER**
+
 ```bash
 # Start the cutover sequence
 ./GO_LIVE_CUTOVER.sh

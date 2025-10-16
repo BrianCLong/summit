@@ -15,7 +15,11 @@ describe('VideoFrameExtractor', () => {
   const mockVideoPath = '/path/to/test-video.mp4';
 
   beforeEach(() => {
-    extractor = new VideoFrameExtractor(mockFfmpegPath, mockFfprobePath, mockTempDir);
+    extractor = new VideoFrameExtractor(
+      mockFfmpegPath,
+      mockFfprobePath,
+      mockTempDir,
+    );
     // Reset mocks
     (ffmpeg as jest.Mocked<typeof ffmpeg>).mockClear();
     (fs.mkdir as jest.Mock).mockClear();
@@ -52,10 +56,15 @@ describe('VideoFrameExtractor', () => {
   it('should extract frames with default options', async () => {
     const { frames, audio } = await extractor.extract(mockVideoPath);
 
-    expect(fs.mkdir).toHaveBeenCalledWith(expect.stringContaining(mockTempDir), { recursive: true });
+    expect(fs.mkdir).toHaveBeenCalledWith(
+      expect.stringContaining(mockTempDir),
+      { recursive: true },
+    );
     expect(ffmpeg).toHaveBeenCalledWith(mockVideoPath);
     expect((ffmpeg as any).mock.results[0].value.fps).toHaveBeenCalledWith(1); // Default fps
-    expect((ffmpeg as any).mock.results[0].value.output).toHaveBeenCalledWith(expect.stringContaining('frame-%s.png'));
+    expect((ffmpeg as any).mock.results[0].value.output).toHaveBeenCalledWith(
+      expect.stringContaining('frame-%s.png'),
+    );
     expect((ffmpeg as any).mock.results[0].value.run).toHaveBeenCalled();
     expect(frames.length).toBe(2);
     expect(frames[0].framePath).toContain('frame-0.000.png');
@@ -70,23 +79,32 @@ describe('VideoFrameExtractor', () => {
 
   it('should extract frames with specified interval', async () => {
     await extractor.extract(mockVideoPath, { interval: 2 });
-    expect((ffmpeg as any).mock.results[0].value.addOption).toHaveBeenCalledWith('-vf', 'fps=1/2');
+    expect(
+      (ffmpeg as any).mock.results[0].value.addOption,
+    ).toHaveBeenCalledWith('-vf', 'fps=1/2');
   });
 
   it('should extract audio when extractAudio is true', async () => {
-    const { audio } = await extractor.extract(mockVideoPath, { extractAudio: true });
+    const { audio } = await extractor.extract(mockVideoPath, {
+      extractAudio: true,
+    });
     expect(audio).toBeDefined();
     expect(audio?.audioPath).toContain('audio-');
     expect(audio?.audioPath).toContain('.mp3');
     expect(audio?.duration).toBe(10);
     expect((ffmpeg as any).mock.results[1].value.noVideo).toHaveBeenCalled(); // Second ffmpeg call for audio
-    expect((ffmpeg as any).mock.results[1].value.audioCodec).toHaveBeenCalledWith('libmp3lame');
+    expect(
+      (ffmpeg as any).mock.results[1].value.audioCodec,
+    ).toHaveBeenCalledWith('libmp3lame');
   });
 
   it('should clean up temporary directory', async () => {
     const tempDirToClean = '/tmp/some-temp-dir';
     await extractor.cleanup(tempDirToClean);
-    expect(fs.rm).toHaveBeenCalledWith(tempDirToClean, { recursive: true, force: true });
+    expect(fs.rm).toHaveBeenCalledWith(tempDirToClean, {
+      recursive: true,
+      force: true,
+    });
   });
 
   it('should handle ffmpeg errors during frame extraction', async () => {
@@ -105,6 +123,8 @@ describe('VideoFrameExtractor', () => {
       run: jest.fn(),
     }));
 
-    await expect(extractor.extract(mockVideoPath)).rejects.toThrow('ffmpeg test error');
+    await expect(extractor.extract(mockVideoPath)).rejects.toThrow(
+      'ffmpeg test error',
+    );
   });
 });

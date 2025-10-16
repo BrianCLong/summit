@@ -42,7 +42,10 @@ const formatUptime = (uptimeMs: number): string => {
   return `${minutes}m ${remainingSeconds}s`;
 };
 
-const moduleStateColor: Record<string, 'success' | 'warning' | 'error' | 'default'> = {
+const moduleStateColor: Record<
+  string,
+  'success' | 'warning' | 'error' | 'default'
+> = {
   running: 'success',
   starting: 'warning',
   error: 'error',
@@ -56,7 +59,8 @@ const presetIcons: Record<string, React.ReactNode> = {
   'rapid-response': <SyncAltIcon fontSize="small" />,
 };
 
-const metricValue = (value: number): string => `${Math.round(value * 100) / 100}`;
+const metricValue = (value: number): string =>
+  `${Math.round(value * 100) / 100}`;
 
 const OrchestratorDashboard: React.FC = () => {
   const orchestrator = useMemo(() => createLaunchableOrchestrator(), []);
@@ -122,14 +126,22 @@ const OrchestratorDashboard: React.FC = () => {
       <Grid item xs={12} md={6} lg={4} key={definition.id}>
         <Card elevation={3} sx={{ height: '100%' }}>
           <CardContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Box>
                 <Typography variant="h6">{definition.displayName}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   {definition.summary}
                 </Typography>
               </Box>
-              <Chip label={status.state.toUpperCase()} color={color} size="small" />
+              <Chip
+                label={status.state.toUpperCase()}
+                color={color}
+                size="small"
+              />
             </Stack>
 
             <Stack spacing={1.5} sx={{ mt: 2 }}>
@@ -168,7 +180,9 @@ const OrchestratorDashboard: React.FC = () => {
                   <Stack>
                     <Stack direction="row" justifyContent="space-between">
                       <Typography variant="body2">Reliability</Typography>
-                      <Typography variant="body2">{reliabilityPercent}%</Typography>
+                      <Typography variant="body2">
+                        {reliabilityPercent}%
+                      </Typography>
                     </Stack>
                     <LinearProgress
                       variant="determinate"
@@ -179,11 +193,15 @@ const OrchestratorDashboard: React.FC = () => {
                 </Tooltip>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body2">Tasks Processed</Typography>
-                  <Typography variant="body2">{status.tasksProcessed}</Typography>
+                  <Typography variant="body2">
+                    {status.tasksProcessed}
+                  </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body2">Uptime</Typography>
-                  <Typography variant="body2">{formatUptime(status.uptimeMs)}</Typography>
+                  <Typography variant="body2">
+                    {formatUptime(status.uptimeMs)}
+                  </Typography>
                 </Stack>
               </Stack>
             </Stack>
@@ -209,23 +227,39 @@ const OrchestratorDashboard: React.FC = () => {
           }}
         >
           <CardContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Box>
                 <Typography variant="subtitle1">{record.task.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {record.task.requestedBy} • {new Date(record.startedAt).toLocaleTimeString()}
+                  {record.task.requestedBy} •{' '}
+                  {new Date(record.startedAt).toLocaleTimeString()}
                 </Typography>
               </Box>
               <Chip
                 label={record.status.toUpperCase()}
-                color={record.status === 'completed' ? 'success' : record.status === 'error' ? 'error' : 'warning'}
+                color={
+                  record.status === 'completed'
+                    ? 'success'
+                    : record.status === 'error'
+                      ? 'error'
+                      : 'warning'
+                }
                 size="small"
               />
             </Stack>
             <Divider sx={{ my: 2 }} />
             <Grid container spacing={2}>
               {record.results.map((result) => (
-                <Grid item xs={12} md={6} key={`${result.moduleId}-${result.action}`}>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}
+                  key={`${result.moduleId}-${result.action}`}
+                >
                   <Stack spacing={0.5}>
                     <Typography variant="body2" fontWeight={600}>
                       {result.moduleId} — {result.action}
@@ -248,15 +282,28 @@ const OrchestratorDashboard: React.FC = () => {
       <Stack spacing={3}>
         <Card elevation={4}>
           <CardContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              flexWrap="wrap"
+              gap={2}
+            >
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <TimelineIcon color="primary" />
-                  <Typography variant="h5">Launchable Orchestrator Control Center</Typography>
+                  <Typography variant="h5">
+                    Launchable Orchestrator Control Center
+                  </Typography>
                 </Stack>
-                <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-                  Coordinate Maestro Composer, Build Plane, Build Platform, CompanyOS, Switchboard,
-                  IntelGraph, and Activities from a single real-time control surface.
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ mt: 1 }}
+                >
+                  Coordinate Maestro Composer, Build Plane, Build Platform,
+                  CompanyOS, Switchboard, IntelGraph, and Activities from a
+                  single real-time control surface.
                 </Typography>
               </Box>
               <Chip
@@ -290,8 +337,16 @@ const OrchestratorDashboard: React.FC = () => {
                       >
                         <CardContent>
                           <Stack spacing={2}>
-                            <Stack direction="row" spacing={1} alignItems="center">
-                              <Chip icon={preset.icon} label={preset.name} variant="outlined" />
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              alignItems="center"
+                            >
+                              <Chip
+                                icon={preset.icon}
+                                label={preset.name}
+                                variant="outlined"
+                              />
                             </Stack>
                             <Typography variant="body2" color="text.secondary">
                               {preset.description}
@@ -321,7 +376,12 @@ const OrchestratorDashboard: React.FC = () => {
 
         <Card elevation={3}>
           <CardContent>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              sx={{ mb: 2 }}
+            >
               <ChecklistIcon color="primary" />
               <Typography variant="h6">Recent Missions</Typography>
             </Stack>

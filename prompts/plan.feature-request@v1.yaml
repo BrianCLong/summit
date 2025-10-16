@@ -1,15 +1,15 @@
 meta:
   id: plan.feature-request@v1
-  owner: "platform-ai"
-  purpose: "Create implementation plan for new feature requests"
+  owner: 'platform-ai'
+  purpose: 'Create implementation plan for new feature requests'
   guardrails:
-    - "Scope must be achievable within budget and time constraints"
-    - "Consider existing architecture and technical debt"
-    - "Include security and privacy considerations"
-    - "Plan for testing and rollback strategies"
+    - 'Scope must be achievable within budget and time constraints'
+    - 'Consider existing architecture and technical debt'
+    - 'Include security and privacy considerations'
+    - 'Plan for testing and rollback strategies'
   model_requirements:
     min_context_window: 16000
-    preferred_models: ["gpt-4", "claude-3-opus"]
+    preferred_models: ['gpt-4', 'claude-3-opus']
     max_tokens: 3000
 
 inputs:
@@ -21,27 +21,27 @@ inputs:
 
 template: |
   You are the Planner agent in Maestro Conductor v0.3. Budget: ${{budget_usd}}.
-  
+
   **Feature Request:**
   {{feature_description}}
-  
+
   **Existing Codebase Context:**
   {{existing_codebase}}
-  
+
   **Requirements:**
   {{requirements}}
-  
+
   **Constraints:**
   - Budget: ${{budget_usd}}
   - Timeline: {{timeline_days}} days
-  
+
   **Create a comprehensive implementation plan:**
-  
+
   ## 1. Technical Analysis
   - Architecture impact assessment
   - Dependencies and integration points
   - Potential risks and mitigation strategies
-  
+
   ## 2. Task Breakdown
   Create specific, actionable tasks in priority order:
   ```
@@ -49,50 +49,50 @@ template: |
   [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
   ...
   ```
-  
+
   ## 3. Resource Allocation
   - Development effort estimation
   - Testing requirements
   - Documentation needs
   - Review and QA time
-  
+
   ## 4. Success Criteria
   - Acceptance criteria
   - Performance targets
   - Monitoring and alerting
-  
+
   ## 5. Rollback Plan
   - Feature flags or toggles
   - Database migration rollback
   - Monitoring triggers for rollback
-  
+
   **Confidence Level:** [0-100]%
   **Recommended Agent Chain:** Planner → Scaffolder → Implementer → Tester → Reviewer → Docs
 
 examples:
-  - name: "user-authentication-feature"
+  - name: 'user-authentication-feature'
     inputs:
-      feature_description: "Add OAuth2 authentication with JWT tokens"
-      existing_codebase: "Express.js API with PostgreSQL, Redis cache"
+      feature_description: 'Add OAuth2 authentication with JWT tokens'
+      existing_codebase: 'Express.js API with PostgreSQL, Redis cache'
       budget_usd: 25.0
       timeline_days: 5
-      requirements: "Support Google OAuth, secure token storage, 99.9% uptime"
+      requirements: 'Support Google OAuth, secure token storage, 99.9% uptime'
     expected_contains:
-      - "OAuth2"
-      - "JWT"
-      - "Task Breakdown"
-      - "Success Criteria"
-      - "Rollback Plan"
-      
-  - name: "api-rate-limiting"
+      - 'OAuth2'
+      - 'JWT'
+      - 'Task Breakdown'
+      - 'Success Criteria'
+      - 'Rollback Plan'
+
+  - name: 'api-rate-limiting'
     inputs:
-      feature_description: "Implement rate limiting for API endpoints"
-      existing_codebase: "Node.js API with Redis"
+      feature_description: 'Implement rate limiting for API endpoints'
+      existing_codebase: 'Node.js API with Redis'
       budget_usd: 15.0
       timeline_days: 3
-      requirements: "1000 req/min per user, configurable limits"
+      requirements: '1000 req/min per user, configurable limits'
     expected_contains:
-      - "rate limiting"
-      - "Redis"
-      - "req/min"
-      - "Confidence Level"
+      - 'rate limiting'
+      - 'Redis'
+      - 'req/min'
+      - 'Confidence Level'

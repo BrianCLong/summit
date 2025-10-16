@@ -153,7 +153,10 @@ export class LaunchableOrchestrator {
   getSnapshot(): OrchestratorSnapshot {
     return {
       modules: this.listModules(),
-      tasks: this.tasks.map((task) => ({ ...task, results: [...task.results] })),
+      tasks: this.tasks.map((task) => ({
+        ...task,
+        results: [...task.results],
+      })),
     };
   }
 
@@ -173,7 +176,9 @@ export class LaunchableOrchestrator {
     if (!listeners) {
       return;
     }
-    listeners.forEach((listener) => listener(payload as EventPayloads[EventName]));
+    listeners.forEach((listener) =>
+      listener(payload as EventPayloads[EventName]),
+    );
   }
 
   validateTask(task: OrchestratorTask): TaskValidationIssue[] {

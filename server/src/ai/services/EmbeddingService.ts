@@ -66,15 +66,15 @@ export class EmbeddingService {
     try {
       // Verify dependencies
       await this.verifyDependencies();
-      
+
       // Load embedding models
       await this.loadEmbeddingModels();
-      
+
       // Initialize vector database tables
       if (this.db) {
         await this.initializeVectorTables();
       }
-      
+
       this.isInitialized = true;
       logger.info('Embedding Service initialized successfully');
     } catch (error) {
@@ -88,7 +88,7 @@ export class EmbeddingService {
    */
   async generateTextEmbedding(
     text: string,
-    options: EmbeddingOptions = {}
+    options: EmbeddingOptions = {},
   ): Promise<number[]> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -97,15 +97,24 @@ export class EmbeddingService {
     const {
       model = 'sentence-transformers/all-MiniLM-L6-v2',
       normalize = true,
-      poolingStrategy = 'mean'
+      poolingStrategy = 'mean',
     } = options;
 
     try {
-      logger.debug(`Generating text embedding for: ${text.substring(0, 100)}...`);
-      
-      const embedding = await this.runTextEmbedding(text, model, normalize, poolingStrategy);
-      
-      logger.debug(`Generated text embedding with dimension: ${embedding.length}`);
+      logger.debug(
+        `Generating text embedding for: ${text.substring(0, 100)}...`,
+      );
+
+      const embedding = await this.runTextEmbedding(
+        text,
+        model,
+        normalize,
+        poolingStrategy,
+      );
+
+      logger.debug(
+        `Generated text embedding with dimension: ${embedding.length}`,
+      );
       return embedding;
     } catch (error) {
       logger.error('Text embedding generation failed:', error);
@@ -118,23 +127,27 @@ export class EmbeddingService {
    */
   async generateImageEmbedding(
     imagePath: string,
-    options: EmbeddingOptions = {}
+    options: EmbeddingOptions = {},
   ): Promise<number[]> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
-    const {
-      model = 'openai/clip-vit-base-patch32',
-      normalize = true
-    } = options;
+    const { model = 'openai/clip-vit-base-patch32', normalize = true } =
+      options;
 
     try {
       logger.debug(`Generating image embedding for: ${imagePath}`);
-      
-      const embedding = await this.runImageEmbedding(imagePath, model, normalize);
-      
-      logger.debug(`Generated image embedding with dimension: ${embedding.length}`);
+
+      const embedding = await this.runImageEmbedding(
+        imagePath,
+        model,
+        normalize,
+      );
+
+      logger.debug(
+        `Generated image embedding with dimension: ${embedding.length}`,
+      );
       return embedding;
     } catch (error) {
       logger.error('Image embedding generation failed:', error);
@@ -147,23 +160,26 @@ export class EmbeddingService {
    */
   async generateAudioEmbedding(
     audioPath: string,
-    options: EmbeddingOptions = {}
+    options: EmbeddingOptions = {},
   ): Promise<number[]> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
-    const {
-      model = 'facebook/wav2vec2-base',
-      normalize = true
-    } = options;
+    const { model = 'facebook/wav2vec2-base', normalize = true } = options;
 
     try {
       logger.debug(`Generating audio embedding for: ${audioPath}`);
-      
-      const embedding = await this.runAudioEmbedding(audioPath, model, normalize);
-      
-      logger.debug(`Generated audio embedding with dimension: ${embedding.length}`);
+
+      const embedding = await this.runAudioEmbedding(
+        audioPath,
+        model,
+        normalize,
+      );
+
+      logger.debug(
+        `Generated audio embedding with dimension: ${embedding.length}`,
+      );
       return embedding;
     } catch (error) {
       logger.error('Audio embedding generation failed:', error);
@@ -184,7 +200,7 @@ export class EmbeddingService {
       text?: number;
       image?: number;
       audio?: number;
-    } = {}
+    } = {},
   ): Promise<number[]> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -193,7 +209,7 @@ export class EmbeddingService {
     const {
       text: textWeight = 1.0,
       image: imageWeight = 1.0,
-      audio: audioWeight = 1.0
+      audio: audioWeight = 1.0,
     } = weights;
 
     try {
@@ -208,13 +224,17 @@ export class EmbeddingService {
       }
 
       if (inputs.imagePath && imageWeight > 0) {
-        const imageEmbedding = await this.generateImageEmbedding(inputs.imagePath);
+        const imageEmbedding = await this.generateImageEmbedding(
+          inputs.imagePath,
+        );
         embeddings.push(imageEmbedding);
         modalityWeights.push(imageWeight);
       }
 
       if (inputs.audioPath && audioWeight > 0) {
-        const audioEmbedding = await this.generateAudioEmbedding(inputs.audioPath);
+        const audioEmbedding = await this.generateAudioEmbedding(
+          inputs.audioPath,
+        );
         embeddings.push(audioEmbedding);
         modalityWeights.push(audioWeight);
       }
@@ -224,9 +244,14 @@ export class EmbeddingService {
       }
 
       // Combine embeddings using weighted fusion
-      const combinedEmbedding = this.fuseEmbeddings(embeddings, modalityWeights);
-      
-      logger.debug(`Generated multimodal embedding with dimension: ${combinedEmbedding.length}`);
+      const combinedEmbedding = this.fuseEmbeddings(
+        embeddings,
+        modalityWeights,
+      );
+
+      logger.debug(
+        `Generated multimodal embedding with dimension: ${combinedEmbedding.length}`,
+      );
       return combinedEmbedding;
     } catch (error) {
       logger.error('Multimodal embedding generation failed:', error);
@@ -242,7 +267,7 @@ export class EmbeddingService {
     vector: number[],
     metadata: Record<string, any>,
     modality: 'text' | 'image' | 'audio' | 'multimodal',
-    source: string
+    source: string,
   ): Promise<void> {
     if (!this.db) {
       throw new Error('Database connection not available');
@@ -265,7 +290,7 @@ export class EmbeddingService {
         JSON.stringify(vector),
         JSON.stringify(metadata),
         modality,
-        source
+        source,
       ]);
 
       logger.debug(`Stored embedding: ${id} (${modality})`);
@@ -285,18 +310,13 @@ export class EmbeddingService {
       threshold?: number;
       modality?: string;
       metadata?: Record<string, any>;
-    } = {}
+    } = {},
   ): Promise<SimilarityResult[]> {
     if (!this.db) {
       throw new Error('Database connection not available');
     }
 
-    const {
-      topK = 10,
-      threshold = 0.0,
-      modality,
-      metadata
-    } = options;
+    const { topK = 10, threshold = 0.0, modality, metadata } = options;
 
     try {
       let query = `
@@ -310,7 +330,7 @@ export class EmbeddingService {
         FROM embeddings
         WHERE (1 - (vector <=> $1::vector)) >= $2
       `;
-      
+
       const params: any[] = [JSON.stringify(queryVector), threshold];
       let paramCount = 2;
 
@@ -331,11 +351,11 @@ export class EmbeddingService {
 
       const result = await this.db.query(query, params);
 
-      const similarities: SimilarityResult[] = result.rows.map(row => ({
+      const similarities: SimilarityResult[] = result.rows.map((row) => ({
         id: row.id,
         similarity: row.similarity,
         metadata: row.metadata,
-        vector: JSON.parse(row.vector)
+        vector: JSON.parse(row.vector),
       }));
 
       logger.debug(`Found ${similarities.length} similar embeddings`);
@@ -354,7 +374,7 @@ export class EmbeddingService {
     options: {
       topK?: number;
       threshold?: number;
-    } = {}
+    } = {},
   ): Promise<SimilarityResult[]> {
     const { topK = 10, threshold = 0.5 } = options;
 
@@ -370,13 +390,17 @@ export class EmbeddingService {
       }
 
       if (query.imageQuery) {
-        const imageEmbedding = await this.generateImageEmbedding(query.imageQuery);
+        const imageEmbedding = await this.generateImageEmbedding(
+          query.imageQuery,
+        );
         queryEmbeddings.push(imageEmbedding);
         modalityWeights.push(query.weights?.image || 1.0);
       }
 
       if (query.audioQuery) {
-        const audioEmbedding = await this.generateAudioEmbedding(query.audioQuery);
+        const audioEmbedding = await this.generateAudioEmbedding(
+          query.audioQuery,
+        );
         queryEmbeddings.push(audioEmbedding);
         modalityWeights.push(query.weights?.audio || 1.0);
       }
@@ -386,10 +410,16 @@ export class EmbeddingService {
       }
 
       // Combine query embeddings
-      const combinedQuery = this.fuseEmbeddings(queryEmbeddings, modalityWeights);
+      const combinedQuery = this.fuseEmbeddings(
+        queryEmbeddings,
+        modalityWeights,
+      );
 
       // Search for similar embeddings
-      const results = await this.findSimilar(combinedQuery, { topK, threshold });
+      const results = await this.findSimilar(combinedQuery, {
+        topK,
+        threshold,
+      });
 
       logger.info(`Cross-modal search returned ${results.length} results`);
       return results;
@@ -408,29 +438,37 @@ export class EmbeddingService {
       numClusters?: number;
       algorithm?: 'kmeans' | 'hierarchical' | 'dbscan';
       minClusterSize?: number;
-    } = {}
+    } = {},
   ): Promise<ClusterResult[]> {
     const {
       numClusters = 5,
       algorithm = 'kmeans',
-      minClusterSize = 2
+      minClusterSize = 2,
     } = options;
 
     try {
       // Get embeddings from database
       const embeddings = await this.getEmbeddingsByIds(embeddingIds);
-      
+
       if (embeddings.length < numClusters) {
         throw new Error('Not enough embeddings for clustering');
       }
 
       // Run clustering algorithm
-      const clusters = await this.runClustering(embeddings, numClusters, algorithm);
+      const clusters = await this.runClustering(
+        embeddings,
+        numClusters,
+        algorithm,
+      );
 
       // Filter out small clusters
-      const validClusters = clusters.filter(cluster => cluster.members.length >= minClusterSize);
+      const validClusters = clusters.filter(
+        (cluster) => cluster.members.length >= minClusterSize,
+      );
 
-      logger.info(`Clustering completed: ${validClusters.length} clusters found`);
+      logger.info(
+        `Clustering completed: ${validClusters.length} clusters found`,
+      );
       return validClusters;
     } catch (error) {
       logger.error('Clustering failed:', error);
@@ -445,16 +483,22 @@ export class EmbeddingService {
     text: string,
     model: string,
     normalize: boolean,
-    poolingStrategy: string
+    poolingStrategy: string,
   ): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      const pythonScript = path.join(this.config.modelsPath, 'text_embedding.py');
-      
+      const pythonScript = path.join(
+        this.config.modelsPath,
+        'text_embedding.py',
+      );
+
       const args = [
         pythonScript,
-        '--text', text,
-        '--model', model,
-        '--pooling', poolingStrategy
+        '--text',
+        text,
+        '--model',
+        model,
+        '--pooling',
+        poolingStrategy,
       ];
 
       if (normalize) {
@@ -502,16 +546,15 @@ export class EmbeddingService {
   private async runImageEmbedding(
     imagePath: string,
     model: string,
-    normalize: boolean
+    normalize: boolean,
   ): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      const pythonScript = path.join(this.config.modelsPath, 'image_embedding.py');
-      
-      const args = [
-        pythonScript,
-        '--image', imagePath,
-        '--model', model
-      ];
+      const pythonScript = path.join(
+        this.config.modelsPath,
+        'image_embedding.py',
+      );
+
+      const args = [pythonScript, '--image', imagePath, '--model', model];
 
       if (normalize) {
         args.push('--normalize');
@@ -558,16 +601,15 @@ export class EmbeddingService {
   private async runAudioEmbedding(
     audioPath: string,
     model: string,
-    normalize: boolean
+    normalize: boolean,
   ): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      const pythonScript = path.join(this.config.modelsPath, 'audio_embedding.py');
-      
-      const args = [
-        pythonScript,
-        '--audio', audioPath,
-        '--model', model
-      ];
+      const pythonScript = path.join(
+        this.config.modelsPath,
+        'audio_embedding.py',
+      );
+
+      const args = [pythonScript, '--audio', audioPath, '--model', model];
 
       if (normalize) {
         args.push('--normalize');
@@ -622,7 +664,7 @@ export class EmbeddingService {
 
     // Normalize weights
     const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-    const normalizedWeights = weights.map(w => w / totalWeight);
+    const normalizedWeights = weights.map((w) => w / totalWeight);
 
     // Get dimension from first embedding
     const dimension = embeddings[0].length;
@@ -636,7 +678,7 @@ export class EmbeddingService {
 
     // Weighted combination
     const fusedEmbedding = new Array(dimension).fill(0);
-    
+
     for (let i = 0; i < dimension; i++) {
       for (let j = 0; j < embeddings.length; j++) {
         fusedEmbedding[i] += embeddings[j][i] * normalizedWeights[j];
@@ -644,7 +686,9 @@ export class EmbeddingService {
     }
 
     // Normalize the fused embedding
-    const norm = Math.sqrt(fusedEmbedding.reduce((sum, val) => sum + val * val, 0));
+    const norm = Math.sqrt(
+      fusedEmbedding.reduce((sum, val) => sum + val * val, 0),
+    );
     if (norm > 0) {
       for (let i = 0; i < dimension; i++) {
         fusedEmbedding[i] /= norm;
@@ -670,13 +714,13 @@ export class EmbeddingService {
 
     const result = await this.db.query(query, [ids]);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       id: row.id,
       vector: JSON.parse(row.vector),
       metadata: row.metadata,
       modality: row.modality,
       source: row.source,
-      createdAt: row.created_at
+      createdAt: row.created_at,
     }));
   }
 
@@ -686,24 +730,27 @@ export class EmbeddingService {
   private async runClustering(
     embeddings: EmbeddingVector[],
     numClusters: number,
-    algorithm: string
+    algorithm: string,
   ): Promise<ClusterResult[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'clustering.py');
-      
+
       const embeddingData = {
-        embeddings: embeddings.map(e => ({
+        embeddings: embeddings.map((e) => ({
           id: e.id,
           vector: e.vector,
-          metadata: e.metadata
-        }))
+          metadata: e.metadata,
+        })),
       };
 
       const args = [
         pythonScript,
-        '--data', JSON.stringify(embeddingData),
-        '--num-clusters', numClusters.toString(),
-        '--algorithm', algorithm
+        '--data',
+        JSON.stringify(embeddingData),
+        '--num-clusters',
+        numClusters.toString(),
+        '--algorithm',
+        algorithm,
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -766,18 +813,22 @@ export class EmbeddingService {
   private async verifyDependencies(): Promise<void> {
     return new Promise((resolve, reject) => {
       const python = spawn(this.config.pythonPath, [
-        '-c', 
-        'import sentence_transformers, transformers, torch, sklearn; print("Dependencies OK")'
+        '-c',
+        'import sentence_transformers, transformers, torch, sklearn; print("Dependencies OK")',
       ]);
-      
+
       python.on('close', (code) => {
         if (code === 0) {
           resolve();
         } else {
-          reject(new Error('Required dependencies not found. Please install sentence-transformers, transformers, torch, scikit-learn.'));
+          reject(
+            new Error(
+              'Required dependencies not found. Please install sentence-transformers, transformers, torch, scikit-learn.',
+            ),
+          );
         }
       });
-      
+
       python.on('error', () => {
         reject(new Error('Python not found or dependencies missing.'));
       });
@@ -793,18 +844,15 @@ export class EmbeddingService {
       const textModels = [
         'sentence-transformers/all-MiniLM-L6-v2',
         'sentence-transformers/all-mpnet-base-v2',
-        'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+        'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
       ];
 
       const imageModels = [
         'openai/clip-vit-base-patch32',
-        'openai/clip-vit-large-patch14'
+        'openai/clip-vit-large-patch14',
       ];
 
-      const audioModels = [
-        'facebook/wav2vec2-base',
-        'facebook/wav2vec2-large'
-      ];
+      const audioModels = ['facebook/wav2vec2-base', 'facebook/wav2vec2-large'];
 
       this.availableModels.set('text', textModels);
       this.availableModels.set('image', imageModels);

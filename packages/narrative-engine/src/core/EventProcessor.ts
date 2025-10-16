@@ -10,7 +10,9 @@ export class EventProcessor {
   processEvent(event: Event): StateUpdate {
     const actor = this.state.getActor(event.actorId);
     if (!actor) {
-      const narrativeLog = [`Event ${event.id} ignored: actor ${event.actorId} missing`];
+      const narrativeLog = [
+        `Event ${event.id} ignored: actor ${event.actorId} missing`,
+      ];
       return { actorMood: {}, triggeredEvents: [], narrativeLog };
     }
 
@@ -44,10 +46,12 @@ export class EventProcessor {
         continue;
       }
       const before = target.getMood();
-      const after = target.adjustMood(influence / Math.max(1, target.getInfluence()));
+      const after = target.adjustMood(
+        influence / Math.max(1, target.getInfluence()),
+      );
       relationship.adjustTrust(Math.max(-0.05, Math.min(0.05, influence / 20)));
       this.propagationLog.push(
-        `${actor.name} influenced ${target.name}: mood ${before.toFixed(2)} -> ${after.toFixed(2)}`
+        `${actor.name} influenced ${target.name}: mood ${before.toFixed(2)} -> ${after.toFixed(2)}`,
       );
     }
   }
@@ -87,7 +91,10 @@ export class EventProcessor {
             type: 'support',
             actorId: relationship.targetId,
             targetId: actor.id,
-            intensity: Math.max(0.5, Math.min(2, Math.abs(actor.getMood()) / 3)),
+            intensity: Math.max(
+              0.5,
+              Math.min(2, Math.abs(actor.getMood()) / 3),
+            ),
             timestamp: event.timestamp,
             payload: { escalatedFrom: event.id },
           });

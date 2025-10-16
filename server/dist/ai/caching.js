@@ -122,7 +122,7 @@ export async function dequeueMLTask() {
         await redisClient.del(taskKey);
         return {
             taskId,
-            taskData: taskData ? JSON.parse(taskData) : null
+            taskData: taskData ? JSON.parse(taskData) : null,
         };
     }
     catch (error) {

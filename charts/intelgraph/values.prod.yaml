@@ -6,13 +6,13 @@ featureFlags:
     coherence: true
 replicaCount: 4
 resources:
-  requests: { cpu: "500m", memory: "512Mi" }
-  limits:   { cpu: "2",    memory: "2Gi" }
+  requests: { cpu: '500m', memory: '512Mi' }
+  limits: { cpu: '2', memory: '2Gi' }
 env:
-  NODE_ENV: "production"
-  REDIS_URL: "redis://redis:6379"
-  CONDUCTOR_RPS_MAX: "1000"
-  ENABLE_PLAYGROUND: "false"
+  NODE_ENV: 'production'
+  REDIS_URL: 'redis://redis:6379'
+  CONDUCTOR_RPS_MAX: '1000'
+  ENABLE_PLAYGROUND: 'false'
 service:
   port: 4000
 networkPolicy:

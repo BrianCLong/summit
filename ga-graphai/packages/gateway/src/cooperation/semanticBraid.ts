@@ -1,4 +1,8 @@
-import { CooperationArtifact, EvidenceLink, TaskSpec } from '@ga-graphai/common-types';
+import {
+  CooperationArtifact,
+  EvidenceLink,
+  TaskSpec,
+} from '@ga-graphai/common-types';
 
 import { GenerationInput, ResourceAdapter } from '../capabilityRegistry.js';
 import { GuardedGenerator } from '../promptOps.js';
@@ -15,7 +19,12 @@ export interface BraidResult {
   drafts: StrandDraft[];
 }
 
-const STRANDS: StrandDraft['strand'][] = ['spec', 'risks', 'tests', 'implementation'];
+const STRANDS: StrandDraft['strand'][] = [
+  'spec',
+  'risks',
+  'tests',
+  'implementation',
+];
 
 function extractDeclaredApis(specDraft: string): Set<string> {
   const matches = specDraft.match(/`([A-Za-z0-9_.-]+)`/g) ?? [];
@@ -30,7 +39,10 @@ function extractReferencedApis(testsDraft: string): Set<string> {
 export class SemanticBraidCoordinator {
   private readonly guard = new GuardedGenerator();
 
-  async weave(task: TaskSpec, assignments: Map<StrandDraft['strand'], ResourceAdapter>): Promise<BraidResult> {
+  async weave(
+    task: TaskSpec,
+    assignments: Map<StrandDraft['strand'], ResourceAdapter>,
+  ): Promise<BraidResult> {
     const drafts: StrandDraft[] = [];
     for (const strand of STRANDS) {
       const resource = assignments.get(strand);
@@ -43,16 +55,24 @@ export class SemanticBraidCoordinator {
         strand,
         prompt,
       } satisfies GenerationInput);
-      drafts.push({ strand, content: output.content, evidence: output.evidence ?? [] });
+      drafts.push({
+        strand,
+        content: output.content,
+        evidence: output.evidence ?? [],
+      });
     }
-    const specDraft = drafts.find((draft) => draft.strand === 'spec')?.content ?? '';
-    const testsDraft = drafts.find((draft) => draft.strand === 'tests')?.content ?? '';
+    const specDraft =
+      drafts.find((draft) => draft.strand === 'spec')?.content ?? '';
+    const testsDraft =
+      drafts.find((draft) => draft.strand === 'tests')?.content ?? '';
     const declaredApis = extractDeclaredApis(specDraft);
     const referencedApis = extractReferencedApis(testsDraft);
     const inconsistencies: string[] = [];
     referencedApis.forEach((api) => {
       if (!declaredApis.has(api)) {
-        inconsistencies.push(`Test references ${api} which is missing in spec strand.`);
+        inconsistencies.push(
+          `Test references ${api} which is missing in spec strand.`,
+        );
       }
     });
 
@@ -62,7 +82,12 @@ export class SemanticBraidCoordinator {
 
     const aggregatedEvidence = drafts.flatMap((draft) => draft.evidence);
 
-    const { artifact } = this.guard.enforce('semantic-braid', combined, [], aggregatedEvidence);
+    const { artifact } = this.guard.enforce(
+      'semantic-braid',
+      combined,
+      [],
+      aggregatedEvidence,
+    );
 
     return {
       artifact,

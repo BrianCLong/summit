@@ -1,18 +1,19 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "companyos-console.fullname" . }}
+  name: { { include "companyos-console.fullname" . } }
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "companyos-console.fullname" . }}
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+    name: { { include "companyos-console.fullname" . } }
+  minReplicas: { { .Values.autoscaling.minReplicas } }
+  maxReplicas: { { .Values.autoscaling.maxReplicas } }
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization:
+            { { .Values.autoscaling.targetCPUUtilizationPercentage } }

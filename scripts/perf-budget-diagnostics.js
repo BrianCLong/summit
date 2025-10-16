@@ -14,7 +14,7 @@ class PerformanceBudgetDiagnostics {
       violations: [],
       recommendations: [],
       slow_queries: [],
-      optimization_hints: []
+      optimization_hints: [],
     };
   }
 
@@ -26,7 +26,8 @@ class PerformanceBudgetDiagnostics {
 
     try {
       const budgetReport = await this.loadBudgetReport(budgetReportPath);
-      const baselineMetrics = await this.loadBaselineMetrics(baselineMetricsPath);
+      const baselineMetrics =
+        await this.loadBaselineMetrics(baselineMetricsPath);
 
       await this.analyzeViolations(budgetReport);
       await this.generateSlowQueryAnalysis(budgetReport, baselineMetrics);
@@ -73,15 +74,50 @@ class PerformanceBudgetDiagnostics {
   generateSimulatedBaseline() {
     return {
       '/health': { p95: 45, p99: 85, error_rate: 0.0008, throughput: 1200 },
-      '/health/ready': { p95: 85, p99: 180, error_rate: 0.002, throughput: 800 },
+      '/health/ready': {
+        p95: 85,
+        p99: 180,
+        error_rate: 0.002,
+        throughput: 800,
+      },
       '/graphql': { p95: 280, p99: 650, error_rate: 0.015, throughput: 150 },
-      '/api/v1/entities': { p95: 220, p99: 480, error_rate: 0.012, throughput: 200 },
-      '/api/v1/entities/{id}': { p95: 120, p99: 290, error_rate: 0.008, throughput: 400 },
-      '/api/v1/search': { p95: 450, p99: 1100, error_rate: 0.025, throughput: 80 },
-      '/api/v1/analytics': { p95: 750, p99: 1800, error_rate: 0.04, throughput: 20 },
+      '/api/v1/entities': {
+        p95: 220,
+        p99: 480,
+        error_rate: 0.012,
+        throughput: 200,
+      },
+      '/api/v1/entities/{id}': {
+        p95: 120,
+        p99: 290,
+        error_rate: 0.008,
+        throughput: 400,
+      },
+      '/api/v1/search': {
+        p95: 450,
+        p99: 1100,
+        error_rate: 0.025,
+        throughput: 80,
+      },
+      '/api/v1/analytics': {
+        p95: 750,
+        p99: 1800,
+        error_rate: 0.04,
+        throughput: 20,
+      },
       '/metrics': { p95: 80, p99: 200, error_rate: 0.0005, throughput: 50 },
-      '/api/v1/auth/login': { p95: 250, p99: 600, error_rate: 0.018, throughput: 100 },
-      '/api/v1/auth/refresh': { p95: 90, p99: 220, error_rate: 0.008, throughput: 300 }
+      '/api/v1/auth/login': {
+        p95: 250,
+        p99: 600,
+        error_rate: 0.018,
+        throughput: 100,
+      },
+      '/api/v1/auth/refresh': {
+        p95: 90,
+        p99: 220,
+        error_rate: 0.008,
+        throughput: 300,
+      },
     };
   }
 
@@ -95,7 +131,7 @@ class PerformanceBudgetDiagnostics {
       this.diagnostics.recommendations.push({
         type: 'no_violations',
         message: 'No performance budget violations detected',
-        priority: 'info'
+        priority: 'info',
       });
       return;
     }
@@ -121,7 +157,7 @@ class PerformanceBudgetDiagnostics {
       violation_type: violation.type,
       severity: this.calculateViolationSeverity(violation),
       impact_analysis: this.analyzeImpact(violation),
-      regression_magnitude: this.calculateRegressionMagnitude(violation)
+      regression_magnitude: this.calculateRegressionMagnitude(violation),
     };
 
     return analysis;
@@ -137,10 +173,10 @@ class PerformanceBudgetDiagnostics {
 
     const overage = (current - budget) / budget;
 
-    if (overage > 1.0) return 'critical';      // >100% over budget
-    if (overage > 0.5) return 'high';         // >50% over budget
-    if (overage > 0.2) return 'medium';       // >20% over budget
-    return 'low';                             // ≤20% over budget
+    if (overage > 1.0) return 'critical'; // >100% over budget
+    if (overage > 0.5) return 'high'; // >50% over budget
+    if (overage > 0.2) return 'medium'; // >20% over budget
+    return 'low'; // ≤20% over budget
   }
 
   /**
@@ -151,16 +187,22 @@ class PerformanceBudgetDiagnostics {
       user_experience: 'unknown',
       system_load: 'unknown',
       cost_implications: 'unknown',
-      cascading_effects: []
+      cascading_effects: [],
     };
 
     // Analyze user experience impact
-    if (violation.endpoint === '/health' || violation.endpoint === '/health/ready') {
+    if (
+      violation.endpoint === '/health' ||
+      violation.endpoint === '/health/ready'
+    ) {
       impact.user_experience = 'infrastructure';
       impact.cascading_effects.push('load_balancer_health_checks');
     } else if (violation.endpoint === '/graphql') {
       impact.user_experience = 'high';
-      impact.cascading_effects.push('frontend_responsiveness', 'user_interaction_latency');
+      impact.cascading_effects.push(
+        'frontend_responsiveness',
+        'user_interaction_latency',
+      );
     } else if (violation.endpoint.includes('/auth/')) {
       impact.user_experience = 'high';
       impact.cascading_effects.push('login_delays', 'session_management');
@@ -170,9 +212,15 @@ class PerformanceBudgetDiagnostics {
     }
 
     // Analyze system load impact
-    if (violation.type === 'latency' && violation.current > violation.budget * 2) {
+    if (
+      violation.type === 'latency' &&
+      violation.current > violation.budget * 2
+    ) {
       impact.system_load = 'high';
-      impact.cascading_effects.push('thread_pool_exhaustion', 'memory_pressure');
+      impact.cascading_effects.push(
+        'thread_pool_exhaustion',
+        'memory_pressure',
+      );
     }
 
     return impact;
@@ -192,7 +240,7 @@ class PerformanceBudgetDiagnostics {
     return {
       type: change > 0 ? 'regression' : 'improvement',
       percentage: Math.abs(percentage),
-      absolute_change: Math.abs(change)
+      absolute_change: Math.abs(change),
     };
   }
 
@@ -204,7 +252,7 @@ class PerformanceBudgetDiagnostics {
       endpoint: violation.endpoint,
       type: 'performance_optimization',
       priority: this.calculateViolationSeverity(violation),
-      actions: []
+      actions: [],
     };
 
     // Endpoint-specific recommendations
@@ -213,28 +261,28 @@ class PerformanceBudgetDiagnostics {
         'Consider implementing GraphQL query complexity analysis',
         'Review resolver efficiency and N+1 query patterns',
         'Implement DataLoader for batched database queries',
-        'Add query timeout and depth limiting'
+        'Add query timeout and depth limiting',
       );
     } else if (violation.endpoint.includes('/search')) {
       recommendation.actions.push(
         'Optimize Elasticsearch/search index configuration',
         'Implement search result caching with appropriate TTL',
         'Consider search query optimization and filters',
-        'Review full-text search indexing strategy'
+        'Review full-text search indexing strategy',
       );
     } else if (violation.endpoint.includes('/entities')) {
       recommendation.actions.push(
         'Review database query optimization for entity operations',
         'Consider implementing entity caching layer',
         'Optimize Neo4j Cypher queries and indexes',
-        'Review entity relationship traversal patterns'
+        'Review entity relationship traversal patterns',
       );
     } else if (violation.endpoint.includes('/analytics')) {
       recommendation.actions.push(
         'Implement analytics result caching',
         'Consider pre-computed analytics aggregations',
         'Optimize data warehouse query patterns',
-        'Review time-series data access patterns'
+        'Review time-series data access patterns',
       );
     }
 
@@ -244,7 +292,7 @@ class PerformanceBudgetDiagnostics {
         'Profile application performance during peak load',
         'Review database connection pooling configuration',
         'Consider implementing request-level caching',
-        'Analyze and optimize critical path operations'
+        'Analyze and optimize critical path operations',
       );
     }
 
@@ -253,7 +301,7 @@ class PerformanceBudgetDiagnostics {
         'Implement circuit breaker patterns for external dependencies',
         'Review error handling and retry mechanisms',
         'Add comprehensive error logging and monitoring',
-        'Consider graceful degradation strategies'
+        'Consider graceful degradation strategies',
       );
     }
 
@@ -270,40 +318,49 @@ class PerformanceBudgetDiagnostics {
     const slowQueries = [
       {
         query_type: 'GraphQL',
-        query: 'query GetEntityWithRelationships($id: ID!) { entity(id: $id) { id name relationships { nodes { id name type } } } }',
+        query:
+          'query GetEntityWithRelationships($id: ID!) { entity(id: $id) { id name relationships { nodes { id name type } } } }',
         avg_duration_ms: 420,
         frequency: 1500,
         optimization_potential: 'high',
         suggested_indexes: ['entity_id_btree', 'relationship_type_hash'],
-        explanation: 'Deep relationship traversal without proper indexing'
+        explanation: 'Deep relationship traversal without proper indexing',
       },
       {
         query_type: 'Cypher',
-        query: 'MATCH (e:Entity)-[r:RELATED_TO*1..3]->(related) WHERE e.id = $entityId RETURN related',
+        query:
+          'MATCH (e:Entity)-[r:RELATED_TO*1..3]->(related) WHERE e.id = $entityId RETURN related',
         avg_duration_ms: 380,
         frequency: 800,
         optimization_potential: 'high',
-        suggested_indexes: ['CREATE INDEX entity_id_index FOR (e:Entity) ON (e.id)'],
-        explanation: 'Variable-length path query without index on starting node'
+        suggested_indexes: [
+          'CREATE INDEX entity_id_index FOR (e:Entity) ON (e.id)',
+        ],
+        explanation:
+          'Variable-length path query without index on starting node',
       },
       {
         query_type: 'SQL',
-        query: 'SELECT * FROM events WHERE created_at BETWEEN $start AND $end ORDER BY created_at DESC LIMIT 100',
+        query:
+          'SELECT * FROM events WHERE created_at BETWEEN $start AND $end ORDER BY created_at DESC LIMIT 100',
         avg_duration_ms: 290,
         frequency: 2000,
         optimization_potential: 'medium',
-        suggested_indexes: ['CREATE INDEX idx_events_created_at ON events(created_at DESC)'],
-        explanation: 'Large table scan with date range and sorting'
+        suggested_indexes: [
+          'CREATE INDEX idx_events_created_at ON events(created_at DESC)',
+        ],
+        explanation: 'Large table scan with date range and sorting',
       },
       {
         query_type: 'Elasticsearch',
-        query: '{ "query": { "bool": { "must": [{ "wildcard": { "content": "*search_term*" } }] } }, "sort": [{ "_score": "desc" }] }',
+        query:
+          '{ "query": { "bool": { "must": [{ "wildcard": { "content": "*search_term*" } }] } }, "sort": [{ "_score": "desc" }] }',
         avg_duration_ms: 580,
         frequency: 600,
         optimization_potential: 'medium',
         suggested_indexes: ['Add ngram analyzer for partial matching'],
-        explanation: 'Wildcard search with scoring on large index'
-      }
+        explanation: 'Wildcard search with scoring on large index',
+      },
     ];
 
     this.diagnostics.slow_queries = slowQueries;
@@ -317,8 +374,11 @@ class PerformanceBudgetDiagnostics {
     this.diagnostics.optimization_hints.push({
       type: 'query_optimization',
       total_optimization_potential_ms: totalOptimizationPotential,
-      high_impact_queries: slowQueries.filter(q => q.optimization_potential === 'high').length,
-      recommendation: 'Focus on high-impact queries with proper indexing and query restructuring'
+      high_impact_queries: slowQueries.filter(
+        (q) => q.optimization_potential === 'high',
+      ).length,
+      recommendation:
+        'Focus on high-impact queries with proper indexing and query restructuring',
     });
   }
 
@@ -343,7 +403,7 @@ if (!entity) {
   entity = await database.getEntity(entityId);
   await redis.setex(cacheKey, 300, JSON.stringify(entity)); // 5min TTL
 }
-`
+`,
       },
       {
         category: 'database_optimization',
@@ -357,7 +417,7 @@ CREATE INDEX idx_entities_type_created ON entities(type, created_at DESC);
 
 -- Neo4j relationship index
 CREATE INDEX relationship_type_timestamp FOR ()-[r:RELATED_TO]-() ON (r.type, r.created_at);
-`
+`,
       },
       {
         category: 'connection_pooling',
@@ -374,7 +434,7 @@ const poolConfig = {
   acquire: 30000,    // Acquire timeout (30s)
   evict: 1000        // Eviction interval (1s)
 };
-`
+`,
       },
       {
         category: 'graphql_optimization',
@@ -391,7 +451,7 @@ const entityLoader = new DataLoader(async (entityIds) => {
 
 // Usage in resolver
 const entity = await entityLoader.load(entityId);
-`
+`,
       },
       {
         category: 'response_compression',
@@ -407,8 +467,8 @@ app.use(compression({
   threshold: 1024,
   filter: (req, res) => req.headers['x-no-compression'] ? false : compression.filter(req, res)
 }));
-`
-      }
+`,
+      },
     ];
 
     this.diagnostics.optimization_hints = hints;
@@ -428,8 +488,8 @@ app.use(compression({
         estimated_improvement: '80-95% query performance improvement',
         query_patterns: [
           'MATCH (e:Entity {id: $id})',
-          'MATCH (e:Entity) WHERE e.id = $id'
-        ]
+          'MATCH (e:Entity) WHERE e.id = $id',
+        ],
       },
       {
         index_type: 'node_property',
@@ -438,47 +498,52 @@ app.use(compression({
         estimated_improvement: '60-80% query performance improvement',
         query_patterns: [
           'MATCH (e:Entity {type: $type})',
-          'MATCH (e:Entity) WHERE e.type IN $types'
-        ]
+          'MATCH (e:Entity) WHERE e.type IN $types',
+        ],
       },
       {
         index_type: 'relationship_property',
-        command: 'CREATE INDEX relationship_weight_index FOR ()-[r:RELATED_TO]-() ON (r.weight)',
+        command:
+          'CREATE INDEX relationship_weight_index FOR ()-[r:RELATED_TO]-() ON (r.weight)',
         rationale: 'Relationship filtering and sorting by weight/importance',
         estimated_improvement: '50-70% query performance improvement',
         query_patterns: [
           'MATCH ()-[r:RELATED_TO]->() WHERE r.weight > $threshold',
-          'MATCH ()-[r:RELATED_TO]->() RETURN r ORDER BY r.weight DESC'
-        ]
+          'MATCH ()-[r:RELATED_TO]->() RETURN r ORDER BY r.weight DESC',
+        ],
       },
       {
         index_type: 'composite',
-        command: 'CREATE INDEX entity_type_created_index FOR (e:Entity) ON (e.type, e.created_at)',
+        command:
+          'CREATE INDEX entity_type_created_index FOR (e:Entity) ON (e.type, e.created_at)',
         rationale: 'Composite index for time-based entity queries by type',
         estimated_improvement: '70-90% query performance improvement',
         query_patterns: [
           'MATCH (e:Entity {type: $type}) WHERE e.created_at > $timestamp',
-          'MATCH (e:Entity) WHERE e.type = $type AND e.created_at BETWEEN $start AND $end'
-        ]
+          'MATCH (e:Entity) WHERE e.type = $type AND e.created_at BETWEEN $start AND $end',
+        ],
       },
       {
         index_type: 'fulltext',
-        command: 'CREATE FULLTEXT INDEX entity_content_search FOR (e:Entity) ON EACH [e.name, e.description]',
+        command:
+          'CREATE FULLTEXT INDEX entity_content_search FOR (e:Entity) ON EACH [e.name, e.description]',
         rationale: 'Full-text search capabilities for entity content',
         estimated_improvement: '90-99% search query performance improvement',
         query_patterns: [
           "CALL db.index.fulltext.queryNodes('entity_content_search', 'search terms')",
-          "CALL db.index.fulltext.queryNodes('entity_content_search', 'name:\"exact match\"')"
-        ]
-      }
+          "CALL db.index.fulltext.queryNodes('entity_content_search', 'name:\"exact match\"')",
+        ],
+      },
     ];
 
     this.diagnostics.cypher_indexes = cypherSuggestions;
 
     // Add index creation script
-    const indexScript = cypherSuggestions.map(suggestion => {
-      return `-- ${suggestion.rationale}\n${suggestion.command};`;
-    }).join('\n\n');
+    const indexScript = cypherSuggestions
+      .map((suggestion) => {
+        return `-- ${suggestion.rationale}\n${suggestion.command};`;
+      })
+      .join('\n\n');
 
     this.diagnostics.index_creation_script = indexScript;
   }
@@ -491,7 +556,10 @@ app.use(compression({
 
     // Export main diagnostics report
     const diagnosticsPath = 'performance-diagnostics.json';
-    fs.writeFileSync(diagnosticsPath, JSON.stringify(this.diagnostics, null, 2));
+    fs.writeFileSync(
+      diagnosticsPath,
+      JSON.stringify(this.diagnostics, null, 2),
+    );
 
     // Export markdown summary for PR comments
     const markdownPath = 'performance-diagnostics.md';
@@ -517,7 +585,9 @@ app.use(compression({
    */
   generateMarkdownSummary() {
     const violations = this.diagnostics.violations.length;
-    const criticalViolations = this.diagnostics.violations.filter(v => v.severity === 'critical').length;
+    const criticalViolations = this.diagnostics.violations.filter(
+      (v) => v.severity === 'critical',
+    ).length;
 
     let markdown = `# 🎯 Performance Budget Analysis
 
@@ -543,7 +613,8 @@ All endpoints are performing within acceptable limits.
 `;
 
     for (const violation of this.diagnostics.violations) {
-      const overage = violation.regression_magnitude?.percentage?.toFixed(1) || 'N/A';
+      const overage =
+        violation.regression_magnitude?.percentage?.toFixed(1) || 'N/A';
       markdown += `| ${violation.endpoint} | ${violation.severity} | ${violation.violation_type} | - | - | ${overage}% |\n`;
     }
 
@@ -606,12 +677,15 @@ if (require.main === module) {
   const budgetReportPath = process.argv[2] || 'budget-report.json';
   const baselineMetricsPath = process.argv[3] || 'baseline-metrics.json';
 
-  diagnostics.analyze(budgetReportPath, baselineMetricsPath).then(success => {
-    process.exit(success ? 0 : 1);
-  }).catch(error => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
+  diagnostics
+    .analyze(budgetReportPath, baselineMetricsPath)
+    .then((success) => {
+      process.exit(success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Fatal error:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = PerformanceBudgetDiagnostics;

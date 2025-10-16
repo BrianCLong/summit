@@ -1,1 +1,3 @@
-export function cognitiveHarmonizer(config) { return { harmonizer: 'Cognitive Harmonizer Placeholder' }; }
+export function cognitiveHarmonizer(config) {
+  return { harmonizer: 'Cognitive Harmonizer Placeholder' };
+}

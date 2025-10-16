@@ -4,7 +4,10 @@ import { nl2cypher } from '../nl2cypher/index';
 
 describe('nl2cypher corpus', () => {
   it('produces expected cypher and AST for corpus', () => {
-    const corpusPath = join(__dirname, '../../../contracts/nl2cypher/prompts.tsv');
+    const corpusPath = join(
+      __dirname,
+      '../../../contracts/nl2cypher/prompts.tsv',
+    );
     const lines = readFileSync(corpusPath, 'utf-8').trim().split('\n');
     let success = 0;
     for (const line of lines) {

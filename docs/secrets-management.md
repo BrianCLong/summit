@@ -58,11 +58,11 @@ externalSecrets:
   provider:
     vault:
       enabled: true
-      server: "https://vault.company.com"
-      path: "secret"
+      server: 'https://vault.company.com'
+      path: 'secret'
       auth:
-        mountPath: "kubernetes"
-        role: "intelgraph"
+        mountPath: 'kubernetes'
+        role: 'intelgraph'
 ```
 
 ### Secret Mapping
@@ -90,10 +90,10 @@ kind: Role
 metadata:
   name: secret-reader
 rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list"]
-  resourceNames: ["ig-platform-*"]
+  - apiGroups: ['']
+    resources: ['secrets']
+    verbs: ['get', 'list']
+    resourceNames: ['ig-platform-*']
 ```
 
 ### Encryption at Rest
@@ -121,7 +121,7 @@ kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/downloa
 externalSecrets:
   enabled: true
 sealedSecrets:
-  enabled: false  # Disable sealed secrets
+  enabled: false # Disable sealed secrets
 ```
 
 ## Secret Templates
@@ -130,18 +130,18 @@ sealedSecrets:
 
 ```yaml
 # Constructed from database secrets
-DATABASE_URL: "postgresql://{{ .postgres_user }}:{{ .postgres_password }}@postgres:5432/{{ .postgres_database }}"
-NEO4J_URI: "bolt://neo4j:7687"
-REDIS_URL: "redis://:{{ .redis_password }}@redis:6379"
+DATABASE_URL: 'postgresql://{{ .postgres_user }}:{{ .postgres_password }}@postgres:5432/{{ .postgres_database }}'
+NEO4J_URI: 'bolt://neo4j:7687'
+REDIS_URL: 'redis://:{{ .redis_password }}@redis:6379'
 ```
 
 ### JWT Configuration
 
 ```yaml
 # JWT and OIDC settings
-JWT_SECRET: "{{ .jwt_secret }}"
-OIDC_CLIENT_SECRET: "{{ .oidc_client_secret }}"
-OIDC_ISSUER: "https://auth.company.com/realms/intelgraph"
+JWT_SECRET: '{{ .jwt_secret }}'
+OIDC_CLIENT_SECRET: '{{ .oidc_client_secret }}'
+OIDC_ISSUER: 'https://auth.company.com/realms/intelgraph'
 ```
 
 ## Troubleshooting
@@ -233,12 +233,12 @@ helm upgrade ig-platform ./charts/ig-platform \
 ```yaml
 # Prometheus alerts for secret issues
 groups:
-- name: secrets
-  rules:
-  - alert: ExternalSecretSyncFailed
-    expr: external_secrets_sync_calls_error > 0
-    for: 5m
-  - alert: SealedSecretDecryptionFailed
-    expr: sealed_secrets_unseal_errors_total > 0
-    for: 1m
+  - name: secrets
+    rules:
+      - alert: ExternalSecretSyncFailed
+        expr: external_secrets_sync_calls_error > 0
+        for: 5m
+      - alert: SealedSecretDecryptionFailed
+        expr: sealed_secrets_unseal_errors_total > 0
+        for: 1m
 ```

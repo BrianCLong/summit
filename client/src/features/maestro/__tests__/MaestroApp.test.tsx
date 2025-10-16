@@ -6,14 +6,34 @@ import userEvent from '@testing-library/user-event';
 import { MaestroApp } from '../../maestro/MaestroApp';
 
 vi.mock('react-virtualized', async () => {
-  const actual = await vi.importActual<typeof import('react-virtualized')>('react-virtualized');
+  const actual =
+    await vi.importActual<typeof import('react-virtualized')>(
+      'react-virtualized',
+    );
   return {
     ...actual,
-    AutoSizer: ({ children }: { children: (size: { width: number; height: number }) => React.ReactNode }) => children({
-      width: 900,
-      height: 600,
-    }),
-    List: ({ rowCount, rowRenderer }: { rowCount: number; rowRenderer: ({ index }: { index: number; key: React.Key; style: React.CSSProperties }) => React.ReactNode }) => (
+    AutoSizer: ({
+      children,
+    }: {
+      children: (size: { width: number; height: number }) => React.ReactNode;
+    }) =>
+      children({
+        width: 900,
+        height: 600,
+      }),
+    List: ({
+      rowCount,
+      rowRenderer,
+    }: {
+      rowCount: number;
+      rowRenderer: ({
+        index,
+      }: {
+        index: number;
+        key: React.Key;
+        style: React.CSSProperties;
+      }) => React.ReactNode;
+    }) => (
       <div data-testid="virtualized-list">
         {Array.from({ length: rowCount }).map((_, index) =>
           rowRenderer({ index, key: `row-${index}`, style: { height: 90 } }),
@@ -26,7 +46,7 @@ vi.mock('react-virtualized', async () => {
 describe('MaestroApp', () => {
   it('renders dashboard overview with health stats', () => {
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/' }] }>
+      <MemoryRouter initialEntries={[{ pathname: '/' }]}>
         <Routes>
           <Route path="/*" element={<MaestroApp />} />
         </Routes>
@@ -52,7 +72,9 @@ describe('MaestroApp', () => {
     await user.clear(input);
     await user.type(input, 'Pipeline 42');
     await waitFor(() => {
-      expect(screen.getByText(/Virtualized list of 1 pipelines/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Virtualized list of 1 pipelines/i),
+      ).toBeInTheDocument();
     });
     expect(screen.getByText(/Pipeline 42/)).toBeInTheDocument();
   });
@@ -76,10 +98,14 @@ describe('MaestroApp', () => {
     await user.type(reasonInput, 'Investigating artifact integrity');
     await user.click(screen.getByRole('button', { name: /Continue/i }));
 
-    expect(await screen.findByText(/Investigating artifact integrity/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Investigating artifact integrity/),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole('link', { name: /Admin/i }));
     expect(await screen.findByText(/Access reasons/)).toBeInTheDocument();
-    expect(screen.getByText(/Investigating artifact integrity/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Investigating artifact integrity/),
+    ).toBeInTheDocument();
   });
 });

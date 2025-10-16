@@ -12,7 +12,11 @@
       "sentiment": 0.15,
       "volatility": 0.4,
       "resilience": 0.6,
-      "themes": { "voter enthusiasm": 0.8, "policy debate": 0.7, "misinformation": 0.2 },
+      "themes": {
+        "voter enthusiasm": 0.8,
+        "policy debate": 0.7,
+        "misinformation": 0.2
+      },
       "relationships": [{ "targetId": "youth_bloc", "strength": 0.6 }]
     },
     {
@@ -24,7 +28,11 @@
       "sentiment": -0.05,
       "volatility": 0.5,
       "resilience": 0.5,
-      "themes": { "voter enthusiasm": 0.6, "policy debate": 0.8, "misinformation": 0.4 },
+      "themes": {
+        "voter enthusiasm": 0.6,
+        "policy debate": 0.8,
+        "misinformation": 0.4
+      },
       "relationships": [{ "targetId": "regional_press", "strength": 0.7 }]
     },
     {
@@ -36,7 +44,11 @@
       "sentiment": -0.1,
       "volatility": 0.6,
       "resilience": 0.4,
-      "themes": { "voter enthusiasm": 0.4, "policy debate": 0.7, "misinformation": 0.5 },
+      "themes": {
+        "voter enthusiasm": 0.4,
+        "policy debate": 0.7,
+        "misinformation": 0.5
+      },
       "relationships": []
     },
     {
@@ -48,7 +60,11 @@
       "sentiment": 0.05,
       "volatility": 0.7,
       "resilience": 0.3,
-      "themes": { "voter enthusiasm": 0.9, "policy debate": 0.5, "misinformation": 0.6 },
+      "themes": {
+        "voter enthusiasm": 0.9,
+        "policy debate": 0.5,
+        "misinformation": 0.6
+      },
       "relationships": []
     }
   ],
@@ -66,7 +82,9 @@
       "intensity": 0.9,
       "sentimentShift": 0.3,
       "influenceShift": 0.1,
-      "parameterAdjustments": [{ "name": "policy_alignment_index", "delta": 0.08 }],
+      "parameterAdjustments": [
+        { "name": "policy_alignment_index", "delta": 0.08 }
+      ],
       "description": "Debate performance scored highly by fact-checkers",
       "scheduledTick": 1
     },

@@ -7,38 +7,43 @@ Hybrid classical + post-quantum cryptographic verification for ultimate future-p
 Verifies Ed25519 (classical) + Dilithium2 (post-quantum) dual signatures.
 """
 
-import json
-import hmac
-import hashlib
 import base64
-import time
-from typing import Dict, Any, Optional, List, NamedTuple
-from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+import hashlib
+import hmac
+import json
 import logging
+import time
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any, NamedTuple
 
 from .signer import PQAAttestation, PQASignature
 
 logger = logging.getLogger(__name__)
 
+
 class VerificationResult(NamedTuple):
     """PQA verification result"""
+
     valid: bool
     classical_valid: bool
     quantum_valid: bool
     timestamp_valid: bool
     signer_trusted: bool
-    error_msg: Optional[str] = None
+    error_msg: str | None = None
+
 
 @dataclass
 class TrustedSigner:
     """Trusted signer configuration"""
+
     signer_id: str
     classical_pubkey: bytes
     quantum_pubkey: bytes
     key_version: str
     valid_from: datetime
-    valid_until: Optional[datetime] = None
+    valid_until: datetime | None = None
+
 
 class PQAVerifier:
     """Hybrid classical + post-quantum attestation verifier
@@ -50,8 +55,7 @@ class PQAVerifier:
     SLA: <2ms verification latency, 100% quantum-readiness coverage
     """
 
-    def __init__(self, trusted_signers: List[TrustedSigner],
-                 max_age_minutes: int = 60):
+    def __init__(self, trusted_signers: list[TrustedSigner], max_age_minutes: int = 60):
         self.trusted_signers = {s.signer_id: s for s in trusted_signers}
         self.max_age = timedelta(minutes=max_age_minutes)
 
@@ -60,8 +64,10 @@ class PQAVerifier:
         self.verify_success_count = 0
         self.total_verify_time = 0.0
 
-        logger.info(f"PQA Verifier initialized: {len(trusted_signers)} trusted signers, "
-                   f"max_age={max_age_minutes}min")
+        logger.info(
+            f"PQA Verifier initialized: {len(trusted_signers)} trusted signers, "
+            f"max_age={max_age_minutes}min"
+        )
 
     def verify_attestation(self, attestation: PQAAttestation) -> VerificationResult:
         """Verify post-quantum attestation with dual signature validation
@@ -85,7 +91,7 @@ class PQAVerifier:
                     quantum_valid=False,
                     timestamp_valid=False,
                     signer_trusted=False,
-                    error_msg=f"Untrusted signer: {attestation.signature.signer_id}"
+                    error_msg=f"Untrusted signer: {attestation.signature.signer_id}",
                 )
 
             # 2. Check timestamp validity
@@ -97,31 +103,27 @@ class PQAVerifier:
                     quantum_valid=False,
                     timestamp_valid=False,
                     signer_trusted=True,
-                    error_msg="Timestamp outside valid window"
+                    error_msg="Timestamp outside valid window",
                 )
 
             # 3. Prepare verification data
             sign_data = {
-                "payload": json.dumps(attestation.payload, sort_keys=True, separators=(',', ':')),
+                "payload": json.dumps(attestation.payload, sort_keys=True, separators=(",", ":")),
                 "attestation_id": attestation.attestation_id,
                 "timestamp": attestation.signature.timestamp,
                 "signer_id": attestation.signature.signer_id,
                 "key_version": attestation.signature.key_version,
-                "metadata": attestation.metadata
+                "metadata": attestation.metadata,
             }
 
             # 4. Verify classical signature
             classical_valid = self._verify_classical(
-                sign_data,
-                attestation.signature.classical_sig,
-                signer.classical_pubkey
+                sign_data, attestation.signature.classical_sig, signer.classical_pubkey
             )
 
             # 5. Verify quantum signature
             quantum_valid = self._verify_quantum(
-                sign_data,
-                attestation.signature.quantum_sig,
-                signer.quantum_pubkey
+                sign_data, attestation.signature.quantum_sig, signer.quantum_pubkey
             )
 
             # 6. Overall validity requires both signatures
@@ -135,15 +137,17 @@ class PQAVerifier:
                 classical_valid=classical_valid,
                 quantum_valid=quantum_valid,
                 timestamp_valid=timestamp_valid,
-                signer_trusted=signer_trusted
+                signer_trusted=signer_trusted,
             )
 
             # Update metrics
             verify_time = time.time() - start_time
             self.total_verify_time += verify_time
 
-            logger.info(f"PQA verification: {attestation.attestation_id}, "
-                       f"result={overall_valid}, verify_time={verify_time*1000:.2f}ms")
+            logger.info(
+                f"PQA verification: {attestation.attestation_id}, "
+                f"result={overall_valid}, verify_time={verify_time*1000:.2f}ms"
+            )
 
             return result
 
@@ -155,10 +159,10 @@ class PQAVerifier:
                 quantum_valid=False,
                 timestamp_valid=False,
                 signer_trusted=False,
-                error_msg=f"Verification error: {e}"
+                error_msg=f"Verification error: {e}",
             )
 
-    def _check_signer_trust(self, signature: PQASignature) -> tuple[bool, Optional[TrustedSigner]]:
+    def _check_signer_trust(self, signature: PQASignature) -> tuple[bool, TrustedSigner | None]:
         """Check if signer is trusted and key is valid"""
         signer = self.trusted_signers.get(signature.signer_id)
         if not signer:
@@ -181,7 +185,7 @@ class PQAVerifier:
     def _check_timestamp_validity(self, signature: PQASignature) -> bool:
         """Check if signature timestamp is within valid window"""
         try:
-            sig_time = datetime.fromisoformat(signature.timestamp.replace('Z', '+00:00'))
+            sig_time = datetime.fromisoformat(signature.timestamp.replace("Z", "+00:00"))
             now = datetime.now(timezone.utc)
 
             # Check not too old
@@ -197,18 +201,14 @@ class PQAVerifier:
         except Exception:
             return False
 
-    def _verify_classical(self, data: Dict[str, Any], signature: str, pubkey: bytes) -> bool:
+    def _verify_classical(self, data: dict[str, Any], signature: str, pubkey: bytes) -> bool:
         """Verify classical cryptographic signature (Ed25519 simulation)"""
         try:
-            canonical_json = json.dumps(data, sort_keys=True, separators=(',', ':'))
-            message_bytes = canonical_json.encode('utf-8')
+            canonical_json = json.dumps(data, sort_keys=True, separators=(",", ":"))
+            message_bytes = canonical_json.encode("utf-8")
 
             # Demo: HMAC-SHA256 verification (production would use Ed25519)
-            expected_sig_bytes = hmac.new(
-                pubkey,
-                message_bytes,
-                hashlib.sha256
-            ).digest()
+            expected_sig_bytes = hmac.new(pubkey, message_bytes, hashlib.sha256).digest()
 
             provided_sig_bytes = base64.b64decode(signature)
             return hmac.compare_digest(expected_sig_bytes, provided_sig_bytes)
@@ -217,18 +217,16 @@ class PQAVerifier:
             logger.warning(f"Classical signature verification error: {e}")
             return False
 
-    def _verify_quantum(self, data: Dict[str, Any], signature: str, pubkey: bytes) -> bool:
+    def _verify_quantum(self, data: dict[str, Any], signature: str, pubkey: bytes) -> bool:
         """Verify post-quantum signature (Dilithium2 simulation)"""
         try:
-            canonical_json = json.dumps(data, sort_keys=True, separators=(',', ':'))
-            message_bytes = canonical_json.encode('utf-8')
+            canonical_json = json.dumps(data, sort_keys=True, separators=(",", ":"))
+            message_bytes = canonical_json.encode("utf-8")
 
             # Demo: Dilithium2 simulation using HMAC with quantum key
             # Production would use actual Dilithium2 verification
             expected_sig_bytes = hmac.new(
-                pubkey,
-                b"DILITHIUM2:" + message_bytes,
-                hashlib.sha512
+                pubkey, b"DILITHIUM2:" + message_bytes, hashlib.sha512
             ).digest()
 
             provided_sig_bytes = base64.b64decode(signature)
@@ -238,7 +236,9 @@ class PQAVerifier:
             logger.warning(f"Quantum signature verification error: {e}")
             return False
 
-    def verify_attestation_chain(self, attestations: List[PQAAttestation]) -> List[VerificationResult]:
+    def verify_attestation_chain(
+        self, attestations: list[PQAAttestation]
+    ) -> list[VerificationResult]:
         """Verify a chain of linked attestations"""
         results = []
         chain_ids = set()
@@ -256,7 +256,7 @@ class PQAVerifier:
 
         return results
 
-    def get_performance_metrics(self) -> Dict[str, float]:
+    def get_performance_metrics(self) -> dict[str, float]:
         """Get verifier performance metrics"""
         avg_verify_time = self.total_verify_time / max(self.verify_count, 1)
         success_rate = self.verify_success_count / max(self.verify_count, 1)
@@ -267,7 +267,7 @@ class PQAVerifier:
             "success_rate_pct": success_rate * 100,
             "avg_verify_time_ms": avg_verify_time * 1000,
             "total_verify_time_s": self.total_verify_time,
-            "sla_compliance_pct": 100.0 if avg_verify_time < 0.002 else 0.0  # <2ms SLA
+            "sla_compliance_pct": 100.0 if avg_verify_time < 0.002 else 0.0,  # <2ms SLA
         }
 
 
@@ -283,7 +283,7 @@ def create_demo_verifier(signer_id: str = "mc-pqa-demo") -> PQAVerifier:
         quantum_pubkey=quantum_key,
         key_version="v1.0-hybrid",
         valid_from=datetime.now(timezone.utc) - timedelta(hours=1),
-        valid_until=datetime.now(timezone.utc) + timedelta(days=365)
+        valid_until=datetime.now(timezone.utc) + timedelta(days=365),
     )
 
     return PQAVerifier([trusted_signer], max_age_minutes=60)
@@ -303,7 +303,7 @@ if __name__ == "__main__":
         "operation": "policy_enforcement",
         "result": "allowed",
         "policy_hash": "sha256:abc123...",
-        "tenant_id": "TENANT_001"
+        "tenant_id": "TENANT_001",
     }
 
     # Sign and verify

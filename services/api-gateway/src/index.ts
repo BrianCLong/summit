@@ -19,31 +19,37 @@ async function startServer() {
   // Security middleware
   // app.use(helmet());
   // app.use(compression());
-  app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credentials: true
-  }));
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+      credentials: true,
+    }),
+  );
 
   // Policy enforcement middleware
-  app.use('/graphql', policyGuard({
-    dryRun: process.env.POLICY_DRY_RUN === 'true'
-  }));
+  app.use(
+    '/graphql',
+    policyGuard({
+      dryRun: process.env.POLICY_DRY_RUN === 'true',
+    }),
+  );
 
   // Apollo GraphQL Server
   const server = new ApolloServer({
     typeDefs,
     resolvers,
     introspection: NODE_ENV === 'development',
-    logger: logger as any
+    logger: logger as any,
   });
 
   await server.start();
 
-  app.use('/graphql',
+  app.use(
+    '/graphql',
     express.json(),
     expressMiddleware(server, {
-      context: createContext
-    })
+      context: createContext,
+    }),
   );
 
   // Health check
@@ -51,7 +57,7 @@ async function startServer() {
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0'
+      version: process.env.npm_package_version || '1.0.0',
     });
   });
 
@@ -61,7 +67,7 @@ async function startServer() {
   });
 }
 
-startServer().catch(error => {
+startServer().catch((error) => {
   logger.error('Failed to start server:', error);
   process.exit(1);
 });

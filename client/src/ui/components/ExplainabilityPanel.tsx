@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState, useMemo } from "react";
+import React, { FC, useCallback, useState, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -7,8 +7,8 @@ import {
   Typography,
   Select,
   MenuItem,
-} from "@mui/material";
-import type { WhyPath } from "../graph/overlays/WhyPathsOverlay";
+} from '@mui/material';
+import type { WhyPath } from '../graph/overlays/WhyPathsOverlay';
 
 interface Props {
   paths: WhyPath[];
@@ -26,10 +26,10 @@ const ExplainabilityPanel: FC<Props> = ({
   onStrategyChange,
 }) => {
   const [index, setIndex] = useState(0);
-  const [strategy, setStrategy] = useState("v2");
+  const [strategy, setStrategy] = useState('v2');
 
   const humanText = useCallback(
-    () => paths.map((p) => `${p.from} → ${p.to} (${p.relId})`).join("\n"),
+    () => paths.map((p) => `${p.from} → ${p.to} (${p.relId})`).join('\n'),
     [paths],
   );
 
@@ -48,29 +48,29 @@ const ExplainabilityPanel: FC<Props> = ({
       null,
       2,
     );
-    const blob = new Blob([payload], { type: "application/json" });
+    const blob = new Blob([payload], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = "why_paths.json";
+    a.download = 'why_paths.json';
     a.click();
     URL.revokeObjectURL(url);
   }, [paths, humanText]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLUListElement>) => {
-    if (e.key === "ArrowDown") {
+    if (e.key === 'ArrowDown') {
       setIndex((i) => Math.min(i + 1, paths.length - 1));
       e.preventDefault();
-    } else if (e.key === "ArrowUp") {
+    } else if (e.key === 'ArrowUp') {
       setIndex((i) => Math.max(i - 1, 0));
       e.preventDefault();
-    } else if (e.key === "Enter") {
+    } else if (e.key === 'Enter') {
       onSelect?.(paths[index]);
     }
   };
 
   const sorted = useMemo(() => {
-    if (strategy === "v2") {
+    if (strategy === 'v2') {
       return [...paths].sort(
         (a, b) => (b.supportScore || 0) - (a.supportScore || 0),
       );
@@ -107,7 +107,7 @@ const ExplainabilityPanel: FC<Props> = ({
         tabIndex={0}
         aria-activedescendant={sorted[index]?.relId}
         onKeyDown={handleKey}
-        sx={{ maxHeight: 200, overflow: "auto" }}
+        sx={{ maxHeight: 200, overflow: 'auto' }}
       >
         {sorted.map((p, i) => (
           <ListItem
@@ -116,7 +116,7 @@ const ExplainabilityPanel: FC<Props> = ({
             role="option"
             selected={i === index}
             onClick={() => onSelect?.(p)}
-            sx={{ cursor: "pointer" }}
+            sx={{ cursor: 'pointer' }}
           >
             <Typography variant="body2">
               {p.from} → {p.to}

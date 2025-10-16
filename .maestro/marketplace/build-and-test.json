@@ -1,12 +1,15 @@
 {
-  "name":"build-and-test",
-  "version":"1.2.0",
-  "summary":"Checkout, turbo build, TIA tests",
-  "jobs":[
-    { "id":"build", "uses":"actions/checkout @v4" },
-    { "id":"turbo","run":"pnpm turbo run build --filter=...[HEAD^]" },
-    { "id":"tia",  "run":"node tools/ci/tia_select.ts && npx jest --ci --runTestsByPath $(cat tia-tests.txt)" }
+  "name": "build-and-test",
+  "version": "1.2.0",
+  "summary": "Checkout, turbo build, TIA tests",
+  "jobs": [
+    { "id": "build", "uses": "actions/checkout @v4" },
+    { "id": "turbo", "run": "pnpm turbo run build --filter=...[HEAD^]" },
+    {
+      "id": "tia",
+      "run": "node tools/ci/tia_select.ts && npx jest --ci --runTestsByPath $(cat tia-tests.txt)"
+    }
   ],
-  "digest":"sha256:{{filled-by-ci}}",
-  "cosignRef":"ghcr.io/intelgraph/flow-components/build-and-test:1.2.0"
+  "digest": "sha256:{{filled-by-ci}}",
+  "cosignRef": "ghcr.io/intelgraph/flow-components/build-and-test:1.2.0"
 }

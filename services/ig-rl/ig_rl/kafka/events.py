@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable
+from typing import Any
 
 
 @dataclass(slots=True)
 class KafkaEvent:
     topic: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
 
 class EventPublisher:

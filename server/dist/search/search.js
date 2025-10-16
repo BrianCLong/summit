@@ -32,7 +32,10 @@ export async function searchAll(input) {
             const res = await session.run(`MATCH (c:Case) WHERE c.id IN $ids
          OPTIONAL MATCH (c)-[:MENTIONS]->(i:IOC)
          RETURN c.id as id, collect({ ioc: i.value, type: i.type })[0..20] as iocs`, { ids });
-            graph = res.records.map((r) => ({ id: r.get('id'), iocs: r.get('iocs') }));
+            graph = res.records.map((r) => ({
+                id: r.get('id'),
+                iocs: r.get('iocs'),
+            }));
         }
         finally {
             await session.close();

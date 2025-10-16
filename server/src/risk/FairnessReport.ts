@@ -9,7 +9,8 @@ export function ksDistance(a: number[], b: number[]): number {
   while (i < sortedA.length && j < sortedB.length) {
     const va = sortedA[i];
     const vb = sortedB[j];
-    if (va <= vb) i++; else j++;
+    if (va <= vb) i++;
+    else j++;
     const cdfA = i / sortedA.length;
     const cdfB = j / sortedB.length;
     d = Math.max(d, Math.abs(cdfA - cdfB));

@@ -8,8 +8,14 @@ import { SourceData } from '../../src/types.js';
 describe('Influence network extraction pipeline', () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  const dataPath = path.resolve(__dirname, '../../test-data/sample-social-posts.json');
-  const expectedPath = path.resolve(__dirname, '../../test-data/expected-network.json');
+  const dataPath = path.resolve(
+    __dirname,
+    '../../test-data/sample-social-posts.json',
+  );
+  const expectedPath = path.resolve(
+    __dirname,
+    '../../test-data/expected-network.json',
+  );
 
   it('reproduces the expected network structure from sample data', () => {
     const posts = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
@@ -49,9 +55,13 @@ describe('Influence network extraction pipeline', () => {
         return a.type.localeCompare(b.type);
       }),
       entities: [...actual.entities].sort((a, b) => a.id.localeCompare(b.id)),
-      rankings: [...actual.rankings].sort((a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id)),
+      rankings: [...actual.rankings].sort(
+        (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id),
+      ),
       motifs: {
-        botNetworks: [...actual.motifs.botNetworks].sort((a, b) => b.activityScore - a.activityScore),
+        botNetworks: [...actual.motifs.botNetworks].sort(
+          (a, b) => b.activityScore - a.activityScore,
+        ),
         amplifierClusters: [...actual.motifs.amplifierClusters].sort(
           (a, b) => b.amplificationScore - a.amplificationScore,
         ),
@@ -74,20 +84,32 @@ describe('Influence network extraction pipeline', () => {
         return a.type.localeCompare(b.type);
       }),
       entities: [...expected.entities].sort((a, b) => a.id.localeCompare(b.id)),
-      rankings: [...expected.rankings].sort((a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id)),
+      rankings: [...expected.rankings].sort(
+        (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id),
+      ),
       motifs: {
-        botNetworks: [...expected.motifs.botNetworks].sort((a, b) => b.activityScore - a.activityScore),
+        botNetworks: [...expected.motifs.botNetworks].sort(
+          (a, b) => b.activityScore - a.activityScore,
+        ),
         amplifierClusters: [...expected.motifs.amplifierClusters].sort(
           (a, b) => b.amplificationScore - a.amplificationScore,
         ),
-        coordinatedBehaviors: [...expected.motifs.coordinatedBehaviors].sort((a, b) => b.support - a.support),
+        coordinatedBehaviors: [...expected.motifs.coordinatedBehaviors].sort(
+          (a, b) => b.support - a.support,
+        ),
       },
     };
 
     expect(normalisedActual).toEqual(normalisedExpected);
     expect(normalisedActual.motifs.botNetworks.length).toBeGreaterThan(0);
-    expect(normalisedActual.relationships.some((rel) => rel.type === 'share')).toBe(true);
-    expect(normalisedActual.relationships.some((rel) => rel.type === 'reply')).toBe(true);
-    expect(normalisedActual.relationships.some((rel) => rel.type === 'mention')).toBe(true);
+    expect(
+      normalisedActual.relationships.some((rel) => rel.type === 'share'),
+    ).toBe(true);
+    expect(
+      normalisedActual.relationships.some((rel) => rel.type === 'reply'),
+    ).toBe(true);
+    expect(
+      normalisedActual.relationships.some((rel) => rel.type === 'mention'),
+    ).toBe(true);
   });
 });

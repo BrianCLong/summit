@@ -1,1 +1,11 @@
-{ "version": "0.1", "commit": "${GIT_SHA}", "artifacts": { "sboms": ["sbom-gateway.spdx.json"], "tests": ["coverage/**", "opa-junit.xml"], "perf": ["k6-results/smoke.json"], "images": ["app-gateway@${IMAGE_DIGEST}"] }, "hashes": { "sbom-gateway.spdx.json": "${SHA256}" } }
+{
+  "version": "0.1",
+  "commit": "${GIT_SHA}",
+  "artifacts": {
+    "sboms": ["sbom-gateway.spdx.json"],
+    "tests": ["coverage/**", "opa-junit.xml"],
+    "perf": ["k6-results/smoke.json"],
+    "images": ["app-gateway@${IMAGE_DIGEST}"]
+  },
+  "hashes": { "sbom-gateway.spdx.json": "${SHA256}" }
+}

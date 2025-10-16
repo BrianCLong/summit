@@ -1,4 +1,15 @@
-{ "title": "Stores — Neo4j & Redis", "panels": [
-  { "type": "timeseries", "title": "Neo4j p95 (ms)", "targets": [{ "expr": "neo4j:bolt_latency_ms:p95" }] },
-  { "type": "timeseries", "title": "Redis ops/s", "targets": [{ "expr": "redis:ops_per_s:rate1m" }] }
-]}
+{
+  "title": "Stores — Neo4j & Redis",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Neo4j p95 (ms)",
+      "targets": [{ "expr": "neo4j:bolt_latency_ms:p95" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis ops/s",
+      "targets": [{ "expr": "redis:ops_per_s:rate1m" }]
+    }
+  ]
+}

@@ -127,7 +127,7 @@ ANCHOR_INTERVAL_MS=500
 ## Root: `docker-compose.override.yml`
 
 ```yaml
-version: "3.9"
+version: '3.9'
 services:
   ledger:
     build: ./impl/ledger-svc
@@ -135,7 +135,7 @@ services:
     env_file:
       - .env
     ports:
-      - "4600:4600"
+      - '4600:4600'
     depends_on: []
 ```
 
@@ -149,7 +149,7 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
-        args: ["--fix"]
+        args: ['--fix']
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.11.2
@@ -161,7 +161,7 @@ repos:
 
 ## Root: `README.md`
 
-```markdown
+````markdown
 # Summit Integrations Scaffolds
 
 This package adds:
@@ -177,9 +177,11 @@ make bootstrap
 make run  # starts ledger at :4600
 make smoke
 ```
+````
 
 Integrate from API/Worker using examples in `/integration/examples/*`.
-```
+
+````
 
 ---
 
@@ -191,7 +193,7 @@ Integrate from API/Worker using examples in `/integration/examples/*`.
 Fields: version, input_hash, policy_version, decision, issued_at, signer_kid, sig, merkle_path(optional), anchor_hash(optional).
 Hash: SHA-256 over canonical JSON of {subject, action, resource, context}.
 Signature: Ed25519 over `version || input_hash || policy_version || decision || issued_at`.
-```
+````
 
 ---
 
@@ -201,9 +203,9 @@ Signature: Ed25519 over `version || input_hash || policy_version || decision || 
 # Ledger API v0.1
 
 POST /receipts/anchor {receipts:[...]} -> {anchor_id, anchor_hash}
-GET  /receipts/{id} -> receipt
+GET /receipts/{id} -> receipt
 POST /digests {pg_digest, neo4j_digest, op_id} -> {entry_id}
-GET  /audit/query?op_id=... -> {receipts, digests, anchor}
+GET /audit/query?op_id=... -> {receipts, digests, anchor}
 ```
 
 ---
@@ -388,21 +390,21 @@ def test_roundtrip():
 ## TS SDK: `impl/policy-receipt-ts/src/crypto.ts`
 
 ```ts
-import { createHash, sign as csign, generateKeyPairSync } from "node:crypto";
+import { createHash, sign as csign, generateKeyPairSync } from 'node:crypto';
 
 export function sha256Hex(buf: Buffer | string): string {
-  const h = createHash("sha256");
+  const h = createHash('sha256');
   h.update(buf);
-  return h.digest("hex");
+  return h.digest('hex');
 }
 
 export function ed25519SignHex(msg: Buffer, privateKeyPem: string): string {
   const sig = csign(null, msg, privateKeyPem);
-  return sig.toString("hex");
+  return sig.toString('hex');
 }
 
 export function devKeypair() {
-  return generateKeyPairSync("ed25519");
+  return generateKeyPairSync('ed25519');
 }
 ```
 
@@ -411,9 +413,9 @@ export function devKeypair() {
 ## TS SDK: `impl/policy-receipt-ts/src/index.ts`
 
 ```ts
-import { sha256Hex, ed25519SignHex } from "./crypto.js";
+import { sha256Hex, ed25519SignHex } from './crypto.js';
 
-export type Decision = "allow" | "deny";
+export type Decision = 'allow' | 'deny';
 export interface Receipt {
   version: string;
   input_hash: string;
@@ -426,20 +428,49 @@ export interface Receipt {
   anchor_hash?: string;
 }
 
-export function canonicalInput(subject: any, action: any, resource: any, context: any): string {
-  return JSON.stringify({ subject, action, resource, context }, Object.keys({}).sort());
+export function canonicalInput(
+  subject: any,
+  action: any,
+  resource: any,
+  context: any,
+): string {
+  return JSON.stringify(
+    { subject, action, resource, context },
+    Object.keys({}).sort(),
+  );
 }
 
-export function inputHash(subject: any, action: any, resource: any, context: any): string {
+export function inputHash(
+  subject: any,
+  action: any,
+  resource: any,
+  context: any,
+): string {
   return sha256Hex(canonicalInput(subject, action, resource, context));
 }
 
-export function signReceipt(inpHash: string, policyVersion: string, decision: Decision, privateKeyPem: string, kid = "dev"): Receipt {
-  const version = "0.1";
+export function signReceipt(
+  inpHash: string,
+  policyVersion: string,
+  decision: Decision,
+  privateKeyPem: string,
+  kid = 'dev',
+): Receipt {
+  const version = '0.1';
   const issued = Math.floor(Date.now() / 1000);
-  const msg = Buffer.from([version, inpHash, policyVersion, decision, String(issued)].join("|"));
+  const msg = Buffer.from(
+    [version, inpHash, policyVersion, decision, String(issued)].join('|'),
+  );
   const sig = ed25519SignHex(msg, privateKeyPem);
-  return { version, input_hash: inpHash, policy_version: policyVersion, decision, issued_at: issued, signer_kid: kid, sig };
+  return {
+    version,
+    input_hash: inpHash,
+    policy_version: policyVersion,
+    decision,
+    issued_at: issued,
+    signer_kid: kid,
+    sig,
+  };
 }
 ```
 
@@ -787,10 +818,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
       - name: Bootstrap
         run: |
           make bootstrap
@@ -829,11 +860,19 @@ print(resp)
 ## Integration Examples: `integration/examples/ts_emit.ts`
 
 ```ts
-import { inputHash, signReceipt } from "../../impl/policy-receipt-ts/src/index.js";
+import {
+  inputHash,
+  signReceipt,
+} from '../../impl/policy-receipt-ts/src/index.js';
 
-const inp = inputHash({ sub: "u1" }, { act: "read" }, { res: "r1" }, { ip: "127.0.0.1" });
+const inp = inputHash(
+  { sub: 'u1' },
+  { act: 'read' },
+  { res: 'r1' },
+  { ip: '127.0.0.1' },
+);
 const pem = `-----BEGIN PRIVATE KEY-----\n...dev...\n-----END PRIVATE KEY-----`;
-const r = signReceipt(inp, "policy-v1", "allow", pem);
+const r = signReceipt(inp, 'policy-v1', 'allow', pem);
 console.log(r);
 ```
 
@@ -864,5 +903,7 @@ Licensed under the Apache License, Version 2.0.
 ## IP placeholders
 
 - `/ip/draft_spec.md`, `/ip/claims.md`, `/ip/prior_art.csv`, `/ip/fto.md` — created empty for immediate authoring.
+
 ```
 
+```

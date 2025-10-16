@@ -48,9 +48,9 @@ export class ProgramOrchestrator extends EventEmitter {
       llmUSD: config.budgets.llmUSD,
       ciMinutes: config.budgets.ciMinutes,
       carbonGCO2e: config.budgets.carbonGCO2e,
-      weeklySpent: { llmUSD: 0, ciMinutes: 0, carbonGCO2e: 0 }
+      weeklySpent: { llmUSD: 0, ciMinutes: 0, carbonGCO2e: 0 },
     };
-    
+
     this.initializeOKRs();
     this.initializeMappings();
   }
@@ -65,17 +65,17 @@ export class ProgramOrchestrator extends EventEmitter {
           {
             id: 'KR1',
             metric: 'api_p95_ms',
-            targetRel: -0.20,
-            current: 250
+            targetRel: -0.2,
+            current: 250,
           },
           {
             id: 'KR2',
             metric: 'cache_hit_rate',
             targetAbs: 0.96,
-            current: 0.91
-          }
+            current: 0.91,
+          },
         ],
-        progress: 0.45
+        progress: 0.45,
       },
       'OKR-QA-ROBUST': {
         id: 'OKR-QA-ROBUST',
@@ -85,16 +85,16 @@ export class ProgramOrchestrator extends EventEmitter {
             id: 'KR1',
             metric: 'flake_rate',
             targetRel: -0.15,
-            current: 0.08
+            current: 0.08,
           },
           {
             id: 'KR2',
             metric: 'mutation_score',
             targetAbs: 0.75,
-            current: 0.68
-          }
+            current: 0.68,
+          },
         ],
-        progress: 0.6
+        progress: 0.6,
       },
       'OKR-SEC-POSTURE': {
         id: 'OKR-SEC-POSTURE',
@@ -104,17 +104,17 @@ export class ProgramOrchestrator extends EventEmitter {
             id: 'KR1',
             metric: 'critical_vulns',
             targetAbs: 0,
-            current: 3
+            current: 3,
           },
           {
             id: 'KR2',
             metric: 'policy_violations',
-            targetRel: -0.30,
-            current: 12
-          }
+            targetRel: -0.3,
+            current: 12,
+          },
         ],
-        progress: 0.25
-      }
+        progress: 0.25,
+      },
     };
   }
 
@@ -123,9 +123,13 @@ export class ProgramOrchestrator extends EventEmitter {
     this.okrMappings = [
       { filePattern: /server\/api\//, okrId: 'OKR-Q3-LATENCY', weight: 1.0 },
       { filePattern: /tests\//, okrId: 'OKR-QA-ROBUST', weight: 1.0 },
-      { filePattern: /security\/|auth\//, okrId: 'OKR-SEC-POSTURE', weight: 1.0 },
+      {
+        filePattern: /security\/|auth\//,
+        okrId: 'OKR-SEC-POSTURE',
+        weight: 1.0,
+      },
       { filePattern: /policy\//, okrId: 'OKR-SEC-POSTURE', weight: 0.8 },
-      { filePattern: /cache\//, okrId: 'OKR-Q3-LATENCY', weight: 0.6 }
+      { filePattern: /cache\//, okrId: 'OKR-Q3-LATENCY', weight: 0.6 },
     ];
   }
 
@@ -134,7 +138,7 @@ export class ProgramOrchestrator extends EventEmitter {
    */
   async mapToOKRs(files: string[]): Promise<string[]> {
     const okrSet = new Set<string>();
-    
+
     for (const file of files) {
       for (const mapping of this.okrMappings) {
         if (mapping.filePattern.test(file)) {
@@ -144,7 +148,7 @@ export class ProgramOrchestrator extends EventEmitter {
     }
 
     const okrs = Array.from(okrSet);
-    
+
     // Emit OKR update events
     for (const okr of okrs) {
       const impact = await this.calculateOKRImpact(okr, files);
@@ -157,47 +161,63 @@ export class ProgramOrchestrator extends EventEmitter {
   /**
    * Check if changes are within budget envelope
    */
-  async checkBudgetEnvelope(okrMappings: string[]): Promise<{ approved: boolean; reason?: string }> {
+  async checkBudgetEnvelope(
+    okrMappings: string[],
+  ): Promise<{ approved: boolean; reason?: string }> {
     // Calculate estimated cost for this PR
     const estimatedCost = this.estimatePRCost(okrMappings);
-    
+
     // Check budget constraints
-    if (this.budgetEnvelope.weeklySpent.llmUSD + estimatedCost.llmUSD > this.budgetEnvelope.llmUSD) {
-      return { 
-        approved: false, 
-        reason: `LLM budget exceeded: ${this.budgetEnvelope.weeklySpent.llmUSD + estimatedCost.llmUSD} > ${this.budgetEnvelope.llmUSD}` 
+    if (
+      this.budgetEnvelope.weeklySpent.llmUSD + estimatedCost.llmUSD >
+      this.budgetEnvelope.llmUSD
+    ) {
+      return {
+        approved: false,
+        reason: `LLM budget exceeded: ${this.budgetEnvelope.weeklySpent.llmUSD + estimatedCost.llmUSD} > ${this.budgetEnvelope.llmUSD}`,
       };
     }
 
-    if (this.budgetEnvelope.weeklySpent.ciMinutes + estimatedCost.ciMinutes > this.budgetEnvelope.ciMinutes) {
-      return { 
-        approved: false, 
-        reason: `CI budget exceeded: ${this.budgetEnvelope.weeklySpent.ciMinutes + estimatedCost.ciMinutes} > ${this.budgetEnvelope.ciMinutes}` 
+    if (
+      this.budgetEnvelope.weeklySpent.ciMinutes + estimatedCost.ciMinutes >
+      this.budgetEnvelope.ciMinutes
+    ) {
+      return {
+        approved: false,
+        reason: `CI budget exceeded: ${this.budgetEnvelope.weeklySpent.ciMinutes + estimatedCost.ciMinutes} > ${this.budgetEnvelope.ciMinutes}`,
       };
     }
 
-    if (this.budgetEnvelope.weeklySpent.carbonGCO2e + estimatedCost.carbonGCO2e > this.budgetEnvelope.carbonGCO2e) {
-      return { 
-        approved: false, 
-        reason: `Carbon budget exceeded: ${this.budgetEnvelope.weeklySpent.carbonGCO2e + estimatedCost.carbonGCO2e} > ${this.budgetEnvelope.carbonGCO2e}` 
+    if (
+      this.budgetEnvelope.weeklySpent.carbonGCO2e + estimatedCost.carbonGCO2e >
+      this.budgetEnvelope.carbonGCO2e
+    ) {
+      return {
+        approved: false,
+        reason: `Carbon budget exceeded: ${this.budgetEnvelope.weeklySpent.carbonGCO2e + estimatedCost.carbonGCO2e} > ${this.budgetEnvelope.carbonGCO2e}`,
       };
     }
 
     // Calculate value-weighted priority
     const valueScore = await this.calculateValueScore(okrMappings);
     const idleBudget = this.calculateIdleBudget();
-    
-    if (idleBudget > 0.03) { // 3% idle budget threshold
-      return { 
-        approved: false, 
-        reason: `High idle budget detected: ${(idleBudget * 100).toFixed(1)}% - prioritizing higher value work` 
+
+    if (idleBudget > 0.03) {
+      // 3% idle budget threshold
+      return {
+        approved: false,
+        reason: `High idle budget detected: ${(idleBudget * 100).toFixed(1)}% - prioritizing higher value work`,
       };
     }
 
     return { approved: true };
   }
 
-  private estimatePRCost(okrMappings: string[]): { llmUSD: number; ciMinutes: number; carbonGCO2e: number } {
+  private estimatePRCost(okrMappings: string[]): {
+    llmUSD: number;
+    ciMinutes: number;
+    carbonGCO2e: number;
+  } {
     // Base costs
     let llmUSD = 0.33; // Target: ≤ $0.33
     let ciMinutes = 12;
@@ -218,13 +238,16 @@ export class ProgramOrchestrator extends EventEmitter {
     return { llmUSD, ciMinutes, carbonGCO2e };
   }
 
-  private async calculateOKRImpact(okr: string, files: string[]): Promise<number> {
+  private async calculateOKRImpact(
+    okr: string,
+    files: string[],
+  ): Promise<number> {
     const registry = this.okrRegistry[okr];
     if (!registry) return 0;
 
     // Calculate impact based on file changes and OKR progress
-    const relevantFiles = files.filter(f => 
-      this.okrMappings.some(m => m.okrId === okr && m.filePattern.test(f))
+    const relevantFiles = files.filter((f) =>
+      this.okrMappings.some((m) => m.okrId === okr && m.filePattern.test(f)),
     );
 
     const impact = relevantFiles.length * 0.02 * (1 - registry.progress);
@@ -233,7 +256,7 @@ export class ProgramOrchestrator extends EventEmitter {
 
   private async calculateValueScore(okrMappings: string[]): Promise<number> {
     let totalValue = 0;
-    
+
     for (const okr of okrMappings) {
       const registry = this.okrRegistry[okr];
       if (registry) {
@@ -250,11 +273,16 @@ export class ProgramOrchestrator extends EventEmitter {
   private calculateIdleBudget(): number {
     const utilization = {
       llm: this.budgetEnvelope.weeklySpent.llmUSD / this.budgetEnvelope.llmUSD,
-      ci: this.budgetEnvelope.weeklySpent.ciMinutes / this.budgetEnvelope.ciMinutes,
-      carbon: this.budgetEnvelope.weeklySpent.carbonGCO2e / this.budgetEnvelope.carbonGCO2e
+      ci:
+        this.budgetEnvelope.weeklySpent.ciMinutes /
+        this.budgetEnvelope.ciMinutes,
+      carbon:
+        this.budgetEnvelope.weeklySpent.carbonGCO2e /
+        this.budgetEnvelope.carbonGCO2e,
     };
 
-    const avgUtilization = (utilization.llm + utilization.ci + utilization.carbon) / 3;
+    const avgUtilization =
+      (utilization.llm + utilization.ci + utilization.carbon) / 3;
     return Math.max(0, 1 - avgUtilization);
   }
 
@@ -264,17 +292,23 @@ export class ProgramOrchestrator extends EventEmitter {
   async getHistoricalOKRImpact(okr: string): Promise<number> {
     const history = this.historicalData.get(okr) || [];
     if (history.length === 0) return 0.05; // Default impact
-    
+
     return history.reduce((sum, val) => sum + val, 0) / history.length;
   }
 
   /**
    * Update budget spending
    */
-  updateBudgetSpending(spent: { llmUSD?: number; ciMinutes?: number; carbonGCO2e?: number }): void {
+  updateBudgetSpending(spent: {
+    llmUSD?: number;
+    ciMinutes?: number;
+    carbonGCO2e?: number;
+  }): void {
     if (spent.llmUSD) this.budgetEnvelope.weeklySpent.llmUSD += spent.llmUSD;
-    if (spent.ciMinutes) this.budgetEnvelope.weeklySpent.ciMinutes += spent.ciMinutes;
-    if (spent.carbonGCO2e) this.budgetEnvelope.weeklySpent.carbonGCO2e += spent.carbonGCO2e;
+    if (spent.ciMinutes)
+      this.budgetEnvelope.weeklySpent.ciMinutes += spent.ciMinutes;
+    if (spent.carbonGCO2e)
+      this.budgetEnvelope.weeklySpent.carbonGCO2e += spent.carbonGCO2e;
   }
 
   /**
@@ -282,10 +316,15 @@ export class ProgramOrchestrator extends EventEmitter {
    */
   async getBudgetUtilization(): Promise<Record<string, number>> {
     return {
-      llmUtilization: this.budgetEnvelope.weeklySpent.llmUSD / this.budgetEnvelope.llmUSD,
-      ciUtilization: this.budgetEnvelope.weeklySpent.ciMinutes / this.budgetEnvelope.ciMinutes,
-      carbonUtilization: this.budgetEnvelope.weeklySpent.carbonGCO2e / this.budgetEnvelope.carbonGCO2e,
-      idleBudget: this.calculateIdleBudget()
+      llmUtilization:
+        this.budgetEnvelope.weeklySpent.llmUSD / this.budgetEnvelope.llmUSD,
+      ciUtilization:
+        this.budgetEnvelope.weeklySpent.ciMinutes /
+        this.budgetEnvelope.ciMinutes,
+      carbonUtilization:
+        this.budgetEnvelope.weeklySpent.carbonGCO2e /
+        this.budgetEnvelope.carbonGCO2e,
+      idleBudget: this.calculateIdleBudget(),
     };
   }
 

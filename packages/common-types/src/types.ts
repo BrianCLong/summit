@@ -64,7 +64,13 @@ export const connectorSchema = z.object({
   createdAt: z.string().datetime(),
 });
 
-export const runStatusEnum = z.enum(['PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'DLQ']);
+export const runStatusEnum = z.enum([
+  'PENDING',
+  'RUNNING',
+  'SUCCEEDED',
+  'FAILED',
+  'DLQ',
+]);
 
 export const runSchema = z.object({
   id: z.string(),

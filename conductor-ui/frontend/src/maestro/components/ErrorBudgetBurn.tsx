@@ -7,7 +7,8 @@ export default function ErrorBudgetBurn({ pipeline }: { pipeline: string }) {
     const slow = Math.max(0.3, Math.random() * 1.2);
     setBurn({ fast, slow });
   }, [pipeline]);
-  const badge = (x: number) => (x >= 2 ? 'bg-red-600' : x >= 1 ? 'bg-amber-500' : 'bg-emerald-600');
+  const badge = (x: number) =>
+    x >= 2 ? 'bg-red-600' : x >= 1 ? 'bg-amber-500' : 'bg-emerald-600';
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       <Card
@@ -24,7 +25,15 @@ export default function ErrorBudgetBurn({ pipeline }: { pipeline: string }) {
   );
 }
 
-function Card({ title, value, cls }: { title: string; value: string; cls: string }) {
+function Card({
+  title,
+  value,
+  cls,
+}: {
+  title: string;
+  value: string;
+  cls: string;
+}) {
   return (
     <div className="rounded-2xl border p-4">
       <div className="mb-1 text-sm text-gray-500">{title}</div>
@@ -33,7 +42,11 @@ function Card({ title, value, cls }: { title: string; value: string; cls: string
         className={`mt-2 inline-block rounded px-2 py-0.5 text-xs text-white ${cls}`}
         aria-live="polite"
       >
-        {cls.includes('emerald') ? 'HEALTHY' : cls.includes('amber') ? 'ALERT' : 'PAGE'}
+        {cls.includes('emerald')
+          ? 'HEALTHY'
+          : cls.includes('amber')
+            ? 'ALERT'
+            : 'PAGE'}
       </span>
     </div>
   );

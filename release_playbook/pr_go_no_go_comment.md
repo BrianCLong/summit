@@ -7,6 +7,7 @@
 **Prod URL:** `${{ vars.PROD_URL }}`
 
 ### Gates
+
 - [x] CI (“CI”) + Policy Gate ✅
 - [x] OPA/Conftest PASS (prod renders)
 - [x] Admission enforcing: Kyverno signed-images + no privileged
@@ -17,6 +18,7 @@
 - [x] SBOMs attached (SPDX + CycloneDX)
 
 ### Evidence Links
+
 - Deploy run(s): `<actions run links>`
 - Flagger events: `<kubectl describe canary output attached>`
 - Grafana: `<dashboard link>`

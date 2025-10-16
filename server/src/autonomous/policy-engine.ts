@@ -58,34 +58,36 @@ const PolicyContextSchema = z.object({
     id: z.string(),
     roles: z.array(z.string()),
     tenantId: z.string(),
-    permissions: z.array(z.string())
+    permissions: z.array(z.string()),
   }),
   resource: z.object({
     type: z.string(),
     id: z.string(),
     tenantId: z.string(),
-    sensitivity: z.enum(['low', 'medium', 'high', 'critical']).optional()
+    sensitivity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   }),
   action: z.object({
     type: z.string(),
     category: z.enum(['read', 'write', 'deploy', 'rollback']),
     autonomy: z.number().int().min(0).max(5),
-    budgets: z.object({
-      tokens: z.number().positive(),
-      usd: z.number().positive(),
-      timeMinutes: z.number().positive()
-    }).optional()
+    budgets: z
+      .object({
+        tokens: z.number().positive(),
+        usd: z.number().positive(),
+        timeMinutes: z.number().positive(),
+      })
+      .optional(),
   }),
   environment: z.object({
     name: z.string(),
     production: z.boolean(),
-    region: z.string()
+    region: z.string(),
   }),
   time: z.object({
     timestamp: z.number(),
     timezone: z.string(),
-    businessHours: z.boolean()
-  })
+    businessHours: z.boolean(),
+  }),
 });
 
 export class PolicyEngine {
@@ -93,9 +95,15 @@ export class PolicyEngine {
   private db: Pool;
   private logger: Logger;
   private policyVersion: string;
-  private cache: Map<string, { decision: PolicyDecision; expires: number }> = new Map();
+  private cache: Map<string, { decision: PolicyDecision; expires: number }> =
+    new Map();
 
-  constructor(opaUrl: string, db: Pool, logger: Logger, policyVersion = '1.0.0') {
+  constructor(
+    opaUrl: string,
+    db: Pool,
+    logger: Logger,
+    policyVersion = '1.0.0',
+  ) {
     this.opaUrl = opaUrl;
     this.db = db;
     this.logger = logger;
@@ -112,21 +120,29 @@ export class PolicyEngine {
     subject: string,
     action: string,
     resource: string,
-    context: any
+    context: any,
   ): Promise<PolicyDecision> {
     try {
       // Build full context
-      const policyContext = await this.buildPolicyContext(subject, action, resource, context);
-      
+      const policyContext = await this.buildPolicyContext(
+        subject,
+        action,
+        resource,
+        context,
+      );
+
       // Validate context
       const validation = PolicyContextSchema.safeParse(policyContext);
       if (!validation.success) {
-        this.logger.warn({ 
-          subject, 
-          action, 
-          resource, 
-          error: validation.error 
-        }, 'Invalid policy context');
+        this.logger.warn(
+          {
+            subject,
+            action,
+            resource,
+            error: validation.error,
+          },
+          'Invalid policy context',
+        );
         return { allowed: false, reason: 'Invalid policy context' };
       }
 
@@ -134,14 +150,20 @@ export class PolicyEngine {
       const cacheKey = this.getCacheKey(policyContext);
       const cached = this.cache.get(cacheKey);
       if (cached && cached.expires > Date.now()) {
-        this.logger.debug({ subject, action, resource }, 'Policy decision from cache');
+        this.logger.debug(
+          { subject, action, resource },
+          'Policy decision from cache',
+        );
         return cached.decision;
       }
 
       // Check database cache
       const dbCached = await this.getFromDbCache(cacheKey);
       if (dbCached) {
-        this.cache.set(cacheKey, { decision: dbCached, expires: Date.now() + 300000 }); // 5 min
+        this.cache.set(cacheKey, {
+          decision: dbCached,
+          expires: Date.now() + 300000,
+        }); // 5 min
         return dbCached;
       }
 
@@ -153,30 +175,42 @@ export class PolicyEngine {
       decision.riskScore = riskScore;
 
       // Determine if approval is required
-      decision.requiresApproval = this.requiresApproval(policyContext, decision, riskScore);
+      decision.requiresApproval = this.requiresApproval(
+        policyContext,
+        decision,
+        riskScore,
+      );
 
       // Cache the decision
       await this.cacheDecision(cacheKey, decision);
 
       // Log the decision
-      await this.logPolicyDecision(subject, action, resource, policyContext, decision);
+      await this.logPolicyDecision(
+        subject,
+        action,
+        resource,
+        policyContext,
+        decision,
+      );
 
       return decision;
-
     } catch (error) {
-      this.logger.error({ 
-        subject, 
-        action, 
-        resource, 
-        error: error.message 
-      }, 'Policy evaluation failed');
+      this.logger.error(
+        {
+          subject,
+          action,
+          resource,
+          error: error.message,
+        },
+        'Policy evaluation failed',
+      );
 
       // Fail-safe: deny by default
-      return { 
-        allowed: false, 
-        reason: 'Policy evaluation error', 
+      return {
+        allowed: false,
+        reason: 'Policy evaluation error',
         requiresApproval: true,
-        riskScore: 100
+        riskScore: 100,
       };
     }
   }
@@ -184,20 +218,28 @@ export class PolicyEngine {
   /**
    * Batch policy evaluation for performance
    */
-  async evaluateBatch(requests: Array<{
-    subject: string;
-    action: string;
-    resource: string;
-    context: any;
-  }>): Promise<PolicyDecision[]> {
+  async evaluateBatch(
+    requests: Array<{
+      subject: string;
+      action: string;
+      resource: string;
+      context: any;
+    }>,
+  ): Promise<PolicyDecision[]> {
     const results = await Promise.allSettled(
-      requests.map(req => this.evaluate(req.subject, req.action, req.resource, req.context))
+      requests.map((req) =>
+        this.evaluate(req.subject, req.action, req.resource, req.context),
+      ),
     );
 
-    return results.map(result => 
-      result.status === 'fulfilled' 
-        ? result.value 
-        : { allowed: false, reason: 'Batch evaluation error', requiresApproval: true }
+    return results.map((result) =>
+      result.status === 'fulfilled'
+        ? result.value
+        : {
+            allowed: false,
+            reason: 'Batch evaluation error',
+            requiresApproval: true,
+          },
     );
   }
 
@@ -208,14 +250,17 @@ export class PolicyEngine {
     subject: string,
     action: string,
     resource: string,
-    context: any
+    context: any,
   ): Promise<PolicyContext> {
     // Get user details (would typically come from auth service)
     const user = await this.getUserDetails(subject);
-    
+
     // Parse resource details
     const [resourceType, resourceId] = resource.split(':');
-    const resourceDetails = await this.getResourceDetails(resourceType, resourceId);
+    const resourceDetails = await this.getResourceDetails(
+      resourceType,
+      resourceId,
+    );
 
     // Determine environment
     const environment = this.getEnvironmentContext();
@@ -225,7 +270,7 @@ export class PolicyEngine {
     const timeContext = {
       timestamp: now.getTime(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      businessHours: this.isBusinessHours(now)
+      businessHours: this.isBusinessHours(now),
     };
 
     return {
@@ -233,50 +278,55 @@ export class PolicyEngine {
         id: subject,
         roles: user.roles || [],
         tenantId: user.tenantId || context.tenantId || 'default',
-        permissions: user.permissions || []
+        permissions: user.permissions || [],
       },
       resource: {
         type: resourceType,
         id: resourceId,
         tenantId: resourceDetails.tenantId || context.tenantId || 'default',
-        sensitivity: resourceDetails.sensitivity || 'medium'
+        sensitivity: resourceDetails.sensitivity || 'medium',
       },
       action: {
         type: action,
         category: this.getActionCategory(action),
         autonomy: context.autonomy || 0,
-        budgets: context.budgets
+        budgets: context.budgets,
       },
       environment,
-      time: timeContext
+      time: timeContext,
     };
   }
 
   /**
    * Evaluate policy with OPA
    */
-  private async evaluateWithOpa(context: PolicyContext): Promise<PolicyDecision> {
+  private async evaluateWithOpa(
+    context: PolicyContext,
+  ): Promise<PolicyDecision> {
     try {
-      const response = await axios.post(`${this.opaUrl}/v1/data/autonomous/allow`, {
-        input: context
-      }, {
-        timeout: 5000,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await axios.post(
+        `${this.opaUrl}/v1/data/autonomous/allow`,
+        {
+          input: context,
+        },
+        {
+          timeout: 5000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
       const result = response.data.result;
-      
+
       return {
         allowed: result.allow === true,
         reason: result.reason,
-        conditions: result.conditions || {}
+        conditions: result.conditions || {},
       };
-
     } catch (error) {
       this.logger.error({ error: error.message }, 'OPA evaluation failed');
-      
+
       // Fallback to local policy evaluation
       return this.evaluateLocalPolicy(context);
     }
@@ -291,10 +341,10 @@ export class PolicyEngine {
     // Production protection
     if (environment.production && action.category !== 'read') {
       if (action.autonomy >= 4) {
-        return { 
-          allowed: false, 
+        return {
+          allowed: false,
           reason: 'High autonomy operations not allowed in production',
-          requiresApproval: true
+          requiresApproval: true,
         };
       }
     }
@@ -302,10 +352,10 @@ export class PolicyEngine {
     // Deployment restrictions
     if (action.category === 'deploy') {
       if (!user.permissions.includes('deploy')) {
-        return { 
-          allowed: false, 
+        return {
+          allowed: false,
           reason: 'User lacks deployment permissions',
-          requiresApproval: true
+          requiresApproval: true,
         };
       }
     }
@@ -316,7 +366,7 @@ export class PolicyEngine {
         return {
           allowed: false,
           reason: 'Critical resources require manual approval',
-          requiresApproval: true
+          requiresApproval: true,
         };
       }
     }
@@ -327,7 +377,7 @@ export class PolicyEngine {
         return {
           allowed: false,
           reason: 'Budget exceeds limits',
-          requiresApproval: true
+          requiresApproval: true,
         };
       }
     }
@@ -338,25 +388,28 @@ export class PolicyEngine {
     }
 
     // Default deny with approval required
-    return { 
+    return {
       allowed: action.autonomy === 0, // Only allow manual mode by default
       reason: 'Default policy requires manual approval',
-      requiresApproval: true
+      requiresApproval: true,
     };
   }
 
   /**
    * Calculate risk score based on context
    */
-  private calculateRiskScore(context: PolicyContext, decision: PolicyDecision): number {
+  private calculateRiskScore(
+    context: PolicyContext,
+    decision: PolicyDecision,
+  ): number {
     let risk = 0;
 
     // Base risk from action category
     const categoryRisk = {
-      'read': 10,
-      'write': 30,
-      'deploy': 60,
-      'rollback': 80
+      read: 10,
+      write: 30,
+      deploy: 60,
+      rollback: 80,
     };
     risk += categoryRisk[context.action.category] || 50;
 
@@ -370,10 +423,10 @@ export class PolicyEngine {
 
     // Resource sensitivity
     const sensitivityRisk = {
-      'low': 0,
-      'medium': 10,
-      'high': 20,
-      'critical': 40
+      low: 0,
+      medium: 10,
+      high: 20,
+      critical: 40,
     };
     risk += sensitivityRisk[context.resource.sensitivity || 'medium'];
 
@@ -395,9 +448,9 @@ export class PolicyEngine {
    * Determine if approval is required
    */
   private requiresApproval(
-    context: PolicyContext, 
-    decision: PolicyDecision, 
-    riskScore: number
+    context: PolicyContext,
+    decision: PolicyDecision,
+    riskScore: number,
   ): boolean {
     // Always require approval if policy explicitly denies
     if (!decision.allowed) return true;
@@ -406,7 +459,10 @@ export class PolicyEngine {
     if (riskScore >= 70) return true;
 
     // Production deployments require approval
-    if (context.environment.production && context.action.category === 'deploy') {
+    if (
+      context.environment.production &&
+      context.action.category === 'deploy'
+    ) {
       return true;
     }
 
@@ -416,7 +472,10 @@ export class PolicyEngine {
     }
 
     // Critical resources always require approval for write operations
-    if (context.resource.sensitivity === 'critical' && context.action.category !== 'read') {
+    if (
+      context.resource.sensitivity === 'critical' &&
+      context.action.category !== 'read'
+    ) {
       return true;
     }
 
@@ -428,54 +487,73 @@ export class PolicyEngine {
    */
   private getCacheKey(context: PolicyContext): string {
     const key = JSON.stringify(context, Object.keys(context).sort());
-    return createHash('sha256').update(`${this.policyVersion}:${key}`).digest('hex');
+    return createHash('sha256')
+      .update(`${this.policyVersion}:${key}`)
+      .digest('hex');
   }
 
-  private async getFromDbCache(cacheKey: string): Promise<PolicyDecision | null> {
+  private async getFromDbCache(
+    cacheKey: string,
+  ): Promise<PolicyDecision | null> {
     try {
-      const result = await this.db.query(`
+      const result = await this.db.query(
+        `
         SELECT allowed, reason, conditions 
         FROM policy_decisions 
         WHERE subject_hash = $1 AND policy_version = $2 AND expires_at > NOW()
-      `, [cacheKey, this.policyVersion]);
+      `,
+        [cacheKey, this.policyVersion],
+      );
 
       if (result.rows.length > 0) {
         const row = result.rows[0];
         return {
           allowed: row.allowed,
           reason: row.reason,
-          conditions: row.conditions || {}
+          conditions: row.conditions || {},
         };
       }
     } catch (error) {
-      this.logger.warn({ error: error.message }, 'Failed to get cached policy decision');
+      this.logger.warn(
+        { error: error.message },
+        'Failed to get cached policy decision',
+      );
     }
     return null;
   }
 
-  private async cacheDecision(cacheKey: string, decision: PolicyDecision): Promise<void> {
+  private async cacheDecision(
+    cacheKey: string,
+    decision: PolicyDecision,
+  ): Promise<void> {
     try {
       // Cache in memory
-      this.cache.set(cacheKey, { 
-        decision, 
-        expires: Date.now() + 300000 // 5 minutes
+      this.cache.set(cacheKey, {
+        decision,
+        expires: Date.now() + 300000, // 5 minutes
       });
 
       // Cache in database
-      await this.db.query(`
+      await this.db.query(
+        `
         INSERT INTO policy_decisions (subject_hash, policy_version, allowed, reason, conditions, expires_at)
         VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '5 minutes')
         ON CONFLICT (subject_hash, policy_version) 
         DO UPDATE SET allowed = $3, reason = $4, conditions = $5, expires_at = NOW() + INTERVAL '5 minutes'
-      `, [
-        cacheKey,
-        this.policyVersion,
-        decision.allowed,
-        decision.reason,
-        JSON.stringify(decision.conditions || {})
-      ]);
+      `,
+        [
+          cacheKey,
+          this.policyVersion,
+          decision.allowed,
+          decision.reason,
+          JSON.stringify(decision.conditions || {}),
+        ],
+      );
     } catch (error) {
-      this.logger.warn({ error: error.message }, 'Failed to cache policy decision');
+      this.logger.warn(
+        { error: error.message },
+        'Failed to cache policy decision',
+      );
     }
   }
 
@@ -484,24 +562,27 @@ export class PolicyEngine {
     action: string,
     resource: string,
     context: PolicyContext,
-    decision: PolicyDecision
+    decision: PolicyDecision,
   ): Promise<void> {
-    this.logger.info({
-      subject,
-      action,
-      resource,
-      decision: {
-        allowed: decision.allowed,
-        reason: decision.reason,
-        riskScore: decision.riskScore,
-        requiresApproval: decision.requiresApproval
+    this.logger.info(
+      {
+        subject,
+        action,
+        resource,
+        decision: {
+          allowed: decision.allowed,
+          reason: decision.reason,
+          riskScore: decision.riskScore,
+          requiresApproval: decision.requiresApproval,
+        },
+        context: {
+          autonomy: context.action.autonomy,
+          environment: context.environment.name,
+          production: context.environment.production,
+        },
       },
-      context: {
-        autonomy: context.action.autonomy,
-        environment: context.environment.name,
-        production: context.environment.production
-      }
-    }, 'Policy decision made');
+      'Policy decision made',
+    );
   }
 
   private async getUserDetails(userId: string): Promise<any> {
@@ -509,7 +590,7 @@ export class PolicyEngine {
     return {
       roles: ['developer'],
       permissions: ['read', 'write'],
-      tenantId: 'default'
+      tenantId: 'default',
     };
   }
 
@@ -517,7 +598,7 @@ export class PolicyEngine {
     // In a real implementation, this would query the resource metadata
     return {
       tenantId: 'default',
-      sensitivity: type === 'production' ? 'critical' : 'medium'
+      sensitivity: type === 'production' ? 'critical' : 'medium',
     };
   }
 
@@ -525,12 +606,18 @@ export class PolicyEngine {
     return {
       name: process.env.NODE_ENV || 'development',
       production: process.env.NODE_ENV === 'production',
-      region: process.env.AWS_REGION || 'us-west-2'
+      region: process.env.AWS_REGION || 'us-west-2',
     };
   }
 
-  private getActionCategory(action: string): 'read' | 'write' | 'deploy' | 'rollback' {
-    if (action.includes('read') || action.includes('get') || action.includes('list')) {
+  private getActionCategory(
+    action: string,
+  ): 'read' | 'write' | 'deploy' | 'rollback' {
+    if (
+      action.includes('read') ||
+      action.includes('get') ||
+      action.includes('list')
+    ) {
       return 'read';
     }
     if (action.includes('deploy')) {

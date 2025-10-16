@@ -8,15 +8,15 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: "0 1 * * *"  # Daily at 1 AM UTC
-  timeZone: "UTC"
+  schedule: '0 1 * * *' # Daily at 1 AM UTC
+  timeZone: 'UTC'
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 7200  # 2 hour timeout
+      activeDeadlineSeconds: 7200 # 2 hour timeout
       backoffLimit: 2
       template:
         metadata:
@@ -27,268 +27,268 @@ spec:
           restartPolicy: Never
           securityContext:
             runAsNonRoot: true
-            runAsUser: 999  # postgres user
+            runAsUser: 999 # postgres user
             runAsGroup: 999
             fsGroup: 999
           serviceAccountName: postgres-backup
           containers:
-          - name: postgres-backup
-            image: postgres:16-alpine
-            imagePullPolicy: IfNotPresent
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              # Configuration
-              BACKUP_NAME="postgres-backup-$(date +%Y%m%d-%H%M%S)"
-              BACKUP_DIR="/backups/${BACKUP_NAME}"
-              RETENTION_DAYS=30
-              
-              echo "Starting PostgreSQL backup: ${BACKUP_NAME}"
-              
-              # Create backup directory
-              mkdir -p "${BACKUP_DIR}"
-              
-              # Export environment variables for PostgreSQL tools
-              export PGPASSWORD="${POSTGRES_PASSWORD}"
-              export PGHOST="${POSTGRES_HOST}"
-              export PGPORT="${POSTGRES_PORT}"
-              export PGUSER="${POSTGRES_USER}"
-              export PGDATABASE="${POSTGRES_DB}"
-              
-              # Test connection
-              echo "Testing database connection..."
-              pg_isready -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB}
-              
-              # Perform base backup with WAL streaming
-              echo "Creating base backup..."
-              pg_basebackup \
-                -h ${POSTGRES_HOST} \
-                -p ${POSTGRES_PORT} \
-                -U ${POSTGRES_USER} \
-                -D "${BACKUP_DIR}/basebackup" \
-                -Ft \
-                -z \
-                -P \
-                -v \
-                -X stream \
-                -W
-              
-              # Create logical dump as additional backup
-              echo "Creating logical dump..."
-              pg_dump \
-                -h ${POSTGRES_HOST} \
-                -p ${POSTGRES_PORT} \
-                -U ${POSTGRES_USER} \
-                -d ${POSTGRES_DB} \
-                --verbose \
-                --format=custom \
-                --compress=9 \
-                --lock-wait-timeout=30000 \
-                --file="${BACKUP_DIR}/logical_dump.sql.gz"
-              
-              # Create schema-only dump for quick structure recovery
-              echo "Creating schema dump..."
-              pg_dump \
-                -h ${POSTGRES_HOST} \
-                -p ${POSTGRES_PORT} \
-                -U ${POSTGRES_USER} \
-                -d ${POSTGRES_DB} \
-                --schema-only \
-                --verbose \
-                --format=plain \
-                --file="${BACKUP_DIR}/schema_only.sql"
-              
-              # Get current WAL position for point-in-time recovery
-              WAL_POSITION=$(psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "SELECT pg_current_wal_lsn();" | tr -d ' ')
-              
-              # Create backup manifest with metadata
-              cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
-              {
-                "backup_name": "${BACKUP_NAME}",
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "database": "${POSTGRES_DB}",
-                "backup_type": "full",
-                "wal_position": "${WAL_POSITION}",
-                "backup_size_bytes": $(du -sb "${BACKUP_DIR}" | cut -f1),
-                "postgresql_version": "$(psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c 'SELECT version();' | head -1 | tr -d ' ')",
-                "backup_method": "pg_basebackup + pg_dump",
-                "compression": "gzip",
-                "retention_policy": "${RETENTION_DAYS} days",
-                "includes_wal": true,
-                "point_in_time_recovery": true
-              }
-              EOF
-              
-              # Create database statistics for monitoring
-              echo "Collecting database statistics..."
-              psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} << 'EOSQL' > "${BACKUP_DIR}/db_stats.txt"
-              -- Database size and statistics
-              SELECT 
-                  pg_database.datname as database_name,
-                  pg_size_pretty(pg_database_size(pg_database.datname)) AS database_size,
-                  numbackends as active_connections
-              FROM pg_database
-              WHERE datname = current_database();
-              
-              -- Table sizes
-              SELECT 
-                  schemaname,
-                  tablename,
-                  pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
-                  pg_total_relation_size(schemaname||'.'||tablename) as size_bytes
-              FROM pg_tables
-              ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
-              LIMIT 20;
-              
-              -- Index usage statistics
-              SELECT 
-                  schemaname,
-                  tablename,
-                  indexname,
-                  idx_scan,
-                  idx_tup_read,
-                  idx_tup_fetch
-              FROM pg_stat_user_indexes
-              WHERE idx_scan > 0
-              ORDER BY idx_scan DESC
-              LIMIT 10;
-              EOSQL
-              
-              # Compress backup for storage efficiency
-              echo "Compressing backup..."
-              tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
-              rm -rf "${BACKUP_DIR}"
-              
-              # Upload to S3 with encryption
-              echo "Uploading to S3..."
-              aws s3 cp "${BACKUP_DIR}.tar.gz" \
-                "s3://${BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --server-side-encryption AES256 \
-                --storage-class STANDARD_IA \
-                --metadata backup-type=postgres,database=${POSTGRES_DB},timestamp=$(date +%s),wal-position=${WAL_POSITION}
-              
-              # Cross-region replication
-              echo "Replicating to DR region..."
-              aws s3 cp "s3://${BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                "s3://${DR_BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --source-region ${AWS_REGION} \
-                --region ${DR_AWS_REGION}
-              
-              # Cleanup local backup
-              rm -f "${BACKUP_DIR}.tar.gz"
-              
-              # Archive WAL files separately for point-in-time recovery
-              echo "Archiving recent WAL files..."
-              WAL_FILES=$(psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "
-                SELECT pg_walfile_name(pg_current_wal_lsn());
-              " | tr -d ' ')
-              
-              # Store WAL position for PITR
-              aws s3 cp - "s3://${BACKUP_BUCKET}/postgres/wal-positions/$(date +%Y/%m/%d)/${BACKUP_NAME}-wal-position.txt" \
-                --server-side-encryption AES256 << EOF
-              {
-                "backup_name": "${BACKUP_NAME}",
-                "wal_position": "${WAL_POSITION}",
-                "wal_file": "${WAL_FILES}",
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-              }
-              EOF
-              
-              # Cleanup old backups (retention policy)
-              echo "Cleaning up old backups..."
-              aws s3 ls "s3://${BACKUP_BUCKET}/postgres/" --recursive | \
-                awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
-                xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
-              
-              # Send success notification with metrics
-              BACKUP_SIZE=$(aws s3 ls "s3://${BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" | awk '{print $3}')
-              curl -X POST "${SLACK_WEBHOOK_URL}" \
-                -H 'Content-Type: application/json' \
-                -d "{\"text\":\"✅ PostgreSQL backup completed successfully: ${BACKUP_NAME}\\nSize: $(numfmt --to=iec ${BACKUP_SIZE})\\nWAL Position: ${WAL_POSITION}\"}" || true
-              
-              echo "PostgreSQL backup completed successfully: ${BACKUP_NAME}"
-              
-            env:
-            - name: POSTGRES_HOST
-              value: "postgres.database"
-            - name: POSTGRES_PORT
-              value: "5432"
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-backup-secrets
-                  key: username
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-backup-secrets
-                  key: password
-            - name: POSTGRES_DB
-              value: "intelgraph"
-            - name: BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: DR_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-backup-bucket
-            - name: AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: aws-region
-            - name: DR_AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-aws-region
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "1Gi"
-                cpu: "500m"
-              limits:
-                memory: "4Gi"
-                cpu: "2000m"
-            volumeMounts:
-            - name: backup-storage
-              mountPath: /backups
-            - name: tmp-volume
-              mountPath: /tmp
+            - name: postgres-backup
+              image: postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  # Configuration
+                  BACKUP_NAME="postgres-backup-$(date +%Y%m%d-%H%M%S)"
+                  BACKUP_DIR="/backups/${BACKUP_NAME}"
+                  RETENTION_DAYS=30
+
+                  echo "Starting PostgreSQL backup: ${BACKUP_NAME}"
+
+                  # Create backup directory
+                  mkdir -p "${BACKUP_DIR}"
+
+                  # Export environment variables for PostgreSQL tools
+                  export PGPASSWORD="${POSTGRES_PASSWORD}"
+                  export PGHOST="${POSTGRES_HOST}"
+                  export PGPORT="${POSTGRES_PORT}"
+                  export PGUSER="${POSTGRES_USER}"
+                  export PGDATABASE="${POSTGRES_DB}"
+
+                  # Test connection
+                  echo "Testing database connection..."
+                  pg_isready -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+
+                  # Perform base backup with WAL streaming
+                  echo "Creating base backup..."
+                  pg_basebackup \
+                    -h ${POSTGRES_HOST} \
+                    -p ${POSTGRES_PORT} \
+                    -U ${POSTGRES_USER} \
+                    -D "${BACKUP_DIR}/basebackup" \
+                    -Ft \
+                    -z \
+                    -P \
+                    -v \
+                    -X stream \
+                    -W
+
+                  # Create logical dump as additional backup
+                  echo "Creating logical dump..."
+                  pg_dump \
+                    -h ${POSTGRES_HOST} \
+                    -p ${POSTGRES_PORT} \
+                    -U ${POSTGRES_USER} \
+                    -d ${POSTGRES_DB} \
+                    --verbose \
+                    --format=custom \
+                    --compress=9 \
+                    --lock-wait-timeout=30000 \
+                    --file="${BACKUP_DIR}/logical_dump.sql.gz"
+
+                  # Create schema-only dump for quick structure recovery
+                  echo "Creating schema dump..."
+                  pg_dump \
+                    -h ${POSTGRES_HOST} \
+                    -p ${POSTGRES_PORT} \
+                    -U ${POSTGRES_USER} \
+                    -d ${POSTGRES_DB} \
+                    --schema-only \
+                    --verbose \
+                    --format=plain \
+                    --file="${BACKUP_DIR}/schema_only.sql"
+
+                  # Get current WAL position for point-in-time recovery
+                  WAL_POSITION=$(psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "SELECT pg_current_wal_lsn();" | tr -d ' ')
+
+                  # Create backup manifest with metadata
+                  cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
+                  {
+                    "backup_name": "${BACKUP_NAME}",
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "database": "${POSTGRES_DB}",
+                    "backup_type": "full",
+                    "wal_position": "${WAL_POSITION}",
+                    "backup_size_bytes": $(du -sb "${BACKUP_DIR}" | cut -f1),
+                    "postgresql_version": "$(psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c 'SELECT version();' | head -1 | tr -d ' ')",
+                    "backup_method": "pg_basebackup + pg_dump",
+                    "compression": "gzip",
+                    "retention_policy": "${RETENTION_DAYS} days",
+                    "includes_wal": true,
+                    "point_in_time_recovery": true
+                  }
+                  EOF
+
+                  # Create database statistics for monitoring
+                  echo "Collecting database statistics..."
+                  psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} << 'EOSQL' > "${BACKUP_DIR}/db_stats.txt"
+                  -- Database size and statistics
+                  SELECT 
+                      pg_database.datname as database_name,
+                      pg_size_pretty(pg_database_size(pg_database.datname)) AS database_size,
+                      numbackends as active_connections
+                  FROM pg_database
+                  WHERE datname = current_database();
+
+                  -- Table sizes
+                  SELECT 
+                      schemaname,
+                      tablename,
+                      pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
+                      pg_total_relation_size(schemaname||'.'||tablename) as size_bytes
+                  FROM pg_tables
+                  ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
+                  LIMIT 20;
+
+                  -- Index usage statistics
+                  SELECT 
+                      schemaname,
+                      tablename,
+                      indexname,
+                      idx_scan,
+                      idx_tup_read,
+                      idx_tup_fetch
+                  FROM pg_stat_user_indexes
+                  WHERE idx_scan > 0
+                  ORDER BY idx_scan DESC
+                  LIMIT 10;
+                  EOSQL
+
+                  # Compress backup for storage efficiency
+                  echo "Compressing backup..."
+                  tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
+                  rm -rf "${BACKUP_DIR}"
+
+                  # Upload to S3 with encryption
+                  echo "Uploading to S3..."
+                  aws s3 cp "${BACKUP_DIR}.tar.gz" \
+                    "s3://${BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --server-side-encryption AES256 \
+                    --storage-class STANDARD_IA \
+                    --metadata backup-type=postgres,database=${POSTGRES_DB},timestamp=$(date +%s),wal-position=${WAL_POSITION}
+
+                  # Cross-region replication
+                  echo "Replicating to DR region..."
+                  aws s3 cp "s3://${BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    "s3://${DR_BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --source-region ${AWS_REGION} \
+                    --region ${DR_AWS_REGION}
+
+                  # Cleanup local backup
+                  rm -f "${BACKUP_DIR}.tar.gz"
+
+                  # Archive WAL files separately for point-in-time recovery
+                  echo "Archiving recent WAL files..."
+                  WAL_FILES=$(psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "
+                    SELECT pg_walfile_name(pg_current_wal_lsn());
+                  " | tr -d ' ')
+
+                  # Store WAL position for PITR
+                  aws s3 cp - "s3://${BACKUP_BUCKET}/postgres/wal-positions/$(date +%Y/%m/%d)/${BACKUP_NAME}-wal-position.txt" \
+                    --server-side-encryption AES256 << EOF
+                  {
+                    "backup_name": "${BACKUP_NAME}",
+                    "wal_position": "${WAL_POSITION}",
+                    "wal_file": "${WAL_FILES}",
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                  }
+                  EOF
+
+                  # Cleanup old backups (retention policy)
+                  echo "Cleaning up old backups..."
+                  aws s3 ls "s3://${BACKUP_BUCKET}/postgres/" --recursive | \
+                    awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
+                    xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
+
+                  # Send success notification with metrics
+                  BACKUP_SIZE=$(aws s3 ls "s3://${BACKUP_BUCKET}/postgres/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" | awk '{print $3}')
+                  curl -X POST "${SLACK_WEBHOOK_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"text\":\"✅ PostgreSQL backup completed successfully: ${BACKUP_NAME}\\nSize: $(numfmt --to=iec ${BACKUP_SIZE})\\nWAL Position: ${WAL_POSITION}\"}" || true
+
+                  echo "PostgreSQL backup completed successfully: ${BACKUP_NAME}"
+
+              env:
+                - name: POSTGRES_HOST
+                  value: 'postgres.database'
+                - name: POSTGRES_PORT
+                  value: '5432'
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-backup-secrets
+                      key: username
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-backup-secrets
+                      key: password
+                - name: POSTGRES_DB
+                  value: 'intelgraph'
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: DR_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-backup-bucket
+                - name: AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: aws-region
+                - name: DR_AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-aws-region
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '1Gi'
+                  cpu: '500m'
+                limits:
+                  memory: '4Gi'
+                  cpu: '2000m'
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                - name: tmp-volume
+                  mountPath: /tmp
           volumes:
-          - name: backup-storage
-            emptyDir:
-              sizeLimit: 20Gi
-          - name: tmp-volume
-            emptyDir:
-              sizeLimit: 4Gi
+            - name: backup-storage
+              emptyDir:
+                sizeLimit: 20Gi
+            - name: tmp-volume
+              emptyDir:
+                sizeLimit: 4Gi
           tolerations:
-          - key: "backup-workload"
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
+            - key: 'backup-workload'
+              operator: 'Equal'
+              value: 'true'
+              effect: 'NoSchedule'
           nodeSelector:
-            node-type: "backup-optimized"
+            node-type: 'backup-optimized'
 ---
 # Continuous WAL archiving configuration
 apiVersion: batch/v1
@@ -300,14 +300,14 @@ metadata:
     app.kubernetes.io/name: postgres-wal-archive
     app.kubernetes.io/component: backup
 spec:
-  schedule: "*/15 * * * *"  # Every 15 minutes
-  timeZone: "UTC"
-  successfulJobsHistoryLimit: 24  # Keep 6 hours of history
+  schedule: '*/15 * * * *' # Every 15 minutes
+  timeZone: 'UTC'
+  successfulJobsHistoryLimit: 24 # Keep 6 hours of history
   failedJobsHistoryLimit: 6
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 600  # 10 minute timeout
+      activeDeadlineSeconds: 600 # 10 minute timeout
       template:
         spec:
           restartPolicy: Never
@@ -317,70 +317,70 @@ spec:
             runAsGroup: 999
           serviceAccountName: postgres-backup
           containers:
-          - name: wal-archiver
-            image: postgres:16-alpine
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              export PGPASSWORD="${POSTGRES_PASSWORD}"
-              
-              # Get current WAL files that need archiving
-              echo "Archiving WAL files..."
-              
-              # This would typically be configured in PostgreSQL's postgresql.conf
-              # archive_command = 'aws s3 cp %p s3://bucket/wal/%f'
-              # For this job, we'll sync any recent WAL files
-              
-              CURRENT_WAL=$(psql -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "SELECT pg_current_wal_lsn();" | tr -d ' ')
-              
-              # Store WAL checkpoint for monitoring
-              aws s3 cp - "s3://${BACKUP_BUCKET}/postgres/wal-checkpoints/$(date +%Y/%m/%d/%H%M)-checkpoint.json" << EOF
-              {
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "wal_position": "${CURRENT_WAL}",
-                "checkpoint_type": "scheduled"
-              }
-              EOF
-              
-              echo "WAL checkpoint recorded: ${CURRENT_WAL}"
-              
-            env:
-            - name: POSTGRES_HOST
-              value: "postgres.database"
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-backup-secrets
-                  key: username
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-backup-secrets
-                  key: password
-            - name: POSTGRES_DB
-              value: "intelgraph"
-            - name: BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "128Mi"
-                cpu: "100m"
-              limits:
-                memory: "256Mi"
-                cpu: "200m"
+            - name: wal-archiver
+              image: postgres:16-alpine
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  export PGPASSWORD="${POSTGRES_PASSWORD}"
+
+                  # Get current WAL files that need archiving
+                  echo "Archiving WAL files..."
+
+                  # This would typically be configured in PostgreSQL's postgresql.conf
+                  # archive_command = 'aws s3 cp %p s3://bucket/wal/%f'
+                  # For this job, we'll sync any recent WAL files
+
+                  CURRENT_WAL=$(psql -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "SELECT pg_current_wal_lsn();" | tr -d ' ')
+
+                  # Store WAL checkpoint for monitoring
+                  aws s3 cp - "s3://${BACKUP_BUCKET}/postgres/wal-checkpoints/$(date +%Y/%m/%d/%H%M)-checkpoint.json" << EOF
+                  {
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "wal_position": "${CURRENT_WAL}",
+                    "checkpoint_type": "scheduled"
+                  }
+                  EOF
+
+                  echo "WAL checkpoint recorded: ${CURRENT_WAL}"
+
+              env:
+                - name: POSTGRES_HOST
+                  value: 'postgres.database'
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-backup-secrets
+                      key: username
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-backup-secrets
+                      key: password
+                - name: POSTGRES_DB
+                  value: 'intelgraph'
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '128Mi'
+                  cpu: '100m'
+                limits:
+                  memory: '256Mi'
+                  cpu: '200m'

@@ -8,31 +8,29 @@ Classified and internal IC analytic platforms absolutely exist and play a decisi
 
 - **Classified platforms** span on-premise and cloud/hybrid architectures on JWICS, SIPRNet, and other classified networks, e.g., DIA MARS (Machine-assisted Analytic Rapid Synthesis), NSA ICREACH, CIA proprietary graph analytics, and Air Force/NGIC fusion and exploitation environments.[^2][^3]
 - These typically incorporate:
-    - All-source ingestion across collection disciplines.[^2]
-    - Advanced graph/link analysis, entity disambiguation, and actor mapping.[^3]
-    - Automated and human-in-the-loop analytic workflows and alerting.[^2]
-    - Secure sharing and partitioning at multiple classification levels (including compartmented).[^4]
-    - AI/ML—GenAI for fusion, signal detection, and vulnerability mapping.[^5][^2]
-    - Custom or mission-specific analyst interfaces and workflow orchestration.[^3]
-    - Embedded cybersecurity and zero trust defense layers.[^6]
-
+  - All-source ingestion across collection disciplines.[^2]
+  - Advanced graph/link analysis, entity disambiguation, and actor mapping.[^3]
+  - Automated and human-in-the-loop analytic workflows and alerting.[^2]
+  - Secure sharing and partitioning at multiple classification levels (including compartmented).[^4]
+  - AI/ML—GenAI for fusion, signal detection, and vulnerability mapping.[^5][^2]
+  - Custom or mission-specific analyst interfaces and workflow orchestration.[^3]
+  - Embedded cybersecurity and zero trust defense layers.[^6]
 
 ### Difference vs. Commercial Platforms
 
-|  | Commercial (Palantir, RF, Maltego, etc.)[^7][^8] | Classified/Internal IC Platforms[^3][^2] |
-| :-- | :-- | :-- |
-| Deployment | SaaS, hybrid, gov cloud, on-prem, modular | Classified enclaves, JWICS, SIPRNet, air-gapped, clandestine |
-| Data Sources | Mostly open/commercial + some classified feeds (gov cloud) | All-source (SIGINT, HUMINT, IMINT, MASINT, OSINT, classified holdings) |
-| Features | Rich graph, entity, automated analytics, API, tradecraft standards | Advanced fusion, proprietary algorithms, custom TTPs, rapid multi-domain exploitation |
-| Security | Regulatory, privacy frameworks, zero trust, moderate compartmentalization | Deep classification, strict controls, need-to-know, TSCM, air-gap, PL-4/PL-5 |
-| Use Cases | Threat intelligence, OSINT, commercial/military, supply chain, cyber | All above + covert ops, NCTC/CT, cyber warfare, clandestine ops, strategic forecasting |
-| Analyst Support | AI-human team, LLM-enabled search, audit/compliance export | Embedded human-machine fusion, black-box AI, mission-tailored UIs, predictive simulation |
+|                 | Commercial (Palantir, RF, Maltego, etc.)[^7][^8]                          | Classified/Internal IC Platforms[^3][^2]                                                 |
+| :-------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| Deployment      | SaaS, hybrid, gov cloud, on-prem, modular                                 | Classified enclaves, JWICS, SIPRNet, air-gapped, clandestine                             |
+| Data Sources    | Mostly open/commercial + some classified feeds (gov cloud)                | All-source (SIGINT, HUMINT, IMINT, MASINT, OSINT, classified holdings)                   |
+| Features        | Rich graph, entity, automated analytics, API, tradecraft standards        | Advanced fusion, proprietary algorithms, custom TTPs, rapid multi-domain exploitation    |
+| Security        | Regulatory, privacy frameworks, zero trust, moderate compartmentalization | Deep classification, strict controls, need-to-know, TSCM, air-gap, PL-4/PL-5             |
+| Use Cases       | Threat intelligence, OSINT, commercial/military, supply chain, cyber      | All above + covert ops, NCTC/CT, cyber warfare, clandestine ops, strategic forecasting   |
+| Analyst Support | AI-human team, LLM-enabled search, audit/compliance export                | Embedded human-machine fusion, black-box AI, mission-tailored UIs, predictive simulation |
 
 ### Real-world Integration
 
 - Internal classified platforms frequently federate with commercial systems (e.g., Palantir’s gov cloud, OpenCTI EE, RF, Maltego on gov enclaves) for approved, lower classified use cases—especially for joint task force work and multi-national alliances.[^4][^3]
 - The 2025 Annual Threat Assessment and analytic edge reports emphasize AI-human teaming and secure, multi-level fusion as mission essentials, indicating the rapid evolution of internal systems to leverage and fuse both classified and unclassified data streams with advanced AI.[^9][^2]
-
 
 ### Policy and Legal Limits
 
@@ -87,4 +85,3 @@ Classified/internal platforms drive much of the analytic edge in 2025, but stric
 [^20]: https://www.comparitech.com/net-admin/best-threat-intelligence-feeds/
 
 [^21]: https://www.justsecurity.org/114297/trump-administration-politicized-intelligence/
-

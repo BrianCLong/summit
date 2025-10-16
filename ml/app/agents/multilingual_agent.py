@@ -2,11 +2,11 @@ from __future__ import annotations
 
 """Multilingual translation and entity extraction agent."""
 
+import re
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Callable, Iterable, List
 
 import networkx as nx
-import re
 
 try:  # pragma: no cover - optional dependency
     from transformers import pipeline as hf_pipeline
@@ -78,7 +78,7 @@ class MultilingualIntelAgent:
         except Exception:
             return text
 
-    def extract_entities(self, text: str, lang: str | None = None) -> List[str]:
+    def extract_entities(self, text: str, lang: str | None = None) -> list[str]:
         """Extract entities from ``text``. Non-English text is translated first."""
 
         if lang and lang.lower() != "en":
@@ -92,10 +92,7 @@ class MultilingualIntelAgent:
                 return [r.get("word", "") for r in result if r.get("word")]
             return [str(r) for r in result]
         except Exception:
-            return [
-                m.group(0)
-                for m in re.finditer(r"\b[A-Z][a-zA-Z]+\b", text)
-            ]
+            return [m.group(0) for m in re.finditer(r"\b[A-Z][a-zA-Z]+\b", text)]
 
     def process_text(self, text: str, source_lang: str | None = None) -> dict:
         """Process text and return detected entities along with translation."""

@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { maskSecret, createSecureCopy, validateSecretStrength } from '../utils/secretUtils';
+import {
+  maskSecret,
+  createSecureCopy,
+  validateSecretStrength,
+} from '../utils/secretUtils';
 
 interface SecretFieldProps {
   label: string;
@@ -26,7 +30,8 @@ const SecretField: React.FC<SecretFieldProps> = ({
   const [copied, setCopied] = useState(false);
 
   const displayValue = isRevealed ? value : maskSecret(value);
-  const validation = showStrengthIndicator && value ? validateSecretStrength(value) : null;
+  const validation =
+    showStrengthIndicator && value ? validateSecretStrength(value) : null;
 
   const handleCopy = createSecureCopy(value, () => {
     setCopied(true);
@@ -93,7 +98,12 @@ const SecretField: React.FC<SecretFieldProps> = ({
                 title={isRevealed ? 'Hide' : 'Reveal'}
               >
                 {isRevealed ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -102,7 +112,12 @@ const SecretField: React.FC<SecretFieldProps> = ({
                     />
                   </svg>
                 ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -142,7 +157,12 @@ const SecretField: React.FC<SecretFieldProps> = ({
                     />
                   </svg>
                 ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

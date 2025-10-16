@@ -4,9 +4,9 @@ namespace: maestro
 image:
   repository: ghcr.io/brianclong/maestro
   # Use either tag or digest (preferred). When digest is set, it wins.
-  tag: "latest"
+  tag: 'latest'
   # Example: sha256:abcdef... (no leading @)
-  digest: ""
+  digest: ''
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -14,7 +14,7 @@ imagePullSecrets:
 
 serviceAccount:
   create: true
-  name: ""
+  name: ''
 
 replicaCount: 2
 
@@ -116,7 +116,7 @@ metrics:
 
 ingress:
   enabled: false
-  className: ""
+  className: ''
   annotations: {}
   hosts:
     - host: maestro.local
@@ -138,20 +138,20 @@ argoRollouts:
 # Optional OIDC secret for gateway (if deploying here)
 oidc:
   createSecret: false
-  issuer: ""
-  clientId: ""
-  clientSecret: ""
+  issuer: ''
+  clientId: ''
+  clientSecret: ''
 
 # Optional SCIM secret
 scim:
   createSecret: false
-  token: ""
+  token: ''
 
 # Audit WORM environment (wired into deployment when set)
 audit:
   worm:
     enabled: false
-    bucket: ""
+    bucket: ''
     retentionDays: 365
 
 # Content Addressable Storage (CAS) buckets by residency
@@ -164,7 +164,7 @@ cas:
 # Optional AWS settings for jobs (e.g., reconciler)
 aws:
   region: us-east-1
-  roleArn: ""
+  roleArn: ''
 
 # Optional secret name containing DATABASE_URL
 secretsRef: maestro

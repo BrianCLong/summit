@@ -10,7 +10,10 @@ interface PresencePillProps {
   platformWide?: boolean;
 }
 
-export function PresencePill({ caseId, platformWide = false }: PresencePillProps) {
+export function PresencePill({
+  caseId,
+  platformWide = false,
+}: PresencePillProps) {
   const { data: caseData } = usePresenceOnCaseSubscription({
     variables: { caseId: caseId! },
     skip: !caseId || platformWide,
@@ -21,7 +24,9 @@ export function PresencePill({ caseId, platformWide = false }: PresencePillProps
   });
 
   const users =
-    caseId && !platformWide ? (caseData?.presence ?? []) : (platformData?.platformPresence ?? []);
+    caseId && !platformWide
+      ? (caseData?.presence ?? [])
+      : (platformData?.platformPresence ?? []);
 
   if (users.length === 0) {
     return null;
@@ -31,17 +36,27 @@ export function PresencePill({ caseId, platformWide = false }: PresencePillProps
   const overflow = users.length - 3;
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }} aria-live="polite">
+    <Box
+      sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+      aria-live="polite"
+    >
       <AvatarGroup
         max={4}
-        sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' } }}
+        sx={{
+          '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' },
+        }}
       >
         {displayUsers.map((user) => (
-          <Tooltip key={user.userId} title={`${user.displayName} (${user.status})`}>
+          <Tooltip
+            key={user.userId}
+            title={`${user.displayName} (${user.status})`}
+          >
             <Avatar>{user.displayName.charAt(0).toUpperCase()}</Avatar>
           </Tooltip>
         ))}
-        {overflow > 0 && <Avatar sx={{ fontSize: '0.6rem' }}>+{overflow}</Avatar>}
+        {overflow > 0 && (
+          <Avatar sx={{ fontSize: '0.6rem' }}>+{overflow}</Avatar>
+        )}
       </AvatarGroup>
 
       <Chip

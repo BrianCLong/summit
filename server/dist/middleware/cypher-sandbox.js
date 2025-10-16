@@ -6,6 +6,7 @@
  */
 import logger from '../utils/logger.js';
 export class CypherSandbox {
+    config;
     constructor(config) {
         this.config = {
             maxExecutionTime: 30000, // 30 seconds
@@ -153,7 +154,9 @@ export class CypherSandbox {
             }
         }
         // Check for disallowed operations
-        const disallowedOps = analysis.operations.filter((op) => !this.config.allowedOperations.map((allowed) => allowed.toLowerCase()).includes(op));
+        const disallowedOps = analysis.operations.filter((op) => !this.config.allowedOperations
+            .map((allowed) => allowed.toLowerCase())
+            .includes(op));
         if (disallowedOps.length > 0) {
             return {
                 allowed: false,

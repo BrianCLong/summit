@@ -73,7 +73,7 @@ export default function IncidentDetail() {
 
   const loadIncidentDetails = async () => {
     if (!incidentId) return;
-    
+
     setLoading(true);
     try {
       const data = await getIncident(incidentId);
@@ -87,49 +87,76 @@ export default function IncidentDetail() {
 
   const groupedEvents = useMemo(() => {
     if (!incident?.events) return [];
-    
+
     const phases = [
       { id: 'detection', label: 'Detection & Alert', types: ['alert'] },
-      { id: 'investigation', label: 'Investigation', types: ['run', 'user_action'] },
-      { id: 'response', label: 'Response & Changes', types: ['system_change', 'escalation'] },
+      {
+        id: 'investigation',
+        label: 'Investigation',
+        types: ['run', 'user_action'],
+      },
+      {
+        id: 'response',
+        label: 'Response & Changes',
+        types: ['system_change', 'escalation'],
+      },
     ];
 
-    return phases.map(phase => ({
+    return phases.map((phase) => ({
       ...phase,
       events: incident.events
-        .filter(event => phase.types.includes(event.type))
-        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
+        .filter((event) => phase.types.includes(event.type))
+        .sort(
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+        ),
     }));
   }, [incident?.events]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return 'bg-red-100 text-red-800';
-      case 'investigating': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'open':
+        return 'bg-red-100 text-red-800';
+      case 'investigating':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'resolved':
+        return 'bg-green-100 text-green-800';
+      case 'closed':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'critical':
+        return 'bg-red-500';
+      case 'high':
+        return 'bg-orange-500';
+      case 'medium':
+        return 'bg-yellow-500';
+      case 'low':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const getEventIcon = (type: string) => {
     switch (type) {
-      case 'alert': return '🚨';
-      case 'run': return '⚙️';
-      case 'user_action': return '👤';
-      case 'system_change': return '🔧';
-      case 'escalation': return '📈';
-      default: return '📝';
+      case 'alert':
+        return '🚨';
+      case 'run':
+        return '⚙️';
+      case 'user_action':
+        return '👤';
+      case 'system_change':
+        return '🔧';
+      case 'escalation':
+        return '📈';
+      default:
+        return '📝';
     }
   };
 
@@ -138,7 +165,7 @@ export default function IncidentDetail() {
     const end = endTime ? new Date(endTime) : new Date();
     const diffMs = end.getTime() - start.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 60) return `${diffMins}m`;
     const hours = Math.floor(diffMins / 60);
     const mins = diffMins % 60;
@@ -157,7 +184,9 @@ export default function IncidentDetail() {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h2 className="text-lg font-semibold text-red-800">Error Loading Incident</h2>
+          <h2 className="text-lg font-semibold text-red-800">
+            Error Loading Incident
+          </h2>
           <p className="text-red-600">{error || 'Incident not found'}</p>
         </div>
       </div>
@@ -171,27 +200,44 @@ export default function IncidentDetail() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-gray-900">{incident.title}</h1>
-              <span className={`px-2 py-1 text-sm font-medium rounded-full ${getStatusColor(incident.status)}`}>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {incident.title}
+              </h1>
+              <span
+                className={`px-2 py-1 text-sm font-medium rounded-full ${getStatusColor(incident.status)}`}
+              >
                 {incident.status.toUpperCase()}
               </span>
               <div className="flex items-center gap-1">
-                <div className={`w-3 h-3 rounded-full ${getSeverityColor(incident.severity)}`}></div>
-                <span className="text-sm font-medium">{incident.severity.toUpperCase()}</span>
+                <div
+                  className={`w-3 h-3 rounded-full ${getSeverityColor(incident.severity)}`}
+                ></div>
+                <span className="text-sm font-medium">
+                  {incident.severity.toUpperCase()}
+                </span>
               </div>
             </div>
             <p className="text-gray-600 max-w-3xl">{incident.description}</p>
             <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-              <span>Started: {new Date(incident.startedAt).toLocaleString()}</span>
+              <span>
+                Started: {new Date(incident.startedAt).toLocaleString()}
+              </span>
               {incident.resolvedAt && (
-                <span>Resolved: {new Date(incident.resolvedAt).toLocaleString()}</span>
+                <span>
+                  Resolved: {new Date(incident.resolvedAt).toLocaleString()}
+                </span>
               )}
-              <span>Duration: {formatDuration(incident.startedAt, incident.resolvedAt)}</span>
-              {incident.assignedTo && <span>Assigned to: {incident.assignedTo}</span>}
+              <span>
+                Duration:{' '}
+                {formatDuration(incident.startedAt, incident.resolvedAt)}
+              </span>
+              {incident.assignedTo && (
+                <span>Assigned to: {incident.assignedTo}</span>
+              )}
             </div>
           </div>
         </div>
-        
+
         {/* Tags */}
         {incident.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
@@ -241,35 +287,48 @@ export default function IncidentDetail() {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-6">
               {/* Virtualized Timeline */}
               <div className="relative">
                 <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-                
-                {(selectedPhase === 'all' ? incident.events : 
-                  groupedEvents.find(p => p.id === selectedPhase)?.events || []
+
+                {(selectedPhase === 'all'
+                  ? incident.events
+                  : groupedEvents.find((p) => p.id === selectedPhase)?.events ||
+                    []
                 ).map((event, index) => (
-                  <div key={event.id} className="relative flex items-start gap-4 pb-8">
+                  <div
+                    key={event.id}
+                    className="relative flex items-start gap-4 pb-8"
+                  >
                     <div className="flex-shrink-0 w-12 h-12 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center text-lg z-10">
                       {getEventIcon(event.type)}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="text-sm font-semibold text-gray-900">{event.title}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{event.description}</p>
+                          <h3 className="text-sm font-semibold text-gray-900">
+                            {event.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {event.description}
+                          </p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                            <span>{new Date(event.timestamp).toLocaleString()}</span>
+                            <span>
+                              {new Date(event.timestamp).toLocaleString()}
+                            </span>
                             <span>by {event.actor}</span>
-                            <span className={`px-2 py-1 rounded ${getSeverityColor(event.severity)} text-white`}>
+                            <span
+                              className={`px-2 py-1 rounded ${getSeverityColor(event.severity)} text-white`}
+                            >
                               {event.severity}
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Event Metadata */}
                       {Object.keys(event.metadata).length > 0 && (
                         <details className="mt-3">
@@ -286,7 +345,7 @@ export default function IncidentDetail() {
                     </div>
                   </div>
                 ))}
-                
+
                 {incident.events.length === 0 && (
                   <div className="text-center py-12 text-gray-500">
                     No timeline events available
@@ -315,19 +374,29 @@ export default function IncidentDetail() {
                       >
                         {run.name}
                       </Link>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        run.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        run.status === 'failed' ? 'bg-red-100 text-red-800' :
-                        run.status === 'running' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          run.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : run.status === 'failed'
+                              ? 'bg-red-100 text-red-800'
+                              : run.status === 'running'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {run.status}
                       </span>
                     </div>
                     <div className="text-xs text-gray-500 space-y-1">
-                      <div>Started: {new Date(run.startedAt).toLocaleString()}</div>
+                      <div>
+                        Started: {new Date(run.startedAt).toLocaleString()}
+                      </div>
                       {run.completedAt && (
-                        <div>Completed: {new Date(run.completedAt).toLocaleString()}</div>
+                        <div>
+                          Completed:{' '}
+                          {new Date(run.completedAt).toLocaleString()}
+                        </div>
                       )}
                       {run.duration && (
                         <div>Duration: {Math.floor(run.duration / 1000)}s</div>
@@ -356,19 +425,27 @@ export default function IncidentDetail() {
                       >
                         {slo.name}
                       </Link>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        slo.impact === 'critical' ? 'bg-red-100 text-red-800' :
-                        slo.impact === 'major' ? 'bg-orange-100 text-orange-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          slo.impact === 'critical'
+                            ? 'bg-red-100 text-red-800'
+                            : slo.impact === 'major'
+                              ? 'bg-orange-100 text-orange-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
                         {slo.impact}
                       </span>
                     </div>
                     <div className="text-xs text-gray-600 space-y-1">
                       <div>Service: {slo.service}</div>
-                      <div>Current SLI: {(slo.currentSLI * 100).toFixed(2)}%</div>
+                      <div>
+                        Current SLI: {(slo.currentSLI * 100).toFixed(2)}%
+                      </div>
                       <div>Objective: {(slo.objective * 100).toFixed(2)}%</div>
-                      <div>Error Budget: {slo.errorBudgetRemaining.toFixed(1)}%</div>
+                      <div>
+                        Error Budget: {slo.errorBudgetRemaining.toFixed(1)}%
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -384,7 +461,10 @@ export default function IncidentDetail() {
               </div>
               <div className="p-4 space-y-2">
                 {incident.evidenceLinks.map((evidence) => (
-                  <div key={evidence.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                  <div
+                    key={evidence.id}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
+                  >
                     <div className="text-lg">
                       {evidence.type === 'log' && '📋'}
                       {evidence.type === 'screenshot' && '📸'}

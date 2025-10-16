@@ -5,6 +5,7 @@ This pack adds external **synthetic monitoring** (status page + alert routing), 
 ---
 
 ## 0) Repo Layout
+
 ```
 ops/
   synthetics/
@@ -38,6 +39,7 @@ deploy/
 ## 1) Synthetics — Blackbox Exporter + Prometheus + PagerDuty
 
 ### 1.1 Blackbox Exporter
+
 ```yaml
 # ops/synthetics/blackbox-exporter.yaml
 apiVersion: apps/v1
@@ -50,13 +52,13 @@ spec:
     metadata: { labels: { app: blackbox-exporter } }
     spec:
       containers:
-      - name: blackbox-exporter
-        image: prom/blackbox-exporter:v0.25.0
-        args: ["--config.file=/etc/blackbox/blackbox.yml"]
-        ports: [{ containerPort: 9115 }]
-        volumeMounts:
-          - name: cfg
-            mountPath: /etc/blackbox
+        - name: blackbox-exporter
+          image: prom/blackbox-exporter:v0.25.0
+          args: ['--config.file=/etc/blackbox/blackbox.yml']
+          ports: [{ containerPort: 9115 }]
+          volumeMounts:
+            - name: cfg
+              mountPath: /etc/blackbox
       volumes:
         - name: cfg
           configMap:
@@ -85,6 +87,7 @@ data:
 ```
 
 ### 1.2 Probes (gateway GraphQL + wallet verify)
+
 ```yaml
 # ops/synthetics/prober-routes.yaml
 apiVersion: monitoring.coreos.com/v1
@@ -115,49 +118,53 @@ spec:
 ```
 
 ### 1.3 Prometheus alerts -> PagerDuty
+
 ```yaml
 # ops/synthetics/synthetics-rules.prom
 groups:
-- name: synthetics.rules
-  rules:
-  - alert: GatewayDown
-    expr: probe_success{job="blackbox-gateway"} == 0
-    for: 2m
-    labels: { severity: critical, team: "intelgraph" }
-    annotations:
-      summary: "Gateway GraphQL unreachable"
-      description: "Synthetic probe failed for 2m. Check ingress, DNS, pods."
-  - alert: WalletVerifyDown
-    expr: probe_success{job="blackbox-wallet"} == 0
-    for: 5m
-    labels: { severity: warning, team: "intelgraph" }
-    annotations:
-      summary: "Wallet verify endpoint unreachable"
-      description: "Wallet health probe failing."
+  - name: synthetics.rules
+    rules:
+      - alert: GatewayDown
+        expr: probe_success{job="blackbox-gateway"} == 0
+        for: 2m
+        labels: { severity: critical, team: 'intelgraph' }
+        annotations:
+          summary: 'Gateway GraphQL unreachable'
+          description: 'Synthetic probe failed for 2m. Check ingress, DNS, pods.'
+      - alert: WalletVerifyDown
+        expr: probe_success{job="blackbox-wallet"} == 0
+        for: 5m
+        labels: { severity: warning, team: 'intelgraph' }
+        annotations:
+          summary: 'Wallet verify endpoint unreachable'
+          description: 'Wallet health probe failing.'
 ```
 
 ```yaml
 # ops/synthetics/pagerduty-routing.yaml
 receivers:
-- name: pagerduty
-  pagerduty_configs:
-  - routing_key: ${PAGERDUTY_ROUTING_KEY}
+  - name: pagerduty
+    pagerduty_configs:
+      - routing_key: ${PAGERDUTY_ROUTING_KEY}
 route:
   receiver: pagerduty
   routes:
-  - matchers: [ severity = "critical" ]
-    receiver: pagerduty
+    - matchers: [severity = "critical"]
+      receiver: pagerduty
 ```
 
 ### 1.4 Status page notes
+
 ```md
 # ops/synthetics/statuspage-config.md
+
 - Components: Gateway API, Webapp, Ledger, Analytics, Wallet, Keycloak
 - Metrics: synthetic uptime (30d), p95 GraphQL latency, wallet verify success ratio
 - Incidents templates: Sev1/Sev2 with public summaries and links to RCA once closed
 ```
 
 ### 1.5 GitHub Action for synthetics from outside cluster
+
 ```yaml
 # .github/workflows/synthetics-check.yaml
 name: synthetics-check
@@ -183,6 +190,7 @@ jobs:
 ## 2) DR Playbook — RTO/RPO, Backups, Restore, Validation
 
 ### 2.1 Backup scripts (daily + hourly WAL, MinIO mirror)
+
 ```bash
 # ops/backup/backup.sh
 set -euo pipefail
@@ -211,37 +219,43 @@ curl -sf "$GATEWAY_URL" -H 'content-type: application/json' -d '{"query":"mutati
 ```
 
 ### 2.2 K8s Cron for backups
+
 ```yaml
 # ops/backup/schedule-cron.yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata: { name: intelgraph-backup, namespace: intelgraph }
 spec:
-  schedule: "0 2 * * *"
+  schedule: '0 2 * * *'
   jobTemplate:
     spec:
       template:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: backup
-            image: ghcr.io/ORG/intelgraph/ops-runner:latest
-            envFrom: [{ secretRef: { name: intelgraph-secrets } }]
-            command: ["/bin/sh","-lc","bash ops/backup/backup.sh"]
+            - name: backup
+              image: ghcr.io/ORG/intelgraph/ops-runner:latest
+              envFrom: [{ secretRef: { name: intelgraph-secrets } }]
+              command: ['/bin/sh', '-lc', 'bash ops/backup/backup.sh']
 ```
 
 ### 2.3 DR Playbook
+
 ```md
 # ops/dr/playbook.md
+
 ## Objectives
+
 - **RTO ≤ 1h**, **RPO ≤ 5m**.
 
 ## Scenarios
+
 1. **Region outage**: restore to warm standby cluster; flip DNS.
 2. **DB corruption**: restore last good backup + apply claim deltas.
 3. **Keycloak outage**: switch to backup realm; accept cached tokens for 1h.
 
 ## Procedure (Region outage)
+
 - Promote standby K8s: `helm upgrade --install` with same values; mount backup volumes or pull from object store.
 - Restore databases using `restore.sh STAMP`.
 - Re-point ingress DNS; validate with `ops/backup/verify.sh`.
@@ -249,6 +263,7 @@ spec:
 ```
 
 ### 2.4 DR Drill Workflow
+
 ```yaml
 # .github/workflows/dr-drill.yaml
 name: dr-drill
@@ -274,14 +289,25 @@ jobs:
 ## 3) Helm Chart Release — OCI + cosign
 
 ### 3.1 Helm packaging & OCI push
+
 ```yaml
 # .github/workflows/helm-release.yaml
 name: helm-release
 on:
   workflow_dispatch:
     inputs:
-      version: { description: 'Chart semver (e.g., 1.0.0)', required: true, type: string }
-      appVersion: { description: 'App version tag (e.g., v1.0.0-uni)', required: true, type: string }
+      version:
+        {
+          description: 'Chart semver (e.g., 1.0.0)',
+          required: true,
+          type: string,
+        }
+      appVersion:
+        {
+          description: 'App version tag (e.g., v1.0.0-uni)',
+          required: true,
+          type: string,
+        }
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -310,8 +336,10 @@ jobs:
 ```
 
 ### 3.2 Chart signing notes
+
 ```md
 # deploy/helm/intelgraph/chart-signing.md
+
 - Use GitHub OIDC + keyless signing (cosign) for charts.
 - Consumers can verify: `cosign verify ghcr.io/ORG/intelgraph/charts/intelgraph:1.0.0`.
 - Optionally, also push to a static index (`helm repo index`) for air‑gapped installs.
@@ -320,6 +348,7 @@ jobs:
 ---
 
 ## 4) Close Remaining Gaps (checklist)
+
 - [ ] Synthetics deployed (blackbox, probes, rules), PagerDuty routing key set
 - [ ] Status page components mapped; initial incidents templates
 - [ ] Backups scheduled via CronJob; restore & verify scripts pass
@@ -330,6 +359,7 @@ jobs:
 ---
 
 ## 5) Quick Commands
+
 ```bash
 # Deploy blackbox + probes + rules (assumes kube-prometheus-stack)
 kubectl apply -f ops/synthetics/blackbox-exporter.yaml

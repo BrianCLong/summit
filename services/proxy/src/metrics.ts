@@ -33,7 +33,10 @@ export function metricsHandler(req: Request, res: Response) {
 
 export function timed(routeLabel: string) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const end = httpReqLatency.startTimer({ route: routeLabel, method: req.method });
+    const end = httpReqLatency.startTimer({
+      route: routeLabel,
+      method: req.method,
+    });
     res.on('finish', () => end({ status: String(res.statusCode) }));
     next();
   };

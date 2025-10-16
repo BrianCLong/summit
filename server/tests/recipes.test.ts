@@ -26,23 +26,23 @@ describe('Recipes REST API', () => {
   describe('GET /recipes', () => {
     it('should return list of recipe files', async () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(['recipe1.yaml', 'recipe2.yml', 'other.txt'] as any);
+      mockFs.readdirSync.mockReturnValue([
+        'recipe1.yaml',
+        'recipe2.yml',
+        'other.txt',
+      ] as any);
 
-      const response = await request(app)
-        .get('/recipes')
-        .expect(200);
+      const response = await request(app).get('/recipes').expect(200);
 
       expect(response.body).toEqual({
-        items: ['recipe1.yaml', 'recipe2.yml']
+        items: ['recipe1.yaml', 'recipe2.yml'],
       });
     });
 
     it('should return empty list when recipes directory does not exist', async () => {
       mockFs.existsSync.mockReturnValue(false);
 
-      const response = await request(app)
-        .get('/recipes')
-        .expect(200);
+      const response = await request(app).get('/recipes').expect(200);
 
       expect(response.body).toEqual({ items: [] });
     });
@@ -52,16 +52,15 @@ describe('Recipes REST API', () => {
         throw new Error('Permission denied');
       });
 
-      const response = await request(app)
-        .get('/recipes')
-        .expect(500);
+      const response = await request(app).get('/recipes').expect(500);
 
       expect(response.body).toEqual({ error: 'failed to list recipes' });
     });
   });
 
   describe('POST /recipes/run', () => {
-    const mockLoadRecipe = require('../src/recipes/loader.js').loadRecipe as jest.MockedFunction<any>;
+    const mockLoadRecipe = require('../src/recipes/loader.js')
+      .loadRecipe as jest.MockedFunction<any>;
 
     beforeEach(() => {
       mockFs.existsSync.mockReturnValue(true);
@@ -69,7 +68,7 @@ describe('Recipes REST API', () => {
       mockLoadRecipe.mockResolvedValue({
         name: 'Test Recipe',
         description: 'Test recipe description',
-        inputs: {}
+        inputs: {},
       });
     });
 
@@ -91,16 +90,16 @@ describe('Recipes REST API', () => {
         .send({ name: 'nonexistent' })
         .expect(404);
 
-      expect(response.body.error).toContain('Recipe \'nonexistent\' not found');
+      expect(response.body.error).toContain("Recipe 'nonexistent' not found");
       expect(response.body.error).toContain('Available recipes: other.yaml');
     });
 
     it('should successfully run recipe with valid name', async () => {
       const response = await request(app)
         .post('/recipes/run')
-        .send({ 
+        .send({
           name: 'test-recipe',
-          inputs: { param1: 'value1' }
+          inputs: { param1: 'value1' },
         })
         .expect(200);
 
@@ -109,14 +108,14 @@ describe('Recipes REST API', () => {
         runId: 'recipe-run-test-uuid-123',
         auditId: 'audit-test-uuid-123',
         recipe: 'test-recipe.yaml',
-        inputs: { param1: 'value1' }
+        inputs: { param1: 'value1' },
       });
     });
 
     it('should handle recipe with .yml extension', async () => {
       mockFs.existsSync
         .mockReturnValueOnce(false) // test-recipe.yaml
-        .mockReturnValueOnce(true);  // test-recipe.yml
+        .mockReturnValueOnce(true); // test-recipe.yml
 
       const response = await request(app)
         .post('/recipes/run')
@@ -135,7 +134,7 @@ describe('Recipes REST API', () => {
         .expect(400);
 
       expect(response.body).toEqual({
-        error: 'Recipe loading error: YAML parsing failed'
+        error: 'Recipe loading error: YAML parsing failed',
       });
     });
 
@@ -144,33 +143,33 @@ describe('Recipes REST API', () => {
         name: 'Test Recipe',
         inputs: {
           requiredParam: { required: true },
-          optionalParam: { required: false }
-        }
+          optionalParam: { required: false },
+        },
       });
 
       const response = await request(app)
         .post('/recipes/run')
-        .send({ 
+        .send({
           name: 'test-recipe',
-          inputs: { optionalParam: 'value' }
+          inputs: { optionalParam: 'value' },
         })
         .expect(400);
 
       expect(response.body).toEqual({
-        error: 'Required input \'requiredParam\' is missing'
+        error: "Required input 'requiredParam' is missing",
       });
     });
 
     it('should handle budget plugin requirement', async () => {
       process.env.REQUIRE_BUDGET_PLUGIN = 'true';
-      
+
       const response = await request(app)
         .post('/recipes/run')
         .send({ name: 'test-recipe' })
         .expect(402);
 
       expect(response.body).toEqual({
-        error: 'Budget plugin is required but not available'
+        error: 'Budget plugin is required but not available',
       });
 
       delete process.env.REQUIRE_BUDGET_PLUGIN;

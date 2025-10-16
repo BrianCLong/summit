@@ -2,7 +2,7 @@ import type {
   ResponseStrategy,
   SelfHealingContext,
   SelfHealingPlan,
-  SelfHealingResult
+  SelfHealingResult,
 } from './types';
 
 export interface SelfHealingOrchestratorOptions {
@@ -10,7 +10,7 @@ export interface SelfHealingOrchestratorOptions {
 }
 
 const DEFAULT_OPTIONS: Required<SelfHealingOrchestratorOptions> = {
-  defaultCooldownMs: 5 * 60 * 1000
+  defaultCooldownMs: 5 * 60 * 1000,
 };
 
 export class SelfHealingOrchestrator {
@@ -55,7 +55,7 @@ export class SelfHealingOrchestrator {
         plans.push({
           strategyId: strategy.id,
           description: strategy.description,
-          actions: result.actions
+          actions: result.actions,
         });
         this.startCooldown(context.asset.id, strategy.id, strategy.cooldownMs);
       }
@@ -64,7 +64,11 @@ export class SelfHealingOrchestrator {
     return { results, plans };
   }
 
-  private startCooldown(assetId: string, strategyId: string, override?: number): void {
+  private startCooldown(
+    assetId: string,
+    strategyId: string,
+    override?: number,
+  ): void {
     const key = `${assetId}:${strategyId}`;
     const duration = override ?? this.options.defaultCooldownMs;
     this.cooldowns.set(key, Date.now() + duration);

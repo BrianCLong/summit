@@ -7,7 +7,7 @@ import {
   estimateTokens,
   getModelById,
   listModels,
-  normalizeCaps
+  normalizeCaps,
 } from '../src/index.js';
 
 test('estimateTokens provides deterministic output', () => {
@@ -18,15 +18,12 @@ test('estimateTokens provides deterministic output', () => {
 
 test('normalizeCaps merges defaults correctly', () => {
   assert.deepEqual(normalizeCaps(undefined), DEFAULT_CAPS);
-  assert.deepEqual(
-    normalizeCaps({ hardUsd: 2, tokenCap: 1000 }),
-    {
-      hardUsd: 2,
-      softPct: DEFAULT_CAPS.softPct,
-      tokenCap: 1000,
-      rpm: DEFAULT_CAPS.rpm
-    }
-  );
+  assert.deepEqual(normalizeCaps({ hardUsd: 2, tokenCap: 1000 }), {
+    hardUsd: 2,
+    softPct: DEFAULT_CAPS.softPct,
+    tokenCap: 1000,
+    rpm: DEFAULT_CAPS.rpm,
+  });
 });
 
 test('models can be filtered and cost calculated', () => {

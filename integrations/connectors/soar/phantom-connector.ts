@@ -131,11 +131,15 @@ export class PhantomConnector extends EventEmitter {
       failedActions: 0,
       averageResolutionTime: 0,
       apiCalls: 0,
-      errorRate: 0
+      errorRate: 0,
     };
   }
 
-  private async makeRequest(endpoint: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET', data?: any): Promise<any> {
+  private async makeRequest(
+    endpoint: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+    data?: any,
+  ): Promise<any> {
     await this.checkRateLimit();
 
     const url = `${this.config.baseUrl}/rest${endpoint}`;
@@ -143,18 +147,20 @@ export class PhantomConnector extends EventEmitter {
     const response = await fetch(url, {
       method,
       headers: {
-        'Authorization': `Bearer ${this.config.token}`,
+        Authorization: `Bearer ${this.config.token}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
     });
 
     this.metrics.apiCalls++;
 
     if (!response.ok) {
       this.metrics.errorRate = this.metrics.errorRate + 1;
-      throw new Error(`Phantom API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Phantom API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     return await response.json();
@@ -167,7 +173,7 @@ export class PhantomConnector extends EventEmitter {
 
     if (requests >= this.config.rateLimitRpm) {
       const waitTime = 60000 - (now % 60000);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
     this.rateLimiter.set(minute.toString(), requests + 1);
@@ -180,15 +186,24 @@ export class PhantomConnector extends EventEmitter {
     }
   }
 
-  async createContainer(containerData: Omit<PhantomContainer, 'id' | 'artifact_count' | 'playbook_runs'>): Promise<PhantomContainer> {
+  async createContainer(
+    containerData: Omit<
+      PhantomContainer,
+      'id' | 'artifact_count' | 'playbook_runs'
+    >,
+  ): Promise<PhantomContainer> {
     try {
-      const response = await this.makeRequest('/container', 'POST', containerData);
+      const response = await this.makeRequest(
+        '/container',
+        'POST',
+        containerData,
+      );
 
       const container: PhantomContainer = {
         id: response.id,
         artifact_count: 0,
         playbook_runs: 0,
-        ...containerData
+        ...containerData,
       };
 
       this.metrics.totalContainers++;
@@ -200,7 +215,7 @@ export class PhantomConnector extends EventEmitter {
         containerId: container.id,
         name: container.name,
         severity: container.severity,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return container;
@@ -208,7 +223,7 @@ export class PhantomConnector extends EventEmitter {
       this.emit('container_creation_failed', {
         error: error instanceof Error ? error.message : 'Unknown error',
         containerData,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
@@ -229,15 +244,15 @@ export class PhantomConnector extends EventEmitter {
       custom_fields: {
         source: incident.source,
         source_id: incident.sourceId,
-        ...incident.customFields
-      }
+        ...incident.customFields,
+      },
     });
 
     // Add artifacts to the container
     for (const artifactData of incident.artifacts) {
       await this.addArtifact({
         ...artifactData,
-        container_id: container.id
+        container_id: container.id,
       });
     }
 
@@ -250,19 +265,21 @@ export class PhantomConnector extends EventEmitter {
       containerId: container.id,
       incidentId: incident.sourceId,
       artifactCount: incident.artifacts.length,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return container;
   }
 
-  async addArtifact(artifact: Omit<PhantomArtifact, 'id'>): Promise<PhantomArtifact> {
+  async addArtifact(
+    artifact: Omit<PhantomArtifact, 'id'>,
+  ): Promise<PhantomArtifact> {
     try {
       const response = await this.makeRequest('/artifact', 'POST', artifact);
 
       const createdArtifact: PhantomArtifact = {
         id: response.id,
-        ...artifact
+        ...artifact,
       };
 
       this.metrics.totalArtifacts++;
@@ -271,7 +288,7 @@ export class PhantomConnector extends EventEmitter {
         artifactId: createdArtifact.id,
         containerId: artifact.container_id,
         name: artifact.name,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return createdArtifact;
@@ -279,7 +296,7 @@ export class PhantomConnector extends EventEmitter {
       this.emit('artifact_creation_failed', {
         error: error instanceof Error ? error.message : 'Unknown error',
         artifact,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
@@ -290,8 +307,15 @@ export class PhantomConnector extends EventEmitter {
     return response;
   }
 
-  async updateContainer(containerId: number, updates: Partial<PhantomContainer>): Promise<PhantomContainer> {
-    const response = await this.makeRequest(`/container/${containerId}`, 'POST', updates);
+  async updateContainer(
+    containerId: number,
+    updates: Partial<PhantomContainer>,
+  ): Promise<PhantomContainer> {
+    const response = await this.makeRequest(
+      `/container/${containerId}`,
+      'POST',
+      updates,
+    );
 
     if (updates.status) {
       if (updates.status === 'closed') {
@@ -305,17 +329,20 @@ export class PhantomConnector extends EventEmitter {
     this.emit('container_updated', {
       containerId,
       updates,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return response;
   }
 
-  async closeContainer(containerId: number, reason?: string): Promise<PhantomContainer> {
+  async closeContainer(
+    containerId: number,
+    reason?: string,
+  ): Promise<PhantomContainer> {
     return await this.updateContainer(containerId, {
       status: 'closed',
       close_time: new Date().toISOString(),
-      custom_fields: reason ? { close_reason: reason } : undefined
+      custom_fields: reason ? { close_reason: reason } : undefined,
     });
   }
 
@@ -325,7 +352,7 @@ export class PhantomConnector extends EventEmitter {
     this.emit('container_tagged', {
       containerId,
       tags,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -335,13 +362,17 @@ export class PhantomConnector extends EventEmitter {
     return response.data || [];
   }
 
-  async runPlaybook(playbookId: number, containerId: number, inputs: Record<string, any> = {}): Promise<PlaybookExecution> {
+  async runPlaybook(
+    playbookId: number,
+    containerId: number,
+    inputs: Record<string, any> = {},
+  ): Promise<PlaybookExecution> {
     try {
       const response = await this.makeRequest('/playbook_run', 'POST', {
         playbook_id: playbookId,
         container_id: containerId,
         scope: 'new',
-        run_data: inputs
+        run_data: inputs,
       });
 
       const execution: PlaybookExecution = {
@@ -351,7 +382,7 @@ export class PhantomConnector extends EventEmitter {
         status: 'queued',
         startTime: new Date(),
         inputs,
-        actions: []
+        actions: [],
       };
 
       this.executions.set(execution.id, execution);
@@ -361,7 +392,7 @@ export class PhantomConnector extends EventEmitter {
         executionId: execution.id,
         playbookId,
         containerId,
-        timestamp: execution.startTime
+        timestamp: execution.startTime,
       });
 
       // Monitor the playbook execution
@@ -373,13 +404,16 @@ export class PhantomConnector extends EventEmitter {
         playbookId,
         containerId,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
   }
 
-  private async monitorPlaybookExecution(runId: number, executionId: string): Promise<void> {
+  private async monitorPlaybookExecution(
+    runId: number,
+    executionId: string,
+  ): Promise<void> {
     const checkInterval = setInterval(async () => {
       try {
         const execution = this.executions.get(executionId);
@@ -405,8 +439,9 @@ export class PhantomConnector extends EventEmitter {
           this.emit('playbook_completed', {
             executionId,
             status: execution.status,
-            duration: execution.endTime.getTime() - execution.startTime.getTime(),
-            timestamp: execution.endTime
+            duration:
+              execution.endTime.getTime() - execution.startTime.getTime(),
+            timestamp: execution.endTime,
           });
         }
 
@@ -414,14 +449,17 @@ export class PhantomConnector extends EventEmitter {
         const actions = await this.getPlaybookActions(runId);
         execution.actions = actions;
 
-        this.metrics.successfulActions += actions.filter(a => a.status === 'success').length;
-        this.metrics.failedActions += actions.filter(a => a.status === 'failed').length;
-
+        this.metrics.successfulActions += actions.filter(
+          (a) => a.status === 'success',
+        ).length;
+        this.metrics.failedActions += actions.filter(
+          (a) => a.status === 'failed',
+        ).length;
       } catch (error) {
         this.emit('playbook_monitor_error', {
           executionId,
           runId,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }, 5000);
@@ -429,16 +467,23 @@ export class PhantomConnector extends EventEmitter {
 
   private mapPhantomStatus(phantomStatus: string): PlaybookExecution['status'] {
     switch (phantomStatus) {
-      case 'running': return 'running';
-      case 'success': return 'completed';
-      case 'failed': return 'failed';
-      case 'cancelled': return 'cancelled';
-      default: return 'queued';
+      case 'running':
+        return 'running';
+      case 'success':
+        return 'completed';
+      case 'failed':
+        return 'failed';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return 'queued';
     }
   }
 
   async getPlaybookActions(runId: number): Promise<PhantomAction[]> {
-    const response = await this.makeRequest(`/action_run?playbook_run_id=${runId}`);
+    const response = await this.makeRequest(
+      `/action_run?playbook_run_id=${runId}`,
+    );
     return response.data || [];
   }
 
@@ -447,7 +492,7 @@ export class PhantomConnector extends EventEmitter {
     actionName: string,
     parameters: Record<string, any>,
     containerId: number,
-    assets?: string[]
+    assets?: string[],
   ): Promise<PhantomAction> {
     try {
       const response = await this.makeRequest('/action_run', 'POST', {
@@ -455,7 +500,7 @@ export class PhantomConnector extends EventEmitter {
         app: appName,
         parameters,
         container_id: containerId,
-        assets: assets || []
+        assets: assets || [],
       });
 
       const action: PhantomAction = {
@@ -470,7 +515,7 @@ export class PhantomConnector extends EventEmitter {
         summary: {},
         playbook_run_id: 0,
         container_id: containerId,
-        start_time: new Date().toISOString()
+        start_time: new Date().toISOString(),
       };
 
       this.emit('action_executed', {
@@ -478,7 +523,7 @@ export class PhantomConnector extends EventEmitter {
         actionName,
         appName,
         containerId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return action;
@@ -488,7 +533,7 @@ export class PhantomConnector extends EventEmitter {
         appName,
         containerId,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
@@ -516,50 +561,59 @@ export class PhantomConnector extends EventEmitter {
   }
 
   async getArtifacts(containerId: number): Promise<PhantomArtifact[]> {
-    const response = await this.makeRequest(`/artifact?container_id=${containerId}`);
+    const response = await this.makeRequest(
+      `/artifact?container_id=${containerId}`,
+    );
     return response.data || [];
   }
 
-  async addComment(containerId: number, comment: string, author?: string): Promise<void> {
+  async addComment(
+    containerId: number,
+    comment: string,
+    author?: string,
+  ): Promise<void> {
     await this.makeRequest('/note', 'POST', {
       container_id: containerId,
       title: 'Automated Comment',
       content: comment,
       note_type: 'general',
-      author: author || 'IntelGraph'
+      author: author || 'IntelGraph',
     });
 
     this.emit('comment_added', {
       containerId,
       comment,
       author: author || 'IntelGraph',
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
-  async addEvidence(containerId: number, evidence: {
-    name: string;
-    description: string;
-    file_path?: string;
-    vault_id?: string;
-    url?: string;
-  }): Promise<void> {
+  async addEvidence(
+    containerId: number,
+    evidence: {
+      name: string;
+      description: string;
+      file_path?: string;
+      vault_id?: string;
+      url?: string;
+    },
+  ): Promise<void> {
     await this.makeRequest('/vault_info', 'POST', {
       container_id: containerId,
       name: evidence.name,
       metadata: {
         description: evidence.description,
-        type: 'evidence'
+        type: 'evidence',
       },
       file_path: evidence.file_path,
       vault_id: evidence.vault_id,
-      url: evidence.url
+      url: evidence.url,
     });
 
     this.emit('evidence_added', {
       containerId,
       evidenceName: evidence.name,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -581,7 +635,7 @@ export class PhantomConnector extends EventEmitter {
 
       this.emit('connection_tested', {
         success: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return true;
@@ -589,7 +643,7 @@ export class PhantomConnector extends EventEmitter {
       this.emit('connection_tested', {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return false;

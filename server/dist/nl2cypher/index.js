@@ -16,7 +16,10 @@ export function nl2cypher(prompt) {
         if (prop && value) {
             const val = value.trim();
             cypher += ` {${prop}: '${val}'}`;
-            rationale.push({ phrase: `where ${prop} is ${val}`, clause: `${prop}: '${val}'` });
+            rationale.push({
+                phrase: `where ${prop} is ${val}`,
+                clause: `${prop}: '${val}'`,
+            });
         }
         cypher += ') RETURN n';
         rationale.push({ phrase: 'return nodes', clause: 'RETURN n' });
@@ -38,7 +41,10 @@ export function nl2cypher(prompt) {
         if (prop && value) {
             const val = value.trim();
             cypher += ` {${prop}: '${val}'}`;
-            rationale.push({ phrase: `where ${prop} is ${val}`, clause: `${prop}: '${val}'` });
+            rationale.push({
+                phrase: `where ${prop} is ${val}`,
+                clause: `${prop}: '${val}'`,
+            });
         }
         cypher += ') RETURN count(n) AS count';
         rationale.push({ phrase: 'return count', clause: 'count(n)' });

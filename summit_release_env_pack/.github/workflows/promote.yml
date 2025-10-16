@@ -2,9 +2,11 @@ name: Promote between environments
 on:
   workflow_dispatch:
     inputs:
-      from_env: { description: "from (dev|staging)", required: true, default: "dev" }
-      to_env:   { description: "to (staging|prod)", required: true, default: "staging" }
-      image_sha: { description: "image SHA to promote", required: true }
+      from_env:
+        { description: 'from (dev|staging)', required: true, default: 'dev' }
+      to_env:
+        { description: 'to (staging|prod)', required: true, default: 'staging' }
+      image_sha: { description: 'image SHA to promote', required: true }
 permissions:
   contents: read
   id-token: write

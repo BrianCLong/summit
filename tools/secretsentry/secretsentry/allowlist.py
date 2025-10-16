@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Iterable
 
 
 @dataclass
@@ -13,7 +13,7 @@ class Allowlist:
     patterns: tuple[str, ...]
 
     @classmethod
-    def from_file(cls, path: Path | None) -> "Allowlist":
+    def from_file(cls, path: Path | None) -> Allowlist:
         if path is None or not path.exists() or path.is_dir():
             return cls(patterns=())
         lines = []
@@ -30,7 +30,7 @@ class Allowlist:
                 return True
         return False
 
-    def extend(self, extra: Iterable[str]) -> "Allowlist":
+    def extend(self, extra: Iterable[str]) -> Allowlist:
         merged: list[str] = list(self.patterns)
         for pattern in extra:
             if pattern not in merged:

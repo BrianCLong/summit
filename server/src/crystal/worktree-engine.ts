@@ -22,7 +22,9 @@ function ensureWithinRepo(repoPath: string, worktreePath: string) {
   const resolvedRepo = path.resolve(repoPath);
   const resolvedWorktree = path.resolve(worktreePath);
   if (!resolvedWorktree.startsWith(resolvedRepo)) {
-    throw new Error(`Worktree path ${resolvedWorktree} must reside within repo ${resolvedRepo}`);
+    throw new Error(
+      `Worktree path ${resolvedWorktree} must reside within repo ${resolvedRepo}`,
+    );
   }
 }
 
@@ -56,7 +58,11 @@ export class WorktreeEngine {
     return queue.enqueue(async () => {
       const repoPath = path.resolve(this.repoRoot, options.projectPath);
       const branch = `crystal/session/${randomUUID()}`;
-      const worktreePath = path.join(repoPath, '.crystal', branch.replace(/\//g, '_'));
+      const worktreePath = path.join(
+        repoPath,
+        '.crystal',
+        branch.replace(/\//g, '_'),
+      );
       ensureWithinRepo(repoPath, worktreePath);
       await fs.mkdir(worktreePath, { recursive: true });
       const now = new Date().toISOString();
@@ -69,7 +75,11 @@ export class WorktreeEngine {
         createdAt: now,
         updatedAt: now,
       };
-      provenanceLedger.record('worktree-engine', 'create', metadata as unknown as JSONRecord);
+      provenanceLedger.record(
+        'worktree-engine',
+        'create',
+        metadata as unknown as JSONRecord,
+      );
       return this.registerWorktree(metadata);
     });
   }
@@ -78,7 +88,10 @@ export class WorktreeEngine {
     return this.worktrees.get(worktreeId);
   }
 
-  async rebaseFromMain(worktreeId: string, mainBranch = 'main'): Promise<WorktreeMetadata> {
+  async rebaseFromMain(
+    worktreeId: string,
+    mainBranch = 'main',
+  ): Promise<WorktreeMetadata> {
     const worktree = this.worktrees.get(worktreeId);
     if (!worktree) {
       throw new Error(`Unknown worktree ${worktreeId}`);
@@ -104,7 +117,10 @@ export class WorktreeEngine {
     });
   }
 
-  async squashAndRebaseToMain(worktreeId: string, message: string): Promise<WorktreeMetadata> {
+  async squashAndRebaseToMain(
+    worktreeId: string,
+    message: string,
+  ): Promise<WorktreeMetadata> {
     const worktree = this.worktrees.get(worktreeId);
     if (!worktree) {
       throw new Error(`Unknown worktree ${worktreeId}`);
@@ -138,7 +154,9 @@ export class WorktreeEngine {
     const queue = this.getQueue(worktree.repoPath);
     await queue.enqueue(async () => {
       this.worktrees.set(worktreeId, { ...worktree, status: 'deleting' });
-      provenanceLedger.record('worktree-engine', 'queue-delete', { worktreeId });
+      provenanceLedger.record('worktree-engine', 'queue-delete', {
+        worktreeId,
+      });
       await fs.rm(worktree.worktreePath, { recursive: true, force: true });
       this.worktrees.delete(worktreeId);
       provenanceLedger.record('worktree-engine', 'deleted', { worktreeId });
@@ -146,8 +164,11 @@ export class WorktreeEngine {
   }
 
   async preview(command: string, args: string[] = []): Promise<string> {
-    const sanitized = `${sanitizeCommand(command)} ${args.map(sanitizeCommand).join(' ')}`.trim();
-    provenanceLedger.record('worktree-engine', 'preview', { command: sanitized });
+    const sanitized =
+      `${sanitizeCommand(command)} ${args.map(sanitizeCommand).join(' ')}`.trim();
+    provenanceLedger.record('worktree-engine', 'preview', {
+      command: sanitized,
+    });
     return sanitized;
   }
 

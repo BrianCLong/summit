@@ -1,6 +1,7 @@
 # Audit Investigation Platform Security Overview
 
 ## Overview
+
 The audit investigation platform unifies cursor provenance and simple ledger audit data to enable
 natural-language driven investigations. It introduces hardened controls for temporal reconstruction,
 cross-system correlation, anomaly surfacing, and export workflows. Security was prioritized in the
@@ -14,6 +15,7 @@ following areas:
   payloads, and deduplicate correlation identifiers before use.
 
 ## Role-based access controls
+
 - `viewer` roles may query the platform but cannot export or inspect anomaly outputs.
 - `analyst` roles may query, export, and review anomaly insights to accelerate investigations.
 - `admin` inherits all capabilities and may be extended with additional overrides.
@@ -21,12 +23,14 @@ following areas:
   flows or alerting policies.
 
 ## Query execution and caching
+
 - Cached query responses are validated for freshness before reuse. Expired entries are purged
   proactively and when new results are written.
 - Cached results are deep-cloned on retrieval to prevent in-memory mutation of canonical findings.
 - Cache size and TTL are configurable, enabling operators to align with retention requirements.
 
 ## Anomaly detection and correlation
+
 - Anomaly detection thresholds are tunable per deployment, allowing environment-specific baselines.
 - Correlation logic requires multiple systems or repeated hits before exposing keys, reducing the
   risk of leaking single-system identifiers.
@@ -34,6 +38,7 @@ following areas:
   of unbounded filters.
 
 ## Export governance and audit trail
+
 - Export payloads require explicit authorization and are serialized in CSV or JSON with escaping to
   prevent spreadsheet formula injection.
 - Each investigation trail entry captures tenant, user, session, filter, options, and aggregate metrics.
@@ -42,6 +47,7 @@ following areas:
   sanitized event metadata.
 
 ## Integration and testing
+
 - Ledger adapters translate provenance events into normalized audit records, ensuring consistent
   severity mapping and correlation identifiers across systems.
 - Vitest coverage validates natural language queries, caching, RBAC enforcement, anomaly visibility,

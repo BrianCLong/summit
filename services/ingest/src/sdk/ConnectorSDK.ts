@@ -224,7 +224,8 @@ export abstract class BaseConnector extends EventEmitter {
 
       this.status.status = 'completed';
       this.status.endTime = new Date();
-      this.metrics.totalRunTime += this.status.endTime.getTime() - this.status.startTime!.getTime();
+      this.metrics.totalRunTime +=
+        this.status.endTime.getTime() - this.status.startTime!.getTime();
 
       logger.info({
         message: 'Connector completed successfully',
@@ -278,7 +279,8 @@ export abstract class BaseConnector extends EventEmitter {
 
       const processingTime = Date.now() - startTime;
       this.metrics.avgProcessingTime =
-        (this.metrics.avgProcessingTime * (this.metrics.batchesProcessed - 1) + processingTime) /
+        (this.metrics.avgProcessingTime * (this.metrics.batchesProcessed - 1) +
+          processingTime) /
         this.metrics.batchesProcessed;
 
       this.emit('batchCompleted', {
@@ -394,7 +396,10 @@ export abstract class BaseConnector extends EventEmitter {
     };
   }
 
-  protected validateRecord(record: IngestRecord): { valid: boolean; errors?: string[] } {
+  protected validateRecord(record: IngestRecord): {
+    valid: boolean;
+    errors?: string[];
+  } {
     const errors: string[] = [];
 
     if (!record.id) errors.push('Record ID is required');
@@ -474,7 +479,10 @@ export class ConnectorRegistry {
     return configs;
   }
 
-  createConnector(connectorId: string, parameters: Record<string, any>): BaseConnector {
+  createConnector(
+    connectorId: string,
+    parameters: Record<string, any>,
+  ): BaseConnector {
     const ConnectorClass = this.connectors.get(connectorId);
     if (!ConnectorClass) {
       throw new Error(`Connector not found: ${connectorId}`);

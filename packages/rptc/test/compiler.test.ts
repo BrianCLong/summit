@@ -9,7 +9,7 @@ import {
   generateTestSuite,
   numberSlot,
   stringSlot,
-  booleanSlot
+  booleanSlot,
 } from '../src/index.js';
 import { PromptValidationError } from '../src/errors.js';
 
@@ -22,17 +22,19 @@ describe('RPTC prompt compiler', () => {
     slots: {
       audience: stringSlot({
         constraints: { minLength: 3, maxLength: 40 },
-        example: 'intelligence leads'
+        example: 'intelligence leads',
       }),
       topic: stringSlot({
         constraints: { minLength: 5, pattern: /^[A-Za-z\s]+$/ },
         example: 'Network defense readiness',
-        counterExamples: ['###']
+        counterExamples: ['###'],
       }),
       count: numberSlot({ constraints: { min: 1, max: 5 }, example: 3 }),
       includeSummary: booleanSlot({ defaultValue: true }),
-      format: enumSlot(['bulleted', 'narrative'] as const, { defaultValue: 'bulleted' })
-    }
+      format: enumSlot(['bulleted', 'narrative'] as const, {
+        defaultValue: 'bulleted',
+      }),
+    },
   });
 
   const validValues = {
@@ -40,7 +42,7 @@ describe('RPTC prompt compiler', () => {
     topic: 'Advanced network hardening',
     count: 3,
     includeSummary: false,
-    format: 'narrative' as const
+    format: 'narrative' as const,
   };
 
   it('renders prompts when validation passes', () => {
@@ -51,7 +53,10 @@ describe('RPTC prompt compiler', () => {
   });
 
   it('exposes compiled adapters for multiple providers', () => {
-    const openai = new OpenAIChatAdapter({ model: 'gpt-test', systemPrompt: 'You are a release agent.' });
+    const openai = new OpenAIChatAdapter({
+      model: 'gpt-test',
+      systemPrompt: 'You are a release agent.',
+    });
     const anthropic = new AnthropicAdapter({ model: 'claude-test' });
     const vertex = new VertexAIAdapter({ model: 'gemini-test' });
 
@@ -63,11 +68,15 @@ describe('RPTC prompt compiler', () => {
 
     const anthropicPayload = anthropic.format(compiled);
     expect(anthropicPayload).toMatchObject({ model: 'claude-test' });
-    expect((anthropicPayload as any).messages[0].content[0].text).toContain('Advanced network hardening');
+    expect((anthropicPayload as any).messages[0].content[0].text).toContain(
+      'Advanced network hardening',
+    );
 
     const vertexPayload = vertex.format(compiled);
     expect(vertexPayload).toMatchObject({ model: 'gemini-test' });
-    expect((vertexPayload as any).contents[0].parts[0].text).toContain('field officers');
+    expect((vertexPayload as any).contents[0].parts[0].text).toContain(
+      'field officers',
+    );
   });
 
   it('fails validation with descriptive errors', () => {
@@ -75,13 +84,22 @@ describe('RPTC prompt compiler', () => {
     expect(validation.valid).toBe(false);
     expect(validation.errors[0].details[0].code).toBe('string.minLength');
 
-    expect(() => prompt.render({ ...validValues, topic: 'bad' })).toThrow(PromptValidationError);
+    expect(() => prompt.render({ ...validValues, topic: 'bad' })).toThrow(
+      PromptValidationError,
+    );
   });
 
   it('rejects extraneous slot data', () => {
-    const validation = prompt.validate({ ...validValues, unknown: 'nope' } as any);
+    const validation = prompt.validate({
+      ...validValues,
+      unknown: 'nope',
+    } as any);
     expect(validation.valid).toBe(false);
-    expect(validation.errors.some((error) => error.details[0].code === 'slot.unexpected')).toBe(true);
+    expect(
+      validation.errors.some(
+        (error) => error.details[0].code === 'slot.unexpected',
+      ),
+    ).toBe(true);
   });
 
   it('produces CI-friendly summaries', () => {
@@ -91,7 +109,11 @@ describe('RPTC prompt compiler', () => {
     expect(summary).toContain('string.minLength');
 
     const suite = generateTestSuite(prompt, { validExample: validValues });
-    expect(suite.cases.some((testCase) => testCase.description.includes('counterexample'))).toBe(true);
+    expect(
+      suite.cases.some((testCase) =>
+        testCase.description.includes('counterexample'),
+      ),
+    ).toBe(true);
     const run = suite.run();
     expect(run.passed).toBe(true);
     const suiteSummary = formatTestRunForCI(suite.name, run);

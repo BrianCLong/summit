@@ -1,7 +1,7 @@
 name: Epic
 description: Track an initiative across multiple stories
-title: "Epic: <name>"
-labels: ["epic"]
+title: 'Epic: <name>'
+labels: ['epic']
 body:
   - type: textarea
     id: summary

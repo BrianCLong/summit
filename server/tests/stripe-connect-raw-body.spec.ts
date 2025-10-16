@@ -16,4 +16,3 @@ describe('Stripe Connect raw-body route', () => {
     expect([200, 400, 503]).toContain(res.status);
   });
 });
-

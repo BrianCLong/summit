@@ -15,7 +15,7 @@ const tracer = trace.getTracer('intelgraph-graphql');
  */
 export function traceResolver<T extends any[], R>(
   resolverName: string,
-  resolver: (...args: T) => Promise<R> | R
+  resolver: (...args: T) => Promise<R> | R,
 ) {
   return async (...args: T): Promise<R> => {
     return await context.with(
@@ -36,12 +36,15 @@ export function traceResolver<T extends any[], R>(
 
           // Add resolver arguments (be careful with sensitive data)
           if (resolverArgs && typeof resolverArgs === 'object') {
-            Object.keys(resolverArgs).forEach(key => {
-              if (!['password', 'token', 'secret'].includes(key.toLowerCase())) {
-                span.setAttribute(`graphql.args.${key}`,
+            Object.keys(resolverArgs).forEach((key) => {
+              if (
+                !['password', 'token', 'secret'].includes(key.toLowerCase())
+              ) {
+                span.setAttribute(
+                  `graphql.args.${key}`,
                   typeof resolverArgs[key] === 'string'
                     ? resolverArgs[key]
-                    : JSON.stringify(resolverArgs[key])
+                    : JSON.stringify(resolverArgs[key]),
                 );
               }
             });
@@ -59,7 +62,6 @@ export function traceResolver<T extends any[], R>(
 
           span.setStatus({ code: SpanStatusCode.OK });
           return result;
-
         } catch (error) {
           // Record the error
           span.recordException(error as Error);
@@ -79,7 +81,7 @@ export function traceResolver<T extends any[], R>(
         } finally {
           span.end();
         }
-      })
+      }),
     );
   };
 }
@@ -88,9 +90,14 @@ export function traceResolver<T extends any[], R>(
  * Decorator for easy resolver tracing
  */
 export function Traced(resolverName?: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
-    const traceName = resolverName || `${target.constructor.name}.${propertyKey}`;
+    const traceName =
+      resolverName || `${target.constructor.name}.${propertyKey}`;
 
     descriptor.value = traceResolver(traceName, originalMethod);
     return descriptor;
@@ -103,10 +110,13 @@ export function Traced(resolverName?: string) {
 export const exampleResolvers = {
   Query: {
     // Using wrapper function
-    entity: traceResolver('Query.entity', async (_: any, args: any, ctx: any) => {
-      // Your resolver logic here
-      return await ctx.services.entities.get(args.id);
-    }),
+    entity: traceResolver(
+      'Query.entity',
+      async (_: any, args: any, ctx: any) => {
+        // Your resolver logic here
+        return await ctx.services.entities.get(args.id);
+      },
+    ),
 
     // Using manual span creation
     entities: async (_: any, args: any, ctx: any, info: any) => {
@@ -126,21 +136,27 @@ export const exampleResolvers = {
             return entities;
           } catch (error) {
             span.recordException(error as Error);
-            span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: (error as Error).message,
+            });
             throw error;
           } finally {
             span.end();
           }
-        })
+        }),
       );
     },
   },
 
   Mutation: {
-    createEntity: traceResolver('Mutation.createEntity', async (_: any, args: any, ctx: any) => {
-      // Mutation logic with automatic tracing
-      return await ctx.services.entities.create(args.input);
-    }),
+    createEntity: traceResolver(
+      'Mutation.createEntity',
+      async (_: any, args: any, ctx: any) => {
+        // Mutation logic with automatic tracing
+        return await ctx.services.entities.create(args.input);
+      },
+    ),
   },
 };
 
@@ -149,20 +165,29 @@ export const exampleResolvers = {
  */
 export function createTracingMiddleware() {
   return {
-    Query: new Proxy({}, {
-      get(target, prop) {
-        return traceResolver(`Query.${String(prop)}`, target[prop]);
-      }
-    }),
-    Mutation: new Proxy({}, {
-      get(target, prop) {
-        return traceResolver(`Mutation.${String(prop)}`, target[prop]);
-      }
-    }),
-    Subscription: new Proxy({}, {
-      get(target, prop) {
-        return traceResolver(`Subscription.${String(prop)}`, target[prop]);
-      }
-    }),
+    Query: new Proxy(
+      {},
+      {
+        get(target, prop) {
+          return traceResolver(`Query.${String(prop)}`, target[prop]);
+        },
+      },
+    ),
+    Mutation: new Proxy(
+      {},
+      {
+        get(target, prop) {
+          return traceResolver(`Mutation.${String(prop)}`, target[prop]);
+        },
+      },
+    ),
+    Subscription: new Proxy(
+      {},
+      {
+        get(target, prop) {
+          return traceResolver(`Subscription.${String(prop)}`, target[prop]);
+        },
+      },
+    ),
   };
 }

@@ -1,12 +1,12 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './cacheService';
 export class ThreatHuntingService extends EventEmitter {
+    iocs = new Map();
+    detections = new Map();
+    hunts = new Map();
+    feedSources = new Map();
     constructor() {
         super();
-        this.iocs = new Map();
-        this.detections = new Map();
-        this.hunts = new Map();
-        this.feedSources = new Map();
         console.log('[THREAT_HUNTING] Advanced threat hunting service initialized');
         this.initializeThreatFeeds();
         this.initializeSampleIOCs();
@@ -97,7 +97,11 @@ export class ThreatHuntingService extends EventEmitter {
                     group: 'TA542',
                     country: 'RU',
                     confidence: 0.8,
-                    reasoning: ['Infrastructure patterns', 'TTP overlap', 'Timing analysis'],
+                    reasoning: [
+                        'Infrastructure patterns',
+                        'TTP overlap',
+                        'Timing analysis',
+                    ],
                 },
                 metadata: { ports: [80, 443, 8080] },
                 createdBy: 'threat-intel-feed',
@@ -387,7 +391,12 @@ export class ThreatHuntingService extends EventEmitter {
             enrichment: {
                 avgEventsPerHour: Math.floor(baseCount / 24),
                 topSources: samples.map((s) => s.source_ip).slice(0, 3),
-                timeDistribution: { morning: 25, afternoon: 35, evening: 25, night: 15 },
+                timeDistribution: {
+                    morning: 25,
+                    afternoon: 35,
+                    evening: 25,
+                    night: 15,
+                },
             },
         };
         return result;
@@ -431,7 +440,8 @@ export class ThreatHuntingService extends EventEmitter {
         if (iocId) {
             detections = detections.filter((det) => det.iocId === iocId);
         }
-        return detections.sort((a, b) => new Date(b.detectionTime).getTime() - new Date(a.detectionTime).getTime());
+        return detections.sort((a, b) => new Date(b.detectionTime).getTime() -
+            new Date(a.detectionTime).getTime());
     }
     /**
      * Get threat hunting statistics
@@ -462,7 +472,8 @@ export class ThreatHuntingService extends EventEmitter {
                 active: iocs.filter((ioc) => ioc.isActive).length,
                 byType: iocsByType,
                 bySeverity: iocsBySeverity,
-                recentlyAdded: iocs.filter((ioc) => new Date(ioc.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000).length,
+                recentlyAdded: iocs.filter((ioc) => new Date(ioc.createdAt).getTime() >
+                    Date.now() - 24 * 60 * 60 * 1000).length,
             },
             hunts: {
                 total: hunts.length,
@@ -474,7 +485,8 @@ export class ThreatHuntingService extends EventEmitter {
                 total: detections.length,
                 new: detections.filter((det) => det.status === 'NEW').length,
                 byStatus: detectionsByStatus,
-                recent24h: detections.filter((det) => new Date(det.detectionTime).getTime() > Date.now() - 24 * 60 * 60 * 1000).length,
+                recent24h: detections.filter((det) => new Date(det.detectionTime).getTime() >
+                    Date.now() - 24 * 60 * 60 * 1000).length,
             },
             feeds: {
                 total: this.feedSources.size,

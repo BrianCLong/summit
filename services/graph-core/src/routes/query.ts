@@ -12,7 +12,8 @@ const router = Router();
 
 router.post('/cypher', (req, res) => {
   const parsed = QueryInput.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (!parsed.success)
+    return res.status(400).json({ error: parsed.error.flatten() });
   if (parsed.data.id && parsed.data.time) {
     const entity = store.getEntityAt(parsed.data.id, parsed.data.time) || null;
     return res.json({ entity });

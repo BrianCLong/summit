@@ -1,6 +1,6 @@
 /**
  * SIEM Management API Routes
- * 
+ *
  * REST endpoints for managing SIEM integrations, providers, and event monitoring.
  */
 
@@ -21,14 +21,15 @@ router.use(authMiddleware);
  * GET /api/siem/providers
  * List all SIEM providers
  */
-router.get('/providers',
+router.get(
+  '/providers',
   rbacMiddleware(['admin', 'security_officer']),
   async (req: Request, res: Response) => {
     try {
       const providers = siemService.listProviders();
-      
+
       // Filter sensitive information for response
-      const filteredProviders = providers.map(provider => ({
+      const filteredProviders = providers.map((provider) => ({
         id: provider.id,
         name: provider.name,
         type: provider.type,
@@ -36,10 +37,10 @@ router.get('/providers',
         config: {
           url: provider.config.url ? '[CONFIGURED]' : '[NOT CONFIGURED]',
           timeout: provider.config.timeout,
-          retryAttempts: provider.config.retryAttempts
+          retryAttempts: provider.config.retryAttempts,
         },
         rateLimits: provider.rateLimits,
-        filterCount: provider.filters.length
+        filterCount: provider.filters.length,
       }));
 
       res.json({
@@ -47,27 +48,28 @@ router.get('/providers',
         data: filteredProviders,
         meta: {
           total: providers.length,
-          enabled: providers.filter(p => p.enabled).length,
-          types: [...new Set(providers.map(p => p.type))]
-        }
+          enabled: providers.filter((p) => p.enabled).length,
+          types: [...new Set(providers.map((p) => p.type))],
+        },
       });
     } catch (error) {
       const err = error as Error;
       logger.error('Failed to list SIEM providers', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM providers', 500);
     }
-  }
+  },
 );
 
 /**
  * GET /api/siem/providers/:id
  * Get specific SIEM provider details
  */
-router.get('/providers/:id',
+router.get(
+  '/providers/:id',
   rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: Request, res: Response) => {
@@ -84,30 +86,31 @@ router.get('/providers/:id',
 
       res.json({
         success: true,
-        data: status
+        data: status,
       });
     } catch (error) {
       const err = error as Error;
       if (error instanceof AppError) {
         throw error;
       }
-      
+
       logger.error('Failed to get SIEM provider', {
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM provider', 500);
     }
-  }
+  },
 );
 
 /**
  * PUT /api/siem/providers/:id
  * Update SIEM provider configuration
  */
-router.put('/providers/:id',
+router.put(
+  '/providers/:id',
   rbacMiddleware(['admin']),
   param('id').isString().notEmpty(),
   body('enabled').isBoolean().optional(),
@@ -119,7 +122,7 @@ router.put('/providers/:id',
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
@@ -142,35 +145,36 @@ router.put('/providers/:id',
         providerId,
         updatedBy: (req as any).user?.id,
         tenantId: (req as any).user?.tenantId,
-        changes: Object.keys(updates)
+        changes: Object.keys(updates),
       });
 
       res.json({
         success: true,
-        message: 'SIEM provider updated successfully'
+        message: 'SIEM provider updated successfully',
       });
     } catch (error) {
       const err = error as Error;
       if (error instanceof AppError) {
         throw error;
       }
-      
+
       logger.error('Failed to update SIEM provider', {
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to update SIEM provider', 500);
     }
-  }
+  },
 );
 
 /**
  * POST /api/siem/providers/:id/test
  * Test SIEM provider connectivity
  */
-router.post('/providers/:id/test',
+router.post(
+  '/providers/:id/test',
   rbacMiddleware(['admin', 'security_officer']),
   param('id').isString().notEmpty(),
   async (req: Request, res: Response) => {
@@ -181,23 +185,23 @@ router.post('/providers/:id/test',
       }
 
       const providerId = req.params.id;
-      
+
       logger.info('Testing SIEM provider connectivity', {
         component: 'SIEMRoutes',
         providerId,
         testedBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId
+        tenantId: (req as any).user?.tenantId,
       });
 
       const testResult = await siemService.testProvider(providerId);
-      
+
       res.json({
         success: true,
         data: {
           providerId,
           connected: testResult,
-          testedAt: new Date().toISOString()
-        }
+          testedAt: new Date().toISOString(),
+        },
       });
     } catch (error) {
       const err = error as Error;
@@ -205,18 +209,19 @@ router.post('/providers/:id/test',
         component: 'SIEMRoutes',
         error: err.message,
         providerId: req.params.id,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to test SIEM provider', 500);
     }
-  }
+  },
 );
 
 /**
  * POST /api/siem/events
  * Manually send event to SIEM systems
  */
-router.post('/events',
+router.post(
+  '/events',
   rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('eventType').isString().notEmpty(),
   body('severity').isIn(['low', 'medium', 'high', 'critical']),
@@ -229,7 +234,7 @@ router.post('/events',
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
@@ -248,8 +253,8 @@ router.post('/events',
         rawData: {
           createdBy: (req as any).user?.id,
           createdAt: new Date(),
-          manual: true
-        }
+          manual: true,
+        },
       };
 
       await siemService.sendEvent(event);
@@ -259,7 +264,7 @@ router.post('/events',
         eventType: event.eventType,
         severity: event.severity,
         sentBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId
+        tenantId: (req as any).user?.tenantId,
       });
 
       res.json({
@@ -269,37 +274,38 @@ router.post('/events',
           eventId: `manual-${Date.now()}`,
           timestamp: event.timestamp,
           eventType: event.eventType,
-          severity: event.severity
-        }
+          severity: event.severity,
+        },
       });
     } catch (error) {
       const err = error as Error;
       logger.error('Failed to send manual SIEM event', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to send SIEM event', 500);
     }
-  }
+  },
 );
 
 /**
  * GET /api/siem/status
  * Get overall SIEM integration status
  */
-router.get('/status',
+router.get(
+  '/status',
   rbacMiddleware(['admin', 'security_officer', 'analyst']),
   async (req: Request, res: Response) => {
     try {
       const providers = siemService.listProviders();
-      const enabledProviders = providers.filter(p => p.enabled);
-      
+      const enabledProviders = providers.filter((p) => p.enabled);
+
       const statusSummary = {
         enabled: enabledProviders.length > 0,
         totalProviders: providers.length,
         enabledProviders: enabledProviders.length,
-        providerStatus: enabledProviders.map(provider => {
+        providerStatus: enabledProviders.map((provider) => {
           const status = siemService.getProviderStatus(provider.id);
           return {
             id: provider.id,
@@ -307,42 +313,43 @@ router.get('/status',
             type: provider.type,
             healthy: status.circuitBreaker?.state !== 'OPEN',
             bufferSize: status.buffer?.size || 0,
-            lastActivity: status.buffer?.lastFlush
+            lastActivity: status.buffer?.lastFlush,
           };
         }),
-        healthySystems: enabledProviders.filter(provider => {
+        healthySystems: enabledProviders.filter((provider) => {
           const status = siemService.getProviderStatus(provider.id);
           return status.circuitBreaker?.state !== 'OPEN';
-        }).length
+        }).length,
       };
 
       res.json({
         success: true,
-        data: statusSummary
+        data: statusSummary,
       });
     } catch (error) {
       const err = error as Error;
       logger.error('Failed to get SIEM status', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM status', 500);
     }
-  }
+  },
 );
 
 /**
  * GET /api/siem/metrics
  * Get SIEM metrics and statistics
  */
-router.get('/metrics',
+router.get(
+  '/metrics',
   rbacMiddleware(['admin', 'security_officer']),
   query('timeRange').isIn(['1h', '24h', '7d', '30d']).optional(),
   query('provider').isString().optional(),
   async (req: Request, res: Response) => {
     try {
-      const timeRange = req.query.timeRange as string || '24h';
+      const timeRange = (req.query.timeRange as string) || '24h';
       const providerFilter = req.query.provider as string;
 
       // In a real implementation, this would query actual metrics from monitoring systems
@@ -353,25 +360,28 @@ router.get('/metrics',
           total: 45672,
           successful: 45123,
           failed: 549,
-          successRate: 98.8
+          successRate: 98.8,
         },
         eventsByType: {
-          'authentication_failed': 1234,
-          'authentication_success': 12456,
-          'data_access': 8934,
-          'privilege_escalation': 456,
-          'suspicious_activity': 789,
-          'request_anomaly': 234
+          authentication_failed: 1234,
+          authentication_success: 12456,
+          data_access: 8934,
+          privilege_escalation: 456,
+          suspicious_activity: 789,
+          request_anomaly: 234,
         },
         eventsBySeverity: {
-          'low': 35000,
-          'medium': 8000,
-          'high': 2500,
-          'critical': 172
+          low: 35000,
+          medium: 8000,
+          high: 2500,
+          critical: 172,
         },
-        providerMetrics: siemService.listProviders()
-          .filter(p => p.enabled && (!providerFilter || p.id === providerFilter))
-          .map(provider => {
+        providerMetrics: siemService
+          .listProviders()
+          .filter(
+            (p) => p.enabled && (!providerFilter || p.id === providerFilter),
+          )
+          .map((provider) => {
             const status = siemService.getProviderStatus(provider.id);
             return {
               id: provider.id,
@@ -381,7 +391,7 @@ router.get('/metrics',
               failures: Math.floor(Math.random() * 100),
               averageLatency: Math.floor(Math.random() * 500) + 100,
               circuitBreakerState: status.circuitBreaker?.state || 'CLOSED',
-              bufferSize: status.buffer?.size || 0
+              bufferSize: status.buffer?.size || 0,
             };
           }),
         alerts: [
@@ -389,38 +399,39 @@ router.get('/metrics',
             time: new Date(Date.now() - 3600000).toISOString(),
             message: 'High number of failed authentication attempts',
             severity: 'high',
-            count: 45
+            count: 45,
           },
           {
             time: new Date(Date.now() - 7200000).toISOString(),
             message: 'Suspicious activity patterns detected',
             severity: 'medium',
-            count: 12
-          }
-        ]
+            count: 12,
+          },
+        ],
       };
 
       res.json({
         success: true,
-        data: mockMetrics
+        data: mockMetrics,
       });
     } catch (error) {
       const err = error as Error;
       logger.error('Failed to get SIEM metrics', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to retrieve SIEM metrics', 500);
     }
-  }
+  },
 );
 
 /**
  * POST /api/siem/alerts
  * Create security alert
  */
-router.post('/alerts',
+router.post(
+  '/alerts',
   rbacMiddleware(['admin', 'security_officer', 'analyst']),
   body('title').isString().notEmpty(),
   body('description').isString().notEmpty(),
@@ -432,7 +443,7 @@ router.post('/alerts',
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', {
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
@@ -443,7 +454,7 @@ router.post('/alerts',
         category: req.body.category || 'security',
         indicators: req.body.indicators || [],
         createdBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId
+        tenantId: (req as any).user?.tenantId,
       };
 
       // Create SIEM event for the alert
@@ -458,13 +469,13 @@ router.post('/alerts',
           description: alert.description,
           category: alert.category,
           indicators: alert.indicators,
-          alertId: `alert-${Date.now()}`
+          alertId: `alert-${Date.now()}`,
         },
         userId: (req as any).user?.id,
         tenantId: (req as any).user?.tenantId,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
-        tags: ['security', 'alert', 'manual']
+        tags: ['security', 'alert', 'manual'],
       };
 
       await siemService.sendEvent(event);
@@ -474,7 +485,7 @@ router.post('/alerts',
         alertTitle: alert.title,
         severity: alert.severity,
         createdBy: (req as any).user?.id,
-        tenantId: (req as any).user?.tenantId
+        tenantId: (req as any).user?.tenantId,
       });
 
       res.json({
@@ -483,73 +494,74 @@ router.post('/alerts',
         data: {
           alertId: event.details.alertId,
           timestamp: event.timestamp,
-          severity: event.severity
-        }
+          severity: event.severity,
+        },
       });
     } catch (error) {
       const err = error as Error;
       logger.error('Failed to create security alert', {
         component: 'SIEMRoutes',
         error: err.message,
-        userId: (req as any).user?.id
+        userId: (req as any).user?.id,
       });
       throw new AppError('Failed to create security alert', 500);
     }
-  }
+  },
 );
 
 /**
  * GET /api/siem/health
  * SIEM service health check
  */
-router.get('/health',
-  async (req: Request, res: Response) => {
-    try {
-      const providers = siemService.listProviders();
-      const enabledProviders = providers.filter(p => p.enabled);
-      
-      const healthyProviders = enabledProviders.filter(provider => {
+router.get('/health', async (req: Request, res: Response) => {
+  try {
+    const providers = siemService.listProviders();
+    const enabledProviders = providers.filter((p) => p.enabled);
+
+    const healthyProviders = enabledProviders.filter((provider) => {
+      const status = siemService.getProviderStatus(provider.id);
+      return status.circuitBreaker?.state !== 'OPEN';
+    });
+
+    const health = {
+      status:
+        healthyProviders.length === enabledProviders.length
+          ? 'healthy'
+          : 'degraded',
+      timestamp: new Date(),
+      providers: {
+        total: providers.length,
+        enabled: enabledProviders.length,
+        healthy: healthyProviders.length,
+        unhealthy: enabledProviders.length - healthyProviders.length,
+      },
+      details: enabledProviders.map((provider) => {
         const status = siemService.getProviderStatus(provider.id);
-        return status.circuitBreaker?.state !== 'OPEN';
-      });
+        return {
+          id: provider.id,
+          name: provider.name,
+          healthy: status.circuitBreaker?.state !== 'OPEN',
+          bufferSize: status.buffer?.size || 0,
+        };
+      }),
+    };
 
-      const health = {
-        status: healthyProviders.length === enabledProviders.length ? 'healthy' : 'degraded',
-        timestamp: new Date(),
-        providers: {
-          total: providers.length,
-          enabled: enabledProviders.length,
-          healthy: healthyProviders.length,
-          unhealthy: enabledProviders.length - healthyProviders.length
-        },
-        details: enabledProviders.map(provider => {
-          const status = siemService.getProviderStatus(provider.id);
-          return {
-            id: provider.id,
-            name: provider.name,
-            healthy: status.circuitBreaker?.state !== 'OPEN',
-            bufferSize: status.buffer?.size || 0
-          };
-        })
-      };
+    const statusCode = health.status === 'healthy' ? 200 : 503;
+    res.status(statusCode).json({
+      success: health.status === 'healthy',
+      data: health,
+    });
+  } catch (error) {
+    logger.error('SIEM health check failed', {
+      component: 'SIEMRoutes',
+      error: error.message,
+    });
 
-      const statusCode = health.status === 'healthy' ? 200 : 503;
-      res.status(statusCode).json({
-        success: health.status === 'healthy',
-        data: health
-      });
-    } catch (error) {
-      logger.error('SIEM health check failed', {
-        component: 'SIEMRoutes',
-        error: error.message
-      });
-      
-      res.status(500).json({
-        success: false,
-        error: 'SIEM service health check failed'
-      });
-    }
+    res.status(500).json({
+      success: false,
+      error: 'SIEM service health check failed',
+    });
   }
-);
+});
 
 export default router;

@@ -1,6 +1,6 @@
 final polish (optional but recommended)
 
-Protect the GA tag pattern (vYYYY.MM.DD-*) in your release train docs.
+Protect the GA tag pattern (vYYYY.MM.DD-\*) in your release train docs.
 
 Lock environment protections for prod (reviewers required; restrict “who can deploy”).
 

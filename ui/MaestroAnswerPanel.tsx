@@ -42,7 +42,12 @@ export default function MaestroAnswerPanel() {
         <ul className="list-disc ml-5">
           {data.citations.map((c: Citation, i: number) => (
             <li key={i}>
-              <a className="text-blue-600 underline" href={c.url} target="_blank" rel="noreferrer">
+              <a
+                className="text-blue-600 underline"
+                href={c.url}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {c.url}
               </a>
             </li>
@@ -51,7 +56,8 @@ export default function MaestroAnswerPanel() {
       </div>
       {data.conflicts?.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-xl p-3">
-          <b>Conflicts detected:</b> {data.conflicts.length}. See Maestro Panel → Conflicts.
+          <b>Conflicts detected:</b> {data.conflicts.length}. See Maestro Panel
+          → Conflicts.
         </div>
       )}
     </div>

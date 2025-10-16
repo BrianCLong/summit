@@ -30,7 +30,7 @@ const OPERATIONS = [
         }
       }
       return visited.size;
-    }
+    },
   },
   {
     name: 'aggregation-pipeline',
@@ -39,7 +39,7 @@ const OPERATIONS = [
       const records = Array.from({ length: 5000 }, (_, index) => ({
         risk: (index % 7) + 1,
         score: (index * 3) % 97,
-        status: index % 5 === 0 ? 'open' : 'closed'
+        status: index % 5 === 0 ? 'open' : 'closed',
       }));
       const summary = records
         .filter((record) => record.status === 'open')
@@ -47,14 +47,15 @@ const OPERATIONS = [
           (acc, record) => {
             acc.count += 1;
             acc.total += record.score;
-            acc.riskBuckets[record.risk] = (acc.riskBuckets[record.risk] || 0) + 1;
+            acc.riskBuckets[record.risk] =
+              (acc.riskBuckets[record.risk] || 0) + 1;
             return acc;
           },
-          { count: 0, total: 0, riskBuckets: {} }
+          { count: 0, total: 0, riskBuckets: {} },
         );
       summary.average = summary.count === 0 ? 0 : summary.total / summary.count;
       return summary;
-    }
+    },
   },
   {
     name: 'json-serialization',
@@ -69,20 +70,21 @@ const OPERATIONS = [
             weight: (edgeIndex * i) % 17,
             metadata: {
               tag: `tag-${edgeIndex}`,
-              confidence: (edgeIndex % 5) / 5
-            }
-          }))
+              confidence: (edgeIndex % 5) / 5,
+            },
+          })),
         });
       }
       const serialized = JSON.stringify(payload);
       const parsed = JSON.parse(serialized);
       return parsed.length;
-    }
-  }
+    },
+  },
 ];
 
 function runPerformanceBenchmark() {
-  const description = 'Validates key analytical operations stay under the 500ms performance budget.';
+  const description =
+    'Validates key analytical operations stay under the 500ms performance budget.';
   const remediation =
     'Profile the affected operation, optimize algorithms or caching, and rerun the benchmark until all steps finish within 500ms.';
   const details = [];
@@ -92,10 +94,12 @@ function runPerformanceBenchmark() {
     if (duration > operation.maxMs) {
       allPassing = false;
       details.push(
-        `${operation.name} took ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms) — investigate performance regressions.`
+        `${operation.name} took ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms) — investigate performance regressions.`,
       );
     } else {
-      details.push(`${operation.name} completed in ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms).`);
+      details.push(
+        `${operation.name} completed in ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms).`,
+      );
     }
   }
   return createResult({
@@ -103,7 +107,7 @@ function runPerformanceBenchmark() {
     description,
     passed: allPassing,
     details,
-    remediation
+    remediation,
   });
 }
 
@@ -115,5 +119,5 @@ function measureOperation(callback) {
 
 module.exports = {
   runPerformanceBenchmark,
-  measureOperation
+  measureOperation,
 };

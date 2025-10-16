@@ -1,16 +1,21 @@
-
-import unittest
 import os
 import sys
-from datetime import datetime
+import unittest
 
 # Add the project root to sys.path to allow absolute imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.insert(0, project_root)
 
-from predictive_threat_suite.timeline_forecast import get_timeline_forecast, enable_timeline_forecast_feature
-from predictive_threat_suite.counterfactual_simulator import simulate_counterfactual, enable_counterfactual_simulator_feature
 from predictive_threat_suite.causal_explainer import get_causal_explanation
+from predictive_threat_suite.counterfactual_simulator import (
+    enable_counterfactual_simulator_feature,
+    simulate_counterfactual,
+)
+from predictive_threat_suite.timeline_forecast import (
+    enable_timeline_forecast_feature,
+    get_timeline_forecast,
+)
+
 
 class TestPredictiveSuiteStubs(unittest.TestCase):
 
@@ -19,19 +24,19 @@ class TestPredictiveSuiteStubs(unittest.TestCase):
         start_date = "2025-01-01"
         end_date = "2025-01-03"
         forecast = get_timeline_forecast(entity_id, start_date, end_date)
-        
+
         self.assertIsInstance(forecast, list)
-        self.assertEqual(len(forecast), 3) # 3 days
+        self.assertEqual(len(forecast), 3)  # 3 days
 
         # Check specific values based on the linear trend (initial_value=10.0, trend_slope=0.5)
         self.assertEqual(forecast[0]["date"], "2025-01-01")
         self.assertEqual(forecast[0]["value"], 10.0)
 
         self.assertEqual(forecast[1]["date"], "2025-01-02")
-        self.assertEqual(forecast[1]["value"], 10.5) # 10.0 + 1 * 0.5
+        self.assertEqual(forecast[1]["value"], 10.5)  # 10.0 + 1 * 0.5
 
         self.assertEqual(forecast[2]["date"], "2025-01-03")
-        self.assertEqual(forecast[2]["value"], 11.0) # 10.0 + 2 * 0.5
+        self.assertEqual(forecast[2]["value"], 11.0)  # 10.0 + 2 * 0.5
 
     def test_enable_timeline_forecast_feature(self):
         self.assertTrue(enable_timeline_forecast_feature(True))
@@ -77,5 +82,6 @@ class TestPredictiveSuiteStubs(unittest.TestCase):
         self.assertIsInstance(explanation, list)
         self.assertGreater(len(explanation), 0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

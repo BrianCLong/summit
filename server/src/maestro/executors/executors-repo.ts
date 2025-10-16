@@ -40,7 +40,10 @@ export class ExecutorsRepo {
     `);
     this.initialized = true;
   }
-  async create(r: Omit<ExecutorRecord, 'id' | 'last_heartbeat' | 'tenant_id'>, tenantId: string): Promise<ExecutorRecord> {
+  async create(
+    r: Omit<ExecutorRecord, 'id' | 'last_heartbeat' | 'tenant_id'>,
+    tenantId: string,
+  ): Promise<ExecutorRecord> {
     await this.ensureTable();
     const { rows } = await this.getPool().query(
       `INSERT INTO executors (name, kind, labels, capacity, status, tenant_id)
@@ -71,7 +74,10 @@ export const executorsRepo = {
   },
 
   // Proxy methods for backward compatibility
-  async create(r: Omit<ExecutorRecord, 'id' | 'last_heartbeat' | 'tenant_id'>, tenantId: string): Promise<ExecutorRecord> {
+  async create(
+    r: Omit<ExecutorRecord, 'id' | 'last_heartbeat' | 'tenant_id'>,
+    tenantId: string,
+  ): Promise<ExecutorRecord> {
     return this.instance.create(r, tenantId);
   },
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export const ExchangeCenter: React.FC = () => {
   return (
@@ -10,4 +10,3 @@ export const ExchangeCenter: React.FC = () => {
 };
 
 export default ExchangeCenter;
-

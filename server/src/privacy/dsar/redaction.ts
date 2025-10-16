@@ -26,7 +26,11 @@ const clone = <T>(value: T): T => {
   return JSON.parse(JSON.stringify(value)) as T;
 };
 
-type TraverseCallback = (args: { key: string; value: unknown; parent: Record<string, unknown> | unknown[] }) => void;
+type TraverseCallback = (args: {
+  key: string;
+  value: unknown;
+  parent: Record<string, unknown> | unknown[];
+}) => void;
 
 const traverse = (value: unknown, cb: TraverseCallback): void => {
   if (Array.isArray(value)) {

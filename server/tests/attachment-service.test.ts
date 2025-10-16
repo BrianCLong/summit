@@ -1,7 +1,11 @@
 import { Readable } from 'stream';
 import { createHash } from 'crypto';
 import * as path from 'path';
-import { AttachmentService, detectPII, redactPII } from '../src/services/AttachmentService';
+import {
+  AttachmentService,
+  detectPII,
+  redactPII,
+} from '../src/services/AttachmentService';
 import { createProvenanceRecord } from '../../packages/shared/provenance';
 
 const TMP_DIR = path.join(__dirname, '..', '..', 'tmp-test');
@@ -11,8 +15,13 @@ describe('AttachmentService', () => {
     const service = new AttachmentService(TMP_DIR);
     const content = 'hello world';
     const stream = Readable.from(content);
-    const meta = await service.save(stream, { filename: 'test.txt', mimeType: 'text/plain' });
-    expect(meta.sha256).toBe(createHash('sha256').update(content).digest('hex'));
+    const meta = await service.save(stream, {
+      filename: 'test.txt',
+      mimeType: 'text/plain',
+    });
+    expect(meta.sha256).toBe(
+      createHash('sha256').update(content).digest('hex'),
+    );
   });
 
   it('detects and redacts PII', () => {

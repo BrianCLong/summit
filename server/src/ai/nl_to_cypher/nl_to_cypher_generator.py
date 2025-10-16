@@ -1,5 +1,5 @@
-
 # server/src/ai/nl_to_cypher/nl_to_cypher_generator.py
+
 
 def generate_cypher_query(natural_language_query: str) -> str:
     """
@@ -28,6 +28,7 @@ def generate_cypher_query(natural_language_query: str) -> str:
         return f"MATCH (a:Asset)-[:LOCATED_AT]->(l:Location {{name: '{location}'}}) RETURN a"
     else:
         return "// Cypher query not generated for this input"
+
 
 def estimate_query_cost(cypher_query: str) -> dict:
     """

@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -10,13 +10,16 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
 # Create formatters and add it to handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 console_handler.setFormatter(formatter)
 
 # Add handlers to the logger
 logger.addHandler(console_handler)
 
-def log_feedback(insight: dict, feedback_type: str, user: str, timestamp: str, original_prediction: dict):
+
+def log_feedback(
+    insight: dict, feedback_type: str, user: str, timestamp: str, original_prediction: dict
+):
     """
     Logs user feedback on AI-generated insights.
 
@@ -33,7 +36,7 @@ def log_feedback(insight: dict, feedback_type: str, user: str, timestamp: str, o
         "user": user,
         "timestamp": timestamp,
         "original_prediction": original_prediction,
-        "logged_at": datetime.now().isoformat()
+        "logged_at": datetime.now().isoformat(),
     }
     logger.info(f"Received AI feedback: {json.dumps(feedback_entry)}")
 
@@ -42,18 +45,19 @@ def log_feedback(insight: dict, feedback_type: str, user: str, timestamp: str, o
     # Example: save_to_database(feedback_entry)
     # Example: send_to_message_queue_for_training(feedback_entry)
 
+
 if __name__ == "__main__":
     # Example usage
     sample_insight = {
         "type": "entity",
         "value": "John Doe",
         "sentiment": "positive",
-        "confidence": 0.85
+        "confidence": 0.85,
     }
     sample_original_prediction = {
         "model_name": "sentiment_model_v1",
         "prediction_id": "pred_123",
-        "raw_output": {"score": 0.9, "label": "positive"}
+        "raw_output": {"score": 0.9, "label": "positive"},
     }
 
     log_feedback(
@@ -61,7 +65,7 @@ if __name__ == "__main__":
         feedback_type="accept",
         user="test_user_1",
         timestamp="2025-08-17T10:00:00Z",
-        original_prediction=sample_original_prediction
+        original_prediction=sample_original_prediction,
     )
 
     log_feedback(
@@ -69,7 +73,7 @@ if __name__ == "__main__":
         feedback_type="reject",
         user="test_user_2",
         timestamp="2025-08-17T10:05:00Z",
-        original_prediction=sample_original_prediction
+        original_prediction=sample_original_prediction,
     )
 
     log_feedback(
@@ -77,5 +81,5 @@ if __name__ == "__main__":
         feedback_type="flag",
         user="test_user_3",
         timestamp="2025-08-17T10:10:00Z",
-        original_prediction=sample_original_prediction
+        original_prediction=sample_original_prediction,
     )

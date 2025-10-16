@@ -14,7 +14,13 @@ processors:
         latency: { threshold_ms: 1500 }
       - name: health-checks-low
         type: string_attribute
-        string_attribute: { key: http.target, values: ["/health","/healthz"], enabled_regex_matching: true, invert_match: true }
+        string_attribute:
+          {
+            key: http.target,
+            values: ['/health', '/healthz'],
+            enabled_regex_matching: true,
+            invert_match: true,
+          }
   batch: {}
 exporters:
   otlphttp: { endpoint: http://tempo.monitoring.svc:4318 }
@@ -23,5 +29,10 @@ extensions: { health_check: {} }
 service:
   extensions: [health_check]
   pipelines:
-    traces: { receivers: [otlp], processors: [tail_sampling,batch], exporters: [otlphttp] }
+    traces:
+      {
+        receivers: [otlp],
+        processors: [tail_sampling, batch],
+        exporters: [otlphttp],
+      }
     metrics: { receivers: [otlp], processors: [batch], exporters: [prometheus] }

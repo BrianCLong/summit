@@ -29,7 +29,7 @@ class HelmDigestChecker {
     console.log('🔍 Checking Helm charts for digest-only policy compliance...');
 
     const chartDirs = ['charts'];
-    let allPassed = true;
+    const allPassed = true;
 
     for (const chartDir of chartDirs) {
       if (fs.existsSync(chartDir)) {
@@ -64,7 +64,7 @@ class HelmDigestChecker {
       'values.yml',
       'values.prod.yaml',
       'values.staging.yaml',
-      'values.dev.yaml'
+      'values.dev.yaml',
     ];
 
     for (const valuesFile of valuesFiles) {
@@ -96,7 +96,6 @@ class HelmDigestChecker {
 
       // Check nested image configurations
       this.checkNestedImages(values, filePath, '');
-
     } catch (error) {
       this.errors.push(`❌ Failed to parse ${filePath}: ${error.message}`);
     }
@@ -116,22 +115,34 @@ class HelmDigestChecker {
     }
   }
 
-  private validateImageConfig(image: ImageConfig, filePath: string, path: string): void {
+  private validateImageConfig(
+    image: ImageConfig,
+    filePath: string,
+    path: string,
+  ): void {
     const location = `${filePath}:${path}`;
 
     // Check for mutable tags
     if (image.tag && image.tag.trim() !== '') {
-      this.errors.push(`❌ ${location}: Found mutable tag "${image.tag}". Use digest instead.`);
+      this.errors.push(
+        `❌ ${location}: Found mutable tag "${image.tag}". Use digest instead.`,
+      );
     }
 
     // Check for missing or invalid digest
     if (!image.digest) {
-      this.errors.push(`❌ ${location}: Missing digest. Images must be referenced by digest.`);
+      this.errors.push(
+        `❌ ${location}: Missing digest. Images must be referenced by digest.`,
+      );
     } else if (!image.digest.startsWith('sha256:')) {
       if (image.digest === 'sha256:example123') {
-        this.warnings.push(`⚠️  ${location}: Using example digest. Replace with actual digest from CI.`);
+        this.warnings.push(
+          `⚠️  ${location}: Using example digest. Replace with actual digest from CI.`,
+        );
       } else {
-        this.errors.push(`❌ ${location}: Invalid digest format. Must start with 'sha256:'.`);
+        this.errors.push(
+          `❌ ${location}: Invalid digest format. Must start with 'sha256:'.`,
+        );
       }
     }
 
@@ -141,8 +152,13 @@ class HelmDigestChecker {
     }
 
     // Validate pull policy
-    if (image.pullPolicy && !['Always', 'IfNotPresent', 'Never'].includes(image.pullPolicy)) {
-      this.warnings.push(`⚠️  ${location}: Invalid pullPolicy "${image.pullPolicy}".`);
+    if (
+      image.pullPolicy &&
+      !['Always', 'IfNotPresent', 'Never'].includes(image.pullPolicy)
+    ) {
+      this.warnings.push(
+        `⚠️  ${location}: Invalid pullPolicy "${image.pullPolicy}".`,
+      );
     }
   }
 
@@ -151,12 +167,12 @@ class HelmDigestChecker {
 
     if (this.warnings.length > 0) {
       console.log('\n⚠️  Warnings:');
-      this.warnings.forEach(warning => console.log(warning));
+      this.warnings.forEach((warning) => console.log(warning));
     }
 
     if (this.errors.length > 0) {
       console.log('\n❌ Policy Violations:');
-      this.errors.forEach(error => console.log(error));
+      this.errors.forEach((error) => console.log(error));
       console.log(`\n❌ ${this.errors.length} policy violation(s) found.`);
       console.log('\n🔧 To fix:');
       console.log('  1. Remove or comment out all image.tag fields');
@@ -167,7 +183,9 @@ class HelmDigestChecker {
     }
 
     if (this.warnings.length > 0 && this.errors.length === 0) {
-      console.log(`\n⚠️  ${this.warnings.length} warning(s) found, but policy compliance achieved.`);
+      console.log(
+        `\n⚠️  ${this.warnings.length} warning(s) found, but policy compliance achieved.`,
+      );
     }
   }
 }
@@ -181,7 +199,7 @@ async function main(): Promise<void> {
 }
 
 if (require.main === module) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error('❌ Fatal error:', error);
     process.exit(1);
   });

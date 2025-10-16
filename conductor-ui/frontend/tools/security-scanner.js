@@ -483,7 +483,7 @@ class SecurityScanner {
       
       sensitiveFiles.forEach(fileName => {
         const matchingFiles = allFiles.filter(f => f.endsWith(fileName))
-        matchingFiles.forEach(file => {
+matchingFiles.forEach(file => {
           try {
             const stats = statSync(file)
             const mode = stats.mode & parseInt('777', 8)
@@ -498,8 +498,8 @@ class SecurityScanner {
               })
             }
           } catch (error) {
-            // File access error
-            continue
+            // File access error within callback; skip this entry
+            return
           }
         })
       })
@@ -525,7 +525,7 @@ class SecurityScanner {
       })
 
       // Check for world-writable files
-      allFiles.forEach(file => {
+allFiles.forEach(file => {
         try {
           const stats = statSync(file)
           if (stats.mode & parseInt('002', 8)) {
@@ -537,7 +537,7 @@ class SecurityScanner {
             })
           }
         } catch {
-          continue
+          return
         }
       })
 
@@ -614,7 +614,7 @@ class SecurityScanner {
         .map(file => join(distDir, file))
 
       const unminifiedFiles = []
-      jsFiles.forEach(file => {
+jsFiles.forEach(file => {
         try {
           const content = readFileSync(file, 'utf8')
           // Simple heuristic: if file has lots of whitespace and comments, it's likely unminified
@@ -626,7 +626,7 @@ class SecurityScanner {
             unminifiedFiles.push(file)
           }
         } catch {
-          continue
+          return
         }
       })
 
@@ -642,7 +642,7 @@ class SecurityScanner {
 
       // Check for large bundle sizes (potential attack surface)
       const largeBundles = []
-      jsFiles.forEach(file => {
+jsFiles.forEach(file => {
         try {
           const stats = statSync(file)
           if (stats.size > 1024 * 1024) { // > 1MB
@@ -652,7 +652,7 @@ class SecurityScanner {
             })
           }
         } catch {
-          continue
+          return
         }
       })
 

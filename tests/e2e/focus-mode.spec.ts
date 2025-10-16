@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test('Focus Mode toggles via hotkey and dims non-active panes', async ({ page }) => {
+test('Focus Mode toggles via hotkey and dims non-active panes', async ({
+  page,
+}) => {
   await page.goto('/case/CASE-1');
   await page.keyboard.press('KeyF');
   await expect(page.locator('#ov-graph')).toHaveClass(/off/);

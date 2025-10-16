@@ -1,14 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "summit.name" . }}
-  labels:
-    {{- include "summit.labels" . | nindent 4 }}
+  name: { { include "summit.name" . } }
+  labels: { { - include "summit.labels" . | nindent 4 } }
 spec:
-  type: {{ .Values.service.type }}
+  type: { { .Values.service.type } }
   selector:
-    app: {{ include "summit.name" . }}
+    app: { { include "summit.name" . } }
   ports:
     - name: http
-      port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
+      port: { { .Values.service.port } }
+      targetPort: { { .Values.service.targetPort } }

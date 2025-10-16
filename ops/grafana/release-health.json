@@ -13,14 +13,14 @@
         "name": "prom",
         "type": "datasource",
         "query": "prometheus",
-        "current": {"text":"Prometheus","value":"PROM_DS"},
+        "current": { "text": "Prometheus", "value": "PROM_DS" },
         "options": []
       },
       {
         "name": "tempo",
         "type": "datasource",
         "query": "tempo",
-        "current": {"text":"Tempo","value":"TEMPO_DS"},
+        "current": { "text": "Tempo", "value": "TEMPO_DS" },
         "options": []
       },
       {
@@ -35,7 +35,7 @@
         "name": "route",
         "type": "custom",
         "query": "/graphql, /api/*, ALL",
-        "current": {"text":"/graphql","value":"/graphql"}
+        "current": { "text": "/graphql", "value": "/graphql" }
       }
     ]
   },
@@ -43,7 +43,7 @@
     {
       "type": "stat",
       "title": "P95 GraphQL latency (s)",
-      "gridPos": {"x":0,"y":0,"w":6,"h":4},
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -55,7 +55,7 @@
     {
       "type": "stat",
       "title": "Error rate (%)",
-      "gridPos": {"x":6,"y":0,"w":6,"h":4},
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -67,7 +67,7 @@
     {
       "type": "graph",
       "title": "P95 latency over time (s)",
-      "gridPos": {"x":0,"y":4,"w":12,"h":7},
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 7 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -80,7 +80,7 @@
     {
       "type": "graph",
       "title": "Error budget burn (fast/slow)",
-      "gridPos": {"x":12,"y":4,"w":12,"h":7},
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 7 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -94,12 +94,12 @@
           "refId": "B"
         }
       ],
-      "yaxes": [{"format": "percentunit"},{"format":"short"}]
+      "yaxes": [{ "format": "percentunit" }, { "format": "short" }]
     },
     {
       "type": "graph",
       "title": "Ingest throughput (events/s)",
-      "gridPos": {"x":0,"y":11,"w":12,"h":7},
+      "gridPos": { "x": 0, "y": 11, "w": 12, "h": 7 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -112,7 +112,7 @@
     {
       "type": "graph",
       "title": "Cost guard blocks by reason",
-      "gridPos": {"x":12,"y":11,"w":12,"h":7},
+      "gridPos": { "x": 12, "y": 11, "w": 12, "h": 7 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -125,7 +125,7 @@
     {
       "type": "graph",
       "title": "NL→Cypher guardrail blocks",
-      "gridPos": {"x":0,"y":18,"w":12,"h":7},
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 7 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -138,7 +138,7 @@
     {
       "type": "stat",
       "title": "Trace sampling (head, %)",
-      "gridPos": {"x":12,"y":18,"w":6,"h":4},
+      "gridPos": { "x": 12, "y": 18, "w": 6, "h": 4 },
       "datasource": "PROM_DS",
       "targets": [
         {
@@ -150,7 +150,7 @@
     {
       "type": "stat",
       "title": "Estimated trace storage (GB/day)",
-      "gridPos": {"x":18,"y":18,"w":6,"h":4},
+      "gridPos": { "x": 18, "y": 18, "w": 6, "h": 4 },
       "datasource": "PROM_DS",
       "targets": [
         {

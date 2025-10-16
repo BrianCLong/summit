@@ -3,7 +3,10 @@ const { generateGraph } = require('@intelgraph/synthdata-js');
 
 function runBenchmark(iterations = 1000) {
   const latencies = [];
-  const spec = { seed: 'bench', counts: { persons: 10, orgs: 5, assets: 3, comms: 10 } };
+  const spec = {
+    seed: 'bench',
+    counts: { persons: 10, orgs: 5, assets: 3, comms: 10 },
+  };
   for (let i = 0; i < iterations; i++) {
     const t0 = performance.now();
     generateGraph(spec);

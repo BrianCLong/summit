@@ -30,7 +30,12 @@ interface TOSCompliance {
 
 interface LicenseInfo {
   domain: string;
-  licenseType: 'public' | 'commercial' | 'academic' | 'restricted' | 'proprietary';
+  licenseType:
+    | 'public'
+    | 'commercial'
+    | 'academic'
+    | 'restricted'
+    | 'proprietary';
   allowedUsage: string[];
   attribution: boolean;
   commercialUse: boolean;
@@ -107,13 +112,21 @@ export class ComplianceGate {
         };
 
         // Log denial for audit
-        await this.logComplianceDecision(complianceResult, { userId, tenantId, purpose });
+        await this.logComplianceDecision(complianceResult, {
+          userId,
+          tenantId,
+          purpose,
+        });
 
         // Update metrics
-        prometheusConductorMetrics.recordOperationalEvent('compliance_gate_blocked', false, {
-          domain,
-          reason: complianceResult.reason,
-        });
+        prometheusConductorMetrics.recordOperationalEvent(
+          'compliance_gate_blocked',
+          false,
+          {
+            domain,
+            reason: complianceResult.reason,
+          },
+        );
 
         return complianceResult;
       }
@@ -128,12 +141,20 @@ export class ComplianceGate {
       };
 
       // Log approval for audit
-      await this.logComplianceDecision(complianceResult, { userId, tenantId, purpose });
+      await this.logComplianceDecision(complianceResult, {
+        userId,
+        tenantId,
+        purpose,
+      });
 
       // Update metrics
-      prometheusConductorMetrics.recordOperationalEvent('compliance_gate_allowed', true, {
-        domain,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'compliance_gate_allowed',
+        true,
+        {
+          domain,
+        },
+      );
 
       return complianceResult;
     } catch (error) {
@@ -179,7 +200,10 @@ export class ComplianceGate {
     // Check if path is explicitly disallowed
     const isDisallowed = robotsPolicy.disallowedPaths.some((disallowedPath) => {
       // Convert robots.txt patterns to regex
-      const pattern = disallowedPath.replace(/\*/g, '.*').replace(/\$/g, '$').replace(/\^/g, '^');
+      const pattern = disallowedPath
+        .replace(/\*/g, '.*')
+        .replace(/\$/g, '$')
+        .replace(/\^/g, '^');
 
       try {
         const regex = new RegExp(pattern);
@@ -232,7 +256,10 @@ export class ComplianceGate {
   /**
    * Check Terms of Service compliance
    */
-  private async checkTOSCompliance(domain: string, purpose: string): Promise<ComplianceCheck> {
+  private async checkTOSCompliance(
+    domain: string,
+    purpose: string,
+  ): Promise<ComplianceCheck> {
     const tos = this.tosCompliance.get(domain);
 
     if (!tos) {
@@ -261,7 +288,10 @@ export class ComplianceGate {
     }
 
     // Check if purpose is allowed
-    if (tos.allowedUseCases.length > 0 && !tos.allowedUseCases.includes(purpose)) {
+    if (
+      tos.allowedUseCases.length > 0 &&
+      !tos.allowedUseCases.includes(purpose)
+    ) {
       return {
         domain,
         path: '',
@@ -285,7 +315,10 @@ export class ComplianceGate {
   /**
    * Check license compliance
    */
-  private async checkLicenseCompliance(domain: string, purpose: string): Promise<ComplianceCheck> {
+  private async checkLicenseCompliance(
+    domain: string,
+    purpose: string,
+  ): Promise<ComplianceCheck> {
     const license = this.licenseInfo.get(domain);
 
     if (!license) {
@@ -320,7 +353,10 @@ export class ComplianceGate {
     }
 
     // Check allowed usage types
-    if (license.allowedUsage.length > 0 && !license.allowedUsage.includes(purpose)) {
+    if (
+      license.allowedUsage.length > 0 &&
+      !license.allowedUsage.includes(purpose)
+    ) {
       return {
         domain,
         path: '',
@@ -344,7 +380,10 @@ export class ComplianceGate {
   /**
    * Check rate limits
    */
-  private async checkRateLimits(domain: string, tenantId: string): Promise<ComplianceCheck> {
+  private async checkRateLimits(
+    domain: string,
+    tenantId: string,
+  ): Promise<ComplianceCheck> {
     const rateLimitKey = `rate_limit:${domain}:${tenantId}`;
     const requestCount = await this.redis.get(rateLimitKey);
 
@@ -467,7 +506,10 @@ export class ComplianceGate {
 
       return policy;
     } catch (error) {
-      logger.warn('Failed to fetch robots.txt', { domain, error: error.message });
+      logger.warn('Failed to fetch robots.txt', {
+        domain,
+        error: error.message,
+      });
       return null;
     }
   }
@@ -603,7 +645,10 @@ export class ComplianceGate {
     return ['intelligence_analysis', 'research', 'documentation'];
   }
 
-  private generateAppealPath(domain: string, failedChecks: ComplianceCheck[]): string {
+  private generateAppealPath(
+    domain: string,
+    failedChecks: ComplianceCheck[],
+  ): string {
     return `Submit appeal at https://conductor.ai/compliance/appeal?domain=${domain}&checks=${failedChecks.map((c) => c.reason).join(',')}`;
   }
 
@@ -652,9 +697,13 @@ export class ComplianceGate {
       .expire(rateLimitKey, 3600) // 1 hour expiry
       .exec();
 
-    prometheusConductorMetrics.recordOperationalEvent('web_fetch_recorded', true, {
-      domain,
-      tenant_id: tenantId,
-    });
+    prometheusConductorMetrics.recordOperationalEvent(
+      'web_fetch_recorded',
+      true,
+      {
+        domain,
+        tenant_id: tenantId,
+      },
+    );
   }
 }

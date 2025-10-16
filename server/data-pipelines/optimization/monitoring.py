@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 try:  # pragma: no cover - optional dependency
     from aiohttp import web
@@ -23,14 +22,14 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for test environments
 
     class _Router:
         def __init__(self) -> None:
-            self._routes: List[_Route] = []
+            self._routes: list[_Route] = []
 
         def add_get(self, canonical: str, handler) -> _Route:  # type: ignore[no-untyped-def]
             route = _Route(canonical, handler)
             self._routes.append(route)
             return route
 
-        def routes(self) -> List[_Route]:
+        def routes(self) -> list[_Route]:
             return list(self._routes)
 
     class _Application:
@@ -38,13 +37,19 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for test environments
             self.router = _Router()
 
     class _Response:
-        def __init__(self, *, text: Optional[str] = None, body: Optional[bytes] = None, content_type: str = "text/plain") -> None:
+        def __init__(
+            self,
+            *,
+            text: str | None = None,
+            body: bytes | None = None,
+            content_type: str = "text/plain",
+        ) -> None:
             self.text = text
             self.body = body
             self.content_type = content_type
 
     web = SimpleNamespace(Application=_Application, Response=_Response)
-from prometheus_client import Counter, Gauge, Histogram, CollectorRegistry, generate_latest
+from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest
 
 
 @dataclass
@@ -61,7 +66,7 @@ class PipelineMetrics:
     avg_latency_ms: float = 0.0
     last_updated: float = field(default_factory=time.time)
 
-    def as_dict(self) -> Dict[str, float]:
+    def as_dict(self) -> dict[str, float]:
         return {
             "total_tasks": float(self.total_tasks),
             "running_tasks": float(self.running_tasks),
@@ -78,11 +83,11 @@ class PipelineMetrics:
 class PipelineMonitor:
     """Tracks task execution and exposes Prometheus metrics."""
 
-    def __init__(self, registry: Optional[CollectorRegistry] = None) -> None:
+    def __init__(self, registry: CollectorRegistry | None = None) -> None:
         self.registry = registry or CollectorRegistry()
         self._metrics = PipelineMetrics()
-        self._latency_samples: List[float] = []
-        self._throughput_window: List[float] = []
+        self._latency_samples: list[float] = []
+        self._throughput_window: list[float] = []
 
         self.task_total = Counter(
             "pipeline_tasks_total",
@@ -124,7 +129,9 @@ class PipelineMonitor:
         self.task_active.inc()
         self._metrics.last_updated = time.time()
 
-    def record_task_end(self, latency_ms: float, *, success: bool, retried: bool, criticality: str) -> None:
+    def record_task_end(
+        self, latency_ms: float, *, success: bool, retried: bool, criticality: str
+    ) -> None:
         self._metrics.running_tasks = max(self._metrics.running_tasks - 1, 0)
         if criticality.lower() in {"blocker", "critical"}:
             self._metrics.critical_backlog = max(self._metrics.critical_backlog - 1, 0)
@@ -162,8 +169,7 @@ class PipelineDashboard:
     def _render_index(self) -> str:
         metrics = self._monitor.snapshot.as_dict()
         rows = "".join(
-            f"<tr><th>{name}</th><td>{value:.2f}</td></tr>"
-            for name, value in metrics.items()
+            f"<tr><th>{name}</th><td>{value:.2f}</td></tr>" for name, value in metrics.items()
         )
         return f"""
         <html>

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, List
-
 from transformers import pipeline
 
 
@@ -20,13 +18,13 @@ class LLMGraphSentimentModel:
         # tests reasonably fast while still exercising the transformers API.
         self._pipe = pipeline("sentiment-analysis", model=model_name)
 
-    async def analyze(self, text: str, neighbours: List[str] | None = None) -> Dict[str, object]:
+    async def analyze(self, text: str, neighbours: list[str] | None = None) -> dict[str, object]:
         result = self._pipe(text)[0]
         label = result["label"].lower()
         score = float(result["score"])
 
         # Distribute confidence equally across neighbours if provided.
-        influence: Dict[str, float] = {}
+        influence: dict[str, float] = {}
         if neighbours:
             weight = score / len(neighbours)
             influence = {n: weight for n in neighbours}

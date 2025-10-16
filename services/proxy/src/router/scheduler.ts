@@ -8,20 +8,33 @@ export type ModelCaps = {
   tpm_cap: number;
   daily_usd_cap?: number;
   usage_windows?: Window[];
-  counters: { rpm: number; tpm: number; usd_today: number; window_open: boolean };
+  counters: {
+    rpm: number;
+    tpm: number;
+    usd_today: number;
+    window_open: boolean;
+  };
 };
 
-export function isWindowOpen(windows: Window[] | undefined, now = DateTime.local()): boolean {
+export function isWindowOpen(
+  windows: Window[] | undefined,
+  now = DateTime.local(),
+): boolean {
   if (!windows || windows.length === 0) return true; // no windows means always on
   const wd = now.weekday % 7; // 1..7 → 0..6
   const hm = now.toFormat('HH:mm');
-  return windows.some((w) => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end);
+  return windows.some(
+    (w) => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end,
+  );
 }
 
 export function canRoute(model: ModelCaps): { ok: boolean; reason?: string } {
-  if (!isWindowOpen(model.usage_windows)) return { ok: false, reason: 'window_closed' };
-  if (model.counters.rpm >= model.rpm_cap) return { ok: false, reason: 'rpm_exhausted' };
-  if (model.counters.tpm >= model.tpm_cap) return { ok: false, reason: 'tpm_exhausted' };
+  if (!isWindowOpen(model.usage_windows))
+    return { ok: false, reason: 'window_closed' };
+  if (model.counters.rpm >= model.rpm_cap)
+    return { ok: false, reason: 'rpm_exhausted' };
+  if (model.counters.tpm >= model.tpm_cap)
+    return { ok: false, reason: 'tpm_exhausted' };
   if (model.daily_usd_cap && model.counters.usd_today >= model.daily_usd_cap) {
     return { ok: false, reason: 'budget_exhausted' };
   }

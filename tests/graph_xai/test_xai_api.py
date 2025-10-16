@@ -1,19 +1,19 @@
-
-import unittest
 import os
 import sys
+import unittest
 
 # Add the project root to sys.path to allow absolute imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.insert(0, project_root)
 
 from graph_xai.xai_api import (
+    assess_fairness,
+    assess_robustness,
+    calculate_saliency_map,
     generate_counterfactuals,
     get_path_rationales,
-    calculate_saliency_map,
-    assess_fairness,
-    assess_robustness
 )
+
 
 class TestXaiApiStubs(unittest.TestCase):
 
@@ -41,5 +41,6 @@ class TestXaiApiStubs(unittest.TestCase):
         self.assertIn("robustness_score", result)
         self.assertIn("vulnerable_nodes", result)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

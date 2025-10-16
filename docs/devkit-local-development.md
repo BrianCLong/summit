@@ -44,14 +44,14 @@ Expected outputs:
 
 ## CLI Reference
 
-| Command | Description |
-| ------- | ----------- |
-| `./dev up` | Builds (if needed) and starts the dev Compose stack, waits for health checks, and runs deterministic database seeds. |
-| `./dev up --no-build` | Skips image builds; useful for tight inner loops once the cache is warm. |
-| `./dev down` | Stops and removes containers, volumes, and networks created by the dev kit. |
-| `./dev seed` | Replays the deterministic Postgres + Neo4j fixtures without touching running containers. |
-| `./dev test` | Executes the end-to-end smoke: hello pipeline → API logs → Jaeger → Prometheus. Report written to `runs/dev-smoke/latest.json`. |
-| `./dev logs api` | Streams container logs for rapid debugging. Any service name from `docker compose ps` is accepted. |
+| Command               | Description                                                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `./dev up`            | Builds (if needed) and starts the dev Compose stack, waits for health checks, and runs deterministic database seeds.            |
+| `./dev up --no-build` | Skips image builds; useful for tight inner loops once the cache is warm.                                                        |
+| `./dev down`          | Stops and removes containers, volumes, and networks created by the dev kit.                                                     |
+| `./dev seed`          | Replays the deterministic Postgres + Neo4j fixtures without touching running containers.                                        |
+| `./dev test`          | Executes the end-to-end smoke: hello pipeline → API logs → Jaeger → Prometheus. Report written to `runs/dev-smoke/latest.json`. |
+| `./dev logs api`      | Streams container logs for rapid debugging. Any service name from `docker compose ps` is accepted.                              |
 
 The CLI is idempotent and safe to rerun; each command reports progress and exit
 status so you can script it in CI or local hooks.
@@ -83,13 +83,13 @@ Seeds can be re-applied at any time with `./dev seed` or by running
 
 ## Troubleshooting
 
-| Symptom | Resolution |
-| ------- | ---------- |
-| `./dev up` hangs on `postgres` or `neo4j` | Ensure no other local services occupy ports 5432/7687. Use `./dev down` followed by `docker ps` to confirm cleanup, then retry with `./dev up --no-build`. |
-| Smoke test fails to reach Jaeger | Confirm Docker Desktop exposes port 16686. The CLI now prints retry attempts; inspect `runs/dev-smoke/latest.json` → `steps[].attempts` and check `docker compose logs jaeger`. |
-| Metrics endpoint times out | Ensure nothing else binds port 9464. Retry `./dev test`; if it continues failing, exec into the API container (`./dev exec api sh`) and run `curl http://localhost:9464/metrics`. |
-| Authentication errors for GraphQL queries | The dev token `dev-token` is accepted when `NODE_ENV=development` and `DEV_TENANT_ID` matches the seeded tenant. Re-run `./dev seed` if you changed tenant IDs. |
-| Vault container exits immediately | The dev stack runs Vault in `-dev` mode. Delete any `vault/` data directory left over from prior runs before executing `./dev up` again. |
+| Symptom                                   | Resolution                                                                                                                                                                        |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `./dev up` hangs on `postgres` or `neo4j` | Ensure no other local services occupy ports 5432/7687. Use `./dev down` followed by `docker ps` to confirm cleanup, then retry with `./dev up --no-build`.                        |
+| Smoke test fails to reach Jaeger          | Confirm Docker Desktop exposes port 16686. The CLI now prints retry attempts; inspect `runs/dev-smoke/latest.json` → `steps[].attempts` and check `docker compose logs jaeger`.   |
+| Metrics endpoint times out                | Ensure nothing else binds port 9464. Retry `./dev test`; if it continues failing, exec into the API container (`./dev exec api sh`) and run `curl http://localhost:9464/metrics`. |
+| Authentication errors for GraphQL queries | The dev token `dev-token` is accepted when `NODE_ENV=development` and `DEV_TENANT_ID` matches the seeded tenant. Re-run `./dev seed` if you changed tenant IDs.                   |
+| Vault container exits immediately         | The dev stack runs Vault in `-dev` mode. Delete any `vault/` data directory left over from prior runs before executing `./dev up` again.                                          |
 
 If an issue persists, file a "Dev Environment" issue using the template in
 `.github/ISSUE_TEMPLATE/dev_environment.yml` and attach the latest smoke report.

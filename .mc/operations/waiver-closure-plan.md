@@ -9,10 +9,12 @@
 ## 🎯 Closure Objectives
 
 ### WA-POL-2025-09-A: Policy Test Edge Cases
+
 **Current**: 10/14 tests passing (4 failing)
 **Target**: 14/14 tests passing (100% policy compliance)
 
 ### WA-SIM-2025-09-B: Privacy Simulation Violations
+
 **Current**: 3 privacy violations for metadata operations
 **Target**: 0 violations OR documented permanent exceptions
 
@@ -21,27 +23,29 @@
 ## 📅 Work Breakdown Schedule
 
 ### Week 1 (Sep 24 - Oct 1): Foundation Work
-| Task | Owner | Due | Status |
-|------|-------|-----|--------|
-| **Policy Module Patches** | | | |
-| Fix P-MTA-03 (role/permissions validation) | Platform Sec | Oct 1 | 🟡 In Progress |
-| Fix P-MTA-07 (field access authorization) | Platform Sec | Oct 1 | 🟡 In Progress |
-| **Test Infrastructure** | | | |
-| Update privacy test fixtures for metadata schemas | Data Eng | Oct 2 | 🟡 In Progress |
-| Add comprehensive role-based test scenarios | Platform Sec | Oct 2 | ⚪ Planned |
+
+| Task                                              | Owner        | Due   | Status         |
+| ------------------------------------------------- | ------------ | ----- | -------------- |
+| **Policy Module Patches**                         |              |       |                |
+| Fix P-MTA-03 (role/permissions validation)        | Platform Sec | Oct 1 | 🟡 In Progress |
+| Fix P-MTA-07 (field access authorization)         | Platform Sec | Oct 1 | 🟡 In Progress |
+| **Test Infrastructure**                           |              |       |                |
+| Update privacy test fixtures for metadata schemas | Data Eng     | Oct 2 | 🟡 In Progress |
+| Add comprehensive role-based test scenarios       | Platform Sec | Oct 2 | ⚪ Planned     |
 
 ### Week 2 (Oct 2 - Oct 8): Integration & Validation
-| Task | Owner | Due | Status |
-|------|-------|-----|--------|
-| **Policy Integration** | | | |
-| Merge policy fixes to main branch | Platform Sec | Oct 3 | ⚪ Planned |
-| Deploy policy updates to staging | SRE | Oct 4 | ⚪ Planned |
-| **Testing & Validation** | | | |
-| Execute full policy test suite | MC Team | Oct 5 | ⚪ Planned |
-| Validate privacy simulation edge cases | Data Eng | Oct 6 | ⚪ Planned |
-| **Release Preparation** | | | |
-| Generate new evidence bundle (v0.1.1-mc) | MC Team | Oct 7 | ⚪ Planned |
-| Deploy to production with policy updates | SRE | Oct 8 | ⚪ Planned |
+
+| Task                                     | Owner        | Due   | Status     |
+| ---------------------------------------- | ------------ | ----- | ---------- |
+| **Policy Integration**                   |              |       |            |
+| Merge policy fixes to main branch        | Platform Sec | Oct 3 | ⚪ Planned |
+| Deploy policy updates to staging         | SRE          | Oct 4 | ⚪ Planned |
+| **Testing & Validation**                 |              |       |            |
+| Execute full policy test suite           | MC Team      | Oct 5 | ⚪ Planned |
+| Validate privacy simulation edge cases   | Data Eng     | Oct 6 | ⚪ Planned |
+| **Release Preparation**                  |              |       |            |
+| Generate new evidence bundle (v0.1.1-mc) | MC Team      | Oct 7 | ⚪ Planned |
+| Deploy to production with policy updates | SRE          | Oct 8 | ⚪ Planned |
 
 ---
 
@@ -50,6 +54,7 @@
 ### Policy Module Fixes
 
 #### P-MTA-03: Role/Permissions Validation
+
 ```rego
 # Current Issue: Missing role validation in test fixtures
 # Fix: Update test data structure
@@ -70,6 +75,7 @@ test_abac_allow_with_valid_attributes if {
 ```
 
 #### P-MTA-07: Field Access Authorization
+
 ```rego
 # Current Issue: confidential_data not in authorized fields
 # Fix: Extend fields_for_clearance mapping
@@ -87,6 +93,7 @@ fields_for_clearance := {
 ### Privacy Simulation Fixes
 
 #### Retention Policy Logic
+
 ```javascript
 // Current Issue: Metadata operations failing retention checks
 // Fix: Add operation_type exemptions
@@ -103,6 +110,7 @@ retention_configured if {
 ```
 
 #### Data Residency Validation
+
 ```javascript
 // Current Issue: US residency check too strict
 // Fix: Improve residency validation logic
@@ -125,6 +133,7 @@ data_transfer_compliant if {
 ## 🧪 Validation Procedures
 
 ### Daily Validation Loop
+
 ```bash
 #!/bin/bash
 # Daily waiver closure validation
@@ -179,28 +188,33 @@ EOF
 ```
 
 ### Pre-Closure Checklist
+
 ```markdown
 ## October 8 Pre-Closure Checklist
 
 ### Technical Validation
+
 - [ ] Policy test suite: 14/14 passing
 - [ ] Privacy simulation: 0 violations
 - [ ] Staging deployment successful
 - [ ] Production deployment plan approved
 
 ### Evidence & Documentation
+
 - [ ] Evidence bundle v0.1.1-mc generated
 - [ ] Policy test reports attached
 - [ ] Privacy simulation results documented
 - [ ] Code review approvals obtained
 
 ### Stakeholder Approval
+
 - [ ] Platform Security sign-off
 - [ ] Data Engineering validation
 - [ ] MC Team approval
 - [ ] CTO final authorization
 
 ### Production Deployment
+
 - [ ] Policy updates deployed
 - [ ] Monitoring confirms clean policy state
 - [ ] Waiver closure documentation complete
@@ -211,6 +225,7 @@ EOF
 ## 🚀 Version 0.1.1-mc Release Plan
 
 ### Release Scope
+
 ```yaml
 version: v0.1.1-mc
 release_type: patch
@@ -230,6 +245,7 @@ evidence_bundle:
 ```
 
 ### Deployment Timeline
+
 ```
 Oct 7, 2025:
   - 09:00 UTC: Final integration testing
@@ -248,14 +264,16 @@ Oct 8, 2025:
 ## 📊 Success Metrics
 
 ### Closure Criteria
-| Metric | Current | Target | Status |
-|--------|---------|--------|--------|
-| Policy Test Pass Rate | 71% (10/14) | 100% (14/14) | 🟡 |
-| Privacy Violations | 3 | 0 | 🟡 |
-| Evidence Bundle | v0.1.0-mc | v0.1.1-mc | ⚪ |
-| Production Stability | GREEN | GREEN | ✅ |
+
+| Metric                | Current     | Target       | Status |
+| --------------------- | ----------- | ------------ | ------ |
+| Policy Test Pass Rate | 71% (10/14) | 100% (14/14) | 🟡     |
+| Privacy Violations    | 3           | 0            | 🟡     |
+| Evidence Bundle       | v0.1.0-mc   | v0.1.1-mc    | ⚪     |
+| Production Stability  | GREEN       | GREEN        | ✅     |
 
 ### Risk Mitigation
+
 - **Rollback Plan**: Previous policy version preserved
 - **Monitoring**: Real-time policy compliance tracking
 - **Fallback**: Temporary waiver extension if critical issues
@@ -268,18 +286,21 @@ Oct 8, 2025:
 By **October 8, 2025**, the following must be achieved:
 
 ✅ **Technical Success**
+
 - 14/14 policy tests passing
 - 0 privacy simulation violations
 - Evidence bundle v0.1.1-mc deployed
 - Production monitoring shows clean state
 
 ✅ **Operational Success**
+
 - No regression in SLO performance
 - No increase in runtime policy denials
 - Cost metrics remain stable
 - Team confidence in policy framework
 
 ✅ **Governance Success**
+
 - All waiver documentation complete
 - Stakeholder sign-offs obtained
 - Process improvements documented
@@ -289,4 +310,4 @@ By **October 8, 2025**, the following must be achieved:
 
 ---
 
-*This plan is tracked daily with automated validation reports and stakeholder updates every 48 hours.*
+_This plan is tracked daily with automated validation reports and stakeholder updates every 48 hours._

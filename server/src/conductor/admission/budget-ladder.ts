@@ -86,7 +86,10 @@ export class BudgetLadderController {
       }
 
       // Update current spend
-      ladder.currentSpend = await this.getCurrentSpend(request.tenantId, ladder.window);
+      ladder.currentSpend = await this.getCurrentSpend(
+        request.tenantId,
+        ladder.window,
+      );
       const projectedSpend = ladder.currentSpend + request.estimatedCost;
       const utilization = projectedSpend / ladder.limit;
 
@@ -101,7 +104,12 @@ export class BudgetLadderController {
       }
 
       // Apply actions for current stage
-      const decision = await this.applyBudgetActions(ladder, currentStage, request, utilization);
+      const decision = await this.applyBudgetActions(
+        ladder,
+        currentStage,
+        request,
+        utilization,
+      );
 
       // Record metrics and audit
       await this.recordBudgetDecision(request, decision, currentStage);
@@ -129,7 +137,8 @@ export class BudgetLadderController {
         budgetUtilization: 1,
         nextThreshold: 'error',
         actionsApplied: ['error_fallback'],
-        userMessage: 'Budget evaluation temporarily unavailable - using reduced quality mode',
+        userMessage:
+          'Budget evaluation temporarily unavailable - using reduced quality mode',
       };
     }
   }
@@ -141,9 +150,10 @@ export class BudgetLadderController {
     const client = await this.pool.connect();
 
     try {
-      const result = await client.query('SELECT * FROM budget_ladders WHERE tenant_id = $1', [
-        tenantId,
-      ]);
+      const result = await client.query(
+        'SELECT * FROM budget_ladders WHERE tenant_id = $1',
+        [tenantId],
+      );
 
       if (result.rows.length === 0) {
         return null;
@@ -197,7 +207,10 @@ export class BudgetLadderController {
   /**
    * Get current spend for budget window
    */
-  private async getCurrentSpend(tenantId: string, window: string): Promise<number> {
+  private async getCurrentSpend(
+    tenantId: string,
+    window: string,
+  ): Promise<number> {
     const client = await this.pool.connect();
 
     try {
@@ -251,7 +264,10 @@ export class BudgetLadderController {
     for (const action of actions) {
       switch (action.type) {
         case 'priority_multiplier':
-          modifiedPriority = Math.max(1, modifiedPriority * action.config.multiplier);
+          modifiedPriority = Math.max(
+            1,
+            modifiedPriority * action.config.multiplier,
+          );
           actionsApplied.push('priority_reduced');
           userMessage =
             action.userMessage ||
@@ -262,13 +278,15 @@ export class BudgetLadderController {
           qualityMode = action.config.mode || 'reduced';
           actionsApplied.push('quality_reduced');
           userMessage =
-            action.userMessage || `Using ${qualityMode} quality mode due to budget constraints`;
+            action.userMessage ||
+            `Using ${qualityMode} quality mode due to budget constraints`;
           break;
 
         case 'cache_fallback':
           qualityMode = 'cached';
           actionsApplied.push('cache_fallback');
-          userMessage = action.userMessage || 'Using cached results due to budget limits';
+          userMessage =
+            action.userMessage || 'Using cached results due to budget limits';
           break;
 
         case 'maintenance_mode':
@@ -276,18 +294,26 @@ export class BudgetLadderController {
           qualityMode = 'unavailable';
           actionsApplied.push('service_unavailable');
           userMessage =
-            action.userMessage || 'Service temporarily unavailable due to budget exhaustion';
+            action.userMessage ||
+            'Service temporarily unavailable due to budget exhaustion';
           break;
 
         case 'notification':
-          await this.sendBudgetNotification(request.tenantId, stage, utilization, action.config);
+          await this.sendBudgetNotification(
+            request.tenantId,
+            stage,
+            utilization,
+            action.config,
+          );
           actionsApplied.push('notification_sent');
           break;
       }
     }
 
     // Calculate next threshold
-    const thresholds = Object.entries(ladder.thresholds).sort(([, a], [, b]) => a - b);
+    const thresholds = Object.entries(ladder.thresholds).sort(
+      ([, a], [, b]) => a - b,
+    );
     let nextThreshold = 'none';
     for (const [name, threshold] of thresholds) {
       if (utilization < threshold) {
@@ -298,7 +324,8 @@ export class BudgetLadderController {
 
     return {
       allowed,
-      modifiedPriority: modifiedPriority !== request.priority ? modifiedPriority : undefined,
+      modifiedPriority:
+        modifiedPriority !== request.priority ? modifiedPriority : undefined,
       qualityMode,
       userMessage,
       budgetRemaining: Math.max(0, ladder.limit - ladder.currentSpend),
@@ -340,9 +367,16 @@ export class BudgetLadderController {
       };
 
       // Queue notification for delivery
-      await this.redis.lPush('notifications_queue', JSON.stringify(notification));
+      await this.redis.lPush(
+        'notifications_queue',
+        JSON.stringify(notification),
+      );
 
-      logger.info('Budget notification queued', { tenantId, stage, utilization });
+      logger.info('Budget notification queued', {
+        tenantId,
+        stage,
+        utilization,
+      });
     } catch (error) {
       logger.error('Failed to send budget notification', {
         error: error.message,
@@ -367,10 +401,14 @@ export class BudgetLadderController {
       { tenant_id: request.tenantId },
     );
 
-    prometheusConductorMetrics.recordOperationalEvent('budget_decision', decision.allowed, {
-      tenant_id: request.tenantId,
-      stage,
-    });
+    prometheusConductorMetrics.recordOperationalEvent(
+      'budget_decision',
+      decision.allowed,
+      {
+        tenant_id: request.tenantId,
+        stage,
+      },
+    );
 
     // Audit log
     const client = await this.pool.connect();
@@ -400,7 +438,10 @@ export class BudgetLadderController {
   /**
    * Get default budget ladder configuration
    */
-  static getDefaultLadder(tenantId: string, monthlyLimit: number): BudgetLadder {
+  static getDefaultLadder(
+    tenantId: string,
+    monthlyLimit: number,
+  ): BudgetLadder {
     return {
       tenantId,
       window: 'monthly',
@@ -446,7 +487,8 @@ export class BudgetLadderController {
           {
             type: 'maintenance_mode',
             config: {},
-            userMessage: 'Service temporarily unavailable - monthly budget exhausted',
+            userMessage:
+              'Service temporarily unavailable - monthly budget exhausted',
           },
           {
             type: 'notification',

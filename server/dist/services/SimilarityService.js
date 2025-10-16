@@ -11,23 +11,28 @@ import pino from 'pino';
 import { z } from 'zod';
 const logger = pino({ name: 'SimilarityService' });
 // Input validation schemas
-const SimilarityQuerySchema = z.object({
+const SimilarityQuerySchema = z
+    .object({
     investigationId: z.string().min(1),
     entityId: z.string().optional(),
     text: z.string().optional(),
     topK: z.number().int().min(1).max(100).default(10),
     threshold: z.number().min(0).max(1).default(0.7),
-    includeText: z.boolean().default(false)
-}).refine(data => data.entityId || data.text, {
-    message: "Either entityId or text must be provided"
+    includeText: z.boolean().default(false),
+})
+    .refine((data) => data.entityId || data.text, {
+    message: 'Either entityId or text must be provided',
 });
 const BulkSimilarityQuerySchema = z.object({
     investigationId: z.string().min(1),
     entityIds: z.array(z.string()).min(1).max(50),
     topK: z.number().int().min(1).max(100).default(5),
-    threshold: z.number().min(0).max(1).default(0.7)
+    threshold: z.number().min(0).max(1).default(0.7),
 });
 export class SimilarityService {
+    postgres;
+    embeddingService;
+    config;
     constructor() {
         this.postgres = null; // Will be initialized lazily
         this.embeddingService = new EmbeddingService();
@@ -35,7 +40,7 @@ export class SimilarityService {
             defaultTopK: 10,
             defaultThreshold: 0.7,
             maxBatchSize: 50,
-            cacheExpiry: 3600 // 1 hour
+            cacheExpiry: 3600, // 1 hour
         };
     }
     getPool() {
@@ -56,7 +61,7 @@ export class SimilarityService {
                     investigationId: validated.investigationId,
                     entityId: validated.entityId,
                     hasText: !!validated.text,
-                    topK: validated.topK
+                    topK: validated.topK,
                 });
                 let targetEmbedding;
                 let queryType;
@@ -71,43 +76,42 @@ export class SimilarityService {
                     // Search by text embedding
                     targetEmbedding = await this.embeddingService.generateEmbedding({
                         text: validated.text,
-                        model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small'
+                        model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
                     });
                     queryType = 'text';
                     queryValue = validated.text;
                 }
                 // Perform similarity search
-                const results = await this.performVectorSearch(targetEmbedding, validated.investigationId, validated.topK, validated.threshold, validated.includeText, validated.entityId // Exclude the query entity itself
-                );
+                const results = await this.performVectorSearch(targetEmbedding, validated.investigationId, validated.topK, validated.threshold, validated.includeText, validated.entityId);
                 const executionTime = Date.now() - startTime;
                 logger.info('Similarity search completed', {
                     investigationId: validated.investigationId,
                     queryType,
                     resultsCount: results.length,
                     executionTime,
-                    topSimilarity: results[0]?.similarity || 0
+                    topSimilarity: results[0]?.similarity || 0,
                 });
                 otelService.addSpanAttributes({
                     'similarity.investigation_id': validated.investigationId,
                     'similarity.query_type': queryType,
                     'similarity.results_count': results.length,
                     'similarity.execution_time': executionTime,
-                    'similarity.top_k': validated.topK
+                    'similarity.top_k': validated.topK,
                 });
                 return {
                     query: {
                         type: queryType,
-                        value: queryValue
+                        value: queryValue,
                     },
                     results,
                     totalResults: results.length,
-                    executionTime
+                    executionTime,
                 };
             }
             catch (error) {
                 logger.error('Similarity search failed', {
                     investigationId: query.investigationId,
-                    error: error instanceof Error ? error.message : 'Unknown error'
+                    error: error instanceof Error ? error.message : 'Unknown error',
                 });
                 throw error;
             }
@@ -123,7 +127,7 @@ export class SimilarityService {
                 logger.debug('Bulk similarity search requested', {
                     investigationId: validated.investigationId,
                     entityCount: validated.entityIds.length,
-                    topK: validated.topK
+                    topK: validated.topK,
                 });
                 const results = new Map();
                 // Process entities in smaller batches to avoid overwhelming the database
@@ -136,14 +140,14 @@ export class SimilarityService {
                                 investigationId: validated.investigationId,
                                 entityId,
                                 topK: validated.topK,
-                                threshold: validated.threshold
+                                threshold: validated.threshold,
                             });
                             return [entityId, similarResult.results];
                         }
                         catch (error) {
                             logger.warn('Failed to find similar entities for entity', {
                                 entityId,
-                                error: error instanceof Error ? error.message : 'Unknown error'
+                                error: error instanceof Error ? error.message : 'Unknown error',
                             });
                             return [entityId, []];
                         }
@@ -156,14 +160,14 @@ export class SimilarityService {
                 logger.info('Bulk similarity search completed', {
                     investigationId: validated.investigationId,
                     entityCount: validated.entityIds.length,
-                    successfulResults: results.size
+                    successfulResults: results.size,
                 });
                 return results;
             }
             catch (error) {
                 logger.error('Bulk similarity search failed', {
                     investigationId: query.investigationId,
-                    error: error instanceof Error ? error.message : 'Unknown error'
+                    error: error instanceof Error ? error.message : 'Unknown error',
                 });
                 throw error;
             }
@@ -223,10 +227,10 @@ export class SimilarityService {
       `;
             params.push(topK);
             const result = await client.query(query, params);
-            return result.rows.map(row => ({
+            return result.rows.map((row) => ({
                 entityId: row.entity_id,
                 similarity: parseFloat(row.similarity),
-                text: includeText ? row.text : undefined
+                text: includeText ? row.text : undefined,
             }));
         }
         finally {
@@ -239,7 +243,7 @@ export class SimilarityService {
     parseVectorString(vectorString) {
         // Remove brackets and split by comma
         const cleaned = vectorString.replace(/^\[|\]$/g, '');
-        return cleaned.split(',').map(v => parseFloat(v.trim()));
+        return cleaned.split(',').map((v) => parseFloat(v.trim()));
     }
     /**
      * Get similarity statistics for an investigation
@@ -271,7 +275,7 @@ export class SimilarityService {
                 totalEmbeddings: parseInt(statsResult.rows[0].total_embeddings),
                 avgSimilarityThreshold: this.config.defaultThreshold,
                 lastUpdated: statsResult.rows[0].last_updated,
-                indexHealth
+                indexHealth,
             };
         }
         finally {

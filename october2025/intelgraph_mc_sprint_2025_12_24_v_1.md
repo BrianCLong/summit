@@ -1,4 +1,4 @@
-```markdown
+````markdown
 ---
 slug: intelgraph-mc-sprint-2025-12-24
 version: v1.0
@@ -16,11 +16,14 @@ status: planned
 > **Mission (Sprint N+6)**: Package **Black‑Cell (air‑gapped) bundle v0.9**, finalize **SOC 2 evidence automation v2**, ship **self‑serve tenant onboarding & billing**, harden **supply‑chain (SLSA/SBOM) + secrets rotation**, and deliver **graph performance optimizations** while keeping SLOs/cost guardrails green. Evidence bundle v7 included.
 
 ## Conductor Summary (Commit)
+
 **Assumptions & Provenance**
+
 - Builds on 2025‑12‑10 GA (Kafka & Hybrid Search), Delegated Admin/SCIM, dashboards, incident automation.
 - Summit bundles remain pending import; placeholders _[ATTACH FROM SUMMIT BUNDLE]_ where applicable.
 
 **Goals**
+
 1. **Black‑Cell v0.9**: offline, no‑egress deployment with signed export channels, file‑drop ingestion, provenance resync tool.
 2. **Evidence Automation v2**: SOC 2 control mapping expansion, auto‑collectors (logs, configs, scans), one‑click export.
 3. **Self‑Serve Onboarding & Billing**: tenant signup, plan selection, metering, budgets & invoices (internal sandbox billing).
@@ -28,23 +31,28 @@ status: planned
 5. **Graph Perf & Cost**: Neo4j query tuning, hot‑path caches, query planner hints, and write‑amplification reduction.
 
 **Non‑Goals**
+
 - Cross‑cloud DR (tracked separately), advanced anomaly detection, production external billing gateways.
 
 **Constraints**
+
 - SLOs unchanged. Black‑Cell runs fully offline with **no external calls**.
 - Cost guardrails unchanged; budget alerts at 80% burn; offline bundle sized ≤ 8 GB.
 
 **Risks**
+
 - R1: Air‑gapped bundle drift vs SaaS features. _Mitigation_: feature flags + compatibility tests.
 - R2: Billing calculations inaccuracies. _Mitigation_: metering golden tests, shadow invoices.
 - R3: Perf changes regress correctness. _Mitigation_: query plan snapshots + canary perf tests.
 
 **Definition of Done**
+
 - Black‑Cell bundle installs in isolated cluster; exports signed and verifiable; resync succeeds with >99.99% provenance continuity; SOC 2 v2 exporter runs; self‑serve onboarding flows in sandbox; SLSA/SBOM gates live; perf targets met (see Observability).
 
 ---
 
 ## Swimlanes
+
 - **Lane A — Black‑Cell** (Platform + SRE + Security)
 - **Lane B — Evidence Automation** (Security + QA + MC)
 - **Lane C — Onboarding & Billing** (Backend + Frontend + SRE FinOps)
@@ -55,9 +63,11 @@ status: planned
 ---
 
 ## Backlog (Epics → Stories → Tasks) + RACI
+
 Estimates in SP.
 
 ### EPIC A: Black‑Cell (Air‑Gapped) v0.9 (36 SP)
+
 - **A‑1** Offline bundle build (Helm + OCI) (10 SP) — _Platform (R), SRE (A)_
   - AC: `ig-blackcell.tgz` signed (cosign), manifests SHA logged.
 - **A‑2** File‑Drop connector (local/volume) (8 SP) — _Data Eng (R)_
@@ -68,27 +78,32 @@ Estimates in SP.
   - AC: reconcile hashes post‑egress; mismatch report ≤ 1e‑6.
 
 ### EPIC B: Evidence Automation v2 (26 SP)
+
 - **B‑1** Control catalog expansion (10 SP) — _Sec (R)_
 - **B‑2** Auto‑collectors (configs/logs/scans) (8 SP) — _SRE (R)_
 - **B‑3** One‑click export (8 SP) — _Backend (R), MC (A)_
 
 ### EPIC C: Self‑Serve Onboarding & Billing (34 SP)
+
 - **C‑1** Tenant signup + verification (10 SP) — _Frontend (R), Backend (C)_
 - **C‑2** Metering (GraphQL calls, ingest events, storage) (10 SP) — _SRE FinOps (R)_
 - **C‑3** Budget & invoice (sandbox) (8 SP) — _Backend (R)_
 - **C‑4** Admin UI for plans & caps (6 SP) — _Frontend (R)_
 
 ### EPIC D: Supply‑Chain & Secrets (24 SP)
+
 - **D‑1** SLSA attestations (8 SP) — _Security (R)_
 - **D‑2** SBOM diff gate (8 SP) — _QA (R)_
 - **D‑3** Secret rotation runbook + KMS (8 SP) — _Platform (R)_
 
 ### EPIC E: Graph Performance (24 SP)
+
 - **E‑1** Query plan snapshots & hints (10 SP) — _Backend (R)_
 - **E‑2** Hot‑path caches (5 SP) — _Backend (R), SRE (C)_
 - **E‑3** Write‑amplification reduction (9 SP) — _Graph Eng (R)_
 
 ### EPIC F: QA & Release (16 SP)
+
 - **F‑1** Conformance + offline install tests (8 SP) — _QA (R)_
 - **F‑2** Evidence bundle v7 (8 SP) — _MC (R)_
 
@@ -97,6 +112,7 @@ _Total_: **160 SP** (descope candidates: C‑4, E‑2 if capacity < 140 SP).
 ---
 
 ## Architecture (Deltas)
+
 ```mermaid
 flowchart LR
   subgraph Black-Cell (Air-gapped)
@@ -120,6 +136,7 @@ flowchart LR
   end
   XPT -- signed bundle --> RSYNC
 ```
+````
 
 **ADR‑018**: Air‑gapped bundle uses **no egress**; only signed export files can leave. _Trade‑off_: operational friction vs assurance.
 
@@ -130,7 +147,9 @@ flowchart LR
 ---
 
 ## Data & Policy
+
 **Provenance Resync (PG)**
+
 ```sql
 CREATE TABLE resync_reports (
   report_id UUID PRIMARY KEY,
@@ -142,6 +161,7 @@ CREATE TABLE resync_reports (
 ```
 
 **Metering (PG)**
+
 ```sql
 CREATE TABLE metering_events (
   id BIGSERIAL PRIMARY KEY,
@@ -153,6 +173,7 @@ CREATE TABLE metering_events (
 ```
 
 **Policies (OPA)**
+
 ```rego
 package intelgraph.egress
 
@@ -168,22 +189,41 @@ allow {
 ---
 
 ## APIs & Schemas
+
 **GraphQL — Onboarding & Billing**
+
 ```graphql
-type Plan { id: ID!, name: String!, priceUSD: Float!, caps: Budget }
+type Plan {
+  id: ID!
+  name: String!
+  priceUSD: Float!
+  caps: Budget
+}
 
-type Invoice { id: ID!, month: String!, items: [InvoiceItem!]!, totalUSD: Float! }
+type Invoice {
+  id: ID!
+  month: String!
+  items: [InvoiceItem!]!
+  totalUSD: Float!
+}
 
-type InvoiceItem { kind: String!, quantity: Float!, unitPriceUSD: Float!, amountUSD: Float! }
+type InvoiceItem {
+  kind: String!
+  quantity: Float!
+  unitPriceUSD: Float!
+  amountUSD: Float!
+}
 
 type Mutation {
   signupTenant(name: String!, region: String!, planId: ID!): ID!
   setPlan(tenantId: ID!, planId: ID!): Boolean @auth(abac: "admin.write")
-  generateInvoice(tenantId: ID!, month: String!): Invoice @auth(abac: "admin.write")
+  generateInvoice(tenantId: ID!, month: String!): Invoice
+    @auth(abac: "admin.write")
 }
 ```
 
 **Resync API (REST)**
+
 ```
 POST /provenance/resync
 Body: { tenantId, bundleSha256, manifest, signatures[] }
@@ -192,6 +232,7 @@ Body: { tenantId, bundleSha256, manifest, signatures[] }
 ---
 
 ## Security & Privacy
+
 - **Supply‑chain**: SLSA provenance attestations for images & artifacts; SBOM (CycloneDX) stored & diffed.
 - **Secrets**: KMS‑backed envelope encryption; quarterly rotation; break‑glass w/ approvals & logging.
 - **Privacy**: export policies enforce purpose limitation; metering logs exclude PII.
@@ -199,6 +240,7 @@ Body: { tenantId, bundleSha256, manifest, signatures[] }
 ---
 
 ## Observability & SLOs
+
 - **Perf Targets**:
   - API reads p95 ≤ 350 ms; writes p95 ≤ 700 ms (unchanged).
   - Graph 1‑hop ≤ 300 ms; 2–3 hop ≤ 1,200 ms (unchanged).
@@ -209,6 +251,7 @@ Body: { tenantId, bundleSha256, manifest, signatures[] }
 ---
 
 ## Testing Strategy
+
 - **Unit**: metering arithmetic; export signing/verify; file‑drop schema mapping.
 - **Contract**: resync REST; billing GraphQL; OPA egress policy.
 - **E2E**: offline install → ingest → export → resync; tenant signup → invoice; secret rotation.
@@ -216,6 +259,7 @@ Body: { tenantId, bundleSha256, manifest, signatures[] }
 - **Chaos**: corrupt export; missing signature; expired secret; cache eviction storm.
 
 **Acceptance Packs**
+
 - Given air‑gapped install, exports verify and resync mismatch rate ≤ 1e‑6.
 - Given month with 1M GraphQL calls & 2M ingest events, invoice matches golden totals ±0.1%.
 - Given SBOM diff with new Restricted‑TOS license, CI blocks merge.
@@ -224,6 +268,7 @@ Body: { tenantId, bundleSha256, manifest, signatures[] }
 ---
 
 ## CI/CD & IaC
+
 ```yaml
 name: blackcell-build
 on: [workflow_dispatch]
@@ -238,6 +283,7 @@ jobs:
 ```
 
 **Terraform (air‑gapped cluster)**
+
 ```hcl
 module "blackcell" {
   source = "./modules/blackcell"
@@ -250,6 +296,7 @@ module "blackcell" {
 ---
 
 ## Code & Scaffolds
+
 ```
 repo/
   blackcell/
@@ -276,71 +323,85 @@ repo/
 ```
 
 **Export signer (TS)**
+
 ```ts
 import { createSign } from 'crypto';
-export function signBundle(path:string, keyPem:string){
+export function signBundle(path: string, keyPem: string) {
   const buf = fs.readFileSync(path);
-  const sig = createSign('sha256').update(buf).sign(keyPem,'base64');
+  const sig = createSign('sha256').update(buf).sign(keyPem, 'base64');
   return { sha256: sha256(buf), sig };
 }
 ```
 
 **Resync tool (TS)**
+
 ```ts
-export async function resync(manifest:any){
-  for(const item of manifest.artifacts){
+export async function resync(manifest: any) {
+  for (const item of manifest.artifacts) {
     const ok = await verifyHash(item.path, item.sha256);
-    if(!ok) report.mismatches++;
+    if (!ok) report.mismatches++;
   }
   return report;
 }
 ```
 
 **Metering (TS)**
+
 ```ts
-export function addEvent(tenant:string, kind:'graphql_call'|'ingest_event'|'storage_gb_hour', qty:number){
+export function addEvent(
+  tenant: string,
+  kind: 'graphql_call' | 'ingest_event' | 'storage_gb_hour',
+  qty: number,
+) {
   // write immutable row; aggregate later
 }
 ```
 
 **Query Plan Snapshot (TS)**
+
 ```ts
-export async function snapshot(opId:string){
+export async function snapshot(opId: string) {
   const plan = await neo4jProfile(opId);
-  await store(plan, { opId, ts: Date.now()});
+  await store(plan, { opId, ts: Date.now() });
 }
 ```
 
 ---
 
 ## Release Plan & Runbooks
+
 - **Staging cuts**: 2025‑12‑28, 2026‑01‑04.
 - **Prod**: 2026‑01‑06 (canary 10→50→100%).
 
 **Backout**
+
 - Disable onboarding/billing mutations; pause export channels; revert perf hints.
 
 **Evidence Bundle v7**
+
 - Black‑Cell bundle SHAs & signatures; offline install logs; resync report; SOC 2 v2 export; metering/invoice proofs; SBOM diffs; perf dashboards; signed manifest.
 
 ---
 
 ## RACI (Consolidated)
-| Workstream | R | A | C | I |
-|---|---|---|---|---|
-| Black‑Cell | Platform | SRE TL | Security, MC | PM |
-| Evidence v2 | Security | MC | QA | PM |
-| Onboarding/Billing | Backend | Tech Lead | SRE FinOps, Frontend | PM |
-| Supply‑Chain/Secrets | Security | MC | Platform | PM |
-| Graph Performance | Backend | Graph Eng TL | SRE | PM |
-| QA & Release | QA | PM | MC | All |
+
+| Workstream           | R        | A            | C                    | I   |
+| -------------------- | -------- | ------------ | -------------------- | --- |
+| Black‑Cell           | Platform | SRE TL       | Security, MC         | PM  |
+| Evidence v2          | Security | MC           | QA                   | PM  |
+| Onboarding/Billing   | Backend  | Tech Lead    | SRE FinOps, Frontend | PM  |
+| Supply‑Chain/Secrets | Security | MC           | Platform             | PM  |
+| Graph Performance    | Backend  | Graph Eng TL | SRE                  | PM  |
+| QA & Release         | QA       | PM           | MC                   | All |
 
 ---
 
 ## Open Items
+
 1. Air‑gapped customer requirements checklist _[ATTACH FROM SUMMIT BUNDLE]_.
 2. Finalize plan SKUs & unit prices for sandbox billing.
 3. Identify top N slow persisted ops for hinting.
 
 ```
 
+```

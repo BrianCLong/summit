@@ -3,10 +3,10 @@ namespace: intelgraph-dev
 image:
   app:
     repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/app
-    tag: "latest"
+    tag: 'latest'
   web:
     repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/web
-    tag: "latest"
+    tag: 'latest'
 
 ingress:
   enabled: true
@@ -33,9 +33,9 @@ env:
   S3_BUCKET: intelgraph-dev-artifacts
 
 neo4j:
-  acceptLicenseAgreement: "yes"
+  acceptLicenseAgreement: 'yes'
   neo4j:
-    password: "please-reset-in-secret"  # overridden by secret
+    password: 'please-reset-in-secret' # overridden by secret
   resources:
-    cpu: "1"
-    memory: "2Gi"
+    cpu: '1'
+    memory: '2Gi'

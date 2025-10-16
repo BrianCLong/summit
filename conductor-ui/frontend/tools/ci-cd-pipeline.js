@@ -5,52 +5,55 @@
  * Manages automated builds, deployments, and continuous integration workflows
  */
 
-import { spawn, exec } from 'child_process'
-import { promisify } from 'util'
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
-import { join, resolve } from 'path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
+import { spawn, exec } from 'child_process';
+import { promisify } from 'util';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
+import { join, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const execAsync = promisify(exec)
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const root = resolve(__dirname, '..')
+const execAsync = promisify(exec);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const root = resolve(__dirname, '..');
 
 class CICDPipeline {
   constructor() {
-    this.pipelineDir = join(root, '.github', 'workflows')
-    this.scriptsDir = join(root, 'scripts')
-    this.results = {}
-    this.startTime = Date.now()
+    this.pipelineDir = join(root, '.github', 'workflows');
+    this.scriptsDir = join(root, 'scripts');
+    this.results = {};
+    this.startTime = Date.now();
   }
 
   async setup() {
-    console.log('🔄 Setting up CI/CD pipeline infrastructure...')
-    
-    // Create necessary directories
-    [this.pipelineDir, this.scriptsDir].forEach(dir => {
-      if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true })
-      }
-    })
+    console
+      .log('🔄 Setting up CI/CD pipeline infrastructure...')
+
+      [
+        // Create necessary directories
+        (this.pipelineDir, this.scriptsDir)
+      ].forEach((dir) => {
+        if (!existsSync(dir)) {
+          mkdirSync(dir, { recursive: true });
+        }
+      });
   }
 
   async createGitHubWorkflows() {
-    console.log('📝 Creating GitHub Actions workflows...')
+    console.log('📝 Creating GitHub Actions workflows...');
 
     const workflows = {
       'ci.yml': this.generateCIWorkflow(),
       'cd.yml': this.generateCDWorkflow(),
       'pr-checks.yml': this.generatePRChecksWorkflow(),
       'security-scan.yml': this.generateSecurityScanWorkflow(),
-      'dependency-update.yml': this.generateDependencyUpdateWorkflow()
-    }
+      'dependency-update.yml': this.generateDependencyUpdateWorkflow(),
+    };
 
     for (const [filename, content] of Object.entries(workflows)) {
-      const filePath = join(this.pipelineDir, filename)
-      writeFileSync(filePath, content)
-      console.log(`  ✅ Created ${filename}`)
+      const filePath = join(this.pipelineDir, filename);
+      writeFileSync(filePath, content);
+      console.log(`  ✅ Created ${filename}`);
     }
   }
 
@@ -261,7 +264,7 @@ jobs:
           name: performance-results
           path: conductor-ui/frontend/test-results/performance-*.json
           retention-days: 7
-`
+`;
   }
 
   generateCDWorkflow() {
@@ -440,7 +443,7 @@ jobs:
             - Digest: \${{ needs.build-and-push.outputs.image-digest }}
           draft: false
           prerelease: false
-`
+`;
   }
 
   generatePRChecksWorkflow() {
@@ -605,7 +608,7 @@ jobs:
           name: accessibility-results
           path: conductor-ui/frontend/test-results/accessibility-*.html
           retention-days: 7
-`
+`;
   }
 
   generateSecurityScanWorkflow() {
@@ -774,7 +777,7 @@ jobs:
           name: security-report
           path: security-report.md
           retention-days: 30
-`
+`;
   }
 
   generateDependencyUpdateWorkflow() {
@@ -915,23 +918,23 @@ jobs:
             } catch (error) {
               console.log('No security issues to report or error parsing audit results');
             }
-`
+`;
   }
 
   async createDeploymentScripts() {
-    console.log('📦 Creating deployment scripts...')
+    console.log('📦 Creating deployment scripts...');
 
     const scripts = {
       'deploy.sh': this.generateDeployScript(),
       'rollback.sh': this.generateRollbackScript(),
       'health-check.sh': this.generateHealthCheckScript(),
-      'smoke-test.sh': this.generateSmokeTestScript()
-    }
+      'smoke-test.sh': this.generateSmokeTestScript(),
+    };
 
     for (const [filename, content] of Object.entries(scripts)) {
-      const filePath = join(this.scriptsDir, filename)
-      writeFileSync(filePath, content, { mode: 0o755 })
-      console.log(`  ✅ Created ${filename}`)
+      const filePath = join(this.scriptsDir, filename);
+      writeFileSync(filePath, content, { mode: 0o755 });
+      console.log(`  ✅ Created ${filename}`);
     }
   }
 
@@ -1001,7 +1004,7 @@ echo "🔍 Running post-deployment checks..."
 ./scripts/smoke-test.sh "\$ENVIRONMENT"
 
 echo "🎉 Deployment verification completed!"
-`
+`;
   }
 
   generateRollbackScript() {
@@ -1069,7 +1072,7 @@ echo "🔍 Running post-rollback checks..."
 ./scripts/health-check.sh "\$ENVIRONMENT"
 
 echo "🎉 Rollback verification completed!"
-`
+`;
   }
 
   generateHealthCheckScript() {
@@ -1209,7 +1212,7 @@ fi
 
 echo ""
 echo "🎉 Health check completed for \$ENVIRONMENT!"
-`
+`;
   }
 
   generateSmokeTestScript() {
@@ -1395,23 +1398,27 @@ rm -f smoke.config.ts
 rm -rf e2e/smoke.spec.ts
 
 echo "🎉 Smoke test completed successfully!"
-`
+`;
   }
 
   async createCIConfig() {
-    console.log('⚙️ Creating CI/CD configuration files...')
+    console.log('⚙️ Creating CI/CD configuration files...');
 
     const configs = {
-      '.audit-ci.json': JSON.stringify({
-        "low": true,
-        "moderate": true,
-        "high": true,
-        "critical": true,
-        "report-type": "summary",
-        "advisories": [],
-        "whitelist": [],
-        "skip-dev": true
-      }, null, 2),
+      '.audit-ci.json': JSON.stringify(
+        {
+          low: true,
+          moderate: true,
+          high: true,
+          critical: true,
+          'report-type': 'summary',
+          advisories: [],
+          whitelist: [],
+          'skip-dev': true,
+        },
+        null,
+        2,
+      ),
 
       '.dockerignore': `# Dependencies
 node_modules/
@@ -1455,7 +1462,7 @@ logs/
 *.log
 `,
 
-      'Dockerfile': `# Multi-stage build for Maestro Frontend
+      Dockerfile: `# Multi-stage build for Maestro Frontend
 FROM node:20-alpine as builder
 
 WORKDIR /app
@@ -1613,20 +1620,20 @@ COPY . .
 EXPOSE 5173
 
 CMD ["npm", "run", "dev"]
-`
-    }
+`,
+    };
 
     for (const [filename, content] of Object.entries(configs)) {
-      const filePath = join(root, filename)
-      writeFileSync(filePath, content)
-      console.log(`  ✅ Created ${filename}`)
+      const filePath = join(root, filename);
+      writeFileSync(filePath, content);
+      console.log(`  ✅ Created ${filename}`);
     }
   }
 
   async generateReport() {
-    console.log('📄 Generating CI/CD pipeline report...')
+    console.log('📄 Generating CI/CD pipeline report...');
 
-    const totalDuration = Date.now() - this.startTime
+    const totalDuration = Date.now() - this.startTime;
     const report = {
       timestamp: new Date().toISOString(),
       duration: totalDuration,
@@ -1634,7 +1641,7 @@ CMD ["npm", "run", "dev"]
         workflowsCreated: 5,
         scriptsCreated: 4,
         configFilesCreated: 7,
-        dockerFilesCreated: 3
+        dockerFilesCreated: 3,
       },
       components: {
         workflows: [
@@ -1642,13 +1649,13 @@ CMD ["npm", "run", "dev"]
           'Continuous Deployment (cd.yml)',
           'Pull Request Checks (pr-checks.yml)',
           'Security Scan (security-scan.yml)',
-          'Dependency Updates (dependency-update.yml)'
+          'Dependency Updates (dependency-update.yml)',
         ],
         scripts: [
           'deploy.sh - Main deployment script',
-          'rollback.sh - Emergency rollback script', 
+          'rollback.sh - Emergency rollback script',
           'health-check.sh - Health monitoring script',
-          'smoke-test.sh - Post-deployment validation'
+          'smoke-test.sh - Post-deployment validation',
         ],
         configurations: [
           '.audit-ci.json - Security audit configuration',
@@ -1656,8 +1663,8 @@ CMD ["npm", "run", "dev"]
           'Dockerfile.dev - Development container',
           'nginx.conf - Web server configuration',
           'docker-compose.yml - Multi-service orchestration',
-          '.dockerignore - Docker build exclusions'
-        ]
+          '.dockerignore - Docker build exclusions',
+        ],
       },
       features: [
         'Automated testing on every push and PR',
@@ -1669,26 +1676,26 @@ CMD ["npm", "run", "dev"]
         'Performance monitoring integration',
         'Automated rollback capabilities',
         'Health checks and smoke tests',
-        'Bundle analysis and size tracking'
-      ]
-    }
+        'Bundle analysis and size tracking',
+      ],
+    };
 
     // Write JSON report
-    const reportDir = join(root, 'test-results')
+    const reportDir = join(root, 'test-results');
     if (!existsSync(reportDir)) {
-      mkdirSync(reportDir, { recursive: true })
+      mkdirSync(reportDir, { recursive: true });
     }
 
     writeFileSync(
       join(reportDir, 'cicd-pipeline-report.json'),
-      JSON.stringify(report, null, 2)
-    )
+      JSON.stringify(report, null, 2),
+    );
 
     // Write HTML report
-    const htmlReport = this.generateHTMLReport(report)
-    writeFileSync(join(reportDir, 'cicd-pipeline-report.html'), htmlReport)
+    const htmlReport = this.generateHTMLReport(report);
+    writeFileSync(join(reportDir, 'cicd-pipeline-report.html'), htmlReport);
 
-    return report
+    return report;
   }
 
   generateHTMLReport(report) {
@@ -1744,94 +1751,118 @@ CMD ["npm", "run", "dev"]
         <div class="section">
             <div class="section-title">📋 GitHub Actions Workflows</div>
             <div class="component-list">
-                ${report.components.workflows.map(workflow => 
-                    `<div class="component-item">${workflow}</div>`
-                ).join('')}
+                ${report.components.workflows
+                  .map(
+                    (workflow) =>
+                      `<div class="component-item">${workflow}</div>`,
+                  )
+                  .join('')}
             </div>
         </div>
         
         <div class="section">
             <div class="section-title">🔧 Deployment Scripts</div>
             <div class="component-list">
-                ${report.components.scripts.map(script => 
-                    `<div class="component-item">${script}</div>`
-                ).join('')}
+                ${report.components.scripts
+                  .map(
+                    (script) => `<div class="component-item">${script}</div>`,
+                  )
+                  .join('')}
             </div>
         </div>
         
         <div class="section">
             <div class="section-title">⚙️ Configuration Files</div>
             <div class="component-list">
-                ${report.components.configurations.map(config => 
-                    `<div class="component-item">${config}</div>`
-                ).join('')}
+                ${report.components.configurations
+                  .map(
+                    (config) => `<div class="component-item">${config}</div>`,
+                  )
+                  .join('')}
             </div>
         </div>
         
         <div class="section">
             <div class="section-title">🚀 Pipeline Features</div>
             <div class="feature-grid">
-                ${report.features.map(feature => 
-                    `<div class="feature-item">${feature}</div>`
-                ).join('')}
+                ${report.features
+                  .map(
+                    (feature) => `<div class="feature-item">${feature}</div>`,
+                  )
+                  .join('')}
             </div>
         </div>
     </div>
 </body>
 </html>
-    `
+    `;
   }
 
   async run() {
     try {
-      await this.setup()
-      await this.createGitHubWorkflows()
-      await this.createDeploymentScripts()
-      await this.createCIConfig()
-      
-      const report = await this.generateReport()
-      
-      console.log('\n🎯 CI/CD Pipeline Setup Summary:')
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-      console.log(`  GitHub Workflows:     ${report.summary.workflowsCreated}`)
-      console.log(`  Deployment Scripts:   ${report.summary.scriptsCreated}`)
-      console.log(`  Configuration Files:  ${report.summary.configFilesCreated}`)
-      console.log(`  Docker Files:         ${report.summary.dockerFilesCreated}`)
-      console.log(`  Setup Duration:       ${(report.duration / 1000).toFixed(2)} seconds`)
-      
-      console.log('\n📋 Created Components:')
-      console.log('  GitHub Actions:')
-      report.components.workflows.forEach(workflow => {
-        console.log(`    ✅ ${workflow}`)
-      })
-      
-      console.log('  Deployment Scripts:')
-      report.components.scripts.forEach(script => {
-        console.log(`    ✅ ${script}`)
-      })
-      
-      console.log('\n💡 Next Steps:')
-      console.log('  1. Review and customize the workflows for your specific needs')
-      console.log('  2. Set up required secrets in GitHub repository settings:')
-      console.log('     - SNYK_TOKEN (for security scanning)')
-      console.log('     - Add deployment-specific secrets as needed')
-      console.log('  3. Test the CI/CD pipeline by creating a pull request')
-      console.log('  4. Configure deployment environments in GitHub')
-      console.log('  5. Update deployment scripts with your specific infrastructure')
-      
-      console.log(`\n📄 Detailed report: ${join('test-results', 'cicd-pipeline-report.html')}`)
-      
+      await this.setup();
+      await this.createGitHubWorkflows();
+      await this.createDeploymentScripts();
+      await this.createCIConfig();
+
+      const report = await this.generateReport();
+
+      console.log('\n🎯 CI/CD Pipeline Setup Summary:');
+      console.log(
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+      );
+      console.log(`  GitHub Workflows:     ${report.summary.workflowsCreated}`);
+      console.log(`  Deployment Scripts:   ${report.summary.scriptsCreated}`);
+      console.log(
+        `  Configuration Files:  ${report.summary.configFilesCreated}`,
+      );
+      console.log(
+        `  Docker Files:         ${report.summary.dockerFilesCreated}`,
+      );
+      console.log(
+        `  Setup Duration:       ${(report.duration / 1000).toFixed(2)} seconds`,
+      );
+
+      console.log('\n📋 Created Components:');
+      console.log('  GitHub Actions:');
+      report.components.workflows.forEach((workflow) => {
+        console.log(`    ✅ ${workflow}`);
+      });
+
+      console.log('  Deployment Scripts:');
+      report.components.scripts.forEach((script) => {
+        console.log(`    ✅ ${script}`);
+      });
+
+      console.log('\n💡 Next Steps:');
+      console.log(
+        '  1. Review and customize the workflows for your specific needs',
+      );
+      console.log(
+        '  2. Set up required secrets in GitHub repository settings:',
+      );
+      console.log('     - SNYK_TOKEN (for security scanning)');
+      console.log('     - Add deployment-specific secrets as needed');
+      console.log('  3. Test the CI/CD pipeline by creating a pull request');
+      console.log('  4. Configure deployment environments in GitHub');
+      console.log(
+        '  5. Update deployment scripts with your specific infrastructure',
+      );
+
+      console.log(
+        `\n📄 Detailed report: ${join('test-results', 'cicd-pipeline-report.html')}`,
+      );
     } catch (error) {
-      console.error('❌ CI/CD pipeline setup failed:', error)
-      process.exit(1)
+      console.error('❌ CI/CD pipeline setup failed:', error);
+      process.exit(1);
     }
   }
 }
 
 // CLI interface
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const pipeline = new CICDPipeline()
-  pipeline.run().catch(console.error)
+  const pipeline = new CICDPipeline();
+  pipeline.run().catch(console.error);
 }
 
-export default CICDPipeline
+export default CICDPipeline;

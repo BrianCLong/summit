@@ -23,8 +23,8 @@ api:
   # Relaxed SLO targets for dev
   slo:
     availability: 95.0
-    latencyP95: 1000  # ms
-    latencyP99: 2000  # ms
+    latencyP95: 1000 # ms
+    latencyP99: 2000 # ms
 
 client:
   replicaCount: 1
@@ -78,9 +78,9 @@ neo4j:
     numberOfServers: 0
 
   config:
-    dbms.memory.heap.initial_size: "1G"
-    dbms.memory.heap.max_size: "2G"
-    dbms.memory.pagecache.size: "1G"
+    dbms.memory.heap.initial_size: '1G'
+    dbms.memory.heap.max_size: '2G'
+    dbms.memory.pagecache.size: '1G'
 
 redis:
   architecture: standalone
@@ -132,12 +132,12 @@ ingress:
             name: intelgraph-client
             port: 80
 
-  tls: []  # No TLS in development
+  tls: [] # No TLS in development
 
 # Reduced observability for development
 prometheus:
   server:
-    retention: "7d"
+    retention: '7d'
     persistentVolume:
       size: 10Gi
     resources:

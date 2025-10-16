@@ -2,7 +2,6 @@
 # Modular, executable tasks mapped to core PSYOPS capabilities
 
 intelgraph_tickets:
-
   - id: TKT-01
     title: Real-time Narrative Extraction
     description: Ingest open-source text/video data to extract emergent narratives in real time.

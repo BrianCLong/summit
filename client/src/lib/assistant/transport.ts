@@ -7,7 +7,12 @@ import type {
 export type TransportOpts = {
   baseUrl: string; // e.g., /api or https://api.intelgraph.io
   getAuthToken: () => string | null;
-  backoff?: { baseMs?: number; maxMs?: number; factor?: number; jitter?: boolean };
+  backoff?: {
+    baseMs?: number;
+    maxMs?: number;
+    factor?: number;
+    jitter?: boolean;
+  };
 };
 
 function expBackoff(
@@ -24,7 +29,9 @@ function withAuthHeaders(getAuthToken: () => string | null) {
 }
 
 // ---- Fetch streaming (HTTP) ----
-export function createFetchStreamTransport(opts: TransportOpts): AssistantTransport {
+export function createFetchStreamTransport(
+  opts: TransportOpts,
+): AssistantTransport {
   let handler: ((e: AssistantEvent) => void) | null = null;
   return {
     on: (fn) => {
@@ -39,7 +46,10 @@ export function createFetchStreamTransport(opts: TransportOpts): AssistantTransp
         handler?.({ type: 'status', value: 'thinking' });
         const res = await fetch(`${opts.baseUrl}/assistant/stream`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...withAuthHeaders(opts.getAuthToken) },
+          headers: {
+            'Content-Type': 'application/json',
+            ...withAuthHeaders(opts.getAuthToken),
+          },
           body: JSON.stringify({ input }),
           signal,
         });
@@ -107,7 +117,10 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
 
   const open = (input: string, signal: AbortSignal) => {
     const token = opts.getAuthToken?.();
-    const url = new URL(`${opts.baseUrl}/assistant/sse`, window.location.origin);
+    const url = new URL(
+      `${opts.baseUrl}/assistant/sse`,
+      window.location.origin,
+    );
     url.searchParams.set('q', input);
     if (token) url.searchParams.set('token', token);
 
@@ -156,7 +169,9 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
 }
 
 // ---- Socket.IO ----
-export function createSocketIoTransport(opts: TransportOpts): AssistantTransport {
+export function createSocketIoTransport(
+  opts: TransportOpts,
+): AssistantTransport {
   // Lazy-import so tests can mock without bundling the client in non-RT paths
   let SocketIO;
   try {
@@ -193,7 +208,9 @@ export function createSocketIoTransport(opts: TransportOpts): AssistantTransport
       if (!socket) {
         connect();
         socket.on('connect', run);
-        socket.on('assistant:token', (event: AssistantEvent) => handler?.(event)); // Expecting structured event
+        socket.on('assistant:token', (event: AssistantEvent) =>
+          handler?.(event),
+        ); // Expecting structured event
         socket.on('assistant:done', (event: AssistantEvent) => {
           handler?.(event);
           attempt = 0;

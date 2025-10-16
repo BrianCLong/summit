@@ -1,4 +1,8 @@
-import { AssistantEvent, AssistantTransport, Clock } from '../EnhancedAIAssistant';
+import {
+  AssistantEvent,
+  AssistantTransport,
+  Clock,
+} from '../EnhancedAIAssistant';
 
 export function makeFakeClock() {
   const real = {
@@ -19,7 +23,11 @@ export function makeFakeTransport(
   script: AssistantEvent[],
   opts: ScriptOptions = {},
 ): AssistantTransport {
-  const { mode = 'microtask', spacingMs = 1, ensureLeadingStatus = true } = opts;
+  const {
+    mode = 'microtask',
+    spacingMs = 1,
+    ensureLeadingStatus = true,
+  } = opts;
 
   const seq =
     ensureLeadingStatus && script[0]?.type !== 'status'
@@ -29,7 +37,8 @@ export function makeFakeTransport(
   let handler: ((e: AssistantEvent) => void) | null = null;
 
   const scheduleMicro = (fn: () => void) => Promise.resolve().then(fn);
-  const scheduleTimer = (fn: () => void, delay: number) => setTimeout(fn, delay);
+  const scheduleTimer = (fn: () => void, delay: number) =>
+    setTimeout(fn, delay);
 
   return {
     on: (fn) => {
@@ -65,7 +74,9 @@ export function makeStreamingTransport(
   opts: ScriptOptions = {},
 ): AssistantTransport {
   const events: AssistantEvent[] = [
-    ...tokens.map((token) => ({ type: 'token', value: token }) as AssistantEvent),
+    ...tokens.map(
+      (token) => ({ type: 'token', value: token }) as AssistantEvent,
+    ),
     { type: 'done' },
   ];
 
