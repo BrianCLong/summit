@@ -17,13 +17,19 @@
     {
       "type": "graph",
       "title": "HTTP rate by status",
-      "targets": [{ "expr": "sum(rate(hubble_http_requests_total[5m])) by (status)" }],
+      "targets": [
+        { "expr": "sum(rate(hubble_http_requests_total[5m])) by (status)" }
+      ],
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
     },
     {
       "type": "table",
       "title": "Top DNS queries (5m)",
-      "targets": [{ "expr": "topk(20, sum(rate(hubble_dns_queries_total[5m])) by (query))" }],
+      "targets": [
+        {
+          "expr": "topk(20, sum(rate(hubble_dns_queries_total[5m])) by (query))"
+        }
+      ],
       "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 }
     }
   ]

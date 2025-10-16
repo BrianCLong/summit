@@ -4,16 +4,16 @@ This guide curates the most prominent open-source and developer-oriented multi-a
 
 ## Top Frameworks with Demo Resources
 
-| Framework | Key strengths | Demo/example availability | Application areas | Reference |
-| --- | --- | --- | --- | --- |
-| AutoGen | Microsoft-led, modular, supports async and human-in-the-loop flows | Official templates, Jupyter notebooks, community gallery | Research automation, enterprise workflows, orchestration backbones | [1][2] |
-| LangGraph | Graph-based orchestration with stateful, multi-agent control | LangSmith, Elastic case studies, open demos | Customer support desks, hierarchical or parallel workflows | [3][4] |
-| LangChain | Large integration ecosystem with robust chaining primitives | 35+ community demos, production templates, plugin examples | General reasoning, retrieval-augmented generation (RAG), tool calling | [5][4] |
-| CrewAI | Role-based collaboration and task hand-offs | Prompt-driven tutorials, web-hosted examples | Virtual assistants, training, fraud detection, teamwork sims | [6][1] |
-| SuperAGI | Built-in UI, parallel agent execution, advanced dev tooling | Browser dashboards, workflow demos, monitoring suite | Complex prototyping, event-driven automations | [1] |
-| LlamaIndex | Retrieval-augmented agent toolkit with document grounding | Jupyter labs, API demos, knowledge workflows | Knowledge agents, data-aware RAG pipelines | [4][1] |
-| Smolagents | Lightweight Python agents with explicit multi-agent control | Example repository, fine-grained teamwork samples | Developer-friendly agent pipelines, research experiments | [4] |
-| OpenAI Agents SDK | Official high-level orchestration for OpenAI agents | API docs, starter code, workflow demos | Composable production agent flows | [4] |
+| Framework         | Key strengths                                                      | Demo/example availability                                  | Application areas                                                     | Reference |
+| ----------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------- | --------- |
+| AutoGen           | Microsoft-led, modular, supports async and human-in-the-loop flows | Official templates, Jupyter notebooks, community gallery   | Research automation, enterprise workflows, orchestration backbones    | [1][2]    |
+| LangGraph         | Graph-based orchestration with stateful, multi-agent control       | LangSmith, Elastic case studies, open demos                | Customer support desks, hierarchical or parallel workflows            | [3][4]    |
+| LangChain         | Large integration ecosystem with robust chaining primitives        | 35+ community demos, production templates, plugin examples | General reasoning, retrieval-augmented generation (RAG), tool calling | [5][4]    |
+| CrewAI            | Role-based collaboration and task hand-offs                        | Prompt-driven tutorials, web-hosted examples               | Virtual assistants, training, fraud detection, teamwork sims          | [6][1]    |
+| SuperAGI          | Built-in UI, parallel agent execution, advanced dev tooling        | Browser dashboards, workflow demos, monitoring suite       | Complex prototyping, event-driven automations                         | [1]       |
+| LlamaIndex        | Retrieval-augmented agent toolkit with document grounding          | Jupyter labs, API demos, knowledge workflows               | Knowledge agents, data-aware RAG pipelines                            | [4][1]    |
+| Smolagents        | Lightweight Python agents with explicit multi-agent control        | Example repository, fine-grained teamwork samples          | Developer-friendly agent pipelines, research experiments              | [4]       |
+| OpenAI Agents SDK | Official high-level orchestration for OpenAI agents                | API docs, starter code, workflow demos                     | Composable production agent flows                                     | [4]       |
 
 ## Demo and Learning Resources
 

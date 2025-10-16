@@ -1,17 +1,22 @@
 # v24.0.0 Release Retrospective
-Date Range: ____  Facilitator: ____  Participants: ____
+
+Date Range: \_**\_ Facilitator: \_\_** Participants: \_\_\_\_
 
 ## What went well
+
 -
 
 ## What we can improve
+
 -
 
 ## DORA Metrics
-- Deployment Frequency: ____
+
+- Deployment Frequency: \_\_\_\_
 - Lead Time for Changes: [Awaiting Input: Lead time for changes]
-- Change Failure Rate: ____
-- MTTR: ____
+- Change Failure Rate: \_\_\_\_
+- MTTR: \_\_\_\_
 
 ## Actions (with owners & due dates)
-- [ ] ____ (Owner, YYYY‑MM‑DD)��DD)
+
+- [ ] \_\_\_\_ (Owner, YYYY‑MM‑DD)��DD)

@@ -7,7 +7,9 @@
     {
       "type": "graph",
       "title": "Cost by tenant (USD)",
-      "targets": [{ "expr": "sum(rate(maestro_cost_usd_total[5m])) by (tenant)" }],
+      "targets": [
+        { "expr": "sum(rate(maestro_cost_usd_total[5m])) by (tenant)" }
+      ],
       "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 }
     },
     {
