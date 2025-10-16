@@ -8,4 +8,3 @@ export default function () {
   });
   check(res, { '200 ok': (r) => r.status === 200 });
 }
-

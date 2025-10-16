@@ -1,6 +1,8 @@
 const createFlow = () => ({ id: 'flow-1', state: 'queued' as const });
 
-const tick = (state: 'queued' | 'running' | 'complete'): 'queued' | 'running' | 'complete' => {
+const tick = (
+  state: 'queued' | 'running' | 'complete',
+): 'queued' | 'running' | 'complete' => {
   if (state === 'queued') return 'running';
   if (state === 'running') return 'complete';
   return 'complete';

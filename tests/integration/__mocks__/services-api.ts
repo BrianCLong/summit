@@ -1,4 +1,8 @@
-type Response<T = any> = { ok: boolean; status: number; json: () => Promise<T> };
+type Response<T = any> = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<T>;
+};
 const toResponse = <T>(body: T, status = 200): Response<T> => ({
   ok: status < 400,
   status,

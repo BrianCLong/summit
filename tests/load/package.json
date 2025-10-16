@@ -13,5 +13,11 @@
   "devDependencies": {
     "k6": "^0.48.0"
   },
-  "keywords": ["load-testing", "performance", "k6", "maestro", "intelgraph"]
+  "keywords": [
+    "load-testing",
+    "performance",
+    "k6",
+    "maestro",
+    "intelgraph"
+  ]
 }

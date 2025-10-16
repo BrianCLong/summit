@@ -15,7 +15,10 @@ function loadTestResults(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(content);
   } catch (error) {
-    console.error(`Error loading test results from ${filePath}:`, error.message);
+    console.error(
+      `Error loading test results from ${filePath}:`,
+      error.message,
+    );
     process.exit(1);
   }
 }
@@ -27,7 +30,10 @@ function loadBaseline() {
       const content = fs.readFileSync(baselinePath, 'utf8');
       return JSON.parse(content);
     } catch (error) {
-      console.warn('Warning: Could not load baseline performance data:', error.message);
+      console.warn(
+        'Warning: Could not load baseline performance data:',
+        error.message,
+      );
     }
   }
   return null;
@@ -41,15 +47,18 @@ function saveBaseline(metrics) {
       p95: metrics.p95,
       avg: metrics.avg,
       error_rate: metrics.error_rate,
-      throughput: metrics.throughput
-    }
+      throughput: metrics.throughput,
+    },
   };
 
   try {
     fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2));
     console.log(`✅ Baseline performance data saved to ${baselinePath}`);
   } catch (error) {
-    console.warn('Warning: Could not save baseline performance data:', error.message);
+    console.warn(
+      'Warning: Could not save baseline performance data:',
+      error.message,
+    );
   }
 }
 
@@ -59,7 +68,7 @@ function extractMetrics(k6Results) {
     avg: null,
     error_rate: null,
     throughput: null,
-    duration: null
+    duration: null,
   };
 
   // Extract from k6 JSON format
@@ -67,7 +76,8 @@ function extractMetrics(k6Results) {
     // Response time metrics
     if (k6Results.metrics.http_req_duration) {
       const duration = k6Results.metrics.http_req_duration;
-      metrics.p95 = duration.values?.['p(95)'] || duration.thresholds?.['p(95)'];
+      metrics.p95 =
+        duration.values?.['p(95)'] || duration.thresholds?.['p(95)'];
       metrics.avg = duration.values?.avg || duration.avg;
     }
 
@@ -104,7 +114,7 @@ function calculateRegression(current, baseline) {
         current: current.p95,
         baseline: baseline.p95,
         regression: regression * 100,
-        status: '❌'
+        status: '❌',
       });
     } else {
       regressions.push({
@@ -112,7 +122,7 @@ function calculateRegression(current, baseline) {
         current: current.p95,
         baseline: baseline.p95,
         regression: regression * 100,
-        status: '✅'
+        status: '✅',
       });
     }
   }
@@ -126,7 +136,7 @@ function calculateRegression(current, baseline) {
         current: current.avg,
         baseline: baseline.avg,
         regression: regression * 100,
-        status: '❌'
+        status: '❌',
       });
     } else {
       regressions.push({
@@ -134,21 +144,22 @@ function calculateRegression(current, baseline) {
         current: current.avg,
         baseline: baseline.avg,
         regression: regression * 100,
-        status: '✅'
+        status: '✅',
       });
     }
   }
 
   // Check throughput regression (lower is worse)
   if (current.throughput && baseline.throughput) {
-    const regression = (baseline.throughput - current.throughput) / baseline.throughput;
+    const regression =
+      (baseline.throughput - current.throughput) / baseline.throughput;
     if (regression > REGRESSION_THRESHOLD) {
       regressions.push({
         metric: 'throughput',
         current: current.throughput,
         baseline: baseline.throughput,
         regression: regression * 100,
-        status: '❌'
+        status: '❌',
       });
     } else {
       regressions.push({
@@ -156,7 +167,7 @@ function calculateRegression(current, baseline) {
         current: current.throughput,
         baseline: baseline.throughput,
         regression: regression * 100,
-        status: '✅'
+        status: '✅',
       });
     }
   }
@@ -174,9 +185,12 @@ function generateReport(metrics, baseline, regressions) {
   report += `|--------|-------|\n`;
   if (metrics.p95) report += `| P95 Latency | ${metrics.p95.toFixed(2)}ms |\n`;
   if (metrics.avg) report += `| Avg Latency | ${metrics.avg.toFixed(2)}ms |\n`;
-  if (metrics.error_rate) report += `| Error Rate | ${(metrics.error_rate * 100).toFixed(2)}% |\n`;
-  if (metrics.throughput) report += `| Throughput | ${metrics.throughput.toFixed(2)} req/s |\n`;
-  if (metrics.duration) report += `| Test Duration | ${(metrics.duration / 60).toFixed(1)} minutes |\n`;
+  if (metrics.error_rate)
+    report += `| Error Rate | ${(metrics.error_rate * 100).toFixed(2)}% |\n`;
+  if (metrics.throughput)
+    report += `| Throughput | ${metrics.throughput.toFixed(2)} req/s |\n`;
+  if (metrics.duration)
+    report += `| Test Duration | ${(metrics.duration / 60).toFixed(1)} minutes |\n`;
 
   // Thresholds compliance
   report += `\n## 🎯 Threshold Compliance\n\n`;
@@ -186,7 +200,8 @@ function generateReport(metrics, baseline, regressions) {
   const p95Status = metrics.p95 && metrics.p95 <= 1500 ? '✅' : '❌';
   report += `| P95 < 1500ms | ${p95Status} (${metrics.p95?.toFixed(2) || 'N/A'}ms) |\n`;
 
-  const errorStatus = metrics.error_rate && metrics.error_rate <= 0.02 ? '✅' : '❌';
+  const errorStatus =
+    metrics.error_rate && metrics.error_rate <= 0.02 ? '✅' : '❌';
   report += `| Error Rate < 2% | ${errorStatus} (${((metrics.error_rate || 0) * 100).toFixed(2)}%) |\n`;
 
   // Regression analysis
@@ -197,11 +212,14 @@ function generateReport(metrics, baseline, regressions) {
     report += `|--------|---------|----------|--------|---------|\n`;
 
     for (const reg of regressions) {
-      const change = reg.regression >= 0 ? `+${reg.regression.toFixed(1)}%` : `${reg.regression.toFixed(1)}%`;
+      const change =
+        reg.regression >= 0
+          ? `+${reg.regression.toFixed(1)}%`
+          : `${reg.regression.toFixed(1)}%`;
       report += `| ${reg.metric} | ${reg.current?.toFixed(2)} | ${reg.baseline?.toFixed(2)} | ${change} | ${reg.status} |\n`;
     }
 
-    const hasRegression = regressions.some(r => r.status === '❌');
+    const hasRegression = regressions.some((r) => r.status === '❌');
     if (hasRegression) {
       report += `\n**⚠️ Performance regressions detected above 20% threshold!**\n`;
     } else {
@@ -247,9 +265,10 @@ function main() {
   console.log(report);
 
   // Exit with error code if performance regressions detected
-  const hasRegression = regressions.some(r => r.status === '❌');
-  const thresholdViolation = (currentMetrics.p95 && currentMetrics.p95 > 1500) ||
-                            (currentMetrics.error_rate && currentMetrics.error_rate > 0.02);
+  const hasRegression = regressions.some((r) => r.status === '❌');
+  const thresholdViolation =
+    (currentMetrics.p95 && currentMetrics.p95 > 1500) ||
+    (currentMetrics.error_rate && currentMetrics.error_rate > 0.02);
 
   if (hasRegression || thresholdViolation) {
     console.error('❌ Performance issues detected!');

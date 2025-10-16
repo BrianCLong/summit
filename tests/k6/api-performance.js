@@ -47,8 +47,8 @@ export const options = {
     'http_req_duration{scenario:search_entities}': ['p(95)<350'],
 
     // Error rate thresholds
-    'errors': ['rate<0.02'], // < 2% error rate
-    'http_req_failed': ['rate<0.01'], // < 1% failure rate
+    errors: ['rate<0.02'], // < 2% error rate
+    http_req_failed: ['rate<0.01'], // < 1% failure rate
   },
 };
 
@@ -74,7 +74,7 @@ export default function () {
   const baseUrl = __ENV.API_URL || 'http://localhost:4001';
   const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${__ENV.TEST_TOKEN || 'dev-token'}`,
+    Authorization: `Bearer ${__ENV.TEST_TOKEN || 'dev-token'}`,
   };
 
   const scenario = __ENV.K6_SCENARIO || 'entity_by_id';
@@ -97,7 +97,8 @@ export default function () {
 }
 
 function testEntityById(baseUrl, headers) {
-  const entityId = testEntityIds[Math.floor(Math.random() * testEntityIds.length)];
+  const entityId =
+    testEntityIds[Math.floor(Math.random() * testEntityIds.length)];
 
   // Use persisted query for better performance
   const query = `
@@ -148,7 +149,8 @@ function testEntityById(baseUrl, headers) {
 }
 
 function testPathBetween(baseUrl, headers) {
-  const fromId = testEntityIds[Math.floor(Math.random() * testEntityIds.length)];
+  const fromId =
+    testEntityIds[Math.floor(Math.random() * testEntityIds.length)];
   const toId = testEntityIds[Math.floor(Math.random() * testEntityIds.length)];
 
   if (fromId === toId) return; // Skip same entity paths
@@ -205,7 +207,8 @@ function testPathBetween(baseUrl, headers) {
 }
 
 function testSearchEntities(baseUrl, headers) {
-  const searchQuery = searchQueries[Math.floor(Math.random() * searchQueries.length)];
+  const searchQuery =
+    searchQueries[Math.floor(Math.random() * searchQueries.length)];
 
   const query = `
     query SearchEntities($query: String!, $filter: EntityFilter, $pagination: PaginationInput) {
@@ -243,8 +246,11 @@ function testSearchEntities(baseUrl, headers) {
     'searchEntities status is 200': (r) => r.status === 200,
     'searchEntities returns data': (r) => {
       const body = JSON.parse(r.body);
-      return body.data && body.data.searchEntities &&
-             Array.isArray(body.data.searchEntities.entities);
+      return (
+        body.data &&
+        body.data.searchEntities &&
+        Array.isArray(body.data.searchEntities.entities)
+      );
     },
     'searchEntities response time < 350ms': (r) => r.timings.duration < 350,
     'searchEntities respects pagination': (r) => {
@@ -271,14 +277,23 @@ export function handleSummary(data) {
     environment: __ENV.TEST_ENVIRONMENT || 'dev',
 
     slo_validation: {
-      entity_by_id_p95_ms: data.metrics['http_req_duration{scenario:entity_by_id}'].values.p95,
-      path_between_p95_ms: data.metrics['http_req_duration{scenario:path_between}'].values.p95,
-      search_entities_p95_ms: data.metrics['http_req_duration{scenario:search_entities}'].values.p95,
+      entity_by_id_p95_ms:
+        data.metrics['http_req_duration{scenario:entity_by_id}'].values.p95,
+      path_between_p95_ms:
+        data.metrics['http_req_duration{scenario:path_between}'].values.p95,
+      search_entities_p95_ms:
+        data.metrics['http_req_duration{scenario:search_entities}'].values.p95,
 
       // SLO compliance
-      entity_by_id_slo_met: data.metrics['http_req_duration{scenario:entity_by_id}'].values.p95 < 350,
-      path_between_slo_met: data.metrics['http_req_duration{scenario:path_between}'].values.p95 < 1200,
-      search_entities_slo_met: data.metrics['http_req_duration{scenario:search_entities}'].values.p95 < 350,
+      entity_by_id_slo_met:
+        data.metrics['http_req_duration{scenario:entity_by_id}'].values.p95 <
+        350,
+      path_between_slo_met:
+        data.metrics['http_req_duration{scenario:path_between}'].values.p95 <
+        1200,
+      search_entities_slo_met:
+        data.metrics['http_req_duration{scenario:search_entities}'].values.p95 <
+        350,
 
       error_rate: data.metrics.errors.values.rate,
       failure_rate: data.metrics.http_req_failed.values.rate,
