@@ -3,17 +3,28 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@app/*": ["src/*"],
-      "@ui/*": ["client/src/*"],
-      "@server/*": ["server/src/*"],
-      "@client/*": ["client/src/*"]
+      "@app/*": [
+        "src/*"
+      ],
+      "@ui/*": [
+        "client/src/*"
+      ],
+      "@server/*": [
+        "server/src/*"
+      ],
+      "@client/*": [
+        "client/src/*"
+      ]
     }
   },
   "references": [
-    { "path": "./client" },
-    { "path": "./server" }
+    {
+      "path": "./client"
+    },
+    {
+      "path": "./server"
+    }
   ],
   "files": [],
   "include": []
 }
-

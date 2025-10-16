@@ -140,51 +140,14 @@ conflicts/
 # Docker
 .dockerignore
 
-# Python artifacts
-*.egg-info/
-__pycache__/
-*.pyc
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Go / Rust / Java
-bin/
-build/
-dist/
-target/
-out/
-.gradle/
-**/build/
-**/out/
-
-# Data / DBs / caches
-data/
-!server/data/
-!server/data/pii/
-!server/data/pii/benchmark.json
-datasets/
-cache/
-caches/
-**/*.db
-**/*.sqlite*
-**/*.log
-logs/
-tmp/
-temp/
-.cache/
-
-# OS / editor
+# Operating System Files
 .DS_Store
-*.swp
-.idea/
-.vscode/
-
-# Neo4j & graph stores
-neo4j/data/
-neo4j/import/
-neo4j/logs/
-neo4j/backups/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # vpc (Terraform)
 vpc/.terraform/
@@ -211,4 +174,9 @@ apps/**/dist/
 **/dist/
 server/test-results/
 server/junit.xml
-\n# Secrets\n.env\n*.pem\n*.key\n*.signed.json
+
+# Secrets
+.env
+*.pem
+*.key
+*.signed.json

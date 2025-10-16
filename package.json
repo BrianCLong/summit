@@ -10,6 +10,7 @@
     "apps/*",
     "packages/*",
     "services/*",
+    "contracts/*",
     "packages/prov-ledger",
     "packages/lac",
     "packages/prov-ledger-client",
@@ -17,8 +18,8 @@
     "packages/hit-protocol",
     "packages/canary-lattice",
     "packages/mcp-core",
-    "apps/server",
-    "packages/afl-store"
+    "packages/afl-store",
+    "apps/server"
   ],
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
@@ -90,7 +91,10 @@
     "prov:dev": "ts-node packages/prov-ledger/src/server.ts",
     "lac:compile": "ts-node packages/lac/src/compiler.ts",
     "kpw:dev": "node packages/kpw-media/dist/server.js",
-    "extract": "npm run --workspace=packages/influence-mining extract --"
+    "extract": "npm run --workspace=packages/influence-mining extract --",
+    "preinstall": "corepack enable || true",
+    "build:all": "pnpm -w -r run build",
+    "ci": "pnpm run lint && pnpm run typecheck && pnpm run test"
   },
   "keywords": [
     "intelligence-analysis",
@@ -138,7 +142,11 @@
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.46.1"
+    "typescript-eslint": "^8.46.1",
+    "ts-node": "^10.9.2",
+    "rimraf": "^5.0.7",
+    "eslint": "^9.12.0",
+    "@types/node": "^20.11.30"
   },
   "husky": {
     "hooks": {
@@ -206,5 +214,7 @@
     "overrides": {
       "typescript": "^5.3.3"
     }
-  }
+  },
+  "packageManager": "pnpm@9.12.3",
+  "type": "module"
 }
