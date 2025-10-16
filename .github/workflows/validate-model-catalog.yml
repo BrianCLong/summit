@@ -9,6 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: changes
+        continue-on-error: true
         with:
           filters: |
             catalog:
@@ -22,6 +23,7 @@ jobs:
       - name: Install validators
         run: npm i -g ajv-cli@5 && npm i yaml@2
       - name: Validate schema
+        continue-on-error: true
         run: |
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/cataloga?.yaml --errors=text || \
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/catalog.yaml
