@@ -1,22 +1,10 @@
-"""
-Setup script for Adversarial Misinformation Defense Platform
-
-This script sets up the package for installation and distribution.
-"""
 from setuptools import setup, find_packages
-from pathlib import Path
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
-# Read the README file
-README_PATH = Path(__file__).parent / "README.md"
-LONG_DESCRIPTION = README_PATH.read_text(encoding="utf-8") if README_PATH.exists() else ""
-
-# Read requirements
-REQUIREMENTS_PATH = Path(__file__).parent / "requirements.txt"
-REQUIREMENTS = []
-if REQUIREMENTS_PATH.exists():
-    REQUIREMENTS = REQUIREMENTS_PATH.read_text(encoding="utf-8").splitlines()
-    REQUIREMENTS = [req.strip() for req in REQUIREMENTS if req.strip() and not req.startswith("#")]
+with open("requirements.txt", "r", encoding="utf-8") as fh:
+    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
     name="adversarial-misinfo-defense",
@@ -24,11 +12,10 @@ setup(
     author="Summit Team",
     author_email="summit-team@example.com",
     description="A comprehensive platform for detecting and defending against adversarial misinformation",
-    long_description=LONG_DESCRIPTION,
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/summit-team/adversarial-misinfo-defense",
-    packages=find_packages(where="."),
-    package_dir={"": "."},
+    packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -42,10 +29,9 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
     ],
     python_requires=">=3.8",
-    install_requires=REQUIREMENTS,
+    install_requires=requirements,
     extras_require={
         "dev": [
             "black>=21.0",
@@ -57,17 +43,12 @@ setup(
         "gpu": [
             "cudatoolkit>=11.1",
         ],
-        "docs": [
-            "sphinx>=4.0.0",
-            "sphinx-rtd-theme>=1.0.0",
-        ],
     },
     entry_points={
         "console_scripts": [
-            "amd=adversarial_misinfo_defense.main:main",
-            "amdp=adversarial_misinfo_defense.cli:main",
+            "amdp-validate=adversarial_misinfo_defense.cli:validate",
+            "amdp-train=adversarial_misinfo_defense.cli:train",
+            "amdp-exercise=adversarial_misinfo_defense.cli:exercise",
         ],
     },
-    include_package_data=True,
-    zip_safe=False,
 )
