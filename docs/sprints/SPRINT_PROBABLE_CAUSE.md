@@ -180,7 +180,7 @@ Deliver a shippable slice that adds **probabilistic ER (record linkage)**, **sim
 
 ## 13) Operating Rules
 
-- **Provenance over prediction.**
+- **Provenance Before Prediction.**
 - **Human‑in‑the‑loop by default.**
 - **Policy by default; reasons mandatory.**
 - **Reversible automation** with verifiable manifests.

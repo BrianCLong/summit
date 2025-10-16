@@ -13,7 +13,7 @@ IntelGraph’s end‑state is a **secure, multi‑tenant intelligence graph plat
 ## II) Prioritization Principles (Consensus)
 
 - **Mission first, ethics always**: safety rails, auditability, consented/authorized data only.
-- **Provenance > prediction**: every assertion has source, confidence, and chain‑of‑custody.
+- **Provenance Before Prediction**: every assertion has source, confidence, and chain‑of‑custody.
 - **Compartmentation**: project/tenant isolation, ABAC/RBAC, two‑person controls for sensitive ops.
 - **Interoperability**: STIX/TAXII, MISP, JSON‑LD, GraphQL, OpenTelemetry, OpenID Connect.
 - **Operate disconnected**: degraded/offline modes; cryptographic sync on reconnect.

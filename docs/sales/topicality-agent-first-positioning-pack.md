@@ -108,7 +108,7 @@ We do not use Topicality agents to justify involuntary reductions. Automation sa
 
 ## 6) Differentiators vs. Market
 
-* **Provenance over prediction:** we ship disclosure packs with every meaningful run.
+* **Provenance Before Prediction:** we ship disclosure packs with every meaningful run.
 * **Agent-first, not prompt-first:** orchestrated agents with policies, not loose copilots.
 * **Employment-safe:** codified pledge + metrics.
 * **Two-week proof path:** value slice in ≤14 days, ROI plan ≤8 weeks.

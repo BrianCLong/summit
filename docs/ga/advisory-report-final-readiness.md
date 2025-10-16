@@ -15,7 +15,7 @@ Unanimous GO with guardrails. Dissents recorded: Starkey, Foster, Oppie. Evidenc
 - Starkey (dissent): Delay 48h; prove cross‑tenant chaos with live traffic.
 - Foster (dissent): Add dual‑control on export of multi‑tenant bundles.
 - Oppie (dissent): Require signed resync logs before external publications.
-- 11‑persona chorus: “Provenance before prediction; disclose proofs, not promises.”
+- 11‑persona chorus: “Provenance Before Prediction; disclose proofs, not promises.”
 - Magruder: Keep command chain short; publish pager tree.
 - Stribol: Pre‑arm triage with p95 and burn alerts; don’t chase vanity metrics.
 

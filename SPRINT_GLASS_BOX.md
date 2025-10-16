@@ -198,7 +198,7 @@ Ship a demonstrable slice that enables **automation playbooks** (dry‑run by de
 
 ## 13) Operating Rules
 
-* **Provenance over prediction.**
+* **Provenance Before Prediction.**
 * **Reversible automation.**
 * **Policy by default; reasons mandatory.**
 * **Explainability first; black‑box last.**

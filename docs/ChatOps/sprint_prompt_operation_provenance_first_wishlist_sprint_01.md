@@ -190,7 +190,7 @@ Produce a working, demoable path: **Ingest → Provenance/Claims → Policy‑gu
 ## 13) Operating Rules
 
 - “Policy by default”: if in doubt, block with a readable reason; log everything.
-- “Provenance over prediction”: no claim ships without a source/transform chain.
+- “Provenance Before Prediction”: no claim ships without a source/transform chain.
 - “Reversible automation”: every automated decision must be explainable and undoable.
 
 ---

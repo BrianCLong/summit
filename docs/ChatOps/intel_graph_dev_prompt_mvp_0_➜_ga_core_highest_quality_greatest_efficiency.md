@@ -8,7 +8,7 @@
 ## 0) Prime Orders (read once, follow always)
 
 - **Golden Path must never break:** _ingest → ER → analyze (graph/timeline/map) → copilot preview → export_.
-- **Provenance over prediction:** every edge/node has `{source, transform, hash, confidence}`.
+- **Provenance Before Prediction:** every edge/node has `{source, transform, hash, confidence}`.
 - **Policy by default:** OPA gates _read/write/execute_. All privileged queries and mutations audit.
 - **Preview before power:** Copilot is **preview‑only** behind a feature flag; user must confirm before execute.
 - **p95 speed:** 2‑hop neighborhood @ 50k nodes ≤ **1.5s** on reference stack.

@@ -195,7 +195,7 @@ Ship an end‑to‑end path that demonstrates: **Bitemporal graph + deterministi
 
 ## 14) Operating Rules
 
-- **Provenance over prediction.**
+- **Provenance Before Prediction.**
 - **Reversible automation.**
 - **Policy by default** with readable reasons.
 

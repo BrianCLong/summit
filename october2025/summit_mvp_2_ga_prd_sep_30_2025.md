@@ -39,7 +39,7 @@
 
 ## 2) Product Strategy Frame (recap)
 
-- **Mission:** Deliver provable intelligence & automation with provenance over prediction.  
+- **Mission:** Deliver provable intelligence & automation with Provenance Before Prediction.  
 - **Flywheel:** Targeted design partners → fast, provable wins (disclosure‑first) → convert to revenue via white‑label modules → reinforce graph memory & automations → lower CAC, higher LTV.  
 - **Portfolio lenses:** Mission value; Time‑to‑proof (≤14 days to demo, ≤8 weeks to ROI); Compliance fit; Strategic leverage.  
 - **North star:** # of provable decisions customers trust (with manifests + Decision nodes).

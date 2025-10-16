@@ -1,6 +1,6 @@
 # Summit — MVP‑2 & GA PRD (360°)
 
-*A living product spec that unifies product, architecture, UX, data, ops, and governance. This version assumes current public repo state and the Council Wishbooks as the north star. Ethics and lawful‑use guardrails apply everywhere. “Provenance over prediction.”*
+*A living product spec that unifies product, architecture, UX, data, ops, and governance. This version assumes current public repo state and the Council Wishbooks as the north star. Ethics and lawful‑use guardrails apply everywhere. “Provenance Before Prediction.”*
 
 ---
 

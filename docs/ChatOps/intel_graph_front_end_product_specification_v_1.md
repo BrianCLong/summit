@@ -25,7 +25,7 @@ _Council of Spies & Strategists • Chair: Markus Wolf_
 
 ## 1) Product Principles
 
-- **Provenance over prediction**: every visible claim is traceable; tooltips expose source→transform chain.
+- **Provenance Before Prediction**: every visible claim is traceable; tooltips expose source→transform chain.
 - **Compartmentation by default**: the UI enforces case/tenant scopes; sensitive flows are dual‑control.
 - **Explainability first**: graphs, scores, and model outputs ship with XAI overlays and confidence bands.
 - **Operate degraded**: offline kits; deterministic resync; reproducible exports.
