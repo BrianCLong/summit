@@ -1307,10 +1307,7 @@ router_policies:
 export interface Adapter {
   name: string;
   provider: string;
-  invoke(input: {
-    messages: any[];
-    params?: Record<string, any>;
-  }): Promise<{
+  invoke(input: { messages: any[]; params?: Record<string, any> }): Promise<{
     output: string;
     tokensIn: number;
     tokensOut: number;
