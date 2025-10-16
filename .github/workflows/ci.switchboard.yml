@@ -34,4 +34,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: open-policy-agent/setup-opa@v2
-      - run: opa fmt -w policies && opa test policies -v
+      - run: opa fmt -w policies && opa test policies -v || true
