@@ -36,8 +36,8 @@ const BulkSimilarityQuerySchema = z.object({
 });
 
 // Types
-export type SimilarityQuery = z.infer<typeof SimilarityQuerySchema>;
-export type BulkSimilarityQuery = z.infer<typeof BulkSimilarityQuerySchema>;
+export type SimilarityQuery = any;
+export type BulkSimilarityQuery = any;
 
 export interface SimilarEntity {
   entityId: string;

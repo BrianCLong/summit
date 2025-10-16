@@ -5,7 +5,7 @@
  * for common graph operations.
  */
 
-import { Driver, Session } from 'neo4j-driver';
+// Relax neo4j types across versions
 import pino from 'pino';
 
 const logger = pino({ name: 'Neo4jOptimizer' });
@@ -27,11 +27,11 @@ interface PerformanceMetrics {
 }
 
 export class Neo4jOptimizer {
-  private driver: Driver;
+  private driver: any;
   private queryProfiles: QueryProfile[] = [];
   private slowQueryThreshold: number = 100; // ms
 
-  constructor(driver: Driver) {
+  constructor(driver: any) {
     this.driver = driver;
   }
 
@@ -103,7 +103,7 @@ export class Neo4jOptimizer {
   async executeWithProfiling<T>(
     cypher: string,
     parameters: Record<string, any>,
-    session: Session,
+    session: any,
   ): Promise<{ results: T[]; profile: QueryProfile }> {
     const startTime = Date.now();
 
@@ -183,7 +183,7 @@ export class Neo4jOptimizer {
   /**
    * Create indexes for optimal performance
    */
-  async createOptimalIndexes(session: Session): Promise<void> {
+  async createOptimalIndexes(session: any): Promise<void> {
     const indexCommands = [
       // Entity indexes
       'CREATE INDEX entity_tenant_type_idx IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.type)',

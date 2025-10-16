@@ -33,7 +33,7 @@ export async function addTicketRunLink(
   const runExists = await pool.query('SELECT id FROM runs WHERE id = $1', [
     runId,
   ]);
-  if (runExists.rows.length === 0) {
+  if (!runExists || !Array.isArray((runExists as any).rows) || runExists.rows.length === 0) {
     throw new Error(`Run ${runId} not found`);
   }
 
@@ -43,7 +43,7 @@ export async function addTicketRunLink(
     [ticket.provider, ticket.externalId],
   );
 
-  if (ticketExists.rows.length === 0) {
+  if (!ticketExists || !Array.isArray((ticketExists as any).rows) || ticketExists.rows.length === 0) {
     console.warn(
       `Ticket ${ticket.provider}:${ticket.externalId} not found, skipping link creation`,
     );

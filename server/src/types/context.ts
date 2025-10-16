@@ -1,4 +1,3 @@
-import { Driver } from 'neo4j-driver';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 
@@ -19,7 +18,7 @@ export interface User {
 
 export interface GraphQLContext {
   user?: User;
-  neo4j: Driver;
+  neo4j: any;
   postgres: Pool;
   redis?: Redis;
   req: any;

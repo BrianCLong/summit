@@ -5,10 +5,10 @@
  * with custom attributes and error handling
  */
 
-import { context, trace, SpanStatusCode } from '@opentelemetry/api';
+import { tracer, SpanStatusCode } from '../observability/telemetry.js';
 
-// Get the GraphQL tracer
-const tracer = trace.getTracer('intelgraph-graphql');
+// Get the GraphQL tracer (no-op)
+const t = tracer;
 
 /**
  * Wrapper function for GraphQL resolvers with automatic tracing
@@ -18,71 +18,66 @@ export function traceResolver<T extends any[], R>(
   resolver: (...args: T) => Promise<R> | R,
 ) {
   return async (...args: T): Promise<R> => {
-    return await context.with(
-      tracer.startActiveSpan(`resolver:${resolverName}`, async (span) => {
-        try {
-          // Extract common GraphQL context info
-          const [parent, resolverArgs, ctx, info] = args as any[];
+    const span = t.startSpan(`resolver:${resolverName}`);
+    try {
+      // Extract common GraphQL context info
+      const [parent, resolverArgs, ctx, info] = args as any[];
 
-          // Add span attributes
-          span.setAttributes({
-            'graphql.resolver.name': resolverName,
-            'graphql.operation.type': info?.operation?.operation || 'unknown',
-            'graphql.field.name': info?.fieldName || 'unknown',
-            'graphql.field.path': info?.path?.key || 'unknown',
-            'user.id': ctx?.user?.id || 'anonymous',
-            'tenant.id': ctx?.tenant?.id || 'default',
-          });
+      // Add span attributes
+      span.setAttributes?.({
+        'graphql.resolver.name': resolverName,
+        'graphql.operation.type': info?.operation?.operation || 'unknown',
+        'graphql.field.name': info?.fieldName || 'unknown',
+        'graphql.field.path': info?.path?.key || 'unknown',
+        'user.id': ctx?.user?.id || 'anonymous',
+        'tenant.id': ctx?.tenant?.id || 'default',
+      });
 
-          // Add resolver arguments (be careful with sensitive data)
-          if (resolverArgs && typeof resolverArgs === 'object') {
-            Object.keys(resolverArgs).forEach((key) => {
-              if (
-                !['password', 'token', 'secret'].includes(key.toLowerCase())
-              ) {
-                span.setAttribute(
-                  `graphql.args.${key}`,
-                  typeof resolverArgs[key] === 'string'
-                    ? resolverArgs[key]
-                    : JSON.stringify(resolverArgs[key]),
-                );
-              }
-            });
+      // Add resolver arguments (be careful with sensitive data)
+      if (resolverArgs && typeof resolverArgs === 'object') {
+        Object.keys(resolverArgs).forEach((key) => {
+          if (!['password', 'token', 'secret'].includes(key.toLowerCase())) {
+            span.setAttribute?.(
+              `graphql.args.${key}`,
+              typeof (resolverArgs as any)[key] === 'string'
+                ? (resolverArgs as any)[key]
+                : JSON.stringify((resolverArgs as any)[key]),
+            );
           }
+        });
+      }
 
-          // Execute the resolver
-          const result = await resolver(...args);
+      // Execute the resolver
+      const result = await resolver(...args);
 
-          // Add result metadata
-          if (Array.isArray(result)) {
-            span.setAttribute('graphql.result.count', result.length);
-          } else if (result && typeof result === 'object') {
-            span.setAttribute('graphql.result.type', 'object');
-          }
+      // Add result metadata
+      if (Array.isArray(result)) {
+        span.setAttribute?.('graphql.result.count', result.length);
+      } else if (result && typeof result === 'object') {
+        span.setAttribute?.('graphql.result.type', 'object');
+      }
 
-          span.setStatus({ code: SpanStatusCode.OK });
-          return result;
-        } catch (error) {
-          // Record the error
-          span.recordException(error as Error);
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: (error as Error).message,
-          });
+      span.setStatus?.({ code: SpanStatusCode.OK as any });
+      return result;
+    } catch (error) {
+      // Record the error
+      span.recordException?.(error as Error);
+      span.setStatus?.({
+        code: SpanStatusCode.ERROR as any,
+        message: (error as Error).message,
+      });
 
-          // Add error attributes
-          span.setAttributes({
-            'error.name': (error as Error).name,
-            'error.message': (error as Error).message,
-            'error.stack': (error as Error).stack || 'no stack',
-          });
+      // Add error attributes
+      span.setAttributes?.({
+        'error.name': (error as Error).name,
+        'error.message': (error as Error).message,
+        'error.stack': (error as Error).stack || 'no stack',
+      });
 
-          throw error;
-        } finally {
-          span.end();
-        }
-      }),
-    );
+      throw error;
+    } finally {
+      span.end?.();
+    }
   };
 }
 
@@ -120,32 +115,29 @@ export const exampleResolvers = {
 
     // Using manual span creation
     entities: async (_: any, args: any, ctx: any, info: any) => {
-      return await context.with(
-        tracer.startActiveSpan('resolver:Query.entities', async (span) => {
-          span.setAttributes({
-            'graphql.resolver.name': 'Query.entities',
-            'graphql.args.limit': args.limit || 10,
-            'graphql.args.offset': args.offset || 0,
-            'user.id': ctx.user?.id || 'anonymous',
-          });
+      const span = t.startSpan('resolver:Query.entities');
+      try {
+        span.setAttributes?.({
+          'graphql.resolver.name': 'Query.entities',
+          'graphql.args.limit': args.limit || 10,
+          'graphql.args.offset': args.offset || 0,
+          'user.id': ctx.user?.id || 'anonymous',
+        });
 
-          try {
-            const entities = await ctx.services.entities.list(args);
-            span.setAttribute('graphql.result.count', entities.length);
-            span.setStatus({ code: SpanStatusCode.OK });
-            return entities;
-          } catch (error) {
-            span.recordException(error as Error);
-            span.setStatus({
-              code: SpanStatusCode.ERROR,
-              message: (error as Error).message,
-            });
-            throw error;
-          } finally {
-            span.end();
-          }
-        }),
-      );
+        const entities = await ctx.services.entities.list(args);
+        span.setAttribute?.('graphql.result.count', entities.length);
+        span.setStatus?.({ code: SpanStatusCode.OK as any });
+        return entities;
+      } catch (error) {
+        span.recordException?.(error as Error);
+        span.setStatus?.({
+          code: SpanStatusCode.ERROR as any,
+          message: (error as Error).message,
+        });
+        throw error;
+      } finally {
+        span.end?.();
+      }
     },
   },
 

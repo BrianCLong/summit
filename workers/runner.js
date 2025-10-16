@@ -1,5 +1,5 @@
 // workers/runner.js
-const Redis = require('ioredis');
+import Redis from 'ioredis';
 const r = new Redis(process.env.REDIS_URL);
 const pool = process.env.POOL_NAME; // "aws" or "oci"
 

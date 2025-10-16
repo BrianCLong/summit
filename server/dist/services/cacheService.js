@@ -202,4 +202,4 @@ export const cacheService = new CacheService();
 setInterval(() => {
     cacheService.cleanup();
 }, 5 * 60 * 1000);
-//# sourceMappingURL=CacheService.js.map
+//# sourceMappingURL=cacheService.js.map

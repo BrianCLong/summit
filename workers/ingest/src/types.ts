@@ -9,14 +9,21 @@ export interface ConnectorConfig {
   expected_daily_rows?: number;
   polling_interval?: string;
   region?: string;
-  transform_rules?: Record<string, any>;
+  transform_rules?: TransformRules;
+}
+
+export interface TransformRules {
+  id_field?: string;
+  name_field?: string;
+  entity_type_field?: string;
+  [key: string]: unknown;
 }
 
 export interface IngestRecord {
   id: string;
   type: string;
   name: string;
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
   pii_flags: Record<string, boolean>;
   source_id: string;
   provenance: ProvenanceMetadata;
@@ -31,8 +38,8 @@ export interface ProvenanceMetadata {
   source_url: string;
   collected_at: string;
   file_hash?: string;
-  response_headers?: Record<string, any>;
-  [key: string]: any;
+  response_headers?: Record<string, string | number | string[]>;
+  [key: string]: unknown;
 }
 
 export interface ProcessingMetrics {

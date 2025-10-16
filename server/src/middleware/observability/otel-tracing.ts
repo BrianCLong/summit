@@ -202,6 +202,11 @@ export class OTelTracingService {
     // no-op
   }
 
+  // Record exception helper (no-op)
+  recordException(_error: unknown) {
+    // no-op
+  }
+
   // Get service configuration
   getConfig(): TracingConfig {
     return { ...this.config };

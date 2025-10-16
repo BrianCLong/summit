@@ -1,0 +1,41 @@
+digraph SummitDeps {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  subgraph cluster_root_compose {
+    label="root docker-compose.yml";
+    postgres; redis; neo4j; opa; jaeger; otel_collector [label="otel-collector"]; mock_services [label="mock-services"]; migrations; seed_fixtures [label="seed-fixtures"]; api; ui; worker; prometheus; grafana; zookeeper; kafka; ingestion_service [label="ingestion-service"]; nlp_service [label="nlp-service"]; reliability_service [label="reliability-service"];
+
+    otel_collector -> jaeger;
+    migrations -> postgres;
+    migrations -> neo4j;
+    seed_fixtures -> migrations;
+    seed_fixtures -> opa;
+    api -> postgres;
+    api -> redis;
+    api -> neo4j;
+    api -> seed_fixtures;
+    api -> otel_collector;
+    ui -> api;
+    worker -> redis;
+    worker -> seed_fixtures;
+    worker -> otel_collector;
+    grafana -> prometheus;
+    grafana -> otel_collector;
+    kafka -> zookeeper;
+    ingestion_service -> kafka;
+    nlp_service -> kafka;
+    reliability_service -> kafka;
+    reliability_service -> redis;
+  }
+
+  subgraph cluster_secondary_compose {
+    label="compose/docker-compose.yml";
+    opa2 [label="opa"]; mc; cos; prom; grafana2 [label="grafana(3001)"]; synthetic;
+    mc -> opa2;
+    cos -> mc;
+    cos -> opa2;
+    grafana2 -> prom;
+    synthetic -> mc;
+  }
+}

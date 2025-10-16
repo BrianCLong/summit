@@ -1,7 +1,7 @@
-import entityResolvers from './entity';
-import relationshipResolvers from './relationship';
-import userResolvers from './user';
-import investigationResolvers from './investigation';
+import entityResolvers from './entity.js';
+import relationshipResolvers from './relationship.js';
+import userResolvers from './user.js';
+import investigationResolvers from './investigation.js';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import evidenceResolvers from './evidence.js';
 import evidenceOkResolvers from './evidenceOk.js';
@@ -9,10 +9,10 @@ import trustRiskResolvers from './trust-risk.js';
 import provenanceResolvers from './provenance.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers
-import { v040Resolvers } from './v040';
+import { v040Resolvers } from './v040/index.js';
 
 // MC Platform v0.4.1 Sovereign Safeguards Resolvers
-import { v041Resolvers } from './v041';
+import { v041Resolvers } from './v041/index.js';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -57,8 +57,6 @@ const resolvers = {
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     runWarGameSimulation:
       wargameResolver.runWarGameSimulation.bind(wargameResolver),
-    updateCrisisScenario:
-      wargameResolver.updateCrisisScenario.bind(wargameResolver),
     deleteCrisisScenario:
       wargameResolver.deleteCrisisScenario.bind(wargameResolver),
   },

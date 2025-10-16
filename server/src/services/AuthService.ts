@@ -1,10 +1,11 @@
 import argon2 from 'argon2';
-import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+import { randomUUID } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
-import { Pool, PoolClient } from 'pg';
+import type { ManagedPostgresPool } from '../db/postgres';
+type PgClientLike = { query: (text: string, params?: any[]) => Promise<any>; release: () => void };
 
 interface UserData {
   email: string;
@@ -96,10 +97,10 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 };
 
 export class AuthService {
-  private pool: Pool;
+  private pool: ManagedPostgresPool;
 
-  constructor() {
-    this.pool = getPostgresPool();
+  constructor(pool?: ManagedPostgresPool) {
+    this.pool = pool ?? getPostgresPool();
   }
 
   async register(userData: UserData): Promise<AuthResponse> {
@@ -203,7 +204,7 @@ export class AuthService {
 
   private async generateTokens(
     user: DatabaseUser,
-    client: PoolClient,
+    client: PgClientLike,
   ): Promise<TokenPair> {
     const tokenPayload: TokenPayload = {
       userId: user.id,
@@ -211,11 +212,13 @@ export class AuthService {
       role: user.role,
     };
 
-    const token = jwt.sign(tokenPayload, config.jwt.secret, {
-      expiresIn: config.jwt.expiresIn,
-    });
+    const token = jwt.sign(
+      tokenPayload,
+      config.jwt.secret as Secret,
+      { expiresIn: config.jwt.expiresIn } as SignOptions,
+    );
 
-    const refreshToken = uuidv4();
+    const refreshToken = randomUUID();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 

@@ -1,6 +1,5 @@
-import { trace, context } from '@opentelemetry/api';
+import { trace } from '@opentelemetry/api';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { z } from 'zod';
 import { BaseConnector } from './BaseConnector';
 import type {
   ConnectorConfig,
@@ -82,7 +81,11 @@ export class HTTPConnector extends BaseConnector {
           });
 
           for (const record of records) {
-            const transformed = this.transformRecord(record);
+            if (typeof record !== 'object' || record === null || Array.isArray(record)) {
+              this.logger.warn({ msg: 'Skipping non-object HTTP record' });
+              continue;
+            }
+            const transformed = this.transformRecord(record as Record<string, unknown>);
 
             yield {
               id: this.extractId(transformed),
@@ -103,7 +106,11 @@ export class HTTPConnector extends BaseConnector {
           // Update checkpoint for next iteration
           if (this.config.checkpoint_field && records.length > 0) {
             const lastRecord = records[records.length - 1];
-            this.lastCheckpoint = lastRecord[this.config.checkpoint_field];
+            if (typeof lastRecord === 'object' && lastRecord !== null && !Array.isArray(lastRecord)) {
+              const lr = lastRecord as Record<string, unknown>;
+              const field = lr[this.config.checkpoint_field];
+              if (typeof field === 'string') this.lastCheckpoint = field;
+            }
           }
 
           // Determine if there are more pages
@@ -194,51 +201,42 @@ export class HTTPConnector extends BaseConnector {
     return await this.httpClient.request(config);
   }
 
-  private extractRecords(data: any): any[] {
+  private extractRecords(data: unknown): unknown[] {
     // Handle different response formats
     if (Array.isArray(data)) {
-      return data;
+      return data as unknown[];
     }
 
     // Common API response patterns
-    if (data.results && Array.isArray(data.results)) {
-      return data.results;
-    }
-
-    if (data.data && Array.isArray(data.data)) {
-      return data.data;
-    }
-
-    if (data.items && Array.isArray(data.items)) {
-      return data.items;
-    }
-
-    // For Topicality insights API
-    if (data.insights && Array.isArray(data.insights)) {
-      return data.insights;
+    if (typeof data === 'object' && data !== null) {
+      const obj = data as Record<string, unknown>;
+      if (Array.isArray(obj.results)) return obj.results as unknown[];
+      if (Array.isArray(obj.data)) return obj.data as unknown[];
+      if (Array.isArray(obj.items)) return obj.items as unknown[];
+      // For Topicality insights API
+      if (Array.isArray(obj.insights as unknown[])) return obj.insights as unknown[];
     }
 
     this.logger.warn({
       msg: 'Unexpected response format, treating as single record',
       data: typeof data,
-      keys: Object.keys(data || {}),
+      keys: typeof data === 'object' && data !== null ? Object.keys(data as object) : [],
     });
 
     return [data];
   }
 
-  private transformRecord(record: any): any {
-    const rules = this.config.transform_rules || {};
+  private transformRecord(record: Record<string, unknown>): Record<string, unknown> {
 
     // Handle Topicality-specific format
     if (this.config.name === 'topicality') {
       return {
-        insight_id: record.id || record.insight_id,
-        insight_type: record.type || 'insight',
-        relevance_score: record.score || record.relevance_score,
-        related_entities: record.entities || record.related_entities || [],
-        topic_tags: record.topics || record.topic_tags || [],
-        timestamp: record.timestamp || record.created_at,
+        insight_id: (record.id as string) || (record.insight_id as string),
+        insight_type: (record.type as string) || 'insight',
+        relevance_score: (record.score as number) || (record.relevance_score as number),
+        related_entities: (record.entities as unknown[]) || (record.related_entities as unknown[]) || [],
+        topic_tags: (record.topics as string[]) || (record.topic_tags as string[]) || [],
+        timestamp: (record.timestamp as string) || (record.created_at as string),
         ...record,
       };
     }
@@ -246,10 +244,10 @@ export class HTTPConnector extends BaseConnector {
     // Handle threat intel format
     if (this.config.purpose === 'threat-intel') {
       return {
-        ioc_id: record.id || record.ioc_id,
-        indicator_type: record.type || record.indicator_type,
-        ioc_value: record.value || record.indicator,
-        confidence_score: record.confidence || record.confidence_score,
+        ioc_id: (record.id as string) || (record.ioc_id as string),
+        indicator_type: (record.type as string) || (record.indicator_type as string),
+        ioc_value: (record.value as string) || (record.indicator as string),
+        confidence_score: (record.confidence as number) || (record.confidence_score as number),
         ...record,
       };
     }
@@ -257,28 +255,31 @@ export class HTTPConnector extends BaseConnector {
     return record;
   }
 
-  private extractId(record: any): string {
+  private extractId(record: Record<string, unknown>): string {
+    const r = record as Record<string, unknown>;
     return (
-      record.insight_id ||
-      record.ioc_id ||
-      record.id ||
+      (r.insight_id as string) ||
+      (r.ioc_id as string) ||
+      (r.id as string) ||
       `http-${Date.now()}-${Math.random()}`
     );
   }
 
-  private extractType(record: any): string {
+  private extractType(record: Record<string, unknown>): string {
+    const r = record as Record<string, unknown>;
     return (
-      record.insight_type || record.indicator_type || record.type || 'unknown'
+      (r.insight_type as string) || (r.indicator_type as string) || (r.type as string) || 'unknown'
     );
   }
 
-  private extractName(record: any): string {
+  private extractName(record: Record<string, unknown>): string {
+    const r = record as Record<string, unknown>;
     return (
-      record.name || record.title || record.ioc_value || record.insight_id || ''
+      (r.name as string) || (r.title as string) || (r.ioc_value as string) || (r.insight_id as string) || ''
     );
   }
 
-  private detectPII(record: any): Record<string, boolean> {
+  private detectPII(record: Record<string, unknown>): Record<string, boolean> {
     const piiFlags: Record<string, boolean> = {};
 
     // More conservative PII detection for API data
@@ -313,11 +314,14 @@ export class HTTPConnector extends BaseConnector {
     };
   }
 
-  private hasMorePages(data: any, recordsCount: number): boolean {
+  private hasMorePages(data: unknown, recordsCount: number): boolean {
     // Check various pagination indicators
-    if (data.has_more !== undefined) return data.has_more;
-    if (data.pagination?.has_next !== undefined)
-      return data.pagination.has_next;
+    if (typeof data === 'object' && data !== null) {
+      const obj = data as Record<string, unknown>;
+      if (typeof obj.has_more === 'boolean') return obj.has_more as boolean;
+      const pagination = obj.pagination as { has_next?: boolean } | undefined;
+      if (pagination && typeof pagination.has_next === 'boolean') return pagination.has_next;
+    }
 
     // For streaming APIs, continue if we got records
     if (this.config.name === 'topicality') {
@@ -351,7 +355,7 @@ export class HTTPConnector extends BaseConnector {
     this.requestCount++;
   }
 
-  private isRetryableError(error: any): boolean {
+  private isRetryableError(error: unknown): boolean {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
       return (
