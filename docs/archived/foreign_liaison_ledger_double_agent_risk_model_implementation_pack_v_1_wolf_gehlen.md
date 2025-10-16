@@ -1,16 +1,20 @@
 # Ceremonial Opening
+
 “Let shadows convene.” — By the Chair’s hand, in session.
 
 # Purpose
+
 Stand up two capabilities, immediately usable:
-1) **Foreign Liaison Ledger (FLL)** — a partner/source provenance and trust registry with chain‑of‑custody for every datum.
-2) **Double‑Agent & Contradiction Model (DACM)** — automated detection and scoring of identity, chronology, capability, and provenance conflicts across compartments.
+
+1. **Foreign Liaison Ledger (FLL)** — a partner/source provenance and trust registry with chain‑of‑custody for every datum.
+2. **Double‑Agent & Contradiction Model (DACM)** — automated detection and scoring of identity, chronology, capability, and provenance conflicts across compartments.
 
 > Chair’s Guidance (Wolf): Archivally rich feeds are power only if they are **tested, contradicted, and provenance‑locked**. Build doubt into the design.
 
 ---
 
 ## 1) System Overview (Architecture at a Glance)
+
 - **Ingestors**: ETL jobs per partner (CSV, JSON, STIX, API). All normalize to FLL JSON Schemas.
 - **Provenance Service**: Content‑addressable store (SHA‑256) + append‑only event log.
 - **Core Registry (SQL)**: Partners, Assets, Assertions, Evidence, ProvenanceEvents, Contradictions, AccessAudit.
@@ -21,6 +25,7 @@ Stand up two capabilities, immediately usable:
 ---
 
 ## 2) Data Model (SQL DDL — deploy day one)
+
 ```sql
 -- Partners (liaison services / providers)
 CREATE TABLE partners (
@@ -113,7 +118,9 @@ CREATE TABLE access_audit (
 ---
 
 ## 3) Normalized JSON Schemas (for ingestors)
+
 **`asset.json`**
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -121,20 +128,21 @@ CREATE TABLE access_audit (
   "type": "object",
   "required": ["partner_id", "partner_asset_ref"],
   "properties": {
-    "asset_id": {"type": "string", "format": "uuid"},
-    "partner_id": {"type": "integer"},
-    "partner_asset_ref": {"type": "string"},
-    "canonical_person_key": {"type": "string"},
-    "status": {"type": "string"},
-    "first_seen": {"type": "string", "format": "date-time"},
-    "last_seen": {"type": "string", "format": "date-time"},
-    "sensitivity_label": {"type": "string"},
-    "notes": {"type": "string"}
+    "asset_id": { "type": "string", "format": "uuid" },
+    "partner_id": { "type": "integer" },
+    "partner_asset_ref": { "type": "string" },
+    "canonical_person_key": { "type": "string" },
+    "status": { "type": "string" },
+    "first_seen": { "type": "string", "format": "date-time" },
+    "last_seen": { "type": "string", "format": "date-time" },
+    "sensitivity_label": { "type": "string" },
+    "notes": { "type": "string" }
   }
 }
 ```
 
 **`assertion.json`**
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -142,21 +150,25 @@ CREATE TABLE access_audit (
   "type": "object",
   "required": ["asset_id", "claim_type", "claim_payload", "provenance_hash"],
   "properties": {
-    "assertion_id": {"type": "string", "format": "uuid"},
-    "asset_id": {"type": "string", "format": "uuid"},
-    "claim_type": {"type": "string", "enum": ["identity", "location", "capability", "intent", "report"]},
-    "claim_payload": {"type": "object"},
-    "claim_time": {"type": "string", "format": "date-time"},
-    "reported_at": {"type": "string", "format": "date-time"},
-    "classification": {"type": "string"},
-    "provenance_hash": {"type": "string"},
-    "reliability_score": {"type": "number", "minimum": 0, "maximum": 1},
-    "caveats": {"type": "string"}
+    "assertion_id": { "type": "string", "format": "uuid" },
+    "asset_id": { "type": "string", "format": "uuid" },
+    "claim_type": {
+      "type": "string",
+      "enum": ["identity", "location", "capability", "intent", "report"]
+    },
+    "claim_payload": { "type": "object" },
+    "claim_time": { "type": "string", "format": "date-time" },
+    "reported_at": { "type": "string", "format": "date-time" },
+    "classification": { "type": "string" },
+    "provenance_hash": { "type": "string" },
+    "reliability_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "caveats": { "type": "string" }
   }
 }
 ```
 
 **`provenance_event.json`**
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -164,15 +176,15 @@ CREATE TABLE access_audit (
   "type": "object",
   "required": ["object_kind", "object_id", "actor", "action", "after_hash"],
   "properties": {
-    "event_id": {"type": "string", "format": "uuid"},
-    "object_kind": {"type": "string"},
-    "object_id": {"type": "string", "format": "uuid"},
-    "actor": {"type": "string"},
-    "action": {"type": "string"},
-    "at": {"type": "string", "format": "date-time"},
-    "before_hash": {"type": "string"},
-    "after_hash": {"type": "string"},
-    "reason": {"type": "string"}
+    "event_id": { "type": "string", "format": "uuid" },
+    "object_kind": { "type": "string" },
+    "object_id": { "type": "string", "format": "uuid" },
+    "actor": { "type": "string" },
+    "action": { "type": "string" },
+    "at": { "type": "string", "format": "date-time" },
+    "before_hash": { "type": "string" },
+    "after_hash": { "type": "string" },
+    "reason": { "type": "string" }
   }
 }
 ```
@@ -180,6 +192,7 @@ CREATE TABLE access_audit (
 ---
 
 ## 4) Chain‑of‑Custody & Hashing (how to provenance‑lock)
+
 **Canonical hash input** = `canonicalize(JSON(payload)) + "|" + ISO8601(claim_time) + "|" + partner_id + "|" + asset_id`
 
 **Append‑only chain**: For each new Evidence entry, set `chain_prev = previous(content_hash)` and recompute `after_hash` in `provenance_events`. Any mutation forces a new event with a new hash; you never overwrite.
@@ -189,7 +202,9 @@ CREATE TABLE access_audit (
 ---
 
 ## 5) Double‑Agent & Contradiction Model (DACM)
+
 ### 5.1 Contradiction Types (rules to enable immediately)
+
 - **ID_COLLISION**: Two partners claim the same canonical_person_key with incompatible biographics.
 - **GEO_IMPOSSIBLE**: Same subject placed in locations that exceed plausible transit between `t1` and `t2`.
 - **CAPABILITY_MISMATCH**: Claimed skills/devices contradict physical/linguistic/technical constraints.
@@ -198,9 +213,11 @@ CREATE TABLE access_audit (
 - **TIMELINE_DISCONTINUITY**: Asset reported active after termination or before first_seen.
 
 ### 5.2 Scoring
+
 `score = 1 - Π(1 - w_i * e_i)` where `e_i` is normalized error for each rule (0..1) and `w_i` is rule weight (default: ID=0.35, GEO=0.20, CAP=0.20, LOOP=0.15, TIME=0.10). Thresholds: **Low ≥0.30**, **Med ≥0.60**, **High ≥0.80**.
 
 ### 5.3 Pseudocode (drop‑in tasks)
+
 ```python
 # Input: list[Assertion]
 # Output: list[Contradiction]
@@ -240,6 +257,7 @@ for c in contradictions:
 ```
 
 ### 5.4 Quiet‑Signals Monitoring
+
 - **Regularity detectors**: Fixed cadence of “wins” from one partner’s feed → mark as staged pipeline.
 - **Lexical twins**: Near‑duplicate phrasing across languages → recycled reporting.
 - **Latency cliffs**: Abrupt drop in time‑to‑report → planted proof or internal leak.
@@ -247,6 +265,7 @@ for c in contradictions:
 ---
 
 ## 6) Analyst Workflow (SOP)
+
 1. **Ingest**: Normalize partner drop → validate against JSON schema → compute hashes → write `assertions` + `evidence` + `provenance_events`.
 2. **Auto‑screen**: DACM runs rules; contradictions open triage tickets with default caveats.
 3. **Triage Board**: Two‑person integrity check (collector vs. counterintelligence). Resolve or escalate.
@@ -256,7 +275,9 @@ for c in contradictions:
 ---
 
 ## 7) Governance & Guardrails
+
 - **ABAC (example)**
+
 ```yaml
 policies:
   - id: analyst-can-view-SREL
@@ -275,12 +296,14 @@ policies:
     action: download
     resource: classification == 'TS//SI//NOFORN'
 ```
+
 - **Tripwires**: Alert on bulk views by single user, viewing one asset >5× in 24h, or cross‑compartment joins without ticket.
 - **Ombuds Review**: Random 5% sampling of analyst decisions per month.
 
 ---
 
 ## 8) Metrics that Matter (Dashboard)
+
 - Partner reliability trend (90‑day EMA).
 - Mean time to contradiction closure.
 - % assertions published with caveats.
@@ -290,6 +313,7 @@ policies:
 ---
 
 ## 9) Implementation Backlog (2‑week sprint plan)
+
 **Day 1–2**: Stand up DB with DDL; seed partners; wire hash functions.
 
 **Day 3–5**: Build JSON validation + ingestors (one partner as pilot). Implement ID_COLLISION, GEO_IMPOSSIBLE.
@@ -303,9 +327,9 @@ policies:
 ---
 
 ## 10) Operating Notes (Wolf)
+
 - **Never** accept a “gift archive” without its chain‑of‑custody and contradiction map.
 - Publish **with caveats by default**; remove caveats only after independent corroboration.
 - Reward the analyst who finds the contradiction, not the one who files the most reports.
 
 > Close of Session: “Seen and ordered. Doubt institutionalized; trust earned.” — M. Wolf
-
