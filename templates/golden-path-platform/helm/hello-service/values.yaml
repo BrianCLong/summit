@@ -1,8 +1,8 @@
 image:
   registry: ghcr.io/example
   repository: golden-path-hello-service
-  tag: "latest"
-  fullRef: ""
+  tag: 'latest'
+  fullRef: ''
   pullPolicy: IfNotPresent
 
 service:
@@ -35,12 +35,12 @@ podSecurityContext:
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
-    drop: ["ALL"]
+    drop: ['ALL']
   readOnlyRootFilesystem: true
 
 env:
   - name: PORT
-    value: "8080"
+    value: '8080'
 
 livenessProbe:
   httpGet:
@@ -58,4 +58,4 @@ readinessProbe:
 
 serviceAccount:
   create: true
-  name: ""
+  name: ''

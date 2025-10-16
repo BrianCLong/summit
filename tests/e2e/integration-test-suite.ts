@@ -15,29 +15,31 @@ import { randomUUID } from 'crypto';
 const TEST_CONFIG = {
   api: {
     baseUrl: process.env.TEST_API_BASE_URL || 'http://localhost:3000',
-    timeout: 30000
+    timeout: 30000,
   },
   databases: {
     postgres: {
-      connectionString: process.env.TEST_POSTGRES_URL || 'postgresql://test:test@localhost:5432/intelgraph_test'
+      connectionString:
+        process.env.TEST_POSTGRES_URL ||
+        'postgresql://test:test@localhost:5432/intelgraph_test',
     },
     neo4j: {
       uri: process.env.TEST_NEO4J_URI || 'bolt://localhost:7687',
       user: process.env.TEST_NEO4J_USER || 'neo4j',
-      password: process.env.TEST_NEO4J_PASSWORD || 'test'
+      password: process.env.TEST_NEO4J_PASSWORD || 'test',
     },
     redis: {
       host: process.env.TEST_REDIS_HOST || 'localhost',
-      port: parseInt(process.env.TEST_REDIS_PORT || '6379')
-    }
+      port: parseInt(process.env.TEST_REDIS_PORT || '6379'),
+    },
   },
   auth: {
     testUser: {
       email: 'test@intelgraph.ai',
       password: 'TestPassword123!',
-      tenantId: 'test-tenant'
-    }
-  }
+      tenantId: 'test-tenant',
+    },
+  },
 };
 
 describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
@@ -47,26 +49,31 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
   let neo4jDriver: any;
   let testCorrelationId: string;
 
-  before(async function() {
+  before(async function () {
     this.timeout(60000); // 1 minute setup timeout
 
     console.log('🔧 Setting up test environment...');
 
     // Initialize database connections
-    pgClient = new Client({ connectionString: TEST_CONFIG.databases.postgres.connectionString });
+    pgClient = new Client({
+      connectionString: TEST_CONFIG.databases.postgres.connectionString,
+    });
     await pgClient.connect();
 
     redisClient = new Redis(TEST_CONFIG.databases.redis);
 
     neo4jDriver = neo4jDriver(
       TEST_CONFIG.databases.neo4j.uri,
-      neo4jDriver.auth.basic(TEST_CONFIG.databases.neo4j.user, TEST_CONFIG.databases.neo4j.password)
+      neo4jDriver.auth.basic(
+        TEST_CONFIG.databases.neo4j.user,
+        TEST_CONFIG.databases.neo4j.password,
+      ),
     );
 
     // Verify database connectivity
     await pgClient.query('SELECT 1');
     await redisClient.ping();
-    
+
     const session = neo4jDriver.session();
     await session.run('RETURN 1');
     await session.close();
@@ -78,7 +85,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       .post('/api/auth/login')
       .send({
         email: TEST_CONFIG.auth.testUser.email,
-        password: TEST_CONFIG.auth.testUser.password
+        password: TEST_CONFIG.auth.testUser.password,
       })
       .timeout(TEST_CONFIG.api.timeout);
 
@@ -89,7 +96,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     console.log('✅ Test user authenticated');
   });
 
-  after(async function() {
+  after(async function () {
     this.timeout(30000);
 
     console.log('🧹 Cleaning up test environment...');
@@ -142,7 +149,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         .post('/api/auth/login')
         .send({
           email: TEST_CONFIG.auth.testUser.email,
-          password: TEST_CONFIG.auth.testUser.password
+          password: TEST_CONFIG.auth.testUser.password,
         })
         .set('X-Correlation-ID', testCorrelationId)
         .timeout(TEST_CONFIG.api.timeout);
@@ -150,7 +157,10 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       expect(response.status).to.equal(200);
       expect(response.body).to.have.property('token');
       expect(response.body).to.have.property('user');
-      expect(response.body.user).to.have.property('email', TEST_CONFIG.auth.testUser.email);
+      expect(response.body.user).to.have.property(
+        'email',
+        TEST_CONFIG.auth.testUser.email,
+      );
     });
 
     it('should reject invalid credentials', async () => {
@@ -158,7 +168,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         .post('/api/auth/login')
         .send({
           email: TEST_CONFIG.auth.testUser.email,
-          password: 'invalid-password'
+          password: 'invalid-password',
         })
         .set('X-Correlation-ID', testCorrelationId)
         .timeout(TEST_CONFIG.api.timeout);
@@ -185,8 +195,8 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         description: 'End-to-end test graph',
         settings: {
           privacy: 'private',
-          collaboration: false
-        }
+          collaboration: false,
+        },
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -199,7 +209,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       expect(response.status).to.equal(201);
       expect(response.body).to.have.property('id');
       expect(response.body).to.have.property('name', graphData.name);
-      
+
       testGraphId = response.body.id;
     });
 
@@ -209,8 +219,8 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         properties: {
           name: 'John Test',
           email: 'john@test.com',
-          role: 'Analyst'
-        }
+          role: 'Analyst',
+        },
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -246,8 +256,8 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         algorithm: 'pagerank',
         parameters: {
           iterations: 20,
-          dampingFactor: 0.85
-        }
+          dampingFactor: 0.85,
+        },
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -273,10 +283,10 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         mode: 'PLAN',
         budgets: {
           tokens: 50000,
-          usd: 25.00,
-          timeMinutes: 30
+          usd: 25.0,
+          timeMinutes: 30,
         },
-        reasonForAccess: 'End-to-end integration testing'
+        reasonForAccess: 'End-to-end integration testing',
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -289,7 +299,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       expect(response.status).to.equal(201);
       expect(response.body).to.have.property('runId');
       expect(response.body).to.have.property('status', 'pending');
-      
+
       testRunId = response.body.runId;
     });
 
@@ -315,9 +325,12 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         .set('X-Correlation-ID', testCorrelationId)
         .timeout(TEST_CONFIG.api.timeout);
 
-      if (statusResponse.body.pending && statusResponse.body.pending.length > 0) {
+      if (
+        statusResponse.body.pending &&
+        statusResponse.body.pending.length > 0
+      ) {
         const approvalId = statusResponse.body.pending[0].id;
-        
+
         const approvalResponse = await request(TEST_CONFIG.api.baseUrl)
           .post(`/api/maestro/v1/approvals/${approvalId}/approve`)
           .set('Authorization', `Bearer ${authToken}`)
@@ -333,17 +346,18 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
   describe('💰 Premium Model Routing', () => {
     it('should optimize model selection based on query complexity', async () => {
       const queryRequest = {
-        query: 'Analyze the relationship patterns in the network and identify potential risk indicators',
+        query:
+          'Analyze the relationship patterns in the network and identify potential risk indicators',
         context: {
           complexity: 'high',
           domain: 'intelligence',
-          urgency: 'normal'
+          urgency: 'normal',
         },
         constraints: {
           maxCost: 10.0,
           maxLatency: 30000,
-          minQuality: 0.8
-        }
+          minQuality: 0.8,
+        },
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -383,8 +397,8 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         resource: 'sensitive-dataset',
         context: {
           purpose: 'intelligence_analysis',
-          environment: 'test'
-        }
+          environment: 'test',
+        },
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -404,7 +418,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       const reportRequest = {
         framework: 'SOC2',
         startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        endDate: new Date().toISOString()
+        endDate: new Date().toISOString(),
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -431,10 +445,10 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         message: 'End-to-end integration test executed',
         details: {
           testSuite: 'e2e-integration',
-          correlationId: testCorrelationId
+          correlationId: testCorrelationId,
         },
         complianceRelevant: true,
-        complianceFrameworks: ['SOC2']
+        complianceFrameworks: ['SOC2'],
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -453,7 +467,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         startTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
         endTime: new Date().toISOString(),
         correlationIds: [testCorrelationId],
-        limit: 100
+        limit: 100,
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -475,7 +489,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         .set('X-Correlation-ID', testCorrelationId)
         .send({
           startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          endDate: new Date().toISOString()
+          endDate: new Date().toISOString(),
         })
         .timeout(TEST_CONFIG.api.timeout);
 
@@ -498,13 +512,13 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
           {
             operation: 'normalization',
             algorithm: 'standard',
-            parameters: {}
-          }
+            parameters: {},
+          },
         ],
         metadata: {
           classification: 'internal',
-          tags: ['test', 'integration']
-        }
+          tags: ['test', 'integration'],
+        },
       };
 
       const response = await request(TEST_CONFIG.api.baseUrl)
@@ -550,19 +564,19 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       expect(response.body).to.have.property('timestamp');
     });
 
-    it('should handle concurrent requests efficiently', async function() {
+    it('should handle concurrent requests efficiently', async function () {
       this.timeout(60000); // 1 minute for concurrent test
 
-      const concurrentRequests = Array.from({ length: 10 }, (_, i) => 
+      const concurrentRequests = Array.from({ length: 10 }, (_, i) =>
         request(TEST_CONFIG.api.baseUrl)
           .get('/api/health')
           .set('Authorization', `Bearer ${authToken}`)
           .set('X-Correlation-ID', `${testCorrelationId}-${i}`)
-          .timeout(TEST_CONFIG.api.timeout)
+          .timeout(TEST_CONFIG.api.timeout),
       );
 
       const results = await Promise.allSettled(concurrentRequests);
-      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const successful = results.filter((r) => r.status === 'fulfilled').length;
 
       expect(successful).to.be.at.least(8); // At least 80% success rate
     });
@@ -579,10 +593,12 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         .timeout(TEST_CONFIG.api.timeout);
 
       expect(response.status).to.be.oneOf([200, 503]); // Healthy or service unavailable
-      
+
       if (response.status === 503) {
         expect(response.body).to.have.property('message');
-        expect(response.body.message).to.include('service temporarily unavailable');
+        expect(response.body.message).to.include(
+          'service temporarily unavailable',
+        );
       }
     });
 
@@ -600,7 +616,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
   });
 
   describe('🔄 End-to-End Workflow', () => {
-    it('should execute complete intelligence analysis workflow', async function() {
+    it('should execute complete intelligence analysis workflow', async function () {
       this.timeout(120000); // 2 minutes for full workflow
 
       console.log('🚀 Starting complete workflow test...');
@@ -612,7 +628,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         .set('X-Correlation-ID', testCorrelationId)
         .send({
           name: `E2E Test Investigation ${Date.now()}`,
-          description: 'End-to-end workflow test'
+          description: 'End-to-end workflow test',
         })
         .timeout(TEST_CONFIG.api.timeout);
 
@@ -630,8 +646,8 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
           budgets: {
             tokens: 100000,
             usd: 50.0,
-            timeMinutes: 60
-          }
+            timeMinutes: 60,
+          },
         })
         .timeout(TEST_CONFIG.api.timeout);
 
@@ -644,7 +660,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       const maxAttempts = 20; // 2 minutes max wait
 
       while (!analysisComplete && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 6000)); // 6 second intervals
+        await new Promise((resolve) => setTimeout(resolve, 6000)); // 6 second intervals
 
         const statusResponse = await request(TEST_CONFIG.api.baseUrl)
           .get(`/api/investigations/${workspaceId}/analyses/${analysisId}`)
@@ -653,9 +669,11 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
           .timeout(TEST_CONFIG.api.timeout);
 
         expect(statusResponse.status).to.equal(200);
-        
+
         const status = statusResponse.body.status;
-        console.log(`📊 Analysis status: ${status} (attempt ${attempts + 1}/${maxAttempts})`);
+        console.log(
+          `📊 Analysis status: ${status} (attempt ${attempts + 1}/${maxAttempts})`,
+        );
 
         if (status === 'completed' || status === 'failed') {
           analysisComplete = true;
@@ -689,23 +707,23 @@ class TestUtils {
   static async waitForCondition(
     condition: () => Promise<boolean>,
     timeout: number = 30000,
-    interval: number = 1000
+    interval: number = 1000,
   ): Promise<boolean> {
     const start = Date.now();
-    
+
     while (Date.now() - start < timeout) {
       if (await condition()) {
         return true;
       }
-      await new Promise(resolve => setTimeout(resolve, interval));
+      await new Promise((resolve) => setTimeout(resolve, interval));
     }
-    
+
     return false;
   }
 
   static generateTestData(type: 'entity' | 'relationship' | 'graph') {
     const timestamp = Date.now();
-    
+
     switch (type) {
       case 'entity':
         return {
@@ -713,29 +731,29 @@ class TestUtils {
           properties: {
             name: `Test Entity ${timestamp}`,
             category: 'test',
-            created: new Date().toISOString()
-          }
+            created: new Date().toISOString(),
+          },
         };
-      
+
       case 'relationship':
         return {
           type: 'RELATED_TO',
           properties: {
             strength: Math.random(),
-            created: new Date().toISOString()
-          }
+            created: new Date().toISOString(),
+          },
         };
-      
+
       case 'graph':
         return {
           name: `Test Graph ${timestamp}`,
           description: 'Generated test graph',
           settings: {
             privacy: 'private',
-            collaboration: false
-          }
+            collaboration: false,
+          },
         };
-      
+
       default:
         throw new Error(`Unknown test data type: ${type}`);
     }

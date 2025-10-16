@@ -61,9 +61,7 @@
     "summary": "Enforce EU-only residency for personal data transfers.",
     "beforeState": "geoPolicy.allowNonEuTransfers = true",
     "afterState": "geoPolicy.allowNonEuTransfers = false",
-    "obligations": [
-      "Route data flows to EU sovereign storage providers"
-    ],
+    "obligations": ["Route data flows to EU sovereign storage providers"],
     "sloImpact": [
       {
         "metric": "dataResidencyCutover",

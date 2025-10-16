@@ -1,5 +1,5 @@
 image:
   tag: dev
-schedule: "*/5 * * * *"
+schedule: '*/5 * * * *'
 serviceAccount:
   roleArn: arn:aws:iam::123456789012:role/golden-path-dev-job

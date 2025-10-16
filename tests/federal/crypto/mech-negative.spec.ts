@@ -9,7 +9,7 @@ describe('Crypto Mechanism Negative Tests', () => {
     process.env.FEDERAL_ENABLED = 'true';
     process.env.FIPS_MODE = 'true';
     process.env.HSM_ENABLED = 'false'; // Use mock for tests
-    
+
     enforcement = new HSMEnforcement({
       enforceHSM: true,
       allowedMechanisms: ['AES-256-GCM', 'ECDSA-P384', 'RSA-PSS-4096'],
@@ -34,7 +34,7 @@ describe('Crypto Mechanism Negative Tests', () => {
       expect(() => {
         enforcement.validateMechanism('RSA-PSS-4096');
       }).not.toThrow();
-      
+
       expect(() => {
         enforcement.validateMechanism('RSA-PSS-2048');
       }).toThrow('Mechanism RSA-PSS-2048 not in FIPS allowlist');
@@ -141,14 +141,18 @@ describe('Crypto Mechanism Negative Tests', () => {
   describe('PKCS#11 mechanism validation', () => {
     it('should have strict allowlist of exactly 3 mechanisms', () => {
       const allowedMechanisms = enforcement.getAllowedMechanisms();
-      expect(allowedMechanisms).toEqual(['AES-256-GCM', 'ECDSA-P384', 'RSA-PSS-4096']);
+      expect(allowedMechanisms).toEqual([
+        'AES-256-GCM',
+        'ECDSA-P384',
+        'RSA-PSS-4096',
+      ]);
       expect(allowedMechanisms).toHaveLength(3);
     });
 
     it('should reject any mechanism not on allowlist', () => {
       const forbiddenMechanisms = [
         'AES-128-GCM',
-        'AES-192-GCM', 
+        'AES-192-GCM',
         'AES-256-CBC',
         'RSA-2048',
         'RSA-PSS-2048',
@@ -157,10 +161,10 @@ describe('Crypto Mechanism Negative Tests', () => {
         'ECDSA-P521',
         'SHA256-RSA',
         'HMAC-SHA256',
-        'ChaCha20-Poly1305'
+        'ChaCha20-Poly1305',
       ];
 
-      forbiddenMechanisms.forEach(mechanism => {
+      forbiddenMechanisms.forEach((mechanism) => {
         expect(() => {
           enforcement.validateMechanism(mechanism);
         }).toThrow(`Mechanism ${mechanism} not in FIPS allowlist`);

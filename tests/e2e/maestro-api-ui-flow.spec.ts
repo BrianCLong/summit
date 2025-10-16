@@ -6,7 +6,9 @@ test.describe('Maestro API UI Flow Simulation', () => {
   // Assume a base URL for the Maestro UI/API gateway is provided via environment variable
   const BASE_URL = process.env.MAESTRO_UI_BASE_URL || 'http://localhost:3000'; // Example UI port
 
-  test('should simulate launching a run via UI interaction', async ({ page }) => {
+  test('should simulate launching a run via UI interaction', async ({
+    page,
+  }) => {
     // This test simulates a user interacting with a UI to launch a run.
     // Since we don't have a real UI, we'll simulate the API calls that a UI would make.
 
@@ -17,19 +19,22 @@ test.describe('Maestro API UI Flow Simulation', () => {
     // 2. Simulate clicking a button to launch a specific runbook
     // In a real UI, this would be a click event. Here, we'll directly make the API call.
     // This assumes the UI would make a POST request to /api/launchRun
-    const launchRunResponse = await page.request.post(`${BASE_URL}/api/launchRun`, {
-      data: {
-        runbookId: 'etl-assistant-demo', // Using one of our placeholder runbooks
-        tenantId: 'playwright-test-tenant',
-        params: {
-          inputData: 'simulated_ui_input',
+    const launchRunResponse = await page.request.post(
+      `${BASE_URL}/api/launchRun`,
+      {
+        data: {
+          runbookId: 'etl-assistant-demo', // Using one of our placeholder runbooks
+          tenantId: 'playwright-test-tenant',
+          params: {
+            inputData: 'simulated_ui_input',
+          },
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${process.env.MAESTRO_UI_API_TOKEN}`, // If UI uses auth
         },
       },
-      headers: {
-        'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${process.env.MAESTRO_UI_API_TOKEN}`, // If UI uses auth
-      },
-    });
+    );
 
     expect(launchRunResponse.status()).toBe(202); // Accepted
     const responseBody = await launchRunResponse.json();

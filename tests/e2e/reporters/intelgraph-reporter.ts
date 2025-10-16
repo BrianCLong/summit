@@ -1,10 +1,15 @@
 /**
  * Custom IntelGraph Playwright Reporter
- * 
+ *
  * Integrates test results with IntelGraph metrics and monitoring systems.
  */
 
-import { Reporter, TestCase, TestResult, FullResult } from '@playwright/test/reporter';
+import {
+  Reporter,
+  TestCase,
+  TestResult,
+  FullResult,
+} from '@playwright/test/reporter';
 import fs from 'fs';
 import path from 'path';
 
@@ -19,7 +24,7 @@ class IntelGraphReporter implements Reporter {
     this.results.push({
       test,
       result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Log test completion with structured format for log aggregation
@@ -37,10 +42,10 @@ class IntelGraphReporter implements Reporter {
         status: result.status,
         duration: result.duration,
         retry: result.retry,
-        error: result.error?.message || null
+        error: result.error?.message || null,
       },
       browser: test.parent.project()?.use?.browserName || 'unknown',
-      tags: ['e2e', 'maestro', 'intelgraph']
+      tags: ['e2e', 'maestro', 'intelgraph'],
     };
 
     console.log(JSON.stringify(logEntry));
@@ -51,18 +56,18 @@ class IntelGraphReporter implements Reporter {
       timestamp: new Date().toISOString(),
       status: result.status,
       totalTests: this.results.length,
-      passed: this.results.filter(r => r.result.status === 'passed').length,
-      failed: this.results.filter(r => r.result.status === 'failed').length,
-      flaky: this.results.filter(r => r.result.status === 'flaky').length,
-      skipped: this.results.filter(r => r.result.status === 'skipped').length,
+      passed: this.results.filter((r) => r.result.status === 'passed').length,
+      failed: this.results.filter((r) => r.result.status === 'failed').length,
+      flaky: this.results.filter((r) => r.result.status === 'flaky').length,
+      skipped: this.results.filter((r) => r.result.status === 'skipped').length,
       duration: this.results.reduce((sum, r) => sum + r.result.duration, 0),
-      
+
       // Browser breakdown
       browsers: this.getBrowserBreakdown(),
-      
+
       // Performance metrics
       performance: this.getPerformanceMetrics(),
-      
+
       // Accessibility compliance
       accessibility: this.getAccessibilityMetrics(),
     };
@@ -77,20 +82,27 @@ class IntelGraphReporter implements Reporter {
     console.log('📊 IntelGraph Test Summary:');
     console.log(`   Status: ${result.status}`);
     console.log(`   Total Tests: ${summary.totalTests}`);
-    console.log(`   Success Rate: ${((summary.passed / summary.totalTests) * 100).toFixed(1)}%`);
+    console.log(
+      `   Success Rate: ${((summary.passed / summary.totalTests) * 100).toFixed(1)}%`,
+    );
     console.log(`   Duration: ${(summary.duration / 1000).toFixed(2)}s`);
-    console.log(`   Browser Coverage: ${Object.keys(summary.browsers).join(', ')}`);
+    console.log(
+      `   Browser Coverage: ${Object.keys(summary.browsers).join(', ')}`,
+    );
   }
 
   private getBrowserBreakdown() {
-    const breakdown: Record<string, { passed: number; failed: number; total: number }> = {};
-    
+    const breakdown: Record<
+      string,
+      { passed: number; failed: number; total: number }
+    > = {};
+
     this.results.forEach(({ test, result }) => {
       const browser = test.parent.project()?.use?.browserName || 'unknown';
       if (!breakdown[browser]) {
         breakdown[browser] = { passed: 0, failed: 0, total: 0 };
       }
-      
+
       breakdown[browser].total++;
       if (result.status === 'passed') {
         breakdown[browser].passed++;
@@ -103,28 +115,42 @@ class IntelGraphReporter implements Reporter {
   }
 
   private getPerformanceMetrics() {
-    const performanceTests = this.results.filter(r => 
-      r.test.titlePath().some(title => title.toLowerCase().includes('performance'))
+    const performanceTests = this.results.filter((r) =>
+      r.test
+        .titlePath()
+        .some((title) => title.toLowerCase().includes('performance')),
     );
 
     return {
       totalPerformanceTests: performanceTests.length,
-      averageLoadTime: performanceTests.length > 0 ? 
-        performanceTests.reduce((sum, r) => sum + r.result.duration, 0) / performanceTests.length : 0,
-      webVitalsCompliance: performanceTests.filter(r => r.result.status === 'passed').length
+      averageLoadTime:
+        performanceTests.length > 0
+          ? performanceTests.reduce((sum, r) => sum + r.result.duration, 0) /
+            performanceTests.length
+          : 0,
+      webVitalsCompliance: performanceTests.filter(
+        (r) => r.result.status === 'passed',
+      ).length,
     };
   }
 
   private getAccessibilityMetrics() {
-    const a11yTests = this.results.filter(r => 
-      r.test.titlePath().some(title => title.toLowerCase().includes('accessibility'))
+    const a11yTests = this.results.filter((r) =>
+      r.test
+        .titlePath()
+        .some((title) => title.toLowerCase().includes('accessibility')),
     );
 
     return {
       totalAccessibilityTests: a11yTests.length,
-      wcagCompliance: a11yTests.filter(r => r.result.status === 'passed').length,
-      complianceRate: a11yTests.length > 0 ? 
-        (a11yTests.filter(r => r.result.status === 'passed').length / a11yTests.length) * 100 : 0
+      wcagCompliance: a11yTests.filter((r) => r.result.status === 'passed')
+        .length,
+      complianceRate:
+        a11yTests.length > 0
+          ? (a11yTests.filter((r) => r.result.status === 'passed').length /
+              a11yTests.length) *
+            100
+          : 0,
     };
   }
 
@@ -157,18 +183,24 @@ e2e_accessibility_compliance_rate ${summary.accessibility.complianceRate / 100}
 `;
 
       // Send to Prometheus Pushgateway
-      const response = await fetch(`${prometheusGateway}/metrics/job/e2e-tests/instance/playwright`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain',
+      const response = await fetch(
+        `${prometheusGateway}/metrics/job/e2e-tests/instance/playwright`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: metrics,
         },
-        body: metrics,
-      });
+      );
 
       if (response.ok) {
         console.log('✅ Metrics sent to Prometheus');
       } else {
-        console.warn('⚠️ Failed to send metrics to Prometheus:', response.statusText);
+        console.warn(
+          '⚠️ Failed to send metrics to Prometheus:',
+          response.statusText,
+        );
       }
     } catch (error) {
       console.warn('⚠️ Error sending metrics to Prometheus:', error);

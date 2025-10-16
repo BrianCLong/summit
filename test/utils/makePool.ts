@@ -6,6 +6,6 @@ export function makePool(rows: QueryRow[] = [], overrides: Partial<any> = {}) {
     query,
     connect: jest.fn(async () => ({ query, release: jest.fn() })),
     end: jest.fn(),
-    ...overrides
+    ...overrides,
   };
 }

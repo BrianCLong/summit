@@ -1,4 +1,3 @@
-
 # Technical Debt Tracker (Auto-Generated)
 
 This document lists all `TODO` and `FIXME` markers found in the repository as of 2025-09-13. It serves as a backlog for future cleanup and refinement sprints.

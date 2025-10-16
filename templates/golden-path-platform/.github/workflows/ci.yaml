@@ -162,14 +162,14 @@ jobs:
       - name: Sign images
         if: github.event_name != 'pull_request'
         env:
-          COSIGN_YES: "1"
+          COSIGN_YES: '1'
         run: |
           cosign sign --keyless ${{ env.SERVICE_IMAGE }}
           cosign sign --keyless ${{ env.JOB_IMAGE }}
       - name: Attach SBOM
         if: github.event_name != 'pull_request'
         env:
-          COSIGN_YES: "1"
+          COSIGN_YES: '1'
         run: |
           cosign attach sbom --sbom artifacts/hello-service-sbom.spdx.json ${{ env.SERVICE_IMAGE }}
           cosign attach sbom --sbom artifacts/hello-job-sbom.spdx.json ${{ env.JOB_IMAGE }}
@@ -186,4 +186,3 @@ jobs:
           path: |
             artifacts/*.json
             provenance
-

@@ -19,7 +19,7 @@ tasks:
 
   build:
     desc: Build service and job binaries
-    deps: ["build:service", "build:job"]
+    deps: ['build:service', 'build:job']
 
   build:service:
     dir: services/hello-service
@@ -99,4 +99,3 @@ tasks:
     desc: Evaluate OPA policy before promotion
     cmds:
       - opa eval --format pretty --data scripts/policy/bundle.rego --input scripts/policy/input.json 'data.cicd.allow'
-
