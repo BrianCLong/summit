@@ -15,8 +15,10 @@ jobs:
               - 'server/**'
             workflows:
               - '.github/workflows/**'
-            root:
-              - '**'
+      - name: No app changes, skip build
+        if: ${{ steps.changes.outputs.client != 'true' && steps.changes.outputs.server != 'true' }}
+        run: echo "No client/server changes; skipping build"
+        shell: bash
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - name: Install deps (scoped)
