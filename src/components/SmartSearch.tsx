@@ -3,7 +3,7 @@ export default function SmartSearch() {
   const [q, setQ] = useState('');
   const [hits, setHits] = useState<any[]>([]);
   useEffect(() => {
-    let t = setTimeout(async () => {
+    const t = setTimeout(async () => {
       if (q.length < 2) return setHits([]);
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);

@@ -27,7 +27,7 @@ test.describe('Maestro UI Accessibility @a11y', () => {
   test('Navigation should be keyboard accessible', async ({ page }) => {
     // Test keyboard navigation
     await page.keyboard.press('Tab');
-    let focused = await page.evaluate(() => document.activeElement?.tagName);
+    const focused = await page.evaluate(() => document.activeElement?.tagName);
     expect(focused).toBeTruthy();
 
     // Navigate through all main nav items

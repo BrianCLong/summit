@@ -12,7 +12,7 @@ export const logger = pino({
   },
 });
 
-let rate = Number(process.env.LOG_SAMPLE_RATE || '1.0');
+const rate = Number(process.env.LOG_SAMPLE_RATE || '1.0');
 export function maybeLog(level: 'info' | 'warn' | 'error', obj: any) {
   if (level === 'error' || Math.random() < rate) logger[level](obj);
 }

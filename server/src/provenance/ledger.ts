@@ -484,7 +484,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         };
 
         try {
-          let query = `
+          const query = `
           SELECT * FROM provenance_ledger_v2 
           ${tenantId ? 'WHERE tenant_id = $1' : ''}
           ORDER BY tenant_id, sequence_number
@@ -924,7 +924,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       resourceType?: string;
     } = {},
   ): Promise<ProvenanceEntry[]> {
-    let whereConditions = ['tenant_id = $1'];
+    const whereConditions = ['tenant_id = $1'];
     const params: any[] = [tenantId];
     let paramIndex = 2;
 

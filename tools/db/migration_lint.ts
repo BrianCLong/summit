@@ -11,7 +11,7 @@ const requireSafe = [
   /CREATE\s+INDEX\s+CONCURRENTLY/i,
 ];
 
-let errors: string[] = [],
+const errors: string[] = [],
   warns: string[] = [];
 for (const f of fs
   .readdirSync(MIG_DIR)

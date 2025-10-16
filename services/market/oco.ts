@@ -6,6 +6,6 @@ export function ocoStep(
   pmax = 5,
 ) {
   // grad>0 → raise price (demand>capacity); grad<0 → lower price
-  let p = price - eta * grad;
+  const p = price - eta * grad;
   return Math.max(pmin, Math.min(pmax, p));
 }

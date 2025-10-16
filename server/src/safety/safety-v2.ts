@@ -244,7 +244,7 @@ export class SafetyV2Service {
 
       // Apply OPA-style decision logic from Chair's policy
       let decision: SafetyEvaluation['decision'];
-      let reasoning: string[] = [];
+      const reasoning: string[] = [];
 
       if (riskScore >= 0.7) {
         decision = 'deny';

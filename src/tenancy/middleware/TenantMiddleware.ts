@@ -268,7 +268,7 @@ export class TenantMiddleware {
     const cacheKey = `tenant:${identifier}`;
 
     // Try cache first
-    let cachedContext = this.contextCache.get(cacheKey);
+    const cachedContext = this.contextCache.get(cacheKey);
     if (cachedContext) {
       return await this.tenantManager.getTenant(cachedContext.tenantId);
     }

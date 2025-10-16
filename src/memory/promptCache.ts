@@ -83,7 +83,7 @@ export class PromptCache {
     this.stats.totalQueries++;
 
     const cacheKey = this.generateCacheKey(prompt, model, context);
-    let entry = this.cache.get(cacheKey);
+    const entry = this.cache.get(cacheKey);
 
     // Check for exact match first
     if (entry && this.isEntryValid(entry)) {

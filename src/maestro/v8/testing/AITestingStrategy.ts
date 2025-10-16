@@ -379,7 +379,7 @@ export class AITestingStrategy extends EventEmitter {
       const allSuites = Array.from(this.testSuites.values());
 
       // Filter by test types if specified
-      let candidateSuites =
+      const candidateSuites =
         testTypes.length > 0
           ? allSuites.filter((suite) => testTypes.includes(suite.type))
           : allSuites;

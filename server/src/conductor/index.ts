@@ -148,7 +148,7 @@ export class Conductor {
         (process.env.CACHE_ENABLED ?? 'true').toLowerCase() === 'true';
       const tenantForCache =
         input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
-      let cached: any | null = null;
+      const cached: any | null = null;
       let cacheKey = '';
       if (cacheEnabled) {
         cacheKey = this.makeCacheKey(decision.expert, input);

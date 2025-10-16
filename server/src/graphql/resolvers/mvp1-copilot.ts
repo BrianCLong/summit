@@ -135,7 +135,7 @@ const mvp1CopilotResolvers = {
         );
 
         // Optionally auto-create entities in the graph
-        let createdEntities: any[] = [];
+        const createdEntities: any[] = [];
         if (
           input.autoCreateEntities &&
           input.investigationId &&

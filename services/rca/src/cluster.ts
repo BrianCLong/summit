@@ -14,7 +14,7 @@ export function cluster(messages: string[], k = 6) {
 }
 function kmeans(X: number[][], k: number, it = 20) {
   const C = X.slice(0, k);
-  let A = new Array(X.length).fill(0);
+  const A = new Array(X.length).fill(0);
   for (let t = 0; t < it; t++) {
     // assign
     for (let i = 0; i < X.length; i++) {

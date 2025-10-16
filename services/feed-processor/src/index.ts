@@ -400,7 +400,7 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
     const rawData = await connector(jobData.source_config);
 
     // Transform data if rules provided
-    let transformedData = rawData;
+    const transformedData = rawData;
     if (jobData.transform_rules && jobData.transform_rules.length > 0) {
       // Add to transform queue
       await transformQueue.add('transform-data', {

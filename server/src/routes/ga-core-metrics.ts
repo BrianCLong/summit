@@ -186,7 +186,7 @@ router.get('/trends/:metric', async (req, res) => {
     const pool = getPostgresPool();
 
     let query: string;
-    let params: any[] = [days];
+    const params: any[] = [days];
 
     switch (metric) {
       case 'er_precision':

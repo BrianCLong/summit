@@ -211,8 +211,8 @@ export class EvidenceProvenanceService {
       //   Key: artifact.s3_key,
       // });
 
-      let integrityValid = false;
-      let s3Metadata = null;
+      const integrityValid = false;
+      const s3Metadata = null;
 
       // try {
       //   const s3Response = await this.s3Client.send(headCommand);

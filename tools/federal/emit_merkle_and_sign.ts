@@ -243,7 +243,7 @@ async function main() {
 
   let outputPath = 'daily-merkle.json';
   let verifyMode = false;
-  let filePaths: string[] = [];
+  const filePaths: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];

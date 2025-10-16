@@ -206,7 +206,7 @@ class MaestroDoctor {
     ).toFixed(1);
 
     let status: 'pass' | 'warn' | 'fail' = 'pass';
-    let message = `${memoryGB}GB RAM, ${cpuCount} CPUs (${memoryUsage}% used)`;
+    const message = `${memoryGB}GB RAM, ${cpuCount} CPUs (${memoryUsage}% used)`;
     let fix = '';
 
     if (memoryGB < 4) {

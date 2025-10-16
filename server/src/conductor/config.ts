@@ -63,8 +63,8 @@ export async function initializeConductorSystem(): Promise<{
     },
   ];
 
-  let missingSecrets: string[] = [];
-  let defaultSecrets: string[] = [];
+  const missingSecrets: string[] = [];
+  const defaultSecrets: string[] = [];
 
   for (const secret of requiredSecrets) {
     if (!secret.value || secret.value === '') {

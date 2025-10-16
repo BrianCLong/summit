@@ -68,7 +68,7 @@ describe('buildSelfEditEvaluationPlan', () => {
   });
 
   it('allows rejected edits to be surfaced when explicitly requested', () => {
-    let now = new Date('2025-10-14T01:00:00.000Z');
+    const now = new Date('2025-10-14T01:00:00.000Z');
     const registry = new SelfEditRegistry({
       clock: () => now,
       minVerifierCount: 1,

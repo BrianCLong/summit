@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
 import http from 'http';
 import url from 'url';
 import { WebSocketServer } from 'ws';

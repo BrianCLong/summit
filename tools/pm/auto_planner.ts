@@ -69,7 +69,7 @@ async function run() {
     repo: REPO[1],
     state: 'open',
   });
-  let ms =
+  const ms =
     milestones.find((m) => m.title === title) ||
     (await gh.rest.issues.createMilestone({
       owner: REPO[0],

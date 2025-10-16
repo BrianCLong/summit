@@ -473,7 +473,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
 
     // Simplified model evaluation (in practice, would use actual ML model)
     let score = 0;
-    let weight = 1 / coalition.length || 1;
+    const weight = 1 / coalition.length || 1;
 
     for (const featureIdx of coalition) {
       const featureName = this.riskFeatures[featureIdx];

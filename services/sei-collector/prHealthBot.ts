@@ -271,7 +271,7 @@ export class PRHealthBot {
       }
     }
 
-    let score = Math.max(0, 100 - flakeRisk);
+    const score = Math.max(0, 100 - flakeRisk);
     let status: 'pass' | 'warn' | 'fail' = 'pass';
     let message = 'Low flake risk';
 
@@ -332,7 +332,7 @@ export class PRHealthBot {
     }
 
     const { utilization, usedUSD, remainingUSD } = budget;
-    let score = Math.max(0, 100 - utilization);
+    const score = Math.max(0, 100 - utilization);
     let status: 'pass' | 'warn' | 'fail' = 'pass';
     let message = `LLM budget: $${usedUSD.toFixed(2)} used (${utilization.toFixed(1)}%)`;
 

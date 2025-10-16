@@ -565,7 +565,7 @@ export class DataLineageTracker extends EventEmitter {
     const assets = Array.from(this.assets.values());
     const transformations = Array.from(this.transformations.values());
 
-    let schema = `
+    const schema = `
 type DataAsset {
   id: ID!
   name: String!

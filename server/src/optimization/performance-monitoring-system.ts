@@ -509,7 +509,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
     const startTime = Date.now() - windowMs;
 
     let current = 0;
-    let errorBudget = { total: 0, consumed: 0, remaining: 0 };
+    const errorBudget = { total: 0, consumed: 0, remaining: 0 };
     let timeToExhaustion = Infinity;
 
     switch (slo.measurement) {

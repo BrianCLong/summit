@@ -29,7 +29,7 @@ class HelmDigestChecker {
     console.log('🔍 Checking Helm charts for digest-only policy compliance...');
 
     const chartDirs = ['charts'];
-    let allPassed = true;
+    const allPassed = true;
 
     for (const chartDir of chartDirs) {
       if (fs.existsSync(chartDir)) {

@@ -329,7 +329,7 @@ test.describe('Maestro Dashboard', () => {
       // Measure Web Vitals using browser APIs
       const webVitals = await page.evaluate(() => {
         return new Promise((resolve) => {
-          let vitals: any = {};
+          const vitals: any = {};
 
           // LCP (Largest Contentful Paint)
           new PerformanceObserver((list) => {

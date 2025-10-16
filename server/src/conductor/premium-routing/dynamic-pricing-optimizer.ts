@@ -333,7 +333,7 @@ export class DynamicPricingOptimizer {
       const factors = await this.calculateDynamicFactors(pricingModel, context);
 
       // Calculate base price
-      let basePrice = this.calculateBasePrice(pricingModel);
+      const basePrice = this.calculateBasePrice(pricingModel);
 
       // Apply dynamic multipliers
       let dynamicPrice = basePrice;
@@ -546,7 +546,7 @@ export class DynamicPricingOptimizer {
     allRecommendations.sort((a, b) => b.impact / b.cost - a.impact / a.cost);
 
     // Select recommendations within budget
-    let selectedRecommendations: QCRRecommendation[] = [];
+    const selectedRecommendations: QCRRecommendation[] = [];
     let totalCost = 0;
     let expectedImprovement = 0;
 

@@ -510,7 +510,7 @@ export class ThompsonSamplingEngine {
       },
     };
 
-    let baseWeights =
+    const baseWeights =
       urgencyWeights[contextFeatures.urgency] || urgencyWeights.medium;
 
     // Adjust weights based on quality requirements

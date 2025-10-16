@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 const samples = JSON.parse(fs.readFileSync('ci_cycle_samples.json', 'utf8')); // minutes per PR from engintel
 function monte(n = 10000) {
-  let out: number[] = [];
+  const out: number[] = [];
   for (let i = 0; i < n; i++) {
     const s = [...Array(12)].reduce(
       (a) => a + samples[Math.floor(Math.random() * samples.length)],

@@ -214,7 +214,7 @@ export class InteractiveDocsEngine extends EventEmitter {
   ): Promise<InteractiveSession> {
     const sessionId = this.generateSessionId();
 
-    let initialState: any = {};
+    const initialState: any = {};
 
     if (type === 'code') {
       const example = this.codeExamples.get(contentId);

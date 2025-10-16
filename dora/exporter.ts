@@ -1,7 +1,7 @@
 import { Octokit } from 'octokit';
 import http from 'http';
 const client = new Octokit({ auth: process.env.GH_TOKEN });
-let metrics = { deploys: 0, lead_time_s: 0, mttr_s: 0, cfr: 0 };
+const metrics = { deploys: 0, lead_time_s: 0, mttr_s: 0, cfr: 0 };
 // TODO: compute from releases, deployments, incidents issues
 http
   .createServer((_req, res) => {

@@ -929,7 +929,7 @@ class InsightsDashboard extends EventEmitter {
     const timeSlots = 24;
     const heatmap = [];
 
-    for (let service of services) {
+    for (const service of services) {
       for (let hour = 0; hour < timeSlots; hour++) {
         heatmap.push({
           service,

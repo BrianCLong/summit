@@ -105,7 +105,7 @@ router.get('/export/signed', async (req, res) => {
     }
     // If WORM bucket configured, upload both artifacts with Object Lock
     const bucket = process.env.AUDIT_WORM_BUCKET;
-    let uris: { packUri?: string; sigUri?: string } = {};
+    const uris: { packUri?: string; sigUri?: string } = {};
     if (bucket) {
       const ts = new Date().toISOString().replace(/[:.]/g, '-');
       const baseKey = `control-packs/${framework}/${ts}`;

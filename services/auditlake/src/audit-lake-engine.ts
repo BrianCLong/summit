@@ -1095,7 +1095,7 @@ export class AuditLakeEngine extends EventEmitter {
     event: AuditEvent,
     privacy: AuditQuery['privacy'],
   ): Record<string, any> {
-    let result: Record<string, any> = { ...event };
+    const result: Record<string, any> = { ...event };
 
     // Apply privacy controls
     if (privacy.masked) {
