@@ -53,8 +53,8 @@ export async function initializeConductorSystem() {
             defaultValue: '/tmp/intelgraph-files',
         },
     ];
-    let missingSecrets = [];
-    let defaultSecrets = [];
+    const missingSecrets = [];
+    const defaultSecrets = [];
     for (const secret of requiredSecrets) {
         if (!secret.value || secret.value === '') {
             missingSecrets.push(secret.name);

@@ -85,7 +85,7 @@ export class Conductor {
             // Cache lookup (if enabled)
             const cacheEnabled = (process.env.CACHE_ENABLED ?? 'true').toLowerCase() === 'true';
             const tenantForCache = input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
-            let cached = null;
+            const cached = null;
             let cacheKey = '';
             if (cacheEnabled) {
                 cacheKey = this.makeCacheKey(decision.expert, input);

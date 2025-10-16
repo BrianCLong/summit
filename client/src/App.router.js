@@ -27,6 +27,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListItemButton,
   IconButton,
   LinearProgress,
   Divider,
@@ -152,14 +153,14 @@ function NavigationDrawer({ open, onClose }) {
       <Box sx={{ width: 250, mt: 8 }}>
         <List>
           {items.map((item) => (
-            <ListItem
-              key={item.path}
-              button
-              selected={location.pathname === item.path}
-              onClick={() => handleNavigation(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                selected={location.pathname === item.path}
+                onClick={() => handleNavigation(item.path)}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>
