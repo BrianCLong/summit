@@ -139,4 +139,29 @@ describe('HeadToHeadEvaluator', () => {
     }
     expect(report.aggregateNetBenefit).toBeGreaterThan(-0.1);
   });
+
+  it('provides a neutral summary when no recommendations qualify', () => {
+    const evaluator = new HeadToHeadEvaluator();
+    const emptySnapshot: CompositeMarketSnapshot = {
+      generatedAt: baseSnapshot.generatedAt,
+      financial: [],
+      energy: [],
+      demand: [],
+      regulation: []
+    };
+    const baselines: BaselineRun[] = [
+      {
+        tool: 'aws-compute-optimizer',
+        workload,
+        baselineSavings: 0.05
+      }
+    ];
+
+    const report = evaluator.run(emptySnapshot, baselines);
+    expect(report.results).toHaveLength(1);
+    const result = report.results[0];
+    expect(result.agentSummary).toBeDefined();
+    expect(result.agentSummary.strategy).toBe('data-unavailable');
+    expect(result.agentSummary.estimatedSavings).toBe(0);
+  });
 });
