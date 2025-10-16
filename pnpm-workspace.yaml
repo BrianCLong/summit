@@ -1,7 +1,7 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "services/*"
-  - "contracts/*"
-  - "server"
-  - "tools/*"
+  - 'apps/*'
+  - 'packages/*'
+  - 'services/*'
+  - 'contracts/*'
+  - 'server'
+  - 'tools/*'
