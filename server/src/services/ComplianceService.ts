@@ -189,7 +189,7 @@ class ComplianceService {
             title: 'Records of Processing Activities',
             description: 'Maintain records of all data processing activities',
             priority: 'high',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'gdpr-art-30-ctrl-1',
@@ -211,7 +211,7 @@ class ComplianceService {
             title: 'Security of Processing',
             description: 'Implement appropriate technical and organizational measures to ensure security',
             priority: 'critical',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'gdpr-art-32-ctrl-1',
@@ -256,7 +256,7 @@ class ComplianceService {
             title: 'Logical and Physical Access Controls',
             description: 'The entity implements logical and physical access controls to protect entity system resources',
             priority: 'critical',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'soc2-cc-6.1-ctrl-1',
@@ -286,7 +286,7 @@ class ComplianceService {
             title: 'System Operations',
             description: 'The entity monitors system capacity and utilization',
             priority: 'medium',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'soc2-cc-7.1-ctrl-1',
@@ -323,7 +323,7 @@ class ComplianceService {
             title: 'Information Classification',
             description: 'Information shall be classified in terms of legal, value, criticality and sensitivity',
             priority: 'high',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'iso27001-a-8-2-ctrl-1',

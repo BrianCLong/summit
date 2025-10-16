@@ -19,6 +19,7 @@ import { Search, Filter, X, ChevronDown, Clock, Star, Zap, Mic, FileText, User, 
 // ... (rest of the file)
             <Mic className="h-4 w-4" />
 import { debounce } from 'lodash';
+import DOMPurify from 'dompurify';
 
 interface SearchResult {
   id: string;
@@ -326,13 +327,18 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
   };
 
   // Highlight search terms
+  const escapeRegExp = (text: string) => {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  };
+
   const highlightText = (text: string, highlights: string[]) => {
     let highlightedText = text;
     highlights.forEach(highlight => {
-      const regex = new RegExp(`(${highlight})`, 'gi');
+      const escapedHighlight = escapeRegExp(highlight);
+      const regex = new RegExp(`(${escapedHighlight})`, 'gi');
       highlightedText = highlightedText.replace(regex, '<mark>$1</mark>');
     });
-    return { __html: highlightedText };
+    return { __html: DOMPurify.sanitize(highlightedText) };
   };
 
   return (

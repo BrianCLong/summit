@@ -1,0 +1,40 @@
+# Dockerfile for Web UI of Adversarial Misinformation Defense Platform
+
+# Use Node.js as base
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    bash \
+    curl
+
+# Copy package files
+COPY web/package.json web/package-lock.json ./
+
+# Install Node.js dependencies
+RUN npm ci --only=production
+
+# Copy web application
+COPY web/ .
+
+# Build the application
+RUN npm run build
+
+# Expose port
+EXPOSE 3000
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Change ownership
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Start the application
+CMD ["npm", "start"]

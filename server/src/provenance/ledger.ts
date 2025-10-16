@@ -1,7 +1,7 @@
 // Maestro Conductor v24.4.0 - Provenance Ledger v2 with Hash-Chain
 // Epic E18: Provenance Integrity & Crypto Evidence - Immutable audit trail
 
-import { trace, Span } from '@opentelemetry/api';
+// No-op tracer shim to avoid OTEL dependency
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { pool } from '../db/pg';
 import { EventEmitter } from 'events';
@@ -13,7 +13,17 @@ import {
   type SignatureBundle,
 } from '../security/crypto/index.js';
 
-const tracer = trace.getTracer('provenance-ledger', '24.4.0');
+const tracer = {
+  startActiveSpan: async (_name: string, fn: (span: any) => Promise<any> | any) => {
+    const span = {
+      setAttributes: (_a?: any) => {},
+      recordException: (_e?: any) => {},
+      setStatus: (_s?: any) => {},
+      end: () => {},
+    };
+    return await fn(span);
+  },
+};
 
 // Metrics
 const ledgerEntries = new Counter({
@@ -142,8 +152,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   async appendEntry(entry: Omit<ProvenanceEntry, 'id' | 'sequenceNumber' | 'previousHash' | 'currentHash'>): Promise<ProvenanceEntry> {
-    return tracer.startActiveSpan('provenance_ledger.append_entry', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('provenance_ledger.append_entry', async (span: any) => {
+      span.setAttributes?.({
         'tenant_id': entry.tenantId,
         'action_type': entry.actionType,
         'resource_type': entry.resourceType,
@@ -228,7 +238,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             (Date.now() - startTime) / 1000
           );
 
-          span.setAttributes({
+          span.setAttributes?.({
             'sequence_number': completeEntry.sequenceNumber.toString(),
             'current_hash': completeEntry.currentHash.substring(0, 16),
             'chain_height': Number(completeEntry.sequenceNumber)
@@ -245,18 +255,18 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         }
 
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
 
   async batchAppendEntries(entries: Array<Omit<ProvenanceEntry, 'id' | 'sequenceNumber' | 'previousHash' | 'currentHash'>>): Promise<ProvenanceEntry[]> {
-    return tracer.startActiveSpan('provenance_ledger.batch_append', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('provenance_ledger.batch_append', async (span: any) => {
+      span.setAttributes?.({
         'batch_size': entries.length,
         'tenant_ids': [...new Set(entries.map(e => e.tenantId))].join(',')
       });
@@ -351,7 +361,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             (Date.now() - startTime) / 1000
           );
 
-          span.setAttributes({
+          span.setAttributes?.({
             'entries_processed': results.length,
             'execution_time_ms': Date.now() - startTime
           });
@@ -418,8 +428,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   async verifyChainIntegrity(tenantId?: string): Promise<LedgerVerification> {
-    return tracer.startActiveSpan('provenance_ledger.verify_integrity', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('provenance_ledger.verify_integrity', async (span: any) => {
+      span.setAttributes?.({
         'tenant_id': tenantId || 'all'
       });
 
@@ -509,7 +519,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
           ledgerIntegrityStatus.set({ tenant_id: tenantId }, status);
         }
 
-        span.setAttributes({
+        span.setAttributes?.({
           'entries_verified': verification.totalEntries,
           'chain_valid': verification.valid,
           'broken_chains': verification.brokenChains,
@@ -531,8 +541,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   async createSignedRoot(tenantId?: string): Promise<LedgerRoot[]> {
-    return tracer.startActiveSpan('provenance_ledger.create_signed_root', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('provenance_ledger.create_signed_root', async (span: any) => {
+      span.setAttributes?.({
         'tenant_id': tenantId || 'all'
       });
 
@@ -547,7 +557,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
           roots.push(root);
         }
 
-        span.setAttributes({
+        span.setAttributes?.({
           'roots_created': roots.length,
           'tenant_count': tenants.length
         });

@@ -1,90 +1,43 @@
 """
 Meme Detection Module for Adversarial Misinformation Defense Platform
 
-This module implements detection of adversarial meme-based misinformation,
-including caption analysis, template identification, and adversarial sample generation.
+This module implements detection of adversarial meme-based misinformation including
+template manipulation, caption deception, and coordinated campaign detection.
 """
 import numpy as np
-import cv2
 import torch
 import torch.nn as nn
+import cv2
 from PIL import Image, ImageDraw, ImageFont
 import pytesseract
 from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
-import re
+import logging
 import random
-from collections import Counter
-import requests
-from io import BytesIO
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
-import json
-
-
-class AdversarialMemeGAN(nn.Module):
-    """
-    Simple GAN for generating adversarial meme samples for training
-    """
-    def __init__(self, text_vocab_size: int = 10000, img_size: int = 64):
-        super(AdversarialMemeGAN, self).__init__()
-        
-        self.text_vocab_size = text_vocab_size
-        self.img_size = img_size
-        
-        # Generator (generates image with text overlay)
-        self.image_generator = nn.Sequential(
-            nn.Linear(100, 128),
-            nn.ReLU(),
-            nn.Linear(128, 256),
-            nn.BatchNorm1d(256),
-            nn.ReLU(),
-            nn.Linear(256, img_size * img_size * 3),
-            nn.Tanh()
-        )
-        
-        # Text generator
-        self.text_generator = nn.Sequential(
-            nn.Linear(100, 128),
-            nn.ReLU(),
-            nn.Linear(128, text_vocab_size),
-            nn.Softmax(dim=-1)
-        )
-        
-        # Discriminator (evaluates meme quality/misinformation potential)
-        self.discriminator = nn.Sequential(
-            nn.Linear(img_size * img_size * 3 + text_vocab_size, 512),
-            nn.LeakyReLU(0.2),
-            nn.Dropout(0.3),
-            nn.Linear(512, 256),
-            nn.LeakyReLU(0.2),
-            nn.Dropout(0.3),
-            nn.Linear(256, 1),
-            nn.Sigmoid()
-        )
-    
-    def forward(self, x):
-        img_generated = self.image_generator(x)
-        text_generated = self.text_generator(x)
-        combined = torch.cat([img_generated, text_generated], dim=1)
-        return self.discriminator(combined)
+import hashlib
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+import re
 
 
 class MemeDetector:
     """
-    Detection module for meme-based misinformation
+    Detection module for meme-based misinformation and adversarial samples
     """
     
     def __init__(self):
         """
-        Initialize the meme detector with default models
+        Initialize the meme detector
         """
-        # Initialize TF-IDF vectorizer for text analysis
-        self.tfidf = TfidfVectorizer(max_features=5000, ngram_range=(1, 2))
-        self.classifier = MultinomialNB()
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        
+        # Initialize detection models
+        self.scaler = StandardScaler()
+        self.anomaly_detector = IsolationForest(contamination=0.1, random_state=42)
         
         # Initialize adversarial GAN
-        self.adversarial_gan = AdversarialMemeGAN()
+        self.adversarial_gan = None
         
         # Known meme templates and patterns
         self.known_templates = {
@@ -129,12 +82,25 @@ class MemeDetector:
             r'(?!.*\b(?:research|study|evidence)\b).*\b(incredibl|unbelievabl|shocking|astounding)\b',
             r'\b(they don\'t want you to know|hidden truth|suppressed|covered up)\b',
             r'\b(banned|censored|removed|taken down|deleted)\b.*\b(video|image|post|tweet)\b',
-            r'\b(leak|leaked|leaking|inside source|anonymous source)\b',
+            r'\b(leak|leaked|leaking|inside source)\b',
             r'\b(big (pharma|tech|media|bank|oil|corporate))\b',
             r'\b(conspiracy|cover[-\s]?up|hoax|scam|fraud|lie(s)?)\b',
             r'\b(profit from|money from|benefit from)\b',
             r'\b(confirmed|verified|scientific proof|documented)\b(?!.*\b(?:peer[-\s]?reviewed|research|study)\b)'
         ]
+        
+        self.logger.info("MemeDetector initialized successfully")
+    
+    def load_image(self, image_path: Union[str, Path]) -> Optional[Image.Image]:
+        """
+        Load image from file path
+        """
+        try:
+            image = Image.open(str(image_path))
+            return image
+        except Exception as e:
+            self.logger.error(f"Error loading image {image_path}: {str(e)}")
+            return None
     
     def extract_text_from_image(self, image: Image.Image) -> str:
         """
@@ -150,7 +116,8 @@ class MemeDetector:
             # Extract text using pytesseract
             text = pytesseract.image_to_string(gray_image)
             return text.strip()
-        except:
+        except Exception as e:
+            self.logger.error(f"Error extracting text from image: {str(e)}")
             return ""
     
     def detect_known_templates(self, image: Image.Image) -> List[Dict[str, Any]]:
@@ -307,7 +274,8 @@ class MemeDetector:
             img_array = np.array(gray_image)
             edges = cv2.Canny(img_array, 50, 150)
             features['edge_density'] = np.sum(edges > 0) / (img_array.shape[0] * img_array.shape[1])
-        except:
+        except Exception as e:
+            self.logger.error(f"Error in edge analysis: {str(e)}")
             features['edge_density'] = 0
         
         # Text overlay analysis
@@ -336,7 +304,8 @@ class MemeDetector:
                     text_area += width * height
             
             return min(1.0, text_area / total_area) if total_area > 0 else 0
-        except:
+        except Exception as e:
+            self.logger.error(f"Error estimating text area ratio: {str(e)}")
             return 0.0  # Default to 0 if analysis fails
     
     def detect_misinfo(self, meme_paths: List[Union[str, Path]]) -> List[Dict[str, Any]]:
@@ -346,50 +315,94 @@ class MemeDetector:
         results = []
         
         for path in meme_paths:
-            # Open image
-            image = Image.open(str(path))
-            
-            # Extract text from image
-            extracted_text = self.extract_text_from_image(image)
-            
-            # Detect known templates
-            template_results = self.detect_known_templates(image)
-            
-            # Analyze caption
-            caption_analysis = self.analyze_caption(extracted_text)
-            
-            # Extract visual features
-            visual_features = self.extract_visual_features(image)
-            
-            # Calculate overall misinfo score
-            template_score = min(1.0, len(template_results) * 0.2)  # Templates alone aren't necessarily bad
-            caption_score = caption_analysis['overall_score']
-            visual_score = visual_features.get('text_area_ratio', 0)  # More text area might indicate manipulation
-            
-            # Combined score with weighted importance
-            combined_score = (
-                0.5 * caption_score +
-                0.3 * template_score +
-                0.2 * visual_score
-            )
-            
-            result = {
-                'meme_path': str(path),
-                'extracted_text': extracted_text,
-                'template_matches': template_results,
-                'caption_analysis': caption_analysis,
-                'visual_features': visual_features,
-                'misinfo_score': combined_score,
-                'confidence': min(1.0, combined_score + 0.2),  # Base confidence
-                'is_misinfo': combined_score > 0.4  # Threshold for flagging
-            }
-            
-            results.append(result)
-            
+            try:
+                # Open image
+                image = self.load_image(path)
+                if image is None:
+                    results.append({
+                        'meme_path': str(path),
+                        'misinfo_score': 0.5,
+                        'confidence': 0.0,
+                        'is_misinfo': False,
+                        'error': 'Could not load image'
+                    })
+                    continue
+                
+                # Extract text from image
+                extracted_text = self.extract_text_from_image(image)
+                
+                # Detect known templates
+                template_results = self.detect_known_templates(image)
+                
+                # Analyze caption
+                caption_analysis = self.analyze_caption(extracted_text)
+                
+                # Extract visual features
+                visual_features = self.extract_visual_features(image)
+                
+                # Calculate overall misinfo score
+                template_score = min(1.0, len(template_results) * 0.2)  # Templates alone aren't necessarily bad
+                caption_score = caption_analysis['overall_score']
+                visual_score = visual_features.get('text_area_ratio', 0)  # More text area might indicate manipulation
+                
+                # Combined score with weighted importance
+                combined_score = (
+                    0.5 * caption_score +
+                    0.3 * template_score +
+                    0.2 * visual_score
+                )
+                
+                # Calculate confidence
+                confidence = self._calculate_confidence(template_results, caption_analysis, visual_features)
+                
+                result = {
+                    'meme_path': str(path),
+                    'extracted_text': extracted_text,
+                    'template_matches': template_results,
+                    'caption_analysis': caption_analysis,
+                    'visual_features': visual_features,
+                    'misinfo_score': combined_score,
+                    'confidence': confidence,
+                    'is_misinfo': combined_score > 0.5  # Threshold for flagging
+                }
+                
+                results.append(result)
+                
+            except Exception as e:
+                self.logger.error(f"Error analyzing meme {path}: {str(e)}")
+                results.append({
+                    'meme_path': str(path),
+                    'misinfo_score': 0.5,
+                    'confidence': 0.0,
+                    'is_misinfo': False,
+                    'error': str(e)
+                })
+        
+        self.logger.info(f"Completed meme analysis with {len(results)} results")
         return results
     
+    def _calculate_confidence(self, template_results: List[Dict[str, Any]], 
+                             caption_analysis: Dict[str, Any], 
+                             visual_features: Dict[str, Any]) -> float:
+        """
+        Calculate confidence based on analysis results
+        """
+        try:
+            # Calculate confidence from different factors
+            template_confidence = len(template_results) * 0.1  # Each template match adds 0.1 confidence
+            caption_confidence = caption_analysis.get('overall_score', 0.0) * 0.8  # Caption score heavily weighted
+            visual_confidence = visual_features.get('text_area_ratio', 0.0) * 0.1  # Visual features lightly weighted
+            
+            # Combine confidences
+            total_confidence = min(1.0, template_confidence + caption_confidence + visual_confidence)
+            
+            return float(total_confidence)
+        except Exception as e:
+            self.logger.error(f"Error calculating confidence: {str(e)}")
+            return 0.5  # Default confidence
+    
     def generate_adversarial_samples(self, base_memes: List[Union[str, Path]], 
-                                   num_samples: int = 5) -> List[Image.Image]:
+                                   num_samples: int = 5) -> List[str]:
         """
         Generate adversarial meme samples for training improvement
         """
@@ -397,161 +410,220 @@ class MemeDetector:
         
         for _ in range(num_samples):
             # Select a random base meme
-            base_path = random.choice(base_memes)
-            base_image = Image.open(str(base_path))
-            
-            # Create adversarial variants
-            adversarial_variants = [
-                self._add_fake_text_overlay(base_image),
-                self._modify_colors(base_image),
-                self._add_watermark(base_image),
-                self._apply_blur_effect(base_image),
-                self._add_border(base_image)
-            ]
-            
-            # Randomly select one variant
-            selected_variant = random.choice(adversarial_variants)
-            adversarial_memes.append(selected_variant)
+            if base_memes:
+                base_path = random.choice(base_memes)
+                
+                # Create adversarial variants
+                adversarial_variants = [
+                    self._add_fake_text_overlay(base_path),
+                    self._modify_colors(base_path),
+                    self._add_watermark(base_path),
+                    self._apply_blur_effect(base_path),
+                    self._add_border(base_path)
+                ]
+                
+                # Randomly select one variant
+                selected_variant = random.choice(adversarial_variants)
+                adversarial_memes.append(selected_variant)
         
+        self.logger.info(f"Generated {len(adversarial_memes)} adversarial meme samples")
         return adversarial_memes
     
-    def _add_fake_text_overlay(self, image: Image.Image) -> Image.Image:
-        """Add fake text overlay to create adversarial sample"""
-        # Create a copy to modify
-        img_copy = image.copy()
-        draw = ImageDraw.Draw(img_copy)
-        
-        # Try to get a font (fallback to default if needed)
-        try:
-            font = ImageFont.truetype("arial.ttf", 24)
-        except:
-            try:
-                font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 24)
-            except:
-                font = ImageFont.load_default()
-        
-        # Add random text
-        fake_texts = [
-            "SHOCKING TRUTH REVEALED!",
-            "THEY DON'T WANT YOU TO KNOW",
-            "BANNED BY BIG TECH",
-            "INSIDE SOURCE CONFIRMS",
-            "UNBELIEVABLE LEAK"
-        ]
-        
-        text = random.choice(fake_texts)
-        width, height = img_copy.size
-        text_width, text_height = draw.textsize(text, font=font) if hasattr(draw, 'textsize') else (len(text)*12, 24)
-        
-        # Position text randomly but visibly
-        x = random.randint(10, max(10, width - text_width - 10))
-        y = random.randint(10, max(10, height - text_height - 10))
-        
-        # Draw text with outline for visibility
-        draw.text((x-1, y-1), text, fill="black", font=font)
-        draw.text((x+1, y-1), text, fill="black", font=font)
-        draw.text((x-1, y+1), text, fill="black", font=font)
-        draw.text((x+1, y+1), text, fill="black", font=font)
-        draw.text((x, y), text, fill="white", font=font)
-        
-        return img_copy
-    
-    def _modify_colors(self, image: Image.Image) -> Image.Image:
-        """Modify colors to create adversarial sample"""
-        # Apply random color adjustments
-        img_array = np.array(image)
-        
-        # Random color shifts
-        r_shift = random.randint(-20, 20)
-        g_shift = random.randint(-20, 20)
-        b_shift = random.randint(-20, 20)
-        
-        if len(img_array.shape) == 3 and img_array.shape[2] >= 3:
-            img_array[:, :, 0] = np.clip(img_array[:, :, 0].astype(np.int16) + r_shift, 0, 255)
-            img_array[:, :, 1] = np.clip(img_array[:, :, 1].astype(np.int16) + g_shift, 0, 255)
-            img_array[:, :, 2] = np.clip(img_array[:, :, 2].astype(np.int16) + b_shift, 0, 255)
-        
-        return Image.fromarray(img_array.astype(np.uint8))
-    
-    def _add_watermark(self, image: Image.Image) -> Image.Image:
-        """Add watermark to create adversarial sample"""
-        img_copy = image.copy()
-        draw = ImageDraw.Draw(img_copy)
-        
-        # Try to get a font
-        try:
-            font = ImageFont.truetype("arial.ttf", 16)
-        except:
-            try:
-                font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 16)
-            except:
-                font = ImageFont.load_default()
-        
-        # Add watermark text
-        watermark = random.choice(["FOR ENTERTAINMENT", "NOT REAL NEWS", "SATIRE"])
-        width, height = img_copy.size
-        text_width, text_height = draw.textsize(watermark, font=font) if hasattr(draw, 'textsize') else (len(watermark)*8, 16)
-        
-        # Position in corner
-        x = width - text_width - 10
-        y = height - text_height - 10
-        
-        # Draw semi-transparent text
-        draw.text((x, y), watermark, fill=(255, 255, 255, 128), font=font)
-        
-        return img_copy
-    
-    def _apply_blur_effect(self, image: Image.Image) -> Image.Image:
-        """Apply blur effect to create adversarial sample"""
-        # Convert to numpy array
-        img_array = np.array(image)
-        
-        # Apply Gaussian blur with random kernel size
-        kernel_size = random.choice([3, 5, 7])
-        if kernel_size % 2 == 0:
-            kernel_size += 1  # Ensure odd kernel size
-        
-        blurred = cv2.GaussianBlur(img_array, (kernel_size, kernel_size), 0)
-        return Image.fromarray(blurred)
-    
-    def _add_border(self, image: Image.Image) -> Image.Image:
-        """Add border to create adversarial sample"""
-        # Add a colored border
-        border_color = (
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255)
-        )
-        
-        border_width = random.randint(2, 10)
-        return ImageOps.expand(image, border=border_width, fill=border_color)
-    
-    def update_model(self, training_memes: List[Union[str, Path]], labels: List[int]):
+    def _add_fake_text_overlay(self, image_path: Union[str, Path]) -> str:
         """
-        Update the model with new training data
+        Add fake text overlay to create adversarial sample
         """
-        # Extract text from all training memes
-        training_texts = []
-        for path in training_memes:
-            image = Image.open(str(path))
-            text = self.extract_text_from_image(image)
-            training_texts.append(text)
-        
-        # Fit classifier on training data
         try:
-            X = self.tfidf.fit_transform(training_texts)
-            self.classifier.fit(X, labels)
-        except:
-            # If fitting fails, continue without updating
-            pass
-        
-        # Generate adversarial samples and continue training
-        adversarial_memes = self.generate_adversarial_samples(training_memes, num_samples=3)
-        adversarial_labels = [1] * len(adversarial_memes)  # All adversarial memes are misinfo
-        
-        # In a real system, you would retrain the models here
-        print(f"Updated model with {len(training_memes)} training memes and {len(adversarial_memes)} adversarial samples")
+            # Load image
+            image = Image.open(str(image_path))
+            
+            # Create a copy to modify
+            img_copy = image.copy()
+            draw = ImageDraw.Draw(img_copy)
+            
+            # Try to get a font (fallback to default if needed)
+            try:
+                font = ImageFont.truetype("arial.ttf", 24)
+            except:
+                try:
+                    font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 24)
+                except:
+                    font = ImageFont.load_default()
+            
+            # Add random text
+            fake_texts = [
+                "SHOCKING TRUTH REVEALED!",
+                "THEY DON'T WANT YOU TO KNOW",
+                "BANNED BY BIG TECH",
+                "INSIDE SOURCE CONFIRMS",
+                "UNBELIEVABLE LEAK"
+            ]
+            
+            text = random.choice(fake_texts)
+            width, height = img_copy.size
+            text_width, text_height = draw.textsize(text, font=font) if hasattr(draw, 'textsize') else (len(text)*12, 24)
+            
+            # Position text randomly but visibly
+            x = random.randint(10, max(10, width - text_width - 10))
+            y = random.randint(10, max(10, height - text_height - 10))
+            
+            # Draw text with outline for visibility
+            draw.text((x-1, y-1), text, fill="black", font=font)
+            draw.text((x+1, y-1), text, fill="black", font=font)
+            draw.text((x-1, y+1), text, fill="black", font=font)
+            draw.text((x+1, y+1), text, fill="black", font=font)
+            draw.text((x, y), text, fill="white", font=font)
+            
+            # Save to temporary file
+            output_path = f"/tmp/adversarial_text_{hashlib.md5(str(image_path).encode()).hexdigest()[:8]}.jpg"
+            img_copy.save(output_path)
+            return output_path
+            
+        except Exception as e:
+            self.logger.error(f"Error adding fake text overlay: {str(e)}")
+            return str(image_path)  # Return original if modification fails
+    
+    def _modify_colors(self, image_path: Union[str, Path]) -> str:
+        """
+        Modify colors to create adversarial sample
+        """
+        try:
+            # Load image
+            image = Image.open(str(image_path))
+            
+            # Apply random color adjustments
+            img_array = np.array(image)
+            
+            # Random color shifts
+            r_shift = random.randint(-20, 20)
+            g_shift = random.randint(-20, 20)
+            b_shift = random.randint(-20, 20)
+            
+            if len(img_array.shape) == 3 and img_array.shape[2] >= 3:
+                img_array[:, :, 0] = np.clip(img_array[:, :, 0].astype(np.int16) + r_shift, 0, 255)
+                img_array[:, :, 1] = np.clip(img_array[:, :, 1].astype(np.int16) + g_shift, 0, 255)
+                img_array[:, :, 2] = np.clip(img_array[:, :, 2].astype(np.int16) + b_shift, 0, 255)
+            
+            # Save modified image
+            modified_image = Image.fromarray(img_array.astype(np.uint8))
+            output_path = f"/tmp/adversarial_color_{hashlib.md5(str(image_path).encode()).hexdigest()[:8]}.jpg"
+            modified_image.save(output_path)
+            return output_path
+            
+        except Exception as e:
+            self.logger.error(f"Error modifying colors: {str(e)}")
+            return str(image_path)  # Return original if modification fails
+    
+    def _add_watermark(self, image_path: Union[str, Path]) -> str:
+        """
+        Add watermark to create adversarial sample
+        """
+        try:
+            # Load image
+            image = Image.open(str(image_path))
+            
+            img_copy = image.copy()
+            draw = ImageDraw.Draw(img_copy)
+            
+            # Try to get a font
+            try:
+                font = ImageFont.truetype("arial.ttf", 16)
+            except:
+                try:
+                    font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 16)
+                except:
+                    font = ImageFont.load_default()
+            
+            # Add watermark text
+            watermark = random.choice(["FOR ENTERTAINMENT", "NOT REAL NEWS", "SATIRE"])
+            width, height = img_copy.size
+            text_width, text_height = draw.textsize(watermark, font=font) if hasattr(draw, 'textsize') else (len(watermark)*8, 16)
+            
+            # Position in corner
+            x = width - text_width - 10
+            y = height - text_height - 10
+            
+            # Draw semi-transparent text
+            draw.text((x, y), watermark, fill=(255, 255, 255, 128), font=font)
+            
+            # Save watermarked image
+            output_path = f"/tmp/adversarial_watermark_{hashlib.md5(str(image_path).encode()).hexdigest()[:8]}.jpg"
+            img_copy.save(output_path)
+            return output_path
+            
+        except Exception as e:
+            self.logger.error(f"Error adding watermark: {str(e)}")
+            return str(image_path)  # Return original if modification fails
+    
+    def _apply_blur_effect(self, image_path: Union[str, Path]) -> str:
+        """
+        Apply blur effect to create adversarial sample
+        """
+        try:
+            # Load image
+            image = Image.open(str(image_path))
+            
+            # Convert to numpy array
+            img_array = np.array(image)
+            
+            # Apply Gaussian blur with random kernel size
+            kernel_size = random.choice([3, 5, 7])
+            if kernel_size % 2 == 0:
+                kernel_size += 1  # Ensure odd kernel size
+            
+            blurred = cv2.GaussianBlur(img_array, (kernel_size, kernel_size), 0)
+            
+            # Save blurred image
+            blurred_image = Image.fromarray(blurred)
+            output_path = f"/tmp/adversarial_blur_{hashlib.md5(str(image_path).encode()).hexdigest()[:8]}.jpg"
+            blurred_image.save(output_path)
+            return output_path
+            
+        except Exception as e:
+            self.logger.error(f"Error applying blur effect: {str(e)}")
+            return str(image_path)  # Return original if modification fails
+    
+    def _add_border(self, image_path: Union[str, Path]) -> str:
+        """
+        Add border to create adversarial sample
+        """
+        try:
+            # Load image
+            image = Image.open(str(image_path))
+            
+            # Add a colored border
+            border_color = (
+                random.randint(0, 255),
+                random.randint(0, 255),
+                random.randint(0, 255)
+            )
+            
+            border_width = random.randint(2, 10)
+            bordered_image = ImageOps.expand(image, border=border_width, fill=border_color)
+            
+            # Save bordered image
+            output_path = f"/tmp/adversarial_border_{hashlib.md5(str(image_path).encode()).hexdigest()[:8]}.jpg"
+            bordered_image.save(output_path)
+            return output_path
+            
+        except Exception as e:
+            self.logger.error(f"Error adding border: {str(e)}")
+            return str(image_path)  # Return original if modification fails
 
 
 # Import ImageOps for the expand function
 import PIL.ImageOps as ImageOps
+
+
+# Convenience function for easy usage
+def create_meme_detector() -> MemeDetector:
+    """
+    Factory function to create and initialize the meme detector
+    """
+    return MemeDetector()
+
+
+__all__ = [
+    'MemeDetector',
+    'create_meme_detector'
+]

@@ -23,6 +23,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken"; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from "express"; // Import types for middleware
+import { validateInput, commonValidations } from "./middleware/input-validation.js";
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 
@@ -32,7 +33,31 @@ export const createApp = async () => {
 
   const app = express();
   const logger = pino();
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Adjust as needed
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    noSniff: true,
+    frameguard: { action: 'deny' },
+    xssFilter: true,
+    referrerPolicy: { policy: 'same-origin' },
+  }));
+  app.disable('x-powered-by');
   app.use(
     cors({
       origin: process.env.CORS_ORIGIN?.split(",") ?? ["http://localhost:3000"],
@@ -61,12 +86,14 @@ export const createApp = async () => {
     }),
   );
 
-  app.get("/search/evidence", async (req, res) => {
+  app.get("/search/evidence", 
+    validateInput([
+      query('q').isString().trim().notEmpty().withMessage('Query parameter \'q\' is required'),
+      query('skip').optional().isInt({ min: 0 }).withMessage('Skip must be a non-negative integer'),
+      query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be an integer between 1 and 100'),
+    ]),
+    async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
-
-    if (!q) {
-      return res.status(400).send({ error: "Query parameter 'q' is required" });
-    }
 
     const driver = getNeo4jDriver();
     const session = driver.session();
@@ -196,6 +223,15 @@ export const createApp = async () => {
   startTrustWorker();
   // Start retention worker if enabled
   startRetentionWorker();
+
+  // Centralized error handling middleware
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    logger.error(`Unhandled error: ${err.message}`, { stack: err.stack, path: req.path });
+    if (res.headersSent) {
+      return next(err);
+    }
+    res.status(500).send({ error: 'Internal Server Error' });
+  });
 
   return app;
 };

@@ -1,4 +1,4 @@
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 export interface QueryResult<T = any> {
   rows: T[];
@@ -10,5 +10,9 @@ export class DatabaseService {
       logger.debug('DatabaseService query (stub)', { sql, params });
     }
     return { rows: [] as T[] };
+  }
+
+  getConnectionConfig(): Record<string, any> {
+    return {};
   }
 }

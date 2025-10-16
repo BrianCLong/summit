@@ -1,18 +1,17 @@
-## Summary
+## 🧠 Copilot Review Tasks
+- [ ] `/explain-changes`
+- [ ] `/generate-tests`
+- [ ] `/risk-callouts`
+- [ ] `/summarize-diff`
 
-## Type
-
-- [ ] Feature - [ ] Bug - [ ] Chore - [ ] Security - [ ] Docs
-
-## Checklist
-
-- [ ] Conventional Commit title
-- [ ] `npm run lint:tests` passes (no `.only`, no `console.error` in tests)
-- [ ] Linked issue(s): #
+## ✅ Checklist
+- [ ] Code compiles & passes CI
 - [ ] Tests added/updated
-- [ ] Telemetry added (logs/metrics/traces)
-- [ ] Docs updated
-- [ ] No secrets/keys in diff
-- [ ] Feature flag checklist completed (if applicable, see `docs/flags.md`)
+- [ ] Documentation updated
+- [ ] OPA policies verified
+- [ ] Grafana dashboards updated if applicable
 
-## Screenshots/Notes
+---
+
+**Context**
+Describe what this change achieves and link related issues or ADRs.

@@ -1,13 +1,23 @@
 // Maestro Conductor v24.3.0 - JDBC Connector for PostgreSQL/MySQL
 // Epic E15: New Connectors - Database connectivity for external sources
 
-import { trace, Span } from '@opentelemetry/api';
+// No-op tracer shim to avoid OTEL dependency
 import { Pool, PoolClient, types as pgTypes } from 'pg';
 import mysql from 'mysql2/promise';
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { EventEmitter } from 'events';
 
-const tracer = trace.getTracer('jdbc-connector', '24.3.0');
+const tracer = {
+  startActiveSpan: async (_name: string, fn: (span: any) => Promise<any> | any) => {
+    const span = {
+      setAttributes: (_a?: any) => {},
+      recordException: (_e?: any) => {},
+      setStatus: (_s?: any) => {},
+      end: () => {},
+    };
+    return await fn(span);
+  },
+};
 
 // Fix PostgreSQL parsing for large integers
 pgTypes.setTypeParser(20, (val) => parseInt(val, 10)); // BIGINT
@@ -123,8 +133,8 @@ export class JDBCConnector extends EventEmitter {
   }
 
   async connect(): Promise<void> {
-    return tracer.startActiveSpan('jdbc.connect', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('jdbc.connect', async (span: any) => {
+      span.setAttributes?.({
         'tenant_id': this.tenantId,
         'database_type': this.config.type,
         'host': this.config.host,
@@ -155,12 +165,12 @@ export class JDBCConnector extends EventEmitter {
         });
 
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         this.emit('error', { tenantId: this.tenantId, error });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
@@ -218,8 +228,8 @@ export class JDBCConnector extends EventEmitter {
   }
 
   async query(sql: string, params: any[] = [], options: QueryOptions = {}): Promise<QueryResult> {
-    return tracer.startActiveSpan('jdbc.query', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('jdbc.query', async (span: any) => {
+      span.setAttributes?.({
         'tenant_id': this.tenantId,
         'database_type': this.config.type,
         'sql_length': sql.length,
@@ -278,8 +288,8 @@ export class JDBCConnector extends EventEmitter {
         return result;
 
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         jdbcOperations.inc({ 
           tenant_id: this.tenantId, 
           database_type: this.config.type, 
@@ -288,7 +298,7 @@ export class JDBCConnector extends EventEmitter {
         });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
@@ -359,8 +369,8 @@ export class JDBCConnector extends EventEmitter {
   }
 
   async batchExecute(sqls: string[], paramSets: any[][], options: QueryOptions = {}): Promise<BatchResult> {
-    return tracer.startActiveSpan('jdbc.batch_execute', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('jdbc.batch_execute', async (span: any) => {
+      span.setAttributes?.({
         'tenant_id': this.tenantId,
         'database_type': this.config.type,
         'batch_size': sqls.length
@@ -425,8 +435,8 @@ export class JDBCConnector extends EventEmitter {
         return result;
 
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         jdbcOperations.inc({ 
           tenant_id: this.tenantId, 
           database_type: this.config.type, 
@@ -435,14 +445,14 @@ export class JDBCConnector extends EventEmitter {
         });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
 
   async getSchemaInfo(schemaName?: string): Promise<SchemaInfo> {
-    return tracer.startActiveSpan('jdbc.get_schema_info', async (span: Span) => {
-      span.setAttributes({
+    return tracer.startActiveSpan('jdbc.get_schema_info', async (span: any) => {
+      span.setAttributes?.({
         'tenant_id': this.tenantId,
         'database_type': this.config.type,
         'schema_name': schemaName || 'default'
@@ -455,11 +465,11 @@ export class JDBCConnector extends EventEmitter {
           return await this.getMySQLSchemaInfo(schemaName || this.config.database);
         }
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
