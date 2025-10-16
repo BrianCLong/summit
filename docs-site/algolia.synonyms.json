@@ -1,4 +1,13 @@
 [
-  { "objectID": "graphrag", "type": "altCorrection1", "word": "GraphRAG", "corrections": ["graph rag","graph-rag"] },
-  { "objectID": "zip", "type": "synonym", "synonyms": ["zip export","zip bundle","certified zip"] }
+  {
+    "objectID": "graphrag",
+    "type": "altCorrection1",
+    "word": "GraphRAG",
+    "corrections": ["graph rag", "graph-rag"]
+  },
+  {
+    "objectID": "zip",
+    "type": "synonym",
+    "synonyms": ["zip export", "zip bundle", "certified zip"]
+  }
 ]

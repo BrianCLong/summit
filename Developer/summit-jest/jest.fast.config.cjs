@@ -6,8 +6,8 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
     'ts-jest': {
-      useESM: true
-    }
+      useESM: true,
+    },
   },
   testEnvironment: 'node',
   roots: ['<rootDir>/server', '<rootDir>/client', '<rootDir>/packages'],
@@ -17,12 +17,27 @@ module.exports = {
     '<rootDir>/archive_20250926/',
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
-    '/node_modules/', '/build/', '/coverage/', '/.next/',
-    '/infra/', '/ops/', '/scripts/', '/.garage/', '/.disabled/',
-    '/intelgraph/', '/vpc/', '/docs/', '/examples/', '/fixtures/',
-    '/conductor-ui/', '/playwright/', '/e2e/',
+    '/node_modules/',
+    '/build/',
+    '/coverage/',
+    '/.next/',
+    '/infra/',
+    '/ops/',
+    '/scripts/',
+    '/.garage/',
+    '/.disabled/',
+    '/intelgraph/',
+    '/vpc/',
+    '/docs/',
+    '/examples/',
+    '/fixtures/',
+    '/conductor-ui/',
+    '/playwright/',
+    '/e2e/',
     // '/services/', '/server/src/maestro/', '/tests/federal/', '/server/src/tests/cluster/',
-    '/server/src/maestro/', '/tests/federal/', '/server/src/tests/cluster/',
+    '/server/src/maestro/',
+    '/tests/federal/',
+    '/server/src/tests/cluster/',
   ],
   testPathIgnorePatterns: [
     '<rootDir>/conductor-ui/',
@@ -41,7 +56,7 @@ module.exports = {
     '/archive/',
     '/archive_20250926/',
     '/salvage/',
-    '/pull/'
+    '/pull/',
   ],
   collectCoverageFrom: [
     '**/*.{ts,tsx,js,jsx}',
@@ -53,11 +68,11 @@ module.exports = {
     '!**/archive/**',
     '!**/archive_20250926/**',
     '!**/salvage/**',
-    '!**/pull/**'
+    '!**/pull/**',
   ],
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
-    '**/?(*.)+(spec|test).{ts,tsx,js,jsx}'
+    '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
   ],
   moduleNameMapper: {
     '^@server/(.*)$': '<rootDir>/server/src/$1',
@@ -70,7 +85,12 @@ module.exports = {
     '^node-fetch$': '<rootDir>/__mocks__/node-fetch.ts',
     '^neo4j-driver$': '<rootDir>/__mocks__/neo4j-driver.ts',
   },
-  moduleDirectories: ['node_modules', '<rootDir>', '<rootDir>/server/src', '<rootDir>/src'],
+  moduleDirectories: [
+    'node_modules',
+    '<rootDir>',
+    '<rootDir>/server/src',
+    '<rootDir>/src',
+  ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
 
   // Keep memory bounded as we expand coverage

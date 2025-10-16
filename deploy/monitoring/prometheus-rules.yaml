@@ -8,253 +8,253 @@ metadata:
     component: monitoring
 spec:
   groups:
-  - name: intelgraph.slo.availability
-    interval: 30s
-    rules:
-    # API Availability SLI
-    - record: intelgraph:sli:api_availability_1m
-      expr: |
-        (
-          sum(rate(http_requests_total{job="intelgraph-api",code!~"5.."}[1m])) or vector(0)
-        ) / (
-          sum(rate(http_requests_total{job="intelgraph-api"}[1m])) or vector(1)
-        )
+    - name: intelgraph.slo.availability
+      interval: 30s
+      rules:
+        # API Availability SLI
+        - record: intelgraph:sli:api_availability_1m
+          expr: |
+            (
+              sum(rate(http_requests_total{job="intelgraph-api",code!~"5.."}[1m])) or vector(0)
+            ) / (
+              sum(rate(http_requests_total{job="intelgraph-api"}[1m])) or vector(1)
+            )
 
-    - record: intelgraph:sli:api_availability_5m
-      expr: |
-        (
-          sum(rate(http_requests_total{job="intelgraph-api",code!~"5.."}[5m])) or vector(0)
-        ) / (
-          sum(rate(http_requests_total{job="intelgraph-api"}[5m])) or vector(1)
-        )
+        - record: intelgraph:sli:api_availability_5m
+          expr: |
+            (
+              sum(rate(http_requests_total{job="intelgraph-api",code!~"5.."}[5m])) or vector(0)
+            ) / (
+              sum(rate(http_requests_total{job="intelgraph-api"}[5m])) or vector(1)
+            )
 
-    # Graph Query Availability SLI
-    - record: intelgraph:sli:graph_query_availability_1m
-      expr: |
-        (
-          sum(rate(cypher_query_executions_total{status="completed"}[1m])) or vector(0)
-        ) / (
-          sum(rate(cypher_query_executions_total[1m])) or vector(1)
-        )
+        # Graph Query Availability SLI
+        - record: intelgraph:sli:graph_query_availability_1m
+          expr: |
+            (
+              sum(rate(cypher_query_executions_total{status="completed"}[1m])) or vector(0)
+            ) / (
+              sum(rate(cypher_query_executions_total[1m])) or vector(1)
+            )
 
-    # NL→Cypher Validity SLI
-    - record: intelgraph:sli:nlq_validity_1m
-      expr: |
-        (
-          sum(rate(nlq_validity_total{valid="true"}[1m])) or vector(0)
-        ) / (
-          sum(rate(nlq_validity_total[1m])) or vector(1)
-        )
+        # NL→Cypher Validity SLI
+        - record: intelgraph:sli:nlq_validity_1m
+          expr: |
+            (
+              sum(rate(nlq_validity_total{valid="true"}[1m])) or vector(0)
+            ) / (
+              sum(rate(nlq_validity_total[1m])) or vector(1)
+            )
 
-  - name: intelgraph.slo.latency
-    interval: 30s
-    rules:
-    # API Latency SLI (95th percentile < 1.5s)
-    - record: intelgraph:sli:api_latency_p95_1m
-      expr: |
-        histogram_quantile(0.95,
-          sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[1m])) by (le)
-        )
+    - name: intelgraph.slo.latency
+      interval: 30s
+      rules:
+        # API Latency SLI (95th percentile < 1.5s)
+        - record: intelgraph:sli:api_latency_p95_1m
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[1m])) by (le)
+            )
 
-    - record: intelgraph:sli:api_latency_p99_1m
-      expr: |
-        histogram_quantile(0.99,
-          sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[1m])) by (le)
-        )
+        - record: intelgraph:sli:api_latency_p99_1m
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[1m])) by (le)
+            )
 
-    # Graph Query Latency SLI
-    - record: intelgraph:sli:graph_query_latency_p95_1m
-      expr: |
-        histogram_quantile(0.95,
-          sum(rate(cypher_query_duration_ms_bucket[1m])) by (le)
-        ) / 1000  # Convert to seconds
+        # Graph Query Latency SLI
+        - record: intelgraph:sli:graph_query_latency_p95_1m
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(cypher_query_duration_ms_bucket[1m])) by (le)
+            ) / 1000  # Convert to seconds
 
-    # NL→Cypher Parse Time SLI
-    - record: intelgraph:sli:nlq_parse_latency_p95_1m
-      expr: |
-        histogram_quantile(0.95,
-          sum(rate(nlq_parse_time_ms_bucket[1m])) by (le)
-        ) / 1000  # Convert to seconds
+        # NL→Cypher Parse Time SLI
+        - record: intelgraph:sli:nlq_parse_latency_p95_1m
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(nlq_parse_time_ms_bucket[1m])) by (le)
+            ) / 1000  # Convert to seconds
 
-  - name: intelgraph.slo.burn_rate
-    interval: 30s
-    rules:
-    # Multi-window burn rate for availability SLO (99.9%)
-    # Error budget: 0.1% = 0.001
-    # Page on 2% error budget burn in 1 hour (14.4x normal rate)
-    - record: intelgraph:burn_rate:availability_1h
-      expr: |
-        (1 - intelgraph:sli:api_availability_1m) / 0.001
+    - name: intelgraph.slo.burn_rate
+      interval: 30s
+      rules:
+        # Multi-window burn rate for availability SLO (99.9%)
+        # Error budget: 0.1% = 0.001
+        # Page on 2% error budget burn in 1 hour (14.4x normal rate)
+        - record: intelgraph:burn_rate:availability_1h
+          expr: |
+            (1 - intelgraph:sli:api_availability_1m) / 0.001
 
-    - record: intelgraph:burn_rate:availability_6h
-      expr: |
-        (1 - intelgraph:sli:api_availability_5m) / 0.001
+        - record: intelgraph:burn_rate:availability_6h
+          expr: |
+            (1 - intelgraph:sli:api_availability_5m) / 0.001
 
-    # Latency SLO burn rate (95th percentile < 1.5s)
-    # If > 1.5s, we're burning error budget
-    - record: intelgraph:burn_rate:latency_1h
-      expr: |
-        (intelgraph:sli:api_latency_p95_1m > 1.5) *
-        (intelgraph:sli:api_latency_p95_1m / 1.5 - 1) / 0.05  # 5% error budget
+        # Latency SLO burn rate (95th percentile < 1.5s)
+        # If > 1.5s, we're burning error budget
+        - record: intelgraph:burn_rate:latency_1h
+          expr: |
+            (intelgraph:sli:api_latency_p95_1m > 1.5) *
+            (intelgraph:sli:api_latency_p95_1m / 1.5 - 1) / 0.05  # 5% error budget
 
-  - name: intelgraph.slo.cost_tracking
-    interval: 30s
-    rules:
-    # Cost per operation tracking
-    - record: intelgraph:cost:graphql_requests_per_million_5m
-      expr: |
-        sum(rate(query_budget_consumed_total{operation="graphql"}[5m])) * 60 * 1000000
+    - name: intelgraph.slo.cost_tracking
+      interval: 30s
+      rules:
+        # Cost per operation tracking
+        - record: intelgraph:cost:graphql_requests_per_million_5m
+          expr: |
+            sum(rate(query_budget_consumed_total{operation="graphql"}[5m])) * 60 * 1000000
 
-    - record: intelgraph:cost:nlq_requests_per_million_5m
-      expr: |
-        sum(rate(query_budget_consumed_total{operation="nlq"}[5m])) * 60 * 1000000
+        - record: intelgraph:cost:nlq_requests_per_million_5m
+          expr: |
+            sum(rate(query_budget_consumed_total{operation="nlq"}[5m])) * 60 * 1000000
 
-    # Budget utilization by tenant
-    - record: intelgraph:cost:budget_utilization_by_tenant
-      expr: |
-        cost_budget_utilization_ratio
+        # Budget utilization by tenant
+        - record: intelgraph:cost:budget_utilization_by_tenant
+          expr: |
+            cost_budget_utilization_ratio
 
-  - name: intelgraph.alerts
-    interval: 30s
-    rules:
-    # SLO Violation Alerts
-    - alert: IntelGraphAPIAvailabilitySLOViolation
-      expr: |
-        (
-          intelgraph:burn_rate:availability_1h > 14
-          and
-          intelgraph:burn_rate:availability_6h > 6
-        )
-        or
-        (
-          intelgraph:burn_rate:availability_1h > 7
-          and
-          intelgraph:burn_rate:availability_6h > 3
-        )
-      for: 2m
-      labels:
-        severity: page
-        service: intelgraph-api
-        slo: availability
-      annotations:
-        summary: "IntelGraph API availability SLO violation"
-        description: "API availability is {{ $value | humanizePercentage }} which violates the 99.9% SLO"
-        runbook_url: "https://docs.intelgraph.io/runbooks/availability-slo"
+    - name: intelgraph.alerts
+      interval: 30s
+      rules:
+        # SLO Violation Alerts
+        - alert: IntelGraphAPIAvailabilitySLOViolation
+          expr: |
+            (
+              intelgraph:burn_rate:availability_1h > 14
+              and
+              intelgraph:burn_rate:availability_6h > 6
+            )
+            or
+            (
+              intelgraph:burn_rate:availability_1h > 7
+              and
+              intelgraph:burn_rate:availability_6h > 3
+            )
+          for: 2m
+          labels:
+            severity: page
+            service: intelgraph-api
+            slo: availability
+          annotations:
+            summary: 'IntelGraph API availability SLO violation'
+            description: 'API availability is {{ $value | humanizePercentage }} which violates the 99.9% SLO'
+            runbook_url: 'https://docs.intelgraph.io/runbooks/availability-slo'
 
-    - alert: IntelGraphAPILatencySLOViolation
-      expr: |
-        intelgraph:sli:api_latency_p95_1m > 1.5
-      for: 5m
-      labels:
-        severity: page
-        service: intelgraph-api
-        slo: latency
-      annotations:
-        summary: "IntelGraph API latency SLO violation"
-        description: "API p95 latency is {{ $value }}s which violates the 1.5s SLO"
+        - alert: IntelGraphAPILatencySLOViolation
+          expr: |
+            intelgraph:sli:api_latency_p95_1m > 1.5
+          for: 5m
+          labels:
+            severity: page
+            service: intelgraph-api
+            slo: latency
+          annotations:
+            summary: 'IntelGraph API latency SLO violation'
+            description: 'API p95 latency is {{ $value }}s which violates the 1.5s SLO'
 
-    - alert: IntelGraphGraphQueryLatencySLOViolation
-      expr: |
-        intelgraph:sli:graph_query_latency_p95_1m > 1.2
-      for: 5m
-      labels:
-        severity: warning
-        service: intelgraph-graph
-        slo: latency
-      annotations:
-        summary: "IntelGraph graph query latency SLO violation"
-        description: "Graph query p95 latency is {{ $value }}s which exceeds the 1.2s threshold"
+        - alert: IntelGraphGraphQueryLatencySLOViolation
+          expr: |
+            intelgraph:sli:graph_query_latency_p95_1m > 1.2
+          for: 5m
+          labels:
+            severity: warning
+            service: intelgraph-graph
+            slo: latency
+          annotations:
+            summary: 'IntelGraph graph query latency SLO violation'
+            description: 'Graph query p95 latency is {{ $value }}s which exceeds the 1.2s threshold'
 
-    # Cost Budget Alerts
-    - alert: IntelGraphCostBudgetWarning
-      expr: |
-        intelgraph:cost:budget_utilization_by_tenant > 0.8
-      for: 5m
-      labels:
-        severity: warning
-        service: intelgraph-cost
-      annotations:
-        summary: "IntelGraph cost budget utilization high"
-        description: "Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget"
+        # Cost Budget Alerts
+        - alert: IntelGraphCostBudgetWarning
+          expr: |
+            intelgraph:cost:budget_utilization_by_tenant > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            service: intelgraph-cost
+          annotations:
+            summary: 'IntelGraph cost budget utilization high'
+            description: 'Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget'
 
-    - alert: IntelGraphCostBudgetCritical
-      expr: |
-        intelgraph:cost:budget_utilization_by_tenant > 0.95
-      for: 1m
-      labels:
-        severity: critical
-        service: intelgraph-cost
-      annotations:
-        summary: "IntelGraph cost budget utilization critical"
-        description: "Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget"
+        - alert: IntelGraphCostBudgetCritical
+          expr: |
+            intelgraph:cost:budget_utilization_by_tenant > 0.95
+          for: 1m
+          labels:
+            severity: critical
+            service: intelgraph-cost
+          annotations:
+            summary: 'IntelGraph cost budget utilization critical'
+            description: 'Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget'
 
-    # Connector Health Alerts
-    - alert: IntelGraphConnectorErrors
-      expr: |
-        sum(rate(connector_errors_total[5m])) by (connector_type) > 0.1
-      for: 3m
-      labels:
-        severity: warning
-        service: intelgraph-connectors
-      annotations:
-        summary: "IntelGraph connector errors"
-        description: "Connector {{ $labels.connector_type }} has {{ $value }} errors/second"
+        # Connector Health Alerts
+        - alert: IntelGraphConnectorErrors
+          expr: |
+            sum(rate(connector_errors_total[5m])) by (connector_type) > 0.1
+          for: 3m
+          labels:
+            severity: warning
+            service: intelgraph-connectors
+          annotations:
+            summary: 'IntelGraph connector errors'
+            description: 'Connector {{ $labels.connector_type }} has {{ $value }} errors/second'
 
-    # Policy Engine Alerts
-    - alert: IntelGraphPolicyEngineLatency
-      expr: |
-        histogram_quantile(0.95, sum(rate(policy_decision_time_ms_bucket[5m])) by (le)) > 5000
-      for: 5m
-      labels:
-        severity: warning
-        service: intelgraph-policy
-      annotations:
-        summary: "IntelGraph policy engine latency high"
-        description: "Policy decision p95 latency is {{ $value }}ms"
+        # Policy Engine Alerts
+        - alert: IntelGraphPolicyEngineLatency
+          expr: |
+            histogram_quantile(0.95, sum(rate(policy_decision_time_ms_bucket[5m])) by (le)) > 5000
+          for: 5m
+          labels:
+            severity: warning
+            service: intelgraph-policy
+          annotations:
+            summary: 'IntelGraph policy engine latency high'
+            description: 'Policy decision p95 latency is {{ $value }}ms'
 
-    - alert: IntelGraphExportBlocks
-      expr: |
-        sum(rate(export_blocks_total[5m])) > 0.5
-      for: 5m
-      labels:
-        severity: info
-        service: intelgraph-exports
-      annotations:
-        summary: "High number of blocked exports"
-        description: "{{ $value }} exports/second are being blocked by policy"
+        - alert: IntelGraphExportBlocks
+          expr: |
+            sum(rate(export_blocks_total[5m])) > 0.5
+          for: 5m
+          labels:
+            severity: info
+            service: intelgraph-exports
+          annotations:
+            summary: 'High number of blocked exports'
+            description: '{{ $value }} exports/second are being blocked by policy'
 
-    # Provenance Ledger Alerts
-    - alert: IntelGraphProvenanceWriteErrors
-      expr: |
-        sum(rate(provenance_writes_total{status="error"}[5m])) > 0.01
-      for: 3m
-      labels:
-        severity: warning
-        service: intelgraph-provenance
-      annotations:
-        summary: "IntelGraph provenance write errors"
-        description: "{{ $value }} provenance writes/second are failing"
+        # Provenance Ledger Alerts
+        - alert: IntelGraphProvenanceWriteErrors
+          expr: |
+            sum(rate(provenance_writes_total{status="error"}[5m])) > 0.01
+          for: 3m
+          labels:
+            severity: warning
+            service: intelgraph-provenance
+          annotations:
+            summary: 'IntelGraph provenance write errors'
+            description: '{{ $value }} provenance writes/second are failing'
 
-    # Slow Query Detection
-    - alert: IntelGraphSlowQueries
-      expr: |
-        histogram_quantile(0.95, sum(rate(cypher_query_duration_ms_bucket[5m])) by (le)) > 10000
-      for: 3m
-      labels:
-        severity: warning
-        service: intelgraph-graph
-      annotations:
-        summary: "IntelGraph slow queries detected"
-        description: "Graph query p95 latency is {{ $value }}ms, indicating slow queries"
+        # Slow Query Detection
+        - alert: IntelGraphSlowQueries
+          expr: |
+            histogram_quantile(0.95, sum(rate(cypher_query_duration_ms_bucket[5m])) by (le)) > 10000
+          for: 3m
+          labels:
+            severity: warning
+            service: intelgraph-graph
+          annotations:
+            summary: 'IntelGraph slow queries detected'
+            description: 'Graph query p95 latency is {{ $value }}ms, indicating slow queries'
 
-    # NL→Cypher Quality Alerts
-    - alert: IntelGraphNLQValidityLow
-      expr: |
-        intelgraph:sli:nlq_validity_1m < 0.9
-      for: 5m
-      labels:
-        severity: warning
-        service: intelgraph-nlq
-      annotations:
-        summary: "IntelGraph NL→Cypher validity low"
-        description: "NL→Cypher validity is {{ $value | humanizePercentage }}, below 90% threshold"
+        # NL→Cypher Quality Alerts
+        - alert: IntelGraphNLQValidityLow
+          expr: |
+            intelgraph:sli:nlq_validity_1m < 0.9
+          for: 5m
+          labels:
+            severity: warning
+            service: intelgraph-nlq
+          annotations:
+            summary: 'IntelGraph NL→Cypher validity low'
+            description: 'NL→Cypher validity is {{ $value | humanizePercentage }}, below 90% threshold'

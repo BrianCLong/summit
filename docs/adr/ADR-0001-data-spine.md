@@ -1,12 +1,15 @@
 # ADR-0001: Establish Data Spine Governance Toolkit
 
 ## Status
+
 Accepted
 
 ## Context
+
 The platform lacked a unified way to manage JSON/Avro data contracts, enforce residency requirements, and capture lineage across ingestion and egress flows. Manual schema drift, inconsistent PII handling in lower environments, and missing provenance made audit preparation expensive.
 
 ## Decision
+
 We introduced the Data Spine toolkit housed in `services/data-spine` with the following pillars:
 
 - **Git-backed schema registry** – Schemas live under `contracts/<name>/<semver>` and are governed by a CLI (`data-spine`) that supports `init`, `validate`, `bump`, and `compat` operations. Semantic versioning is enforced and compatibility checks fail the build on breaking changes.
@@ -16,6 +19,7 @@ We introduced the Data Spine toolkit housed in `services/data-spine` with the fo
 - **Residency audits** – `data-spine audit residency` emits machine-readable compliance reports for audit evidence.
 
 ## Consequences
+
 - Engineers can self-serve schema updates while CI blocks breaking mutations.
 - Compliance and security teams gain traceability over PII handling and residency posture.
 - Additional connectors can push lineage events to the sink without bespoke plumbing.

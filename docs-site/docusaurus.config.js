@@ -22,11 +22,13 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
+          editUrl:
+            'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
         },
         blog: {
           showReadingTime: true,
-          editUrl: 'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
+          editUrl:
+            'https://github.com/intelgraph/intelgraph/tree/main/docs-site/',
         },
         theme: { customCss: require.resolve('./src/css/custom.css') },
       }),
@@ -42,7 +44,11 @@ const config = {
         items: [
           { type: 'doc', docId: 'intro', position: 'left', label: 'Docs' },
           { to: '/blog', label: 'Blog', position: 'left' },
-          { href: 'https://github.com/intelgraph/intelgraph', label: 'GitHub', position: 'right' },
+          {
+            href: 'https://github.com/intelgraph/intelgraph',
+            label: 'GitHub',
+            position: 'right',
+          },
         ],
       },
       footer: {
@@ -56,8 +62,10 @@ const config = {
         apiKey: 'PUBLIC_SEARCH_KEY',
         indexName: 'intelgraph_docs',
         contextualSearch: true,
-        searchParameters: { optionalWords: ['GraphRAG','graph rag','orchestration','workflow'] }
-      }
+        searchParameters: {
+          optionalWords: ['GraphRAG', 'graph rag', 'orchestration', 'workflow'],
+        },
+      },
     }),
 
   plugins: [
@@ -66,7 +74,7 @@ const config = {
       {
         id: 'default',
         path: '../docs',
-        routeBasePath: '/',         // docs at site root
+        routeBasePath: '/', // docs at site root
         sidebarPath: './sidebars.js',
         editUrl: 'https://github.com/intelgraph/intelgraph/edit/main/docs/',
         showLastUpdateTime: true,
@@ -83,24 +91,21 @@ const config = {
           {
             id: 'maestro',
             spec: '../maestro-orchestration-api.yaml',
-            route: '/intelgraph/api/maestro/1.0.0'
+            route: '/intelgraph/api/maestro/1.0.0',
           },
           {
             id: 'core',
             spec: '../intelgraph-core-api.yaml',
-            route: '/intelgraph/api/core/1.0.0'
-          }
+            route: '/intelgraph/api/core/1.0.0',
+          },
         ],
-        theme: { primaryColor: '#0f766e' }
-      }
+        theme: { primaryColor: '#0f766e' },
+      },
     ],
     [
       '@docusaurus/plugin-client-redirects',
-      { redirects: [
-          { from: '/api', to: '/intelgraph/api/core/1.0.0' }
-        ]
-      }
-    ]
+      { redirects: [{ from: '/api', to: '/intelgraph/api/core/1.0.0' }] },
+    ],
   ],
 };
 

@@ -16,9 +16,9 @@ spec:
               - name: job
                 value: intelgraph-api
               - name: p95_threshold
-                value: "0.8"
+                value: '0.8'
               - name: err_threshold
-                value: "0.02"
+                value: '0.02'
         - setWeight: 25
         - pause: { duration: 300 }
         - analysis:
@@ -28,7 +28,7 @@ spec:
               - name: job
                 value: intelgraph-api
               - name: availability_threshold
-                value: "0.995"
+                value: '0.995'
         - setWeight: 50
         - pause: { duration: 300 }
         - analysis:
@@ -38,7 +38,7 @@ spec:
               - name: job
                 value: intelgraph-api
               - name: p95_threshold
-                value: "0.8"
+                value: '0.8'
               - name: err_threshold
-                value: "0.02"
+                value: '0.02'
         - setWeight: 100

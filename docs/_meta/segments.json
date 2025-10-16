@@ -1,4 +1,6 @@
-{ "segments": [
-  { "id": "user-free", "when": "role=user & plan=free" },
-  { "id": "admin-enterprise", "when": "role=admin & plan=enterprise" }
-] }
+{
+  "segments": [
+    { "id": "user-free", "when": "role=user & plan=free" },
+    { "id": "admin-enterprise", "when": "role=admin & plan=enterprise" }
+  ]
+}

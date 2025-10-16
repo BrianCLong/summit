@@ -2,61 +2,61 @@
 # This file maps product features to their required documentation artifacts
 # Used for automated coverage validation and quality gates
 
-version: "2.0.0"
-lastUpdated: "2025-09-09"
-owner: "docs"
+version: '2.0.0'
+lastUpdated: '2025-09-09'
+owner: 'docs'
 
 # Documentation artifact types required for features
 artifactTypes:
   howto:
-    description: "Step-by-step procedural guides"
+    description: 'Step-by-step procedural guides'
     required: true
-    template: "how-to-template.md"
-  
+    template: 'how-to-template.md'
+
   tutorial:
-    description: "End-to-end learning experiences"
+    description: 'End-to-end learning experiences'
     required: false
-    template: "tutorial-template.md"
-  
+    template: 'tutorial-template.md'
+
   reference:
-    description: "Technical reference and API documentation"
+    description: 'Technical reference and API documentation'
     required: true
-    template: "reference-template.md"
-  
+    template: 'reference-template.md'
+
   concept:
-    description: "Conceptual explanations and theory"
+    description: 'Conceptual explanations and theory'
     required: false
-    template: "concept-template.md"
-  
+    template: 'concept-template.md'
+
   troubleshooting:
-    description: "Problem-solving guides and FAQs"
+    description: 'Problem-solving guides and FAQs'
     required: false
-    template: "troubleshooting-template.md"
+    template: 'troubleshooting-template.md'
 
 # Feature categories and their documentation requirements
 categories:
   core-platform:
-    description: "Core IntelGraph platform capabilities"
+    description: 'Core IntelGraph platform capabilities'
     coverageRequirement: 100
-    
+
   integrations:
-    description: "Third-party integrations and connectors"
+    description: 'Third-party integrations and connectors'
     coverageRequirement: 95
-    
+
   apis:
-    description: "API endpoints and SDK functionality"
+    description: 'API endpoints and SDK functionality'
     coverageRequirement: 100
-    
+
   ui-features:
-    description: "User interface features and workflows"
+    description: 'User interface features and workflows'
     coverageRequirement: 90
-    
+
   admin-tools:
-    description: "Administrative and operational tools"
+    description: 'Administrative and operational tools'
     coverageRequirement: 95
-    
+
   security:
-    description: "Security features and compliance"
+    description: 'Security features and compliance'
     coverageRequirement: 100
 
 # Feature inventory with documentation requirements
@@ -64,11 +64,11 @@ features:
   # Core Platform Features
   - id: zip-export
     name: ZIP Export & Certification
-    category: "core-platform"
-    version: "1.0.0"
-    status: "ga"
+    category: 'core-platform'
+    version: '1.0.0'
+    status: 'ga'
     owners: [platform, security]
-    priority: "critical"
+    priority: 'critical'
     docs:
       howto: 'how-to/zip-export.md'
       reference: 'reference/zip-export-spec.md'
@@ -81,11 +81,11 @@ features:
 
   - id: coherence-ecosystem
     name: Global Coherence Ecosystem (v24)
-    category: "core-platform"
-    version: "2.4.0"
-    status: "ga"
+    category: 'core-platform'
+    version: '2.4.0'
+    status: 'ga'
     owners: [ml]
-    priority: "critical"
+    priority: 'critical'
     docs:
       howto: 'how-to/coherence/operate.md'
       reference: 'reference/coherence/apis.md'
@@ -95,160 +95,160 @@ features:
       codeExamples: true
       apiTesting: true
       userTesting: true
-    
-  - id: "graphrag-query-engine"
-    name: "GraphRAG Query Engine"
-    category: "core-platform"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["platform", "ml"]
-    priority: "critical"
+
+  - id: 'graphrag-query-engine'
+    name: 'GraphRAG Query Engine'
+    category: 'core-platform'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['platform', 'ml']
+    priority: 'critical'
     docs:
-      howto: "how-to/graphrag/execute-queries.md"
-      reference: "reference/graphrag/query-api.md"
-      tutorial: "tutorials/getting-started/first-graphrag-query.md"
-      concept: "concepts/graphrag/query-engine-overview.md"
+      howto: 'how-to/graphrag/execute-queries.md'
+      reference: 'reference/graphrag/query-api.md'
+      tutorial: 'tutorials/getting-started/first-graphrag-query.md'
+      concept: 'concepts/graphrag/query-engine-overview.md'
     validation:
       codeExamples: true
       apiTesting: true
       userTesting: true
-    
-  - id: "maestro-orchestration"
-    name: "Maestro Orchestration Engine"
-    category: "core-platform"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["platform"]
-    priority: "critical"
+
+  - id: 'maestro-orchestration'
+    name: 'Maestro Orchestration Engine'
+    category: 'core-platform'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['platform']
+    priority: 'critical'
     docs:
-      howto: "how-to/maestro/create-workflows.md"
-      reference: "reference/maestro/orchestration-api.md"
-      tutorial: "tutorials/maestro/workflow-automation.md"
-      concept: "concepts/maestro/orchestration-patterns.md"
+      howto: 'how-to/maestro/create-workflows.md'
+      reference: 'reference/maestro/orchestration-api.md'
+      tutorial: 'tutorials/maestro/workflow-automation.md'
+      concept: 'concepts/maestro/orchestration-patterns.md'
     validation:
       codeExamples: true
       apiTesting: true
       userTesting: true
 
   # API Features
-  - id: "core-api"
-    name: "IntelGraph Core API"
-    category: "apis"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["api"]
-    priority: "critical"
+  - id: 'core-api'
+    name: 'IntelGraph Core API'
+    category: 'apis'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['api']
+    priority: 'critical'
     docs:
-      howto: "how-to/api/authentication-setup.md"
-      reference: "reference/api/core-api-spec.md"
-      tutorial: "tutorials/api/first-api-calls.md"
+      howto: 'how-to/api/authentication-setup.md'
+      reference: 'reference/api/core-api-spec.md'
+      tutorial: 'tutorials/api/first-api-calls.md'
     validation:
       codeExamples: true
       apiTesting: true
       openApiValidation: true
-      
-  - id: "webhooks"
-    name: "Webhook System"
-    category: "apis"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["api"]
-    priority: "high"
+
+  - id: 'webhooks'
+    name: 'Webhook System'
+    category: 'apis'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['api']
+    priority: 'high'
     docs:
-      howto: "how-to/webhooks/setup-webhooks.md"
-      reference: "reference/webhooks/webhook-events.md"
-      troubleshooting: "troubleshooting/webhooks/webhook-debugging.md"
+      howto: 'how-to/webhooks/setup-webhooks.md'
+      reference: 'reference/webhooks/webhook-events.md'
+      troubleshooting: 'troubleshooting/webhooks/webhook-debugging.md'
     validation:
       codeExamples: true
       apiTesting: true
 
   # Integration Features
-  - id: "elasticsearch-connector"
-    name: "Elasticsearch Connector"
-    category: "integrations"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["integrations"]
-    priority: "high"
+  - id: 'elasticsearch-connector'
+    name: 'Elasticsearch Connector'
+    category: 'integrations'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['integrations']
+    priority: 'high'
     docs:
-      howto: "how-to/integrations/elasticsearch-setup.md"
-      reference: "reference/integrations/elasticsearch-config.md"
-      troubleshooting: "troubleshooting/integrations/elasticsearch-issues.md"
+      howto: 'how-to/integrations/elasticsearch-setup.md'
+      reference: 'reference/integrations/elasticsearch-config.md'
+      troubleshooting: 'troubleshooting/integrations/elasticsearch-issues.md'
     validation:
       codeExamples: true
       integrationTesting: true
-      
-  - id: "splunk-connector"
-    name: "Splunk Connector"
-    category: "integrations"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["integrations"]
-    priority: "high"
+
+  - id: 'splunk-connector'
+    name: 'Splunk Connector'
+    category: 'integrations'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['integrations']
+    priority: 'high'
     docs:
-      howto: "how-to/integrations/splunk-integration.md"
-      reference: "reference/integrations/splunk-connector.md"
+      howto: 'how-to/integrations/splunk-integration.md'
+      reference: 'reference/integrations/splunk-connector.md'
     validation:
       codeExamples: true
       integrationTesting: true
 
   # Security Features
-  - id: "oauth-authentication"
-    name: "OAuth 2.0 Authentication"
-    category: "security"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["security"]
-    priority: "critical"
+  - id: 'oauth-authentication'
+    name: 'OAuth 2.0 Authentication'
+    category: 'security'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['security']
+    priority: 'critical'
     docs:
-      howto: "how-to/security/oauth-setup.md"
-      reference: "reference/security/oauth-flows.md"
-      troubleshooting: "troubleshooting/security/oauth-issues.md"
+      howto: 'how-to/security/oauth-setup.md'
+      reference: 'reference/security/oauth-flows.md'
+      troubleshooting: 'troubleshooting/security/oauth-issues.md'
     validation:
       securityTesting: true
       complianceTesting: true
-      
-  - id: "rbac-permissions"
-    name: "Role-Based Access Control"
-    category: "security"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["security"]
-    priority: "critical"
+
+  - id: 'rbac-permissions'
+    name: 'Role-Based Access Control'
+    category: 'security'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['security']
+    priority: 'critical'
     docs:
-      howto: "how-to/security/rbac-configuration.md"
-      reference: "reference/security/permission-model.md"
-      concept: "concepts/security/access-control.md"
+      howto: 'how-to/security/rbac-configuration.md'
+      reference: 'reference/security/permission-model.md'
+      concept: 'concepts/security/access-control.md'
     validation:
       securityTesting: true
       complianceTesting: true
 
   # Admin Tools
-  - id: "health-monitoring"
-    name: "System Health Monitoring"
-    category: "admin-tools"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["ops"]
-    priority: "high"
+  - id: 'health-monitoring'
+    name: 'System Health Monitoring'
+    category: 'admin-tools'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['ops']
+    priority: 'high'
     docs:
-      howto: "how-to/admin/monitoring-setup.md"
-      reference: "reference/admin/health-metrics.md"
-      troubleshooting: "troubleshooting/admin/monitoring-issues.md"
+      howto: 'how-to/admin/monitoring-setup.md'
+      reference: 'reference/admin/health-metrics.md'
+      troubleshooting: 'troubleshooting/admin/monitoring-issues.md'
     validation:
       operationalTesting: true
-      
-  - id: "backup-restore"
-    name: "Backup & Restore System"
-    category: "admin-tools"
-    version: "1.0.0"
-    status: "ga"
-    owners: ["ops"]
-    priority: "critical"
+
+  - id: 'backup-restore'
+    name: 'Backup & Restore System'
+    category: 'admin-tools'
+    version: '1.0.0'
+    status: 'ga'
+    owners: ['ops']
+    priority: 'critical'
     docs:
-      howto: "how-to/admin/backup-procedures.md"
-      reference: "reference/admin/backup-formats.md"
-      troubleshooting: "troubleshooting/admin/recovery-procedures.md"
+      howto: 'how-to/admin/backup-procedures.md'
+      reference: 'reference/admin/backup-formats.md'
+      troubleshooting: 'troubleshooting/admin/recovery-procedures.md'
     validation:
       operationalTesting: true
       disasterRecoveryTesting: true
@@ -258,41 +258,41 @@ validationRules:
   # Required artifacts per feature status
   statusRequirements:
     ga:
-      required: ["howto", "reference"]
-      recommended: ["tutorial", "concept", "troubleshooting"]
+      required: ['howto', 'reference']
+      recommended: ['tutorial', 'concept', 'troubleshooting']
     beta:
-      required: ["howto"]
-      recommended: ["concept"]
+      required: ['howto']
+      recommended: ['concept']
     alpha:
-      required: ["concept"]
-      recommended: ["howto"]
+      required: ['concept']
+      recommended: ['howto']
     deprecated:
-      required: ["howto"] # Migration guide
+      required: ['howto'] # Migration guide
       recommended: []
-      
+
   # Priority-based requirements
   priorityRequirements:
     critical:
-      required: ["howto", "reference", "troubleshooting"]
-      recommended: ["tutorial", "concept"]
+      required: ['howto', 'reference', 'troubleshooting']
+      recommended: ['tutorial', 'concept']
     high:
-      required: ["howto", "reference"]
-      recommended: ["troubleshooting"]
+      required: ['howto', 'reference']
+      recommended: ['troubleshooting']
     medium:
-      required: ["howto"]
-      recommended: ["reference"]
+      required: ['howto']
+      recommended: ['reference']
     low:
       required: []
-      recommended: ["howto"]
+      recommended: ['howto']
 
 # Quality thresholds
 qualityThresholds:
   coverage:
-    minimum: 85  # Minimum overall coverage percentage
-    target: 95   # Target coverage percentage
-    
+    minimum: 85 # Minimum overall coverage percentage
+    target: 95 # Target coverage percentage
+
   freshness:
-    maxAge: 180  # Maximum days since last update
-    
+    maxAge: 180 # Maximum days since last update
+
   validation:
-    minimumTests: 2  # Minimum validation tests per feature
+    minimumTests: 2 # Minimum validation tests per feature

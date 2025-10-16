@@ -1,9 +1,11 @@
 # Argo Rollouts + Metrics Gates
+
 Generated 2025-09-24T12:00:00.000000Z
 
 This pack adds **Prometheus-backed AnalysisTemplates** and patches to your existing Rollouts so canary steps are **guarded by SLOs** (p95 latency, error rate, availability).
 
 ## Install
+
 ```bash
 # 1) Apply templates
 kubectl -n companyos apply -f deploy/rollouts/analysis/templates.yaml
@@ -29,3 +31,4 @@ p95_threshold (seconds): e.g., 0.8 → 800ms
 err_threshold (fraction): e.g., 0.02 → 2%
 
 availability_threshold (fraction): e.g., 0.995 → 99.5%
+```

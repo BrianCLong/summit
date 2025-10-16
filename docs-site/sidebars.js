@@ -13,10 +13,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Tutorials',
-      items: [
-        'tutorials/first-ingest',
-        'tutorials/first-query',
-      ],
+      items: ['tutorials/first-ingest', 'tutorials/first-query'],
     },
     {
       type: 'category',
@@ -33,7 +30,11 @@ const sidebars = {
         'ARCHITECTURE',
         'DATA_MODEL',
         'ENV_VARS',
-        { type: 'link', label: 'Maestro API', href: '/intelgraph/api/maestro/1.0.0' },
+        {
+          type: 'link',
+          label: 'Maestro API',
+          href: '/intelgraph/api/maestro/1.0.0',
+        },
         { type: 'link', label: 'Core API', href: '/intelgraph/api/core/1.0.0' },
       ],
     },

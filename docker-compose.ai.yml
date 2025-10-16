@@ -229,7 +229,8 @@ services:
     networks:
       - intelgraph-network
     healthcheck:
-      test: ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'devpassword', 'RETURN 1']
+      test:
+        ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'devpassword', 'RETURN 1']
       interval: 30s
       timeout: 10s
       retries: 5

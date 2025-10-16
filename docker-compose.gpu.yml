@@ -32,7 +32,15 @@ services:
     build:
       context: ./ml
       dockerfile: Dockerfile.gpu
-    command: ['celery', '-A', 'app.celery_app', 'worker', '--loglevel=INFO', '--concurrency=1']
+    command:
+      [
+        'celery',
+        '-A',
+        'app.celery_app',
+        'worker',
+        '--loglevel=INFO',
+        '--concurrency=1',
+      ]
     environment:
       - REDIS_URL=redis://:devpassword@redis:6379/0
       - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}

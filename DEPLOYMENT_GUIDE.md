@@ -7,12 +7,14 @@ This guide provides complete instructions for deploying the Summit IntelGraph pl
 ## 📦 What's Included
 
 ### 🏗️ Infrastructure
+
 - **MCP Core Server** - Complete Model Context Protocol implementation
 - **Maestro Conductor UI** - Enterprise-grade interface framework
 - **AI/ML Upgrades** - torch 2.8.0, transformers 4.53.0, advanced simulation
 - **Enterprise Tooling** - 1,000+ files of production infrastructure
 
 ### 🚀 Deployment Assets
+
 - Multi-environment deployment scripts (`scripts/deploy-now.sh`)
 - Docker containerization with health checks
 - Environment-specific configurations (dev/stage/prod)
@@ -20,21 +22,23 @@ This guide provides complete instructions for deploying the Summit IntelGraph pl
 
 ## 🎯 Target Environments
 
-| Environment | Hosts | Purpose |
-|-------------|-------|---------|
-| **DEV** | `intelgraph-dev.topicality.co`<br/>`maestro-dev.topicality.co` | Development testing |
-| **STAGE** | `stage.topicality.co` | Pre-production validation |
-| **PROD** | `prod.topicality.co`<br/>`www.topicality.co` | Production workloads |
+| Environment | Hosts                                                          | Purpose                   |
+| ----------- | -------------------------------------------------------------- | ------------------------- |
+| **DEV**     | `intelgraph-dev.topicality.co`<br/>`maestro-dev.topicality.co` | Development testing       |
+| **STAGE**   | `stage.topicality.co`                                          | Pre-production validation |
+| **PROD**    | `prod.topicality.co`<br/>`www.topicality.co`                   | Production workloads      |
 
 ## 🔧 Prerequisites
 
 ### Required Infrastructure
+
 - **EC2 instances** (t3.micro or larger) running Ubuntu 20.04+
 - **SSH access** with keypair authentication
 - **Cloudflare DNS** pointing to EC2 public IPs
 - **Security groups** allowing inbound 80/443
 
 ### Local Requirements
+
 ```bash
 # Install required tools
 curl -fsSL https://get.docker.com | sh
@@ -44,6 +48,7 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 ## 🚀 Quick Deployment
 
 ### Option 1: Automated Multi-Environment Deployment
+
 ```bash
 # Clone and prepare
 git clone https://github.com/BrianCLong/summit.git
@@ -59,6 +64,7 @@ chmod 600 ~/.ssh/maestro-keypair.pem
 ```
 
 ### Option 2: AWS ECR + Multi-Environment
+
 ```bash
 # Configure AWS
 aws configure
@@ -72,6 +78,7 @@ export ECR_REGISTRY="123456789012.dkr.ecr.us-east-2.amazonaws.com"
 ```
 
 ### Option 3: Single Environment
+
 ```bash
 # Deploy to specific environment
 ssh -i ~/.ssh/your-key.pem ubuntu@your-host.com
@@ -103,13 +110,16 @@ curl https://prod.topicality.co/healthz
 ## 🌐 Live URLs (Post-Deployment)
 
 ### Development
+
 - **IntelGraph Dev**: https://intelgraph-dev.topicality.co
 - **Maestro Dev**: https://maestro-dev.topicality.co
 
 ### Staging
+
 - **Stage**: https://stage.topicality.co
 
 ### Production
+
 - **Production**: https://prod.topicality.co
 - **WWW**: https://www.topicality.co
 
@@ -132,11 +142,13 @@ docker-compose up -d
 ## 📊 Monitoring & Observability
 
 ### Built-in Monitoring
+
 - **Health checks**: `/healthz` endpoint on all services
 - **Docker health checks**: Built into containers
 - **Process monitoring**: systemd/docker restart policies
 
 ### Log Access
+
 ```bash
 # View application logs
 ssh ubuntu@target-host
@@ -150,6 +162,7 @@ journalctl -u docker -f
 ## 🔒 Security Configuration
 
 ### Environment Variables
+
 Create `.env` files for each environment:
 
 ```bash
@@ -162,6 +175,7 @@ REDIS_URL=redis://host:6379
 ```
 
 ### Secrets Management
+
 - Use AWS Secrets Manager for production secrets
 - Environment variables for configuration
 - No secrets in Docker images or git
@@ -171,6 +185,7 @@ REDIS_URL=redis://host:6379
 ### Common Issues
 
 **SSH Connection Failed**
+
 ```bash
 # Check SSH key permissions
 chmod 600 ~/.ssh/maestro-keypair.pem
@@ -180,6 +195,7 @@ ssh -i ~/.ssh/maestro-keypair.pem ubuntu@target-host
 ```
 
 **Docker Build Failed**
+
 ```bash
 # Check Docker daemon
 sudo systemctl status docker
@@ -190,6 +206,7 @@ df -h
 ```
 
 **Service Not Responding**
+
 ```bash
 # Check container status
 docker-compose ps
@@ -202,10 +219,12 @@ docker-compose restart
 ## 📞 Support
 
 ### Deployment Support
+
 - **GitHub Issues**: https://github.com/BrianCLong/summit/issues
 - **Release Notes**: https://github.com/BrianCLong/summit/releases/tag/v2025.09.21-mega-merge
 
 ### Emergency Procedures
+
 1. **Service Down**: Automatic restart via Docker health checks
 2. **Complete Failure**: Rollback to previous version
 3. **Data Issues**: Point-in-time restore from backups
@@ -215,6 +234,7 @@ docker-compose restart
 ## 🎉 Deployment Complete!
 
 Once deployed, Summit provides:
+
 - **🧠 MCP Core Server** - Model Context Protocol
 - **🎼 Maestro Conductor UI** - Enterprise interface
 - **📊 Real-time Analytics** - Intelligence processing
