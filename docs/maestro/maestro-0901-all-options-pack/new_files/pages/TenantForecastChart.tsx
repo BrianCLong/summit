@@ -23,7 +23,11 @@ export default function TenantForecastChart() {
   return (
     <div className="p-6 space-y-3">
       <h1 className="text-2xl font-semibold">Tenant Costs</h1>
-      <LineTimeseries title="Forecast (EMA)" data={series} ariaLabel="Tenant cost forecast EMA" />
+      <LineTimeseries
+        title="Forecast (EMA)"
+        data={series}
+        ariaLabel="Tenant cost forecast EMA"
+      />
       <section className="border rounded p-3">
         <h3 className="font-medium">Anomalies</h3>
         <ul className="text-sm mt-2">

@@ -31,6 +31,7 @@ Maestro UI provides convenient deep links to external observability platforms (G
 - **Location:** On the `RunDetail.tsx` page, a "View Trace" button is available for the entire run.
 - **Functionality:** Clicking this button constructs a URL to Grafana/Tempo, passing the `traceId` of the run as a query parameter. This opens the full trace view in Tempo, allowing you to see all spans associated with that run.
 - **URL Structure (Example):**
+
   ```
   {{grafanaBase}}/explore?orgId=1&left=%5B%22now-1h%22,%22now%22,%22Tempo%22,%7B%22query%22:%22<run_trace_id>%22%7D,%7B%22ui%22:%22trace%22%7D%5D
   ```

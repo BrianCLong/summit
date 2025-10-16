@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react';
 
-type Pin = { step?: string; model: string; reason?: string; actor?: string; createdAt?: string };
+type Pin = {
+  step?: string;
+  model: string;
+  reason?: string;
+  actor?: string;
+  createdAt?: string;
+};
 
 async function getPins(): Promise<Pin[]> {
-  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base =
+    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
   const res = await fetch(`${base}/routing/pins`);
   if (!res.ok) throw new Error('Failed to load pins');
   return res.json();
 }
 async function putPin(pin: Pin): Promise<void> {
-  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base =
+    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
   await fetch(`${base}/routing/pin`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -17,7 +25,8 @@ async function putPin(pin: Pin): Promise<void> {
   });
 }
 async function explainPolicy(payload: any): Promise<any> {
-  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base =
+    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
   const res = await fetch(`${base}/policies/explain`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -48,7 +57,12 @@ export default function RoutingPinPanel() {
     setBusy(true);
     setErr(null);
     try {
-      const resp = await explainPolicy({ action: 'route.pin', step, model, note });
+      const resp = await explainPolicy({
+        action: 'route.pin',
+        step,
+        model,
+        note,
+      });
       setExplain(resp);
     } catch (e) {
       setErr(String(e));
@@ -98,7 +112,11 @@ export default function RoutingPinPanel() {
         />
       </div>
       <div className="flex gap-2">
-        <button className="border rounded px-3 py-1" onClick={onExplain} disabled={busy}>
+        <button
+          className="border rounded px-3 py-1"
+          onClick={onExplain}
+          disabled={busy}
+        >
           Explain (Policy)
         </button>
         <button
@@ -119,7 +137,10 @@ export default function RoutingPinPanel() {
         <h4 className="text-sm font-medium mt-2">Current Pins</h4>
         <ul className="text-sm mt-1 space-y-1 max-h-[30vh] overflow-auto pr-1">
           {pins.map((p, idx) => (
-            <li key={idx} className="border rounded p-2 flex items-center justify-between">
+            <li
+              key={idx}
+              className="border rounded p-2 flex items-center justify-between"
+            >
               <div>
                 <span className="font-mono">{p.step || '*'}</span> →{' '}
                 <span className="font-mono">{p.model}</span>

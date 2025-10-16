@@ -13,7 +13,10 @@ export default function ServingLaneTrends() {
       getServingMetrics?.()
         .then((r: any) => {
           const toPts = (arr: any[]) =>
-            (arr || []).map((p: any) => ({ x: new Date(p.ts).toLocaleTimeString(), y: p.value }));
+            (arr || []).map((p: any) => ({
+              x: new Date(p.ts).toLocaleTimeString(),
+              y: p.value,
+            }));
           setSeriesQ(toPts(r?.series?.qDepth || r?.seriesQ || []));
           setSeriesB(toPts(r?.series?.batch || r?.seriesBatch || []));
           setSeriesK(toPts(r?.series?.kvHit || r?.seriesKv || []));
