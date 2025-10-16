@@ -187,9 +187,15 @@ Deliver a **prov‑ledger beta vertical** + **ABAC/OPA** gate at GraphQL + **tri
 
 ```ts
 it('elides restricted fields under OPA', async () => {
-  const res = await gqlPersisted('CaseEntitiesRestricted', { id: 'C-1' }, as('analyst'));
+  const res = await gqlPersisted(
+    'CaseEntitiesRestricted',
+    { id: 'C-1' },
+    as('analyst'),
+  );
   expect(res.errors).toBeFalsy();
-  expect(res.data.entities.every((e) => e.sensitivity === undefined)).toBe(true);
+  expect(res.data.entities.every((e) => e.sensitivity === undefined)).toBe(
+    true,
+  );
 });
 ```
 

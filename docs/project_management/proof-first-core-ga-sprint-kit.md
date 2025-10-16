@@ -12,11 +12,11 @@
 
 **Success Metrics:**
 
-* p95 graph query < 1.5s on seeded dataset
-* NL→Cypher ≥95% syntactic validity on corpus; sandbox + undo/redo
-* Prov-Ledger external verification passes on golden fixtures
-* ER service merges reproducible with /er/explain
-* Tri-pane UI reduces time-to-path discovery vs. baseline
+- p95 graph query < 1.5s on seeded dataset
+- NL→Cypher ≥95% syntactic validity on corpus; sandbox + undo/redo
+- Prov-Ledger external verification passes on golden fixtures
+- ER service merges reproducible with /er/explain
+- Tri-pane UI reduces time-to-path discovery vs. baseline
 
 **Out of Scope:** federated multi-graph search; full Graph-XAI dashboards; advanced deception lab.
 
@@ -28,94 +28,83 @@
 
 **A1. Evidence Registration & Transform Tracking**
 
-* *As an* analyst *I want* to register evidence with immutable lineage *so that* I can export a verifiable manifest.
-* Acceptance:
-
-  * POST /evidence/register persists source hash + metadata
-  * Transform steps recorded (operation, model+version, config checksum)
-  * Export produces `hash-manifest.json` (Merkle tree)
+- _As an_ analyst _I want_ to register evidence with immutable lineage _so that_ I can export a verifiable manifest.
+- Acceptance:
+  - POST /evidence/register persists source hash + metadata
+  - Transform steps recorded (operation, model+version, config checksum)
+  - Export produces `hash-manifest.json` (Merkle tree)
 
 **A2. External Verifier (CLI)**
 
-* *As a* compliance reviewer *I want* a CLI to verify a manifest against fixtures *so that* integrity can be independently audited.
-* Acceptance:
-
-  * `prov-verify fixtures/case-demo` exits 0 on untampered bundle
-  * Tamper causes non-zero exit and human-readable diff report
+- _As a_ compliance reviewer _I want_ a CLI to verify a manifest against fixtures _so that_ integrity can be independently audited.
+- Acceptance:
+  - `prov-verify fixtures/case-demo` exits 0 on untampered bundle
+  - Tamper causes non-zero exit and human-readable diff report
 
 **A3. License/Authority Blockers on Export**
 
-* *As an* approver *I want* export evaluation against license/authority policies *so that* non-compliant exports are blocked with reasons.
-* Acceptance:
-
-  * Blocked export returns `{reason, license_clause, owner, appeal_path}`
+- _As an_ approver _I want_ export evaluation against license/authority policies _so that_ non-compliant exports are blocked with reasons.
+- Acceptance:
+  - Blocked export returns `{reason, license_clause, owner, appeal_path}`
 
 ### EPIC B: NL→Cypher Copilot (auditable)
 
 **B1. Prompt→Preview→Sandbox Exec**
 
-* *As an* analyst *I want* to see generated Cypher with cost preview before running *so that* I can avoid runaway queries.
-* Acceptance:
-
-  * `nl_to_cypher(prompt, schema)` returns `{cypher, cost_estimate}`
-  * Sandbox execute returns preview; undo/redo supported
+- _As an_ analyst _I want_ to see generated Cypher with cost preview before running _so that_ I can avoid runaway queries.
+- Acceptance:
+  - `nl_to_cypher(prompt, schema)` returns `{cypher, cost_estimate}`
+  - Sandbox execute returns preview; undo/redo supported
 
 **B2. Quality & Safety Gates**
 
-* *As a* lead *I want* ≥95% syntactic validity and rollback capability *so that* productivity is high and safe.
-* Acceptance:
-
-  * Test corpus produces ≥95% syntactic validity
-  * Diff vs manual Cypher snapshot; rollback tested
+- _As a_ lead _I want_ ≥95% syntactic validity and rollback capability _so that_ productivity is high and safe.
+- Acceptance:
+  - Test corpus produces ≥95% syntactic validity
+  - Diff vs manual Cypher snapshot; rollback tested
 
 ### EPIC C: Entity Resolution (v0)
 
 **C1. Candidate Generation & Merge**
 
-* *As an* analyst *I want* candidate pairs and reversible merges *so that* I can safely adjudicate entities.
-* Acceptance:
-
-  * `/er/candidates`, `/er/merge` endpoints exist
-  * Merges reversible; audit includes user+reason
+- _As an_ analyst _I want_ candidate pairs and reversible merges _so that_ I can safely adjudicate entities.
+- Acceptance:
+  - `/er/candidates`, `/er/merge` endpoints exist
+  - Merges reversible; audit includes user+reason
 
 **C2. Explainability Endpoint**
 
-* *As an* analyst *I want* `/er/explain` with feature vectors and rationale *so that* I can trust merges.
-* Acceptance:
-
-  * Explain returns blocking features + scores + rationale
+- _As an_ analyst _I want_ `/er/explain` with feature vectors and rationale _so that_ I can trust merges.
+- Acceptance:
+  - Explain returns blocking features + scores + rationale
 
 ### EPIC D: Ops (SLO + Cost Guard)
 
 **D1. SLO Dashboards**
 
-* *As an* SRE *I want* OTEL/Prom dashboards for p95 graph latency *so that* we can enforce SLOs.
-* Acceptance:
-
-  * Dashboards deployed; alert fires under induced load
+- _As an_ SRE _I want_ OTEL/Prom dashboards for p95 graph latency _so that_ we can enforce SLOs.
+- Acceptance:
+  - Dashboards deployed; alert fires under induced load
 
 **D2. Cost Guard (budgeter + killer)**
 
-* *As an* SRE *I want* plan-budget evaluation and slow-query kill *so that* costs and availability remain stable.
-* Acceptance:
-
-  * Synthetic hog killed; event visible on dashboard & alert channel
+- _As an_ SRE _I want_ plan-budget evaluation and slow-query kill _so that_ costs and availability remain stable.
+- Acceptance:
+  - Synthetic hog killed; event visible on dashboard & alert channel
 
 ### EPIC E: UI – Tri-Pane + Explain View
 
 **E1. Tri-Pane Integration (graph/map/timeline)**
 
-* *As a* user *I want* synchronized panes with saved views *so that* exploration is fast.
-* Acceptance:
-
-  * Brushing sync across panes; saved view works
+- _As a_ user _I want_ synchronized panes with saved views _so that_ exploration is fast.
+- Acceptance:
+  - Brushing sync across panes; saved view works
 
 **E2. Explain This View**
 
-* *As a* user *I want* evidence/provenance overlays and policy bindings *so that* every assertion is accountable.
-* Acceptance:
-
-  * Tooltip shows provenance & confidence opacity; “Explain” lists evidence nodes & policies
+- _As a_ user _I want_ evidence/provenance overlays and policy bindings _so that_ every assertion is accountable.
+- Acceptance:
+  - Tooltip shows provenance & confidence opacity; “Explain” lists evidence nodes & policies
 
 ---
 
@@ -125,72 +114,71 @@
 
 **A. Provenance**
 
-* A-1: Implement `/evidence/register` (Go, repo `services/prov-ledger`) — **5 SP** — *Owner:* Backend
-* A-2: Transform recorder middleware (Go) — **3 SP** — *Owner:* Backend
-* A-3: Export `hash-manifest.json` (Merkle) — **5 SP** — *Owner:* Backend
-* A-4: `prov-verify` CLI with diffing — **5 SP** — *Owner:* Tools
-* A-5: Export blocker policy evaluation (OPA pass-through) — **5 SP** — *Owner:* Backend
+- A-1: Implement `/evidence/register` (Go, repo `services/prov-ledger`) — **5 SP** — _Owner:_ Backend
+- A-2: Transform recorder middleware (Go) — **3 SP** — _Owner:_ Backend
+- A-3: Export `hash-manifest.json` (Merkle) — **5 SP** — _Owner:_ Backend
+- A-4: `prov-verify` CLI with diffing — **5 SP** — _Owner:_ Tools
+- A-5: Export blocker policy evaluation (OPA pass-through) — **5 SP** — _Owner:_ Backend
 
 **B. Query Copilot**
 
-* B-1: `nl_to_cypher` module + schema prompt composer (TS) — **8 SP** — *Owner:* AI/FE
-* B-2: Cost estimator & preview panel (TS) — **5 SP** — *Owner:* FE
-* B-3: Sandbox executor + undo/redo (TS) — **5 SP** — *Owner:* FE
-* B-4: Corpus + tests to ≥95% syntax validity — **5 SP** — *Owner:* QA/AI
+- B-1: `nl_to_cypher` module + schema prompt composer (TS) — **8 SP** — _Owner:_ AI/FE
+- B-2: Cost estimator & preview panel (TS) — **5 SP** — _Owner:_ FE
+- B-3: Sandbox executor + undo/redo (TS) — **5 SP** — _Owner:_ FE
+- B-4: Corpus + tests to ≥95% syntax validity — **5 SP** — _Owner:_ QA/AI
 
 **C. ER Service**
 
-* C-1: Blocking + candidate generation (Go) — **5 SP** — *Owner:* Backend
-* C-2: `/er/merge` reversible merges + audit log — **5 SP** — *Owner:* Backend
-* C-3: `/er/explain` (features+rationale) — **3 SP** — *Owner:* Backend
-* C-4: Golden fixtures `er/golden/*.json` — **3 SP** — *Owner:* Data
+- C-1: Blocking + candidate generation (Go) — **5 SP** — _Owner:_ Backend
+- C-2: `/er/merge` reversible merges + audit log — **5 SP** — _Owner:_ Backend
+- C-3: `/er/explain` (features+rationale) — **3 SP** — _Owner:_ Backend
+- C-4: Golden fixtures `er/golden/*.json` — **3 SP** — _Owner:_ Data
 
 **D. Ops**
 
-* D-1: OTEL traces + Prom metrics emitters — **5 SP** — *Owner:* Platform
-* D-2: Dashboards JSON (p95, errors, CostGuard) — **3 SP** — *Owner:* Platform
-* D-3: Cost Guard plan budget + killer — **5 SP** — *Owner:* Platform
-* D-4: k6 load scripts + alert wiring — **5 SP** — *Owner:* Platform
+- D-1: OTEL traces + Prom metrics emitters — **5 SP** — _Owner:_ Platform
+- D-2: Dashboards JSON (p95, errors, CostGuard) — **3 SP** — _Owner:_ Platform
+- D-3: Cost Guard plan budget + killer — **5 SP** — _Owner:_ Platform
+- D-4: k6 load scripts + alert wiring — **5 SP** — _Owner:_ Platform
 
 **E. UI**
 
-* E-1: Tri-pane shell & routing `/case/:id/explore` — **5 SP** — *Owner:* FE
-* E-2: Sync brushing across panes — **5 SP** — *Owner:* FE
-* E-3: Explain overlay + provenance tooltips — **5 SP** — *Owner:* FE
-* E-4: Cypress benchmarks + screenshot diffs — **3 SP** — *Owner:* QA/FE
+- E-1: Tri-pane shell & routing `/case/:id/explore` — **5 SP** — _Owner:_ FE
+- E-2: Sync brushing across panes — **5 SP** — _Owner:_ FE
+- E-3: Explain overlay + provenance tooltips — **5 SP** — _Owner:_ FE
+- E-4: Cypress benchmarks + screenshot diffs — **3 SP** — _Owner:_ QA/FE
 
 **F. Connectors Golden Path**
 
-* F-1: RSS/News connector w/ manifest & tests — **5 SP** — *Owner:* Integrations
-* F-2: STIX/TAXII connector — **5 SP** — *Owner:* Integrations
-* F-3: CSV ingest wizard + PII flags — **5 SP** — *Owner:* Integrations
+- F-1: RSS/News connector w/ manifest & tests — **5 SP** — _Owner:_ Integrations
+- F-2: STIX/TAXII connector — **5 SP** — _Owner:_ Integrations
+- F-3: CSV ingest wizard + PII flags — **5 SP** — _Owner:_ Integrations
 
 ---
 
 ## 3) Team Setup & Cadence
 
-* **Board Columns:** Backlog → Ready → In Progress → In Review → QA/Acceptance → Done
-* **Daily Standup (10 min):** What moved SLO/acceptance needles? What’s blocked? Today’s single critical path item.
-* **Ceremonies:**
-
-  * Sprint Planning (90 min) — scope & capacity
-  * Mid-sprint Review (30 min) — metric checks + risk triage
-  * Sprint Review/Demo (45 min)
-  * Retro (30 min) — “start/stop/continue” + action owners
+- **Board Columns:** Backlog → Ready → In Progress → In Review → QA/Acceptance → Done
+- **Daily Standup (10 min):** What moved SLO/acceptance needles? What’s blocked? Today’s single critical path item.
+- **Ceremonies:**
+  - Sprint Planning (90 min) — scope & capacity
+  - Mid-sprint Review (30 min) — metric checks + risk triage
+  - Sprint Review/Demo (45 min)
+  - Retro (30 min) — “start/stop/continue” + action owners
 
 ---
 
 ## 4) Definition of Ready (DoR)
 
-* User story has acceptance criteria + test fixture path
-* Service owner, codeowners set; rollback plan noted
-* Telemetry & security requirements stated (metrics, traces, auth scope)
+- User story has acceptance criteria + test fixture path
+- Service owner, codeowners set; rollback plan noted
+- Telemetry & security requirements stated (metrics, traces, auth scope)
 
 ## 5) Definition of Done (DoD)
 
-* CI green: unit + contract + acceptance packs
-* Artifact(s): dashboard JSON, CLI logs, screenshot diffs attached
-* Docs updated (README + runbooks); audit log entries verified
+- CI green: unit + contract + acceptance packs
+- Artifact(s): dashboard JSON, CLI logs, screenshot diffs attached
+- Docs updated (README + runbooks); audit log entries verified
 
 ---
 
@@ -200,7 +188,7 @@
 name: ci
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -246,25 +234,32 @@ name: Feature request
 about: Propose a capability or improvement
 labels: feat, needs-triage
 ---
+
 ## User Story
+
 As a <role>, I want <capability> so that <outcome>.
 
 ## Acceptance Criteria
+
 - [ ]
 - [ ]
 
 ## Non-Goals
+
 -
 
 ## Telemetry & Security
+
 Metrics:
 Traces:
 Auth scope:
 
 ## Test Fixtures
+
 Path(s):
 
 ## Dependencies
+
 -
 ```
 
@@ -276,9 +271,11 @@ name: Bug report
 about: Help us fix a defect
 labels: bug, needs-triage
 ---
+
 ## Summary
 
 ## Steps to Reproduce
+
 1.
 2.
 
@@ -301,6 +298,7 @@ labels: bug, needs-triage
 ## How (Design/Implementation)
 
 ## Acceptance Evidence
+
 - [ ] Unit tests
 - [ ] Contract tests
 - [ ] Acceptance pack output attached (screenshots, CLI logs)
@@ -309,6 +307,7 @@ labels: bug, needs-triage
 ## Risk & Rollback
 
 ## Checklist
+
 - [ ] Codeowners approved
 - [ ] Security review (if policy/export touching)
 - [ ] Telemetry added (metrics/traces)
@@ -318,9 +317,9 @@ labels: bug, needs-triage
 
 ## 8) Branching, Commits, Labels
 
-* **Branching:** trunk-based; `feat/<epic>-<short>`; `fix/<area>-<short>`
-* **Commit style:** Conventional Commits (e.g., `feat(er): reversible merges + audit log`)
-* **Labels:** `feat`, `bug`, `infra`, `ops`, `security`, `ui`, `backend`, `ai`, `docs`, `blocked`, `good-first-issue`, `needs-triage`
+- **Branching:** trunk-based; `feat/<epic>-<short>`; `fix/<area>-<short>`
+- **Commit style:** Conventional Commits (e.g., `feat(er): reversible merges + audit log`)
+- **Labels:** `feat`, `bug`, `infra`, `ops`, `security`, `ui`, `backend`, `ai`, `docs`, `blocked`, `good-first-issue`, `needs-triage`
 
 ---
 
@@ -328,11 +327,11 @@ labels: bug, needs-triage
 
 ### 9.1 Acceptance Packs
 
-* **Prov-Ledger:** run `prov-verify` against `fixtures/case-demo` → expect exit 0; tamper → nonzero + diff
-* **NL→Cypher:** run corpus → ≥95% syntactic validity; snapshot diffs preserved
-* **ER:** reproduce merges; `/er/explain` returns features + rationale JSON
-* **Ops:** k6 script triggers alert; dashboards updated; Cost Guard logs a kill
-* **UI:** Cypress time-to-path benchmark; screenshot diffs of Explain overlay
+- **Prov-Ledger:** run `prov-verify` against `fixtures/case-demo` → expect exit 0; tamper → nonzero + diff
+- **NL→Cypher:** run corpus → ≥95% syntactic validity; snapshot diffs preserved
+- **ER:** reproduce merges; `/er/explain` returns features + rationale JSON
+- **Ops:** k6 script triggers alert; dashboards updated; Cost Guard logs a kill
+- **UI:** Cypress time-to-path benchmark; screenshot diffs of Explain overlay
 
 ### 9.2 k6 Smoke Script (skeleton)
 
@@ -340,9 +339,14 @@ labels: bug, needs-triage
 import http from 'k6/http';
 import { sleep, check } from 'k6';
 export const options = { vus: 10, duration: '2m' };
-export default function() {
-  const r = http.post('https://api.local/query', { cypher: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100' });
-  check(r, { 'status 200': (res) => res.status === 200, 'latency ok': (res) => res.timings.duration < 1500 });
+export default function () {
+  const r = http.post('https://api.local/query', {
+    cypher: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100',
+  });
+  check(r, {
+    'status 200': (res) => res.status === 200,
+    'latency ok': (res) => res.timings.duration < 1500,
+  });
   sleep(1);
 }
 ```
@@ -351,17 +355,17 @@ export default function() {
 
 ## 10) Observability & Dashboards
 
-* **Metrics:** `graph_query_latency_ms`, `query_errors_total`, `cost_guard_kills_total`
-* **Traces:** span names for `/evidence/register`, `/er/*`, `nl_to_cypher`, `sandbox_execute`
-* **Dashboards:** SLO p95 latency, Error rate, Cost Guard actions
+- **Metrics:** `graph_query_latency_ms`, `query_errors_total`, `cost_guard_kills_total`
+- **Traces:** span names for `/evidence/register`, `/er/*`, `nl_to_cypher`, `sandbox_execute`
+- **Dashboards:** SLO p95 latency, Error rate, Cost Guard actions
 
 ---
 
 ## 11) Security & Policy
 
-* OIDC + WebAuthn step-up for export actions
-* OPA pass-through on export & query exec; policy dry-run endpoint
-* Audit log for merges/exports includes user, reason, timestamp, policy id
+- OIDC + WebAuthn step-up for export actions
+- OPA pass-through on export & query exec; policy dry-run endpoint
+- Audit log for merges/exports includes user, reason, timestamp, policy id
 
 ---
 
@@ -378,8 +382,8 @@ export default function() {
 
 ## 13) Runbooks (Brief)
 
-* **Incident: Query Latency Breach** → enable Cost Guard kill → capture trace → attach dashboard link to issue
-* **Rollback:** disable new copilot feature flag; revert ER merge via `/er/merge?revert`
+- **Incident: Query Latency Breach** → enable Cost Guard kill → capture trace → attach dashboard link to issue
+- **Rollback:** disable new copilot feature flag; revert ER merge via `/er/merge?revert`
 
 ---
 
@@ -565,8 +569,8 @@ Status mapping: Backlog → Ready → In Progress → In Review → QA/Acceptanc
 
 ## 20) Milestones & Capacity
 
-* **Milestone:** Proof-First Core GA (2 weeks)
-* **Capacity Template:**
+- **Milestone:** Proof-First Core GA (2 weeks)
+- **Capacity Template:**
 
 ```
 Role         Devs  Availability(d)  Focus%  Capacity(d)
@@ -602,20 +606,20 @@ R5  Policy blocks legit exports         L          M      Sec     Dry-run simula
 
 ```yaml
 groups:
-- name: graph-slo
-  rules:
-  - alert: GraphP95LatencyHigh
-    expr: histogram_quantile(0.95, sum by (le) (rate(graph_query_latency_ms_bucket[5m]))) > 1.5
-    for: 10m
-    labels: {severity: page}
-    annotations:
-      summary: p95 graph latency above SLO
-  - alert: CostGuardKillsSpike
-    expr: rate(cost_guard_kills_total[5m]) > 0
-    for: 1m
-    labels: {severity: warn}
-    annotations:
-      summary: Cost Guard killed a query
+  - name: graph-slo
+    rules:
+      - alert: GraphP95LatencyHigh
+        expr: histogram_quantile(0.95, sum by (le) (rate(graph_query_latency_ms_bucket[5m]))) > 1.5
+        for: 10m
+        labels: { severity: page }
+        annotations:
+          summary: p95 graph latency above SLO
+      - alert: CostGuardKillsSpike
+        expr: rate(cost_guard_kills_total[5m]) > 0
+        for: 1m
+        labels: { severity: warn }
+        annotations:
+          summary: Cost Guard killed a query
 ```
 
 ---
@@ -640,9 +644,9 @@ kubectl apply -f ops/grafana/dashboards
 
 ## 24) CONTRIBUTING.md (excerpt)
 
-* Use Conventional Commits. PRs must attach acceptance evidence.
-* Persisted GraphQL queries only. No `any` in TS.
-* Telemetry is not optional: add metrics/traces for new endpoints.
+- Use Conventional Commits. PRs must attach acceptance evidence.
+- Persisted GraphQL queries only. No `any` in TS.
+- Telemetry is not optional: add metrics/traces for new endpoints.
 
 ---
 
@@ -671,7 +675,7 @@ This extends the sprint kit with seeds for issues, labels, CODEOWNERS, protectio
 
 ```yaml
 openapi: 3.0.3
-info: {title: Prov-Ledger API, version: 0.1.0}
+info: { title: Prov-Ledger API, version: 0.1.0 }
 paths:
   /evidence/register:
     post:
@@ -684,11 +688,11 @@ paths:
               type: object
               required: [sourceUri, hash, metadata]
               properties:
-                sourceUri: {type: string}
-                hash: {type: string, description: sha256}
-                metadata: {type: object}
+                sourceUri: { type: string }
+                hash: { type: string, description: sha256 }
+                metadata: { type: object }
       responses:
-        '201': {description: Created}
+        '201': { description: Created }
   /claim/parse:
     post:
       summary: Parse claim and attach to case
@@ -700,10 +704,10 @@ paths:
               type: object
               required: [caseId, claim]
               properties:
-                caseId: {type: string}
-                claim: {type: string}
+                caseId: { type: string }
+                claim: { type: string }
       responses:
-        '200': {description: OK}
+        '200': { description: OK }
   /export/manifest:
     get:
       summary: Export verifiable manifest
@@ -711,20 +715,20 @@ paths:
         - in: query
           name: caseId
           required: true
-          schema: {type: string}
+          schema: { type: string }
       responses:
         '200':
           description: Manifest
           content:
             application/json:
-              schema: {type: object}
+              schema: { type: object }
 ```
 
 `services/er-service/openapi.yaml`
 
 ```yaml
 openapi: 3.0.3
-info: {title: ER Service, version: 0.1.0}
+info: { title: ER Service, version: 0.1.0 }
 paths:
   /er/candidates:
     post:
@@ -733,8 +737,16 @@ paths:
         required: true
         content:
           application/json:
-            schema: {type: object, properties: {block: {type: string}, limit: {type: integer, default: 100}}}
-      responses: {'200': {description: OK}}
+            schema:
+              {
+                type: object,
+                properties:
+                  {
+                    block: { type: string },
+                    limit: { type: integer, default: 100 },
+                  },
+              }
+      responses: { '200': { description: OK } }
   /er/merge:
     post:
       summary: Merge entities (reversible)
@@ -746,10 +758,10 @@ paths:
               type: object
               required: [leftId, rightId, policy]
               properties:
-                leftId: {type: string}
-                rightId: {type: string}
-                policy: {type: string}
-      responses: {'200': {description: OK}}
+                leftId: { type: string }
+                rightId: { type: string }
+                policy: { type: string }
+      responses: { '200': { description: OK } }
   /er/explain:
     get:
       summary: Explain decision
@@ -757,15 +769,15 @@ paths:
         - in: query
           name: id
           required: true
-          schema: {type: string}
-      responses: {'200': {description: OK}}
+          schema: { type: string }
+      responses: { '200': { description: OK } }
 ```
 
 `services/cost-guard/openapi.yaml`
 
 ```yaml
 openapi: 3.0.3
-info: {title: Cost Guard, version: 0.1.0}
+info: { title: Cost Guard, version: 0.1.0 }
 paths:
   /budget/evaluate:
     post:
@@ -774,8 +786,13 @@ paths:
         required: true
         content:
           application/json:
-            schema: {type: object, properties: {tenant: {type: string}, plan: {type: object}}}
-      responses: {'200': {description: allowed|throttle|kill}}
+            schema:
+              {
+                type: object,
+                properties:
+                  { tenant: { type: string }, plan: { type: object } },
+              }
+      responses: { '200': { description: allowed|throttle|kill } }
   /kill:
     post:
       summary: Kill slow query by id
@@ -783,8 +800,8 @@ paths:
         required: true
         content:
           application/json:
-            schema: {type: object, properties: {queryId: {type: string}}}
-      responses: {'202': {description: accepted}}
+            schema: { type: object, properties: { queryId: { type: string } } }
+      responses: { '202': { description: accepted } }
 ```
 
 ---
@@ -806,17 +823,39 @@ type Mutation {
   erMerge(leftId: ID!, rightId: ID!, policy: String!): MergeResult!
 }
 
-type Case { id: ID!, title: String!, createdAt: String! }
-input EvidenceInput { sourceUri: String!, hash: String!, metadata: JSON }
+type Case {
+  id: ID!
+  title: String!
+  createdAt: String!
+}
+input EvidenceInput {
+  sourceUri: String!
+  hash: String!
+  metadata: JSON
+}
 scalar JSON
 
-type CypherPreview { cypher: String!, costEstimate: Float! }
+type CypherPreview {
+  cypher: String!
+  costEstimate: Float!
+}
 
-type SandboxResult { rows: [JSON!]!, latencyMs: Int! }
+type SandboxResult {
+  rows: [JSON!]!
+  latencyMs: Int!
+}
 
-type Entity { id: ID!, label: String!, confidence: Float }
+type Entity {
+  id: ID!
+  label: String!
+  confidence: Float
+}
 
-type MergeResult { mergedId: ID!, reversible: Boolean!, auditId: ID! }
+type MergeResult {
+  mergedId: ID!
+  reversible: Boolean!
+  auditId: ID!
+}
 ```
 
 ---
@@ -835,9 +874,9 @@ appVersion: 0.1.0
 `charts/prov-ledger/values.yaml`
 
 ```yaml
-image: {repository: prov-ledger, tag: latest, pullPolicy: IfNotPresent}
-resources: {limits: {cpu: 500m, memory: 512Mi}}
-service: {type: ClusterIP, port: 8080}
+image: { repository: prov-ledger, tag: latest, pullPolicy: IfNotPresent }
+resources: { limits: { cpu: 500m, memory: 512Mi } }
+service: { type: ClusterIP, port: 8080 }
 ```
 
 `charts/prov-ledger/templates/deployment.yaml`
@@ -862,7 +901,7 @@ spec:
           valueFrom: {secretKeyRef: {name: otel, key: endpoint}}
 ```
 
-*(duplicate skeletons for er-service, cost-guard as needed)*
+_(duplicate skeletons for er-service, cost-guard as needed)_
 
 ---
 
@@ -925,11 +964,19 @@ import http from 'k6/http';
 import { sleep, check } from 'k6';
 export const options = { vus: 20, duration: '3m' };
 export default function () {
-  const r = http.post('http://localhost:4000/graphql', JSON.stringify({
-    query: 'mutation($c:String!,$id:String!){ runSandbox(cypher:$c, caseId:$id){ latencyMs } }',
-    variables: { c: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100', id: 'demo' }
-  }), { headers: { 'Content-Type': 'application/json' } });
-  check(r, { '200': (res) => res.status === 200 });
+  const r = http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query:
+        'mutation($c:String!,$id:String!){ runSandbox(cypher:$c, caseId:$id){ latencyMs } }',
+      variables: {
+        c: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100',
+        id: 'demo',
+      },
+    }),
+    { headers: { 'Content-Type': 'application/json' } },
+  );
+  check(r, { 200: (res) => res.status === 200 });
   sleep(1);
 }
 ```
@@ -945,8 +992,8 @@ export default function () {
   "caseId": "demo",
   "root": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
   "steps": [
-    {"op": "ingest", "model": "csv", "configChecksum": "abc123"},
-    {"op": "er", "model": "lsh-v1", "configChecksum": "def456"}
+    { "op": "ingest", "model": "csv", "configChecksum": "abc123" },
+    { "op": "er", "model": "lsh-v1", "configChecksum": "def456" }
   ]
 }
 ```
@@ -954,7 +1001,12 @@ export default function () {
 `fixtures/er/golden/sample.json`
 
 ```json
-{"leftId":"p:123","rightId":"p:456","features":{"nameJaro":0.93,"emailExact":1},"decision":"merge"}
+{
+  "leftId": "p:123",
+  "rightId": "p:456",
+  "features": { "nameJaro": 0.93, "emailExact": 1 },
+  "decision": "merge"
+}
 ```
 
 ---
@@ -999,12 +1051,12 @@ blocked[case] { input.sanctions_list[case] }
 
 ## 34) Security: Lightweight Threat Model Checklist
 
-* Data flow enumerated for /evidence, /export, /er/*, /sandbox
-* AuthN: OIDC + WebAuthn step-up on export/merge
-* AuthZ: ABAC via OPA; field-level GraphQL rules
-* Secrets: Kubernetes secrets (sealed secrets if available)
-* Telemetry PII policy: redact identifiers in traces
-* Supply chain: Dependabot enabled; Go/Node lockfiles committed
+- Data flow enumerated for /evidence, /export, /er/\*, /sandbox
+- AuthN: OIDC + WebAuthn step-up on export/merge
+- AuthZ: ABAC via OPA; field-level GraphQL rules
+- Secrets: Kubernetes secrets (sealed secrets if available)
+- Telemetry PII policy: redact identifiers in traces
+- Supply chain: Dependabot enabled; Go/Node lockfiles committed
 
 ---
 
@@ -1014,9 +1066,16 @@ blocked[case] { input.sanctions_list[case] }
 
 ```js
 const fs = require('fs');
-const nodes = [...Array(100)].map((_,i)=>({id:`n${i}`,label:'Person'}));
-const edges = [...Array(200)].map((_,i)=>({from:`n${i%100}`,to:`n${(i*7)%100}`,rel:'KNOWS'}));
-fs.writeFileSync('fixtures/case-demo/demo.graph.json', JSON.stringify({nodes,edges},null,2));
+const nodes = [...Array(100)].map((_, i) => ({ id: `n${i}`, label: 'Person' }));
+const edges = [...Array(200)].map((_, i) => ({
+  from: `n${i % 100}`,
+  to: `n${(i * 7) % 100}`,
+  rel: 'KNOWS',
+}));
+fs.writeFileSync(
+  'fixtures/case-demo/demo.graph.json',
+  JSON.stringify({ nodes, edges }, null, 2),
+);
 console.log('Seed graph written.');
 ```
 
@@ -1140,7 +1199,7 @@ USER 65532:65532
 ENTRYPOINT ["/app"]
 ```
 
-*(copy & adjust path for other services)*
+_(copy & adjust path for other services)_
 
 ---
 
@@ -1155,15 +1214,29 @@ import typeDefs from './typeDefs';
 
 const resolvers = {
   Query: {
-    case: (_:any, {id}:{id:string}) => ({ id, title: 'Demo', createdAt: new Date().toISOString() }),
+    case: (_: any, { id }: { id: string }) => ({
+      id,
+      title: 'Demo',
+      createdAt: new Date().toISOString(),
+    }),
     search: () => [],
-    cypherPreview: (_:any, {prompt}:{prompt:string}) => ({ cypher: `// from: ${prompt}`, costEstimate: 1.0 }),
+    cypherPreview: (_: any, { prompt }: { prompt: string }) => ({
+      cypher: `// from: ${prompt}`,
+      costEstimate: 1.0,
+    }),
   },
   Mutation: {
     runSandbox: async () => ({ rows: [], latencyMs: 42 }),
-    registerEvidence: async (_:any, {input}:{input:any}) => ({ id: 'ev-1', ...input }),
-    erMerge: async () => ({ mergedId: 'm-1', reversible: true, auditId: 'a-1' }),
-  }
+    registerEvidence: async (_: any, { input }: { input: any }) => ({
+      id: 'ev-1',
+      ...input,
+    }),
+    erMerge: async () => ({
+      mergedId: 'm-1',
+      reversible: true,
+      auditId: 'a-1',
+    }),
+  },
 };
 
 const yoga = createYoga({ schema: createSchema({ typeDefs, resolvers }) });
@@ -1175,28 +1248,79 @@ server.listen(4000, () => console.log('api-gateway on :4000'));
 
 ```ts
 export default /* GraphQL */ `
-scalar JSON
- type Query { case(id: ID!): Case search(text: String!, limit: Int = 20): [Entity!]! cypherPreview(prompt: String!, caseId: ID!): CypherPreview! }
- type Mutation { runSandbox(cypher: String!, caseId: ID!): SandboxResult! registerEvidence(input: EvidenceInput!): Evidence! erMerge(leftId: ID!, rightId: ID!, policy: String!): MergeResult! }
- type Case { id: ID!, title: String!, createdAt: String! }
- input EvidenceInput { sourceUri: String!, hash: String!, metadata: JSON }
- type CypherPreview { cypher: String!, costEstimate: Float! }
- type SandboxResult { rows: [JSON!]!, latencyMs: Int! }
- type Entity { id: ID!, label: String!, confidence: Float }
- type MergeResult { mergedId: ID!, reversible: Boolean!, auditId: ID! }
+  scalar JSON
+  type Query {
+    case(id: ID!): Case
+    search(text: String!, limit: Int = 20): [Entity!]!
+    cypherPreview(prompt: String!, caseId: ID!): CypherPreview!
+  }
+  type Mutation {
+    runSandbox(cypher: String!, caseId: ID!): SandboxResult!
+    registerEvidence(input: EvidenceInput!): Evidence!
+    erMerge(leftId: ID!, rightId: ID!, policy: String!): MergeResult!
+  }
+  type Case {
+    id: ID!
+    title: String!
+    createdAt: String!
+  }
+  input EvidenceInput {
+    sourceUri: String!
+    hash: String!
+    metadata: JSON
+  }
+  type CypherPreview {
+    cypher: String!
+    costEstimate: Float!
+  }
+  type SandboxResult {
+    rows: [JSON!]!
+    latencyMs: Int!
+  }
+  type Entity {
+    id: ID!
+    label: String!
+    confidence: Float
+  }
+  type MergeResult {
+    mergedId: ID!
+    reversible: Boolean!
+    auditId: ID!
+  }
 `;
 ```
 
 `packages/api-gateway/package.json`
 
 ```json
-{ "name":"api-gateway","private":true,"type":"module","scripts":{"dev":"tsx src/server.ts","build":"tsc -p .","start":"node dist/server.js","persist":"node scripts/persisted.js"},"dependencies":{"graphql":"^16","graphql-yoga":"^5"},"devDependencies":{"tsx":"^4","typescript":"^5"}}
+{
+  "name": "api-gateway",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc -p .",
+    "start": "node dist/server.js",
+    "persist": "node scripts/persisted.js"
+  },
+  "dependencies": { "graphql": "^16", "graphql-yoga": "^5" },
+  "devDependencies": { "tsx": "^4", "typescript": "^5" }
+}
 ```
 
 `packages/api-gateway/tsconfig.json`
 
 ```json
-{ "compilerOptions": { "outDir":"dist","module":"esnext","target":"es2022","moduleResolution":"bundler","strict":true }, "include":["src"] }
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "esnext",
+    "target": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true
+  },
+  "include": ["src"]
+}
 ```
 
 **Persisted queries scaffold** `packages/api-gateway/scripts/persisted.js`
@@ -1204,7 +1328,7 @@ scalar JSON
 ```js
 import fs from 'fs';
 const queries = { getCase: 'query($id:ID!){case(id:$id){id}}' };
-fs.writeFileSync('persisted.json', JSON.stringify(queries,null,2));
+fs.writeFileSync('persisted.json', JSON.stringify(queries, null, 2));
 ```
 
 ---
@@ -1215,17 +1339,30 @@ fs.writeFileSync('persisted.json', JSON.stringify(queries,null,2));
 
 ```tsx
 import { useState } from 'react';
-export default function App(){
-  const [prompt,setPrompt]=useState('');
+export default function App() {
+  const [prompt, setPrompt] = useState('');
   return (
     <div className="grid grid-cols-12 h-screen">
       <aside className="col-span-3 p-4 border-r">
         <h1 className="text-xl font-bold">Explore</h1>
-        <input data-testid="prompt" className="w-full border p-2" value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Show relationships from A to B"/>
-        <button data-testid="preview-run" className="mt-2 px-3 py-2 border rounded">Preview</button>
+        <input
+          data-testid="prompt"
+          className="w-full border p-2"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Show relationships from A to B"
+        />
+        <button
+          data-testid="preview-run"
+          className="mt-2 px-3 py-2 border rounded"
+        >
+          Preview
+        </button>
       </aside>
       <main className="col-span-9 grid grid-rows-2 grid-cols-2 gap-2 p-2">
-        <section className="row-span-2 border" data-testid="graph">Graph</section>
+        <section className="row-span-2 border" data-testid="graph">
+          Graph
+        </section>
         <section className="border">Timeline</section>
         <section className="border">Map</section>
       </main>
@@ -1238,7 +1375,17 @@ export default function App(){
 
 ```html
 <!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Tri-Pane</title><script type="module" src="/src/main.tsx"></script></head><body><div id="root"></div></body></html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tri-Pane</title>
+    <script type="module" src="/src/main.tsx"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
 ```
 
 `apps/web/src/main.tsx`
@@ -1247,19 +1394,38 @@ export default function App(){
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-createRoot(document.getElementById('root')!).render(<App/>);
+createRoot(document.getElementById('root')!).render(<App />);
 ```
 
 `apps/web/package.json`
 
 ```json
-{ "name":"web","private":true,"scripts":{"dev":"vite","build":"vite build","preview":"vite preview"},"devDependencies":{"vite":"^5","typescript":"^5","@types/react":"^18","@types/react-dom":"^18"},"dependencies":{"react":"^18","react-dom":"^18"}}
+{
+  "name": "web",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5",
+    "typescript": "^5",
+    "@types/react": "^18",
+    "@types/react-dom": "^18"
+  },
+  "dependencies": { "react": "^18", "react-dom": "^18" }
+}
 ```
 
 `apps/web/tailwind.config.js`
 
 ```js
-export default { content:["./index.html","./src/**/*.{ts,tsx}"], theme:{ extend:{} }, plugins:[] }
+export default {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: { extend: {} },
+  plugins: [],
+};
 ```
 
 ---
@@ -1269,7 +1435,14 @@ export default { content:["./index.html","./src/**/*.{ts,tsx}"], theme:{ extend:
 **Root** `package.json`
 
 ```json
-{ "private": true, "workspaces": ["apps/*","packages/*"], "scripts": { "dev:api": "pnpm --filter api-gateway dev", "dev:web": "pnpm --filter web dev" } }
+{
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:api": "pnpm --filter api-gateway dev",
+    "dev:web": "pnpm --filter web dev"
+  }
+}
 ```
 
 **Root** `.tool-versions` (asdf)
@@ -1283,12 +1456,12 @@ nodejs 20.15.0
 
 ```yaml
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
-  hooks:
-  - id: trailing-whitespace
-  - id: end-of-file-fixer
-  - id: check-added-large-files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
 ```
 
 ---
@@ -1342,10 +1515,12 @@ node packages/api-gateway/scripts/persisted.js
 `packages/api-gateway/src/middleware/cost.ts`
 
 ```ts
-export function enforceCost(max=10000){
-  return async (req:any, _res:any, next:any) => {
-    const est = Number(req.headers['x-estimated-cost']||0);
-    if(est>max){ return next(new Error('Query exceeds cost budget')); }
+export function enforceCost(max = 10000) {
+  return async (req: any, _res: any, next: any) => {
+    const est = Number(req.headers['x-estimated-cost'] || 0);
+    if (est > max) {
+      return next(new Error('Query exceeds cost budget'));
+    }
     next();
   };
 }
@@ -1374,11 +1549,11 @@ dev: services api web
 
 ## 46) Ready-to-Demo Checklist (hour-before)
 
-* [ ] Docker images built & tagged
-* [ ] k6 smoke passes; alerts wired
-* [ ] Fixtures loaded; explain overlay shows provenance
-* [ ] Persisted queries generated
-* [ ] Rollback toggles verified (feature flags/copilot)
+- [ ] Docker images built & tagged
+- [ ] k6 smoke passes; alerts wired
+- [ ] Fixtures loaded; explain overlay shows provenance
+- [ ] Persisted queries generated
+- [ ] Rollback toggles verified (feature flags/copilot)
 
 ---
 
