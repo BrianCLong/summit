@@ -5,6 +5,7 @@ import {
   ContextAwareDecomposer,
   HierarchicalSummarizer,
   MetaPromptPlanner,
+  PromptEngineeringToolkit,
   RecursiveSelfImprovementEngine,
   SelfConsensusEngine,
   TokenAwareRetriever,
@@ -159,18 +160,100 @@ describe('HierarchicalSummarizer', () => {
   });
 });
 
+describe('PromptEngineeringToolkit', () => {
+  it('runs end-to-end optimisation pipeline and returns structured report', async () => {
+    const toolkit = new PromptEngineeringToolkit({
+      decomposition: {
+        embed: keywordEmbedder,
+        adaptiveThreshold: true,
+        maxSegments: 2
+      },
+      retrieval: {
+        embed: keywordEmbedder,
+        tokenBudget: 20,
+        minimumRelevance: 0.3
+      },
+      summarization: {
+        layers: [
+          {
+            maxTokens: 30,
+            summarizer: async text => text.split(/\s+/).slice(0, 30).join(' ')
+          },
+          {
+            maxTokens: 15,
+            summarizer: async text => text.split(/\s+/).slice(0, 15).join(' ')
+          }
+        ]
+      },
+      planner: {
+        tokenBudget: 60,
+        modules: [
+          {
+            name: 'summary',
+            estimatedTokens: 20,
+            template: context => `Summarize task: ${context.task}`
+          },
+          {
+            name: 'validate',
+            estimatedTokens: 30,
+            template: context => `Validate insights for ${context.task}`
+          }
+        ]
+      },
+      rsip: {
+        aspects: ['relevance', 'clarity'],
+        generator: async prompt =>
+          prompt.includes('::refined::') ? `${prompt.replace('::refined::', '')} ::final::` : `${prompt} ::draft::`,
+        evaluator: async output =>
+          output.includes('::final::') ? 0.95 : output.includes('::draft::') ? 0.6 : 0.8,
+        refinePrompt: (previousPrompt, output) =>
+          output.includes('::draft::') ? `${previousPrompt} ::refined::` : previousPrompt,
+        maxIterations: 3,
+        qualityThreshold: 0.8
+      },
+      consensusThreshold: 0.7,
+      broker: {
+        tokenLimitPerSync: 50
+      }
+    });
+
+    const report = await toolkit.optimise({
+      task: 'climate strategy accuracy',
+      complexity: 0.7,
+      segments: [
+        { id: 's1', text: 'Climate strategy overview with energy transition focus.' },
+        { id: 's2', text: 'Historical anecdotes unrelated.' }
+      ],
+      documents: [
+        { id: 'd1', text: 'Climate energy policy improvements boost accuracy.' },
+        { id: 'd2', text: 'Cooking recipe with no relation.' }
+      ],
+      initialPrompt: 'Explain the latest climate accuracy metrics.',
+      agents: ['alpha', 'beta'],
+      basePrompt: 'Collaborate on the refined plan.'
+    });
+
+    expect(report.decomposition.selected.length).toBeGreaterThan(0);
+    expect(report.retrieval.documents.length).toBe(1);
+    expect(report.plannedPrompt.modules).toContain('summary');
+    expect(report.rsip.iterations).toBeLessThanOrEqual(3);
+    expect(report.consensus.clusters.length).toBeGreaterThan(0);
+    expect(report.assignments.length).toBe(2);
+  });
+});
+
 describe('CollaborativeContextBroker', () => {
   it('produces token-bounded diffs and assignments', () => {
-    const broker = new CollaborativeContextBroker({ tokenBudget: 30 });
-    broker.upsert({ id: 'ctx1', content: 'Climate accuracy metrics update.', updatedAt: 10, relevance: 0.9 });
-    broker.upsert({ id: 'ctx2', content: 'Energy efficiency gains summary.', updatedAt: 12, relevance: 0.8 });
-    broker.upsert({ id: 'ctx3', content: 'Irrelevant note about history.', updatedAt: 15, relevance: 0.2 });
+    const broker = new CollaborativeContextBroker({ tokenLimitPerSync: 30 });
+    broker.upsert({ id: 'ctx1', content: 'Climate accuracy metrics update.', lastUpdated: 10 });
+    broker.upsert({ id: 'ctx2', content: 'Energy efficiency gains summary.', lastUpdated: 12 });
+    broker.upsert({ id: 'ctx3', content: 'Irrelevant note about history.', lastUpdated: 15 });
 
     const diffs = broker.diffSince(9);
     expect(diffs.length).toBeGreaterThanOrEqual(2);
-    const assignments = broker.assignContext(['alpha', 'beta'], 'Base prompt', 9);
-    expect(assignments[0].prompt).toContain('Context');
-    expect(assignments[0].contextIds.length).toBeGreaterThanOrEqual(1);
+    const assignments = broker.assignAgents(['alpha', 'beta'], 'Base prompt', 9);
+    expect(assignments[0].prompt).toContain('Context update');
+    expect(assignments.length).toBe(2);
   });
 });
 

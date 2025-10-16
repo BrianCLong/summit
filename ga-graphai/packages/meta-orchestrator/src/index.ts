@@ -594,37 +594,46 @@ export type {
 
 export {
   ContextAwareDecomposer,
-  CollaborativeContextBroker,
-  HierarchicalSummarizer,
-  MetaPromptPlanner,
-  RecursiveSelfImprovementEngine,
-  SelfConsensusEngine,
-  TokenAwareRetriever,
-  type AgentAssignment,
-  type CandidateGenerationOptions,
-  type ConsensusCluster,
-  type ConsensusResult,
   type ContextAwareDecompositionOptions,
-  type ContextDiff,
   type ContextSegment,
-  type ContextState,
   type DecomposedContext,
+  type SalientSegment
+} from './prompt/contextDecomposer.js';
+export { CollaborativeContextBroker, type AgentAssignment, type BrokerOptions, type ContextDiff, type ContextState } from './prompt/collaboration.js';
+export {
+  HierarchicalSummarizer,
   type HierarchicalSummarizerOptions,
   type HierarchicalSummaryResult,
+  type SummarizationLayer
+} from './prompt/summarizer.js';
+export {
+  MetaPromptPlanner,
+  type PlannedPrompt,
   type PlannerFeedback,
   type PlannerOptions,
-  type PlannedPrompt,
   type PromptModule,
-  type PromptModuleContext,
+  type PromptModuleContext
+} from './prompt/planner.js';
+export {
+  RecursiveSelfImprovementEngine,
   type QualityAspect,
-  type RetrievedContext,
-  type RetrievableDocument,
   type RSIPIterationLog,
   type RSIPOptions,
-  type RSIPRunResult,
-  type SemanticEmbeddingFunction,
-  type SimilarityFunction,
-  type SummarizationLayer,
+  type RSIPRunResult
+} from './prompt/rsip.js';
+export {
+  SelfConsensusEngine,
+  type CandidateGenerationOptions,
+  type ConsensusCluster,
+  type ConsensusResult
+} from './prompt/consensus.js';
+export {
+  TokenAwareRetriever,
+  type RetrievedContext,
+  type RetrievableDocument,
   type TokenAwareRetrievalOptions,
-  type TokenEstimator
-} from './promptEngineering.js';
+  type RetrievedDocument
+} from './prompt/retriever.js';
+export { type SimilarityFunction } from './prompt/types.js';
+export { clampValue, cosineSimilarity, defaultTokenEstimator, type TokenEstimator } from './prompt/utils.js';
+export { PromptEngineeringToolkit, type PromptEngineeringToolkitOptions, type PromptOptimizationInput, type PromptOptimizationReport } from './prompt/toolkit.js';
