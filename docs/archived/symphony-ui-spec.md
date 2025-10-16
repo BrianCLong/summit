@@ -633,6 +633,7 @@ const NAV = [
 export default function SymphonyUI() {
 const [tab, setTab] = useState("dash");
 return (
+
 <div className="min-h-screen bg-slate-50 text-slate-900">
 <header className="sticky top-0 z-10 bg-white border-b border-slate-200">
 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -668,6 +669,7 @@ tab === n.key ? "bg-slate-900 text-white border-slate-900" : "bg-white hover:bg-
 
 function Card({ title, children, right }) {
 return (
+
 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm">
 <div className="px-4 py-3 border-b border-slate-100 flex items-center">
 <div className="font-semibold">{title}</div>
@@ -697,6 +699,7 @@ tick();
 useInterval(tick, 5000, []);
 
 return (
+
 <div className="grid md:grid-cols-2 gap-4">
 <Card title="Gateway (LiteLLM)">
 <ServiceStatus label="LiteLLM" up={!!status?.litellm?.up} details={`${status?.litellm?.models ?? 0} models`} />
@@ -727,6 +730,7 @@ return (
 
 function ServiceStatus({ label, up, details }) {
 return (
+
 <div className="flex items-center gap-2 mb-2">
 <span className={classNames("inline-block w-2.5 h-2.5 rounded-full", up ? "bg-emerald-500" : "bg-rose-500")} />
 <div className="font-medium">{label}</div>
@@ -737,6 +741,7 @@ return (
 
 function Endpoint({ url }) {
 return (
+
 <div className="text-xs text-slate-500">
 <span className="font-mono">{url}</span>
 </div>
@@ -774,6 +779,7 @@ setErr(String(e));
 })();
 }, []);
 return (
+
 <div className="grid md:grid-cols-2 gap-4">
 <Card title="Gateway Models" right={<span className="text-sm text-slate-500">{gw.length}</span>}>
 <ul className="text-sm space-y-1 max-h-80 overflow-auto">
@@ -815,6 +821,7 @@ setBusy(false);
 }
 };
 return (
+
 <div className="grid gap-4">
 <Card title="Prompt">
 <div className="flex flex-col md:flex-row gap-2">
@@ -847,6 +854,7 @@ setBusy(false);
 }
 };
 return (
+
 <div className="grid gap-4">
 <Card title="RAG Question">
 <div className="flex gap-2">
@@ -903,6 +911,7 @@ setBusy(false);
 }
 };
 return (
+
 <div className="grid gap-4">
 <Card
 title="Run Migrations"
@@ -960,6 +969,7 @@ setBusy(false);
 useEffect(() => { load(); }, []);
 
 return (
+
 <div className="grid gap-4">
 <Card
 title="Orchestration Policy"
@@ -997,8 +1007,11 @@ setBusy(false);
 return (
 <Card title="LiteLLM Logs" right={<button onClick={pull} disabled={busy || !ENV.PROXY_BASE} className="px-3 py-1.5 rounded-xl border disabled:opacity-50">Refresh</button>}>
 {ENV.PROXY_BASE ? (
+
 <pre className="text-xs whitespace-pre-wrap min-h-[240px]">{out || (busy ? "Loading…" : "(no output)")}</pre>
+
 ) : (
+
 <div className="text-sm text-slate-600">Proxy not configured. Logs available on host at <code>/tmp/litellm.log</code>.</div>
 )}
 </Card>

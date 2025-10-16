@@ -2,10 +2,10 @@
 
 The database pooling overhaul was validated with a scripted workload that replays the production mix of read-heavy API requests (85% reads, 15% writes) against a staging clone. Each test ran for 30 minutes on c6i.2xlarge application nodes pointed at identical Postgres clusters.
 
-| Scenario | Avg Throughput (req/s) | P95 Latency (ms) | Notes |
-| --- | --- | --- | --- |
-| Legacy pool (single writer) | 820 | 310 | Saturated writer pool, no read routing |
-| Optimized pool (this change) | **1245** | 180 | Multi-replica reads, retries, statement cache |
+| Scenario                     | Avg Throughput (req/s) | P95 Latency (ms) | Notes                                         |
+| ---------------------------- | ---------------------- | ---------------- | --------------------------------------------- |
+| Legacy pool (single writer)  | 820                    | 310              | Saturated writer pool, no read routing        |
+| Optimized pool (this change) | **1245**               | 180              | Multi-replica reads, retries, statement cache |
 
 The optimized configuration delivered a 51.8% throughput increase with a 42% reduction in p95 latency. Metrics were captured with k6 + Prometheus, and slow query logs show statement cache hit rates above 93% post-change.
 
