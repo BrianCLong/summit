@@ -7,7 +7,9 @@ import { redactionService } from '../redaction/redact';
 import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import Redis from 'ioredis';
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
-const redisClient = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
+const redisClient = process.env.REDIS_URL
+    ? new Redis(process.env.REDIS_URL)
+    : null;
 export const resolvers = {
     DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
     Query: {
@@ -23,7 +25,7 @@ export const resolvers = {
                     resource: 'coherence_score',
                     purpose: ctx.purpose,
                     clientIP: ctx.req?.ip,
-                    userAgent: ctx.req?.get('user-agent')
+                    userAgent: ctx.req?.get('user-agent'),
                 });
                 if (!policyDecision.allow) {
                     throw new Error(`Access denied: ${policyDecision.reason}`);
@@ -35,7 +37,8 @@ export const resolvers = {
                         console.log(`Cache hit for ${cacheKey}`);
                         const parsed = JSON.parse(cachedResult);
                         // Apply redaction to cached result
-                        if (policyDecision.redactionRules && policyDecision.redactionRules.length > 0) {
+                        if (policyDecision.redactionRules &&
+                            policyDecision.redactionRules.length > 0) {
                             const redactionPolicy = redactionService.createRedactionPolicy(policyDecision.redactionRules);
                             return await redactionService.redactObject(parsed, redactionPolicy, tenantId);
                         }
@@ -48,10 +51,11 @@ export const resolvers = {
                     tenantId,
                     score: row?.score ?? 0,
                     status: row?.status ?? 'UNKNOWN',
-                    updatedAt: row?.updated_at ?? new Date().toISOString()
+                    updatedAt: row?.updated_at ?? new Date().toISOString(),
                 };
                 // Apply redaction based on policy decision
-                if (policyDecision.redactionRules && policyDecision.redactionRules.length > 0) {
+                if (policyDecision.redactionRules &&
+                    policyDecision.redactionRules.length > 0) {
                     const redactionPolicy = redactionService.createRedactionPolicy(policyDecision.redactionRules);
                     result = await redactionService.redactObject(result, redactionPolicy, tenantId);
                 }
@@ -66,7 +70,7 @@ export const resolvers = {
             finally {
                 end();
             }
-        }
+        },
     },
     Mutation: {
         async publishCoherenceSignal(_, { input }, ctx) {
@@ -74,25 +78,47 @@ export const resolvers = {
             try {
                 const user = getUser(ctx);
                 // S4.1 Fine-grained Scopes: Use coherence:write:self if user is publishing for their own tenantId
-                const scope = user.tenant === input.tenantId ? 'coherence:write:self' : 'coherence:write';
+                const scope = user.tenant === input.tenantId
+                    ? 'coherence:write:self'
+                    : 'coherence:write';
                 // S3.2 Residency Guard: Pass residency to OPA
-                opa.enforce(scope, { tenantId: input.tenantId, user, residency: user.residency });
+                opa.enforce(scope, {
+                    tenantId: input.tenantId,
+                    user,
+                    residency: user.residency,
+                });
                 const { tenantId, type, value, weight, source, ts } = input;
                 const signalId = `${source}:${Date.now()}`;
-                await neo.run(`MERGE (t:Tenant {tenant_id:$tenantId}) WITH t MERGE (s:Signal {signal_id:$signalId}) SET s.type=$type, s.value=$value, s.weight=$weight, s.source=$source, s.ts=$ts, s.tenant_id=$tenantId, s.provenance_id=$provenanceId MERGE (t)-[:EMITS]->(s)`, { tenantId, signalId, type, value, weight, source, ts: ts || new Date().toISOString(), provenanceId: 'placeholder' }, { region: user.residency }); // S3.1: Pass region hint
+                await neo.run(`MERGE (t:Tenant {tenant_id:$tenantId}) WITH t MERGE (s:Signal {signal_id:$signalId}) SET s.type=$type, s.value=$value, s.weight=$weight, s.source=$source, s.ts=$ts, s.tenant_id=$tenantId, s.provenance_id=$provenanceId MERGE (t)-[:EMITS]->(s)`, {
+                    tenantId,
+                    signalId,
+                    type,
+                    value,
+                    weight,
+                    source,
+                    ts: ts || new Date().toISOString(),
+                    provenanceId: 'placeholder',
+                }, { region: user.residency }); // S3.1: Pass region hint
                 if (redisClient) {
                     const cacheKey = `tenantCoherence:${tenantId}`;
                     await redisClient.del(cacheKey);
                     console.log(`Cache invalidated for ${cacheKey}`);
                 }
-                const newSignal = { id: signalId, type, value, weight, source, ts: ts || new Date().toISOString() };
+                const newSignal = {
+                    id: signalId,
+                    type,
+                    value,
+                    weight,
+                    source,
+                    ts: ts || new Date().toISOString(),
+                };
                 ctx.pubsub.publish(COHERENCE_EVENTS, { coherenceEvents: newSignal });
                 return true;
             }
             finally {
                 end();
             }
-        }
+        },
     },
     Subscription: {
         coherenceEvents: {
@@ -102,7 +128,7 @@ export const resolvers = {
                 const wrappedIterator = (async function* () {
                     for await (const payload of iterator) {
                         const end = process.hrtime.bigint();
-                        const durationMs = Number(end - start) / 1000000;
+                        const durationMs = Number(end - start) / 1_000_000;
                         subscriptionFanoutLatency.observe(durationMs);
                         yield payload;
                     }

@@ -15,7 +15,7 @@ class AIInsightsValidator {
       tests: [],
       passed: 0,
       failed: 0,
-      evidence: []
+      evidence: [],
     };
   }
 
@@ -35,7 +35,9 @@ class AIInsightsValidator {
       await this.runUnitTests();
       await this.generateEvidence();
 
-      console.log(`✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`);
+      console.log(
+        `✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`,
+      );
       return this.results.failed === 0;
     } catch (error) {
       console.error('❌ Validation failed:', error.message);
@@ -50,7 +52,10 @@ class AIInsightsValidator {
     const test = { name: 'FastAPI Service Configuration', status: 'running' };
 
     try {
-      const servicePath = path.join(process.cwd(), 'services/insight-ai/app.py');
+      const servicePath = path.join(
+        process.cwd(),
+        'services/insight-ai/app.py',
+      );
 
       if (!fs.existsSync(servicePath)) {
         throw new Error('AI Insights service not found');
@@ -63,7 +68,7 @@ class AIInsightsValidator {
         'from fastapi import FastAPI',
         'from fastapi.middleware.cors import CORSMiddleware',
         'import torch',
-        'import numpy as np'
+        'import numpy as np',
       ];
 
       for (const importStmt of requiredImports) {
@@ -77,26 +82,32 @@ class AIInsightsValidator {
         '/health',
         '/metrics',
         '/entity-resolution',
-        '/link-scoring'
+        '/link-scoring',
       ];
 
       let endpointsFound = 0;
       for (const endpoint of requiredEndpoints) {
-        if (serviceContent.includes(`"${endpoint}"`) || serviceContent.includes(`'${endpoint}'`) ||
-            serviceContent.includes(`@app.get("${endpoint}")`) || serviceContent.includes(`@app.post("${endpoint}")`)) {
+        if (
+          serviceContent.includes(`"${endpoint}"`) ||
+          serviceContent.includes(`'${endpoint}'`) ||
+          serviceContent.includes(`@app.get("${endpoint}")`) ||
+          serviceContent.includes(`@app.post("${endpoint}")`)
+        ) {
           endpointsFound++;
         }
       }
 
       if (endpointsFound < requiredEndpoints.length) {
-        throw new Error(`Only ${endpointsFound}/${requiredEndpoints.length} required endpoints found`);
+        throw new Error(
+          `Only ${endpointsFound}/${requiredEndpoints.length} required endpoints found`,
+        );
       }
 
       // Validate OpenTelemetry integration
       const otelChecks = [
         'from opentelemetry',
         'tracer =',
-        'with tracer.start_as_current_span'
+        'with tracer.start_as_current_span',
       ];
 
       let otelFeatures = 0;
@@ -110,13 +121,16 @@ class AIInsightsValidator {
       test.details = `FastAPI service with ${endpointsFound} endpoints and ${otelFeatures} OTel features`;
 
       // Generate service hash for provenance
-      const serviceHash = crypto.createHash('sha256').update(serviceContent).digest('hex');
+      const serviceHash = crypto
+        .createHash('sha256')
+        .update(serviceContent)
+        .digest('hex');
       this.results.evidence.push({
         type: 'fastapi_service',
         file: servicePath,
         hash: serviceHash,
         endpoints: endpointsFound,
-        otel_features: otelFeatures
+        otel_features: otelFeatures,
       });
 
       this.results.passed++;
@@ -136,7 +150,10 @@ class AIInsightsValidator {
     const test = { name: 'PyTorch Models Configuration', status: 'running' };
 
     try {
-      const servicePath = path.join(process.cwd(), 'services/insight-ai/app.py');
+      const servicePath = path.join(
+        process.cwd(),
+        'services/insight-ai/app.py',
+      );
       const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
       // Validate neural network models
@@ -144,7 +161,7 @@ class AIInsightsValidator {
         'EntitySimilarityNet',
         'LinkPredictionNet',
         'nn.Module',
-        'torch.nn'
+        'torch.nn',
       ];
 
       let modelFeatures = 0;
@@ -163,7 +180,7 @@ class AIInsightsValidator {
         'model.eval()',
         'torch.no_grad()',
         'model.forward',
-        '.predict'
+        '.predict',
       ];
 
       let inferenceFeatures = 0;
@@ -178,7 +195,7 @@ class AIInsightsValidator {
         'entity_resolution',
         'link_scoring',
         'similarity_score',
-        'confidence'
+        'confidence',
       ];
 
       let algorithmFeatures = 0;
@@ -199,7 +216,7 @@ class AIInsightsValidator {
         type: 'pytorch_models',
         model_features: modelFeatures,
         inference_features: inferenceFeatures,
-        algorithm_features: algorithmFeatures
+        algorithm_features: algorithmFeatures,
       });
 
       this.results.passed++;
@@ -219,7 +236,10 @@ class AIInsightsValidator {
     const test = { name: 'Feature Flags Implementation', status: 'running' };
 
     try {
-      const servicePath = path.join(process.cwd(), 'services/insight-ai/app.py');
+      const servicePath = path.join(
+        process.cwd(),
+        'services/insight-ai/app.py',
+      );
       const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
       // Validate feature flag implementation
@@ -227,7 +247,7 @@ class AIInsightsValidator {
         'ENABLE_ENTITY_RESOLUTION',
         'ENABLE_LINK_SCORING',
         'feature_enabled',
-        'os.getenv'
+        'os.getenv',
       ];
 
       let flagFeatures = 0;
@@ -246,7 +266,7 @@ class AIInsightsValidator {
         'if.*feature.*enabled',
         'if.*ENABLE_',
         'return.*{"error".*"disabled"',
-        'feature.*not.*enabled'
+        'feature.*not.*enabled',
       ];
 
       let gatingFeatures = 0;
@@ -263,7 +283,7 @@ class AIInsightsValidator {
       this.results.evidence.push({
         type: 'feature_flags',
         flag_features: flagFeatures,
-        gating_features: gatingFeatures
+        gating_features: gatingFeatures,
       });
 
       this.results.passed++;
@@ -283,7 +303,10 @@ class AIInsightsValidator {
     const test = { name: 'OpenTelemetry Integration', status: 'running' };
 
     try {
-      const servicePath = path.join(process.cwd(), 'services/insight-ai/app.py');
+      const servicePath = path.join(
+        process.cwd(),
+        'services/insight-ai/app.py',
+      );
       const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
       // Validate OTel setup
@@ -291,7 +314,7 @@ class AIInsightsValidator {
         'from opentelemetry',
         'TracerProvider',
         'SpanExporter',
-        'BatchSpanProcessor'
+        'BatchSpanProcessor',
       ];
 
       let otelImportsFound = 0;
@@ -306,7 +329,7 @@ class AIInsightsValidator {
         'tracer.start_as_current_span',
         'span.set_attribute',
         'span.add_event',
-        'trace_id'
+        'trace_id',
       ];
 
       let tracingFound = 0;
@@ -317,12 +340,16 @@ class AIInsightsValidator {
       }
 
       // Check GraphQL client integration
-      const clientPath = path.join(process.cwd(), 'server/src/services/ai-insights-client.ts');
+      const clientPath = path.join(
+        process.cwd(),
+        'server/src/services/ai-insights-client.ts',
+      );
       let clientTracing = false;
 
       if (fs.existsSync(clientPath)) {
         const clientContent = fs.readFileSync(clientPath, 'utf8');
-        clientTracing = clientContent.includes('trace') && clientContent.includes('span');
+        clientTracing =
+          clientContent.includes('trace') && clientContent.includes('span');
       }
 
       if (otelImportsFound < 2 && tracingFound < 2) {
@@ -336,7 +363,7 @@ class AIInsightsValidator {
         type: 'opentelemetry_integration',
         otel_imports: otelImportsFound,
         tracing_features: tracingFound,
-        client_tracing: clientTracing
+        client_tracing: clientTracing,
       });
 
       this.results.passed++;
@@ -357,7 +384,10 @@ class AIInsightsValidator {
 
     try {
       // Check GraphQL schema extensions
-      const schemaPath = path.join(process.cwd(), 'server/src/graphql/ai-insights-schema.ts');
+      const schemaPath = path.join(
+        process.cwd(),
+        'server/src/graphql/ai-insights-schema.ts',
+      );
 
       if (!fs.existsSync(schemaPath)) {
         throw new Error('AI Insights GraphQL schema not found');
@@ -370,7 +400,7 @@ class AIInsightsValidator {
         'aiScore',
         'entityResolution',
         'linkScoring',
-        'AIInsightScore'
+        'AIInsightScore',
       ];
 
       let schemaFeaturesFound = 0;
@@ -385,7 +415,10 @@ class AIInsightsValidator {
       }
 
       // Check client integration
-      const clientPath = path.join(process.cwd(), 'server/src/services/ai-insights-client.ts');
+      const clientPath = path.join(
+        process.cwd(),
+        'server/src/services/ai-insights-client.ts',
+      );
 
       if (!fs.existsSync(clientPath)) {
         throw new Error('AI Insights client not found');
@@ -398,7 +431,7 @@ class AIInsightsValidator {
         'resolveEntities',
         'scoreLinks',
         'class AIInsightsClient',
-        'async'
+        'async',
       ];
 
       let clientMethodsFound = 0;
@@ -420,7 +453,7 @@ class AIInsightsValidator {
         schema_features: schemaFeaturesFound,
         client_methods: clientMethodsFound,
         schema_file: schemaPath,
-        client_file: clientPath
+        client_file: clientPath,
       });
 
       this.results.passed++;
@@ -440,7 +473,10 @@ class AIInsightsValidator {
     const test = { name: 'Caching Strategy', status: 'running' };
 
     try {
-      const servicePath = path.join(process.cwd(), 'services/insight-ai/app.py');
+      const servicePath = path.join(
+        process.cwd(),
+        'services/insight-ai/app.py',
+      );
       const serviceContent = fs.readFileSync(servicePath, 'utf8');
 
       // Validate caching implementation
@@ -449,7 +485,7 @@ class AIInsightsValidator {
         'redis',
         'ttl',
         'lru_cache',
-        'cached_result'
+        'cached_result',
       ];
 
       let cachingFound = 0;
@@ -464,7 +500,7 @@ class AIInsightsValidator {
         'hot_path',
         'cache_key',
         'cache_hit',
-        'cache_miss'
+        'cache_miss',
       ];
 
       let hotPathFound = 0;
@@ -484,7 +520,7 @@ class AIInsightsValidator {
       this.results.evidence.push({
         type: 'caching_strategy',
         caching_features: cachingFound,
-        hot_path_features: hotPathFound
+        hot_path_features: hotPathFound,
       });
 
       this.results.passed++;
@@ -508,7 +544,7 @@ class AIInsightsValidator {
       const testPaths = [
         'services/insight-ai/tests/',
         'tests/ai-insights/',
-        'server/src/services/__tests__/'
+        'server/src/services/__tests__/',
       ];
 
       let testsFound = false;
@@ -532,9 +568,9 @@ class AIInsightsValidator {
           lines: 85.7,
           branches: 82.3,
           functions: 88.9,
-          statements: 84.1
+          statements: 84.1,
         },
-        critical_paths_coverage: 91.2
+        critical_paths_coverage: 91.2,
       };
 
       // Validate coverage requirements
@@ -542,11 +578,15 @@ class AIInsightsValidator {
       const criticalPathRequirement = 90;
 
       if (testResults.coverage.lines < coverageRequirement) {
-        throw new Error(`Line coverage ${testResults.coverage.lines}% below requirement ${coverageRequirement}%`);
+        throw new Error(
+          `Line coverage ${testResults.coverage.lines}% below requirement ${coverageRequirement}%`,
+        );
       }
 
       if (testResults.critical_paths_coverage < criticalPathRequirement) {
-        throw new Error(`Critical path coverage ${testResults.critical_paths_coverage}% below requirement ${criticalPathRequirement}%`);
+        throw new Error(
+          `Critical path coverage ${testResults.critical_paths_coverage}% below requirement ${criticalPathRequirement}%`,
+        );
       }
 
       // Generate model performance metrics
@@ -554,14 +594,14 @@ class AIInsightsValidator {
         entity_resolution: {
           precision: 0.87,
           recall: 0.84,
-          f1_score: 0.85
+          f1_score: 0.85,
         },
         link_scoring: {
           precision: 0.82,
           recall: 0.79,
-          f1_score: 0.80
+          f1_score: 0.8,
         },
-        golden_set_validation: true
+        golden_set_validation: true,
       };
 
       test.status = 'passed';
@@ -574,7 +614,7 @@ class AIInsightsValidator {
         test_results: testResults,
         model_metrics: modelMetrics,
         tests_found: testsFound,
-        test_path: testPath
+        test_path: testPath,
       });
 
       this.results.passed++;
@@ -608,78 +648,93 @@ class AIInsightsValidator {
         version: '0.1.0',
         type: 'Multi-task Neural Network',
         frameworks: ['PyTorch', 'FastAPI'],
-        purpose: 'Entity resolution and link scoring for intelligence analysis'
+        purpose: 'Entity resolution and link scoring for intelligence analysis',
       },
       intended_use: {
-        primary_uses: ['Entity deduplication', 'Link prediction', 'Similarity scoring'],
+        primary_uses: [
+          'Entity deduplication',
+          'Link prediction',
+          'Similarity scoring',
+        ],
         primary_users: ['Intelligence analysts', 'Data scientists'],
-        out_of_scope: ['Real-time critical decisions', 'Automated actions without human review']
+        out_of_scope: [
+          'Real-time critical decisions',
+          'Automated actions without human review',
+        ],
       },
       performance: {
         entity_resolution: {
           precision: 0.87,
           recall: 0.84,
-          f1_score: 0.85
+          f1_score: 0.85,
         },
         link_scoring: {
           precision: 0.82,
           recall: 0.79,
-          f1_score: 0.80
+          f1_score: 0.8,
         },
         latency: {
           p95: '150ms',
-          p99: '300ms'
-        }
+          p99: '300ms',
+        },
       },
       data: {
-        training_data: 'Synthetic intelligence datasets + public knowledge graphs',
-        preprocessing: 'Text normalization, entity extraction, feature engineering',
-        data_splits: 'Train: 70%, Validation: 15%, Test: 15%'
+        training_data:
+          'Synthetic intelligence datasets + public knowledge graphs',
+        preprocessing:
+          'Text normalization, entity extraction, feature engineering',
+        data_splits: 'Train: 70%, Validation: 15%, Test: 15%',
       },
       ethical_considerations: {
         bias_testing: 'Tested for demographic and geographic bias',
         fairness_constraints: 'Equal performance across entity types',
-        human_oversight: 'All predictions require analyst review'
+        human_oversight: 'All predictions require analyst review',
       },
       caveats_recommendations: [
         'Model outputs are suggestions, not definitive determinations',
         'Performance may vary on out-of-domain data',
         'Regular retraining recommended with new data',
-        'Feature flags allow gradual rollout and quick disable'
-      ]
+        'Feature flags allow gradual rollout and quick disable',
+      ],
     };
 
     fs.writeFileSync(modelCardPath, JSON.stringify(modelCard, null, 2));
 
     // Generate feature flag configuration
-    const featureFlagConfigPath = path.join(evidenceDir, 'ai-feature-flags-config.json');
+    const featureFlagConfigPath = path.join(
+      evidenceDir,
+      'ai-feature-flags-config.json',
+    );
     const featureFlagConfig = {
       timestamp: new Date().toISOString(),
       flags: {
         ENABLE_ENTITY_RESOLUTION: {
           value: true,
           description: 'Enable entity resolution endpoint',
-          rollout_percentage: 100
+          rollout_percentage: 100,
         },
         ENABLE_LINK_SCORING: {
           value: true,
           description: 'Enable link scoring endpoint',
-          rollout_percentage: 100
+          rollout_percentage: 100,
         },
         ENABLE_MODEL_DRIFT_DETECTION: {
           value: true,
           description: 'Enable model drift monitoring',
-          rollout_percentage: 100
+          rollout_percentage: 100,
         },
         ENABLE_ADVANCED_CACHING: {
           value: true,
           description: 'Enable advanced caching strategies',
-          rollout_percentage: 50
-        }
-      }
+          rollout_percentage: 50,
+        },
+      },
     };
 
-    fs.writeFileSync(featureFlagConfigPath, JSON.stringify(featureFlagConfig, null, 2));
+    fs.writeFileSync(
+      featureFlagConfigPath,
+      JSON.stringify(featureFlagConfig, null, 2),
+    );
 
     console.log(`📋 Evidence generated:`);
     console.log(`  - Validation report: ${reportPath}`);
@@ -691,12 +746,15 @@ class AIInsightsValidator {
 // CLI execution
 if (require.main === module) {
   const validator = new AIInsightsValidator();
-  validator.validate().then(success => {
-    process.exit(success ? 0 : 1);
-  }).catch(error => {
-    console.error('Fatal validation error:', error);
-    process.exit(1);
-  });
+  validator
+    .validate()
+    .then((success) => {
+      process.exit(success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Fatal validation error:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = AIInsightsValidator;

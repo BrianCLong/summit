@@ -3,7 +3,7 @@
  * Committee Requirements: PII redaction, real-time processing, observability integration
  */
 import express from 'express';
-import { requireAuthority, requireReasonForAccess } from '../middleware/authority.js';
+import { requireAuthority, requireReasonForAccess, } from '../middleware/authority.js';
 import StreamingIngestWorker from '../services/streaming/ingest-worker.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import logger from '../utils/logger.js';
@@ -15,12 +15,16 @@ router.use(requireReasonForAccess);
 router.post('/ingest', requireAuthority('streaming_ingest', ['data_ingestion']), async (req, res) => {
     const span = otelService.getCurrentSpan();
     try {
-        const { source, data_type, raw_data, priority = 5, metadata = {}, correlation_id } = req.body;
+        const { source, data_type, raw_data, priority = 5, metadata = {}, correlation_id, } = req.body;
         // Validate required fields
         if (!source || !data_type || !raw_data) {
             otelService.addSpanAttributes({
                 'streaming.validation_error': true,
-                'streaming.missing_fields': ['source', 'data_type', 'raw_data'].filter((field) => !req.body[field]),
+                'streaming.missing_fields': [
+                    'source',
+                    'data_type',
+                    'raw_data',
+                ].filter((field) => !req.body[field]),
             });
             return res.status(400).json({
                 success: false,
@@ -28,7 +32,13 @@ router.post('/ingest', requireAuthority('streaming_ingest', ['data_ingestion']),
                 code: 'MISSING_REQUIRED_FIELDS',
             });
         }
-        const validDataTypes = ['event', 'entity', 'relationship', 'document', 'metric'];
+        const validDataTypes = [
+            'event',
+            'entity',
+            'relationship',
+            'document',
+            'metric',
+        ];
         if (!validDataTypes.includes(data_type)) {
             otelService.addSpanAttributes({
                 'streaming.validation_error': true,
@@ -356,7 +366,8 @@ router.get('/events/stream', requireAuthority('streaming_ingest', ['real_time_ev
 router.get('/health', async (req, res) => {
     try {
         const metrics = ingestWorker.getMetrics();
-        const isHealthy = metrics.worker_status === 'healthy' || metrics.worker_status === 'degraded';
+        const isHealthy = metrics.worker_status === 'healthy' ||
+            metrics.worker_status === 'degraded';
         res.status(isHealthy ? 200 : 503).json({
             success: isHealthy,
             service: 'streaming-ingest',

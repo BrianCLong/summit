@@ -1,57 +1,57 @@
 # v24_modules/config/activity_scenario.yaml
 # Template for defining narrative + agent scenarios
 
-scenario_name: "Example Coherence Scenario"
-description: "A template for defining narrative and multi-agent interaction scenarios."
-version: "1.0"
+scenario_name: 'Example Coherence Scenario'
+description: 'A template for defining narrative and multi-agent interaction scenarios.'
+version: '1.0'
 
 narrative:
-  title: "The Rise of Global Coherence"
-  summary: "A narrative focusing on the emergence of global coherence signals and their impact on collective behavior."
-  keywords: ["coherence", "global", "narrative", "influence"]
+  title: 'The Rise of Global Coherence'
+  summary: 'A narrative focusing on the emergence of global coherence signals and their impact on collective behavior.'
+  keywords: ['coherence', 'global', 'narrative', 'influence']
 
 agents:
-  - agent_id: "agent_alpha"
-    type: "information_disseminator"
+  - agent_id: 'agent_alpha'
+    type: 'information_disseminator'
     objectives:
-      - "increase positive coherence signals"
-      - "counter negative narratives"
-    tactics: ["social_media_amplification", "trusted_messenger_engagement"]
+      - 'increase positive coherence signals'
+      - 'counter negative narratives'
+    tactics: ['social_media_amplification', 'trusted_messenger_engagement']
 
-  - agent_id: "agent_beta"
-    type: "data_analyst"
+  - agent_id: 'agent_beta'
+    type: 'data_analyst'
     objectives:
-      - "monitor coherence signal anomalies"
-      - "identify emerging narratives"
-    tactics: ["real_time_data_analysis", "pattern_recognition"]
+      - 'monitor coherence signal anomalies'
+      - 'identify emerging narratives'
+    tactics: ['real_time_data_analysis', 'pattern_recognition']
 
 activities:
-  - activity_id: "act_001"
-    type: "signal_broadcast"
-    agent: "agent_alpha"
-    narrative_element: "positive_coherence_message"
+  - activity_id: 'act_001'
+    type: 'signal_broadcast'
+    agent: 'agent_alpha'
+    narrative_element: 'positive_coherence_message'
     parameters:
-      channel: "global_news_network"
-      reach: "10M"
-      frequency: "daily"
+      channel: 'global_news_network'
+      reach: '10M'
+      frequency: 'daily'
 
-  - activity_id: "act_002"
-    type: "anomaly_detection"
-    agent: "agent_beta"
-    target_data_stream: "coherence.signals.v1"
+  - activity_id: 'act_002'
+    type: 'anomaly_detection'
+    agent: 'agent_beta'
+    target_data_stream: 'coherence.signals.v1'
     parameters:
-      threshold: "0.1"
-      alert_level: "high"
+      threshold: '0.1'
+      alert_level: 'high'
 
 expected_outcomes:
-  - outcome_id: "oc_001"
-    description: "Overall coherence score increases by 10% within 7 days."
-    metric: "coherence_score"
-    target_value: "+10%"
-    timeframe: "7d"
+  - outcome_id: 'oc_001'
+    description: 'Overall coherence score increases by 10% within 7 days.'
+    metric: 'coherence_score'
+    target_value: '+10%'
+    timeframe: '7d'
 
-  - outcome_id: "oc_002"
-    description: "Negative narrative sentiment decreases by 5%."
-    metric: "narrative_sentiment"
-    target_value: "-5%"
-    timeframe: "7d"
+  - outcome_id: 'oc_002'
+    description: 'Negative narrative sentiment decreases by 5%.'
+    metric: 'narrative_sentiment'
+    target_value: '-5%'
+    timeframe: '7d'

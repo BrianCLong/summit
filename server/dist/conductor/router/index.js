@@ -1,8 +1,9 @@
 // System-level Mixture-of-Experts Router
 // Routes tasks to the optimal expert based on task characteristics and constraints
 export class MoERouter {
+    expertCapabilities;
+    routingHistory = new Map();
     constructor() {
-        this.routingHistory = new Map();
         this.expertCapabilities = {
             LLM_LIGHT: {
                 type: 'LLM_LIGHT',
@@ -262,11 +263,13 @@ export class MoERouter {
         for (const candidate of candidates) {
             const capability = this.expertCapabilities[candidate];
             // Check latency constraints
-            if (capability.avgLatencyMs && capability.avgLatencyMs > features.maxLatencyMs) {
+            if (capability.avgLatencyMs &&
+                capability.avgLatencyMs > features.maxLatencyMs) {
                 continue;
             }
             // Check security constraints
-            if (features.sensitivityLevel === 'secret' && capability.securityLevel === 'low') {
+            if (features.sensitivityLevel === 'secret' &&
+                capability.securityLevel === 'low') {
                 continue;
             }
             // Calculate confidence based on feature matching

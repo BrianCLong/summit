@@ -37,6 +37,9 @@ export var ClusteringAlgorithm;
     ClusteringAlgorithm["HDBSCAN"] = "HDBSCAN";
 })(ClusteringAlgorithm || (ClusteringAlgorithm = {}));
 export class MultimodalDataService {
+    db;
+    mediaUploadService;
+    extractionJobService;
     constructor(db, mediaUploadService, extractionJobService) {
         this.db = db;
         this.mediaUploadService = mediaUploadService;
@@ -85,7 +88,7 @@ export class MultimodalDataService {
                 userId,
                 now,
                 now,
-                now
+                now,
             ];
             const result = await this.db.query(query, values);
             const mediaSource = this.mapRowToMediaSource(result.rows[0]);
@@ -104,7 +107,9 @@ export class MultimodalDataService {
         try {
             const query = 'SELECT * FROM media_sources WHERE id = $1';
             const result = await this.db.query(query, [id]);
-            return result.rows.length > 0 ? this.mapRowToMediaSource(result.rows[0]) : null;
+            return result.rows.length > 0
+                ? this.mapRowToMediaSource(result.rows[0])
+                : null;
         }
         catch (error) {
             logger.error(`Failed to get media source ${id}:`, error);
@@ -141,7 +146,7 @@ export class MultimodalDataService {
                 values.push(filters.offset);
             }
             const result = await this.db.query(query, values);
-            return result.rows.map(row => this.mapRowToMediaSource(row));
+            return result.rows.map((row) => this.mapRowToMediaSource(row));
         }
         catch (error) {
             logger.error(`Failed to get media sources for investigation ${investigationId}:`, error);
@@ -209,7 +214,7 @@ export class MultimodalDataService {
                 false, // human_verified defaults to false
                 JSON.stringify(input.metadata || {}),
                 now,
-                now
+                now,
             ];
             const result = await this.db.query(query, values);
             const entity = this.mapRowToMultimodalEntity(result.rows[0]);
@@ -230,7 +235,9 @@ export class MultimodalDataService {
         try {
             const query = 'SELECT * FROM multimodal_entities WHERE id = $1';
             const result = await this.db.query(query, [id]);
-            return result.rows.length > 0 ? this.mapRowToMultimodalEntity(result.rows[0]) : null;
+            return result.rows.length > 0
+                ? this.mapRowToMultimodalEntity(result.rows[0])
+                : null;
         }
         catch (error) {
             logger.error(`Failed to get multimodal entity ${id}:`, error);
@@ -275,7 +282,7 @@ export class MultimodalDataService {
                 values.push(filters.offset);
             }
             const result = await this.db.query(query, values);
-            return result.rows.map(row => this.mapRowToMultimodalEntity(row));
+            return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
         }
         catch (error) {
             logger.error(`Failed to get multimodal entities for investigation ${investigationId}:`, error);
@@ -356,7 +363,7 @@ export class MultimodalDataService {
                 verification.verified ? new Date() : null,
                 verification.notes,
                 verification.qualityScore,
-                id
+                id,
             ];
             const result = await this.db.query(query, values);
             if (result.rows.length === 0) {
@@ -418,7 +425,7 @@ export class MultimodalDataService {
                 values.push(query.topK);
             }
             const result = await this.db.query(sqlQuery, values);
-            return result.rows.map(row => this.mapRowToMultimodalEntity(row));
+            return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
         }
         catch (error) {
             logger.error(`Failed to perform semantic search:`, error);
@@ -450,9 +457,9 @@ export class MultimodalDataService {
                 entity.entityType,
                 entityId,
                 threshold,
-                topK
+                topK,
             ]);
-            return result.rows.map(row => this.mapRowToMultimodalEntity(row));
+            return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
         }
         catch (error) {
             logger.error(`Failed to find similar entities for ${entityId}:`, error);
@@ -494,7 +501,7 @@ export class MultimodalDataService {
             uploadedBy: row.uploaded_by,
             uploadedAt: row.uploaded_at,
             createdAt: row.created_at,
-            updatedAt: row.updated_at
+            updatedAt: row.updated_at,
         };
     }
     mapRowToMultimodalEntity(row) {
@@ -526,7 +533,7 @@ export class MultimodalDataService {
             audioEmbedding: row.audio_embedding,
             metadata: row.metadata || {},
             createdAt: row.created_at,
-            updatedAt: row.updated_at
+            updatedAt: row.updated_at,
         };
     }
 }

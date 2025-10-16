@@ -95,7 +95,9 @@ describe('MCPClient', () => {
         test('executes tool successfully', async () => {
             const expectedResult = { success: true, data: 'test-result' };
             // Mock successful tool execution
-            const executionPromise = client.executeTool('test-server', 'test.tool', { input: 'test' });
+            const executionPromise = client.executeTool('test-server', 'test.tool', {
+                input: 'test',
+            });
             // Simulate WebSocket send
             expect(mockWs.send).toHaveBeenCalled();
             const sentMessage = JSON.parse(mockWs.send.mock.calls[0][0]);
@@ -113,7 +115,9 @@ describe('MCPClient', () => {
             expect(result).toEqual(expectedResult);
         });
         test('handles tool execution error', async () => {
-            const executionPromise = client.executeTool('test-server', 'test.tool', { input: 'test' });
+            const executionPromise = client.executeTool('test-server', 'test.tool', {
+                input: 'test',
+            });
             const sentMessage = JSON.parse(mockWs.send.mock.calls[0][0]);
             // Simulate error response
             const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
@@ -129,13 +133,17 @@ describe('MCPClient', () => {
             await expect(executionPromise).rejects.toThrow('MCP Error: Tool execution failed');
         });
         test('validates tool scopes', async () => {
-            await expect(client.executeTool('test-server', 'test.tool', { input: 'test' }, ['wrong:scope'])).rejects.toThrow('Insufficient scopes');
+            await expect(client.executeTool('test-server', 'test.tool', { input: 'test' }, [
+                'wrong:scope',
+            ])).rejects.toThrow('Insufficient scopes');
         });
         test('validates tool existence', async () => {
             await expect(client.executeTool('test-server', 'nonexistent.tool', {})).rejects.toThrow("Tool 'nonexistent.tool' not found");
         });
         test('handles request timeout', async () => {
-            const clientWithTimeout = new MCPClient(registry.getAllServers(), { timeout: 100 });
+            const clientWithTimeout = new MCPClient(registry.getAllServers(), {
+                timeout: 100,
+            });
             mockWs.once.mockImplementation((event, callback) => {
                 if (event === 'open')
                     setTimeout(callback, 0);
@@ -221,13 +229,21 @@ describe('MCPServerRegistry', () => {
         const server1Config = {
             ...mockServerConfig,
             tools: [
-                { name: 'tool1', description: '', schema: { type: 'object', properties: {} } },
+                {
+                    name: 'tool1',
+                    description: '',
+                    schema: { type: 'object', properties: {} },
+                },
             ],
         };
         const server2Config = {
             ...mockServerConfig,
             tools: [
-                { name: 'tool2', description: '', schema: { type: 'object', properties: {} } },
+                {
+                    name: 'tool2',
+                    description: '',
+                    schema: { type: 'object', properties: {} },
+                },
             ],
         };
         registry.register('server1', server1Config);

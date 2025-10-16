@@ -3,9 +3,13 @@
  * Committee Requirements: OTEL scaffolding, performance monitoring, SLO tracking
  * Stribol: "OTEL traces across gateway→services; smoke test asserts spans exist"
  */
-import { SpanStatusCode, tracer as noopTracer } from '../../observability/telemetry.js';
+import { SpanStatusCode, tracer as noopTracer, } from '../../observability/telemetry.js';
 import logger from '../../utils/logger.js';
 export class OTelTracingService {
+    static instance;
+    sdk = null;
+    config;
+    tracer;
     static getInstance() {
         if (!OTelTracingService.instance) {
             OTelTracingService.instance = new OTelTracingService();
@@ -13,7 +17,6 @@ export class OTelTracingService {
         return OTelTracingService.instance;
     }
     constructor() {
-        this.sdk = null;
         this.config = {
             enabled: false,
             service_name: process.env.OTEL_SERVICE_NAME || 'intelgraph-api',

@@ -1,4 +1,4 @@
-const { getNeo4jDriver, getPostgresPool } = require("../config/database");
+const { getNeo4jDriver, getPostgresPool } = require('../config/database');
 class PublicDataService {
     constructor() {
         this.driver = getNeo4jDriver();
@@ -13,7 +13,7 @@ class PublicDataService {
             const props = {
                 id,
                 label: `${source.toUpperCase()} ${query}`,
-                type: "DOCUMENT",
+                type: 'DOCUMENT',
                 investigation_id: investigationId,
             };
             await session.run(`MERGE (n:Entity {id:$id}) SET n += $props`, {
@@ -21,7 +21,7 @@ class PublicDataService {
                 props,
             });
             await this.pool.query(`INSERT INTO provenance (resource_type, resource_id, source, uri, extractor, metadata)
-         VALUES ($1,$2,$3,$4,$5,$6)`, ["entity", id, source, null, "publicdata", { query }]);
+         VALUES ($1,$2,$3,$4,$5,$6)`, ['entity', id, source, null, 'publicdata', { query }]);
         }
         finally {
             await session.close();

@@ -11,6 +11,9 @@
 import axios from 'axios';
 import { writeAudit } from '../utils/audit.js';
 export class OPAMiddleware {
+    options;
+    cache;
+    stats;
     constructor(options = {}) {
         this.options = {
             opaUrl: process.env.OPA_URL || 'http://localhost:8181',
@@ -19,7 +22,7 @@ export class OPAMiddleware {
             cacheEnabled: options.cacheEnabled !== false,
             cacheTTL: options.cacheTTL || 300000, // 5 minutes
             timeout: options.timeout || 5000,
-            ...options
+            ...options,
         };
         this.cache = new Map();
         this.stats = {
@@ -27,7 +30,7 @@ export class OPAMiddleware {
             allowedRequests: 0,
             deniedRequests: 0,
             cacheHits: 0,
-            errors: 0
+            errors: 0,
         };
     }
     /**
@@ -38,7 +41,7 @@ export class OPAMiddleware {
             user: input.user?.id || 'anonymous',
             action: input.action,
             resource: input.resource,
-            tenantId: input.context.tenantId
+            tenantId: input.context.tenantId,
         };
         return JSON.stringify(key);
     }
@@ -67,14 +70,14 @@ export class OPAMiddleware {
         try {
             const response = await axios.post(`${this.options.opaUrl}${this.options.policyPath}`, { input }, {
                 timeout: this.options.timeout,
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
             });
             const result = response.data.result || { allow: false };
             // Cache the result
             if (this.options.cacheEnabled) {
                 this.cache.set(cacheKey, {
                     result,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
                 });
             }
             if (result.allow) {
@@ -92,7 +95,7 @@ export class OPAMiddleware {
             return {
                 allow: false,
                 reason: 'Policy service unavailable',
-                error: error.message
+                error: error.message,
             };
         }
     }
@@ -112,19 +115,19 @@ export class OPAMiddleware {
                     email: user?.email,
                     role: user?.role,
                     tenantId: user?.tenantId,
-                    permissions: user?.permissions || []
+                    permissions: user?.permissions || [],
                 },
                 action: `${operation}.${fieldName}`,
                 resource: {
                     type: parentType,
                     field: fieldName,
-                    args: this.sanitizeArgs(args)
+                    args: this.sanitizeArgs(args),
                 },
                 context: {
                     investigationId: args.investigationId || args.input?.investigationId,
                     entityType: args.input?.type || args.type,
-                    tenantId: user?.tenantId
-                }
+                    tenantId: user?.tenantId,
+                },
             };
             const decision = await this.checkPolicy(policyInput);
             if (!decision.allow) {
@@ -149,7 +152,7 @@ export class OPAMiddleware {
                     email: user?.email,
                     role: user?.role,
                     tenantId: user?.tenantId,
-                    permissions: user?.permissions || []
+                    permissions: user?.permissions || [],
                 },
                 action: `${method}.${path}`,
                 resource: {
@@ -157,20 +160,20 @@ export class OPAMiddleware {
                     path: path,
                     method: method,
                     params: req.params,
-                    query: req.query
+                    query: req.query,
                 },
                 context: {
                     tenantId: user?.tenantId,
                     ip: req.ip,
-                    userAgent: req.get('User-Agent')
-                }
+                    userAgent: req.get('User-Agent'),
+                },
             };
             const decision = await this.checkPolicy(policyInput);
             if (!decision.allow) {
                 await this.auditDeniedAccess(user, policyInput, decision);
                 return res.status(403).json({
                     error: 'Access denied',
-                    reason: decision.reason || 'Insufficient privileges'
+                    reason: decision.reason || 'Insufficient privileges',
                 });
             }
             next();
@@ -202,8 +205,8 @@ export class OPAMiddleware {
             details: {
                 reason: decision.reason,
                 action: policyInput.action,
-                tenantId: policyInput.context.tenantId
-            }
+                tenantId: policyInput.context.tenantId,
+            },
         });
     }
     /**
@@ -213,10 +216,12 @@ export class OPAMiddleware {
         return {
             ...this.stats,
             cacheSize: this.cache.size,
-            successRate: this.stats.totalRequests > 0 ?
-                (this.stats.allowedRequests / this.stats.totalRequests) * 100 : 0,
-            cacheHitRate: this.stats.totalRequests > 0 ?
-                (this.stats.cacheHits / this.stats.totalRequests) * 100 : 0
+            successRate: this.stats.totalRequests > 0
+                ? (this.stats.allowedRequests / this.stats.totalRequests) * 100
+                : 0,
+            cacheHitRate: this.stats.totalRequests > 0
+                ? (this.stats.cacheHits / this.stats.totalRequests) * 100
+                : 0,
         };
     }
     /**
@@ -233,18 +238,20 @@ export class OPAMiddleware {
             return { status: 'disabled', healthy: true };
         }
         try {
-            const response = await axios.get(`${this.options.opaUrl}/health`, { timeout: this.options.timeout });
+            const response = await axios.get(`${this.options.opaUrl}/health`, {
+                timeout: this.options.timeout,
+            });
             return {
                 status: 'healthy',
                 healthy: true,
-                opaStatus: response.status
+                opaStatus: response.status,
             };
         }
         catch (error) {
             return {
                 status: 'unhealthy',
                 healthy: false,
-                error: error.message
+                error: error.message,
             };
         }
     }

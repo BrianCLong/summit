@@ -24,7 +24,9 @@ export function movingAverage(data, windowSize) {
  */
 export const buildHistogram = (values, buckets) => {
   return buckets.map((bucket) => {
-    const count = values.filter((value) => value >= bucket.min && value <= bucket.max).length;
+    const count = values.filter(
+      (value) => value >= bucket.min && value <= bucket.max,
+    ).length;
     return { ...bucket, count };
   });
 };

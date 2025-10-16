@@ -6,11 +6,15 @@
 import logger from '../config/logger.js';
 const workerLogger = logger.child({ name: 'OutboxNeo4jSync' });
 export class OutboxNeo4jSync {
+    pg;
+    neo4j;
+    config;
+    isRunning = false;
+    intervalId;
     constructor(pg, neo4j, config = {}) {
         this.pg = pg;
         this.neo4j = neo4j;
         this.config = config;
-        this.isRunning = false;
         this.config = {
             batchSize: 100,
             intervalMs: 2000,
@@ -104,9 +108,7 @@ export class OutboxNeo4jSync {
                 default:
                     eventLogger.warn(`Unknown event topic: ${event.topic}`);
                     // Mark as processed to avoid retry loop
-                    await client.query(`UPDATE outbox_events SET processed_at = now() WHERE id = $1`, [
-                        event.id,
-                    ]);
+                    await client.query(`UPDATE outbox_events SET processed_at = now() WHERE id = $1`, [event.id]);
                     return;
             }
             // Mark as successfully processed

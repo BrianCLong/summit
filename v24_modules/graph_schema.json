@@ -4,27 +4,27 @@
       {
         "label": "Tenant",
         "properties": {
-          "tenant_id": {"type": "string", "is_key": true}
+          "tenant_id": { "type": "string", "is_key": true }
         }
       },
       {
         "label": "Signal",
         "properties": {
-          "signal_id": {"type": "string", "is_key": true},
-          "type": {"type": "string"},
-          "value": {"type": "float"},
-          "weight": {"type": "float", "optional": true},
-          "source": {"type": "string"},
-          "ts": {"type": "datetime"}
+          "signal_id": { "type": "string", "is_key": true },
+          "type": { "type": "string" },
+          "value": { "type": "float" },
+          "weight": { "type": "float", "optional": true },
+          "source": { "type": "string" },
+          "ts": { "type": "datetime" }
         }
       },
       {
         "label": "CoherenceScore",
         "properties": {
-          "tenant_id": {"type": "string", "is_key": true},
-          "score": {"type": "float"},
-          "status": {"type": "string"},
-          "updated_at": {"type": "datetime"}
+          "tenant_id": { "type": "string", "is_key": true },
+          "score": { "type": "float" },
+          "status": { "type": "string" },
+          "updated_at": { "type": "datetime" }
         }
       }
     ],
@@ -43,13 +43,18 @@
   },
   "visualization_example": {
     "nodes": [
-      {"id": "tenant1", "label": "Tenant A", "type": "Tenant"},
-      {"id": "signal1", "label": "Signal X", "type": "Signal"},
-      {"id": "score1", "label": "Score A", "type": "CoherenceScore"}
+      { "id": "tenant1", "label": "Tenant A", "type": "Tenant" },
+      { "id": "signal1", "label": "Signal X", "type": "Signal" },
+      { "id": "score1", "label": "Score A", "type": "CoherenceScore" }
     ],
     "edges": [
-      {"id": "e1", "source": "tenant1", "target": "signal1", "type": "EMITS"},
-      {"id": "e2", "source": "tenant1", "target": "score1", "type": "HAS_SCORE"}
+      { "id": "e1", "source": "tenant1", "target": "signal1", "type": "EMITS" },
+      {
+        "id": "e2",
+        "source": "tenant1",
+        "target": "score1",
+        "type": "HAS_SCORE"
+      }
     ]
   }
 }

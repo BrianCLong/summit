@@ -1,10 +1,17 @@
 export class JobsRepo {
+    pool;
     constructor(pool) {
         this.pool = pool;
     }
     async insert(row) {
         const q = `INSERT INTO ai_jobs (id, kind, status, created_at, meta) VALUES ($1,$2,$3,$4,$5)`;
-        await this.pool.query(q, [row.id, row.kind, row.status, row.createdAt, row.meta || {}]);
+        await this.pool.query(q, [
+            row.id,
+            row.kind,
+            row.status,
+            row.createdAt,
+            row.meta || {},
+        ]);
     }
     async update(id, patch) {
         const q = `UPDATE ai_jobs SET status=COALESCE($2,status), finished_at=COALESCE($3,finished_at), error=COALESCE($4,error) WHERE id=$1`;

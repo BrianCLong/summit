@@ -82,7 +82,7 @@ export const multimodalResolvers = {
                 throw new Error('Authentication required');
             const multimodalService = new MultimodalDataService(context.neo4jDriver, context.authService, context.storageService);
             return await multimodalService.findDuplicateEntities(args);
-        }
+        },
     },
     Mutation: {
         // Media Upload and Management
@@ -169,7 +169,7 @@ export const multimodalResolvers = {
                 mediaSourceId: args.mediaSourceId,
                 extractionMethods: args.extractionMethods,
                 investigationId: args.investigationId,
-                processingParams: { reprocess: true }
+                processingParams: { reprocess: true },
             }, context.user.id);
         },
         // Batch Operations
@@ -200,7 +200,7 @@ export const multimodalResolvers = {
                     const job = await multimodalService.startExtractionJob({
                         mediaSourceId,
                         extractionMethods: args.extractionMethods,
-                        investigationId: args.investigationId
+                        investigationId: args.investigationId,
                     }, context.user.id);
                     jobs.push(job);
                 }
@@ -236,7 +236,7 @@ export const multimodalResolvers = {
                 throw new Error('Authentication required');
             const multimodalService = new MultimodalDataService(context.neo4jDriver, context.authService, context.storageService);
             return await multimodalService.cleanupDuplicateEntities(args.investigationId, args.similarity || 0.95, args.autoMerge || false, context.user.id);
-        }
+        },
     },
     Subscription: {
         // Extraction Processing
@@ -245,53 +245,65 @@ export const multimodalResolvers = {
                 if (!context.user)
                     throw new Error('Authentication required');
                 // Return subscription for job updates
-                return context.pubsub.asyncIterator([`EXTRACTION_JOB_UPDATED_${args.jobId}`]);
+                return context.pubsub.asyncIterator([
+                    `EXTRACTION_JOB_UPDATED_${args.jobId}`,
+                ]);
             },
-            resolve: (event) => event.payload
+            resolve: (event) => event.payload,
         },
         extractionJobCompleted: {
             subscribe: async (parent, args, context) => {
                 if (!context.user)
                     throw new Error('Authentication required');
                 // Return subscription for completed jobs in investigation
-                return context.pubsub.asyncIterator([`EXTRACTION_JOB_COMPLETED_${args.investigationId}`]);
+                return context.pubsub.asyncIterator([
+                    `EXTRACTION_JOB_COMPLETED_${args.investigationId}`,
+                ]);
             },
-            resolve: (event) => event.payload
+            resolve: (event) => event.payload,
         },
         // Entity Updates
         multimodalEntityAdded: {
             subscribe: async (parent, args, context) => {
                 if (!context.user)
                     throw new Error('Authentication required');
-                return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_ADDED_${args.investigationId}`]);
+                return context.pubsub.asyncIterator([
+                    `MULTIMODAL_ENTITY_ADDED_${args.investigationId}`,
+                ]);
             },
-            resolve: (event) => event.payload
+            resolve: (event) => event.payload,
         },
         multimodalEntityUpdated: {
             subscribe: async (parent, args, context) => {
                 if (!context.user)
                     throw new Error('Authentication required');
-                return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_UPDATED_${args.investigationId}`]);
+                return context.pubsub.asyncIterator([
+                    `MULTIMODAL_ENTITY_UPDATED_${args.investigationId}`,
+                ]);
             },
-            resolve: (event) => event.payload
+            resolve: (event) => event.payload,
         },
         multimodalEntityVerified: {
             subscribe: async (parent, args, context) => {
                 if (!context.user)
                     throw new Error('Authentication required');
-                return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_VERIFIED_${args.investigationId}`]);
+                return context.pubsub.asyncIterator([
+                    `MULTIMODAL_ENTITY_VERIFIED_${args.investigationId}`,
+                ]);
             },
-            resolve: (event) => event.payload
+            resolve: (event) => event.payload,
         },
         // Cross-modal Events
         crossModalMatchFound: {
             subscribe: async (parent, args, context) => {
                 if (!context.user)
                     throw new Error('Authentication required');
-                return context.pubsub.asyncIterator([`CROSS_MODAL_MATCH_FOUND_${args.investigationId}`]);
+                return context.pubsub.asyncIterator([
+                    `CROSS_MODAL_MATCH_FOUND_${args.investigationId}`,
+                ]);
             },
-            resolve: (event) => event.payload
-        }
+            resolve: (event) => event.payload,
+        },
     },
     // Type Resolvers
     MultimodalEntity: {
@@ -303,7 +315,7 @@ export const multimodalResolvers = {
           MATCH (e:MultimodalEntity {id: $entityId})-[:EXTRACTED_FROM]->(m:MediaSource)
           RETURN m
         `, { entityId: parent.id });
-                return result.records.map(record => record.get('m').properties);
+                return result.records.map((record) => record.get('m').properties);
             }
             finally {
                 await session.close();
@@ -317,7 +329,7 @@ export const multimodalResolvers = {
           MATCH (e:MultimodalEntity {id: $entityId})-[:HAS_CROSS_MODAL_MATCH]->(c:CrossModalMatch)
           RETURN c
         `, { entityId: parent.id });
-                return result.records.map(record => record.get('c').properties);
+                return result.records.map((record) => record.get('c').properties);
             }
             finally {
                 await session.close();
@@ -331,16 +343,16 @@ export const multimodalResolvers = {
           MATCH (e:MultimodalEntity {id: $entityId})-[r:MultimodalRelationship]-(other:MultimodalEntity)
           RETURN r, other
         `, { entityId: parent.id });
-                return result.records.map(record => ({
+                return result.records.map((record) => ({
                     ...record.get('r').properties,
                     sourceEntity: parent,
-                    targetEntity: record.get('other').properties
+                    targetEntity: record.get('other').properties,
                 }));
             }
             finally {
                 await session.close();
             }
-        }
+        },
     },
     ExtractionJob: {
         results: async (parent, args, context) => {
@@ -359,13 +371,15 @@ export const multimodalResolvers = {
                 const record = result.records[0];
                 return {
                     entities: record.get('entities').map((e) => e.properties),
-                    relationships: record.get('relationships').map((r) => r.properties),
+                    relationships: record
+                        .get('relationships')
+                        .map((r) => r.properties),
                     summary: {
                         totalEntities: parent.entitiesExtracted,
                         totalRelationships: parent.relationshipsExtracted,
                         averageConfidence: 0.8, // Calculate from actual data
                         processingTime: parent.duration,
-                        dataQualityScore: 0.85
+                        dataQualityScore: 0.85,
                     },
                     qualityMetrics: {
                         overallScore: 0.85,
@@ -373,15 +387,15 @@ export const multimodalResolvers = {
                         crossModalConsistency: 0.8,
                         temporalConsistency: 0.85,
                         duplicateRate: 0.05,
-                        verificationRate: 0.1
-                    }
+                        verificationRate: 0.1,
+                    },
                 };
             }
             finally {
                 await session.close();
             }
-        }
-    }
+        },
+    },
 };
 export default multimodalResolvers;
 //# sourceMappingURL=multimodalResolvers.js.map

@@ -4,6 +4,7 @@ import { createHash } from 'crypto';
 import * as path from 'path';
 import { createProvenanceRecord } from '../../../packages/shared/provenance';
 export class AttachmentService {
+    baseDir;
     constructor(baseDir = path.join(process.cwd(), 'attachments')) {
         this.baseDir = baseDir;
     }

@@ -3,9 +3,10 @@ import path from 'path';
 import pino from 'pino';
 const logger = pino({ name: 'SpeechToTextEngine' });
 export class SpeechToTextEngine {
+    config;
+    isInitialized = false;
+    availableModels = [];
     constructor(config) {
-        this.isInitialized = false;
-        this.availableModels = [];
         this.config = config;
     }
     /**
@@ -32,7 +33,7 @@ export class SpeechToTextEngine {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        const { language = 'auto', model = 'whisper-base', enableDiarization = false, enhanceAudio = true, timestamping = true, maxSpeakers = 5, chunkDuration = 30, enablePunctuation = true, filterProfanity = false } = options;
+        const { language = 'auto', model = 'whisper-base', enableDiarization = false, enhanceAudio = true, timestamping = true, maxSpeakers = 5, chunkDuration = 30, enablePunctuation = true, filterProfanity = false, } = options;
         logger.info(`Starting transcription for: ${audioPath} with model: ${model}`);
         try {
             let processedAudioPath = audioPath;
@@ -95,13 +96,14 @@ export class SpeechToTextEngine {
         for (const [speakerId, speakerSegments] of speakers.entries()) {
             const totalDuration = speakerSegments.reduce((sum, seg) => sum + (seg.endTime - seg.startTime), 0);
             const characterCount = speakerSegments.reduce((sum, seg) => sum + seg.text.length, 0);
-            const avgConfidence = speakerSegments.reduce((sum, seg) => sum + seg.confidence, 0) / speakerSegments.length;
+            const avgConfidence = speakerSegments.reduce((sum, seg) => sum + seg.confidence, 0) /
+                speakerSegments.length;
             speakerInfos.push({
                 speakerId,
                 segments: speakerSegments,
                 totalDuration,
                 characterCount,
-                confidence: avgConfidence
+                confidence: avgConfidence,
             });
         }
         return speakerInfos.sort((a, b) => b.totalDuration - a.totalDuration);
@@ -114,9 +116,12 @@ export class SpeechToTextEngine {
             const pythonScript = path.join(this.config.modelsPath, 'whisper_transcription.py');
             const args = [
                 pythonScript,
-                '--audio', audioPath,
-                '--model', model,
-                '--output-format', 'json'
+                '--audio',
+                audioPath,
+                '--model',
+                model,
+                '--output-format',
+                'json',
             ];
             if (language !== 'auto') {
                 args.push('--language', language);
@@ -171,7 +176,7 @@ export class SpeechToTextEngine {
                         word: word.word,
                         startTime: word.start,
                         endTime: word.end,
-                        confidence: word.confidence || 0.8
+                        confidence: word.confidence || 0.8,
                     });
                 }
             }
@@ -181,7 +186,7 @@ export class SpeechToTextEngine {
                 endTime: segment.end,
                 confidence: segment.confidence || 0.8,
                 detectedLanguage: whisperResult.language || 'unknown',
-                words
+                words,
             });
         }
         return segments;
@@ -197,7 +202,8 @@ export class SpeechToTextEngine {
                 const segmentMidpoint = (segment.startTime + segment.endTime) / 2;
                 // Find the speaker segment that contains this transcription segment
                 for (const speakerSegment of diarizationResult) {
-                    if (segmentMidpoint >= speakerSegment.start && segmentMidpoint <= speakerSegment.end) {
+                    if (segmentMidpoint >= speakerSegment.start &&
+                        segmentMidpoint <= speakerSegment.end) {
                         segment.speaker = speakerSegment.speaker;
                         break;
                     }
@@ -229,8 +235,10 @@ export class SpeechToTextEngine {
             const pythonScript = path.join(this.config.modelsPath, 'speaker_diarization.py');
             const args = [
                 pythonScript,
-                '--audio', audioPath,
-                '--max-speakers', maxSpeakers.toString()
+                '--audio',
+                audioPath,
+                '--max-speakers',
+                maxSpeakers.toString(),
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -267,12 +275,16 @@ export class SpeechToTextEngine {
         return new Promise((resolve, reject) => {
             // Use FFmpeg for audio enhancement
             const ffmpeg = spawn('ffmpeg', [
-                '-i', audioPath,
-                '-af', 'highpass=f=80,lowpass=f=8000,volume=1.5,dynaudnorm', // Audio filters
-                '-ar', '16000', // Sample rate
-                '-ac', '1', // Mono
+                '-i',
+                audioPath,
+                '-af',
+                'highpass=f=80,lowpass=f=8000,volume=1.5,dynaudnorm', // Audio filters
+                '-ar',
+                '16000', // Sample rate
+                '-ac',
+                '1', // Mono
                 '-y', // Overwrite output
-                enhancedPath
+                enhancedPath,
             ]);
             ffmpeg.on('close', (code) => {
                 if (code === 0) {
@@ -296,13 +308,17 @@ export class SpeechToTextEngine {
         const audioPath = path.join(this.config.tempPath, `extracted_${Date.now()}.wav`);
         return new Promise((resolve, reject) => {
             const ffmpeg = spawn('ffmpeg', [
-                '-i', videoPath,
+                '-i',
+                videoPath,
                 '-vn', // No video
-                '-acodec', 'pcm_s16le', // Audio codec
-                '-ar', '16000', // Sample rate
-                '-ac', '1', // Mono
+                '-acodec',
+                'pcm_s16le', // Audio codec
+                '-ar',
+                '16000', // Sample rate
+                '-ac',
+                '1', // Mono
                 '-y', // Overwrite output
-                audioPath
+                audioPath,
             ]);
             ffmpeg.on('close', (code) => {
                 if (code === 0) {
@@ -374,7 +390,9 @@ export class SpeechToTextEngine {
     filterProfanity(segments) {
         const profanityWords = [
             // Add profanity words to filter - using placeholders here
-            'profanity1', 'profanity2', 'profanity3'
+            'profanity1',
+            'profanity2',
+            'profanity3',
         ];
         for (const segment of segments) {
             let filteredText = segment.text;
@@ -429,8 +447,8 @@ export class SpeechToTextEngine {
     getTotalDuration(segments) {
         if (segments.length === 0)
             return 0;
-        const firstStart = Math.min(...segments.map(s => s.startTime));
-        const lastEnd = Math.max(...segments.map(s => s.endTime));
+        const firstStart = Math.min(...segments.map((s) => s.startTime));
+        const lastEnd = Math.max(...segments.map((s) => s.endTime));
         return lastEnd - firstStart;
     }
     /**
@@ -440,7 +458,7 @@ export class SpeechToTextEngine {
         return new Promise((resolve, reject) => {
             const python = spawn(this.config.pythonPath, [
                 '-c',
-                'import whisper, pyannote.audio; print("Dependencies OK")'
+                'import whisper, pyannote.audio; print("Dependencies OK")',
             ]);
             python.on('close', (code) => {
                 if (code === 0) {
@@ -461,9 +479,13 @@ export class SpeechToTextEngine {
     async loadAvailableModels() {
         try {
             const models = [
-                'whisper-tiny', 'whisper-base', 'whisper-small',
-                'whisper-medium', 'whisper-large', 'whisper-large-v2',
-                'whisper-large-v3'
+                'whisper-tiny',
+                'whisper-base',
+                'whisper-small',
+                'whisper-medium',
+                'whisper-large',
+                'whisper-large-v2',
+                'whisper-large-v3',
             ];
             this.availableModels = models;
             logger.info(`Available models: ${this.availableModels.join(', ')}`);

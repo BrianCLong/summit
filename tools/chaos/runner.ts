@@ -67,13 +67,12 @@ export class ChaosRunner extends EventEmitter {
 
       this.emit('experiments_loaded', {
         count: this.experiments.size,
-        experiments: Array.from(this.experiments.keys())
+        experiments: Array.from(this.experiments.keys()),
       });
-
     } catch (error) {
       this.emit('error', {
         type: 'config_load_error',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -93,7 +92,9 @@ export class ChaosRunner extends EventEmitter {
     }
 
     // Check safety limits
-    if (this.activeExperiments.size >= this.safetyConfig.maxConcurrentExperiments) {
+    if (
+      this.activeExperiments.size >= this.safetyConfig.maxConcurrentExperiments
+    ) {
       throw new Error('Maximum concurrent experiments reached');
     }
 
@@ -105,7 +106,7 @@ export class ChaosRunner extends EventEmitter {
       startTime: new Date(),
       status: 'running',
       metrics: {},
-      observations: []
+      observations: [],
     };
 
     this.activeExperiments.set(name, result);
@@ -126,14 +127,12 @@ export class ChaosRunner extends EventEmitter {
       result.endTime = new Date();
 
       this.emit('experiment_completed', { name, result });
-
     } catch (error) {
       result.status = 'failure';
       result.endTime = new Date();
       result.errors = [error.message];
 
       this.emit('experiment_failed', { name, error: error.message });
-
     } finally {
       // Always execute rollback
       await this.executeRollback(experiment, result);
@@ -158,15 +157,14 @@ export class ChaosRunner extends EventEmitter {
         if (result.status === 'failure' && this.isCriticalFailure(result)) {
           this.emit('suite_aborted', {
             reason: 'Critical failure detected',
-            failedExperiment: name
+            failedExperiment: name,
           });
           break;
         }
-
       } catch (error) {
         this.emit('suite_error', {
           experiment: name,
-          error: error.message
+          error: error.message,
         });
         break;
       }
@@ -184,7 +182,7 @@ export class ChaosRunner extends EventEmitter {
     this.emit('emergency_stop', {
       reason,
       activeExperiments: Array.from(this.activeExperiments.keys()),
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Abort all active experiments
@@ -197,7 +195,7 @@ export class ChaosRunner extends EventEmitter {
         if (experiment) {
           await this.executeRollback(experiment, result);
         }
-      }
+      },
     );
 
     await Promise.all(rollbackPromises);
@@ -225,11 +223,13 @@ export class ChaosRunner extends EventEmitter {
       emergencyStop: this.emergencyStop,
       activeExperiments: Array.from(this.activeExperiments.keys()),
       totalExperiments: this.experiments.size,
-      safetyConfig: this.safetyConfig
+      safetyConfig: this.safetyConfig,
     };
   }
 
-  private async validatePreConditions(experiment: ChaosExperiment): Promise<void> {
+  private async validatePreConditions(
+    experiment: ChaosExperiment,
+  ): Promise<void> {
     // Check system health
     const healthCheck = await this.checkSystemHealth();
     if (!healthCheck.healthy) {
@@ -277,7 +277,7 @@ export class ChaosRunner extends EventEmitter {
 
   private async monitorExperiment(
     experiment: ChaosExperiment,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): Promise<void> {
     const duration = this.parseDuration(experiment.duration || '5m');
     const startTime = Date.now();
@@ -304,13 +304,13 @@ export class ChaosRunner extends EventEmitter {
       result.observations.push(...observations);
 
       // Wait before next check
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 
   private async validateSuccessCriteria(
     experiment: ChaosExperiment,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): Promise<boolean> {
     const { successCriteria } = experiment;
     const { metrics } = result;
@@ -326,12 +326,16 @@ export class ChaosRunner extends EventEmitter {
       // Simple comparison (extend for complex criteria)
       if (typeof expectedValue === 'number') {
         if (actualValue < expectedValue) {
-          result.observations.push(`Criterion failed: ${criterion} = ${actualValue}, expected >= ${expectedValue}`);
+          result.observations.push(
+            `Criterion failed: ${criterion} = ${actualValue}, expected >= ${expectedValue}`,
+          );
           return false;
         }
       } else if (typeof expectedValue === 'boolean') {
         if (actualValue !== expectedValue) {
-          result.observations.push(`Criterion failed: ${criterion} = ${actualValue}, expected ${expectedValue}`);
+          result.observations.push(
+            `Criterion failed: ${criterion} = ${actualValue}, expected ${expectedValue}`,
+          );
           return false;
         }
       }
@@ -342,7 +346,7 @@ export class ChaosRunner extends EventEmitter {
 
   private async executeRollback(
     experiment: ChaosExperiment,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): Promise<void> {
     try {
       // Implement rollback based on experiment type
@@ -370,17 +374,19 @@ export class ChaosRunner extends EventEmitter {
 
       result.rollbackExecuted = true;
       this.emit('rollback_completed', { experiment: experiment.name });
-
     } catch (error) {
       this.emit('rollback_failed', {
         experiment: experiment.name,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
   }
 
-  private async checkSystemHealth(): Promise<{ healthy: boolean; reason?: string }> {
+  private async checkSystemHealth(): Promise<{
+    healthy: boolean;
+    reason?: string;
+  }> {
     // Implement health checks
     // This is a simplified version
     return { healthy: true };
@@ -392,15 +398,23 @@ export class ChaosRunner extends EventEmitter {
     return 0.95;
   }
 
-  private async validateBlastRadius(experiment: ChaosExperiment): Promise<void> {
+  private async validateBlastRadius(
+    experiment: ChaosExperiment,
+  ): Promise<void> {
     // Implement blast radius validation
     const estimatedImpact = this.estimateImpact(experiment);
 
-    if (estimatedImpact.affectedServices > this.safetyConfig.blastRadiusLimits.maxAffectedServices) {
+    if (
+      estimatedImpact.affectedServices >
+      this.safetyConfig.blastRadiusLimits.maxAffectedServices
+    ) {
       throw new Error('Experiment exceeds maximum affected services limit');
     }
 
-    if (estimatedImpact.userImpact > this.safetyConfig.blastRadiusLimits.maxUserImpact) {
+    if (
+      estimatedImpact.userImpact >
+      this.safetyConfig.blastRadiusLimits.maxUserImpact
+    ) {
       throw new Error('Experiment exceeds maximum user impact limit');
     }
   }
@@ -412,7 +426,7 @@ export class ChaosRunner extends EventEmitter {
     // Simplified impact estimation
     return {
       affectedServices: 1,
-      userImpact: 0.05
+      userImpact: 0.05,
     };
   }
 
@@ -422,16 +436,21 @@ export class ChaosRunner extends EventEmitter {
       api_availability: 0.98,
       error_rate: 0.02,
       response_time_p95: 250,
-      slo_compliance: 0.95
+      slo_compliance: 0.95,
     };
   }
 
-  private async collectObservations(experiment: ChaosExperiment): Promise<string[]> {
+  private async collectObservations(
+    experiment: ChaosExperiment,
+  ): Promise<string[]> {
     // Implement observation collection
     return [`System responding to ${experiment.type} fault injection`];
   }
 
-  private async evaluateCondition(condition: string, metrics: Record<string, number>): Promise<boolean> {
+  private async evaluateCondition(
+    condition: string,
+    metrics: Record<string, number>,
+  ): Promise<boolean> {
     // Implement condition evaluation
     // This is a simplified version
     return false;
@@ -445,18 +464,24 @@ export class ChaosRunner extends EventEmitter {
     const unit = match[2];
 
     switch (unit) {
-      case 's': return value * 1000;
-      case 'm': return value * 60 * 1000;
-      case 'h': return value * 60 * 60 * 1000;
-      default: return 300000;
+      case 's':
+        return value * 1000;
+      case 'm':
+        return value * 60 * 1000;
+      case 'h':
+        return value * 60 * 60 * 1000;
+      default:
+        return 300000;
     }
   }
 
   private isCriticalFailure(result: ExperimentResult): boolean {
     // Determine if failure is critical enough to stop suite
-    return result.errors?.some(error =>
-      error.includes('Emergency') || error.includes('Critical')
-    ) || false;
+    return (
+      result.errors?.some(
+        (error) => error.includes('Emergency') || error.includes('Critical'),
+      ) || false
+    );
   }
 
   private startSafetyMonitoring(): void {

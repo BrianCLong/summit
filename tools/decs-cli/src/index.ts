@@ -82,16 +82,26 @@ const __dirname = path.dirname(__filename);
 const schedulerManifest = path.resolve(__dirname, '../../decs/Cargo.toml');
 
 const program = new Command();
-program.name('decs').description('TypeScript CLI for the Data Embargo & Cooling-Off Scheduler');
+program
+  .name('decs')
+  .description('TypeScript CLI for the Data Embargo & Cooling-Off Scheduler');
 
 program
   .command('generate')
-  .description('Generate a signed schedule from policy JSON and ingest metadata')
+  .description(
+    'Generate a signed schedule from policy JSON and ingest metadata',
+  )
   .requiredOption('--policies <file>', 'Path to embargo policies JSON')
   .requiredOption('--ingests <file>', 'Path to dataset ingest metadata JSON')
   .option('--out <file>', 'Write the schedule JSON to a file')
   .action((options) => {
-    const args = ['generate', '--policies', options.policies, '--ingests', options.ingests];
+    const args = [
+      'generate',
+      '--policies',
+      options.policies,
+      '--ingests',
+      options.ingests,
+    ];
     if (options.out) {
       args.push('--output', options.out);
     }
@@ -104,12 +114,20 @@ program
 
 program
   .command('reconcile')
-  .description('Reconcile access logs against a schedule and emit breach alerts')
+  .description(
+    'Reconcile access logs against a schedule and emit breach alerts',
+  )
   .requiredOption('--schedule <file>', 'Signed schedule JSON file')
   .requiredOption('--access-log <file>', 'Access log JSON file')
   .option('--out <file>', 'Write the reconciliation report to a file')
   .action((options) => {
-    const args = ['reconcile', '--schedule', options.schedule, '--access-log', options.accessLog];
+    const args = [
+      'reconcile',
+      '--schedule',
+      options.schedule,
+      '--access-log',
+      options.accessLog,
+    ];
     if (options.out) {
       args.push('--output', options.out);
     }
@@ -127,7 +145,13 @@ program
   .requiredOption('--requests <file>', 'Backfill request JSON file')
   .option('--out <file>', 'Write the simulation report to a file')
   .action((options) => {
-    const args = ['simulate', '--schedule', options.schedule, '--requests', options.requests];
+    const args = [
+      'simulate',
+      '--schedule',
+      options.schedule,
+      '--requests',
+      options.requests,
+    ];
     if (options.out) {
       args.push('--output', options.out);
     }
@@ -145,7 +169,13 @@ program
   .requiredOption('--current <file>', 'Current schedule JSON file')
   .option('--out <file>', 'Write diff JSON to file')
   .action((options) => {
-    const args = ['diff', '--previous', options.previous, '--current', options.current];
+    const args = [
+      'diff',
+      '--previous',
+      options.previous,
+      '--current',
+      options.current,
+    ];
     if (options.out) {
       args.push('--output', options.out);
     }
@@ -177,7 +207,7 @@ function runScheduler(args: string[]): string {
     '--bin',
     'decs-scheduler',
     '--',
-    ...args
+    ...args,
   ];
   const result = spawnSync('cargo', cargoArgs, { encoding: 'utf-8' });
   handleSpawnResult(result);
@@ -214,20 +244,29 @@ function renderSchedule(schedule: SignedSchedule, wroteFile: boolean): void {
   }
   console.log(`Entries: ${schedule.entries.length}`);
   for (const entry of schedule.entries) {
-    const versionLabel = entry.dataset_version ? ` (version ${entry.dataset_version})` : '';
+    const versionLabel = entry.dataset_version
+      ? ` (version ${entry.dataset_version})`
+      : '';
     console.log(
-      `• ${entry.dataset}${versionLabel} :: ${entry.region} → storage ${entry.storage_gate.open_at}, api ${entry.api_gate.open_at}`
+      `• ${entry.dataset}${versionLabel} :: ${entry.region} → storage ${entry.storage_gate.open_at}, api ${entry.api_gate.open_at}`,
     );
     if (entry.exceptions.length > 0) {
       for (const exception of entry.exceptions) {
-        console.log(`    ↳ exception for ${exception.principal} after ${exception.allow_after}`);
+        console.log(
+          `    ↳ exception for ${exception.principal} after ${exception.allow_after}`,
+        );
       }
     }
   }
 }
 
-function renderReconciliation(report: ReconciliationReport, wroteFile: boolean): void {
-  const prefix = wroteFile ? 'Reconciliation report saved.' : 'Reconciliation complete.';
+function renderReconciliation(
+  report: ReconciliationReport,
+  wroteFile: boolean,
+): void {
+  const prefix = wroteFile
+    ? 'Reconciliation report saved.'
+    : 'Reconciliation complete.';
   console.log(`${prefix} Proof token: ${report.proof_token}`);
   if (report.zero_breach_proof) {
     console.log('✅ No embargo breaches detected.');
@@ -235,14 +274,16 @@ function renderReconciliation(report: ReconciliationReport, wroteFile: boolean):
     console.log(`⚠️ ${report.breaches.length} embargo breach(es) detected:`);
     for (const breach of report.breaches) {
       console.log(
-        `• ${breach.event.dataset}/${breach.event.region} principal ${breach.event.principal} at ${breach.event.occurred_at} before ${breach.gate_open_at}`
+        `• ${breach.event.dataset}/${breach.event.region} principal ${breach.event.principal} at ${breach.event.occurred_at} before ${breach.gate_open_at}`,
       );
     }
   }
 }
 
 function renderSimulation(report: SimulationReport, wroteFile: boolean): void {
-  const prefix = wroteFile ? 'Simulation report saved.' : 'Simulation completed.';
+  const prefix = wroteFile
+    ? 'Simulation report saved.'
+    : 'Simulation completed.';
   console.log(prefix);
   if (report.all_safe) {
     console.log('✅ All backfill requests respect embargo gates.');
@@ -250,7 +291,7 @@ function renderSimulation(report: SimulationReport, wroteFile: boolean): void {
     console.log('⚠️ Some backfill requests violate embargo gates:');
     for (const result of report.results.filter((item) => !item.allowed)) {
       console.log(
-        `• ${result.request.dataset}/${result.request.region} at ${result.request.requested_at} blocked until ${result.gate_open_at} (${result.reason})`
+        `• ${result.request.dataset}/${result.request.region} at ${result.request.requested_at} blocked until ${result.gate_open_at} (${result.reason})`,
       );
     }
   }
@@ -265,8 +306,7 @@ function renderDiff(diff: ScheduleDiff[], wroteFile: boolean): void {
   }
   for (const change of diff) {
     console.log(
-      `• ${change.dataset}/${change.region} field ${change.field}: ${change.previous} → ${change.current}`
+      `• ${change.dataset}/${change.region} field ${change.field}: ${change.previous} → ${change.current}`,
     );
   }
 }
-

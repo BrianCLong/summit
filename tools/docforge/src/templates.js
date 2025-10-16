@@ -10,7 +10,9 @@ function renderParagraphs(text) {
     .map((block) => block.trim())
     .filter(Boolean);
   return paragraphs
-    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br />')}</p>`)
+    .map(
+      (paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br />')}</p>`,
+    )
     .join('\n');
 }
 
@@ -64,14 +66,20 @@ function renderLayout({ title, body, breadcrumbs = [], version }) {
 </html>`;
 }
 
-function renderIndexPage({ version, modules, adrs, versionScoped, versions = [] }) {
+function renderIndexPage({
+  version,
+  modules,
+  adrs,
+  versionScoped,
+  versions = [],
+}) {
   const moduleRows = modules
     .map(
       (module) => `<tr>
         <td><a href="./${versionScoped ? 'modules' : version + '/modules'}/${module.id}.html">${escapeHtml(module.path)}</a></td>
         <td>${escapeHtml(module.language)}</td>
         <td>${escapeHtml(module.entries[0]?.summary || '')}</td>
-      </tr>`
+      </tr>`,
     )
     .join('\n');
 
@@ -80,12 +88,15 @@ function renderIndexPage({ version, modules, adrs, versionScoped, versions = [] 
       (adr) => `<tr>
         <td><a href="./${versionScoped ? 'adrs' : version + '/adrs'}/${adr.id}.html">${escapeHtml(adr.title)}</a></td>
         <td>${escapeHtml(adr.summary)}</td>
-      </tr>`
+      </tr>`,
     )
     .join('\n');
 
   const versionsList = versions
-    .map((entry) => `<li><a href="./${entry.version}/index.html">${escapeHtml(entry.version)}</a></li>`)
+    .map(
+      (entry) =>
+        `<li><a href="./${entry.version}/index.html">${escapeHtml(entry.version)}</a></li>`,
+    )
     .join('\n');
 
   const bodySections = [];
@@ -100,7 +111,9 @@ function renderIndexPage({ version, modules, adrs, versionScoped, versions = [] 
   bodySections.push('<section id="modules">');
   bodySections.push('<h2>API Modules</h2>');
   bodySections.push('<table>');
-  bodySections.push('<thead><tr><th>Module</th><th>Language</th><th>Summary</th></tr></thead>');
+  bodySections.push(
+    '<thead><tr><th>Module</th><th>Language</th><th>Summary</th></tr></thead>',
+  );
   bodySections.push(`<tbody>${moduleRows}</tbody>`);
   bodySections.push('</table>');
   bodySections.push('</section>');
@@ -114,15 +127,17 @@ function renderIndexPage({ version, modules, adrs, versionScoped, versions = [] 
   bodySections.push('</section>');
 
   return renderLayout({
-    title: versionScoped ? `DocForge ${version} Documentation` : 'DocForge Documentation',
+    title: versionScoped
+      ? `DocForge ${version} Documentation`
+      : 'DocForge Documentation',
     version: versionScoped ? version : undefined,
     body: bodySections.join('\n'),
     breadcrumbs: versionScoped
       ? [
           { label: 'Home', href: '../index.html' },
-          { label: `Version ${version}` }
+          { label: `Version ${version}` },
         ]
-      : [{ label: 'Home' }]
+      : [{ label: 'Home' }],
   });
 }
 
@@ -140,7 +155,7 @@ function renderModulePage(module, version) {
         ${renderParagraphs(entry.description)}
       </article>`;
     }),
-    '</section>'
+    '</section>',
   ].join('\n');
 
   return renderLayout({
@@ -150,8 +165,8 @@ function renderModulePage(module, version) {
     breadcrumbs: [
       { label: 'Home', href: '../index.html' },
       { label: 'Modules', href: '../index.html#modules' },
-      { label: module.path }
-    ]
+      { label: module.path },
+    ],
   });
 }
 
@@ -160,7 +175,7 @@ function renderAdrPage(adr, version) {
     '<section>',
     `<h2>${escapeHtml(adr.title)}</h2>`,
     adr.html,
-    '</section>'
+    '</section>',
   ].join('\n');
 
   return renderLayout({
@@ -170,13 +185,13 @@ function renderAdrPage(adr, version) {
     breadcrumbs: [
       { label: 'Home', href: '../index.html' },
       { label: 'ADRs', href: '../index.html#adrs' },
-      { label: adr.title }
-    ]
+      { label: adr.title },
+    ],
   });
 }
 
 module.exports = {
   renderIndexPage,
   renderModulePage,
-  renderAdrPage
+  renderAdrPage,
 };

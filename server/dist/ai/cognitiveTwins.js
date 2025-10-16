@@ -2,6 +2,8 @@ import { randomUUID } from 'crypto';
 import { getPostgresPool } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 export class CognitiveTwinService {
+    pg;
+    neo4j;
     constructor(pg, neo4j) {
         this.pg = pg;
         this.neo4j = neo4j;
@@ -29,7 +31,10 @@ export class CognitiveTwinService {
         return twins;
     }
     async persistTwin(twin) {
-        await Promise.all([this.persistToPostgres(twin), this.persistToNeo4j(twin)]);
+        await Promise.all([
+            this.persistToPostgres(twin),
+            this.persistToNeo4j(twin),
+        ]);
     }
     async persistToPostgres(twin) {
         await this.pg.query(`CREATE TABLE IF NOT EXISTS cognitive_twins (
@@ -67,7 +72,7 @@ export async function simulateCognitiveTwins(entities, environment = 'default') 
     const neo4j = getNeo4jDriver();
     const service = new CognitiveTwinService(pg, neo4j);
     const twins = await service.simulate(entities);
-    await Promise.all(twins.map(twin => service.deployTwin(twin, environment)));
+    await Promise.all(twins.map((twin) => service.deployTwin(twin, environment)));
     return twins;
 }
 //# sourceMappingURL=cognitiveTwins.js.map

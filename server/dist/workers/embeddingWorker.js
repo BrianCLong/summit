@@ -4,7 +4,9 @@ const EmbeddingService = require('../services/EmbeddingService');
 function arrayToVectorLiteral(arr) {
     if (!Array.isArray(arr))
         return null;
-    return '[' + arr.map((x) => (typeof x === 'number' ? x : Number(x) || 0)).join(',') + ']';
+    return ('[' +
+        arr.map((x) => (typeof x === 'number' ? x : Number(x) || 0)).join(',') +
+        ']');
 }
 async function fetchExistingIds(pg, ids) {
     if (!ids.length)

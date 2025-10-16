@@ -12,7 +12,7 @@ const gnnResolvers = {
         gnnModels: async (_, __, { user, req }) => {
             try {
                 const result = await GNNService.listModels({
-                    token: req.headers.authorization?.replace('Bearer ', '')
+                    token: req.headers.authorization?.replace('Bearer ', ''),
                 });
                 if (!result.success) {
                     throw new Error(result.error);
@@ -22,15 +22,15 @@ const gnnResolvers = {
                         name,
                         ...info,
                         config: JSON.stringify(info.config || {}),
-                        metrics: JSON.stringify(info.metrics || {})
+                        metrics: JSON.stringify(info.metrics || {}),
                     })),
-                    count: result.count
+                    count: result.count,
                 };
             }
             catch (error) {
                 logger.error('Failed to list GNN models', {
                     error: error.message,
-                    userId: user?.id
+                    userId: user?.id,
                 });
                 throw new Error(`Failed to list GNN models: ${error.message}`);
             }
@@ -41,7 +41,7 @@ const gnnResolvers = {
         gnnModel: async (_, { name }, { user, req }) => {
             try {
                 const result = await GNNService.getModelInfo(name, {
-                    token: req.headers.authorization?.replace('Bearer ', '')
+                    token: req.headers.authorization?.replace('Bearer ', ''),
                 });
                 if (!result.success) {
                     throw new Error(result.error);
@@ -50,25 +50,25 @@ const gnnResolvers = {
                     name,
                     ...result.modelInfo,
                     config: JSON.stringify(result.modelInfo.config || {}),
-                    metrics: JSON.stringify(result.modelInfo.metrics || {})
+                    metrics: JSON.stringify(result.modelInfo.metrics || {}),
                 };
             }
             catch (error) {
                 logger.error('Failed to get GNN model info', {
                     modelName: name,
                     error: error.message,
-                    userId: user?.id
+                    userId: user?.id,
                 });
                 throw new Error(`Failed to get model info: ${error.message}`);
             }
-        }
+        },
     },
     Mutation: {
         /**
          * Perform node classification using GNN
          */
         gnnNodeClassification: async (_, args, { user, req }) => {
-            const { investigationId, graphData, nodeFeatures, nodeLabels, modelName, modelConfig, taskMode, options } = args.input;
+            const { investigationId, graphData, nodeFeatures, nodeLabels, modelName, modelConfig, taskMode, options, } = args.input;
             return trackGraphOperation('gnn_node_classification', investigationId, async () => {
                 try {
                     // Convert graph data format
@@ -83,8 +83,8 @@ const gnnResolvers = {
                         taskMode: taskMode || 'predict',
                         options: {
                             ...options,
-                            token: req.headers.authorization?.replace('Bearer ', '')
-                        }
+                            token: req.headers.authorization?.replace('Bearer ', ''),
+                        },
                     });
                     if (!result.success) {
                         throw new Error(result.error);
@@ -94,7 +94,7 @@ const gnnResolvers = {
                         jobId: result.jobId,
                         taskMode: result.taskMode,
                         modelName: result.modelName,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     return {
                         success: true,
@@ -102,14 +102,14 @@ const gnnResolvers = {
                         taskId: result.taskId,
                         message: result.message,
                         modelName: result.modelName,
-                        taskMode: result.taskMode
+                        taskMode: result.taskMode,
                     };
                 }
                 catch (error) {
                     logger.error('GNN node classification failed', {
                         investigationId,
                         error: error.message,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     throw new Error(`Node classification failed: ${error.message}`);
                 }
@@ -119,7 +119,7 @@ const gnnResolvers = {
          * Perform link prediction using GNN
          */
         gnnLinkPrediction: async (_, args, { user, req }) => {
-            const { investigationId, graphData, nodeFeatures, candidateEdges, modelName, modelConfig, taskMode, options } = args.input;
+            const { investigationId, graphData, nodeFeatures, candidateEdges, modelName, modelConfig, taskMode, options, } = args.input;
             return trackGraphOperation('gnn_link_prediction', investigationId, async () => {
                 try {
                     const convertedGraphData = GNNService.convertGraphData(graphData);
@@ -133,8 +133,8 @@ const gnnResolvers = {
                         taskMode: taskMode || 'predict',
                         options: {
                             ...options,
-                            token: req.headers.authorization?.replace('Bearer ', '')
-                        }
+                            token: req.headers.authorization?.replace('Bearer ', ''),
+                        },
                     });
                     if (!result.success) {
                         throw new Error(result.error);
@@ -145,7 +145,7 @@ const gnnResolvers = {
                         taskMode: result.taskMode,
                         modelName: result.modelName,
                         candidateEdgeCount: candidateEdges?.length || 0,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     return {
                         success: true,
@@ -153,14 +153,14 @@ const gnnResolvers = {
                         taskId: result.taskId,
                         message: result.message,
                         modelName: result.modelName,
-                        taskMode: result.taskMode
+                        taskMode: result.taskMode,
                     };
                 }
                 catch (error) {
                     logger.error('GNN link prediction failed', {
                         investigationId,
                         error: error.message,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     throw new Error(`Link prediction failed: ${error.message}`);
                 }
@@ -170,11 +170,11 @@ const gnnResolvers = {
          * Perform graph classification using GNN
          */
         gnnGraphClassification: async (_, args, { user, req }) => {
-            const { investigationId, graphs, graphLabels, modelName, modelConfig, taskMode, options } = args.input;
+            const { investigationId, graphs, graphLabels, modelName, modelConfig, taskMode, options, } = args.input;
             return trackGraphOperation('gnn_graph_classification', investigationId, async () => {
                 try {
                     // Convert multiple graphs
-                    const convertedGraphs = graphs.map(graph => GNNService.convertGraphData(graph));
+                    const convertedGraphs = graphs.map((graph) => GNNService.convertGraphData(graph));
                     const result = await GNNService.classifyGraphs({
                         investigationId,
                         graphs: convertedGraphs,
@@ -184,8 +184,8 @@ const gnnResolvers = {
                         taskMode: taskMode || 'predict',
                         options: {
                             ...options,
-                            token: req.headers.authorization?.replace('Bearer ', '')
-                        }
+                            token: req.headers.authorization?.replace('Bearer ', ''),
+                        },
                     });
                     if (!result.success) {
                         throw new Error(result.error);
@@ -196,7 +196,7 @@ const gnnResolvers = {
                         taskMode: result.taskMode,
                         modelName: result.modelName,
                         graphCount: graphs.length,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     return {
                         success: true,
@@ -204,14 +204,14 @@ const gnnResolvers = {
                         taskId: result.taskId,
                         message: result.message,
                         modelName: result.modelName,
-                        taskMode: result.taskMode
+                        taskMode: result.taskMode,
                     };
                 }
                 catch (error) {
                     logger.error('GNN graph classification failed', {
                         investigationId,
                         error: error.message,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     throw new Error(`Graph classification failed: ${error.message}`);
                 }
@@ -221,7 +221,7 @@ const gnnResolvers = {
          * Perform anomaly detection using GNN
          */
         gnnAnomalyDetection: async (_, args, { user, req }) => {
-            const { investigationId, graphData, nodeFeatures, normalNodes, modelName, modelConfig, taskMode, anomalyThreshold, options } = args.input;
+            const { investigationId, graphData, nodeFeatures, normalNodes, modelName, modelConfig, taskMode, anomalyThreshold, options, } = args.input;
             return trackGraphOperation('gnn_anomaly_detection', investigationId, async () => {
                 try {
                     const convertedGraphData = GNNService.convertGraphData(graphData);
@@ -236,8 +236,8 @@ const gnnResolvers = {
                         anomalyThreshold: anomalyThreshold || 0.5,
                         options: {
                             ...options,
-                            token: req.headers.authorization?.replace('Bearer ', '')
-                        }
+                            token: req.headers.authorization?.replace('Bearer ', ''),
+                        },
                     });
                     if (!result.success) {
                         throw new Error(result.error);
@@ -248,7 +248,7 @@ const gnnResolvers = {
                         taskMode: result.taskMode,
                         modelName: result.modelName,
                         anomalyThreshold: anomalyThreshold || 0.5,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     return {
                         success: true,
@@ -256,14 +256,14 @@ const gnnResolvers = {
                         taskId: result.taskId,
                         message: result.message,
                         modelName: result.modelName,
-                        taskMode: result.taskMode
+                        taskMode: result.taskMode,
                     };
                 }
                 catch (error) {
                     logger.error('GNN anomaly detection failed', {
                         investigationId,
                         error: error.message,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     throw new Error(`Anomaly detection failed: ${error.message}`);
                 }
@@ -273,7 +273,7 @@ const gnnResolvers = {
          * Generate node embeddings using GNN
          */
         gnnGenerateEmbeddings: async (_, args, { user, req }) => {
-            const { investigationId, graphData, nodeFeatures, modelName, embeddingDim, options } = args.input;
+            const { investigationId, graphData, nodeFeatures, modelName, embeddingDim, options, } = args.input;
             return trackGraphOperation('gnn_generate_embeddings', investigationId, async () => {
                 try {
                     const convertedGraphData = GNNService.convertGraphData(graphData);
@@ -285,8 +285,8 @@ const gnnResolvers = {
                         embeddingDim: embeddingDim || 128,
                         options: {
                             ...options,
-                            token: req.headers.authorization?.replace('Bearer ', '')
-                        }
+                            token: req.headers.authorization?.replace('Bearer ', ''),
+                        },
                     });
                     if (!result.success) {
                         throw new Error(result.error);
@@ -296,21 +296,21 @@ const gnnResolvers = {
                         jobId: result.jobId,
                         modelName: result.modelName,
                         embeddingDim: embeddingDim || 128,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     return {
                         success: true,
                         jobId: result.jobId,
                         taskId: result.taskId,
                         message: result.message,
-                        modelName: result.modelName
+                        modelName: result.modelName,
                     };
                 }
                 catch (error) {
                     logger.error('GNN embedding generation failed', {
                         investigationId,
                         error: error.message,
-                        userId: user?.id
+                        userId: user?.id,
                     });
                     throw new Error(`Embedding generation failed: ${error.message}`);
                 }
@@ -322,31 +322,31 @@ const gnnResolvers = {
         deleteGnnModel: async (_, { name }, { user, req }) => {
             try {
                 const result = await GNNService.deleteModel(name, {
-                    token: req.headers.authorization?.replace('Bearer ', '')
+                    token: req.headers.authorization?.replace('Bearer ', ''),
                 });
                 if (!result.success) {
                     throw new Error(result.error);
                 }
                 logger.info('GNN model deleted', {
                     modelName: name,
-                    userId: user?.id
+                    userId: user?.id,
                 });
                 return {
                     success: true,
                     message: `Model ${name} deleted successfully`,
-                    modelName: name
+                    modelName: name,
                 };
             }
             catch (error) {
                 logger.error('Failed to delete GNN model', {
                     modelName: name,
                     error: error.message,
-                    userId: user?.id
+                    userId: user?.id,
                 });
                 throw new Error(`Failed to delete model: ${error.message}`);
             }
-        }
-    }
+        },
+    },
 };
 module.exports = gnnResolvers;
 //# sourceMappingURL=gnnResolvers.js.map

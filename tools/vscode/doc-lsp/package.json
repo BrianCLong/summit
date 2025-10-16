@@ -1,1 +1,12 @@
-{ "name":"intelgraph-docs-lsp","version":"0.0.1","engines":{"vscode":"^1.75.0"},"main":"extension.js","activationEvents":["onLanguage:markdown","onLanguage:mdx"] }
+{
+  "name": "intelgraph-docs-lsp",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "main": "extension.js",
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onLanguage:mdx"
+  ]
+}

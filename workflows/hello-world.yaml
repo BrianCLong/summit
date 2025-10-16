@@ -88,13 +88,13 @@ spec:
             - |
               set -ex
               echo "Registering Hello-World workflow..."
-              
+
               # Wait for Conductor to be ready
               until curl -f http://maestro-conductor:8080/health; do
                 echo "Waiting for Conductor..."
                 sleep 10
               done
-              
+
               # Register workflow definition
               curl -X POST \
                 http://maestro-conductor:8080/api/metadata/workflow \
@@ -102,7 +102,7 @@ spec:
                 -d @/workflow/hello-world.json
                 
               echo "Hello-World workflow registered successfully!"
-              
+
           volumeMounts:
             - name: workflow-config
               mountPath: /workflow
@@ -120,7 +120,7 @@ spec:
 
 ---
 apiVersion: batch/v1
-kind: CronJob  
+kind: CronJob
 metadata:
   name: hello-world-scheduler
   namespace: dev-orch
@@ -129,7 +129,7 @@ metadata:
     app.kubernetes.io/component: scheduler
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: "*/15 * * * *"  # Every 15 minutes
+  schedule: '*/15 * * * *' # Every 15 minutes
   jobTemplate:
     spec:
       template:
@@ -144,9 +144,9 @@ spec:
                 - |
                   set -ex
                   echo "Triggering Hello-World workflow..."
-                  
+
                   WORKFLOW_ID=$(date +%s)
-                  
+
                   curl -X POST \
                     http://maestro-conductor:8080/api/workflow/hello_world_workflow \
                     -H "Content-Type: application/json" \

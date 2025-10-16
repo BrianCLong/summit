@@ -1,16 +1,14 @@
-import Redis from "ioredis";
-import pino from "pino";
+import Redis from 'ioredis';
+import pino from 'pino';
 const logger = pino();
 class GraphCRDT {
-    constructor() {
-        this.nodes = new Map();
-        this.edges = new Map();
-    }
+    nodes = new Map();
+    edges = new Map();
     apply(op) {
-        const store = op.kind === "node" ? this.nodes : this.edges;
+        const store = op.kind === 'node' ? this.nodes : this.edges;
         const existing = store.get(op.id);
         if (!existing || op.ts >= existing.ts) {
-            if (op.action === "delete") {
+            if (op.action === 'delete') {
                 store.delete(op.id);
             }
             else {
@@ -31,7 +29,7 @@ function getGraph(graphId) {
     return entry;
 }
 const redisOptions = {
-    host: process.env.REDIS_HOST || "localhost",
+    host: process.env.REDIS_HOST || 'localhost',
     port: Number(process.env.REDIS_PORT || 6379),
     password: process.env.REDIS_PASSWORD || undefined,
 };
@@ -40,27 +38,27 @@ const sub = pub.duplicate();
 let ioRef = null;
 export function initGraphSync(ns) {
     ioRef = ns;
-    sub.psubscribe("graph:op:*");
-    sub.on("pmessage", (_pattern, channel, message) => {
-        const graphId = channel.split(":")[2];
+    sub.psubscribe('graph:op:*');
+    sub.on('pmessage', (_pattern, channel, message) => {
+        const graphId = channel.split(':')[2];
         const op = JSON.parse(message);
         const entry = getGraph(graphId);
         entry.clock = Math.max(entry.clock, op.ts);
         if (entry.crdt.apply(op)) {
-            ioRef?.to(`graph:${graphId}`).emit("graph:op", { graphId, op });
+            ioRef?.to(`graph:${graphId}`).emit('graph:op', { graphId, op });
         }
     });
-    sub.on("error", (err) => logger.error({ err }, "Redis sub error"));
+    sub.on('error', (err) => logger.error({ err }, 'Redis sub error'));
 }
 export function registerGraphHandlers(socket) {
-    socket.on("graph:op", ({ graphId, op }) => {
+    socket.on('graph:op', ({ graphId, op }) => {
         if (!graphId || !op)
             return;
         const entry = getGraph(graphId);
         entry.clock = Math.max(entry.clock, op.ts || 0) + 1;
         op.ts = entry.clock;
         if (entry.crdt.apply(op)) {
-            socket.to(`graph:${graphId}`).emit("graph:op", { graphId, op });
+            socket.to(`graph:${graphId}`).emit('graph:op', { graphId, op });
             pub.publish(`graph:op:${graphId}`, JSON.stringify(op));
         }
     });

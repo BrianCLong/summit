@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './cacheService';
 export class InvestigationWorkflowService extends EventEmitter {
+    investigations = new Map();
+    templates = new Map();
     constructor() {
         super();
-        this.investigations = new Map();
-        this.templates = new Map();
         console.log('[WORKFLOW] Investigation workflow service initialized');
         this.initializeTemplates();
     }
@@ -319,7 +319,8 @@ export class InvestigationWorkflowService extends EventEmitter {
                 return acc;
             }, {}),
             byStage: investigations.reduce((acc, inv) => {
-                acc[inv.workflow.currentStage] = (acc[inv.workflow.currentStage] || 0) + 1;
+                acc[inv.workflow.currentStage] =
+                    (acc[inv.workflow.currentStage] || 0) + 1;
                 return acc;
             }, {}),
             overdueSLA: investigations.filter((inv) => {
@@ -331,14 +332,42 @@ export class InvestigationWorkflowService extends EventEmitter {
     }
     getStageRequirements(stage) {
         const requirements = {
-            INTAKE: ['Initial report documented', 'Priority assigned', 'Analyst assigned'],
-            TRIAGE: ['Threat assessment completed', 'Scope determined', 'Resources allocated'],
-            INVESTIGATION: ['Evidence collected', 'Entities identified', 'Timeline constructed'],
-            ANALYSIS: ['Root cause identified', 'Attack vectors mapped', 'Impact assessed'],
+            INTAKE: [
+                'Initial report documented',
+                'Priority assigned',
+                'Analyst assigned',
+            ],
+            TRIAGE: [
+                'Threat assessment completed',
+                'Scope determined',
+                'Resources allocated',
+            ],
+            INVESTIGATION: [
+                'Evidence collected',
+                'Entities identified',
+                'Timeline constructed',
+            ],
+            ANALYSIS: [
+                'Root cause identified',
+                'Attack vectors mapped',
+                'Impact assessed',
+            ],
             CONTAINMENT: ['Threat contained', 'Systems isolated', 'Damage minimized'],
-            ERADICATION: ['Threat removed', 'Vulnerabilities patched', 'Systems hardened'],
-            RECOVERY: ['Systems restored', 'Operations normalized', 'Monitoring enhanced'],
-            LESSONS_LEARNED: ['Report documented', 'Improvements identified', 'Training updated'],
+            ERADICATION: [
+                'Threat removed',
+                'Vulnerabilities patched',
+                'Systems hardened',
+            ],
+            RECOVERY: [
+                'Systems restored',
+                'Operations normalized',
+                'Monitoring enhanced',
+            ],
+            LESSONS_LEARNED: [
+                'Report documented',
+                'Improvements identified',
+                'Training updated',
+            ],
         };
         return requirements[stage] || [];
     }

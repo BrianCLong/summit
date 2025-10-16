@@ -10,6 +10,14 @@ import { insertAnalyticsTrace } from '../../db/timescale.js';
 import ProvenanceLedgerService from '../provenance-ledger.js';
 import logger from '../../utils/logger.js';
 export class StreamingIngestWorker extends EventEmitter {
+    static instance;
+    messageQueue = [];
+    processing = false;
+    batchSize = 100;
+    batchTimeout = 5000; // 5 seconds
+    metrics;
+    provenanceService;
+    piiConfig;
     static getInstance() {
         if (!StreamingIngestWorker.instance) {
             StreamingIngestWorker.instance = new StreamingIngestWorker();
@@ -18,10 +26,6 @@ export class StreamingIngestWorker extends EventEmitter {
     }
     constructor() {
         super();
-        this.messageQueue = [];
-        this.processing = false;
-        this.batchSize = 100;
-        this.batchTimeout = 5000; // 5 seconds
         this.provenanceService = ProvenanceLedgerService.getInstance();
         this.initializeMetrics();
         this.initializePIIRedaction();
@@ -257,7 +261,9 @@ export class StreamingIngestWorker extends EventEmitter {
             logger.info({
                 message: 'PII redaction applied',
                 fields_redacted: piiFieldsRemoved.length,
-                patterns_matched: [...new Set(piiFieldsRemoved.map((f) => f.split('.').pop()))],
+                patterns_matched: [
+                    ...new Set(piiFieldsRemoved.map((f) => f.split('.').pop())),
+                ],
             });
             this.metrics.pii_redactions_applied++;
         }
@@ -411,7 +417,10 @@ export class StreamingIngestWorker extends EventEmitter {
             data_type: message.data_type,
             timestamp: message.timestamp,
         };
-        return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
+        return crypto
+            .createHash('md5')
+            .update(JSON.stringify(normalized))
+            .digest('hex');
     }
     updateMetrics() {
         // Update messages per second
@@ -425,7 +434,8 @@ export class StreamingIngestWorker extends EventEmitter {
         if (this.metrics.errors_encountered > 10) {
             this.metrics.worker_status = 'unhealthy';
         }
-        else if (this.metrics.errors_encountered > 5 || this.metrics.queue_size > 500) {
+        else if (this.metrics.errors_encountered > 5 ||
+            this.metrics.queue_size > 500) {
             this.metrics.worker_status = 'degraded';
         }
         else {

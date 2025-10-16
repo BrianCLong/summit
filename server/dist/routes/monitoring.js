@@ -5,7 +5,7 @@ import express from 'express';
 import { z } from 'zod';
 import { register, webVitalValue } from '../monitoring/metrics.js';
 import { performHealthCheck, getCachedHealthStatus, livenessProbe, readinessProbe, checkDatabase, checkNeo4j, checkRedis, checkMlService, checkSystemResources, } from '../monitoring/health.js';
-import { recordBusinessEvent } from '../monitoring/businessMetrics.js';
+import { recordBusinessEvent, } from '../monitoring/businessMetrics.js';
 const router = express.Router();
 router.use(express.json());
 /**
@@ -234,7 +234,9 @@ router.post('/web-vitals', (req, res) => {
         res.status(204).end();
     }
     catch (error) {
-        res.status(500).json({ error: 'Failed to record web vital', details: error.message });
+        res
+            .status(500)
+            .json({ error: 'Failed to record web vital', details: error.message });
     }
 });
 export default router;

@@ -10,7 +10,12 @@ import { S3CSVConnector } from './connectors/S3CSVConnector';
 import { HTTPConnector } from './connectors/HTTPConnector';
 import { BaseConnector } from './connectors/BaseConnector';
 import { logger } from './utils/logger';
-import type { ConnectorConfig, IngestRecord, IngestJobConfig, ProcessingMetrics } from './types';
+import type {
+  ConnectorConfig,
+  IngestRecord,
+  IngestJobConfig,
+  ProcessingMetrics,
+} from './types';
 
 const tracer = trace.getTracer('intelgraph-ingest-orchestrator');
 
@@ -36,8 +41,8 @@ export class IngestOrchestrator {
       process.env.NEO4J_URI || 'bolt://localhost:7687',
       neo4j.auth.basic(
         process.env.NEO4J_USERNAME || 'neo4j',
-        process.env.NEO4J_PASSWORD || 'password'
-      )
+        process.env.NEO4J_PASSWORD || 'password',
+      ),
     );
 
     // Initialize Kafka producer
@@ -67,7 +72,9 @@ export class IngestOrchestrator {
           connector = new HTTPConnector(connectorConfig);
           break;
         default:
-          this.logger.warn('Unknown connector type', { type: connectorConfig.type });
+          this.logger.warn('Unknown connector type', {
+            type: connectorConfig.type,
+          });
           continue;
       }
 
@@ -99,8 +106,8 @@ export class IngestOrchestrator {
       this.isRunning = true;
 
       // Start processing each connector
-      const promises = Array.from(this.connectors.entries()).map(([name, connector]) =>
-        this.processConnector(name, connector)
+      const promises = Array.from(this.connectors.entries()).map(
+        ([name, connector]) => this.processConnector(name, connector),
       );
 
       await Promise.all(promises);
@@ -115,7 +122,10 @@ export class IngestOrchestrator {
     }
   }
 
-  private async processConnector(name: string, connector: BaseConnector): Promise<void> {
+  private async processConnector(
+    name: string,
+    connector: BaseConnector,
+  ): Promise<void> {
     const span = tracer.startSpan('process-connector', {
       attributes: {
         'connector.name': name,
@@ -167,7 +177,6 @@ export class IngestOrchestrator {
       });
 
       span.setStatus({ code: 1 }); // OK
-
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
@@ -199,7 +208,6 @@ export class IngestOrchestrator {
       await this.emitToKafka(batch);
 
       span.setStatus({ code: 1 }); // OK
-
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
@@ -245,8 +253,9 @@ export class IngestOrchestrator {
 
       await client.query('COMMIT');
 
-      this.logger.debug('Wrote batch to PostgreSQL', { batch_size: batch.length });
-
+      this.logger.debug('Wrote batch to PostgreSQL', {
+        batch_size: batch.length,
+      });
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -279,7 +288,7 @@ export class IngestOrchestrator {
         MERGE (e)-[:FROM_SOURCE]->(s)
       `;
 
-      const rows = batch.map(record => ({
+      const rows = batch.map((record) => ({
         id: record.id,
         type: record.type,
         name: record.name,
@@ -295,9 +304,10 @@ export class IngestOrchestrator {
       await tx.commit();
 
       this.logger.debug('Wrote batch to Neo4j', { batch_size: batch.length });
-
     } catch (error) {
-      this.logger.error('Failed to write to Neo4j', { error: (error as Error).message });
+      this.logger.error('Failed to write to Neo4j', {
+        error: (error as Error).message,
+      });
       throw error;
     } finally {
       await session.close();
@@ -305,14 +315,14 @@ export class IngestOrchestrator {
   }
 
   private async emitToKafka(batch: IngestRecord[]): Promise<void> {
-    const messages = batch.map(record => ({
+    const messages = batch.map((record) => ({
       key: record.id,
       value: JSON.stringify(record),
       headers: {
         'content-type': 'application/json',
         'source-connector': record.source_id,
         'retention-tier': record.retention_tier,
-        'purpose': record.purpose,
+        purpose: record.purpose,
       },
     }));
 
@@ -324,17 +334,22 @@ export class IngestOrchestrator {
     this.logger.debug('Emitted batch to Kafka', { batch_size: batch.length });
   }
 
-  private async emitCheckpoint(connectorName: string, recordCount: number): Promise<void> {
+  private async emitCheckpoint(
+    connectorName: string,
+    recordCount: number,
+  ): Promise<void> {
     await this.kafkaProducer.send({
       topic: 'intelgraph-checkpoints',
-      messages: [{
-        key: connectorName,
-        value: JSON.stringify({
-          connector: connectorName,
-          record_count: recordCount,
-          timestamp: new Date().toISOString(),
-        }),
-      }],
+      messages: [
+        {
+          key: connectorName,
+          value: JSON.stringify({
+            connector: connectorName,
+            record_count: recordCount,
+            timestamp: new Date().toISOString(),
+          }),
+        },
+      ],
     });
 
     this.logger.info('Emitted checkpoint', {
@@ -383,7 +398,9 @@ export class IngestOrchestrator {
 
     // Shutdown connectors
     await Promise.all(
-      Array.from(this.connectors.values()).map(connector => connector.shutdown())
+      Array.from(this.connectors.values()).map((connector) =>
+        connector.shutdown(),
+      ),
     );
 
     // Close connections

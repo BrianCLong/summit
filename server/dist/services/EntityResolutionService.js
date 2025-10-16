@@ -1,11 +1,9 @@
-import pino from "pino";
-import { getPostgresPool } from "../config/database";
-import { BehavioralFingerprintService, } from "./BehavioralFingerprintService.js";
-const log = pino({ name: "EntityResolutionService" });
+import pino from 'pino';
+import { getPostgresPool } from '../config/database';
+import { BehavioralFingerprintService, } from './BehavioralFingerprintService.js';
+const log = pino({ name: 'EntityResolutionService' });
 export class EntityResolutionService {
-    constructor() {
-        this.behavioralService = new BehavioralFingerprintService();
-    }
+    behavioralService = new BehavioralFingerprintService();
     /**
      * Normalizes entity properties for deterministic comparison.
      * @param entity The entity object, typically from Neo4j, with properties.
@@ -45,9 +43,9 @@ export class EntityResolutionService {
         if (normalizedProps.url)
             parts.push(`url:${normalizedProps.url}`);
         if (parts.length === 0) {
-            return ""; // Cannot generate a canonical key without identifying properties
+            return ''; // Cannot generate a canonical key without identifying properties
         }
-        return parts.sort().join("|");
+        return parts.sort().join('|');
     }
     /**
      * Finds potential duplicate entities in Neo4j based on canonical keys.
@@ -62,11 +60,11 @@ export class EntityResolutionService {
       RETURN e.id AS id, e.name AS name, e.email AS email, e.url AS url
     `);
         for (const record of result.records) {
-            const entityId = record.get("id");
+            const entityId = record.get('id');
             const entityProps = {
-                name: record.get("name"),
-                email: record.get("email"),
-                url: record.get("url"),
+                name: record.get('name'),
+                email: record.get('email'),
+                url: record.get('url'),
             };
             const normalized = this.normalizeEntityProperties(entityProps);
             const canonicalKey = this.generateCanonicalKey(normalized);
@@ -95,7 +93,7 @@ export class EntityResolutionService {
      */
     async mergeEntities(session, masterEntityId, duplicateEntityIds) {
         if (duplicateEntityIds.includes(masterEntityId)) {
-            throw new Error("Master entity ID cannot be in the list of duplicate entity IDs.");
+            throw new Error('Master entity ID cannot be in the list of duplicate entity IDs.');
         }
         const allEntityIds = [masterEntityId, ...duplicateEntityIds];
         // Update canonicalId for all entities being merged to point to the master's canonicalId
@@ -129,13 +127,13 @@ export class EntityResolutionService {
       WHERE d.id IN $duplicateEntityIds
       DETACH DELETE d
     `, { duplicateEntityIds });
-        log.info(`Merged entities: ${duplicateEntityIds.join(", ")} into ${masterEntityId}`);
+        log.info(`Merged entities: ${duplicateEntityIds.join(', ')} into ${masterEntityId}`);
         // Log to audit_logs
         const pool = getPostgresPool();
         await pool.query(`INSERT INTO audit_logs (action, resource_type, resource_id, details)
        VALUES ($1, $2, $3, $4)`, [
-            "entity_merge",
-            "Entity",
+            'entity_merge',
+            'Entity',
             masterEntityId,
             { merged_from: duplicateEntityIds },
         ]);

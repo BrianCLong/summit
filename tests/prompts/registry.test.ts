@@ -9,32 +9,32 @@ describe('PromptRegistry', () => {
   beforeAll(async () => {
     // Create test fixtures directory
     await fs.mkdir(testPromptsDir, { recursive: true });
-    
+
     // Create schema.json
     const schema = {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "type": "object",
-      "required": ["meta", "inputs", "template"],
-      "properties": {
-        "meta": {
-          "type": "object",
-          "required": ["id", "owner", "purpose"],
-          "properties": {
-            "id": { "type": "string" },
-            "owner": { "type": "string" },
-            "purpose": { "type": "string" },
-            "guardrails": { "type": "array" }
-          }
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      required: ['meta', 'inputs', 'template'],
+      properties: {
+        meta: {
+          type: 'object',
+          required: ['id', 'owner', 'purpose'],
+          properties: {
+            id: { type: 'string' },
+            owner: { type: 'string' },
+            purpose: { type: 'string' },
+            guardrails: { type: 'array' },
+          },
         },
-        "inputs": { "type": "object" },
-        "template": { "type": "string" },
-        "examples": { "type": "array" }
-      }
+        inputs: { type: 'object' },
+        template: { type: 'string' },
+        examples: { type: 'array' },
+      },
     };
-    
+
     await fs.writeFile(
-      path.join(testPromptsDir, 'schema.json'), 
-      JSON.stringify(schema, null, 2)
+      path.join(testPromptsDir, 'schema.json'),
+      JSON.stringify(schema, null, 2),
     );
 
     // Create test prompt
@@ -72,7 +72,7 @@ examples:
 
     await fs.writeFile(
       path.join(testPromptsDir, 'test.simple@v1.yaml'),
-      testPrompt
+      testPrompt,
     );
 
     registry = new PromptRegistry(testPromptsDir);
@@ -100,12 +100,14 @@ meta:
 inputs: {}
 template: "test"
 `;
-      
+
       const invalidPath = path.join(testPromptsDir, 'invalid.yaml');
       await fs.writeFile(invalidPath, invalidPrompt);
-      
-      await expect(registry.reloadPrompts()).rejects.toThrow('Invalid prompt schema');
-      
+
+      await expect(registry.reloadPrompts()).rejects.toThrow(
+        'Invalid prompt schema',
+      );
+
       // Clean up
       await fs.unlink(invalidPath);
     });
@@ -116,7 +118,7 @@ template: "test"
       const result = registry.render('test.simple@v1', {
         name: 'Alice',
         count: 3,
-        items: ['x', 'y', 'z']
+        items: ['x', 'y', 'z'],
       });
 
       expect(result).toContain('Hello Alice!');
@@ -140,7 +142,7 @@ template: "test"
         registry.render('test.simple@v1', {
           name: 'Alice',
           count: 'not-a-number', // wrong type
-          items: ['x', 'y']
+          items: ['x', 'y'],
         });
       }).toThrow('Invalid type for count');
     });
@@ -157,7 +159,7 @@ template: "test"
       const result = registry.render('test.simple@v1', {
         name: 'Bob',
         count: 2,
-        items: ['first', 'second']
+        items: ['first', 'second'],
       });
 
       expect(result).toContain('- first');
@@ -168,7 +170,7 @@ template: "test"
       const result = registry.render('test.simple@v1', {
         name: 'Charlie',
         count: 0,
-        items: []
+        items: [],
       });
 
       expect(result).toContain('Hello Charlie!');
@@ -180,7 +182,7 @@ template: "test"
   describe('golden tests', () => {
     test('runs golden tests for all prompts', async () => {
       const results = await registry.runGoldenTests();
-      
+
       expect(results).toHaveLength(1); // One example in our test prompt
       expect(results[0].promptId).toBe('test.simple@v1');
       expect(results[0].exampleName).toBe('basic-test');
@@ -189,7 +191,7 @@ template: "test"
 
     test('runs golden tests for specific prompt', async () => {
       const results = await registry.runGoldenTests('test.simple@v1');
-      
+
       expect(results).toHaveLength(1);
       expect(results[0].passed).toBe(true);
       expect(results[0].missingExpected).toEqual([]);
@@ -219,15 +221,15 @@ examples:
 
       await fs.writeFile(
         path.join(testPromptsDir, 'test.failing@v1.yaml'),
-        failingPrompt
+        failingPrompt,
       );
-      
+
       await registry.reloadPrompts();
       const results = await registry.runGoldenTests('test.failing@v1');
-      
+
       expect(results[0].passed).toBe(false);
       expect(results[0].missingExpected).toContain('missing-text');
-      
+
       // Clean up
       await fs.unlink(path.join(testPromptsDir, 'test.failing@v1.yaml'));
     });
@@ -237,12 +239,12 @@ examples:
     test('lists all prompts', () => {
       const prompts = registry.getAllPrompts();
       expect(prompts.length).toBeGreaterThan(0);
-      expect(prompts.find(p => p.meta.id === 'test.simple@v1')).toBeDefined();
+      expect(prompts.find((p) => p.meta.id === 'test.simple@v1')).toBeDefined();
     });
 
     test('reloads prompts', async () => {
       const initialCount = registry.getAllPrompts().length;
-      
+
       // Add a new prompt file
       const newPrompt = `
 meta:
@@ -253,18 +255,18 @@ inputs:
   text: string
 template: "New: {{text}}"
 `;
-      
+
       await fs.writeFile(
         path.join(testPromptsDir, 'test.new@v1.yaml'),
-        newPrompt
+        newPrompt,
       );
-      
+
       await registry.reloadPrompts();
-      
+
       const newCount = registry.getAllPrompts().length;
       expect(newCount).toBe(initialCount + 1);
       expect(registry.getPrompt('test.new@v1')).toBeDefined();
-      
+
       // Clean up
       await fs.unlink(path.join(testPromptsDir, 'test.new@v1.yaml'));
     });

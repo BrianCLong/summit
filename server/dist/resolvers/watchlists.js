@@ -3,7 +3,7 @@ const service = new WatchlistService();
 export const watchlistResolvers = {
     Query: {
         watchlists: () => service.all(),
-        watchlist: (_, { id }) => service.get(id)
+        watchlist: (_, { id }) => service.get(id),
     },
     Mutation: {
         createWatchlist: (_, args) => service.create(args),
@@ -20,7 +20,7 @@ export const watchlistResolvers = {
         deleteWatchlist: (_, { id }) => {
             delete service.lists[id];
             return true;
-        }
-    }
+        },
+    },
 };
 //# sourceMappingURL=watchlists.js.map

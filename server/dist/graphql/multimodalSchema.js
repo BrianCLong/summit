@@ -87,28 +87,27 @@ const multimodalTypeDefs = gql `
     properties: JSON!
     confidence: Float!
     confidenceLevel: ConfidenceLevel!
-    
+
     # Multimodal specific fields
     extractedFrom: [MediaSource!]!
     extractionMethod: ExtractionMethod!
     boundingBoxes: [BoundingBox!]! # Location within media
     temporalBounds: [TemporalBound!]! # Time bounds for audio/video
     spatialContext: SpatialContext # Geographic context
-    
     # Cross-modal references
     crossModalMatches: [CrossModalMatch!]!
     similarEntities: [EntitySimilarity!]!
-    
+
     # Verification and provenance
     verified: Boolean!
     verifiedBy: User
     verifiedAt: DateTime
     provenance: [ExtractionProvenance!]!
-    
+
     # Graph relationships
     relationships: [MultimodalRelationship!]!
     investigations: [Investigation!]!
-    
+
     # Audit
     createdBy: User!
     createdAt: DateTime!
@@ -175,29 +174,29 @@ const multimodalTypeDefs = gql `
     weight: Float
     confidence: Float!
     confidenceLevel: ConfidenceLevel!
-    
+
     # Temporal validity
     validFrom: DateTime
     validTo: DateTime
-    
+
     # Multimodal extraction context
     extractedFrom: [MediaSource!]!
     extractionMethod: ExtractionMethod!
     spatialContext: [SpatialContext!]!
     temporalContext: [TemporalBound!]!
-    
+
     # Source and target entities
     sourceEntity: MultimodalEntity!
     targetEntity: MultimodalEntity!
-    
+
     # Cross-modal evidence
     supportingEvidence: [Evidence!]!
-    
+
     # Verification
     verified: Boolean!
     verifiedBy: User
     verifiedAt: DateTime
-    
+
     # Audit
     createdBy: User!
     createdAt: DateTime!
@@ -412,9 +411,13 @@ const multimodalTypeDefs = gql `
   # Extended Query Types
   extend type Query {
     # Media Sources
-    mediaSources(investigationId: ID, mediaType: MediaType, limit: Int = 50): [MediaSource!]!
+    mediaSources(
+      investigationId: ID
+      mediaType: MediaType
+      limit: Int = 50
+    ): [MediaSource!]!
     mediaSource(id: ID!): MediaSource
-    
+
     # Multimodal Entities and Relationships
     multimodalEntities(
       investigationId: ID
@@ -430,7 +433,7 @@ const multimodalTypeDefs = gql `
       targetEntityId: ID
       limit: Int = 50
     ): [MultimodalRelationship!]!
-    
+
     # Cross-modal matching
     findCrossModalMatches(
       entityId: ID!
@@ -438,7 +441,7 @@ const multimodalTypeDefs = gql `
       minSimilarity: Float = 0.7
       limit: Int = 10
     ): [CrossModalMatch!]!
-    
+
     # Processing and Jobs
     extractionJobs(
       investigationId: ID
@@ -446,12 +449,12 @@ const multimodalTypeDefs = gql `
       limit: Int = 20
     ): [ExtractionJob!]!
     extractionJob(id: ID!): ExtractionJob
-    
+
     # Search and Analytics
     multimodalSearch(input: MultimodalSearchInput!): MultimodalSearchResults!
     semanticSearch(input: SemanticSearchInput!): [MultimodalEntity!]!
     multimodalAnalytics(investigationId: ID!): MultimodalAnalytics!
-    
+
     # Quality and Verification
     unverifiedEntities(
       investigationId: ID
@@ -472,18 +475,34 @@ const multimodalTypeDefs = gql `
     uploadMedia(input: MediaSourceInput!): MediaSource!
     deleteMediaSource(id: ID!): Boolean!
     updateMediaMetadata(id: ID!, metadata: JSON!): MediaSource!
-    
+
     # Entity Creation and Management
-    createMultimodalEntity(input: CreateMultimodalEntityInput!): MultimodalEntity!
-    updateMultimodalEntity(id: ID!, input: CreateMultimodalEntityInput!): MultimodalEntity!
+    createMultimodalEntity(
+      input: CreateMultimodalEntityInput!
+    ): MultimodalEntity!
+    updateMultimodalEntity(
+      id: ID!
+      input: CreateMultimodalEntityInput!
+    ): MultimodalEntity!
     verifyMultimodalEntity(id: ID!, verified: Boolean!): MultimodalEntity!
-    mergeMultimodalEntities(primaryId: ID!, secondaryIds: [ID!]!): MultimodalEntity!
-    
+    mergeMultimodalEntities(
+      primaryId: ID!
+      secondaryIds: [ID!]!
+    ): MultimodalEntity!
+
     # Relationship Management
-    createMultimodalRelationship(input: CreateMultimodalRelationshipInput!): MultimodalRelationship!
-    updateMultimodalRelationship(id: ID!, input: CreateMultimodalRelationshipInput!): MultimodalRelationship!
-    verifyMultimodalRelationship(id: ID!, verified: Boolean!): MultimodalRelationship!
-    
+    createMultimodalRelationship(
+      input: CreateMultimodalRelationshipInput!
+    ): MultimodalRelationship!
+    updateMultimodalRelationship(
+      id: ID!
+      input: CreateMultimodalRelationshipInput!
+    ): MultimodalRelationship!
+    verifyMultimodalRelationship(
+      id: ID!
+      verified: Boolean!
+    ): MultimodalRelationship!
+
     # Processing Pipeline
     startExtractionJob(input: ExtractionJobInput!): ExtractionJob!
     cancelExtractionJob(id: ID!): Boolean!
@@ -492,7 +511,7 @@ const multimodalTypeDefs = gql `
       extractionMethods: [ExtractionMethod!]!
       investigationId: ID!
     ): ExtractionJob!
-    
+
     # Batch Operations
     batchUploadMedia(inputs: [MediaSourceInput!]!): [MediaSource!]!
     batchExtractEntities(
@@ -500,11 +519,17 @@ const multimodalTypeDefs = gql `
       extractionMethods: [ExtractionMethod!]!
       investigationId: ID!
     ): [ExtractionJob!]!
-    
+
     # Cross-modal Operations
-    generateCrossModalMatches(entityId: ID!, targetMediaTypes: [MediaType!]!): [CrossModalMatch!]!
-    computeSemanticClusters(investigationId: ID!, algorithm: String = "kmeans"): [SemanticCluster!]!
-    
+    generateCrossModalMatches(
+      entityId: ID!
+      targetMediaTypes: [MediaType!]!
+    ): [CrossModalMatch!]!
+    computeSemanticClusters(
+      investigationId: ID!
+      algorithm: String = "kmeans"
+    ): [SemanticCluster!]!
+
     # Quality and Cleanup
     validateExtractionResults(jobId: ID!): QualityMetrics!
     cleanupDuplicateEntities(
@@ -519,16 +544,16 @@ const multimodalTypeDefs = gql `
     # Extraction Processing
     extractionJobUpdated(jobId: ID!): ExtractionJob!
     extractionJobCompleted(investigationId: ID!): ExtractionJob!
-    
+
     # Entity Updates
     multimodalEntityAdded(investigationId: ID!): MultimodalEntity!
     multimodalEntityUpdated(investigationId: ID!): MultimodalEntity!
     multimodalEntityVerified(investigationId: ID!): MultimodalEntity!
-    
+
     # Relationship Updates
     multimodalRelationshipAdded(investigationId: ID!): MultimodalRelationship!
     multimodalRelationshipUpdated(investigationId: ID!): MultimodalRelationship!
-    
+
     # Cross-modal Events
     crossModalMatchFound(investigationId: ID!): CrossModalMatch!
     semanticClusterUpdated(investigationId: ID!): SemanticCluster!

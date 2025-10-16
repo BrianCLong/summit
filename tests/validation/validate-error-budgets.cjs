@@ -15,7 +15,7 @@ class ErrorBudgetValidator {
       tests: [],
       passed: 0,
       failed: 0,
-      evidence: []
+      evidence: [],
     };
   }
 
@@ -33,7 +33,9 @@ class ErrorBudgetValidator {
       await this.simulateAlertFlow();
       await this.generateEvidence();
 
-      console.log(`✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`);
+      console.log(
+        `✅ Validation complete: ${this.results.passed}/${this.results.passed + this.results.failed} tests passed`,
+      );
       return this.results.failed === 0;
     } catch (error) {
       console.error('❌ Validation failed:', error.message);
@@ -49,7 +51,10 @@ class ErrorBudgetValidator {
 
     try {
       // Check if error budget rules file exists and is valid
-      const rulesPath = path.join(process.cwd(), 'monitoring/prometheus/error-budget-rules.yml');
+      const rulesPath = path.join(
+        process.cwd(),
+        'monitoring/prometheus/error-budget-rules.yml',
+      );
 
       if (!fs.existsSync(rulesPath)) {
         throw new Error('Error budget rules file not found');
@@ -64,7 +69,7 @@ class ErrorBudgetValidator {
         'error_budget:availability:burn_rate_2h',
         'error_budget:availability:burn_rate_6h',
         'error_budget:latency:burn_rate_5m',
-        'error_budget:error_rate:burn_rate_5m'
+        'error_budget:error_rate:burn_rate_5m',
       ];
 
       for (const rule of requiredRules) {
@@ -78,7 +83,7 @@ class ErrorBudgetValidator {
         'ErrorBudgetBurnRateCritical',
         'ErrorBudgetBurnRateHigh',
         'ErrorBudgetBurnRateMedium',
-        'SLOBreach'
+        'SLOBreach',
       ];
 
       for (const alert of requiredAlerts) {
@@ -91,12 +96,15 @@ class ErrorBudgetValidator {
       test.details = `Found ${requiredRules.length} burn-rate rules and ${requiredAlerts.length} alert rules`;
 
       // Generate file hash for provenance
-      const fileHash = crypto.createHash('sha256').update(rulesContent).digest('hex');
+      const fileHash = crypto
+        .createHash('sha256')
+        .update(rulesContent)
+        .digest('hex');
       this.results.evidence.push({
         type: 'prometheus_rules',
         file: rulesPath,
         hash: fileHash,
-        size: rulesContent.length
+        size: rulesContent.length,
       });
 
       this.results.passed++;
@@ -113,22 +121,30 @@ class ErrorBudgetValidator {
    * Test 2: Validate Multi-Window Burn Rate Configuration
    */
   async validateBurnRateWindows() {
-    const test = { name: 'Multi-Window Burn Rate Configuration', status: 'running' };
+    const test = {
+      name: 'Multi-Window Burn Rate Configuration',
+      status: 'running',
+    };
 
     try {
-      const rulesPath = path.join(process.cwd(), 'monitoring/prometheus/error-budget-rules.yml');
+      const rulesPath = path.join(
+        process.cwd(),
+        'monitoring/prometheus/error-budget-rules.yml',
+      );
       const rulesContent = fs.readFileSync(rulesPath, 'utf8');
 
       // Validate burn rate windows
       const windowPatterns = [
-        /burn_rate_5m.*\[5m\]/,     // 5-minute window
-        /burn_rate_30m.*\[30m\]/,   // 30-minute window
-        /burn_rate_2h.*\[2h\]/,     // 2-hour window
-        /burn_rate_6h.*\[6h\]/      // 6-hour window
+        /burn_rate_5m.*\[5m\]/, // 5-minute window
+        /burn_rate_30m.*\[30m\]/, // 30-minute window
+        /burn_rate_2h.*\[2h\]/, // 2-hour window
+        /burn_rate_6h.*\[6h\]/, // 6-hour window
       ];
 
-      const foundWindows = windowPatterns.map(pattern => pattern.test(rulesContent));
-      const allWindowsFound = foundWindows.every(found => found);
+      const foundWindows = windowPatterns.map((pattern) =>
+        pattern.test(rulesContent),
+      );
+      const allWindowsFound = foundWindows.every((found) => found);
 
       if (!allWindowsFound) {
         throw new Error('Not all required burn rate windows found');
@@ -136,9 +152,9 @@ class ErrorBudgetValidator {
 
       // Validate burn rate thresholds
       const burnRateThresholds = {
-        critical: /14\.4/,    // Critical: 14.4x normal burn rate
-        high: /6/,            // High: 6x normal burn rate
-        medium: /3/           // Medium: 3x normal burn rate
+        critical: /14\.4/, // Critical: 14.4x normal burn rate
+        high: /6/, // High: 6x normal burn rate
+        medium: /3/, // Medium: 3x normal burn rate
       };
 
       for (const [severity, pattern] of Object.entries(burnRateThresholds)) {
@@ -148,7 +164,8 @@ class ErrorBudgetValidator {
       }
 
       test.status = 'passed';
-      test.details = 'All required burn rate windows (5m/30m/2h/6h) and thresholds validated';
+      test.details =
+        'All required burn rate windows (5m/30m/2h/6h) and thresholds validated';
       this.results.passed++;
     } catch (error) {
       test.status = 'failed';
@@ -166,15 +183,18 @@ class ErrorBudgetValidator {
     const test = { name: 'Severity Routing Configuration', status: 'running' };
 
     try {
-      const rulesPath = path.join(process.cwd(), 'monitoring/prometheus/error-budget-rules.yml');
+      const rulesPath = path.join(
+        process.cwd(),
+        'monitoring/prometheus/error-budget-rules.yml',
+      );
       const rulesContent = fs.readFileSync(rulesPath, 'utf8');
 
       // Validate severity labels
       const severityLevels = ['critical', 'high', 'medium'];
       const rtoRequirements = {
-        critical: '15m',   // <15m RTO
-        high: '1h',        // <1h RTO
-        medium: '6h'       // <6h RTO
+        critical: '15m', // <15m RTO
+        high: '1h', // <1h RTO
+        medium: '6h', // <6h RTO
       };
 
       for (const severity of severityLevels) {
@@ -189,7 +209,7 @@ class ErrorBudgetValidator {
         'summary',
         'description',
         'runbook_url',
-        'dashboard_url'
+        'dashboard_url',
       ];
 
       for (const annotation of requiredAnnotations) {
@@ -219,7 +239,10 @@ class ErrorBudgetValidator {
 
     try {
       // Check SLO dashboard exists
-      const dashboardPath = path.join(process.cwd(), 'monitoring/grafana/slo-dashboard.json');
+      const dashboardPath = path.join(
+        process.cwd(),
+        'monitoring/grafana/slo-dashboard.json',
+      );
 
       if (!fs.existsSync(dashboardPath)) {
         throw new Error('SLO dashboard file not found');
@@ -233,13 +256,15 @@ class ErrorBudgetValidator {
         'Error Budget Remaining',
         'Burn Rate',
         'SLO Compliance',
-        'Alert Status'
+        'Alert Status',
       ];
 
-      const panelTitles = dashboard.dashboard.panels.map(p => p.title);
+      const panelTitles = dashboard.dashboard.panels.map((p) => p.title);
 
       for (const requiredPanel of requiredPanels) {
-        const found = panelTitles.some(title => title.includes(requiredPanel));
+        const found = panelTitles.some((title) =>
+          title.includes(requiredPanel),
+        );
         if (!found) {
           throw new Error(`Required panel missing: ${requiredPanel}`);
         }
@@ -247,9 +272,9 @@ class ErrorBudgetValidator {
 
       // Validate burn rate queries
       const burnRateQueries = dashboard.dashboard.panels
-        .filter(p => p.targets)
-        .flatMap(p => p.targets)
-        .filter(t => t.expr && t.expr.includes('burn_rate'));
+        .filter((p) => p.targets)
+        .flatMap((p) => p.targets)
+        .filter((t) => t.expr && t.expr.includes('burn_rate'));
 
       if (burnRateQueries.length === 0) {
         throw new Error('No burn rate queries found in dashboard');
@@ -259,12 +284,15 @@ class ErrorBudgetValidator {
       test.details = `Dashboard contains ${dashboard.dashboard.panels.length} panels with ${burnRateQueries.length} burn rate queries`;
 
       // Generate dashboard hash for provenance
-      const dashboardHash = crypto.createHash('sha256').update(dashboardContent).digest('hex');
+      const dashboardHash = crypto
+        .createHash('sha256')
+        .update(dashboardContent)
+        .digest('hex');
       this.results.evidence.push({
         type: 'slo_dashboard',
         file: dashboardPath,
         hash: dashboardHash,
-        panels: dashboard.dashboard.panels.length
+        panels: dashboard.dashboard.panels.length,
       });
 
       this.results.passed++;
@@ -291,22 +319,22 @@ class ErrorBudgetValidator {
           burn_rate: 14.4,
           window: '5m',
           expected_severity: 'critical',
-          expected_rto: '15m'
+          expected_rto: '15m',
         },
         {
           name: 'High Burn Rate',
           burn_rate: 6.0,
           window: '30m',
           expected_severity: 'high',
-          expected_rto: '1h'
+          expected_rto: '1h',
         },
         {
           name: 'Medium Burn Rate',
           burn_rate: 3.0,
           window: '2h',
           expected_severity: 'medium',
-          expected_rto: '6h'
-        }
+          expected_rto: '6h',
+        },
       ];
 
       const simulationResults = [];
@@ -318,17 +346,21 @@ class ErrorBudgetValidator {
           triggered: scenario.burn_rate > 1.0,
           severity: scenario.expected_severity,
           rto: scenario.expected_rto,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
 
         simulationResults.push(result);
       }
 
       // Validate all scenarios trigger correctly
-      const triggeredCount = simulationResults.filter(r => r.triggered).length;
+      const triggeredCount = simulationResults.filter(
+        (r) => r.triggered,
+      ).length;
 
       if (triggeredCount !== alertScenarios.length) {
-        throw new Error(`Expected ${alertScenarios.length} alerts, got ${triggeredCount}`);
+        throw new Error(
+          `Expected ${alertScenarios.length} alerts, got ${triggeredCount}`,
+        );
       }
 
       test.status = 'passed';
@@ -339,7 +371,7 @@ class ErrorBudgetValidator {
         type: 'alert_simulation',
         scenarios: alertScenarios.length,
         triggered: triggeredCount,
-        results: simulationResults
+        results: simulationResults,
       });
 
       this.results.passed++;
@@ -366,7 +398,10 @@ class ErrorBudgetValidator {
     fs.writeFileSync(reportPath, JSON.stringify(this.results, null, 2));
 
     // Generate Prometheus rules hash manifest
-    const manifestPath = path.join(evidenceDir, 'prometheus-rules-manifest.json');
+    const manifestPath = path.join(
+      evidenceDir,
+      'prometheus-rules-manifest.json',
+    );
     const manifest = {
       timestamp: new Date().toISOString(),
       component: 'error-budgets-burn-rate-alerts',
@@ -375,8 +410,8 @@ class ErrorBudgetValidator {
       test_summary: {
         total: this.results.tests.length,
         passed: this.results.passed,
-        failed: this.results.failed
-      }
+        failed: this.results.failed,
+      },
     };
 
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
@@ -390,12 +425,15 @@ class ErrorBudgetValidator {
 // CLI execution
 if (require.main === module) {
   const validator = new ErrorBudgetValidator();
-  validator.validate().then(success => {
-    process.exit(success ? 0 : 1);
-  }).catch(error => {
-    console.error('Fatal validation error:', error);
-    process.exit(1);
-  });
+  validator
+    .validate()
+    .then((success) => {
+      process.exit(success ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Fatal validation error:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = ErrorBudgetValidator;

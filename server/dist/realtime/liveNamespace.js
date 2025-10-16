@@ -1,7 +1,7 @@
-import { createAdapter } from "@socket.io/redis-adapter";
-import { getRedisClient } from "../db/redis.js";
-import { verifyToken } from "../lib/auth.js";
-import pino from "pino";
+import { createAdapter } from '@socket.io/redis-adapter';
+import { getRedisClient } from '../db/redis.js';
+import { verifyToken } from '../lib/auth.js';
+import pino from 'pino';
 /**
  * mountLiveNamespace configures the Socket.IO "/live" namespace. It performs
  * JWT auth, joins clients to workspace rooms and relays basic live events such
@@ -13,13 +13,13 @@ export function mountLiveNamespace(io) {
     const pubClient = getRedisClient();
     const subClient = pubClient.duplicate();
     io.adapter(createAdapter(pubClient, subClient));
-    const nsp = io.of("/live");
+    const nsp = io.of('/live');
     nsp.use(async (socket, next) => {
         try {
             const token = socket.handshake.auth?.token;
             const workspaceId = socket.handshake.auth?.workspaceId;
             if (!token || !workspaceId)
-                return next(new Error("UNAUTHORIZED"));
+                return next(new Error('UNAUTHORIZED'));
             const user = await verifyToken(token);
             // @ts-ignore – attach user for handlers
             socket.data.user = user;
@@ -27,24 +27,24 @@ export function mountLiveNamespace(io) {
             next();
         }
         catch (err) {
-            next(new Error("UNAUTHORIZED"));
+            next(new Error('UNAUTHORIZED'));
         }
     });
-    nsp.on("connection", (socket) => {
+    nsp.on('connection', (socket) => {
         const workspaceId = socket.handshake.auth?.workspaceId;
-        logger.info({ workspaceId }, "live:connected");
-        socket.on("presence:update", (presence) => {
+        logger.info({ workspaceId }, 'live:connected');
+        socket.on('presence:update', (presence) => {
             presence.updatedAt = new Date().toISOString();
-            nsp.to(workspaceId).emit("presence:update", presence);
+            nsp.to(workspaceId).emit('presence:update', presence);
         });
-        socket.on("graph:ops", (ops) => {
-            nsp.to(workspaceId).emit("graph:commit", ops);
+        socket.on('graph:ops', (ops) => {
+            nsp.to(workspaceId).emit('graph:commit', ops);
         });
-        socket.on("comment:add", (comment) => {
-            nsp.to(workspaceId).emit("comment:new", comment);
+        socket.on('comment:add', (comment) => {
+            nsp.to(workspaceId).emit('comment:new', comment);
         });
-        socket.on("disconnect", (reason) => {
-            logger.info({ workspaceId, reason }, "live:disconnected");
+        socket.on('disconnect', (reason) => {
+            logger.info({ workspaceId, reason }, 'live:disconnected');
         });
     });
 }

@@ -1,7 +1,7 @@
 /**
  * Comprehensive audit logging for AI operations
  */
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 let auditRepo = null;
 export function setupAIAuditLogging(db) {
     auditRepo = db.audit;
@@ -20,8 +20,8 @@ export async function auditAIOperation(type, actorId, meta = {}) {
             meta: {
                 ...meta,
                 timestamp: Date.now(),
-                service: 'intelgraph-ai'
-            }
+                service: 'intelgraph-ai',
+            },
         });
     }
     catch (error) {
@@ -33,7 +33,7 @@ export async function auditJobCreation(jobId, kind, userId, metadata = {}) {
     await auditAIOperation('AI_JOB_CREATED', userId, {
         jobId,
         kind,
-        ...metadata
+        ...metadata,
     });
 }
 export async function auditJobCompletion(jobId, kind, status, processingTime, metadata = {}) {
@@ -42,7 +42,7 @@ export async function auditJobCompletion(jobId, kind, status, processingTime, me
         kind,
         status,
         processingTimeMs: processingTime,
-        ...metadata
+        ...metadata,
     });
 }
 export async function auditInsightDecision(insightId, decision, userId, reason) {
@@ -50,7 +50,7 @@ export async function auditInsightDecision(insightId, decision, userId, reason) 
         insightId,
         decision,
         reason,
-        timestamp: Date.now()
+        timestamp: Date.now(),
     });
 }
 export async function auditMLModelUsage(modelName, taskType, userId, performanceMetrics = {}) {
@@ -58,7 +58,7 @@ export async function auditMLModelUsage(modelName, taskType, userId, performance
         modelName,
         taskType,
         performanceMetrics,
-        timestamp: Date.now()
+        timestamp: Date.now(),
     });
 }
 export async function auditSecurityEvent(eventType, details, severity = 'medium') {
@@ -66,7 +66,7 @@ export async function auditSecurityEvent(eventType, details, severity = 'medium'
         eventType,
         severity,
         details,
-        timestamp: Date.now()
+        timestamp: Date.now(),
     });
 }
 export async function auditDataAccess(dataType, operation, userId, recordCount, details = {}) {
@@ -75,7 +75,7 @@ export async function auditDataAccess(dataType, operation, userId, recordCount, 
         operation,
         recordCount,
         details,
-        timestamp: Date.now()
+        timestamp: Date.now(),
     });
 }
 export async function auditWebhookReceived(jobId, kind, signature, ipAddress) {
@@ -85,7 +85,7 @@ export async function auditWebhookReceived(jobId, kind, signature, ipAddress) {
         signaturePresent: !!signature,
         signatureValid: true, // This would be set by the webhook handler
         ipAddress,
-        timestamp: Date.now()
+        timestamp: Date.now(),
     });
 }
 export async function auditConfigurationChange(configType, userId, oldValue, newValue) {
@@ -93,7 +93,7 @@ export async function auditConfigurationChange(configType, userId, oldValue, new
         configType,
         oldValue,
         newValue,
-        timestamp: Date.now()
+        timestamp: Date.now(),
     });
 }
 // Get audit trail for specific entities
@@ -131,14 +131,16 @@ export async function generateAuditReport(startDate, endDate) {
             period: { startDate, endDate },
             summary: {
                 totalEvents: events.length,
-                jobsCreated: events.filter((e) => e.type === 'AI_JOB_CREATED').length,
-                jobsCompleted: events.filter((e) => e.type === 'AI_JOB_COMPLETED').length,
+                jobsCreated: events.filter((e) => e.type === 'AI_JOB_CREATED')
+                    .length,
+                jobsCompleted: events.filter((e) => e.type === 'AI_JOB_COMPLETED')
+                    .length,
                 insightDecisions: events.filter((e) => e.type === 'AI_INSIGHT_DECISION').length,
                 securityEvents: events.filter((e) => e.type === 'AI_SECURITY_EVENT').length,
             },
             topUsers: getTopActors(events),
             securitySummary: getSecuritySummary(events),
-            performanceMetrics: getPerformanceMetrics(events)
+            performanceMetrics: getPerformanceMetrics(events),
         };
         return report;
     }
@@ -149,8 +151,10 @@ export async function generateAuditReport(startDate, endDate) {
 }
 function getTopActors(events) {
     const actorCounts = {};
-    events.forEach(event => {
-        if (event.actor_id && event.actor_id !== 'system' && event.actor_id !== 'ml-service') {
+    events.forEach((event) => {
+        if (event.actor_id &&
+            event.actor_id !== 'system' &&
+            event.actor_id !== 'ml-service') {
             actorCounts[event.actor_id] = (actorCounts[event.actor_id] || 0) + 1;
         }
     });
@@ -160,30 +164,30 @@ function getTopActors(events) {
         .map(([actorId, count]) => ({ actorId, eventCount: count }));
 }
 function getSecuritySummary(events) {
-    const securityEvents = events.filter(e => e.type === 'AI_SECURITY_EVENT');
+    const securityEvents = events.filter((e) => e.type === 'AI_SECURITY_EVENT');
     const severityCounts = {};
-    securityEvents.forEach(event => {
+    securityEvents.forEach((event) => {
         const severity = event.meta?.severity || 'unknown';
         severityCounts[severity] = (severityCounts[severity] || 0) + 1;
     });
     return {
         totalSecurityEvents: securityEvents.length,
         severityBreakdown: severityCounts,
-        recentCritical: securityEvents.filter(e => e.meta?.severity === 'critical').length
+        recentCritical: securityEvents.filter((e) => e.meta?.severity === 'critical').length,
     };
 }
 function getPerformanceMetrics(events) {
-    const jobCompletions = events.filter(e => e.type === 'AI_JOB_COMPLETED' && e.meta?.processingTimeMs);
+    const jobCompletions = events.filter((e) => e.type === 'AI_JOB_COMPLETED' && e.meta?.processingTimeMs);
     if (jobCompletions.length === 0) {
         return { averageProcessingTime: null, totalJobs: 0 };
     }
-    const processingTimes = jobCompletions.map(e => e.meta.processingTimeMs);
+    const processingTimes = jobCompletions.map((e) => e.meta.processingTimeMs);
     const average = processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length;
     return {
         averageProcessingTime: Math.round(average),
         totalJobs: jobCompletions.length,
         fastestJob: Math.min(...processingTimes),
-        slowestJob: Math.max(...processingTimes)
+        slowestJob: Math.max(...processingTimes),
     };
 }
 //# sourceMappingURL=auditLogging.js.map

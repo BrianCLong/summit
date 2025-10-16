@@ -3,6 +3,7 @@
 The following tickets deliver the `attest verify` tool as an isolated CI utility that validates CycloneDX SBOMs and in-toto/SLSA provenance artifacts using cosign public keys. Each ticket incorporates the program constraints that work must remain path-isolated (`tools/attest/**`), operate fully offline/deterministically, and initially land as non-blocking checks before promotion to required status.
 
 ## Epic Overview
+
 - **Epic Name:** Attestation Verifier Enablement
 - **Goal:** Ship a hardened verification CLI that ingests CI artifacts, validates signatures, surfaces dependency drift, and emits a signed verification report plus optional PR delta comment.
 - **Success Metrics:**
@@ -15,6 +16,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
 ---
 
 ## Ticket 1 – Story – CLI Contract & UX Envelope
+
 - **Summary:** Design and implement the `attest verify` CLI entry point with flag validation and contextual help that emphasises offline execution requirements.
 - **Acceptance Criteria:**
   1. `attest verify --help` lists required flags `--sbom`, `--provenance`, `--key`, notes offline-only operation, and documents report output path.
@@ -28,6 +30,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
   - Wire CLI invocation into `package.json` / `Justfile` task for CI invocation.
 
 ## Ticket 2 – Story – CycloneDX SBOM Verification Engine
+
 - **Summary:** Build SBOM loader/validator that enforces schema compliance, signature validation, and digest integrity for CycloneDX JSON documents.
 - **Acceptance Criteria:**
   1. SBOM parser validates against bundled CycloneDX JSON schema without network fetches.
@@ -41,6 +44,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
   - Author unit tests for good and bad SBOM fixtures (missing sigs, digest drift).
 
 ## Ticket 3 – Story – Provenance Verification Engine
+
 - **Summary:** Implement provenance validator ensuring required supply-chain steps, signatures, and recorded digests align with provenance payload.
 - **Acceptance Criteria:**
   1. Provenance artifacts load offline; schema validation uses vendored in-toto/SLSA definitions.
@@ -54,6 +58,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
   - Document provenance assumptions in module README.
 
 ## Ticket 4 – Story – Cross-Artifact Correlation & Drift Detection
+
 - **Summary:** Compare SBOM components to provenance outputs to detect drift, missing components, and mismatched digests.
 - **Acceptance Criteria:**
   1. Verification fails when any SBOM component lacks provenance coverage (and vice versa).
@@ -67,6 +72,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
   - Ensure failures annotate remediation guidance (e.g., regenerate artifacts).
 
 ## Ticket 5 – Story – Signed Verification Report Generation
+
 - **Summary:** Produce deterministic verification report summarising SBOM/provenance outcomes and sign it using cosign.
 - **Acceptance Criteria:**
   1. Report captures overall status, per-check results, component digest summaries, and dependency delta reference.
@@ -80,6 +86,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
   - Document report consumption and storage expectations.
 
 ## Ticket 6 – Story – Dependency Delta Computation & PR Commenter
+
 - **Summary:** Provide optional dependency drift diff + PR comment integration that runs post-verification with offline toggles.
 - **Acceptance Criteria:**
   1. Delta engine categorises added/removed/changed components using SBOM diffing logic.
@@ -93,6 +100,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
   - Provide documentation snippet covering enablement + security posture.
 
 ## Ticket 7 – Story – Acceptance Test Suite & Progressive Enforcement
+
 - **Summary:** Assemble end-to-end acceptance harness exercising fixtures, ensuring deterministic output, and documenting progressive enforcement plan.
 - **Acceptance Criteria:**
   1. Test harness executes entirely offline, using vendored fixtures + cosign keys.
@@ -106,6 +114,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
   - Capture runbook entry for troubleshooting failures.
 
 ## Ticket 8 – Story – Documentation, Onboarding & Security Review
+
 - **Summary:** Deliver comprehensive documentation, onboarding materials, and security review sign-off for attestation verifier rollout.
 - **Acceptance Criteria:**
   1. README (or docs page) covers installation, CLI usage, offline verification philosophy, and deterministic testing guidance.
@@ -121,6 +130,7 @@ The following tickets deliver the `attest verify` tool as an isolated CI utility
 ---
 
 ### Cross-Cutting Considerations
+
 - **Path Isolation:** All implementation lives under `tools/attest/**`; no shared app/service code is modified.
 - **Determinism:** Tests rely exclusively on vendored data; no network I/O permitted.
 - **Security Posture:** Cosign keys treated as inputs; no secret material committed. Offline verification is mandatory.

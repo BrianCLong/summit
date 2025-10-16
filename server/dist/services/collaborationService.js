@@ -2,13 +2,14 @@ import { EventEmitter } from 'events';
 import { PubSub } from 'graphql-subscriptions';
 import { cacheService } from './cacheService';
 export class CollaborationService extends EventEmitter {
+    activeUsers = new Map();
+    pendingEdits = new Map();
+    comments = new Map();
+    notifications = [];
+    maxNotifications = 100;
+    pubsub;
     constructor() {
         super();
-        this.activeUsers = new Map();
-        this.pendingEdits = new Map();
-        this.comments = new Map();
-        this.notifications = [];
-        this.maxNotifications = 100;
         this.pubsub = new PubSub();
         console.log('[COLLABORATION] Real-time collaboration service initialized');
         // Clean up inactive users every minute
@@ -47,7 +48,12 @@ export class CollaborationService extends EventEmitter {
         };
         this.addNotification(notification);
         this.emit('userJoined', { userId, investigationId, userInfo, presence });
-        this.pubsub.publish('userJoined', { userId, investigationId, userInfo, presence });
+        this.pubsub.publish('userJoined', {
+            userId,
+            investigationId,
+            userInfo,
+            presence,
+        });
         console.log(`[COLLABORATION] User ${userInfo.name} joined investigation ${investigationId}`);
     }
     /**
@@ -87,7 +93,11 @@ export class CollaborationService extends EventEmitter {
             };
             this.activeUsers.set(presenceKey, updatedPresence);
             await cacheService.set(`presence:${userId}:${investigationId}`, updatedPresence, 300);
-            this.emit('presenceUpdated', { userId, investigationId, presence: updatedPresence });
+            this.emit('presenceUpdated', {
+                userId,
+                investigationId,
+                presence: updatedPresence,
+            });
             this.pubsub.publish('presenceUpdated', {
                 userId,
                 investigationId,
@@ -230,7 +240,8 @@ export class CollaborationService extends EventEmitter {
     getPendingEdits(investigationId) {
         const edits = [];
         for (const edit of this.pendingEdits.values()) {
-            if (edit.investigationId === investigationId && edit.status === 'PENDING') {
+            if (edit.investigationId === investigationId &&
+                edit.status === 'PENDING') {
                 edits.push(edit);
             }
         }

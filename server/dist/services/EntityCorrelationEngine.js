@@ -1,9 +1,9 @@
-const fs = require("fs");
-const path = require("path");
-const PROTOCOL_PATH = path.resolve(__dirname, "../../../CROSS_DOMAIN_FUSION_PROTOCOL_COMPLETED.md");
-let PROTOCOL_DOC = "";
+const fs = require('fs');
+const path = require('path');
+const PROTOCOL_PATH = path.resolve(__dirname, '../../../CROSS_DOMAIN_FUSION_PROTOCOL_COMPLETED.md');
+let PROTOCOL_DOC = '';
 try {
-    PROTOCOL_DOC = fs.readFileSync(PROTOCOL_PATH, "utf8");
+    PROTOCOL_DOC = fs.readFileSync(PROTOCOL_PATH, 'utf8');
 }
 catch (err) {
     // If the protocol document is missing we still allow the engine to function.
@@ -25,7 +25,7 @@ class EntityCorrelationEngine {
         this.protocol = PROTOCOL_DOC;
     }
     registerResolver(resolver) {
-        if (typeof resolver === "function")
+        if (typeof resolver === 'function')
             this.resolvers.push(resolver);
     }
     // Normalise according to protocol schemas
@@ -34,14 +34,14 @@ class EntityCorrelationEngine {
             id: entity.id,
             type: entity.type ? String(entity.type).toUpperCase().trim() : undefined,
             label: entity.label ? String(entity.label).trim() : undefined,
-            source: entity.source || "unknown",
+            source: entity.source || 'unknown',
             attributes: { ...(entity.attributes || {}) },
             confidence: entity.confidence ?? 0.5,
         };
         return normalized;
     }
     // Simple Levenshtein distance for string similarity
-    calculateStringSimilarity(str1 = "", str2 = "") {
+    calculateStringSimilarity(str1 = '', str2 = '') {
         const a = str1.toLowerCase();
         const b = str2.toLowerCase();
         const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
@@ -87,14 +87,19 @@ class EntityCorrelationEngine {
         }
         const n1 = this.normalize(e1);
         const n2 = this.normalize(e2);
-        if (n1.label && n2.label && n1.label.toLowerCase() === n2.label.toLowerCase()) {
+        if (n1.label &&
+            n2.label &&
+            n1.label.toLowerCase() === n2.label.toLowerCase()) {
             return true;
         }
-        const stringScore = this.calculateStringSimilarity(n1.label || "", n2.label || "");
+        const stringScore = this.calculateStringSimilarity(n1.label || '', n2.label || '');
         if (stringScore >= 0.9) {
             return true;
         }
-        const sharedAttrs = Object.keys({ ...n1.attributes, ...n2.attributes }).filter((key) => n1.attributes[key] && n2.attributes[key]);
+        const sharedAttrs = Object.keys({
+            ...n1.attributes,
+            ...n2.attributes,
+        }).filter((key) => n1.attributes[key] && n2.attributes[key]);
         if (sharedAttrs.length > 0) {
             const attrMatches = sharedAttrs.filter((key) => n1.attributes[key] === n2.attributes[key]);
             if (attrMatches.length / sharedAttrs.length >= 0.8) {

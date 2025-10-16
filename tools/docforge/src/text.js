@@ -43,5 +43,5 @@ function summarize(text) {
 module.exports = {
   normalizeComment,
   normalizeDocstring,
-  summarize
+  summarize,
 };

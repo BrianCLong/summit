@@ -1,10 +1,18 @@
-import { S3Client, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  GetObjectCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 import { trace, context } from '@opentelemetry/api';
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import { z } from 'zod';
 import { BaseConnector } from './BaseConnector';
-import type { ConnectorConfig, IngestRecord, ProvenanceMetadata } from '../types';
+import type {
+  ConnectorConfig,
+  IngestRecord,
+  ProvenanceMetadata,
+} from '../types';
 
 const tracer = trace.getTracer('intelgraph-s3csv-connector');
 
@@ -27,10 +35,12 @@ export class S3CSVConnector extends BaseConnector {
     this.s3Client = new S3Client({
       region: process.env.AWS_REGION || 'us-west-2',
       endpoint: process.env.AWS_ENDPOINT_URL,
-      credentials: process.env.AWS_ENDPOINT_URL ? {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-      } : undefined,
+      credentials: process.env.AWS_ENDPOINT_URL
+        ? {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+          }
+        : undefined,
       forcePathStyle: !!process.env.AWS_ENDPOINT_URL, // Required for MinIO
     });
   }
@@ -93,7 +103,6 @@ export class S3CSVConnector extends BaseConnector {
       span.setAttributes({
         'ingest.objects_processed': objects.length,
       });
-
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message }); // ERROR
@@ -111,7 +120,10 @@ export class S3CSVConnector extends BaseConnector {
     return { bucket: match[1], key: match[2] };
   }
 
-  private async listObjects(bucket: string, prefix: string): Promise<Array<{ Key?: string; Size?: number; LastModified?: Date }>> {
+  private async listObjects(
+    bucket: string,
+    prefix: string,
+  ): Promise<Array<{ Key?: string; Size?: number; LastModified?: Date }>> {
     const command = new ListObjectsV2Command({
       Bucket: bucket,
       Prefix: prefix,
@@ -125,7 +137,7 @@ export class S3CSVConnector extends BaseConnector {
   private async *processObject(
     bucket: string,
     key: string,
-    provenance: ProvenanceMetadata
+    provenance: ProvenanceMetadata,
   ): AsyncGenerator<IngestRecord> {
     const command = new GetObjectCommand({ Bucket: bucket, Key: key });
     const response = await this.s3Client.send(command);
@@ -210,15 +222,24 @@ export class S3CSVConnector extends BaseConnector {
     return piiFlags;
   }
 
-  private isPIIField(fieldName: string, value: string, piiFields: string[]): boolean {
+  private isPIIField(
+    fieldName: string,
+    value: string,
+    piiFields: string[],
+  ): boolean {
     // Simple heuristic - in production, use more sophisticated PII detection
     const lowerFieldName = fieldName.toLowerCase();
-    return piiFields.some(pii => lowerFieldName.includes(pii)) ||
-           /\b[\w\.-]+@[\w\.-]+\.\w+\b/.test(value) || // Email pattern
-           /\b\d{3}-?\d{2}-?\d{4}\b/.test(value);      // SSN pattern
+    return (
+      piiFields.some((pii) => lowerFieldName.includes(pii)) ||
+      /\b[\w\.-]+@[\w\.-]+\.\w+\b/.test(value) || // Email pattern
+      /\b\d{3}-?\d{2}-?\d{4}\b/.test(value)
+    ); // SSN pattern
   }
 
-  private async calculateObjectHash(bucket: string, key: string): Promise<string> {
+  private async calculateObjectHash(
+    bucket: string,
+    key: string,
+  ): Promise<string> {
     // Simple implementation - in production, use proper crypto hash
     return `sha256:${Buffer.from(`${bucket}/${key}${Date.now()}`).toString('base64')}`;
   }
@@ -226,10 +247,12 @@ export class S3CSVConnector extends BaseConnector {
   async healthCheck(): Promise<boolean> {
     try {
       const { bucket } = this.parseS3Url(this.config.url);
-      await this.s3Client.send(new ListObjectsV2Command({
-        Bucket: bucket,
-        MaxKeys: 1,
-      }));
+      await this.s3Client.send(
+        new ListObjectsV2Command({
+          Bucket: bucket,
+          MaxKeys: 1,
+        }),
+      );
       return true;
     } catch (error) {
       this.logger.error('S3 health check failed', {

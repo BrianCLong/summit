@@ -1,6 +1,10 @@
 import { evaluate } from './AccessControl.js';
 import { writeAudit } from '../utils/audit.js';
 export class PolicyError extends Error {
+    code;
+    reason;
+    requiredClearances;
+    appealPath;
     constructor(opts) {
         super(opts.reason);
         this.code = opts.code;
@@ -12,7 +16,9 @@ export class PolicyError extends Error {
 export function withPolicy(resolver, spec) {
     return (async (parent, args, context, info) => {
         const user = context.user || {};
-        const resource = spec.getResource ? await spec.getResource(parent, args, context, info) : {};
+        const resource = spec.getResource
+            ? await spec.getResource(parent, args, context, info)
+            : {};
         const decision = await evaluate(spec.action, user, resource, {});
         const requestId = context?.req?.id || context.requestId;
         const traceId = context?.traceId;

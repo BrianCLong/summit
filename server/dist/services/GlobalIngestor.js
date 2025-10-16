@@ -1,5 +1,5 @@
-const OSINTFeedService = require("./OSINTFeedService");
-const bus = require("../workers/eventBus");
+const OSINTFeedService = require('./OSINTFeedService');
+const bus = require('../workers/eventBus');
 class GlobalIngestor {
     constructor({ feedService } = {}) {
         this.feedService = feedService || new OSINTFeedService();
@@ -8,7 +8,7 @@ class GlobalIngestor {
     async pollAndQueue(subject) {
         const results = await this.feedService.poll(subject);
         results.forEach((r) => {
-            this.bus.emit("raw-event", { source: r.source, data: r.data });
+            this.bus.emit('raw-event', { source: r.source, data: r.data });
         });
         return results.length;
     }

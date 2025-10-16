@@ -3,9 +3,11 @@ import path from 'path';
 import crypto from 'crypto';
 import yaml from 'js-yaml';
 export class ExperimentManager {
+    configPath;
+    experiments = [];
+    logPath;
     constructor(configPath = path.join(process.cwd(), 'config', 'experiments.yaml'), logFile = path.join(process.cwd(), 'experiment-exposures.log')) {
         this.configPath = configPath;
-        this.experiments = [];
         this.logPath = logFile;
         this.loadConfig();
     }
@@ -18,7 +20,10 @@ export class ExperimentManager {
         const exp = this.experiments.find((e) => e.id === experimentId);
         if (!exp)
             return null;
-        const hash = crypto.createHash('sha256').update(`${experimentId}:${userId}`).digest('hex');
+        const hash = crypto
+            .createHash('sha256')
+            .update(`${experimentId}:${userId}`)
+            .digest('hex');
         const num = parseInt(hash.slice(0, 8), 16) % 100;
         let cumulative = 0;
         for (const [variant, weight] of Object.entries(exp.variant_split)) {

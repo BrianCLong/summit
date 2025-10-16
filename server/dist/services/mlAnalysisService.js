@@ -1,9 +1,9 @@
-import { persistenceService } from './persistenceService';
+import { persistenceService, } from './persistenceService';
 import { cacheService } from './cacheService';
 export class MLAnalysisService {
+    modelVersion = '1.2.3';
+    lastTraining = new Date().toISOString();
     constructor() {
-        this.modelVersion = '1.2.3';
-        this.lastTraining = new Date().toISOString();
         console.log('[ML] AI/ML Analysis Service initialized');
         console.log(`[ML] Model version: ${this.modelVersion}`);
     }
@@ -129,7 +129,9 @@ export class MLAnalysisService {
             // Simulate betweenness centrality calculation
             centralityScores[entity.id] = Math.random() * 0.8 + 0.1; // 0.1-0.9
             // Simulate influence score based on connections and TTP sophistication
-            const ttpInfluence = entity.attack_ttps ? entity.attack_ttps.length * 0.15 : 0;
+            const ttpInfluence = entity.attack_ttps
+                ? entity.attack_ttps.length * 0.15
+                : 0;
             const confidenceInfluence = entity.confidence * 0.4;
             influenceScores[entity.id] = Math.min(1.0, ttpInfluence + confidenceInfluence);
         });
@@ -137,7 +139,9 @@ export class MLAnalysisService {
             centrality_scores: centralityScores,
             clustering_coefficient: 0.67 + Math.random() * 0.2, // 0.67-0.87
             average_path_length: 2.3 + Math.random() * 0.8, // 2.3-3.1
-            network_density: entities.length > 0 ? relationships.length / (entities.length * (entities.length - 1)) : 0,
+            network_density: entities.length > 0
+                ? relationships.length / (entities.length * (entities.length - 1))
+                : 0,
             community_modularity: 0.45 + Math.random() * 0.3, // 0.45-0.75
             influence_scores: influenceScores,
         };
@@ -177,7 +181,8 @@ export class MLAnalysisService {
                 time_window: 'Post-compromise phases',
             },
         ];
-        const behavioralScore = patterns.reduce((sum, p) => sum + p.confidence * p.frequency, 0) / patterns.length;
+        const behavioralScore = patterns.reduce((sum, p) => sum + p.confidence * p.frequency, 0) /
+            patterns.length;
         const patternStability = 0.85 + Math.random() * 0.1; // 85-95% stability
         return {
             patterns,

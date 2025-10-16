@@ -5,6 +5,9 @@ import pino from 'pino';
 import { randomUUID } from 'crypto';
 const logger = pino({ name: 'VideoFrameExtractor' });
 export class VideoFrameExtractor {
+    ffmpegPath;
+    ffprobePath;
+    tempDir;
     constructor(ffmpegPath, ffprobePath, tempDir) {
         this.ffmpegPath = ffmpegPath;
         this.ffprobePath = ffprobePath;
@@ -48,7 +51,9 @@ export class VideoFrameExtractor {
                 .on('filenames', (filenames) => {
                 filenames.forEach((filename) => {
                     const timestampMatch = filename.match(/frame-(\d+(\.\d+)?)\./);
-                    const timestamp = timestampMatch ? parseFloat(timestampMatch[1]) : 0; // Extract timestamp from filename
+                    const timestamp = timestampMatch
+                        ? parseFloat(timestampMatch[1])
+                        : 0; // Extract timestamp from filename
                     frames.push({
                         framePath: path.join(outputDir, filename),
                         timestamp: timestamp,

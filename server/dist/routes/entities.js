@@ -1,7 +1,7 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { getNeo4jDriver, getPostgresPool } = require('../config/database');
-const { ensureAuthenticated, requirePermission } = require('../middleware/auth');
+const { ensureAuthenticated, requirePermission, } = require('../middleware/auth');
 const sanitize = require('../middleware/sanitize').default;
 const router = express.Router();
 // Authn for all, RBAC for write, sanitize inputs
@@ -77,7 +77,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 router.post('/', requirePermission('entity:create'), async (req, res) => {
-    const { type = 'CUSTOM', label, description = '', properties = {}, position } = req.body || {};
+    const { type = 'CUSTOM', label, description = '', properties = {}, position, } = req.body || {};
     if (!label)
         return res.status(400).json({ error: 'label required' });
     const id = uuidv4();

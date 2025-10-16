@@ -2,7 +2,7 @@
 // Integrates the Conductor system with GraphQL API
 import { conductor } from './index';
 import { OPAClient } from './security/opa-client';
-import { governanceLimitEngine, estimateTaskCost, estimateTokenCount } from './governance/limits';
+import { governanceLimitEngine, estimateTaskCost, estimateTokenCount, } from './governance/limits';
 import { createBudgetController } from './admission/budget-control';
 import Redis from 'ioredis';
 export const conductorResolvers = {
@@ -71,7 +71,8 @@ export const conductorResolvers = {
                 throw new Error(`Budget control: ${budgetAdmission.reason}`);
             }
             // If budget is in degraded mode and expert was blocked, suggest alternatives
-            if (budgetAdmission.mode !== 'normal' && budgetAdmission.allowedExperts.length > 0) {
+            if (budgetAdmission.mode !== 'normal' &&
+                budgetAdmission.allowedExperts.length > 0) {
                 console.warn('Budget degradation active:', {
                     mode: budgetAdmission.mode,
                     allowedExperts: budgetAdmission.allowedExperts,
@@ -258,7 +259,9 @@ export const conductorQueries = {
         });
         return {
             status: overallHealthy ? 'healthy' : 'unhealthy',
-            message: overallHealthy ? 'All systems operational' : 'Some components unhealthy',
+            message: overallHealthy
+                ? 'All systems operational'
+                : 'Some components unhealthy',
             checks,
         };
     },

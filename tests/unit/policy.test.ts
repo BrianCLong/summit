@@ -3,7 +3,9 @@ import { policy } from '../../server/src/services/policy';
 describe('Policy Assertions', () => {
   // Test case: Unauthorized user
   test('should throw unauthorized error if user is null', () => {
-    expect(() => policy.assert(null, ['some:scope'], {})).toThrow('unauthorized');
+    expect(() => policy.assert(null, ['some:scope'], {})).toThrow(
+      'unauthorized',
+    );
   });
 
   // Test case: Case membership
@@ -34,24 +36,35 @@ describe('Policy Assertions', () => {
   Object.keys(classificationLevels).forEach((level) => {
     test(`should allow access for user with ${level} classification to ${level} scope`, () => {
       const user = { classification: level };
-      expect(() => policy.assert(user, [`classification:${level}`], {})).not.toThrow();
+      expect(() =>
+        policy.assert(user, [`classification:${level}`], {}),
+      ).not.toThrow();
     });
 
     test(`should allow access for user with higher classification than ${level} to ${level} scope`, () => {
       const userClassificationIndex = classificationLevels[level];
-      if (userClassificationIndex < Object.keys(classificationLevels).length - 1) {
-        const higherLevel = Object.keys(classificationLevels)[userClassificationIndex + 1];
+      if (
+        userClassificationIndex <
+        Object.keys(classificationLevels).length - 1
+      ) {
+        const higherLevel =
+          Object.keys(classificationLevels)[userClassificationIndex + 1];
         const user = { classification: higherLevel };
-        expect(() => policy.assert(user, [`classification:${level}`], {})).not.toThrow();
+        expect(() =>
+          policy.assert(user, [`classification:${level}`], {}),
+        ).not.toThrow();
       }
     });
 
     test(`should deny access for user with lower classification than ${level} to ${level} scope`, () => {
       const userClassificationIndex = classificationLevels[level];
       if (userClassificationIndex > 0) {
-        const lowerLevel = Object.keys(classificationLevels)[userClassificationIndex - 1];
+        const lowerLevel =
+          Object.keys(classificationLevels)[userClassificationIndex - 1];
         const user = { classification: lowerLevel };
-        expect(() => policy.assert(user, [`classification:${level}`], {})).toThrow(
+        expect(() =>
+          policy.assert(user, [`classification:${level}`], {}),
+        ).toThrow(
           `forbidden: insufficient classification (${lowerLevel.toLowerCase()} < ${level})`,
         );
       }
@@ -75,7 +88,9 @@ describe('Policy Assertions', () => {
   test('should deny access if tenant mismatches', () => {
     const user = { tenantId: 'tenantA' };
     const ctx = { args: { tenantId: 'tenantB' } };
-    expect(() => policy.assert(user, ['tenant:match'], ctx)).toThrow('forbidden: tenant mismatch');
+    expect(() => policy.assert(user, ['tenant:match'], ctx)).toThrow(
+      'forbidden: tenant mismatch',
+    );
   });
 
   test('should allow access if tenant:match scope is present but no targetTenantId in args', () => {

@@ -8,7 +8,7 @@ import { httpLatency, httpErrors, tokensOut } from '../telemetry/metrics'; // Ne
 import { randomUUID } from 'node:crypto'; // New import
 import { isSuspicious } from '../services/guard'; // New import
 import { getCached, setCached } from '../cache/answers'; // New import
-import { fetchGraphContext, fetchTextPassages, buildRagPrompt } from '../services/rag'; // New import
+import { fetchGraphContext, fetchTextPassages, buildRagPrompt, } from '../services/rag'; // New import
 // Simple experiment logging placeholder
 function logExperiment(reqId, userId, exp, variant) {
     console.log(`[EXP] reqId=${reqId} userId=${userId} exp=${exp} variant=${variant}`);
@@ -35,9 +35,16 @@ export function mountAssistant(app, io) {
             // Simple random assignment for demonstration (replace with proper tenant assignment)
             if (Math.random() < 0.1) {
                 // 10% of requests go to RAG variant
-                const graphContext = await fetchGraphContext({ investigationId: reqId, focusIds }); // Pass reqId as investigationId
+                const graphContext = await fetchGraphContext({
+                    investigationId: reqId,
+                    focusIds,
+                }); // Pass reqId as investigationId
                 const textPassages = await fetchTextPassages(input);
-                input = buildRagPrompt({ question: input, graph: graphContext, passages: textPassages });
+                input = buildRagPrompt({
+                    question: input,
+                    graph: graphContext,
+                    passages: textPassages,
+                });
                 experimentVariant = 'rag_v1';
                 cites = [
                     ...graphContext.map((g) => ({ kind: 'graph', ...g })),
@@ -61,7 +68,10 @@ export function mountAssistant(app, io) {
         });
         const ac = new AbortController();
         req.on('close', () => ac.abort());
-        const end = httpLatency.startTimer({ path: '/assistant/stream', method: 'POST' });
+        const end = httpLatency.startTimer({
+            path: '/assistant/stream',
+            method: 'POST',
+        });
         let tokens = 0;
         let fullResponseText = ''; // To collect full response for cache
         try {
@@ -129,9 +139,16 @@ export function mountAssistant(app, io) {
             // Simple random assignment for demonstration (replace with proper tenant assignment)
             if (Math.random() < 0.1) {
                 // 10% of requests go to RAG variant
-                const graphContext = await fetchGraphContext({ investigationId: reqId, focusIds }); // Pass reqId as investigationId
+                const graphContext = await fetchGraphContext({
+                    investigationId: reqId,
+                    focusIds,
+                }); // Pass reqId as investigationId
                 const textPassages = await fetchTextPassages(input);
-                input = buildRagPrompt({ question: input, graph: graphContext, passages: textPassages });
+                input = buildRagPrompt({
+                    question: input,
+                    graph: graphContext,
+                    passages: textPassages,
+                });
                 experimentVariant = 'rag_v1';
                 cites = [
                     ...graphContext.map((g) => ({ kind: 'graph', ...g })),
@@ -157,7 +174,10 @@ export function mountAssistant(app, io) {
         const ac = new AbortController();
         req.on('close', () => ac.abort());
         const ping = setInterval(() => res.write(`: ping\n\n`), 15000);
-        const end = httpLatency.startTimer({ path: '/assistant/sse', method: 'GET' });
+        const end = httpLatency.startTimer({
+            path: '/assistant/sse',
+            method: 'GET',
+        });
         let tokens = 0;
         try {
             write(res, { type: 'status', value: 'thinking' }); // Initial status
@@ -241,7 +261,7 @@ export function mountAssistant(app, io) {
     // Socket.IO wiring (optional; client already supports it)
     if (io) {
         io.on('connection', (socket) => {
-            socket.on('assistant:ask', async ({ input, focusIds = [] }) => {
+            socket.on('assistant:ask', async ({ input, focusIds = [], }) => {
                 // Added focusIds
                 if (isSuspicious(input)) {
                     socket.emit('assistant:error', 'input_rejected');
@@ -254,7 +274,10 @@ export function mountAssistant(app, io) {
                     // Simple random assignment for demonstration (replace with proper tenant assignment)
                     if (Math.random() < 0.1) {
                         // 10% of requests go to RAG variant
-                        const graphContext = await fetchGraphContext({ investigationId: reqId, focusIds }); // Pass reqId as investigationId
+                        const graphContext = await fetchGraphContext({
+                            investigationId: reqId,
+                            focusIds,
+                        }); // Pass reqId as investigationId
                         const textPassages = await fetchTextPassages(input);
                         input = buildRagPrompt({
                             question: input,
@@ -284,7 +307,10 @@ export function mountAssistant(app, io) {
                 let tokens = 0;
                 let fullResponseText = ''; // To collect full response for cache
                 try {
-                    socket.emit('assistant:token', { type: 'status', value: 'thinking' }); // Initial status
+                    socket.emit('assistant:token', {
+                        type: 'status',
+                        value: 'thinking',
+                    }); // Initial status
                     for await (const tok of llm.stream(input, ac.signal)) {
                         tokens += 1;
                         tokensOut.inc({ mode: 'socket' }, 1);

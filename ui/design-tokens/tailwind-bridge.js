@@ -60,7 +60,10 @@ function generateTailwindTheme(tokens) {
 
   // Convert font sizes with line heights
   for (const [key, value] of Object.entries(tokens.typography['font-size'])) {
-    theme.fontSize[key] = [value, { lineHeight: tokens.typography['line-height'].normal }];
+    theme.fontSize[key] = [
+      value,
+      { lineHeight: tokens.typography['line-height'].normal },
+    ];
   }
 
   return theme;

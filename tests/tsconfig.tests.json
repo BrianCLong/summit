@@ -9,5 +9,10 @@
     "isolatedModules": true
   },
   "include": ["../tests/**/*", "../server/src/**/*"],
-  "exclude": ["../node_modules", "../conductor-ui/**", "../playwright/**", "../e2e/**"]
+  "exclude": [
+    "../node_modules",
+    "../conductor-ui/**",
+    "../playwright/**",
+    "../e2e/**"
+  ]
 }

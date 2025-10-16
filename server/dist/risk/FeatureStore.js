@@ -8,7 +8,7 @@ export class FeatureStore {
             case_links_30d: 0,
             temporal_anomaly_24h: 0,
             centrality_30d: 0,
-            first_seen_recent: 0
+            first_seen_recent: 0,
         };
     }
 }

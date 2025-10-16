@@ -18,7 +18,11 @@ router.get('/', async (req, res) => {
             params.push(`%${action}%`);
         }
         if (resource) {
-            where.push('(resource_type ILIKE $' + (params.length + 1) + ' OR resource_id ILIKE $' + (params.length + 2) + ')');
+            where.push('(resource_type ILIKE $' +
+                (params.length + 1) +
+                ' OR resource_id ILIKE $' +
+                (params.length + 2) +
+                ')');
             params.push(`%${resource}%`, `%${resource}%`);
         }
         const whereSql = where.join(' AND ');
@@ -27,7 +31,12 @@ router.get('/', async (req, res) => {
         const countSql = `SELECT COUNT(*)::int AS c FROM audit_logs WHERE ${whereSql}`;
         const listRes = await pool.query(listSql, [...params, limit, offset]);
         const countRes = await pool.query(countSql, params);
-        res.json({ items: listRes.rows, total: countRes.rows[0].c, page, pageSize: limit });
+        res.json({
+            items: listRes.rows,
+            total: countRes.rows[0].c,
+            page,
+            pageSize: limit,
+        });
     }
     catch (e) {
         res.status(500).json({ error: e.message });
@@ -58,7 +67,12 @@ router.get('/all', requireRole('admin'), async (req, res) => {
         const countSql = `SELECT COUNT(*)::int AS c FROM audit_logs ${whereSql}`;
         const listRes = await pool.query(listSql, [...params, limit, offset]);
         const countRes = await pool.query(countSql, params);
-        res.json({ items: listRes.rows, total: countRes.rows[0].c, page, pageSize: limit });
+        res.json({
+            items: listRes.rows,
+            total: countRes.rows[0].c,
+            page,
+            pageSize: limit,
+        });
     }
     catch (e) {
         res.status(500).json({ error: e.message });

@@ -19,5 +19,5 @@ function createSitemap({ version, modulePages, adrPages }) {
 }
 
 module.exports = {
-  createSitemap
+  createSitemap,
 };

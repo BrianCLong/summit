@@ -6,6 +6,8 @@ import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 const repoLogger = logger.child({ name: 'RelationshipRepo' });
 export class RelationshipRepo {
+    pg;
+    neo4j;
     constructor(pg, neo4j) {
         this.pg = pg;
         this.neo4j = neo4j;
@@ -45,7 +47,10 @@ export class RelationshipRepo {
          VALUES ($1, $2, $3)`, [
                 uuidv4(),
                 'relationship.upsert',
-                JSON.stringify({ id: relationship.id, tenantId: relationship.tenant_id }),
+                JSON.stringify({
+                    id: relationship.id,
+                    tenantId: relationship.tenant_id,
+                }),
             ]);
             await client.query('COMMIT');
             // 4. Best effort Neo4j write

@@ -58,8 +58,8 @@ detector = platform['detector']
 
 # Analyze text for misinformation
 text_samples = [
-    "This shocking revelation will change everything!",
-    "Research shows balanced approaches are beneficial."
+    "This shocking revelation will change everything you thought you knew!",
+    "Research shows balanced diets and regular exercise are beneficial."
 ]
 
 results = detector.detect_text_misinfo(text_samples)
@@ -90,7 +90,7 @@ print(results)
 - `USER_GUIDE.md`: Detailed usage guide
 - `PATENT_CLAIM_CHECKLIST.md`: Intellectual property mapping
 - `VALIDATION_REPORT.md`: Performance benchmarks
-- `FINAL_SUMMARY.md`: Implementation summary
+- `example_usage.py`: Usage examples
 
 ## Requirements
 

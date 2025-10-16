@@ -2,8 +2,8 @@
  * Simulation Engine Service Tests
  * P0 Critical - MVP1 requirement validation
  */
-const SimulationEngineService = require("../services/SimulationEngineService");
-describe("Simulation Engine Service - P0 Critical MVP1", () => {
+const SimulationEngineService = require('../services/SimulationEngineService');
+describe('Simulation Engine Service - P0 Critical MVP1', () => {
     let simulationService;
     let mockNeo4jDriver;
     let mockCopilotService;
@@ -35,45 +35,45 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
-    describe("Simulation Engine Initialization", () => {
-        test("should initialize all required simulation engines", () => {
+    describe('Simulation Engine Initialization', () => {
+        test('should initialize all required simulation engines', () => {
             const engines = simulationService.getAvailableEngines();
             expect(engines).toHaveLength(7);
-            expect(engines.map((e) => e.type)).toContain("NETWORK_PROPAGATION");
-            expect(engines.map((e) => e.type)).toContain("BEHAVIORAL_PREDICTION");
-            expect(engines.map((e) => e.type)).toContain("RISK_ASSESSMENT");
-            expect(engines.map((e) => e.type)).toContain("RESOURCE_ALLOCATION");
-            expect(engines.map((e) => e.type)).toContain("EVENT_CASCADE");
-            expect(engines.map((e) => e.type)).toContain("MONTE_CARLO");
-            expect(engines.map((e) => e.type)).toContain("ADAPTIVE_BEHAVIOR");
+            expect(engines.map((e) => e.type)).toContain('NETWORK_PROPAGATION');
+            expect(engines.map((e) => e.type)).toContain('BEHAVIORAL_PREDICTION');
+            expect(engines.map((e) => e.type)).toContain('RISK_ASSESSMENT');
+            expect(engines.map((e) => e.type)).toContain('RESOURCE_ALLOCATION');
+            expect(engines.map((e) => e.type)).toContain('EVENT_CASCADE');
+            expect(engines.map((e) => e.type)).toContain('MONTE_CARLO');
+            expect(engines.map((e) => e.type)).toContain('ADAPTIVE_BEHAVIOR');
         });
-        test("should configure engine parameters correctly", () => {
+        test('should configure engine parameters correctly', () => {
             const engines = simulationService.getAvailableEngines();
-            const networkEngine = engines.find((e) => e.type === "NETWORK_PROPAGATION");
-            expect(networkEngine.parameters.some((p) => p.name === "propagationRate")).toBe(true);
-            expect(networkEngine.parameters.some((p) => p.name === "decayFactor")).toBe(true);
-            const behavioralEngine = engines.find((e) => e.type === "BEHAVIORAL_PREDICTION");
-            expect(behavioralEngine.parameters.some((p) => p.name === "timeHorizon")).toBe(true);
-            expect(behavioralEngine.parameters.some((p) => p.name === "confidenceThreshold")).toBe(true);
+            const networkEngine = engines.find((e) => e.type === 'NETWORK_PROPAGATION');
+            expect(networkEngine.parameters.some((p) => p.name === 'propagationRate')).toBe(true);
+            expect(networkEngine.parameters.some((p) => p.name === 'decayFactor')).toBe(true);
+            const behavioralEngine = engines.find((e) => e.type === 'BEHAVIORAL_PREDICTION');
+            expect(behavioralEngine.parameters.some((p) => p.name === 'timeHorizon')).toBe(true);
+            expect(behavioralEngine.parameters.some((p) => p.name === 'confidenceThreshold')).toBe(true);
         });
-        test("should load scenario templates", () => {
+        test('should load scenario templates', () => {
             const scenarios = simulationService.getScenarioLibrary();
             expect(scenarios.length).toBeGreaterThan(0);
-            expect(scenarios.map((s) => s.type)).toContain("THREAT_PROPAGATION");
-            expect(scenarios.map((s) => s.type)).toContain("INFLUENCE_MAPPING");
-            expect(scenarios.map((s) => s.type)).toContain("OPERATIONAL_PLANNING");
-            expect(scenarios.map((s) => s.type)).toContain("CRISIS_RESPONSE");
-            expect(scenarios.map((s) => s.type)).toContain("PREDICTIVE_INTELLIGENCE");
-            expect(scenarios.map((s) => s.type)).toContain("CYBER_PHYSICAL");
-            expect(scenarios.map((s) => s.type)).toContain("SOCIO_COGNITIVE");
+            expect(scenarios.map((s) => s.type)).toContain('THREAT_PROPAGATION');
+            expect(scenarios.map((s) => s.type)).toContain('INFLUENCE_MAPPING');
+            expect(scenarios.map((s) => s.type)).toContain('OPERATIONAL_PLANNING');
+            expect(scenarios.map((s) => s.type)).toContain('CRISIS_RESPONSE');
+            expect(scenarios.map((s) => s.type)).toContain('PREDICTIVE_INTELLIGENCE');
+            expect(scenarios.map((s) => s.type)).toContain('CYBER_PHYSICAL');
+            expect(scenarios.map((s) => s.type)).toContain('SOCIO_COGNITIVE');
         });
     });
-    describe("Simulation Configuration and Validation", () => {
-        test("should validate simulation configuration", () => {
+    describe('Simulation Configuration and Validation', () => {
+        test('should validate simulation configuration', () => {
             const validSimulation = {
-                engines: ["NETWORK_PROPAGATION"],
+                engines: ['NETWORK_PROPAGATION'],
                 graphData: {
-                    nodes: [{ id: "1", label: "Node 1" }],
+                    nodes: [{ id: '1', label: 'Node 1' }],
                     edges: [],
                 },
             };
@@ -81,19 +81,19 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 simulationService.validateSimulationConfig(validSimulation);
             }).not.toThrow();
         });
-        test("should reject unknown engines", () => {
+        test('should reject unknown engines', () => {
             const invalidSimulation = {
-                engines: ["UNKNOWN_ENGINE"],
+                engines: ['UNKNOWN_ENGINE'],
                 graphData: { nodes: [], edges: [] },
             };
             expect(() => {
                 simulationService.validateSimulationConfig(invalidSimulation);
-            }).toThrow("Unknown simulation engine: UNKNOWN_ENGINE");
+            }).toThrow('Unknown simulation engine: UNKNOWN_ENGINE');
         });
-        test("should validate engine parameters", () => {
+        test('should validate engine parameters', () => {
             const engineParams = {
-                propagationRate: { type: "number", min: 0, max: 1 },
-                maxIterations: { type: "integer", min: 1 },
+                propagationRate: { type: 'number', min: 0, max: 1 },
+                maxIterations: { type: 'integer', min: 1 },
             };
             // Valid parameters
             expect(() => {
@@ -105,43 +105,43 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             // Invalid type
             expect(() => {
                 simulationService.validateEngineParameters({
-                    propagationRate: "invalid",
+                    propagationRate: 'invalid',
                 }, engineParams);
-            }).toThrow("Parameter propagationRate must be a number");
+            }).toThrow('Parameter propagationRate must be a number');
             // Out of range
             expect(() => {
                 simulationService.validateEngineParameters({
                     propagationRate: 1.5,
                 }, engineParams);
-            }).toThrow("Parameter propagationRate must be <= 1");
+            }).toThrow('Parameter propagationRate must be <= 1');
         });
-        test("should reject simulations with no graph data", () => {
+        test('should reject simulations with no graph data', () => {
             const simulation = {
-                engines: ["NETWORK_PROPAGATION"],
+                engines: ['NETWORK_PROPAGATION'],
                 graphData: { nodes: [], edges: [] },
             };
             expect(() => {
                 simulationService.validateSimulationConfig(simulation);
-            }).toThrow("No graph data available for simulation");
+            }).toThrow('No graph data available for simulation');
         });
     });
-    describe("Graph Data Loading", () => {
-        test("should load graph data from Neo4j", async () => {
+    describe('Graph Data Loading', () => {
+        test('should load graph data from Neo4j', async () => {
             // Mock Neo4j responses
             mockSession.run
                 .mockResolvedValueOnce({
                 records: [
                     {
                         get: () => ({
-                            properties: { id: "1", label: "Entity 1", type: "PERSON" },
+                            properties: { id: '1', label: 'Entity 1', type: 'PERSON' },
                         }),
                     },
                     {
                         get: () => ({
                             properties: {
-                                id: "2",
-                                label: "Entity 2",
-                                type: "ORGANIZATION",
+                                id: '2',
+                                label: 'Entity 2',
+                                type: 'ORGANIZATION',
                             },
                         }),
                     },
@@ -151,62 +151,62 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 records: [
                     {
                         get: (field) => {
-                            if (field === "a")
-                                return { properties: { id: "1", label: "Entity 1" } };
-                            if (field === "b")
-                                return { properties: { id: "2", label: "Entity 2" } };
-                            if (field === "r")
+                            if (field === 'a')
+                                return { properties: { id: '1', label: 'Entity 1' } };
+                            if (field === 'b')
+                                return { properties: { id: '2', label: 'Entity 2' } };
+                            if (field === 'r')
                                 return {
-                                    properties: { id: "rel1", type: "KNOWS", weight: 0.8 },
+                                    properties: { id: 'rel1', type: 'KNOWS', weight: 0.8 },
                                 };
                         },
                     },
                 ],
             });
-            const graphData = await simulationService.loadGraphData("inv123");
+            const graphData = await simulationService.loadGraphData('inv123');
             expect(graphData.nodes).toHaveLength(2);
             expect(graphData.edges).toHaveLength(1);
-            expect(graphData.nodes[0].id).toBe("1");
+            expect(graphData.nodes[0].id).toBe('1');
             expect(graphData.edges[0].weight).toBe(0.8);
         });
-        test("should handle database connection errors", async () => {
-            mockSession.run.mockRejectedValue(new Error("Connection failed"));
-            await expect(simulationService.loadGraphData("inv123")).rejects.toThrow("Connection failed");
+        test('should handle database connection errors', async () => {
+            mockSession.run.mockRejectedValue(new Error('Connection failed'));
+            await expect(simulationService.loadGraphData('inv123')).rejects.toThrow('Connection failed');
         });
     });
-    describe("Threat feed integration", () => {
-        test("should update behaviors using threat feeds during initialization", async () => {
+    describe('Threat feed integration', () => {
+        test('should update behaviors using threat feeds during initialization', async () => {
             const simulation = {
-                engines: ["NETWORK_PROPAGATION"],
-                investigationId: "inv1",
-                graphData: { nodes: [{ id: "1", properties: {} }], edges: [] },
+                engines: ['NETWORK_PROPAGATION'],
+                investigationId: 'inv1',
+                graphData: { nodes: [{ id: '1', properties: {} }], edges: [] },
             };
             simulationService.loadGraphData = jest.fn().mockResolvedValue({
-                nodes: [{ id: "1", properties: {} }],
+                nodes: [{ id: '1', properties: {} }],
                 edges: [],
             });
             mockThreatFeedService.fetchLatestFeeds.mockResolvedValue([
-                { targetId: "1", score: 0.9 },
+                { targetId: '1', score: 0.9 },
             ]);
             await simulationService.initializeSimulation(simulation);
             expect(mockThreatFeedService.fetchLatestFeeds).toHaveBeenCalled();
             expect(simulation.environment.nodes[0].simulationData.liveThreatScore).toBe(0.9);
         });
     });
-    describe("Simulation Execution", () => {
-        test("should run complete simulation successfully", async () => {
+    describe('Simulation Execution', () => {
+        test('should run complete simulation successfully', async () => {
             // Mock graph data loading
             mockSession.run
                 .mockResolvedValueOnce({
                 records: [
                     {
                         get: () => ({
-                            properties: { id: "1", label: "Node 1", type: "PERSON" },
+                            properties: { id: '1', label: 'Node 1', type: 'PERSON' },
                         }),
                     },
                     {
                         get: () => ({
-                            properties: { id: "2", label: "Node 2", type: "PERSON" },
+                            properties: { id: '2', label: 'Node 2', type: 'PERSON' },
                         }),
                     },
                 ],
@@ -215,112 +215,112 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 records: [
                     {
                         get: (field) => {
-                            if (field === "a")
-                                return { properties: { id: "1" } };
-                            if (field === "b")
-                                return { properties: { id: "2" } };
-                            if (field === "r")
+                            if (field === 'a')
+                                return { properties: { id: '1' } };
+                            if (field === 'b')
+                                return { properties: { id: '2' } };
+                            if (field === 'r')
                                 return {
-                                    properties: { id: "rel1", type: "KNOWS", weight: 0.8 },
+                                    properties: { id: 'rel1', type: 'KNOWS', weight: 0.8 },
                                 };
                         },
                     },
                 ],
             });
             const config = {
-                name: "Test Simulation",
-                engines: ["NETWORK_PROPAGATION"],
+                name: 'Test Simulation',
+                engines: ['NETWORK_PROPAGATION'],
                 parameters: {
                     propagationRate: 0.3,
-                    sourceNode: "1",
+                    sourceNode: '1',
                 },
-                investigationId: "inv123",
-                userId: "user456",
+                investigationId: 'inv123',
+                userId: 'user456',
             };
             const simulation = await simulationService.runSimulation(config);
-            expect(simulation.status).toBe("COMPLETED");
+            expect(simulation.status).toBe('COMPLETED');
             expect(simulation.results).toBeDefined();
             expect(simulation.results.engineResults.NETWORK_PROPAGATION).toBeDefined();
             expect(simulation.executionTime).toBeGreaterThan(0);
         });
-        test("should handle simulation initialization failure", async () => {
-            mockSession.run.mockRejectedValue(new Error("Database error"));
+        test('should handle simulation initialization failure', async () => {
+            mockSession.run.mockRejectedValue(new Error('Database error'));
             const config = {
-                name: "Failed Simulation",
-                engines: ["NETWORK_PROPAGATION"],
-                investigationId: "inv123",
-                userId: "user456",
+                name: 'Failed Simulation',
+                engines: ['NETWORK_PROPAGATION'],
+                investigationId: 'inv123',
+                userId: 'user456',
             };
-            await expect(simulationService.runSimulation(config)).rejects.toThrow("Database error");
+            await expect(simulationService.runSimulation(config)).rejects.toThrow('Database error');
         });
-        test("should emit simulation lifecycle events", async () => {
+        test('should emit simulation lifecycle events', async () => {
             const startedHandler = jest.fn();
             const completedHandler = jest.fn();
-            simulationService.on("simulationStarted", startedHandler);
-            simulationService.on("simulationCompleted", completedHandler);
+            simulationService.on('simulationStarted', startedHandler);
+            simulationService.on('simulationCompleted', completedHandler);
             // Mock successful data loading
             mockSession.run
                 .mockResolvedValueOnce({
                 records: [
-                    { get: () => ({ properties: { id: "1", label: "Node 1" } }) },
+                    { get: () => ({ properties: { id: '1', label: 'Node 1' } }) },
                 ],
             })
                 .mockResolvedValueOnce({ records: [] });
             const config = {
-                name: "Event Test",
-                engines: ["NETWORK_PROPAGATION"],
-                investigationId: "inv123",
-                userId: "user456",
+                name: 'Event Test',
+                engines: ['NETWORK_PROPAGATION'],
+                investigationId: 'inv123',
+                userId: 'user456',
             };
             const simulation = await simulationService.runSimulation(config);
             expect(startedHandler).toHaveBeenCalledWith(expect.objectContaining({
-                status: "LOADING_DATA",
+                status: 'LOADING_DATA',
             }));
             expect(completedHandler).toHaveBeenCalledWith(expect.objectContaining({
-                status: "COMPLETED",
+                status: 'COMPLETED',
             }));
         });
     });
-    describe("Network Propagation Engine", () => {
-        test("should simulate network propagation correctly", async () => {
+    describe('Network Propagation Engine', () => {
+        test('should simulate network propagation correctly', async () => {
             const simulation = {
                 environment: {
                     nodes: [
-                        { id: "1", simulationData: {} },
-                        { id: "2", simulationData: {} },
-                        { id: "3", simulationData: {} },
+                        { id: '1', simulationData: {} },
+                        { id: '2', simulationData: {} },
+                        { id: '3', simulationData: {} },
                     ],
                     edges: [
-                        { source: "1", target: "2", weight: 0.8 },
-                        { source: "2", target: "3", weight: 0.6 },
+                        { source: '1', target: '2', weight: 0.8 },
+                        { source: '2', target: '3', weight: 0.6 },
                     ],
                 },
             };
             const params = {
                 propagationRate: 0.5,
                 decayFactor: 0.1,
-                sourceNode: "1",
+                sourceNode: '1',
                 maxIterations: 10,
                 threshold: 0.01,
             };
             const results = await simulationService.executeNetworkPropagation(simulation, params);
-            expect(results.type).toBe("NETWORK_PROPAGATION");
+            expect(results.type).toBe('NETWORK_PROPAGATION');
             expect(results.timeline).toBeDefined();
             expect(results.timeline.length).toBeGreaterThan(0);
             expect(results.finalState).toBeDefined();
             expect(results.finalState.propagationDistribution).toHaveLength(3);
             expect(results.converged).toBeDefined();
         });
-        test("should handle convergence detection", async () => {
+        test('should handle convergence detection', async () => {
             const simulation = {
                 environment: {
-                    nodes: [{ id: "1", simulationData: {} }],
+                    nodes: [{ id: '1', simulationData: {} }],
                     edges: [],
                 },
             };
             const params = {
                 propagationRate: 0.0, // No propagation, should converge quickly
-                sourceNode: "1",
+                sourceNode: '1',
                 threshold: 0.01,
             };
             const results = await simulationService.executeNetworkPropagation(simulation, params);
@@ -328,13 +328,13 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(results.iterations).toBeLessThan(10);
         });
     });
-    describe("Behavioral Prediction Engine", () => {
-        test("should generate behavioral predictions", async () => {
+    describe('Behavioral Prediction Engine', () => {
+        test('should generate behavioral predictions', async () => {
             const simulation = {
                 environment: {
                     nodes: [
-                        { id: "1", label: "Person A" },
-                        { id: "2", label: "Person B" },
+                        { id: '1', label: 'Person A' },
+                        { id: '2', label: 'Person B' },
                     ],
                 },
             };
@@ -344,16 +344,16 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 patternWeight: 0.8,
             };
             const results = await simulationService.executeBehavioralPrediction(simulation, params);
-            expect(results.type).toBe("BEHAVIORAL_PREDICTION");
+            expect(results.type).toBe('BEHAVIORAL_PREDICTION');
             expect(results.predictions).toHaveLength(2);
             expect(results.predictions[0].predictions).toHaveLength(30);
             expect(results.summary.averageConfidence).toBeGreaterThan(0);
             expect(results.summary.predictedEvents).toBeDefined();
         });
-        test("should include temporal factors in predictions", async () => {
+        test('should include temporal factors in predictions', async () => {
             const simulation = {
                 environment: {
-                    nodes: [{ id: "1", label: "Test Entity" }],
+                    nodes: [{ id: '1', label: 'Test Entity' }],
                 },
             };
             const params = {
@@ -369,15 +369,15 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(dayPrediction.factors.random).toBeDefined();
         });
     });
-    describe("Risk Assessment Engine", () => {
-        test("should assess risk for entities", async () => {
+    describe('Risk Assessment Engine', () => {
+        test('should assess risk for entities', async () => {
             const simulation = {
                 environment: {
                     nodes: [
-                        { id: "1", label: "High Risk Entity" },
-                        { id: "2", label: "Low Risk Entity" },
+                        { id: '1', label: 'High Risk Entity' },
+                        { id: '2', label: 'Low Risk Entity' },
                     ],
-                    edges: [{ source: "1", target: "2", weight: 0.9 }],
+                    edges: [{ source: '1', target: '2', weight: 0.9 }],
                 },
             };
             const params = {
@@ -393,20 +393,20 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 threatLevel: 0.7,
             });
             const results = await simulationService.executeRiskAssessment(simulation, params);
-            expect(results.type).toBe("RISK_ASSESSMENT");
+            expect(results.type).toBe('RISK_ASSESSMENT');
             expect(results.assessments).toHaveLength(2);
             expect(results.assessments[0].totalRisk).toBeGreaterThan(0);
             expect(results.assessments[0].riskLevel).toBeDefined();
             expect(results.summary.averageRisk).toBeGreaterThan(0);
         });
-        test("should identify risk clusters", async () => {
+        test('should identify risk clusters', async () => {
             const simulation = {
                 environment: {
                     nodes: [
-                        { id: "1", label: "Entity 1" },
-                        { id: "2", label: "Entity 2" },
+                        { id: '1', label: 'Entity 1' },
+                        { id: '2', label: 'Entity 2' },
                     ],
-                    edges: [{ source: "1", target: "2", weight: 1.0 }],
+                    edges: [{ source: '1', target: '2', weight: 1.0 }],
                 },
             };
             simulationService.analyzeRiskFactors = jest.fn().mockResolvedValue({
@@ -419,11 +419,11 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(results.propagationPaths).toBeDefined();
         });
     });
-    describe("Monte Carlo Engine", () => {
-        test("should run Monte Carlo simulation", async () => {
+    describe('Monte Carlo Engine', () => {
+        test('should run Monte Carlo simulation', async () => {
             const simulation = {
                 environment: {
-                    nodes: [{ id: "1" }],
+                    nodes: [{ id: '1' }],
                     edges: [],
                 },
             };
@@ -434,14 +434,14 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 parallelExecution: false, // For predictable testing
             };
             const results = await simulationService.executeMonteCarlo(simulation, params);
-            expect(results.type).toBe("MONTE_CARLO");
+            expect(results.type).toBe('MONTE_CARLO');
             expect(results.iterations).toBe(100);
             expect(results.results).toHaveLength(100);
             expect(results.analysis.mean).toBeDefined();
             expect(results.analysis.standardDeviation).toBeDefined();
             expect(results.analysis.confidenceInterval).toBeDefined();
         });
-        test("should calculate statistical measures correctly", () => {
+        test('should calculate statistical measures correctly', () => {
             const values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
             const analysis = simulationService.analyzeMonteCarloResults(values.map((v, i) => ({ iteration: i, outcome: v })), 0.95);
             expect(analysis.mean).toBeCloseTo(0.55, 1);
@@ -449,9 +449,9 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(analysis.distribution).toBeDefined();
             expect(analysis.riskMetrics.valueAtRisk).toBeDefined();
         });
-        test("should handle parallel execution", async () => {
+        test('should handle parallel execution', async () => {
             const simulation = {
-                environment: { nodes: [{ id: "1" }], edges: [] },
+                environment: { nodes: [{ id: '1' }], edges: [] },
             };
             const results = await simulationService.executeMonteCarlo(simulation, {
                 iterations: 50,
@@ -461,32 +461,32 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(results.results).toHaveLength(50);
         });
     });
-    describe("Event Cascade Engine", () => {
-        test("should simulate event cascades", async () => {
+    describe('Event Cascade Engine', () => {
+        test('should simulate event cascades', async () => {
             const simulation = {
                 environment: {
                     nodes: [
-                        { id: "1", label: "Trigger" },
-                        { id: "2", label: "Target 1" },
-                        { id: "3", label: "Target 2" },
+                        { id: '1', label: 'Trigger' },
+                        { id: '2', label: 'Target 1' },
+                        { id: '3', label: 'Target 2' },
                     ],
                     edges: [
-                        { source: "1", target: "2", weight: 0.8 },
-                        { source: "2", target: "3", weight: 0.6 },
+                        { source: '1', target: '2', weight: 0.8 },
+                        { source: '2', target: '3', weight: 0.6 },
                     ],
                 },
             };
             // Mock trigger events and connected nodes
             simulationService.identifyTriggerEvents = jest
                 .fn()
-                .mockReturnValue([{ nodeId: "1", label: "Trigger" }]);
+                .mockReturnValue([{ nodeId: '1', label: 'Trigger' }]);
             simulationService.getConnectedNodes = jest
                 .fn()
                 .mockReturnValueOnce([
-                { id: "2", label: "Target 1", edge: { weight: 0.8 } },
+                { id: '2', label: 'Target 1', edge: { weight: 0.8 } },
             ])
                 .mockReturnValueOnce([
-                { id: "3", label: "Target 2", edge: { weight: 0.6 } },
+                { id: '3', label: 'Target 2', edge: { weight: 0.6 } },
             ]);
             const params = {
                 triggerProbability: 0.8,
@@ -494,12 +494,12 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 timeDelay: 24,
             };
             const results = await simulationService.executeEventCascade(simulation, params);
-            expect(results.type).toBe("EVENT_CASCADE");
+            expect(results.type).toBe('EVENT_CASCADE');
             expect(results.cascades).toBeDefined();
             expect(results.summary.totalCascades).toBeGreaterThan(0);
             expect(results.summary.maxCascadeDepth).toBeGreaterThanOrEqual(0);
         });
-        test("should respect cascade depth limits", async () => {
+        test('should respect cascade depth limits', async () => {
             const simulation = {
                 environment: {
                     nodes: Array(10)
@@ -516,7 +516,7 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             };
             simulationService.identifyTriggerEvents = jest
                 .fn()
-                .mockReturnValue([{ nodeId: "0", label: "Start" }]);
+                .mockReturnValue([{ nodeId: '0', label: 'Start' }]);
             const maxDepth = 3;
             const results = await simulationService.executeEventCascade(simulation, {
                 cascadeDepth: maxDepth,
@@ -526,14 +526,14 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(maxDepthReached).toBeLessThanOrEqual(maxDepth);
         });
     });
-    describe("Resource Allocation Engine", () => {
-        test("should optimize resource allocation", async () => {
+    describe('Resource Allocation Engine', () => {
+        test('should optimize resource allocation', async () => {
             const simulation = {
                 environment: {
                     nodes: [
-                        { id: "1", label: "High Priority" },
-                        { id: "2", label: "Medium Priority" },
-                        { id: "3", label: "Low Priority" },
+                        { id: '1', label: 'High Priority' },
+                        { id: '2', label: 'Medium Priority' },
+                        { id: '3', label: 'Low Priority' },
                     ],
                 },
             };
@@ -548,21 +548,21 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
                 .mockReturnValueOnce(0.6)
                 .mockReturnValueOnce(0.3);
             const params = {
-                resourceTypes: ["personnel", "equipment"],
-                optimizationGoal: "maximize_coverage",
+                resourceTypes: ['personnel', 'equipment'],
+                optimizationGoal: 'maximize_coverage',
                 timeframe: 7,
             };
             const results = await simulationService.executeResourceAllocation(simulation, params);
-            expect(results.type).toBe("RESOURCE_ALLOCATION");
+            expect(results.type).toBe('RESOURCE_ALLOCATION');
             expect(results.initialPlan).toBeDefined();
             expect(results.executionTimeline).toHaveLength(7);
             expect(results.summary.coverageAchieved).toBeGreaterThanOrEqual(0);
             expect(results.summary.efficiencyScore).toBeGreaterThanOrEqual(0);
         });
-        test("should track resource utilization over time", async () => {
+        test('should track resource utilization over time', async () => {
             const simulation = {
                 environment: {
-                    nodes: [{ id: "1", label: "Target" }],
+                    nodes: [{ id: '1', label: 'Target' }],
                 },
             };
             simulationService.initializeResourcePool = jest.fn().mockReturnValue({
@@ -580,25 +580,25 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             });
         });
     });
-    describe("Simulation Management", () => {
-        test("should track active simulations", () => {
+    describe('Simulation Management', () => {
+        test('should track active simulations', () => {
             const activeSimulations = simulationService.getActiveSimulations();
             expect(Array.isArray(activeSimulations)).toBe(true);
         });
-        test("should get simulation status", async () => {
+        test('should get simulation status', async () => {
             // Mock data loading
             mockSession.run
                 .mockResolvedValueOnce({
                 records: [
-                    { get: () => ({ properties: { id: "1", label: "Node 1" } }) },
+                    { get: () => ({ properties: { id: '1', label: 'Node 1' } }) },
                 ],
             })
                 .mockResolvedValueOnce({ records: [] });
             const simulationPromise = simulationService.runSimulation({
-                name: "Status Test",
-                engines: ["NETWORK_PROPAGATION"],
-                investigationId: "inv123",
-                userId: "user456",
+                name: 'Status Test',
+                engines: ['NETWORK_PROPAGATION'],
+                investigationId: 'inv123',
+                userId: 'user456',
             });
             // Get status while running
             setTimeout(() => {
@@ -611,21 +611,21 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             }, 100);
             await simulationPromise;
         });
-        test("should cancel running simulation", async () => {
+        test('should cancel running simulation', async () => {
             // Start a simulation
             mockSession.run
                 .mockResolvedValueOnce({
                 records: [
-                    { get: () => ({ properties: { id: "1", label: "Node 1" } }) },
+                    { get: () => ({ properties: { id: '1', label: 'Node 1' } }) },
                 ],
             })
                 .mockResolvedValueOnce({ records: [] });
             const simulationPromise = simulationService.runSimulation({
-                name: "Cancel Test",
-                engines: ["MONTE_CARLO"], // Longer running
+                name: 'Cancel Test',
+                engines: ['MONTE_CARLO'], // Longer running
                 parameters: { iterations: 1000 },
-                investigationId: "inv123",
-                userId: "user456",
+                investigationId: 'inv123',
+                userId: 'user456',
             });
             // Cancel after short delay
             setTimeout(async () => {
@@ -638,15 +638,15 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             await simulationPromise;
         });
     });
-    describe("Performance Metrics", () => {
-        test("should track simulation metrics", () => {
+    describe('Performance Metrics', () => {
+        test('should track simulation metrics', () => {
             const metrics = simulationService.getMetrics();
             expect(metrics.totalSimulations).toBeGreaterThanOrEqual(0);
             expect(metrics.completedSimulations).toBeGreaterThanOrEqual(0);
             expect(metrics.averageExecutionTime).toBeGreaterThanOrEqual(0);
             expect(metrics.activeSimulations).toBeDefined();
         });
-        test("should calculate success rate", () => {
+        test('should calculate success rate', () => {
             const metrics = simulationService.getMetrics();
             if (metrics.totalSimulations > 0) {
                 const expectedRate = ((metrics.completedSimulations / metrics.totalSimulations) *
@@ -655,43 +655,43 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             }
         });
     });
-    describe("Error Handling", () => {
-        test("should handle engine execution failures gracefully", async () => {
+    describe('Error Handling', () => {
+        test('should handle engine execution failures gracefully', async () => {
             // Mock data loading
             mockSession.run
                 .mockResolvedValueOnce({
                 records: [
-                    { get: () => ({ properties: { id: "1", label: "Node 1" } }) },
+                    { get: () => ({ properties: { id: '1', label: 'Node 1' } }) },
                 ],
             })
                 .mockResolvedValueOnce({ records: [] });
             // Force engine failure
-            simulationService.engines.set("FAILING_ENGINE", {
-                name: "Failing Engine",
-                execute: jest.fn().mockRejectedValue(new Error("Engine failed")),
+            simulationService.engines.set('FAILING_ENGINE', {
+                name: 'Failing Engine',
+                execute: jest.fn().mockRejectedValue(new Error('Engine failed')),
             });
             const config = {
-                name: "Error Test",
-                engines: ["FAILING_ENGINE"],
-                investigationId: "inv123",
-                userId: "user456",
+                name: 'Error Test',
+                engines: ['FAILING_ENGINE'],
+                investigationId: 'inv123',
+                userId: 'user456',
             };
             await expect(simulationService.runSimulation(config)).rejects.toThrow();
         });
-        test("should validate parameter ranges", () => {
+        test('should validate parameter ranges', () => {
             const engineParams = {
-                rate: { type: "number", min: 0, max: 1 },
+                rate: { type: 'number', min: 0, max: 1 },
             };
             expect(() => {
                 simulationService.validateEngineParameters({ rate: -0.5 }, engineParams);
-            }).toThrow("Parameter rate must be >= 0");
+            }).toThrow('Parameter rate must be >= 0');
             expect(() => {
                 simulationService.validateEngineParameters({ rate: 1.5 }, engineParams);
-            }).toThrow("Parameter rate must be <= 1");
+            }).toThrow('Parameter rate must be <= 1');
         });
     });
-    describe("Utility Functions", () => {
-        test("should calculate statistical measures correctly", () => {
+    describe('Utility Functions', () => {
+        test('should calculate statistical measures correctly', () => {
             const distribution = simulationService.calculateDistribution([
                 0.1, 0.2, 0.3, 0.4, 0.5,
             ]);
@@ -699,17 +699,17 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(distribution.length).toBe(10); // Default bins
             expect(distribution.every((bin) => bin.probability >= 0)).toBe(true);
         });
-        test("should calculate Value at Risk correctly", () => {
+        test('should calculate Value at Risk correctly', () => {
             const values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
             const var95 = simulationService.calculateVaR(values, 0.05);
             expect(var95).toBe(0.1); // 5th percentile
         });
-        test("should calculate Conditional Value at Risk correctly", () => {
+        test('should calculate Conditional Value at Risk correctly', () => {
             const values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
             const cvar = simulationService.calculateCVaR(values, 0.05);
             expect(cvar).toBe(0.1); // Average of values <= VaR
         });
-        test("should create proper delay promises", async () => {
+        test('should create proper delay promises', async () => {
             const start = Date.now();
             await simulationService.delay(100);
             const elapsed = Date.now() - start;
@@ -717,35 +717,35 @@ describe("Simulation Engine Service - P0 Critical MVP1", () => {
             expect(elapsed).toBeLessThan(200);
         });
     });
-    describe("Scenario Templates", () => {
-        test("should provide threat propagation scenario", () => {
+    describe('Scenario Templates', () => {
+        test('should provide threat propagation scenario', () => {
             const scenarios = simulationService.getScenarioLibrary();
-            const threatScenario = scenarios.find((s) => s.type === "THREAT_PROPAGATION");
+            const threatScenario = scenarios.find((s) => s.type === 'THREAT_PROPAGATION');
             expect(threatScenario).toBeDefined();
-            expect(threatScenario.engines).toContain("NETWORK_PROPAGATION");
-            expect(threatScenario.engines).toContain("RISK_ASSESSMENT");
-            expect(threatScenario.outputMetrics).toContain("infected_nodes");
+            expect(threatScenario.engines).toContain('NETWORK_PROPAGATION');
+            expect(threatScenario.engines).toContain('RISK_ASSESSMENT');
+            expect(threatScenario.outputMetrics).toContain('infected_nodes');
         });
-        test("should provide operational planning scenario", () => {
+        test('should provide operational planning scenario', () => {
             const scenarios = simulationService.getScenarioLibrary();
-            const operationalScenario = scenarios.find((s) => s.type === "OPERATIONAL_PLANNING");
+            const operationalScenario = scenarios.find((s) => s.type === 'OPERATIONAL_PLANNING');
             expect(operationalScenario).toBeDefined();
-            expect(operationalScenario.engines).toContain("RESOURCE_ALLOCATION");
-            expect(operationalScenario.engines).toContain("MONTE_CARLO");
-            expect(operationalScenario.outputMetrics).toContain("coverage_percentage");
+            expect(operationalScenario.engines).toContain('RESOURCE_ALLOCATION');
+            expect(operationalScenario.engines).toContain('MONTE_CARLO');
+            expect(operationalScenario.outputMetrics).toContain('coverage_percentage');
         });
-        test("should provide crisis response scenario", () => {
+        test('should provide crisis response scenario', () => {
             const scenarios = simulationService.getScenarioLibrary();
-            const crisisScenario = scenarios.find((s) => s.type === "CRISIS_RESPONSE");
+            const crisisScenario = scenarios.find((s) => s.type === 'CRISIS_RESPONSE');
             expect(crisisScenario).toBeDefined();
-            expect(crisisScenario.engines).toContain("EVENT_CASCADE");
-            expect(crisisScenario.engines).toContain("RISK_ASSESSMENT");
-            expect(crisisScenario.engines).toContain("RESOURCE_ALLOCATION");
+            expect(crisisScenario.engines).toContain('EVENT_CASCADE');
+            expect(crisisScenario.engines).toContain('RISK_ASSESSMENT');
+            expect(crisisScenario.engines).toContain('RESOURCE_ALLOCATION');
         });
     });
 });
 // Performance tests for simulation engine
-describe("Simulation Engine Performance - P0 Critical", () => {
+describe('Simulation Engine Performance - P0 Critical', () => {
     let simulationService;
     let mockNeo4jDriver;
     let mockSession;
@@ -763,7 +763,7 @@ describe("Simulation Engine Performance - P0 Critical", () => {
             warn: jest.fn(),
         });
     });
-    test("should complete network propagation simulation within reasonable time", async () => {
+    test('should complete network propagation simulation within reasonable time', async () => {
         const largeNetwork = {
             environment: {
                 nodes: Array(100)
@@ -785,16 +785,16 @@ describe("Simulation Engine Performance - P0 Critical", () => {
         const results = await simulationService.executeNetworkPropagation(largeNetwork, {
             propagationRate: 0.3,
             maxIterations: 50,
-            sourceNode: "0",
+            sourceNode: '0',
         });
         const executionTime = Date.now() - start;
         expect(executionTime).toBeLessThan(5000); // Should complete within 5 seconds
         expect(results.finalState.propagationDistribution).toHaveLength(100);
     });
-    test("should handle Monte Carlo simulation with many iterations efficiently", async () => {
+    test('should handle Monte Carlo simulation with many iterations efficiently', async () => {
         const simulation = {
             environment: {
-                nodes: [{ id: "1" }],
+                nodes: [{ id: '1' }],
                 edges: [],
             },
         };
@@ -809,15 +809,15 @@ describe("Simulation Engine Performance - P0 Critical", () => {
     });
 });
 // Integration tests for simulation engine
-if (process.env.TEST_MODE === "integration") {
-    describe("Simulation Engine Integration Tests", () => {
-        test("should integrate with real Neo4j database", async () => {
+if (process.env.TEST_MODE === 'integration') {
+    describe('Simulation Engine Integration Tests', () => {
+        test('should integrate with real Neo4j database', async () => {
             // Test with actual database connection
         });
-        test("should handle real-world graph sizes", async () => {
+        test('should handle real-world graph sizes', async () => {
             // Test with large, realistic datasets
         });
-        test("should integrate with copilot orchestration", async () => {
+        test('should integrate with copilot orchestration', async () => {
             // Test simulation triggering from natural language queries
         });
     });

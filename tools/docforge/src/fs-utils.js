@@ -18,15 +18,13 @@ function shouldIgnore(relativePath, ignoreList) {
   if (!ignoreList || ignoreList.length === 0) {
     return false;
   }
-  return ignoreList.some((segment) => relativePath.split(path.sep).includes(segment));
+  return ignoreList.some((segment) =>
+    relativePath.split(path.sep).includes(segment),
+  );
 }
 
 async function walkFiles(rootDir, options) {
-  const {
-    extensions = [],
-    includeDirectories,
-    ignore = []
-  } = options;
+  const { extensions = [], includeDirectories, ignore = [] } = options;
   const normalizedExt = extensions.map((ext) => ext.toLowerCase());
   const results = [];
   const startDirs = [];
@@ -43,9 +41,14 @@ async function walkFiles(rootDir, options) {
   }
 
   async function traverse(currentAbsolute, currentRelative) {
-    const dirEntries = await fs.readdir(currentAbsolute, { withFileTypes: true });
+    const dirEntries = await fs.readdir(currentAbsolute, {
+      withFileTypes: true,
+    });
     for (const entry of dirEntries) {
-      const entryRelative = currentRelative === '.' ? entry.name : path.join(currentRelative, entry.name);
+      const entryRelative =
+        currentRelative === '.'
+          ? entry.name
+          : path.join(currentRelative, entry.name);
       if (shouldIgnore(entryRelative, ignore)) {
         continue;
       }
@@ -99,5 +102,5 @@ module.exports = {
   walkFiles,
   escapeHtml,
   writeFileAtomic,
-  trimLines
+  trimLines,
 };

@@ -6,7 +6,9 @@ export async function executeSandbox(cypher, rowLimit = 10) {
     }
     let container;
     try {
-        container = await new Neo4jContainer('neo4j:5').withPassword('password').start();
+        container = await new Neo4jContainer('neo4j:5')
+            .withPassword('password')
+            .start();
     }
     catch {
         throw new Error('Neo4j container unavailable');

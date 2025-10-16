@@ -42,7 +42,7 @@ export function initSocket(httpServer) {
             handler(...args);
         };
         const EDIT_ROLES = ['EDITOR', 'ADMIN'];
-        socket.on('entity_update', authorize(EDIT_ROLES, 'entity_update', ({ graphId, entityId, changes }) => {
+        socket.on('entity_update', authorize(EDIT_ROLES, 'entity_update', ({ graphId, entityId, changes, }) => {
             if (!graphId || !entityId)
                 return;
             socket.to(`graph:${graphId}`).emit('entity_updated', {

@@ -14,7 +14,7 @@ function createSearchIndex({ version, modules, adrs, modulePages, adrPages }) {
       title: module.path,
       url: normalizeUrl(relativePath),
       language: module.language,
-      summary: module.entries[0]?.summary || ''
+      summary: module.entries[0]?.summary || '',
     });
     module.entries.forEach((entry) => {
       const anchor = slugify(entry.name);
@@ -24,7 +24,7 @@ function createSearchIndex({ version, modules, adrs, modulePages, adrPages }) {
         title: `${entry.name} (${module.path})`,
         url: `${normalizeUrl(relativePath)}#${anchor}`,
         language: module.language,
-        summary: entry.summary
+        summary: entry.summary,
       });
     });
   });
@@ -35,7 +35,7 @@ function createSearchIndex({ version, modules, adrs, modulePages, adrPages }) {
       type: 'adr',
       title: adr.title,
       url: normalizeUrl(relativePath),
-      summary: adr.summary
+      summary: adr.summary,
     });
   });
 
@@ -43,10 +43,10 @@ function createSearchIndex({ version, modules, adrs, modulePages, adrPages }) {
   return {
     version,
     generatedAt: '1970-01-01T00:00:00.000Z',
-    items
+    items,
   };
 }
 
 module.exports = {
-  createSearchIndex
+  createSearchIndex,
 };

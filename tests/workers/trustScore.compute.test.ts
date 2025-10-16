@@ -13,4 +13,3 @@ describe('computeTrustScore', () => {
     expect(score).toBeGreaterThan(0); // bounded
   });
 });
-

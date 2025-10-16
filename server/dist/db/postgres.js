@@ -19,13 +19,17 @@ const MAX_SLOW_QUERY_ENTRIES = parseInt(process.env.PG_SLOW_QUERY_ANALYSIS_ENTRI
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = parseInt(process.env.PG_CIRCUIT_BREAKER_FAILURE_THRESHOLD ?? '5', 10);
 const CIRCUIT_BREAKER_COOLDOWN_MS = parseInt(process.env.PG_CIRCUIT_BREAKER_COOLDOWN_MS ?? '30000', 10);
 class CircuitBreaker {
+    name;
+    failureThreshold;
+    cooldownMs;
+    failureCount = 0;
+    state = 'closed';
+    openUntil = 0;
+    lastError;
     constructor(name, failureThreshold, cooldownMs) {
         this.name = name;
         this.failureThreshold = failureThreshold;
         this.cooldownMs = cooldownMs;
-        this.failureCount = 0;
-        this.state = 'closed';
-        this.openUntil = 0;
     }
     canExecute() {
         if (this.state === 'open') {
@@ -94,7 +98,13 @@ const transientErrorCodes = new Set([
     '08P01',
     '40001',
 ]);
-const transientNodeErrors = new Set(['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EHOSTUNREACH', 'EPIPE']);
+const transientNodeErrors = new Set([
+    'ECONNRESET',
+    'ECONNREFUSED',
+    'ETIMEDOUT',
+    'EHOSTUNREACH',
+    'EPIPE',
+]);
 function parseConnectionConfig() {
     if (process.env.DATABASE_URL) {
         return { connectionString: process.env.DATABASE_URL };
@@ -112,7 +122,9 @@ function parseReadReplicaUrls() {
         .split(',')
         .map((url) => url.trim())
         .filter(Boolean);
-    const legacy = process.env.DATABASE_READ_URL ? [process.env.DATABASE_READ_URL] : [];
+    const legacy = process.env.DATABASE_READ_URL
+        ? [process.env.DATABASE_READ_URL]
+        : [];
     return [...new Set([...explicit, ...legacy])];
 }
 function createPool(config, name, type, max) {
@@ -122,7 +134,9 @@ function createPool(config, name, type, max) {
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 5000,
         application_name: `summit-${type}-${process.env.CURRENT_REGION || 'global'}`,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
+        ssl: process.env.NODE_ENV === 'production'
+            ? { rejectUnauthorized: true }
+            : false,
     });
     pool.on('error', (err) => {
         logger.error({ pool: name, err }, 'Unexpected PostgreSQL client error');
@@ -142,7 +156,9 @@ function initializePools() {
     writePoolWrapper = createPool(baseConfig, 'write-primary', 'write', DEFAULT_WRITE_POOL_SIZE);
     const replicaUrls = parseReadReplicaUrls();
     if (replicaUrls.length === 0) {
-        readPoolWrappers = [createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE)];
+        readPoolWrappers = [
+            createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE),
+        ];
     }
     else {
         readPoolWrappers = replicaUrls.map((url, idx) => createPool({ connectionString: url }, `read-replica-${idx + 1}`, 'read', DEFAULT_READ_POOL_SIZE));
@@ -150,14 +166,38 @@ function initializePools() {
     managedPool = createManagedPool(writePoolWrapper, readPoolWrappers);
 }
 function createManagedPool(writePool, readPools) {
-    const query = (queryInput, params, options = {}) => executeManagedQuery({ queryInput, params, options, desiredType: 'auto', writePool, readPools });
-    const read = (queryInput, params, options = {}) => executeManagedQuery({ queryInput, params, options: { ...options, forceWrite: false }, desiredType: 'read', writePool, readPools });
-    const write = (queryInput, params, options = {}) => executeManagedQuery({ queryInput, params, options: { ...options, forceWrite: true }, desiredType: 'write', writePool, readPools });
+    const query = (queryInput, params, options = {}) => executeManagedQuery({
+        queryInput,
+        params,
+        options,
+        desiredType: 'auto',
+        writePool,
+        readPools,
+    });
+    const read = (queryInput, params, options = {}) => executeManagedQuery({
+        queryInput,
+        params,
+        options: { ...options, forceWrite: false },
+        desiredType: 'read',
+        writePool,
+        readPools,
+    });
+    const write = (queryInput, params, options = {}) => executeManagedQuery({
+        queryInput,
+        params,
+        options: { ...options, forceWrite: true },
+        desiredType: 'write',
+        writePool,
+        readPools,
+    });
     const connect = async () => {
         return writePool.pool.connect();
     };
     const end = async () => {
-        await Promise.all([writePool.pool.end(), ...readPools.map((wrapper) => wrapper.pool.end())]);
+        await Promise.all([
+            writePool.pool.end(),
+            ...readPools.map((wrapper) => wrapper.pool.end()),
+        ]);
         managedPool = null;
         writePoolWrapper = null;
         readPoolWrappers = [];
@@ -210,13 +250,25 @@ function createManagedPool(writePool, readPools) {
         }));
         return entries.sort((a, b) => b.maxDurationMs - a.maxDurationMs);
     };
-    return { query, read, write, connect, end, on, healthCheck, slowQueryInsights };
+    return {
+        query,
+        read,
+        write,
+        connect,
+        end,
+        on,
+        healthCheck,
+        slowQueryInsights,
+    };
 }
 async function executeManagedQuery({ queryInput, params, options, desiredType, writePool, readPools, }) {
     const normalized = normalizeQuery(queryInput, params);
     const queryType = desiredType === 'auto' ? inferQueryType(normalized.text) : desiredType;
-    const poolCandidates = queryType === 'write' ? [writePool] : [...pickReadPoolSequence(readPools), writePool];
-    const timeoutMs = options.timeoutMs ?? (queryType === 'write' ? WRITE_TIMEOUT_MS : READ_TIMEOUT_MS);
+    const poolCandidates = queryType === 'write'
+        ? [writePool]
+        : [...pickReadPoolSequence(readPools), writePool];
+    const timeoutMs = options.timeoutMs ??
+        (queryType === 'write' ? WRITE_TIMEOUT_MS : READ_TIMEOUT_MS);
     const label = options.label ?? inferOperation(normalized.text);
     let lastError;
     for (const candidate of poolCandidates) {
@@ -328,7 +380,11 @@ function getPreparedStatementName(queryText) {
     if (existing) {
         return existing;
     }
-    const hash = crypto.createHash('sha1').update(normalized).digest('hex').slice(0, 16);
+    const hash = crypto
+        .createHash('sha1')
+        .update(normalized)
+        .digest('hex')
+        .slice(0, 16);
     const name = `stmt_${hash}`;
     preparedStatementCache.set(normalized, name);
     if (preparedStatementCache.size > MAX_PREPARED_STATEMENTS) {
@@ -341,7 +397,12 @@ function getPreparedStatementName(queryText) {
 }
 function recordSlowQuery(statementName, duration, poolName, sql) {
     const key = `${poolName}:${statementName}`;
-    const entry = slowQueryStats.get(key) ?? { count: 0, totalDuration: 0, maxDuration: 0, pool: poolName };
+    const entry = slowQueryStats.get(key) ?? {
+        count: 0,
+        totalDuration: 0,
+        maxDuration: 0,
+        pool: poolName,
+    };
     entry.count += 1;
     entry.totalDuration += duration;
     entry.maxDuration = Math.max(entry.maxDuration, duration);
@@ -371,7 +432,17 @@ function inferQueryType(queryText) {
     if (normalized.startsWith('with')) {
         const match = normalized.match(/with\s+[\s\S]*?\b(select|insert|update|delete|merge|create|alter|drop)\b/);
         if (match && match[1]) {
-            return ['insert', 'update', 'delete', 'merge', 'create', 'alter', 'drop'].includes(match[1]) ? 'write' : 'read';
+            return [
+                'insert',
+                'update',
+                'delete',
+                'merge',
+                'create',
+                'alter',
+                'drop',
+            ].includes(match[1])
+                ? 'write'
+                : 'read';
         }
     }
     const firstToken = normalized.split(/\s+/)[0];

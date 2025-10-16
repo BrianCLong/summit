@@ -1,26 +1,26 @@
 # Hello World Reference Workflow
 # Basic health verification workflow for production validation
 name: hello-world-health-check
-version: "1.0.0"
-description: "Basic health verification workflow to validate all core platform components"
+version: '1.0.0'
+description: 'Basic health verification workflow to validate all core platform components'
 
 metadata:
-  tags: ["reference", "health", "validation", "production"]
-  author: "IntelGraph Platform Team"
-  created: "2025-01-20"
-  slo_target_duration: "30s"
-  
+  tags: ['reference', 'health', 'validation', 'production']
+  author: 'IntelGraph Platform Team'
+  created: '2025-01-20'
+  slo_target_duration: '30s'
+
 triggers:
-  - type: "schedule"
-    cron: "*/5 * * * *"  # Every 5 minutes
+  - type: 'schedule'
+    cron: '*/5 * * * *' # Every 5 minutes
     enabled: true
-  - type: "manual"
+  - type: 'manual'
     enabled: true
-  - type: "webhook"
+  - type: 'webhook'
     enabled: true
-    
+
 variables:
-  test_message: "Hello from IntelGraph Maestro!"
+  test_message: 'Hello from IntelGraph Maestro!'
   expected_response_time_ms: 5000
   max_retries: 3
 
@@ -28,82 +28,83 @@ tasks:
   # Task 1: Basic API Health Check
   - name: api_health_check
     type: http_request
-    description: "Verify core API endpoints are responding"
+    description: 'Verify core API endpoints are responding'
     timeout: 10s
     retry:
       attempts: 3
       delay: 2s
     config:
       method: GET
-      url: "http://maestro-conductor:5000/health"
+      url: 'http://maestro-conductor:5000/health'
       headers:
-        Content-Type: "application/json"
+        Content-Type: 'application/json'
       expected_status: 200
-      expected_response_contains: "healthy"
+      expected_response_contains: 'healthy'
     outputs:
-      health_status: "$.status"
-      response_time: "$.responseTime"
-    
+      health_status: '$.status'
+      response_time: '$.responseTime'
+
   # Task 2: Database Connectivity Check
   - name: database_health_check
     type: database_query
-    description: "Verify database connectivity and basic query"
+    description: 'Verify database connectivity and basic query'
     timeout: 10s
-    depends_on: ["api_health_check"]
+    depends_on: ['api_health_check']
     config:
-      query: "SELECT 1 as test_value, NOW() as current_time"
+      query: 'SELECT 1 as test_value, NOW() as current_time'
       expected_rows: 1
     outputs:
-      db_response_time: "$.queryTime"
-      current_time: "$.rows[0].current_time"
-      
-  # Task 3: Redis Connectivity Check  
+      db_response_time: '$.queryTime'
+      current_time: '$.rows[0].current_time'
+
+  # Task 3: Redis Connectivity Check
   - name: redis_health_check
     type: redis_operation
-    description: "Verify Redis connectivity and basic operations"
+    description: 'Verify Redis connectivity and basic operations'
     timeout: 10s
-    depends_on: ["api_health_check"]
+    depends_on: ['api_health_check']
     config:
       operations:
-        - type: "SET"
-          key: "health_check:${workflow.execution_id}"
-          value: "${variables.test_message}"
+        - type: 'SET'
+          key: 'health_check:${workflow.execution_id}'
+          value: '${variables.test_message}'
           ttl: 300
-        - type: "GET" 
-          key: "health_check:${workflow.execution_id}"
-          expected_value: "${variables.test_message}"
-        - type: "DEL"
-          key: "health_check:${workflow.execution_id}"
+        - type: 'GET'
+          key: 'health_check:${workflow.execution_id}'
+          expected_value: '${variables.test_message}'
+        - type: 'DEL'
+          key: 'health_check:${workflow.execution_id}'
     outputs:
-      redis_response_time: "$.operationTime"
-      
+      redis_response_time: '$.operationTime'
+
   # Task 4: Authentication System Check
   - name: auth_system_check
     type: http_request
-    description: "Verify authentication system is functional"
+    description: 'Verify authentication system is functional'
     timeout: 15s
-    depends_on: ["api_health_check"]
+    depends_on: ['api_health_check']
     config:
       method: GET
-      url: "http://maestro-conductor:5000/auth/jwks"
+      url: 'http://maestro-conductor:5000/auth/jwks'
       expected_status: 200
-      expected_response_contains: "keys"
+      expected_response_contains: 'keys'
     outputs:
-      auth_response_time: "$.responseTime"
-      jwks_key_count: "$.keys.length"
-      
+      auth_response_time: '$.responseTime'
+      jwks_key_count: '$.keys.length'
+
   # Task 5: Basic Orchestration Test
   - name: basic_orchestration_test
-    type: http_request  
-    description: "Test basic orchestration capability"
+    type: http_request
+    description: 'Test basic orchestration capability'
     timeout: 30s
-    depends_on: ["database_health_check", "redis_health_check", "auth_system_check"]
+    depends_on:
+      ['database_health_check', 'redis_health_check', 'auth_system_check']
     config:
       method: POST
-      url: "http://maestro-conductor:5000/orchestrate"
+      url: 'http://maestro-conductor:5000/orchestrate'
       headers:
-        Content-Type: "application/json"
-        Authorization: "Bearer ${auth.test_token}"
+        Content-Type: 'application/json'
+        Authorization: 'Bearer ${auth.test_token}'
       body: |
         {
           "query": "What is 2 + 2?",
@@ -115,81 +116,81 @@ tasks:
           }
         }
       expected_status: 200
-      expected_response_contains: "success"
+      expected_response_contains: 'success'
     outputs:
-      orchestration_response_time: "$.responseTime"
-      orchestration_result: "$.data.result"
-      
+      orchestration_response_time: '$.responseTime'
+      orchestration_result: '$.data.result'
+
   # Task 6: Metrics Collection Test
   - name: metrics_collection_test
     type: http_request
-    description: "Verify metrics are being collected properly"
-    timeout: 10s 
-    depends_on: ["basic_orchestration_test"]
+    description: 'Verify metrics are being collected properly'
+    timeout: 10s
+    depends_on: ['basic_orchestration_test']
     config:
       method: GET
-      url: "http://maestro-conductor:9090/metrics"
+      url: 'http://maestro-conductor:9090/metrics'
       expected_status: 200
-      expected_response_contains: "conductor_"
+      expected_response_contains: 'conductor_'
     outputs:
-      metrics_response_time: "$.responseTime"
-      
+      metrics_response_time: '$.responseTime'
+
   # Task 7: Workflow Status Validation
   - name: workflow_status_validation
     type: workflow_operation
-    description: "Validate workflow execution status"
+    description: 'Validate workflow execution status'
     timeout: 10s
-    depends_on: ["metrics_collection_test"]
+    depends_on: ['metrics_collection_test']
     config:
-      operation: "get_status"
-      workflow_id: "${workflow.execution_id}"
+      operation: 'get_status'
+      workflow_id: '${workflow.execution_id}'
     outputs:
-      workflow_status: "$.status"
-      execution_duration: "$.duration"
-      task_count: "$.task_count"
+      workflow_status: '$.status'
+      execution_duration: '$.duration'
+      task_count: '$.task_count'
 
 # Success criteria for the entire workflow
 success_criteria:
   - condition: "tasks.api_health_check.outputs.health_status == 'healthy'"
-    message: "API health check passed"
-  - condition: "tasks.database_health_check.outputs.db_response_time < 1000"
-    message: "Database response time within SLA"
-  - condition: "tasks.redis_health_check.outputs.redis_response_time < 500"
-    message: "Redis response time within SLA"
-  - condition: "tasks.auth_system_check.outputs.jwks_key_count > 0"
-    message: "Authentication system has valid keys"
-  - condition: "tasks.basic_orchestration_test.outputs.orchestration_response_time < ${variables.expected_response_time_ms}"
-    message: "Orchestration response time within SLA"
+    message: 'API health check passed'
+  - condition: 'tasks.database_health_check.outputs.db_response_time < 1000'
+    message: 'Database response time within SLA'
+  - condition: 'tasks.redis_health_check.outputs.redis_response_time < 500'
+    message: 'Redis response time within SLA'
+  - condition: 'tasks.auth_system_check.outputs.jwks_key_count > 0'
+    message: 'Authentication system has valid keys'
+  - condition: 'tasks.basic_orchestration_test.outputs.orchestration_response_time < ${variables.expected_response_time_ms}'
+    message: 'Orchestration response time within SLA'
   - condition: "tasks.workflow_status_validation.outputs.workflow_status == 'RUNNING'"
-    message: "Workflow status tracking functional"
+    message: 'Workflow status tracking functional'
 
 # Failure handling
 on_failure:
   - type: alert
     severity: critical
-    message: "Hello World health check failed: ${failure.message}"
-    channels: ["slack", "pagerduty"]
+    message: 'Hello World health check failed: ${failure.message}'
+    channels: ['slack', 'pagerduty']
   - type: metrics
-    increment: "workflow_health_check_failures_total"
+    increment: 'workflow_health_check_failures_total'
     labels:
-      workflow: "hello-world"
-      failure_reason: "${failure.reason}"
+      workflow: 'hello-world'
+      failure_reason: '${failure.reason}'
 
-# Success handling  
+# Success handling
 on_success:
   - type: metrics
-    increment: "workflow_health_check_success_total"
+    increment: 'workflow_health_check_success_total'
     labels:
-      workflow: "hello-world"
+      workflow: 'hello-world'
   - type: log
     level: info
-    message: "Hello World health check completed successfully in ${workflow.execution_duration}ms"
+    message: 'Hello World health check completed successfully in ${workflow.execution_duration}ms'
 
 # Resource requirements
 resources:
-  cpu_limit: "100m"
-  memory_limit: "128Mi"
-  timeout: "120s"
+  cpu_limit: '100m'
+  memory_limit: '128Mi'
+  timeout: '120s'
   max_retries: 2
 
 # Monitoring and observability
@@ -197,8 +198,8 @@ observability:
   trace: true
   metrics: true
   logs: true
-  
+
 slo_targets:
   success_rate: 99.9
   max_duration_ms: 30000
-  error_budget_minutes: 43.2  # monthly
+  error_budget_minutes: 43.2 # monthly

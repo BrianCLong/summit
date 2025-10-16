@@ -5,14 +5,16 @@ import { randomUUID as uuid } from 'crypto';
 import logger from '../../config/logger.js';
 // Load allowed executor URLs from environment variable
 const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS
-    ? process.env.MCP_ALLOWED_EXECUTOR_URLS.split(',').map(url => url.trim())
+    ? process.env.MCP_ALLOWED_EXECUTOR_URLS.split(',').map((url) => url.trim())
     : [];
 export class MCPClient {
+    servers;
+    options;
+    connections = new Map();
+    pendingRequests = new Map();
     constructor(servers, options = {}) {
         this.servers = servers;
         this.options = options;
-        this.connections = new Map();
-        this.pendingRequests = new Map();
         this.options = {
             timeout: 30000,
             retryAttempts: 3,
@@ -29,7 +31,8 @@ export class MCPClient {
             throw new Error(`MCP server '${serverName}' not configured`);
         }
         // Enforce allowlist
-        if (allowedExecutorUrls.length > 0 && !allowedExecutorUrls.includes(config.url)) {
+        if (allowedExecutorUrls.length > 0 &&
+            !allowedExecutorUrls.includes(config.url)) {
             logger.error(`Attempted to connect to disallowed MCP server URL: ${config.url}`);
             throw new Error(`Connection to '${config.url}' is not allowed by policy.`);
         }
@@ -221,9 +224,7 @@ export class MCPClient {
 }
 // MCP Server Registry - manages server configurations
 export class MCPServerRegistry {
-    constructor() {
-        this.servers = {};
-    }
+    servers = {};
     /**
      * Register an MCP server
      */

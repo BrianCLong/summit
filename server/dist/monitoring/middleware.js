@@ -30,13 +30,17 @@ function httpMetricsMiddleware(req, res, next) {
             route,
             status_code: res.statusCode,
         });
-        if (route.startsWith('/api') || route.startsWith('/graphql') || route.startsWith('/monitoring')) {
+        if (route.startsWith('/api') ||
+            route.startsWith('/graphql') ||
+            route.startsWith('/monitoring')) {
             const tenantId = (req.headers['x-tenant-id'] || req.headers['x-tenant']) ?? 'unknown';
             metrics.businessApiCallsTotal.inc({
                 service: req.baseUrl || 'maestro-api',
                 route,
                 status_code: String(res.statusCode),
-                tenant: Array.isArray(tenantId) ? tenantId[0] : String(tenantId || 'unknown'),
+                tenant: Array.isArray(tenantId)
+                    ? tenantId[0]
+                    : String(tenantId || 'unknown'),
             });
         }
         originalEnd.apply(this, args);
@@ -67,7 +71,7 @@ function graphqlMetricsMiddleware() {
                 },
                 didEncounterErrors(requestContext) {
                     const { operationName } = requestContext.metrics || {};
-                    requestContext.errors.forEach(error => {
+                    requestContext.errors.forEach((error) => {
                         metrics.graphqlErrors.inc({
                             operation: operationName || 'unknown',
                             error_type: error.constructor.name || 'GraphQLError',

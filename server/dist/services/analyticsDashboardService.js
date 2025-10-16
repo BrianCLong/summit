@@ -1,12 +1,13 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class AnalyticsDashboardService extends EventEmitter {
+    widgets = new Map();
+    charts = new Map();
+    reports = new Map();
+    cache;
+    dataUpdateInterval = null;
     constructor() {
         super();
-        this.widgets = new Map();
-        this.charts = new Map();
-        this.reports = new Map();
-        this.dataUpdateInterval = null;
         this.cache = new RedisCache();
         this.initializeDefaultDashboard();
         this.startDataRefresh();
@@ -135,9 +136,18 @@ export class AnalyticsDashboardService extends EventEmitter {
             topThreatTypes: [
                 { type: 'Malware', count: Math.floor(Math.random() * 300) + 100 },
                 { type: 'Phishing', count: Math.floor(Math.random() * 250) + 80 },
-                { type: 'Command & Control', count: Math.floor(Math.random() * 200) + 60 },
-                { type: 'Data Exfiltration', count: Math.floor(Math.random() * 150) + 40 },
-                { type: 'Lateral Movement', count: Math.floor(Math.random() * 100) + 30 },
+                {
+                    type: 'Command & Control',
+                    count: Math.floor(Math.random() * 200) + 60,
+                },
+                {
+                    type: 'Data Exfiltration',
+                    count: Math.floor(Math.random() * 150) + 40,
+                },
+                {
+                    type: 'Lateral Movement',
+                    count: Math.floor(Math.random() * 100) + 30,
+                },
             ],
             geographicDistribution: [
                 { country: 'US', threatCount: Math.floor(Math.random() * 500) + 200 },
@@ -306,9 +316,21 @@ export class AnalyticsDashboardService extends EventEmitter {
                 { lat: 37.7749, lng: -122.4194, weight: Math.random() * 100 }, // San Francisco
             ],
             clusters: [
-                { lat: 40.7128, lng: -74.006, count: Math.floor(Math.random() * 50) + 10 },
-                { lat: 51.5074, lng: -0.1278, count: Math.floor(Math.random() * 40) + 8 },
-                { lat: 35.6762, lng: 139.6503, count: Math.floor(Math.random() * 35) + 7 },
+                {
+                    lat: 40.7128,
+                    lng: -74.006,
+                    count: Math.floor(Math.random() * 50) + 10,
+                },
+                {
+                    lat: 51.5074,
+                    lng: -0.1278,
+                    count: Math.floor(Math.random() * 40) + 8,
+                },
+                {
+                    lat: 35.6762,
+                    lng: 139.6503,
+                    count: Math.floor(Math.random() * 35) + 7,
+                },
             ],
         };
         await this.cache.set('analytics:geo-threats', JSON.stringify(geoData), 300);
@@ -344,7 +366,13 @@ export class AnalyticsDashboardService extends EventEmitter {
         return data;
     }
     generateNetworkNodes(count) {
-        const nodeTypes = ['Person', 'Organization', 'Location', 'Event', 'Document'];
+        const nodeTypes = [
+            'Person',
+            'Organization',
+            'Location',
+            'Event',
+            'Document',
+        ];
         const nodes = [];
         for (let i = 0; i < count; i++) {
             nodes.push({
@@ -361,7 +389,13 @@ export class AnalyticsDashboardService extends EventEmitter {
     }
     generateNetworkEdges(count) {
         const edges = [];
-        const relationTypes = ['CONNECTED_TO', 'RELATED_TO', 'INVOLVED_IN', 'LOCATED_AT', 'OWNS'];
+        const relationTypes = [
+            'CONNECTED_TO',
+            'RELATED_TO',
+            'INVOLVED_IN',
+            'LOCATED_AT',
+            'OWNS',
+        ];
         for (let i = 0; i < count; i++) {
             edges.push({
                 id: `edge_${i}`,

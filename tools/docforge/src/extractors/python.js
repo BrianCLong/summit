@@ -14,7 +14,7 @@ function extractPythonDocs(source) {
       kind,
       summary: summarize(description),
       description,
-      signature: kind === 'module' ? name : `${kind} ${name}`
+      signature: kind === 'module' ? name : `${kind} ${name}`,
     });
   }
 
@@ -99,5 +99,5 @@ function extractPythonDocs(source) {
 }
 
 module.exports = {
-  extractPythonDocs
+  extractPythonDocs,
 };

@@ -8,7 +8,9 @@ const path = require('path');
 
 function verifyBundle(bundlePath, requireManifest, requireHashes) {
   console.log(`Verifying bundle: ${bundlePath}`);
-  console.log(`Require manifest: ${requireManifest}, Require hashes: ${requireHashes}`);
+  console.log(
+    `Require manifest: ${requireManifest}, Require hashes: ${requireHashes}`,
+  );
 
   // Simulate verification logic
   // In a real scenario, this would involve:
@@ -45,7 +47,9 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!bundlePath) {
-  console.error('Usage: verify.js --bundle <path> [--require-manifest] [--require-hashes]');
+  console.error(
+    'Usage: verify.js --bundle <path> [--require-manifest] [--require-hashes]',
+  );
   process.exit(1);
 }
 

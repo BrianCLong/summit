@@ -30,7 +30,7 @@ class CopilotOrchestrator {
         if (resume) {
             // Try to find an existing resumable run
             const resumableRuns = await this.store.findResumableRuns(investigationId);
-            run = resumableRuns.find(r => r.goalText === goalText);
+            run = resumableRuns.find((r) => r.goalText === goalText);
             if (run) {
                 await this.emit(run.id, null, 'info', 'Resuming existing run');
                 return this.resumeRun(run);
@@ -48,9 +48,9 @@ class CopilotOrchestrator {
             plan,
             metadata: {
                 createdBy: options.userId || 'system',
-                version: '1.0'
+                version: '1.0',
             },
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
         };
         await this.store.saveRun(run);
         // Save tasks for the plan
@@ -62,7 +62,7 @@ class CopilotOrchestrator {
                 sequenceNumber: i,
                 taskType: step.kind,
                 inputParams: step.input,
-                status: 'pending'
+                status: 'pending',
             });
         }
         // Schedule execution asynchronously
@@ -81,7 +81,10 @@ class CopilotOrchestrator {
         run.status = 'running';
         run.startedAt = new Date().toISOString();
         await this.store.updateRun(run);
-        this.activeRuns.set(run.id, { state: 'scheduled', startedAt: run.startedAt });
+        this.activeRuns.set(run.id, {
+            state: 'scheduled',
+            startedAt: run.startedAt,
+        });
         // Start execution from failed/pending tasks
         setImmediate(() => this.executeRun(run.id, run));
         return run;
@@ -95,7 +98,10 @@ class CopilotOrchestrator {
             return;
         }
         const runStartTimestamp = new Date().toISOString();
-        this.activeRuns.set(runId, { state: 'running', startedAt: runStartTimestamp });
+        this.activeRuns.set(runId, {
+            state: 'running',
+            startedAt: runStartTimestamp,
+        });
         try {
             const run = prefetchedRun
                 ? { ...prefetchedRun }
@@ -172,7 +178,7 @@ class CopilotOrchestrator {
             // Task failed - check if we should retry
             if (retryCount < maxRetries && this.isRetryableError(error)) {
                 await this.emit(runId, task.id, 'warning', `${task.taskType} failed, retrying (${retryCount + 1}/${maxRetries}): ${error.message}`);
-                await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
+                await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
                 return this.executeTask(runId, task, retryCount + 1);
             }
             // Task failed permanently
@@ -188,29 +194,32 @@ class CopilotOrchestrator {
      */
     async executeTaskLogic(task) {
         // Simulate async work with deterministic latency for testing
-        await new Promise(resolve => setTimeout(resolve, 50 + Math.floor(Math.random() * 50)));
+        await new Promise((resolve) => setTimeout(resolve, 50 + Math.floor(Math.random() * 50)));
         switch (task.taskType) {
             case 'NEO4J_QUERY':
                 // TODO: Call actual Neo4j service
-                return { rows: Math.floor(Math.random() * 100), query: task.inputParams };
+                return {
+                    rows: Math.floor(Math.random() * 100),
+                    query: task.inputParams,
+                };
             case 'GRAPH_ANALYTICS':
                 // TODO: Call actual graph analytics service
                 return {
                     algorithm: task.inputParams,
                     nodesProcessed: Math.floor(Math.random() * 1000),
-                    completed: true
+                    completed: true,
                 };
             case 'SUMMARIZE':
                 // TODO: Call actual summarization service
                 return {
                     summary: `Analysis complete: ${Math.floor(Math.random() * 10)} key findings identified`,
-                    confidence: Math.random()
+                    confidence: Math.random(),
                 };
             case 'ENRICH_DATA':
                 // TODO: Call actual enrichment service
                 return {
                     enrichedEntities: Math.floor(Math.random() * 50),
-                    sourcesUsed: ['OSINT', 'Public Records', 'Social Media']
+                    sourcesUsed: ['OSINT', 'Public Records', 'Social Media'],
                 };
             default:
                 throw new Error(`Unknown task type: ${task.taskType}`);
@@ -225,9 +234,9 @@ class CopilotOrchestrator {
             'ETIMEDOUT',
             'ENOTFOUND',
             'Service temporarily unavailable',
-            'Rate limit exceeded'
+            'Rate limit exceeded',
         ];
-        return retryableErrors.some(retryable => error.message.includes(retryable) || error.code === retryable);
+        return retryableErrors.some((retryable) => error.message.includes(retryable) || error.code === retryable);
     }
     /**
      * Emit event to both Socket.IO and Redis Streams
@@ -239,7 +248,7 @@ class CopilotOrchestrator {
             level,
             message,
             payload,
-            ts: new Date().toISOString()
+            ts: new Date().toISOString(),
         };
         // Store in database
         await this.store.pushEvent(runId, event);
@@ -266,13 +275,13 @@ class CopilotOrchestrator {
             return null;
         const tasks = await this.store.getTasksForRun(runId);
         const events = await this.store.listEvents(runId, {
-            limit: options.eventLimit || 100
+            limit: options.eventLimit || 100,
         });
         return {
             ...run,
             tasks,
             events,
-            isActive: this.activeRuns.has(runId)
+            isActive: this.activeRuns.has(runId),
         };
     }
     /**

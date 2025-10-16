@@ -46,6 +46,7 @@ scan root unless absolute. Example:
 ## GitHub Action
 
 Two workflow templates are provided under `tools/secretsentry/github/`.
+
 - `secretsentry-warn.yml` keeps the job non-blocking and is intended for the one-week burn-in.
 - `secretsentry-block.yml` flips the job to a required, blocking enforcement mode.
 

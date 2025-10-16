@@ -1,4 +1,5 @@
 # 1) Scheduled Synthetic — Persisted Query Health
+
 **File:** `.github/workflows/synthetic-pq.yml`
 
 Runs every 5 minutes against staging/prod, calling your persisted **tenantCoherence** query via hash. Fails fast, uploads logs, and (optional) posts to Slack.
@@ -42,6 +43,7 @@ jobs:
 ---
 
 # 2) Backstage Service Catalog Entry
+
 **File:** `catalog-info.yaml`
 
 Registers the service with SLOs, on-call, runbooks, and dashboards.
@@ -56,10 +58,10 @@ metadata:
   annotations:
     pagerduty.com/service-id: intelgraph-server
     grafana/dashboard-url: https://grafana.example.com/d/v24
-    slo/read-p95-ms: "350"
-    slo/write-p95-ms: "700"
-    slo/sub-fanout-p95-ms: "250"
-    slo/error-rate-pct: "0.1"
+    slo/read-p95-ms: '350'
+    slo/write-p95-ms: '700'
+    slo/sub-fanout-p95-ms: '250'
+    slo/error-rate-pct: '0.1'
 spec:
   type: service
   lifecycle: production
@@ -71,6 +73,7 @@ spec:
 ---
 
 # 3) On‑Call Runbook (Quick Triage)
+
 **File:** `runbooks/v24-coherence.md`
 
 - **Alert:** GraphQL p95 > 350ms (10m) or error‑rate > 0.1% (10m)
@@ -85,19 +88,23 @@ spec:
 ---
 
 # 4) Go/No‑Go Sign‑off Pack
+
 **File:** `release/go-no-go.md`
 
 ```md
 # v24.0.0 Go/No-Go — Sign‑offs
-Date: ____  Time (America/Denver): ____
+
+Date: \_**\_ Time (America/Denver): \_\_**
 
 ## Approvals
-- Eng Lead v24: ____
-- SRE On‑Call: ____
-- Security: ____
-- Platform Arch: ____
+
+- Eng Lead v24: \_\_\_\_
+- SRE On‑Call: \_\_\_\_
+- Security: \_\_\_\_
+- Platform Arch: \_\_\_\_
 
 ## Gates
+
 - [ ] CI green (tests, OPA, SBOM, vuln)
 - [ ] k6 SLO suite within budgets
 - [ ] Persisted queries frozen & deployed
@@ -105,6 +112,7 @@ Date: ____  Time (America/Denver): ____
 - [ ] Secrets validated in prod
 
 ## Risk Notes & Backout
+
 - Canary plan: 10%→50%→100%
 - Rollback: feature flag off + Helm rollback
 ```
@@ -112,25 +120,30 @@ Date: ____  Time (America/Denver): ____
 ---
 
 # 5) Post‑Release Retro Template
+
 **File:** `postmortems/v24-retro-template.md`
 
 ```md
 # v24.0.0 Release Retrospective
-Date Range: ____  Facilitator: ____  Participants: ____
+
+Date Range: \_**\_ Facilitator: \_\_** Participants: \_\_\_\_
 
 ## What went well
+
 -
 
 ## What we can improve
+
 -
 
 ## DORA Metrics
-- Deployment Frequency: ____
-- Lead Time for Changes: ____
-- Change Failure Rate: ____
-- MTTR: ____
+
+- Deployment Frequency: \_\_\_\_
+- Lead Time for Changes: \_\_\_\_
+- Change Failure Rate: \_\_\_\_
+- MTTR: \_\_\_\_
 
 ## Actions (with owners & due dates)
-- [ ] ____ (Owner, YYYY‑MM‑DD)
-```
 
+- [ ] \_\_\_\_ (Owner, YYYY‑MM‑DD)
+```

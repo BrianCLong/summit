@@ -37,7 +37,7 @@ class CopilotPostgresStore {
             run.status,
             JSON.stringify(run.plan || {}),
             JSON.stringify(run.metadata || {}),
-            run.createdAt || new Date().toISOString()
+            run.createdAt || new Date().toISOString(),
         ];
         try {
             const result = await this.pg.query(query, values);
@@ -111,7 +111,7 @@ class CopilotPostgresStore {
             JSON.stringify(run.plan || {}),
             JSON.stringify(run.metadata || {}),
             run.startedAt || null,
-            run.finishedAt || null
+            run.finishedAt || null,
         ];
         try {
             const result = await this.pg.query(query, values);
@@ -168,7 +168,7 @@ class CopilotPostgresStore {
             task.status,
             task.errorMessage || task.error || null,
             task.startedAt || null,
-            task.finishedAt || null
+            task.finishedAt || null,
         ];
         try {
             const result = await this.pg.query(query, values);
@@ -212,7 +212,7 @@ class CopilotPostgresStore {
     `;
         try {
             const result = await this.pg.query(query, [runId]);
-            const mapped = result.rows.map(row => this.mapTaskFromDb(row));
+            const mapped = result.rows.map((row) => this.mapTaskFromDb(row));
             this.memory.tasks.set(runId, mapped);
             return mapped;
         }
@@ -243,7 +243,7 @@ class CopilotPostgresStore {
             JSON.stringify(task.outputData || task.output || {}),
             task.errorMessage || task.error || null,
             task.startedAt || null,
-            task.finishedAt || null
+            task.finishedAt || null,
         ];
         try {
             const result = await this.pg.query(query, values);
@@ -277,7 +277,7 @@ class CopilotPostgresStore {
             (event.level || 'info').toLowerCase(),
             event.message,
             JSON.stringify(event.payload || {}),
-            event.ts || new Date().toISOString()
+            event.ts || new Date().toISOString(),
         ];
         try {
             const result = await this.pg.query(query, values);
@@ -327,7 +327,7 @@ class CopilotPostgresStore {
         params.push(limit);
         try {
             const result = await this.pg.query(query, params);
-            const mapped = result.rows.map(row => this.mapEventFromDb(row));
+            const mapped = result.rows.map((row) => this.mapEventFromDb(row));
             this.memory.events.set(runId, mapped);
             return mapped;
         }
@@ -362,7 +362,7 @@ class CopilotPostgresStore {
         query += ` ORDER BY created_at DESC`;
         try {
             const result = await this.pg.query(query, params);
-            const mapped = result.rows.map(row => this.mapRunFromDb(row));
+            const mapped = result.rows.map((row) => this.mapRunFromDb(row));
             mapped.forEach((run) => this.memory.runs.set(run.id, run));
             return mapped;
         }
@@ -412,11 +412,17 @@ class CopilotPostgresStore {
                     if (rangeMs && now - created > rangeMs)
                         return;
                 }
-                const entry = stats.get(run.status) || { status: run.status, count: 0, totalDuration: 0 };
+                const entry = stats.get(run.status) || {
+                    status: run.status,
+                    count: 0,
+                    totalDuration: 0,
+                };
                 entry.count += 1;
                 if (run.startedAt && run.finishedAt) {
                     entry.totalDuration +=
-                        (new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime()) / 1000;
+                        (new Date(run.finishedAt).getTime() -
+                            new Date(run.startedAt).getTime()) /
+                            1000;
                 }
                 stats.set(run.status, entry);
             });
@@ -520,11 +526,13 @@ class CopilotPostgresStore {
             investigationId: row.investigation_id,
             status: row.status,
             plan: typeof row.plan === 'string' ? JSON.parse(row.plan) : row.plan,
-            metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+            metadata: typeof row.metadata === 'string'
+                ? JSON.parse(row.metadata)
+                : row.metadata,
             createdAt: row.created_at,
             updatedAt: row.updated_at,
             startedAt: row.started_at,
-            finishedAt: row.finished_at
+            finishedAt: row.finished_at,
         };
     }
     mapTaskFromDb(row) {
@@ -537,16 +545,24 @@ class CopilotPostgresStore {
             seq: row.sequence_number, // backwards compatibility
             taskType: row.task_type,
             kind: row.task_type, // backwards compatibility
-            inputParams: typeof row.input_params === 'string' ? JSON.parse(row.input_params) : row.input_params,
-            input: typeof row.input_params === 'string' ? JSON.parse(row.input_params) : row.input_params, // backwards compatibility
-            outputData: typeof row.output_data === 'string' ? JSON.parse(row.output_data) : row.output_data,
-            output: typeof row.output_data === 'string' ? JSON.parse(row.output_data) : row.output_data, // backwards compatibility
+            inputParams: typeof row.input_params === 'string'
+                ? JSON.parse(row.input_params)
+                : row.input_params,
+            input: typeof row.input_params === 'string'
+                ? JSON.parse(row.input_params)
+                : row.input_params, // backwards compatibility
+            outputData: typeof row.output_data === 'string'
+                ? JSON.parse(row.output_data)
+                : row.output_data,
+            output: typeof row.output_data === 'string'
+                ? JSON.parse(row.output_data)
+                : row.output_data, // backwards compatibility
             status: row.status,
             errorMessage: row.error_message,
             error: row.error_message, // backwards compatibility
             createdAt: row.created_at,
             startedAt: row.started_at,
-            finishedAt: row.finished_at
+            finishedAt: row.finished_at,
         };
     }
     mapEventFromDb(row) {
@@ -560,7 +576,7 @@ class CopilotPostgresStore {
             message: row.message,
             payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload,
             ts: row.created_at,
-            createdAt: row.created_at
+            createdAt: row.created_at,
         };
     }
 }

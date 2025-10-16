@@ -10,10 +10,12 @@ import pino from 'pino';
 const logger = pino({ name: 'authPolicy' });
 // Zod schemas for validation
 const ActionSchema = z.string().min(1);
-const ResourceSchema = z.object({
+const ResourceSchema = z
+    .object({
     type: z.string(),
-    id: z.string()
-}).passthrough();
+    id: z.string(),
+})
+    .passthrough();
 /**
  * Mock policy service - replace with actual OPA integration
  */
@@ -58,10 +60,14 @@ class MockPolicyService {
         const [operation] = action.split(':');
         // Read operations
         if (operation === 'read') {
-            return { allow: user.roles.includes('analyst') || user.roles.includes('viewer') };
+            return {
+                allow: user.roles.includes('analyst') || user.roles.includes('viewer'),
+            };
         }
         // Write operations
-        if (operation === 'write' || operation === 'create' || operation === 'update') {
+        if (operation === 'write' ||
+            operation === 'create' ||
+            operation === 'update') {
             return { allow: user.roles.includes('analyst') };
         }
         // Delete operations
@@ -108,8 +114,8 @@ export function withAuthAndPolicy(action, resourceFactory) {
                         userAgent: context.req?.headers?.['user-agent'],
                         ip: context.req?.ip,
                         orgId: context.user.orgId,
-                        teamId: context.user.teamId
-                    }
+                        teamId: context.user.teamId,
+                    },
                 };
                 const policyResult = await policyService.evaluate(policyInput);
                 if (!policyResult.allow) {
@@ -131,7 +137,8 @@ export function withAuthAndPolicy(action, resourceFactory) {
             }
             catch (error) {
                 const duration = Date.now() - startTime;
-                if (error instanceof AuthenticationError || error instanceof ForbiddenError) {
+                if (error instanceof AuthenticationError ||
+                    error instanceof ForbiddenError) {
                     // Re-throw auth errors as-is
                     throw error;
                 }
@@ -179,7 +186,7 @@ export function investigationResource(investigationId, orgId, teamId) {
         type: 'investigation',
         id: investigationId,
         orgId,
-        teamId
+        teamId,
     };
 }
 /**
@@ -191,7 +198,7 @@ export function entityResource(entityId, investigationId, orgId, teamId) {
         id: entityId,
         investigationId,
         orgId,
-        teamId
+        teamId,
     };
 }
 /**
@@ -203,7 +210,7 @@ export function relationshipResource(relationshipId, investigationId, orgId, tea
         id: relationshipId,
         investigationId,
         orgId,
-        teamId
+        teamId,
     };
 }
 /**
@@ -214,7 +221,7 @@ export function getPolicyStats() {
     return {
         serviceType: 'mock',
         totalEvaluations: 0,
-        deniedRequests: 0
+        deniedRequests: 0,
     };
 }
 /**
@@ -237,5 +244,5 @@ export function getPolicyStats() {
  *     )
  *   }
  * }
- */ 
+ */
 //# sourceMappingURL=withAuthAndPolicy.js.map

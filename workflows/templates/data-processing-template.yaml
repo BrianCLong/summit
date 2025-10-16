@@ -1,15 +1,15 @@
 # Data Processing Workflow Template
 # Reusable template for data ingestion, processing, and analysis workflows
 name: data-processing-template
-version: "1.0.0"
-description: "Reusable template for data processing workflows with customizable ETL operations"
+version: '1.0.0'
+description: 'Reusable template for data processing workflows with customizable ETL operations'
 
 metadata:
-  tags: ["template", "data", "processing", "etl", "analytics"]
-  author: "IntelGraph Platform Team"
-  created: "2025-01-20"
-  category: "data"
-  template_type: "parametric"
+  tags: ['template', 'data', 'processing', 'etl', 'analytics']
+  author: 'IntelGraph Platform Team'
+  created: '2025-01-20'
+  category: 'data'
+  template_type: 'parametric'
 
 # Template parameters
 parameters:
@@ -17,408 +17,420 @@ parameters:
   dataset_name:
     type: string
     required: true
-    description: "Name of the dataset to process"
-    
+    description: 'Name of the dataset to process'
+
   data_source_type:
     type: string
     required: true
-    enum: ["file_upload", "database", "api", "stream", "s3", "gcs"]
-    description: "Type of data source"
-    
+    enum: ['file_upload', 'database', 'api', 'stream', 's3', 'gcs']
+    description: 'Type of data source'
+
   data_format:
     type: string
     required: true
-    enum: ["csv", "json", "parquet", "xml", "excel", "avro"]
-    description: "Format of the input data"
-    
+    enum: ['csv', 'json', 'parquet', 'xml', 'excel', 'avro']
+    description: 'Format of the input data'
+
   # Processing Parameters
   processing_type:
     type: string
-    default: "standard"
-    enum: ["minimal", "standard", "advanced", "ml_pipeline"]
-    description: "Level of data processing to perform"
-    
+    default: 'standard'
+    enum: ['minimal', 'standard', 'advanced', 'ml_pipeline']
+    description: 'Level of data processing to perform'
+
   data_quality_checks:
     type: array
-    default: ["completeness", "validity", "consistency"]
+    default: ['completeness', 'validity', 'consistency']
     items:
       type: string
-      enum: ["completeness", "validity", "consistency", "accuracy", "timeliness", "uniqueness"]
-    description: "Data quality checks to perform"
-    
+      enum:
+        [
+          'completeness',
+          'validity',
+          'consistency',
+          'accuracy',
+          'timeliness',
+          'uniqueness',
+        ]
+    description: 'Data quality checks to perform'
+
   transformations:
     type: array
-    default: ["clean", "normalize", "enrich"]
+    default: ['clean', 'normalize', 'enrich']
     items:
       type: string
-      enum: ["clean", "normalize", "enrich", "aggregate", "filter", "deduplicate"]
-    description: "Data transformations to apply"
-    
+      enum:
+        ['clean', 'normalize', 'enrich', 'aggregate', 'filter', 'deduplicate']
+    description: 'Data transformations to apply'
+
   # Output Parameters
   output_format:
     type: string
-    default: "parquet"
-    enum: ["csv", "json", "parquet", "delta", "iceberg"]
-    description: "Format for processed data output"
-    
+    default: 'parquet'
+    enum: ['csv', 'json', 'parquet', 'delta', 'iceberg']
+    description: 'Format for processed data output'
+
   output_partitioning:
     type: string
-    default: "none"
-    enum: ["none", "date", "category", "hash", "range"]
-    description: "Partitioning strategy for output data"
-    
+    default: 'none'
+    enum: ['none', 'date', 'category', 'hash', 'range']
+    description: 'Partitioning strategy for output data'
+
   # Performance Parameters
   batch_size:
     type: number
     default: 1000
     minimum: 100
     maximum: 100000
-    description: "Batch size for processing operations"
-    
+    description: 'Batch size for processing operations'
+
   max_memory_gb:
     type: number
     default: 4
     minimum: 1
     maximum: 32
-    description: "Maximum memory allocation in GB"
-    
+    description: 'Maximum memory allocation in GB'
+
   parallelism_level:
     type: number
     default: 4
     minimum: 1
     maximum: 16
-    description: "Level of parallelism for processing"
-    
+    description: 'Level of parallelism for processing'
+
   # Quality Parameters
   error_threshold:
     type: number
     default: 0.05
     minimum: 0.0
     maximum: 0.5
-    description: "Maximum acceptable error rate (0.0-0.5)"
-    
+    description: 'Maximum acceptable error rate (0.0-0.5)'
+
   completeness_threshold:
     type: number
     default: 0.95
     minimum: 0.5
     maximum: 1.0
-    description: "Minimum required data completeness (0.5-1.0)"
+    description: 'Minimum required data completeness (0.5-1.0)'
 
 # Template variables
 variables:
-  dataset_id: "${parameters.dataset_name}-${timestamp()}"
-  source_type: "${parameters.data_source_type}"
-  format: "${parameters.data_format}"
-  processing_level: "${parameters.processing_type}"
-  quality_checks: "${parameters.data_quality_checks}"
-  transforms: "${parameters.transformations}"
-  output_fmt: "${parameters.output_format}"
+  dataset_id: '${parameters.dataset_name}-${timestamp()}'
+  source_type: '${parameters.data_source_type}'
+  format: '${parameters.data_format}'
+  processing_level: '${parameters.processing_type}'
+  quality_checks: '${parameters.data_quality_checks}'
+  transforms: '${parameters.transformations}'
+  output_fmt: '${parameters.output_format}'
 
 # Template tasks
 tasks:
   # Phase 1: Data Source Validation
   - name: validate_data_source
     type: data_validation
-    description: "Validate data source accessibility and format"
+    description: 'Validate data source accessibility and format'
     timeout: 120s
     config:
-      source_type: "${variables.source_type}"
-      format: "${variables.format}"
+      source_type: '${variables.source_type}'
+      format: '${variables.format}'
       validation_checks:
-        - "accessibility"
-        - "format_compliance"
-        - "size_estimation"
-        - "schema_detection"
+        - 'accessibility'
+        - 'format_compliance'
+        - 'size_estimation'
+        - 'schema_detection'
     outputs:
-      source_valid: "$.validation.valid"
-      schema_detected: "$.schema"
-      estimated_rows: "$.metadata.estimated_rows"
-      estimated_size_mb: "$.metadata.estimated_size_mb"
-      
+      source_valid: '$.validation.valid'
+      schema_detected: '$.schema'
+      estimated_rows: '$.metadata.estimated_rows'
+      estimated_size_mb: '$.metadata.estimated_size_mb'
+
   # Phase 2: Data Ingestion
   - name: ingest_data
     type: data_ingestion
-    description: "Ingest data from source"
-    timeout: "${parameters.batch_size / 100}m"
-    depends_on: ["validate_data_source"]
+    description: 'Ingest data from source'
+    timeout: '${parameters.batch_size / 100}m'
+    depends_on: ['validate_data_source']
     config:
-      source_type: "${variables.source_type}"
-      format: "${variables.format}"
-      batch_size: "${parameters.batch_size}"
-      parallelism: "${parameters.parallelism_level}"
-      memory_limit: "${parameters.max_memory_gb}GB"
-      schema: "${tasks.validate_data_source.outputs.schema_detected}"
+      source_type: '${variables.source_type}'
+      format: '${variables.format}'
+      batch_size: '${parameters.batch_size}'
+      parallelism: '${parameters.parallelism_level}'
+      memory_limit: '${parameters.max_memory_gb}GB'
+      schema: '${tasks.validate_data_source.outputs.schema_detected}'
     outputs:
-      ingestion_id: "$.ingestion.id"
-      rows_ingested: "$.ingestion.rows_count"
-      ingestion_time_ms: "$.ingestion.duration_ms"
-      data_location: "$.ingestion.location"
-      
+      ingestion_id: '$.ingestion.id'
+      rows_ingested: '$.ingestion.rows_count'
+      ingestion_time_ms: '$.ingestion.duration_ms'
+      data_location: '$.ingestion.location'
+
   # Phase 3: Data Quality Assessment
   - name: assess_data_quality
     type: data_quality
-    description: "Assess data quality metrics"
+    description: 'Assess data quality metrics'
     timeout: 300s
-    depends_on: ["ingest_data"]
+    depends_on: ['ingest_data']
     config:
-      data_location: "${tasks.ingest_data.outputs.data_location}"
-      quality_checks: "${variables.quality_checks}"
+      data_location: '${tasks.ingest_data.outputs.data_location}'
+      quality_checks: '${variables.quality_checks}'
       thresholds:
-        completeness: "${parameters.completeness_threshold}"
-        error_rate: "${parameters.error_threshold}"
+        completeness: '${parameters.completeness_threshold}'
+        error_rate: '${parameters.error_threshold}'
       sample_size: 10000
     outputs:
-      quality_score: "$.quality.overall_score"
-      completeness_score: "$.quality.completeness"
-      validity_score: "$.quality.validity"
-      consistency_score: "$.quality.consistency"
-      quality_report: "$.quality.detailed_report"
-      
+      quality_score: '$.quality.overall_score'
+      completeness_score: '$.quality.completeness'
+      validity_score: '$.quality.validity'
+      consistency_score: '$.quality.consistency'
+      quality_report: '$.quality.detailed_report'
+
   # Phase 4: Data Cleaning
   - name: clean_data
     type: data_transformation
-    description: "Clean and standardize data"
-    timeout: "${parameters.batch_size / 50}m"
-    depends_on: ["assess_data_quality"]
+    description: 'Clean and standardize data'
+    timeout: '${parameters.batch_size / 50}m'
+    depends_on: ['assess_data_quality']
     condition: "contains(variables.transforms, 'clean')"
     config:
-      data_location: "${tasks.ingest_data.outputs.data_location}"
+      data_location: '${tasks.ingest_data.outputs.data_location}'
       operations:
-        - "remove_duplicates"
-        - "handle_nulls"
-        - "standardize_formats"
-        - "trim_whitespace"
-        - "validate_datatypes"
-      batch_size: "${parameters.batch_size}"
-      error_handling: "quarantine"
+        - 'remove_duplicates'
+        - 'handle_nulls'
+        - 'standardize_formats'
+        - 'trim_whitespace'
+        - 'validate_datatypes'
+      batch_size: '${parameters.batch_size}'
+      error_handling: 'quarantine'
     outputs:
-      cleaned_location: "$.transformation.output_location"
-      rows_cleaned: "$.transformation.rows_processed"
-      errors_found: "$.transformation.errors_count"
-      
+      cleaned_location: '$.transformation.output_location'
+      rows_cleaned: '$.transformation.rows_processed'
+      errors_found: '$.transformation.errors_count'
+
   # Phase 5: Data Normalization
   - name: normalize_data
     type: data_transformation
-    description: "Normalize data structures and values"
-    timeout: "${parameters.batch_size / 75}m"
-    depends_on: ["clean_data"]
+    description: 'Normalize data structures and values'
+    timeout: '${parameters.batch_size / 75}m'
+    depends_on: ['clean_data']
     condition: "contains(variables.transforms, 'normalize')"
     config:
-      data_location: "${tasks.clean_data.outputs.cleaned_location || tasks.ingest_data.outputs.data_location}"
+      data_location: '${tasks.clean_data.outputs.cleaned_location || tasks.ingest_data.outputs.data_location}'
       operations:
-        - "standardize_column_names"
-        - "normalize_text_case"
-        - "standardize_date_formats"
-        - "normalize_numeric_precision"
-      normalization_rules: "standard"
+        - 'standardize_column_names'
+        - 'normalize_text_case'
+        - 'standardize_date_formats'
+        - 'normalize_numeric_precision'
+      normalization_rules: 'standard'
     outputs:
-      normalized_location: "$.transformation.output_location"
-      rows_normalized: "$.transformation.rows_processed"
-      
+      normalized_location: '$.transformation.output_location'
+      rows_normalized: '$.transformation.rows_processed'
+
   # Phase 6: Data Enrichment
   - name: enrich_data
     type: data_enhancement
-    description: "Enrich data with additional information"
-    timeout: "${parameters.batch_size / 25}m"
-    depends_on: ["normalize_data"]
+    description: 'Enrich data with additional information'
+    timeout: '${parameters.batch_size / 25}m'
+    depends_on: ['normalize_data']
     condition: "contains(variables.transforms, 'enrich')"
     config:
-      data_location: "${tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location || tasks.ingest_data.outputs.data_location}"
+      data_location: '${tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location || tasks.ingest_data.outputs.data_location}'
       enrichment_types:
-        - "geocoding"
-        - "industry_classification"
-        - "entity_resolution"
-        - "sentiment_analysis"
+        - 'geocoding'
+        - 'industry_classification'
+        - 'entity_resolution'
+        - 'sentiment_analysis'
       external_apis:
-        geocoding: "enabled"
-        industry_data: "enabled"
+        geocoding: 'enabled'
+        industry_data: 'enabled'
       confidence_threshold: 0.8
     outputs:
-      enriched_location: "$.enhancement.output_location"
-      enrichment_coverage: "$.enhancement.coverage_percentage"
-      
+      enriched_location: '$.enhancement.output_location'
+      enrichment_coverage: '$.enhancement.coverage_percentage'
+
   # Phase 7: Data Aggregation (Advanced Processing)
   - name: aggregate_data
     type: data_aggregation
-    description: "Perform data aggregation and summarization"
-    timeout: "${parameters.batch_size / 100}m"
-    depends_on: ["enrich_data"]
+    description: 'Perform data aggregation and summarization'
+    timeout: '${parameters.batch_size / 100}m'
+    depends_on: ['enrich_data']
     condition: "contains(variables.transforms, 'aggregate') && parameters.processing_type != 'minimal'"
     config:
-      data_location: "${tasks.enrich_data.outputs.enriched_location || tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location}"
+      data_location: '${tasks.enrich_data.outputs.enriched_location || tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location}'
       aggregation_rules:
-        - group_by: ["category", "date_partition"]
-          metrics: ["count", "sum", "avg", "min", "max"]
-        - group_by: ["region"]
-          metrics: ["count", "distinct_count"]
-      output_granularity: "daily"
+        - group_by: ['category', 'date_partition']
+          metrics: ['count', 'sum', 'avg', 'min', 'max']
+        - group_by: ['region']
+          metrics: ['count', 'distinct_count']
+      output_granularity: 'daily'
     outputs:
-      aggregated_location: "$.aggregation.output_location"
-      summary_statistics: "$.aggregation.statistics"
-      
+      aggregated_location: '$.aggregation.output_location'
+      summary_statistics: '$.aggregation.statistics'
+
   # Phase 8: Final Quality Check
   - name: final_quality_check
     type: data_quality
-    description: "Final quality assessment of processed data"
+    description: 'Final quality assessment of processed data'
     timeout: 180s
-    depends_on: ["aggregate_data", "enrich_data", "normalize_data", "clean_data"]
+    depends_on:
+      ['aggregate_data', 'enrich_data', 'normalize_data', 'clean_data']
     config:
-      data_location: "${tasks.aggregate_data.outputs.aggregated_location || tasks.enrich_data.outputs.enriched_location || tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location}"
-      quality_checks: "all"
+      data_location: '${tasks.aggregate_data.outputs.aggregated_location || tasks.enrich_data.outputs.enriched_location || tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location}'
+      quality_checks: 'all'
       generate_profile: true
     outputs:
-      final_quality_score: "$.quality.overall_score"
-      data_profile: "$.profile"
-      quality_comparison: "$.quality.improvement_from_initial"
-      
+      final_quality_score: '$.quality.overall_score'
+      data_profile: '$.profile'
+      quality_comparison: '$.quality.improvement_from_initial'
+
   # Phase 9: Data Export
   - name: export_processed_data
     type: data_export
-    description: "Export processed data to final destination"
-    timeout: "${parameters.batch_size / 200}m"
-    depends_on: ["final_quality_check"]
+    description: 'Export processed data to final destination'
+    timeout: '${parameters.batch_size / 200}m'
+    depends_on: ['final_quality_check']
     config:
-      source_location: "${tasks.aggregate_data.outputs.aggregated_location || tasks.enrich_data.outputs.enriched_location || tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location}"
-      output_format: "${variables.output_fmt}"
-      partitioning: "${parameters.output_partitioning}"
-      compression: "snappy"
+      source_location: '${tasks.aggregate_data.outputs.aggregated_location || tasks.enrich_data.outputs.enriched_location || tasks.normalize_data.outputs.normalized_location || tasks.clean_data.outputs.cleaned_location}'
+      output_format: '${variables.output_fmt}'
+      partitioning: '${parameters.output_partitioning}'
+      compression: 'snappy'
       metadata_generation: true
     outputs:
-      export_location: "$.export.location"
-      files_generated: "$.export.file_count"
-      total_size_mb: "$.export.total_size_mb"
-      
+      export_location: '$.export.location'
+      files_generated: '$.export.file_count'
+      total_size_mb: '$.export.total_size_mb'
+
   # Phase 10: Generate Processing Report
   - name: generate_report
     type: report_generation
-    description: "Generate data processing summary report"
+    description: 'Generate data processing summary report'
     timeout: 60s
-    depends_on: ["export_processed_data"]
+    depends_on: ['export_processed_data']
     config:
-      template: "data_processing_summary"
+      template: 'data_processing_summary'
       data:
         dataset_info:
-          name: "${parameters.dataset_name}"
-          source_type: "${variables.source_type}"
-          format: "${variables.format}"
+          name: '${parameters.dataset_name}'
+          source_type: '${variables.source_type}'
+          format: '${variables.format}'
         processing_summary:
-          initial_quality: "${tasks.assess_data_quality.outputs.quality_score}"
-          final_quality: "${tasks.final_quality_check.outputs.final_quality_score}"
-          rows_processed: "${tasks.ingest_data.outputs.rows_ingested}"
-          transformations: "${variables.transforms}"
+          initial_quality: '${tasks.assess_data_quality.outputs.quality_score}'
+          final_quality: '${tasks.final_quality_check.outputs.final_quality_score}'
+          rows_processed: '${tasks.ingest_data.outputs.rows_ingested}'
+          transformations: '${variables.transforms}'
         output_info:
-          location: "${tasks.export_processed_data.outputs.export_location}"
-          format: "${variables.output_fmt}"
-          size_mb: "${tasks.export_processed_data.outputs.total_size_mb}"
-      format: ["pdf", "json"]
+          location: '${tasks.export_processed_data.outputs.export_location}'
+          format: '${variables.output_fmt}'
+          size_mb: '${tasks.export_processed_data.outputs.total_size_mb}'
+      format: ['pdf', 'json']
     outputs:
-      report_id: "$.report.id"
-      report_url: "$.report.url"
+      report_id: '$.report.id'
+      report_url: '$.report.url'
 
 # Template success criteria
 success_criteria:
-  - condition: "tasks.validate_data_source.outputs.source_valid == true"
-    message: "Data source validation successful"
-  - condition: "tasks.assess_data_quality.outputs.completeness_score >= parameters.completeness_threshold"
-    message: "Data completeness meets minimum threshold"
-  - condition: "tasks.final_quality_check.outputs.final_quality_score >= tasks.assess_data_quality.outputs.quality_score"
-    message: "Data quality improved or maintained"
-  - condition: "tasks.export_processed_data.outputs.files_generated > 0"
-    message: "Data export completed successfully"
+  - condition: 'tasks.validate_data_source.outputs.source_valid == true'
+    message: 'Data source validation successful'
+  - condition: 'tasks.assess_data_quality.outputs.completeness_score >= parameters.completeness_threshold'
+    message: 'Data completeness meets minimum threshold'
+  - condition: 'tasks.final_quality_check.outputs.final_quality_score >= tasks.assess_data_quality.outputs.quality_score'
+    message: 'Data quality improved or maintained'
+  - condition: 'tasks.export_processed_data.outputs.files_generated > 0'
+    message: 'Data export completed successfully'
 
 # Template failure handling
 on_failure:
   - type: alert
     severity: warning
-    message: "Data processing failed for dataset ${parameters.dataset_name}"
-    details: "Processing failed at task: ${failure.task}"
+    message: 'Data processing failed for dataset ${parameters.dataset_name}'
+    details: 'Processing failed at task: ${failure.task}'
   - type: cleanup
-    operation: "remove_temporary_data"
-    locations: [
-      "${tasks.ingest_data.outputs.data_location}",
-      "${tasks.clean_data.outputs.cleaned_location}",
-      "${tasks.normalize_data.outputs.normalized_location}"
-    ]
+    operation: 'remove_temporary_data'
+    locations:
+      [
+        '${tasks.ingest_data.outputs.data_location}',
+        '${tasks.clean_data.outputs.cleaned_location}',
+        '${tasks.normalize_data.outputs.normalized_location}',
+      ]
 
 # Template success handling
 on_success:
   - type: metrics
-    increment: "data_processing_success_total"
+    increment: 'data_processing_success_total'
     labels:
-      dataset: "${parameters.dataset_name}"
-      source_type: "${variables.source_type}"
-      processing_type: "${parameters.processing_type}"
+      dataset: '${parameters.dataset_name}'
+      source_type: '${variables.source_type}'
+      processing_type: '${parameters.processing_type}'
   - type: catalog
-    operation: "register_dataset"
+    operation: 'register_dataset'
     dataset:
-      name: "${parameters.dataset_name}"
-      location: "${tasks.export_processed_data.outputs.export_location}"
-      format: "${variables.output_fmt}"
-      quality_score: "${tasks.final_quality_check.outputs.final_quality_score}"
-      processing_date: "${workflow.completed_at}"
+      name: '${parameters.dataset_name}'
+      location: '${tasks.export_processed_data.outputs.export_location}'
+      format: '${variables.output_fmt}'
+      quality_score: '${tasks.final_quality_check.outputs.final_quality_score}'
+      processing_date: '${workflow.completed_at}'
 
 # Template resource requirements
 resources:
-  cpu_limit: "${parameters.parallelism_level * 250}m"
-  memory_limit: "${parameters.max_memory_gb}Gi"
-  timeout: "120m"
+  cpu_limit: '${parameters.parallelism_level * 250}m'
+  memory_limit: '${parameters.max_memory_gb}Gi'
+  timeout: '120m'
   max_retries: 2
-  
+
 # Template observability
 observability:
   trace: true
   metrics: true
   logs: true
   custom_metrics:
-    - name: "data_processing_rows_per_second"
-      value: "${tasks.ingest_data.outputs.rows_ingested / (tasks.ingest_data.outputs.ingestion_time_ms / 1000)}"
+    - name: 'data_processing_rows_per_second'
+      value: '${tasks.ingest_data.outputs.rows_ingested / (tasks.ingest_data.outputs.ingestion_time_ms / 1000)}'
       labels:
-        dataset: "${parameters.dataset_name}"
-        format: "${variables.format}"
-    - name: "data_quality_improvement"
-      value: "${tasks.final_quality_check.outputs.final_quality_score - tasks.assess_data_quality.outputs.quality_score}"
+        dataset: '${parameters.dataset_name}'
+        format: '${variables.format}'
+    - name: 'data_quality_improvement'
+      value: '${tasks.final_quality_check.outputs.final_quality_score - tasks.assess_data_quality.outputs.quality_score}'
       labels:
-        dataset: "${parameters.dataset_name}"
-        processing_type: "${parameters.processing_type}"
+        dataset: '${parameters.dataset_name}'
+        processing_type: '${parameters.processing_type}'
 
 # Template usage examples
 usage_examples:
-  - name: "Customer Data Processing"
-    description: "Process customer data with full cleaning and enrichment"
+  - name: 'Customer Data Processing'
+    description: 'Process customer data with full cleaning and enrichment'
     parameters:
-      dataset_name: "customer-data-q4-2024"
-      data_source_type: "file_upload"
-      data_format: "csv"
-      processing_type: "advanced"
-      transformations: ["clean", "normalize", "enrich", "aggregate"]
-      
-  - name: "Transaction Log Processing" 
-    description: "Minimal processing of transaction logs"
+      dataset_name: 'customer-data-q4-2024'
+      data_source_type: 'file_upload'
+      data_format: 'csv'
+      processing_type: 'advanced'
+      transformations: ['clean', 'normalize', 'enrich', 'aggregate']
+
+  - name: 'Transaction Log Processing'
+    description: 'Minimal processing of transaction logs'
     parameters:
-      dataset_name: "transaction-logs-daily"
-      data_source_type: "stream"
-      data_format: "json"
-      processing_type: "minimal"
+      dataset_name: 'transaction-logs-daily'
+      data_source_type: 'stream'
+      data_format: 'json'
+      processing_type: 'minimal'
       batch_size: 10000
-      transformations: ["clean"]
-      
-  - name: "ML Pipeline Data Prep"
-    description: "Prepare data for machine learning pipeline"
+      transformations: ['clean']
+
+  - name: 'ML Pipeline Data Prep'
+    description: 'Prepare data for machine learning pipeline'
     parameters:
-      dataset_name: "ml-training-data"
-      data_source_type: "database"
-      data_format: "parquet"
-      processing_type: "ml_pipeline"
-      data_quality_checks: ["completeness", "validity", "consistency", "accuracy"]
-      transformations: ["clean", "normalize", "enrich"]
+      dataset_name: 'ml-training-data'
+      data_source_type: 'database'
+      data_format: 'parquet'
+      processing_type: 'ml_pipeline'
+      data_quality_checks:
+        ['completeness', 'validity', 'consistency', 'accuracy']
+      transformations: ['clean', 'normalize', 'enrich']
 
 # Template validation rules
 validation_rules:
-  - rule: "parameters.batch_size > 0"
-    message: "Batch size must be greater than zero"
-  - rule: "parameters.error_threshold >= 0.0 && parameters.error_threshold <= 0.5"
-    message: "Error threshold must be between 0.0 and 0.5"
-  - rule: "parameters.completeness_threshold >= 0.5 && parameters.completeness_threshold <= 1.0"
-    message: "Completeness threshold must be between 0.5 and 1.0"
-  - rule: "len(parameters.transformations) > 0"
-    message: "At least one transformation must be specified"
+  - rule: 'parameters.batch_size > 0'
+    message: 'Batch size must be greater than zero'
+  - rule: 'parameters.error_threshold >= 0.0 && parameters.error_threshold <= 0.5'
+    message: 'Error threshold must be between 0.0 and 0.5'
+  - rule: 'parameters.completeness_threshold >= 0.5 && parameters.completeness_threshold <= 1.0'
+    message: 'Completeness threshold must be between 0.5 and 1.0'
+  - rule: 'len(parameters.transformations) > 0'
+    message: 'At least one transformation must be specified'

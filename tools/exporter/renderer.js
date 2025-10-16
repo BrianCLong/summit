@@ -20,8 +20,12 @@ export async function render({
       return;
     }
 
-    const headerTemplate = headerPath ? await fs.readFile(headerPath, 'utf8') : '<span></span>';
-    const footerTemplate = footerPath ? await fs.readFile(footerPath, 'utf8') : '<span></span>';
+    const headerTemplate = headerPath
+      ? await fs.readFile(headerPath, 'utf8')
+      : '<span></span>';
+    const footerTemplate = footerPath
+      ? await fs.readFile(footerPath, 'utf8')
+      : '<span></span>';
 
     await page.pdf({
       path: out,

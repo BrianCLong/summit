@@ -173,13 +173,13 @@ spec:
             - |
               set -ex
               echo "Registering Hello-Case workflow..."
-              
+
               # Wait for Conductor to be ready
               until curl -f http://maestro-conductor:8080/health; do
                 echo "Waiting for Conductor..."
                 sleep 10
               done
-              
+
               # Register workflow definition
               curl -X POST \
                 http://maestro-conductor:8080/api/metadata/workflow \
@@ -187,7 +187,7 @@ spec:
                 -d @/workflow/hello-case.json
                 
               echo "Hello-Case workflow registered successfully!"
-              
+
           volumeMounts:
             - name: workflow-config
               mountPath: /workflow
@@ -214,7 +214,7 @@ metadata:
     app.kubernetes.io/component: scheduler
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: "0 */6 * * *"  # Every 6 hours
+  schedule: '0 */6 * * *' # Every 6 hours
   jobTemplate:
     spec:
       template:
@@ -229,9 +229,9 @@ spec:
                 - |
                   set -ex
                   echo "Triggering Hello-Case workflow..."
-                  
+
                   WORKFLOW_ID=$(date +%s)
-                  
+
                   curl -X POST \
                     http://maestro-conductor:8080/api/workflow/hello_case_workflow \
                     -H "Content-Type: application/json" \

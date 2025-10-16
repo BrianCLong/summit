@@ -42,10 +42,12 @@ router.post('/sandbox/execute', async (req, res) => {
                 /\bCALL\b\s+apoc\./i,
                 /\bLOAD\s+CSV\b/i,
                 /\bPERIODIC\s+COMMIT\b/i,
-                /\bREMOVE\b/i
+                /\bREMOVE\b/i,
             ];
             if (banned.some((r) => r.test(cypher))) {
-                return res.status(400).json({ error: 'Query contains forbidden operations in sandbox' });
+                return res
+                    .status(400)
+                    .json({ error: 'Query contains forbidden operations in sandbox' });
             }
             // Enforce LIMIT if missing when returning rows
             let safe = cypher;

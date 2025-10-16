@@ -42,7 +42,7 @@ const investigationRepo = new InvestigationRepo(pg);
 const DateTimeScalar = new GraphQLScalarType({
     name: 'DateTime',
     description: 'DateTime custom scalar type',
-    serialize: (value) => (value instanceof Date ? value.toISOString() : value),
+    serialize: (value) => value instanceof Date ? value.toISOString() : value,
     parseValue: (value) => new Date(value),
     parseLiteral(ast) {
         if (ast.kind === Kind.STRING) {
@@ -257,7 +257,10 @@ export const coreResolvers = {
             const userId = context.user?.sub || context.user?.id || 'system';
             // Add investigation context to props if provided
             if (parsed.investigationId) {
-                parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
+                parsed.props = {
+                    ...parsed.props,
+                    investigationId: parsed.investigationId,
+                };
             }
             return await entityRepo.create(parsed, userId);
         },
@@ -283,7 +286,10 @@ export const coreResolvers = {
             const userId = context.user?.sub || context.user?.id || 'system';
             // Add investigation context to props if provided
             if (parsed.investigationId) {
-                parsed.props = { ...parsed.props, investigationId: parsed.investigationId };
+                parsed.props = {
+                    ...parsed.props,
+                    investigationId: parsed.investigationId,
+                };
             }
             return await relationshipRepo.create(parsed, userId);
         },

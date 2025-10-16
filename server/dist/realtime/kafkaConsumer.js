@@ -1,6 +1,8 @@
 import { Kafka } from 'kafkajs'; // Assuming kafkajs is installed
 import { WargameResolver } from '../resolvers/WargameResolver'; // Import the resolver
-const KAFKA_BROKERS = process.env.KAFKA_BROKERS ? process.env.KAFKA_BROKERS.split(',') : ['localhost:9092'];
+const KAFKA_BROKERS = process.env.KAFKA_BROKERS
+    ? process.env.KAFKA_BROKERS.split(',')
+    : ['localhost:9092'];
 const KAFKA_TOPIC = 'intelgraph.alerts.crisis_scenario_trigger';
 const KAFKA_GROUP_ID = 'wargame-dashboard-consumer-group';
 let consumer = null;
@@ -19,7 +21,7 @@ export const startKafkaConsumer = async () => {
         await consumer.connect();
         await consumer.subscribe({ topic: KAFKA_TOPIC, fromBeginning: false });
         await consumer.run({
-            eachMessage: async ({ topic, partition, message }) => {
+            eachMessage: async ({ topic, partition, message, }) => {
                 if (!message.value) {
                     console.warn(`Kafka Consumer: Received empty message from topic ${topic}`);
                     return;
@@ -32,15 +34,16 @@ export const startKafkaConsumer = async () => {
                     crisisType: payload.crisis_type || 'unknown_crisis',
                     targetAudiences: payload.target_audiences || ['general_public'],
                     keyNarratives: payload.key_narratives || ['unspecified_narrative'],
-                    adversaryProfiles: payload.adversary_profiles || ['unknown_adversary'],
+                    adversaryProfiles: payload.adversary_profiles || [
+                        'unknown_adversary',
+                    ],
                     simulationParameters: payload.simulation_parameters || {},
                 };
                 console.log('Kafka Consumer: Triggering war-game simulation from Kafka message...');
                 try {
                     // Call the resolver directly to run the simulation
                     const newScenario = await wargameResolver.runWarGameSimulation(null, // parent
-                    { input: scenarioInput }, {} // context - mock as it's an internal call
-                    );
+                    { input: scenarioInput }, {});
                     console.log(`Kafka Consumer: Successfully triggered simulation for scenario: ${newScenario.id}`);
                 }
                 catch (error) {

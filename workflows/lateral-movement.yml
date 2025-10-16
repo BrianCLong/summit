@@ -1,13 +1,13 @@
 steps:
   - id: enumerate-hosts
-    prompt: "Map compromised hosts and connected accounts."
+    prompt: 'Map compromised hosts and connected accounts.'
     expected_artifacts:
       - host_list
     queries:
-      - "MATCH (h:Host {case_id: $case_id}) RETURN h"
+      - 'MATCH (h:Host {case_id: $case_id}) RETURN h'
   - id: track-privilege-escalation
-    prompt: "Identify privilege escalation events and credentials used."
+    prompt: 'Identify privilege escalation events and credentials used.'
     expected_artifacts:
       - credential_nodes
     queries:
-      - "MATCH (c:Credential)-[:USED_ON]->(:Host {case_id: $case_id}) RETURN c"
+      - 'MATCH (c:Credential)-[:USED_ON]->(:Host {case_id: $case_id}) RETURN c'

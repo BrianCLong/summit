@@ -12,7 +12,7 @@ class TracingService {
             serviceName: process.env.SERVICE_NAME || 'intelgraph-api',
             environment: process.env.NODE_ENV || 'development',
             sampleRate: parseFloat(process.env.TRACE_SAMPLE_RATE) || 1.0,
-            maxSpanDuration: parseInt(process.env.MAX_SPAN_DURATION) || 300000 // 5 minutes
+            maxSpanDuration: parseInt(process.env.MAX_SPAN_DURATION) || 300000, // 5 minutes
         };
         this.activeSpans = new Map();
         this.completedSpans = [];
@@ -20,7 +20,7 @@ class TracingService {
             totalSpans: 0,
             activeSpanCount: 0,
             averageSpanDuration: 0,
-            errorCount: 0
+            errorCount: 0,
         };
     }
     /**
@@ -40,11 +40,11 @@ class TracingService {
             attributes: {
                 service: this.config.serviceName,
                 environment: this.config.environment,
-                ...options.attributes
+                ...options.attributes,
             },
             events: [],
             error: null,
-            parentId: options.parentId || null
+            parentId: options.parentId || null,
         };
         this.activeSpans.set(span.id, span);
         this.metrics.totalSpans++;
@@ -52,7 +52,7 @@ class TracingService {
         logger.debug('Span started', {
             spanId: span.id,
             name: span.name,
-            parentId: span.parentId
+            parentId: span.parentId,
         });
         return {
             id: span.id,
@@ -60,7 +60,7 @@ class TracingService {
             addEvent: (name, attributes) => this.addSpanEvent(span.id, name, attributes),
             setStatus: (status) => this.setSpanStatus(span.id, status),
             recordException: (error) => this.recordSpanException(span.id, error),
-            end: () => this.endSpan(span.id)
+            end: () => this.endSpan(span.id),
         };
     }
     /**
@@ -73,7 +73,7 @@ class TracingService {
             addEvent: () => { },
             setStatus: () => { },
             recordException: () => { },
-            end: () => { }
+            end: () => { },
         };
     }
     /**
@@ -91,7 +91,8 @@ class TracingService {
         this.metrics.activeSpanCount--;
         // Update average duration
         const totalDuration = this.completedSpans.reduce((sum, s) => sum + s.duration, 0);
-        this.metrics.averageSpanDuration = totalDuration / this.completedSpans.length;
+        this.metrics.averageSpanDuration =
+            totalDuration / this.completedSpans.length;
         // Keep only recent spans to prevent memory leak
         if (this.completedSpans.length > 1000) {
             this.completedSpans = this.completedSpans.slice(-500);
@@ -100,15 +101,16 @@ class TracingService {
             spanId: span.id,
             name: span.name,
             duration: span.duration,
-            status: span.status
+            status: span.status,
         });
         // Log long-running spans
-        if (span.duration > 10000) { // 10 seconds
+        if (span.duration > 10000) {
+            // 10 seconds
             logger.warn('Long-running span detected', {
                 spanId: span.id,
                 name: span.name,
                 duration: span.duration,
-                attributes: span.attributes
+                attributes: span.attributes,
             });
         }
     }
@@ -130,7 +132,7 @@ class TracingService {
             span.events.push({
                 name,
                 timestamp: Date.now(),
-                attributes
+                attributes,
             });
         }
     }
@@ -155,14 +157,14 @@ class TracingService {
             span.error = {
                 name: error.name,
                 message: error.message,
-                stack: error.stack
+                stack: error.stack,
             };
             span.status = 'error';
             this.metrics.errorCount++;
             logger.error('Span exception recorded', {
                 spanId: span.id,
                 name: span.name,
-                error: error.message
+                error: error.message,
             });
         }
     }
@@ -219,8 +221,8 @@ class TracingService {
                     'http.path': req.path,
                     'http.user_agent': req.get('User-Agent'),
                     'http.remote_addr': req.ip,
-                    'user.id': req.user?.id
-                }
+                    'user.id': req.user?.id,
+                },
             });
             // Store span in request
             req.traceSpan = span;
@@ -229,7 +231,7 @@ class TracingService {
             res.end = function (...args) {
                 span.setAttributes({
                     'http.status_code': res.statusCode,
-                    'http.response.content_length': res.get('content-length')
+                    'http.response.content_length': res.get('content-length'),
                 });
                 if (res.statusCode >= 400) {
                     span.setStatus({ code: 2, message: `HTTP ${res.statusCode}` });
@@ -260,7 +262,7 @@ class TracingService {
                     'graphql.field.name': fieldName,
                     'graphql.operation.name': info.operation.name?.value,
                     'user.id': context.user?.id,
-                    'graphql.resolver': resolverName
+                    'graphql.resolver': resolverName,
                 });
                 const result = await originalResolver(parent, args, context, info);
                 // Add result metadata
@@ -274,7 +276,7 @@ class TracingService {
                 }
                 return result;
             }, {
-                attributes: { resolver: resolverName }
+                attributes: { resolver: resolverName },
             });
         };
     }
@@ -286,7 +288,7 @@ class TracingService {
             span.setAttributes({
                 'db.operation': operation,
                 'db.statement': typeof query === 'string' ? query.substring(0, 500) : 'complex-query',
-                'db.system': 'neo4j'
+                'db.system': 'neo4j',
             });
             if (params.investigationId) {
                 span.setAttributes({ 'investigation.id': params.investigationId });
@@ -299,9 +301,7 @@ class TracingService {
      * Get recent traces for debugging
      */
     getRecentTraces(limit = 50) {
-        return this.completedSpans
-            .slice(-limit)
-            .map(span => ({
+        return this.completedSpans.slice(-limit).map((span) => ({
             id: span.id,
             name: span.name,
             duration: span.duration,
@@ -309,18 +309,18 @@ class TracingService {
             startTime: new Date(span.startTime).toISOString(),
             attributes: span.attributes,
             events: span.events,
-            error: span.error
+            error: span.error,
         }));
     }
     /**
      * Get active spans (for debugging)
      */
     getActiveSpans() {
-        return Array.from(this.activeSpans.values()).map(span => ({
+        return Array.from(this.activeSpans.values()).map((span) => ({
             id: span.id,
             name: span.name,
             duration: Date.now() - span.startTime,
-            attributes: span.attributes
+            attributes: span.attributes,
         }));
     }
     /**
@@ -335,7 +335,7 @@ class TracingService {
                 logger.warn('Cleaning up stale span', {
                     spanId: span.id,
                     name: span.name,
-                    age: now - span.startTime
+                    age: now - span.startTime,
                 });
                 span.attributes.stale = true;
                 this.endSpan(spanId);
@@ -350,7 +350,7 @@ class TracingService {
         if (format === 'jaeger') {
             // Convert to Jaeger format
             return {
-                data: traces.map(trace => ({
+                data: traces.map((trace) => ({
                     traceID: trace.id.replace(/-/g, ''),
                     spanID: trace.id.replace(/-/g, '').substring(0, 16),
                     operationName: trace.name,
@@ -359,15 +359,19 @@ class TracingService {
                     tags: Object.entries(trace.attributes).map(([key, value]) => ({
                         key,
                         type: typeof value === 'string' ? 'string' : 'number',
-                        value: value.toString()
+                        value: value.toString(),
                     })),
                     process: {
                         serviceName: this.config.serviceName,
                         tags: [
-                            { key: 'environment', value: this.config.environment, type: 'string' }
-                        ]
-                    }
-                }))
+                            {
+                                key: 'environment',
+                                value: this.config.environment,
+                                type: 'string',
+                            },
+                        ],
+                    },
+                })),
             };
         }
         return { traces };
@@ -383,14 +387,14 @@ class TracingService {
                 activeSpanCount: this.metrics.activeSpanCount,
                 averageSpanDuration: Math.round(this.metrics.averageSpanDuration),
                 errorCount: this.metrics.errorCount,
-                completedSpanCount: this.completedSpans.length
+                completedSpanCount: this.completedSpans.length,
             },
             config: {
                 enabled: this.config.enabled,
                 serviceName: this.config.serviceName,
                 environment: this.config.environment,
-                sampleRate: this.config.sampleRate
-            }
+                sampleRate: this.config.sampleRate,
+            },
         };
     }
     /**

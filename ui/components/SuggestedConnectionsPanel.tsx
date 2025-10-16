@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 interface Prediction {
   source: number;
@@ -10,7 +10,7 @@ export default function SuggestedConnectionsPanel() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
 
   useEffect(() => {
-    fetch("/ai/gnn/link-predictions")
+    fetch('/ai/gnn/link-predictions')
       .then((res) => res.json())
       .then((data) => {
         const sorted = [...data].sort((a, b) => b.confidence - a.confidence);
@@ -19,9 +19,9 @@ export default function SuggestedConnectionsPanel() {
   }, []);
 
   const handleAction = (p: Prediction, accepted: boolean) => {
-    fetch("/ai/gnn/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    fetch('/ai/gnn/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...p, accepted }),
     });
     setPredictions((prev) =>

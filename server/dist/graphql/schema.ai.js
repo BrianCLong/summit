@@ -1,8 +1,17 @@
 const gql = require('graphql-tag');
 // AI/Analytics schema extensions for insights and search
 const aiTypeDefs = gql `
-  type AIRecommendation { from: ID!, to: ID!, score: Float!, reason: String }
-  type AIAnomaly { entityId: ID!, anomalyScore: Float!, reason: String }
+  type AIRecommendation {
+    from: ID!
+    to: ID!
+    score: Float!
+    reason: String
+  }
+  type AIAnomaly {
+    entityId: ID!
+    anomalyScore: Float!
+    reason: String
+  }
 
   extend type Query {
     suggestLinks(entityId: ID!, limit: Int = 5): [AIRecommendation!]!
@@ -16,7 +25,11 @@ const aiTypeDefs = gql `
   }
 
   extend type Mutation {
-    recordAnomaly(entityId: ID!, anomalyScore: Float!, reason: String): AIAnomaly!
+    recordAnomaly(
+      entityId: ID!
+      anomalyScore: Float!
+      reason: String
+    ): AIAnomaly!
   }
 `;
 module.exports = { aiTypeDefs };

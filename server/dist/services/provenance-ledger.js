@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import { query as timescaleQuery } from '../db/timescale.js';
 import logger from '../utils/logger.js';
 export class ProvenanceLedgerService {
+    static instance;
     static getInstance() {
         if (!ProvenanceLedgerService.instance) {
             ProvenanceLedgerService.instance = new ProvenanceLedgerService();
@@ -16,7 +17,10 @@ export class ProvenanceLedgerService {
     // Committee requirement: Content hashing for integrity
     generateContentHash(content) {
         const normalizedContent = JSON.stringify(content, Object.keys(content).sort());
-        return crypto.createHash('sha256').update(normalizedContent, 'utf8').digest('hex');
+        return crypto
+            .createHash('sha256')
+            .update(normalizedContent, 'utf8')
+            .digest('hex');
     }
     // Committee requirement: Cryptographic signatures for immutability
     generateSignature(data, privateKey) {
@@ -30,7 +34,12 @@ export class ProvenanceLedgerService {
         const id = crypto.randomUUID();
         const timestamp = new Date();
         const content_hash = this.generateContentHash({ ...entry, timestamp });
-        const signature = this.generateSignature({ id, content_hash, ...entry, timestamp });
+        const signature = this.generateSignature({
+            id,
+            content_hash,
+            ...entry,
+            timestamp,
+        });
         const provenanceEntry = {
             id,
             content_hash,

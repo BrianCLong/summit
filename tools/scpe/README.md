@@ -154,4 +154,3 @@ Tests are executed with `pytest`:
 ```bash
 pytest tools/scpe/tests
 ```
-

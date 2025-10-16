@@ -9,6 +9,8 @@ import { insertAnalyticsTrace } from '../../db/timescale.js';
 import GraphXAIExplainer from './graph-explainer.js';
 import logger from '../../utils/logger.js';
 export class DetectorService {
+    static instance;
+    xaiExplainer;
     static getInstance() {
         if (!DetectorService.instance) {
             DetectorService.instance = new DetectorService();
@@ -172,7 +174,11 @@ export class DetectorService {
                 description: 'Central node with many connections',
                 min_degree: 10,
             },
-            { pattern: 'clique_formation', description: 'Dense interconnected group', min_density: 0.8 },
+            {
+                pattern: 'clique_formation',
+                description: 'Dense interconnected group',
+                min_density: 0.8,
+            },
             {
                 pattern: 'bridge_node',
                 description: 'Node connecting separate clusters',
@@ -192,7 +198,10 @@ export class DetectorService {
                     evidence: [
                         {
                             evidence_type: 'pattern_match',
-                            evidence_data: { pattern: pattern.pattern, match_score: match.confidence },
+                            evidence_data: {
+                                pattern: pattern.pattern,
+                                match_score: match.confidence,
+                            },
                             confidence: match.confidence,
                             source: 'pattern_matcher',
                         },
@@ -374,7 +383,8 @@ export class DetectorService {
     // Helper methods
     calculateNodeDegree(nodeId, graphData) {
         const edges = graphData.edges || [];
-        return edges.filter((e) => e.source === nodeId || e.target === nodeId).length;
+        return edges.filter((e) => e.source === nodeId || e.target === nodeId)
+            .length;
     }
     calculateDegreeDistribution(graphData) {
         const nodes = graphData.nodes || [];
@@ -382,7 +392,8 @@ export class DetectorService {
     }
     calculateAnomalyThreshold(distribution, sensitivity) {
         const mean = distribution.reduce((sum, val) => sum + val, 0) / distribution.length;
-        const variance = distribution.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / distribution.length;
+        const variance = distribution.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+            distribution.length;
         const stdDev = Math.sqrt(variance);
         // Adjust threshold based on sensitivity (0.1 = very sensitive, 0.9 = less sensitive)
         const zScore = 2 + (1 - sensitivity) * 2; // Range: 2-4 standard deviations
@@ -439,7 +450,9 @@ export class DetectorService {
         return {
             node_count: nodes.length,
             edge_count: edges.length,
-            density: nodes.length > 1 ? (2 * edges.length) / (nodes.length * (nodes.length - 1)) : 0,
+            density: nodes.length > 1
+                ? (2 * edges.length) / (nodes.length * (nodes.length - 1))
+                : 0,
             clustering_coefficient: 0.3, // Simplified calculation
         };
     }
@@ -447,8 +460,10 @@ export class DetectorService {
         const byType = {};
         const bySeverity = {};
         for (const detection of detections) {
-            byType[detection.detection_type] = (byType[detection.detection_type] || 0) + 1;
-            bySeverity[detection.severity] = (bySeverity[detection.severity] || 0) + 1;
+            byType[detection.detection_type] =
+                (byType[detection.detection_type] || 0) + 1;
+            bySeverity[detection.severity] =
+                (bySeverity[detection.severity] || 0) + 1;
         }
         return {
             total_detections: detections.length,
@@ -494,7 +509,10 @@ export class DetectorService {
             sensitivity_level: request.sensitivity_level,
             graph_hash: this.calculateGraphHash(request.graph_data),
         };
-        return crypto.createHash('md5').update(JSON.stringify(normalized)).digest('hex');
+        return crypto
+            .createHash('md5')
+            .update(JSON.stringify(normalized))
+            .digest('hex');
     }
     calculateGraphHash(graphData) {
         if (!graphData)

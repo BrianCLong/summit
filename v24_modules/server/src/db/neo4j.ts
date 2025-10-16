@@ -1,13 +1,13 @@
-import neo4j, { 
-  Driver, 
-  Session, 
-  Transaction, 
-  Result, 
-  Record, 
+import neo4j, {
+  Driver,
+  Session,
+  Transaction,
+  Result,
+  Record,
   Integer,
   DateTime,
   Node,
-  Relationship
+  Relationship,
 } from 'neo4j-driver';
 import { logger } from '../observability/logger.js';
 import { incrementCounter, recordHistogram } from '../observability/metrics.js';
@@ -57,13 +57,18 @@ class Neo4jConnection {
         maxConnectionPoolSize: 50,
         connectionAcquisitionTimeout: 60000, // 1 minute
         disableLosslessIntegers: true,
-        encrypted: config.NODE_ENV === 'production' ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
-        trust: config.NODE_ENV === 'production' ? 'TRUST_SYSTEM_CA_SIGNED_CERTIFICATES' : 'TRUST_ALL_CERTIFICATES',
+        encrypted:
+          config.NODE_ENV === 'production' ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
+        trust:
+          config.NODE_ENV === 'production'
+            ? 'TRUST_SYSTEM_CA_SIGNED_CERTIFICATES'
+            : 'TRUST_ALL_CERTIFICATES',
         logging: {
           level: config.NODE_ENV === 'production' ? 'warn' : 'info',
-          logger: (level, message) => logger.debug(`Neo4j ${level}`, { message })
-        }
-      }
+          logger: (level, message) =>
+            logger.debug(`Neo4j ${level}`, { message }),
+        },
+      },
     );
   }
 
@@ -76,40 +81,39 @@ class Neo4jConnection {
       logger.info('Connecting to Neo4j', {
         uri: config.NEO4J_URI,
         user: config.NEO4J_USER,
-        database: config.NEO4J_DATABASE
+        database: config.NEO4J_DATABASE,
       });
 
       // Verify connectivity
       await this.driver.verifyConnectivity();
-      
+
       // Create indexes and constraints
       await this.setupSchema();
-      
+
       this.isConnected = true;
-      
+
       logger.info('Neo4j connection established and schema initialized', {
         uri: config.NEO4J_URI,
-        database: config.NEO4J_DATABASE
+        database: config.NEO4J_DATABASE,
       });
-
     } catch (error) {
       logger.error('Failed to connect to Neo4j', {
         error: error.message,
         stack: error.stack,
-        uri: config.NEO4J_URI
+        uri: config.NEO4J_URI,
       });
-      
+
       incrementCounter('neo4j_connection_errors_total', {
-        error_type: error.name || 'unknown'
+        error_type: error.name || 'unknown',
       });
-      
+
       throw error;
     }
   }
 
   private async setupSchema(): Promise<void> {
     const session = this.getSession();
-    
+
     try {
       logger.info('Setting up Neo4j schema and indexes...');
 
@@ -125,7 +129,10 @@ class Neo4jConnection {
           logger.debug('Created constraint', { constraint });
         } catch (error) {
           if (!error.message.includes('already exists')) {
-            logger.warn('Failed to create constraint', { constraint, error: error.message });
+            logger.warn('Failed to create constraint', {
+              constraint,
+              error: error.message,
+            });
           }
         }
       }
@@ -145,13 +152,15 @@ class Neo4jConnection {
           logger.debug('Created index', { index });
         } catch (error) {
           if (!error.message.includes('already exists')) {
-            logger.warn('Failed to create index', { index, error: error.message });
+            logger.warn('Failed to create index', {
+              index,
+              error: error.message,
+            });
           }
         }
       }
 
       logger.info('Neo4j schema setup completed');
-
     } finally {
       await session.close();
     }
@@ -161,10 +170,10 @@ class Neo4jConnection {
     if (!this.isConnected) {
       throw new Error('Neo4j not connected. Call connect() first.');
     }
-    
-    return this.driver.session({ 
+
+    return this.driver.session({
       database: database || config.NEO4J_DATABASE,
-      defaultAccessMode: neo4j.session.WRITE
+      defaultAccessMode: neo4j.session.WRITE,
     });
   }
 
@@ -176,13 +185,12 @@ class Neo4jConnection {
     try {
       await this.driver.close();
       this.isConnected = false;
-      
+
       logger.info('Neo4j connection closed');
-      
     } catch (error) {
       logger.error('Error closing Neo4j connection', {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
     }
   }
@@ -195,10 +203,12 @@ class Neo4jConnection {
 class Neo4jSignalRepository {
   constructor(private connection: Neo4jConnection) {}
 
-  async upsertSignal(signal: Signal): Promise<{ signalId: string; wasCreated: boolean }> {
+  async upsertSignal(
+    signal: Signal,
+  ): Promise<{ signalId: string; wasCreated: boolean }> {
     const session = this.connection.getSession();
     const startTime = Date.now();
-    
+
     try {
       const query = `
         MERGE (t:Tenant {tenantId: $tenantId})
@@ -246,11 +256,11 @@ class Neo4jSignalRepository {
         source: signal.source,
         ts: signal.ts.toISOString(),
         provenanceId: signal.provenance.id,
-        metadata: signal.metadata || {}
+        metadata: signal.metadata || {},
       };
 
       const result = await session.run(query, parameters);
-      
+
       if (result.records.length === 0) {
         throw new Error('Signal upsert returned no results');
       }
@@ -263,30 +273,29 @@ class Neo4jSignalRepository {
       const duration = Date.now() - startTime;
       recordHistogram('neo4j_query_duration_seconds', duration / 1000, {
         operation: 'upsert_signal',
-        tenant_id: signal.tenantId
+        tenant_id: signal.tenantId,
       });
 
       incrementCounter('neo4j_signals_upserted_total', {
         tenant_id: signal.tenantId,
         signal_type: signal.type,
-        was_created: wasCreated.toString()
+        was_created: wasCreated.toString(),
       });
 
       logger.debug('Signal upserted in Neo4j', {
         signalId,
         tenantId: signal.tenantId,
         wasCreated,
-        duration
+        duration,
       });
 
       return { signalId, wasCreated };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       incrementCounter('neo4j_query_errors_total', {
         operation: 'upsert_signal',
-        error_type: error.name || 'unknown'
+        error_type: error.name || 'unknown',
       });
 
       logger.error('Failed to upsert signal in Neo4j', {
@@ -294,17 +303,18 @@ class Neo4jSignalRepository {
         tenantId: signal.tenantId,
         error: error.message,
         stack: error.stack,
-        duration
+        duration,
       });
 
       throw error;
-
     } finally {
       await session.close();
     }
   }
 
-  async batchUpsertSignals(signals: Signal[]): Promise<{ successCount: number; errorCount: number; details: any[] }> {
+  async batchUpsertSignals(
+    signals: Signal[],
+  ): Promise<{ successCount: number; errorCount: number; details: any[] }> {
     const session = this.connection.getSession();
     const startTime = Date.now();
     const results: any[] = [];
@@ -314,12 +324,12 @@ class Neo4jSignalRepository {
     try {
       // Process in batches to avoid memory issues
       const batchSize = 100;
-      
+
       for (let i = 0; i < signals.length; i += batchSize) {
         const batch = signals.slice(i, i + batchSize);
-        
+
         const tx = session.beginTransaction();
-        
+
         try {
           for (const signal of batch) {
             try {
@@ -366,38 +376,36 @@ class Neo4jSignalRepository {
                 source: signal.source,
                 ts: signal.ts.toISOString(),
                 provenanceId: signal.provenance.id,
-                metadata: signal.metadata || {}
+                metadata: signal.metadata || {},
               };
 
               const result = await tx.run(query, parameters);
-              
+
               if (result.records.length > 0) {
                 const record = result.records[0];
                 results.push({
                   signalId: signal.signalId,
                   status: 'success',
-                  wasCreated: record.get('wasCreated')
+                  wasCreated: record.get('wasCreated'),
                 });
                 successCount++;
               }
-
             } catch (error) {
               logger.error('Error processing signal in batch', {
                 signalId: signal.signalId,
-                error: error.message
+                error: error.message,
               });
-              
+
               results.push({
                 signalId: signal.signalId,
                 status: 'error',
-                error: error.message
+                error: error.message,
               });
               errorCount++;
             }
           }
-          
+
           await tx.commit();
-          
         } catch (error) {
           await tx.rollback();
           throw error;
@@ -405,50 +413,51 @@ class Neo4jSignalRepository {
       }
 
       const duration = Date.now() - startTime;
-      
+
       recordHistogram('neo4j_batch_query_duration_seconds', duration / 1000, {
         operation: 'batch_upsert_signals',
-        batch_size: signals.length.toString()
+        batch_size: signals.length.toString(),
       });
 
       incrementCounter('neo4j_batch_signals_processed_total', {
         batch_size: signals.length.toString(),
         success_count: successCount.toString(),
-        error_count: errorCount.toString()
+        error_count: errorCount.toString(),
       });
 
       logger.info('Batch signal upsert completed', {
         totalSignals: signals.length,
         successCount,
         errorCount,
-        duration
+        duration,
       });
 
       return { successCount, errorCount, details: results };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       incrementCounter('neo4j_batch_query_errors_total', {
         operation: 'batch_upsert_signals',
-        error_type: error.name || 'unknown'
+        error_type: error.name || 'unknown',
       });
 
       logger.error('Failed to batch upsert signals in Neo4j', {
         batchSize: signals.length,
         error: error.message,
         stack: error.stack,
-        duration
+        duration,
       });
 
       throw error;
-
     } finally {
       await session.close();
     }
   }
 
-  async computeCoherenceScore(tenantId: string, windowHours: number = 24): Promise<CoherenceScore | null> {
+  async computeCoherenceScore(
+    tenantId: string,
+    windowHours: number = 24,
+  ): Promise<CoherenceScore | null> {
     const session = this.connection.getSession();
     const startTime = Date.now();
 
@@ -494,9 +503,9 @@ class Neo4jSignalRepository {
                windowEnd
       `;
 
-      const result = await session.run(query, { 
-        tenantId, 
-        windowHours: windowHours.toString() 
+      const result = await session.run(query, {
+        tenantId,
+        windowHours: windowHours.toString(),
       });
 
       if (result.records.length === 0) {
@@ -512,14 +521,14 @@ class Neo4jSignalRepository {
         updatedAt: new Date(record.get('updatedAt').toString()),
         signalCount: record.get('signalCount').toNumber(),
         windowStart: new Date(record.get('windowStart').toString()),
-        windowEnd: new Date(record.get('windowEnd').toString())
+        windowEnd: new Date(record.get('windowEnd').toString()),
       };
 
       const duration = Date.now() - startTime;
-      
+
       recordHistogram('neo4j_query_duration_seconds', duration / 1000, {
         operation: 'compute_coherence_score',
-        tenant_id: tenantId
+        tenant_id: tenantId,
       });
 
       logger.debug('Coherence score computed', {
@@ -527,17 +536,16 @@ class Neo4jSignalRepository {
         score: coherenceScore.score,
         status: coherenceScore.status,
         signalCount: coherenceScore.signalCount,
-        duration
+        duration,
       });
 
       return coherenceScore;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       incrementCounter('neo4j_query_errors_total', {
         operation: 'compute_coherence_score',
-        error_type: error.name || 'unknown'
+        error_type: error.name || 'unknown',
       });
 
       logger.error('Failed to compute coherence score', {
@@ -545,17 +553,20 @@ class Neo4jSignalRepository {
         windowHours,
         error: error.message,
         stack: error.stack,
-        duration
+        duration,
       });
 
       throw error;
-
     } finally {
       await session.close();
     }
   }
 
-  async getTenantSignals(tenantId: string, limit: number = 1000, offset: number = 0): Promise<Signal[]> {
+  async getTenantSignals(
+    tenantId: string,
+    limit: number = 1000,
+    offset: number = 0,
+  ): Promise<Signal[]> {
     const session = this.connection.getSession();
     const startTime = Date.now();
 
@@ -577,8 +588,8 @@ class Neo4jSignalRepository {
       `;
 
       const result = await session.run(query, { tenantId, limit, offset });
-      
-      const signals: Signal[] = result.records.map(record => ({
+
+      const signals: Signal[] = result.records.map((record) => ({
         signalId: record.get('signalId'),
         tenantId: record.get('tenantId'),
         type: record.get('type'),
@@ -587,24 +598,23 @@ class Neo4jSignalRepository {
         source: record.get('source'),
         ts: new Date(record.get('ts').toString()),
         metadata: record.get('metadata') || {},
-        provenance: { id: record.get('provenanceId') }
+        provenance: { id: record.get('provenanceId') },
       }));
 
       const duration = Date.now() - startTime;
-      
+
       recordHistogram('neo4j_query_duration_seconds', duration / 1000, {
         operation: 'get_tenant_signals',
-        tenant_id: tenantId
+        tenant_id: tenantId,
       });
 
       return signals;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       incrementCounter('neo4j_query_errors_total', {
         operation: 'get_tenant_signals',
-        error_type: error.name || 'unknown'
+        error_type: error.name || 'unknown',
       });
 
       logger.error('Failed to get tenant signals', {
@@ -612,11 +622,10 @@ class Neo4jSignalRepository {
         limit,
         offset,
         error: error.message,
-        duration
+        duration,
       });
 
       throw error;
-
     } finally {
       await session.close();
     }
@@ -631,34 +640,37 @@ export async function initializeDatabase(): Promise<void> {
   try {
     neo4jConnection = new Neo4jConnection();
     await neo4jConnection.connect();
-    
+
     signalRepository = new Neo4jSignalRepository(neo4jConnection);
-    
+
     logger.info('Neo4j database initialized successfully');
-    
   } catch (error) {
     logger.error('Failed to initialize Neo4j database', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
-    
+
     throw error;
   }
 }
 
 export function getSignalRepository(): Neo4jSignalRepository {
   if (!signalRepository) {
-    throw new Error('Signal repository not initialized. Call initializeDatabase() first.');
+    throw new Error(
+      'Signal repository not initialized. Call initializeDatabase() first.',
+    );
   }
-  
+
   return signalRepository;
 }
 
 export function getNeo4jConnection(): Neo4jConnection {
   if (!neo4jConnection) {
-    throw new Error('Neo4j connection not initialized. Call initializeDatabase() first.');
+    throw new Error(
+      'Neo4j connection not initialized. Call initializeDatabase() first.',
+    );
   }
-  
+
   return neo4jConnection;
 }
 

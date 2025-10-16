@@ -104,7 +104,9 @@ export function recordExpertExecution(expert, decisionId, latencyMs, cost, succe
             'conductor.execution.latency_ms': latencyMs,
             'conductor.execution.cost_usd': cost,
             'conductor.execution.success': success,
-            'conductor.execution.result_size': result ? JSON.stringify(result).length : 0,
+            'conductor.execution.result_size': result
+                ? JSON.stringify(result).length
+                : 0,
         });
         // Add result summary for successful executions
         if (success && result) {
@@ -265,7 +267,10 @@ export function conductorTracingMiddleware() {
                 'conductor.response_size': chunk ? chunk.length : 0,
             });
             if (res.statusCode >= 400) {
-                span.setStatus({ code: SpanStatusCode.ERROR, message: `HTTP ${res.statusCode}` });
+                span.setStatus({
+                    code: SpanStatusCode.ERROR,
+                    message: `HTTP ${res.statusCode}`,
+                });
             }
             else {
                 span.setStatus({ code: SpanStatusCode.OK });
@@ -295,7 +300,8 @@ export function createConductorGraphQLPlugin() {
                 },
                 didResolveOperation(requestContext) {
                     const { operationName } = requestContext.request;
-                    if (operationName === 'conduct' || operationName === 'previewRouting') {
+                    if (operationName === 'conduct' ||
+                        operationName === 'previewRouting') {
                         const span = trace.getActiveSpan();
                         if (span) {
                             span.setAttributes({
@@ -308,7 +314,8 @@ export function createConductorGraphQLPlugin() {
                 },
                 didEncounterErrors(requestContext) {
                     const { operationName } = requestContext.request;
-                    if (operationName === 'conduct' || operationName === 'previewRouting') {
+                    if (operationName === 'conduct' ||
+                        operationName === 'previewRouting') {
                         const span = trace.getActiveSpan();
                         if (span) {
                             requestContext.errors.forEach((error) => {

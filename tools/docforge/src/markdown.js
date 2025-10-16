@@ -57,5 +57,5 @@ function markdownToHtml(markdown) {
 }
 
 module.exports = {
-  markdownToHtml
+  markdownToHtml,
 };

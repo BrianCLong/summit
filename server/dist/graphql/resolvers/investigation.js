@@ -17,11 +17,21 @@ const investigationResolvers = {
             logger.info(`Fetching investigations (placeholder) limit: ${limit}, offset: ${offset}`);
             // Placeholder: In a real implementation, fetch investigations from PostgreSQL with pagination
             return [
-                { id: 'inv-1', name: 'Project Alpha', description: 'Initial investigation', createdAt: new Date().toISOString() },
-                { id: 'inv-2', name: 'Project Beta', description: 'Follow-up investigation', createdAt: new Date().toISOString() },
+                {
+                    id: 'inv-1',
+                    name: 'Project Alpha',
+                    description: 'Initial investigation',
+                    createdAt: new Date().toISOString(),
+                },
+                {
+                    id: 'inv-2',
+                    name: 'Project Beta',
+                    description: 'Follow-up investigation',
+                    createdAt: new Date().toISOString(),
+                },
             ];
         },
-        auditTrace: async (_, { investigationId, filter }) => {
+        auditTrace: async (_, { investigationId, filter, }) => {
             logger.info(`Fetching audit trace for investigation ${investigationId}`);
             const pool = getPostgresPool();
             const params = [investigationId];
@@ -64,7 +74,7 @@ const investigationResolvers = {
                 createdAt: new Date().toISOString(),
             };
         },
-        updateInvestigation: async (_, { id, input }) => {
+        updateInvestigation: async (_, { id, input, }) => {
             logger.info(`Updating investigation ${id}: ${JSON.stringify(input)} (placeholder)`);
             // Placeholder: In a real implementation, update investigation in PostgreSQL
             return {

@@ -1,16 +1,17 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class MonitoringObservabilityService extends EventEmitter {
+    alerts = new Map();
+    logs = [];
+    traces = new Map();
+    serviceHealth = new Map();
+    dashboards = new Map();
+    cache;
+    maxLogs = 10000;
+    logRetentionDays = 30;
+    alertRetentionDays = 90;
     constructor() {
         super();
-        this.alerts = new Map();
-        this.logs = [];
-        this.traces = new Map();
-        this.serviceHealth = new Map();
-        this.dashboards = new Map();
-        this.maxLogs = 10000;
-        this.logRetentionDays = 30;
-        this.alertRetentionDays = 90;
         this.cache = new RedisCache();
         this.initializeServices();
         this.startHealthChecks();
@@ -80,7 +81,9 @@ export class MonitoringObservabilityService extends EventEmitter {
                     ...health,
                     lastCheck: new Date(),
                     responseTime,
-                    uptime: serviceName === 'intelgraph-server' ? process.uptime() : Math.random() * 86400,
+                    uptime: serviceName === 'intelgraph-server'
+                        ? process.uptime()
+                        : Math.random() * 86400,
                     metrics: {
                         cpu: Math.random() * 80 + 10,
                         memory: Math.random() * 70 + 20,
@@ -118,7 +121,10 @@ export class MonitoringObservabilityService extends EventEmitter {
                         metadata: { previousStatus: health.status, newStatus: status },
                     });
                 }
-                this.emit('health-check-completed', { service: serviceName, health: updatedHealth });
+                this.emit('health-check-completed', {
+                    service: serviceName,
+                    health: updatedHealth,
+                });
             }
         }
         catch (error) {
@@ -180,7 +186,8 @@ export class MonitoringObservabilityService extends EventEmitter {
     }
     checkForLogPatternAlerts(logEntry) {
         const recentErrors = this.logs.filter((log) => log.level === 'error' ||
-            (log.level === 'fatal' && Date.now() - log.timestamp.getTime() < 300000));
+            (log.level === 'fatal' &&
+                Date.now() - log.timestamp.getTime() < 300000));
         if (recentErrors.length > 10) {
             this.createAlert({
                 type: 'system',
@@ -220,7 +227,9 @@ export class MonitoringObservabilityService extends EventEmitter {
         const spans = this.traces.get(traceId);
         if (!spans)
             return;
-        const span = spanId ? spans.find((s) => s.id === spanId) : spans[spans.length - 1];
+        const span = spanId
+            ? spans.find((s) => s.id === spanId)
+            : spans[spans.length - 1];
         if (!span)
             return;
         span.endTime = new Date();
@@ -249,7 +258,11 @@ export class MonitoringObservabilityService extends EventEmitter {
                 threshold: 5000,
                 currentValue: span.duration,
                 tags: ['performance', 'trace'],
-                metadata: { traceId, spanId: span.id, operationName: span.operationName },
+                metadata: {
+                    traceId,
+                    spanId: span.id,
+                    operationName: span.operationName,
+                },
             });
         }
         this.emit('trace-finished', { traceId, span });
@@ -429,7 +442,8 @@ export class MonitoringObservabilityService extends EventEmitter {
             overall = 'degraded';
         }
         const avgResponseTime = services.reduce((sum, s) => sum + s.responseTime, 0) / services.length;
-        const errorRate = services.reduce((sum, s) => sum + s.metrics.errorRate, 0) / services.length;
+        const errorRate = services.reduce((sum, s) => sum + s.metrics.errorRate, 0) /
+            services.length;
         const uptime = Math.max(...services.map((s) => s.uptime));
         return {
             overall,

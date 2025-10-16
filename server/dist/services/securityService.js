@@ -3,19 +3,19 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { cacheService } from './cacheService';
 export class SecurityService extends EventEmitter {
+    users = new Map();
+    roles = new Map();
+    sessions = new Map();
+    apiKeys = new Map();
+    securityEvents = [];
+    auditLogs = [];
+    maxEventHistory = 10000;
+    maxAuditHistory = 50000;
+    jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production';
+    jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production';
+    saltRounds = 12;
     constructor() {
         super();
-        this.users = new Map();
-        this.roles = new Map();
-        this.sessions = new Map();
-        this.apiKeys = new Map();
-        this.securityEvents = [];
-        this.auditLogs = [];
-        this.maxEventHistory = 10000;
-        this.maxAuditHistory = 50000;
-        this.jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production';
-        this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production';
-        this.saltRounds = 12;
         console.log('[SECURITY] Advanced security service initialized');
         this.initializeRoles();
         this.initializeAdminUser();
@@ -306,7 +306,10 @@ export class SecurityService extends EventEmitter {
             const decoded = jwt.verify(token, this.jwtSecret);
             const user = this.users.get(decoded.userId);
             const session = this.sessions.get(decoded.sessionId);
-            if (!user || !session || !session.isActive || new Date(session.expiresAt) < new Date()) {
+            if (!user ||
+                !session ||
+                !session.isActive ||
+                new Date(session.expiresAt) < new Date()) {
                 return null;
             }
             // Update last activity
@@ -413,7 +416,8 @@ export class SecurityService extends EventEmitter {
         // Emit event for real-time monitoring
         this.emit('securityEvent', securityEvent);
         // Cache high-risk events
-        if (securityEvent.riskLevel === 'CRITICAL' || securityEvent.riskLevel === 'HIGH') {
+        if (securityEvent.riskLevel === 'CRITICAL' ||
+            securityEvent.riskLevel === 'HIGH') {
             await cacheService.set(`security_event:${securityEvent.id}`, securityEvent, 3600);
         }
         console.log(`[SECURITY] ${securityEvent.riskLevel} event: ${securityEvent.description}`);
@@ -468,7 +472,8 @@ export class SecurityService extends EventEmitter {
     validateAccessContext(user, ipAddress, userAgent) {
         const context = user.accessContext;
         // IP whitelist check
-        if (context.ipWhitelist.length > 0 && !context.ipWhitelist.includes(ipAddress)) {
+        if (context.ipWhitelist.length > 0 &&
+            !context.ipWhitelist.includes(ipAddress)) {
             return false;
         }
         // Time restrictions check
@@ -511,8 +516,10 @@ export class SecurityService extends EventEmitter {
             users: {
                 total: this.users.size,
                 active: activeUsers,
-                locked: Array.from(this.users.values()).filter((u) => u.lockedUntil).length,
-                mfaEnabled: Array.from(this.users.values()).filter((u) => u.mfaEnabled).length,
+                locked: Array.from(this.users.values()).filter((u) => u.lockedUntil)
+                    .length,
+                mfaEnabled: Array.from(this.users.values()).filter((u) => u.mfaEnabled)
+                    .length,
             },
             sessions: {
                 active: activeSessions,
@@ -590,7 +597,8 @@ export class SecurityService extends EventEmitter {
         const auditCutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const auditBefore = this.auditLogs.length;
         this.auditLogs = this.auditLogs.filter((log) => new Date(log.timestamp).getTime() > auditCutoff);
-        if (eventsBefore !== this.securityEvents.length || auditBefore !== this.auditLogs.length) {
+        if (eventsBefore !== this.securityEvents.length ||
+            auditBefore !== this.auditLogs.length) {
             console.log(`[SECURITY] Cleaned up old events and audit logs`);
         }
     }

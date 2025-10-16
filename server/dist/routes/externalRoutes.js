@@ -7,7 +7,9 @@ const svc = new ExternalAPIService(console);
 router.use(ensureAuthenticated);
 router.get('/providers', (req, res) => {
     const p = svc.providers();
-    res.json({ providers: Object.keys(p).map(k => ({ id: k, info: p[k].info })) });
+    res.json({
+        providers: Object.keys(p).map((k) => ({ id: k, info: p[k].info })),
+    });
 });
 router.post('/query', async (req, res) => {
     try {
@@ -25,7 +27,9 @@ router.post('/query', async (req, res) => {
         )`);
             await pool.query('INSERT INTO external_queries (provider, params, user_id) VALUES ($1,$2,$3)', [provider, params || {}, req.user?.id || null]);
         }
-        catch (e) { /* ignore */ }
+        catch (e) {
+            /* ignore */
+        }
         res.json({ success: true, ...out });
     }
     catch (e) {

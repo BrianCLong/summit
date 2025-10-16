@@ -43,7 +43,8 @@ export class AuditHashChain {
   private checkpointPath: string;
   private privateKey?: string;
   private currentSequence: number = 0;
-  private lastHash: string = '0000000000000000000000000000000000000000000000000000000000000000';
+  private lastHash: string =
+    '0000000000000000000000000000000000000000000000000000000000000000';
 
   constructor(logPath: string, privateKey?: string) {
     this.logPath = logPath;
@@ -66,7 +67,10 @@ export class AuditHashChain {
 
     // Calculate event hash
     const eventData = JSON.stringify(event, Object.keys(event).sort());
-    const eventHash = crypto.createHash('sha256').update(eventData).digest('hex');
+    const eventHash = crypto
+      .createHash('sha256')
+      .update(eventData)
+      .digest('hex');
 
     // Create hash chain entry
     const entry: HashChainEntry = {
@@ -74,7 +78,11 @@ export class AuditHashChain {
       timestamp: event.timestamp,
       eventHash,
       previousHash: this.lastHash,
-      chainHash: this.calculateChainHash(eventHash, this.lastHash, this.currentSequence)
+      chainHash: this.calculateChainHash(
+        eventHash,
+        this.lastHash,
+        this.currentSequence,
+      ),
     };
 
     // Sign entry if private key available
@@ -99,23 +107,30 @@ export class AuditHashChain {
   /**
    * Verify hash chain integrity
    */
-  async verifyChain(startSequence = 1, endSequence?: number): Promise<{
+  async verifyChain(
+    startSequence = 1,
+    endSequence?: number,
+  ): Promise<{
     valid: boolean;
     errors: string[];
     verifiedEntries: number;
   }> {
     const errors: string[] = [];
     let verifiedEntries = 0;
-    let expectedPreviousHash = startSequence === 1 ?
-      '0000000000000000000000000000000000000000000000000000000000000000' :
-      await this.getHashAtSequence(startSequence - 1);
+    let expectedPreviousHash =
+      startSequence === 1
+        ? '0000000000000000000000000000000000000000000000000000000000000000'
+        : await this.getHashAtSequence(startSequence - 1);
 
     const entries = await this.readLogEntries(startSequence, endSequence);
 
     for (const { event, chainEntry } of entries) {
       // Verify event hash
       const eventData = JSON.stringify(event, Object.keys(event).sort());
-      const calculatedEventHash = crypto.createHash('sha256').update(eventData).digest('hex');
+      const calculatedEventHash = crypto
+        .createHash('sha256')
+        .update(eventData)
+        .digest('hex');
 
       if (calculatedEventHash !== chainEntry.eventHash) {
         errors.push(`Sequence ${chainEntry.sequence}: Event hash mismatch`);
@@ -132,7 +147,7 @@ export class AuditHashChain {
       const calculatedChainHash = this.calculateChainHash(
         chainEntry.eventHash,
         chainEntry.previousHash,
-        chainEntry.sequence
+        chainEntry.sequence,
       );
 
       if (calculatedChainHash !== chainEntry.chainHash) {
@@ -155,7 +170,7 @@ export class AuditHashChain {
     return {
       valid: errors.length === 0,
       errors,
-      verifiedEntries
+      verifiedEntries,
     };
   }
 
@@ -165,11 +180,11 @@ export class AuditHashChain {
   async createCheckpoint(): Promise<Checkpoint> {
     const recentEntries = await this.readLogEntries(
       Math.max(1, this.currentSequence - 999),
-      this.currentSequence
+      this.currentSequence,
     );
 
     // Calculate merkle root
-    const hashes = recentEntries.map(entry => entry.chainEntry.chainHash);
+    const hashes = recentEntries.map((entry) => entry.chainEntry.chainHash);
     const merkleRoot = this.calculateMerkleRoot(hashes);
 
     const checkpoint: Checkpoint = {
@@ -177,7 +192,7 @@ export class AuditHashChain {
       timestamp: new Date().toISOString(),
       eventCount: recentEntries.length,
       merkleRoot,
-      signature: ''
+      signature: '',
     };
 
     // Sign checkpoint
@@ -186,9 +201,11 @@ export class AuditHashChain {
         sequence: checkpoint.sequence,
         timestamp: checkpoint.timestamp,
         eventCount: checkpoint.eventCount,
-        merkleRoot: checkpoint.merkleRoot
+        merkleRoot: checkpoint.merkleRoot,
       });
-      checkpoint.signature = crypto.sign('sha256', Buffer.from(checkpointData), this.privateKey).toString('hex');
+      checkpoint.signature = crypto
+        .sign('sha256', Buffer.from(checkpointData), this.privateKey)
+        .toString('hex');
     }
 
     // Save checkpoint
@@ -210,7 +227,9 @@ export class AuditHashChain {
 
     try {
       // Simple NTP check (in production, use proper NTP client)
-      const ntpResponse = await fetch('http://worldtimeapi.org/api/timezone/UTC');
+      const ntpResponse = await fetch(
+        'http://worldtimeapi.org/api/timezone/UTC',
+      );
       const ntpData = await ntpResponse.json();
       const ntpTime = new Date(ntpData.utc_datetime);
 
@@ -221,19 +240,23 @@ export class AuditHashChain {
         valid: skew <= maxSkew,
         skew,
         ntpTime,
-        systemTime
+        systemTime,
       };
     } catch (error) {
       console.warn('NTP validation failed:', error.message);
       return {
         valid: false,
         skew: -1,
-        systemTime
+        systemTime,
       };
     }
   }
 
-  private calculateChainHash(eventHash: string, previousHash: string, sequence: number): string {
+  private calculateChainHash(
+    eventHash: string,
+    previousHash: string,
+    sequence: number,
+  ): string {
     const data = `${eventHash}:${previousHash}:${sequence}`;
     return crypto.createHash('sha256').update(data).digest('hex');
   }
@@ -246,10 +269,12 @@ export class AuditHashChain {
       timestamp: entry.timestamp,
       eventHash: entry.eventHash,
       previousHash: entry.previousHash,
-      chainHash: entry.chainHash
+      chainHash: entry.chainHash,
     });
 
-    return crypto.sign('sha256', Buffer.from(entryData), this.privateKey).toString('hex');
+    return crypto
+      .sign('sha256', Buffer.from(entryData), this.privateKey)
+      .toString('hex');
   }
 
   private verifySignature(entry: HashChainEntry): boolean {
@@ -260,11 +285,16 @@ export class AuditHashChain {
       timestamp: entry.timestamp,
       eventHash: entry.eventHash,
       previousHash: entry.previousHash,
-      chainHash: entry.chainHash
+      chainHash: entry.chainHash,
     });
 
     try {
-      return crypto.verify('sha256', Buffer.from(entryData), this.privateKey, Buffer.from(entry.signature, 'hex'));
+      return crypto.verify(
+        'sha256',
+        Buffer.from(entryData),
+        this.privateKey,
+        Buffer.from(entry.signature, 'hex'),
+      );
     } catch {
       return false;
     }
@@ -278,7 +308,10 @@ export class AuditHashChain {
     for (let i = 0; i < hashes.length; i += 2) {
       const left = hashes[i];
       const right = hashes[i + 1] || left; // Duplicate if odd number
-      const combined = crypto.createHash('sha256').update(left + right).digest('hex');
+      const combined = crypto
+        .createHash('sha256')
+        .update(left + right)
+        .digest('hex');
       nextLevel.push(combined);
     }
 
@@ -294,12 +327,16 @@ export class AuditHashChain {
     }
   }
 
-  private async writeLogEntry(event: AuditEvent, chainEntry: HashChainEntry): Promise<void> {
-    const logLine = JSON.stringify({
-      event,
-      chainEntry,
-      timestamp: new Date().toISOString()
-    }) + '\n';
+  private async writeLogEntry(
+    event: AuditEvent,
+    chainEntry: HashChainEntry,
+  ): Promise<void> {
+    const logLine =
+      JSON.stringify({
+        event,
+        chainEntry,
+        timestamp: new Date().toISOString(),
+      }) + '\n';
 
     await fs.appendFile(this.logPath, logLine);
   }
@@ -309,20 +346,31 @@ export class AuditHashChain {
     await fs.appendFile(this.checkpointPath, checkpointLine);
   }
 
-  private async readLogEntries(startSequence: number, endSequence?: number): Promise<Array<{
-    event: AuditEvent;
-    chainEntry: HashChainEntry;
-  }>> {
+  private async readLogEntries(
+    startSequence: number,
+    endSequence?: number,
+  ): Promise<
+    Array<{
+      event: AuditEvent;
+      chainEntry: HashChainEntry;
+    }>
+  > {
     try {
       const content = await fs.readFile(this.logPath, 'utf-8');
-      const lines = content.trim().split('\n').filter(line => line);
-      const entries: Array<{ event: AuditEvent; chainEntry: HashChainEntry }> = [];
+      const lines = content
+        .trim()
+        .split('\n')
+        .filter((line) => line);
+      const entries: Array<{ event: AuditEvent; chainEntry: HashChainEntry }> =
+        [];
 
       for (const line of lines) {
         try {
           const parsed = JSON.parse(line);
-          if (parsed.chainEntry.sequence >= startSequence &&
-              (!endSequence || parsed.chainEntry.sequence <= endSequence)) {
+          if (
+            parsed.chainEntry.sequence >= startSequence &&
+            (!endSequence || parsed.chainEntry.sequence <= endSequence)
+          ) {
             entries.push(parsed);
           }
         } catch {

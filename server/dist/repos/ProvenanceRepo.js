@@ -1,4 +1,5 @@
 export class ProvenanceRepo {
+    pg;
     constructor(pg) {
         this.pg = pg;
     }
@@ -48,7 +49,10 @@ export class ProvenanceRepo {
             // provenance.source (if available)
             where.push(`(COALESCE(source,'') = ANY($${params.push(filter.sourceIn)}))`);
         }
-        return { where: where.length ? `WHERE ${where.join(' AND ')}` : '', params };
+        return {
+            where: where.length ? `WHERE ${where.join(' AND ')}` : '',
+            params,
+        };
     }
     mapRow(r) {
         // Normalize to API shape
@@ -62,7 +66,9 @@ export class ProvenanceRepo {
         return {
             id: r.id,
             kind,
-            createdAt: createdAt instanceof Date ? createdAt.toISOString() : new Date(createdAt).toISOString(),
+            createdAt: createdAt instanceof Date
+                ? createdAt.toISOString()
+                : new Date(createdAt).toISOString(),
             metadata,
         };
     }

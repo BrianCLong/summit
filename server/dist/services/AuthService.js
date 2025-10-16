@@ -38,6 +38,7 @@ const ROLE_PERMISSIONS = {
     ],
 };
 export class AuthService {
+    pool;
     constructor() {
         this.pool = getPostgresPool();
     }
@@ -60,7 +61,7 @@ export class AuthService {
                 passwordHash,
                 userData.firstName,
                 userData.lastName,
-                userData.role || 'ANALYST'
+                userData.role || 'ANALYST',
             ]);
             const user = userResult.rows[0];
             const { token, refreshToken } = await this.generateTokens(user, client);
@@ -69,7 +70,7 @@ export class AuthService {
                 user: this.formatUser(user),
                 token,
                 refreshToken,
-                expiresIn: 24 * 60 * 60
+                expiresIn: 24 * 60 * 60,
             };
         }
         catch (error) {
@@ -99,7 +100,7 @@ export class AuthService {
                 user: this.formatUser(user),
                 token,
                 refreshToken,
-                expiresIn: 24 * 60 * 60
+                expiresIn: 24 * 60 * 60,
             };
         }
         catch (error) {
@@ -114,10 +115,10 @@ export class AuthService {
         const tokenPayload = {
             userId: user.id,
             email: user.email,
-            role: user.role
+            role: user.role,
         };
         const token = jwt.sign(tokenPayload, config.jwt.secret, {
-            expiresIn: config.jwt.expiresIn
+            expiresIn: config.jwt.expiresIn,
         });
         const refreshToken = uuidv4();
         const expiresAt = new Date();
@@ -168,7 +169,7 @@ export class AuthService {
             isActive: user.is_active,
             lastLogin: user.last_login,
             createdAt: user.created_at,
-            updatedAt: user.updated_at
+            updatedAt: user.updated_at,
         };
     }
 }

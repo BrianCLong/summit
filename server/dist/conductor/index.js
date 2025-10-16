@@ -1,9 +1,9 @@
 // Main Conductor Implementation
 // Orchestrates MoE routing with MCP tool execution and security controls
 import { moERouter } from './router';
-import { mcpClient, executeToolAnywhere, initializeMCPClient } from './mcp/client';
+import { mcpClient, executeToolAnywhere, initializeMCPClient, } from './mcp/client';
 import { randomUUID as uuid } from 'crypto';
-import { createBudgetController } from './admission/budget-control';
+import { createBudgetController, } from './admission/budget-control';
 import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
 import { ConductorCache } from './cache';
@@ -13,11 +13,15 @@ import { checkResidency } from '../policy/opaClient.js';
 import { checkQuota, accrueUsage } from './quotas.js';
 import { MissionControlConflictResolver, } from './mission-control/conflict-resolution';
 export class Conductor {
+    config;
+    activeTaskCount = 0;
+    queue = [];
+    auditLog = []; // Keep existing auditLog
+    budgetController; // Add this line
+    cache;
+    missionControlResolver;
     constructor(config) {
         this.config = config;
-        this.activeTaskCount = 0;
-        this.queue = [];
-        this.auditLog = []; // Keep existing auditLog
         // Initialize MCP client with default options
         initializeMCPClient({
             timeout: config.defaultTimeoutMs,
@@ -48,14 +52,17 @@ export class Conductor {
         const auditId = this.config.auditEnabled ? uuid() : undefined;
         const startTime = performance.now();
         // Determine tenantId for budget control
-        const tenantId = input.userContext?.tenantId || input.userContext?.tenant || 'global';
+        const tenantId = input.userContext?.tenantId ||
+            input.userContext?.tenant ||
+            'global';
         let missionControlResolution = null;
         let missionControlLogs = [];
         try {
             if (input.missionControlContext) {
                 missionControlResolution = this.missionControlResolver.resolve(input.missionControlContext);
                 if (!missionControlResolution.allowProceed) {
-                    const deferReason = missionControlResolution.deferred.find((entry) => entry.missionId === input.missionControlContext?.currentMissionId)?.reason || 'Mission deferred by arbitration';
+                    const deferReason = missionControlResolution.deferred.find((entry) => entry.missionId ===
+                        input.missionControlContext?.currentMissionId)?.reason || 'Mission deferred by arbitration';
                     throw new Error(`Mission control deferred ${input.missionControlContext.currentMissionId}: ${deferReason}`);
                 }
                 missionControlLogs = this.formatMissionControlLogs(missionControlResolution);
@@ -96,7 +103,10 @@ export class Conductor {
                             auditId,
                         };
                         if (missionControlLogs.length) {
-                            conductResult.logs = [...missionControlLogs, ...conductResult.logs];
+                            conductResult.logs = [
+                                ...missionControlLogs,
+                                ...conductResult.logs,
+                            ];
                         }
                         if (this.config.auditEnabled) {
                             this.logAudit({
@@ -138,7 +148,8 @@ export class Conductor {
             }
             // Residency + security gates
             const residency = input.userContext?.residency || undefined;
-            const region = input.userContext?.region || this.config?.llmProviders?.light?.endpoint?.match(/(eu|us\-east|us\-west)/)?.[1];
+            const region = input.userContext?.region ||
+                this.config?.llmProviders?.light?.endpoint?.match(/(eu|us\-east|us\-west)/)?.[1];
             if (residency) {
                 const r = await checkResidency({ region, residency });
                 if (!r.allow) {
@@ -226,7 +237,12 @@ export class Conductor {
         }
     }
     makeCacheKey(expert, input) {
-        const basis = JSON.stringify({ expert, task: input.task, dataRefs: input.dataRefs, ctx: input.userContext });
+        const basis = JSON.stringify({
+            expert,
+            task: input.task,
+            dataRefs: input.dataRefs,
+            ctx: input.userContext,
+        });
         return createHash('sha1').update(basis).digest('hex');
     }
     /**
@@ -443,7 +459,11 @@ export class Conductor {
             return { output: out?.data ?? out, logs, cost: 0.004 };
         }
         logs.push('OSINT tool execution (mock)');
-        return { output: { query: input.task, sources: [], findings: [], confidence: 0.5 }, logs, cost: 0.003 };
+        return {
+            output: { query: input.task, sources: [], findings: [], confidence: 0.5 },
+            logs,
+            cost: 0.003,
+        };
     }
     /**
      * Execute export operations (placeholder)
@@ -481,7 +501,9 @@ export class Conductor {
      * Execute LLM operations (placeholder)
      */
     async executeLLM(expert, input, logs) {
-        const config = expert === 'LLM_LIGHT' ? this.config.llmProviders.light : this.config.llmProviders.heavy;
+        const config = expert === 'LLM_LIGHT'
+            ? this.config.llmProviders.light
+            : this.config.llmProviders.heavy;
         if (!config) {
             throw new Error(`${expert} provider not configured`);
         }

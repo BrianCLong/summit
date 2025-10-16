@@ -1,10 +1,29 @@
-import { useState } from "react";
-import { Command, CommandInput, CommandList, CommandItem } from "@/components/ui/command";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Mic, PhoneCall, Video, MessageSquare, Rocket, Activity, Users, Brain } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState } from 'react';
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+} from '@/components/ui/command';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Mic,
+  PhoneCall,
+  Video,
+  MessageSquare,
+  Rocket,
+  Activity,
+  Users,
+  Brain,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 
 type Agent = {
   id: string;
@@ -20,17 +39,22 @@ type Tile = {
 };
 
 const agents: Agent[] = [
-  { id: "maestro", name: "Maestro Conductor", tags: ["router", "exec"] },
-  { id: "codex", name: "CodeGen Codex", tags: ["dev", "test"] },
-  { id: "sentinel", name: "Sentinel CI", tags: ["sec", "policy"] },
-  { id: "scribe", name: "Scribe", tags: ["notes", "transcribe"] },
+  { id: 'maestro', name: 'Maestro Conductor', tags: ['router', 'exec'] },
+  { id: 'codex', name: 'CodeGen Codex', tags: ['dev', 'test'] },
+  { id: 'sentinel', name: 'Sentinel CI', tags: ['sec', 'policy'] },
+  { id: 'scribe', name: 'Scribe', tags: ['notes', 'transcribe'] },
 ];
 
 const tiles: Tile[] = [
-  { id: "status", title: "System Status", metric: "OK", desc: "All lanes green" },
-  { id: "incidents", title: "Incidents", metric: "0", desc: "No active" },
-  { id: "deploys", title: "Deploys", metric: "3", desc: "prod canary live" },
-  { id: "cost", title: "LLM Spend", metric: "$42", desc: "24h window" },
+  {
+    id: 'status',
+    title: 'System Status',
+    metric: 'OK',
+    desc: 'All lanes green',
+  },
+  { id: 'incidents', title: 'Incidents', metric: '0', desc: 'No active' },
+  { id: 'deploys', title: 'Deploys', metric: '3', desc: 'prod canary live' },
+  { id: 'cost', title: 'LLM Spend', metric: '$42', desc: '24h window' },
 ];
 
 export default function Switchboard() {
@@ -57,10 +81,14 @@ export default function Switchboard() {
               >
                 <div>
                   <p className="font-medium">{a.name}</p>
-                  <p className="text-xs opacity-70">{a.tags.join(" • ")}</p>
+                  <p className="text-xs opacity-70">{a.tags.join(' • ')}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setOpen(true)}
+                  >
                     <MessageSquare className="h-4 w-4" />
                   </Button>
                   <Button size="sm" variant="secondary">
@@ -84,7 +112,11 @@ export default function Switchboard() {
       <main className="col-span-6 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           {tiles.map((t) => (
-            <motion.div key={t.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <Card className="rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -110,7 +142,9 @@ export default function Switchboard() {
                 Live WebRTC Stage
               </div>
             ) : (
-              <Button onClick={() => setMeeting(true)}>Start Local Meeting</Button>
+              <Button onClick={() => setMeeting(true)}>
+                Start Local Meeting
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -134,7 +168,8 @@ export default function Switchboard() {
               <Button variant="secondary">Present</Button>
             </div>
             <div className="text-xs opacity-70">
-              Context loaded: org, agenda, metrics. Actions will be policy-checked.
+              Context loaded: org, agenda, metrics. Actions will be
+              policy-checked.
             </div>
           </CardContent>
         </Card>
@@ -156,12 +191,19 @@ export default function Switchboard() {
           className="fixed inset-0 flex items-start justify-center bg-black/40 p-10"
           onClick={() => setCmdOpen(false)}
         >
-          <div className="w-full max-w-xl" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="w-full max-w-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
             <Command>
               <CommandInput placeholder="/call maestro | /present deck | /join room | /status api" />
               <CommandList>
-                <CommandItem onSelect={() => setMeeting(true)}>Start meeting</CommandItem>
-                <CommandItem onSelect={() => setOpen(true)}>Message Scribe</CommandItem>
+                <CommandItem onSelect={() => setMeeting(true)}>
+                  Start meeting
+                </CommandItem>
+                <CommandItem onSelect={() => setOpen(true)}>
+                  Message Scribe
+                </CommandItem>
                 <CommandItem>Open Graph View</CommandItem>
               </CommandList>
             </Command>

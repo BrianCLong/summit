@@ -13,21 +13,21 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
         // Mock Neo4j session
         mockSession = {
             run: jest.fn(),
-            close: jest.fn()
+            close: jest.fn(),
         };
         // Mock Neo4j driver
         mockNeo4jDriver = {
-            session: jest.fn(() => mockSession)
+            session: jest.fn(() => mockSession),
         };
         // Mock auth service
         mockAuthService = {
             verifyToken: jest.fn(),
             hasRole: jest.fn(),
-            getUserRole: jest.fn()
+            getUserRole: jest.fn(),
         };
         // Mock storage service
         mockStorageService = {
-            store: jest.fn(() => Promise.resolve('https://storage.example.com/file123'))
+            store: jest.fn(() => Promise.resolve('https://storage.example.com/file123')),
         };
         multimodalService = new MultimodalDataService(mockNeo4jDriver, mockAuthService, mockStorageService);
     });
@@ -43,19 +43,21 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                 mimeType: 'image/jpeg',
                 filesize: 1024,
                 quality: 'HIGH',
-                metadata: { camera: 'iPhone 12' }
+                metadata: { camera: 'iPhone 12' },
             };
             mockSession.run.mockResolvedValueOnce({
-                records: [{
+                records: [
+                    {
                         get: () => ({
                             properties: {
                                 id: 'media123',
                                 uri: 'https://storage.example.com/file123',
                                 mediaType: 'IMAGE',
-                                filename: 'test.jpg'
-                            }
-                        })
-                    }]
+                                filename: 'test.jpg',
+                            },
+                        }),
+                    },
+                ],
             });
             const result = await multimodalService.uploadMediaSource(mediaData, 'user123');
             expect(result).toBeDefined();
@@ -84,24 +86,31 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                 extractionMethod: 'NLP_SPACY',
                 extractedFrom: ['media123'],
                 investigationId: 'inv456',
-                boundingBoxes: [{
+                boundingBoxes: [
+                    {
                         mediaSourceId: 'media123',
-                        x: 0.2, y: 0.3, width: 0.4, height: 0.3,
-                        confidence: 0.9
-                    }],
-                properties: { age: '35', role: 'suspect' }
+                        x: 0.2,
+                        y: 0.3,
+                        width: 0.4,
+                        height: 0.3,
+                        confidence: 0.9,
+                    },
+                ],
+                properties: { age: '35', role: 'suspect' },
             };
             mockSession.run.mockResolvedValueOnce({
-                records: [{
+                records: [
+                    {
                         get: () => ({
                             properties: {
                                 id: 'entity789',
                                 label: 'John Smith',
                                 confidence: 0.85,
-                                confidenceLevel: 'HIGH'
-                            }
-                        })
-                    }]
+                                confidenceLevel: 'HIGH',
+                            },
+                        }),
+                    },
+                ],
             });
             const result = await multimodalService.createMultimodalEntity(entityData, 'user123');
             expect(result).toBeDefined();
@@ -123,35 +132,39 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
             // Mock entity query
             mockSession.run
                 .mockResolvedValueOnce({
-                records: [{
+                records: [
+                    {
                         get: () => ({
                             properties: {
                                 id: 'entity789',
                                 label: 'John Smith',
-                                type: 'PERSON'
-                            }
-                        })
-                    }]
+                                type: 'PERSON',
+                            },
+                        }),
+                    },
+                ],
             })
                 // Mock candidates query
                 .mockResolvedValueOnce({
-                records: [{
+                records: [
+                    {
                         get: (field) => {
                             if (field === 'e2') {
                                 return {
                                     properties: {
                                         id: 'entity790',
                                         label: 'John Smith',
-                                        type: 'PERSON'
-                                    }
+                                        type: 'PERSON',
+                                    },
                                 };
                             }
                             if (field === 'sourceType')
                                 return 'TEXT';
                             if (field === 'targetType')
                                 return 'IMAGE';
-                        }
-                    }]
+                        },
+                    },
+                ],
             })
                 // Mock match creation
                 .mockResolvedValueOnce({ records: [] });
@@ -176,18 +189,20 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                 mediaSourceId: 'media123',
                 extractionMethods: ['NLP_SPACY', 'COMPUTER_VISION'],
                 investigationId: 'inv456',
-                processingParams: { threshold: 0.7 }
+                processingParams: { threshold: 0.7 },
             };
             mockSession.run.mockResolvedValueOnce({
-                records: [{
+                records: [
+                    {
                         get: () => ({
                             properties: {
                                 id: 'job789',
                                 status: 'PENDING',
-                                progress: 0.0
-                            }
-                        })
-                    }]
+                                progress: 0.0,
+                            },
+                        }),
+                    },
+                ],
             });
             const result = await multimodalService.startExtractionJob(jobData, 'user123');
             expect(result).toBeDefined();
@@ -198,7 +213,7 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
             const jobData = {
                 mediaSourceId: 'media123',
                 extractionMethods: ['INVALID_METHOD'],
-                investigationId: 'inv456'
+                investigationId: 'inv456',
             };
             await expect(multimodalService.startExtractionJob(jobData, 'user123')).rejects.toThrow('No valid extraction methods specified');
         });
@@ -219,26 +234,28 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                 mediaTypes: ['IMAGE', 'VIDEO'],
                 minConfidence: 0.7,
                 investigationId: 'inv456',
-                limit: 20
+                limit: 20,
             };
             mockSession.run.mockResolvedValueOnce({
-                records: [{
+                records: [
+                    {
                         get: (field) => {
                             if (field === 'node') {
                                 return {
                                     properties: {
                                         id: 'entity789',
                                         label: 'Suspicious Individual',
-                                        confidence: 0.85
-                                    }
+                                        confidence: 0.85,
+                                    },
                                 };
                             }
                             if (field === 'mediaSources')
                                 return [];
                             if (field === 'crossModalMatches')
                                 return [];
-                        }
-                    }]
+                        },
+                    },
+                ],
             });
             const result = await multimodalService.multimodalSearch(searchInput);
             expect(result).toBeDefined();
@@ -272,7 +289,7 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                 content: Buffer.from('test'),
                 filename: 'test.jpg',
                 mediaType: 'IMAGE',
-                mimeType: 'image/jpeg'
+                mimeType: 'image/jpeg',
             }, 'user123')).rejects.toThrow('Database connection failed');
             expect(mockSession.close).toHaveBeenCalled();
         });
@@ -282,7 +299,7 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                 content: Buffer.from('test'),
                 filename: 'test.jpg',
                 mediaType: 'IMAGE',
-                mimeType: 'image/jpeg'
+                mimeType: 'image/jpeg',
             }, 'user123')).rejects.toThrow('Storage failed');
         });
     });
@@ -291,15 +308,15 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
             const textMediaSource = {
                 id: 'media123',
                 mediaType: 'TEXT',
-                filename: 'document.txt'
+                filename: 'document.txt',
             };
             const imageMediaSource = {
                 id: 'media456',
                 mediaType: 'IMAGE',
-                filename: 'photo.jpg'
+                filename: 'photo.jpg',
             };
             const textResults = await multimodalService.simulateExtraction(textMediaSource, 'NLP_SPACY', { confidence: 0.85 }, 'inv789');
-            const imageResults = await multimodalService.simulateExtraction(imageMediaSource, 'COMPUTER_VISION', { confidence: 0.80 }, 'inv789');
+            const imageResults = await multimodalService.simulateExtraction(imageMediaSource, 'COMPUTER_VISION', { confidence: 0.8 }, 'inv789');
             expect(textResults.entities.length).toBeGreaterThan(0);
             expect(textResults.entities[0].type).toBe('PERSON');
             expect(imageResults.entities.length).toBeGreaterThan(0);

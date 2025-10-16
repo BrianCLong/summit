@@ -8,7 +8,10 @@ async function run() {
     const res = await fetch(`${baseUrl}/dr/backup`, { method: 'POST' });
     console.log(await res.json());
   } else if (command === 'restore') {
-    const res = await fetch(`${baseUrl}/dr/restore`, { method: 'POST', body: arg ?? '' });
+    const res = await fetch(`${baseUrl}/dr/restore`, {
+      method: 'POST',
+      body: arg ?? '',
+    });
     console.log(await res.json());
   } else if (command === 'status') {
     const res = await fetch(`${baseUrl}/dr/status/${arg}`);

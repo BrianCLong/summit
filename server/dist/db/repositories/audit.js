@@ -1,10 +1,17 @@
 export class AuditRepo {
+    pool;
     constructor(pool) {
         this.pool = pool;
     }
     async insert(row) {
         const q = `INSERT INTO audit_events (id, type, actor_id, created_at, meta) VALUES ($1,$2,$3,$4,$5)`;
-        await this.pool.query(q, [row.id, row.type, row.actorId, row.createdAt, row.meta || {}]);
+        await this.pool.query(q, [
+            row.id,
+            row.type,
+            row.actorId,
+            row.createdAt,
+            row.meta || {},
+        ]);
     }
     async findByType(type, limit = 100) {
         const { rows } = await this.pool.query(`SELECT * FROM audit_events WHERE type = $1 ORDER BY created_at DESC LIMIT $2`, [type, limit]);

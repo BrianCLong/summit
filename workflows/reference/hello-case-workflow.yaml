@@ -1,26 +1,26 @@
-# Hello Case Reference Workflow  
+# Hello Case Reference Workflow
 # End-to-end intelligence analysis workflow for production validation
 name: hello-case-e2e-validation
-version: "1.0.0"
-description: "End-to-end validation workflow simulating a complete intelligence analysis case"
+version: '1.0.0'
+description: 'End-to-end validation workflow simulating a complete intelligence analysis case'
 
 metadata:
-  tags: ["reference", "e2e", "intelligence", "validation", "production"]
-  author: "IntelGraph Platform Team"
-  created: "2025-01-20"
-  slo_target_duration: "300s"  # 5 minutes
-  
+  tags: ['reference', 'e2e', 'intelligence', 'validation', 'production']
+  author: 'IntelGraph Platform Team'
+  created: '2025-01-20'
+  slo_target_duration: '300s' # 5 minutes
+
 triggers:
-  - type: "schedule"
-    cron: "0 */6 * * *"  # Every 6 hours
+  - type: 'schedule'
+    cron: '0 */6 * * *' # Every 6 hours
     enabled: true
-  - type: "manual"
+  - type: 'manual'
     enabled: true
-    
+
 variables:
-  test_case_id: "hello-case-${workflow.execution_id}"
-  analysis_target: "Example Technology Company"
-  evidence_sources: ["web", "social", "public_records"]
+  test_case_id: 'hello-case-${workflow.execution_id}'
+  analysis_target: 'Example Technology Company'
+  evidence_sources: ['web', 'social', 'public_records']
   confidence_threshold: 0.75
   max_budget_usd: 10.0
 
@@ -28,223 +28,225 @@ tasks:
   # Phase 1: Case Initialization
   - name: initialize_case
     type: case_management
-    description: "Initialize new intelligence analysis case"
+    description: 'Initialize new intelligence analysis case'
     timeout: 30s
     config:
-      operation: "create_case"
+      operation: 'create_case'
       case_data:
-        id: "${variables.test_case_id}"
-        title: "Hello Case E2E Validation"
-        description: "Automated end-to-end validation case"
-        priority: "medium"
-        analyst: "${user.id}"
-        tags: ["validation", "automated", "hello-case"]
-        classification: "unclassified"
+        id: '${variables.test_case_id}'
+        title: 'Hello Case E2E Validation'
+        description: 'Automated end-to-end validation case'
+        priority: 'medium'
+        analyst: '${user.id}'
+        tags: ['validation', 'automated', 'hello-case']
+        classification: 'unclassified'
     outputs:
-      case_id: "$.case.id"
-      case_status: "$.case.status"
-      creation_time: "$.case.created_at"
-      
+      case_id: '$.case.id'
+      case_status: '$.case.status'
+      creation_time: '$.case.created_at'
+
   # Phase 2: Evidence Collection Setup
   - name: setup_evidence_collection
     type: evidence_orchestration
-    description: "Set up evidence collection sources"
+    description: 'Set up evidence collection sources'
     timeout: 60s
-    depends_on: ["initialize_case"]
+    depends_on: ['initialize_case']
     config:
-      case_id: "${tasks.initialize_case.outputs.case_id}"
-      sources: "${variables.evidence_sources}"
+      case_id: '${tasks.initialize_case.outputs.case_id}'
+      sources: '${variables.evidence_sources}'
       collection_parameters:
         web_search:
           max_results: 20
-          time_range: "7d"
-          domains: ["example.com", "news.example.com"]
+          time_range: '7d'
+          domains: ['example.com', 'news.example.com']
         social_media:
-          platforms: ["twitter", "linkedin"]
-          keywords: ["${variables.analysis_target}"]
+          platforms: ['twitter', 'linkedin']
+          keywords: ['${variables.analysis_target}']
           sentiment_analysis: true
         public_records:
-          databases: ["corporate_filings", "patent_records"]
-          entity: "${variables.analysis_target}"
+          databases: ['corporate_filings', 'patent_records']
+          entity: '${variables.analysis_target}'
     outputs:
-      collection_id: "$.collection.id"
-      source_count: "$.sources.length"
-      estimated_cost: "$.estimated_cost_usd"
-      
+      collection_id: '$.collection.id'
+      source_count: '$.sources.length'
+      estimated_cost: '$.estimated_cost_usd'
+
   # Phase 3: Web Intelligence Gathering
   - name: web_intelligence_gathering
     type: web_orchestration
-    description: "Conduct web intelligence gathering"
+    description: 'Conduct web intelligence gathering'
     timeout: 180s
-    depends_on: ["setup_evidence_collection"]
+    depends_on: ['setup_evidence_collection']
     config:
-      query: "Gather intelligence about ${variables.analysis_target} including corporate structure, key personnel, and recent activities"
+      query: 'Gather intelligence about ${variables.analysis_target} including corporate structure, key personnel, and recent activities'
       context:
-        purpose: "intelligence_analysis"
-        urgency: "medium"
-        budgetLimit: "${variables.max_budget_usd}"
-        qualityThreshold: "${variables.confidence_threshold}"
+        purpose: 'intelligence_analysis'
+        urgency: 'medium'
+        budgetLimit: '${variables.max_budget_usd}'
+        qualityThreshold: '${variables.confidence_threshold}'
         expectedOutputLength: 2000
         requiredSources: 3
-        synthesisStrategy: "comprehensive"
+        synthesisStrategy: 'comprehensive'
       constraints:
-        domains_allowed: ["*.example.com", "news.example.com", "wikipedia.org"]
-        content_types: ["html", "pdf", "json"]
+        domains_allowed: ['*.example.com', 'news.example.com', 'wikipedia.org']
+        content_types: ['html', 'pdf', 'json']
         max_depth: 2
     outputs:
-      intelligence_report: "$.result.synthesis"
-      sources_used: "$.metadata.sourcesUsed"
-      confidence_score: "$.confidence"
-      processing_time: "$.performance.processingTime"
-      
+      intelligence_report: '$.result.synthesis'
+      sources_used: '$.metadata.sourcesUsed'
+      confidence_score: '$.confidence'
+      processing_time: '$.performance.processingTime'
+
   # Phase 4: Evidence Analysis
   - name: evidence_analysis
     type: analysis_engine
-    description: "Analyze collected evidence for insights"
+    description: 'Analyze collected evidence for insights'
     timeout: 120s
-    depends_on: ["web_intelligence_gathering"]
+    depends_on: ['web_intelligence_gathering']
     config:
-      analysis_type: "entity_analysis"
-      data: "${tasks.web_intelligence_gathering.outputs.intelligence_report}"
+      analysis_type: 'entity_analysis'
+      data: '${tasks.web_intelligence_gathering.outputs.intelligence_report}'
       parameters:
         entity_extraction: true
         relationship_mapping: true
         sentiment_analysis: true
         credibility_assessment: true
         timeline_construction: true
-      confidence_threshold: "${variables.confidence_threshold}"
+      confidence_threshold: '${variables.confidence_threshold}'
     outputs:
-      entities_found: "$.analysis.entities"
-      relationships: "$.analysis.relationships" 
-      timeline: "$.analysis.timeline"
-      credibility_score: "$.analysis.credibility"
-      key_insights: "$.analysis.insights"
-      
+      entities_found: '$.analysis.entities'
+      relationships: '$.analysis.relationships'
+      timeline: '$.analysis.timeline'
+      credibility_score: '$.analysis.credibility'
+      key_insights: '$.analysis.insights'
+
   # Phase 5: Policy Compliance Check
   - name: policy_compliance_check
     type: policy_enforcement
-    description: "Verify analysis complies with all policies"
+    description: 'Verify analysis complies with all policies'
     timeout: 30s
-    depends_on: ["evidence_analysis"]
+    depends_on: ['evidence_analysis']
     config:
-      case_id: "${tasks.initialize_case.outputs.case_id}"
-      analysis_data: "${tasks.evidence_analysis.outputs}"
-      policies_to_check: [
-        "data_privacy_compliance",
-        "source_credibility_standards", 
-        "ethical_intelligence_guidelines",
-        "classification_requirements"
-      ]
+      case_id: '${tasks.initialize_case.outputs.case_id}'
+      analysis_data: '${tasks.evidence_analysis.outputs}'
+      policies_to_check:
+        [
+          'data_privacy_compliance',
+          'source_credibility_standards',
+          'ethical_intelligence_guidelines',
+          'classification_requirements',
+        ]
     outputs:
-      compliance_status: "$.compliance.status"
-      policy_violations: "$.compliance.violations"
-      recommendations: "$.compliance.recommendations"
-      
+      compliance_status: '$.compliance.status'
+      policy_violations: '$.compliance.violations'
+      recommendations: '$.compliance.recommendations'
+
   # Phase 6: Report Generation
   - name: generate_analysis_report
     type: report_generation
-    description: "Generate comprehensive analysis report"
+    description: 'Generate comprehensive analysis report'
     timeout: 90s
-    depends_on: ["policy_compliance_check"]
+    depends_on: ['policy_compliance_check']
     config:
-      template: "intelligence_analysis_standard"
+      template: 'intelligence_analysis_standard'
       data:
-        case_info: "${tasks.initialize_case.outputs}"
-        intelligence: "${tasks.web_intelligence_gathering.outputs}"
-        analysis: "${tasks.evidence_analysis.outputs}" 
-        compliance: "${tasks.policy_compliance_check.outputs}"
-      format: "pdf"
-      classification: "unclassified"
-      distribution: ["analyst", "supervisor"]
+        case_info: '${tasks.initialize_case.outputs}'
+        intelligence: '${tasks.web_intelligence_gathering.outputs}'
+        analysis: '${tasks.evidence_analysis.outputs}'
+        compliance: '${tasks.policy_compliance_check.outputs}'
+      format: 'pdf'
+      classification: 'unclassified'
+      distribution: ['analyst', 'supervisor']
     outputs:
-      report_id: "$.report.id"
-      report_url: "$.report.url"
-      page_count: "$.report.pages"
-      generation_time: "$.performance.generation_time"
-      
+      report_id: '$.report.id'
+      report_url: '$.report.url'
+      page_count: '$.report.pages'
+      generation_time: '$.performance.generation_time'
+
   # Phase 7: Evidence Export
   - name: export_evidence_package
     type: evidence_export
-    description: "Export evidence package for archival"
+    description: 'Export evidence package for archival'
     timeout: 60s
-    depends_on: ["generate_analysis_report"]
+    depends_on: ['generate_analysis_report']
     config:
-      case_id: "${tasks.initialize_case.outputs.case_id}"
-      export_format: "structured_json"
+      case_id: '${tasks.initialize_case.outputs.case_id}'
+      export_format: 'structured_json'
       include_attachments: true
       encryption: true
       compression: true
     outputs:
-      export_id: "$.export.id"
-      package_size_mb: "$.export.size_mb"
-      file_count: "$.export.file_count"
-      export_url: "$.export.url"
-      
+      export_id: '$.export.id'
+      package_size_mb: '$.export.size_mb'
+      file_count: '$.export.file_count'
+      export_url: '$.export.url'
+
   # Phase 8: Quality Metrics Collection
   - name: collect_quality_metrics
     type: quality_assessment
-    description: "Collect quality metrics for the analysis"
+    description: 'Collect quality metrics for the analysis'
     timeout: 30s
-    depends_on: ["export_evidence_package"]
+    depends_on: ['export_evidence_package']
     config:
-      case_id: "${tasks.initialize_case.outputs.case_id}"
-      metrics_to_collect: [
-        "source_diversity",
-        "information_completeness", 
-        "analysis_depth",
-        "timeliness",
-        "accuracy_indicators"
-      ]
+      case_id: '${tasks.initialize_case.outputs.case_id}'
+      metrics_to_collect:
+        [
+          'source_diversity',
+          'information_completeness',
+          'analysis_depth',
+          'timeliness',
+          'accuracy_indicators',
+        ]
     outputs:
-      quality_score: "$.quality.overall_score"
-      source_diversity: "$.quality.source_diversity"
-      completeness: "$.quality.completeness"
-      accuracy_indicators: "$.quality.accuracy"
-      
+      quality_score: '$.quality.overall_score'
+      source_diversity: '$.quality.source_diversity'
+      completeness: '$.quality.completeness'
+      accuracy_indicators: '$.quality.accuracy'
+
   # Phase 9: Case Closure
   - name: close_case
     type: case_management
-    description: "Close the validation case"
+    description: 'Close the validation case'
     timeout: 30s
-    depends_on: ["collect_quality_metrics"]
+    depends_on: ['collect_quality_metrics']
     config:
-      operation: "close_case"
-      case_id: "${tasks.initialize_case.outputs.case_id}"
+      operation: 'close_case'
+      case_id: '${tasks.initialize_case.outputs.case_id}'
       closure_data:
-        status: "completed"
-        resolution: "Successful E2E validation completed"
-        final_report_id: "${tasks.generate_analysis_report.outputs.report_id}"
-        evidence_package_id: "${tasks.export_evidence_package.outputs.export_id}"
-        quality_assessment: "${tasks.collect_quality_metrics.outputs}"
+        status: 'completed'
+        resolution: 'Successful E2E validation completed'
+        final_report_id: '${tasks.generate_analysis_report.outputs.report_id}'
+        evidence_package_id: '${tasks.export_evidence_package.outputs.export_id}'
+        quality_assessment: '${tasks.collect_quality_metrics.outputs}'
     outputs:
-      closure_time: "$.case.closed_at"
-      total_duration: "$.case.total_duration_minutes"
-      final_status: "$.case.status"
+      closure_time: '$.case.closed_at'
+      total_duration: '$.case.total_duration_minutes'
+      final_status: '$.case.status'
 
 # Success criteria for the entire workflow
 success_criteria:
   - condition: "tasks.initialize_case.outputs.case_status == 'active'"
-    message: "Case initialization successful"
-  - condition: "tasks.setup_evidence_collection.outputs.source_count >= 3"
-    message: "Evidence sources properly configured"
-  - condition: "tasks.web_intelligence_gathering.outputs.confidence_score >= ${variables.confidence_threshold}"
-    message: "Intelligence gathering met confidence threshold"
-  - condition: "tasks.evidence_analysis.outputs.entities_found.length > 0"
-    message: "Entity analysis found relevant entities"
+    message: 'Case initialization successful'
+  - condition: 'tasks.setup_evidence_collection.outputs.source_count >= 3'
+    message: 'Evidence sources properly configured'
+  - condition: 'tasks.web_intelligence_gathering.outputs.confidence_score >= ${variables.confidence_threshold}'
+    message: 'Intelligence gathering met confidence threshold'
+  - condition: 'tasks.evidence_analysis.outputs.entities_found.length > 0'
+    message: 'Entity analysis found relevant entities'
   - condition: "tasks.policy_compliance_check.outputs.compliance_status == 'compliant'"
-    message: "Analysis passed all policy checks"
-  - condition: "tasks.generate_analysis_report.outputs.report_id != null"
-    message: "Analysis report generated successfully"
-  - condition: "tasks.export_evidence_package.outputs.export_id != null"
-    message: "Evidence package exported successfully"
-  - condition: "tasks.collect_quality_metrics.outputs.quality_score >= 0.7"
-    message: "Quality metrics meet minimum standards"
+    message: 'Analysis passed all policy checks'
+  - condition: 'tasks.generate_analysis_report.outputs.report_id != null'
+    message: 'Analysis report generated successfully'
+  - condition: 'tasks.export_evidence_package.outputs.export_id != null'
+    message: 'Evidence package exported successfully'
+  - condition: 'tasks.collect_quality_metrics.outputs.quality_score >= 0.7'
+    message: 'Quality metrics meet minimum standards'
   - condition: "tasks.close_case.outputs.final_status == 'completed'"
-    message: "Case closed successfully"
+    message: 'Case closed successfully'
 
 # Performance targets
 performance_targets:
-  max_total_duration: 300000  # 5 minutes
+  max_total_duration: 300000 # 5 minutes
   max_cost_usd: 10.0
   min_confidence_score: 0.75
   min_quality_score: 0.7
@@ -253,43 +255,43 @@ performance_targets:
 on_failure:
   - type: alert
     severity: warning
-    message: "Hello Case E2E validation failed at task: ${failure.task}"
-    details: "${failure.message}"
-    channels: ["slack"]
+    message: 'Hello Case E2E validation failed at task: ${failure.task}'
+    details: '${failure.message}'
+    channels: ['slack']
   - type: case_management
-    operation: "update_case_status"
-    case_id: "${tasks.initialize_case.outputs.case_id}"
-    status: "failed"
-    notes: "E2E validation failed: ${failure.message}"
+    operation: 'update_case_status'
+    case_id: '${tasks.initialize_case.outputs.case_id}'
+    status: 'failed'
+    notes: 'E2E validation failed: ${failure.message}'
   - type: metrics
-    increment: "workflow_e2e_validation_failures_total"
+    increment: 'workflow_e2e_validation_failures_total'
     labels:
-      workflow: "hello-case"
-      failure_task: "${failure.task}"
-      failure_reason: "${failure.reason}"
+      workflow: 'hello-case'
+      failure_task: '${failure.task}'
+      failure_reason: '${failure.reason}'
 
 # Success handling
 on_success:
   - type: metrics
-    increment: "workflow_e2e_validation_success_total"
+    increment: 'workflow_e2e_validation_success_total'
     labels:
-      workflow: "hello-case"
-      total_duration: "${workflow.execution_duration}"
-      quality_score: "${tasks.collect_quality_metrics.outputs.quality_score}"
+      workflow: 'hello-case'
+      total_duration: '${workflow.execution_duration}'
+      quality_score: '${tasks.collect_quality_metrics.outputs.quality_score}'
   - type: log
     level: info
-    message: "Hello Case E2E validation completed successfully"
+    message: 'Hello Case E2E validation completed successfully'
     details:
-      duration: "${workflow.execution_duration}ms"
-      case_id: "${tasks.initialize_case.outputs.case_id}"
-      quality_score: "${tasks.collect_quality_metrics.outputs.quality_score}"
-      total_cost: "${workflow.total_cost_usd}"
+      duration: '${workflow.execution_duration}ms'
+      case_id: '${tasks.initialize_case.outputs.case_id}'
+      quality_score: '${tasks.collect_quality_metrics.outputs.quality_score}'
+      total_cost: '${workflow.total_cost_usd}'
 
 # Resource requirements
 resources:
-  cpu_limit: "500m"
-  memory_limit: "1Gi"
-  timeout: "600s"  # 10 minutes
+  cpu_limit: '500m'
+  memory_limit: '1Gi'
+  timeout: '600s' # 10 minutes
   max_retries: 1
 
 # Monitoring and observability
@@ -298,14 +300,14 @@ observability:
   metrics: true
   logs: true
   custom_metrics:
-    - name: "hello_case_intelligence_quality"
-      value: "${tasks.collect_quality_metrics.outputs.quality_score}"
+    - name: 'hello_case_intelligence_quality'
+      value: '${tasks.collect_quality_metrics.outputs.quality_score}'
       labels:
-        case_id: "${tasks.initialize_case.outputs.case_id}"
-    - name: "hello_case_processing_cost"
-      value: "${workflow.total_cost_usd}"
+        case_id: '${tasks.initialize_case.outputs.case_id}'
+    - name: 'hello_case_processing_cost'
+      value: '${workflow.total_cost_usd}'
       labels:
-        case_id: "${tasks.initialize_case.outputs.case_id}"
+        case_id: '${tasks.initialize_case.outputs.case_id}'
 
 # SLO targets
 slo_targets:
@@ -313,12 +315,12 @@ slo_targets:
   max_duration_ms: 300000
   max_cost_usd: 10.0
   min_quality_score: 0.7
-  error_budget_minutes: 43.2  # monthly
+  error_budget_minutes: 43.2 # monthly
 
 # Data retention
 data_retention:
-  case_data: "1y"
-  evidence_packages: "2y" 
-  reports: "5y"
-  metrics: "1y"
-  logs: "90d"
+  case_data: '1y'
+  evidence_packages: '2y'
+  reports: '5y'
+  metrics: '1y'
+  logs: '90d'

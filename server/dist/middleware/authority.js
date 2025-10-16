@@ -6,6 +6,7 @@
  */
 import logger from '../utils/logger.js';
 export class AuthorityGuard {
+    static instance;
     static getInstance() {
         if (!AuthorityGuard.instance) {
             AuthorityGuard.instance = new AuthorityGuard();
@@ -72,7 +73,8 @@ export class AuthorityGuard {
             return false;
         }
         // Check if authority scope covers requested operation scope
-        const hasScope = scope.every((requestedScope) => authority.scope.includes(requestedScope) || authority.scope.includes('*'));
+        const hasScope = scope.every((requestedScope) => authority.scope.includes(requestedScope) ||
+            authority.scope.includes('*'));
         if (!hasScope) {
             logger.warn({
                 message: 'Authority scope insufficient',

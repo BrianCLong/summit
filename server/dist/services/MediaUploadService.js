@@ -21,6 +21,7 @@ export var MediaType;
     MediaType["GEOSPATIAL"] = "GEOSPATIAL";
 })(MediaType || (MediaType = {}));
 export class MediaUploadService {
+    config;
     constructor(config) {
         this.config = config;
         this.ensureDirectories();
@@ -29,7 +30,9 @@ export class MediaUploadService {
         try {
             await fs.mkdir(this.config.uploadPath, { recursive: true });
             await fs.mkdir(this.config.thumbnailPath, { recursive: true });
-            await fs.mkdir(path.join(this.config.uploadPath, 'temp'), { recursive: true });
+            await fs.mkdir(path.join(this.config.uploadPath, 'temp'), {
+                recursive: true,
+            });
         }
         catch (error) {
             logger.error('Failed to create upload directories:', error);
@@ -88,8 +91,8 @@ export class MediaUploadService {
                     uploadedBy: userId,
                     uploadedAt: new Date().toISOString(),
                     processingVersion: '1.0',
-                    ...additionalMetadata
-                }
+                    ...additionalMetadata,
+                },
             };
             logger.info(`Successfully uploaded media: ${uniqueFilename}, size: ${stats.size}, type: ${mediaType}`);
             return metadata;
@@ -178,7 +181,7 @@ export class MediaUploadService {
         return {
             width: metadata.width,
             height: metadata.height,
-            channels: metadata.channels
+            channels: metadata.channels,
         };
     }
     /**
@@ -191,8 +194,8 @@ export class MediaUploadService {
                     reject(err);
                     return;
                 }
-                const videoStream = metadata.streams.find(s => s.codec_type === 'video');
-                const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+                const videoStream = metadata.streams.find((s) => s.codec_type === 'video');
+                const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
                 const dimensions = {};
                 if (videoStream) {
                     dimensions.width = videoStream.width;
@@ -288,11 +291,11 @@ export class MediaUploadService {
                     format: metadata.format.format_name,
                     duration: metadata.format.duration,
                     bitrate: metadata.format.bit_rate,
-                    streams: metadata.streams.length
+                    streams: metadata.streams.length,
                 };
                 // Extract codec information
-                const videoStream = metadata.streams.find(s => s.codec_type === 'video');
-                const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+                const videoStream = metadata.streams.find((s) => s.codec_type === 'video');
+                const audioStream = metadata.streams.find((s) => s.codec_type === 'audio');
                 if (videoStream) {
                     result.videoCodec = videoStream.codec_name;
                     result.videoProfile = videoStream.profile;
@@ -336,7 +339,7 @@ export class MediaUploadService {
                 count: 1,
                 folder: path.dirname(thumbnailPath),
                 filename: path.basename(thumbnailPath),
-                timemarks: ['10%'] // Take screenshot at 10% of video duration
+                timemarks: ['10%'], // Take screenshot at 10% of video duration
             })
                 .on('end', () => resolve())
                 .on('error', reject);
@@ -358,8 +361,8 @@ export class MediaUploadService {
      * Check if file type is allowed
      */
     isAllowedType(mimeType) {
-        return this.config.allowedTypes.includes(mimeType) ||
-            this.config.allowedTypes.some(allowed => allowed.endsWith('/*') && mimeType.startsWith(allowed.slice(0, -1)));
+        return (this.config.allowedTypes.includes(mimeType) ||
+            this.config.allowedTypes.some((allowed) => allowed.endsWith('/*') && mimeType.startsWith(allowed.slice(0, -1))));
     }
     /**
      * Delete uploaded media file and thumbnail
@@ -392,7 +395,7 @@ export class MediaUploadService {
             return {
                 exists: true,
                 size: stats.size,
-                modified: stats.mtime
+                modified: stats.mtime,
             };
         }
         catch (error) {
@@ -426,10 +429,10 @@ export const defaultMediaUploadConfig = {
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/json',
-        'application/xml'
+        'application/xml',
     ],
     uploadPath: process.env.MEDIA_UPLOAD_PATH || '/tmp/intelgraph/uploads',
     thumbnailPath: process.env.MEDIA_THUMBNAIL_PATH || '/tmp/intelgraph/thumbnails',
-    chunkSize: 64 * 1024 // 64KB chunks
+    chunkSize: 64 * 1024, // 64KB chunks
 };
 //# sourceMappingURL=MediaUploadService.js.map

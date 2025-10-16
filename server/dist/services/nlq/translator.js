@@ -3,7 +3,8 @@ export class NLQTranslator {
         const lower = question.toLowerCase();
         let cypher;
         if (lower.includes('person') || lower.includes('people')) {
-            cypher = 'MATCH (n:Person) WHERE n.tenantId = $tenantId RETURN n LIMIT 25';
+            cypher =
+                'MATCH (n:Person) WHERE n.tenantId = $tenantId RETURN n LIMIT 25';
         }
         else {
             cypher = 'MATCH (n) WHERE n.tenantId = $tenantId RETURN n LIMIT 25';

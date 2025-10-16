@@ -9,7 +9,7 @@ import { register } from '../../monitoring/metrics.js';
 import EmbeddingService from '../../services/EmbeddingService.js';
 const log = pino({ name: 'similarity' });
 let pool = null;
-const CACHE_TTL_MS = 60000;
+const CACHE_TTL_MS = 60_000;
 const cache = new Map();
 const similarityMs = new client.Histogram({
     name: 'similarity_ms',
@@ -40,12 +40,16 @@ function getPool() {
     }
     return pool;
 }
-const Args = z.object({
+const Args = z
+    .object({
     entityId: z.string().optional(),
     text: z.string().optional(),
     topK: z.number().int().min(1).max(100).default(20),
-    tenantId: z.string()
-}).refine((a) => a.entityId || a.text, { message: 'entityId or text required' });
+    tenantId: z.string(),
+})
+    .refine((a) => a.entityId || a.text, {
+    message: 'entityId or text required',
+});
 const embeddingService = new EmbeddingService();
 async function embeddingForText(text) {
     try {
@@ -60,7 +64,10 @@ export const similarityResolvers = {
     Query: {
         similarEntities: withAuthAndPolicy('read:entities', (args, ctx) => ({ type: 'tenant', id: ctx.user.tenant }))(async (_, args, ctx) => {
             const start = Date.now();
-            const { entityId, text, topK } = Args.parse({ ...args, tenantId: ctx.user.tenant });
+            const { entityId, text, topK } = Args.parse({
+                ...args,
+                tenantId: ctx.user.tenant,
+            });
             let embedding;
             if (entityId) {
                 const r = await getPool().query('SELECT embedding FROM entity_embeddings WHERE entity_id=$1 AND tenant_id=$2', [entityId, ctx.user.tenant]);
@@ -74,7 +81,9 @@ export const similarityResolvers = {
             else {
                 embedding = await embeddingForText(text);
             }
-            const hash = createHash('sha256').update(embedding.join(',')).digest('base64');
+            const hash = createHash('sha256')
+                .update(embedding.join(','))
+                .digest('base64');
             const key = `${hash}:${topK}`;
             const hit = cache.get(key);
             if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
@@ -87,13 +96,16 @@ export const similarityResolvers = {
            WHERE e.tenant_id = $2
            ORDER BY e.embedding <=> $1::vector ASC
            LIMIT $3`, [`[${embedding.join(',')}]`, ctx.user.tenant, topK]);
-            const data = rows.rows.map((r) => ({ id: r.entity_id, score: Number(r.score) }));
+            const data = rows.rows.map((r) => ({
+                id: r.entity_id,
+                score: Number(r.score),
+            }));
             cache.set(key, { data, ts: Date.now() });
             updateCacheMetrics(false);
             log.info({ count: rows.rowCount }, 'similarEntities');
             similarityMs.observe(Date.now() - start);
             return data;
-        })
-    }
+        }),
+    },
 };
 //# sourceMappingURL=similarity.js.map

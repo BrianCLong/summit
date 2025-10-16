@@ -12,31 +12,31 @@ tests:
     input_series:
       # API request metrics
       - series: 'http_requests_total{job="api-server", status="200"}'
-        values: '100+10x10'  # 100, 110, 120, ... for 10 minutes
+        values: '100+10x10' # 100, 110, 120, ... for 10 minutes
 
       - series: 'http_requests_total{job="api-server", status="500"}'
-        values: '5+1x10'     # 5, 6, 7, ... for 10 minutes (growing error rate)
+        values: '5+1x10' # 5, 6, 7, ... for 10 minutes (growing error rate)
 
       # NL→Cypher latency metrics
       - series: 'nlq_duration_seconds_bucket{job="gateway", le="2.0"}'
-        values: '90+5x10'    # 90% under 2s initially, degrading
+        values: '90+5x10' # 90% under 2s initially, degrading
 
       - series: 'nlq_duration_seconds_bucket{job="gateway", le="+Inf"}'
-        values: '100+10x10'  # Total requests
+        values: '100+10x10' # Total requests
 
       # Database connection metrics
       - series: 'neo4j_connections_active{job="neo4j"}'
-        values: '50+5x10'    # Growing connection count
+        values: '50+5x10' # Growing connection count
 
       - series: 'neo4j_connections_max{job="neo4j"}'
-        values: '100+0x10'   # Static max connections
+        values: '100+0x10' # Static max connections
 
       # Model orchestration budget
       - series: 'model_budget_spent_dollars{env="prod"}'
-        values: '75+5x10'    # Growing towards budget limit
+        values: '75+5x10' # Growing towards budget limit
 
       - series: 'model_budget_limit_dollars{env="prod"}'
-        values: '100+0x10'   # Static budget limit
+        values: '100+0x10' # Static budget limit
 
     alert_rule_test:
       # High Error Rate Alert
@@ -47,8 +47,8 @@ tests:
               severity: warning
               job: api-server
             exp_annotations:
-              summary: "High error rate detected"
-              description: "Error rate is 10.00% over the last 5 minutes"
+              summary: 'High error rate detected'
+              description: 'Error rate is 10.00% over the last 5 minutes'
 
       # NL→Cypher SLO Burn
       - eval_time: 8m
@@ -58,8 +58,8 @@ tests:
               severity: critical
               service: gateway
             exp_annotations:
-              summary: "NL→Cypher latency SLO burning fast"
-              description: "95th percentile latency is above 2s threshold"
+              summary: 'NL→Cypher latency SLO burning fast'
+              description: '95th percentile latency is above 2s threshold'
 
       # Database Connection Pool Exhaustion
       - eval_time: 7m
@@ -69,8 +69,8 @@ tests:
               severity: warning
               instance: neo4j
             exp_annotations:
-              summary: "Database connection pool usage high"
-              description: "Connection pool is 95% full"
+              summary: 'Database connection pool usage high'
+              description: 'Connection pool is 95% full'
 
       # Model Budget Near Limit
       - eval_time: 9m
@@ -80,23 +80,23 @@ tests:
               severity: warning
               env: prod
             exp_annotations:
-              summary: "Model budget approaching limit"
-              description: "Model budget is 95% spent for environment prod"
+              summary: 'Model budget approaching limit'
+              description: 'Model budget is 95% spent for environment prod'
 
   # Infrastructure Monitoring Tests
   - interval: 30s
     input_series:
       # CPU utilization
       - series: 'cpu_usage_percent{instance="api-1", job="node-exporter"}'
-        values: '60+5x8'     # CPU climbing from 60% to 95%
+        values: '60+5x8' # CPU climbing from 60% to 95%
 
       # Memory utilization
       - series: 'memory_usage_percent{instance="api-1", job="node-exporter"}'
-        values: '70+3x8'     # Memory climbing from 70% to 91%
+        values: '70+3x8' # Memory climbing from 70% to 91%
 
       # Disk space
       - series: 'disk_usage_percent{instance="api-1", mount="/"}'
-        values: '80+2x8'     # Disk usage climbing
+        values: '80+2x8' # Disk usage climbing
 
     alert_rule_test:
       # High CPU Alert
@@ -107,7 +107,7 @@ tests:
               severity: warning
               instance: api-1
             exp_annotations:
-              summary: "High CPU usage detected"
+              summary: 'High CPU usage detected'
 
       # High Memory Alert
       - eval_time: 4m
@@ -122,10 +122,10 @@ tests:
     input_series:
       # Model request failures
       - series: 'model_requests_total{provider="openai", model="gpt-4", status="success"}'
-        values: '100+8x10'   # Successful requests
+        values: '100+8x10' # Successful requests
 
       - series: 'model_requests_total{provider="openai", model="gpt-4", status="error"}'
-        values: '2+3x10'     # Increasing errors
+        values: '2+3x10' # Increasing errors
 
       # Model response times
       - series: 'model_request_duration_seconds{provider="openai", model="gpt-4", quantile="0.95"}'
@@ -133,7 +133,7 @@ tests:
 
       # Circuit breaker state
       - series: 'circuit_breaker_state{provider="openai"}'
-        values: '0+0x5 1+0x5'  # Closed for 5m, then open
+        values: '0+0x5 1+0x5' # Closed for 5m, then open
 
     alert_rule_test:
       # Model Provider High Error Rate
@@ -145,8 +145,8 @@ tests:
               provider: openai
               model: gpt-4
             exp_annotations:
-              summary: "Model provider error rate high"
-              description: "Error rate for openai/gpt-4 is above threshold"
+              summary: 'Model provider error rate high'
+              description: 'Error rate for openai/gpt-4 is above threshold'
 
       # Model Latency High
       - eval_time: 9m
@@ -170,18 +170,18 @@ tests:
     input_series:
       # Failed authentication attempts
       - series: 'auth_failures_total{endpoint="/api/login"}'
-        values: '5+10x6'     # Rapid increase in auth failures
+        values: '5+10x6' # Rapid increase in auth failures
 
       # Policy violations
       - series: 'policy_violations_total{policy="data-export", action="deny"}'
-        values: '1+2x5'      # Growing policy violations
+        values: '1+2x5' # Growing policy violations
 
       # WebAuthn step-up challenges
       - series: 'webauthn_challenges_total{result="success"}'
-        values: '50+5x10'    # Successful challenges
+        values: '50+5x10' # Successful challenges
 
       - series: 'webauthn_challenges_total{result="failure"}'
-        values: '2+1x10'     # Some failures
+        values: '2+1x10' # Some failures
 
     alert_rule_test:
       # Authentication Failure Spike
@@ -192,7 +192,7 @@ tests:
               severity: critical
               endpoint: /api/login
             exp_annotations:
-              summary: "Authentication failure spike detected"
+              summary: 'Authentication failure spike detected'
 
       # Policy Violation Increase
       - eval_time: 4m
@@ -207,18 +207,18 @@ tests:
     input_series:
       # Build duration
       - series: 'build_duration_seconds{pipeline="main", status="success"}'
-        values: '300+30x4'   # Build times increasing
+        values: '300+30x4' # Build times increasing
 
       - series: 'build_duration_seconds{pipeline="main", status="failure"}'
-        values: '0+0x3 180+0x1'  # One failure at end
+        values: '0+0x3 180+0x1' # One failure at end
 
       # Deployment frequency
       - series: 'deployments_total{env="prod", status="success"}'
-        values: '10+1x12'    # Regular deployments
+        values: '10+1x12' # Regular deployments
 
       # Test coverage
       - series: 'test_coverage_percent{suite="unit"}'
-        values: '85-1x8'     # Coverage dropping
+        values: '85-1x8' # Coverage dropping
 
     alert_rule_test:
       # Build Time Regression

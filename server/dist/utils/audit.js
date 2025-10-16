@@ -3,7 +3,10 @@ import { getPostgresPool } from '../config/database.js';
 function deepDiff(before = {}, after = {}) {
     // Simple structural diff capturing changed keys only
     const changed = {};
-    const keys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+    const keys = new Set([
+        ...Object.keys(before || {}),
+        ...Object.keys(after || {}),
+    ]);
     for (const k of keys) {
         const bv = before?.[k];
         const av = after?.[k];

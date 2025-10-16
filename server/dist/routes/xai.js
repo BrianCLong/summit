@@ -4,7 +4,7 @@
  * Magruder: "Graph-XAI layer is a differentiator; ship the explainers on day one"
  */
 import express from 'express';
-import { requireAuthority, requireReasonForAccess } from '../middleware/authority.js';
+import { requireAuthority, requireReasonForAccess, } from '../middleware/authority.js';
 import GraphXAIExplainer from '../services/xai/graph-explainer.js';
 import DetectorService from '../services/xai/detectors.js';
 import logger from '../utils/logger.js';

@@ -7,9 +7,10 @@
 import pino from 'pino';
 const logger = pino({ name: 'Neo4jOptimizer' });
 export class Neo4jOptimizer {
+    driver;
+    queryProfiles = [];
+    slowQueryThreshold = 100; // ms
     constructor(driver) {
-        this.queryProfiles = [];
-        this.slowQueryThreshold = 100; // ms
         this.driver = driver;
     }
     /**
@@ -85,7 +86,7 @@ export class Neo4jOptimizer {
                 logger.warn('Slow query detected', {
                     executionTime,
                     cypher: cypher.substring(0, 100),
-                    dbHits: profile.dbHits
+                    dbHits: profile.dbHits,
                 });
             }
             this.queryProfiles.push(profile);
@@ -94,8 +95,8 @@ export class Neo4jOptimizer {
                 this.queryProfiles = this.queryProfiles.slice(-1000);
             }
             return {
-                results: result.records.map(record => record.toObject()),
-                profile
+                results: result.records.map((record) => record.toObject()),
+                profile,
             };
         }
         catch (error) {
@@ -112,17 +113,17 @@ export class Neo4jOptimizer {
                 averageExecutionTime: 0,
                 indexUsageRate: 0,
                 slowQueries: [],
-                totalQueries: 0
+                totalQueries: 0,
             };
         }
         const totalExecutionTime = this.queryProfiles.reduce((sum, profile) => sum + profile.executionTime, 0);
-        const queriesWithIndexes = this.queryProfiles.filter(profile => profile.usedIndexes.length > 0);
-        const slowQueries = this.queryProfiles.filter(profile => profile.executionTime > this.slowQueryThreshold);
+        const queriesWithIndexes = this.queryProfiles.filter((profile) => profile.usedIndexes.length > 0);
+        const slowQueries = this.queryProfiles.filter((profile) => profile.executionTime > this.slowQueryThreshold);
         return {
             averageExecutionTime: totalExecutionTime / this.queryProfiles.length,
             indexUsageRate: queriesWithIndexes.length / this.queryProfiles.length,
             slowQueries: slowQueries.slice(-10), // Last 10 slow queries
-            totalQueries: this.queryProfiles.length
+            totalQueries: this.queryProfiles.length,
         };
     }
     /**
@@ -133,14 +134,14 @@ export class Neo4jOptimizer {
             // Entity indexes
             'CREATE INDEX entity_tenant_type_idx IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.type)',
             'CREATE INDEX entity_created_idx IF NOT EXISTS FOR (e:Entity) ON (e.createdAt)',
-            // Relationship indexes  
+            // Relationship indexes
             'CREATE INDEX rel_tenant_type_idx IF NOT EXISTS FOR ()-[r:RELATIONSHIP]->() ON (r.tenantId, r.type)',
             // Vector index for embeddings
             `CREATE INDEX entity_embedding_idx IF NOT EXISTS FOR (e:Entity) ON (e.embedding)
        OPTIONS {indexConfig: {
          \`vector.dimensions\`: 1536,
          \`vector.similarity_function\`: 'cosine'
-       }}`
+       }}`,
         ];
         for (const command of indexCommands) {
             try {
@@ -150,7 +151,7 @@ export class Neo4jOptimizer {
             catch (error) {
                 logger.warn('Index creation failed or already exists', {
                     command: command.substring(0, 50),
-                    error: error.message
+                    error: error.message,
                 });
             }
         }
@@ -193,7 +194,7 @@ export class Neo4jOptimizer {
             executionTime,
             dbHits,
             operatorType,
-            usedIndexes
+            usedIndexes,
         };
     }
     extractDbHits(plan) {

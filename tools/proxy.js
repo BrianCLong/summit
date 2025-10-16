@@ -40,7 +40,8 @@ const ALLOWED_COMMANDS = [
 ];
 
 // HMAC-based request authentication (optional)
-const HMAC_SECRET = process.env.SYMPHONY_HMAC_SECRET || 'symphony-local-dev-key';
+const HMAC_SECRET =
+  process.env.SYMPHONY_HMAC_SECRET || 'symphony-local-dev-key';
 
 function validateCommand(cmd) {
   // Exact match required - no shell injection possible
@@ -84,7 +85,11 @@ function textResponse(res, text, status = 200) {
 }
 
 function errorResponse(res, message, status = 500) {
-  jsonResponse(res, { error: message, timestamp: new Date().toISOString() }, status);
+  jsonResponse(
+    res,
+    { error: message, timestamp: new Date().toISOString() },
+    status,
+  );
 }
 
 async function execCommand(cmd, options = {}) {
@@ -100,7 +105,9 @@ async function execCommand(cmd, options = {}) {
       },
       (error, stdout, stderr) => {
         if (error) {
-          reject(new Error(`Command failed: ${error.message}\nStderr: ${stderr}`));
+          reject(
+            new Error(`Command failed: ${error.message}\nStderr: ${stderr}`),
+          );
         } else {
           resolve({ stdout, stderr, success: true });
         }
@@ -122,9 +129,12 @@ async function getSystemStatus() {
 
   // Check LiteLLM
   try {
-    const result = await execCommand('curl -s -f http://127.0.0.1:4000/v1/models', {
-      timeout: 5000,
-    });
+    const result = await execCommand(
+      'curl -s -f http://127.0.0.1:4000/v1/models',
+      {
+        timeout: 5000,
+      },
+    );
     status.services.litellm = { status: 'up', port: 4000 };
   } catch (e) {
     status.services.litellm = { status: 'down', error: e.message };
@@ -132,9 +142,12 @@ async function getSystemStatus() {
 
   // Check Ollama
   try {
-    const result = await execCommand('curl -s -f http://127.0.0.1:11434/api/tags', {
-      timeout: 5000,
-    });
+    const result = await execCommand(
+      'curl -s -f http://127.0.0.1:11434/api/tags',
+      {
+        timeout: 5000,
+      },
+    );
     status.services.ollama = { status: 'up', port: 11434 };
   } catch (e) {
     status.services.ollama = { status: 'down', error: e.message };
@@ -142,7 +155,9 @@ async function getSystemStatus() {
 
   // Check Neo4j
   try {
-    const result = await execCommand('curl -s -f http://127.0.0.1:7474/', { timeout: 5000 });
+    const result = await execCommand('curl -s -f http://127.0.0.1:7474/', {
+      timeout: 5000,
+    });
     status.services.neo4j = { status: 'up', port: 7474 };
   } catch (e) {
     status.services.neo4j = { status: 'down', error: e.message };
@@ -194,7 +209,8 @@ async function queryRag(question) {
   } catch (e) {
     return {
       error: e.message,
-      answer: "RAG query failed. Make sure the RAG index is built with 'just rag-build'.",
+      answer:
+        "RAG query failed. Make sure the RAG index is built with 'just rag-build'.",
       query: question,
       timestamp: new Date().toISOString(),
     };
@@ -283,7 +299,10 @@ async function getBudgetData() {
         totalCost += cost;
 
         // Generate mock history for sparkline (ascending cumulative spend)
-        const hist = Array.from({ length: 24 }, (_, i) => (cost * (i + 1)) / 24);
+        const hist = Array.from(
+          { length: 24 },
+          (_, i) => (cost * (i + 1)) / 24,
+        );
 
         items.push({
           model,
@@ -416,7 +435,10 @@ async function createGitHubIssue(data) {
       state: 'open',
     };
 
-    const issuePath = path.join(issuesDir, `${repo.replace('/', '-')}-${issueId}.json`);
+    const issuePath = path.join(
+      issuesDir,
+      `${repo.replace('/', '-')}-${issueId}.json`,
+    );
     fs.writeFileSync(issuePath, JSON.stringify(issue, null, 2));
 
     return {
@@ -546,7 +568,9 @@ const server = http.createServer(async (req, res) => {
         if (method === 'GET') {
           try {
             // Try to get models from LiteLLM
-            const result = await execCommand('curl -s http://127.0.0.1:4000/v1/models');
+            const result = await execCommand(
+              'curl -s http://127.0.0.1:4000/v1/models',
+            );
             const modelsData = JSON.parse(result.stdout);
             jsonResponse(res, modelsData);
           } catch (e) {
@@ -600,9 +624,8 @@ const server = http.createServer(async (req, res) => {
 
       case '/governance/record':
         if (method === 'POST') {
-          const { type, title, council, severity, tags, summary, detail } = JSON.parse(
-            body || '{}',
-          );
+          const { type, title, council, severity, tags, summary, detail } =
+            JSON.parse(body || '{}');
 
           if (!type || !title) {
             errorResponse(res, 'Type and title are required', 400);
@@ -626,7 +649,13 @@ const server = http.createServer(async (req, res) => {
 
       case '/github/issues':
         if (method === 'POST') {
-          const { repo, title, body: issueBody, labels, assignees } = JSON.parse(body || '{}');
+          const {
+            repo,
+            title,
+            body: issueBody,
+            labels,
+            assignees,
+          } = JSON.parse(body || '{}');
 
           if (!repo || !title) {
             errorResponse(res, 'Repository and title are required', 400);
@@ -674,7 +703,9 @@ process.on('SIGINT', () => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`🎭 Symphony Orchestra Proxy running on http://127.0.0.1:${PORT}`);
+  console.log(
+    `🎭 Symphony Orchestra Proxy running on http://127.0.0.1:${PORT}`,
+  );
   console.log(`📊 Status: http://127.0.0.1:${PORT}/status.json`);
   console.log(`🔍 Health: http://127.0.0.1:${PORT}/health`);
   console.log('');

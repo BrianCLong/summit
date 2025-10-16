@@ -11,7 +11,10 @@ import { verify } from '../cli.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function makeManifest(records) {
-  const sha = crypto.createHash('sha256').update(JSON.stringify({ records })).digest('hex');
+  const sha = crypto
+    .createHash('sha256')
+    .update(JSON.stringify({ records }))
+    .digest('hex');
   return { records, sha256: sha };
 }
 

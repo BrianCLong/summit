@@ -4,147 +4,149 @@ import WebSocket from 'ws';
 import { promises as fs } from 'fs';
 import path from 'path';
 export class FilesServer {
+    config;
+    server;
+    rateLimitCache = new Map();
+    // Available tools
+    tools = [
+        {
+            name: 'files.search',
+            description: 'Search for files by name, content, or metadata',
+            schema: {
+                type: 'object',
+                properties: {
+                    query: {
+                        type: 'string',
+                        description: 'Search query (filename or content)',
+                    },
+                    path: {
+                        type: 'string',
+                        description: 'Directory to search in (relative to base)',
+                    },
+                    extension: {
+                        type: 'string',
+                        description: 'File extension filter',
+                    },
+                    limit: {
+                        type: 'number',
+                        default: 20,
+                        description: 'Maximum number of results',
+                    },
+                },
+                required: ['query'],
+            },
+            scopes: ['files:read'],
+        },
+        {
+            name: 'files.get',
+            description: 'Read file contents',
+            schema: {
+                type: 'object',
+                properties: {
+                    path: {
+                        type: 'string',
+                        description: 'File path relative to base directory',
+                    },
+                    encoding: {
+                        type: 'string',
+                        enum: ['utf8', 'base64', 'binary'],
+                        default: 'utf8',
+                    },
+                },
+                required: ['path'],
+            },
+            scopes: ['files:read'],
+        },
+        {
+            name: 'files.put',
+            description: 'Write or update file contents (policy-gated)',
+            schema: {
+                type: 'object',
+                properties: {
+                    path: {
+                        type: 'string',
+                        description: 'File path relative to base directory',
+                    },
+                    content: {
+                        type: 'string',
+                        description: 'File content to write',
+                    },
+                    encoding: {
+                        type: 'string',
+                        enum: ['utf8', 'base64', 'binary'],
+                        default: 'utf8',
+                    },
+                    createDirs: {
+                        type: 'boolean',
+                        default: false,
+                        description: "Create parent directories if they don't exist",
+                    },
+                },
+                required: ['path', 'content'],
+            },
+            scopes: ['files:write'],
+        },
+        {
+            name: 'files.list',
+            description: 'List files and directories',
+            schema: {
+                type: 'object',
+                properties: {
+                    path: {
+                        type: 'string',
+                        default: '.',
+                        description: 'Directory path relative to base',
+                    },
+                    recursive: {
+                        type: 'boolean',
+                        default: false,
+                    },
+                    includeHidden: {
+                        type: 'boolean',
+                        default: false,
+                    },
+                },
+            },
+            scopes: ['files:read'],
+        },
+        {
+            name: 'files.meta',
+            description: 'Get file metadata (size, dates, permissions)',
+            schema: {
+                type: 'object',
+                properties: {
+                    path: {
+                        type: 'string',
+                        description: 'File path relative to base directory',
+                    },
+                },
+                required: ['path'],
+            },
+            scopes: ['files:read'],
+        },
+        {
+            name: 'files.delete',
+            description: 'Delete file or directory (requires elevated permissions)',
+            schema: {
+                type: 'object',
+                properties: {
+                    path: {
+                        type: 'string',
+                        description: 'File/directory path to delete',
+                    },
+                    recursive: {
+                        type: 'boolean',
+                        default: false,
+                        description: 'Delete directories recursively',
+                    },
+                },
+                required: ['path'],
+            },
+            scopes: ['files:write', 'files:delete'],
+        },
+    ];
     constructor(config) {
         this.config = config;
-        this.rateLimitCache = new Map();
-        // Available tools
-        this.tools = [
-            {
-                name: 'files.search',
-                description: 'Search for files by name, content, or metadata',
-                schema: {
-                    type: 'object',
-                    properties: {
-                        query: {
-                            type: 'string',
-                            description: 'Search query (filename or content)',
-                        },
-                        path: {
-                            type: 'string',
-                            description: 'Directory to search in (relative to base)',
-                        },
-                        extension: {
-                            type: 'string',
-                            description: 'File extension filter',
-                        },
-                        limit: {
-                            type: 'number',
-                            default: 20,
-                            description: 'Maximum number of results',
-                        },
-                    },
-                    required: ['query'],
-                },
-                scopes: ['files:read'],
-            },
-            {
-                name: 'files.get',
-                description: 'Read file contents',
-                schema: {
-                    type: 'object',
-                    properties: {
-                        path: {
-                            type: 'string',
-                            description: 'File path relative to base directory',
-                        },
-                        encoding: {
-                            type: 'string',
-                            enum: ['utf8', 'base64', 'binary'],
-                            default: 'utf8',
-                        },
-                    },
-                    required: ['path'],
-                },
-                scopes: ['files:read'],
-            },
-            {
-                name: 'files.put',
-                description: 'Write or update file contents (policy-gated)',
-                schema: {
-                    type: 'object',
-                    properties: {
-                        path: {
-                            type: 'string',
-                            description: 'File path relative to base directory',
-                        },
-                        content: {
-                            type: 'string',
-                            description: 'File content to write',
-                        },
-                        encoding: {
-                            type: 'string',
-                            enum: ['utf8', 'base64', 'binary'],
-                            default: 'utf8',
-                        },
-                        createDirs: {
-                            type: 'boolean',
-                            default: false,
-                            description: "Create parent directories if they don't exist",
-                        },
-                    },
-                    required: ['path', 'content'],
-                },
-                scopes: ['files:write'],
-            },
-            {
-                name: 'files.list',
-                description: 'List files and directories',
-                schema: {
-                    type: 'object',
-                    properties: {
-                        path: {
-                            type: 'string',
-                            default: '.',
-                            description: 'Directory path relative to base',
-                        },
-                        recursive: {
-                            type: 'boolean',
-                            default: false,
-                        },
-                        includeHidden: {
-                            type: 'boolean',
-                            default: false,
-                        },
-                    },
-                },
-                scopes: ['files:read'],
-            },
-            {
-                name: 'files.meta',
-                description: 'Get file metadata (size, dates, permissions)',
-                schema: {
-                    type: 'object',
-                    properties: {
-                        path: {
-                            type: 'string',
-                            description: 'File path relative to base directory',
-                        },
-                    },
-                    required: ['path'],
-                },
-                scopes: ['files:read'],
-            },
-            {
-                name: 'files.delete',
-                description: 'Delete file or directory (requires elevated permissions)',
-                schema: {
-                    type: 'object',
-                    properties: {
-                        path: {
-                            type: 'string',
-                            description: 'File/directory path to delete',
-                        },
-                        recursive: {
-                            type: 'boolean',
-                            default: false,
-                            description: 'Delete directories recursively',
-                        },
-                    },
-                    required: ['path'],
-                },
-                scopes: ['files:write', 'files:delete'],
-            },
-        ];
         this.server = new WebSocket.Server({ port: config.port });
         this.setupWebSocketHandlers();
         console.log(`Files MCP Server listening on port ${config.port}`);
@@ -356,7 +358,7 @@ export class FilesServer {
         }
     }
     async putFile(args) {
-        const { path: filePath, content, encoding = 'utf8', createDirs = false } = args;
+        const { path: filePath, content, encoding = 'utf8', createDirs = false, } = args;
         const fullPath = this.resolvePath(filePath);
         await this.validatePath(fullPath);
         await this.validateWrite(fullPath);
@@ -390,7 +392,7 @@ export class FilesServer {
         }
     }
     async listFiles(args) {
-        const { path: dirPath = '.', recursive = false, includeHidden = false } = args;
+        const { path: dirPath = '.', recursive = false, includeHidden = false, } = args;
         const fullPath = this.resolvePath(dirPath);
         await this.validatePath(fullPath);
         try {
@@ -496,7 +498,8 @@ export class FilesServer {
     }
     async validateFileAccess(fullPath) {
         const ext = path.extname(fullPath).toLowerCase();
-        if (this.config.allowedExtensions.length > 0 && !this.config.allowedExtensions.includes(ext)) {
+        if (this.config.allowedExtensions.length > 0 &&
+            !this.config.allowedExtensions.includes(ext)) {
             throw new Error(`File type '${ext}' not allowed`);
         }
     }

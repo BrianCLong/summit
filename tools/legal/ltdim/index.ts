@@ -154,11 +154,14 @@ export interface RunResult {
   reportText: string;
 }
 
-const DEFAULT_PRIVATE_KEY = process.env.LTDIM_PRIVATE_KEY || '-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----'; // TODO: Load from a secure location
+const DEFAULT_PRIVATE_KEY =
+  process.env.LTDIM_PRIVATE_KEY ||
+  '-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----'; // TODO: Load from a secure location
 
 const DEFAULT_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAtfR/sCXeHwMoUxAIKvs5ZS9NzDteLpUrG3LJpg973fM=\n-----END PUBLIC KEY-----`;
 
-const CLAUSE_HEADER_REGEX = /^(Clause|Section|Article)\s+([0-9A-Za-z.\-]+)\s*[:\-]?\s*(.*)$/i;
+const CLAUSE_HEADER_REGEX =
+  /^(Clause|Section|Article)\s+([0-9A-Za-z.\-]+)\s*[:\-]?\s*(.*)$/i;
 
 export const DEFAULT_RULE_CATALOG: RuleCatalog = {
   rules: [
@@ -175,7 +178,7 @@ export const DEFAULT_RULE_CATALOG: RuleCatalog = {
         status: 'blocked',
         summary: 'Enforce EU-only residency for personal data transfers.',
         beforeState: 'geoPolicy.allowNonEuTransfers = true',
-        afterState: 'geoPolicy.allowNonEuTransfers = false'
+        afterState: 'geoPolicy.allowNonEuTransfers = false',
       },
       obligations: ['Route data flows to EU sovereign storage providers'],
       sloImpact: [
@@ -183,19 +186,20 @@ export const DEFAULT_RULE_CATALOG: RuleCatalog = {
           metric: 'dataResidencyCutover',
           delta: 4,
           unit: 'hours',
-          reason: 'Migration to EU sovereign regions'
+          reason: 'Migration to EU sovereign regions',
         },
         {
           metric: 'transferLatency',
           delta: 12,
           unit: '%',
-          reason: 'Geo-fencing and compliance routing'
-        }
-      ]
+          reason: 'Geo-fencing and compliance routing',
+        },
+      ],
     },
     {
       id: 'retention-window-extension',
-      description: 'Extend data retention windows when clause increases storage duration.',
+      description:
+        'Extend data retention windows when clause increases storage duration.',
       clauseIds: ['Clause 4'],
       changeTypes: ['modified'],
       keywords: ['retain', '90'],
@@ -203,19 +207,19 @@ export const DEFAULT_RULE_CATALOG: RuleCatalog = {
         policyId: 'data.retention.window',
         action: 'update',
         status: 'allowed',
-        summary: 'Extend retention timer to updated clause requirement.'
+        summary: 'Extend retention timer to updated clause requirement.',
       },
       obligations: [
         'Update retention timer configuration to 90 days',
-        'Notify compliance team of retention change'
+        'Notify compliance team of retention change',
       ],
       sloImpact: [
         {
           metric: 'storageCost',
           delta: 15,
           unit: '%',
-          reason: 'Longer retention window'
-        }
+          reason: 'Longer retention window',
+        },
       ],
       projector: ({ diff, text }) => {
         const afterDays = extractDays(text);
@@ -229,7 +233,7 @@ export const DEFAULT_RULE_CATALOG: RuleCatalog = {
           updates.beforeState = `retention.days = ${beforeDays}`;
         }
         return updates;
-      }
+      },
     },
     {
       id: 'incident-accelerated-notification',
@@ -243,21 +247,24 @@ export const DEFAULT_RULE_CATALOG: RuleCatalog = {
         status: 'allowed',
         summary: 'Accelerate breach notification SLA to 24 hours.',
         beforeState: 'incident.slaHours = 72',
-        afterState: 'incident.slaHours = 24'
+        afterState: 'incident.slaHours = 24',
       },
-      obligations: ['Implement automated detection to support 24h breach notifications'],
+      obligations: [
+        'Implement automated detection to support 24h breach notifications',
+      ],
       sloImpact: [
         {
           metric: 'onCallLoad',
           delta: 2,
           unit: 'FTE',
-          reason: 'Need expanded on-call coverage for faster notification'
-        }
-      ]
+          reason: 'Need expanded on-call coverage for faster notification',
+        },
+      ],
     },
     {
       id: 'ai-transparency-governance',
-      description: 'Add AI transparency obligations when new audit clauses are introduced.',
+      description:
+        'Add AI transparency obligations when new audit clauses are introduced.',
       clauseIds: ['Clause 6'],
       changeTypes: ['added'],
       keywords: ['ai', 'transparency', 'audit'],
@@ -265,29 +272,30 @@ export const DEFAULT_RULE_CATALOG: RuleCatalog = {
         policyId: 'ai.governance.transparency',
         action: 'add',
         status: 'allowed',
-        summary: 'Enable AI transparency controls and audit logging.'
+        summary: 'Enable AI transparency controls and audit logging.',
       },
       obligations: [
         'Stand up AI transparency reporting pipeline',
-        'Schedule quarterly model governance audits'
+        'Schedule quarterly model governance audits',
       ],
       sloImpact: [
         {
           metric: 'auditCycleTime',
           delta: -10,
           unit: '%',
-          reason: 'Automated evidence collection via transparency tooling'
-        }
-      ]
-    }
-  ]
+          reason: 'Automated evidence collection via transparency tooling',
+        },
+      ],
+    },
+  ],
 };
 
 export function parseLegalText(text: string): Clause[] {
   const normalized = text.replace(/\r\n/g, '\n');
   const lines = normalized.split('\n');
   const clauses: Clause[] = [];
-  let current: { id: string; heading: string; bodyLines: string[] } | null = null;
+  let current: { id: string; heading: string; bodyLines: string[] } | null =
+    null;
 
   const pushCurrent = () => {
     if (!current) {
@@ -307,7 +315,8 @@ export function parseLegalText(text: string): Clause[] {
     if (match) {
       pushCurrent();
       const [, keyword, identifier, trailing] = match;
-      const normalizedKeyword = keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase();
+      const normalizedKeyword =
+        keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase();
       const id = `${normalizedKeyword} ${identifier}`;
       const heading = trailing.trim();
       current = { id, heading, bodyLines: [] };
@@ -326,13 +335,18 @@ function clauseFingerprint(clause: Clause): string {
   return `${clause.heading}\n${clause.body}`.trim();
 }
 
-export function diffClauses(baseline: Clause[], revised: Clause[]): ClauseDiff[] {
+export function diffClauses(
+  baseline: Clause[],
+  revised: Clause[],
+): ClauseDiff[] {
   const baselineMap = new Map(baseline.map((clause) => [clause.id, clause]));
   const revisedMap = new Map(revised.map((clause) => [clause.id, clause]));
   const ids = new Set<string>();
   baseline.forEach((c) => ids.add(c.id));
   revised.forEach((c) => ids.add(c.id));
-  const sortedIds = Array.from(ids).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const sortedIds = Array.from(ids).sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true }),
+  );
 
   const diffs: ClauseDiff[] = [];
   for (const clauseId of sortedIds) {
@@ -348,7 +362,12 @@ export function diffClauses(baseline: Clause[], revised: Clause[]): ClauseDiff[]
     }
     if (beforeClause && afterClause) {
       if (clauseFingerprint(beforeClause) !== clauseFingerprint(afterClause)) {
-        diffs.push({ clauseId, changeType: 'modified', beforeClause, afterClause });
+        diffs.push({
+          clauseId,
+          changeType: 'modified',
+          beforeClause,
+          afterClause,
+        });
       }
     }
   }
@@ -356,7 +375,11 @@ export function diffClauses(baseline: Clause[], revised: Clause[]): ClauseDiff[]
   return diffs;
 }
 
-function matchesRule(rule: RuleDefinition, diff: ClauseDiff, text: string): boolean {
+function matchesRule(
+  rule: RuleDefinition,
+  diff: ClauseDiff,
+  text: string,
+): boolean {
   if (rule.clauseIds && !rule.clauseIds.includes(diff.clauseId)) {
     return false;
   }
@@ -374,11 +397,15 @@ function matchesRule(rule: RuleDefinition, diff: ClauseDiff, text: string): bool
   return true;
 }
 
-function buildPolicyDelta(rule: RuleDefinition, diff: ClauseDiff, text: string): PolicyDelta {
+function buildPolicyDelta(
+  rule: RuleDefinition,
+  diff: ClauseDiff,
+  text: string,
+): PolicyDelta {
   const template: PolicyDeltaTemplate = {
     ...rule.delta,
     beforeState: rule.delta.beforeState ?? null,
-    afterState: rule.delta.afterState ?? null
+    afterState: rule.delta.afterState ?? null,
   };
 
   const projection = rule.projector?.({ diff, text });
@@ -402,11 +429,14 @@ function buildPolicyDelta(rule: RuleDefinition, diff: ClauseDiff, text: string):
     clauseHeading: diff.afterClause?.heading ?? diff.beforeClause?.heading,
     clauseExcerpt: text.trim(),
     obligations: [...(rule.obligations ?? [])],
-    sloImpact: [...(rule.sloImpact ?? [])]
+    sloImpact: [...(rule.sloImpact ?? [])],
   };
 }
 
-export function mapDiffsToPolicyDeltas(diffs: ClauseDiff[], catalog: RuleCatalog): PolicyDelta[] {
+export function mapDiffsToPolicyDeltas(
+  diffs: ClauseDiff[],
+  catalog: RuleCatalog,
+): PolicyDelta[] {
   const policyDeltas: PolicyDelta[] = [];
   for (const diff of diffs) {
     const referenceClause = diff.afterClause ?? diff.beforeClause;
@@ -436,7 +466,10 @@ export function simulateImpact(policyDeltas: PolicyDelta[]): ImpactSummary {
   let allowedChanges = 0;
   let manualReviewChanges = 0;
   const obligations = new Set<string>();
-  const sloMap = new Map<string, { metric: string; totalDelta: number; unit: string; drivers: Set<string> }>();
+  const sloMap = new Map<
+    string,
+    { metric: string; totalDelta: number; unit: string; drivers: Set<string> }
+  >();
 
   for (const delta of policyDeltas) {
     if (delta.status === 'blocked') {
@@ -459,7 +492,7 @@ export function simulateImpact(policyDeltas: PolicyDelta[]): ImpactSummary {
           metric: impact.metric,
           totalDelta: impact.delta,
           unit: impact.unit,
-          drivers: new Set([impact.reason])
+          drivers: new Set([impact.reason]),
         });
       } else {
         entry.totalDelta += impact.delta;
@@ -468,21 +501,23 @@ export function simulateImpact(policyDeltas: PolicyDelta[]): ImpactSummary {
     }
   }
 
-  const sloImpact: AggregatedSloImpact[] = Array.from(sloMap.values()).map((entry) => {
-    let direction: AggregatedSloImpact['direction'] = 'neutral';
-    if (entry.totalDelta > 0) {
-      direction = 'degraded';
-    } else if (entry.totalDelta < 0) {
-      direction = 'improved';
-    }
-    return {
-      metric: entry.metric,
-      totalDelta: Number(entry.totalDelta.toFixed(4)),
-      unit: entry.unit,
-      direction,
-      drivers: Array.from(entry.drivers).sort((a, b) => a.localeCompare(b))
-    };
-  });
+  const sloImpact: AggregatedSloImpact[] = Array.from(sloMap.values()).map(
+    (entry) => {
+      let direction: AggregatedSloImpact['direction'] = 'neutral';
+      if (entry.totalDelta > 0) {
+        direction = 'degraded';
+      } else if (entry.totalDelta < 0) {
+        direction = 'improved';
+      }
+      return {
+        metric: entry.metric,
+        totalDelta: Number(entry.totalDelta.toFixed(4)),
+        unit: entry.unit,
+        direction,
+        drivers: Array.from(entry.drivers).sort((a, b) => a.localeCompare(b)),
+      };
+    },
+  );
 
   sloImpact.sort((a, b) => a.metric.localeCompare(b.metric));
 
@@ -491,7 +526,7 @@ export function simulateImpact(policyDeltas: PolicyDelta[]): ImpactSummary {
     allowedChanges,
     manualReviewChanges,
     obligations: Array.from(obligations).sort((a, b) => a.localeCompare(b)),
-    sloImpact
+    sloImpact,
   };
 }
 
@@ -501,35 +536,46 @@ function canonicalizeReportPayload(payload: ImpactReportPayload): string {
 
 export function signImpactReport(
   payload: ImpactReportPayload,
-  privateKeyPem: string = DEFAULT_PRIVATE_KEY
+  privateKeyPem: string = DEFAULT_PRIVATE_KEY,
 ): SignedImpactReport {
   const canonicalPayload = canonicalizeReportPayload(payload);
   const privateKey = crypto.createPrivateKey(privateKeyPem);
-  const signature = crypto.sign(null, Buffer.from(canonicalPayload), privateKey).toString('base64');
+  const signature = crypto
+    .sign(null, Buffer.from(canonicalPayload), privateKey)
+    .toString('base64');
   return {
     payload,
     signature,
     algorithm: 'ed25519',
     publicKey: DEFAULT_PUBLIC_KEY,
-    canonicalPayload
+    canonicalPayload,
   };
 }
 
 export function verifyImpactReportSignature(
   canonicalPayload: string,
   signature: string,
-  publicKeyPem: string = DEFAULT_PUBLIC_KEY
+  publicKeyPem: string = DEFAULT_PUBLIC_KEY,
 ): boolean {
   const publicKey = crypto.createPublicKey(publicKeyPem);
-  return crypto.verify(null, Buffer.from(canonicalPayload), publicKey, Buffer.from(signature, 'base64'));
+  return crypto.verify(
+    null,
+    Buffer.from(canonicalPayload),
+    publicKey,
+    Buffer.from(signature, 'base64'),
+  );
 }
 
 export function renderImpactReport(report: SignedImpactReport): string {
   const lines: string[] = [];
   lines.push(`# LTDIM Impact Report`);
   lines.push(`Generated: ${report.payload.generatedAt}`);
-  lines.push(`Baseline: ${report.payload.baseline.name} (${report.payload.baseline.version})`);
-  lines.push(`Revised: ${report.payload.revised.name} (${report.payload.revised.version})`);
+  lines.push(
+    `Baseline: ${report.payload.baseline.name} (${report.payload.baseline.version})`,
+  );
+  lines.push(
+    `Revised: ${report.payload.revised.name} (${report.payload.revised.version})`,
+  );
   lines.push('');
   lines.push('## Clause Changes');
   if (report.payload.clauseDiffs.length === 0) {
@@ -539,7 +585,7 @@ export function renderImpactReport(report: SignedImpactReport): string {
       lines.push(
         `- ${clause.clauseId} (${clause.changeType}) — ${
           clause.afterHeading ?? clause.beforeHeading ?? 'Unspecified heading'
-        }`
+        }`,
       );
     }
   }
@@ -550,7 +596,7 @@ export function renderImpactReport(report: SignedImpactReport): string {
   } else {
     for (const delta of report.payload.policyDeltas) {
       lines.push(
-        `- [${delta.status.toUpperCase()}] ${delta.policyId} (${delta.action}) ← rule ${delta.ruleId} (${delta.clauseId})`
+        `- [${delta.status.toUpperCase()}] ${delta.policyId} (${delta.action}) ← rule ${delta.ruleId} (${delta.clauseId})`,
       );
       if (delta.beforeState) {
         lines.push(`  • Before: ${delta.beforeState}`);
@@ -564,7 +610,7 @@ export function renderImpactReport(report: SignedImpactReport): string {
   lines.push('');
   lines.push('## Impact Summary');
   lines.push(
-    `- Changes — blocked: ${report.payload.impactSummary.blockedChanges}, allowed: ${report.payload.impactSummary.allowedChanges}, manual-review: ${report.payload.impactSummary.manualReviewChanges}`
+    `- Changes — blocked: ${report.payload.impactSummary.blockedChanges}, allowed: ${report.payload.impactSummary.allowedChanges}, manual-review: ${report.payload.impactSummary.manualReviewChanges}`,
   );
   lines.push('- Obligations:');
   if (report.payload.impactSummary.obligations.length === 0) {
@@ -581,8 +627,8 @@ export function renderImpactReport(report: SignedImpactReport): string {
     for (const slo of report.payload.impactSummary.sloImpact) {
       lines.push(
         `  • ${slo.metric}: ${slo.totalDelta}${slo.unit} (${slo.direction}); drivers: ${slo.drivers.join(
-          '; '
-        )}`
+          '; ',
+        )}`,
       );
     }
   }
@@ -598,13 +644,13 @@ export function buildPolicyPullRequest(
   baselineDoc: LegalDocument,
   revisedDoc: LegalDocument,
   policyDeltas: PolicyDelta[],
-  impactSummary: ImpactSummary
+  impactSummary: ImpactSummary,
 ): PolicyPullRequest {
   const title = `LTDIM: ${baselineDoc.name} ${baselineDoc.version} → ${revisedDoc.version}`;
   const headerLines: string[] = [];
   headerLines.push('## Summary');
   headerLines.push(
-    `- Blocked changes: ${impactSummary.blockedChanges}; allowed changes: ${impactSummary.allowedChanges}; manual review: ${impactSummary.manualReviewChanges}`
+    `- Blocked changes: ${impactSummary.blockedChanges}; allowed changes: ${impactSummary.allowedChanges}; manual review: ${impactSummary.manualReviewChanges}`,
   );
   if (impactSummary.obligations.length > 0) {
     headerLines.push('- Obligations:');
@@ -618,7 +664,7 @@ export function buildPolicyPullRequest(
     headerLines.push('- SLO effects:');
     for (const slo of impactSummary.sloImpact) {
       headerLines.push(
-        `  - ${slo.metric}: ${slo.totalDelta}${slo.unit} (${slo.direction}); drivers: ${slo.drivers.join(', ')}`
+        `  - ${slo.metric}: ${slo.totalDelta}${slo.unit} (${slo.direction}); drivers: ${slo.drivers.join(', ')}`,
       );
     }
   } else {
@@ -631,7 +677,7 @@ export function buildPolicyPullRequest(
   } else {
     for (const delta of policyDeltas) {
       headerLines.push(
-        `- ${delta.policyId} (${delta.action}, ${delta.status}) — ${delta.summary} [rule ${delta.ruleId}]`
+        `- ${delta.policyId} (${delta.action}, ${delta.status}) — ${delta.summary} [rule ${delta.ruleId}]`,
       );
       if (delta.beforeState) {
         headerLines.push(`  - Before: ${delta.beforeState}`);
@@ -650,13 +696,13 @@ export function buildPolicyPullRequest(
     action: delta.action,
     summary: delta.summary,
     beforeState: delta.beforeState ?? null,
-    afterState: delta.afterState ?? null
+    afterState: delta.afterState ?? null,
   }));
 
   return {
     title,
     body: headerLines.join('\n'),
-    diffs
+    diffs,
   };
 }
 
@@ -676,19 +722,23 @@ export function runLtdim(options: RunOptions): RunResult {
     generatedAt: timestamp,
     baseline: {
       name: options.baselineDoc.name,
-      version: options.baselineDoc.version
+      version: options.baselineDoc.version,
     },
     revised: {
       name: options.revisedDoc.name,
-      version: options.revisedDoc.version
+      version: options.revisedDoc.version,
     },
     clauseDiffs: clauseDiffs.map((diff) => ({
       clauseId: diff.clauseId,
       changeType: diff.changeType,
       beforeHeading: diff.beforeClause?.heading,
       afterHeading: diff.afterClause?.heading,
-      beforeText: diff.beforeClause ? clauseFingerprint(diff.beforeClause) : undefined,
-      afterText: diff.afterClause ? clauseFingerprint(diff.afterClause) : undefined
+      beforeText: diff.beforeClause
+        ? clauseFingerprint(diff.beforeClause)
+        : undefined,
+      afterText: diff.afterClause
+        ? clauseFingerprint(diff.afterClause)
+        : undefined,
     })),
     policyDeltas: policyDeltas.map((delta) => ({
       policyId: delta.policyId,
@@ -698,15 +748,20 @@ export function runLtdim(options: RunOptions): RunResult {
       status: delta.status,
       action: delta.action,
       beforeState: delta.beforeState ?? null,
-      afterState: delta.afterState ?? null
+      afterState: delta.afterState ?? null,
     })),
-    impactSummary
+    impactSummary,
   };
 
   const signedReport = signImpactReport(reportPayload, privateKeyPem);
   signedReport.publicKey = publicKeyPem;
   const reportText = renderImpactReport(signedReport);
-  const pullRequest = buildPolicyPullRequest(options.baselineDoc, options.revisedDoc, policyDeltas, impactSummary);
+  const pullRequest = buildPolicyPullRequest(
+    options.baselineDoc,
+    options.revisedDoc,
+    policyDeltas,
+    impactSummary,
+  );
 
   return {
     clauseDiffs,
@@ -714,7 +769,7 @@ export function runLtdim(options: RunOptions): RunResult {
     impactSummary,
     signedReport,
     pullRequest,
-    reportText
+    reportText,
   };
 }
 

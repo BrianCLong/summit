@@ -4,8 +4,8 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
-import { metrics, trace, SpanStatusCode, SpanKind } from '@opentelemetry/api';
+import { BatchSpanProcessor, ConsoleSpanExporter, } from '@opentelemetry/sdk-trace-node';
+import { metrics, trace, SpanStatusCode, SpanKind, } from '@opentelemetry/api';
 import pino from 'pino';
 const logger = pino({ name: 'telemetry' });
 // Service information
@@ -157,8 +157,8 @@ export function createSpan(name, fn, attributes) {
     });
 }
 class IntelGraphCostTracker {
+    budgets = new Map();
     constructor() {
-        this.budgets = new Map();
         // Initialize default budgets
         this.budgets.set('default', { used: 0, limit: 1000 });
     }
@@ -197,9 +197,7 @@ class IntelGraphCostTracker {
 }
 export const costTracker = new IntelGraphCostTracker();
 class Neo4jSlowQueryKiller {
-    constructor() {
-        this.activeQueries = new Map();
-    }
+    activeQueries = new Map();
     registerQuery(queryId, query, timeout) {
         const startTime = new Date();
         const timeoutHandle = setTimeout(() => {
@@ -319,7 +317,8 @@ if (process.env.NODE_ENV !== 'test') {
     sdk.start();
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        sdk.shutdown()
+        sdk
+            .shutdown()
             .then(() => logger.info('OpenTelemetry SDK shut down'))
             .catch((error) => logger.error('Error shutting down OpenTelemetry SDK', error));
     });

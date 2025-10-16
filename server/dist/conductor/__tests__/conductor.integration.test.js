@@ -6,7 +6,13 @@ import { conductorMetrics } from '../metrics';
 describe('Conductor Integration', () => {
     let conductor;
     const testConfig = {
-        enabledExperts: ['LLM_LIGHT', 'LLM_HEAVY', 'GRAPH_TOOL', 'RAG_TOOL', 'FILES_TOOL'],
+        enabledExperts: [
+            'LLM_LIGHT',
+            'LLM_HEAVY',
+            'GRAPH_TOOL',
+            'RAG_TOOL',
+            'FILES_TOOL',
+        ],
         defaultTimeoutMs: 5000,
         maxConcurrentTasks: 5,
         auditEnabled: true,
@@ -273,7 +279,10 @@ describe('Conductor Integration', () => {
             const inputs = [
                 { task: 'Run pagerank algorithm', expectedExpert: 'GRAPH_TOOL' },
                 { task: 'Calculate community detection', expectedExpert: 'GRAPH_TOOL' },
-                { task: 'Find shortest path between nodes', expectedExpert: 'GRAPH_TOOL' },
+                {
+                    task: 'Find shortest path between nodes',
+                    expectedExpert: 'GRAPH_TOOL',
+                },
             ];
             for (const { task, expectedExpert } of inputs) {
                 const result = await conductor.conduct({

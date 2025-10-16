@@ -26,7 +26,7 @@ const traceExporter = new OTLPTraceExporter({
         process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
         'http://localhost:4318/v1/traces',
     headers: {
-        'Authorization': process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
+        Authorization: process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
     },
 });
 const metricExporter = new OTLPMetricExporter({
@@ -34,7 +34,7 @@ const metricExporter = new OTLPMetricExporter({
         process.env.OTEL_EXPORTER_OTLP_ENDPOINT?.replace('/traces', '/metrics') ||
         'http://localhost:4318/v1/metrics',
     headers: {
-        'Authorization': process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
+        Authorization: process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
     },
 });
 // Auto-instrumentations with custom configuration
@@ -141,7 +141,7 @@ export function getTracer(name = 'intelgraph') {
 // Environment validation
 export function validateOtelConfig() {
     const required = ['OTEL_EXPORTER_OTLP_ENDPOINT'];
-    const missing = required.filter(env => !process.env[env]);
+    const missing = required.filter((env) => !process.env[env]);
     if (missing.length > 0) {
         console.warn(`⚠️  Missing OTEL environment variables: ${missing.join(', ')}`);
         console.warn('⚠️  OpenTelemetry will use default endpoints');

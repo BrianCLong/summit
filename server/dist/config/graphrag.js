@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 const defaultPrompt = z.object({
     question: z.string().min(3),
 });
@@ -20,8 +20,8 @@ const graphragConfig = {
         default: {
             promptSchema: defaultPrompt,
             outputSchema: defaultOutput,
-            tokenBudget: parseInt(process.env.GRAPHRAG_TOKEN_BUDGET || "2000"),
-            latencyBudgetMs: parseInt(process.env.GRAPHRAG_LATENCY_BUDGET_MS || "2000"),
+            tokenBudget: parseInt(process.env.GRAPHRAG_TOKEN_BUDGET || '2000'),
+            latencyBudgetMs: parseInt(process.env.GRAPHRAG_LATENCY_BUDGET_MS || '2000'),
         },
     },
 };

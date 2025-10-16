@@ -78,13 +78,19 @@ const wargameSchema = gql `
 
   extend type Query {
     # Retrieve social media telemetry for a given scenario
-    getCrisisTelemetry(scenarioId: ID!, limit: Int, offset: Int): [SocialMediaTelemetry!]!
+    getCrisisTelemetry(
+      scenarioId: ID!
+      limit: Int
+      offset: Int
+    ): [SocialMediaTelemetry!]!
     # Retrieve adversary intent estimates for a given scenario
     getAdversaryIntentEstimates(scenarioId: ID!): [AdversaryIntentEstimate!]!
     # Retrieve narrative heatmap data for a given scenario
     getNarrativeHeatmapData(scenarioId: ID!): [NarrativeHeatmapData!]!
     # Retrieve strategic response playbooks for a given scenario
-    getStrategicResponsePlaybooks(scenarioId: ID!): [StrategicResponsePlaybook!]!
+    getStrategicResponsePlaybooks(
+      scenarioId: ID!
+    ): [StrategicResponsePlaybook!]!
     # Get a specific crisis scenario by ID
     getCrisisScenario(id: ID!): CrisisScenario
     # Get all crisisScenarios

@@ -2,8 +2,8 @@
  * Real-time Notification and Alerting Service - P1 Priority
  * Comprehensive notification system with multiple channels and intelligent routing
  */
-const EventEmitter = require("events");
-const { v4: uuidv4 } = require("uuid");
+const EventEmitter = require('events');
+const { v4: uuidv4 } = require('uuid');
 class NotificationService extends EventEmitter {
     constructor(socketIO, postgresPool, redisClient, securityService, logger) {
         super();
@@ -36,373 +36,373 @@ class NotificationService extends EventEmitter {
         this.setupEventListeners();
     }
     initializeAlertChannels() {
-        this.alertChannels.set("REAL_TIME", {
-            id: "REAL_TIME",
-            name: "Real-time WebSocket",
-            description: "Immediate notifications via WebSocket connection",
-            priority: "IMMEDIATE",
-            deliveryMethod: "websocket",
+        this.alertChannels.set('REAL_TIME', {
+            id: 'REAL_TIME',
+            name: 'Real-time WebSocket',
+            description: 'Immediate notifications via WebSocket connection',
+            priority: 'IMMEDIATE',
+            deliveryMethod: 'websocket',
             maxRetries: 0,
             enabled: true,
         });
-        this.alertChannels.set("EMAIL", {
-            id: "EMAIL",
-            name: "Email Notifications",
-            description: "Email delivery for important alerts",
-            priority: "HIGH",
-            deliveryMethod: "email",
+        this.alertChannels.set('EMAIL', {
+            id: 'EMAIL',
+            name: 'Email Notifications',
+            description: 'Email delivery for important alerts',
+            priority: 'HIGH',
+            deliveryMethod: 'email',
             maxRetries: 3,
             retryDelay: 60000, // 1 minute
             enabled: true,
         });
-        this.alertChannels.set("SMS", {
-            id: "SMS",
-            name: "SMS Alerts",
-            description: "SMS delivery for critical alerts",
-            priority: "CRITICAL",
-            deliveryMethod: "sms",
+        this.alertChannels.set('SMS', {
+            id: 'SMS',
+            name: 'SMS Alerts',
+            description: 'SMS delivery for critical alerts',
+            priority: 'CRITICAL',
+            deliveryMethod: 'sms',
             maxRetries: 2,
             retryDelay: 30000, // 30 seconds
             enabled: true,
         });
-        this.alertChannels.set("PUSH", {
-            id: "PUSH",
-            name: "Push Notifications",
-            description: "Mobile push notifications",
-            priority: "MEDIUM",
-            deliveryMethod: "push",
+        this.alertChannels.set('PUSH', {
+            id: 'PUSH',
+            name: 'Push Notifications',
+            description: 'Mobile push notifications',
+            priority: 'MEDIUM',
+            deliveryMethod: 'push',
             maxRetries: 2,
             retryDelay: 120000, // 2 minutes
             enabled: true,
         });
-        this.alertChannels.set("WEBHOOK", {
-            id: "WEBHOOK",
-            name: "Webhook Integration",
-            description: "HTTP webhook for external systems",
-            priority: "HIGH",
-            deliveryMethod: "webhook",
+        this.alertChannels.set('WEBHOOK', {
+            id: 'WEBHOOK',
+            name: 'Webhook Integration',
+            description: 'HTTP webhook for external systems',
+            priority: 'HIGH',
+            deliveryMethod: 'webhook',
             maxRetries: 3,
             retryDelay: 60000,
             enabled: true,
         });
-        this.alertChannels.set("IN_APP", {
-            id: "IN_APP",
-            name: "In-Application",
-            description: "In-app notification center",
-            priority: "LOW",
-            deliveryMethod: "in_app",
+        this.alertChannels.set('IN_APP', {
+            id: 'IN_APP',
+            name: 'In-Application',
+            description: 'In-app notification center',
+            priority: 'LOW',
+            deliveryMethod: 'in_app',
             maxRetries: 1,
             retryDelay: 5000,
             enabled: true,
         });
     }
     initializeNotificationTemplates() {
-        this.notificationTemplates.set("SECURITY_ALERT", {
-            id: "SECURITY_ALERT",
-            name: "Security Alert",
-            category: "SECURITY",
-            priority: "CRITICAL",
-            channels: ["REAL_TIME", "EMAIL", "SMS"],
+        this.notificationTemplates.set('SECURITY_ALERT', {
+            id: 'SECURITY_ALERT',
+            name: 'Security Alert',
+            category: 'SECURITY',
+            priority: 'CRITICAL',
+            channels: ['REAL_TIME', 'EMAIL', 'SMS'],
             template: {
-                title: "Security Alert: {{alertType}}",
-                body: "A {{severity}} security event has been detected: {{description}}. Immediate attention required.",
-                actionUrl: "/security/alerts/{{alertId}}",
+                title: 'Security Alert: {{alertType}}',
+                body: 'A {{severity}} security event has been detected: {{description}}. Immediate attention required.',
+                actionUrl: '/security/alerts/{{alertId}}',
                 actions: [
                     {
-                        label: "View Details",
-                        action: "view_alert",
-                        url: "/security/alerts/{{alertId}}",
+                        label: 'View Details',
+                        action: 'view_alert',
+                        url: '/security/alerts/{{alertId}}',
                     },
-                    { label: "Acknowledge", action: "acknowledge_alert" },
+                    { label: 'Acknowledge', action: 'acknowledge_alert' },
                 ],
             },
             escalation: {
                 enabled: true,
                 timeouts: [300000, 900000], // 5 min, 15 min
-                recipients: ["security_team", "system_admin"],
+                recipients: ['security_team', 'system_admin'],
             },
         });
-        this.notificationTemplates.set("INVESTIGATION_UPDATE", {
-            id: "INVESTIGATION_UPDATE",
-            name: "Investigation Update",
-            category: "INVESTIGATION",
-            priority: "MEDIUM",
-            channels: ["REAL_TIME", "IN_APP", "EMAIL"],
+        this.notificationTemplates.set('INVESTIGATION_UPDATE', {
+            id: 'INVESTIGATION_UPDATE',
+            name: 'Investigation Update',
+            category: 'INVESTIGATION',
+            priority: 'MEDIUM',
+            channels: ['REAL_TIME', 'IN_APP', 'EMAIL'],
             template: {
-                title: "Investigation Updated: {{investigationTitle}}",
+                title: 'Investigation Updated: {{investigationTitle}}',
                 body: 'Investigation "{{investigationTitle}}" has been updated. {{updateType}}: {{updateDescription}}',
-                actionUrl: "/investigations/{{investigationId}}",
+                actionUrl: '/investigations/{{investigationId}}',
                 actions: [
                     {
-                        label: "View Investigation",
-                        action: "view_investigation",
-                        url: "/investigations/{{investigationId}}",
+                        label: 'View Investigation',
+                        action: 'view_investigation',
+                        url: '/investigations/{{investigationId}}',
                     },
                 ],
             },
         });
-        this.notificationTemplates.set("ENTITY_DISCOVERY", {
-            id: "ENTITY_DISCOVERY",
-            name: "New Entity Discovered",
-            category: "DISCOVERY",
-            priority: "MEDIUM",
-            channels: ["REAL_TIME", "IN_APP"],
+        this.notificationTemplates.set('ENTITY_DISCOVERY', {
+            id: 'ENTITY_DISCOVERY',
+            name: 'New Entity Discovered',
+            category: 'DISCOVERY',
+            priority: 'MEDIUM',
+            channels: ['REAL_TIME', 'IN_APP'],
             template: {
-                title: "New Entity Discovered: {{entityLabel}}",
+                title: 'New Entity Discovered: {{entityLabel}}',
                 body: 'A new {{entityType}} entity "{{entityLabel}}" has been discovered in investigation "{{investigationTitle}}".',
-                actionUrl: "/entities/{{entityId}}",
+                actionUrl: '/entities/{{entityId}}',
                 actions: [
                     {
-                        label: "View Entity",
-                        action: "view_entity",
-                        url: "/entities/{{entityId}}",
+                        label: 'View Entity',
+                        action: 'view_entity',
+                        url: '/entities/{{entityId}}',
                     },
-                    { label: "Add to Investigation", action: "add_to_investigation" },
+                    { label: 'Add to Investigation', action: 'add_to_investigation' },
                 ],
             },
         });
-        this.notificationTemplates.set("ANALYTICS_COMPLETE", {
-            id: "ANALYTICS_COMPLETE",
-            name: "Analytics Job Complete",
-            category: "ANALYTICS",
-            priority: "LOW",
-            channels: ["REAL_TIME", "IN_APP"],
+        this.notificationTemplates.set('ANALYTICS_COMPLETE', {
+            id: 'ANALYTICS_COMPLETE',
+            name: 'Analytics Job Complete',
+            category: 'ANALYTICS',
+            priority: 'LOW',
+            channels: ['REAL_TIME', 'IN_APP'],
             template: {
-                title: "Analytics Complete: {{jobType}}",
-                body: "Your {{jobType}} analytics job has completed successfully. {{resultsCount}} results found.",
-                actionUrl: "/analytics/results/{{jobId}}",
+                title: 'Analytics Complete: {{jobType}}',
+                body: 'Your {{jobType}} analytics job has completed successfully. {{resultsCount}} results found.',
+                actionUrl: '/analytics/results/{{jobId}}',
                 actions: [
                     {
-                        label: "View Results",
-                        action: "view_results",
-                        url: "/analytics/results/{{jobId}}",
+                        label: 'View Results',
+                        action: 'view_results',
+                        url: '/analytics/results/{{jobId}}',
                     },
                 ],
             },
         });
-        this.notificationTemplates.set("REPORT_READY", {
-            id: "REPORT_READY",
-            name: "Report Ready",
-            category: "REPORTING",
-            priority: "MEDIUM",
-            channels: ["EMAIL", "IN_APP"],
+        this.notificationTemplates.set('REPORT_READY', {
+            id: 'REPORT_READY',
+            name: 'Report Ready',
+            category: 'REPORTING',
+            priority: 'MEDIUM',
+            channels: ['EMAIL', 'IN_APP'],
             template: {
-                title: "Report Ready: {{reportName}}",
+                title: 'Report Ready: {{reportName}}',
                 body: 'Your requested report "{{reportName}}" is ready for download.',
-                actionUrl: "/reports/{{reportId}}",
+                actionUrl: '/reports/{{reportId}}',
                 actions: [
                     {
-                        label: "Download Report",
-                        action: "download_report",
-                        url: "/reports/{{reportId}}/download",
+                        label: 'Download Report',
+                        action: 'download_report',
+                        url: '/reports/{{reportId}}/download',
                     },
                     {
-                        label: "View Online",
-                        action: "view_report",
-                        url: "/reports/{{reportId}}",
+                        label: 'View Online',
+                        action: 'view_report',
+                        url: '/reports/{{reportId}}',
                     },
                 ],
             },
         });
-        this.notificationTemplates.set("SYSTEM_MAINTENANCE", {
-            id: "SYSTEM_MAINTENANCE",
-            name: "System Maintenance",
-            category: "SYSTEM",
-            priority: "HIGH",
-            channels: ["EMAIL", "IN_APP", "PUSH"],
+        this.notificationTemplates.set('SYSTEM_MAINTENANCE', {
+            id: 'SYSTEM_MAINTENANCE',
+            name: 'System Maintenance',
+            category: 'SYSTEM',
+            priority: 'HIGH',
+            channels: ['EMAIL', 'IN_APP', 'PUSH'],
             template: {
-                title: "Scheduled Maintenance: {{maintenanceType}}",
-                body: "System maintenance is scheduled for {{scheduledTime}}. Expected duration: {{duration}}. {{description}}",
-                actionUrl: "/system/maintenance",
+                title: 'Scheduled Maintenance: {{maintenanceType}}',
+                body: 'System maintenance is scheduled for {{scheduledTime}}. Expected duration: {{duration}}. {{description}}',
+                actionUrl: '/system/maintenance',
                 actions: [
                     {
-                        label: "View Details",
-                        action: "view_maintenance",
-                        url: "/system/maintenance",
+                        label: 'View Details',
+                        action: 'view_maintenance',
+                        url: '/system/maintenance',
                     },
                 ],
             },
         });
-        this.notificationTemplates.set("ANOMALY_DETECTED", {
-            id: "ANOMALY_DETECTED",
-            name: "Anomaly Detected",
-            category: "ANALYTICS",
-            priority: "HIGH",
-            channels: ["REAL_TIME", "EMAIL", "IN_APP"],
+        this.notificationTemplates.set('ANOMALY_DETECTED', {
+            id: 'ANOMALY_DETECTED',
+            name: 'Anomaly Detected',
+            category: 'ANALYTICS',
+            priority: 'HIGH',
+            channels: ['REAL_TIME', 'EMAIL', 'IN_APP'],
             template: {
-                title: "Anomaly Detected: {{anomalyType}}",
-                body: "An anomaly has been detected in {{context}}. Anomaly score: {{score}}. {{description}}",
-                actionUrl: "/analytics/anomalies/{{anomalyId}}",
+                title: 'Anomaly Detected: {{anomalyType}}',
+                body: 'An anomaly has been detected in {{context}}. Anomaly score: {{score}}. {{description}}',
+                actionUrl: '/analytics/anomalies/{{anomalyId}}',
                 actions: [
                     {
-                        label: "Investigate",
-                        action: "investigate_anomaly",
-                        url: "/analytics/anomalies/{{anomalyId}}",
+                        label: 'Investigate',
+                        action: 'investigate_anomaly',
+                        url: '/analytics/anomalies/{{anomalyId}}',
                     },
-                    { label: "Mark as False Positive", action: "mark_false_positive" },
+                    { label: 'Mark as False Positive', action: 'mark_false_positive' },
                 ],
             },
         });
-        this.notificationTemplates.set("COLLABORATION_INVITE", {
-            id: "COLLABORATION_INVITE",
-            name: "Collaboration Invitation",
-            category: "COLLABORATION",
-            priority: "MEDIUM",
-            channels: ["EMAIL", "IN_APP"],
+        this.notificationTemplates.set('COLLABORATION_INVITE', {
+            id: 'COLLABORATION_INVITE',
+            name: 'Collaboration Invitation',
+            category: 'COLLABORATION',
+            priority: 'MEDIUM',
+            channels: ['EMAIL', 'IN_APP'],
             template: {
-                title: "You have been invited to collaborate",
+                title: 'You have been invited to collaborate',
                 body: '{{inviterName}} has invited you to collaborate on "{{investigationTitle}}".',
-                actionUrl: "/investigations/{{investigationId}}",
+                actionUrl: '/investigations/{{investigationId}}',
                 actions: [
-                    { label: "Accept", action: "accept_collaboration" },
-                    { label: "Decline", action: "decline_collaboration" },
+                    { label: 'Accept', action: 'accept_collaboration' },
+                    { label: 'Decline', action: 'decline_collaboration' },
                 ],
             },
         });
     }
     initializeAlertRules() {
-        this.alertRules.set("HIGH_RISK_ENTITY", {
-            id: "HIGH_RISK_ENTITY",
-            name: "High Risk Entity Detection",
-            description: "Triggers when an entity is classified as high risk",
+        this.alertRules.set('HIGH_RISK_ENTITY', {
+            id: 'HIGH_RISK_ENTITY',
+            name: 'High Risk Entity Detection',
+            description: 'Triggers when an entity is classified as high risk',
             enabled: true,
             conditions: [
-                { field: "entity.riskLevel", operator: "equals", value: "HIGH" },
+                { field: 'entity.riskLevel', operator: 'equals', value: 'HIGH' },
                 {
-                    field: "entity.type",
-                    operator: "in",
-                    value: ["PERSON", "ORGANIZATION"],
+                    field: 'entity.type',
+                    operator: 'in',
+                    value: ['PERSON', 'ORGANIZATION'],
                 },
             ],
             actions: [
                 {
-                    type: "NOTIFICATION",
-                    template: "SECURITY_ALERT",
-                    recipients: ["assigned_analyst", "supervisor"],
-                    urgency: "HIGH",
+                    type: 'NOTIFICATION',
+                    template: 'SECURITY_ALERT',
+                    recipients: ['assigned_analyst', 'supervisor'],
+                    urgency: 'HIGH',
                 },
             ],
             cooldown: 3600000, // 1 hour
             lastTriggered: new Map(),
         });
-        this.alertRules.set("MULTIPLE_FAILED_LOGINS", {
-            id: "MULTIPLE_FAILED_LOGINS",
-            name: "Multiple Failed Login Attempts",
-            description: "Triggers on multiple failed login attempts",
+        this.alertRules.set('MULTIPLE_FAILED_LOGINS', {
+            id: 'MULTIPLE_FAILED_LOGINS',
+            name: 'Multiple Failed Login Attempts',
+            description: 'Triggers on multiple failed login attempts',
             enabled: true,
             conditions: [
-                { field: "event.type", operator: "equals", value: "LOGIN_FAILED" },
+                { field: 'event.type', operator: 'equals', value: 'LOGIN_FAILED' },
                 {
-                    field: "event.count",
-                    operator: "greater_than",
+                    field: 'event.count',
+                    operator: 'greater_than',
                     value: 5,
                     timeWindow: 300000,
                 }, // 5 minutes
             ],
             actions: [
                 {
-                    type: "NOTIFICATION",
-                    template: "SECURITY_ALERT",
-                    recipients: ["security_team"],
-                    urgency: "CRITICAL",
+                    type: 'NOTIFICATION',
+                    template: 'SECURITY_ALERT',
+                    recipients: ['security_team'],
+                    urgency: 'CRITICAL',
                 },
                 {
-                    type: "AUTO_RESPONSE",
-                    action: "LOCK_ACCOUNT",
+                    type: 'AUTO_RESPONSE',
+                    action: 'LOCK_ACCOUNT',
                 },
             ],
         });
-        this.alertRules.set("LARGE_DATA_EXPORT", {
-            id: "LARGE_DATA_EXPORT",
-            name: "Large Data Export Alert",
-            description: "Triggers on large data export operations",
+        this.alertRules.set('LARGE_DATA_EXPORT', {
+            id: 'LARGE_DATA_EXPORT',
+            name: 'Large Data Export Alert',
+            description: 'Triggers on large data export operations',
             enabled: true,
             conditions: [
-                { field: "export.size", operator: "greater_than", value: 100000000 }, // 100MB
-                { field: "export.type", operator: "not_equals", value: "SCHEDULED" },
+                { field: 'export.size', operator: 'greater_than', value: 100000000 }, // 100MB
+                { field: 'export.type', operator: 'not_equals', value: 'SCHEDULED' },
             ],
             actions: [
                 {
-                    type: "NOTIFICATION",
-                    template: "SECURITY_ALERT",
-                    recipients: ["data_protection_officer", "supervisor"],
-                    urgency: "HIGH",
+                    type: 'NOTIFICATION',
+                    template: 'SECURITY_ALERT',
+                    recipients: ['data_protection_officer', 'supervisor'],
+                    urgency: 'HIGH',
                 },
             ],
         });
-        this.alertRules.set("UNUSUAL_ACCESS_PATTERN", {
-            id: "UNUSUAL_ACCESS_PATTERN",
-            name: "Unusual Access Pattern",
-            description: "Triggers on unusual access patterns",
+        this.alertRules.set('UNUSUAL_ACCESS_PATTERN', {
+            id: 'UNUSUAL_ACCESS_PATTERN',
+            name: 'Unusual Access Pattern',
+            description: 'Triggers on unusual access patterns',
             enabled: true,
             conditions: [
                 {
-                    field: "access.time",
-                    operator: "outside_hours",
+                    field: 'access.time',
+                    operator: 'outside_hours',
                     value: { start: 6, end: 22 },
                 },
-                { field: "access.location", operator: "anomalous", threshold: 0.8 },
+                { field: 'access.location', operator: 'anomalous', threshold: 0.8 },
             ],
             actions: [
                 {
-                    type: "NOTIFICATION",
-                    template: "SECURITY_ALERT",
-                    recipients: ["user", "security_team"],
-                    urgency: "MEDIUM",
+                    type: 'NOTIFICATION',
+                    template: 'SECURITY_ALERT',
+                    recipients: ['user', 'security_team'],
+                    urgency: 'MEDIUM',
                 },
             ],
         });
-        this.alertRules.set("ANALYTICS_ANOMALY", {
-            id: "ANALYTICS_ANOMALY",
-            name: "Analytics Anomaly Detection",
-            description: "Triggers when analytics detects anomalies",
+        this.alertRules.set('ANALYTICS_ANOMALY', {
+            id: 'ANALYTICS_ANOMALY',
+            name: 'Analytics Anomaly Detection',
+            description: 'Triggers when analytics detects anomalies',
             enabled: true,
             conditions: [
-                { field: "anomaly.score", operator: "greater_than", value: 0.85 },
+                { field: 'anomaly.score', operator: 'greater_than', value: 0.85 },
                 {
-                    field: "anomaly.type",
-                    operator: "in",
-                    value: ["BEHAVIORAL", "STRUCTURAL", "TEMPORAL"],
+                    field: 'anomaly.type',
+                    operator: 'in',
+                    value: ['BEHAVIORAL', 'STRUCTURAL', 'TEMPORAL'],
                 },
             ],
             actions: [
                 {
-                    type: "NOTIFICATION",
-                    template: "ANOMALY_DETECTED",
-                    recipients: ["investigation_team"],
-                    urgency: "HIGH",
+                    type: 'NOTIFICATION',
+                    template: 'ANOMALY_DETECTED',
+                    recipients: ['investigation_team'],
+                    urgency: 'HIGH',
                 },
             ],
         });
     }
     initializeDeliveryChannels() {
-        this.deliveryChannels.set("websocket", {
-            name: "WebSocket",
+        this.deliveryChannels.set('websocket', {
+            name: 'WebSocket',
             deliver: this.deliverWebSocketNotification.bind(this),
             validate: this.validateWebSocketDelivery.bind(this),
         });
-        this.deliveryChannels.set("email", {
-            name: "Email",
+        this.deliveryChannels.set('email', {
+            name: 'Email',
             deliver: this.deliverEmailNotification.bind(this),
             validate: this.validateEmailDelivery.bind(this),
         });
-        this.deliveryChannels.set("sms", {
-            name: "SMS",
+        this.deliveryChannels.set('sms', {
+            name: 'SMS',
             deliver: this.deliverSMSNotification.bind(this),
             validate: this.validateSMSDelivery.bind(this),
         });
-        this.deliveryChannels.set("push", {
-            name: "Push",
+        this.deliveryChannels.set('push', {
+            name: 'Push',
             deliver: this.deliverPushNotification.bind(this),
             validate: this.validatePushDelivery.bind(this),
         });
-        this.deliveryChannels.set("webhook", {
-            name: "Webhook",
+        this.deliveryChannels.set('webhook', {
+            name: 'Webhook',
             deliver: this.deliverWebhookNotification.bind(this),
             validate: this.validateWebhookDelivery.bind(this),
         });
-        this.deliveryChannels.set("in_app", {
-            name: "In-App",
+        this.deliveryChannels.set('in_app', {
+            name: 'In-App',
             deliver: this.deliverInAppNotification.bind(this),
             validate: this.validateInAppDelivery.bind(this),
         });
@@ -424,20 +424,20 @@ class NotificationService extends EventEmitter {
     setupEventListeners() {
         // Listen to various system events
         if (this.securityService) {
-            this.securityService.on("securityEvent", (event) => {
+            this.securityService.on('securityEvent', (event) => {
                 this.handleSecurityEvent(event);
             });
-            this.securityService.on("securityAlert", (alert) => {
+            this.securityService.on('securityAlert', (alert) => {
                 this.handleSecurityAlert(alert);
             });
         }
         // Listen to socket connections for real-time delivery
         if (this.socketIO) {
-            this.socketIO.on("connection", (socket) => {
-                socket.on("subscribe_notifications", (data) => {
+            this.socketIO.on('connection', (socket) => {
+                socket.on('subscribe_notifications', (data) => {
                     this.handleNotificationSubscription(socket, data);
                 });
-                socket.on("acknowledge_notification", (notificationId) => {
+                socket.on('acknowledge_notification', (notificationId) => {
                     this.acknowledgeNotification(notificationId, socket.userId);
                 });
             });
@@ -450,10 +450,10 @@ class NotificationService extends EventEmitter {
             templateId: notificationData.templateId,
             recipients: notificationData.recipients,
             data: notificationData.data,
-            priority: notificationData.priority || "MEDIUM",
+            priority: notificationData.priority || 'MEDIUM',
             channels: notificationData.channels || [],
             createdAt: new Date(),
-            status: "QUEUED",
+            status: 'QUEUED',
             attempts: 0,
             metadata: notificationData.metadata || {},
         };
@@ -484,7 +484,7 @@ class NotificationService extends EventEmitter {
         // Queue for processing
         this.notificationQueue.push(notification);
         this.metrics.totalNotifications++;
-        this.emit("notificationQueued", notification);
+        this.emit('notificationQueued', notification);
         return notification;
     }
     async processNotificationQueue() {
@@ -496,8 +496,8 @@ class NotificationService extends EventEmitter {
                 await this.processNotification(notification);
             }
             catch (error) {
-                this.logger.error("Failed to process notification:", error);
-                notification.status = "FAILED";
+                this.logger.error('Failed to process notification:', error);
+                notification.status = 'FAILED';
                 notification.error = error.message;
                 this.metrics.failedNotifications++;
             }
@@ -505,26 +505,26 @@ class NotificationService extends EventEmitter {
     }
     async processNotification(notification) {
         const startTime = Date.now();
-        notification.status = "PROCESSING";
+        notification.status = 'PROCESSING';
         const deliveryPromises = notification.deliveries.map((delivery) => this.deliverToChannel(notification, delivery));
         const results = await Promise.allSettled(deliveryPromises);
         let successCount = 0;
         let failureCount = 0;
         results.forEach((result, index) => {
             const delivery = notification.deliveries[index];
-            if (result.status === "fulfilled") {
-                delivery.status = "DELIVERED";
+            if (result.status === 'fulfilled') {
+                delivery.status = 'DELIVERED';
                 delivery.deliveredAt = new Date();
                 successCount++;
             }
             else {
-                delivery.status = "FAILED";
+                delivery.status = 'FAILED';
                 delivery.error = result.reason.message;
                 delivery.attempts = (delivery.attempts || 0) + 1;
                 failureCount++;
             }
         });
-        notification.status = successCount > 0 ? "DELIVERED" : "FAILED";
+        notification.status = successCount > 0 ? 'DELIVERED' : 'FAILED';
         notification.deliveryTime = Date.now() - startTime;
         if (successCount > 0) {
             this.metrics.deliveredNotifications++;
@@ -533,10 +533,10 @@ class NotificationService extends EventEmitter {
         // Store notification in database
         await this.storeNotification(notification);
         // Handle escalation for failed critical notifications
-        if (failureCount > 0 && notification.priority === "CRITICAL") {
+        if (failureCount > 0 && notification.priority === 'CRITICAL') {
             await this.handleFailedCriticalNotification(notification);
         }
-        this.emit("notificationProcessed", notification);
+        this.emit('notificationProcessed', notification);
     }
     async deliverToChannel(notification, delivery) {
         const channel = this.deliveryChannels.get(delivery.channel);
@@ -568,7 +568,7 @@ class NotificationService extends EventEmitter {
     // Delivery channel implementations
     async deliverWebSocketNotification(notification, delivery) {
         const socketMessage = {
-            type: "notification",
+            type: 'notification',
             id: notification.id,
             title: notification.title,
             body: notification.body,
@@ -582,18 +582,18 @@ class NotificationService extends EventEmitter {
         // Broadcast to investigation room if provided
         if (delivery.investigationId) {
             const room = `investigation_${delivery.investigationId}`;
-            if (typeof this.socketIO.sendToRoom === "function") {
-                this.socketIO.sendToRoom(room, "notification", socketMessage);
+            if (typeof this.socketIO.sendToRoom === 'function') {
+                this.socketIO.sendToRoom(room, 'notification', socketMessage);
             }
-            else if (typeof this.socketIO.to === "function") {
-                this.socketIO.to(room).emit("notification", socketMessage);
+            else if (typeof this.socketIO.to === 'function') {
+                this.socketIO.to(room).emit('notification', socketMessage);
             }
             else {
                 // Fallback: iterate sockets in room
                 const roomSet = this.socketIO.sockets?.adapter?.rooms?.get(room) || new Set();
                 roomSet.forEach((socketId) => {
                     const socket = this.socketIO.sockets?.sockets?.get(socketId);
-                    socket?.emit?.("notification", socketMessage);
+                    socket?.emit?.('notification', socketMessage);
                 });
             }
             return { delivered: true };
@@ -607,9 +607,9 @@ class NotificationService extends EventEmitter {
                 const sockets = this.getUserSockets(uid) || [];
                 const online = sockets.length > 0 &&
                     sockets.some((s) => {
-                        if (typeof s === "string")
+                        if (typeof s === 'string')
                             return s === uid;
-                        if (s && typeof s === "object")
+                        if (s && typeof s === 'object')
                             return s.userId === uid || s.id === uid;
                         return false;
                     });
@@ -626,10 +626,10 @@ class NotificationService extends EventEmitter {
         const userId = delivery.userId;
         const userSockets = this.getUserSockets(userId);
         if (userSockets.length === 0) {
-            throw new Error("User not connected via WebSocket");
+            throw new Error('User not connected via WebSocket');
         }
         userSockets.forEach((socket) => {
-            socket?.emit?.("notification", socketMessage);
+            socket?.emit?.('notification', socketMessage);
         });
         return { delivered: true, recipients: userSockets.length };
     }
@@ -646,7 +646,7 @@ class NotificationService extends EventEmitter {
         await this.delay(100 + Math.random() * 500); // Simulate network delay
         if (Math.random() < 0.05) {
             // 5% failure rate for simulation
-            throw new Error("Email delivery failed");
+            throw new Error('Email delivery failed');
         }
         return { delivered: true, messageId: uuidv4() };
     }
@@ -655,12 +655,12 @@ class NotificationService extends EventEmitter {
         // For now, simulate SMS delivery
         const smsText = `${notification.title}\n\n${notification.body}`;
         if (smsText.length > 160) {
-            throw new Error("SMS message too long");
+            throw new Error('SMS message too long');
         }
         await this.delay(200 + Math.random() * 300);
         if (Math.random() < 0.02) {
             // 2% failure rate
-            throw new Error("SMS delivery failed");
+            throw new Error('SMS delivery failed');
         }
         return { delivered: true, messageId: uuidv4() };
     }
@@ -679,7 +679,7 @@ class NotificationService extends EventEmitter {
         await this.delay(150 + Math.random() * 250);
         if (Math.random() < 0.03) {
             // 3% failure rate
-            throw new Error("Push notification delivery failed");
+            throw new Error('Push notification delivery failed');
         }
         return { delivered: true, messageId: uuidv4() };
     }
@@ -687,7 +687,7 @@ class NotificationService extends EventEmitter {
         // Webhook delivery implementation
         const webhookData = {
             notificationId: notification.id,
-            type: "notification",
+            type: 'notification',
             title: notification.title,
             body: notification.body,
             category: notification.category,
@@ -699,7 +699,7 @@ class NotificationService extends EventEmitter {
         await this.delay(300 + Math.random() * 700);
         if (Math.random() < 0.08) {
             // 8% failure rate
-            throw new Error("Webhook delivery failed");
+            throw new Error('Webhook delivery failed');
         }
         return { delivered: true, statusCode: 200 };
     }
@@ -732,14 +732,14 @@ class NotificationService extends EventEmitter {
                 const matches = await this.evaluateRuleConditions(rule, eventData);
                 if (matches) {
                     // Check cooldown
-                    const lastTriggered = rule.lastTriggered.get(eventData.userId || "system");
+                    const lastTriggered = rule.lastTriggered.get(eventData.userId || 'system');
                     if (lastTriggered && Date.now() - lastTriggered < rule.cooldown) {
                         continue;
                     }
                     await this.executeRuleActions(rule, eventData);
-                    rule.lastTriggered.set(eventData.userId || "system", Date.now());
+                    rule.lastTriggered.set(eventData.userId || 'system', Date.now());
                     this.metrics.alertRulesTriggered++;
-                    this.emit("alertRuleTriggered", { rule, eventData });
+                    this.emit('alertRuleTriggered', { rule, eventData });
                 }
             }
             catch (error) {
@@ -758,25 +758,25 @@ class NotificationService extends EventEmitter {
     evaluateCondition(condition, eventData) {
         const value = this.getNestedValue(eventData, condition.field);
         switch (condition.operator) {
-            case "equals":
+            case 'equals':
                 return value === condition.value;
-            case "not_equals":
+            case 'not_equals':
                 return value !== condition.value;
-            case "greater_than":
+            case 'greater_than':
                 return value > condition.value;
-            case "less_than":
+            case 'less_than':
                 return value < condition.value;
-            case "in":
+            case 'in':
                 return (Array.isArray(condition.value) && condition.value.includes(value));
-            case "not_in":
+            case 'not_in':
                 return (Array.isArray(condition.value) && !condition.value.includes(value));
-            case "contains":
-                return typeof value === "string" && value.includes(condition.value);
-            case "outside_hours": {
+            case 'contains':
+                return typeof value === 'string' && value.includes(condition.value);
+            case 'outside_hours': {
                 const hour = new Date().getHours();
                 return hour < condition.value.start || hour > condition.value.end;
             }
-            case "anomalous":
+            case 'anomalous':
                 return value > condition.threshold;
             default:
                 return false;
@@ -785,7 +785,7 @@ class NotificationService extends EventEmitter {
     async executeRuleActions(rule, eventData) {
         for (const action of rule.actions) {
             try {
-                if (action.type === "NOTIFICATION") {
+                if (action.type === 'NOTIFICATION') {
                     await this.sendNotification({
                         templateId: action.template,
                         recipients: await this.resolveRecipients(action.recipients, eventData),
@@ -794,7 +794,7 @@ class NotificationService extends EventEmitter {
                         metadata: { ruleId: rule.id, triggeredBy: eventData },
                     });
                 }
-                else if (action.type === "AUTO_RESPONSE") {
+                else if (action.type === 'AUTO_RESPONSE') {
                     await this.executeAutoResponse(action, eventData);
                 }
             }
@@ -811,15 +811,15 @@ class NotificationService extends EventEmitter {
     }
     async handleSecurityAlert(alert) {
         const notification = await this.sendNotification({
-            templateId: "SECURITY_ALERT",
-            recipients: ["security_team", "system_admin"],
+            templateId: 'SECURITY_ALERT',
+            recipients: ['security_team', 'system_admin'],
             data: {
                 alertType: alert.type,
                 severity: alert.severity,
-                description: alert.details?.description || "Security alert detected",
+                description: alert.details?.description || 'Security alert detected',
                 alertId: alert.id,
             },
-            priority: "CRITICAL",
+            priority: 'CRITICAL',
             metadata: { alertId: alert.id },
         });
         this.activeAlerts.set(alert.id, {
@@ -835,7 +835,7 @@ class NotificationService extends EventEmitter {
         // Validate session
         const session = await this.securityService.verifySession(data.token);
         if (!session || session.userId !== userId) {
-            socket.emit("subscription_error", { error: "Invalid session" });
+            socket.emit('subscription_error', { error: 'Invalid session' });
             return;
         }
         socket.userId = userId;
@@ -846,18 +846,18 @@ class NotificationService extends EventEmitter {
         }
         // Send any pending notifications
         await this.sendPendingNotifications(socket, userId);
-        socket.emit("subscription_success", { userId });
+        socket.emit('subscription_success', { userId });
     }
     async acknowledgeNotification(notificationId, userId) {
         // Update notification status
-        await this.redisClient.hset(`notification:${notificationId}`, "acknowledged", "true", "acknowledgedBy", userId, "acknowledgedAt", new Date().toISOString());
+        await this.redisClient.hset(`notification:${notificationId}`, 'acknowledged', 'true', 'acknowledgedBy', userId, 'acknowledgedAt', new Date().toISOString());
         // Check if this is an alert acknowledgment
         const alert = Array.from(this.activeAlerts.values()).find((a) => a.notificationId === notificationId);
         if (alert) {
             alert.acknowledged = true;
             alert.acknowledgedBy = userId;
             alert.acknowledgedAt = new Date();
-            this.emit("alertAcknowledged", alert);
+            this.emit('alertAcknowledged', alert);
         }
     }
     // User preference management
@@ -865,7 +865,7 @@ class NotificationService extends EventEmitter {
         const userPrefs = {
             userId,
             channels: preferences.channels || {},
-            frequency: preferences.frequency || "IMMEDIATE",
+            frequency: preferences.frequency || 'IMMEDIATE',
             quietHours: preferences.quietHours || { enabled: false },
             categories: preferences.categories || {},
             updatedAt: new Date(),
@@ -896,14 +896,14 @@ class NotificationService extends EventEmitter {
                 SMS: false,
                 WEBHOOK: false,
             },
-            frequency: "IMMEDIATE",
+            frequency: 'IMMEDIATE',
             quietHours: { enabled: false },
             categories: {
-                SECURITY: { enabled: true, channels: ["REAL_TIME", "EMAIL", "SMS"] },
-                INVESTIGATION: { enabled: true, channels: ["REAL_TIME", "IN_APP"] },
-                ANALYTICS: { enabled: true, channels: ["REAL_TIME", "IN_APP"] },
-                REPORTING: { enabled: true, channels: ["EMAIL", "IN_APP"] },
-                SYSTEM: { enabled: true, channels: ["EMAIL", "IN_APP"] },
+                SECURITY: { enabled: true, channels: ['REAL_TIME', 'EMAIL', 'SMS'] },
+                INVESTIGATION: { enabled: true, channels: ['REAL_TIME', 'IN_APP'] },
+                ANALYTICS: { enabled: true, channels: ['REAL_TIME', 'IN_APP'] },
+                REPORTING: { enabled: true, channels: ['EMAIL', 'IN_APP'] },
+                SYSTEM: { enabled: true, channels: ['EMAIL', 'IN_APP'] },
             },
         };
     }
@@ -925,28 +925,28 @@ class NotificationService extends EventEmitter {
                 continue;
             // Check quiet hours
             if (this.isQuietHours(preferences.quietHours)) {
-                if (!["REAL_TIME", "IN_APP"].includes(channelId))
+                if (!['REAL_TIME', 'IN_APP'].includes(channelId))
                     continue;
             }
             const delivery = {
                 userId: user.id,
                 channel: channelId,
                 channelConfig: channel,
-                status: "PENDING",
+                status: 'PENDING',
                 attempts: 0,
             };
             // Add channel-specific delivery details
             switch (channelId) {
-                case "EMAIL":
+                case 'EMAIL':
                     delivery.email = user.email;
                     break;
-                case "SMS":
+                case 'SMS':
                     delivery.phone = user.phone;
                     break;
-                case "PUSH":
+                case 'PUSH':
                     delivery.deviceToken = user.deviceToken;
                     break;
-                case "WEBHOOK":
+                case 'WEBHOOK':
                     delivery.webhookUrl = user.webhookUrl;
                     break;
             }
@@ -960,7 +960,7 @@ class NotificationService extends EventEmitter {
         });
     }
     getNestedValue(obj, path) {
-        return path.split(".").reduce((current, key) => current?.[key], obj);
+        return path.split('.').reduce((current, key) => current?.[key], obj);
     }
     getUserSockets(userId) {
         const userRoom = this.socketIO.sockets.adapter.rooms.get(`user_${userId}`);
@@ -978,7 +978,7 @@ class NotificationService extends EventEmitter {
           <p>${notification.body}</p>
           ${notification.actions
             .map((action) => `<a href="${action.url}" style="background: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; margin-right: 10px;">${action.label}</a>`)
-            .join("")}
+            .join('')}
         </body>
       </html>
     `;
@@ -1031,7 +1031,7 @@ class NotificationService extends EventEmitter {
             ? ((this.metrics.deliveredNotifications /
                 this.metrics.totalNotifications) *
                 100).toFixed(2)
-            : "0";
+            : '0';
         return {
             ...this.metrics,
             successRate,

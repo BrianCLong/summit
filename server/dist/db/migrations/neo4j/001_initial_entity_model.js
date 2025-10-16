@@ -32,7 +32,8 @@ module.exports = {
                 console.log(`✅ Created constraint: ${constraint.split(' ')[2]}`);
             }
             catch (error) {
-                if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+                if (!error.message.includes('already exists') &&
+                    !error.message.includes('An equivalent')) {
                     console.warn(`⚠️  Failed to create constraint: ${error.message}`);
                 }
             }
@@ -50,7 +51,8 @@ module.exports = {
                 console.log(`✅ Created relationship constraint: ${constraint.split(' ')[2]}`);
             }
             catch (error) {
-                if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+                if (!error.message.includes('already exists') &&
+                    !error.message.includes('An equivalent')) {
                     console.warn(`⚠️  Failed to create relationship constraint: ${error.message}`);
                 }
             }
@@ -70,7 +72,7 @@ module.exports = {
             'CREATE INDEX investigation_created_by_idx IF NOT EXISTS FOR (i:Investigation) ON (i.createdBy)',
             'CREATE INDEX investigation_created_at_idx IF NOT EXISTS FOR (i:Investigation) ON (i.createdAt)',
             'CREATE INDEX investigation_updated_at_idx IF NOT EXISTS FOR (i:Investigation) ON (i.updatedAt)',
-            // User indexes  
+            // User indexes
             'CREATE INDEX user_role_idx IF NOT EXISTS FOR (u:User) ON (u.role)',
             'CREATE INDEX user_active_idx IF NOT EXISTS FOR (u:User) ON (u.isActive)',
             'CREATE INDEX user_last_login_idx IF NOT EXISTS FOR (u:User) ON (u.lastLogin)',
@@ -86,7 +88,8 @@ module.exports = {
                 console.log(`✅ Created index: ${index.split(' ')[2]}`);
             }
             catch (error) {
-                if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+                if (!error.message.includes('already exists') &&
+                    !error.message.includes('An equivalent')) {
                     console.warn(`⚠️  Failed to create index: ${error.message}`);
                 }
             }
@@ -103,7 +106,8 @@ module.exports = {
                 console.log(`✅ Created fulltext index: ${index.split(' ')[3]}`);
             }
             catch (error) {
-                if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+                if (!error.message.includes('already exists') &&
+                    !error.message.includes('An equivalent')) {
                     console.warn(`⚠️  Failed to create fulltext index: ${error.message}`);
                 }
             }
@@ -121,7 +125,8 @@ module.exports = {
                 console.log(`✅ Created composite index: ${index.split(' ')[2]}`);
             }
             catch (error) {
-                if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+                if (!error.message.includes('already exists') &&
+                    !error.message.includes('An equivalent')) {
                     console.warn(`⚠️  Failed to create composite index: ${error.message}`);
                 }
             }
@@ -139,7 +144,8 @@ module.exports = {
                 console.log(`✅ Created range index: ${index.split(' ')[3]}`);
             }
             catch (error) {
-                if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+                if (!error.message.includes('already exists') &&
+                    !error.message.includes('An equivalent')) {
                     console.warn(`⚠️  Failed to create range index: ${error.message}`);
                 }
             }
@@ -166,7 +172,7 @@ module.exports = {
             'DROP INDEX user_role_idx IF EXISTS',
             'DROP INDEX relationship_type_idx IF EXISTS',
             'DROP INDEX entity_type_investigation_idx IF EXISTS',
-            'DROP INDEX entity_confidence_range_idx IF EXISTS'
+            'DROP INDEX entity_confidence_range_idx IF EXISTS',
         ];
         for (const dropIndex of indexesToDrop) {
             try {
@@ -183,7 +189,7 @@ module.exports = {
             'DROP CONSTRAINT user_id_unique IF EXISTS',
             'DROP CONSTRAINT investigation_id_unique IF EXISTS',
             'DROP CONSTRAINT user_email_unique IF EXISTS',
-            'DROP CONSTRAINT relationship_id_unique IF EXISTS'
+            'DROP CONSTRAINT relationship_id_unique IF EXISTS',
         ];
         for (const dropConstraint of constraintsToDrop) {
             try {
@@ -195,6 +201,6 @@ module.exports = {
             }
         }
         console.log('✅ Entity model rollback completed');
-    }
+    },
 };
 //# sourceMappingURL=001_initial_entity_model.js.map

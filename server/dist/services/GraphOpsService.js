@@ -47,7 +47,14 @@ async function expandNeighborhood(entityId, radius = 1, { tenantId, investigatio
         const nodes = rec ? rec.get('nodes') : [];
         const edges = rec ? rec.get('edges') : [];
         const ms = Date.now() - start;
-        logger.info('expandNeighborhood', { entityId, radius, investigationId, tenantId, ms, traceId });
+        logger.info('expandNeighborhood', {
+            entityId,
+            radius,
+            investigationId,
+            tenantId,
+            ms,
+            traceId,
+        });
         return { nodes, edges };
     }
     finally {

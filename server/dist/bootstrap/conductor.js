@@ -7,7 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import { typeDefs as schema } from '../graphql/schema/index.js';
 import logger from '../config/logger';
-import { initializeConductorSystem, shutdownConductorSystem } from '../conductor/config';
+import { initializeConductorSystem, shutdownConductorSystem, } from '../conductor/config';
 import { createConductorGraphQLPlugin } from '../conductor/observability';
 const conductorLogger = logger.child({ name: 'conductor-bootstrap' });
 /**
@@ -52,7 +52,11 @@ export async function wireConductor(options) {
                 try {
                     const { getConductorHealth } = await import('../conductor/metrics');
                     const health = await getConductorHealth();
-                    const statusCode = health.status === 'pass' ? 200 : health.status === 'warn' ? 200 : 503;
+                    const statusCode = health.status === 'pass'
+                        ? 200
+                        : health.status === 'warn'
+                            ? 200
+                            : 503;
                     res.status(statusCode).json(health);
                 }
                 catch (error) {
