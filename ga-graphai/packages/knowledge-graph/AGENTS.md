@@ -1,0 +1,3 @@
+- Knowledge graph package.
+- Use 2 spaces for indentation in TypeScript.
+- Run `npm test` inside this package after changes.

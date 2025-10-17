@@ -716,3 +716,10 @@ export {
 export { type SimilarityFunction } from './prompt/types.js';
 export { clampValue, cosineSimilarity, defaultTokenEstimator, type TokenEstimator } from './prompt/utils.js';
 export { PromptEngineeringToolkit, type PromptEngineeringToolkitOptions, type PromptOptimizationInput, type PromptOptimizationReport } from './prompt/toolkit.js';
+export {
+  GenerativeActionTranslator,
+  type ActionPlan,
+  type ActionStep,
+  type GenerativeActionTranslatorOptions,
+  type OrchestrationIntent,
+} from './gen-actions/intentTranslator.js';

@@ -7,9 +7,14 @@
   "scripts": {
     "test": "vitest run"
   },
+  "dependencies": {
+    "@ga-graphai/common-types": "file:../common-types",
+    "@ga-graphai/knowledge-graph": "file:../knowledge-graph",
+    "@ga-graphai/cost-guard": "file:../cost-guard"
+  },
   "devDependencies": {
     "@types/node": "^20.12.7",
-    "typescript": "^5.4.0",
-    "vitest": "^1.5.0"
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   }
 }

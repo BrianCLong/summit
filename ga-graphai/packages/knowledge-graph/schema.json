@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OrchestrationKnowledgeGraphSnapshot",
+  "type": "object",
+  "required": ["generatedAt", "version", "nodes", "edges", "serviceRisk"],
+  "properties": {
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "version": { "type": "integer", "minimum": 0 },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "data"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "from", "to", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "type": { "type": "string" },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "serviceRisk": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["score", "factors"],
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "factors": {
+            "type": "object",
+            "properties": {
+              "incidentLoad": { "type": "number" },
+              "costPressure": { "type": "number" },
+              "policyRisk": { "type": "number" }
+            },
+            "additionalProperties": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "common-types": "file:../common-types",
-    "policy": "file:../policy"
+    "policy": "file:../policy",
+    "@ga-graphai/knowledge-graph": "file:../knowledge-graph"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
