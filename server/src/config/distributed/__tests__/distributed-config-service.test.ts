@@ -4,13 +4,15 @@ import InMemoryConfigRepository from '../repository';
 import { FeatureFlagAdapter, SecretResolver } from '../types';
 
 describe('DistributedConfigService', () => {
+  const featureSchema = z.object({
+    enableCaching: z.boolean().default(false),
+    enableStreaming: z.boolean().default(false),
+  });
+
   const schema = z.object({
     endpoint: z.string().url(),
     retries: z.number().int().min(0),
-    features: z.object({
-      enableCaching: z.boolean(),
-      enableStreaming: z.boolean(),
-    }),
+    features: featureSchema,
     database: z.object({
       host: z.string(),
       password: z.union([
