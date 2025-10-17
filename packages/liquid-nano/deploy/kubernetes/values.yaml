@@ -1,0 +1,15 @@
+image:
+  repository: ghcr.io/example/liquid-nano
+  tag: pilot
+  pullPolicy: IfNotPresent
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+config:
+  telemetry:
+    mode: otlp
+    endpoint: http://otel-collector:4318

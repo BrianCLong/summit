@@ -1,0 +1,23 @@
+{
+  "id": "pilot-edge-01",
+  "environment": "staging",
+  "telemetry": {
+    "mode": "otlp",
+    "endpoint": "http://otel-collector:4318",
+    "sampleRate": 0.5
+  },
+  "security": {
+    "allowDynamicPlugins": false,
+    "redactFields": ["secret", "token", "apiKey"],
+    "validateSignatures": true
+  },
+  "performance": {
+    "maxConcurrency": 4,
+    "highWatermark": 512,
+    "adaptiveThrottling": true
+  },
+  "auditTrail": {
+    "enabled": true,
+    "sink": "stdout"
+  }
+}

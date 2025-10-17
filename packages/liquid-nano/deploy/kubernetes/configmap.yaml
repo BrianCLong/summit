@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: liquid-nano-config
+  labels:
+    app: liquid-nano
+data:
+  liquid-nano.config.json: |
+    {
+      "id": "cluster-pilot-01",
+      "environment": "staging",
+      "telemetry": {
+        "mode": "otlp",
+        "endpoint": "http://otel-collector:4318",
+        "sampleRate": 0.5
+      },
+      "security": {
+        "allowDynamicPlugins": false,
+        "redactFields": ["secret", "token"],
+        "validateSignatures": true
+      },
+      "performance": {
+        "maxConcurrency": 6,
+        "highWatermark": 1024,
+        "adaptiveThrottling": true
+      },
+      "auditTrail": {
+        "enabled": true,
+        "sink": "stdout"
+      }
+    }

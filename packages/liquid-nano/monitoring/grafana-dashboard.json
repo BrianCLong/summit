@@ -1,0 +1,35 @@
+{
+  "title": "Liquid Nano Pilot",
+  "editable": true,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Event Throughput",
+      "targets": [
+        {
+          "expr": "rate(runtime_events_total[1m])",
+          "legendFormat": "Events/sec"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Plugin Error Rate",
+      "targets": [
+        {
+          "expr": "rate(plugin_failed_total[5m]) / rate(plugin_processed_total[5m])",
+          "legendFormat": "Failure %"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Average Plugin Duration",
+      "targets": [
+        {
+          "expr": "avg(plugin_duration_avg)"
+        }
+      ]
+    }
+  ]
+}
