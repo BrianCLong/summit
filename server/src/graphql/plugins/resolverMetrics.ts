@@ -1,16 +1,16 @@
-import type { ApolloServerPlugin } from '@apollo/server';
+import type { ApolloServerPlugin, GraphQLRequestContext, GraphQLRequestListener, GraphQLRequestExecutionListener } from '@apollo/server';
 import {
   graphqlResolverDurationSeconds,
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
 } from '../../monitoring/metrics.js';
 
-const resolverMetricsPlugin: ApolloServerPlugin = {
-  async requestDidStart() {
+const resolverMetricsPlugin: ApolloServerPlugin<any> = {
+async requestDidStart(_ctx: GraphQLRequestContext<any>): Promise<GraphQLRequestListener<any>> {
     return {
-      executionDidStart() {
+executionDidStart(): GraphQLRequestExecutionListener<any> {
         return {
-          willResolveField({ info }) {
+willResolveField({ info }: { info: any }) {
             const start = process.hrtime.bigint();
             const labels = {
               resolver_name: `${info.parentType.name}.${info.fieldName}`,
