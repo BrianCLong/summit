@@ -1,6 +1,10 @@
 import { Pool } from 'pg';
 import { jest } from '@jest/globals';
 
+const resolvedMock = (value: unknown) => jest.fn(async () => value);
+
+const returnedMock = (value: unknown) => jest.fn(() => value);
+
 // Setup test environment
 process.env.NODE_ENV = 'test';
 process.env.LOG_LEVEL = 'error';
@@ -62,22 +66,22 @@ global.testDb = testDbPool;
 // Mock external services
 jest.mock('../src/services/ExternalAPIService', () => ({
   ExternalAPIService: jest.fn().mockImplementation(() => ({
-    sendSlackNotification: jest.fn().mockResolvedValue(true),
-    createJiraIssue: jest.fn().mockResolvedValue({ id: 'JIRA-123' }),
-    queryVirusTotal: jest.fn().mockResolvedValue({ malicious: false }),
+    sendSlackNotification: resolvedMock(true),
+    createJiraIssue: resolvedMock({ id: 'JIRA-123' }),
+    queryVirusTotal: resolvedMock({ malicious: false }),
   })),
 }));
 
 // Mock Redis
 jest.mock('redis', () => ({
   createClient: jest.fn(() => ({
-    connect: jest.fn().mockResolvedValue(undefined),
-    disconnect: jest.fn().mockResolvedValue(undefined),
-    get: jest.fn().mockResolvedValue(null),
-    set: jest.fn().mockResolvedValue('OK'),
-    del: jest.fn().mockResolvedValue(1),
-    exists: jest.fn().mockResolvedValue(0),
-    expire: jest.fn().mockResolvedValue(1),
+    connect: resolvedMock(undefined),
+    disconnect: resolvedMock(undefined),
+    get: resolvedMock(null),
+    set: resolvedMock('OK'),
+    del: resolvedMock(1),
+    exists: resolvedMock(0),
+    expire: resolvedMock(1),
   })),
 }));
 
@@ -85,10 +89,10 @@ jest.mock('redis', () => ({
 jest.mock('neo4j-driver', () => ({
   driver: jest.fn(() => ({
     session: jest.fn(() => ({
-      run: jest.fn().mockResolvedValue({ records: [] }),
-      close: jest.fn().mockResolvedValue(undefined),
+      run: resolvedMock({ records: [] }),
+      close: resolvedMock(undefined),
     })),
-    close: jest.fn().mockResolvedValue(undefined),
+    close: resolvedMock(undefined),
   })),
   auth: {
     basic: jest.fn(),
@@ -100,9 +104,9 @@ jest.mock('socket.io', () => ({
   Server: jest.fn().mockImplementation(() => ({
     on: jest.fn(),
     emit: jest.fn(),
-    to: jest.fn(() => ({
+    to: returnedMock({
       emit: jest.fn(),
-    })),
+    }),
     close: jest.fn(),
   })),
 }));
