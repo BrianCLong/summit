@@ -22,6 +22,9 @@ export async function linkTicketToRun({
   );
 }
 
+const safeRows = <T = unknown>(result: any): T[] =>
+  Array.isArray(result?.rows) ? (result.rows as T[]) : [];
+
 export async function addTicketRunLink(
   ticket: TicketIdentifier,
   runId: string,
@@ -30,20 +33,20 @@ export async function addTicketRunLink(
   const pool = getPostgresPool();
 
   // Check if run exists
-  const runExists = await pool.query('SELECT id FROM runs WHERE id = $1', [
+  const runResult = await pool.query('SELECT id FROM runs WHERE id = $1', [
     runId,
   ]);
-  if (runExists.rows.length === 0) {
+  if (safeRows(runResult).length === 0) {
     throw new Error(`Run ${runId} not found`);
   }
 
   // Check if ticket exists
-  const ticketExists = await pool.query(
+  const ticketResult = await pool.query(
     'SELECT id FROM tickets WHERE provider = $1 AND external_id = $2',
     [ticket.provider, ticket.externalId],
   );
 
-  if (ticketExists.rows.length === 0) {
+  if (safeRows(ticketResult).length === 0) {
     console.warn(
       `Ticket ${ticket.provider}:${ticket.externalId} not found, skipping link creation`,
     );
@@ -87,21 +90,21 @@ export async function addTicketDeploymentLink(
   const pool = getPostgresPool();
 
   // Check if deployment exists
-  const deploymentExists = await pool.query(
+  const deploymentResult = await pool.query(
     'SELECT id FROM deployments WHERE id = $1',
     [deploymentId],
   );
-  if (deploymentExists.rows.length === 0) {
+  if (safeRows(deploymentResult).length === 0) {
     throw new Error(`Deployment ${deploymentId} not found`);
   }
 
   // Check if ticket exists
-  const ticketExists = await pool.query(
+  const ticketResult = await pool.query(
     'SELECT id FROM tickets WHERE provider = $1 AND external_id = $2',
     [ticket.provider, ticket.externalId],
   );
 
-  if (ticketExists.rows.length === 0) {
+  if (safeRows(ticketResult).length === 0) {
     console.warn(
       `Ticket ${ticket.provider}:${ticket.externalId} not found, skipping link creation`,
     );
@@ -133,15 +136,18 @@ export async function getTicketLinks({
   externalId: string;
 }) {
   const pool = getPostgresPool();
-  const runs = await pool.query(
+  const runsResult = await pool.query(
     `SELECT run_id AS id FROM ticket_runs WHERE provider=$1 AND external_id=$2 ORDER BY created_at DESC`,
     [provider, externalId],
   );
-  const deployments = await pool.query(
+  const deploymentsResult = await pool.query(
     `SELECT deployment_id AS id FROM ticket_deployments WHERE provider=$1 AND external_id=$2 ORDER BY created_at DESC`,
     [provider, externalId],
   );
-  return { runs: runs.rows, deployments: deployments.rows };
+  return {
+    runs: safeRows(runsResult),
+    deployments: safeRows(deploymentsResult),
+  };
 }
 
 /**
