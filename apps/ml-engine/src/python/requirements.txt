@@ -31,5 +31,5 @@ tqdm==4.65.0
 click==8.1.3
 
 # Optional GPU support (uncomment if CUDA available)
-# torch==2.0.1+cu118
+# torch==2.8.0+cu121
 # faiss-gpu==1.7.4
