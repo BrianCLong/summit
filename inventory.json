@@ -1,0 +1,3366 @@
+[
+  {
+    "kind": "node",
+    "path": ".",
+    "name": "intelgraph-platform",
+    "version": "1.0.0",
+    "scripts": {
+      "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
+      "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+      "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+      "server:dev": "npm run --workspace=apps/server dev",
+      "client:dev": "cd client && npm run dev",
+      "devkit:seed": "node scripts/devkit/seed-fixtures.js",
+      "devkit:parity": "node scripts/devkit/check-parity.js",
+      "devkit:smoke": "node smoke-test.js --ci",
+      "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+      "docker:prod": "docker-compose up",
+      "test:jest": "jest --config jest.projects.cjs --maxWorkers=50% --detectOpenHandles",
+      "test:e2e": "playwright test",
+      "test:ci": "pnpm run test:jest && pnpm run test:e2e",
+      "test": "pnpm run test:jest",
+      "test:server": "cd server && npm test",
+      "test:client": "cd client && npm test",
+      "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
+      "test:smoke:backend": "cd server && npm run test:smoke",
+      "test:smoke:frontend": "cd client && npm run test:smoke",
+      "test:unit": "npm run test",
+      "test:integration": "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
+      "test:api": "cd services/api && npx jest -c jest.config.cjs",
+      "test:policy": "node scripts/ci/test-policy-runner.cjs",
+      "build": "npm run build:client && npm run build:server",
+      "build:client": "cd client && npm run build",
+      "build:server": "cd server && npm run build",
+      "deploy:dev": "scripts/deploy.sh dev",
+      "deploy:staging": "scripts/deploy.sh staging",
+      "deploy:prod": "scripts/deploy.sh prod",
+      "backup": "scripts/backup.sh",
+      "lint": "eslint . && ruff .",
+      "lint:tests": "node scripts/guard-tests.js",
+      "lint:server": "cd server && npm run lint",
+      "lint:client": "cd client && npm run lint",
+      "typecheck": "tsc -b --pretty false",
+      "typecheck:server": "cd server && tsc --noEmit",
+      "typecheck:client": "cd client && tsc --noEmit",
+      "format": "prettier -w . && ruff format",
+      "pr:risk": "node scripts/pr-risk-score.js",
+      "db:migrate": "cd server && npm run db:migrate",
+      "db:seed": "cd server && npm run db:seed",
+      "db:api:migrate": "bash scripts/db/apply_api_migrations.sh",
+      "seed:demo": "node scripts/seed/centrality_demo.js",
+      "seed:demo:cet": "node scripts/seed/demo_cases_triage.js",
+      "persisted:build": "node scripts/graphql/build_persisted_map.js client/src/queries services/api/persisted/queries.json",
+      "persisted:check": "node scripts/graphql/build_persisted_map.js client/src/queries /tmp/queries.json && diff -q /tmp/queries.json services/api/persisted/queries.json || (echo 'Persisted query map drift'; exit 1)",
+      "db:reset": "npm run db:migrate && npm run db:seed",
+      "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
+      "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
+      "install:pm": "node scripts/select-pm.js",
+      "e2e": "playwright test",
+      "perf:snapshot": "bash scripts/perf/snapshot.sh",
+      "screenshots": "npx playwright test scripts/playwright/capture_screenshots.spec.ts --reporter=line",
+      "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
+      "graphql:codegen": "graphql-codegen",
+      "db:pg:generate": "prisma generate",
+      "db:pg:migrate": "prisma migrate deploy",
+      "db:pg:status": "prisma migrate status",
+      "db:knex:migrate": "knex migrate:latest --knexfile packages/db/knex/knexfile.cjs",
+      "db:knex:rollback": "knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs",
+      "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
+      "changeset": "changeset",
+      "release": "changeset version && changeset publish",
+      "precommit": "lint-staged",
+      "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
+      "db:knex:smoke": "knex migrate:down && knex migrate:up",
+      "prov:dev": "ts-node packages/prov-ledger/src/server.ts",
+      "lac:compile": "ts-node packages/lac/src/compiler.ts",
+      "kpw:dev": "node packages/kpw-media/dist/server.js",
+      "extract": "npm run --workspace=packages/influence-mining extract --",
+      "preinstall": "corepack enable || true",
+      "build:all": "pnpm -w -r run build",
+      "ci": "pnpm run lint && pnpm run typecheck && pnpm run test"
+    },
+    "test_commands": [
+      "jest --config jest.projects.cjs --maxWorkers=50% --detectOpenHandles",
+      "playwright test",
+      "pnpm run test:jest && pnpm run test:e2e",
+      "pnpm run test:jest",
+      "cd server && npm test",
+      "cd client && npm test",
+      "npm run test:smoke:backend && npm run test:smoke:frontend",
+      "cd server && npm run test:smoke",
+      "cd client && npm run test:smoke",
+      "npm run test",
+      "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
+      "cd services/api && npx jest -c jest.config.cjs",
+      "node scripts/ci/test-policy-runner.cjs",
+      "node scripts/guard-tests.js"
+    ],
+    "build_commands": [
+      "npm run build:client && npm run build:server"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "contracts",
+    "name": "maestro-contract-tests",
+    "scripts": {
+      "test": "vitest run",
+      "test:watch": "vitest"
+    },
+    "test_commands": [
+      "vitest run",
+      "vitest"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "conductor-ui",
+    "name": "maestro-conductor-ui",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject"
+    },
+    "test_commands": [
+      "react-scripts test"
+    ],
+    "build_commands": [
+      "react-scripts build"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "conductor-ui/backend",
+    "name": "backend",
+    "version": "1.0.0",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "test_commands": [
+      "echo \"Error: no test specified\" && exit 1"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "conductor-ui/frontend",
+    "name": "conductor-frontend",
+    "version": "0.0.0",
+    "scripts": {
+      "dev": "vite",
+      "build": "tsc -b && vite build",
+      "build:maestro": "vite build -c vite.config.maestro.ts --base=/maestro/",
+      "build:production": "./scripts/build-production.sh",
+      "build:staging": "vite build --mode staging --config vite.config.production.ts",
+      "build:analyze": "vite build --mode analyze",
+      "lint": "eslint .",
+      "type-check": "tsc --noEmit",
+      "preview": "vite preview",
+      "test": "playwright test",
+      "test:e2e": "playwright test e2e/",
+      "test:a11y": "playwright test --grep @a11y",
+      "test:perf": "echo 'Performance tests skipped'",
+      "test:privacy": "playwright test privacy/tests/",
+      "deploy:production": "./scripts/deploy-production.sh",
+      "setup:grafana": "./scripts/setup-grafana.sh",
+      "bundle:check": "bundlesize",
+      "bundle:analyze": "npx vite-bundle-analyzer dist"
+    },
+    "test_commands": [
+      "playwright test",
+      "playwright test e2e/",
+      "playwright test --grep @a11y",
+      "echo 'Performance tests skipped'",
+      "playwright test privacy/tests/"
+    ],
+    "build_commands": [
+      "tsc -b && vite build"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "conductor-ui/frontend/.github/workflows"
+  },
+  {
+    "kind": "node",
+    "path": "streaming/ingest-gw",
+    "name": "ingest-gw",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "streaming/alerts-api",
+    "name": "alerts-api",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "github-actions",
+    "path": "ga-caseops/.github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "ga-caseops/packages/caseops"
+  },
+  {
+    "kind": "node",
+    "path": "ga-caseops/packages/prov-ledger",
+    "name": "ga-caseops-prov-ledger",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "ga-caseops/packages/policy",
+    "name": "ga-caseops-policy",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "ga-caseops/packages/common-types",
+    "name": "ga-caseops-common-types",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "ga-caseops/packages/gateway",
+    "name": "ga-caseops-gateway",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/index.js"
+    },
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "operator-kit",
+    "name": "symphony-operator-kit",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "tsx server/index.ts",
+      "build": "tsc -p .",
+      "start": "node dist/index.js"
+    },
+    "build_commands": [
+      "tsc -p ."
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mcp",
+    "name": "intelgraph-mcp",
+    "version": "0.1.0",
+    "scripts": {
+      "xpnpm": "node tools/pnpm/run-pnpm.js",
+      "build": "npm run xpnpm -- -r build",
+      "dev": "npm run xpnpm -- -r --parallel dev",
+      "test": "npm run xpnpm -- -r test",
+      "lint": "npm run xpnpm -- -r lint",
+      "typecheck": "npm run xpnpm -- -r typecheck",
+      "conformance": "npm run xpnpm -- --filter conformance-cli start",
+      "bench": "npm run xpnpm -- --filter harness start",
+      "shootout": "npm run xpnpm -- --filter shootout-ui dev"
+    },
+    "test_commands": [
+      "npm run xpnpm -- -r test"
+    ],
+    "build_commands": [
+      "npm run xpnpm -- -r build"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mcp/services/runtime-pooler",
+    "name": "runtime-pooler",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "ts-node-dev src/index.ts",
+      "build": "tsc -p .",
+      "lint": "eslint .",
+      "typecheck": "tsc -p . --noEmit",
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc -p ."
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mcp/services/replay-engine",
+    "name": "replay-engine",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "ts-node-dev src/index.ts",
+      "build": "tsc -p .",
+      "test": "vitest run",
+      "lint": "eslint .",
+      "typecheck": "tsc -p . --noEmit"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc -p ."
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mcp/benchmarks/harness",
+    "name": "mcp-bench-harness",
+    "version": "0.1.0",
+    "scripts": {
+      "start": "tsx src/run.ts"
+    }
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mcp/shootout-ui",
+    "name": "shootout-ui",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start"
+    },
+    "build_commands": [
+      "next build"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "intelgraph-mcp/.github/workflows"
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mcp/packages/sdk-ts",
+    "name": "@intelgraph/mcp-sdk",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p .",
+      "test": "vitest run",
+      "lint": "eslint .",
+      "typecheck": "tsc -p . --noEmit"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc -p ."
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mcp/tools/conformance-cli",
+    "name": "@intelgraph/mcp-conformance-cli",
+    "version": "0.1.0",
+    "scripts": {
+      "start": "tsx bin/ig-mcp-conformance.ts",
+      "build": "tsc -p .",
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc -p ."
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "connectors/s3csv",
+    "name": "@maestro/s3csv-connector",
+    "version": "24.2.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/index.js",
+      "dev": "ts-node src/index.ts",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "sdk/python"
+  },
+  {
+    "kind": "python",
+    "path": "sdk/python/maestro_sdk"
+  },
+  {
+    "kind": "node",
+    "path": "sdk/typescript",
+    "name": "@intelgraph/maestro-sdk",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "jest",
+      "build": "tsc",
+      "typecheck": "tsc --noEmit",
+      "lint": "eslint \"{src,test}/**/*.ts\"",
+      "format": "prettier --write \"{src,test}/**/*.ts\""
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "go",
+    "path": "sdk/go/abac"
+  },
+  {
+    "kind": "node",
+    "path": "sdk/qpg/typescript",
+    "name": "@summit/qpg-client",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "intelgraph-mvp/api"
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph-mvp/ui",
+    "name": "intelgraph-ui",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "test": "playwright test"
+    },
+    "test_commands": [
+      "playwright test"
+    ],
+    "build_commands": [
+      "next build"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "summit_helm_argocd_multiacct_pack/.github/workflows"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "summit_helm_argocd_multiacct_pack/helm/summit"
+  },
+  {
+    "kind": "terraform",
+    "path": "summit_helm_argocd_multiacct_pack/infra/terraform/aws/multi_account_ecr"
+  },
+  {
+    "kind": "node",
+    "path": "server-v039",
+    "name": "mc-admin-server",
+    "version": "0.3.9",
+    "scripts": {
+      "start": "node dist/index.js",
+      "dev": "tsx src/index.ts",
+      "build": "tsc -p tsconfig.json",
+      "lint": "eslint ."
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "prov_ledger"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "prov_ledger/infra/helm/prov-ledger"
+  },
+  {
+    "kind": "node",
+    "path": "prov-ledger-service",
+    "name": "@intelgraph/prov-ledger-service",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "dev": "ts-node src/server.ts",
+      "test": "jest",
+      "lint": "eslint src --ext .ts"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "v24_modules"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "v24_modules/trust_score_calculator"
+  },
+  {
+    "kind": "github-actions",
+    "path": "v24_modules/.github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "reliability-service"
+  },
+  {
+    "kind": "go",
+    "path": "templates/golden-path-platform/services/hello-service"
+  },
+  {
+    "kind": "go",
+    "path": "templates/golden-path-platform/jobs/hello-job"
+  },
+  {
+    "kind": "github-actions",
+    "path": "templates/golden-path-platform/.github/workflows"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "templates/golden-path-platform/helm/hello-job"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "templates/golden-path-platform/helm/hello-service"
+  },
+  {
+    "kind": "python",
+    "path": "cognitive_nlp_engine"
+  },
+  {
+    "kind": "python",
+    "path": "copilot"
+  },
+  {
+    "kind": "python",
+    "path": "api"
+  },
+  {
+    "kind": "node",
+    "path": "cli/ig-brief",
+    "name": "ig-brief",
+    "version": "0.0.1"
+  },
+  {
+    "kind": "node",
+    "path": "cli/ig-detect",
+    "name": "ig-detect",
+    "version": "0.0.1"
+  },
+  {
+    "kind": "node",
+    "path": "client-v039",
+    "name": "mc-admin-client",
+    "version": "0.3.9",
+    "scripts": {
+      "build": "tsc -p tsconfig.json"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "tests/load",
+    "name": "intelgraph-load-testing",
+    "version": "1.0.0",
+    "scripts": {
+      "test:load": "k6 run --vus 50 --duration 300s maestro-load-test.js",
+      "test:load:production": "k6 run --vus 100 --duration 600s maestro-load-test.js",
+      "test:soak": "k6 run --duration 14400s soak-test.js",
+      "test:capacity": "k6 run capacity-planning.js",
+      "test:load:ci": "k6 run --quiet --vus 10 --duration 60s maestro-load-test.js",
+      "test:smoke": "k6 run --vus 1 --duration 30s maestro-load-test.js"
+    },
+    "test_commands": [
+      "k6 run --vus 50 --duration 300s maestro-load-test.js",
+      "k6 run --vus 100 --duration 600s maestro-load-test.js",
+      "k6 run --duration 14400s soak-test.js",
+      "k6 run capacity-planning.js",
+      "k6 run --quiet --vus 10 --duration 60s maestro-load-test.js",
+      "k6 run --vus 1 --duration 30s maestro-load-test.js"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "tests/e2e",
+    "name": "@intelgraph/e2e-tests",
+    "version": "1.0.0",
+    "scripts": {
+      "test": "playwright test",
+      "test:chromium": "playwright test --project=chromium-desktop",
+      "test:firefox": "playwright test --project=firefox-desktop",
+      "test:webkit": "playwright test --project=webkit-desktop",
+      "test:mobile": "playwright test --project=chromium-mobile --project=webkit-mobile",
+      "test:accessibility": "playwright test --project=chromium-a11y",
+      "test:performance": "playwright test --project=chromium-performance",
+      "test:security": "playwright test --project=chromium-security",
+      "test:headed": "playwright test --headed",
+      "test:debug": "playwright test --debug",
+      "report": "playwright show-report",
+      "install": "playwright install --with-deps",
+      "codegen": "playwright codegen localhost:3000"
+    },
+    "test_commands": [
+      "playwright test",
+      "playwright test --project=chromium-desktop",
+      "playwright test --project=firefox-desktop",
+      "playwright test --project=webkit-desktop",
+      "playwright test --project=chromium-mobile --project=webkit-mobile",
+      "playwright test --project=chromium-a11y",
+      "playwright test --project=chromium-performance",
+      "playwright test --project=chromium-security",
+      "playwright test --headed",
+      "playwright test --debug"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "docs-site",
+    "name": "docs-site",
+    "version": "0.0.0",
+    "scripts": {
+      "docusaurus": "docusaurus",
+      "start": "docusaurus start",
+      "build": "docusaurus build",
+      "swizzle": "docusaurus swizzle",
+      "deploy": "docusaurus deploy",
+      "clear": "docusaurus clear",
+      "serve": "docusaurus serve",
+      "docs:build": "docusaurus build",
+      "write-translations": "docusaurus write-translations",
+      "write-heading-ids": "docusaurus write-heading-ids"
+    },
+    "build_commands": [
+      "docusaurus build"
+    ]
+  },
+  {
+    "kind": "go",
+    "path": "pcbo"
+  },
+  {
+    "kind": "node",
+    "path": "pcbo/cli",
+    "name": "@summit/pcbo-cli",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "lint": "eslint src --ext .ts",
+      "test": "node --test dist",
+      "prepare": "npm run build"
+    },
+    "test_commands": [
+      "node --test dist"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "summit_release_env_pack/.github/workflows"
+  },
+  {
+    "kind": "terraform",
+    "path": "summit_release_env_pack/infra/terraform/aws/oidc_ecr"
+  },
+  {
+    "kind": "github-actions",
+    "path": "summit-company_extended/.github/workflows"
+  },
+  {
+    "kind": "node",
+    "path": "summit-company_extended/intelgraph/api",
+    "name": "intelgraph-api-stub",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "ts-node server.ts"
+    }
+  },
+  {
+    "kind": "helm-chart",
+    "path": "summit-company_extended/infra/helm/charts/orgmesh-exporter"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "summit-company_extended/infra/helm/charts/intelgraph-api"
+  },
+  {
+    "kind": "python",
+    "path": "eval"
+  },
+  {
+    "kind": "python",
+    "path": "nlp-service"
+  },
+  {
+    "kind": "python",
+    "path": "graph-xai"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "graph-xai/infra/helm/graph-xai"
+  },
+  {
+    "kind": "python",
+    "path": "python"
+  },
+  {
+    "kind": "node",
+    "path": "monitoring/synthetic",
+    "name": "@intelgraph/synthetic-monitoring",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "node synthetic-monitor.js",
+      "test": "node --test test/synthetic-monitor.test.js",
+      "health": "node health-check.js",
+      "debug": "NODE_ENV=development DEBUG=* node synthetic-monitor.js"
+    },
+    "test_commands": [
+      "node --test test/synthetic-monitor.test.js"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "summit_policy_release_pack/.github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "cognitive_insights_engine"
+  },
+  {
+    "kind": "github-actions",
+    "path": "summit_ticket_pack (1)/.github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "ml"
+  },
+  {
+    "kind": "rust",
+    "path": "services/mtfs"
+  },
+  {
+    "kind": "rust",
+    "path": "services/mtfs/core"
+  },
+  {
+    "kind": "node",
+    "path": "services/mtfs/client",
+    "name": "mtfs-client",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "rust",
+    "path": "services/mtfs/server"
+  },
+  {
+    "kind": "go",
+    "path": "services/rcsi"
+  },
+  {
+    "kind": "python",
+    "path": "services/ingest"
+  },
+  {
+    "kind": "node",
+    "path": "services/trr",
+    "name": "tool-risk-registry",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc --noEmit",
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc --noEmit"
+    ]
+  },
+  {
+    "kind": "go",
+    "path": "services/qawe"
+  },
+  {
+    "kind": "node",
+    "path": "services/synthdata",
+    "name": "@intelgraph/synthdata-service",
+    "version": "0.1.0",
+    "scripts": {
+      "start": "node index.js",
+      "build": "npx tsc",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "npx tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/feed-processor",
+    "name": "@intelgraph/feed-processor",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "npx tsc",
+      "dev": "tsx watch src/index.ts",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "npx tsc"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "services/er"
+  },
+  {
+    "kind": "node",
+    "path": "services/agent-runtime",
+    "name": "@intelgraph/agent-runtime",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsx watch src/index.ts",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/tenant-admin",
+    "name": "tenant-admin-service",
+    "version": "0.1.0",
+    "scripts": {
+      "start": "node index.js",
+      "test": "node --test",
+      "build": "echo skip"
+    },
+    "test_commands": [
+      "node --test"
+    ],
+    "build_commands": [
+      "echo skip"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/docling-svc",
+    "name": "docling-svc",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.build.json",
+      "dev": "ts-node src/index.ts",
+      "start": "node dist/index.js",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.build.json"
+    ]
+  },
+  {
+    "kind": "helm-chart",
+    "path": "services/docling-svc/helm/docling-svc"
+  },
+  {
+    "kind": "python",
+    "path": "services/graph-xai"
+  },
+  {
+    "kind": "node",
+    "path": "services/workflow",
+    "name": "@intelgraph/workflow-service",
+    "version": "0.1.0",
+    "scripts": {
+      "start": "node src/server.js",
+      "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+      "build": "echo skip"
+    },
+    "test_commands": [
+      "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    ],
+    "build_commands": [
+      "echo skip"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "services/ingest-sandbox"
+  },
+  {
+    "kind": "node",
+    "path": "services/api-gateway",
+    "name": "@intelgraph/api-gateway",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsx watch src/index.ts",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/policy-audit",
+    "name": "policy-audit-service",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "node index.js",
+      "build": "npx tsc"
+    },
+    "build_commands": [
+      "npx tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/build-hub",
+    "name": "maestro-build-hub",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "tsx watch src/index.ts",
+      "build": "tsc",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "typecheck": "tsc --noEmit",
+      "lint": "eslint src --ext .ts",
+      "docker:build": "docker build -t maestro-build-hub ."
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/prov-ledger",
+    "name": "@intelgraph/prov-ledger",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "npx tsc",
+      "dev": "tsx watch src/index.ts",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit",
+      "migrate": "tsx src/scripts/migrate.ts"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "npx tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/authz-gateway",
+    "name": "authz-gateway",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/index.js",
+      "dev": "ts-node src/index.ts",
+      "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+      "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+      "test": "jest --coverage",
+      "test:fuzz": "jest --runTestsByPath tests/fuzz/governance-gate.fuzz.test.ts --coverage"
+    },
+    "test_commands": [
+      "jest --coverage",
+      "jest --runTestsByPath tests/fuzz/governance-gate.fuzz.test.ts --coverage"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "services/scout"
+  },
+  {
+    "kind": "python",
+    "path": "services/insight-ai"
+  },
+  {
+    "kind": "node",
+    "path": "services/data-spine",
+    "name": "@summit/data-spine",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "node --test"
+    },
+    "test_commands": [
+      "node --test"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "services/ig-rl"
+  },
+  {
+    "kind": "node",
+    "path": "services/graph-core",
+    "name": "graph-core-service",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "npx tsc",
+      "start": "node dist/index.js",
+      "dev": "tsx watch src/index.ts",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "npx tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/license-registry",
+    "name": "@intelgraph/license-registry",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "npx tsc",
+      "dev": "tsx watch src/index.ts",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "npx tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/spar",
+    "name": "@summit/spar",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "vitest run",
+      "test:watch": "vitest",
+      "clean": "rimraf dist"
+    },
+    "test_commands": [
+      "vitest run",
+      "vitest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "services/privacy",
+    "name": "@intelgraph/privacy",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest --runInBand",
+      "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "test_commands": [
+      "jest --runInBand"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "go",
+    "path": "services/qpg"
+  },
+  {
+    "kind": "node",
+    "path": "services/exporter",
+    "name": "@intelgraph/exporter",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs .",
+      "format": "prettier --check ."
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai",
+    "name": "ga-graphai-root",
+    "scripts": {
+      "test": "npm run -ws --if-present test"
+    },
+    "test_commands": [
+      "npm run -ws --if-present test"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "ga-graphai/.github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "ga-graphai/packages/graphai"
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/maestro-conductor",
+    "name": "maestro-conductor",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/er-service",
+    "name": "@ga-graphai/er-service",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "ga-graphai/packages/autonomous-investigator"
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/query-copilot",
+    "name": "@ga-graphai/query-copilot",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/cost-guard",
+    "name": "@ga-graphai/cost-guard",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/prov-ledger",
+    "name": "@ga-graphai/prov-ledger",
+    "version": "0.2.0",
+    "scripts": {
+      "test": "vitest run",
+      "test:record": "node --loader ts-node/esm ./tests/record.test.ts"
+    },
+    "test_commands": [
+      "vitest run",
+      "node --loader ts-node/esm ./tests/record.test.ts"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "ga-graphai/packages/worker"
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/policy",
+    "name": "policy",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run && NODE_TEST=1 NODE_OPTIONS=--loader ts-node/esm node --test tests/policy-engine.test.js",
+      "test:validator": "node --loader ts-node/esm ./tests/validator.test.ts"
+    },
+    "test_commands": [
+      "vitest run && NODE_TEST=1 NODE_OPTIONS=--loader ts-node/esm node --test tests/policy-engine.test.js",
+      "node --loader ts-node/esm ./tests/validator.test.ts"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/meta-orchestrator",
+    "name": "meta-orchestrator",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/workflow-diff-engine",
+    "name": "workflow-diff-engine",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/cloud-arbitrage",
+    "name": "@ga-graphai/cloud-arbitrage",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/web",
+    "name": "web",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "ga-graphai/packages/pckd"
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/common-types",
+    "name": "@ga-graphai/common-types",
+    "version": "0.2.0",
+    "scripts": {
+      "test": "vitest run",
+      "test:workflow": "node --loader ts-node/esm ./tests/workflow-types.test.ts"
+    },
+    "test_commands": [
+      "vitest run",
+      "node --loader ts-node/esm ./tests/workflow-types.test.ts"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/workcell-runtime",
+    "name": "workcell-runtime",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "vitest run"
+    },
+    "test_commands": [
+      "vitest run"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "ga-graphai/packages/gateway",
+    "name": "@ga-graphai/gateway",
+    "version": "0.2.0",
+    "scripts": {
+      "test": "vitest run && node --test tests"
+    },
+    "test_commands": [
+      "vitest run && node --test tests"
+    ]
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/postgres"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/graphai"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/redis"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/worker"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/minio"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/web"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/neo4j"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ga-graphai/infra/helm/gateway"
+  },
+  {
+    "kind": "python",
+    "path": "ner-service"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/billing"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/aurora"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/envs/prod"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/envs/free-tier"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/envs/staging"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/environments/prod"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/environments/staging"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/environments/dev"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/s3-object-lock"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/modules/worm_bucket"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/modules/s3-backups"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/modules/eks"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/modules/rds-postgres"
+  },
+  {
+    "kind": "terraform",
+    "path": "terraform/modules/tenant"
+  },
+  {
+    "kind": "node",
+    "path": "apps/mobile-interface",
+    "name": "@intelgraph/mobile-interface",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "next dev -p 3001",
+      "build": "next build",
+      "start": "next start -p 3001",
+      "lint": "next lint",
+      "type-check": "tsc --noEmit",
+      "test": "jest",
+      "test:watch": "jest --watch",
+      "storybook": "storybook dev -p 6006",
+      "build-storybook": "storybook build"
+    },
+    "test_commands": [
+      "jest",
+      "jest --watch"
+    ],
+    "build_commands": [
+      "next build"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/graph-analytics",
+    "name": "@intelgraph/graph-analytics",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "dev": "tsx watch src/server.ts",
+      "test": "jest",
+      "lint": "eslint src --ext .ts,.tsx",
+      "type-check": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/ml-engine",
+    "name": "@intelgraph/ml-engine",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "dev": "tsx watch src/server.ts",
+      "test": "jest",
+      "lint": "eslint src --ext .ts,.tsx",
+      "type-check": "tsc --noEmit",
+      "setup-python": "cd src/python && pip3 install -r requirements.txt",
+      "train": "node dist/cli.js train",
+      "evaluate": "node dist/cli.js evaluate"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "apps/ml-engine/src/python"
+  },
+  {
+    "kind": "python",
+    "path": "apps/jupyterkit"
+  },
+  {
+    "kind": "node",
+    "path": "apps/intelgraph-api",
+    "name": "@companyos/intelgraph-api",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+      "build": "tsc -p tsconfig.json",
+      "start": "node dist/index.js",
+      "lint": "eslint . --ext .ts || true"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/workflow-engine",
+    "name": "@intelgraph/workflow-engine",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "dev": "tsx watch src/server.ts",
+      "test": "jest",
+      "lint": "eslint src --ext .ts,.tsx",
+      "type-check": "tsc --noEmit",
+      "seed-templates": "node dist/scripts/seed-templates.js"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/analytics-engine",
+    "name": "@intelgraph/analytics-engine",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "dev": "tsx watch src/server.ts",
+      "test": "jest",
+      "lint": "eslint src --ext .ts,.tsx",
+      "type-check": "tsc --noEmit",
+      "seed-templates": "node dist/scripts/seed-templates.js"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/webapp",
+    "name": "webapp",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "vite",
+      "build": "vite build",
+      "preview": "vite preview",
+      "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --no-eslintrc --config .eslintrc.cjs \"src/**/*.{ts,tsx}\"",
+      "format": "prettier --check 'src/**/*.{ts,tsx,css,html}'",
+      "test": "jest",
+      "test:e2e": "playwright test"
+    },
+    "test_commands": [
+      "jest",
+      "playwright test"
+    ],
+    "build_commands": [
+      "vite build"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/web",
+    "name": "@intelgraph/web",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "vite",
+      "build": "tsc && vite build",
+      "preview": "vite preview",
+      "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+      "lint:fix": "eslint . --ext ts,tsx --fix",
+      "typecheck": "tsc --noEmit",
+      "test": "vitest",
+      "test:ui": "vitest --ui",
+      "storybook": "storybook dev -p 6006",
+      "build-storybook": "storybook build"
+    },
+    "test_commands": [
+      "vitest",
+      "vitest --ui"
+    ],
+    "build_commands": [
+      "tsc && vite build"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/server",
+    "name": "apps-server",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/index.js",
+      "dev": "ts-node src/index.ts"
+    },
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "apps/search-engine",
+    "name": "@intelgraph/search-engine",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "dev": "tsx watch src/server.ts",
+      "test": "jest",
+      "lint": "eslint src --ext .ts,.tsx",
+      "type-check": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "terraform",
+    "path": "vpc/examples/basic"
+  },
+  {
+    "kind": "terraform",
+    "path": "vpc/modules/vpc"
+  },
+  {
+    "kind": "node",
+    "path": "extensions/vscode-maestro",
+    "name": "maestro",
+    "version": "1.0.0",
+    "scripts": {
+      "vscode:prepublish": "npm run compile",
+      "compile": "tsc -p ./",
+      "watch": "tsc -watch -p ./",
+      "pretest": "npm run compile && npm run lint",
+      "lint": "eslint src --ext ts",
+      "test": "node ./out/test/runTest.js",
+      "package": "vsce package",
+      "publish": "vsce publish"
+    },
+    "test_commands": [
+      "npm run compile && npm run lint",
+      "node ./out/test/runTest.js"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "extensions/symphony-ops",
+    "name": "symphony-ops"
+  },
+  {
+    "kind": "python",
+    "path": "adversarial-misinfo-defense-platform"
+  },
+  {
+    "kind": "node",
+    "path": "adversarial-misinfo-defense-platform/web",
+    "name": "amd-web-ui",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "next lint"
+    },
+    "build_commands": [
+      "next build"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "client",
+    "name": "intelgraph-client",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "vite",
+      "build": "vite build",
+      "preview": "vite preview",
+      "typecheck": "tsc --noEmit",
+      "test": "npm run test:jest && npm run test:vitest",
+      "test:jest": "node node_modules/jest/bin/jest.js --config jest.config.cjs",
+      "test:vitest": "vitest",
+      "test:e2e": "playwright test",
+      "test:golden-path": "playwright test golden-path-ci-gate.spec.ts",
+      "test:coverage": "jest --coverage",
+      "lint": "eslint src --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
+      "lint:fix": "eslint src --ext js,jsx,ts,tsx --fix",
+      "format": "prettier --write .",
+      "persist:queries": "graphql-codegen --config codegen.ts",
+      "generate:persisted": "node scripts/generate-persisted-operations.js"
+    },
+    "test_commands": [
+      "npm run test:jest && npm run test:vitest",
+      "node node_modules/jest/bin/jest.js --config jest.config.cjs",
+      "vitest",
+      "playwright test",
+      "playwright test golden-path-ci-gate.spec.ts",
+      "jest --coverage"
+    ],
+    "build_commands": [
+      "vite build"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "prov-ledger"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "prov-ledger/infra/helm/prov-ledger"
+  },
+  {
+    "kind": "node",
+    "path": "benchmarks/harness",
+    "name": "@intelgraph/bench-harness",
+    "version": "0.1.0",
+    "scripts": {
+      "perf:mini": "node run-mini.js",
+      "report:publish": "node report.js"
+    }
+  },
+  {
+    "kind": "node",
+    "path": "active-measures-module",
+    "name": "active-measures-module",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "ts-node src/index.ts",
+      "test": "jest --coverage"
+    },
+    "test_commands": [
+      "jest --coverage"
+    ]
+  },
+  {
+    "kind": "helm-chart",
+    "path": "k8s/grafana"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "k8s/copilot"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "k8s/otel-collector"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "k8s/prov-ledger"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "k8s/sandbox"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "k8s/opa"
+  },
+  {
+    "kind": "terraform",
+    "path": "deploy/terraform/modules/eks-gpu"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "deploy/helm/intelgraph"
+  },
+  {
+    "kind": "github-actions",
+    "path": "summit_ticket_pack/.github/workflows"
+  },
+  {
+    "kind": "node",
+    "path": "clients/cos-policy-fetcher",
+    "name": "cos-policy-fetcher",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p .",
+      "start": "node dist/index.js",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p ."
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "cognitive-targeting-engine"
+  },
+  {
+    "kind": "python",
+    "path": "worker"
+  },
+  {
+    "kind": "github-actions",
+    "path": "october2025/mc_release_hardening_and_dashboards_bundle/.github/workflows"
+  },
+  {
+    "kind": "node",
+    "path": "october2025/companyos-switchboard",
+    "name": "companyos-switchboard",
+    "version": "0.1.0",
+    "scripts": {
+      "bootstrap": "make bootstrap",
+      "dev": "make dev",
+      "build": "make build",
+      "tauri:dev": "make tauri-dev",
+      "policy:test": "make policy-test"
+    },
+    "test_commands": [
+      "make policy-test"
+    ],
+    "build_commands": [
+      "make build"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "october2025/companyos-switchboard/apps/web",
+    "name": "switchboard-web",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "next dev -p 3000",
+      "build": "next build",
+      "start": "next start -p 3000",
+      "lint": "eslint .",
+      "typecheck": "tsc --noEmit"
+    },
+    "build_commands": [
+      "next build"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "october2025/companyos-switchboard/.github/workflows"
+  },
+  {
+    "kind": "rust",
+    "path": "october2025/companyos-switchboard/src-tauri"
+  },
+  {
+    "kind": "github-actions",
+    "path": "october2025/mc_scoped_ci_and_renovate_bundle/.github/workflows"
+  },
+  {
+    "kind": "github-actions",
+    "path": "october2025/mc_make_release_and_templates_bundle/.github/workflows"
+  },
+  {
+    "kind": "github-actions",
+    "path": "october2025/mc_release_verification_opa_alerts_bundle/.github/workflows"
+  },
+  {
+    "kind": "rust",
+    "path": "decs"
+  },
+  {
+    "kind": "go",
+    "path": "drst"
+  },
+  {
+    "kind": "python",
+    "path": "graph_xai"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "graph_xai/infra/helm/graph-xai"
+  },
+  {
+    "kind": "node",
+    "path": "frontend",
+    "name": "frontend",
+    "version": "0.0.0",
+    "scripts": {
+      "dev": "vite --host",
+      "build": "vite build",
+      "preview": "vite preview",
+      "test": "vitest"
+    },
+    "test_commands": [
+      "vitest"
+    ],
+    "build_commands": [
+      "vite build"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": ".github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "cognitive-insights"
+  },
+  {
+    "kind": "go",
+    "path": "libs/configguard/go"
+  },
+  {
+    "kind": "node",
+    "path": "libs/configguard/ts",
+    "name": "@summit/configguard",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest --config jest.config.cjs --runInBand"
+    },
+    "test_commands": [
+      "jest --config jest.config.cjs --runInBand"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "terraform",
+    "path": "intelgraph_enhancements/ci_cd_terraform"
+  },
+  {
+    "kind": "python",
+    "path": "modules/connector-sdk-s3csv"
+  },
+  {
+    "kind": "node",
+    "path": "webapp",
+    "name": "webapp",
+    "scripts": {
+      "dev": "node src/index.js",
+      "lint": "prettier -c ."
+    }
+  },
+  {
+    "kind": "node",
+    "path": "packages/atl",
+    "name": "@intelgraph/atl",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/kpw-media",
+    "name": "@intelgraph/kpw-media",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "dev": "node --env-file=.env dist/server.js",
+      "start": "node dist/server.js",
+      "verify": "node dist/cli.js"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/influence-mining",
+    "name": "@intelgraph/influence-mining",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "preextract": "npm run build",
+      "extract": "node dist/cli.js",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/deception-detector",
+    "name": "@intelgraph/deception-detector",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest",
+      "start": "node dist/index.js"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "packages/osint"
+  },
+  {
+    "kind": "python",
+    "path": "packages/connectors"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk",
+    "name": "@intelgraph/sdk",
+    "version": "0.0.0",
+    "scripts": {
+      "build": "echo skip"
+    },
+    "build_commands": [
+      "echo skip"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/graph-algos-js",
+    "name": "@intelgraph/graph-algos-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/anomaly-js",
+    "name": "@intelgraph/anomaly-js",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "node --test"
+    },
+    "test_commands": [
+      "node --test"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/search-js",
+    "name": "@intelgraph/search-sdk",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc"
+    },
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/data-quality-js",
+    "name": "@intelgraph/data-quality",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/prov-ledger-js",
+    "name": "@intelgraph/prov-ledger-js",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "node --test"
+    },
+    "test_commands": [
+      "node --test"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/synthdata-js",
+    "name": "@intelgraph/synthdata-js",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/privacy-js",
+    "name": "@intelgraph/privacy-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/gateway-js",
+    "name": "@intelgraph/gateway-js",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs .",
+      "typecheck": "tsc -p tsconfig.json --noEmit",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/connector-js",
+    "name": "@intelgraph/connector-js",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/collab-js",
+    "name": "@intelgraph/collab-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/reporting-js",
+    "name": "@intelgraph/reporting-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/audit-js",
+    "name": "@intelgraph/audit-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/workflow-js",
+    "name": "@intelgraph/workflow-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/tenant-js",
+    "name": "@intelgraph/tenant-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/enrichment-js",
+    "name": "@intelgraph/enrichment-sdk",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk/geospatial-js",
+    "name": "@intelgraph/geospatial-js",
+    "version": "0.1.0"
+  },
+  {
+    "kind": "node",
+    "path": "packages/prov-ledger-sdk",
+    "name": "@intelgraph/prov-ledger-sdk",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsc --watch",
+      "test": "jest",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/ingest-wizard",
+    "name": "@intelgraph/ingest-wizard",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsc --watch",
+      "test": "jest",
+      "lint": "eslint src --ext .ts,.tsx",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/gateway-tariff",
+    "name": "@intelgraph/gateway-tariff",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/afl-store",
+    "name": "@intelgraph/afl-store",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "packages/caseops"
+  },
+  {
+    "kind": "node",
+    "path": "packages/maestro-cli",
+    "name": "@intelgraph/maestro",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsc --watch",
+      "start": "node dist/index.js",
+      "test": "jest",
+      "lint": "eslint src/**/*.ts",
+      "clean": "rm -rf dist"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/graph-ai-core",
+    "name": "@intelgraph/graph-ai-core",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsc --watch",
+      "test": "jest",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/event-booster",
+    "name": "@intelgraph/event-booster",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/event-booster/test/EventBooster.test.ts packages/event-booster/test/SyntheticGenerators.test.ts packages/event-booster/test/PerformanceBenchmarks.test.ts --coverage"
+    },
+    "test_commands": [
+      "jest --config ../../jest.config.cjs --runTestsByPath packages/event-booster/test/EventBooster.test.ts packages/event-booster/test/SyntheticGenerators.test.ts packages/event-booster/test/PerformanceBenchmarks.test.ts --coverage"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/liquid-nano",
+    "name": "@summit/liquid-nano",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.build.json",
+      "clean": "rm -rf dist",
+      "lint": "eslint \"**/*.{ts,tsx}\"",
+      "test": "jest --config ./jest.config.ts --runInBand",
+      "test:coverage": "jest --config ./jest.config.ts --coverage",
+      "typecheck": "tsc -p tsconfig.json --noEmit",
+      "format": "prettier --check .",
+      "prepare": "npm run build"
+    },
+    "test_commands": [
+      "jest --config ./jest.config.ts --runInBand",
+      "jest --config ./jest.config.ts --coverage"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.build.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "packages/geotemporal"
+  },
+  {
+    "kind": "node",
+    "path": "packages/mapping-dsl",
+    "name": "@intelgraph/mapping-dsl",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/hrn",
+    "name": "@intelgraph/hrn",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/adc",
+    "name": "@intelgraph/adc",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "packages/sdk-python"
+  },
+  {
+    "kind": "node",
+    "path": "packages/sdk-ts",
+    "name": "@summit/maestro-sdk",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "clean": "rimraf dist",
+      "lint": "eslint .",
+      "test": "vitest run",
+      "prepublishOnly": "npm run clean && npm run build && npm test"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/policy-audit",
+    "name": "@intelgraph/policy-audit",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "jest",
+      "build": "npx tsc"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "npx tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/narrative-engine",
+    "name": "@summit/narrative-engine",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/tasks-core",
+    "name": "@summit/maestro-tasks-core",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "clean": "rimraf dist",
+      "test": "vitest run",
+      "prepublishOnly": "npm run clean && npm run build && npm test"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "packages/docs"
+  },
+  {
+    "kind": "node",
+    "path": "packages/lreg-exporter",
+    "name": "@intelgraph/lreg-exporter",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "start": "node dist/server.js",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/rptc",
+    "name": "@summit/rptc",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.build.json",
+      "clean": "rm -rf dist",
+      "test": "jest --config jest.config.ts",
+      "lint": "eslint src --ext .ts",
+      "format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\""
+    },
+    "test_commands": [
+      "jest --config jest.config.ts"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.build.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/prov-ledger",
+    "name": "@intelgraph/prov-ledger-lib",
+    "version": "0.2.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/community",
+    "name": "@summit/community",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "lint": "eslint .",
+      "test": "npm_config_progress=false npx --yes c8 node --loader ts-node/esm --test __tests__/communityHub.test.ts"
+    },
+    "test_commands": [
+      "npm_config_progress=false npx --yes c8 node --loader ts-node/esm --test __tests__/communityHub.test.ts"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "packages/sdk-py"
+  },
+  {
+    "kind": "node",
+    "path": "packages/canary-lattice",
+    "name": "@intelgraph/canary-lattice",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc"
+    },
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/crsp",
+    "name": "@intelgraph/crsp",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/prov-ledger-client",
+    "name": "@intelgraph/prov-ledger-client",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc"
+    },
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/jira-integration",
+    "name": "@summit/jira-integration",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "lint": "eslint src __tests__ --ext .ts",
+      "test": "jest --coverage",
+      "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "test_commands": [
+      "jest --coverage"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "packages/geo"
+  },
+  {
+    "kind": "python",
+    "path": "packages/finintel"
+  },
+  {
+    "kind": "node",
+    "path": "packages/aer-ledger",
+    "name": "@intelgraph/aer-ledger",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "start": "node dist/server.js",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/kompromat-sim",
+    "name": "@intelgraph/kompromat-sim",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "start": "node dist/cli.js"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/govbrief",
+    "name": "@summit/govbrief",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -b",
+      "clean": "rm -rf dist",
+      "lint": "eslint src --ext .ts",
+      "typecheck": "tsc --noEmit"
+    },
+    "build_commands": [
+      "tsc -b"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/hit-protocol",
+    "name": "@intelgraph/hit-protocol",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc"
+    },
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/common-types",
+    "name": "@intelgraph/common-types",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "generate:schema": "node scripts/generateSchemas.js"
+    },
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/maestro-core",
+    "name": "@maestro/core",
+    "version": "1.0.0",
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsc --watch",
+      "test": "jest",
+      "test:watch": "jest --watch",
+      "lint": "eslint src/**/*.ts",
+      "clean": "rm -rf dist"
+    },
+    "test_commands": [
+      "jest",
+      "jest --watch"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/gdr",
+    "name": "@intelgraph/gdr",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "packages/ledger-server",
+    "name": "@intelgraph/ledger-server",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "start": "node dist/index.js",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "deescalation-coach"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "deescalation-coach/infra/helm/deescalation-coach"
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph",
+    "name": "intelgraph-platform",
+    "version": "1.0.0",
+    "scripts": {
+      "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
+      "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+      "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+      "server:dev": "cd server && npm run dev",
+      "client:dev": "cd client && npm run dev",
+      "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+      "docker:prod": "docker-compose up",
+      "test": "npm run test:server && npm run test:client",
+      "test:server": "cd ../server && npm test",
+      "test:client": "cd ../client && npm test",
+      "test:e2e": "npx playwright test",
+      "build": "npm run build:client && npm run build:server",
+      "build:client": "cd client && npm run build",
+      "build:server": "cd server && npm run build",
+      "deploy:dev": "scripts/deploy.sh dev",
+      "deploy:staging": "scripts/deploy.sh staging",
+      "deploy:prod": "scripts/deploy.sh prod",
+      "backup": "scripts/backup.sh",
+      "lint": "npm run lint:server && npm run lint:client",
+      "lint:server": "cd server && npm run lint",
+      "lint:client": "cd client && npm run lint",
+      "format": "prettier --write .",
+      "db:migrate": "cd server && npm run db:migrate",
+      "db:seed": "cd server && npm run db:seed",
+      "db:reset": "npm run db:migrate && npm run db:seed"
+    },
+    "test_commands": [
+      "npm run test:server && npm run test:client",
+      "cd ../server && npm test",
+      "cd ../client && npm test",
+      "npx playwright test"
+    ],
+    "build_commands": [
+      "npm run build:client && npm run build:server"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "intelgraph/python"
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph/client",
+    "name": "intelgraph-client-legacy",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "vite",
+      "build": "vite build",
+      "preview": "vite preview",
+      "test": "vitest",
+      "test:ui": "vitest --ui",
+      "test:coverage": "vitest run --coverage",
+      "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+      "lint:fix": "eslint . --ext js,jsx --fix",
+      "format": "prettier --write ."
+    },
+    "test_commands": [
+      "vitest",
+      "vitest --ui",
+      "vitest run --coverage"
+    ],
+    "build_commands": [
+      "vite build"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "intelgraph/.github/workflows"
+  },
+  {
+    "kind": "node",
+    "path": "intelgraph/server",
+    "name": "intelgraph-server",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "node server.js",
+      "dev": "nodemon --inspect=0.0.0.0:9229 server.js",
+      "build": "echo 'No build step required'",
+      "test": "jest",
+      "test:watch": "jest --watch",
+      "test:coverage": "jest --coverage",
+      "lint": "eslint .",
+      "lint:fix": "eslint . --fix",
+      "format": "prettier --write .",
+      "db:migrate": "node scripts/migrate.js",
+      "db:seed": "node scripts/seed.js",
+      "db:reset": "npm run db:migrate && npm run db:seed"
+    },
+    "test_commands": [
+      "jest",
+      "jest --watch",
+      "jest --coverage"
+    ],
+    "build_commands": [
+      "echo 'No build step required'"
+    ]
+  },
+  {
+    "kind": "python",
+    "path": "intelgraph/api-packages/notification-api"
+  },
+  {
+    "kind": "python",
+    "path": "intelgraph/api-packages/data-ingestion-api"
+  },
+  {
+    "kind": "python",
+    "path": "intelgraph/api-packages/authentication-api"
+  },
+  {
+    "kind": "python",
+    "path": "intelgraph/api-packages/analytics-api"
+  },
+  {
+    "kind": "python",
+    "path": "myservice"
+  },
+  {
+    "kind": "python",
+    "path": "ingestion"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/companyos-console"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/velero"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/mc-runner"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/satellite"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/ig-platform"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/opencost"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/flow-audit"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/monitoring"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/intelgraph-api"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/backup"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/worker-gpu"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/intelgraph-maestro"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/observability"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/companyos"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/replicator"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/gateway"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "charts/maestro"
+  },
+  {
+    "kind": "github-actions",
+    "path": "intelgraph-docs-bundle/.github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "graph-service"
+  },
+  {
+    "kind": "node",
+    "path": "server",
+    "name": "intelgraph-server",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "node dist/index.js",
+      "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+      "dev:worker": "cross-env NODE_ENV=development CONDUCTOR_ROLE=worker WORKER_PORT=4100 nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm' src/conductor/worker-entrypoint.ts",
+      "build": "tsc",
+      "typecheck": "tsc --noEmit",
+      "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
+      "test": "jest",
+      "test:watch": "jest --watch",
+      "test:coverage": "jest --coverage",
+      "lint": "eslint .",
+      "lint:fix": "eslint . --fix",
+      "format": "prettier --write .",
+      "migrate": "ts-node scripts/migrate.ts up",
+      "db:migrate": "node scripts/db_migrate.cjs",
+      "codegen": "graphql-codegen --config codegen.yml",
+      "codegen:watch": "graphql-codegen --config codegen.yml --watch",
+      "seed": "ts-node scripts/seed-data.ts",
+      "seed:demo": "ts-node scripts/seed-demo.ts",
+      "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
+      "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts"
+    },
+    "test_commands": [
+      "jest",
+      "jest --watch",
+      "jest --coverage"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "server/.github/workflows"
+  },
+  {
+    "kind": "python",
+    "path": "server/data-pipelines"
+  },
+  {
+    "kind": "python",
+    "path": "tools/scpe"
+  },
+  {
+    "kind": "node",
+    "path": "tools/claim-verifier",
+    "name": "claim-verifier",
+    "version": "0.1.0",
+    "scripts": {
+      "test": "node --test"
+    },
+    "test_commands": [
+      "node --test"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "tools/decs-cli",
+    "name": "@summit/decs-cli",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "start": "node dist/index.js",
+      "dev": "ts-node src/index.ts",
+      "test": "node --test"
+    },
+    "test_commands": [
+      "node --test"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "go",
+    "path": "tools/scba"
+  },
+  {
+    "kind": "python",
+    "path": "tools/secretsentry"
+  },
+  {
+    "kind": "node",
+    "path": "tools/vscode/doc-lsp",
+    "name": "intelgraph-docs-lsp",
+    "version": "0.0.1"
+  },
+  {
+    "kind": "node",
+    "path": "tools/vscode/intelgraph-docs",
+    "name": "intelgraph-docs-helper",
+    "version": "0.0.1"
+  },
+  {
+    "kind": "node",
+    "path": "tools/docforge/__tests__/__fixtures__/sample_repo",
+    "name": "sample",
+    "version": "2.3.4"
+  },
+  {
+    "kind": "python",
+    "path": "tools/esa"
+  },
+  {
+    "kind": "node",
+    "path": "companyos",
+    "name": "companyos",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p .",
+      "start": "node dist/index.js",
+      "evidence:sample": "node dist/evidence/publish_sample.js"
+    },
+    "build_commands": [
+      "tsc -p ."
+    ]
+  },
+  {
+    "kind": "go",
+    "path": "orchestration/runtime"
+  },
+  {
+    "kind": "github-actions",
+    "path": "orchestration/.github/workflows"
+  },
+  {
+    "kind": "node",
+    "path": "orchestration/packages/intent-engine",
+    "name": "@chronos/intent-engine",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "clean": "rimraf dist",
+      "lint": "eslint \"src/**/*.ts\"",
+      "test": "vitest run",
+      "typecheck": "tsc --noEmit"
+    },
+    "test_commands": [
+      "vitest run"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "github-actions",
+    "path": "ops/observability-ci/.github/workflows"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "ops/gateway"
+  },
+  {
+    "kind": "node",
+    "path": "ui/qawe",
+    "name": "qawe-ui",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "vite",
+      "build": "vite build",
+      "preview": "vite preview"
+    },
+    "build_commands": [
+      "vite build"
+    ]
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/postgres"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/redis"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/nlp-service"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/ai-service"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/predictive-suite"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/client"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/intelgraph"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/neo4j"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/server"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/tenant"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/osint-service"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/summit"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "helm/worker-python"
+  },
+  {
+    "kind": "go",
+    "path": "ccs"
+  },
+  {
+    "kind": "node",
+    "path": "ccs/bindings",
+    "name": "@summit/ccs-bindings",
+    "version": "0.1.0",
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "test": "ts-node --transpile-only test/replay.test.ts"
+    },
+    "test_commands": [
+      "ts-node --transpile-only test/replay.test.ts"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "helm-chart",
+    "path": "sprint-kits/proof-first-core-ga/charts/er-service"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "sprint-kits/proof-first-core-ga/charts/cost-guard"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "sprint-kits/proof-first-core-ga/charts/prov-ledger"
+  },
+  {
+    "kind": "node",
+    "path": "gateway",
+    "name": "intelgraph-gateway",
+    "version": "0.1.0",
+    "scripts": {
+      "dev": "tsx src/index.ts",
+      "build": "tsc",
+      "test": "jest"
+    },
+    "test_commands": [
+      "jest"
+    ],
+    "build_commands": [
+      "tsc"
+    ]
+  },
+  {
+    "kind": "node",
+    "path": "gateway/graphql-bff",
+    "name": "graphql-bff",
+    "version": "0.1.0",
+    "scripts": {
+      "start": "node dist/index.js",
+      "dev": "ts-node-dev --respawn src/index.ts",
+      "build": "tsc -p tsconfig.json",
+      "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs .",
+      "typecheck": "tsc -p tsconfig.json --noEmit",
+      "test": "jest --runInBand",
+      "contract:federation": "jest --runInBand __tests__/contract.test.ts",
+      "sec:zap": "echo 'zap scan placeholder'",
+      "docker:build": "docker build . -t graphql-bff"
+    },
+    "test_commands": [
+      "jest --runInBand"
+    ],
+    "build_commands": [
+      "tsc -p tsconfig.json"
+    ]
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/cdn"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/glue"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/envs/prod"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/iam/externaldns"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/s3"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/aws"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/aws/iam"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/aws/rds-postgres"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/aws/neo4j-backup"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/terraform/kms"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/terraform/storage"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/terraform/aws"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/terraform/stage"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/terraform/modules/kms-tenant-grant"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/terraform/dev"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/eks-baseline/terraform"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/oci"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "infra/helm/postgres"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "infra/helm/redis"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "infra/helm/analytics"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "infra/helm/intelgraph"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "infra/helm/web"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "infra/helm/neo4j"
+  },
+  {
+    "kind": "helm-chart",
+    "path": "infra/helm/gateway"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/tags"
+  },
+  {
+    "kind": "terraform",
+    "path": "infra/dr"
+  }
+]

@@ -5,7 +5,11 @@ import pinoHttp from 'pino-http';
 import { initKeys, getPublicJwk, getPrivateKey } from './keys';
 import { login, introspect } from './auth';
 import { requireAuth } from './middleware';
-import { startObservability, metricsHandler } from './observability';
+import {
+  startObservability,
+  metricsHandler,
+  requestMetricsMiddleware,
+} from './observability';
 import { AttributeService } from './attribute-service';
 import { StepUpManager } from './stepup';
 import { authorize } from './policy';
@@ -21,6 +25,7 @@ export async function createApp() {
   const app = express();
   app.use(pinoHttp());
   app.use(express.json());
+  app.use(requestMetricsMiddleware);
 
   app.get('/metrics', metricsHandler);
 
