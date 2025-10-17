@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+  title: Summit Visualization Platform
+  version: "0.1.0"
+paths:
+  /api/v1/signals:
+    post:
+      summary: Ingest observed signals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'https://schemas.summit.io/viz/observed-signal.json#/$defs/batch'
+      responses:
+        '207':
+          description: Multi-status response with per-record receipts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  receipts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        signal_id:
+                          type: string
+                          format: uuid
+                        status:
+                          type: string
+                          enum: [accepted, rejected]
+                        signature:
+                          type: string
+                        message:
+                          type: string
+  /api/v1/scenario-runs/{id}:
+    put:
+      summary: Launch a counterfactual simulation run
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policy_toggles:
+                  type: object
+                start_ts:
+                  type: string
+                  format: date-time
+                end_ts:
+                  type: string
+                  format: date-time
+      responses:
+        '202':
+          description: Simulation accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scenario_id:
+                    type: string
+                    format: uuid
+                  websocket_channel:
+                    type: string
+  /api/v1/provenance/export/{id}:
+    get:
+      summary: Download signed narrative bundle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: format
+          required: false
+          schema:
+            type: string
+            enum: [pdf, html, zip]
+      responses:
+        '200':
+          description: Signed artifact
+          headers:
+            x-summit-sigstore-bundle:
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/html:
+              schema:
+                type: string
