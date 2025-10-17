@@ -16,9 +16,7 @@ interface TimelineEvent {
     | 'investigation';
   severity: 'low' | 'medium' | 'high' | 'critical';
   entities: string[];
-  metadata?: {
-    [key: string]: any;
-  };
+  metadata?: Record<string, unknown>;
   source?: string;
   confidence: number;
 }
@@ -32,14 +30,23 @@ interface TimeCluster {
   anomaly: boolean;
 }
 
+type NormalizedTimeRange = {
+  start: number;
+  end: number;
+};
+
+type SupportedTimeRange =
+  | NormalizedTimeRange
+  | {
+      min: number;
+      max: number;
+    };
+
 interface TemporalAnalysisProps {
   events: TimelineEvent[];
   width?: number;
   height?: number;
-  timeRange?: {
-    start: number;
-    end: number;
-  };
+  timeRange?: SupportedTimeRange;
   onEventClick?: (event: TimelineEvent) => void;
   onTimeRangeChange?: (range: { start: number; end: number }) => void;
   showClusters?: boolean;
@@ -51,6 +58,9 @@ interface TemporalAnalysisProps {
     minConfidence?: number;
   };
   className?: string;
+  enableZoom?: boolean;
+  investigationId?: string;
+  onEventSelect?: (event: unknown) => void;
 }
 
 const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
@@ -121,7 +131,18 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
   }, [filteredEvents]);
 
   // Calculate effective time range
-  const effectiveTimeRange = timeRange || timeBounds;
+  const effectiveTimeRange: NormalizedTimeRange = useMemo(() => {
+    if (timeRange) {
+      if ('start' in timeRange && 'end' in timeRange) {
+        return { start: timeRange.start, end: timeRange.end };
+      }
+      if ('min' in timeRange && 'max' in timeRange) {
+        return { start: timeRange.min, end: timeRange.max };
+      }
+    }
+
+    return { start: timeBounds.min, end: timeBounds.max };
+  }, [timeBounds.max, timeBounds.min, timeRange]);
   const timeSpan = effectiveTimeRange.end - effectiveTimeRange.start;
   const viewportEnd = viewportStart + timeSpan / zoomLevel;
 
