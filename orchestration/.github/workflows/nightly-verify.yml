@@ -1,0 +1,33 @@
+name: Chronos Nightly NL→DAG→Exec Smoke
+
+on:
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Compile workflow to IR
+        run: |
+          cd orchestration/packages/intent-engine
+          npm ci
+          npm run build
+          node dist/cli.js ../../examples/resize-images.yaml > /tmp/ir.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Dry-run execution
+        run: |
+          cd orchestration/runtime
+          go test ./internal/engine -run TestExecutorRunsWorkflow -count=1
+      - name: Upload IR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chronos-ir
+          path: /tmp/ir.json

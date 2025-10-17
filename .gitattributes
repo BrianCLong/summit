@@ -2,14 +2,15 @@
 *.sh text eol=lf
 *.bat text eol=crlf
 
-# Lockfiles → no diff noise
-package-lock.json -diff
-yarn.lock -diff
-pnpm-lock.yaml -diff
-poetry.lock -diff
-composer.lock -diff
-Cargo.lock -diff
-go.sum -diff
+# Lockfiles must remain diffable for CODEX PRs
+package-lock.json text diff
+yarn.lock text diff
+pnpm-lock.yaml text diff
+poetry.lock text diff
+composer.lock text diff
+Cargo.lock text diff
+# Go ecosystem lockfiles must remain diffable for CODEX PRs
+go.sum text diff
 
 # GraphQL schemas
 *.graphql diff

@@ -1,0 +1,37 @@
+name: Chronos Intent Engine CI
+
+on:
+  push:
+    paths:
+      - 'orchestration/packages/intent-engine/**'
+      - 'orchestration/examples/**'
+      - 'orchestration/.github/workflows/ci-intent-engine.yml'
+  pull_request:
+    paths:
+      - 'orchestration/packages/intent-engine/**'
+      - 'orchestration/examples/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          cd orchestration/packages/intent-engine
+          npm ci
+      - name: Type check
+        run: |
+          cd orchestration/packages/intent-engine
+          npm run typecheck
+      - name: Run tests
+        run: |
+          cd orchestration/packages/intent-engine
+          npm test -- --runInBand
+      - name: Build package
+        run: |
+          cd orchestration/packages/intent-engine
+          npm run build

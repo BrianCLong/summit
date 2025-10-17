@@ -1,0 +1,35 @@
+apiVersion: chronos.v1
+kind: Workflow
+metadata:
+  name: resize-images
+  namespace: media
+spec:
+  inputs:
+    bucket: s3://raw
+    keyPrefix: /day=2025-10-14/
+  tasks:
+    - id: list
+      uses: http.get
+      with:
+        url: "https://media-svc/list"
+        query:
+          bucket: "{{inputs.bucket}}"
+          prefix: "{{inputs.keyPrefix}}"
+    - id: resize
+      uses: kafka.publish
+      with:
+        topic: media.resize
+        payload: "{{tasks.list.output.files}}"
+      needs:
+        - list
+  retries:
+    default:
+      strategy: exponential
+      maxAttempts: 5
+      baseMs: 500
+  compensation:
+    onFailure:
+      - uses: kafka.publish
+        with:
+          topic: media.deadletter
+          payload: "{{runtime.failure}}"
