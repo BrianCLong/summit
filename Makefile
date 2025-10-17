@@ -49,14 +49,13 @@ smoke:
 	@if [ -d tests ] || [ -f pytest.ini ] || [ -f pyproject.toml ]; then \
 	  . .venv/bin/activate 2>/dev/null || true; \
 	  python - <<'PY' || true
-import importlib.util, sys, subprocess, shutil
-if shutil.which("pytest"):
-    sys.exit(subprocess.call(["pytest","-q"]))
-print("pytest not installed; skipping")
-PY
+	import importlib.util, sys, subprocess, shutil
+	if shutil.which("pytest"):
+	    sys.exit(subprocess.call(["pytest","-q"]))
+	print("pytest not installed; skipping")
+	PY
 	fi
 	# Last-resort canary
 	@node -e "console.log('node ok')" 2>/dev/null || true
 	@python -c "print('python ok')" 2>/dev/null || true
 	@echo "smoke: DONE"
-
