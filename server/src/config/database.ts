@@ -1,4 +1,3 @@
-import neo4j, { Driver, Session } from 'neo4j-driver';
 import Redis from 'ioredis';
 import config from './index.js';
 import logger from '../utils/logger.js';
@@ -7,36 +6,58 @@ import {
   closePostgresPool as closeManagedPostgresPool,
   ManagedPostgresPool,
 } from '../db/postgres';
+import {
+  getNeo4jDriver as getSharedNeo4jDriver,
+  initializeNeo4jDriver,
+  isNeo4jMockMode,
+} from '../db/neo4j.js';
 
-let neo4jDriver: Driver | null = null;
+type Neo4jDriver = ReturnType<typeof getSharedNeo4jDriver>;
+
+let neo4jDriver: Neo4jDriver | null = null;
 let postgresPool: ManagedPostgresPool | null = null;
 let redisClient: Redis | null = null;
 
 // Neo4j Connection
-async function connectNeo4j(): Promise<Driver> {
-  try {
-    neo4jDriver = neo4j.driver(
-      config.neo4j.uri,
-      neo4j.auth.basic(config.neo4j.username, config.neo4j.password),
-    );
-
-    // Test connection
-    const session = neo4jDriver.session();
-    await session.run('RETURN 1');
-    await session.close();
-
-    // Run migrations to set up constraints and indexes
-    await runNeo4jMigrations();
-
-    logger.info('✅ Connected to Neo4j');
+async function connectNeo4j(): Promise<Neo4jDriver> {
+  if (neo4jDriver) {
     return neo4jDriver;
-  } catch (error) {
-    logger.error('❌ Failed to connect to Neo4j:', error);
-    throw error;
   }
+
+  try {
+    await initializeNeo4jDriver();
+  } catch (error) {
+    logger.error('❌ Failed to establish Neo4j connectivity:', error);
+    if (config.requireRealDbs) {
+      throw error;
+    }
+  }
+
+  neo4jDriver = getSharedNeo4jDriver();
+
+  if (isNeo4jMockMode()) {
+    logger.warn('Neo4j unavailable - operating in mock mode for development.');
+    return neo4jDriver;
+  }
+
+  const session = neo4jDriver.session();
+  try {
+    await session.run('RETURN 1');
+  } finally {
+    await session.close();
+  }
+
+  await runNeo4jMigrations();
+
+  logger.info('✅ Connected to Neo4j');
+  return neo4jDriver;
 }
 
 async function runNeo4jMigrations(): Promise<void> {
+  if (isNeo4jMockMode()) {
+    logger.debug('Skipping Neo4j migrations in mock mode.');
+    return;
+  }
   try {
     // Import migration manager lazily to avoid circular dependencies
     const { migrationManager } = await import('../db/migrations/index.js');
@@ -52,6 +73,10 @@ async function runNeo4jMigrations(): Promise<void> {
 
 async function createNeo4jConstraints(): Promise<void> {
   if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
+  if (isNeo4jMockMode()) {
+    logger.debug('Skipping Neo4j constraint creation in mock mode.');
+    return;
+  }
   const session = neo4jDriver.session();
 
   try {
@@ -276,7 +301,7 @@ async function connectRedis(): Promise<Redis | null> {
   }
 }
 
-function getNeo4jDriver(): Driver {
+function getNeo4jDriver(): Neo4jDriver {
   if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
   return neo4jDriver;
 }
