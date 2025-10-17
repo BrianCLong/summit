@@ -390,8 +390,27 @@ class InventoryReconciliationEngine:
 
     def _calculate_fingerprint(self, data: Dict) -> str:
         """Calculate unique fingerprint for deduplication"""
-        # Use stable attributes for fingerprint
-        key_attrs = f"{data.get('id', '')}{data.get('type', '')}{data.get('name', '')}"
+
+        def first_non_empty(keys: Tuple[str, ...]) -> str:
+            for key in keys:
+                value = data.get(key)
+                if value not in (None, ""):
+                    return str(value)
+            return ""
+
+        key_parts = [
+            first_non_empty(("id", "resource_id", "asset_id")),
+            first_non_empty(("tenant", "tenant_id", "account_id", "subscription_id")),
+            first_non_empty(("type", "resource_type", "asset_type"))
+        ]
+
+        # When stable identifiers are unavailable, fall back to name-based keys.
+        if not any(key_parts):
+            key_parts.extend([
+                first_non_empty(("name", "resource_name")),
+            ])
+
+        key_attrs = "|".join(part for part in key_parts if part)
         return hashlib.sha256(key_attrs.encode()).hexdigest()[:16]
 
     def _has_significant_change(self, old: Asset, new: Asset) -> bool:
