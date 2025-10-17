@@ -18,7 +18,7 @@ import { createCoverageMap } from 'istanbul-lib-coverage';
 import type { CoverageSummaryData } from 'istanbul-lib-coverage';
 
 import * as policy from '../../src/policy';
-import { requireAuth } from '../../src/middleware';
+import { requireAuth, type AuthenticatedRequest } from '../../src/middleware';
 import { initKeys, getPrivateKey } from '../../src/keys';
 import type {
   AuthorizationDecision,
@@ -201,12 +201,13 @@ function createHarnessApp() {
   app.get(
     '/governance/test',
     requireAuth(attributeServiceStub, { action: 'dataset:read' }),
-    (req, res) => {
+    (req: AuthenticatedRequest, res) => {
+      const { obligations = [], subjectAttributes, resourceAttributes } = req;
       res.json({
         ok: true,
-        obligations: (req as any).obligations ?? [],
-        subject: (req as any).subjectAttributes,
-        resource: (req as any).resourceAttributes,
+        obligations,
+        subject: subjectAttributes,
+        resource: resourceAttributes,
       });
     },
   );
@@ -231,7 +232,10 @@ describe('governance gate fuzzing', () => {
   });
 
   afterAll(() => {
-    const coverage = (globalThis as any).__coverage__;
+    type CoverageAwareGlobal = typeof globalThis & {
+      __coverage__?: unknown;
+    };
+    const coverage = (globalThis as CoverageAwareGlobal).__coverage__;
     expect(coverage).toBeDefined();
     if (!coverage) {
       return;

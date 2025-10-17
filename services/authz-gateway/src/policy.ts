@@ -16,7 +16,7 @@ export async function authorize(
   try {
     const res = await axios.post(opaUrl(), { input });
     const result = res.data?.result;
-    if (!result) {
+    if (result === null || result === undefined) {
       return { allowed: false, reason: 'opa_no_result', obligations: [] };
     }
     if (typeof result === 'boolean') {
@@ -26,9 +26,15 @@ export async function authorize(
         obligations: [],
       };
     }
+    const reason =
+      result.reason !== undefined && result.reason !== null
+        ? String(result.reason)
+        : result.allow
+          ? 'allow'
+          : 'deny';
     return {
       allowed: Boolean(result.allow),
-      reason: String(result.reason || (result.allow ? 'allow' : 'deny')),
+      reason,
       obligations: Array.isArray(result.obligations) ? result.obligations : [],
     };
   } catch (error) {
