@@ -6,6 +6,7 @@
       "Bash(make:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
+      "Bash(git merge:*)",
       "Bash(unzip:*)",
       "Bash(rsync:*)",
       "Bash(npm run test:skills:*)"
