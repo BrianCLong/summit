@@ -4,6 +4,11 @@ import { HealthMonitor } from './monitoring';
 import { SelfHealingOrchestrator } from './self-healing';
 import { CostLatencyOptimizer } from './optimization';
 import { JobRouter } from './job-router';
+import {
+  PredictiveInsightEngine,
+  type PredictiveInsightEngineOptions,
+  type PredictiveInsight,
+} from './predictive-insights';
 import type {
   AnomalySignal,
   DiscoveryEvent,
@@ -26,6 +31,7 @@ export interface MaestroConductorOptions {
   selfHealing?: SelfHealingOrchestratorOptions;
   optimizer?: CostLatencyOptimizerOptions;
   jobRouter?: JobRouterOptions;
+  insights?: PredictiveInsightEngineOptions;
 }
 
 export class MaestroConductor {
@@ -45,11 +51,16 @@ export class MaestroConductor {
 
   private readonly incidents: IncidentReport[] = [];
 
+  private readonly insights?: PredictiveInsightEngine;
+
   constructor(options?: MaestroConductorOptions) {
     this.anomaly = new AnomalyDetector(options?.anomaly);
     this.selfHealing = new SelfHealingOrchestrator(options?.selfHealing);
     this.optimizer = new CostLatencyOptimizer(options?.optimizer);
     this.jobRouter = new JobRouter(options?.jobRouter);
+    if (options?.insights) {
+      this.insights = new PredictiveInsightEngine(options.insights);
+    }
   }
 
   registerDiscoveryProvider(provider: DiscoveryProvider): void {
@@ -88,12 +99,26 @@ export class MaestroConductor {
     return this.optimizer.listSnapshots();
   }
 
+  getPredictiveInsights(serviceId?: string): PredictiveInsight[] {
+    if (!this.insights) {
+      return [];
+    }
+    if (serviceId) {
+      const asset = this.discovery.getAsset(serviceId);
+      const environmentId = asset?.region ?? asset?.labels?.environment ?? 'unknown';
+      const insight = this.insights.buildInsight(serviceId, environmentId);
+      return insight ? [insight] : [];
+    }
+    return this.insights.listHighRiskInsights();
+  }
+
   async ingestHealthSignal(signal: HealthSignal): Promise<void> {
     this.monitor.ingest(signal);
     const sample = this.toOptimizationSample(signal);
     if (sample) {
       this.optimizer.update(sample);
     }
+    this.insights?.observeHealthSignal(signal);
     const anomaly = this.anomaly.evaluate(signal);
     if (anomaly) {
       await this.handleAnomaly(anomaly);

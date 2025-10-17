@@ -208,6 +208,14 @@ export class PolicyEngine {
   }
 }
 
+export {
+  GuardedPolicyGateway,
+  type GuardedDecision,
+  type GuardedPolicyGatewayOptions,
+  type GuardedEvaluationContext,
+  type GuardedAuditEntry,
+} from './guarded-gateway.js';
+
 export function buildDefaultPolicyEngine(): PolicyEngine {
   const engine = new PolicyEngine([
     {

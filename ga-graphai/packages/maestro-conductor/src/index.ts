@@ -6,3 +6,8 @@ export { SelfHealingOrchestrator } from './self-healing';
 export { CostLatencyOptimizer } from './optimization';
 export { JobRouter } from './job-router';
 export { MaestroConductor } from './maestro-conductor';
+export {
+  PredictiveInsightEngine,
+  type PredictiveInsight,
+  type PredictiveInsightEngineOptions,
+} from './predictive-insights';

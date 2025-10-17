@@ -1,5 +1,5 @@
 {
-  "name": "meta-orchestrator",
+  "name": "@ga-graphai/knowledge-graph",
   "version": "0.1.0",
   "type": "module",
   "exports": "./src/index.ts",
@@ -8,8 +8,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ga-graphai/common-types": "file:../common-types",
-    "@ga-graphai/knowledge-graph": "file:../knowledge-graph"
+    "@ga-graphai/common-types": "file:../common-types"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
