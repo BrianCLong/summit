@@ -120,10 +120,17 @@ class GraphAwarePlaybookRunner:
                 return self._create_summary(TaskStatus.SKIPPED, "Approval denied")
 
         # Execute tasks in DAG order with parallelization
-        await self._execute_dag(execution_plan)
+        dag_success = await self._execute_dag(execution_plan)
 
         # Generate execution summary
-        summary = self._create_summary(TaskStatus.SUCCESS, "Playbook completed")
+        if dag_success:
+            summary_status = TaskStatus.SUCCESS
+            summary_message = "Playbook completed"
+        else:
+            summary_status = TaskStatus.FAILED
+            summary_message = "Playbook completed with errors"
+
+        summary = self._create_summary(summary_status, summary_message)
 
         logger.info(f"Playbook execution complete: {playbook['name']}")
         return summary
@@ -221,8 +228,14 @@ class GraphAwarePlaybookRunner:
         # Simulate approval (auto-approve in this example)
         return True
 
-    async def _execute_dag(self, execution_plan: List[List[str]]):
-        """Execute DAG with parallelization"""
+    async def _execute_dag(self, execution_plan: List[List[str]]) -> bool:
+        """Execute DAG with parallelization
+
+        Returns:
+            bool: True if all tasks completed successfully, False if any failed.
+        """
+        overall_success = True
+
         for level_idx, level_tasks in enumerate(execution_plan):
             logger.info(f"Executing level {level_idx}: {len(level_tasks)} tasks")
 
@@ -239,13 +252,20 @@ class GraphAwarePlaybookRunner:
             for task_id, result in zip(level_tasks, results):
                 if isinstance(result, Exception):
                     logger.error(f"Task {task_id} failed: {result}")
-                    self.task_results[task_id] = TaskExecution(
-                        task_id=task_id,
-                        status=TaskStatus.FAILED,
-                        start_time=datetime.utcnow(),
-                        end_time=datetime.utcnow(),
-                        error=str(result)
-                    )
+                    overall_success = False
+
+                    # `_execute_task` records failure results before raising,
+                    # but guard in case an unexpected exception bypassed it.
+                    if task_id not in self.task_results:
+                        self.task_results[task_id] = TaskExecution(
+                            task_id=task_id,
+                            status=TaskStatus.FAILED,
+                            start_time=datetime.utcnow(),
+                            end_time=datetime.utcnow(),
+                            error=str(result)
+                        )
+
+        return overall_success
 
     async def _execute_task(self, task: PlaybookTask) -> TaskExecution:
         """Execute single task"""
