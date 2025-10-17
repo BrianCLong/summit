@@ -18,7 +18,8 @@
 
     "typeRoots": ["./node_modules/@types"],
     "allowImportingTsExtensions": true,
-    "types": ["node", "jest", "dom", "dom.iterable"]
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "jest"]
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }

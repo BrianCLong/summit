@@ -1,11 +1,9 @@
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
+import { ApolloServer } from 'apollo-server';
 import { readFileSync } from 'fs';
-import path from 'path';
 import { dropResolvers } from './graphql/resolvers/drop';
 
 const typeDefs = readFileSync(
-  path.join(__dirname, './graphql/schemas/drop.graphql'),
+  new URL('./graphql/schemas/drop.graphql', import.meta.url),
   'utf8',
 );
 
@@ -18,8 +16,11 @@ const server = new ApolloServer({
   },
 });
 
-startStandaloneServer(server, {
-  listen: { port: 4001 }, // Use a different port than the main GraphQL API (4000)
-}).then(({ url }) => {
-  console.log(`🚀 Drop Gateway ready at ${url}`);
-});
+server
+  .listen({ port: 4001 })
+  .then(({ url }) => {
+    console.log(`🚀 Drop Gateway ready at ${url}`);
+  })
+  .catch((error) => {
+    console.error('Failed to start Drop Gateway server', error);
+  });
