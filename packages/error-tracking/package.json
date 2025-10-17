@@ -1,0 +1,50 @@
+{
+  "name": "@summit/error-tracking",
+  "version": "0.1.0",
+  "description": "Unified Sentry error tracking toolkit for Summit applications",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "DEPLOYMENT.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "c8 --reporter=text --reporter=lcov tsx --test ../../packages/error-tracking/__tests__/index.test.ts"
+  },
+  "dependencies": {
+    "@sentry/browser": "^8.38.0",
+    "@sentry/cli": "^2.37.0",
+    "@sentry/node": "^8.38.0",
+    "@sentry/react": "^8.38.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "c8": "^9.1.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "semver": "^7.7.3",
+    "tsx": "^4.17.0",
+    "typescript-eslint": "^8.46.1"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}
