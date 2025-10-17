@@ -1,0 +1,27 @@
+name: Skill Request
+description: Request a new Claude Skill or enhancement
+labels: [ai/claude, enhancement]
+body:
+  - type: input
+    id: skill_name
+    attributes:
+      label: Skill name
+      placeholder: e.g., api.graphql-designer
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose & scope
+  - type: textarea
+    id: inputs_outputs
+    attributes:
+      label: Inputs/outputs and acceptance criteria
+  - type: textarea
+    id: guardrails
+    attributes:
+      label: SLO/Cost/Privacy guardrails
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies & risks

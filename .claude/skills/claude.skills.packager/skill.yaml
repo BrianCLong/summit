@@ -1,0 +1,38 @@
+id: intelgraph/claude.skills.packager
+version: 0.1.0
+name: Claude Skills Packager
+description: Generate skill folders, manifests, and publish them to the org registry with provenance and SBOM.
+entrypoints:
+  chat: instructions/cheatsheet.md
+  api: scripts/runner.ts
+activation:
+  triggers:
+    - keywords: ['Packager', 'Registry', 'Manifest', 'SBOM']
+    - filetypes: ['.yaml', '.json', '.ts']
+    - contexts: ['repo:*/.claude', 'editor:typescript']
+permissions:
+  tools: ["code-exec", "file-system"]
+security:
+  data_handling: policies/data-map.yaml
+  retention_default: standard-365d
+  retention_overrides: []
+guardrails:
+  slos:
+    reads_p95_ms: 350
+    writes_p95_ms: 700
+    subs_p95_ms: 250
+  cost:
+    monthly_budget_usd: 18000
+    alert_threshold: 0.8
+observability:
+  otel: observability/otel.yaml
+  dashboards: []
+acceptance:
+  criteria: tests/acceptance.md
+  verify: scripts/verify.ts
+provenance:
+  manifest: provenance/hashes.json
+  export: provenance/export.sig
+distribution:
+  channels: ["org"]
+  compatibility: ["claude.ai", "claude-code", "api", "agent-sdk"]

@@ -312,7 +312,21 @@ python src/ai/models/whisper_transcription.py --help  # Test speech-to-text
 # Utilities
 npm run health       # System health check
 npm run cleanup      # Clean up containers and images
+
+# Claude Skills
+npm run test:skills  # Run all skill verifiers
 ```
+
+### Claude Skills (Anthropic Integration)
+
+Summit includes an **Anthropic Skills Pack** for AI-augmented development workflows:
+
+- **Location**: `.claude/skills/*` with `skill.yaml` manifests
+- **Registry**: `.claude/registry.yaml` indexes all installed skills
+- **CI Validation**: `Claude Skills Verify` workflow validates manifests and generates provenance hashes
+- **Local Verification**: `npm run test:skills` (requires Node 20, ts-node/tsx recommended)
+
+**Available Skills**: API design, observability, security, testing, CI/CD, documentation, and more. See [RUNBOOKS/AI/CLAUDE-SKILLS.md](RUNBOOKS/AI/CLAUDE-SKILLS.md) for operational guidance.
 
 ### Environment Configuration
 

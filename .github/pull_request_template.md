@@ -1,17 +1,18 @@
 ## Summary
+<!-- Briefly explain the purpose of this PR -->
 
-## Type
+## Changes
+<!-- List key changes -->
 
-- [ ] Feature - [ ] Bug - [ ] Chore - [ ] Security - [ ] Docs
+## Testing
+- [ ] Local tests pass
+- [ ] CI green
 
-## Checklist
+## Acceptance Pack
+- [ ] Skills manifests validate
+- [ ] Provenance hash generated
+- [ ] Ops runbook updated
+- [ ] Security guardrails checked
 
-- [ ] Conventional Commit title
-- [ ] Linked issue(s): #
-- [ ] Tests added/updated
-- [ ] Telemetry added (logs/metrics/traces)
-- [ ] Docs updated
-- [ ] No secrets/keys in diff
-- [ ] Feature flag checklist completed (if applicable, see `docs/flags.md`)
-
-## Screenshots/Notes
+## Risk & Rollback
+<!-- Note risk level and rollback plan -->

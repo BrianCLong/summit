@@ -1,0 +1,36 @@
+id: intelgraph/sec.threat-modeler
+version: 0.1.0
+name: Threat Modeler (STRIDE)
+description: Generate STRIDE models and abuse/misuse cases with mitigations.
+entrypoints:
+  chat: instructions/cheatsheet.md
+  api: scripts/runner.ts
+activation:
+  triggers:
+    - keywords: ["STRIDE", "Threat Model"]
+    - filetypes: [".md"]
+    - contexts: ["repo:*/policies", "editor:markdown"]
+permissions:
+  tools: ["code-exec", "file-system"]
+guardrails:
+  slos:
+    reads_p95_ms: 350
+    writes_p95_ms: 700
+    subs_p95_ms: 250
+  cost:
+    monthly_budget_usd: 18000
+    alert_threshold: 0.8
+security:
+  data_handling: policies/data-map.yaml
+  retention_default: standard-365d
+observability:
+  otel: observability/otel.yaml
+acceptance:
+  criteria: tests/acceptance.md
+  verify: scripts/verify.ts
+provenance:
+  manifest: provenance/hashes.json
+  export: provenance/export.sig
+distribution:
+  channels: ["org"]
+  compatibility: ["claude.ai", "claude-code", "api", "agent-sdk"]

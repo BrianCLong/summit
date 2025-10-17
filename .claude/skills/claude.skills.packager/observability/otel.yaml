@@ -1,0 +1,10 @@
+# OpenTelemetry resources and attributes for generated components
+service:
+  name: summit-generated-skill
+  version: 0.1.0
+  namespace: intelgraph
+metrics:
+  - name: graphql.read.p95
+    unit: ms
+  - name: graphql.write.p95
+    unit: ms

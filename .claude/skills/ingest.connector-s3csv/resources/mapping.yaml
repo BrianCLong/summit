@@ -1,0 +1,10 @@
+source: s3://{bucket}/{prefix}
+schema_map:
+  id: id
+  name: name
+  created_at: createdAt
+dedupe:
+  keys: [id]
+  strategy: keep-latest
+provenance:
+  attach: true

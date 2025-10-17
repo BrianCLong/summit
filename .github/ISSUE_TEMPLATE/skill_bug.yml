@@ -1,0 +1,31 @@
+name: Skill Bug
+description: Report a bug or failure in a Claude Skill
+labels: [ai/claude, bug]
+body:
+  - type: input
+    id: skill_id
+    attributes:
+      label: Skill ID
+      placeholder: intelgraph/<skill>
+    validations:
+      required: true
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / outputs
+  - type: checkboxes
+    id: env
+    attributes:
+      label: Environments
+      options:
+        - label: Dev
+        - label: Staging
+        - label: Prod

@@ -1,0 +1,9 @@
+# Example SDL snippet (extend as needed)
+interface Node { id: ID! createdAt: DateTime! updatedAt: DateTime! }
+
+type Entity implements Node { id: ID! name: String! labels: [String!]! }
+
+type Query {
+  entity(id: ID!): Entity @rateLimit(window: "1m", max: 120)
+  searchEntities(q: String!, first: Int = 25, after: String): EntityConnection
+}

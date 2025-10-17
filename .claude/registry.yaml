@@ -1,0 +1,37 @@
+skills:
+  - id: intelgraph/api.rate-limits-quotas
+    version: 0.1.0
+    path: .claude/skills/api.rate-limits-quotas
+  - id: intelgraph/cicd.pipeline-gates
+    version: 0.1.0
+    path: .claude/skills/cicd.pipeline-gates
+  - id: intelgraph/test.load-k6
+    version: 0.1.0
+    path: .claude/skills/test.load-k6
+  - id: intelgraph/test.contract-e2e
+    version: 0.1.0
+    path: .claude/skills/test.contract-e2e
+  - id: intelgraph/sec.threat-modeler
+    version: 0.1.0
+    path: .claude/skills/sec.threat-modeler
+  - id: intelgraph/privacy.design
+    version: 0.1.0
+    path: .claude/skills/privacy.design
+  - id: intelgraph/prov.ledger-hooks
+    version: 0.1.0
+    path: .claude/skills/prov.ledger-hooks
+  - id: intelgraph/tenant.abac-scopes
+    version: 0.1.0
+    path: .claude/skills/tenant.abac-scopes
+  - id: intelgraph/gds.graph-analytics
+    version: 0.1.0
+    path: .claude/skills/gds.graph-analytics
+  - id: intelgraph/release.notes-generator
+    version: 0.1.0
+    path: .claude/skills/release.notes-generator
+  - id: intelgraph/docs.enablement
+    version: 0.1.0
+    path: .claude/skills/docs.enablement
+  - id: intelgraph/edge.airgapped-export
+    version: 0.1.0
+    path: .claude/skills/edge.airgapped-export

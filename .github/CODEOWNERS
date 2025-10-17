@@ -10,5 +10,9 @@
 # These owners will be suggested for any code changes in the server directory
 /server/ @intelgraph-backend-team
 
+# Claude skills and AI runbooks
+/.claude/ @intelgraph-devops-team
+/RUNBOOKS/AI/ @intelgraph-devops-team
+
 # You can also specify individuals
 # /docs/ @your-username

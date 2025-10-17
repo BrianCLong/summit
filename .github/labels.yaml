@@ -1,0 +1,18 @@
+- name: ai/claude
+  color: 3b82f6
+  description: Claude skills and automation
+- name: security
+  color: ef4444
+  description: Security-related changes
+- name: observability
+  color: f59e0b
+  description: Metrics, logs, traces, dashboards
+- name: ci
+  color: 10b981
+  description: CI/CD pipelines and gates
+- name: docs
+  color: 8b5cf6
+  description: Documentation and enablement
+- name: good-first-revert
+  color: 6b7280
+  description: Safe to revert in rollback

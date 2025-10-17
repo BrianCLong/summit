@@ -1,0 +1,2 @@
+- YAML validates
+- Verify passes

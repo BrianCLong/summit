@@ -1,0 +1,8 @@
+{
+  "bundle": "airgapped-export",
+  "includes": [
+    "bin/",
+    "docs/"
+  ],
+  "signature": "UNSIGNED"
+}

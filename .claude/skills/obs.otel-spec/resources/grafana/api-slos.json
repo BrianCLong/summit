@@ -1,0 +1,32 @@
+{
+  "title": "IntelGraph API SLOs",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Read p95 (ms)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(api_read_latency_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Write p95 (ms)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(api_write_latency_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Availability 99.9%",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status!~\"5..\"}[30d]))/sum(rate(http_requests_total[30d]))"
+        }
+      ]
+    }
+  ]
+}
