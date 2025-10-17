@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { opaPolicyEngine } from '../conductor/governance/opa-integration.js';
 import { RequestContext } from './context-binding.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
 declare global {
   namespace Express {
