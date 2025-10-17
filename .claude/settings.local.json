@@ -5,7 +5,14 @@
       "Bash(git -C /home/blong/Developer/summit status apps/web/package-lock.json)",
       "Bash(make:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create --title \"security: update torch to 2.8.0 to address CVE vulnerabilities\" --body \"$(cat <<''EOF''\n## Summary\nUpdates PyTorch to version 2.8.0 across all Python dependencies to address security vulnerabilities.\n\n## Security Issues Addressed\n- **HIGH**: Minerva timing attack on P-256 in python-ecdsa (Dependabot alert #1380)\n- Related torch security vulnerabilities in older versions\n\n## Changes\n**server/requirements.txt:**\n- torch: 2.1.0 → 2.8.0\n- torchvision: 0.16.0 → 0.19.0\n- torchaudio: 2.1.0 → 2.5.0\n\n**apps/ml-engine/src/python/requirements.txt:**\n- torch: 2.0.1 → 2.8.0\n\n## Test Plan\n- [ ] Verify Python dependencies install correctly\n- [ ] Run ML engine tests\n- [ ] Verify CV/OCR functionality still works\n- [ ] Check Dependabot alerts are resolved\n\n## References\n- Dependabot alert #1380\n- PyTorch 2.8.0 release notes\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nEOF\n)\" --base main)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh pr list:*)"
     ],
     "deny": [],
     "ask": []
