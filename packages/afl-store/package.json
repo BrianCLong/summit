@@ -9,13 +9,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "ioredis": "^5.4.1",
-    "neo4j-driver": "^5.23.0"
+    "ioredis": "^5.8.1",
+    "neo4j-driver": "^6.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.2",
-    "@types/jest": "^29.5.12",
-    "jest": "^29.7.0",
-    "@types/node": "^22.7.4"
+    "typescript": "^5.9.3",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.8.1"
   }
 }
