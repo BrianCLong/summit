@@ -9,11 +9,11 @@
     "generate:schema": "node scripts/generateSchemas.js"
   },
   "dependencies": {
-    "zod": "^3.23.8",
+    "zod": "^4.1.12",
     "zod-to-json-schema": "^3.22.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "^5.9.3"
   },
   "exports": {
     ".": {

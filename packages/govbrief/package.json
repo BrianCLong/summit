@@ -21,7 +21,7 @@
   "author": "Summit Directorate J",
   "license": "MIT",
   "dependencies": {
-    "commander": "^12.1.0",
-    "node-html-parser": "^6.1.11"
+    "commander": "^14.0.1",
+    "node-html-parser": "^7.0.1"
   }
 }
