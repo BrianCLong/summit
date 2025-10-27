@@ -19,9 +19,9 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^24.8.1",
+    "@types/node": "^24.9.1",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
-    "vitest": "^1.4.0"
+    "vitest": "^4.0.3"
   }
 }
