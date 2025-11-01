@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
-import { Pool, PoolClient } from 'pg';
+import type { Pool, PoolClient } from 'pg';
 
 interface UserData {
   email: string;

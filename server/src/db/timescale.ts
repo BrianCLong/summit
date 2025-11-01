@@ -6,7 +6,8 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { Pool, QueryResult, PoolClient } from 'pg';
+import { Pool } from 'pg';
+import type { QueryResult, PoolClient } from 'pg';
 import logger from '../utils/logger.js';
 
 interface TimescaleConfig {
@@ -154,7 +155,7 @@ export async function queryTemporalPatterns(
   }
 
   const query_text = `
-    SELECT 
+    SELECT
       event_type,
       COUNT(*) as event_count,
       AVG(confidence) as avg_confidence,

@@ -3,7 +3,8 @@
  * Handles relationships between entities with PostgreSQL + Neo4j dual-write
  */
 
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
+import type { PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
@@ -283,10 +284,10 @@ export class RelationshipRepo {
     tenantId: string,
   ): Promise<{ incoming: number; outgoing: number }> {
     const { rows } = await this.pg.query(
-      `SELECT 
+      `SELECT
          COUNT(*) FILTER (WHERE src_id = $2) as outgoing,
          COUNT(*) FILTER (WHERE dst_id = $2) as incoming
-       FROM relationships 
+       FROM relationships
        WHERE tenant_id = $1 AND (src_id = $2 OR dst_id = $2)`,
       [tenantId, entityId],
     );

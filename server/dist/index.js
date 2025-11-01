@@ -11,7 +11,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
-import { getNeo4jDriver } from './db/neo4j.js';
+import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger = pino();
@@ -33,6 +33,7 @@ const startServer = async () => {
     const app = await createApp();
     const schema = makeExecutableSchema({ typeDefs, resolvers });
     const httpServer = http.createServer(app);
+    await initializeNeo4jDriver();
     // Subscriptions with Persisted Query validation
     const wss = new WebSocketServer({
         server: httpServer,

@@ -756,24 +756,6 @@ export class RunbookExecutor extends EventEmitter {
     });
   }
 
-  private evaluateCondition(
-    condition: string,
-    context: Record<string, any>,
-  ): boolean {
-    try {
-      // Create safe evaluation context
-      const safeContext = { ...context, Date, Math };
-      const func = new Function(
-        ...Object.keys(safeContext),
-        `return ${condition}`,
-      );
-      return func(...Object.values(safeContext));
-    } catch (error) {
-      console.warn(`Condition evaluation failed: ${error.message}`);
-      return false;
-    }
-  }
-
   private addLog(
     execution: RunbookExecution,
     level: 'info' | 'warn' | 'error',

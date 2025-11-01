@@ -286,9 +286,9 @@ export function conductorTracingMiddleware() {
  */
 export function createConductorGraphQLPlugin() {
     return {
-        requestDidStart() {
+        async requestDidStart() {
             return {
-                willSendResponse(requestContext) {
+                async willSendResponse(requestContext) {
                     // Add trace context to GraphQL responses
                     if (requestContext.response.http) {
                         const traceContext = getCurrentTraceContext();
@@ -298,7 +298,7 @@ export function createConductorGraphQLPlugin() {
                         }
                     }
                 },
-                didResolveOperation(requestContext) {
+                async didResolveOperation(requestContext) {
                     const { operationName } = requestContext.request;
                     if (operationName === 'conduct' ||
                         operationName === 'previewRouting') {
@@ -312,7 +312,7 @@ export function createConductorGraphQLPlugin() {
                         }
                     }
                 },
-                didEncounterErrors(requestContext) {
+                async didEncounterErrors(requestContext) {
                     const { operationName } = requestContext.request;
                     if (operationName === 'conduct' ||
                         operationName === 'previewRouting') {

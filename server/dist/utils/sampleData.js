@@ -1,6 +1,6 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import pino from 'pino';
 const logger = pino();
 export async function createSampleData() {
@@ -22,7 +22,7 @@ async function createSampleEntities() {
     try {
         const entities = [
             {
-                id: uuidv4(),
+                id: randomUUID(),
                 type: 'PERSON',
                 props: {
                     name: 'John Smith',
@@ -100,7 +100,7 @@ async function createSampleRelationships() {
         if (entities.length >= 2) {
             const relationships = [
                 {
-                    id: uuidv4(),
+                    id: randomUUID(),
                     from: entities[0].properties.id,
                     to: entities[1].properties.id,
                     type: 'WORKS_FOR',

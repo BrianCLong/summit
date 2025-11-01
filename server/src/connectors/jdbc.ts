@@ -2,7 +2,8 @@
 // Epic E15: New Connectors - Database connectivity for external sources
 
 // No-op tracer shim to avoid OTEL dependency
-import { Pool, PoolClient, types as pgTypes } from 'pg';
+import { Pool, types as pgTypes } from 'pg';
+import type { PoolClient } from 'pg';
 import mysql from 'mysql2/promise';
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { EventEmitter } from 'events';
@@ -510,7 +511,7 @@ export class JDBCConnector extends EventEmitter {
     schemaName: string,
   ): Promise<SchemaInfo> {
     const tablesQuery = `
-      SELECT table_name, table_schema, table_type, 
+      SELECT table_name, table_schema, table_type,
              obj_description(c.oid) as comment
       FROM information_schema.tables t
       LEFT JOIN pg_class c ON c.relname = t.table_name
@@ -519,7 +520,7 @@ export class JDBCConnector extends EventEmitter {
     `;
 
     const columnsQuery = `
-      SELECT c.table_name, c.column_name, c.data_type, 
+      SELECT c.table_name, c.column_name, c.data_type,
              c.is_nullable::boolean as nullable,
              c.column_default as default_value,
              CASE WHEN tc.constraint_type = 'PRIMARY KEY' THEN true ELSE false END as is_primary_key,
@@ -582,18 +583,18 @@ export class JDBCConnector extends EventEmitter {
   private async getMySQLSchemaInfo(databaseName: string): Promise<SchemaInfo> {
     const tablesQuery = `
       SELECT table_name, table_schema, table_type, table_comment as comment
-      FROM information_schema.tables 
+      FROM information_schema.tables
       WHERE table_schema = ?
       ORDER BY table_name;
     `;
 
     const columnsQuery = `
-      SELECT table_name, column_name, data_type, 
+      SELECT table_name, column_name, data_type,
              is_nullable = 'YES' as nullable,
              column_default as default_value,
              column_key = 'PRI' as is_primary_key,
              column_key = 'MUL' as is_foreign_key
-      FROM information_schema.columns 
+      FROM information_schema.columns
       WHERE table_schema = ?
       ORDER BY table_name, ordinal_position;
     `;
@@ -603,7 +604,7 @@ export class JDBCConnector extends EventEmitter {
              GROUP_CONCAT(column_name ORDER BY seq_in_index) as columns,
              non_unique = 0 as unique,
              index_type as type
-      FROM information_schema.statistics 
+      FROM information_schema.statistics
       WHERE table_schema = ?
       GROUP BY table_name, index_name, non_unique, index_type
       ORDER BY table_name, index_name;

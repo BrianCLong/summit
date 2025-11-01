@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { z } from 'zod';
+import { z, type ZodType } from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { fipsService } from './fips-compliance.js';
 

@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { z } from 'zod';
+import { z, type ZodType } from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // FIPS 140-2 Level 3 compliant cryptographic service
@@ -408,7 +408,7 @@ export class FIPSComplianceService implements FIPSCrypto {
         const sign = crypto.createSign(this.config.algorithms.hash);
         sign.update(data);
         signature = sign.sign(
-          '-----BEGIN EC PRIVATE KEY-----...-----END EC PRIVATE KEY-----',
+          '-----BEGIN EC PRIVATE KEY-----...-----END EC PRIVATE KEY-----', // pragma: allowlist secret (test data)
           'hex',
         );
       }

@@ -3,7 +3,7 @@
  * Type-safe, validated mutations for graph operations with audit trails and rollback
  */
 
-import { z } from 'zod';
+import { z, type ZodSchema, type ZodError } from 'zod';
 import { randomUUID as uuidv4 } from 'crypto';
 import { getNeo4jDriver, getPostgresPool } from '../../config/database';
 import { validateCustomMetadata } from '../../services/CustomSchemaService';
@@ -86,7 +86,7 @@ export interface SafeMutationResult<T = any> {
   success: boolean;
   data?: T;
   error?: string;
-  validationErrors?: z.ZodError;
+  validationErrors?: ZodError;
   auditLogId?: string;
   rollbackId?: string;
   warnings?: string[];
@@ -162,7 +162,7 @@ async function createAuditLog(
  * Safe mutation wrapper with comprehensive error handling and auditing
  */
 async function safeMutation<TInput, TOutput>(
-  schema: z.ZodSchema<TInput>,
+  schema: ZodSchema<TInput>,
   input: unknown,
   context: MutationContext,
   mutationFn: (

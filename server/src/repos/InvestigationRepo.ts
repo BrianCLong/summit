@@ -3,7 +3,8 @@
  * Handles investigation/case management with PostgreSQL
  */
 
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
+import type { PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 
@@ -213,14 +214,14 @@ export class InvestigationRepo {
     // This assumes you'll add investigation_id to entities/relationships tables
     // or implement a different association mechanism
     const entityQuery = `
-      SELECT COUNT(*) as count 
-      FROM entities 
+      SELECT COUNT(*) as count
+      FROM entities
       WHERE tenant_id = $1 AND props->>'investigationId' = $2
     `;
 
     const relationshipQuery = `
-      SELECT COUNT(*) as count 
-      FROM relationships 
+      SELECT COUNT(*) as count
+      FROM relationships
       WHERE tenant_id = $1 AND props->>'investigationId' = $2
     `;
 

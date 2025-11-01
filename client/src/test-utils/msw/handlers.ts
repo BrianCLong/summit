@@ -6,7 +6,7 @@ export const handlers = [
   // ServerStats query
   graphql.query('ServerStats', (req: any, res: any, ctx: any) => {
     return res(ctx.data({
-      
+
         serverStats: {
           uptime: '2d 14h 32m',
           totalInvestigations: 128,
@@ -18,7 +18,7 @@ export const handlers = [
             neo4j: 'connected',
           },
         },
-      
+
     }));
   }),
 
@@ -153,7 +153,7 @@ export const handlers = [
           triage_score: 0.75,
           actor_links: ['APT29'],
         },
-      
+
     }));
   }),
 
@@ -161,7 +161,7 @@ export const handlers = [
   graphql.query('HealthCheck', (req: any, res: any, ctx: any) => {
     return res(ctx.data({
         health: 'OK',
-      
+
     }));
   }),
 
@@ -198,8 +198,8 @@ export const handlers = [
           ],
           lastUpdated: '2024-01-15T15:30:00Z',
         },
-      },
-    }));
+      }
+    ));
   }),
 
   // Timeline Events
@@ -259,7 +259,7 @@ export const handlers = [
           ],
           lastEnriched: '2024-01-15T14:00:00Z',
         },
-      
+
     }));
   }),
 ];

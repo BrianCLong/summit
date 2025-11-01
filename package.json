@@ -142,10 +142,14 @@
     "@semantic-release/npm": "^12.0.2",
     "@swc/core": "^1.13.5",
     "@swc/jest": "^0.2.39",
+    "@types/express": "^5.0.5",
     "@types/jest": "^29.5.14",
+    "@types/node": "^20.11.30",
+    "@types/pg": "^8.15.6",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
     "concurrently": "^9.2.0",
+    "eslint": "^9.12.0",
     "eslint-plugin-jest": "^27.9.0",
     "globals": "^15.12.0",
     "husky": "^9.1.7",
@@ -155,14 +159,12 @@
     "lint-staged": "^16.1.5",
     "markdownlint-cli": "^0.45.0",
     "prettier": "^3.6.2",
+    "rimraf": "^5.0.7",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.46.1",
     "ts-node": "^10.9.2",
-    "rimraf": "^5.0.7",
-    "eslint": "^9.12.0",
-    "@types/node": "^20.11.30"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.46.1"
   },
   "husky": {
     "hooks": {

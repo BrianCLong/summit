@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, type ZodType } from 'zod';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';

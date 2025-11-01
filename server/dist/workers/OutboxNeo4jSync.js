@@ -3,7 +3,7 @@
  * Handles eventual consistency between PostgreSQL and Neo4j
  * Processes outbox events with retry logic and idempotent operations
  */
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 const workerLogger = logger.child({ name: 'OutboxNeo4jSync' });
 export class OutboxNeo4jSync {
     pg;
@@ -61,10 +61,10 @@ export class OutboxNeo4jSync {
         try {
             // Get unprocessed events with advisory lock to prevent concurrent processing
             const { rows } = await client.query(`SELECT id, topic, payload, created_at, attempts, last_error
-         FROM outbox_events 
-         WHERE processed_at IS NULL 
+         FROM outbox_events
+         WHERE processed_at IS NULL
          AND attempts < $1
-         ORDER BY created_at ASC 
+         ORDER BY created_at ASC
          LIMIT $2
          FOR UPDATE SKIP LOCKED`, [this.config.maxRetries, this.config.batchSize]);
             if (rows.length === 0) {
@@ -120,8 +120,8 @@ export class OutboxNeo4jSync {
             const errorMessage = error.message || String(error);
             eventLogger.error({ error, newAttempts }, 'Event processing failed');
             // Update attempt count and error
-            await client.query(`UPDATE outbox_events 
-         SET attempts = $2, last_error = $3 
+            await client.query(`UPDATE outbox_events
+         SET attempts = $2, last_error = $3
          WHERE id = $1`, [event.id, newAttempts, errorMessage]);
             // If max retries reached, log and continue (could implement DLQ here)
             if (newAttempts >= this.config.maxRetries) {
@@ -238,7 +238,7 @@ export class OutboxNeo4jSync {
      * Get outbox statistics
      */
     async getStats() {
-        const { rows } = await this.pg.query(`SELECT 
+        const { rows } = await this.pg.query(`SELECT
          COUNT(*) FILTER (WHERE processed_at IS NULL AND attempts < $1) as pending,
          COUNT(*) FILTER (WHERE processed_at IS NULL AND attempts >= $1) as failed,
          COUNT(*) FILTER (WHERE processed_at IS NOT NULL) as processed
@@ -253,8 +253,8 @@ export class OutboxNeo4jSync {
      * Clean up old processed events
      */
     async cleanup(olderThanDays = 7) {
-        const { rowCount } = await this.pg.query(`DELETE FROM outbox_events 
-       WHERE processed_at IS NOT NULL 
+        const { rowCount } = await this.pg.query(`DELETE FROM outbox_events
+       WHERE processed_at IS NOT NULL
        AND processed_at < now() - interval '${olderThanDays} days'`);
         const deletedCount = rowCount || 0;
         if (deletedCount > 0) {
