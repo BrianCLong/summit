@@ -1,0 +1,6 @@
+apiVersion: v2
+name: deepagent-mvp
+description: A Helm chart for the DeepAgent MVP
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
