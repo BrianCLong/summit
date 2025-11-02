@@ -1,4 +1,4 @@
-import { GraphQLUpload } from 'graphql-upload-ts';
+import GraphQLUpload from 'graphql-upload-ts/dist/GraphQLUpload.js';
 import { AttachmentService } from '../services/AttachmentService';
 import type { Readable } from 'stream';
 

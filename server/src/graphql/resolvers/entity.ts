@@ -1,5 +1,5 @@
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
-import { randomUUID } from 'node:crypto';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import {
   pubsub,
@@ -8,12 +8,22 @@ import {
   ENTITY_DELETED,
   tenantEvent,
 } from '../subscriptions.js';
-import { requireTenant } from '../../middleware/withTenant.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import axios from 'axios'; // For calling ML service
+import { GraphQLError } from 'graphql';
 
 const logger = pino();
 const driver = getNeo4jDriver();
+
+// Helper function to extract tenant from context
+const requireTenant = (ctx: any): string => {
+  if (!ctx?.user?.tenant) {
+    throw new GraphQLError('Tenant required', {
+      extensions: { code: 'FORBIDDEN' },
+    });
+  }
+  return ctx.user.tenant;
+};
 
 const entityResolvers = {
   Query: {
@@ -156,10 +166,12 @@ const entityResolvers = {
         let paramIndex = 2; // Start index for additional parameters
 
         // Add filters for type and props
+        const type = filters?.type;
+        const props = filters?.props;
         if (type || props) {
           pgQuery += ` JOIN entities e ON ee.entity_id = e.id WHERE 1=1`; // Assuming 'entities' table exists with 'id' and 'type'
           if (type) {
-            pgQuery += ` AND e.type = ${paramIndex}`;
+            pgQuery += ` AND e.type = $${paramIndex}`;
             pgQueryParams.push(type);
             paramIndex++;
           }
@@ -167,7 +179,7 @@ const entityResolvers = {
             // This is a simplified example. Real JSONB querying would be more complex.
             // Assuming props is a flat object and we're checking for existence of keys/values.
             for (const key in props) {
-              pgQuery += ` AND e.props->>'${key}' = ${paramIndex}`;
+              pgQuery += ` AND e.props->>'${key}' = $${paramIndex}`;
               pgQueryParams.push(props[key]);
               paramIndex++;
             }

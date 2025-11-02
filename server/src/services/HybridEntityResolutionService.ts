@@ -1,7 +1,7 @@
 import path from 'path';
 import { PythonShell } from 'python-shell';
 import pino from 'pino';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 
 const log = pino({ name: 'HybridEntityResolutionService' });
 
@@ -11,6 +11,9 @@ export interface ERServiceResult {
   match: boolean;
   explanation: Record<string, number>;
   traceId: string;
+  confidence?: number;
+  method?: string;
+  riskScore?: number;
 }
 
 export async function resolveEntities(
