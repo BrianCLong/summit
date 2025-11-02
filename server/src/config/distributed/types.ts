@@ -1,4 +1,5 @@
-import { z, type ZodTypeAny } from 'zod';
+import { z } from 'zod';
+import type { ZodType } from 'zod';
 
 export type EnvironmentName =
   | 'development'
@@ -90,7 +91,7 @@ export interface DriftReport {
   generatedAt: Date;
 }
 
-export type ConfigSchema = ZodTypeAny;
+export type ConfigSchema = ZodType;
 
 export type ConfigWatcher<TConfig = Record<string, any>> = (payload: {
   configId: string;

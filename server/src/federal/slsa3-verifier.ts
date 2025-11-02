@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { z, type ZodType } from 'zod';
+import { z } from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // SLSA v1.0 provenance verification for air-gap supply chain security

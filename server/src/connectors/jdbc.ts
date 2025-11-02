@@ -2,9 +2,12 @@
 // Epic E15: New Connectors - Database connectivity for external sources
 
 // No-op tracer shim to avoid OTEL dependency
-import { Pool, types as pgTypes } from 'pg';
-import type { PoolClient } from 'pg';
+import pkg from 'pg';
+const { Pool: PgPool, types } = pkg as any;
+type Pool = any;
+type PoolClient = any;
 import mysql from 'mysql2/promise';
+type MySQLPool = any;
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { EventEmitter } from 'events';
 
@@ -24,8 +27,8 @@ const tracer = {
 };
 
 // Fix PostgreSQL parsing for large integers
-pgTypes.setTypeParser(20, (val) => parseInt(val, 10)); // BIGINT
-pgTypes.setTypeParser(1700, (val) => parseFloat(val)); // NUMERIC
+types.setTypeParser(20, (val) => parseInt(val, 10)); // BIGINT
+types.setTypeParser(1700, (val) => parseFloat(val)); // NUMERIC
 
 // Metrics
 const jdbcOperations = new Counter({
@@ -131,7 +134,7 @@ export interface SchemaInfo {
 export class JDBCConnector extends EventEmitter {
   private config: JDBCConfig;
   private tenantId: string;
-  private pool: Pool | mysql.Pool | null = null;
+  private pool: Pool | MySQLPool | null = null;
   private connected = false;
 
   constructor(tenantId: string, config: JDBCConfig) {
@@ -197,7 +200,7 @@ export class JDBCConnector extends EventEmitter {
       search_path: this.config.schema || 'public',
     };
 
-    this.pool = new Pool(poolConfig);
+    this.pool = new PgPool(poolConfig);
 
     // Test connection
     const client = await (this.pool as Pool).connect();
@@ -226,7 +229,7 @@ export class JDBCConnector extends EventEmitter {
     this.pool = mysql.createPool(poolConfig);
 
     // Test connection
-    const connection = await (this.pool as mysql.Pool).getConnection();
+    const connection = await (this.pool as MySQLPool).getConnection();
     try {
       await connection.execute('SELECT 1');
     } finally {
@@ -355,7 +358,7 @@ export class JDBCConnector extends EventEmitter {
     params: any[],
     options: QueryOptions,
   ): Promise<QueryResult> {
-    const connection = await (this.pool as mysql.Pool).getConnection();
+    const connection = await (this.pool as MySQLPool).getConnection();
 
     try {
       // Set query timeout if specified
@@ -718,7 +721,7 @@ export class JDBCConnector extends EventEmitter {
       if (this.config.type === 'postgresql') {
         await (this.pool as Pool).end();
       } else {
-        await (this.pool as mysql.Pool).end();
+        await (this.pool as MySQLPool).end();
       }
 
       this.pool = null;

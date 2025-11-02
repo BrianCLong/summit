@@ -110,7 +110,7 @@ export async function closeNeo4jDriver(): Promise<void> {
 export class Neo4jService {
   constructor(private readonly _driver: Neo4jDriver = getNeo4jDriver()) {}
 
-  getSession(options?: neo4j.SessionOptions) {
+  getSession(options?: Parameters<Neo4jDriver['session']>[0]) {
     return this._driver.session(options as any);
   }
 
@@ -191,7 +191,7 @@ async function teardownRealDriver(): Promise<void> {
 function createDriverFacade(): Neo4jDriver {
   const facade: Partial<Neo4jDriver> = {};
 
-  facade.session = ((options?: neo4j.SessionOptions) => {
+  facade.session = ((options?: Parameters<Neo4jDriver['session']>[0]) => {
     const session = realDriver
       ? realDriver.session(options)
       : createMockSession();
@@ -267,3 +267,17 @@ function instrumentSession(session: any) {
   };
   return session;
 }
+
+// Export a convenience object for simple queries
+export const neo = {
+  run: async (cypher: string, params?: any, context?: { tenantId?: string }) => {
+    const driver = getNeo4jDriver();
+    const session = driver.session();
+    try {
+      const result = await session.run(cypher, params);
+      return result;
+    } finally {
+      await session.close();
+    }
+  },
+};

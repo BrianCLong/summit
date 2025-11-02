@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { z, type ZodType } from 'zod';
+import { z } from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // FIPS 140-2 Level 3 compliant cryptographic service

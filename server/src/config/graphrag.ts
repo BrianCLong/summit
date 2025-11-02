@@ -1,4 +1,5 @@
-import { z, type ZodSchema } from 'zod';
+import { z } from 'zod';
+import type { ZodSchema } from 'zod';
 
 export interface UseCaseConfig {
   promptSchema: ZodSchema;

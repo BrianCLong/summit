@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import { z, type ZodType } from 'zod';
+import { z } from 'zod';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { initPKCS11, ecdsaP384Sign, finalizePKCS11 } from './pkcs11-guard.js';
 
