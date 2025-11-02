@@ -262,6 +262,35 @@ export class PrometheusConductorMetrics {
   ): void {
     conductorTaskTimeoutTotal.inc({ expert, timeout_type: timeoutType });
   }
+
+  /**
+   * Record operational event (for general operational tracking)
+   */
+  public recordOperationalEvent(
+    eventType: string,
+    metadata?: Record<string, any>,
+  ): void {
+    // Record as a security event with generic type
+    conductorSecurityEventsTotal.inc({
+      type: eventType,
+      result: metadata?.success !== false ? 'allowed' : 'denied',
+    });
+  }
+
+  /**
+   * Record operational metric (for general metric tracking)
+   */
+  public recordOperationalMetric(
+    metricName: string,
+    value: number,
+    labels?: Record<string, string>,
+  ): void {
+    // For now, record as active task count or use a generic gauge
+    // This is a stub implementation that can be expanded
+    if (metricName.includes('active') || metricName.includes('count')) {
+      conductorActiveTasksGauge.set(value);
+    }
+  }
 }
 
 // Singleton instance
