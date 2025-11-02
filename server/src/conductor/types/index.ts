@@ -20,6 +20,7 @@ export interface ConductInput {
   sensitivity?: 'low' | 'pii' | 'secret';
   userContext?: Record<string, any>;
   investigationId?: string;
+  runId?: string;
   missionControlContext?: MissionControlConflictContext;
 }
 
