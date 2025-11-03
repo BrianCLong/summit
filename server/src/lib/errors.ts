@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
-import { ZodError, z } from 'zod';
+import { z } from 'zod';
 
 const logger = pino({ name: 'ErrorMapper' });
 

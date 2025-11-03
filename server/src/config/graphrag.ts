@@ -1,8 +1,8 @@
-import { z, ZodSchema } from 'zod';
+import { z } from 'zod';
 
 export interface UseCaseConfig {
-  promptSchema: ZodSchema;
-  outputSchema: ZodSchema;
+  promptSchema: z.ZodTypeAny;
+  outputSchema: z.ZodTypeAny;
   tokenBudget: number;
   latencyBudgetMs: number;
 }

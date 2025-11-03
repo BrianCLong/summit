@@ -11,7 +11,7 @@
 
 import { Driver, Session } from 'neo4j-driver';
 import { Redis } from 'ioredis';
-import { z, ZodSchema } from 'zod';
+import { z } from 'zod';
 import { createHash } from 'crypto';
 import pino from 'pino';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js'; // Import CircuitBreaker
@@ -416,7 +416,7 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
     request: GraphRAGRequest,
-    schema: ZodSchema,
+    schema: z.ZodTypeAny,
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
 
