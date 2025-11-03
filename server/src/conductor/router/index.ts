@@ -257,6 +257,10 @@ export class MoERouter {
       candidates.push('GRAPH_TOOL');
     }
 
+    if (features.hasExportKeywords) {
+      candidates.push('EXPORT_TOOL');
+    }
+
     if (features.hasFileKeywords) {
       candidates.push('FILES_TOOL');
     }
@@ -265,12 +269,7 @@ export class MoERouter {
       candidates.push('OSINT_TOOL');
     }
 
-    if (features.hasExportKeywords) {
-      candidates.push('EXPORT_TOOL');
-    }
-
-    // Always include LLM options
-    if (features.maxLatencyMs < 1500 || features.complexityScore <= 2) {
+    if (features.maxLatencyMs < 1500) {
       candidates.push('LLM_LIGHT');
     }
 
@@ -278,13 +277,16 @@ export class MoERouter {
       candidates.push('LLM_HEAVY');
     }
 
-    // Default to RAG for general queries
-    if (candidates.length === 0 || features.investigationContext) {
+    if (features.investigationContext) {
       candidates.push('RAG_TOOL');
     }
 
-    // Remove duplicates
-    return [...new Set(candidates)];
+    // Remove duplicates while preserving priority order
+    const orderedUnique = candidates.filter(
+      (candidate, index) => candidates.indexOf(candidate) === index,
+    );
+
+    return orderedUnique;
   }
 
   /**
