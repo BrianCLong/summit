@@ -23,6 +23,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   role?: string;
+  tenantId?: string;
   permissions?: string[];
 }
 
@@ -49,6 +50,7 @@ interface EntityInput {
   source?: string;
   position?: { x: number; y: number };
   investigationId?: string;
+  canonicalId?: string;
 }
 
 interface RelationshipInput {
