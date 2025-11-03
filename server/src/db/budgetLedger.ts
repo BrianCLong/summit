@@ -3,8 +3,7 @@
  * Source of truth for tenant budgets and detailed audit trail
  */
 
-import { Pool } from 'pg';
-import type { PoolClient } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import logger from '../utils/logger';
 
 export interface TenantBudget {
@@ -328,8 +327,8 @@ export class BudgetLedgerManager {
     try {
       await client.query('BEGIN');
 
-      const setClauses = [];
-      const values = [tenantId];
+      const setClauses: string[] = [];
+      const values: any[] = [tenantId];
       let paramIndex = 2;
 
       if (updates.monthlyUsdLimit !== undefined) {
@@ -452,7 +451,7 @@ export class BudgetLedgerManager {
   ): Promise<SpendingSummary> {
     try {
       let dateFilter = '';
-      const params = [tenantId];
+      const params: any[] = [tenantId];
 
       if (startDate) {
         dateFilter += ' AND created_at >= $2';

@@ -11,7 +11,7 @@
 
 import { Driver, Session } from 'neo4j-driver';
 import { Redis } from 'ioredis';
-import { z, type ZodSchema } from 'zod';
+import { z, ZodSchema } from 'zod';
 import { createHash } from 'crypto';
 import pino from 'pino';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js'; // Import CircuitBreaker

@@ -11,7 +11,7 @@ export async function pickVariant(
     `SELECT variant_key, alpha, beta FROM bandit_state WHERE runbook=$1 AND step_id=$2`,
     [runbook, stepId],
   );
-  const state = new Map(
+  const state = new Map<string, { alpha: number; beta: number }>(
     rows.map((r: any) => [
       r.variant_key,
       {

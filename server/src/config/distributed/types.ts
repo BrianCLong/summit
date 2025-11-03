@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import type { ZodType } from 'zod';
+import { z, ZodType } from 'zod';
 
 export type EnvironmentName =
   | 'development'

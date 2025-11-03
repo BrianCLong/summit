@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import type { PoolConfig } from 'pg';
+import { PoolConfig } from 'pg';
 
 export interface TenantDbConfig {
   postgres: PoolConfig;

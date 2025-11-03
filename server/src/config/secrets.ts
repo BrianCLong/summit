@@ -87,7 +87,7 @@ const EnvSchema = z.object({
     .optional(),
 });
 
-type EnvConfig = typeof EnvSchema extends z.ZodType<infer T> ? T : never;
+type EnvConfig = z.infer<typeof EnvSchema>;
 
 // Production security checks
 const INSECURE_DEFAULTS = [

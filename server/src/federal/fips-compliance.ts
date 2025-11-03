@@ -515,6 +515,12 @@ export class FIPSComplianceService implements FIPSCrypto {
     }
   }
 
+  getLocalSVID(): string | null {
+    // Return SPIFFE Verifiable Identity Document for HSM authentication
+    // In production, this would retrieve the SVID from the SPIRE agent
+    return this.hsmConnection ? 'spiffe://example.org/fips-service' : null;
+  }
+
   private isFIPSApprovedAlgorithm(algorithm: string): boolean {
     const approvedAlgorithms = [
       'AES-256-GCM',
