@@ -5,7 +5,7 @@
  * Prevents cross-tenant data access at the resolver level.
  */
 
-import { GraphQLError } from 'graphql';
+import { GraphQLError, GraphQLResolveInfo } from 'graphql';
 import pino from 'pino';
 
 const logger = pino({ name: 'withTenant' });
@@ -26,14 +26,14 @@ export const withTenant = (
     parent: unknown,
     args: Record<string, unknown>,
     context: TenantContext,
-    info: unknown,
+    info: GraphQLResolveInfo,
   ) => unknown,
 ) => {
   return (
     parent: unknown,
     args: Record<string, unknown>,
     context: TenantContext,
-    info: unknown,
+    info: GraphQLResolveInfo,
   ) => {
     // Ensure user context exists
     if (!context?.user) {
