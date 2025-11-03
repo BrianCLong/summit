@@ -347,7 +347,7 @@ export class MultimodalDataService {
   ): Promise<MediaSource> {
     try {
       const query = `
-        UPDATE media_sources 
+        UPDATE media_sources
         SET processing_status = $1, updated_at = NOW()
         WHERE id = $2
         RETURNING *
@@ -520,6 +520,7 @@ export class MultimodalDataService {
   async updateMultimodalEntity(
     id: string,
     input: Partial<MultimodalEntityInput>,
+    userId?: string,
   ): Promise<MultimodalEntity> {
     try {
       const updates: string[] = [];
@@ -580,7 +581,7 @@ export class MultimodalDataService {
       values.push(id);
 
       const query = `
-        UPDATE multimodal_entities 
+        UPDATE multimodal_entities
         SET ${updates.join(', ')}
         WHERE id = $${++paramCount}
         RETURNING *
@@ -604,13 +605,19 @@ export class MultimodalDataService {
    */
   async verifyMultimodalEntity(
     id: string,
-    verification: VerificationInput,
+    verified: boolean | VerificationInput,
     userId: string,
   ): Promise<MultimodalEntity> {
     try {
+      // Handle both boolean and VerificationInput
+      const verification: VerificationInput =
+        typeof verified === 'boolean'
+          ? { verified }
+          : verified;
+
       const query = `
-        UPDATE multimodal_entities 
-        SET human_verified = $1, verified_by = $2, verified_at = $3, 
+        UPDATE multimodal_entities
+        SET human_verified = $1, verified_by = $2, verified_at = $3,
             verification_notes = $4, quality_score = $5, updated_at = NOW()
         WHERE id = $6
         RETURNING *
@@ -620,8 +627,8 @@ export class MultimodalDataService {
         verification.verified,
         userId,
         verification.verified ? new Date() : null,
-        verification.notes,
-        verification.qualityScore,
+        verification.notes || null,
+        verification.qualityScore || null,
         id,
       ];
 
@@ -664,7 +671,112 @@ export class MultimodalDataService {
     }
   }
 
+  // ===== CROSS-MODAL MATCHING OPERATIONS =====
+
+  /**
+   * Find cross-modal matches for an entity
+   */
+  async findCrossModalMatches(
+    entityId: string,
+    targetMediaTypes: string[],
+  ): Promise<CrossModalMatch[]> {
+    // TODO: Implement cross-modal matching algorithm
+    logger.warn('findCrossModalMatches not yet implemented');
+    return [];
+  }
+
+  /**
+   * Get all cross-modal matches for investigation
+   */
+  async getCrossModalMatches(
+    investigationId: string,
+    filters: {
+      matchType?: CrossModalMatchType;
+      minConfidence?: number;
+      verified?: boolean;
+      limit?: number;
+    } = {},
+  ): Promise<CrossModalMatch[]> {
+    // TODO: Implement cross-modal matches retrieval
+    logger.warn('getCrossModalMatches not yet implemented');
+    return [];
+  }
+
+  // ===== EXTRACTION JOB OPERATIONS =====
+
+  /**
+   * Get extraction jobs with filtering
+   */
+  async getExtractionJobs(filters: {
+    investigationId?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<any[]> {
+    // Delegate to ExtractionJobService
+    // TODO: Implement proper filtering
+    logger.warn('getExtractionJobs not yet implemented');
+    return [];
+  }
+
+  /**
+   * Get single extraction job
+   */
+  async getExtractionJob(id: string): Promise<any | null> {
+    // TODO: Implement extraction job retrieval
+    logger.warn('getExtractionJob not yet implemented');
+    return null;
+  }
+
+  /**
+   * Start an extraction job
+   */
+  async startExtractionJob(input: any, userId: string): Promise<any> {
+    // TODO: Implement extraction job creation
+    logger.warn('startExtractionJob not yet implemented');
+    return { id: 'stub', status: 'PENDING' };
+  }
+
+  /**
+   * Cancel an extraction job
+   */
+  async cancelExtractionJob(id: string, userId: string): Promise<any> {
+    // TODO: Implement extraction job cancellation
+    logger.warn('cancelExtractionJob not yet implemented');
+    return { id, status: 'CANCELLED' };
+  }
+
+  /**
+   * Validate extraction results
+   */
+  async validateExtractionResults(jobId: string): Promise<any> {
+    // TODO: Implement extraction validation
+    logger.warn('validateExtractionResults not yet implemented');
+    return { valid: true, issues: [] };
+  }
+
   // ===== SEMANTIC SEARCH OPERATIONS =====
+
+  /**
+   * Perform multimodal search across all entity types
+   */
+  async multimodalSearch(input: {
+    query: string;
+    mediaTypes?: string[];
+    entityTypes?: string[];
+    investigationId?: string;
+    includeCrossModal?: boolean;
+    minConfidence?: number;
+    limit?: number;
+  }): Promise<any> {
+    // TODO: Implement comprehensive multimodal search
+    logger.warn('multimodalSearch not yet implemented');
+    return {
+      entities: [],
+      mediaSources: [],
+      crossModalMatches: [],
+      totalResults: 0,
+    };
+  }
 
   /**
    * Perform semantic search using vector similarity
@@ -734,10 +846,10 @@ export class MultimodalDataService {
       }
 
       const query = `
-        SELECT * FROM multimodal_entities 
-        WHERE investigation_id = $1 
-        AND entity_type = $2 
-        AND id != $3 
+        SELECT * FROM multimodal_entities
+        WHERE investigation_id = $1
+        AND entity_type = $2
+        AND id != $3
         AND confidence >= $4
         ORDER BY confidence DESC
         LIMIT $5
@@ -756,6 +868,210 @@ export class MultimodalDataService {
       logger.error(`Failed to find similar entities for ${entityId}:`, error);
       throw error;
     }
+  }
+
+  // ===== ANALYTICS AND QUALITY OPERATIONS =====
+
+  /**
+   * Get analytics for investigation
+   */
+  async getMultimodalAnalytics(investigationId: string): Promise<any> {
+    // TODO: Implement comprehensive analytics
+    logger.warn('getMultimodalAnalytics not yet implemented');
+    return {
+      totalMediaSources: 0,
+      totalEntities: 0,
+      totalCrossModalMatches: 0,
+      averageConfidence: 0,
+      mediaTypeDistribution: {},
+      entityTypeDistribution: {},
+      extractionMethodDistribution: {},
+      verificationRate: 0,
+      qualityScore: 0,
+    };
+  }
+
+  /**
+   * Get unverified entities for review
+   */
+  async getUnverifiedEntities(filters: {
+    investigationId?: string;
+    mediaType?: string;
+    limit?: number;
+  }): Promise<MultimodalEntity[]> {
+    try {
+      return await this.getMultimodalEntities(filters.investigationId || '', {
+        mediaType: filters.mediaType as MediaType,
+        verified: false,
+        limit: filters.limit,
+      });
+    } catch (error) {
+      logger.error('Failed to get unverified entities:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Find duplicate entities
+   */
+  async findDuplicateEntities(filters: {
+    investigationId?: string;
+    similarity?: number;
+    limit?: number;
+  }): Promise<any[]> {
+    // TODO: Implement duplicate detection algorithm
+    logger.warn('findDuplicateEntities not yet implemented');
+    return [];
+  }
+
+  /**
+   * Cleanup duplicate entities
+   */
+  async cleanupDuplicateEntities(
+    investigationId: string,
+    similarity: number,
+    autoMerge: boolean,
+    userId: string,
+  ): Promise<any> {
+    // TODO: Implement duplicate cleanup
+    logger.warn('cleanupDuplicateEntities not yet implemented');
+    return {
+      duplicatesFound: 0,
+      entitiesMerged: 0,
+      entitiesDeleted: 0,
+    };
+  }
+
+  // ===== MEDIA SOURCE MANAGEMENT =====
+
+  /**
+   * Upload a new media source
+   */
+  async uploadMediaSource(input: any, userId: string): Promise<MediaSource> {
+    // TODO: Integrate with MediaUploadService
+    logger.warn('uploadMediaSource not yet implemented');
+    throw new Error('uploadMediaSource not implemented');
+  }
+
+  /**
+   * Delete a media source
+   */
+  async deleteMediaSource(id: string, userId: string): Promise<boolean> {
+    try {
+      const query = 'DELETE FROM media_sources WHERE id = $1';
+      const result = await this.db.query(query, [id]);
+      const deleted = (result.rowCount ?? 0) > 0;
+
+      if (deleted) {
+        logger.info(`Deleted media source: ${id} by user: ${userId}`);
+      }
+
+      return deleted;
+    } catch (error) {
+      logger.error(`Failed to delete media source ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update media metadata
+   */
+  async updateMediaMetadata(
+    id: string,
+    metadata: any,
+    userId: string,
+  ): Promise<MediaSource> {
+    try {
+      const query = `
+        UPDATE media_sources
+        SET metadata = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING *
+      `;
+
+      const result = await this.db.query(query, [JSON.stringify(metadata), id]);
+
+      if (result.rows.length === 0) {
+        throw new Error(`Media source ${id} not found`);
+      }
+
+      logger.info(`Updated media metadata: ${id} by user: ${userId}`);
+      return this.mapRowToMediaSource(result.rows[0]);
+    } catch (error) {
+      logger.error(`Failed to update media metadata ${id}:`, error);
+      throw error;
+    }
+  }
+
+  // ===== ENTITY RELATIONSHIP OPERATIONS =====
+
+  /**
+   * Merge multiple entities into one
+   */
+  async mergeMultimodalEntities(
+    primaryId: string,
+    secondaryIds: string[],
+    userId: string,
+  ): Promise<MultimodalEntity> {
+    // TODO: Implement entity merging logic
+    logger.warn('mergeMultimodalEntities not yet implemented');
+    const primary = await this.getMultimodalEntity(primaryId);
+    if (!primary) {
+      throw new Error(`Primary entity ${primaryId} not found`);
+    }
+    return primary;
+  }
+
+  /**
+   * Create a multimodal relationship
+   */
+  async createMultimodalRelationship(
+    input: any,
+    userId: string,
+  ): Promise<any> {
+    // TODO: Implement relationship creation
+    logger.warn('createMultimodalRelationship not yet implemented');
+    return { id: uuidv4(), ...input };
+  }
+
+  /**
+   * Update a multimodal relationship
+   */
+  async updateMultimodalRelationship(
+    id: string,
+    input: any,
+    userId: string,
+  ): Promise<any> {
+    // TODO: Implement relationship update
+    logger.warn('updateMultimodalRelationship not yet implemented');
+    return { id, ...input };
+  }
+
+  /**
+   * Verify a multimodal relationship
+   */
+  async verifyMultimodalRelationship(
+    id: string,
+    verified: boolean,
+    userId: string,
+  ): Promise<any> {
+    // TODO: Implement relationship verification
+    logger.warn('verifyMultimodalRelationship not yet implemented');
+    return { id, verified, verifiedBy: userId };
+  }
+
+  // ===== CLUSTERING AND ADVANCED ANALYTICS =====
+
+  /**
+   * Compute semantic clusters
+   */
+  async computeSemanticClusters(
+    investigationId: string,
+    algorithm?: string,
+  ): Promise<SemanticCluster[]> {
+    // TODO: Implement clustering algorithm
+    logger.warn('computeSemanticClusters not yet implemented');
+    return [];
   }
 
   // ===== UTILITY METHODS =====
