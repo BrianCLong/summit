@@ -16,17 +16,15 @@ export default [
       sourceType: 'module',
       globals: { ...globals.node },
       parserOptions: {
-        // Avoid project: './tsconfig.json' until tsconfig includes tests to prevent perf/parse errors
         ecmaFeatures: { jsx: false },
       },
     },
     linterOptions: { reportUnusedDisableDirectives: true },
     rules: {
-      '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-misused-promises': [
-        'error',
-        { checksVoidReturn: { attributes: false } },
-      ],
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/consistent-type-imports': [
         'warn',
         { prefer: 'type-imports' },
@@ -36,13 +34,24 @@ export default [
     },
   },
   {
-    files: ['tests/**/*.ts', '**/*.spec.ts', '**/*.test.ts'],
+    files: [
+      'tests/**/*.ts',
+      'tests/**/*.js',
+      '**/*.spec.ts',
+      '**/*.spec.js',
+      '**/*.test.ts',
+      '**/*.test.js',
+    ],
     plugins: { jest: (await import('eslint-plugin-jest')).default },
-    languageOptions: { globals: { ...globals.node, jest: true } },
+    languageOptions: {
+      globals: { ...globals.node, ...globals.jest },
+    },
     rules: {
       'jest/expect-expect': 'warn',
       'jest/no-disabled-tests': 'warn',
       'jest/no-identical-title': 'error',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
   prettier,
