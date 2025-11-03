@@ -1,6 +1,6 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';

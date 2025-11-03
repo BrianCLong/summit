@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
+import { Pool } from 'pg';
+import type { QueryConfig, QueryResult, PoolClient } from 'pg';
 import dotenv from 'dotenv';
 import baseLogger from '../config/logger';
 

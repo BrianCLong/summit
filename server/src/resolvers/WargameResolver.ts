@@ -8,7 +8,7 @@ import {
   StrategicResponsePlaybook,
 } from '../generated/graphql-types';
 import { getNeo4jDriver } from '../db/neo4j';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import axios from 'axios';
 
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8001';

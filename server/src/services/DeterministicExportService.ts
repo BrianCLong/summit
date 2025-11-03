@@ -21,7 +21,7 @@ import {
 import { createHash } from 'crypto';
 import { join } from 'path';
 import archiver from 'archiver';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import logger from '../config/logger';
 import { getPostgresPool } from '../config/database';
 import { redactData } from '../utils/dataRedaction';
