@@ -531,6 +531,8 @@ export interface CloudProviderDescriptor {
   maxThroughputPerMinute: number;
   baseLatencyMs: number;
   policyTags?: string[];
+  dataResidencyTags?: string[];
+  sovereignRegions?: string[];
 }
 
 export interface PricingSignal {
@@ -564,6 +566,9 @@ export interface PipelineStageDefinition {
   slaSeconds: number;
   guardrail?: StageExecutionGuardrail;
   fallbackStrategies?: StageFallbackStrategy[];
+  dataResidency?: string[];
+  sovereignRequired?: boolean;
+  sensitivityLevel?: number;
 }
 
 export interface PlannerRewardWeights {
@@ -593,6 +598,10 @@ export interface PlannerDecision {
   expectedCost: number;
   expectedThroughput: number;
   expectedLatency: number;
+  residency?: string;
+  sovereign?: boolean;
+  privacyCost?: number;
+  policyReasons?: string[];
 }
 
 export interface PlannerExplanation {

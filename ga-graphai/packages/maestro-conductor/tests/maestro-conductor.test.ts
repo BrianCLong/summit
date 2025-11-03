@@ -236,4 +236,20 @@ describe('MaestroConductor meta-agent', () => {
     ).toBe(true);
     expect(plan.fallbacks.length).toBeLessThanOrEqual(1);
   });
+
+  it('records narrative scorecards and augments recommended playbooks', () => {
+    const recorded = conductor.recordNarrativeScorecard({
+      campaignId: 'campaign-1',
+      narrative: 'supply-chain disinfo',
+      identification: 0.8,
+      imitation: 0.7,
+      amplification: 0.75,
+      emotionalRisk: 0.72,
+      recommendedPlaybooks: ['exposure-report'],
+    });
+
+    expect(recorded.recommendedPlaybooks).toContain('rapid-response-comms');
+    expect(recorded.recommendedPlaybooks).toContain('media-literacy-boost');
+    expect(conductor.listNarrativeScorecards()).toHaveLength(1);
+  });
 });

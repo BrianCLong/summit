@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { TriPaneController, type EvidenceNode } from '../src/index.js';
+import {
+  TriPaneController,
+  type EvidenceNode,
+  type NarrativeTelemetry,
+} from '../src/index.js';
 
 vi.mock('policy', () => ({
   computeWorkflowEstimates: () => ({
@@ -74,5 +78,28 @@ describe('TriPaneController', () => {
     controller.recordPathDiscovery(1200);
     controller.recordPathDiscovery(800);
     expect(controller.averageTimeToPath()).toBe(1000);
+  });
+
+  it('aggregates narrative telemetry and exposes diagnostics', () => {
+    const controller = new TriPaneController();
+    const telemetry: NarrativeTelemetry[] = [
+      {
+        identification: 0.8,
+        imitation: 0.6,
+        amplification: 0.7,
+        emotionalSignals: { fear: 0.4, hope: 0.2 },
+      },
+      {
+        identification: 0.7,
+        imitation: 0.65,
+        amplification: 0.75,
+        emotionalSignals: { anger: 0.3, uncertainty: 0.2 },
+      },
+    ];
+
+    const diagnostics = controller.ingestNarrativeTelemetry(telemetry);
+    expect(diagnostics.identification).toBeGreaterThan(0.7);
+    expect(diagnostics.emotionalRisk).toBeGreaterThan(0);
+    expect(controller.getNarrativeDiagnostics()).toEqual(diagnostics);
   });
 });

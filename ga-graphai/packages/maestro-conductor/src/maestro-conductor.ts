@@ -14,6 +14,7 @@ import type {
   PolicyHook,
   ResponseStrategy,
   RoutingPlan,
+  NarrativeScorecard,
 } from './types';
 import type { AnomalyDetectorOptions } from './anomaly';
 import type { SelfHealingOrchestratorOptions } from './self-healing';
@@ -44,6 +45,8 @@ export class MaestroConductor {
   private readonly policyHooks: PolicyHook[] = [];
 
   private readonly incidents: IncidentReport[] = [];
+
+  private readonly narrativeScorecards: NarrativeScorecard[] = [];
 
   constructor(options?: MaestroConductorOptions) {
     this.anomaly = new AnomalyDetector(options?.anomaly);
@@ -107,6 +110,34 @@ export class MaestroConductor {
       throw new Error('no assets registered');
     }
     return this.jobRouter.route(job, assets, performance, this.policyHooks);
+  }
+
+  recordNarrativeScorecard(scorecard: NarrativeScorecard): NarrativeScorecard {
+    const playbooks = new Set(scorecard.recommendedPlaybooks);
+    if (scorecard.emotionalRisk >= 0.7) {
+      playbooks.add('rapid-response-comms');
+      playbooks.add('disclosure-charter');
+    }
+    if (
+      scorecard.identification + scorecard.imitation + scorecard.amplification >=
+      2.1
+    ) {
+      playbooks.add('media-literacy-boost');
+    }
+    const enriched: NarrativeScorecard = {
+      ...scorecard,
+      recommendedPlaybooks: Array.from(playbooks),
+      emotionalRisk: Number(scorecard.emotionalRisk.toFixed(3)),
+      identification: Number(scorecard.identification.toFixed(3)),
+      imitation: Number(scorecard.imitation.toFixed(3)),
+      amplification: Number(scorecard.amplification.toFixed(3)),
+    };
+    this.narrativeScorecards.push(enriched);
+    return enriched;
+  }
+
+  listNarrativeScorecards(): NarrativeScorecard[] {
+    return [...this.narrativeScorecards];
   }
 
   private toOptimizationSample(

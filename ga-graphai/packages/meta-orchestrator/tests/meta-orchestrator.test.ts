@@ -77,6 +77,8 @@ describe('MetaOrchestrator', () => {
         maxThroughputPerMinute: 140,
         baseLatencyMs: 70,
         policyTags: ['fedramp', 'pci'],
+        dataResidencyTags: ['fedramp', 'us-east-1'],
+        sovereignRegions: ['us-gov-west-1'],
       },
       {
         name: 'azure',
@@ -87,7 +89,9 @@ describe('MetaOrchestrator', () => {
         securityCertifications: ['fedramp', 'hipaa'],
         maxThroughputPerMinute: 120,
         baseLatencyMs: 65,
-        policyTags: ['fedramp', 'hipaa'],
+        policyTags: ['fedramp', 'hipaa', 'sovereign'],
+        dataResidencyTags: ['fedramp', 'eastus'],
+        sovereignRegions: ['eastus'],
       },
       {
         name: 'oci',
@@ -98,7 +102,9 @@ describe('MetaOrchestrator', () => {
         securityCertifications: ['iso'],
         maxThroughputPerMinute: 130,
         baseLatencyMs: 80,
-        policyTags: ['iso'],
+        policyTags: ['iso', 'sovereign'],
+        dataResidencyTags: ['iso', 'us-phoenix-1'],
+        sovereignRegions: ['us-phoenix-1'],
       },
     ];
 
@@ -116,6 +122,8 @@ describe('MetaOrchestrator', () => {
       fallbackStrategies: [
         { provider: 'aws', region: 'us-east-1', trigger: 'execution-failure' },
       ],
+      dataResidency: ['fedramp'],
+      sensitivityLevel: 3,
     };
 
     pricing = [
@@ -162,6 +170,8 @@ describe('MetaOrchestrator', () => {
     expect(plan.steps[0].primary.provider).toBe('azure');
     expect(plan.steps[0].fallbacks[0].provider).toBe('aws');
     expect(plan.steps[0].explanation.narrative).toContain('Secure Build');
+    expect(plan.steps[0].primary.residency).toBe('fedramp');
+    expect(plan.steps[0].primary.privacyCost).toBeGreaterThan(0);
     expect(auditTrail.some((entry) => entry.category === 'plan')).toBe(true);
   });
 
@@ -253,5 +263,30 @@ describe('MetaOrchestrator', () => {
     const telemetry = orchestrator.deriveTelemetry(outcome);
     expect(telemetry.throughputPerMinute).toBe(130);
     expect(telemetry.selfHealingRate).toBeGreaterThan(0);
+  });
+
+  it('enforces sovereign placement for sensitive stages', async () => {
+    const orchestrator = new MetaOrchestrator({
+      pipelineId: 'pipeline-x',
+      providers,
+      pricingFeed,
+      execution,
+      auditSink: { record: () => undefined },
+      reasoningModel: new TemplateReasoningModel(),
+    });
+
+    const sovereignStage: PipelineStageDefinition = {
+      ...stage,
+      id: 'sovereign-stage',
+      dataResidency: ['sovereign'],
+      sovereignRequired: true,
+      sensitivityLevel: 5,
+    };
+
+    const plan = await orchestrator.createPlan([sovereignStage]);
+    expect(plan.steps[0].primary.policyReasons).toContain(
+      'sovereign routing enforced',
+    );
+    expect(plan.steps[0].primary.residency).toBeDefined();
   });
 });

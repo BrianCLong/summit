@@ -120,6 +120,64 @@ function matchPricing(
   );
 }
 
+function residencyCompliance(
+  stage: PipelineStageDefinition,
+  provider: CloudProviderDescriptor,
+  region: string,
+): { allowed: boolean; score: number; matched?: string; reason?: string } {
+  if (!stage.dataResidency || stage.dataResidency.length === 0) {
+    return { allowed: true, score: 1, matched: region };
+  }
+  const providerResidency = new Set<string>([
+    region,
+    ...(provider.dataResidencyTags ?? []),
+    ...(provider.policyTags ?? []),
+  ]);
+  const matched = stage.dataResidency.find((tag) => providerResidency.has(tag));
+  if (matched) {
+    return {
+      allowed: true,
+      score: 1,
+      matched,
+      reason: `residency satisfied via ${matched}`,
+    };
+  }
+  return {
+    allowed: false,
+    score: 0,
+    reason: `requires residency ${stage.dataResidency.join(', ')}`,
+  };
+}
+
+function sovereigntySatisfied(
+  stage: PipelineStageDefinition,
+  provider: CloudProviderDescriptor,
+  region: string,
+): boolean {
+  if (!stage.sovereignRequired) {
+    return true;
+  }
+  if (provider.sovereignRegions?.includes(region)) {
+    return true;
+  }
+  return (provider.policyTags ?? []).some((tag) => tag.toLowerCase().includes('sovereign'));
+}
+
+function privacyCost(
+  stage: PipelineStageDefinition,
+  provider: CloudProviderDescriptor,
+  region: string,
+): number {
+  const base = Math.max(stage.sensitivityLevel ?? 1, 1) * 0.1;
+  if (stage.sovereignRequired && sovereigntySatisfied(stage, provider, region)) {
+    return Number(Math.max(base * 0.5, 0.05).toFixed(4));
+  }
+  if (stage.dataResidency && stage.dataResidency.length > 0) {
+    return Number(Math.max(base * 0.8, 0.05).toFixed(4));
+  }
+  return Number(Math.max(base, 0.05).toFixed(4));
+}
+
 function complianceScore(
   provider: CloudProviderDescriptor,
   stage: PipelineStageDefinition,
@@ -305,15 +363,26 @@ export class HybridSymbolicLLMPlanner {
       if (compliance === 0) {
         return [] as CandidateScore[];
       }
+      const residency = residencyCompliance(stage, provider, region);
+      if (!residency.allowed) {
+        return [] as CandidateScore[];
+      }
+      if (!sovereigntySatisfied(stage, provider, region)) {
+        return [] as CandidateScore[];
+      }
       const throughputScore = normalizedThroughput[index] || 0;
       const reliabilityScore = normalizedReliability[index] || 0;
       const costScore = price === 0 ? 1 : clamp(1 / price, 0, 1);
       const sustainabilityScore = provider.sustainabilityScore ?? 0.5;
+      const policyScore =
+        (compliance + residency.score + (stage.sovereignRequired ? 1 : 0)) /
+        (stage.sovereignRequired ? 3 : 2);
+      const privacy = privacyCost(stage, provider, region);
       const aggregate =
         weights.throughput * throughputScore +
         weights.reliability * reliabilityScore +
         weights.cost * costScore +
-        weights.compliance * compliance +
+        weights.compliance * policyScore +
         (weights.sustainability ?? 0) * sustainabilityScore;
       const decision: PlannerDecision = {
         provider: provider.name,
@@ -324,6 +393,13 @@ export class HybridSymbolicLLMPlanner {
           stage.minThroughputPerMinute,
         ),
         expectedLatency: provider.baseLatencyMs,
+        residency: residency.matched ?? region,
+        sovereign: stage.sovereignRequired ?? false,
+        privacyCost: privacy,
+        policyReasons: [
+          ...(residency.reason ? [residency.reason] : []),
+          ...(stage.sovereignRequired ? ['sovereign routing enforced'] : []),
+        ],
       };
       return [
         {
@@ -336,6 +412,8 @@ export class HybridSymbolicLLMPlanner {
             reliability: reliabilityScore,
             cost: costScore,
             compliance,
+            residency: residency.score,
+            privacy,
             sustainability: sustainabilityScore,
             aggregate,
           },
@@ -360,10 +438,19 @@ export class HybridSymbolicLLMPlanner {
     if (stage.complianceTags.length > 0) {
       constraints.push(`compliance tags ${stage.complianceTags.join(', ')}`);
     }
+    if (stage.dataResidency && stage.dataResidency.length > 0) {
+      constraints.push(`data residency ${stage.dataResidency.join(', ')}`);
+    }
+    if (stage.sovereignRequired) {
+      constraints.push('sovereign routing required');
+    }
     if (stage.guardrail) {
       constraints.push(
         `error rate <= ${stage.guardrail.maxErrorRate} with recovery ${stage.guardrail.recoveryTimeoutSeconds}s`,
       );
+    }
+    if (primary.decision.privacyCost !== undefined) {
+      constraints.push(`privacy cost ${primary.decision.privacyCost}`);
     }
     return {
       stageId: stage.id,

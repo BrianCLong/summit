@@ -14,12 +14,20 @@ import type {
 } from 'common-types';
 import { PolicyEngine } from 'policy';
 import { ProvenanceLedger } from 'prov-ledger';
+import type {
+  FederatedDataNode,
+  SubgraphPlan,
+  SubgraphPlanStep,
+  SubgraphQueryRequest,
+} from './federation.js';
+import { FederatedPlanner } from './federation.js';
 
 export interface WorkcellRuntimeOptions {
   policy: PolicyEngine;
   ledger: ProvenanceLedger;
   tools?: WorkcellToolDefinition[];
   agents?: WorkcellAgentDefinition[];
+  federatedNodes?: FederatedDataNode[];
 }
 
 function normaliseOutput(
@@ -57,6 +65,8 @@ export class WorkcellRuntime {
 
   private readonly orders: WorkOrderResult[] = [];
 
+  private readonly federatedPlanner = new FederatedPlanner();
+
   constructor(options: WorkcellRuntimeOptions) {
     this.policy = options.policy;
     this.ledger = options.ledger;
@@ -71,6 +81,11 @@ export class WorkcellRuntime {
         this.registerAgent(agent);
       }
     }
+    if (options.federatedNodes) {
+      for (const node of options.federatedNodes) {
+        this.registerFederatedNode(node);
+      }
+    }
   }
 
   registerTool(tool: WorkcellToolDefinition): void {
@@ -81,8 +96,66 @@ export class WorkcellRuntime {
     this.agents.set(agent.name, agent);
   }
 
+  registerFederatedNode(node: FederatedDataNode): void {
+    this.federatedPlanner.registerNode(node);
+  }
+
   listOrders(): WorkOrderResult[] {
     return [...this.orders];
+  }
+
+  planSubgraphQuery(request: SubgraphQueryRequest): SubgraphPlan {
+    const plan = this.federatedPlanner.plan(request);
+    const enrichedSteps: SubgraphPlanStep[] = plan.steps.map((step) => {
+      const evaluation = this.policy.evaluate({
+        action: 'subgraph.route',
+        resource: step.capability,
+        context: {
+          tenantId: request.tenantId,
+          userId: request.requestedBy,
+          roles: request.roles,
+          region: step.locality,
+          attributes: request.attributes,
+        },
+      });
+
+      const rationale = [...step.rationale, ...evaluation.reasons];
+      return {
+        ...step,
+        policy: evaluation,
+        rationale,
+      } satisfies SubgraphPlanStep;
+    });
+
+    const runtimePlan: SubgraphPlan = {
+      queryId: plan.queryId,
+      tenantId: plan.tenantId,
+      steps: enrichedSteps,
+      residualBudget: plan.residualBudget,
+      warnings: plan.warnings,
+    };
+
+    this.appendLedger({
+      id: `${plan.queryId}:${Date.now()}`,
+      category: 'federated-plan',
+      actor: request.requestedBy,
+      action: runtimePlan.residualBudget > 0 ? 'plan.accepted' : 'plan.warning',
+      resource: plan.queryId,
+      payload: {
+        tenantId: plan.tenantId,
+        residualBudget: runtimePlan.residualBudget,
+        steps: runtimePlan.steps.map((step) => ({
+          nodeId: step.nodeId,
+          capability: step.capability,
+          privacyCost: step.privacyCost,
+          locality: step.locality,
+          policy: step.policy,
+        })),
+        warnings: runtimePlan.warnings,
+      },
+    });
+
+    return runtimePlan;
   }
 
   async submitOrder(order: WorkOrderSubmission): Promise<WorkOrderResult> {
@@ -263,3 +336,9 @@ export type {
   WorkcellAgentDefinition,
   WorkcellToolDefinition,
 } from 'common-types';
+export type {
+  FederatedDataNode,
+  SubgraphPlan,
+  SubgraphPlanStep,
+  SubgraphQueryRequest,
+} from './federation.js';

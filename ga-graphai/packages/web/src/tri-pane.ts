@@ -15,6 +15,7 @@ export interface TriPaneState {
   policyBindings: string[];
   confidenceOpacity: number;
   savedViews: Record<string, TriPaneState>;
+  narrativeDiagnostics?: NarrativeDiagnostics;
 }
 
 export interface ExplainView {
@@ -22,11 +23,24 @@ export interface ExplainView {
   evidence: EvidenceNode[];
   policyBindings: string[];
   confidenceOpacity: number;
+  narrativeDiagnostics?: NarrativeDiagnostics;
 }
 
 export interface PathMetric {
   timestamp: number;
   durationMs: number;
+}
+
+export interface NarrativeTelemetry {
+  identification: number;
+  imitation: number;
+  amplification: number;
+  emotionalSignals: Record<string, number>;
+}
+
+export interface NarrativeDiagnostics extends NarrativeTelemetry {
+  emotionalRisk: number;
+  volatility: number;
 }
 
 type Listener = (state: TriPaneState) => void;
@@ -46,6 +60,7 @@ export class TriPaneController {
       policyBindings: [],
       confidenceOpacity: 1,
       savedViews: {},
+      narrativeDiagnostics: undefined,
     };
   }
 
@@ -54,6 +69,9 @@ export class TriPaneController {
       ...this.state,
       evidence: [...this.state.evidence],
       policyBindings: [...this.state.policyBindings],
+      narrativeDiagnostics: this.state.narrativeDiagnostics
+        ? { ...this.state.narrativeDiagnostics }
+        : undefined,
     };
   }
 
@@ -138,7 +156,94 @@ export class TriPaneController {
       evidence: [...this.state.evidence],
       policyBindings: [...this.state.policyBindings],
       confidenceOpacity: this.state.confidenceOpacity,
+      narrativeDiagnostics: this.state.narrativeDiagnostics
+        ? { ...this.state.narrativeDiagnostics }
+        : undefined,
     };
+  }
+
+  ingestNarrativeTelemetry(samples: NarrativeTelemetry[]): NarrativeDiagnostics {
+    if (!samples.length) {
+      const diagnostics: NarrativeDiagnostics = {
+        identification: 0,
+        imitation: 0,
+        amplification: 0,
+        emotionalSignals: {},
+        emotionalRisk: 0,
+        volatility: 0,
+      };
+      this.state.narrativeDiagnostics = diagnostics;
+      this.emit('graph');
+      return diagnostics;
+    }
+
+    const aggregate = samples.reduce(
+      (acc, sample) => {
+        acc.identification += sample.identification;
+        acc.imitation += sample.imitation;
+        acc.amplification += sample.amplification;
+        for (const [key, value] of Object.entries(sample.emotionalSignals)) {
+          acc.emotionalSignals[key] =
+            (acc.emotionalSignals[key] ?? 0) + value;
+        }
+        return acc;
+      },
+      {
+        identification: 0,
+        imitation: 0,
+        amplification: 0,
+        emotionalSignals: {} as Record<string, number>,
+      },
+    );
+
+    const normalisedSignals: Record<string, number> = {};
+    for (const [key, value] of Object.entries(aggregate.emotionalSignals)) {
+      normalisedSignals[key] = Number(
+        (value / samples.length).toFixed(4),
+      );
+    }
+
+    const identification = Number(
+      (aggregate.identification / samples.length).toFixed(4),
+    );
+    const imitation = Number(
+      (aggregate.imitation / samples.length).toFixed(4),
+    );
+    const amplification = Number(
+      (aggregate.amplification / samples.length).toFixed(4),
+    );
+
+    const deltas = samples.map((sample) => {
+      const diff =
+        Math.abs(sample.identification - identification) +
+        Math.abs(sample.imitation - imitation) +
+        Math.abs(sample.amplification - amplification);
+      return diff / 3;
+    });
+    const volatility = Number(
+      (deltas.reduce((acc, value) => acc + value, 0) / samples.length).toFixed(4),
+    );
+
+    const emotionalRisk = computeEmotionalRisk(normalisedSignals);
+
+    const diagnostics: NarrativeDiagnostics = {
+      identification,
+      imitation,
+      amplification,
+      emotionalSignals: normalisedSignals,
+      emotionalRisk,
+      volatility,
+    };
+
+    this.state.narrativeDiagnostics = diagnostics;
+    this.emit('graph');
+    return diagnostics;
+  }
+
+  getNarrativeDiagnostics(): NarrativeDiagnostics | undefined {
+    return this.state.narrativeDiagnostics
+      ? { ...this.state.narrativeDiagnostics }
+      : undefined;
   }
 
   private emit(panel: Panel): void {
@@ -150,4 +255,14 @@ export class TriPaneController {
       listener(this.current);
     }
   }
+}
+
+function computeEmotionalRisk(signals: Record<string, number>): number {
+  const fear = signals.fear ?? 0;
+  const anger = signals.anger ?? 0;
+  const uncertainty = signals.uncertainty ?? 0;
+  const hope = signals.hope ?? 0;
+  const trust = signals.trust ?? 0;
+  const raw = fear * 0.6 + anger * 0.6 + uncertainty * 0.4 - (hope + trust) * 0.3;
+  return clamp(Number(raw.toFixed(4)), 0, 1);
 }

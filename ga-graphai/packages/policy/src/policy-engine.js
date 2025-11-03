@@ -61,6 +61,49 @@ function buildContext(request, caps) {
   };
 }
 
+function evaluateEthicsControls(ethics = {}) {
+  if (!ethics || Object.keys(ethics).length === 0) {
+    return { status: 'allow', obligations: [], metadata: {} };
+  }
+
+  const obligations = [];
+  const justification = ethics.collectionJustification ?? {};
+  if (!justification.purpose) {
+    return { status: 'deny', reason: 'JUSTIFICATION_REQUIRED' };
+  }
+  if (typeof justification.proportionality === 'number') {
+    if (justification.proportionality < 0.3) {
+      return { status: 'deny', reason: 'DISPROPORTIONATE_COLLECTION' };
+    }
+    if (justification.proportionality < 0.6) {
+      obligations.push('audit.proportionality-review');
+    }
+  }
+  if (!ethics.postOperationPlan) {
+    obligations.push('audit.post-operation');
+  }
+
+  const biasAudit = ethics.biasAudit ?? {};
+  if (biasAudit.risk === 'high' && !(biasAudit.mitigations?.length > 0)) {
+    return { status: 'deny', reason: 'BIAS_RISK_UNMITIGATED' };
+  }
+  if (biasAudit.risk === 'high') {
+    obligations.push('bias.executive-approval');
+  } else if (biasAudit.risk === 'medium') {
+    obligations.push('bias.monitoring');
+  }
+
+  return {
+    status: 'allow',
+    obligations,
+    metadata: {
+      justification,
+      biasAudit,
+      postOperationPlan: Boolean(ethics.postOperationPlan),
+    },
+  };
+}
+
 export class PolicyEngine {
   constructor(policyDoc, options = {}) {
     this.policyDoc = policyDoc ?? {};
@@ -125,12 +168,24 @@ export class PolicyEngine {
       return { status: 'deny', reason: 'CAP_DENY_PAID_MODEL', model, caps };
     }
 
+    const ethicsVerdict = evaluateEthicsControls(request.ethics);
+    if (ethicsVerdict.status === 'deny') {
+      return {
+        status: 'deny',
+        reason: ethicsVerdict.reason,
+        model,
+        caps,
+      };
+    }
+
     return {
       status: 'allow',
       model,
       caps,
       appliedRule,
       context,
+      obligations: ethicsVerdict.obligations,
+      ethics: ethicsVerdict.metadata,
     };
   }
 

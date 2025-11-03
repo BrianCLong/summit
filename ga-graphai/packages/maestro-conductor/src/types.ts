@@ -161,6 +161,16 @@ export interface SelfHealingContext {
   policies: PolicyHook[];
 }
 
+export interface NarrativeScorecard {
+  campaignId: string;
+  narrative: string;
+  identification: number;
+  imitation: number;
+  amplification: number;
+  emotionalRisk: number;
+  recommendedPlaybooks: string[];
+}
+
 export interface SelfHealingResult {
   strategyId: string;
   executed: boolean;
