@@ -61,6 +61,13 @@ export const redis = {
     }
   },
 
+  ping: async (): Promise<string> => {
+    if (!redisClient) {
+      throw new Error('Redis client not initialized');
+    }
+    return await redisClient.ping();
+  },
+
   // Cache for OPA decisions with TTL
   setWithTTL: async (key: string, value: string, ttlSeconds: number = 300) => {
     if (!redisClient) return false;
@@ -69,6 +76,32 @@ export const redis = {
       return true;
     } catch (error) {
       console.error('Redis setWithTTL failed:', error);
+      return false;
+    }
+  },
+
+  setWithTTLIfNotExists: async (
+    key: string,
+    value: string,
+    ttlSeconds: number = 300,
+  ) => {
+    if (!redisClient) return false;
+    try {
+      const result = await redisClient.set(key, value, 'EX', ttlSeconds, 'NX');
+      return result === 'OK';
+    } catch (error) {
+      console.error('Redis setWithTTLIfNotExists failed:', error);
+      return false;
+    }
+  },
+
+  setex: async (key: string, ttlSeconds: number, value: string) => {
+    if (!redisClient) return false;
+    try {
+      await redisClient.setex(key, ttlSeconds, value);
+      return true;
+    } catch (error) {
+      console.error('Redis setex failed:', error);
       return false;
     }
   },
