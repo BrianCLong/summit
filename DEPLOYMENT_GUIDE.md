@@ -87,6 +87,26 @@ ssh -i ~/.ssh/your-key.pem ubuntu@your-host.com
 curl -fsSL https://raw.githubusercontent.com/BrianCLong/summit/v2025.09.21-mega-merge/scripts/deploy-now.sh | bash
 ```
 
+## 🧰 $0 Control Plane Stack Options
+
+Summit ships with two free, open-source control-plane stacks that layer on top
+of the base deployment. Pick the one that matches your operating model today
+and evolve over time:
+
+- **Option A — Minimal:** OpenTofu + Ansible for provisioning/configuration,
+  Cluster Autoscaler (plus optional KEDA) for k3s/Kubernetes scaling, and the
+  Prometheus/Alertmanager/Grafana OSS/Loki combo with `blackbox_exporter` for
+  uptime checks.
+- **Option B — Full GitOps:** Crossplane for cloud resources, Argo CD or Flux
+  CD for sync-from-Git workflows, Prometheus + Grafana OSS + Alertmanager backed
+  by Grafana Mimir/Loki/Tempo via the OpenTelemetry Collector, and KEDA alongside
+  the Cluster Autoscaler.
+
+The detailed component tables and operating tips live in
+[`deploy/zero-cost-stacks.md`](deploy/zero-cost-stacks.md). Feel free to mix and
+match pieces—start with the minimal stack to get running quickly, then adopt the
+GitOps control plane when you need long-term guardrails and observability.
+
 ## 🔍 Health Checks
 
 After deployment, verify all services:
