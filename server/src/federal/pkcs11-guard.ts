@@ -2,6 +2,12 @@ import * as pkcs11 from 'pkcs11js';
 import crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
+// Type declarations for pkcs11js (not fully typed in the package)
+type PKCS11 = any;
+type Slot = any;
+type Session = any;
+type Handle = any;
+
 // PKCS#11 Guard for Federal/Gov Pack - CloudHSM with strict mechanism allowlist
 export type AllowedMech = 'AES_GCM_256' | 'ECDSA_P384' | 'RSA_PSS_4096';
 
@@ -55,9 +61,9 @@ const ALLOWLIST: Record<
 };
 
 export interface PKCS11Context {
-  p11: pkcs11.PKCS11;
-  slot: pkcs11.Slot;
-  session: pkcs11.Session;
+  p11: PKCS11;
+  slot: Slot;
+  session: Session;
   tokenInfo: any;
   mechanisms: number[];
 }
@@ -238,7 +244,7 @@ export async function performHSMSelfTest(
     }
 
     // Test 2: Key generation (temporary AES key)
-    let hTempKey: pkcs11.Handle | null = null;
+    let hTempKey: Handle | null = null;
     try {
       const template = [
         { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_SECRET_KEY },
