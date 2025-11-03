@@ -11,19 +11,42 @@
 
 import { Driver, Session } from 'neo4j-driver';
 import { Redis } from 'ioredis';
-import { z } from 'zod';
-import { createHash } from 'crypto';
+import * as z from 'zod';
+import { randomUUID, createHash } from 'crypto';
 import pino from 'pino';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js'; // Import CircuitBreaker
-import { rankPaths, ScoreBreakdown } from './PathRankingService.js';
-import {
-  graphragSchemaFailuresTotal,
-  graphragCacheHitRatio,
-} from '../monitoring/metrics.js';
+import { rankPaths } from './PathRankingService.js';
 import { mapGraphRAGError, UserFacingError } from '../lib/errors.js';
 import graphragConfig from '../config/graphrag.js';
 
 const logger: pino.Logger = pino({ name: 'GraphRAGService' });
+
+type CounterLike = { inc: (...args: any[]) => void };
+type GaugeLike = { set: (...args: any[]) => void };
+
+const noopCounter: CounterLike = { inc: () => {} };
+const noopGauge: GaugeLike = { set: () => {} };
+
+let graphragSchemaFailuresTotal: CounterLike = noopCounter;
+let graphragCacheHitRatio: GaugeLike = noopGauge;
+
+import('../monitoring/metrics.js')
+  .then((metricsModule) => {
+    if (metricsModule?.graphragSchemaFailuresTotal) {
+      graphragSchemaFailuresTotal = metricsModule.graphragSchemaFailuresTotal;
+    }
+    if (metricsModule?.graphragCacheHitRatio) {
+      graphragCacheHitRatio = metricsModule.graphragCacheHitRatio;
+    }
+  })
+  .catch((error) => {
+    logger.warn(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'Metrics module unavailable, using no-op counters for GraphRAG',
+    );
+  });
 
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
@@ -84,13 +107,61 @@ const GraphRAGResponseSchema = z.object({
 });
 
 // Types derived from schemas
-export type GraphRAGRequest = z.infer<typeof GraphRAGRequestSchema>;
-export type Entity = z.infer<typeof EntitySchema>;
-export type Relationship = z.infer<typeof RelationshipSchema>;
-export type WhyPath = z.infer<typeof WhyPathSchema>;
-export type ScoreBreakdown = z.infer<typeof ScoreBreakdownSchema>;
-export type Citations = z.infer<typeof CitationsSchema>;
-export type GraphRAGResponse = z.infer<typeof GraphRAGResponseSchema>;
+export interface GraphRAGRequest {
+  investigationId: string;
+  question: string;
+  focusEntityIds?: string[];
+  maxHops?: number;
+  temperature?: number;
+  maxTokens?: number;
+  useCase?: string;
+  rankingStrategy?: 'v1' | 'v2';
+}
+
+export interface Entity {
+  id: string;
+  type: string;
+  label: string;
+  description?: string;
+  properties: Record<string, unknown>;
+  confidence: number;
+}
+
+export interface Relationship {
+  id: string;
+  type: string;
+  fromEntityId: string;
+  toEntityId: string;
+  label?: string;
+  properties: Record<string, unknown>;
+  confidence: number;
+}
+
+export interface ScoreBreakdown {
+  length: number;
+  edgeType: number;
+  centrality: number;
+}
+
+export interface WhyPath {
+  from: string;
+  to: string;
+  relId: string;
+  type: string;
+  supportScore?: number;
+  score_breakdown?: ScoreBreakdown;
+}
+
+export interface Citations {
+  entityIds: string[];
+}
+
+export interface GraphRAGResponse {
+  answer: string;
+  confidence: number;
+  citations: Citations;
+  why_paths: WhyPath[];
+}
 
 interface SubgraphContext {
   entities: Entity[];
@@ -180,9 +251,11 @@ export class GraphRAGService {
         validated.maxTokens &&
         validated.maxTokens > useCaseConfig.tokenBudget
       ) {
+        const traceId = randomUUID();
         throw new UserFacingError(
           `Token budget exceeded: requested ${validated.maxTokens}, budget ${useCaseConfig.tokenBudget}`,
-          'TOKEN_BUDGET_EXCEEDED',
+          429,
+          traceId,
         );
       }
       const startTime = Date.now();
@@ -403,7 +476,11 @@ export class GraphRAGService {
   /**
    * Build concise string from Zod validation issues
    */
-  private summarizeZodIssues(error: z.ZodError): string {
+  private summarizeZodIssues(error: any): string {
+    if (!(error instanceof z.ZodError)) {
+      return 'Unknown validation error';
+    }
+
     return error.issues
       .map((i) => `${i.path.join('.')}: ${i.message}`)
       .join('; ');
@@ -416,7 +493,7 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
     request: GraphRAGRequest,
-    schema: z.ZodSchema,
+    schema: any,
   ): Promise<GraphRAGResponse> {
     const prompt = this.buildContextPrompt(question, context);
 
@@ -663,6 +740,7 @@ Respond with JSON only:`;
     status: string;
     cacheStatus: string;
     config: typeof this.config;
+    circuitBreaker: ReturnType<CircuitBreaker['getMetrics']>;
   }> {
     let cacheStatus = 'disabled';
 

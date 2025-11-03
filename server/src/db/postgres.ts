@@ -614,10 +614,15 @@ function normalizeQuery(
   const text = query.text.trim();
   const values = query.values ?? params ?? [];
 
+  const statementName =
+    query && typeof (query as any).name === 'string'
+      ? ((query as any).name as string)
+      : getPreparedStatementName(text);
+
   return {
     text,
     values,
-    name: query.name ?? getPreparedStatementName(text),
+    name: statementName,
   };
 }
 

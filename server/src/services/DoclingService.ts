@@ -1,16 +1,9 @@
 import axios from 'axios';
 import { randomUUID, createHash } from 'crypto';
+import pino from 'pino';
 import { env } from '../config/env.js';
-import {
-  doclingInferenceDuration,
-  doclingInferenceTotal,
-  doclingCharactersProcessed,
-  doclingCostUsd,
-} from '../monitoring/metrics.js';
 import { doclingRepository } from '../db/repositories/doclingRepository.js';
 import { doclingGraphRepository } from '../db/repositories/doclingGraphRepository.js';
-import { tenantCostService } from './TenantCostService.js';
-import { provenanceLedger } from '../provenance/ledger.js';
 import type {
   DoclingBaseResponse,
   SummarizeBuildFailureInput,
@@ -27,6 +20,98 @@ import type {
 interface DoclingCallOptions {
   operation: 'parse' | 'summarize' | 'extract';
 }
+
+type CounterMetric = {
+  labels: (...args: any[]) => { inc: (value?: number) => void };
+  inc: (value?: number) => void;
+};
+
+type HistogramMetric = {
+  startTimer: (labels?: Record<string, unknown>) => () => void;
+};
+
+const createNoopCounter = (): CounterMetric => ({
+  labels: () => ({ inc: () => {} }),
+  inc: () => {},
+});
+
+const createNoopHistogram = (): HistogramMetric => ({
+  startTimer: () => () => {},
+});
+
+let doclingInferenceDuration: HistogramMetric = createNoopHistogram();
+let doclingInferenceTotal: CounterMetric = createNoopCounter();
+let doclingCharactersProcessed: CounterMetric = createNoopCounter();
+let doclingCostUsd: CounterMetric = createNoopCounter();
+
+const logger = pino({ name: 'DoclingService' });
+
+import('../monitoring/metrics.js')
+  .then((metricsModule: any) => {
+    doclingInferenceDuration =
+      metricsModule?.doclingInferenceDuration || doclingInferenceDuration;
+    doclingInferenceTotal =
+      metricsModule?.doclingInferenceTotal || doclingInferenceTotal;
+    doclingCharactersProcessed =
+      metricsModule?.doclingCharactersProcessed || doclingCharactersProcessed;
+    doclingCostUsd = metricsModule?.doclingCostUsd || doclingCostUsd;
+  })
+  .catch((error) => {
+    logger.warn(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'Metrics module unavailable for DoclingService, using no-op metrics',
+    );
+  });
+
+type ProvenanceLedgerLike = {
+  appendEntry: (entry: Record<string, unknown>) => Promise<void> | void;
+};
+
+let provenanceLedger: ProvenanceLedgerLike = {
+  appendEntry: async () => {},
+};
+
+import('../provenance/ledger.js')
+  .then((module: any) => {
+    if (module?.provenanceLedger) {
+      provenanceLedger = module.provenanceLedger;
+    }
+  })
+  .catch((error) => {
+    logger.warn(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'Provenance ledger unavailable, using no-op implementation',
+    );
+  });
+
+type TenantCostServiceLike = {
+  recordDoclingCost: (
+    tenantId: string,
+    costUsd: number,
+    metadata: Record<string, unknown>,
+  ) => void;
+};
+
+let tenantCostService: TenantCostServiceLike = {
+  recordDoclingCost: () => {},
+};
+
+import('./TenantCostService.js')
+  .then((module: any) => {
+    tenantCostService = module?.tenantCostService || tenantCostService;
+  })
+  .catch((error) => {
+    logger.warn(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'TenantCostService unavailable, using no-op cost recorder',
+    );
+  });
 
 class DoclingService {
   private http: ReturnType<typeof axios.create>;

@@ -24,7 +24,18 @@ export default {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  moduleFileExtensions: [
+    'ts',
+    'tsx',
+    'js',
+    'jsx',
+    'mjs',
+    'cjs',
+    'json',
+    'node',
+  ],
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
@@ -32,10 +43,10 @@ export default {
         useESM: true,
         tsconfig: {
           module: 'esnext',
-          target: 'es2020',
+          target: 'es2022',
+          },
         },
-      },
-    ],
+      ],
   },
   collectCoverageFrom: [
     'src/**/*.ts',

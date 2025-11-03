@@ -1,4 +1,41 @@
-import { neo } from '../neo4j.js';
+import pino from 'pino';
+
+type RunFunction = (
+  query: string,
+  params?: Record<string, unknown>,
+) => Promise<any>;
+
+const logger = pino({ name: 'DoclingGraphRepository' });
+
+let runCypher: RunFunction = async () => ({ records: [] });
+
+import('../neo4j.js')
+  .then((module: any) => {
+    if (module?.neo && typeof module.neo.run === 'function') {
+      runCypher = (query: string, params?: Record<string, unknown>) =>
+        module.neo.run(query, params);
+      return;
+    }
+    if (typeof module?.getNeo4jDriver === 'function') {
+      runCypher = async (query: string, params?: Record<string, unknown>) => {
+        const driver = module.getNeo4jDriver();
+        const session = driver.session();
+        try {
+          return await session.run(query, params);
+        } finally {
+          await session.close();
+        }
+      };
+    }
+  })
+  .catch((error) => {
+    logger.warn(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'Neo4j module unavailable for DoclingGraphRepository; using no-op runner',
+    );
+  });
 
 type FragmentGraphInput = {
   id: string;
@@ -32,10 +69,10 @@ class DoclingGraphRepository {
 
   private async ensureConstraints() {
     if (this.initialized) return;
-    await neo.run(
+    await runCypher(
       `CREATE CONSTRAINT IF NOT EXISTS ON (f:DocFragment) ASSERT f.id IS UNIQUE`,
     );
-    await neo.run(
+    await runCypher(
       `CREATE CONSTRAINT IF NOT EXISTS ON (s:DocSummary) ASSERT s.id IS UNIQUE`,
     );
     this.initialized = true;
@@ -64,7 +101,7 @@ class DoclingGraphRepository {
         testId: context.testId || null,
         prId: context.prId || null,
       };
-      await neo.run(
+      await runCypher(
         `MERGE (f:DocFragment { id: $id })
          ON CREATE SET f.sha256 = $sha256, f.sourceType = $sourceType, f.requestId = $requestId, f.tenantId = $tenantId, f.textPreview = $text, f.sourceUri = $sourceUri, f.createdAt = datetime()
          ON MATCH SET f.sha256 = $sha256, f.sourceType = $sourceType, f.requestId = $requestId, f.tenantId = $tenantId, f.textPreview = $text, f.sourceUri = $sourceUri, f.updatedAt = datetime()
@@ -82,7 +119,7 @@ class DoclingGraphRepository {
     context: { buildId?: string; tenantId: string },
   ) {
     await this.ensureConstraints();
-    await neo.run(
+    await runCypher(
       `MERGE (s:DocSummary { id: $id })
        ON CREATE SET s.tenantId = $tenantId, s.requestId = $requestId, s.scope = $scope, s.focus = $focus, s.text = $text, s.createdAt = datetime()
        ON MATCH SET s.scope = $scope, s.focus = $focus, s.text = $text, s.updatedAt = datetime()
@@ -107,7 +144,7 @@ class DoclingGraphRepository {
   ) {
     await this.ensureConstraints();
     for (const link of links) {
-      await neo.run(
+      await runCypher(
         `MATCH (f:DocFragment { id: $fragmentId })
          MERGE (t:DocTarget { id: $targetId, tenantId: $tenantId })
          SET t.type = $targetType

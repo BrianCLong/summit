@@ -3,11 +3,11 @@
  * Combines graph traversal with LLM generation for intelligent responses
  */
 
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 import logger from '../utils/logger.js';
-const { trackGraphOperation, trackError } = require('../monitoring/metrics');
+import { trackGraphOperation, trackError } from '../monitoring/metrics.js';
 
-class GraphRAGService {
+export class GraphRAGService {
   constructor(neo4jDriver, embedService, llmService, redisClient) {
     this.neo4jDriver = neo4jDriver;
     this.embedService = embedService;
@@ -542,4 +542,4 @@ RESPONSE:`;
   }
 }
 
-module.exports = GraphRAGService;
+export default GraphRAGService;
