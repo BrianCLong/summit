@@ -26,7 +26,17 @@
       "Bash(npm run typecheck:*)",
       "Bash(node -e:*)",
       "Bash(npx tsc:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(for file in src/resolvers/ai.ts src/resolvers/WargameResolver.ts src/routes/aiWebhook.ts src/services/AuthService.ts src/services/DeterministicExportService.ts src/services/ExtractionJobService.ts src/services/LLMAnalystService.ts src/services/MediaUploadService.ts src/services/MultimodalDataService.ts src/workers/approvedWriter.ts)",
+      "Bash(do)",
+      "Bash(if grep -q \"from ''uuid''\" \"$file\")",
+      "Bash(then)",
+      "Bash(echo:*)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(for file in src/db/timescale.ts src/repos/EntityRepo.ts src/repos/InvestigationRepo.ts src/repos/RelationshipRepo.ts)",
+      "Bash(if grep -q \"{ .*, ,\" \"$file\")",
+      "Bash(head:*)"
     ],
     "deny": [],
     "ask": []
