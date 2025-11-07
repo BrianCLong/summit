@@ -100,6 +100,11 @@
     "src/db/budgetLedger.ts",
     "src/db/postgres.ts",
     "src/db/timescale.ts",
+    "src/disclosure/bundle.ts",
+    "src/resolvers/advancedML.ts",
+    "src/routes/compliance.ts",
+    "src/services/AdvancedMLService.ts",
+    "src/services/DoclingService.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
