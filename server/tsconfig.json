@@ -79,6 +79,13 @@
     "src/services/ai-insights-client.ts",
     "src/qam/DifferentialPrivacyAccountant.ts",
     "src/services/ExtractionJobService.ts",
+    "src/routes/siem.ts",
+    "src/routes/dlp.ts",
+    "src/optimization/optimization-manager.ts",
+    "src/services/RTBFJobService.ts",
+    "src/services/RTBFAuditService.ts",
+    "src/middleware/graphql-hardening.ts",
+    "src/websocket/core.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
