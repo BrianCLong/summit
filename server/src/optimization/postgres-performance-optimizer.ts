@@ -1,7 +1,6 @@
 // server/src/optimization/postgres-performance-optimizer.ts
 
-import { Pool } from 'pg';
-import type { PoolClient, QueryResult } from 'pg';
+import { Pool, type PoolClient, type QueryResult } from 'pg';
 import { getRedisClient } from '../config/database.js';
 import logger from '../config/logger.js';
 import { createHash } from 'crypto';
