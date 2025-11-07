@@ -36,6 +36,11 @@
     "src/graphql/resolvers/v040/**",
     "src/graphql/resolvers/v041/**",
     "src/realtime/kafkaConsumer.ts",
+    "src/workers/enhanced-worker-template.ts",
+    "src/workers/embeddingUpsertWorker.ts",
+    "src/workers/canary-escalate.ts",
+    "src/middleware/spiffe-auth.ts",
+    "src/middleware/maestro-authz.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
