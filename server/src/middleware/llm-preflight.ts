@@ -8,6 +8,7 @@ import {
   countTokens,
   getModelFamily,
   validateTokenBudget,
+  ModelFamily,
 } from '../lib/tokcount';
 import logger from '../utils/logger';
 
@@ -46,7 +47,7 @@ export async function enforceTokenBudget(
 
     const inferredProvider = provider || getModelFamily(model);
     const tokenCount = await countTokens(
-      inferredProvider,
+      inferredProvider as ModelFamily,
       model,
       prompt,
       completion,
@@ -152,7 +153,7 @@ export async function truncatePromptIfNeeded(
     }
 
     const inferredProvider = provider || getModelFamily(model);
-    const tokenCount = await countTokens(inferredProvider, model, prompt);
+    const tokenCount = await countTokens(inferredProvider as ModelFamily, model, prompt);
 
     if (tokenCount.total > maxTokens) {
       // Simple truncation strategy - take first portion of prompt
@@ -210,7 +211,7 @@ export async function enforceTokenBudgetWithTracking(
 
     const inferredProvider = provider || getModelFamily(model);
     const tokenCount = await countTokens(
-      inferredProvider,
+      inferredProvider as ModelFamily,
       model,
       prompt,
       completion,
