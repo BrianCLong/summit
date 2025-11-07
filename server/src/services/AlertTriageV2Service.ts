@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Logger } from 'winston';
+import winston from 'winston';
 import { Redis } from 'ioredis';
 
 export interface TriageScore {
@@ -55,7 +55,7 @@ export interface PolicyRule {
 export class AlertTriageV2Service {
   private prisma: PrismaClient;
   private redis: Redis;
-  private logger: Logger;
+  private logger: winston.Logger;
   private modelEndpoint: string;
   private fallbackEnabled: boolean;
   private readonly CACHE_TTL = 300; // 5 minutes

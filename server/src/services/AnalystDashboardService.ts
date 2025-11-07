@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Logger } from 'winston';
+import winston from 'winston';
 import { Redis } from 'ioredis';
 
 export interface MTTTMetrics {
@@ -67,7 +67,7 @@ export interface AlertVolumeMetrics {
 export class AnalystDashboardService {
   private prisma: PrismaClient;
   private redis: Redis;
-  private logger: Logger;
+  private logger: winston.Logger;
   private readonly CACHE_TTL = 300; // 5 minutes
   private readonly BASELINE_MTTT_TARGET = 900; // 15 minutes in seconds
 
@@ -104,7 +104,7 @@ export class AnalystDashboardService {
 
       // Query triage completion times
       const triageData = await this.prisma.$queryRaw`
-        SELECT 
+        SELECT
           alert_id,
           analyst_id,
           severity,
@@ -112,9 +112,9 @@ export class AnalystDashboardService {
           started_at,
           completed_at,
           EXTRACT(EPOCH FROM (completed_at - started_at)) as triage_time_seconds
-        FROM alert_triage 
-        WHERE completed_at IS NOT NULL 
-          AND started_at >= ${start} 
+        FROM alert_triage
+        WHERE completed_at IS NOT NULL
+          AND started_at >= ${start}
           AND completed_at <= ${end}
           AND triage_status = 'completed'
         ORDER BY triage_time_seconds ASC
@@ -216,7 +216,7 @@ export class AnalystDashboardService {
 
       // Query alert classifications
       const classificationData = await this.prisma.$queryRaw`
-        SELECT 
+        SELECT
           alert_id,
           rule_id,
           category,
@@ -224,7 +224,7 @@ export class AnalystDashboardService {
           classification,
           confidence
         FROM alert_feedback
-        WHERE created_at >= ${start} 
+        WHERE created_at >= ${start}
           AND created_at <= ${end}
           AND classification IS NOT NULL
       `;
@@ -317,7 +317,7 @@ export class AnalystDashboardService {
     );
 
     const performanceData = await this.prisma.$queryRaw`
-      SELECT 
+      SELECT
         at.analyst_id,
         u.name as analyst_name,
         COUNT(*) as alerts_triaged,
@@ -328,7 +328,7 @@ export class AnalystDashboardService {
       FROM alert_triage at
       LEFT JOIN users u ON at.analyst_id = u.id
       LEFT JOIN alert_feedback af ON at.alert_id = af.alert_id AND at.analyst_id = af.analyst_id
-      WHERE at.completed_at >= ${start} 
+      WHERE at.completed_at >= ${start}
         AND at.completed_at <= ${end}
         AND at.triage_status IN ('completed', 'escalated')
       GROUP BY at.analyst_id, u.name
@@ -365,14 +365,14 @@ export class AnalystDashboardService {
     );
 
     const volumeData = await this.prisma.$queryRaw`
-      SELECT 
+      SELECT
         COUNT(*) as total_alerts,
         EXTRACT(HOUR FROM created_at) as hour,
         EXTRACT(DOW FROM created_at) as day_of_week,
         severity,
         source_system
       FROM alerts
-      WHERE created_at >= ${start} 
+      WHERE created_at >= ${start}
         AND created_at <= ${end}
       GROUP BY EXTRACT(HOUR FROM created_at), EXTRACT(DOW FROM created_at), severity, source_system
     `;

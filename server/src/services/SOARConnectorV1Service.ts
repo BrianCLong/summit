@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Logger } from 'winston';
+import winston from 'winston';
 import { Redis } from 'ioredis';
 import fetch from 'node-fetch';
 
@@ -55,7 +55,7 @@ export interface TicketLink {
 export class SOARConnectorV1Service {
   private prisma: PrismaClient;
   private redis: Redis;
-  private logger: Logger;
+  private logger: winston.Logger;
   private config: SOARConnectorConfig;
   private readonly RETRY_ATTEMPTS = 3;
   private readonly RETRY_DELAY_MS = 1000;
@@ -832,7 +832,7 @@ export class SOARConnectorV1Service {
 
   private formatAlertForTicket(alertData: any): string {
     return `Security Alert Details:
-    
+
 Alert ID: ${alertData.id}
 Severity: ${alertData.severity}
 Type: ${alertData.type}

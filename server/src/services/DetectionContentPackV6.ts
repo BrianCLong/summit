@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Logger } from 'winston';
+import winston from 'winston';
 
 export interface DetectionRule {
   id: string;
@@ -59,7 +59,7 @@ export interface AttackCoverageMap {
 
 export class DetectionContentPackV6Service {
   private prisma: PrismaClient;
-  private logger: Logger;
+  private logger: winston.Logger;
 
   constructor(prisma: PrismaClient, logger: Logger) {
     this.prisma = prisma;
@@ -174,7 +174,7 @@ export class DetectionContentPackV6Service {
           | where EventID == 4625
           | where TimeGenerated > ago(5m)
           | extend Account = strcat(TargetDomainName, "\\\\", TargetUserName)
-          | summarize FailedAttempts = count(), UniqueAccounts = dcount(Account), 
+          | summarize FailedAttempts = count(), UniqueAccounts = dcount(Account),
                      Accounts = make_set(Account, 10) by IpAddress, bin(TimeGenerated, 1m)
           | where FailedAttempts >= 10 and UniqueAccounts >= 5
           | project TimeGenerated, IpAddress, FailedAttempts, UniqueAccounts, Accounts
@@ -260,7 +260,7 @@ export class DetectionContentPackV6Service {
         severity: 'high',
         query: `
           DeviceProcessEvents
-          | where ProcessCommandLine contains "lsass" 
+          | where ProcessCommandLine contains "lsass"
               or ProcessCommandLine contains "procdump"
               or ProcessCommandLine contains "rundll32"
           | where ProcessCommandLine contains "-ma" or ProcessCommandLine contains "MiniDump"
@@ -306,7 +306,7 @@ export class DetectionContentPackV6Service {
           | where EventID == 4769
           | where ServiceName !endswith "$"
           | where TicketEncryptionType in ("0x17", "0x18") // RC4 encryption
-          | summarize ServiceTicketRequests = count(), Services = make_set(ServiceName) 
+          | summarize ServiceTicketRequests = count(), Services = make_set(ServiceName)
                      by SubjectUserName, SubjectDomainName, bin(TimeGenerated, 5m)
           | where ServiceTicketRequests >= 10
         `,
@@ -510,7 +510,7 @@ export class DetectionContentPackV6Service {
         query: `
           DnsEvents
           | where QueryType == "TXT" or len(Name) > 50
-          | summarize QueryCount = count(), UniqueQueries = dcount(Name), 
+          | summarize QueryCount = count(), UniqueQueries = dcount(Name),
                      AvgQueryLength = avg(strlen(Name)) by ClientIP, bin(TimeGenerated, 1m)
           | where QueryCount > 20 and AvgQueryLength > 30
         `,

@@ -1,4 +1,4 @@
-import { getPostgresClient } from '../db/postgres';
+import { getPostgresPool } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 import { isFeatureEnabled } from '../config/mvp1-features';
 import pino from 'pino';
@@ -128,7 +128,7 @@ interface AuditEvent {
 }
 
 export class MVP1RBACService {
-  private postgresClient = getPostgresClient();
+  private postgresClient = getPostgresPool();
   private neo4jDriver = getNeo4jDriver();
 
   // Role-based permission mapping
@@ -288,12 +288,12 @@ export class MVP1RBACService {
 
     try {
       const query = `
-        SELECT 
-          created_by, 
+        SELECT
+          created_by,
           assigned_to,
           shared_with,
           status
-        FROM investigations 
+        FROM investigations
         WHERE id = $1 AND tenant_id = $2
       `;
 
@@ -465,13 +465,13 @@ export class MVP1RBACService {
           tenantId: $tenantId
         })
         CREATE (u)-[:PERFORMED]->(a)
-        
+
         // Link to investigation if present
         WITH a
         WHERE $investigationId IS NOT NULL
         MATCH (i:Investigation {id: $investigationId, tenantId: $tenantId})
         CREATE (a)-[:RELATES_TO]->(i)
-        
+
         RETURN a.id as auditId
       `;
 

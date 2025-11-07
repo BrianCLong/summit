@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(node -p:*)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(for file in src/services/AlertTriageV2Service.ts src/services/AnalystDashboardService.ts src/services/AnalystFeedbackService.ts src/services/DetectionContentPackV5.ts src/services/DetectionContentPackV6.ts src/services/SOARConnectorV1Service.ts src/services/SOARPlaybookService.ts)",
+      "Bash(if grep -q \"import.*Logger.*from.*winston\" \"$file\")"
     ],
     "deny": [],
     "ask": []

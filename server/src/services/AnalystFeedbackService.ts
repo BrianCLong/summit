@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Logger } from 'winston';
+import winston from 'winston';
 
 export interface AnalystFeedback {
   id: string;
@@ -27,7 +27,7 @@ export interface LabelStoreEntry {
 
 export class AnalystFeedbackService {
   private prisma: PrismaClient;
-  private logger: Logger;
+  private logger: winston.Logger;
 
   constructor(prisma: PrismaClient, logger: Logger) {
     this.prisma = prisma;
