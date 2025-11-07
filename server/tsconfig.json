@@ -86,6 +86,10 @@
     "src/services/RTBFAuditService.ts",
     "src/middleware/graphql-hardening.ts",
     "src/websocket/core.ts",
+    "src/services/securityService.ts",
+    "src/services/SIEMService.ts",
+    "src/qam/AdaptiveQuantumApp.ts",
+    "src/conductor/governance/opa-integration.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
