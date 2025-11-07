@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = createLogger('KeyRiskMLExplainer');
+const logger = baseLogger.child({ module: 'KeyRiskMLExplainer' });
 
 export interface SHAPExplanation {
   keyId: string;

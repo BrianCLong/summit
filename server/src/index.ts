@@ -1,4 +1,5 @@
 import http from 'http';
+import express from 'express';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import pino from 'pino';
@@ -65,7 +66,7 @@ const startServer = async () => {
     });
   }
 
-  const { initSocket, getIO } = await import('./realtime/socket.ts'); // JWT auth
+  const { initSocket, getIO } = await import('./realtime/socket.js'); // JWT auth
 
   const port = Number(process.env.PORT || 4000);
   httpServer.listen(port, async () => {

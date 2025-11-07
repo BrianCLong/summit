@@ -338,7 +338,7 @@ export class LegalHoldOrchestrator {
       custodianId,
       'acknowledged',
       {
-        acknowledgedAt,
+        acknowledgementAt,
         status: 'acknowledged',
       },
     );

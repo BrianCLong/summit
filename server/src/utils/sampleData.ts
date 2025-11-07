@@ -26,7 +26,7 @@ async function createSampleEntities(): Promise<void> {
   try {
     const entities = [
       {
-        id: randomUUID(),
+        id: uuidv4(),
         type: 'PERSON',
         props: {
           name: 'John Smith',
@@ -113,7 +113,7 @@ async function createSampleRelationships(): Promise<void> {
     if (entities.length >= 2) {
       const relationships = [
         {
-          id: randomUUID(),
+          id: uuidv4(),
           from: entities[0].properties.id,
           to: entities[1].properties.id,
           type: 'WORKS_FOR',

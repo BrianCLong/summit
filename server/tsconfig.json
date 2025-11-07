@@ -98,6 +98,7 @@
     "src/repos/InvestigationRepo.ts",
     "src/repos/RelationshipRepo.ts",
     "src/db/budgetLedger.ts",
+    "src/db/postgres.ts",
     "src/db/timescale.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",

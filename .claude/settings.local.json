@@ -4,7 +4,12 @@
       "Bash(for file in src/federal/airgap-service.ts src/federal/dual-notary.ts src/federal/fips-compliance.ts src/federal/slsa3-verifier.ts)",
       "Bash(if grep -q \"import { z } from ''zod'';\" \"$file\")",
       "Bash(for file in src/db/budgetLedger.ts src/db/postgres.ts src/db/timescale.ts)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git -C /Users/brianlong/Developer/summit/server status --short)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(awk:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

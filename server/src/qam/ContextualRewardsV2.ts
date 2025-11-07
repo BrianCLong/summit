@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
+import baseLogger from '../config/logger';
 
-const logger = createLogger('ContextualRewardsV2');
+const logger = baseLogger.child({ module: 'ContextualRewardsV2' });
 
 export interface ExecutionContext {
   tenantId: string;
