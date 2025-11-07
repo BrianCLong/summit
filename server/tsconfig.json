@@ -31,6 +31,11 @@
     "src/nl2cypher/**",
     "src/runbooks/**",
     "src/routes/replay.ts",
+    "src/maestro/**",
+    "src/monitoring/opentelemetry.ts",
+    "src/graphql/resolvers/v040/**",
+    "src/graphql/resolvers/v041/**",
+    "src/realtime/kafkaConsumer.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
