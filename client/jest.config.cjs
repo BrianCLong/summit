@@ -11,6 +11,7 @@ const config = {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
     '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
+    '^@testing-library/react-hooks$': '<rootDir>/src/test-utils/renderHookShim.ts',
   },
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',

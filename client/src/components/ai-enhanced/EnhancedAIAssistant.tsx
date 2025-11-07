@@ -215,10 +215,26 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollTo({
-      top: messagesEndRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
+    const node = messagesEndRef.current;
+    if (!node) {
+      return;
+    }
+
+    if (typeof (node as HTMLElement).scrollTo === 'function') {
+      (node as HTMLElement).scrollTo({
+        top: node.scrollHeight,
+        behavior: 'smooth',
+      });
+      return;
+    }
+
+    // jsdom and older browsers do not implement scrollTo on generic elements.
+    try {
+      node.scrollTop = node.scrollHeight;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to adjust scroll position', error);
+    }
   }, [messages]);
 
   // ✅ subscribe exactly once per transport; no dependency on streamBuf

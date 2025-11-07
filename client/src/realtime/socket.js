@@ -1,12 +1,14 @@
 import { io } from 'socket.io-client';
 import $ from 'jquery';
 
+import { getEnvVar } from '../utils/env';
+
 let socket;
 let clock = 0;
 
 export function getSocket() {
   if (!socket) {
-    const url = import.meta?.env?.VITE_WS_URL || undefined;
+    const url = getEnvVar('VITE_WS_URL') || undefined;
     const token =
       (typeof localStorage !== 'undefined' &&
         (localStorage.getItem('auth_token') ||

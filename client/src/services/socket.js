@@ -1,5 +1,7 @@
 import { io } from 'socket.io-client';
 
+import { getEnvVar } from '../utils/env';
+
 let socket = null;
 const OP_BATCH_WINDOW = 50; // ms
 let pendingOps = [];
@@ -16,7 +18,7 @@ export function getSocket() {
     return null;
   }
 
-  const url = import.meta.env.VITE_WS_URL || 'http://localhost:4000';
+  const url = getEnvVar('VITE_WS_URL', 'http://localhost:4000');
 
   socket = io(url, {
     transports: ['websocket', 'polling'],

@@ -9,8 +9,10 @@ import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 
+import { getEnvVar } from '../utils/env';
+
 const httpLink = createHttpLink({
-  uri: import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql',
+  uri: getEnvVar('VITE_API_URL', 'http://localhost:4000/graphql'),
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -38,9 +40,7 @@ const authLink = setContext((_, { headers }) => {
 let link = authLink.concat(httpLink);
 
 try {
-  const wsUrl = (
-    import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql'
-  )
+  const wsUrl = getEnvVar('VITE_API_URL', 'http://localhost:4000/graphql')
     .replace('http://', 'ws://')
     .replace('https://', 'wss://');
 

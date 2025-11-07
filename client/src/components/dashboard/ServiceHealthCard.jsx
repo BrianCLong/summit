@@ -8,6 +8,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { getEnvVar } from '../../utils/env';
+
 function kvColor(v) {
   const ok = ['ok', 'healthy', 'connected'];
   if (!v) return 'default';
@@ -23,7 +25,7 @@ export default function ServiceHealthCard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const base = import.meta?.env?.VITE_API_URL || '';
+    const base = getEnvVar('VITE_API_URL', '');
     const url = `${base}/health`;
     fetch(url)
       .then((r) => r.json())

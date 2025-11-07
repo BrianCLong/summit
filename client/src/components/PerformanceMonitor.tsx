@@ -32,9 +32,12 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     const memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // MB
 
     // Network requests (approximate)
-    const entries = performance.getEntriesByType(
-      'resource',
-    ) as PerformanceResourceTiming[];
+    const canReadEntries =
+      typeof performance !== 'undefined' &&
+      typeof performance.getEntriesByType === 'function';
+    const entries = canReadEntries
+      ? (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
+      : [];
     const recentRequests = entries.filter(
       (entry) => now - entry.startTime < sampleInterval,
     ).length;
@@ -43,9 +46,13 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     const errorCount = (window as any).__performanceErrors || 0;
 
     // Render time (using performance marks if available)
-    const renderTime = performance
-      .getEntriesByType('measure')
-      .reduce((acc, measure) => acc + measure.duration, 0);
+    const measureEntries = canReadEntries
+      ? performance.getEntriesByType('measure')
+      : [];
+    const renderTime = measureEntries.reduce(
+      (acc, measure) => acc + (measure as PerformanceEntry).duration,
+      0,
+    );
 
     return {
       renderTime,

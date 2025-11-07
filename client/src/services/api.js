@@ -1,5 +1,7 @@
+import { getEnvVar } from '../utils/env';
+
 export function apiBase() {
-  const root = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const root = getEnvVar('VITE_API_URL', 'http://localhost:4000');
   return root.replace(/\/$/, '');
 }
 

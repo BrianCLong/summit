@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSubscription, gql } from '@apollo/client';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useSubscription, gql, getApolloContext } from '@apollo/client';
 
 const NOTIFICATION_SUBSCRIPTION = gql`
   subscription NotificationUpdates {
@@ -47,6 +47,11 @@ function NotificationSystem({
   maxNotifications = 5,
   autoHideDuration = 5000,
 }: NotificationSystemProps) {
+  const apolloContext = useContext(getApolloContext());
+  if (!apolloContext?.client) {
+    return null;
+  }
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showPanel, setShowPanel] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);

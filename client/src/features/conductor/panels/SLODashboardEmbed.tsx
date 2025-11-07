@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { getEnvVar } from '../../../utils/env';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 
 export function SLODashboardEmbed({
-  grafanaUrl = import.meta.env.VITE_GRAFANA_URL || '',
-  dashboard = import.meta.env.VITE_GRAFANA_MAESTRO_DASH_UID || '',
+  grafanaUrl = getEnvVar('VITE_GRAFANA_URL'),
+  dashboard = getEnvVar('VITE_GRAFANA_MAESTRO_DASH_UID'),
   theme = 'light',
 }: {
   grafanaUrl?: string;
