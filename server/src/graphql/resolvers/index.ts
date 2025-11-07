@@ -8,11 +8,11 @@ import evidenceOkResolvers from './evidenceOk.js';
 import trustRiskResolvers from './trust-risk.js';
 import provenanceResolvers from './provenance.js';
 
-// MC Platform v0.4.0 Transcendent Intelligence Resolvers
-import { v040Resolvers } from './v040';
+// MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
+// import { v040Resolvers } from './v040';
 
-// MC Platform v0.4.1 Sovereign Safeguards Resolvers
-import { v041Resolvers } from './v041';
+// MC Platform v0.4.1 Sovereign Safeguards Resolvers (DISABLED - incomplete)
+// import { v041Resolvers } from './v041';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -25,10 +25,10 @@ const resolvers = {
     ...(evidenceOkResolvers.Query || {}),
     ...(trustRiskResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
-    // MC Platform v0.4.0 Transcendent Intelligence
-    ...(v040Resolvers.Query || {}),
-    // MC Platform v0.4.1 Sovereign Safeguards
-    ...(v041Resolvers.Query || {}),
+    // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
+    // ...(v040Resolvers.Query || {}),
+    // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
+    // ...(v041Resolvers.Query || {}),
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     getCrisisTelemetry:
       wargameResolver.getCrisisTelemetry.bind(wargameResolver),
@@ -50,10 +50,10 @@ const resolvers = {
     ...(evidenceResolvers.Mutation || {}),
     ...(trustRiskResolvers.Mutation || {}),
     ...(provenanceResolvers.Mutation || {}),
-    // MC Platform v0.4.0 Transcendent Intelligence
-    ...(v040Resolvers.Mutation || {}),
-    // MC Platform v0.4.1 Sovereign Safeguards
-    ...(v041Resolvers.Mutation || {}),
+    // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
+    // ...(v040Resolvers.Mutation || {}),
+    // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
+    // ...(v041Resolvers.Mutation || {}),
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     runWarGameSimulation:
       wargameResolver.runWarGameSimulation.bind(wargameResolver),
