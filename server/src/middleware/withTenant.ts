@@ -70,6 +70,26 @@ export const withTenant = (
 };
 
 /**
+ * Helper function to extract and validate tenant from context
+ */
+export const requireTenant = (context: TenantContext): string => {
+  if (!context?.user) {
+    throw new GraphQLError('Authentication required', {
+      extensions: { code: 'UNAUTHENTICATED' },
+    });
+  }
+
+  if (!context.user.tenant) {
+    logger.error({ userId: context.user.id }, 'User missing tenant');
+    throw new GraphQLError('Missing tenant context', {
+      extensions: { code: 'FORBIDDEN' },
+    });
+  }
+
+  return context.user.tenant;
+};
+
+/**
  * Helper function to create tenant-scoped Redis keys
  */
 export const tenantKey = (tenant: string, base: string): string => {

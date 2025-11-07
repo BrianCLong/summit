@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import { pubsub } from '../realtime/pubsub';
-import { v4 as uuid } from 'uuid';
+import { randomUUID as uuid } from 'node:crypto';
 
 const router = Router();
 const SECRET = process.env.ML_WEBHOOK_SECRET!;

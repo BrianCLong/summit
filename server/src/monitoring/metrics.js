@@ -252,6 +252,14 @@ const pbacDecisionsTotal = new client.Counter({
   labelNames: ['decision'],
 });
 register.registerMetric(pbacDecisionsTotal);
+
+const admissionDecisionsTotal = new client.Counter({
+  name: 'admission_decisions_total',
+  help: 'Total admission control decisions',
+  labelNames: ['decision', 'policy'],
+});
+register.registerMetric(admissionDecisionsTotal);
+
 // New domain metrics
 const graphExpandRequestsTotal = new client.Counter({
   name: 'graph_expand_requests_total',
@@ -393,6 +401,7 @@ export {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
   pbacDecisionsTotal,
+  admissionDecisionsTotal,
   pipelineUptimeRatio,
   pipelineFreshnessSeconds,
   pipelineCompletenessRatio,

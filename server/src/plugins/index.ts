@@ -1,6 +1,6 @@
 import { Plugin, PluginContext } from './sdk';
 import { vaultReadKvV2 } from '../vault/helpers';
-import { RedisCache } from '../cache/redis.js';
+import { RedisService as RedisCache } from '../cache/redis.js';
 import { pluginInvocations, pluginErrors } from '../metrics/pluginMetrics.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
