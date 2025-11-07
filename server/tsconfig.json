@@ -65,6 +65,11 @@
     "src/optimization/index.ts",
     "src/conductor/cache.ts",
     "src/graphql/resolvers/safe-mutations.ts",
+    "src/middleware/abuseGuard.ts",
+    "src/middleware/idempotency.ts",
+    "src/middleware/opa.ts",
+    "src/rate/redisBucket.ts",
+    "src/routes/assistant.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
