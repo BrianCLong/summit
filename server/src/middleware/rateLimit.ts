@@ -41,7 +41,6 @@ export const createRateLimitMiddleware = (
 ) => {
   return rateLimit({
     store: new RedisStore({
-      // @ts-expect-error - Known issue with RedisStore types
       sendCommand: (...args: string[]) => redisClient.call(...args),
     }),
     ...defaultRateLimitOptions,
