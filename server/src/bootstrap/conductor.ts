@@ -90,9 +90,9 @@ export async function wireConductor(options: {
           const health = await getConductorHealth();
 
           const statusCode =
-            health.status === 'pass'
+            health.status === 'healthy'
               ? 200
-              : health.status === 'warn'
+              : health.status === 'degraded'
                 ? 200
                 : 503;
 
