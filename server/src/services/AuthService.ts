@@ -4,7 +4,8 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
-import { Pool, type PoolClient } from 'pg';
+import { Pool } from 'pg';
+import type { PoolClient } from '@types/pg';
 
 interface UserData {
   email: string;

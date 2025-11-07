@@ -6,7 +6,8 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { Pool, type QueryResult, type PoolClient } from 'pg';
+import { Pool } from 'pg';
+import type { QueryResult, PoolClient } from '@types/pg';
 import logger from '../utils/logger.js';
 
 interface TimescaleConfig {
