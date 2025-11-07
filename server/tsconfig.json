@@ -27,6 +27,10 @@
     "src/conductor/**",
     "src/coherence/**",
     "src/ai/**",
+    "src/kpro/**",
+    "src/nl2cypher/**",
+    "src/runbooks/**",
+    "src/routes/replay.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
