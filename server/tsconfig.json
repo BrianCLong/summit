@@ -55,6 +55,13 @@
     "src/graphql/resolvers/multimodalResolvers.ts",
     "src/services/MediaUploadService.ts",
     "src/services/GACoremetricsService.ts",
+    "src/config/distributed/**",
+    "src/config/graphrag.ts",
+    "src/config/secrets.ts",
+    "src/config/tenant-database.ts",
+    "src/federal/**",
+    "src/runtime/breakers.ts",
+    "src/qam/IncidentAutoReweighter.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
