@@ -1,10 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -p:*)",
-      "Bash(cut:*)",
-      "Bash(for file in src/services/AlertTriageV2Service.ts src/services/AnalystDashboardService.ts src/services/AnalystFeedbackService.ts src/services/DetectionContentPackV5.ts src/services/DetectionContentPackV6.ts src/services/SOARConnectorV1Service.ts src/services/SOARPlaybookService.ts)",
-      "Bash(if grep -q \"import.*Logger.*from.*winston\" \"$file\")"
+      "Bash(for file in src/federal/airgap-service.ts src/federal/dual-notary.ts src/federal/fips-compliance.ts src/federal/slsa3-verifier.ts)",
+      "Bash(if grep -q \"import { z } from ''zod'';\" \"$file\")",
+      "Bash(for file in src/db/budgetLedger.ts src/db/postgres.ts src/db/timescale.ts)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

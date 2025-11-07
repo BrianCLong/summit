@@ -62,6 +62,9 @@
     "src/federal/**",
     "src/runtime/breakers.ts",
     "src/qam/IncidentAutoReweighter.ts",
+    "src/optimization/index.ts",
+    "src/conductor/cache.ts",
+    "src/graphql/resolvers/safe-mutations.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
