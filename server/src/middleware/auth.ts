@@ -42,3 +42,7 @@ export function requirePermission(permission: string) {
     }
   };
 }
+
+// Export aliases for compatibility
+export const authMiddleware = ensureAuthenticated;
+export const auth = ensureAuthenticated;
