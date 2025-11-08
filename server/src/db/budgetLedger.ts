@@ -3,8 +3,7 @@
  * Source of truth for tenant budgets and detailed audit trail
  */
 
-import { Pool } from 'pg';
-import type { PoolClient } from '@types/pg';
+import { Pool, type PoolClient } from 'pg';
 import logger from '../utils/logger';
 
 export interface TenantBudget {
