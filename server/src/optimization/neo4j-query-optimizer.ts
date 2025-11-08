@@ -1,6 +1,6 @@
 // server/src/optimization/neo4j-query-optimizer.ts
 
-import { Driver, Session, Result, Integer } from 'neo4j-driver';
+import { Driver, Session, Result, Integer, int } from 'neo4j-driver';
 import { getRedisClient } from '../config/database.js';
 import logger from '../utils/logger.js';
 import { createHash } from 'crypto';
@@ -724,7 +724,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
 
   private serializeValue(value: any): any {
     if (value && typeof value === 'object') {
-      if (Integer.isInteger(value)) {
+      if (int.isInt(value)) {
         return { _type: 'Integer', _value: value.toString() };
       }
       // Handle other Neo4j types as needed
