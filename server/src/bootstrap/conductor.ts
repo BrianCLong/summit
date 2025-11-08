@@ -69,7 +69,7 @@ export async function wireConductor(options: {
 
     // Add GraphQL endpoint for Conductor
     if (options.app) {
-      const apollo = new ApolloServer({ schema, introspection: true });
+      const apollo = new ApolloServer({ typeDefs: schema, introspection: true });
       await apollo.start();
       options.app.use(
         '/graphql',
