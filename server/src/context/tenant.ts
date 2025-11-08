@@ -88,8 +88,8 @@ class TenantContextService {
           }
 
           // Query tenant information from database
-          const tenantRecord = await pg.oneOrNone<TenantRecord>(
-            `SELECT 
+          const tenantRecord = (await pg.oneOrNone(
+            `SELECT
              tenant_id,
              region_tag,
              residency_region,
@@ -106,11 +106,11 @@ class TenantContextService {
              quota_export_calls_per_day,
              created_at,
              updated_at
-           FROM tenants 
+           FROM tenants
            WHERE tenant_id = $1`,
             [tenantId],
             { tenantId },
-          );
+          )) as TenantRecord | null;
 
           if (!tenantRecord) {
             span.setAttributes({ tenant_found: false });
