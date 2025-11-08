@@ -526,7 +526,6 @@ async function startLiveServer() {
   const server = new ApolloServer({
     schema,
     introspection: true,
-    playground: true,
   });
 
   // Health check endpoint
