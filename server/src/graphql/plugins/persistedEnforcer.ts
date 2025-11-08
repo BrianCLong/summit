@@ -150,7 +150,7 @@ export function persistedEnforcer(
     emergencyBypass: config?.emergencyBypass ?? EMERGENCY_BYPASS,
     allowIntrospection: config?.allowIntrospection ?? ALLOW_INTROSPECTION,
     allowHealth: config?.allowHealth ?? ALLOW_HEALTH,
-    canaryTenants: config?.canaryTenants ?? CANARY_TENANTS,
+    canaryTenants: (config?.canaryTenants ?? CANARY_TENANTS) as Set<string>,
     enforceForCanariesOnly: config?.enforceForCanariesOnly ?? true,
   };
 

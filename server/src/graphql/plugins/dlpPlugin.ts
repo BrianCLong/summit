@@ -227,7 +227,7 @@ export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
                 );
 
                 // Update response with processed content
-                response.body.singleResult.data = processedContent;
+                response.body.singleResult.data = processedContent as Record<string, unknown>;
 
                 logger.info('GraphQL DLP response processing completed', {
                   component: 'DLPPlugin',
