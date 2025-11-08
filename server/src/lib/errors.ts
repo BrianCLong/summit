@@ -30,9 +30,9 @@ export class AppError extends Error {
 export function mapGraphRAGError(error: unknown): UserFacingError {
   const traceId = randomUUID();
   let summary = 'Unknown error';
-  if (error instanceof z.ZodError) {
-    summary = error.issues
-      .map((i) => `${i.path.join('.')}: ${i.message}`)
+  if (error && typeof error === 'object' && 'issues' in error && Array.isArray((error as any).issues)) {
+    summary = (error as any).issues
+      .map((i: any) => `${i.path.join('.')}: ${i.message}`)
       .join('; ');
   } else if (error instanceof Error) {
     summary = error.message;

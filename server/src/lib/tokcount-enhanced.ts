@@ -113,18 +113,11 @@ const PRICING_REGISTRY: Record<
 /**
  * LRU cache for token count estimates (5-minute TTL, 10k entries max)
  */
-const tokenCache = new LRU<
-  string,
-  {
-    tokens: number;
-    method: 'precise' | 'heuristic';
-    timestamp: number;
-  }
->({
+const tokenCache = new LRU({
   max: 10000,
   ttl: 5 * 60 * 1000, // 5 minutes
   updateAgeOnGet: true,
-});
+}) as any;
 
 /**
  * Apply provider-specific billing rounding rules
