@@ -126,7 +126,6 @@ class OpaPolicyEngine {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         'opa_policy_evaluation',
-        decision.allow,
       );
       prometheusConductorMetrics.recordOperationalMetric(
         'opa_evaluation_time',
@@ -139,7 +138,6 @@ class OpaPolicyEngine {
 
       prometheusConductorMetrics.recordOperationalEvent(
         'opa_evaluation_error',
-        false,
       );
 
       // Fail-safe: deny by default
@@ -259,7 +257,6 @@ class OpaPolicyEngine {
     this.policyCache.clear();
     prometheusConductorMetrics.recordOperationalEvent(
       'opa_cache_cleared',
-      true,
     );
   }
 }
@@ -316,7 +313,6 @@ export class TagPropagationSystem {
       console.error('Tag propagation failed:', error);
       prometheusConductorMetrics.recordOperationalEvent(
         'tag_propagation_error',
-        false,
       );
     }
   }
@@ -430,7 +426,6 @@ export class TenantIsolationMiddleware {
 
           prometheusConductorMetrics.recordOperationalEvent(
             'tenant_isolation_violation',
-            false,
           );
 
           return res.status(403).json({
