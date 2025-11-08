@@ -31,7 +31,7 @@ export interface EstimateOutput {
   completionUSD: number;
   totalUSD: number;
   cacheHit: boolean;
-  estimationMethod: 'precise' | 'heuristic' | 'cached';
+  estimationMethod: 'precise' | 'heuristic' | 'cached' | 'reconciled';
 }
 
 export interface ReconciliationResult extends EstimateOutput {
@@ -318,7 +318,7 @@ export async function estimateTokensAndCost(
   const cached = tokenCache.get(cacheKey);
 
   let promptTokens: number;
-  let estimationMethod: 'precise' | 'heuristic' | 'cached';
+  let estimationMethod: 'precise' | 'heuristic' | 'cached' | 'reconciled';
   let cacheHit = false;
 
   if (cached && Date.now() - cached.timestamp < 300000) {
