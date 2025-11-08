@@ -91,7 +91,6 @@ class OpaPolicyEngine {
       if (cached && cached.expiry > Date.now()) {
         prometheusConductorMetrics.recordOperationalEvent(
           'opa_cache_hit',
-          true,
         );
         return cached.decision;
       }
