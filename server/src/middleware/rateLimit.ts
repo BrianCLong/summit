@@ -21,7 +21,7 @@ interface RateLimitOptions {
   windowMs: number; // Window size in milliseconds
   max: number; // Max requests per window
   message?: string; // Custom message
-  keyGenerator?: (req: any) => string; // Function to generate key
+  keyGenerator?: (req: any, res: any) => string; // Function to generate key
   statusCode?: number; // Status code for exceeded limits
   headers?: boolean; // Include X-RateLimit-* headers
 }
@@ -46,7 +46,7 @@ export const createRateLimitMiddleware = (
     ...defaultRateLimitOptions,
     ...options,
     // Custom key generator to support per-user/per-tenant limits
-    keyGenerator: (req) => {
+    keyGenerator: (req, res) => {
       // Prioritize user ID from authenticated context
       if (req.user && req.user.id) {
         return `user:${req.user.id}`;
@@ -60,7 +60,7 @@ export const createRateLimitMiddleware = (
     },
     handler: (req, res, next, options) => {
       logger.warn(
-        `Rate limit exceeded for ${options.keyGenerator(req)} on ${req.path}`,
+        `Rate limit exceeded for ${options.keyGenerator(req, res)} on ${req.path}`,
       );
       res.status(options.statusCode).send(options.message);
     },
