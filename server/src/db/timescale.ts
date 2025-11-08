@@ -65,7 +65,7 @@ export async function query<T = any>(
   const client = await timescalePool.connect();
 
   try {
-    const result = await client.query<T>(text, params);
+    const result = await client.query(text, params) as QueryResult<T>;
     const duration = Date.now() - start;
 
     // Committee spec: Log slow queries for GA-Core optimization
