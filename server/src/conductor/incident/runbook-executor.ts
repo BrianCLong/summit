@@ -245,7 +245,6 @@ export class RunbookExecutor extends EventEmitter {
     const duration = (execution.endTime || Date.now()) - execution.startTime;
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_executed',
-      execution.status === 'completed',
     );
   }
 
