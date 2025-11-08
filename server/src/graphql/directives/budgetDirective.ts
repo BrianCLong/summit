@@ -12,6 +12,7 @@ import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
 import {
   estimateTokensAndCost,
   reconcileActualUsage,
+  Provider,
 } from '../../lib/tokcount-enhanced';
 import logger from '../../utils/logger';
 
@@ -187,7 +188,7 @@ export function budgetDirective(directiveName = 'budget') {
                 // 2. Estimate tokens and cost
                 const estimation = await estimateTokensAndCost({
                   payload: promptPayload,
-                  provider,
+                  provider: provider as Provider,
                   model,
                 });
 
