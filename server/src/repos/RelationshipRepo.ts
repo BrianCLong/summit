@@ -225,7 +225,7 @@ export class RelationshipRepo {
 
     query += ` ORDER BY created_at DESC`;
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: RelationshipRow[] };
     return rows.map(this.mapRow);
   }
 
@@ -272,7 +272,7 @@ export class RelationshipRepo {
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(Math.min(limit, 1000), offset);
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: RelationshipRow[] };
     return rows.map(this.mapRow);
   }
 
