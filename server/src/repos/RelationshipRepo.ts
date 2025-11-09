@@ -82,7 +82,7 @@ export class RelationshipRepo {
       }
 
       // 2. Insert relationship
-      const { rows } = await client.query<RelationshipRow>(
+      const { rows } = (await client.query(
         `INSERT INTO relationships (id, tenant_id, src_id, dst_id, type, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
@@ -95,7 +95,7 @@ export class RelationshipRepo {
           JSON.stringify(input.props || {}),
           userId,
         ],
-      );
+      )) as { rows: RelationshipRow[] };
 
       const relationship = rows[0];
 
@@ -200,7 +200,7 @@ export class RelationshipRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: RelationshipRow[] };
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
 

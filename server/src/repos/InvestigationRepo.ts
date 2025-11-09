@@ -62,7 +62,7 @@ export class InvestigationRepo {
   ): Promise<Investigation> {
     const id = uuidv4();
 
-    const { rows } = await this.pg.query<InvestigationRow>(
+    const { rows } = (await this.pg.query(
       `INSERT INTO investigations (id, tenant_id, name, description, status, props, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
@@ -75,7 +75,7 @@ export class InvestigationRepo {
         JSON.stringify(input.props || {}),
         userId,
       ],
-    );
+    )) as { rows: InvestigationRow[] };
 
     return this.mapRow(rows[0]);
   }
@@ -118,12 +118,12 @@ export class InvestigationRepo {
 
     updateFields.push(`updated_at = now()`);
 
-    const { rows } = await this.pg.query<InvestigationRow>(
+    const { rows } = (await this.pg.query(
       `UPDATE investigations SET ${updateFields.join(', ')}
        WHERE id = $1
        RETURNING *`,
       params,
-    );
+    )) as { rows: InvestigationRow[] };
 
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
@@ -166,7 +166,7 @@ export class InvestigationRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query<InvestigationRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
@@ -197,7 +197,7 @@ export class InvestigationRepo {
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(Math.min(limit, 1000), offset);
 
-    const { rows } = await this.pg.query<InvestigationRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
     return rows.map(this.mapRow);
   }
 
@@ -253,7 +253,7 @@ export class InvestigationRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query<InvestigationRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
     const investigationsMap = new Map(
       rows.map((row) => [row.id, this.mapRow(row)]),
     );
