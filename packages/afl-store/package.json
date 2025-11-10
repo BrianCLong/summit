@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "ioredis": "^5.8.2",
-    "neo4j-driver": "^6.0.0"
+    "neo4j-driver": "^6.0.1"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
     "@types/jest": "^30.0.0",
     "jest": "^30.2.0",
-    "@types/node": "^24.9.1"
+    "@types/node": "^24.10.0"
   }
 }

@@ -132,7 +132,7 @@
     "@apollo/client": "^4.0.7",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^9.39.1",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
     "@playwright/test": "^1.56.1",
@@ -143,8 +143,8 @@
     "@swc/core": "^1.13.5",
     "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.3",
     "concurrently": "^9.2.0",
     "eslint-plugin-jest": "^27.9.0",
     "globals": "^16.4.0",
@@ -158,11 +158,11 @@
     "semantic-release": "^25.0.1",
     "ts-jest": "^29.4.5",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.2",
+    "typescript-eslint": "^8.46.3",
     "ts-node": "^10.9.2",
     "rimraf": "^6.0.1",
-    "eslint": "^9.38.0",
-    "@types/node": "^24.9.1"
+    "eslint": "^9.39.1",
+    "@types/node": "^24.10.0"
   },
   "husky": {
     "hooks": {
@@ -219,8 +219,8 @@
     "cross-env": "^10.1.0",
     "docx": "^9.5.1",
     "dotenv": "^17.2.3",
-    "jest-extended": "^6.0.0",
-    "neo4j-driver": "^6.0.0",
+    "jest-extended": "^7.0.0",
+    "neo4j-driver": "^6.0.1",
     "pg": "^8.16.3",
     "redis": "^5.8.1",
     "ws": "^8.18.3"
