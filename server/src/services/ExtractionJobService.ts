@@ -741,12 +741,12 @@ export class ExtractionJobService {
 
       for (const detection of results) {
         entities.push({
-          entityType: detection.class_name,
+          entityType: detection.className,
           boundingBox: {
-            x: detection.bbox.x,
-            y: detection.bbox.y,
-            width: detection.bbox.width,
-            height: detection.bbox.height,
+            x: detection.boundingBox.x,
+            y: detection.boundingBox.y,
+            width: detection.boundingBox.width,
+            height: detection.boundingBox.height,
             confidence: detection.confidence,
           },
           confidence: detection.confidence,
@@ -754,9 +754,9 @@ export class ExtractionJobService {
           extractionVersion: '2.0.0',
           metadata: {
             model: detection.model,
-            classId: detection.class_id,
-            area: detection.bbox.width * detection.bbox.height,
-            trackingId: detection.tracking_id,
+            classId: detection.classId,
+            area: detection.boundingBox.width * detection.boundingBox.height,
+            trackingId: detection.trackingId,
           },
         });
       }
