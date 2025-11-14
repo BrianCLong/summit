@@ -10,7 +10,7 @@
  */
 
 import { Driver, Session } from 'neo4j-driver';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import { z } from 'zod';
 import { createHash } from 'crypto';
 import pino from 'pino';
