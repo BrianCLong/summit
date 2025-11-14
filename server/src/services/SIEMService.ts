@@ -7,7 +7,7 @@
 
 import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
-import { redisClient } from '../db/redis.js';
+import { getRedisClient } from '../db/redis.js';
 import axios from 'axios';
 import crypto from 'crypto';
 

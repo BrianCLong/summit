@@ -7,7 +7,7 @@
 
 import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
-import { redisClient } from '../db/redis.js';
+import { getRedisClient } from '../db/redis.js';
 
 export interface DLPPolicy {
   id: string;
@@ -684,7 +684,7 @@ class DLPService {
   ): Promise<void> {
     const quarantineKey = `${this.cachePrefix}quarantine:${context.tenantId}:${Date.now()}`;
 
-    await redisClient.setex(
+    await getRedisClient().setex(
       quarantineKey,
       86400 * 7,
       JSON.stringify({
@@ -786,7 +786,7 @@ class DLPService {
 
   private async getCachedResult(key: string): Promise<DLPScanResult[] | null> {
     try {
-      const cached = await redisClient.get(key);
+      const cached = await getRedisClient().get(key);
       return cached ? JSON.parse(cached) : null;
     } catch {
       return null;
@@ -799,7 +799,7 @@ class DLPService {
     ttl: number,
   ): Promise<void> {
     try {
-      await redisClient.setex(key, ttl, JSON.stringify(results));
+      await getRedisClient().setex(key, ttl, JSON.stringify(results));
     } catch (error) {
       logger.warn('Failed to cache DLP results', {
         component: 'DLPService',
