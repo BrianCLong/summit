@@ -57,9 +57,9 @@ export class RedisService {
     return this.sub.del(key);
   }
 
-  async set(key: string, value: string, expiryMode?: 'EX' | 'PX', time?: number): Promise<'OK' | null> {
-    if (expiryMode && time !== undefined) {
-      return this.sub.set(key, value, expiryMode, time);
+  async set(key: string, value: string, ttlSeconds?: number): Promise<'OK' | null> {
+    if (ttlSeconds !== undefined) {
+      return this.sub.set(key, value, 'EX', ttlSeconds);
     }
     return this.sub.set(key, value);
   }
