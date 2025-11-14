@@ -56,4 +56,15 @@ export class RedisService {
   async del(key: string): Promise<number> {
     return this.sub.del(key);
   }
+
+  async set(key: string, value: string, expiryMode?: 'EX' | 'PX', time?: number): Promise<'OK' | null> {
+    if (expiryMode && time !== undefined) {
+      return this.sub.set(key, value, expiryMode, time);
+    }
+    return this.sub.set(key, value);
+  }
+
+  async getKeysByPattern(pattern: string): Promise<string[]> {
+    return this.sub.keys(pattern);
+  }
 }
