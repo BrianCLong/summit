@@ -307,7 +307,7 @@ export class EntityRepo {
   ): Promise<(Entity | null)[]> {
     if (ids.length === 0) return [];
 
-    const params = [ids];
+    const params: any[] = [ids];
     let query = `SELECT * FROM entities WHERE id = ANY($1)`;
 
     if (tenantId) {

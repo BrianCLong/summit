@@ -245,7 +245,7 @@ export class InvestigationRepo {
   ): Promise<(Investigation | null)[]> {
     if (ids.length === 0) return [];
 
-    const params = [ids];
+    const params: any[] = [ids];
     let query = `SELECT * FROM investigations WHERE id = ANY($1)`;
 
     if (tenantId) {
