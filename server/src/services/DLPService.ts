@@ -97,8 +97,8 @@ class DLPService {
   constructor() {
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 5,
-      recoveryTimeout: 30000,
-      monitoringPeriod: 60000,
+      resetTimeout: 30000,
+      // monitoringPeriod: 60000, // Not a valid CircuitBreakerOption
     });
 
     this.initializeDefaultPolicies();

@@ -20,7 +20,7 @@ import type {
 
 export interface SignOptions {
   includeTimestamp?: boolean;
-  metadata?: Record<string, unknown>;
+  metadata?: import('./types.js').JsonObject;
 }
 
 export interface CryptoPipelineOptions {

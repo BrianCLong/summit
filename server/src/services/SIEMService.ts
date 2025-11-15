@@ -271,8 +271,8 @@ class SIEMService {
             id,
             new CircuitBreaker({
               failureThreshold: 5,
-              recoveryTimeout: 60000,
-              monitoringPeriod: 300000, // 5 minutes
+              resetTimeout: 60000,
+              // monitoringPeriod: 300000, // Not a valid CircuitBreakerOption
             }),
           );
           this.eventBuffer.set(id, []);

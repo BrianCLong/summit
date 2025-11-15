@@ -905,15 +905,15 @@ export class PerformanceMonitoringSystem extends EventEmitter {
           'SELECT count(*) as idle FROM pg_stat_activity WHERE state = $1',
           ['idle'],
         ),
-        client.query(`SELECT 
+        client.query(`SELECT
           sum(calls) as total_queries,
-          avg(mean_exec_time) as avg_query_time 
-          FROM pg_stat_statements 
+          avg(mean_exec_time) as avg_query_time
+          FROM pg_stat_statements
           WHERE calls > 0
         `),
-        client.query(`SELECT 
+        client.query(`SELECT
           sum(blks_hit) as cache_hits,
-          sum(blks_read) as cache_misses 
+          sum(blks_read) as cache_misses
           FROM pg_stat_database
         `),
       ]);
@@ -1112,7 +1112,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
       Date.now() - this.METRICS_RETENTION_HOURS * 60 * 60 * 1000;
     this.metrics[type] = this.metrics[type].filter(
       (m) => (m as any).timestamp > cutoffTime,
-    );
+    ) as any;
   }
 
   private getLatestMetrics(): any {

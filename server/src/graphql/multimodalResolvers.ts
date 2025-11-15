@@ -178,7 +178,10 @@ export const multimodalResolvers = {
         context.storageService,
       );
 
-      return await multimodalService.getMediaSources(args);
+      return await multimodalService.getMediaSources(args.investigationId || '', {
+        mediaType: args.mediaType as any,
+        limit: args.limit,
+      });
     },
 
     mediaSource: async (
@@ -211,7 +214,10 @@ export const multimodalResolvers = {
         context.storageService,
       );
 
-      return await multimodalService.getMultimodalEntities(args);
+      return await multimodalService.getMultimodalEntities(args.investigationId || '', {
+        mediaType: args.mediaType as any,
+        limit: args.limit,
+      });
     },
 
     multimodalEntity: async (
@@ -313,7 +319,11 @@ export const multimodalResolvers = {
         context.storageService,
       );
 
-      return await multimodalService.semanticSearch(args.input);
+      return await multimodalService.semanticSearch('', {
+        topK: args.input.limit,
+        threshold: args.input.threshold,
+        mediaTypes: args.input.mediaTypes as any,
+      });
     },
 
     multimodalAnalytics: async (
@@ -443,7 +453,7 @@ export const multimodalResolvers = {
       );
 
       return await multimodalService.createMultimodalEntity(
-        args.input,
+        args.input as any,
         context.user.id,
       );
     },

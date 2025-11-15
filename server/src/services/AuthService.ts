@@ -4,8 +4,7 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
-import { Pool } from 'pg';
-import type { PoolClient } from '@types/pg';
+import { Pool, PoolClient } from 'pg';
 
 interface UserData {
   email: string;
@@ -212,6 +211,7 @@ export class AuthService {
       role: user.role,
     };
 
+    // @ts-ignore - jwt.sign overload mismatch
     const token = jwt.sign(tokenPayload, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn,
     });

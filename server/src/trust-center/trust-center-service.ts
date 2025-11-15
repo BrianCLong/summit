@@ -76,7 +76,7 @@ export class TrustCenterService {
 
       // Create report record
       await pool.query(
-        `INSERT INTO trust_center_reports 
+        `INSERT INTO trust_center_reports
          (id, tenant_id, report_type, status, metadata, created_at, expires_at)
          VALUES ($1, $2, 'audit_export', 'generating', $3, now(), now() + interval '7 days')`,
         [
@@ -152,7 +152,7 @@ export class TrustCenterService {
 
       // Update report status
       await pool.query(
-        `UPDATE trust_center_reports 
+        `UPDATE trust_center_reports
          SET status = 'completed', download_url = $2, updated_at = now()
          WHERE id = $1`,
         [reportId, `/api/trust-center/download/${reportId}`],
@@ -172,7 +172,7 @@ export class TrustCenterService {
 
       const pool = getPostgresPool();
       await pool.query(
-        `UPDATE trust_center_reports 
+        `UPDATE trust_center_reports
          SET status = 'failed', error_message = $2, updated_at = now()
          WHERE id = $1`,
         [reportId, error.message],
@@ -197,7 +197,7 @@ export class TrustCenterService {
     // Collect policy decisions
     if (request.includePolicyDecisions) {
       const { rows: policyRows } = await pool.query(
-        `SELECT * FROM policy_audit 
+        `SELECT * FROM policy_audit
          WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
          ORDER BY created_at DESC`,
         [request.tenantId, request.startDate, request.endDate],
@@ -210,7 +210,7 @@ export class TrustCenterService {
       const { rows: routerRows } = await pool.query(
         `SELECT rd.*, re.payload as override_event
          FROM router_decisions rd
-         LEFT JOIN run_event re ON re.run_id = rd.run_id 
+         LEFT JOIN run_event re ON re.run_id = rd.run_id
            AND re.kind = 'routing.override'
          WHERE rd.created_at BETWEEN $1 AND $2
          ORDER BY rd.created_at DESC`,
@@ -233,7 +233,7 @@ export class TrustCenterService {
       } else {
         // Get evidence for all runs in time range
         const { rows: evidenceRows } = await pool.query(
-          `SELECT * FROM evidence_artifacts 
+          `SELECT * FROM evidence_artifacts
            WHERE created_at BETWEEN $1 AND $2
            ORDER BY created_at DESC LIMIT 1000`,
           [request.startDate, request.endDate],
@@ -244,7 +244,7 @@ export class TrustCenterService {
 
     // Include system events
     const { rows: eventRows } = await pool.query(
-      `SELECT * FROM run_event 
+      `SELECT * FROM run_event
        WHERE ts BETWEEN $1 AND $2
        AND kind IN ('approval.created', 'approval.approved', 'approval.declined', 'routing.override')
        ORDER BY ts DESC`,
@@ -289,9 +289,9 @@ export class TrustCenterService {
       );
 
       const { rows: mcpRows } = await pool.query(
-        `SELECT name, url FROM mcp_servers 
+        `SELECT name, url FROM mcp_servers
          WHERE id IN (
-           SELECT server_id FROM mcp_sessions 
+           SELECT server_id FROM mcp_sessions
            WHERE id IN (
              SELECT session_id FROM mcp_audit WHERE session_id IN (
                SELECT id FROM mcp_sessions WHERE created_at <= $1
@@ -389,18 +389,18 @@ export class TrustCenterService {
           rd.policy_applied as metadata
         FROM router_decisions rd
         WHERE rd.run_id = $1
-        
+
         UNION ALL
-        
+
         SELECT DISTINCT
           ms.name as component_name,
           'mcp-server' as component_type,
           ms.tags as metadata
         FROM mcp_servers ms
         WHERE ms.id IN (
-          SELECT server_id FROM mcp_sessions 
+          SELECT server_id FROM mcp_sessions
           WHERE id IN (
-            SELECT DISTINCT session_id FROM mcp_audit 
+            SELECT DISTINCT session_id FROM mcp_audit
             WHERE created_at BETWEEN (
               SELECT started_at FROM run WHERE id = $1
             ) AND (
@@ -629,26 +629,7 @@ export class TrustCenterService {
         : [];
 
       // Generate SLSA attestation
-      const slsaAttestation = await this.generateSLSAAttestation(tenantId, {
-        buildDefinition: {
-          buildType: 'intelgraph-audit',
-          externalParameters: {
-            tenant: tenantId,
-            period: `${startDate}_to_${endDate}`,
-          },
-          internalParameters: {
-            auditVersion: '1.0',
-            frameworks: frameworks.join(','),
-          },
-        },
-        runDetails: {
-          builder: { id: 'intelgraph-trust-center' },
-          metadata: {
-            invocationId: reportId,
-            startedOn: new Date().toISOString(),
-          },
-        },
-      });
+      const slsaAttestation = await this.generateSLSAAttestation(reportId, tenantId);
 
       const report = {
         metadata: {
@@ -836,7 +817,7 @@ export class TrustCenterService {
     // Policy decisions
     const policyQuery = await pool.query(
       `SELECT created_at, decision, policy, user_id, resource, metadata
-       FROM policy_decisions 
+       FROM policy_decisions
        WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
        ORDER BY created_at DESC`,
       [tenantId, startDate, endDate],
@@ -846,7 +827,7 @@ export class TrustCenterService {
     // Router decisions
     const routerQuery = await pool.query(
       `SELECT created_at, run_id, selected_model, candidates, scores, override_reason, metadata
-       FROM router_decisions 
+       FROM router_decisions
        WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
        ORDER BY created_at DESC`,
       [tenantId, startDate, endDate],
@@ -856,7 +837,7 @@ export class TrustCenterService {
     // Evidence artifacts
     const evidenceQuery = await pool.query(
       `SELECT created_at, type, hash, size_bytes, source, metadata
-       FROM evidence_artifacts 
+       FROM evidence_artifacts
        WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
        ORDER BY created_at DESC`,
       [tenantId, startDate, endDate],
@@ -867,7 +848,7 @@ export class TrustCenterService {
     if (includeMetrics) {
       const metricsQuery = await pool.query(
         `SELECT timestamp, model, latency_ms, tokens_in, tokens_out, cost_usd, metadata
-         FROM serving_metrics 
+         FROM serving_metrics
          WHERE tenant_id = $1 AND timestamp BETWEEN $2 AND $3
          ORDER BY timestamp DESC
          LIMIT 1000`,

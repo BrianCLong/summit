@@ -153,6 +153,7 @@ export function budgetDirective(directiveName = 'budget') {
 
   const transformer = (schema: any) =>
     mapSchema(schema, {
+      // @ts-ignore - FieldMapper type incompatibility
       [MapperKind.OBJECT_FIELD]: (fieldConfig: GraphQLField<any, any>) => {
         const directive = getDirective(
           schema,

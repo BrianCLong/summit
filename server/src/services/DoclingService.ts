@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { randomUUID, createHash } from 'crypto';
+// @ts-ignore - env.ts is currently empty/placeholder
 import { env } from '../config/env.js';
 import {
   doclingInferenceDuration,

@@ -392,7 +392,7 @@ export class AnalyticsDashboardService extends EventEmitter {
             tension: 0.1,
           },
         ],
-      },
+      } as any,
       options: {
         responsive: true,
         interaction: { intersect: false },

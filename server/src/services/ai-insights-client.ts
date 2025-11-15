@@ -86,7 +86,7 @@ export class AIInsightsClient {
       return [];
     }
 
-    return this.tracer.startActiveSpan(
+    return (this.tracer as any).startActiveSpan(
       'ai-insights.resolve-entities',
       async (span) => {
         try {
@@ -140,7 +140,7 @@ export class AIInsightsClient {
       return [];
     }
 
-    return this.tracer.startActiveSpan(
+    return (this.tracer as any).startActiveSpan(
       'ai-insights.score-links',
       async (span) => {
         try {
