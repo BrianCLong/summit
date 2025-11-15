@@ -7,11 +7,43 @@ import prettier from 'eslint-config-prettier';
 export default [
   { ignores: ['dist/**', 'coverage/**', 'node_modules/**', '.eslintrc.*', 'eslint.config.*.rehydrated', 'eslint.config.*.v9-backup'] },
   js.configs.recommended,
-  // Note: typescript-eslint recommended config temporarily disabled due to
+  // JavaScript files - Node environment (exclude from TypeScript rules)
+  {
+    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: { ...globals.node },
+    },
+    rules: {
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-process-exit': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+  // K6 performance test files
+  {
+    files: ['perf/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        __ENV: 'readonly',
+        __VU: 'readonly',
+        __ITER: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off', // K6 uses console for output
+    },
+  },
+  // TypeScript files - Note: typescript-eslint recommended config temporarily disabled due to
   // compatibility issue with ESLint 9.33.0 + @typescript-eslint/eslint-plugin 8.0.0
   // Issue: @typescript-eslint/no-unused-expressions rule crashes with undefined options
   {
-    files: ['src/**/*.ts', 'tests/**/*.ts', 'scripts/**/*.ts', '*.ts'],
+    files: ['src/**/*.ts', '*.ts'],
     plugins: {
       '@typescript-eslint': tseslint.plugin,
     },
@@ -32,14 +64,35 @@ export default [
       'no-process-exit': 'off',
     },
   },
+  // Script files - allow console output
   {
-    files: ['tests/**/*.ts', '**/*.spec.ts', '**/*.test.ts'],
+    files: ['scripts/**/*.ts', 'scripts/**/*.js'],
+    languageOptions: {
+      parser: tseslint.parser,
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.node },
+    },
+    rules: {
+      'no-console': 'off', // Scripts need console output
+      'no-process-exit': 'off',
+    },
+  },
+  // Test files - Jest environment
+  {
+    files: ['tests/**/*.ts', '__tests__/**/*.ts', '**/*.spec.ts', '**/*.test.ts'],
     plugins: { jest: (await import('eslint-plugin-jest')).default },
-    languageOptions: { globals: { ...globals.node, jest: true } },
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+    },
     rules: {
       'jest/expect-expect': 'warn',
       'jest/no-disabled-tests': 'warn',
       'jest/no-identical-title': 'error',
+      'no-console': 'off', // Allow console in tests
     },
   },
   prettier,
