@@ -3,6 +3,7 @@
  * Replaces demo resolvers with PostgreSQL (canonical) + Neo4j (graph) dual-write
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';

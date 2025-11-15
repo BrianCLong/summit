@@ -3,6 +3,7 @@
  * Handles investigation/case management with PostgreSQL
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';

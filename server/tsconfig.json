@@ -81,6 +81,7 @@
     "src/services/ExtractionJobService.ts",
     "src/routes/siem.ts",
     "src/routes/dlp.ts",
+    "src/routes/nl2cypher.ts",
     "src/optimization/optimization-manager.ts",
     "src/services/RTBFJobService.ts",
     "src/services/RTBFAuditService.ts",

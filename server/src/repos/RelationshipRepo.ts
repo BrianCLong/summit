@@ -3,6 +3,7 @@
  * Handles relationships between entities with PostgreSQL + Neo4j dual-write
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';

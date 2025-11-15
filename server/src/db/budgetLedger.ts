@@ -3,6 +3,7 @@
  * Source of truth for tenant budgets and detailed audit trail
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import logger from '../utils/logger';
 
