@@ -51,7 +51,10 @@ export default [
       parser: tseslint.parser,
       ecmaVersion: 2022,
       sourceType: 'module',
-      globals: { ...globals.node },
+      globals: {
+        ...globals.node,
+        NodeJS: 'readonly', // TypeScript namespace for Node.js types
+      },
       parserOptions: {
         // Avoid project: './tsconfig.json' until tsconfig includes tests to prevent perf/parse errors
         ecmaFeatures: { jsx: false },
@@ -78,14 +81,24 @@ export default [
       'no-process-exit': 'off',
     },
   },
-  // Test files - Jest environment
+  // Test files - Jest environment (including __tests__ directories and __mocks__)
   {
-    files: ['tests/**/*.ts', '__tests__/**/*.ts', '**/*.spec.ts', '**/*.test.ts'],
+    files: [
+      'tests/**/*.ts',
+      'tests/**/*.js',
+      '__tests__/**/*.ts',
+      '__tests__/**/*.js',
+      'src/**/__tests__/**/*.ts',
+      'src/**/__mocks__/**/*.ts',
+      '**/*.spec.ts',
+      '**/*.test.ts',
+    ],
     plugins: { jest: (await import('eslint-plugin-jest')).default },
     languageOptions: {
       globals: {
         ...globals.node,
         ...globals.jest,
+        NodeJS: 'readonly', // TypeScript namespace
       },
     },
     rules: {
