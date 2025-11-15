@@ -7,9 +7,24 @@ import prettier from 'eslint-config-prettier';
 export default [
   { ignores: ['dist/**', 'coverage/**', 'node_modules/**', '.eslintrc.*', 'eslint.config.*.rehydrated', 'eslint.config.*.v9-backup'] },
   js.configs.recommended,
-  // JavaScript files - Node environment (exclude from TypeScript rules)
+  // JavaScript ES module files (.mjs and .js using import/export)
   {
-    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+    files: ['**/*.mjs', '**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.node },
+    },
+    rules: {
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-process-exit': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+  // CommonJS files (.cjs or specific CommonJS .js files)
+  {
+    files: ['**/*.cjs'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
@@ -95,6 +110,9 @@ export default [
     ],
     plugins: { jest: (await import('eslint-plugin-jest')).default },
     languageOptions: {
+      parser: tseslint.parser, // Use TypeScript parser for .ts test files
+      ecmaVersion: 2022,
+      sourceType: 'module',
       globals: {
         ...globals.node,
         ...globals.jest,
