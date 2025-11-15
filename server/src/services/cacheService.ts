@@ -69,7 +69,7 @@ export class CacheService {
         const rkey = `${this.namespace}:${key}`;
         const raw = await this.redisClient.get(rkey);
         if (raw) {
-          const parsed = JSON.parse(raw) as CacheEntry<T>;
+          const parsed = JSON.parse(raw as string) as CacheEntry<T>;
           const now = Date.now();
           if (now - parsed.timestamp < parsed.ttl * 1000) {
             recHit('redis', op);

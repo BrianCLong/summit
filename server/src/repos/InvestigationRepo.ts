@@ -3,8 +3,7 @@
  * Handles investigation/case management with PostgreSQL
  */
 
-import { Pool } from 'pg';
-import type { PoolClient } from '@types/pg';
+import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 

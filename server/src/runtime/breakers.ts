@@ -1,9 +1,15 @@
-import CircuitBreaker, { Options } from 'opossum';
+import CircuitBreaker from 'opossum';
 
 export function breaker<TArgs extends any[], TRes>(
   fn: (...args: TArgs) => Promise<TRes>,
   name: string,
-  opts: Partial<Options> = {},
+  opts: Partial<{
+    timeout?: number;
+    errorThresholdPercentage?: number;
+    resetTimeout?: number;
+    rollingCountTimeout?: number;
+    rollingCountBuckets?: number;
+  }> = {},
 ) {
   const br = new CircuitBreaker(fn, {
     timeout: 3000, // fail fast

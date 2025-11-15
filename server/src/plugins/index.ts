@@ -41,8 +41,9 @@ export async function runPlugin(
     vault: { read: (path: string) => vaultReadKvV2(path) },
     cache: {
       get: async (k: string) => (await cache.get(k)) as any,
-      set: async (k: string, v: any, ttl?: number) =>
-        cache.set(k, v, Math.max(1, Number(ttl || 300))),
+      set: async (k: string, v: any, ttl?: number) => {
+        await cache.set(k, v, Math.max(1, Number(ttl || 300)));
+      },
     },
     logger: console as any,
   };

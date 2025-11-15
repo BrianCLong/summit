@@ -847,11 +847,11 @@ export class TenantSLOService extends EventEmitter {
         },
       );
 
-      this.metrics.incrementCounter('tenant_slo_violations', 1, {
+      this.metrics.incrementCounter('tenant_slo_violations', {
         tenant_id: metrics.tenantId,
         slo_type: violation.type,
         severity: violation.severity,
-      });
+      }, 1);
     }
   }
 
@@ -1003,11 +1003,11 @@ export class TenantSLOService extends EventEmitter {
     this.activeAlerts.set(tenantId, tenantAlerts);
 
     // Update metrics
-    this.metrics.incrementCounter('tenant_slo_alerts', 1, {
+    this.metrics.incrementCounter('tenant_slo_alerts', {
       tenant_id: tenantId,
       alert_type: alertType,
       severity,
-    });
+    }, 1);
 
     this.metrics.setGauge('tenant_active_alerts', tenantAlerts.length, {
       tenant_id: tenantId,

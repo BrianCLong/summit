@@ -116,7 +116,7 @@ export class ExtractionJobService {
       batchSize: parseInt(process.env.AI_BATCH_SIZE || '32'),
     };
 
-    this.extractionEngine = new ExtractionEngine(engineConfig);
+    this.extractionEngine = new ExtractionEngine(engineConfig, this.db);
     this.ocrEngine = new OCREngine(engineConfig);
     this.objectDetectionEngine = new ObjectDetectionEngine(engineConfig);
     this.speechToTextEngine = new SpeechToTextEngine(engineConfig);
@@ -585,11 +585,12 @@ export class ExtractionJobService {
           break;
 
         case 'embedding_generation':
-          const embeddingResults = await this.runEmbeddingGeneration(
-            mediaSource,
-            options,
-          );
-          entities.push(...embeddingResults);
+          // TODO: Implement embedding generation
+          // const embeddingResults = await this.runEmbeddingGeneration(
+          //   mediaSource,
+          //   options,
+          // );
+          // entities.push(...embeddingResults);
           break;
 
         case 'object_detection':

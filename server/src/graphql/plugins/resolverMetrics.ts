@@ -8,7 +8,7 @@ import {
 const resolverMetricsPlugin: ApolloServerPlugin<any> = {
 async requestDidStart(_ctx: GraphQLRequestContext<any>): Promise<GraphQLRequestListener<any>> {
     return {
-executionDidStart(): GraphQLRequestExecutionListener<any> {
+async executionDidStart(): Promise<GraphQLRequestExecutionListener<any>> {
         return {
 willResolveField({ info }: { info: any }) {
             const start = process.hrtime.bigint();

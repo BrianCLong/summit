@@ -736,9 +736,12 @@ export class ContextualRewardsV2 extends EventEmitter {
     }
 
     // Normalize weights
-    const sum = Object.values(currentWeights).reduce((a, b) => a + b, 0);
+    const sum: number = (Object.values(currentWeights) as number[]).reduce(
+      (a: number, b: number) => a + b,
+      0,
+    );
     for (const key in currentWeights) {
-      currentWeights[key] /= sum;
+      (currentWeights as any)[key] = (currentWeights as any)[key] / sum;
     }
 
     this.contextualWeights.set(contextKey, currentWeights);
