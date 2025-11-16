@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import winston from 'winston';
+import winston, { Logger } from 'winston';
 
 export interface PlaybookExecution {
   id: string;

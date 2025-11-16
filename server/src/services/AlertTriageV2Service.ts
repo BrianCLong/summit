@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import winston from 'winston';
+import winston, { Logger } from 'winston';
 import { Redis } from 'ioredis';
 
 export interface TriageScore {
