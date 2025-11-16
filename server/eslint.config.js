@@ -104,9 +104,13 @@ export default [
       '__tests__/**/*.ts',
       '__tests__/**/*.js',
       'src/**/__tests__/**/*.ts',
+      'src/**/__tests__/**/*.js',
       'src/**/__mocks__/**/*.ts',
+      'src/**/__mocks__/**/*.js',
       '**/*.spec.ts',
+      '**/*.spec.js',
       '**/*.test.ts',
+      '**/*.test.js',
     ],
     plugins: { jest: (await import('eslint-plugin-jest')).default },
     languageOptions: {
