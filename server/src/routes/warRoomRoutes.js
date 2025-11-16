@@ -3,6 +3,9 @@
  * RESTful endpoints for war room management
  */
 
+/* eslint-disable no-undef */
+// TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization
+
 const express = require('express');
 const WarRoomController = require('../controllers/WarRoomController');
 const { ensureAuthenticated, requireRole } = require('../middleware/auth');
