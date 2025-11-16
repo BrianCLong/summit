@@ -216,11 +216,13 @@ export function mountAssistant(app: Express, io?: any) {
         method: 'GET',
       });
       let tokens = 0;
+      let fullResponseText = ''; // To collect full response for cache
       try {
         write(res, { type: 'status', value: 'thinking' }); // Initial status
         for await (const tok of llm.stream(input, ac.signal)) {
           tokens += 1;
           tokensOut.inc({ mode: 'sse' }, 1);
+          fullResponseText += tok; // Collect full response
           write(res, { type: 'token', value: tok }); // Structured token
         }
         write(res, { type: 'done', cites: cites }); // Pass collected cites

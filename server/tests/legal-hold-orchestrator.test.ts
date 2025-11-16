@@ -13,6 +13,10 @@ import {
   PreservationVerificationResult,
 } from '../src/cases/legal-hold/types';
 
+// Type declarations for test-only types
+type EDiscoveryCollectionRequest = any;
+type EDiscoveryCollectionResult = any;
+
 describe('LegalHoldOrchestrator', () => {
   const baseScope: PreservationDataScope = {
     connectors: ['s3-archive', 'o365'],

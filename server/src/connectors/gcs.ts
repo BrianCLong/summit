@@ -3,7 +3,7 @@
 
 // No-op tracer shim to avoid OTEL dependency
 // GCS SDK loaded dynamically to avoid type resolution requirement during typecheck
- 
+
 const gcsLib: any = (() => {
   try {
     return require('@google-cloud/storage');
@@ -12,6 +12,7 @@ const gcsLib: any = (() => {
   }
 })();
 const { Storage } = gcsLib as any;
+type Storage = any;
 type Bucket = any;
 type File = any;
 import { Counter, Histogram, Gauge } from 'prom-client';

@@ -12,6 +12,7 @@
 import axios from 'axios';
 import { Request, Response, NextFunction } from 'express';
 import { writeAudit } from '../utils/audit.js';
+import logger from '../utils/logger.js';
 
 interface User {
   id?: string;
