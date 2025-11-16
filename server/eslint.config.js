@@ -115,7 +115,10 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.node,
-        ...globals.jest,
+        // Transform globals.jest values from false to 'readonly'
+        ...Object.fromEntries(
+          Object.keys(globals.jest).map(key => [key, 'readonly'])
+        ),
         NodeJS: 'readonly', // TypeScript namespace
       },
     },
