@@ -104,6 +104,8 @@ export default [
       'tests/**/*.cjs',
       '__tests__/**/*.ts',
       '__tests__/**/*.js',
+      'src/tests/**/*.ts',
+      'src/tests/**/*.js',
       'src/**/__tests__/**/*.ts',
       'src/**/__tests__/**/*.js',
       'src/**/__mocks__/**/*.ts',
