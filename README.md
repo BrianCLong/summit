@@ -12,14 +12,14 @@
   </a>
 </p>
 
-# IntelGraph Platform
+# Summit Platform
 
 ---
 
 ## 🛠 Developer Onboarding (Deployable-First)
 
-IntelGraph follows a **deployable-first mantra**:  
-🚨 If `make up` or `make smoke` fails, **stop everything and fix it**.  
+Summit follows a **deployable-first mantra**:
+🚨 If `make up` or `make smoke` fails, **stop everything and fix it**.
 No code merges that break the golden path workflow:
 
 **Investigation → Entities → Relationships → Copilot → Results**
@@ -79,8 +79,8 @@ Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
 
 ```bash
 # Clone and start the platform
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 ./start.sh
 ```
 
@@ -161,7 +161,7 @@ cd intelgraph
 
 ## 🧠 Real-Time Narrative Simulation Engine
 
-The simulation engine keeps evolving story arcs in lockstep with injected events, streaming data, and policy interventions. It runs alongside the IntelGraph API server and exposes REST controls under `/api/narrative-sim`.
+The simulation engine keeps evolving story arcs in lockstep with injected events, streaming data, and policy interventions. It runs alongside the Summit API server and exposes REST controls under `/api/narrative-sim`.
 
 ### Capabilities
 
@@ -289,8 +289,8 @@ This executes focused Jest suites for the engine core and REST endpoints while k
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 
 # 2. Start all services (recommended)
 ./start.sh
@@ -305,7 +305,7 @@ npm run server:dev    # Backend only (port 4000)
 
 ### 🤖 AI/ML Setup (Optional)
 
-IntelGraph includes a powerful multimodal AI extraction engine for enhanced intelligence analysis:
+Summit includes a powerful multimodal AI extraction engine for enhanced intelligence analysis:
 
 ```bash
 # Navigate to server directory
@@ -344,7 +344,7 @@ AI_ENABLE_GPU=true npm run dev
 docker-compose -f docker-compose.ai.yml up -d
 
 # Test AI services
-docker exec intelgraph-ai python /app/scripts/test-ai-extraction.py
+docker exec summit-ai python /app/scripts/test-ai-extraction.py
 ```
 
 ### Available Scripts
@@ -397,7 +397,7 @@ cp .env.example .env
 ```bash
 # Development
 NODE_ENV=development
-DEBUG=intelgraph:*
+DEBUG=summit:*
 
 # Database URLs
 NEO4J_URI=bolt://localhost:7687
@@ -405,13 +405,13 @@ NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=devpassword
 
 POSTGRES_HOST=localhost
-POSTGRES_DB=intelgraph_dev
-POSTGRES_USER=intelgraph
+POSTGRES_DB=summit_dev
+POSTGRES_USER=summit
 POSTGRES_PASSWORD=devpassword
 
 TIMESCALEDB_HOST=localhost
 TIMESCALEDB_PORT=5433
-TIMESCALEDB_DB=intelgraph_timeseries
+TIMESCALEDB_DB=summit_timeseries
 TIMESCALEDB_USER=timescale
 TIMESCALEDB_PASSWORD=devpassword
 
@@ -462,14 +462,14 @@ The platform uses four databases:
 
 2. **PostgreSQL** (Relational Database)
    - Host: localhost:5432
-   - Database: `intelgraph_dev`
-   - Username: `intelgraph`
+   - Database: `summit_dev`
+   - Username: `summit`
    - Password: `devpassword`
    - Purpose: User data, audit logs, metadata
 
 3. **TimescaleDB** (Time-series Database)
    - Host: localhost:5433
-   - Database: `intelgraph_timeseries`
+   - Database: `summit_timeseries`
    - Username: `timescale`
    - Password: `devpassword`
    - Purpose: Metrics and event storage
@@ -482,7 +482,7 @@ The platform uses four databases:
 ### Code Structure
 
 ```
-intelgraph/
+summit/
 ├── client/                 # React frontend application
 │   ├── src/
 │   │   ├── components/     # React components
@@ -552,19 +552,19 @@ NODE_ENV=production make up
 ### Kubernetes Deployment (Helm)
 
 ```bash
-# Install IntelGraph with Helm
-helm upgrade --install intelgraph ./helm/intelgraph \
-  --namespace intelgraph --create-namespace \
-  --values helm/intelgraph/values/prod.yaml
+# Install Summit with Helm
+helm upgrade --install summit ./helm/summit \
+  --namespace summit --create-namespace \
+  --values helm/summit/values/prod.yaml
 
 # Check deployment status
-kubectl get pods -n intelgraph
+kubectl get pods -n summit
 
 # Run health tests
-helm test intelgraph -n intelgraph
+helm test summit -n summit
 
 # Access services via port-forward
-kubectl -n intelgraph port-forward svc/intelgraph-server 4000:4000 &
+kubectl -n summit port-forward svc/summit-server 4000:4000 &
 npm run test:smoke
 ```
 
@@ -918,8 +918,8 @@ Access Grafana dashboards at http://localhost:3100:
 
 ### Community
 
-- [GitHub Discussions](https://github.com/BrianCLong/intelgraph/discussions)
-- [Issue Tracker](https://github.com/BrianCLong/intelgraph/issues)
+- [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
+- [Issue Tracker](https://github.com/BrianCLong/summit/issues)
 - [Release Notes](CHANGELOG.md)
 
 ### Learning Resources
@@ -933,9 +933,9 @@ Access Grafana dashboards at http://localhost:3100:
 ### Getting Help
 
 - **Documentation**: Check [docs/](docs/) directory
-- **Issues**: [GitHub Issues](https://github.com/BrianCLong/intelgraph/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/BrianCLong/intelgraph/discussions)
-- **Email**: support@intelgraph.com
+- **Issues**: [GitHub Issues](https://github.com/BrianCLong/summit/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
+- **Email**: support@summit.com
 
 ### Reporting Bugs
 
@@ -950,7 +950,7 @@ Please include:
 
 ### Feature Requests
 
-Use the [Feature Request template](https://github.com/BrianCLong/intelgraph/issues/new?template=feature_request.md) and include:
+Use the [Feature Request template](https://github.com/BrianCLong/summit/issues/new?template=feature_request.md) and include:
 
 - Clear description of the feature
 - Use case and business value
@@ -972,4 +972,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**IntelGraph Platform** - Next-Generation Intelligence Analysis
+**Summit Platform** - Next-Generation Intelligence Analysis

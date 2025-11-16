@@ -3,8 +3,8 @@ services:
     image: postgres:16-alpine
     container_name: postgres
     environment:
-      POSTGRES_DB: intelgraph_dev
-      POSTGRES_USER: intelgraph
+      POSTGRES_DB: summit_dev
+      POSTGRES_USER: summit
       POSTGRES_PASSWORD: dev_password
     ports:
       - '5432:5432'
@@ -12,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./server/db/migrations/postgres:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph_dev']
+      test: ['CMD-SHELL', 'pg_isready -U summit -d summit_dev']
       interval: 10s
       timeout: 5s
       retries: 30

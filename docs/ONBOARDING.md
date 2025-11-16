@@ -1,6 +1,6 @@
-# 🛠 IntelGraph Developer Onboarding Brief
+# 🛠 Summit Developer Onboarding Brief
 
-Welcome to **IntelGraph** — an AI-augmented intelligence analysis platform.  
+Welcome to **Summit** — an AI-augmented intelligence analysis platform.
 Our mission: **supercharge development of the MVP** while **always keeping a deployable build foremost**.
 
 ---
@@ -9,7 +9,7 @@ Our mission: **supercharge development of the MVP** while **always keeping a dep
 
 1. **Deployable First**
    - If `make up` or `make smoke` fails, **stop everything** and fix it.
-   - Never merge code that breaks the golden path:  
+   - Never merge code that breaks the golden path:
      **Investigation → Entities → Relationships → Copilot → Results**.
 
 2. **Supercharged MVP Delivery**
@@ -23,8 +23,8 @@ Our mission: **supercharge development of the MVP** while **always keeping a dep
 
 ```bash
 # 1. Clone and enter repo
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 
 # 2. Copy environment config
 cp .env.example .env
