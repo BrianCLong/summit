@@ -39,7 +39,7 @@ export default [
   },
   // K6 performance test files
   {
-    files: ['perf/**/*.js'],
+    files: ['perf/**/*.js', 'tests/k6*.js', 'tests/**/*k6*.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -101,6 +101,7 @@ export default [
     files: [
       'tests/**/*.ts',
       'tests/**/*.js',
+      'tests/**/*.cjs',
       '__tests__/**/*.ts',
       '__tests__/**/*.js',
       'src/**/__tests__/**/*.ts',
