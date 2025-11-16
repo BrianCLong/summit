@@ -131,10 +131,11 @@ export function createApolloV5Server(
 
             async willSendResponse(requestContext) {
               const { response } = requestContext;
+              const body = response.body as any;
               logger.info(
                 {
                   operationName: requestContext.request.operationName,
-                  hasErrors: !!response.body.singleResult?.errors?.length,
+                  hasErrors: !!(body.singleResult?.errors?.length || (body.kind === 'single' && body.singleResult?.errors?.length)),
                 },
                 'GraphQL operation completed',
               );
@@ -220,10 +221,11 @@ export function createHealthCheck(server: ApolloServer<GraphQLContext>) {
           timestamp: new Date().toISOString(),
         });
       } else {
+        const body = result.body as any;
         res.status(503).json({
           status: 'unhealthy',
           service: 'apollo-v5-graphql',
-          errors: result.body.singleResult.errors,
+          errors: body.singleResult?.errors || (body.kind === 'single' ? body.singleResult?.errors : []),
         });
       }
     } catch (error) {

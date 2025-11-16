@@ -52,7 +52,7 @@ interface ThompsonSamplingResult {
 
 export class ThompsonSamplingEngine {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private contextualArms: Map<string, ModelArm[]> = new Map();
   private contextFeatureCache: Map<string, ContextFeatures> = new Map();
   private explorationDecay = 0.95; // Decay factor for exploration
@@ -61,7 +61,7 @@ export class ThompsonSamplingEngine {
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
   }
 
   async initialize(): Promise<void> {

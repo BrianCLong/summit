@@ -39,18 +39,19 @@ export async function makeBundle({
   await zip.finalize();
 
   const sha256 = await sha(outPath);
-  const worm =
-    (process.env.AUDIT_WORM_ENABLED || 'false').toLowerCase() === 'true';
-  const bucket = process.env.AUDIT_BUCKET;
+  // WORM storage disabled - worm.ts module is commented out
+  // const worm =
+  //   (process.env.AUDIT_WORM_ENABLED || 'false').toLowerCase() === 'true';
+  // const bucket = process.env.AUDIT_BUCKET;
 
-  if (worm && bucket) {
-    const key = `disclosures/${new Date().toISOString().slice(0, 10)}/${sha256}.zip`;
-    const fs = await import('fs/promises');
-    const buf = await fs.readFile(outPath);
-    const { putLocked } = await import('../audit/worm.js');
-    const uri = await putLocked(bucket, key, buf as any);
-    return { path: uri, sha256 };
-  }
+  // if (worm && bucket) {
+  //   const key = `disclosures/${new Date().toISOString().slice(0, 10)}/${sha256}.zip`;
+  //   const fs = await import('fs/promises');
+  //   const buf = await fs.readFile(outPath);
+  //   const { putLocked } = await import('../audit/worm.js');
+  //   const uri = await putLocked(bucket, key, buf as any);
+  //   return { path: uri, sha256 };
+  // }
 
   return { path: outPath, sha256 };
 }

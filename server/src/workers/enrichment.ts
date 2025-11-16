@@ -2,6 +2,9 @@
 import { runCypher } from '../graph/neo4j';
 import Redis from 'ioredis';
 
+// Type declaration for BullMQ JobsOptions (when bullmq is not available)
+type JobsOptions = any;
+
 const connection = new Redis(process.env.REDIS_URL!); // Use Redis connection string from env
 const QUEUE = 'assistant:enrich';
 

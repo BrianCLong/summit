@@ -1,5 +1,6 @@
 // Resolver skeletons for safe mutations. Wire into schema when ready.
 import type { GraphQLResolveInfo } from 'graphql';
+import { trace } from '@opentelemetry/api';
 
 type JSONValue = any;
 

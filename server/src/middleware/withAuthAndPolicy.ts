@@ -408,3 +408,6 @@ export function getPolicyStats(): {
  *   }
  * }
  */
+
+// Export alias for compatibility
+export const rbacMiddleware = withAuthAndPolicy;

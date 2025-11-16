@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import { jest } from '@jest/globals';
 
 const resolvedMock = (value: unknown) => jest.fn(async () => value);
 

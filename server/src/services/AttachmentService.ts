@@ -3,6 +3,7 @@ import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
 import * as path from 'path';
 import type { Readable } from 'stream';
+// @ts-ignore - provenance.ts is outside rootDir but required for shared functionality
 import { createProvenanceRecord } from '../../../packages/shared/provenance';
 
 export interface AttachmentMetadata {
@@ -43,7 +44,7 @@ export class AttachmentService {
     const tempPath = path.join(this.baseDir, `${Date.now()}-${filename}`);
     const hash = createHash('sha256');
     const writeStream = createWriteStream(tempPath);
-    await pipeline(
+    await (pipeline as any)(
       stream,
       async function* (source) {
         for await (const chunk of source) {

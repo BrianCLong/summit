@@ -245,7 +245,6 @@ export class RunbookExecutor extends EventEmitter {
     const duration = (execution.endTime || Date.now()) - execution.startTime;
     prometheusConductorMetrics.recordOperationalEvent(
       'runbook_executed',
-      execution.status === 'completed',
     );
   }
 
@@ -754,24 +753,6 @@ export class RunbookExecutor extends EventEmitter {
       const value = context[key] || process.env[key];
       return value !== undefined ? value.toString() : match;
     });
-  }
-
-  private evaluateCondition(
-    condition: string,
-    context: Record<string, any>,
-  ): boolean {
-    try {
-      // Create safe evaluation context
-      const safeContext = { ...context, Date, Math };
-      const func = new Function(
-        ...Object.keys(safeContext),
-        `return ${condition}`,
-      );
-      return func(...Object.values(safeContext));
-    } catch (error) {
-      console.warn(`Condition evaluation failed: ${error.message}`);
-      return false;
-    }
   }
 
   private addLog(

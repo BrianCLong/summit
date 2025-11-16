@@ -947,7 +947,7 @@ export class DataResidencyService {
     };
   }
 
-  private async decryptLocally(encryptedData: string, metadata: any) {
+  private async decryptLocally(encryptedData: string, metadata: any): Promise<string> {
     // For demo purposes, local decryption is simulated
     // In production, you'd need proper key management
     throw new Error(

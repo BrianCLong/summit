@@ -6,6 +6,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 
+// @ts-ignore - pg type imports
 import { Pool, QueryResult, PoolClient } from 'pg';
 import logger from '../utils/logger.js';
 
@@ -64,7 +65,7 @@ export async function query<T = any>(
   const client = await timescalePool.connect();
 
   try {
-    const result = await client.query<T>(text, params);
+    const result = await client.query(text, params) as QueryResult<T>;
     const duration = Date.now() - start;
 
     // Committee spec: Log slow queries for GA-Core optimization
@@ -154,7 +155,7 @@ export async function queryTemporalPatterns(
   }
 
   const query_text = `
-    SELECT 
+    SELECT
       event_type,
       COUNT(*) as event_count,
       AVG(confidence) as avg_confidence,

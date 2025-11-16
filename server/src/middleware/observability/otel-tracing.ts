@@ -197,6 +197,23 @@ export class OTelTracingService {
     return null;
   }
 
+  // Record exception in current span
+  recordException(error: Error | string, attributes?: Record<string, any>): void {
+    if (!this.config.enabled) {
+      return;
+    }
+
+    const span = this.getCurrentSpan();
+    if (span) {
+      const errorObj = typeof error === 'string' ? new Error(error) : error;
+      span.recordException(errorObj);
+      if (attributes) {
+        span.setAttributes(attributes);
+      }
+      span.setStatus({ code: SpanStatusCode.ERROR, message: errorObj.message });
+    }
+  }
+
   // Add attributes to current span
   addSpanAttributes(attributes: Record<string, any>) {
     // no-op

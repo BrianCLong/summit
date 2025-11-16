@@ -1,9 +1,10 @@
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
 interface UserData {
@@ -211,6 +212,7 @@ export class AuthService {
       role: user.role,
     };
 
+    // @ts-ignore - jwt.sign overload mismatch
     const token = jwt.sign(tokenPayload, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn,
     });

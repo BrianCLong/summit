@@ -35,7 +35,12 @@ interface ManagedConnectionOptions {
   maxRetryDelay?: number;
   backoffMultiplier?: number;
   jitter?: number;
-  logger?: Pick<Console, 'info' | 'warn' | 'error' | 'debug'>;
+  logger?: {
+    info: (...args: any[]) => void;
+    warn: (...args: any[]) => void;
+    error: (...args: any[]) => void;
+    debug: (...args: any[]) => void;
+  };
 }
 
 const DEFAULT_OPTIONS: Required<ManagedConnectionOptions> = {

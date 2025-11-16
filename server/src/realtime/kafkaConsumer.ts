@@ -1,5 +1,7 @@
+// @ts-ignore - kafkajs types
 import { Kafka, Consumer, EachMessagePayload } from 'kafkajs'; // Assuming kafkajs is installed
 import { WargameResolver } from '../resolvers/WargameResolver'; // Import the resolver
+// @ts-ignore - GraphQL generated types
 import { CrisisScenarioInput } from '../generated/graphql-types'; // Import types
 
 const KAFKA_BROKERS = process.env.KAFKA_BROKERS

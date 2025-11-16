@@ -47,7 +47,7 @@ export class GAReleaseService {
     const environment = this.detectEnvironment();
 
     return {
-      version: this.packageJson?.version || '1.0.0-ga',
+      version: (this.packageJson?.version as string) || '1.0.0-ga',
       buildDate: new Date().toISOString(),
       commitHash,
       environment,

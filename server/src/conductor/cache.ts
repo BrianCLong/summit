@@ -32,6 +32,8 @@ function redisFromEnv() {
   });
 }
 
+const redis = redisFromEnv();
+
 // function s3FromEnv() {
 //   const region = process.env.AWS_REGION || 'us-east-1';
 //   const endpoint = process.env.S3_ENDPOINT || undefined;

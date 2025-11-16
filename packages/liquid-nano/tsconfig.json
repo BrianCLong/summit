@@ -6,7 +6,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "rootDir": "./",
-    "module": "ES2022",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node", "jest"],
     "resolveJsonModule": true

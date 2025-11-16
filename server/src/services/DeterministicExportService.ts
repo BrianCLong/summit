@@ -21,7 +21,7 @@ import {
 import { createHash } from 'crypto';
 import { join } from 'path';
 import archiver from 'archiver';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import logger from '../config/logger';
 import { getPostgresPool } from '../config/database';
 import { redactData } from '../utils/dataRedaction';
@@ -284,7 +284,7 @@ export class DeterministicExportService {
     // Fetch relationships with deterministic ordering
     const relationshipsQuery = `
       MATCH (a:Entity)-[r:RELATIONSHIP]->(b:Entity)
-      ${where.replace(/e\./g, 'a.')} 
+      ${where.replace(/e\./g, 'a.')}
       ${where ? 'AND b.investigation_id = a.investigation_id' : ''}
       RETURN a, r, b
       ORDER BY r.id, r.created_at, a.id, b.id
@@ -386,14 +386,27 @@ export class DeterministicExportService {
       outputHash: '',
     };
 
-    // Apply redactions (this should use the actual user from request)
+    // Create stub user for redaction (TODO: use actual user from request context)
+    const redactionUser = {
+      id: request.userId,
+      email: 'export-service@internal',
+      username: 'export-service',
+      firstName: 'Export',
+      lastName: 'Service',
+      role: 'analyst',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Apply redactions
     entities = entities.map((entity) =>
-      redactData(entity, { role: 'analyst' }),
+      redactData(entity, redactionUser),
     );
     relationships = relationships.map((rel) => ({
       ...rel,
-      sourceEntity: redactData(rel.sourceEntity, { role: 'analyst' }),
-      targetEntity: redactData(rel.targetEntity, { role: 'analyst' }),
+      sourceEntity: redactData(rel.sourceEntity, redactionUser),
+      targetEntity: redactData(rel.targetEntity, redactionUser),
     }));
 
     redactionTransform.outputHash = this.calculateObjectHash({

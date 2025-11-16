@@ -45,7 +45,7 @@ export function startCostExporter(intervalMs = 60000) {
       const usdCpu = Number(r.cpu || 0) * R.cpu;
       const usdGb = Number(r.gb || 0) * R.gb;
       const usdEgr = Number(r.egr || 0) * R.egr;
-      const usdGpu = (gpuByTenant.get(t) || 0) * R.gpu;
+      const usdGpu = Number(gpuByTenant.get(t) || 0) * R.gpu;
       cost.labels(t, 'cpu').inc(usdCpu);
       cost.labels(t, 'gpu').inc(usdGpu);
       cost.labels(t, 'mem').inc(usdGb);

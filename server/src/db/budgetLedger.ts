@@ -3,6 +3,7 @@
  * Source of truth for tenant budgets and detailed audit trail
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import logger from '../utils/logger';
 
@@ -250,7 +251,7 @@ export class BudgetLedgerManager {
   ): Promise<boolean> {
     try {
       const result = await this.pool.query(
-        `UPDATE budget_ledger 
+        `UPDATE budget_ledger
          SET status = $2, failed_reason = $3, updated_at = NOW()
          WHERE id = $1 AND status = 'estimated'`,
         [ledgerId, status, reason],
@@ -273,10 +274,10 @@ export class BudgetLedgerManager {
   async getTenantBudget(tenantId: string): Promise<TenantBudget | null> {
     try {
       const result = await this.pool.query(
-        `SELECT tenant_id, monthly_usd_limit, daily_usd_limit, hard_cap, 
-                notification_threshold, emergency_contact, updated_by, 
+        `SELECT tenant_id, monthly_usd_limit, daily_usd_limit, hard_cap,
+                notification_threshold, emergency_contact, updated_by,
                 updated_at, created_at, created_by, notes
-         FROM tenant_budget 
+         FROM tenant_budget
          WHERE tenant_id = $1 AND deleted_at IS NULL`,
         [tenantId],
       );
@@ -327,8 +328,8 @@ export class BudgetLedgerManager {
     try {
       await client.query('BEGIN');
 
-      const setClauses = [];
-      const values = [tenantId];
+      const setClauses: string[] = [];
+      const values: any[] = [tenantId];
       let paramIndex = 2;
 
       if (updates.monthlyUsdLimit !== undefined) {
@@ -371,7 +372,7 @@ export class BudgetLedgerManager {
       }
 
       const result = await client.query(
-        `UPDATE tenant_budget 
+        `UPDATE tenant_budget
          SET ${setClauses.join(', ')}, updated_at = NOW()
          WHERE tenant_id = $1 AND deleted_at IS NULL`,
         values,
@@ -451,7 +452,7 @@ export class BudgetLedgerManager {
   ): Promise<SpendingSummary> {
     try {
       let dateFilter = '';
-      const params = [tenantId];
+      const params: any[] = [tenantId];
 
       if (startDate) {
         dateFilter += ' AND created_at >= $2';
@@ -465,14 +466,14 @@ export class BudgetLedgerManager {
 
       const result = await this.pool.query(
         `
-        SELECT 
+        SELECT
           tenant_id,
           COUNT(*) as total_operations,
           SUM(est_total_usd) as estimated_usd,
           SUM(actual_total_usd) as actual_usd,
           COALESCE(SUM(actual_total_usd), SUM(est_total_usd)) as total_usd,
           AVG(accuracy_ratio) FILTER (WHERE accuracy_ratio IS NOT NULL) as avg_accuracy_ratio
-        FROM budget_ledger 
+        FROM budget_ledger
         WHERE tenant_id = $1 AND status IN ('estimated', 'reconciled')${dateFilter}
         GROUP BY tenant_id
       `,

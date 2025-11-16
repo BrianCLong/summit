@@ -26,6 +26,8 @@ jobs:
       - uses: actions/checkout@v4
       - id: guard
         uses: ./.github/actions/backlog-guard
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summarize guard decision
         if: steps.guard.outputs.saturated == 'true'

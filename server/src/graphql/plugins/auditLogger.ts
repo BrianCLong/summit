@@ -4,7 +4,8 @@ import type {
 } from '@apollo/server';
 import fs from 'fs';
 import axios from 'axios';
-import { isEqual } from 'lodash';
+import _ from 'lodash';
+const { isEqual } = _;
 
 const ELASTIC_URL = process.env.ELASTICSEARCH_URL;
 const LOG_FILE = process.env.AUDIT_LOG_FILE || 'audit-log.jsonl';

@@ -1,5 +1,6 @@
 // server/src/optimization/postgres-performance-optimizer.ts
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient, QueryResult } from 'pg';
 import { getRedisClient } from '../config/database.js';
 import logger from '../config/logger.js';
@@ -492,8 +493,8 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
     try {
       // Get all tables that need analyzing
       const tablesResult = await client.query(`
-        SELECT schemaname, tablename 
-        FROM pg_tables 
+        SELECT schemaname, tablename
+        FROM pg_tables
         WHERE schemaname = 'public'
       `);
 
@@ -520,7 +521,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
       const tablesResult = await client.query(`
         SELECT schemaname, tablename,
                n_dead_tup::float / GREATEST(n_live_tup + n_dead_tup, 1) as dead_ratio
-        FROM pg_stat_user_tables 
+        FROM pg_stat_user_tables
         WHERE n_dead_tup > 1000 OR n_dead_tup::float / GREATEST(n_live_tup + n_dead_tup, 1) > 0.1
         ORDER BY dead_ratio DESC
         LIMIT 20
@@ -550,7 +551,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
       const indexResult = await client.query(`
         SELECT schemaname, tablename, indexname,
                pg_size_pretty(pg_relation_size(indexrelid)) as index_size
-        FROM pg_stat_user_indexes 
+        FROM pg_stat_user_indexes
         WHERE idx_scan < 100 AND pg_relation_size(indexrelid) > 10485760 -- 10MB
         ORDER BY pg_relation_size(indexrelid) DESC
         LIMIT 10
@@ -1053,7 +1054,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
       for (const rec of topRecommendations) {
         const indexName = `idx_${rec.table}_${rec.columns.join('_')}_auto`;
         const createIndexSQL = `
-          CREATE INDEX CONCURRENTLY ${indexName} 
+          CREATE INDEX CONCURRENTLY ${indexName}
           ON ${rec.table} USING ${rec.indexType} (${rec.columns.join(', ')})
         `;
 

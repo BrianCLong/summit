@@ -3,6 +3,9 @@
  * RESTful endpoints for managing external API connections
  */
 
+/* eslint-disable no-undef */
+// TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization
+
 const express = require('express');
 const RestConnectorService = require('../services/RestConnectorService');
 const { ensureAuthenticated, requireRole } = require('../middleware/auth');

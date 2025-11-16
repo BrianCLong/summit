@@ -121,7 +121,7 @@ export interface ContractTestResult {
 }
 
 export class ContractTestingFramework extends EventEmitter {
-  private ajv: Ajv;
+  private ajv: InstanceType<typeof Ajv>;
   private contracts: Map<string, Contract> = new Map();
   private testHistory: ContractTest[] = [];
 

@@ -139,7 +139,7 @@ export const resolvers = {
             ts: ts || new Date().toISOString(),
             provenanceId: 'placeholder',
           },
-          { region: user.residency },
+          { region: user.residency } as any,
         ); // S3.1: Pass region hint
 
         if (redisClient) {

@@ -5,8 +5,8 @@
 
 import { ApolloError } from 'apollo-server-express';
 import { Context } from '../../context';
-import { logger } from '../../../config/logger';
-import { auditLogger } from '../../middleware/auditLogger';
+import logger from '../../../config/logger';
+import auditLogger from '../../middleware/auditLogger';
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 import { readFile, writeFile } from 'fs/promises';

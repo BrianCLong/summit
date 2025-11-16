@@ -13,7 +13,8 @@ import {
 import { getPostgresPool } from '../config/database';
 import { getNeo4jDriver } from '../config/database';
 import logger from '../config/logger';
-import { HybridEntityResolutionService } from './HybridEntityResolutionService';
+// @ts-ignore - HybridEntityResolutionService class doesn't exist (exports resolveEntities function instead)
+// import { HybridEntityResolutionService } from './HybridEntityResolutionService';
 
 const log = logger.child({ name: 'GACoreMetrics' });
 
@@ -105,7 +106,8 @@ export class GACoreMetricsService {
     labelNames: ['gate', 'status', 'requirement', 'current_value', 'threshold'],
   });
 
-  private erService = new HybridEntityResolutionService();
+  // @ts-ignore - HybridEntityResolutionService class doesn't exist
+  // private erService = new HybridEntityResolutionService();
 
   constructor() {
     // Start metrics collection
@@ -153,7 +155,7 @@ export class GACoreMetricsService {
 
       // Get current precision metrics
       const currentMetrics = await pool.query(`
-        SELECT 
+        SELECT
           entity_type,
           precision,
           total_decisions,
@@ -175,7 +177,7 @@ export class GACoreMetricsService {
 
       // Get daily precision metrics for trend
       const dailyMetrics = await pool.query(`
-        SELECT 
+        SELECT
           DATE(created_at) as metric_date,
           entity_type,
           precision
@@ -222,8 +224,8 @@ export class GACoreMetricsService {
 
       // Calculate denials with appeals rate
       const denialMetrics = await pool.query(`
-        SELECT 
-          COUNT(CASE WHEN appeal_available = true THEN 1 END)::DECIMAL / 
+        SELECT
+          COUNT(CASE WHEN appeal_available = true THEN 1 END)::DECIMAL /
           NULLIF(COUNT(*), 0) as appeals_rate
         FROM policy_decisions_log
         WHERE created_at >= NOW() - INTERVAL '7 days'
@@ -280,7 +282,7 @@ export class GACoreMetricsService {
 
       // Get Copilot NL→Cypher success rate
       const copilotMetrics = await pool.query(`
-        SELECT 
+        SELECT
           COUNT(CASE WHEN e.status = 'EXECUTED' THEN 1 END)::DECIMAL /
           NULLIF(COUNT(*), 0) as success_rate
         FROM nl_cypher_translations t
@@ -306,7 +308,7 @@ export class GACoreMetricsService {
       const pool = getPostgresPool();
 
       const rigorMetrics = await pool.query(`
-        SELECT 
+        SELECT
           AVG(confidence * 10) as avg_rigor_score
         FROM merge_decisions
         WHERE created_at >= NOW() - INTERVAL '7 days'

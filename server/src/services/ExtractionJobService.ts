@@ -1,6 +1,6 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';
@@ -116,7 +116,7 @@ export class ExtractionJobService {
       batchSize: parseInt(process.env.AI_BATCH_SIZE || '32'),
     };
 
-    this.extractionEngine = new ExtractionEngine(engineConfig);
+    this.extractionEngine = new ExtractionEngine(engineConfig, this.db);
     this.ocrEngine = new OCREngine(engineConfig);
     this.objectDetectionEngine = new ObjectDetectionEngine(engineConfig);
     this.speechToTextEngine = new SpeechToTextEngine(engineConfig);
@@ -585,11 +585,12 @@ export class ExtractionJobService {
           break;
 
         case 'embedding_generation':
-          const embeddingResults = await this.runEmbeddingGeneration(
-            mediaSource,
-            options,
-          );
-          entities.push(...embeddingResults);
+          // TODO: Implement embedding generation
+          // const embeddingResults = await this.runEmbeddingGeneration(
+          //   mediaSource,
+          //   options,
+          // );
+          // entities.push(...embeddingResults);
           break;
 
         case 'object_detection':
@@ -741,12 +742,12 @@ export class ExtractionJobService {
 
       for (const detection of results) {
         entities.push({
-          entityType: detection.class_name,
+          entityType: detection.className,
           boundingBox: {
-            x: detection.bbox.x,
-            y: detection.bbox.y,
-            width: detection.bbox.width,
-            height: detection.bbox.height,
+            x: detection.boundingBox.x,
+            y: detection.boundingBox.y,
+            width: detection.boundingBox.width,
+            height: detection.boundingBox.height,
             confidence: detection.confidence,
           },
           confidence: detection.confidence,
@@ -754,9 +755,9 @@ export class ExtractionJobService {
           extractionVersion: '2.0.0',
           metadata: {
             model: detection.model,
-            classId: detection.class_id,
-            area: detection.bbox.width * detection.bbox.height,
-            trackingId: detection.tracking_id,
+            classId: detection.classId,
+            area: detection.boundingBox.width * detection.boundingBox.height,
+            trackingId: detection.trackingId,
           },
         });
       }

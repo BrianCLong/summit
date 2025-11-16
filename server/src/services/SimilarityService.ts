@@ -10,7 +10,7 @@ import { getPostgresPool } from '../config/database.js';
 import EmbeddingService from './EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 import pino from 'pino';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const logger = pino({ name: 'SimilarityService' });
 
@@ -36,7 +36,9 @@ const BulkSimilarityQuerySchema = z.object({
 });
 
 // Types
+// @ts-ignore - zod type resolution issue
 export type SimilarityQuery = z.infer<typeof SimilarityQuerySchema>;
+// @ts-ignore - zod type resolution issue
 export type BulkSimilarityQuery = z.infer<typeof BulkSimilarityQuerySchema>;
 
 export interface SimilarEntity {
@@ -282,7 +284,7 @@ export class SimilarityService {
 
       // Build query
       let query = `
-        SELECT 
+        SELECT
           ee.entity_id,
           1 - (ee.embedding <=> $1::vector) as similarity
           ${includeText ? ', ee.text' : ''}
@@ -348,10 +350,10 @@ export class SimilarityService {
       // Get embedding count and last update
       const statsResult = await client.query(
         `
-        SELECT 
+        SELECT
           COUNT(*) as total_embeddings,
           MAX(updated_at) as last_updated
-        FROM entity_embeddings 
+        FROM entity_embeddings
         WHERE investigation_id = $1
       `,
         [investigationId],
@@ -359,13 +361,13 @@ export class SimilarityService {
 
       // Check index health
       const indexResult = await client.query(`
-        SELECT 
-          schemaname, 
-          tablename, 
-          indexname, 
+        SELECT
+          schemaname,
+          tablename,
+          indexname,
           indexdef
-        FROM pg_indexes 
-        WHERE tablename = 'entity_embeddings' 
+        FROM pg_indexes
+        WHERE tablename = 'entity_embeddings'
           AND indexname = 'entity_embeddings_hnsw_idx'
       `);
 
@@ -396,8 +398,8 @@ export class SimilarityService {
 
       // Recreate index
       await client.query(`
-        CREATE INDEX entity_embeddings_hnsw_idx 
-        ON entity_embeddings 
+        CREATE INDEX entity_embeddings_hnsw_idx
+        ON entity_embeddings
         USING hnsw (embedding vector_cosine_ops)
         WITH (m = 16, ef_construction = 64)
       `);

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { RedisCache } from '../cache/redis';
+import { RedisService as RedisCache } from '../cache/redis';
 
 interface PerformanceMetrics {
   id: string;

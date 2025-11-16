@@ -18,7 +18,7 @@ export function replayGuard() {
 
 export const webhookRatelimit = rateLimit({
   windowMs: 60_000,
-  limit: 120,
+  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
 });

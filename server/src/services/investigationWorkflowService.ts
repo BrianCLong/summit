@@ -344,7 +344,7 @@ export class InvestigationWorkflowService extends EventEmitter {
     // Initialize workflow stages
     const workflow: WorkflowStage = {
       currentStage: 'INTAKE',
-      stages: {},
+      stages: {} as WorkflowStage['stages'],
     };
 
     template.workflowStages.forEach((stage) => {
@@ -380,8 +380,8 @@ export class InvestigationWorkflowService extends EventEmitter {
       collaborators: data.assignedTo,
       permissions: data.assignedTo.map((userId) => ({
         userId,
-        role: 'ANALYST',
-        permissions: ['read', 'write', 'manage_evidence'],
+        role: 'ANALYST' as InvestigationRole,
+        permissions: ['READ', 'write', 'manage_evidence'] as PermissionType[],
         grantedBy: data.createdBy,
         grantedAt: now,
       })),

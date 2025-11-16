@@ -72,7 +72,7 @@ interface BanditReward {
 
 export class MultiArmedBanditOptimizer {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private arms: Map<string, BanditArm> = new Map();
   private strategies: Map<string, OptimizationStrategy> = new Map();
   private rewardHistory: Map<string, number[]> = new Map();
@@ -89,7 +89,7 @@ export class MultiArmedBanditOptimizer {
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
     this.initializeStrategies();
   }
 

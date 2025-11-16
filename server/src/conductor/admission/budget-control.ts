@@ -17,7 +17,7 @@ export interface BudgetConfig {
 
 export interface AdmissionResult {
   admit: boolean;
-  mode: 'normal' | 'degraded' | 'emergency' | 'blocked';
+  mode: 'normal' | 'degraded' | 'critical' | 'emergency' | 'blocked';
   reason: string;
   allowedExperts: ExpertType[];
   blockedExperts: ExpertType[];

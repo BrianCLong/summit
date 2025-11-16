@@ -56,11 +56,11 @@ interface BudgetDecision {
 
 export class BudgetLadderController {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
   }
 
   async connect(): Promise<void> {

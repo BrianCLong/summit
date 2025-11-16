@@ -56,13 +56,13 @@ interface RunbookIntegrity {
 
 export class KeyHygieneManager {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private keyRotationIntervalDays: number;
   private signatureValidityDays: number;
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
     this.keyRotationIntervalDays = parseInt(
       process.env.KEY_ROTATION_DAYS || '90',
     );

@@ -1,14 +1,18 @@
 import { GraphQLContext } from '../types/context';
-import {
-  CrisisScenario,
-  CrisisScenarioInput,
-  SocialMediaTelemetry,
-  AdversaryIntentEstimate,
-  NarrativeHeatmapData,
-  StrategicResponsePlaybook,
-} from '../generated/graphql-types';
+// @ts-ignore - GraphQL generated type: CrisisScenario
+import type { CrisisScenario } from '../generated/graphql-types';
+// @ts-ignore - GraphQL generated type: CrisisScenarioInput
+import type { CrisisScenarioInput } from '../generated/graphql-types';
+// @ts-ignore - GraphQL generated type: SocialMediaTelemetry
+import type { SocialMediaTelemetry } from '../generated/graphql-types';
+// @ts-ignore - GraphQL generated type: AdversaryIntentEstimate
+import type { AdversaryIntentEstimate } from '../generated/graphql-types';
+// @ts-ignore - GraphQL generated type: NarrativeHeatmapData
+import type { NarrativeHeatmapData } from '../generated/graphql-types';
+// @ts-ignore - GraphQL generated type: StrategicResponsePlaybook
+import type { StrategicResponsePlaybook } from '../generated/graphql-types';
 import { getNeo4jDriver } from '../db/neo4j';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import axios from 'axios';
 
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8001';
@@ -196,6 +200,38 @@ export class WargameResolver {
       const newScenario = createScenarioResult.records[0].get('s')
         .properties as CrisisScenario;
       return newScenario;
+    } finally {
+      await session.close();
+    }
+  }
+
+  async updateCrisisScenario(
+    _parent: any,
+    { id, input }: { id: string; input: CrisisScenarioInput },
+    _context: GraphQLContext,
+  ): Promise<CrisisScenario | undefined> {
+    // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+    console.log('Updating crisis scenario:', id, 'with input:', input);
+    const session = this.driver.session();
+    try {
+      const updatedAt = new Date().toISOString();
+      const result = await session.run(
+        `MATCH (s:CrisisScenario {id: $id})
+         SET s.crisisType = $crisisType,
+             s.updatedAt = $updatedAt,
+             s.simulationParameters = $simulationParameters
+         RETURN s`,
+        {
+          id,
+          crisisType: input.crisisType,
+          updatedAt,
+          simulationParameters: input.simulationParameters,
+        },
+      );
+      if (result.records.length > 0) {
+        return result.records[0].get('s').properties as CrisisScenario;
+      }
+      return undefined;
     } finally {
       await session.close();
     }

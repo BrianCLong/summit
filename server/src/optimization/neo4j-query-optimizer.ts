@@ -724,7 +724,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
 
   private serializeValue(value: any): any {
     if (value && typeof value === 'object') {
-      if (Integer.isInteger(value)) {
+      if (value.toInt && typeof value.toInt === 'function') {
         return { _type: 'Integer', _value: value.toString() };
       }
       // Handle other Neo4j types as needed

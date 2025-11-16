@@ -1,6 +1,6 @@
 import { Plugin, PluginContext } from './sdk';
 import { vaultReadKvV2 } from '../vault/helpers';
-import { RedisCache } from '../cache/redis.js';
+import { RedisService as RedisCache } from '../cache/redis.js';
 import { pluginInvocations, pluginErrors } from '../metrics/pluginMetrics.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
@@ -41,8 +41,9 @@ export async function runPlugin(
     vault: { read: (path: string) => vaultReadKvV2(path) },
     cache: {
       get: async (k: string) => (await cache.get(k)) as any,
-      set: async (k: string, v: any, ttl?: number) =>
-        cache.set(k, v, Math.max(1, Number(ttl || 300))),
+      set: async (k: string, v: any, ttl?: number) => {
+        await cache.set(k, v, Math.max(1, Number(ttl || 300)));
+      },
     },
     logger: console as any,
   };

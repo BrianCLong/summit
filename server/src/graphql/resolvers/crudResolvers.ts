@@ -1,5 +1,5 @@
 import { PubSub } from 'graphql-subscriptions';
-import { randomUUID } from 'node:crypto';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import {
   getNeo4jDriver,
   getPostgresPool,
@@ -23,6 +23,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   role?: string;
+  tenantId?: string;
   permissions?: string[];
 }
 
@@ -49,6 +50,7 @@ interface EntityInput {
   source?: string;
   position?: { x: number; y: number };
   investigationId?: string;
+  canonicalId?: string;
 }
 
 interface RelationshipInput {

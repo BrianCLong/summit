@@ -2,6 +2,11 @@ import fetchFn from 'node-fetch';
 import crypto from 'crypto';
 import { VectorDocument, VectorIndexSnapshot } from '../types.js';
 
+// Type declarations for web API types
+type RequestInit = any;
+type HeadersInit = any;
+type Response = any;
+
 export type FetchLike = (
   input: string,
   init?: RequestInit,

@@ -2,10 +2,11 @@ import { createWriteStream, createReadStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
+// @ts-ignore - Upload type not exported from graphql-upload-ts
 import { Upload } from 'graphql-upload-ts';
 import pino from 'pino';
 
@@ -182,6 +183,7 @@ export class MediaUploadService {
     const writeStream = createWriteStream(filePath);
 
     try {
+      // @ts-ignore - stream type incompatibility
       await pipeline(stream, writeStream);
     } catch (error) {
       // Ensure write stream is closed

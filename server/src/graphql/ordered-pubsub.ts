@@ -73,7 +73,7 @@ export default class OrderedPubSub {
   asyncIterator<T>(triggers: string | string[]) {
     const triggerList = Array.isArray(triggers) ? triggers : [triggers];
     const baseIterator =
-      this.pubsub.asyncIterator<EventEnvelope<T>>(triggerList);
+      this.pubsub.asyncIterator(triggerList) as AsyncIterator<EventEnvelope<T>>;
 
     const buffered = triggerList
       .flatMap((t) => this.buffers.get(t) ?? [])

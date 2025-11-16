@@ -1,13 +1,17 @@
 import request from 'supertest';
-import { app } from '../app.js';
-import { getPostgresPool } from '../db/postgres.js';
-import { evidenceProvenanceService } from '../maestro/evidence/provenance-service.js';
+import { createApp } from '../../app.js';
+import { getPostgresPool } from '../../db/postgres.js';
+import { evidenceProvenanceService } from '../evidence/provenance-service.js';
 
 describe('Maestro Integration Tests', () => {
   let testRunId: string;
   let authToken: string;
+  let app: any;
 
   beforeAll(async () => {
+    // Create app
+    app = await createApp();
+
     // Setup test database
     const pool = getPostgresPool();
     await pool.query('BEGIN');

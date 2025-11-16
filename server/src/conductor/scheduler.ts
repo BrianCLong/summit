@@ -46,12 +46,13 @@ async function loop() {
               if (count >= cap) continue;
             }
             let choice: any = null;
+            let est: any = null;
             if (
               (process.env.ADVISOR_AUTO_APPLY || 'false').toLowerCase() ===
               'true'
             ) {
               // Estimate costs (very rough stub; replace with historical estimator)
-              const est = estimateFromRunbook(s.runbook);
+              est = estimateFromRunbook(s.runbook);
               // Residency from runbook hint (e.g., eu/us prefix) or env default
               const residency = process.env.DEFAULT_RESIDENCY || undefined;
               choice = await choosePool(est, residency);

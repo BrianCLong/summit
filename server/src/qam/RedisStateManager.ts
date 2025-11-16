@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
+import baseLogger from '../config/logger';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
 import { promisify } from 'util';
 
-const logger = createLogger('RedisStateManager');
+const logger = baseLogger.child({ module: 'RedisStateManager' });
 
 const compress = promisify(zlib.gzip);
 const decompress = promisify(zlib.gunzip);

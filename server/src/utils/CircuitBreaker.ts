@@ -67,6 +67,14 @@ export class CircuitBreaker {
     };
   }
 
+  public getFailureCount(): number {
+    return this.failureCount;
+  }
+
+  public getLastFailureTime(): number {
+    return this.lastFailureTime;
+  }
+
   private calculateP95Latency(): number {
     if (this.metrics.latencies.length === 0) {
       return 0;

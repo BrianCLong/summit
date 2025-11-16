@@ -3,6 +3,7 @@
  * Replaces demo resolvers with PostgreSQL (canonical) + Neo4j (graph) dual-write
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
@@ -62,7 +63,7 @@ export class EntityRepo {
       await client.query('BEGIN');
 
       // 1. Write to PostgreSQL (source of truth)
-      const { rows } = await client.query<EntityRow>(
+      const { rows } = (await client.query(
         `INSERT INTO entities (id, tenant_id, kind, labels, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
@@ -74,7 +75,7 @@ export class EntityRepo {
           JSON.stringify(input.props || {}),
           userId,
         ],
-      );
+      )) as { rows: EntityRow[] };
 
       const entity = rows[0];
 
@@ -143,12 +144,12 @@ export class EntityRepo {
 
       updateFields.push(`updated_at = now()`);
 
-      const { rows } = await client.query<EntityRow>(
+      const { rows } = (await client.query(
         `UPDATE entities SET ${updateFields.join(', ')}
          WHERE id = $1
          RETURNING *`,
         params,
-      );
+      )) as { rows: EntityRow[] };
 
       if (rows.length === 0) {
         await client.query('ROLLBACK');
@@ -254,7 +255,7 @@ export class EntityRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query<EntityRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
@@ -293,7 +294,7 @@ export class EntityRepo {
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(Math.min(limit, 1000), offset); // Cap at 1000 for safety
 
-    const { rows } = await this.pg.query<EntityRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
     return rows.map(this.mapRow);
   }
 
@@ -306,7 +307,7 @@ export class EntityRepo {
   ): Promise<(Entity | null)[]> {
     if (ids.length === 0) return [];
 
-    const params = [ids];
+    const params: any[] = [ids];
     let query = `SELECT * FROM entities WHERE id = ANY($1)`;
 
     if (tenantId) {
@@ -314,7 +315,7 @@ export class EntityRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query<EntityRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
     const entitiesMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
 
     return ids.map((id) => entitiesMap.get(id) || null);

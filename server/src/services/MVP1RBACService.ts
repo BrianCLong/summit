@@ -1,4 +1,4 @@
-import { getPostgresClient } from '../db/postgres';
+import { getPostgresPool } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 import { isFeatureEnabled } from '../config/mvp1-features';
 import pino from 'pino';
@@ -128,64 +128,68 @@ interface AuditEvent {
 }
 
 export class MVP1RBACService {
-  private postgresClient = getPostgresClient();
+  private postgresClient = getPostgresPool();
   private neo4jDriver = getNeo4jDriver();
+
+  // Base permissions arrays to avoid circular reference
+  private static readonly VIEWER_PERMISSIONS: Permission[] = [
+    Permission.ENTITY_READ,
+    Permission.INVESTIGATION_READ,
+    Permission.RELATIONSHIP_READ,
+    Permission.ANALYTICS_READ,
+    Permission.EXPORT_CSV,
+  ];
+
+  private static readonly ANALYST_PERMISSIONS: Permission[] = [
+    ...MVP1RBACService.VIEWER_PERMISSIONS,
+    Permission.ANALYTICS_RUN,
+    Permission.ANALYTICS_EXPORT,
+    Permission.AI_QUERY,
+    Permission.EXPORT_JSON,
+  ];
+
+  private static readonly EDITOR_PERMISSIONS: Permission[] = [
+    ...MVP1RBACService.ANALYST_PERMISSIONS,
+    Permission.ENTITY_CREATE,
+    Permission.ENTITY_UPDATE,
+    Permission.RELATIONSHIP_CREATE,
+    Permission.RELATIONSHIP_UPDATE,
+    Permission.INVESTIGATION_CREATE,
+    Permission.INVESTIGATION_UPDATE,
+    Permission.AI_SUGGEST,
+  ];
+
+  private static readonly INVESTIGATOR_PERMISSIONS: Permission[] = [
+    ...MVP1RBACService.EDITOR_PERMISSIONS,
+    Permission.ENTITY_DELETE,
+    Permission.RELATIONSHIP_DELETE,
+    Permission.INVESTIGATION_DELETE,
+    Permission.INVESTIGATION_SHARE,
+    Permission.INVESTIGATION_ARCHIVE,
+    Permission.ENTITY_BULK_IMPORT,
+    Permission.EXPORT_PDF,
+    Permission.AI_ADMIN,
+  ];
+
+  private static readonly ADMIN_PERMISSIONS: Permission[] = [
+    ...MVP1RBACService.INVESTIGATOR_PERMISSIONS,
+    Permission.USER_READ,
+    Permission.USER_CREATE,
+    Permission.USER_UPDATE,
+    Permission.TENANT_READ,
+    Permission.TENANT_UPDATE,
+    Permission.AUDIT_READ,
+    Permission.SYSTEM_MONITOR,
+  ];
 
   // Role-based permission mapping
   private readonly rolePermissions: Record<Role, Permission[]> = {
-    [Role.VIEWER]: [
-      Permission.ENTITY_READ,
-      Permission.INVESTIGATION_READ,
-      Permission.RELATIONSHIP_READ,
-      Permission.ANALYTICS_READ,
-      Permission.EXPORT_CSV,
-    ],
-
-    [Role.ANALYST]: [
-      ...this.rolePermissions[Role.VIEWER],
-      Permission.ANALYTICS_RUN,
-      Permission.ANALYTICS_EXPORT,
-      Permission.AI_QUERY,
-      Permission.EXPORT_JSON,
-    ],
-
-    [Role.EDITOR]: [
-      ...this.rolePermissions[Role.ANALYST],
-      Permission.ENTITY_CREATE,
-      Permission.ENTITY_UPDATE,
-      Permission.RELATIONSHIP_CREATE,
-      Permission.RELATIONSHIP_UPDATE,
-      Permission.INVESTIGATION_CREATE,
-      Permission.INVESTIGATION_UPDATE,
-      Permission.AI_SUGGEST,
-    ],
-
-    [Role.INVESTIGATOR]: [
-      ...this.rolePermissions[Role.EDITOR],
-      Permission.ENTITY_DELETE,
-      Permission.RELATIONSHIP_DELETE,
-      Permission.INVESTIGATION_DELETE,
-      Permission.INVESTIGATION_SHARE,
-      Permission.INVESTIGATION_ARCHIVE,
-      Permission.ENTITY_BULK_IMPORT,
-      Permission.EXPORT_PDF,
-      Permission.AI_ADMIN,
-    ],
-
-    [Role.ADMIN]: [
-      ...this.rolePermissions[Role.INVESTIGATOR],
-      Permission.USER_READ,
-      Permission.USER_CREATE,
-      Permission.USER_UPDATE,
-      Permission.TENANT_READ,
-      Permission.TENANT_UPDATE,
-      Permission.AUDIT_READ,
-      Permission.SYSTEM_MONITOR,
-    ],
-
-    [Role.SUPER_ADMIN]: [
-      ...Object.values(Permission), // All permissions
-    ],
+    [Role.VIEWER]: MVP1RBACService.VIEWER_PERMISSIONS,
+    [Role.ANALYST]: MVP1RBACService.ANALYST_PERMISSIONS,
+    [Role.EDITOR]: MVP1RBACService.EDITOR_PERMISSIONS,
+    [Role.INVESTIGATOR]: MVP1RBACService.INVESTIGATOR_PERMISSIONS,
+    [Role.ADMIN]: MVP1RBACService.ADMIN_PERMISSIONS,
+    [Role.SUPER_ADMIN]: Object.values(Permission), // All permissions
   };
 
   /**
@@ -288,12 +292,12 @@ export class MVP1RBACService {
 
     try {
       const query = `
-        SELECT 
-          created_by, 
+        SELECT
+          created_by,
           assigned_to,
           shared_with,
           status
-        FROM investigations 
+        FROM investigations
         WHERE id = $1 AND tenant_id = $2
       `;
 
@@ -465,13 +469,13 @@ export class MVP1RBACService {
           tenantId: $tenantId
         })
         CREATE (u)-[:PERFORMED]->(a)
-        
+
         // Link to investigation if present
         WITH a
         WHERE $investigationId IS NOT NULL
         MATCH (i:Investigation {id: $investigationId, tenantId: $tenantId})
         CREATE (a)-[:RELATES_TO]->(i)
-        
+
         RETURN a.id as auditId
       `;
 

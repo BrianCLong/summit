@@ -9,6 +9,9 @@ import fetch from 'node-fetch';
 import logger from '../utils/logger';
 import { SafeMutationMetrics } from '../monitoring/safeMutationsMetrics';
 
+// Type declaration for BullMQ Job (when bullmq is not available)
+type Job<T = any> = { data: T; id?: string };
+
 interface EscalationJobData {
   checkDate?: string;
   dryRun?: boolean;
@@ -236,15 +239,15 @@ export class CanaryEscalationManager {
    */
   private async findEscalationCandidates(): Promise<EscalationCandidate[]> {
     const query = `
-      SELECT 
+      SELECT
         tenant_id,
         daily_usd_limit,
         monthly_usd_limit,
         last_escalated_at,
         canary,
         auto_escalate
-      FROM tenant_budget 
-      WHERE canary = TRUE 
+      FROM tenant_budget
+      WHERE canary = TRUE
         AND auto_escalate = TRUE
         AND daily_usd_limit < $1
         AND deleted_at IS NULL
@@ -434,8 +437,8 @@ export class CanaryEscalationManager {
 
     try {
       const updateQuery = `
-        UPDATE tenant_budget 
-        SET 
+        UPDATE tenant_budget
+        SET
           daily_usd_limit = $1,
           monthly_usd_limit = $2,
           last_escalated_at = NOW(),

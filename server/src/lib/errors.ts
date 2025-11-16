@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
-import { ZodError } from 'zod';
+import { z } from 'zod';
 
 const logger = pino({ name: 'ErrorMapper' });
 
@@ -15,12 +15,24 @@ export class UserFacingError extends Error {
   }
 }
 
+export class AppError extends Error {
+  statusCode: number;
+  code?: string;
+
+  constructor(message: string, statusCode: number = 500, code?: string) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = code;
+    this.name = 'AppError';
+  }
+}
+
 export function mapGraphRAGError(error: unknown): UserFacingError {
   const traceId = randomUUID();
   let summary = 'Unknown error';
-  if (error instanceof ZodError) {
-    summary = error.issues
-      .map((i) => `${i.path.join('.')}: ${i.message}`)
+  if (error && typeof error === 'object' && 'issues' in error && Array.isArray((error as any).issues)) {
+    summary = (error as any).issues
+      .map((i: any) => `${i.path.join('.')}: ${i.message}`)
       .join('; ');
   } else if (error instanceof Error) {
     summary = error.message;

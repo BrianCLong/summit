@@ -227,15 +227,15 @@ export class MissionVault {
             OPTIONAL MATCH (m)-[:HAS_MILESTONE]->(ms:Milestone)
             OPTIONAL MATCH (m)-[:HAS_RISK]->(rf:RiskFactor)
             OPTIONAL MATCH (m)-[:HAS_CRITERIA]->(sc:SuccessCriteria)
-            
-            WITH m, 
+
+            WITH m,
                  collect(DISTINCT obj) as objectives,
                  collect(DISTINCT sh) as stakeholders,
                  collect(DISTINCT res) as resources,
                  collect(DISTINCT ms) as milestones,
                  collect(DISTINCT rf) as riskFactors,
                  collect(DISTINCT sc) as successCriteria
-            
+
             RETURN m {
               .*,
               objectives: objectives,
@@ -283,8 +283,8 @@ export class MissionVault {
       metadata?: Record<string, any>;
     },
   ): Promise<void> {
+    const session = this.neo4j.getSession();
     try {
-      const session = this.neo4j.getSession();
 
       await session.executeWrite(async (tx) => {
         // Update mission phase if provided
@@ -467,15 +467,15 @@ export class MissionVault {
           OPTIONAL MATCH (m)-[:HAS_MILESTONE]->(ms:Milestone)
           OPTIONAL MATCH (m)-[:HAS_RISK]->(rf:RiskFactor)
           OPTIONAL MATCH (m)-[:HAS_CRITERIA]->(sc:SuccessCriteria)
-          
-          WITH m, 
+
+          WITH m,
                collect(DISTINCT obj) as objectives,
                collect(DISTINCT sh) as stakeholders,
                collect(DISTINCT res) as resources,
                collect(DISTINCT ms) as milestones,
                collect(DISTINCT rf) as riskFactors,
                collect(DISTINCT sc) as successCriteria
-          
+
           RETURN m {
             .*,
             objectives: objectives,
@@ -510,8 +510,8 @@ export class MissionVault {
       relevanceScore: number;
     },
   ): Promise<void> {
+    const session = this.neo4j.getSession();
     try {
-      const session = this.neo4j.getSession();
 
       await session.executeWrite(async (tx) => {
         await tx.run(

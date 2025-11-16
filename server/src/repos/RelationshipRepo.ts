@@ -3,6 +3,7 @@
  * Handles relationships between entities with PostgreSQL + Neo4j dual-write
  */
 
+// @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
@@ -81,7 +82,7 @@ export class RelationshipRepo {
       }
 
       // 2. Insert relationship
-      const { rows } = await client.query<RelationshipRow>(
+      const { rows } = (await client.query(
         `INSERT INTO relationships (id, tenant_id, src_id, dst_id, type, props, created_by)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
@@ -94,7 +95,7 @@ export class RelationshipRepo {
           JSON.stringify(input.props || {}),
           userId,
         ],
-      );
+      )) as { rows: RelationshipRow[] };
 
       const relationship = rows[0];
 
@@ -199,7 +200,7 @@ export class RelationshipRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: RelationshipRow[] };
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
@@ -224,7 +225,7 @@ export class RelationshipRepo {
 
     query += ` ORDER BY created_at DESC`;
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: RelationshipRow[] };
     return rows.map(this.mapRow);
   }
 
@@ -271,7 +272,7 @@ export class RelationshipRepo {
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(Math.min(limit, 1000), offset);
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+    const { rows } = (await this.pg.query(query, params)) as { rows: RelationshipRow[] };
     return rows.map(this.mapRow);
   }
 
@@ -283,10 +284,10 @@ export class RelationshipRepo {
     tenantId: string,
   ): Promise<{ incoming: number; outgoing: number }> {
     const { rows } = await this.pg.query(
-      `SELECT 
+      `SELECT
          COUNT(*) FILTER (WHERE src_id = $2) as outgoing,
          COUNT(*) FILTER (WHERE dst_id = $2) as incoming
-       FROM relationships 
+       FROM relationships
        WHERE tenant_id = $1 AND (src_id = $2 OR dst_id = $2)`,
       [tenantId, entityId],
     );

@@ -5,7 +5,7 @@
  * Prevents cross-tenant data access at the resolver level.
  */
 
-import { GraphQLError } from 'graphql';
+import { GraphQLError, GraphQLResolveInfo } from 'graphql';
 import pino from 'pino';
 
 const logger = pino({ name: 'withTenant' });
@@ -26,14 +26,14 @@ export const withTenant = (
     parent: unknown,
     args: Record<string, unknown>,
     context: TenantContext,
-    info: unknown,
+    info: GraphQLResolveInfo,
   ) => unknown,
 ) => {
   return (
     parent: unknown,
     args: Record<string, unknown>,
     context: TenantContext,
-    info: unknown,
+    info: GraphQLResolveInfo,
   ) => {
     // Ensure user context exists
     if (!context?.user) {
@@ -67,6 +67,26 @@ export const withTenant = (
 
     return resolver(parent, scopedArgs, context, info);
   };
+};
+
+/**
+ * Helper function to extract and validate tenant from context
+ */
+export const requireTenant = (context: TenantContext): string => {
+  if (!context?.user) {
+    throw new GraphQLError('Authentication required', {
+      extensions: { code: 'UNAUTHENTICATED' },
+    });
+  }
+
+  if (!context.user.tenant) {
+    logger.error({ userId: context.user.id }, 'User missing tenant');
+    throw new GraphQLError('Missing tenant context', {
+      extensions: { code: 'FORBIDDEN' },
+    });
+  }
+
+  return context.user.tenant;
 };
 
 /**

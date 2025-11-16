@@ -1,6 +1,5 @@
-import { jest, describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
-import app from '../../src/app.js';
+import { createApp } from '../../src/app.js';
 
 // Mock database and external dependencies
 jest.mock('../../src/db/postgres.js');
@@ -8,9 +7,11 @@ jest.mock('../../src/services/ticket-links.js');
 
 describe('Ticket Linking Integration Flow', () => {
   let server: any;
+  let app: any;
 
   beforeAll(async () => {
-    // Start test server
+    // Create and start test server
+    app = await createApp();
     server = app.listen(0);
   });
 

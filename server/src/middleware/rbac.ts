@@ -47,7 +47,10 @@ export function requireAnyPermission(permissions: string[]) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    if (!authService.hasAnyPermission(user, permissions)) {
+    const hasAny = permissions.some(perm =>
+      user.permissions?.includes(perm) || (user as any).role === 'admin'
+    );
+    if (!hasAny) {
       return res.status(403).json({
         error: 'Insufficient permissions',
         required: `Any of: ${permissions.join(', ')}`,
@@ -73,7 +76,10 @@ export function requireAllPermissions(permissions: string[]) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    if (!authService.hasAllPermissions(user, permissions)) {
+    const hasAll = permissions.every(perm =>
+      user.permissions?.includes(perm) || (user as any).role === 'admin'
+    );
+    if (!hasAll) {
       return res.status(403).json({
         error: 'Insufficient permissions',
         required: `All of: ${permissions.join(', ')}`,

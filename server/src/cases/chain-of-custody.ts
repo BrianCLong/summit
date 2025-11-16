@@ -1,4 +1,4 @@
-import { createHash, sign, verify, KeyObject } from 'crypto';
+import { createHash, sign, verify, KeyObject } from 'node:crypto';
 
 export interface CustodyEvent {
   caseId: string;

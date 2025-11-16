@@ -6,7 +6,8 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
-    "sourceMap": true
+    "sourceMap": true,
+    "allowImportingTsExtensions": false
   },
   "include": ["src"],
   "exclude": ["__tests__"]

@@ -162,7 +162,7 @@ async function createAuditLog(
  * Safe mutation wrapper with comprehensive error handling and auditing
  */
 async function safeMutation<TInput, TOutput>(
-  schema: z.ZodSchema<TInput>,
+  schema: z.ZodType<TInput>,
   input: unknown,
   context: MutationContext,
   mutationFn: (

@@ -1,5 +1,9 @@
 name: backlog-guard
 description: Detects GitHub Actions queue saturation and outputs 'saturated' boolean
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
 runs:
   using: 'composite'
   steps:
@@ -17,18 +21,11 @@ runs:
           && sudo apt install gh -y
         }
 
-    - name: Configure GitHub CLI
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        echo "$GH_TOKEN" | gh auth login --with-token
-
     - id: detect
       name: Detect queue saturation
       shell: bash
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ inputs.github-token }}
       run: |
         set -euo pipefail
         THRESHOLD="${ACTIONS_QUEUE_THRESHOLD:-15}"

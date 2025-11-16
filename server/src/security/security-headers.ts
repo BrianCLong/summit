@@ -71,14 +71,8 @@ class SecurityHeadersManager {
         allow: false,
       },
 
-      // Expect-CT (deprecated but still useful)
-      expectCt: isProduction
-        ? {
-            maxAge: 86400, // 24 hours
-            enforce: true,
-            reportUri: this.config.reportingEndpoint,
-          }
-        : false,
+      // Note: Expect-CT has been deprecated and removed from helmet
+      // Certificate Transparency is now handled by browsers automatically
 
       // Frameguard (X-Frame-Options)
       frameguard: {

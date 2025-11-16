@@ -62,13 +62,13 @@ interface OnCallRotation {
 
 export class AlertingEngine {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private prometheusUrl: string;
   private activeAlerts: Map<string, Alert>;
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
     this.prometheusUrl = process.env.PROMETHEUS_URL || 'http://localhost:9090';
     this.activeAlerts = new Map();
   }

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Logger } from 'winston';
+import winston, { Logger } from 'winston';
 
 export interface PlaybookExecution {
   id: string;
@@ -36,7 +36,7 @@ export interface PlaybookApproval {
 
 export class SOARPlaybookService {
   private prisma: PrismaClient;
-  private logger: Logger;
+  private logger: winston.Logger;
 
   constructor(prisma: PrismaClient, logger: Logger) {
     this.prisma = prisma;

@@ -137,8 +137,8 @@ export class FederatedOrchestrationService {
           enclave_id, region, jurisdiction, capabilities, data_classifications,
           policy_version, public_key, endpoints, status, registered_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())
-        ON CONFLICT (enclave_id) 
-        DO UPDATE SET 
+        ON CONFLICT (enclave_id)
+        DO UPDATE SET
           region = EXCLUDED.region,
           jurisdiction = EXCLUDED.jurisdiction,
           capabilities = EXCLUDED.capabilities,
@@ -626,7 +626,7 @@ export class FederatedOrchestrationService {
           {
             method: 'GET',
             timeout: 5000,
-          },
+          } as any,
         );
 
         const status = healthResponse.ok ? 'healthy' : 'unhealthy';
