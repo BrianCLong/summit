@@ -195,7 +195,7 @@ interface ExecutionMetadata {
 
 export class EnhancedPremiumModelRegistry {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private models: Map<string, EnhancedPremiumModel> = new Map();
   private executionHistory: Map<string, ModelExecutionResult[]> = new Map();
   private costTracker: Map<string, number> = new Map();
@@ -203,7 +203,7 @@ export class EnhancedPremiumModelRegistry {
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
   }
 
   async initialize(): Promise<void> {

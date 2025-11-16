@@ -12,7 +12,7 @@ interface IdempotencyOptions {
   /**
    * Redis client instance (will create default if not provided)
    */
-  redisClient?: RedisClientType;
+  redisClient?: Redis;
 
   /**
    * TTL for idempotency keys in milliseconds
@@ -62,7 +62,7 @@ interface IdempotencyRecord {
 }
 
 class IdempotencyManager {
-  private redis: RedisClientType;
+  private redis: Redis;
   private options: Required<IdempotencyOptions>;
 
   constructor(options: IdempotencyOptions = {}) {
@@ -82,24 +82,15 @@ class IdempotencyManager {
     this.redis = this.options.redisClient;
   }
 
-  private createDefaultRedisClient(): RedisClientType {
-    const client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-      socket: {
-        reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+  private createDefaultRedisClient(): Redis {
+    const client = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+      reconnectOnError: (err) => {
+        logger.error('Redis client error in idempotency middleware', {
+          error: err,
+        });
+        return true;
       },
-    });
-
-    client.on('error', (err) => {
-      logger.error('Redis client error in idempotency middleware', {
-        error: err,
-      });
-    });
-
-    client.connect().catch((err) => {
-      logger.error('Failed to connect Redis client for idempotency', {
-        error: err,
-      });
+      retryStrategy: (times) => Math.min(times * 50, 500),
     });
 
     return client;

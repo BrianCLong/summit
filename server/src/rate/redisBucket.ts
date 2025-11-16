@@ -142,21 +142,18 @@ end
  * Redis-backed token bucket rate limiter
  */
 export class RedisBucket {
-  private client: RedisClientType;
+  private client: Redis;
   private connected: boolean = false;
   private luaScriptSha: string | null = null;
   private batchScriptSha: string | null = null;
 
   constructor(redisUrl?: string) {
-    this.client = createClient({
-      url: redisUrl || process.env.REDIS_URL || 'redis://localhost:6379',
-      socket: {
-        connectTimeout: 5000,
-        commandTimeout: 2000,
-      },
-      retry: {
-        retries: 3,
-        factor: 2,
+    this.client = new Redis(redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
+      connectTimeout: 5000,
+      commandTimeout: 2000,
+      retryStrategy: (times) => {
+        if (times > 3) return null;
+        return times * 2 * 1000;
       },
     });
 

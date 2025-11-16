@@ -213,7 +213,7 @@ interface Checkpoint {
 
 export class AdvancedRoutingEngine {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private thompsonSampling: ThompsonSamplingEngine;
   private banditOptimizer: MultiArmedBanditOptimizer;
   private modelRegistry: EnhancedPremiumModelRegistry;
@@ -232,7 +232,7 @@ export class AdvancedRoutingEngine {
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
     this.thompsonSampling = new ThompsonSamplingEngine();
     this.banditOptimizer = new MultiArmedBanditOptimizer();
     this.modelRegistry = new EnhancedPremiumModelRegistry();

@@ -231,7 +231,7 @@ interface ActionItem {
 
 export class AdaptiveLearningSystem {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private learningPoints: Map<string, LearningPoint[]> = new Map();
   private modelProfiles: Map<string, ModelLearningProfile> = new Map();
   private predictiveModels: Map<string, any> = new Map();
@@ -246,7 +246,7 @@ export class AdaptiveLearningSystem {
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
   }
 
   async initialize(): Promise<void> {

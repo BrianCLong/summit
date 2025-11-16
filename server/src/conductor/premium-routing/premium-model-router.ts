@@ -78,14 +78,14 @@ interface ModelPerformance {
 
 export class PremiumModelRouter {
   private pool: Pool;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private availableModels: Map<string, PremiumModel>;
   private performanceData: Map<string, ModelPerformance>;
   private loadBalancers: Map<string, ModelLoadBalancer>;
 
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.redis = createClient({ url: process.env.REDIS_URL });
+    this.redis = new Redis(process.env.REDIS_URL);
     this.availableModels = new Map();
     this.performanceData = new Map();
     this.loadBalancers = new Map();
