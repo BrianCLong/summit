@@ -9,30 +9,31 @@ import { MCPServerConfig } from '../types';
 jest.mock('ws');
 const MockWebSocket = WebSocket as jest.MockedClass<typeof WebSocket>;
 
+// Shared mock configuration for all tests
+const mockServerConfig: MCPServerConfig = {
+  url: 'ws://localhost:8001',
+  name: 'test-server',
+  authToken: 'test-token',
+  tools: [
+    {
+      name: 'test.tool',
+      description: 'Test tool',
+      schema: {
+        type: 'object',
+        properties: {
+          input: { type: 'string' },
+        },
+        required: ['input'],
+      },
+      scopes: ['test:read'],
+    },
+  ],
+};
+
 describe('MCPClient', () => {
   let client: MCPClient;
   let registry: MCPServerRegistry;
   let mockWs: jest.Mocked<WebSocket>;
-
-  const mockServerConfig: MCPServerConfig = {
-    url: 'ws://localhost:8001',
-    name: 'test-server',
-    authToken: 'test-token',
-    tools: [
-      {
-        name: 'test.tool',
-        description: 'Test tool',
-        schema: {
-          type: 'object',
-          properties: {
-            input: { type: 'string' },
-          },
-          required: ['input'],
-        },
-        scopes: ['test:read'],
-      },
-    ],
-  };
 
   beforeEach(() => {
     registry = new MCPServerRegistry();
