@@ -19,11 +19,11 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "devDependencies": {
-    "eslint": "^9.5.0",
-    "rimraf": "^5.0.5",
-    "typescript": "^5.4.0",
-    "vitest": "^2.0.0",
-    "@types/node": "^20.11.30"
+    "eslint": "^9.39.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.3",
+    "@types/node": "^24.10.0"
   },
   "exports": {
     ".": {

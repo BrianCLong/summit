@@ -13,11 +13,11 @@
     "test": "node --test"
   },
   "dependencies": {
-    "commander": "^11.1.0"
+    "commander": "^14.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
+    "@types/node": "^24.10.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }

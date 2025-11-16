@@ -18,9 +18,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^20.17.6",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3"
+    "@types/node": "^24.10.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
   }
 }
