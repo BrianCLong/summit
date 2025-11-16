@@ -93,11 +93,33 @@ cd summit
 
 ## 🎯 Golden Path Demo
 
+**Critical Path**: Investigation → Entities → Relationships → Copilot → Results
+
+This 5-minute workflow validates the core platform functionality:
+
 1. **Open Frontend**: Navigate to http://localhost:3000
+   - Verify: Login page loads, no console errors
+
 2. **Create Investigation**: Click "New Investigation" from Dashboard
+   - Verify: Investigation created with unique ID
+   - Should take < 2 seconds
+
 3. **Add Entities**: Use the graph explorer to add entities and relationships
-4. **Run Analysis**: Execute Copilot analysis for AI-augmented insights
+   - Create at least 2 entities (e.g., Person, Organization)
+   - Link them with a relationship (e.g., "works_for")
+   - Verify: Graph visualizes correctly
+
+4. **Run Copilot Analysis**: Execute AI-augmented insights
+   - Click "Run Copilot Goal" or similar action
+   - Verify: Progress indicators show, results stream in real-time
+
 5. **View Results**: Explore generated insights and recommendations
+   - Verify: Insights appear in UI
+   - Verify: Graph updates with new discovered relationships (if any)
+
+**Success Criteria**: All steps complete without errors in < 5 minutes
+
+**If any step fails**: Stop and fix before continuing development (Deployable-First Mantra)
 
 ## 📋 Table of Contents
 
