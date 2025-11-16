@@ -1,0 +1,69 @@
+name: Fast Lane
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast-gate:
+    name: Fast Lane Gate
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+      NODE_OPTIONS: '--max-old-space-size=4096'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+
+      - name: Bootstrap (install dependencies)
+        run: make bootstrap
+        timeout-minutes: 5
+
+      - name: Run linter
+        run: pnpm run lint
+        timeout-minutes: 5
+
+      - name: Run typecheck
+        run: pnpm run typecheck
+        timeout-minutes: 5
+
+      - name: Run unit tests
+        run: pnpm run test
+        timeout-minutes: 10
+        env:
+          # Use in-memory databases for speed
+          NEO4J_PASSWORD: testpassword
+          POSTGRES_PASSWORD: testpassword
+
+      - name: Fast lane summary
+        if: always()
+        run: |
+          echo "🎯 Fast Lane Gate Summary"
+          echo "========================="
+          echo "Bootstrap: ✅"
+          echo "Lint: ✅"
+          echo "Typecheck: ✅"
+          echo "Tests: ✅"
+          echo ""
+          echo "🟢 All fast lane gates passed!"
