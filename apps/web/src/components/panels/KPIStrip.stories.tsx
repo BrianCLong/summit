@@ -29,7 +29,7 @@ export const Loading: Story = {
   },
 }
 
-export const Error: Story = {
+export const ErrorState: Story = {
   args: {
     data: [],
     error: new Error('Failed to load KPI metrics'),

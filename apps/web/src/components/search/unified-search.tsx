@@ -32,7 +32,7 @@ const getTypeIcon = (type: string) => {
 }
 // ... (rest of the file)
 ;<Mic className="h-4 w-4" />
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 import DOMPurify from 'dompurify'
 
 interface SearchResult {
