@@ -3,7 +3,7 @@
  * Enforces license compliance, TOS validation, and DPIA requirements
  */
 
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { z } from 'zod';
@@ -147,7 +147,7 @@ async function policyMiddleware(request: any, reply: any) {
 }
 
 // Create Fastify instance
-const server = Fastify({
+const server: FastifyInstance = Fastify({
   logger: {
     level: NODE_ENV === 'development' ? 'debug' : 'info',
     ...(NODE_ENV === 'development'
@@ -225,10 +225,10 @@ server.post<{
       ],
     );
 
-    server.log.info('Created license', {
+    server.log.info({
       licenseId: licenseData.id,
       authority: (request as any).authorityId,
-    });
+    }, 'Created license');
 
     return LicenseSchema.parse({
       ...result.rows[0],
@@ -236,7 +236,7 @@ server.post<{
       restrictions: result.rows[0].restrictions,
     });
   } catch (error) {
-    server.log.error('Failed to create license', error);
+    server.log.error(error, 'Failed to create license');
     reply.status(500);
     return { error: 'Failed to create license' };
   }
@@ -272,7 +272,7 @@ server.post<{ Body: any }>('/data-sources', async (request, reply) => {
   try {
     const data = DataSourceSchema.parse({
       id: `ds_${Date.now()}`,
-      ...request.body,
+      ...(request.body as object),
       created_at: new Date().toISOString(),
     });
 
@@ -296,18 +296,18 @@ server.post<{ Body: any }>('/data-sources', async (request, reply) => {
       ],
     );
 
-    server.log.info('Registered data source', {
+    server.log.info({
       dataSourceId: data.id,
       licenseId: data.license_id,
       authority: (request as any).authorityId,
-    });
+    }, 'Registered data source');
 
     return DataSourceSchema.parse({
       ...result.rows[0],
       geographic_restrictions: result.rows[0].geographic_restrictions,
     });
   } catch (error) {
-    server.log.error('Failed to register data source', error);
+    server.log.error(error, 'Failed to register data source');
     reply.status(500);
     return { error: 'Failed to register data source' };
   }
@@ -436,17 +436,17 @@ server.post<{ Body: ComplianceCheck }>(
         reason_for_access: (request as any).reasonForAccess,
       };
 
-      server.log.info('Compliance check performed', {
+      server.log.info({
         operation,
         compliance: overallCompliance,
         violationCount: violations.length,
         warningCount: warnings.length,
         authority: (request as any).authorityId,
-      });
+      }, 'Compliance check performed');
 
       return response;
     } catch (error) {
-      server.log.error('Compliance check failed', error);
+      server.log.error(error, 'Compliance check failed');
       reply.status(500);
       return { error: 'Compliance check failed' };
     }
@@ -457,7 +457,7 @@ server.post<{ Body: ComplianceCheck }>(
 server.post<{ Body: any }>('/dpia/assessment', async (request, reply) => {
   try {
     const assessment = DPIAAssessmentSchema.parse({
-      ...request.body,
+      ...(request.body as object),
       completed_by: (request as any).authorityId,
       completed_at: new Date().toISOString(),
     });
@@ -489,11 +489,11 @@ server.post<{ Body: any }>('/dpia/assessment', async (request, reply) => {
       [assessment.data_source_id],
     );
 
-    server.log.info('DPIA assessment completed', {
+    server.log.info({
       dataSourceId: assessment.data_source_id,
       riskLevel: assessment.risk_level,
       authority: (request as any).authorityId,
-    });
+    }, 'DPIA assessment completed');
 
     return DPIAAssessmentSchema.parse({
       ...result.rows[0],
@@ -501,7 +501,7 @@ server.post<{ Body: any }>('/dpia/assessment', async (request, reply) => {
       security_measures: result.rows[0].security_measures,
     });
   } catch (error) {
-    server.log.error('Failed to complete DPIA assessment', error);
+    server.log.error(error, 'Failed to complete DPIA assessment');
     reply.status(500);
     return { error: 'Failed to complete DPIA assessment' };
   }
