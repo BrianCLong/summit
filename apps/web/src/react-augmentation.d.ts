@@ -501,6 +501,26 @@ declare module 'lodash/debounce' {
   export = debounce;
 }
 
+// MSW types (Mock Service Worker)
+declare module 'msw' {
+  export const http: any;
+  export const HttpResponse: any;
+  export const rest: any;
+  export const response: any;
+  export const setupWorker: any;
+}
+
+// React-Redux types
+declare module 'react-redux' {
+  export type TypedUseSelectorHook<TState> = <TSelected>(
+    selector: (state: TState) => TSelected,
+    equalityFn?: (left: TSelected, right: TSelected) => boolean
+  ) => TSelected;
+  export const useDispatch: any;
+  export const useSelector: any;
+  export const Provider: any;
+}
+
 // JQuery types for legacy code
 declare namespace JQuery {
   interface AjaxSettings {}

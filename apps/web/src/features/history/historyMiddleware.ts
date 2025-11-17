@@ -1,5 +1,5 @@
 import { Middleware } from '@reduxjs/toolkit'
-import { applyPatches, enablePatches, produceWithPatches, Patch } from 'immer'
+import { applyPatches, enablePatches, produceWithPatches, type Patch } from 'immer'
 import { push, popUndo, popRedo, moveToRedo, moveToUndo } from './historySlice'
 import { recordAudit } from '../../telemetry/audit' // stub below
 import { withSpan } from '../../telemetry/otel' // stub below

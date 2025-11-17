@@ -666,7 +666,7 @@ function MermaidTrace({ spec }: { spec: string }) {
     })
   }, [])
   useEffect(() => {
-    if (ref.current) mermaid.run({ querySelector: '.mermaid' })
+    if (ref.current) (mermaid as any).run({ querySelector: '.mermaid' })
   }, [spec])
   return (
     <Card className="col-span-12">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 import { io } from 'socket.io-client'
 import $ from 'jquery'
 
@@ -40,7 +40,9 @@ export default function ModelMatrix() {
   const [rows, setRows] = useState<Row[]>([])
   useEffect(() => {
     socket.on('model_stats', (payload: Row[]) => setRows(payload))
-    return () => socket.off('model_stats')
+    return () => {
+      socket.off('model_stats')
+    }
   }, [])
 
   useEffect(() => {
