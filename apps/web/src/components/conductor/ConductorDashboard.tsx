@@ -80,37 +80,6 @@ interface ConductorMetrics {
   }
 }
 
-interface GitHubMetrics {
-  openPRs: number
-  codeQualityScore: number
-  testCoverage: number
-  deploymentFrequency: number
-  meanTimeToRecovery: number
-  recentCommits: Array<{
-    sha: string
-    message: string
-    author: string
-    timestamp: string
-    status: 'success' | 'pending' | 'failure'
-  }>
-}
-
-interface JIRAMetrics {
-  openIssues: number
-  inProgressIssues: number
-  resolvedThisWeek: number
-  avgResolutionTime: number
-  priorityDistribution: Record<string, number>
-  recentIssues: Array<{
-    key: string
-    summary: string
-    status: string
-    assignee: string
-    priority: string
-    created: string
-  }>
-}
-
 export const ConductorDashboard: React.FC = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState<
     '1h' | '24h' | '7d' | '30d'
@@ -599,25 +568,25 @@ export const ConductorDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <MetricCard
                   title="Open PRs"
-                  value={githubData?.openPRs?.toString() || '0'}
+                  value={githubData?.pullRequests?.open?.toString() || '0'}
                   icon={<GitBranch className="h-5 w-5" />}
                   color="text-blue-600"
                 />
                 <MetricCard
                   title="Code Quality"
-                  value={`${githubData?.codeQualityScore || 0}%`}
+                  value={`${githubData?.codeQuality?.codeQualityScore || 0}%`}
                   icon={<Shield className="h-5 w-5" />}
                   color="text-green-600"
                 />
                 <MetricCard
                   title="Test Coverage"
-                  value={`${githubData?.testCoverage || 0}%`}
+                  value={`${githubData?.codeQuality?.testCoverage || 0}%`}
                   icon={<Activity className="h-5 w-5" />}
                   color="text-purple-600"
                 />
                 <MetricCard
                   title="MTTR"
-                  value={`${githubData?.meanTimeToRecovery || 0}h`}
+                  value={`${githubData?.deployments?.meanTimeToRecovery || 0}h`}
                   icon={<Clock className="h-5 w-5" />}
                   color="text-orange-600"
                 />
@@ -629,7 +598,7 @@ export const ConductorDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {githubData?.recentCommits?.map(commit => (
+                    {githubData?.commits?.recentCommits?.map(commit => (
                       <div
                         key={commit.sha}
                         className="flex items-center space-x-4 p-3 border rounded-lg"
@@ -648,7 +617,7 @@ export const ConductorDashboard: React.FC = () => {
                         <div className="flex-1">
                           <p className="font-medium">{commit.message}</p>
                           <p className="text-sm text-gray-600">
-                            {commit.author} • {commit.timestamp}
+                            {commit.author.name} • {commit.timestamp}
                           </p>
                         </div>
                         <code className="text-xs bg-gray-100 px-2 py-1 rounded">
@@ -672,25 +641,25 @@ export const ConductorDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <MetricCard
                   title="Open Issues"
-                  value={jiraData?.openIssues?.toString() || '0'}
+                  value={jiraData?.issues?.open?.toString() || '0'}
                   icon={<Bug className="h-5 w-5" />}
                   color="text-red-600"
                 />
                 <MetricCard
                   title="In Progress"
-                  value={jiraData?.inProgressIssues?.toString() || '0'}
+                  value={jiraData?.issues?.inProgress?.toString() || '0'}
                   icon={<Activity className="h-5 w-5" />}
                   color="text-blue-600"
                 />
                 <MetricCard
-                  title="Resolved This Week"
-                  value={jiraData?.resolvedThisWeek?.toString() || '0'}
+                  title="Resolved"
+                  value={jiraData?.issues?.resolved?.toString() || '0'}
                   icon={<TrendingUp className="h-5 w-5" />}
                   color="text-green-600"
                 />
                 <MetricCard
                   title="Avg Resolution"
-                  value={`${jiraData?.avgResolutionTime || 0}d`}
+                  value={`${jiraData?.issues?.avgResolutionTime || 0}d`}
                   icon={<Clock className="h-5 w-5" />}
                   color="text-purple-600"
                 />
@@ -712,7 +681,7 @@ export const ConductorDashboard: React.FC = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {jiraData?.recentIssues?.map(issue => (
+                      {jiraData?.issues?.recentIssues?.map(issue => (
                         <TableRow key={issue.key}>
                           <TableCell>
                             <div>
@@ -723,22 +692,22 @@ export const ConductorDashboard: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{issue.status}</Badge>
+                            <Badge variant="secondary">{issue.status.name}</Badge>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant={
-                                issue.priority === 'High'
+                                issue.priority.name === 'High'
                                   ? 'destructive'
-                                  : issue.priority === 'Medium'
+                                  : issue.priority.name === 'Medium'
                                     ? 'default'
                                     : 'secondary'
                               }
                             >
-                              {issue.priority}
+                              {issue.priority.name}
                             </Badge>
                           </TableCell>
-                          <TableCell>{issue.assignee}</TableCell>
+                          <TableCell>{issue.assignee?.displayName || 'Unassigned'}</TableCell>
                           <TableCell>{issue.created}</TableCell>
                         </TableRow>
                       ))}
