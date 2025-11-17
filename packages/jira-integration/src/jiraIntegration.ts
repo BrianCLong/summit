@@ -37,7 +37,7 @@ export class JiraIntegrationService {
     const fields: Record<string, unknown> = {};
     Object.entries(this.config.customFieldMap).forEach(
       ([logicalField, jiraField]) => {
-        const value = (input as Record<string, unknown>)[logicalField];
+        const value = (input as unknown as Record<string, unknown>)[logicalField];
         if (value === undefined) {
           return;
         }
@@ -119,7 +119,7 @@ export class JiraIntegrationService {
       const blob = new Blob([attachment.data], {
         type: attachment.contentType,
       });
-      formData.append('file', blob, attachment.fileName);
+      formData.append('file', blob as unknown as Blob, attachment.fileName);
     });
 
     await this.client.request(`/rest/api/3/issue/${issueId}/attachments`, {
@@ -246,7 +246,7 @@ export class JiraIntegrationService {
     const result: WorkflowSyncResult = {
       issueId: event.issue.id,
       transitioned: Boolean(mappedTarget),
-      targetState: mappedTarget,
+      targetState: mappedTarget ?? undefined,
     };
 
     this.auditLogger.record(

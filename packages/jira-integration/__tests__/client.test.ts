@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { InMemoryAuditLogger } from '../src/logger.js';
-import { JiraApiClient, JiraApiError } from '../src/client.js';
+import { JiraApiClient, JiraApiError, FetchImplementation } from '../src/client.js';
 import { JiraIntegrationConfig } from '../src/types.js';
 
 describe('JiraApiClient', () => {
@@ -61,7 +61,7 @@ describe('JiraApiClient', () => {
     const client = new JiraApiClient(
       config,
       auditLogger,
-      fetchMock as unknown as typeof fetch,
+      fetchMock as unknown as FetchImplementation,
     );
     const response = await client.request<{ id: string }>('/rest/api/3/issue', {
       method: 'GET',
@@ -81,7 +81,7 @@ describe('JiraApiClient', () => {
     const client = new JiraApiClient(
       config,
       auditLogger,
-      fetchMock as unknown as typeof fetch,
+      fetchMock as unknown as FetchImplementation,
     );
     await expect(
       client.request('/rest/api/3/issue', { method: 'GET' }),
