@@ -207,3 +207,13 @@ export interface GeoLocation {
   entityCount: number
   metadata: Record<string, any>
 }
+
+export interface GeospatialEvent {
+  id: string
+  timestamp: string
+  location: GeoLocation
+  type: string
+  severity?: AlertSeverity
+  description?: string
+  metadata: Record<string, any>
+}
