@@ -44,7 +44,9 @@
       "Bash(npx tsc:*)",
       "Bash(pnpm -F @intelgraph/web run typecheck:*)",
       "Bash(pnpm -F @intelgraph/license-registry run typecheck:*)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(git -C /Users/brianlong/Developer/summit status --short)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

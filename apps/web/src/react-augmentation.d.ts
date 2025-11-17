@@ -486,3 +486,25 @@ declare namespace React {
     | Iterable<ReactNode>
     | Promise<ReactNode>;
 }
+
+// Lodash types
+declare module 'lodash/debounce' {
+  function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait?: number,
+    options?: {
+      leading?: boolean;
+      maxWait?: number;
+      trailing?: boolean;
+    }
+  ): T & { cancel(): void; flush(): void };
+  export = debounce;
+}
+
+// JQuery types for legacy code
+declare namespace JQuery {
+  interface AjaxSettings {}
+  interface Promise<T> {}
+}
+
+declare type JQuery<TElement = HTMLElement> = any;
