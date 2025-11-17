@@ -93,7 +93,7 @@ export function TriPaneAnalysisView({
 
   const [timeFilter, setTimeFilter] = useState<TimeRange | null>(null)
   const [showProvenance, setShowProvenance] = useState(true)
-  const [graphLayout] = useState<GraphLayout>({ type: 'force' })
+  const [graphLayout] = useState<GraphLayout>({ type: 'force', settings: {} })
   const [provenanceData, setProvenanceData] = useState<
     Map<string, ProvenanceInfo>
   >(new Map())
@@ -147,15 +147,15 @@ export function TriPaneAnalysisView({
     // Filter entities that appear in the filtered events
     const relevantEntityIds = new Set([
       ...filteredTimelineEvents.map(e => e.entityId).filter(Boolean),
-      ...filteredGeospatialEvents.map(e => e.entityId).filter(Boolean),
+      // GeospatialEvent doesn't have entityId, so we skip it
     ])
 
     const filteredEntities = entities.filter(
       entity =>
         relevantEntityIds.has(entity.id) ||
-        (entity.lastSeen &&
-          new Date(entity.lastSeen) >= timeFilter.start &&
-          new Date(entity.lastSeen) <= timeFilter.end)
+        (entity.updatedAt &&
+          new Date(entity.updatedAt) >= timeFilter.start &&
+          new Date(entity.updatedAt) <= timeFilter.end)
     )
 
     const filteredEntityIds = new Set(filteredEntities.map(e => e.id))
