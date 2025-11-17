@@ -472,3 +472,55 @@ declare module 'lodash/debounce' {
   ): T & { cancel(): void; flush(): void };
   export = debounce;
 }
+
+// Fix for third-party libraries with React 19 JSX incompatibility
+declare module 'lucide-react' {
+  import * as React from 'react';
+  export type LucideProps = React.SVGProps<SVGSVGElement> & {
+    size?: string | number;
+    absoluteStrokeWidth?: boolean;
+  };
+  export type LucideIcon = React.ForwardRefExoticComponent<
+    Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
+  >;
+  export const Icon: LucideIcon;
+  // Re-export all icons as compatible components
+  export * from 'lucide-react/dist/esm/icons';
+}
+
+declare module 'react-router-dom' {
+  import * as React from 'react';
+  import type * as H from 'history';
+
+  export interface LinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
+    to: string | Partial<H.Location>;
+    replace?: boolean;
+    state?: any;
+    reloadDocument?: boolean;
+  }
+  export const Link: React.ForwardRefExoticComponent<LinkProps & React.RefAttributes<HTMLAnchorElement>>;
+
+  export interface NavLinkProps extends LinkProps {
+    caseSensitive?: boolean;
+    end?: boolean;
+  }
+  export const NavLink: React.ForwardRefExoticComponent<NavLinkProps & React.RefAttributes<HTMLAnchorElement>>;
+
+  export * from 'react-router-dom/dist/index';
+}
+
+declare module 'cmdk' {
+  import * as React from 'react';
+
+  export interface CommandProps extends React.HTMLAttributes<HTMLDivElement> {
+    label?: string;
+    shouldFilter?: boolean;
+    filter?: (value: string, search: string) => number;
+    value?: string;
+    onValueChange?: (value: string) => void;
+    loop?: boolean;
+  }
+  export const Command: React.ForwardRefExoticComponent<CommandProps & React.RefAttributes<HTMLDivElement>>;
+
+  export * from 'cmdk/dist/index';
+}
