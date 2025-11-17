@@ -56,7 +56,7 @@ export type OrchestrateWebResponse = {
 export type BudgetsResponse = {
   tier: 'bronze' | 'silver' | 'gold'
   remaining: { tokens: number; usd: number }
-  burndown: Array<{ t: string; usd: number; number }>
+  burndown: Array<{ t: string; usd: number; tokens: number }>
 }
 
 export type PolicyCheckResponse = {

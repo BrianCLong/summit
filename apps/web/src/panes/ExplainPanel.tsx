@@ -1,10 +1,10 @@
 import React from 'react'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { selectExplainModel, close } from '../features/explain/explainSlice'
+import { selectExplain, close } from '../features/explain/explainSlice'
 
 export default function ExplainPanel() {
   const d = useAppDispatch()
-  const model = useAppSelector(selectExplainModel)
+  const model = useAppSelector(selectExplain)
   return (
     <div style={{ padding: 12 }}>
       <header className="flex items-center justify-between">
@@ -16,7 +16,8 @@ export default function ExplainPanel() {
       <section>
         <h4>Query</h4>
         <pre data-test="explain-query">
-          {JSON.stringify(model.query, null, 2)}
+          {/* Query feature removed with viewSync - TODO: restore if needed */}
+          N/A
         </pre>
       </section>
       <section>
