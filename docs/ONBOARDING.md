@@ -37,10 +37,9 @@ make smoke
 
 # 5. Optional: Enable AI/Kafka capabilities
 # make up-ai     # For AI processing
-# make up-kafka  # For streaming
-# make up-full   # For both AI + Kafka
 ```
 
+- 💡 **Shortcut**: run `./start.sh [--ai]` to execute `make bootstrap && make up && make smoke` with health-gate polling.
 - ✅ If all green → you’re ready to develop!
 - ❌ If red → fix before coding. No broken builds allowed.
 
@@ -108,6 +107,22 @@ make seed       # load demo data
 make smoke      # full golden path smoke test
 make smoke-lite # simplified validation (fast)
 ```
+
+---
+
+## 🔐 Environment Files & Secrets
+
+- `.env.example` is **DEV ONLY**. Copy it to `.env` on laptops and keep the DEV-ONLY warnings intact.
+- `.env.production.sample` ships with empty placeholders so Terraform, Helm, and GitHub Actions can fail fast when secrets are missing.
+- When `NODE_ENV=production`, the server refuses to boot if `JWT_SECRET`, `JWT_REFRESH_SECRET`, DB passwords, or CORS origins match the sample defaults or include `localhost`.
+
+---
+
+## 🩺 Health & Observability
+
+- Health probes: `curl http://localhost:4000/health`, `/health/detailed`, `/health/ready`, `/health/live`, `/metrics`.
+- Prometheus + Grafana live under `observability/` and are wired into `docker-compose.dev.yml`. Grafana auto-loads the **Summit Golden Path** dashboard with the admin credentials defined in `.env`.
+- `scripts/wait-for-stack.sh` waits until API/Postgres/Neo4j/Redis succeed before handing control back to `make up` (CLI and CI use the same guardrail).
 
 ---
 

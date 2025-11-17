@@ -9,7 +9,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/brianlong/intelgraph.git
+git clone https://github.com/BrianCLong/summit.git
 cd intelgraph
 
 # Copy environment configuration

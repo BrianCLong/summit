@@ -1,0 +1,257 @@
+name: Validation Run (lockfile + golden path)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_grafana_render:
+        description: 'Render Grafana SLO panels (requires creds)'
+        required: false
+        default: 'false'
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - '**/*.png'
+      - '**/*.jpg'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    if: ${{ (github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request') && github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      COMPOSE_PROFILES: dev
+      API_PORT: '4000'
+      GATEWAY_PORT: '4100'
+      GRAFANA_URL: 'http://localhost:3000'
+      GRAFANA_USER: ${{ secrets.GRAFANA_USER }}
+      GRAFANA_PASS: ${{ secrets.GRAFANA_PASS }}
+      RUN_GRAFANA_RENDER: ${{ github.event.inputs.run_grafana_render || 'false' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['18.x', '20.x']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node ${{ matrix.node }} + pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Verify packageManager pin
+        run: |
+          jq -r '.packageManager' package.json | grep -q 'pnpm@9\.12\.0' || {
+            echo "packageManager version drifted—update package.json and workflow pin"; exit 1;
+          }
+
+      - name: Show versions
+        run: |
+          node -v
+          pnpm -v
+
+      - name: Detect code changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - '!(**/*.md)'
+
+      - name: Install deps (prefer frozen), regen lockfile on failure (Node 20 leg only)
+        id: install
+        run: |
+          set -e
+          if pnpm install --frozen-lockfile; then
+            echo "frozen_ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "${{ matrix.node }}" != "20.x" ]]; then
+            echo "Frozen install failed on Node ${{ matrix.node }}; regeneration only happens on 20.x"
+            exit 1
+          fi
+          echo "Frozen install failed; regenerating lockfile..."
+          pnpm install
+          pnpm install --lockfile-only
+          git add pnpm-lock.yaml || true
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: regen pnpm-lock.yaml via CI"
+            if [[ "${{ github.event.pull_request.head.repo.fork }}" == "false" ]]; then
+              git push
+            else
+              echo "Fork PR detected: not pushing lockfile."
+            fi
+          fi
+          pnpm install --frozen-lockfile
+          echo "frozen_ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Lint / Typecheck / Build / Test
+        run: |
+          set -e
+          pnpm -w run lint
+          pnpm -w run typecheck || true
+          pnpm -w run build
+          pnpm -w run test
+
+      - name: Generate SBOM (SPDX)
+        if: matrix.node == '20.x'
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          output-file: sbom.spdx.json
+
+      - name: Trivy vulnerability scan
+        if: matrix.node == '20.x'
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+          vuln-type: 'os,library'
+
+      - name: Prepare artifacts dir
+        run: mkdir -p artifacts
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        if: steps.changes.outputs.code == 'true'
+
+      - name: Build API image with cache
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          docker buildx build \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            -f server/Dockerfile.dev \
+            -t summit/server:ci \
+            server
+
+      - name: Build client image with cache
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          docker buildx build \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            -f client/Dockerfile.dev \
+            -t summit/client:ci \
+            client
+
+      - name: Docker compose up
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set -e
+          make bootstrap
+          make up
+          bash scripts/wait-for-stack.sh
+
+      - name: Health & metrics curls (API + Gateway)
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set -e
+          mkdir -p artifacts
+          echo "== API ==" | tee artifacts/health.log
+          curl -sSf "http://localhost:${API_PORT}/health" | tee -a artifacts/health.log
+          echo >> artifacts/health.log
+          curl -sSf "http://localhost:${API_PORT}/health/detailed" | tee -a artifacts/health.log
+          echo >> artifacts/health.log
+          curl -sSf "http://localhost:${API_PORT}/metrics" | head -n 40 | tee artifacts/metrics.log
+          echo "== GATEWAY ==" >> artifacts/health.log
+          curl -sSf "http://localhost:${GATEWAY_PORT}/health" | tee -a artifacts/health.log
+          echo >> artifacts/health.log
+          curl -sSf "http://localhost:${GATEWAY_PORT}/metrics" | head -n 40 | tee -a artifacts/metrics.log
+
+      - name: Smoke test
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set -e
+          make smoke | tee artifacts/smoke.log
+
+      - name: Prod guardrail negative (must fail to start)
+        if: steps.changes.outputs.code == 'true'
+        run: |
+          set +e
+          NODE_ENV=production \
+          JWT_SECRET=changeme \
+          CORS_ORIGIN="*" \
+          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
+          NEO4J_PASSWORD=devpassword \
+          REDIS_PASSWORD=devpassword \
+          pnpm --filter @summit/server start:prod
+          rc=$?
+          {
+            echo "server exit code: $rc"
+            if [ "$rc" -eq 0 ]; then
+              echo "Expected failure with weak prod config; got success."
+              exit 1
+            else
+              echo "PASS: refused weak prod config"
+            fi
+          } | tee artifacts/prod-guard.log
+          set -e
+
+      - name: (Optional) Render Grafana SLO panels to PNG
+        if: env.RUN_GRAFANA_RENDER == 'true'
+        run: |
+          set -e
+          mkdir -p artifacts/grafana
+          curl -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
+            "${GRAFANA_URL}/render/d-solo/summit-golden-path?panelId=1&width=1600&height=900&tz=UTC" \
+            -o artifacts/grafana/summit-golden-path-panel-1.png || true
+          curl -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
+            "${GRAFANA_URL}/render/d-solo/summit-golden-path?panelId=2&width=1600&height=900&tz=UTC" \
+            -o artifacts/grafana/summit-golden-path-panel-2.png || true
+
+      - name: Compose down (always)
+        if: always() && steps.changes.outputs.code == 'true'
+        run: make down
+
+      - name: Create job summary
+        if: always()
+        run: |
+          {
+            echo "## Validation Summary"
+            echo "- Node: ${{ matrix.node }}"
+            echo "- Frozen lockfile: ${{ steps.install.outputs.frozen_ok }}"
+            if [ -f artifacts/health.log ]; then
+              echo "### Health (tail)"
+              tail -n 40 artifacts/health.log
+            fi
+            if [ -f artifacts/smoke.log ]; then
+              echo "### Smoke (tail)"
+              tail -n 40 artifacts/smoke.log
+            fi
+            if [ -f artifacts/prod-guard.log ]; then
+              echo "### Prod Guard"
+              cat artifacts/prod-guard.log
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-validation-${{ matrix.node }}
+          path: artifacts
+          if-no-files-found: warn
+          retention-days: 7

@@ -3,7 +3,7 @@
 ## Overview
 
 - **Repository scope:** Unified monorepo combining application services (`api/`, `client/`, `dashboard/`), data/ETL tooling (`airflow/dags/`, `etl/openlineage/`), infrastructure-as-code (`charts/`, `deploy/`, `docker/`, `alertmanager/`), and security/operations content (`RUNBOOKS/`, `SECURITY/`, `.zap/`).
-- **Activity snapshot:** Recent archival and bug bash artifacts (e.g., `archive_20250926`, `bug-bash-results/20250922`) indicate ongoing large-scale changes alongside legacy snapshots.
+- **Activity snapshot:** Recent archival and bug bash artifacts (e.g., `archive/20250926`, `bug-bash-results/20250922`) indicate ongoing large-scale changes alongside legacy snapshots.
 - **Backlog signal:** Public issue/PR queues remain large (≈300+ issues, ≈400+ open PRs), pointing to potential review and maintenance load.
 
 ## Risk Assessment

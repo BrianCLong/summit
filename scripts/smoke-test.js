@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-vars, no-console */
 
 /**
  * IntelGraph Smoke Test - Golden Path Verification
@@ -13,17 +14,31 @@
 
 const axios = require('axios');
 const { WebSocket } = require('ws');
+const fs = require('fs');
+const path = require('path');
 
 // Configuration
+const defaultApiBase = process.env.API_BASE_URL || 'http://localhost:4000';
+const repoRoot = path.resolve(__dirname, '..');
+const defaultDataset = path.join(
+  repoRoot,
+  'data',
+  'golden-path',
+  'demo-investigation.json',
+);
 const config = {
-  apiUrl: process.env.VITE_API_URL || 'http://localhost:4000/graphql',
-  wsUrl: process.env.VITE_WS_URL || 'http://localhost:4000',
+  apiBaseUrl: defaultApiBase,
+  apiUrl: process.env.VITE_API_URL || `${defaultApiBase}/graphql`,
+  wsUrl: process.env.VITE_WS_URL || defaultApiBase,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   neo4jUrl: process.env.NEO4J_URL || 'http://localhost:7474',
-  adminUrl: process.env.ADMIN_URL || 'http://localhost:8080',
+  metricsUrl: process.env.METRICS_URL || `${defaultApiBase}/metrics`,
   timeout: 30000,
   maxRetries: 3,
   retryDelay: 2000,
+  datasetPath: path.resolve(
+    process.env.GOLDEN_PATH_DATASET || defaultDataset,
+  ),
 };
 
 // GraphQL queries and mutations
@@ -110,6 +125,8 @@ class SmokeTest {
       total: 0,
       details: [],
     };
+    this.datasetPath = config.datasetPath;
+    this.dataset = this.loadDataset();
   }
 
   async log(message, type = 'info') {
@@ -212,6 +229,25 @@ class SmokeTest {
     }
   }
 
+  loadDataset() {
+    if (!fs.existsSync(this.datasetPath)) {
+      throw new Error(
+        `Golden path dataset not found: ${this.datasetPath}. Set GOLDEN_PATH_DATASET or run make bootstrap.`,
+      );
+    }
+    const raw = fs.readFileSync(this.datasetPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!parsed.investigation || !Array.isArray(parsed.entities)) {
+      throw new Error(`Dataset at ${this.datasetPath} is missing required keys`);
+    }
+    return parsed;
+  }
+
+  async fetchJson(url) {
+    const response = await axios.get(url, { timeout: config.timeout });
+    return response.data;
+  }
+
   async retryOperation(operation, maxRetries = config.maxRetries) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -241,6 +277,7 @@ class SmokeTest {
     await this.log(`API URL: ${config.apiUrl}`, 'info');
     await this.log(`Frontend URL: ${config.frontendUrl}`, 'info');
     await this.log(`Neo4j URL: ${config.neo4jUrl}`, 'info');
+    await this.log(`Dataset: ${this.datasetPath}`, 'info');
 
     let investigationId = null;
     let entityIds = [];
@@ -264,10 +301,35 @@ class SmokeTest {
       }
     });
 
-    await this.test('Admin Interface Health Check', async () => {
-      const healthy = await this.httpHealthCheck('Admin', config.adminUrl);
+    await this.test('API /health endpoint', async () => {
+      const healthy = await this.httpHealthCheck(
+        'API health',
+        `${config.apiBaseUrl}/health`,
+      );
       if (!healthy) {
-        throw new Error('Admin interface is not responding');
+        throw new Error('API /health is not responding');
+      }
+    });
+
+    await this.test('API /health/detailed endpoint', async () => {
+      const health = await this.fetchJson(
+        `${config.apiBaseUrl}/health/detailed`,
+      );
+      if (!health.services || !health.services.neo4j) {
+        throw new Error('Detailed health payload missing service statuses');
+      }
+    });
+
+    await this.test('Metrics Endpoint', async () => {
+      const response = await axios.get(config.metricsUrl, {
+        timeout: config.timeout,
+      });
+      if (
+        response.status !== 200 ||
+        (typeof response.data === 'string' &&
+          !response.data.includes('http_requests_total'))
+      ) {
+        throw new Error('Metrics endpoint did not return Prometheus payload');
       }
     });
 
@@ -292,12 +354,12 @@ class SmokeTest {
 
     // Phase 3: Golden Path - Investigation Workflow
     await this.test('Create Investigation', async () => {
+      const { investigation } = this.dataset;
       const variables = {
         input: {
-          name: 'Smoke Test Investigation',
-          description:
-            'Automated smoke test investigation for production readiness',
-          type: 'THREAT_ANALYSIS',
+          name: investigation.name,
+          description: investigation.description,
+          type: investigation.type || 'THREAT_ANALYSIS',
         },
       };
 
@@ -321,23 +383,7 @@ class SmokeTest {
     });
 
     await this.test('Add Multiple Entities', async () => {
-      const entities = [
-        {
-          type: 'PERSON',
-          name: 'John Doe',
-          properties: { role: 'suspect', age: 35 },
-        },
-        {
-          type: 'ORGANIZATION',
-          name: 'ACME Corp',
-          properties: { industry: 'tech', founded: '2010' },
-        },
-        {
-          type: 'LOCATION',
-          name: 'San Francisco',
-          properties: { country: 'USA', type: 'city' },
-        },
-      ];
+      const entities = this.dataset.entities;
 
       for (const entity of entities) {
         const variables = {
@@ -364,20 +410,7 @@ class SmokeTest {
     });
 
     await this.test('Add Multiple Relationships', async () => {
-      const relationships = [
-        {
-          type: 'WORKS_FOR',
-          from: 0,
-          to: 1,
-          properties: { role: 'CEO', since: '2020' },
-        },
-        {
-          type: 'LOCATED_IN',
-          from: 1,
-          to: 2,
-          properties: { headquarters: true },
-        },
-      ];
+      const relationships = this.dataset.relationships || [];
 
       for (const rel of relationships) {
         const variables = {
@@ -413,7 +446,9 @@ class SmokeTest {
     // Phase 5: AI Copilot Testing
     await this.test('Start Copilot Run', async () => {
       const variables = {
-        goal: 'Analyze the network relationships and identify key connections between entities',
+        goal:
+          this.dataset.copilotGoal ||
+          'Analyze dataset relationships for summit smoke test',
         investigationId,
       };
 

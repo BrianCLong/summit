@@ -1,29 +1,55 @@
-name: Release Utilities
+name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'RC version tag (e.g., v1.0.0-rc.1)'
-        required: true
-        default: 'v1.0.0-rc.1'
+  push:
+    branches: [main]
+    paths:
+      - '**/package.json'
+      - pnpm-lock.yaml
+      - Makefile
+      - docker-compose*.yml
+
+permissions:
+  contents: write
+  packages: read
 
 jobs:
-  release-utils:
+  release:
     runs-on: ubuntu-latest
+    env:
+      PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - name: Tag RC
-        run: scripts/release/rc_tag.sh ${{ github.event.inputs.version }}
-      - name: Generate SBOM
-        run: scripts/release/generate_sbom.sh sbom.json
-      - name: Upload artifacts
+          node-version: 20
+          cache: 'pnpm'
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - name: Configure pnpm store
+        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Build workspace
+        run: pnpm build
+      - name: Tests
+        run: pnpm test
+      - name: Package deployable bundle
+        run: |
+          tar -czf summit-bundle.tgz docker-compose.dev.yml docker-compose.ai.yml start.sh Makefile .env.example .env.production.sample observability/
+      - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts
-          path: |
-            CHANGELOG_RC.md
-            sbom.json
+          name: summit-bundle
+          path: summit-bundle.tgz

@@ -4,4 +4,7 @@ packages:
   - 'services/*'
   - 'contracts/*'
   - 'server'
+  - 'client'
   - 'tools/*'
+exclude:
+  - 'archive/**'

@@ -1,59 +1,70 @@
 [![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
-
-# CI Status
-
-<p>
-  <a href="https://github.com/BrianCLong/summit/actions/workflows/lane-fast.yml">
-    <img alt="Fast Lane" src="https://github.com/BrianCLong/summit/actions/workflows/lane-fast.yml/badge.svg">
-  </a>
-  <a href="https://github.com/BrianCLong/summit/actions/workflows/lane-integration.yml">
-    <img alt="Integration Lane" src="https://github.com/BrianCLong/summit/actions/workflows/lane-integration.yml/badge.svg">
-  </a>
-</p>
+[![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
+[![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
+[![Release](https://github.com/BrianCLong/summit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/release.yml)
 
 # Summit Platform
 
----
+> Deployable-first IntelGraph (Summit) stack with GraphQL, React, Neo4j, PostgreSQL, Redis, and observability/AI services.
 
 ## 🛠 Developer Onboarding (Deployable-First)
 
-Summit follows a **deployable-first mantra**:
-🚨 If `make up` or `make smoke` fails, **stop everything and fix it**.
-No code merges that break the golden path workflow:
-
-**Investigation → Entities → Relationships → Copilot → Results**
+- **Golden path = `make bootstrap && make up && make smoke`**. Fresh clones must go green before you write code.
+- `./start.sh [--ai]` wraps the golden path on laptops and CI. It fails fast if health probes do not respond.
+- The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
 
 ## Quickstart (Local)
 
-**Prereqs:** Docker Desktop (6–8 GB memory), Node 18 (optional for host dev), Python 3.10+
+**Prereqs:** Docker Desktop ≥ 4.x (8 GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+.
 
 ```bash
-make bootstrap
-make up        # Core services only (minimal hardware)
-make smoke
+git clone https://github.com/BrianCLong/summit.git
+cd summit
+make bootstrap          # installs pnpm deps + venv + .env
+make up                 # docker-compose.dev.yml (API, web, dbs, observability)
+make smoke              # golden path automation against seeded data
 ```
 
-- Client: [http://localhost:3000](http://localhost:3000)
-- GraphQL: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (neo4j / devpassword)
+- One-command bootstrap: `./start.sh` (add `--ai` to include kafka + ai-worker, `--skip-smoke` only for debugging).
+- Services: Client http://localhost:3000, GraphQL http://localhost:4000/graphql, Neo4j http://localhost:7474, Prometheus http://localhost:9090, Grafana http://localhost:3001.
+- Optional AI/Kafka stack: `make up-ai` (or `./start.sh --ai`) loads `docker-compose.ai.yml`.
 
-### Optional AI/Kafka Services
+### Observability & Health
+
+- Health probes ship at `/health`, `/health/detailed`, `/health/ready`, `/health/live`, `/metrics`. `make smoke` curls them before executing mutations.
+- Prometheus scrapes `api:4000/metrics` using `observability/prometheus/prometheus-dev.yml`.
+- Grafana auto-provisions the **Summit Golden Path** dashboard (`observability/grafana/provisioning/dashboards/summit-golden-path.json`) with Prometheus datasource credentials from `.env`. Panels cover GraphQL p95, health-check uptime, and the lightweight dev gateway stub exposed on port `4100`.
+- Stack wait logic lives in `scripts/wait-for-stack.sh`; it blocks until API+DBs pass readiness probes.
+
+### Workspace Layout & Docs
+
+- `apps/` – entrypoint services (client, web, gateway, analytics engines, etc.).
+- `packages/` and `services/` – shared libraries, workers, ingestion pipelines.
+- `archive/` – gigabytes of historical evidence moved out of the hot path and excluded from CI caches.
+- `docs/ONBOARDING.md` – day-one onboarding.
+- `docs/README.md` – documentation index, policies, and archived plans.
+
+### Production Secrets & Guardrails
+
+- `.env.example` is **DEV-ONLY** and documents every credential. `.env.production.sample` contains empty placeholders for production charts and pipelines.
+- The API refuses to boot when `NODE_ENV=production` if `JWT_SECRET`, `JWT_REFRESH_SECRET`, database passwords, or CORS allow-lists match known defaults or include `localhost/*`.
+- CORS allow-listing, rate limiting, persisted queries, and metrics are enforced in production automatically.
+
+### pnpm Workspace Commands
 
 ```bash
-make up-ai     # Add AI processing capabilities
-make up-kafka  # Add Kafka streaming
-make up-full   # All services (AI + Kafka)
-
-# Data flow simulators (requires Kafka)
-make ingest    # produce sample posts to Kafka
-make graph     # consume and write to Neo4j
+pnpm install          # installs all workspace deps with turbo cache metadata
+pnpm build            # turbo build graph + caching
+pnpm test             # unit/integration suites (Jest/Vitest focus)
+pnpm lint             # ESLint + Ruff (for Python helpers)
+pnpm typecheck        # tsconfig project references
+pnpm smoke            # same as make smoke (Node-based E2E)
 ```
 
-📖 Full details: [docs/ONBOARDING.md](docs/ONBOARDING.md)
+## CI Status
 
-For a complete documentation index see [docs/README.md](docs/README.md).
-Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
+The `ci.yml` workflow runs on every PR + main: cached `pnpm install`, `make bootstrap`, `make up` (headless), `make smoke`, lint, typecheck, Jest, Playwright/E2E (currently proxies to the smoke test), SBOM + Trivy scans, and Docker layer caching. `security.yml` runs CodeQL analysis, dependency review, and gitleaks on a nightly schedule + PRs touching lockfiles. `release.yml` gates semantic-release with the same caches and requires a green CI status before packaging artifacts. All three workflows back the badges above and are required checks for merge.
 
 ---
 
@@ -91,11 +102,11 @@ cd summit
 - **Neo4j**: http://localhost:7474 (Graph Database UI)
 - **Adminer**: http://localhost:8080 (Database Admin)
 
-## 🎯 Golden Path Demo
+## 🎯 Golden Path Demo (Seeded Dataset)
 
 **Critical Path**: Investigation → Entities → Relationships → Copilot → Results
 
-This 5-minute workflow validates the core platform functionality:
+This 5-minute workflow validates the core platform functionality using the dataset in [`data/golden-path/demo-investigation.json`](data/golden-path/demo-investigation.json). `make smoke` and the `scripts/smoke-test.js` harness use the same payload so local runs match CI exactly.
 
 1. **Open Frontend**: Navigate to http://localhost:3000
    - Verify: Login page loads, no console errors
@@ -109,7 +120,7 @@ This 5-minute workflow validates the core platform functionality:
    - Link them with a relationship (e.g., "works_for")
    - Verify: Graph visualizes correctly
 
-4. **Run Copilot Analysis**: Execute AI-augmented insights
+4. **Run Copilot Analysis**: Execute AI-augmented insights from the dataset goal
    - Click "Run Copilot Goal" or similar action
    - Verify: Progress indicators show, results stream in real-time
 
@@ -119,7 +130,27 @@ This 5-minute workflow validates the core platform functionality:
 
 **Success Criteria**: All steps complete without errors in < 5 minutes
 
-**If any step fails**: Stop and fix before continuing development (Deployable-First Mantra)
+**If any step fails**: Stop and fix before continuing development (Deployable-First Mantra). Re-run `make smoke` after your fix to ensure parity with CI.
+
+## ✅ Validation Notes
+
+Run these from a clean machine (or CI runner) to verify the golden path end-to-end. Capture the output in your PR description for traceability.
+
+```bash
+git clone https://github.com/BrianCLong/summit.git && cd summit
+corepack enable && pnpm -v
+pnpm install --frozen-lockfile
+
+make bootstrap
+make up
+make smoke
+
+curl -sf http://localhost:4000/health && echo OK
+curl -sf http://localhost:4000/health/detailed | jq '.status'
+curl -sf http://localhost:4000/metrics | head -n 20
+
+make down
+```
 
 ## 📋 Table of Contents
 
@@ -132,6 +163,8 @@ This 5-minute workflow validates the core platform functionality:
 - [Security](#-security)
 - [Contributing](#-contributing)
 - [Support](#-support)
+- [Developer Onboarding](docs/ONBOARDING.md)
+- [Documentation Index](docs/README.md)
 - [Project Management](docs/project_management/README.md)
 
 ## ✨ Features

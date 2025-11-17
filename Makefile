@@ -1,13 +1,18 @@
-.PHONY: bootstrap up smoke tools
+.PHONY: bootstrap up up-ai smoke tools down
 
 # Minimal, portable golden path. No assumptions about project layout.
 
 SHELL := /usr/bin/env bash
 NODE_VERSION ?= 18
 PY_VERSION ?= 3.11
+COMPOSE ?= ./scripts/run-compose.sh
+DEV_COMPOSE_FILE ?= docker-compose.dev.yml
+AI_COMPOSE_FILE ?= docker-compose.ai.yml
+ENV_FILE ?= .env
 
 bootstrap:
 	@echo "==> bootstrap: node, python, envs"
+	@if [ ! -f $(ENV_FILE) ]; then cp .env.example $(ENV_FILE) && echo "seeded $(ENV_FILE) from .env.example"; fi
 	# Node: prefer corepack/pnpm if present, else npm
 	@if [ -f package.json ]; then \
 	  command -v corepack >/dev/null 2>&1 && corepack enable || true; \
@@ -33,29 +38,34 @@ bootstrap:
 
 up:
 	@echo "==> up: best-effort bring-up (no-op if stack not containerized)"
-	@if [ -f docker-compose.yml ] || [ -f compose.yml ]; then \
-	  docker compose up -d --quiet-pull || docker-compose up -d; \
+	@if [ -f $(DEV_COMPOSE_FILE) ]; then \
+	  $(COMPOSE) -f $(DEV_COMPOSE_FILE) --env-file $(ENV_FILE) up -d --build --remove-orphans; \
+	  ./scripts/wait-for-stack.sh; \
 	else \
 	  echo "no compose file; skipping"; \
 	fi
 
+up-ai:
+	@echo "==> up (AI profile)"
+	@if [ -f $(AI_COMPOSE_FILE) ]; then \
+	  $(COMPOSE) -f $(DEV_COMPOSE_FILE) -f $(AI_COMPOSE_FILE) --env-file $(ENV_FILE) up -d --build --remove-orphans; \
+	  ./scripts/wait-for-stack.sh; \
+	else \
+	  echo "$(AI_COMPOSE_FILE) missing; run make up instead"; \
+	fi
+
+down:
+	@echo "==> down: stopping summit stack"
+	@if [ -f $(DEV_COMPOSE_FILE) ]; then \
+	  $(COMPOSE) -f $(DEV_COMPOSE_FILE) down --remove-orphans || true; \
+	fi
+
 smoke:
 	@echo "==> smoke: lightweight sanity checks"
-	# JS/TS tests if present
 	@if [ -f package.json ]; then \
-	  if jq -e '.scripts.test' package.json >/dev/null 2>&1; then npm test --silent || npm run test --silent || true; else echo "no npm test script"; fi; \
+	  if command -v pnpm >/dev/null 2>&1; then pnpm smoke; \
+	  else npm run smoke; fi; \
+	else \
+	  echo "package.json missing; skipping JS smoke"; \
 	fi
-	# Python tests if present
-	@if [ -d tests ] || [ -f pytest.ini ] || [ -f pyproject.toml ]; then \
-	  . .venv/bin/activate 2>/dev/null || true; \
-	  python - <<'PY' || true
-	import importlib.util, sys, subprocess, shutil
-	if shutil.which("pytest"):
-	    sys.exit(subprocess.call(["pytest","-q"]))
-	print("pytest not installed; skipping")
-	PY
-	fi
-	# Last-resort canary
-	@node -e "console.log('node ok')" 2>/dev/null || true
-	@python -c "print('python ok')" 2>/dev/null || true
 	@echo "smoke: DONE"

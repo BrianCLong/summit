@@ -24,7 +24,8 @@
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
-    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "prepare": "husky install",
+    "dev": "turbo run dev --parallel --cache-dir=.turbo",
     "server:dev": "npm run --workspace=apps/server dev",
     "client:dev": "cd client && npm run dev",
     "devkit:seed": "node scripts/devkit/seed-fixtures.js",
@@ -33,9 +34,9 @@
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:prod": "docker-compose up",
     "test:jest": "jest --config jest.projects.cjs --maxWorkers=50% --detectOpenHandles",
-    "test:e2e": "playwright test",
+    "test:e2e": "pnpm smoke",
     "test:ci": "pnpm run test:jest && pnpm run test:e2e",
-    "test": "pnpm run test:jest",
+    "test": "turbo run test --cache-dir=.turbo --continue",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
@@ -45,18 +46,18 @@
     "test:integration": "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
     "test:api": "cd services/api && npx jest -c jest.config.cjs",
     "test:policy": "node scripts/ci/test-policy-runner.cjs",
-    "build": "npm run build:client && npm run build:server",
+    "build": "turbo run build --cache-dir=.turbo --continue",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
     "deploy:dev": "scripts/deploy.sh dev",
     "deploy:staging": "scripts/deploy.sh staging",
     "deploy:prod": "scripts/deploy.sh prod",
     "backup": "scripts/backup.sh",
-    "lint": "eslint . && ruff .",
+    "lint": "turbo run lint --cache-dir=.turbo --continue",
     "lint:tests": "node scripts/guard-tests.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
-    "typecheck": "tsc -b --pretty false",
+    "typecheck": "turbo run typecheck --cache-dir=.turbo --continue",
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier -w . && ruff format",
@@ -94,7 +95,11 @@
     "extract": "npm run --workspace=packages/influence-mining extract --",
     "preinstall": "corepack enable || true",
     "build:all": "pnpm -w -r run build",
-    "ci": "pnpm run lint && pnpm run typecheck && pnpm run test"
+    "ci": "pnpm run lint && pnpm run typecheck && pnpm run test",
+    "ci:prod-guard": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ci/prod-config-check.ts",
+    "smoke": "node scripts/smoke-test.js",
+    "smoke:ci": "NODE_ENV=test node scripts/smoke-test.js",
+    "bootstrap": "make bootstrap"
   },
   "keywords": [
     "intelligence-analysis",
@@ -125,7 +130,10 @@
       "@opentelemetry/exporter-trace-otlp-http": "0.48.0",
       "@opentelemetry/exporter-metrics-otlp-http": "0.48.0",
       "@opentelemetry/auto-instrumentations-node": "0.48.0",
-      "graphql-redis-subscriptions": "^3.6.0"
+      "graphql-redis-subscriptions": "^3.6.0",
+      "express-rate-limit": "8.1.0",
+      "neo4j-driver": "6.0.0",
+      "eslint": "9.37.0"
     }
   },
   "devDependencies": {
@@ -161,8 +169,9 @@
     "typescript-eslint": "^8.46.3",
     "ts-node": "^10.9.2",
     "rimraf": "^6.0.1",
-    "eslint": "^9.39.1",
-    "@types/node": "^24.10.0"
+    "eslint": "9.37.0",
+    "@types/node": "^24.10.0",
+    "turbo": "^2.3.3"
   },
   "husky": {
     "hooks": {
@@ -220,12 +229,12 @@
     "docx": "^9.5.1",
     "dotenv": "^17.2.3",
     "jest-extended": "^7.0.0",
-    "neo4j-driver": "^6.0.1",
+    "neo4j-driver": "6.0.0",
     "pg": "^8.16.3",
     "redis": "^5.8.1",
     "ws": "^8.18.3"
   },
   "private": true,
-  "packageManager": "pnpm@9.12.3",
+  "packageManager": "pnpm@9.12.0",
   "type": "module"
 }

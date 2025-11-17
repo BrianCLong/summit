@@ -13,6 +13,7 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
+import { cfg } from './config.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -58,7 +59,7 @@ const startServer = async () => {
     wss,
   );
 
-  if (process.env.NODE_ENV === 'production') {
+  if (cfg.NODE_ENV === 'production') {
     const clientDistPath = path.resolve(__dirname, '../../client/dist');
     app.use(express.static(clientDistPath));
     app.get('*', (_req, res) => {
@@ -68,7 +69,7 @@ const startServer = async () => {
 
   const { initSocket, getIO } = await import('./realtime/socket.js'); // JWT auth
 
-  const port = Number(process.env.PORT || 4000);
+  const port = Number(cfg.PORT || 4000);
   httpServer.listen(port, async () => {
     logger.info(`Server listening on port ${port}`);
 

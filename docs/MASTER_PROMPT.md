@@ -119,7 +119,7 @@ server/policies/           # Security policies
 **30-Second Start:**
 
 ```bash
-git clone https://github.com/brianlong/intelgraph.git
+git clone https://github.com/BrianCLong/summit.git
 cd intelgraph && cp .env.example .env
 make up                    # Full environment in Docker
 make smoke                 # Verify everything works

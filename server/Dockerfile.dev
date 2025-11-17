@@ -15,7 +15,8 @@ RUN apk add --no-cache \
     pixman-dev \
     pangomm-dev \
     libjpeg-turbo-dev \
-    freetype-dev
+    freetype-dev \
+    curl
 
 # Install nodemon globally (as root)
 RUN npm install -g nodemon

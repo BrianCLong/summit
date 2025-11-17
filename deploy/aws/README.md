@@ -38,7 +38,7 @@ Internet → CloudFront (1TB free) → Route 53 → EC2 (t4g.small free)
 
 ```bash
 # Clone and setup
-git clone https://github.com/brianclong/intelgraph
+git clone https://github.com/BrianCLong/summit
 cd intelgraph/deploy/aws
 
 # Configure environment

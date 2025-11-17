@@ -1,42 +1,49 @@
-name: Security-Scans
+name: Security
 
 on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
-    - cron: '0 3 * * 1' # weekly
-  workflow_dispatch: {}
+    - cron: '0 3 * * *'
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
-  trivy-fs:
+  codeql:
+    name: CodeQL
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.20.0
+      - uses: github/codeql-action/init@v3
         with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-fs.sarif'
-          severity: 'CRITICAL,HIGH'
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-fs.sarif
+          languages: javascript,python
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3
 
-  npm-audit:
+  dependency-review:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/dependency-review-action@v4
         with:
-          node-version: 20
-      - name: Audit server
-        working-directory: server
-        run: |
-          npm ci
-          npm audit --audit-level=high || true
-      - name: Audit client
-        working-directory: client
-        run: |
-          npm ci
-          npm audit --audit-level=high || true
+          fail-on-severity: high
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --source=. --no-banner --redact

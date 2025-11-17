@@ -1,0 +1,38 @@
+{
+  "investigation": {
+    "name": "Summit Golden Path",
+    "description": "Demo investigation bundled with summit make smoke",
+    "type": "INTELLIGENCE_ANALYSIS"
+  },
+  "entities": [
+    {
+      "type": "PERSON",
+      "name": "Avery Patel",
+      "properties": {"role": "analyst", "affiliation": "Helios Trust"}
+    },
+    {
+      "type": "ORGANIZATION",
+      "name": "Helios Trust",
+      "properties": {"sector": "finance", "risk_score": 62}
+    },
+    {
+      "type": "LOCATION",
+      "name": "Lisbon",
+      "properties": {"country": "Portugal", "lat": 38.7223, "lng": -9.1393}
+    }],
+  "relationships": [
+    {
+      "type": "REPRESENTS",
+      "from": 0,
+      "to": 1,
+      "properties": {"since": "2024-03-04"}
+    },
+    {
+      "type": "OPERATES_IN",
+      "from": 1,
+      "to": 2,
+      "properties": {"headquarters": true}
+    }
+  ],
+  "copilotGoal": "Summarize how Helios Trust recruits analysts and any Lisbon-based ties"
+}
