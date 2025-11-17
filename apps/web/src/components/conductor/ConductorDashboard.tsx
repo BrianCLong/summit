@@ -1,6 +1,6 @@
 // apps/web/src/components/conductor/ConductorDashboard.tsx
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   Card,
   CardContent,
@@ -8,7 +8,6 @@ import {
   CardTitle,
   Progress,
   Badge,
-  Button,
   Tabs,
   TabsContent,
   TabsList,
@@ -49,46 +48,14 @@ import { useConductorMetrics } from '@/hooks/useConductorMetrics'
 import { useGitHubIntegration } from '@/hooks/useGitHubIntegration'
 import { useJIRAIntegration } from '@/hooks/useJIRAIntegration'
 
-interface ConductorMetrics {
-  routing: {
-    totalRequests: number
-    successRate: number
-    avgLatency: number
-    expertDistribution: Record<string, number>
-    qualityGatesPassed: number
-    costEfficiency: number
-  }
-  webOrchestration: {
-    activeInterfaces: number
-    synthesisQuality: number
-    complianceScore: number
-    citationCoverage: number
-    contradictionRate: number
-  }
-  premiumModels: {
-    utilizationRate: number
-    costSavings: number
-    qualityImprovement: number
-    modelDistribution: Record<string, number>
-    thomsonSamplingConvergence: number
-  }
-  infrastructure: {
-    uptimePercentage: number
-    scalingEvents: number
-    alertsActive: number
-    budgetUtilization: number
-  }
-}
-
 export const ConductorDashboard: React.FC = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState<
     '1h' | '24h' | '7d' | '30d'
   >('24h')
-  const [refreshInterval, setRefreshInterval] = useState(30000) // 30 seconds
+  const [refreshInterval] = useState(30000) // 30 seconds
 
   const {
     data: metrics,
-    loading: metricsLoading,
     error: metricsError,
   } = useConductorMetrics({
     timeRange: selectedTimeRange,

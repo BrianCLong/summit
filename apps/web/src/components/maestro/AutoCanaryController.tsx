@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import {
   ChartBarIcon,
-  ExclamationTriangleIcon,
   CheckCircleIcon,
   XMarkIcon,
   PlayIcon,
@@ -52,9 +51,6 @@ export function AutoCanaryController({
 }: AutoCanaryControllerProps) {
   const [canaryConfig, setCanaryConfig] = useState<CanaryConfig | null>(null)
   const [loading, setLoading] = useState(true)
-  const [manualOverride, setManualOverride] = useState<
-    'promote' | 'abort' | null
-  >(null)
 
   useEffect(() => {
     fetchCanaryStatus()

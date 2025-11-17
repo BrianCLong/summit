@@ -4,7 +4,6 @@ import { Search, FileText, User, AlertTriangle, Zap } from 'lucide-react'
 import { useSearch } from '@/contexts/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
-import { cn } from '@/lib/utils'
 
 interface SearchResult {
   id: string

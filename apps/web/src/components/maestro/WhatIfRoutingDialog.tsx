@@ -14,7 +14,7 @@ import {
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 // Mock API functions (would come from maestroApi)
-const mockRoutePreview = async (task: string) => {
+const mockRoutePreview = async (_task: string) => {
   await new Promise(resolve => setTimeout(resolve, 300))
   return {
     candidates: [
@@ -78,7 +78,6 @@ export default function WhatIfRoutingDialog({
   onClose,
   route = 'codegen',
   defaultModel = 'gpt-4o-mini',
-  tenant = 'acme',
 }: WhatIfRoutingDialogProps) {
   const root = useRef<HTMLDivElement>(null)
   useFocusTrap(root, open)
@@ -299,7 +298,7 @@ export default function WhatIfRoutingDialog({
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis />
                       <Tooltip
-                        formatter={(value, name) => [
+                        formatter={(value) => [
                           `${Number(value).toFixed(2)}`,
                           'Score',
                         ]}

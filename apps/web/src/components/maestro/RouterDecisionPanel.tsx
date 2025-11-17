@@ -3,7 +3,6 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ArrowPathIcon,
 } from '@heroicons/react/24/outline'
 
 interface RouterCandidate {

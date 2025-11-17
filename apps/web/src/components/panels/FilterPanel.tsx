@@ -3,7 +3,6 @@ import {
   Filter,
   X,
   Calendar,
-  Sliders,
   Tag,
   Database,
   RefreshCw,

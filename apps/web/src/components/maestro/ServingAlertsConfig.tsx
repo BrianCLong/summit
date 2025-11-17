@@ -4,7 +4,6 @@
 import React, { useEffect, useState } from 'react'
 import {
   BellIcon,
-  ExclamationTriangleIcon,
   CheckCircleIcon,
   CogIcon,
 } from '@heroicons/react/24/outline'
@@ -59,7 +58,7 @@ const mockGetServingAlertConfig = async (): Promise<ServingAlertConfig> => {
 }
 
 const mockPutServingAlertConfig = async (
-  config: ServingAlertConfig
+  _config: ServingAlertConfig
 ): Promise<{ ok: boolean }> => {
   await new Promise(resolve => setTimeout(resolve, 500))
   return { ok: true }

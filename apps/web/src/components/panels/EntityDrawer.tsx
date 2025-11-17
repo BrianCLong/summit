@@ -1,6 +1,5 @@
 import * as React from 'react'
 import {
-  X,
   ExternalLink,
   Edit3,
   Trash2,

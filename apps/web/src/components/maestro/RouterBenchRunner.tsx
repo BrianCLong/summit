@@ -17,8 +17,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  BarChart,
-  Bar,
   CartesianGrid,
 } from 'recharts'
 
@@ -96,7 +94,6 @@ export default function RouterBenchRunner() {
   )
   const [tokens, setTokens] = useState(1500)
 
-  const [benchmarks, setBenchmarks] = useState<BenchmarkSuite[]>([])
   const [currentBench, setCurrentBench] = useState<BenchmarkSuite | null>(null)
   const [perfData, setPerfData] = useState<PerfPoint[]>([])
 
@@ -148,7 +145,6 @@ export default function RouterBenchRunner() {
       }
 
       setCurrentBench(benchmark)
-      setBenchmarks(prev => [benchmark, ...prev.slice(0, 9)]) // Keep last 10
     } catch (error) {
       alert(
         'Benchmark failed: ' +
@@ -163,13 +159,6 @@ export default function RouterBenchRunner() {
     if (results.length === 0) return null
     return results.reduce((best, current) =>
       current.score > best.score ? current : best
-    )
-  }
-
-  const getWorstModel = (results: BenchResult[]) => {
-    if (results.length === 0) return null
-    return results.reduce((worst, current) =>
-      current.score < worst.score ? current : worst
     )
   }
 
