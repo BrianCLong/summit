@@ -527,7 +527,7 @@ server.post<{ Body: { name: string; version?: string; inputs?: any } }>(
 
       return execution;
     } catch (error) {
-      server.log.error('Failed to start runbook', error);
+      server.log.error(error, 'Failed to start runbook');
       reply.status(500);
       return { error: 'Failed to start runbook execution' };
     }
@@ -543,7 +543,7 @@ server.post<{ Body: { sourceId: string; inputs?: any } }>(
       const execution = await engine.replayExecution(sourceId, inputs);
       return execution;
     } catch (error) {
-      server.log.error('Failed to replay runbook', error);
+      server.log.error(error, 'Failed to replay runbook');
       reply.status(500);
       return { error: 'Failed to replay runbook execution' };
     }
