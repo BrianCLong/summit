@@ -44,14 +44,14 @@ const navItems: NavItem[] = [
   {
     name: 'Explore',
     href: '/explore',
-    icon: Search,
+    icon: Search as React.ComponentType<{ className?: string }>,
     resource: 'investigations',
     action: 'read',
   },
   {
     name: 'Alerts',
     href: '/alerts',
-    icon: AlertTriangle,
+    icon: AlertTriangle as React.ComponentType<{ className?: string }>,
     badge: 3,
     resource: 'alerts',
     action: 'read',
@@ -59,57 +59,57 @@ const navItems: NavItem[] = [
   {
     name: 'Cases',
     href: '/cases',
-    icon: FileText,
+    icon: FileText as React.ComponentType<{ className?: string }>,
     resource: 'cases',
     action: 'read',
   },
   {
     name: 'Command Center',
     href: '/dashboards/command-center',
-    icon: BarChart3,
+    icon: BarChart3 as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
   },
   {
     name: 'Supply Chain',
     href: '/dashboards/supply-chain',
-    icon: BarChart3,
+    icon: BarChart3 as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
   },
   {
     name: 'Data Sources',
     href: '/data/sources',
-    icon: Database,
+    icon: Database as React.ComponentType<{ className?: string }>,
     resource: 'data',
     action: 'read',
   },
   {
     name: 'Models',
     href: '/models',
-    icon: Brain,
+    icon: Brain as React.ComponentType<{ className?: string }>,
     resource: 'models',
     action: 'read',
   },
   {
     name: 'Reports',
     href: '/reports',
-    icon: FileBarChart,
+    icon: FileBarChart as React.ComponentType<{ className?: string }>,
     resource: 'reports',
     action: 'read',
   },
   {
     name: 'Admin',
     href: '/admin',
-    icon: Settings,
+    icon: Settings as React.ComponentType<{ className?: string }>,
     resource: 'admin',
     action: 'read',
   },
 ]
 
 const supportItems: NavItem[] = [
-  { name: 'Help', href: '/help', icon: HelpCircle },
-  { name: 'Changelog', href: '/changelog', icon: History },
+  { name: 'Help', href: '/help', icon: HelpCircle as React.ComponentType<{ className?: string }> },
+  { name: 'Changelog', href: '/changelog', icon: History as React.ComponentType<{ className?: string }> },
 ]
 
 export function Navigation({ user }: NavigationProps) {
