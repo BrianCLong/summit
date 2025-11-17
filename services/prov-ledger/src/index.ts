@@ -3,7 +3,7 @@
  * Consolidated from multiple scattered prov-ledger implementations
  */
 
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { z } from 'zod';
@@ -89,10 +89,10 @@ async function policyMiddleware(request: any, reply: any) {
     const dryRun = process.env.POLICY_DRY_RUN === 'true';
 
     if (dryRun) {
-      request.log.warn('Policy violation in dry-run mode', {
+      request.log.warn({
         missingAuth: !authorityId,
         missingReason: !reasonForAccess,
-      });
+      }, 'Policy violation in dry-run mode');
       request.policyWarnings = request.policyWarnings || [];
       request.policyWarnings.push({
         error: 'Policy denial',
@@ -114,7 +114,7 @@ async function policyMiddleware(request: any, reply: any) {
 }
 
 // Create Fastify instance
-const server = Fastify({
+const server: FastifyInstance = Fastify({
   logger: {
     level: NODE_ENV === 'development' ? 'debug' : 'info',
     ...(NODE_ENV === 'development'
@@ -197,15 +197,15 @@ server.post<{ Body: CreateClaim }>(
         created_at: result.rows[0].created_at,
       };
 
-      server.log.info('Created claim', {
+      server.log.info({
         claimId: id,
         hash,
         authority: (request as any).authorityId,
-      });
+      }, 'Created claim');
 
       return claim;
     } catch (error) {
-      server.log.error('Failed to create claim', error);
+      server.log.error(error, 'Failed to create claim');
       reply.status(500);
       return { error: 'Failed to create claim' };
     }
@@ -240,7 +240,7 @@ server.get<{ Params: { id: string } }>(
 
       return claim;
     } catch (error) {
-      server.log.error('Failed to get claim', error);
+      server.log.error(error, 'Failed to get claim');
       reply.status(500);
       return { error: 'Failed to retrieve claim' };
     }
@@ -270,7 +270,7 @@ server.get<{ Querystring: { claimId: string } }>(
 
       return chains;
     } catch (error) {
-      server.log.error('Failed to get provenance', error);
+      server.log.error(error, 'Failed to get provenance');
       reply.status(500);
       return { error: 'Failed to retrieve provenance' };
     }
@@ -315,15 +315,15 @@ server.post<{
       created_at: result.rows[0].created_at,
     };
 
-    server.log.info('Created provenance chain', {
+    server.log.info({
       provenanceId: id,
       claimId,
       authority: (request as any).authorityId,
-    });
+    }, 'Created provenance chain');
 
     return chain;
   } catch (error) {
-    server.log.error('Failed to create provenance chain', error);
+    server.log.error(error, 'Failed to create provenance chain');
     reply.status(500);
     return { error: 'Failed to create provenance chain' };
   }
@@ -345,7 +345,7 @@ server.post<{ Body: { content: any; expectedHash: string } }>(
         verified_at: new Date().toISOString(),
       };
     } catch (error) {
-      server.log.error('Failed to verify hash', error);
+      server.log.error(error, 'Failed to verify hash');
       reply.status(500);
       return { error: 'Hash verification failed' };
     }
@@ -381,14 +381,14 @@ server.get('/export/manifest', async (request, reply) => {
       generated_at: new Date().toISOString(),
     };
 
-    server.log.info('Generated export manifest', {
+    server.log.info({
       claimCount: claims.length,
       authority: (request as any).authorityId,
-    });
+    }, 'Generated export manifest');
 
     return manifest;
   } catch (error) {
-    server.log.error('Failed to generate manifest', error);
+    server.log.error(error, 'Failed to generate manifest');
     reply.status(500);
     return { error: 'Failed to generate manifest' };
   }
