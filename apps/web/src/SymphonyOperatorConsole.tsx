@@ -19,13 +19,11 @@ import {
   Play,
   Save,
   Shield,
-  Square,
   Triangle,
   Zap,
 } from 'lucide-react'
 import {
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -35,7 +33,6 @@ import {
   Bar,
   BarChart,
 } from 'recharts'
-import { motion } from 'framer-motion'
 import mermaid from 'mermaid'
 
 /**
@@ -166,10 +163,14 @@ function KPIBar() {
   const refresh = async () => {
     try {
       setBd(await getJSON<Burndown>('/status/burndown.json'))
-    } catch {}
+    } catch {
+      // Silently ignore burndown fetch errors
+    }
     try {
       setHl(await getJSON<Health>('/status/health.json'))
-    } catch {}
+    } catch {
+      // Silently ignore health fetch errors
+    }
   }
 
   useEffect(() => {
@@ -238,7 +239,9 @@ function useBurndownSeries() {
         ...s.slice(-120),
         { time: Date.now(), p95, errors, count },
       ])
-    } catch {}
+    } catch {
+      // Silently ignore telemetry fetch errors
+    }
   }
   useEffect(() => {
     tick()
@@ -348,7 +351,9 @@ function RoutingMatrix() {
       } catch {
         setModels(base)
       }
-    } catch {}
+    } catch {
+      // Silently ignore model config fetch errors
+    }
   }
   useEffect(() => {
     load()
@@ -361,7 +366,9 @@ function RoutingMatrix() {
         method: 'PUT',
         body: JSON.stringify({ models }),
       })
-    } catch {}
+    } catch {
+      // Silently ignore policy save errors
+    }
     setSaving(false)
   }
 
@@ -480,7 +487,9 @@ function UsageWindows() {
         method: 'PUT',
         body: JSON.stringify({ windows: rows }),
       })
-    } catch {}
+    } catch {
+      // Silently ignore schedule save errors
+    }
     setSaving(false)
   }
   return (
