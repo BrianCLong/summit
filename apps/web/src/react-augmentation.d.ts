@@ -413,3 +413,48 @@ declare module 'cmdk' {
     Separator: ComponentType<HTMLAttributes<HTMLDivElement>>;
   };
 }
+
+// Augment @storybook/react types for React 19 compatibility
+declare module '@storybook/react' {
+  import type { ComponentType } from 'react';
+
+  export interface StoryContext<TArgs = any> {
+    args: TArgs;
+    argTypes: any;
+    globals: any;
+    hooks: any;
+    parameters: any;
+    viewMode: 'story' | 'docs';
+    loaded: any;
+    abortSignal: AbortSignal;
+    canvasElement: HTMLElement;
+    id: string;
+    kind: string;
+    name: string;
+    story: string;
+  }
+
+  export interface StoryFn<TArgs = any> {
+    (args: TArgs, context: StoryContext<TArgs>): React.ReactNode;
+  }
+
+  export type StoryObj<T = any> = {
+    args?: Partial<T>;
+    argTypes?: any;
+    parameters?: any;
+    decorators?: any[];
+    render?: StoryFn<T>;
+    play?: (context: StoryContext<T>) => Promise<void> | void;
+  };
+
+  export type Meta<T = any> = {
+    title?: string;
+    component?: ComponentType<T>;
+    subcomponents?: Record<string, ComponentType<any>>;
+    argTypes?: any;
+    args?: Partial<T>;
+    parameters?: any;
+    decorators?: any[];
+    tags?: string[];
+  };
+}
