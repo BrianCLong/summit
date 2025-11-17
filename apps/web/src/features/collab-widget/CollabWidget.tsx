@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import DOMPurify from 'dompurify'
 import $ from 'jquery'
-import { CollabClient } from '../../../../packages/sdk/collab-js/src/collabClient'
+import { CollabClient } from '@intelgraph/collab-js'
 
 interface Comment {
   commentId: string

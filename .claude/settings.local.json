@@ -29,7 +29,22 @@
       "Bash(pnpm list:*)",
       "Bash(pnpm update:*)",
       "Bash(pnpm run lint:fix:*)",
-      "Bash(pnpm exec eslint:*)"
+      "Bash(pnpm exec eslint:*)",
+      "Bash(git -C /Users/brianlong/Developer/summit/server log --oneline -3)",
+      "Bash(test:*)",
+      "Bash(/bashes)",
+      "Bash(xargs:*)",
+      "Bash(git log:*)",
+      "Bash(pnpm run typecheck:*)",
+      "Bash(tee:*)",
+      "Bash([ -f package.json ])",
+      "Bash(/tmp/typecheck-output3.txt)",
+      "Bash(git reset:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm -F @intelgraph/web run typecheck:*)",
+      "Bash(pnpm -F @intelgraph/license-registry run typecheck:*)",
+      "Bash(cut:*)"
     ],
     "deny": [],
     "ask": []
