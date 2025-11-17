@@ -10,6 +10,7 @@ import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
 import monitoringRouter from './routes/monitoring.js';
+import healthRouter from './routes/health.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
@@ -25,6 +26,7 @@ import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
+import { cfg } from './config.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -33,9 +35,20 @@ export const createApp = async () => {
   const app = express();
   const logger = pino();
   app.use(helmet());
+  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'],
+      origin: (origin, callback) => {
+        if (!origin || cfg.NODE_ENV !== 'production') {
+          return callback(null, true);
+        }
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error(`Origin ${origin} not allowed by Summit CORS policy`));
+      },
       credentials: true,
     }),
   );
@@ -43,7 +56,11 @@ export const createApp = async () => {
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
 
-  // Rate limiting (exempt monitoring endpoints)
+  // Health endpoints (exempt from rate limiting)
+  const healthRouter = (await import('./routes/health.js')).default;
+  app.use(healthRouter);
+
+  // Other routes (exempt from rate limiting)
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
@@ -146,18 +163,18 @@ export const createApp = async () => {
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
       // Enable PBAC in production
-      ...(process.env.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
+      ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
     ],
     // Security configuration based on environment
-    introspection: process.env.NODE_ENV !== 'production',
+    introspection: cfg.NODE_ENV !== 'production',
     // Enhanced query validation rules
     validationRules: [
-      depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+      depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
     ],
     // Security context
     formatError: (err) => {
       // Don't expose internal errors in production
-      if (process.env.NODE_ENV === 'production') {
+      if (cfg.NODE_ENV === 'production') {
         logger.error(
           { err, stack: (err as any).stack },
           `GraphQL Error: ${err.message}`,
@@ -177,12 +194,12 @@ export const createApp = async () => {
   } = await import('./config/production-security.js');
 
   // Apply security middleware based on environment
-  if (process.env.NODE_ENV === 'production') {
+  if (cfg.NODE_ENV === 'production') {
     applyProductionSecurity(app);
   }
 
   const authenticateToken =
-    process.env.NODE_ENV === 'production'
+    cfg.NODE_ENV === 'production'
       ? productionAuthMiddleware
       : (req: Request, res: Response, next: NextFunction) => {
           // Development mode - relaxed auth for easier testing
