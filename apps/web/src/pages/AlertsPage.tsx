@@ -23,7 +23,7 @@ import {
   useUpdateAlertStatus,
 } from '@/hooks/useGraphQL'
 import mockData from '@/mock/data.json'
-import type { Alert, KPIMetric } from '@/types'
+import type { Alert, KPIMetric, AlertStatus } from '@/types'
 
 export default function AlertsPage() {
   // GraphQL hooks
@@ -124,7 +124,7 @@ export default function AlertsPage() {
     },
   ]
 
-  const handleStatusChange = async (alertId: string, newStatus: string) => {
+  const handleStatusChange = async (alertId: string, newStatus: AlertStatus) => {
     try {
       if (alertsData) {
         await updateAlertStatus({
