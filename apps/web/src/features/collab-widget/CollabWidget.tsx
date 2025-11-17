@@ -30,7 +30,7 @@ export const CollabWidget: React.FC<Props> = ({ entityId, client }) => {
   useEffect(() => {
     const cy = (window as { cy?: unknown }).cy
     if (cy) {
-      ;(
+      (
         $ as unknown as (el: unknown) => {
           on: (
             event: string,
