@@ -11,7 +11,7 @@ interface QueueItem {
 }
 
 interface AutoscaleHints {
-  minuteAhead: number
+  minuteAhead?: number
 }
 
 export default function SchedulerBoard() {

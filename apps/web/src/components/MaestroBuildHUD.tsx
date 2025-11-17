@@ -395,7 +395,7 @@ export default function MaestroBuildHUD({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .animate-highlight {
           animation: highlight 2s ease-in-out;
         }
