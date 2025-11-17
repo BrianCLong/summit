@@ -558,10 +558,10 @@ function extractRelationships(data: any[]): any[] {
 // Health monitoring
 setInterval(async () => {
   try {
-    const waiting = await ingestionQueue.waiting();
-    const active = await ingestionQueue.active();
-    const completed = await ingestionQueue.completed();
-    const failed = await ingestionQueue.failed();
+    const waiting = await ingestionQueue.getWaitingCount();
+    const active = await ingestionQueue.getActiveCount();
+    const completed = await ingestionQueue.getCompletedCount();
+    const failed = await ingestionQueue.getFailedCount();
 
     logger.info('Queue health', {
       ingestion: { waiting, active, completed, failed },

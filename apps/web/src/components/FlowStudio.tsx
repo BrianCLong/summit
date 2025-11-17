@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import $ from 'jquery'
+// import $ from 'jquery'
 type Node = { id: string; type: string; label: string }
 export default function FlowStudio() {
   const [nodes, setNodes] = useState<Node[]>([
@@ -12,12 +12,13 @@ export default function FlowStudio() {
     { from: 't1', to: 'd1' },
   ])
   useEffect(() => {
-    $('#q').on('input', function () {
-      const v = $(this).val()?.toString().toLowerCase() || ''
-      $('.fs-node').each(function () {
-        $(this).toggle($(this).text().toLowerCase().includes(v))
-      })
-    })
+    // TODO: Replace jQuery with React state management
+    // $('#q').on('input', function () {
+    //   const v = $(this).val()?.toString().toLowerCase() || ''
+    //   $('.fs-node').each(function () {
+    //     $(this).toggle($(this).text().toLowerCase().includes(v))
+    //   })
+    // })
   }, [nodes.length])
   function exportDsl() {
     const dsl = {

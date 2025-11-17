@@ -50,7 +50,8 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
 
   // Check PostgreSQL connection
   try {
-    const { pool } = await import('../db/postgres.js');
+    const { getPostgresPool } = await import('../db/postgres.js');
+    const pool = getPostgresPool();
     await pool.query('SELECT 1');
     health.services.postgres = 'healthy';
   } catch (error) {
@@ -60,7 +61,8 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
 
   // Check Redis connection
   try {
-    const redis = (await import('../db/redis.js')).default;
+    const { getRedisClient } = await import('../db/redis.js');
+    const redis = getRedisClient();
     await redis.ping();
     health.services.redis = 'healthy';
   } catch (error) {
@@ -82,7 +84,8 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
     const neo4j = (await import('../db/neo4jConnection.js')).default;
     await neo4j.getDriver().verifyConnectivity();
 
-    const { pool } = await import('../db/postgres.js');
+    const { getPostgresPool } = await import('../db/postgres.js');
+    const pool = getPostgresPool();
     await pool.query('SELECT 1');
 
     res.status(200).json({ status: 'ready' });

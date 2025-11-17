@@ -218,7 +218,10 @@ class RunbookEngine {
       },
       {
         attempts: 3,
-        backoff: 'exponential',
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
       },
     );
 
@@ -319,7 +322,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
     // Execute tasks in topological order
     for (const taskId of sortedTaskIds) {
-      const task = taskMap.get(taskId);
+      const task = taskMap.get(taskId) as RunbookTask;
       if (!task) continue;
 
       // Update task status
@@ -332,13 +335,13 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
       try {
         // Collect inputs from dependencies
-        const taskInputs = { ...inputs, ...task.with };
+        const taskInputs = { ...inputs, ...(task.with || {}) };
         for (const depId of task.needs || []) {
           taskInputs[`${depId}_output`] = results.get(depId);
         }
 
         // Execute task
-        const executor = taskExecutors[task.uses];
+        const executor = taskExecutors[task.uses] as any;
         if (!executor) {
           throw new Error(`Unknown task type: ${task.uses}`);
         }
@@ -409,7 +412,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 });
 
 // Policy enforcement
-function policyMiddleware(request: any, reply: any, done: any) {
+async function policyMiddleware(request: any, reply: any) {
   const authorityId = request.headers['x-authority-id'];
   const reasonForAccess = request.headers['x-reason-for-access'];
 
@@ -418,7 +421,7 @@ function policyMiddleware(request: any, reply: any, done: any) {
 
     if (dryRun) {
       request.log.warn('Policy violation in dry-run mode');
-      return done();
+      return;
     }
 
     return reply.status(403).send({
@@ -430,7 +433,6 @@ function policyMiddleware(request: any, reply: any, done: any) {
 
   request.authorityId = authorityId;
   request.reasonForAccess = reasonForAccess;
-  done();
 }
 
 // Create Fastify instance
@@ -551,7 +553,7 @@ server.post<{ Body: { sourceId: string; inputs?: any } }>(
 // WebSocket for real-time updates
 server.register(async function (fastify) {
   fastify.get('/ws', { websocket: true }, (connection, req) => {
-    connection.socket.on('message', (message) => {
+    connection.on('message', (message) => {
       const data = JSON.parse(message.toString());
 
       if (data.type === 'subscribe' && data.executionId) {
@@ -559,7 +561,7 @@ server.register(async function (fastify) {
         const interval = setInterval(async () => {
           const execution = await engine.getExecution(data.executionId);
           if (execution) {
-            connection.socket.send(
+            connection.send(
               JSON.stringify({
                 type: 'execution_update',
                 data: execution,
@@ -574,7 +576,7 @@ server.register(async function (fastify) {
           }
         }, 1000);
 
-        connection.socket.on('close', () => {
+        connection.on('close', () => {
           clearInterval(interval);
         });
       }

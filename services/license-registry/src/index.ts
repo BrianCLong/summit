@@ -123,7 +123,7 @@ const LICENSE_TEMPLATES: Record<string, Partial<License>> = {
 };
 
 // Policy enforcement
-function policyMiddleware(request: any, reply: any, done: any) {
+async function policyMiddleware(request: any, reply: any) {
   const authorityId = request.headers['x-authority-id'];
   const reasonForAccess = request.headers['x-reason-for-access'];
 
@@ -132,7 +132,7 @@ function policyMiddleware(request: any, reply: any, done: any) {
 
     if (dryRun) {
       request.log.warn('Policy violation in dry-run mode');
-      return done();
+      return;
     }
 
     return reply.status(403).send({
@@ -144,7 +144,6 @@ function policyMiddleware(request: any, reply: any, done: any) {
 
   request.authorityId = authorityId;
   request.reasonForAccess = reasonForAccess;
-  done();
 }
 
 // Create Fastify instance
