@@ -1,4 +1,4 @@
-import { Blob } from 'node:buffer';
+// Use global Blob instead of node:buffer Blob for FormData compatibility
 import { JiraApiClient, JiraApiError } from './client.js';
 import { AuditLogger, createAuditEntry } from './logger.js';
 import {
@@ -116,15 +116,17 @@ export class JiraIntegrationService {
   ): Promise<void> {
     const formData = new FormData();
     attachments.forEach((attachment) => {
-      const blob = new Blob([attachment.data], {
+      // Convert Buffer to Uint8Array for Blob compatibility
+      const uint8Array = new Uint8Array(attachment.data);
+      const blob = new Blob([uint8Array], {
         type: attachment.contentType,
       });
-      formData.append('file', blob as unknown as Blob, attachment.fileName);
+      formData.append('file', blob, attachment.fileName);
     });
 
     await this.client.request(`/rest/api/3/issue/${issueId}/attachments`, {
       method: 'POST',
-      body: formData as unknown as BodyInit,
+      body: formData as any,
       headers: {
         'X-Atlassian-Token': 'no-check',
       },
@@ -246,7 +248,7 @@ export class JiraIntegrationService {
     const result: WorkflowSyncResult = {
       issueId: event.issue.id,
       transitioned: Boolean(mappedTarget),
-      targetState: mappedTarget ?? undefined,
+      ...(mappedTarget && { targetState: mappedTarget }),
     };
 
     this.auditLogger.record(

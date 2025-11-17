@@ -68,20 +68,14 @@ export class JiraApiClient {
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
-        const response = await this.fetchImpl(url, {
-          ...init,
+        const requestInit: RequestInit = {
           headers,
-          body: init.body ?? undefined,
-          // enforce JSON content-type when sending objects
-          ...(init.body && typeof init.body === 'string'
-            ? {
-                headers: {
-                  'Content-Type': 'application/json',
-                  ...headers,
-                },
-              }
-            : {}),
-        });
+          ...(init.method && { method: init.method }),
+          ...(init.body && { body: init.body }),
+          ...(init.redirect && { redirect: init.redirect }),
+          ...(init.signal && { signal: init.signal }),
+        };
+        const response = await this.fetchImpl(url, requestInit);
 
         if (!response.ok) {
           const bodyText = await response.text();
