@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useSubscription } from '@apollo/client/react'
 import { gql } from '@apollo/client'
+import type { Alert, Entity } from '@/types'
 
 // GraphQL Queries
 export const GET_ENTITIES = gql`
@@ -203,7 +204,7 @@ export const INVESTIGATION_UPDATES = gql`
 
 // Custom hooks for common operations
 export function useEntities(filters?: any) {
-  return useQuery(GET_ENTITIES, {
+  return useQuery<{ entities: Entity[] }>(GET_ENTITIES, {
     variables: { filters },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
@@ -230,7 +231,7 @@ export function useInvestigations(filters?: {
 }
 
 export function useAlerts(filters?: { severity?: string; status?: string }) {
-  return useQuery(GET_ALERTS, {
+  return useQuery<{ alerts: Alert[] }>(GET_ALERTS, {
     variables: filters,
     fetchPolicy: 'cache-and-network',
     pollInterval: 15000, // Poll every 15 seconds for alerts
@@ -259,11 +260,11 @@ export function useUpdateAlertStatus() {
 
 // Subscription hooks
 export function useEntityUpdates() {
-  return useSubscription(ENTITY_UPDATES)
+  return useSubscription<{ entityUpdated: Entity }>(ENTITY_UPDATES)
 }
 
 export function useAlertUpdates() {
-  return useSubscription(ALERT_UPDATES)
+  return useSubscription<{ alertCreated: Alert }>(ALERT_UPDATES)
 }
 
 export function useInvestigationUpdates(investigationId?: string) {
