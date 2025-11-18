@@ -65,7 +65,7 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({
         </Typography>
       ) : (
         <List>
-          {estimates.map((estimate) => (
+          {estimates.map((estimate: any) => (
             <Card key={estimate.id} sx={{ mb: 2 }}>
               <CardContent>
                 <Typography variant="h6" component="div">

@@ -69,7 +69,7 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
         </Typography>
       ) : (
         <Box>
-          {playbooks.map((playbook) => (
+          {playbooks.map((playbook: any) => (
             <Accordion key={playbook.id} sx={{ mb: 2 }}>
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}

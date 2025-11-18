@@ -4,7 +4,7 @@ import { useAnalysisStore } from './store';
 // In a full implementation, mapbox-gl would render a map synchronized with timeRange
 
 export const MapPane: React.FC = () => {
-  const timeRange = useAnalysisStore((s) => s.timeRange);
+  const timeRange = useAnalysisStore((s: any) => s.timeRange);
   return (
     <div data-testid="map-pane" className="p-2">
       Map showing data from {timeRange.start} to {timeRange.end}

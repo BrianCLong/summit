@@ -34,7 +34,7 @@ export function createFetchStreamTransport(
 ): AssistantTransport {
   let handler: ((e: AssistantEvent) => void) | null = null;
   return {
-    on: (fn) => {
+    on: (fn: any) => {
       handler = fn;
       return () => {
         handler = null;
@@ -158,7 +158,7 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
   };
 
   return {
-    on: (fn) => {
+    on: (fn: any) => {
       handler = fn;
       return () => {
         handler = null;
@@ -193,7 +193,7 @@ export function createSocketIoTransport(
   };
 
   return {
-    on: (fn) => {
+    on: (fn: any) => {
       handler = fn;
       return () => {
         handler = null;

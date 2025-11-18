@@ -15,20 +15,20 @@ interface AnalysisState {
   clearPinned: () => void;
 }
 
-export const useAnalysisStore = create<AnalysisState>((set) => ({
+export const useAnalysisStore = create<AnalysisState>((set: any) => ({
   timeRange: { start: 0, end: 100 },
   activeQuery: null,
   pinned: new Set<string>(),
-  setTimeRange: (range) =>
+  setTimeRange: (range: any) =>
     set({
       timeRange: {
         start: Math.min(range.start, range.end),
         end: Math.max(range.start, range.end),
       },
     }),
-  runQuery: (activeQuery) => set({ activeQuery }),
-  togglePinned: (id) =>
-    set((s) => {
+  runQuery: (activeQuery: any) => set({ activeQuery }),
+  togglePinned: (id: any) =>
+    set((s: any) => {
       const next = new Set(s.pinned);
       next.has(id) ? next.delete(id) : next.add(id);
       return { pinned: next };

@@ -9,7 +9,7 @@ function openNlqModal() {
 }
 
 export const CommandPalette: React.FC = () => {
-  const runQuery = useAnalysisStore((s) => s.runQuery);
+  const runQuery = useAnalysisStore((s: any) => s.runQuery);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
