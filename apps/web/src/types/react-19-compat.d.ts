@@ -48,6 +48,12 @@ declare module 'cmdk' {
   export * from 'cmdk/dist/index'
 }
 
+// Patch for immer - ensure patch-related exports are available
+declare module 'immer' {
+  export type { Patch, PatchListener } from 'immer/dist/immer'
+  export { produceWithPatches, applyPatches, enablePatches } from 'immer/dist/immer'
+}
+
 // Global type utilities for React 19 compatibility
 declare global {
   namespace React {
