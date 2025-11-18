@@ -46,7 +46,7 @@ export function PresencePill({
           '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' },
         }}
       >
-        {displayUsers.map((user) => (
+        {displayUsers.map((user: any) => (
           <Tooltip
             key={user.userId}
             title={`${user.displayName} (${user.status})`}

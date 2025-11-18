@@ -605,7 +605,7 @@ function InvestigationManager({
               type="text"
               value={filter.assignedTo}
               onChange={(e) =>
-                setFilter((prev) => ({ ...prev, assignedTo: e.target.value }))
+                setFilter((prev: any) => ({ ...prev, assignedTo: e.target.value }))
               }
               placeholder="Filter by assignee..."
               style={{
