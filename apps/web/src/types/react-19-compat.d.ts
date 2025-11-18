@@ -48,6 +48,12 @@ declare module 'cmdk' {
   export * from 'cmdk/dist/index'
 }
 
+// Patch for Apollo Client - re-export React hooks from main module
+declare module '@apollo/client' {
+  export * from '@apollo/client/core'
+  export * from '@apollo/client/react'
+}
+
 // Global type utilities for React 19 compatibility
 declare global {
   namespace React {
