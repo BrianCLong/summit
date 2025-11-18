@@ -56,11 +56,11 @@ export default function LatencyPanels() {
                 <LineChart data={trend} aria-label="p95 trend">
                   <XAxis
                     dataKey="ts"
-                    tickFormatter={(v) => new Date(v).toLocaleTimeString()}
+                    tickFormatter={(v: number) => new Date(v).toLocaleTimeString()}
                   />
                   <YAxis unit=" ms" />
                   <Tooltip
-                    labelFormatter={(v) => new Date(Number(v)).toLocaleString()}
+                    labelFormatter={(v: number | string) => new Date(Number(v)).toLocaleString()}
                   />
                   <Line
                     type="monotone"

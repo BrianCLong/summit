@@ -229,7 +229,7 @@ export default function MTTTTrendWidget({
               <YAxis
                 fontSize={12}
                 tick={{ fill: '#666' }}
-                tickFormatter={(value) => formatTime(value)}
+                tickFormatter={(value: number) => formatTime(value)}
               />
               <ReferenceLine
                 y={targetMTTT}
@@ -273,7 +273,7 @@ export default function MTTTTrendWidget({
               <YAxis
                 fontSize={12}
                 tick={{ fill: '#666' }}
-                tickFormatter={(value) => formatTime(value)}
+                tickFormatter={(value: number) => formatTime(value)}
               />
               <ReferenceLine
                 y={targetMTTT}
@@ -301,7 +301,7 @@ export default function MTTTTrendWidget({
               <YAxis
                 fontSize={12}
                 tick={{ fill: '#666' }}
-                tickFormatter={(value) => formatTime(value)}
+                tickFormatter={(value: number) => formatTime(value)}
               />
               <ReferenceLine
                 y={targetMTTT}
