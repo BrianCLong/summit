@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useSubscription, gql } from '@apollo/client'
+import { useQuery, useMutation, useSubscription } from '@apollo/client/react'
+import { gql } from '@apollo/client'
 
 // GraphQL Queries
 export const GET_ENTITIES = gql`
