@@ -41,7 +41,7 @@ export function NeighborhoodStreaming({
       limit: batchLimit,
     },
     skip: !isStreaming,
-    onSubscriptionData: ({ subscriptionData }) => {
+    onSubscriptionData: ({ subscriptionData }: any) => {
       const streamData = subscriptionData.data?.streamNeighbors;
       if (!streamData) return;
 

@@ -697,10 +697,10 @@ export function IntelGraphWorkbench() {
                     },
                     getRadius: 10000, // Adjust radius based on zoom level
                     pickable: true,
-                    onHover: ({ object, x, y }) => {
+                    onHover: ({ object, x, y }: any) => {
                       // TODO: Show tooltip on hover
                     },
-                    onClick: ({ object }) => {
+                    onClick: ({ object }: any) => {
                       if (object) handleNodeClick(object as GraphNode);
                     },
                   }),
@@ -756,10 +756,10 @@ export function IntelGraphWorkbench() {
                     getTargetColor: [255, 0, 128, 160],
                     getWidth: 2,
                     pickable: true,
-                    onHover: ({ object, x, y }) => {
+                    onHover: ({ object, x, y }: any) => {
                       // TODO: Show tooltip on hover
                     },
-                    onClick: ({ object }) => {
+                    onClick: ({ object }: any) => {
                       if (object) handleLinkClick(object as GraphLink);
                     },
                   }),

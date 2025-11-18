@@ -56,7 +56,7 @@ export function PipelinesPage() {
     );
   }, [debouncedOwner, debouncedSearch]);
 
-  const rowRenderer: ListRowRenderer = ({ index, key, style }) => {
+  const rowRenderer: ListRowRenderer = ({ index, key, style }: any) => {
     const pipeline = filtered[index];
     if (!pipeline) return null;
     return (
@@ -133,7 +133,7 @@ export function PipelinesPage() {
           <span>Queue</span>
         </div>
         <AutoSizer disableHeight>
-          {({ width }) => (
+          {({ width }: any) => (
             <List
               width={width}
               height={520}
