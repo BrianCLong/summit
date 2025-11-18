@@ -20,3 +20,9 @@ declare module 'jquery' {
   const jq: any;
   export default jq;
 }
+
+// Global type for test environment
+declare global {
+  // Allow access to global.fetch in tests
+  var global: typeof globalThis;
+}
