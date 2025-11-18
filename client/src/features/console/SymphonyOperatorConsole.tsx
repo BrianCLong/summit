@@ -265,13 +265,13 @@ function LatencyChart() {
           >
             <XAxis
               dataKey="time"
-              tickFormatter={(t) => new Date(t).toLocaleTimeString()}
+              tickFormatter={(t: any) => new Date(t).toLocaleTimeString()}
               hide
             />
             <YAxis hide />
             <Tooltip
               formatter={(v: any, n: any) => [v, n]}
-              labelFormatter={(t) => new Date(t).toLocaleTimeString()}
+              labelFormatter={(t: any) => new Date(t).toLocaleTimeString()}
             />
             <Area type="monotone" dataKey="p95" fillOpacity={0.2} />
             <Line type="monotone" dataKey="count" dot={false} />
@@ -300,7 +300,7 @@ function ErrorChart() {
           >
             <XAxis
               dataKey="time"
-              tickFormatter={(t) => new Date(t).toLocaleTimeString()}
+              tickFormatter={(t: any) => new Date(t).toLocaleTimeString()}
               hide
             />
             <YAxis hide />
@@ -383,7 +383,7 @@ function RoutingMatrix() {
               <Label className="text-xs">weight</Label>
               <Slider
                 value={[m.weight]}
-                onValueChange={(v) =>
+                onValueChange={(v: any) =>
                   setModels((arr) =>
                     arr.map((x, idx) =>
                       idx === i ? { ...x, weight: v[0] } : x,
@@ -401,7 +401,7 @@ function RoutingMatrix() {
               <Label className="text-xs">allow</Label>
               <Switch
                 checked={m.allow}
-                onCheckedChange={(v) =>
+                onCheckedChange={(v: any) =>
                   setModels((arr) =>
                     arr.map((x, idx) => (idx === i ? { ...x, allow: v } : x)),
                   )
@@ -412,7 +412,7 @@ function RoutingMatrix() {
               <Input
                 placeholder="rpm cap"
                 value={m.rpm_cap ?? ''}
-                onChange={(e) =>
+                onChange={(e: any) =>
                   setModels((arr) =>
                     arr.map((x, idx) =>
                       idx === i
@@ -427,7 +427,7 @@ function RoutingMatrix() {
               <Input
                 placeholder="tpm cap"
                 value={m.tpm_cap ?? ''}
-                onChange={(e) =>
+                onChange={(e: any) =>
                   setModels((arr) =>
                     arr.map((x, idx) =>
                       idx === i
@@ -503,7 +503,7 @@ function UsageWindows() {
               className="col-span-12 md:col-span-4"
               placeholder="model name (e.g., gemini/1.5-pro)"
               value={r.name}
-              onChange={(e) =>
+              onChange={(e: any) =>
                 setRows((arr) =>
                   arr.map((x, idx) =>
                     idx === i ? { ...x, name: e.target.value } : x,
@@ -515,7 +515,7 @@ function UsageWindows() {
               className="col-span-12 md:col-span-6"
               placeholder="window (e.g., Mon-Fri 09:00-14:00 MT)"
               value={r.window}
-              onChange={(e) =>
+              onChange={(e: any) =>
                 setRows((arr) =>
                   arr.map((x, idx) =>
                     idx === i ? { ...x, window: e.target.value } : x,
@@ -527,7 +527,7 @@ function UsageWindows() {
               className="col-span-12 md:col-span-2"
               placeholder="overflow→"
               value={r.overflow_to || ''}
-              onChange={(e) =>
+              onChange={(e: any) =>
                 setRows((arr) =>
                   arr.map((x, idx) =>
                     idx === i ? { ...x, overflow_to: e.target.value } : x,
@@ -597,19 +597,19 @@ function RequestComposer() {
             className="col-span-12 md:col-span-2"
             placeholder="task"
             value={task}
-            onChange={(e) => setTask(e.target.value)}
+            onChange={(e: any) => setTask(e.target.value)}
           />
           <Input
             className="col-span-12 md:col-span-4"
             placeholder="model (optional)"
             value={model}
-            onChange={(e) => setModel(e.target.value)}
+            onChange={(e: any) => setModel(e.target.value)}
           />
           <Textarea
             className="col-span-12 md:col-span-6"
             placeholder="input"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e: any) => setInput(e.target.value)}
           />
         </div>
         <div className="flex gap-2 items-center">
@@ -738,19 +738,19 @@ function GitHubPane() {
             className="col-span-12 md:col-span-3"
             placeholder="owner"
             value={owner}
-            onChange={(e) => setOwner(e.target.value)}
+            onChange={(e: any) => setOwner(e.target.value)}
           />
           <Input
             className="col-span-12 md:col-span-3"
             placeholder="repo"
             value={repo}
-            onChange={(e) => setRepo(e.target.value)}
+            onChange={(e: any) => setRepo(e.target.value)}
           />
           <Input
             className="col-span-12 md:col-span-6"
             placeholder="gh token (repo scope)"
             value={token}
-            onChange={(e) => setToken(e.target.value)}
+            onChange={(e: any) => setToken(e.target.value)}
           />
         </div>
         <Button variant="outline" onClick={save}>
@@ -807,7 +807,7 @@ function TicketBoard() {
       },
     ]);
   const move = (id: string, status: T['status']) =>
-    setItems((arr) => arr.map((t) => (t.id === id ? { ...t, status } : t)));
+    setItems((arr) => arr.map((t: any) => (t.id === id ? { ...t, status } : t)));
   return (
     <Card className="col-span-12">
       <CardHeader>
@@ -822,12 +822,12 @@ function TicketBoard() {
               <div className="text-sm font-medium capitalize mb-2">{col}</div>
               <div className="space-y-2">
                 {items
-                  .filter((t) => t.status === col)
-                  .map((t) => (
+                  .filter((t: any) => t.status === col)
+                  .map((t: any) => (
                     <div key={t.id} className="rounded-xl border bg-card p-2">
                       <Input
                         value={t.title}
-                        onChange={(e) =>
+                        onChange={(e: any) =>
                           setItems((arr) =>
                             arr.map((x) =>
                               x.id === t.id
@@ -923,7 +923,7 @@ export default function SymphonyOperatorConsole() {
             id="proxy"
             className="w-[320px]"
             value={proxyBase}
-            onChange={(e) => setProxyBase(e.target.value)}
+            onChange={(e: any) => setProxyBase(e.target.value)}
           />
         </div>
       </div>
@@ -962,7 +962,7 @@ export default function SymphonyOperatorConsole() {
             <CardContent>
               <Textarea
                 value={traceSpec}
-                onChange={(e) => setTraceSpec(e.target.value)}
+                onChange={(e: any) => setTraceSpec(e.target.value)}
                 className="font-mono"
                 rows={6}
               />
