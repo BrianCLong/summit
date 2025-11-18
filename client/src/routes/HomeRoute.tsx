@@ -1272,7 +1272,7 @@ function HomeRouteInner() {
                   `${metric.name} exceeded ${threshold.value}`,
                 );
               }}
-              onLogEvent={(logEvent) => {
+              onLogEvent={(logEvent: any) => {
                 console.log('Log event:', logEvent);
                 if (logEvent.level === 'ERROR') {
                   toast.error(
@@ -1317,7 +1317,7 @@ function HomeRouteInner() {
           >
             <DataConnectorsDashboard
               investigationId={selectedInvestigation?.id}
-              onConnectorStatus={(connector, status) => {
+              onConnectorStatus={(connector: any, status: any) => {
                 console.log('Connector status:', connector, status);
                 if (status === 'error' || status === 'disconnected') {
                   toast.error('Connector', `${connector.name}: ${status}`);
@@ -1325,14 +1325,14 @@ function HomeRouteInner() {
                   toast.success('Connector', `${connector.name}: Connected`);
                 }
               }}
-              onDataFlow={(source, target, records) => {
+              onDataFlow={(source: any, target: any, records: any) => {
                 console.log('Data flow:', source, target, records);
                 toast.info(
                   'Data Flow',
                   `${source} → ${target}: ${records} records`,
                 );
               }}
-              onTemplateApply={(template, connector) => {
+              onTemplateApply={(template: any, connector: any) => {
                 console.log('Template applied:', template, connector);
                 toast.success(
                   'Template',
@@ -1376,21 +1376,21 @@ function HomeRouteInner() {
             <InvestigationRecommendationsEngine
               investigationId={selectedInvestigation?.id}
               context={aiContext}
-              onRecommendationSelect={(recommendation) => {
+              onRecommendationSelect={(recommendation: any) => {
                 console.log('Selected recommendation:', recommendation);
                 toast.info(
                   'AI Recommendation',
                   `${recommendation.type}: ${recommendation.title}`,
                 );
               }}
-              onSimilarCaseSelect={(similarCase) => {
+              onSimilarCaseSelect={(similarCase: any) => {
                 console.log('Selected similar case:', similarCase);
                 toast.info(
                   'Similar Case',
                   `${similarCase.title} (${similarCase.similarity}% match)`,
                 );
               }}
-              onStrategyApply={(strategy) => {
+              onStrategyApply={(strategy: any) => {
                 console.log('Applied strategy:', strategy);
                 toast.success(
                   'Strategy Applied',
@@ -1717,7 +1717,7 @@ function HomeRouteInner() {
           >
             <IntelligenceFeedsEnrichment
               investigationId={selectedInvestigation?.id}
-              onFeedStatus={(feed, status) => {
+              onFeedStatus={(feed: any, status: any) => {
                 console.log('Feed status:', feed, status);
                 if (status === 'connected') {
                   toast.success(
@@ -1731,21 +1731,21 @@ function HomeRouteInner() {
                   );
                 }
               }}
-              onEnrichmentComplete={(entity, enrichments) => {
+              onEnrichmentComplete={(entity: any, enrichments: any) => {
                 console.log('Enrichment completed:', entity, enrichments);
                 toast.info(
                   'Enrichment',
                   `${entity.type} enriched with ${enrichments.length} sources`,
                 );
               }}
-              onCorrelationFound={(correlation) => {
+              onCorrelationFound={(correlation: any) => {
                 console.log('Correlation found:', correlation);
                 toast.warning(
                   'Correlation Alert',
                   `${correlation.type}: ${correlation.entities.length} entities`,
                 );
               }}
-              onAlertGenerated={(alert) => {
+              onAlertGenerated={(alert: any) => {
                 console.log('Alert generated:', alert);
                 if (
                   alert.severity === 'high' ||

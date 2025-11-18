@@ -58,7 +58,7 @@ export default function OsintHealth() {
     setLogs(json?.data?.osintRuns || []);
   };
 
-  const handleAddToCaseClick = (kind, refId) => {
+  const handleAddToCaseClick = (kind: any, refId: any) => {
     setSelectedItem({ kind, refId });
     setAddCaseModalOpen(true);
   };

@@ -114,7 +114,7 @@ export function createBuildPlane(): BaseModule {
           message: `Artifacts staged for ${components.join(', ')}`,
           output: {
             components,
-            checksums: components.map((component) => `${component}-sha256`),
+            checksums: components.map((component: any) => `${component}-sha256`),
           },
           telemetry: {
             latencyMs: 150,
