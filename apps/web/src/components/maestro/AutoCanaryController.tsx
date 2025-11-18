@@ -6,6 +6,7 @@ import {
   PlayIcon,
   PauseIcon,
   ArrowPathIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
 interface CanaryMetrics {

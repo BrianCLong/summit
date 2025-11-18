@@ -6,6 +6,7 @@ import {
   BellIcon,
   CheckCircleIcon,
   CogIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
 interface ServingAlertConfig {

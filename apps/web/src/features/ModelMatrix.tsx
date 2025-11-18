@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { DataGrid, type GridColDef } from '@mui/x-data-grid'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { io } from 'socket.io-client'
 import $ from 'jquery'
 
