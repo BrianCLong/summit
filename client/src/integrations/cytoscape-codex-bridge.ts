@@ -7,7 +7,7 @@ export function attachCodexBridge(cy: Core, onAdd: (payload: any) => void) {
     const node = evt.target.data();
     $container.trigger('intelgraph:node_selected', [node]);
   });
-  $container.on('intelgraph:add_to_codex', (_e, node) => {
+  $container.on('intelgraph:add_to_codex', (_e: any, node: any) => {
     onAdd({
       type: 'entity',
       entityId: node.id,

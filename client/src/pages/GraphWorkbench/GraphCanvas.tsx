@@ -94,7 +94,7 @@ export default function GraphCanvas() {
       const node = cy
         .$('node')
         .find(
-          (n) =>
+          (n: any) =>
             n.renderedBoundingBox().x1 < e.offsetX &&
             n.renderedBoundingBox().x2 > e.offsetX &&
             n.renderedBoundingBox().y1 < e.offsetY &&
@@ -110,7 +110,7 @@ export default function GraphCanvas() {
     let startX = 0;
     let startY = 0;
     let $marquee: JQuery | null = null;
-    $container.on('mousedown', (e) => {
+    $container.on('mousedown', (e: any) => {
       if (e.button !== 0 || e.shiftKey !== true) return; // hold Shift to lasso
       lasso = true;
       startX = e.pageX;
@@ -128,7 +128,7 @@ export default function GraphCanvas() {
         })
         .appendTo('body');
     });
-    $container.on('mousemove', (e) => {
+    $container.on('mousemove', (e: any) => {
       if (!lasso || !$marquee) return;
       const x = Math.min(e.pageX, startX);
       const y = Math.min(e.pageY, startY);
@@ -136,7 +136,7 @@ export default function GraphCanvas() {
       const h = Math.abs(e.pageY - startY);
       $marquee.css({ left: x, top: y, width: w, height: h });
     });
-    $container.on('mouseup', (e) => {
+    $container.on('mouseup', (e: any) => {
       if (!lasso) return;
       lasso = false;
       if ($marquee) {

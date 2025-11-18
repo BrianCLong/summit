@@ -40,7 +40,7 @@ export function createFetchStreamTransport(
         handler = null;
       };
     },
-    send: async (input, signal) => {
+    send: async (input: any, signal: any) => {
       try {
         // Emit a local thinking status so UIs/tests get immediate feedback
         handler?.({ type: 'status', value: 'thinking' });
@@ -164,7 +164,7 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
         handler = null;
       };
     },
-    send: (input, signal) => open(input, signal),
+    send: (input: any, signal: any) => open(input, signal),
   };
 }
 
@@ -199,7 +199,7 @@ export function createSocketIoTransport(
         handler = null;
       };
     },
-    send: (input, signal) => {
+    send: (input: any, signal: any) => {
       const run = () => {
         // handler?.({ type: "status", value: "thinking" }); // Server will send this
         socket.emit('assistant:ask', { input });

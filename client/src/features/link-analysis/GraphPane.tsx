@@ -22,7 +22,7 @@ export const GraphPane: React.FC = () => {
       <ReactFlow
         nodes={nodes}
         edges={[]}
-        onNodeClick={(_, node) => togglePinned(node.id)}
+        onNodeClick={(_: any, node: any) => togglePinned(node.id)}
       >
         <Background />
       </ReactFlow>

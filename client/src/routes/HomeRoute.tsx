@@ -1157,7 +1157,7 @@ function HomeRouteInner() {
             <CollaborativeWorkspace
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
-              onCollaborationEvent={(event) => {
+              onCollaborationEvent={(event: any) => {
                 console.log('Collaboration event:', event);
                 toast.info('Collaboration', `${event.type}: ${event.userId}`);
               }}
@@ -1204,7 +1204,7 @@ function HomeRouteInner() {
             <SecurityAuditDashboard
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
-              onSecurityEvent={(event) => {
+              onSecurityEvent={(event: any) => {
                 console.log('Security event:', event);
                 if (
                   event.severity === 'high' ||
@@ -1261,11 +1261,11 @@ function HomeRouteInner() {
           >
             <SystemObservabilityDashboard
               investigationId={selectedInvestigation?.id}
-              onServiceAlert={(service, alert) => {
+              onServiceAlert={(service: any, alert: any) => {
                 console.log('Service alert:', service, alert);
                 toast.warning('System Alert', `${service}: ${alert.message}`);
               }}
-              onMetricThreshold={(metric, threshold) => {
+              onMetricThreshold={(metric: any, threshold: any) => {
                 console.log('Metric threshold:', metric, threshold);
                 toast.info(
                   'Performance',

@@ -74,15 +74,15 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
 
   const telemetry = data?.getCrisisTelemetry || [];
 
-  const totalVolume = telemetry.reduce((sum, item) => sum + item.volume, 0);
+  const totalVolume = telemetry.reduce((sum: any, item: any) => sum + item.volume, 0);
   const avgSentiment =
     telemetry.length > 0
-      ? telemetry.reduce((sum, item) => sum + item.sentiment, 0) /
+      ? telemetry.reduce((sum: any, item: any) => sum + item.sentiment, 0) /
         telemetry.length
       : 0;
   const avgVirality =
     telemetry.length > 0
-      ? telemetry.reduce((sum, item) => sum + item.viralityScore, 0) /
+      ? telemetry.reduce((sum: any, item: any) => sum + item.viralityScore, 0) /
         telemetry.length
       : 0;
 

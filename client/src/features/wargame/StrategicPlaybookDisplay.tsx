@@ -95,7 +95,7 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
                   Steps:
                 </Typography>
                 <List dense>
-                  {playbook.steps.map((step, index) => (
+                  {playbook.steps.map((step: any, index: any) => (
                     <ListItem key={index}>
                       <ListItemIcon>
                         <CheckCircleOutlineIcon color="primary" />
@@ -109,7 +109,7 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
                   Metrics of Effectiveness (MOEs):
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-                  {playbook.metricsOfEffectiveness.map((moe, index) => (
+                  {playbook.metricsOfEffectiveness.map((moe: any, index: any) => (
                     <Chip
                       key={index}
                       label={moe}
@@ -123,7 +123,7 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
                   Metrics of Performance (MOPs):
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-                  {playbook.metricsOfPerformance.map((mop, index) => (
+                  {playbook.metricsOfPerformance.map((mop: any, index: any) => (
                     <Chip
                       key={index}
                       label={mop}
