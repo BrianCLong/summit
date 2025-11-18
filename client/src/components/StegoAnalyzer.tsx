@@ -61,22 +61,22 @@ const MatrixGraph: React.FC<{ matrix: number[][] }> = ({ matrix }) => {
       .data(matrix)
       .enter()
       .append('g')
-      .attr('transform', (_, i) => `translate(0,${y(i)!})`)
+      .attr('transform', (_: any, i: any) => `translate(0,${y(i)!})`)
       .selectAll('rect')
-      .data((row, i) => row.map((value, j) => ({ value, row: i, col: j })))
+      .data((row: any, i: any) => row.map((value: any, j: any) => ({ value, row: i, col: j })))
       .enter()
       .append('rect')
-      .attr('x', (d) => x(d.col)!)
+      .attr('x', (d: any) => x(d.col)!)
       .attr('y', 0)
       .attr('width', x.bandwidth())
       .attr('height', y.bandwidth())
-      .attr('fill', (d) => color(d.value))
-      .on('mouseover', (event, d) => {
+      .attr('fill', (d: any) => color(d.value))
+      .on('mouseover', (event: any, d: any) => {
         tooltip
           .style('visibility', 'visible')
           .text(`Encoded ${d.row}, Decoded ${d.col}: ${d.value}`);
       })
-      .on('mousemove', (event) => {
+      .on('mousemove', (event: any) => {
         tooltip
           .style('top', `${event.pageY - 10}px`)
           .style('left', `${event.pageX + 10}px`);
