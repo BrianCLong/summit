@@ -4,7 +4,7 @@ import mockData from '@/mock/data.json'
 
 const meta: Meta<typeof KPIStrip> = {
   title: 'Panels/KPIStrip',
-  component: KPIStrip,
+  component: KPIStrip as any,
   parameters: {
     layout: 'padded',
   },

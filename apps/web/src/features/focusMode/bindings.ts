@@ -4,8 +4,9 @@ import { enterFocus, exitFocus, toggleManual } from './focusSlice'
 
 export function bindFocusMode($root: JQuery, dispatch: AppDispatch) {
   // Hotkey: F toggles manual, spotlight current hovered pane
-  $root.on('keydown', (e: KeyboardEvent) => {
-    if ((e as any).code === 'KeyF' && !e.repeat) {
+  $root.on('keydown', (e: JQuery.KeyDownEvent) => {
+    const nativeEvent = e.originalEvent as KeyboardEvent
+    if (nativeEvent.code === 'KeyF' && !nativeEvent.repeat) {
       const region = currentRegionFromHover()
       dispatch(toggleManual({ region }))
       $root.trigger('intelgraph:focus:toggled', [region])

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { DataGrid, type GridColDef } from '@mui/x-data-grid'
+import { DataGrid } from '@mui/x-data-grid'
 import { io } from 'socket.io-client'
 import $ from 'jquery'
 
@@ -18,7 +18,16 @@ type Row = {
   ttfbms: number
 }
 
-const cols: GridColDef[] = [
+interface ColDef {
+  field: keyof Row
+  headerName: string
+  width?: number
+  flex?: number
+  renderCell?: (params: any) => React.ReactNode
+  valueFormatter?: (params: any) => string
+}
+
+const cols: ColDef[] = [
   { field: 'id', headerName: 'Model', flex: 1 },
   { field: 'class', headerName: 'Class', width: 100 },
   { field: 'window', headerName: 'Window', width: 110 },

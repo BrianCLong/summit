@@ -74,7 +74,7 @@ async function getJSON<T = any>(path: string, init?: RequestInit): Promise<T> {
 }
 
 function useInterval(callback: () => void, delay: number) {
-  const savedRef = useRef<() => void>()
+  const savedRef = useRef<(() => void) | undefined>(undefined)
   useEffect(() => {
     savedRef.current = callback
   }, [callback])

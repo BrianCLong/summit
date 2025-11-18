@@ -70,7 +70,7 @@ interface UseConductorMetricsOptions {
 
 export const useConductorMetrics = (options: UseConductorMetricsOptions) => {
   const { timeRange, refreshInterval = 30000, tenantId } = options
-  const intervalRef = useRef<NodeJS.Timeout>()
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   const fetchMetrics = async (): Promise<ConductorMetrics> => {
     const params = new URLSearchParams({

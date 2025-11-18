@@ -7,7 +7,7 @@ import { TimelineRail } from '@/components/panels/TimelineRail'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import {
   Calendar,
-  Map,
+  Map as MapIcon,
   Share2,
   Info,
   Eye,
@@ -466,7 +466,7 @@ export function TriPaneAnalysisView({
             <div className="h-full bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
               {/* Placeholder for map component */}
               <div className="text-center space-y-2">
-                <Map className="h-12 w-12 mx-auto text-muted-foreground" />
+                <MapIcon className="h-12 w-12 mx-auto text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">Map component</p>
                 <p className="text-xs text-muted-foreground">
                   {filteredData.geospatialEvents.length} location events
