@@ -22,7 +22,7 @@ import {
   Videocam,
   Message,
   RocketLaunch,
-  Activity,
+  ShowChart as Activity,
   Group,
   Lightbulb,
   Search,
