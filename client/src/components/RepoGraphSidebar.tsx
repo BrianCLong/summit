@@ -22,9 +22,9 @@ export default function RepoGraphSidebar({ files }: { files: string[] }) {
   useEffect(() => {
     if (!handlerBoundRef.current) {
       handlerBoundRef.current = true;
-      $('#rg-q').on('input', function () {
+      $('#rg-q').on('input', function (this: HTMLElement) {
         const v = $(this).val()?.toString().toLowerCase() || '';
-        $('.rg-row').each(function () {
+        $('.rg-row').each(function (this: HTMLElement) {
           $(this).toggle($(this).text().toLowerCase().includes(v));
         });
       });

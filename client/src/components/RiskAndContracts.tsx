@@ -32,9 +32,9 @@ export default function RiskAndContracts() {
   useEffect(() => {
     if (!handlerBoundRef.current && h) {
       handlerBoundRef.current = true;
-      $('#risk-q').on('input', function () {
+      $('#risk-q').on('input', function (this: HTMLElement) {
         const v = ($(this).val() || '').toString().toLowerCase();
-        $('.risk-row').each(function () {
+        $('.risk-row').each(function (this: HTMLElement) {
           $(this).toggle($(this).text().toLowerCase().includes(v));
         });
       });

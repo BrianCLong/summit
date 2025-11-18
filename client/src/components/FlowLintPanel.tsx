@@ -17,9 +17,9 @@ export default function FlowLintPanel() {
 
     if (!handlerBoundRef.current) {
       handlerBoundRef.current = true;
-      $('#q').on('input', function () {
+      $('#q').on('input', function (this: HTMLElement) {
         const v = $(this).val()?.toString().toLowerCase() || '';
-        $('.lint-row').each(function () {
+        $('.lint-row').each(function (this: HTMLElement) {
           $(this).toggle($(this).text().toLowerCase().includes(v));
         });
       });

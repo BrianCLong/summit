@@ -48,9 +48,9 @@ export default function TrustBoard() {
   useEffect(() => {
     if (!handlerBoundRef.current) {
       handlerBoundRef.current = true;
-      $('#q').on('input', function () {
+      $('#q').on('input', function (this: HTMLElement) {
         const v = $(this).val()?.toString().toLowerCase() || '';
-        $('.row').each(function () {
+        $('.row').each(function (this: HTMLElement) {
           $(this).toggle($(this).text().toLowerCase().indexOf(v) >= 0);
         });
       });

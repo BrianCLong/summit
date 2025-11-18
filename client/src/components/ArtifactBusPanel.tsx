@@ -6,9 +6,9 @@ export default function ArtifactBusPanel() {
     fetch('/api/oci/metrics')
       .then((r) => r.json())
       .then(setRows);
-    $('#ab-q').on('input', function () {
+    $('#ab-q').on('input', function (this: HTMLElement) {
       const v = ($(this).val() || '').toString().toLowerCase();
-      $('.ab-row').each(function () {
+      $('.ab-row').each(function (this: HTMLElement) {
         $(this).toggle($(this).text().toLowerCase().includes(v));
       });
     });
