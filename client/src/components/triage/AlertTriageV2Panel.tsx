@@ -246,7 +246,7 @@ export default function AlertTriageV2Panel({
             </AccordionSummary>
             <AccordionDetails>
               <Box>
-                {factors.map((factor, index) => (
+                {factors.map((factor: any, index: number) => (
                   <Box
                     key={index}
                     display="flex"
@@ -342,7 +342,7 @@ export default function AlertTriageV2Panel({
             Evidence Summary
           </Typography>
 
-          {alertData.evidenceSnippets.map((snippet, index) => (
+          {alertData.evidenceSnippets.map((snippet: any, index: number) => (
             <Box
               key={index}
               sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
@@ -352,7 +352,7 @@ export default function AlertTriageV2Panel({
               </Typography>
               {snippet.sourceLinks && (
                 <Box mt={1}>
-                  {snippet.sourceLinks.map((link, linkIndex) => (
+                  {snippet.sourceLinks.map((link: any, linkIndex: number) => (
                     <Button
                       key={linkIndex}
                       size="small"
@@ -383,7 +383,7 @@ export default function AlertTriageV2Panel({
             Feedback History
           </Typography>
 
-          {feedbackData.alertFeedback.map((feedback) => (
+          {feedbackData.alertFeedback.map((feedback: any) => (
             <Box
               key={feedback.id}
               sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
