@@ -30,7 +30,7 @@ const GraphCanvas: React.FC = () => {
     });
 
     // jQuery wrapper for simple drag feedback
-    $(cy.container()).on('mouseup', 'node', (evt) => {
+    $(cy.container()).on('mouseup', 'node', (evt: any) => {
       const n = evt.target;
       dispatch(
         addNode({

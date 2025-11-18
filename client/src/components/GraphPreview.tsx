@@ -69,7 +69,7 @@ function GraphPreview({
         return currentNodes.map((node) => {
           // Simple circular layout with some randomness
           const angle =
-            (nodes.findIndex((n) => n.id === node.id) / nodes.length) *
+            (nodes.findIndex((n: any) => n.id === node.id) / nodes.length) *
             Math.PI *
             2;
           const radius = Math.min(width, height) * 0.3;
@@ -96,7 +96,7 @@ function GraphPreview({
 
     // Initialize nodes with positions
     setSimulationNodes(
-      nodes.map((node) => ({
+      nodes.map((node: any) => ({
         ...node,
         x: width / 2 + (Math.random() - 0.5) * 100,
         y: height / 2 + (Math.random() - 0.5) * 100,
@@ -132,7 +132,7 @@ function GraphPreview({
       ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
 
-      edges.forEach((edge) => {
+      edges.forEach((edge: any) => {
         const sourceNode = simulationNodes.find((n) => n.id === edge.source);
         const targetNode = simulationNodes.find((n) => n.id === edge.target);
 

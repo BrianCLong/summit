@@ -246,7 +246,7 @@ export function KShortestPathsPanel({
           </Typography>
 
           <List dense>
-            {paths.map((path, index) => (
+            {paths.map((path: any, index: number) => (
               <React.Fragment key={path.id}>
                 <ListItem
                   button
@@ -285,7 +285,7 @@ export function KShortestPathsPanel({
                     }
                     secondary={
                       <Typography variant="caption" color="text.secondary">
-                        {path.nodes.map((node) => node.label).join(' → ')}
+                        {path.nodes.map((node: any) => node.label).join(' → ')}
                       </Typography>
                     }
                   />

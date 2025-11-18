@@ -355,7 +355,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                 rows={3}
                 placeholder="Explain why this access is needed for business purposes..."
                 value={businessNeed}
-                onChange={(e) => setBusinessNeed(e.target.value)}
+                onChange={(e: any) => setBusinessNeed(e.target.value)}
                 required
               />
               <Form.Text className="text-muted">
@@ -371,7 +371,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                 rows={3}
                 placeholder="Provide technical details about the access needed..."
                 value={justification}
-                onChange={(e) => setJustification(e.target.value)}
+                onChange={(e: any) => setJustification(e.target.value)}
                 required
               />
               <Form.Text className="text-muted">
@@ -385,7 +385,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                   <Form.Label>Urgency Level *</Form.Label>
                   <Form.Select
                     value={urgency}
-                    onChange={(e) => setUrgency(e.target.value as any)}
+                    onChange={(e: any) => setUrgency(e.target.value as any)}
                   >
                     <option value="LOW">Low - Routine work</option>
                     <option value="MEDIUM">
@@ -405,7 +405,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                   <Form.Label>Requested Duration</Form.Label>
                   <Form.Select
                     value={requestedDuration}
-                    onChange={(e) => setRequestedDuration(e.target.value)}
+                    onChange={(e: any) => setRequestedDuration(e.target.value)}
                   >
                     <option value="4 hours">4 hours</option>
                     <option value="12 hours">12 hours</option>

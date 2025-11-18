@@ -540,7 +540,7 @@ function InvestigationManager({
             <select
               value={filter.status}
               onChange={(e) =>
-                setFilter((prev) => ({ ...prev, status: e.target.value }))
+                setFilter((prev: any) => ({ ...prev, status: e.target.value }))
               }
               style={{
                 width: '100%',
@@ -572,7 +572,7 @@ function InvestigationManager({
             <select
               value={filter.priority}
               onChange={(e) =>
-                setFilter((prev) => ({ ...prev, priority: e.target.value }))
+                setFilter((prev: any) => ({ ...prev, priority: e.target.value }))
               }
               style={{
                 width: '100%',

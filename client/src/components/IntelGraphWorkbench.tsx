@@ -683,8 +683,8 @@ export function IntelGraphWorkbench() {
                     data: filteredGraphData.nodes.filter(
                       (n) => n.lat !== undefined && n.lon !== undefined,
                     ),
-                    getPosition: (d) => [d.lon, d.lat],
-                    getFillColor: (d) => {
+                    getPosition: (d: any) => [d.lon, d.lat],
+                    getFillColor: (d: any) => {
                       const color = nodeColors[d.id];
                       return color
                         ? [
@@ -728,7 +728,7 @@ export function IntelGraphWorkbench() {
                         targetNode?.lon !== undefined
                       );
                     }),
-                    getSourcePosition: (d) => {
+                    getSourcePosition: (d: any) => {
                       const sourceNode = filteredGraphData.nodes.find(
                         (n) =>
                           n.id ===
@@ -740,7 +740,7 @@ export function IntelGraphWorkbench() {
                         ? [sourceNode.lon, sourceNode.lat]
                         : [0, 0];
                     },
-                    getTargetPosition: (d) => {
+                    getTargetPosition: (d: any) => {
                       const targetNode = filteredGraphData.nodes.find(
                         (n) =>
                           n.id ===
@@ -792,7 +792,7 @@ export function IntelGraphWorkbench() {
           // If showMap is true, ForceGraph2D should not render nodes/links as they are handled by DeckGL
           // However, ForceGraph2D is still useful for its simulation and controls
           // We might need to hide its visual elements when map is active
-          nodeCanvasObject={(node, ctx, globalScale) => {
+          nodeCanvasObject={(node: any, ctx: any, globalScale: any) => {
             if (showMap) return; // Don't draw nodes if map is active
             const label = node.label || node.id;
             const fontSize = 12 / globalScale;
@@ -817,7 +817,7 @@ export function IntelGraphWorkbench() {
 
             node.__bckgDimensions = bckgDimensions; // for hit testing
           }}
-          linkCanvasObject={(link, ctx, globalScale) => {
+          linkCanvasObject={(link: any, ctx: any, globalScale: any) => {
             if (showMap) return; // Don't draw links if map is active
             // Draw link as before
             const start = link.source as GraphNode;
