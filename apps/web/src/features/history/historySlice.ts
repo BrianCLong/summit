@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { Patch } from 'immer'
+import { Patch } from 'immer'
 
 export interface HistoryEntry {
   label: string // e.g., "codex:addCard"
