@@ -7,6 +7,12 @@ import {
   createDecipheriv,
 } from 'crypto';
 import { z } from 'zod';
+import type { BufferEncoding } from 'node:buffer';
+
+const toEncodedString = (value: Uint8Array, encoding: BufferEncoding) =>
+  Buffer.from(value).toString(encoding);
+
+const randomHex = (size: number) => toEncodedString(randomBytes(size), 'hex');
 
 interface ResidencyConfig {
   region: string;
@@ -586,10 +592,11 @@ export class DataResidencyService {
       encryptedData: encrypted,
       algorithm: 'aes-256-gcm-aws-kms',
       keyId: config.keyId,
-      encryptedDataKey: Buffer.from(
-        'aws-kms-encrypted-' + dataKey.toString('hex'),
-      ).toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
+      encryptedDataKey: toEncodedString(
+        Buffer.from(`aws-kms-encrypted-${toEncodedString(dataKey, 'hex')}`),
+        'base64',
+      ),
+      authTag: toEncodedString(cipher.getAuthTag(), 'base64'),
     };
   }
 
@@ -621,7 +628,7 @@ export class DataResidencyService {
     return {
       plaintextDataKey: randomBytes(32),
       encryptedDataKey: Buffer.from(
-        'aws-kms-encrypted-' + randomBytes(32).toString('hex'),
+        `aws-kms-encrypted-${randomHex(32)}`,
       ),
     };
   }
@@ -642,9 +649,10 @@ export class DataResidencyService {
       encryptedData: encrypted,
       algorithm: 'aes-256-cbc-azure-kv',
       keyId: config.keyId,
-      encryptedDataKey: Buffer.from(
-        'azure-kv-encrypted-' + dataKey.toString('hex'),
-      ).toString('base64'),
+      encryptedDataKey: toEncodedString(
+        Buffer.from(`azure-kv-encrypted-${toEncodedString(dataKey, 'hex')}`),
+        'base64',
+      ),
     };
   }
 
@@ -673,7 +681,7 @@ export class DataResidencyService {
     return {
       plaintextDataKey: randomBytes(32),
       encryptedDataKey: Buffer.from(
-        'azure-kv-encrypted-' + randomBytes(32).toString('hex'),
+        `azure-kv-encrypted-${randomHex(32)}`,
       ),
     };
   }
@@ -694,10 +702,11 @@ export class DataResidencyService {
       encryptedData: encrypted,
       algorithm: 'aes-256-gcm-gcp-kms',
       keyId: config.keyId,
-      encryptedDataKey: Buffer.from(
-        'gcp-kms-encrypted-' + dataKey.toString('hex'),
-      ).toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
+      encryptedDataKey: toEncodedString(
+        Buffer.from(`gcp-kms-encrypted-${toEncodedString(dataKey, 'hex')}`),
+        'base64',
+      ),
+      authTag: toEncodedString(cipher.getAuthTag(), 'base64'),
     };
   }
 
@@ -728,7 +737,7 @@ export class DataResidencyService {
     return {
       plaintextDataKey: randomBytes(32),
       encryptedDataKey: Buffer.from(
-        'gcp-kms-encrypted-' + randomBytes(32).toString('hex'),
+        `gcp-kms-encrypted-${randomHex(32)}`,
       ),
     };
   }
@@ -761,9 +770,9 @@ export class DataResidencyService {
       algorithm: 'aes-256-gcm-customer-managed',
       keyId: config.keyId,
       encryptedDataKey,
-      iv: iv.toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
-      keyAuthTag: keyEncryptionKey.getAuthTag().toString('base64'),
+      iv: toEncodedString(iv, 'base64'),
+      authTag: toEncodedString(cipher.getAuthTag(), 'base64'),
+      keyAuthTag: toEncodedString(keyEncryptionKey.getAuthTag(), 'base64'),
     };
   }
 
@@ -862,8 +871,8 @@ export class DataResidencyService {
 
     return JSON.stringify({
       encrypted,
-      iv: iv.toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
+      iv: toEncodedString(iv, 'base64'),
+      authTag: toEncodedString(cipher.getAuthTag(), 'base64'),
     });
   }
 
@@ -941,9 +950,9 @@ export class DataResidencyService {
     return {
       encryptedData: encrypted,
       algorithm: 'aes-256-gcm-local',
-      keyId: 'local-' + randomBytes(8).toString('hex'),
-      iv: iv.toString('base64'),
-      authTag: cipher.getAuthTag().toString('base64'),
+      keyId: `local-${randomHex(8)}`,
+      iv: toEncodedString(iv, 'base64'),
+      authTag: toEncodedString(cipher.getAuthTag(), 'base64'),
     };
   }
 

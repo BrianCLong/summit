@@ -28,9 +28,9 @@ export const ModelCardSchema = z.object({
   version: z.string(),
   dataset: z.string(),
   training_date: z.string().datetime(),
-  metrics: z.record(z.number()),
-  fairness_tests: z.record(z.any()),
-  robustness_tests: z.record(z.any()),
+  metrics: z.record(z.string(), z.number()),
+  fairness_tests: z.record(z.string(), z.any()),
+  robustness_tests: z.record(z.string(), z.any()),
 });
 
 export type ModelCard = z.infer<typeof ModelCardSchema>;
@@ -59,7 +59,7 @@ export const CounterfactualRequestSchema = z.object({
   edgeId: z.string().optional(),
   model: z.string(),
   version: z.string(),
-  constraints: z.record(z.any()).optional(),
+  constraints: z.record(z.string(), z.any()).optional(),
 });
 
 export type CounterfactualRequest = z.infer<typeof CounterfactualRequestSchema>;

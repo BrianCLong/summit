@@ -4,7 +4,6 @@ import {
   PaperAirplaneIcon,
   XMarkIcon,
   SparklesIcon,
-  ExclamationTriangleIcon,
   ClipboardDocumentIcon,
 } from '@heroicons/react/24/outline'
 

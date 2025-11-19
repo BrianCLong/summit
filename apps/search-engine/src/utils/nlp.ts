@@ -1,8 +1,7 @@
+import compromise from 'compromise';
 import * as natural from 'natural';
 import * as stopword from 'stopword';
-import compromise from 'compromise';
-
-export { natural, stopword };
+import { en, removeStopwords } from 'stopword';
 
 export class NLPProcessor {
   private tokenizer: natural.WordTokenizer;
@@ -47,10 +46,8 @@ export class NLPProcessor {
   }
 
   removeStopwords(tokens: string[], language: string = 'en'): string[] {
-    return stopword.removeStopwords(
-      tokens,
-      stopword[language as keyof typeof stopword] || stopword.en,
-    );
+    const languageList: Record<string, string[]> = { en };
+    return removeStopwords(tokens, languageList[language] || en);
   }
 
   stem(tokens: string[]): string[] {
@@ -70,7 +67,7 @@ export class NLPProcessor {
       people: doc.people().out('array'),
       places: doc.places().out('array'),
       organizations: doc.organizations().out('array'),
-      dates: doc.dates().out('array'),
+      dates: (doc as any).dates?.().out('array') ?? [],
       misc: doc.topics().out('array'),
     };
   }

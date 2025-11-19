@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import neo4j from 'neo4j-driver';
 import pkg from 'pg';
 

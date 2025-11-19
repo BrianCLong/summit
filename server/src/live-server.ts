@@ -7,7 +7,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import compression from 'compression';
@@ -586,7 +586,8 @@ async function startLiveServer() {
 
   // Apply GraphQL middleware
   await server.start();
-  server.applyMiddleware({ app, path: '/graphql' });
+  const compatApp = app as unknown as import('express-serve-static-core').Express;
+  server.applyMiddleware({ app: compatApp, path: '/graphql' });
 
   const PORT = process.env.PORT || 4001;
 

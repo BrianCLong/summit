@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';

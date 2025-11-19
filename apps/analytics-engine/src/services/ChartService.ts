@@ -459,9 +459,11 @@ export class ChartService {
       case 'day':
         return date.toLocaleDateString();
       case 'week':
-        const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        return `Week of ${weekStart.toLocaleDateString()}`;
+        {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          return `Week of ${weekStart.toLocaleDateString()}`;
+        }
       case 'month':
         return date.toLocaleDateString('en-US', {
           year: 'numeric',

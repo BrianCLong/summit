@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "ts-node src/server.ts",
     "test": "jest",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@fastify/formbody": "^7.0.1",

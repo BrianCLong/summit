@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "test": "node --test dist",
     "prepare": "npm run build"
   },

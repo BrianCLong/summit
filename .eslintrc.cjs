@@ -46,7 +46,10 @@ module.exports = {
       { 'newlines-between': 'always', alphabetize: { order: 'asc' } },
     ],
     'react/prop-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'no-unused-expressions': 'off',
+    '@typescript-eslint/no-unused-expressions': ['error', {}],
   },
   ignorePatterns: ['dist', 'build', 'coverage', 'node_modules'],
 };

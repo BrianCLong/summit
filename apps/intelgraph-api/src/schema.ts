@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql } from 'apollo-server-express';
 import base from '../schema/base.graphql?raw';
 

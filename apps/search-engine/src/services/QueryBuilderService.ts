@@ -1,5 +1,4 @@
-import { SearchQuery, QueryBuilder, SearchFilters } from '../types';
-import { natural, stopword } from '../utils/nlp';
+import { SearchFilters, QueryBuilder, SearchQuery } from '../types';
 
 export class QueryBuilderService {
   private synonyms: Map<string, string[]> = new Map();

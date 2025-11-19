@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rm -rf dist",
-    "lint": "eslint src --ext .ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

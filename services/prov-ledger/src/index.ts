@@ -7,6 +7,8 @@ import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { z } from 'zod';
+
+const anyRecord = () => z.record(z.string(), z.any());
 import { Pool } from 'pg';
 import crypto from 'crypto';
 
@@ -22,17 +24,17 @@ const pool = new Pool({
 
 // Schemas
 const CreateClaimSchema = z.object({
-  content: z.record(z.any()),
+  content: anyRecord(),
   signature: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: anyRecord().optional(),
 });
 
 const ClaimSchema = z.object({
   id: z.string(),
-  content: z.record(z.any()),
+  content: anyRecord(),
   hash: z.string(),
   signature: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: anyRecord().optional(),
   created_at: z.string().datetime(),
 });
 
@@ -41,7 +43,7 @@ const ProvenanceChainSchema = z.object({
   claim_id: z.string(),
   transforms: z.array(z.string()),
   sources: z.array(z.string()),
-  lineage: z.record(z.any()),
+  lineage: anyRecord(),
   created_at: z.string().datetime(),
 });
 

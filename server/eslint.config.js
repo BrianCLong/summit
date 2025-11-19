@@ -5,8 +5,43 @@ import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 
 export default [
-  { ignores: ['dist/**', 'coverage/**', 'node_modules/**', '.eslintrc.*', 'eslint.config.*.rehydrated', 'eslint.config.*.v9-backup'] },
+  {
+    ignores: [
+      'dist/**',
+      'coverage/**',
+      'node_modules/**',
+      '.eslintrc.*',
+      'eslint.config.*.rehydrated',
+      'eslint.config.*.v9-backup',
+      'server.js',
+      'tests/**',
+    ],
+  },
   js.configs.recommended,
+  {
+    rules: {
+      'no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      'no-useless-escape': 'warn',
+      'no-case-declarations': 'warn',
+      'no-empty': 'warn',
+      'no-useless-catch': 'warn',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-async-promise-executor': 'warn',
+      'no-dupe-keys': 'warn',
+      'no-shadow-restricted-names': 'warn',
+      'no-redeclare': 'warn',
+      'no-empty-pattern': 'warn',
+      'no-control-regex': 'warn',
+      'no-unreachable': 'warn',
+      'no-duplicate-case': 'warn',
+      'no-dupe-class-members': 'warn',
+      'no-prototype-builtins': 'warn',
+      '@typescript-eslint/no-var-requires': 'off',
+    },
+  },
   // JavaScript ES module files (.mjs and .js using import/export)
   {
     files: ['**/*.mjs', '**/*.js'],

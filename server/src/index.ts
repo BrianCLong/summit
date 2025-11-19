@@ -1,6 +1,6 @@
 import http from 'http';
 import express from 'express';
-import { useServer } from 'graphql-ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import pino from 'pino';
 import { getContext } from './lib/auth.js';

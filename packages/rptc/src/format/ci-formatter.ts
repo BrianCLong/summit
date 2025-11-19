@@ -30,7 +30,7 @@ export function formatTestRunForCI<TSlots extends SlotSchemaMap>(
     .filter((result) => !result.passed)
     .map((result) => {
       const message = result.error?.message ?? 'Unknown failure';
-      return `  - case=\"${result.testCase.description}\" slot=${String(result.testCase.slot)} :: ${message}`;
+      return `  - case="${result.testCase.description}" slot=${String(result.testCase.slot)} :: ${message}`;
     })
     .join('\n');
   return lines.length > 0

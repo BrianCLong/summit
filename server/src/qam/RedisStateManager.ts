@@ -3,11 +3,17 @@ import baseLogger from '../config/logger';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
 import { promisify } from 'util';
+import type { BufferEncoding } from 'node:buffer';
 
 const logger = baseLogger.child({ module: 'RedisStateManager' });
 
 const compress = promisify(zlib.gzip);
 const decompress = promisify(zlib.gunzip);
+
+const encodeBuffer = (value: Uint8Array, encoding: BufferEncoding) =>
+  Buffer.from(value).toString(encoding);
+
+const randomHex = (size: number) => encodeBuffer(crypto.randomBytes(size), 'hex');
 
 export interface StateSnapshot {
   id: string;
@@ -151,7 +157,7 @@ export class RedisStateManager extends EventEmitter {
         const compressedBuffer = await compress(
           Buffer.from(serializedData, 'utf8'),
         );
-        serializedData = compressedBuffer.toString('base64');
+        serializedData = encodeBuffer(compressedBuffer, 'base64');
         compressed = true;
       }
 
@@ -271,7 +277,7 @@ export class RedisStateManager extends EventEmitter {
       if (storedData.compressed) {
         const compressedBuffer = Buffer.from(data, 'base64');
         const decompressedBuffer = await decompress(compressedBuffer);
-        data = decompressedBuffer.toString('utf8');
+        data = encodeBuffer(decompressedBuffer, 'utf8');
       }
 
       // Parse final data

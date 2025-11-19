@@ -1,12 +1,13 @@
 import { Router } from 'express';
+import { rateLimit } from 'express-rate-limit';
+
 import { ElasticsearchService } from '../services/ElasticsearchService';
 import { QueryBuilderService } from '../services/QueryBuilderService';
 import { SavedSearchService } from '../services/SavedSearchService';
-import { SearchQuery, QueryBuilder } from '../types';
+import { QueryBuilder, SearchQuery } from '../types';
 import { authMiddleware } from '../middleware/auth';
-import rateLimit from 'express-rate-limit';
 
-const router = Router();
+const router: Router = Router();
 const elasticsearchService = new ElasticsearchService();
 const queryBuilderService = new QueryBuilderService();
 const savedSearchService = new SavedSearchService();
@@ -224,7 +225,7 @@ router.get('/templates', async (req, res) => {
 router.post('/saved', async (req, res) => {
   try {
     const { name, description, query, isPublic = false, tags = [] } = req.body;
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
@@ -257,7 +258,7 @@ router.post('/saved', async (req, res) => {
 
 router.get('/saved', async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const {
       includePublic = 'false',
       tags,
@@ -291,7 +292,7 @@ router.get('/saved', async (req, res) => {
 router.get('/saved/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
@@ -317,7 +318,7 @@ router.put('/saved/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
@@ -346,7 +347,7 @@ router.put('/saved/:id', async (req, res) => {
 router.delete('/saved/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
@@ -371,7 +372,7 @@ router.delete('/saved/:id', async (req, res) => {
 router.post('/saved/:id/execute', async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
@@ -400,7 +401,7 @@ router.post('/saved/:id/execute', async (req, res) => {
 
 router.get('/saved/popular', async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const { limit = '10' } = req.query;
 
     if (!userId) {
@@ -424,7 +425,7 @@ router.get('/saved/popular', async (req, res) => {
 
 router.get('/saved/recent', async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const { limit = '10' } = req.query;
 
     if (!userId) {

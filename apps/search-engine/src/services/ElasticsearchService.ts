@@ -1,17 +1,14 @@
 import { Client } from '@elastic/elasticsearch';
-import {
-  SearchQuery,
-  SearchResponse,
-  SearchResult,
-  SearchIndex,
-  QueryBuilder,
-} from '../types';
-import { Logger } from 'winston';
-import { createLogger, format, transports } from 'winston';
+import { createLogger, format, transports, Logger } from 'winston';
+
+import { SearchIndex, SearchQuery, SearchResponse, SearchResult } from '../types';
 
 export class ElasticsearchService {
   private client: Client;
   private logger: Logger;
+  private getBody<T>(response: any): T {
+    return (response as any).body ?? response;
+  }
 
   constructor() {
     this.client = new Client({
@@ -60,19 +57,20 @@ export class ElasticsearchService {
         request_cache: true,
         timeout: '30s',
       });
+      const body = this.getBody<any>(response);
 
       const searchResponse: SearchResponse = {
         query,
-        results: this.transformHits(response.body.hits.hits),
+        results: this.transformHits(body.hits.hits),
         total: {
-          value: response.body.hits.total.value,
-          relation: response.body.hits.total.relation,
+          value: body.hits.total.value,
+          relation: body.hits.total.relation,
         },
-        took: response.body.took,
-        timedOut: response.body.timed_out,
-        facets: this.transformAggregations(response.body.aggregations),
-        suggestions: this.transformSuggestions(response.body.suggest),
-        scrollId: response.body._scroll_id,
+        took: body.took,
+        timedOut: body.timed_out,
+        facets: this.transformAggregations(body.aggregations),
+        suggestions: this.transformSuggestions(body.suggest),
+        scrollId: body._scroll_id,
       };
 
       this.logger.info('Search completed', {
@@ -457,7 +455,10 @@ export class ElasticsearchService {
   }
 
   private getQueryEmbedding(queryText: string): number[] {
-    return new Array(384).fill(0).map(() => Math.random());
+    const base = Math.max(queryText.length, 1);
+    return new Array(384)
+      .fill(0)
+      .map((_, idx) => ((idx + 1) * base) % 1);
   }
 
   async createIndex(index: SearchIndex): Promise<void> {
@@ -492,7 +493,8 @@ export class ElasticsearchService {
 
   async deleteIndex(indexName: string): Promise<void> {
     try {
-      await this.client.indices.delete({ index: indexName });
+      const response = await this.client.indices.delete({ index: indexName });
+      this.getBody(response);
       this.logger.info('Index deleted successfully', { indexName });
     } catch (error) {
       this.logger.error('Failed to delete index', {
@@ -509,12 +511,13 @@ export class ElasticsearchService {
     document: any,
   ): Promise<void> {
     try {
-      await this.client.index({
+      const response = await this.client.index({
         index: indexName,
         id,
         body: document,
         refresh: 'wait_for',
       });
+      this.getBody(response);
 
       this.logger.debug('Document indexed successfully', { indexName, id });
     } catch (error) {
@@ -533,10 +536,11 @@ export class ElasticsearchService {
         body: operations,
         refresh: 'wait_for',
       });
+      const body = this.getBody<any>(response);
 
-      if (response.body.errors) {
+      if (body.errors) {
         const erroredDocuments: any[] = [];
-        response.body.items.forEach((action: any, i: number) => {
+        body.items.forEach((action: any, i: number) => {
           const operation = Object.keys(action)[0];
           if (action[operation].error) {
             erroredDocuments.push({
@@ -555,8 +559,8 @@ export class ElasticsearchService {
       }
 
       this.logger.info('Bulk indexing completed', {
-        took: response.body.took,
-        errors: response.body.errors,
+        took: body.took,
+        errors: body.errors,
       });
     } catch (error) {
       this.logger.error('Bulk indexing failed', {
@@ -573,7 +577,7 @@ export class ElasticsearchService {
         metric: ['docs', 'store', 'indexing', 'search'],
       });
 
-      return response.body.indices;
+      return this.getBody<any>(response).indices;
     } catch (error) {
       this.logger.error('Failed to get index stats', {
         error: error instanceof Error ? error.message : String(error),
@@ -584,14 +588,14 @@ export class ElasticsearchService {
 
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
-      const health = await this.client.cluster.health();
-      const info = await this.client.info();
+      const health = this.getBody<any>(await this.client.cluster.health());
+      const info = this.getBody<any>(await this.client.info());
 
       return {
-        status: health.body.status,
+        status: health.status,
         details: {
-          cluster: health.body,
-          version: info.body.version,
+          cluster: health,
+          version: info.version,
         },
       };
     } catch (error) {

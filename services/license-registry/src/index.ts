@@ -7,6 +7,8 @@ import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { z } from 'zod';
+
+const anyRecord = () => z.record(z.string(), z.any());
 import { Pool } from 'pg';
 
 const PORT = parseInt(process.env.PORT || '4030');
@@ -31,7 +33,7 @@ const LicenseSchema = z.object({
     'public_domain',
   ]),
   version: z.string().optional(),
-  terms: z.record(z.any()),
+  terms: anyRecord(),
   restrictions: z.object({
     commercial_use: z.boolean(),
     export_allowed: z.boolean(),

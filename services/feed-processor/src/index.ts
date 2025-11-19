@@ -13,6 +13,8 @@ import pino from 'pino';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+const jsonRecord = () => z.record(z.string(), z.any());
+
 // Logger
 const logger = pino({
   level: NODE_ENV === 'development' ? 'debug' : 'info',
@@ -50,10 +52,10 @@ const transformQueue = new Queue(
 const IngestionJobSchema = z.object({
   job_id: z.string(),
   source_type: z.enum(['csv', 'json', 'elasticsearch', 'esri', 'api']),
-  source_config: z.record(z.any()),
+  source_config: jsonRecord(),
   data_source_id: z.string(),
   target_graph: z.string().default('main'),
-  transform_rules: z.array(z.record(z.any())).optional(),
+  transform_rules: z.array(jsonRecord()).optional(),
   authority_id: z.string(),
   reason_for_access: z.string(),
 });
@@ -63,19 +65,19 @@ const LineageEventSchema = z.object({
   eventTime: z.string().datetime(),
   run: z.object({
     runId: z.string(),
-    facets: z.record(z.any()).optional(),
+    facets: jsonRecord().optional(),
   }),
   job: z.object({
     namespace: z.string(),
     name: z.string(),
-    facets: z.record(z.any()).optional(),
+    facets: jsonRecord().optional(),
   }),
   inputs: z
     .array(
       z.object({
         namespace: z.string(),
         name: z.string(),
-        facets: z.record(z.any()).optional(),
+        facets: jsonRecord().optional(),
       }),
     )
     .optional(),
@@ -84,7 +86,7 @@ const LineageEventSchema = z.object({
       z.object({
         namespace: z.string(),
         name: z.string(),
-        facets: z.record(z.any()).optional(),
+        facets: jsonRecord().optional(),
       }),
     )
     .optional(),
@@ -118,13 +120,16 @@ class OpenLineageClient {
         throw new Error(`OpenLineage emit failed: ${response.status}`);
       }
 
-      logger.info('OpenLineage event emitted', {
-        eventType: event.eventType,
-        job: event.job.name,
-        runId: event.run.runId,
-      });
+      logger.info(
+        {
+          eventType: event.eventType,
+          job: event.job.name,
+          runId: event.run.runId,
+        },
+        'OpenLineage event emitted',
+      );
     } catch (error) {
-      logger.error('Failed to emit OpenLineage event', error);
+      logger.error({ err: error }, 'Failed to emit OpenLineage event');
       // Don't fail the job if lineage emission fails
     }
   }
@@ -208,7 +213,7 @@ class LicenseEnforcer {
       });
 
       if (!response.ok) {
-        logger.error('License check failed', { status: response.status });
+        logger.error({ status: response.status }, 'License check failed');
         return {
           allowed: false,
           reason: 'License validation service unavailable',
@@ -222,7 +227,7 @@ class LicenseEnforcer {
         reason: result.human_readable_reason,
       };
     } catch (error) {
-      logger.error('License enforcement error', error);
+      logger.error({ err: error }, 'License enforcement error');
       return { allowed: false, reason: 'License validation failed' };
     }
   }
@@ -234,7 +239,7 @@ const licenseEnforcer = new LicenseEnforcer();
 const connectors = {
   csv: async (config: any): Promise<any[]> => {
     // Mock CSV connector
-    logger.info('Processing CSV data', config);
+    logger.info(config, 'Processing CSV data');
     await new Promise((resolve) => setTimeout(resolve, 1000));
     return [
       { id: '1', name: 'Entity A', type: 'person', source: 'csv' },
@@ -244,7 +249,7 @@ const connectors = {
 
   elasticsearch: async (config: any): Promise<any[]> => {
     // Mock Elasticsearch connector
-    logger.info('Querying Elasticsearch', config);
+    logger.info(config, 'Querying Elasticsearch');
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return [
       {
@@ -264,7 +269,7 @@ const connectors = {
 
   esri: async (config: any): Promise<any[]> => {
     // Mock ESRI ArcGIS connector
-    logger.info('Fetching ESRI data', config);
+    logger.info(config, 'Fetching ESRI data');
     await new Promise((resolve) => setTimeout(resolve, 1500));
     return [
       {
@@ -282,7 +287,7 @@ const connectors = {
 
   api: async (config: any): Promise<any[]> => {
     // Mock API connector
-    logger.info('Calling external API', config);
+    logger.info(config, 'Calling external API');
     await new Promise((resolve) => setTimeout(resolve, 800));
     return [
       { id: '1', data: 'Sample API data', status: 'active' },
@@ -311,10 +316,13 @@ class GraphStorage {
         }
       });
 
-      logger.info('Stored entities in graph', {
-        count: entities.length,
-        jobId,
-      });
+      logger.info(
+        {
+          count: entities.length,
+          jobId,
+        },
+        'Stored entities in graph',
+      );
     } finally {
       await session.close();
     }
@@ -343,10 +351,13 @@ class GraphStorage {
         }
       });
 
-      logger.info('Created relationships in graph', {
-        count: relationships.length,
-        jobId,
-      });
+      logger.info(
+        {
+          count: relationships.length,
+          jobId,
+        },
+        'Created relationships in graph',
+      );
     } finally {
       await session.close();
     }
@@ -442,17 +453,23 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
       ),
     );
 
-    logger.info('Ingestion job completed', {
-      jobId: jobData.job_id,
-      recordsProcessed: rawData.length,
-      runId,
-    });
+    logger.info(
+      {
+        jobId: jobData.job_id,
+        recordsProcessed: rawData.length,
+        runId,
+      },
+      'Ingestion job completed',
+    );
   } catch (error) {
-    logger.error('Ingestion job failed', {
-      jobId: jobData.job_id,
-      error: (error as Error).message,
-      runId,
-    });
+    logger.error(
+      {
+        jobId: jobData.job_id,
+        error: (error as Error).message,
+        runId,
+      },
+      'Ingestion job failed',
+    );
 
     // Emit FAIL event
     await lineageClient.emitEvent(
@@ -471,10 +488,13 @@ transformQueue.process('transform-data', 3, async (job) => {
   const { job_id, raw_data, transform_rules, run_id } = job.data;
 
   try {
-    logger.info('Starting data transformation', {
-      jobId: job_id,
-      runId: run_id,
-    });
+    logger.info(
+      {
+        jobId: job_id,
+        runId: run_id,
+      },
+      'Starting data transformation',
+    );
 
     // Apply transformation rules
     let transformedData = raw_data;
@@ -521,17 +541,23 @@ transformQueue.process('transform-data', 3, async (job) => {
       await graphStorage.createRelationships(relationships, job_id);
     }
 
-    logger.info('Transformation completed', {
-      jobId: job_id,
-      inputRecords: raw_data.length,
-      outputRecords: transformedData.length,
-      relationships: relationships.length,
-    });
+    logger.info(
+      {
+        jobId: job_id,
+        inputRecords: raw_data.length,
+        outputRecords: transformedData.length,
+        relationships: relationships.length,
+      },
+      'Transformation completed',
+    );
   } catch (error) {
-    logger.error('Transformation failed', {
-      jobId: job_id,
-      error: (error as Error).message,
-    });
+    logger.error(
+      {
+        jobId: job_id,
+        error: (error as Error).message,
+      },
+      'Transformation failed',
+    );
     throw error;
   }
 });
@@ -563,11 +589,14 @@ setInterval(async () => {
     const completed = await ingestionQueue.getCompletedCount();
     const failed = await ingestionQueue.getFailedCount();
 
-    logger.info('Queue health', {
-      ingestion: { waiting, active, completed, failed },
-    });
+    logger.info(
+      {
+        ingestion: { waiting, active, completed, failed },
+      },
+      'Queue health',
+    );
   } catch (error) {
-    logger.error('Health check failed', error);
+    logger.error({ err: error }, 'Health check failed');
   }
 }, 30000);
 

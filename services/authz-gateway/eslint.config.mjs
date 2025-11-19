@@ -6,5 +6,12 @@ export default [
   { ignores: ['dist', 'jest.config.cjs'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    rules: {
+      'no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': ['error', {}],
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
   prettier,
 ];

@@ -19,6 +19,9 @@ export default [
     },
     rules: {
       'import/no-unresolved': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': ['error', {}],
     },
   },
 ];

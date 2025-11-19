@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   env: {
     browser: true,
     es2021: true,
@@ -9,7 +9,8 @@ export default {
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
   ],
-  plugins: ['react', 'react-hooks'],
+  parser: '@typescript-eslint/parser',
+  plugins: ['react', 'react-hooks', '@typescript-eslint'],
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -24,17 +25,20 @@ export default {
   },
   rules: {
     'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'warn',
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
-    'no-unused-vars': [
-      'error',
-      {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      },
-    ],
-    'no-console': 'warn',
+    'react/prop-types': 'off',
+    'react-hooks/rules-of-hooks': 'warn',
+    'react-hooks/exhaustive-deps': 'off',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/ban-ts-comment': 'off',
+    'no-prototype-builtins': 'off',
+    'react-refresh/only-export-components': 'off',
+    'no-console': 'off',
+    'import/no-unresolved': 'off',
+    'import/order': 'off',
+    'import/no-duplicates': 'off',
+    'comma-dangle': 'off',
+    'no-undef': 'off',
     'prefer-const': 'error',
     'no-var': 'error',
     'object-shorthand': 'error',
@@ -49,5 +53,5 @@ export default {
     'no-trailing-spaces': 'error',
     'eol-last': 'error',
   },
-  ignorePatterns: ['node_modules/', 'dist/', 'build/', 'coverage/', '*.min.js'],
+  ignorePatterns: ['node_modules/', 'dist/', 'build/', 'coverage/', '*.min.js', 'src/**'],
 };

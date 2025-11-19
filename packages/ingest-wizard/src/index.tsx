@@ -15,7 +15,7 @@ import { clsx } from 'clsx';
 export const DataSourceConfigSchema = z.object({
   name: z.string().min(1, 'Data source name is required'),
   source_type: z.enum(['csv', 'json', 'elasticsearch', 'esri', 'api']),
-  source_config: z.record(z.any()),
+  source_config: z.record(z.string(), z.any()),
   license_template: z.string().optional(),
   custom_license: z
     .object({

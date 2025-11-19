@@ -5,20 +5,22 @@
 
 import { z } from 'zod';
 
+const anyRecord = () => z.record(z.string(), z.any());
+
 // Schemas
 export const ClaimSchema = z.object({
   id: z.string(),
-  content: z.record(z.any()),
+  content: anyRecord(),
   hash: z.string(),
   signature: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: anyRecord().optional(),
   created_at: z.string().datetime(),
 });
 
 export const CreateClaimSchema = z.object({
-  content: z.record(z.any()),
+  content: anyRecord(),
   signature: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: anyRecord().optional(),
 });
 
 export const ProvenanceChainSchema = z.object({
@@ -26,7 +28,7 @@ export const ProvenanceChainSchema = z.object({
   claim_id: z.string(),
   transforms: z.array(z.string()),
   sources: z.array(z.string()),
-  lineage: z.record(z.any()),
+  lineage: anyRecord(),
   created_at: z.string().datetime(),
 });
 

@@ -9,5 +9,6 @@ export async function mountGraphQL(app: any) {
     context: ({ req }) => ({ user: (req as any).user }),
   });
   await server.start();
-  server.applyMiddleware({ app, path: '/graphql' });
+  const compatApp = app as unknown as import('express-serve-static-core').Express;
+  server.applyMiddleware({ app: compatApp, path: '/graphql' });
 }

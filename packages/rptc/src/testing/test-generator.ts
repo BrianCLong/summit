@@ -309,8 +309,9 @@ function buildNumberCases<TSlots extends SlotSchemaMap>(
 
 function buildEnumCase<TSlots extends SlotSchemaMap>(
   slotName: keyof TSlots,
-  schema: EnumSlotSchema<string>,
+  _schema: EnumSlotSchema<string>,
 ): GeneratedTestCase<TSlots> {
+  void _schema;
   return {
     description: `rejects value outside enum for ${String(slotName)}`,
     slot: slotName,
@@ -375,9 +376,9 @@ function executeTestCase<TSlots extends SlotSchemaMap>(
       return { testCase, passed: true };
     }
     let threw = false;
-    try {
-      template.render(mergedValues);
-    } catch (error) {
+  try {
+    template.render(mergedValues);
+    } catch {
       threw = true;
     }
     if (!threw) {

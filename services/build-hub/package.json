@@ -10,7 +10,7 @@
     "start": "node dist/index.js",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "docker:build": "docker build -t maestro-build-hub ."
   },
   "dependencies": {

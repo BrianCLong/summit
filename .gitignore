@@ -38,6 +38,8 @@ out
 dist
 build
 docs/site/
+*.tsbuildinfo
+.turbo/
 
 # Serverless directories
 .serverless/

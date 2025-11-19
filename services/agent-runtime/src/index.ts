@@ -19,6 +19,8 @@ import { register, collectDefaultMetrics } from 'prom-client';
 const PORT = parseInt(process.env.PORT || '4012');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+const jsonRecord = () => z.record(z.string(), z.any());
+
 // Prometheus metrics
 collectDefaultMetrics();
 
@@ -36,7 +38,7 @@ const RunbookTaskSchema = z.object({
   id: z.string(),
   name: z.string(),
   uses: z.string(),
-  with: z.record(z.any()).optional(),
+  with: jsonRecord().optional(),
   needs: z.array(z.string()).optional().default([]),
   timeout: z.number().optional().default(300),
   retries: z.number().optional().default(0),
@@ -63,15 +65,15 @@ const RunbookExecutionSchema = z.object({
       status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']),
       started_at: z.string().datetime().optional(),
       completed_at: z.string().datetime().optional(),
-      output: z.record(z.any()).optional(),
+      output: jsonRecord().optional(),
       error: z.string().optional(),
     }),
   ),
-  inputs: z.record(z.any()).optional(),
+  inputs: jsonRecord().optional(),
   created_at: z.string().datetime(),
   started_at: z.string().datetime().optional(),
   completed_at: z.string().datetime().optional(),
-  kpis: z.record(z.any()).optional(),
+  kpis: jsonRecord().optional(),
   replay_source: z.string().optional(),
 });
 

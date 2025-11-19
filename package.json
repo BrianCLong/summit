@@ -6,21 +6,6 @@
   "bin": {
     "docforge": "./tools/docforge/cli.js"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*",
-    "services/*",
-    "contracts/*",
-    "packages/prov-ledger",
-    "packages/lac",
-    "packages/prov-ledger-client",
-    "packages/kompromat-sim",
-    "packages/hit-protocol",
-    "packages/canary-lattice",
-    "packages/mcp-core",
-    "packages/afl-store",
-    "apps/server"
-  ],
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
