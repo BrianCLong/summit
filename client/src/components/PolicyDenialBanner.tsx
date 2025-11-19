@@ -63,6 +63,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 }) => {
   const [showAppealForm, setShowAppealForm] = useState(false);
   const [appealSubmitted, setAppealSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Appeal form state
   const [justification, setJustification] = useState('');
@@ -111,6 +112,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
   const handleSubmitAppeal = async () => {
     try {
+      setError(null);
       const result = await submitAppeal({
         variables: {
           decisionId: decision.decisionId,
@@ -124,16 +126,11 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
       if (result.data?.submitPolicyAppeal) {
         setAppealSubmitted(true);
         setShowAppealForm(false);
-
-        // Show success message
-        console.log(
-          'Appeal submitted successfully:',
-          result.data.submitPolicyAppeal,
-        );
       }
-    } catch (error) {
-      console.error('Failed to submit appeal:', error);
-      // Handle error (show error message)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to submit appeal. Please try again.',
+      );
     }
   };
 
@@ -337,6 +334,12 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
         </Modal.Header>
         <Modal.Body>
           <Form>
+            {error && (
+              <Alert variant="danger" className="mb-3" dismissible onClose={() => setError(null)}>
+                {error}
+              </Alert>
+            )}
+
             <div className="mb-3">
               <Alert variant="info" className="small">
                 <InfoCircle className="me-2" />
