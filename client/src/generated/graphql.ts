@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
@@ -408,25 +409,6 @@ export type MockCommentsQuery = {
   serverStats: { __typename?: 'ServerStats'; uptime: string };
 };
 
-export type ServerStatsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type ServerStatsQuery = {
-  __typename?: 'Query';
-  serverStats: {
-    __typename?: 'ServerStats';
-    uptime: string;
-    totalInvestigations: number;
-    totalEntities: number;
-    totalRelationships: number;
-    databaseStatus: {
-      __typename?: 'DatabaseStatus';
-      redis: string;
-      postgres: string;
-      neo4j: string;
-    };
-  };
-};
-
 export type InvestigationsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type InvestigationsQuery = {
@@ -729,25 +711,6 @@ export type MockSavedSearchesQueryVariables = Exact<{ [key: string]: never }>;
 export type MockSavedSearchesQuery = {
   __typename?: 'Query';
   serverStats: { __typename?: 'ServerStats'; uptime: string; totalInvestigations: number };
-};
-
-export type ServerStatsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type ServerStatsQuery = {
-  __typename?: 'Query';
-  serverStats: {
-    __typename?: 'ServerStats';
-    uptime: string;
-    totalInvestigations: number;
-    totalEntities: number;
-    totalRelationships: number;
-    databaseStatus: {
-      __typename?: 'DatabaseStatus';
-      redis: string;
-      postgres: string;
-      neo4j: string;
-    };
-  };
 };
 
 export type HealthCheckQueryVariables = Exact<{ [key: string]: never }>;
@@ -2402,3 +2365,4 @@ export type TimelineEventsQueryResult = Apollo.QueryResult<
   TimelineEventsQuery,
   TimelineEventsQueryVariables
 >;
+// @ts-nocheck

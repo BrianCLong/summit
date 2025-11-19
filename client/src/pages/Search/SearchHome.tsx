@@ -9,7 +9,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   IconButton,
   Tooltip,
   FormControl,
@@ -29,6 +28,7 @@ import {
   ListItemText,
   Alert,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import {
   Search,
   FilterList,
@@ -208,7 +208,7 @@ export default function SearchHome() {
         {/* Simple Search Tab */}
         <TabPanel value={selectedTab} index={0}>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={3}>
+            <Grid xs={12} md={3}>
               <Card sx={{ borderRadius: 3 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -266,7 +266,7 @@ export default function SearchHome() {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={9}>
+            <Grid xs={12} md={9}>
               {searchQuery ? (
                 <ResultList
                   results={searchResults || []}
@@ -295,14 +295,14 @@ export default function SearchHome() {
         {/* Advanced Filters Tab */}
         <TabPanel value={selectedTab} index={1}>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <Alert severity="info" sx={{ mb: 3 }}>
                 Use advanced filters to create precise queries across multiple
                 entity types and attributes.
               </Alert>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Card sx={{ borderRadius: 3 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -370,7 +370,7 @@ export default function SearchHome() {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Card sx={{ borderRadius: 3 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -471,7 +471,7 @@ export default function SearchHome() {
               </Typography>
 
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <Stack spacing={2}>
                     <Typography variant="subtitle2">Time Range</Typography>
                     <Stack direction="row" spacing={2}>
@@ -491,7 +491,7 @@ export default function SearchHome() {
                   </Stack>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <Stack spacing={2}>
                     <Typography variant="subtitle2">Analysis Type</Typography>
                     <FormControl fullWidth size="small">
@@ -531,7 +531,7 @@ export default function SearchHome() {
               </Typography>
 
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <Stack spacing={2}>
                     <TextField
                       label="Location"
@@ -555,7 +555,7 @@ export default function SearchHome() {
                   </Stack>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <Paper
                     variant="outlined"
                     sx={{

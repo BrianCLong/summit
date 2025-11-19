@@ -4,6 +4,19 @@ import { ModuleDefinition } from './types';
 const simulate = async (duration = 35): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, duration));
 
+const asString = (value: unknown, fallback: string): string =>
+  typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+
+const asNumber = (value: unknown, fallback: number): number =>
+  typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+
+const asStringArray = (value: unknown, fallback: string[]): string[] => {
+  if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+    return value;
+  }
+  return fallback;
+};
+
 function createModule(
   definition: ModuleDefinition,
   handlers: Record<string, ModuleHandler>,
@@ -33,7 +46,10 @@ export function createMaestroComposer(): BaseModule {
     {
       'compose-blueprint': async ({ action, task }) => {
         await simulate();
-        const pipeline = action.payload?.pipeline ?? `${task.name}-blueprint`;
+        const pipeline = asString(
+          action.payload?.pipeline,
+          `${task.name}-blueprint`,
+        );
         return {
           message: `Blueprint ${pipeline} composed`,
           output: {
@@ -51,7 +67,7 @@ export function createMaestroComposer(): BaseModule {
       },
       'schedule-symphony': async ({ action }) => {
         await simulate();
-        const window = action.payload?.window ?? 'next-available';
+        const window = asString(action.payload?.window, 'next-available');
         return {
           message: `Maestro symphony scheduled for ${window}`,
           output: {
@@ -68,12 +84,13 @@ export function createMaestroComposer(): BaseModule {
       },
       'publish-runbook': async ({ action }) => {
         await simulate(20);
-        const audience = action.payload?.audience ?? 'global';
+        const audience = asString(action.payload?.audience, 'global');
+        const version = asString(action.payload?.version, 'v1.0.0');
         return {
           message: `Runbook published to ${audience} audience`,
           output: {
             audience,
-            version: action.payload?.version ?? 'v1.0.0',
+            version,
           },
           telemetry: {
             latencyMs: 40,
@@ -109,12 +126,15 @@ export function createBuildPlane(): BaseModule {
     {
       'prepare-artifacts': async ({ action }) => {
         await simulate(45);
-        const components = action.payload?.components ?? ['ui', 'api'];
+        const components = asStringArray(action.payload?.components, [
+          'ui',
+          'api',
+        ]);
         return {
           message: `Artifacts staged for ${components.join(', ')}`,
           output: {
             components,
-            checksums: components.map((component: any) => `${component}-sha256`),
+            checksums: components.map((component) => `${component}-sha256`),
           },
           telemetry: {
             latencyMs: 150,
@@ -126,7 +146,7 @@ export function createBuildPlane(): BaseModule {
       },
       'validate-supply-chain': async ({ action }) => {
         await simulate(50);
-        const policyPack = action.payload?.policyPack ?? 'default';
+        const policyPack = asString(action.payload?.policyPack, 'default');
         return {
           message: `Supply chain policy ${policyPack} verified`,
           output: {
@@ -144,12 +164,16 @@ export function createBuildPlane(): BaseModule {
       },
       'promote-build': async ({ action }) => {
         await simulate(30);
-        const target = action.payload?.target ?? 'staging';
+        const target = asString(action.payload?.target, 'staging');
+        const changeWindow = asString(
+          action.payload?.changeWindow,
+          'immediate',
+        );
         return {
           message: `Build promoted to ${target}`,
           output: {
             target,
-            changeWindow: action.payload?.changeWindow ?? 'immediate',
+            changeWindow,
           },
           telemetry: {
             latencyMs: 110,
@@ -181,7 +205,7 @@ export function createBuildPlatform(): BaseModule {
     {
       'plan-release': async ({ action }) => {
         await simulate(35);
-        const release = action.payload?.release ?? 'vNext';
+        const release = asString(action.payload?.release, 'vNext');
         return {
           message: `Release ${release} planned with approvals`,
           output: {
@@ -214,7 +238,10 @@ export function createBuildPlatform(): BaseModule {
       },
       'verify-deployment': async ({ action }) => {
         await simulate(40);
-        const environment = action.payload?.environment ?? 'production';
+        const environment = asString(
+          action.payload?.environment,
+          'production',
+        );
         return {
           message: `Deployment to ${environment} verified`,
           output: {
@@ -256,7 +283,7 @@ export function createCompanyOS(): BaseModule {
     {
       'provision-workspace': async ({ action }) => {
         await simulate(30);
-        const team = action.payload?.team ?? 'core-platform';
+        const team = asString(action.payload?.team, 'core-platform');
         return {
           message: `Workspace provisioned for ${team}`,
           output: {
@@ -273,12 +300,16 @@ export function createCompanyOS(): BaseModule {
       },
       'synchronize-policies': async ({ action }) => {
         await simulate(20);
-        const domains = action.payload?.domains ?? ['security', 'privacy'];
+        const domains = asStringArray(action.payload?.domains, [
+          'security',
+          'privacy',
+        ]);
+        const version = asString(action.payload?.version, '2025.1');
         return {
           message: `Policies synchronized across ${domains.length} domains`,
           output: {
             domains,
-            version: action.payload?.version ?? '2025.1',
+            version,
           },
           telemetry: {
             latencyMs: 90,
@@ -290,7 +321,7 @@ export function createCompanyOS(): BaseModule {
       },
       'broadcast-update': async ({ action }) => {
         await simulate(25);
-        const channel = action.payload?.channel ?? 'all-hands';
+        const channel = asString(action.payload?.channel, 'all-hands');
         return {
           message: `Update broadcast to ${channel}`,
           output: {
@@ -327,12 +358,13 @@ export function createSwitchboard(): BaseModule {
     {
       'route-signal': async ({ action }) => {
         await simulate(15);
-        const signal = action.payload?.signal ?? 'deployment-ready';
+        const signal = asString(action.payload?.signal, 'deployment-ready');
+        const subscribers = asNumber(action.payload?.subscribers, 8);
         return {
           message: `Signal ${signal} routed to subscribers`,
           output: {
             signal,
-            subscribers: action.payload?.subscribers ?? 8,
+            subscribers,
           },
           telemetry: {
             latencyMs: 55,
@@ -344,7 +376,7 @@ export function createSwitchboard(): BaseModule {
       },
       'elevate-incident': async ({ action }) => {
         await simulate(35);
-        const severity = action.payload?.severity ?? 'medium';
+        const severity = asString(action.payload?.severity, 'medium');
         return {
           message: `Incident elevated with severity ${severity}`,
           output: {
@@ -361,10 +393,10 @@ export function createSwitchboard(): BaseModule {
       },
       'sync-webhooks': async ({ action }) => {
         await simulate(20);
-        const integrations = action.payload?.integrations ?? [
+        const integrations = asStringArray(action.payload?.integrations, [
           'slack',
           'pagerduty',
-        ];
+        ]);
         return {
           message: `Webhooks synchronized (${integrations.join(', ')})`,
           output: {
@@ -401,7 +433,7 @@ export function createIntelGraph(): BaseModule {
     {
       'analyze-graph': async ({ action }) => {
         await simulate(45);
-        const nodes = action.payload?.nodes ?? 1250;
+        const nodes = asNumber(action.payload?.nodes, 1250);
         return {
           message: `Graph analysis completed for ${nodes} nodes`,
           output: {
@@ -419,7 +451,10 @@ export function createIntelGraph(): BaseModule {
       },
       'enrich-entities': async ({ action }) => {
         await simulate(30);
-        const providers = action.payload?.providers ?? ['openintel', 'signals'];
+        const providers = asStringArray(action.payload?.providers, [
+          'openintel',
+          'signals',
+        ]);
         return {
           message: `Entities enriched using ${providers.join(', ')}`,
           output: {
@@ -436,12 +471,16 @@ export function createIntelGraph(): BaseModule {
       },
       'publish-findings': async ({ action }) => {
         await simulate(20);
-        const audience = action.payload?.audience ?? 'executive';
+        const audience = asString(action.payload?.audience, 'executive');
+        const summary = asString(
+          action.payload?.summary,
+          'All systems nominal',
+        );
         return {
           message: `Findings published to ${audience} briefing`,
           output: {
             audience,
-            summary: action.payload?.summary ?? 'All systems nominal',
+            summary,
           },
           telemetry: {
             latencyMs: 95,
@@ -472,7 +511,7 @@ export function createActivitiesModule(): BaseModule {
     {
       'synchronize-cadence': async ({ action }) => {
         await simulate(25);
-        const cadence = action.payload?.cadence ?? 'weekly';
+        const cadence = asString(action.payload?.cadence, 'weekly');
         return {
           message: `Cadence synchronized for ${cadence} rituals`,
           output: {
@@ -489,12 +528,13 @@ export function createActivitiesModule(): BaseModule {
       },
       'log-activity': async ({ action }) => {
         await simulate(20);
-        const activity = action.payload?.activity ?? 'deployment';
+        const activity = asString(action.payload?.activity, 'deployment');
+        const owner = asString(action.payload?.owner, 'orchestrator');
         return {
           message: `Activity ${activity} recorded`,
           output: {
             activity,
-            owner: action.payload?.owner ?? 'orchestrator',
+            owner,
           },
           telemetry: {
             latencyMs: 80,
@@ -506,7 +546,7 @@ export function createActivitiesModule(): BaseModule {
       },
       'generate-report': async ({ action }) => {
         await simulate(35);
-        const scope = action.payload?.scope ?? 'launch-readiness';
+        const scope = asString(action.payload?.scope, 'launch-readiness');
         return {
           message: `Activity report generated for ${scope}`,
           output: {

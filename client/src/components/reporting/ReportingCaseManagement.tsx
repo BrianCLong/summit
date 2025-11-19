@@ -102,15 +102,7 @@ interface Report {
   sections: Array<{
     id: string;
     title: string;
-    type:
-      | 'summary'
-      | 'findings'
-      | 'evidence'
-      | 'timeline'
-      | 'recommendations'
-      | 'appendix'
-      | 'charts'
-      | 'network_graph';
+    type: string;
     content: string;
     order: number;
     required: boolean;

@@ -397,9 +397,9 @@ export default function AlertTriageV2Panel({
                     )?.label
                   }
                   color={
-                    FEEDBACK_TYPES.find(
+                    (FEEDBACK_TYPES.find(
                       (ft) => ft.value === feedback.feedbackType,
-                    )?.color
+                    )?.color as any) ?? 'default'
                   }
                   icon={
                     FEEDBACK_TYPES.find(

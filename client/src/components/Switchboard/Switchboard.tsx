@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Typography,
   List,
-  ListItem,
+  ListItemButton,
   TextField,
   InputAdornment,
   IconButton,
@@ -246,22 +246,18 @@ export default function Switchboard() {
                   <Search />
                 </InputAdornment>
               ),
-            }}
-            className="p-4"
-          />
-          <List>
-            {filteredCommands.map((cmd, index) => (
-              <ListItem
-                button
-                key={index}
-                onClick={() => handleCommandSelect(cmd)}
-              >
-                <Typography>{cmd}</Typography>
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-      </Dialog>
-    </Box>
+          }}
+          className="p-4"
+        />
+        <List>
+          {filteredCommands.map((cmd, index) => (
+            <ListItemButton key={index} onClick={() => handleCommandSelect(cmd)}>
+              <Typography>{cmd}</Typography>
+            </ListItemButton>
+          ))}
+        </List>
+      </DialogContent>
+    </Dialog>
+  </Box>
   );
 }

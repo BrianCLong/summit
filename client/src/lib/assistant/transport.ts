@@ -25,7 +25,9 @@ function expBackoff(
 
 function withAuthHeaders(getAuthToken: () => string | null) {
   const token = getAuthToken?.();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
 }
 
 // ---- Fetch streaming (HTTP) ----
@@ -46,10 +48,7 @@ export function createFetchStreamTransport(
         handler?.({ type: 'status', value: 'thinking' });
         const res = await fetch(`${opts.baseUrl}/assistant/stream`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...withAuthHeaders(opts.getAuthToken),
-          },
+          headers: withAuthHeaders(opts.getAuthToken),
           body: JSON.stringify({ input }),
           signal,
         });
@@ -173,7 +172,7 @@ export function createSocketIoTransport(
   opts: TransportOpts,
 ): AssistantTransport {
   // Lazy-import so tests can mock without bundling the client in non-RT paths
-  let SocketIO;
+  let SocketIO: any;
   try {
     SocketIO = require('socket.io-client');
   } catch (_) {}

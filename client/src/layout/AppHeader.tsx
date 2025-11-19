@@ -30,14 +30,14 @@ import {
   Assessment,
   OpenInNew,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store/index.ts';
-import { setTenant, setStatus } from '../store/slices/ui.ts';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setTenant, setStatus } from '../store/slices/ui';
 
 export default function AppHeader() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { tenant, status } = useAppSelector((s) => s.ui);
+  const { tenant, status } = useAppSelector((s: any) => s.ui);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
     null,
   );

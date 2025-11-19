@@ -16,10 +16,10 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Grid,
   Chip,
   LinearProgress,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import {
   MoreVert,
   FilterList,
@@ -122,7 +122,11 @@ export default function AttackHeatmapWidget({
 }: AttackHeatmapWidgetProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({
+  const [selectedFilters, setSelectedFilters] = useState<{
+    tactics: string[];
+    severity: string[];
+    hasAlerts: false,
+  }>({
     tactics: [],
     severity: [],
     hasAlerts: false,
@@ -443,7 +447,7 @@ export default function AttackHeatmapWidget({
 
           {/* Summary Stats */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={3}>
+            <Grid xs={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary">
                   {summary.totalTechniques || 0}
@@ -451,7 +455,7 @@ export default function AttackHeatmapWidget({
                 <Typography variant="caption">Total Techniques</Typography>
               </Box>
             </Grid>
-            <Grid item xs={3}>
+            <Grid xs={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main">
                   {summary.coveredTechniques || 0}
@@ -459,7 +463,7 @@ export default function AttackHeatmapWidget({
                 <Typography variant="caption">Covered</Typography>
               </Box>
             </Grid>
-            <Grid item xs={3}>
+            <Grid xs={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="warning.main">
                   {summary.recentActivity || 0}
@@ -467,7 +471,7 @@ export default function AttackHeatmapWidget({
                 <Typography variant="caption">Recent Alerts</Typography>
               </Box>
             </Grid>
-            <Grid item xs={3}>
+            <Grid xs={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="info.main">
                   {(summary.coveragePercentage || 0).toFixed(0)}%
@@ -583,7 +587,7 @@ export default function AttackHeatmapWidget({
             </DialogTitle>
             <DialogContent>
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Typography variant="subtitle2" gutterBottom>
                     Detection Coverage
                   </Typography>
@@ -606,7 +610,7 @@ export default function AttackHeatmapWidget({
                     </Typography>
                   )}
                 </Grid>
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Typography variant="subtitle2" gutterBottom>
                     Alert Activity
                   </Typography>
@@ -644,7 +648,7 @@ export default function AttackHeatmapWidget({
         <DialogTitle>Filter ATT&CK Coverage</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Tactics</InputLabel>
                 <Select
@@ -672,7 +676,7 @@ export default function AttackHeatmapWidget({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Alert Severity</InputLabel>
                 <Select

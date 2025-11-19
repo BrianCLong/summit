@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Grid from '@mui/material/Grid';
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Grid,
+  Alert,
   Chip,
   Table,
   TableBody,
@@ -16,7 +17,6 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -35,6 +35,14 @@ import {
   ExpandMore,
 } from '@mui/icons-material';
 
+type TaskData =
+  | Record<string, unknown>
+  | unknown[]
+  | string
+  | number
+  | boolean
+  | null;
+
 interface TaskExecution {
   taskId: string;
   taskType: string;
@@ -46,8 +54,8 @@ interface TaskExecution {
   executionTime?: number;
   retryCount: number;
   reasonForIncompletion?: string;
-  inputData?: unknown;
-  outputData?: unknown;
+  inputData?: TaskData;
+  outputData?: TaskData;
   logs?: string[];
 }
 
@@ -59,13 +67,16 @@ interface TaskStatistics {
   averageExecutionTime: number;
 }
 
+type TaskStatus = TaskExecution['status'];
+type TaskFilter = 'ALL' | TaskStatus;
+
 export const TaskMonitor: React.FC = () => {
   const [tasks, setTasks] = useState<TaskExecution[]>([]);
   const [statistics, setStatistics] = useState<TaskStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState<TaskExecution | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [filter, setFilter] = useState<string>('ALL');
+  const [filter, setFilter] = useState<TaskFilter>('ALL');
 
   // Mock data for demonstration
   useEffect(() => {
@@ -297,7 +308,7 @@ export const TaskMonitor: React.FC = () => {
           Filter by Status
         </Typography>
         <Box display="flex" gap={1} flexWrap="wrap">
-          {['ALL', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'SCHEDULED'].map(
+          {(['ALL', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'SCHEDULED'] as TaskFilter[]).map(
             (status) => (
               <Chip
                 key={status}
@@ -552,3 +563,4 @@ export const TaskMonitor: React.FC = () => {
     </Box>
   );
 };
+export default TaskMonitor;

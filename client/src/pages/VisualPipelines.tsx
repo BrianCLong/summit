@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   Paper,
   TextField,
   Typography,
@@ -13,15 +12,18 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 
 type Pipeline = { id: string; name: string; spec: unknown };
+type HintResponse = { hints?: string[] } | { error?: string };
+type CopilotSuggestion = Record<string, unknown> | string | null;
 
 export default function VisualPipelines() {
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [name, setName] = useState('My Pipeline');
   const [specText, setSpecText] = useState('{"nodes":[],"edges":[]}');
   const [hints, setHints] = useState<string[]>([]);
-  const [suggestion, setSuggestion] = useState<unknown>(null);
+  const [suggestion, setSuggestion] = useState<CopilotSuggestion>(null);
   const [error, setError] = useState<string>('');
 
   const load = async () => {
@@ -61,8 +63,8 @@ export default function VisualPipelines() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(spec),
       });
-      const data = await r.json();
-      setHints(data.hints || []);
+      const data: HintResponse = await r.json();
+      setHints('hints' in data && Array.isArray(data.hints) ? data.hints : []);
     } catch {
       setHints(['Invalid JSON']);
     }
@@ -86,7 +88,7 @@ export default function VisualPipelines() {
       </Typography>
       {error && <Alert severity="error">{error}</Alert>}
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6">Create / Edit</Typography>
@@ -136,7 +138,7 @@ export default function VisualPipelines() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6">Pipelines</Typography>

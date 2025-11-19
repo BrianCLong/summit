@@ -8,7 +8,6 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   Card,
   CardContent,
   IconButton,
@@ -28,6 +27,7 @@ import {
   Badge,
   Divider,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import {
   TrendingUp,
   TrendingDown,
@@ -366,7 +366,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
           </Typography>
           <Grid container spacing={3}>
             {metrics.map((metric) => (
-              <Grid item xs={12} sm={6} md={4} key={metric.id}>
+              <Grid xs={12} sm={6} md={4} key={metric.id}>
                 <MetricCard metric={metric} />
               </Grid>
             ))}

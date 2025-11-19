@@ -5,7 +5,6 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -13,9 +12,10 @@ import {
   Typography,
   Button,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import {
   CheckCircle,
-  Error,
+  Error as ErrorIcon,
   Warning,
   Info,
   Rocket,
@@ -75,7 +75,7 @@ const GAReleaseStatus: React.FC = () => {
       setReleaseInfo(infoData.data);
       setDeploymentStatus(statusData.data);
       setError(null);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
@@ -92,7 +92,7 @@ const GAReleaseStatus: React.FC = () => {
         // Refresh status after SBOM generation
         fetchReleaseData();
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError('Failed to generate SBOM');
     }
   };
@@ -102,7 +102,7 @@ const GAReleaseStatus: React.FC = () => {
       case 'pass':
         return <CheckCircle color="success" />;
       case 'fail':
-        return <Error color="error" />;
+        return <ErrorIcon color="error" />;
       case 'warning':
         return <Warning color="warning" />;
       default:
@@ -143,7 +143,7 @@ const GAReleaseStatus: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Release Information */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -198,7 +198,7 @@ const GAReleaseStatus: React.FC = () => {
         </Grid>
 
         {/* Deployment Status */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -217,15 +217,15 @@ const GAReleaseStatus: React.FC = () => {
                     />
                   </Box>
 
-                  <Grid container spacing={1} mb={2}>
-                    <Grid item xs={6}>
+          <Grid container spacing={1} mb={2}>
+            <Grid xs={6}>
                       <Chip
                         label={`Tests: ${deploymentStatus.testsPass ? 'Pass' : 'Fail'}`}
                         color={deploymentStatus.testsPass ? 'success' : 'error'}
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={6}>
+            <Grid xs={6}>
                       <Chip
                         label={`SBOM: ${deploymentStatus.sbomGenerated ? 'Generated' : 'Missing'}`}
                         color={

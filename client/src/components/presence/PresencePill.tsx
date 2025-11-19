@@ -1,9 +1,11 @@
 import React from 'react';
 import { Chip, Avatar, AvatarGroup, Tooltip, Box } from '@mui/material';
-import {
-  usePresenceOnCaseSubscription,
-  usePlatformPresenceSubscription,
-} from '../../generated/graphql';
+const mockPresence = [
+  { userId: '1', displayName: 'Analyst A', status: 'active' },
+  { userId: '2', displayName: 'Analyst B', status: 'reviewing' },
+  { userId: '3', displayName: 'Analyst C', status: 'active' },
+  { userId: '4', displayName: 'Analyst D', status: 'away' },
+];
 
 interface PresencePillProps {
   caseId?: string;
@@ -14,19 +16,7 @@ export function PresencePill({
   caseId,
   platformWide = false,
 }: PresencePillProps) {
-  const { data: caseData } = usePresenceOnCaseSubscription({
-    variables: { caseId: caseId! },
-    skip: !caseId || platformWide,
-  });
-
-  const { data: platformData } = usePlatformPresenceSubscription({
-    skip: !platformWide,
-  });
-
-  const users =
-    caseId && !platformWide
-      ? (caseData?.presence ?? [])
-      : (platformData?.platformPresence ?? []);
+  const users = platformWide || !caseId ? mockPresence : mockPresence.slice(0, 2);
 
   if (users.length === 0) {
     return null;

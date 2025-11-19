@@ -156,8 +156,9 @@ export function QueryChipBuilder({
           size="small"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              parseKeyboardDSL(e.currentTarget.value);
-              e.currentTarget.value = '';
+              const target = e.target as HTMLInputElement;
+              parseKeyboardDSL(target.value);
+              target.value = '';
             }
           }}
           helperText="Press Enter to parse. Format: field:value, field>value, field<value"

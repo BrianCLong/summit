@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Box, Button } from '@mui/material';
 import { gql, useQuery } from '@apollo/client';
 import { DataSet, Timeline } from 'vis-timeline/standalone';
+import type { DataItem, TimelineOptions } from 'vis-timeline/standalone';
 import 'vis-timeline/dist/vis-timeline-graph2d.min.css';
 
 const EVENTS_QUERY = gql`
@@ -19,9 +20,20 @@ const EVENTS_QUERY = gql`
   }
 `;
 
+type InvestigationEntity = {
+  id: string;
+  type: string;
+  createdAt: string;
+};
+
+type TimelineQueryResult = {
+  entities?: InvestigationEntity[];
+  relationships?: InvestigationEntity[];
+};
+
 interface TimelineViewerProps {
   investigationId: string;
-  onSelect?: (item: any) => void;
+  onSelect?: (item: DataItem) => void;
 }
 
 const TimelineViewer: React.FC<TimelineViewerProps> = ({
@@ -31,14 +43,21 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<Timeline | null>(null);
 
-  const { data } = useQuery(EVENTS_QUERY, { variables: { investigationId } });
+  const { data } = useQuery<TimelineQueryResult>(EVENTS_QUERY, {
+    variables: { investigationId },
+  });
 
   useEffect(() => {
     if (containerRef.current && !timelineRef.current) {
-      const items = new DataSet([]);
-      timelineRef.current = new Timeline(containerRef.current, items, {
+      const items = new DataSet<DataItem>([]);
+      const options: TimelineOptions = {
         zoomable: true,
-      });
+      };
+      timelineRef.current = new Timeline(
+        containerRef.current,
+        items,
+        options,
+      );
       timelineRef.current.on('select', (props) => {
         if (onSelect) {
           const item = items.get(props.items[0]);
@@ -48,20 +67,20 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
     }
 
     if (timelineRef.current && data) {
-      const items = new DataSet([
-        ...(data.entities || []).map((e: any) => ({
+      const items = new DataSet<DataItem>([
+        ...(data.entities || []).map((e) => ({
           id: `entity-${e.id}`,
           content: `🧩 ${e.type}`,
           start: e.createdAt,
           group: 'Entities',
-          data: { type: 'entity', ...e },
+          data: { kind: 'entity', entity: e },
         })),
-        ...(data.relationships || []).map((r: any) => ({
+        ...(data.relationships || []).map((r) => ({
           id: `rel-${r.id}`,
           content: `🔗 ${r.type}`,
           start: r.createdAt,
           group: 'Relationships',
-          data: { type: 'relationship', ...r },
+          data: { kind: 'relationship', relationship: r },
         })),
       ]);
       timelineRef.current.setItems(items);

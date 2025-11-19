@@ -480,8 +480,6 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
     loadAllInsights();
   };
 
-  const isLoading = Object.values(loading).some(Boolean);
-
   if (!selectedEntity) {
     return (
       <Paper

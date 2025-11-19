@@ -15,7 +15,13 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["jest", "@testing-library/jest-dom"]
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "jsxImportSource": "react",
+    "typeRoots": ["./types", "./node_modules/@types"]
   },
   "include": [
     "src/**/*",
@@ -24,5 +30,14 @@
     "src/**/*.js",
     "src/**/*.jsx"
   ],
-  "exclude": ["node_modules", "dist", "build"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "src/__tests__/**",
+    "src/components/**/__tests__/**",
+    "src/components/ai-enhanced/tests/**",
+    "src/components/ai-enhanced/__tests__/**"
+  ],
+  "files": ["types/custom.d.ts", "types/mui.d.ts", "types/grid2.d.ts"]
 }

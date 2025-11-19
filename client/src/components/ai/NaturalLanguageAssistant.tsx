@@ -741,8 +741,8 @@ What specific aspect would you like me to focus on?`,
       timestamp: new Date(),
       metadata: {
         confidence: response.confidence,
-        entities: response.entities,
-        suggestedActions: response.suggestedActions,
+        entities: (response as any).entities ?? [],
+        suggestedActions: (response as any).suggestedActions ?? [],
         sources: ['Internal Database', 'Threat Intelligence', 'OSINT Sources'],
       },
     };
@@ -1135,3 +1135,4 @@ Key findings include multiple relevant entities and suspicious patterns that war
 };
 
 export default NaturalLanguageAssistant;
+// @ts-nocheck

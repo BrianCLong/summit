@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { useState, useCallback } from 'react';
 import Toast, { ToastProps } from './Toast';
 
 interface ToastContextType {
@@ -62,7 +63,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   const removeToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const clearAllToasts = useCallback(() => {
     setToasts([]);

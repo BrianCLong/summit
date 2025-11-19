@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import Grid from '@mui/material/Grid';
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardContent,
   Alert,
@@ -36,6 +36,66 @@ import {
   Analytics,
 } from '@mui/icons-material';
 import { useQuery, useMutation, gql } from '@apollo/client';
+
+interface CounterPsyOpsEngineStatus {
+  status: string;
+  activeScenarios: number;
+  detectedThreats: number;
+  deployedCountermeasures: number;
+  lastUpdate: string;
+}
+
+interface DisinformationDetectionStatus {
+  status: string;
+  processedContent: number;
+  detectedCampaigns: number;
+  confidenceScore: number;
+  lastScan: string;
+}
+
+interface AdversarySimulationStatus {
+  status: string;
+  activeSimulations: number;
+  generatedTTPs: number;
+  lastExecution: string;
+}
+
+interface PsyOpsStatusResponse {
+  counterPsyOpsEngine?: CounterPsyOpsEngineStatus | null;
+  disinformationDetection?: DisinformationDetectionStatus | null;
+  adversarySimulation?: AdversarySimulationStatus | null;
+}
+
+interface ToggleEngineResponse {
+  toggleCounterPsyOpsEngine: {
+    status: string;
+    message: string;
+  };
+}
+
+interface ToggleEngineVariables {
+  enabled: boolean;
+}
+
+interface AdversarySimulationInput {
+  adversaryType: string;
+  temperature: number;
+  persistence: string;
+}
+
+interface GenerateSimulationResponse {
+  generateAdversarySimulation: {
+    id: string;
+    ttps: string[];
+    intent: string;
+    obfuscation: string;
+    temporalModel: string;
+  };
+}
+
+interface GenerateSimulationVariables {
+  config: AdversarySimulationInput;
+}
 
 // GraphQL Queries and Mutations
 const GET_PSYOPS_STATUS = gql`
@@ -109,20 +169,33 @@ const PsyOpsDashboard: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [simulationDialog, setSimulationDialog] = useState(false);
   const [engineEnabled, setEngineEnabled] = useState(true);
-  const [simulationConfig, setSimulationConfig] = useState({
-    adversaryType: 'APT',
-    temperature: 0.7,
-    persistence: 'high',
-  });
+  const [simulationConfig, setSimulationConfig] =
+    useState<AdversarySimulationInput>({
+      adversaryType: 'APT',
+      temperature: 0.7,
+      persistence: 'high',
+    });
 
-  const { loading, error, data, refetch } = useQuery(GET_PSYOPS_STATUS, {
-    pollInterval: 5000, // Poll every 5 seconds for real-time updates
-  });
+  const { loading, error, data, refetch } = useQuery<PsyOpsStatusResponse>(
+    GET_PSYOPS_STATUS,
+    {
+      pollInterval: 5000,
+    },
+  );
 
-  const [toggleEngine] = useMutation(TOGGLE_PSYOPS_ENGINE);
-  const [generateSimulation] = useMutation(GENERATE_ADVERSARY_SIMULATION);
+  const [toggleEngine] = useMutation<
+    ToggleEngineResponse,
+    ToggleEngineVariables
+  >(TOGGLE_PSYOPS_ENGINE);
+  const [generateSimulation] = useMutation<
+    GenerateSimulationResponse,
+    GenerateSimulationVariables
+  >(GENERATE_ADVERSARY_SIMULATION);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (
+    _event: React.SyntheticEvent,
+    newValue: number,
+  ) => {
     setTabValue(newValue);
   };
 

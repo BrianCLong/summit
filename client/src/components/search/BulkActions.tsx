@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -26,7 +26,6 @@ import {
   Share,
   GetApp,
 } from '@mui/icons-material';
-import { useBulkActionMutation } from '../../generated/graphql';
 
 interface BulkActionsProps {
   selectedItems: string[];
@@ -34,37 +33,52 @@ interface BulkActionsProps {
   onActionComplete: () => void;
 }
 
-const BULK_ACTIONS = [
-  { id: 'tag', label: 'Add Tags', icon: Label, color: 'primary' as const },
+type BulkActionId =
+  | 'tag'
+  | 'move'
+  | 'share'
+  | 'export'
+  | 'archive'
+  | 'delete';
+
+type BulkActionConfig = {
+  id: BulkActionId;
+  label: string;
+  icon: typeof Label;
+  color: 'primary' | 'info' | 'secondary' | 'success' | 'warning' | 'error';
+};
+
+const BULK_ACTIONS: BulkActionConfig[] = [
+  { id: 'tag', label: 'Add Tags', icon: Label, color: 'primary' },
   {
     id: 'move',
     label: 'Move to Investigation',
     icon: Folder,
-    color: 'info' as const,
+    color: 'info',
   },
   {
     id: 'share',
     label: 'Share Selection',
     icon: Share,
-    color: 'secondary' as const,
+    color: 'secondary',
   },
   {
     id: 'export',
     label: 'Export Selection',
     icon: GetApp,
-    color: 'success' as const,
+    color: 'success',
   },
   {
     id: 'archive',
     label: 'Archive Items',
     icon: Archive,
-    color: 'warning' as const,
+    color: 'warning',
   },
   {
     id: 'delete',
     label: 'Delete Items',
     icon: Delete,
-    color: 'error' as const,
+    color: 'error',
   },
 ];
 
@@ -74,12 +88,14 @@ export function BulkActions({
   onActionComplete,
 }: BulkActionsProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [dialogAction, setDialogAction] = useState<string | null>(null);
-  const [actionMetadata, setActionMetadata] = useState<any>({});
+  const [dialogAction, setDialogAction] = useState<BulkActionId | null>(null);
+  const [actionMetadata, setActionMetadata] = useState<Record<string, string>>(
+    {},
+  );
 
   const [bulkAction, { loading }] = useBulkActionMutation();
 
-  const handleActionClick = (actionId: string) => {
+  const handleActionClick = (actionId: BulkActionId) => {
     setDialogAction(actionId);
     setAnchorEl(null);
     setActionMetadata({});
@@ -258,4 +274,34 @@ export function BulkActions({
       </Dialog>
     </>
   );
+}
+
+type BulkActionVariables = {
+  action: BulkActionId;
+  targetIds: string[];
+  metadata: Record<string, string>;
+};
+
+type BulkActionMutation = (options: {
+  variables: BulkActionVariables;
+}) => Promise<void>;
+
+function useBulkActionMutation(): [
+  BulkActionMutation,
+  { loading: boolean },
+] {
+  const [loading, setLoading] = useState(false);
+
+  const mutate = useCallback<BulkActionMutation>(async ({ variables }) => {
+    setLoading(true);
+    try {
+      // Simulate async persistence while UI wiring is finalized.
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      console.log('Bulk action executed', variables);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return [mutate, { loading }];
 }

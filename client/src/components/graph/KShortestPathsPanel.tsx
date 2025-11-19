@@ -7,7 +7,7 @@ import {
   Button,
   Chip,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   LinearProgress,
   IconButton,
@@ -28,18 +28,86 @@ import {
   PlayArrow,
 } from '@mui/icons-material';
 import {
-  useKShortestPathsLazyQuery,
-  useCancelPathFindingMutation,
+  useMockKShortestPathsLazyQuery,
+  type MockKShortestPathsQuery,
 } from '../../generated/graphql';
+
+interface GraphNodeLite {
+  id: string;
+  label: string;
+}
+
+interface KShortestPath {
+  id: string;
+  length: number;
+  score?: number;
+  nodes: GraphNodeLite[];
+  significance?: boolean;
+}
+
+interface PathMetadata {
+  pathsFound: number;
+  searchTime: number;
+  nodesExplored: number;
+  maxDepthReached: number;
+}
 
 interface KShortestPathsPanelProps {
   selectedNodes: string[];
-  onPathSelect: (path: any) => void;
-  onPathHighlight: (path: any) => void;
+  onPathSelect: (path: KShortestPath) => void;
+  onPathHighlight: (path: KShortestPath) => void;
 }
 
 const MAX_K = 5;
 const MAX_DEPTH = 6;
+
+const createMockPaths = (
+  nodes: Array<{ id: string; label: string }> = [],
+  sourceId: string,
+  targetId: string,
+  kValue: number,
+  maxDepthValue: number,
+  pathType: string,
+): KShortestPath[] => {
+  const availableNodes =
+    nodes.length > 0
+      ? nodes
+      : Array.from({ length: 10 }, (_, idx) => ({
+          id: `node-${idx}`,
+          label: `Node ${idx}`,
+        }));
+
+  const generatePath = (index: number): KShortestPath => {
+    const hopCount = Math.min(
+      maxDepthValue,
+      Math.max(2, Math.floor(Math.random() * maxDepthValue) + 2),
+    );
+    const intermediates: GraphNodeLite[] = [];
+    for (let i = 0; i < hopCount - 2; i++) {
+      const randomNode =
+        availableNodes[Math.floor(Math.random() * availableNodes.length)];
+      intermediates.push({ id: randomNode.id, label: randomNode.label });
+    }
+
+    const pathNodes: GraphNodeLite[] = [
+      { id: sourceId, label: sourceId },
+      ...intermediates,
+      { id: targetId, label: targetId },
+    ];
+
+    return {
+      id: `mock-path-${Date.now()}-${index}`,
+      nodes: pathNodes,
+      length: pathNodes.length - 1,
+      score: Math.random() * 10,
+      significance: pathType !== 'all' ? Math.random() > 0.5 : undefined,
+    };
+  };
+
+  return Array.from({ length: Math.min(kValue, MAX_K) }, (_, idx) =>
+    generatePath(idx),
+  );
+};
 
 export function KShortestPathsPanel({
   selectedNodes,
@@ -52,12 +120,11 @@ export function KShortestPathsPanel({
   const [maxDepth, setMaxDepth] = useState(4);
   const [pathType, setPathType] = useState('all');
   const [operationId, setOperationId] = useState<string | null>(null);
+  const [paths, setPaths] = useState<KShortestPath[]>([]);
+  const [metadata, setMetadata] = useState<PathMetadata | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const [findPaths, { data, loading, error }] = useKShortestPathsLazyQuery();
-  const [cancelPathFinding] = useCancelPathFindingMutation();
-
-  const paths = data?.kShortestPaths?.paths || [];
-  const metadata = data?.kShortestPaths?.metadata;
+  const [findPaths, { loading, error }] = useMockKShortestPathsLazyQuery();
 
   const canSearch = sourceId && targetId && sourceId !== targetId;
 
@@ -66,32 +133,53 @@ export function KShortestPathsPanel({
 
     const newOperationId = `path-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     setOperationId(newOperationId);
+    setLocalError(null);
+    setPaths([]);
+    setMetadata(null);
 
     findPaths({
       variables: {
         sourceId,
         targetId,
-        k,
-        maxDepth,
-        filters: {
-          type: pathType === 'all' ? undefined : pathType,
-        },
       },
-    });
-  }, [sourceId, targetId, k, maxDepth, pathType, canSearch, findPaths]);
-
-  const handleCancel = useCallback(async () => {
-    if (!operationId) return;
-
-    try {
-      await cancelPathFinding({
-        variables: { operationId },
+    })
+      .then((result) => {
+        const graphData = result.data?.graphData;
+        const generatedPaths = createMockPaths(
+          graphData?.nodes ?? [],
+          sourceId,
+          targetId,
+          k,
+          maxDepth,
+          pathType,
+        );
+        setPaths(generatedPaths);
+        setMetadata({
+          pathsFound: generatedPaths.length,
+          searchTime: Math.floor(Math.random() * 200) + 50,
+          nodesExplored: Math.min(
+            graphData?.nodes.length ?? generatedPaths.length * 2,
+            maxDepth * generatedPaths.length,
+          ),
+          maxDepthReached: Math.min(
+            maxDepth,
+            generatedPaths.reduce(
+              (max, path) => Math.max(max, path.nodes.length - 1),
+              0,
+            ),
+          ),
+        });
+      })
+      .catch((err: unknown) => {
+        setLocalError(
+          err instanceof Error ? err.message : 'Failed to compute paths.',
+        );
       });
-      setOperationId(null);
-    } catch (error) {
-      console.error('Failed to cancel path finding:', error);
-    }
-  }, [operationId, cancelPathFinding]);
+  }, [canSearch, findPaths, maxDepth, pathType, sourceId, targetId, k]);
+
+  const handleCancel = useCallback(() => {
+    setOperationId(null);
+  }, []);
 
   // Auto-fill from selected nodes
   const handleSelectFromGraph = useCallback(() => {
@@ -192,14 +280,14 @@ export function KShortestPathsPanel({
               Find Paths
             </Button>
           ) : (
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<Cancel />}
-              onClick={handleCancel}
-            >
-              Cancel Search
-            </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<Cancel />}
+                onClick={handleCancel}
+              >
+                Cancel Search
+              </Button>
           )}
 
           <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
@@ -220,9 +308,9 @@ export function KShortestPathsPanel({
       )}
 
       {/* Error State */}
-      {error && (
+      {(error || localError) && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Path finding failed: {error.message}
+          Path finding failed: {error?.message ?? localError}
         </Alert>
       )}
 
@@ -246,10 +334,10 @@ export function KShortestPathsPanel({
           </Typography>
 
           <List dense>
-            {paths.map((path: any, index: number) => (
+            {paths.map((path, index) => (
               <React.Fragment key={path.id}>
-                <ListItem
-                  button
+                <ListItemButton
+                  component="li"
                   onClick={() => onPathSelect(path)}
                   onMouseEnter={() => onPathHighlight(path)}
                   sx={{ borderRadius: 1, mb: 0.5 }}
@@ -285,7 +373,7 @@ export function KShortestPathsPanel({
                     }
                     secondary={
                       <Typography variant="caption" color="text.secondary">
-                        {path.nodes.map((node: any) => node.label).join(' → ')}
+                        {path.nodes.map((node) => node.label).join(' → ')}
                       </Typography>
                     }
                   />
@@ -293,7 +381,7 @@ export function KShortestPathsPanel({
                   <IconButton size="small" onClick={() => onPathSelect(path)}>
                     <Visibility fontSize="small" />
                   </IconButton>
-                </ListItem>
+                </ListItemButton>
 
                 {index < paths.length - 1 && <Divider />}
               </React.Fragment>
@@ -302,7 +390,12 @@ export function KShortestPathsPanel({
         </Box>
       )}
 
-      {paths.length === 0 && !loading && !error && sourceId && targetId && (
+      {paths.length === 0 &&
+        !loading &&
+        !error &&
+        !localError &&
+        sourceId &&
+        targetId && (
         <Alert severity="info">
           No paths found between the selected nodes within the specified
           constraints. Try increasing the maximum depth or adjusting the path

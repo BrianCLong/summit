@@ -42,7 +42,7 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 
       if (matchingShortcut) {
         // Check if we should prevent default behavior
-        const activeElement = document.activeElement;
+        const activeElement = document.activeElement as HTMLElement | null;
         const isInputElement =
           activeElement &&
           (activeElement.tagName === 'INPUT' ||
@@ -105,7 +105,7 @@ export const useKeyboardShortcuts = (
       );
 
       if (matchingShortcut) {
-        const activeElement = document.activeElement;
+        const activeElement = document.activeElement as HTMLElement | null;
         const isInputElement =
           activeElement &&
           (activeElement.tagName === 'INPUT' ||

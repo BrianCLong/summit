@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppSelector } from '../../store/index.ts';
+import { useAppSelector } from '../../store/hooks';
 import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
 import {
   LineChart,
@@ -12,7 +12,7 @@ import {
 import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function LatencyPanels() {
-  const { tenant, status, operation } = useAppSelector((s) => s.ui);
+  const { tenant, status, operation } = useAppSelector((s: any) => s.ui);
   const { data: p95, loading: loadingP95 } = useSafeQuery<{ valueMs: number }>({
     queryKey: `p95_${tenant}_${status}_${operation}`,
     mock: { valueMs: 120.4 },

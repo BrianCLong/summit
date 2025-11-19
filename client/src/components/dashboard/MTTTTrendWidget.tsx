@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -9,12 +9,12 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Select,
-  Grid,
   Chip,
   LinearProgress,
   Tooltip,
 } from '@mui/material';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Grid from '@mui/material/Unstable_Grid2';
 import {
   MoreVert,
   TrendingUp,
@@ -99,10 +99,59 @@ interface MTTTData {
   escalatedAlerts: number;
 }
 
+type ChartType = 'line' | 'area' | 'bar';
+
+interface MTTTStats {
+  p50: number;
+  p90: number;
+  p95: number;
+  mean: number;
+}
+
+interface MTTTSummary {
+  currentMTTT?: MTTTStats | null;
+  previousMTTT?: MTTTStats | null;
+  trend?: 'improving' | 'degrading' | 'stable' | string | null;
+  improvement?: number | null;
+  targetMTTT?: number | null;
+  slaCompliance?: number | null;
+}
+
+interface CohortBreakdown {
+  cohort: string;
+  mttt: number;
+  alertCount: number;
+  improvement?: number | null;
+  slaCompliance?: number | null;
+}
+
+interface TopPerformer {
+  analyst: string;
+  avgMTTT: number;
+  alertsTriaged: number;
+  slaCompliance?: number | null;
+}
+
+interface MTTTQueryData {
+  mtttMetrics?: {
+    summary: MTTTSummary;
+    timeSeries: MTTTData[];
+    cohortBreakdown: CohortBreakdown[];
+    topPerformers: TopPerformer[];
+  } | null;
+}
+
+interface MTTTQueryVariables {
+  timeRange: string;
+  cohortFilter: {
+    cohort: string;
+  };
+}
+
 interface MTTTTrendWidgetProps {
   timeRange?: string;
   height?: number;
-  cohortFilter?: any;
+  cohortFilter?: string;
 }
 
 const TIME_RANGES = [
@@ -128,10 +177,15 @@ export default function MTTTTrendWidget({
 }: MTTTTrendWidgetProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange);
-  const [selectedCohort, setSelectedCohort] = useState(cohortFilter || 'all');
-  const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('line');
+  const [selectedCohort, setSelectedCohort] = useState(
+    cohortFilter ?? 'all',
+  );
+  const [chartType, setChartType] = useState<ChartType>('line');
 
-  const { data, loading, error, refetch } = useQuery(MTTT_METRICS_QUERY, {
+  const { data, loading, error, refetch } = useQuery<
+    MTTTQueryData,
+    MTTTQueryVariables
+  >(MTTT_METRICS_QUERY, {
     variables: {
       timeRange: selectedTimeRange,
       cohortFilter: { cohort: selectedCohort },
@@ -145,6 +199,14 @@ export default function MTTTTrendWidget({
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleTimeRangeChange = (event: SelectChangeEvent<string>) => {
+    setSelectedTimeRange(event.target.value);
+  };
+
+  const handleCohortChange = (event: SelectChangeEvent<string>) => {
+    setSelectedCohort(event.target.value);
   };
 
   const handleExport = () => {
@@ -204,16 +266,17 @@ export default function MTTTTrendWidget({
   };
 
   const renderChart = () => {
-    if (!data?.mtttMetrics?.timeSeries) return null;
+    const metrics = data?.mtttMetrics;
+    if (!metrics) return null;
 
-    const timeSeriesData = data.mtttMetrics.timeSeries.map(
-      (point: MTTTData) => ({
-        ...point,
-        timestamp: new Date(point.timestamp).toLocaleTimeString(),
-      }),
-    );
+    const timeSeriesData = (metrics.timeSeries ?? []).map((point) => ({
+      ...point,
+      timestamp: new Date(point.timestamp).toLocaleTimeString(),
+    }));
 
-    const targetMTTT = data.mtttMetrics.summary.targetMTTT || 15; // Default 15 minutes
+    if (timeSeriesData.length === 0) return null;
+
+    const targetMTTT = metrics.summary?.targetMTTT ?? 15; // Default 15 minutes
 
     switch (chartType) {
       case 'area':
@@ -377,7 +440,9 @@ export default function MTTTTrendWidget({
     );
   }
 
-  const { summary, cohortBreakdown, topPerformers } = data?.mtttMetrics || {};
+  const summary = data?.mtttMetrics?.summary;
+  const cohortBreakdown = data?.mtttMetrics?.cohortBreakdown ?? [];
+  const slaCompliance = summary?.slaCompliance ?? 0;
 
   return (
     <Card sx={{ height }}>
@@ -395,14 +460,15 @@ export default function MTTTTrendWidget({
             <Typography variant="h6">Mean Time to Triage (MTTT)</Typography>
             <Typography variant="body2" color="text.secondary">
               Current P50: {formatTime(summary?.currentMTTT?.p50 || 0)} • SLA
-              Compliance: {((summary?.slaCompliance || 0) * 100).toFixed(1)}%
+              Compliance:{' '}
+              {((summary?.slaCompliance || 0) * 100).toFixed(1)}%
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <FormControl size="small" sx={{ minWidth: 100 }}>
               <Select
                 value={selectedTimeRange}
-                onChange={(e) => setSelectedTimeRange(e.target.value)}
+                onChange={handleTimeRangeChange}
               >
                 {TIME_RANGES.map((range) => (
                   <MenuItem key={range.value} value={range.value}>
@@ -414,7 +480,7 @@ export default function MTTTTrendWidget({
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <Select
                 value={selectedCohort}
-                onChange={(e) => setSelectedCohort(e.target.value)}
+                onChange={handleCohortChange}
               >
                 {COHORT_OPTIONS.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
@@ -434,7 +500,7 @@ export default function MTTTTrendWidget({
 
         {/* Summary Metrics */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={3}>
+          <Grid xs={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="primary">
                 {formatTime(summary?.currentMTTT?.p50 || 0)}
@@ -448,10 +514,13 @@ export default function MTTTTrendWidget({
                   mt: 0.5,
                 }}
               >
-                {getTrendIcon(summary?.trend)}
+                {getTrendIcon(summary?.trend ?? 'stable')}
                 <Typography
                   variant="caption"
-                  sx={{ color: getTrendColor(summary?.trend), ml: 0.5 }}
+                  sx={{
+                    color: getTrendColor(summary?.trend ?? 'stable'),
+                    ml: 0.5,
+                  }}
                 >
                   {summary?.improvement
                     ? `${(summary.improvement * 100).toFixed(1)}%`
@@ -460,7 +529,7 @@ export default function MTTTTrendWidget({
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid xs={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="warning.main">
                 {formatTime(summary?.currentMTTT?.p90 || 0)}
@@ -468,7 +537,7 @@ export default function MTTTTrendWidget({
               <Typography variant="caption">P90 MTTT</Typography>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid xs={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="error.main">
                 {formatTime(summary?.currentMTTT?.p95 || 0)}
@@ -476,15 +545,13 @@ export default function MTTTTrendWidget({
               <Typography variant="caption">P95 MTTT</Typography>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid xs={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography
                 variant="h4"
-                color={
-                  summary?.slaCompliance >= 0.8 ? 'success.main' : 'error.main'
-                }
+                color={slaCompliance >= 0.8 ? 'success.main' : 'error.main'}
               >
-                {((summary?.slaCompliance || 0) * 100).toFixed(0)}%
+                {(slaCompliance * 100).toFixed(0)}%
               </Typography>
               <Typography variant="caption">SLA Compliance</Typography>
             </Box>
@@ -496,13 +563,13 @@ export default function MTTTTrendWidget({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <Typography variant="subtitle2">Trend Analysis</Typography>
             <Box sx={{ display: 'flex', gap: 0.5 }}>
-              {['line', 'area', 'bar'].map((type) => (
+              {(['line', 'area', 'bar'] as ChartType[]).map((type) => (
                 <Chip
                   key={type}
                   size="small"
                   label={type}
                   variant={chartType === type ? 'filled' : 'outlined'}
-                  onClick={() => setChartType(type as any)}
+                  onClick={() => setChartType(type)}
                 />
               ))}
             </Box>
@@ -511,14 +578,14 @@ export default function MTTTTrendWidget({
         </Box>
 
         {/* Cohort Breakdown */}
-        {cohortBreakdown && cohortBreakdown.length > 0 && (
+        {cohortBreakdown.length > 0 && (
           <Box>
             <Typography variant="subtitle2" gutterBottom>
               Cohort Performance
             </Typography>
             <Grid container spacing={1}>
-              {cohortBreakdown.map((cohort: any, index: number) => (
-                <Grid item xs={6} key={index}>
+              {cohortBreakdown.map((cohort, index) => (
+                <Grid xs={6} key={index}>
                   <Box
                     sx={{
                       p: 1,

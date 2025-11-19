@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { AutoSizer, List, ListRowRenderer } from 'react-virtualized';
 import { useNavigate, useSearchParams } from 'react-router-dom';

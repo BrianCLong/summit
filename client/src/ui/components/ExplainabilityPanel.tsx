@@ -3,7 +3,7 @@ import {
   Box,
   Button,
   List,
-  ListItem,
+  ListItemButton,
   Typography,
   Select,
   MenuItem,
@@ -110,18 +110,19 @@ const ExplainabilityPanel: FC<Props> = ({
         sx={{ maxHeight: 200, overflow: 'auto' }}
       >
         {sorted.map((p, i) => (
-          <ListItem
+          <ListItemButton
             key={p.relId}
             id={p.relId}
             role="option"
             selected={i === index}
             onClick={() => onSelect?.(p)}
+            component="li"
             sx={{ cursor: 'pointer' }}
           >
             <Typography variant="body2">
               {p.from} → {p.to}
             </Typography>
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
     </Box>

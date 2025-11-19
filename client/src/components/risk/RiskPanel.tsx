@@ -1,5 +1,8 @@
 import React from 'react';
-import { RiskResult } from '../../../server/src/risk/RiskEngine';
+type RiskResult = {
+  band: string;
+  contributions: Array<{ feature: string; delta: number }>;
+};
 
 export default function RiskPanel({ result }: { result: RiskResult }) {
   return (

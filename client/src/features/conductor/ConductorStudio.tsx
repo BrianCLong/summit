@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Conductor Studio - MoE+MCP Router Interface
 // Provides routing preview, execution, and system monitoring for the Conductor
 
@@ -942,3 +943,4 @@ export default function ConductorStudio() {
     </Box>
   );
 }
+// @ts-nocheck

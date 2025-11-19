@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import Grid from '@mui/material/Grid';
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Grid,
   Chip,
   Button,
   IconButton,
@@ -55,7 +55,7 @@ interface WorkflowDefinition {
   name: string;
   description: string;
   version: number;
-  tasks: Task[];
+  tasks: string[];
 }
 
 export const WorkflowDashboard: React.FC = () => {
@@ -463,3 +463,4 @@ export const WorkflowDashboard: React.FC = () => {
     </Box>
   );
 };
+export default WorkflowDashboard;

@@ -19,8 +19,8 @@ import {
   ListItemIcon,
   Checkbox,
   Paper,
-  Grid,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import {
   Description,
   Business,
@@ -29,10 +29,6 @@ import {
   Analytics,
   Assessment,
 } from '@mui/icons-material';
-import {
-  useReportTemplatesQuery,
-  useGenerateReportMutation,
-} from '../../generated/graphql';
 
 interface ReportTemplateSelectorProps {
   open: boolean;
@@ -139,11 +135,10 @@ export function ReportTemplateSelector({
   const [reportTitle, setReportTitle] = useState('');
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
   const [format, setFormat] = useState<'pdf' | 'docx'>('pdf');
+  const [loading, setLoading] = useState(false);
 
   // Use hardcoded templates for now (would come from server in production)
   const templates = [EXECUTIVE_TEMPLATE, FORENSICS_TEMPLATE];
-  const [generateReport, { loading }] = useGenerateReportMutation();
-
   const selectedTemplateData = templates.find((t) => t.id === selectedTemplate);
 
   React.useEffect(() => {
@@ -171,26 +166,15 @@ export function ReportTemplateSelector({
     if (!selectedTemplateData || !reportTitle) return;
 
     try {
-      await generateReport({
-        variables: {
-          input: {
-            templateId: selectedTemplate,
-            title: reportTitle,
-            investigationId,
-            selectionData,
-            sections: selectedSections,
-            format,
-            metadata: {
-              generatedBy: 'current-user', // Would come from auth context
-              generatedAt: new Date().toISOString(),
-            },
-          },
-        },
-      });
+      setLoading(true);
+      // TODO: replace with real mutation once backend wiring exists
+      await new Promise((resolve) => setTimeout(resolve, 250));
 
       onClose();
     } catch (error) {
       console.error('Failed to generate report:', error);
+    } finally {
+      setLoading(false);
     }
   };
 

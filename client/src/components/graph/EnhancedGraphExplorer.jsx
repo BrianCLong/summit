@@ -107,7 +107,7 @@ import { gql, useMutation, useLazyQuery } from '@apollo/client';
 import { apolloClient } from '../../services/apollo';
 import EnrichmentPanel from '../osint/EnrichmentPanel';
 import RelationshipModal from './RelationshipModal';
-import EntityDrawer from '../../../../ui/components/EntityDrawer';
+import EntityDrawer from '../EntityDrawer';
 // (TextField, Slider already imported above in the bulk MUI import)
 import ConflictResolutionModal from '../collaboration/ConflictResolutionModal';
 

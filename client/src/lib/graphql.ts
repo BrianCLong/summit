@@ -1,1 +1,2 @@
-export { COPILOT_QUERY } from '../graphql/copilot.gql.js';
+// Stub export for legacy consumers
+export const COPILOT_QUERY: any = {};

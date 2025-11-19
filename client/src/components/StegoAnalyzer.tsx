@@ -14,7 +14,34 @@ const ANALYZE_STEGO_MUTATION = gql`
   }
 `;
 
-const MatrixGraph: React.FC<{ matrix: number[][] }> = ({ matrix }) => {
+type RiskMatrix = number[][];
+
+type AnalyzeStegoResult = {
+  risk_matrix?: RiskMatrix | null;
+  recommendations?: string[] | null;
+  entropy?: number | null;
+  simulated_dct_diffs_mean?: number | null;
+  note?: string | null;
+};
+
+interface AnalyzeStegoResponse {
+  analyzeStego?: AnalyzeStegoResult | null;
+}
+
+interface AnalyzeStegoVariables {
+  mediaDataInput: {
+    data: string;
+    params: Record<string, unknown>;
+  };
+}
+
+type MatrixCell = {
+  value: number;
+  row: number;
+  col: number;
+};
+
+const MatrixGraph: React.FC<{ matrix: RiskMatrix }> = ({ matrix }) => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -35,11 +62,11 @@ const MatrixGraph: React.FC<{ matrix: number[][] }> = ({ matrix }) => {
       .attr('height', height);
 
     const x = d3
-      .scaleBand<number>()
+      .scaleBand()
       .domain(d3.range(numCols))
       .range([0, width]);
     const y = d3
-      .scaleBand<number>()
+      .scaleBand()
       .domain(d3.range(numRows))
       .range([0, height]);
 
@@ -61,22 +88,24 @@ const MatrixGraph: React.FC<{ matrix: number[][] }> = ({ matrix }) => {
       .data(matrix)
       .enter()
       .append('g')
-      .attr('transform', (_: any, i: any) => `translate(0,${y(i)!})`)
+      .attr('transform', (_: number, i: number) => `translate(0,${y(i)!})`)
       .selectAll('rect')
-      .data((row: any, i: any) => row.map((value: any, j: any) => ({ value, row: i, col: j })))
+      .data((row: number[], i: number) =>
+        row.map((value, j) => ({ value, row: i, col: j })),
+      )
       .enter()
       .append('rect')
-      .attr('x', (d: any) => x(d.col)!)
+      .attr('x', (d: MatrixCell) => x(d.col)!)
       .attr('y', 0)
       .attr('width', x.bandwidth())
       .attr('height', y.bandwidth())
-      .attr('fill', (d: any) => color(d.value))
-      .on('mouseover', (event: any, d: any) => {
+      .attr('fill', (d: MatrixCell) => color(d.value))
+      .on('mouseover', (_event: MouseEvent, d: MatrixCell) => {
         tooltip
           .style('visibility', 'visible')
           .text(`Encoded ${d.row}, Decoded ${d.col}: ${d.value}`);
       })
-      .on('mousemove', (event: any) => {
+      .on('mousemove', (event: MouseEvent) => {
         tooltip
           .style('top', `${event.pageY - 10}px`)
           .style('left', `${event.pageX + 10}px`);
@@ -90,23 +119,31 @@ const MatrixGraph: React.FC<{ matrix: number[][] }> = ({ matrix }) => {
 const StegoAnalyzer: React.FC = () => {
   const [mediaData, setMediaData] = useState('');
   const [stegoParams, setStegoParams] = useState('');
-  const [analyzeStego, { data, loading, error }] = useMutation(
-    ANALYZE_STEGO_MUTATION,
-  );
+  const [analyzeStego, { data, loading, error }] =
+    useMutation(ANALYZE_STEGO_MUTATION);
 
   const handleSubmit = async () => {
     try {
-      const parsedMediaData = mediaData; // This should be base64 string
-      const parsedStegoParams = stegoParams ? JSON.parse(stegoParams) : {};
+      const parsedMediaData = mediaData.trim();
+      if (!parsedMediaData) {
+        throw new Error('Media data cannot be empty.');
+      }
+
+      const parsedStegoParams = stegoParams
+        ? (JSON.parse(stegoParams) as Record<string, unknown>)
+        : {};
+
       await analyzeStego({
         variables: {
           mediaDataInput: { data: parsedMediaData, params: parsedStegoParams },
         },
       });
     } catch (e) {
-      alert(
-        'Invalid input. Media data should be base64 string, params should be JSON.',
-      );
+      const message =
+        e instanceof Error
+          ? e.message
+          : 'Invalid input. Media data should be base64 string, params should be JSON.';
+      alert(message);
       console.error(e);
     }
   };
@@ -136,20 +173,29 @@ const StegoAnalyzer: React.FC = () => {
       </button>
 
       {error && <p className="text-red-500 mt-4">Error: {error.message}</p>}
-      {data && (
+      {(() => {
+        const analysis = (data as AnalyzeStegoResponse | undefined)
+          ?.analyzeStego;
+        const riskMatrix = Array.isArray(analysis?.risk_matrix)
+          ? (analysis.risk_matrix as RiskMatrix)
+          : null;
+        if (!analysis) return null;
+
+        return (
         <div className="mt-4 p-4 bg-gray-100 rounded">
           <h3 className="font-semibold">Analysis Results:</h3>
           <pre className="whitespace-pre-wrap text-sm">
-            {JSON.stringify(data.analyzeStego, null, 2)}
+            {JSON.stringify(analysis, null, 2)}
           </pre>
-          {Array.isArray(data.analyzeStego?.risk_matrix) && (
+          {riskMatrix && (
             <div className="mt-4">
               <h4 className="font-semibold mb-2">Encoded vs Decoded Matrix</h4>
-              <MatrixGraph matrix={data.analyzeStego.risk_matrix} />
+              <MatrixGraph matrix={riskMatrix} />
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { createFetchStreamTransport } from './transport';
-import type { AssistantEvent } from ' @/components/ai-enhanced/EnhancedAIAssistant';
+import type { AssistantEvent } from '@/components/ai-enhanced/EnhancedAIAssistant';
 
 function collect(
   transport: ReturnType<typeof createFetchStreamTransport>,

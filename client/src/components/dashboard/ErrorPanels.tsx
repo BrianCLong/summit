@@ -28,7 +28,8 @@ export default function ErrorPanels() {
       field: 'ratio',
       headerName: 'Error Ratio',
       flex: 1,
-      valueFormatter: (p) => `${(Number(p.value || 0) * 100).toFixed(2)}%`,
+      valueFormatter: (p: { value?: number }) =>
+        `${(Number(p.value || 0) * 100).toFixed(2)}%`,
     },
   ];
 
