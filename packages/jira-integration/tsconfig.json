@@ -13,8 +13,13 @@
     "sourceMap": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "target": "ES2022"
+    "target": "ES2022",
+    "allowImportingTsExtensions": false,
+    "composite": true
   },
-  "include": ["src/**/*", "__tests__/**/*"],
+  "include": [
+    "src/**/*",
+    "__tests__/**/*"
+  ],
   "references": []
 }

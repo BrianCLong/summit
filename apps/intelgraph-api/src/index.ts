@@ -67,7 +67,7 @@ async function main() {
     },
   });
   await server.start();
-  server.applyMiddleware({ app, path: '/graphql' });
+  server.applyMiddleware({ app: app as any, path: '/graphql' });
   app.listen(PORT, () => logger.info({ PORT }, 'IntelGraph API listening'));
 }
 

@@ -976,7 +976,7 @@ export class GraphAnalyticsService {
   private async getCachedResult(key: string): Promise<any> {
     try {
       const cached = await this.redisClient.get(`graph-analytics:${key}`);
-      return cached ? JSON.parse(cached) : null;
+      return cached ? JSON.parse(cached as string) : null;
     } catch (error) {
       logger.warn('Failed to get cached result:', error);
       return null;

@@ -5,11 +5,20 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ],
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "references": [
-    { "path": "../../packages/types" },
-    { "path": "../../packages/ai-core" }
-  ]
+    {
+      "path": "../../packages/types"
+    },
+    {
 }

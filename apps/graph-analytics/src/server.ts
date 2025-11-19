@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { type Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import compression from 'compression';
 import { Pool } from 'pg';
-import neo4j from 'neo4j-driver';
+import neo4j, { type Driver } from 'neo4j-driver';
 import { createClient } from 'redis';
 import { GraphAnalyticsService } from './services/GraphAnalyticsService';
 import { NetworkVisualizationService } from './services/NetworkVisualizationService';
@@ -12,7 +12,7 @@ import { logger } from './utils/logger';
 import { config } from './config';
 import { authenticate, authorize } from './middleware/auth';
 
-const app = express();
+const app: Application = express();
 const PORT = config.server.port || 4006;
 
 // Security middleware
@@ -49,7 +49,7 @@ app.get('/health', (req, res) => {
 
 // Database connections
 let pgPool: Pool;
-let neo4jDriver: neo4j.Driver;
+let neo4jDriver: Driver;
 let redisClient: any;
 let graphAnalyticsService: GraphAnalyticsService;
 let networkVisualizationService: NetworkVisualizationService;

@@ -7,13 +7,27 @@
     "allowJs": false,
     "isolatedModules": true,
     "noEmit": false,
-    "declaration": false,
+    "declaration": true,
     "outDir": "../../dist/services/build-hub",
     "rootDir": "src",
     "removeComments": true,
-    "incremental": true
+    "incremental": true,
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
-  "references": [{ "path": "../../packages/types" }]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "references": [
+    {
+      "path": "../../packages/types"
+    }
+  ]
 }

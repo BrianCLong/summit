@@ -99,6 +99,14 @@ export class DashboardService {
     private redisClient: RedisClientType,
   ) {}
 
+  private parseCachePayload<T>(payload: string | Buffer | null): T | null {
+    if (!payload) {
+      return null;
+    }
+    const raw = typeof payload === 'string' ? payload : payload.toString('utf8');
+    return JSON.parse(raw) as T;
+  }
+
   async createDashboard(
     dashboard: Omit<Dashboard, 'id' | 'createdAt' | 'updatedAt'>,
     userId: string,
@@ -170,10 +178,12 @@ export class DashboardService {
   ): Promise<Dashboard | null> {
     // Check cache first
     const cacheKey = `dashboard:${dashboardId}:${userId}`;
-    const cached = await this.redisClient.get(cacheKey);
+    const cached = this.parseCachePayload<Dashboard>(
+      await this.redisClient.get(cacheKey),
+    );
 
     if (cached) {
-      return JSON.parse(cached);
+      return cached;
     }
 
     try {
@@ -204,7 +214,7 @@ export class DashboardService {
         return null;
       }
 
-      const row = dashboardResult.rows[0];
+      const row = dashboardResult.rows[0] as Record<string, any>;
 
       // Get widgets
       const widgets = await this.getDashboardWidgets(dashboardId);
@@ -360,10 +370,12 @@ export class DashboardService {
 
       // Check cache
       const cacheKey = `widget_data:${widgetId}`;
-      const cached = await this.redisClient.get(cacheKey);
+      const cached = this.parseCachePayload<any>(
+        await this.redisClient.get(cacheKey),
+      );
 
       if (cached && widget.dataSource.cacheTTL) {
-        return JSON.parse(cached);
+        return cached;
       }
 
       // Execute data source query
@@ -691,12 +703,14 @@ export class DashboardService {
   }
 
   private applyMapTransformation(data: any[], config: any): any[] {
-    const { mapping } = config;
+    const mappingEntries = Object.entries(
+      (config.mapping ?? {}) as Record<string, string>,
+    );
 
     return data.map((item) => {
-      const mapped: any = {};
+      const mapped: Record<string, unknown> = {};
 
-      for (const [newField, oldField] of Object.entries(mapping)) {
+      for (const [newField, oldField] of mappingEntries) {
         mapped[newField] = item[oldField];
       }
 
@@ -801,7 +815,7 @@ export class DashboardService {
       )`,
     ];
 
-    const params = [userId];
+    const params: (string | number)[] = [userId];
     let paramIndex = 2;
 
     if (search) {
@@ -852,27 +866,30 @@ export class DashboardService {
 
     const result = await this.pgPool.query(dataQuery, params);
 
-    const dashboards = result.rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      widgets: [], // Don't load widgets for list view
-      layout: row.layout,
-      theme: row.theme,
-      isPublic: row.is_public,
-      shareToken: row.share_token,
-      tags: row.tags || [],
-      createdBy: row.created_by,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      accessControl: row.access_control || {
-        viewers: [],
-        editors: [],
-        owners: [],
-      },
-      settings: row.settings || {},
-      _widgetCount: row.widget_count,
-    }));
+    const dashboards = result.rows.map((row) => {
+      const normalized = row as Record<string, any>;
+      return {
+        id: normalized.id,
+        name: normalized.name,
+        description: normalized.description,
+        widgets: [], // Don't load widgets for list view
+        layout: normalized.layout,
+        theme: normalized.theme,
+        isPublic: normalized.is_public,
+        shareToken: normalized.share_token,
+        tags: normalized.tags || [],
+        createdBy: normalized.created_by,
+        createdAt: normalized.created_at,
+        updatedAt: normalized.updated_at,
+        accessControl: normalized.access_control || {
+          viewers: [],
+          editors: [],
+          owners: [],
+        },
+        settings: normalized.settings || {},
+        _widgetCount: normalized.widget_count,
+      };
+    });
 
     return { dashboards, total };
   }

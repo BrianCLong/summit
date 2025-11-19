@@ -4,12 +4,23 @@
     "module": "ES2020",
     "moduleResolution": "node",
     "outDir": "dist",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": false,
+    "composite": true
+    ,"tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "include": ["src"],
-  "exclude": ["node_modules"],
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "references": [
-    { "path": "../../packages/types" },
-    { "path": "../../packages/graph-ai-core" }
+    {
+      "path": "../../packages/types"
+    },
+    {
+      "path": "../../packages/graph-ai-core"
+    }
   ]
 }
