@@ -1,5 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+type SuggestedAction = {
+  type:
+    | 'search'
+    | 'analyze'
+    | 'investigate'
+    | 'export'
+    | 'visualize'
+    | 'correlate'
+    | 'report';
+  description: string;
+  parameters: Record<string, unknown>;
+};
+
+type MessageEntity = {
+  type:
+    | 'person'
+    | 'organization'
+    | 'location'
+    | 'date'
+    | 'event'
+    | 'ip'
+    | 'hash'
+    | 'url';
+  value: string;
+  confidence: number;
+  id?: string;
+};
+
+type RelatedDataEntry = {
+  type: 'entity' | 'investigation' | 'artifact' | 'report';
+  id: string;
+  title: string;
+  relevance: number;
+};
+
 interface ConversationMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -8,36 +43,9 @@ interface ConversationMessage {
   metadata?: {
     confidence?: number;
     sources?: string[];
-    entities?: Array<{
-      type:
-        | 'person'
-        | 'organization'
-        | 'location'
-        | 'date'
-        | 'event'
-        | 'ip'
-        | 'hash'
-        | 'url';
-      value: string;
-      confidence: number;
-    }>;
-    suggestedActions?: Array<{
-      type:
-        | 'search'
-        | 'analyze'
-        | 'investigate'
-        | 'export'
-        | 'visualize'
-        | 'correlate';
-      description: string;
-      parameters: any;
-    }>;
-    relatedData?: Array<{
-      type: 'entity' | 'investigation' | 'artifact' | 'report';
-      id: string;
-      title: string;
-      relevance: number;
-    }>;
+    entities?: MessageEntity[];
+    suggestedActions?: SuggestedAction[];
+    relatedData?: RelatedDataEntry[];
   };
   isStreaming?: boolean;
 }
@@ -89,14 +97,7 @@ interface InvestigationTask {
   progress: number;
   startTime: Date;
   estimatedCompletion?: Date;
-  results?: {
-    entities?: any[];
-    relationships?: any[];
-    insights?: string[];
-    visualizations?: any[];
-    confidence: number;
-    sources: string[];
-  };
+  results?: TaskResults;
   parameters: {
     depth?: number;
     timeRange?: { start: Date; end: Date };
@@ -129,12 +130,32 @@ interface AnalysisCapability {
   estimatedTime: string;
 }
 
+interface TaskResults {
+  entities: Array<{
+    id: string;
+    name: string;
+    type: string;
+    confidence: number;
+  }>;
+  relationships: Array<{
+    id: string;
+    source?: string;
+    target?: string;
+    type: string;
+    confidence: number;
+  }>;
+  insights: string[];
+  visualizations: Array<Record<string, unknown>>;
+  confidence: number;
+  sources: string[];
+}
+
 interface NaturalLanguageAssistantProps {
   investigationId?: string;
   context?: Partial<InvestigationContext>;
   onTaskCreate?: (task: InvestigationTask) => void;
-  onTaskComplete?: (taskId: string, results: any) => void;
-  onEntityDiscovered?: (entity: any) => void;
+  onTaskComplete?: (taskId: string, results: TaskResults) => void;
+  onEntityDiscovered?: (entity: MessageEntity) => void;
   onInsightGenerated?: (insight: string, confidence: number) => void;
   enableVoiceInput?: boolean;
   enableProactiveAssistance?: boolean;
@@ -168,9 +189,11 @@ const NaturalLanguageAssistant: React.FC<NaturalLanguageAssistantProps> = ({
   useEffect(() => {
     initializeAssistant();
     generateCapabilities();
+    let cleanup: (() => void) | undefined;
     if (enableProactiveAssistance) {
-      startProactiveAssistance();
+      cleanup = startProactiveAssistance();
     }
+    return () => cleanup?.();
   }, [investigationId, enableProactiveAssistance]);
 
   useEffect(() => {
@@ -602,8 +625,16 @@ What would you like to investigate today?`,
   const generateAIResponse = async (
     userMessage: string,
   ): Promise<ConversationMessage> => {
+    type AssistantResponseTemplate = {
+      pattern: RegExp;
+      response: string;
+      confidence: number;
+      entities?: MessageEntity[];
+      suggestedActions: SuggestedAction[];
+    };
+
     // Simulate intelligent response generation
-    const responses = [
+    const responses: AssistantResponseTemplate[] = [
       {
         pattern: /search|find|look up|investigate/i,
         response: `I'll search our database for information related to your query. Let me analyze the available data across ${investigationContext?.availableData.dataSourcesConnected.length} connected sources.
@@ -732,6 +763,7 @@ What specific aspect would you like me to focus on?`,
           parameters: {},
         },
       ],
+      entities: [],
     };
 
     return {
@@ -741,8 +773,8 @@ What specific aspect would you like me to focus on?`,
       timestamp: new Date(),
       metadata: {
         confidence: response.confidence,
-        entities: (response as any).entities ?? [],
-        suggestedActions: (response as any).suggestedActions ?? [],
+        entities: response.entities ?? [],
+        suggestedActions: response.suggestedActions ?? [],
         sources: ['Internal Database', 'Threat Intelligence', 'OSINT Sources'],
       },
     };
@@ -805,12 +837,18 @@ What specific aspect would you like me to focus on?`,
     }
 
     // Complete task with results
-    const results = {
+    const results: TaskResults = {
       entities: [
-        { id: 'entity-result-1', name: 'Task Result Entity', confidence: 0.89 },
+        {
+          id: 'entity-result-1',
+          name: 'Task Result Entity',
+          type: 'entity',
+          confidence: 0.89,
+        },
       ],
       relationships: [
         {
+          id: 'relationship-result-1',
           source: 'entity-1',
           target: 'entity-2',
           type: 'communication',
@@ -824,6 +862,7 @@ What specific aspect would you like me to focus on?`,
       ],
       confidence: 0.85,
       sources: ['Database Query', 'AI Analysis', 'Pattern Recognition'],
+      visualizations: [],
     };
 
     setActiveTasks((prev) =>
@@ -1135,4 +1174,3 @@ Key findings include multiple relevant entities and suspicious patterns that war
 };
 
 export default NaturalLanguageAssistant;
-// @ts-nocheck
