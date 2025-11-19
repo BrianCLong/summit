@@ -7,7 +7,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { useServer } from 'graphql-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import compression from 'compression';
