@@ -7,7 +7,6 @@ import {
   createDecipheriv,
 } from 'crypto';
 import { z } from 'zod';
-import type { BufferEncoding } from 'node:buffer';
 
 const toEncodedString = (value: Uint8Array, encoding: BufferEncoding) =>
   Buffer.from(value).toString(encoding);

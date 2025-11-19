@@ -3,7 +3,6 @@ import baseLogger from '../config/logger';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
 import { promisify } from 'util';
-import type { BufferEncoding } from 'node:buffer';
 
 const logger = baseLogger.child({ module: 'RedisStateManager' });
 
@@ -549,7 +548,7 @@ export class RedisStateManager extends EventEmitter {
   // Private helper methods
 
   private generateStateId(): string {
-    return `state_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `state_${Date.now()}_${randomHex(8)}`;
   }
 
   private buildRedisKey(
@@ -592,9 +591,9 @@ export class RedisStateManager extends EventEmitter {
       const authTag = cipher.getAuthTag();
 
       return JSON.stringify({
-        iv: iv.toString('hex'),
+        iv: encodeBuffer(iv, 'hex'),
         data: encrypted,
-        authTag: authTag.toString('hex'),
+        authTag: encodeBuffer(authTag, 'hex'),
       });
     } catch (error) {
       logger.error('Encryption failed', { error });

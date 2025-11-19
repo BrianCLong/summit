@@ -7,6 +7,9 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { MCPRequest, MCPResponse, MCPTool } from '../../types';
 
+const encodeBuffer = (value: Uint8Array, encoding: BufferEncoding) =>
+  Buffer.from(value).toString(encoding);
+
 export interface FilesServerConfig {
   port: number;
   basePath: string; // Base directory for file operations
@@ -397,7 +400,7 @@ export class FilesServer {
       let content;
       if (encoding === 'base64') {
         const buffer = await fs.readFile(fullPath);
-        content = buffer.toString('base64');
+        content = encodeBuffer(buffer, 'base64');
       } else if (encoding === 'binary') {
         const buffer = await fs.readFile(fullPath);
         content = Array.from(buffer);

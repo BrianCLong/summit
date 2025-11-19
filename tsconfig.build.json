@@ -1,0 +1,48 @@
+{
+  "files": [],
+  "references": [
+    // Core applications
+    { "path": "./client" },
+    { "path": "./server" },
+
+    // Apps workspace
+    { "path": "./apps/analytics-engine" },
+    { "path": "./apps/graph-analytics" },
+    { "path": "./apps/intelgraph-api" },
+    { "path": "./apps/ml-engine" },
+    { "path": "./apps/mobile-interface" },
+    { "path": "./apps/search-engine" },
+    { "path": "./apps/server" },
+    { "path": "./apps/types" },
+    { "path": "./apps/web" },
+    { "path": "./apps/webapp" },
+
+    // Packages workspace
+    { "path": "./packages/common-types" },
+    { "path": "./packages/govbrief" },
+    { "path": "./packages/graph-ai-core" },
+    { "path": "./packages/ingest-wizard" },
+    { "path": "./packages/jira-integration" },
+    { "path": "./packages/maestro-cli" },
+    { "path": "./packages/maestro-core" },
+    { "path": "./packages/prov-ledger-sdk" },
+    { "path": "./packages/rptc" },
+    { "path": "./packages/sdk-ts" },
+    { "path": "./packages/types" },
+
+    // Services workspace
+    { "path": "./services/agent-runtime" },
+    { "path": "./services/api-gateway" },
+    { "path": "./services/authz-gateway" },
+    { "path": "./services/build-hub" },
+    { "path": "./services/docling-svc" },
+    { "path": "./services/exporter" },
+    { "path": "./services/feed-processor" },
+    { "path": "./services/graph-core" },
+    { "path": "./services/license-registry" },
+    { "path": "./services/privacy" },
+    { "path": "./services/prov-ledger" },
+    { "path": "./services/spar" },
+    { "path": "./services/trr" }
+  ]
+}

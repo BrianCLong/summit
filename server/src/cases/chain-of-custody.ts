@@ -1,5 +1,8 @@
 import { createHash, sign, verify, KeyObject } from 'node:crypto';
 
+const encodeBuffer = (value: Uint8Array, encoding: BufferEncoding) =>
+  Buffer.from(value).toString(encoding);
+
 export interface CustodyEvent {
   caseId: string;
   attachmentId?: string;
@@ -23,7 +26,8 @@ export async function writeCoC(
   const eventHash = createHash('sha256')
     .update(prevHash + payload)
     .digest('hex');
-  const signature = sign(null, Buffer.from(eventHash), privateKey).toString(
+  const signature = encodeBuffer(
+    sign(null, Buffer.from(eventHash), privateKey),
     'base64',
   );
   await db.custodyEvent.create({

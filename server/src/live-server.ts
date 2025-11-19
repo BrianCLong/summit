@@ -3,11 +3,11 @@
  * Simplified production-ready server for immediate deployment
  */
 
-import express from 'express';
+import express, { type Application } from 'express';
 import { createServer } from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { useServer } from 'graphql-ws/use/ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import compression from 'compression';
@@ -586,7 +586,7 @@ async function startLiveServer() {
 
   // Apply GraphQL middleware
   await server.start();
-  const compatApp = app as unknown as import('express-serve-static-core').Express;
+  const compatApp = app as unknown as Application;
   server.applyMiddleware({ app: compatApp, path: '/graphql' });
 
   const PORT = process.env.PORT || 4001;
