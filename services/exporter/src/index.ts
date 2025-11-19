@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { type Application } from 'express';
 import helmet from 'helmet';
 import { createExport, ExportRequest } from './exporter';
 
-const app = express();
+const app: Application = express();
 app.use(express.json());
 app.use(helmet());
 

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
 import { EntitySchema } from '../schema';
 import {
@@ -19,7 +19,7 @@ const DecideInput = z.object({
   user: z.string(),
 });
 
-const router = Router();
+const router: RouterType = Router();
 
 router.post('/candidates', (req, res) => {
   const parsed = CandidateInput.safeParse(req.body);

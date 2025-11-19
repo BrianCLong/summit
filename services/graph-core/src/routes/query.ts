@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
 import { store } from '../services/store';
 
@@ -8,7 +8,7 @@ const QueryInput = z.object({
   id: z.string().optional(),
 });
 
-const router = Router();
+const router: RouterType = Router();
 
 router.post('/cypher', (req, res) => {
   const parsed = QueryInput.safeParse(req.body);

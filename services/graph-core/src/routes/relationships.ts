@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import { Router, type Router as RouterType } from 'express';
 import { RelationshipSchema } from '../schema';
 import { store } from '../services/store';
 
-const router = Router();
+const router: RouterType = Router();
 
 router.post('/', (req, res) => {
   const parse = RelationshipSchema.safeParse(req.body);

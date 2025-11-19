@@ -16,13 +16,13 @@ import { authorize } from './policy';
 import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
 
-export async function createApp() {
+export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
 
-  const app = express();
+  const app: express.Application = express();
   app.use(pinoHttp());
   app.use(express.json());
   app.use(requestMetricsMiddleware);

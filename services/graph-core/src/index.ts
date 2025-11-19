@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type Application } from 'express';
 import { json } from 'body-parser';
 import entities from './routes/entities';
 import relationships from './routes/relationships';
@@ -6,7 +6,7 @@ import er from './routes/er';
 import query from './routes/query';
 import { correlationId } from './middleware/correlationId';
 
-const app = express();
+const app: Application = express();
 app.use(json());
 app.use(correlationId);
 
