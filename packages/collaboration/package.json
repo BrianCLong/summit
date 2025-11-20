@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/collaboration",
+  "version": "1.0.0",
+  "description": "Comprehensive collaboration platform for intelligence analysis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/workspace": "workspace:*",
+    "@intelgraph/real-time-sync": "workspace:*",
+    "@intelgraph/commenting": "workspace:*",
+    "@intelgraph/version-control": "workspace:*",
+    "zod": "^3.22.0",
+    "nanoid": "^5.0.0",
+    "ws": "^8.14.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.0",
+    "typescript": "^5.3.0"
+  }
+}
