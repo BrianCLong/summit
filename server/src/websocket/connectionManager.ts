@@ -1,4 +1,5 @@
 import promClient from 'prom-client';
+import { activeConnections } from '../observability/metrics.js';
 
 export enum ConnectionState {
   CONNECTING = 'connecting',

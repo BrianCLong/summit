@@ -7,6 +7,7 @@ import {
   ManagedConnection,
   WebSocketConnectionPool,
 } from './connectionManager.js';
+import { activeConnections } from '../observability/metrics.js';
 
 interface WebSocketClaims {
   tenantId: string;
@@ -320,6 +321,7 @@ export class WebSocketCore {
         );
         connection.manager = manager;
         this.connections.set(connectionId, connection);
+        activeConnections.inc({ tenant: connection.tenantId });
 
         console.log(
           `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
@@ -354,6 +356,7 @@ export class WebSocketCore {
         }
 
         this.connections.delete(connectionId);
+        activeConnections.dec({ tenant: connection.tenantId });
 
         if (code === 1000) {
           this.connectionPool.removeConnection(connectionId, 'graceful_close');
@@ -497,7 +500,11 @@ export class WebSocketCore {
         this.HEARTBEAT_INTERVAL * 2,
       );
       for (const connectionId of closed) {
+        const connection = this.connections.get(connectionId);
         this.connections.delete(connectionId);
+        if (connection) {
+          activeConnections.dec({ tenant: connection.tenantId });
+        }
         console.log(`Closing stale connection: ${connectionId}`);
       }
     }, this.HEARTBEAT_INTERVAL);
