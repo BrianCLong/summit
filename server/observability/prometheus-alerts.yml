@@ -1,0 +1,347 @@
+# IntelGraph Platform - Prometheus Alert Rules
+# SLO-based alerting for critical service metrics
+
+groups:
+  # ============================================================================
+  # HTTP/API ALERTS
+  # ============================================================================
+  - name: http_api_alerts
+    interval: 30s
+    rules:
+      - alert: HighHTTPErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status_code=~"5.."}[5m])
+            /
+            rate(http_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High HTTP 5xx error rate detected"
+          description: "HTTP 5xx error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      - alert: HighHTTPLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High HTTP request latency (P95)"
+          description: "HTTP P95 latency is {{ $value }}s (threshold: 2s)"
+
+      - alert: HighHTTPLatencyCritical
+        expr: |
+          histogram_quantile(0.99,
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 5
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Critical HTTP request latency (P99)"
+          description: "HTTP P99 latency is {{ $value }}s (threshold: 5s)"
+
+  # ============================================================================
+  # GRAPHQL ALERTS
+  # ============================================================================
+  - name: graphql_alerts
+    interval: 30s
+    rules:
+      - alert: HighGraphQLErrorRate
+        expr: |
+          (
+            rate(graphql_resolver_errors_total[5m])
+            /
+            rate(graphql_resolver_calls_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: graphql
+        annotations:
+          summary: "High GraphQL resolver error rate"
+          description: "GraphQL error rate is {{ $value | humanizePercentage }} for {{ $labels.resolver_name }}"
+
+      - alert: SlowGraphQLResolver
+        expr: |
+          histogram_quantile(0.95,
+            rate(graphql_resolver_duration_seconds_bucket[5m])
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: graphql
+        annotations:
+          summary: "Slow GraphQL resolver detected"
+          description: "Resolver {{ $labels.resolver_name }} P95 latency is {{ $value }}s"
+
+  # ============================================================================
+  # DATABASE ALERTS
+  # ============================================================================
+  - name: database_alerts
+    interval: 30s
+    rules:
+      - alert: PostgreSQLPoolExhaustion
+        expr: |
+          (
+            db_connection_pool_active{database="postgresql"}
+            /
+            db_connection_pool_size{database="postgresql"}
+          ) > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL connection pool near exhaustion"
+          description: "Pool {{ $labels.pool }} is {{ $value | humanizePercentage }} utilized (threshold: 90%)"
+
+      - alert: PostgreSQLConnectionWaiting
+        expr: db_connection_pool_waiting{database="postgresql"} > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High number of connections waiting"
+          description: "{{ $value }} connections waiting for pool {{ $labels.pool }}"
+
+      - alert: HighDatabaseQueryLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(db_query_duration_seconds_bucket{database="postgresql"}[5m])
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High database query latency"
+          description: "{{ $labels.database }} {{ $labels.operation }} P95 latency is {{ $value }}s"
+
+      - alert: Neo4jConnectivityDown
+        expr: neo4j_connectivity_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Neo4j connectivity lost"
+          description: "Neo4j database is unreachable"
+
+      - alert: HighNeo4jSessionCount
+        expr: neo4j_sessions_active > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High number of active Neo4j sessions"
+          description: "{{ $value }} active Neo4j sessions (threshold: 100)"
+
+  # ============================================================================
+  # REDIS/CACHE ALERTS
+  # ============================================================================
+  - name: cache_alerts
+    interval: 30s
+    rules:
+      - alert: LowCacheHitRatio
+        expr: redis_cache_hit_ratio < 0.7
+        for: 10m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Low Redis cache hit ratio"
+          description: "Cache {{ $labels.cache_name }} hit ratio is {{ $value | humanizePercentage }} (threshold: 70%)"
+
+      - alert: HighRedisLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(redis_operation_duration_seconds_bucket[5m])
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "High Redis operation latency"
+          description: "Redis {{ $labels.operation }} P95 latency is {{ $value }}s (threshold: 100ms)"
+
+  # ============================================================================
+  # QUEUE ALERTS
+  # ============================================================================
+  - name: queue_alerts
+    interval: 30s
+    rules:
+      - alert: HighQueueBacklog
+        expr: queue_jobs_waiting > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: queue
+        annotations:
+          summary: "High job queue backlog"
+          description: "Queue {{ $labels.queue }} has {{ $value }} jobs waiting"
+
+      - alert: CriticalQueueBacklog
+        expr: queue_jobs_waiting > 10000
+        for: 5m
+        labels:
+          severity: critical
+          component: queue
+        annotations:
+          summary: "Critical job queue backlog"
+          description: "Queue {{ $labels.queue }} has {{ $value }} jobs waiting (critical threshold)"
+
+      - alert: HighQueueJobFailureRate
+        expr: |
+          (
+            rate(queue_jobs_failed_total[5m])
+            /
+            (rate(queue_jobs_completed_total[5m]) + rate(queue_jobs_failed_total[5m]))
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: queue
+        annotations:
+          summary: "High queue job failure rate"
+          description: "Queue {{ $labels.queue }} failure rate is {{ $value | humanizePercentage }}"
+
+  # ============================================================================
+  # SYSTEM RESOURCE ALERTS
+  # ============================================================================
+  - name: system_alerts
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            application_memory_usage_bytes{component="heap_used"}
+            /
+            application_memory_usage_bytes{component="heap_total"}
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High Node.js heap memory usage"
+          description: "Heap usage is {{ $value | humanizePercentage }} (threshold: 90%)"
+
+      - alert: HighEventLoopLag
+        expr: nodejs_eventloop_lag_seconds > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High event loop lag detected"
+          description: "Event loop lag is {{ $value }}s (threshold: 100ms)"
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% (threshold: 80%)"
+
+  # ============================================================================
+  # SERVICE ERROR ALERTS
+  # ============================================================================
+  - name: service_error_alerts
+    interval: 30s
+    rules:
+      - alert: HighServiceErrorRate
+        expr: rate(service_errors_total{severity="error"}[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: service
+        annotations:
+          summary: "High service error rate"
+          description: "Service {{ $labels.service }} error rate is {{ $value }}/s"
+
+      - alert: CriticalServiceErrors
+        expr: rate(service_errors_total{severity="critical"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: service
+        annotations:
+          summary: "Critical service errors detected"
+          description: "Service {{ $labels.service }} critical error rate is {{ $value }}/s"
+
+  # ============================================================================
+  # WEBSOCKET ALERTS
+  # ============================================================================
+  - name: websocket_alerts
+    interval: 30s
+    rules:
+      - alert: HighWebSocketConnections
+        expr: websocket_connections_active > 10000
+        for: 5m
+        labels:
+          severity: warning
+          component: websocket
+        annotations:
+          summary: "High number of WebSocket connections"
+          description: "{{ $value }} active WebSocket connections (threshold: 10000)"
+
+      - alert: CriticalWebSocketConnections
+        expr: websocket_connections_active > 50000
+        for: 2m
+        labels:
+          severity: critical
+          component: websocket
+        annotations:
+          summary: "Critical number of WebSocket connections"
+          description: "{{ $value }} active WebSocket connections (critical threshold: 50000)"
+
+  # ============================================================================
+  # SLO VIOLATION ALERTS
+  # ============================================================================
+  - name: slo_alerts
+    interval: 1m
+    rules:
+      # SLO: 99.9% availability (error budget: 0.1% errors over 1h)
+      - alert: SLOErrorBudgetExhausted
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total[1h]))
+          ) > 0.001
+        for: 5m
+        labels:
+          severity: critical
+          component: slo
+        annotations:
+          summary: "SLO error budget exhausted"
+          description: "Error rate {{ $value | humanizePercentage }} exceeds 0.1% budget over 1h"
+
+      # SLO: 95% of requests < 500ms
+      - alert: SLOLatencyBudgetExhausted
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket[1h])
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: critical
+          component: slo
+        annotations:
+          summary: "SLO latency budget exhausted"
+          description: "P95 latency {{ $value }}s exceeds 500ms budget"
