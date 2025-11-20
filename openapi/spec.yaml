@@ -1,0 +1,1634 @@
+openapi: 3.0.3
+info:
+  title: IntelGraph Platform API
+  version: 1.0.0
+  description: |
+    Next-generation intelligence analysis platform with AI-augmented graph analytics.
+
+    ## Overview
+    The IntelGraph Platform API provides comprehensive access to intelligence analysis capabilities,
+    including:
+    - **Case Management**: Create and manage investigation cases
+    - **Evidence Handling**: Annotate and export evidence
+    - **Data Ingestion**: Connect to multiple data sources (Twitter, GitHub, S3, etc.)
+    - **Triage**: AI-powered suggestion and approval workflows
+    - **Analytics**: Advanced graph analytics and link prediction
+    - **AI Copilot**: Natural language query generation and classification
+    - **Administration**: User, tenant, and policy management
+
+    ## Authentication
+    All API endpoints require JWT Bearer token authentication via OIDC.
+    Include the token in the `Authorization` header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+
+    ## Rate Limiting
+    API requests are rate-limited based on user role and endpoint sensitivity.
+    Rate limit headers are included in responses:
+    - `X-RateLimit-Limit`: Maximum requests per window
+    - `X-RateLimit-Remaining`: Remaining requests in current window
+    - `X-RateLimit-Reset`: Time when the rate limit resets
+
+    ## Errors
+    The API uses standard HTTP status codes and returns errors in JSON format:
+    ```json
+    {
+      "ok": false,
+      "error": "Error message description"
+    }
+    ```
+
+  contact:
+    name: IntelGraph Team
+    email: support@intelgraph.example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:4000
+    description: Development server
+  - url: https://api.intelgraph.example.com
+    description: Production server
+
+tags:
+  - name: Cases
+    description: Investigation case management operations
+  - name: Evidence
+    description: Evidence annotation and export
+  - name: Ingest
+    description: Data ingestion from external sources
+  - name: Triage
+    description: AI-powered triage suggestions and workflow
+  - name: Analytics
+    description: Advanced analytics and predictions
+  - name: Copilot
+    description: AI assistant for query generation and safety
+  - name: Admin
+    description: Administrative operations (users, tenants, audit)
+  - name: Health
+    description: Health check and monitoring endpoints
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: OIDC JWT token authentication
+
+  schemas:
+    Case:
+      type: object
+      required:
+        - id
+        - title
+        - status
+        - evidence
+      properties:
+        id:
+          type: string
+          description: Unique case identifier
+          example: "a7b2c3d4"
+        title:
+          type: string
+          description: Case title
+          example: "Suspicious Network Activity Investigation"
+        status:
+          type: string
+          enum: [draft, open, approved, closed]
+          description: Current case status
+          example: "draft"
+        evidence:
+          type: array
+          items:
+            type: string
+          description: Array of evidence IDs associated with this case
+          example: ["e1", "e2", "e3"]
+        createdAt:
+          type: string
+          format: date-time
+          description: Case creation timestamp
+
+    Annotation:
+      type: object
+      required:
+        - id
+        - range
+        - note
+      properties:
+        id:
+          type: string
+          description: Unique annotation identifier
+          example: "ann123"
+        range:
+          type: string
+          description: Text range or location reference (e.g., "0-100" for character positions)
+          example: "45-89"
+        note:
+          type: string
+          description: Annotation content/note
+          example: "Suspicious timestamp - correlates with external event"
+        author:
+          type: string
+          format: email
+          description: Email of the user who created the annotation
+          example: "analyst@example.com"
+
+    Suggestion:
+      type: object
+      required:
+        - id
+        - type
+        - data
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique suggestion identifier
+          example: "sug456"
+        type:
+          type: string
+          enum: [link, anomaly]
+          description: Type of triage suggestion
+          example: "link"
+        data:
+          type: object
+          additionalProperties: true
+          description: Suggestion-specific data payload
+          example: {"sourceId": "e1", "targetId": "e2", "confidence": 0.85}
+        status:
+          type: string
+          enum: [new, approved, rejected, materialized]
+          description: Current suggestion status
+          example: "new"
+        score:
+          type: number
+          format: float
+          description: Confidence/relevance score (0.0 - 1.0)
+          example: 0.85
+
+    IngestJob:
+      type: object
+      required:
+        - id
+        - connector
+        - status
+        - progress
+      properties:
+        id:
+          type: string
+          description: Unique job identifier
+          example: "job789"
+        connector:
+          type: string
+          description: Data source connector type
+          example: "twitter"
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+          description: Current job status
+          example: "running"
+        progress:
+          type: number
+          format: int32
+          minimum: 0
+          maximum: 100
+          description: Job progress percentage
+          example: 45
+
+    Connector:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: Connector identifier
+          example: "twitter"
+        name:
+          type: string
+          description: Human-readable connector name
+          example: "Twitter/X"
+
+    ConnectorSchema:
+      type: object
+      properties:
+        required:
+          type: array
+          items:
+            type: string
+          description: List of required configuration fields
+          example: ["bearerToken", "query"]
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              type:
+                type: string
+              format:
+                type: string
+              title:
+                type: string
+          description: JSON Schema for connector configuration
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "u1"
+        email:
+          type: string
+          format: email
+          example: "analyst@example.com"
+        role:
+          type: string
+          enum: [analyst, investigator, supervisor, admin, viewer]
+          example: "analyst"
+        tenantId:
+          type: string
+          example: "default"
+
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "default"
+        name:
+          type: string
+          example: "Default Tenant"
+
+    AuditEvent:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        userId:
+          type: string
+        action:
+          type: string
+          example: "case.create"
+        details:
+          type: object
+          additionalProperties: true
+        ip:
+          type: string
+          format: ipv4
+          example: "192.168.1.100"
+        tenantId:
+          type: string
+
+    FeatureFlag:
+      type: object
+      additionalProperties:
+        type: boolean
+      description: Map of feature flag keys to boolean values
+      example:
+        enableAdvancedAnalytics: true
+        enableBulkExport: false
+
+    LinkPrediction:
+      type: object
+      properties:
+        a:
+          type: string
+          description: First entity ID
+        b:
+          type: string
+          description: Second entity ID
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Prediction confidence score
+
+    CostEstimate:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        cost:
+          type: number
+          format: float
+          description: Estimated cost in arbitrary units
+
+    SafetyClassification:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        classification:
+          type: string
+          enum: [safe, unsafe]
+        reasons:
+          type: array
+          items:
+            type: string
+          description: List of reasons for classification
+
+    CookbookQuery:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        query:
+          type: string
+          description: GraphQL query template
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        uptime:
+          type: number
+          description: Server uptime in seconds
+        timestamp:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required:
+        - ok
+        - error
+      properties:
+        ok:
+          type: boolean
+          enum: [false]
+          example: false
+        error:
+          type: string
+          description: Error message
+          example: "Resource not found"
+        fields:
+          type: array
+          items:
+            type: string
+          description: List of problematic fields (for validation errors)
+
+paths:
+  # Health & Monitoring
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the current health status of the API service
+      operationId: getHealth
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              examples:
+                healthy:
+                  value:
+                    status: healthy
+                    uptime: 3600
+                    timestamp: "2025-01-15T10:30:00Z"
+
+  /metrics:
+    get:
+      summary: Basic metrics endpoint
+      description: Returns basic service metrics including uptime and memory usage
+      operationId: getMetrics
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uptime:
+                    type: number
+                  memory:
+                    type: object
+                    properties:
+                      used:
+                        type: number
+                      total:
+                        type: number
+
+  # Cases API
+  /api/cases:
+    post:
+      summary: Create a new case
+      description: Creates a new investigation case with draft status
+      operationId: createCase
+      tags:
+        - Cases
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Case title
+                  example: "Financial Fraud Investigation"
+            examples:
+              newCase:
+                value:
+                  title: "Suspicious Transaction Pattern Analysis"
+      responses:
+        '200':
+          description: Case created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '401':
+          description: Unauthorized - invalid or missing JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/cases/{id}:
+    get:
+      summary: Get case by ID
+      description: Retrieves a specific case by its unique identifier
+      operationId: getCaseById
+      tags:
+        - Cases
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique case identifier
+          example: "a7b2c3d4"
+      responses:
+        '200':
+          description: Case found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '404':
+          description: Case not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                ok: false
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /api/cases/{id}/approve:
+    post:
+      summary: Approve a case
+      description: Changes case status to 'approved' and logs the action for audit
+      operationId: approveCase
+      tags:
+        - Cases
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Case identifier to approve
+      responses:
+        '200':
+          description: Case approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  case:
+                    $ref: '#/components/schemas/Case'
+        '404':
+          description: Case not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires investigation:update permission
+        '500':
+          description: Internal server error
+
+  /api/cases/{id}/export:
+    get:
+      summary: Export case data
+      description: Exports complete case bundle including evidence with watermark
+      operationId: exportCase
+      tags:
+        - Cases
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Case identifier to export
+      responses:
+        '200':
+          description: Case exported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  bundle:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      title:
+                        type: string
+                      status:
+                        type: string
+                      evidence:
+                        type: array
+                        items:
+                          type: string
+                      watermark:
+                        type: object
+                        properties:
+                          ts:
+                            type: string
+                            format: date-time
+        '404':
+          description: Case not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires data:export permission
+
+  # Evidence API
+  /api/evidence/{id}/annotations:
+    get:
+      summary: Get annotations for evidence
+      description: Retrieves all annotations associated with a specific evidence item
+      operationId: getEvidenceAnnotations
+      tags:
+        - Evidence
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Evidence identifier
+          example: "evidence123"
+      responses:
+        '200':
+          description: Annotations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Annotation'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires investigation:read permission
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create annotation for evidence
+      description: Adds a new annotation to an evidence item with text range and note
+      operationId: createEvidenceAnnotation
+      tags:
+        - Evidence
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Evidence identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - range
+                - note
+              properties:
+                range:
+                  type: string
+                  description: Text range (e.g., "0-100" for character positions)
+                  example: "45-89"
+                note:
+                  type: string
+                  description: Annotation text/note
+                  example: "Key evidence - matches suspect timeline"
+            examples:
+              textAnnotation:
+                value:
+                  range: "120-145"
+                  note: "Suspicious communication pattern detected"
+      responses:
+        '200':
+          description: Annotation created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  annotation:
+                    $ref: '#/components/schemas/Annotation'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires investigation:update permission
+        '500':
+          description: Internal server error
+
+  /api/evidence/{id}/pdf:
+    get:
+      summary: Export evidence as PDF
+      description: Generates a PDF export URL for the specified evidence item
+      operationId: exportEvidencePDF
+      tags:
+        - Evidence
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Evidence identifier
+      responses:
+        '200':
+          description: PDF export URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  url:
+                    type: string
+                    format: uri
+                    description: Download URL for PDF export
+                    example: "/downloads/evidence123.pdf"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires data:export permission
+
+  # Ingest API
+  /api/ingest/connectors:
+    get:
+      summary: List available data connectors
+      description: Returns all supported data source connectors for ingestion
+      operationId: listConnectors
+      tags:
+        - Ingest
+      security: []
+      responses:
+        '200':
+          description: List of available connectors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Connector'
+              examples:
+                connectorList:
+                  value:
+                    items:
+                      - id: "twitter"
+                        name: "Twitter/X"
+                      - id: "github"
+                        name: "GitHub"
+                      - id: "s3"
+                        name: "Amazon S3"
+
+  /api/ingest/start:
+    post:
+      summary: Start ingestion job
+      description: Initiates a new data ingestion job for the specified connector
+      operationId: startIngestJob
+      tags:
+        - Ingest
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connector
+              properties:
+                connector:
+                  type: string
+                  description: Connector ID from /connectors endpoint
+                  example: "twitter"
+                config:
+                  type: object
+                  additionalProperties: true
+                  description: Connector-specific configuration
+            examples:
+              twitterIngest:
+                value:
+                  connector: "twitter"
+                  config:
+                    bearerToken: "YOUR_TOKEN"
+                    query: "#cybersecurity"
+      responses:
+        '200':
+          description: Job started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  job_id:
+                    type: string
+                    example: "job789"
+                  connector:
+                    type: string
+                    example: "twitter"
+        '400':
+          description: Bad request - connector_required or invalid configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingConnector:
+                  value:
+                    ok: false
+                    error: "connector_required"
+
+  /api/ingest/progress/{id}:
+    get:
+      summary: Check ingestion job progress
+      description: Returns current status and progress of an ingestion job
+      operationId: getIngestProgress
+      tags:
+        - Ingest
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job identifier
+      responses:
+        '200':
+          description: Job progress retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [queued, running, completed, failed]
+                  progress:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                ok: false
+                error: "not_found"
+
+  /api/ingest/cancel/{id}:
+    post:
+      summary: Cancel ingestion job
+      description: Cancels a running or queued ingestion job
+      operationId: cancelIngestJob
+      tags:
+        - Ingest
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job identifier to cancel
+      responses:
+        '200':
+          description: Job cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: string
+        '404':
+          description: Job not found
+
+  /api/ingest/schema/{id}:
+    get:
+      summary: Get connector configuration schema
+      description: Returns the JSON Schema for configuring a specific connector
+      operationId: getConnectorSchema
+      tags:
+        - Ingest
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Connector identifier
+          example: "twitter"
+      responses:
+        '200':
+          description: Connector schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorSchema'
+              examples:
+                twitterSchema:
+                  value:
+                    required: ["bearerToken", "query"]
+                    properties:
+                      bearerToken:
+                        type: "string"
+                        title: "Bearer Token"
+                      query:
+                        type: "string"
+                        title: "Search Query"
+
+  /api/ingest/dry-run/{id}:
+    post:
+      summary: Validate connector configuration
+      description: Validates connector configuration without starting ingestion
+      operationId: dryRunConnector
+      tags:
+        - Ingest
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Connector identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: Connector configuration to validate
+      responses:
+        '200':
+          description: Configuration valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Configuration invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "missing_required"
+                  fields:
+                    type: array
+                    items:
+                      type: string
+
+  # Triage API
+  /api/triage/suggestions:
+    get:
+      summary: List triage suggestions
+      description: Retrieves all triage suggestions ordered by creation date
+      operationId: listTriageSuggestions
+      tags:
+        - Triage
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Suggestions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Suggestion'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires analytics:run permission
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create triage suggestion
+      description: Creates a new AI-generated triage suggestion
+      operationId: createTriageSuggestion
+      tags:
+        - Triage
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [link, anomaly]
+                  default: link
+                data:
+                  type: object
+                  additionalProperties: true
+            examples:
+              linkSuggestion:
+                value:
+                  type: "link"
+                  data:
+                    sourceId: "e1"
+                    targetId: "e2"
+                    confidence: 0.92
+      responses:
+        '200':
+          description: Suggestion created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  suggestion:
+                    $ref: '#/components/schemas/Suggestion'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires analytics:run permission
+        '500':
+          description: Internal server error
+
+  /api/triage/suggestions/{id}/approve:
+    post:
+      summary: Approve triage suggestion
+      description: Approves a suggestion and updates its status
+      operationId: approveTriageSuggestion
+      tags:
+        - Triage
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Suggestion identifier
+      responses:
+        '200':
+          description: Suggestion approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  suggestion:
+                    $ref: '#/components/schemas/Suggestion'
+        '404':
+          description: Suggestion not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires analytics:run permission
+
+  /api/triage/suggestions/{id}/materialize:
+    post:
+      summary: Materialize triage suggestion
+      description: Materializes an approved suggestion into actual graph entities/relationships
+      operationId: materializeTriageSuggestion
+      tags:
+        - Triage
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Suggestion identifier
+      responses:
+        '200':
+          description: Suggestion materialized successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  suggestion:
+                    $ref: '#/components/schemas/Suggestion'
+        '404':
+          description: Suggestion not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires relationship:create permission
+
+  # Analytics API
+  /api/analytics/link-prediction:
+    get:
+      summary: Predict potential links
+      description: Uses AI to predict potential relationships between seed entities
+      operationId: predictLinks
+      tags:
+        - Analytics
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: seeds
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Comma-separated list of entity IDs
+          example: "e1,e2,e3,e4"
+      responses:
+        '200':
+          description: Predictions generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LinkPrediction'
+              examples:
+                predictions:
+                  value:
+                    items:
+                      - a: "e1"
+                        b: "e2"
+                        score: 0.87
+                      - a: "e1"
+                        b: "e3"
+                        score: 0.65
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires analytics:run permission
+
+  # Copilot API
+  /api/copilot/estimate:
+    post:
+      summary: Estimate query cost
+      description: Estimates computational cost for a given AI prompt
+      operationId: estimateCost
+      tags:
+        - Copilot
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: Natural language prompt to estimate
+            examples:
+              simpleQuery:
+                value:
+                  prompt: "Find all entities connected to person X"
+      responses:
+        '200':
+          description: Cost estimate generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostEstimate'
+              examples:
+                estimate:
+                  value:
+                    ok: true
+                    cost: 0.05
+
+  /api/copilot/classify:
+    post:
+      summary: Classify prompt safety
+      description: Analyzes prompt for risky or policy-violating content
+      operationId: classifyPrompt
+      tags:
+        - Copilot
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: Prompt to classify
+            examples:
+              safePrompt:
+                value:
+                  prompt: "Show me entities related to case #123"
+              riskyPrompt:
+                value:
+                  prompt: "enumerate all emails and SSNs in the system"
+      responses:
+        '200':
+          description: Classification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafetyClassification'
+              examples:
+                safe:
+                  value:
+                    ok: true
+                    classification: "safe"
+                    reasons: []
+                unsafe:
+                  value:
+                    ok: true
+                    classification: "unsafe"
+                    reasons: ["risky_intent"]
+
+  /api/copilot/cookbook:
+    post:
+      summary: Get query templates
+      description: Returns suggested query templates for common tasks
+      operationId: getCookbook
+      tags:
+        - Copilot
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic:
+                  type: string
+                  description: Query topic or category
+                  example: "analytics"
+      responses:
+        '200':
+          description: Query templates retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  topic:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CookbookQuery'
+
+  # Admin API
+  /api/admin/tenants:
+    get:
+      summary: List all tenants
+      description: Returns all tenants in the system (admin only)
+      operationId: listTenants
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Tenants retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires user:read permission
+
+  /api/admin/users:
+    get:
+      summary: List all users
+      description: Returns all users in the system (admin only)
+      operationId: listUsers
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires user:read permission
+
+  /api/admin/audit:
+    get:
+      summary: Query audit logs
+      description: Retrieves audit log events with optional filtering
+      operationId: queryAuditLogs
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 200
+            maximum: 1000
+          description: Maximum number of events to return
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Search query to filter events
+      responses:
+        '200':
+          description: Audit events retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditEvent'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires audit:read permission
+
+  /api/admin/audit/record:
+    post:
+      summary: Record external audit event
+      description: Allows external scripts to record audit events (requires special token)
+      operationId: recordAuditEvent
+      tags:
+        - Admin
+      security: []
+      parameters:
+        - name: x-audit-token
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Special audit hook token
+        - name: x-audit-nonce
+          in: header
+          required: true
+          schema:
+            type: string
+          description: One-time nonce for replay protection
+        - name: x-audit-ts
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: Unix timestamp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  description: Action identifier
+                  example: "external.backup"
+                details:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Audit event recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '400':
+          description: Stale timestamp or missing nonce
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "stale"
+        '401':
+          description: Unauthorized - invalid token
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "unauthorized"
+        '409':
+          description: Replay attack detected (nonce reused)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "replay"
+
+  /api/admin/flags:
+    get:
+      summary: Get feature flags
+      description: Returns current feature flag settings
+      operationId: getFeatureFlags
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Feature flags retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flags:
+                    $ref: '#/components/schemas/FeatureFlag'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires user:read permission
+
+  /api/admin/flags/{key}:
+    put:
+      summary: Update feature flag
+      description: Sets a feature flag value
+      operationId: updateFeatureFlag
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Feature flag key
+          example: "enableAdvancedAnalytics"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: boolean
+            examples:
+              enable:
+                value:
+                  value: true
+      responses:
+        '200':
+          description: Flag updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  key:
+                    type: string
+                  value:
+                    type: boolean
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires user:read permission
+
+  /api/admin/policy:
+    get:
+      summary: Get OPA policy
+      description: Retrieves the current Rego policy content (dev only)
+      operationId: getPolicy
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Policy content retrieved
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Rego policy source code
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires user:read permission
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update OPA policy
+      description: Updates the Rego policy content (dev only, use with caution)
+      operationId: updatePolicy
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: New Rego policy source code
+      responses:
+        '200':
+          description: Policy updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires user:read permission
+        '500':
+          description: Internal server error

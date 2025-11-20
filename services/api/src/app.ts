@@ -31,6 +31,9 @@ import { casesRouter } from './routes/cases.js';
 import { evidenceRouter } from './routes/evidence.js';
 import { analyticsExtRouter } from './routes/analytics_ext.js';
 import { triageRouter } from './routes/triage.js';
+import { swaggerRouter } from './docs/swagger.js';
+import { graphqlDocsRouter } from './docs/graphql-docs.js';
+import { validateRequest } from './middleware/openapi-validator.js';
 
 export async function createApp() {
   const app = express();
@@ -60,6 +63,11 @@ export async function createApp() {
   app.use(compression());
   app.use(json({ limit: '10mb' }));
 
+  // OpenAPI request validation (optional - only for /api routes)
+  if (process.env.ENABLE_API_VALIDATION === 'true') {
+    app.use(validateRequest);
+  }
+
   // Health check endpoint
   app.get('/health', (req, res) => {
     res.json({
@@ -79,20 +87,24 @@ export async function createApp() {
     });
   });
 
+  // API Documentation (Swagger/OpenAPI)
+  app.use('/api/docs', swaggerRouter);
+  app.use('/api/docs', graphqlDocsRouter);
+
   // Ingest wizard API (scaffold)
-  app.use('/ingest', ingestRouter);
+  app.use('/api/ingest', ingestRouter);
   // Copilot utility
-  app.use('/copilot', copilotRouter);
+  app.use('/api/copilot', copilotRouter);
   // Admin console
-  app.use('/admin', adminRouter);
+  app.use('/api/admin', adminRouter);
   // Cases
-  app.use('/cases', casesRouter);
+  app.use('/api/cases', casesRouter);
   // Evidence
-  app.use('/evidence', evidenceRouter);
+  app.use('/api/evidence', evidenceRouter);
   // Analytics expansion
-  app.use('/analytics', analyticsExtRouter);
+  app.use('/api/analytics', analyticsExtRouter);
   // Triage queue
-  app.use('/triage', triageRouter);
+  app.use('/api/triage', triageRouter);
 
   // Create Apollo Server
   const server = new ApolloServer({
