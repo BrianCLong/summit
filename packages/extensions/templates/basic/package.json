@@ -1,0 +1,17 @@
+{
+  "name": "@summit-extensions/my-extension",
+  "version": "0.1.0",
+  "description": "My Summit extension",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@summit/extensions": "workspace:*",
+    "typescript": "^5.3.3"
+  }
+}

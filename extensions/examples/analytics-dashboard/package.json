@@ -1,0 +1,17 @@
+{
+  "name": "@summit-extensions/analytics-dashboard",
+  "version": "1.0.0",
+  "description": "Analytics dashboard extension for Summit",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@summit/extensions": "workspace:*",
+    "typescript": "^5.3.3"
+  }
+}
