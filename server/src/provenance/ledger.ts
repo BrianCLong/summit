@@ -189,8 +189,9 @@ export class ProvenanceLedgerV2 extends EventEmitter {
               ? previousEntry.sequenceNumber + 1n
               : 1n;
 
-            // Generate unique ID and current hash
-            const id = `prov_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+            // Generate cryptographically secure unique ID
+            const crypto = require('crypto');
+            const id = `prov_${Date.now()}_${crypto.randomBytes(6).toString('base64url')}`;
             const currentHash = this.computeEntryHash({
               id,
               sequenceNumber,
@@ -326,7 +327,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
                   ? previousEntry.sequenceNumber + 1n
                   : 1n;
 
-                const id = `prov_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+                // Generate cryptographically secure provenance ID
+                const crypto = require('crypto');
+                const id = `prov_${Date.now()}_${crypto.randomBytes(6).toString('base64url')}`;
+
                 const currentHash = this.computeEntryHash({
                   id,
                   sequenceNumber,
@@ -657,8 +661,11 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     // Sign the root hash using cosign
     const signature = await this.signWithCosign(rootHash);
 
+    // Generate cryptographically secure root ID
+    const crypto = require('crypto');
     const root: LedgerRoot = {
-      id: `root_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      id: `root_${Date.now()}_${crypto.randomBytes(6).toString('base64url')}`,
+
       tenantId,
       rootHash,
       startSequence: BigInt(range.start_seq),

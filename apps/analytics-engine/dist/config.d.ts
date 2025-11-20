@@ -1,30 +1,30 @@
 export declare const config: {
     server: {
         port: number;
-        allowedOrigins: string[];
-        environment: string;
+        allowedOrigins: any;
+        environment: any;
     };
     database: {
         postgres: {
-            host: string;
+            host: any;
             port: number;
-            user: string;
-            password: string;
-            database: string;
+            user: any;
+            password: any;
+            database: any;
             ssl: boolean | {
                 rejectUnauthorized: boolean;
             };
         };
         neo4j: {
-            uri: string;
-            user: string;
-            password: string;
+            uri: any;
+            user: any;
+            password: any;
         };
     };
     redis: {
-        host: string;
+        host: any;
         port: number;
-        password: string;
+        password: any;
         db: number;
     };
     analytics: {
@@ -47,12 +47,12 @@ export declare const config: {
         exportTimeout: number;
     };
     auth: {
-        jwtSecret: string;
-        jwtExpiresIn: string;
+        jwtSecret: any;
+        jwtExpiresIn: any;
     };
     monitoring: {
         metricsEnabled: boolean;
         metricsPort: number;
-        logLevel: string;
+        logLevel: any;
     };
 };

@@ -247,7 +247,9 @@ export class WORMAuditChainService {
       }
 
       // Create new segment
-      const segmentId = `segment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate cryptographically secure segment ID
+      const crypto = require('crypto');
+      const segmentId = `segment-${Date.now()}-${crypto.randomBytes(8).toString('base64url')}`;
 
       this.currentSegment = {
         segmentId,

@@ -21,8 +21,10 @@ incidentRouter.post('/incidents', async (req, res) => {
       });
     }
 
+    // Generate cryptographically secure incident ID
+    const crypto = require('crypto');
     const incidentContext = {
-      id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `incident_${Date.now()}_${crypto.randomBytes(8).toString('base64url')}`,
       type,
       severity,
       source: source || 'manual',

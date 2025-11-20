@@ -200,7 +200,9 @@ export class FIPSComplianceService implements FIPSCrypto {
         throw new Error(`Algorithm ${algorithm} is not FIPS 140-2 approved`);
       }
 
-      const keyId = `fips-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate cryptographically secure FIPS key ID
+      const crypto = require('crypto');
+      const keyId = `fips-${Date.now()}-${crypto.randomBytes(8).toString('base64url')}`;
 
       // Generate key in HSM
       let keyHandle;

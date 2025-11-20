@@ -43,7 +43,9 @@ class WarRoomController {
         });
       }
 
-      const warRoomId = `wr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Generate cryptographically secure war room ID
+      const crypto = require('crypto');
+      const warRoomId = `wr_${Date.now()}_${crypto.randomBytes(8).toString('base64url')}`;
 
       // Initialize war room
       const warRoom = await this.warRoomSync.initializeWarRoom(warRoomId, null);

@@ -599,7 +599,9 @@ export class AirGapService {
         );
       }
 
-      const sessionId = `breakglass-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate cryptographically secure break-glass session ID
+      const crypto = require('crypto');
+      const sessionId = `breakglass-${Date.now()}-${crypto.randomBytes(8).toString('base64url')}`;
 
       const session: BreakGlassSession = {
         sessionId,
