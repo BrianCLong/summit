@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: counterterrorism-config
+  namespace: intelligence
+data:
+  log-level: "info"
+  environment: "production"
+  metrics-enabled: "true"
+  audit-logging: "true"

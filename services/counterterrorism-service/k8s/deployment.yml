@@ -1,0 +1,176 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: counterterrorism-service
+  namespace: intelligence
+  labels:
+    app: counterterrorism-service
+    component: backend
+    tier: services
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: counterterrorism-service
+  template:
+    metadata:
+      labels:
+        app: counterterrorism-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3020"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: counterterrorism-service
+          image: counterterrorism-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3020
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3020"
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: counterterrorism-config
+                  key: log-level
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+            - name: secrets
+              mountPath: /app/secrets
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: counterterrorism-config
+        - name: secrets
+          secret:
+            secretName: counterterrorism-secrets
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: threat-assessment-service
+  namespace: intelligence
+  labels:
+    app: threat-assessment-service
+    component: backend
+    tier: services
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: threat-assessment-service
+  template:
+    metadata:
+      labels:
+        app: threat-assessment-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3021"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: threat-assessment-service
+          image: threat-assessment-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3021
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3021"
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: counterterrorism-config
+                  key: log-level
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+            - name: secrets
+              mountPath: /app/secrets
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: counterterrorism-config
+        - name: secrets
+          secret:
+            secretName: counterterrorism-secrets

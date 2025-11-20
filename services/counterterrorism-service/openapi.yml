@@ -1,0 +1,351 @@
+openapi: 3.0.3
+info:
+  title: Counterterrorism Service API
+  description: |
+    Comprehensive counterterrorism intelligence and operations API.
+
+    ## Security Notice
+    This API is designed for authorized law enforcement and intelligence use only.
+    All access is logged and monitored.
+
+  version: 0.1.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3020
+    description: Development server
+  - url: https://api.counterterrorism.example.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Service health and status
+  - name: Threats
+    description: Threat intelligence and assessment
+  - name: Operations
+    description: Counterterrorism operations
+  - name: Intelligence
+    description: Intelligence services access
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: counterterrorism
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/threat-picture:
+    get:
+      summary: Get comprehensive threat picture
+      tags:
+        - Threats
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Comprehensive threat assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatPicture'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/interdiction-opportunities:
+    get:
+      summary: Identify interdiction opportunities
+      tags:
+        - Operations
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of interdiction opportunities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterdictionOpportunity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/disruption-targets:
+    get:
+      summary: Identify disruption targets
+      tags:
+        - Operations
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of potential disruption targets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DisruptionTarget'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/services/{service}:
+    get:
+      summary: Check service availability
+      tags:
+        - Intelligence
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: service
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - organizations
+              - attacks
+              - radicalization
+              - fighters
+              - finance
+              - propaganda
+      responses:
+        '200':
+          description: Service information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: boolean
+                  service:
+                    type: string
+        '404':
+          description: Service not found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    ThreatPicture:
+      type: object
+      properties:
+        organizations:
+          type: object
+          properties:
+            total:
+              type: integer
+            active:
+              type: integer
+            threats:
+              type: array
+              items:
+                $ref: '#/components/schemas/ThreatIndicator'
+        attacks:
+          type: object
+          properties:
+            total:
+              type: integer
+            critical:
+              type: integer
+            indicators:
+              type: integer
+        radicalization:
+          type: object
+          properties:
+            total:
+              type: integer
+            highRisk:
+              type: integer
+        fighters:
+          type: object
+          properties:
+            total:
+              type: integer
+            returnees:
+              type: integer
+        finance:
+          type: object
+          properties:
+            totalFlow:
+              type: number
+            networks:
+              type: integer
+        propaganda:
+          type: object
+          properties:
+            total:
+              type: integer
+            campaigns:
+              type: integer
+
+    ThreatIndicator:
+      type: object
+      properties:
+        organizationId:
+          type: string
+        type:
+          type: string
+        severity:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW]
+        description:
+          type: string
+        detected:
+          type: string
+          format: date-time
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    InterdictionOpportunity:
+      type: object
+      properties:
+        id:
+          type: string
+        targetId:
+          type: string
+        targetType:
+          type: string
+          enum: [INDIVIDUAL, ORGANIZATION, NETWORK, OPERATION]
+        opportunity:
+          type: string
+        timeWindow:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+            optimal:
+              type: string
+              format: date-time
+        probability:
+          type: number
+          minimum: 0
+          maximum: 1
+        impact:
+          type: number
+          minimum: 0
+          maximum: 1
+        recommendation:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+
+    DisruptionTarget:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        priority:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW]
+        vulnerabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vulnerability'
+        disruptionMethods:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisruptionMethod'
+        expectedImpact:
+          type: string
+        risks:
+          type: array
+          items:
+            type: string
+
+    Vulnerability:
+      type: object
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW]
+        exploitable:
+          type: boolean
+
+    DisruptionMethod:
+      type: object
+      properties:
+        method:
+          type: string
+        description:
+          type: string
+        feasibility:
+          type: string
+          enum: [HIGH, MEDIUM, LOW]
+        impact:
+          type: string
+          enum: [HIGH, MEDIUM, LOW]
+        legalCompliance:
+          type: boolean
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Invalid or missing authentication
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Unauthorized access
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Internal server error
+
+security:
+  - BearerAuth: []

@@ -1,0 +1,297 @@
+openapi: 3.0.3
+info:
+  title: Threat Assessment Service API
+  description: |
+    Comprehensive threat assessment and risk analysis API for counterterrorism operations.
+
+    ## Security Notice
+    This API is designed for authorized law enforcement and intelligence use only.
+
+  version: 0.1.0
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3021
+    description: Development server
+  - url: https://api.threat-assessment.example.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Service health and status
+  - name: Assessment
+    description: Threat assessment operations
+  - name: Analysis
+    description: Analysis and probability calculations
+  - name: Geographic
+    description: Geographic threat analysis
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+
+  /api/attack-probability/{targetId}:
+    get:
+      summary: Calculate attack probability
+      tags:
+        - Analysis
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: targetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Attack probability assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttackProbability'
+
+  /api/geographic-threats:
+    get:
+      summary: Get geographic threat map
+      tags:
+        - Geographic
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Geographic threat distribution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeographicThreatMap'
+
+  /api/sector-threats:
+    get:
+      summary: Get sector-specific threats
+      tags:
+        - Analysis
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Threats by sector
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectorThreat'
+
+  /api/risk-matrix:
+    get:
+      summary: Generate risk matrix
+      tags:
+        - Assessment
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Comprehensive risk matrix
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskMatrix'
+
+  /api/assessment/{targetId}:
+    get:
+      summary: Get threat assessment
+      tags:
+        - Assessment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: targetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Threat assessment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAssessment'
+        '404':
+          description: Assessment not found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AttackProbability:
+      type: object
+      properties:
+        targetId:
+          type: string
+        probability:
+          type: number
+          minimum: 0
+          maximum: 1
+        timeframe:
+          type: string
+        attackTypes:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              probability:
+                type: number
+              lethality:
+                type: number
+        factors:
+          type: array
+          items:
+            type: object
+            properties:
+              factor:
+                type: string
+              weight:
+                type: number
+              present:
+                type: boolean
+              description:
+                type: string
+        confidence:
+          type: number
+
+    GeographicThreatMap:
+      type: object
+      properties:
+        regions:
+          type: array
+          items:
+            type: object
+            properties:
+              region:
+                type: string
+              threatLevel:
+                type: number
+              organizations:
+                type: integer
+              attacks:
+                type: integer
+        hotspots:
+          type: array
+          items:
+            type: object
+            properties:
+              location:
+                type: string
+              coordinates:
+                type: array
+                items:
+                  type: number
+              threatLevel:
+                type: number
+              radius:
+                type: number
+        generated:
+          type: string
+          format: date-time
+
+    SectorThreat:
+      type: object
+      properties:
+        sector:
+          type: string
+        threatLevel:
+          type: number
+        vulnerabilities:
+          type: array
+          items:
+            type: string
+        attackTypes:
+          type: array
+          items:
+            type: string
+        incidents:
+          type: integer
+        trend:
+          type: string
+          enum: [INCREASING, DECREASING, STABLE]
+
+    RiskMatrix:
+      type: object
+      properties:
+        scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              description:
+                type: string
+              likelihood:
+                type: number
+              impact:
+                type: number
+              riskScore:
+                type: number
+              mitigations:
+                type: array
+                items:
+                  type: string
+              priority:
+                type: string
+                enum: [CRITICAL, HIGH, MEDIUM, LOW]
+        generated:
+          type: string
+          format: date-time
+
+    ThreatAssessment:
+      type: object
+      properties:
+        id:
+          type: string
+        targetId:
+          type: string
+        targetType:
+          type: string
+        assessmentDate:
+          type: string
+          format: date-time
+        overallThreat:
+          type: number
+        components:
+          type: array
+          items:
+            type: object
+        recommendations:
+          type: array
+          items:
+            type: string
+        confidence:
+          type: number
+
+security:
+  - BearerAuth: []
