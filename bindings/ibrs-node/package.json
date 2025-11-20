@@ -1,0 +1,21 @@
+{
+  "name": "@summit/ibrs-node",
+  "version": "0.1.0",
+  "description": "Node.js bindings for the Immutable Business Rules Sandbox",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "*.node"
+  ],
+  "scripts": {
+    "build": "napi build --release",
+    "build:debug": "napi build",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2.16.4"
+  },
+  "license": "MIT"
+}
