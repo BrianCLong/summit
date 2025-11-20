@@ -1,0 +1,30 @@
+{
+  "name": "@summit/mdm-core",
+  "version": "1.0.0",
+  "description": "Core Master Data Management infrastructure with golden record management and entity resolution",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mdm",
+    "master-data-management",
+    "golden-records",
+    "entity-resolution",
+    "data-quality"
+  ],
+  "dependencies": {
+    "zod": "^3.22.4",
+    "uuid": "^11.0.3",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.9.3"
+  }
+}
