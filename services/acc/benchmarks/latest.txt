@@ -1,0 +1,19 @@
+?   	github.com/summit/acc/cmd/acc	[no test files]
+?   	github.com/summit/acc/internal/config	[no test files]
+goos: linux
+goarch: amd64
+pkg: github.com/summit/acc/internal/planner
+cpu: Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
+BenchmarkPlannerStrong-5         	 1690188	      1377 ns/op
+BenchmarkPlannerStrong-5         	 1646956	      1409 ns/op
+BenchmarkPlannerStrong-5         	 1489255	      1494 ns/op
+BenchmarkPlannerBounded-5        	 1178076	      1952 ns/op
+BenchmarkPlannerBounded-5        	 1218237	      1673 ns/op
+BenchmarkPlannerBounded-5        	 1454456	      1604 ns/op
+BenchmarkPlannerReadMyWrites-5   	 1360384	      1727 ns/op
+BenchmarkPlannerReadMyWrites-5   	 1378848	      1804 ns/op
+BenchmarkPlannerReadMyWrites-5   	 1277917	      1611 ns/op
+PASS
+ok  	github.com/summit/acc/internal/planner	35.960s
+?   	github.com/summit/acc/internal/server	[no test files]
+?   	github.com/summit/acc/internal/session	[no test files]
