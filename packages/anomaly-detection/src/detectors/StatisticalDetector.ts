@@ -6,7 +6,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { mean, std, median, quantile } from 'simple-statistics';
+import { mean, standardDeviation, median, quantile } from 'simple-statistics';
 import {
   Anomaly,
   StatisticalAnomalyConfig,
@@ -35,7 +35,7 @@ export class StatisticalDetector {
 
     const anomalies: Anomaly[] = [];
     const dataMean = mean(data);
-    const dataStd = std(data);
+    const dataStd = standardDeviation(data);
 
     for (let i = 0; i < data.length; i++) {
       const zScore = Math.abs((data[i] - dataMean) / dataStd);
@@ -67,7 +67,7 @@ export class StatisticalDetector {
     for (let i = window; i < data.length; i++) {
       const windowData = data.slice(i - window, i);
       const windowMean = mean(windowData);
-      const windowStd = std(windowData);
+      const windowStd = standardDeviation(windowData);
 
       if (windowStd === 0) continue;
 
@@ -183,7 +183,7 @@ export class StatisticalDetector {
     const anomalies: Anomaly[] = [];
     const n = data.length;
     const dataMean = mean(data);
-    const dataStd = std(data);
+    const dataStd = standardDeviation(data);
 
     // Critical value for Grubbs' test (approximate for alpha=0.05)
     const alpha = 0.05;
@@ -234,7 +234,7 @@ export class StatisticalDetector {
     return {
       mean: mean(data),
       median: median(data),
-      std: std(data),
+      std: standardDeviation(data),
       min: Math.min(...data),
       max: Math.max(...data),
       trend

@@ -6,7 +6,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { mean, std, variance } from 'simple-statistics';
+import { mean, standardDeviation, variance } from 'simple-statistics';
 import { ChangePoint, TimeSeriesStats } from '../models/AnomalyModels.js';
 
 export class ChangePointDetector {
@@ -21,7 +21,7 @@ export class ChangePointDetector {
   ): ChangePoint[] {
     const changePoints: ChangePoint[] = [];
     const dataMean = mean(data);
-    const dataStd = std(data);
+    const dataStd = standardDeviation(data);
 
     let cumulativeSum = 0;
     let maxCumulativeSum = 0;
@@ -213,7 +213,7 @@ export class ChangePointDetector {
     return {
       mean: mean(data),
       median: data.length > 0 ? data[Math.floor(data.length / 2)] : 0,
-      std: std(data),
+      std: standardDeviation(data),
       min: Math.min(...data),
       max: Math.max(...data),
       trend: this.calculateTrend(data)
