@@ -67,9 +67,9 @@ export const CandidateRequestSchema = z.object({
   tenantId: z.string(),
   entity: EntityRecordSchema,
   population: z.array(EntityRecordSchema),
-  topK: z.number().int().positive().optional().default(5),
-  threshold: z.number().min(0).max(1).optional().default(0.7),
-  method: z.enum(['deterministic', 'probabilistic', 'hybrid']).optional().default('hybrid'),
+  topK: z.number().int().positive().optional(),
+  threshold: z.number().min(0).max(1).optional(),
+  method: z.enum(['deterministic', 'probabilistic', 'hybrid']).optional(),
   policyTags: z.array(z.string()).optional(),
 });
 
@@ -89,7 +89,7 @@ export const MergeRequestSchema = z.object({
   primaryId: z.string().optional(),
   actor: z.string(),
   reason: z.string(),
-  policyTags: z.array(z.string()).optional().default([]),
+  policyTags: z.array(z.string()).optional(),
   confidence: z.number().min(0).max(1).optional(),
 });
 

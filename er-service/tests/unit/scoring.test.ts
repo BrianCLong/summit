@@ -93,7 +93,7 @@ describe('Scoring System', () => {
       expect(result.method).toBe('hybrid');
       expect(result.score).toBeGreaterThan(0);
       expect(result.confidence).toBeGreaterThan(0);
-      expect(result.rationale).toContain(expect.stringMatching(/Hybrid score/));
+      expect(result.rationale.some(r => r.includes('Hybrid score'))).toBe(true);
     });
   });
 

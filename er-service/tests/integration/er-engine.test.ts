@@ -1,12 +1,8 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { EREngine } from '../../src/core/er-engine';
 import type { EntityRecord } from '../../src/types';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 describe('ER Engine Integration', () => {
   let engine: EREngine;
@@ -16,7 +12,7 @@ describe('ER Engine Integration', () => {
     engine = new EREngine();
 
     // Load golden dataset
-    const dataPath = join(__dirname, '../fixtures/golden-dataset.json');
+    const dataPath = join(process.cwd(), 'tests/fixtures/golden-dataset.json');
     goldenDataset = JSON.parse(readFileSync(dataPath, 'utf-8'));
 
     // Store entities in engine for testing
