@@ -9,12 +9,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "zod": "^4.1.12",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
   }
 }
