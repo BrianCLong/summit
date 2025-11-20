@@ -1,0 +1,31 @@
+{
+  "name": "tesq",
+  "version": "0.1.0",
+  "description": "Tool Execution Sandbox & Quotas (TESQ) for running LLM-invoked tools safely.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "test": "vitest run",
+    "redteam": "ts-node src/redteam.ts"
+  },
+  "keywords": [
+    "sandbox",
+    "llm",
+    "security",
+    "quotas"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "eslint": "^8.57.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2",
+    "vitest": "^1.6.0"
+  }
+}
