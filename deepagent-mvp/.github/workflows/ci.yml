@@ -42,10 +42,8 @@ jobs:
         NEO4J_USER: neo4j
         NEO4J_PASSWORD: password
       run: |
-        chmod +x ./wait-for-it.sh
-        docker-compose up -d postgres neo4j tool-server
-        ./wait-for-it.sh postgres neo4j tool-server -- npm test
-        docker-compose down
+        docker-compose up -d --build
+        docker-compose exec -T app npm test
 
     - name: Run k6 smoke test
       uses: grafana/k6-action@v0.2.0

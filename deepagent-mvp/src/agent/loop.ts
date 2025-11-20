@@ -28,7 +28,8 @@ export class AgentLoop {
     private actor: string,
     private task: string,
     private goalHints: string[],
-    private toolFilters: string[]
+    private toolFilters: string[],
+    private purpose: string
   ) {
     this.runId = uuidv4();
     this.status = 'IDLE';
@@ -37,7 +38,7 @@ export class AgentLoop {
     this.toolRetriever = new ToolRetriever();
     this.toolExecutor = new ToolExecutor();
     this.memoryStore = new MemoryStore();
-    this.memoryFolding = new MemoryFolding(this.tenantId, this.llm);
+    this.memoryFolding = new MemoryFolding(this.tenantId, this.llm, this.purpose);
     this.provenanceLedger = new ProvenanceLedger();
   }
 
@@ -49,7 +50,7 @@ export class AgentLoop {
     const event = { runId: this.runId, type, data, ts: new Date().toISOString() };
     getIO().emit('agent-event', event);
     pubsub.publish(`RUN_EVENTS_${this.runId}`, { runEvents: event });
-    await this.memoryStore.addEpisodicMemory(this.tenantId, { run_id: this.runId, tenant_id: this.tenantId, step: this.step++, event_json: event, ts: new Date() });
+    await this.memoryStore.addEpisodicMemory(this.tenantId, { run_id: this.runId, tenant_id: this.tenantId, step: this.step, event_json: event, ts: new Date() });
     await this.provenanceLedger.recordEvent(this.tenantId, this.runId, this.actor, type, data);
   }
 
@@ -58,6 +59,7 @@ export class AgentLoop {
     await this.emitEvent('status', this.status);
 
     while (this.status === 'RUNNING') {
+      this.step++;
       const action = await this.planner.decide();
       await this.emitEvent('action', action);
 

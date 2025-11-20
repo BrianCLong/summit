@@ -6,11 +6,13 @@ import { config } from '../../src/config';
 import { createServer } from 'http';
 import { initSocket, getIO } from '../../src/server/realtime/socket';
 import Client from 'socket.io-client';
+import { generateMockJwt, setupNockJwks } from '../test-utils';
 
 describe('AgentLoop', () => {
   let pool: Pool;
   let httpServer: any;
   let clientSocket: any;
+  let mockJwt: string;
 
   beforeAll((done) => {
     pool = new Pool(config.postgres);
@@ -19,6 +21,8 @@ describe('AgentLoop', () => {
     httpServer.listen(() => {
       const port = (httpServer.address() as any).port;
       clientSocket = Client(`http://localhost:${port}`);
+      mockJwt = generateMockJwt({ tenantId: 'tenant-a', actor: 'admin' });
+      setupNockJwks();
       clientSocket.on('connect', done);
     });
   });
@@ -30,7 +34,7 @@ describe('AgentLoop', () => {
   });
 
   it('should run a multi-step task and return the correct answer', (done) => {
-    const agentLoop = new AgentLoop('tenant-a', 'admin', 'My computer is on fire', [], []);
+    const agentLoop = new AgentLoop('tenant-a', 'admin', 'My computer is on fire', [], [], 'test-purpose');
 
     clientSocket.on('agent-event', (event: any) => {
       if (event.type === 'final-answer') {

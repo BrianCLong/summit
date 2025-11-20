@@ -5,9 +5,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
-      - neo4j
-      - tool-server
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
@@ -20,6 +21,11 @@ services:
 
   postgres:
     image: postgres:15
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -31,6 +37,11 @@ services:
 
   neo4j:
     image: neo4j:5
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O /dev/null --spider http://localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - "7474:7474"
       - "7687:7687"

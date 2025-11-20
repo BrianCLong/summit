@@ -29,6 +29,7 @@ CREATE TABLE working_memory (
   tenant_id TEXT NOT NULL,
   summary TEXT,
   key_facts JSONB,
+  retention_tier TEXT NOT NULL DEFAULT 'standard',
   ts TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX idx_working_memory_tenant_id ON working_memory (tenant_id);
@@ -51,6 +52,7 @@ CREATE TABLE provenance_events (
   actor TEXT NOT NULL,
   type TEXT NOT NULL,
   payload JSONB NOT NULL,
+  retention_tier TEXT NOT NULL DEFAULT 'standard',
   ts TIMESTAMPTZ DEFAULT NOW(),
   prev_hash TEXT,
   hash TEXT NOT NULL

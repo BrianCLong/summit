@@ -21,15 +21,13 @@ type Tool {
 }
 
 input StartRunInput {
-  tenantId: String!
-  actor: String!
   task: String!
   goalHints: [String!]
   toolFilters: [String!]
+  purpose: String
 }
 
 input RegisterToolInput {
-  tenantId: String!
   name: String!
   description: String!
   openapi: JSON!
@@ -38,7 +36,7 @@ input RegisterToolInput {
 }
 
 type Query {
-  run(id: ID!, tenantId: String!): AgentRun
+  run(id: ID!): AgentRun
 }
 
 type Mutation {

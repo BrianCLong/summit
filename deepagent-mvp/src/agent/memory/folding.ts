@@ -4,7 +4,7 @@ import { LLM } from '../reasoning/llm';
 export class MemoryFolding {
   private memoryStore: MemoryStore;
 
-  constructor(private tenantId: string, private llm: LLM) {
+  constructor(private tenantId: string, private llm: LLM, private purpose: string) {
     this.memoryStore = new MemoryStore();
   }
 
@@ -21,14 +21,23 @@ export class MemoryFolding {
       events_processed: episodicMemories.length,
     };
 
+    const retentionTier = this.getRetentionTier(this.purpose);
     await this.memoryStore.updateWorkingMemory(this.tenantId, {
       run_id: runId,
       tenant_id: this.tenantId,
       summary,
       key_facts,
       ts: new Date(),
-    });
+    }, retentionTier);
 
-    // A real implementation would prune the episodic memory here to save space.
+    // Prune the episodic memory to save space, keeping the last 5 events.
+    await this.memoryStore.pruneEpisodicMemory(this.tenantId, runId, 5);
+  }
+
+  private getRetentionTier(purpose: string): string {
+    if (purpose === 'pii') {
+      return 'short-30d';
+    }
+    return 'standard-365d';
   }
 }

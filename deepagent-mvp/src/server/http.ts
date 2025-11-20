@@ -15,6 +15,7 @@ import { resolvers } from './graphql/resolvers';
 import { config } from '../config';
 import { logger } from '../observability/logging';
 import { initSocket } from './realtime/socket';
+import { getContext } from './auth';
 
 const typeDefs = readFileSync(join(__dirname, 'graphql/schema.graphql'), 'utf8');
 const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -48,7 +49,9 @@ export const startServer = async () => {
 
   await server.start();
 
-  app.use('/graphql', cors<cors.CorsRequest>(), bodyParser.json(), expressMiddleware(server));
+  app.use('/graphql', cors<cors.CorsRequest>(), bodyParser.json(), expressMiddleware(server, {
+    context: getContext,
+  }));
 
   initSocket(httpServer);
 

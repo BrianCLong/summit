@@ -20,9 +20,9 @@ export class MemoryStore {
     return result.rows;
   }
 
-  public async updateWorkingMemory(tenantId: string, memory: WorkingMemory): Promise<void> {
-    const query = 'INSERT INTO working_memory (tenant_id, run_id, summary, key_facts) VALUES ($1, $2, $3, $4) ON CONFLICT (run_id) DO UPDATE SET summary = $3, key_facts = $4';
-    await this.pool.query(query, [tenantId, memory.run_id, memory.summary, memory.key_facts]);
+  public async updateWorkingMemory(tenantId: string, memory: WorkingMemory, retentionTier = 'standard'): Promise<void> {
+    const query = 'INSERT INTO working_memory (tenant_id, run_id, summary, key_facts, retention_tier) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (run_id) DO UPDATE SET summary = $3, key_facts = $4, retention_tier = $5';
+    await this.pool.query(query, [tenantId, memory.run_id, memory.summary, memory.key_facts, retentionTier]);
   }
 
   public async getWorkingMemory(tenantId: string, runId: string): Promise<WorkingMemory | null> {
@@ -40,5 +40,27 @@ export class MemoryStore {
     const query = 'SELECT * FROM tool_memory WHERE tenant_id = $1 AND run_id = $2 AND tool_id = $3';
     const result = await this.pool.query(query, [tenantId, runId, toolId]);
     return result.rows[0] || null;
+  }
+
+  public async pruneEpisodicMemory(tenantId: string, runId: string, keep = 10): Promise<void> {
+    const query = `
+      DELETE FROM episodic_memory
+      WHERE (run_id, step) IN (
+        SELECT run_id, step
+        FROM episodic_memory
+        WHERE tenant_id = $1 AND run_id = $2
+        ORDER BY step DESC
+        OFFSET $3
+      )
+    `;
+    await this.pool.query(query, [tenantId, runId, keep]);
+  }
+
+  public async purge(retentionTier: string, days: number): Promise<void> {
+    const query = `
+      DELETE FROM working_memory
+      WHERE retention_tier = $1 AND ts < NOW() - INTERVAL '${days} days'
+    `;
+    await this.pool.query(query, [retentionTier]);
   }
 }

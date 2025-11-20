@@ -1,5 +1,6 @@
-INSERT INTO tools (name, description, openapi, tags) VALUES
+INSERT INTO tools (tenant_id, name, description, openapi, tags) VALUES
 (
+  'intelgraph',
   'searchCatalog',
   'Searches the product catalog.',
   '{
@@ -28,6 +29,7 @@ INSERT INTO tools (name, description, openapi, tags) VALUES
   '{"search", "catalog"}'
 ),
 (
+  'intelgraph',
   'lookupUser',
   'Looks up a user by their ID.',
   '{
@@ -56,6 +58,7 @@ INSERT INTO tools (name, description, openapi, tags) VALUES
   '{"user", "lookup"}'
 ),
 (
+  'intelgraph',
   'createTicket',
   'Creates a new support ticket.',
   '{

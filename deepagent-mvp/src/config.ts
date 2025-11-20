@@ -17,4 +17,9 @@ export const config = {
     password: process.env.NEO4J_PASSWORD || 'password',
   },
   jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
+  auth: {
+    jwksUri: process.env.JWKS_URI || 'https://your-auth-provider.com/.well-known/jwks.json',
+    audience: process.env.JWT_AUDIENCE || 'your-api-audience',
+    issuer: process.env.JWT_ISSUER || 'https://your-auth-provider.com/',
+  }
 };
