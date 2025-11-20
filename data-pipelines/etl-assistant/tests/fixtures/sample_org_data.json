@@ -1,0 +1,29 @@
+[
+  {
+    "company_name": "Acme Corporation",
+    "industry": "Technology",
+    "city": "San Francisco",
+    "state": "CA",
+    "country": "USA",
+    "ein": "12-3456789",
+    "employee_count": 5000
+  },
+  {
+    "company_name": "Global Industries LLC",
+    "industry": "Manufacturing",
+    "city": "Detroit",
+    "state": "MI",
+    "country": "USA",
+    "ein": "98-7654321",
+    "employee_count": 12000
+  },
+  {
+    "company_name": "Tech Innovations Inc",
+    "industry": "Software",
+    "city": "Austin",
+    "state": "TX",
+    "country": "USA",
+    "ein": "45-6789012",
+    "employee_count": 800
+  }
+]
