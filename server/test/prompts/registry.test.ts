@@ -1,4 +1,4 @@
-import { PromptRegistry } from '../../server/prompts/registry';
+import { PromptRegistry } from '../../prompts/registry';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -12,24 +12,59 @@ describe('PromptRegistry', () => {
 
     // Create schema.json
     const schema = {
-      $schema: 'http://json-schema.org/draft-07/schema#',
-      type: 'object',
-      required: ['meta', 'inputs', 'template'],
-      properties: {
-        meta: {
-          type: 'object',
-          required: ['id', 'owner', 'purpose'],
-          properties: {
-            id: { type: 'string' },
-            owner: { type: 'string' },
-            purpose: { type: 'string' },
-            guardrails: { type: 'array' },
-          },
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Maestro Prompt Template",
+      "type": "object",
+      "required": ["meta", "modelConfig", "inputs", "template"],
+      "properties": {
+        "meta": {
+          "type": "object",
+          "required": ["id", "owner", "purpose"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+@v[0-9]+$",
+              "description": "Unique identifier with version (e.g. implement.fix-test@v1)"
+            },
+            "owner": { "type": "string" },
+            "purpose": { "type": "string" },
+            "tags": { "type": "array", "items": { "type": "string" } },
+            "guardrails": { "type": "array", "items": { "type": "string" } }
+          }
         },
-        inputs: { type: 'object' },
-        template: { type: 'string' },
-        examples: { type: 'array' },
-      },
+        "modelConfig": {
+          "type": "object",
+          "required": ["model"],
+          "properties": {
+            "model": { "type": "string" },
+            "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+            "maxTokens": { "type": "number" },
+            "topP": { "type": "number" },
+            "stop": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "inputs": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_][a-zA-Z0-9_]*$": { "type": "string" }
+          }
+        },
+        "template": { "type": "string" },
+        "outputSchema": { "type": "object" },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "inputs"],
+            "properties": {
+              "name": { "type": "string" },
+              "inputs": { "type": "object" },
+              "expected_contains": { "type": "array", "items": { "type": "string" } },
+              "expected_output": { "type": "string" }
+            }
+          }
+        }
+      }
     };
 
     await fs.writeFile(
@@ -45,6 +80,10 @@ meta:
   purpose: Simple test prompt
   guardrails:
     - "Never expose secrets"
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.0
 
 inputs:
   name: string
@@ -90,6 +129,7 @@ examples:
       expect(prompt).toBeDefined();
       expect(prompt?.meta.id).toBe('test.simple@v1');
       expect(prompt?.meta.owner).toBe('test-team');
+      expect(prompt?.modelConfig.model).toBe('gpt-4');
     });
 
     test('validates prompt schema', async () => {
@@ -97,6 +137,7 @@ examples:
 meta:
   id: invalid@v1
   # missing required owner field
+# missing modelConfig
 inputs: {}
 template: "test"
 `;
@@ -110,6 +151,7 @@ template: "test"
 
       // Clean up
       await fs.unlink(invalidPath);
+      await registry.reloadPrompts();
     });
   });
 
@@ -205,6 +247,9 @@ meta:
   owner: test-team
   purpose: Failing test prompt
 
+modelConfig:
+  model: 'gpt-4'
+
 inputs:
   message: string
 
@@ -232,6 +277,7 @@ examples:
 
       // Clean up
       await fs.unlink(path.join(testPromptsDir, 'test.failing@v1.yaml'));
+      await registry.reloadPrompts();
     });
   });
 
@@ -251,6 +297,8 @@ meta:
   id: test.new@v1
   owner: test-team
   purpose: New test prompt
+modelConfig:
+  model: 'gpt-4'
 inputs:
   text: string
 template: "New: {{text}}"
