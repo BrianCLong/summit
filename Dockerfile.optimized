@@ -1,0 +1,130 @@
+# ============================================================================
+# Multi-Stage Optimized Dockerfile for Summit/IntelGraph Platform
+# ============================================================================
+# Features:
+# - Multi-stage builds for minimal final image size
+# - BuildKit cache mounts for faster builds
+# - Security hardening with distroless/chainguard base
+# - Optimized layer caching for dependencies
+# - Health checks and non-root user
+# ============================================================================
+
+# Stage 1: Base image with pnpm
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+WORKDIR /app
+
+# Stage 2: Dependencies (production + dev)
+FROM base AS deps
+# Copy only dependency manifests for better cache hit rate
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc* ./
+COPY turbo.json ./
+
+# Mount cache for pnpm store to speed up subsequent builds
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prefer-offline
+
+# Stage 3: Production dependencies only
+FROM base AS prod-deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc* ./
+COPY turbo.json ./
+
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prefer-offline --prod
+
+# Stage 4: Build application
+FROM base AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy workspace manifests first (better caching)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY tsconfig*.json ./
+COPY .swcrc* ./
+
+# Copy source code
+COPY apps ./apps
+COPY packages ./packages
+COPY services ./services
+COPY server ./server
+COPY client ./client
+
+# Build arguments for environment-specific configs
+ARG API_BASE_URL
+ARG GRAPHQL_SCHEMA_URL
+ARG BUILD_ENV=production
+ARG TURBO_TOKEN
+ARG TURBO_TEAM
+
+ENV API_BASE_URL=$API_BASE_URL
+ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
+ENV NODE_ENV=production
+
+# Build with Turbo cache
+RUN --mount=type=cache,id=turbo,target=/app/.turbo \
+    pnpm build
+
+# Prune for production deployment
+RUN pnpm turbo prune --scope=@intelgraph/web --scope=@intelgraph/server --docker
+
+# Stage 5: Runtime image (secure distroless/chainguard)
+FROM cgr.dev/chainguard/node:20 AS runtime
+
+WORKDIR /app
+
+# Copy production dependencies
+COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --from=builder --chown=node:node /app/package.json ./
+COPY --from=builder --chown=node:node /app/turbo.json ./
+
+# Copy pruned workspace if needed
+COPY --from=builder --chown=node:node /app/out/full ./
+
+# Expose ports
+EXPOSE 3000 4000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));"
+
+# Run as non-root user (chainguard node image defaults to node user)
+USER node
+
+# Default command
+CMD ["node", "dist/server/index.js"]
+
+# Labels for metadata
+LABEL org.opencontainers.image.title="Summit IntelGraph Platform"
+LABEL org.opencontainers.image.description="AI-augmented intelligence analysis platform"
+LABEL org.opencontainers.image.vendor="BrianCLong"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.source="https://github.com/BrianCLong/summit"
+
+# ============================================================================
+# Build Instructions:
+# ============================================================================
+#
+# With BuildKit (recommended):
+#   DOCKER_BUILDKIT=1 docker build \
+#     --build-arg API_BASE_URL=https://api.example.com \
+#     --build-arg GRAPHQL_SCHEMA_URL=https://api.example.com/graphql \
+#     --target runtime \
+#     -t summit:latest \
+#     -f Dockerfile.optimized .
+#
+# With cache mounts for CI/CD:
+#   docker buildx build \
+#     --cache-from type=registry,ref=ghcr.io/brianclong/summit:cache \
+#     --cache-to type=registry,ref=ghcr.io/brianclong/summit:cache,mode=max \
+#     --build-arg API_BASE_URL=$API_BASE_URL \
+#     -t summit:latest \
+#     -f Dockerfile.optimized .
+#
+# ============================================================================

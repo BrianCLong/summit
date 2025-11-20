@@ -1,0 +1,399 @@
+# ============================================================================
+# Summit Helm Chart Values
+# Comprehensive configuration for deployment strategies and infrastructure
+# ============================================================================
+
+# Global configuration
+global:
+  environment: production  # development, staging, production
+  region: us-east-1
+  clusterName: summit-prod
+
+# Deployment strategy: standard, blue-green, canary
+deploymentStrategy: canary
+
+# Application image configuration
+image:
+  repository: ghcr.io/brianclong/summit
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Replica configuration
+replicaCount: 5
+
+# Auto-scaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+
+# Resource limits
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+# Health check configuration
+healthChecks:
+  liveness:
+    enabled: true
+    path: /health/live
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    enabled: true
+    path: /health/ready
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+  startup:
+    enabled: true
+    path: /health/startup
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 12
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+  hosts:
+    - host: api.summit.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: summit-tls-cert
+      hosts:
+        - api.summit.example.com
+
+# Blue-Green deployment configuration
+blueGreen:
+  enabled: false
+  autoPromotionEnabled: false
+  scaleDownDelaySeconds: 300
+  scaleDownDelayRevisionLimit: 2
+  previewReplicaCount: 2
+  activeService: summit-active
+  previewService: summit-preview
+  analysis:
+    enabled: true
+    prePromotion:
+      - health-check
+      - error-rate
+      - latency
+      - smoke-tests
+    postPromotion:
+      - error-rate
+      - latency
+      - slo-compliance
+
+# Canary deployment configuration
+canary:
+  enabled: true
+  steps:
+    - weight: 5
+      pause: 5m
+    - weight: 10
+      pause: 5m
+    - weight: 25
+      pause: 10m
+    - weight: 50
+      pause: 10m
+    - weight: 75
+      pause: 10m
+    - weight: 100
+  trafficRouting:
+    istio:
+      enabled: true
+      virtualService: summit-vsvc
+    nginx:
+      enabled: false
+  analysis:
+    enabled: true
+    continuous: true
+    templates:
+      - health-check
+      - error-rate
+      - latency
+      - comparison
+      - business-metrics
+    thresholds:
+      errorRate: 0.02  # 2%
+      p95Latency: 500  # 500ms
+      p99Latency: 1000 # 1s
+      successRate: 0.98 # 98%
+
+# Rollback configuration
+rollback:
+  enabled: true
+  automatic: true
+  onFailure: true
+  healthCheckTimeout: 300
+  analysisThreshold: 2
+
+# Monitoring and observability
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    scrape: true
+    port: 9090
+    path: /metrics
+  grafana:
+    enabled: true
+    dashboards: true
+  servicemonitor:
+    enabled: true
+    interval: 30s
+  alerts:
+    enabled: true
+
+# Security configuration
+security:
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+  networkPolicy:
+    enabled: true
+    ingress:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                name: ingress
+    egress:
+      - to:
+          - namespaceSelector: {}
+        ports:
+          - protocol: TCP
+            port: 443
+          - protocol: TCP
+            port: 80
+
+# Service mesh configuration
+serviceMesh:
+  enabled: true
+  type: istio  # istio, linkerd, consul
+  mtls:
+    enabled: true
+    mode: STRICT
+  retry:
+    attempts: 3
+    perTryTimeout: 10s
+    retryOn: 5xx,reset,connect-failure,refused-stream
+  timeout: 30s
+  circuitBreaker:
+    enabled: true
+    consecutiveErrors: 5
+    interval: 30s
+    baseEjectionTime: 30s
+
+# Database configuration
+database:
+  neo4j:
+    enabled: true
+    uri: bolt://neo4j.intelgraph-prod.svc.cluster.local:7687
+    existingSecret: neo4j-credentials
+  postgresql:
+    enabled: true
+    host: postgres.intelgraph-prod.svc.cluster.local
+    port: 5432
+    database: summit
+    existingSecret: postgres-credentials
+  redis:
+    enabled: true
+    host: redis.intelgraph-prod.svc.cluster.local
+    port: 6379
+    existingSecret: redis-credentials
+
+# External secrets
+externalSecrets:
+  enabled: false
+  backend: aws-secrets-manager  # aws-secrets-manager, vault, gcp-secret-manager
+  region: us-east-1
+  secrets:
+    - name: summit-secrets
+      key: summit/prod/secrets
+
+# Environment variables
+env:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  DEPLOYMENT_STRATEGY: canary
+
+# Config maps
+configMaps:
+  - name: summit-config
+    data: {}
+
+# Secrets (use external secrets in production)
+secrets:
+  - name: summit-secrets
+    data: {}
+
+# Persistence
+persistence:
+  enabled: false
+  storageClass: gp3
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Pod anti-affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - summit
+          topologyKey: kubernetes.io/hostname
+
+# Topology spread constraints
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app: summit
+
+# Service account
+serviceAccount:
+  create: true
+  name: summit
+  annotations: {}
+
+# RBAC
+rbac:
+  create: true
+  rules: []
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Init containers
+initContainers: []
+
+# Sidecar containers
+sidecars: []
+
+# Volume mounts
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: cache
+    mountPath: /app/.cache
+
+# Volumes
+volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+
+# Lifecycle hooks
+lifecycle:
+  preStop:
+    exec:
+      command: ["/bin/sh", "-c", "sleep 15"]
+
+# Annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+
+# Labels
+podLabels:
+  app: summit
+  version: v1
+
+# Priority class
+priorityClassName: ""
+
+# DNS config
+dnsConfig: {}
+dnsPolicy: ClusterFirst
+
+# Host aliases
+hostAliases: []
+
+# Termination grace period
+terminationGracePeriodSeconds: 30
+
+# Dependencies (enable/disable sub-charts)
+neo4j:
+  enabled: false
+  # See neo4j chart values
+
+postgresql:
+  enabled: false
+  # See postgresql chart values
+
+redis:
+  enabled: false
+  # See redis chart values
+
+prometheus:
+  enabled: false
+  # See prometheus chart values

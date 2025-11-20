@@ -1,8 +1,133 @@
+# ============================================================================
+# Docker Build Context Exclusions
+# Optimizes build performance by excluding unnecessary files
+# ============================================================================
+
+# Development dependencies and caches
 **/node_modules
-**/.next
-**/dist
 **/.pnpm-store
+**/.npm
+**/.yarn
+**/.cache
+
+# Build outputs (will be generated in container)
+**/dist
+**/build
+**/out
+**/.next
+**/.turbo
+**/.swc
+
+# Git and version control
 **/.git
+**/.gitignore
+**/.gitattributes
+.github
+.gitlab-ci.yml
+
+# Documentation
+*.md
+!README.md
+docs/
+RUNBOOKS/
+.archive/
+archive/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.p12
+secrets/
+*.secret
+
+# IDE and editor files
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+*~
+.vs
+.settings
+
+# Testing
+coverage
+.nyc_output
+__tests__/__snapshots__
+*.test.ts
+*.spec.ts
+test/
+tests/
+e2e/
+playwright-report/
+test-results/
+
+# CI/CD artifacts
+.circleci
+.travis.yml
+.gitlab-ci.yml
+azure-pipelines.yml
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+.temp
+
+# Database and data files
+*.db
+*.sqlite
+*.sqlite3
+data/
+backups/
+
+# Docker files (recursive builds not needed)
+Dockerfile*
+!Dockerfile.optimized
+.dockerignore
+docker-compose*.yml
+
+# Kubernetes and deployment (not needed in image)
+k8s/
+helm/
 **/.terraform
 **/.terraform.lock.hcl
 **/*.tfstate*
+terraform/
+infra/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Disabled features
+.disabled/
+
+# Misc
+*.bak
+*.orig
+*.rej

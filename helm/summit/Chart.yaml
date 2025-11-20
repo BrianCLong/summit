@@ -1,8 +1,46 @@
 apiVersion: v2
 name: summit
-description: Summit (formerly IntelGraph)
+description: Helm chart for Summit/IntelGraph Platform with advanced deployment strategies
 type: application
-version: 0.1.0
-appVersion: '1.0.0'
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - summit
+  - intelgraph
+  - intelligence
+  - analytics
+  - ai
+home: https://github.com/BrianCLong/summit
+sources:
+  - https://github.com/BrianCLong/summit
+maintainers:
+  - name: Summit Team
+    email: team@summit.example.com
+
 aliases:
   - intelgraph
+
+dependencies:
+  - name: neo4j
+    version: 5.22.0
+    repository: https://neo4j.github.io/helm-charts/
+    condition: neo4j.enabled
+  - name: postgresql
+    version: 13.2.24
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: 18.6.1
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+
+annotations:
+  artifacthub.io/changes: |
+    - kind: added
+      description: Blue-green deployment strategy support
+    - kind: added
+      description: Canary deployment with progressive traffic shifting
+    - kind: added
+      description: Automated rollback with health checks
+    - kind: added
+      description: Comprehensive monitoring and alerting
