@@ -1,4 +1,4 @@
-import { Feature } from '../index.js';
+import { Feature } from '../index';
 
 export class FeatureSelector {
   selectByImportance(features: Feature[], topK: number, threshold?: number): Feature[] {

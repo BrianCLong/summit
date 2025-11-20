@@ -1,4 +1,4 @@
-import { Optimizer, OptimizationStudy } from '../types.js';
+import { Optimizer, OptimizationStudy } from '../types';
 
 /**
  * Random Search optimizer
@@ -19,7 +19,7 @@ export class RandomSearchOptimizer implements Optimizer {
     return sample;
   }
 
-  update(study: OptimizationStudy): void {
+  update(_study: OptimizationStudy): void {
     // Random search doesn't learn from previous trials
   }
 

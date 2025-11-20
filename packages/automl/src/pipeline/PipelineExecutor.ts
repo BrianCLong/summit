@@ -1,4 +1,4 @@
-import { Pipeline, PipelineStep, JobStatus } from '../core/types.js';
+import { Pipeline, PipelineStep, JobStatus } from '../core/types';
 
 /**
  * Executor for running AutoML pipelines
@@ -9,7 +9,7 @@ export class PipelineExecutor {
   /**
    * Execute a pipeline
    */
-  async execute(pipeline: Pipeline): Promise<Pipeline> {
+  async execute(_pipeline: Pipeline): Promise<Pipeline> {
     this.runningPipelines.set(pipeline.id, pipeline);
     pipeline.status = 'pending' as JobStatus;
 
@@ -56,7 +56,7 @@ export class PipelineExecutor {
 
   // Private execution methods
 
-  private async executeStep(step: PipelineStep, pipeline: Pipeline): Promise<void> {
+  private async executeStep(step: PipelineStep, _pipeline: Pipeline): Promise<void> {
     step.status = 'running';
 
     try {
@@ -90,7 +90,7 @@ export class PipelineExecutor {
 
   private async executePreprocessing(
     step: PipelineStep,
-    pipeline: Pipeline
+    _pipeline: Pipeline
   ): Promise<any> {
     // Simulate preprocessing
     await this.simulateWork(500);
@@ -105,7 +105,7 @@ export class PipelineExecutor {
 
   private async executeFeatureEngineering(
     step: PipelineStep,
-    pipeline: Pipeline
+    _pipeline: Pipeline
   ): Promise<any> {
     // Simulate feature engineering
     await this.simulateWork(800);
@@ -131,7 +131,7 @@ export class PipelineExecutor {
 
   private async executeModelTraining(
     step: PipelineStep,
-    pipeline: Pipeline
+    _pipeline: Pipeline
   ): Promise<any> {
     // Simulate model training
     await this.simulateWork(2000);
@@ -158,7 +158,7 @@ export class PipelineExecutor {
 
   private async executeEnsemble(
     step: PipelineStep,
-    pipeline: Pipeline
+    _pipeline: Pipeline
   ): Promise<any> {
     // Simulate ensemble building
     await this.simulateWork(1500);
@@ -177,7 +177,7 @@ export class PipelineExecutor {
 
   private async executeDeployment(
     step: PipelineStep,
-    pipeline: Pipeline
+    _pipeline: Pipeline
   ): Promise<any> {
     // Simulate deployment
     await this.simulateWork(1000);
@@ -199,7 +199,7 @@ export class PipelineExecutor {
   /**
    * Validate pipeline before execution
    */
-  validate(pipeline: Pipeline): { valid: boolean; errors: string[] } {
+  validate(_pipeline: Pipeline): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!pipeline.steps || pipeline.steps.length === 0) {
@@ -230,7 +230,7 @@ export class PipelineExecutor {
   /**
    * Resume pipeline from failed step
    */
-  async resume(pipeline: Pipeline, fromStepIndex: number): Promise<Pipeline> {
+  async resume(_pipeline: Pipeline, fromStepIndex: number): Promise<Pipeline> {
     if (fromStepIndex < 0 || fromStepIndex >= pipeline.steps.length) {
       throw new Error('Invalid step index');
     }

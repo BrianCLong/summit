@@ -1,4 +1,4 @@
-import { Optimizer, OptimizationStudy, TrialResult } from '../types.js';
+import { Optimizer, OptimizationStudy, TrialResult } from '../types';
 
 /**
  * Bayesian Optimization using Gaussian Processes
@@ -64,9 +64,9 @@ export class BayesianOptimizer implements Optimizer {
    */
   update(study: OptimizationStudy, trial: TrialResult): void {
     // In a real implementation, this would update the GP model
-    // For now, we just log the update
+    // Silently track completed trials
     if (trial.status === 'completed') {
-      console.log(`Trial ${trial.id} completed with score ${trial.score}`);
+      // Update internal GP state here
     }
   }
 
@@ -121,7 +121,7 @@ export class BayesianOptimizer implements Optimizer {
 
       switch (def.type) {
         case 'int':
-        case 'float':
+        case 'float': {
           // Normalize to [0, 1]
           let normalized = (value - def.min) / (def.max - def.min);
           if (def.logScale) {
@@ -130,13 +130,15 @@ export class BayesianOptimizer implements Optimizer {
           }
           vector.push(normalized);
           break;
-        case 'categorical':
+        }
+        case 'categorical': {
           // One-hot encoding
           const index = def.values.indexOf(value);
           for (let i = 0; i < def.values.length; i++) {
             vector.push(i === index ? 1 : 0);
           }
           break;
+        }
         case 'boolean':
           vector.push(value ? 1 : 0);
           break;

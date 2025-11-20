@@ -1,11 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
 import {
   AlgorithmType,
   ModelConfig,
   ModelComplexity,
   Dataset,
   AutoMLJobConfig,
-} from './types.js';
+} from './types';
 
 /**
  * Algorithm recommendation engine for automated model selection
@@ -99,7 +98,7 @@ export class ModelSelector {
 
     // Check feature types
     const categoricalFeatures = dataset.features.filter(f => f.type === 'categorical').length;
-    const numericFeatures = dataset.features.filter(f => f.type === 'numeric').length;
+    const _numericFeatures = dataset.features.filter(f => f.type === 'numeric').length;
 
     if (metadata.supportsCategorical || categoricalFeatures === 0) {
       reasons.push('Categorical features supported');

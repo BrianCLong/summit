@@ -1,4 +1,4 @@
-import { Optimizer, OptimizationStudy, TrialResult } from '../types.js';
+import { Optimizer, OptimizationStudy, TrialResult } from '../types';
 
 /**
  * Genetic Algorithm optimizer for hyperparameter tuning

@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Pipeline, PipelineStep } from '../core/types.js';
+import { Pipeline } from '../core/types';
 
 /**
  * Builder for creating AutoML pipelines
  */
 export class PipelineBuilder {
-  private pipeline: Pipeline;
+  private _pipeline: Pipeline;
 
   constructor(name: string) {
     this.pipeline = {
@@ -149,7 +149,7 @@ export class PipelineBuilder {
   /**
    * Clone an existing pipeline
    */
-  static clone(pipeline: Pipeline): Pipeline {
+  static clone(_pipeline: Pipeline): Pipeline {
     return {
       ...pipeline,
       id: uuidv4(),

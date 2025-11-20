@@ -4,11 +4,11 @@ import {
   OptimizationConfig,
   TrialResult,
   Optimizer,
-} from './types.js';
-import { BayesianOptimizer } from './optimizers/BayesianOptimizer.js';
-import { RandomSearchOptimizer } from './optimizers/RandomSearch.js';
-import { GridSearchOptimizer } from './optimizers/GridSearch.js';
-import { GeneticAlgorithmOptimizer } from './optimizers/GeneticAlgorithm.js';
+} from './types';
+import { BayesianOptimizer } from './optimizers/BayesianOptimizer';
+import { RandomSearchOptimizer } from './optimizers/RandomSearch';
+import { GridSearchOptimizer } from './optimizers/GridSearch';
+import { GeneticAlgorithmOptimizer } from './optimizers/GeneticAlgorithm';
 
 /**
  * Study manager for hyperparameter optimization

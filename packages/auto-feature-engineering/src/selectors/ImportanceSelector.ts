@@ -1,4 +1,4 @@
-import { Feature } from '../index.js';
+import { Feature } from '../index';
 
 export class ImportanceSelector {
   rankByMutualInformation(features: Feature[], target: any[]): Feature[] {

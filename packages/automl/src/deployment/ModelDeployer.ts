@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DeploymentConfig } from '../core/types.js';
+import { DeploymentConfig } from '../core/types';
 
 /**
  * Automated model deployment system
@@ -92,7 +92,7 @@ export class ModelDeployer {
   /**
    * Rollback deployment
    */
-  async rollback(deploymentId: string, targetVersion?: string): Promise<void> {
+  async rollback(deploymentId: string, _targetVersion?: string): Promise<void> {
     const deployment = this.deployments.get(deploymentId);
     if (!deployment) {
       throw new Error(`Deployment ${deploymentId} not found`);

@@ -44,13 +44,13 @@ export type OptimizationConfig = z.infer<typeof OptimizationConfigSchema>;
 // Trial result
 export const TrialResultSchema = z.object({
   id: z.string(),
-  parameters: z.record(z.any()),
-  metrics: z.record(z.number()),
+  parameters: z.record(z.string(), z.unknown()),
+  metrics: z.record(z.string(), z.number()),
   score: z.number(),
   status: z.enum(['running', 'completed', 'failed', 'pruned']),
   startTime: z.string(),
   endTime: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type TrialResult = z.infer<typeof TrialResultSchema>;

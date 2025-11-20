@@ -1,5 +1,4 @@
-import { Feature, FeatureEngineeringConfig } from '../index.js';
-import { v4 as uuidv4 } from 'uuid';
+import { Feature, FeatureEngineeringConfig } from '../index';
 
 export class FeatureGenerator {
   async generate(features: Feature[], config: FeatureEngineeringConfig): Promise<Feature[]> {

@@ -1,4 +1,4 @@
-import { OptimizationStudy, TrialResult } from '../types.js';
+import { OptimizationStudy, TrialResult } from '../types';
 
 /**
  * Warm start strategies for transfer learning in hyperparameter optimization

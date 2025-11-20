@@ -33,12 +33,12 @@ export const DatasetSchema = z.object({
     type: z.enum(['numeric', 'categorical', 'text', 'datetime', 'boolean']),
     missing: z.number(),
     unique: z.number(),
-    distribution: z.record(z.any()).optional(),
+    distribution: z.record(z.string(), z.unknown()).optional(),
   })),
   target: z.string().optional(),
   rows: z.number(),
   columns: z.number(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type Dataset = z.infer<typeof DatasetSchema>;
@@ -47,7 +47,7 @@ export type Dataset = z.infer<typeof DatasetSchema>;
 export const ModelConfigSchema = z.object({
   algorithm: z.string(),
   algorithmType: z.nativeEnum(AlgorithmType),
-  hyperparameters: z.record(z.any()),
+  hyperparameters: z.record(z.string(), z.unknown()),
   complexity: z.nativeEnum(ModelComplexity),
   estimatedTime: z.number().optional(),
   estimatedCost: z.number().optional(),
@@ -66,7 +66,7 @@ export const PerformanceMetricsSchema = z.object({
   mae: z.number().optional(),
   r2: z.number().optional(),
   silhouetteScore: z.number().optional(),
-  custom: z.record(z.number()).optional(),
+  custom: z.record(z.string(), z.number()).optional(),
   validationMethod: z.string(),
   folds: z.number().optional(),
 });
@@ -85,7 +85,7 @@ export const ModelResultSchema = z.object({
     importance: z.number(),
   })).optional(),
   crossValidationScores: z.array(z.number()).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   timestamp: z.string(),
 });
 

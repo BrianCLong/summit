@@ -1,14 +1,14 @@
 // Core exports
-export * from './core/types.js';
-export * from './core/ModelSelector.js';
-export * from './core/AutoMLOrchestrator.js';
+export * from './core/types';
+export * from './core/ModelSelector';
+export * from './core/AutoMLOrchestrator';
 
 // Pipeline exports
-export * from './pipeline/PipelineBuilder.js';
-export * from './pipeline/PipelineExecutor.js';
+export * from './pipeline/PipelineBuilder';
+export * from './pipeline/PipelineExecutor';
 
 // Experiment tracking exports
-export * from './experiment-tracking/ExperimentTracker.js';
+export * from './experiment-tracking/ExperimentTracker';
 
 // Deployment exports
-export * from './deployment/ModelDeployer.js';
+export * from './deployment/ModelDeployer';

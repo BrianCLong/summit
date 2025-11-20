@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ModelSelector } from './ModelSelector.js';
+import { ModelSelector } from './ModelSelector';
 import {
   AutoMLJob,
   AutoMLJobConfig,
@@ -7,7 +7,7 @@ import {
   ModelResult,
   PerformanceMetrics,
   ModelConfig,
-} from './types.js';
+} from './types';
 
 /**
  * Main orchestrator for AutoML jobs

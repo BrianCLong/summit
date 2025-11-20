@@ -1,4 +1,4 @@
-import { OptimizationStudy, TrialResult } from '../types.js';
+import { OptimizationStudy, TrialResult } from '../types';
 
 /**
  * Early stopping strategies for hyperparameter optimization
@@ -41,7 +41,7 @@ export class EarlyStoppingStrategy {
     iteration: number
   ): boolean {
     // Hyperband algorithm implementation
-    const maxIter = Math.pow(3, bracket);
+    const _maxIter = Math.pow(3, bracket);
     const eta = 3;
 
     const trialsInBracket = study.trials.filter(
@@ -73,7 +73,7 @@ export class EarlyStoppingStrategy {
     study: OptimizationStudy,
     currentTrial: Partial<TrialResult>,
     round: number,
-    totalRounds: number
+    _totalRounds: number
   ): boolean {
     const trialsInRound = study.trials.filter(
       t => t.metadata?.round === round

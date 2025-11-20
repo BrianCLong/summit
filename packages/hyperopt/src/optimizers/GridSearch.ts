@@ -1,4 +1,4 @@
-import { Optimizer, OptimizationStudy } from '../types.js';
+import { Optimizer, OptimizationStudy } from '../types';
 
 /**
  * Grid Search optimizer
@@ -27,7 +27,7 @@ export class GridSearchOptimizer implements Optimizer {
     return this.gridPoints[this.currentIndex++];
   }
 
-  update(study: OptimizationStudy): void {
+  update(_study: OptimizationStudy): void {
     // Grid search doesn't learn from previous trials
   }
 

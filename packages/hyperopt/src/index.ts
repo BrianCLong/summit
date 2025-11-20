@@ -1,13 +1,13 @@
 // Core exports
-export * from './types.js';
-export * from './StudyManager.js';
+export * from './types';
+export * from './StudyManager';
 
 // Optimizer exports
-export * from './optimizers/BayesianOptimizer.js';
-export * from './optimizers/RandomSearch.js';
-export * from './optimizers/GridSearch.js';
-export * from './optimizers/GeneticAlgorithm.js';
+export * from './optimizers/BayesianOptimizer';
+export * from './optimizers/RandomSearch';
+export * from './optimizers/GridSearch';
+export * from './optimizers/GeneticAlgorithm';
 
 // Strategies
-export * from './strategies/EarlyStopping.js';
-export * from './strategies/WarmStart.js';
+export * from './strategies/EarlyStopping';
+export * from './strategies/WarmStart';

@@ -1,16 +1,16 @@
 // Feature generators
-export * from './generators/FeatureGenerator.js';
-export * from './generators/PolynomialFeatures.js';
-export * from './generators/InteractionFeatures.js';
-export * from './generators/TimeBasedFeatures.js';
-export * from './generators/StatisticalFeatures.js';
+export * from './generators/FeatureGenerator';
+export * from './generators/PolynomialFeatures';
+export * from './generators/InteractionFeatures';
+export * from './generators/TimeBasedFeatures';
+export * from './generators/StatisticalFeatures';
 
 // Feature selectors
-export * from './selectors/FeatureSelector.js';
-export * from './selectors/ImportanceSelector.js';
+export * from './selectors/FeatureSelector';
+export * from './selectors/ImportanceSelector';
 
 // Feature transformers
-export * from './transformers/FeatureTransformer.js';
+export * from './transformers/FeatureTransformer';
 
 /**
  * Automated Feature Engineering Platform
