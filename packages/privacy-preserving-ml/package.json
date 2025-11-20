@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/privacy-preserving-ml",
+  "version": "1.0.0",
+  "description": "Privacy-preserving ML with private gradient descent, synthetic data, and attack detection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["privacy-preserving", "ml", "differential-privacy", "synthetic-data"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/differential-privacy": "workspace:*",
+    "@intelgraph/homomorphic-encryption": "workspace:*",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}

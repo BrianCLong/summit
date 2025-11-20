@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/secure-aggregation",
+  "version": "1.0.0",
+  "description": "Byzantine-robust secure aggregation protocols for federated learning",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["secure-aggregation", "byzantine-robust", "federated-learning"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/homomorphic-encryption": "workspace:*",
+    "crypto": "^1.0.1",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}

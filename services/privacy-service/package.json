@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/privacy-service",
+  "version": "1.0.0",
+  "description": "Privacy analysis and enforcement service",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/differential-privacy": "workspace:*",
+    "@intelgraph/privacy-preserving-ml": "workspace:*",
+    "@intelgraph/homomorphic-encryption": "workspace:*",
+    "express": "^5.0.1",
+    "cors": "^2.8.5",
+    "pg": "^8.11.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}
