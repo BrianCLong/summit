@@ -41,6 +41,7 @@ export class MaestroTracer extends EventEmitter {
   private sdk: NodeSDK;
   private tracer: any;
   private meter: any;
+  private prometheusExporter: any;
 
   // Metrics
   private workflowRunsTotal: Counter;
