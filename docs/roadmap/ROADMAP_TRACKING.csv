@@ -1,0 +1,85 @@
+Quarter,Month,Epic ID,Epic Name,Type,Status,Owner,Start Date,End Date,Story Points,Completed Points,Progress %,Priority,Dependencies,Risks,Notes
+Q4 2025,Nov,AA,Policy Intelligence v1,Feature,In Progress,Platform Security Team,2025-11-17,2025-11-28,10,0,0%,P0,OPA policy engine,Risk model mis-scores critical change,Conservative weights; manual gates
+Q4 2025,Nov,AA1,Change-Risk Scoring Engine,Feature,In Progress,Platform Security Team,2025-11-17,2025-11-28,4,0,0%,P0,OPA policy engine; RBAC audit logs,False positives/negatives,Canary testing on historical incidents
+Q4 2025,Nov,AA2,Drift Detection + Rollback,Feature,Pending,Platform SRE Team,2025-11-17,2025-11-28,4,0,0%,P0,Policy versioning system,Rollback cascading failures,Dependency graph analysis
+Q4 2025,Nov,AA3,Notifications & UX,Feature,Pending,Product Engineering,2025-11-17,2025-11-28,2,0,0%,P1,Slack/Email integrations,Notification spam,Rate limiting; batching
+Q4 2025,Nov,AB,Inventory Graph UI v1,Feature,Pending,Frontend/Backend Teams,2025-11-17,2025-11-28,8,0,0%,P0,Neo4j accessible,Graph queries too slow,Depth limiting; caching; indexes
+Q4 2025,Nov,AB1,Graph Service & API,Feature,Pending,Backend Infrastructure Team,2025-11-17,2025-11-28,3,0,0%,P0,Neo4j; GraphQL configured,Permission checks slow,Batch permission checks; Redis cache
+Q4 2025,Nov,AB2,UI Panel in Alert View,Feature,Pending,Frontend Team,2025-11-17,2025-11-28,3,0,0%,P0,Cytoscape.js; Graph API,Graph too dense (unusable),Depth limiting; clustering
+Q4 2025,Nov,AB3,Ownership Context,Feature,Pending,Frontend Team,2025-11-17,2025-11-28,2,0,0%,P1,Entity metadata populated,Ownership data incomplete,CMDB sync process
+Q4 2025,Nov,AC,SOAR v1.4 Scale & Safety,Feature,Pending,Automation Platform Team,2025-11-17,2025-11-28,8,0,0%,P0,Redis for BullMQ,Queue overwhelmed,Rate limits; backpressure
+Q4 2025,Nov,AC1,Bulk Incident Operations + Queues,Feature,Pending,Automation Platform Team,2025-11-17,2025-11-28,4,0,0%,P0,Redis; SOAR action handlers,Partial failures; inconsistent state,Transaction logging; rollback support
+Q4 2025,Nov,AC2,Parallelization + Circuit Breakers,Feature,Pending,Automation Platform Team,2025-11-17,2025-11-28,4,0,0%,P0,Playbook YAML schema,Complex dependencies (deadlocks),Cycle detection in DAG builder
+Q4 2025,Nov,AD,Intel v4 (Active Learning Beta),Feature,Pending,ML Platform Team,2025-11-17,2025-11-28,4,0,0%,P1,Intel v3 in production,Low feedback rate,Gamification; make feedback quick (<5s)
+Q4 2025,Nov,AD1,Feedback Capture + Labeling,Feature,Pending,ML Platform Team,2025-11-17,2025-11-28,2,0,0%,P1,Privacy/legal approval,Feedback contains PII,Sanitization pipeline; regex filters
+Q4 2025,Nov,AD2,Batch Retrain Pipeline + Canary,Feature,Pending,ML Platform Team,2025-11-17,2025-11-28,2,0,0%,P1,MLflow/model registry; ≥100 samples/week,Insufficient feedback data,Seed with synthetic examples
+Q4 2025,Nov,AE,Observability & Enablement,Feature,Pending,SRE Team,2025-11-17,2025-11-28,2,0,0%,P0,Prometheus; Grafana; AlertManager,Alert fatigue,Tune thresholds; batch alerts
+Q4 2025,Nov,AE1,Dashboards Alerts Runbooks,Feature,Pending,SRE Team,2025-11-17,2025-11-28,2,0,0%,P0,Prometheus metrics configured,Runbooks become stale,Monthly runbook review
+Q4 2025,Dec,DEBT-01,Critical TODO Sweep,Debt,Pending,Entire Engineering Team,2025-11-17,2025-12-20,TBD,0,0%,P0,None,None,Target: Close 100 TODOs (50% reduction)
+Q4 2025,Nov,DEBT-02,Critical CVE Remediation (16),Debt,In Progress,Security Team,2025-11-20,2025-11-26,TBD,0,0%,P0,Dependabot alerts,Patch causes production issue,Rollback plan; test in staging
+Q4 2025,Dec,DEBT-03,High CVE Remediation (36),Debt,Pending,Distributed Engineers,2025-11-27,2025-12-17,TBD,0,0%,P0,None,None,12 CVEs per week (Weeks 2-4)
+Q4 2025,Dec,DEBT-04,GraphQL Schema Hardening,Debt,Pending,Backend Team,2025-12-01,2025-12-20,TBD,0,0%,P1,None,None,Enable real-time subscriptions; fix schema gaps
+Q4 2025,Dec,DEBT-05,Test Coverage Uplift,Debt,Pending,QA Team,2025-12-01,2025-12-20,TBD,0,0%,P1,None,None,Collab sync E2E; DLP variable scanning
+Q1 2026,Jan,EA,Agent Adapter Layer (AAL) v1,Feature,Pending,Platform Team,2026-01-06,2026-03-31,20,0,0%,P0,None,Integration complexity,Phased rollout (LangGraph → AutoGen → SK)
+Q1 2026,Jan,EA1,LangGraph Adapter,Feature,Pending,Platform Team,2026-01-06,2026-02-14,10,0,0%,P0,LangGraph docs/API,API changes,Version pinning; canary testing
+Q1 2026,Feb,EA2,AutoGen Adapter,Feature,Pending,Platform Team,2026-02-17,2026-03-14,8,0,0%,P0,AutoGen/AG2 API,Breaking changes in AG2,Adapter abstraction layer
+Q1 2026,Mar,EA3,Memory & Tools Adapters,Feature,Pending,Platform Team,2026-03-17,2026-03-31,2,0,0%,P1,Zep-style memory; Bedrock Agents,None,Adapter pattern reuse
+Q1 2026,Jan,EB,Org Mesh Twin Console v1,Feature,Pending,Frontend/Analytics Teams,2026-01-06,2026-03-31,15,0,0%,P0,Autonomy metrics instrumented,Data accuracy,Validate metrics logic
+Q1 2026,Jan,EB1,Autonomy Budgets & Index,Feature,Pending,Analytics Team,2026-01-06,2026-02-14,8,0,0%,P0,Task completion telemetry,Baseline establishment,Historical data analysis
+Q1 2026,Feb,EB2,Approval Heatmap & Dashboards,Feature,Pending,Frontend Team,2026-02-17,2026-03-31,7,0,0%,P0,Approval workflow data,None,Grafana + custom UI
+Q1 2026,Jan,EC,SOAR v1.5,Feature,Pending,Automation Team,2026-01-06,2026-03-31,12,0,0%,P0,SOAR v1.4 deployed,None,Incremental improvements
+Q1 2026,Jan,EC1,Graph-Aware Batching,Feature,Pending,Automation Team,2026-01-06,2026-02-28,6,0,0%,P0,Graph API; entity relationships,None,Optimize batch grouping
+Q1 2026,Mar,EC2,Per-Tenant Quotas + HIL Dashboard,Feature,Pending,Automation Team,2026-03-01,2026-03-31,6,0,0%,P0,Multi-tenant support,None,Quota enforcement; approval UI
+Q1 2026,Jan,DEBT-06,Neo4j Enterprise Migration,Debt,Pending,Infrastructure Team,2026-01-06,2026-03-31,TBD,0,0%,P0,Neo4j Enterprise license,Downtime during migration,Blue-green deployment
+Q1 2026,Jan,DEBT-07,Security Hardening Sprint,Debt,Pending,Security Team,2026-01-06,2026-02-28,TBD,0,0%,P0,IdP API access,None,SCIM sync; external secrets operator
+Q1 2026,Mar,DEBT-08,Observability Debt,Debt,Pending,SRE Team,2026-03-01,2026-03-31,TBD,0,0%,P1,None,None,AI model metrics; cross-modal telemetry
+Q2 2026,Apr,FA,Contained L3 Playbooks,Feature,Pending,Automation/ML Teams,2026-04-01,2026-06-30,18,0,0%,P0,None,Playbook quality,Thorough testing; incident replays
+Q2 2026,Apr,FA1,SRE Incident Triage Playbook,Feature,Pending,Automation Team,2026-04-01,2026-05-15,6,0,0%,P0,OOOPSiferGPT integration,None,Tier-3 approvals + auto-revert
+Q2 2026,May,FA2,Finance Recon Playbook,Feature,Pending,Automation Team,2026-05-16,2026-06-15,6,0,0%,P0,Royalcrown IG API,None,Read-mostly autonomy
+Q2 2026,Jun,FA3,Growth Ops Playbook,Feature,Pending,Automation Team,2026-06-16,2026-06-30,6,0,0%,P0,Guy IG integration,None,Capped Tier-2 experiments
+Q2 2026,Apr,FB,Customer Pilots (3),Feature,Pending,Customer Success/Engineering,2026-04-01,2026-06-30,25,0,0%,P0,Pilot agreements; data access,Data quality issues,Validation layer; normalization
+Q2 2026,Apr,FB1,Pilot 1 Onboarding & Instrumentation,Feature,Pending,Customer Success,2026-04-01,2026-05-31,8,0,0%,P0,Pilot agreement,None,Causality tracking
+Q2 2026,May,FB2,Pilot 2 Onboarding & Instrumentation,Feature,Pending,Customer Success,2026-05-01,2026-06-30,8,0,0%,P0,Pilot agreement,None,Causality tracking
+Q2 2026,May,FB3,Pilot 3 Onboarding & Instrumentation,Feature,Pending,Customer Success,2026-05-01,2026-06-30,9,0,0%,P0,Pilot agreement,None,ROI analysis; case study
+Q2 2026,Apr,FC,Sector Pack Alpha: Finserv,Feature,Pending,Compliance Team,2026-04-01,2026-06-30,15,0,0%,P0,PCI-DSS controls mapped,None,Pre-built integrations
+Q2 2026,Apr,FC1,PCI-DSS Controls & Evidence,Feature,Pending,Compliance Team,2026-04-01,2026-05-31,10,0,0%,P0,Compliance framework,None,Evidence collectors
+Q2 2026,Jun,FC2,Residency Toggles & Integrations,Feature,Pending,Platform Team,2026-06-01,2026-06-30,5,0,0%,P1,None,None,Data residency options
+Q2 2026,Apr,FD,Evidence Automation,Feature,Pending,Compliance/Platform Teams,2026-04-01,2026-06-30,12,0,0%,P0,SOC2/ISO controls,None,DECISIONS.md streaming
+Q2 2026,Apr,DEBT-09,Performance Optimization Sprint,Debt,Pending,Infrastructure Team,2026-04-01,2026-06-30,TBD,0,0%,P0,None,Vector DB migration regression,A/B testing; quality metrics
+Q2 2026,Apr,DEBT-10,Vector Search Migration,Debt,Pending,Infrastructure Team,2026-04-01,2026-05-31,TBD,0,0%,P0,Vendor selection (Pinecone/Weaviate),None,pgvector → specialized DB
+Q2 2026,May,DEBT-11,Graph Query Optimization,Debt,Pending,Backend Team,2026-05-01,2026-06-30,TBD,0,0%,P1,None,None,Cypher profiling; indexes
+Q2 2026,Jun,DEBT-12,Audit Trail Completion,Debt,Pending,Compliance Team,2026-06-01,2026-06-30,TBD,0,0%,P1,None,None,AI decision lineage
+Q3 2026,Jul,GA,Autonomy Credits Live,Feature,Pending,Platform/Finance Teams,2026-07-01,2026-09-30,20,0,0%,P0,CFO approval,Low adoption,CFO engagement; ROI case studies
+Q3 2026,Jul,GA1,Credit System & Policy,Feature,Pending,Platform Team,2026-07-01,2026-08-15,10,0,0%,P0,IntelGraph 2.0 schema,None,AutonomyCredit entity
+Q3 2026,Aug,GA2,CFO Dashboards & Loan/Borrow,Feature,Pending,Frontend/Analytics Teams,2026-08-16,2026-09-30,10,0,0%,P0,Credit system deployed,None,Cost per outcome visibility
+Q3 2026,Jul,GB,Sector Packs GA,Feature,Pending,Compliance Team,2026-07-01,2026-09-30,18,0,0%,P0,Finserv pack alpha validated,None,Finserv + Public Sector
+Q3 2026,Jul,GB1,Finserv Pack GA (PCI-DSS),Feature,Pending,Compliance Team,2026-07-01,2026-08-31,8,0,0%,P0,None,None,Production-ready integrations
+Q3 2026,Aug,GB2,Public Sector Pack (FedRAMP Foundation),Feature,Pending,Compliance Team,2026-08-01,2026-09-30,10,0,0%,P0,FedRAMP controls mapped,None,Pre-linked evidence collectors
+Q3 2026,Jul,GC,AAL v2,Feature,Pending,Platform Team,2026-07-01,2026-09-30,15,0,0%,P0,AAL v1 validated,None,Semantic Kernel adapter
+Q3 2026,Jul,GC1,Semantic Kernel Adapter,Feature,Pending,Platform Team,2026-07-01,2026-08-31,10,0,0%,P0,SK API docs,None,Multi-runtime orchestration
+Q3 2026,Sep,GC2,Multi-Runtime Plan Orchestration,Feature,Pending,Platform Team,2026-09-01,2026-09-30,5,0,0%,P1,None,None,Cross-framework telemetry
+Q3 2026,Jul,GD,2-Week PoV Factory,Feature,Pending,Sales/Engineering Teams,2026-07-01,2026-09-30,12,0,0%,P0,None,None,Automated scripts + ROI deck
+Q3 2026,Sep,GD1,PoV Automation Scripts,Feature,Pending,Sales Engineering,2026-09-01,2026-09-30,8,0,0%,P0,None,None,Target: ≥80% win-rate
+Q3 2026,Sep,GD2,ROI Deck & Metrics,Feature,Pending,Product Marketing,2026-09-01,2026-09-30,4,0,0%,P1,None,None,Customer case studies
+Q3 2026,Jul,DEBT-13,Multi-Tenant Isolation Audit,Debt,Pending,Security Team,2026-07-01,2026-09-30,TBD,0,0%,P0,None,Multi-tenant bugs in prod,Penetration testing; chaos engineering
+Q3 2026,Aug,DEBT-14,Backup & DR Hardening,Debt,Pending,Infrastructure Team,2026-08-01,2026-09-30,TBD,0,0%,P0,None,None,Encrypted backups; failover testing
+Q3 2026,Sep,DEBT-15,Dependency Security Sweep,Debt,Pending,Security Team,2026-09-01,2026-09-30,TBD,0,0%,P1,None,None,CVE remediation; SBOM completeness
+Q4 2026,Oct,HA,Org Mesh Twin v2 (Planning Surface),Feature,Pending,Platform Team,2026-10-01,2026-12-31,18,0,0%,P0,Org Mesh Twin v1 validated,None,Monte Carlo simulations
+Q4 2026,Oct,HA1,Autonomy Redistribution UI,Feature,Pending,Frontend Team,2026-10-01,2026-11-30,10,0,0%,P0,None,None,Click node → propose redistribution
+Q4 2026,Nov,HA2,Monte Carlo Capacity Planning,Feature,Pending,Analytics Team,2026-11-01,2026-12-31,8,0,0%,P0,Historical data,None,Simulation engine
+Q4 2026,Oct,HB,SLO-Driven Progressive Delivery,Feature,Pending,Infrastructure Team,2026-10-01,2026-12-31,15,0,0%,P0,Argo Rollouts; Prometheus,None,Default for all agent deployments
+Q4 2026,Oct,HB1,Prometheus Analysis Gates,Feature,Pending,Infrastructure Team,2026-10-01,2026-11-30,10,0,0%,P0,Metrics configured,None,P95; error rate; latency thresholds
+Q4 2026,Nov,HB2,Automated Rollback Triggers,Feature,Pending,Infrastructure Team,2026-11-01,2026-12-31,5,0,0%,P0,None,None,<5min rollback SLA
+Q4 2026,Oct,HC,Sovereign Mode GA,Feature,Pending,Infrastructure Team,2026-10-01,2026-12-31,20,0,0%,P0,FedRAMP audit prep,None,Single-tenant VPC; FIPS crypto
+Q4 2026,Oct,HC1,Single-Tenant VPC Deployment,Feature,Pending,Infrastructure Team,2026-10-01,2026-11-30,10,0,0%,P0,None,None,Air-gapped artifact mirroring
+Q4 2026,Nov,HC2,FIPS Crypto & Compliance,Feature,Pending,Security Team,2026-11-01,2026-12-31,10,0,0%,P0,FIPS modules available,None,FedRAMP controls
+Q4 2026,Oct,HD,IntelGraph 2.0,Feature,Pending,Platform/ML Teams,2026-10-01,2026-12-31,18,0,0%,P0,None,Backward compatibility,Schema migration plan
+Q4 2026,Oct,HD1,AutonomyCredit + EvidenceLink Entities,Feature,Pending,Platform Team,2026-10-01,2026-11-30,10,0,0%,P0,None,None,First-class entities
+Q4 2026,Nov,HD2,CausalOutcome Entity,Feature,Pending,ML/Analytics Teams,2026-11-01,2026-12-31,8,0,0%,P0,Pilot ROI data,None,Intervention → ROI linkage
+Q4 2026,Oct,HE,Maestro Conductor++,Feature,Pending,Platform Team,2026-10-01,2026-12-31,15,0,0%,P0,None,None,Plan evaluators; two-man rule
+Q4 2026,Oct,HE1,Plan Evaluators Library,Feature,Pending,Platform Team,2026-10-01,2026-11-30,8,0,0%,P0,None,None,Red-team prompts; cost ceilings
+Q4 2026,Nov,HE2,Two-Man Rule Automation,Feature,Pending,Automation Team,2026-11-01,2026-12-31,7,0,0%,P0,None,None,Batched approvals; partial execution
+Q4 2026,Oct,DEBT-16,Final TODO Elimination,Debt,Pending,Entire Engineering Team,2026-10-01,2026-12-31,TBD,0,0%,P0,None,None,Target: 0 production TODOs
+Q4 2026,Oct,DEBT-17,FedRAMP Compliance Readiness,Debt,Pending,Compliance/Security Teams,2026-10-01,2026-12-31,TBD,0,0%,P0,FedRAMP auditor engaged,Audit delays,Early auditor engagement
+Q4 2026,Nov,DEBT-18,Performance at Scale Validation,Debt,Pending,Infrastructure Team,2026-11-01,2026-12-31,TBD,0,0%,P0,None,Unknown bottlenecks,Gradual ramp testing
+Q4 2026,Dec,DEBT-19,Platform Stability Hardening,Debt,Pending,SRE Team,2026-12-01,2026-12-31,TBD,0,0%,P0,None,None,MTTR <30min; 99.9% uptime SLO
