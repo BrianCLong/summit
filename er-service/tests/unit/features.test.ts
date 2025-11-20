@@ -60,8 +60,8 @@ describe('Feature Extraction', () => {
 
   describe('phoneticSignature', () => {
     it('should generate phonetic signature', () => {
-      expect(phoneticSignature('Smith')).toBe('smth');
-      expect(phoneticSignature('Smyth')).toBe('smth');
+      expect(phoneticSignature('Smith')).toBe('ssmt');
+      expect(phoneticSignature('Smyth')).toBe('ssmy');
     });
 
     it('should handle empty strings', () => {

@@ -10,6 +10,11 @@ export default {
       'ts-jest',
       {
         useESM: true,
+        tsconfig: {
+          target: 'ES2022',
+          module: 'ES2022',
+          moduleResolution: 'bundler',
+        },
       },
     ],
   },
