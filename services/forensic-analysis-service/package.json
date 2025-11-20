@@ -1,0 +1,26 @@
+{
+  "name": "@intelgraph/forensic-analysis-service",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/metadata-extractor": "workspace:*",
+    "@intelgraph/timeline-analyzer": "workspace:*",
+    "express": "^4.21.3",
+    "zod": "^4.1.12",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "tsx": "^4.17.0"
+  }
+}
