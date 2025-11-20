@@ -1,0 +1,664 @@
+# Summit Backup Sets Configuration
+# Defines full, partial, and per-tenant/project backup strategies
+
+# Recovery Objectives
+recovery_objectives:
+  rto: "4 hours"  # Recovery Time Objective
+  rpo: "15 minutes"  # Recovery Point Objective
+  description: "Maximum acceptable downtime: 4 hours. Maximum acceptable data loss: 15 minutes."
+
+# Backup Set Definitions
+backup_sets:
+  # Full System Backup - Everything
+  full:
+    name: "Full System Backup"
+    description: "Complete backup of all services, databases, and configurations"
+    frequency: "daily"
+    retention_days: 30
+    components:
+      - neo4j_full
+      - postgres_full
+      - timescale_full
+      - redis_full
+      - audit_chain
+      - config_files
+      - secrets
+      - provenance_store
+      - policy_store
+      - catalog_store
+    storage:
+      - local
+      - s3
+    encryption: true
+    compression: true
+    verification: true
+
+  # Minimal Backup - Core databases only
+  minimal:
+    name: "Minimal Core Backup"
+    description: "Essential databases only, for quick recovery testing"
+    frequency: "hourly"
+    retention_days: 7
+    components:
+      - postgres_core
+      - neo4j_core
+      - redis_cache
+    storage:
+      - local
+    encryption: false
+    compression: true
+    verification: true
+
+  # Per-Tenant Backup - Isolated tenant data
+  tenant:
+    name: "Per-Tenant Backup"
+    description: "Isolated backup of single tenant data (where multi-tenancy is supported)"
+    frequency: "hourly"
+    retention_days: 14
+    components:
+      - postgres_tenant_data
+      - neo4j_tenant_graph
+      - tenant_config
+      - tenant_audit
+    storage:
+      - local
+      - s3
+    encryption: true
+    compression: true
+    verification: true
+    metadata:
+      tenant_id_required: true
+      isolation_level: "complete"
+
+  # Per-Project Backup - Project-level data
+  project:
+    name: "Per-Project Backup"
+    description: "Backup of specific project/investigation data"
+    frequency: "on_demand"
+    retention_days: 90
+    components:
+      - postgres_project_data
+      - neo4j_project_graph
+      - project_artifacts
+      - project_provenance
+    storage:
+      - local
+      - s3
+    encryption: true
+    compression: true
+    verification: true
+    metadata:
+      project_id_required: true
+      include_related_entities: true
+
+  # Configuration Only - No data
+  config_only:
+    name: "Configuration Backup"
+    description: "System configuration, policies, and secrets only"
+    frequency: "on_change"
+    retention_days: 90
+    components:
+      - config_files
+      - secrets
+      - opa_policies
+      - policy_bundles
+      - catalog_definitions
+    storage:
+      - local
+      - s3
+      - git
+    encryption: true
+    compression: true
+    verification: true
+
+  # DR Snapshot - Production-ready full backup
+  disaster_recovery:
+    name: "Disaster Recovery Snapshot"
+    description: "Complete production-ready backup for DR scenarios"
+    frequency: "every_6_hours"
+    retention_days: 60
+    components:
+      - neo4j_full
+      - postgres_full
+      - timescale_full
+      - redis_full
+      - audit_chain
+      - config_files
+      - secrets
+      - provenance_store
+      - policy_store
+      - catalog_store
+      - kubernetes_configs
+      - infrastructure_state
+    storage:
+      - s3_primary
+      - s3_dr_region
+    encryption: true
+    compression: true
+    verification: true
+    multi_region: true
+    cross_region_replication: true
+
+# Component Definitions
+components:
+  neo4j_full:
+    type: "database"
+    service: "neo4j"
+    method: "neo4j-admin dump"
+    includes:
+      - "all_databases"
+      - "graph_statistics"
+      - "indexes"
+      - "constraints"
+    estimated_size: "5GB"
+    estimated_duration: "5min"
+
+  neo4j_core:
+    type: "database"
+    service: "neo4j"
+    method: "cypher_export"
+    includes:
+      - "core_entities"
+      - "critical_relationships"
+    exclude:
+      - "demo_data"
+      - "test_data"
+    estimated_size: "1GB"
+    estimated_duration: "2min"
+
+  neo4j_tenant_graph:
+    type: "database"
+    service: "neo4j"
+    method: "filtered_export"
+    query: "MATCH (n) WHERE n.tenant_id = $tenant_id RETURN n"
+    includes:
+      - "tenant_entities"
+      - "tenant_relationships"
+    estimated_size: "500MB"
+    estimated_duration: "3min"
+
+  neo4j_project_graph:
+    type: "database"
+    service: "neo4j"
+    method: "filtered_export"
+    query: "MATCH (n) WHERE n.project_id = $project_id OR n.investigation_id = $project_id RETURN n"
+    includes:
+      - "project_entities"
+      - "investigation_graph"
+      - "related_entities"
+    estimated_size: "200MB"
+    estimated_duration: "2min"
+
+  postgres_full:
+    type: "database"
+    service: "postgres"
+    method: "pg_dump"
+    includes:
+      - "all_schemas"
+      - "all_tables"
+      - "sequences"
+      - "functions"
+      - "triggers"
+    format: "custom"
+    estimated_size: "10GB"
+    estimated_duration: "10min"
+
+  postgres_core:
+    type: "database"
+    service: "postgres"
+    method: "pg_dump"
+    includes:
+      - "schema: public"
+      - "essential_tables"
+    exclude:
+      - "logs"
+      - "analytics_cache"
+      - "temporary_data"
+    format: "custom"
+    estimated_size: "2GB"
+    estimated_duration: "3min"
+
+  postgres_tenant_data:
+    type: "database"
+    service: "postgres"
+    method: "pg_dump"
+    filter: "WHERE tenant_id = $tenant_id"
+    includes:
+      - "tenant_entities"
+      - "tenant_investigations"
+      - "tenant_users"
+      - "tenant_config"
+    format: "custom"
+    estimated_size: "500MB"
+    estimated_duration: "2min"
+
+  postgres_project_data:
+    type: "database"
+    service: "postgres"
+    method: "pg_dump"
+    filter: "WHERE project_id = $project_id OR investigation_id = $project_id"
+    includes:
+      - "investigation_data"
+      - "project_runs"
+      - "project_tasks"
+      - "project_results"
+    format: "custom"
+    estimated_size: "100MB"
+    estimated_duration: "1min"
+
+  timescale_full:
+    type: "timeseries"
+    service: "postgres"
+    method: "pg_dump"
+    includes:
+      - "hypertable: events"
+      - "hypertable: temporal_patterns"
+      - "hypertable: analytics_traces"
+      - "continuous_aggregates"
+    format: "custom"
+    estimated_size: "20GB"
+    estimated_duration: "15min"
+
+  redis_full:
+    type: "cache"
+    service: "redis"
+    method: "rdb_snapshot"
+    includes:
+      - "all_keys"
+    estimated_size: "500MB"
+    estimated_duration: "2min"
+
+  redis_cache:
+    type: "cache"
+    service: "redis"
+    method: "rdb_snapshot"
+    includes:
+      - "cache_keys_only"
+    exclude:
+      - "session_data"
+      - "temporary_locks"
+    estimated_size: "100MB"
+    estimated_duration: "1min"
+
+  audit_chain:
+    type: "filesystem"
+    path: "${AUDIT_CHAIN_PATH:-./data/audit}"
+    method: "tar_gz"
+    includes:
+      - "audit_logs"
+      - "integrity_chains"
+      - "verification_data"
+    estimated_size: "1GB"
+    estimated_duration: "2min"
+
+  tenant_audit:
+    type: "filesystem"
+    path: "${AUDIT_CHAIN_PATH:-./data/audit}"
+    method: "tar_gz"
+    filter: "tenant_id"
+    includes:
+      - "tenant_audit_logs"
+    estimated_size: "100MB"
+    estimated_duration: "1min"
+
+  config_files:
+    type: "filesystem"
+    method: "copy"
+    includes:
+      - "docker-compose*.yml"
+      - ".env"
+      - "Justfile"
+      - "server/src/conductor/config.ts"
+      - "policy/opa-config.yaml"
+      - "ops/observability/prometheus.yml"
+      - "ops/observability/alert-rules.yml"
+    estimated_size: "10MB"
+    estimated_duration: "30sec"
+
+  secrets:
+    type: "secrets"
+    method: "encrypted_export"
+    includes:
+      - "env_secrets"
+      - "docker_secrets"
+      - "vault_secrets"
+    encryption: "required"
+    estimated_size: "1MB"
+    estimated_duration: "30sec"
+
+  opa_policies:
+    type: "filesystem"
+    path: "server/src/conductor/security"
+    method: "copy"
+    includes:
+      - "opa_policy_files"
+    estimated_size: "5MB"
+    estimated_duration: "30sec"
+
+  policy_bundles:
+    type: "filesystem"
+    path: "policy/bundles"
+    method: "copy"
+    includes:
+      - "signed_policy_bundles"
+    estimated_size: "10MB"
+    estimated_duration: "30sec"
+
+  provenance_store:
+    type: "database"
+    service: "postgres"
+    schema: "provenance"
+    method: "pg_dump"
+    includes:
+      - "provenance_chains"
+      - "lineage_data"
+      - "attestations"
+    format: "custom"
+    estimated_size: "2GB"
+    estimated_duration: "3min"
+
+  policy_store:
+    type: "database"
+    service: "postgres"
+    schema: "policy"
+    method: "pg_dump"
+    includes:
+      - "policy_definitions"
+      - "policy_decisions"
+      - "compliance_data"
+    format: "custom"
+    estimated_size: "500MB"
+    estimated_duration: "2min"
+
+  catalog_store:
+    type: "database"
+    service: "postgres"
+    schema: "catalog"
+    method: "pg_dump"
+    includes:
+      - "data_catalog"
+      - "metadata_registry"
+      - "schema_definitions"
+    format: "custom"
+    estimated_size: "1GB"
+    estimated_duration: "2min"
+
+  catalog_definitions:
+    type: "filesystem"
+    path: "catalog"
+    method: "copy"
+    includes:
+      - "catalog_yaml_files"
+    estimated_size: "5MB"
+    estimated_duration: "30sec"
+
+  kubernetes_configs:
+    type: "kubernetes"
+    method: "kubectl_export"
+    includes:
+      - "configmaps"
+      - "secrets"
+      - "services"
+      - "deployments"
+      - "statefulsets"
+      - "networkpolicies"
+    namespaces:
+      - "default"
+      - "database"
+      - "monitoring"
+      - "security"
+    estimated_size: "50MB"
+    estimated_duration: "2min"
+
+  infrastructure_state:
+    type: "terraform"
+    path: "infra"
+    method: "terraform_state_export"
+    includes:
+      - "terraform_state"
+      - "terraform_vars"
+    estimated_size: "10MB"
+    estimated_duration: "1min"
+
+  tenant_config:
+    type: "database"
+    service: "postgres"
+    table: "tenant_config"
+    method: "pg_dump"
+    filter: "WHERE tenant_id = $tenant_id"
+    format: "custom"
+    estimated_size: "10MB"
+    estimated_duration: "30sec"
+
+  project_artifacts:
+    type: "filesystem"
+    path: "${ARTIFACTS_PATH:-./data/artifacts}"
+    method: "tar_gz"
+    filter: "project_id"
+    includes:
+      - "project_outputs"
+      - "investigation_reports"
+      - "attachments"
+    estimated_size: "500MB"
+    estimated_duration: "3min"
+
+  project_provenance:
+    type: "database"
+    service: "postgres"
+    schema: "provenance"
+    method: "pg_dump"
+    filter: "WHERE project_id = $project_id"
+    format: "custom"
+    estimated_size: "50MB"
+    estimated_duration: "1min"
+
+# Storage Configurations
+storage:
+  local:
+    type: "filesystem"
+    path: "${BACKUP_BASE:-./backups}"
+    retention_days: 7
+    cleanup_enabled: true
+
+  s3:
+    type: "s3"
+    bucket: "${S3_BUCKET}"
+    prefix: "summit-backups"
+    region: "${AWS_REGION:-us-west-2}"
+    storage_class: "STANDARD_IA"
+    retention_days: 30
+    lifecycle_enabled: true
+
+  s3_primary:
+    type: "s3"
+    bucket: "${S3_BACKUP_BUCKET_PRIMARY}"
+    prefix: "dr-backups"
+    region: "us-west-2"
+    storage_class: "STANDARD_IA"
+    encryption: "AES256"
+    retention_days: 60
+
+  s3_dr_region:
+    type: "s3"
+    bucket: "${S3_BACKUP_BUCKET_DR}"
+    prefix: "dr-backups"
+    region: "us-east-1"
+    storage_class: "STANDARD_IA"
+    encryption: "AES256"
+    retention_days: 60
+    replication_source: "s3_primary"
+
+  git:
+    type: "git"
+    repository: "${CONFIG_BACKUP_REPO}"
+    branch: "backup/config"
+    commit_message: "Automated config backup"
+
+# Restore Environments
+restore_environments:
+  production:
+    name: "Production"
+    sanitization: false
+    validation_required: true
+    approval_required: true
+    rollback_enabled: true
+
+  staging:
+    name: "Staging"
+    sanitization: "minimal"
+    validation_required: true
+    approval_required: true
+    rollback_enabled: true
+
+  dr_rehearsal:
+    name: "DR Rehearsal"
+    sanitization: false
+    validation_required: true
+    approval_required: true
+    automated_tests: true
+    golden_path_required: true
+
+  dev:
+    name: "Development"
+    sanitization: "full"
+    validation_required: false
+    approval_required: false
+    data_masking:
+      - pii_fields
+      - sensitive_data
+      - production_credentials
+    data_reduction: 0.1  # 10% of production data
+
+  test:
+    name: "Testing"
+    sanitization: "full"
+    validation_required: true
+    approval_required: false
+    data_masking:
+      - pii_fields
+      - sensitive_data
+      - production_credentials
+      - financial_data
+    data_reduction: 0.2  # 20% of production data
+    synthetic_data: true
+
+# Sanitization Rules
+sanitization_rules:
+  pii_fields:
+    - table: "users"
+      columns: ["email", "phone", "ssn", "address"]
+      method: "faker"
+    - table: "entities"
+      columns: ["contact_email", "phone_number"]
+      method: "anonymize"
+
+  sensitive_data:
+    - table: "investigations"
+      columns: ["classified_info", "internal_notes"]
+      method: "redact"
+    - table: "audit_logs"
+      columns: ["user_ip", "session_data"]
+      method: "hash"
+
+  production_credentials:
+    - pattern: ".*_KEY$"
+      method: "replace"
+      value: "dev_test_key"
+    - pattern: ".*_SECRET$"
+      method: "replace"
+      value: "dev_test_secret"
+    - pattern: ".*_PASSWORD$"
+      method: "replace"
+      value: "DevPassword123!"
+
+  financial_data:
+    - table: "billing"
+      columns: ["credit_card", "bank_account"]
+      method: "redact"
+
+# Validation Rules
+validation:
+  integrity:
+    - check: "checksum_verification"
+      required: true
+    - check: "file_count_verification"
+      required: true
+    - check: "size_verification"
+      required: false
+      tolerance: 0.1  # 10% variance allowed
+
+  database:
+    - check: "connection_test"
+      required: true
+    - check: "row_count_verification"
+      required: true
+      critical_tables:
+        - "entities"
+        - "investigations"
+        - "users"
+    - check: "referential_integrity"
+      required: true
+    - check: "index_verification"
+      required: false
+
+  application:
+    - check: "health_endpoint"
+      required: true
+      timeout: 30
+    - check: "smoke_tests"
+      required: true
+    - check: "golden_path_tests"
+      required: false  # Required for DR rehearsal
+
+# Scheduling
+schedules:
+  full_backup:
+    cron: "0 2 * * *"  # Daily at 2 AM
+    backup_set: "full"
+    enabled: true
+
+  minimal_backup:
+    cron: "0 * * * *"  # Hourly
+    backup_set: "minimal"
+    enabled: true
+
+  dr_snapshot:
+    cron: "0 */6 * * *"  # Every 6 hours
+    backup_set: "disaster_recovery"
+    enabled: true
+
+  config_backup:
+    cron: "0 */4 * * *"  # Every 4 hours
+    backup_set: "config_only"
+    enabled: true
+
+# Monitoring and Alerting
+monitoring:
+  backup_success_rate:
+    threshold: 0.98  # 98% success rate
+    window: "24h"
+    alert: true
+
+  backup_duration:
+    thresholds:
+      full: "30min"
+      minimal: "5min"
+      tenant: "10min"
+      project: "5min"
+    alert: true
+
+  backup_size:
+    growth_rate_threshold: 1.5  # Alert if backup grows >50% unexpectedly
+    alert: true
+
+  restore_test_frequency:
+    minimum: "weekly"
+    alert: true
+
+  rpo_compliance:
+    max_age: "15min"
+    alert: true
+
+  rto_tracking:
+    target: "4h"
+    alert: true
