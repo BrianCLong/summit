@@ -4,6 +4,7 @@ import { performance } from 'node:perf_hooks';
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import dotenv from 'dotenv';
 import baseLogger from '../config/logger';
+import { cacheService } from '../services/cacheService.js';
 
 dotenv.config();
 
@@ -13,6 +14,10 @@ interface QueryOptions {
   forceWrite?: boolean;
   timeoutMs?: number;
   label?: string;
+  cache?: {
+    key: string;
+    ttl?: number;
+  };
 }
 
 type QueryExecutor = <T = any>(
@@ -458,6 +463,22 @@ async function executeManagedQuery({
   const normalized = normalizeQuery(queryInput, params);
   const queryType =
     desiredType === 'auto' ? inferQueryType(normalized.text) : desiredType;
+
+  // Handle caching for read queries
+  if (queryType === 'read' && options.cache?.key) {
+    try {
+      const cachedResult = await cacheService.get<QueryResult<any>>(
+        options.cache.key,
+      );
+      if (cachedResult) {
+        logger.debug({ key: options.cache.key }, 'Postgres query cache hit');
+        return cachedResult;
+      }
+    } catch (err) {
+      logger.warn({ err }, 'Failed to retrieve from cache');
+    }
+  }
+
   const poolCandidates =
     queryType === 'write'
       ? [writePool]
@@ -476,7 +497,34 @@ async function executeManagedQuery({
     }
 
     try {
-      return await executeWithRetry(candidate, normalized, timeoutMs, label);
+      const result = await executeWithRetry(
+        candidate,
+        normalized,
+        timeoutMs,
+        label,
+      );
+
+      // Cache success result for read queries
+      if (queryType === 'read' && options.cache?.key) {
+        // We cache the essential parts of QueryResult
+        // Note: We don't cache the full object because fields/oid might not survive serialization cleanly
+        // or might be unnecessary. Storing rows, rowCount, command.
+        const cacheableResult = {
+          rows: result.rows,
+          rowCount: result.rowCount,
+          command: result.command,
+          oid: result.oid,
+          fields: [], // Often fields are circular or complex, skipping for simple cache
+        };
+
+        cacheService
+          .set(options.cache.key, cacheableResult, options.cache.ttl)
+          .catch((err) =>
+            logger.warn({ err }, 'Failed to set cache for Postgres query'),
+          );
+      }
+
+      return result;
     } catch (error) {
       lastError = error as Error;
 

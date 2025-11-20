@@ -7,6 +7,7 @@ import {
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
+import { cacheService } from '../services/cacheService.js';
 
 dotenv.config();
 
@@ -23,11 +24,17 @@ const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
+const MAX_SLOW_QUERY_ENTRIES = 200;
 
 let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
 let connectivityTimer: NodeJS.Timeout | null = null;
 let isMockMode = true;
+
+const slowQueryStats = new Map<
+  string,
+  { count: number; totalDuration: number; maxDuration: number; cypher: string }
+>();
 
 const driverFacade: Neo4jDriver = createDriverFacade();
 
@@ -258,6 +265,7 @@ function instrumentSession(session: any) {
       neo4jQueryLatencyMs.observe({ operation, label }, latency);
       if (latency > 300) {
         logger.warn(`Slow Neo4j query (${latency}ms): ${cypher}`);
+        recordSlowQuery(cypher, latency);
       }
       return result;
     } catch (error) {
@@ -266,6 +274,27 @@ function instrumentSession(session: any) {
     }
   };
   return session;
+}
+
+function recordSlowQuery(cypher: string, duration: number) {
+  const key = cypher.substring(0, 100); // Use partial cypher as key
+  const entry = slowQueryStats.get(key) ?? {
+    count: 0,
+    totalDuration: 0,
+    maxDuration: 0,
+    cypher: cypher, // Keep full cypher in value
+  };
+  entry.count += 1;
+  entry.totalDuration += duration;
+  entry.maxDuration = Math.max(entry.maxDuration, duration);
+  slowQueryStats.set(key, entry);
+
+  if (slowQueryStats.size > MAX_SLOW_QUERY_ENTRIES) {
+    const iterator = slowQueryStats.keys().next();
+    if (!iterator.done) {
+      slowQueryStats.delete(iterator.value);
+    }
+  }
 }
 
 // Export a convenience object for simple queries
@@ -280,4 +309,44 @@ export const neo = {
       await session.close();
     }
   },
+  cachedRun: async (
+    cypher: string,
+    params?: any,
+    cacheOptions?: { key: string; ttl?: number }
+  ): Promise<{ records: any[]; summary: any }> => {
+    if (cacheOptions?.key) {
+      const cached = await cacheService.get<{ records: any[]; summary: any }>(cacheOptions.key);
+      if (cached) {
+        return cached;
+      }
+    }
+
+    const driver = getNeo4jDriver();
+    const session = driver.session();
+    try {
+      const result = await session.run(cypher, params);
+
+      // Convert records to plain objects for caching
+      const records = result.records.map((r: any) => r.toObject());
+      const summary = {
+        counters: result.summary.counters,
+        query: result.summary.query,
+        updateStatistics: result.summary.updateStatistics,
+      };
+
+      const cacheable = { records, summary };
+
+      if (cacheOptions?.key) {
+        await cacheService.set(cacheOptions.key, cacheable, cacheOptions.ttl);
+      }
+
+      return cacheable;
+    } finally {
+      await session.close();
+    }
+  },
+  slowQueryInsights: () => {
+    const entries = Array.from(slowQueryStats.values());
+    return entries.sort((a, b) => b.maxDuration - a.maxDuration);
+  }
 };
