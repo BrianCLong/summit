@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/3d-visualization",
+  "version": "1.0.0",
+  "description": "3D and immersive visualization library for IntelGraph",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.162.0",
+    "@types/three": "^0.162.0",
+    "@react-three/fiber": "^8.16.2",
+    "@react-three/drei": "^9.105.4",
+    "@react-three/postprocessing": "^2.16.2",
+    "react-globe.gl": "^2.27.2",
+    "3d-force-graph": "^1.73.3",
+    "@intelgraph/visualization": "workspace:*",
+    "leva": "^0.9.35"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0"
+  }
+}
