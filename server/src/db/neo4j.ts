@@ -31,6 +31,32 @@ let isMockMode = true;
 
 const driverFacade: Neo4jDriver = createDriverFacade();
 
+type DriverReadyReason = 'initial' | 'reconnected';
+type DriverReadyEvent = { driver: Neo4jDriver; reason: DriverReadyReason };
+type DriverReadyListener = (event: DriverReadyEvent) => void | Promise<void>;
+
+const driverReadyListeners = new Set<DriverReadyListener>();
+let hasEmittedReadyEvent = false;
+
+export function onNeo4jDriverReady(
+  listener: DriverReadyListener,
+): () => void {
+  driverReadyListeners.add(listener);
+
+  if (realDriver && !isMockMode) {
+    const reason: DriverReadyReason = hasEmittedReadyEvent
+      ? 'reconnected'
+      : 'initial';
+    queueMicrotask(() => {
+      void invokeDriverReadyListener(listener, reason);
+    });
+  }
+
+  return () => {
+    driverReadyListeners.delete(listener);
+  };
+}
+
 ensureInitialization().catch((error) => {
   if (REQUIRE_REAL_DBS) {
     logger.error(
@@ -156,6 +182,7 @@ async function connectToNeo4j(): Promise<void> {
     isMockMode = false;
     neo4jConnectivityUp.set(1);
     logger.info('Neo4j driver initialized.');
+    await notifyDriverReady(hasEmittedReadyEvent ? 'reconnected' : 'initial');
   } catch (error) {
     if (candidate) {
       await candidate.close().catch(() => {});
@@ -171,6 +198,27 @@ async function connectToNeo4j(): Promise<void> {
     logger.warn(
       `Neo4j connection failed - continuing with mock driver. Reason: ${(error as Error).message}`,
     );
+  }
+}
+
+async function notifyDriverReady(reason: DriverReadyReason): Promise<void> {
+  const listeners = Array.from(driverReadyListeners);
+
+  for (const listener of listeners) {
+    await invokeDriverReadyListener(listener, reason);
+  }
+
+  hasEmittedReadyEvent = true;
+}
+
+async function invokeDriverReadyListener(
+  listener: DriverReadyListener,
+  reason: DriverReadyReason,
+): Promise<void> {
+  try {
+    await listener({ driver: driverFacade, reason });
+  } catch (error) {
+    logger.error('Error in Neo4j driver ready listener', error);
   }
 }
 

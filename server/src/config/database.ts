@@ -10,6 +10,7 @@ import {
   getNeo4jDriver as getSharedNeo4jDriver,
   initializeNeo4jDriver,
   isNeo4jMockMode,
+  onNeo4jDriverReady,
 } from '../db/neo4j.js';
 
 type Neo4jDriver = ReturnType<typeof getSharedNeo4jDriver>;
@@ -17,12 +18,16 @@ type Neo4jDriver = ReturnType<typeof getSharedNeo4jDriver>;
 let neo4jDriver: Neo4jDriver | null = null;
 let postgresPool: ManagedPostgresPool | null = null;
 let redisClient: Redis | null = null;
+let neo4jMigrationsCompleted = false;
+let neo4jReadyHookRegistered = false;
 
 // Neo4j Connection
 async function connectNeo4j(): Promise<Neo4jDriver> {
   if (neo4jDriver) {
     return neo4jDriver;
   }
+
+  registerNeo4jReadyHook();
 
   try {
     await initializeNeo4jDriver();
@@ -37,6 +42,7 @@ async function connectNeo4j(): Promise<Neo4jDriver> {
 
   if (isNeo4jMockMode()) {
     logger.warn('Neo4j unavailable - operating in mock mode for development.');
+    neo4jMigrationsCompleted = false;
     return neo4jDriver;
   }
 
@@ -47,7 +53,10 @@ async function connectNeo4j(): Promise<Neo4jDriver> {
     await session.close();
   }
 
-  await runNeo4jMigrations();
+  if (!neo4jMigrationsCompleted) {
+    await runNeo4jMigrations();
+    neo4jMigrationsCompleted = true;
+  }
 
   logger.info('✅ Connected to Neo4j');
   return neo4jDriver;
@@ -69,6 +78,33 @@ async function runNeo4jMigrations(): Promise<void> {
     );
     await createNeo4jConstraints();
   }
+}
+
+function registerNeo4jReadyHook(): void {
+  if (neo4jReadyHookRegistered) {
+    return;
+  }
+
+  neo4jReadyHookRegistered = true;
+
+  onNeo4jDriverReady(async ({ reason }) => {
+    if (isNeo4jMockMode()) {
+      neo4jMigrationsCompleted = false;
+      return;
+    }
+
+    if (reason === 'reconnected' || !neo4jMigrationsCompleted) {
+      try {
+        await runNeo4jMigrations();
+        neo4jMigrationsCompleted = true;
+        if (reason === 'reconnected') {
+          logger.info('Neo4j migrations reapplied after driver reconnection.');
+        }
+      } catch (error) {
+        logger.error('Failed to run Neo4j migrations after driver recovery:', error);
+      }
+    }
+  });
 }
 
 async function createNeo4jConstraints(): Promise<void> {
@@ -323,6 +359,8 @@ async function closeConnections(): Promise<void> {
   if (neo4jDriver) {
     await neo4jDriver.close();
     logger.info('Neo4j connection closed');
+    neo4jDriver = null;
+    neo4jMigrationsCompleted = false;
   }
   if (postgresPool) {
     await closeManagedPostgresPool();
