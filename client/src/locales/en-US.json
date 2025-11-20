@@ -1,0 +1,266 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "refresh": "Refresh",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "confirm": "Confirm"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "investigations": "Investigations",
+    "graph": "Graph",
+    "graphWorkbench": "Graph Workbench",
+    "copilot": "Copilot",
+    "orchestrator": "Orchestrator",
+    "threats": "Threat Assessment",
+    "disclosures": "Disclosure Packager",
+    "accessIntel": "Access Intelligence",
+    "geoint": "Geographic Intelligence",
+    "reports": "Reports",
+    "settings": "Settings",
+    "system": "System",
+    "admin": "Admin"
+  },
+  "auth": {
+    "appTitle": "IntelGraph",
+    "appSubtitle": "Intelligence Analysis Platform",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "demoNotice": "Demo: Enter any email and password to continue",
+    "loginError": "Please enter email and password",
+    "loginSuccess": "Login successful",
+    "logoutSuccess": "Logged out successfully",
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "newInvestigation": "New Investigation",
+    "startFromTemplate": "Start from Template",
+    "sendDemoAlert": "Send Demo Alert",
+    "activeInvestigations": "Active Investigations",
+    "totalEntities": "Total Entities",
+    "relationships": "Relationships",
+    "thisMonth": "This Month",
+    "recentInvestigations": "Recent Investigations",
+    "entities": "entities",
+    "entitiesPlural": "{count} entities",
+    "updated": "Updated {time}",
+    "status": {
+      "active": "active",
+      "pending": "pending",
+      "completed": "completed",
+      "archived": "archived"
+    },
+    "stats": {
+      "activeInvestigations": "Active Investigations",
+      "totalEntities": "Total Entities",
+      "relationships": "Relationships",
+      "monthlyGrowth": "This Month"
+    }
+  },
+  "copilot": {
+    "title": "Intelligent Copilot",
+    "subtitle": "AI-Powered Intelligence Analysis Assistant",
+    "placeholder": "Ask a question or request analysis...",
+    "send": "Send",
+    "clear": "Clear",
+    "quickActions": "Quick Actions",
+    "liveInsights": "Live Insights",
+    "analyzeNetwork": "Analyze Network",
+    "threatAssessment": "Threat Assessment",
+    "predictPatterns": "Predict Patterns",
+    "investigationSummary": "Investigation Summary",
+    "thinking": "Thinking...",
+    "analyzing": "Analyzing...",
+    "generating": "Generating response...",
+    "responses": {
+      "networkAnalysis": {
+        "title": "🔍 **Network Analysis Complete**",
+        "keyFindings": "**Key Findings:**",
+        "riskAssessment": "**Risk Assessment:**",
+        "recommendations": "**Recommendations:**",
+        "detected": "Detected {count} potential risk clusters in the relationship graph",
+        "centralHub": "{name} appears to be a central hub with {percent}% connectivity",
+        "activitySpike": "Unusual activity spike detected in the last {days} days"
+      },
+      "threatAssessment": {
+        "title": "🛡️ **Threat Assessment Report**",
+        "currentLevel": "**Current Threat Level: {level}**",
+        "activeThreats": "**Active Threats Identified:**",
+        "threatVectors": "**Threat Vectors:**",
+        "mitigation": "**Mitigation Strategies:**"
+      },
+      "predictiveAnalysis": {
+        "title": "🔮 **Predictive Analysis Results**",
+        "patternRecognition": "**Pattern Recognition:**",
+        "futurePredictions": "**Future Predictions (Next {days} days):**",
+        "anomalyAlerts": "**Anomaly Alerts:**"
+      },
+      "investigationSummary": {
+        "title": "📊 **Investigation Summary**",
+        "caseOverview": "**Case Overview:**",
+        "keyEvidence": "**Key Evidence:**",
+        "currentStatus": "**Current Status:**",
+        "nextSteps": "**Next Steps:**"
+      }
+    },
+    "insights": {
+      "moreConnections": "💡 {name} has {percent}% more connections than average",
+      "unusualActivity": "⚠️ Unusual activity detected in {cluster} cluster",
+      "personsOfInterest": "🎯 {count} new potential persons of interest identified",
+      "communicationIncrease": "📈 Communication patterns show {percent}% increase",
+      "crossReference": "🔍 Cross-reference opportunity with Case #{caseId}"
+    }
+  },
+  "investigations": {
+    "title": "Investigations",
+    "create": "Create Investigation",
+    "open": "Open",
+    "details": "Details",
+    "timeline": "Timeline",
+    "evidence": "Evidence",
+    "notes": "Notes",
+    "collaborate": "Collaborate",
+    "status": "Status",
+    "priority": "Priority",
+    "assignedTo": "Assigned To",
+    "createdBy": "Created By",
+    "lastModified": "Last Modified"
+  },
+  "graph": {
+    "title": "Graph Explorer",
+    "nodes": "Nodes",
+    "edges": "Edges",
+    "paths": "Paths",
+    "neighbors": "Neighbors",
+    "streaming": "Streaming",
+    "findPaths": "Find Paths",
+    "shortestPaths": "Shortest Paths",
+    "pathLength": "Path Length",
+    "layout": "Layout",
+    "filters": "Filters",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "hideSelected": "Hide Selected",
+    "showAll": "Show All"
+  },
+  "search": {
+    "powerSearch": "Power Search",
+    "savedSearches": "Saved Searches",
+    "bulkActions": "Bulk Actions",
+    "queryBuilder": "Query Builder",
+    "addFilter": "Add Filter",
+    "clearFilters": "Clear Filters",
+    "searchPlaceholder": "Search entities, relationships...",
+    "noResults": "No results found",
+    "searching": "Searching..."
+  },
+  "reports": {
+    "title": "Reports",
+    "generateReport": "Generate Report",
+    "executiveSummary": "Executive Summary",
+    "forensicsReport": "Forensics Report",
+    "reportTemplate": "Report Template",
+    "exportFormat": "Export Format",
+    "download": "Download",
+    "print": "Print",
+    "share": "Share"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "preferences": "Preferences",
+    "security": "Security",
+    "notifications": "Notifications",
+    "language": "Language",
+    "timezone": "Timezone",
+    "theme": "Theme",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "autoMode": "Auto"
+  },
+  "errors": {
+    "genericError": "An error occurred. Please try again.",
+    "networkError": "Network error. Please check your connection.",
+    "notFound": "Not found",
+    "unauthorized": "You are not authorized to access this resource.",
+    "forbidden": "Access forbidden",
+    "serverError": "Server error. Please try again later.",
+    "validationError": "Please check your input and try again.",
+    "backendConnection": "Backend connection failed. Check if server is running.",
+    "goalNotFound": "Error: Goal not found",
+    "runNotFound": "Run not found",
+    "titleRequired": "Title required",
+    "feedUrlRequired": "Feed URL required",
+    "queryRequired": "Query required",
+    "translationNotFound": "Translation key \"{key}\" not found",
+    "unknownError": "Unknown error"
+  },
+  "notifications": {
+    "success": "Success",
+    "info": "Information",
+    "warning": "Warning",
+    "error": "Error",
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "updated": "Updated successfully",
+    "created": "Created successfully"
+  },
+  "performance": {
+    "fps": "FPS",
+    "performance": "Performance",
+    "budget": "Budget",
+    "lighthouse": "Lighthouse"
+  },
+  "dates": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "lastWeek": "Last Week",
+    "lastMonth": "Last Month",
+    "custom": "Custom Range"
+  },
+  "presence": {
+    "active": "active",
+    "away": "away",
+    "busy": "busy",
+    "offline": "offline",
+    "usersOnline": "{count} users online"
+  },
+  "entities": {
+    "person": "Person",
+    "organization": "Organization",
+    "location": "Location",
+    "document": "Document",
+    "event": "Event",
+    "account": "Account",
+    "device": "Device",
+    "vehicle": "Vehicle"
+  },
+  "time": {
+    "now": "Now",
+    "minutesAgo": "{count} minutes ago",
+    "hoursAgo": "{count} hours ago",
+    "daysAgo": "{count} days ago",
+    "weeksAgo": "{count} weeks ago",
+    "monthsAgo": "{count} months ago"
+  }
+}

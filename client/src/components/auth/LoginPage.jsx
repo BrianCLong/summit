@@ -10,10 +10,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../store/slices/authSlice';
+import { useI18n } from '../../hooks/useI18n';
+import LocaleSelector from '../i18n/LocaleSelector';
 
 function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t, isLoading } = useI18n();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
 
@@ -38,9 +41,26 @@ function LoginPage() {
 
       navigate('/dashboard');
     } else {
-      setError('Please enter email and password');
+      setError(t('auth.loginError'));
     }
   };
+
+  // Show loading state while translations are loading
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'grey.100',
+        }}
+      >
+        <Typography>{t('common.loading')}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -50,11 +70,17 @@ function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: 'grey.100',
+        position: 'relative',
       }}
     >
+      {/* Locale Selector in top-right corner */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <LocaleSelector variant="button" size="small" />
+      </Box>
+
       <Paper sx={{ p: 4, maxWidth: 400, width: '100%' }}>
         <Typography variant="h4" align="center" gutterBottom fontWeight="bold">
-          IntelGraph
+          {t('auth.appTitle')}
         </Typography>
         <Typography
           variant="subtitle1"
@@ -62,7 +88,7 @@ function LoginPage() {
           color="text.secondary"
           sx={{ mb: 3 }}
         >
-          Intelligence Analysis Platform
+          {t('auth.appSubtitle')}
         </Typography>
 
         {error && (
@@ -74,35 +100,35 @@ function LoginPage() {
         <Box component="form" onSubmit={handleLogin}>
           <TextField
             fullWidth
-            label="Email"
+            label={t('auth.email')}
             type="email"
             value={credentials.email}
             onChange={(e) =>
               setCredentials({ ...credentials, email: e.target.value })
             }
             autoComplete="email"
-            inputProps={{ 'aria-label': 'email' }}
+            inputProps={{ 'aria-label': t('auth.email') }}
             sx={{ mb: 2 }}
           />
           <TextField
             fullWidth
-            label="Password"
+            label={t('auth.password')}
             type="password"
             value={credentials.password}
             onChange={(e) =>
               setCredentials({ ...credentials, password: e.target.value })
             }
             autoComplete="current-password"
-            inputProps={{ 'aria-label': 'password' }}
+            inputProps={{ 'aria-label': t('auth.password') }}
             sx={{ mb: 3 }}
           />
           <Button type="submit" fullWidth variant="contained" size="large">
-            Sign In
+            {t('auth.signIn')}
           </Button>
         </Box>
 
         <Alert severity="info" sx={{ mt: 3 }}>
-          Demo: Enter any email and password to continue
+          {t('auth.demoNotice')}
         </Alert>
       </Paper>
     </Box>
