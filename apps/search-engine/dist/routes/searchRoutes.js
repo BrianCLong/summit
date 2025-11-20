@@ -1,9 +1,9 @@
 import { Router } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { ElasticsearchService } from '../services/ElasticsearchService';
 import { QueryBuilderService } from '../services/QueryBuilderService';
 import { SavedSearchService } from '../services/SavedSearchService';
 import { authMiddleware } from '../middleware/auth';
-import rateLimit from 'express-rate-limit';
 const router = Router();
 const elasticsearchService = new ElasticsearchService();
 const queryBuilderService = new QueryBuilderService();
@@ -220,7 +220,7 @@ router.post('/saved', async (req, res) => {
 router.get('/saved', async (req, res) => {
     try {
         const userId = req.user?.id;
-        const { includePublic = 'false', tags, limit = '50', offset = '0' } = req.query;
+        const { includePublic = 'false', tags, limit = '50', offset = '0', } = req.query;
         if (!userId) {
             return res.status(401).json({ error: 'User not authenticated' });
         }
@@ -380,4 +380,3 @@ router.get('/health', async (req, res) => {
     }
 });
 export default router;
-//# sourceMappingURL=searchRoutes.js.map

@@ -10,7 +10,7 @@ import { DashboardService } from './services/DashboardService';
 import { ChartService } from './services/ChartService';
 import { logger } from './utils/logger';
 import { config } from './config';
-import { authenticate, authorize } from './middleware/auth';
+import { authenticate, authorize, } from './middleware/auth';
 const app = express();
 const PORT = config.server.port || 4004;
 // Security middleware
@@ -45,6 +45,14 @@ let neo4jDriver;
 let redisClient;
 let dashboardService;
 let chartService;
+const DASHBOARD_SORT_FIELDS = ['name', 'created_at', 'updated_at'];
+const normalizeSortBy = (value) => {
+    if (typeof value === 'string' &&
+        DASHBOARD_SORT_FIELDS.includes(value)) {
+        return value;
+    }
+    return 'updated_at';
+};
 async function initializeServices() {
     try {
         // PostgreSQL connection
@@ -95,7 +103,8 @@ app.use('/api', authenticate);
 // Dashboard API Routes
 app.post('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
     try {
-        const dashboard = await dashboardService.createDashboard(req.body, req.user.id);
+        const userId = req.user.id;
+        const dashboard = await dashboardService.createDashboard(req.body, userId);
         res.status(201).json(dashboard);
     }
     catch (error) {
@@ -106,22 +115,26 @@ app.post('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
 app.get('/api/dashboards', authorize(['user', 'admin']), async (req, res) => {
     try {
         const { page = '1', limit = '20', search, tags, sortBy = 'updated_at', sortOrder = 'desc', } = req.query;
+        const parsedLimit = parseInt(limit, 10);
+        const parsedPage = parseInt(page, 10);
+        const normalizedSortBy = normalizeSortBy(sortBy);
+        const normalizedSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
         const options = {
-            limit: parseInt(limit),
-            offset: (parseInt(page) - 1) * parseInt(limit),
-            search: search,
-            tags: tags ? tags.split(',') : undefined,
-            sortBy: sortBy,
-            sortOrder: sortOrder,
+            limit: parsedLimit,
+            offset: (parsedPage - 1) * parsedLimit,
+            search: typeof search === 'string' ? search : undefined,
+            tags: typeof tags === 'string' ? tags.split(',') : undefined,
+            sortBy: normalizedSortBy,
+            sortOrder: normalizedSortOrder,
         };
         const result = await dashboardService.listDashboards(req.user.id, options);
         res.json({
             dashboards: result.dashboards,
             pagination: {
                 total: result.total,
-                page: parseInt(page),
-                limit: parseInt(limit),
-                pages: Math.ceil(result.total / parseInt(limit)),
+                page: parsedPage,
+                limit: parsedLimit,
+                pages: Math.ceil(result.total / parsedLimit),
             },
         });
     }
@@ -208,7 +221,9 @@ app.get('/api/charts/entity-types', authorize(['user', 'admin']), async (req, re
     }
     catch (error) {
         logger.error('Error getting entity type distribution:', error);
-        res.status(500).json({ error: 'Failed to generate entity type distribution' });
+        res
+            .status(500)
+            .json({ error: 'Failed to generate entity type distribution' });
     }
 });
 app.get('/api/charts/case-status', authorize(['user', 'admin']), async (req, res) => {
@@ -218,7 +233,9 @@ app.get('/api/charts/case-status', authorize(['user', 'admin']), async (req, res
     }
     catch (error) {
         logger.error('Error getting case status comparison:', error);
-        res.status(500).json({ error: 'Failed to generate case status comparison' });
+        res
+            .status(500)
+            .json({ error: 'Failed to generate case status comparison' });
     }
 });
 app.get('/api/charts/activity-heatmap', authorize(['user', 'admin']), async (req, res) => {
@@ -255,7 +272,9 @@ app.post('/api/dashboard-templates/:id/create', authorize(['user', 'admin']), as
     }
     catch (error) {
         logger.error('Error creating dashboard from template:', error);
-        res.status(500).json({ error: 'Failed to create dashboard from template' });
+        res
+            .status(500)
+            .json({ error: 'Failed to create dashboard from template' });
     }
 });
 // Analytics insights endpoints
@@ -410,4 +429,3 @@ if (require.main === module) {
     startServer();
 }
 export { app };
-//# sourceMappingURL=server.js.map

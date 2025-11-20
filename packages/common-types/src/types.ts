@@ -24,8 +24,8 @@ export const edgeTypes = [
 
 export const entitySchema = z.object({
   id: z.string(),
-  kind: z.enum(entityKinds),
-  payload: z.record(z.unknown()),
+  kind: z.enum(entityKinds as [string, ...string[]]),
+  payload: z.record(z.string(), z.unknown()),
   observedAt: z.string().datetime(),
   tenantId: z.string(),
   policyLabels: z.array(z.string()).default([]),
@@ -38,7 +38,7 @@ export const entitySchema = z.object({
 
 export const edgeSchema = z.object({
   id: z.string(),
-  type: z.enum(edgeTypes),
+  type: z.enum(edgeTypes as [string, ...string[]]),
   sourceId: z.string(),
   targetId: z.string(),
   observedAt: z.string().datetime(),
@@ -111,7 +111,7 @@ export const envelopeSchema = z.object({
   }),
   kind: envelopeKindEnum,
   type: z.string(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   observedAt: z.string().datetime(),
   hash: z.string(),
   policyLabels: z.array(z.string()).default([]),

@@ -160,4 +160,3 @@ export interface SearchTemplate {
     createdAt: Date;
     updatedAt: Date;
 }
-//# sourceMappingURL=index.d.ts.map

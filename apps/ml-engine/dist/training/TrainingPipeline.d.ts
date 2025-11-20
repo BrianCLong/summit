@@ -50,4 +50,3 @@ export declare class TrainingPipeline {
     getModelHistory(modelType?: string, limit?: number): Promise<ModelVersion[]>;
     scheduleTraining(cron: string, modelType: string): Promise<void>;
 }
-//# sourceMappingURL=TrainingPipeline.d.ts.map

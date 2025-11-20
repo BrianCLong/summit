@@ -1,4 +1,4 @@
-import { SearchQuery, QueryBuilder, SearchFilters } from '../types';
+import { SearchFilters, QueryBuilder, SearchQuery } from '../types';
 export declare class QueryBuilderService {
     private synonyms;
     private fieldMappings;
@@ -22,4 +22,3 @@ export declare class QueryBuilderService {
     parseFilterExpression(expression: string): SearchFilters;
     generateSearchTemplates(): Record<string, string>;
 }
-//# sourceMappingURL=QueryBuilderService.d.ts.map

@@ -5,4 +5,3 @@ export declare const performanceLogger: {
         end: () => void;
     };
 };
-//# sourceMappingURL=logger.d.ts.map

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
     user: {
         id: string;
         email: string;
@@ -8,5 +8,3 @@ interface AuthenticatedRequest extends Request {
 }
 export declare const authenticate: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>>;
 export declare const authorize: (allowedRoles: string[]) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>>;
-export {};
-//# sourceMappingURL=auth.d.ts.map

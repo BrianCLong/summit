@@ -141,7 +141,9 @@ export class ChartService {
                     label: chartQuery.aggregateFunction || 'Count',
                     data,
                     backgroundColor: colors.slice(0, data.length),
-                    borderColor: colors.slice(0, data.length).map((color) => this.darkenColor(color, 0.2)),
+                    borderColor: colors
+                        .slice(0, data.length)
+                        .map((color) => this.darkenColor(color, 0.2)),
                     borderWidth: 1,
                 },
             ],
@@ -189,7 +191,8 @@ export class ChartService {
             labels,
             datasets,
             metadata: {
-                total: Object.values(nested).reduce((sum, group) => sum + Object.values(group).reduce((groupSum, val) => groupSum + val, 0), 0),
+                total: Object.values(nested).reduce((sum, group) => sum +
+                    Object.values(group).reduce((groupSum, val) => groupSum + val, 0), 0),
                 aggregation: chartQuery.aggregateFunction,
                 generatedAt: new Date(),
             },
@@ -197,7 +200,9 @@ export class ChartService {
     }
     transformDistributionData(rawData, chartQuery) {
         const valueField = chartQuery.aggregateBy || 'value';
-        const values = rawData.map((row) => Number(row[valueField])).filter((v) => !isNaN(v));
+        const values = rawData
+            .map((row) => Number(row[valueField]))
+            .filter((v) => !isNaN(v));
         if (values.length === 0) {
             return {
                 labels: [],
@@ -242,7 +247,9 @@ export class ChartService {
         };
     }
     transformRelationshipData(rawData, chartQuery) {
-        const xField = Array.isArray(chartQuery.groupBy) ? chartQuery.groupBy[0] : 'x';
+        const xField = Array.isArray(chartQuery.groupBy)
+            ? chartQuery.groupBy[0]
+            : 'x';
         const yField = chartQuery.aggregateBy || 'y';
         const data = rawData.map((row) => ({
             x: Number(row[xField]) || 0,
@@ -286,7 +293,8 @@ export class ChartService {
                     result[key] = values.reduce((sum, val) => sum + val, 0);
                     break;
                 case 'avg':
-                    result[key] = values.reduce((sum, val) => sum + val, 0) / values.length;
+                    result[key] =
+                        values.reduce((sum, val) => sum + val, 0) / values.length;
                     break;
                 case 'count':
                     result[key] = values.length;
@@ -306,15 +314,23 @@ export class ChartService {
     formatDateLabel(date, interval) {
         switch (interval) {
             case 'hour':
-                return (date.toLocaleDateString() + ' ' + date.getHours().toString().padStart(2, '0') + ':00');
+                return (date.toLocaleDateString() +
+                    ' ' +
+                    date.getHours().toString().padStart(2, '0') +
+                    ':00');
             case 'day':
                 return date.toLocaleDateString();
             case 'week':
-                const weekStart = new Date(date);
-                weekStart.setDate(date.getDate() - date.getDay());
-                return `Week of ${weekStart.toLocaleDateString()}`;
+                {
+                    const weekStart = new Date(date);
+                    weekStart.setDate(date.getDate() - date.getDay());
+                    return `Week of ${weekStart.toLocaleDateString()}`;
+                }
             case 'month':
-                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                });
             case 'year':
                 return date.getFullYear().toString();
             default:
@@ -436,7 +452,15 @@ export class ChartService {
             data: heatmapData,
             labels: {
                 hours: Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0') + ':00'),
-                days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                days: [
+                    'Sunday',
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                ],
             },
             metadata: {
                 days,
@@ -445,4 +469,3 @@ export class ChartService {
         };
     }
 }
-//# sourceMappingURL=ChartService.js.map

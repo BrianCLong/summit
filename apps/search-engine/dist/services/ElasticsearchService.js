@@ -3,6 +3,9 @@ import { createLogger, format, transports } from 'winston';
 export class ElasticsearchService {
     client;
     logger;
+    getBody(response) {
+        return response.body ?? response;
+    }
     constructor() {
         this.client = new Client({
             node: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
@@ -41,18 +44,19 @@ export class ElasticsearchService {
                 request_cache: true,
                 timeout: '30s',
             });
+            const body = this.getBody(response);
             const searchResponse = {
                 query,
-                results: this.transformHits(response.body.hits.hits),
+                results: this.transformHits(body.hits.hits),
                 total: {
-                    value: response.body.hits.total.value,
-                    relation: response.body.hits.total.relation,
+                    value: body.hits.total.value,
+                    relation: body.hits.total.relation,
                 },
-                took: response.body.took,
-                timedOut: response.body.timed_out,
-                facets: this.transformAggregations(response.body.aggregations),
-                suggestions: this.transformSuggestions(response.body.suggest),
-                scrollId: response.body._scroll_id,
+                took: body.took,
+                timedOut: body.timed_out,
+                facets: this.transformAggregations(body.aggregations),
+                suggestions: this.transformSuggestions(body.suggest),
+                scrollId: body._scroll_id,
             };
             this.logger.info('Search completed', {
                 query: query.query,
@@ -152,8 +156,12 @@ export class ElasticsearchService {
                 boolQuery.bool.filter.push({
                     range: {
                         [query.filters.dateRange.field]: {
-                            ...(query.filters.dateRange.from && { gte: query.filters.dateRange.from }),
-                            ...(query.filters.dateRange.to && { lte: query.filters.dateRange.to }),
+                            ...(query.filters.dateRange.from && {
+                                gte: query.filters.dateRange.from,
+                            }),
+                            ...(query.filters.dateRange.to && {
+                                lte: query.filters.dateRange.to,
+                            }),
                         },
                     },
                 });
@@ -237,7 +245,13 @@ export class ElasticsearchService {
         return {
             multi_match: {
                 query: queryText,
-                fields: ['title^3', 'content^2', 'description^1.5', 'tags^2', 'metadata.*'],
+                fields: [
+                    'title^3',
+                    'content^2',
+                    'description^1.5',
+                    'tags^2',
+                    'metadata.*',
+                ],
                 type: 'best_fields',
                 operator: 'or',
                 fuzziness: 'AUTO',
@@ -390,24 +404,30 @@ export class ElasticsearchService {
         return results;
     }
     getQueryEmbedding(queryText) {
-        return new Array(384).fill(0).map(() => Math.random());
+        const base = Math.max(queryText.length, 1);
+        return new Array(384)
+            .fill(0)
+            .map((_, idx) => ((idx + 1) * base) % 1);
     }
     async createIndex(index) {
         try {
-            await this.client.indices.create({
+            const createRequest = {
                 index: index.name,
                 body: {
                     mappings: index.mappings,
                     settings: index.settings,
                 },
-            });
+            };
+            await this.client.indices.create(createRequest);
             if (index.aliases.length > 0) {
-                const aliasActions = index.aliases.map((alias) => ({
-                    add: { index: index.name, alias },
-                }));
-                await this.client.indices.updateAliases({
-                    body: { actions: aliasActions },
-                });
+                const aliasRequest = {
+                    body: {
+                        actions: index.aliases.map((alias) => ({
+                            add: { index: index.name, alias },
+                        })),
+                    },
+                };
+                await this.client.indices.updateAliases(aliasRequest);
             }
             this.logger.info('Index created successfully', { indexName: index.name });
         }
@@ -421,7 +441,8 @@ export class ElasticsearchService {
     }
     async deleteIndex(indexName) {
         try {
-            await this.client.indices.delete({ index: indexName });
+            const response = await this.client.indices.delete({ index: indexName });
+            this.getBody(response);
             this.logger.info('Index deleted successfully', { indexName });
         }
         catch (error) {
@@ -434,12 +455,13 @@ export class ElasticsearchService {
     }
     async indexDocument(indexName, id, document) {
         try {
-            await this.client.index({
+            const response = await this.client.index({
                 index: indexName,
                 id,
                 body: document,
                 refresh: 'wait_for',
             });
+            this.getBody(response);
             this.logger.debug('Document indexed successfully', { indexName, id });
         }
         catch (error) {
@@ -457,9 +479,10 @@ export class ElasticsearchService {
                 body: operations,
                 refresh: 'wait_for',
             });
-            if (response.body.errors) {
+            const body = this.getBody(response);
+            if (body.errors) {
                 const erroredDocuments = [];
-                response.body.items.forEach((action, i) => {
+                body.items.forEach((action, i) => {
                     const operation = Object.keys(action)[0];
                     if (action[operation].error) {
                         erroredDocuments.push({
@@ -476,8 +499,8 @@ export class ElasticsearchService {
                 });
             }
             this.logger.info('Bulk indexing completed', {
-                took: response.body.took,
-                errors: response.body.errors,
+                took: body.took,
+                errors: body.errors,
             });
         }
         catch (error) {
@@ -493,7 +516,7 @@ export class ElasticsearchService {
                 index: '_all',
                 metric: ['docs', 'store', 'indexing', 'search'],
             });
-            return response.body.indices;
+            return this.getBody(response).indices;
         }
         catch (error) {
             this.logger.error('Failed to get index stats', {
@@ -504,13 +527,13 @@ export class ElasticsearchService {
     }
     async healthCheck() {
         try {
-            const health = await this.client.cluster.health();
-            const info = await this.client.info();
+            const health = this.getBody(await this.client.cluster.health());
+            const info = this.getBody(await this.client.info());
             return {
-                status: health.body.status,
+                status: health.status,
                 details: {
-                    cluster: health.body,
-                    version: info.body.version,
+                    cluster: health,
+                    version: info.version,
                 },
             };
         }
@@ -524,4 +547,3 @@ export class ElasticsearchService {
         }
     }
 }
-//# sourceMappingURL=ElasticsearchService.js.map

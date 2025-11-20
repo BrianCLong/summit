@@ -326,4 +326,3 @@ if (require.main === module) {
     startServer();
 }
 export { app };
-//# sourceMappingURL=server.js.map

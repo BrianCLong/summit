@@ -35,4 +35,3 @@ export declare class SavedSearchService {
     getRecentSearches(userId: string, limit?: number): Promise<SavedSearch[]>;
     searchSavedSearches(userId: string, searchTerm: string): Promise<SavedSearch[]>;
 }
-//# sourceMappingURL=SavedSearchService.d.ts.map

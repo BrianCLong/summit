@@ -9,6 +9,13 @@ export class DashboardService {
         this.neo4jDriver = neo4jDriver;
         this.redisClient = redisClient;
     }
+    parseCachePayload(payload) {
+        if (!payload) {
+            return null;
+        }
+        const raw = typeof payload === 'string' ? payload : payload.toString('utf8');
+        return JSON.parse(raw);
+    }
     async createDashboard(dashboard, userId) {
         const client = await this.pgPool.connect();
         try {
@@ -65,9 +72,9 @@ export class DashboardService {
     async getDashboard(dashboardId, userId) {
         // Check cache first
         const cacheKey = `dashboard:${dashboardId}:${userId}`;
-        const cached = await this.redisClient.get(cacheKey);
+        const cached = this.parseCachePayload(await this.redisClient.get(cacheKey));
         if (cached) {
-            return JSON.parse(cached);
+            return cached;
         }
         try {
             // Get dashboard
@@ -84,8 +91,12 @@ export class DashboardService {
         FROM dashboards d
         WHERE d.id = $1
       `;
-            const dashboardResult = await this.pgPool.query(dashboardQuery, [dashboardId, userId]);
-            if (dashboardResult.rows.length === 0 || !dashboardResult.rows[0].has_access) {
+            const dashboardResult = await this.pgPool.query(dashboardQuery, [
+                dashboardId,
+                userId,
+            ]);
+            if (dashboardResult.rows.length === 0 ||
+                !dashboardResult.rows[0].has_access) {
                 return null;
             }
             const row = dashboardResult.rows[0];
@@ -104,7 +115,11 @@ export class DashboardService {
                 createdBy: row.created_by,
                 createdAt: row.created_at,
                 updatedAt: row.updated_at,
-                accessControl: row.access_control || { viewers: [], editors: [], owners: [] },
+                accessControl: row.access_control || {
+                    viewers: [],
+                    editors: [],
+                    owners: [],
+                },
                 settings: row.settings || {},
             };
             // Cache for 5 minutes
@@ -187,7 +202,9 @@ export class DashboardService {
                 throw new Error('Insufficient permissions to delete dashboard');
             }
             // Delete dashboard (cascade will handle widgets)
-            await this.pgPool.query('DELETE FROM dashboards WHERE id = $1', [dashboardId]);
+            await this.pgPool.query('DELETE FROM dashboards WHERE id = $1', [
+                dashboardId,
+            ]);
             // Clear cache
             await this.invalidateDashboardCache(dashboardId);
             logger.info(`Dashboard deleted: ${dashboardId} by user ${userId}`);
@@ -206,9 +223,9 @@ export class DashboardService {
             }
             // Check cache
             const cacheKey = `widget_data:${widgetId}`;
-            const cached = await this.redisClient.get(cacheKey);
+            const cached = this.parseCachePayload(await this.redisClient.get(cacheKey));
             if (cached && widget.dataSource.cacheTTL) {
-                return JSON.parse(cached);
+                return cached;
             }
             // Execute data source query
             let data = await this.executeDataSource(widget.dataSource, userId);
@@ -427,13 +444,16 @@ export class DashboardService {
             }
             // Apply aggregation functions
             for (const [field, func] of Object.entries(aggregations)) {
-                const values = items.map((item) => item[field]).filter((v) => v != null);
+                const values = items
+                    .map((item) => item[field])
+                    .filter((v) => v != null);
                 switch (func) {
                     case 'sum':
                         aggregated[field] = values.reduce((sum, val) => sum + Number(val), 0);
                         break;
                     case 'avg':
-                        aggregated[field] = values.reduce((sum, val) => sum + Number(val), 0) / values.length;
+                        aggregated[field] =
+                            values.reduce((sum, val) => sum + Number(val), 0) / values.length;
                         break;
                     case 'count':
                         aggregated[field] = values.length;
@@ -466,10 +486,10 @@ export class DashboardService {
         });
     }
     applyMapTransformation(data, config) {
-        const { mapping } = config;
+        const mappingEntries = Object.entries((config.mapping ?? {}));
         return data.map((item) => {
             const mapped = {};
-            for (const [newField, oldField] of Object.entries(mapping)) {
+            for (const [newField, oldField] of mappingEntries) {
                 mapped[newField] = item[oldField];
             }
             return { ...item, ...mapped };
@@ -489,7 +509,11 @@ export class DashboardService {
             return false;
         }
         const row = result.rows[0];
-        const accessControl = row.access_control || { viewers: [], editors: [], owners: [] };
+        const accessControl = row.access_control || {
+            viewers: [],
+            editors: [],
+            owners: [],
+        };
         // Owner has all access
         if (row.created_by === userId) {
             return true;
@@ -502,7 +526,8 @@ export class DashboardService {
                     accessControl.editors?.includes(userId) ||
                     accessControl.owners?.includes(userId));
             case 'edit':
-                return accessControl.editors?.includes(userId) || accessControl.owners?.includes(userId);
+                return (accessControl.editors?.includes(userId) ||
+                    accessControl.owners?.includes(userId));
             case 'owner':
                 return accessControl.owners?.includes(userId);
             default:
@@ -544,7 +569,9 @@ export class DashboardService {
             params.push(JSON.stringify(tags));
             paramIndex++;
         }
-        const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+        const whereClause = whereConditions.length > 0
+            ? `WHERE ${whereConditions.join(' AND ')}`
+            : '';
         // Count query
         const countQuery = `
       SELECT COUNT(*) as total
@@ -569,23 +596,30 @@ export class DashboardService {
     `;
         params.push(limit, offset);
         const result = await this.pgPool.query(dataQuery, params);
-        const dashboards = result.rows.map((row) => ({
-            id: row.id,
-            name: row.name,
-            description: row.description,
-            widgets: [], // Don't load widgets for list view
-            layout: row.layout,
-            theme: row.theme,
-            isPublic: row.is_public,
-            shareToken: row.share_token,
-            tags: row.tags || [],
-            createdBy: row.created_by,
-            createdAt: row.created_at,
-            updatedAt: row.updated_at,
-            accessControl: row.access_control || { viewers: [], editors: [], owners: [] },
-            settings: row.settings || {},
-            _widgetCount: row.widget_count,
-        }));
+        const dashboards = result.rows.map((row) => {
+            const normalized = row;
+            return {
+                id: normalized.id,
+                name: normalized.name,
+                description: normalized.description,
+                widgets: [], // Don't load widgets for list view
+                layout: normalized.layout,
+                theme: normalized.theme,
+                isPublic: normalized.is_public,
+                shareToken: normalized.share_token,
+                tags: normalized.tags || [],
+                createdBy: normalized.created_by,
+                createdAt: normalized.created_at,
+                updatedAt: normalized.updated_at,
+                accessControl: normalized.access_control || {
+                    viewers: [],
+                    editors: [],
+                    owners: [],
+                },
+                settings: normalized.settings || {},
+                _widgetCount: normalized.widget_count,
+            };
+        });
         return { dashboards, total };
     }
     async getDashboardTemplates(category) {
@@ -612,7 +646,9 @@ export class DashboardService {
         try {
             // Get template
             const templateQuery = 'SELECT * FROM dashboard_templates WHERE id = $1';
-            const templateResult = await this.pgPool.query(templateQuery, [templateId]);
+            const templateResult = await this.pgPool.query(templateQuery, [
+                templateId,
+            ]);
             if (templateResult.rows.length === 0) {
                 throw new Error('Template not found');
             }
@@ -655,4 +691,3 @@ export class DashboardService {
         }
     }
 }
-//# sourceMappingURL=DashboardService.js.map

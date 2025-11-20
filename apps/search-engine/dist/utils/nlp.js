@@ -1,7 +1,7 @@
+import compromise from 'compromise';
 import * as natural from 'natural';
 import * as stopword from 'stopword';
-import compromise from 'compromise';
-export { natural, stopword };
+import { en, removeStopwords } from 'stopword';
 export class NLPProcessor {
     tokenizer;
     stemmer;
@@ -21,7 +21,10 @@ export class NLPProcessor {
             { text: 'location address place geography', label: 'geographic' },
             { text: 'document file report paper', label: 'document' },
             { text: 'event incident occurrence happening', label: 'temporal' },
-            { text: 'organization company business enterprise', label: 'organization' },
+            {
+                text: 'organization company business enterprise',
+                label: 'organization',
+            },
         ];
         trainingData.forEach((item) => {
             this.classifier.addDocument(item.text, item.label);
@@ -32,7 +35,8 @@ export class NLPProcessor {
         return this.tokenizer.tokenize(text.toLowerCase()) || [];
     }
     removeStopwords(tokens, language = 'en') {
-        return stopword.removeStopwords(tokens, stopword[language] || stopword.en);
+        const languageList = { en };
+        return removeStopwords(tokens, languageList[language] || en);
     }
     stem(tokens) {
         return tokens.map((token) => this.stemmer.stem(token));
@@ -43,7 +47,7 @@ export class NLPProcessor {
             people: doc.people().out('array'),
             places: doc.places().out('array'),
             organizations: doc.organizations().out('array'),
-            dates: doc.dates().out('array'),
+            dates: doc.dates?.().out('array') ?? [],
             misc: doc.topics().out('array'),
         };
     }
@@ -128,7 +132,14 @@ export class NLPProcessor {
         return expandedText;
     }
     detectLanguage(text) {
-        const languages = ['english', 'spanish', 'french', 'german', 'italian', 'portuguese'];
+        const languages = [
+            'english',
+            'spanish',
+            'french',
+            'german',
+            'italian',
+            'portuguese',
+        ];
         const scores = {};
         languages.forEach((lang) => {
             const langStopwords = stopword[lang] || [];
@@ -136,7 +147,7 @@ export class NLPProcessor {
             const stopwordCount = tokens.filter((token) => langStopwords.includes(token)).length;
             scores[lang] = stopwordCount / tokens.length;
         });
-        return Object.entries(scores).reduce((a, b) => (scores[a[0]] > scores[b[0]] ? a : b))[0];
+        return Object.entries(scores).reduce((a, b) => scores[a[0]] > scores[b[0]] ? a : b)[0];
     }
     calculateTextSimilarity(text1, text2) {
         const tokens1 = new Set(this.removeStopwords(this.tokenize(text1)));
@@ -216,4 +227,3 @@ export class NLPProcessor {
         return values;
     }
 }
-//# sourceMappingURL=nlp.js.map

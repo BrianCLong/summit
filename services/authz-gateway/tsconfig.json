@@ -6,16 +6,17 @@
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "allowImportingTsExtensions": false,
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": [
-    "src"
+    "src/**/*"
   ],
   "references": [
     {
       "path": "../../packages/types"
-    },
-    {
+    }
+  ]
 }

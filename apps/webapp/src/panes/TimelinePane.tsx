@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Timeline } from 'vis-timeline/standalone';
-import { DataSet } from 'vis-data/peer/esm/vis-data';
+import { DataSet } from 'vis-data';
 import $ from 'jquery';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';

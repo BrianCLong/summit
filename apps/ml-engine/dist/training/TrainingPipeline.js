@@ -14,8 +14,12 @@ export class TrainingPipeline {
     async ensureModelsDirectory() {
         try {
             await fs.mkdir(this.modelsDir, { recursive: true });
-            await fs.mkdir(path.join(this.modelsDir, 'entity-resolution'), { recursive: true });
-            await fs.mkdir(path.join(this.modelsDir, 'training-data'), { recursive: true });
+            await fs.mkdir(path.join(this.modelsDir, 'entity-resolution'), {
+                recursive: true,
+            });
+            await fs.mkdir(path.join(this.modelsDir, 'training-data'), {
+                recursive: true,
+            });
         }
         catch (error) {
             logger.error('Failed to create models directory:', error);
@@ -248,7 +252,8 @@ export class TrainingPipeline {
         const activeModel = await this.getActiveModel(modelVersion.modelType);
         if (!activeModel) {
             // No active model, activate if meets minimum criteria
-            return modelVersion.metrics.f1Score >= 0.7 && modelVersion.metrics.accuracy >= 0.75;
+            return (modelVersion.metrics.f1Score >= 0.7 &&
+                modelVersion.metrics.accuracy >= 0.75);
         }
         // Compare with active model
         const improvement = modelVersion.metrics.f1Score - activeModel.metrics.f1Score;
@@ -329,4 +334,3 @@ export class TrainingPipeline {
         // Implementation would depend on chosen job scheduler
     }
 }
-//# sourceMappingURL=TrainingPipeline.js.map
