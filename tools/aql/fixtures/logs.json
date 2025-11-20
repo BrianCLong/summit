@@ -1,0 +1,33 @@
+[
+  {
+    "id": "log-evt-123",
+    "timestamp": "2024-01-05T12:00:00Z",
+    "subject": "Alice",
+    "action": "LOGIN",
+    "resource": "console",
+    "attributes": {
+      "event_id": "evt-123",
+      "ip": "192.0.2.10",
+      "location": "denver"
+    },
+    "provenance": [
+      { "source_connector": "ledger", "relation": "recorded", "reference": "ledger-evt-123" },
+      { "source_connector": "mpc", "relation": "proof", "reference": "mpc-proof-123" }
+    ]
+  },
+  {
+    "id": "log-evt-456",
+    "timestamp": "2024-01-06T09:00:00Z",
+    "subject": "Bob",
+    "action": "DOWNLOAD",
+    "resource": "s3://classified",
+    "attributes": {
+      "event_id": "evt-456",
+      "ip": "198.51.100.5",
+      "location": "seattle"
+    },
+    "provenance": [
+      { "source_connector": "ledger", "relation": "recorded", "reference": "ledger-evt-456" }
+    ]
+  }
+]
