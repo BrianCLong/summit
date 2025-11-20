@@ -69,3 +69,31 @@ smoke:
 	  echo "package.json missing; skipping JS smoke"; \
 	fi
 	@echo "smoke: DONE"
+
+catalog\:list:
+	@echo "==> catalog:list: browsing data catalog"
+	@if [ -f scripts/catalog-list.ts ]; then \
+	  node --loader ts-node/esm scripts/catalog-list.ts $(ARGS); \
+	else \
+	  echo "catalog-list.ts not found"; exit 1; \
+	fi
+
+catalog\:show:
+	@echo "==> catalog:show: show dataset details"
+	@if [ -z "$(DATASET_ID)" ]; then \
+	  echo "Error: DATASET_ID required. Usage: make catalog:show DATASET_ID=<dataset-id>"; \
+	  exit 1; \
+	fi
+	@if [ -f scripts/catalog-show.ts ]; then \
+	  node --loader ts-node/esm scripts/catalog-show.ts $(DATASET_ID) $(ARGS); \
+	else \
+	  echo "catalog-show.ts not found"; exit 1; \
+	fi
+
+catalog\:stats:
+	@echo "==> catalog:stats: catalog statistics"
+	@if [ -f scripts/catalog-stats.ts ]; then \
+	  node --loader ts-node/esm scripts/catalog-stats.ts $(ARGS); \
+	else \
+	  echo "catalog-stats.ts not found"; exit 1; \
+	fi
