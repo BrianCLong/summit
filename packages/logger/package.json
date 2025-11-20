@@ -1,0 +1,40 @@
+{
+  "name": "@intelgraph/logger",
+  "version": "1.0.0",
+  "description": "Structured logging with correlation IDs and audit trails",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "pino-abstract-transport": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "eslint": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4"
+  },
+  "keywords": [
+    "logging",
+    "pino",
+    "structured-logging",
+    "audit",
+    "correlation-id"
+  ]
+}
