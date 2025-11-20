@@ -1,0 +1,48 @@
+{
+  "name": "@intelgraph/entity-extraction",
+  "version": "1.0.0",
+  "description": "Named Entity Recognition and entity extraction with multi-language support",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./ner": {
+      "import": "./dist/ner/index.js",
+      "types": "./dist/ner/index.d.ts"
+    },
+    "./disambiguation": {
+      "import": "./dist/disambiguation/index.js",
+      "types": "./dist/disambiguation/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ner",
+    "named-entity-recognition",
+    "entity-extraction",
+    "entity-disambiguation",
+    "entity-linking"
+  ],
+  "dependencies": {
+    "@intelgraph/nlp": "workspace:*",
+    "compromise": "^14.13.0",
+    "compromise-dates": "^3.3.0",
+    "wink-nlp": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3",
+    "eslint": "9.39.1"
+  }
+}

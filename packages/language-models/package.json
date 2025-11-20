@@ -1,0 +1,40 @@
+{
+  "name": "@intelgraph/language-models",
+  "version": "1.0.0",
+  "description": "Advanced language models with transformer-based architecture",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "language-models",
+    "transformers",
+    "bert",
+    "gpt",
+    "embeddings",
+    "question-answering",
+    "summarization"
+  ],
+  "dependencies": {
+    "@intelgraph/nlp": "workspace:*",
+    "@intelgraph/text-analytics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3",
+    "eslint": "9.39.1"
+  }
+}
