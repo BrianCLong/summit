@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
-import { cfg } from './config.js';
+import { configService } from './config/ConfigService.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -33,13 +33,13 @@ export const createApp = async () => {
   const app = express();
   const logger = pino();
   app.use(helmet());
-  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
+  const allowedOrigins = configService.get('app').corsOrigin.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
   app.use(
     cors({
       origin: (origin, callback) => {
-        if (!origin || cfg.NODE_ENV !== 'production') {
+        if (!origin || configService.get('app').env !== 'production') {
           return callback(null, true);
         }
         if (allowedOrigins.includes(origin)) {
@@ -158,18 +158,18 @@ export const createApp = async () => {
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
       // Enable PBAC in production
-      ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
+      ...(configService.get('app').env === 'production' ? [pbacPlugin() as any] : []),
     ],
     // Security configuration based on environment
-    introspection: cfg.NODE_ENV !== 'production',
+    introspection: configService.get('app').env !== 'production',
     // Enhanced query validation rules
     validationRules: [
-      depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+      depthLimit(configService.get('app').env === 'production' ? 6 : 8), // Stricter in prod
     ],
     // Security context
     formatError: (err) => {
       // Don't expose internal errors in production
-      if (cfg.NODE_ENV === 'production') {
+      if (configService.get('app').env === 'production') {
         logger.error(
           { err, stack: (err as any).stack },
           `GraphQL Error: ${err.message}`,
@@ -188,12 +188,12 @@ export const createApp = async () => {
   } = await import('./config/production-security.js');
 
   // Apply security middleware based on environment
-  if (cfg.NODE_ENV === 'production') {
+  if (configService.get('app').env === 'production') {
     applyProductionSecurity(app);
   }
 
   const authenticateToken =
-    cfg.NODE_ENV === 'production'
+    configService.get('app').env === 'production'
       ? productionAuthMiddleware
       : (req: Request, res: Response, next: NextFunction) => {
           // Development mode - relaxed auth for easier testing
