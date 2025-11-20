@@ -1,0 +1,83 @@
+{
+  "$schema": "https://intelgraph.example/schemas/backlog-1.json",
+  "version": "0.1",
+  "epics": [
+    {
+      "id": "E-SAMPLE-001",
+      "title": "Authentication & Authorization",
+      "priority": "Must",
+      "stories": [
+        {
+          "id": "S-SAMPLE-001",
+          "title": "Implement OAuth 2.0 login flow",
+          "owner": "Security Team",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "User can log in with GitHub OAuth",
+            "User can log in with Google OAuth",
+            "Tokens are securely stored",
+            "Session management is implemented"
+          ]
+        },
+        {
+          "id": "S-SAMPLE-002",
+          "title": "Add role-based access control (RBAC)",
+          "owner": "Security Team",
+          "depends_on": ["S-SAMPLE-001"],
+          "acceptance_criteria": [
+            "Define admin, editor, and viewer roles",
+            "Implement permission checks on all routes",
+            "Add role assignment UI"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-SAMPLE-002",
+      "title": "Performance Optimization",
+      "priority": "Should",
+      "stories": [
+        {
+          "id": "S-SAMPLE-003",
+          "title": "Add Redis caching layer",
+          "owner": "Backend Team",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Configure Redis connection",
+            "Cache frequently accessed data",
+            "Implement cache invalidation strategy"
+          ]
+        },
+        {
+          "id": "S-SAMPLE-004",
+          "title": "Optimize database queries",
+          "owner": "Backend Team",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Add database indexes",
+            "Refactor N+1 queries",
+            "Implement query result caching"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-SAMPLE-003",
+      "title": "UI Polish",
+      "priority": "Could",
+      "stories": [
+        {
+          "id": "S-SAMPLE-005",
+          "title": "Add dark mode support",
+          "owner": "Frontend Team",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Create dark theme color palette",
+            "Add theme toggle UI",
+            "Persist theme preference"
+          ]
+        }
+      ]
+    }
+  ]
+}
