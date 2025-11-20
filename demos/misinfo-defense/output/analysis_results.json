@@ -1,0 +1,562 @@
+{
+  "demo_name": "Adversarial Misinfo Defense",
+  "processed_at": "2025-11-20T07:59:37.046490",
+  "pipeline_version": "2.0.0",
+  "mode": "mock",
+  "total_posts": 10,
+  "misinfo_detected": 6,
+  "legitimate_content": 4,
+  "detection_rate": 0.6,
+  "results": [
+    {
+      "post": {
+        "id": "post_001",
+        "platform": "twitter",
+        "text": "BREAKING: New study shows miracle cure discovered by independent researchers! Mainstream media won't cover this! #TruthRevealed",
+        "timestamp": "2025-11-20T10:30:00Z",
+        "author": "healthtruth_2025",
+        "engagement": {
+          "likes": 8453,
+          "retweets": 2134,
+          "replies": 892
+        },
+        "media": [],
+        "ground_truth": {
+          "is_misinfo": true,
+          "category": "health_misinfo",
+          "manipulation_type": "unverified_claims",
+          "confidence": 0.92
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.045214",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": true,
+            "confidence": 0.92,
+            "category": "health_misinfo",
+            "red_flags": [],
+            "manipulation_type": "unverified_claims"
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": true,
+        "confidence": 0.92,
+        "evidence": [],
+        "processing_time_ms": 0.03552436828613281
+      }
+    },
+    {
+      "post": {
+        "id": "post_002",
+        "platform": "facebook",
+        "text": "Scientists at Johns Hopkins confirm seasonal flu vaccine reduces severe illness by 40-60% in at-risk populations. Full study: https://example.com/study",
+        "timestamp": "2025-11-20T11:15:00Z",
+        "author": "cdc_official",
+        "engagement": {
+          "likes": 342,
+          "shares": 89,
+          "comments": 45
+        },
+        "media": [],
+        "ground_truth": {
+          "is_misinfo": false,
+          "category": "verified_health_info",
+          "manipulation_type": null,
+          "confidence": 0.98
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.045372",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": false,
+            "confidence": 0.98,
+            "category": "verified_health_info",
+            "red_flags": [],
+            "manipulation_type": null
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": false,
+        "confidence": 0.98,
+        "evidence": [],
+        "processing_time_ms": 0.014066696166992188
+      }
+    },
+    {
+      "post": {
+        "id": "post_003",
+        "platform": "tiktok",
+        "text": "Watch this SHOCKING footage of politician saying the opposite of their campaign promise!",
+        "timestamp": "2025-11-20T09:45:00Z",
+        "author": "political_watchdog",
+        "engagement": {
+          "likes": 15420,
+          "shares": 3421,
+          "comments": 1823
+        },
+        "media": [
+          {
+            "type": "video",
+            "url": "/demos/misinfo-defense/datasets/media/deepfake_001.mp4",
+            "duration": 23
+          }
+        ],
+        "ground_truth": {
+          "is_misinfo": true,
+          "category": "political_manipulation",
+          "manipulation_type": "deepfake_video",
+          "confidence": 0.87,
+          "manipulation_markers": [
+            "face_swap",
+            "audio_synthesis",
+            "temporal_artifacts"
+          ]
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.045505",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": true,
+            "confidence": 0.87,
+            "category": "political_manipulation",
+            "red_flags": [],
+            "manipulation_type": "deepfake_video"
+          },
+          "video": {
+            "is_deepfake": true,
+            "confidence": 0.87,
+            "manipulation_markers": [
+              "face_swap",
+              "audio_synthesis",
+              "temporal_artifacts"
+            ]
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": true,
+        "confidence": 0.87,
+        "evidence": [
+          {
+            "type": "deepfake_detection",
+            "title": "Deepfake Video Detected",
+            "description": "Found 3 manipulation markers: face_swap, audio_synthesis, temporal_artifacts. These forensic indicators suggest synthetic or manipulated video content.",
+            "severity": "critical",
+            "indicators": [
+              "face_swap",
+              "audio_synthesis",
+              "temporal_artifacts"
+            ]
+          }
+        ],
+        "processing_time_ms": 0.013828277587890625
+      }
+    },
+    {
+      "post": {
+        "id": "post_004",
+        "platform": "instagram",
+        "text": "This photo proves climate activists are hypocrites - caught using plastic water bottles at their own rally!",
+        "timestamp": "2025-11-20T08:20:00Z",
+        "author": "fact_checker_pro",
+        "engagement": {
+          "likes": 6234,
+          "shares": 1542,
+          "comments": 892
+        },
+        "media": [
+          {
+            "type": "image",
+            "url": "/demos/misinfo-defense/datasets/media/manipulated_photo_001.jpg"
+          }
+        ],
+        "ground_truth": {
+          "is_misinfo": true,
+          "category": "visual_manipulation",
+          "manipulation_type": "context_removal",
+          "confidence": 0.85,
+          "notes": "Photo is from different event, misleading caption"
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.045650",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": true,
+            "confidence": 0.85,
+            "category": "visual_manipulation",
+            "red_flags": [],
+            "manipulation_type": "context_removal"
+          },
+          "image": {
+            "is_manipulated": true,
+            "confidence": 0.85,
+            "manipulation_type": "context_removal"
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": true,
+        "confidence": 0.85,
+        "evidence": [
+          {
+            "type": "image_manipulation",
+            "title": "Image Manipulation Detected",
+            "description": "Manipulation type: context_removal. The image has been altered in a way that could mislead viewers.",
+            "severity": "high",
+            "indicators": [
+              "context_removal"
+            ]
+          }
+        ],
+        "processing_time_ms": 0.011205673217773438
+      }
+    },
+    {
+      "post": {
+        "id": "post_005",
+        "platform": "reddit",
+        "text": "PSA: Remember to check multiple sources before sharing information. Here's a guide to identifying credible news sources and fact-checking techniques.",
+        "timestamp": "2025-11-20T12:00:00Z",
+        "author": "media_literacy_101",
+        "engagement": {
+          "upvotes": 892,
+          "comments": 124
+        },
+        "media": [],
+        "ground_truth": {
+          "is_misinfo": false,
+          "category": "media_literacy",
+          "manipulation_type": null,
+          "confidence": 0.99
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.045810",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": false,
+            "confidence": 0.99,
+            "category": "media_literacy",
+            "red_flags": [],
+            "manipulation_type": null
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": false,
+        "confidence": 0.99,
+        "evidence": [],
+        "processing_time_ms": 0.0133514404296875
+      }
+    },
+    {
+      "post": {
+        "id": "post_006",
+        "platform": "twitter",
+        "text": "🚨 EXPOSED: Election machines in 47 states connected to foreign servers! Anonymous whistleblower reveals all! Thread 🧵👇",
+        "timestamp": "2025-11-20T07:30:00Z",
+        "author": "patriot_news_network",
+        "engagement": {
+          "likes": 12389,
+          "retweets": 5432,
+          "replies": 2341
+        },
+        "media": [],
+        "ground_truth": {
+          "is_misinfo": true,
+          "category": "election_misinfo",
+          "manipulation_type": "conspiracy_theory",
+          "confidence": 0.94,
+          "red_flags": [
+            "anonymous_source",
+            "extraordinary_claims",
+            "no_evidence",
+            "emotional_language"
+          ]
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.045943",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": true,
+            "confidence": 0.94,
+            "category": "election_misinfo",
+            "red_flags": [
+              "anonymous_source",
+              "extraordinary_claims",
+              "no_evidence",
+              "emotional_language"
+            ],
+            "manipulation_type": "conspiracy_theory"
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": true,
+        "confidence": 0.94,
+        "evidence": [
+          {
+            "type": "text_analysis",
+            "title": "Suspicious Language Patterns Detected",
+            "description": "Found 4 red flags: anonymous_source, extraordinary_claims, no_evidence, emotional_language. These patterns are commonly associated with election_misinfo.",
+            "severity": "critical",
+            "indicators": [
+              "anonymous_source",
+              "extraordinary_claims",
+              "no_evidence",
+              "emotional_language"
+            ]
+          }
+        ],
+        "processing_time_ms": 0.012874603271484375
+      }
+    },
+    {
+      "post": {
+        "id": "post_007",
+        "platform": "youtube",
+        "text": "Debunking Common Myths: A fact-checker explains the scientific consensus on vaccine safety with citations to peer-reviewed research.",
+        "timestamp": "2025-11-20T13:15:00Z",
+        "author": "science_communication",
+        "engagement": {
+          "likes": 3421,
+          "dislikes": 234,
+          "comments": 567
+        },
+        "media": [
+          {
+            "type": "video",
+            "url": "/demos/misinfo-defense/datasets/media/educational_video_001.mp4",
+            "duration": 342
+          }
+        ],
+        "ground_truth": {
+          "is_misinfo": false,
+          "category": "science_communication",
+          "manipulation_type": null,
+          "confidence": 0.97
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.046065",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": false,
+            "confidence": 0.97,
+            "category": "science_communication",
+            "red_flags": [],
+            "manipulation_type": null
+          },
+          "video": {
+            "is_deepfake": false,
+            "confidence": 0.97,
+            "manipulation_markers": []
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": false,
+        "confidence": 0.97,
+        "evidence": [],
+        "processing_time_ms": 0.011920928955078125
+      }
+    },
+    {
+      "post": {
+        "id": "post_008",
+        "platform": "telegram",
+        "text": "Big Pharma doesn't want you to know about this natural remedy that cures everything! DM me for the secret formula. Limited time offer!",
+        "timestamp": "2025-11-20T06:45:00Z",
+        "author": "wellness_insider",
+        "engagement": {
+          "views": 23421,
+          "forwards": 1234
+        },
+        "media": [],
+        "ground_truth": {
+          "is_misinfo": true,
+          "category": "health_scam",
+          "manipulation_type": "fraudulent_product",
+          "confidence": 0.96,
+          "red_flags": [
+            "miracle_cure",
+            "conspiracy",
+            "commercial_intent",
+            "urgency_tactics"
+          ]
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.046187",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": true,
+            "confidence": 0.96,
+            "category": "health_scam",
+            "red_flags": [
+              "miracle_cure",
+              "conspiracy",
+              "commercial_intent",
+              "urgency_tactics"
+            ],
+            "manipulation_type": "fraudulent_product"
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": true,
+        "confidence": 0.96,
+        "evidence": [
+          {
+            "type": "text_analysis",
+            "title": "Suspicious Language Patterns Detected",
+            "description": "Found 4 red flags: miracle_cure, conspiracy, commercial_intent, urgency_tactics. These patterns are commonly associated with health_scam.",
+            "severity": "critical",
+            "indicators": [
+              "miracle_cure",
+              "conspiracy",
+              "commercial_intent",
+              "urgency_tactics"
+            ]
+          }
+        ],
+        "processing_time_ms": 0.011920928955078125
+      }
+    },
+    {
+      "post": {
+        "id": "post_009",
+        "platform": "twitter",
+        "text": "New meme format dropped! [image of historical event with anachronistic modern elements added for humor]",
+        "timestamp": "2025-11-20T14:30:00Z",
+        "author": "meme_lord_supreme",
+        "engagement": {
+          "likes": 4523,
+          "retweets": 892,
+          "replies": 234
+        },
+        "media": [
+          {
+            "type": "image",
+            "url": "/demos/misinfo-defense/datasets/media/satire_meme_001.jpg"
+          }
+        ],
+        "ground_truth": {
+          "is_misinfo": false,
+          "category": "satire",
+          "manipulation_type": "obvious_parody",
+          "confidence": 0.91,
+          "notes": "Clearly satirical, not intended to deceive"
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.046297",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": false,
+            "confidence": 0.91,
+            "category": "satire",
+            "red_flags": [],
+            "manipulation_type": "obvious_parody"
+          },
+          "image": {
+            "is_manipulated": false,
+            "confidence": 0.91,
+            "manipulation_type": "obvious_parody"
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": false,
+        "confidence": 0.91,
+        "evidence": [],
+        "processing_time_ms": 0.0095367431640625
+      }
+    },
+    {
+      "post": {
+        "id": "post_010",
+        "platform": "facebook",
+        "text": "URGENT: Government planning to take away your rights next month! Share before they censor this! No sources needed, just THINK about it!",
+        "timestamp": "2025-11-20T05:15:00Z",
+        "author": "freedom_fighter_2025",
+        "engagement": {
+          "likes": 18234,
+          "shares": 7821,
+          "comments": 3421
+        },
+        "media": [],
+        "ground_truth": {
+          "is_misinfo": true,
+          "category": "political_fearmongering",
+          "manipulation_type": "baseless_claim",
+          "confidence": 0.93,
+          "red_flags": [
+            "urgency",
+            "no_evidence",
+            "emotional_manipulation",
+            "viral_request",
+            "anti_establishment"
+          ]
+        }
+      },
+      "analysis": {
+        "timestamp": "2025-11-20T07:59:37.046410",
+        "mode": "mock",
+        "detection_results": {
+          "text": {
+            "is_misinfo": true,
+            "confidence": 0.93,
+            "category": "political_fearmongering",
+            "red_flags": [
+              "urgency",
+              "no_evidence",
+              "emotional_manipulation",
+              "viral_request",
+              "anti_establishment"
+            ],
+            "manipulation_type": "baseless_claim"
+          }
+        },
+        "overall_score": 0.0,
+        "is_misinfo": true,
+        "confidence": 0.93,
+        "evidence": [
+          {
+            "type": "text_analysis",
+            "title": "Suspicious Language Patterns Detected",
+            "description": "Found 5 red flags: urgency, no_evidence, emotional_manipulation, viral_request, anti_establishment. These patterns are commonly associated with political_fearmongering.",
+            "severity": "critical",
+            "indicators": [
+              "urgency",
+              "no_evidence",
+              "emotional_manipulation",
+              "viral_request",
+              "anti_establishment"
+            ]
+          }
+        ],
+        "processing_time_ms": 0.00858306884765625
+      }
+    }
+  ],
+  "metrics": {
+    "posts_processed": 10,
+    "posts_failed": 0,
+    "misinfo_detected": 6,
+    "legitimate_detected": 4,
+    "total_processing_time_ms": 0.14281272888183594,
+    "avg_processing_time_ms": 0.014281272888183594,
+    "avg_confidence": 0.932,
+    "error_count": 0,
+    "success_rate": 1.0
+  },
+  "pipeline_duration_seconds": 0.0019731521606445312
+}

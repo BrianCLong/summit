@@ -58,6 +58,8 @@
     "db:api:migrate": "bash scripts/db/apply_api_migrations.sh",
     "seed:demo": "node scripts/seed/centrality_demo.js",
     "seed:demo:cet": "node scripts/seed/demo_cases_triage.js",
+    "demo:misinfo": "bash demos/cli.sh misinfo",
+    "demo:deescalation": "bash demos/cli.sh deescalation",
     "persisted:build": "node scripts/graphql/build_persisted_map.js client/src/queries services/api/persisted/queries.json",
     "persisted:check": "node scripts/graphql/build_persisted_map.js client/src/queries /tmp/queries.json && diff -q /tmp/queries.json services/api/persisted/queries.json || (echo 'Persisted query map drift'; exit 1)",
     "db:reset": "npm run db:migrate && npm run db:seed",
