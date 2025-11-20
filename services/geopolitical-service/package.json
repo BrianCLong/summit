@@ -1,0 +1,46 @@
+{
+  "name": "geopolitical-service",
+  "version": "1.0.0",
+  "description": "Geopolitical intelligence data integration and aggregation service",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/geopolitical-monitor": "workspace:*",
+    "@intelgraph/conflict-tracker": "workspace:*",
+    "@intelgraph/sanctions-monitor": "workspace:*",
+    "@intelgraph/country-risk": "workspace:*",
+    "@intelgraph/political-analysis": "workspace:*",
+    "@intelgraph/early-warning": "workspace:*",
+    "express": "^5.1.0",
+    "zod": "^4.1.12",
+    "uuid": "^13.0.0",
+    "pg": "^8.16.3",
+    "body-parser": "^1.20.2",
+    "@opentelemetry/api": "^1.9.0"
+  },
+  "devDependencies": {
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "supertest": "^7.1.4",
+    "@types/supertest": "^6.0.3",
+    "@types/uuid": "^11.0.0",
+    "@types/body-parser": "^1.19.5",
+    "tsx": "^4.19.2"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
