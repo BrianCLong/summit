@@ -1,0 +1,45 @@
+{
+  "name": "@intelgraph/api-framework",
+  "version": "1.0.0",
+  "description": "Unified API framework combining REST, GraphQL, and streaming APIs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "api-framework",
+    "rest",
+    "graphql",
+    "websocket",
+    "unified-api"
+  ],
+  "dependencies": {
+    "@intelgraph/query-language": "workspace:*",
+    "@intelgraph/rest-api": "workspace:*",
+    "@intelgraph/streaming-api": "workspace:*",
+    "express": "^5.1.0",
+    "@apollo/server": "^5.1.0",
+    "graphql": "^16.12.0",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
