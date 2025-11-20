@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "STIX 2.1 Bundle (MTIF subset)",
+  "type": "object",
+  "required": ["type", "id", "spec_version", "objects"],
+  "properties": {
+    "type": { "const": "bundle" },
+    "id": { "type": "string", "pattern": "^bundle--[0-9a-fA-F-]{36}$" },
+    "spec_version": { "const": "2.1" },
+    "objects": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/attackPattern" },
+          { "$ref": "#/definitions/indicator" },
+          { "$ref": "#/definitions/relationship" },
+          { "$ref": "#/definitions/identity" },
+          { "$ref": "#/definitions/extensionDefinition" }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "common": {
+      "type": "object",
+      "required": ["type", "id", "spec_version", "created", "modified"],
+      "properties": {
+        "type": { "type": "string" },
+        "id": { "type": "string" },
+        "spec_version": { "const": "2.1" },
+        "created": { "type": "string", "format": "date-time" },
+        "modified": { "type": "string", "format": "date-time" },
+        "description": { "type": "string" },
+        "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "created_by_ref": { "type": "string" },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "external_references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source_name"],
+            "properties": {
+              "source_name": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
+              "external_id": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    "attackPattern": {
+      "allOf": [
+        { "$ref": "#/definitions/common" },
+        {
+          "properties": {
+            "type": { "const": "attack-pattern" },
+            "id": {
+              "type": "string",
+              "pattern": "^attack-pattern--[0-9a-fA-F-]{36}$"
+            },
+            "name": { "type": "string" },
+            "extensions": { "type": "object" },
+            "kill_chain_phases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["kill_chain_name", "phase_name"],
+                "properties": {
+                  "kill_chain_name": { "type": "string" },
+                  "phase_name": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["name"],
+          "additionalProperties": true
+        }
+      ]
+    },
+    "indicator": {
+      "allOf": [
+        { "$ref": "#/definitions/common" },
+        {
+          "properties": {
+            "type": { "const": "indicator" },
+            "id": {
+              "type": "string",
+              "pattern": "^indicator--[0-9a-fA-F-]{36}$"
+            },
+            "name": { "type": "string" },
+            "pattern": { "type": "string", "pattern": "^\\[.*\\]$" },
+            "pattern_type": { "type": "string" },
+            "valid_from": { "type": "string", "format": "date-time" },
+            "extensions": { "type": "object" }
+          },
+          "required": ["name", "pattern", "pattern_type", "valid_from"],
+          "additionalProperties": true
+        }
+      ]
+    },
+    "relationship": {
+      "allOf": [
+        { "$ref": "#/definitions/common" },
+        {
+          "properties": {
+            "type": { "const": "relationship" },
+            "id": {
+              "type": "string",
+              "pattern": "^relationship--[0-9a-fA-F-]{36}$"
+            },
+            "relationship_type": { "type": "string" },
+            "source_ref": { "type": "string" },
+            "target_ref": { "type": "string" }
+          },
+          "required": ["relationship_type", "source_ref", "target_ref"],
+          "additionalProperties": true
+        }
+      ]
+    },
+    "identity": {
+      "allOf": [
+        { "$ref": "#/definitions/common" },
+        {
+          "properties": {
+            "type": { "const": "identity" },
+            "id": {
+              "type": "string",
+              "pattern": "^identity--[0-9a-fA-F-]{36}$"
+            },
+            "name": { "type": "string" },
+            "identity_class": { "type": "string" },
+            "roles": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "sectors": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["name", "identity_class"],
+          "additionalProperties": true
+        }
+      ]
+    },
+    "extensionDefinition": {
+      "allOf": [
+        { "$ref": "#/definitions/common" },
+        {
+          "properties": {
+            "type": { "const": "extension-definition" },
+            "id": {
+              "type": "string",
+              "pattern": "^extension-definition--[0-9a-fA-F-]{36}$"
+            },
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "schema": { "type": "string", "format": "uri" },
+            "version": { "type": "string" },
+            "extension_types": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "extension_properties": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "schema",
+            "version",
+            "extension_types",
+            "extension_properties"
+          ],
+          "additionalProperties": true
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}
