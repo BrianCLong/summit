@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: supply-chain-ingress
+  namespace: supply-chain
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - api.supplychain.intelgraph.com
+    secretName: supply-chain-tls
+  rules:
+  - host: api.supplychain.intelgraph.com
+    http:
+      paths:
+      - path: /api/supply-chain
+        pathType: Prefix
+        backend:
+          service:
+            name: supply-chain-service
+            port:
+              number: 4020
+      - path: /api/risk
+        pathType: Prefix
+        backend:
+          service:
+            name: risk-assessment-service
+            port:
+              number: 4021
+      - path: /ws
+        pathType: Prefix
+        backend:
+          service:
+            name: supply-chain-events
+            port:
+              number: 4022
