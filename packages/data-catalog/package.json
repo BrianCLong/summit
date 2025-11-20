@@ -1,0 +1,10 @@
+{
+  "name": "@summit/data-catalog",
+  "version": "1.0.0",
+  "description": "Data catalog with metadata management and lineage tracking",
+  "main": "dist/index.js",
+  "keywords": ["catalog", "metadata", "lineage", "governance"],
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

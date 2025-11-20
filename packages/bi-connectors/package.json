@@ -1,0 +1,11 @@
+{
+  "name": "@summit/bi-connectors",
+  "version": "1.0.0",
+  "description": "BI tool connectors for Tableau, PowerBI, Looker, and more",
+  "main": "dist/index.js",
+  "keywords": ["bi", "tableau", "powerbi", "looker", "connectors"],
+  "dependencies": {
+    "pg": "^8.11.3",
+    "express": "^4.18.2"
+  }
+}

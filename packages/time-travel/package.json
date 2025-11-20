@@ -1,0 +1,10 @@
+{
+  "name": "@summit/time-travel",
+  "version": "1.0.0",
+  "description": "Time-travel queries and temporal data management",
+  "main": "dist/index.js",
+  "keywords": ["time-travel", "temporal", "versioning", "history"],
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

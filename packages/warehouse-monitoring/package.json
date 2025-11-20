@@ -1,0 +1,10 @@
+{
+  "name": "@summit/warehouse-monitoring",
+  "version": "1.0.0",
+  "description": "Real-time monitoring and performance profiling for data warehouse",
+  "main": "dist/index.js",
+  "keywords": ["monitoring", "metrics", "profiling", "observability"],
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}
