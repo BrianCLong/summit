@@ -1,0 +1,10 @@
+{
+  "packageName": "intelgraph_sdk",
+  "projectName": "intelgraph-sdk",
+  "packageVersion": "2.1.0",
+  "packageUrl": "https://github.com/BrianCLong/summit",
+  "projectDescription": "Official Python SDK for IntelGraph Platform API",
+  "library": "urllib3",
+  "hideGenerationTimestamp": true,
+  "generateSourceCodeOnly": false
+}
