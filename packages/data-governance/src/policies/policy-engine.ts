@@ -51,7 +51,7 @@ export class PolicyEngine {
               policyId: policy.id,
               policyName: policy.name,
               violationType: 'access-denied',
-              severity: evaluation.severity || 'high',
+              severity: (evaluation.severity as 'low' | 'medium' | 'high' | 'critical') || 'high',
               description: evaluation.reason || 'Access denied by policy',
               detectedAt: new Date(),
               userId,

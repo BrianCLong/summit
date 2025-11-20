@@ -108,7 +108,7 @@ function createApp(): Application {
     standardHeaders: true,
     legacyHeaders: false,
   });
-  app.use(config.api.prefix, limiter);
+  app.use(limiter as any);
 
   // Authentication middleware (stub)
   const authMiddleware = (req: Request, res: Response, next: Function) => {
@@ -236,7 +236,7 @@ function createApp(): Application {
     };
 
     const swaggerSpec = swaggerJsdoc(swaggerOptions);
-    app.use(config.swagger.path, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    app.use(config.swagger.path, swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
     logger.info({ path: config.swagger.path }, 'Swagger documentation enabled');
   }
 
