@@ -1,0 +1,19 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: postgres-primary-failure
+  namespace: chaos-testing
+  annotations:
+    summary: "Mark PostgreSQL primary pod as failed to validate failover paths"
+spec:
+  action: pod-failure
+  mode: one
+  duration: 15m
+  selector:
+    namespaces:
+      - intelgraph-production
+    labelSelectors:
+      app.kubernetes.io/name: intelgraph-postgres
+      role: primary
+  scheduler:
+    cron: "30 2 * * 1"
