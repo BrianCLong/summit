@@ -1,0 +1,29 @@
+{
+  "model_name": "emotion-classifier-v1",
+  "architecture": "RoBERTa",
+  "base_model": "roberta-base",
+  "fine_tuned_for": "multi-class emotion classification",
+  "supported_languages": ["en"],
+  "max_sequence_length": 512,
+  "num_labels": 7,
+  "labels": ["anger", "fear", "joy", "sadness", "surprise", "disgust", "trust"],
+  "training_dataset": "emotion-corpus-intelligence",
+  "training_samples": 50000,
+  "validation_accuracy": 0.89,
+  "inference": {
+    "batch_size": 8,
+    "quantization": "int8",
+    "device": "cpu"
+  },
+  "deployment": {
+    "framework": "transformers",
+    "version": "4.35.0",
+    "endpoint": "/api/emotion/classify"
+  },
+  "metrics": {
+    "f1_score": 0.87,
+    "precision": 0.89,
+    "recall": 0.86,
+    "macro_avg_f1": 0.88
+  }
+}
