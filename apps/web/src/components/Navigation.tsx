@@ -142,11 +142,13 @@ export function Navigation({ user }: NavigationProps) {
                 ? 'bg-accent text-accent-foreground'
                 : 'text-muted-foreground'
             )}
+            aria-current={isActive ? 'page' : undefined}
+            aria-label={item.badge ? `${item.name} (${item.badge} notifications)` : item.name}
           >
-            <item.icon className="h-4 w-4" />
+            <item.icon className="h-4 w-4" aria-hidden="true" />
             <span className="flex-1">{item.name}</span>
             {item.badge && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs" aria-label={`${item.badge} notifications`}>
                 {item.badge}
               </Badge>
             )}
@@ -158,11 +160,16 @@ export function Navigation({ user }: NavigationProps) {
   }
 
   return (
-    <nav className="w-64 border-r bg-muted/50 flex flex-col">
+    <nav
+      id="navigation"
+      className="w-64 border-r bg-muted/50 flex flex-col"
+      role="navigation"
+      aria-label="Main navigation"
+    >
       {/* Logo */}
       <div className="p-6 border-b">
-        <NavLink to="/" className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+        <NavLink to="/" className="flex items-center gap-3" aria-label="IntelGraph home">
+          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center" aria-hidden="true">
             <span className="text-primary-foreground font-bold text-sm">
               IG
             </span>
@@ -177,30 +184,43 @@ export function Navigation({ user }: NavigationProps) {
           variant="outline"
           className="w-full justify-start text-muted-foreground"
           onClick={openSearch}
+          aria-label="Open global search (Command+K)"
         >
-          <Command className="h-4 w-4 mr-2" />
+          <Command className="h-4 w-4 mr-2" aria-hidden="true" />
           Search...
-          <kbd className="ml-auto text-xs">⌘K</kbd>
+          <kbd className="ml-auto text-xs" aria-hidden="true">⌘K</kbd>
         </Button>
       </div>
 
       {/* Main Navigation */}
       <div className="flex-1 p-4 space-y-2">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
+        <div
+          className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2"
+          role="heading"
+          aria-level={2}
+        >
           Intelligence
         </div>
         {navItems.slice(0, 3).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
+        <div
+          className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6"
+          role="heading"
+          aria-level={2}
+        >
           Dashboards
         </div>
         {navItems.slice(3, 5).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
+        <div
+          className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6"
+          role="heading"
+          aria-level={2}
+        >
           Platform
         </div>
         {navItems.slice(5).map(item => (
@@ -216,8 +236,8 @@ export function Navigation({ user }: NavigationProps) {
 
         {/* User Profile & Logout */}
         <div className="pt-4 space-y-2">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+          <div className="flex items-center gap-3 px-3 py-2" role="region" aria-label="User profile">
+            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center" aria-hidden="true">
               <span className="text-primary-foreground text-xs font-medium">
                 {user?.name?.charAt(0) || 'U'}
               </span>
@@ -235,8 +255,9 @@ export function Navigation({ user }: NavigationProps) {
             size="sm"
             className="w-full justify-start text-muted-foreground"
             onClick={logout}
+            aria-label="Sign out of your account"
           >
-            <LogOut className="h-4 w-4 mr-2" />
+            <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
             Sign Out
           </Button>
         </div>

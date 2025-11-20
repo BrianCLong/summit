@@ -1,0 +1,212 @@
+name: Accessibility Tests
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'client/**'
+      - 'e2e/**'
+      - '.github/workflows/accessibility.yml'
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  component-accessibility-tests:
+    name: Component Accessibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run component accessibility tests
+        run: pnpm --filter @intelgraph/web test -- --run tests/accessibility/
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-accessibility-test-results
+          path: apps/web/test-results/
+          retention-days: 7
+
+  e2e-accessibility-tests:
+    name: E2E Accessibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build application
+        run: pnpm --filter @intelgraph/web build
+
+      - name: Start application
+        run: |
+          pnpm --filter @intelgraph/web preview &
+          echo $! > /tmp/preview.pid
+          sleep 10
+
+      - name: Run E2E accessibility tests
+        run: pnpm exec playwright test e2e/client/accessibility.spec.ts
+
+      - name: Stop application
+        if: always()
+        run: |
+          if [ -f /tmp/preview.pid ]; then
+            kill $(cat /tmp/preview.pid) || true
+          fi
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-accessibility-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-accessibility-test-results
+          path: e2e/test-results/
+          retention-days: 7
+
+  lighthouse-audit:
+    name: Lighthouse Accessibility Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm --filter @intelgraph/web build
+
+      - name: Start application
+        run: |
+          pnpm --filter @intelgraph/web preview &
+          echo $! > /tmp/preview.pid
+          sleep 10
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            http://localhost:4173
+            http://localhost:4173/explore
+            http://localhost:4173/alerts
+            http://localhost:4173/cases
+          configPath: '.github/lighthouse/lighthouse-config.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Stop application
+        if: always()
+        run: |
+          if [ -f /tmp/preview.pid ]; then
+            kill $(cat /tmp/preview.pid) || true
+          fi
+
+  accessibility-summary:
+    name: Accessibility Summary
+    runs-on: ubuntu-latest
+    needs: [component-accessibility-tests, e2e-accessibility-tests, lighthouse-audit]
+    if: always()
+
+    steps:
+      - name: Check test results
+        run: |
+          if [ "${{ needs.component-accessibility-tests.result }}" != "success" ] || \
+             [ "${{ needs.e2e-accessibility-tests.result }}" != "success" ] || \
+             [ "${{ needs.lighthouse-audit.result }}" != "success" ]; then
+            echo "❌ Accessibility tests failed"
+            echo "Please review the test results and fix any violations."
+            exit 1
+          else
+            echo "✅ All accessibility tests passed!"
+          fi

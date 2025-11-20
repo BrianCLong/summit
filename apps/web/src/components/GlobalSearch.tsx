@@ -161,34 +161,52 @@ export function GlobalSearch() {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-      <div className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl">
+    <div
+      className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="search-dialog-title"
+      onClick={closeSearch}
+    >
+      <div
+        className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Command className="rounded-lg border shadow-md bg-popover">
           <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
             <Command.Input
               placeholder="Search entities, investigations, alerts..."
               value={query}
               onValueChange={setQuery}
               className="flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Global search"
+              autoFocus
             />
           </div>
+          <span id="search-dialog-title" className="sr-only">Global Search</span>
 
-          <Command.List className="max-h-96 overflow-y-auto p-2">
+          <Command.List className="max-h-96 overflow-y-auto p-2" role="listbox" aria-label="Search results">
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+              {loading && 'Searching...'}
+              {!loading && query && results.length > 0 && `${results.length} results found`}
+              {!loading && query && results.length === 0 && 'No results found'}
+            </div>
+
             {loading && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
+              <div className="py-6 text-center text-sm text-muted-foreground" aria-hidden="true">
                 Searching...
               </div>
             )}
 
             {!loading && query && results.length === 0 && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
+              <div className="py-6 text-center text-sm text-muted-foreground" aria-hidden="true">
                 No results found for "{query}"
               </div>
             )}
 
             {!query && !loading && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
+              <div className="py-6 text-center text-sm text-muted-foreground" aria-hidden="true">
                 Type to search across entities, investigations, and more...
               </div>
             )}
@@ -205,6 +223,8 @@ export function GlobalSearch() {
                       <Command.Group
                         key={type}
                         heading={type.charAt(0).toUpperCase() + type.slice(1)}
+                        role="group"
+                        aria-label={`${type.charAt(0).toUpperCase() + type.slice(1)} results`}
                       >
                         {typeResults.map(result => {
                           const Icon = result.icon || getTypeIcon(result.type)
@@ -214,8 +234,10 @@ export function GlobalSearch() {
                               value={result.id}
                               onSelect={() => handleSelect(result)}
                               className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-md"
+                              role="option"
+                              aria-label={`${result.title}${result.description ? ': ' + result.description : ''}`}
                             >
-                              <Icon className="h-4 w-4 text-muted-foreground" />
+                              <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium truncate">
                                   {result.title}
@@ -232,6 +254,7 @@ export function GlobalSearch() {
                                     getTypeBadgeVariant(result.type) as any
                                   }
                                   className="text-xs"
+                                  aria-hidden="true"
                                 >
                                   {result.badge}
                                 </Badge>
@@ -247,14 +270,14 @@ export function GlobalSearch() {
             )}
           </Command.List>
 
-          <div className="border-t px-3 py-2 text-xs text-muted-foreground">
+          <div className="border-t px-3 py-2 text-xs text-muted-foreground" role="note" aria-label="Keyboard shortcuts">
             <div className="flex items-center justify-between">
               <span>Press Enter to select, Esc to close</span>
               <div className="flex items-center gap-1">
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
+                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium" aria-hidden="true">
                   ↑
                 </kbd>
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
+                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium" aria-hidden="true">
                   ↓
                 </kbd>
                 <span className="text-[10px]">to navigate</span>
