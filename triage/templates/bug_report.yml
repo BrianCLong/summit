@@ -1,0 +1,75 @@
+name: Bug Report
+description: Create a report to help us improve
+title: "[Bug]: "
+labels: ["type/bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of the software are you running?
+      placeholder: v1.0.0
+    validations:
+      required: false
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P0 - Critical (Crash, Data Loss, Security)
+        - P1 - Major (Feature Broken, No Workaround)
+        - P2 - Minor (Feature Broken, Workaround Available)
+        - P3 - Trivial (Cosmetic, Typo)
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Frontend / UX
+        - API / Backend
+        - Infrastructure / Dev Env
+        - Documentation
+        - Security
+        - Policy Engine
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
