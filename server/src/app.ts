@@ -10,7 +10,6 @@ import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
 import monitoringRouter from './routes/monitoring.js';
-import healthRouter from './routes/health.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
@@ -22,7 +21,6 @@ import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
@@ -187,7 +185,6 @@ export const createApp = async () => {
   const {
     productionAuthMiddleware,
     applyProductionSecurity,
-    graphqlSecurityConfig,
   } = await import('./config/production-security.js');
 
   // Apply security middleware based on environment

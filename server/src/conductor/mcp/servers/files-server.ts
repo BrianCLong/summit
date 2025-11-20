@@ -7,6 +7,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { MCPRequest, MCPResponse, MCPTool } from '../../types';
 
+type BufferEncoding = 'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' | 'base64' | 'base64url' | 'latin1' | 'binary' | 'hex';
+
 const encodeBuffer = (value: Uint8Array, encoding: BufferEncoding) =>
   Buffer.from(value).toString(encoding);
 
