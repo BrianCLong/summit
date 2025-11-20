@@ -21,9 +21,12 @@ import OnboardingTour from '../onboarding/OnboardingTour';
 import ActivityWidget from '../activity/ActivityWidget';
 import ServiceHealthCard from './ServiceHealthCard';
 import TemplateModal from '../templates/TemplateModal';
+import { useI18n } from '../../hooks/useI18n';
+import LocaleSelector from '../i18n/LocaleSelector';
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
 
@@ -48,24 +51,29 @@ function Dashboard() {
 
   const stats = [
     {
-      label: 'Active Investigations',
+      label: t('dashboard.stats.activeInvestigations'),
       value: '12',
       icon: <Assessment />,
       color: 'primary',
     },
     {
-      label: 'Total Entities',
+      label: t('dashboard.stats.totalEntities'),
       value: '1,247',
       icon: <Group />,
       color: 'secondary',
     },
     {
-      label: 'Relationships',
+      label: t('dashboard.stats.relationships'),
       value: '3,891',
       icon: <AccountTree />,
       color: 'success',
     },
-    { label: 'This Month', value: '+23%', icon: <TrendingUp />, color: 'info' },
+    {
+      label: t('dashboard.stats.monthlyGrowth'),
+      value: '+23%',
+      icon: <TrendingUp />,
+      color: 'info'
+    },
   ];
 
   const recentInvestigations = [
@@ -123,38 +131,39 @@ function Dashboard() {
         }}
       >
         <Typography variant="h4" component="h1" fontWeight="bold">
-          Dashboard
+          {t('dashboard.title')}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/investigations')}
-          size="large"
-        >
-          New Investigation
-        </Button>
-        <Button
-          sx={{ ml: 2 }}
-          variant="outlined"
-          onClick={() => setShowTemplateModal(true)}
-          size="large"
-        >
-          Start from Template
-        </Button>
-        <Button
-          sx={{ ml: 2 }}
-          variant="outlined"
-          onClick={() =>
-            createAlert({
-              variables: {
-                title: 'Demo alert',
-                message: 'This is a demo alert from Dashboard',
-              },
-            })
-          }
-        >
-          Send Demo Alert
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <LocaleSelector variant="button" size="small" />
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/investigations')}
+            size="large"
+          >
+            {t('dashboard.newInvestigation')}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => setShowTemplateModal(true)}
+            size="large"
+          >
+            {t('dashboard.startFromTemplate')}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() =>
+              createAlert({
+                variables: {
+                  title: 'Demo alert',
+                  message: 'This is a demo alert from Dashboard',
+                },
+              })
+            }
+          >
+            {t('dashboard.sendDemoAlert')}
+          </Button>
+        </Box>
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -199,7 +208,7 @@ function Dashboard() {
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom fontWeight="bold">
-            Recent Investigations
+            {t('dashboard.recentInvestigations')}
           </Typography>
           <Box sx={{ mt: 2 }}>
             {recentInvestigations.map((investigation) => (
@@ -221,12 +230,11 @@ function Dashboard() {
                     {investigation.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {investigation.entities} entities • Updated{' '}
-                    {investigation.updated}
+                    {t('dashboard.entitiesPlural', { count: investigation.entities })} • {t('dashboard.updated', { time: investigation.updated })}
                   </Typography>
                 </Box>
                 <Chip
-                  label={investigation.status}
+                  label={t(`dashboard.status.${investigation.status}`)}
                   color={getStatusColor(investigation.status)}
                   size="small"
                 />
