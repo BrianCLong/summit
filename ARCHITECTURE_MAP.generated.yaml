@@ -220,7 +220,7 @@ services:
     version: latest
     compose_service: prometheus
     port: 9090
-    config_path: ops/observability/prometheus.yml
+    config_path: observability/prometheus/prometheus-dev.yml
     description: Time-series metrics collection and storage
     data_volume: prometheus_data
     retention: 15d
@@ -238,8 +238,8 @@ services:
     compose_service: grafana
     port: 8080
     config_paths:
-      - ops/observability/grafana/dashboards
-      - ops/observability/grafana/datasources
+      - observability/grafana/provisioning/dashboards
+      - observability/grafana/provisioning/datasources
     description: Visualization dashboards for metrics and observability
     data_volume: grafana_data
     referenced_in:
