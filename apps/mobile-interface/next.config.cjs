@@ -3,26 +3,111 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
+  scope: '/',
+  sw: 'sw.js',
+  swSrc: 'public/sw-custom.js',
+  buildExcludes: [/middleware-manifest\.json$/],
   runtimeCaching: [
+    // Images - Cache First
     {
-      urlPattern: /^https?.*\.(png|jpg|jpeg|svg|gif|webp|ico)$/,
+      urlPattern: /^https?.*\.(png|jpg|jpeg|svg|gif|webp|ico|avif)$/,
       handler: 'CacheFirst',
       options: {
         cacheName: 'images',
         expiration: {
-          maxEntries: 100,
+          maxEntries: 200,
           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
         },
       },
     },
+    // Fonts - Cache First
+    {
+      urlPattern: /^https?.*\.(woff|woff2|eot|ttf|otf)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'fonts',
+        expiration: {
+          maxEntries: 30,
+          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+        },
+      },
+    },
+    // Static Assets - Cache First
+    {
+      urlPattern: /^https?.*\.(js|css)$/,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'static-assets',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+        },
+      },
+    },
+    // API - Network First with offline fallback
     {
       urlPattern: /^https?.*\/api\/.*/,
       handler: 'NetworkFirst',
       options: {
         cacheName: 'api-cache',
         expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 5 * 60, // 5 minutes
+        },
+        networkTimeoutSeconds: 10,
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    // GraphQL - Network First with offline fallback
+    {
+      urlPattern: /^https?.*\/graphql$/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'graphql-cache',
+        expiration: {
           maxEntries: 50,
           maxAgeSeconds: 5 * 60, // 5 minutes
+        },
+        networkTimeoutSeconds: 10,
+        plugins: [
+          {
+            cacheWillUpdate: async ({response}) => {
+              // Don't cache errors
+              if (response && response.status === 200) {
+                return response;
+              }
+              return null;
+            },
+          },
+        ],
+      },
+    },
+    // App Shell - Network First
+    {
+      urlPattern: /^\/_next\/data\/.+\.json$/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'next-data',
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+    // Pages - Network First with cache fallback
+    {
+      urlPattern: /^\/.*$/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'pages',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
         },
         networkTimeoutSeconds: 10,
       },

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - IntelGraph</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: #fff;
+            color: #2563eb;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .features {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            p {
+                font-size: 16px;
+            }
+
+            .container {
+                padding: 30px 20px;
+            }
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📡</div>
+        <h1>You're Offline</h1>
+        <p>It looks like you've lost your internet connection. Don't worry, IntelGraph works offline too!</p>
+
+        <button class="button" onclick="checkConnection()">Try Again</button>
+
+        <div class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 16px; font-size: 14px;">Checking connection...</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✅</div>
+                <div class="feature-text">
+                    <strong>Cached Content:</strong> Access recently viewed data while offline
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💾</div>
+                <div class="feature-text">
+                    <strong>Automatic Sync:</strong> Your changes will sync when you're back online
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">
+                    <strong>Secure:</strong> All data is encrypted and stored securely on your device
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkConnection() {
+            const loading = document.querySelector('.loading');
+            const button = document.querySelector('.button');
+
+            loading.classList.add('active');
+            button.style.display = 'none';
+
+            fetch('/', { method: 'HEAD', cache: 'no-store' })
+                .then(() => {
+                    // Connection restored
+                    window.location.href = '/';
+                })
+                .catch(() => {
+                    // Still offline
+                    setTimeout(() => {
+                        loading.classList.remove('active');
+                        button.style.display = 'inline-block';
+                        alert('Still offline. Please check your internet connection.');
+                    }, 2000);
+                });
+        }
+
+        // Auto-check connection every 5 seconds
+        setInterval(() => {
+            if (navigator.onLine) {
+                checkConnection();
+            }
+        }, 5000);
+
+        // Listen for online event
+        window.addEventListener('online', () => {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>
