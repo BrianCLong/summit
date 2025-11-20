@@ -108,10 +108,10 @@ cognitive_insights_engine/poetry.lock
 **/poetry.lock
 **/Pipfile.lock
 
-# JavaScript/TypeScript package manager lockfiles are ignored to prevent
-# accidental binary diffs from blocking PR workflows
+# JavaScript/TypeScript package manager lockfiles
+# NOTE: pnpm-lock.yaml MUST be committed for reproducible CI builds
+# Only ignore yarn.lock as we use pnpm exclusively
 yarn.lock
-pnpm-lock.yaml
 
 # Additional large data artifacts generated during investigations or exports
 *.parquet

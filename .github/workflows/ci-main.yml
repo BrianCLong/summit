@@ -6,7 +6,7 @@ on:
     branches: [main]
   merge_group:
 env:
-  NODE_VERSIONS: '18,20'
+  NODE_VERSIONS: '20'
   FORCE_COLOR: 3
 jobs:
   smoke-validation:
@@ -17,7 +17,7 @@ jobs:
       security-events: write
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [20]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,14 +37,11 @@ jobs:
           rm -rf node_modules **/node_modules */*/node_modules .pnpm-store || true
           pnpm install
       - name: Typecheck validation
-        run: pnpm run typecheck || true
-        continue-on-error: true
+        run: pnpm run typecheck
       - name: Build validation
-        run: pnpm run build || true
-        continue-on-error: true
+        run: pnpm run build
       - name: Lint validation
-        run: pnpm run lint || true
-        continue-on-error: true
+        run: pnpm run lint
       # Optional: upload SARIF if your linter emits it (guard to avoid hard-fail)
       - name: Upload SARIF (if present)
         if: always() && hashFiles('**/*.sarif') != ''
