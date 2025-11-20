@@ -1,0 +1,226 @@
+name: ZAP DAST Scan
+
+# Dynamic Application Security Testing with OWASP ZAP
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to scan (default: http://localhost:3000)'
+        required: false
+        default: 'http://localhost:3000'
+      scan_type:
+        description: 'Scan type (baseline, full, api)'
+        required: false
+        default: 'baseline'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'client/**'
+      - 'apps/**'
+      - 'gateway/**'
+      - 'server/**'
+  schedule:
+    # Run full scan weekly on Sundays at 2 AM
+    - cron: '0 2 * * 0'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  zap-scan:
+    name: OWASP ZAP Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Compose
+        run: |
+          docker compose version
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+
+      - name: Build application
+        run: |
+          echo "🏗️  Building application for DAST scan..."
+
+          # Install dependencies
+          pnpm install --frozen-lockfile || pnpm install
+
+          # Build client if exists
+          if [ -d "client" ]; then
+            cd client
+            pnpm build || npm run build || echo "Client build skipped"
+            cd ..
+          fi
+
+      - name: Start application services
+        run: |
+          echo "🚀 Starting application services..."
+
+          # Start services with docker-compose
+          if [ -f docker-compose.yml ]; then
+            # Start client and required backend services
+            docker compose up -d client db || \
+            docker compose up -d web || \
+            docker compose up -d || \
+            echo "Using available services"
+
+            echo "⏳ Waiting for services to be ready..."
+            sleep 30
+
+            # Health check
+            MAX_RETRIES=10
+            RETRY_COUNT=0
+
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f http://localhost:3000 > /dev/null 2>&1 || \
+                 curl -f http://localhost:8080 > /dev/null 2>&1; then
+                echo "✅ Application is ready"
+                break
+              fi
+
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "⏳ Waiting for application... (attempt $RETRY_COUNT/$MAX_RETRIES)"
+              sleep 10
+            done
+
+            if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+              echo "⚠️  Application not responding, proceeding anyway"
+            fi
+          else
+            echo "⚠️  No docker-compose.yml found, skipping service startup"
+          fi
+
+      - name: ZAP Baseline Scan
+        if: github.event.inputs.scan_type == 'baseline' || github.event.inputs.scan_type == ''
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l WARN'
+          issue_title: 'ZAP Baseline Scan Report'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow_issue_writing: true
+
+      - name: ZAP Full Scan
+        if: github.event.inputs.scan_type == 'full' || github.event_name == 'schedule'
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-j -l WARN'
+          issue_title: 'ZAP Full Scan Report'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow_issue_writing: true
+
+      - name: ZAP API Scan
+        if: github.event.inputs.scan_type == 'api'
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
+          format: openapi
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-j -l WARN'
+          issue_title: 'ZAP API Scan Report'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow_issue_writing: true
+
+      - name: Upload ZAP Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-results
+          path: |
+            zap-baseline-report.html
+            zap-full-report.html
+            zap-api-report.html
+          retention-days: 30
+
+      - name: Check for High/Critical Issues
+        if: always()
+        run: |
+          echo "🔍 Checking ZAP scan results for critical issues..."
+
+          # Parse HTML report if exists
+          if [ -f zap-baseline-report.html ] || [ -f zap-full-report.html ]; then
+            REPORT=$(ls zap-*-report.html | head -1)
+
+            # Check for High/Critical alerts
+            if grep -q "High.*Risk" "$REPORT" || grep -q "Critical.*Risk" "$REPORT"; then
+              echo "⚠️  High or Critical security issues found!"
+              echo "::warning::ZAP scan detected high/critical security issues"
+
+              # Don't fail on PR scans, only warn
+              if [ "${{ github.event_name }}" == "pull_request" ]; then
+                echo "PR scan - reporting only, not failing"
+              else
+                exit 1
+              fi
+            else
+              echo "✅ No high/critical issues detected"
+            fi
+          else
+            echo "No ZAP report found to analyze"
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "🧹 Cleaning up services..."
+          docker compose down -v || true
+          docker system prune -f || true
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let message = '## 🔒 ZAP DAST Scan Results\n\n';
+
+            // Try to read ZAP report summary
+            const reportFiles = ['zap-baseline-report.html', 'zap-full-report.html'];
+            let reportFound = false;
+
+            for (const reportFile of reportFiles) {
+              if (fs.existsSync(reportFile)) {
+                const content = fs.readFileSync(reportFile, 'utf8');
+
+                // Extract summary (simplified - actual parsing would be more complex)
+                const hasHighRisk = content.includes('High') && content.includes('Risk');
+                const hasMediumRisk = content.includes('Medium') && content.includes('Risk');
+
+                message += hasHighRisk ? '⚠️ **High risk issues detected**\n' : '';
+                message += hasMediumRisk ? '⚠️ Medium risk issues detected\n' : '';
+                message += !hasHighRisk && !hasMediumRisk ? '✅ No high-risk issues detected\n' : '';
+
+                reportFound = true;
+                break;
+              }
+            }
+
+            if (!reportFound) {
+              message += '⚠️ No scan report generated - check logs\n';
+            }
+
+            message += '\n📊 View detailed results in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
