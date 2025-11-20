@@ -10,6 +10,7 @@ node_modules/
 !.yarn/versions
 .npm/
 .eslintcache
+node-compile-cache/
 
 # Optional REPL history
 .node_repl_history
