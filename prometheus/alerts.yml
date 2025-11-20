@@ -1,0 +1,351 @@
+# Prometheus alerting rules for IntelGraph
+# Defines alerts for API performance, system health, and critical metrics
+
+groups:
+  # ==================== API Performance Alerts ====================
+  - name: api_performance
+    interval: 30s
+    rules:
+      # High API error rate
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (instance) /
+            sum(rate(http_requests_total[5m])) by (instance)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API error rate on {{ $labels.instance }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # Critical API error rate
+      - alert: CriticalAPIErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (instance) /
+            sum(rate(http_requests_total[5m])) by (instance)
+          ) > 0.10
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Critical API error rate on {{ $labels.instance }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      # High API latency p50
+      - alert: HighAPILatencyP50
+        expr: histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, instance)) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API latency (p50) on {{ $labels.instance }}"
+          description: "p50 latency is {{ $value }}s (threshold: 0.5s)"
+
+      # High API latency p95
+      - alert: HighAPILatencyP95
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, instance)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API latency (p95) on {{ $labels.instance }}"
+          description: "p95 latency is {{ $value }}s (threshold: 2s)"
+
+      # High API latency p99
+      - alert: HighAPILatencyP99
+        expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, instance)) > 5
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High API latency (p99) on {{ $labels.instance }}"
+          description: "p99 latency is {{ $value }}s (threshold: 5s)"
+
+  # ==================== GraphQL Performance Alerts ====================
+  - name: graphql_performance
+    interval: 30s
+    rules:
+      # High GraphQL error rate
+      - alert: HighGraphQLErrorRate
+        expr: |
+          (
+            sum(rate(graphql_errors_total[5m])) by (instance) /
+            sum(rate(graphql_requests_total[5m])) by (instance)
+          ) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+          component: graphql
+        annotations:
+          summary: "High GraphQL error rate"
+          description: "GraphQL error rate is {{ $value | humanizePercentage }}"
+
+      # Slow GraphQL queries
+      - alert: SlowGraphQLQueries
+        expr: histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le, operation)) > 3
+        for: 5m
+        labels:
+          severity: warning
+          component: graphql
+        annotations:
+          summary: "Slow GraphQL queries detected"
+          description: "p95 duration for {{ $labels.operation }} is {{ $value }}s"
+
+      # High resolver latency
+      - alert: HighResolverLatency
+        expr: histogram_quantile(0.95, sum(rate(graphql_resolver_duration_seconds_bucket[5m])) by (le, resolver)) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: graphql
+        annotations:
+          summary: "High GraphQL resolver latency"
+          description: "p95 resolver {{ $labels.resolver }} duration is {{ $value }}s"
+
+  # ==================== Database Performance Alerts ====================
+  - name: database_performance
+    interval: 30s
+    rules:
+      # Neo4j query performance
+      - alert: SlowNeo4jQueries
+        expr: histogram_quantile(0.95, sum(rate(neo4j_query_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: neo4j
+        annotations:
+          summary: "Slow Neo4j queries detected"
+          description: "p95 Neo4j query duration is {{ $value }}s"
+
+      # PostgreSQL connection pool exhaustion
+      - alert: PostgreSQLConnectionPoolExhaustion
+        expr: |
+          (
+            pg_stat_database_numbackends /
+            pg_settings_max_connections
+          ) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: postgresql
+        annotations:
+          summary: "PostgreSQL connection pool near exhaustion"
+          description: "Connection pool is {{ $value | humanizePercentage }} full"
+
+      # PostgreSQL slow queries
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_statements_mean_exec_time[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: postgresql
+        annotations:
+          summary: "Slow PostgreSQL queries detected"
+          description: "Mean execution time is {{ $value }}ms"
+
+      # Low cache hit rate (Redis)
+      - alert: LowRedisCacheHitRate
+        expr: |
+          (
+            rate(redis_keyspace_hits_total[5m]) /
+            (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
+          ) < 0.80
+        for: 10m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "Low Redis cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 80%)"
+
+  # ==================== System Health Alerts ====================
+  - name: system_health
+    interval: 30s
+    rules:
+      # Service down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} has been down for more than 1 minute"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: |
+          (
+            100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          ) > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%"
+
+      # Critical CPU usage
+      - alert: CriticalCPUUsage
+        expr: |
+          (
+            100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          ) > 95
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Critical CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) /
+            node_memory_MemTotal_bytes
+          ) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      # Critical memory usage
+      - alert: CriticalMemoryUsage
+        expr: |
+          (
+            (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) /
+            node_memory_MemTotal_bytes
+          ) > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Critical memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      # Low disk space
+      - alert: LowDiskSpace
+        expr: |
+          (
+            node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"} /
+            node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"}
+          ) < 0.15
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Available disk space is {{ $value | humanizePercentage }}"
+
+      # Critical disk space
+      - alert: CriticalDiskSpace
+        expr: |
+          (
+            node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"} /
+            node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"}
+          ) < 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Critical disk space on {{ $labels.instance }}"
+          description: "Available disk space is {{ $value | humanizePercentage }}"
+
+  # ==================== Container Alerts ====================
+  - name: container_health
+    interval: 30s
+    rules:
+      # Container high memory usage
+      - alert: ContainerHighMemoryUsage
+        expr: |
+          (
+            container_memory_usage_bytes{name!=""} /
+            container_spec_memory_limit_bytes{name!=""}
+          ) > 0.90
+        for: 5m
+        labels:
+          severity: warning
+          component: docker
+        annotations:
+          summary: "Container {{ $labels.name }} high memory usage"
+          description: "Container memory usage is {{ $value | humanizePercentage }}"
+
+      # Container high CPU usage
+      - alert: ContainerHighCPUUsage
+        expr: |
+          (
+            rate(container_cpu_usage_seconds_total{name!=""}[5m]) * 100
+          ) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: docker
+        annotations:
+          summary: "Container {{ $labels.name }} high CPU usage"
+          description: "Container CPU usage is {{ $value }}%"
+
+      # Container restart rate
+      - alert: ContainerHighRestartRate
+        expr: rate(container_last_seen{name!=""}[15m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: docker
+        annotations:
+          summary: "Container {{ $labels.name }} restarting frequently"
+          description: "Container restart rate is {{ $value }}"
+
+  # ==================== Database Connection Alerts ====================
+  - name: database_connections
+    interval: 30s
+    rules:
+      # PostgreSQL connection failure
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: postgresql
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL at {{ $labels.instance }} is unreachable"
+
+      # Redis connection failure
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis at {{ $labels.instance }} is unreachable"
+
+      # Neo4j connection failure
+      - alert: Neo4jDown
+        expr: neo4j_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: neo4j
+        annotations:
+          summary: "Neo4j is down"
+          description: "Neo4j at {{ $labels.instance }} is unreachable"
