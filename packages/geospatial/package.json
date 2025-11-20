@@ -1,0 +1,37 @@
+{
+  "name": "@intelgraph/geospatial",
+  "version": "1.0.0",
+  "description": "Geospatial intelligence data structures and ingestion for IntelGraph",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "geospatial",
+    "GEOINT",
+    "GIS",
+    "intelligence"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@turf/turf": "^7.1.0",
+    "@types/geojson": "^7946.0.14",
+    "geojson": "^0.5.0",
+    "shpjs": "^6.0.0",
+    "xml2js": "^0.6.2",
+    "proj4": "^2.12.1",
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3"
+  }
+}

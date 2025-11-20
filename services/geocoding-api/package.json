@@ -1,0 +1,42 @@
+{
+  "name": "@intelgraph/geocoding-api",
+  "version": "1.0.0",
+  "description": "Geocoding and reverse geocoding API service for IntelGraph",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "geocoding",
+    "reverse-geocoding",
+    "geolocation",
+    "GEOINT"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/geospatial": "workspace:*",
+    "express": "^4.21.2",
+    "axios": "^1.11.0",
+    "node-cache": "^5.1.2",
+    "dotenv": "^17.2.3",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "express-rate-limit": "^7.5.0",
+    "geoip-lite": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^24.10.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}

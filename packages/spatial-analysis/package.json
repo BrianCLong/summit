@@ -1,0 +1,34 @@
+{
+  "name": "@intelgraph/spatial-analysis",
+  "version": "1.0.0",
+  "description": "Advanced spatial analysis algorithms for IntelGraph GEOINT platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "spatial-analysis",
+    "clustering",
+    "hotspot",
+    "geospatial",
+    "GEOINT"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/geospatial": "workspace:*",
+    "@turf/turf": "^7.1.0",
+    "@types/geojson": "^7946.0.14"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3"
+  }
+}
