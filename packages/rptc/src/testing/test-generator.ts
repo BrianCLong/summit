@@ -93,7 +93,9 @@ function buildBaseValues<TSlots extends SlotSchemaMap>(
   template: PromptTemplate<TSlots>,
   options: TestGenerationOptions<TSlots>,
 ): SlotValues<TSlots> {
-  const base: Partial<SlotValues<TSlots>> = { ...(options.validExample ?? {}) };
+  const base: Partial<SlotValues<TSlots>> = {
+    ...(options.validExample ?? ({} as SlotValues<TSlots>)),
+  };
 
   for (const [slotName, schema] of Object.entries(template.slots) as Array<
     [keyof TSlots, SlotSchema]

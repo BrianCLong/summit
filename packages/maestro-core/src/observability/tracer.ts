@@ -41,7 +41,6 @@ export class MaestroTracer extends EventEmitter {
   private sdk: NodeSDK;
   private tracer: any;
   private meter: any;
-  private prometheusExporter: any;
 
   // Metrics
   private workflowRunsTotal: Counter;
@@ -81,19 +80,19 @@ export class MaestroTracer extends EventEmitter {
       );
     }
 
+    const prometheusExporter = new PrometheusExporter({
+      port: this.config.prometheusPort || 9090,
+    });
+
     // Initialize SDK
     this.sdk = new NodeSDK({
       resource,
       traceExporter: exporters.length > 0 ? exporters[0] : undefined,
+      metricReader: prometheusExporter,
       instrumentations:
         this.config.enableAutoInstrumentation !== false
           ? [getNodeAutoInstrumentations()]
           : [],
-    });
-
-    // Initialize Prometheus exporter separately (metricExporter not in NodeSDK config)
-    this.prometheusExporter = new PrometheusExporter({
-      port: this.config.prometheusPort || 9090,
     });
   }
 
@@ -173,6 +172,10 @@ export class MaestroTracer extends EventEmitter {
   }
 
   // Workflow tracing
+  startSpan(operationName: string, options?: SpanOptions): any {
+    return this.tracer.startSpan(operationName, options);
+  }
+
   startWorkflowSpan(
     runId: string,
     workflowName: string,
@@ -467,7 +470,7 @@ export function traced(operationName?: string) {
 
     descriptor.value = async function (...args: any[]) {
       const tracerInstance = getTracer();
-      const span = trace.getTracer('maestro').startSpan(
+      const span = tracerInstance.startSpan(
         operationName || `${target.constructor.name}.${propertyKey}`,
       );
 
