@@ -1,0 +1,26 @@
+{
+  "_description": "Golden dataset for Redis cache - E2E tests",
+  "cache:entity:person-001": {
+    "id": "person-001",
+    "name": "John Doe",
+    "type": "person",
+    "cached_at": "2025-01-01T00:00:00Z"
+  },
+  "cache:entity:org-001": {
+    "id": "org-001",
+    "name": "Acme Corp",
+    "type": "organization",
+    "cached_at": "2025-01-01T00:00:00Z"
+  },
+  "session:test-session-001": {
+    "user_id": "10000000-0000-0000-0000-000000000001",
+    "created_at": "2025-01-01T00:00:00Z",
+    "expires_at": "2025-01-02T00:00:00Z"
+  },
+  "rate_limit:10.0.0.1:ai": "5",
+  "rate_limit:10.0.0.2:api": "100",
+  "feature_flag:ai_enabled": "true",
+  "feature_flag:export_enabled": "true",
+  "config:max_entities": "10000",
+  "config:max_relationships": "50000"
+}

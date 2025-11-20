@@ -1,0 +1,46 @@
+{
+  "description": "Golden dataset for Neo4j graph database - E2E tests",
+  "statements": [
+    {
+      "query": "CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE"
+    },
+    {
+      "query": "CREATE CONSTRAINT person_email IF NOT EXISTS FOR (p:Person) REQUIRE p.email IS UNIQUE"
+    },
+    {
+      "query": "CREATE INDEX entity_name IF NOT EXISTS FOR (e:Entity) ON (e.name)"
+    },
+    {
+      "query": "CREATE (p1:Person:Entity {id: 'person-001', name: 'John Doe', email: 'john@example.com', type: 'person'})",
+      "params": {}
+    },
+    {
+      "query": "CREATE (p2:Person:Entity {id: 'person-002', name: 'Jane Smith', email: 'jane@example.com', type: 'person'})",
+      "params": {}
+    },
+    {
+      "query": "CREATE (o1:Organization:Entity {id: 'org-001', name: 'Acme Corp', type: 'organization'})",
+      "params": {}
+    },
+    {
+      "query": "CREATE (o2:Organization:Entity {id: 'org-002', name: 'Tech Industries', type: 'organization'})",
+      "params": {}
+    },
+    {
+      "query": "MATCH (p1:Person {id: 'person-001'}), (o1:Organization {id: 'org-001'}) CREATE (p1)-[:WORKS_FOR {since: '2020-01-01', role: 'Engineer'}]->(o1)",
+      "params": {}
+    },
+    {
+      "query": "MATCH (p2:Person {id: 'person-002'}), (o1:Organization {id: 'org-001'}) CREATE (p2)-[:WORKS_FOR {since: '2019-06-15', role: 'Manager'}]->(o1)",
+      "params": {}
+    },
+    {
+      "query": "MATCH (p1:Person {id: 'person-001'}), (p2:Person {id: 'person-002'}) CREATE (p1)-[:KNOWS {since: '2020-01-01', strength: 0.8}]->(p2)",
+      "params": {}
+    },
+    {
+      "query": "MATCH (o1:Organization {id: 'org-001'}), (o2:Organization {id: 'org-002'}) CREATE (o1)-[:PARTNER_WITH {since: '2021-03-01', type: 'strategic'}]->(o2)",
+      "params": {}
+    }
+  ]
+}
