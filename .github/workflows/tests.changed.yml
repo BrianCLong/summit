@@ -68,13 +68,13 @@ jobs:
       - name: Install & heal
         run: |
           corepack enable || true
-          corepack prepare pnpm@9.12.3 --activate || true
-          pnpm i --frozen-lockfile=false
+          corepack prepare pnpm@9.12.0 --activate || true
+          pnpm i --frozen-lockfile
           node scripts/monorepo_heal.mjs || true
 
       - name: Typecheck (fast)
-        run: pnpm exec tsc -b --pretty --noEmit || true
+        run: pnpm exec tsc -b --pretty --noEmit
 
       - name: Test (${{ matrix.path }})
         working-directory: ${{ matrix.path }}
-        run: pnpm run test || echo "::warning::tests failed in ${{ matrix.path }}"
+        run: pnpm run test

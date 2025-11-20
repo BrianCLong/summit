@@ -36,7 +36,7 @@ jobs:
       - name: Enable corepack + pnpm
         run: |
           corepack enable || true
-          corepack prepare pnpm@9.12.3 --activate || true
+          corepack prepare pnpm@9.12.0 --activate || true
       - name: Install
         run: pnpm i -w
       - name: Setup Terraform
@@ -47,7 +47,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.15.2 --frozen-lockfile=false
+          version: v3.15.2
       - name: Codegen (GraphQL)
         run: |
           if [ -f codegen.ts ]; then npx -y graphql-code-generator --config codegen.ts || true; fi

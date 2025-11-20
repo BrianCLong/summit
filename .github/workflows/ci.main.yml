@@ -24,20 +24,20 @@ jobs:
       - name: Enable corepack + pnpm
         run: |
           corepack enable || true
-          corepack prepare pnpm@9.12.3 --activate || true
+          corepack prepare pnpm@9.12.0 --activate || true
           pnpm -v
 
       - name: Install
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint || true
+        run: pnpm run lint
 
       - name: Typecheck
-        run: pnpm run typecheck || true
+        run: pnpm run typecheck
 
       - name: Test
-        run: pnpm run test || true
+        run: pnpm run test
 
       - name: Build
         run: |

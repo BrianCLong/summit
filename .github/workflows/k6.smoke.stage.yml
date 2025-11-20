@@ -23,8 +23,8 @@ jobs:
       - name: Install & heal
         run: |
           corepack enable || true
-          corepack prepare pnpm@9.12.3 --activate || true
-          pnpm i -w --frozen-lockfile=false
+          corepack prepare pnpm@9.12.0 --activate || true
+          pnpm i -w --frozen-lockfile
           node scripts/monorepo_heal.mjs || true
       - name: Setup k6
         uses: grafana/setup-k6-action@v1

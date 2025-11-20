@@ -58,8 +58,8 @@ jobs:
       - name: Install
         run: |
           corepack enable || true
-          corepack prepare pnpm@9.12.3 --activate || true
-          pnpm i --frozen-lockfile=false
+          corepack prepare pnpm@9.12.0 --activate || true
+          pnpm i --frozen-lockfile
       - name: Monorepo heal
         run: node scripts/monorepo_heal.mjs
       - name: Dry-run pack (strict)
