@@ -1,0 +1,20 @@
+{
+  "name": "@intelgraph/graph-viz",
+  "version": "1.0.0",
+  "description": "Graph visualization layouts and rendering",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0"
+  },
+  "type": "module"
+}
