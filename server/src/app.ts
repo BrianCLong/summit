@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
+import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
@@ -19,6 +20,7 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
+import { initializeTracing, getTracer } from './observability/tracer.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
@@ -30,8 +32,16 @@ export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
+  // Initialize OpenTelemetry tracing
+  const tracer = initializeTracing();
+  await tracer.initialize();
+
   const app = express();
   const logger = pino();
+
+  // Add correlation ID middleware FIRST (before other middleware)
+  app.use(correlationIdMiddleware);
+
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
@@ -50,7 +60,22 @@ export const createApp = async () => {
       credentials: true,
     }),
   );
-  app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }));
+
+  // Enhanced Pino HTTP logger with correlation and trace context
+  app.use(
+    pinoHttp({
+      logger,
+      redact: ['req.headers.authorization', 'req.headers.cookie'],
+      customProps: (req: any) => ({
+        correlationId: req.correlationId,
+        traceId: req.traceId,
+        spanId: req.spanId,
+        userId: req.user?.sub || req.user?.id,
+        tenantId: req.user?.tenant_id,
+      }),
+    }),
+  );
+
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
 
