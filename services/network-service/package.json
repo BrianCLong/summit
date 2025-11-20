@@ -1,0 +1,32 @@
+{
+  "name": "@intelgraph/network-service",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "tsx src/server.ts",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/network-analysis": "workspace:*",
+    "@intelgraph/community-detection": "workspace:*",
+    "@intelgraph/influence-analysis": "workspace:*",
+    "@intelgraph/link-prediction": "workspace:*",
+    "@intelgraph/network-visualization": "workspace:*",
+    "@intelgraph/social-media-analysis": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "express": "^5.0.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.9.3",
+    "tsx": "^4.19.2"
+  }
+}
