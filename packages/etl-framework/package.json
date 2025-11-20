@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/etl-framework",
+  "version": "1.0.0",
+  "description": "Comprehensive ETL/ELT framework for data pipelines",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/data-integration": "workspace:*",
+    "zod": "^3.24.1",
+    "winston": "^3.17.0",
+    "pg": "^8.16.3",
+    "bull": "^4.16.5",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0"
+  }
+}
