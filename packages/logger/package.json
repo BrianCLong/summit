@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/logger",
+  "version": "1.0.0",
+  "description": "Standardized structured logging for IntelGraph platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "logging",
+    "structured-logging",
+    "winston",
+    "observability"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "winston": "^3.11.0",
+    "winston-loki": "^6.0.8",
+    "winston-daily-rotate-file": "^4.7.1",
+    "@opentelemetry/api": "1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": "1.7.0"
+  }
+}

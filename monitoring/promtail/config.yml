@@ -1,0 +1,300 @@
+# Promtail Configuration for IntelGraph
+# Collects logs from multiple sources and ships to Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 1048576  # 1MB
+    timeout: 10s
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+
+scrape_configs:
+  # Application logs from file
+  - job_name: application-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: application
+          environment: ${ENVIRONMENT:-development}
+          __path__: /var/log/intelgraph/*.log
+
+    pipeline_stages:
+      # Parse JSON logs
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            service: service
+            correlationId: correlationId
+            traceId: traceId
+            spanId: spanId
+            userId: userId
+
+      # Set timestamp from log entry
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+      # Extract labels
+      - labels:
+          level:
+          service:
+          correlationId:
+          traceId:
+
+      # Add output formatting
+      - output:
+          source: message
+
+  # Docker container logs
+  - job_name: docker-containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+
+    relabel_configs:
+      # Only scrape containers with specific labels
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        regex: 'summit|intelgraph'
+        action: keep
+
+      # Container name
+      - source_labels: ['__meta_docker_container_name']
+        target_label: container_name
+
+      # Service name
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: service
+
+      # Environment
+      - source_labels: ['__meta_docker_container_label_environment']
+        target_label: environment
+
+      # Project
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: project
+
+    pipeline_stages:
+      # Try to parse as JSON first
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            correlationId: correlationId
+            traceId: traceId
+            spanId: spanId
+            userId: userId
+            service: service
+          source: log
+
+      # If JSON parsing fails, treat as plain text
+      - match:
+          selector: '{job="docker-containers"}'
+          stages:
+            - regex:
+                expression: '^(?P<timestamp>\S+)\s+\[(?P<level>\w+)\]\s+(?P<message>.*)$'
+            - labels:
+                level:
+
+      # Set timestamp if available
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+          fallback_formats:
+            - '2006-01-02T15:04:05.999999999Z07:00'
+            - '2006-01-02 15:04:05'
+
+      # Extract additional labels
+      - labels:
+          level:
+          correlationId:
+          traceId:
+          service:
+
+  # System logs
+  - job_name: system-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          environment: ${ENVIRONMENT:-development}
+          __path__: /var/log/syslog
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\w+\s+\d+\s+\d+:\d+:\d+)\s+(?P<hostname>\S+)\s+(?P<app>\S+)(\[(?P<pid>\d+)\])?: (?P<message>.*)$'
+
+      - timestamp:
+          source: timestamp
+          format: 'Jan _2 15:04:05'
+
+      - labels:
+          app:
+          hostname:
+
+  # Neo4j logs
+  - job_name: neo4j-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: neo4j
+          service: neo4j
+          environment: ${ENVIRONMENT:-development}
+          __path__: /var/log/neo4j/*.log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+)\+\d+\s+(?P<level>\w+)\s+\[(?P<thread>[^\]]+)\]\s+(?P<logger>[^\s]+)\s+-\s+(?P<message>.*)$'
+
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05.000'
+
+      - labels:
+          level:
+          thread:
+
+  # PostgreSQL logs
+  - job_name: postgresql-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: postgresql
+          service: postgresql
+          environment: ${ENVIRONMENT:-development}
+          __path__: /var/log/postgresql/*.log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+(?P<timezone>\w+)\s+\[(?P<pid>\d+)\]\s+(?P<level>\w+):\s+(?P<message>.*)$'
+
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05'
+
+      - labels:
+          level:
+
+  # Nginx access logs
+  - job_name: nginx-access
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-access
+          service: nginx
+          log_type: access
+          environment: ${ENVIRONMENT:-development}
+          __path__: /var/log/nginx/access.log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>[\w\.]+) - (?P<remote_user>[^ ]*) \[(?P<timestamp>[^\]]+)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>[^\"]*)" "(?P<http_user_agent>[^\"]*)"'
+
+      - timestamp:
+          source: timestamp
+          format: '02/Jan/2006:15:04:05 -0700'
+
+      - labels:
+          method:
+          status:
+
+  # Nginx error logs
+  - job_name: nginx-error
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-error
+          service: nginx
+          log_type: error
+          environment: ${ENVIRONMENT:-development}
+          __path__: /var/log/nginx/error.log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2})\s+\[(?P<level>\w+)\]\s+(?P<message>.*)$'
+
+      - timestamp:
+          source: timestamp
+          format: '2006/01/02 15:04:05'
+
+      - labels:
+          level:
+
+  # Kubernetes pod logs (if running in k8s)
+  - job_name: kubernetes-pods
+    kubernetes_sd_configs:
+      - role: pod
+
+    relabel_configs:
+      # Only scrape pods with logging enabled
+      - source_labels: [__meta_kubernetes_pod_label_logging]
+        regex: 'true'
+        action: keep
+
+      # Namespace
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+
+      # Pod name
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+
+      # Container name
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        target_label: container
+
+      # App label
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        target_label: app
+
+      # Environment
+      - source_labels: [__meta_kubernetes_pod_label_environment]
+        target_label: environment
+
+      # Path to pod logs
+      - source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
+        target_label: __path__
+        separator: /
+        replacement: /var/log/pods/*$1/*.log
+
+    pipeline_stages:
+      - cri: {}  # Parse CRI format
+
+      # Try to parse JSON
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            correlationId: correlationId
+            traceId: traceId
+            service: service
+
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+      - labels:
+          level:
+          correlationId:
+          traceId:
+          service:
