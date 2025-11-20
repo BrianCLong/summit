@@ -1,25 +1,39 @@
-# IntelGraph
+# Summit Documentation Index
 
-**Synthetic Fusion for Intelligence Analysis.**
+Use this page as the fast path to the docs you need. The golden path details live in `README.md`; onboarding mirrors it with only the steps required to get productive.
 
-IntelGraph unifies OSINT, graph analytics, GenAI/GraphRAG, and agentic runbooks to deliver end‑to‑end Threat‑to‑Response (TDIR) in one open, explainable platform.
+## If you only have 30 minutes
 
-### Why now
+- Spin up the stack: follow **[Developer Onboarding](ONBOARDING.md#-quickstart-30-minutes-to-productive)** and run `make bootstrap && make up && make smoke`.
+- Run tests: `pnpm test` for the suite, `pnpm smoke` for the golden path harness.
+- Skim architecture: **[ARCHITECTURE.md](ARCHITECTURE.md)** for high-level components, data stores, and boundaries.
 
-Fragmented tools force swivel‑chair investigations. IntelGraph fuses **Shared** features (TI, SIEM integration, visualization, entity resolution, etc.) with **Unique** edges (GraphRAG, Agentic AI, index‑free adjacency, dynamic exploration) into a cohesive analyst experience.
+## Getting Started
 
-### MVP Scope (30 days)
+- **[README.md](../README.md)** – Single source of truth for prerequisites, golden path commands, and service endpoints.
+- **[ONBOARDING.md](ONBOARDING.md)** – Day-one setup that mirrors the README without duplicating every detail.
+- **[GOLDEN_PATH.md](GOLDEN_PATH.md)** – Additional context on the Investigation → Entities → Relationships → Copilot → Results workflow.
 
-- Neo4j persistence (temporal edges + confidence)
-- Streamlit UI (neighborhood, multi‑hop path, timeline)
-- OSINT connector framework (Wikipedia demo)
-- GenAI‑assisted Q&A over graph (GraphRAG prototype)
+## Runbooks & Operations
 
-See `docs/ROADMAP.md` for next phases and `docs/ARCHITECTURE.md` for system design.
+- **[RUNBOOKS/INDEX.md](../RUNBOOKS/INDEX.md)** – Operational guides and incident playbooks.
+- **[RUNBOOKS/dev-bootstrap.md](../RUNBOOKS/dev-bootstrap.md)** – Local stack bring-up with verification steps.
+- **[RUNBOOKS/schema-migration-playbook.md](../RUNBOOKS/schema-migration-playbook.md)** – Safe database migration procedures.
 
-## Documentation Structure
+## Security & Governance
 
-- `docs/` – Active guides, architecture references, and onboarding material
-- `docs/archive/` – Historical documents retained for reference only
+- **[SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md)** – Security posture and privacy controls.
+- **[COMPLIANCE.md](COMPLIANCE.md)** and **[DATA_RETENTION_POLICY.md](DATA_RETENTION_POLICY.md)** – Compliance, retention, and auditing references.
+- **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** – Expected behavior and reporting channels.
 
-Refer to [`docs/archive/README.md`](archive/README.md) for archive guidelines.
+## Product & Architecture References
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** – Core components, data flows, and dependencies.
+- **[DATA_MODEL.md](DATA_MODEL.md)** – Graph schema and storage expectations.
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.
+- **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
+
+## Archived & Historical Material
+
+- `docs/archived/` – Historical documents retained for context; not authoritative for current workflows.
+- See [`docs/archived/README.md`](archived/README.md) for archive conventions and retrieval hints.
