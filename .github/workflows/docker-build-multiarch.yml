@@ -1,0 +1,370 @@
+name: Build Multi-Architecture Docker Images
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY_GHCR: ghcr.io
+  REGISTRY_DOCKERHUB: docker.io
+
+jobs:
+  prepare:
+    name: Prepare Build Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+      created: ${{ steps.meta.outputs.created }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate metadata
+        id: meta
+        run: |
+          # Determine version
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+          else
+            VERSION="$(git describe --tags --always --dirty)-${GITHUB_SHA:0:7}"
+          fi
+
+          # Generate timestamp
+          CREATED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "created=${CREATED}" >> $GITHUB_OUTPUT
+
+          # Generate tags
+          TAGS="${{ env.REGISTRY_GHCR }}/${{ github.repository }}/api:${VERSION}"
+          TAGS="${TAGS},${{ env.REGISTRY_GHCR }}/${{ github.repository }}/api:latest"
+
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAGS="${TAGS},${{ env.REGISTRY_GHCR }}/${{ github.repository }}/api:stable"
+          fi
+
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+          # Generate labels
+          LABELS="org.opencontainers.image.title=IntelGraph"
+          LABELS="${LABELS},org.opencontainers.image.description=Intelligence Analysis Platform"
+          LABELS="${LABELS},org.opencontainers.image.version=${VERSION}"
+          LABELS="${LABELS},org.opencontainers.image.created=${CREATED}"
+          LABELS="${LABELS},org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}"
+          LABELS="${LABELS},org.opencontainers.image.revision=${{ github.sha }}"
+          LABELS="${LABELS},org.opencontainers.image.vendor=IntelGraph"
+
+          echo "labels=${LABELS}" >> $GITHUB_OUTPUT
+
+  build-api:
+    name: Build API Service
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GHCR }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract platform name
+        id: platform
+        run: |
+          PLATFORM_PAIR=${{ matrix.platform }}
+          PLATFORM_NAME=${PLATFORM_PAIR//\//-}
+          echo "name=${PLATFORM_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deploy/docker/Dockerfile.api
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: ${{ env.REGISTRY_GHCR }}/${{ github.repository }}/api:${{ needs.prepare.outputs.version }}-${{ steps.platform.outputs.name }}
+          labels: ${{ needs.prepare.outputs.labels }}
+          build-args: |
+            VERSION=${{ needs.prepare.outputs.version }}
+            BUILD_DATE=${{ needs.prepare.outputs.created }}
+            VCS_REF=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          outputs: type=image,name=${{ env.REGISTRY_GHCR }}/${{ github.repository }}/api,push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-api-${{ steps.platform.outputs.name }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  build-web:
+    name: Build Web Service
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GHCR }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract platform name
+        id: platform
+        run: |
+          PLATFORM_PAIR=${{ matrix.platform }}
+          PLATFORM_NAME=${PLATFORM_PAIR//\//-}
+          echo "name=${PLATFORM_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deploy/docker/Dockerfile.web
+          platforms: ${{ matrix.platform }}
+          push: true
+          labels: ${{ needs.prepare.outputs.labels }}
+          build-args: |
+            VERSION=${{ needs.prepare.outputs.version }}
+            BUILD_DATE=${{ needs.prepare.outputs.created }}
+            VCS_REF=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          outputs: type=image,name=${{ env.REGISTRY_GHCR }}/${{ github.repository }}/web,push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-web-${{ steps.platform.outputs.name }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-api:
+    name: Merge API Manifests
+    runs-on: ubuntu-latest
+    needs: [prepare, build-api]
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-api-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GHCR }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          IMAGE_NAME="${{ env.REGISTRY_GHCR }}/${{ github.repository }}/api"
+
+          # Create tags array
+          TAGS=(
+            "${IMAGE_NAME}:${VERSION}"
+            "${IMAGE_NAME}:${GITHUB_SHA:0:7}"
+          )
+
+          # Add branch-specific tags
+          if [[ "${{ github.ref }}" == refs/heads/main ]]; then
+            TAGS+=("${IMAGE_NAME}:latest")
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAGS+=("${IMAGE_NAME}:stable")
+          fi
+
+          # Create manifest for each tag
+          for TAG in "${TAGS[@]}"; do
+            docker buildx imagetools create \
+              $(printf '%s ' $(find . -type f -exec echo "${IMAGE_NAME}@sha256:{}" \;)) \
+              --tag "${TAG}"
+          done
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect \
+            ${{ env.REGISTRY_GHCR }}/${{ github.repository }}/api:${{ needs.prepare.outputs.version }}
+
+  merge-web:
+    name: Merge Web Manifests
+    runs-on: ubuntu-latest
+    needs: [prepare, build-web]
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-web-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GHCR }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          IMAGE_NAME="${{ env.REGISTRY_GHCR }}/${{ github.repository }}/web"
+
+          TAGS=(
+            "${IMAGE_NAME}:${VERSION}"
+            "${IMAGE_NAME}:${GITHUB_SHA:0:7}"
+          )
+
+          if [[ "${{ github.ref }}" == refs/heads/main ]]; then
+            TAGS+=("${IMAGE_NAME}:latest")
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAGS+=("${IMAGE_NAME}:stable")
+          fi
+
+          for TAG in "${TAGS[@]}"; do
+            docker buildx imagetools create \
+              $(printf '%s ' $(find . -type f -exec echo "${IMAGE_NAME}@sha256:{}" \;)) \
+              --tag "${TAG}"
+          done
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect \
+            ${{ env.REGISTRY_GHCR }}/${{ github.repository }}/web:${{ needs.prepare.outputs.version }}
+
+  security-scan:
+    name: Security Scan
+    needs: [merge-api, merge-web, prepare]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [api, web]
+
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY_GHCR }}/${{ github.repository }}/${{ matrix.service }}:${{ needs.prepare.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-results-${{ matrix.service }}.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results-${{ matrix.service }}.sarif'
+          category: 'trivy-${{ matrix.service }}'
+
+  sign-images:
+    name: Sign Container Images
+    needs: [merge-api, merge-web, prepare, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+
+    strategy:
+      matrix:
+        service: [api, web]
+
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GHCR }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign container image
+        run: |
+          IMAGE="${{ env.REGISTRY_GHCR }}/${{ github.repository }}/${{ matrix.service }}:${{ needs.prepare.outputs.version }}"
+          cosign sign --yes "${IMAGE}"
+
+      - name: Verify signature
+        run: |
+          IMAGE="${{ env.REGISTRY_GHCR }}/${{ github.repository }}/${{ matrix.service }}:${{ needs.prepare.outputs.version }}"
+          cosign verify "${IMAGE}" \
+            --certificate-identity-regexp="https://github.com/${{ github.repository }}" \
+            --certificate-oidc-issuer=https://token.actions.githubusercontent.com

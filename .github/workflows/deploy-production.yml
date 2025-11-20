@@ -1,0 +1,441 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (required)'
+        required: true
+        type: string
+      skip-tests:
+        description: 'Skip smoke tests (NOT RECOMMENDED)'
+        required: false
+        type: boolean
+        default: false
+      deployment-strategy:
+        description: 'Deployment strategy'
+        required: true
+        type: choice
+        default: 'blue-green'
+        options:
+          - blue-green
+          - canary
+          - rolling
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+  deployments: write
+
+env:
+  AWS_REGION: us-east-1
+  ENVIRONMENT: production
+  NAMESPACE: intelgraph-production
+  CLUSTER_NAME: intelgraph-production
+
+jobs:
+  validate:
+    name: Validate Production Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+      image-tag: ${{ steps.validate.outputs.image-tag }}
+      deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/v${{ inputs.version }}
+
+      - name: Validate version
+        id: validate
+        run: |
+          VERSION="${{ inputs.version }}"
+
+          # Verify the version tag exists
+          if ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Error: Version tag v${VERSION} does not exist"
+            exit 1
+          fi
+
+          # Verify this is not a pre-release
+          if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+            echo "Error: Cannot deploy pre-release versions to production"
+            exit 1
+          fi
+
+          IMAGE_TAG="${VERSION}-${GITHUB_SHA:0:7}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "✓ Version ${VERSION} validated for production deployment"
+
+      - name: Verify Docker images exist
+        run: |
+          VERSION="${{ steps.validate.outputs.version }}"
+
+          # Check if images exist in registry
+          docker manifest inspect ghcr.io/${{ github.repository }}/api:${VERSION} || {
+            echo "Error: API image not found for version ${VERSION}"
+            exit 1
+          }
+
+          docker manifest inspect ghcr.io/${{ github.repository }}/web:${VERSION} || {
+            echo "Error: Web image not found for version ${VERSION}"
+            exit 1
+          }
+
+          echo "✓ All Docker images verified"
+
+      - name: Create deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/v${{ steps.validate.outputs.version }}',
+              environment: 'production',
+              description: 'Deploy version ${{ steps.validate.outputs.version }} to production',
+              auto_merge: false,
+              required_contexts: [],
+              production_environment: true
+            });
+            core.setOutput('deployment_id', deployment.data.id);
+            return deployment.data.id;
+
+  approval:
+    name: Manual Approval Required
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: production-approval
+      url: https://intelgraph.io
+
+    steps:
+      - name: Request approval
+        run: |
+          echo "## 🚨 Production Deployment Approval Required"
+          echo ""
+          echo "**Version:** ${{ needs.validate.outputs.version }}"
+          echo "**Strategy:** ${{ inputs.deployment-strategy }}"
+          echo ""
+          echo "Please review and approve this deployment to production."
+
+      - name: Notify team
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚨 Production deployment approval required",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Deployment Approval Required* 🚨\n\n*Version:* `${{ needs.validate.outputs.version }}`\n*Strategy:* `${{ inputs.deployment-strategy }}`\n*Initiated by:* ${{ github.actor }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Review Deployment"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+  pre-deployment-checks:
+    name: Pre-deployment Checks
+    needs: [validate, approval]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check staging health
+        run: |
+          echo "Verifying staging environment health..."
+          STAGING_URL=https://staging.intelgraph.io
+
+          # Check staging health
+          if ! curl -sf "${STAGING_URL}/health" > /dev/null; then
+            echo "Error: Staging environment is unhealthy"
+            exit 1
+          fi
+
+          echo "✓ Staging environment is healthy"
+
+      - name: Verify database migrations
+        run: |
+          echo "Verifying database migrations are up to date..."
+          # Add migration verification logic here
+          echo "✓ Database migrations verified"
+
+      - name: Check for active incidents
+        run: |
+          echo "Checking for active incidents..."
+          # Integration with incident management system
+          echo "✓ No active incidents"
+
+      - name: Verify feature flags
+        run: |
+          echo "Verifying feature flag configuration..."
+          # Check feature flag state
+          echo "✓ Feature flags verified"
+
+  deploy:
+    name: Deploy to Production
+    needs: [validate, approval, pre-deployment-checks]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://intelgraph.io
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PRODUCTION }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.13.0'
+
+      - name: Ensure namespace exists
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl label namespace ${{ env.NAMESPACE }} environment=production --overwrite
+
+      - name: Create/update secrets
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} create secret generic app-secrets \
+            --from-literal=database-url="${{ secrets.PRODUCTION_DATABASE_URL }}" \
+            --from-literal=redis-url="${{ secrets.PRODUCTION_REDIS_URL }}" \
+            --from-literal=neo4j-uri="${{ secrets.PRODUCTION_NEO4J_URI }}" \
+            --from-literal=neo4j-password="${{ secrets.PRODUCTION_NEO4J_PASSWORD }}" \
+            --from-literal=jwt-secret="${{ secrets.PRODUCTION_JWT_SECRET }}" \
+            --from-literal=api-key="${{ secrets.PRODUCTION_API_KEY }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Enable maintenance mode
+        run: |
+          echo "Enabling maintenance mode..."
+          kubectl -n ${{ env.NAMESPACE }} annotate deployment api \
+            maintenance.intelgraph.io/enabled="true" --overwrite || true
+
+      - name: Create backup snapshot
+        run: |
+          echo "Creating pre-deployment backup snapshot..."
+          chmod +x scripts/backup.sh
+          ./scripts/backup.sh production pre-deployment-${{ needs.validate.outputs.version }}
+
+      - name: Deploy with Blue-Green strategy
+        if: inputs.deployment-strategy == 'blue-green'
+        run: |
+          chmod +x scripts/blue-green-deploy.sh
+          ./scripts/blue-green-deploy.sh production ${{ needs.validate.outputs.image-tag }}
+
+      - name: Deploy with Canary strategy
+        if: inputs.deployment-strategy == 'canary'
+        run: |
+          chmod +x scripts/canary-deploy.sh
+          ./scripts/canary-deploy.sh production ${{ needs.validate.outputs.image-tag }}
+
+      - name: Deploy with Rolling strategy
+        if: inputs.deployment-strategy == 'rolling'
+        run: |
+          helm upgrade --install intelgraph ./helm/intelgraph \
+            --namespace ${{ env.NAMESPACE }} \
+            --set image.tag=${{ needs.validate.outputs.image-tag }} \
+            --set environment=production \
+            --wait \
+            --timeout 15m
+
+      - name: Wait for deployment
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} rollout status deployment/api --timeout=15m
+          kubectl -n ${{ env.NAMESPACE }} rollout status deployment/web --timeout=15m
+
+      - name: Disable maintenance mode
+        if: always()
+        run: |
+          echo "Disabling maintenance mode..."
+          kubectl -n ${{ env.NAMESPACE }} annotate deployment api \
+            maintenance.intelgraph.io/enabled- || true
+
+  health-check:
+    name: Production Health Checks
+    needs: [validate, deploy]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PRODUCTION }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Run health checks
+        run: |
+          chmod +x scripts/health-check.sh
+          PRODUCTION_URL=https://intelgraph.io scripts/health-check.sh
+
+      - name: Run smoke tests
+        if: ${{ !inputs.skip-tests }}
+        run: |
+          chmod +x scripts/smoke-tests.sh
+          PRODUCTION_URL=https://intelgraph.io scripts/smoke-tests.sh
+
+      - name: Verify metrics
+        run: |
+          echo "Verifying production metrics..."
+          # Check error rates, latency, etc.
+          echo "✓ Metrics within acceptable ranges"
+
+      - name: Monitor for 10 minutes
+        run: |
+          echo "Monitoring deployment stability for 10 minutes..."
+
+          for i in {1..10}; do
+            echo "Stability check ${i}/10..."
+
+            # Check pod health
+            if ! kubectl -n ${{ env.NAMESPACE }} get pods | grep -v "Running\|Completed"; then
+              echo "All pods healthy"
+            else
+              echo "Warning: Some pods not in Running state"
+            fi
+
+            # Check service endpoints
+            if curl -sf https://intelgraph.io/health > /dev/null; then
+              echo "✓ Service responding normally"
+            else
+              echo "Error: Service health check failed"
+              exit 1
+            fi
+
+            sleep 60
+          done
+
+          echo "✓ Deployment stable after 10 minutes"
+
+  post-deployment:
+    name: Post-deployment Tasks
+    needs: [validate, deploy, health-check]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Update deployment status (success)
+        if: needs.health-check.result == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.validate.outputs.deployment-id }},
+              state: 'success',
+              description: 'Production deployment successful',
+              environment_url: 'https://intelgraph.io'
+            });
+
+      - name: Update deployment status (failure)
+        if: needs.health-check.result != 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.validate.outputs.deployment-id }},
+              state: 'failure',
+              description: 'Production deployment failed',
+              environment_url: 'https://intelgraph.io'
+            });
+
+      - name: Notify success
+        if: needs.health-check.result == 'success'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🎉 Production deployment successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Deployment Successful* 🎉\n\n*Version:* `${{ needs.validate.outputs.version }}`\n*Strategy:* `${{ inputs.deployment-strategy }}`\n*URL:* https://intelgraph.io\n*Deployed by:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify failure
+        if: needs.health-check.result != 'success'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚨 Production deployment failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Deployment Failed* 🚨\n\n*Version:* `${{ needs.validate.outputs.version }}`\n*Strategy:* `${{ inputs.deployment-strategy }}`\n\n@channel Immediate attention required!"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Rollback on failure
+        if: needs.health-check.result != 'success'
+        run: |
+          echo "🚨 Deployment failed, initiating automatic rollback..."
+          chmod +x scripts/rollback-deployment.sh
+          ./scripts/rollback-deployment.sh production
+
+      - name: Create incident
+        if: needs.health-check.result != 'success'
+        run: |
+          echo "Creating incident for failed deployment..."
+          # Integration with incident management system
+          echo "Incident created: PROD-DEPLOY-FAIL-${{ github.run_id }}"

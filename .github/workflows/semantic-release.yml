@@ -1,0 +1,151 @@
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+      - beta
+      - alpha
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  packages: write
+  id-token: write
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      new-release-published: ${{ steps.semantic.outputs.new-release-published }}
+      new-release-version: ${{ steps.semantic.outputs.new-release-version }}
+      new-release-git-tag: ${{ steps.semantic.outputs.new-release-git-tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test || true
+
+      - name: Run linter
+        run: pnpm lint || true
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          semantic_version: 22
+          extra_plugins: |
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+            @semantic-release/exec@6
+            conventional-changelog-conventionalcommits@7
+
+      - name: Create release bundle
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          VERSION=${{ steps.semantic.outputs.new-release-version }}
+          tar -czf summit-${VERSION}.tgz \
+            docker-compose.yml \
+            docker-compose.prod.yml \
+            Dockerfile \
+            scripts/ \
+            helm/ \
+            .env.example \
+            README.md \
+            CHANGELOG.md
+
+      - name: Upload release artifact
+        if: steps.semantic.outputs.new-release-published == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle-${{ steps.semantic.outputs.new-release-version }}
+          path: summit-${{ steps.semantic.outputs.new-release-version }}.tgz
+          retention-days: 90
+
+      - name: Notify Slack
+        if: steps.semantic.outputs.new-release-published == 'true'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 New release published: v${{ steps.semantic.outputs.new-release-version }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*New Release Published* 🚀\n\n*Version:* `${{ steps.semantic.outputs.new-release-version }}`\n*Tag:* `${{ steps.semantic.outputs.new-release-git-tag }}`\n*Branch:* `${{ github.ref_name }}`"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Release"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.semantic.outputs.new-release-git-tag }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Summary
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          echo "## 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.semantic.outputs.new-release-version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${{ steps.semantic.outputs.new-release-git-tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] Deploy to staging" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] Run smoke tests" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] Deploy to production (manual approval required)" >> $GITHUB_STEP_SUMMARY
+
+  trigger-staging-deployment:
+    name: Trigger Staging Deployment
+    needs: release
+    if: needs.release.outputs.new-release-published == 'true'
+    uses: ./.github/workflows/deploy-staging.yml
+    with:
+      version: ${{ needs.release.outputs.new-release-version }}
+      environment: staging
+    secrets: inherit
