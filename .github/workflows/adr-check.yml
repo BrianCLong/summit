@@ -1,0 +1,164 @@
+name: ADR Update Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      # Auth & Security
+      - 'services/authz-gateway/**'
+      - 'policy/**'
+      - 'server/src/middleware/auth*/**'
+      - 'server/src/services/Auth*'
+      # Data & Graph
+      - 'server/src/graph/**'
+      - 'server/src/db/migrations/**'
+      - 'server/src/workers/OutboxNeo4jSync.ts'
+      # API
+      - '**/*.graphql'
+      - 'gateway/supergraph/**'
+      - 'apps/*/schema.graphql'
+      # Copilot & AI
+      - 'server/src/services/rag.ts'
+      - 'server/src/services/copilot/**'
+      - 'server/src/llm/**'
+      # Provenance & Compliance
+      - 'packages/prov-ledger/**'
+      - 'prov-ledger-service/**'
+      - 'server/src/services/ProvenanceService.ts'
+      # Authority & Policy Compiler
+      - 'packages/authority-compiler/**'
+      - 'authority-definitions/**'
+      # Multi-tenancy
+      - 'server/src/middleware/tenant*'
+      - 'server/src/db/rls-policies.sql'
+      - 'server/src/services/CompartmentService.ts'
+
+jobs:
+  check-adr-update:
+    runs-on: ubuntu-latest
+    name: Check if ADR updated for foundational changes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history to check changed files
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            services/authz-gateway/**
+            policy/**
+            server/src/middleware/auth*/**
+            server/src/services/Auth*
+            server/src/graph/**
+            server/src/db/migrations/**
+            **/*.graphql
+            server/src/services/rag.ts
+            server/src/services/copilot/**
+            packages/prov-ledger/**
+            packages/authority-compiler/**
+            server/src/middleware/tenant*
+            server/src/services/CompartmentService.ts
+
+      - name: Check for ADR updates
+        id: adr-check
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          # Check if any ADR files were modified
+          ADR_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep "^adr/.*\.md$" || true)
+
+          if [ -z "$ADR_CHANGED" ]; then
+            echo "⚠️  WARNING: Foundational code modified without ADR update"
+            echo ""
+            echo "The following foundational areas were changed:"
+            echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n'
+            echo ""
+            echo "Please consider updating the relevant ADR(s) if architectural decisions have changed:"
+            echo ""
+            echo "📚 Relevant ADRs:"
+
+            # Suggest relevant ADRs based on changed paths
+            if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "authz-gateway\|policy/\|middleware/auth"; then
+              echo "  - ADR-0002: ABAC Step-Up Auth (adr/0002-abac-step-up.md)"
+              echo "  - ADR-0010: Multi-Tenant Compartment Model (adr/0010-multi-tenant-compartment-model.md)"
+            fi
+
+            if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "graph/\|Neo4j"; then
+              echo "  - ADR-0006: Neo4j Graph Store (adr/0006-neo4j-graph-store.md)"
+            fi
+
+            if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "\.graphql"; then
+              echo "  - ADR-0007: GraphQL API Design (adr/0007-graphql-api-design.md)"
+            fi
+
+            if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "copilot\|rag\.ts\|llm/"; then
+              echo "  - ADR-0012: Copilot GraphRAG Architecture (adr/0012-copilot-graphrag-architecture.md)"
+            fi
+
+            if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "prov-ledger\|ProvenanceService"; then
+              echo "  - ADR-0011: Provenance Ledger Schema (adr/0011-provenance-ledger-schema.md)"
+            fi
+
+            if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q "authority-compiler"; then
+              echo "  - ADR-0008: Authority & License Compiler (adr/0008-authority-license-compiler.md)"
+            fi
+
+            echo ""
+            echo "Use 'intelgraph adr:list' to see all ADRs"
+            echo ""
+            echo "If no architectural decision changed, you can safely ignore this warning."
+            echo "If architectural decisions changed, please update the relevant ADR(s)."
+            echo ""
+
+            # This is a warning, not a failure - we don't want to block PRs
+            echo "status=warning" >> $GITHUB_OUTPUT
+          else
+            echo "✅ ADR files updated:"
+            echo "$ADR_CHANGED"
+            echo "status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if warning)
+        if: steps.adr-check.outputs.status == 'warning'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## ⚠️  ADR Update Reminder
+
+            This PR modifies foundational architectural areas but doesn't update any ADRs.
+
+            **Changed foundational files:**
+            \`\`\`
+            ${{ steps.changed-files.outputs.all_changed_files }}
+            \`\`\`
+
+            If architectural decisions have changed, please update the relevant ADR(s):
+            - Use \`intelgraph adr:list\` to see all ADRs
+            - Update existing ADRs if decisions changed
+            - Create new ADRs for new architectural decisions
+
+            **Common ADRs that may need updates:**
+            - [ADR-0002: ABAC Step-Up Auth](../blob/main/adr/0002-abac-step-up.md)
+            - [ADR-0006: Neo4j Graph Store](../blob/main/adr/0006-neo4j-graph-store.md)
+            - [ADR-0007: GraphQL API Design](../blob/main/adr/0007-graphql-api-design.md)
+            - [ADR-0012: Copilot GraphRAG](../blob/main/adr/0012-copilot-graphrag-architecture.md)
+
+            See [How We Use ADRs](../blob/main/adr/HOW_WE_USE_ADRS.md) for guidance.
+
+            ---
+            *This is a reminder, not a blocker. If no architectural decisions changed, you can safely ignore this.*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Success message
+        if: steps.changed-files.outputs.any_changed == 'true' && steps.adr-check.outputs.status == 'success'
+        run: |
+          echo "✅ Foundational code changed and ADRs updated - excellent!"
