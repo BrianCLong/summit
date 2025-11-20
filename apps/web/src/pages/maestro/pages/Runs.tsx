@@ -1,7 +1,7 @@
 // =============================================
 // Maestro Runs Management - Live DAG Viewer
 // =============================================
-import React, { useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom'
 import {
   PlayIcon,
@@ -111,14 +111,12 @@ function RunsTable() {
   const { hasPermission } = useTenant()
   const { showNotification } = useNotification()
   const [runs, setRuns] = useState<Run[]>(mockRuns)
-  const [filteredRuns, setFilteredRuns] = useState<Run[]>(mockRuns)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedRuns, setSelectedRuns] = useState<string[]>([])
 
-  // Filter runs based on search and status
-  useEffect(() => {
-    const filtered = runs.filter(run => {
+  const filteredRuns = useMemo(() => {
+    return runs.filter(run => {
       const matchesSearch =
         run.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         run.runbook.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -127,7 +125,6 @@ function RunsTable() {
         statusFilter === 'all' || run.status === statusFilter
       return matchesSearch && matchesStatus
     })
-    setFilteredRuns(filtered)
   }, [runs, searchQuery, statusFilter])
 
   const getStatusColor = (status: Run['status']) => {
@@ -699,6 +696,15 @@ function DAGTab({ run }: { run: Run }) {
 }
 
 function LogsTab({ run }: { run: Run }) {
+  const logs = useMemo(() => buildDeterministicLogs(run), [run])
+  const levelClasses: Record<LogEntry['level'], string> = {
+    info: 'text-blue-400',
+    log: 'text-gray-300',
+    success: 'text-green-400',
+    error: 'text-red-400',
+    warning: 'text-yellow-400',
+  }
+
   return (
     <div>
       <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
@@ -706,41 +712,72 @@ function LogsTab({ run }: { run: Run }) {
       </h3>
       <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400 h-96 overflow-y-auto">
         <div className="space-y-1">
-          {run.steps.flatMap((step, stepIndex) => [
-            <div key={`${step.id}-start`} className="text-blue-400">
-              [{step.startTime?.toLocaleTimeString()}] Starting step:{' '}
-              {step.name}
-            </div>,
-            ...Array.from(
-              { length: Math.floor(Math.random() * 5) + 2 },
-              (_, logIndex) => (
-                <div
-                  key={`${step.id}-log-${logIndex}`}
-                  className="text-gray-300"
-                >
-                  [{step.startTime?.toLocaleTimeString()}] Processing...{' '}
-                  {Math.random().toString(36).slice(2)}
-                </div>
-              )
-            ),
-            <div
-              key={`${step.id}-end`}
-              className={
-                step.status === 'completed'
-                  ? 'text-green-400'
-                  : step.status === 'failed'
-                    ? 'text-red-400'
-                    : 'text-yellow-400'
-              }
-            >
-              [{step.endTime?.toLocaleTimeString() || 'In progress'}] Step{' '}
-              {step.status}: {step.name}
-            </div>,
-          ])}
+          {logs.map(log => (
+            <div key={log.key} className={levelClasses[log.level]}>
+              {log.text}
+            </div>
+          ))}
         </div>
       </div>
     </div>
   )
+}
+
+type LogLevel = 'info' | 'log' | 'success' | 'error' | 'warning'
+
+interface LogEntry {
+  key: string
+  level: LogLevel
+  text: string
+}
+
+function buildDeterministicLogs(run: Run): LogEntry[] {
+  return run.steps.flatMap((step, stepIndex) => {
+    const entries: LogEntry[] = []
+    const seedBase = `${run.id}-${step.id}-${stepIndex}`
+    const startTime = step.startTime?.toLocaleTimeString() ?? 'Unknown'
+    const endTime = step.endTime?.toLocaleTimeString() ?? 'In progress'
+
+    entries.push({
+      key: `${step.id}-start`,
+      level: 'info',
+      text: `[${startTime}] Starting step: ${step.name}`,
+    })
+
+    const logCount = (hashString(seedBase) % 4) + 2
+    for (let logIndex = 0; logIndex < logCount; logIndex++) {
+      const snippet = hashString(`${seedBase}-${logIndex}`)
+        .toString(16)
+        .slice(0, 6)
+      entries.push({
+        key: `${step.id}-log-${logIndex}`,
+        level: 'log',
+        text: `[${startTime}] Processing chunk ${logIndex + 1} (${snippet})`,
+      })
+    }
+
+    entries.push({
+      key: `${step.id}-end`,
+      level:
+        step.status === 'completed'
+          ? 'success'
+          : step.status === 'failed'
+            ? 'error'
+            : 'warning',
+      text: `[${endTime}] Step ${step.status}: ${step.name}`,
+    })
+
+    return entries
+  })
+}
+
+function hashString(value: string): number {
+  let hash = 0
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) - hash + value.charCodeAt(i)
+    hash |= 0
+  }
+  return Math.abs(hash)
 }
 
 function ArtifactsTab({ run }: { run: Run }) {

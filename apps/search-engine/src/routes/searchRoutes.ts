@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 
+import { authMiddleware } from '../middleware/auth';
 import { ElasticsearchService } from '../services/ElasticsearchService';
 import { QueryBuilderService } from '../services/QueryBuilderService';
 import { SavedSearchService } from '../services/SavedSearchService';
 import { QueryBuilder, SearchQuery } from '../types';
-import { authMiddleware } from '../middleware/auth';
 
 const router: Router = Router();
 const elasticsearchService = new ElasticsearchService();

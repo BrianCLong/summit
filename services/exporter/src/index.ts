@@ -14,6 +14,7 @@ app.post('/export', async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="export.zip"');
     res.send(zip);
   } catch (err) {
+    console.error('Export request failed', err);
     res.status(400).json({ error: 'export_failed' });
   }
 });

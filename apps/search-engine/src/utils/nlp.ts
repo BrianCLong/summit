@@ -1,7 +1,9 @@
 import compromise from 'compromise';
 import * as natural from 'natural';
-import * as stopword from 'stopword';
-import { en, removeStopwords } from 'stopword';
+import stopword from 'stopword';
+
+const stopwordModule = stopword as typeof import('stopword');
+const { en, removeStopwords } = stopwordModule;
 
 export class NLPProcessor {
   private tokenizer: natural.WordTokenizer;
@@ -188,7 +190,8 @@ export class NLPProcessor {
     const scores: Record<string, number> = {};
 
     languages.forEach((lang) => {
-      const langStopwords = stopword[lang as keyof typeof stopword] || [];
+      const langStopwords =
+        stopwordModule[lang as keyof typeof stopwordModule] || [];
       const tokens = this.tokenize(text);
       const stopwordCount = tokens.filter((token) =>
         langStopwords.includes(token),

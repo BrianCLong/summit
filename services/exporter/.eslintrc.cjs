@@ -5,6 +5,7 @@ module.exports = {
     es2021: true,
     jest: true,
   },
+  ignorePatterns: ['dist/**'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
