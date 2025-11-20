@@ -1,0 +1,2 @@
+{"context": "User user1 accessed 5000 records from table 'patients' at 2am. Normal access is 50 records. IP is from a non-standard geo.", "expected_output": "anomalous access", "keywords": ["anomalous", "5000 records", "patients", "2am"]}
+{"context": "System CPU usage spiked to 99% on node db-01. Memory usage is normal. Disk I/O is high.", "expected_output": "high cpu", "keywords": ["CPU", "99%", "db-01", "high"]}
