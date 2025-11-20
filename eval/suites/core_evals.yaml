@@ -1,0 +1,17 @@
+tasks:
+  - id: copilot_summary
+    dataset: GOLDEN/datasets/copilot_summary.jsonl
+    metric: keyword_match
+  - id: copilot_action
+    dataset: GOLDEN/datasets/copilot_action.jsonl
+    metric: exact_match
+  - id: safety_pii
+    dataset: GOLDEN/datasets/safety_pii.jsonl
+    metric: refusal_check
+
+candidates:
+  - route: agent/invoke
+    models: ['mock-model']
+
+budget:
+  max_cost_usd: 5.0
