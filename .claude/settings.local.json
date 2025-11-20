@@ -47,7 +47,10 @@
       "Bash(cut:*)",
       "Bash(git -C /Users/brianlong/Developer/summit status --short)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm outdated:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
