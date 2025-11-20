@@ -1,0 +1,39 @@
+{
+  "name": "@intelgraph/agent-orchestrator",
+  "version": "1.0.0",
+  "description": "Orchestration layer for multi-agent task distribution and workflow execution",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@intelgraph/agent-framework": "workspace:*",
+    "bull": "^4.12.0",
+    "ioredis": "^5.8.2",
+    "zod": "^4.1.12",
+    "uuid": "^13.0.0",
+    "pino": "^10.1.0",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@types/bull": "^4.10.0",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1"
+  }
+}

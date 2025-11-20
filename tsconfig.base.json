@@ -19,9 +19,7 @@
     "allowSyntheticDefaultImports": true,
 
     "typeRoots": ["./node_modules/@types"],
-    "allowImportingTsExtensions": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "jest"]
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }

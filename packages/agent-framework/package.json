@@ -1,0 +1,48 @@
+{
+  "name": "@intelgraph/agent-framework",
+  "version": "1.0.0",
+  "description": "Core framework for autonomous multi-agent intelligence analysis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./agents": {
+      "types": "./dist/agents/index.d.ts",
+      "import": "./dist/agents/index.js"
+    },
+    "./communication": {
+      "types": "./dist/communication/index.d.ts",
+      "import": "./dist/communication/index.js"
+    },
+    "./lifecycle": {
+      "types": "./dist/lifecycle/index.d.ts",
+      "import": "./dist/lifecycle/index.js"
+    }
+  },
+  "dependencies": {
+    "zod": "^4.1.12",
+    "uuid": "^13.0.0",
+    "eventemitter3": "^5.0.1",
+    "pino": "^10.1.0",
+    "ioredis": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1"
+  }
+}
