@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/tools",
+  "version": "1.0.0",
+  "description": "Development tools and utilities for IntelGraph",
+  "bin": {
+    "generate-icons": "./generate-icons.js"
+  },
+  "scripts": {
+    "generate-icons": "node generate-icons.js"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1"
+  },
+  "keywords": [
+    "tools",
+    "icons",
+    "mobile",
+    "assets"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}
