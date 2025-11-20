@@ -1,0 +1,197 @@
+# .github/workflows/mobile-ios.yml
+name: iOS Build and Deploy
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/mobile-native/**'
+      - '.github/workflows/mobile-ios.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile-native/**'
+  release:
+    types: [published]
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_14.2.app/Contents/Developer
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm --filter @intelgraph/mobile-native lint
+
+      - name: Run type check
+        run: pnpm --filter @intelgraph/mobile-native typecheck
+
+      - name: Run tests
+        run: pnpm --filter @intelgraph/mobile-native test
+
+  build:
+    name: Build iOS App
+    runs-on: macos-13
+    needs: lint-and-test
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd apps/mobile-native/ios
+          pod install
+
+      - name: Import Certificates
+        env:
+          CERTIFICATES_P12: ${{ secrets.CERTIFICATES_P12 }}
+          CERTIFICATES_PASSWORD: ${{ secrets.CERTIFICATES_PASSWORD }}
+        run: |
+          echo $CERTIFICATES_P12 | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P $CERTIFICATES_PASSWORD -T /usr/bin/codesign
+          security list-keychains -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+
+      - name: Import Provisioning Profile
+        env:
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo $PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Build Archive
+        run: |
+          cd apps/mobile-native/ios
+          xcodebuild -workspace IntelGraph.xcworkspace \
+            -scheme IntelGraph \
+            -configuration Release \
+            -archivePath build/IntelGraph.xcarchive \
+            archive
+
+      - name: Export IPA
+        run: |
+          cd apps/mobile-native/ios
+          xcodebuild -exportArchive \
+            -archivePath build/IntelGraph.xcarchive \
+            -exportPath build/ \
+            -exportOptionsPlist ExportOptions.plist
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-app
+          path: apps/mobile-native/ios/build/IntelGraph.ipa
+
+  deploy-testflight:
+    name: Deploy to TestFlight
+    runs-on: macos-13
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download IPA
+        uses: actions/download-artifact@v3
+        with:
+          name: ios-app
+          path: build/
+
+      - name: Upload to TestFlight
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcrun altool --upload-app \
+            -f build/IntelGraph.ipa \
+            -t ios \
+            -u $APPLE_ID \
+            -p $APPLE_ID_PASSWORD
+
+  deploy-app-store:
+    name: Deploy to App Store
+    runs-on: macos-13
+    needs: build
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download IPA
+        uses: actions/download-artifact@v3
+        with:
+          name: ios-app
+          path: build/
+
+      - name: Upload to App Store
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: |
+          xcrun altool --upload-app \
+            -f build/IntelGraph.ipa \
+            -t ios \
+            -u $APPLE_ID \
+            -p $APPLE_ID_PASSWORD
+
+      - name: Notify Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: intelgraph
+          SENTRY_PROJECT: mobile-ios
+        run: |
+          curl -sL https://sentry.io/get-cli/ | bash
+          sentry-cli releases new ${{ github.ref_name }}
+          sentry-cli releases set-commits ${{ github.ref_name }} --auto
+          sentry-cli releases finalize ${{ github.ref_name }}
