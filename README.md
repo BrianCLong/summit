@@ -22,11 +22,12 @@
 git clone https://github.com/BrianCLong/summit.git
 cd summit
 make bootstrap          # installs pnpm deps + venv + .env
-make up                 # docker-compose.dev.yml (API, web, dbs, observability)
+make up                 # docker-compose.dev.yml + migrations (API, web, dbs, observability)
 make smoke              # golden path automation against seeded data
 ```
 
 - One-command bootstrap: `./start.sh` (add `--ai` to include kafka + ai-worker, `--skip-smoke` only for debugging).
+- **Database migrations run automatically** during `make up`. For manual migration: `make migrate`.
 - Services: Client http://localhost:3000, GraphQL http://localhost:4000/graphql, Neo4j http://localhost:7474, Prometheus http://localhost:9090, Grafana http://localhost:3001.
 - Optional AI/Kafka stack: `make up-ai` (or `./start.sh --ai`) loads `docker-compose.ai.yml`.
 

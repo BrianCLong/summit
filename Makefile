@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai smoke tools down help preflight
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -17,10 +17,11 @@ help:
 	@echo "  make bootstrap    - Install dependencies (Node, Python, .env setup)"
 	@echo "  make up           - Start core services (Docker required)"
 	@echo "  make up-ai        - Start services with AI capabilities"
+	@echo "  make migrate      - Run database migrations (PostgreSQL + Neo4j)"
 	@echo "  make smoke        - Run smoke tests (validates golden path)"
 	@echo "  make down         - Stop all services"
 	@echo ""
-	@echo "Quick start: ./start.sh (runs bootstrap + up + smoke)"
+	@echo "Quick start: ./start.sh (runs bootstrap + up + migrate + smoke)"
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  - Docker Desktop >= 4.x (8GB RAM recommended)"
@@ -29,6 +30,7 @@ help:
 	@echo ""
 	@echo "Troubleshooting:"
 	@echo "  - If 'make up' fails: Check Docker is running (docker info)"
+	@echo "  - If 'make migrate' fails: Check PostgreSQL is running (docker-compose ps)"
 	@echo "  - If smoke fails: Check logs (docker-compose logs api)"
 	@echo "  - For help: See docs/ONBOARDING.md or run ./start.sh --help"
 
@@ -106,6 +108,8 @@ up: preflight
 	    echo "  curl http://localhost:4000/health/detailed"; \
 	    exit 1; \
 	  }; \
+	  echo "Running database migrations..."; \
+	  $(MAKE) migrate; \
 	  echo ""; \
 	  echo "Services ready! ✓"; \
 	  echo "  - API: http://localhost:4000/graphql"; \
@@ -132,6 +136,7 @@ up-ai: preflight
 	    exit 1; \
 	  }; \
 	  ./scripts/wait-for-stack.sh; \
+	  $(MAKE) migrate; \
 	  echo ""; \
 	  echo "AI services ready! ✓"; \
 	else \
@@ -139,6 +144,32 @@ up-ai: preflight
 	  echo "AI capabilities not available. Running 'make up' instead..."; \
 	  $(MAKE) up; \
 	fi
+
+migrate:
+	@echo "==> migrate: Running database migrations..."
+	@if [ ! -f $(ENV_FILE) ]; then \
+	  echo "ERROR: $(ENV_FILE) not found. Run 'make bootstrap' first."; \
+	  exit 1; \
+	fi
+	@# Source .env and run migrations
+	@set -a; source $(ENV_FILE); set +a; \
+	  if [ -f scripts/run-migrations.sh ]; then \
+	    ./scripts/run-migrations.sh || { \
+	      echo ""; \
+	      echo "ERROR: Database migrations failed."; \
+	      echo "Troubleshooting:"; \
+	      echo "  1. Ensure PostgreSQL is running: docker-compose ps postgres"; \
+	      echo "  2. Check PostgreSQL logs: docker-compose logs postgres"; \
+	      echo "  3. Verify connection: psql \$$DATABASE_URL -c 'SELECT 1'"; \
+	      echo "  4. Check migrations directory: ls -la server/db/migrations/postgres/"; \
+	      exit 1; \
+	    }; \
+	  else \
+	    echo "WARNING: scripts/run-migrations.sh not found; skipping migrations"; \
+	  fi
+	@echo ""
+	@echo "migrate: DONE ✓"
+	@echo "Database schema is ready for use"
 
 down:
 	@echo "==> down: stopping summit stack"
