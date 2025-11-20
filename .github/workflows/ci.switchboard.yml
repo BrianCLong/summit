@@ -10,9 +10,7 @@ jobs:
           lfs: true
       - uses: dorny/paths-filter@v3
         id: changes
-        continue-on-error: true
         with:
-          initial-fetch-depth: 0
           filters: |
             client:
               - 'client/**'
@@ -21,27 +19,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: No app changes, skip build
-        if: ${{ steps.changes.outputs.client != 'true' && steps.changes.outputs.server != 'true' }}
-        run: echo "No client/server changes; skipping build"
-      - name: Install deps (scoped)
+      - name: Install, Lint, Typecheck, and Build
         if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
-        continue-on-error: true
         run: |
-          if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
-            cd client && npm ci; \
-          else \
-            npm ci; \
-          fi
-      - name: Lint/Typecheck/Build (scoped)
-        if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
-        continue-on-error: true
-        run: |
-          if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
-            cd client && npm run lint && npm run typecheck && npm run build; \
-          else \
-            npm run lint && npm run typecheck && npm run build; \
-          fi
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
   policies:
     runs-on: ubuntu-latest
     steps:
@@ -52,7 +36,6 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: pol
         with:
-          initial-fetch-depth: 0
           filters: |
             pol:
               - 'policies/**'
@@ -63,4 +46,3 @@ jobs:
         if: steps.pol.outputs.pol == 'true'
       - run: opa fmt -w policies && opa test policies -v
         if: steps.pol.outputs.pol == 'true'
-        continue-on-error: true

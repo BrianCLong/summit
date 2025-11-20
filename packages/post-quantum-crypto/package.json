@@ -13,9 +13,9 @@
   "dependencies": {
     "@noble/hashes": "^1.3.3",
     "@stablelib/random": "^1.0.2",
-    "pqc-kyber": "^1.1.0",
-    "dilithium-crystals": "^3.1.3",
-    "sphincsplus": "^3.0.0"
+    "pqc-kyber": "^0.7.0",
+    "dilithium-crystals": "^1.0.6",
+    "sphincs": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
