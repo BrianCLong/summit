@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opa
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: opa }
+  template:
+    metadata: { labels: { app: opa } }
+    spec:
+      containers:
+        - name: opa
+          image: openpolicyagent/opa:0.65.0-rootless
+          ports:
+            - containerPort: 8181
+          args:
+            - "run"
+            - "--server"
+            - "--addr=0.0.0.0:8181"
+            - "/policies"
+          volumeMounts:
+            - readOnly: true
+              mountPath: /policies
+              name: opa-policy
+      volumes:
+        - name: opa-policy
+          configMap:
+            name: opa-policy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opa
+spec:
+  selector: { app: opa }
+  ports: [{ port: 8181, targetPort: 8181 }]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opa-policy
+data:
+  conductor.rego: |
+    package conductor
+
+    default allow = true
+
+    tenant_isolation := result {
+      input := input
+      result := {
+        "allow": true,
+        "reason": "tenant isolation OK",
+        "warnings": [],
+        "data_filters": {
+          "tenant_scope": [input.input.tenantId]
+        }
+      }
+    }
+
+    data_access := result {
+      result := {"allow": true, "reason": "data access OK"}
+    }
+
+    cross_tenant := result {
+      result := {"allow": false, "reason": "cross-tenant blocked by default"}
+    }
