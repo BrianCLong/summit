@@ -1,0 +1,36 @@
+{
+  "name": "@summit/workflow-monitoring",
+  "version": "0.1.0",
+  "description": "Monitoring and observability for workflow orchestration",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "dev": "tsc -p tsconfig.json --watch",
+    "prepublishOnly": "npm run clean && npm run build && npm test"
+  },
+  "dependencies": {
+    "@summit/dag-engine": "workspace:*",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

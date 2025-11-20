@@ -8,6 +8,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "types": [],
     "removeComments": true,
     "allowImportingTsExtensions": false
   },

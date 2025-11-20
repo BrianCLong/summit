@@ -1,0 +1,40 @@
+{
+  "name": "@summit/dag-engine",
+  "version": "0.1.0",
+  "description": "DAG-based workflow engine with dependency management and execution",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "dev": "tsc -p tsconfig.json --watch",
+    "prepublishOnly": "npm run clean && npm run build && npm test"
+  },
+  "dependencies": {
+    "graphlib": "^2.1.8",
+    "uuid": "^11.0.3",
+    "eventemitter3": "^5.0.1",
+    "p-queue": "^8.0.1",
+    "p-limit": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

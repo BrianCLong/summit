@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": []
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../../packages/dag-engine" },
+    { "path": "../../packages/task-scheduling" },
+    { "path": "../../packages/workflow-operators" },
+    { "path": "../../packages/workflow-orchestration" },
+    { "path": "../../packages/workflow-monitoring" }
+  ]
+}

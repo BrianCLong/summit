@@ -1,0 +1,41 @@
+{
+  "name": "@summit/task-scheduling",
+  "version": "0.1.0",
+  "description": "Task scheduling with cron, triggers, and sensors",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "dev": "tsc -p tsconfig.json --watch",
+    "prepublishOnly": "npm run clean && npm run build && npm test"
+  },
+  "dependencies": {
+    "@summit/dag-engine": "workspace:*",
+    "cron-parser": "^4.9.0",
+    "node-cron": "^3.0.3",
+    "eventemitter3": "^5.0.1",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/node-cron": "^3.0.11",
+    "@types/uuid": "^10.0.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

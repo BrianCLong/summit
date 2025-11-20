@@ -1,0 +1,39 @@
+{
+  "name": "@summit/orchestration-service",
+  "version": "0.1.0",
+  "description": "Orchestration service with REST API for workflow management",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@summit/dag-engine": "workspace:*",
+    "@summit/task-scheduling": "workspace:*",
+    "@summit/workflow-operators": "workspace:*",
+    "@summit/workflow-orchestration": "workspace:*",
+    "@summit/workflow-monitoring": "workspace:*",
+    "express": "^5.0.3",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.3",
+    "compression": "^1.7.5",
+    "helmet": "^8.0.1",
+    "morgan": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.6",
+    "@types/morgan": "^1.10.0",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.3"
+  }
+}
