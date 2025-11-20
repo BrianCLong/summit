@@ -1,0 +1,167 @@
+{
+  "holdId": "hold-123",
+  "issuedAt": "2025-09-27T06:23:39Z",
+  "window": {
+    "start": "2025-09-27T05:23:39.286979858Z",
+    "end": "2025-09-27T07:23:39.286980147Z"
+  },
+  "scope": {
+    "elasticsearch": ["logs/doc-1"],
+    "kafka": ["audit:1"],
+    "lifecycle": ["session-9"],
+    "postgres": ["events/42"],
+    "s3": ["key-a", "key-b"]
+  },
+  "scopeDiff": {
+    "added": {
+      "elasticsearch": ["logs/doc-1"],
+      "kafka": ["audit:1"],
+      "lifecycle": ["session-9"],
+      "postgres": ["events/42"],
+      "s3": ["key-a", "key-b"]
+    },
+    "removed": {},
+    "unchanged": {}
+  },
+  "custodyChain": [
+    {
+      "sequence": 1,
+      "timestamp": "2025-09-27T06:23:39.287581681Z",
+      "holdId": "hold-123",
+      "system": "s3",
+      "action": "apply",
+      "scopeFingerprint": "hold-123|s3|[key-a:true:true:false,key-b:true:true:false]",
+      "prevHash": "",
+      "hash": "5aba7f9107f7f6e00f998f0b1c803c47873397cf0155adbbcbfcf3aa40613937"
+    },
+    {
+      "sequence": 2,
+      "timestamp": "2025-09-27T06:23:39.287721651Z",
+      "holdId": "hold-123",
+      "system": "postgres",
+      "action": "apply",
+      "scopeFingerprint": "hold-123|postgres|[events/42:true:false]",
+      "prevHash": "5aba7f9107f7f6e00f998f0b1c803c47873397cf0155adbbcbfcf3aa40613937",
+      "hash": "b231adb7e3f8c3e48b03be7f11a4230f29a1b06108af63b97352727528afb332"
+    },
+    {
+      "sequence": 3,
+      "timestamp": "2025-09-27T06:23:39.287889669Z",
+      "holdId": "hold-123",
+      "system": "kafka",
+      "action": "apply",
+      "scopeFingerprint": "hold-123|kafka|[audit:1:true:false:true]",
+      "prevHash": "b231adb7e3f8c3e48b03be7f11a4230f29a1b06108af63b97352727528afb332",
+      "hash": "ac0500ef28d6cac5ed5aa54893534b96803d320a7a4d31c1792f14714563226a"
+    },
+    {
+      "sequence": 4,
+      "timestamp": "2025-09-27T06:23:39.288000771Z",
+      "holdId": "hold-123",
+      "system": "elasticsearch",
+      "action": "apply",
+      "scopeFingerprint": "hold-123|elasticsearch|[logs/doc-1:true:false:true]",
+      "prevHash": "ac0500ef28d6cac5ed5aa54893534b96803d320a7a4d31c1792f14714563226a",
+      "hash": "041492e6ae1014b994c7c79132b00116ffa6c303c2f35c4c27412c21ccee1d2d"
+    },
+    {
+      "sequence": 5,
+      "timestamp": "2025-09-27T06:23:39.288062791Z",
+      "holdId": "hold-123",
+      "system": "lifecycle",
+      "action": "apply",
+      "scopeFingerprint": "hold-123|lifecycle|[session-9:true:false]",
+      "prevHash": "041492e6ae1014b994c7c79132b00116ffa6c303c2f35c4c27412c21ccee1d2d",
+      "hash": "aecec7f4a84ce363593ec0c540986edae69bbe9fc4c22ed447c0d2e3c9a4c6a5"
+    },
+    {
+      "sequence": 6,
+      "timestamp": "2025-09-27T06:23:39.288335339Z",
+      "holdId": "hold-123",
+      "system": "s3",
+      "action": "verify",
+      "scopeFingerprint": "hold-123|s3|[key-a:true:true:false,key-b:true:true:false]",
+      "prevHash": "aecec7f4a84ce363593ec0c540986edae69bbe9fc4c22ed447c0d2e3c9a4c6a5",
+      "hash": "2d54c0ea7a86318100276bd6a24a7394ce34fa67519e92755e5b874dc0d90e77"
+    },
+    {
+      "sequence": 7,
+      "timestamp": "2025-09-27T06:23:39.288350921Z",
+      "holdId": "hold-123",
+      "system": "postgres",
+      "action": "verify",
+      "scopeFingerprint": "hold-123|postgres|[events/42:true:false]",
+      "prevHash": "2d54c0ea7a86318100276bd6a24a7394ce34fa67519e92755e5b874dc0d90e77",
+      "hash": "e842607f92831c8f8ad126b0f31293bfe60512b0c8f28beb64ed9fabce76b9e9"
+    },
+    {
+      "sequence": 8,
+      "timestamp": "2025-09-27T06:23:39.28835697Z",
+      "holdId": "hold-123",
+      "system": "kafka",
+      "action": "verify",
+      "scopeFingerprint": "hold-123|kafka|[audit:1:true:false:true]",
+      "prevHash": "e842607f92831c8f8ad126b0f31293bfe60512b0c8f28beb64ed9fabce76b9e9",
+      "hash": "5a9a177bf53161ed0bc0b105b0870e0372c5d0e020441716fd6abf2b5bcb0d62"
+    },
+    {
+      "sequence": 9,
+      "timestamp": "2025-09-27T06:23:39.288362105Z",
+      "holdId": "hold-123",
+      "system": "elasticsearch",
+      "action": "verify",
+      "scopeFingerprint": "hold-123|elasticsearch|[logs/doc-1:true:false:true]",
+      "prevHash": "5a9a177bf53161ed0bc0b105b0870e0372c5d0e020441716fd6abf2b5bcb0d62",
+      "hash": "929d81fe769c639945df72ef9731e817dc99959a62d238237f5dab6722dad3fe"
+    },
+    {
+      "sequence": 10,
+      "timestamp": "2025-09-27T06:23:39.288515526Z",
+      "holdId": "hold-123",
+      "system": "lifecycle",
+      "action": "verify",
+      "scopeFingerprint": "hold-123|lifecycle|[session-9:true:false]",
+      "prevHash": "929d81fe769c639945df72ef9731e817dc99959a62d238237f5dab6722dad3fe",
+      "hash": "9633c95679c7880eebc81677fdec5ef8f50693a04598eed9fc66cfb24bd289e8"
+    }
+  ],
+  "reports": [
+    {
+      "system": "s3",
+      "frozenResources": ["key-a", "key-b"],
+      "snapshotted": ["key-a", "key-b"],
+      "tagged": {
+        "key-a": {"lho": "active"},
+        "key-b": {"lho": "active"}
+      }
+    },
+    {
+      "system": "postgres",
+      "frozenResources": ["events/42"],
+      "snapshotted": [],
+      "tagged": {}
+    },
+    {
+      "system": "kafka",
+      "frozenResources": ["audit:1"],
+      "snapshotted": [],
+      "tagged": {}
+    },
+    {
+      "system": "elasticsearch",
+      "frozenResources": ["logs/doc-1"],
+      "snapshotted": ["logs/doc-1"],
+      "tagged": {
+        "logs/doc-1": {"lho": "active"}
+      }
+    },
+    {
+      "system": "lifecycle",
+      "frozenResources": ["session-9"],
+      "snapshotted": [],
+      "tagged": {
+        "session-9": {"lho": "active"}
+      }
+    }
+  ]
+}
