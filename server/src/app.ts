@@ -11,6 +11,7 @@ import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
+import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
@@ -61,6 +62,7 @@ export const createApp = async () => {
   // Other routes (exempt from rate limiting)
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
+  app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
