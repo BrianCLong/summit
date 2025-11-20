@@ -1,0 +1,33 @@
+{
+  "name": "@summit/reporting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -w -p tsconfig.json"
+  },
+  "dependencies": {
+    "@summit/templates": "workspace:*",
+    "@summit/nlg": "workspace:*",
+    "@summit/classification": "workspace:*",
+    "zod": "^4.1.12",
+    "uuid": "^13.0.0",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^11.0.0",
+    "@types/node": "^24.10.1",
+    "@types/jest": "^30.0.0",
+    "typescript": "^5.9.3"
+  }
+}

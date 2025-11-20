@@ -1,0 +1,36 @@
+{
+  "name": "report-generator-service",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@summit/reporting": "workspace:*",
+    "@summit/templates": "workspace:*",
+    "@summit/nlg": "workspace:*",
+    "@summit/briefing-generation": "workspace:*",
+    "@summit/classification": "workspace:*",
+    "@summit/dissemination": "workspace:*",
+    "express": "^5.1.0",
+    "zod": "^4.1.12",
+    "uuid": "^13.0.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "docx": "^9.5.1",
+    "pdfkit": "^0.15.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.10.1",
+    "@types/cors": "^2.8.17",
+    "@types/uuid": "^11.0.0",
+    "@types/body-parser": "^1.19.5",
+    "tsx": "^4.19.2"
+  }
+}
