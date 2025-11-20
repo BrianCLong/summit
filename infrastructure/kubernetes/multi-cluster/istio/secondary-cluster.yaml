@@ -1,0 +1,134 @@
+# Istio Configuration for Secondary Clusters (AKS/GKE)
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: secondary-cluster
+spec:
+  profile: default
+
+  values:
+    global:
+      meshID: summit-mesh
+      multiCluster:
+        # Set clusterName appropriately (aks-primary or gke-primary)
+        clusterName: secondary-cluster
+      # Set network appropriately (network2 for AKS, network3 for GKE)
+      network: network2
+
+      mtls:
+        enabled: true
+        auto: true
+
+      tracer:
+        zipkin:
+          address: zipkin.istio-system:9411
+
+      proxy:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+        accessLogFile: /dev/stdout
+        accessLogEncoding: JSON
+        concurrency: 2
+        enablePrometheusMerge: true
+
+  components:
+    base:
+      enabled: true
+
+    pilot:
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2048Mi
+          limits:
+            cpu: 2000m
+            memory: 4096Mi
+        hpaSpec:
+          minReplicas: 2
+          maxReplicas: 5
+
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      k8s:
+        service:
+          type: LoadBalancer
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+        hpaSpec:
+          minReplicas: 2
+          maxReplicas: 5
+
+    - name: istio-eastwestgateway
+      enabled: true
+      label:
+        istio: eastwestgateway
+        app: istio-eastwestgateway
+        topology.istio.io/network: network2
+      k8s:
+        service:
+          type: LoadBalancer
+          ports:
+          - port: 15021
+            name: status-port
+          - port: 15443
+            name: tls
+          - port: 15012
+            name: tcp-istiod
+          - port: 15017
+            name: tcp-webhook
+        env:
+        - name: ISTIO_META_ROUTER_MODE
+          value: "sni-dnat"
+        - name: ISTIO_META_REQUESTED_NETWORK_VIEW
+          value: network2
+
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+
+    cni:
+      enabled: false
+
+  meshConfig:
+    enablePrometheusMerge: true
+    accessLogFile: /dev/stdout
+    accessLogEncoding: JSON
+
+    defaultConfig:
+      tracing:
+        sampling: 1.0
+        zipkin:
+          address: zipkin.istio-system:9411
+
+    enableAutoMtls: true
+
+    defaultServiceExportTo:
+    - "*"
+
+    outboundTrafficPolicy:
+      mode: ALLOW_ANY
+
+    rootNamespace: istio-system
+    trustDomain: cluster.local
