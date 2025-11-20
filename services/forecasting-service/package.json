@@ -27,10 +27,11 @@
     "compression": "^1.7.5"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/cors": "^2.8.17",
     "@types/compression": "^1.7.5",
-    "typescript": "^5.9.3",
-    "tsx": "^4.19.2"
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
   }
 }

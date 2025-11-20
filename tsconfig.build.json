@@ -18,7 +18,9 @@
     { "path": "./apps/webapp" },
 
     // Packages workspace
+    { "path": "./packages/anomaly-detection" },
     { "path": "./packages/common-types" },
+    { "path": "./packages/forecasting" },
     { "path": "./packages/govbrief" },
     { "path": "./packages/graph-ai-core" },
     { "path": "./packages/ingest-wizard" },
@@ -28,6 +30,9 @@
     { "path": "./packages/prov-ledger-sdk" },
     { "path": "./packages/rptc" },
     { "path": "./packages/sdk-ts" },
+    { "path": "./packages/seasonal-decomposition" },
+    { "path": "./packages/time-series" },
+    { "path": "./packages/ts-feature-engineering" },
     { "path": "./packages/types" },
 
     // Services workspace
@@ -38,11 +43,13 @@
     { "path": "./services/docling-svc" },
     { "path": "./services/exporter" },
     { "path": "./services/feed-processor" },
+    { "path": "./services/forecasting-service" },
     { "path": "./services/graph-core" },
     { "path": "./services/license-registry" },
     { "path": "./services/privacy" },
     { "path": "./services/prov-ledger" },
     { "path": "./services/spar" },
+    { "path": "./services/time-series-service" },
     { "path": "./services/trr" }
   ]
 }
