@@ -10,8 +10,6 @@
 
 ## 1) Sprint Goal
 
-<<<<<<< HEAD
-
 1. Lift **new-user activation rate by +8%** via onboarding improvements and timely nudges.
 2. Ship **search engagement telemetry** to validate latency/relevance changes.
 3. Deliver **one scalable lifecycle channel** (email) with experimentable templates.

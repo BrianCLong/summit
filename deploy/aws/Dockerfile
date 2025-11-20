@@ -21,8 +21,6 @@ WORKDIR /app
 
 RUN rm -rf /app/node_modules
 RUN rm -rf /app/dist
-<<<<<<< Updated upstream
-=======
 RUN cd server && pnpm install
 RUN cd server && pnpm add -D @types/node
 RUN cd conductor-ui && pnpm install
@@ -30,7 +28,6 @@ RUN cd conductor-ui && pnpm install
 # Build applications
 RUN cd server && npm run build
 RUN cd conductor-ui && npm run build
->>>>>>> Stashed changes
 
 # Production stage
 FROM node:20-alpine AS production
