@@ -6,45 +6,87 @@ const sidebars = {
       type: 'category',
       label: 'Get Started',
       items: [
-        'README', // docs/README.md
-        'DEVELOPER_ONBOARDING',
+        'README', // Summit IntelGraph Overview
+        'get-started/quickstart-5-min', // 5-Minute Quickstart
+        'DEVELOPER_ONBOARDING', // 30-Minute Developer Onboarding
       ],
     },
     {
       type: 'category',
       label: 'Tutorials',
-      items: ['tutorials/first-ingest', 'tutorials/first-query'],
+      items: [
+        'tutorials/first-ingest',
+        'tutorials/first-query',
+      ],
     },
     {
       type: 'category',
-      label: 'How-tos',
+      label: 'Core Concepts',
+      collapsed: false,
       items: [
-        'runbooks/prod-readiness-runbook',
-        'maestro/CANARY_ROLLBACK_RUNBOOK',
+        {
+          type: 'category',
+          label: 'Platform Architecture',
+          items: [
+            'ARCHITECTURE', // High-level architecture
+            'maestro/ARCHITECTURE', // Maestro-specific architecture
+            'architecture/semantic-search-system',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Key Features',
+          items: [
+            'concepts/provenance', // Provenance & Policy Enforcement
+            'concepts/copilot', // AI Copilot (NL to Cypher)
+            'prov-ledger', // Provenance Ledger (existing)
+          ],
+        },
       ],
     },
     {
       type: 'category',
       label: 'Reference',
       items: [
-        'ARCHITECTURE',
-        'DATA_MODEL',
-        'ENV_VARS',
         {
-          type: 'link',
-          label: 'Maestro API',
-          href: '/intelgraph/api/maestro/1.0.0',
+          type: 'category',
+          label: 'CLI Tools',
+          items: [
+            'reference/maestro-cli', // Maestro CLI Reference
+          ],
         },
-        { type: 'link', label: 'Core API', href: '/intelgraph/api/core/1.0.0' },
+        {
+          type: 'category',
+          label: 'API Documentation',
+          items: [
+            {
+              type: 'link',
+              label: 'Maestro Orchestration API',
+              href: '/intelgraph/api/maestro/1.0.0',
+            },
+            {
+              type: 'link',
+              label: 'IntelGraph Core API',
+              href: '/intelgraph/api/core/1.0.0',
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Configuration',
+          items: [
+            'DATA_MODEL',
+            'ENV_VARS',
+          ],
+        },
       ],
     },
     {
       type: 'category',
-      label: 'Concepts',
+      label: 'How-To Guides',
       items: [
-        'maestro/ARCHITECTURE',
-        'architecture/semantic-search-system',
-        'prov-ledger',
+        'runbooks/prod-readiness-runbook',
+        'maestro/CANARY_ROLLBACK_RUNBOOK',
       ],
     },
     {
@@ -68,7 +110,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'ADRs',
+      label: 'Architecture Decisions',
       items: [
         'ADR/ADR-001-two-product-strategy',
         'ADR/ADR-002-contract-only-integration',

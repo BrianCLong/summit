@@ -1,0 +1,112 @@
+name: Documentation Validation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'docs-site/**'
+      - 'scripts/docs/**'
+      - '.github/workflows/docs-validation.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'docs-site/**'
+
+jobs:
+  validate-docs:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install glob
+
+      - name: Check for broken links
+        run: |
+          node scripts/docs/check-links.js
+
+      - name: Validate code snippets
+        run: |
+          node scripts/docs/validate-snippets.js
+
+      - name: Build documentation site
+        working-directory: docs-site
+        run: |
+          npm install
+          npm run build
+
+      - name: Report success
+        if: success()
+        run: |
+          echo "✅ All documentation validation checks passed!"
+          echo "   - Links validated"
+          echo "   - Code snippets validated"
+          echo "   - Documentation site built successfully"
+
+  lint-markdown:
+    name: Lint Markdown Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint markdown files
+        run: |
+          markdownlint 'docs/**/*.md' --config .markdownlint.json || true
+        continue-on-error: true
+
+  check-stale-docs:
+    name: Check for Stale Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history
+
+      - name: Find stale documentation
+        run: |
+          echo "Checking for documentation files not updated in 6+ months..."
+
+          SIX_MONTHS_AGO=$(date -d '6 months ago' +%s)
+          STALE_DOCS=()
+
+          while IFS= read -r file; do
+            LAST_MODIFIED=$(git log -1 --format=%ct "$file")
+            if [ "$LAST_MODIFIED" -lt "$SIX_MONTHS_AGO" ]; then
+              DAYS_OLD=$(( ($(date +%s) - LAST_MODIFIED) / 86400 ))
+              STALE_DOCS+=("$file (${DAYS_OLD} days old)")
+            fi
+          done < <(find docs -name '*.md' -type f)
+
+          if [ ${#STALE_DOCS[@]} -gt 0 ]; then
+            echo "⚠️ Found ${#STALE_DOCS[@]} potentially stale documentation files:"
+            printf '%s\n' "${STALE_DOCS[@]}"
+            echo ""
+            echo "Consider reviewing these files for accuracy."
+          else
+            echo "✅ No stale documentation found!"
+          fi
+        continue-on-error: true

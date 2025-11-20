@@ -3,8 +3,8 @@ const darkCodeTheme = require('./src/main/docusaurus-theme-live-code/lib/theme/p
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Maestro & IntelGraph API Docs',
-  tagline: 'Orchestrate Intelligence, Securely.',
+  title: 'Summit IntelGraph Documentation',
+  tagline: 'The view from above the clouds — Sum it. See it. Decide.',
   url: 'https://intelgraph.github.io',
   baseUrl: '/intelgraph/',
   onBrokenLinks: 'throw',
@@ -39,13 +39,13 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'Maestro & IntelGraph',
-        logo: { alt: 'Maestro & IntelGraph Logo', src: 'img/logo.svg' },
+        title: 'Summit IntelGraph',
+        logo: { alt: 'Summit IntelGraph Logo', src: 'img/logo.svg' },
         items: [
-          { type: 'doc', docId: 'intro', position: 'left', label: 'Docs' },
+          { type: 'doc', docId: 'README', position: 'left', label: 'Docs' },
           { to: '/blog', label: 'Blog', position: 'left' },
           {
-            href: 'https://github.com/intelgraph/intelgraph',
+            href: 'https://github.com/BrianCLong/summit',
             label: 'GitHub',
             position: 'right',
           },
@@ -53,8 +53,30 @@ const config = {
       },
       footer: {
         style: 'dark',
-        links: [],
-        copyright: `Copyright © ${new Date().getFullYear()} IntelGraph. Built with Docusaurus.`,
+        links: [
+          {
+            title: 'Docs',
+            items: [
+              { label: 'Get Started', to: '/README' },
+              { label: 'Architecture', to: '/ARCHITECTURE' },
+              { label: 'Maestro CLI', to: '/reference/maestro-cli' },
+            ],
+          },
+          {
+            title: 'Features',
+            items: [
+              { label: 'Provenance & Policy', to: '/concepts/provenance' },
+              { label: 'AI Copilot', to: '/concepts/copilot' },
+            ],
+          },
+          {
+            title: 'More',
+            items: [
+              { label: 'GitHub', href: 'https://github.com/BrianCLong/summit' },
+            ],
+          },
+        ],
+        copyright: `Copyright © ${new Date().getFullYear()} Summit IntelGraph. Built with Docusaurus.`,
       },
       prism: { theme: lightCodeTheme, darkTheme: darkCodeTheme },
       algolia: {

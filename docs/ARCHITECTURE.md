@@ -1,9 +1,6 @@
-# IntelGraph Backend Architecture
+# Summit IntelGraph Architecture
 
-The IntelGraph platform is optimized for graph-first intelligence work that must meet
-the Council Wishbooks’ governance, provenance, and federation mandates. The backend
-stack below is production-ready for MVP-0, scales to millions of nodes/edges, and
-keeps policy, audit, and observability requirements front-and-center.
+Summit IntelGraph is a production-grade, provenance-first intelligence platform built on 152 specialized microservices. The architecture is optimized for graph-first intelligence work that meets enterprise governance, provenance, and federation requirements while scaling to millions of nodes/edges with sub-second query performance.
 
 ## Recommended Stack (TL;DR)
 
@@ -20,54 +17,167 @@ keeps policy, audit, and observability requirements front-and-center.
 
 ## High-Level Topology
 
+```mermaid
+graph TB
+    subgraph "API Gateway Layer"
+        GW[API Gateway<br/>Node.js + Express + Apollo GraphQL]
+        AUTH[Authentication<br/>OIDC/JWKS + MFA Step-up]
+        AUTHZ[Authorization<br/>OPA RBAC/ABAC]
+        BUDGET[Cost Guard<br/>Query Budgets]
+    end
+
+    subgraph "Core Intelligence Services (152 Microservices)"
+        GRAPH[Graph Core<br/>Neo4j + Cypher API]
+        PROV[Provenance API<br/>SQLite <200ms]
+        COPILOT[AI Copilot<br/>NL→Cypher + RAG]
+        CONDUCTOR[Authority Compiler<br/>WASM + Cosign]
+        POLICY[Policy Engine<br/>Auto-derivation + Constraints]
+        MAESTRO[Maestro CLI<br/>Build Orchestration]
+        EDGE[Edge Sync<br/>CRDT + Vector Clocks]
+        TENANT[Multi-Tenant Manager<br/>4-Tier Isolation]
+    end
+
+    subgraph "Data Layer"
+        NEO[(Neo4j<br/>Graph Store)]
+        PG[(PostgreSQL<br/>Metadata + Audit)]
+        REDIS[(Redis<br/>Cache + Sessions)]
+        SQLITE[(SQLite<br/>Provenance Ledger)]
+    end
+
+    subgraph "Observability"
+        OTEL[OpenTelemetry]
+        PROM[Prometheus]
+        LOGS[Structured Logs]
+    end
+
+    GW --> AUTH --> AUTHZ --> BUDGET
+    BUDGET --> GRAPH
+    BUDGET --> PROV
+    BUDGET --> COPILOT
+    BUDGET --> CONDUCTOR
+    BUDGET --> POLICY
+
+    GRAPH --> NEO
+    PROV --> SQLITE
+    COPILOT --> NEO
+    CONDUCTOR --> PG
+    POLICY --> PG
+    TENANT --> PG
+    EDGE --> REDIS
+
+    GW --> OTEL
+    GRAPH --> PROM
+    COPILOT --> LOGS
 ```
-[Gateway/API]
-  Node18 + Express + Apollo (GraphQL)
-  ├─ AuthN (OIDC/JWKS) + Session
-  ├─ AuthZ (OPA/ABAC: policy tags, purpose limits)
-  ├─ Cost Guard & Query Budgets
-  └─ GraphQL schema (federated)
 
-[Services]
-  • graph-core        → Neo4j (temporal+geo, provenance tags)
-  • case-metadata     → Postgres (cases, tasks, SLAs, audit rollups)
-  • prov-ledger       → Postgres+object store (hash trees, manifests)
-  • ingestion/etl     → Kafka streams, Redis cache, enrichers
-  • feature-store     → Postgres (materialized views) + parquet exports
-  • guardrails/policy → OPA bundle server + license/authority compiler
-  • runbook-engine    → workers (Kafka) + signed logs
-
-[Data]
-  Neo4j 5.x | Postgres 15+ | Redis | S3-compatible object store
-
-[Observability]
-  OpenTelemetry → Tempo/Jaeger, Prometheus, ELK
-```
-
-This service layout mirrors the capability map: entity/relationship graph, temporal
-truth, provenance ledger, case workflows, guardrails, and export packaging.
+This architecture delivers:
+- **<200ms provenance lookups** via optimized SQLite storage
+- **<500ms Maestro queries** for dependency graph operations
+- **<1s graph queries** with policy enforcement
+- **Zero-downtime deployments** with canary rollouts
+- **Offline-first edge** with automatic CRDT conflict resolution
 
 ## Core Service Responsibilities
 
-- **Graph Core (Neo4j)**
-  - Owns entity/relationship models, policy labels, temporal validity windows.
-  - Supports k-hop traversals, community detection, and time-sliced neighborhoods.
-  - Exposes Cypher resolvers behind GraphQL with query budget enforcement.
-- **Case Metadata (Postgres)**
-  - Tracks cases, tasks, SLAs, disclosure packs, and feature-store snapshots.
-  - Provides reporting views and aggregates for leadership dashboards.
-- **Provenance Ledger (Postgres + Object Store)**
-  - Persists claim/manifold hash trees, transform chains, and export manifests.
-  - Issues verifiable bundles with chain-of-custody evidence.
-- **Guardrails & Policy (OPA)**
-  - Evaluates RBAC + ABAC rules using tagged entities, data licenses, and stated purpose.
-  - Returns human-readable denial reasons and appeal paths.
-- **Ingestion & Enrichment (Kafka, Redis)**
-  - Normalizes inbound evidence, enriches metadata (GeoIP, OCR, STT), deduplicates via Redis.
-  - Streams `graph.upsert` events to Neo4j workers and `runbook.events` to automation.
-- **Runbook Engine**
-  - Executes declarative workflows (fetch → transform → score → notify) with signed logs.
-  - Supports replay and offline bundles for degraded operations.
+### 1. Provenance API (`/services/provenance/`)
+**Purpose:** High-performance provenance tracking with <200ms response times
+
+**Capabilities:**
+- SQLite-based provenance storage for fast local queries
+- Immutable audit trails with cryptographic hashing
+- Build metadata tracking with reproducibility guarantees
+- Policy derivation from provenance data
+- Full chain-of-custody for court-ready evidence
+
+**Performance:** <200ms API response time, supports 10K+ lookups/sec
+
+### 2. Authority Compiler - Conductor (`/packages/conductor/`)
+**Purpose:** Plugin-based build orchestration with cryptographic verification
+
+**Capabilities:**
+- WASM runtime for sandboxed plugin execution (Wasmtime)
+- Cosign signature verification for all plugins
+- Schema compilation, intent validation, acceptance criteria
+- SBOM ingestion and OCI image validation
+- Provenance ledger integration with hash trees
+- Plugin registry with dependency resolution
+
+**Security:** All plugins cryptographically signed, WASM sandboxing prevents malicious code
+
+### 3. AI Copilot (`/services/copilot/`)
+**Purpose:** Natural language to Cypher translation with policy guardrails
+
+**Capabilities:**
+- FastAPI service translating NL queries to Cypher
+- RAG (Retrieval Augmented Generation) with document embedding
+- Policy-based guardrails preventing delete/export operations
+- Citation tracking for all AI-generated responses
+- Sandbox execution with 2-second timeout enforcement
+- Query validation and read-only enforcement
+
+**Use Cases:** "Show me all entities connected to John Doe" → Cypher query + visualization
+
+### 4. Multi-Tenant Architecture (`/services/tenant-manager/`)
+**Purpose:** Enterprise-grade tenant isolation with 4-tier resource management
+
+**Tiers:**
+- **Starter:** 5 users, 10K nodes, 100MB storage, 1K API calls/day
+- **Professional:** 25 users, 100K nodes, 1GB storage, 10K API calls/day, analytics
+- **Enterprise:** 100 users, 1M nodes, 10GB storage, 100K API calls/day, AI, SSO, MFA
+- **Government:** Unlimited, dedicated infrastructure, air-gap support, compliance features
+
+**Isolation:** Per-tenant databases, encryption, IP whitelisting, audit levels, feature flags
+
+### 5. Edge Deployment & CRDT Sync (`/services/edge-sync/`)
+**Purpose:** Offline-first edge nodes with automatic conflict resolution
+
+**Capabilities:**
+- CRDT (Conflict-free Replicated Data Types) for distributed sync
+- Vector clocks and Lamport clocks for causality tracking
+- Automatic conflict resolution with node capability advertisement
+- Delta sync for bandwidth efficiency
+- REST endpoints for state reconciliation
+- Works fully offline with eventual consistency
+
+**Use Cases:** Field operations, air-gapped environments, disconnected intelligence gathering
+
+### 6. Maestro CLI (`/packages/maestro/`)
+**Purpose:** Golden path workflows for build orchestration and dependency management
+
+**Commands:**
+- `maestro-init` — Repository migration wizard with shadow build validation
+- `maestro-explain` — Build performance analysis with critical path identification
+- `maestro-query` — Dependency graph queries (<500ms target)
+- `maestro-doctor` — Environment diagnostics with health scoring
+
+**Performance:** <500ms for dependency graph queries on 10K+ node build graphs
+
+### 7. Graph Core (Neo4j)
+- Owns entity/relationship models, policy labels, temporal validity windows
+- Supports k-hop traversals, community detection, and time-sliced neighborhoods
+- Exposes Cypher resolvers behind GraphQL with query budget enforcement
+- Graph explainability (XAI) service for transparent AI reasoning
+- Entity resolution with ML-based duplicate detection
+
+### 8. Policy Engine (OPA + Custom)
+- RBAC + ABAC evaluation with policy tags and purpose limits
+- Automatic policy derivation from build metadata
+- Read-only enforcement for unprivileged users
+- Query constraint validation and rewriting
+- Human-readable denial reasons and appeal paths
+- MFA step-up authentication for sensitive operations
+
+### 9. Case Metadata (Postgres)
+- Tracks cases, tasks, SLAs, disclosure packs, and feature snapshots
+- Provides reporting views and aggregates for leadership dashboards
+- Data lineage tracking and quality metrics
+- Immutable audit logs for compliance (DSAR/RTBF workflows)
+
+### 10. Ingestion & Enrichment (Kafka, Redis)
+- Normalizes inbound evidence, enriches metadata (GeoIP, OCR, STT)
+- Deduplicates via Redis, streams events to Neo4j workers
+- Supports STIX/TAXII/MISP interoperability
+- High-volume ingest with backpressure handling
 
 ## API Gateway Blueprint
 

@@ -1,0 +1,203 @@
+SUMMIT PLATFORM - KEY IMPLEMENTATION FILES
+
+================================================================================
+1. PROVENANCE & POLICY ENFORCEMENT
+================================================================================
+
+Provenance Tracking:
+  /home/user/summit/services/provenance/query_api.py - <200ms query API
+  /home/user/summit/services/provenance/dag_builder.py - DAG construction
+  /home/user/summit/services/provenance/jws.ts - JWT verification
+
+Policy Enforcement:
+  /home/user/summit/services/authz-gateway/src/index.ts - Auth gateway
+  /home/user/summit/services/authz-gateway/src/policy.ts - Policy router
+  /home/user/summit/services/authz-gateway/src/attribute-service.ts - ABAC
+  /home/user/summit/services/authz-gateway/src/stepup.ts - MFA enforcement
+  /home/user/summit/services/policy-sidecar/server.js - Policy evaluation
+  /home/user/summit/services/conductor/src/build/policy.ts - Policy derivation
+
+================================================================================
+2. AUTHORITY COMPILER (CONDUCTOR)
+================================================================================
+
+Plugin Registry & Build System:
+  /home/user/summit/services/conductor/src/plugins/registry.ts - Plugin mgmt
+  /home/user/summit/services/conductor/src/build/index.ts - Build system
+  /home/user/summit/services/conductor/src/build/schema.ts - Schema defs
+  /home/user/summit/services/conductor/src/build/intent.ts - Intent compile
+  /home/user/summit/services/conductor/src/build/policy.ts - Policy engine
+  /home/user/summit/services/conductor/src/provenance/ledger.ts - Ledger
+
+WASM Runtime:
+  /home/user/summit/services/conductor/src/wasm/runner.ts - WASM execution
+  /home/user/summit/services/conductor/src/wasm/run_with_wasmtime.ts
+
+================================================================================
+3. COPILOT/AI FEATURES
+================================================================================
+
+AI Copilot Service:
+  /home/user/summit/services/ai-copilot/src/main.py - Main service (port 8002)
+    - NL→Cypher translation endpoint
+    - RAG endpoint with citations
+    - Policy guardrails
+    - Sandbox execution
+
+================================================================================
+4. MULTI-TENANT ARCHITECTURE
+================================================================================
+
+Tenant Management:
+  /home/user/summit/src/tenancy/core/TenantManager.ts - Core tenant logic
+  /home/user/summit/src/tenancy/middleware/TenantMiddleware.ts - Middleware
+  /home/user/summit/src/tenancy/database/TenantDatabaseManager.ts - DB mgmt
+  /home/user/summit/src/tenancy/billing/UsageTracker.ts - Metering
+  /home/user/summit/src/tenancy/MultiTenantScheduler.ts - Scheduling
+
+Features:
+  - 4 tier levels (starter, professional, enterprise, government)
+  - Resource limits per tenant (users, nodes, edges, storage, API calls)
+  - Feature flags (analytics, collaboration, AI, SSO, MFA, export)
+  - Security config (encryption, IP whitelist, password policy, audit levels)
+
+================================================================================
+5. EDGE DEPLOYMENT
+================================================================================
+
+Edge Conductor:
+  /home/user/summit/server/src/conductor/edge/crdt-sync.ts - CRDT sync
+  /home/user/summit/server/src/conductor/edge/sync-api.ts - Sync endpoints
+
+Features:
+  - Offline-first CRDT replication
+  - Vector clock & Lamport clock for causality
+  - Conflict resolution
+  - Node capability advertisement
+
+================================================================================
+6. GOLDEN PATH WORKFLOWS
+================================================================================
+
+Maestro CLI Tools:
+  /home/user/summit/src/cli/maestro-init.js - Migration wizard
+    - Repository analysis & discovery
+    - Shadow build validation
+    - Parity reporting
+    - Auto-fix suggestions
+
+  /home/user/summit/src/cli/maestro-explain.ts - Build analysis
+    - Critical path analysis
+    - Cache statistics
+    - Graph visualization (text/html/dot/json)
+    - Performance recommendations
+
+  /home/user/summit/src/cli/maestro-query.ts - Dependency querying
+    - deps, rdeps, path, impact, find, stats
+    - Sub-500ms query target
+    - Interactive mode
+
+  /home/user/summit/src/cli/maestro-doctor.ts - Environment diagnostics
+    - Environment checks
+    - Tool availability
+    - Configuration validation
+    - Health scoring
+
+Workflow Engine:
+  /home/user/summit/services/workflow/src/index.js - Core service
+  /home/user/summit/services/workflow/src/routes.js - Routes
+
+================================================================================
+7. GRAPH DATABASE & QUERY CAPABILITIES
+================================================================================
+
+Graph Core Service:
+  /home/user/summit/services/graph-core/src/index.ts - Main service
+  /home/user/summit/services/graph-core/src/routes/query.ts - Cypher queries
+  /home/user/summit/services/graph-core/src/routes/entities.ts - Entity CRUD
+  /home/user/summit/services/graph-core/src/routes/relationships.ts - Edges
+  /home/user/summit/services/graph-core/src/routes/er.ts - Entity resolution
+
+Graph Services:
+  /home/user/summit/services/graph/src/claims.ts - Claim management
+  /home/user/summit/services/graph-algos/app.py - Graph algorithms
+  /home/user/summit/services/graph-xai/app/main.py - Explainability
+  /home/user/summit/services/repograph/index.ts - Replication
+
+Additional:
+  /home/user/summit/services/graph-api/ - REST API
+  /home/user/summit/services/graph_svc/ - GraphQL wrapper
+  /home/user/summit/services/gateway/src/nl2cypher/ - NL→Cypher guards
+
+================================================================================
+8. CLI COMMANDS & APIs
+================================================================================
+
+REST Endpoints:
+  /auth/login - User authentication
+  /.well-known/jwks.json - JWT key discovery
+  /auth/introspect - Token validation
+  /subject/:id/attributes - User attributes
+  /resource/:id/attributes - Resource attributes
+  /authorize - Authorization decisions
+  /copilot/query - NL→Cypher
+  /copilot/rag - RAG with citations
+  /api/v1/entities - Entity CRUD
+  /api/v1/relationships - Relationship CRUD
+  /api/v1/er - Entity resolution
+  /api/v1/query - Cypher queries
+  /v0/eval - Policy evaluation
+  /v0/audit - Policy audit
+  /health - Health check
+  /metrics - Prometheus metrics
+
+CLI Tools:
+  /home/user/summit/cli/ig-federate/index.js - Federation
+  /home/user/summit/cli/ig-psi/index.js - Private Set Intersection
+  /home/user/summit/cli/ig-detect/index.js - Detection
+  /home/user/summit/cli/ig-brief/index.js - Briefing
+  /home/user/summit/cli/ig-dp/index.js - Differential Privacy
+
+================================================================================
+9. ADDITIONAL CAPABILITIES
+================================================================================
+
+Data Quality & Lineage:
+  /home/user/summit/services/data-spine/ - Lineage tracking
+  /home/user/summit/services/data-quality/ - Quality metrics
+  /home/user/summit/services/auditlake/ - Audit aggregation
+
+Compliance & Security:
+  /home/user/summit/services/audit-log/ - Immutable logs
+  /home/user/summit/services/privacy-labeler/ - PII detection
+  /home/user/summit/services/compliance/ - DSAR/RTBF
+
+Advanced Analytics:
+  /home/user/summit/services/analytics/ - Statistical analysis
+  /home/user/summit/services/insight-ai/ - ML insights
+  /home/user/summit/src/insights/InsightsDashboard.ts - Dashboard
+
+ML/AI Infrastructure:
+  /home/user/summit/services/agent-runtime/ - Agent execution
+  /home/user/summit/services/entity-resolution/ - ML-based ER
+  /home/user/summit/services/rlhf/ - RLHF training
+
+================================================================================
+PLATFORM STATISTICS
+================================================================================
+
+Services: 152 microservices
+Primary Languages: TypeScript/JavaScript, Python, Go
+Databases: Neo4j, PostgreSQL, Redis, SQLite
+Frameworks: Express.js, FastAPI, Kubernetes
+Build System: Maestro (custom distributed)
+Orchestration: Helm + Kubernetes
+
+Performance Targets:
+  - Provenance: <200ms
+  - Maestro: <500ms
+  - Policy: <10ms
+  - Graph: <1s
+  - Copilot: 2s timeout
+
+================================================================================
