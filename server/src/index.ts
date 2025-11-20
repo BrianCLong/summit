@@ -2,7 +2,7 @@ import http from 'http';
 import express from 'express';
 import { useServer } from 'graphql-ws/use/ws';
 import { WebSocketServer } from 'ws';
-import pino from 'pino';
+import { logger, initErrorTracking } from './logging/index.js';
 import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,9 +16,11 @@ import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const logger: pino.Logger = pino();
 
 const startServer = async () => {
+  // Initialize error tracking (Sentry)
+  initErrorTracking();
+
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;

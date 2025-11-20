@@ -6,9 +6,8 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import pino from 'pino';
-import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
+import { logger, loggingMiddleware, httpLogger } from './logging/index.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
@@ -31,7 +30,6 @@ export const createApp = async () => {
   const __dirname = path.dirname(__filename);
 
   const app = express();
-  const logger = pino();
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
@@ -50,7 +48,8 @@ export const createApp = async () => {
       credentials: true,
     }),
   );
-  app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }));
+  app.use(loggingMiddleware);
+  app.use(httpLogger);
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
 

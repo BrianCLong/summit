@@ -19,9 +19,9 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 // @ts-ignore - OpenTelemetry types not fully resolved
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
-import pino from 'pino';
+import { createLogger } from '../logging/logger';
 
-const logger: pino.Logger = pino({ name: 'opentelemetry' });
+const logger = createLogger('opentelemetry');
 
 interface TracingConfig {
   serviceName: string;
