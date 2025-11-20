@@ -6,5 +6,6 @@ packages:
   - 'server'
   - 'client'
   - 'tools/*'
+  - 'summit-cli'
 exclude:
   - 'archive/**'
