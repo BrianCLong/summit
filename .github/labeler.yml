@@ -1,18 +1,207 @@
-client:
-  - 'client/**'
-server:
-  - 'server/**'
-python:
-  - 'python/**'
-data-pipelines:
-  - 'server/data-pipelines/**'
-workflows:
-  - '.github/workflows/**'
-infra:
-  - 'infra/**'
-graphql:
-  - 'packages/graphql/**'
-db:
-  - 'packages/db/**'
-neo4j:
-  - 'packages/neo4j/**'
+# =============================================================================
+# PR Auto-Labeler Configuration
+# Automatically labels PRs based on changed files
+# =============================================================================
+
+# TYPE-BASED LABELS
+# =============================================================================
+
+'type: documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+      - 'README*'
+      - 'CONTRIBUTING*'
+      - 'CHANGELOG*'
+      - 'LICENSE*'
+      - '.github/**/*.md'
+
+'type: dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
+      - 'yarn.lock'
+      - '**/package.json'
+      - 'Gemfile*'
+      - 'requirements*.txt'
+      - 'Pipfile*'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+
+'type: security':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/security*.yml'
+      - '.github/workflows/trivy*.yml'
+      - '.github/workflows/gitleaks*.yml'
+      - 'SECURITY/**/*'
+      - 'SECURITY.md'
+      - '**/security/**/*'
+      - '**/*security*'
+      - '**/*auth*'
+      - '**/rbac/**/*'
+      - '**/opa/**/*'
+      - 'ops/security/**/*'
+
+'type: tests':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.ts'
+      - '**/*.test.tsx'
+      - '**/*.test.js'
+      - '**/*.test.jsx'
+      - '**/*.spec.ts'
+      - '**/*.spec.tsx'
+      - '**/*.spec.js'
+      - '**/*.spec.jsx'
+      - 'tests/**/*'
+      - '**/__tests__/**/*'
+      - '**/test/**/*'
+      - 'e2e/**/*'
+      - 'playwright/**/*'
+      - 'jest.config.*'
+      - 'vitest.config.*'
+
+'type: ci/cd':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**/*'
+      - '.github/actions/**/*'
+      - 'Makefile'
+      - 'docker-compose*.yml'
+      - 'Dockerfile*'
+      - '.dockerignore'
+      - 'scripts/ci/**/*'
+
+'type: infrastructure':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'infra/**/*'
+      - 'terraform/**/*'
+      - 'k8s/**/*'
+      - 'helm/**/*'
+      - 'ops/**/*'
+      - '**/Dockerfile*'
+
+'type: configuration':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.config.js'
+      - '*.config.ts'
+      - '*.config.json'
+      - 'tsconfig*.json'
+      - '.eslintrc*'
+      - '.prettierrc*'
+      - '.editorconfig'
+      - '.env*'
+      - 'config/**/*'
+
+'type: database':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/migrations/**/*'
+      - '**/prisma/**/*'
+      - 'packages/db/**/*'
+      - 'packages/neo4j/**/*'
+      - '**/schema.sql'
+      - '**/schema.prisma'
+
+# AREA-BASED LABELS
+# =============================================================================
+
+'area: frontend':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'client/**/*'
+      - 'apps/web/**/*'
+      - 'packages/ui/**/*'
+      - '**/*.tsx'
+      - '**/*.jsx'
+      - '**/components/**/*'
+
+'area: backend':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'server/**/*'
+      - 'apps/api/**/*'
+      - 'services/**/*'
+      - 'packages/api/**/*'
+
+'area: graphql':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'packages/graphql/**/*'
+      - '**/*.graphql'
+      - '**/*.gql'
+      - '**/schema.graphql'
+      - '**/resolvers/**/*'
+
+'area: python':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.py'
+      - 'python/**/*'
+      - 'requirements*.txt'
+      - 'Pipfile*'
+      - 'setup.py'
+      - 'pyproject.toml'
+
+'area: data-pipelines':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'server/data-pipelines/**/*'
+      - '**/pipelines/**/*'
+      - '**/etl/**/*'
+
+'area: observability':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'observability/**/*'
+      - '**/grafana/**/*'
+      - '**/prometheus/**/*'
+      - '**/monitoring/**/*'
+      - '**/metrics/**/*'
+      - '**/tracing/**/*'
+
+# PRIORITY LABELS (based on critical files)
+# =============================================================================
+
+'priority: high':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'server/src/index.ts'
+      - 'client/src/index.tsx'
+      - '**/auth/**/*'
+      - 'SECURITY/**/*'
+      - '.github/workflows/ci*.yml'
+
+# SIZE LABELS (handled by separate workflow, but can be configured here too)
+# =============================================================================
+
+'size: XS':
+  - changed-files:
+    - count-less-than: 10
+
+'size: S':
+  - changed-files:
+    - count-greater-than: 9
+    - count-less-than: 30
+
+'size: M':
+  - changed-files:
+    - count-greater-than: 29
+    - count-less-than: 100
+
+'size: L':
+  - changed-files:
+    - count-greater-than: 99
+    - count-less-than: 500
+
+'size: XL':
+  - changed-files:
+    - count-greater-than: 499
