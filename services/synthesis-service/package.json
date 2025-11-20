@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/synthesis-service",
+  "version": "1.0.0",
+  "description": "Unified API service for synthetic data generation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@intelgraph/synthetic-data": "workspace:*",
+    "@intelgraph/privacy-preserving": "workspace:*",
+    "@intelgraph/text-generation": "workspace:*",
+    "@intelgraph/image-synthesis": "workspace:*",
+    "@intelgraph/audio-synthesis": "workspace:*",
+    "@intelgraph/graph-synthesis": "workspace:*",
+    "@intelgraph/geospatial-synthesis": "workspace:*",
+    "@intelgraph/data-augmentation": "workspace:*",
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.0",
+    "@types/cors": "^2.8.13",
+    "typescript": "^5.0.0"
+  }
+}

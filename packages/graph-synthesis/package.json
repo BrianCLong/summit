@@ -1,0 +1,10 @@
+{
+  "name": "@intelgraph/graph-synthesis",
+  "version": "1.0.0",
+  "description": "Graph and network synthesis with privacy preservation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*"
+  }
+}

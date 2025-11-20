@@ -1,0 +1,31 @@
+{
+  "name": "@intelgraph/privacy-preserving",
+  "version": "1.0.0",
+  "description": "Privacy-preserving data synthesis with differential privacy, k-anonymity, and compliance verification",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "differential-privacy",
+    "k-anonymity",
+    "l-diversity",
+    "t-closeness",
+    "privacy-preserving",
+    "GDPR",
+    "HIPAA"
+  ],
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/synthetic-data": "workspace:*",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.195",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
