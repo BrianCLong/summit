@@ -1,0 +1,44 @@
+{
+  "Rules": [
+    {
+      "Id": "artifacts-lifecycle-policy",
+      "Status": "Enabled",
+      "Filter": {
+        "And": {
+          "Prefix": "artifacts/",
+          "Tags": [
+            {
+              "Key": "Type",
+              "Value": "build-artifact"
+            }
+          ]
+        }
+      },
+      "Transitions": [
+        {
+          "Days": 60,
+          "StorageClass": "STANDARD_IA"
+        }
+      ],
+      "Expiration": {
+        "Days": 180
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 7
+      }
+    },
+    {
+      "Id": "temp-files-cleanup",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "temp/"
+      },
+      "Expiration": {
+        "Days": 7
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 1
+      }
+    }
+  ]
+}

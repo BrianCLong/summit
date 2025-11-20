@@ -1,0 +1,116 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: spot-only
+  labels:
+    cost-optimization: karpenter-spot
+spec:
+  # Spot-only provisioner for cost-sensitive workloads
+  requirements:
+    # Instance categories (flexible for better spot availability)
+    - key: karpenter.k8s.aws/instance-category
+      operator: In
+      values: ["c", "m", "r", "t"]  # Include burstable for small workloads
+
+    # Instance generations
+    - key: karpenter.k8s.aws/instance-generation
+      operator: Gt
+      values: ["5"]
+
+    # SPOT ONLY
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["spot"]
+
+    # Architecture (AMD64 + ARM64 for better availability)
+    - key: kubernetes.io/arch
+      operator: In
+      values: ["amd64", "arm64"]
+
+    # Availability zones
+    - key: topology.kubernetes.io/zone
+      operator: In
+      values: ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+  # Limits
+  limits:
+    resources:
+      cpu: "500"
+      memory: 1000Gi
+
+  # Aggressive consolidation for spot
+  consolidation:
+    enabled: true
+
+  # Provider reference
+  providerRef:
+    name: spot-only
+
+  # Tolerate spot interruptions
+  taints:
+    - key: karpenter.sh/spot
+      value: "true"
+      effect: NoSchedule
+
+  # Labels
+  labels:
+    workload-type: spot
+    capacity-type: spot
+    managed-by: karpenter
+    cost-optimization: spot-70-percent-savings
+
+  # Shorter TTL for spot nodes
+  ttlSecondsAfterEmpty: 15       # Quick cleanup
+  ttlSecondsUntilExpired: 172800  # 2 days (spot churn expected)
+
+  # Higher weight (prefer spot over on-demand)
+  weight: 100
+
+---
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: spot-only
+spec:
+  subnetSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+    Tier: private
+
+  securityGroupSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+
+  amiFamily: AL2
+
+  # Spot-optimized configuration
+  userData: |
+    #!/bin/bash
+    set -e
+
+    # Configure kubelet for spot
+    echo "KUBELET_EXTRA_ARGS=--max-pods=110 --kube-reserved=cpu=100m,memory=500Mi" >> /etc/sysconfig/kubelet
+
+    # Install node-termination-handler
+    kubectl label node $(hostname) lifecycle=spot
+
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 40Gi  # Smaller for spot
+        volumeType: gp3
+        iops: 3000
+        throughput: 125
+        encrypted: true
+        deleteOnTermination: true
+
+  metadataOptions:
+    httpEndpoint: enabled
+    httpProtocolIPv6: disabled
+    httpPutResponseHopLimit: 2
+    httpTokens: required
+
+  tags:
+    Name: karpenter-spot-${CLUSTER_NAME}
+    NodeType: spot
+    ManagedBy: Karpenter
+    CostOptimization: spot-instances
+    LifecycleType: spot

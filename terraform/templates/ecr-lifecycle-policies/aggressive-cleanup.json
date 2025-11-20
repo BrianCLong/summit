@@ -1,0 +1,69 @@
+{
+  "rules": [
+    {
+      "rulePriority": 1,
+      "description": "Keep last 5 production images",
+      "selection": {
+        "tagStatus": "tagged",
+        "tagPrefixList": ["prod", "production", "release"],
+        "countType": "imageCountMoreThan",
+        "countNumber": 5
+      },
+      "action": {
+        "type": "expire"
+      }
+    },
+    {
+      "rulePriority": 2,
+      "description": "Delete untagged images older than 7 days",
+      "selection": {
+        "tagStatus": "untagged",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 7
+      },
+      "action": {
+        "type": "expire"
+      }
+    },
+    {
+      "rulePriority": 3,
+      "description": "Keep only last 2 staging images",
+      "selection": {
+        "tagStatus": "tagged",
+        "tagPrefixList": ["staging", "stg"],
+        "countType": "imageCountMoreThan",
+        "countNumber": 2
+      },
+      "action": {
+        "type": "expire"
+      }
+    },
+    {
+      "rulePriority": 4,
+      "description": "Keep only last 1 development image",
+      "selection": {
+        "tagStatus": "tagged",
+        "tagPrefixList": ["dev", "feature", "test", "branch"],
+        "countType": "imageCountMoreThan",
+        "countNumber": 1
+      },
+      "action": {
+        "type": "expire"
+      }
+    },
+    {
+      "rulePriority": 5,
+      "description": "Delete any other tagged images older than 30 days",
+      "selection": {
+        "tagStatus": "any",
+        "countType": "sinceImagePushed",
+        "countUnit": "days",
+        "countNumber": 30
+      },
+      "action": {
+        "type": "expire"
+      }
+    }
+  ]
+}

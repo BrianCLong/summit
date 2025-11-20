@@ -1,0 +1,44 @@
+{
+  "Rules": [
+    {
+      "Id": "backup-lifecycle-policy",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": ""
+      },
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "STANDARD_IA"
+        },
+        {
+          "Days": 90,
+          "StorageClass": "GLACIER"
+        },
+        {
+          "Days": 180,
+          "StorageClass": "DEEP_ARCHIVE"
+        }
+      ],
+      "Expiration": {
+        "Days": 365
+      },
+      "NoncurrentVersionTransitions": [
+        {
+          "NoncurrentDays": 7,
+          "StorageClass": "STANDARD_IA"
+        },
+        {
+          "NoncurrentDays": 30,
+          "StorageClass": "GLACIER"
+        }
+      ],
+      "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 90
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 7
+      }
+    }
+  ]
+}

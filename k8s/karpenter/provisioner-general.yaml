@@ -1,0 +1,119 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: general-purpose
+  labels:
+    cost-optimization: karpenter
+spec:
+  # Requirements for node selection
+  requirements:
+    # Instance categories (flexible sizing)
+    - key: karpenter.k8s.aws/instance-category
+      operator: In
+      values: ["c", "m", "r"]  # Compute, general, memory optimized
+
+    # Instance generations (prefer latest for cost/performance)
+    - key: karpenter.k8s.aws/instance-generation
+      operator: Gt
+      values: ["5"]  # 6th gen and newer (m6i, c6i, r6i, etc.)
+
+    # Capacity types (mix of spot and on-demand)
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["spot", "on-demand"]
+
+    # CPU architecture (prefer Graviton for cost savings)
+    - key: kubernetes.io/arch
+      operator: In
+      values: ["amd64", "arm64"]
+
+    # Availability zones
+    - key: topology.kubernetes.io/zone
+      operator: In
+      values: ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+  # Limits
+  limits:
+    resources:
+      cpu: "1000"      # Max 1000 CPU cores
+      memory: 2000Gi   # Max 2TB memory
+
+  # Consolidation (cost optimization)
+  consolidation:
+    enabled: true
+
+  # Provider-specific configuration
+  providerRef:
+    name: general-purpose
+
+  # Taints (none for general workloads)
+  taints: []
+
+  # Labels applied to nodes
+  labels:
+    workload-type: general
+    managed-by: karpenter
+    cost-optimization: enabled
+
+  # Time-to-live
+  ttlSecondsAfterEmpty: 30      # Deprovision empty nodes after 30s
+  ttlSecondsUntilExpired: 604800  # Expire nodes after 7 days (drift detection)
+
+  # Weight (higher = more preferred)
+  weight: 10
+
+---
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: general-purpose
+spec:
+  # Subnet selector (use private subnets)
+  subnetSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+    Tier: private
+
+  # Security group selector
+  securityGroupSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+
+  # AMI selection
+  amiFamily: AL2  # Amazon Linux 2
+
+  # User data (bootstrap script)
+  userData: |
+    #!/bin/bash
+    set -e
+
+    # Configure kubelet
+    echo "KUBELET_EXTRA_ARGS=--max-pods=110" >> /etc/sysconfig/kubelet
+
+    # Install SSM agent for session manager (optional)
+    yum install -y amazon-ssm-agent
+    systemctl enable amazon-ssm-agent
+    systemctl start amazon-ssm-agent
+
+  # Block device mappings
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 50Gi
+        volumeType: gp3
+        iops: 3000
+        throughput: 125
+        encrypted: true
+        deleteOnTermination: true
+
+  # Metadata options
+  metadataOptions:
+    httpEndpoint: enabled
+    httpProtocolIPv6: disabled
+    httpPutResponseHopLimit: 2
+    httpTokens: required  # IMDSv2 required
+
+  # Tags
+  tags:
+    Name: karpenter-general-${CLUSTER_NAME}
+    NodeType: general-purpose
+    ManagedBy: Karpenter
+    CostOptimization: karpenter-provisioned

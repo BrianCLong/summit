@@ -1,0 +1,120 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: gpu-workloads
+  labels:
+    cost-optimization: gpu-right-sizing
+spec:
+  # GPU instance requirements
+  requirements:
+    # GPU instance families (T4 recommended over K80)
+    - key: karpenter.k8s.aws/instance-family
+      operator: In
+      values: ["g4dn", "g5"]  # T4 (g4dn) or A10G (g5)
+
+    # Prefer spot for GPU (60-70% savings)
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["spot", "on-demand"]
+
+    # AMD64 architecture (GPU instances)
+    - key: kubernetes.io/arch
+      operator: In
+      values: ["amd64"]
+
+    # Availability zones
+    - key: topology.kubernetes.io/zone
+      operator: In
+      values: ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+  # Limits
+  limits:
+    resources:
+      nvidia.com/gpu: "10"  # Max 10 GPUs
+
+  # Consolidation (enabled but careful with GPU workloads)
+  consolidation:
+    enabled: false  # Disable for GPU (avoid interruptions)
+
+  # Provider reference
+  providerRef:
+    name: gpu-workloads
+
+  # GPU taint
+  taints:
+    - key: nvidia.com/gpu
+      value: "true"
+      effect: NoSchedule
+
+  # Labels
+  labels:
+    workload-type: gpu
+    gpu-type: nvidia
+    managed-by: karpenter
+    cost-optimization: t4-over-k80
+
+  # Longer TTL for expensive GPU instances
+  ttlSecondsAfterEmpty: 300      # 5 minutes
+  ttlSecondsUntilExpired: 259200  # 3 days
+
+  # Lower weight (only for GPU workloads)
+  weight: 1
+
+---
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: gpu-workloads
+spec:
+  subnetSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+    Tier: private
+
+  securityGroupSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+
+  # EKS-optimized AMI with GPU support
+  amiFamily: AL2
+  amiSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}-gpu
+
+  # GPU-specific user data
+  userData: |
+    #!/bin/bash
+    set -e
+
+    # Install NVIDIA drivers
+    yum install -y gcc kernel-devel-$(uname -r)
+
+    # NVIDIA Container Toolkit
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+    curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.repo | tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+    yum install -y nvidia-container-toolkit
+    systemctl restart docker
+
+    # Configure kubelet
+    echo "KUBELET_EXTRA_ARGS=--max-pods=58 --register-with-taints=nvidia.com/gpu=true:NoSchedule" >> /etc/sysconfig/kubelet
+
+  # Larger EBS volume for GPU workloads
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 100Gi
+        volumeType: gp3
+        iops: 3000
+        throughput: 125
+        encrypted: true
+        deleteOnTermination: true
+
+  metadataOptions:
+    httpEndpoint: enabled
+    httpProtocolIPv6: disabled
+    httpPutResponseHopLimit: 2
+    httpTokens: required
+
+  tags:
+    Name: karpenter-gpu-${CLUSTER_NAME}
+    NodeType: gpu
+    ManagedBy: Karpenter
+    CostOptimization: t4-gpu
+    GPUType: nvidia-t4

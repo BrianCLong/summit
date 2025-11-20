@@ -1,0 +1,77 @@
+# Karpenter Helm Chart Values
+# Cost Optimization: 20-30% savings on compute costs
+# Estimated Savings: $100-200/month
+
+# Controller configuration
+controller:
+  replicas: 2  # HA for production
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Pod disruption budget for HA
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  # Affinity to spread across AZs
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: karpenter
+            topologyKey: kubernetes.io/hostname
+
+# Service account
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::${AWS_ACCOUNT_ID}:role/KarpenterControllerRole-${CLUSTER_NAME}"
+
+# Settings
+settings:
+  aws:
+    # Cluster configuration
+    clusterName: ${CLUSTER_NAME}
+    clusterEndpoint: ${CLUSTER_ENDPOINT}
+    defaultInstanceProfile: KarpenterNodeInstanceProfile-${CLUSTER_NAME}
+
+    # Enable interruption handling for spot instances
+    interruptionQueueName: ${CLUSTER_NAME}-karpenter
+
+    # Isolated VPC support
+    enablePodENI: false
+    enableENILimitedPodDensity: true
+
+    # VM memory overhead (OS + kubelet)
+    vmMemoryOverheadPercent: 0.075  # 7.5%
+
+  # Batching configuration (reduce API calls)
+  batchMaxDuration: 10s
+  batchIdleDuration: 1s
+
+# Webhook configuration
+webhook:
+  enabled: true
+  port: 8443
+
+# Logging
+logLevel: info
+logEncoding: json
+
+# Global tags for all resources
+globalTags:
+  ManagedBy: Karpenter
+  Environment: ${ENVIRONMENT}
+  CostOptimization: karpenter-autoscaling
+
+# Additional controller arguments
+additionalArgs:
+  - --feature-gates=Drift=true  # Enable drift detection
