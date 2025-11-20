@@ -1,0 +1,58 @@
+# Ruff configuration for Python code quality
+# See: https://docs.astral.sh/ruff/
+
+line-length = 100
+indent-width = 4
+
+# Target Python 3.11+
+target-version = "py311"
+
+[lint]
+# Enable pycodestyle (E), Pyflakes (F), isort (I), and other useful rules
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # Pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "C4",    # flake8-comprehensions
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "RUF",   # Ruff-specific rules
+]
+
+# Ignore specific rules as needed
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+]
+
+# Allow fix for all enabled rules (when `--fix` is provided)
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+# Use double quotes for strings
+quote-style = "double"
+
+# Indent with spaces
+indent-style = "space"
+
+# Use `\n` line endings for all files
+line-ending = "lf"
+
+# Automatically detect the appropriate line ending
+skip-magic-trailing-comma = false
+
+[lint.isort]
+known-first-party = ["intelgraph", "summit"]
+
+[lint.per-file-ignores]
+# Ignore unused imports in __init__.py files
+"__init__.py" = ["F401"]
+# Ignore all rules in test files for certain patterns
+"**/tests/**/*.py" = ["S101"]  # Allow assert in tests
