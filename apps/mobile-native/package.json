@@ -99,8 +99,8 @@
     "react-test-renderer": "^19.2.0",
     "detox": "^20.28.7",
     "@types/jest": "^30.0.0",
-    "metro-react-native-babel-preset": "^0.79.4",
-    "react-native-dotenv": "^4.2.1"
+    "metro-react-native-babel-preset": "^0.77.0",
+    "react-native-dotenv": "^3.4.11"
   },
   "engines": {
     "node": ">=18.0.0"
