@@ -1,0 +1,45 @@
+{
+  "id": "rest-api-datasource",
+  "name": "REST API Data Source",
+  "version": "1.0.0",
+  "description": "Connect to any REST API as a data source",
+  "author": {
+    "name": "Summit Team",
+    "email": "team@summit.dev"
+  },
+  "license": "MIT",
+  "category": "data-source",
+  "main": "./dist/index.js",
+  "engineVersion": ">=1.0.0",
+  "permissions": [
+    "network:access",
+    "read:data"
+  ],
+  "resources": {
+    "maxMemoryMB": 128,
+    "maxCpuPercent": 30,
+    "maxStorageMB": 50,
+    "maxNetworkMbps": 10
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "baseUrl": {
+        "type": "string",
+        "format": "uri",
+        "description": "Base URL of the REST API"
+      },
+      "apiKey": {
+        "type": "string",
+        "description": "API key for authentication",
+        "secret": true
+      },
+      "timeout": {
+        "type": "number",
+        "default": 30000,
+        "description": "Request timeout in milliseconds"
+      }
+    },
+    "required": ["baseUrl", "apiKey"]
+  }
+}
