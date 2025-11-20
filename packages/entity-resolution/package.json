@@ -1,0 +1,66 @@
+{
+  "name": "@summit/entity-resolution",
+  "version": "1.0.0",
+  "description": "Advanced entity extraction, recognition, resolution, and deduplication engine with ML-based matching",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "entity-resolution",
+    "entity-extraction",
+    "ner",
+    "named-entity-recognition",
+    "fuzzy-matching",
+    "record-linkage",
+    "deduplication",
+    "entity-matching"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "natural": "^8.0.1",
+    "compromise": "^14.14.3",
+    "string-similarity": "^4.0.4",
+    "leven": "^4.0.0",
+    "fast-levenshtein": "^3.0.0",
+    "uuid": "^13.0.0",
+    "pino": "^9.5.0",
+    "zod": "^3.23.8",
+    "@tensorflow/tfjs-node": "^4.22.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@types/natural": "^5.1.5",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist",
+    "models",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

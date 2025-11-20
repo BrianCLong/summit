@@ -1,0 +1,68 @@
+{
+  "name": "@summit/knowledge-graph",
+  "version": "1.0.0",
+  "description": "Enterprise knowledge graph database and storage infrastructure with graph partitioning, versioning, and temporal queries",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "knowledge-graph",
+    "graph-database",
+    "neo4j",
+    "rdf",
+    "triple-store",
+    "property-graph",
+    "graph-partitioning",
+    "temporal-graph"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "neo4j-driver": "^6.0.1",
+    "rdflib": "^2.2.34",
+    "jsonld": "^8.3.2",
+    "sparqljs": "^3.7.3",
+    "graphology": "^0.25.4",
+    "graphology-gexf": "^0.12.2",
+    "graphology-graphml": "^0.4.0",
+    "graphology-utils": "^2.5.2",
+    "uuid": "^13.0.0",
+    "pino": "^9.5.0",
+    "zod": "^3.23.8",
+    "ioredis": "^5.4.1",
+    "@opentelemetry/api": "^1.9.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

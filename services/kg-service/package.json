@@ -1,0 +1,36 @@
+{
+  "name": "@summit/kg-service",
+  "version": "1.0.0",
+  "description": "Knowledge Graph REST API service",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@summit/knowledge-graph": "workspace:*",
+    "@summit/graph-analytics": "workspace:*",
+    "@summit/ontology-management": "workspace:*",
+    "@summit/semantic-reasoning": "workspace:*",
+    "express": "^5.0.1",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "pino": "^9.5.0",
+    "pino-http": "^10.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}
