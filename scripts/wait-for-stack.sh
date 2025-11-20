@@ -55,14 +55,18 @@ function diagnose_failure() {
   echo "Diagnostics:"
   echo ""
 
-  # Check each health endpoint
-  for url in "$HEALTH_URL" "$READY_URL" "$DETAILED_URL" "$METRICS_URL"; do
+  # Check each health endpoint with explanations
+  echo "Health endpoint status:"
+  for url in "$READY_URL" "$DETAILED_URL" "$METRICS_URL" "$HEALTH_URL"; do
     if curl -fsS --max-time 5 "$url" >/dev/null 2>&1; then
       echo "  ✓ $url responding"
     else
       echo "  ✗ $url NOT responding"
     fi
   done
+  echo ""
+  echo "Note: /health/ready is the canonical probe (checks databases)"
+  echo "      /health only checks process liveness (may be false positive)"
 
   echo ""
   echo "Port status:"
@@ -89,10 +93,13 @@ function diagnose_failure() {
 }
 
 log "Waiting for stack to be healthy (max ${MAX_ATTEMPTS} attempts, ${SLEEP_SECONDS}s between checks)..."
+log "Using readiness probe /health/ready to verify database connectivity"
 
 for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
   # Check HTTP health endpoints
-  if ping_url "$HEALTH_URL" && ping_url "$READY_URL" && ping_url "$DETAILED_URL" && ping_url "$METRICS_URL"; then
+  # Note: We prioritize /health/ready over /health because it verifies database connectivity
+  # /health only checks if the process is alive (false positive if DBs are down)
+  if ping_url "$READY_URL" && ping_url "$DETAILED_URL" && ping_url "$METRICS_URL"; then
     # Check port connectivity
     if check_ports; then
       log "Stack healthy after ${attempt} attempt(s) ✓"

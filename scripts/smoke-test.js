@@ -195,12 +195,16 @@ class SmokeTest {
     }
   }
 
-  async waitForWebSocket(url, timeout = 5000) {
+  async waitForWebSocket(url, timeout = 10000) {
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(url);
       const timer = setTimeout(() => {
         ws.close();
-        reject(new Error('WebSocket connection timeout'));
+        reject(
+          new Error(
+            `WebSocket connection timeout after ${timeout}ms. The API may be slow to bind Socket.io.`,
+          ),
+        );
       }, timeout);
 
       ws.on('open', () => {
@@ -211,7 +215,12 @@ class SmokeTest {
 
       ws.on('error', (error) => {
         clearTimeout(timer);
-        reject(error);
+        ws.close();
+        reject(
+          new Error(
+            `WebSocket connection failed: ${error.message}. Check that Socket.io is enabled on the API.`,
+          ),
+        );
       });
     });
   }
@@ -248,16 +257,26 @@ class SmokeTest {
     return response.data;
   }
 
-  async retryOperation(operation, maxRetries = config.maxRetries) {
+  async retryOperation(operation, maxRetries = config.maxRetries, operationName = 'operation') {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
+        if (attempt > 1) {
+          await this.log(
+            `${operationName}: Attempt ${attempt}/${maxRetries}`,
+            'info',
+          );
+        }
         return await operation();
       } catch (error) {
         if (attempt === maxRetries) {
           throw error;
         }
         await this.log(
-          `Attempt ${attempt} failed, retrying in ${config.retryDelay}ms...`,
+          `${operationName}: Attempt ${attempt}/${maxRetries} failed - ${error.message}`,
+          'warning',
+        );
+        await this.log(
+          `Retrying in ${config.retryDelay}ms...`,
           'warning',
         );
         await new Promise((resolve) => setTimeout(resolve, config.retryDelay));
@@ -362,11 +381,15 @@ class SmokeTest {
     });
 
     await this.test('WebSocket Connection', async () => {
-      await this.retryOperation(async () => {
-        await this.waitForWebSocket(
-          `${config.wsUrl}/socket.io/?EIO=4&transport=websocket`,
-        );
-      });
+      await this.retryOperation(
+        async () => {
+          await this.waitForWebSocket(
+            `${config.wsUrl}/socket.io/?EIO=4&transport=websocket`,
+          );
+        },
+        config.maxRetries,
+        'WebSocket connection',
+      );
     });
 
     // Phase 3: Golden Path - Investigation Workflow

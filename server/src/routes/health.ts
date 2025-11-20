@@ -12,8 +12,15 @@ interface ServiceHealthError {
 }
 
 /**
- * Basic health check endpoint
- * Returns 200 OK if the service is running
+ * Basic health check endpoint (Liveness probe)
+ * Returns 200 OK if the service process is running
+ *
+ * ⚠️  WARNING: This endpoint does NOT check database connectivity.
+ *    Use /health/ready for readiness checks in deployment scripts.
+ *    Use /health/detailed for comprehensive status with service checks.
+ *
+ * @see /health/ready - Readiness probe (checks critical services)
+ * @see /health/live - Liveness probe (alias for this endpoint)
  */
 router.get('/health', async (_req: Request, res: Response) => {
   res.status(200).json({
