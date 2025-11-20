@@ -1,0 +1,49 @@
+{
+  "name": "@summit/network-viz",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "@summit/visualization": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "cytoscape": "^3.33.1",
+    "cytoscape-cola": "^2.5.1",
+    "cytoscape-dagre": "^2.5.0",
+    "cytoscape-fcose": "^2.2.0",
+    "cytoscape-cose-bilkent": "^4.1.0",
+    "d3": "^7.9.0",
+    "d3-force": "^3.0.0",
+    "d3-hierarchy": "^3.1.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/cytoscape": "^3.21.8",
+    "@types/d3": "^7.4.3",
+    "@jest/globals": "^30.0.0",
+    "@types/jest": "^30.0.0",
+    "typescript": "^5.9.3",
+    "eslint": "^9.39.1"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

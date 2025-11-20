@@ -1,0 +1,431 @@
+# Dashboard Service GraphQL Schema
+
+scalar JSON
+scalar DateTime
+scalar UUID
+
+# ===== Types =====
+
+type Dashboard {
+  id: UUID!
+  name: String!
+  description: String
+  ownerId: UUID!
+  owner: User
+  isPublic: Boolean!
+  widgets: [DashboardWidget!]!
+  filters: [DashboardFilter!]!
+  layout: DashboardLayout!
+  theme: DashboardTheme
+  settings: DashboardSettings!
+  permissions: DashboardPermissions!
+  metadata: DashboardMetadata!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type DashboardWidget {
+  id: UUID!
+  dashboardId: UUID!
+  type: WidgetType!
+  title: String!
+  description: String
+  config: JSON!
+  layout: WidgetLayout!
+  style: WidgetStyle
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DashboardFilter {
+  id: UUID!
+  dashboardId: UUID!
+  field: String!
+  label: String!
+  type: FilterType!
+  options: [FilterOption!]
+  defaultValue: JSON
+  createdAt: DateTime!
+}
+
+type DashboardLayout {
+  cols: Int!
+  rowHeight: Int!
+  compactType: String
+  preventCollision: Boolean!
+}
+
+type DashboardTheme {
+  name: String!
+  backgroundColor: String!
+  cardBackgroundColor: String!
+  textColor: String!
+  accentColor: String!
+  gridColor: String!
+  fontFamily: String!
+}
+
+type DashboardSettings {
+  autoRefresh: Boolean!
+  refreshInterval: Int
+  timezone: String!
+  dateFormat: String!
+  numberFormat: String!
+}
+
+type DashboardPermissions {
+  ownerId: UUID!
+  isPublic: Boolean!
+  sharedWith: [SharedUser!]!
+}
+
+type DashboardMetadata {
+  tags: [String!]!
+  category: String
+  version: Int!
+}
+
+type WidgetLayout {
+  i: String!
+  x: Int!
+  y: Int!
+  w: Int!
+  h: Int!
+  minW: Int
+  minH: Int
+  maxW: Int
+  maxH: Int
+  static: Boolean!
+}
+
+type WidgetStyle {
+  backgroundColor: String
+  borderColor: String
+  borderWidth: Int
+  borderRadius: Int
+  padding: Int
+}
+
+type SharedUser {
+  userId: UUID!
+  user: User
+  role: UserRole!
+  grantedAt: DateTime!
+  grantedBy: UUID!
+}
+
+type FilterOption {
+  value: String!
+  label: String!
+}
+
+type DashboardComment {
+  id: UUID!
+  dashboardId: UUID!
+  widgetId: UUID
+  userId: UUID!
+  user: User
+  parentCommentId: UUID
+  parentComment: DashboardComment
+  content: String!
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  replies: [DashboardComment!]
+}
+
+type DashboardSnapshot {
+  id: UUID!
+  dashboardId: UUID!
+  snapshotData: JSON!
+  version: Int!
+  createdBy: UUID!
+  creator: User
+  createdAt: DateTime!
+  description: String
+}
+
+type DashboardTemplate {
+  id: UUID!
+  templateName: String!
+  category: String!
+  previewImage: String
+  templateData: JSON!
+  isSystem: Boolean!
+  createdBy: UUID
+  creator: User
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DashboardActivity {
+  id: UUID!
+  dashboardId: UUID!
+  userId: UUID!
+  user: User
+  action: ActivityAction!
+  details: JSON
+  createdAt: DateTime!
+}
+
+type User {
+  id: UUID!
+  username: String!
+  email: String!
+}
+
+# ===== Enums =====
+
+enum WidgetType {
+  CHART
+  METRIC
+  TABLE
+  MAP
+  TEXT
+  IMAGE
+  IFRAME
+  CUSTOM
+}
+
+enum FilterType {
+  SELECT
+  MULTISELECT
+  DATE
+  DATERANGE
+  TEXT
+  NUMBER
+}
+
+enum UserRole {
+  VIEWER
+  EDITOR
+  ADMIN
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  DELETED
+  VIEWED
+  SHARED
+  EXPORTED
+  COMMENTED
+}
+
+# ===== Inputs =====
+
+input CreateDashboardInput {
+  name: String!
+  description: String
+  isPublic: Boolean
+  layout: DashboardLayoutInput
+  theme: DashboardThemeInput
+  settings: DashboardSettingsInput
+  metadata: DashboardMetadataInput
+}
+
+input UpdateDashboardInput {
+  name: String
+  description: String
+  isPublic: Boolean
+  layout: DashboardLayoutInput
+  theme: DashboardThemeInput
+  settings: DashboardSettingsInput
+  metadata: DashboardMetadataInput
+}
+
+input DashboardLayoutInput {
+  cols: Int
+  rowHeight: Int
+  compactType: String
+  preventCollision: Boolean
+}
+
+input DashboardThemeInput {
+  name: String!
+  backgroundColor: String!
+  cardBackgroundColor: String!
+  textColor: String!
+  accentColor: String!
+  gridColor: String!
+  fontFamily: String!
+}
+
+input DashboardSettingsInput {
+  autoRefresh: Boolean
+  refreshInterval: Int
+  timezone: String
+  dateFormat: String
+  numberFormat: String
+}
+
+input DashboardMetadataInput {
+  tags: [String!]
+  category: String
+}
+
+input CreateWidgetInput {
+  dashboardId: UUID!
+  type: WidgetType!
+  title: String!
+  description: String
+  config: JSON!
+  layout: WidgetLayoutInput!
+  style: WidgetStyleInput
+}
+
+input UpdateWidgetInput {
+  title: String
+  description: String
+  config: JSON
+  layout: WidgetLayoutInput
+  style: WidgetStyleInput
+}
+
+input WidgetLayoutInput {
+  i: String!
+  x: Int!
+  y: Int!
+  w: Int!
+  h: Int!
+  minW: Int
+  minH: Int
+  maxW: Int
+  maxH: Int
+  static: Boolean
+}
+
+input WidgetStyleInput {
+  backgroundColor: String
+  borderColor: String
+  borderWidth: Int
+  borderRadius: Int
+  padding: Int
+}
+
+input CreateFilterInput {
+  dashboardId: UUID!
+  field: String!
+  label: String!
+  type: FilterType!
+  options: [FilterOptionInput!]
+  defaultValue: JSON
+}
+
+input FilterOptionInput {
+  value: String!
+  label: String!
+}
+
+input ShareDashboardInput {
+  dashboardId: UUID!
+  userId: UUID!
+  role: UserRole!
+}
+
+input CreateCommentInput {
+  dashboardId: UUID!
+  widgetId: UUID
+  parentCommentId: UUID
+  content: String!
+  metadata: JSON
+}
+
+input UpdateCommentInput {
+  content: String!
+  metadata: JSON
+}
+
+input CreateSnapshotInput {
+  dashboardId: UUID!
+  description: String
+}
+
+# ===== Queries =====
+
+type Query {
+  # Dashboard queries
+  dashboard(id: UUID!): Dashboard
+  dashboards(
+    ownerId: UUID
+    isPublic: Boolean
+    search: String
+    tags: [String!]
+    category: String
+    limit: Int
+    offset: Int
+  ): [Dashboard!]!
+
+  myDashboards(limit: Int, offset: Int): [Dashboard!]!
+  sharedWithMe(limit: Int, offset: Int): [Dashboard!]!
+
+  # Widget queries
+  widget(id: UUID!): DashboardWidget
+  dashboardWidgets(dashboardId: UUID!): [DashboardWidget!]!
+
+  # Template queries
+  dashboardTemplates(category: String): [DashboardTemplate!]!
+  dashboardTemplate(id: UUID!): DashboardTemplate
+
+  # Comment queries
+  dashboardComments(dashboardId: UUID!, widgetId: UUID): [DashboardComment!]!
+
+  # Snapshot queries
+  dashboardSnapshots(dashboardId: UUID!): [DashboardSnapshot!]!
+  dashboardSnapshot(id: UUID!): DashboardSnapshot
+
+  # Activity queries
+  dashboardActivity(dashboardId: UUID!, limit: Int, offset: Int): [DashboardActivity!]!
+}
+
+# ===== Mutations =====
+
+type Mutation {
+  # Dashboard mutations
+  createDashboard(input: CreateDashboardInput!): Dashboard!
+  updateDashboard(id: UUID!, input: UpdateDashboardInput!): Dashboard!
+  deleteDashboard(id: UUID!): Boolean!
+  duplicateDashboard(id: UUID!, name: String): Dashboard!
+
+  # Widget mutations
+  createWidget(input: CreateWidgetInput!): DashboardWidget!
+  updateWidget(id: UUID!, input: UpdateWidgetInput!): DashboardWidget!
+  deleteWidget(id: UUID!): Boolean!
+  updateWidgetLayout(id: UUID!, layout: WidgetLayoutInput!): DashboardWidget!
+
+  # Filter mutations
+  createFilter(input: CreateFilterInput!): DashboardFilter!
+  deleteFilter(id: UUID!): Boolean!
+
+  # Sharing mutations
+  shareDashboard(input: ShareDashboardInput!): Boolean!
+  revokeDashboardAccess(dashboardId: UUID!, userId: UUID!): Boolean!
+  updateDashboardPermission(dashboardId: UUID!, userId: UUID!, role: UserRole!): Boolean!
+
+  # Comment mutations
+  createComment(input: CreateCommentInput!): DashboardComment!
+  updateComment(id: UUID!, input: UpdateCommentInput!): DashboardComment!
+  deleteComment(id: UUID!): Boolean!
+
+  # Snapshot mutations
+  createSnapshot(input: CreateSnapshotInput!): DashboardSnapshot!
+  restoreSnapshot(snapshotId: UUID!): Dashboard!
+
+  # Template mutations
+  createTemplateFromDashboard(dashboardId: UUID!, templateName: String!, category: String!): DashboardTemplate!
+  createDashboardFromTemplate(templateId: UUID!, name: String!): Dashboard!
+}
+
+# ===== Subscriptions =====
+
+type Subscription {
+  # Real-time dashboard updates
+  dashboardUpdated(dashboardId: UUID!): Dashboard!
+  widgetUpdated(dashboardId: UUID!): DashboardWidget!
+  commentAdded(dashboardId: UUID!): DashboardComment!
+
+  # Collaborative editing
+  dashboardViewers(dashboardId: UUID!): [User!]!
+}

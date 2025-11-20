@@ -1,0 +1,47 @@
+{
+  "name": "@summit/geospatial-viz",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "@summit/visualization": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0",
+    "d3": "^7.9.0",
+    "d3-geo": "^3.1.1",
+    "d3-scale": "^4.0.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/leaflet": "^1.9.14",
+    "@types/d3": "^7.4.3",
+    "@types/d3-geo": "^3.1.0",
+    "@jest/globals": "^30.0.0",
+    "@types/jest": "^30.0.0",
+    "typescript": "^5.9.3",
+    "eslint": "^9.39.1"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
