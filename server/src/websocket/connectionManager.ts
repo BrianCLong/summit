@@ -1,4 +1,4 @@
-import * as promClient from 'prom-client';
+import promClient from 'prom-client';
 
 export enum ConnectionState {
   CONNECTING = 'connecting',
