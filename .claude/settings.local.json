@@ -51,7 +51,9 @@
       "Bash(pnpm test:*)",
       "Bash(pnpm outdated:*)",
       "Bash(git push:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(git rebase:*)",
+      "Bash(git diff:*)"
     ],
     "deny": [],
     "ask": []

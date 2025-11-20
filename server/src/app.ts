@@ -20,46 +20,42 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
+import { configureSecurity, unifiedAuthMiddleware, apiRateLimiter } from './middleware/securityChain.js';
 
 export const createApp = async () => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
   const app = express();
   const logger = pino();
-  app.use(helmet());
-  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || cfg.NODE_ENV !== 'production') {
-          return callback(null, true);
-        }
-        if (allowedOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(new Error(`Origin ${origin} not allowed by Summit CORS policy`));
-      },
-      credentials: true,
-    }),
-  );
+
+  // Apply Security Chain (Helmet, CORS, Global Rate Limit, Request Signing, Versioning)
+  configureSecurity(app);
+
   app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }));
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
 
-  // Health endpoints (exempt from rate limiting)
+  // Health endpoints
   const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
 
-  // Other routes (exempt from rate limiting)
+  // Protect Sensitive Routes with Unified Auth (API Key / JWT)
+  const protectedPrefixes = [
+    '/api',
+    '/monitoring',
+    '/disclosures',
+    '/rbac',
+    '/search',
+    '/metrics'
+  ];
+
+  protectedPrefixes.forEach(prefix => {
+    app.use(prefix, unifiedAuthMiddleware);
+  });
+
+  // Mount Routes
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
@@ -67,13 +63,9 @@ export const createApp = async () => {
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.get('/metrics', metricsRoute);
-  app.use(
-    rateLimit({
-      windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
-      max: Number(process.env.RATE_LIMIT_MAX || 600),
-      message: { error: 'Too many requests, please try again later' },
-    }),
-  );
+
+  // Additional Rate Limiting for API routes
+  app.use('/api', apiRateLimiter);
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
@@ -186,37 +178,15 @@ export const createApp = async () => {
   // Production Authentication - Use proper JWT validation
   const {
     productionAuthMiddleware,
-    applyProductionSecurity,
   } = await import('./config/production-security.js');
 
-  // Apply security middleware based on environment
-  if (cfg.NODE_ENV === 'production') {
-    applyProductionSecurity(app);
-  }
-
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
-
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
+  // Use unified auth for GraphQL
+  const authenticateToken = unifiedAuthMiddleware;
 
   app.use(
     '/graphql',
     express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    authenticateToken,
     expressMiddleware(apollo, { context: getContext }),
   );
 
