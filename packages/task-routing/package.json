@@ -1,0 +1,33 @@
+{
+  "name": "@intelgraph/task-routing",
+  "version": "1.0.0",
+  "description": "Intelligent task routing and assignment system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@types/lodash": "^4.14.202",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "task-routing",
+    "load-balancing",
+    "skill-based-routing",
+    "workflow",
+    "automation"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "type": "module"
+}
