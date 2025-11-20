@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/data-classification",
+  "version": "1.0.0",
+  "description": "Data classification system with TLP support and classification-based access control",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "data-classification",
+    "tlp",
+    "access-control",
+    "security"
+  ],
+  "dependencies": {
+    "zod": "^3.22.4",
+    "pg": "^8.16.3",
+    "@intelgraph/compliance": "workspace:*",
+    "@intelgraph/audit-logging": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.9.3"
+  }
+}

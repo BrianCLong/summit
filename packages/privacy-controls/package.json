@@ -1,0 +1,31 @@
+{
+  "name": "@intelgraph/privacy-controls",
+  "version": "1.0.0",
+  "description": "Privacy controls with PII detection, GDPR Article 17 right to be forgotten, and consent management",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "privacy",
+    "gdpr",
+    "ccpa",
+    "pii",
+    "consent"
+  ],
+  "dependencies": {
+    "zod": "^3.22.4",
+    "pg": "^8.16.3",
+    "@intelgraph/compliance": "workspace:*",
+    "@intelgraph/audit-logging": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/audit-logging",
+  "version": "1.0.0",
+  "description": "Immutable audit logging system with tamper-proof storage for enterprise compliance",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "audit",
+    "logging",
+    "compliance",
+    "immutable",
+    "blockchain"
+  ],
+  "dependencies": {
+    "zod": "^3.22.4",
+    "pg": "^8.16.3",
+    "@intelgraph/compliance": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.9.3"
+  }
+}

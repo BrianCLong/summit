@@ -1,0 +1,33 @@
+{
+  "name": "@intelgraph/compliance",
+  "version": "1.0.0",
+  "description": "Enterprise compliance and governance framework with FedRAMP, NIST 800-53, ISO 27001, SOC 2, and GDPR/CCPA support",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "compliance",
+    "fedramp",
+    "nist",
+    "iso27001",
+    "soc2",
+    "gdpr",
+    "governance",
+    "audit"
+  ],
+  "dependencies": {
+    "zod": "^3.22.4",
+    "pg": "^8.16.3",
+    "date-fns": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.9.3"
+  }
+}
