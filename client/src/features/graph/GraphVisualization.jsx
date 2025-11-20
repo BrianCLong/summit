@@ -50,6 +50,7 @@ import {
   setNodeTypeFilter, // New import for node type filter
   setMinConfidenceFilter, // New import for min confidence filter
 } from '../../store/slices/graphSlice';
+import { trackEvent } from '../../services/analytics';
 
 // Register Cytoscape.js extensions
 cytoscape.use(coseBilkent);
@@ -576,6 +577,7 @@ const GraphVisualization = () => {
   };
 
   const handleAddNode = () => {
+    trackEvent('entities_linked');
     const newNodeId = `node_${Date.now()}`;
     dispatch(
       addNode({

@@ -30,6 +30,7 @@ import {
   MicOff,
 } from '@mui/icons-material';
 import { useHoldToTalk } from './hooks/useHoldToTalk'; // Correct relative path
+import { trackEvent } from '../../services/analytics';
 
 // Types
 interface Message {
@@ -287,6 +288,8 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
     async (text?: string) => {
       const messageText = text || inputValue;
       if (!messageText.trim()) return;
+
+      trackEvent('copilot_run');
 
       const userMessage: Message = {
         id: `msg-${clock.now()}`,

@@ -3,7 +3,15 @@
  */
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
-import { register, webVitalValue } from '../monitoring/metrics.js';
+import {
+  register,
+  webVitalValue,
+  goldenPathStepTotal,
+  doraDeploymentFrequency,
+  doraLeadTimeSeconds,
+  doraMttrSeconds,
+  doraChangeFailRate,
+} from '../monitoring/metrics.js';
 import {
   performHealthCheck,
   getCachedHealthStatus,
@@ -256,6 +264,62 @@ router.post('/web-vitals', (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: 'Failed to record web vital', details: error.message });
+  }
+});
+
+/**
+ * Record Golden Path events
+ * POST /metrics/events
+ */
+router.post('/metrics/events', (req: Request, res: Response) => {
+  const { step, status } = req.body;
+  if (!step) {
+    return res.status(400).json({ error: 'Step is required' });
+  }
+  try {
+    goldenPathStepTotal.inc({ step, status: status || 'success' });
+    res.status(204).end();
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ error: 'Failed to record event', details: error.message });
+  }
+});
+
+/**
+ * Update DORA metrics
+ * POST /metrics/dora
+ */
+router.post('/metrics/dora', (req: Request, res: Response) => {
+  const {
+    deployment_frequency,
+    lead_time_seconds,
+    mttr_seconds,
+    change_fail_rate,
+    environment = 'production',
+    event,
+  } = req.body;
+
+  try {
+    if (event === 'deployment' || deployment_frequency) {
+      doraDeploymentFrequency.inc({ environment });
+    }
+
+    if (typeof lead_time_seconds === 'number') {
+      doraLeadTimeSeconds.set({ environment }, lead_time_seconds);
+    }
+    if (typeof mttr_seconds === 'number') {
+      doraMttrSeconds.set({ environment }, mttr_seconds);
+    }
+    if (typeof change_fail_rate === 'number') {
+      doraChangeFailRate.set({ environment }, change_fail_rate);
+    }
+
+    res.status(204).end();
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ error: 'Failed to update DORA metrics', details: error.message });
   }
 });
 

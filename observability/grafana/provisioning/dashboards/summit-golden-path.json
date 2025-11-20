@@ -100,6 +100,83 @@
           "datasource": {"type": "prometheus", "uid": "summit-prom"}
         }
       ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Golden Path Funnel",
+      "gridPos": {"x": 0, "y": 22, "w": 24, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(golden_path_step_total) by (step)",
+          "legendFormat": "{{step}}",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ],
+      "options": {
+        "displayMode": "basic",
+        "orientation": "horizontal",
+        "showUnfilled": true
+      }
+    },
+    {
+      "type": "stat",
+      "title": "DORA: Deployment Frequency",
+      "gridPos": {"x": 0, "y": 30, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(increase(dora_deployment_frequency_total[1d]))",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "DORA: Lead Time",
+      "gridPos": {"x": 6, "y": 30, "w": 6, "h": 6},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(dora_lead_time_seconds)",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "DORA: MTTR",
+      "gridPos": {"x": 12, "y": 30, "w": 6, "h": 6},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(dora_mttr_seconds)",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "DORA: Change Fail Rate",
+      "gridPos": {"x": 18, "y": 30, "w": 6, "h": 6},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(dora_change_fail_rate) * 100",
+          "datasource": {"type": "prometheus", "uid": "summit-prom"}
+        }
+      ]
     }
   ]
 }

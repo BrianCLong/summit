@@ -379,6 +379,43 @@ register.registerMetric(businessApiCallsTotal);
 register.registerMetric(businessRevenueTotal);
 register.registerMetric(serviceAutoRemediationsTotal);
 
+// Golden Path Metrics
+const goldenPathStepTotal = new client.Counter({
+  name: 'golden_path_step_total',
+  help: 'Total number of users reaching each step of the golden path',
+  labelNames: ['step', 'status'],
+});
+register.registerMetric(goldenPathStepTotal);
+
+// DORA Metrics
+const doraDeploymentFrequency = new client.Counter({
+  name: 'dora_deployment_frequency_total',
+  help: 'Total number of deployments',
+  labelNames: ['environment'],
+});
+register.registerMetric(doraDeploymentFrequency);
+
+const doraLeadTimeSeconds = new client.Gauge({
+  name: 'dora_lead_time_seconds',
+  help: 'Time from commit to production',
+  labelNames: ['environment'],
+});
+register.registerMetric(doraLeadTimeSeconds);
+
+const doraMttrSeconds = new client.Gauge({
+  name: 'dora_mttr_seconds',
+  help: 'Mean time to recover from failure',
+  labelNames: ['environment'],
+});
+register.registerMetric(doraMttrSeconds);
+
+const doraChangeFailRate = new client.Gauge({
+  name: 'dora_change_fail_rate',
+  help: 'Percentage of deployments causing failure',
+  labelNames: ['environment'],
+});
+register.registerMetric(doraChangeFailRate);
+
 const metrics = {
   graphExpandRequestsTotal,
   aiRequestTotal,
@@ -450,4 +487,9 @@ export {
   businessApiCallsTotal,
   businessRevenueTotal,
   serviceAutoRemediationsTotal,
+  goldenPathStepTotal,
+  doraDeploymentFrequency,
+  doraLeadTimeSeconds,
+  doraMttrSeconds,
+  doraChangeFailRate,
 };

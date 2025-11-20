@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -67,6 +67,7 @@ import {
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
+import { trackEvent } from '../../services/analytics';
 
 interface Investigation {
   id: string;
@@ -208,6 +209,10 @@ export default function InvestigationDetail() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [addEvidenceOpen, setAddEvidenceOpen] = useState(false);
   const [addNoteOpen, setAddNoteOpen] = useState(false);
+
+  useEffect(() => {
+    trackEvent('results_viewed');
+  }, []);
 
   const { data: investigation, loading } = useSafeQuery<Investigation>({
     queryKey: `investigation_${id}`,

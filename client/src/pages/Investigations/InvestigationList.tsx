@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, Typography, Button, Stack } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
+import { trackEvent } from '../../services/analytics';
 
 // @ts-nocheck
 export default function InvestigationList() {
@@ -28,7 +29,12 @@ export default function InvestigationList() {
           sx={{ mb: 1 }}
         >
           <Typography variant="h6">Investigations</Typography>
-          <Button variant="contained">Create from Template</Button>
+          <Button
+            variant="contained"
+            onClick={() => trackEvent('investigation_created')}
+          >
+            Create from Template
+          </Button>
         </Stack>
         <div style={{ height: 420 }}>
           <DataGrid
