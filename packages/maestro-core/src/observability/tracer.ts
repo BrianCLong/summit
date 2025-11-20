@@ -84,13 +84,15 @@ export class MaestroTracer extends EventEmitter {
     this.sdk = new NodeSDK({
       resource,
       traceExporter: exporters.length > 0 ? exporters[0] : undefined,
-      metricExporter: new PrometheusExporter({
-        port: this.config.prometheusPort || 9090,
-      }),
       instrumentations:
         this.config.enableAutoInstrumentation !== false
           ? [getNodeAutoInstrumentations()]
           : [],
+    });
+
+    // Initialize Prometheus exporter separately (metricExporter not in NodeSDK config)
+    this.prometheusExporter = new PrometheusExporter({
+      port: this.config.prometheusPort || 9090,
     });
   }
 
@@ -463,13 +465,13 @@ export function traced(operationName?: string) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
-      const tracer = getTracer();
-      const span = tracer.tracer.startSpan(
+      const tracerInstance = getTracer();
+      const span = trace.getTracer('maestro').startSpan(
         operationName || `${target.constructor.name}.${propertyKey}`,
       );
 
       try {
-        const result = await tracer.withSpan(span, () =>
+        const result = await tracerInstance.withSpan(span, () =>
           originalMethod.apply(this, args),
         );
         span.setStatus({ code: SpanStatusCode.OK });

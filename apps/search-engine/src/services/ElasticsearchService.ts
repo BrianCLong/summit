@@ -471,7 +471,7 @@ export class ElasticsearchService {
         },
       } as Parameters<Client['indices']['create']>[0];
 
-      await this.client.indices.create(createRequest);
+      await this.client.indices.create(createRequest as any);
 
       if (index.aliases.length > 0) {
         const aliasRequest = {
@@ -482,7 +482,7 @@ export class ElasticsearchService {
           },
         } as Parameters<Client['indices']['updateAliases']>[0];
 
-        await this.client.indices.updateAliases(aliasRequest);
+        await this.client.indices.updateAliases(aliasRequest as any);
       }
 
       this.logger.info('Index created successfully', { indexName: index.name });
