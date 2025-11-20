@@ -1,5 +1,14 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import {
+  migrateDeprecatedKey,
+  emitDeprecationWarnings,
+} from './config/deprecated';
+
+// Apply deprecated key migrations before validation
+// This allows old keys to work with warnings
+migrateDeprecatedKey('NEO4J_USERNAME', 'NEO4J_USER');
+migrateDeprecatedKey('POSTGRES_URL', 'DATABASE_URL');
 
 const Env = z
   .object({
@@ -81,6 +90,10 @@ export const cfg = (() => {
   } else {
     console.log(`[STARTUP] Environment validated (${present} keys)`);
   }
+
+  // Emit deprecation warnings after validation succeeds
+  emitDeprecationWarnings();
+
   return env;
 })();
 
