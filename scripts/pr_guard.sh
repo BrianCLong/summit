@@ -22,7 +22,7 @@ git fetch -q origin --depth=50 || true
 git rev-parse --verify "$BASE_REF" >/dev/null || die "Base ref '$BASE_REF' not found"
 
 ## 1) Conflict markers anywhere in tree
-if grep -R --line-number -E '^(<<<<<<<|=======|>>>>>>>)' -- . ':(exclude).git' ; then
+if grep -R --line-number -E '^(<<<<<<<|=======|>>>>>>>)' --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build -- . ; then
   $STRICT && die "Conflict markers present" || warn "Conflict markers present"
 fi
 
