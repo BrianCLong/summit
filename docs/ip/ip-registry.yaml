@@ -1,0 +1,565 @@
+# IP Registry - Summit / IntelGraph
+# Single source of truth for all IP families
+#
+# Schema:
+#   family_id: Unique identifier (e.g., F1, F2, LLM_ORCH_001)
+#   name: Human-readable name
+#   summary: 1-3 sentence description
+#   status: [idea, partial, mvp, v1, v2+]
+#   owner: String (placeholder: unassigned, team name, or individual)
+#   modules: List of primary code paths implementing this family
+#   capabilities: Key capabilities this family enables
+#   horizons: Roadmap items per horizon (h0_hardening, h1_mvp, h2_v1, h3_moonshot)
+#   risks: Technical/operational risks
+#   dependencies: Other families or external infra this relies on
+#   tags: Categorization tags for filtering/search
+
+families:
+  - family_id: F1
+    name: "Provenance-First Multi-LLM Orchestration for Investigation Graphs"
+    summary: >
+      Unified orchestration layer that routes investigative queries across multiple LLM providers
+      (OpenAI, Anthropic, local models, etc.) while maintaining immutable provenance logs of every
+      decision, API call, and result. Enables proof-carrying analytics and compliance-ready audit trails.
+    status: mvp
+    owner: unassigned
+    modules:
+      - client/src/services/orchestrator/
+      - server/orchestrator/
+      - packages/prov-ledger/
+      - services/prov-ledger/
+      - .maestro/
+      - .mc/
+      - .orchestrator/
+    capabilities:
+      - Multi-provider LLM routing with failover
+      - Provenance ledger for all AI operations
+      - Policy-based model selection
+      - Cost-aware routing
+      - Explainable AI recommendations with audit trails
+      - Export control compliance for model outputs
+    horizons:
+      h0_hardening:
+        - Add stronger typing and validation for orchestrator tasks
+        - Improve test coverage for provenance ledger
+        - Add observability hooks (OTel spans) for all orchestrator operations
+      h1_mvp:
+        - Expose orchestrator as a first-class GraphQL API
+        - Build UX for "Ask Copilot" with provenance viewer
+        - Integrate with investigation workflow golden path
+      h2_v1:
+        - Multi-tenant orchestrator with per-tenant model policies
+        - Advanced routing: quality scores, latency optimization, cost budgets
+        - Integration with feature store for model performance tracking
+      h3_moonshot:
+        - Self-tuning orchestrator that learns optimal routing policies from feedback
+        - Cross-investigation learning: reuse successful reasoning chains
+        - Federated orchestration across air-gapped environments
+    risks:
+      - LLM provider API changes breaking routing logic
+      - Provenance ledger performance at scale (millions of operations)
+      - Model output consistency across providers
+    dependencies:
+      - Neo4j for graph queries
+      - Redis for caching
+      - External: OpenAI, Anthropic, etc. APIs
+    tags:
+      - provenance
+      - multi-llm
+      - orchestration
+      - audit
+      - compliance
+
+  - family_id: F2
+    name: "Cognitive Targeting Engine for Real-Time Active Measures"
+    summary: >
+      Adaptive cognitive influence system that models narratives, actors, and information flows
+      to recommend proportional active measures. Integrates psyops tactics with real-time graph
+      analytics and rule-based + LLM narrative generation. Includes operational safeguards and
+      proportionality controls.
+    status: partial
+    owner: unassigned
+    modules:
+      - cognitive-targeting-engine/
+      - active-measures-module/
+      - server/src/services/narrative-sim/
+      - scenarios/narrative/
+    capabilities:
+      - Real-time narrative simulation with tick-based evolution
+      - Actor behavior modeling (trust, reach, momentum)
+      - Rule-based + LLM hybrid narrative generation
+      - Event injection and parameter perturbation APIs
+      - Proportionality scoring for active measures
+      - Scenario library for crisis response, elections, IO
+    horizons:
+      h0_hardening:
+        - Add comprehensive tests for narrative simulation engine
+        - Improve performance of tick loop for large simulations
+        - Add validation for event schema and actor parameters
+      h1_mvp:
+        - Expose narrative sim API in GraphQL
+        - Build UI for scenario builder and live simulation viewer
+        - Integrate with investigation workflow for context
+      h2_v1:
+        - Multi-agent adversarial simulation (red vs blue teams)
+        - Advanced LLM integration for realistic narrative generation
+        - Feedback loops from real-world data (social media, news)
+      h3_moonshot:
+        - Autonomous active measures recommendation system with human-in-the-loop approval
+        - Cross-domain narrative tracking (cyber + info ops + kinetic)
+        - Predictive modeling of narrative outcomes using reinforcement learning
+    risks:
+      - Ethical concerns around active measures automation
+      - Attribution risk if measures are too aggressive
+      - Model drift in narrative generation over time
+    dependencies:
+      - F1 (Multi-LLM Orchestration) for LLM integration
+      - Neo4j for actor/entity graphs
+    tags:
+      - psyops
+      - active-measures
+      - narrative
+      - simulation
+      - cognitive
+
+  - family_id: F3
+    name: "Adversarial Misinformation Defense Platform"
+    summary: >
+      Multi-modal detection and defense system for adversarial content (deepfakes, coordinated campaigns,
+      synthetic media). Combines computer vision, NLP, audio analysis, and behavioral pattern matching
+      with autonomous tactic evolution and GAN-LLM hybrid adversarial training.
+    status: partial
+    owner: unassigned
+    modules:
+      - adversarial-misinfo-defense-platform/
+      - server/src/ai/models/
+      - ml/
+      - python/
+    capabilities:
+      - Multi-modal deepfake detection (video, audio, image)
+      - Coordinated campaign detection via behavior analysis
+      - Autonomous tactic evolution system
+      - GAN-based adversarial sample generation for training
+      - Pattern-based detection libraries organized by tactic
+      - Red/blue team scenario builder
+      - Validation against state-of-the-art benchmarks
+    horizons:
+      h0_hardening:
+        - Add tests for all detection modalities
+        - Improve false positive rates through cross-modal validation
+        - Add observability for detection confidence scores
+      h1_mvp:
+        - Expose detection APIs in GraphQL
+        - Build UI for content analysis and threat visualization
+        - Integrate with investigation workflow for threat entities
+      h2_v1:
+        - Real-time detection pipeline for streaming media
+        - Integration with social media connectors
+        - Automated threat intelligence feed generation
+      h3_moonshot:
+        - Fully autonomous defensive AI that evolves tactics without human intervention
+        - Predictive threat modeling (detect campaigns before they scale)
+        - Cross-platform attribution (link actors across Twitter, Telegram, etc.)
+    risks:
+      - Arms race with adversarial AI (cat and mouse game)
+      - High computational cost for real-time video analysis
+      - Regulatory concerns around content moderation
+    dependencies:
+      - F1 (Multi-LLM Orchestration) for LLM-guided tactic evolution
+      - External: ML models (YOLO, Whisper, spaCy, etc.)
+    tags:
+      - misinfo-defense
+      - deepfake
+      - detection
+      - adversarial-ai
+      - psyops
+
+  - family_id: F4
+    name: "Multi-Cloud Arbitrage Orchestration with Incentive-Aware Routing"
+    summary: >
+      Dynamic workload placement system that continuously optimizes across cloud providers
+      (AWS, GCP, Azure, colocation) by fusing carbon incentives, energy pricing, spot/reserved
+      capacity, and regulatory compliance into a unified scoring model. Includes A/B benchmark
+      harness to validate uplift vs. industry optimizers.
+    status: idea
+    owner: unassigned
+    modules:
+      - finops/
+      - ga-graphai/packages/cloud-arbitrage/
+    capabilities:
+      - Incentive-aware routing (carbon, energy, financial)
+      - Federated spot + reserved capacity hedging
+      - Real-time cost optimization with SLA enforcement
+      - A/B benchmark harness for validation
+      - Regulation-constrained optimization (data residency, sovereignty)
+      - Policy compliance ledger for audit
+    horizons:
+      h0_hardening:
+        - Define data model for cloud arbitrage scoring
+        - Set up observability for workload placement decisions
+      h1_mvp:
+        - Build proof-of-concept arbitrage engine
+        - Integrate with one cloud provider (AWS) for testing
+        - Add basic cost tracking and reporting
+      h2_v1:
+        - Multi-provider arbitrage with automatic failover
+        - Carbon intensity tracking and optimization
+        - A/B testing framework to validate savings claims
+      h3_moonshot:
+        - Fully autonomous FinOps platform integrated with billing
+        - Predictive cost modeling using ML (forecast workload demand)
+        - Cross-market arbitrage (energy futures, carbon credits)
+    risks:
+      - Provider API rate limits and cost transparency gaps
+      - Regulatory complexity across jurisdictions
+      - Market volatility in spot pricing
+    dependencies:
+      - External: AWS, GCP, Azure APIs
+      - Internal: Cost tracking and budgeting systems
+    tags:
+      - finops
+      - cloud-arbitrage
+      - cost-optimization
+      - carbon
+      - multi-cloud
+
+  - family_id: F5
+    name: "GraphRAG with Query Preview and Explainable Retrieval"
+    summary: >
+      Graph-native retrieval-augmented generation that uses Neo4j subgraph queries as context
+      for LLM prompts. Includes query preview (show user what will be retrieved), explainable
+      retrieval paths, and provenance linking every generated insight back to source entities/edges.
+    status: mvp
+    owner: unassigned
+    modules:
+      - intelgraph/
+      - intelgraph-mcp/
+      - graph_xai/
+      - graph-xai/
+      - server/src/graphql/
+    capabilities:
+      - Subgraph retrieval for LLM context
+      - Query preview before execution
+      - Explainable retrieval paths (why this entity was included)
+      - Provenance linking from LLM outputs to graph entities
+      - Integration with investigation workflow
+      - Support for temporal queries (time-based subgraphs)
+    horizons:
+      h0_hardening:
+        - Add tests for GraphRAG query generation
+        - Improve performance of subgraph retrieval
+        - Add validation for query complexity limits
+      h1_mvp:
+        - Expose GraphRAG as GraphQL API
+        - Build UI for query preview and result exploration
+        - Integrate with Copilot for investigative insights
+      h2_v1:
+        - Advanced query optimization (caching, indexing)
+        - Multi-hop reasoning over graph (follow relationships)
+        - Adaptive retrieval (learn which subgraphs are most useful)
+      h3_moonshot:
+        - Self-improving GraphRAG that learns from user feedback
+        - Cross-investigation knowledge transfer
+        - Federated GraphRAG across air-gapped graphs
+    risks:
+      - Query complexity blowup (too many hops)
+      - Neo4j performance at scale
+      - LLM context window limits
+    dependencies:
+      - F1 (Multi-LLM Orchestration)
+      - Neo4j
+    tags:
+      - graphrag
+      - rag
+      - graph
+      - llm
+      - explainability
+
+  - family_id: F6
+    name: "Graph-Native Investigation Workflow with AI Copilot"
+    summary: >
+      End-to-end investigative workflow that guides users through Investigation → Entities →
+      Relationships → Copilot → Results. Integrates AI recommendations, data-driven suggestions,
+      and tunable cognitive targeting levers directly into the UX. Designed to be the "golden path"
+      for intelligence analysts.
+    status: v1
+    owner: unassigned
+    modules:
+      - client/
+      - conductor-ui/
+      - apps/intelgraph-client/
+      - server/src/graphql/
+    capabilities:
+      - Investigation management (create, share, collaborate)
+      - Entity and relationship CRUD with graph visualization
+      - AI Copilot integration for insights
+      - Real-time collaboration (multi-user editing)
+      - Data-driven recommendations (suggested entities, paths)
+      - Tunable cognitive targeting modes
+      - Export and reporting (PDF, GraphML, ZIP)
+    horizons:
+      h0_hardening:
+        - Improve test coverage for investigation workflow
+        - Add observability for user actions (telemetry)
+        - Harden error handling and edge cases
+      h1_mvp:
+        - Already at MVP, focus on UX polish
+        - Add onboarding flow for new users
+        - Integrate with more data connectors
+      h2_v1:
+        - Advanced graph analytics (centrality, communities)
+        - Temporal investigation (time-travel queries)
+        - Multi-modal entity enrichment (images, docs, audio)
+      h3_moonshot:
+        - Fully autonomous investigation agent (AI-driven hypothesis generation)
+        - Cross-investigation pattern detection (find similar cases)
+        - Federated investigations across organizations
+    risks:
+      - UX complexity as features grow
+      - Performance with large graphs (>100k entities)
+      - User adoption and training
+    dependencies:
+      - F1 (Multi-LLM Orchestration)
+      - F5 (GraphRAG)
+      - Neo4j
+    tags:
+      - investigation
+      - graph
+      - ux
+      - copilot
+      - workflow
+
+  - family_id: F7
+    name: "Multi-Modal AI Extraction Pipeline"
+    summary: >
+      Automated entity and relationship extraction from multimodal content (text, images, video,
+      audio, PDFs). Combines OCR, object detection, face recognition, speech-to-text, NER, and
+      sentiment analysis with quality scoring and validation workflows. Feeds directly into the
+      investigation graph.
+    status: mvp
+    owner: unassigned
+    modules:
+      - server/src/ai/
+      - ml/
+      - python/
+      - intelgraph_ai_ml/
+    capabilities:
+      - OCR for text extraction (Tesseract, PaddleOCR)
+      - Object detection (YOLO v8)
+      - Face recognition (MTCNN + FaceNet)
+      - Speech-to-text (Whisper)
+      - NLP entity recognition (spaCy)
+      - Sentiment analysis and topic modeling
+      - Cross-modal matching (find related content)
+      - Quality scoring and confidence metrics
+    horizons:
+      h0_hardening:
+        - Add tests for all extraction modalities
+        - Improve error handling for malformed inputs
+        - Add observability for extraction job queue
+      h1_mvp:
+        - Expose extraction API in GraphQL
+        - Build UI for bulk upload and extraction results
+        - Integrate with investigation workflow
+      h2_v1:
+        - Real-time extraction pipeline for streaming media
+        - Advanced multimodal fusion (combine text + image + audio)
+        - Active learning for model improvement
+      h3_moonshot:
+        - Zero-shot entity extraction (no training data required)
+        - Fully autonomous extraction agent with self-validation
+        - Cross-domain extraction (cyber + physical + social)
+    risks:
+      - Model accuracy and false positives
+      - Computational cost for video processing
+      - Privacy concerns around face recognition
+    dependencies:
+      - External: ML models (YOLO, Whisper, spaCy, etc.)
+      - Kafka for job queue
+    tags:
+      - ai-ml
+      - extraction
+      - multimodal
+      - ocr
+      - nlp
+
+  - family_id: F8
+    name: "Real-Time Observability with SLO-Driven Operations"
+    summary: >
+      Comprehensive observability stack (OpenTelemetry, Prometheus, Grafana) with SLO tracking,
+      automated alerting, and DORA metrics. Includes proof-carrying telemetry (every metric
+      traceable to source code) and integration with provenance ledger for audit.
+    status: v1
+    owner: unassigned
+    modules:
+      - observability/
+      - prometheus/
+      - grafana/
+      - monitoring/
+      - dora/
+      - ops/
+    capabilities:
+      - OpenTelemetry instrumentation across all services
+      - Prometheus metrics collection and storage
+      - Grafana dashboards for system health
+      - SLO tracking (latency, availability, error rates)
+      - Automated alerting with runbook links
+      - DORA metrics (deployment frequency, lead time, MTTR)
+      - Integration with provenance ledger for audit
+    horizons:
+      h0_hardening:
+        - Add more Prometheus metrics for critical paths
+        - Improve Grafana dashboard layouts
+        - Add runbooks for all alerts
+      h1_mvp:
+        - Already at v1, focus on expanding coverage
+        - Add SLO dashboards for all services
+        - Integrate with incident management tools
+      h2_v1:
+        - Predictive alerting using ML (anomaly detection)
+        - Automated remediation for common issues
+        - Cross-service tracing with detailed flame graphs
+      h3_moonshot:
+        - Fully autonomous SRE agent (self-healing systems)
+        - Cost-aware observability (optimize metric cardinality)
+        - Federated observability across air-gapped environments
+    risks:
+      - Metric explosion and storage costs
+      - Alert fatigue from false positives
+      - Dashboard maintenance burden
+    dependencies:
+      - OpenTelemetry
+      - Prometheus
+      - Grafana
+    tags:
+      - observability
+      - slo
+      - monitoring
+      - dora
+      - sre
+
+  - family_id: F9
+    name: "Export Controls & Governance Automation"
+    summary: >
+      Policy-as-code system for export controls, data residency, and access governance. Integrates
+      Open Policy Agent (OPA) with graph-based access control (ABAC), provenance tracking, and
+      automated compliance reporting. Ensures all operations are audit-ready and legally defensible.
+    status: partial
+    owner: unassigned
+    modules:
+      - controls/
+      - contracts/
+      - policies/
+      - policy/
+      - opa/
+      - SECURITY/
+      - .security/
+    capabilities:
+      - Policy-as-code with OPA (Rego)
+      - Graph-based ABAC (attribute-based access control)
+      - Export control checks for model outputs
+      - Data residency enforcement
+      - Automated compliance reporting
+      - Integration with provenance ledger
+      - Audit trail for all policy decisions
+    horizons:
+      h0_hardening:
+        - Add tests for all OPA policies
+        - Improve error messages for policy violations
+        - Add observability for policy evaluations
+      h1_mvp:
+        - Expose policy API in GraphQL
+        - Build UI for policy management and audit logs
+        - Integrate with investigation workflow
+      h2_v1:
+        - Multi-tenant policy isolation
+        - Advanced ABAC with dynamic attributes
+        - Real-time policy updates without restart
+      h3_moonshot:
+        - AI-assisted policy authoring (natural language → Rego)
+        - Predictive compliance (flag issues before they happen)
+        - Federated policy enforcement across organizations
+    risks:
+      - Policy complexity and maintainability
+      - Performance overhead of policy evaluation
+      - Regulatory changes requiring rapid updates
+    dependencies:
+      - OPA
+      - F1 (Provenance ledger)
+    tags:
+      - export-control
+      - governance
+      - compliance
+      - opa
+      - abac
+
+  - family_id: F10
+    name: "Universal Data Connector SDK with Streaming & Batch"
+    summary: >
+      Pluggable connector framework for ingesting data from any source (STIX/TAXII, Splunk,
+      Sentinel, Elasticsearch, CSV, APIs, etc.). Supports both streaming and batch modes with
+      declarative schema mappings, provenance tracking, and error handling. Designed to be
+      the "data onramp" for all intelligence sources.
+    status: mvp
+    owner: unassigned
+    modules:
+      - connectors/
+      - data-pipelines/
+      - etl/
+      - ingestion/
+    capabilities:
+      - Pluggable connector architecture
+      - Streaming and batch ingestion modes
+      - Declarative schema-on-read mappings
+      - Provenance tracking for all ingested data
+      - Error handling and retry logic
+      - Support for 17+ connector types (STIX, Splunk, Sentinel, etc.)
+      - Integration with investigation workflow
+    horizons:
+      h0_hardening:
+        - Add tests for all connectors
+        - Improve error handling and logging
+        - Add observability for ingestion jobs
+      h1_mvp:
+        - Expose connector API in GraphQL
+        - Build UI for connector configuration and status
+        - Add more connector types (Telegram, dark web, etc.)
+      h2_v1:
+        - Real-time streaming connectors with Kafka
+        - Advanced schema validation and transformation
+        - Automated connector health checks and alerts
+      h3_moonshot:
+        - Fully autonomous connector agent (auto-discover sources)
+        - Zero-config connectors (AI-inferred schema mappings)
+        - Federated data mesh with cross-org connectors
+    risks:
+      - Connector API changes from upstream sources
+      - Performance bottlenecks with high-volume streams
+      - Schema drift over time
+    dependencies:
+      - Kafka for streaming
+      - F1 (Provenance ledger)
+    tags:
+      - connectors
+      - etl
+      - ingestion
+      - data-pipelines
+      - streaming
+
+# Summary statistics (auto-updated by scripts/ip-metrics.ts):
+# - Total families: 10
+# - Status breakdown:
+#   - idea: 1 (F4)
+#   - partial: 3 (F2, F3, F9)
+#   - mvp: 4 (F1, F5, F7, F10)
+#   - v1: 2 (F6, F8)
+#   - v2+: 0
+# - Tags (most common):
+#   - provenance (2)
+#   - orchestration (1)
+#   - psyops (2)
+#   - graph (3)
+#   - llm (2)
+#   - ai-ml (2)
+#   - observability (1)
+#   - compliance (2)

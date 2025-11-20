@@ -1,0 +1,17 @@
+{
+  "ip_families": ["F10"],
+  "primary_family": "F10",
+  "notes": "STIX/TAXII connector implementing the Universal Data Connector SDK pattern. Demonstrates pluggable architecture with declarative schema mappings, provenance tracking, and error handling. Serves as reference implementation for all connectors.",
+  "key_capabilities": [
+    "STIX 2.x data ingestion",
+    "TAXII 2.x protocol support",
+    "Declarative schema-on-read mapping",
+    "Provenance tracking for ingested data",
+    "Error handling and retry logic"
+  ],
+  "related_packages": [
+    "connectors/splunk_connector",
+    "connectors/sentinel_connector",
+    "data-pipelines/universal-ingest"
+  ]
+}

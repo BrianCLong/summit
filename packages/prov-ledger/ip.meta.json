@@ -1,0 +1,17 @@
+{
+  "ip_families": ["F1", "F9"],
+  "primary_family": "F1",
+  "notes": "Core provenance ledger package enabling immutable audit trails and proof-carrying analytics. Provides cryptographic verification of data lineage (SHA-256 hashing, Ed25519 signatures). Critical for both multi-LLM orchestration provenance (F1) and export controls compliance (F9). Implements manifest signing, step recording, and verification APIs.",
+  "key_capabilities": [
+    "Immutable provenance manifests",
+    "Cryptographic step verification",
+    "Hash-based content integrity",
+    "Ed25519 digital signatures",
+    "Audit trail generation"
+  ],
+  "related_packages": [
+    "services/prov-ledger",
+    "ga-graphai/packages/prov-ledger",
+    "packages/prov-ledger-sdk"
+  ]
+}

@@ -1,3 +1,6 @@
+// @ip-family: F1
+// Core multi-LLM orchestrator with modular task dispatch, status tracking, and event emission.
+// Implements provenance-first orchestration pattern enabling proof-carrying analytics.
 import { BaseModule } from './moduleBase';
 import { defaultModules } from './modules';
 import {

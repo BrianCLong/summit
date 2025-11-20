@@ -1,3 +1,7 @@
+// @ip-family: F1,F9
+// Provenance ledger for immutable audit trails and proof-carrying analytics (F1).
+// Integrates with export controls and governance automation (F9) for compliance.
+// Provides cryptographic verification of data lineage and transformation steps.
 import {
   createHash,
   createPrivateKey,
