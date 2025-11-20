@@ -1,0 +1,30 @@
+{
+  "name": "@summit/cloud-platform-service",
+  "version": "1.0.0",
+  "description": "Cloud platform service for multi-cloud management",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@summit/cloud-platform": "workspace:*",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "pino": "^10.1.0",
+    "pino-http": "^11.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.19",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.19.0"
+  }
+}
