@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Predictive Forecasting Service
+  predictive-forecasting:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: predictive-forecasting
+    ports:
+      - "8091:8091"
+    environment:
+      - SERVICE_NAME=forecasting
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./:/app
+      - ./sample_dataset.npz:/data/sample_dataset.npz:ro
+    command: uvicorn api_service:app --host 0.0.0.0 --port 8091 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - predictive-network
+    restart: unless-stopped
+
+  # Prometheus (scrapes metrics from predictive services)
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: predictive-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - predictive-network
+    restart: unless-stopped
+
+  # Grafana (visualizes metrics)
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: predictive-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+    volumes:
+      - ./grafana-provisioning:/etc/grafana/provisioning:ro
+      - ../observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - predictive-network
+    restart: unless-stopped
+
+networks:
+  predictive-network:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:
