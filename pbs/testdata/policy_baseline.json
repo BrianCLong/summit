@@ -1,0 +1,28 @@
+{
+  "name": "baseline-policy",
+  "version": "2024-08-01",
+  "description": "Baseline adjudication policy mirroring historical outcomes.",
+  "default_decision": "allow",
+  "base_latency_ms": 2,
+  "rules": [
+    {
+      "id": "rule-payment-redact",
+      "description": "Redact payment content regardless of country",
+      "match": {
+        "content_type": "payment"
+      },
+      "decision": "redact",
+      "latency_ms": 5
+    },
+    {
+      "id": "rule-us-image-transform",
+      "description": "Transform US image uploads",
+      "match": {
+        "content_type": "image",
+        "country": "US"
+      },
+      "decision": "transform",
+      "latency_ms": 3
+    }
+  ]
+}

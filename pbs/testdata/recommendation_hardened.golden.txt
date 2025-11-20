@@ -1,0 +1,10 @@
+# PBS Rollout Recommendation
+verdict: hold
+policy_version: 2024-08-15
+run_id: a1722d1fd487acec2c982a635d3de0f807fe99c9b00ee98228c56829c91b4e0e
+rationale:
+  - block-rate delta +20.00% exceeds limit
+metrics:
+  block_rate_delta: +0.2000
+  latency_delta_ms: +5.80
+  canary_catches: 1
