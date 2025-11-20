@@ -1,12 +1,98 @@
+global:
+  resolve_timeout: 5m
+  slack_api_url: '${SLACK_WEBHOOK_URL:-}' # Set via env var
+
+# Root route
 route:
-  group_by: ['alertname', 'service']
+  receiver: 'default'
+  group_by: ['alertname', 'service', 'severity']
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
-  receiver: oncall
+
+  # Child routes for different severities
+  routes:
+    - receiver: 'critical'
+      matchers:
+        - severity = critical
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: true
+
+    - receiver: 'warning'
+      matchers:
+        - severity = warning
+      group_wait: 30s
+      repeat_interval: 4h
+
+    - receiver: 'info'
+      matchers:
+        - severity = info
+      group_wait: 2m
+      repeat_interval: 12h
+
+# Inhibition rules - suppress alerts when related alerts fire
+inhibit_rules:
+  # Inhibit warning alerts if critical alert for same service fires
+  - source_matchers:
+      - severity = critical
+    target_matchers:
+      - severity = warning
+    equal: ['service', 'alertname']
+
+  # Inhibit all alerts if service is down
+  - source_matchers:
+      - alertname = ServiceDown
+    target_matchers:
+      - service = ~.+
+    equal: ['service']
+
 receivers:
-  - name: oncall
+  - name: 'default'
     webhook_configs:
-      - url: https://runbook-bot/actions/ingest
+      - url: 'http://localhost:5001/alerts' # Development webhook
+        send_resolved: true
+
+  - name: 'critical'
+    slack_configs:
+      - channel: '#alerts-critical'
+        title: '🚨 [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}'
+        text: |-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Severity:* {{ .Labels.severity }}
+          *Details:*
+          {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+      - api_url: '${PAGERDUTY_URL:-}'
+        routing_key: '${PAGERDUTY_KEY:-}'
+        send_resolved: true
+
+  - name: 'warning'
+    slack_configs:
+      - channel: '#alerts-warning'
+        title: '⚠️ [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}'
+        text: |-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          {{ end }}
+        send_resolved: true
+
+  - name: 'info'
+    webhook_configs:
+      - url: 'http://localhost:5001/alerts/info'
+        send_resolved: true
+
+  - name: 'oncall'
+    webhook_configs:
+      - url: 'https://runbook-bot/actions/ingest'
+        send_resolved: true
+
 templates:
-  - 'observability/alertmanager/templates/*.tmpl'
+  - '/etc/alertmanager/templates/*.tmpl'

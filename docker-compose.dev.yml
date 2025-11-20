@@ -81,6 +81,11 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-600}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      # OpenTelemetry Configuration
+      OTEL_SERVICE_NAME: summit-api
+      OTEL_SERVICE_VERSION: 1.0.0
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
       - '4000:4000'
     depends_on:
@@ -108,6 +113,11 @@ services:
     restart: unless-stopped
     environment:
       PORT: 4100
+      # OpenTelemetry Configuration
+      OTEL_SERVICE_NAME: summit-gateway
+      OTEL_SERVICE_VERSION: 1.0.0
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     depends_on:
       api:
         condition: service_healthy
@@ -155,6 +165,14 @@ services:
     restart: unless-stopped
     volumes:
       - ./observability/prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/alerts:/etc/prometheus/alerts:ro
+      - ./observability/prometheus/recording-rules.yaml:/etc/prometheus/recording-rules.yaml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=30d'
     ports:
       - '9090:9090'
     networks:
@@ -167,7 +185,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
-      GF_INSTALL_PLUGINS: grafana-clock-panel
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel
+      GF_FEATURE_TOGGLES_ENABLE: tempoSearch tempoBackendSearch
     ports:
       - '3001:3000'
     volumes:
@@ -176,6 +195,67 @@ services:
     depends_on:
       prometheus:
         condition: service_started
+      loki:
+        condition: service_started
+      jaeger:
+        condition: service_started
+    networks:
+      - summit
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    container_name: summit-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+      SPAN_STORAGE_TYPE: memory
+    ports:
+      - '16686:16686' # Jaeger UI
+      - '4317:4317'   # OTLP gRPC receiver
+      - '4318:4318'   # OTLP HTTP receiver
+      - '14268:14268' # Jaeger collector HTTP
+    networks:
+      - summit
+
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: summit-loki
+    restart: unless-stopped
+    ports:
+      - '3100:3100'
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./observability/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - summit
+
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: summit-promtail
+    restart: unless-stopped
+    volumes:
+      - ./observability/promtail/promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+    networks:
+      - summit
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: summit-alertmanager
+    restart: unless-stopped
+    ports:
+      - '9093:9093'
+    volumes:
+      - ./observability/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yaml'
+      - '--storage.path=/alertmanager'
     networks:
       - summit
 
@@ -185,6 +265,9 @@ volumes:
   neo4j_data:
   neo4j_logs:
   grafana_data:
+  prometheus_data:
+  loki_data:
+  alertmanager_data:
 
 networks:
   summit:

@@ -1,0 +1,106 @@
+# Resource Utilization Alerts
+# Monitor system resources to prevent saturation
+
+groups:
+  - name: resource-alerts
+    interval: 30s
+    rules:
+      # Memory Alerts
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% (current: {{ $value | humanizePercentage }})"
+          runbook_url: "https://runbooks.summit.dev/troubleshooting/high-memory"
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is above 95% (current: {{ $value | humanizePercentage }}). Risk of OOM."
+
+      # CPU Alerts
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for 10 minutes (current: {{ $value | humanizePercentage }})"
+          runbook_url: "https://runbooks.summit.dev/troubleshooting/high-cpu"
+
+      # Disk Space Alerts
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|ramfs"}) * 100 < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space running low"
+          description: "Disk {{ $labels.mountpoint }} has less than 20% free space ({{ $value | humanizePercentage }} remaining)"
+          runbook_url: "https://runbooks.summit.dev/troubleshooting/disk-space"
+
+      - alert: DiskSpaceCritical
+        expr: |
+          (node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|ramfs"}) * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space critically low"
+          description: "Disk {{ $labels.mountpoint }} has less than 10% free space ({{ $value | humanizePercentage }} remaining)"
+
+      # Container Resource Alerts
+      - alert: ContainerHighMemory
+        expr: |
+          (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container memory usage high"
+          description: "Container {{ $labels.name }} is using {{ $value | humanizePercentage }} of its memory limit"
+
+      - alert: ContainerHighCPU
+        expr: |
+          (rate(container_cpu_usage_seconds_total{name!=""}[5m]) / container_spec_cpu_quota{name!=""}) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container CPU usage high"
+          description: "Container {{ $labels.name }} is using {{ $value | humanizePercentage }} of its CPU quota"
+
+      # Connection Pool Alerts
+      - alert: PostgresConnectionPoolHigh
+        expr: |
+          (pg_stat_database_numbackends / pg_settings_max_connections) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+        annotations:
+          summary: "PostgreSQL connection pool near limit"
+          description: "PostgreSQL is using {{ $value | humanizePercentage }} of max connections"
+
+      - alert: RedisConnectionPoolHigh
+        expr: |
+          (redis_connected_clients / redis_config_maxclients) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis connection pool near limit"
+          description: "Redis is using {{ $value | humanizePercentage }} of max connections"
