@@ -7,6 +7,7 @@
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
+import { provenanceLedger } from '../provenance/ledger.js';
 
 const repoLogger = logger.child({ name: 'InvestigationRepo' });
 
@@ -77,7 +78,25 @@ export class InvestigationRepo {
       ],
     )) as { rows: InvestigationRow[] };
 
-    return this.mapRow(rows[0]);
+    const investigation = this.mapRow(rows[0]);
+
+    // Record activity
+    provenanceLedger
+      .appendEntry({
+        tenantId: input.tenantId,
+        actionType: 'INVESTIGATION_CREATED',
+        resourceType: 'investigation',
+        resourceId: investigation.id,
+        actorId: userId,
+        actorType: 'user',
+        payload: { name: input.name },
+        metadata: {},
+      })
+      .catch((err) =>
+        repoLogger.error('Failed to record investigation creation', err),
+      );
+
+    return investigation;
   }
 
   /**
@@ -125,7 +144,26 @@ export class InvestigationRepo {
       params,
     )) as { rows: InvestigationRow[] };
 
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    if (rows[0]) {
+      const investigation = this.mapRow(rows[0]);
+      provenanceLedger
+        .appendEntry({
+          tenantId: investigation.tenantId,
+          actionType: 'INVESTIGATION_UPDATED',
+          resourceType: 'investigation',
+          resourceId: investigation.id,
+          actorId: 'system', // We don't have userId passed to update(), maybe add it later
+          actorType: 'system',
+          payload: { updates: input },
+          metadata: {},
+        })
+        .catch((err) =>
+          repoLogger.error('Failed to record investigation update', err),
+        );
+      return investigation;
+    }
+
+    return null;
   }
 
   /**
@@ -139,13 +177,32 @@ export class InvestigationRepo {
 
       // Note: In a full implementation, you might want to soft-delete
       // or handle related entities/relationships more carefully
-      const { rowCount } = await client.query(
-        `DELETE FROM investigations WHERE id = $1`,
+      const { rows } = await client.query(
+        `DELETE FROM investigations WHERE id = $1 RETURNING tenant_id`,
         [id],
       );
 
       await client.query('COMMIT');
-      return rowCount !== null && rowCount > 0;
+
+      if (rows.length > 0) {
+        provenanceLedger
+          .appendEntry({
+            tenantId: rows[0].tenant_id,
+            actionType: 'INVESTIGATION_DELETED',
+            resourceType: 'investigation',
+            resourceId: id,
+            actorId: 'system', // Missing userId in delete()
+            actorType: 'system',
+            payload: {},
+            metadata: {},
+          })
+          .catch((err) =>
+            repoLogger.error('Failed to record investigation deletion', err),
+          );
+        return true;
+      }
+
+      return false;
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

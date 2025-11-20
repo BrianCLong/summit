@@ -279,7 +279,12 @@ export const coreResolvers = {
   Mutation: {
     // Entity mutations
     createEntity: async (_: any, { input }: any, context: any) => {
-      const parsed = EntityInputZ.parse(input);
+      const effectiveTenantId =
+        input.tenantId ||
+        context.tenantId ||
+        context.user?.tenantId ||
+        'default_tenant';
+      const parsed = EntityInputZ.parse({ ...input, tenantId: effectiveTenantId });
       const userId = context.user?.sub || context.user?.id || 'system';
 
       // Add investigation context to props if provided
@@ -315,7 +320,15 @@ export const coreResolvers = {
 
     // Relationship mutations
     createRelationship: async (_: any, { input }: any, context: any) => {
-      const parsed = RelationshipInputZ.parse(input);
+      const effectiveTenantId =
+        input.tenantId ||
+        context.tenantId ||
+        context.user?.tenantId ||
+        'default_tenant';
+      const parsed = RelationshipInputZ.parse({
+        ...input,
+        tenantId: effectiveTenantId,
+      });
       const userId = context.user?.sub || context.user?.id || 'system';
 
       // Add investigation context to props if provided
@@ -350,7 +363,9 @@ export const coreResolvers = {
     // Investigation mutations
     createInvestigation: async (_: any, { input }: any, context: any) => {
       const userId = context.user?.sub || context.user?.id || 'system';
-      return await investigationRepo.create(input, userId);
+      const tenantId =
+        context.tenantId || context.user?.tenantId || 'default_tenant';
+      return await investigationRepo.create({ ...input, tenantId }, userId);
     },
 
     updateInvestigation: async (_: any, { input }: any, context: any) => {

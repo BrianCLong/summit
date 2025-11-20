@@ -6,6 +6,7 @@ const { graphTypeDefs } = require('./schema.graphops.js');
 const { aiTypeDefs } = require('./schema.ai.js');
 const graphragTypes = require('./types/graphragTypes.js');
 const coreTypeDefs = require('./schema/core.js');
+import { activityTypeDefs } from './schema/activity.js';
 
 // Load v0.4.0 Transcendent Intelligence schema
 const v040Schema = gql(
@@ -37,4 +38,5 @@ export const typeDefs = [
   graphragTypes,
   aiTypeDefs,
   v040Schema,
+  activityTypeDefs,
 ];

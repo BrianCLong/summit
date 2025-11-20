@@ -920,8 +920,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       fromSequence?: bigint;
       toSequence?: bigint;
       limit?: number;
+      offset?: number;
       actionType?: string;
       resourceType?: string;
+      order?: 'ASC' | 'DESC';
     } = {},
   ): Promise<ProvenanceEntry[]> {
     const whereConditions = ['tenant_id = $1'];
@@ -952,11 +954,14 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       paramIndex++;
     }
 
+    const sortOrder = options.order === 'DESC' ? 'DESC' : 'ASC';
+
     const query = `
       SELECT * FROM provenance_ledger_v2
       WHERE ${whereConditions.join(' AND ')}
-      ORDER BY sequence_number
+      ORDER BY sequence_number ${sortOrder}
       ${options.limit ? `LIMIT ${options.limit}` : ''}
+      ${options.offset ? `OFFSET ${options.offset}` : ''}
     `;
 
     const result = await pool.query(query, params);
