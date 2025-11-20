@@ -1,0 +1,38 @@
+{
+  "name": "@intelgraph/rpa",
+  "version": "1.0.0",
+  "description": "Robotic Process Automation capabilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0",
+    "axios": "^1.11.0",
+    "cheerio": "^1.0.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.7",
+    "puppeteer": "^24.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^7.0.1",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "rpa",
+    "automation",
+    "scraping",
+    "workflow",
+    "bot"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "type": "module"
+}

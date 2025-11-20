@@ -1,0 +1,40 @@
+{
+  "name": "@intelgraph/connectors",
+  "version": "1.0.0",
+  "description": "Integration connectors framework for workflow automation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0",
+    "axios": "^1.11.0",
+    "pg": "^8.16.3",
+    "redis": "^5.8.1",
+    "nodemailer": "^7.0.7",
+    "@slack/web-api": "^7.11.0",
+    "@aws-sdk/client-s3": "^3.713.0",
+    "@azure/storage-blob": "^12.26.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@types/pg": "^8.15.6",
+    "@types/nodemailer": "^7.0.1",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "connectors",
+    "integrations",
+    "workflow",
+    "automation",
+    "api"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "type": "module"
+}

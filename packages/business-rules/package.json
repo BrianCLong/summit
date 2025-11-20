@@ -1,0 +1,34 @@
+{
+  "name": "@intelgraph/business-rules",
+  "version": "1.0.0",
+  "description": "Business Rules Engine with DMN support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0",
+    "lodash": "^4.17.21",
+    "expr-eval": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@types/lodash": "^4.14.202",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "business-rules",
+    "dmn",
+    "decision-engine",
+    "rule-engine",
+    "workflow"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "type": "module"
+}
