@@ -1,5 +1,30 @@
 extends: ['spectral:oas', 'spectral:asyncapi']
 rules:
+  # Existing rules
   oas3-api-servers: warn
   operation-operationId: error
   no-invalid-media-type-examples: error
+
+  # Enhanced OpenAPI documentation rules
+  info-contact: error
+  info-description: error
+  info-license: warn
+  operation-description: error
+  operation-summary: warn
+  operation-tags: error
+  operation-tag-defined: error
+  parameter-description: warn
+  tag-description: warn
+  oas3-operation-security-defined: warn
+  oas3-schema: error
+  oas3-valid-media-example: warn
+  oas3-valid-schema-example: warn
+
+  # Custom IntelGraph rules
+  require-security-on-mutations:
+    description: All POST/PUT/PATCH/DELETE operations must have security
+    severity: error
+    given: "$.paths[*][?(@property === 'post' || @property === 'put' || @property === 'patch' || @property === 'delete')]"
+    then:
+      field: security
+      function: truthy
