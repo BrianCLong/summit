@@ -1,0 +1,371 @@
+# Predictive Threat Suite Configuration
+# Override settings by setting environment variables or creating config.local.yaml
+
+# Service Configuration
+service:
+  name: "predictive-threat-suite"
+  version: "0.1.0-alpha"
+  host: "0.0.0.0"
+  port: 8091
+  workers: 4
+  reload: false  # Set to true for development
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# API Configuration
+api:
+  title: "Predictive Threat Suite API"
+  description: "Timeline forecasting and counterfactual simulation for threat intelligence"
+  docs_url: "/docs"
+  redoc_url: "/redoc"
+  openapi_url: "/openapi.json"
+
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+    requests_per_hour: 1000
+
+  # Request timeout
+  timeout_seconds: 60
+
+  # CORS settings
+  cors:
+    enabled: true
+    allow_origins:
+      - "http://localhost:3000"
+      - "http://localhost:3001"
+      - "https://summit.internal"
+    allow_methods:
+      - "GET"
+      - "POST"
+      - "OPTIONS"
+    allow_headers:
+      - "Content-Type"
+      - "Authorization"
+
+# Forecasting Configuration
+forecasting:
+  enabled: true
+
+  # Model settings
+  models:
+    arima:
+      enabled: true
+      default_p: 2
+      default_d: 1
+      default_q: 2
+      max_p: 5
+      max_d: 2
+      max_q: 5
+
+    exponential_smoothing:
+      enabled: true
+      default_alpha: 0.3
+      default_beta: 0.1
+      min_alpha: 0.1
+      max_alpha: 0.9
+      min_beta: 0.05
+      max_beta: 0.5
+
+  # Forecast settings
+  default_horizon: "24h"
+  default_confidence_level: 0.95
+  default_model_type: "arima"
+
+  # Constraints
+  min_historical_points: 10
+  max_historical_points: 10000
+  max_forecast_horizon_days: 30
+
+  # Performance settings
+  cache_enabled: true
+  cache_ttl_seconds: 900  # 15 minutes
+  max_concurrent_forecasts: 10
+
+# Simulation Configuration
+simulation:
+  enabled: true
+
+  # Intervention types
+  interventions:
+    - deploy_patch
+    - rate_limit
+    - scale_up
+    - circuit_breaker
+    - traffic_shift
+    - rollback
+    - do_nothing
+
+  # Simulation settings
+  default_timeframe: "24h"
+  max_interventions_per_scenario: 10
+
+  # Causal model weights
+  causal_weights:
+    threat_level_impact: 0.4
+    error_rate_impact: 0.25
+    latency_impact: 0.20
+    resource_impact: 0.15
+
+  # Intervention effectiveness (baseline probabilities)
+  intervention_effectiveness:
+    deploy_patch:
+      threat_reduction: 0.70
+      error_reduction: 0.60
+      latency_improvement: 0.40
+      cost: 0.50
+      time_to_effect_minutes: 30
+
+    rate_limit:
+      threat_reduction: 0.40
+      error_reduction: 0.30
+      latency_improvement: 0.60
+      cost: 0.20
+      time_to_effect_minutes: 5
+
+    scale_up:
+      threat_reduction: 0.30
+      error_reduction: 0.50
+      latency_improvement: 0.70
+      cost: 0.70
+      time_to_effect_minutes: 10
+
+    circuit_breaker:
+      threat_reduction: 0.50
+      error_reduction: 0.70
+      latency_improvement: 0.30
+      cost: 0.30
+      time_to_effect_minutes: 2
+
+    traffic_shift:
+      threat_reduction: 0.60
+      error_reduction: 0.40
+      latency_improvement: 0.50
+      cost: 0.40
+      time_to_effect_minutes: 15
+
+    rollback:
+      threat_reduction: 0.80
+      error_reduction: 0.80
+      latency_improvement: 0.60
+      cost: 0.60
+      time_to_effect_minutes: 20
+
+  # Performance settings
+  cache_enabled: true
+  cache_ttl_seconds: 600  # 10 minutes
+  max_concurrent_simulations: 20
+
+# Metrics Configuration
+metrics:
+  enabled: true
+  endpoint: "/metrics"
+  export_interval_seconds: 15
+
+  # Metric retention
+  retention:
+    forecast_values_count: 100  # Keep last N forecast values per entity
+    simulation_results_count: 50  # Keep last N simulation results per entity
+
+  # Performance metrics
+  track_latency: true
+  track_throughput: true
+  track_errors: true
+  track_accuracy: true
+
+# Data Management
+data:
+  # Historical data
+  max_data_points_in_memory: 100000
+  data_cleanup_interval_seconds: 3600  # 1 hour
+
+  # Sample dataset generation
+  sample_datasets:
+    enabled: true
+    output_directory: "/data/samples"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"  # json or text
+  output: "stdout"  # stdout, file, or both
+
+  # File logging (if output includes "file")
+  file:
+    path: "/var/log/predictive-suite/app.log"
+    max_size_mb: 100
+    max_files: 10
+    rotation: "daily"  # daily, size, or both
+
+  # Structured logging fields
+  include_fields:
+    - timestamp
+    - level
+    - message
+    - request_id
+    - entity_id
+    - signal_type
+    - model_type
+
+# Integration Settings
+integration:
+  # Prometheus
+  prometheus:
+    enabled: true
+    scrape_interval_seconds: 15
+    push_gateway_url: null  # Optional: http://pushgateway:9091
+
+  # Grafana
+  grafana:
+    enabled: true
+    dashboards_path: "/etc/grafana/provisioning/dashboards"
+
+  # Summit platform
+  summit:
+    enabled: true
+    base_url: "http://server:4000"
+    api_key: null  # Set via environment variable: SUMMIT_API_KEY
+    timeout_seconds: 30
+
+# Security Settings
+security:
+  # Authentication
+  authentication:
+    enabled: false  # Set to true for production
+    type: "api_key"  # api_key, oauth, or jwt
+    api_key_header: "X-API-Key"
+
+  # API keys (for development only - use secrets management in production)
+  api_keys:
+    - name: "development"
+      key: "dev-key-12345"
+      permissions:
+        - forecast:read
+        - forecast:write
+        - simulate:read
+        - simulate:write
+
+  # TLS/SSL
+  tls:
+    enabled: false
+    cert_file: "/etc/ssl/certs/predictive-suite.crt"
+    key_file: "/etc/ssl/private/predictive-suite.key"
+
+  # Request validation
+  validation:
+    max_payload_size_mb: 10
+    sanitize_inputs: true
+
+# Feature Flags
+features:
+  # Model features
+  arima_forecasting: true
+  exponential_smoothing_forecasting: true
+  prophet_forecasting: false  # Requires additional dependencies
+  lstm_forecasting: false  # Future feature
+
+  # Simulation features
+  causal_simulation: true
+  quantum_enhanced_prediction: false  # Future feature
+  multi_variate_forecasting: false  # Future feature
+
+  # Advanced features
+  auto_model_selection: false  # Future feature
+  hyperparameter_tuning: false  # Future feature
+  drift_detection: false  # Future feature
+  auto_retraining: false  # Future feature
+
+  # UI features
+  interactive_dashboards: true
+  api_documentation: true
+
+# Performance Tuning
+performance:
+  # Worker pool
+  worker_pool_size: 10
+  worker_timeout_seconds: 300
+
+  # Connection pooling
+  connection_pool:
+    max_size: 100
+    min_size: 10
+    timeout_seconds: 30
+
+  # Memory management
+  memory:
+    max_heap_size_mb: 1024
+    gc_threshold_mb: 768
+
+  # Optimization
+  optimization:
+    enable_caching: true
+    enable_batch_processing: true
+    enable_lazy_loading: true
+
+# Development Settings
+development:
+  debug_mode: false
+  hot_reload: false
+  verbose_logging: false
+  enable_profiling: false
+  mock_data: false
+
+# Production Settings
+production:
+  enable_monitoring: true
+  enable_alerting: true
+  enable_tracing: true
+  enable_metrics: true
+  health_check_interval_seconds: 30
+
+# Resource Limits
+resources:
+  cpu:
+    limit_cores: 2
+    request_cores: 0.5
+
+  memory:
+    limit_mb: 1024
+    request_mb: 256
+
+  disk:
+    limit_gb: 10
+
+# Backup and Recovery
+backup:
+  enabled: false
+  interval_hours: 24
+  retention_days: 30
+  destination: "s3://predictive-suite-backups/"
+
+# Monitoring and Alerting
+monitoring:
+  health_checks:
+    enabled: true
+    endpoint: "/health"
+    liveness_probe_path: "/health/live"
+    readiness_probe_path: "/health/ready"
+    startup_probe_path: "/health/startup"
+
+  alerts:
+    enabled: true
+    channels:
+      - type: "prometheus"
+        enabled: true
+      - type: "email"
+        enabled: false
+        recipients:
+          - "team@summit.internal"
+      - type: "slack"
+        enabled: false
+        webhook_url: null  # Set via environment variable
+
+# Deployment Settings
+deployment:
+  environment: "development"  # development, staging, production
+  namespace: "predictive-suite"
+  replicas: 2
+  rolling_update:
+    max_surge: 1
+    max_unavailable: 0
+  revision_history_limit: 10

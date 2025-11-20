@@ -1,0 +1,354 @@
+# Prometheus Alert Rules for Predictive Threat Suite
+
+groups:
+  - name: predictive_suite_alerts
+    interval: 30s
+    rules:
+      # ============================================================================
+      # Service Availability Alerts
+      # ============================================================================
+
+      - alert: PredictiveSuiteDown
+        expr: up{job="predictive-suite"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "Predictive Suite service is down"
+          description: "The Predictive Threat Suite API service has been down for more than 2 minutes."
+          runbook_url: "https://docs.summit.internal/runbooks/predictive-suite-down"
+          dashboard_url: "http://grafana:3001/d/predictive-platform-health"
+
+      - alert: PredictiveSuiteDegraded
+        expr: |
+          (
+            rate(predictive_http_requests_total{status=~"5.."}[5m])
+            /
+            rate(predictive_http_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "Predictive Suite error rate is high"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          runbook_url: "https://docs.summit.internal/runbooks/predictive-suite-errors"
+
+      # ============================================================================
+      # Performance Alerts
+      # ============================================================================
+
+      - alert: PredictiveSuiteHighLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(predictive_http_request_duration_seconds_bucket[5m])
+          ) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "Predictive Suite API latency is high"
+          description: "P95 latency is {{ $value | humanizeDuration }} (threshold: 1s)"
+          runbook_url: "https://docs.summit.internal/runbooks/predictive-suite-latency"
+
+      - alert: ForecastGenerationSlow
+        expr: |
+          histogram_quantile(0.95,
+            rate(predictive_forecast_generation_duration_seconds_bucket{model_type="arima"}[5m])
+          ) > 0.5
+        for: 15m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "Forecast generation is slow"
+          description: "ARIMA forecast generation P95 is {{ $value | humanizeDuration }} (threshold: 500ms)"
+          runbook_url: "https://docs.summit.internal/runbooks/slow-forecast-generation"
+
+      - alert: SimulationSlow
+        expr: |
+          histogram_quantile(0.95,
+            rate(predictive_simulation_duration_seconds_bucket[5m])
+          ) > 0.3
+        for: 15m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "Counterfactual simulation is slow"
+          description: "Simulation P95 is {{ $value | humanizeDuration }} (threshold: 300ms)"
+          runbook_url: "https://docs.summit.internal/runbooks/slow-simulation"
+
+      # ============================================================================
+      # Accuracy Alerts
+      # ============================================================================
+
+      - alert: ForecastAccuracyDegraded
+        expr: |
+          predictive_forecast_accuracy_mape > 20
+        for: 1h
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: data-science
+        annotations:
+          summary: "Forecast accuracy has degraded"
+          description: "MAPE for {{ $labels.signal_type }} on {{ $labels.entity_id }} is {{ $value | printf \"%.1f\" }}% (threshold: 20%)"
+          runbook_url: "https://docs.summit.internal/runbooks/forecast-accuracy-degraded"
+          action: "Consider retraining model or investigating data quality issues"
+
+      - alert: ForecastAccuracyCritical
+        expr: |
+          predictive_forecast_accuracy_mape > 50
+        for: 30m
+        labels:
+          severity: critical
+          component: predictive-suite
+          team: data-science
+        annotations:
+          summary: "Forecast accuracy is critically low"
+          description: "MAPE for {{ $labels.signal_type }} on {{ $labels.entity_id }} is {{ $value | printf \"%.1f\" }}% (threshold: 50%)"
+          runbook_url: "https://docs.summit.internal/runbooks/forecast-accuracy-critical"
+          action: "Immediate investigation required - model may be failing"
+
+      # ============================================================================
+      # Operational Alerts
+      # ============================================================================
+
+      - alert: HighForecastFailureRate
+        expr: |
+          (
+            rate(predictive_forecast_generation_total{status="error"}[10m])
+            /
+            rate(predictive_forecast_generation_total[10m])
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "High forecast generation failure rate"
+          description: "Forecast failure rate is {{ $value | humanizePercentage }} for {{ $labels.signal_type }} (threshold: 10%)"
+          runbook_url: "https://docs.summit.internal/runbooks/forecast-failures"
+
+      - alert: HighSimulationFailureRate
+        expr: |
+          (
+            rate(predictive_simulation_total{status="error"}[10m])
+            /
+            rate(predictive_simulation_total[10m])
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "High simulation failure rate"
+          description: "Simulation failure rate is {{ $value | humanizePercentage }} for {{ $labels.entity_id }} (threshold: 10%)"
+          runbook_url: "https://docs.summit.internal/runbooks/simulation-failures"
+
+      - alert: NoRecentForecasts
+        expr: |
+          (time() - predictive_forecast_generation_total) > 900
+        for: 5m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "No recent forecasts generated"
+          description: "No forecasts have been generated for {{ $labels.signal_type }} in the last 15 minutes"
+          runbook_url: "https://docs.summit.internal/runbooks/no-forecasts"
+
+      # ============================================================================
+      # Threat Detection Alerts
+      # ============================================================================
+
+      - alert: HighBaselineRiskDetected
+        expr: |
+          predictive_simulation_risk_score{scenario_type="baseline"} > 0.8
+        for: 5m
+        labels:
+          severity: high
+          component: predictive-suite
+          team: security
+        annotations:
+          summary: "High baseline risk detected"
+          description: "Baseline risk score for {{ $labels.entity_id }} is {{ $value | printf \"%.2f\" }} (threshold: 0.8)"
+          runbook_url: "https://docs.summit.internal/runbooks/high-baseline-risk"
+          action: "Review recommended interventions immediately"
+
+      - alert: CriticalRecommendationPending
+        expr: |
+          predictive_simulation_recommendation_priority{recommended_action!="do_nothing"} == 3
+        for: 2m
+        labels:
+          severity: critical
+          component: predictive-suite
+          team: security
+        annotations:
+          summary: "Critical intervention recommended"
+          description: "Critical priority recommendation: {{ $labels.recommended_action }} for {{ $labels.entity_id }}"
+          runbook_url: "https://docs.summit.internal/runbooks/critical-intervention"
+          action: "Execute recommended intervention: {{ $labels.recommended_action }}"
+
+      # ============================================================================
+      # Resource Alerts
+      # ============================================================================
+
+      - alert: PredictiveSuiteHighMemory
+        expr: |
+          process_resident_memory_bytes{job="predictive-suite"} > 1073741824
+        for: 10m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "Predictive Suite memory usage is high"
+          description: "Memory usage is {{ $value | humanize1024 }} (threshold: 1GB)"
+          runbook_url: "https://docs.summit.internal/runbooks/high-memory"
+
+      - alert: PredictiveSuiteHighCPU
+        expr: |
+          rate(process_cpu_seconds_total{job="predictive-suite"}[5m]) > 0.8
+        for: 15m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+        annotations:
+          summary: "Predictive Suite CPU usage is high"
+          description: "CPU usage is {{ $value | humanizePercentage }} (threshold: 80%)"
+          runbook_url: "https://docs.summit.internal/runbooks/high-cpu"
+
+      # ============================================================================
+      # SLO Burn Rate Alerts
+      # ============================================================================
+
+      - alert: PredictiveSuiteFastSLOBurn
+        expr: |
+          (
+            1 - (
+              (
+                rate(predictive_http_requests_total[1h]) -
+                rate(predictive_http_requests_total{status=~"5.."}[1h])
+              ) / rate(predictive_http_requests_total[1h])
+            )
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          component: predictive-suite
+          team: observability
+          slo: availability
+        annotations:
+          summary: "Fast SLO error budget burn detected"
+          description: "Error budget is burning at {{ $value | humanizePercentage }} over 1h (consuming 1% of monthly budget per hour)"
+          runbook_url: "https://docs.summit.internal/runbooks/slo-burn"
+
+      - alert: PredictiveSuiteSlowSLOBurn
+        expr: |
+          (
+            1 - (
+              (
+                rate(predictive_http_requests_total[6h]) -
+                rate(predictive_http_requests_total{status=~"5.."}[6h])
+              ) / rate(predictive_http_requests_total[6h])
+            )
+          ) > 0.005
+        for: 30m
+        labels:
+          severity: warning
+          component: predictive-suite
+          team: observability
+          slo: availability
+        annotations:
+          summary: "Slow SLO error budget burn detected"
+          description: "Error budget is burning at {{ $value | humanizePercentage }} over 6h"
+          runbook_url: "https://docs.summit.internal/runbooks/slo-burn"
+
+  # ============================================================================
+  # Recording Rules for Efficient Queries
+  # ============================================================================
+
+  - name: predictive_suite_recording_rules
+    interval: 30s
+    rules:
+      # Error rate pre-computation
+      - record: predictive_suite:error_rate:5m
+        expr: |
+          rate(predictive_http_requests_total{status=~"5.."}[5m])
+          /
+          rate(predictive_http_requests_total[5m])
+
+      # Success rate pre-computation
+      - record: predictive_suite:success_rate:5m
+        expr: |
+          1 - (
+            rate(predictive_http_requests_total{status=~"5.."}[5m])
+            /
+            rate(predictive_http_requests_total[5m])
+          )
+
+      # P95 latency pre-computation
+      - record: predictive_suite:latency_p95:5m
+        expr: |
+          histogram_quantile(0.95,
+            rate(predictive_http_request_duration_seconds_bucket[5m])
+          )
+
+      # P99 latency pre-computation
+      - record: predictive_suite:latency_p99:5m
+        expr: |
+          histogram_quantile(0.99,
+            rate(predictive_http_request_duration_seconds_bucket[5m])
+          )
+
+      # Request rate per endpoint
+      - record: predictive_suite:requests_per_endpoint:5m
+        expr: |
+          sum by (endpoint) (
+            rate(predictive_http_requests_total[5m])
+          )
+
+      # Average forecast accuracy by signal type
+      - record: predictive_suite:avg_forecast_accuracy_mape:1h
+        expr: |
+          avg by (signal_type) (
+            predictive_forecast_accuracy_mape
+          )
+
+      # Forecast generation throughput
+      - record: predictive_suite:forecast_generation_rate:5m
+        expr: |
+          sum by (model_type, signal_type) (
+            rate(predictive_forecast_generation_total{status="success"}[5m])
+          )
+
+      # Simulation throughput
+      - record: predictive_suite:simulation_rate:5m
+        expr: |
+          sum(rate(predictive_simulation_total{status="success"}[5m]))
+
+      # Average baseline risk
+      - record: predictive_suite:avg_baseline_risk:15m
+        expr: |
+          avg(predictive_simulation_risk_score{scenario_type="baseline"})
+
+      # High risk entities count
+      - record: predictive_suite:high_risk_entities:now
+        expr: |
+          count(
+            predictive_simulation_risk_score{scenario_type="baseline"} > 0.7
+          )
