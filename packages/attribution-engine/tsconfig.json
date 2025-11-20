@@ -1,0 +1,29 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "sourceMap": true,
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../common-types"
+    },
+    {
+      "path": "../identity-resolution"
+    },
+    {
+      "path": "../entity-linking"
+    },
+    {
+      "path": "../digital-footprint"
+    }
+  ]
+}

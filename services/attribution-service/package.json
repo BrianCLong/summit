@@ -1,0 +1,38 @@
+{
+  "name": "attribution-service",
+  "version": "0.1.0",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "@intelgraph/attribution-engine": "workspace:*",
+    "@intelgraph/identity-resolution": "workspace:*",
+    "@intelgraph/entity-linking": "workspace:*",
+    "@intelgraph/digital-footprint": "workspace:*",
+    "@intelgraph/behavioral-analysis": "workspace:*",
+    "@intelgraph/graph-analytics": "workspace:*",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "pino": "^10.1.0",
+    "pino-http": "^11.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "ts-node": "^10.9.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5"
+  }
+}
