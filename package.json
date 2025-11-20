@@ -31,6 +31,7 @@
     "test:integration": "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
     "test:api": "cd services/api && npx jest -c jest.config.cjs",
     "test:policy": "node scripts/ci/test-policy-runner.cjs",
+    "test:quick": "echo 'Quick test placeholder - implement actual quick tests'",
     "build": "turbo run build --cache-dir=.turbo --continue",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
