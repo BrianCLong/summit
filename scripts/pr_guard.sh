@@ -21,8 +21,8 @@ git rev-parse --is-inside-work-tree >/dev/null || die "Run inside a git repo"
 git fetch -q origin --depth=50 || true
 git rev-parse --verify "$BASE_REF" >/dev/null || die "Base ref '$BASE_REF' not found"
 
-## 1) Conflict markers anywhere in tree
-if grep -R --line-number -E '^(<<<<<<<|=======|>>>>>>>)' --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build -- . ; then
+## 1) Conflict markers anywhere in tree (Git-style with space after marker)
+if grep -R --line-number -E '^(<<<<<<<\s|=======\s|>>>>>>>\s)' --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build --exclude-dir=.venv --exclude-dir=venv -- . ; then
   $STRICT && die "Conflict markers present" || warn "Conflict markers present"
 fi
 
