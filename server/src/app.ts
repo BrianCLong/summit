@@ -13,6 +13,7 @@ import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import predictiveRouter from './routes/predictive.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import rbacRouter from './routes/rbacRoutes.js';
 import { typeDefs } from './graphql/schema.js';
@@ -62,6 +63,7 @@ export const createApp = async () => {
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
+  app.use('/api/predictive', predictiveRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.get('/metrics', metricsRoute);
