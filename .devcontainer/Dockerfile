@@ -6,8 +6,10 @@ FROM mcr.microsoft.com/devcontainers/typescript-node:20
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_ENV=development
+ENV PNPM_VERSION=9.12.0
+ENV PYTHON_VERSION=3.11
 
-# Install system dependencies
+# Install system dependencies including JDK for Kafka streaming
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
@@ -20,11 +22,34 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     build-essential \
-    python3 \
+    python3.11 \
+    python3.11-venv \
+    python3.11-dev \
     python3-pip \
     postgresql-client \
     redis-tools \
+    openjdk-17-jdk \
     && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.11 as default
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 \
+    && update-alternatives --set python3 /usr/bin/python3.11
+
+# Install pnpm globally with pinned version
+RUN npm install -g pnpm@${PNPM_VERSION} \
+    && corepack enable \
+    && corepack prepare pnpm@${PNPM_VERSION} --activate
+
+# Install Gradle for Kafka streaming jobs
+ENV GRADLE_VERSION=8.5
+RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -P /tmp \
+    && unzip -d /opt/gradle /tmp/gradle-${GRADLE_VERSION}-bin.zip \
+    && rm /tmp/gradle-${GRADLE_VERSION}-bin.zip \
+    && ln -s /opt/gradle/gradle-${GRADLE_VERSION}/bin/gradle /usr/bin/gradle
+
+# Set JAVA_HOME
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Install additional CLI tools
 RUN npm install -g \

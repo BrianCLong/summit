@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai smoke tools down
+.PHONY: bootstrap dev up up-ai smoke tools down
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -35,6 +35,13 @@ bootstrap:
 	'y=YAML(); doc=y.load(sys.stdin.read()); print(json.dumps(doc))' > scripts/tools/yq_json.py
 	@chmod +x scripts/tools/yq_json.py
 	@echo "bootstrap: DONE"
+
+dev: up
+	@echo "==> dev: full stack is running"
+	@echo "    - Web App: http://localhost:3000"
+	@echo "    - API Gateway: http://localhost:4000"
+	@echo "    - Neo4j Browser: http://localhost:7474"
+	@echo "    - Grafana: http://localhost:3001"
 
 up:
 	@echo "==> up: best-effort bring-up (no-op if stack not containerized)"

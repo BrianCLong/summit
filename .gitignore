@@ -63,7 +63,10 @@ ehthumbs.db
 Thumbs.db
 
 # IDE files
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo

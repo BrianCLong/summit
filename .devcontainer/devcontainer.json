@@ -131,6 +131,8 @@
 
   "postCreateCommand": "bash .devcontainer/setup.sh",
 
+  "postStartCommand": "make dev",
+
   "remoteUser": "node",
   "containerUser": "node",
 

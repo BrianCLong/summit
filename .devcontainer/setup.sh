@@ -25,22 +25,12 @@ log_warning() {
 }
 
 # Install dependencies
-log_info "Installing Node.js dependencies..."
-npm ci
+log_info "Installing Node.js dependencies with pnpm..."
+pnpm install --frozen-lockfile || pnpm install
 
-log_info "Installing server dependencies..."
-pushd server >/dev/null
-npm install
-popd >/dev/null
-
-log_info "Installing client dependencies..."
-pushd client >/dev/null
-npm install
-popd >/dev/null
-
-# Install global development tools
+# Install global development tools (using pnpm)
 log_info "Installing global development tools..."
-npm install -g \
+pnpm add -g \
     typescript \
     ts-node \
     nodemon \
@@ -52,6 +42,15 @@ if [ -f ".pre-commit-config.yaml" ]; then
     log_info "Installing pre-commit hooks..."
     pre-commit install
     pre-commit install --hook-type commit-msg
+fi
+
+# Install and setup Husky git hooks
+if [ -f "package.json" ]; then
+    log_info "Installing Husky git hooks..."
+    pnpm run prepare || true
+    if [ -d ".husky" ]; then
+        log_success "Husky hooks installed"
+    fi
 fi
 
 # Create necessary directories
