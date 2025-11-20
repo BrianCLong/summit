@@ -1,0 +1,54 @@
+{
+  "name": "@intelgraph/ranking",
+  "version": "1.0.0",
+  "description": "Advanced ranking algorithms with learning-to-rank, hybrid fusion, and personalization",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ml-matrix": "^6.11.1",
+    "ml-logistic-regression": "^2.1.1",
+    "ml-random-forest": "^1.1.1",
+    "regression": "^2.0.1",
+    "mathjs": "^14.0.2",
+    "lodash": "^4.17.21",
+    "lru-cache": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/lodash": "^4.14.202",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "ranking",
+    "learning-to-rank",
+    "ltr",
+    "hybrid-search",
+    "reciprocal-rank-fusion",
+    "personalization",
+    "diversity"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

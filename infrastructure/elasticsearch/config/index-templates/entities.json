@@ -1,0 +1,115 @@
+{
+  "index_patterns": ["entities-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 3,
+      "number_of_replicas": 1,
+      "index.max_result_window": 100000,
+      "index.mapping.total_fields.limit": 2000,
+      "analysis": {
+        "analyzer": {
+          "intelligence_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "asciifolding",
+              "intelligence_stopwords",
+              "intelligence_synonyms",
+              "porter_stem"
+            ]
+          },
+          "exact_analyzer": {
+            "type": "custom",
+            "tokenizer": "keyword",
+            "filter": ["lowercase", "asciifolding"]
+          }
+        },
+        "filter": {
+          "intelligence_stopwords": {
+            "type": "stop",
+            "stopwords": ["the", "a", "an", "and", "or", "but"]
+          },
+          "intelligence_synonyms": {
+            "type": "synonym",
+            "synonyms": [
+              "organization,company,corp,enterprise,org",
+              "person,individual,human,people",
+              "threat,danger,risk,vulnerability",
+              "malware,virus,trojan,backdoor",
+              "apt,advanced persistent threat"
+            ]
+          }
+        }
+      }
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "entityType": {
+          "type": "keyword"
+        },
+        "title": {
+          "type": "text",
+          "analyzer": "intelligence_analyzer",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            },
+            "exact": {
+              "type": "text",
+              "analyzer": "exact_analyzer"
+            }
+          }
+        },
+        "content": {
+          "type": "text",
+          "analyzer": "intelligence_analyzer"
+        },
+        "description": {
+          "type": "text",
+          "analyzer": "intelligence_analyzer"
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "source": {
+          "type": "keyword"
+        },
+        "confidence": {
+          "type": "float"
+        },
+        "createdAt": {
+          "type": "date"
+        },
+        "updatedAt": {
+          "type": "date"
+        },
+        "metadata": {
+          "type": "object",
+          "dynamic": true
+        },
+        "embedding_vector": {
+          "type": "dense_vector",
+          "dims": 384,
+          "index": true,
+          "similarity": "cosine"
+        },
+        "location": {
+          "type": "geo_point"
+        },
+        "suggest": {
+          "type": "completion"
+        }
+      }
+    }
+  },
+  "priority": 500,
+  "version": 1,
+  "_meta": {
+    "description": "Index template for intelligence entities"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "@intelgraph/semantic-search",
+  "version": "1.0.0",
+  "description": "Semantic search with dense vector embeddings and neural retrieval",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^4.21.0",
+    "@xenova/transformers": "^2.17.2",
+    "onnxruntime-node": "^1.20.1",
+    "faiss-node": "^0.5.1",
+    "hnswlib-node": "^3.0.0",
+    "sentence-transformers": "^0.2.0",
+    "openai": "^4.71.0",
+    "cohere-ai": "^7.14.0",
+    "voyageai": "^0.0.3",
+    "axios": "^1.11.0",
+    "lodash": "^4.17.21",
+    "p-queue": "^8.0.1",
+    "lru-cache": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/lodash": "^4.14.202",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "semantic-search",
+    "vector-embeddings",
+    "sentence-transformers",
+    "bert",
+    "neural-search",
+    "dense-retrieval"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

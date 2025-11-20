@@ -1,0 +1,81 @@
+# ======================== Elasticsearch Configuration =========================
+#
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what you are trying to accomplish and the consequences.
+#
+
+# ---------------------------------- Cluster -----------------------------------
+cluster.name: intelgraph-cluster
+node.name: es-node-1
+
+# ----------------------------------- Paths ------------------------------------
+path.data: /usr/share/elasticsearch/data
+path.logs: /usr/share/elasticsearch/logs
+
+# ----------------------------------- Memory -----------------------------------
+bootstrap.memory_lock: true
+
+# ---------------------------------- Network -----------------------------------
+network.host: 0.0.0.0
+http.port: 9200
+transport.port: 9300
+
+# --------------------------------- Discovery ----------------------------------
+discovery.type: single-node
+
+# ---------------------------------- Gateway -----------------------------------
+gateway.recover_after_nodes: 1
+
+# ---------------------------------- Various -----------------------------------
+action.destructive_requires_name: true
+
+# ---------------------------------- X-Pack ------------------------------------
+xpack.security.enabled: true
+xpack.security.enrollment.enabled: true
+
+xpack.security.http.ssl:
+  enabled: false
+
+xpack.security.transport.ssl:
+  enabled: false
+
+# Machine Learning
+xpack.ml.enabled: true
+xpack.ml.max_open_jobs: 20
+
+# Monitoring
+xpack.monitoring.enabled: true
+xpack.monitoring.collection.enabled: true
+
+# ---------------------------------- Indices -----------------------------------
+# Index settings
+indices.memory.index_buffer_size: 30%
+indices.queries.cache.size: 10%
+indices.fielddata.cache.size: 20%
+
+# Indexing performance
+indices.recovery.max_bytes_per_sec: 100mb
+cluster.routing.allocation.node_concurrent_recoveries: 4
+
+# ---------------------------------- Search ------------------------------------
+# Search performance
+search.max_buckets: 100000
+search.default_search_timeout: 30s
+
+# Thread pools
+thread_pool.search.size: 30
+thread_pool.search.queue_size: 1000
+thread_pool.write.size: 30
+thread_pool.write.queue_size: 1000
+
+# ---------------------------------- Indexing ----------------------------------
+# Bulk indexing
+http.max_content_length: 200mb
+
+# Refresh interval (can be increased for better indexing performance)
+# index.refresh_interval: 30s
+
+# Translog settings
+# index.translog.durability: async
+# index.translog.sync_interval: 30s
