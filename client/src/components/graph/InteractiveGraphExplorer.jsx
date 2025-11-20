@@ -23,6 +23,7 @@ import {
   Tooltip,
   Alert,
   Grid,
+  Stack,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -37,6 +38,7 @@ import {
   Psychology as PsychologyIcon,
 } from '@mui/icons-material';
 import DynamicEntityClustering from './DynamicEntityClustering';
+import QueryBuilderPreview from '../search/QueryBuilderPreview';
 
 // Simulated graph data for demo
 const sampleNodes = [
@@ -556,14 +558,17 @@ export default function InteractiveGraphExplorer() {
 
         {/* Dynamic Entity Clustering Panel */}
         <Grid item xs={12} lg={4}>
-          <DynamicEntityClustering
-            nodes={filteredNodes}
-            edges={edges}
-            onClusterSelect={(cluster) => {
-              console.log('🧩 Cluster selected:', cluster);
-              // TODO: Highlight cluster nodes in graph
-            }}
-          />
+          <Stack spacing={2} sx={{ height: '100%' }}>
+            <QueryBuilderPreview />
+            <DynamicEntityClustering
+              nodes={filteredNodes}
+              edges={edges}
+              onClusterSelect={(cluster) => {
+                console.log('🧩 Cluster selected:', cluster);
+                // TODO: Highlight cluster nodes in graph
+              }}
+            />
+          </Stack>
         </Grid>
       </Grid>
 
