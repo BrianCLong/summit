@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/catalog-ui",
+  "version": "0.1.0",
+  "description": "React UI components for data catalog visualization",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/data-catalog": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "d3": "^7.8.5",
+    "dagre": "^0.8.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@types/d3": "^7.4.3",
+    "@types/dagre": "^0.7.52",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
