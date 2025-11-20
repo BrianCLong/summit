@@ -1,0 +1,57 @@
+{
+  "name": "@intelgraph/nlp",
+  "version": "1.0.0",
+  "description": "Core NLP utilities and text preprocessing pipeline",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./preprocessing": {
+      "import": "./dist/preprocessing/index.js",
+      "types": "./dist/preprocessing/index.d.ts"
+    },
+    "./tokenization": {
+      "import": "./dist/tokenization/index.js",
+      "types": "./dist/tokenization/index.d.ts"
+    },
+    "./language-detection": {
+      "import": "./dist/language-detection/index.js",
+      "types": "./dist/language-detection/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "nlp",
+    "natural-language-processing",
+    "text-preprocessing",
+    "tokenization",
+    "language-detection",
+    "lemmatization"
+  ],
+  "dependencies": {
+    "compromise": "^14.13.0",
+    "franc": "^6.2.0",
+    "natural": "^7.0.7",
+    "stopword": "^3.1.1",
+    "wink-nlp": "^2.2.0",
+    "wink-eng-lite-web-model": "^1.5.0",
+    "spellchecker": "^3.7.1",
+    "unicode-normalize": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3",
+    "eslint": "9.39.1"
+  }
+}
