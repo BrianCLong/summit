@@ -1,5 +1,12 @@
 import { gql } from 'apollo-server-express';
 import base from '../schema/base.graphql?raw';
+import {
+  analyzeTemporalPatterns,
+  detectGraphAnomalies,
+  runCentrality,
+  runCommunityDetection,
+  runShortestPath,
+} from './lib/graphAnalytics.js';
 
 export const typeDefs = gql`
   ${base}
@@ -78,6 +85,26 @@ export const resolvers = {
       return ctx.pg.any(
         'select id, name, description, created_at as "createdAt" from permission',
       );
+    },
+    graphCommunityDetection: async (_: any, { input }: any, ctx: any) => {
+      authorize(ctx.user, ['admin', 'viewer']);
+      return runCommunityDetection(ctx.neo, input, ctx.logger);
+    },
+    graphCentrality: async (_: any, { input }: any, ctx: any) => {
+      authorize(ctx.user, ['admin', 'viewer']);
+      return runCentrality(ctx.neo, input, ctx.logger);
+    },
+    graphShortestPath: async (_: any, { input }: any, ctx: any) => {
+      authorize(ctx.user, ['admin', 'viewer']);
+      return runShortestPath(ctx.neo, input);
+    },
+    graphAnomalies: async (_: any, { input }: any, ctx: any) => {
+      authorize(ctx.user, ['admin', 'viewer']);
+      return detectGraphAnomalies(ctx.neo, input, ctx.logger);
+    },
+    graphTemporalPatterns: async (_: any, { input }: any, ctx: any) => {
+      authorize(ctx.user, ['admin', 'viewer']);
+      return analyzeTemporalPatterns(ctx.neo, input);
     },
   },
   Mutation: {

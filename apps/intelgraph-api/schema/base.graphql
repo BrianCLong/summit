@@ -146,12 +146,163 @@ type Provenance {
   artifact_hash: String # New field for artifact content hash
 }
 
+enum CommunityDetectionAlgorithm {
+  LOUVAIN
+  LABEL_PROPAGATION
+}
+
+enum CentralityAlgorithm {
+  PAGERANK
+  BETWEENNESS
+}
+
+enum RelationshipDirection {
+  OUTGOING
+  INCOMING
+  UNDIRECTED
+}
+
+enum TemporalEntityType {
+  NODE
+  RELATIONSHIP
+}
+
+enum TemporalInterval {
+  HOUR
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
+}
+
+type AnalyticsMetadata {
+  generatedAt: String!
+  nodeCount: Int!
+  edgeCount: Int!
+  runtimeMs: Float!
+}
+
+type CommunityDetectionCommunity {
+  communityId: Int!
+  nodes: [ID!]!
+  size: Int!
+  score: Float!
+}
+
+type CommunityDetectionResult {
+  algorithm: CommunityDetectionAlgorithm!
+  communities: [CommunityDetectionCommunity!]!
+  metadata: AnalyticsMetadata!
+}
+
+input CommunityDetectionInput {
+  algorithm: CommunityDetectionAlgorithm!
+  nodeLabels: [String!]
+  relationshipTypes: [String!]
+  minCommunitySize: Int
+  maxIterations: Int
+  weightProperty: String
+  maxEdges: Int
+}
+
+type CentralityScore {
+  nodeId: ID!
+  score: Float!
+  rank: Int!
+}
+
+input CentralityInput {
+  algorithm: CentralityAlgorithm!
+  nodeLabels: [String!]
+  relationshipTypes: [String!]
+  maxResults: Int
+  dampingFactor: Float
+  tolerance: Float
+  maxIterations: Int
+  direction: RelationshipDirection
+  weightProperty: String
+  maxEdges: Int
+}
+
+type PathNode {
+  id: ID!
+  labels: [String!]!
+}
+
+type PathEdge {
+  id: ID
+  type: String!
+  weight: Float!
+}
+
+type PathResult {
+  sourceId: ID!
+  targetId: ID!
+  hops: Int!
+  totalCost: Float
+  nodes: [PathNode!]!
+  edges: [PathEdge!]!
+}
+
+input ShortestPathInput {
+  sourceId: ID!
+  targetId: ID!
+  relationshipTypes: [String!]
+  maxDepth: Int
+  direction: RelationshipDirection
+  weightProperty: String
+}
+
+type AnomalyMetric {
+  key: String!
+  value: Float!
+}
+
+type GraphAnomaly {
+  nodeId: ID!
+  score: Float!
+  reason: String!
+  metrics: [AnomalyMetric!]!
+}
+
+input GraphAnomalyInput {
+  nodeLabels: [String!]
+  relationshipTypes: [String!]
+  weightProperty: String
+  sensitivity: Float
+  minScore: Float
+  maxEdges: Int
+}
+
+type TemporalMetric {
+  bucket: String!
+  count: Int!
+  avgDegree: Float!
+}
+
+input TemporalPatternInput {
+  entity: TemporalEntityType!
+  nodeLabels: [String!]
+  relationshipTypes: [String!]
+  timestampProperty: String!
+  interval: TemporalInterval!
+  maxEntries: Int
+  since: String
+  until: String
+}
+
 type Query {
   org(id: ID!): Organization
   tenant(id: ID!): Tenant
   user(id: ID!): User
   roles: [Role!]! # New query for roles
   permissions: [Permission!]! # New query for permissions
+  graphCommunityDetection(input: CommunityDetectionInput!): CommunityDetectionResult!
+  graphCentrality(input: CentralityInput!): [CentralityScore!]!
+  graphShortestPath(input: ShortestPathInput!): PathResult
+  graphAnomalies(input: GraphAnomalyInput!): [GraphAnomaly!]!
+  graphTemporalPatterns(input: TemporalPatternInput!): [TemporalMetric!]!
 }
 
 type Mutation {
