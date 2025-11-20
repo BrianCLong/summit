@@ -7,6 +7,7 @@
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
 const EntityCorrelationEngine = require('./EntityCorrelationEngine');
+const MultimodalFusionLayer = require('./MultimodalFusionLayer');
 
 class AIExtractionService extends EventEmitter {
   constructor(multimodalService, authService, logger) {
@@ -37,6 +38,7 @@ class AIExtractionService extends EventEmitter {
     };
 
     this.entityCorrelationEngine = new EntityCorrelationEngine();
+    this.fusionLayer = new MultimodalFusionLayer();
     this.initializePipelines();
     this.startProcessingLoop();
   }
@@ -141,6 +143,17 @@ class AIExtractionService extends EventEmitter {
       ],
       maxFileSize: 200 * 1024 * 1024, // 200MB
       extract: this.extractWithHybridAI.bind(this),
+    });
+
+    this.pipelines.set('MULTIMODAL_CLIP', {
+      name: 'CLIP Multimodal Embedding',
+      version: '1.1.0',
+      mediaTypes: ['TEXT', 'IMAGE', 'AUDIO', 'VIDEO', 'DOCUMENT'],
+      confidence: 0.92,
+      processingTimeMs: 2500,
+      supportedEntities: ['PERSON', 'OBJECT', 'EVENT', 'LOCATION'],
+      maxFileSize: 150 * 1024 * 1024, // 150MB
+      extract: this.extractWithClip.bind(this),
     });
 
     this.logger.info(
@@ -268,6 +281,7 @@ class AIExtractionService extends EventEmitter {
         processingTime: 0,
         averageConfidence: 0,
         qualityScore: 0,
+        fusedConfidence: 0,
       },
     };
 
@@ -364,6 +378,8 @@ class AIExtractionService extends EventEmitter {
     }
 
     results.summary.qualityScore = this.calculateQualityScore(results, job);
+
+    this.applyFusionInsights(mediaSource, results);
 
     // Finalize job
     job.status = 'COMPLETED';
@@ -697,6 +713,53 @@ class AIExtractionService extends EventEmitter {
   }
 
   /**
+   * CLIP-style multimodal embedding pipeline
+   */
+  async extractWithClip(mediaSource, params) {
+    await this.simulateProcessingDelay(260);
+
+    const descriptor = {
+      mediaType: mediaSource.mediaType,
+      filename: mediaSource.filename,
+      uri: mediaSource.uri,
+      metadata: params?.metadata || {},
+      quality: mediaSource.quality || 'MEDIUM',
+    };
+
+    const embeddingBundle = this.fusionLayer.generateEntityEmbeddings(
+      {
+        id: mediaSource.id,
+        label: mediaSource.filename || `${mediaSource.mediaType} signal`,
+        confidence: 0.9,
+        properties: params || {},
+      },
+      [descriptor],
+    );
+
+    const { overall: fusedConfidence } = this.fusionLayer.computeFusedConfidence(
+      0.9,
+      embeddingBundle.modalities,
+    );
+
+    const entities = [
+      {
+        type: 'OBJECT',
+        label: `${mediaSource.mediaType} signal`,
+        confidence: Number(fusedConfidence.toFixed(3)),
+        properties: {
+          source: 'clip_embedding',
+          modalities: embeddingBundle.modalities.map((entry) => entry.modality),
+          fusion_vector: embeddingBundle.combined,
+        },
+        boundingBoxes: params?.boundingBoxes || [],
+        temporalBounds: params?.temporalBounds || [],
+      },
+    ];
+
+    return { entities, relationships: [] };
+  }
+
+  /**
    * Hybrid AI extraction pipeline (combines multiple methods)
    */
   async extractWithHybridAI(mediaSource, params) {
@@ -789,6 +852,47 @@ class AIExtractionService extends EventEmitter {
     };
   }
 
+  applyFusionInsights(mediaSource, results) {
+    if (!results.entities || results.entities.length === 0) {
+      return;
+    }
+
+    const correlations = this.fusionLayer.inferCorrelations(results.entities);
+    const timelineSeeds = results.entities.map((entity, index) => ({
+      entityId: entity.id || `entity-${index}`,
+      label: entity.label,
+      description: entity.properties?.context || entity.properties?.source || null,
+      timestamp: new Date(),
+      modalities: [mediaSource.mediaType],
+      confidence: entity.confidence ?? 0.5,
+      context: { source: entity.properties?.source || 'extraction' },
+    }));
+
+    const timeline = this.fusionLayer.buildTimeline(timelineSeeds).map((event) => ({
+      id: event.id,
+      entityId: event.entityId,
+      label: event.label,
+      timestamp: event.timestamp.toISOString(),
+      confidence: event.confidence,
+      sequence: event.sequence,
+    }));
+
+    const { overall: fusedConfidence } = this.fusionLayer.computeFusedConfidence(
+      results.summary.averageConfidence || 0.5,
+      results.entities.map((entity) => ({
+        modality: mediaSource.mediaType,
+        confidence: entity.confidence ?? 0.5,
+      })),
+      correlations.map((correlation) => correlation.similarity),
+    );
+
+    results.summary.fusedConfidence = Number(fusedConfidence.toFixed(3));
+    results.fusion = {
+      correlations,
+      timeline,
+    };
+  }
+
   /**
    * Group similar entities for fusion
    */
@@ -824,6 +928,9 @@ class AIExtractionService extends EventEmitter {
       mediaType: 'TEXT', // This would come from actual database
       filename: 'test.txt',
       filesize: 1024,
+      uri: `mock://media/${mediaSourceId}`,
+      quality: 'MEDIUM',
+      metadata: {},
     };
   }
 

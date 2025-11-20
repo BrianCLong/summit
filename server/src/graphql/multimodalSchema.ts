@@ -29,6 +29,7 @@ const multimodalTypeDefs = gql`
     GEOINT_PROCESSING
     MANUAL_ANNOTATION
     AI_HYBRID
+    MULTIMODAL_CLIP
   }
 
   enum MediaQuality {
@@ -323,6 +324,20 @@ const multimodalTypeDefs = gql`
     generatedAt: DateTime!
   }
 
+  type MultimodalTimelineEvent {
+    id: ID!
+    entityId: ID
+    mediaSourceIds: [ID!]!
+    label: String!
+    description: String
+    timestamp: DateTime!
+    modalities: [MediaType!]!
+    confidence: Float!
+    confidenceLevel: ConfidenceLevel!
+    context: JSON!
+    sequence: Int!
+  }
+
   # Input Types
   input MediaSourceInput {
     uri: String!
@@ -456,6 +471,10 @@ const multimodalTypeDefs = gql`
     multimodalSearch(input: MultimodalSearchInput!): MultimodalSearchResults!
     semanticSearch(input: SemanticSearchInput!): [MultimodalEntity!]!
     multimodalAnalytics(investigationId: ID!): MultimodalAnalytics!
+    multimodalTimeline(
+      investigationId: ID!
+      windowHours: Int = 72
+    ): [MultimodalTimelineEvent!]!
 
     # Quality and Verification
     unverifiedEntities(
