@@ -10,7 +10,8 @@
     "rootDir": "./",
     "outDir": "./dist",
     "allowImportingTsExtensions": false,
-    "composite": true
+    "composite": true,
+    "types": ["node", "vitest"]
   },
   "include": [
     "src",
