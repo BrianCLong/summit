@@ -1,11 +1,138 @@
+# STIX/TAXII Connector Manifest - SDK v1.0 Compliant
+
 name: stix-taxii-connector
-description: A simple STIX/TAXII feed connector for IntelGraph.
-version: 0.1.0
+description: STIX/TAXII 2.x threat intelligence feed connector with rate limiting and PII controls
+version: 1.0.0
+author: IntelGraph Team
 ingestion_type: streaming
+
 supported_formats:
   - stix
+  - stix2
+  - taxii
+  - json
+
 schema_mapping_file: schema_mapping.py
 sample_data_file: sample.json
-rate_limit_policy: # Placeholder for future rate limiting configuration
-  type: per_source
-  requests_per_minute: 100
+
+# Golden I/O tests
+golden_io_tests:
+  - test_stix_taxii_connector.py
+  - test_stix_parsing.py
+
+# Rate limiting policy (critical for TAXII servers)
+rate_limit:
+  requests_per_hour: 100  # Conservative default
+  requests_per_minute: 2  # Prevent overwhelming TAXII servers
+  burst_limit: 5
+  backoff_strategy: exponential
+  max_retries: 3
+  timeout_seconds: 30
+
+# PII detection and handling
+pii_flags:
+  - field_name: identity.name
+    description: Identity objects may contain person/organization names
+    severity: medium
+    redaction_policy: allow
+    legal_basis: Threat intelligence sharing
+
+  - field_name: email-addr.value
+    description: Email addresses in STIX objects
+    severity: high
+    redaction_policy: redact
+
+  - field_name: user-account.account_login
+    description: User account identifiers
+    severity: medium
+    redaction_policy: redact
+
+  - field_name: x_personally_identifiable
+    description: Custom STIX extension for PII markers
+    severity: high
+    redaction_policy: prompt
+
+# License and compliance
+license:
+  type: varies-by-feed
+  classification: restricted
+  attribution_required: true
+  allowed_use_cases:
+    - threat-intelligence
+    - security-research
+    - incident-response
+    - defensive-security
+  blocked_use_cases:
+    - offensive-operations
+    - commercial-resale
+    - unauthorized-disclosure
+  blocked_fields:
+    - field_name: tool.payload_bin
+      reason: Malware payloads prohibited without proper sandboxing
+      alternative: Use hash-based indicators instead
+
+    - field_name: artifact.payload_bin
+      reason: Binary artifacts require separate secure handling
+      alternative: Reference by hash or external secure storage
+
+# Data retention
+retention_policy:
+  duration: 90-days
+  archival_strategy: archive
+
+# STIX/TAXII configuration
+configuration:
+  taxii_version: "2.1"
+  verify_ssl: true
+  timeout_seconds: 30
+  max_content_length: 10485760  # 10MB
+  stix_version: "2.1"
+
+  # TAXII server settings (example)
+  # taxii_url: https://taxii.example.com/api/
+  # collection_id: <uuid>
+  # api_root: /api/
+
+  # Authentication
+  # auth_type: basic  # or "bearer", "apikey"
+  # username: <set via env>
+  # password: <set via env>
+
+  # Filtering
+  added_after: null  # Filter for objects added after this timestamp
+  match_spec_version: "2.1"
+  object_types:  # Only fetch these STIX object types
+    - indicator
+    - malware
+    - threat-actor
+    - attack-pattern
+    - vulnerability
+    - campaign
+    - intrusion-set
+
+# Dependencies
+dependencies:
+  - python>=3.8
+  - requests>=2.25.0
+  - stix2>=3.0.0
+  - taxii2-client>=2.3.0
+  - pyyaml>=5.4
+
+# Lineage tracking
+lineage:
+  enabled: true
+  source_system: stix-taxii-feed
+  data_classification: restricted
+
+# Quality metrics
+quality_metrics:
+  expected_success_rate: 0.90
+  max_error_rate: 0.10
+  completeness_threshold: 0.85
+
+# Feed-specific metadata
+feed_metadata:
+  tlp_marking: amber  # Default TLP marking
+  confidence_threshold: 50  # Minimum confidence score for indicators
+  validate_stix: true  # Validate STIX objects against schema
+  dedupe_window_hours: 24
