@@ -8,6 +8,9 @@ const logger = pino();
 const JWT_SECRET =
   process.env.JWT_SECRET ||
   'dev_jwt_secret_12345_very_long_secret_for_development';
+const REFRESH_TOKEN_SECRET =
+  process.env.REFRESH_TOKEN_SECRET ||
+  'dev_refresh_secret_67890_another_super_long_secret_for_dev';
 
 interface User {
   id: string;
@@ -84,7 +87,7 @@ export const verifyToken = async (token: string): Promise<User> => {
   }
 };
 
-export const generateToken = (user: User): string => {
+export const generateAccessToken = (user: User): string => {
   return jwt.sign(
     {
       userId: user.id,
@@ -92,8 +95,27 @@ export const generateToken = (user: User): string => {
       role: user.role,
     },
     JWT_SECRET,
-    { expiresIn: '1h' },
+    { expiresIn: '5m' },
   );
+};
+
+export const generateRefreshToken = (user: User): string => {
+  return jwt.sign(
+    {
+      userId: user.id,
+      // Refresh token does not need email/role
+    },
+    REFRESH_TOKEN_SECRET,
+    { expiresIn: '7d' },
+  );
+};
+
+export const generateTokens = (
+  user: User,
+): { accessToken: string; refreshToken: string } => {
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  return { accessToken, refreshToken };
 };
 
 export const requireAuth = (context: AuthContext): User => {

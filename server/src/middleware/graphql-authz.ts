@@ -109,10 +109,19 @@ export class GraphQLAuthzPlugin {
         throw new AuthenticationError('Authentication required');
       }
 
+      // Get required permission from schema
+      const { requiredPermission } = info.fieldNodes[0].directives.find(
+        (d) => d.name.value === 'auth',
+      )?.arguments[0].value;
+
       try {
         // Build OPA input
-        const opaInput = this.buildOPAInput(context, args, info);
-
+        const opaInput = this.buildOPAInput(
+          context,
+          args,
+          info,
+          requiredPermission,
+        );
         // Query OPA for decision
         const decision = await this.queryOPA(opaInput);
 
@@ -159,6 +168,7 @@ export class GraphQLAuthzPlugin {
     context: AuthContext,
     args: any,
     info: GraphQLResolveInfo,
+    requiredPermission?: string,
   ): OPAInput {
     const operation = info.operation.operation; // 'query' | 'mutation' | 'subscription'
     const fieldName = info.fieldName;
@@ -176,7 +186,7 @@ export class GraphQLAuthzPlugin {
         orgId: context.user.orgId,
         teamId: context.user.teamId,
       },
-      action: `${operation}.${fieldName}`,
+      action: requiredPermission || `${operation}.${fieldName}`,
       resource: {
         type: returnType,
         field: fieldName,

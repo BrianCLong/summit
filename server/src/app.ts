@@ -10,6 +10,7 @@ import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
 import monitoringRouter from './routes/monitoring.js';
+import authRouter from './routes/auth.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
@@ -39,12 +40,16 @@ export const createApp = async () => {
       credentials: true,
     }),
   );
+import { serviceAuthzMiddleware } from './middleware/service-authz.js';
+
   app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }));
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
+  app.use(serviceAuthzMiddleware);
 
   // Rate limiting (exempt monitoring endpoints)
   app.use('/monitoring', monitoringRouter);
+  app.use('/auth', authRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);

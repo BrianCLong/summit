@@ -14,19 +14,70 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/graphql';
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:4001/graphql';
 const TENANT = import.meta.env.VITE_TENANT_ID || 'dev';
 
-export async function createApolloClient() {
-  const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
-    if (graphQLErrors?.length) {
-      // minimal console metric stub (dev-only)
-      // eslint-disable-next-line no-console
-      console.warn('[GQL]', operation.operationName, graphQLErrors);
-    }
-    if (networkError) {
-      // eslint-disable-next-line no-console
-      console.error('[NET]', networkError);
-    }
-  });
+import { Observable } from '@apollo/client';
 
+let isRefreshing = false;
+let pendingRequests: ((token: string) => void)[] = [];
+
+const refreshToken = async () => {
+  try {
+    const response = await fetch('/auth/refresh_token', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    const { accessToken } = await response.json();
+    localStorage.setItem('token', accessToken);
+    return accessToken;
+  } catch (error) {
+    localStorage.removeItem('token');
+    // Handle refresh failure (e.g., redirect to login)
+    return null;
+  }
+};
+
+export async function createApolloClient() {
+  const errorLink = onError(
+    ({ graphQLErrors, networkError, operation, forward }) => {
+      if (graphQLErrors) {
+        for (const err of graphQLErrors) {
+          if (err.extensions.code === 'UNAUTHENTICATED') {
+            if (!isRefreshing) {
+              isRefreshing = true;
+              refreshToken().then((token) => {
+                isRefreshing = false;
+                if (token) {
+                  pendingRequests.forEach((resolve) => resolve(token));
+                  pendingRequests = [];
+                }
+              });
+            }
+            return new Observable((observer) => {
+              pendingRequests.push(() => {
+                const oldHeaders = operation.getContext().headers;
+                operation.setContext({
+                  headers: {
+                    ...oldHeaders,
+                    authorization: `Bearer ${localStorage.getItem('token')}`,
+                  },
+                });
+                const subscriber = {
+                  next: observer.next.bind(observer),
+                  error: observer.error.bind(observer),
+                  complete: observer.complete.bind(observer),
+                };
+                forward(operation).subscribe(subscriber);
+              });
+            });
+          }
+        }
+      }
+
+      if (networkError) {
+        // eslint-disable-next-line no-console
+        console.error('[NET]', networkError);
+      }
+    },
+  );
   // Retry policy for network errors on idempotent operations
   const retryLink = new RetryLink({
     delay: {

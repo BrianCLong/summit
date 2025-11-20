@@ -48,6 +48,7 @@ module.exports = {
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
   ],
   moduleNameMapper: {
+    '^uuid$': 'uuid',
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
     '^pg$': '<rootDir>/__mocks__/pg.js',
@@ -55,5 +56,5 @@ module.exports = {
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
   },
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!(uuid|.*\\.mjs$))'],
 };

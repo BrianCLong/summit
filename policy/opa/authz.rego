@@ -9,9 +9,16 @@ allow {
 }
 
 allowed_actions := {
-  "viewer": {"read"},
-  "analyst": {"read", "query", "export"},
-  "admin": {"read", "query", "export", "write"}
+  "viewer": {"read:logs", "read:metrics"},
+  "analyst": {"read:logs", "read:metrics", "query:logs", "export:csv"},
+  "admin": {
+    "read:logs",
+    "read:metrics",
+    "query:logs",
+    "export:csv",
+    "write:users",
+    "write:roles"
+  }
 }
 
 violation_reason := reason if not allow

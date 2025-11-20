@@ -395,6 +395,8 @@ input SemanticSearchFilter {
     ): [AuditLog!]!
   }
   
+  directive @auth(requires: String) on FIELD_DEFINITION
+
   input EntityInput { type: String!, props: JSON }
   input RelationshipInput { from: ID!, to: ID!, type: String!, props: JSON }
   
@@ -405,9 +407,9 @@ input SemanticSearchFilter {
     createRelationship(input: RelationshipInput!): Relationship!
     updateRelationship(id: ID!, input: RelationshipInput!): Relationship!
     deleteRelationship(id: ID!): Boolean!
-    createUser(input: UserInput!): User!
-    updateUser(id: ID!, input: UserInput!): User!
-    deleteUser(id: ID!): Boolean!
+    createUser(input: UserInput!): User! @auth(requires: "write:users")
+    updateUser(id: ID!, input: UserInput!): User! @auth(requires: "write:users")
+    deleteUser(id: ID!): Boolean! @auth(requires: "write:users")
     createInvestigation(input: InvestigationInput!): Investigation!
     updateInvestigation(id: ID!, input: InvestigationInput!): Investigation!
     deleteInvestigation(id: ID!): Boolean!
