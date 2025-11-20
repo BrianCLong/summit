@@ -1,0 +1,24 @@
+{
+  "name": "@intelgraph/iot-analytics",
+  "version": "1.0.0",
+  "description": "IoT analytics with anomaly detection and predictive maintenance",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["iot", "analytics", "anomaly-detection", "predictive-maintenance"],
+  "dependencies": {
+    "@intelgraph/sensor-data": "workspace:*",
+    "pino": "^9.0.0",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/iot-platform",
+  "version": "1.0.0",
+  "description": "Core IoT platform with multi-protocol support for device connectivity",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["iot", "mqtt", "coap", "amqp", "websocket", "protocols"],
+  "dependencies": {
+    "mqtt": "^5.3.5",
+    "coap": "^1.3.0",
+    "amqplib": "^0.10.3",
+    "ws": "^8.18.3",
+    "eventemitter3": "^5.0.1",
+    "uuid": "^10.0.0",
+    "jose": "^5.2.2",
+    "pino": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.9.3"
+  }
+}

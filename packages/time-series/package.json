@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/time-series",
+  "version": "1.0.0",
+  "description": "Time-series data storage with TimescaleDB and InfluxDB support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["timeseries", "timescaledb", "influxdb", "iot", "storage"],
+  "dependencies": {
+    "@intelgraph/sensor-data": "workspace:*",
+    "pg": "^8.16.3",
+    "pino": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.11.0",
+    "typescript": "^5.9.3"
+  }
+}

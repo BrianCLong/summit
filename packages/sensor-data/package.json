@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/sensor-data",
+  "version": "1.0.0",
+  "description": "Sensor data ingestion, processing, and streaming for IoT devices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["iot", "sensors", "telemetry", "data-ingestion", "streaming"],
+  "dependencies": {
+    "@intelgraph/iot-platform": "workspace:*",
+    "uuid": "^10.0.0",
+    "pino": "^9.0.0",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

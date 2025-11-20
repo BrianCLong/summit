@@ -1,0 +1,24 @@
+{
+  "name": "@intelgraph/industrial-iot",
+  "version": "1.0.0",
+  "description": "Industrial IoT integration with SCADA, PLC, and MES systems",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["industrial-iot", "scada", "plc", "mes", "opc-ua"],
+  "dependencies": {
+    "@intelgraph/sensor-data": "workspace:*",
+    "pino": "^9.0.0",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

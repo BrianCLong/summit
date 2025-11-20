@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/iot-gateway",
+  "version": "1.0.0",
+  "description": "IoT Gateway service for device connectivity and data routing",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/iot-platform": "workspace:*",
+    "@intelgraph/device-management": "workspace:*",
+    "@intelgraph/sensor-data": "workspace:*",
+    "@intelgraph/time-series": "workspace:*",
+    "@intelgraph/edge-computing": "workspace:*",
+    "@intelgraph/iot-analytics": "workspace:*",
+    "express": "^5.0.1",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "pino": "^9.0.0",
+    "pino-http": "^10.0.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "tsx": "^4.19.2"
+  }
+}

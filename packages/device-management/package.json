@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/device-management",
+  "version": "1.0.0",
+  "description": "IoT device lifecycle management, provisioning, and OTA updates",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["iot", "device-management", "provisioning", "ota", "firmware"],
+  "dependencies": {
+    "@intelgraph/iot-platform": "workspace:*",
+    "uuid": "^10.0.0",
+    "pino": "^9.0.0",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
