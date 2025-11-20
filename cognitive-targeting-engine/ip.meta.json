@@ -1,0 +1,18 @@
+{
+  "ip_families": ["F2"],
+  "primary_family": "F2",
+  "notes": "Cognitive targeting engine for real-time active measures with narrative simulation, actor behavior modeling, and proportionality scoring. CONFIDENTIAL - National Security Sensitive.",
+  "key_capabilities": [
+    "Real-time narrative simulation with tick-based evolution",
+    "Actor behavior modeling (trust, reach, momentum)",
+    "Rule-based + LLM hybrid narrative generation",
+    "Event injection and parameter perturbation APIs",
+    "Proportionality scoring for active measures",
+    "Scenario library for crisis response, elections, IO"
+  ],
+  "related_packages": [
+    "active-measures-module/",
+    "server/src/services/narrative-sim/",
+    "scenarios/narrative/"
+  ]
+}

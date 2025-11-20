@@ -100,7 +100,8 @@
     "metrics:loc": "cloc server/src client/src apps packages services --exclude-dir=node_modules,dist,build,coverage,.turbo,archive",
     "metrics:all": "pnpm run metrics:report && pnpm run metrics:complexity && pnpm run metrics:loc",
     "ip:metrics": "ts-node scripts/ip-metrics.ts",
-    "ip:metrics:json": "ts-node scripts/ip-metrics.ts --format=json"
+    "ip:metrics:json": "ts-node scripts/ip-metrics.ts --format=json",
+    "ip:weekly-report": "ts-node scripts/ip-weekly-report.ts"
   },
   "keywords": [
     "intelligence-analysis",

@@ -1,0 +1,19 @@
+{
+  "ip_families": ["F8"],
+  "primary_family": "F8",
+  "notes": "Comprehensive observability stack (OpenTelemetry, Prometheus, Grafana) with SLO tracking and DORA metrics. Includes proof-carrying telemetry where every metric is traceable to source code.",
+  "key_capabilities": [
+    "OpenTelemetry instrumentation across all services",
+    "Prometheus metrics collection and storage",
+    "Grafana dashboards for system health",
+    "SLO tracking (latency, availability, error rates)",
+    "Automated alerting with runbook links",
+    "DORA metrics (deployment frequency, lead time, MTTR)"
+  ],
+  "components": [
+    "prometheus/",
+    "grafana/",
+    "dx-metrics/",
+    "alertmanager/"
+  ]
+}

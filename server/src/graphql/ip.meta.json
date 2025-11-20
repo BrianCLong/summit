@@ -1,0 +1,16 @@
+{
+  "ip_families": ["F6", "F1", "F5"],
+  "primary_family": "F6",
+  "notes": "Core GraphQL API implementing the golden path Investigation workflow (F6). Integrates multi-LLM orchestration via AI resolvers (F1) and GraphRAG for intelligent query expansion (F5). All investigation operations flow through this API layer.",
+  "key_capabilities": [
+    "Investigation CRUD operations",
+    "Entity and relationship management",
+    "Real-time subscriptions for collaboration",
+    "AI Copilot integration",
+    "GraphRAG-powered query expansion"
+  ],
+  "related_packages": [
+    "client/src/pages/Investigation",
+    "server/src/services/InvestigationService.ts"
+  ]
+}

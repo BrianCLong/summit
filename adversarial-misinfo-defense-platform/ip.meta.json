@@ -1,0 +1,19 @@
+{
+  "ip_families": ["F3"],
+  "primary_family": "F3",
+  "notes": "Multi-modal adversarial detection and defense system with autonomous tactic evolution and GAN-LLM hybrid training. Detects deepfakes, coordinated campaigns, and synthetic media.",
+  "key_capabilities": [
+    "Multi-modal deepfake detection (video, audio, image)",
+    "Coordinated campaign detection via behavior analysis",
+    "Autonomous tactic evolution system",
+    "GAN-based adversarial sample generation for training",
+    "Pattern-based detection libraries organized by tactic",
+    "Red/blue team scenario builder",
+    "Validation against state-of-the-art benchmarks"
+  ],
+  "related_packages": [
+    "ml/",
+    "python/",
+    "server/src/ai/models/"
+  ]
+}

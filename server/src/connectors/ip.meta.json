@@ -1,0 +1,19 @@
+{
+  "ip_families": ["F10"],
+  "primary_family": "F10",
+  "notes": "Universal Data Connector SDK implementations. Each connector (STIX, Splunk, Sentinel, CSV, etc.) follows the pluggable architecture pattern with declarative schema mappings and provenance tracking.",
+  "key_capabilities": [
+    "Streaming and batch ingestion modes",
+    "Declarative schema-on-read mappings",
+    "Provenance tracking for all ingested data",
+    "Error handling and retry logic",
+    "Support for 17+ connector types"
+  ],
+  "connectors": [
+    "stix_taxii_connector",
+    "splunk_connector",
+    "sentinel_connector",
+    "elasticsearch_connector",
+    "csv_connector"
+  ]
+}
