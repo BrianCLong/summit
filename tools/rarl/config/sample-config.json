@@ -1,0 +1,31 @@
+{
+  "config": {
+    "secret": "super-secret-key",
+    "windowSeconds": 60,
+    "tenants": {
+      "tenant-a": {
+        "tools": {
+          "embedding-api": {
+            "baseLimit": 100,
+            "burstCredits": 25,
+            "priorityLanes": {
+              "default": {"multiplier": 1, "burstBonus": 0},
+              "priority": {"multiplier": 1.5, "burstBonus": 10}
+            },
+            "risk": {
+              "defaultMultiplier": 1,
+              "anomalyBuckets": [
+                {"min": 0, "max": 0.4, "multiplier": 1},
+                {"min": 0.4, "max": 0.7, "multiplier": 0.75},
+                {"min": 0.7, "max": 0, "multiplier": 0.4}
+              ],
+              "geoMultipliers": {"us": 1, "cn": 0.5},
+              "policyTierMultipliers": {"gold": 1.2, "standard": 1},
+              "highRiskPenaltyMultiplier": 0.25
+            }
+          }
+        }
+      }
+    }
+  }
+}
