@@ -1,0 +1,14 @@
+openapi: 3.0.3
+info:
+  title: Maestro Executors API
+  version: 1.0.0
+servers:
+  - url: /api/maestro/v1
+paths:
+  /executors:
+    get: { summary: List executors, responses: { '200': { description: OK } } }
+    post:
+      {
+        summary: Register executor,
+        responses: { '201': { description: Created } },
+      }

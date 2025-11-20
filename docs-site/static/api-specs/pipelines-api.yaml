@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: Maestro Pipelines API
+  version: 1.0.0
+servers:
+  - url: /api/maestro/v1
+paths:
+  /pipelines:
+    get: { summary: List pipelines, responses: { '200': { description: OK } } }
+    post:
+      {
+        summary: Create pipeline,
+        responses: { '201': { description: Created } },
+      }
+  /pipelines/hints:
+    post:
+      {
+        summary: Policy hints for pipeline spec,
+        responses: { '200': { description: OK } },
+      }
+  /pipelines/copilot/suggest:
+    post:
+      {
+        summary: Suggest a pipeline DAG from a prompt,
+        responses: { '200': { description: OK } },
+      }
+  /pipelines/{id}:
+    get:
+      {
+        summary: Get pipeline,
+        responses:
+          { '200': { description: OK }, '404': { description: Not Found } },
+      }
+    put: { summary: Update pipeline, responses: { '200': { description: OK } } }
+    delete:
+      {
+        summary: Delete pipeline,
+        responses: { '204': { description: No Content } },
+      }

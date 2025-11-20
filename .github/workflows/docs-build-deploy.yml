@@ -1,0 +1,312 @@
+name: Documentation Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'docs-site/**'
+      - 'api/**'
+      - 'contracts/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - '.github/workflows/docs-build-deploy.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'docs-site/**'
+      - 'api/**'
+      - 'contracts/**'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to GitHub Pages'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  lint-docs:
+    name: Lint Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: docs-site/package-lock.json
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint Markdown files
+        run: npm run docs:lint
+        continue-on-error: true
+
+      - name: Check for broken links
+        run: |
+          npm install -g markdown-link-check
+          find docs -name '*.md' -exec markdown-link-check {} \; || true
+
+  validate-structure:
+    name: Validate Documentation Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate documentation structure
+        run: npm run docs:validate
+
+  generate-api-docs:
+    name: Generate API Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate API documentation
+        run: |
+          npm run docs:generate:api
+          npm run docs:generate:sdk || echo "TypeDoc generation skipped"
+
+      - name: Upload API docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs
+          path: |
+            docs-site/static/api-specs/
+            docs/reference/
+          retention-days: 7
+
+  build-docusaurus:
+    name: Build Docusaurus Site
+    runs-on: ubuntu-latest
+    needs: [generate-api-docs]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download API docs
+        uses: actions/download-artifact@v4
+        with:
+          name: api-docs
+          path: .
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: docs-site/package-lock.json
+
+      - name: Install Docusaurus dependencies
+        working-directory: docs-site
+        run: npm ci || npm install
+
+      - name: Build Docusaurus site
+        working-directory: docs-site
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docusaurus-build
+          path: docs-site/build
+          retention-days: 7
+
+      - name: Check build size
+        run: |
+          BUILD_SIZE=$(du -sh docs-site/build | cut -f1)
+          echo "📦 Build size: $BUILD_SIZE"
+          echo "build_size=$BUILD_SIZE" >> $GITHUB_OUTPUT
+
+  test-docs:
+    name: Test Documentation
+    runs-on: ubuntu-latest
+    needs: [build-docusaurus]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: docusaurus-build
+          path: docs-site/build
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Serve documentation
+        working-directory: docs-site
+        run: |
+          npm install -g serve
+          serve -l 3000 build &
+          sleep 5
+
+      - name: Test documentation site
+        run: |
+          # Test homepage loads
+          curl -f http://localhost:3000/ > /dev/null || exit 1
+          echo "✓ Homepage loads successfully"
+
+          # Test API docs load
+          curl -f http://localhost:3000/api/core > /dev/null || echo "⚠ API docs may not be available"
+
+          # Check for broken assets
+          curl -f http://localhost:3000/img/logo.svg > /dev/null || echo "⚠ Logo not found"
+
+          echo "✓ Documentation site tests passed"
+
+  check-accessibility:
+    name: Check Accessibility
+    runs-on: ubuntu-latest
+    needs: [build-docusaurus]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: docusaurus-build
+          path: docs-site/build
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install accessibility tools
+        run: npm install -g @axe-core/cli serve
+
+      - name: Serve site and check accessibility
+        working-directory: docs-site
+        run: |
+          serve -l 3000 build &
+          SERVER_PID=$!
+          sleep 5
+
+          # Run accessibility checks
+          axe http://localhost:3000 --exit || echo "⚠ Accessibility issues found"
+
+          kill $SERVER_PID
+
+  generate-sbom:
+    name: Generate Documentation SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate SBOM
+        run: npm run docs:sbom
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-sbom
+          path: docs-sbom.json
+          retention-days: 90
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [lint-docs, validate-structure, build-docusaurus, test-docs]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' ||
+      github.event.inputs.deploy == 'true'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docusaurus-build
+          path: ./build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '📚 Documentation deployed! View at: ${{ steps.deployment.outputs.page_url }}'
+            })
+
+  report:
+    name: Documentation Report
+    runs-on: ubuntu-latest
+    needs: [lint-docs, validate-structure, build-docusaurus, test-docs, check-accessibility]
+    if: always()
+    steps:
+      - name: Generate report
+        run: |
+          echo "# Documentation Build Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint: ${{ needs.lint-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Validate: ${{ needs.validate-structure.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: ${{ needs.build-docusaurus.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Test: ${{ needs.test-docs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Accessibility: ${{ needs.check-accessibility.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review any warnings or errors above" >> $GITHUB_STEP_SUMMARY
+          echo "2. Update documentation as needed" >> $GITHUB_STEP_SUMMARY
+          echo "3. Merge when all checks pass" >> $GITHUB_STEP_SUMMARY

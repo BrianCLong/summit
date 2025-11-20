@@ -7,33 +7,60 @@ import logger from '../utils/logger.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
+/**
+ * User registration data structure
+ */
 interface UserData {
+  /** User's email address (required, must be unique) */
   email: string;
+  /** Username (optional, must be unique if provided) */
   username?: string;
+  /** Plain text password (will be hashed before storage) */
   password: string;
+  /** User's first name */
   firstName?: string;
+  /** User's last name */
   lastName?: string;
+  /** User role (defaults to 'ANALYST' if not specified) */
   role?: string;
 }
 
+/**
+ * User data structure returned from API
+ */
 interface User {
+  /** Unique user identifier (UUID) */
   id: string;
+  /** User's email address */
   email: string;
+  /** Username (optional) */
   username?: string;
+  /** User's first name */
   firstName?: string;
+  /** User's last name */
   lastName?: string;
+  /** Combined first and last name */
   fullName?: string;
+  /** User's role (ADMIN, ANALYST, VIEWER) */
   role: string;
+  /** Whether the user account is active */
   isActive: boolean;
+  /** Timestamp of last successful login */
   lastLogin?: Date;
+  /** Account creation timestamp */
   createdAt: Date;
+  /** Last account update timestamp */
   updatedAt?: Date;
 }
 
+/**
+ * Internal database representation of user
+ */
 interface DatabaseUser {
   id: string;
   email: string;
   username?: string;
+  /** Argon2 hashed password */
   password_hash: string;
   first_name?: string;
   last_name?: string;
@@ -44,25 +71,46 @@ interface DatabaseUser {
   updated_at?: Date;
 }
 
+/**
+ * Authentication response structure
+ */
 interface AuthResponse {
+  /** User data */
   user: User;
+  /** JWT access token */
   token: string;
+  /** Refresh token for obtaining new access tokens */
   refreshToken: string;
+  /** Token expiration time in seconds */
   expiresIn: number;
 }
 
+/**
+ * JWT token payload structure
+ */
 interface TokenPayload {
+  /** User ID */
   userId: string;
+  /** User email */
   email: string;
+  /** User role for authorization */
   role: string;
 }
 
+/**
+ * Token pair returned during authentication
+ */
 interface TokenPair {
+  /** JWT access token */
   token: string;
+  /** Refresh token */
   refreshToken: string;
 }
 
-// Define permissions for each role
+/**
+ * Role-based permissions mapping
+ * Defines what operations each role is authorized to perform
+ */
 const ROLE_PERMISSIONS: Record<string, string[]> = {
   ADMIN: [
     '*', // Admin has all permissions
@@ -96,6 +144,35 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
   ],
 };
 
+/**
+ * Authentication Service
+ *
+ * Provides comprehensive user authentication and authorization functionality including:
+ * - User registration with password hashing (Argon2)
+ * - Login with JWT token generation
+ * - Token verification and refresh
+ * - Role-based access control (RBAC)
+ * - Session management
+ * - Password updates and account management
+ *
+ * @example
+ * ```typescript
+ * const authService = new AuthService();
+ *
+ * // Register a new user
+ * const { user, token } = await authService.register({
+ *   email: 'analyst@example.com',
+ *   password: 'securePassword123',
+ *   role: 'ANALYST'
+ * });
+ *
+ * // Login
+ * const authResponse = await authService.login('analyst@example.com', 'securePassword123');
+ *
+ * // Verify token
+ * const user = await authService.verifyToken(token);
+ * ```
+ */
 export class AuthService {
   private pool: Pool;
 
@@ -103,6 +180,29 @@ export class AuthService {
     this.pool = getPostgresPool();
   }
 
+  /**
+   * Register a new user account
+   *
+   * Creates a new user with hashed password (Argon2), generates authentication tokens,
+   * and stores session information. The operation is transactional to ensure data consistency.
+   *
+   * @param userData - User registration data including email, password, and optional profile info
+   * @returns Authentication response with user data, access token, and refresh token
+   * @throws {Error} If user with email/username already exists
+   * @throws {Error} If database transaction fails
+   *
+   * @example
+   * ```typescript
+   * const response = await authService.register({
+   *   email: 'analyst@example.com',
+   *   username: 'analyst1',
+   *   password: 'securePassword123',
+   *   firstName: 'John',
+   *   lastName: 'Doe',
+   *   role: 'ANALYST'
+   * });
+   * ```
+   */
   async register(userData: UserData): Promise<AuthResponse> {
     const client = await this.pool.connect();
 
@@ -156,6 +256,30 @@ export class AuthService {
     }
   }
 
+  /**
+   * Authenticate user and create session
+   *
+   * Verifies user credentials, updates last login timestamp, and generates new
+   * authentication tokens. IP address and user agent can be logged for security auditing.
+   *
+   * @param email - User's email address
+   * @param password - Plain text password (will be verified against stored hash)
+   * @param ipAddress - Optional IP address for audit logging
+   * @param userAgent - Optional user agent for audit logging
+   * @returns Authentication response with user data and tokens
+   * @throws {Error} If credentials are invalid
+   * @throws {Error} If user account is inactive
+   *
+   * @example
+   * ```typescript
+   * const response = await authService.login(
+   *   'analyst@example.com',
+   *   'password123',
+   *   '192.168.1.1',
+   *   'Mozilla/5.0...'
+   * );
+   * ```
+   */
   async login(
     email: string,
     password: string,
@@ -202,6 +326,17 @@ export class AuthService {
     }
   }
 
+  /**
+   * Generate JWT access token and refresh token
+   *
+   * Creates a signed JWT with user claims and a UUID refresh token.
+   * Stores the refresh token in the database with 7-day expiration.
+   *
+   * @param user - Database user object
+   * @param client - PostgreSQL client for session storage
+   * @returns Token pair containing access and refresh tokens
+   * @private
+   */
   private async generateTokens(
     user: DatabaseUser,
     client: PoolClient,
@@ -232,6 +367,24 @@ export class AuthService {
     return { token, refreshToken };
   }
 
+  /**
+   * Verify JWT access token and retrieve user
+   *
+   * Validates the token signature and expiration, then retrieves the
+   * current user data from the database. Returns null if token is invalid
+   * or user is inactive.
+   *
+   * @param token - JWT access token to verify
+   * @returns User object if valid, null otherwise
+   *
+   * @example
+   * ```typescript
+   * const user = await authService.verifyToken(req.headers.authorization);
+   * if (!user) {
+   *   throw new Error('Unauthorized');
+   * }
+   * ```
+   */
   async verifyToken(token: string): Promise<User | null> {
     try {
       if (!token) return null;

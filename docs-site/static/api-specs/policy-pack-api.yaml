@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: IntelGraph Policy Pack Contracts
+  version: 0.1.0
+paths:
+  /v1/policy/packs/{packId}:
+    get:
+      summary: Download signed policy pack tarball
+      parameters:
+        - in: path
+          name: packId
+          required: true
+          schema: { type: string, enum: [policy-pack-v0] }
+      responses:
+        '200':
+          description: OK
+          headers:
+            Digest: { description: sha-256 of tar, schema: { type: string } }
+            ETag:
+              {
+                description: Weak ETag keyed to digest,
+                schema: { type: string },
+              }
+            X-Cosign-Bundle:
+              {
+                description: Optional inline Sigstore bundle,
+                schema: { type: string },
+              }
+          content:
+            application/vnd.intelgraph.policy+tar:
+              { schema: { type: string, format: binary } }
+        '503': { description: Pack not built }
+    head:
+      summary: Probe for digest/etag without body
+      parameters:
+        - $ref: '#/paths/~1v1~1policy~1packs~1{packId}/get/parameters/0'
+      responses:
+        '200': { description: OK }
+  /v1/policy/packs/{packId}/attestation:
+    get:
+      summary: Fetch Sigstore verification bundle (for offline verify)
+      parameters:
+        - $ref: '#/paths/~1v1~1policy~1packs~1{packId}/get/parameters/0'
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag:
+              {
+                description: Weak ETag keyed to pack digest,
+                schema: { type: string },
+              }
+          content:
+            application/vnd.sigstore.bundle+json:
+              { schema: { type: object, additionalProperties: true } }
+        '503': { description: Attestation not available }

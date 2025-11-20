@@ -89,22 +89,55 @@ const config = {
       {
         specs: [
           {
-            id: 'maestro',
-            spec: '../maestro-orchestration-api.yaml',
-            route: '/intelgraph/api/maestro/1.0.0',
+            id: 'core',
+            spec: 'static/api-specs/core-api.yaml',
+            route: '/api/core',
           },
           {
-            id: 'core',
-            spec: '../intelgraph-core-api.yaml',
-            route: '/intelgraph/api/core/1.0.0',
+            id: 'maestro',
+            spec: 'static/api-specs/maestro-api.yaml',
+            route: '/api/maestro',
+          },
+          {
+            id: 'pipelines',
+            spec: 'static/api-specs/pipelines-api.yaml',
+            route: '/api/pipelines',
+          },
+          {
+            id: 'executors',
+            spec: 'static/api-specs/executors-api.yaml',
+            route: '/api/executors',
+          },
+          {
+            id: 'policy-pack',
+            spec: 'static/api-specs/policy-pack-api.yaml',
+            route: '/api/policy-pack',
+          },
+          {
+            id: 'evidence',
+            spec: 'static/api-specs/evidence-api.yaml',
+            route: '/api/evidence',
           },
         ],
-        theme: { primaryColor: '#0f766e' },
+        theme: {
+          primaryColor: '#0f766e',
+          options: {
+            hideDownloadButton: false,
+            disableSearch: false,
+            showObjectSchemaExamples: true,
+          },
+        },
       },
     ],
     [
       '@docusaurus/plugin-client-redirects',
-      { redirects: [{ from: '/api', to: '/intelgraph/api/core/1.0.0' }] },
+      {
+        redirects: [
+          { from: '/api', to: '/api/core' },
+          { from: '/intelgraph/api/core/1.0.0', to: '/api/core' },
+          { from: '/intelgraph/api/maestro/1.0.0', to: '/api/maestro' },
+        ],
+      },
     ],
   ],
 };

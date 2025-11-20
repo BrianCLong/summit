@@ -86,7 +86,22 @@
     "ci:prod-guard": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ci/prod-config-check.ts",
     "smoke": "node scripts/smoke-test.js",
     "smoke:ci": "NODE_ENV=test node scripts/smoke-test.js",
-    "bootstrap": "make bootstrap"
+    "bootstrap": "make bootstrap",
+    "docs:dev": "cd docs-site && npm start",
+    "docs:build": "npm run docs:generate && cd docs-site && npm run build",
+    "docs:serve": "cd docs-site && npm run serve",
+    "docs:generate": "npm run docs:generate:sdk && npm run docs:generate:graphql && npm run docs:generate:grpc",
+    "docs:generate:sdk": "typedoc",
+    "docs:generate:graphql": "bash scripts/docs/gen-graphql-docs.sh",
+    "docs:generate:grpc": "bash scripts/docs/gen-grpc-docs.sh",
+    "docs:generate:api": "node scripts/docs/generate-api-docs.js",
+    "docs:lint": "markdownlint 'docs/**/*.md' --ignore node_modules --ignore docs-site",
+    "docs:lint:fix": "markdownlint 'docs/**/*.md' --ignore node_modules --ignore docs-site --fix",
+    "docs:validate": "node scripts/docs/validate-docs-structure.js",
+    "docs:deploy": "cd docs-site && GIT_USER=$(git config user.name) npm run deploy",
+    "docs:clean": "rimraf docs-site/build docs-site/.docusaurus",
+    "docs:sbom": "node scripts/docs/generate-docs-sbom.js",
+    "docs:version": "node scripts/docs/version-docs.js"
   },
   "keywords": [
     "intelligence-analysis",

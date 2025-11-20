@@ -1,0 +1,55 @@
+openapi: 3.0.3
+info:
+  title: Maestro Conductor Evidence API (stub)
+  version: 0.1.0
+paths:
+  /v1/evidence:
+    post:
+      summary: Publish evidence bundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                releaseId: { type: string }
+                service: { type: string }
+                artifacts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type: { type: string }
+                      sha256: { type: string }
+                slo:
+                  type: object
+                  properties:
+                    service: { type: string }
+                    p95Ms: { type: integer }
+                    p99Ms: { type: integer }
+                    errorRate: { type: number }
+                    window: { type: string }
+                cost:
+                  type: object
+      responses:
+        '202':
+          description: Accepted
+  /v1/policy/packs/{packId}:
+    get:
+      summary: Fetch signed policy pack (starter)
+      parameters:
+        - in: path
+          name: packId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Pack manifest (starter)
+          content:
+            application/vnd.intelgraph.policy+tar:
+              schema:
+                type: object
+                properties:
+                  manifest: { type: object }
