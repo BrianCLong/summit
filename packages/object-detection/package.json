@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/object-detection",
+  "version": "1.0.0",
+  "description": "AI/ML-powered object detection and recognition for satellite imagery",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "object-detection",
+    "ai",
+    "machine-learning",
+    "computer-vision",
+    "geoint"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@intelgraph/satellite-imagery": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

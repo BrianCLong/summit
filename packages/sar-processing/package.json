@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/sar-processing",
+  "version": "1.0.0",
+  "description": "Synthetic Aperture Radar processing including InSAR and maritime surveillance",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "sar",
+    "insar",
+    "radar",
+    "maritime-surveillance",
+    "geoint"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@intelgraph/satellite-imagery": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

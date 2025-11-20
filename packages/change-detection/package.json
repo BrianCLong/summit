@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/change-detection",
+  "version": "1.0.0",
+  "description": "Temporal analysis and change detection in satellite imagery",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "change-detection",
+    "temporal-analysis",
+    "geoint",
+    "remote-sensing"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@intelgraph/satellite-imagery": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

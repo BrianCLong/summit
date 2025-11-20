@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/geospatial-analysis",
+  "version": "1.0.0",
+  "description": "Terrain analysis, viewshed, mission planning, and geospatial intelligence",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "geospatial",
+    "terrain-analysis",
+    "viewshed",
+    "mission-planning",
+    "geoint"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@intelgraph/satellite-imagery": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

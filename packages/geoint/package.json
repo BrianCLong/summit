@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/geoint",
+  "version": "1.0.0",
+  "description": "Comprehensive geospatial intelligence operations and product generation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "geoint",
+    "intelligence",
+    "pattern-of-life",
+    "multi-int-fusion",
+    "geospatial-intelligence"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@intelgraph/satellite-imagery": "workspace:*",
+    "@intelgraph/object-detection": "workspace:*",
+    "@intelgraph/change-detection": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

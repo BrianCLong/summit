@@ -1,0 +1,26 @@
+{
+  "name": "@intelgraph/satellite-imagery",
+  "version": "1.0.0",
+  "description": "Satellite imagery ingestion, processing, and management",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "satellite",
+    "imagery",
+    "remote-sensing",
+    "geoint",
+    "preprocessing"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
