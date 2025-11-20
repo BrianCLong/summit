@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Filter, Settings, Download, RefreshCw } from 'lucide-react'
+import { Search, Filter, Settings, Download, RefreshCw, Sparkles, ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { isEnhancedTriPaneEnabled } from '@/lib/flags'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
@@ -19,6 +21,8 @@ import type {
 } from '@/types'
 
 export default function ExplorePage() {
+  const navigate = useNavigate()
+
   // GraphQL hooks
   const {
     data: entitiesData,
@@ -209,6 +213,34 @@ export default function ExplorePage() {
 
   return (
     <div className="h-full flex flex-col">
+      {/* New Feature Banner */}
+      {isEnhancedTriPaneEnabled() && (
+        <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border-b border-blue-500/20 px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-5 w-5 text-blue-500" />
+              <div>
+                <div className="font-semibold text-sm">
+                  New: Enhanced Tri-Pane Analysis View
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Experience synchronized timeline, graph, and map views with XAI explanations
+                </div>
+              </div>
+            </div>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => navigate('/explore/tri-pane')}
+              className="flex items-center gap-2"
+            >
+              Try it now
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b">
         <div className="flex items-center gap-4">

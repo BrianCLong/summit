@@ -16,6 +16,7 @@ import { SocketProvider } from '@/contexts/SocketContext'
 // Pages
 import HomePage from '@/pages/HomePage'
 import ExplorePage from '@/pages/ExplorePage'
+import TriPaneDemoPage from '@/pages/TriPaneDemoPage'
 import AlertsPage from '@/pages/AlertsPage'
 import AlertDetailPage from '@/pages/AlertDetailPage'
 import CasesPage from '@/pages/CasesPage'
@@ -52,6 +53,10 @@ function App() {
                   <Route path="/" element={<Layout />}>
                     <Route index element={<HomePage />} />
                     <Route path="explore" element={<ExplorePage />} />
+                    <Route
+                      path="explore/tri-pane"
+                      element={<TriPaneDemoPage />}
+                    />
 
                     {/* Alerts */}
                     <Route path="alerts" element={<AlertsPage />} />

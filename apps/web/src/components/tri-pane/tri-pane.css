@@ -1,0 +1,318 @@
+/* Enhanced Tri-Pane View Animations and Styles */
+
+/* Smooth transitions for pane focus */
+.tri-pane-focus-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Pane focus ring animation */
+@keyframes focus-ring-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+  }
+}
+
+.tri-pane-focus {
+  animation: focus-ring-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Explain sidebar slide animation */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.explain-sidebar-enter {
+  animation: slideInFromRight 0.3s ease-out forwards;
+}
+
+.explain-sidebar-exit {
+  animation: slideOutToRight 0.3s ease-in forwards;
+}
+
+/* Time filter indicator fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.time-filter-indicator {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Histogram bar hover effect */
+.histogram-bar {
+  transition: all 0.2s ease-out;
+}
+
+.histogram-bar:hover {
+  filter: brightness(1.2);
+  transform: scaleY(1.05);
+  transform-origin: bottom;
+}
+
+/* XAI overlay fade in */
+.xai-overlay {
+  animation: fadeIn 0.4s ease-out;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease-out;
+}
+
+/* Map marker pulse */
+@keyframes marker-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.map-marker-selected {
+  animation: marker-pulse 1.5s ease-in-out infinite;
+}
+
+/* Entity card hover effect in Explain sidebar */
+.entity-contribution-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.entity-contribution-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Confidence bar fill animation */
+@keyframes fillBar {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--bar-width);
+  }
+}
+
+.confidence-bar {
+  animation: fillBar 0.8s ease-out;
+  transition: width 0.5s ease-out;
+}
+
+/* Section collapse/expand animation */
+.section-content-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-out;
+}
+
+.section-content-enter-active {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.section-content-exit {
+  max-height: 1000px;
+  opacity: 1;
+  overflow: hidden;
+  transition: all 0.3s ease-in;
+}
+
+.section-content-exit-active {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* Provenance overlay shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.provenance-loading {
+  background: linear-gradient(
+    to right,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.dark .provenance-loading {
+  background: linear-gradient(
+    to right,
+    #2a2a2a 0%,
+    #3a3a3a 20%,
+    #2a2a2a 40%,
+    #2a2a2a 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Keyboard shortcut badge */
+.keyboard-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease-out;
+}
+
+.keyboard-shortcut:hover {
+  transform: scale(1.05);
+}
+
+/* Smooth scroll for timeline */
+.timeline-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Graph canvas fade in */
+.graph-canvas-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.graph-canvas-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.4s ease-out;
+}
+
+/* Map controls slide in */
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.map-controls {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Tooltip fade in */
+.tooltip-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.tooltip-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.15s ease-out;
+}
+
+/* Badge pulse for notifications */
+@keyframes badge-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.notification-badge {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* Responsive transitions */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode specific animations */
+.dark .xai-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.dark .entity-contribution-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1),
+    0 2px 4px -1px rgba(255, 255, 255, 0.06);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tri-pane-focus {
+    outline: 3px solid currentColor;
+  }
+
+  .entity-contribution-card:hover {
+    outline: 2px solid currentColor;
+  }
+}
