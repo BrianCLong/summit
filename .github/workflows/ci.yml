@@ -163,3 +163,80 @@ jobs:
       - name: Tear down stack
         if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
+
+  e2e-tests:
+    name: E2E Tests (Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+    runs-on: ubuntu-latest
+    needs: build-test
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2, 3, 4]
+        shardTotal: [4]
+    env:
+      DOCKER_BUILDKIT: '1'
+      COMPOSE_DOCKER_CLI_BUILD: '1'
+      PNPM_CACHE_FOLDER: ~/.pnpm-store
+      E2E_WORKERS: '2'
+      SHARD_INDEX: ${{ matrix.shardIndex }}
+      SHARD_TOTAL: ${{ matrix.shardTotal }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - name: Configure pnpm store
+        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Bootstrap repo
+        run: make bootstrap
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-e2e-${{ hashFiles('docker-compose.dev.yml') }}
+          restore-keys: ${{ runner.os }}-buildx-e2e-
+      - name: Bring up stack
+        run: make up
+      - name: Wait for services
+        run: ./scripts/wait-for-stack.sh
+      - name: Run E2E tests (Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+        run: |
+          cd tests/e2e
+          pnpm exec playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-shard-${{ matrix.shardIndex }}
+          path: tests/e2e/playwright-report/
+          retention-days: 30
+      - name: Upload test screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots-shard-${{ matrix.shardIndex }}
+          path: tests/e2e/test-results/
+          retention-days: 30
+      - name: Compose logs on failure
+        if: failure()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
+      - name: Tear down stack
+        if: always()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
