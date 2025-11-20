@@ -1,0 +1,263 @@
+name: Connector Golden Tests
+
+on:
+  pull_request:
+    paths:
+      - 'connectors/**'
+      - '.github/workflows/connector-golden-tests.yml'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'connectors/**'
+
+jobs:
+  discover-connectors:
+    name: Discover Connectors with Golden Tests
+    runs-on: ubuntu-latest
+    outputs:
+      connectors: ${{ steps.discover.outputs.connectors }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Discover connectors
+        id: discover
+        run: |
+          # Find all connectors with golden tests
+          CONNECTORS=$(find connectors -name "test_golden.py" -type f | \
+            sed 's|/test_golden.py||' | \
+            sed 's|connectors/||' | \
+            sed 's|/__tests__||' | \
+            jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          echo "connectors=$CONNECTORS" >> $GITHUB_OUTPUT
+          echo "Found connectors: $CONNECTORS"
+
+  golden-tests:
+    name: Golden Tests - ${{ matrix.connector }}
+    runs-on: ubuntu-latest
+    needs: discover-connectors
+    if: needs.discover-connectors.outputs.connectors != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        connector: ${{ fromJson(needs.discover-connectors.outputs.connectors) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest pytest-asyncio deepdiff
+
+          # Install connector-specific dependencies if requirements.txt exists
+          if [ -f "connectors/${{ matrix.connector }}/requirements.txt" ]; then
+            pip install -r "connectors/${{ matrix.connector }}/requirements.txt"
+          fi
+
+          # Install common dependencies
+          pip install httpx>=0.27.0 pydantic>=2.0.0 || true
+
+          # Connector-specific dependencies
+          if [ "${{ matrix.connector }}" == "cisa-kev" ]; then
+            pip install httpx pydantic
+          elif [ "${{ matrix.connector }}" == "dns-whois" ]; then
+            pip install dnspython python-whois httpx pydantic
+          fi
+
+      - name: Run golden tests
+        run: |
+          # Set PYTHONPATH to include project root
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+
+          # Run golden tests for this connector
+          pytest "connectors/${{ matrix.connector }}/__tests__/test_golden.py" \
+            -v \
+            --tb=short \
+            --color=yes \
+            --junitxml=test-results/${{ matrix.connector }}-golden.xml
+        continue-on-error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: golden-test-results-${{ matrix.connector }}
+          path: test-results/${{ matrix.connector }}-golden.xml
+
+  unit-tests:
+    name: Unit Tests - ${{ matrix.connector }}
+    runs-on: ubuntu-latest
+    needs: discover-connectors
+    if: needs.discover-connectors.outputs.connectors != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        connector: ${{ fromJson(needs.discover-connectors.outputs.connectors) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov
+
+          # Install connector-specific dependencies
+          if [ -f "connectors/${{ matrix.connector }}/requirements.txt" ]; then
+            pip install -r "connectors/${{ matrix.connector }}/requirements.txt"
+          fi
+
+          # Install common dependencies
+          pip install httpx>=0.27.0 pydantic>=2.0.0 || true
+
+      - name: Run unit tests with coverage
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+
+          pytest "connectors/${{ matrix.connector }}/__tests__/test_mapping.py" \
+            -v \
+            --cov="connectors/${{ matrix.connector }}" \
+            --cov-report=xml \
+            --cov-report=term \
+            --junitxml=test-results/${{ matrix.connector }}-unit.xml
+        continue-on-error: false
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: ${{ matrix.connector }}
+          name: ${{ matrix.connector }}-coverage
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-results-${{ matrix.connector }}
+          path: test-results/${{ matrix.connector }}-unit.xml
+
+  e2e-tests:
+    name: E2E Tests - ${{ matrix.connector }}
+    runs-on: ubuntu-latest
+    needs: discover-connectors
+    if: needs.discover-connectors.outputs.connectors != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        connector: ${{ fromJson(needs.discover-connectors.outputs.connectors) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest pytest-asyncio
+
+          # Install connector-specific dependencies
+          if [ -f "connectors/${{ matrix.connector }}/requirements.txt" ]; then
+            pip install -r "connectors/${{ matrix.connector }}/requirements.txt"
+          fi
+
+          # Install common dependencies
+          pip install httpx>=0.27.0 pydantic>=2.0.0 || true
+
+      - name: Run E2E tests
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+
+          pytest "connectors/${{ matrix.connector }}/__tests__/test_e2e.py" \
+            -v \
+            --tb=short \
+            --junitxml=test-results/${{ matrix.connector }}-e2e.xml
+        continue-on-error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-results-${{ matrix.connector }}
+          path: test-results/${{ matrix.connector }}-e2e.xml
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [golden-tests, unit-tests, e2e-tests]
+    if: always()
+
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v3
+        with:
+          path: test-results
+
+      - name: Publish test summary
+        run: |
+          echo "## Connector Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Golden Tests" >> $GITHUB_STEP_SUMMARY
+          if [ -d "test-results" ]; then
+            find test-results -name "*-golden.xml" -type f | wc -l | \
+              xargs -I {} echo "- {} connector(s) tested" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Unit Tests" >> $GITHUB_STEP_SUMMARY
+          if [ -d "test-results" ]; then
+            find test-results -name "*-unit.xml" -type f | wc -l | \
+              xargs -I {} echo "- {} connector(s) tested" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### E2E Tests" >> $GITHUB_STEP_SUMMARY
+          if [ -d "test-results" ]; then
+            find test-results -name "*-e2e.xml" -type f | wc -l | \
+              xargs -I {} echo "- {} connector(s) tested" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [golden-tests, unit-tests, e2e-tests]
+    if: always()
+
+    steps:
+      - name: Check test results
+        run: |
+          if [ "${{ needs.golden-tests.result }}" != "success" ]; then
+            echo "::error::Golden tests failed"
+            exit 1
+          fi
+
+          if [ "${{ needs.unit-tests.result }}" != "success" ]; then
+            echo "::error::Unit tests failed"
+            exit 1
+          fi
+
+          if [ "${{ needs.e2e-tests.result }}" != "success" ]; then
+            echo "::warning::E2E tests failed (non-blocking)"
+          fi
+
+          echo "::notice::All critical tests passed"

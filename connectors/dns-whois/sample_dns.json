@@ -1,0 +1,50 @@
+{
+  "domains": [
+    "example.com",
+    "google.com"
+  ],
+  "dns_records": {
+    "example.com": {
+      "A": ["93.184.216.34"],
+      "AAAA": ["2606:2800:220:1:248:1893:25c8:1946"],
+      "MX": [
+        {"priority": 0, "exchange": "mail.example.com"}
+      ],
+      "NS": [
+        "a.iana-servers.net",
+        "b.iana-servers.net"
+      ],
+      "TXT": [
+        "v=spf1 -all"
+      ]
+    },
+    "google.com": {
+      "A": ["142.250.80.46"],
+      "AAAA": ["2607:f8b0:4004:c07::71"],
+      "MX": [
+        {"priority": 10, "exchange": "smtp.google.com"}
+      ],
+      "NS": [
+        "ns1.google.com",
+        "ns2.google.com"
+      ]
+    }
+  },
+  "whois_sample": {
+    "domain_name": "example.com",
+    "registrar": "Example Registrar Inc.",
+    "creation_date": "1995-08-14",
+    "expiration_date": "2025-08-13",
+    "updated_date": "2024-08-14",
+    "status": ["clientTransferProhibited"],
+    "name_servers": [
+      "a.iana-servers.net",
+      "b.iana-servers.net"
+    ],
+    "org": "Example Organization LLC",
+    "name": "John Doe",
+    "emails": ["admin@example.com"],
+    "address": "123 Example St, City, ST 12345, US"
+  },
+  "note": "WHOIS data contains PII and will be redacted in production"
+}

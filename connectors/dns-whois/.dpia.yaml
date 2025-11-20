@@ -1,0 +1,375 @@
+# Data Protection Impact Assessment
+# DNS/WHOIS Infrastructure Connector
+
+assessment:
+  connector_name: "dns-whois"
+  version: "1.0.0"
+  assessment_date: "2025-11-20"
+  assessor: "Data Governance Team"
+  review_date: "2026-05-20"  # 6-month review due to PII
+  severity: high  # Contains PII
+
+# === Data Categories ===
+data_categories:
+  - category: domain_registration_data
+    present: true
+    fields:
+      - domain_name
+      - registrar
+      - creation_date
+      - expiration_date
+      - nameservers
+      - status
+    classification: public
+    sensitivity: low
+
+  - category: dns_records
+    present: true
+    fields:
+      - a_records
+      - aaaa_records
+      - mx_records
+      - txt_records
+      - ns_records
+      - cname_records
+    classification: public
+    sensitivity: low
+
+  - category: personal_identifiable_information
+    present: true  # CRITICAL - WHOIS contains PII
+    fields:
+      - registrant_name
+      - registrant_email
+      - registrant_phone
+      - registrant_address
+      - admin_name
+      - admin_email
+      - admin_phone
+      - tech_name
+      - tech_email
+      - tech_phone
+    classification: confidential
+    sensitivity: high
+    gdpr_category: personal_data
+
+  - category: organizational_data
+    present: true
+    fields:
+      - registrant_organization
+      - admin_organization
+      - tech_organization
+    classification: internal
+    sensitivity: medium
+
+  - category: telemetry
+    present: true
+    fields:
+      - ingestion_timestamp
+      - query_timestamp
+      - connector_version
+      - cache_hit
+    classification: internal
+    sensitivity: low
+
+# === Lawful Basis ===
+lawful_basis:
+  primary: legitimate_interest
+  description: "Processing publicly available WHOIS data for infrastructure security analysis and threat detection"
+  legitimate_interest_assessment: |
+    Purpose: Domain infrastructure analysis, threat intelligence, incident response
+    Necessity: Essential for security operations and threat detection
+    Balancing test: Security benefits outweigh minimal privacy impact on already-public data
+    Safeguards: PII redaction, data minimization, short retention period
+  documentation: "WHOIS data is publicly available but subject to GDPR. Implemented comprehensive safeguards."
+  consent_required: false  # Public data, legitimate interest basis
+  data_subject_rights: applicable  # Still subject to GDPR rights
+
+# === Purpose & Use ===
+purpose:
+  primary: "Analyze domain infrastructure for security monitoring and threat intelligence"
+  secondary:
+    - "Track domain ownership and registration changes"
+    - "Identify malicious infrastructure (C2 domains)"
+    - "Support incident response investigations"
+    - "Monitor brand protection and domain squatting"
+  prohibited_uses:
+    - "Marketing or advertising"
+    - "Unsolicited contact of registrants"
+    - "Sale or transfer of PII to third parties"
+    - "Profiling or automated decision-making"
+  data_minimization: "Only collect fields necessary for security analysis. Redact or hash PII when possible."
+  retention_justification: "90-day retention for historical analysis and trend detection. Shorter than typical due to PII."
+
+# === Risk Analysis ===
+risk_analysis:
+  - risk: pii_exposure
+    likelihood: medium
+    impact: critical
+    rationale: "WHOIS data contains names, emails, phone numbers, addresses"
+    mitigation: "Automatic PII detection, redaction, audit logging, access controls, short retention"
+    residual_risk: low
+
+  - risk: unauthorized_access_to_pii
+    likelihood: medium
+    impact: critical
+    rationale: "Internal systems could be compromised exposing PII"
+    mitigation: "Encryption at rest/transit, RBAC, audit logs, MFA, network segmentation"
+    residual_risk: low
+
+  - risk: gdpr_violation
+    likelihood: medium
+    impact: critical
+    rationale: "WHOIS data may include EU residents, subject to GDPR"
+    mitigation: "GDPR compliance framework, right to erasure, data minimization, lawful basis"
+    residual_risk: low
+
+  - risk: excessive_data_collection
+    likelihood: low
+    impact: medium
+    rationale: "Could collect more PII than necessary"
+    mitigation: "Field whitelisting, PII filtering, data minimization by design"
+    residual_risk: very_low
+
+  - risk: rate_limit_violation
+    likelihood: medium
+    impact: low
+    rationale: "WHOIS servers may block excessive queries"
+    mitigation: "Rate limiting, exponential backoff, caching, query throttling"
+    residual_risk: very_low
+
+  - risk: data_breach_notification_failure
+    likelihood: low
+    impact: high
+    rationale: "PII breach requires notification within 72 hours"
+    mitigation: "Incident response plan, breach detection, notification procedures"
+    residual_risk: low
+
+  - risk: third_party_whois_server_logging
+    likelihood: high
+    impact: low
+    rationale: "WHOIS servers may log queries revealing our interests"
+    mitigation: "Use privacy-preserving WHOIS APIs when available, rotate query sources"
+    residual_risk: low
+
+# === Mitigations ===
+mitigations:
+  technical:
+    - "Automatic PII detection on all ingested data"
+    - "PII redaction: mask emails, hash names, mask phone numbers"
+    - "Data encrypted in transit (TLS 1.3)"
+    - "Data encrypted at rest (AES-256)"
+    - "Access restricted via RBAC (read, write, admin)"
+    - "Audit logging for all PII access"
+    - "MFA required for data access"
+    - "Network segmentation for data storage"
+    - "Immutable audit trail"
+    - "Automated data deletion after 90 days"
+
+  organizational:
+    - "Data minimization by design - only necessary fields"
+    - "Privacy training for all personnel"
+    - "Incident response plan with 72h breach notification"
+    - "GDPR compliance officer assigned"
+    - "Regular privacy audits (quarterly)"
+    - "Data processing agreements with WHOIS API providers"
+    - "Clear privacy policy published"
+
+  legal:
+    - "Terms of service compliance with WHOIS providers"
+    - "GDPR Article 6(1)(f) legitimate interest basis documented"
+    - "Right to erasure procedures implemented"
+    - "Data subject access request (DSAR) procedures"
+    - "Privacy notice provided to data subjects upon request"
+
+# === Security Controls ===
+security_controls:
+  encryption_in_transit: true
+  encryption_at_rest: true
+  access_control: rbac
+  mfa_required: true
+  audit_logging: true
+  data_validation: true
+  pii_detection: automatic
+  pii_redaction: automatic
+  anomaly_detection: true
+  intrusion_detection: true
+  network_segmentation: true
+  secure_backup: true
+  disaster_recovery: true
+
+# === Retention & Deletion ===
+retention:
+  default_days: 90  # Shorter due to PII
+  justification: "Sufficient for historical trend analysis while minimizing PII storage"
+  legal_hold_supported: true  # For investigations
+  deletion_method: secure_wipe
+  backup_retention_days: 30
+  anonymization_required: false  # Data deleted, not anonymized
+  auto_deletion: true  # Automated deletion after retention period
+
+# === Cross-Border Transfers ===
+cross_border_transfers:
+  applicable: true
+  jurisdictions:
+    - US  # WHOIS servers often in US
+    - EU  # Domain registrants may be in EU
+    - Various  # International WHOIS servers
+  legal_basis: standard_contractual_clauses
+  safeguards:
+    - "Standard Contractual Clauses (SCCs) with data processors"
+    - "Encryption in transit and at rest"
+    - "Limited data transfers (only necessary fields)"
+    - "EU data sovereignty option available"
+
+# === Data Subject Rights (GDPR) ===
+data_subject_rights:
+  applicable: true
+
+  right_to_access:
+    supported: true
+    process: "Data subjects can request copies of their data via DSAR form"
+    response_time_days: 30
+
+  right_to_rectification:
+    supported: limited
+    note: "WHOIS data comes from registrars; rectification must occur at source"
+
+  right_to_erasure:
+    supported: true
+    process: "Immediate deletion upon verified request, documented in audit log"
+    response_time_days: 7
+
+  right_to_portability:
+    supported: true
+    format: JSON
+
+  right_to_object:
+    supported: true
+    process: "Data subjects can object to processing; data deleted unless legal obligation"
+
+  right_to_restriction:
+    supported: true
+    process: "Processing can be restricted pending dispute resolution"
+
+  automated_decision_making:
+    applicable: false
+    note: "No automated decision-making or profiling"
+
+# === Third-Party Sharing ===
+third_party_sharing:
+  enabled: false
+  recipients: []
+  purpose: n/a
+  legal_basis: n/a
+  note: "PII is not shared with any third parties"
+
+# === Children's Data ===
+childrens_data:
+  applicable: false
+  note: "WHOIS registrants must be 18+; no special handling needed"
+
+# === Monitoring & Review ===
+monitoring:
+  periodic_review: quarterly  # More frequent due to PII
+  automated_checks: true
+  pii_detection_audit: weekly
+  access_audit: daily
+  compliance_reporting: monthly
+  incident_response_plan: true
+  breach_notification_procedure: true
+  dpo_oversight: true
+
+# === Approvals ===
+approvals:
+  - role: dpo
+    name: "Data Protection Officer"
+    email: "dpo@intelgraph.io"
+    date: "2025-11-20"
+    approved: true
+    comments: "High PII risk. Approved with comprehensive mitigations. Requires quarterly review."
+
+  - role: security
+    name: "Security Team Lead"
+    email: "security@intelgraph.io"
+    date: "2025-11-20"
+    approved: true
+    comments: "Security controls adequate. Monitor PII access logs closely."
+
+  - role: legal
+    name: "Legal Counsel"
+    email: "legal@intelgraph.io"
+    date: "2025-11-20"
+    approved: true
+    comments: "GDPR compliance framework in place. Ensure SCCs with WHOIS API providers."
+
+  - role: privacy
+    name: "Privacy Officer"
+    email: "privacy@intelgraph.io"
+    date: "2025-11-20"
+    approved: true
+    conditions:
+      - "Implement automated PII redaction before approval"
+      - "Establish DSAR process"
+      - "Quarterly privacy audits required"
+
+# === Privacy Impact Summary ===
+privacy_impact_summary:
+  overall_risk: medium  # High data sensitivity, but strong mitigations
+  key_concerns:
+    - "WHOIS contains significant PII (names, emails, phones, addresses)"
+    - "Cross-border transfers to WHOIS servers globally"
+    - "GDPR applies to EU registrant data"
+    - "Right to erasure must be honored"
+
+  key_safeguards:
+    - "Automatic PII detection and redaction"
+    - "Short retention period (90 days)"
+    - "Data minimization (only necessary fields)"
+    - "Strong access controls and audit logging"
+    - "GDPR compliance framework"
+
+  recommendation: "APPROVED with conditions. High-risk connector requiring continuous monitoring and quarterly reviews."
+
+# === Incident Response ===
+incident_response:
+  pii_breach_procedure: |
+    1. Detect breach via monitoring/alerting (target: <1 hour)
+    2. Contain breach - isolate affected systems (target: <2 hours)
+    3. Assess scope - identify affected data subjects (target: <12 hours)
+    4. Notify DPO and privacy team (target: <4 hours)
+    5. Notify supervisory authority if required (target: <72 hours from detection)
+    6. Notify affected data subjects if high risk (target: <72 hours)
+    7. Document incident in breach register
+    8. Conduct post-incident review and remediation
+
+  breach_notification_thresholds:
+    - "Any unauthorized access to PII"
+    - "Any PII data exfiltration"
+    - "Any failure of PII redaction system"
+    - "Any GDPR violation"
+
+  escalation_contacts:
+    - dpo@intelgraph.io
+    - security-incident@intelgraph.io
+    - legal@intelgraph.io
+
+# === Notes ===
+notes: |
+  DNS/WHOIS connector presents significant privacy considerations due to PII in WHOIS data.
+
+  Key Privacy Challenges:
+  1. WHOIS data is publicly available BUT still subject to GDPR if it contains EU residents' data
+  2. Domain registrant information includes names, emails, phones, addresses
+  3. Right to erasure must be honored even for historical data
+  4. Data minimization is critical - only collect necessary fields
+
+  Mitigation Strategy:
+  1. Automatic PII detection on all ingested data
+  2. Immediate redaction/masking of PII fields
+  3. Short retention period (90 days vs. typical 365 days)
+  4. Strong access controls and audit logging
+  5. GDPR compliance framework (DSAR, right to erasure, lawful basis)
+
+  Review quarterly or when connector is significantly modified.
+
+  Next Review: 2026-05-20

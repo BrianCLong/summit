@@ -1,0 +1,189 @@
+# DNS/WHOIS Connector Manifest
+# Version: 1.0.0
+
+# === Core Metadata ===
+name: dns-whois
+display_name: "DNS & WHOIS Infrastructure Connector"
+description: "Connector for DNS records and WHOIS registration data - essential for infrastructure analysis, domain ownership tracking, and threat intelligence"
+version: "1.0.0"
+author: "IntelGraph Data Intake Team"
+license: "MIT"
+
+# === Connector Type ===
+ingestion_type: hybrid  # Supports both batch (bulk domain lists) and streaming (real-time queries)
+supported_formats:
+  - dns_records
+  - whois_text
+  - json
+
+# === Data Source Configuration ===
+source:
+  type: api
+  authentication:
+    type: none  # Public DNS resolvers, some WHOIS may require auth
+    required_credentials: []
+    optional_credentials:
+      - whois_api_key  # For commercial WHOIS APIs
+  endpoints:
+    dns: "8.8.8.8"  # Google Public DNS (configurable)
+    whois: "whois.iana.org"  # Default WHOIS server
+  documentation_url: "https://docs.intelgraph.io/connectors/dns-whois"
+
+# === Rate Limiting ===
+# WHOIS servers have strict rate limits, DNS is more permissive
+rate_limit:
+  enabled: true
+  type: per_source
+  requests_per_second: 1  # Conservative for WHOIS
+  burst_size: 5
+  backoff_strategy: exponential
+  max_retries: 3
+  retry_delay_seconds: 2
+
+# === Schema & Mapping ===
+schema_mapping_file: schema_mapping.py
+entity_types:
+  - Domain
+  - Organization
+  - Person
+  - IPAddress
+  - DNSRecord
+relationship_types:
+  - REGISTERED_TO  # Domain -> Organization
+  - MANAGED_BY     # Domain -> Person
+  - RESOLVES_TO    # Domain -> IPAddress
+  - HAS_NAMESERVER # Domain -> Domain
+  - HAS_MX_RECORD  # Domain -> Domain
+
+# === Testing ===
+sample_data_file: sample_dns.json
+golden_tests:
+  enabled: true
+  test_cases:
+    - name: basic_dns_lookup
+      input: __tests__/golden/input/basic_domains.txt
+      expected: __tests__/golden/expected/dns_entities.json
+    - name: whois_with_pii
+      input: __tests__/golden/input/whois_sample.txt
+      expected: __tests__/golden/expected/whois_entities_redacted.json
+    - name: mx_records
+      input: __tests__/golden/input/mx_domains.txt
+      expected: __tests__/golden/expected/mx_entities.json
+
+# === Compliance & Governance ===
+compliance:
+  pii_detection: true  # CRITICAL - WHOIS contains email, phone, names
+  pii_fields:
+    - registrant_email
+    - registrant_phone
+    - admin_email
+    - admin_phone
+    - tech_email
+    - tech_phone
+    - registrant_name
+    - admin_name
+    - tech_name
+  pii_redaction_policy: mask  # mask | hash | remove
+  license_check: true
+  data_classification: internal  # WHOIS may contain PII, must be protected
+  retention_days: 90  # Shorter retention due to PII
+  gdpr_compliant: true
+  data_minimization: true  # Only collect necessary fields
+
+# === Observability ===
+observability:
+  metrics_enabled: true
+  sli_targets:
+    availability: 0.95           # 95% success rate (external dependencies)
+    latency_p95_ms: 5000         # 95th percentile < 5s (WHOIS can be slow)
+    throughput_min: 60           # Min records/min (rate limited)
+    data_freshness_hours: 168    # Weekly refresh acceptable for domains
+    pii_detection_rate: 1.0      # Must detect 100% of PII fields
+  slo_window_days: 30
+  alert_on_slo_breach: true
+  alert_on_pii_leakage: true  # Critical alert
+
+# === Resource Limits ===
+resources:
+  max_concurrent_requests: 2   # Low due to rate limits
+  batch_size: 10               # Small batches for rate limiting
+  timeout_seconds: 10          # DNS/WHOIS can timeout
+  memory_limit_mb: 256
+  cache_ttl_seconds: 86400     # 24h cache for DNS records
+
+# === Dependencies ===
+dependencies:
+  python: ">=3.11"
+  packages:
+    - dnspython>=2.4.0         # DNS resolution
+    - python-whois>=0.8.0      # WHOIS parsing
+    - httpx>=0.27.0
+    - pydantic>=2.0.0
+
+# === Rate Limit Specifics ===
+rate_limit_details:
+  dns:
+    queries_per_second: 10     # DNS is more permissive
+    timeout_seconds: 5
+  whois:
+    queries_per_second: 1      # WHOIS is very restrictive
+    queries_per_day: 1000      # Some servers have daily limits
+    timeout_seconds: 10
+
+# === PII Handling ===
+pii_handling:
+  detection_mode: automatic
+  redaction_rules:
+    email:
+      method: mask
+      pattern: "***@***.***"
+    phone:
+      method: mask
+      pattern: "+**-***-***-****"
+    name:
+      method: hash  # One-way hash for deduplication
+      algorithm: sha256
+  audit_log: true  # Log all PII access
+  consent_required: false  # Public WHOIS data, no consent needed
+  right_to_erasure: true   # Support GDPR erasure requests
+
+# === Error Handling ===
+error_handling:
+  domain_not_found: skip       # Skip non-existent domains
+  whois_unavailable: retry     # Retry with backoff
+  rate_limit_exceeded: wait    # Wait and retry
+  invalid_domain: skip         # Skip malformed domains
+  pii_detection_failed: alert  # Alert on PII detection failures
+
+# === Metadata ===
+metadata:
+  category: infrastructure
+  tags:
+    - dns
+    - whois
+    - domain
+    - infrastructure
+    - networking
+    - registration
+  data_volume_estimate: "Variable - depends on domain list size"
+  query_patterns:
+    - bulk_domain_list
+    - real_time_lookup
+    - scheduled_refresh
+  use_cases:
+    - Domain ownership tracking
+    - Infrastructure mapping
+    - Threat intelligence (C2 domains)
+    - Brand protection
+    - Incident response
+  maintainer: "data-intake-team@intelgraph.io"
+
+# === Privacy Notes ===
+privacy:
+  pii_risk: high  # WHOIS contains significant PII
+  gdpr_considerations: "WHOIS data is publicly available but still subject to GDPR. Must implement right to erasure, data minimization, and proper retention policies."
+  data_controller: intelgraph
+  data_processor: whois_servers
+  lawful_basis: legitimate_interest
+  purpose_limitation: "Domain infrastructure analysis only"
+  storage_limitation: 90_days

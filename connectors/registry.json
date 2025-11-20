@@ -1,0 +1,470 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-11-20T00:00:00Z",
+  "total_connectors": 17,
+  "ga_ready_count": 1,
+  "in_development_count": 1,
+  "connectors": [
+    {
+      "id": "cisa-kev",
+      "name": "CISA KEV",
+      "display_name": "CISA Known Exploited Vulnerabilities Catalog",
+      "version": "1.0.0",
+      "status": "ga_ready",
+      "author": "IntelGraph Data Intake Team",
+      "category": "security",
+      "tags": ["cve", "vulnerability", "security", "cisa", "ransomware"],
+      "description": "Connector for CISA's Known Exploited Vulnerabilities (KEV) catalog - authoritative source of actively exploited vulnerabilities",
+      "ingestion_type": "batch",
+      "supported_formats": ["json"],
+      "entity_types": ["Vulnerability"],
+      "relationship_types": [],
+      "data_classification": "public",
+      "pii_risk": "none",
+      "rate_limit_required": false,
+      "authentication_required": false,
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": true,
+        "has_golden_tests": true,
+        "pii_detection": true,
+        "license_check": true,
+        "gdpr_compliant": true
+      },
+      "observability": {
+        "metrics_enabled": true,
+        "sli_slo_configured": true,
+        "alerting_configured": true
+      },
+      "testing": {
+        "unit_tests": true,
+        "e2e_tests": true,
+        "golden_tests": true,
+        "test_count": 30
+      },
+      "documentation": {
+        "readme": true,
+        "api_reference": true,
+        "examples": true
+      },
+      "path": "connectors/cisa-kev",
+      "manifest_path": "connectors/cisa-kev/manifest.yaml",
+      "reference_implementation": true
+    },
+    {
+      "id": "dns-whois",
+      "name": "DNS/WHOIS",
+      "display_name": "DNS & WHOIS Infrastructure Connector",
+      "version": "1.0.0",
+      "status": "in_development",
+      "author": "IntelGraph Data Intake Team",
+      "category": "infrastructure",
+      "tags": ["dns", "whois", "domain", "infrastructure", "networking"],
+      "description": "Connector for DNS records and WHOIS registration data - essential for infrastructure analysis and domain tracking",
+      "ingestion_type": "hybrid",
+      "supported_formats": ["dns_records", "whois_text", "json"],
+      "entity_types": ["Domain", "Organization", "Person", "IPAddress", "DNSRecord"],
+      "relationship_types": ["REGISTERED_TO", "MANAGED_BY", "RESOLVES_TO", "HAS_NAMESERVER", "HAS_MX_RECORD"],
+      "data_classification": "internal",
+      "pii_risk": "high",
+      "rate_limit_required": true,
+      "authentication_required": false,
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": true,
+        "has_golden_tests": false,
+        "pii_detection": true,
+        "license_check": true,
+        "gdpr_compliant": true
+      },
+      "observability": {
+        "metrics_enabled": false,
+        "sli_slo_configured": false,
+        "alerting_configured": false
+      },
+      "testing": {
+        "unit_tests": false,
+        "e2e_tests": false,
+        "golden_tests": false,
+        "test_count": 0
+      },
+      "documentation": {
+        "readme": true,
+        "api_reference": false,
+        "examples": true
+      },
+      "path": "connectors/dns-whois",
+      "manifest_path": "connectors/dns-whois/manifest.yaml",
+      "reference_implementation": false,
+      "privacy_notes": "WHOIS data contains PII. Automatic redaction implemented."
+    },
+    {
+      "id": "csv",
+      "name": "CSV",
+      "display_name": "CSV File Connector",
+      "version": "0.5.0",
+      "status": "needs_ga_hardening",
+      "category": "file",
+      "tags": ["csv", "file", "batch"],
+      "description": "Connector for CSV file ingestion",
+      "ingestion_type": "batch",
+      "supported_formats": ["csv"],
+      "data_classification": "varies",
+      "pii_risk": "unknown",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false,
+        "pii_detection": false,
+        "license_check": false
+      },
+      "path": "connectors/csv_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "json",
+      "name": "JSON",
+      "display_name": "JSON File Connector",
+      "version": "0.5.0",
+      "status": "needs_ga_hardening",
+      "category": "file",
+      "tags": ["json", "file", "batch"],
+      "description": "Connector for JSON file ingestion",
+      "ingestion_type": "batch",
+      "supported_formats": ["json"],
+      "data_classification": "varies",
+      "pii_risk": "unknown",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false,
+        "pii_detection": false,
+        "license_check": false
+      },
+      "path": "connectors/json_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "stix-taxii",
+      "name": "STIX/TAXII",
+      "display_name": "STIX/TAXII Threat Intelligence",
+      "version": "0.5.0",
+      "status": "needs_ga_hardening",
+      "category": "threat-intel",
+      "tags": ["stix", "taxii", "threat-intel", "ioc"],
+      "description": "Connector for STIX/TAXII threat intelligence feeds",
+      "ingestion_type": "streaming",
+      "supported_formats": ["stix"],
+      "data_classification": "internal",
+      "pii_risk": "low",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false,
+        "pii_detection": false,
+        "license_check": false
+      },
+      "path": "connectors/stix_taxii_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "splunk",
+      "name": "Splunk",
+      "display_name": "Splunk SIEM Connector",
+      "version": "0.5.0",
+      "status": "needs_ga_hardening",
+      "category": "siem",
+      "tags": ["splunk", "siem", "logs", "events"],
+      "description": "Connector for Splunk SIEM",
+      "ingestion_type": "streaming",
+      "supported_formats": ["json"],
+      "data_classification": "internal",
+      "pii_risk": "medium",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false,
+        "pii_detection": false,
+        "license_check": false
+      },
+      "path": "connectors/splunk_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "sentinel",
+      "name": "Sentinel",
+      "display_name": "Microsoft Sentinel SIEM",
+      "version": "0.5.0",
+      "status": "needs_ga_hardening",
+      "category": "siem",
+      "tags": ["sentinel", "microsoft", "siem", "azure"],
+      "description": "Connector for Microsoft Sentinel",
+      "ingestion_type": "streaming",
+      "supported_formats": ["json"],
+      "data_classification": "internal",
+      "pii_risk": "medium",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false,
+        "pii_detection": false,
+        "license_check": false
+      },
+      "path": "connectors/sentinel_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "ofac-sdn",
+      "name": "OFAC SDN",
+      "display_name": "OFAC Sanctions List",
+      "version": "0.5.0",
+      "status": "needs_ga_hardening",
+      "category": "sanctions",
+      "tags": ["ofac", "sanctions", "compliance", "screening"],
+      "description": "Connector for OFAC Specially Designated Nationals list",
+      "ingestion_type": "batch",
+      "supported_formats": ["csv"],
+      "data_classification": "public",
+      "pii_risk": "high",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false,
+        "pii_detection": false,
+        "license_check": false
+      },
+      "path": "connectors/ofac_sdn_connector",
+      "reference_implementation": false,
+      "privacy_notes": "Contains PII of sanctioned individuals"
+    },
+    {
+      "id": "rss-news",
+      "name": "RSS News",
+      "display_name": "RSS News Feed Connector",
+      "version": "0.5.0",
+      "status": "needs_ga_hardening",
+      "category": "osint",
+      "tags": ["rss", "news", "osint", "media"],
+      "description": "Connector for RSS news feeds",
+      "ingestion_type": "streaming",
+      "supported_formats": ["xml", "rss"],
+      "data_classification": "public",
+      "pii_risk": "low",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false,
+        "pii_detection": false,
+        "license_check": false
+      },
+      "path": "connectors/rss_news_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "elasticsearch",
+      "name": "Elasticsearch",
+      "display_name": "Elasticsearch Connector",
+      "version": "0.5.0",
+      "status": "production",
+      "category": "database",
+      "tags": ["elasticsearch", "search", "logs"],
+      "description": "Connector for Elasticsearch",
+      "ingestion_type": "streaming",
+      "supported_formats": ["json"],
+      "data_classification": "varies",
+      "compliance": {
+        "has_manifest": true,
+        "has_dpia": false,
+        "has_golden_tests": false
+      },
+      "path": "connectors/elasticsearch_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "chronicle",
+      "name": "Chronicle",
+      "display_name": "Google Chronicle Security",
+      "version": "0.5.0",
+      "status": "production",
+      "category": "siem",
+      "tags": ["chronicle", "google", "siem", "security"],
+      "description": "Connector for Google Chronicle",
+      "ingestion_type": "streaming",
+      "supported_formats": ["json"],
+      "path": "connectors/chronicle_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "duckdb",
+      "name": "DuckDB",
+      "display_name": "DuckDB Connector",
+      "version": "0.5.0",
+      "status": "production",
+      "category": "database",
+      "tags": ["duckdb", "database", "analytics"],
+      "description": "Connector for DuckDB",
+      "ingestion_type": "batch",
+      "supported_formats": ["sql"],
+      "path": "connectors/duckdb_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "esri",
+      "name": "ESRI",
+      "display_name": "ESRI ArcGIS Connector",
+      "version": "0.5.0",
+      "status": "production",
+      "category": "geospatial",
+      "tags": ["esri", "arcgis", "geospatial", "gis"],
+      "description": "Connector for ESRI ArcGIS",
+      "ingestion_type": "batch",
+      "supported_formats": ["json"],
+      "path": "connectors/esri_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "mapbox",
+      "name": "Mapbox",
+      "display_name": "Mapbox Connector",
+      "version": "0.5.0",
+      "status": "production",
+      "category": "geospatial",
+      "tags": ["mapbox", "geospatial", "mapping"],
+      "description": "Connector for Mapbox",
+      "ingestion_type": "batch",
+      "supported_formats": ["json"],
+      "path": "connectors/mapbox_connector",
+      "reference_implementation": false
+    },
+    {
+      "id": "s3-csv",
+      "name": "S3 CSV",
+      "display_name": "S3 CSV Connector",
+      "version": "0.3.0",
+      "status": "partial",
+      "category": "cloud-storage",
+      "tags": ["s3", "aws", "csv", "cloud"],
+      "description": "Connector for CSV files in AWS S3",
+      "ingestion_type": "batch",
+      "supported_formats": ["csv"],
+      "path": "connectors/s3csv",
+      "reference_implementation": false
+    },
+    {
+      "id": "misp-ts",
+      "name": "MISP (TypeScript)",
+      "display_name": "MISP Threat Intelligence (TypeScript)",
+      "version": "0.5.0",
+      "status": "production",
+      "category": "threat-intel",
+      "tags": ["misp", "threat-intel", "ioc", "typescript"],
+      "description": "MISP threat intelligence connector (TypeScript version)",
+      "ingestion_type": "hybrid",
+      "supported_formats": ["json"],
+      "path": "integrations/connectors/threat-intel/misp-connector.ts",
+      "language": "typescript",
+      "reference_implementation": false,
+      "notes": "Python version needed for consistency"
+    }
+  ],
+  "ga_target_connectors": [
+    {
+      "id": "cisa-kev",
+      "status": "complete",
+      "priority": 1
+    },
+    {
+      "id": "csv",
+      "status": "needs_hardening",
+      "priority": 2
+    },
+    {
+      "id": "stix-taxii",
+      "status": "needs_hardening",
+      "priority": 3
+    },
+    {
+      "id": "ofac-sdn",
+      "status": "needs_hardening",
+      "priority": 4
+    },
+    {
+      "id": "misp-python",
+      "status": "missing",
+      "priority": 5,
+      "notes": "Need Python version (TypeScript exists)"
+    },
+    {
+      "id": "gdelt",
+      "status": "missing",
+      "priority": 6
+    },
+    {
+      "id": "dns-whois",
+      "status": "in_development",
+      "priority": 7
+    },
+    {
+      "id": "slack-jira",
+      "status": "missing",
+      "priority": 8
+    },
+    {
+      "id": "s3",
+      "status": "partial",
+      "priority": 9,
+      "notes": "Expand beyond CSV"
+    },
+    {
+      "id": "http",
+      "status": "partial",
+      "priority": 10,
+      "notes": "Exists in ingestion service, needs main connectors/"
+    }
+  ],
+  "statistics": {
+    "by_status": {
+      "ga_ready": 1,
+      "in_development": 1,
+      "needs_ga_hardening": 7,
+      "production": 6,
+      "partial": 2
+    },
+    "by_category": {
+      "security": 1,
+      "infrastructure": 1,
+      "file": 2,
+      "threat-intel": 2,
+      "siem": 4,
+      "sanctions": 1,
+      "osint": 1,
+      "database": 2,
+      "geospatial": 2,
+      "cloud-storage": 1
+    },
+    "compliance_coverage": {
+      "has_manifest": 15,
+      "has_dpia": 2,
+      "has_golden_tests": 1,
+      "pii_detection": 2,
+      "license_check": 2,
+      "gdpr_compliant": 2
+    },
+    "pii_risk_distribution": {
+      "none": 1,
+      "low": 2,
+      "medium": 2,
+      "high": 2,
+      "unknown": 10
+    }
+  },
+  "next_steps": [
+    "Complete DNS/WHOIS connector (tests + observability)",
+    "Harden 7 existing connectors (CSV, JSON, STIX/TAXII, Splunk, Sentinel, OFAC SDN, RSS News)",
+    "Implement MISP Python connector",
+    "Implement GDELT connector",
+    "Complete S3 connector (beyond CSV)",
+    "Implement HTTP connector in main connectors/",
+    "Implement Slack/Jira metadata connectors"
+  ]
+}
