@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/graph-query",
+  "version": "0.1.0",
+  "description": "Graph query language support (Cypher, Gremlin, SPARQL)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@intelgraph/graph-database": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "@jest/globals": "^30.0.0",
+    "@types/jest": "^30.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
