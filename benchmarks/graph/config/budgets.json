@@ -1,0 +1,106 @@
+{
+  "description": "Performance budgets for graph queries (milliseconds)",
+  "budgets": {
+    "entity_crud": {
+      "description": "Entity and relationship CRUD operations",
+      "thresholds": {
+        "p50": 20,
+        "p95": 50,
+        "p99": 100
+      },
+      "critical": false
+    },
+    "k_hop_traversal_1": {
+      "description": "1-hop neighborhood expansion",
+      "thresholds": {
+        "p50": 30,
+        "p95": 75,
+        "p99": 150
+      },
+      "critical": true
+    },
+    "k_hop_traversal_2": {
+      "description": "2-hop subgraph retrieval (GraphRAG pattern)",
+      "thresholds": {
+        "p50": 50,
+        "p95": 150,
+        "p99": 300
+      },
+      "critical": true
+    },
+    "k_hop_traversal_3": {
+      "description": "3-hop deep traversal",
+      "thresholds": {
+        "p50": 100,
+        "p95": 300,
+        "p99": 600
+      },
+      "critical": false
+    },
+    "shortest_path": {
+      "description": "Single shortest path query",
+      "thresholds": {
+        "p50": 40,
+        "p95": 100,
+        "p99": 200
+      },
+      "critical": true
+    },
+    "all_shortest_paths": {
+      "description": "All shortest paths between two nodes",
+      "thresholds": {
+        "p50": 80,
+        "p95": 200,
+        "p99": 400
+      },
+      "critical": false
+    },
+    "degree_centrality": {
+      "description": "Degree centrality calculation",
+      "thresholds": {
+        "p50": 50,
+        "p95": 150,
+        "p99": 300
+      },
+      "critical": true
+    },
+    "betweenness_centrality": {
+      "description": "Betweenness centrality (approximation)",
+      "thresholds": {
+        "p50": 200,
+        "p95": 500,
+        "p99": 1000
+      },
+      "critical": false
+    },
+    "closeness_centrality": {
+      "description": "Closeness centrality calculation",
+      "thresholds": {
+        "p50": 150,
+        "p95": 400,
+        "p99": 800
+      },
+      "critical": false
+    },
+    "community_detection": {
+      "description": "Connected components analysis",
+      "thresholds": {
+        "p50": 100,
+        "p95": 300,
+        "p99": 600
+      },
+      "critical": false
+    },
+    "graph_metrics": {
+      "description": "Basic graph statistics",
+      "thresholds": {
+        "p50": 50,
+        "p95": 120,
+        "p99": 250
+      },
+      "critical": true
+    }
+  },
+  "regression_threshold": 0.15,
+  "regression_threshold_description": "Fail if p95 increases by more than 15%"
+}
