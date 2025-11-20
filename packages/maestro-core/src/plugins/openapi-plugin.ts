@@ -456,7 +456,7 @@ export class OpenAPIPlugin implements StepPlugin {
 
     return {
       status: response.status,
-      headers: response.headers,
+      headers: this.normalizeHeaders(response.headers),
       data: response.data,
       duration_ms: duration,
       cached: false,
@@ -501,6 +501,30 @@ export class OpenAPIPlugin implements StepPlugin {
         }
         break;
     }
+  }
+
+  private normalizeHeaders(
+    headers: unknown,
+  ): Record<string, string> {
+    if (!headers) {
+      return {};
+    }
+
+    const source =
+      typeof (headers as any).toJSON === 'function'
+        ? (headers as any).toJSON()
+        : headers;
+
+    return Object.entries(source as Record<string, unknown>).reduce(
+      (acc, [key, value]) => {
+        if (typeof value === 'undefined' || value === null) {
+          return acc;
+        }
+        acc[key] = Array.isArray(value) ? value.join(', ') : String(value);
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
   }
 
   private async getOAuth2Token(

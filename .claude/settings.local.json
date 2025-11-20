@@ -46,7 +46,8 @@
       "Bash(pnpm -F @intelgraph/license-registry run typecheck:*)",
       "Bash(cut:*)",
       "Bash(git -C /Users/brianlong/Developer/summit status --short)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

@@ -569,12 +569,18 @@ export class WebScraperPlugin implements StepPlugin {
     const $ = cheerio.load(html);
 
     // Headers
-    $('h1').each((i, el) => $(el).replaceWith(`\n# ${$(el).text()}\n`));
-    $('h2').each((i, el) => $(el).replaceWith(`\n## ${$(el).text()}\n`));
-    $('h3').each((i, el) => $(el).replaceWith(`\n### ${$(el).text()}\n`));
+    $('h1').each((_, el) => {
+      $(el).replaceWith(`\n# ${$(el).text()}\n`);
+    });
+    $('h2').each((_, el) => {
+      $(el).replaceWith(`\n## ${$(el).text()}\n`);
+    });
+    $('h3').each((_, el) => {
+      $(el).replaceWith(`\n### ${$(el).text()}\n`);
+    });
 
     // Links
-    $('a').each((i, el) => {
+    $('a').each((_, el) => {
       const text = $(el).text();
       const href = $(el).attr('href');
       if (href) {
@@ -583,11 +589,17 @@ export class WebScraperPlugin implements StepPlugin {
     });
 
     // Bold and italic
-    $('strong, b').each((i, el) => $(el).replaceWith(`**${$(el).text()}**`));
-    $('em, i').each((i, el) => $(el).replaceWith(`*${$(el).text()}*`));
+    $('strong, b').each((_, el) => {
+      $(el).replaceWith(`**${$(el).text()}**`);
+    });
+    $('em, i').each((_, el) => {
+      $(el).replaceWith(`*${$(el).text()}*`);
+    });
 
     // Paragraphs
-    $('p').each((i, el) => $(el).replaceWith(`\n${$(el).text()}\n`));
+    $('p').each((_, el) => {
+      $(el).replaceWith(`\n${$(el).text()}\n`);
+    });
 
     return $.text();
   }

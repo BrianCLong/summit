@@ -17,7 +17,7 @@ import {
   SpanStatusCode,
   SpanKind,
 } from '@opentelemetry/api';
-import { Counter, Histogram, Gauge } from '@opentelemetry/api-metrics';
+import { Counter, Histogram } from '@opentelemetry/api-metrics';
 import { EventEmitter } from 'events';
 
 export interface TracingConfig {
@@ -47,7 +47,7 @@ export class MaestroTracer extends EventEmitter {
   private workflowDuration: Histogram;
   private stepExecutionsTotal: Counter;
   private stepDuration: Histogram;
-  private activeRuns: Gauge;
+  private activeRunsValue = 0;
   private costTotal: Counter;
   private errorRate: Counter;
 
@@ -140,9 +140,15 @@ export class MaestroTracer extends EventEmitter {
     );
 
     // System metrics
-    this.activeRuns = this.meter.createGauge('maestro_active_runs', {
-      description: 'Number of currently active workflow runs',
-    });
+    this.meter.createObservableGauge(
+      'maestro_active_runs',
+      {
+        description: 'Number of currently active workflow runs',
+      },
+      (observableResult) => {
+        observableResult.observe(this.activeRunsValue);
+      },
+    );
 
     this.costTotal = this.meter.createCounter('maestro_cost_usd_total', {
       description: 'Total cost in USD',
@@ -380,7 +386,7 @@ export class MaestroTracer extends EventEmitter {
 
   // Metrics helpers
   updateActiveRuns(count: number): void {
-    this.activeRuns.record(count);
+    this.activeRunsValue = count;
   }
 
   recordError(errorType: string, attributes: Record<string, any> = {}): void {
