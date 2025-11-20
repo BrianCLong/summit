@@ -150,7 +150,21 @@ conflicts/
 ehthumbs.db
 Thumbs.db
 
-# vpc (Terraform)
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/*.tfvars
+!**/*.tfvars.example
+**/crash.log
+**/override.tf
+**/override.tf.json
+*.tfplan
+.terraformrc
+terraform.rc
+
+# vpc (Terraform) - Legacy
 vpc/.terraform/
 vpc/.terraform.lock.hcl
 vpc/terraform.tfstate
@@ -184,8 +198,42 @@ neo4j/import/
 neo4j/logs/
 neo4j/backups/
 
-# Secrets
+# Secrets - CRITICAL: Never commit these!
 .env
 *.pem
 *.key
 *.signed.json
+**/secrets.yaml
+**/secrets.*.yaml
+**/*-secrets.yaml
+**/secret-values.yaml
+**/external-secrets.yaml
+
+# Helm/Kubernetes secrets
+charts/**/secrets/
+charts/**/.secrets/
+**/kubeconfig
+**/kubeconfig.*
+*.kubeconfig
+
+# Cloud credentials
+**/.aws/credentials
+**/.gcp/credentials.json
+**/.azure/credentials
+
+# Certificate files
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# SSH keys
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+
+# API tokens and keys
+**/api-key.txt
+**/token.txt
+**/.token

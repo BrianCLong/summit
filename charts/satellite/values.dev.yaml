@@ -1,14 +1,20 @@
-# Development Environment Configuration
-# Golden Path: OTEL + Prometheus + Feature Flags enabled by default
+# Satellite Development Environment Configuration
+# Golden Path: OTEL + Prometheus + Feature Flags enabled
 
 image:
-  repository: ghcr.io/brianclong/maestro-control-plane
-  tag: v0.1.0
-replicaCount: 2
+  repository: ghcr.io/brianclong/satellite
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
 
 resources:
-  requests: { cpu: '200m', memory: '256Mi' }
-  limits: { cpu: '1', memory: '1Gi' }
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
 
 # ============================================================================
 # OpenTelemetry - Enabled by Default
@@ -25,14 +31,11 @@ opentelemetry:
 # ============================================================================
 metrics:
   enabled: true
-  prometheusRule:
-    enabled: true
-    namespace: monitoring
+  port: 9090
 
-# ServiceMonitor for automatic Prometheus scraping
 serviceMonitor:
   enabled: true
-  interval: 15s
+  interval: 30s
 
 # ============================================================================
 # Feature Flags - Enabled by Default
@@ -41,9 +44,8 @@ featureFlags:
   enabled: true
   provider: flagd
   defaults:
-    enableNewUI: true
-    enableBetaFeatures: true
-    enableAdvancedAnalytics: true
+    enableEdgeCompute: true
+    enableLocalCache: true
 
 # ============================================================================
 # Application Configuration
@@ -58,13 +60,9 @@ env:
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector.observability.svc.cluster.local:4317"
   - name: OTEL_SERVICE_NAME
-    value: "maestro"
+    value: "satellite"
   - name: OTEL_RESOURCE_ATTRIBUTES
     value: "service.namespace=summit,deployment.environment=dev"
-  - name: OTEL_TRACES_SAMPLER
-    value: "parentbased_traceidratio"
-  - name: OTEL_TRACES_SAMPLER_ARG
-    value: "1.0"
 
   # Feature Flags
   - name: FEATURE_FLAGS_ENABLED
@@ -72,44 +70,39 @@ env:
   - name: FLAGD_HOST
     value: "flagd.summit.svc.cluster.local"
 
-  # Application Secrets
-  - name: OIDC_ISSUER
-    valueFrom: { secretKeyRef: { name: maestro-secrets, key: oidc_issuer } }
-  - name: POSTGRES_URL
-    valueFrom: { secretKeyRef: { name: maestro-secrets, key: pg_url } }
-  - name: REDIS_URL
-    valueFrom: { secretKeyRef: { name: maestro-secrets, key: redis_url } }
-  - name: KAFKA_BROKERS
-    value: 'kafka:9092'
-  - name: S3_BUCKET
-    value: 'maestro-artifacts-dev'
-
 service:
   type: ClusterIP
   port: 8080
 
-podDisruptionBudget:
-  minAvailable: 1
+# Health probes
+probes:
+  liveness:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
 
-autoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 8
-  targetCPUUtilizationPercentage: 60
-
-# ============================================================================
-# Network Policy - Allow OTEL and Prometheus
-# ============================================================================
+# Network policy
 networkPolicy:
   enabled: true
   ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
     - from:
         - namespaceSelector:
             matchLabels:
               name: monitoring
       ports:
-        - protocol: TCP
-          port: 8080
         - protocol: TCP
           port: 9090
   egress:
@@ -120,17 +113,13 @@ networkPolicy:
               name: observability
       ports:
         - port: 4317
-        - port: 4318
-    # Kafka, Redis, Postgres
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - port: 9092
-        - port: 6379
-        - port: 5432
-        - port: 443
     # DNS
     - to: []
       ports:
         - protocol: UDP
           port: 53
+    # HTTPS
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
