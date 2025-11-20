@@ -1,0 +1,526 @@
+{
+  "dashboard": {
+    "title": "Summit Cost Optimization & Resource Efficiency",
+    "tags": ["cost", "optimization", "finops", "resources"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 1,
+    "refresh": "1m",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Cost Trend (Last 30 Days)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(resource_cost_total[$__rate_interval])) * 3600 * 24",
+            "legendFormat": "Daily Cost",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "currencyUSD",
+            "label": "Cost per Day"
+          }
+        ],
+        "alert": {
+          "name": "Daily Cost Exceeds Budget",
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [1000],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "5m",
+          "frequency": "1m",
+          "handler": 1,
+          "message": "Daily cost has exceeded $1000 budget threshold",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 2,
+        "title": "Cost by Environment",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum by (environment) (rate(resource_cost_total[$__rate_interval]))",
+            "legendFormat": "{{ environment }}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["value", "percent"]
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Cost by Service",
+        "type": "bargauge",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (service) (rate(resource_cost_total[$__rate_interval]))) * 3600 * 24",
+            "legendFormat": "{{ service }}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cost by Resource Type",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum by (resource_type) (rate(resource_cost_total[$__rate_interval]))",
+            "legendFormat": "{{ resource_type }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "stacking": {
+                "mode": "normal"
+              }
+            },
+            "unit": "currencyUSD/sec"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Budget Utilization by Team",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 8, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "sum by (team) (budget_utilization_percent)",
+            "legendFormat": "{{ team }}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "textMode": "value_and_name",
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "horizontal"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 70, "color": "yellow" },
+                { "value": 85, "color": "orange" },
+                { "value": 95, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Resource Efficiency Metrics",
+        "type": "table",
+        "gridPos": { "h": 6, "w": 8, "x": 8, "y": 16 },
+        "targets": [
+          {
+            "expr": "avg by (service) (resource_cpu_utilization_percent)",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          },
+          {
+            "expr": "avg by (service) (resource_memory_utilization_percent)",
+            "format": "table",
+            "instant": true,
+            "refId": "B"
+          },
+          {
+            "expr": "sum by (service) (resource_idle_time_seconds)",
+            "format": "table",
+            "instant": true,
+            "refId": "C"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          }
+        ],
+        "options": {
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Value #A" },
+              "properties": [
+                { "id": "displayName", "value": "CPU %" },
+                { "id": "unit", "value": "percent" }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value #B" },
+              "properties": [
+                { "id": "displayName", "value": "Memory %" },
+                { "id": "unit", "value": "percent" }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Value #C" },
+              "properties": [
+                { "id": "displayName", "value": "Idle Time" },
+                { "id": "unit", "value": "s" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "Wasted Resources (Idle > 50%)",
+        "type": "table",
+        "gridPos": { "h": 6, "w": 8, "x": 16, "y": 16 },
+        "targets": [
+          {
+            "expr": "sum by (resource_id, resource_type) (resource_cost_total) unless on(resource_id) (avg_over_time(resource_cpu_utilization_percent[1h]) > 50 or avg_over_time(resource_memory_utilization_percent[1h]) > 50)",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "indexByName": {
+                "resource_id": 0,
+                "resource_type": 1,
+                "Value": 2
+              },
+              "renameByName": {
+                "resource_id": "Resource ID",
+                "resource_type": "Type",
+                "Value": "Wasted Cost"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Wasted Cost" },
+              "properties": [
+                { "id": "unit", "value": "currencyUSD" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "Pod Autoscaling Activity",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 22 },
+        "targets": [
+          {
+            "expr": "sum by (deployment) (kube_deployment_spec_replicas)",
+            "legendFormat": "{{ deployment }} - desired",
+            "refId": "A"
+          },
+          {
+            "expr": "sum by (deployment) (kube_deployment_status_replicas_available)",
+            "legendFormat": "{{ deployment }} - available",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "stepAfter"
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Cost Anomalies Detected",
+        "type": "logs",
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 22 },
+        "targets": [
+          {
+            "expr": "{job=\"cost-anomaly-detector\"} |= \"anomaly\"",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "wrapLogMessage": true,
+          "sortOrder": "Descending"
+        }
+      },
+      {
+        "id": 10,
+        "title": "Rate Limiting Effectiveness",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 28 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[$__rate_interval]))",
+            "legendFormat": "Total Requests",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(http_requests_rate_limited_total[$__rate_interval]))",
+            "legendFormat": "Rate Limited",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Database Connection Pool Utilization",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 28 },
+        "targets": [
+          {
+            "expr": "pg_pool_size{pool_type=\"write\"}",
+            "legendFormat": "Write Pool Size",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_pool_active_connections{pool_type=\"write\"}",
+            "legendFormat": "Write Active",
+            "refId": "B"
+          },
+          {
+            "expr": "pg_pool_size{pool_type=\"read\"}",
+            "legendFormat": "Read Pool Size",
+            "refId": "C"
+          },
+          {
+            "expr": "pg_pool_active_connections{pool_type=\"read\"}",
+            "legendFormat": "Read Active",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Spot Instance Savings",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 34 },
+        "targets": [
+          {
+            "expr": "sum(spot_instance_savings_total)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "textMode": "value",
+          "colorMode": "value",
+          "graphMode": "area"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Projected Monthly Cost",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 34 },
+        "targets": [
+          {
+            "expr": "sum(rate(resource_cost_total[24h])) * 3600 * 24 * 30",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "textMode": "value",
+          "colorMode": "background",
+          "graphMode": "none"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 20000, "color": "yellow" },
+                { "value": 30000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Cost Per Request",
+        "type": "gauge",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 34 },
+        "targets": [
+          {
+            "expr": "sum(rate(resource_cost_total[$__rate_interval])) / sum(rate(http_requests_total[$__rate_interval]))",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "min": 0,
+            "max": 0.01,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 0.005, "color": "yellow" },
+                { "value": 0.008, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "Idle Resources Recommendation",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 34 },
+        "targets": [
+          {
+            "expr": "count(avg_over_time(resource_cpu_utilization_percent[1h]) < 20 and avg_over_time(resource_memory_utilization_percent[1h]) < 30)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 5, "color": "yellow" },
+                { "value": 10, "color": "red" }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "query",
+          "query": "label_values(resource_cost_total, environment)",
+          "multi": true,
+          "includeAll": true
+        },
+        {
+          "name": "service",
+          "type": "query",
+          "query": "label_values(resource_cost_total{environment=~\"$environment\"}, service)",
+          "multi": true,
+          "includeAll": true
+        },
+        {
+          "name": "cost_center",
+          "type": "query",
+          "query": "label_values(resource_cost_total, cost_center)",
+          "multi": true,
+          "includeAll": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(kube_deployment_status_observed_generation[5m]) > 0",
+          "tagKeys": "deployment",
+          "textFormat": "Deployment: {{ deployment }}"
+        },
+        {
+          "name": "Cost Alerts",
+          "datasource": "Loki",
+          "expr": "{job=\"cost-guard\"} |= \"budget exceeded\"",
+          "textFormat": "{{ msg }}"
+        }
+      ]
+    }
+  }
+}
