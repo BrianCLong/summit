@@ -3,16 +3,16 @@
   "compilerOptions": {
     "outDir": "dist",
     "allowImportingTsExtensions": false,
-    "composite": true
-    ,"tsBuildInfoFile": "dist/.tsbuildinfo"
+    "composite": true,
+    ,"tsBuildInfoFile": "dist/.tsbuildinfo",
     "types": []
   },
   "include": [
-    "src"
+    "src",
   ],
   "references": [
     {
-      "path": "../types"
+      "path": "../types",
     }
   ]
 }

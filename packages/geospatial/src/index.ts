@@ -1,15 +1,24 @@
 /**
- * IntelGraph Geospatial Intelligence Package
- * Core geospatial data structures and ingestion capabilities
+ * @intelgraph/geospatial
+ * Geospatial analysis and visualization utilities
  */
 
-// Types
-export * from './types/geospatial.js';
+import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Point } from 'geojson';
 
-// Parsers
-export { GeoJSONParser } from './parsers/geojson-parser.js';
-export { KMLParser } from './parsers/kml-parser.js';
-export { ShapefileParser } from './parsers/shapefile-parser.js';
+export interface HeatmapPoint {
+  lat: number;
+  lng: number;
+  intensity?: number;
+}
 
-// Utilities
-export * from './utils/distance.js';
+export interface GeospatialAnalysis {
+  analyze(features: FeatureCollection): Promise<any>;
+}
+
+export interface MapConfig {
+  center?: [number, number];
+  zoom?: number;
+  layers?: string[];
+}
+
+export * from 'geojson';

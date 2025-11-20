@@ -16,12 +16,12 @@
     "moduleResolution": "Bundler",
     "target": "ES2022",
     "allowImportingTsExtensions": false,
-    "composite": true
+    "composite": true,
     "types": []
   },
   "include": [
     "src/**/*",
-    "__tests__/**/*"
+    "__tests__/**/*",
   ],
   "references": []
 }

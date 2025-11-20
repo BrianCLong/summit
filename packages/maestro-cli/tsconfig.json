@@ -13,14 +13,14 @@
     }
   },
   "include": [
-    "src"
+    "src",
   ],
   "references": [
     {
-      "path": "../types"
+      "path": "../types",
     },
     {
-      "path": "../maestro-core"
+      "path": "../maestro-core",
     }
   ]
 }

@@ -7,15 +7,15 @@
     "allowImportingTsExtensions": false,
     "allowImportingTsExtensions": false,
     "composite": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
     "types": []
   },
   "include": [
-    "src"
+    "src",
   ],
   "references": [
     {
-      "path": "../types"
+      "path": "../types",
     }
   ]
 }

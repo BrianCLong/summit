@@ -10,15 +10,15 @@
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
     "types": []
   },
   "include": [
-    "src"
+    "src",
   ],
   "references": [
     {
-      "path": "../types"
+      "path": "../types",
     }
   ]
 }

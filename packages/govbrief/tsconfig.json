@@ -15,10 +15,10 @@
     "strict": true,
     "skipLibCheck": true,
     "allowImportingTsExtensions": false,
-    "composite": true
+    "composite": true,
     "types": []
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
   ]
 }
