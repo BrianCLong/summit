@@ -6,5 +6,6 @@ packages:
   - 'server'
   - 'client'
   - 'tools/*'
+  - 'docs-site'
 exclude:
   - 'archive/**'

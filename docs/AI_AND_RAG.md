@@ -1,8 +1,8 @@
 ---
+id: ai-and-rag
+title: AI + GraphRAG + Agentic Runbooks
+---
 
-## docs/AI_AND_RAG.md
-
-```markdown
 # AI + GraphRAG + Agentic Runbooks
 
 ## GraphRAG
@@ -20,4 +20,3 @@
 
 - Auto‑attach `why_paths`: minimal set of edges supporting the answer.
 - Confidence calibration with held‑out eval sets.
-```

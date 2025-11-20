@@ -1,25 +1,59 @@
-# IntelGraph
+# Summit: Intelligent Automation Stack
 
-**Synthetic Fusion for Intelligence Analysis.**
+**Deployable-first IntelGraph + Automation with Governance, Observability, and Provenance.**
 
-IntelGraph unifies OSINT, graph analytics, GenAI/GraphRAG, and agentic runbooks to deliver end‑to‑end Threat‑to‑Response (TDIR) in one open, explainable platform.
+Summit (formerly IntelGraph) unifies OSINT, graph analytics, GenAI/GraphRAG, and agentic runbooks into a single, deployable platform. It is designed for organizations that need rigorous auditability, "human-in-the-loop" decision making, and rapid time-to-value.
 
-### Why now
+### What is Summit?
 
-Fragmented tools force swivel‑chair investigations. IntelGraph fuses **Shared** features (TI, SIEM integration, visualization, entity resolution, etc.) with **Unique** edges (GraphRAG, Agentic AI, index‑free adjacency, dynamic exploration) into a cohesive analyst experience.
+Summit is a **deployable-first stack** that combines:
+- **IntelGraph**: A knowledge graph engine (Neo4j) for storing entities, relationships, and temporal data.
+- **Maestro**: An orchestration layer for managing agentic workflows and evidence gathering.
+- **Provenance Ledger**: A cryptographically verifiable log of all automated and human decisions.
+- **Observability**: Built-in OpenTelemetry, Prometheus, and Grafana integration.
 
-### MVP Scope (30 days)
+### The Golden Path
 
-- Neo4j persistence (temporal edges + confidence)
-- Streamlit UI (neighborhood, multi‑hop path, timeline)
-- OSINT connector framework (Wikipedia demo)
-- GenAI‑assisted Q&A over graph (GraphRAG prototype)
+Get from zero to insight in minutes:
 
-See `docs/ROADMAP.md` for next phases and `docs/ARCHITECTURE.md` for system design.
+1. **Investigation**: Start a new case or mission.
+2. **Entities**: Ingest or manually create people, organizations, and assets.
+3. **Relationships**: Define how entities connect (e.g., `WORKS_FOR`, `LOCATED_IN`).
+4. **Copilot**: Use the AI assistant to traverse the graph and suggest connections.
+5. **Results**: Generate an evidence-backed report with a single click.
 
-## Documentation Structure
+### Quick Start
 
-- `docs/` – Active guides, architecture references, and onboarding material
-- `docs/archive/` – Historical documents retained for reference only
+```bash
+# 1. Clone
+git clone https://github.com/BrianCLong/summit.git
 
-Refer to [`docs/archive/README.md`](archive/README.md) for archive guidelines.
+# 2. Bootstrap (Setup env & dependencies)
+make bootstrap
+
+# 3. Run Stack
+make up
+
+# 4. Verify
+make smoke
+```
+
+See [Get Started](/get-started/quickstart) for detailed instructions.
+
+### Why Summit?
+
+| Feature | Benefit |
+| :--- | :--- |
+| **Deployable-First** | Clone and run. No SaaS lock-in. You own the data. |
+| **GraphRAG** | AI that understands _structure_, not just text chunks. |
+| **Governance** | Every AI decision is logged, auditable, and reversible. |
+| **Agentic** | Runbooks that execute themselves, with human oversight. |
+
+---
+
+### Documentation
+
+- **[Get Started](/get-started/quickstart)**: Installation and "Hello World".
+- **[Governance & Provenance](/governance/provenance)**: How we ensure trust and auditability.
+- **[Architecture](/maestro/ARCHITECTURE)**: Deep dive into the system internals.
+- **[API Reference](/intelgraph/api/core/1.0.0)**: GraphQL and REST endpoints.

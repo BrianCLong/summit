@@ -38,6 +38,8 @@ out
 dist
 build
 docs/site/
+docs-site/build/
+docs-site/.docusaurus/
 *.tsbuildinfo
 .turbo/
 

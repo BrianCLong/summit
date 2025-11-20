@@ -7,20 +7,21 @@ const sidebars = {
       label: 'Get Started',
       items: [
         'README', // docs/README.md
-        'DEVELOPER_ONBOARDING',
+        'get-started/quickstart',
       ],
     },
     {
       type: 'category',
-      label: 'Tutorials',
-      items: ['tutorials/first-ingest', 'tutorials/first-query'],
+      label: 'Concepts',
+      items: [
+        'concepts/certification',
+      ],
     },
     {
       type: 'category',
-      label: 'How-tos',
+      label: 'Governance',
       items: [
-        'runbooks/prod-readiness-runbook',
-        'maestro/CANARY_ROLLBACK_RUNBOOK',
+        'governance/provenance',
       ],
     },
     {
@@ -36,44 +37,6 @@ const sidebars = {
           href: '/intelgraph/api/maestro/1.0.0',
         },
         { type: 'link', label: 'Core API', href: '/intelgraph/api/core/1.0.0' },
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Concepts',
-      items: [
-        'maestro/ARCHITECTURE',
-        'architecture/semantic-search-system',
-        'prov-ledger',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Operations',
-      items: [
-        'RUNBOOKS',
-        'maestro/DR_RUNBOOK',
-        'infra/dr-runbook',
-        'devops/incident-runbook',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Release Notes',
-      items: [
-        'releases/RELEASE_NOTES_1.0.0',
-        'releases/RELEASE_NOTES_v2.5',
-        'releases/GA-CORE-RELEASE_NOTES',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'ADRs',
-      items: [
-        'ADR/ADR-001-two-product-strategy',
-        'ADR/ADR-002-contract-only-integration',
-        'ADR/ADR-003-separate-repos-packaged-adapters',
-        'ADR/ADR-007-MoE-MCP-Conductor',
       ],
     },
   ],
