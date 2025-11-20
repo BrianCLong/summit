@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  vision-api:
+    build:
+      context: ../..
+      dockerfile: services/vision-api/Dockerfile
+    image: intelgraph/vision-api:latest
+    container_name: vision-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - VISION_API_PORT=8080
+      - UPLOAD_DIR=/tmp/vision-uploads
+      - YOLO_SCRIPT_PATH=/app/server/src/ai/models/yolo_detection.py
+      - FACE_SCRIPT_PATH=/app/server/src/ai/models/face_detection.py
+      - OCR_SCRIPT_PATH=/app/server/src/ai/models/ocr_engine.py
+    volumes:
+      - vision-uploads:/tmp/vision-uploads
+      - vision-models:/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - intelgraph
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: vision-api-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - intelgraph
+
+volumes:
+  vision-uploads:
+  vision-models:
+  redis-data:
+
+networks:
+  intelgraph:
+    driver: bridge
