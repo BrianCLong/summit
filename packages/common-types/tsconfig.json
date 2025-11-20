@@ -4,10 +4,12 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "sourceMap": true,
     "allowImportingTsExtensions": false,
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "types": []
   },
   "include": [
     "src"
