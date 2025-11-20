@@ -13,7 +13,11 @@ export interface Scorer {
  * Deterministic scorer using weighted feature combination
  */
 export class DeterministicScorer implements Scorer {
-  constructor(config: ScoringConfig) {}
+  private config: ScoringConfig;
+
+  constructor(config: ScoringConfig) {
+    this.config = config;
+  }
 
   score(entityA: EntityRecord, entityB: EntityRecord): CandidateScore {
     const features = extractFeatures(entityA, entityB);
@@ -31,11 +35,11 @@ export class DeterministicScorer implements Scorer {
     score += features.accountIdMatch * weights.accountIdMatch;
 
     // Normalize to 0-1
-    const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
+    const totalWeight = Object.values(weights).reduce((a: number, b: number) => a + b, 0);
     score = score / totalWeight;
 
     // Build rationale
-    const rationale = this.buildRationale(features, weights);
+    const rationale = this.buildRationale(features);
 
     // Confidence is equal to score for deterministic
     const confidence = score;
@@ -101,7 +105,11 @@ export class DeterministicScorer implements Scorer {
  * Probabilistic scorer using Bayesian-inspired confidence estimation
  */
 export class ProbabilisticScorer implements Scorer {
-  constructor(config: ScoringConfig) {}
+  private config: ScoringConfig;
+
+  constructor(config: ScoringConfig) {
+    this.config = config;
+  }
 
   score(entityA: EntityRecord, entityB: EntityRecord): CandidateScore {
     const features = extractFeatures(entityA, entityB);
@@ -144,7 +152,7 @@ export class ProbabilisticScorer implements Scorer {
     score += features.deviceIdMatch * weights.deviceIdMatch;
     score += features.accountIdMatch * weights.accountIdMatch;
 
-    const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
+    const totalWeight = Object.values(weights).reduce((a: number, b: number) => a + b, 0);
     return score / totalWeight;
   }
 

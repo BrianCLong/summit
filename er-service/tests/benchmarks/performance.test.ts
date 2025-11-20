@@ -35,7 +35,7 @@ describe('Performance Benchmarks', () => {
   describe('Merge Operation Performance', () => {
     it('should handle 100 merge operations per second', () => {
       const tenantId = 'perf-test-tenant';
-      const entities = generateEntities(200, tenantId);
+      generateEntities(200, tenantId);
 
       const merges: MergeRequest[] = [];
       for (let i = 0; i < 100; i++) {
@@ -67,7 +67,7 @@ describe('Performance Benchmarks', () => {
 
     it('should handle batch merge operations efficiently', () => {
       const tenantId = 'batch-test-tenant';
-      const entities = generateEntities(1000, tenantId);
+      generateEntities(1000, tenantId);
 
       const startTime = Date.now();
 
@@ -152,7 +152,7 @@ describe('Performance Benchmarks', () => {
   describe('Memory and Storage Performance', () => {
     it('should handle large audit logs efficiently', () => {
       const tenantId = 'audit-perf-test';
-      const entities = generateEntities(200, tenantId);
+      generateEntities(200, tenantId);
 
       // Create 1000 merge operations
       for (let i = 0; i < 1000; i++) {
@@ -196,7 +196,7 @@ describe('Performance Benchmarks', () => {
   describe('Concurrent Operations', () => {
     it('should handle concurrent merge requests', async () => {
       const tenantId = 'concurrent-test';
-      const entities = generateEntities(200, tenantId);
+      generateEntities(200, tenantId);
 
       const mergePromises: Promise<void>[] = [];
 

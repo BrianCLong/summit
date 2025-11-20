@@ -291,7 +291,7 @@ export function calculateAccountIdMatch(
   }
 
   const setA = new Set(entityA.accountIds);
-  const setB = new Set(entityB.deviceIds);
+  const setB = new Set(entityB.accountIds);
   const intersection = [...setA].filter(id => setB.has(id));
   const union = new Set([...setA, ...setB]);
 

@@ -50,7 +50,7 @@ function createApp() {
 /**
  * Start server
  */
-function start() {
+export function start() {
   const app = createApp();
   const port = process.env.PORT || 3001;
 
@@ -59,10 +59,11 @@ function start() {
   });
 }
 
-// Start if run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  start();
-}
+// Start if run directly (when not imported as module)
+// Disabled for test compatibility - start manually via `npm start`
+// if (import.meta.url === `file://${process.argv[1]}`) {
+//   start();
+// }
 
 export { createApp, EREngine };
 export * from './types.js';
