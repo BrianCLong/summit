@@ -9,7 +9,9 @@ import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { Logger } from 'pino';
 import { z } from 'zod';
-import { sign, verify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+
+const { sign, verify } = jwt;
 
 // Core audit event types
 export type AuditEventType =
@@ -161,7 +163,7 @@ const AuditEventSchema = z.object({
   action: z.string(),
   outcome: z.enum(['success', 'failure', 'partial']),
   message: z.string(),
-  details: z.record(z.any()),
+  details: z.record(z.string(), z.any()),
   complianceRelevant: z.boolean(),
   complianceFrameworks: z.array(z.string()),
 });
@@ -184,6 +186,9 @@ export class AdvancedAuditSystem extends EventEmitter {
   private eventBuffer: AuditEvent[] = [];
   private flushInterval: NodeJS.Timeout;
 
+  // Singleton instance
+  private static instance: AdvancedAuditSystem;
+
   constructor(
     db: Pool,
     redis: Redis,
@@ -198,14 +203,7 @@ export class AdvancedAuditSystem extends EventEmitter {
     this.logger = logger;
     this.signingKey = signingKey;
     this.encryptionKey = encryptionKey;
-
-    // Initialize schema
-    this.initializeSchema().catch((err) => {
-      this.logger.error(
-        { error: err.message },
-        'Failed to initialize audit schema',
-      );
-    });
+    AdvancedAuditSystem.instance = this;
 
     // Start periodic flush
     this.flushInterval = setInterval(() => {
@@ -249,9 +247,23 @@ export class AdvancedAuditSystem extends EventEmitter {
         ...validation.data,
       } as AuditEvent;
 
-      // Calculate integrity hash
-      event.hash = this.calculateEventHash(event);
+      // Determine previous event hash if empty (e.g., first event after restart)
+      if (!this.lastEventHash) {
+        const lastEventRes = await this.db.query('SELECT hash FROM audit_events ORDER BY timestamp DESC LIMIT 1');
+        if (lastEventRes.rows.length > 0) {
+          this.lastEventHash = lastEventRes.rows[0].hash;
+        } else {
+          this.lastEventHash = '0000000000000000000000000000000000000000000000000000000000000000'; // Genesis hash
+        }
+      }
+
+      // Set previous hash before calculating current hash
       event.previousEventHash = this.lastEventHash;
+
+      // Calculate integrity hash (includes previous hash)
+      event.hash = this.calculateEventHash(event);
+
+      // Update last known hash
       this.lastEventHash = event.hash;
 
       // Sign the event
@@ -293,6 +305,70 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
       throw error;
     }
+  }
+
+  /**
+   * Purge old audit events based on retention policy
+   */
+  async purgeOldEvents(): Promise<number> {
+    try {
+      const retentionDate = new Date();
+      retentionDate.setDate(retentionDate.getDate() - this.retentionPeriodDays);
+
+      const result = await this.db.query(
+        'DELETE FROM audit_events WHERE timestamp < $1',
+        [retentionDate],
+      );
+
+      const count = result.rowCount || 0;
+      this.logger.info({ count, retentionDate }, 'Purged old audit events');
+      return count;
+    } catch (error) {
+      this.logger.error({ error: error.message }, 'Failed to purge old audit events');
+      throw error;
+    }
+  }
+
+  /**
+   * Export audit events
+   */
+  async exportEvents(query: AuditQuery, format: 'json' | 'csv' = 'json'): Promise<string> {
+    const events = await this.queryEvents(query);
+
+    if (format === 'json') {
+      return JSON.stringify(events, null, 2);
+    } else {
+      // CSV conversion with proper escaping
+      if (events.length === 0) return '';
+
+      const headers = Object.keys(events[0]);
+      const csvRows = [headers.join(',')];
+
+      for (const event of events) {
+        const values = headers.map(header => {
+          const val = (event as any)[header];
+          let strVal = typeof val === 'object' && val !== null
+            ? JSON.stringify(val)
+            : String(val ?? '');
+
+          // Escape quotes and wrap in quotes if containing comma or newline
+          if (strVal.includes(',') || strVal.includes('\n') || strVal.includes('"')) {
+            strVal = `"${strVal.replace(/"/g, '""')}"`;
+          }
+          return strVal;
+        });
+        csvRows.push(values.join(','));
+      }
+
+      return csvRows.join('\n');
+    }
+  }
+
+  static getInstance(): AdvancedAuditSystem {
+    if (!AdvancedAuditSystem.instance) {
+      throw new Error('AdvancedAuditSystem not initialized');
+    }
+    return AdvancedAuditSystem.instance;
   }
 
   /**
@@ -640,64 +716,6 @@ export class AdvancedAuditSystem extends EventEmitter {
   /**
    * Private helper methods
    */
-  private async initializeSchema(): Promise<void> {
-    const schema = `
-      CREATE TABLE IF NOT EXISTS audit_events (
-        id UUID PRIMARY KEY,
-        event_type TEXT NOT NULL,
-        level TEXT NOT NULL,
-        timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        correlation_id UUID NOT NULL,
-        session_id UUID,
-        request_id UUID,
-        user_id TEXT,
-        tenant_id TEXT NOT NULL,
-        service_id TEXT NOT NULL,
-        resource_type TEXT,
-        resource_id TEXT,
-        resource_path TEXT,
-        action TEXT NOT NULL,
-        outcome TEXT NOT NULL,
-        message TEXT NOT NULL,
-        details JSONB DEFAULT '{}',
-        ip_address INET,
-        user_agent TEXT,
-        compliance_relevant BOOLEAN DEFAULT FALSE,
-        compliance_frameworks TEXT[] DEFAULT '{}',
-        data_classification TEXT,
-        hash TEXT,
-        signature TEXT,
-        previous_event_hash TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_audit_events_timestamp ON audit_events(timestamp DESC);
-      CREATE INDEX IF NOT EXISTS idx_audit_events_correlation_id ON audit_events(correlation_id);
-      CREATE INDEX IF NOT EXISTS idx_audit_events_user_id ON audit_events(user_id);
-      CREATE INDEX IF NOT EXISTS idx_audit_events_tenant_id ON audit_events(tenant_id);
-      CREATE INDEX IF NOT EXISTS idx_audit_events_event_type ON audit_events(event_type);
-      CREATE INDEX IF NOT EXISTS idx_audit_events_level ON audit_events(level);
-      CREATE INDEX IF NOT EXISTS idx_audit_events_compliance ON audit_events(compliance_relevant) WHERE compliance_relevant = true;
-
-      CREATE TABLE IF NOT EXISTS compliance_reports (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        framework TEXT NOT NULL,
-        period_start TIMESTAMPTZ NOT NULL,
-        period_end TIMESTAMPTZ NOT NULL,
-        report_data JSONB NOT NULL,
-        generated_at TIMESTAMPTZ DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS forensic_analyses (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        correlation_id UUID NOT NULL,
-        analysis_data JSONB NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `;
-
-    await this.db.query(schema);
-  }
 
   private async flushEventBuffer(): Promise<void> {
     if (this.eventBuffer.length === 0) return;
@@ -780,6 +798,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       action: event.action,
       message: event.message,
       details: event.details,
+      previousEventHash: event.previousEventHash, // Crucial for chaining
     };
 
     return createHash('sha256')
