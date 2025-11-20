@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/threat-feed-ingestion",
+  "version": "1.0.0",
+  "description": "Threat intelligence feed ingestion and processing service",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/threat-intelligence": "workspace:*",
+    "@intelgraph/mitre-attack": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "p-queue": "^8.0.1",
+    "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.0",
+    "typescript": "^5.9.3"
+  }
+}

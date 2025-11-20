@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/threat-intelligence",
+  "version": "1.0.0",
+  "description": "Comprehensive threat intelligence and CTI capabilities with STIX/TAXII 2.1 support",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "axios": "^1.7.2",
+    "stix2": "^2.1.0",
+    "taxii2-client": "^1.0.0",
+    "zod": "^4.1.12",
+    "p-queue": "^8.0.1",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.9.3",
+    "jest": "^30.0.0",
+    "@types/jest": "^30.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
