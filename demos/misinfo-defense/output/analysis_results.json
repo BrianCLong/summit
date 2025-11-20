@@ -1,6 +1,8 @@
 {
   "demo_name": "Adversarial Misinfo Defense",
-  "processed_at": "2025-11-20T07:44:06.951496",
+  "processed_at": "2025-11-20T07:59:37.046490",
+  "pipeline_version": "2.0.0",
+  "mode": "mock",
   "total_posts": 10,
   "misinfo_detected": 6,
   "legitimate_content": 4,
@@ -27,7 +29,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951030",
+        "timestamp": "2025-11-20T07:59:37.045214",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": true,
@@ -40,7 +43,8 @@
         "overall_score": 0.0,
         "is_misinfo": true,
         "confidence": 0.92,
-        "evidence": []
+        "evidence": [],
+        "processing_time_ms": 0.03552436828613281
       }
     },
     {
@@ -64,7 +68,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951087",
+        "timestamp": "2025-11-20T07:59:37.045372",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": false,
@@ -77,7 +82,8 @@
         "overall_score": 0.0,
         "is_misinfo": false,
         "confidence": 0.98,
-        "evidence": []
+        "evidence": [],
+        "processing_time_ms": 0.014066696166992188
       }
     },
     {
@@ -112,7 +118,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951109",
+        "timestamp": "2025-11-20T07:59:37.045505",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": true,
@@ -138,10 +145,16 @@
           {
             "type": "deepfake_detection",
             "title": "Deepfake Video Detected",
-            "description": "Found manipulation markers: face_swap, audio_synthesis, temporal_artifacts",
-            "severity": "critical"
+            "description": "Found 3 manipulation markers: face_swap, audio_synthesis, temporal_artifacts. These forensic indicators suggest synthetic or manipulated video content.",
+            "severity": "critical",
+            "indicators": [
+              "face_swap",
+              "audio_synthesis",
+              "temporal_artifacts"
+            ]
           }
-        ]
+        ],
+        "processing_time_ms": 0.013828277587890625
       }
     },
     {
@@ -171,7 +184,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951133",
+        "timestamp": "2025-11-20T07:59:37.045650",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": true,
@@ -193,10 +207,14 @@
           {
             "type": "image_manipulation",
             "title": "Image Manipulation Detected",
-            "description": "Type: context_removal",
-            "severity": "high"
+            "description": "Manipulation type: context_removal. The image has been altered in a way that could mislead viewers.",
+            "severity": "high",
+            "indicators": [
+              "context_removal"
+            ]
           }
-        ]
+        ],
+        "processing_time_ms": 0.011205673217773438
       }
     },
     {
@@ -219,7 +237,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951288",
+        "timestamp": "2025-11-20T07:59:37.045810",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": false,
@@ -232,14 +251,15 @@
         "overall_score": 0.0,
         "is_misinfo": false,
         "confidence": 0.99,
-        "evidence": []
+        "evidence": [],
+        "processing_time_ms": 0.0133514404296875
       }
     },
     {
       "post": {
         "id": "post_006",
         "platform": "twitter",
-        "text": "\ud83d\udea8 EXPOSED: Election machines in 47 states connected to foreign servers! Anonymous whistleblower reveals all! Thread \ud83e\uddf5\ud83d\udc47",
+        "text": "🚨 EXPOSED: Election machines in 47 states connected to foreign servers! Anonymous whistleblower reveals all! Thread 🧵👇",
         "timestamp": "2025-11-20T07:30:00Z",
         "author": "patriot_news_network",
         "engagement": {
@@ -262,7 +282,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951323",
+        "timestamp": "2025-11-20T07:59:37.045943",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": true,
@@ -284,10 +305,17 @@
           {
             "type": "text_analysis",
             "title": "Suspicious Language Patterns Detected",
-            "description": "Found 4 red flags: anonymous_source, extraordinary_claims, no_evidence, emotional_language",
-            "severity": "high"
+            "description": "Found 4 red flags: anonymous_source, extraordinary_claims, no_evidence, emotional_language. These patterns are commonly associated with election_misinfo.",
+            "severity": "critical",
+            "indicators": [
+              "anonymous_source",
+              "extraordinary_claims",
+              "no_evidence",
+              "emotional_language"
+            ]
           }
-        ]
+        ],
+        "processing_time_ms": 0.012874603271484375
       }
     },
     {
@@ -317,7 +345,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951354",
+        "timestamp": "2025-11-20T07:59:37.046065",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": false,
@@ -335,7 +364,8 @@
         "overall_score": 0.0,
         "is_misinfo": false,
         "confidence": 0.97,
-        "evidence": []
+        "evidence": [],
+        "processing_time_ms": 0.011920928955078125
       }
     },
     {
@@ -364,7 +394,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951437",
+        "timestamp": "2025-11-20T07:59:37.046187",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": true,
@@ -386,10 +417,17 @@
           {
             "type": "text_analysis",
             "title": "Suspicious Language Patterns Detected",
-            "description": "Found 4 red flags: miracle_cure, conspiracy, commercial_intent, urgency_tactics",
-            "severity": "high"
+            "description": "Found 4 red flags: miracle_cure, conspiracy, commercial_intent, urgency_tactics. These patterns are commonly associated with health_scam.",
+            "severity": "critical",
+            "indicators": [
+              "miracle_cure",
+              "conspiracy",
+              "commercial_intent",
+              "urgency_tactics"
+            ]
           }
-        ]
+        ],
+        "processing_time_ms": 0.011920928955078125
       }
     },
     {
@@ -419,7 +457,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951461",
+        "timestamp": "2025-11-20T07:59:37.046297",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": false,
@@ -437,7 +476,8 @@
         "overall_score": 0.0,
         "is_misinfo": false,
         "confidence": 0.91,
-        "evidence": []
+        "evidence": [],
+        "processing_time_ms": 0.0095367431640625
       }
     },
     {
@@ -468,7 +508,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:44:06.951475",
+        "timestamp": "2025-11-20T07:59:37.046410",
+        "mode": "mock",
         "detection_results": {
           "text": {
             "is_misinfo": true,
@@ -491,11 +532,31 @@
           {
             "type": "text_analysis",
             "title": "Suspicious Language Patterns Detected",
-            "description": "Found 5 red flags: urgency, no_evidence, emotional_manipulation, viral_request, anti_establishment",
-            "severity": "high"
+            "description": "Found 5 red flags: urgency, no_evidence, emotional_manipulation, viral_request, anti_establishment. These patterns are commonly associated with political_fearmongering.",
+            "severity": "critical",
+            "indicators": [
+              "urgency",
+              "no_evidence",
+              "emotional_manipulation",
+              "viral_request",
+              "anti_establishment"
+            ]
           }
-        ]
+        ],
+        "processing_time_ms": 0.00858306884765625
       }
     }
-  ]
+  ],
+  "metrics": {
+    "posts_processed": 10,
+    "posts_failed": 0,
+    "misinfo_detected": 6,
+    "legitimate_detected": 4,
+    "total_processing_time_ms": 0.14281272888183594,
+    "avg_processing_time_ms": 0.014281272888183594,
+    "avg_confidence": 0.932,
+    "error_count": 0,
+    "success_rate": 1.0
+  },
+  "pipeline_duration_seconds": 0.0019731521606445312
 }
