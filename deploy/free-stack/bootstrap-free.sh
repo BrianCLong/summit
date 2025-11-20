@@ -774,7 +774,16 @@ show_final_status() {
     echo "   ufw allow 30080:30082/tcp  # For NodePort access"
     echo ""
     echo "4. 🚀 Push your manifests and watch ArgoCD sync!"
-    
+    echo ""
+    echo "5. 🧰 Layer in the $0 IaC/GitOps stack that fits your needs:"
+    echo "   - Option A (minimal): OpenTofu + Ansible for IaC/config, Cluster Autoscaler,"
+    echo "     Prometheus + Alertmanager + Grafana OSS + Loki, and the Prometheus"
+    echo "     blackbox_exporter for uptime."
+    echo "   - Option B (GitOps control plane): Crossplane, Argo CD or Flux CD,"
+    echo "     Prometheus + Grafana OSS + Alertmanager with Grafana Mimir/Tempo,"
+    echo "     OpenTelemetry Collector, and KEDA for event-driven autoscaling."
+    echo "   - Full component tables live in deploy/zero-cost-stacks.md (same repo)."
+
     echo -e "\n${GREEN}🎯 Your $0-cost dev/staging/prod environment is LIVE!${NC}"
     echo -e "${BLUE}═══════════════════════════════════════${NC}"
     
@@ -805,6 +814,9 @@ Production: /root/argocd-prod-password.txt
 kube-env [dev|staging|prod|host]
 monitor-stack
 argocd-ui [dev|staging|prod]
+
+# Reference Docs
+Zero-cost stack options: deploy/zero-cost-stacks.md
 EOF
     
     log "📄 Configuration saved to /root/free-stack-info.txt"
