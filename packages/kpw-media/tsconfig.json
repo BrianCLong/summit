@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "types": ["node"]
+    "types": []
   },
   "include": ["src/**/*.ts"]
 }

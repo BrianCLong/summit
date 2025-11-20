@@ -9,6 +9,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "declarationMap": true,
     "sourceMap": true,
     "module": "ESNext",
@@ -16,6 +17,7 @@
     "target": "ES2022",
     "allowImportingTsExtensions": false,
     "composite": true
+    "types": []
   },
   "include": [
     "src/**/*",

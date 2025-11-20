@@ -4,9 +4,11 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true
+    "types": []
   },
   "include": ["src/**/*"]
 }

@@ -2,11 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "outDir": "dist",
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "rootDir": "src",
     "allowImportingTsExtensions": false
+    "types": []
   },
   "include": [
     "src"
