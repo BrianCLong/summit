@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2025-11-20T10:37:36.632Z",
+  "metrics": {
+    "score": 73,
+    "scoreGrade": "C",
+    "totalFiles": 2628,
+    "largeFiles": 397,
+    "extremeFiles": 26,
+    "technicalDebt": 118,
+    "duplication": 0,
+    "linesOfCode": null
+  },
+  "badges": {
+    "maintainabilityScore": {
+      "schemaVersion": 1,
+      "label": "maintainability",
+      "message": "C (73/100)",
+      "color": "yellowgreen"
+    },
+    "largeFiles": {
+      "schemaVersion": 1,
+      "label": "files >500 lines",
+      "message": "397 (15.1%)",
+      "color": "yellow"
+    },
+    "technicalDebt": {
+      "schemaVersion": 1,
+      "label": "technical debt",
+      "message": "118 TODOs (0.04/file)",
+      "color": "brightgreen"
+    },
+    "duplication": {
+      "schemaVersion": 1,
+      "label": "duplication",
+      "message": "0.0%",
+      "color": "brightgreen"
+    },
+    "totalFiles": {
+      "schemaVersion": 1,
+      "label": "total files",
+      "message": "2628",
+      "color": "blue"
+    },
+    "extremeFiles": {
+      "schemaVersion": 1,
+      "label": "files >1500 lines",
+      "message": "26",
+      "color": "red"
+    }
+  }
+}

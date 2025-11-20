@@ -257,6 +257,8 @@ jobs:
           REPORT_DATE=$(date +"%Y-%m-%d")
           REPORT_FILE="reports/maintainability-report-${REPORT_DATE}.md"
 
+          # Run the maintainability report generator
+          node scripts/maintainability-report.cjs --output="$REPORT_FILE" || \
           cat > "$REPORT_FILE" << 'EOF'
           # Maintainability Trend Report
 

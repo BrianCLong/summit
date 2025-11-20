@@ -1,0 +1,2091 @@
+{
+  "fileSize": {
+    "total": 2628,
+    "bySize": {
+      "small": 1839,
+      "medium": 391,
+      "large": 309,
+      "veryLarge": 63,
+      "extreme": 26
+    },
+    "largeFiles": [
+      {
+        "file": "services/mstc/src/data/canon.ts",
+        "lines": 2645
+      },
+      {
+        "file": "client/src/components/graph/EnhancedGraphExplorer.jsx",
+        "lines": 2474
+      },
+      {
+        "file": "client/src/components/graph/EnhancedGraphExplorer.js",
+        "lines": 2472
+      },
+      {
+        "file": "client/src/generated/graphql.ts",
+        "lines": 2369
+      },
+      {
+        "file": "client/src/components/threat/ThreatHuntingDarkWeb.tsx",
+        "lines": 2064
+      },
+      {
+        "file": "server/src/services/VisualizationService.js",
+        "lines": 2032
+      },
+      {
+        "file": "client/src/routes/HomeRoute.tsx",
+        "lines": 1864
+      },
+      {
+        "file": "client/src/components/osint/OSINTCollectionFramework.tsx",
+        "lines": 1860
+      },
+      {
+        "file": "server/src/services/ReportingService.js",
+        "lines": 1859
+      },
+      {
+        "file": "client/src/components/reporting/ReportingCaseManagement.tsx",
+        "lines": 1821
+      },
+      {
+        "file": "client/src/components/integrations/DataConnectorsDashboard.tsx",
+        "lines": 1790
+      },
+      {
+        "file": "client/src/components/behavioral/BehavioralAnalytics.tsx",
+        "lines": 1783
+      },
+      {
+        "file": "client/src/components/intelligence/IntelligenceFeedsEnrichment.tsx",
+        "lines": 1771
+      },
+      {
+        "file": "client/src/components/ai/InvestigationRecommendationsEngine.tsx",
+        "lines": 1761
+      },
+      {
+        "file": "services/auditlake/src/audit-lake-engine.ts",
+        "lines": 1715
+      },
+      {
+        "file": "client/src/components/reporting/EnterpriseDashboard.tsx",
+        "lines": 1698
+      },
+      {
+        "file": "server/src/graphql/resolvers/crudResolvers.ts",
+        "lines": 1678
+      },
+      {
+        "file": "client/src/components/threat-hunting/ThreatHuntingDashboard.jsx",
+        "lines": 1641
+      },
+      {
+        "file": "client/src/components/threat-hunting/ThreatHuntingDashboard.js",
+        "lines": 1641
+      },
+      {
+        "file": "client/src/components/monitoring/SystemObservabilityDashboard.tsx",
+        "lines": 1606
+      },
+      {
+        "file": "services/blockchain/src/address-clusterer.ts",
+        "lines": 1601
+      },
+      {
+        "file": "services/aml/src/typology-detector.ts",
+        "lines": 1587
+      },
+      {
+        "file": "server/src/services/AdvancedAnalyticsService.js",
+        "lines": 1585
+      },
+      {
+        "file": "server/src/services/SimulationEngineService.js",
+        "lines": 1559
+      },
+      {
+        "file": "client/src/components/geospatial/GeospatialIntelligence.tsx",
+        "lines": 1538
+      },
+      {
+        "file": "server/src/services/TenantSLOService.ts",
+        "lines": 1512
+      },
+      {
+        "file": "server/src/conductor/premium-routing/advanced-routing-engine.ts",
+        "lines": 1492
+      },
+      {
+        "file": "server/src/services/RTBFAuditService.ts",
+        "lines": 1455
+      },
+      {
+        "file": "server/src/services/EnterpriseSecurityService.js",
+        "lines": 1455
+      },
+      {
+        "file": "client/src/components/security/SecurityAuditDashboard.tsx",
+        "lines": 1450
+      },
+      {
+        "file": "server/src/optimization/performance-monitoring-system.ts",
+        "lines": 1430
+      },
+      {
+        "file": "server/src/conductor/premium-routing/enhanced-premium-models.ts",
+        "lines": 1406
+      },
+      {
+        "file": "client/src/components/graph/CytoscapeGraph.jsx",
+        "lines": 1403
+      },
+      {
+        "file": "server/src/services/RTBFJobService.ts",
+        "lines": 1387
+      },
+      {
+        "file": "client/src/components/social/SocialNetworkAnalysis.tsx",
+        "lines": 1387
+      },
+      {
+        "file": "server/src/conductor/premium-routing/dynamic-pricing-optimizer.ts",
+        "lines": 1363
+      },
+      {
+        "file": "client/src/components/workflow/InvestigationWorkflowPanel.js",
+        "lines": 1351
+      },
+      {
+        "file": "client/src/components/workflow/InvestigationWorkflowPanel.jsx",
+        "lines": 1351
+      },
+      {
+        "file": "server/src/optimization/cost-efficiency-optimizer.ts",
+        "lines": 1347
+      },
+      {
+        "file": "client/src/components/graph/CytoscapeGraph.js",
+        "lines": 1345
+      },
+      {
+        "file": "server/src/services/CIBudgetService.ts",
+        "lines": 1321
+      },
+      {
+        "file": "server/src/conductor/premium-routing/adaptive-learning-system.ts",
+        "lines": 1308
+      },
+      {
+        "file": "server/src/services/CopilotOrchestrationService.js",
+        "lines": 1299
+      },
+      {
+        "file": "server/src/services/ExtractionJobService.ts",
+        "lines": 1295
+      },
+      {
+        "file": "server/src/services/NotificationService.js",
+        "lines": 1287
+      },
+      {
+        "file": "server/src/quality-evaluation/evaluation-platform.ts",
+        "lines": 1286
+      },
+      {
+        "file": "services/aml/src/sanctions-screener.ts",
+        "lines": 1278
+      },
+      {
+        "file": "client/src/components/mlops/ModelManagementDashboard.tsx",
+        "lines": 1275
+      },
+      {
+        "file": "client/src/components/crypto/CryptocurrencyAnalyzer.tsx",
+        "lines": 1275
+      },
+      {
+        "file": "client/src/components/forensics/DigitalForensicsWorkbench.tsx",
+        "lines": 1250
+      },
+      {
+        "file": "server/src/services/ComplianceService.ts",
+        "lines": 1238
+      },
+      {
+        "file": "server/src/conductor/evaluation/golden-tasks.ts",
+        "lines": 1228
+      },
+      {
+        "file": "server/src/qam/KeyRiskMLExplainer.ts",
+        "lines": 1212
+      },
+      {
+        "file": "server/src/services/TenantPartitioningService.ts",
+        "lines": 1208
+      },
+      {
+        "file": "server/src/ai/ExtractionEngine.ts",
+        "lines": 1204
+      },
+      {
+        "file": "server/src/services/WebSocketService.js",
+        "lines": 1190
+      },
+      {
+        "file": "server/src/services/advancedSearchService.ts",
+        "lines": 1187
+      },
+      {
+        "file": "server/src/data-residency/residency-service.ts",
+        "lines": 1187
+      },
+      {
+        "file": "server/src/conductor/sandbox/action-sandbox.ts",
+        "lines": 1186
+      },
+      {
+        "file": "client/src/components/ai/NaturalLanguageAssistant.tsx",
+        "lines": 1177
+      },
+      {
+        "file": "server/src/optimization/api-gateway-optimizer.ts",
+        "lines": 1171
+      },
+      {
+        "file": "server/src/conductor/deployment/blue-green.ts",
+        "lines": 1167
+      },
+      {
+        "file": "server/src/services/MultimodalDataService.ts",
+        "lines": 1158
+      },
+      {
+        "file": "client/src/components/detection/ThreatDetectionEngine.tsx",
+        "lines": 1135
+      },
+      {
+        "file": "server/src/services/PluginService.js",
+        "lines": 1131
+      },
+      {
+        "file": "server/src/services/TenantCostService.ts",
+        "lines": 1121
+      },
+      {
+        "file": "client/src/components/security/SecurityDashboard.jsx",
+        "lines": 1119
+      },
+      {
+        "file": "client/src/components/security/SecurityDashboard.js",
+        "lines": 1119
+      },
+      {
+        "file": "server/src/optimization/postgres-performance-optimizer.ts",
+        "lines": 1117
+      },
+      {
+        "file": "server/src/audit/advanced-audit-system.ts",
+        "lines": 1112
+      },
+      {
+        "file": "services/aml/src/entity-resolver.ts",
+        "lines": 1110
+      },
+      {
+        "file": "server/src/trust-center/trust-center-service.ts",
+        "lines": 1106
+      },
+      {
+        "file": "client/src/pages/Investigations/InvestigationDetail.tsx",
+        "lines": 1091
+      },
+      {
+        "file": "server/src/qam/StateMerkleAnchor.ts",
+        "lines": 1088
+      },
+      {
+        "file": "server/src/ai/engines/FaceDetectionEngine.ts",
+        "lines": 1077
+      },
+      {
+        "file": "apps/feed-processor/src/services/FeedProcessorService.ts",
+        "lines": 1075
+      },
+      {
+        "file": "server/src/coherence/coherenceService.ts",
+        "lines": 1074
+      },
+      {
+        "file": "server/src/tests/simulationEngine.test.js",
+        "lines": 1070
+      },
+      {
+        "file": "server/src/gates/migrationGates.ts",
+        "lines": 1055
+      },
+      {
+        "file": "server/src/tests/integrationService.test.js",
+        "lines": 1053
+      },
+      {
+        "file": "server/src/services/threatHuntingService.ts",
+        "lines": 1041
+      },
+      {
+        "file": "server/src/conductor/premium-routing/cost-performance-optimizer.ts",
+        "lines": 1037
+      },
+      {
+        "file": "apps/web/src/SymphonyOperatorConsole.tsx",
+        "lines": 1036
+      },
+      {
+        "file": "apps/workflow-engine/src/services/WorkflowService.ts",
+        "lines": 1030
+      },
+      {
+        "file": "server/src/provenance/ledger.ts",
+        "lines": 1029
+      },
+      {
+        "file": "client/src/features/console/SymphonyOperatorConsole.tsx",
+        "lines": 1028
+      },
+      {
+        "file": "client/src/features/graph/GraphVisualization.jsx",
+        "lines": 1023
+      },
+      {
+        "file": "client/src/features/graph/GraphVisualization.js",
+        "lines": 1023
+      },
+      {
+        "file": "server/src/tests/mobileService.test.js",
+        "lines": 1011
+      },
+      {
+        "file": "server/src/conductor/policy/policy-engine.ts",
+        "lines": 998
+      },
+      {
+        "file": "server/src/graphql/multimodalResolvers.ts",
+        "lines": 997
+      },
+      {
+        "file": "server/src/qam/ContextualRewardsV2.ts",
+        "lines": 994
+      },
+      {
+        "file": "server/src/tests/visualizationService.test.js",
+        "lines": 993
+      },
+      {
+        "file": "client/src/components/intelligence/ThreatIntelligenceHub.tsx",
+        "lines": 991
+      },
+      {
+        "file": "apps/graph-analytics/src/services/GraphAnalyticsService.ts",
+        "lines": 986
+      },
+      {
+        "file": "apps/analytics-engine/src/services/DashboardService.ts",
+        "lines": 984
+      },
+      {
+        "file": "server/src/services/AIExtractionService.js",
+        "lines": 983
+      },
+      {
+        "file": "server/src/services/securityService.ts",
+        "lines": 979
+      },
+      {
+        "file": "server/src/tests/pluginService.test.js",
+        "lines": 978
+      },
+      {
+        "file": "server/src/conductor/compliance/compliance-engine.ts",
+        "lines": 975
+      },
+      {
+        "file": "client/src/components/ai/NaturalLanguageQuery.js",
+        "lines": 970
+      },
+      {
+        "file": "server/src/coherence/intelligence/missionVault.ts",
+        "lines": 968
+      },
+      {
+        "file": "client/src/components/ai/NaturalLanguageQuery.jsx",
+        "lines": 967
+      },
+      {
+        "file": "services/data-quality/src/lineage-tracker.ts",
+        "lines": 960
+      },
+      {
+        "file": "server/src/services/SOARConnectorV1Service.ts",
+        "lines": 957
+      },
+      {
+        "file": "server/src/services/SIEMService.ts",
+        "lines": 950
+      },
+      {
+        "file": "server/src/conductor/observability/alerting-engine.ts",
+        "lines": 950
+      },
+      {
+        "file": "client/src/features/conductor/ConductorStudio.tsx",
+        "lines": 947
+      },
+      {
+        "file": "client/src/components/analytics/AdvancedAnalyticsDashboard.js",
+        "lines": 938
+      },
+      {
+        "file": "client/src/components/analytics/AdvancedAnalyticsDashboard.jsx",
+        "lines": 938
+      },
+      {
+        "file": "server/src/conductor/learn/bandit.ts",
+        "lines": 935
+      },
+      {
+        "file": "server/src/autonomous/sandbox.ts",
+        "lines": 923
+      },
+      {
+        "file": "client/src/components/InvestigationManager.tsx",
+        "lines": 923
+      },
+      {
+        "file": "server/src/conductor/premium-routing/premium-model-router.ts",
+        "lines": 919
+      },
+      {
+        "file": "client/src/components/visualization/DataVisualizationStudio.tsx",
+        "lines": 913
+      },
+      {
+        "file": "server/src/services/AnalystDashboardService.ts",
+        "lines": 908
+      },
+      {
+        "file": "server/src/services/IntegrationService.js",
+        "lines": 907
+      },
+      {
+        "file": "server/src/ai/engines/TextAnalysisEngine.ts",
+        "lines": 902
+      },
+      {
+        "file": "server/src/conductor/workflows/workflow-executor.ts",
+        "lines": 901
+      },
+      {
+        "file": "server/src/ai/services/EmbeddingService.ts",
+        "lines": 894
+      },
+      {
+        "file": "server/src/services/MultimodalDataService.js",
+        "lines": 892
+      },
+      {
+        "file": "server/src/services/WarRoomSyncService.js",
+        "lines": 887
+      },
+      {
+        "file": "client/src/components/collaboration/CollaborationPanel.js",
+        "lines": 887
+      },
+      {
+        "file": "client/src/components/collaboration/CollaborationPanel.jsx",
+        "lines": 883
+      },
+      {
+        "file": "client/src/features/admin/AdminStudio.tsx",
+        "lines": 878
+      },
+      {
+        "file": "server/src/conductor/router/router-v2.ts",
+        "lines": 875
+      },
+      {
+        "file": "server/src/connectors/azure.ts",
+        "lines": 871
+      },
+      {
+        "file": "client/src/components/collaboration/CollaborativeWorkspace.tsx",
+        "lines": 868
+      },
+      {
+        "file": "server/src/qam/AdaptiveQuantumApp.ts",
+        "lines": 865
+      },
+      {
+        "file": "server/src/optimization/optimization-manager.ts",
+        "lines": 863
+      },
+      {
+        "file": "server/src/federal/airgap-service.ts",
+        "lines": 858
+      },
+      {
+        "file": "server/src/safety/safety-v2.ts",
+        "lines": 855
+      },
+      {
+        "file": "client/src/components/threat/ThreatAssessmentEngine.jsx",
+        "lines": 854
+      },
+      {
+        "file": "client/src/components/threat/ThreatAssessmentEngine.js",
+        "lines": 854
+      },
+      {
+        "file": "client/src/components/psyops/PsyOpsDashboard.tsx",
+        "lines": 850
+      },
+      {
+        "file": "client/src/components/IntelGraphWorkbench.tsx",
+        "lines": 850
+      },
+      {
+        "file": "apps/web/src/pages/maestro/pages/Runs.tsx",
+        "lines": 850
+      },
+      {
+        "file": "client/src/components/ai/AIAnalysisPanel.jsx",
+        "lines": 842
+      },
+      {
+        "file": "client/src/components/ai/AIAnalysisPanel.js",
+        "lines": 842
+      },
+      {
+        "file": "server/src/optimization/neo4j-query-optimizer.ts",
+        "lines": 841
+      },
+      {
+        "file": "server/src/middleware/ingestValidator.ts",
+        "lines": 836
+      },
+      {
+        "file": "server/src/privacy/piiOntologyEngine.ts",
+        "lines": 831
+      },
+      {
+        "file": "server/src/conductor/web-orchestration/web-orchestrator.ts",
+        "lines": 831
+      },
+      {
+        "file": "server/src/cases/legal-hold/orchestrator.ts",
+        "lines": 829
+      },
+      {
+        "file": "server/src/migrations/migrationFramework.ts",
+        "lines": 828
+      },
+      {
+        "file": "server/src/conductor/index.ts",
+        "lines": 827
+      },
+      {
+        "file": "server/src/qam/DifferentialPrivacyAccountant.ts",
+        "lines": 826
+      },
+      {
+        "file": "server/src/conductor/premium-routing/multi-armed-bandit-optimizer.ts",
+        "lines": 826
+      },
+      {
+        "file": "server/src/concurrent/concurrent-request-handler.ts",
+        "lines": 819
+      },
+      {
+        "file": "apps/feed-processor/src/server.ts",
+        "lines": 816
+      },
+      {
+        "file": "server/src/routes/ai.ts",
+        "lines": 815
+      },
+      {
+        "file": "server/src/services/DLPService.ts",
+        "lines": 814
+      },
+      {
+        "file": "server/src/conductor/premium-routing/thompson-sampling-engine.ts",
+        "lines": 814
+      },
+      {
+        "file": "apps/web/src/components/conductor/ConductorDashboard.tsx",
+        "lines": 812
+      },
+      {
+        "file": "server/src/ai/PsyOpsDefenseEngine.ts",
+        "lines": 809
+      },
+      {
+        "file": "server/src/coherence/intelligence/activityFingerprintIndex.ts",
+        "lines": 808
+      },
+      {
+        "file": "server/src/services/DetectionContentPackV5.ts",
+        "lines": 807
+      },
+      {
+        "file": "server/src/conductor/incident/runbook-executor.ts",
+        "lines": 806
+      },
+      {
+        "file": "server/src/coherence/intelligence/narrativeImpactModel.ts",
+        "lines": 804
+      },
+      {
+        "file": "server/src/tests/reportingService.test.js",
+        "lines": 800
+      },
+      {
+        "file": "server/src/conductor/runbooks/key-hygiene.ts",
+        "lines": 796
+      },
+      {
+        "file": "client/src/components/graph/MVP0Canvas.jsx",
+        "lines": 795
+      },
+      {
+        "file": "client/src/components/graph/MVP0Canvas.js",
+        "lines": 795
+      },
+      {
+        "file": "server/src/conductor/incident/war-room.ts",
+        "lines": 791
+      },
+      {
+        "file": "server/src/services/FederatedSearchService.js",
+        "lines": 787
+      },
+      {
+        "file": "client/src/components/dashboard/AnalyticsDashboard.jsx",
+        "lines": 785
+      },
+      {
+        "file": "client/src/components/dashboard/AnalyticsDashboard.js",
+        "lines": 785
+      },
+      {
+        "file": "client/src/components/onboarding/GoldenPathWizard.jsx",
+        "lines": 785
+      },
+      {
+        "file": "server/src/db/postgres.ts",
+        "lines": 784
+      },
+      {
+        "file": "client/src/components/onboarding/GoldenPathWizard.js",
+        "lines": 784
+      },
+      {
+        "file": "client/src/components/analytics/PerformanceMonitoringPanel.jsx",
+        "lines": 784
+      },
+      {
+        "file": "client/src/components/analytics/PerformanceMonitoringPanel.js",
+        "lines": 784
+      },
+      {
+        "file": "server/src/conductor/persistence/outbox-processor.ts",
+        "lines": 783
+      },
+      {
+        "file": "server/src/conductor/edge/crdt-sync.ts",
+        "lines": 778
+      },
+      {
+        "file": "services/enterprise/src/sso-manager.ts",
+        "lines": 777
+      },
+      {
+        "file": "server/src/federated/orchestration-service.ts",
+        "lines": 776
+      },
+      {
+        "file": "server/src/db/queryOptimizer.ts",
+        "lines": 774
+      },
+      {
+        "file": "apps/graph-analytics/src/services/NetworkVisualizationService.ts",
+        "lines": 772
+      },
+      {
+        "file": "server/src/conductor/failover/multi-region.ts",
+        "lines": 769
+      },
+      {
+        "file": "server/src/middleware/graphAbuseGuard.ts",
+        "lines": 768
+      },
+      {
+        "file": "client/src/components/layout/ResponsiveLayout.js",
+        "lines": 766
+      },
+      {
+        "file": "client/src/components/layout/ResponsiveLayout.jsx",
+        "lines": 766
+      },
+      {
+        "file": "server/src/qam/RedisStateManager.ts",
+        "lines": 763
+      },
+      {
+        "file": "server/src/qam/IncidentAutoReweighter.ts",
+        "lines": 762
+      },
+      {
+        "file": "server/src/connectors/jdbc.ts",
+        "lines": 762
+      },
+      {
+        "file": "server/src/conductor/failover/data-replication.ts",
+        "lines": 760
+      },
+      {
+        "file": "server/src/runbooks/rapid-attribution.ts",
+        "lines": 759
+      },
+      {
+        "file": "server/src/qam/LinUCBOptimizer.ts",
+        "lines": 754
+      },
+      {
+        "file": "server/src/ai/engines/ObjectDetectionEngine.ts",
+        "lines": 752
+      },
+      {
+        "file": "server/src/services/GraphAnalyticsService.js",
+        "lines": 750
+      },
+      {
+        "file": "server/src/services/investigationWorkflowService.ts",
+        "lines": 749
+      },
+      {
+        "file": "server/src/autonomous/policy-engine.ts",
+        "lines": 749
+      },
+      {
+        "file": "server/src/services/SovereignSafeguardsService.ts",
+        "lines": 748
+      },
+      {
+        "file": "server/src/services/STIXImportService.js",
+        "lines": 745
+      },
+      {
+        "file": "server/src/ai/engines/SpeechToTextEngine.ts",
+        "lines": 744
+      },
+      {
+        "file": "server/src/conductor/scheduling/cost-aware-scheduler.ts",
+        "lines": 744
+      },
+      {
+        "file": "server/src/conductor/incident/response-engine.ts",
+        "lines": 743
+      },
+      {
+        "file": "server/src/conductor/runbooks/registry.ts",
+        "lines": 743
+      },
+      {
+        "file": "client/src/components/onboarding/OnboardingTour.js",
+        "lines": 743
+      },
+      {
+        "file": "client/src/components/onboarding/OnboardingTour.jsx",
+        "lines": 743
+      },
+      {
+        "file": "apps/workflow-engine/src/server.ts",
+        "lines": 738
+      },
+      {
+        "file": "apps/feed-processor/src/services/EnrichmentService.ts",
+        "lines": 735
+      },
+      {
+        "file": "server/src/graphql/mutations/SafeMutations.ts",
+        "lines": 729
+      },
+      {
+        "file": "server/src/services/MobileService.js",
+        "lines": 728
+      },
+      {
+        "file": "server/src/services/attribution/FederatedAttributionEngine.ts",
+        "lines": 728
+      },
+      {
+        "file": "server/src/autonomous/orchestrator.enhanced.ts",
+        "lines": 728
+      },
+      {
+        "file": "server/src/marketplace/plugin-manager.ts",
+        "lines": 725
+      },
+      {
+        "file": "server/src/federal/slsa3-verifier.ts",
+        "lines": 725
+      },
+      {
+        "file": "client/src/components/dashboard/AttackHeatmapWidget.tsx",
+        "lines": 725
+      },
+      {
+        "file": "client/src/components/visualization/InteractiveGraphCanvas.tsx",
+        "lines": 724
+      },
+      {
+        "file": "server/src/testing/contractTesting.ts",
+        "lines": 722
+      },
+      {
+        "file": "server/src/conductor/edge/crdt-conflict-resolver.ts",
+        "lines": 722
+      },
+      {
+        "file": "server/src/services/GNNService.js",
+        "lines": 717
+      },
+      {
+        "file": "server/src/graphql/resolvers/v041/sovereign-resolvers.ts",
+        "lines": 714
+      },
+      {
+        "file": "server/src/services/DeterministicExportService.ts",
+        "lines": 714
+      },
+      {
+        "file": "server/src/db/indexManager.ts",
+        "lines": 713
+      },
+      {
+        "file": "server/src/services/xai/detectors.ts",
+        "lines": 713
+      },
+      {
+        "file": "server/src/conductor/web-orchestration/compliance-gate.ts",
+        "lines": 710
+      },
+      {
+        "file": "server/src/services/RelationshipService.js",
+        "lines": 709
+      },
+      {
+        "file": "packages/maestro-core/src/plugins/web-scraper-plugin.ts",
+        "lines": 708
+      },
+      {
+        "file": "client/src/App.router.jsx",
+        "lines": 707
+      },
+      {
+        "file": "server/src/services/monitoringObservabilityService.ts",
+        "lines": 706
+      },
+      {
+        "file": "server/src/connectors/gcs.ts",
+        "lines": 703
+      },
+      {
+        "file": "server/src/services/DetectionContentPackV6.ts",
+        "lines": 702
+      },
+      {
+        "file": "server/src/services/AlertTriageV2Service.ts",
+        "lines": 702
+      },
+      {
+        "file": "server/src/federal/worm-audit-chain.ts",
+        "lines": 702
+      },
+      {
+        "file": "client/src/components/timeline/TemporalAnalysis.tsx",
+        "lines": 698
+      },
+      {
+        "file": "server/src/services/GraphRAGService.ts",
+        "lines": 697
+      },
+      {
+        "file": "apps/graph-analytics/src/server.ts",
+        "lines": 697
+      },
+      {
+        "file": "server/src/ai/engines/OCREngine.ts",
+        "lines": 695
+      },
+      {
+        "file": "server/src/conductor/governance/limits.ts",
+        "lines": 695
+      },
+      {
+        "file": "client/src/App.router.js",
+        "lines": 692
+      },
+      {
+        "file": "client/src/components/tri-pane/EnhancedTriPaneExplorer.tsx",
+        "lines": 691
+      },
+      {
+        "file": "client/src/pages/IOC/IOCList.tsx",
+        "lines": 689
+      },
+      {
+        "file": "client/src/components/graph/AdvancedCollaborativeGraph.jsx",
+        "lines": 687
+      },
+      {
+        "file": "client/src/components/graph/AdvancedCollaborativeGraph.js",
+        "lines": 687
+      },
+      {
+        "file": "client/src/components/collaboration/CommentSystem.js",
+        "lines": 687
+      },
+      {
+        "file": "client/src/components/collaboration/CommentSystem.jsx",
+        "lines": 687
+      },
+      {
+        "file": "client/src/components/versioning/VersionComparison.jsx",
+        "lines": 687
+      },
+      {
+        "file": "client/src/components/versioning/VersionComparison.js",
+        "lines": 687
+      },
+      {
+        "file": "packages/maestro-core/src/plugins/openapi-plugin.ts",
+        "lines": 687
+      },
+      {
+        "file": "server/src/pii/patterns.ts",
+        "lines": 682
+      },
+      {
+        "file": "server/src/services/OIDCAuthService.ts",
+        "lines": 680
+      },
+      {
+        "file": "apps/workflow-engine/src/services/WorkflowBuilder.ts",
+        "lines": 680
+      },
+      {
+        "file": "server/src/conductor/edge/sync-api.ts",
+        "lines": 671
+      },
+      {
+        "file": "services/authz-gateway/tests/fuzz/governance-gate.fuzz.test.ts",
+        "lines": 670
+      },
+      {
+        "file": "server/src/websocket/connectionManager.ts",
+        "lines": 667
+      },
+      {
+        "file": "server/src/tests/copilotOrchestration.test.js",
+        "lines": 665
+      },
+      {
+        "file": "server/src/services/analyticsDashboardService.ts",
+        "lines": 665
+      },
+      {
+        "file": "server/src/conductor/mcp/servers/files-server.ts",
+        "lines": 664
+      },
+      {
+        "file": "client/src/components/visualization/AdvancedNetworkAnalysis.tsx",
+        "lines": 661
+      },
+      {
+        "file": "client/src/components/timeline/InvestigationTimeline.js",
+        "lines": 661
+      },
+      {
+        "file": "client/src/components/timeline/InvestigationTimeline.jsx",
+        "lines": 661
+      },
+      {
+        "file": "server/src/federal/fips-compliance.ts",
+        "lines": 660
+      },
+      {
+        "file": "client/src/components/versioning/GraphVersionHistory.jsx",
+        "lines": 655
+      },
+      {
+        "file": "client/src/components/versioning/GraphVersionHistory.js",
+        "lines": 655
+      },
+      {
+        "file": "server/src/disclosure/export-service.ts",
+        "lines": 654
+      },
+      {
+        "file": "client/src/components/dashboard/MTTTTrendWidget.tsx",
+        "lines": 654
+      },
+      {
+        "file": "client/src/components/collaboration/LiveChat.jsx",
+        "lines": 654
+      },
+      {
+        "file": "client/src/components/collaboration/LiveChat.js",
+        "lines": 654
+      },
+      {
+        "file": "server/src/tests/enterpriseSecurity.test.js",
+        "lines": 653
+      },
+      {
+        "file": "client/src/components/golden-path/GoldenPathValidator.tsx",
+        "lines": 651
+      },
+      {
+        "file": "server/src/db/budgetLedger.ts",
+        "lines": 647
+      },
+      {
+        "file": "client/src/features/admin/CostExplorer.tsx",
+        "lines": 647
+      },
+      {
+        "file": "server/src/coherence/routes.ts",
+        "lines": 645
+      },
+      {
+        "file": "server/src/maestro/routing/learning-to-rank.ts",
+        "lines": 643
+      },
+      {
+        "file": "server/src/services/streaming/ingest-worker.ts",
+        "lines": 641
+      },
+      {
+        "file": "client/src/components/ai-enhanced/EnhancedAIAssistant.tsx",
+        "lines": 639
+      },
+      {
+        "file": "server/src/live-server.ts",
+        "lines": 635
+      },
+      {
+        "file": "server/src/middleware/siemMiddleware.ts",
+        "lines": 635
+      },
+      {
+        "file": "client/src/components/graph/CustomLayouts.js",
+        "lines": 635
+      },
+      {
+        "file": "server/src/conductor/compliance/compliance-api.ts",
+        "lines": 631
+      },
+      {
+        "file": "apps/analytics-engine/src/services/ChartService.ts",
+        "lines": 631
+      },
+      {
+        "file": "client/src/components/collaboration/PresenceIndicator.jsx",
+        "lines": 628
+      },
+      {
+        "file": "client/src/components/collaboration/PresenceIndicator.js",
+        "lines": 628
+      },
+      {
+        "file": "server/src/conductor/api/evidence-routes.ts",
+        "lines": 627
+      },
+      {
+        "file": "server/src/db/pg.ts",
+        "lines": 626
+      },
+      {
+        "file": "server/src/tests/advancedAnalytics.test.js",
+        "lines": 626
+      },
+      {
+        "file": "server/src/graphql/ai-insights-schema.ts",
+        "lines": 624
+      },
+      {
+        "file": "server/src/policy/residencyEnforcer.ts",
+        "lines": 623
+      },
+      {
+        "file": "services/feed-processor/src/index.ts",
+        "lines": 620
+      },
+      {
+        "file": "server/src/db/compensationLog.ts",
+        "lines": 619
+      },
+      {
+        "file": "server/src/conductor/web-orchestration/orchestration-service.ts",
+        "lines": 619
+      },
+      {
+        "file": "client/src/pages/Search/components/FacetPanel.tsx",
+        "lines": 619
+      },
+      {
+        "file": "packages/ingest-wizard/src/index.tsx",
+        "lines": 619
+      },
+      {
+        "file": "apps/search-engine/src/services/SavedSearchService.ts",
+        "lines": 618
+      },
+      {
+        "file": "server/src/middleware/opa-with-appeals.ts",
+        "lines": 616
+      },
+      {
+        "file": "server/src/copilot/store.postgres.js",
+        "lines": 616
+      },
+      {
+        "file": "apps/search-engine/src/services/ElasticsearchService.ts",
+        "lines": 615
+      },
+      {
+        "file": "server/src/routes/data-residency.ts",
+        "lines": 611
+      },
+      {
+        "file": "client/src/components/HelpSystem.tsx",
+        "lines": 611
+      },
+      {
+        "file": "server/src/conductor/security/threat-detection.ts",
+        "lines": 609
+      },
+      {
+        "file": "server/src/services/DoclingService.ts",
+        "lines": 607
+      },
+      {
+        "file": "server/src/services/CSVImportService.js",
+        "lines": 606
+      },
+      {
+        "file": "services/agent-runtime/src/index.ts",
+        "lines": 606
+      },
+      {
+        "file": "server/src/controllers/WarRoomController.js",
+        "lines": 605
+      },
+      {
+        "file": "apps/analytics-engine/src/server.ts",
+        "lines": 604
+      },
+      {
+        "file": "apps/web/src/components/search/unified-search.tsx",
+        "lines": 603
+      },
+      {
+        "file": "server/src/graphql/resolvers/entity.ts",
+        "lines": 601
+      },
+      {
+        "file": "server/src/services/SOARPlaybookService.ts",
+        "lines": 599
+      },
+      {
+        "file": "client/src/components/InsightPanel.jsx",
+        "lines": 598
+      },
+      {
+        "file": "server/src/services/MVP1RBACService.ts",
+        "lines": 597
+      },
+      {
+        "file": "client/src/components/InsightPanel.js",
+        "lines": 596
+      },
+      {
+        "file": "client/src/components/graph/AdvancedGraphView.jsx",
+        "lines": 595
+      },
+      {
+        "file": "client/src/components/graph/AdvancedGraphView.js",
+        "lines": 595
+      },
+      {
+        "file": "server/src/websocket/core.ts",
+        "lines": 594
+      },
+      {
+        "file": "server/src/services/MediaUploadService.ts",
+        "lines": 592
+      },
+      {
+        "file": "client/src/components/analytics/AdvancedAnalyticsDashboard.tsx",
+        "lines": 591
+      },
+      {
+        "file": "client/src/pages/Search/SearchHome.tsx",
+        "lines": 589
+      },
+      {
+        "file": "server/src/graphql/resolvers/multimodalResolvers.ts",
+        "lines": 588
+      },
+      {
+        "file": "server/src/services/ContextAnalysisService.js",
+        "lines": 588
+      },
+      {
+        "file": "client/src/components/graph/InteractiveGraphExplorer.jsx",
+        "lines": 588
+      },
+      {
+        "file": "server/src/http/incident.ts",
+        "lines": 587
+      },
+      {
+        "file": "server/src/conductor/admission/budget-control.ts",
+        "lines": 586
+      },
+      {
+        "file": "server/src/routes/quality-evaluation.ts",
+        "lines": 586
+      },
+      {
+        "file": "server/src/tests/copilot.persistence.test.js",
+        "lines": 585
+      },
+      {
+        "file": "server/src/routes/dlp.ts",
+        "lines": 585
+      },
+      {
+        "file": "client/src/components/DataExport.tsx",
+        "lines": 583
+      },
+      {
+        "file": "services/privacy/src/consentReconciler.ts",
+        "lines": 583
+      },
+      {
+        "file": "server/src/conductor/learn/reward-api.ts",
+        "lines": 582
+      },
+      {
+        "file": "server/src/maestro/assistant/graphrag-service.ts",
+        "lines": 581
+      },
+      {
+        "file": "server/src/conductor/runbooks/runbook-api.ts",
+        "lines": 581
+      },
+      {
+        "file": "server/src/services/CostOptimizationService.ts",
+        "lines": 577
+      },
+      {
+        "file": "client/src/components/graph/PerformanceMode.js",
+        "lines": 577
+      },
+      {
+        "file": "client/src/components/graph/PerformanceMode.jsx",
+        "lines": 577
+      },
+      {
+        "file": "client/src/services/orchestrator/modules.ts",
+        "lines": 577
+      },
+      {
+        "file": "services/api/src/realtime/socket.ts",
+        "lines": 574
+      },
+      {
+        "file": "server/src/workers/reconcile.ts",
+        "lines": 573
+      },
+      {
+        "file": "client/src/components/ai/MLAnalysisPanel.jsx",
+        "lines": 571
+      },
+      {
+        "file": "client/src/components/ai/MLAnalysisPanel.js",
+        "lines": 571
+      },
+      {
+        "file": "server/src/rate/redisBucket.ts",
+        "lines": 570
+      },
+      {
+        "file": "server/src/graphql/resolvers/v040/transcendent-resolvers.ts",
+        "lines": 569
+      },
+      {
+        "file": "client/src/pages/DisclosurePackagerPage.tsx",
+        "lines": 569
+      },
+      {
+        "file": "apps/search-engine/src/services/QueryBuilderService.ts",
+        "lines": 569
+      },
+      {
+        "file": "server/src/routes/siem.ts",
+        "lines": 568
+      },
+      {
+        "file": "server/src/routes/connectorRoutes.js",
+        "lines": 567
+      },
+      {
+        "file": "client/src/components/MaestroUI/TaskMonitor.tsx",
+        "lines": 567
+      },
+      {
+        "file": "server/src/graphql/multimodalSchema.ts",
+        "lines": 566
+      },
+      {
+        "file": "server/src/tests/aiExtraction.test.js",
+        "lines": 562
+      },
+      {
+        "file": "server/src/conductor/api/workflow-routes.ts",
+        "lines": 562
+      },
+      {
+        "file": "services/ingest/src/connectors/HttpCsvConnector.ts",
+        "lines": 562
+      },
+      {
+        "file": "server/src/observability/finops-dashboard.ts",
+        "lines": 561
+      },
+      {
+        "file": "client/src/components/triage/AlertTriageV2Panel.tsx",
+        "lines": 560
+      },
+      {
+        "file": "server/src/services/RestConnectorService.js",
+        "lines": 559
+      },
+      {
+        "file": "server/src/monitoring/safeMutationsMetrics.ts",
+        "lines": 559
+      },
+      {
+        "file": "server/src/middleware/abuseGuard.ts",
+        "lines": 558
+      },
+      {
+        "file": "server/src/routes/admin.ts",
+        "lines": 555
+      },
+      {
+        "file": "client/src/components/ai/EnhancedCopilotRunPanel.js",
+        "lines": 555
+      },
+      {
+        "file": "client/src/components/ai/EnhancedCopilotRunPanel.jsx",
+        "lines": 555
+      },
+      {
+        "file": "server/src/workers/canary-escalate.ts",
+        "lines": 554
+      },
+      {
+        "file": "services/license-registry/src/index.ts",
+        "lines": 552
+      },
+      {
+        "file": "services/sei-collector/prHealthBot.ts",
+        "lines": 550
+      },
+      {
+        "file": "server/src/graphql/intelgraph/resolvers.ts",
+        "lines": 549
+      },
+      {
+        "file": "server/src/conductor/audit/chain-verifier.ts",
+        "lines": 548
+      },
+      {
+        "file": "server/src/conductor/governance/opa-integration.ts",
+        "lines": 547
+      },
+      {
+        "file": "client/src/features/admin/OverridesPanel.tsx",
+        "lines": 547
+      },
+      {
+        "file": "server/src/maestro/provenance/merkle-ledger.ts",
+        "lines": 546
+      },
+      {
+        "file": "client/src/pages/Hunting/HuntList.tsx",
+        "lines": 546
+      },
+      {
+        "file": "server/src/metrics/cost.ts",
+        "lines": 545
+      },
+      {
+        "file": "packages/maestro-core/src/plugins/cosign-plugin.ts",
+        "lines": 545
+      },
+      {
+        "file": "server/src/routes/export-api.ts",
+        "lines": 544
+      },
+      {
+        "file": "server/src/routes/import.js",
+        "lines": 542
+      },
+      {
+        "file": "packages/rptc/src/compiler.ts",
+        "lines": 541
+      },
+      {
+        "file": "client/src/components/graph-advanced/AdvancedGraphInteractions.tsx",
+        "lines": 540
+      },
+      {
+        "file": "services/data-spine/src/schemaRegistry.js",
+        "lines": 540
+      },
+      {
+        "file": "server/src/coherence/graphql/resolvers.ts",
+        "lines": 536
+      },
+      {
+        "file": "services/api/src/db/redis.ts",
+        "lines": 532
+      },
+      {
+        "file": "apps/web/src/react-augmentation.d.ts",
+        "lines": 531
+      },
+      {
+        "file": "server/src/services/xai/graph-explainer.ts",
+        "lines": 530
+      },
+      {
+        "file": "client/src/components/collaboration/UserPresence.js",
+        "lines": 529
+      },
+      {
+        "file": "server/src/config/distributed/distributed-config-service.ts",
+        "lines": 528
+      },
+      {
+        "file": "client/src/components/collaboration/UserPresence.jsx",
+        "lines": 528
+      },
+      {
+        "file": "client/src/pages/Search/components/ResultList.tsx",
+        "lines": 528
+      },
+      {
+        "file": "server/src/services/provenance-ledger.ts",
+        "lines": 527
+      },
+      {
+        "file": "server/src/conductor/mission-control/conflict-resolution.ts",
+        "lines": 527
+      },
+      {
+        "file": "client/src/components/collaboration/CollaborationHub.js",
+        "lines": 526
+      },
+      {
+        "file": "client/src/components/collaboration/CollaborationHub.jsx",
+        "lines": 526
+      },
+      {
+        "file": "server/src/routes/federationRoutes.js",
+        "lines": 525
+      },
+      {
+        "file": "server/src/conductor/evaluation/evaluation-api.ts",
+        "lines": 524
+      },
+      {
+        "file": "packages/maestro-cli/src/commands/run.ts",
+        "lines": 524
+      },
+      {
+        "file": "packages/maestro-core/src/budget/budget-manager.ts",
+        "lines": 522
+      },
+      {
+        "file": "server/src/federal/dual-notary.ts",
+        "lines": 521
+      },
+      {
+        "file": "apps/web/src/components/maestro/RouterBenchRunner.tsx",
+        "lines": 518
+      },
+      {
+        "file": "services/ingest/src/sdk/ConnectorSDK.ts",
+        "lines": 518
+      },
+      {
+        "file": "server/src/services/GACoremetricsService.ts",
+        "lines": 513
+      },
+      {
+        "file": "server/src/services/NeighborhoodCache.ts",
+        "lines": 513
+      },
+      {
+        "file": "server/src/conductor/api/conductor-routes.ts",
+        "lines": 513
+      },
+      {
+        "file": "client/src/components/NotificationSystem.tsx",
+        "lines": 511
+      },
+      {
+        "file": "server/src/routes/warRoomRoutes.js",
+        "lines": 509
+      },
+      {
+        "file": "apps/ml-engine/src/training/TrainingPipeline.ts",
+        "lines": 508
+      },
+      {
+        "file": "server/src/conductor/api/agent-routes.ts",
+        "lines": 507
+      },
+      {
+        "file": "apps/web/src/components/maestro/ServingAlertsConfig.tsx",
+        "lines": 507
+      },
+      {
+        "file": "client/src/components/AdvancedSearch.tsx",
+        "lines": 506
+      },
+      {
+        "file": "server/src/tests/warRoomSync.test.js",
+        "lines": 505
+      },
+      {
+        "file": "apps/web/src/components/tri-pane/TriPaneAnalysisView.tsx",
+        "lines": 505
+      },
+      {
+        "file": "server/src/controllers/FederationController.js",
+        "lines": 502
+      },
+      {
+        "file": "server/src/conductor/admission/budget-ladder.ts",
+        "lines": 502
+      }
+    ]
+  },
+  "debt": {
+    "todo": [
+      {
+        "location": "server/src/ai/nl-to-cypher/nl-to-cypher.service.ts",
+        "comment": "174:      // TODO: Integrate with actual Neo4j sandbox connection"
+      },
+      {
+        "location": "server/src/middleware/opa-enforcer.ts",
+        "comment": "436:      cacheHitRate: 0, // TODO: Track cache hits/misses"
+      },
+      {
+        "location": "server/src/middleware/opa-abac.ts",
+        "comment": "161:    // TODO: Implement proper OIDC validation with issuer verification"
+      },
+      {
+        "location": "server/src/middleware/opa-abac.ts",
+        "comment": "313:            operation_type: 'query', // TODO: Detect mutation vs query"
+      },
+      {
+        "location": "server/src/middleware/llm-preflight.ts",
+        "comment": "220:    // TODO: Implement usage tracking per user/tenant"
+      },
+      {
+        "location": "server/src/middleware/idempotency.ts",
+        "comment": "403:        errorRate: 0, // TODO: Track error rate in metrics"
+      },
+      {
+        "location": "server/src/graphql/resolvers.er.ts",
+        "comment": "382:          // TODO: Implement merge logic"
+      },
+      {
+        "location": "server/src/graphql/resolvers/graphragResolvers.ts",
+        "comment": "167:        // TODO: Fetch full entity objects from Neo4j using the entity IDs"
+      },
+      {
+        "location": "server/src/graphql/resolvers/graphragResolvers.ts",
+        "comment": "221:        // TODO: Implement cache clearing logic"
+      },
+      {
+        "location": "server/src/graphql/resolvers/safe-mutations.ts",
+        "comment": "41:          // TODO: enforce idempotency via audit/outbox store; validate DAG/policies"
+      },
+      {
+        "location": "server/src/graphql/resolvers/safe-mutations.ts",
+        "comment": "83:          // TODO: enqueue via outbox; start saga orchestrator"
+      },
+      {
+        "location": "server/src/graphql/resolvers/mvp1-copilot.ts",
+        "comment": "151:          // TODO: Integrate with entity creation service"
+      },
+      {
+        "location": "server/src/graphql/intelgraph/resolvers.ts",
+        "comment": "412:              clustering: 0, // TODO: Calculate actual clustering coefficient"
+      },
+      {
+        "location": "server/src/graphql/intelgraph/resolvers.ts",
+        "comment": "450:            opa: 'healthy', // TODO: Implement OPA health check"
+      },
+      {
+        "location": "server/src/graphql/resolvers.copilot.js",
+        "comment": "24:      // TODO: Add proper filtering to store"
+      },
+      {
+        "location": "server/src/graphql/attachments.ts",
+        "comment": "2:const GraphQLUpload: any = null; // TODO: Fix graphql-upload-ts import"
+      },
+      {
+        "location": "server/src/graphql/watchlists.ts",
+        "comment": "1:// TODO: Create proper shared schema package"
+      },
+      {
+        "location": "server/src/graphql/mutations/SafeMutations.ts",
+        "comment": "338:          // TODO: Implement cache invalidation"
+      },
+      {
+        "location": "server/src/graphql/mutations/SafeMutations.ts",
+        "comment": "505:            // TODO: Implement custom schema setting"
+      },
+      {
+        "location": "server/src/services/ExtractionJobService.ts",
+        "comment": "588:          // TODO: Implement embedding generation"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.js",
+        "comment": "710:        relationships: [], // TODO: Add relationship search"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "683:    // TODO: Implement cross-modal matching algorithm"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "700:    // TODO: Implement cross-modal matches retrieval"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "716:    // TODO: Implement proper filtering"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "725:    // TODO: Implement extraction job retrieval"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "734:    // TODO: Implement extraction job creation"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "743:    // TODO: Implement extraction job cancellation"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "752:    // TODO: Implement extraction validation"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "771:    // TODO: Implement comprehensive multimodal search"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "879:    // TODO: Implement comprehensive analytics"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "922:    // TODO: Implement duplicate detection algorithm"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "936:    // TODO: Implement duplicate cleanup"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "951:    // TODO: Integrate with MediaUploadService"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "1016:    // TODO: Implement entity merging logic"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "1032:    // TODO: Implement relationship creation"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "1045:    // TODO: Implement relationship update"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "1058:    // TODO: Implement relationship verification"
+      },
+      {
+        "location": "server/src/services/MultimodalDataService.ts",
+        "comment": "1072:    // TODO: Implement clustering algorithm"
+      },
+      {
+        "location": "server/src/services/DeterministicExportService.ts",
+        "comment": "389:    // Create stub user for redaction (TODO: use actual user from request context)"
+      },
+      {
+        "location": "server/src/conductor/models.ts",
+        "comment": "6:  // TODO: implement cosign verification of OCI/S3 reference"
+      },
+      {
+        "location": "server/src/conductor/events/engine.ts",
+        "comment": "70:  // TODO: implement HMAC-SHA256 check"
+      },
+      {
+        "location": "server/src/conductor/events/engine.ts",
+        "comment": "74:  // TODO: enqueue a run with payload"
+      },
+      {
+        "location": "server/src/conductor/mcp/client.ts",
+        "comment": "76:      // TODO: Implement certificate pinning here"
+      },
+      {
+        "location": "server/src/conductor/learn/bandit.ts",
+        "comment": "688:        last24h: 0, // TODO: Implement time-windowed metrics"
+      },
+      {
+        "location": "server/src/conductor/learn/bandit.ts",
+        "comment": "840:    return 0.2; // TODO: Implement based on recent decisions"
+      },
+      {
+        "location": "server/src/conductor/scheduler/selectGpuPool.ts",
+        "comment": "18:  // TODO: load dynamic pools; placeholder"
+      },
+      {
+        "location": "server/src/conductor/api/conductor-routes.ts",
+        "comment": "196:      // TODO: wire real metrics aggregations here"
+      },
+      {
+        "location": "server/src/conductor/admission/budget-control.ts",
+        "comment": "209:        requests: 0, // TODO: Track per-expert request counts if needed"
+      },
+      {
+        "location": "server/src/conductor/steps/cleanroomAggregate.ts",
+        "comment": "4:  // TODO: apply per-metric DP noise if requested"
+      },
+      {
+        "location": "server/src/conductor/steps/embedUpsert.ts",
+        "comment": "26:  // TODO: call Python/HTTP embedding generator; placeholder"
+      },
+      {
+        "location": "server/src/conductor/contracts/trust.ts",
+        "comment": "16:  // TODO: Verify signature against provider's registered key (PKI/cosign)"
+      },
+      {
+        "location": "server/src/conductor/router/router-v2.ts",
+        "comment": "811:    // TODO: Implement based on routing history analysis"
+      },
+      {
+        "location": "server/src/conductor/router/router-v2.ts",
+        "comment": "816:    // TODO: Implement cost efficiency calculation"
+      },
+      {
+        "location": "server/src/conductor/router/router-v2.ts",
+        "comment": "821:    // TODO: Implement latency prediction accuracy"
+      },
+      {
+        "location": "server/src/risk/FeatureStore.ts",
+        "comment": "9:    // TODO: Implement real aggregation logic"
+      },
+      {
+        "location": "server/src/routes/connectorRoutes.js",
+        "comment": "7:// TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization"
+      },
+      {
+        "location": "server/src/routes/warRoomRoutes.js",
+        "comment": "7:// TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization"
+      },
+      {
+        "location": "server/src/routes/recipes.ts",
+        "comment": "95:    // TODO: Enqueue job with your actual job queue (BullMQ, etc.)"
+      },
+      {
+        "location": "server/src/routes/ai.ts",
+        "comment": "303:      // TODO: Replace with actual LLM integration"
+      },
+      {
+        "location": "server/src/routes/ai.ts",
+        "comment": "345:    // TODO: Replace with actual model health checks"
+      },
+      {
+        "location": "server/src/routes/federationRoutes.js",
+        "comment": "7:// TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization"
+      },
+      {
+        "location": "server/src/routes/tracingRoutes.js",
+        "comment": "7:// TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization"
+      },
+      {
+        "location": "server/src/copilot/orchestrator.js",
+        "comment": "21:      // TODO: call existing service/repo; here we simulate"
+      },
+      {
+        "location": "server/src/copilot/orchestrator.enhanced.js",
+        "comment": "273:        // TODO: Call actual Neo4j service"
+      },
+      {
+        "location": "server/src/copilot/orchestrator.enhanced.js",
+        "comment": "280:        // TODO: Call actual graph analytics service"
+      },
+      {
+        "location": "server/src/copilot/orchestrator.enhanced.js",
+        "comment": "288:        // TODO: Call actual summarization service"
+      },
+      {
+        "location": "server/src/copilot/orchestrator.enhanced.js",
+        "comment": "295:        // TODO: Call actual enrichment service"
+      },
+      {
+        "location": "server/src/claims/sign.ts",
+        "comment": "24:  // TODO: reuse MerkleLog to recompute root; placeholder returns true"
+      },
+      {
+        "location": "client/src/hooks/usePrefetch.ts",
+        "comment": "3:// TODO: Re-enable when GraphQL schema is available"
+      },
+      {
+        "location": "client/src/hooks/usePrefetch.ts",
+        "comment": "16:  // TODO: Re-enable when GraphQL schema is available"
+      },
+      {
+        "location": "client/src/hooks/usePrefetch.ts",
+        "comment": "29:  // TODO: Re-enable when GraphQL schema is available"
+      },
+      {
+        "location": "client/src/hooks/usePrefetch.ts",
+        "comment": "43:  // TODO: Re-enable when GraphQL schema is available"
+      },
+      {
+        "location": "client/src/components/ErrorBoundary.tsx",
+        "comment": "5:  // Old: // TODO: wire to your telemetry"
+      },
+      {
+        "location": "client/src/components/graph/InteractiveGraphExplorer.jsx",
+        "comment": "564:              // TODO: Highlight cluster nodes in graph"
+      },
+      {
+        "location": "client/src/components/dashboard/StatsOverview.tsx",
+        "comment": "5:  // TODO: Re-enable GraphQL query when schema is available"
+      },
+      {
+        "location": "client/src/components/dashboard/LiveActivityFeed.tsx",
+        "comment": "24:// TODO: Re-enable GraphQL subscription when schema is available"
+      },
+      {
+        "location": "client/src/components/dashboard/LiveActivityFeed.tsx",
+        "comment": "108:  // TODO: Re-enable GraphQL subscription when schema is available"
+      },
+      {
+        "location": "client/src/components/dashboard/LiveActivityFeed.tsx",
+        "comment": "119:  // TODO: Re-enable when GraphQL subscription is available"
+      },
+      {
+        "location": "client/src/components/IntelGraphWorkbench.tsx",
+        "comment": "361:      // TODO: Implement layout logic here (dagre, radial)"
+      },
+      {
+        "location": "client/src/components/IntelGraphWorkbench.tsx",
+        "comment": "708:                      // TODO: Show tooltip on hover"
+      },
+      {
+        "location": "client/src/components/IntelGraphWorkbench.tsx",
+        "comment": "767:                      // TODO: Show tooltip on hover"
+      },
+      {
+        "location": "client/src/components/reports/ReportTemplateSelector.tsx",
+        "comment": "170:      // TODO: replace with real mutation once backend wiring exists"
+      },
+      {
+        "location": "client/src/pages/IOC/IOCList.tsx",
+        "comment": "543:                // TODO: Navigate to IOC detail page"
+      },
+      {
+        "location": "client/src/pages/IOC/IOCList.tsx",
+        "comment": "619:              // TODO: Add IOC logic here"
+      },
+      {
+        "location": "client/src/pages/IOC/IOCList.tsx",
+        "comment": "678:              // TODO: Import IOCs logic here"
+      },
+      {
+        "location": "client/src/pages/Search/components/ResultList.tsx",
+        "comment": "263:                            /* TODO: Navigate to detail page */"
+      },
+      {
+        "location": "client/src/pages/Search/components/ResultList.tsx",
+        "comment": "322:                              /* TODO: Filter by tag */"
+      },
+      {
+        "location": "client/src/pages/Hunting/HuntList.tsx",
+        "comment": "461:                // TODO: Navigate to hunt detail page"
+      },
+      {
+        "location": "client/src/pages/Hunting/HuntList.tsx",
+        "comment": "536:              // TODO: Create hunt logic here"
+      },
+      {
+        "location": "client/src/routes/ActionDetailsRoute.tsx",
+        "comment": "42:      {/* TODO: render the rest of the action details here */}"
+      },
+      {
+        "location": "apps/analytics-engine/src/server.ts",
+        "comment": "462:        // TODO: Implement PDF export"
+      },
+      {
+        "location": "apps/web/src/features/explain/explainSlice.ts",
+        "comment": "3:// TODO: viewSync feature was removed - restore if needed"
+      },
+      {
+        "location": "apps/web/src/features/explain/explainSlice.ts",
+        "comment": "36:// TODO: Re-enable when viewSync feature is restored"
+      },
+      {
+        "location": "apps/web/src/components/FlowStudio.tsx",
+        "comment": "15:    // TODO: Replace jQuery with React state management"
+      },
+      {
+        "location": "apps/web/src/sync/history-explain-bridge.ts",
+        "comment": "1:// TODO: Remove jQuery dependency - migrate to React event system"
+      },
+      {
+        "location": "apps/web/src/sync/history-explain-bridge.ts",
+        "comment": "10:  // TODO: Replace with React-based event system"
+      },
+      {
+        "location": "apps/web/src/panes/ExplainPanel.tsx",
+        "comment": "19:          {/* Query feature removed with viewSync - TODO: restore if needed */}"
+      },
+      {
+        "location": "apps/gateway/src/rbac/scim.ts",
+        "comment": "2:  // TODO: Implement SCIM sync using your IdP API."
+      },
+      {
+        "location": "packages/maestro-cli/src/commands/dsar.ts",
+        "comment": "18:      // TODO: Implement actual data export logic"
+      },
+      {
+        "location": "packages/maestro-cli/src/commands/dsar.ts",
+        "comment": "35:      // TODO: Implement actual data deletion/anonymization logic"
+      },
+      {
+        "location": "services/lsc-service/src/index.ts",
+        "comment": "25:  // TODO: Add logic to build the GSN graph based on events"
+      },
+      {
+        "location": "services/attest/src/verifier.ts",
+        "comment": "10:  // TODO: call AMD/Intel verification service; parse claims → measurement digest"
+      },
+      {
+        "location": "services/api/src/app.ts",
+        "comment": "74:    // TODO: Implement Prometheus metrics"
+      },
+      {
+        "location": "services/knowledge-service/src/index.ts",
+        "comment": "24:  // TODO: Query vector store with the embedding of the query"
+      },
+      {
+        "location": "services/knowledge-service/src/index.ts",
+        "comment": "43:  // TODO: Query graph store (e.g., Neo4j) for code relationships"
+      },
+      {
+        "location": "services/enrichment/src/index.ts",
+        "comment": "101:  // TODO: emit to enrichment.results.v1"
+      },
+      {
+        "location": "services/api-gateway/src/resolvers.ts",
+        "comment": "38:      // TODO: Delegate to graph service"
+      },
+      {
+        "location": "services/api-gateway/src/resolvers.ts",
+        "comment": "43:      // TODO: Delegate to graph service"
+      },
+      {
+        "location": "services/brief/src/index.ts",
+        "comment": "6:  return 'TODO: implement rendering pipeline';"
+      },
+      {
+        "location": "services/identity-spiffe/src/controller.ts",
+        "comment": "19: * TODO: integrate with SPIRE server to mint SVIDs for workloads."
+      }
+    ],
+    "fixme": [],
+    "hack": [],
+    "xxx": [
+      {
+        "location": "server/src/conductor/security/opa-client.ts",
+        "comment": "147:        replacement: 'XXX-XX-XXXX',"
+      },
+      {
+        "location": "server/src/conductor/security/opa-client.ts",
+        "comment": "149:      { name: 'SSN_NoHyphen', regex: /\\b\\d{9}\\b/g, replacement: 'XXXXXXXXX' },"
+      },
+      {
+        "location": "server/src/conductor/security/opa-client.ts",
+        "comment": "162:        replacement: 'XXXX-XXXX-XXXX-XXXX',"
+      },
+      {
+        "location": "server/src/conductor/security/opa-client.ts",
+        "comment": "169:        replacement: 'XXX-XXX-XXXX',"
+      },
+      {
+        "location": "services/conductor/src/prompt/guardedGenerator.ts",
+        "comment": "27:    .replace(PII_PATTERNS[0], 'XXX-XX-XXXX')"
+      },
+      {
+        "location": "services/conductor/src/prompt/guardedGenerator.ts",
+        "comment": "28:    .replace(PII_PATTERNS[1], 'XXXX-XXXX-XXXX-XXXX');"
+      },
+      {
+        "location": "services/conductor/src/dlp/policy.ts",
+        "comment": "11:    .replace(/\\d{3}-\\d{2}-\\d{4}/g, 'XXX-XX-XXXX')"
+      },
+      {
+        "location": "services/conductor/src/dlp/policy.ts",
+        "comment": "12:    .replace(/\\b(?:\\d[ -]*?){13,16}\\b/g, 'XXXX-XXXX-XXXX-XXXX');"
+      }
+    ],
+    "total": 118
+  },
+  "duplication": {
+    "available": true,
+    "percentage": 0,
+    "duplicates": []
+  },
+  "loc": {
+    "available": false
+  }
+}
