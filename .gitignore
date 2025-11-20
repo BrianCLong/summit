@@ -172,6 +172,8 @@ conductor-ui/.jest-cache-ui/
 .orchestrator/
 apps/**/dist/
 **/dist/
+# Preserve built CLI artifacts for kpw-media so the published binary is available without an extra build step.
+!packages/kpw-media/dist/
 server/test-results/
 server/junit.xml
 
