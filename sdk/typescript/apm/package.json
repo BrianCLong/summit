@@ -1,0 +1,21 @@
+{
+  "name": "@summit/apm-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for the Access Path Minimizer planner.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "npm run build && node --test test/apm.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "typescript": "^5.9.2"
+  }
+}
