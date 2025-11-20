@@ -1,0 +1,38 @@
+{
+  "name": "@intelgraph/catalog-service",
+  "version": "0.1.0",
+  "description": "REST API service for data catalog operations",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/data-catalog": "workspace:*",
+    "@intelgraph/business-glossary": "workspace:*",
+    "@intelgraph/semantic-search": "workspace:*",
+    "@intelgraph/catalog-analytics": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "express-validator": "^7.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.7.0"
+  }
+}
