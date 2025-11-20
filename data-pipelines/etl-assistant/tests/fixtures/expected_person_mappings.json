@@ -1,0 +1,73 @@
+{
+  "fields": [
+    {
+      "name": "first_name",
+      "inferred_type": "string",
+      "canonical_entity": "Person",
+      "canonical_property": "firstName"
+    },
+    {
+      "name": "last_name",
+      "inferred_type": "string",
+      "canonical_entity": "Person",
+      "canonical_property": "lastName"
+    },
+    {
+      "name": "email",
+      "inferred_type": "email",
+      "canonical_entity": "Person",
+      "canonical_property": "email"
+    },
+    {
+      "name": "phone",
+      "inferred_type": "phone",
+      "canonical_entity": "Person",
+      "canonical_property": "phone"
+    },
+    {
+      "name": "date_of_birth",
+      "inferred_type": "date",
+      "canonical_entity": "Person",
+      "canonical_property": "dateOfBirth"
+    },
+    {
+      "name": "ssn",
+      "inferred_type": "string",
+      "canonical_entity": "Person",
+      "canonical_property": "nationalId"
+    },
+    {
+      "name": "address",
+      "inferred_type": "string",
+      "canonical_entity": "Person",
+      "canonical_property": "address"
+    }
+  ],
+  "primary_entity": "Person",
+  "expected_pii": [
+    {
+      "field": "ssn",
+      "category": "ssn",
+      "severity": "critical",
+      "strategy": "hash"
+    },
+    {
+      "field": "email",
+      "category": "email",
+      "severity": "medium",
+      "strategy": "tokenize"
+    },
+    {
+      "field": "phone",
+      "category": "phone",
+      "severity": "medium",
+      "strategy": "mask"
+    },
+    {
+      "field": "date_of_birth",
+      "category": "date_of_birth",
+      "severity": "medium",
+      "strategy": "mask"
+    }
+  ]
+}
