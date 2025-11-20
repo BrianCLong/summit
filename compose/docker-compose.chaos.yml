@@ -1,0 +1,84 @@
+# Chaos Engineering Stack Extension
+# Adds database services for resilience testing
+version: '3.9'
+
+services:
+  # PostgreSQL database for relational data
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: summit
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: summit_dev_pass
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U summit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit_network
+
+  # Neo4j graph database
+  neo4j:
+    image: neo4j:5.15-community
+    environment:
+      NEO4J_AUTH: neo4j/summit_dev_pass
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_initial__size: 512M
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p summit_dev_pass 'RETURN 1' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - summit_network
+
+  # Extend MC service with database connections
+  mc:
+    environment:
+      - DATABASE_URL=postgresql://summit:summit_dev_pass@postgres:5432/summit
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=summit_dev_pass
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - summit_network
+
+  # Chaos mesh for advanced chaos experiments (optional)
+  # Uncomment to enable chaos mesh capabilities
+  # chaos-mesh:
+  #   image: pingcap/chaos-mesh:v2.6.0
+  #   privileged: true
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   networks:
+  #     - summit_network
+
+volumes:
+  postgres_data:
+    driver: local
+  neo4j_data:
+    driver: local
+  neo4j_logs:
+    driver: local
+
+networks:
+  summit_network:
+    driver: bridge

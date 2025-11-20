@@ -1,0 +1,332 @@
+# Prometheus Recording and Alerting Rules for Chaos Engineering
+# Deploy to Prometheus to enable SLO tracking and chaos-specific alerts
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: resilience-lab-alerts
+  namespace: default
+  labels:
+    app: resilience-lab
+    prometheus: kube-prometheus
+spec:
+  groups:
+    # Recording Rules for Chaos Metrics
+    - name: chaos.recording.rules
+      interval: 30s
+      rules:
+        # Record chaos experiment status
+        - record: chaos:experiment:active
+          expr: |
+            max_over_time(litmuschaos_experiment_status[5m]) == 1
+
+        # Record experiment duration
+        - record: chaos:experiment:duration_seconds
+          expr: |
+            litmuschaos_experiment_end_time - litmuschaos_experiment_start_time
+
+        # Record experiment success rate (24h window)
+        - record: chaos:experiment:success_rate_24h
+          expr: |
+            sum(litmuschaos_experiments_total{result="Pass"}) /
+            sum(litmuschaos_experiments_total)
+
+        # Record system availability during chaos
+        - record: chaos:system:availability_during_chaos
+          expr: |
+            avg_over_time(up{job="intelgraph-server"}[5m]) and
+            max_over_time(litmuschaos_experiment_status[5m]) == 1
+
+        # Record error rate during chaos
+        - record: chaos:system:error_rate_during_chaos
+          expr: |
+            (
+              sum(rate(http_requests_total{code!~"2.."}[1m])) /
+              sum(rate(http_requests_total[1m]))
+            ) and
+            max_over_time(litmuschaos_experiment_status[5m]) == 1
+
+        # Record recovery time (time to restore health after chaos)
+        - record: chaos:system:recovery_time_seconds
+          expr: |
+            time() - litmuschaos_experiment_end_time
+            unless on() up{job="intelgraph-server"} == 1
+
+    # SLO Definitions
+    - name: chaos.slo.rules
+      interval: 30s
+      rules:
+        # Availability SLO: 95% uptime
+        - record: slo:availability:ratio
+          expr: |
+            avg_over_time(up{job="intelgraph-server"}[5m])
+
+        - record: slo:availability:target
+          expr: 0.95
+
+        # Error rate SLO: <5% errors
+        - record: slo:error_rate:ratio
+          expr: |
+            sum(rate(http_requests_total{code!~"2.."}[5m])) /
+            sum(rate(http_requests_total[5m]))
+
+        - record: slo:error_rate:target
+          expr: 0.05
+
+        # Latency SLO: p95 < 500ms
+        - record: slo:latency:p95_seconds
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+            )
+
+        - record: slo:latency:p95_target_seconds
+          expr: 0.5
+
+        # Latency SLO: p99 < 1s
+        - record: slo:latency:p99_seconds
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+            )
+
+        - record: slo:latency:p99_target_seconds
+          expr: 1.0
+
+    # Alerting Rules
+    - name: chaos.alert.rules
+      rules:
+        # Critical: Chaos experiment failed
+        - alert: ChaosExperimentFailed
+          expr: |
+            litmuschaos_experiments_total{result="Fail"} > 0
+          for: 1m
+          labels:
+            severity: warning
+            component: chaos-engineering
+            team: platform
+          annotations:
+            summary: "Chaos experiment {{ $labels.experiment }} failed"
+            description: |
+              Chaos experiment {{ $labels.experiment }} in namespace {{ $labels.namespace }} has failed.
+
+              This indicates the system did not handle the injected failure gracefully.
+
+              **Investigation Steps:**
+              1. Review chaos experiment logs: `kubectl logs -n {{ $labels.namespace }} -l name={{ $labels.experiment }}`
+              2. Check application error logs during chaos window
+              3. Verify health probes configuration
+              4. Review recovery mechanisms
+              5. Check if failure is expected behavior
+
+              **Experiment Details:**
+              - Namespace: {{ $labels.namespace }}
+              - Experiment: {{ $labels.experiment }}
+              - Result: {{ $labels.result }}
+
+        # Critical: System not recovering after chaos
+        - alert: SystemNotRecoveringFromChaos
+          expr: |
+            (
+              avg_over_time(up{job="intelgraph-server"}[5m]) < 0.8
+            ) and (
+              max_over_time(litmuschaos_experiment_status[10m]) == 0
+            )
+          for: 5m
+          labels:
+            severity: critical
+            component: chaos-engineering
+            team: platform
+            pager: "true"
+          annotations:
+            summary: "System not recovering after chaos experiment"
+            description: |
+              System availability is {{ printf "%.1f" (mul $value 100) }}% after chaos experiment ended.
+
+              **Current Status:**
+              - Availability: {{ printf "%.1f" (mul $value 100) }}% (target: >95%)
+              - Time since chaos ended: >5 minutes
+
+              **Immediate Actions:**
+              1. Check for stuck pods: `kubectl get pods -A | grep -v Running`
+              2. Review pod events: `kubectl get events -A --sort-by='.lastTimestamp'`
+              3. Verify auto-scaling: `kubectl get hpa -A`
+              4. Check resource constraints: `kubectl top pods -A`
+              5. Consider manual intervention if auto-recovery fails
+
+              **Recovery Checklist:**
+              - [ ] All pods are Running
+              - [ ] Health checks passing
+              - [ ] No crash loops
+              - [ ] Resource limits not exceeded
+              - [ ] Network connectivity restored
+
+        # High: Chaos impact too high
+        - alert: ChaosImpactTooHigh
+          expr: |
+            (
+              histogram_quantile(0.95,
+                sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le)
+              ) > 0.5
+            ) and (
+              max_over_time(litmuschaos_experiment_status[5m]) == 1
+            )
+          for: 2m
+          labels:
+            severity: high
+            component: chaos-engineering
+            team: platform
+          annotations:
+            summary: "Chaos experiment causing excessive performance degradation"
+            description: |
+              P95 latency is {{ printf "%.0f" (mul $value 1000) }}ms during chaos experiment.
+
+              **Performance Impact:**
+              - Current P95: {{ printf "%.0f" (mul $value 1000) }}ms
+              - Target: <500ms
+              - Degradation: {{ printf "%.1f" (mul (div $value 0.5) 100) }}%
+
+              **Possible Causes:**
+              1. Chaos experiment is too aggressive
+              2. System lacks sufficient redundancy
+              3. Resource allocation is inadequate
+              4. Circuit breakers not configured
+
+              **Actions:**
+              1. Review chaos experiment intensity
+              2. Check if multiple replicas are available
+              3. Verify resource requests/limits
+              4. Consider adding circuit breakers
+              5. May need to stop chaos if critical
+
+        # High: High error rate during chaos
+        - alert: HighErrorRateDuringChaos
+          expr: |
+            (
+              sum(rate(http_requests_total{job="intelgraph-server",code!~"2.."}[5m])) /
+              sum(rate(http_requests_total{job="intelgraph-server"}[5m]))
+              > 0.1
+            ) and (
+              max_over_time(litmuschaos_experiment_status[5m]) == 1
+            )
+          for: 1m
+          labels:
+            severity: high
+            component: chaos-engineering
+            team: platform
+          annotations:
+            summary: "Error rate >10% during chaos experiment"
+            description: |
+              Error rate is {{ printf "%.2f" (mul $value 100) }}% during chaos experiment.
+
+              **Error Details:**
+              - Current error rate: {{ printf "%.2f" (mul $value 100) }}%
+              - Target: <5%
+              - SLO breach: {{ printf "%.1fx" (div $value 0.05) }}
+
+              **This indicates:**
+              1. Inadequate error handling in application
+              2. Insufficient redundancy/failover
+              3. Missing circuit breakers or retry logic
+              4. Chaos experiment may be too aggressive
+
+              **Remediation:**
+              1. Implement retry logic with exponential backoff
+              2. Add circuit breakers for failing dependencies
+              3. Increase replica count for HA
+              4. Add graceful degradation paths
+              5. Review timeout configurations
+
+        # Warning: SLO breach during chaos
+        - alert: SLOBreachDuringChaos
+          expr: |
+            (
+              (slo:availability:ratio < slo:availability:target) or
+              (slo:error_rate:ratio > slo:error_rate:target) or
+              (slo:latency:p95_seconds > slo:latency:p95_target_seconds)
+            ) and (
+              max_over_time(litmuschaos_experiment_status[5m]) == 1
+            )
+          for: 3m
+          labels:
+            severity: warning
+            component: chaos-engineering
+            team: platform
+          annotations:
+            summary: "SLO breach detected during chaos experiment"
+            description: |
+              One or more SLOs are breached during chaos testing.
+
+              **SLO Status:**
+              - Availability: {{ printf "%.1f" (mul slo:availability:ratio 100) }}% (target: ≥95%)
+              - Error Rate: {{ printf "%.2f" (mul slo:error_rate:ratio 100) }}% (target: ≤5%)
+              - P95 Latency: {{ printf "%.0f" (mul slo:latency:p95_seconds 1000) }}ms (target: ≤500ms)
+
+              **Context:**
+              This is expected during chaos testing but should recover quickly.
+              Monitor for recovery after chaos experiment ends.
+
+        # Info: Chaos experiment started
+        - alert: ChaosExperimentStarted
+          expr: |
+            litmuschaos_experiment_status == 1
+          for: 10s
+          labels:
+            severity: info
+            component: chaos-engineering
+            team: platform
+          annotations:
+            summary: "Chaos experiment {{ $labels.experiment }} started"
+            description: |
+              Chaos experiment {{ $labels.experiment }} has started in namespace {{ $labels.namespace }}.
+
+              **Experiment Info:**
+              - Experiment: {{ $labels.experiment }}
+              - Namespace: {{ $labels.namespace }}
+              - Target: {{ $labels.appLabel }}
+
+              Monitor dashboards for system behavior during chaos.
+
+        # Info: Long running chaos experiment
+        - alert: ChaosExperimentRunningTooLong
+          expr: |
+            (time() - litmuschaos_experiment_start_time) > 600
+          for: 1m
+          labels:
+            severity: warning
+            component: chaos-engineering
+            team: platform
+          annotations:
+            summary: "Chaos experiment running longer than expected"
+            description: |
+              Chaos experiment {{ $labels.experiment }} has been running for >10 minutes.
+
+              **Duration:** {{ printf "%.0f" $value }}s
+
+              **Actions:**
+              1. Check if experiment is stuck
+              2. Review experiment configuration
+              3. Consider manual termination if needed:
+                 `kubectl delete chaosengine {{ $labels.experiment }} -n {{ $labels.namespace }}`
+
+    # Resilience Score Calculation
+    - name: chaos.resilience.score
+      interval: 5m
+      rules:
+        # Overall resilience score (0-100)
+        - record: chaos:resilience:score
+          expr: |
+            (
+              (min(slo:availability:ratio / slo:availability:target, 1) * 40) +
+              (min((1 - slo:error_rate:ratio) / (1 - slo:error_rate:target), 1) * 30) +
+              (min(slo:latency:p95_target_seconds / slo:latency:p95_seconds, 1) * 20) +
+              (min(chaos:experiment:success_rate_24h, 1) * 10)
+            )
+
+        # Resilience trend (comparing to 7d average)
+        - record: chaos:resilience:trend
+          expr: |
+            (
+              chaos:resilience:score -
+              avg_over_time(chaos:resilience:score[7d])
+            ) / avg_over_time(chaos:resilience:score[7d])

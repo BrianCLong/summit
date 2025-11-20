@@ -1,0 +1,141 @@
+name: Nightly Chaos Tests
+
+on:
+  # Run nightly at 2 AM UTC on weekdays
+  schedule:
+    - cron: '0 2 * * 1-5'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'smoke_suite'
+        type: choice
+        options:
+          - smoke_suite
+          - ci_suite
+          - full_suite
+
+jobs:
+  chaos-smoke:
+    name: Chaos Engineering Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq bc curl
+          docker --version
+          docker-compose --version
+
+      - name: Start chaos testing stack
+        run: |
+          make chaos-up
+          sleep 15
+
+      - name: Wait for services to be healthy
+        run: |
+          timeout 120 bash -c '
+            until docker-compose -f compose/docker-compose.yml \
+                                 -f compose/docker-compose.chaos.yml \
+                                 ps | grep -q "healthy"; do
+              echo "Waiting for services to be healthy..."
+              sleep 5
+            done
+          '
+
+      - name: Run chaos test suite
+        id: chaos
+        run: |
+          SUITE=${{ github.event.inputs.suite || 'smoke_suite' }}
+          echo "Running suite: $SUITE"
+          make chaos:smoke || echo "CHAOS_FAILED=true" >> $GITHUB_ENV
+
+      - name: Validate SLOs
+        if: always()
+        run: |
+          make chaos:validate-slos || echo "SLO_VALIDATION_FAILED=true" >> $GITHUB_ENV
+
+      - name: Collect service logs
+        if: always()
+        run: |
+          mkdir -p artifacts/chaos/logs
+          docker-compose -f compose/docker-compose.yml \
+                         -f compose/docker-compose.chaos.yml \
+                         logs --no-color > artifacts/chaos/logs/services.log 2>&1
+
+      - name: Upload chaos reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chaos-reports-${{ github.run_number }}
+          path: |
+            artifacts/chaos/reports/
+            artifacts/chaos/logs/
+          retention-days: 30
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## 🔥 Chaos Engineering Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Find latest suite report
+          LATEST_REPORT=$(ls -t artifacts/chaos/reports/suite_*.json | head -1)
+
+          if [ -f "$LATEST_REPORT" ]; then
+            TOTAL=$(jq -r '.summary.total' "$LATEST_REPORT")
+            PASSED=$(jq -r '.summary.passed' "$LATEST_REPORT")
+            FAILED=$(jq -r '.summary.failed' "$LATEST_REPORT")
+
+            echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+            echo "- **Total Scenarios:** $TOTAL" >> $GITHUB_STEP_SUMMARY
+            echo "- **Passed:** ✅ $PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Failed:** ❌ $FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Add scenario details
+            echo "### Scenario Details" >> $GITHUB_STEP_SUMMARY
+            jq -r '.scenarios[] | "- **\(.scenario_name)**: \(.status | ascii_upcase) (Recovery: \(.metrics.recovery_time_seconds)s)"' "$LATEST_REPORT" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No test reports found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Add SLO status
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### SLO Compliance" >> $GITHUB_STEP_SUMMARY
+          if [ "$SLO_VALIDATION_FAILED" = "true" ]; then
+            echo "❌ SLO validation failed - review reports" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ SLO validation passed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Stop chaos stack
+        if: always()
+        run: |
+          make chaos-down
+
+      - name: Fail job if tests failed
+        if: env.CHAOS_FAILED == 'true'
+        run: |
+          echo "Chaos tests failed - check artifacts for details"
+          exit 1
+
+  notify-failures:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: chaos-smoke
+    if: failure()
+    steps:
+      - name: Send notification
+        run: |
+          echo "Chaos tests failed! Check workflow artifacts for reports."
+          # Add Slack/Discord/Email notification here
+          # curl -X POST $SLACK_WEBHOOK_URL -d '{"text":"Chaos tests failed!"}'

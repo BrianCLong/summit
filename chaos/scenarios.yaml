@@ -1,0 +1,261 @@
+# Resilience Lab: Standard Chaos Scenarios
+# Defines reusable chaos experiments for Summit platform
+
+metadata:
+  version: "1.0.0"
+  author: "Summit Resilience Team"
+  description: "Standard chaos scenarios for testing system resilience"
+
+# SLO Definitions - What we expect the system to achieve
+slos:
+  recovery_time_seconds: 30
+  max_error_rate_percent: 5
+  min_availability_percent: 95
+
+# Standard Chaos Scenarios
+scenarios:
+  # 1. Kill Neo4j Database
+  - id: kill-neo4j
+    name: "Neo4j Database Failure"
+    description: "Simulates sudden Neo4j database failure to test graph query resilience"
+    severity: high
+    targets:
+      compose:
+        service: neo4j
+        action: stop
+        duration: 60
+      kubernetes:
+        namespace: default
+        selector: app=neo4j
+        action: delete-pod
+        count: 1
+    healthChecks:
+      - type: http
+        url: "http://localhost:4000/health"
+        expectedStatus: 200
+        timeout: 5
+      - type: graphql
+        url: "http://localhost:4000/graphql"
+        query: "{ __typename }"
+        timeout: 10
+    metrics:
+      - name: recovery_time
+        description: "Time for service to return to healthy state"
+        threshold: 30
+      - name: error_rate
+        description: "Percentage of failed requests during chaos"
+        threshold: 5
+
+  # 2. Kill Postgres Database
+  - id: kill-postgres
+    name: "PostgreSQL Database Failure"
+    description: "Simulates PostgreSQL failure to test relational query resilience"
+    severity: high
+    targets:
+      compose:
+        service: postgres
+        action: stop
+        duration: 60
+      kubernetes:
+        namespace: default
+        selector: app=postgresql
+        action: delete-pod
+        count: 1
+    healthChecks:
+      - type: http
+        url: "http://localhost:4000/health/db"
+        expectedStatus: 200
+        timeout: 5
+      - type: tcp
+        host: localhost
+        port: 5432
+        timeout: 3
+    metrics:
+      - name: recovery_time
+        threshold: 30
+      - name: error_rate
+        threshold: 5
+      - name: connection_pool_recovery
+        threshold: 10
+
+  # 3. Kill GraphQL API
+  - id: kill-graphql-api
+    name: "GraphQL API Failure"
+    description: "Simulates API server failure to test high availability and load balancing"
+    severity: critical
+    targets:
+      compose:
+        service: mc
+        action: stop
+        duration: 45
+      kubernetes:
+        namespace: default
+        selector: app=intelgraph-server
+        action: delete-pod
+        count: 1
+    healthChecks:
+      - type: http
+        url: "http://localhost:4000/health"
+        expectedStatus: 200
+        timeout: 3
+      - type: graphql
+        url: "http://localhost:4000/graphql"
+        query: "{ __typename }"
+        timeout: 5
+    metrics:
+      - name: recovery_time
+        threshold: 20
+      - name: request_success_rate
+        threshold: 95
+      - name: p95_latency
+        threshold: 500
+
+  # 4. Network Latency
+  - id: network-latency-db
+    name: "Database Network Latency"
+    description: "Introduces network latency between application and databases"
+    severity: medium
+    targets:
+      compose:
+        service: mc
+        action: network-delay
+        delay_ms: 100
+        jitter_ms: 20
+        duration: 120
+      kubernetes:
+        namespace: default
+        selector: app=intelgraph-server
+        action: network-chaos
+        latency: 100ms
+        jitter: 20ms
+        duration: 120
+    healthChecks:
+      - type: http
+        url: "http://localhost:4000/health"
+        expectedStatus: 200
+        timeout: 10
+      - type: graphql
+        url: "http://localhost:4000/graphql"
+        query: "{ __typename }"
+        timeout: 15
+    metrics:
+      - name: p95_latency
+        threshold: 300
+      - name: p99_latency
+        threshold: 500
+      - name: timeout_rate
+        threshold: 1
+
+  # 5. Container Resource Starvation
+  - id: cpu-stress
+    name: "CPU Starvation"
+    description: "Simulates high CPU load to test graceful degradation"
+    severity: medium
+    targets:
+      compose:
+        service: mc
+        action: cpu-stress
+        load_percent: 80
+        duration: 90
+      kubernetes:
+        namespace: default
+        selector: app=intelgraph-server
+        action: pod-cpu-stress
+        workers: 2
+        duration: 90
+    healthChecks:
+      - type: http
+        url: "http://localhost:4000/health"
+        expectedStatus: 200
+        timeout: 10
+    metrics:
+      - name: p95_latency
+        threshold: 1000
+      - name: error_rate
+        threshold: 5
+
+  # 6. Memory Pressure
+  - id: memory-stress
+    name: "Memory Pressure"
+    description: "Simulates memory exhaustion to test OOM handling"
+    severity: medium
+    targets:
+      compose:
+        service: mc
+        action: memory-stress
+        size_mb: 256
+        duration: 60
+      kubernetes:
+        namespace: default
+        selector: app=intelgraph-server
+        action: pod-memory-stress
+        workers: 1
+        size: 256M
+        duration: 60
+    healthChecks:
+      - type: http
+        url: "http://localhost:4000/health"
+        expectedStatus: 200
+        timeout: 5
+    metrics:
+      - name: recovery_time
+        threshold: 30
+      - name: oom_kills
+        threshold: 1
+
+  # 7. Cascading Failure
+  - id: cascade-db-api
+    name: "Cascading Database to API Failure"
+    description: "Sequential failure propagation test"
+    severity: critical
+    targets:
+      compose:
+        services:
+          - name: postgres
+            action: stop
+            delay: 0
+          - name: neo4j
+            action: stop
+            delay: 10
+          - name: mc
+            action: restart
+            delay: 20
+        duration: 90
+      kubernetes:
+        sequence:
+          - selector: app=postgresql
+            action: delete-pod
+            delay: 0
+          - selector: app=neo4j
+            action: delete-pod
+            delay: 10
+    healthChecks:
+      - type: http
+        url: "http://localhost:4000/health"
+        expectedStatus: 200
+        timeout: 15
+    metrics:
+      - name: recovery_time
+        threshold: 60
+      - name: error_rate
+        threshold: 10
+
+# Smoke test suite - subset of scenarios for quick validation
+smoke_suite:
+  - kill-graphql-api
+  - network-latency-db
+
+# Full resilience suite - comprehensive testing
+full_suite:
+  - kill-neo4j
+  - kill-postgres
+  - kill-graphql-api
+  - network-latency-db
+  - cpu-stress
+  - memory-stress
+
+# CI/CD suite - safe for automated runs
+ci_suite:
+  - kill-graphql-api
+  - network-latency-db
+  - cpu-stress

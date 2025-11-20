@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai smoke tools down
+.PHONY: bootstrap up up-ai smoke tools down chaos-up chaos-down chaos\:smoke chaos\:full chaos\:validate-slos
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -69,3 +69,39 @@ smoke:
 	  echo "package.json missing; skipping JS smoke"; \
 	fi
 	@echo "smoke: DONE"
+
+# Chaos Engineering / Resilience Lab targets
+chaos-up:
+	@echo "==> chaos-up: starting chaos testing stack"
+	@if [ -f compose/docker-compose.yml ] && [ -f compose/docker-compose.chaos.yml ]; then \
+	  $(COMPOSE) -f compose/docker-compose.yml -f compose/docker-compose.chaos.yml --env-file $(ENV_FILE) up -d --build --remove-orphans; \
+	  echo "Waiting for services to be healthy..."; \
+	  sleep 10; \
+	  ./scripts/wait-for-stack.sh || true; \
+	else \
+	  echo "Compose files missing; skipping chaos stack"; \
+	fi
+
+chaos-down:
+	@echo "==> chaos-down: stopping chaos testing stack"
+	@if [ -f compose/docker-compose.yml ] && [ -f compose/docker-compose.chaos.yml ]; then \
+	  $(COMPOSE) -f compose/docker-compose.yml -f compose/docker-compose.chaos.yml down --remove-orphans || true; \
+	fi
+
+chaos\:smoke:
+	@echo "==> chaos:smoke: running smoke suite chaos tests"
+	@mkdir -p artifacts/chaos/reports artifacts/chaos/temp
+	@TARGET=compose SUITE=smoke_suite ./chaos/runner.sh
+
+chaos\:full:
+	@echo "==> chaos:full: running full resilience test suite"
+	@mkdir -p artifacts/chaos/reports artifacts/chaos/temp
+	@TARGET=compose SUITE=full_suite ./chaos/runner.sh
+
+chaos\:validate-slos:
+	@echo "==> chaos:validate-slos: validating SLO compliance"
+	@./chaos/slo-validator.sh
+
+chaos\:dry-run:
+	@echo "==> chaos:dry-run: testing chaos runner without executing chaos"
+	@DRY_RUN=true TARGET=compose SUITE=smoke_suite ./chaos/runner.sh

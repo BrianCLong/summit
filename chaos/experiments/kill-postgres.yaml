@@ -1,0 +1,124 @@
+# Chaos Engineering: PostgreSQL Failure
+# Tests application resilience to database failures
+
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: postgres-failure-experiment
+  namespace: default
+  annotations:
+    chaos.alpha.kubernetes.io/experiment-type: 'pod-failure'
+    chaos.alpha.kubernetes.io/scope: 'scoped'
+    chaos.alpha.kubernetes.io/safety-level: 'high'
+spec:
+  appinfo:
+    appns: default
+    applabel: 'app=postgresql'
+    appkind: statefulset
+
+  chaosServiceAccount: chaos-service-account
+  monitoring: true
+  jobCleanUpPolicy: retain
+
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: '60'
+
+            - name: CHAOS_INTERVAL
+              value: '30'
+
+            - name: FORCE
+              value: 'false'
+
+            - name: PODS_AFFECTED_PERC
+              value: '50'
+
+        probe:
+          # Health check for database connectivity
+          - name: 'postgres-connectivity-probe'
+            type: 'cmdProbe'
+            mode: 'Continuous'
+            runProperties:
+              probeTimeout: 10
+              retry: 3
+              interval: 15
+            cmdProbe/inputs:
+              command: 'psql'
+              args:
+                - '-h'
+                - 'postgres.default.svc.cluster.local'
+                - '-U'
+                - 'summit'
+                - '-d'
+                - 'summit'
+                - '-c'
+                - 'SELECT 1'
+              source:
+                image: 'postgres:16-alpine'
+                inheritInputs: true
+              comparator:
+                type: 'string'
+                criteria: 'contains'
+                value: '1 row'
+
+          # Application health during DB chaos
+          - name: 'app-health-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
+            runProperties:
+              probeTimeout: 10
+              retry: 3
+              interval: 10
+            httpProbe/inputs:
+              url: 'http://intelgraph-server.default.svc.cluster.local:4000/health/db'
+              insecureSkipTLS: true
+              responseTimeout: 5
+              method:
+                get:
+                  criteria: '=='
+                  responseCode: '200'
+
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosSchedule
+metadata:
+  name: weekly-postgres-chaos
+  namespace: default
+spec:
+  schedule:
+    now: false
+    once: false
+    repeat:
+      timeRange:
+        startTime: '02:30'
+        endTime: '03:00'
+      properties:
+        minChaosInterval: '15m'
+      workDays:
+        includedDays: 'wed'
+        excludedDays: 'mon,tue,thu,fri,sat,sun'
+
+  engineTemplateSpec:
+    appinfo:
+      appns: default
+      applabel: 'app=postgresql'
+      appkind: statefulset
+
+    chaosServiceAccount: chaos-service-account
+    monitoring: true
+
+    experiments:
+      - name: pod-delete
+        spec:
+          components:
+            env:
+              - name: TOTAL_CHAOS_DURATION
+                value: '60'
+              - name: FORCE
+                value: 'false'
+              - name: PODS_AFFECTED_PERC
+                value: '50'

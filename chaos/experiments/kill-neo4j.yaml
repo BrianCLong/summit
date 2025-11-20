@@ -1,0 +1,142 @@
+# Chaos Engineering: Neo4j Graph Database Failure
+# Tests application resilience to graph database failures
+
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: neo4j-failure-experiment
+  namespace: default
+  annotations:
+    chaos.alpha.kubernetes.io/experiment-type: 'pod-failure'
+    chaos.alpha.kubernetes.io/scope: 'scoped'
+    chaos.alpha.kubernetes.io/safety-level: 'high'
+spec:
+  appinfo:
+    appns: default
+    applabel: 'app=neo4j'
+    appkind: statefulset
+
+  chaosServiceAccount: chaos-service-account
+  monitoring: true
+  jobCleanUpPolicy: retain
+
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: '60'
+
+            - name: CHAOS_INTERVAL
+              value: '30'
+
+            - name: FORCE
+              value: 'false'
+
+            - name: PODS_AFFECTED_PERC
+              value: '50'
+
+        probe:
+          # Neo4j connectivity probe
+          - name: 'neo4j-connectivity-probe'
+            type: 'cmdProbe'
+            mode: 'Continuous'
+            runProperties:
+              probeTimeout: 15
+              retry: 3
+              interval: 20
+            cmdProbe/inputs:
+              command: 'cypher-shell'
+              args:
+                - '-a'
+                - 'bolt://neo4j.default.svc.cluster.local:7687'
+                - '-u'
+                - 'neo4j'
+                - '-p'
+                - '$NEO4J_PASSWORD'
+                - 'RETURN 1'
+              source:
+                image: 'neo4j:5.15-community'
+                inheritInputs: true
+              comparator:
+                type: 'string'
+                criteria: 'contains'
+                value: '1'
+
+          # Application health during graph DB chaos
+          - name: 'app-graph-health-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
+            runProperties:
+              probeTimeout: 10
+              retry: 3
+              interval: 15
+            httpProbe/inputs:
+              url: 'http://intelgraph-server.default.svc.cluster.local:4000/health'
+              insecureSkipTLS: true
+              responseTimeout: 5
+              method:
+                get:
+                  criteria: '=='
+                  responseCode: '200'
+
+          # GraphQL query probe
+          - name: 'graphql-query-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
+            runProperties:
+              probeTimeout: 15
+              retry: 2
+              interval: 20
+            httpProbe/inputs:
+              url: 'http://intelgraph-server.default.svc.cluster.local:4000/graphql'
+              insecureSkipTLS: true
+              responseTimeout: 10
+              method:
+                post:
+                  contentType: 'application/json'
+                  body: '{"query": "{ __typename }"}'
+                  criteria: '=='
+                  responseCode: '200'
+
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosSchedule
+metadata:
+  name: weekly-neo4j-chaos
+  namespace: default
+spec:
+  schedule:
+    now: false
+    once: false
+    repeat:
+      timeRange:
+        startTime: '03:00'
+        endTime: '03:30'
+      properties:
+        minChaosInterval: '15m'
+      workDays:
+        includedDays: 'thu'
+        excludedDays: 'mon,tue,wed,fri,sat,sun'
+
+  engineTemplateSpec:
+    appinfo:
+      appns: default
+      applabel: 'app=neo4j'
+      appkind: statefulset
+
+    chaosServiceAccount: chaos-service-account
+    monitoring: true
+
+    experiments:
+      - name: pod-delete
+        spec:
+          components:
+            env:
+              - name: TOTAL_CHAOS_DURATION
+                value: '60'
+              - name: FORCE
+                value: 'false'
+              - name: PODS_AFFECTED_PERC
+                value: '50'

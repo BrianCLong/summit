@@ -1,0 +1,156 @@
+# Chaos Engineering: GraphQL API Failure
+# Tests application high availability and load balancing
+
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: graphql-api-failure-experiment
+  namespace: default
+  annotations:
+    chaos.alpha.kubernetes.io/experiment-type: 'pod-failure'
+    chaos.alpha.kubernetes.io/scope: 'scoped'
+    chaos.alpha.kubernetes.io/safety-level: 'critical'
+spec:
+  appinfo:
+    appns: default
+    applabel: 'app=intelgraph-server'
+    appkind: deployment
+
+  chaosServiceAccount: chaos-service-account
+  monitoring: true
+  jobCleanUpPolicy: retain
+
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            # Shorter duration for critical service
+            - name: TOTAL_CHAOS_DURATION
+              value: '45'
+
+            - name: CHAOS_INTERVAL
+              value: '20'
+
+            - name: FORCE
+              value: 'false'
+
+            # Only affect one pod at a time
+            - name: TARGET_PODS
+              value: '1'
+
+            - name: RANDOMNESS_ENABLED
+              value: 'true'
+
+        probe:
+          # Primary health endpoint
+          - name: 'api-health-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
+            runProperties:
+              probeTimeout: 5
+              retry: 3
+              interval: 5
+            httpProbe/inputs:
+              url: 'http://intelgraph-server.default.svc.cluster.local:4000/health'
+              insecureSkipTLS: true
+              responseTimeout: 3
+              method:
+                get:
+                  criteria: '=='
+                  responseCode: '200'
+
+          # GraphQL endpoint probe
+          - name: 'graphql-endpoint-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
+            runProperties:
+              probeTimeout: 10
+              retry: 2
+              interval: 10
+            httpProbe/inputs:
+              url: 'http://intelgraph-server.default.svc.cluster.local:4000/graphql'
+              insecureSkipTLS: true
+              responseTimeout: 5
+              method:
+                post:
+                  contentType: 'application/json'
+                  body: '{"query": "{ __typename }"}'
+                  criteria: '=='
+                  responseCode: '200'
+
+          # Ensure minimum pod count during chaos
+          - name: 'min-replicas-probe'
+            type: 'k8sProbe'
+            mode: 'Continuous'
+            k8sProbe/inputs:
+              group: 'apps'
+              version: 'v1'
+              resource: 'deployments'
+              namespace: 'default'
+              fieldSelector: 'metadata.name=intelgraph-server'
+              operation: 'present'
+            runProperties:
+              probeTimeout: 10
+              retry: 3
+              interval: 10
+
+          # Service availability probe
+          - name: 'service-endpoint-probe'
+            type: 'httpProbe'
+            mode: 'SOT'  # Start of Test - verify before chaos
+            runProperties:
+              probeTimeout: 5
+              retry: 5
+              interval: 2
+            httpProbe/inputs:
+              url: 'http://intelgraph-server.default.svc.cluster.local:4000/health/ready'
+              insecureSkipTLS: true
+              responseTimeout: 3
+              method:
+                get:
+                  criteria: '=='
+                  responseCode: '200'
+
+---
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosSchedule
+metadata:
+  name: nightly-api-chaos
+  namespace: default
+spec:
+  schedule:
+    now: false
+    once: false
+    repeat:
+      timeRange:
+        startTime: '02:00'
+        endTime: '02:30'
+      properties:
+        minChaosInterval: '10m'
+      workDays:
+        includedDays: 'mon,tue,wed,thu,fri'
+        excludedDays: 'sat,sun'
+
+  engineTemplateSpec:
+    appinfo:
+      appns: default
+      applabel: 'app=intelgraph-server'
+      appkind: deployment
+
+    chaosServiceAccount: chaos-service-account
+    monitoring: true
+
+    experiments:
+      - name: pod-delete
+        spec:
+          components:
+            env:
+              - name: TOTAL_CHAOS_DURATION
+                value: '45'
+              - name: CHAOS_INTERVAL
+                value: '20'
+              - name: FORCE
+                value: 'false'
+              - name: TARGET_PODS
+                value: '1'
