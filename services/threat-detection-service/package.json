@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/threat-detection-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Real-time threat detection and analytics service",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@intelgraph/insider-threat": "workspace:*",
+    "@intelgraph/espionage-detection": "workspace:*",
+    "@intelgraph/foreign-influence": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "express": "^5.1.0",
+    "ws": "^8.18.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.10.1",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}

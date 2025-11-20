@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/counterintel-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Counterintelligence operations service",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@intelgraph/insider-threat": "workspace:*",
+    "@intelgraph/espionage-detection": "workspace:*",
+    "@intelgraph/foreign-influence": "workspace:*",
+    "@intelgraph/counterespionage": "workspace:*",
+    "@intelgraph/personnel-security": "workspace:*",
+    "@intelgraph/technical-ci": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "express": "^5.1.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}
