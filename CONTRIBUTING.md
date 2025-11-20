@@ -1,6 +1,38 @@
 # Contributing to IntelGraph
 
-## Prereqs
+Welcome! We're excited to have you contribute to Summit/IntelGraph. This guide will help you get started.
+
+## 📚 Developer Resources
+
+Before you start, check out these comprehensive guides:
+
+### Getting Started
+- 🚀 **[Developer Onboarding](docs/DEVELOPER_ONBOARDING.md)** - Get productive in 30 minutes
+- 📖 **[CLAUDE.md](CLAUDE.md)** - Complete development reference guide
+- 🔧 **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solutions to common issues
+- ⚡ **[Quick Reference](docs/QUICK_REFERENCE.md)** - Commands and patterns cheat sheet
+
+### Code Quality & Review
+- 👀 **[Code Review Guidelines](docs/CODE_REVIEW_GUIDELINES.md)** - Review standards and best practices
+- 📋 **[Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md)** - Comprehensive PR checklist
+
+### Workflows & Processes
+- 🔄 **[Contribution Workflows](docs/CONTRIBUTION_WORKFLOWS.md)** - Visual workflow diagrams
+- 🏗️ **[Architecture](docs/ARCHITECTURE.md)** - System design and structure
+
+### Development Tools
+- 💻 **[VS Code Setup](.vscode/README.md)** - Recommended extensions and settings
+- 🧪 **Testing Guidelines** - See below for comprehensive testing guide
+
+### Quick Health Check
+Run this script to verify your development environment:
+```bash
+./scripts/dev-check.sh
+```
+
+---
+
+## Prerequisites
 
 - Node 20 LTS, pnpm 9 (corepack)
 - Docker (Compose) for local services

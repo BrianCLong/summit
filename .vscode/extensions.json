@@ -1,0 +1,75 @@
+{
+  "recommendations": [
+    // Essential
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    
+    // TypeScript & JavaScript
+    "pmneo.tsimporter",
+    "usernamehw.errorlens",
+    "yoavbls.pretty-ts-errors",
+    
+    // GraphQL
+    "graphql.vscode-graphql",
+    "graphql.vscode-graphql-syntax",
+    
+    // Testing
+    "orta.vscode-jest",
+    "ms-playwright.playwright",
+    
+    // Docker & Kubernetes
+    "ms-azuretools.vscode-docker",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    
+    // Git
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    
+    // Markdown
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    
+    // Database
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg",
+    "neo4j.neo4j-vscode",
+    
+    // Utilities
+    "christian-kohler.path-intellisense",
+    "wayou.vscode-todo-highlight",
+    "aaron-bond.better-comments",
+    "streetsidesoftware.code-spell-checker",
+    
+    // Monorepo/Workspace
+    "arcanis.vscode-zipfs",
+    
+    // AI Assistance (optional)
+    "github.copilot",
+    "github.copilot-chat",
+    "anthropic.claude-dev",
+    
+    // Formatting & Linting
+    "foxundermoon.shell-format",
+    "timonwong.shellcheck",
+    
+    // YAML & JSON
+    "redhat.vscode-yaml",
+    "tamasfe.even-better-toml",
+    
+    // Environment Files
+    "mikestead.dotenv",
+    
+    // REST Client
+    "humao.rest-client",
+    
+    // Python (if using Python services)
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff"
+  ],
+  "unwantedRecommendations": [
+    "hookyqr.beautify",
+    "ms-vscode.vscode-typescript-tslint-plugin"
+  ]
+}
