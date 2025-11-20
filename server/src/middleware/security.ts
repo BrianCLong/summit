@@ -53,11 +53,12 @@ export const strictRateLimiter = createRateLimiter(
 
 /**
  * Auth rate limiter for login attempts
+ * OWASP Requirement: 5 requests per minute
  */
 export const authRateLimiter = createRateLimiter(
-  15 * 60 * 1000, // 15 minutes
-  5, // 5 attempts max
-  'Too many authentication attempts',
+  60 * 1000, // 1 minute
+  5, // 5 attempts max per minute
+  'Too many authentication attempts. Please try again later.',
 );
 
 /**
@@ -71,11 +72,22 @@ export const aiRateLimiter = createRateLimiter(
 
 /**
  * GraphQL rate limiter
+ * OWASP Requirement: 100 requests per minute
  */
 export const graphqlRateLimiter = createRateLimiter(
   60 * 1000, // 1 minute
-  50, // 50 queries max
-  'Too many GraphQL requests',
+  100, // 100 queries max per minute
+  'Too many GraphQL requests. Please slow down.',
+);
+
+/**
+ * REST API rate limiter
+ * OWASP Requirement: 1000 requests per hour
+ */
+export const restApiRateLimiter = createRateLimiter(
+  60 * 60 * 1000, // 1 hour
+  1000, // 1000 requests max per hour
+  'REST API rate limit exceeded. Please try again later.',
 );
 
 /**

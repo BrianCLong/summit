@@ -101,7 +101,7 @@ class SecurityHeadersManager {
       // Origin Agent Cluster
       originAgentCluster: true,
 
-      // Permissions Policy (Feature Policy)
+      // Permissions Policy (Feature Policy) - Disabled here, added as custom header
       permittedCrossDomainPolicies: false,
 
       // Referrer Policy
@@ -182,6 +182,32 @@ class SecurityHeadersManager {
 
       // API versioning
       res.setHeader('X-API-Version', process.env.API_VERSION || '1.0');
+
+      // Permissions Policy (restricts browser features)
+      const permissionsPolicy = [
+        'accelerometer=()',
+        'autoplay=()',
+        'camera=()',
+        'cross-origin-isolated=()',
+        'display-capture=()',
+        'encrypted-media=()',
+        'fullscreen=(self)',
+        'geolocation=()',
+        'gyroscope=()',
+        'keyboard-map=()',
+        'magnetometer=()',
+        'microphone=()',
+        'midi=()',
+        'payment=()',
+        'picture-in-picture=()',
+        'publickey-credentials-get=(self)',
+        'screen-wake-lock=()',
+        'sync-xhr=(self)',
+        'usb=()',
+        'web-share=()',
+        'xr-spatial-tracking=()',
+      ].join(', ');
+      res.setHeader('Permissions-Policy', permissionsPolicy);
 
       // Request ID for tracing
       const requestId =

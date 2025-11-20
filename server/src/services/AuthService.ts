@@ -238,6 +238,19 @@ export class AuthService {
 
       const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
 
+      // Check if token is blacklisted
+      const blacklistCheck = await this.pool.query(
+        'SELECT 1 FROM token_blacklist WHERE token_hash = $1',
+        [this.hashToken(token)],
+      );
+
+      if (blacklistCheck.rows.length > 0) {
+        logger.warn('Blacklisted token attempted to be used:', {
+          userId: decoded.userId,
+        });
+        return null;
+      }
+
       const client = await this.pool.connect();
       const userResult = await client.query(
         'SELECT * FROM users WHERE id = $1 AND is_active = true',
@@ -254,6 +267,146 @@ export class AuthService {
       logger.warn('Invalid token:', error.message);
       return null;
     }
+  }
+
+  /**
+   * Refresh access token using refresh token
+   * Implements token rotation - old refresh token is invalidated
+   */
+  async refreshAccessToken(refreshToken: string): Promise<TokenPair | null> {
+    const client = await this.pool.connect();
+
+    try {
+      // Verify refresh token exists and is not expired
+      const sessionResult = await client.query(
+        `
+        SELECT user_id, expires_at, is_revoked
+        FROM user_sessions
+        WHERE refresh_token = $1
+      `,
+        [refreshToken],
+      );
+
+      if (sessionResult.rows.length === 0) {
+        logger.warn('Invalid refresh token used');
+        return null;
+      }
+
+      const session = sessionResult.rows[0];
+
+      // Check if token is revoked
+      if (session.is_revoked) {
+        logger.warn('Revoked refresh token attempted to be used');
+        return null;
+      }
+
+      // Check if token is expired
+      if (new Date(session.expires_at) < new Date()) {
+        logger.warn('Expired refresh token used');
+        await client.query(
+          'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
+          [refreshToken],
+        );
+        return null;
+      }
+
+      // Get user data
+      const userResult = await client.query(
+        'SELECT * FROM users WHERE id = $1 AND is_active = true',
+        [session.user_id],
+      );
+
+      if (userResult.rows.length === 0) {
+        return null;
+      }
+
+      const user = userResult.rows[0] as DatabaseUser;
+
+      // Revoke old refresh token
+      await client.query(
+        'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
+        [refreshToken],
+      );
+
+      // Generate new token pair with rotation
+      const newTokenPair = await this.generateTokens(user, client);
+
+      logger.info('Token successfully refreshed with rotation', {
+        userId: user.id,
+      });
+
+      return newTokenPair;
+    } catch (error) {
+      logger.error('Error refreshing token:', error);
+      return null;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Revoke/blacklist an access token
+   */
+  async revokeToken(token: string): Promise<boolean> {
+    try {
+      const tokenHash = this.hashToken(token);
+
+      await this.pool.query(
+        `
+        INSERT INTO token_blacklist (token_hash, revoked_at, expires_at)
+        VALUES ($1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '24 hours')
+        ON CONFLICT (token_hash) DO NOTHING
+      `,
+        [tokenHash],
+      );
+
+      logger.info('Token successfully blacklisted');
+      return true;
+    } catch (error) {
+      logger.error('Error revoking token:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Logout - revoke all user sessions
+   */
+  async logout(userId: string, currentToken?: string): Promise<boolean> {
+    const client = await this.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // Revoke all refresh tokens for user
+      await client.query(
+        'UPDATE user_sessions SET is_revoked = true WHERE user_id = $1',
+        [userId],
+      );
+
+      // Blacklist current access token if provided
+      if (currentToken) {
+        await this.revokeToken(currentToken);
+      }
+
+      await client.query('COMMIT');
+
+      logger.info('User logged out successfully', { userId });
+      return true;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error('Error during logout:', error);
+      return false;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Hash token for blacklist storage (avoid storing full tokens)
+   */
+  private hashToken(token: string): string {
+    const crypto = require('crypto');
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   hasPermission(user: User | null, permission: string): boolean {
