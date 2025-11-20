@@ -1,0 +1,25 @@
+{
+  "name": "@summit/canonical-schema",
+  "version": "1.0.0",
+  "description": "Canonical graph schema and entity resolution types for Summit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "summit",
+    "intelgraph",
+    "schema",
+    "entity-resolution",
+    "canonical"
+  ],
+  "author": "Summit Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
