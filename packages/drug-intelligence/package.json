@@ -1,0 +1,19 @@
+{
+  "name": "@intelgraph/drug-intelligence",
+  "version": "1.0.0",
+  "description": "Drug trafficking intelligence and analysis for law enforcement",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@intelgraph/corruption-tracking",
+  "version": "1.0.0",
+  "description": "Corruption and infiltration tracking for law enforcement",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.3"
+  }
+}
