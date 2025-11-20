@@ -1,142 +1,124 @@
+/**
+ * Audit & Compliance API Routes
+ *
+ * Endpoints for querying audit logs and generating compliance reports
+ */
+
 import { Router } from 'express';
-import archiver from 'archiver';
-import { getPostgresPool } from '../db/postgres.js';
-import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
+import { AdvancedAuditSystem, AuditQuery, ComplianceFramework } from '../audit/advanced-audit-system';
+import { authenticateUser, requirePermission } from '../middleware/auth';
+import { Logger } from 'pino';
 
-export const auditRouter = Router();
+export function createAuditRoutes(
+  auditSystem: AdvancedAuditSystem,
+  logger: Logger,
+): Router {
+  const router = Router();
 
-auditRouter.get('/incidents/:id/audit-bundle.zip', async (req, res) => {
-  const tenant = String(
-    (req.headers['x-tenant-id'] as any) ||
-      (req.headers['x-tenant'] as any) ||
-      '',
+  /**
+   * Query audit events
+   * POST /api/audit/query
+   */
+  router.post(
+    '/query',
+    authenticateUser,
+    requirePermission('audit:read'),
+    async (req, res, next) => {
+      try {
+        const user = (req as any).user;
+        const {
+          startTime,
+          endTime,
+          eventTypes,
+          levels,
+          userIds,
+          resourceTypes,
+          correlationIds,
+          complianceFrameworks,
+          limit = 100,
+          offset = 0,
+        } = req.body;
+
+        // Build query
+        const query: AuditQuery = {
+          startTime: startTime ? new Date(startTime) : undefined,
+          endTime: endTime ? new Date(endTime) : undefined,
+          eventTypes,
+          levels,
+          userIds,
+          tenantIds: [user.tenant],
+          resourceTypes,
+          correlationIds,
+          complianceFrameworks,
+          limit: Math.min(limit, 1000),
+          offset,
+        };
+
+        const events = await auditSystem.queryEvents(query);
+
+        res.json({
+          events,
+          pagination: {
+            limit: query.limit,
+            offset: query.offset,
+            count: events.length,
+          },
+        });
+      } catch (error) {
+        logger.error({ error: error.message }, 'Failed to query audit events');
+        next(error);
+      }
+    },
   );
-  if (!tenant) return res.status(400).json({ error: 'tenant_required' });
-  const { id } = req.params as { id: string };
-  const pg = getPostgresPool();
-  const prov = new ProvenanceRepo(pg);
 
-  res.setHeader('Content-Type', 'application/zip');
-  res.setHeader(
-    'Content-Disposition',
-    `attachment; filename="incident-${id}-audit.zip"`,
+  /**
+   * Generate compliance report
+   * POST /api/audit/compliance-report
+   */
+  router.post(
+    '/compliance-report',
+    authenticateUser,
+    requirePermission('compliance:read'),
+    async (req, res, next) => {
+      try {
+        const { framework, startDate, endDate } = req.body;
+
+        const report = await auditSystem.generateComplianceReport(
+          framework as ComplianceFramework,
+          new Date(startDate),
+          new Date(endDate),
+        );
+
+        res.json({ report });
+      } catch (error) {
+        next(error);
+      }
+    },
   );
-  const archive = archiver('zip', { zlib: { level: 9 } });
-  archive.on('error', (err) =>
-    res.status(500).end(`Archive error: ${err.message}`),
+
+  /**
+   * Verify audit trail integrity
+   * POST /api/audit/verify-integrity
+   */
+  router.post(
+    '/verify-integrity',
+    authenticateUser,
+    requirePermission('audit:admin'),
+    async (req, res, next) => {
+      try {
+        const { startDate, endDate } = req.body;
+
+        const verification = await auditSystem.verifyIntegrity(
+          startDate ? new Date(startDate) : undefined,
+          endDate ? new Date(endDate) : undefined,
+        );
+
+        res.json({ verification });
+      } catch (error) {
+        next(error);
+      }
+    },
   );
-  archive.pipe(res);
 
-  try {
-    const { rows } = await pg.query('SELECT * FROM incidents WHERE id = $1', [
-      id,
-    ]);
-    archive.append(
-      JSON.stringify(
-        { incident: rows[0] ?? null, generatedAt: new Date().toISOString() },
-        null,
-        2,
-      ),
-      { name: 'incident.json' },
-    );
-  } catch {
-    archive.append(
-      JSON.stringify(
-        {
-          warning: 'incidents table not available',
-          generatedAt: new Date().toISOString(),
-        },
-        null,
-        2,
-      ),
-      { name: 'incident.json' },
-    );
-  }
-
-  try {
-    const events = await prov.by('incident', id, undefined, 5000, 0);
-    archive.append(JSON.stringify(events, null, 2), {
-      name: 'provenance.json',
-    });
-  } catch {
-    archive.append(
-      JSON.stringify({ error: 'failed to load provenance' }, null, 2),
-      {
-        name: 'provenance.json',
-      },
-    );
-  }
-
-  await archive.finalize();
-});
-
-auditRouter.get('/investigations/:id/audit-bundle.zip', async (req, res) => {
-  const tenant = String(
-    (req.headers['x-tenant-id'] as any) ||
-      (req.headers['x-tenant'] as any) ||
-      '',
-  );
-  if (!tenant) return res.status(400).json({ error: 'tenant_required' });
-  const { id } = req.params as { id: string };
-  const pg = getPostgresPool();
-  const prov = new ProvenanceRepo(pg);
-
-  res.setHeader('Content-Type', 'application/zip');
-  res.setHeader(
-    'Content-Disposition',
-    `attachment; filename="investigation-${id}-audit.zip"`,
-  );
-  const archive = archiver('zip', { zlib: { level: 9 } });
-  archive.on('error', (err) =>
-    res.status(500).end(`Archive error: ${err.message}`),
-  );
-  archive.pipe(res);
-
-  try {
-    const { rows } = await pg.query(
-      'SELECT * FROM investigations WHERE id = $1',
-      [id],
-    );
-    archive.append(
-      JSON.stringify(
-        {
-          investigation: rows[0] ?? null,
-          generatedAt: new Date().toISOString(),
-        },
-        null,
-        2,
-      ),
-      { name: 'investigation.json' },
-    );
-  } catch {
-    archive.append(
-      JSON.stringify(
-        {
-          warning: 'investigations table not available',
-          generatedAt: new Date().toISOString(),
-        },
-        null,
-        2,
-      ),
-      { name: 'investigation.json' },
-    );
-  }
-
-  try {
-    const events = await prov.by('investigation', id, undefined, 5000, 0);
-    archive.append(JSON.stringify(events, null, 2), {
-      name: 'provenance.json',
-    });
-  } catch {
-    archive.append(
-      JSON.stringify({ error: 'failed to load provenance' }, null, 2),
-      {
-        name: 'provenance.json',
-      },
-    );
-  }
-
-  await archive.finalize();
-});
-
-export default auditRouter;
+  return router;
+}
