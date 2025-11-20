@@ -1,0 +1,99 @@
+# Example workflow showing Turbo caching integration
+# This can be used as a reference to enhance existing workflows
+
+name: Turbo Cache Example
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20.11.1'
+  PNPM_VERSION: '9.12.0'  # Updated to match root package.json
+
+jobs:
+  build-and-test:
+    name: Build and Test with Turbo Cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ════════════════════════════════════════════════════════
+      # Turbo Cache Configuration
+      # ════════════════════════════════════════════════════════
+
+      - name: Cache Turbo build outputs
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      # ════════════════════════════════════════════════════════
+      # Build & Test with Turbo
+      # ════════════════════════════════════════════════════════
+
+      - name: Lint
+        run: pnpm run lint
+        env:
+          # Optional: Enable Vercel Remote Cache
+          # TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          # TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TELEMETRY_DISABLED: 1
+
+      - name: Typecheck
+        run: pnpm run typecheck
+        env:
+          TURBO_TELEMETRY_DISABLED: 1
+
+      - name: Build
+        run: pnpm run build
+        env:
+          TURBO_TELEMETRY_DISABLED: 1
+
+      - name: Test
+        run: pnpm run test -- --passWithNoTests
+        env:
+          TURBO_TELEMETRY_DISABLED: 1
+
+      # ════════════════════════════════════════════════════════
+      # Upload Artifacts
+      # ════════════════════════════════════════════════════════
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: ./coverage
+          fail_ci_if_error: false
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-outputs
+          path: |
+            **/dist
+            **/build
+            !**/node_modules
+          retention-days: 7

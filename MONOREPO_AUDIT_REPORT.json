@@ -1,0 +1,1801 @@
+{
+  "timestamp": "2025-11-20T07:09:42.534Z",
+  "summary": {
+    "total": 157,
+    "apps": 45,
+    "services": 19,
+    "libraries": 93,
+    "withMissingScripts": 134,
+    "withIssues": 17
+  },
+  "packages": [
+    {
+      "path": "active-measures-module/package.json",
+      "name": "active-measures-module",
+      "category": "app",
+      "missingScripts": [
+        "build",
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "adversarial-misinfo-defense-platform/web/package.json",
+      "name": "amd-web-ui",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/analytics-engine/package.json",
+      "name": "@intelgraph/analytics-engine",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/graph-analytics/package.json",
+      "name": "@intelgraph/graph-analytics",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/intelgraph-api/package.json",
+      "name": "@companyos/intelgraph-api",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/ml-engine/package.json",
+      "name": "@intelgraph/ml-engine",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/mobile-interface/package.json",
+      "name": "@intelgraph/mobile-interface",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/search-engine/package.json",
+      "name": "@intelgraph/search-engine",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/server/package.json",
+      "name": "apps-server",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/web/package.json",
+      "name": "@intelgraph/web",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": true
+    },
+    {
+      "path": "apps/webapp/package.json",
+      "name": "webapp",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "apps/workflow-engine/package.json",
+      "name": "@intelgraph/workflow-engine",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "benchmarks/harness/package.json",
+      "name": "@intelgraph/bench-harness",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ccs/bindings/package.json",
+      "name": "@summit/ccs-bindings",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "cli/ig-brief/package.json",
+      "name": "ig-brief",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "cli/ig-detect/package.json",
+      "name": "ig-detect",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "client/package.json",
+      "name": "intelgraph-client",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": true
+    },
+    {
+      "path": "client-v039/package.json",
+      "name": "mc-admin-client",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "clients/cos-policy-fetcher/package.json",
+      "name": "cos-policy-fetcher",
+      "category": "app",
+      "missingScripts": [
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "companyos/package.json",
+      "name": "companyos",
+      "category": "app",
+      "missingScripts": [
+        "dev",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "conductor-ui/backend/package.json",
+      "name": "backend",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "conductor-ui/frontend/package.json",
+      "name": "conductor-frontend",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "conductor-ui/package.json",
+      "name": "maestro-conductor-ui",
+      "category": "app",
+      "missingScripts": [
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "connectors/s3csv/package.json",
+      "name": "@maestro/s3csv-connector",
+      "category": "app",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "contracts/package.json",
+      "name": "maestro-contract-tests",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "docs-site/package.json",
+      "name": "docs-site",
+      "category": "app",
+      "missingScripts": [
+        "dev",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "extensions/symphony-ops/package.json",
+      "name": "symphony-ops",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "extensions/vscode-maestro/package.json",
+      "name": "maestro",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "frontend/package.json",
+      "name": "frontend",
+      "category": "app",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-caseops/packages/common-types/package.json",
+      "name": "ga-caseops-common-types",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-caseops/packages/gateway/package.json",
+      "name": "ga-caseops-gateway",
+      "category": "app",
+      "missingScripts": [
+        "dev",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-caseops/packages/policy/package.json",
+      "name": "ga-caseops-policy",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-caseops/packages/prov-ledger/package.json",
+      "name": "ga-caseops-prov-ledger",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/package.json",
+      "name": "ga-graphai-root",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/cloud-arbitrage/package.json",
+      "name": "@ga-graphai/cloud-arbitrage",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/common-types/package.json",
+      "name": "@ga-graphai/common-types",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/cost-guard/package.json",
+      "name": "@ga-graphai/cost-guard",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/er-service/package.json",
+      "name": "@ga-graphai/er-service",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/gateway/package.json",
+      "name": "@ga-graphai/gateway",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/knowledge-graph/package.json",
+      "name": "@ga-graphai/knowledge-graph",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/maestro-conductor/package.json",
+      "name": "maestro-conductor",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/meta-orchestrator/package.json",
+      "name": "meta-orchestrator",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/policy/package.json",
+      "name": "policy",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/prov-ledger/package.json",
+      "name": "@ga-graphai/prov-ledger",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/query-copilot/package.json",
+      "name": "@ga-graphai/query-copilot",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/web/package.json",
+      "name": "web",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/workcell-runtime/package.json",
+      "name": "workcell-runtime",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ga-graphai/packages/workflow-diff-engine/package.json",
+      "name": "workflow-diff-engine",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "gateway/graphql-bff/package.json",
+      "name": "graphql-bff",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "gateway/package.json",
+      "name": "intelgraph-gateway",
+      "category": "app",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "intelgraph/client/package.json",
+      "name": "intelgraph-client-legacy",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "intelgraph/package.json",
+      "name": "intelgraph-platform",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "intelgraph/server/package.json",
+      "name": "intelgraph-server",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "intelgraph-mcp/benchmarks/harness/package.json",
+      "name": "mcp-bench-harness",
+      "category": "app",
+      "missingScripts": [
+        "build",
+        "dev",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "intelgraph-mcp/package.json",
+      "name": "intelgraph-mcp",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "intelgraph-mcp/packages/sdk-ts/package.json",
+      "name": "@intelgraph/mcp-sdk",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "intelgraph-mcp/services/replay-engine/package.json",
+      "name": "replay-engine",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "intelgraph-mcp/services/runtime-pooler/package.json",
+      "name": "runtime-pooler",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "intelgraph-mcp/shootout-ui/package.json",
+      "name": "shootout-ui",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "intelgraph-mcp/tools/conformance-cli/package.json",
+      "name": "@intelgraph/mcp-conformance-cli",
+      "category": "app",
+      "missingScripts": [
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "intelgraph-mvp/ui/package.json",
+      "name": "intelgraph-ui",
+      "category": "app",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "libs/configguard/ts/package.json",
+      "name": "@summit/configguard",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "monitoring/synthetic/package.json",
+      "name": "@intelgraph/synthetic-monitoring",
+      "category": "app",
+      "missingScripts": [
+        "build",
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "october2025/companyos-switchboard/apps/web/package.json",
+      "name": "switchboard-web",
+      "category": "app",
+      "missingScripts": [
+        "test"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "october2025/companyos-switchboard/package.json",
+      "name": "companyos-switchboard",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "operator-kit/package.json",
+      "name": "symphony-operator-kit",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "orchestration/packages/intent-engine/package.json",
+      "name": "@chronos/intent-engine",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": true
+    },
+    {
+      "path": "package.json",
+      "name": "intelgraph-platform",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "packages/adc/package.json",
+      "name": "@intelgraph/adc",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/aer-ledger/package.json",
+      "name": "@intelgraph/aer-ledger",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/afl-store/package.json",
+      "name": "@intelgraph/afl-store",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/atl/package.json",
+      "name": "@intelgraph/atl",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/canary-lattice/package.json",
+      "name": "@intelgraph/canary-lattice",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/common-types/package.json",
+      "name": "@intelgraph/common-types",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/community/package.json",
+      "name": "@summit/community",
+      "category": "library",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/crsp/package.json",
+      "name": "@intelgraph/crsp",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/deception-detector/package.json",
+      "name": "@intelgraph/deception-detector",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/event-booster/package.json",
+      "name": "@intelgraph/event-booster",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/gateway-tariff/package.json",
+      "name": "@intelgraph/gateway-tariff",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/gdr/package.json",
+      "name": "@intelgraph/gdr",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/govbrief/package.json",
+      "name": "@summit/govbrief",
+      "category": "library",
+      "missingScripts": [
+        "test"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/graph-ai-core/package.json",
+      "name": "@intelgraph/graph-ai-core",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "packages/hit-protocol/package.json",
+      "name": "@intelgraph/hit-protocol",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/hrn/package.json",
+      "name": "@intelgraph/hrn",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/influence-mining/package.json",
+      "name": "@intelgraph/influence-mining",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/ingest-wizard/package.json",
+      "name": "@intelgraph/ingest-wizard",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "packages/jira-integration/package.json",
+      "name": "@summit/jira-integration",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "packages/kompromat-sim/package.json",
+      "name": "@intelgraph/kompromat-sim",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/kpw-media/package.json",
+      "name": "@intelgraph/kpw-media",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/ledger-server/package.json",
+      "name": "@intelgraph/ledger-server",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/liquid-nano/package.json",
+      "name": "@summit/liquid-nano",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "packages/lreg-exporter/package.json",
+      "name": "@intelgraph/lreg-exporter",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/maestro-cli/package.json",
+      "name": "@intelgraph/maestro",
+      "category": "library",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/maestro-core/package.json",
+      "name": "@maestro/core",
+      "category": "library",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/mapping-dsl/package.json",
+      "name": "@intelgraph/mapping-dsl",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/narrative-engine/package.json",
+      "name": "@summit/narrative-engine",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/policy-audit/package.json",
+      "name": "@intelgraph/policy-audit",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/prov-ledger/package.json",
+      "name": "@intelgraph/prov-ledger-lib",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/prov-ledger-client/package.json",
+      "name": "@intelgraph/prov-ledger-client",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/prov-ledger-sdk/package.json",
+      "name": "@intelgraph/prov-ledger-sdk",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "packages/rptc/package.json",
+      "name": "@summit/rptc",
+      "category": "library",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/anomaly-js/package.json",
+      "name": "@intelgraph/anomaly-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/audit-js/package.json",
+      "name": "@intelgraph/audit-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/collab-js/package.json",
+      "name": "@intelgraph/collab-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/connector-js/package.json",
+      "name": "@intelgraph/connector-js",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/data-quality-js/package.json",
+      "name": "@intelgraph/data-quality",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/enrichment-js/package.json",
+      "name": "@intelgraph/enrichment-sdk",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/gateway-js/package.json",
+      "name": "@intelgraph/gateway-js",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "packages/sdk/geospatial-js/package.json",
+      "name": "@intelgraph/geospatial-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/graph-algos-js/package.json",
+      "name": "@intelgraph/graph-algos-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/package.json",
+      "name": "@intelgraph/sdk",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/privacy-js/package.json",
+      "name": "@intelgraph/privacy-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/prov-ledger-js/package.json",
+      "name": "@intelgraph/prov-ledger-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/reporting-js/package.json",
+      "name": "@intelgraph/reporting-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/search-js/package.json",
+      "name": "@intelgraph/search-sdk",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/synthdata-js/package.json",
+      "name": "@intelgraph/synthdata-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/tenant-js/package.json",
+      "name": "@intelgraph/tenant-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk/workflow-js/package.json",
+      "name": "@intelgraph/workflow-js",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/sdk-ts/package.json",
+      "name": "@summit/maestro-sdk",
+      "category": "library",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "packages/tasks-core/package.json",
+      "name": "@summit/maestro-tasks-core",
+      "category": "library",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "pcbo/cli/package.json",
+      "name": "@summit/pcbo-cli",
+      "category": "library",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "prov-ledger-service/package.json",
+      "name": "@intelgraph/prov-ledger-service",
+      "category": "app",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "sdk/qpg/typescript/package.json",
+      "name": "@summit/qpg-client",
+      "category": "library",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "sdk/typescript/package.json",
+      "name": "@intelgraph/maestro-sdk",
+      "category": "library",
+      "missingScripts": [],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": true
+    },
+    {
+      "path": "server/package.json",
+      "name": "intelgraph-server",
+      "category": "app",
+      "missingScripts": [],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": true
+    },
+    {
+      "path": "server-v039/package.json",
+      "name": "mc-admin-server",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/agent-runtime/package.json",
+      "name": "@intelgraph/agent-runtime",
+      "category": "service",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "services/api-gateway/package.json",
+      "name": "@intelgraph/api-gateway",
+      "category": "service",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "services/authz-gateway/package.json",
+      "name": "authz-gateway",
+      "category": "service",
+      "missingScripts": [
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/build-hub/package.json",
+      "name": "maestro-build-hub",
+      "category": "service",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "services/data-spine/package.json",
+      "name": "@summit/data-spine",
+      "category": "service",
+      "missingScripts": [
+        "build",
+        "dev",
+        "start",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/docling-svc/package.json",
+      "name": "docling-svc",
+      "category": "service",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/exporter/package.json",
+      "name": "@intelgraph/exporter",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/feed-processor/package.json",
+      "name": "@intelgraph/feed-processor",
+      "category": "service",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "services/graph-core/package.json",
+      "name": "graph-core-service",
+      "category": "service",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/license-registry/package.json",
+      "name": "@intelgraph/license-registry",
+      "category": "service",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "services/mtfs/client/package.json",
+      "name": "mtfs-client",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "start",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/policy-audit/package.json",
+      "name": "policy-audit-service",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/privacy/package.json",
+      "name": "@intelgraph/privacy",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "start",
+        "lint"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/prov-ledger/package.json",
+      "name": "@intelgraph/prov-ledger",
+      "category": "service",
+      "missingScripts": [],
+      "issues": [],
+      "hasAllScripts": true
+    },
+    {
+      "path": "services/spar/package.json",
+      "name": "@summit/spar",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "start",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/synthdata/package.json",
+      "name": "@intelgraph/synthdata-service",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/tenant-admin/package.json",
+      "name": "tenant-admin-service",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/trr/package.json",
+      "name": "tool-risk-registry",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "start",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "services/workflow/package.json",
+      "name": "@intelgraph/workflow-service",
+      "category": "service",
+      "missingScripts": [
+        "dev",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "streaming/alerts-api/package.json",
+      "name": "alerts-api",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "streaming/ingest-gw/package.json",
+      "name": "ingest-gw",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "summit-company_extended/intelgraph/api/package.json",
+      "name": "intelgraph-api-stub",
+      "category": "app",
+      "missingScripts": [
+        "build",
+        "dev",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    },
+    {
+      "path": "tests/e2e/package.json",
+      "name": "@intelgraph/e2e-tests",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "tests/load/package.json",
+      "name": "intelgraph-load-testing",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "tools/claim-verifier/package.json",
+      "name": "claim-verifier",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "tools/decs-cli/package.json",
+      "name": "@summit/decs-cli",
+      "category": "app",
+      "missingScripts": [
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "tools/docforge/__tests__/__fixtures__/sample_repo/package.json",
+      "name": "sample",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "tools/vscode/doc-lsp/package.json",
+      "name": "intelgraph-docs-lsp",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "tools/vscode/intelgraph-docs/package.json",
+      "name": "intelgraph-docs-helper",
+      "category": "library",
+      "missingScripts": [
+        "build",
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "ui/qawe/package.json",
+      "name": "qawe-ui",
+      "category": "app",
+      "missingScripts": [
+        "test",
+        "lint",
+        "typecheck"
+      ],
+      "issues": [],
+      "hasAllScripts": false
+    },
+    {
+      "path": "webapp/package.json",
+      "name": "webapp",
+      "category": "app",
+      "missingScripts": [
+        "build",
+        "test",
+        "typecheck"
+      ],
+      "issues": [
+        "Has own lockfile (should use workspace root)"
+      ],
+      "hasAllScripts": false
+    }
+  ]
+}

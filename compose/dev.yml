@@ -1,0 +1,445 @@
+version: '3.9'
+
+# Hermetic development stack for IntelGraph Platform
+# Usage: make dev (or docker compose -f compose/dev.yml up)
+# Target: <5min boot time with full hot-reload
+
+x-node-service: &node-service
+  image: node:20-bullseye
+  user: node
+  working_dir: /workspace
+  volumes:
+    - ..:/workspace:cached
+    - node_modules:/workspace/node_modules
+  networks:
+    - summit-dev
+  environment: &common-env
+    NODE_ENV: development
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_USER: summit
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password}
+    POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
+    DATABASE_URL: postgresql://summit:${POSTGRES_PASSWORD:-dev_password}@postgres:5432/${POSTGRES_DB:-summit_dev}
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    REDIS_URL: redis://redis:6379
+    NEO4J_URI: bolt://neo4j:7687
+    NEO4J_USERNAME: neo4j
+    NEO4J_PASSWORD: ${NEO4J_PASSWORD:-dev_password}
+    OPA_URL: http://opa:8181
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+
+services:
+  # ═══════════════════════════════════════════════════════
+  # Infrastructure Services
+  # ═══════════════════════════════════════════════════════
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: summit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --lc-collate=C --lc-ctype=C'
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../server/db/migrations/postgres:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U summit -d ${POSTGRES_DB:-summit_dev}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=database'
+
+  redis:
+    image: redis:7-alpine
+    container_name: summit-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=cache'
+
+  neo4j:
+    image: neo4j:5.24.0-community
+    container_name: summit-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-dev_password}
+      NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
+      NEO4J_PLUGINS: '["apoc","graph-data-science"]'
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 2G
+      NEO4J_dbms_memory_pagecache_size: 512m
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+    ports:
+      - '7474:7474'  # HTTP
+      - '7687:7687'  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+    healthcheck:
+      test: ['CMD-SHELL', 'cypher-shell -u neo4j -p ${NEO4J_PASSWORD:-dev_password} "RETURN 1" || exit 1']
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=graph-database'
+
+  opa:
+    image: openpolicyagent/opa:0.68.0
+    container_name: summit-opa
+    restart: unless-stopped
+    command:
+      - run
+      - --server
+      - --watch
+      - --addr=0.0.0.0:8181
+      - /policy
+    ports:
+      - '8181:8181'
+    volumes:
+      - ../policy/opa:/policy:ro
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8181/health?bundles']
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=policy-engine'
+
+  # ═══════════════════════════════════════════════════════
+  # Observability Stack
+  # ═══════════════════════════════════════════════════════
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.110.0
+    container_name: summit-otel-collector
+    restart: unless-stopped
+    command: ['--config=/etc/otel-collector.yaml']
+    ports:
+      - '4317:4317'   # OTLP gRPC
+      - '4318:4318'   # OTLP HTTP
+      - '9464:9464'   # Prometheus exporter
+    volumes:
+      - ../ops/devkit/otel-collector.yaml:/etc/otel-collector.yaml:ro
+    networks:
+      - summit-dev
+    depends_on:
+      - jaeger
+    labels:
+      - 'summit.service=observability'
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    container_name: summit-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+      SPAN_STORAGE_TYPE: memory
+      MEMORY_MAX_TRACES: 10000
+    ports:
+      - '16686:16686'  # Jaeger UI
+      - '14268:14268'  # HTTP collector
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=tracing'
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: summit-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    ports:
+      - '9090:9090'
+    volumes:
+      - ../ops/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=metrics'
+
+  grafana:
+    image: grafana/grafana:10.4.7
+    container_name: summit-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-dev_password}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-worldmap-panel
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+    ports:
+      - '8080:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../ops/observability/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../ops/observability/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - summit-dev
+    depends_on:
+      - prometheus
+      - otel-collector
+    labels:
+      - 'summit.service=visualization'
+
+  # ═══════════════════════════════════════════════════════
+  # Application Services
+  # ═══════════════════════════════════════════════════════
+
+  migrations:
+    <<: *node-service
+    container_name: summit-migrations
+    working_dir: /workspace/server
+    command:
+      - bash
+      - -c
+      - |
+        echo "Running database migrations..."
+        if [ ! -d node_modules ]; then
+          echo "Installing dependencies..."
+          pnpm install --frozen-lockfile --prefer-offline
+        fi
+        pnpm run migrate || echo "Migrations failed but continuing..."
+    environment:
+      <<: *common-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    restart: 'no'
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=migrations'
+
+  seed:
+    <<: *node-service
+    container_name: summit-seed
+    command:
+      - bash
+      - -c
+      - |
+        echo "Seeding development data..."
+        if [ ! -d node_modules ]; then
+          pnpm install --frozen-lockfile --prefer-offline
+        fi
+        node scripts/devkit/seed-fixtures.js || echo "Seeding failed but continuing..."
+    environment:
+      <<: *common-env
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      opa:
+        condition: service_healthy
+    restart: 'no'
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=seed'
+
+  api:
+    <<: *node-service
+    container_name: summit-api
+    command:
+      - bash
+      - -c
+      - |
+        echo "Starting API server..."
+        if [ ! -d node_modules ]; then
+          pnpm install --frozen-lockfile --prefer-offline
+        fi
+        cd server && pnpm run dev
+    environment:
+      <<: *common-env
+      PORT: 4000
+      OTEL_SERVICE_NAME: summit-api
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      opa:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      seed:
+        condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ['CMD', 'node', '/workspace/scripts/health-check.js', 'http://localhost:4000/health']
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=api'
+      - 'prometheus.job=summit_api'
+      - 'prometheus.port=4000'
+
+  web:
+    <<: *node-service
+    container_name: summit-web
+    command:
+      - bash
+      - -c
+      - |
+        echo "Starting web UI..."
+        if [ ! -d node_modules ]; then
+          pnpm install --frozen-lockfile --prefer-offline
+        fi
+        cd client && pnpm run dev -- --host 0.0.0.0 --port 3000
+    environment:
+      <<: *common-env
+      VITE_PORT: 3000
+      VITE_HOST: 0.0.0.0
+      VITE_API_URL: http://api:4000/graphql
+      VITE_WS_URL: ws://api:4000/graphql
+    ports:
+      - '3000:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=web'
+
+  worker:
+    <<: *node-service
+    container_name: summit-worker
+    command:
+      - bash
+      - -c
+      - |
+        echo "Starting background worker..."
+        if [ ! -d node_modules ]; then
+          pnpm install --frozen-lockfile --prefer-offline
+        fi
+        cd server && pnpm run dev:worker || node scripts/worker.js
+    environment:
+      <<: *common-env
+      WORKER_PORT: 4100
+      OTEL_SERVICE_NAME: summit-worker
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '4100:4100'
+    depends_on:
+      api:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:4100/health >/dev/null 2>&1 || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=worker'
+
+  mock-services:
+    <<: *node-service
+    container_name: summit-mock-services
+    command: ['node', 'scripts/devkit/mock-services.js']
+    environment:
+      MOCK_SERVICE_PORT: 4010
+    ports:
+      - '4010:4010'
+    healthcheck:
+      test: ['CMD', 'node', 'scripts/health-check.js', 'http://localhost:4010/health']
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 10s
+    networks:
+      - summit-dev
+    labels:
+      - 'summit.service=mock'
+
+# ═══════════════════════════════════════════════════════
+# Volumes
+# ═══════════════════════════════════════════════════════
+
+volumes:
+  node_modules:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  neo4j_data:
+    driver: local
+  neo4j_logs:
+    driver: local
+  neo4j_import:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ═══════════════════════════════════════════════════════
+# Networks
+# ═══════════════════════════════════════════════════════
+
+networks:
+  summit-dev:
+    driver: bridge
+    name: summit-dev
+    labels:
+      - 'summit.network=development'
