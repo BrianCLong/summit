@@ -18,6 +18,17 @@ export { MongoDBConnector } from './connectors/MongoDBConnector.js';
 export { RESTAPIConnector } from './connectors/RESTAPIConnector.js';
 export { S3Connector } from './connectors/S3Connector.js';
 
+// SaaS connectors
+export { SalesforceConnector } from './connectors/SalesforceConnector.js';
+export { HubSpotConnector } from './connectors/HubSpotConnector.js';
+export { JiraConnector } from './connectors/JiraConnector.js';
+
+// Threat intelligence connectors
+export { STIXTAXIIConnector } from './connectors/STIXTAXIIConnector.js';
+
+// Streaming connectors
+export { KafkaConnector } from './connectors/KafkaConnector.js';
+
 // Re-export commonly used types
 export type {
   DataSourceConfig,
