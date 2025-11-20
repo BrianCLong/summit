@@ -30,7 +30,13 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json',
+        tsconfig: {
+          module: 'es2022',
+          target: 'es2022',
+          allowJs: true,
+          skipLibCheck: true,
+          esModuleInterop: true,
+        },
       },
     ],
   },

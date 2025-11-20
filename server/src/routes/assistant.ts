@@ -77,7 +77,7 @@ export function mountAssistant(app: Express, io?: any) {
       }
       logExperiment(reqId, userId, 'rag_experiment', experimentVariant); // Log experiment
 
-      const tenant = (req as any).user?.org ?? 'public';
+      const tenant = (req as any).user?.tenant || (req as any).user?.org || 'public';
       const cached = await getCached(tenant, input);
       if (cached) {
         res.write(cached);
@@ -244,6 +244,7 @@ export function mountAssistant(app: Express, io?: any) {
             mode: 'sse',
             tokens,
             exp: experimentVariant,
+                tenantId: tenant,
             // This payload will need to be processed by writeAudits
           },
         });
@@ -342,7 +343,7 @@ export function mountAssistant(app: Express, io?: any) {
             }
           }
           logExperiment(reqId, userId, 'rag_experiment', experimentVariant); // Log experiment
-          const tenant = socket.handshake.auth?.org ?? 'public'; // Assuming org from Socket.IO auth
+          const tenant = socket.handshake.headers['x-tenant-id'] || socket.handshake.headers['x-tenant'] || socket.handshake.auth?.org || 'public';
           const cached = await getCached(tenant, input);
           if (cached) {
             socket.emit('assistant:token', cached);
@@ -385,6 +386,7 @@ export function mountAssistant(app: Express, io?: any) {
                 mode: 'socket',
                 tokens,
                 exp: experimentVariant,
+                tenantId: tenant,
                 // This payload will need to be processed by writeAudits
               },
             });

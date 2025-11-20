@@ -14,6 +14,7 @@ interface User {
   email: string;
   username?: string;
   role?: string;
+  tenant?: string;
 }
 
 interface AuthContext {
@@ -36,7 +37,17 @@ export const getContext = async ({
     }
 
     const user = await verifyToken(token);
-    logger.info({ requestId, userId: user.id }, 'Authenticated request');
+
+    // Extract tenant from header
+    const tenant = req.headers['x-tenant-id'] || req.headers['x-tenant'];
+    if (tenant) {
+      user.tenant = tenant;
+    } else if (process.env.NODE_ENV === 'development') {
+        // Default tenant for development if not provided
+        user.tenant = 'default-tenant';
+    }
+
+    logger.info({ requestId, userId: user.id, tenant: user.tenant }, 'Authenticated request');
     return { user, isAuthenticated: true, requestId };
   } catch (error) {
     logger.warn(
@@ -56,6 +67,7 @@ export const verifyToken = async (token: string): Promise<User> => {
         email: 'developer@intelgraph.com',
         username: 'developer',
         role: 'ADMIN',
+        tenant: 'default-tenant',
       };
     }
 

@@ -20,6 +20,16 @@ export async function ensureAuthenticated(
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const user = await authService.verifyToken(token);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Extract tenant from header
+    const tenant =
+      (req.headers['x-tenant-id'] as string) ||
+      (req.headers['x-tenant'] as string);
+    if (tenant) {
+      (user as any).tenant = tenant;
+      (user as any).org = tenant; // For backward compatibility
+    }
+
     req.user = user;
     next();
   } catch (e) {

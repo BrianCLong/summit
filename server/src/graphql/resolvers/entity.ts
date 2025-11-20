@@ -133,7 +133,9 @@ const entityResolvers = {
         limit: number;
         offset: number;
       },
+      context: any,
     ) => {
+      const tenantId = requireTenant(context);
       const pgPool = getPostgresPool();
       const neo4jSession = driver.session();
       let pgClient;
@@ -215,8 +217,8 @@ const entityResolvers = {
           if (ids.length === 0) return [];
 
           const result = await session.run(
-            `MATCH (n:Entity) WHERE n.id IN $ids RETURN n`,
-            { ids },
+            `MATCH (n:Entity) WHERE n.id IN $ids AND n.tenantId = $tenantId RETURN n`,
+            { ids, tenantId },
           );
 
           const entityMap = new Map();

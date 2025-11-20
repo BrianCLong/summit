@@ -30,12 +30,15 @@ async function writeAudits(audits: any[]) {
   const answerCreations = audits.filter((a) => a.type === 'answer_creation');
   if (answerCreations.length > 0) {
     for (const ac of answerCreations) {
+      const tenantId = ac.tenantId || 'unknown';
       await runCypher(
         `
         MERGE (u:User {id:$userId})
+          ON CREATE SET u.tenantId = $tenantId
         MERGE (r:Request {id:$reqId})
+          ON CREATE SET r.tenantId = $tenantId
         MERGE (a:Answer {id:$answerId})
-          ON CREATE SET a.createdAt:timestamp(), a.mode:$mode, a.tokens:$tokens, a.experiment:$exp
+          ON CREATE SET a.createdAt=timestamp(), a.mode=$mode, a.tokens=$tokens, a.experiment=$exp, a.tenantId=$tenantId
         MERGE (u)-[:MADE_REQUEST]->(r)
         MERGE (r)-[:PRODUCED]->(a)
       `,
@@ -46,6 +49,7 @@ async function writeAudits(audits: any[]) {
           mode: ac.mode,
           tokens: ac.tokens,
           exp: ac.exp,
+          tenantId,
         },
       );
     }

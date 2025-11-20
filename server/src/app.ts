@@ -78,8 +78,58 @@ export const createApp = async () => {
     }),
   );
 
-  app.get('/search/evidence', async (req, res) => {
+  // Production Authentication - Use proper JWT validation
+  const {
+    productionAuthMiddleware,
+    applyProductionSecurity,
+    graphqlSecurityConfig,
+  } = await import('./config/production-security.js');
+
+  const authenticateToken =
+    cfg.NODE_ENV === 'production'
+      ? productionAuthMiddleware
+      : async (req: Request, res: Response, next: NextFunction) => {
+          // Development mode - relaxed auth for easier testing
+          const authHeader = req.headers['authorization'];
+          const token = authHeader && authHeader.split(' ')[1];
+
+          if (token) {
+            // Verify token if present
+            try {
+              const { verifyToken } = await import('./lib/auth.js');
+              const user = await verifyToken(token);
+              (req as any).user = user;
+            } catch (e) {
+              console.warn('Invalid token in dev mode', e);
+            }
+          }
+
+          if (!(req as any).user) {
+            console.warn('Development: No valid token provided, using mock user');
+            (req as any).user = {
+              id: 'dev-user',
+              email: 'dev@intelgraph.local',
+              role: 'admin',
+              tenant: 'default-tenant',
+            };
+          }
+
+          // Extract tenant from header override
+          const tenant = req.headers['x-tenant-id'] || req.headers['x-tenant'];
+          if (tenant) {
+            (req as any).user.tenant = tenant;
+          }
+
+          next();
+        };
+
+  app.get('/search/evidence', authenticateToken, async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
+    const tenantId = (req as any).user?.tenant;
+
+    if (!tenantId) {
+      return res.status(403).json({ error: 'Missing tenant context' });
+    }
 
     if (!q) {
       return res.status(400).send({ error: "Query parameter 'q' is required" });
@@ -91,6 +141,7 @@ export const createApp = async () => {
     try {
       const searchQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
+        WHERE node.tenantId = $tenantId
         RETURN node, score
         SKIP $skip
         LIMIT $limit
@@ -98,16 +149,18 @@ export const createApp = async () => {
 
       const countQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
+        WHERE node.tenantId = $tenantId
         RETURN count(node) as total
       `;
 
       const [searchResult, countResult] = await Promise.all([
         session.run(searchQuery, {
           query: q,
+          tenantId,
           skip: Number(skip),
           limit: Number(limit),
         }),
-        session.run(countQuery, { query: q }),
+        session.run(countQuery, { query: q, tenantId }),
       ]);
 
       const evidence = searchResult.records.map((record) => ({
@@ -186,36 +239,10 @@ export const createApp = async () => {
   });
   await apollo.start();
 
-  // Production Authentication - Use proper JWT validation
-  const {
-    productionAuthMiddleware,
-    applyProductionSecurity,
-    graphqlSecurityConfig,
-  } = await import('./config/production-security.js');
-
   // Apply security middleware based on environment
   if (cfg.NODE_ENV === 'production') {
     applyProductionSecurity(app);
   }
-
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
-
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
 
   app.use(
     '/graphql',

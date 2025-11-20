@@ -1,9 +1,11 @@
 import { evidenceProvenanceService } from '../../maestro/evidence/provenance-service';
 import { saveEvidenceBundle } from '../../db/repositories/evidenceRepo.js';
+import { requireTenant } from '../../middleware/withTenant.js';
 
 export const evidenceResolvers = {
   Mutation: {
     async publishEvidence(_: any, { input }: any, ctx: any) {
+      const tenantId = requireTenant(ctx);
       const now = new Date().toISOString();
       const id = `ev_${Date.now()}`;
       try {
@@ -23,6 +25,7 @@ export const evidenceResolvers = {
         // Persist to Postgres for provenance linking
         await saveEvidenceBundle({
           id,
+          tenant_id: tenantId,
           service: input.service,
           release_id: input.releaseId,
           artifacts: input.artifacts || [],
