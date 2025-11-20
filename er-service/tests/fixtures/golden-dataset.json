@@ -1,0 +1,101 @@
+{
+  "tenantId": "tenant-golden-test",
+  "entities": [
+    {
+      "id": "person-001",
+      "type": "person",
+      "name": "John Michael Smith",
+      "aliases": ["John Smith", "J.M. Smith"],
+      "tenantId": "tenant-golden-test",
+      "attributes": {
+        "email": "john.smith@example.com",
+        "age": 35,
+        "occupation": "Engineer"
+      },
+      "locations": [
+        { "lat": 40.7128, "lon": -74.0060, "timestamp": "2024-01-15T10:00:00Z" }
+      ],
+      "timestamps": ["2024-01-15T10:00:00Z", "2024-01-15T14:30:00Z"],
+      "deviceIds": ["device-abc123", "device-def456"],
+      "accountIds": ["acct-1001"],
+      "ipAddresses": ["192.168.1.100"]
+    },
+    {
+      "id": "person-002",
+      "type": "person",
+      "name": "Jon M. Smith",
+      "aliases": ["Jonathan Smith"],
+      "tenantId": "tenant-golden-test",
+      "attributes": {
+        "email": "john.smith@example.com",
+        "age": 35,
+        "occupation": "Software Engineer"
+      },
+      "locations": [
+        { "lat": 40.7130, "lon": -74.0062, "timestamp": "2024-01-15T10:05:00Z" }
+      ],
+      "timestamps": ["2024-01-15T10:05:00Z"],
+      "deviceIds": ["device-abc123"],
+      "accountIds": ["acct-1001"],
+      "ipAddresses": ["192.168.1.100"]
+    },
+    {
+      "id": "person-003",
+      "type": "person",
+      "name": "Jane Elizabeth Doe",
+      "tenantId": "tenant-golden-test",
+      "attributes": {
+        "email": "jane.doe@example.com",
+        "age": 28,
+        "occupation": "Designer"
+      },
+      "locations": [
+        { "lat": 34.0522, "lon": -118.2437, "timestamp": "2024-01-15T09:00:00Z" }
+      ],
+      "timestamps": ["2024-01-15T09:00:00Z"],
+      "deviceIds": ["device-xyz789"],
+      "accountIds": ["acct-2002"],
+      "ipAddresses": ["10.0.0.50"]
+    },
+    {
+      "id": "person-004",
+      "type": "person",
+      "name": "Robert Johnson",
+      "tenantId": "tenant-golden-test",
+      "attributes": {
+        "email": "bob.johnson@example.com",
+        "age": 42
+      },
+      "deviceIds": ["device-ghi111"],
+      "accountIds": ["acct-3003"]
+    },
+    {
+      "id": "org-001",
+      "type": "organization",
+      "name": "Acme Corporation",
+      "aliases": ["Acme Corp", "ACME"],
+      "tenantId": "tenant-golden-test",
+      "attributes": {
+        "industry": "Technology",
+        "employees": 500,
+        "founded": 2010
+      },
+      "locations": [
+        { "lat": 37.7749, "lon": -122.4194 }
+      ]
+    },
+    {
+      "id": "org-002",
+      "type": "organization",
+      "name": "ACME Corporation Inc",
+      "tenantId": "tenant-golden-test",
+      "attributes": {
+        "industry": "Technology",
+        "employees": 500
+      },
+      "locations": [
+        { "lat": 37.7750, "lon": -122.4195 }
+      ]
+    }
+  ]
+}
