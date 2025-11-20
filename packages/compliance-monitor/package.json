@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/compliance-monitor",
+  "version": "1.0.0",
+  "description": "Supply chain compliance monitoring including export controls, conflict minerals, product safety, and regulatory tracking",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "compliance",
+    "regulatory",
+    "export-controls",
+    "supply-chain"
+  ],
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  }
+}

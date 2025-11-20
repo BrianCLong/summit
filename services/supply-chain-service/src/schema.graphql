@@ -1,0 +1,634 @@
+"""
+Supply Chain Intelligence GraphQL Schema
+"""
+
+scalar DateTime
+scalar JSON
+
+# ============================================================================
+# Supply Chain Network Types
+# ============================================================================
+
+enum SupplierTier {
+  TIER1
+  TIER2
+  TIER3
+  TIER4
+  TIER5
+}
+
+enum NodeType {
+  MANUFACTURER
+  SUPPLIER
+  DISTRIBUTOR
+  LOGISTICS_PROVIDER
+  RAW_MATERIAL_PROVIDER
+  COMPONENT_MANUFACTURER
+  ASSEMBLY_PLANT
+  WAREHOUSE
+  RETAIL
+  SERVICE_PROVIDER
+}
+
+enum NodeStatus {
+  ACTIVE
+  INACTIVE
+  AT_RISK
+  DISRUPTED
+  CONTINGENCY
+  DEPRECATED
+}
+
+type SupplyChainNode {
+  id: ID!
+  name: String!
+  type: NodeType!
+  tier: SupplierTier!
+  status: NodeStatus!
+  entityId: String
+  location: Location!
+  metrics: NodeMetrics
+  riskScore: Float
+  riskFactors: [String!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Location {
+  country: String!
+  region: String
+  city: String
+  coordinates: Coordinates
+}
+
+type Coordinates {
+  lat: Float!
+  lng: Float!
+}
+
+type NodeMetrics {
+  reliabilityScore: Float
+  qualityScore: Float
+  deliveryPerformance: Float
+  capacityUtilization: Float
+}
+
+type SupplyChainEdge {
+  id: ID!
+  sourceId: String!
+  targetId: String!
+  relationshipType: String!
+  criticality: String!
+  dependencyScore: Float!
+  alternativesAvailable: Boolean!
+  leadTime: LeadTime
+  riskLevel: String
+}
+
+type LeadTime {
+  average: Float!
+  min: Float!
+  max: Float!
+}
+
+type SupplyChainNetwork {
+  id: ID!
+  name: String!
+  description: String
+  nodes: [SupplyChainNode!]!
+  edges: [SupplyChainEdge!]!
+  metadata: NetworkMetadata!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type NetworkMetadata {
+  rootNodeId: String
+  maxTier: Int!
+  totalNodes: Int!
+  totalEdges: Int!
+  geographicSpan: [String!]!
+}
+
+type NetworkAnalysisResult {
+  networkId: ID!
+  timestamp: DateTime!
+  criticalPaths: [CriticalPath!]!
+  singlePointsOfFailure: [SinglePointOfFailure!]!
+  bottlenecks: [BottleneckAnalysis!]!
+  topology: NetworkTopology!
+  overallRiskScore: Float!
+  resilienceScore: Float!
+  diversificationScore: Float!
+  recommendations: [Recommendation!]!
+}
+
+type CriticalPath {
+  path: [String!]!
+  totalLeadTime: Float!
+  bottleneckNodes: [String!]!
+  riskScore: Float!
+}
+
+type SinglePointOfFailure {
+  nodeId: String!
+  impactedNodes: [String!]!
+  impactScore: Float!
+  alternatives: [AlternativeNode!]!
+}
+
+type AlternativeNode {
+  nodeId: String!
+  switchingCost: Float
+  switchingTime: Float
+}
+
+type BottleneckAnalysis {
+  nodeId: String!
+  type: String!
+  severity: String!
+  throughputLimit: Float
+  currentUtilization: Float
+  recommendations: [String!]!
+}
+
+type NetworkTopology {
+  density: Float!
+  avgPathLength: Float!
+  clusteringCoefficient: Float!
+  centralNodes: [CentralNode!]!
+  communities: [Community!]!
+}
+
+type CentralNode {
+  nodeId: String!
+  centralityScore: Float!
+  type: String!
+}
+
+type Community {
+  id: String!
+  nodeIds: [String!]!
+  modularity: Float!
+}
+
+type Recommendation {
+  priority: String!
+  category: String!
+  description: String!
+  impactedNodes: [String!]!
+}
+
+# ============================================================================
+# Supplier Risk Types
+# ============================================================================
+
+type SupplierRiskAssessment {
+  supplierId: ID!
+  supplierName: String!
+  timestamp: DateTime!
+  financialHealth: FinancialHealthScore
+  cybersecurityPosture: CybersecurityPosture
+  geopoliticalRisk: GeopoliticalRisk
+  esgScore: ESGScore
+  regulatoryCompliance: RegulatoryCompliance
+  performanceScore: PerformanceScore
+  overallRiskScore: Float!
+  riskLevel: String!
+  riskTier: String!
+  keyRisks: [KeyRisk!]!
+  mitigationActions: [MitigationAction!]!
+  approvalStatus: String!
+}
+
+type FinancialHealthScore {
+  overallScore: Float!
+  profitabilityScore: Float!
+  liquidityScore: Float!
+  solvencyScore: Float!
+  bankruptcyRisk: String!
+  trendDirection: String!
+}
+
+type CybersecurityPosture {
+  overallScore: Float!
+  controlCoverageScore: Float!
+  incidentHistoryScore: Float!
+  vulnerabilityScore: Float!
+  riskLevel: String!
+  certifications: [String!]
+}
+
+type GeopoliticalRisk {
+  overallRiskScore: Float!
+  riskLevel: String!
+  countryRisk: CountryRisk!
+}
+
+type CountryRisk {
+  country: String!
+  riskScore: Float!
+  politicalStabilityIndex: Float
+}
+
+type ESGScore {
+  overallESGScore: Float!
+  environmentalScore: Float!
+  socialScore: Float!
+  governanceScore: Float!
+  rating: String!
+  criticalIssues: [String!]!
+}
+
+type RegulatoryCompliance {
+  complianceScore: Float!
+  complianceRate: Float!
+  activeViolations: Int!
+  criticalViolations: Int!
+  complianceRisk: String!
+}
+
+type PerformanceScore {
+  overallPerformanceScore: Float!
+  qualityScore: Float!
+  deliveryScore: Float!
+  capacityScore: Float!
+  performanceRating: String!
+  performanceTrend: String!
+}
+
+type KeyRisk {
+  category: String!
+  description: String!
+  severity: String!
+  likelihood: String!
+  impact: String!
+}
+
+type MitigationAction {
+  priority: String!
+  action: String!
+  timeline: String!
+  status: String!
+}
+
+# ============================================================================
+# Third-Party Risk Types
+# ============================================================================
+
+type Vendor {
+  id: ID!
+  name: String!
+  status: String!
+  tier: String!
+  legalName: String!
+  industry: String!
+  servicesProvided: [String!]!
+  riskAssessment: SupplierRiskAssessment
+}
+
+type DueDiligenceAssessment {
+  id: ID!
+  vendorId: ID!
+  overallResult: String!
+  riskRating: String!
+  checks: [DueDiligenceCheck!]!
+}
+
+type DueDiligenceCheck {
+  checkType: String!
+  status: String!
+  result: String
+  findings: [String!]
+}
+
+type VendorAlert {
+  id: ID!
+  vendorId: ID!
+  alertType: String!
+  severity: String!
+  title: String!
+  description: String!
+  status: String!
+  detectedAt: DateTime!
+}
+
+# ============================================================================
+# Component Tracking Types
+# ============================================================================
+
+type Component {
+  id: ID!
+  partNumber: String!
+  description: String!
+  type: String!
+  manufacturer: Manufacturer!
+  lifecycleStatus: String!
+  leadTimeDays: Float!
+}
+
+type Manufacturer {
+  supplierId: String!
+  name: String!
+  country: String!
+}
+
+type BillOfMaterials {
+  id: ID!
+  productId: String!
+  productName: String!
+  version: String!
+  items: [BOMItem!]!
+  status: String!
+  totalMaterialCost: Float
+}
+
+type BOMItem {
+  componentId: String!
+  partNumber: String!
+  quantity: Float!
+  unit: String!
+  isCritical: Boolean!
+  preferredSupplier: String
+}
+
+type ComponentSourcing {
+  componentId: ID!
+  partNumber: String!
+  sources: [Source!]!
+  marketAvailability: String!
+  singleSourceRisk: Boolean!
+}
+
+type Source {
+  supplierId: String!
+  supplierName: String!
+  preferenceRank: Int!
+  unitPrice: Float!
+  leadTimeDays: Float!
+  qualityRating: Float
+}
+
+# ============================================================================
+# Logistics Intelligence Types
+# ============================================================================
+
+type Shipment {
+  id: ID!
+  trackingNumber: String!
+  status: String!
+  carrier: Carrier!
+  origin: Address!
+  destination: Address!
+  estimatedDeliveryDate: DateTime!
+  actualDeliveryDate: DateTime
+  onTimePerformance: Boolean
+  events: [ShipmentEvent!]!
+}
+
+type Carrier {
+  id: ID!
+  name: String!
+  performanceRating: Float
+}
+
+type Address {
+  name: String!
+  country: String!
+  city: String
+  address: String
+}
+
+type ShipmentEvent {
+  timestamp: DateTime!
+  eventType: String!
+  location: String!
+  description: String!
+  isException: Boolean!
+}
+
+type PortIntelligence {
+  portCode: String!
+  portName: String!
+  country: String!
+  status: String!
+  congestionLevel: Float!
+  averageWaitTime: Float
+}
+
+# ============================================================================
+# Compliance Monitoring Types
+# ============================================================================
+
+type ExportControlClassification {
+  id: ID!
+  componentId: String
+  eccn: String
+  licenseRequired: Boolean!
+  jurisdiction: [String!]!
+  status: String!
+}
+
+type SanctionsScreening {
+  id: ID!
+  entityName: String!
+  screeningDate: DateTime!
+  overallResult: String!
+  riskLevel: String!
+  matches: [SanctionMatch!]!
+}
+
+type SanctionMatch {
+  listName: String!
+  matchType: String!
+  matchScore: Float!
+}
+
+type ProductRecall {
+  id: ID!
+  productId: String!
+  recallNumber: String!
+  recallType: String!
+  severity: String!
+  unitsAffected: Int!
+  status: String!
+}
+
+type RegulatoryChange {
+  id: ID!
+  regulation: String!
+  jurisdiction: String!
+  changeType: String!
+  title: String!
+  effectiveDate: DateTime!
+  impactLevel: String!
+  actionRequired: Boolean!
+}
+
+# ============================================================================
+# Queries
+# ============================================================================
+
+type Query {
+  # Network queries
+  supplyChainNetwork(id: ID!): SupplyChainNetwork
+  analyzeNetwork(networkId: ID!): NetworkAnalysisResult
+  findAlternativeSuppliers(supplierId: ID!): [AlternativeSupplier!]!
+
+  # Risk queries
+  supplierRiskAssessment(supplierId: ID!): SupplierRiskAssessment
+  listHighRiskSuppliers(minRiskScore: Float): [SupplierRiskAssessment!]!
+
+  # Vendor queries
+  vendor(id: ID!): Vendor
+  listVendors(status: String, tier: String): [Vendor!]!
+  vendorAlerts(vendorId: ID, severity: String): [VendorAlert!]!
+
+  # Component queries
+  component(id: ID!): Component
+  billOfMaterials(id: ID!): BillOfMaterials
+  componentSourcing(componentId: ID!): ComponentSourcing
+
+  # Logistics queries
+  shipment(id: ID!): Shipment
+  trackShipment(trackingNumber: String!): Shipment
+  portIntelligence(portCode: String!): PortIntelligence
+
+  # Compliance queries
+  exportControlCheck(componentId: ID!): ExportControlClassification
+  sanctionsScreening(entityId: ID!): SanctionsScreening
+  productRecalls(status: String): [ProductRecall!]!
+  regulatoryChanges(jurisdiction: String, impactLevel: String): [RegulatoryChange!]!
+
+  # Analytics
+  supplyChainHealthScore: HealthScore!
+  riskDashboard: RiskDashboard!
+}
+
+type AlternativeSupplier {
+  supplierId: String!
+  matchScore: Float!
+  capabilities: [String!]!
+  advantages: [String!]!
+  disadvantages: [String!]!
+}
+
+type HealthScore {
+  overallScore: Float!
+  networkResilience: Float!
+  supplierHealth: Float!
+  complianceScore: Float!
+  logisticsPerformance: Float!
+}
+
+type RiskDashboard {
+  criticalRisks: Int!
+  highRisks: Int!
+  mediumRisks: Int!
+  trendDirection: String!
+  topRisks: [TopRisk!]!
+}
+
+type TopRisk {
+  category: String!
+  description: String!
+  severity: String!
+  affectedSuppliers: Int!
+}
+
+# ============================================================================
+# Mutations
+# ============================================================================
+
+type Mutation {
+  # Network mutations
+  createSupplyChainNetwork(input: CreateNetworkInput!): SupplyChainNetwork!
+  updateSupplyChainNode(id: ID!, input: UpdateNodeInput!): SupplyChainNode!
+
+  # Risk mutations
+  performSupplierRiskAssessment(supplierId: ID!): SupplierRiskAssessment!
+  updateRiskMitigation(assessmentId: ID!, actionId: ID!, status: String!): MitigationAction!
+
+  # Vendor mutations
+  onboardVendor(input: VendorInput!): Vendor!
+  updateVendorStatus(id: ID!, status: String!): Vendor!
+  acknowledgeAlert(alertId: ID!): VendorAlert!
+
+  # Component mutations
+  createBillOfMaterials(input: BOMInput!): BillOfMaterials!
+  updateComponentSourcing(componentId: ID!, input: SourcingInput!): ComponentSourcing!
+
+  # Shipment mutations
+  createShipment(input: ShipmentInput!): Shipment!
+  updateShipmentStatus(id: ID!, status: String!): Shipment!
+
+  # Compliance mutations
+  performSanctionsScreening(entityId: ID!): SanctionsScreening!
+  initiateProductRecall(input: RecallInput!): ProductRecall!
+}
+
+# Input types
+input CreateNetworkInput {
+  name: String!
+  description: String
+  rootNodeId: String
+}
+
+input UpdateNodeInput {
+  status: NodeStatus
+  riskScore: Float
+}
+
+input VendorInput {
+  name: String!
+  legalName: String!
+  industry: String!
+  country: String!
+}
+
+input BOMInput {
+  productId: String!
+  productName: String!
+  version: String!
+  items: [BOMItemInput!]!
+}
+
+input BOMItemInput {
+  componentId: String!
+  quantity: Float!
+  unit: String!
+}
+
+input SourcingInput {
+  sources: [SourceInput!]!
+}
+
+input SourceInput {
+  supplierId: String!
+  preferenceRank: Int!
+}
+
+input ShipmentInput {
+  trackingNumber: String!
+  carrierId: String!
+  origin: String!
+  destination: String!
+}
+
+input RecallInput {
+  productId: String!
+  recallType: String!
+  severity: String!
+  issueDescription: String!
+}
+
+# ============================================================================
+# Subscriptions
+# ============================================================================
+
+type Subscription {
+  shipmentUpdated(trackingNumber: String!): Shipment!
+  vendorAlertCreated(vendorId: ID): VendorAlert!
+  riskScoreChanged(supplierId: ID!): SupplierRiskAssessment!
+  regulatoryChangePublished(jurisdiction: String): RegulatoryChange!
+}

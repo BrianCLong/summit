@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/third-party-risk",
+  "version": "1.0.0",
+  "description": "Third-party risk management including vendor onboarding, continuous monitoring, fourth-party assessment, and access control",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "third-party-risk",
+    "vendor-management",
+    "due-diligence",
+    "continuous-monitoring"
+  ],
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/supplier-risk": "workspace:*",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  }
+}
