@@ -7,6 +7,15 @@ import { Router, Request, Response } from 'express';
 import { ProvenanceLedgerBetaService } from '../services/provenance-ledger-beta.js';
 import { ingestDocument } from '../services/evidence-registration-flow.js';
 import logger from '../utils/logger.js';
+import {
+  validateLicenseInput,
+  validateSourceInput,
+  validateTransformInput,
+  validateEvidenceInput,
+  validateClaimInput,
+  validateIngestInput,
+  validateExportInput,
+} from '../middleware/provenance-validation.js';
 import type {
   SourceInput,
   TransformInput,
@@ -28,7 +37,7 @@ const provenanceLedger = ProvenanceLedgerBetaService.getInstance();
  * POST /api/provenance-beta/licenses
  * Create a new license
  */
-router.post('/licenses', async (req: Request, res: Response) => {
+router.post('/licenses', validateLicenseInput, async (req: Request, res: Response) => {
   try {
     const input: LicenseInput = req.body;
     const license = await provenanceLedger.createLicense(input);
@@ -90,7 +99,7 @@ router.get('/licenses/:id', async (req: Request, res: Response) => {
  * POST /api/provenance-beta/sources
  * Register a new source
  */
-router.post('/sources', async (req: Request, res: Response) => {
+router.post('/sources', validateSourceInput, async (req: Request, res: Response) => {
   try {
     const input: SourceInput = req.body;
     const source = await provenanceLedger.registerSource(input);
@@ -152,7 +161,7 @@ router.get('/sources/:id', async (req: Request, res: Response) => {
  * POST /api/provenance-beta/transforms
  * Register a new transform
  */
-router.post('/transforms', async (req: Request, res: Response) => {
+router.post('/transforms', validateTransformInput, async (req: Request, res: Response) => {
   try {
     const input: TransformInput = req.body;
     const transform = await provenanceLedger.registerTransform(input);
@@ -215,7 +224,7 @@ router.get('/transforms/:id', async (req: Request, res: Response) => {
  * POST /api/provenance-beta/evidence
  * Register new evidence
  */
-router.post('/evidence', async (req: Request, res: Response) => {
+router.post('/evidence', validateEvidenceInput, async (req: Request, res: Response) => {
   try {
     const input: EvidenceInput = req.body;
     const evidence = await provenanceLedger.registerEvidence(input);
@@ -278,7 +287,7 @@ router.get('/evidence/:id', async (req: Request, res: Response) => {
  * POST /api/provenance-beta/claims
  * Register a new claim
  */
-router.post('/claims', async (req: Request, res: Response) => {
+router.post('/claims', validateClaimInput, async (req: Request, res: Response) => {
   try {
     const input: ClaimInput = req.body;
     const claim = await provenanceLedger.registerClaim(input);
@@ -424,7 +433,7 @@ router.get('/chain/:itemId', async (req: Request, res: Response) => {
  * POST /api/provenance-beta/export
  * Create an export manifest
  */
-router.post('/export', async (req: Request, res: Response) => {
+router.post('/export', validateExportInput, async (req: Request, res: Response) => {
   try {
     const input: BundleCreateInput = req.body;
     const manifest = await provenanceLedger.createExportManifest(input);
@@ -485,7 +494,7 @@ router.get(
  * POST /api/provenance-beta/ingest
  * Complete document ingestion flow
  */
-router.post('/ingest', async (req: Request, res: Response) => {
+router.post('/ingest', validateIngestInput, async (req: Request, res: Response) => {
   try {
     const {
       documentPath,

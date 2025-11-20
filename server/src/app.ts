@@ -65,6 +65,10 @@ export const createApp = async () => {
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.get('/metrics', metricsRoute);
+
+  // Provenance Ledger Beta routes
+  const provenanceBetaRouter = (await import('./routes/provenance-beta.js')).default;
+  app.use('/api/provenance-beta', provenanceBetaRouter);
   app.use(
     rateLimit({
       windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),

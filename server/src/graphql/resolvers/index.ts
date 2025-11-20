@@ -7,6 +7,7 @@ import evidenceResolvers from './evidence.js';
 import evidenceOkResolvers from './evidenceOk.js';
 import trustRiskResolvers from './trust-risk.js';
 import provenanceResolvers from './provenance.js';
+import provenanceBetaResolvers from './provenance-beta.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040';
@@ -25,6 +26,7 @@ const resolvers = {
     ...(evidenceOkResolvers.Query || {}),
     ...(trustRiskResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
+    ...(provenanceBetaResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -50,6 +52,7 @@ const resolvers = {
     ...(evidenceResolvers.Mutation || {}),
     ...(trustRiskResolvers.Mutation || {}),
     ...(provenanceResolvers.Mutation || {}),
+    ...(provenanceBetaResolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -62,6 +65,12 @@ const resolvers = {
     deleteCrisisScenario:
       wargameResolver.deleteCrisisScenario.bind(wargameResolver),
   },
+  // Provenance Beta type resolvers
+  ...(provenanceBetaResolvers.Source ? { Source: provenanceBetaResolvers.Source } : {}),
+  ...(provenanceBetaResolvers.Evidence ? { Evidence: provenanceBetaResolvers.Evidence } : {}),
+  ...(provenanceBetaResolvers.Claim ? { Claim: provenanceBetaResolvers.Claim } : {}),
+  ...(provenanceBetaResolvers.Transform ? { Transform: provenanceBetaResolvers.Transform } : {}),
+  ...(provenanceBetaResolvers.ExportManifest ? { ExportManifest: provenanceBetaResolvers.ExportManifest } : {}),
 };
 
 export default resolvers;
