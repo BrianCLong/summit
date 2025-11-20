@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai smoke tools down
+.PHONY: bootstrap up up-ai smoke tools down observability:demo
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -69,3 +69,26 @@ smoke:
 	  echo "package.json missing; skipping JS smoke"; \
 	fi
 	@echo "smoke: DONE"
+
+observability:demo:
+	@echo "==> observability:demo: Starting SLO-driven alerting demonstration"
+	@echo ""
+	@echo "This will spin up:"
+	@echo "  - Prometheus (metrics collection)"
+	@echo "  - Alertmanager (alert routing)"
+	@echo "  - Grafana (dashboards)"
+	@echo "  - Golden Path metrics exporter"
+	@echo "  - DORA metrics exporter"
+	@echo "  - Load generator (with controlled error injection)"
+	@echo ""
+	@cd observability/demo && $(MAKE) demo
+	@echo ""
+	@echo "✅ Observability demo is running!"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. View dashboards: make -C observability/demo info"
+	@echo "  2. Check SLO metrics: make -C observability/demo metrics"
+	@echo "  3. Break golden path: make -C observability/demo break-golden-path"
+	@echo "  4. Monitor alerts: http://localhost:9090/alerts"
+	@echo ""
+	@echo "Documentation: observability/docs/slo-guide.md"

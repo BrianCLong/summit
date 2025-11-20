@@ -1,14 +1,62 @@
 import asyncio
+import time
 from collections import Counter
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
+from prometheus_client import Counter as PromCounter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from starlette.responses import Response
 
 PROMPT_VERSION = "0.1"
 QUERY_TIMEOUT_SECONDS = 2
 
 app = FastAPI(title="AI Copilot", version="1.0.0")
+
+# ========================================
+# Prometheus Metrics for SLO Tracking
+# ========================================
+
+# Copilot request latency - key SLO metric
+copilot_request_duration = Histogram(
+    'summit_copilot_request_duration_seconds',
+    'AI Copilot request duration in seconds',
+    ['endpoint', 'status'],
+    buckets=[0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0]
+)
+
+# Request counters
+copilot_requests_total = PromCounter(
+    'summit_copilot_requests_total',
+    'Total AI Copilot requests',
+    ['endpoint', 'status']
+)
+
+# Policy violations
+copilot_policy_violations = PromCounter(
+    'summit_copilot_policy_violations_total',
+    'Total policy violations detected',
+    ['policy_type']
+)
+
+# Query timeouts
+copilot_query_timeouts = PromCounter(
+    'summit_copilot_query_timeouts_total',
+    'Total query timeouts',
+    ['endpoint']
+)
+
+# Metrics endpoint
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint"""
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# Health endpoint
+@app.get("/health")
+async def health():
+    """Health check endpoint"""
+    return {"status": "healthy", "version": "1.0.0"}
 
 # --- Policy Guardrails ----------------------------------------------------
 
@@ -16,12 +64,15 @@ app = FastAPI(title="AI Copilot", version="1.0.0")
 def policy_check(text: str) -> None:
     lowered = text.lower()
     if "delete" in lowered:
+        copilot_policy_violations.labels(policy_type="write_operation").inc()
         raise HTTPException(
             status_code=403, detail="Policy violation: write operations are not allowed"
         )
     if "export" in lowered:
+        copilot_policy_violations.labels(policy_type="export").inc()
         raise HTTPException(status_code=403, detail="Policy violation: export is not permitted")
     if "ssn" in lowered:
+        copilot_policy_violations.labels(policy_type="pii").inc()
         raise HTTPException(status_code=403, detail="Policy violation: PII detected")
 
 
@@ -66,16 +117,33 @@ class QueryResponse(BaseModel):
 
 @app.post("/copilot/query", response_model=QueryResponse)
 async def copilot_query(req: QueryRequest) -> QueryResponse:
-    policy_check(req.nl)
-    query = translate_to_cypher(req.nl)
-    allowlist_check(query)
+    start_time = time.time()
+    status = "success"
+
     try:
-        results = await asyncio.wait_for(
-            asyncio.to_thread(sandbox_execute, query), QUERY_TIMEOUT_SECONDS
-        )
-    except TimeoutError as exc:
-        raise HTTPException(status_code=504, detail="Query timed out") from exc
-    return QueryResponse(nl=req.nl, generatedQuery=query, results=results)
+        policy_check(req.nl)
+        query = translate_to_cypher(req.nl)
+        allowlist_check(query)
+        try:
+            results = await asyncio.wait_for(
+                asyncio.to_thread(sandbox_execute, query), QUERY_TIMEOUT_SECONDS
+            )
+        except TimeoutError as exc:
+            status = "timeout"
+            copilot_query_timeouts.labels(endpoint="query").inc()
+            raise HTTPException(status_code=504, detail="Query timed out") from exc
+
+        return QueryResponse(nl=req.nl, generatedQuery=query, results=results)
+
+    except HTTPException as exc:
+        status = f"error_{exc.status_code}"
+        raise
+
+    finally:
+        # Record request duration for SLO tracking
+        duration = time.time() - start_time
+        copilot_request_duration.labels(endpoint="query", status=status).observe(duration)
+        copilot_requests_total.labels(endpoint="query", status=status).inc()
 
 
 # --- RAG -----------------------------------------------------------------
@@ -142,11 +210,26 @@ class RagResponse(BaseModel):
 
 @app.post("/copilot/rag", response_model=RagResponse)
 async def copilot_rag(req: RagRequest) -> RagResponse:
-    policy_check(req.question)
-    result = retrieve(req.question)
-    if not result:
-        raise HTTPException(status_code=404, detail="No relevant information found")
-    return RagResponse(answer=result["answer"], citations=[result["citation"]])
+    start_time = time.time()
+    status = "success"
+
+    try:
+        policy_check(req.question)
+        result = retrieve(req.question)
+        if not result:
+            status = "not_found"
+            raise HTTPException(status_code=404, detail="No relevant information found")
+        return RagResponse(answer=result["answer"], citations=[result["citation"]])
+
+    except HTTPException as exc:
+        status = f"error_{exc.status_code}"
+        raise
+
+    finally:
+        # Record request duration for SLO tracking
+        duration = time.time() - start_time
+        copilot_request_duration.labels(endpoint="rag", status=status).observe(duration)
+        copilot_requests_total.labels(endpoint="rag", status=status).inc()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,281 @@
+# Alertmanager Configuration for SLO-Driven Alerts
+# Multi-channel routing based on severity, SLO, and team
+# Version: 1.0
+# Owner: Platform SRE Team
+
+global:
+  # Global settings
+  resolve_timeout: 5m
+  slack_api_url: ${SLACK_WEBHOOK_URL}
+  pagerduty_url: https://events.pagerduty.com/v2/enqueue
+
+# Template files
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Alert routing tree
+route:
+  # Default receiver for unmatched alerts
+  receiver: 'slack-dev'
+
+  # Group alerts by SLO and alertname to reduce noise
+  group_by: ['slo', 'alertname', 'severity']
+
+  # Wait 30s before sending initial notification (allows grouping)
+  group_wait: 30s
+
+  # Wait 5m before sending updates about same alert group
+  group_interval: 5m
+
+  # Send reminder every 4h for ongoing alerts
+  repeat_interval: 4h
+
+  # Routing rules
+  routes:
+    # ========================================
+    # Critical SLO Alerts → PagerDuty + Slack
+    # ========================================
+    - match:
+        severity: critical
+      receiver: 'pagerduty-critical-and-slack'
+      continue: false
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 15m
+
+      routes:
+        # Golden Path critical → Platform SRE on-call
+        - match:
+            slo: golden_path
+            severity: critical
+          receiver: 'pagerduty-platform-sre'
+          continue: true
+
+        # Copilot critical → AI Team on-call
+        - match:
+            slo: copilot_latency
+            severity: critical
+          receiver: 'pagerduty-ai-team'
+          continue: true
+
+        # Ingestion critical → Data Team on-call
+        - match:
+            slo: ingestion_freshness
+            severity: critical
+          receiver: 'pagerduty-data-team'
+          continue: true
+
+    # ========================================
+    # Warning SLO Alerts → Slack Dev Channel
+    # ========================================
+    - match:
+        severity: warning
+      receiver: 'slack-dev-detailed'
+      continue: false
+      group_wait: 5m
+      group_interval: 10m
+      repeat_interval: 2h
+
+      routes:
+        # Golden Path warnings → Platform SRE Slack
+        - match:
+            slo: golden_path
+            severity: warning
+          receiver: 'slack-platform-sre'
+
+        # Copilot warnings → AI Team Slack
+        - match:
+            slo: copilot_latency
+            severity: warning
+          receiver: 'slack-ai-team'
+
+        # Ingestion warnings → Data Team Slack
+        - match:
+            slo: ingestion_freshness
+            severity: warning
+          receiver: 'slack-data-team'
+
+    # ========================================
+    # Error Budget Exhausted → Product + Leadership
+    # ========================================
+    - match_re:
+        alertname: '.*ErrorBudgetExhausted'
+      receiver: 'slack-product-and-leadership'
+      continue: false
+      group_wait: 1m
+      repeat_interval: 24h
+
+# Alert inhibition rules (suppress noise)
+inhibit_rules:
+  # Suppress slow burn if fast burn is firing
+  - source_match:
+      alertname: '.*FastBurn'
+    target_match:
+      alertname: '.*SlowBurn'
+    equal: ['slo']
+
+  # Suppress individual connector alerts if platform-wide alert is firing
+  - source_match:
+      alertname: 'PlatformMultipleSLOsBreach'
+    target_match_re:
+      alertname: '(GoldenPath|CopilotLatency|IngestionFreshness).*'
+    equal: ['slo']
+
+# Receiver definitions
+receivers:
+  # ========================================
+  # PagerDuty Receivers (Critical Alerts)
+  # ========================================
+  - name: 'pagerduty-critical-and-slack'
+    pagerduty_configs:
+      - routing_key: ${PAGERDUTY_CRITICAL_KEY}
+        severity: 'critical'
+        description: '{{ .CommonAnnotations.summary }}'
+        details:
+          firing: '{{ .Alerts.Firing | len }}'
+          resolved: '{{ .Alerts.Resolved | len }}'
+          slo: '{{ .CommonLabels.slo }}'
+          team: '{{ .CommonLabels.team }}'
+          runbook: '{{ .CommonAnnotations.runbook }}'
+          dashboard: '{{ .CommonAnnotations.dashboard }}'
+    slack_configs:
+      - channel: '#summit-oncall'
+        title: '🚨 [CRITICAL SLO] {{ .CommonLabels.alertname }}'
+        text: |
+          *Alert:* {{ .CommonAnnotations.summary }}
+          *Severity:* {{ .CommonLabels.severity | toUpper }}
+          *SLO:* {{ .CommonLabels.slo }}
+          *Team:* {{ .CommonLabels.team }}
+
+          *Description:*
+          {{ .CommonAnnotations.description }}
+
+          *Runbook:* {{ .CommonAnnotations.runbook }}
+          *Dashboard:* {{ .CommonAnnotations.dashboard }}
+        color: 'danger'
+        send_resolved: true
+
+  - name: 'pagerduty-platform-sre'
+    pagerduty_configs:
+      - routing_key: ${PAGERDUTY_PLATFORM_SRE_KEY}
+        severity: 'critical'
+        description: 'Golden Path SLO Breach: {{ .CommonAnnotations.summary }}'
+
+  - name: 'pagerduty-ai-team'
+    pagerduty_configs:
+      - routing_key: ${PAGERDUTY_AI_TEAM_KEY}
+        severity: 'critical'
+        description: 'Copilot SLO Breach: {{ .CommonAnnotations.summary }}'
+
+  - name: 'pagerduty-data-team'
+    pagerduty_configs:
+      - routing_key: ${PAGERDUTY_DATA_TEAM_KEY}
+        severity: 'critical'
+        description: 'Ingestion SLO Breach: {{ .CommonAnnotations.summary }}'
+
+  # ========================================
+  # Slack Receivers (Warnings & Info)
+  # ========================================
+  - name: 'slack-dev'
+    slack_configs:
+      - channel: '#summit-dev'
+        title: '[{{ .CommonLabels.severity | toUpper }}] {{ .CommonLabels.alertname }}'
+        text: '{{ .CommonAnnotations.summary }}'
+        send_resolved: true
+
+  - name: 'slack-dev-detailed'
+    slack_configs:
+      - channel: '#summit-dev'
+        title: '⚠️  [WARNING SLO] {{ .CommonLabels.alertname }}'
+        text: |
+          *Alert:* {{ .CommonAnnotations.summary }}
+          *SLO:* {{ .CommonLabels.slo }}
+          *Team:* {{ .CommonLabels.team }}
+
+          {{ .CommonAnnotations.description }}
+
+          *Runbook:* {{ .CommonAnnotations.runbook }}
+        color: 'warning'
+        send_resolved: true
+
+  - name: 'slack-platform-sre'
+    slack_configs:
+      - channel: '#platform-sre'
+        title: '⚠️  Golden Path SLO Warning'
+        text: |
+          {{ .CommonAnnotations.summary }}
+
+          {{ .CommonAnnotations.description }}
+
+          <{{ .CommonAnnotations.dashboard }}|View Dashboard>
+        color: 'warning'
+        send_resolved: true
+
+  - name: 'slack-ai-team'
+    slack_configs:
+      - channel: '#ai-team'
+        title: '⚠️  Copilot SLO Warning'
+        text: |
+          {{ .CommonAnnotations.summary }}
+
+          {{ .CommonAnnotations.description }}
+
+          <{{ .CommonAnnotations.dashboard }}|View Dashboard>
+        color: 'warning'
+        send_resolved: true
+
+  - name: 'slack-data-team'
+    slack_configs:
+      - channel: '#data-team'
+        title: '⚠️  Ingestion SLO Warning'
+        text: |
+          {{ .CommonAnnotations.summary }}
+
+          {{ .CommonAnnotations.description }}
+
+          <{{ .CommonAnnotations.dashboard }}|View Dashboard>
+        color: 'warning'
+        send_resolved: true
+
+  - name: 'slack-product-and-leadership'
+    slack_configs:
+      - channel: '#summit-product'
+        title: '🔴 Error Budget Exhausted'
+        text: |
+          *{{ .CommonAnnotations.summary }}*
+
+          An SLO error budget has been fully consumed, indicating sustained service degradation.
+
+          *SLO:* {{ .CommonLabels.slo }}
+          *Team Owner:* {{ .CommonLabels.team }}
+
+          This requires:
+          1. Immediate remediation to restore service quality
+          2. Post-incident review to prevent recurrence
+          3. Possible SLO target adjustment discussion
+
+          *Runbook:* {{ .CommonAnnotations.runbook }}
+          *Dashboard:* {{ .CommonAnnotations.dashboard }}
+        color: 'danger'
+        send_resolved: true
+
+  # ========================================
+  # Email Receivers (Long-term notifications)
+  # ========================================
+  - name: 'email-sre-team'
+    email_configs:
+      - to: 'sre-team@summit.io'
+        from: 'alertmanager@summit.io'
+        smarthost: 'smtp.sendgrid.net:587'
+        auth_username: 'apikey'
+        auth_password: ${SENDGRID_API_KEY}
+        headers:
+          Subject: '[Summit SLO Alert] {{ .CommonLabels.alertname }}'
+        html: |
+          <h2>{{ .CommonAnnotations.summary }}</h2>
+          <p><strong>Severity:</strong> {{ .CommonLabels.severity }}</p>
+          <p><strong>SLO:</strong> {{ .CommonLabels.slo }}</p>
+          <p><strong>Team:</strong> {{ .CommonLabels.team }}</p>
+          <hr>
+          <p>{{ .CommonAnnotations.description }}</p>
+          <p><a href="{{ .CommonAnnotations.runbook }}">Runbook</a> | <a href="{{ .CommonAnnotations.dashboard }}">Dashboard</a></p>

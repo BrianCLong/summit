@@ -1,0 +1,314 @@
+# Summit SLO Definitions
+# These are the core Service Level Objectives for the IntelGraph/Summit platform
+# Version: 1.0
+# Owner: Platform SRE Team
+# Last Updated: 2025-11-20
+
+apiVersion: observability.summit.io/v1
+kind: SLODefinition
+metadata:
+  name: summit-core-slos
+  namespace: production
+  labels:
+    team: platform-sre
+    priority: critical
+    review-cycle: weekly
+
+spec:
+  description: |
+    Core SLOs for Summit platform focusing on three golden signals:
+    1. Golden Path Success Rate - End-to-end system health
+    2. AI Copilot Latency - User-facing AI response times
+    3. Data Ingestion Freshness - Real-time data pipeline health
+
+  # Error budget configuration
+  errorBudget:
+    policy: 28-day rolling window
+    alertThresholds:
+      - name: fast-burn
+        description: Alert when consuming error budget at dangerous rate
+        consumptionRate: 10x  # 10% of monthly budget in 1 hour
+        alertWindow: 1h
+        severity: critical
+        channels: [pagerduty, slack-oncall]
+
+      - name: slow-burn
+        description: Alert when steadily consuming error budget
+        consumptionRate: 2x   # 5% of monthly budget in 6 hours
+        alertWindow: 6h
+        severity: warning
+        channels: [slack-dev, email]
+
+  # SLO Definitions
+  objectives:
+    # ========================================
+    # 1. Golden Path Success Rate
+    # ========================================
+    - name: golden-path-success-rate
+      displayName: "Golden Path Success Rate"
+      description: |
+        Measures end-to-end system health via synthetic checks covering:
+        - Frontend UI availability
+        - API health endpoints
+        - GraphQL query resolution
+        - Core service health (Worker, OPA, OTEL, Jaeger)
+        - Database connectivity
+
+        This is the smoke test equivalent - if this fails, something
+        critical is broken in the platform.
+
+      owner: platform-sre
+      severity: critical
+
+      # Target: 99.9% of golden path checks should succeed
+      target: 99.9
+      window: 28d
+
+      # Business impact
+      impact:
+        user: "Users cannot access critical platform features"
+        business: "Platform unavailable - revenue impact"
+        blast_radius: "All users"
+
+      # SLI definition
+      sli:
+        type: prometheus
+        # Ratio of successful smoke checks to total checks
+        query: |
+          sum(rate(summit_golden_path_checks_total{status="success"}[5m]))
+          /
+          sum(rate(summit_golden_path_checks_total[5m]))
+
+      # Alerting configuration
+      alerts:
+        - name: GoldenPathFastBurn
+          condition: burn_rate_1h > 10 and burn_rate_5m > 10
+          severity: critical
+          for: 5m
+          annotations:
+            summary: "Golden path is failing at dangerous rate"
+            description: "{{ $value }}% of golden path checks failing. System is critically degraded."
+            runbook: "https://docs.summit.io/runbooks/golden-path-failure"
+
+        - name: GoldenPathSlowBurn
+          condition: burn_rate_6h > 2
+          severity: warning
+          for: 15m
+          annotations:
+            summary: "Golden path error budget burning slowly"
+            description: "Golden path checks showing elevated failures. Investigate before critical."
+            runbook: "https://docs.summit.io/runbooks/golden-path-degraded"
+
+      # Related dashboards
+      dashboards:
+        - name: "Golden Path - Overview"
+          url: "https://grafana.summit.io/d/golden-path"
+        - name: "System Health"
+          url: "https://grafana.summit.io/d/system-health"
+
+    # ========================================
+    # 2. AI Copilot Latency
+    # ========================================
+    - name: copilot-latency-p95
+      displayName: "AI Copilot p95 Latency"
+      description: |
+        Measures end-to-end latency for AI Copilot queries including:
+        - Policy checks
+        - NL to Cypher translation
+        - Query validation
+        - Graph database execution
+        - Response formatting
+
+        Target: 95th percentile under 2000ms for acceptable UX.
+
+      owner: ai-team
+      severity: high
+
+      # Target: 99% of time, p95 latency stays under 2000ms
+      target: 99.0
+      window: 28d
+
+      # Business impact
+      impact:
+        user: "Slow AI responses degrade user experience"
+        business: "User satisfaction and retention at risk"
+        blast_radius: "AI Copilot users"
+
+      # SLI definition
+      sli:
+        type: prometheus
+        # Ratio of fast requests to total requests
+        query: |
+          sum(rate(summit_copilot_request_duration_seconds_bucket{le="2.0"}[5m]))
+          /
+          sum(rate(summit_copilot_request_duration_seconds_count[5m]))
+
+      # Alerting configuration
+      alerts:
+        - name: CopilotLatencyFastBurn
+          condition: burn_rate_1h > 10 and burn_rate_5m > 10
+          severity: critical
+          for: 5m
+          annotations:
+            summary: "AI Copilot latency severely degraded"
+            description: "p95 latency exceeding 2000ms at {{ $value }}% rate. Users experiencing slow responses."
+            runbook: "https://docs.summit.io/runbooks/copilot-latency"
+
+        - name: CopilotLatencySlowBurn
+          condition: burn_rate_6h > 2
+          severity: warning
+          for: 15m
+          annotations:
+            summary: "AI Copilot latency elevated"
+            description: "Copilot response times trending slower. Monitor for further degradation."
+            runbook: "https://docs.summit.io/runbooks/copilot-performance"
+
+      # Quantile targets for monitoring
+      quantiles:
+        p50: 500ms
+        p95: 2000ms
+        p99: 5000ms
+
+      # Related dashboards
+      dashboards:
+        - name: "AI Copilot - Performance"
+          url: "https://grafana.summit.io/d/copilot-perf"
+        - name: "LLM Costs & Latency"
+          url: "https://grafana.summit.io/d/llm-metrics"
+
+    # ========================================
+    # 3. Data Ingestion Freshness
+    # ========================================
+    - name: ingestion-freshness
+      displayName: "Data Ingestion Freshness"
+      description: |
+        Measures data freshness for critical connectors:
+        - Entity feeds (threat intelligence)
+        - Indicator feeds (IOCs)
+        - Topicality feeds (current events)
+
+        Target: 95% of ingestion runs complete within 15 minutes
+        of scheduled time. This ensures analysts have current data.
+
+      owner: data-team
+      severity: high
+
+      # Target: 95% of ingestion jobs complete on time
+      target: 95.0
+      window: 28d
+
+      # Business impact
+      impact:
+        user: "Analysts working with stale data"
+        business: "Threat detection delayed, compliance risk"
+        blast_radius: "All analysts"
+
+      # SLI definition
+      sli:
+        type: prometheus
+        # Ratio of fresh ingestion runs to total runs
+        query: |
+          sum(rate(summit_ingestion_freshness_seconds_bucket{le="900"}[5m]))
+          /
+          sum(rate(summit_ingestion_freshness_seconds_count[5m]))
+
+      # Per-connector targets
+      connectors:
+        - name: entities-feed
+          priority: critical
+          maxLagSeconds: 900   # 15 minutes
+          schedule: "*/15 * * * *"  # Every 15 min
+
+        - name: indicators-feed
+          priority: critical
+          maxLagSeconds: 900
+          schedule: "*/15 * * * *"
+
+        - name: topicality-feed
+          priority: high
+          maxLagSeconds: 1800  # 30 minutes
+          schedule: "*/30 * * * *"  # Every 30 min
+
+      # Alerting configuration
+      alerts:
+        - name: IngestionFreshnessFastBurn
+          condition: burn_rate_1h > 10 and burn_rate_5m > 10
+          severity: critical
+          for: 5m
+          annotations:
+            summary: "Critical data connectors severely lagging"
+            description: "{{ $value }}% of ingestion jobs missing freshness targets. Data is stale."
+            runbook: "https://docs.summit.io/runbooks/ingestion-lag"
+
+        - name: IngestionFreshnessSlowBurn
+          condition: burn_rate_6h > 2
+          severity: warning
+          for: 15m
+          annotations:
+            summary: "Data ingestion showing elevated lag"
+            description: "Some connectors falling behind schedule. Monitor for connector issues."
+            runbook: "https://docs.summit.io/runbooks/ingestion-monitoring"
+
+        - name: IngestionConnectorDown
+          condition: absent(summit_ingestion_last_success_timestamp) > 3600
+          severity: critical
+          for: 10m
+          annotations:
+            summary: "Critical connector {{ $labels.connector }} has not reported success"
+            description: "Connector has not successfully ingested data in over 1 hour."
+            runbook: "https://docs.summit.io/runbooks/connector-down"
+
+      # Related dashboards
+      dashboards:
+        - name: "Data Ingestion - Overview"
+          url: "https://grafana.summit.io/d/ingestion"
+        - name: "Connector Health"
+          url: "https://grafana.summit.io/d/connectors"
+
+  # Metadata and review schedule
+  reviews:
+    frequency: weekly
+    day: monday
+    time: "10:00 AM UTC"
+    attendees:
+      - platform-sre
+      - ai-team
+      - data-team
+    agenda:
+      - Review error budget consumption
+      - Analyze alert patterns and false positives
+      - Discuss SLO target adjustments
+      - Review incident correlation with SLO breaches
+
+  # Integration points
+  integrations:
+    prometheus:
+      endpoint: http://prometheus:9090
+      rulesPath: /etc/prometheus/rules/slo-*.yaml
+
+    alertmanager:
+      endpoint: http://alertmanager:9093
+      configPath: /etc/alertmanager/alertmanager.yml
+
+    grafana:
+      endpoint: http://grafana:3000
+      dashboardPath: /var/lib/grafana/dashboards/slo/
+
+    pagerduty:
+      integrationKey: ${PAGERDUTY_INTEGRATION_KEY}
+      severity_mapping:
+        critical: "critical"
+        high: "error"
+        warning: "warning"
+
+    slack:
+      oncall_channel: "#summit-oncall"
+      dev_channel: "#summit-dev"
+      product_channel: "#summit-product"
+
+  # Documentation
+  documentation:
+    runbooks: "https://docs.summit.io/runbooks/"
+    architecture: "https://docs.summit.io/architecture/observability"
+    dashboards: "https://grafana.summit.io/dashboards/slo"
+    postmortems: "https://docs.summit.io/postmortems/"

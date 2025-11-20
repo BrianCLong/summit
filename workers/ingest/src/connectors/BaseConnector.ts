@@ -6,6 +6,13 @@ export abstract class BaseConnector {
   protected logger = logger.child({ component: 'connector' });
   protected schema?: z.ZodSchema;
 
+  // Metrics tracking for SLO monitoring
+  protected lastSuccessTimestamp: number = 0;
+  protected lastAttemptTimestamp: number = 0;
+  protected recordsIngested: number = 0;
+  protected errorCount: number = 0;
+  protected consecutiveFailures: number = 0;
+
   constructor(protected config: ConnectorConfig) {
     this.logger = logger.child({
       component: 'connector',
@@ -51,13 +58,72 @@ export abstract class BaseConnector {
   abstract healthCheck(): Promise<boolean>;
 
   /**
-   * Get connector metrics for monitoring
+   * Get connector metrics for monitoring and SLO tracking
    */
   getMetrics(): Record<string, number> {
+    const now = Date.now();
+    const freshnessSeconds = this.lastSuccessTimestamp
+      ? (now - this.lastSuccessTimestamp) / 1000
+      : -1;
+
     return {
-      // Override in subclasses to provide specific metrics
-      uptime: Date.now(),
+      // Freshness metric - key SLO indicator
+      summit_ingestion_freshness_seconds: freshnessSeconds,
+
+      // Last successful ingestion timestamp (Unix epoch ms)
+      summit_ingestion_last_success_timestamp: this.lastSuccessTimestamp,
+
+      // Last attempt timestamp
+      summit_ingestion_last_attempt_timestamp: this.lastAttemptTimestamp,
+
+      // Total records ingested
+      summit_ingestion_records_total: this.recordsIngested,
+
+      // Error count
+      summit_ingestion_errors_total: this.errorCount,
+
+      // Consecutive failures (reset on success)
+      summit_ingestion_consecutive_failures: this.consecutiveFailures,
+
+      // Health status: 1 = healthy, 0 = unhealthy
+      summit_ingestion_health_status: this.consecutiveFailures < 3 ? 1 : 0,
     };
+  }
+
+  /**
+   * Mark ingestion attempt started
+   */
+  protected markAttemptStarted(): void {
+    this.lastAttemptTimestamp = Date.now();
+  }
+
+  /**
+   * Mark ingestion succeeded with record count
+   */
+  protected markSuccess(recordCount: number = 0): void {
+    this.lastSuccessTimestamp = Date.now();
+    this.recordsIngested += recordCount;
+    this.consecutiveFailures = 0;
+
+    this.logger.info('Ingestion succeeded', {
+      connector: this.config.name,
+      records: recordCount,
+      freshness_seconds: 0,
+    });
+  }
+
+  /**
+   * Mark ingestion failed
+   */
+  protected markFailure(error: Error): void {
+    this.errorCount++;
+    this.consecutiveFailures++;
+
+    this.logger.error('Ingestion failed', {
+      connector: this.config.name,
+      error: error.message,
+      consecutive_failures: this.consecutiveFailures,
+    });
   }
 
   /**

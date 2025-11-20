@@ -1,0 +1,247 @@
+# Prometheus Recording Rules for SLO Calculations
+# These rules pre-calculate SLI values and burn rates for efficient alerting
+# Version: 1.0
+# Owner: Platform SRE Team
+
+groups:
+  # ========================================
+  # Golden Path SLO Recording Rules
+  # ========================================
+  - name: golden-path-slo-recording
+    interval: 30s
+    rules:
+      # SLI: Ratio of successful golden path checks to total checks
+      - record: slo:golden_path:success_ratio:rate5m
+        expr: |
+          sum(rate(summit_golden_path_checks_total{status="success"}[5m]))
+          /
+          sum(rate(summit_golden_path_checks_total{status=~"success|failed"}[5m]))
+
+      - record: slo:golden_path:success_ratio:rate30m
+        expr: |
+          sum(rate(summit_golden_path_checks_total{status="success"}[30m]))
+          /
+          sum(rate(summit_golden_path_checks_total{status=~"success|failed"}[30m]))
+
+      - record: slo:golden_path:success_ratio:rate1h
+        expr: |
+          sum(rate(summit_golden_path_checks_total{status="success"}[1h]))
+          /
+          sum(rate(summit_golden_path_checks_total{status=~"success|failed"}[1h]))
+
+      - record: slo:golden_path:success_ratio:rate6h
+        expr: |
+          sum(rate(summit_golden_path_checks_total{status="success"}[6h]))
+          /
+          sum(rate(summit_golden_path_checks_total{status=~"success|failed"}[6h]))
+
+      # Error ratio (inverse of success ratio)
+      - record: slo:golden_path:error_ratio:rate5m
+        expr: 1 - slo:golden_path:success_ratio:rate5m
+
+      - record: slo:golden_path:error_ratio:rate1h
+        expr: 1 - slo:golden_path:success_ratio:rate1h
+
+      - record: slo:golden_path:error_ratio:rate6h
+        expr: 1 - slo:golden_path:success_ratio:rate6h
+
+      # Burn rate calculation
+      # Target: 99.9% success = 0.1% error budget
+      # Fast burn: consuming 10% of monthly budget in 1 hour = 72x normal rate
+      # Slow burn: consuming 5% of monthly budget in 6 hours = 20x normal rate
+      - record: slo:golden_path:burn_rate:1h
+        expr: slo:golden_path:error_ratio:rate1h / 0.001
+
+      - record: slo:golden_path:burn_rate:5m
+        expr: slo:golden_path:error_ratio:rate5m / 0.001
+
+      - record: slo:golden_path:burn_rate:6h
+        expr: slo:golden_path:error_ratio:rate6h / 0.001
+
+      # Error budget remaining (28 day window)
+      # 1.0 = full budget, 0.0 = budget exhausted
+      - record: slo:golden_path:error_budget_remaining:28d
+        expr: |
+          1 - (
+            sum(increase(summit_golden_path_checks_total{status="failed"}[28d]))
+            /
+            sum(increase(summit_golden_path_checks_total{status=~"success|failed"}[28d]))
+          ) / 0.001
+
+  # ========================================
+  # Copilot Latency SLO Recording Rules
+  # ========================================
+  - name: copilot-latency-slo-recording
+    interval: 30s
+    rules:
+      # SLI: Ratio of requests under 2000ms to total requests
+      - record: slo:copilot_latency:success_ratio:rate5m
+        expr: |
+          sum(rate(summit_copilot_request_duration_seconds_bucket{le="2.0"}[5m]))
+          /
+          sum(rate(summit_copilot_request_duration_seconds_count[5m]))
+
+      - record: slo:copilot_latency:success_ratio:rate30m
+        expr: |
+          sum(rate(summit_copilot_request_duration_seconds_bucket{le="2.0"}[30m]))
+          /
+          sum(rate(summit_copilot_request_duration_seconds_count[30m]))
+
+      - record: slo:copilot_latency:success_ratio:rate1h
+        expr: |
+          sum(rate(summit_copilot_request_duration_seconds_bucket{le="2.0"}[1h]))
+          /
+          sum(rate(summit_copilot_request_duration_seconds_count[1h]))
+
+      - record: slo:copilot_latency:success_ratio:rate6h
+        expr: |
+          sum(rate(summit_copilot_request_duration_seconds_bucket{le="2.0"}[6h]))
+          /
+          sum(rate(summit_copilot_request_duration_seconds_count[6h]))
+
+      # Error ratio (requests exceeding 2000ms)
+      - record: slo:copilot_latency:error_ratio:rate5m
+        expr: 1 - slo:copilot_latency:success_ratio:rate5m
+
+      - record: slo:copilot_latency:error_ratio:rate1h
+        expr: 1 - slo:copilot_latency:success_ratio:rate1h
+
+      - record: slo:copilot_latency:error_ratio:rate6h
+        expr: 1 - slo:copilot_latency:success_ratio:rate6h
+
+      # Burn rate calculation
+      # Target: 99% of time p95 < 2000ms = 1% error budget
+      - record: slo:copilot_latency:burn_rate:1h
+        expr: slo:copilot_latency:error_ratio:rate1h / 0.01
+
+      - record: slo:copilot_latency:burn_rate:5m
+        expr: slo:copilot_latency:error_ratio:rate5m / 0.01
+
+      - record: slo:copilot_latency:burn_rate:6h
+        expr: slo:copilot_latency:error_ratio:rate6h / 0.01
+
+      # Error budget remaining (28 day window)
+      - record: slo:copilot_latency:error_budget_remaining:28d
+        expr: |
+          1 - (
+            sum(increase(summit_copilot_request_duration_seconds_count[28d]))
+            -
+            sum(increase(summit_copilot_request_duration_seconds_bucket{le="2.0"}[28d]))
+          ) / (
+            sum(increase(summit_copilot_request_duration_seconds_count[28d])) * 0.01
+          )
+
+      # P95 latency (quantile calculation)
+      - record: slo:copilot_latency:p95:rate5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(summit_copilot_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      # Request rate
+      - record: slo:copilot:request_rate:rate5m
+        expr: sum(rate(summit_copilot_requests_total[5m]))
+
+  # ========================================
+  # Ingestion Freshness SLO Recording Rules
+  # ========================================
+  - name: ingestion-freshness-slo-recording
+    interval: 30s
+    rules:
+      # SLI: Ratio of fresh ingestions (< 900s lag) to total
+      - record: slo:ingestion_freshness:success_ratio:rate5m
+        expr: |
+          sum(rate(summit_ingestion_freshness_seconds_bucket{le="900"}[5m]))
+          /
+          sum(rate(summit_ingestion_freshness_seconds_count[5m]))
+
+      - record: slo:ingestion_freshness:success_ratio:rate30m
+        expr: |
+          sum(rate(summit_ingestion_freshness_seconds_bucket{le="900"}[30m]))
+          /
+          sum(rate(summit_ingestion_freshness_seconds_count[30m]))
+
+      - record: slo:ingestion_freshness:success_ratio:rate1h
+        expr: |
+          sum(rate(summit_ingestion_freshness_seconds_bucket{le="900"}[1h]))
+          /
+          sum(rate(summit_ingestion_freshness_seconds_count[1h]))
+
+      - record: slo:ingestion_freshness:success_ratio:rate6h
+        expr: |
+          sum(rate(summit_ingestion_freshness_seconds_bucket{le="900"}[6h]))
+          /
+          sum(rate(summit_ingestion_freshness_seconds_count[6h]))
+
+      # Error ratio (ingestions exceeding 900s lag)
+      - record: slo:ingestion_freshness:error_ratio:rate5m
+        expr: 1 - slo:ingestion_freshness:success_ratio:rate5m
+
+      - record: slo:ingestion_freshness:error_ratio:rate1h
+        expr: 1 - slo:ingestion_freshness:success_ratio:rate1h
+
+      - record: slo:ingestion_freshness:error_ratio:rate6h
+        expr: 1 - slo:ingestion_freshness:success_ratio:rate6h
+
+      # Burn rate calculation
+      # Target: 95% of ingestions < 900s = 5% error budget
+      - record: slo:ingestion_freshness:burn_rate:1h
+        expr: slo:ingestion_freshness:error_ratio:rate1h / 0.05
+
+      - record: slo:ingestion_freshness:burn_rate:5m
+        expr: slo:ingestion_freshness:error_ratio:rate5m / 0.05
+
+      - record: slo:ingestion_freshness:burn_rate:6h
+        expr: slo:ingestion_freshness:error_ratio:rate6h / 0.05
+
+      # Error budget remaining (28 day window)
+      - record: slo:ingestion_freshness:error_budget_remaining:28d
+        expr: |
+          1 - (
+            sum(increase(summit_ingestion_freshness_seconds_count[28d]))
+            -
+            sum(increase(summit_ingestion_freshness_seconds_bucket{le="900"}[28d]))
+          ) / (
+            sum(increase(summit_ingestion_freshness_seconds_count[28d])) * 0.05
+          )
+
+      # Per-connector freshness
+      - record: slo:ingestion_freshness:lag_seconds:max
+        expr: |
+          max(summit_ingestion_freshness_seconds) by (connector)
+
+      # Connector health status
+      - record: slo:ingestion:health_status
+        expr: summit_ingestion_health_status
+
+  # ========================================
+  # Aggregated SLO Dashboard Metrics
+  # ========================================
+  - name: slo-dashboard-aggregates
+    interval: 1m
+    rules:
+      # Overall platform health score (0-1)
+      # Weighted average of the three core SLOs
+      - record: slo:platform:health_score
+        expr: |
+          (
+            slo:golden_path:success_ratio:rate5m * 0.5 +
+            slo:copilot_latency:success_ratio:rate5m * 0.3 +
+            slo:ingestion_freshness:success_ratio:rate5m * 0.2
+          )
+
+      # Combined error budget consumption rate
+      - record: slo:platform:error_budget_burn_rate:1h
+        expr: |
+          max(
+            slo:golden_path:burn_rate:1h,
+            slo:copilot_latency:burn_rate:1h,
+            slo:ingestion_freshness:burn_rate:1h
+          )
+
+      # SLO compliance (all SLOs meeting targets)
+      - record: slo:platform:compliance
+        expr: |
+          (slo:golden_path:success_ratio:rate1h >= 0.999) *
+          (slo:copilot_latency:success_ratio:rate1h >= 0.99) *
+          (slo:ingestion_freshness:success_ratio:rate1h >= 0.95)

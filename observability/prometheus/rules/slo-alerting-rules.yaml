@@ -1,0 +1,275 @@
+# Prometheus Alerting Rules for SLO-Driven Alerts
+# Multi-window, multi-burn-rate alerting strategy for low false positive rate
+# Based on Google SRE Workbook Chapter 5: Alerting on SLOs
+# Version: 1.0
+# Owner: Platform SRE Team
+
+groups:
+  # ========================================
+  # Golden Path SLO Alerts
+  # ========================================
+  - name: golden-path-slo-alerts
+    rules:
+      # Critical: Fast burn rate (10x) - Page immediately
+      # Consuming 10% of monthly error budget in 1 hour
+      - alert: GoldenPathFastBurn
+        expr: |
+          slo:golden_path:burn_rate:1h > 10
+          and
+          slo:golden_path:burn_rate:5m > 10
+        for: 2m
+        labels:
+          severity: critical
+          slo: golden_path
+          team: platform-sre
+          channel: pagerduty
+          escalate: true
+        annotations:
+          summary: "Golden Path SLO: Critical error budget burn"
+          description: |
+            Golden path checks are failing at {{ $value | humanizePercentage }} rate.
+            Error budget will be exhausted in {{ with query "1 / slo:golden_path:burn_rate:1h * 28 * 24" }}{{ . | first | value | humanizeDuration }}{{ end }} at this rate.
+
+            Current status:
+            - 1h burn rate: {{ with query "slo:golden_path:burn_rate:1h" }}{{ . | first | value | printf "%.1fx" }}{{ end }}
+            - Success ratio: {{ with query "slo:golden_path:success_ratio:rate1h" }}{{ . | first | value | humanizePercentage }}{{ end }}
+            - Error budget remaining: {{ with query "slo:golden_path:error_budget_remaining:28d" }}{{ . | first | value | humanizePercentage }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/golden-path-fast-burn"
+          dashboard: "https://grafana.summit.io/d/golden-path-slo"
+          impact: "Users cannot access critical platform features"
+          action: "Check service health endpoints, review recent deployments"
+
+      # Warning: Slow burn rate (2x) - Alert to dev channel
+      # Consuming 5% of monthly error budget in 6 hours
+      - alert: GoldenPathSlowBurn
+        expr: |
+          slo:golden_path:burn_rate:6h > 2
+          and
+          slo:golden_path:burn_rate:30m > 2
+        for: 15m
+        labels:
+          severity: warning
+          slo: golden_path
+          team: platform-sre
+          channel: slack-dev
+        annotations:
+          summary: "Golden Path SLO: Elevated error rate"
+          description: |
+            Golden path checks showing elevated failure rate.
+            Error budget will be exhausted in {{ with query "1 / slo:golden_path:burn_rate:6h * 28 * 24" }}{{ . | first | value | humanizeDuration }}{{ end }} at this rate.
+
+            Current status:
+            - 6h burn rate: {{ with query "slo:golden_path:burn_rate:6h" }}{{ . | first | value | printf "%.1fx" }}{{ end }}
+            - Success ratio: {{ with query "slo:golden_path:success_ratio:rate6h" }}{{ . | first | value | humanizePercentage }}{{ end }}
+            - Error budget remaining: {{ with query "slo:golden_path:error_budget_remaining:28d" }}{{ . | first | value | humanizePercentage }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/golden-path-slow-burn"
+          dashboard: "https://grafana.summit.io/d/golden-path-slo"
+
+      # Error budget exhausted
+      - alert: GoldenPathErrorBudgetExhausted
+        expr: slo:golden_path:error_budget_remaining:28d < 0
+        for: 5m
+        labels:
+          severity: critical
+          slo: golden_path
+          team: platform-sre
+          channel: pagerduty
+        annotations:
+          summary: "Golden Path SLO: Error budget exhausted"
+          description: "Golden path error budget has been fully consumed. Immediate action required."
+          runbook: "https://docs.summit.io/runbooks/error-budget-exhausted"
+
+  # ========================================
+  # Copilot Latency SLO Alerts
+  # ========================================
+  - name: copilot-latency-slo-alerts
+    rules:
+      # Critical: Fast burn rate
+      - alert: CopilotLatencyFastBurn
+        expr: |
+          slo:copilot_latency:burn_rate:1h > 10
+          and
+          slo:copilot_latency:burn_rate:5m > 10
+        for: 2m
+        labels:
+          severity: critical
+          slo: copilot_latency
+          team: ai-team
+          channel: pagerduty
+          escalate: true
+        annotations:
+          summary: "AI Copilot SLO: Critical latency degradation"
+          description: |
+            AI Copilot p95 latency severely degraded (>2000ms).
+            Error budget will be exhausted in {{ with query "1 / slo:copilot_latency:burn_rate:1h * 28 * 24" }}{{ . | first | value | humanizeDuration }}{{ end }} at this rate.
+
+            Current status:
+            - p95 latency: {{ with query "slo:copilot_latency:p95:rate5m" }}{{ . | first | value | printf "%.0fms" }}{{ end }}
+            - 1h burn rate: {{ with query "slo:copilot_latency:burn_rate:1h" }}{{ . | first | value | printf "%.1fx" }}{{ end }}
+            - Success ratio: {{ with query "slo:copilot_latency:success_ratio:rate1h" }}{{ . | first | value | humanizePercentage }}{{ end }}
+            - Request rate: {{ with query "slo:copilot:request_rate:rate5m" }}{{ . | first | value | printf "%.1f req/s" }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/copilot-latency-fast-burn"
+          dashboard: "https://grafana.summit.io/d/copilot-latency-slo"
+          impact: "Users experiencing slow AI responses (>2s)"
+          action: "Check LLM API health, database query performance, graph query optimization"
+
+      # Warning: Slow burn rate
+      - alert: CopilotLatencySlowBurn
+        expr: |
+          slo:copilot_latency:burn_rate:6h > 2
+          and
+          slo:copilot_latency:burn_rate:30m > 2
+        for: 15m
+        labels:
+          severity: warning
+          slo: copilot_latency
+          team: ai-team
+          channel: slack-dev
+        annotations:
+          summary: "AI Copilot SLO: Elevated latency"
+          description: |
+            AI Copilot latency showing elevated p95 times.
+            Error budget will be exhausted in {{ with query "1 / slo:copilot_latency:burn_rate:6h * 28 * 24" }}{{ . | first | value | humanizeDuration }}{{ end }} at this rate.
+
+            Current status:
+            - p95 latency: {{ with query "slo:copilot_latency:p95:rate5m" }}{{ . | first | value | printf "%.0fms" }}{{ end }}
+            - 6h burn rate: {{ with query "slo:copilot_latency:burn_rate:6h" }}{{ . | first | value | printf "%.1fx" }}{{ end }}
+            - Success ratio: {{ with query "slo:copilot_latency:success_ratio:rate6h" }}{{ . | first | value | humanizePercentage }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/copilot-latency-slow-burn"
+          dashboard: "https://grafana.summit.io/d/copilot-latency-slo"
+
+      # Error budget exhausted
+      - alert: CopilotLatencyErrorBudgetExhausted
+        expr: slo:copilot_latency:error_budget_remaining:28d < 0
+        for: 5m
+        labels:
+          severity: critical
+          slo: copilot_latency
+          team: ai-team
+          channel: slack-product
+        annotations:
+          summary: "AI Copilot SLO: Error budget exhausted"
+          description: "Copilot latency error budget has been fully consumed. Performance optimization required."
+          runbook: "https://docs.summit.io/runbooks/error-budget-exhausted"
+
+  # ========================================
+  # Ingestion Freshness SLO Alerts
+  # ========================================
+  - name: ingestion-freshness-slo-alerts
+    rules:
+      # Critical: Fast burn rate
+      - alert: IngestionFreshnessFastBurn
+        expr: |
+          slo:ingestion_freshness:burn_rate:1h > 10
+          and
+          slo:ingestion_freshness:burn_rate:5m > 10
+        for: 2m
+        labels:
+          severity: critical
+          slo: ingestion_freshness
+          team: data-team
+          channel: pagerduty
+          escalate: true
+        annotations:
+          summary: "Data Ingestion SLO: Critical freshness degradation"
+          description: |
+            Data connectors severely lagging behind schedule.
+            Error budget will be exhausted in {{ with query "1 / slo:ingestion_freshness:burn_rate:1h * 28 * 24" }}{{ . | first | value | humanizeDuration }}{{ end }} at this rate.
+
+            Current status:
+            - 1h burn rate: {{ with query "slo:ingestion_freshness:burn_rate:1h" }}{{ . | first | value | printf "%.1fx" }}{{ end }}
+            - Success ratio: {{ with query "slo:ingestion_freshness:success_ratio:rate1h" }}{{ . | first | value | humanizePercentage }}{{ end }}
+            - Max lag: {{ with query "slo:ingestion_freshness:lag_seconds:max" }}{{ . | first | value | humanizeDuration }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/ingestion-freshness-fast-burn"
+          dashboard: "https://grafana.summit.io/d/ingestion-freshness-slo"
+          impact: "Analysts working with stale data (>15min lag)"
+          action: "Check connector health, Kafka lag, database write performance"
+
+      # Warning: Slow burn rate
+      - alert: IngestionFreshnessSlowBurn
+        expr: |
+          slo:ingestion_freshness:burn_rate:6h > 2
+          and
+          slo:ingestion_freshness:burn_rate:30m > 2
+        for: 15m
+        labels:
+          severity: warning
+          slo: ingestion_freshness
+          team: data-team
+          channel: slack-dev
+        annotations:
+          summary: "Data Ingestion SLO: Elevated lag"
+          description: |
+            Data connectors showing elevated lag times.
+            Error budget will be exhausted in {{ with query "1 / slo:ingestion_freshness:burn_rate:6h * 28 * 24" }}{{ . | first | value | humanizeDuration }}{{ end }} at this rate.
+
+            Current status:
+            - 6h burn rate: {{ with query "slo:ingestion_freshness:burn_rate:6h" }}{{ . | first | value | printf "%.1fx" }}{{ end }}
+            - Success ratio: {{ with query "slo:ingestion_freshness:success_ratio:rate6h" }}{{ . | first | value | humanizePercentage }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/ingestion-freshness-slow-burn"
+          dashboard: "https://grafana.summit.io/d/ingestion-freshness-slo"
+
+      # Connector down (no successful ingestion in 1 hour)
+      - alert: IngestionConnectorDown
+        expr: |
+          (time() - summit_ingestion_last_success_timestamp / 1000) > 3600
+          and
+          summit_ingestion_health_status == 0
+        for: 10m
+        labels:
+          severity: critical
+          slo: ingestion_freshness
+          team: data-team
+          channel: pagerduty
+        annotations:
+          summary: "Critical connector {{ $labels.connector }} is down"
+          description: |
+            Connector {{ $labels.connector }} has not successfully ingested data in over 1 hour.
+            Last success: {{ with query "summit_ingestion_last_success_timestamp{connector='$labels.connector'} / 1000" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            Consecutive failures: {{ with query "summit_ingestion_consecutive_failures{connector='$labels.connector'}" }}{{ . | first | value }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/connector-down"
+          dashboard: "https://grafana.summit.io/d/ingestion-freshness-slo"
+
+  # ========================================
+  # Platform-Wide SLO Alerts
+  # ========================================
+  - name: platform-slo-alerts
+    rules:
+      # Multiple SLOs breached simultaneously
+      - alert: PlatformMultipleSLOsBreach
+        expr: |
+          count(
+            (slo:golden_path:burn_rate:1h > 5) or
+            (slo:copilot_latency:burn_rate:1h > 5) or
+            (slo:ingestion_freshness:burn_rate:1h > 5)
+          ) >= 2
+        for: 5m
+        labels:
+          severity: critical
+          team: platform-sre
+          channel: pagerduty
+          escalate: true
+        annotations:
+          summary: "Platform-wide degradation: Multiple SLOs breaching"
+          description: |
+            Multiple SLOs are simultaneously breaching their targets.
+            This indicates a platform-wide issue requiring immediate investigation.
+
+            Platform health score: {{ with query "slo:platform:health_score" }}{{ . | first | value | humanizePercentage }}{{ end }}
+          runbook: "https://docs.summit.io/runbooks/platform-wide-degradation"
+          dashboard: "https://grafana.summit.io/d/platform-slo-overview"
+
+      # Platform health score critically low
+      - alert: PlatformHealthScoreCritical
+        expr: slo:platform:health_score < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          team: platform-sre
+          channel: slack-oncall
+        annotations:
+          summary: "Platform health score below 95%"
+          description: |
+            Overall platform health score is {{ with query "slo:platform:health_score" }}{{ . | first | value | humanizePercentage }}{{ end }}.
+            Multiple services may be degraded.
+          runbook: "https://docs.summit.io/runbooks/platform-health-degraded"

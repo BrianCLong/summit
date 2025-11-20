@@ -1,0 +1,140 @@
+# SLO-Driven Alerting Demo Stack
+# Spins up full observability infrastructure for demonstration
+#
+# Usage:
+#   docker-compose up -d
+#   make observability:demo
+
+version: '3.8'
+
+services:
+  # ========================================
+  # Prometheus - Metrics Collection & Alerting
+  # ========================================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: summit-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - summit-observability
+    restart: unless-stopped
+
+  # ========================================
+  # Alertmanager - Alert Routing
+  # ========================================
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: summit-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ../alertmanager/alertmanager-slo.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - summit-observability
+    restart: unless-stopped
+
+  # ========================================
+  # Grafana - Visualization & Dashboards
+  # ========================================
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: summit-grafana
+    ports:
+      - "3333:3000"  # Using 3333 to avoid conflict with app
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3333
+    networks:
+      - summit-observability
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # ========================================
+  # Golden Path Exporter
+  # ========================================
+  golden-path-exporter:
+    build:
+      context: ../../
+      dockerfile: observability/demo/Dockerfile.golden-path
+    container_name: summit-golden-path-exporter
+    ports:
+      - "9465:9465"
+    environment:
+      - METRICS_PORT=9465
+      - CHECK_INTERVAL_SECONDS=30
+    networks:
+      - summit-observability
+    restart: unless-stopped
+
+  # ========================================
+  # DORA Metrics Exporter
+  # ========================================
+  dora-exporter:
+    build:
+      context: ../../
+      dockerfile: observability/demo/Dockerfile.dora
+    container_name: summit-dora-exporter
+    ports:
+      - "9102:9102"
+    environment:
+      - GH_TOKEN=${GH_TOKEN}
+      - GITHUB_REPO_OWNER=${GITHUB_REPO_OWNER:-BrianCLong}
+      - GITHUB_REPO_NAME=${GITHUB_REPO_NAME:-summit}
+      - DORA_LOOKBACK_DAYS=28
+      - DORA_METRICS_PORT=9102
+      - DORA_REFRESH_INTERVAL_SECONDS=300
+    networks:
+      - summit-observability
+    restart: unless-stopped
+
+  # ========================================
+  # Load Generator (for demo)
+  # ========================================
+  load-generator:
+    build:
+      context: ../../
+      dockerfile: observability/demo/Dockerfile.load-gen
+    container_name: summit-load-generator
+    environment:
+      - TARGET_URL=http://host.docker.internal:4000
+      - COPILOT_URL=http://host.docker.internal:8002
+      - ERROR_RATE=0.05  # Inject 5% error rate for demo
+      - RPS=10  # 10 requests per second
+    networks:
+      - summit-observability
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+networks:
+  summit-observability:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  alertmanager-data:
+  grafana-data:

@@ -1,0 +1,69 @@
+# Prometheus Configuration for SLO-Driven Alerting Demo
+# This is a simplified config for the demo environment
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'summit-demo'
+    environment: 'demo'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load SLO recording and alerting rules
+rule_files:
+  - '/etc/prometheus/rules/*.yaml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Golden Path Exporter
+  - job_name: 'golden-path'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['golden-path-exporter:9465']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'summit_golden_path_.*'
+        action: keep
+
+  # DORA Metrics Exporter
+  - job_name: 'dora'
+    scrape_interval: 60s
+    static_configs:
+      - targets: ['dora-exporter:9102']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'dora_.*'
+        action: keep
+
+  # AI Copilot Service (if running locally)
+  - job_name: 'copilot'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:8002']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'summit_copilot_.*'
+        action: keep
+
+  # Summit API Server (if running locally)
+  - job_name: 'summit-api'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:4000']
+    metrics_path: '/metrics'
+
+  # Alertmanager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
