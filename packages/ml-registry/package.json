@@ -1,0 +1,39 @@
+{
+  "name": "@intelgraph/ml-registry",
+  "version": "1.0.0",
+  "description": "ML Model Registry with versioning, lineage tracking, and lifecycle management",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/graph-ai-core": "workspace:*",
+    "zod": "^4.1.12",
+    "pg": "^8.16.3",
+    "redis": "^5.8.1",
+    "uuid": "^11.1.1",
+    "pino": "^9.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
