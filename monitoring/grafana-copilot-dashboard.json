@@ -1,0 +1,472 @@
+{
+  "dashboard": {
+    "title": "AI Copilot Monitoring",
+    "tags": ["copilot", "ai", "summit"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Query Rate (per minute)",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(copilot_nl_queries_total[1m])",
+            "legendFormat": "{{status}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Queries/min"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Query Success Rate",
+        "type": "singlestat",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(copilot_nl_queries_total{status=\"success\"}[5m])) / sum(rate(copilot_nl_queries_total[5m]))",
+            "refId": "A"
+          }
+        ],
+        "format": "percentunit",
+        "thresholds": "0.9,0.95",
+        "colors": ["#d44a3a", "#e0b400", "#299c46"]
+      },
+      {
+        "id": 3,
+        "title": "Blocked Queries",
+        "type": "singlestat",
+        "gridPos": {
+          "x": 18,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "expr": "sum(increase(copilot_queries_blocked_total[1h]))",
+            "refId": "A"
+          }
+        ],
+        "format": "short",
+        "thresholds": "10,50",
+        "colors": ["#299c46", "#e0b400", "#d44a3a"]
+      },
+      {
+        "id": 4,
+        "title": "Average Query Execution Time",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(copilot_cypher_execution_duration_seconds_bucket[5m])) by (le, complexity))",
+            "legendFormat": "p50 - {{complexity}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(copilot_cypher_execution_duration_seconds_bucket[5m])) by (le, complexity))",
+            "legendFormat": "p95 - {{complexity}}",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(copilot_cypher_execution_duration_seconds_bucket[5m])) by (le, complexity))",
+            "legendFormat": "p99 - {{complexity}}",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Duration"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Query Complexity Distribution",
+        "type": "piechart",
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "sum by (complexity) (increase(copilot_nl_queries_total[1h]))",
+            "legendFormat": "{{complexity}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "LLM API Costs (USD)",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "increase(copilot_llm_api_cost_usd[1h])",
+            "legendFormat": "{{model}} - {{operation}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "currencyUSD",
+            "label": "Cost"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Daily Cost Budget Remaining",
+        "type": "gauge",
+        "gridPos": {
+          "x": 12,
+          "y": 16,
+          "w": 6,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "copilot_daily_cost_budget_usd",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 20, "color": "yellow"},
+                {"value": 50, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Result Size Distribution",
+        "type": "graph",
+        "gridPos": {
+          "x": 18,
+          "y": 16,
+          "w": 6,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(copilot_query_result_size_bucket[5m])) by (le))",
+            "legendFormat": "p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(copilot_query_result_size_bucket[5m])) by (le))",
+            "legendFormat": "p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(copilot_query_result_size_bucket[5m])) by (le))",
+            "legendFormat": "p99",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Rows"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Block Reasons (Last Hour)",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (block_reason) (increase(copilot_queries_blocked_total[1h])))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByPattern": {
+                "block_reason": "Reason",
+                "Value": "Count"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Security Events",
+        "type": "logs",
+        "gridPos": {
+          "x": 12,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "{job=\"summit-copilot\"} |= \"prompt_injection\" or \"dangerous_query\"",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showLabels": true,
+          "showTime": true,
+          "wrapLogMessage": true
+        }
+      },
+      {
+        "id": 11,
+        "title": "Hypothesis Generation Rate",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 32,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(copilot_hypotheses_generated_total[5m])",
+            "legendFormat": "{{success}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Generations/min"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Narrative Generation Rate",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 32,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(copilot_narratives_generated_total[5m])",
+            "legendFormat": "{{style}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Generations/min"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Estimation Accuracy",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 40,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "copilot_estimation_accuracy_ratio{quantile=\"0.5\"}",
+            "legendFormat": "p50 - {{complexity}}",
+            "refId": "A"
+          },
+          {
+            "expr": "copilot_estimation_accuracy_ratio{quantile=\"0.9\"}",
+            "legendFormat": "p90 - {{complexity}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Ratio (1.0 = perfect)"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Audit Entries Created",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 40,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(copilot_audit_entries_created_total[5m])",
+            "legendFormat": "{{operation}} - {{privacy_level}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Entries/min"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Top Users by Query Volume (Last Hour)",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 48,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (user_id) (increase(copilot_nl_queries_total[1h])))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByPattern": {
+                "user_id": "User ID",
+                "Value": "Query Count"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Template Usage",
+        "type": "table",
+        "gridPos": {
+          "x": 12,
+          "y": 48,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (template_id, category) (increase(copilot_template_usage_total[1h])))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByPattern": {
+                "template_id": "Template",
+                "category": "Category",
+                "Value": "Usage Count"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "investigation_id",
+          "type": "query",
+          "datasource": "Prometheus",
+          "query": "label_values(copilot_nl_queries_total, investigation_id)",
+          "refresh": 1,
+          "multi": false,
+          "includeAll": false
+        },
+        {
+          "name": "time_range",
+          "type": "interval",
+          "query": "1m,5m,15m,1h,6h,1d",
+          "current": {
+            "text": "5m",
+            "value": "5m"
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(copilot_build_info[5m]) > 0",
+          "titleFormat": "Deployment",
+          "textFormat": "New copilot version deployed"
+        }
+      ]
+    }
+  }
+}
