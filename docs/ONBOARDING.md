@@ -21,39 +21,41 @@ Our mission: **supercharge development of the MVP** while **always keeping a dep
 
 ## 🔑 Quickstart (30 Minutes to Productive)
 
+**Prereqs:** Docker Desktop ≥ 4.x (8 GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+.
+
 ```bash
 # 1. Clone and enter repo
 git clone https://github.com/BrianCLong/summit.git
 cd summit
 
-# 2. Copy environment config
-cp .env.example .env
+# 2. Bootstrap dependencies + env (seeds .env from .env.example)
+make bootstrap
 
-# 3. Start core environment (minimal hardware)
-make bootstrap && make up
+# 3. Start the stack (API, UI, Postgres, Neo4j, Redis, observability)
+make up
 
-# 4. Run smoke tests (must pass!)
+# 4. Validate the golden path automation
 make smoke
 
-# 5. Optional: Enable AI/Kafka capabilities
-# make up-ai     # For AI processing
+# 5. Optional: AI/Kafka profile
+make up-ai
 ```
 
-- 💡 **Shortcut**: run `./start.sh [--ai]` to execute `make bootstrap && make up && make smoke` with health-gate polling.
-- ✅ If all green → you’re ready to develop!
+- 💡 **Shortcut:** `./start.sh [--ai]` wraps `make bootstrap && make up && make smoke` with health/ready polling; add `--skip-smoke` only when debugging startup issues.
+- ✅ If all green → you’re ready to develop.
 - ❌ If red → fix before coding. No broken builds allowed.
 
 ---
 
 ## 📋 Golden Path Workflow
 
-1. Create a new **Investigation**.
-2. Add **Entities** and **Relationships**.
-3. Import data (CSV or STIX/TAXII).
-4. Run **Copilot Goal**.
-5. Watch live **Events & Results** update in the graph.
+1. Open http://localhost:3000 once `make up` finishes (GraphQL is at http://localhost:4000/graphql for sanity checks).
+2. Create a new **Investigation** from the dashboard using the seeded dataset (`data/golden-path/demo-investigation.json`).
+3. Add **Entities** and **Relationships** with the graph explorer.
+4. Import or review seeded data, then run the **Copilot Goal**.
+5. Observe **Results** and graph updates in real time.
 
-👉 Every developer must be able to demo this flow at any time.
+👉 Every developer must be able to demo **Investigation → Entities → Relationships → Copilot → Results** on demand. `make smoke` executes the same path non-interactively.
 
 ---
 
