@@ -2,12 +2,35 @@ const { v4: uuid } = require('uuid');
 const store = require('./store.memory');
 const { generatePlanForGoal } = require('./plan');
 
+/**
+ * Copilot Orchestrator
+ *
+ * This module manages the lifecycle of Copilot "Runs".
+ * A Run consists of a Goal -> Plan -> Tasks -> Execution loop.
+ *
+ * Architecture:
+ * - State is currently held in memory (store.memory.js), but designed to be swappable (e.g. store.postgres.js).
+ * - Execution is async/event-driven.
+ * - Client communication happens via Socket.IO rooms (`copilot:run:{runId}`).
+ */
+
 // injected at app bootstrap
 let io = null;
 function setIO(socketIO) {
   io = socketIO;
 }
 
+/**
+ * Executes a single task step.
+ *
+ * CURRENT STATUS: STUB IMPLEMENTATION
+ * This function currently mocks responses for demonstration purposes.
+ *
+ * TODO: Implement real handlers for:
+ * - NEO4J_QUERY: Execute Cypher against the graph.
+ * - GRAPH_ANALYTICS: Call GDS algorithms.
+ * - SUMMARIZE: Call LLM service.
+ */
 async function executeTask(task) {
   const now = () => new Date().toISOString();
   task.status = 'RUNNING';
@@ -40,6 +63,13 @@ async function executeTask(task) {
   }
 }
 
+/**
+ * Initiates a new Copilot Run.
+ *
+ * 1. Generates a Plan (static or LLM-based) for the goal.
+ * 2. Persists the Run state.
+ * 3. Kicks off the async execution loop.
+ */
 async function startRun(goalId, goalText) {
   const runId = uuid();
   const plan = generatePlanForGoal(goalId, goalText);
@@ -52,7 +82,7 @@ async function startRun(goalId, goalText) {
   };
   store.saveRun(run);
 
-  // async execute
+  // async execute - verify this doesn't block the main thread if tasks become heavy
   setImmediate(async () => {
     run.status = 'RUNNING';
     run.startedAt = new Date().toISOString();

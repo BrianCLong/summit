@@ -7,6 +7,11 @@
  * - Field-level permissions
  * - Audit logging for denied operations
  * - Policy caching for performance
+ *
+ * Architecture:
+ * This middleware acts as a PEP (Policy Enforcement Point).
+ * It delegates decision making to OPA (PDP - Policy Decision Point).
+ * Decisions are "Fail-Closed": if OPA is unreachable or errors, access is DENIED.
  */
 
 import axios from 'axios';
@@ -119,7 +124,11 @@ export class OPAMiddleware {
   }
 
   /**
-   * Generate cache key for policy decision
+   * Generate cache key for policy decision.
+   *
+   * CAUTION: Uses JSON.stringify which is not deterministic for key ordering.
+   * However, input objects are constructed structurally in this class,
+   * so key order should remain consistent in practice.
    */
   private generateCacheKey(input: PolicyInput): string {
     const key = {
@@ -132,7 +141,9 @@ export class OPAMiddleware {
   }
 
   /**
-   * Check policy with OPA
+   * Check policy with OPA.
+   *
+   * Returns { allow: false } if OPA is unreachable (Fail-Closed).
    */
   async checkPolicy(input: PolicyInput): Promise<PolicyDecision> {
     this.stats.totalRequests++;
@@ -196,7 +207,14 @@ export class OPAMiddleware {
   }
 
   /**
-   * Create GraphQL resolver middleware
+   * Create GraphQL resolver middleware.
+   *
+   * Wraps a resolver to enforce policy BEFORE execution.
+   * Extracts:
+   * - User context
+   * - Operation type (Query/Mutation)
+   * - Resource type (GraphQL Type) and Field
+   * - Arguments (sanitized)
    */
   createGraphQLMiddleware() {
     return async (
@@ -248,7 +266,9 @@ export class OPAMiddleware {
   }
 
   /**
-   * Create REST API middleware
+   * Create REST API middleware.
+   *
+   * Enforces policy on Express routes.
    */
   createRestMiddleware() {
     return async (
@@ -298,7 +318,8 @@ export class OPAMiddleware {
   }
 
   /**
-   * Sanitize arguments for policy evaluation
+   * Sanitize arguments for policy evaluation.
+   * Removes secrets to prevent leaking them into OPA logs or Audits.
    */
   private sanitizeArgs(args: any): any {
     // Remove sensitive data that shouldn't be in policy logs

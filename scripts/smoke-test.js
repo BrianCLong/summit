@@ -4,12 +4,17 @@
 /**
  * IntelGraph Smoke Test - Golden Path Verification
  *
- * This script verifies the complete golden path:
- * 1. Create Investigation
- * 2. Add entities/links
- * 3. Import data
- * 4. Run Copilot
- * 5. See live results
+ * "Golden Path" Definition:
+ * The critical user journey that MUST work for the system to be considered viable.
+ * 1. Infrastructure Health (Frontend, API, Neo4j, Metrics)
+ * 2. Investigation Creation (Write Path)
+ * 3. Entity & Relationship Linking (Graph Write Path)
+ * 4. Copilot Execution (Orchestration Layer)
+ * 5. Data Retrieval (Read Path)
+ *
+ * Usage:
+ * - Run in CI/CD pipelines as a blocking gate.
+ * - Run locally to verify environment integrity (`make smoke`).
  */
 
 const axios = require('axios');
@@ -248,6 +253,10 @@ class SmokeTest {
     return response.data;
   }
 
+  /**
+   * Executes an operation with retry logic.
+   * Crucial for CI environments where services might be "flaky" or starting up.
+   */
   async retryOperation(operation, maxRetries = config.maxRetries) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {

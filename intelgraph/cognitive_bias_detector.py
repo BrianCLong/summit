@@ -3,6 +3,20 @@ Cognitive Bias Mitigation Engine for IntelGraph
 
 This module implements a comprehensive system for detecting, mitigating, and 
 managing cognitive biases in cognitive agents' decision-making processes.
+
+Input Contracts:
+The `detect_bias` method expects a `decision_context` dictionary.
+Specific detectors look for specific keys:
+- CONFIRMATION_BIAS: `evidence` (list of {supports: bool}), `current_belief` (bool)
+- AVAILABILITY_HEURISTIC: `decision_factors`, `memory_recall` (in agent_state)
+- ANCHORING_BIAS: `initial_estimate`, `final_estimate`
+- HINDSIGHT_BIAS: `outcome_known`, `predicted_confidence`, `post_hoc_confidence`
+- OPTIMISM_BIAS: `expected_outcomes` (positive/negative outlooks)
+- LOSS_AVERSION: `gains`, `losses`, `risk_preference`
+- STATUS_QUO_BIAS: `change_options`, `current_state`, `preference_strength`
+- OVERCONFIDENCE_EFFECT: `self_assessment`, `actual_performance` (in agent_state)
+- SUNK_COST_FALLACY: `sunk_costs` (amount_invested), `continuation_decision`
+- FRAMING_EFFECT: `decision_frame`, `alternatives`
 """
 
 from dataclasses import dataclass, field
@@ -30,7 +44,14 @@ class BiasType(Enum):
 
 @dataclass
 class BiasDetectionResult:
-    """Result of bias detection in a decision-making context."""
+    """
+    Result of bias detection in a decision-making context.
+
+    Attributes:
+        confidence_score: 0.0 to 1.0 representing the algorithm's certainty.
+        severity_level: Qualitative assessment (low/medium/high/critical).
+        impact_assessment: Structured data explaining *why* this was flagged.
+    """
     detection_id: str
     bias_type: BiasType
     confidence_score: float  # 0.0 to 1.0
@@ -48,6 +69,11 @@ class BiasDetectionResult:
 class BiasDetector:
     """
     Core class for detecting cognitive biases in decision-making processes.
+
+    Architecture:
+    - Uses a registry of detection functions (Strategy Pattern).
+    - Maintains short-term history of detections for statistical analysis.
+    - detectors return Optional[BiasDetectionResult] (None = no bias detected).
     """
     
     def __init__(self):
@@ -93,6 +119,7 @@ class BiasDetector:
         detection_results = []
         
         for bias_type, detector_func in self.bias_identifiers.items():
+            # Each detector is responsible for checking if it has the necessary context
             result = detector_func(decision_context, agent_state)
             if result:
                 detection_results.append(result)
@@ -112,7 +139,12 @@ class BiasDetector:
         return detection_results
     
     def _detect_confirmation_bias(self, decision_context: Dict, agent_state: Dict) -> Optional[BiasDetectionResult]:
-        """Detect confirmation bias based on information seeking and interpretation patterns."""
+        """
+        Detect confirmation bias.
+
+        Trigger: When ratio of confirming evidence to total evidence exceeds 80%.
+        Requires: decision_context['evidence'] (list of items with 'supports' attribute)
+        """
         # Look for signs of confirmation bias:
         # - Tendency to seek information that confirms existing beliefs
         # - Disregard for disconfirming evidence

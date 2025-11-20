@@ -29,3 +29,29 @@
 
 - Run `scripts/green_build.sh` to self-heal and build
 - Run `node scripts/audit_workspaces.mjs --strict` for hard audit
+
+## Code Documentation Standards
+
+Good comments explain **why** and **how**, not just **what**.
+
+### When to Comment
+1.  **Complex Logic:** Explain "magic numbers" or tricky algorithms (e.g., simulation weighting).
+2.  **Invariants:** State what must be true for the code to work (e.g., "Input array must be sorted").
+3.  **Workarounds:** Document *why* a hack is there (e.g., "Disable integer lossless to support DTOs").
+4.  **Public APIs:** exported classes and functions should have TSDoc/JSDoc explaining their purpose.
+
+### Anti-Patterns
+- **Redundant:** `i++; // increment i`
+- **Outdated:** Comments that refer to deleted variables or old behavior.
+- **Commented-out Code:** Just delete it; Git remembers.
+
+### Format
+Use TSDoc/JSDoc `/** ... */` for functions/classes and `//` for inline implementation details.
+
+```typescript
+/**
+ * Calculates the momentum of a narrative arc.
+ * Uses a weighted average of top 3 entities to prevent outlier skew.
+ */
+function calculateMomentum(...) { ... }
+```

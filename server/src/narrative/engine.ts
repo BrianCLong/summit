@@ -19,6 +19,20 @@ import {
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
 
+/**
+ * The NarrativeSimulationEngine acts as the "physics engine" for the narrative world.
+ *
+ * It manages:
+ * 1. The global clock (ticks).
+ * 2. Entity states (sentiment, influence, pressure).
+ * 3. Event propagation and its impact on entities.
+ * 4. "Story Arcs" - high-level abstractions of how themes are evolving.
+ *
+ * Invariants:
+ * - State is immutable from the outside (access via getState()).
+ * - Events are processed in discrete ticks.
+ * - Entity scores are clamped to specific ranges (Sentiment: -1..1, Influence: 0..1.5).
+ */
 export class NarrativeSimulationEngine {
   private state: NarrativeState;
   private generator: NarrativeGenerator;
@@ -92,11 +106,25 @@ export class NarrativeSimulationEngine {
     });
   }
 
+  /**
+   * Schedules an event to occur at a future tick.
+   * If no tick is specified, it defaults to the next tick.
+   */
   queueEvent(event: NarrativeEvent): void {
     const scheduledTick = event.scheduledTick ?? this.state.tick + 1;
     this.eventQueue.push({ ...event, scheduledTick });
   }
 
+  /**
+   * Advances the simulation by a specified number of steps.
+   *
+   * Each step:
+   * 1. Advances the clock.
+   * 2. Processes all events scheduled for this tick (or earlier).
+   * 3. Updates 'Arcs' based on the new entity states.
+   * 4. Generates a high-level narrative summary (using LLM or rules).
+   * 5. Applies natural decay/regression to entity states.
+   */
   async tick(steps = 1): Promise<NarrativeState> {
     for (let index = 0; index < steps; index += 1) {
       this.advanceClock();
@@ -113,6 +141,9 @@ export class NarrativeSimulationEngine {
     return this.state;
   }
 
+  /**
+   * Helper to manually inject a "God-mode" intervention or user action.
+   */
   injectActorAction(
     actorId: string,
     description: string,
@@ -214,6 +245,16 @@ export class NarrativeSimulationEngine {
     return ready.reverse();
   }
 
+  /**
+   * Applies a single event's effects to actors and targets.
+   *
+   * Logic:
+   * 1. Actor gets state adjusted (usually reinforced).
+   * 2. Targets get state adjusted (often reacting to the event).
+   * 3. Global parameters (if any) are shifted.
+   * 4. Second-order effects: The event propagates to the Actor's *other* relationships.
+   *    (e.g. If A attacks B, A's ally C also reacts).
+   */
   private applyEvent(event: NarrativeEvent): void {
     if (event.actorId && this.state.entities[event.actorId]) {
       this.adjustEntityState(this.state.entities[event.actorId], event, 1);
@@ -238,17 +279,19 @@ export class NarrativeSimulationEngine {
       });
     }
 
+    // Propagate event through the actor's relationship network
     if (event.actorId) {
       const actor = this.state.entities[event.actorId];
       if (actor) {
         actor.relationships.forEach((edge) => {
           const related = this.state.entities[edge.targetId];
           if (!related) return;
+          // Dampened propagation based on relationship strength
           const propagatedEvent: NarrativeEvent = {
             ...event,
             id: `${event.id}:${edge.targetId}`,
             actorId: related.id,
-            targetIds: [],
+            targetIds: [], // Propagation stops here to prevent infinite loops
             intensity: event.intensity * edge.strength * 0.5,
             sentimentShift:
               (event.sentimentShift ?? 0) * edge.strength * related.resilience,
@@ -265,16 +308,26 @@ export class NarrativeSimulationEngine {
     event: NarrativeEvent,
     weight: number,
   ): void {
+    // Sentiment changes are dampened by entity resilience
     const sentimentDelta =
       (event.sentimentShift ?? 0) *
       event.intensity *
       weight *
       (1 - entity.resilience * 0.5);
+
+    // Influence changes are dampened by volatility (higher volatility = less stable influence, paradoxically?)
+    // Actually logic here: 1 - volatility*0.5 means highly volatile entities resist influence change LESS?
+    // Wait, 1 - 0.9 = 0.1 multiplier. 1 - 0.1 = 0.9 multiplier.
+    // So HIGH volatility (0.9) -> SMALL multiplier (0.1) -> SMALL change.
+    // This seems counter-intuitive. Volatile things should change MORE.
+    // TODO: Verify if volatility math is inverted. For now documenting behavior as-is.
     const influenceDelta =
       (event.influenceShift ?? 0) * weight * (1 - entity.volatility * 0.5);
 
     entity.sentiment = this.clamp(entity.sentiment + sentimentDelta, -1, 1);
     entity.influence = this.clamp(entity.influence + influenceDelta, 0, 1.5);
+
+    // Pressure increases with any sentiment shift magnitude
     entity.pressure = this.clamp(
       entity.pressure + Math.abs(sentimentDelta) * 0.5,
       0,
@@ -299,11 +352,21 @@ export class NarrativeSimulationEngine {
     }
   }
 
+  /**
+   * Calculates the high-level "Story Arcs" for each theme.
+   *
+   * An Arc represents the aggregate momentum of a theme across all entities.
+   * It identifies:
+   * - Which entities are driving the theme (Key Drivers).
+   * - The overall "Outlook" (Improving vs Degrading).
+   * - A confidence score based on the strength of the top drivers.
+   */
   private computeArcs(): StoryArc[] {
     return this.state.themes.map((theme) => {
       const entityScores = Object.values(this.state.entities).map((entity) => {
         const themeAffinity = entity.themes[theme] ?? 0;
         const normalizedSentiment = (entity.sentiment + 1) / 2;
+        // Score = (0..1 sentiment) * influence * affinity
         return {
           id: entity.id,
           name: entity.name,
@@ -365,6 +428,12 @@ export class NarrativeSimulationEngine {
     return `${theme}: ${outlookText}${leadNames ? ` Key drivers: ${leadNames}.` : ''}`;
   }
 
+  /**
+   * Simulates natural entropy/decay of states over time.
+   * - Pressure decays slowly.
+   * - Sentiment regresses towards neutral (0).
+   * - Parameters regress towards 0.
+   */
   private applyNaturalDynamics(): void {
     Object.values(this.state.entities).forEach((entity) => {
       const decay = (entity.pressure - entity.resilience * 0.3) * 0.05;
