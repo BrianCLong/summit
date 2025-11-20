@@ -463,28 +463,24 @@ export class ElasticsearchService {
 
   async createIndex(index: SearchIndex): Promise<void> {
     try {
-      const createRequest: Parameters<
-        Client['indices']['create']
-      >[0] = {
+      const createRequest = {
         index: index.name,
         body: {
-          mappings: index.mappings,
-          settings: index.settings,
+          mappings: index.mappings as Record<string, unknown>,
+          settings: index.settings as Record<string, unknown>,
         },
-      };
+      } as Parameters<Client['indices']['create']>[0];
 
       await this.client.indices.create(createRequest);
 
       if (index.aliases.length > 0) {
-        const aliasRequest: Parameters<
-          Client['indices']['updateAliases']
-        >[0] = {
+        const aliasRequest = {
           body: {
             actions: index.aliases.map((alias) => ({
               add: { index: index.name, alias },
-            })),
+            })) as Array<{ add: { index: string; alias: string } }>,
           },
-        };
+        } as Parameters<Client['indices']['updateAliases']>[0];
 
         await this.client.indices.updateAliases(aliasRequest);
       }
