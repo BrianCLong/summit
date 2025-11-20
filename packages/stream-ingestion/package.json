@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/stream-ingestion",
+  "version": "1.0.0",
+  "description": "Multi-protocol data ingestion with collectors for HTTP, MQTT, gRPC, WebSocket, logs, IoT, social media, CDC, and more",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/stream-ingestion/test/*.test.ts --coverage",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "keywords": [
+    "data-ingestion",
+    "collectors",
+    "http",
+    "mqtt",
+    "grpc",
+    "websocket",
+    "iot"
+  ],
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@intelgraph/stream-processing": "workspace:*",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.10"
+  },
+  "sideEffects": false
+}

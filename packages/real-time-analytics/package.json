@@ -1,0 +1,33 @@
+{
+  "name": "@intelgraph/real-time-analytics",
+  "version": "1.0.0",
+  "description": "Real-time streaming analytics with statistical calculations, ML inference, time series analysis, and predictive analytics",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/real-time-analytics/test/*.test.ts --coverage",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "keywords": [
+    "real-time-analytics",
+    "streaming-analytics",
+    "time-series",
+    "machine-learning",
+    "predictive-analytics",
+    "statistics"
+  ],
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@intelgraph/stream-processing": "workspace:*",
+    "@intelgraph/event-processing": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "sideEffects": false
+}

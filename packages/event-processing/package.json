@@ -1,0 +1,32 @@
+{
+  "name": "@intelgraph/event-processing",
+  "version": "1.0.0",
+  "description": "Complex Event Processing (CEP) engine with pattern matching, event correlation, enrichment, and transformation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/event-processing/test/*.test.ts --coverage",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "keywords": [
+    "cep",
+    "complex-event-processing",
+    "event-correlation",
+    "pattern-matching",
+    "event-enrichment",
+    "stream-processing"
+  ],
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@intelgraph/stream-processing": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "sideEffects": false
+}
