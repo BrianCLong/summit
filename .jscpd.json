@@ -1,0 +1,48 @@
+{
+  "threshold": 3,
+  "reporters": ["html", "json", "console", "badge"],
+  "ignore": [
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.js",
+    "**/*.spec.ts",
+    "**/*.spec.js",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.turbo/**",
+    "**/archive/**",
+    "**/.archive/**",
+    "**/generated/**",
+    "**/*.min.js",
+    "**/*.bundle.js"
+  ],
+  "format": ["typescript", "javascript", "jsx", "tsx"],
+  "minLines": 10,
+  "minTokens": 100,
+  "maxLines": 1000,
+  "maxSize": "100kb",
+  "output": "./jscpd-report",
+  "path": [
+    "server/src",
+    "client/src",
+    "apps",
+    "packages",
+    "services"
+  ],
+  "absolute": true,
+  "gitignore": true,
+  "blame": true,
+  "cache": true,
+  "exitCode": 0,
+  "formatsExts": {
+    "typescript": ["ts", "tsx"],
+    "javascript": ["js", "jsx"]
+  },
+  "reporters-options": {
+    "badge": {
+      "path": "./jscpd-report"
+    }
+  }
+}

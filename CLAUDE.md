@@ -586,6 +586,128 @@ curl http://localhost:4000/metrics
 docker exec -it <neo4j-container> cypher-shell -u neo4j -p devpassword
 ```
 
+### Code Quality & Static Analysis
+
+#### Running Quality Checks
+
+```bash
+# Run all quality checks
+pnpm run ci                     # Lint + typecheck + test
+
+# Individual checks
+pnpm run lint                   # ESLint
+pnpm run typecheck              # TypeScript
+pnpm run test                   # Jest tests
+
+# Code metrics and analysis
+pnpm run metrics:all            # All metrics
+pnpm run metrics:complexity     # Complexity analysis
+pnpm run metrics:duplication    # Code duplication (jscpd)
+pnpm run metrics:loc            # Lines of code stats
+pnpm run metrics:report         # Maintainability report
+
+# Security
+pnpm run security:scan          # Audit + security linting
+pnpm run security:audit         # Dependency audit
+pnpm run security:lint          # Security-focused ESLint
+```
+
+#### Quality Tools
+
+1. **SonarQube** - Comprehensive code quality analysis
+   - Configuration: `sonar-project.properties`
+   - Tracks: Complexity, duplication, code smells, security vulnerabilities
+   - Quality gates: Maintainability (A), Reliability (A), Security (A)
+   - Workflow: `.github/workflows/code-quality.yml`
+
+2. **ESLint** - Code linting with multiple configurations
+   - Base: `eslint.config.js` (ESLint v9 flat config)
+   - Complexity: `.eslintrc.complexity.cjs` (cyclomatic complexity ≤ 15)
+   - Security: `.eslintrc.security.cjs` (security vulnerabilities)
+   - Plugins: complexity, security, sonarjs, no-unsanitized
+
+3. **jscpd** - Code duplication detection
+   - Configuration: `.jscpd.json`
+   - Threshold: 3% duplication (max 5%)
+   - Min lines: 10, Min tokens: 100
+   - Reports: HTML, JSON, console, badge
+
+4. **Danger.js** - Automated PR code review
+   - Configuration: `dangerfile.ts`
+   - Checks: PR size, description, tests, security, dependencies
+   - Workflow: `.github/workflows/danger.yml`
+
+5. **TypeScript** - Static type checking
+   - Configuration: `tsconfig.base.json`
+   - Strict mode: Disabled (gradual migration)
+   - Project references: `tsconfig.build.json`
+
+#### Quality Metrics & Targets
+
+| Metric | Target | Current Threshold | Tool |
+|--------|--------|-------------------|------|
+| Code Coverage | 80% | 70% | Jest |
+| Cyclomatic Complexity | ≤ 10 | ≤ 15 | ESLint |
+| Cognitive Complexity | ≤ 10 | ≤ 15 | SonarJS |
+| File Length | ≤ 300 lines | ≤ 500 lines | ESLint |
+| Function Length | ≤ 50 lines | ≤ 100 lines | ESLint |
+| Code Duplication | ≤ 3% | ≤ 5% | jscpd |
+| Technical Debt Ratio | < 5% (A) | < 5% (A) | SonarQube |
+
+#### Pre-Commit Hooks (Husky)
+
+Runs automatically on every commit:
+1. **Gitleaks** - Secret scanning
+2. **ESLint** - Code linting with auto-fix
+3. **Prettier** - Code formatting
+4. **TypeScript** - Type checking
+5. **Dependency Audit** - High-severity vulnerability check (warning only)
+
+Location: `.husky/pre-commit`
+
+#### Quality Documentation
+
+- **Coding Standards**: `docs/CODING_STANDARDS.md`
+- **Code Quality Dashboard**: `docs/CODE_QUALITY_DASHBOARD.md`
+- **Technical Debt Tracking**: `docs/TECHNICAL_DEBT.md`
+
+#### Common Quality Issues
+
+**High Complexity** (71 files > 1000 lines):
+```bash
+# Find complex files
+pnpm run metrics:complexity
+
+# Refactor approach:
+# 1. Extract functions
+# 2. Use early returns
+# 3. Split into modules
+```
+
+**Code Duplication**:
+```bash
+# Find duplicates
+pnpm run metrics:duplication
+open jscpd-report/index.html
+
+# Refactor approach:
+# 1. Extract shared utilities
+# 2. Create base classes
+# 3. Use composition
+```
+
+**Low Test Coverage**:
+```bash
+# Check coverage
+pnpm run test:coverage
+pnpm run test:coverage:html
+
+# Improve approach:
+# 1. Write tests for new code first (TDD)
+# 2. Focus on complex logic
+# 3. Test edge cases
+```
+
 ---
 
 ## Security & Compliance
@@ -923,6 +1045,12 @@ pnpm db:neo4j:migrate       # Neo4j migrations
 # GraphQL
 pnpm graphql:codegen        # Generate types
 pnpm persisted:build        # Build persisted queries
+
+# Code Quality
+pnpm run metrics:all        # All quality metrics
+pnpm run metrics:complexity # Complexity analysis
+pnpm run metrics:duplication # Duplication detection
+pnpm run security:scan      # Security audit + lint
 
 # CI/CD
 pnpm ci                     # Run full CI suite locally

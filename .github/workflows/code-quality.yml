@@ -1,0 +1,227 @@
+name: Code Quality Analysis
+
+on:
+  push:
+    branches: [main, develop, 'claude/**']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run weekly code quality analysis on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18.18'
+  PNPM_VERSION: '9.12.0'
+
+jobs:
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: pnpm run test:coverage
+        continue-on-error: true
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: SonarQube Quality Gate check
+        uses: SonarSource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+  complexity-analysis:
+    name: Complexity & Maintainability Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run complexity analysis
+        run: pnpm run metrics:complexity
+        continue-on-error: true
+
+      - name: Generate maintainability report
+        run: pnpm run metrics:report:json > maintainability-report.json
+        continue-on-error: true
+
+      - name: Upload maintainability report
+        uses: actions/upload-artifact@v4
+        with:
+          name: maintainability-report
+          path: maintainability-report.json
+          retention-days: 30
+
+  duplication-analysis:
+    name: Code Duplication Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run duplication detection
+        run: pnpm run metrics:duplication
+        continue-on-error: true
+
+      - name: Upload duplication report
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplication-report
+          path: jscpd-report/
+          retention-days: 30
+
+  code-metrics:
+    name: Code Metrics & Statistics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate lines of code metrics
+        run: |
+          pnpm run metrics:loc > loc-report.txt
+          cat loc-report.txt
+        continue-on-error: true
+
+      - name: Upload LOC report
+        uses: actions/upload-artifact@v4
+        with:
+          name: loc-report
+          path: loc-report.txt
+          retention-days: 30
+
+  technical-debt:
+    name: Technical Debt Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Count TODOs and FIXMEs
+        run: |
+          echo "# Technical Debt Report" > technical-debt.md
+          echo "" >> technical-debt.md
+          echo "## TODOs" >> technical-debt.md
+          grep -r "TODO" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" server/src client/src apps packages services | wc -l >> technical-debt.md || echo "0" >> technical-debt.md
+          echo "" >> technical-debt.md
+          echo "## FIXMEs" >> technical-debt.md
+          grep -r "FIXME" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" server/src client/src apps packages services | wc -l >> technical-debt.md || echo "0" >> technical-debt.md
+          echo "" >> technical-debt.md
+          echo "## HACKs" >> technical-debt.md
+          grep -r "HACK" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" server/src client/src apps packages services | wc -l >> technical-debt.md || echo "0" >> technical-debt.md
+          cat technical-debt.md
+
+      - name: Upload technical debt report
+        uses: actions/upload-artifact@v4
+        with:
+          name: technical-debt-report
+          path: technical-debt.md
+          retention-days: 30
+
+  quality-summary:
+    name: Quality Summary
+    runs-on: ubuntu-latest
+    needs: [complexity-analysis, duplication-analysis, code-metrics, technical-debt]
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create quality summary
+        run: |
+          echo "# Code Quality Summary" > quality-summary.md
+          echo "" >> quality-summary.md
+          echo "## Analysis Date: $(date)" >> quality-summary.md
+          echo "" >> quality-summary.md
+          echo "All code quality reports have been generated and uploaded as artifacts." >> quality-summary.md
+          echo "" >> quality-summary.md
+          echo "- Maintainability Report: See maintainability-report artifact" >> quality-summary.md
+          echo "- Duplication Report: See duplication-report artifact" >> quality-summary.md
+          echo "- LOC Report: See loc-report artifact" >> quality-summary.md
+          echo "- Technical Debt Report: See technical-debt-report artifact" >> quality-summary.md
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('quality-summary.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });

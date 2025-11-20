@@ -1,17 +1,44 @@
-name: danger
-on: [pull_request]
+name: Danger CI
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+env:
+  NODE_VERSION: '18.18'
+  PNPM_VERSION: '9.12.0'
 
 jobs:
   danger:
+    name: Danger.js Code Review
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          node-version: 18
-      - name: Install Danger
-        run: npm install danger --no-save
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Run Danger
-        run: npx danger ci
+        run: pnpm exec danger ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

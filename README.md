@@ -63,6 +63,48 @@ pnpm typecheck        # tsconfig project references
 pnpm smoke            # same as make smoke (Node-based E2E)
 ```
 
+### Code Quality & Static Analysis
+
+Summit includes comprehensive code quality monitoring and static analysis tools:
+
+```bash
+# Run all quality checks
+pnpm run ci                     # Lint + typecheck + test
+
+# Code metrics and analysis
+pnpm run metrics:all            # All metrics (complexity, duplication, LOC)
+pnpm run metrics:complexity     # Cyclomatic complexity analysis
+pnpm run metrics:duplication    # Code duplication detection (jscpd)
+pnpm run metrics:loc            # Lines of code statistics
+
+# Security scanning
+pnpm run security:scan          # Dependency audit + security linting
+```
+
+**Quality Tools:**
+- **SonarQube** - Comprehensive code analysis (config: `sonar-project.properties`)
+- **ESLint** - Multiple configurations for complexity and security
+- **jscpd** - Code duplication detection (target: < 3%)
+- **Danger.js** - Automated PR code review
+
+**Quality Targets:**
+- Code Coverage: 80% (current threshold: 70%)
+- Cyclomatic Complexity: ≤ 15 (target: ≤ 10)
+- Code Duplication: ≤ 5% (target: ≤ 3%)
+- Technical Debt Ratio: < 5% (A rating)
+
+**Pre-Commit Hooks** (Husky):
+- Gitleaks (secret scanning)
+- ESLint (linting with auto-fix)
+- Prettier (code formatting)
+- TypeScript (type checking)
+- Dependency audit (high-severity check)
+
+**Documentation:**
+- [Coding Standards](docs/CODING_STANDARDS.md)
+- [Code Quality Dashboard](docs/CODE_QUALITY_DASHBOARD.md)
+- [Technical Debt Tracking](docs/TECHNICAL_DEBT.md)
+
 💡 **New to Summit?** Run `make help` for a quick command reference, or see [docs/COMMAND_REFERENCE.md](docs/COMMAND_REFERENCE.md) for the full guide.
 
 ## CI Status
