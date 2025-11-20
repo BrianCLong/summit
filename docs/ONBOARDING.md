@@ -101,12 +101,13 @@ make smoke
 ## 📚 Helpful Commands
 
 ```bash
+make help       # show all available commands with descriptions
 make up         # start environment
 make down       # stop & clean
-make seed       # load demo data
-make smoke      # full golden path smoke test
-make smoke-lite # simplified validation (fast)
+make smoke      # full golden path smoke test (validates end-to-end)
 ```
+
+💡 **Tip**: Run `make help` to see all available commands. For detailed command reference, see [docs/COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md).
 
 ---
 
@@ -134,7 +135,47 @@ make smoke-lite # simplified validation (fast)
 - Code covered by tests and instrumentation.
 - Docs reflect reality.
 
+## 🆘 Troubleshooting
+
+### "Docker is not running"
+```bash
+# Check Docker status
+docker info
+
+# If failed, start Docker Desktop and try again
+make up
+```
+
+### "Health checks failing"
+```bash
+# View detailed health status
+curl http://localhost:4000/health/detailed | jq
+
+# Check individual service logs
+docker-compose logs api
+docker-compose logs postgres
+docker-compose logs neo4j
+
+# Nuclear option: clean restart
+make down
+make up
+```
+
+### "Smoke tests failing"
+```bash
+# Run smoke with verbose output
+pnpm smoke
+
+# Check what failed and fix that specific step
+# Golden path: Investigation → Entities → Relationships → Copilot → Results
+
+# After fixing, validate
+make smoke
+```
+
+For more help, see [docs/COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) or ask in #summit-dev.
+
 ---
 
 > ⚡️ Remember: _Ship fast, but ship safe._
-> If it can’t deploy today, it doesn’t merge.
+> If it can't deploy today, it doesn't merge.
