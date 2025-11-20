@@ -1,0 +1,457 @@
+# GraphQL Schema for Operations C2 Service
+
+type Query {
+  # Mission Operations
+  mission(id: ID!): Mission
+  missions(filter: MissionFilter): [Mission!]!
+  missionStatus(id: ID!): MissionStatus!
+
+  # Collection Assets
+  asset(id: ID!): CollectionAsset
+  assets(filter: AssetFilter): [CollectionAsset!]!
+  availableAssets(criteria: AssetCriteria!): [CollectionAsset!]!
+
+  # Operations Center
+  cop(id: ID!): CommonOperatingPicture
+  events(filter: EventFilter): [OperationalEvent!]!
+  activeAlerts: [Alert!]!
+
+  # Intelligence Fusion
+  intelligenceReport(id: ID!): IntelligenceReport
+  fusedProducts(filter: FusionFilter): [FusedIntelligence!]!
+  entities(filter: EntityFilter): [ResolvedEntity!]!
+  correlations(options: CorrelationOptions): [Correlation!]!
+
+  # Targeting
+  target(id: ID!): Target
+  targets(filter: TargetFilter): [Target!]!
+  targetPackage(id: ID!): TargetPackage
+  hvts: [HighValueTarget!]!
+
+  # Decision Support
+  coa(id: ID!): CourseOfAction
+  coaComparison(coaIds: [ID!]!, criteria: [ComparisonCriterion!]!): COAComparison
+  riskAssessment(id: ID!): RiskAssessment
+  executiveBriefing(id: ID!): ExecutiveBriefing
+
+  # System
+  systemStatus: SystemStatus!
+}
+
+type Mutation {
+  # Mission Operations
+  createMission(input: CreateMissionInput!): Mission!
+  updateMission(id: ID!, input: UpdateMissionInput!): Mission!
+  startMission(id: ID!): MissionExecution!
+  completeMission(id: ID!, summary: String!): MissionCompletion!
+
+  # Collection Coordination
+  registerAsset(input: RegisterAssetInput!): CollectionAsset!
+  createCollectionTask(input: CreateTaskInput!): CollectionTask!
+  scheduleTask(taskId: ID!, assetId: ID!): ScheduleSlot!
+
+  # Operations Center
+  updateCOP(input: UpdateCOPInput!): CommonOperatingPicture!
+  addCOPEntity(copId: ID!, layerId: ID!, entity: COPEntityInput!): COPEntity!
+  recordEvent(input: RecordEventInput!): OperationalEvent!
+  acknowledgeAlert(alertId: ID!, userId: ID!): Alert!
+  createCrisisResponse(input: CreateCrisisInput!): CrisisResponse!
+
+  # Intelligence Fusion
+  ingestReport(input: IngestReportInput!): IntelligenceReport!
+  createFusedProduct(reportIds: [ID!]!, topic: String!): FusedIntelligence!
+
+  # Targeting
+  createTarget(input: CreateTargetInput!): Target!
+  createTargetPackage(input: CreateTargetPackageInput!): TargetPackage!
+  submitStrikeRequest(input: StrikeRequestInput!): StrikeRequest!
+  recordBDA(input: BDAInput!): BattleDamageAssessment!
+
+  # Decision Support
+  createCOA(input: CreateCOAInput!): CourseOfAction!
+  compareCOAs(coaIds: [ID!]!, criteria: [ComparisonCriterion!]!): COAComparison!
+  createRiskAssessment(input: RiskAssessmentInput!): RiskAssessment!
+  generateBriefing(input: BriefingInput!): ExecutiveBriefing!
+  recordDecision(input: DecisionInput!): DecisionRecord!
+}
+
+type Subscription {
+  # Real-time updates
+  missionUpdated(missionId: ID!): Mission!
+  eventCreated(filter: EventFilter): OperationalEvent!
+  alertCreated: Alert!
+  copUpdated(copId: ID!): CommonOperatingPicture!
+  assetStatusChanged(assetId: ID!): CollectionAsset!
+}
+
+# Mission Types
+
+type Mission {
+  id: ID!
+  operationId: String!
+  name: String!
+  codeName: String
+  classification: Classification!
+  type: OperationType!
+  objective: String!
+  priority: Priority!
+  status: OperationStatus!
+
+  planningTeam: [TeamMember!]!
+  requirements: [IntelligenceRequirement!]!
+  collectionPlan: CollectionPlan!
+  resources: ResourceAllocation!
+  timeline: Timeline!
+  risks: [Risk!]!
+  compliance: ComplianceInfo!
+  opsec: OpsecInfo!
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+}
+
+input CreateMissionInput {
+  name: String!
+  codeName: String
+  classification: Classification!
+  type: OperationType!
+  objective: String!
+  background: String!
+  priority: Priority!
+  planningTeam: [TeamMemberInput!]!
+  requirements: [IntelligenceRequirementInput!]
+  timeline: TimelineInput!
+}
+
+type MissionStatus {
+  missionId: ID!
+  status: OperationStatus!
+  progress: Float!
+  startTime: DateTime
+  endTime: DateTime
+  metrics: MissionMetrics!
+  issues: [Issue!]!
+  risk: RiskSummary!
+}
+
+# Collection Types
+
+type CollectionAsset {
+  id: ID!
+  name: String!
+  type: AssetType!
+  platform: PlatformType!
+  status: AssetStatus!
+  capabilities: AssetCapabilities!
+  position: Position
+  operational: OperationalStatus!
+  assignment: AssetAssignment
+}
+
+type CollectionTask {
+  id: ID!
+  missionId: String!
+  assetId: String!
+  priority: TaskPriority!
+  status: TaskStatus!
+  taskType: TaskType!
+  target: TaskTarget!
+  parameters: TaskParameters!
+  execution: ExecutionInfo
+}
+
+# Operations Center Types
+
+type CommonOperatingPicture {
+  id: ID!
+  name: String!
+  description: String!
+  operationId: String
+  layers: [COPLayer!]!
+  viewport: Viewport!
+  timeWindow: TimeWindow!
+  updatedAt: DateTime!
+}
+
+type COPLayer {
+  id: ID!
+  name: String!
+  type: COPLayerType!
+  visible: Boolean!
+  opacity: Float!
+  entities: [COPEntity!]!
+}
+
+type COPEntity {
+  id: ID!
+  type: EntityType!
+  category: EntityCategory!
+  geometry: Geometry!
+  properties: EntityProperties!
+  display: DisplayProperties!
+}
+
+type OperationalEvent {
+  id: ID!
+  type: EventType!
+  severity: Severity!
+  priority: Priority!
+  timestamp: DateTime!
+  title: String!
+  description: String!
+  source: String!
+  confidence: Float!
+  location: Location
+  involvedEntities: [String!]!
+  status: EventStatus!
+}
+
+# Intelligence Fusion Types
+
+type IntelligenceReport {
+  id: ID!
+  discipline: IntelligenceDiscipline!
+  source: Source!
+  title: String!
+  summary: String!
+  classification: String!
+  reportDate: DateTime!
+  informationDate: DateTime!
+  entities: [EntityMention!]!
+  confidence: Float!
+  priority: Priority!
+}
+
+type FusedIntelligence {
+  id: ID!
+  topic: String!
+  summary: String!
+  sourceReports: [SourceReport!]!
+  assessment: FusedAssessment!
+  timeline: [TimelineEvent!]!
+  entities: [FusedEntity!]!
+  locations: [FusedLocation!]!
+  producedAt: DateTime!
+}
+
+type ResolvedEntity {
+  id: ID!
+  type: EntityType!
+  canonicalName: String!
+  aliases: [String!]!
+  attributes: [EntityAttribute!]!
+  mentions: [EntityMention!]!
+  relationships: [EntityRelationship!]!
+  resolutionConfidence: Float!
+}
+
+# Targeting Types
+
+type Target {
+  id: ID!
+  name: String!
+  category: TargetCategory!
+  type: TargetType!
+  status: TargetStatus!
+  location: TargetLocation!
+  description: String!
+  significance: Significance!
+  intelligence: TargetIntelligence!
+  collateral: CollateralInfo!
+  priority: Int!
+}
+
+type TargetPackage {
+  id: ID!
+  targetId: String!
+  name: String!
+  targetData: Target!
+  imagery: [ImageryProduct!]!
+  intelligence: [IntelligenceReference!]!
+  weaponeering: Weaponeering!
+  timing: TimingInfo!
+  legalReview: LegalReview!
+  approvals: [Approval!]!
+}
+
+type StrikeRequest {
+  id: ID!
+  targetPackageId: String!
+  requestType: StrikeRequestType!
+  execution: ExecutionPlan!
+  status: StrikeStatus!
+  timing: StrikeTiming!
+}
+
+# Decision Support Types
+
+type CourseOfAction {
+  id: ID!
+  name: String!
+  description: String!
+  objectives: [Objective!]!
+  resources: ResourceRequirements!
+  timeline: COATimeline!
+  risks: [Risk!]!
+  advantages: [Advantage!]!
+  disadvantages: [Disadvantage!]!
+  feasibility: FeasibilityAssessment!
+  successProbability: Float!
+  overallScore: Float!
+}
+
+type COAComparison {
+  id: ID!
+  coas: [String!]!
+  criteria: [ComparisonCriterion!]!
+  ranking: [COARanking!]!
+  recommendation: Recommendation!
+}
+
+type RiskAssessment {
+  id: ID!
+  name: String!
+  risks: [Risk!]!
+  overallRisk: RiskLevel!
+  matrix: RiskMatrix!
+  recommendations: [String!]!
+}
+
+type ExecutiveBriefing {
+  id: ID!
+  title: String!
+  classification: String!
+  audience: [String!]!
+  executiveSummary: String!
+  situation: SituationOverview!
+  assessment: Assessment!
+  options: [Option!]!
+  recommendation: BriefingRecommendation!
+  attachments: [Attachment!]!
+}
+
+# Enums
+
+enum Classification {
+  UNCLASSIFIED
+  CONFIDENTIAL
+  SECRET
+  TOP_SECRET
+  TOP_SECRET_SCI
+}
+
+enum OperationType {
+  RECONNAISSANCE
+  SURVEILLANCE
+  TARGETING
+  COLLECTION
+  ANALYSIS
+  COUNTER_INTELLIGENCE
+  SPECIAL_OPERATIONS
+  CYBER_OPERATIONS
+  MULTI_DISCIPLINE
+}
+
+enum OperationStatus {
+  PLANNING
+  APPROVED
+  ACTIVE
+  SUSPENDED
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  ROUTINE
+}
+
+enum AssetType {
+  SATELLITE
+  UAV
+  AIRCRAFT
+  GROUND_SENSOR
+  MARITIME_VESSEL
+  CYBER_SENSOR
+  HUMAN_SOURCE
+  TECHNICAL_COLLECTION
+  SIGNALS_INTELLIGENCE
+  IMAGERY_INTELLIGENCE
+  MEASUREMENT_SIGNATURE
+}
+
+enum AssetStatus {
+  AVAILABLE
+  TASKED
+  IN_OPERATION
+  MAINTENANCE
+  OFFLINE
+  DEGRADED
+  LOST
+}
+
+enum IntelligenceDiscipline {
+  HUMINT
+  SIGINT
+  IMINT
+  MASINT
+  GEOINT
+  OSINT
+  TECHINT
+  CYBINT
+  FININT
+  ACINT
+}
+
+enum EventType {
+  CONTACT
+  DETECTION
+  ENGAGEMENT
+  MOVEMENT
+  COMMUNICATION
+  ALERT
+  STATUS_CHANGE
+  INTELLIGENCE_REPORT
+  SENSOR_ACTIVATION
+  MISSION_UPDATE
+}
+
+enum Severity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TargetCategory {
+  STRATEGIC
+  OPERATIONAL
+  TACTICAL
+  TIME_SENSITIVE
+  HIGH_VALUE
+  HIGH_PAYOFF
+}
+
+enum TargetStatus {
+  NOMINATED
+  VALIDATED
+  APPROVED
+  DENIED
+  IN_PROSECUTION
+  STRUCK
+  ASSESSED
+  RE_ATTACK_REQUIRED
+  DESTROYED
+  INACTIVE
+}
+
+# Scalars
+
+scalar DateTime
+scalar JSON
