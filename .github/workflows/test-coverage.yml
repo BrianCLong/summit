@@ -1,0 +1,230 @@
+name: Test Coverage
+
+on:
+  push:
+    branches: [main, develop, claude/**]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Run Tests with Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+      neo4j:
+        image: neo4j:5
+        env:
+          NEO4J_AUTH: neo4j/testpassword
+          NEO4J_PLUGINS: '["apoc"]'
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p testpassword 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 7687:7687
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better coverage comparison
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Wait for services
+        run: |
+          timeout 30 bash -c 'until pg_isready -h localhost -p 5432; do sleep 1; done'
+          timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping; do sleep 1; done'
+          sleep 5
+
+      - name: Run server tests with coverage
+        run: |
+          cd server
+          pnpm test -- --coverage --maxWorkers=2
+        env:
+          NODE_ENV: test
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: testpassword
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: testpassword
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret-for-ci
+          JWT_REFRESH_SECRET: test-refresh-secret-for-ci
+          REQUIRE_REAL_DBS: 'false'
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./server/coverage/lcov.info
+          flags: server
+          name: server-coverage
+          fail_ci_if_error: false
+
+      - name: Generate coverage summary
+        run: |
+          cd server
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            node -e "
+              const coverage = require('./coverage/coverage-summary.json');
+              const total = coverage.total;
+              console.log('| Metric | Coverage |');
+              console.log('|--------|----------|');
+              console.log('| Lines | ' + total.lines.pct + '% |');
+              console.log('| Statements | ' + total.statements.pct + '% |');
+              console.log('| Functions | ' + total.functions.pct + '% |');
+              console.log('| Branches | ' + total.branches.pct + '% |');
+            " >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Coverage threshold check
+        run: |
+          cd server
+          pnpm test -- --coverage --coverageReporters=json-summary --passWithNoTests
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const coverage = require('./coverage/coverage-summary.json');
+              const total = coverage.total;
+              const minCoverage = { lines: 20, statements: 20, functions: 20, branches: 15 };
+              let failed = false;
+
+              Object.keys(minCoverage).forEach(metric => {
+                if (total[metric].pct < minCoverage[metric]) {
+                  console.error(\`❌ Coverage for \${metric} (\${total[metric].pct}%) is below threshold (\${minCoverage[metric]}%)\`);
+                  failed = true;
+                } else {
+                  console.log(\`✅ Coverage for \${metric} (\${total[metric].pct}%) meets threshold (\${minCoverage[metric]}%)\`);
+                }
+              });
+
+              if (failed) process.exit(1);
+            "
+          fi
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.node-version }}
+          path: |
+            server/coverage/
+            server/test-results/
+          retention-days: 30
+
+  coverage-comment:
+    name: Comment Coverage on PR
+    needs: test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report-20.x
+          path: ./coverage
+
+      - name: Comment coverage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coveragePath = './coverage/coverage-summary.json';
+
+            if (!fs.existsSync(coveragePath)) {
+              console.log('No coverage file found');
+              return;
+            }
+
+            const coverage = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+            const total = coverage.total;
+
+            const comment = `
+            ## 📊 Test Coverage Report
+
+            | Metric | Coverage | Status |
+            |--------|----------|--------|
+            | Lines | ${total.lines.pct}% | ${total.lines.pct >= 20 ? '✅' : '❌'} |
+            | Statements | ${total.statements.pct}% | ${total.statements.pct >= 20 ? '✅' : '❌'} |
+            | Functions | ${total.functions.pct}% | ${total.functions.pct >= 20 ? '✅' : '❌'} |
+            | Branches | ${total.branches.pct}% | ${total.branches.pct >= 15 ? '✅' : '❌'} |
+
+            **Covered:** ${total.lines.covered}/${total.lines.total} lines
+
+            <details>
+            <summary>View details</summary>
+
+            - **Lines:** ${total.lines.covered}/${total.lines.total}
+            - **Statements:** ${total.statements.covered}/${total.statements.total}
+            - **Functions:** ${total.functions.covered}/${total.functions.total}
+            - **Branches:** ${total.branches.covered}/${total.branches.total}
+
+            </details>
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
