@@ -1,0 +1,16 @@
+{
+  "name": "@summit/query-optimizer",
+  "version": "1.0.0",
+  "description": "Advanced query optimizer with cost-based optimization and materialized views",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": ["query-optimizer", "cost-based", "materialized-views", "indexes"],
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}
