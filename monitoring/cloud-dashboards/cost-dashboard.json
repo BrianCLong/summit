@@ -1,0 +1,101 @@
+{
+  "dashboard": {
+    "title": "Cloud Cost Optimization Dashboard",
+    "tags": ["cost", "finops", "optimization"],
+    "timezone": "UTC",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Current Month Spend",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(cloud_costs_current_month)",
+            "legendFormat": "Current Month"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Budget vs Actual",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "cloud_budget_amount",
+            "legendFormat": "Budget"
+          },
+          {
+            "expr": "cloud_costs_current_month",
+            "legendFormat": "Actual"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Cost Trend (30 days)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (day) (cloud_costs_daily)",
+            "legendFormat": "Daily Cost"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Cost by Service",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (service) (cloud_costs_by_service)",
+            "legendFormat": "{{service}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Rightsizing Opportunities",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "rightsizing_recommendations",
+            "format": "table"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Idle Resources",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(idle_resources)",
+            "legendFormat": "Idle Resources"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Potential Savings",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(potential_savings_monthly)",
+            "legendFormat": "Monthly Savings"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Untagged Resources",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "untagged_resources",
+            "format": "table"
+          }
+        ]
+      }
+    ]
+  }
+}
