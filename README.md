@@ -51,6 +51,29 @@ make smoke              # golden path automation against seeded data
 - The API refuses to boot when `NODE_ENV=production` if `JWT_SECRET`, `JWT_REFRESH_SECRET`, database passwords, or CORS allow-lists match known defaults or include `localhost/*`.
 - CORS allow-listing, rate limiting, persisted queries, and metrics are enforced in production automatically.
 
+## Security Implementation
+
+### Rule of Two Architecture
+
+The Summit platform implements Meta's "Agents Rule of Two" principle to mitigate prompt injection vulnerabilities. This architectural approach ensures that no single component handles more than two of the following capabilities:
+
+1. Processing untrusted input
+2. Accessing sensitive systems
+3. Changing state or communicating externally
+
+This principle has been implemented throughout the platform:
+
+- **API Layer**: All endpoints now sanitize untrusted input before processing
+- **Orchestration Layer**: Clear separation between input validation and state change operations
+- **Data Access Layer**: Secure access to sensitive systems without direct input processing
+- **Cognitive Insights Service**: Input sanitization for text analysis endpoints
+- **Copilot Service**: Input sanitization for NER and link suggestion endpoints
+- **Ingest Service**: Input sanitization for data ingestion jobs
+- **RAG Service**: Input sanitization across search, query, and Cypher endpoints
+- **AI Copilot Service**: Input sanitization for query and RAG endpoints
+
+For detailed information, see [SECURITY_RULE_OF_TWO.md](SECURITY_RULE_OF_TWO.md) and [SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md).
+
 ### pnpm Workspace Commands
 
 ```bash
