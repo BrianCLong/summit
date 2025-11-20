@@ -1,0 +1,310 @@
+================================================================================
+🔧 CONFIGURATION ANALYSIS REPORT
+================================================================================
+
+📈 SUMMARY
+--------------------------------------------------------------------------------
+Config sources scanned:     1237
+Code files scanned:         4705
+Total defined keys:         15003
+Total used keys:            1024
+Unused keys:                28588
+Missing keys:               1290
+Duplicate keys:             3146
+Deprecated patterns:        12
+
+🗑️  UNUSED KEYS (Defined but never used)
+--------------------------------------------------------------------------------
+  • PORT
+    Defined in: .env.production:9
+    Value: 4000
+  • PORT
+    Defined in: .env.maestro-dev:54
+    Value: 4000
+  • PORT
+    Defined in: .env:7
+    Value: 4000
+  • PORT
+    Defined in: server/.env.rehydrated:6
+    Value: 8080
+  • PORT
+    Defined in: server/.env.production:8
+    Value: 4000
+  • PORT
+    Defined in: server/.env:6
+    Value: 8080
+  • PORT
+    Defined in: server/.env.production.rehydrated:8
+    Value: 4000
+  • PORT
+    Defined in: server/.env.production.template:6
+    Value: 8080
+  • PORT
+    Defined in: libs/configguard/go/testdata/interpolation.yaml:0
+    Value: 3000
+  • PORT
+    Defined in: libs/configguard/go/testdata/valid.yaml:0
+    Value: 8080
+  • PORT
+    Defined in: libs/configguard/go/testdata/invalid.yaml:0
+    Value: 80
+  • PORT
+    Defined in: libs/configguard/ts/src/__tests__/fixtures/interpolation.yaml:0
+    Value: 3000
+  • PORT
+    Defined in: libs/configguard/ts/src/__tests__/fixtures/valid.yaml:0
+    Value: 8080
+  • PORT
+    Defined in: libs/configguard/ts/src/__tests__/fixtures/invalid.yaml:0
+    Value: 80
+  • PORT
+    Defined in: services/docling-svc/src/config.ts:4
+    Value: zod-schema
+  • PORT
+    Defined in: server/src/config.ts:7
+    Value: zod-schema
+  • PORT
+    Defined in: server/src/config/secrets.ts:15
+    Value: zod-schema
+  • APP_URL
+    Defined in: .env.production:10
+    Value: https://app.summit.run
+  • APP_URL
+    Defined in: .env:13
+    Value: http://localhost:3000
+  • PROMETHEUS_BASIC_AUTH_USER
+    Defined in: .env.production:35
+  ... and 28568 more
+
+🚨 MISSING KEYS (Used but not defined)
+--------------------------------------------------------------------------------
+  • PLAYWRIGHT_USE_WEBSERVER
+    Used in: playwright.config.ts:3
+  • BASE_URL
+    Used in: playwright.config.ts:16
+    Used in: conductor-ui/frontend/playwright.config.ts:11
+    Used in: conductor-ui/frontend/e2e/maestro-auth.spec.ts:3
+  • OPA_URL
+    Used in: server-v039/src/opa.ts:4
+    Used in: intelgraph-mcp/services/runtime-pooler/src/authz.ts:15
+    Used in: services/api/src/graphql/abac.ts:3
+  • PERSISTED_MANIFEST
+    Used in: server-v039/src/persisted.ts:5
+    Used in: server/src/graphql/plugins/persistedQueries.ts:9
+  • LEDGER_PRIVATE_PEM
+    Used in: packages/ledger-server/src/index.ts:34
+  • LEDGER_PUBLIC_PEM
+    Used in: packages/ledger-server/src/index.ts:35
+  • PROVENANCE_SECRET
+    Used in: packages/shared/provenance.ts:11
+    Used in: packages/shared/provenance.js:2
+  • LIQUID_NANO_ENV
+    Used in: packages/liquid-nano/scripts/tests/setup.ts:2
+  • PUBLIC_KEY_PEM
+    Used in: packages/prov-ledger/src/cli.ts:6
+    Used in: packages/kpw-media/src/server.ts:10
+  • PUBLIC_KEY_FILE
+    Used in: packages/prov-ledger/src/cli.ts:7
+    Used in: packages/kpw-media/src/cli.ts:7
+  • PRIVATE_KEY_PEM
+    Used in: packages/prov-ledger/src/server.ts:6
+    Used in: packages/kpw-media/src/server.ts:9
+  • AFL_REDIS_URL
+    Used in: packages/afl-store/src/index.ts:10
+    Used in: packages/agent-gateway/src/ingest/pipeline.ts:4
+    Used in: .disabled/afl-store/src/index.ts:10
+  • AER_PUBLIC_KEY_FILE
+    Used in: packages/aer-ledger/src/cli.ts:6
+  • AER_PRIVATE_KEY_PEM
+    Used in: packages/aer-ledger/src/server.ts:7
+  • AER_PUBLIC_KEY_PEM
+    Used in: packages/aer-ledger/src/server.ts:8
+  • COSIGN_EXPERIMENTAL
+    Used in: packages/maestro-core/src/plugins/cosign-plugin.ts:179
+    Used in: packages/maestro-core/src/plugins/cosign-plugin.ts:246
+    Used in: packages/maestro-core/src/plugins/cosign-plugin.ts:303
+  • MAESTRO_VERBOSE
+    Used in: packages/maestro-cli/src/index.ts:51
+    Used in: packages/maestro-cli/src/index.ts:406
+  • MAESTRO_SKIP_UPDATE_CHECK
+    Used in: packages/maestro-cli/src/index.ts:354
+  • MAESTRO_DATABASE_URL
+    Used in: packages/maestro-cli/src/commands/run.ts:211
+  • MAESTRO_ARTIFACT_BUCKET
+    Used in: packages/maestro-cli/src/commands/run.ts:218
+  ... and 878 more keys
+
+⚠️  DUPLICATE KEYS (Defined in multiple places)
+--------------------------------------------------------------------------------
+  • NODE_ENV (9 definitions)
+    - .env.production:8
+    - .env.maestro-dev:52
+    - .env:6
+    - server/.env.rehydrated:5
+    - server/.env.production:7
+    - server/.env:5
+    - server/.env.production.rehydrated:7
+    - server/.env.production.template:5
+    - server/src/config.ts:6
+  • PORT (17 definitions)
+    - .env.production:9
+    - .env.maestro-dev:54
+    - .env:7
+    - server/.env.rehydrated:6
+    - server/.env.production:8
+    - server/.env:6
+    - server/.env.production.rehydrated:8
+    - server/.env.production.template:6
+    - libs/configguard/go/testdata/interpolation.yaml:0
+    - libs/configguard/go/testdata/valid.yaml:0
+    - libs/configguard/go/testdata/invalid.yaml:0
+    - libs/configguard/ts/src/__tests__/fixtures/interpolation.yaml:0
+    - libs/configguard/ts/src/__tests__/fixtures/valid.yaml:0
+    - libs/configguard/ts/src/__tests__/fixtures/invalid.yaml:0
+    - services/docling-svc/src/config.ts:4
+    - server/src/config.ts:7
+    - server/src/config/secrets.ts:15
+  • APP_URL (2 definitions)
+    - .env.production:10
+    - .env:13
+  • API_URL (2 definitions)
+    - .env.production:11
+    - .env:14
+  • CORS_ORIGIN (9 definitions)
+    - .env.production:12
+    - .env:55
+    - server/.env.rehydrated:34
+    - server/.env.production:164
+    - server/.env:34
+    - server/.env.production.rehydrated:150
+    - server/.env.production.template:48
+    - server/src/config.ts:17
+    - server/src/config/secrets.ts:55
+  • JWT_SECRET (9 definitions)
+    - .env.production:15
+    - .env:46
+    - server/.env.rehydrated:20
+    - server/.env.production:56
+    - server/.env:20
+    - server/.env.production.rehydrated:42
+    - server/.env.production.template:34
+    - server/src/config.ts:15
+    - server/src/config/secrets.ts:41
+  • JWT_REFRESH_SECRET (8 definitions)
+    - .env.production:16
+    - .env:48
+    - server/.env.rehydrated:21
+    - server/.env.production:58
+    - server/.env:21
+    - server/.env.production.rehydrated:44
+    - server/.env.production.template:35
+    - server/src/config.ts:16
+  • SESSION_SECRET (4 definitions)
+    - .env.production:17
+    - server/.env.rehydrated:24
+    - server/.env:24
+    - server/.env.production.template:38
+  • DATABASE_URL (11 definitions)
+    - .env.production:20
+    - server/.env.rehydrated:9
+    - server/.env:9
+    - server/.env.production.template:9
+    - libs/configguard/go/testdata/interpolation.yaml:0
+    - libs/configguard/go/testdata/valid.yaml:0
+    - libs/configguard/go/testdata/invalid.yaml:0
+    - libs/configguard/ts/src/__tests__/fixtures/interpolation.yaml:0
+    - libs/configguard/ts/src/__tests__/fixtures/valid.yaml:0
+    - libs/configguard/ts/src/__tests__/fixtures/invalid.yaml:0
+    - server/src/config.ts:8
+  • NEO4J_URI (12 definitions)
+    - .env.production:21
+    - .env.maestro-dev:5
+    - .env:20
+    - server/.env.rehydrated:10
+    - server/.env.production:19
+    - server/.env:10
+    - server/.env.production.rehydrated:19
+    - server/.env.production.template:24
+    - scripts/.env.rehydrated:1
+    - scripts/.env:1
+    - server/src/config.ts:9
+    - server/src/config/secrets.ts:29
+  • NEO4J_USERNAME (4 definitions)
+    - .env.production:22
+    - .env:21
+    - server/.env.production:20
+    - server/.env.production.rehydrated:20
+  • NEO4J_PASSWORD (9 definitions)
+    - .env.production:23
+    - .env.maestro-dev:7
+    - .env:22
+    - server/.env.rehydrated:12
+    - server/.env.production:21
+    - server/.env:12
+    - server/.env.production.rehydrated:21
+    - server/.env.production.template:26
+    - server/src/config.ts:11
+  • POSTGRES_HOST (4 definitions)
+    - .env.production:24
+    - .env:26
+    - server/.env.production:25
+    - server/.env.production.rehydrated:25
+  • POSTGRES_PORT (4 definitions)
+    - .env.production:25
+    - .env:27
+    - server/.env.production:26
+    - server/.env.production.rehydrated:26
+  • POSTGRES_DB (4 definitions)
+    - .env.production:26
+    - .env:28
+    - server/.env.production:27
+    - server/.env.production.rehydrated:27
+  ... and 3131 more
+
+🔄 DEPRECATED PATTERNS
+--------------------------------------------------------------------------------
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: apps/workflow-engine/src/config.ts:26
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: apps/graph-analytics/src/config.ts:26
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: apps/ml-engine/src/config.ts:26
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: apps/analytics-engine/src/config.ts:26
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: services/api/src/db/neo4j.ts:21
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: server/src/conductor/config.ts:10
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: server/src/config/index.ts:59
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: server/src/db/neo4j.ts:20
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: workers/ingest/src/IngestOrchestrator.ts:43
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+  • NEO4J_USERNAME → NEO4J_USER
+    Found in: server/src/config/index.js:10
+    Action: Replace 'NEO4J_USERNAME' with 'NEO4J_USER'
+
+💡 RECOMMENDATIONS
+--------------------------------------------------------------------------------
+  ⚠️  Found 28588 unused config keys. Consider removing them to reduce confusion.
+  🚨 Found 1290 missing config keys. Add these to .env.example with documentation.
+  ⚠️  Found 3146 duplicate config keys across files. Consolidate to single source of truth.
+  🔄 Found 12 deprecated patterns. Follow migration guide to modernize.
+  ✅ Consolidate config loading: Choose ONE approach (recommended: Zod-based validation in server/src/config.ts)
+  ✅ Remove duplicate config files: Delete legacy .js versions, keep only .ts
+  ✅ Standardize validation: Use Zod throughout for type safety and runtime validation
+  ✅ Document .env precedence: Create clear documentation of config file loading order
+
+================================================================================
+Report generated: 2025-11-20
+================================================================================
