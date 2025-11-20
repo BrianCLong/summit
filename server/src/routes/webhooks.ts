@@ -6,8 +6,127 @@ import {
   extractTicketFromPR,
 } from '../services/ticket-links.js';
 import { LifecycleManager } from '../services/lifecycle-listeners.js';
+import { webhookService, CreateWebhookSchema, UpdateWebhookSchema } from '../webhooks/webhook.service.js';
+import { z } from 'zod/v4';
 
 const router = Router();
+
+// Helper for validation (for new routes)
+const validate = (schema: any) => (req: any, res: any, next: any) => {
+  try {
+    req.body = schema.parse(req.body);
+    next();
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid input', details: error });
+  }
+};
+
+// Helper for tenant ID (assuming it's in req.user or req.headers)
+const getTenantId = (req: any) => {
+    // In production, strict auth is enforced and tenantId comes from req.user
+    // In dev/testing, we allow header override IF req.user is missing
+    if (req.user?.tenantId) {
+        return req.user.tenantId;
+    }
+    // Fallback for development/testing purposes ONLY
+    return req.headers['x-tenant-id'] || 'default-tenant';
+};
+
+// --- New Webhook Management Routes ---
+
+// Create Webhook
+router.post('/', validate(CreateWebhookSchema), async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const webhook = await webhookService.createWebhook(tenantId, req.body);
+    res.status(201).json(webhook);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// List Webhooks
+router.get('/', async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const webhooks = await webhookService.getWebhooks(tenantId);
+    res.json(webhooks);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Webhook
+router.get('/:id', async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const webhook = await webhookService.getWebhook(tenantId, req.params.id);
+    if (!webhook) {
+      return res.status(404).json({ error: 'Webhook not found' });
+    }
+    res.json(webhook);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update Webhook
+router.patch('/:id', validate(UpdateWebhookSchema), async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const webhook = await webhookService.updateWebhook(tenantId, req.params.id, req.body);
+    if (!webhook) {
+        return res.status(404).json({ error: 'Webhook not found' });
+    }
+    res.json(webhook);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete Webhook
+router.delete('/:id', async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const success = await webhookService.deleteWebhook(tenantId, req.params.id);
+    if (!success) {
+        return res.status(404).json({ error: 'Webhook not found' });
+    }
+    res.status(204).send();
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Deliveries
+router.get('/:id/deliveries', async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const deliveries = await webhookService.getDeliveries(tenantId, req.params.id, limit, offset);
+    res.json(deliveries);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test Trigger
+router.post('/trigger-test', async (req, res) => {
+    try {
+        const tenantId = getTenantId(req);
+        const { eventType, payload } = req.body;
+        if (!eventType || !payload) {
+            return res.status(400).json({ error: 'eventType and payload required'});
+        }
+        await webhookService.triggerEvent(tenantId, eventType, payload);
+        res.json({ message: 'Event triggered' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// --- Existing Webhook Routes (GitHub, Jira, Lifecycle) ---
 
 /**
  * GitHub webhook handler for issue and PR events
