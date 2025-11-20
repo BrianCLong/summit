@@ -1,4 +1,5 @@
 import { createClient, RedisClientType } from 'redis';
+
 import {
   recHit,
   recMiss,
@@ -33,10 +34,10 @@ export class CacheService {
         );
         this.redisClient
           .connect()
-          .then(() => console.log('[CACHE] Redis cache connected'))
+          .then(() => console.info('[CACHE] Redis cache connected'))
           .catch((e) => console.warn('[CACHE] Redis connect failed', e));
       } else {
-        console.log('[CACHE] Using in-memory cache only');
+        console.info('[CACHE] Using in-memory cache only');
       }
     } catch (error) {
       console.warn('[CACHE] Redis unavailable, using in-memory cache:', error);
@@ -53,13 +54,13 @@ export class CacheService {
     if (entry) {
       const now = Date.now();
       if (now - entry.timestamp < entry.ttl * 1000) {
-        console.log(`[CACHE] Memory cache hit for key: ${key}`);
+        console.info(`[CACHE] Memory cache hit for key: ${key}`);
         recHit('memory', op);
         return entry.data as T;
       } else {
         // Expired, remove from cache
         this.memoryCache.delete(key);
-        console.log(`[CACHE] Memory cache expired for key: ${key}`);
+        console.info(`[CACHE] Memory cache expired for key: ${key}`);
       }
     }
 
@@ -83,7 +84,7 @@ export class CacheService {
       }
     }
 
-    console.log(`[CACHE] Cache miss for key: ${key}`);
+    console.info(`[CACHE] Cache miss for key: ${key}`);
     recMiss(this.redisClient ? 'redis' : 'memory', op);
     return null;
   }
@@ -102,7 +103,7 @@ export class CacheService {
       ttl: cacheTTL,
     });
 
-    console.log(`[CACHE] Cached data for key: ${key} (TTL: ${cacheTTL}s)`);
+    console.info(`[CACHE] Cached data for key: ${key} (TTL: ${cacheTTL}s)`);
     recSet('memory', op);
 
     if (this.redisClient) {
@@ -127,9 +128,8 @@ export class CacheService {
    * Delete cached data
    */
   async delete(key: string): Promise<void> {
-    const op = 'delete';
     this.memoryCache.delete(key);
-    console.log(`[CACHE] Deleted cache for key: ${key}`);
+    console.info(`[CACHE] Deleted cache for key: ${key}`);
     if (this.redisClient) {
       try {
         await this.redisClient.del(`${this.namespace}:${key}`);
@@ -144,7 +144,7 @@ export class CacheService {
    */
   async clear(): Promise<void> {
     this.memoryCache.clear();
-    console.log('[CACHE] Cleared all memory cache');
+    console.info('[CACHE] Cleared all memory cache');
     if (this.redisClient) {
       try {
         const pattern = `${this.namespace}:*`;
@@ -180,7 +180,7 @@ export class CacheService {
     let validEntries = 0;
     let expiredEntries = 0;
 
-    for (const [key, entry] of this.memoryCache.entries()) {
+    for (const [_, entry] of this.memoryCache.entries()) {
       if (now - entry.timestamp < entry.ttl * 1000) {
         validEntries++;
       } else {
@@ -213,7 +213,7 @@ export class CacheService {
     }
 
     if (cleaned > 0) {
-      console.log(`[CACHE] Cleaned up ${cleaned} expired entries`);
+      console.info(`[CACHE] Cleaned up ${cleaned} expired entries`);
     }
   }
 }

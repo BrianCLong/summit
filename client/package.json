@@ -14,7 +14,7 @@
     "test:e2e": "playwright test",
     "test:golden-path": "playwright test golden-path-ci-gate.spec.ts",
     "test:coverage": "jest --coverage",
-    "lint": "echo \"Skipping legacy client lint backlog (tracked separately)\"",
+    "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write .",
     "persist:queries": "graphql-codegen --config codegen.ts",

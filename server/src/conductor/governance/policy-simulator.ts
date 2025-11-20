@@ -1,7 +1,8 @@
 // server/src/conductor/governance/policy-simulator.ts
 
-import { Pool } from 'pg';
 import Redis from 'ioredis';
+import { Pool } from 'pg';
+
 import logger from '../../config/logger.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 

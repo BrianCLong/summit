@@ -12,13 +12,26 @@
 
 ## Common Tasks
 
-- Typecheck: `make typecheck`
-- Lint: `make lint`
-- Test: `make test`
-- E2E (smoke): `make e2e`
-- Build all: `make build`
-- Codegen (GraphQL): `make codegen`
+- Typecheck: `pnpm typecheck`
+- Lint: `pnpm lint`
+- Test: `pnpm test`
+- E2E (smoke): `make smoke`
+- Build all: `pnpm build`
+- Codegen (GraphQL): `pnpm graphql:codegen`
 - Bring up services: `make up` / `make down`
+
+## Code Style
+
+We use **ESLint** and **Prettier** to ensure consistent code style.
+
+- **Lint:** `pnpm lint` (checks for errors)
+- **Fix:** `pnpm lint:fix` (auto-fixes linting and formatting issues)
+- **Format:** `pnpm format` (runs Prettier)
+
+### Guidelines
+- **Strictness:** We avoid overly strict rules (like `no-any` everywhere) to keep development frictionless, but we enforce correctness and standard patterns.
+- **Prettier:** formatting is automatic. Do not fight Prettier; run `pnpm format` or configure your editor to format on save.
+- **CI:** Code must pass `pnpm lint` and `pnpm typecheck` before merging.
 
 ## Branch & PR
 
