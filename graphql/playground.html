@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GraphQL Playground - IntelGraph</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/graphql-playground-react/build/static/css/index.css"
+  />
+  <link rel="shortcut icon" href="https://cdn.jsdelivr.net/npm/graphql-playground-react/build/favicon.png" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    #auth-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    #auth-form {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    #auth-form h2 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    #auth-form input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    #auth-form button {
+      width: 100%;
+      padding: 12px;
+      background-color: #e535ab;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #auth-form button:hover {
+      background-color: #d128a0;
+    }
+
+    #auth-form button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: #d32f2f;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .info {
+      color: #666;
+      font-size: 13px;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    #logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 1000;
+      font-size: 14px;
+    }
+
+    #logout-btn:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="auth-overlay">
+    <div id="auth-form">
+      <h2>🔐 GraphQL Playground Authentication</h2>
+      <p class="info">
+        Enter your credentials to access the GraphQL API. Your token will be automatically included in all requests.
+      </p>
+      <form id="login-form">
+        <input
+          type="email"
+          id="email"
+          placeholder="Email"
+          required
+          autocomplete="username"
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+          autocomplete="current-password"
+        />
+        <button type="submit" id="login-btn">Login</button>
+        <div id="auth-error" class="error"></div>
+      </form>
+      <p class="info">
+        <strong>Development Mode:</strong><br>
+        Use any email/password for testing. In production, this will validate against your auth service.
+      </p>
+    </div>
+  </div>
+
+  <button id="logout-btn" style="display: none;">Logout</button>
+
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/graphql-playground-react/build/static/js/middleware.js"></script>
+
+  <script>
+    // Authentication state
+    let authToken = localStorage.getItem('graphql_auth_token');
+    let userEmail = localStorage.getItem('graphql_user_email');
+
+    // Check if already authenticated
+    if (authToken) {
+      initPlayground(authToken);
+    }
+
+    // Login form handler
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('auth-error');
+      const loginBtn = document.getElementById('login-btn');
+
+      errorEl.textContent = '';
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+
+      try {
+        // In development, generate a mock token
+        // In production, replace this with actual API call
+        const isDev = window.location.hostname === 'localhost';
+
+        let token;
+        if (isDev) {
+          // Development: generate mock JWT
+          token = btoa(JSON.stringify({
+            email,
+            exp: Date.now() + 86400000,
+            roles: ['admin', 'analyst']
+          }));
+        } else {
+          // Production: call auth endpoint
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          if (!response.ok) {
+            throw new Error('Authentication failed');
+          }
+
+          const data = await response.json();
+          token = data.token;
+        }
+
+        // Store token
+        localStorage.setItem('graphql_auth_token', token);
+        localStorage.setItem('graphql_user_email', email);
+
+        // Initialize playground
+        initPlayground(token);
+
+      } catch (error) {
+        errorEl.textContent = error.message || 'Authentication failed. Please try again.';
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      }
+    });
+
+    // Logout handler
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('graphql_auth_token');
+      localStorage.removeItem('graphql_user_email');
+      location.reload();
+    });
+
+    // Initialize playground with auth token
+    function initPlayground(token) {
+      document.getElementById('auth-overlay').style.display = 'none';
+      document.getElementById('logout-btn').style.display = 'block';
+
+      const userEmail = localStorage.getItem('graphql_user_email');
+      if (userEmail) {
+        document.getElementById('logout-btn').textContent = `Logout (${userEmail})`;
+      }
+
+      // Initialize GraphQL Playground
+      window.GraphQLPlayground.init(document.getElementById('root'), {
+        endpoint: '/graphql',
+        settings: {
+          'editor.theme': 'dark',
+          'editor.cursorShape': 'line',
+          'editor.reuseHeaders': true,
+          'tracing.hideTracingResponse': false,
+          'queryPlan.hideQueryPlanResponse': false,
+          'editor.fontSize': 14,
+          'editor.fontFamily': "'Source Code Pro', 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace",
+          'request.credentials': 'include'
+        },
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        tabs: [
+          {
+            name: 'Example: List Entities',
+            endpoint: '/graphql',
+            query: `# Welcome to the IntelGraph GraphQL Playground!
+#
+# Keyboard shortcuts:
+#  - Prettify Query:  Shift-Ctrl-P (or press the prettify button)
+#  - Run Query:       Ctrl-Enter (or press the play button)
+#  - Auto Complete:   Ctrl-Space (or just start typing)
+#
+
+query ListEntities {
+  entities(limit: 10) {
+    id
+    type
+    props
+    createdAt
+  }
+}`,
+          },
+          {
+            name: 'Example: Entity Insights',
+            endpoint: '/graphql',
+            query: `query GetEntityInsights($entityId: ID!) {
+  generateEntityInsights(
+    entityId: $entityId
+    entityType: "Person"
+  ) {
+    entityId
+    insights
+    suggestedRelationships {
+      type
+      reason
+      confidence
+    }
+    riskFactors {
+      factor
+      severity
+      description
+    }
+  }
+}`,
+            variables: JSON.stringify({ entityId: "example-entity-id" }, null, 2),
+          },
+          {
+            name: 'Example: GraphRAG Query',
+            endpoint: '/graphql',
+            query: `query GraphRAGQuery($investigationId: ID!, $question: String!) {
+  graphRagAnswer(input: {
+    investigationId: $investigationId
+    question: $question
+    maxHops: 2
+    temperature: 0
+  }) {
+    answer
+    confidence
+    citations {
+      entityIds
+    }
+    why_paths {
+      from
+      to
+      type
+      supportScore
+    }
+  }
+}`,
+            variables: JSON.stringify({
+              investigationId: "example-investigation-id",
+              question: "What are the connections between these entities?"
+            }, null, 2),
+          },
+          {
+            name: 'Example: Create Investigation',
+            endpoint: '/graphql',
+            query: `mutation CreateInvestigation($input: InvestigationInput!) {
+  createInvestigation(input: $input) {
+    id
+    name
+    description
+    createdAt
+  }
+}`,
+            variables: JSON.stringify({
+              input: {
+                name: "New Investigation",
+                description: "Investigation description"
+              }
+            }, null, 2),
+          }
+        ]
+      });
+    }
+  </script>
+</body>
+</html>
