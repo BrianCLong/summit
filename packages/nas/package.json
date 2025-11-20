@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/nas",
+  "version": "1.0.0",
+  "description": "Neural Architecture Search framework with reinforcement learning and evolutionary search",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.1.12",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "eslint": "^9.39.1"
+  },
+  "type": "module"
+}
