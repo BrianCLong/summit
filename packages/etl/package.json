@@ -1,0 +1,61 @@
+{
+  "name": "@intelgraph/etl",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "Multi-source data fusion and ETL pipeline for IntelGraph",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "zod": "^4.1.12",
+    "axios": "^1.7.2",
+    "rss-parser": "^3.13.0",
+    "csv-parse": "^5.5.6",
+    "xml2js": "^0.6.2",
+    "cheerio": "^1.0.0",
+    "bottleneck": "^2.19.5",
+    "imap": "^0.8.19",
+    "mailparser": "^3.7.1",
+    "bull": "^4.15.1",
+    "ioredis": "^5.8.2",
+    "p-queue": "^8.0.1",
+    "natural": "^8.0.1",
+    "compromise": "^14.14.2",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.10.2",
+    "@types/xml2js": "^0.4.14",
+    "@types/imap": "^0.8.40",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3",
+    "jest": "^30.0.0",
+    "ts-jest": "^29.2.5"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./connectors": {
+      "types": "./dist/connectors/index.d.ts",
+      "import": "./dist/connectors/index.js"
+    },
+    "./transformers": {
+      "types": "./dist/transformers/index.d.ts",
+      "import": "./dist/transformers/index.js"
+    },
+    "./pipeline": {
+      "types": "./dist/pipeline/index.d.ts",
+      "import": "./dist/pipeline/index.js"
+    }
+  }
+}
