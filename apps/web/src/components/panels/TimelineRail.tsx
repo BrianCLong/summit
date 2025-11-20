@@ -6,12 +6,22 @@ import {
   ChevronRight,
   Filter,
   Zap,
+  Maximize2,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { formatRelativeTime } from '@/lib/utils'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import {
+  setTimeRange,
+  selectEvents,
+  selectSelectedEventIds,
+  selectSelectedEntityIds,
+  selectTimeRange,
+} from '@/features/viewSync/viewSyncSlice'
+import { useTelemetry } from '@/lib/telemetry'
 import type { TimelineEvent, PanelProps } from '@/types'
 
 interface TimelineRailProps extends PanelProps<TimelineEvent[]> {
@@ -27,11 +37,17 @@ export function TimelineRail({
   error,
   onTimeRangeChange,
   onEventSelect,
-  selectedEventId,
+  selectedEventId: deprecatedSelectedEventId,
   autoScroll = true,
   className,
 }: TimelineRailProps) {
-  const [timeRange, setTimeRange] = React.useState<{
+  const dispatch = useAppDispatch()
+  const selectedEventIds = useAppSelector(selectSelectedEventIds)
+  const selectedEntityIds = useAppSelector(selectSelectedEntityIds)
+  const globalTimeRange = useAppSelector(selectTimeRange)
+  const { trackPaneInteraction, trackBrushing } = useTelemetry()
+
+  const [localTimeRange, setLocalTimeRange] = React.useState<{
     start: string
     end: string
   }>({
@@ -39,6 +55,7 @@ export function TimelineRail({
     end: '',
   })
   const [showFilters, setShowFilters] = React.useState(false)
+  const [brushing, setBrushing] = React.useState(false)
   const timelineRef = React.useRef<HTMLDivElement>(null)
 
   // Auto-scroll to latest events

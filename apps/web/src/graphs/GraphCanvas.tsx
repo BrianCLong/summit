@@ -1,6 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 import { cn } from '@/lib/utils'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import {
+  selectEntities,
+  toggleEntitySelection,
+  setHoveredEntity,
+  selectSelectedEntityIds,
+  selectHoveredEntityId,
+  selectTimeRange,
+} from '@/features/viewSync/viewSyncSlice'
+import { useTelemetry } from '@/lib/telemetry'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
 interface GraphCanvasProps {
@@ -35,9 +45,15 @@ export function GraphCanvas({
   relationships,
   layout,
   onEntitySelect,
-  selectedEntityId,
+  selectedEntityId: deprecatedSelectedEntityId,
   className,
 }: GraphCanvasProps) {
+  const dispatch = useAppDispatch()
+  const selectedEntityIds = useAppSelector(selectSelectedEntityIds)
+  const hoveredEntityId = useAppSelector(selectHoveredEntityId)
+  const timeRange = useAppSelector(selectTimeRange)
+  const { trackPaneInteraction } = useTelemetry()
+
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
 
@@ -247,15 +263,25 @@ export function GraphCanvas({
       .append('circle')
       .attr('r', d => 15 + d.entity.confidence * 10)
       .attr('fill', d => getEntityColor(d.entity.type))
-      .attr('stroke', d =>
-        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
-      )
-      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
-      .style('filter', d =>
-        selectedEntityId === d.entity.id
+      .attr('stroke', d => {
+        const isSelected = selectedEntityIds.includes(d.entity.id)
+        const isHovered = hoveredEntityId === d.entity.id
+        return isSelected ? '#fbbf24' : isHovered ? '#8b5cf6' : '#fff'
+      })
+      .attr('stroke-width', d => {
+        const isSelected = selectedEntityIds.includes(d.entity.id)
+        const isHovered = hoveredEntityId === d.entity.id
+        return isSelected ? 3 : isHovered ? 2.5 : 2
+      })
+      .style('filter', d => {
+        const isSelected = selectedEntityIds.includes(d.entity.id)
+        const isHovered = hoveredEntityId === d.entity.id
+        return isSelected
           ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
+          : isHovered
+          ? 'drop-shadow(0 0 6px rgba(139, 92, 246, 0.5))'
           : 'none'
-      )
+      })
 
     // Node icons (using text for simplicity)
     node
@@ -293,6 +319,18 @@ export function GraphCanvas({
     // Click handler for nodes
     node.on('click', (event, d) => {
       event.stopPropagation()
+
+      // Support multi-selection with Cmd/Ctrl key
+      if (event.metaKey || event.ctrlKey) {
+        dispatch(toggleEntitySelection(d.entity.id))
+      } else {
+        dispatch(selectEntities([d.entity.id]))
+      }
+
+      // Track interaction
+      trackPaneInteraction('graph', 'select_entity', { entityId: d.entity.id })
+
+      // Legacy callback
       onEntitySelect?.(d.entity)
     })
 
@@ -303,6 +341,9 @@ export function GraphCanvas({
         .transition()
         .duration(200)
         .attr('r', 20 + d.entity.confidence * 10)
+
+      // Update Redux hover state (synchronized across panes)
+      dispatch(setHoveredEntity(d.entity.id))
 
       // Highlight connected links
       link.style('stroke-opacity', l =>
@@ -316,6 +357,9 @@ export function GraphCanvas({
         .transition()
         .duration(200)
         .attr('r', 15 + d.entity.confidence * 10)
+
+      // Clear Redux hover state
+      dispatch(setHoveredEntity(null))
 
       // Reset link opacity
       link.style('stroke-opacity', 0.6)
@@ -351,7 +395,10 @@ export function GraphCanvas({
     relationships,
     layout,
     dimensions,
-    selectedEntityId,
+    selectedEntityIds,
+    hoveredEntityId,
+    dispatch,
+    trackPaneInteraction,
     onEntitySelect,
   ])
 

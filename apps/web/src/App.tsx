@@ -5,9 +5,13 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
+import { Provider } from 'react-redux'
 import { ApolloProvider } from '@apollo/client'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
+
+// Redux store
+import { store } from '@/store'
 
 // Apollo Client and Socket Context
 import { apolloClient } from '@/lib/apollo'
@@ -37,62 +41,64 @@ import { AuthProvider } from '@/contexts/AuthContext'
 
 function App() {
   return (
-    <ApolloProvider client={apolloClient}>
-      <SocketProvider>
-        <TooltipProvider>
-          <AuthProvider>
-            <SearchProvider>
-              <Router>
-                <Routes>
-                  {/* Auth routes */}
-                  <Route path="/signin" element={<SignInPage />} />
-                  <Route path="/access-denied" element={<AccessDeniedPage />} />
+    <Provider store={store}>
+      <ApolloProvider client={apolloClient}>
+        <SocketProvider>
+          <TooltipProvider>
+            <AuthProvider>
+              <SearchProvider>
+                <Router>
+                  <Routes>
+                    {/* Auth routes */}
+                    <Route path="/signin" element={<SignInPage />} />
+                    <Route path="/access-denied" element={<AccessDeniedPage />} />
 
-                  {/* Protected routes with layout */}
-                  <Route path="/" element={<Layout />}>
-                    <Route index element={<HomePage />} />
-                    <Route path="explore" element={<ExplorePage />} />
+                    {/* Protected routes with layout */}
+                    <Route path="/" element={<Layout />}>
+                      <Route index element={<HomePage />} />
+                      <Route path="explore" element={<ExplorePage />} />
 
-                    {/* Alerts */}
-                    <Route path="alerts" element={<AlertsPage />} />
-                    <Route path="alerts/:id" element={<AlertDetailPage />} />
+                      {/* Alerts */}
+                      <Route path="alerts" element={<AlertsPage />} />
+                      <Route path="alerts/:id" element={<AlertDetailPage />} />
 
-                    {/* Cases */}
-                    <Route path="cases" element={<CasesPage />} />
-                    <Route path="cases/:id" element={<CaseDetailPage />} />
+                      {/* Cases */}
+                      <Route path="cases" element={<CasesPage />} />
+                      <Route path="cases/:id" element={<CaseDetailPage />} />
 
-                    {/* Dashboards */}
-                    <Route
-                      path="dashboards/command-center"
-                      element={<CommandCenterDashboard />}
-                    />
-                    <Route
-                      path="dashboards/supply-chain"
-                      element={<SupplyChainDashboard />}
-                    />
+                      {/* Dashboards */}
+                      <Route
+                        path="dashboards/command-center"
+                        element={<CommandCenterDashboard />}
+                      />
+                      <Route
+                        path="dashboards/supply-chain"
+                        element={<SupplyChainDashboard />}
+                      />
 
-                    {/* Data & Models */}
-                    <Route path="data/sources" element={<DataSourcesPage />} />
-                    <Route path="models" element={<ModelsPage />} />
-                    <Route path="reports" element={<ReportsPage />} />
+                      {/* Data & Models */}
+                      <Route path="data/sources" element={<DataSourcesPage />} />
+                      <Route path="models" element={<ModelsPage />} />
+                      <Route path="reports" element={<ReportsPage />} />
 
-                    {/* Admin */}
-                    <Route path="admin/*" element={<AdminPage />} />
+                      {/* Admin */}
+                      <Route path="admin/*" element={<AdminPage />} />
 
-                    {/* Support */}
-                    <Route path="help" element={<HelpPage />} />
-                    <Route path="changelog" element={<ChangelogPage />} />
+                      {/* Support */}
+                      <Route path="help" element={<HelpPage />} />
+                      <Route path="changelog" element={<ChangelogPage />} />
 
-                    {/* Catch all */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Route>
-                </Routes>
-              </Router>
-            </SearchProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </SocketProvider>
-    </ApolloProvider>
+                      {/* Catch all */}
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Route>
+                  </Routes>
+                </Router>
+              </SearchProvider>
+            </AuthProvider>
+          </TooltipProvider>
+        </SocketProvider>
+      </ApolloProvider>
+    </Provider>
   )
 }
 
