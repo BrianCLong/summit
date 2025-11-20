@@ -1,0 +1,4 @@
+asset_id,org_id,hosting_model,purpose_tags,provenance_ref
+ASSET-5001,ORG-300,managed-service,operations|security-monitoring,s3csv/relationships/2025-09-01T15:30:00Z
+ASSET-5002,ORG-200,self-hosted,operations|compliance,s3csv/relationships/2025-09-01T15:30:00Z
+ASSET-5003,ORG-100,cloud-native,operations|analytics,s3csv/relationships/2025-09-01T15:30:00Z
