@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/metadata-discovery",
+  "version": "0.1.0",
+  "description": "Automated metadata discovery and extraction for databases, files, and APIs",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/data-catalog": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "pg": "^8.16.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/jest": "^30.0.0",
+    "@types/pg": "^8.11.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1"
+  }
+}
