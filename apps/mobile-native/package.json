@@ -38,11 +38,11 @@
     "react-native-gesture-handler": "^2.21.0",
     "react-native-reanimated": "^4.0.3",
     "@react-native-async-storage/async-storage": "^2.1.0",
-    "@react-native-community/netinfo": "^13.1.0",
-    "react-native-sqlite-storage": "^7.0.1",
+    "@react-native-community/netinfo": "^11.4.1",
+    "react-native-sqlite-storage": "^6.0.1",
     "@shopify/react-native-skia": "^1.7.2",
     "react-native-maps": "^1.21.0",
-    "react-native-geolocation-service": "^5.3.2",
+    "react-native-geolocation-service": "^5.3.1",
     "react-native-background-geolocation": "^4.19.0",
     "@notifee/react-native": "^9.3.2",
     "@react-native-firebase/app": "^22.4.1",
@@ -99,7 +99,7 @@
     "react-test-renderer": "^19.2.0",
     "detox": "^20.28.7",
     "@types/jest": "^30.0.0",
-    "metro-react-native-babel-preset": "^0.79.4",
+    "metro-react-native-babel-preset": "^0.77.0",
     "react-native-dotenv": "^3.4.11"
   },
   "engines": {
