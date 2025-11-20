@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/data-integration",
+  "version": "0.1.0",
+  "description": "Enterprise data integration framework with ETL/ELT capabilities",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "zod": "^4.1.12",
+    "eventemitter3": "^5.0.1",
+    "p-queue": "^8.0.1",
+    "p-retry": "^6.2.1",
+    "rxjs": "^7.8.1",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

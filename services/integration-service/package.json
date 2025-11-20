@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/integration-service",
+  "version": "0.1.0",
+  "description": "REST API service for data integration platform",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@intelgraph/data-integration": "workspace:*",
+    "@intelgraph/etl-engine": "workspace:*",
+    "@intelgraph/workflow-orchestration": "workspace:*",
+    "@intelgraph/cdc-engine": "workspace:*",
+    "@intelgraph/data-connectors": "workspace:*",
+    "express": "^5.0.2",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "zod": "^4.1.12",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.19.2"
+  }
+}
