@@ -48,6 +48,30 @@ export const config = {
         process.env.TRAINING_DATA_RETENTION_DAYS || '30',
       ),
     },
+
+    autoTuning: {
+      performanceDegradationThreshold: parseFloat(
+        process.env.ML_PERFORMANCE_DEGRADATION_THRESHOLD || '0.05',
+      ),
+      evaluationWindow: parseInt(
+        process.env.ML_PERFORMANCE_EVALUATION_WINDOW || '12',
+      ),
+      minEvaluations: parseInt(
+        process.env.ML_MIN_EVALUATIONS_FOR_RETRAIN || '3',
+      ),
+      checkIntervalMs: parseInt(
+        process.env.ML_RETRAIN_CHECK_INTERVAL_MS || '300000',
+      ),
+      cooldownMs: parseInt(
+        process.env.ML_RETRAIN_COOLDOWN_MS || '1800000',
+      ),
+    },
+
+    benchmarking: {
+      realtimeWindowMinutes: parseInt(
+        process.env.ML_BENCHMARK_REALTIME_WINDOW_MINUTES || '15',
+      ),
+    },
   },
 
   redis: {
