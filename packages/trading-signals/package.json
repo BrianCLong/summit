@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/trading-signals",
+  "version": "1.0.0",
+  "description": "Trading signal generation with ML predictions, sentiment analysis, and signal aggregation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "keywords": [
+    "trading-signals",
+    "machine-learning",
+    "sentiment-analysis",
+    "prediction",
+    "backtesting"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/market-data": "workspace:*",
+    "@intelgraph/technical-analysis": "workspace:*",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

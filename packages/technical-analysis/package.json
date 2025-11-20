@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/technical-analysis",
+  "version": "1.0.0",
+  "description": "Technical analysis engine with trend indicators, volume analysis, and pattern recognition",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "keywords": [
+    "technical-analysis",
+    "trading",
+    "indicators",
+    "patterns",
+    "charting"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/market-data": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

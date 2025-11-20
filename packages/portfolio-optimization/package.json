@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/portfolio-optimization",
+  "version": "1.0.0",
+  "description": "Portfolio optimization with mean-variance, risk parity, and factor analysis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "keywords": [
+    "portfolio",
+    "optimization",
+    "risk-management",
+    "asset-allocation"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/market-data": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

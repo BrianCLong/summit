@@ -1,0 +1,33 @@
+{
+  "name": "@intelgraph/signal-generator",
+  "version": "1.0.0",
+  "description": "Trading signal generation service orchestrating market data, technical analysis, and ML predictions",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "trading",
+    "signals",
+    "service"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/market-data": "workspace:*",
+    "@intelgraph/technical-analysis": "workspace:*",
+    "@intelgraph/trading-signals": "workspace:*",
+    "@intelgraph/portfolio-optimization": "workspace:*",
+    "redis": "^5.8.1",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.9.3",
+    "ts-node": "^10.9.2"
+  }
+}
