@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
+import { tenantContext } from './middleware/tenantContext.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
@@ -52,6 +53,10 @@ export const createApp = async () => {
   );
   app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }));
   app.use(express.json({ limit: '1mb' }));
+
+  // Tenant context should be loaded early
+  app.use(tenantContext);
+
   app.use(auditLogger);
 
   // Health endpoints (exempt from rate limiting)
