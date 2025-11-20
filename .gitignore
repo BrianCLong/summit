@@ -176,6 +176,8 @@ apps/**/dist/
 **/dist/
 server/test-results/
 server/junit.xml
+coverage/
+**/coverage/
 
 # Neo4j & graph stores
 neo4j/data/
