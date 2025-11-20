@@ -29,6 +29,8 @@ import {
   type InvestigationAction,
   type UserIdentity,
 } from './investigationAccess.js';
+import { registerPresenceHandlers } from './presence.js';
+import { registerAnalyticsHandlers } from './analytics.js';
 
 const logger = pino();
 
@@ -258,6 +260,10 @@ export function initSocket(httpServer: any): Server {
         }
       },
     );
+
+    // Register additional handlers for presence and analytics
+    registerPresenceHandlers(socket);
+    registerAnalyticsHandlers(socket);
 
     socket.on(
       'presence:heartbeat',
