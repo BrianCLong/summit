@@ -1,0 +1,32 @@
+{
+  "name": "@intelgraph/event-bus-service",
+  "version": "1.0.0",
+  "description": "Standalone event bus service for distributed messaging",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-esm src/server.ts",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/event-bus": "workspace:*",
+    "@intelgraph/event-sourcing": "workspace:*",
+    "@intelgraph/cqrs": "workspace:*",
+    "@intelgraph/messaging": "workspace:*",
+    "@intelgraph/event-streaming": "workspace:*",
+    "express": "^5.0.1",
+    "pino": "^9.0.0",
+    "pino-http": "^10.0.0",
+    "dotenv": "^17.2.3",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.9.3",
+    "ts-node": "^10.9.2"
+  }
+}
