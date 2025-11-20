@@ -1,0 +1,681 @@
+import { Client } from '@elastic/elasticsearch';
+import pino from 'pino';
+// @ts-ignore - EmbeddingService is JS
+import EmbeddingService from '../services/EmbeddingService.js';
+import {
+  SearchIndex,
+  SearchQuery,
+  SearchResponse,
+  SearchResult,
+  FacetResult,
+  SearchSuggestion,
+} from './types';
+
+export class ElasticsearchService {
+  private client: Client;
+  private logger = pino({ name: 'ElasticsearchService' });
+  private embeddingService: EmbeddingService;
+
+  constructor() {
+    this.client = new Client({
+      node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
+      auth: process.env.ELASTICSEARCH_API_KEY
+        ? { apiKey: process.env.ELASTICSEARCH_API_KEY }
+        : process.env.ELASTICSEARCH_USERNAME
+        ? {
+            username: process.env.ELASTICSEARCH_USERNAME,
+            password: process.env.ELASTICSEARCH_PASSWORD || '',
+          }
+        : undefined,
+      requestTimeout: 30000,
+      maxRetries: 3,
+      resurrectStrategy: 'ping',
+      tls: {
+        rejectUnauthorized: process.env.ELASTICSEARCH_VERIFY_SSL !== 'false',
+      },
+    });
+
+    this.embeddingService = new EmbeddingService();
+  }
+
+  private getBody<T>(response: any): T {
+    return response.body ?? response;
+  }
+
+  async search(query: SearchQuery): Promise<SearchResponse> {
+    const startTime = Date.now();
+
+    try {
+      const elasticQuery = await this.buildElasticsearchQuery(query);
+
+      this.logger.info(
+        {
+          query: query.query,
+          searchType: query.searchType,
+          filters: query.filters,
+        },
+        'Executing search query',
+      );
+
+      const indices = this.getSearchIndices(query);
+      // Ensure indices exist or use wildcards. For now, we assume indices might not exist so we might want to check or just run it.
+      // If index doesn't exist, Elastic throws 404. We might want to handle that or let it fail.
+
+      const response = await this.client.search({
+        index: indices,
+        body: elasticQuery,
+        track_total_hits: true,
+        request_cache: true,
+        timeout: '30s',
+        ignore_unavailable: true, // Good for multi-index search
+      });
+      const body = this.getBody<any>(response);
+
+      // Handle case where no hits found (body.hits might be undefined if error occurred but didn't throw?)
+      // Standard elastic response always has hits.
+
+      const searchResponse: SearchResponse = {
+        query,
+        results: this.transformHits(body.hits?.hits || []),
+        total: {
+          value: body.hits?.total?.value || 0,
+          relation: body.hits?.total?.relation || 'eq',
+        },
+        took: body.took,
+        timedOut: body.timed_out,
+        facets: this.transformAggregations(body.aggregations),
+        suggestions: this.transformSuggestions(body.suggest),
+        scrollId: body._scroll_id,
+      };
+
+      this.logger.info(
+        {
+          query: query.query,
+          resultCount: searchResponse.results.length,
+          totalHits: searchResponse.total.value,
+          took: searchResponse.took,
+          executionTime: Date.now() - startTime,
+        },
+        'Search completed',
+      );
+
+      return searchResponse;
+    } catch (error) {
+      this.logger.error(
+        {
+          query: query.query,
+          error: error instanceof Error ? error.message : String(error),
+          executionTime: Date.now() - startTime,
+        },
+        'Search failed',
+      );
+      throw error;
+    }
+  }
+
+  private async buildElasticsearchQuery(query: SearchQuery): Promise<any> {
+    const esQuery: any = {
+      query: await this.buildQueryClause(query),
+      size: query.pagination?.size || 20,
+      from:
+        ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 20),
+    };
+
+    // Add sorting
+    if (query.sort) {
+      esQuery.sort = [
+        {
+          [query.sort.field]: {
+            order: query.sort.order,
+            mode: query.sort.mode,
+          },
+        },
+      ];
+    } else {
+      // Default sort by score
+      esQuery.sort = [{ _score: { order: 'desc' } }];
+    }
+
+    // Add highlighting
+    if (query.highlight) {
+      esQuery.highlight = {
+        fields: query.highlight.fields.reduce((acc, field) => {
+          acc[field] = {
+            fragment_size: query.highlight!.fragmentSize || 150,
+            number_of_fragments: query.highlight!.numberOfFragments || 3,
+            pre_tags: query.highlight!.preTags || ['<mark>'],
+            post_tags: query.highlight!.postTags || ['</mark>'],
+          };
+          return acc;
+        }, {} as any),
+      };
+    }
+
+    // Add aggregations/facets
+    if (query.facets && query.facets.length > 0) {
+      esQuery.aggs = this.buildAggregations(query.facets);
+    }
+
+    // Add scroll for pagination
+    if (query.pagination?.scroll) {
+      esQuery.scroll = query.pagination.scroll;
+    }
+
+    // Add suggestions
+    if (query.query) {
+      esQuery.suggest = {
+        'title-suggest': {
+          prefix: query.query,
+          completion: {
+            field: 'suggest',
+            size: 5,
+          },
+        },
+      };
+    }
+
+    return esQuery;
+  }
+
+  private async buildQueryClause(query: SearchQuery): Promise<any> {
+    const boolQuery: any = {
+      bool: {
+        must: [],
+        should: [],
+        filter: [],
+        must_not: [],
+      },
+    };
+
+    // Main query
+    if (query.query && query.query.trim()) {
+      switch (query.searchType) {
+        case 'semantic':
+          boolQuery.bool.must.push(await this.buildSemanticQuery(query.query));
+          break;
+        case 'fuzzy':
+          boolQuery.bool.must.push(this.buildFuzzyQuery(query.query));
+          break;
+        case 'hybrid':
+          boolQuery.bool.should.push(this.buildFullTextQuery(query.query));
+          boolQuery.bool.should.push(await this.buildSemanticQuery(query.query));
+          boolQuery.bool.minimum_should_match = 1;
+          break;
+        default:
+          boolQuery.bool.must.push(this.buildFullTextQuery(query.query));
+      }
+    } else {
+      boolQuery.bool.must.push({ match_all: {} });
+    }
+
+    // Add filters
+    if (query.filters) {
+      if (query.filters.dateRange) {
+        boolQuery.bool.filter.push({
+          range: {
+            [query.filters.dateRange.field]: {
+              ...(query.filters.dateRange.from && {
+                gte: query.filters.dateRange.from,
+              }),
+              ...(query.filters.dateRange.to && {
+                lte: query.filters.dateRange.to,
+              }),
+            },
+          },
+        });
+      }
+
+      if (query.filters.entityTypes && query.filters.entityTypes.length > 0) {
+        boolQuery.bool.filter.push({
+          terms: { 'entityType.keyword': query.filters.entityTypes },
+        });
+      }
+
+      if (query.filters.sources && query.filters.sources.length > 0) {
+        boolQuery.bool.filter.push({
+          terms: { 'source.keyword': query.filters.sources },
+        });
+      }
+
+      if (query.filters.tags && query.filters.tags.length > 0) {
+        boolQuery.bool.filter.push({
+          terms: { 'tags.keyword': query.filters.tags },
+        });
+      }
+
+      if (query.filters.confidence) {
+        boolQuery.bool.filter.push({
+          range: {
+            confidence: {
+              ...(query.filters.confidence.min !== undefined && {
+                gte: query.filters.confidence.min,
+              }),
+              ...(query.filters.confidence.max !== undefined && {
+                lte: query.filters.confidence.max,
+              }),
+            },
+          },
+        });
+      }
+
+      if (query.filters.custom) {
+        Object.entries(query.filters.custom).forEach(([field, value]) => {
+          if (Array.isArray(value)) {
+            boolQuery.bool.filter.push({
+              terms: { [field]: value },
+            });
+          } else {
+            boolQuery.bool.filter.push({
+              term: { [field]: value },
+            });
+          }
+        });
+      }
+    }
+
+    // Apply boosts
+    if (query.boost) {
+      if (query.boost.fields) {
+        Object.entries(query.boost.fields).forEach(([field, boost]) => {
+          const fieldQuery = boolQuery.bool.must.find(
+            (q: any) => q.multi_match,
+          );
+          if (fieldQuery && fieldQuery.multi_match) {
+            fieldQuery.multi_match.fields = fieldQuery.multi_match.fields || [];
+            fieldQuery.multi_match.fields.push(`${field}^${boost}`);
+          }
+        });
+      }
+
+      if (query.boost.functions && query.boost.functions.length > 0) {
+        return {
+          function_score: {
+            query: boolQuery,
+            functions: query.boost.functions.map((func) => ({
+              field_value_factor: {
+                field: func.field,
+                factor: func.factor || 1.2,
+                modifier: func.modifier || 'log1p',
+                missing: func.missing || 1,
+              },
+            })),
+            score_mode: 'sum',
+            boost_mode: 'multiply',
+          },
+        };
+      }
+    }
+
+    return boolQuery;
+  }
+
+  private buildFullTextQuery(queryText: string): any {
+    return {
+      multi_match: {
+        query: queryText,
+        fields: [
+          'title^3',
+          'content^2',
+          'description^1.5',
+          'tags^2',
+          'metadata.*',
+        ],
+        type: 'best_fields',
+        operator: 'or',
+        fuzziness: 'AUTO',
+        prefix_length: 2,
+        max_expansions: 50,
+      },
+    };
+  }
+
+  private async buildSemanticQuery(queryText: string): Promise<any> {
+    const embedding = await this.embeddingService.generateEmbedding({
+      text: queryText,
+    });
+    return {
+      script_score: {
+        query: { match_all: {} },
+        script: {
+          source: `
+            if (doc['embedding_vector'].size() == 0) return 0;
+            def queryVector = params.query_vector;
+            def docVector = doc['embedding_vector'].value;
+            return cosineSimilarity(queryVector, docVector) + 1.0;
+          `,
+          params: {
+            query_vector: embedding,
+          },
+        },
+      },
+    };
+  }
+
+  private buildFuzzyQuery(queryText: string): any {
+    const words = queryText.split(/\s+/);
+    return {
+      bool: {
+        should: words.map((word) => ({
+          fuzzy: {
+            content: {
+              value: word,
+              fuzziness: 'AUTO',
+              max_expansions: 50,
+              prefix_length: 2,
+            },
+          },
+        })),
+        minimum_should_match: Math.ceil(words.length * 0.6),
+      },
+    };
+  }
+
+  private buildAggregations(facets: string[]): any {
+    const aggs: any = {};
+
+    facets.forEach((facet) => {
+      switch (facet) {
+        case 'entityTypes':
+          aggs.entityTypes = {
+            terms: {
+              field: 'entityType.keyword',
+              size: 20,
+            },
+          };
+          break;
+        case 'sources':
+          aggs.sources = {
+            terms: {
+              field: 'source.keyword',
+              size: 20,
+            },
+          };
+          break;
+        case 'tags':
+          aggs.tags = {
+            terms: {
+              field: 'tags.keyword',
+              size: 20,
+            },
+          };
+          break;
+        case 'dateHistogram':
+          aggs.dateHistogram = {
+            date_histogram: {
+              field: 'createdAt',
+              calendar_interval: 'day',
+              min_doc_count: 1,
+            },
+          };
+          break;
+        case 'confidence':
+          aggs.confidence = {
+            histogram: {
+              field: 'confidence',
+              interval: 0.1,
+              min_doc_count: 1,
+            },
+          };
+          break;
+      }
+    });
+
+    return aggs;
+  }
+
+  private getSearchIndices(query: SearchQuery): string[] {
+    const indices = ['entities', 'cases', 'documents', 'comments', 'events'];
+
+    if (query.filters?.entityTypes) {
+      // Map entity types to index names (assuming simple pluralization + 's')
+      // Or we can just search all and filter.
+      // For now, sticking to logic from apps/search-engine:
+      return query.filters.entityTypes.map((type) => `${type.toLowerCase()}s`);
+    }
+
+    return indices;
+  }
+
+  private transformHits(hits: any[]): SearchResult[] {
+    return hits.map((hit) => ({
+      id: hit._id,
+      type: hit._index.slice(0, -1) as any,
+      score: hit._score,
+      source: hit._source,
+      highlight: hit.highlight,
+      explanation: hit._explanation,
+    }));
+  }
+
+  private transformAggregations(aggs: any): Record<string, any> | undefined {
+    if (!aggs) return undefined;
+
+    const facets: Record<string, any> = {};
+
+    Object.entries(aggs).forEach(([key, value]: [string, any]) => {
+      if (value.buckets) {
+        facets[key] = {
+          buckets: value.buckets.map((bucket: any) => ({
+            key: bucket.key,
+            docCount: bucket.doc_count,
+            subAggregations: bucket.aggregations
+              ? this.transformAggregations(bucket.aggregations)
+              : undefined,
+          })),
+          docCountErrorUpperBound: value.doc_count_error_upper_bound || 0,
+          sumOtherDocCount: value.sum_other_doc_count || 0,
+        };
+      }
+    });
+
+    return facets;
+  }
+
+  private transformSuggestions(suggestions: any): any[] | undefined {
+    if (!suggestions) return undefined;
+
+    const results: any[] = [];
+
+    Object.values(suggestions).forEach((suggestion: any) => {
+      if (Array.isArray(suggestion)) {
+        suggestion.forEach((s) => {
+          if (s.options) {
+            results.push(
+              ...s.options.map((option: any) => ({
+                text: option.text,
+                score: option.score,
+                freq: option.freq,
+              })),
+            );
+          }
+        });
+      }
+    });
+
+    return results;
+  }
+
+  async createIndex(index: SearchIndex): Promise<void> {
+    try {
+      const exists = await this.client.indices.exists({ index: index.name });
+      if (exists) {
+        this.logger.info({ indexName: index.name }, 'Index already exists');
+        return;
+      }
+
+      const createRequest: any = {
+        index: index.name,
+        mappings: index.mappings,
+        settings: index.settings,
+      };
+
+      await this.client.indices.create(createRequest);
+
+      if (index.aliases.length > 0) {
+        const aliasRequest: any = {
+          actions: index.aliases.map((alias) => ({
+            add: { index: index.name, alias },
+          })),
+        };
+
+        await this.client.indices.updateAliases(aliasRequest);
+      }
+
+      this.logger.info({ indexName: index.name }, 'Index created successfully');
+    } catch (error) {
+      this.logger.error(
+        {
+          indexName: index.name,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        'Failed to create index',
+      );
+      throw error;
+    }
+  }
+
+  async deleteIndex(indexName: string): Promise<void> {
+    try {
+      await this.client.indices.delete({ index: indexName });
+      this.logger.info({ indexName }, 'Index deleted successfully');
+    } catch (error) {
+      this.logger.error(
+        {
+          indexName,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        'Failed to delete index',
+      );
+      throw error;
+    }
+  }
+
+  async indexDocument(
+    indexName: string,
+    id: string,
+    document: any,
+  ): Promise<void> {
+    try {
+      // If we want to automatically generate embeddings for certain fields:
+      if (document.content || document.description) {
+         // Optional: embedding generation logic here if not pre-calculated.
+         // But for now assume document is ready to index or we can do it:
+         const textToEmbed = document.content || document.description || document.title;
+         if (textToEmbed) {
+             const embedding = await this.embeddingService.generateEmbedding({ text: textToEmbed });
+             document.embedding_vector = embedding;
+         }
+      }
+
+      const response = await this.client.index({
+        index: indexName,
+        id,
+        body: document,
+        refresh: 'wait_for',
+      });
+      this.getBody(response);
+
+      this.logger.debug({ indexName, id }, 'Document indexed successfully');
+    } catch (error) {
+      this.logger.error(
+        {
+          indexName,
+          id,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        'Failed to index document',
+      );
+      throw error;
+    }
+  }
+
+  async bulkIndex(operations: any[]): Promise<void> {
+    try {
+      const response = await this.client.bulk({
+        body: operations,
+        refresh: 'wait_for',
+      });
+      const body = this.getBody<any>(response);
+
+      if (body.errors) {
+        const erroredDocuments: any[] = [];
+        body.items.forEach((action: any, i: number) => {
+          const operation = Object.keys(action)[0];
+          if (action[operation].error) {
+            erroredDocuments.push({
+              status: action[operation].status,
+              error: action[operation].error,
+              operation: operations[i * 2],
+              document: operations[i * 2 + 1],
+            });
+          }
+        });
+
+        this.logger.error(
+          {
+            errorCount: erroredDocuments.length,
+            errors: erroredDocuments,
+          },
+          'Bulk indexing partially failed',
+        );
+      }
+
+      this.logger.info(
+        {
+          took: body.took,
+          errors: body.errors,
+        },
+        'Bulk indexing completed',
+      );
+    } catch (error) {
+      this.logger.error(
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+        'Bulk indexing failed',
+      );
+      throw error;
+    }
+  }
+
+  async getIndexStats(): Promise<Record<string, any>> {
+    try {
+      const response = await this.client.indices.stats({
+        index: '_all',
+        metric: ['docs', 'store', 'indexing', 'search'],
+      });
+
+      return this.getBody<any>(response).indices;
+    } catch (error) {
+      this.logger.error(
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+        'Failed to get index stats',
+      );
+      throw error;
+    }
+  }
+
+  async healthCheck(): Promise<{ status: string; details: any }> {
+    try {
+      const health = this.getBody<any>(await this.client.cluster.health());
+      const info = this.getBody<any>(await this.client.info());
+
+      return {
+        status: health.status,
+        details: {
+          cluster: health,
+          version: info.version,
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'red',
+        details: {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      };
+    }
+  }
+}
