@@ -1,0 +1,17 @@
+{
+  "WALG_S3_PREFIX": "s3://summit-wal-archives/postgres",
+  "WALG_COMPRESSION_METHOD": "lz4",
+  "WALG_DELTA_MAX_STEPS": 7,
+  "WALG_UPLOAD_CONCURRENCY": 4,
+  "WALG_DOWNLOAD_CONCURRENCY": 4,
+  "WALG_UPLOAD_DISK_CONCURRENCY": 2,
+  "WALG_TAR_SIZE_THRESHOLD": 1073741824,
+  "AWS_REGION": "us-west-2",
+  "AWS_ENDPOINT": "",
+  "WALG_S3_STORAGE_CLASS": "STANDARD_IA",
+  "WALG_S3_SSE": "AES256",
+  "PGDATA": "/var/lib/postgresql/data",
+  "PGHOST": "localhost",
+  "PGPORT": "5432",
+  "PGUSER": "postgres"
+}
