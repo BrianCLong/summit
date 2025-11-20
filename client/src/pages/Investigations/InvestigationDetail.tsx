@@ -67,6 +67,7 @@ import {
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
+import { useI18n } from '../../hooks/useI18n';
 
 interface Investigation {
   id: string;
@@ -144,7 +145,7 @@ interface TabPanelProps {
 
 function TabPanel({ children, value, index }: TabPanelProps) {
   return (
-    <div role="tabpanel" hidden={value !== index}>
+    <div role="tabpanel" hidden={value !== index} aria-labelledby={`tab-${index}`}>
       {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
   );
@@ -204,6 +205,7 @@ const getClassificationColor = (
 };
 
 export default function InvestigationDetail() {
+  const { t, formatDate } = useI18n();
   const { id } = useParams();
   const [selectedTab, setSelectedTab] = useState(0);
   const [addEvidenceOpen, setAddEvidenceOpen] = useState(false);
@@ -380,7 +382,7 @@ export default function InvestigationDetail() {
     return (
       <Box sx={{ m: 2 }}>
         <LinearProgress />
-        <Typography sx={{ mt: 2 }}>Loading investigation...</Typography>
+        <Typography sx={{ mt: 2 }}>{t('investigation.loading')}</Typography>
       </Box>
     );
   }
@@ -408,7 +410,7 @@ export default function InvestigationDetail() {
                     {investigation.title}
                   </Typography>
                   <Typography variant="subtitle1" color="text.secondary">
-                    Case ID: {investigation.id}
+                    {t('investigation.caseId')} {investigation.id}
                   </Typography>
                 </Box>
               </Stack>
@@ -444,28 +446,30 @@ export default function InvestigationDetail() {
               <Stack direction="row" spacing={4} sx={{ mb: 2 }}>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    Created
+                    {t('investigation.created')}
                   </Typography>
                   <Typography variant="body2">
-                    {new Date(investigation.createdAt).toLocaleDateString()}
+                    {formatDate(investigation.createdAt)}
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    Last Updated
+                    {t('investigation.lastUpdated')}
                   </Typography>
                   <Typography variant="body2">
-                    {new Date(investigation.lastUpdated).toLocaleDateString()}
+                    {formatDate(investigation.lastUpdated)}
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    Progress
+                    {t('investigation.progress')}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <LinearProgress
                       variant="determinate"
                       value={investigation.progress}
+                      aria-label={t('investigation.progress')}
+                      aria-valuenow={investigation.progress}
                       sx={{ width: 100, height: 8, borderRadius: 4 }}
                     />
                     <Typography variant="body2">
@@ -484,18 +488,18 @@ export default function InvestigationDetail() {
 
             <Stack spacing={2} alignItems="flex-end">
               <Stack direction="row" spacing={1}>
-                <Tooltip title="Share Investigation">
-                  <IconButton>
+                <Tooltip title={t('investigation.share')}>
+                  <IconButton aria-label={t('investigation.share')}>
                     <Share />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Export Report">
-                  <IconButton>
+                <Tooltip title={t('investigation.exportReport')}>
+                  <IconButton aria-label={t('investigation.exportReport')}>
                     <Download />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Edit Investigation">
-                  <IconButton>
+                <Tooltip title={t('investigation.edit')}>
+                  <IconButton aria-label={t('investigation.edit')}>
                     <Edit />
                   </IconButton>
                 </Tooltip>
@@ -503,18 +507,18 @@ export default function InvestigationDetail() {
 
               <Box>
                 <Typography variant="caption" color="text.secondary">
-                  Assigned Team
+                  {t('investigation.assignedTeam')}
                 </Typography>
                 <Stack direction="row" spacing={1}>
                   {investigation.assignedTo.map((person) => (
-                    <Avatar key={person} sx={{ width: 32, height: 32 }}>
+                    <Avatar key={person} sx={{ width: 32, height: 32 }} aria-label={person}>
                       {person
                         .split(' ')
                         .map((n) => n[0])
                         .join('')}
                     </Avatar>
                   ))}
-                  <IconButton size="small" sx={{ width: 32, height: 32 }}>
+                  <IconButton size="small" sx={{ width: 32, height: 32 }} aria-label={t('common.add')}>
                     <Add />
                   </IconButton>
                 </Stack>
@@ -531,22 +535,29 @@ export default function InvestigationDetail() {
           onChange={(_, v) => setSelectedTab(v)}
           variant="scrollable"
           scrollButtons="auto"
+          aria-label="Investigation tabs"
         >
           <Tab
             icon={<AttachFile />}
             label={`Evidence (${investigation.evidence.length})`}
+            id="tab-0"
+            aria-controls="tabpanel-0"
           />
           <Tab
             icon={<Group />}
             label={`Entities (${investigation.entities.length})`}
+            id="tab-1"
+            aria-controls="tabpanel-1"
           />
-          <Tab icon={<TimelineIcon />} label="Timeline" />
+          <Tab icon={<TimelineIcon />} label={t('investigation.timeline')} id="tab-2" aria-controls="tabpanel-2" />
           <Tab
             icon={<Comment />}
             label={`Notes (${investigation.notes.length})`}
+            id="tab-3"
+            aria-controls="tabpanel-3"
           />
-          <Tab icon={<AccountTree />} label="Relationships" />
-          <Tab icon={<Assessment />} label="Analysis" />
+          <Tab icon={<AccountTree />} label={t('investigation.entityRelationships')} id="tab-4" aria-controls="tabpanel-4" />
+          <Tab icon={<Assessment />} label={t('investigation.analysis')} id="tab-5" aria-controls="tabpanel-5" />
         </Tabs>
 
         {/* Evidence Tab */}
@@ -558,13 +569,13 @@ export default function InvestigationDetail() {
               alignItems="center"
               sx={{ mb: 3 }}
             >
-              <Typography variant="h6">Evidence Management</Typography>
+              <Typography variant="h6">{t('investigation.evidenceManagement')}</Typography>
               <Button
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => setAddEvidenceOpen(true)}
               >
-                Add Evidence
+                {t('investigation.addEvidence')}
               </Button>
             </Stack>
 
@@ -622,7 +633,7 @@ export default function InvestigationDetail() {
                           <Accordion sx={{ mt: 2 }}>
                             <AccordionSummary expandIcon={<ExpandMore />}>
                               <Typography variant="body2">
-                                Chain of Custody ({evidence.chain.length}{' '}
+                                {t('investigation.chainOfCustody')} ({evidence.chain.length}{' '}
                                 entries)
                               </Typography>
                             </AccordionSummary>
@@ -672,12 +683,12 @@ export default function InvestigationDetail() {
 
                         <Stack direction="row" spacing={1}>
                           <Tooltip title="View Evidence">
-                            <IconButton>
+                            <IconButton aria-label="View Evidence">
                               <Visibility />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Download">
-                            <IconButton>
+                            <IconButton aria-label="Download">
                               <Download />
                             </IconButton>
                           </Tooltip>
@@ -695,7 +706,7 @@ export default function InvestigationDetail() {
         <TabPanel value={selectedTab} index={1}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Connected Entities
+              {t('investigation.connectedEntities')}
             </Typography>
 
             <Grid container spacing={2}>
@@ -713,6 +724,7 @@ export default function InvestigationDetail() {
                                   ? 'warning.main'
                                   : 'success.main',
                           }}
+                          aria-hidden="true"
                         >
                           {entity.type === 'PERSON' ? (
                             <Person />
@@ -762,7 +774,7 @@ export default function InvestigationDetail() {
         <TabPanel value={selectedTab} index={2}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Investigation Timeline
+              {t('investigation.timeline')}
             </Typography>
 
             <Timeline>
@@ -818,13 +830,13 @@ export default function InvestigationDetail() {
               alignItems="center"
               sx={{ mb: 3 }}
             >
-              <Typography variant="h6">Investigation Notes</Typography>
+              <Typography variant="h6">{t('investigation.notes')}</Typography>
               <Button
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => setAddNoteOpen(true)}
               >
-                Add Note
+                {t('investigation.addNote')}
               </Button>
             </Stack>
 
@@ -887,11 +899,10 @@ export default function InvestigationDetail() {
         <TabPanel value={selectedTab} index={4}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Entity Relationships
+              {t('investigation.entityRelationships')}
             </Typography>
             <Alert severity="info" sx={{ mb: 3 }}>
-              Interactive relationship graph showing connections between
-              entities in this investigation.
+              {t('investigation.relationshipGraphDesc')}
             </Alert>
 
             <Paper
@@ -907,10 +918,10 @@ export default function InvestigationDetail() {
               <Stack alignItems="center">
                 <AccountTree sx={{ fontSize: 64, color: 'text.secondary' }} />
                 <Typography variant="h6" color="text.secondary">
-                  Relationship Graph
+                  {t('investigation.relationshipGraph')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Interactive network visualization of entity connections
+                  {t('investigation.relationshipGraphDesc')}
                 </Typography>
               </Stack>
             </Paper>
@@ -921,7 +932,7 @@ export default function InvestigationDetail() {
         <TabPanel value={selectedTab} index={5}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Investigation Analysis
+              {t('investigation.analysis')}
             </Typography>
 
             <Grid container spacing={3}>
@@ -929,13 +940,13 @@ export default function InvestigationDetail() {
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
                     <Typography variant="subtitle1" gutterBottom>
-                      Risk Assessment
+                      {t('investigation.riskAssessment')}
                     </Typography>
                     <Stack spacing={2}>
                       <Box>
                         <Stack direction="row" justifyContent="space-between">
                           <Typography variant="body2">
-                            Overall Risk Level
+                            {t('investigation.overallRisk')}
                           </Typography>
                           <Typography
                             variant="body2"
@@ -955,7 +966,7 @@ export default function InvestigationDetail() {
                       <Box>
                         <Stack direction="row" justifyContent="space-between">
                           <Typography variant="body2">
-                            Evidence Strength
+                            {t('investigation.evidenceStrength')}
                           </Typography>
                           <Typography
                             variant="body2"
@@ -981,7 +992,7 @@ export default function InvestigationDetail() {
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
                     <Typography variant="subtitle1" gutterBottom>
-                      Key Findings
+                      {t('investigation.keyFindings')}
                     </Typography>
                     <List dense>
                       <ListItem>
@@ -1026,14 +1037,15 @@ export default function InvestigationDetail() {
         onClose={() => setAddEvidenceOpen(false)}
         maxWidth="md"
         fullWidth
+        aria-labelledby="add-evidence-dialog-title"
       >
-        <DialogTitle>Add Evidence to Investigation</DialogTitle>
+        <DialogTitle id="add-evidence-dialog-title">{t('investigation.dialog.addEvidence')}</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField fullWidth label="Evidence Name" />
+            <TextField fullWidth label={t('investigation.label.evidenceName')} />
             <FormControl fullWidth>
-              <InputLabel>Evidence Type</InputLabel>
-              <Select label="Evidence Type">
+              <InputLabel>{t('investigation.label.evidenceType')}</InputLabel>
+              <Select label={t('investigation.label.evidenceType')}>
                 <MenuItem value="DOCUMENT">Document</MenuItem>
                 <MenuItem value="DIGITAL">Digital Evidence</MenuItem>
                 <MenuItem value="PHYSICAL">Physical Evidence</MenuItem>
@@ -1041,14 +1053,14 @@ export default function InvestigationDetail() {
                 <MenuItem value="FORENSIC">Forensic Analysis</MenuItem>
               </Select>
             </FormControl>
-            <TextField fullWidth label="Description" multiline rows={3} />
-            <TextField fullWidth label="Location/Source" />
-            <TextField fullWidth label="Chain of Custody Notes" />
+            <TextField fullWidth label={t('investigation.label.description')} multiline rows={3} />
+            <TextField fullWidth label={t('investigation.label.location')} />
+            <TextField fullWidth label={t('investigation.label.custodyNotes')} />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddEvidenceOpen(false)}>Cancel</Button>
-          <Button variant="contained">Add Evidence</Button>
+          <Button onClick={() => setAddEvidenceOpen(false)}>{t('common.cancel')}</Button>
+          <Button variant="contained">{t('investigation.addEvidence')}</Button>
         </DialogActions>
       </Dialog>
 
@@ -1058,13 +1070,14 @@ export default function InvestigationDetail() {
         onClose={() => setAddNoteOpen(false)}
         maxWidth="md"
         fullWidth
+        aria-labelledby="add-note-dialog-title"
       >
-        <DialogTitle>Add Investigation Note</DialogTitle>
+        <DialogTitle id="add-note-dialog-title">{t('investigation.dialog.addNote')}</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <FormControl fullWidth>
-              <InputLabel>Classification Level</InputLabel>
-              <Select label="Classification Level">
+              <InputLabel>{t('investigation.label.classification')}</InputLabel>
+              <Select label={t('investigation.label.classification')}>
                 <MenuItem value="UNCLASSIFIED">Unclassified</MenuItem>
                 <MenuItem value="CONFIDENTIAL">Confidential</MenuItem>
                 <MenuItem value="SECRET">Secret</MenuItem>
@@ -1073,16 +1086,16 @@ export default function InvestigationDetail() {
             </FormControl>
             <TextField
               fullWidth
-              label="Note Content"
+              label={t('investigation.label.noteContent')}
               multiline
               rows={6}
-              placeholder="Enter your investigation notes..."
+              placeholder={t('investigation.placeholder.enterNotes')}
             />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddNoteOpen(false)}>Cancel</Button>
-          <Button variant="contained">Add Note</Button>
+          <Button onClick={() => setAddNoteOpen(false)}>{t('common.cancel')}</Button>
+          <Button variant="contained">{t('investigation.addNote')}</Button>
         </DialogActions>
       </Dialog>
     </Box>

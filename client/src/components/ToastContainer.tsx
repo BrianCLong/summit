@@ -63,7 +63,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   const removeToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const clearAllToasts = useCallback(() => {
     setToasts([]);

@@ -27,19 +27,19 @@ export function getSocket() {
 
   // Basic connection logging (optional)
   socket.on('connect', () => {
-    // eslint-disable-next-line no-console
+
     console.log('WebSocket connected', socket.id);
   });
   socket.on('disconnect', (reason) => {
-    // eslint-disable-next-line no-console
+
     console.log('WebSocket disconnected', reason);
   });
   socket.on('connect_error', (err) => {
-    // eslint-disable-next-line no-console
+
     console.warn('WebSocket connection error:', err?.message || err);
   });
   socket.on('op:ack', (ack) => {
-    // eslint-disable-next-line no-console
+
     console.debug('ack', ack);
   });
 

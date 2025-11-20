@@ -89,7 +89,7 @@ export default function OsintStudio() {
     const socket = getSocket();
     if (socket) {
       socket.on('OSINT_EVT', (evt: any) => {
-        // eslint-disable-next-line no-console
+
         console.log('OSINT_EVT', evt);
         const id = evt.itemId || `${Date.now()}`;
         cyRef.current.add({

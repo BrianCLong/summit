@@ -18,11 +18,11 @@ export async function createApolloClient() {
   const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
     if (graphQLErrors?.length) {
       // minimal console metric stub (dev-only)
-      // eslint-disable-next-line no-console
+
       console.warn('[GQL]', operation.operationName, graphQLErrors);
     }
     if (networkError) {
-      // eslint-disable-next-line no-console
+
       console.error('[NET]', networkError);
     }
   });

@@ -196,7 +196,7 @@ export function RunViewPage() {
               <pre className="space-y-1 px-4 py-3 text-xs leading-5">
                 {visibleLogs.map((line, index) => (
                   <code
-                    // eslint-disable-next-line react/no-array-index-key
+
                     key={`${line}-${index}`}
                     className={`block rounded px-2 py-1 ${highlightIndex === index ? 'bg-emerald-500/30 text-white' : 'text-slate-300'}`}
                   >

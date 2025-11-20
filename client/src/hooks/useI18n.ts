@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import enMessages from '../locales/en.json';
 
 export type Locale =
   | 'en-US' // English (United States)
@@ -35,77 +36,6 @@ export type Locale =
 interface Messages {
   [key: string]: string | Messages;
 }
-
-// Base English messages
-const EN_MESSAGES: Messages = {
-  common: {
-    loading: 'Loading...',
-    error: 'Error',
-    success: 'Success',
-    cancel: 'Cancel',
-    save: 'Save',
-    edit: 'Edit',
-    delete: 'Delete',
-    search: 'Search',
-    filter: 'Filter',
-    export: 'Export',
-    refresh: 'Refresh',
-    close: 'Close',
-    yes: 'Yes',
-    no: 'No',
-  },
-  navigation: {
-    dashboard: 'Dashboard',
-    investigations: 'Investigations',
-    graphWorkbench: 'Graph Workbench',
-    reports: 'Reports',
-    settings: 'Settings',
-  },
-  presence: {
-    active: 'active',
-    away: 'away',
-    busy: 'busy',
-    offline: 'offline',
-    usersOnline: '{count} users online',
-  },
-  graph: {
-    nodes: 'Nodes',
-    edges: 'Edges',
-    paths: 'Paths',
-    neighbors: 'Neighbors',
-    streaming: 'Streaming',
-    findPaths: 'Find Paths',
-    shortestPaths: 'Shortest Paths',
-    pathLength: 'Path Length',
-  },
-  search: {
-    powerSearch: 'Power Search',
-    savedSearches: 'Saved Searches',
-    bulkActions: 'Bulk Actions',
-    queryBuilder: 'Query Builder',
-    addFilter: 'Add Filter',
-    clearFilters: 'Clear Filters',
-  },
-  reports: {
-    generateReport: 'Generate Report',
-    executiveSummary: 'Executive Summary',
-    forensicsReport: 'Forensics Report',
-    reportTemplate: 'Report Template',
-    exportFormat: 'Export Format',
-  },
-  performance: {
-    fps: 'FPS',
-    performance: 'Performance',
-    budget: 'Budget',
-    lighthouse: 'Lighthouse',
-  },
-  dates: {
-    today: 'Today',
-    yesterday: 'Yesterday',
-    lastWeek: 'Last Week',
-    lastMonth: 'Last Month',
-  },
-};
 
 // Locale configurations
 const LOCALE_CONFIGS: Record<
@@ -308,36 +238,61 @@ export function useI18n() {
     return stored && stored in LOCALE_CONFIGS ? stored : 'en-US';
   });
 
-  const [messages, setMessages] = useState<Messages>(EN_MESSAGES);
+  const [messages, setMessages] = useState<Messages>(enMessages);
 
   // Load messages for current locale
   useEffect(() => {
-    if (locale === 'en-US') {
-      setMessages(EN_MESSAGES);
+    if (locale.startsWith('en')) {
+      setMessages(enMessages);
       return;
     }
 
-    // In production, these would be loaded dynamically
-    // For now, we'll fall back to English
-    setMessages(EN_MESSAGES);
+    const loadMessages = async () => {
+      try {
+        // Try to load exact match first
+        let mod;
+        try {
+          // @ts-ignore
+          mod = await import(`../locales/${locale}.json`);
+        } catch {
+          // Fallback to language code (e.g. ar.json for ar-SA if we had it)
+          const lang = locale.split('-')[0];
+          // @ts-ignore
+          mod = await import(`../locales/${lang}.json`);
+        }
+        setMessages(mod.default || mod);
+      } catch (e) {
+        console.warn(`Failed to load messages for locale ${locale}, falling back to English`, e);
+        setMessages(enMessages);
+      }
+    };
+
+    loadMessages();
   }, [locale]);
 
   // Persist locale preference
   useEffect(() => {
     localStorage.setItem('locale', locale);
+    document.documentElement.lang = locale;
   }, [locale]);
 
   const t = useMemo(() => {
     return (key: string, params?: Record<string, any>): string => {
-      const keys = key.split('.');
-      let value: any = messages;
+      // First check if the key exists directly (flat structure support)
+      let value: any = messages[key];
 
-      for (const k of keys) {
-        value = value?.[k];
+      // If not found directly, try nested lookup
+      if (value === undefined) {
+        const keys = key.split('.');
+        value = messages;
+        for (const k of keys) {
+          value = value?.[k];
+          if (value === undefined) break;
+        }
       }
 
       if (typeof value !== 'string') {
-        console.warn(`Translation key "${key}" not found`);
+        // console.warn(`Translation key "${key}" not found`); // too noisy during dev
         return key;
       }
 
@@ -356,27 +311,39 @@ export function useI18n() {
     const config = LOCALE_CONFIGS[locale];
     return (date: Date | string): string => {
       const d = typeof date === 'string' ? new Date(date) : date;
-      return d.toLocaleDateString(locale, {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
+      try {
+        return d.toLocaleDateString(locale, {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+      } catch {
+        return d.toDateString();
+      }
     };
   }, [locale]);
 
   const formatNumber = useMemo(() => {
     const config = LOCALE_CONFIGS[locale];
     return (num: number): string => {
-      return num.toLocaleString(locale, config.numberFormat);
+      try {
+        return num.toLocaleString(locale, config.numberFormat);
+      } catch {
+        return num.toString();
+      }
     };
   }, [locale]);
 
   const formatCurrency = useMemo(() => {
     return (amount: number, currency = 'EUR'): string => {
-      return amount.toLocaleString(locale, {
-        style: 'currency',
-        currency,
-      });
+      try {
+        return amount.toLocaleString(locale, {
+          style: 'currency',
+          currency,
+        });
+      } catch {
+        return `${amount} ${currency}`;
+      }
     };
   }, [locale]);
 
