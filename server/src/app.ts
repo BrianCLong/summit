@@ -25,6 +25,8 @@ import { Request, Response, NextFunction } from 'express'; // Import types for m
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
+import webhookRouter from './routes/webhooks.js';
+import { webhookWorker } from './webhooks/webhook.worker.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -64,6 +66,7 @@ export const createApp = async () => {
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
+  app.use('/api/webhooks', webhookRouter);
   app.get('/metrics', metricsRoute);
   app.use(
     rateLimit({
@@ -222,6 +225,14 @@ export const createApp = async () => {
   startTrustWorker();
   // Start retention worker if enabled
   startRetentionWorker();
+
+  // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
+  // In a real production setup, this might be in a separate process/container.
+  // For MVP/Monolith, we keep it here.
+  if (webhookWorker) {
+      // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
+      // though import side-effects usually suffice.
+  }
 
   return app;
 };
