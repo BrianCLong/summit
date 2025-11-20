@@ -72,7 +72,8 @@ export class DashboardService {
     async getDashboard(dashboardId, userId) {
         // Check cache first
         const cacheKey = `dashboard:${dashboardId}:${userId}`;
-        const cached = this.parseCachePayload(await this.redisClient.get(cacheKey));
+        const rawCache = (await this.redisClient.get(cacheKey));
+        const cached = this.parseCachePayload(rawCache);
         if (cached) {
             return cached;
         }
@@ -223,7 +224,8 @@ export class DashboardService {
             }
             // Check cache
             const cacheKey = `widget_data:${widgetId}`;
-            const cached = this.parseCachePayload(await this.redisClient.get(cacheKey));
+            const rawCache = (await this.redisClient.get(cacheKey));
+            const cached = this.parseCachePayload(rawCache);
             if (cached && widget.dataSource.cacheTTL) {
                 return cached;
             }

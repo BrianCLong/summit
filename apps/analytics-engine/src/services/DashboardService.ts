@@ -178,9 +178,11 @@ export class DashboardService {
   ): Promise<Dashboard | null> {
     // Check cache first
     const cacheKey = `dashboard:${dashboardId}:${userId}`;
-    const cached = this.parseCachePayload<Dashboard>(
-      await this.redisClient.get(cacheKey),
-    );
+    const rawCache = (await this.redisClient.get(cacheKey)) as
+      | string
+      | Buffer
+      | null;
+    const cached = this.parseCachePayload<Dashboard>(rawCache);
 
     if (cached) {
       return cached;
@@ -370,9 +372,11 @@ export class DashboardService {
 
       // Check cache
       const cacheKey = `widget_data:${widgetId}`;
-      const cached = this.parseCachePayload<any>(
-        await this.redisClient.get(cacheKey),
-      );
+      const rawCache = (await this.redisClient.get(cacheKey)) as
+        | string
+        | Buffer
+        | null;
+      const cached = this.parseCachePayload<any>(rawCache);
 
       if (cached && widget.dataSource.cacheTTL) {
         return cached;

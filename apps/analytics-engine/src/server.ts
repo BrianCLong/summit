@@ -60,6 +60,9 @@ let chartService: ChartService;
 
 const DASHBOARD_SORT_FIELDS = ['name', 'created_at', 'updated_at'] as const;
 type DashboardSortField = (typeof DASHBOARD_SORT_FIELDS)[number];
+type DashboardListOptions = Parameters<
+  DashboardService['listDashboards']
+>[1];
 
 const normalizeSortBy = (value: unknown): DashboardSortField => {
   if (
@@ -170,7 +173,7 @@ app.get(
       const normalizedSortBy = normalizeSortBy(sortBy);
       const normalizedSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
 
-      const options = {
+      const options: DashboardListOptions = {
         limit: parsedLimit,
         offset: (parsedPage - 1) * parsedLimit,
         search: typeof search === 'string' ? search : undefined,

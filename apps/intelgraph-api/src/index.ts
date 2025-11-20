@@ -6,8 +6,8 @@ import pino from 'pino';
 import { ApolloServer } from 'apollo-server-express';
 import { typeDefs, resolvers } from './schema.js';
 import { makeContext } from './lib/context.js';
-import { expressjwt } from 'express-jwt';
-import jwksRsa, { type GetVerificationKey } from 'jwks-rsa';
+import { expressjwt, type GetVerificationKey } from 'express-jwt';
+import jwksRsa from 'jwks-rsa';
 import { trace, context } from '@opentelemetry/api';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;

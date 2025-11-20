@@ -3,7 +3,7 @@
  * Simplified production-ready server for immediate deployment
  */
 
-import express, { type Application } from 'express';
+import express from 'express';
 import { createServer } from 'http';
 import { ApolloServer } from 'apollo-server-express';
 import { WebSocketServer } from 'ws';
@@ -586,7 +586,7 @@ async function startLiveServer() {
 
   // Apply GraphQL middleware
   await server.start();
-  const compatApp = app as unknown as Application;
+  const compatApp = app as any;
   server.applyMiddleware({ app: compatApp, path: '/graphql' });
 
   const PORT = process.env.PORT || 4001;
