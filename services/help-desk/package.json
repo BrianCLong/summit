@@ -1,0 +1,36 @@
+{
+  "name": "@summit/help-desk-service",
+  "version": "1.0.0",
+  "description": "Help desk API service",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "ioredis": "^5.8.2",
+    "pino": "^10.1.0",
+    "pino-http": "^11.0.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "express-rate-limit": "^8.2.1",
+    "zod": "^4.1.12",
+    "dotenv": "^16.4.7",
+    "@summit/support-system": "workspace:*",
+    "@summit/knowledge-base": "workspace:*",
+    "@summit/training-platform": "workspace:*",
+    "@summit/sla-management": "workspace:*",
+    "@summit/health-monitoring": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^22.15.6",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3"
+  }
+}

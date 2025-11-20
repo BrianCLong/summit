@@ -1,0 +1,27 @@
+{
+  "name": "@summit/knowledge-base",
+  "version": "1.0.0",
+  "description": "Self-service knowledge base with articles, FAQs, and tutorials",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "pg": "^8.16.3",
+    "zod": "^4.1.12",
+    "pino": "^10.1.0",
+    "marked": "^15.0.6",
+    "sanitize-html": "^2.14.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.6",
+    "@types/pg": "^8.11.17",
+    "@types/marked": "^6.0.0",
+    "@types/sanitize-html": "^2.14.0",
+    "typescript": "^5.8.3"
+  }
+}

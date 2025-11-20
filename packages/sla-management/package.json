@@ -1,0 +1,24 @@
+{
+  "name": "@summit/sla-management",
+  "version": "1.0.0",
+  "description": "SLA tracking, compliance monitoring, and breach management",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "pg": "^8.16.3",
+    "pino": "^10.1.0",
+    "date-fns": "^4.1.0",
+    "bullmq": "^5.63.2",
+    "ioredis": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.6",
+    "@types/pg": "^8.11.17",
+    "typescript": "^5.8.3"
+  }
+}

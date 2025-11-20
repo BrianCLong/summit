@@ -1,0 +1,24 @@
+{
+  "name": "@summit/training-platform",
+  "version": "1.0.0",
+  "description": "Online training and certification platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "pg": "^8.16.3",
+    "zod": "^4.1.12",
+    "pino": "^10.1.0",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.6",
+    "@types/pg": "^8.11.17",
+    "typescript": "^5.8.3"
+  }
+}
