@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>C2PA Bridge Browser Verifier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>C2PA Bridge Browser Verifier</h1>
+      <p>
+        Load an asset, its provenance manifest, and the trusted public key to verify the
+        signature and integrity chain entirely in the browser.
+      </p>
+      <section class="inputs">
+        <label>
+          Asset file
+          <input type="file" id="asset" />
+        </label>
+        <label>
+          Manifest JSON
+          <input type="file" id="manifest" accept="application/json" />
+        </label>
+        <label class="key-input">
+          Public key (PEM)
+          <textarea id="publicKey" rows="6" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
+        </label>
+        <button id="verify">Verify</button>
+      </section>
+      <section id="results" class="results" hidden>
+        <h2>Verification Results</h2>
+        <pre id="resultText"></pre>
+      </section>
+    </main>
+    <script type="module" src="./viewer.js"></script>
+  </body>
+</html>
