@@ -369,12 +369,22 @@ router.get(
       const user = req.user as any;
 
       // Set up Server-Sent Events
+      // SECURITY: Use specific origin instead of wildcard
+      const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://intelgraph.app',
+      ];
+      const origin = req.headers.origin || '';
+      const allowOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': allowOrigin,
         'Access-Control-Allow-Headers': 'Cache-Control',
+        'Access-Control-Allow-Credentials': 'true',
       });
 
       // Send initial connection event

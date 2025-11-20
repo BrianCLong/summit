@@ -1,1 +1,49 @@
-npx --no lint-staged
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔒 Running security checks..."
+
+# Run gitleaks to detect secrets
+echo "🔍 Scanning for secrets..."
+if command -v gitleaks &> /dev/null; then
+  gitleaks protect --staged --verbose || {
+    echo "❌ Secret detected! Please remove sensitive data before committing."
+    exit 1
+  }
+else
+  echo "⚠️  Gitleaks not installed. Install with: brew install gitleaks (macOS) or see https://github.com/gitleaks/gitleaks"
+fi
+
+# Run security linting on staged files
+echo "🔍 Running security linting..."
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|jsx|tsx)$' || true)
+
+if [ -n "$STAGED_FILES" ]; then
+  echo "Linting staged files: $STAGED_FILES"
+  pnpm exec eslint --config .eslintrc.security.cjs $STAGED_FILES --max-warnings 10 || {
+    echo "❌ Security linting failed. Please fix the issues before committing."
+    exit 1
+  }
+fi
+
+# Run standard linting
+echo "🔍 Running standard linting..."
+pnpm run lint || {
+  echo "❌ Linting failed. Please fix the issues before committing."
+  exit 1
+}
+
+# Run type checking
+echo "🔍 Running type checking..."
+pnpm run typecheck || {
+  echo "❌ Type checking failed. Please fix the issues before committing."
+  exit 1
+}
+
+# Run dependency audit (warning only, don't fail)
+echo "🔍 Running dependency audit..."
+pnpm audit --audit-level=high || {
+  echo "⚠️  High severity vulnerabilities found. Consider addressing them."
+}
+
+echo "✅ All security checks passed!"

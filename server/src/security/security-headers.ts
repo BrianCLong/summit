@@ -210,10 +210,12 @@ class SecurityHeadersManager {
       res.setHeader('Permissions-Policy', permissionsPolicy);
 
       // Request ID for tracing
+      // SECURITY: Use cryptographically secure random for request IDs
+      const crypto = require('crypto');
       const requestId =
         req.headers['x-request-id'] ||
         req.headers['x-correlation-id'] ||
-        `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        `req_${Date.now()}_${crypto.randomBytes(8).toString('base64url')}`;
       res.setHeader('X-Request-ID', requestId);
 
       // Rate limiting info (if available)
