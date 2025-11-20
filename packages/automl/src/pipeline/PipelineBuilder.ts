@@ -8,7 +8,7 @@ export class PipelineBuilder {
   private _pipeline: Pipeline;
 
   constructor(name: string) {
-    this.pipeline = {
+    this._pipeline = {
       id: uuidv4(),
       name,
       steps: [],
@@ -25,7 +25,7 @@ export class PipelineBuilder {
     imputation?: 'mean' | 'median' | 'mode' | 'knn';
     outlierHandling?: 'remove' | 'clip' | 'transform';
   }): this {
-    this.pipeline.steps.push({
+    this._pipeline.steps.push({
       id: uuidv4(),
       name: 'Preprocessing',
       type: 'preprocessing',
@@ -45,7 +45,7 @@ export class PipelineBuilder {
     statistical?: boolean;
     domainSpecific?: Record<string, any>;
   }): this {
-    this.pipeline.steps.push({
+    this._pipeline.steps.push({
       id: uuidv4(),
       name: 'Feature Engineering',
       type: 'feature_engineering',
@@ -66,7 +66,7 @@ export class PipelineBuilder {
       folds: number;
     };
   }): this {
-    this.pipeline.steps.push({
+    this._pipeline.steps.push({
       id: uuidv4(),
       name: `Train ${config.algorithm}`,
       type: 'model_training',
@@ -84,7 +84,7 @@ export class PipelineBuilder {
     models: string[];
     weights?: number[];
   }): this {
-    this.pipeline.steps.push({
+    this._pipeline.steps.push({
       id: uuidv4(),
       name: `Ensemble (${config.method})`,
       type: 'ensemble',
@@ -105,7 +105,7 @@ export class PipelineBuilder {
     };
     monitoring?: boolean;
   }): this {
-    this.pipeline.steps.push({
+    this._pipeline.steps.push({
       id: uuidv4(),
       name: `Deploy to ${config.target}`,
       type: 'deployment',
@@ -119,7 +119,7 @@ export class PipelineBuilder {
    * Build and return the pipeline
    */
   build(): Pipeline {
-    return { ...this.pipeline };
+    return { ...this._pipeline };
   }
 
   /**
@@ -128,11 +128,11 @@ export class PipelineBuilder {
   validate(): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (this.pipeline.steps.length === 0) {
+    if (this._pipeline.steps.length === 0) {
       errors.push('Pipeline must have at least one step');
     }
 
-    const hasModelTraining = this.pipeline.steps.some(
+    const hasModelTraining = this._pipeline.steps.some(
       step => step.type === 'model_training'
     );
 
@@ -149,7 +149,7 @@ export class PipelineBuilder {
   /**
    * Clone an existing pipeline
    */
-  static clone(_pipeline: Pipeline): Pipeline {
+  static clone(pipeline: Pipeline): Pipeline {
     return {
       ...pipeline,
       id: uuidv4(),

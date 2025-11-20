@@ -9,7 +9,7 @@ export class PipelineExecutor {
   /**
    * Execute a pipeline
    */
-  async execute(_pipeline: Pipeline): Promise<Pipeline> {
+  async execute(pipeline: Pipeline): Promise<Pipeline> {
     this.runningPipelines.set(pipeline.id, pipeline);
     pipeline.status = 'pending' as JobStatus;
 
@@ -56,7 +56,7 @@ export class PipelineExecutor {
 
   // Private execution methods
 
-  private async executeStep(step: PipelineStep, _pipeline: Pipeline): Promise<void> {
+  private async executeStep(step: PipelineStep, pipeline: Pipeline): Promise<void> {
     step.status = 'running';
 
     try {
@@ -199,7 +199,7 @@ export class PipelineExecutor {
   /**
    * Validate pipeline before execution
    */
-  validate(_pipeline: Pipeline): { valid: boolean; errors: string[] } {
+  validate(pipeline: Pipeline): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!pipeline.steps || pipeline.steps.length === 0) {
@@ -230,7 +230,7 @@ export class PipelineExecutor {
   /**
    * Resume pipeline from failed step
    */
-  async resume(_pipeline: Pipeline, fromStepIndex: number): Promise<Pipeline> {
+  async resume(pipeline: Pipeline, fromStepIndex: number): Promise<Pipeline> {
     if (fromStepIndex < 0 || fromStepIndex >= pipeline.steps.length) {
       throw new Error('Invalid step index');
     }
