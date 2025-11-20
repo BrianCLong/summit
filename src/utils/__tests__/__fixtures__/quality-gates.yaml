@@ -1,0 +1,25 @@
+features:
+  base-flag:
+    default: false
+    description: Base capability required for dependent features
+    rollout:
+      dev: 100
+      staging: 100
+      prod: 0
+  dependent-flag:
+    default: true
+    description: Requires base flag to protect runtime guardrails
+    guardrails:
+      requires:
+        - base-flag
+      metrics:
+        - latency_p95
+      performance_budget: "p95<450ms"
+    rollout:
+      dev: 100
+      staging: 100
+      prod: 50
+  immutable-flag:
+    default: true
+    immutable: true
+    description: Safety net that should survive kill switches
