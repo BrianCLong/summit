@@ -1,0 +1,22 @@
+{
+  "name": "@intelgraph/regulatory-reporting",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/transaction-monitoring": "workspace:*",
+    "@intelgraph/aml-detection": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1"
+  },
+  "types": "dist/index.d.ts"
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@intelgraph/financial-crime-service",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/transaction-monitoring": "workspace:*",
+    "@intelgraph/aml-detection": "workspace:*",
+    "@intelgraph/sanctions-screening": "workspace:*",
+    "@intelgraph/kyc-verification": "workspace:*",
+    "@intelgraph/fraud-detection": "workspace:*",
+    "@intelgraph/crypto-monitoring": "workspace:*",
+    "@intelgraph/financial-network-analysis": "workspace:*",
+    "@intelgraph/regulatory-reporting": "workspace:*",
+    "@intelgraph/case-management": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1",
+    "ts-node": "^10.9.2"
+  },
+  "types": "dist/index.d.ts"
+}

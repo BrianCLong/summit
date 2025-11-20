@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src"],
+  "references": [
+    {"path": "../../packages/transaction-monitoring"},
+    {"path": "../../packages/aml-detection"},
+    {"path": "../../packages/sanctions-screening"},
+    {"path": "../../packages/kyc-verification"},
+    {"path": "../../packages/fraud-detection"},
+    {"path": "../../packages/crypto-monitoring"},
+    {"path": "../../packages/financial-network-analysis"},
+    {"path": "../../packages/regulatory-reporting"},
+    {"path": "../../packages/case-management"}
+  ]
+}

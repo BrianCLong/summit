@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/aml-detection",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -w"
+  },
+  "dependencies": {
+    "@intelgraph/transaction-monitoring": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "@types/node": "^24.10.1"
+  },
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
