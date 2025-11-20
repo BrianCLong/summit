@@ -1,8 +1,101 @@
+# CSV Connector Manifest - SDK v1.0 Compliant
+
 name: csv-connector
-description: A simple CSV file connector for IntelGraph.
-version: 0.1.0
+description: CSV file connector for IntelGraph with PII detection and license enforcement
+version: 1.0.0
+author: IntelGraph Team
 ingestion_type: batch
+
 supported_formats:
   - csv
+  - tsv
+
 schema_mapping_file: schema_mapping.py
 sample_data_file: sample.csv
+
+# Golden I/O tests
+golden_io_tests:
+  - test_csv_connector.py
+  - test_csv_edge_cases.py
+
+# Rate limiting policy
+rate_limit:
+  requests_per_hour: 10000  # High limit for batch processing
+  burst_limit: 100
+  backoff_strategy: exponential
+  max_retries: 3
+  timeout_seconds: 60
+
+# PII detection and handling
+pii_flags:
+  - field_name: name
+    description: Person names may be PII
+    severity: medium
+    redaction_policy: prompt  # Ask user during wizard
+    legal_basis: Legitimate business interest for entity resolution
+
+  - field_name: email
+    description: Email addresses are PII
+    severity: high
+    redaction_policy: redact
+    pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
+
+  - field_name: phone
+    description: Phone numbers are PII
+    severity: high
+    redaction_policy: redact
+    pattern: "(\\+\\d{1,3}[-.]?)?\\(?\\d{3}\\)?[-.]?\\d{3}[-.]?\\d{4}"
+
+  - field_name: ssn
+    description: Social Security Numbers
+    severity: critical
+    redaction_policy: block
+
+# License and compliance
+license:
+  type: user-provided-data
+  classification: internal
+  attribution_required: false
+  allowed_use_cases:
+    - research
+    - analysis
+    - entity-resolution
+    - threat-intelligence
+  blocked_use_cases:
+    - commercial-resale
+    - mass-surveillance
+  blocked_fields:
+    - field_name: credit_card
+      reason: Payment card data prohibited by PCI-DSS compliance
+      alternative: Use tokenized payment references instead
+
+# Data retention
+retention_policy:
+  duration: 1-year
+  archival_strategy: archive
+
+# Connector configuration
+configuration:
+  delimiter: ","
+  encoding: utf-8
+  skip_header: true
+  max_file_size_mb: 1000
+  batch_size: 1000
+
+# Dependencies
+dependencies:
+  - python>=3.8
+  - pyyaml>=5.4
+  - csv (stdlib)
+
+# Lineage tracking
+lineage:
+  enabled: true
+  source_system: csv-file-upload
+  data_classification: internal
+
+# Quality metrics
+quality_metrics:
+  expected_success_rate: 0.95
+  max_error_rate: 0.05
+  completeness_threshold: 0.90
