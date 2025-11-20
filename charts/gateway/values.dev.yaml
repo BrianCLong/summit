@@ -1,14 +1,20 @@
-# Development Environment Configuration
-# Golden Path: OTEL + Prometheus + Feature Flags enabled by default
+# Gateway Development Environment Configuration
+# Golden Path: OTEL + Prometheus + Feature Flags enabled
 
 image:
-  repository: ghcr.io/brianclong/maestro-control-plane
-  tag: v0.1.0
+  repository: ghcr.io/brianclong/gateway
+  tag: latest
+  pullPolicy: IfNotPresent
+
 replicaCount: 2
 
 resources:
-  requests: { cpu: '200m', memory: '256Mi' }
-  limits: { cpu: '1', memory: '1Gi' }
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
 
 # ============================================================================
 # OpenTelemetry - Enabled by Default
@@ -25,14 +31,16 @@ opentelemetry:
 # ============================================================================
 metrics:
   enabled: true
-  prometheusRule:
-    enabled: true
-    namespace: monitoring
+  port: 9090
 
-# ServiceMonitor for automatic Prometheus scraping
 serviceMonitor:
   enabled: true
   interval: 15s
+  path: /metrics
+
+prometheusRule:
+  enabled: true
+  namespace: monitoring
 
 # ============================================================================
 # Feature Flags - Enabled by Default
@@ -41,9 +49,9 @@ featureFlags:
   enabled: true
   provider: flagd
   defaults:
-    enableNewUI: true
-    enableBetaFeatures: true
-    enableAdvancedAnalytics: true
+    enableRateLimiting: false  # Relaxed in dev
+    enableCORS: true
+    enableRequestLogging: true
 
 # ============================================================================
 # Application Configuration
@@ -53,12 +61,14 @@ env:
     value: 'development'
   - name: LOG_LEVEL
     value: 'debug'
+  - name: PORT
+    value: '8080'
 
   # OTEL Configuration
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector.observability.svc.cluster.local:4317"
   - name: OTEL_SERVICE_NAME
-    value: "maestro"
+    value: "gateway"
   - name: OTEL_RESOURCE_ATTRIBUTES
     value: "service.namespace=summit,deployment.environment=dev"
   - name: OTEL_TRACES_SAMPLER
@@ -72,44 +82,68 @@ env:
   - name: FLAGD_HOST
     value: "flagd.summit.svc.cluster.local"
 
-  # Application Secrets
-  - name: OIDC_ISSUER
-    valueFrom: { secretKeyRef: { name: maestro-secrets, key: oidc_issuer } }
-  - name: POSTGRES_URL
-    valueFrom: { secretKeyRef: { name: maestro-secrets, key: pg_url } }
-  - name: REDIS_URL
-    valueFrom: { secretKeyRef: { name: maestro-secrets, key: redis_url } }
-  - name: KAFKA_BROKERS
-    value: 'kafka:9092'
-  - name: S3_BUCKET
-    value: 'maestro-artifacts-dev'
-
 service:
   type: ClusterIP
-  port: 8080
+  port: 80
+  targetPort: 8080
 
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+  hosts:
+    - host: gateway-dev.summit.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: gateway-dev-tls
+      hosts:
+        - gateway-dev.summit.local
+
+# Health probes
+probes:
+  liveness:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# High availability
 podDisruptionBudget:
+  enabled: true
   minAvailable: 1
 
 autoscaling:
   enabled: true
   minReplicas: 2
-  maxReplicas: 8
-  targetCPUUtilizationPercentage: 60
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
 
-# ============================================================================
-# Network Policy - Allow OTEL and Prometheus
-# ============================================================================
+# Network policy
 networkPolicy:
   enabled: true
   ingress:
     - from:
         - namespaceSelector:
             matchLabels:
-              name: monitoring
+              name: ingress-nginx
       ports:
         - protocol: TCP
           port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
         - protocol: TCP
           port: 9090
   egress:
@@ -120,14 +154,11 @@ networkPolicy:
               name: observability
       ports:
         - port: 4317
-        - port: 4318
-    # Kafka, Redis, Postgres
+    # Upstream services
     - to:
         - namespaceSelector: {}
       ports:
-        - port: 9092
-        - port: 6379
-        - port: 5432
+        - port: 8080
         - port: 443
     # DNS
     - to: []

@@ -1,0 +1,52 @@
+# chart-testing (ct) configuration for linting Helm charts
+# https://github.com/helm/chart-testing
+
+# The name of the directory that contains the charts
+chart-dirs:
+  - .
+
+# Patterns of charts to exclude from linting
+excluded-charts: []
+
+# List of additional Helm repositories to add
+chart-repos:
+  - prometheus-community=https://prometheus-community.github.io/helm-charts
+  - grafana=https://grafana.github.io/helm-charts
+  - jetstack=https://charts.jetstack.io
+  - external-secrets=https://charts.external-secrets.io
+  - bitnami=https://charts.bitnami.com/bitnami
+  - open-telemetry=https://open-telemetry.github.io/opentelemetry-helm-charts
+
+# Target branch for detecting changed charts
+target-branch: main
+
+# Validate maintainers in Chart.yaml
+validate-maintainers: false
+
+# Check for version bumps
+check-version-increment: true
+
+# Perform `helm lint`
+lint: true
+
+# Perform `helm install` to validate installation
+install: false
+
+# Helm extra arguments
+helm-extra-args: --timeout 600s
+
+# Upgrade the chart if it is already installed
+upgrade: true
+
+# Additional YAML schema checks
+additional-commands:
+  - helm template {chart} | kubeval --strict --ignore-missing-schemas
+
+# Validate that values.yaml is properly formatted
+validate-chart-schema: true
+
+# Validate against Kubernetes versions
+kubernetes-versions:
+  - v1.28.0
+  - v1.29.0
+  - v1.30.0
