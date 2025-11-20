@@ -1,14 +1,84 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":preserveSemverRanges"],
+  "extends": [
+    "config:recommended",
+    ":preserveSemverRanges",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    "group:allNonMajor",
+    "schedule:weekends"
+  ],
+  "labels": ["dependencies", "renovate"],
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 0,
   "schedule": ["before 8am on monday"],
   "rangeStrategy": "bump",
   "automerge": false,
+  "commitMessagePrefix": "chore(deps):",
+  "postUpdateOptions": ["pnpmDedupe"],
+  "docker": {
+    "enabled": true,
+    "pinDigests": true,
+    "major": {
+      "enabled": true
+    }
+  },
+  "dockerfile": {
+    "enabled": true,
+    "pinDigests": true
+  },
   "packageRules": [
     {
+      "description": "Pin GitHub Actions to commit SHA",
       "matchManagers": ["github-actions"],
       "groupName": "github-actions",
+      "pinDigests": true,
       "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Auto-merge Docker digest updates",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["digest"],
+      "automerge": true,
+      "schedule": ["before 6am on Monday"]
+    },
+    {
+      "description": "Group all non-major updates",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Security updates - high priority",
+      "matchDatasources": ["npm"],
+      "matchPackagePatterns": ["^express$", "^jsonwebtoken$", "^bcrypt", "^helmet", "^express-rate-limit$"],
+      "labels": ["security", "high-priority"],
+      "automerge": false,
+      "schedule": ["at any time"]
+    },
+    {
+      "description": "Separate major TypeScript updates",
+      "matchPackageNames": ["typescript"],
+      "separateMajorMinor": true,
+      "separateMinorPatch": true
+    },
+    {
+      "description": "OpenTelemetry packages should stay synchronized",
+      "matchPackagePatterns": ["^@opentelemetry/"],
+      "groupName": "OpenTelemetry packages",
+      "schedule": ["before 6am on Tuesday"]
     }
-  ]
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security", "vulnerability"],
+    "automerge": false,
+    "schedule": ["at any time"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "timezone": "UTC"
 }
