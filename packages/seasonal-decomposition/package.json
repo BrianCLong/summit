@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/seasonal-decomposition",
+  "version": "1.0.0",
+  "description": "Seasonal decomposition and trend analysis for time series",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["seasonal-decomposition", "stl", "trend-analysis", "time-series"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/time-series": "workspace:*",
+    "simple-statistics": "^7.8.3",
+    "mathjs": "^12.4.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

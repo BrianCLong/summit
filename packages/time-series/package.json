@@ -1,0 +1,32 @@
+{
+  "name": "@intelgraph/time-series",
+  "version": "1.0.0",
+  "description": "Enterprise time series data storage, indexing, and management for Summit intelligence platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "time-series",
+    "timescaledb",
+    "analytics",
+    "intelligence",
+    "temporal-data"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.16.3",
+    "compression-stream": "^1.0.0",
+    "lz4": "^0.6.5"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0",
+    "typescript": "^5.9.3"
+  }
+}
