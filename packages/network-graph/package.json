@@ -1,0 +1,38 @@
+{
+  "name": "@intelgraph/network-graph",
+  "version": "1.0.0",
+  "description": "Enhanced network graph visualization for IntelGraph",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "cytoscape": "^3.29.2",
+    "@types/cytoscape": "^3.21.3",
+    "react-cytoscapejs": "^2.0.0",
+    "d3-force": "^3.0.0",
+    "d3-hierarchy": "^3.1.2",
+    "@types/d3-force": "^3.0.9",
+    "@types/d3-hierarchy": "^3.1.6",
+    "vis-network": "^9.1.9",
+    "@intelgraph/visualization": "workspace:*",
+    "graphology": "^0.25.4",
+    "graphology-layout-forceatlas2": "^0.10.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0"
+  }
+}
