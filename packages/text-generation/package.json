@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/text-generation",
+  "version": "1.0.0",
+  "description": "Text data generation with GPT-based synthesis, NER, and multi-lingual support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "text-generation",
+    "gpt",
+    "nlp",
+    "named-entity-generation",
+    "paraphrasing",
+    "multi-lingual"
+  ],
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.195",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
