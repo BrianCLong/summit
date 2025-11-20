@@ -102,6 +102,53 @@ cd summit
 - **Neo4j**: http://localhost:7474 (Graph Database UI)
 - **Adminer**: http://localhost:8080 (Database Admin)
 
+## 🛠️ Summit CLI (Unified Command Interface)
+
+**New!** The Summit CLI consolidates 300+ scripts and 25+ tools into a single, discoverable interface for both humans and AI agents.
+
+### Quick Start with Summit CLI
+
+```bash
+# Install Summit CLI
+cd summit-cli && pnpm install && pnpm link --global
+
+# First-time setup (interactive)
+summit init
+
+# Or use traditional commands
+make bootstrap && make up && make smoke
+```
+
+### Common Commands
+
+```bash
+summit dev up              # Start development stack
+summit dev status          # Check service health
+summit test smoke          # Run golden path tests
+summit db migrate          # Run database migrations
+summit deploy staging      # Deploy to staging
+summit doctor              # System diagnostics
+```
+
+### Machine-Readable Output (AI Agents)
+
+```bash
+# Get structured JSON output
+summit dev status --json
+summit test smoke --json
+summit doctor --json
+
+# Streaming NDJSON for long operations
+summit dev up --ndjson
+```
+
+### Documentation
+
+- **Quickstart Guide**: [`docs/summit-cli-quickstart.md`](docs/summit-cli-quickstart.md)
+- **Migration Guide**: [`docs/summit-cli-migration-guide.md`](docs/summit-cli-migration-guide.md)
+- **CLI Reference**: `summit --help` and [`summit-cli/README.md`](summit-cli/README.md)
+- **Design**: [`summit-cli/DESIGN.md`](summit-cli/DESIGN.md)
+
 ## 🎯 Golden Path Demo (Seeded Dataset)
 
 **Critical Path**: Investigation → Entities → Relationships → Copilot → Results
