@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "bundle": {
+    "id": "bundle-20260301-entity-123",
+    "generatedAt": "2026-03-01T12:07:00.000Z",
+    "sourceSystem": "summit-black-cell",
+    "environment": "prod-black-cell",
+    "exportType": "entity-provenance",
+    "itemCount": 1,
+    "filters": {
+      "entityId": "entity-123",
+      "classification": "TS"
+    }
+  },
+  "claims": [
+    {
+      "claimId": "claim-001",
+      "entityId": "entity-123",
+      "type": "network-association",
+      "disposition": "confirmed",
+      "summary": "Entity 123 participates in the target influence network.",
+      "createdAt": "2026-03-01T12:06:30.000Z",
+      "confidence": "high",
+      "evidence": [
+        {
+          "evidenceId": "evidence-ingest",
+          "stage": "ingest",
+          "artifactHash": "aab3238922bcc25a6f606eb525ffdc56d58f495dad7f9d95a0f8a3c99f9f0f48",
+          "ledgerSequence": 1,
+          "artifactUri": "s3://black-cell/raw/entity-123.json",
+          "transformChain": [
+            "collect:radio-spectrum"
+          ]
+        },
+        {
+          "evidenceId": "evidence-transform",
+          "stage": "transform",
+          "artifactHash": "0f343b0931126a20f133d67c2b018a3b2f8732d9cb01eb3a7ddc3a8a12ef1b52",
+          "ledgerSequence": 2,
+          "artifactUri": "s3://black-cell/stage/entity-123/graph.json",
+          "transformChain": [
+            "dedupe@1.4.2",
+            "graph-augment@2.0.0"
+          ]
+        },
+        {
+          "evidenceId": "evidence-delivery",
+          "stage": "delivery",
+          "artifactHash": "b4b147bc522828731f1a016bfa72c073cf0b3ad93c9d690c1ba4e06b5f8c2d0b",
+          "ledgerSequence": 3,
+          "artifactUri": "intelgraph://entity/123"
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "entity-123.json",
+      "hash": "b4b147bc522828731f1a016bfa72c073cf0b3ad93c9d690c1ba4e06b5f8c2d0b",
+      "ledgerSequence": 3,
+      "mimeType": "application/json",
+      "bytes": 2048,
+      "sourceStage": "delivery"
+    }
+  ],
+  "ledger": {
+    "uri": "./ledger.json",
+    "rootHash": "be2701ab88fbd543b64709d49308d3239e7cd9adbabb92fe698b1c49c4b86bf0",
+    "entries": [
+      {
+        "sequence": 1,
+        "hash": "0c5d0182526e90a167fb8c9ba9cb29553564cb885aaeac0daf645252a8dd8392"
+      },
+      {
+        "sequence": 2,
+        "hash": "8c4f59c52ddf611934f08ff7b6bc983681af7babe39cce41dafff449d9cbf607"
+      },
+      {
+        "sequence": 3,
+        "hash": "be2701ab88fbd543b64709d49308d3239e7cd9adbabb92fe698b1c49c4b86bf0"
+      }
+    ]
+  },
+  "integrity": {
+    "manifestHash": "6bd3e0dc79ba3fdea242f75919ef7a83c71129795979bc87dd114d4c97c713a6",
+    "signature": {
+      "algorithm": "ed25519",
+      "keyId": "export-signer",
+      "value": "CPA0L7OSVB9aJNuuKaDftsLAWG2qLRALiYn1Afnz2RYubwX9KaRF80Cq4DS7btGWu7MHgiCkHohjD+EodAVDCw=="
+    }
+  }
+}
