@@ -3,34 +3,17 @@ import path from 'path';
 import yaml from 'js-yaml';
 import Ajv from 'ajv';
 import { logger } from '../utils/logger';
-
-export interface PromptTemplate {
-  meta: {
-    id: string;
-    owner: string;
-    purpose: string;
-    guardrails?: string[];
-    model_requirements?: {
-      min_context_window?: number;
-      preferred_models?: string[];
-      max_tokens?: number;
-    };
-  };
-  inputs: Record<string, string>;
-  template: string;
-  examples?: Array<{
-    name: string;
-    inputs: Record<string, any>;
-    expected_contains: string[];
-  }>;
-}
+import type { PromptConfig } from './types';
 
 export class PromptRegistry {
-  private prompts: Map<string, PromptTemplate> = new Map();
+  private prompts: Map<string, PromptConfig> = new Map();
   private schema: any = null;
   private ajv = new Ajv();
+  private promptsDir: string;
 
-  constructor(private promptsDir: string = './prompts') {}
+  constructor(promptsDir: string = './prompts') {
+    this.promptsDir = promptsDir;
+  }
 
   async initialize(): Promise<void> {
     try {
@@ -63,11 +46,14 @@ export class PromptRegistry {
   private async loadPrompt(filePath: string): Promise<void> {
     try {
       const content = await fs.readFile(filePath, 'utf-8');
-      const prompt = yaml.load(content) as PromptTemplate;
+      const prompt = yaml.load(content) as PromptConfig;
 
       // Validate against schema
-      if (this.schema && !this.ajv.validate(this.schema, prompt)) {
-        throw new Error(`Invalid prompt schema: ${this.ajv.errorsText()}`);
+      if (this.schema) {
+        const valid = this.ajv.validate(this.schema, prompt);
+        if (!valid) {
+          throw new Error(`Invalid prompt schema: ${this.ajv.errorsText()}`);
+        }
       }
 
       this.prompts.set(prompt.meta.id, prompt);
@@ -84,11 +70,11 @@ export class PromptRegistry {
     }
   }
 
-  getPrompt(id: string): PromptTemplate | null {
+  getPrompt(id: string): PromptConfig | null {
     return this.prompts.get(id) || null;
   }
 
-  getAllPrompts(): PromptTemplate[] {
+  getAllPrompts(): PromptConfig[] {
     return Array.from(this.prompts.values());
   }
 
@@ -106,12 +92,10 @@ export class PromptRegistry {
   }
 
   private validateInputs(
-    prompt: PromptTemplate,
+    prompt: PromptConfig,
     inputs: Record<string, any>,
   ): void {
     const required = Object.keys(prompt.inputs);
-    const provided = Object.keys(inputs);
-
     const missing = required.filter((key) => !(key in inputs));
     if (missing.length > 0) {
       throw new Error(`Missing required inputs: ${missing.join(', ')}`);
@@ -141,7 +125,7 @@ export class PromptRegistry {
       case 'object':
         return typeof value === 'object' && !Array.isArray(value);
       default:
-        return false;
+        return true;
     }
   }
 
@@ -220,21 +204,27 @@ export class PromptRegistry {
       for (const example of prompt!.examples) {
         try {
           const rendered = this.render(prompt!.meta.id, example.inputs);
-          const passed = example.expected_contains.every((expected) =>
-            rendered.includes(expected),
-          );
+          let passed = true;
+          let missing: string[] = [];
+
+          if (example.expected_contains) {
+            passed = example.expected_contains.every((expected) =>
+              rendered.includes(expected),
+            );
+            if (!passed) {
+               missing = example.expected_contains.filter(
+                  (expected) => !rendered.includes(expected),
+                );
+            }
+          }
 
           results.push({
             promptId: prompt!.meta.id,
             exampleName: example.name,
             passed,
             rendered,
-            expectedContains: example.expected_contains,
-            missingExpected: passed
-              ? []
-              : example.expected_contains.filter(
-                  (expected) => !rendered.includes(expected),
-                ),
+            expectedContains: example.expected_contains || [],
+            missingExpected: missing,
           });
         } catch (error: any) {
           results.push({
@@ -242,8 +232,8 @@ export class PromptRegistry {
             exampleName: example.name,
             passed: false,
             error: error.message,
-            expectedContains: example.expected_contains,
-            missingExpected: example.expected_contains,
+            expectedContains: example.expected_contains || [],
+            missingExpected: example.expected_contains || [],
           });
         }
       }
@@ -261,7 +251,6 @@ export class PromptRegistry {
     return results;
   }
 
-  // Hot reload prompts for development
   async reloadPrompts(): Promise<void> {
     this.prompts.clear();
     await this.initialize();
@@ -278,5 +267,4 @@ interface TestResult {
   missingExpected: string[];
 }
 
-// Singleton instance
 export const promptRegistry = new PromptRegistry();
