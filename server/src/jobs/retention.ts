@@ -2,6 +2,8 @@ import { getPostgresPool } from '../db/postgres.js';
 import { DataRetentionEngine } from '../governance/retention/dataRetentionEngine.js';
 import { RetentionScheduler } from '../governance/retention/scheduler.js';
 import { DatasetMetadata } from '../governance/retention/types.js';
+import { queueManager } from '../queue/index.js';
+import { QueueName } from '../queue/types.js';
 
 const pool = getPostgresPool();
 const scheduler = new RetentionScheduler(60000);
@@ -35,18 +37,44 @@ async function ensureAiSuggestionDataset(days: number): Promise<void> {
     };
 
     await retentionEngine.registerDataset(metadata, 'system');
-    await retentionEngine.schedulePurge(AI_SUGGESTION_DATASET_ID, intervalMs);
+    await scheduleRetentionJob(AI_SUGGESTION_DATASET_ID, intervalMs);
     return;
   }
 
   if (!existing.schedule) {
-    await retentionEngine.schedulePurge(AI_SUGGESTION_DATASET_ID, intervalMs);
+    await scheduleRetentionJob(AI_SUGGESTION_DATASET_ID, intervalMs);
   }
+}
+
+async function scheduleRetentionJob(datasetId: string, intervalMs: number) {
+  // Deprecating in-memory scheduler in favor of distributed BullMQ
+  // await retentionEngine.schedulePurge(datasetId, intervalMs);
+
+  // Schedule in BullMQ for robustness and distributed execution
+  await queueManager.addJob(
+    QueueName.RETENTION,
+    `purge-${datasetId}`,
+    {
+      type: 'retention-purge',
+      payload: { datasetId, mode: 'scheduled' }
+    },
+    {
+      repeat: { every: intervalMs }
+    }
+  );
 }
 
 export async function purgeOldSuggestions(days = 90): Promise<void> {
   await ensureAiSuggestionDataset(days);
-  await retentionEngine.purgeDataset(AI_SUGGESTION_DATASET_ID, 'manual');
+  // Trigger immediate job
+  await queueManager.addJob(
+    QueueName.RETENTION,
+    `manual-purge-${AI_SUGGESTION_DATASET_ID}-${Date.now()}`,
+    {
+        type: 'retention-purge',
+        payload: { datasetId: AI_SUGGESTION_DATASET_ID, mode: 'manual' }
+    }
+  );
 }
 
 export async function initializeDataRetentionPolicies(): Promise<void> {

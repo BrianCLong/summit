@@ -25,6 +25,8 @@ import { Request, Response, NextFunction } from 'express'; // Import types for m
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
+import { queueManager } from './queue/index.js';
+import { initializeProcessors } from './jobs/processors/index.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -72,6 +74,10 @@ export const createApp = async () => {
       message: { error: 'Too many requests, please try again later' },
     }),
   );
+
+  // Setup Bull Board
+  queueManager.setupBoard(app);
+  initializeProcessors();
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
