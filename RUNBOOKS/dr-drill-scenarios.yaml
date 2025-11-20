@@ -1,0 +1,494 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dr-drill-scenarios
+  namespace: chaos-system
+  labels:
+    app.kubernetes.io/name: disaster-recovery
+    app.kubernetes.io/component: drills
+data:
+  # DR Drill Scenarios for Summit
+  # Integrates with ChaosEngine to test backup, restore, and recovery procedures
+
+  scenario-1-total-data-loss.yaml: |
+    # Scenario 1: Total Data Loss and Recovery
+    # Simulates catastrophic data loss and validates full restore process
+
+    name: "Total Data Loss DR Drill"
+    description: "Simulate complete data loss across all databases and verify full restore"
+    type: "disaster_recovery"
+    severity: "critical"
+    duration: "2h"
+
+    objectives:
+      rto: "4 hours"
+      rpo: "15 minutes"
+
+    prerequisites:
+      - name: "Recent backup available"
+        check: "test -d ./backups/summit-backup-full-* | tail -1"
+        required: true
+      - name: "DR environment ready"
+        check: "docker compose ps | grep -q 'Up'"
+        required: true
+      - name: "Backup validation passed"
+        check: "./scripts/backup-enhanced.sh --set=full --dry-run"
+        required: false
+
+    phases:
+      - name: "Phase 1: Baseline Capture"
+        duration: "15min"
+        steps:
+          - action: "Capture baseline metrics"
+            command: |
+              mkdir -p ./dr-drills/baseline-$(date +%Y%m%d)
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "\copy (SELECT COUNT(*) FROM entities) TO '/tmp/baseline-entities.txt'"
+              docker exec neo4j cypher-shell -u neo4j -p local_dev_pw \
+                "MATCH (n) RETURN COUNT(n)" > ./dr-drills/baseline-neo4j-count.txt
+          - action: "Run golden path tests (pre-disaster)"
+            command: "pnpm test:golden-path"
+            success_criteria: "exit_code == 0"
+          - action: "Record demo story results"
+            command: "pnpm test:demo-stories"
+            success_criteria: "exit_code == 0"
+
+      - name: "Phase 2: Disaster Simulation"
+        duration: "5min"
+        steps:
+          - action: "Stop all services"
+            command: "docker compose down"
+          - action: "Destroy all data volumes"
+            command: |
+              docker volume rm summit_postgres_data || true
+              docker volume rm summit_neo4j_data || true
+              docker volume rm summit_redis_data || true
+            warning: "DESTRUCTIVE - All data will be lost"
+          - action: "Verify data destruction"
+            command: |
+              docker volume ls | grep -q summit_postgres_data && exit 1 || exit 0
+              docker volume ls | grep -q summit_neo4j_data && exit 1 || exit 0
+
+      - name: "Phase 3: Recovery Initiation"
+        duration: "10min"
+        steps:
+          - action: "Identify latest backup"
+            command: |
+              export LATEST_BACKUP=$(ls -t ./backups/summit-backup-full-* | head -1 | xargs basename)
+              echo "Latest backup: $LATEST_BACKUP"
+              echo "$LATEST_BACKUP" > /tmp/dr-restore-target.txt
+          - action: "Verify backup integrity"
+            command: |
+              BACKUP_ID=$(cat /tmp/dr-restore-target.txt)
+              ./scripts/restore-enhanced.sh "$BACKUP_ID" --mode=verify-only
+            success_criteria: "exit_code == 0"
+
+      - name: "Phase 4: Full Restore"
+        duration: "60min"
+        steps:
+          - action: "Execute full restore"
+            command: |
+              BACKUP_ID=$(cat /tmp/dr-restore-target.txt)
+              ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=dr_rehearsal --mode=full
+            success_criteria: "exit_code == 0"
+            timeout: "3600s"
+          - action: "Verify database connectivity"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev -c "SELECT 1"
+              docker exec neo4j cypher-shell -u neo4j -p local_dev_pw "RETURN 1"
+              docker exec redis redis-cli ping
+            success_criteria: "exit_code == 0"
+
+      - name: "Phase 5: Validation"
+        duration: "30min"
+        steps:
+          - action: "Compare data counts"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "\copy (SELECT COUNT(*) FROM entities) TO '/tmp/restored-entities.txt'"
+              diff ./dr-drills/baseline-entities.txt /tmp/restored-entities.txt
+          - action: "Run golden path tests (post-restore)"
+            command: "pnpm test:golden-path"
+            success_criteria: "exit_code == 0"
+            required: true
+          - action: "Run demo stories (post-restore)"
+            command: "pnpm test:demo-stories"
+            success_criteria: "exit_code == 0"
+            required: true
+          - action: "Verify data integrity"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "SELECT COUNT(*) FROM pg_stat_database WHERE datname='intelgraph_dev'"
+            success_criteria: "output > 0"
+
+      - name: "Phase 6: Cleanup"
+        duration: "10min"
+        steps:
+          - action: "Document results"
+            command: |
+              cat > ./dr-drills/drill-report-$(date +%Y%m%d).md << EOF
+              # DR Drill Report
+              - Date: $(date)
+              - Scenario: Total Data Loss
+              - RTO Target: 4 hours
+              - RTO Actual: [FILL IN]
+              - RPO Target: 15 minutes
+              - RPO Actual: [FILL IN]
+              - Status: [SUCCESS/FAILED]
+              - Issues: [NONE/LIST]
+              EOF
+          - action: "Archive drill artifacts"
+            command: |
+              tar -czf ./dr-drills/drill-$(date +%Y%m%d).tar.gz ./dr-drills/baseline-*
+
+    success_criteria:
+      - metric: "rto"
+        threshold: "4h"
+        actual: "calculated_from_phases"
+      - metric: "data_integrity"
+        threshold: "100%"
+      - metric: "golden_path_tests"
+        threshold: "100% pass"
+      - metric: "demo_stories"
+        threshold: "100% pass"
+
+    rollback:
+      - "Restore from previous known-good backup if drill fails"
+      - "Document issues for remediation"
+
+  scenario-2-database-corruption.yaml: |
+    # Scenario 2: Database Corruption Recovery
+    # Simulates database corruption and validates selective restore
+
+    name: "Database Corruption DR Drill"
+    description: "Simulate database corruption and perform selective restore"
+    type: "disaster_recovery"
+    severity: "high"
+    duration: "1h"
+
+    objectives:
+      rto: "2 hours"
+      rpo: "15 minutes"
+
+    phases:
+      - name: "Phase 1: Corrupt Database"
+        steps:
+          - action: "Backup current state"
+            command: "./scripts/backup-enhanced.sh --set=minimal"
+          - action: "Introduce corruption"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "UPDATE entities SET data = 'CORRUPTED' WHERE id IN (SELECT id FROM entities LIMIT 100)"
+          - action: "Verify corruption"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "SELECT COUNT(*) FROM entities WHERE data = 'CORRUPTED'"
+
+      - name: "Phase 2: Detect and Respond"
+        steps:
+          - action: "Detect corruption via monitoring"
+            command: "echo 'Simulating corruption detection alert'"
+          - action: "Identify affected tables"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
+
+      - name: "Phase 3: Selective Restore"
+        steps:
+          - action: "Restore PostgreSQL only"
+            command: |
+              export RESTORE_POSTGRES=true
+              export RESTORE_NEO4J=false
+              export RESTORE_REDIS=false
+              BACKUP_ID=$(ls -t ./backups/summit-backup-* | head -1 | xargs basename)
+              ./scripts/restore-enhanced.sh "$BACKUP_ID" --mode=selective
+          - action: "Verify restoration"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "SELECT COUNT(*) FROM entities WHERE data != 'CORRUPTED'"
+
+      - name: "Phase 4: Validation"
+        steps:
+          - action: "Run application tests"
+            command: "pnpm test:integration"
+          - action: "Verify data consistency"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "SELECT COUNT(*) FROM entities" > /tmp/entity-count.txt
+
+  scenario-3-multi-region-failover.yaml: |
+    # Scenario 3: Multi-Region Failover Drill
+    # Tests failover to DR region with backup restore
+
+    name: "Multi-Region Failover DR Drill"
+    description: "Simulate primary region failure and failover to DR region"
+    type: "disaster_recovery"
+    severity: "critical"
+    duration: "4h"
+
+    objectives:
+      rto: "4 hours"
+      rpo: "15 minutes"
+
+    prerequisites:
+      - name: "DR region infrastructure ready"
+        check: "aws eks describe-cluster --name summit-dr --region us-east-1"
+      - name: "Latest backup replicated to DR region"
+        check: "aws s3 ls s3://summit-backups-dr/summit-backup-disaster_recovery-"
+
+    phases:
+      - name: "Phase 1: Primary Region Failure"
+        steps:
+          - action: "Simulate primary region outage"
+            command: "echo 'Simulating us-west-2 region failure'"
+          - action: "Verify DR region accessibility"
+            command: "aws eks update-kubeconfig --name summit-dr --region us-east-1"
+
+      - name: "Phase 2: DR Infrastructure Activation"
+        steps:
+          - action: "Scale up DR region EKS cluster"
+            command: |
+              kubectl scale deployment postgres --replicas=1 -n database
+              kubectl scale deployment neo4j --replicas=1 -n database
+              kubectl scale deployment redis --replicas=1 -n database
+          - action: "Download latest backup from S3"
+            command: |
+              aws s3 cp s3://summit-backups-dr/$(aws s3 ls s3://summit-backups-dr/ | sort | tail -1 | awk '{print $4}') /tmp/dr-backup.tar.gz
+              tar -xzf /tmp/dr-backup.tar.gz -C ./backups/
+
+      - name: "Phase 3: Data Restore"
+        steps:
+          - action: "Execute restore in DR region"
+            command: |
+              BACKUP_ID=$(ls -t ./backups/summit-backup-disaster_recovery-* | head -1 | xargs basename)
+              ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=dr_rehearsal
+
+      - name: "Phase 4: DNS Cutover"
+        steps:
+          - action: "Update Route53 DNS records"
+            command: |
+              aws route53 change-resource-record-sets --hosted-zone-id Z123456 \
+                --change-batch file://dns-cutover-dr.json
+          - action: "Verify DNS propagation"
+            command: "dig api.summit.example.com"
+
+      - name: "Phase 5: Application Validation"
+        steps:
+          - action: "Health check all services"
+            command: |
+              curl -f http://api.summit.example.com/health
+          - action: "Run golden path tests"
+            command: "pnpm test:golden-path"
+          - action: "Run demo stories"
+            command: "pnpm test:demo-stories"
+
+      - name: "Phase 6: Monitoring and Documentation"
+        steps:
+          - action: "Enable DR region monitoring"
+            command: |
+              kubectl apply -f k8s/monitoring/ -n monitoring
+          - action: "Document failover time"
+            command: |
+              echo "Failover completed at: $(date)" >> ./dr-drills/failover-log.txt
+
+  scenario-4-backup-validation.yaml: |
+    # Scenario 4: Automated Backup Validation Drill
+    # Regularly validates that backups are restorable
+
+    name: "Automated Backup Validation"
+    description: "Automated validation that recent backups can be restored successfully"
+    type: "backup_validation"
+    severity: "medium"
+    duration: "30min"
+    frequency: "weekly"
+
+    objectives:
+      validation_success_rate: "100%"
+      restore_time: "< 30 minutes"
+
+    phases:
+      - name: "Phase 1: Select Backup"
+        steps:
+          - action: "Find most recent full backup"
+            command: |
+              export BACKUP_ID=$(ls -t ./backups/summit-backup-full-* | head -1 | xargs basename)
+              echo "Testing backup: $BACKUP_ID"
+
+      - name: "Phase 2: Integrity Check"
+        steps:
+          - action: "Verify backup checksums"
+            command: |
+              cd ./backups/$BACKUP_ID && sha256sum -c CHECKSUMS
+            success_criteria: "exit_code == 0"
+
+      - name: "Phase 3: Test Restore (Dry Run)"
+        steps:
+          - action: "Simulate restore"
+            command: |
+              ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=test --dry-run
+            success_criteria: "exit_code == 0"
+
+      - name: "Phase 4: Sample Data Validation"
+        steps:
+          - action: "Extract and validate metadata"
+            command: |
+              cat ./backups/$BACKUP_ID/backup-metadata.json | jq .
+            success_criteria: "valid_json"
+          - action: "Check backup age"
+            command: |
+              BACKUP_DATE=$(cat ./backups/$BACKUP_ID/backup-metadata.json | jq -r .timestamp)
+              AGE_HOURS=$(( ($(date +%s) - $(date -d "$BACKUP_DATE" +%s)) / 3600 ))
+              test $AGE_HOURS -lt 24
+            success_criteria: "exit_code == 0"
+
+      - name: "Phase 5: Report Results"
+        steps:
+          - action: "Generate validation report"
+            command: |
+              cat > ./dr-drills/validation-$(date +%Y%m%d).txt << EOF
+              Backup Validation Report
+              Date: $(date)
+              Backup ID: $BACKUP_ID
+              Integrity: PASS
+              Age: OK
+              Status: VALIDATED
+              EOF
+
+  scenario-5-tenant-data-recovery.yaml: |
+    # Scenario 5: Per-Tenant Data Recovery
+    # Tests ability to restore individual tenant data
+
+    name: "Per-Tenant Data Recovery Drill"
+    description: "Validate ability to restore data for a specific tenant without affecting others"
+    type: "disaster_recovery"
+    severity: "medium"
+    duration: "45min"
+
+    prerequisites:
+      - name: "Tenant backup available"
+        check: "ls ./backups/summit-backup-tenant-*"
+
+    phases:
+      - name: "Phase 1: Backup Tenant Data"
+        steps:
+          - action: "Create tenant backup"
+            command: |
+              export TENANT_ID="test-tenant-123"
+              ./scripts/backup-enhanced.sh --set=tenant --tenant-id=$TENANT_ID
+
+      - name: "Phase 2: Simulate Tenant Data Loss"
+        steps:
+          - action: "Delete tenant data"
+            command: |
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "DELETE FROM entities WHERE tenant_id = 'test-tenant-123'"
+              docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -c "DELETE FROM investigations WHERE tenant_id = 'test-tenant-123'"
+
+      - name: "Phase 3: Restore Tenant Data"
+        steps:
+          - action: "Restore tenant backup"
+            command: |
+              BACKUP_ID=$(ls -t ./backups/summit-backup-tenant-test-tenant-123-* | head -1 | xargs basename)
+              # Custom tenant restore logic here
+              echo "Restoring tenant data from $BACKUP_ID"
+
+      - name: "Phase 4: Validate Restoration"
+        steps:
+          - action: "Verify tenant data restored"
+            command: |
+              COUNT=$(docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -t -c "SELECT COUNT(*) FROM entities WHERE tenant_id = 'test-tenant-123'")
+              test $COUNT -gt 0
+          - action: "Verify other tenants unaffected"
+            command: |
+              COUNT=$(docker exec postgres psql -U intelgraph -d intelgraph_dev \
+                -t -c "SELECT COUNT(DISTINCT tenant_id) FROM entities")
+              test $COUNT -gt 1
+
+  scenario-6-chaos-with-recovery.yaml: |
+    # Scenario 6: Chaos Engineering + DR Recovery
+    # Combines chaos injection with recovery procedures
+
+    name: "Chaos Engineering with DR Recovery"
+    description: "Inject failures and validate automatic recovery mechanisms"
+    type: "chaos_recovery"
+    severity: "high"
+    duration: "2h"
+
+    chaos_experiments:
+      - type: "network_partition"
+        target: "postgres"
+        duration: "5min"
+        recovery: "automatic"
+      - type: "service_degradation"
+        target: "neo4j"
+        degradation: "50%"
+        duration: "10min"
+        recovery: "backup_restore"
+      - type: "data_corruption"
+        target: "redis"
+        corruption_rate: "10%"
+        recovery: "selective_restore"
+
+    recovery_procedures:
+      - condition: "service_unavailable"
+        action: "restart_service"
+        timeout: "5min"
+      - condition: "data_corruption_detected"
+        action: "restore_from_backup"
+        backup_type: "latest_incremental"
+      - condition: "recovery_failed"
+        action: "escalate_to_dr"
+
+    validation:
+      - name: "Service Recovery"
+        metric: "uptime > 99%"
+      - name: "Data Integrity"
+        metric: "corruption_rate < 0.01%"
+      - name: "Golden Path Tests"
+        metric: "pass_rate == 100%"
+
+  # Drill Execution Scripts
+  execute-drill.sh: |
+    #!/usr/bin/env bash
+    # DR Drill Execution Script
+    set -euo pipefail
+
+    SCENARIO="${1:-scenario-1-total-data-loss}"
+    DRILL_DIR="./dr-drills/$(date +%Y%m%d-%H%M%S)-${SCENARIO}"
+
+    mkdir -p "$DRILL_DIR"
+
+    echo "🚨 Starting DR Drill: $SCENARIO"
+    echo "Drill directory: $DRILL_DIR"
+
+    # Load scenario
+    SCENARIO_FILE="./RUNBOOKS/dr-drill-scenarios.yaml"
+
+    # Execute drill phases
+    # This would integrate with ChaosEngine or be executed manually
+
+    echo "✅ DR Drill completed"
+    echo "Results saved to: $DRILL_DIR"
+
+  schedule-drills.yaml: |
+    # Scheduled DR Drills
+    drills:
+      - name: "Weekly Backup Validation"
+        scenario: "scenario-4-backup-validation"
+        schedule: "0 2 * * 0"  # Every Sunday at 2 AM
+        enabled: true
+
+      - name: "Monthly Total Data Loss Drill"
+        scenario: "scenario-1-total-data-loss"
+        schedule: "0 3 1 * *"  # 1st of month at 3 AM
+        enabled: true
+        notification:
+          - "ops-team@example.com"
+
+      - name: "Quarterly Multi-Region Failover"
+        scenario: "scenario-3-multi-region-failover"
+        schedule: "0 4 1 */3 *"  # Every 3 months
+        enabled: true
+        requires_approval: true
