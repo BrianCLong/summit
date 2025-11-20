@@ -62,6 +62,8 @@ pnpm typecheck        # tsconfig project references
 pnpm smoke            # same as make smoke (Node-based E2E)
 ```
 
+💡 **New to Summit?** Run `make help` for a quick command reference, or see [docs/COMMAND_REFERENCE.md](docs/COMMAND_REFERENCE.md) for the full guide.
+
 ## CI Status
 
 The `ci.yml` workflow runs on every PR + main: cached `pnpm install`, `make bootstrap`, `make up` (headless), `make smoke`, lint, typecheck, Jest, Playwright/E2E (currently proxies to the smoke test), SBOM + Trivy scans, and Docker layer caching. `security.yml` runs CodeQL analysis, dependency review, and gitleaks on a nightly schedule + PRs touching lockfiles. `release.yml` gates semantic-release with the same caches and requires a green CI status before packaging artifacts. All three workflows back the badges above and are required checks for merge.
