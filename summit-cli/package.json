@@ -14,8 +14,14 @@
   "scripts": {
     "dev": "node --watch bin/summit.js",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "test:verbose": "NODE_OPTIONS='--experimental-vm-modules' jest --verbose",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "lint:fix": "eslint src/ --fix",
+    "typecheck": "tsc --noEmit",
+    "validate": "pnpm run lint && pnpm run typecheck && pnpm run test",
+    "validate:integration": "./scripts/validate-integration.sh"
   },
   "keywords": [
     "cli",
