@@ -237,3 +237,7 @@ id_ed25519.*
 **/api-key.txt
 **/token.txt
 **/.token
+
+# PR Dashboard generated files
+pr-dashboard-report.json
+pr-dashboard.html
