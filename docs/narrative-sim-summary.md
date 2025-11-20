@@ -1,4 +1,5 @@
 # Real-Time Narrative Simulation Engine
+<!-- Feature ID: F-NARRATIVE-SIM-001 -->
 
 ## Overview
 

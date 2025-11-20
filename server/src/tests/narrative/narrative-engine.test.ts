@@ -57,6 +57,7 @@ const createConfig = (
 });
 
 describe('NarrativeSimulationEngine', () => {
+  // F-NARRATIVE-SIM-001: Test narrative tick processing
   it('applies queued events and updates entity sentiment and arcs', async () => {
     const engine = new NarrativeSimulationEngine(
       createConfig({ id: 'sim-events' }),

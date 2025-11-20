@@ -19,6 +19,7 @@ import {
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
 
+// F-NARRATIVE-SIM-001: Core Engine implementation
 export class NarrativeSimulationEngine {
   private state: NarrativeState;
   private generator: NarrativeGenerator;
