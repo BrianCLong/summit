@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/realtime",
+  "version": "1.0.0",
+  "description": "Real-time communication and notification system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "realtime",
+    "websocket",
+    "notifications",
+    "alerts"
+  ],
+  "dependencies": {
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "zod": "^4.0.17",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3"
+  }
+}

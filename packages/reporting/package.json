@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/reporting",
+  "version": "1.0.0",
+  "description": "Intelligence reporting and export capabilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "reporting",
+    "export",
+    "pdf",
+    "docx",
+    "pptx"
+  ],
+  "dependencies": {
+    "zod": "^4.0.17",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3"
+  }
+}

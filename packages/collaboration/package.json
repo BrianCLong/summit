@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/collaboration",
+  "version": "1.0.0",
+  "description": "Collaboration, access control, and RBAC system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "collaboration",
+    "access-control",
+    "rbac",
+    "permissions"
+  ],
+  "dependencies": {
+    "zod": "^4.0.17",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3"
+  }
+}
