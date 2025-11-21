@@ -8,6 +8,83 @@
     "refresh": "10s",
     "panels": [
       {
+        "id": 31,
+        "title": "Golden Path Funnel",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 32,
+        "title": "User Journey Completion",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "sum by (step) (golden_path_events_total)",
+            "legendFormat": "{{step}}"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": true,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "displayMode": "gradient",
+          "orientation": "horizontal"
+        }
+      },
+      {
+        "id": 33,
+        "title": "Copilot Interactions",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(copilot_interactions_total)",
+            "legendFormat": "Total Interactions"
+          },
+          {
+            "expr": "sum(copilot_interactions_total{status='success'}) / sum(copilot_interactions_total) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ]
+      },
+      {
+        "id": 34,
+        "title": "DORA Metrics",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 35,
+        "title": "Deployment Frequency",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(dora_deployments_total[1d]))",
+            "legendFormat": "Deployments / Day"
+          }
+        ]
+      },
+      {
+        "id": 36,
+        "title": "Change Failure Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "dora_change_failure_rate * 100",
+            "legendFormat": "Failure Rate %"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "green"},
+            {"value": 15, "color": "yellow"},
+            {"value": 30, "color": "red"}
+          ]
+        }
+      },
+      {
         "id": 1,
         "title": "Service Health Overview",
         "type": "row",

@@ -176,6 +176,13 @@ export const llmRequestDuration = new client.Histogram({
   registers: [registry]
 });
 
+export const copilotInteractionsTotal = new client.Counter({
+  name: 'copilot_interactions_total',
+  help: 'Total number of Copilot interactions',
+  labelNames: ['status'],
+  registers: [registry]
+});
+
 // ==================== Business Metrics ====================
 export const investigationsTotal = new client.Counter({
   name: 'investigations_total',
@@ -195,6 +202,42 @@ export const relationshipsTotal = new client.Counter({
   name: 'relationships_total',
   help: 'Total number of relationships created',
   labelNames: ['relationship_type'],
+  registers: [registry]
+});
+
+// Golden Path Metrics
+export const goldenPathEventsTotal = new client.Counter({
+  name: 'golden_path_events_total',
+  help: 'Events tracked along the user Golden Path',
+  labelNames: ['step'], // 'investigation_created', 'entity_added', 'relationship_added', 'copilot_query', 'results_viewed'
+  registers: [registry]
+});
+
+// ==================== DORA Metrics ====================
+export const deploymentFrequency = new client.Counter({
+  name: 'dora_deployments_total',
+  help: 'Total number of deployments',
+  labelNames: ['environment'],
+  registers: [registry]
+});
+
+export const changeFailureRate = new client.Gauge({
+  name: 'dora_change_failure_rate',
+  help: 'Percentage of deployments causing failure in production',
+  registers: [registry]
+});
+
+export const leadTimeForChanges = new client.Histogram({
+  name: 'dora_lead_time_seconds',
+  help: 'Time from commit to production',
+  buckets: [300, 600, 1800, 3600, 7200, 14400, 28800, 86400], // 5m to 24h
+  registers: [registry]
+});
+
+export const timeToRestoreService = new client.Histogram({
+  name: 'dora_time_to_restore_seconds',
+  help: 'Time to restore service after incident',
+  buckets: [60, 300, 600, 1800, 3600, 14400],
   registers: [registry]
 });
 

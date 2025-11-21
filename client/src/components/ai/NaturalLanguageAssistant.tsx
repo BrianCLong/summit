@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { trackGoldenPath, trackCopilotInteraction } from '../../telemetry/metrics';
 
 type SuggestedAction = {
   type:
@@ -608,8 +609,14 @@ What would you like to investigate today?`,
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // Generate AI response
-    const aiResponse = await generateAIResponse(message);
-    setMessages((prev) => [...prev, aiResponse]);
+    try {
+      const aiResponse = await generateAIResponse(message);
+      setMessages((prev) => [...prev, aiResponse]);
+      // trackGoldenPath('copilot_query'); // Handled by backend
+      // trackCopilotInteraction('success'); // Handled by backend
+    } catch (error) {
+      // trackCopilotInteraction('error'); // Handled by backend
+    }
 
     // Create investigation task if needed
     if (shouldCreateTask(message)) {

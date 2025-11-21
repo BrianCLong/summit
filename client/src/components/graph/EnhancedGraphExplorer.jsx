@@ -105,6 +105,7 @@ import GeoMapPanel from '../geoint/GeoMapPanel';
 import SearchPanel from '../ai/SearchPanel.jsx';
 import { gql, useMutation, useLazyQuery } from '@apollo/client';
 import { apolloClient } from '../../services/apollo';
+import { trackGoldenPath } from '../../telemetry/metrics';
 import EnrichmentPanel from '../osint/EnrichmentPanel';
 import RelationshipModal from './RelationshipModal';
 import EntityDrawer from '../EntityDrawer';
@@ -903,6 +904,7 @@ function EnhancedGraphExplorer() {
             },
           },
         });
+        // trackGoldenPath('relationship_added'); // Handled by backend
       } catch (e) {
         console.warn('Failed to create relationship', e);
       } finally {

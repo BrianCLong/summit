@@ -5,6 +5,7 @@ import {
   UserInputError,
 } from 'apollo-server-express';
 import { isFeatureEnabled } from '../../config/mvp1-features';
+import { copilotInteractionsTotal, goldenPathEventsTotal } from '../../metrics.js';
 
 const copilotService = new CopilotIntegrationService();
 
@@ -134,6 +135,9 @@ const mvp1CopilotResolvers = {
           },
         );
 
+        copilotInteractionsTotal.inc({ status: 'success' });
+        goldenPathEventsTotal.inc({ step: 'copilot_query' });
+
         // Optionally auto-create entities in the graph
         const createdEntities: any[] = [];
         if (
@@ -177,6 +181,7 @@ const mvp1CopilotResolvers = {
           },
         };
       } catch (error: any) {
+        copilotInteractionsTotal.inc({ status: 'error' });
         throw new Error(`Entity extraction failed: ${error.message}`);
       }
     },

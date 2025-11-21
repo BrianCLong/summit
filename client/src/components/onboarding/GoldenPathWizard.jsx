@@ -69,6 +69,7 @@ import {
 } from '@mui/icons-material';
 import { useMutation, useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
+import { trackGoldenPath, trackCopilotInteraction } from '../../telemetry/metrics';
 
 // GraphQL operations (would be imported from actual files)
 const CREATE_INVESTIGATION = `
@@ -231,6 +232,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         ...prev,
         investigation: data.createInvestigation,
       }));
+      // trackGoldenPath('investigation_created'); // Handled by backend
       handleComplete(0);
       handleNext();
     } catch (error) {
@@ -268,6 +270,8 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       if (useDemo) {
         await createDemoData();
       }
+
+      // trackGoldenPath('entity_added'); // Handled by backend
 
       handleComplete(1);
       handleNext();
@@ -317,6 +321,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
             },
           },
         });
+        // trackGoldenPath('relationship_added'); // Handled by backend
       } catch (error) {
         console.error('Failed to create demo relationship:', error);
       }
@@ -336,16 +341,20 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       });
 
       setWizardData((prev) => ({ ...prev, copilotRun: data.startCopilotRun }));
+      // trackGoldenPath('copilot_query'); // Handled by backend
+      // trackCopilotInteraction('success'); // Handled by backend
       handleComplete(3);
       handleNext();
     } catch (error) {
       console.error('Failed to start Copilot run:', error);
+      // trackCopilotInteraction('error'); // Handled by backend
     }
   };
 
   const handleFinish = () => {
     if (wizardData.investigation) {
       navigate(`/investigations/${wizardData.investigation.id}`);
+      trackGoldenPath('results_viewed');
     }
 
     if (onComplete) {

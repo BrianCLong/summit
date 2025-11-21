@@ -11,6 +11,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import { goldenPathEventsTotal } from '../../metrics.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -295,7 +296,9 @@ export const coreResolvers = {
         };
       }
 
-      return await entityRepo.create(parsed, userId);
+      const result = await entityRepo.create(parsed, userId);
+      goldenPathEventsTotal.inc({ step: 'entity_added' });
+      return result;
     },
 
     updateEntity: async (_: any, { input }: any, context: any) => {
@@ -339,7 +342,9 @@ export const coreResolvers = {
         };
       }
 
-      return await relationshipRepo.create(parsed, userId);
+      const result = await relationshipRepo.create(parsed, userId);
+      goldenPathEventsTotal.inc({ step: 'relationship_added' });
+      return result;
     },
 
     deleteRelationship: async (_: any, { id, tenantId }: any, context: any) => {
@@ -365,7 +370,9 @@ export const coreResolvers = {
       const userId = context.user?.sub || context.user?.id || 'system';
       const tenantId =
         context.tenantId || context.user?.tenantId || 'default_tenant';
-      return await investigationRepo.create({ ...input, tenantId }, userId);
+      const result = await investigationRepo.create({ ...input, tenantId }, userId);
+      goldenPathEventsTotal.inc({ step: 'investigation_created' });
+      return result;
     },
 
     updateInvestigation: async (_: any, { input }: any, context: any) => {
