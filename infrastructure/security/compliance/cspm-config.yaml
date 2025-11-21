@@ -1,0 +1,200 @@
+# Cloud Security Posture Management (CSPM) Configuration
+# Unified security compliance across AWS, Azure, and GCP
+
+apiVersion: v1
+kind: SecurityPolicy
+metadata:
+  name: summit-cspm-policy
+  version: "1.0"
+
+# Compliance frameworks to enforce
+compliance:
+  frameworks:
+    - CIS-AWS-Foundations-v1.4
+    - CIS-Azure-Foundations-v1.5
+    - CIS-GCP-Foundations-v1.3
+    - SOC2-Type2
+    - PCI-DSS-v4.0
+    - GDPR
+    - HIPAA
+
+# Security rules
+rules:
+  # Identity and Access Management
+  iam:
+    - id: IAM-001
+      name: "MFA Required for All Users"
+      description: "Multi-factor authentication must be enabled for all users"
+      severity: critical
+      providers: [aws, azure, gcp]
+      remediation: "Enable MFA for the user account"
+
+    - id: IAM-002
+      name: "No Root Account Access Keys"
+      description: "Root account should not have access keys"
+      severity: critical
+      providers: [aws]
+      remediation: "Delete root account access keys"
+
+    - id: IAM-003
+      name: "Principle of Least Privilege"
+      description: "IAM policies should follow least privilege principle"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Review and restrict IAM permissions"
+
+    - id: IAM-004
+      name: "Service Account Key Rotation"
+      description: "Service account keys should be rotated every 90 days"
+      severity: medium
+      providers: [gcp]
+      remediation: "Enable automatic key rotation"
+
+  # Network Security
+  network:
+    - id: NET-001
+      name: "No Public SSH Access"
+      description: "SSH (port 22) should not be open to 0.0.0.0/0"
+      severity: critical
+      providers: [aws, azure, gcp]
+      remediation: "Restrict SSH access to specific IP ranges"
+
+    - id: NET-002
+      name: "No Public RDP Access"
+      description: "RDP (port 3389) should not be open to 0.0.0.0/0"
+      severity: critical
+      providers: [aws, azure]
+      remediation: "Restrict RDP access to VPN or specific IPs"
+
+    - id: NET-003
+      name: "VPC Flow Logs Enabled"
+      description: "VPC flow logs should be enabled for network monitoring"
+      severity: medium
+      providers: [aws, azure, gcp]
+      remediation: "Enable VPC/VNet flow logs"
+
+    - id: NET-004
+      name: "Private Subnets for Databases"
+      description: "Database resources should be in private subnets"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Move databases to private subnets"
+
+  # Data Protection
+  data:
+    - id: DATA-001
+      name: "Storage Encryption at Rest"
+      description: "All storage must be encrypted at rest"
+      severity: critical
+      providers: [aws, azure, gcp]
+      remediation: "Enable server-side encryption"
+
+    - id: DATA-002
+      name: "Database Encryption"
+      description: "All databases must have encryption enabled"
+      severity: critical
+      providers: [aws, azure, gcp]
+      remediation: "Enable database encryption"
+
+    - id: DATA-003
+      name: "No Public S3 Buckets"
+      description: "S3 buckets should not be publicly accessible"
+      severity: critical
+      providers: [aws]
+      remediation: "Block public access on S3 bucket"
+
+    - id: DATA-004
+      name: "Backup Encryption"
+      description: "All backups must be encrypted"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Enable backup encryption"
+
+  # Logging and Monitoring
+  logging:
+    - id: LOG-001
+      name: "CloudTrail Enabled"
+      description: "AWS CloudTrail should be enabled in all regions"
+      severity: critical
+      providers: [aws]
+      remediation: "Enable CloudTrail in all regions"
+
+    - id: LOG-002
+      name: "Activity Log Retention"
+      description: "Audit logs should be retained for at least 90 days"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Configure log retention to 90+ days"
+
+    - id: LOG-003
+      name: "Security Alerts Configured"
+      description: "Security alerts should be configured for critical events"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Configure security alert rules"
+
+  # Kubernetes Security
+  kubernetes:
+    - id: K8S-001
+      name: "Pod Security Standards"
+      description: "Pods should comply with restricted security standards"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Apply restricted PodSecurityStandard"
+
+    - id: K8S-002
+      name: "No Privileged Containers"
+      description: "Containers should not run in privileged mode"
+      severity: critical
+      providers: [aws, azure, gcp]
+      remediation: "Remove privileged flag from containers"
+
+    - id: K8S-003
+      name: "Network Policies Defined"
+      description: "All namespaces should have network policies"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Define network policies for namespace"
+
+    - id: K8S-004
+      name: "RBAC Configured"
+      description: "Kubernetes RBAC should be properly configured"
+      severity: high
+      providers: [aws, azure, gcp]
+      remediation: "Review and configure RBAC policies"
+
+# Scanning schedule
+scanning:
+  frequency: "*/30 * * * *"  # Every 30 minutes
+  fullScan: "0 0 * * *"      # Daily full scan
+
+# Alert configuration
+alerts:
+  channels:
+    - type: slack
+      webhook: "${SLACK_SECURITY_WEBHOOK}"
+      severities: [critical, high]
+    - type: email
+      recipients:
+        - security@summit.dev
+        - devops@summit.dev
+      severities: [critical]
+    - type: pagerduty
+      serviceKey: "${PAGERDUTY_KEY}"
+      severities: [critical]
+
+# Remediation settings
+remediation:
+  autoRemediate:
+    enabled: true
+    severities: [critical]
+    dryRun: false
+    excludeRules: []
+
+# Exceptions
+exceptions:
+  - ruleId: NET-001
+    resource: "bastion-host"
+    reason: "Bastion host requires SSH access"
+    expiry: "2025-12-31"
+    approvedBy: "security-team"

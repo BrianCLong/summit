@@ -1,0 +1,25 @@
+apiVersion: v2
+name: summit-api
+description: Summit API Helm chart for multi-cloud Kubernetes deployments
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - summit
+  - api
+  - multi-cloud
+
+maintainers:
+  - name: Summit Team
+    email: platform@summit.dev
+
+dependencies:
+  - name: redis
+    version: 17.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: postgresql
+    version: 12.x.x
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled

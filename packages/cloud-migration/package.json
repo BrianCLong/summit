@@ -1,0 +1,41 @@
+{
+  "name": "@summit/cloud-migration",
+  "version": "1.0.0",
+  "description": "Multi-cloud migration and portability toolkit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "migration",
+    "multi-cloud",
+    "portability",
+    "aws",
+    "azure",
+    "gcp"
+  ],
+  "dependencies": {
+    "@summit/cloud-abstraction": "workspace:*",
+    "@aws-sdk/client-migration-hub": "^3.450.0",
+    "@aws-sdk/client-application-discovery-service": "^3.450.0",
+    "zod": "^3.22.0",
+    "winston": "^3.11.0",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.0",
+    "ora": "^7.0.1",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.3.0",
+    "tsx": "^4.7.0"
+  },
+  "bin": {
+    "summit-migrate": "./dist/cli.js"
+  }
+}

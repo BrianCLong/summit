@@ -1,0 +1,242 @@
+# Security Scanner Configuration
+# Comprehensive scanning for containers, infrastructure, and code
+
+apiVersion: v1
+kind: SecurityScannerConfig
+metadata:
+  name: summit-security-scanner
+  version: "1.0"
+
+# Container image scanning
+containerScanning:
+  enabled: true
+  scanners:
+    - name: trivy
+      enabled: true
+      config:
+        severity: "CRITICAL,HIGH,MEDIUM"
+        ignoreUnfixed: false
+        timeout: "10m"
+
+    - name: grype
+      enabled: true
+      config:
+        failOn: "critical"
+        onlyFixed: false
+
+    - name: snyk
+      enabled: true
+      config:
+        severity: "high"
+        failOnIssues: true
+
+  registries:
+    - name: ghcr.io
+      type: github
+    - name: docker.io
+      type: dockerhub
+
+  schedule: "0 */4 * * *"  # Every 4 hours
+
+  policies:
+    - name: block-critical
+      action: block
+      condition:
+        severity: critical
+        count: 1
+
+    - name: warn-high
+      action: warn
+      condition:
+        severity: high
+        count: 5
+
+# Infrastructure as Code scanning
+iacScanning:
+  enabled: true
+  scanners:
+    - name: tfsec
+      enabled: true
+      paths:
+        - "infrastructure/terraform/**"
+      config:
+        excludedChecks: []
+        softFail: false
+
+    - name: checkov
+      enabled: true
+      paths:
+        - "infrastructure/terraform/**"
+        - "infrastructure/kubernetes/**"
+      config:
+        framework: all
+        softFail: false
+        skipChecks: []
+
+    - name: kics
+      enabled: true
+      paths:
+        - "infrastructure/**"
+      config:
+        type: terraform,kubernetes,helm,docker
+
+  schedule: "0 2 * * *"  # Daily at 2 AM
+
+# Secret scanning
+secretScanning:
+  enabled: true
+  scanners:
+    - name: gitleaks
+      enabled: true
+      config:
+        configPath: ".gitleaks.toml"
+        verbose: false
+
+    - name: trufflehog
+      enabled: true
+      config:
+        includeDetectors: all
+        excludeDetectors: []
+
+  paths:
+    - "**/*"
+  exclude:
+    - "node_modules/**"
+    - "vendor/**"
+    - "*.lock"
+
+  preCommit: true
+  preScan: true
+
+# Dependency scanning
+dependencyScanning:
+  enabled: true
+  scanners:
+    - name: npm-audit
+      enabled: true
+      paths:
+        - "package.json"
+        - "packages/*/package.json"
+
+    - name: snyk
+      enabled: true
+      config:
+        severity: "high"
+        failOn: "upgradable"
+
+    - name: dependabot
+      enabled: true
+      config:
+        ecosystem: npm
+        schedule: daily
+
+  policies:
+    - name: block-critical
+      action: block
+      condition:
+        severity: critical
+
+# SAST (Static Application Security Testing)
+sast:
+  enabled: true
+  scanners:
+    - name: semgrep
+      enabled: true
+      config:
+        rules:
+          - auto
+          - p/security-audit
+          - p/typescript
+        severity: "ERROR,WARNING"
+
+    - name: codeql
+      enabled: true
+      languages:
+        - typescript
+        - javascript
+
+  schedule: "0 3 * * *"  # Daily at 3 AM
+
+# DAST (Dynamic Application Security Testing)
+dast:
+  enabled: true
+  scanners:
+    - name: zap
+      enabled: true
+      config:
+        target: "${API_URL}"
+        scanType: "full"
+        contextFile: "security/zap-context.xml"
+
+  schedule: "0 4 * * SUN"  # Weekly on Sunday
+
+# Kubernetes security scanning
+kubernetesScanning:
+  enabled: true
+  scanners:
+    - name: kubesec
+      enabled: true
+      config:
+        threshold: 0
+
+    - name: polaris
+      enabled: true
+      config:
+        audit: true
+        dashboard: false
+
+    - name: kube-bench
+      enabled: true
+      config:
+        benchmark: cis-1.8
+
+  namespaces:
+    - summit
+    - monitoring
+    - istio-system
+
+  schedule: "0 */6 * * *"  # Every 6 hours
+
+# Reporting
+reporting:
+  formats:
+    - json
+    - sarif
+    - html
+
+  storage:
+    type: s3
+    bucket: "summit-security-reports"
+    prefix: "scans/"
+    retention: 90
+
+  notifications:
+    slack:
+      webhook: "${SLACK_SECURITY_WEBHOOK}"
+      channels:
+        - "#security-alerts"
+      onFinding: true
+      minSeverity: high
+
+    email:
+      recipients:
+        - security@summit.dev
+      onFinding: true
+      minSeverity: critical
+
+# Integration with CI/CD
+cicd:
+  blockOnFinding:
+    severity: critical
+    scanTypes:
+      - container
+      - secret
+      - dependency
+
+  warnOnFinding:
+    severity: high
+    scanTypes:
+      - all
+
+  failureExitCode: 1
+  warningExitCode: 0
