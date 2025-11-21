@@ -1,58 +1,57 @@
-// ESLint v9 flat-config root
-// Applies base JS/TS rules across the monorepo; package-level configs refine further.
-import js from '@eslint/js';
-import * as tseslint from 'typescript-eslint';
-import prettier from 'eslint-config-prettier';
-import path from 'node:path';
 
-const IGNORE = [
-  '**/node_modules/**',
-  '**/dist/**',
-  '**/build/**',
-  '**/coverage/**',
-  '**/.vite/**',
-  '**/.next/**',
-  '**/.cache/**',
-  '**/generated/**',
-  'frontend/.vite/**', // legacy build artifacts
-  '**/public/**',
-  '**/*.min.js',
-  '.github/workflows/compliance-automation.yml',
-  'v4/archive/**',
-  '.venv/**',
-  'venv/**',
-];
+import security from "eslint-plugin-security";
+import noUnsanitized from "eslint-plugin-no-unsanitized";
+import globals from "globals";
 
 export default [
-  { ignores: IGNORE },
-  js.configs.recommended,
-  ...tseslint.configs.recommended, // type-agnostic rules; package configs can opt into type-aware if desired
   {
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
-      parserOptions: {
-        // Avoid project-based type checking here to keep root fast
-        ecmaFeatures: { jsx: true },
-      },
-    },
-    settings: {
-      react: { version: 'detect' },
+    plugins: {
+      security,
+      "no-unsanitized": noUnsanitized,
     },
     rules: {
-      'no-console': 'warn',
-      'no-debugger': 'error',
-      'no-unused-vars': 'off', // handled by @typescript-eslint/no-unused-vars
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/no-explicit-any': 'off',
-      'no-unused-expressions': 'off',
-      '@typescript-eslint/no-unused-expressions': ['error', {}],
-      'no-undef': 'off',
+      "security/detect-buffer-noassert": "error",
+      "security/detect-child-process": "warn",
+      "security/detect-disable-mustache-escape": "error",
+      "security/detect-eval-with-expression": "error",
+      "security/detect-new-buffer": "error",
+      "security/detect-no-csrf-before-method-override": "error",
+      "security/detect-non-literal-fs-filename": "warn",
+      "security/detect-non-literal-regexp": "warn",
+      "security/detect-non-literal-require": "warn",
+      "security/detect-object-injection": "warn",
+      "security/detect-possible-timing-attacks": "warn",
+      "security/detect-pseudoRandomBytes": "error",
+      "security/detect-unsafe-regex": "error",
+      "no-unsanitized/method": "error",
+      "no-unsanitized/property": "error",
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error",
+      "no-script-url": "error",
+      "no-return-assign": "error",
+      "no-param-reassign": ["error", { props: false }],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-debugger": "error",
+      "no-alert": "error",
+      eqeqeq: ["error", "always"],
+      strict: ["error", "global"],
+      "no-var": "error",
+      "prefer-const": "error",
+    },
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
   },
-  // Disable formatting-related rules in favor of Prettier
-  prettier,
+  {
+    files: ["**/*.test.ts", "**/*.test.js", "**/*.spec.ts", "**/*.spec.js"],
+    rules: {
+      "security/detect-non-literal-fs-filename": "off",
+      "security/detect-child-process": "off",
+      "no-console": "off",
+    },
+  },
 ];
